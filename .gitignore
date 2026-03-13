@@ -1,0 +1,48 @@
+# --- Python / Django ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+*.log
+.python-version
+.venv/
+venv/
+env/
+
+# Django static/media (se generati in deploy)
+backend/staticfiles/
+backend/media/
+
+# Coverage / test artefacts
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- Node / React ---
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.eslintcache
+frontend/.turbo/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Env / secrets ---
+.env
+.env.*
+!.env.example
+
+# Cursor / tooling
+.cursor/
+.DS_Store
+

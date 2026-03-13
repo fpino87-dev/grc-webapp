@@ -1,0 +1,40 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "compliance": "Compliance",
+    "risk": "Risk",
+    "operations": "Operations",
+    "governance": "Governance",
+    "audit": "Audit",
+    "settings": "Settings"
+  },
+  "status": {
+    "compliant": "Compliant",
+    "parziale": "Partial",
+    "gap": "Gap",
+    "na": "N/A",
+    "non_valutato": "Not assessed",
+    "aperto": "Open",
+    "chiuso": "Closed",
+    "in_corso": "In progress",
+    "scaduto": "Overdue"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "approve": "Approve",
+    "reject": "Reject",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "export": "Export",
+    "upload": "Upload"
+  },
+  "ai": {
+    "suggestion_label": "AI Suggestion",
+    "accept": "Use this",
+    "edit_and_use": "Edit and use",
+    "ignore": "Ignore",
+    "ai_badge": "AI"
+  }
+}
+

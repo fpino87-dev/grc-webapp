@@ -1,0 +1,15 @@
+# GRC Compliance Webapp
+## Stack
+Backend : Python 3.11 · Django 5 · DRF · Celery 5 · Redis 7 · PostgreSQL 15
+Frontend: React 18 · TypeScript · i18next · Tailwind · Recharts · Vite
+## Regole assolute
+- Tutti i model ereditano da core.models.BaseModel
+- Business logic SOLO in services.py
+- Ogni azione chiama core.audit.log_action()
+- AuditLog append-only — trigger PostgreSQL impedisce UPDATE/DELETE
+- Task assegnati a ruolo (risoluzione dinamica), mai a utente diretto
+- Framework normativi = JSON in backend/frameworks/, non codice
+- Soft delete sempre — mai hard delete
+- Nessuna query N+1 — select_related/prefetch_related obbligatori
+- M20 AI: nessun PII al cloud senza sanitization, human-in-the-loop sempre
+## Lingue: it (default) · en (fallback) · fr · pl · tr

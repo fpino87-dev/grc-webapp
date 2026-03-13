@@ -1,0 +1,16 @@
+Django==5.1.*
+djangorestframework==3.15.*
+django-environ==0.11.*
+django-cors-headers==4.4.*
+django-filter==24.*
+celery==5.4.*
+redis==5.0.*
+django-celery-beat==2.7.*
+django-celery-results==2.5.*
+psycopg2-binary==2.9.*
+boto3==1.35.*
+django-storages==1.14.*
+openpyxl==3.1.*
+djangorestframework-simplejwt==5.3.*
+drf-spectacular==0.27.*
+python-dateutil==2.9.*

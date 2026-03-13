@@ -1,0 +1,40 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "compliance": "Compliance",
+    "risk": "Risk",
+    "operations": "Operazioni",
+    "governance": "Governance",
+    "audit": "Audit",
+    "settings": "Impostazioni"
+  },
+  "status": {
+    "compliant": "Compliant",
+    "parziale": "Parziale",
+    "gap": "Gap",
+    "na": "N/A",
+    "non_valutato": "Non valutato",
+    "aperto": "Aperto",
+    "chiuso": "Chiuso",
+    "in_corso": "In corso",
+    "scaduto": "Scaduto"
+  },
+  "actions": {
+    "save": "Salva",
+    "cancel": "Annulla",
+    "approve": "Approva",
+    "reject": "Rifiuta",
+    "confirm": "Conferma",
+    "delete": "Elimina",
+    "export": "Esporta",
+    "upload": "Carica"
+  },
+  "ai": {
+    "suggestion_label": "Suggerimento IA",
+    "accept": "Usa questo",
+    "edit_and_use": "Modifica e usa",
+    "ignore": "Ignora",
+    "ai_badge": "IA"
+  }
+}
+

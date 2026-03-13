@@ -1,0 +1,26 @@
+.PHONY: dev migrate test lint load-fw seed shell
+
+dev:
+	docker compose up -d db redis minio mailhog
+	cd backend && python manage.py runserver &
+	cd frontend && npm run dev
+
+migrate:
+	cd backend && python manage.py migrate
+
+test:
+	cd backend && pytest
+	cd frontend && npm test -- --watchAll=false
+
+lint:
+	cd backend && ruff check . && ruff format --check .
+
+load-fw:
+	cd backend && python manage.py load_frameworks
+
+seed:
+	cd backend && python manage.py seed_demo
+
+shell:
+	cd backend && python manage.py shell_plus
+
