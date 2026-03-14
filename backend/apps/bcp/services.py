@@ -58,4 +58,15 @@ def record_test(plan: BcpPlan, result: str, user, notes: str = "") -> BcpTest:
         entity=plan,
         payload={"id": str(plan.id), "result": result, "test_id": str(test.id)},
     )
+
+    # Se fallito o parziale crea PDCA automatico
+    if result in ("fallito", "parziale"):
+        from apps.pdca.services import create_cycle
+        create_cycle(
+            plant=plan.plant,
+            title=f"PDCA BCP test fallito — {plan.title}",
+            trigger_type="bcp_test_fallito",
+            trigger_source_id=test.pk,
+        )
+
     return test

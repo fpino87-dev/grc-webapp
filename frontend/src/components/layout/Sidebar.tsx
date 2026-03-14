@@ -14,6 +14,7 @@ const navGroups = [
     label: "Compliance",
     items: [
       { to: "/controls", label: "Controlli", icon: "✓", roles: null },
+      { to: "/gap-analysis", label: "Gap Analysis", icon: "⇌", roles: null },
       { to: "/documents", label: "Documenti", icon: "📄", roles: null },
       { to: "/audit-prep", label: "Audit Prep", icon: "📋", roles: null },
     ],

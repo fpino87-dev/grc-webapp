@@ -49,6 +49,31 @@ export interface ControlDetailInfo {
   current_evidences: EvidenceRef[];
 }
 
+export interface GapEntry {
+  id: string;
+  external_id: string;
+  title: string;
+  domain: string;
+  source_status?: string;
+}
+
+export interface GapAnalysisResult {
+  source_framework: string;
+  target_framework: string;
+  covered: GapEntry[];
+  partial: GapEntry[];
+  gap: GapEntry[];
+  not_mapped: GapEntry[];
+  summary: {
+    total: number;
+    covered: number;
+    partial: number;
+    gap: number;
+    not_mapped: number;
+    pct_ready: number;
+  };
+}
+
 export const controlsApi = {
   instances: (params?: Record<string, string>) =>
     apiClient.get<{ results: ControlInstance[]; count: number }>("/controls/instances/", { params: { page_size: "500", ...params } }).then((r) => r.data),
@@ -66,4 +91,6 @@ export const controlsApi = {
     apiClient.post(`/controls/instances/${instanceId}/link_evidence/`, { evidence_id: evidenceId }).then((r) => r.data),
   unlinkEvidence: (instanceId: string, evidenceId: string) =>
     apiClient.post(`/controls/instances/${instanceId}/unlink_evidence/`, { evidence_id: evidenceId }).then((r) => r.data),
+  gapAnalysis: (source: string, target: string, plant?: string) =>
+    apiClient.get<GapAnalysisResult>("/controls/gap-analysis/", { params: { source, target, ...(plant ? { plant } : {}) } }).then((r) => r.data),
 };

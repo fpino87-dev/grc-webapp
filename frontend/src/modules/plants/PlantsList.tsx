@@ -5,6 +5,90 @@ import { controlsApi } from "../../api/endpoints/controls";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { useAuthStore } from "../../store/auth";
 
+const COUNTRIES = ["IT", "DE", "FR", "PL", "TR", "ES", "UK", "US", "RO", "CZ"];
+const TIMEZONES = ["Europe/Rome", "Europe/Berlin", "Europe/Paris", "Europe/Warsaw", "Europe/Istanbul"];
+
+function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [form, setForm] = useState<Partial<Plant>>({
+    name: plant.name,
+    country: plant.country,
+    nis2_scope: plant.nis2_scope,
+    status: plant.status,
+    has_ot: plant.has_ot,
+  });
+  const [error, setError] = useState("");
+
+  const mutation = useMutation({
+    mutationFn: (data: Partial<Plant>) => plantsApi.update(plant.id, data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["plants"] }); onClose(); },
+    onError: (e: any) => setError(e?.response?.data?.error || e?.response?.data?.detail || JSON.stringify(e?.response?.data) || "Errore"),
+  });
+
+  function set(field: string, value: unknown) {
+    setForm(f => ({ ...f, [field]: value }));
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+        <h3 className="text-lg font-semibold mb-1">Modifica sito</h3>
+        <p className="text-xs text-gray-400 mb-4 font-mono">{plant.code}</p>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+            <input value={form.name ?? ""} onChange={e => set("name", e.target.value)}
+              className="w-full border rounded px-3 py-2 text-sm" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Paese</label>
+              <select value={form.country ?? ""} onChange={e => set("country", e.target.value)}
+                className="w-full border rounded px-3 py-2 text-sm">
+                {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Stato</label>
+              <select value={form.status ?? ""} onChange={e => set("status", e.target.value)}
+                className="w-full border rounded px-3 py-2 text-sm">
+                <option value="attivo">Attivo</option>
+                <option value="in_dismissione">In dismissione</option>
+                <option value="chiuso">Chiuso</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Perimetro NIS2</label>
+            <select value={form.nis2_scope ?? ""} onChange={e => set("nis2_scope", e.target.value)}
+              className="w-full border rounded px-3 py-2 text-sm">
+              <option value="non_soggetto">Non soggetto</option>
+              <option value="importante">Importante</option>
+              <option value="essenziale">Essenziale</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <input type="checkbox" id="edit_has_ot" checked={!!form.has_ot}
+              onChange={e => set("has_ot", e.target.checked)} className="rounded" />
+            <label htmlFor="edit_has_ot" className="text-sm text-gray-700">Presenza reti OT / ICS</label>
+          </div>
+        </div>
+        {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
+        <div className="flex justify-end gap-2 mt-4">
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
+          <button
+            onClick={() => mutation.mutate(form)}
+            disabled={mutation.isPending || !form.name}
+            className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
+          >
+            {mutation.isPending ? "Salvataggio..." : "Salva"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const EMPTY: Partial<Plant> = {
   code: "", name: "", country: "IT",
   nis2_scope: "non_soggetto", status: "attivo", has_ot: false,
@@ -331,6 +415,7 @@ function FrameworkPanel({ plant, onClose }: { plant: Plant; onClose: () => void 
 
 export function PlantsList() {
   const [showNew, setShowNew] = useState(false);
+  const [editPlant, setEditPlant] = useState<Plant | null>(null);
   const [frameworkPlant, setFrameworkPlant] = useState<Plant | null>(null);
   const { data: plants, isLoading } = useQuery({
     queryKey: ["plants"],
@@ -391,6 +476,9 @@ export function PlantsList() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
+                      <button onClick={() => setEditPlant(p)}
+                        className="text-xs text-gray-500 hover:text-gray-700 border border-gray-200 rounded px-1.5 py-0.5 hover:bg-gray-50"
+                        title="Modifica sito">✏</button>
                       <button onClick={() => setFrameworkPlant(p)}
                         className="text-xs text-indigo-600 hover:underline">
                         Framework
@@ -409,6 +497,7 @@ export function PlantsList() {
       </div>
 
       {showNew && <PlantModal onClose={() => setShowNew(false)} />}
+      {editPlant && <EditPlantModal plant={editPlant} onClose={() => setEditPlant(null)} />}
       {frameworkPlant && <FrameworkPanel plant={frameworkPlant} onClose={() => setFrameworkPlant(null)} />}
     </div>
   );

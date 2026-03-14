@@ -35,6 +35,24 @@ class ManagementReviewViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(review)
         return Response(serializer.data)
 
+    @action(detail=True, methods=["post"], url_path="generate-snapshot")
+    def generate_snapshot(self, request, pk=None):
+        review = self.get_object()
+        snapshot = services.generate_snapshot(review, request.user)
+        return Response(snapshot)
+
+    @action(detail=True, methods=["post"])
+    def approve(self, request, pk=None):
+        from django.core.exceptions import ValidationError
+        review = self.get_object()
+        note = request.data.get("note", "")
+        try:
+            review = services.approve_review(review, request.user, note)
+            serializer = self.get_serializer(review)
+            return Response(serializer.data)
+        except ValidationError as e:
+            return Response({"error": e.message}, status=400)
+
 
 class ReviewActionViewSet(viewsets.ModelViewSet):
     queryset = ReviewAction.objects.all()

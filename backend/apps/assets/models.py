@@ -34,6 +34,21 @@ class Asset(BaseModel):
     )
     notes = models.TextField(blank=True)
 
+    @property
+    def risk_score(self):
+        ra = self.risk_assessments.filter(
+            status="completato", deleted_at__isnull=True
+        ).order_by("-assessed_at").first()
+        return ra.weighted_score if ra else None
+
+    @property
+    def risk_level(self):
+        s = self.risk_score
+        if s is None:   return "non_valutato"
+        if s <= 7:      return "verde"
+        if s <= 14:     return "giallo"
+        return "rosso"
+
     class Meta:
         ordering = ["-criticality", "name"]
 
@@ -45,6 +60,19 @@ class AssetIT(Asset):
     eol_date = models.DateField(null=True, blank=True)
     cve_score_max = models.FloatField(null=True, blank=True)
     internet_exposed = models.BooleanField(default=False)
+
+    @property
+    def is_eol(self):
+        from django.utils import timezone
+        return self.eol_date and self.eol_date < timezone.now().date()
+
+    @property
+    def exposure_score(self):
+        score = 1
+        if self.internet_exposed:     score += 2
+        if self.cve_score_max and self.cve_score_max >= 7.0: score += 1
+        if self.is_eol:               score += 1
+        return min(5, score)
 
     class Meta:
         verbose_name = "Asset IT"
@@ -73,6 +101,14 @@ class AssetOT(Asset):
         on_delete=models.SET_NULL,
     )
     vendor = models.CharField(max_length=100, blank=True)
+
+    @property
+    def isolation_score(self):
+        score = 5
+        if self.purdue_level >= 3:  score -= 1
+        if self.patchable:          score -= 1
+        if self.network_zone and self.network_zone.zone_type == "OT": score -= 1
+        return max(1, score)
 
     class Meta:
         verbose_name = "Asset OT"

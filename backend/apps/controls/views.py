@@ -1,6 +1,8 @@
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Control, ControlDomain, ControlInstance, Framework
 from .serializers import (
@@ -165,4 +167,18 @@ class ControlInstanceViewSet(viewsets.ModelViewSet):
             return Response({"error": "Evidenza non trovata."}, status=404)
         instance.evidences.remove(evidence)
         return Response({"ok": True})
+
+
+class GapAnalysisView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from .services import gap_analysis
+        source = request.query_params.get("source")
+        target = request.query_params.get("target")
+        plant_id = request.query_params.get("plant")
+        if not source or not target:
+            return Response({"error": "Parametri 'source' e 'target' obbligatori."}, status=400)
+        result = gap_analysis(source, target, plant_id)
+        return Response(result)
 

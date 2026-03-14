@@ -4,6 +4,7 @@ import { Shell } from "./components/layout/Shell";
 import { LoginPage } from "./pages/LoginPage";
 import { Dashboard } from "./modules/dashboard/Dashboard";
 import { ControlsList } from "./modules/controls/ControlsList";
+import { GapAnalysisPage } from "./modules/controls/GapAnalysisPage";
 import { IncidentsList } from "./modules/incidents/IncidentsList";
 import { PlantsList } from "./modules/plants/PlantsList";
 import { GovernancePage } from "./modules/governance/GovernancePage";
@@ -44,6 +45,7 @@ export function App() {
         >
           <Route index element={<Dashboard />} />
           <Route path="controls" element={<ControlsList />} />
+          <Route path="gap-analysis" element={<GapAnalysisPage />} />
           <Route path="incidents" element={<IncidentsList />} />
           <Route path="plants" element={<PlantsList />} />
           <Route path="governance" element={<GovernancePage />} />

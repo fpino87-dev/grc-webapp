@@ -40,7 +40,10 @@ def create_task(
         plant=plant,
         priority=priority,
         source=source,
+        source_module=source_module or "",
+        source_id=source_id,
         assigned_to=assigned_to,
+        assigned_role=assign_value if assign_type == "role" else "",
         due_date=due_date,
         control_instance=control_instance,
     )

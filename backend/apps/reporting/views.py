@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Count, Q
+from django.utils import timezone
 
 
 class ComplianceSummaryView(APIView):
@@ -54,6 +55,79 @@ class IncidentSummaryView(APIView):
         by_severity = dict(qs.values("severity").annotate(n=Count("id")).values_list("severity", "n"))
         by_status = dict(qs.values("status").annotate(n=Count("id")).values_list("status", "n"))
         return Response({"total": qs.count(), "by_severity": by_severity, "by_status": by_status})
+
+
+class OwnerReportView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from apps.risk.models import RiskAssessment
+        from apps.bia.models import CriticalProcess
+        from apps.tasks.models import Task
+
+        plant_id = request.query_params.get("plant")
+
+        risks_qs = RiskAssessment.objects.filter(
+            status="completato", deleted_at__isnull=True
+        )
+        if plant_id:
+            risks_qs = risks_qs.filter(plant_id=plant_id)
+
+        risks_by_owner = list(
+            risks_qs.values(
+                "owner__id", "owner__first_name", "owner__last_name", "owner__email"
+            ).annotate(
+                totale=Count("id"),
+                rossi=Count("id", filter=Q(score__gt=14)),
+                gialli=Count("id", filter=Q(score__gt=7, score__lte=14)),
+                verdi=Count("id", filter=Q(score__lte=7)),
+            ).order_by("-rossi")
+        )
+
+        # Add process count per owner
+        for entry in risks_by_owner:
+            owner_id = entry["owner__id"]
+            procs_qs = CriticalProcess.objects.filter(deleted_at__isnull=True)
+            if plant_id:
+                procs_qs = procs_qs.filter(plant_id=plant_id)
+            if owner_id:
+                entry["processes"] = procs_qs.filter(owner_id=owner_id).count()
+            else:
+                entry["processes"] = 0
+            entry["owner_name"] = f"{entry['owner__first_name']} {entry['owner__last_name']}".strip() or entry.get("owner__email") or "—"
+            entry["owner_email"] = entry["owner__email"] or ""
+
+        # Tasks by owner
+        since_30 = timezone.now() - timezone.timedelta(days=30)
+        tasks_qs = Task.objects.filter(deleted_at__isnull=True)
+        if plant_id:
+            tasks_qs = tasks_qs.filter(plant_id=plant_id)
+
+        tasks_by_owner = list(
+            tasks_qs.values(
+                "assigned_to__first_name", "assigned_to__last_name", "assigned_to__email"
+            ).annotate(
+                aperti=Count("id", filter=Q(status__in=["aperto", "in_corso"])),
+                scaduti=Count("id", filter=Q(
+                    status__in=["aperto", "in_corso"],
+                    due_date__lt=timezone.now().date(),
+                )),
+                completati_30gg=Count("id", filter=Q(
+                    status="completato",
+                    completed_at__gte=since_30,
+                )),
+            ).order_by("-aperti")
+        )
+        for entry in tasks_by_owner:
+            entry["owner_name"] = (
+                f"{entry['assigned_to__first_name']} {entry['assigned_to__last_name']}".strip()
+                or entry.get("assigned_to__email") or "—"
+            )
+
+        return Response({
+            "risks_by_owner": risks_by_owner,
+            "tasks_by_owner": tasks_by_owner,
+        })
 
 
 class DashboardSummaryView(APIView):

@@ -34,6 +34,7 @@ class RiskAssessment(BaseModel):
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
+        related_name="risk_assessments",
     )
     name = models.CharField(max_length=200, blank=True, default="")
     threat_category = models.CharField(max_length=50, blank=True, default="", choices=THREAT_CATEGORIES)
@@ -54,6 +55,14 @@ class RiskAssessment(BaseModel):
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
+    )
+    owner = models.ForeignKey(
+        "auth.User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="owned_risks",
+        help_text="Responsabile del rischio (diverso da chi lo ha valutato)",
     )
     assessed_at = models.DateTimeField(null=True, blank=True)
     score = models.IntegerField(null=True, blank=True)

@@ -35,6 +35,31 @@ class ManagementReview(BaseModel):
     next_review_date = models.DateField(null=True, blank=True)
     document_id = models.UUIDField(null=True, blank=True)
 
+    # Snapshot dati al momento della creazione
+    snapshot_generated_at = models.DateTimeField(null=True, blank=True)
+    snapshot_data         = models.JSONField(default=dict)
+
+    # Workflow approvazione
+    approval_status = models.CharField(
+        max_length=20,
+        choices=[
+            ("bozza",      "Bozza"),
+            ("in_review",  "In revisione"),
+            ("approvato",  "Approvato"),
+            ("rifiutato",  "Rifiutato"),
+        ],
+        default="bozza",
+    )
+    approved_by   = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="approved_reviews",
+    )
+    approved_at   = models.DateTimeField(null=True, blank=True)
+    approval_note = models.TextField(blank=True)
+
     class Meta:
         ordering = ["-review_date"]
 

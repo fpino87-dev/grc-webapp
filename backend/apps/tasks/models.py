@@ -36,6 +36,9 @@ class Task(BaseModel):
         ("yearly", "Annuale"),
     ]
 
+    source_module = models.CharField(max_length=10, blank=True, default="")
+    source_id     = models.UUIDField(null=True, blank=True)
+
     title = models.CharField(max_length=300)
     description = models.TextField(blank=True)
     plant = models.ForeignKey(
