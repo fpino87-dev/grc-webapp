@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { biaApi, type CriticalProcess } from "../../api/endpoints/bia";
 import { plantsApi } from "../../api/endpoints/plants";
 import { StatusBadge } from "../../components/ui/StatusBadge";
+import { AssistenteValutazione } from "../../components/ui/AssistenteValutazione";
 
 function CriticalityBar({ value }: { value: number }) {
   const pct = (value / 5) * 100;
@@ -78,6 +79,7 @@ function NewProcessModal({ plants, onClose }: { plants: { id: string; code: stri
 
 export function BiaPage() {
   const [showNew, setShowNew] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState("");
   const qc = useQueryClient();
 
@@ -106,9 +108,17 @@ export function BiaPage() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold text-gray-900">Rischio — Business Impact Analysis</h2>
-        <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700">
-          + Nuovo processo
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+          >
+            <span>?</span> Guida alla valutazione
+          </button>
+          <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700">
+            + Nuovo processo
+          </button>
+        </div>
       </div>
 
       <div className="flex items-center gap-3 mb-4">
@@ -169,6 +179,7 @@ export function BiaPage() {
       </div>
 
       {showNew && plants && <NewProcessModal plants={plants} onClose={() => setShowNew(false)} />}
+      <AssistenteValutazione open={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </div>
   );
 }

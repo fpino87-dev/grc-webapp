@@ -67,6 +67,13 @@ class RiskAssessment(BaseModel):
         related_name="accepted_risks",
     )
     plan_due_date = models.DateField(null=True, blank=True)
+    critical_process = models.ForeignKey(
+        "bia.CriticalProcess",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="risk_assessments",
+    )
 
     def save(self, *args, **kwargs):
         if self.probability and self.impact:
@@ -82,6 +89,15 @@ class RiskAssessment(BaseModel):
         if self.score <= 14:
             return "giallo"
         return "rosso"
+
+    @property
+    def weighted_score(self):
+        """Score tecnico pesato per criticità BIA."""
+        if self.score is None:
+            return None
+        multipliers = {1: 1.0, 2: 1.0, 3: 1.2, 4: 1.5, 5: 2.0}
+        crit = getattr(self.critical_process, "criticality", 3)
+        return min(25, round(self.score * multipliers.get(crit, 1.0)))
 
 
 class RiskDimension(BaseModel):

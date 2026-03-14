@@ -47,6 +47,8 @@ class LessonLearned(BaseModel):
     )
     corrective_action = models.TextField(blank=True)
     tags = models.JSONField(default=list)
+    source_module = models.CharField(max_length=10, blank=True, default="")
+    source_id = models.UUIDField(null=True, blank=True)
 
     class Meta:
         ordering = ["-created_at"]

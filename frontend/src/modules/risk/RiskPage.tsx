@@ -4,6 +4,7 @@ import { riskApi, type RiskAssessment, type RiskMitigationPlan, THREAT_CATEGORIE
 import { plantsApi } from "../../api/endpoints/plants";
 import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
+import { AssistenteValutazione } from "../../components/ui/AssistenteValutazione";
 
 // ── Risk matrix cell colour ──────────────────────────────────────────────────
 function matrixColor(p: number, i: number): string {
@@ -250,6 +251,7 @@ export function RiskPage() {
   const [typeFilter, setTypeFilter] = useState<"" | "IT" | "OT">("");
   const [statusFilter, setStatusFilter] = useState("");
   const [showNew, setShowNew] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const selectedPlant = useAuthStore(s => s.selectedPlant);
   const qc = useQueryClient();
@@ -283,9 +285,17 @@ export function RiskPage() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold text-gray-900">Risk Assessment</h2>
-        <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700">
-          + Nuovo scenario
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+          >
+            <span>?</span> Guida alla valutazione
+          </button>
+          <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700">
+            + Nuovo scenario
+          </button>
+        </div>
       </div>
 
       <div className="mb-4 flex items-center gap-3">
@@ -390,6 +400,7 @@ export function RiskPage() {
       </div>
 
       {showNew && plants && <NewAssessmentModal plants={plants} onClose={() => setShowNew(false)} />}
+      <AssistenteValutazione open={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </div>
   );
 }

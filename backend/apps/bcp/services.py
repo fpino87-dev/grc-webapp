@@ -19,6 +19,24 @@ def approve_plan(plan: BcpPlan, user) -> BcpPlan:
     return plan
 
 
+def check_missing_bcp_plans(plant):
+    """Restituisce processi critici (criticality >= 4) senza BCP plan attivo."""
+    from apps.bia.models import CriticalProcess
+
+    processes = CriticalProcess.objects.filter(
+        plant=plant,
+        criticality__gte=4,
+        status="approvato",
+        deleted_at__isnull=True,
+    )
+    missing = []
+    for p in processes:
+        has_bcp = p.bcp_plans.filter(deleted_at__isnull=True).exists()
+        if not has_bcp:
+            missing.append(p)
+    return missing
+
+
 def record_test(plan: BcpPlan, result: str, user, notes: str = "") -> BcpTest:
     """Record a BCP test and update last_test_date on the plan."""
     from django.utils import timezone

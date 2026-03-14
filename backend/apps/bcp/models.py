@@ -33,6 +33,13 @@ class BcpPlan(BaseModel):
     last_test_date = models.DateField(null=True, blank=True)
     next_test_date = models.DateField(null=True, blank=True)
     critical_processes = models.ManyToManyField("bia.CriticalProcess", blank=True)
+    critical_process = models.ForeignKey(
+        "bia.CriticalProcess",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="bcp_plans",
+    )
     content = models.JSONField(default=dict)
 
     class Meta:

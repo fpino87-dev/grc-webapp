@@ -13,6 +13,33 @@ class RiskAssessmentViewSet(viewsets.ModelViewSet):
     serializer_class = RiskAssessmentSerializer
     filterset_fields = ["plant", "status", "assessment_type"]
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        risk_level = self.request.query_params.get("risk_level")
+        has_pdca = self.request.query_params.get("has_pdca")
+        plant = self.request.query_params.get("plant")
+
+        if plant:
+            qs = qs.filter(plant_id=plant)
+
+        if risk_level:
+            # Filtra per livello calcolato (verde/giallo/rosso)
+            if risk_level == "verde":
+                qs = qs.filter(score__lte=7)
+            elif risk_level == "giallo":
+                qs = qs.filter(score__gt=7, score__lte=14)
+            elif risk_level == "rosso":
+                qs = qs.filter(score__gt=14)
+
+        if has_pdca == "false":
+            from apps.pdca.models import PdcaCycle
+            ids_with_pdca = PdcaCycle.objects.exclude(
+                fase_corrente="chiuso"
+            ).values_list("trigger_source_id", flat=True)
+            qs = qs.exclude(pk__in=ids_with_pdca)
+
+        return qs
+
     def perform_create(self, serializer):
         instance = serializer.save()
         log_action(

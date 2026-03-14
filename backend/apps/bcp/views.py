@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
 from core.audit import log_action
+from apps.bia.serializers import CriticalProcessSerializer
 from .models import BcpPlan, BcpTest
 from .serializers import BcpPlanSerializer, BcpTestSerializer
 from . import services
@@ -27,6 +28,23 @@ class BcpPlanViewSet(viewsets.ModelViewSet):
             entity=instance,
             payload={"id": str(instance.id), "title": instance.title},
         )
+
+    @action(detail=False, methods=["get"], url_path="missing-plans")
+    def missing_plans(self, request):
+        """GET /api/v1/bcp/plans/missing-plans/?plant=<uuid>
+        Restituisce processi critici (criticality >= 4) senza BCP plan attivo.
+        """
+        plant_id = request.query_params.get("plant")
+        if not plant_id:
+            return Response({"detail": "Parametro 'plant' obbligatorio."}, status=400)
+        from apps.plants.models import Plant
+        try:
+            plant = Plant.objects.get(pk=plant_id)
+        except Plant.DoesNotExist:
+            return Response({"detail": "Plant non trovato."}, status=404)
+        missing = services.check_missing_bcp_plans(plant)
+        serializer = CriticalProcessSerializer(missing, many=True)
+        return Response(serializer.data)
 
     @action(detail=True, methods=["post"])
     def approve(self, request, pk=None):
