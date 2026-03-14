@@ -26,6 +26,8 @@ class ControlInstanceSerializer(serializers.ModelSerializer):
     control_title = serializers.SerializerMethodField()
     framework_code = serializers.CharField(source="control.framework.code", read_only=True)
     mapped_controls = serializers.SerializerMethodField()
+    suggested_status = serializers.SerializerMethodField(read_only=True)
+    suggestion_differs = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = ControlInstance
@@ -33,6 +35,14 @@ class ControlInstanceSerializer(serializers.ModelSerializer):
 
     def get_control_title(self, obj):
         return obj.control.get_title("it")
+
+    def get_suggested_status(self, obj):
+        from .services import calc_suggested_status
+        return calc_suggested_status(obj)
+
+    def get_suggestion_differs(self, obj):
+        from .services import calc_suggested_status
+        return calc_suggested_status(obj) != obj.status
 
     def get_mapped_controls(self, obj):
         result = []

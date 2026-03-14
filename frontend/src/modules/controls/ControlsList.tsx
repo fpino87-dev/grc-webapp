@@ -72,11 +72,19 @@ function InlineStatusSelect({ instance }: { instance: ControlInstance }) {
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 flex-wrap">
       <button onClick={() => setEditing(true)} title="Clicca per modificare" className="group flex items-center gap-1">
         <StatusBadge status={instance.status} />
         <span className="text-gray-300 group-hover:text-gray-500 text-xs">✎</span>
       </button>
+      {instance.suggestion_differs && instance.suggested_status && (
+        <span
+          title={`Suggerimento sistema: ${instance.suggested_status}`}
+          className="text-xs px-1.5 py-0.5 rounded border border-dashed border-indigo-300 text-indigo-500"
+        >
+          → {instance.suggested_status}
+        </span>
+      )}
       {hasMappings && instance.status !== "non_valutato" && (
         <button
           onClick={() => propagateMutation.mutate()}
@@ -179,9 +187,13 @@ export function ControlsList() {
                       <span>{c.control_external_id || c.control}</span>
                       <button
                         onClick={() => setSelectedInstance(c.id)}
-                        className="ml-1 w-5 h-5 rounded-full bg-gray-200 text-gray-600 text-xs hover:bg-blue-100 hover:text-blue-600 flex items-center justify-center font-bold shrink-0"
-                        title="Dettaglio controllo"
-                      >?</button>
+                        className="ml-1 w-5 h-5 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 flex items-center justify-center shrink-0"
+                        title="Gestione controllo"
+                      >
+                        <svg viewBox="0 0 12 12" className="w-3 h-3 fill-current" aria-hidden="true">
+                          <path d="M3 2l7 4-7 4V2z" />
+                        </svg>
+                      </button>
                     </div>
                   </td>
                   <td className="px-4 py-3">

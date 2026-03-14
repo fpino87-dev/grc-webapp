@@ -173,6 +173,35 @@ def evaluate_control(instance, new_status, user, note=""):
     return instance
 
 
+def calc_suggested_status(instance) -> str:
+    """
+    Inferisce lo stato suggerito in base ai documenti/evidenze collegati.
+    Regole:
+      - Nessun requisito definito → non_valutato
+      - Tutti i requisiti soddisfatti → compliant
+      - Qualcosa presente (anche scaduto) → parziale
+      - Nessuna documentazione → gap
+    """
+    req = instance.control.evidence_requirement or {}
+    has_req = bool(
+        req.get("documents") or req.get("evidences")
+        or req.get("min_documents") or req.get("min_evidences")
+    )
+    if not has_req:
+        return "non_valutato"
+
+    check = check_evidence_requirements(instance)
+    if check["satisfied"]:
+        return "compliant"
+
+    has_docs = instance.documents.filter(status="approvato", deleted_at__isnull=True).exists()
+    has_ev = instance.evidences.filter(deleted_at__isnull=True).exists()
+    if has_docs or has_ev:
+        return "parziale"
+
+    return "gap"
+
+
 def gap_analysis(source_framework_code: str, target_framework_code: str, plant_id) -> dict:
     """
     Confronta due framework e mostra cosa manca per passare dall'uno all'altro.

@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { controlsApi, type EvidenceRef, type LinkedDocument, type RequirementsCheck } from "../../api/endpoints/controls";
+import { controlsApi, type EvidenceRef, type LinkedDocument, type RequirementsCheck, type EvidenceRequirement } from "../../api/endpoints/controls";
 import { documentsApi, EVIDENCE_TYPE_LABELS } from "../../api/endpoints/documents";
 import { useAuthStore } from "../../store/auth";
+import { StatusBadge } from "../../components/ui/StatusBadge";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -43,7 +44,7 @@ const STATUS_GUIDE = [
   { status: "non_valutato", icon: "⬜", label: "Non valutato",  req: "Abbassa il compliance score del plant", badge: "bg-gray-50 text-gray-500" },
 ];
 
-type Tab = "cosa" | "valutare" | "docevidence" | "storico";
+type Tab = "cosa" | "valutazione" | "docevidence" | "storico";
 
 // ─── Tab 1: Cos'è ─────────────────────────────────────────────────────────────
 
@@ -122,15 +123,47 @@ function TabCosa({ info }: { info: NonNullable<ReturnType<typeof useDetailInfo>[
   );
 }
 
-// ─── Tab 2: Come valutare ─────────────────────────────────────────────────────
+// ─── Tab 2: Valutazione ───────────────────────────────────────────────────────
 
-function TabValutare({ instanceId, requirements }: { instanceId: string; requirements: RequirementsCheck }) {
+function TabValutazione({
+  instanceId,
+  requirements,
+  currentStatus,
+  suggestedStatus,
+  suggestedStatusReason,
+  evidenceRequirement,
+}: {
+  instanceId: string;
+  requirements: RequirementsCheck;
+  currentStatus: string;
+  suggestedStatus: string;
+  suggestedStatusReason: string;
+  evidenceRequirement: EvidenceRequirement;
+}) {
   const qc = useQueryClient();
   const [selectedStatus, setSelectedStatus] = useState("");
   const [note, setNote] = useState("");
   const [blockError, setBlockError] = useState("");
+  const [applyModalOpen, setApplyModalOpen] = useState(false);
+  const [applyNote, setApplyNote] = useState("");
+  const [manualOpen, setManualOpen] = useState(false);
 
-  const mutation = useMutation({
+  const suggestionDiffers = suggestedStatus !== currentStatus;
+
+  const applyMutation = useMutation({
+    mutationFn: () => controlsApi.applySuggestion(instanceId, applyNote),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["controls"] });
+      qc.invalidateQueries({ queryKey: ["control-detail", instanceId] });
+      setApplyModalOpen(false);
+    },
+    onError: (e: unknown) => {
+      const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? "Errore sconosciuto";
+      setBlockError(msg);
+    },
+  });
+
+  const evaluateMutation = useMutation({
     mutationFn: () => controlsApi.evaluate(instanceId, selectedStatus, note),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["controls"] });
@@ -143,76 +176,154 @@ function TabValutare({ instanceId, requirements }: { instanceId: string; require
     },
   });
 
+  const noRequirements = !evidenceRequirement ||
+    (!evidenceRequirement.documents?.length && !evidenceRequirement.evidences?.length &&
+     !evidenceRequirement.min_documents && !evidenceRequirement.min_evidences);
+
   const reqNotSatisfied = selectedStatus === "compliant" && !requirements.satisfied;
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-gray-200 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="text-left px-3 py-2 text-xs font-medium text-gray-500 w-8"></th>
-              <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Stato</th>
-              <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Requisiti</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {STATUS_GUIDE.map(s => (
-              <tr key={s.status} className="hover:bg-gray-50">
-                <td className="px-3 py-2 text-base">{s.icon}</td>
-                <td className="px-3 py-2">
-                  <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${s.badge}`}>{s.label}</span>
-                </td>
-                <td className="px-3 py-2 text-xs text-gray-500 leading-snug">{s.req}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Banner requisiti */}
+      {noRequirements ? (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500">
+          ℹ️ Nessun requisito documentale definito per questo controllo.
+        </div>
+      ) : !requirements.satisfied ? (
+        <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-800">
+          <p className="font-semibold mb-1">⛔ Requisiti non soddisfatti</p>
+          {requirements.missing_documents.map((m, i) => <p key={i}>• Documento mancante: {m.description || m.type}</p>)}
+          {requirements.missing_evidences.map((m, i) => <p key={i}>• Evidenza mancante: {m.description || m.type}</p>)}
+          {requirements.expired_evidences.map((e, i) => <p key={i}>• Evidenza scaduta: {e.title} ({e.expired_on})</p>)}
+        </div>
+      ) : requirements.warnings.length > 0 ? (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 text-xs text-yellow-800">
+          <p className="font-semibold mb-1">⚠️ Attenzione</p>
+          {requirements.warnings.map((w, i) => <p key={i}>• {w}</p>)}
+        </div>
+      ) : (
+        <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-xs text-green-800">
+          ✅ Tutti i requisiti soddisfatti
+        </div>
+      )}
+
+      {/* Due box: Stato ufficiale / Suggerimento sistema */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="border border-gray-200 rounded-lg p-3">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Stato ufficiale</p>
+          <StatusBadge status={currentStatus} />
+        </div>
+        <div className="border border-indigo-200 rounded-lg p-3 bg-indigo-50/30">
+          <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide mb-2">Suggerimento sistema</p>
+          <StatusBadge status={suggestedStatus} />
+          {suggestedStatusReason && (
+            <p className="text-xs text-gray-500 mt-1.5 leading-snug">{suggestedStatusReason}</p>
+          )}
+        </div>
       </div>
 
-      <div className="border border-gray-200 rounded-lg p-3 space-y-3">
-        <p className="text-sm font-medium text-gray-700">Cambia stato valutazione</p>
-
-        <select
-          value={selectedStatus}
-          onChange={e => { setSelectedStatus(e.target.value); setBlockError(""); }}
-          className="w-full border rounded px-3 py-2 text-sm"
-        >
-          <option value="">— seleziona nuovo stato —</option>
-          {STATUS_GUIDE.map(s => <option key={s.status} value={s.status}>{s.icon} {s.label}</option>)}
-        </select>
-
-        {reqNotSatisfied && (
-          <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-700">
-            <p className="font-semibold mb-1">⛔ Requisiti non soddisfatti — risolvi nel tab "Documenti & Evidenze"</p>
-            {requirements.missing_documents.map((m, i) => <p key={i}>• Documento mancante: {m.description || m.type}</p>)}
-            {requirements.missing_evidences.map((m, i) => <p key={i}>• Evidenza mancante: {m.description || m.type}</p>)}
-            {requirements.expired_evidences.map((e, i) => <p key={i}>• Scaduta: {e.title} ({e.expired_on})</p>)}
-          </div>
-        )}
-
-        <textarea
-          value={note}
-          onChange={e => setNote(e.target.value)}
-          placeholder="Nota / giustificazione (obbligatoria per N/A, min 20 caratteri)"
-          className="w-full border rounded px-3 py-2 text-sm resize-none"
-          rows={3}
-        />
-
-        {blockError && (
-          <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-sm text-red-700">
-            <span className="mr-1">⛔</span>{blockError}
-          </div>
-        )}
-
+      {/* Bottone applica suggerimento */}
+      {suggestionDiffers && !applyModalOpen && (
         <button
-          onClick={() => mutation.mutate()}
-          disabled={mutation.isPending || !selectedStatus || reqNotSatisfied}
-          title={reqNotSatisfied ? "Risolvi i requisiti nel tab Documenti & Evidenze" : undefined}
-          className="w-full py-2 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+          onClick={() => { setApplyNote(suggestedStatusReason); setApplyModalOpen(true); }}
+          className="w-full py-2 bg-indigo-600 text-white rounded text-sm font-medium hover:bg-indigo-700 flex items-center justify-center gap-2"
         >
-          {mutation.isPending ? "Salvataggio..." : "Salva valutazione"}
+          <svg viewBox="0 0 12 12" className="w-3.5 h-3.5 fill-current" aria-hidden="true">
+            <path d="M3 2l7 4-7 4V2z" />
+          </svg>
+          Applica suggerimento ({suggestedStatus})
         </button>
+      )}
+
+      {/* Mini-modal applica suggerimento */}
+      {applyModalOpen && (
+        <div className="border border-indigo-200 rounded-lg p-3 space-y-2 bg-indigo-50/50">
+          <p className="text-sm font-medium text-gray-700">
+            Applica suggerimento: <strong>{suggestedStatus}</strong>
+          </p>
+          <textarea
+            value={applyNote}
+            onChange={e => setApplyNote(e.target.value)}
+            placeholder="Nota (opzionale)"
+            className="w-full border rounded px-3 py-2 text-sm resize-none"
+            rows={2}
+          />
+          {blockError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-sm text-red-700">
+              ⛔ {blockError}
+            </div>
+          )}
+          <div className="flex gap-2">
+            <button
+              onClick={() => applyMutation.mutate()}
+              disabled={applyMutation.isPending}
+              className="flex-1 py-1.5 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700 disabled:opacity-50"
+            >
+              {applyMutation.isPending ? "Applicazione..." : "Conferma"}
+            </button>
+            <button
+              onClick={() => { setApplyModalOpen(false); setBlockError(""); }}
+              className="px-3 py-1.5 border rounded text-sm text-gray-600 hover:bg-gray-50"
+            >
+              Annulla
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Cambio manuale — collassabile */}
+      <div className="border border-gray-200 rounded-lg">
+        <button
+          onClick={() => setManualOpen(o => !o)}
+          className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          <span>Cambio manuale stato</span>
+          <span className="text-gray-400">{manualOpen ? "▲" : "▼"}</span>
+        </button>
+        {manualOpen && (
+          <div className="px-3 pb-3 border-t border-gray-100 pt-2 space-y-3">
+            <select
+              value={selectedStatus}
+              onChange={e => { setSelectedStatus(e.target.value); setBlockError(""); }}
+              className="w-full border rounded px-3 py-2 text-sm"
+            >
+              <option value="">— seleziona nuovo stato —</option>
+              {STATUS_GUIDE.map(s => <option key={s.status} value={s.status}>{s.icon} {s.label}</option>)}
+            </select>
+
+            {reqNotSatisfied && (
+              <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-700">
+                <p className="font-semibold mb-1">⛔ Requisiti non soddisfatti — risolvi nel tab "Documenti & Evidenze"</p>
+                {requirements.missing_documents.map((m, i) => <p key={i}>• Documento mancante: {m.description || m.type}</p>)}
+                {requirements.missing_evidences.map((m, i) => <p key={i}>• Evidenza mancante: {m.description || m.type}</p>)}
+                {requirements.expired_evidences.map((e, i) => <p key={i}>• Scaduta: {e.title} ({e.expired_on})</p>)}
+              </div>
+            )}
+
+            <textarea
+              value={note}
+              onChange={e => setNote(e.target.value)}
+              placeholder="Nota / giustificazione (obbligatoria per N/A, min 20 caratteri)"
+              className="w-full border rounded px-3 py-2 text-sm resize-none"
+              rows={3}
+            />
+
+            {blockError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-sm text-red-700">
+                <span className="mr-1">⛔</span>{blockError}
+              </div>
+            )}
+
+            <button
+              onClick={() => evaluateMutation.mutate()}
+              disabled={evaluateMutation.isPending || !selectedStatus || reqNotSatisfied}
+              title={reqNotSatisfied ? "Risolvi i requisiti nel tab Documenti & Evidenze" : undefined}
+              className="w-full py-2 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+            >
+              {evaluateMutation.isPending ? "Salvataggio..." : "Salva valutazione"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -512,18 +623,27 @@ function TabDocEvidence({
   evidences,
   documents,
   requirements,
+  evidenceRequirement,
 }: {
   instanceId: string;
   evidences: EvidenceRef[];
   documents: LinkedDocument[];
   requirements: RequirementsCheck;
+  evidenceRequirement: EvidenceRequirement;
 }) {
   const plant = useAuthStore(s => s.selectedPlant?.id ?? null);
+  const noRequirements = !evidenceRequirement ||
+    (!evidenceRequirement.documents?.length && !evidenceRequirement.evidences?.length &&
+     !evidenceRequirement.min_documents && !evidenceRequirement.min_evidences);
 
   return (
     <div className="space-y-3">
       {/* Banner requisiti */}
-      {!requirements.satisfied ? (
+      {noRequirements ? (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500">
+          ℹ️ Nessun requisito documentale definito per questo controllo.
+        </div>
+      ) : !requirements.satisfied ? (
         <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-800">
           <p className="font-semibold mb-1">⛔ Requisiti non soddisfatti per Compliant</p>
           {requirements.missing_documents.map((m, i) => <p key={i}>• Documento mancante: {m.description || m.type}</p>)}
@@ -615,7 +735,7 @@ export function ControlDetailDrawer({ instanceId, onClose }: Props) {
 
   const tabs: [Tab, string][] = [
     ["cosa",        "Cos'è"],
-    ["valutare",    "Come valutare"],
+    ["valutazione", "Valutazione"],
     ["docevidence", "Documenti & Evidenze"],
     ["storico",     "Storico"],
   ];
@@ -631,7 +751,7 @@ export function ControlDetailDrawer({ instanceId, onClose }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0 bg-gradient-to-r from-slate-700 to-slate-800">
           <div>
-            <h2 className="text-white font-semibold text-base">Dettaglio controllo</h2>
+            <h2 className="text-white font-semibold text-base">Gestione controllo</h2>
             <p className="text-slate-300 text-xs mt-0.5">
               {isLoading ? "Caricamento..." : info ? `${info.control_id} — ${info.framework}` : "—"}
             </p>
@@ -655,6 +775,9 @@ export function ControlDetailDrawer({ instanceId, onClose }: Props) {
               {t === "docevidence" && info && !info.requirements.satisfied && (
                 <span className="ml-1 inline-flex w-2 h-2 bg-red-500 rounded-full" />
               )}
+              {t === "valutazione" && info && info.suggested_status !== info.current_status && (
+                <span className="ml-1 inline-flex w-2 h-2 bg-indigo-400 rounded-full" />
+              )}
             </button>
           ))}
         </div>
@@ -665,13 +788,23 @@ export function ControlDetailDrawer({ instanceId, onClose }: Props) {
           {!isLoading && info && (
             <>
               {tab === "cosa"        && <TabCosa info={info} />}
-              {tab === "valutare"    && <TabValutare instanceId={instanceId!} requirements={info.requirements} />}
+              {tab === "valutazione" && (
+                <TabValutazione
+                  instanceId={instanceId!}
+                  requirements={info.requirements}
+                  currentStatus={info.current_status}
+                  suggestedStatus={info.suggested_status}
+                  suggestedStatusReason={info.suggested_status_reason}
+                  evidenceRequirement={info.evidence_requirement}
+                />
+              )}
               {tab === "docevidence" && (
                 <TabDocEvidence
                   instanceId={instanceId!}
                   evidences={info.current_evidences}
                   documents={info.linked_documents}
                   requirements={info.requirements}
+                  evidenceRequirement={info.evidence_requirement}
                 />
               )}
               {tab === "storico"     && <TabStorico history={info.evaluation_history} />}

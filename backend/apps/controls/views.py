@@ -28,12 +28,42 @@ class ControlViewSet(viewsets.ModelViewSet):
     serializer_class = ControlSerializer
 
 
+def _explain_suggestion(instance) -> str:
+    from .services import calc_suggested_status, check_evidence_requirements
+
+    req = instance.control.evidence_requirement or {}
+    has_req = bool(
+        req.get("documents") or req.get("evidences")
+        or req.get("min_documents") or req.get("min_evidences")
+    )
+    if not has_req:
+        return "Nessun requisito documentale definito per questo controllo."
+
+    suggested = calc_suggested_status(instance)
+    if suggested == "compliant":
+        return "Tutti i requisiti documentali sono soddisfatti."
+
+    check = check_evidence_requirements(instance)
+    msgs = []
+    for md in check["missing_documents"]:
+        msgs.append(f"Documento mancante: {md['description'] or md['type']}")
+    for me in check["missing_evidences"]:
+        msgs.append(f"Evidenza mancante: {me['description'] or me['type']}")
+    for ee in check["expired_evidences"]:
+        msgs.append(f"Evidenza scaduta: {ee['title']} (scaduta il {ee['expired_on']})")
+
+    prefix = "Requisiti parzialmente soddisfatti." if suggested == "parziale" else "Nessuna documentazione presente."
+    return (prefix + " " + "; ".join(msgs)) if msgs else prefix
+
+
 class ControlInstanceViewSet(viewsets.ModelViewSet):
     queryset = ControlInstance.objects.select_related(
         "plant", "control__framework", "control__domain"
     ).prefetch_related(
         "control__mappings_from__target_control__framework",
         "control__mappings_to__source_control__framework",
+        "documents",
+        "evidences",
     )
     serializer_class = ControlInstanceSerializer
 
@@ -144,7 +174,13 @@ class ControlInstanceViewSet(viewsets.ModelViewSet):
         from .services import check_evidence_requirements
         requirements = check_evidence_requirements(instance)
 
+        from .services import calc_suggested_status
+        suggested_status = calc_suggested_status(instance)
+
         return Response({
+            "current_status": instance.status,
+            "suggested_status": suggested_status,
+            "suggested_status_reason": _explain_suggestion(instance),
             "control_id": control.external_id,
             "title": control.get_title(lang),
             "domain": control.domain.get_name(lang) if control.domain else "",
@@ -199,6 +235,22 @@ class ControlInstanceViewSet(viewsets.ModelViewSet):
             return Response({"error": "Evidenza non trovata."}, status=404)
         instance.evidences.add(evidence)
         return Response({"ok": True})
+
+    @action(detail=True, methods=["post"], url_path="apply-suggestion")
+    def apply_suggestion(self, request, pk=None):
+        """Valuta il controllo applicando lo stato suggerito dal sistema."""
+        from .services import calc_suggested_status, evaluate_control
+        from django.core.exceptions import ValidationError
+
+        instance = self.get_object()
+        suggested = calc_suggested_status(instance)
+        note = request.data.get("note", "")
+        try:
+            evaluate_control(instance, suggested, request.user, note)
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
+        except ValidationError as e:
+            return Response({"error": e.message}, status=400)
 
     @action(detail=True, methods=["post"], url_path="unlink_evidence")
     def unlink_evidence(self, request, pk=None):

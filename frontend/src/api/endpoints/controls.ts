@@ -18,6 +18,8 @@ export interface ControlInstance {
   notes: string;
   last_evaluated_at: string | null;
   mapped_controls: MappedControl[];
+  suggested_status?: string;
+  suggestion_differs?: boolean;
 }
 
 export interface Framework {
@@ -84,6 +86,9 @@ export interface ControlDetailInfo {
   current_evidences: EvidenceRef[];
   linked_documents: LinkedDocument[];
   requirements: RequirementsCheck;
+  current_status: string;
+  suggested_status: string;
+  suggested_status_reason: string;
 }
 
 export interface GapEntry {
@@ -134,4 +139,6 @@ export const controlsApi = {
     apiClient.post(`/controls/instances/${instanceId}/link-document/`, { document_id: documentId }).then((r) => r.data),
   unlinkDocument: (instanceId: string, documentId: string) =>
     apiClient.post(`/controls/instances/${instanceId}/unlink-document/`, { document_id: documentId }).then((r) => r.data),
+  applySuggestion: (instanceId: string, note: string) =>
+    apiClient.post(`/controls/instances/${instanceId}/apply-suggestion/`, { note }).then((r) => r.data),
 };
