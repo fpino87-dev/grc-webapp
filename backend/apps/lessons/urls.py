@@ -1,6 +1,7 @@
-from django.urls import path
 from rest_framework.routers import DefaultRouter
+from .views import LessonLearnedViewSet
 
 router = DefaultRouter()
-urlpatterns = router.urls
+router.register("lessons", LessonLearnedViewSet, basename="lesson-learned")
 
+urlpatterns = router.urls

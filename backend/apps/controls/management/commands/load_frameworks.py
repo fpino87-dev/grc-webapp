@@ -15,7 +15,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         from apps.controls.models import Control, ControlDomain, ControlMapping, Framework
 
-        base = Path(__file__).resolve().parents[5] / "frameworks"
+        base = Path(__file__).resolve().parents[4] / "frameworks"
         files = [Path(options["file"])] if options["file"] else sorted(base.glob("*.json"))
         if not files:
             self.stdout.write(self.style.WARNING("Nessun JSON in backend/frameworks/"))

@@ -1,6 +1,10 @@
-from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-router = DefaultRouter()
-urlpatterns = router.urls
+from .views import RiskAssessmentViewSet, RiskDimensionViewSet, RiskMitigationPlanViewSet
 
+router = DefaultRouter()
+router.register("assessments", RiskAssessmentViewSet, basename="risk-assessment")
+router.register("dimensions", RiskDimensionViewSet, basename="risk-dimension")
+router.register("mitigation-plans", RiskMitigationPlanViewSet, basename="risk-mitigation-plan")
+
+urlpatterns = router.urls

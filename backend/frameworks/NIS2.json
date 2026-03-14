@@ -1,0 +1,221 @@
+{
+  "code": "NIS2",
+  "name": "Direttiva NIS2 (UE 2022/2555)",
+  "version": "2022",
+  "published_at": "2022-12-27",
+  "domains": [
+    {"code": "RISK",     "translations": {"it": {"name": "Analisi dei rischi e sicurezza SI"}, "en": {"name": "Risk analysis and IS security"}},     "order": 1},
+    {"code": "INCIDENT", "translations": {"it": {"name": "Gestione degli incidenti"},           "en": {"name": "Incident handling"}},                "order": 2},
+    {"code": "BCP",      "translations": {"it": {"name": "Continuità operativa"},               "en": {"name": "Business continuity"}},              "order": 3},
+    {"code": "SUPPLY",   "translations": {"it": {"name": "Sicurezza catena di fornitura"},      "en": {"name": "Supply chain security"}},            "order": 4},
+    {"code": "DEVOPS",   "translations": {"it": {"name": "Sicurezza sviluppo e manutenzione"},  "en": {"name": "Secure development and maintenance"}}, "order": 5},
+    {"code": "ASSESS",   "translations": {"it": {"name": "Valutazione efficacia misure"},       "en": {"name": "Effectiveness assessment"}},         "order": 6},
+    {"code": "TRAINING", "translations": {"it": {"name": "Igiene informatica e formazione"},    "en": {"name": "Cyber hygiene and training"}},       "order": 7},
+    {"code": "CRYPTO",   "translations": {"it": {"name": "Crittografia e cifratura"},           "en": {"name": "Cryptography and encryption"}},     "order": 8},
+    {"code": "HR",       "translations": {"it": {"name": "Sicurezza HR, accessi e asset"},      "en": {"name": "HR security, access control, asset management"}}, "order": 9},
+    {"code": "MFA",      "translations": {"it": {"name": "Autenticazione e comunicazioni sicure"}, "en": {"name": "MFA and secure communications"}}, "order": 10}
+  ],
+  "controls": [
+    {
+      "external_id": "NIS2-ART21-1.1",
+      "domain": "RISK",
+      "translations": {
+        "it": {"title": "Politica di analisi dei rischi", "description": "Adottare una politica documentata per l'analisi e la gestione dei rischi per la sicurezza delle reti e dei sistemi informativi."},
+        "en": {"title": "Risk analysis policy", "description": "Adopt a documented policy for the analysis and management of risks to network and information systems security."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-1.2",
+      "domain": "RISK",
+      "translations": {
+        "it": {"title": "Valutazione periodica dei rischi", "description": "Eseguire valutazioni dei rischi con cadenza almeno annuale e dopo eventi significativi, documentando i risultati."},
+        "en": {"title": "Periodic risk assessment", "description": "Perform risk assessments at least annually and after significant events, documenting findings."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-1.3",
+      "domain": "RISK",
+      "translations": {
+        "it": {"title": "Registro dei rischi", "description": "Mantenere un registro aggiornato dei rischi identificati con indicazione della probabilità, dell'impatto e delle misure di trattamento adottate."},
+        "en": {"title": "Risk register", "description": "Maintain an updated risk register with likelihood, impact and treatment measures for each identified risk."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-2.1",
+      "domain": "INCIDENT",
+      "translations": {
+        "it": {"title": "Procedura di gestione degli incidenti", "description": "Disporre di una procedura documentata per la gestione degli incidenti di sicurezza, dalla rilevazione alla chiusura."},
+        "en": {"title": "Incident management procedure", "description": "Have a documented procedure for handling security incidents, from detection to closure."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-2.2",
+      "domain": "INCIDENT",
+      "translations": {
+        "it": {"title": "Notifica CSIRT entro 24h", "description": "Notificare al CSIRT nazionale un preallarme entro 24 ore dalla conoscenza di un incidente significativo."},
+        "en": {"title": "CSIRT early warning within 24h", "description": "Notify the national CSIRT of an early warning within 24 hours of becoming aware of a significant incident."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-2.3",
+      "domain": "INCIDENT",
+      "translations": {
+        "it": {"title": "Notifica CSIRT entro 72h", "description": "Inviare una notifica all'autorità competente entro 72 ore dall'incidente con valutazione iniziale, gravità e indicatori di compromissione."},
+        "en": {"title": "CSIRT notification within 72h", "description": "Submit a notification to the competent authority within 72 hours with initial assessment, severity and indicators of compromise."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-2.4",
+      "domain": "INCIDENT",
+      "translations": {
+        "it": {"title": "Relazione finale incidente entro 30 giorni", "description": "Trasmettere una relazione finale dettagliata entro 30 giorni dalla notifica iniziale con analisi delle cause e misure adottate."},
+        "en": {"title": "Incident final report within 30 days", "description": "Submit a detailed final report within 30 days of initial notification with root cause analysis and corrective measures."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-3.1",
+      "domain": "BCP",
+      "translations": {
+        "it": {"title": "Piano di continuità operativa (BCP)", "description": "Adottare e testare un piano di continuità operativa che garantisca la ripresa dei servizi essenziali in caso di incidente grave."},
+        "en": {"title": "Business continuity plan (BCP)", "description": "Adopt and test a business continuity plan that ensures resumption of essential services following a major incident."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-3.2",
+      "domain": "BCP",
+      "translations": {
+        "it": {"title": "Piano di ripristino d'emergenza (DR)", "description": "Disporre di un piano di disaster recovery con obiettivi RTO e RPO definiti e verificati attraverso test periodici."},
+        "en": {"title": "Disaster recovery plan (DR)", "description": "Have a disaster recovery plan with defined and tested RTO and RPO objectives through periodic tests."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-3.3",
+      "domain": "BCP",
+      "translations": {
+        "it": {"title": "Gestione delle crisi", "description": "Stabilire un processo di gestione delle crisi con ruoli, responsabilità e canali di comunicazione per gli scenari di crisi informatica."},
+        "en": {"title": "Crisis management", "description": "Establish a crisis management process with roles, responsibilities and communication channels for cyber crisis scenarios."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-4.1",
+      "domain": "SUPPLY",
+      "translations": {
+        "it": {"title": "Valutazione sicurezza dei fornitori", "description": "Valutare i rischi di sicurezza informatica nei rapporti con i fornitori diretti e i prestatori di servizi, inclusi i fornitori di servizi gestiti."},
+        "en": {"title": "Supplier security assessment", "description": "Assess cybersecurity risks in relationships with direct suppliers and service providers, including managed service providers."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-4.2",
+      "domain": "SUPPLY",
+      "translations": {
+        "it": {"title": "Clausole di sicurezza nei contratti", "description": "Includere nei contratti con fornitori critici requisiti minimi di sicurezza, obbligo di notifica degli incidenti e diritto di audit."},
+        "en": {"title": "Security clauses in contracts", "description": "Include minimum security requirements, incident notification obligations and audit rights in contracts with critical suppliers."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-5.1",
+      "domain": "DEVOPS",
+      "translations": {
+        "it": {"title": "Sicurezza nel ciclo di sviluppo software", "description": "Integrare pratiche di sicurezza nel ciclo di vita dello sviluppo software (SDLC): requisiti di sicurezza, code review, test di vulnerabilità."},
+        "en": {"title": "Security in software development lifecycle", "description": "Integrate security practices into SDLC: security requirements, code reviews, vulnerability testing."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-5.2",
+      "domain": "DEVOPS",
+      "translations": {
+        "it": {"title": "Gestione vulnerabilità e patch", "description": "Implementare un processo di gestione delle vulnerabilità con prioritizzazione basata sul rischio e applicazione tempestiva delle patch critiche."},
+        "en": {"title": "Vulnerability and patch management", "description": "Implement a vulnerability management process with risk-based prioritization and timely application of critical patches."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-6.1",
+      "domain": "ASSESS",
+      "translations": {
+        "it": {"title": "Verifica periodica dell'efficacia", "description": "Effettuare verifiche periodiche (almeno annuali) dell'efficacia delle misure di sicurezza, attraverso audit interni o test tecnici."},
+        "en": {"title": "Periodic effectiveness review", "description": "Perform periodic reviews (at least annual) of the effectiveness of security measures through internal audits or technical tests."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-6.2",
+      "domain": "ASSESS",
+      "translations": {
+        "it": {"title": "Penetration test e vulnerability assessment", "description": "Eseguire test di penetrazione e valutazioni di vulnerabilità con cadenza appropriata al profilo di rischio dell'organizzazione."},
+        "en": {"title": "Penetration testing and vulnerability assessment", "description": "Conduct penetration tests and vulnerability assessments with frequency appropriate to the organization's risk profile."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-7.1",
+      "domain": "TRAINING",
+      "translations": {
+        "it": {"title": "Programma di formazione sulla sicurezza", "description": "Attuare un programma di formazione e sensibilizzazione sulla cybersecurity per tutto il personale, differenziato per ruolo."},
+        "en": {"title": "Security awareness training programme", "description": "Implement a cybersecurity training and awareness programme for all staff, differentiated by role."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-7.2",
+      "domain": "TRAINING",
+      "translations": {
+        "it": {"title": "Igiene informatica di base", "description": "Definire e comunicare al personale le pratiche di igiene informatica di base: password policy, aggiornamenti software, uso dispositivi."},
+        "en": {"title": "Basic cyber hygiene practices", "description": "Define and communicate basic cyber hygiene practices to staff: password policy, software updates, device usage."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-8.1",
+      "domain": "CRYPTO",
+      "translations": {
+        "it": {"title": "Politica sull'uso della crittografia", "description": "Adottare una politica sull'utilizzo della crittografia e cifratura per proteggere dati in transito e a riposo, con indicazione degli algoritmi approvati."},
+        "en": {"title": "Cryptography and encryption policy", "description": "Adopt a policy on cryptography and encryption to protect data in transit and at rest, specifying approved algorithms."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-8.2",
+      "domain": "CRYPTO",
+      "translations": {
+        "it": {"title": "Gestione delle chiavi crittografiche", "description": "Implementare procedure per la generazione, distribuzione, conservazione, rotazione e revoca delle chiavi crittografiche."},
+        "en": {"title": "Cryptographic key management", "description": "Implement procedures for generation, distribution, storage, rotation and revocation of cryptographic keys."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-9.1",
+      "domain": "HR",
+      "translations": {
+        "it": {"title": "Controllo degli accessi e IAM", "description": "Implementare un sistema di gestione delle identità e degli accessi (IAM) basato sul principio del minimo privilegio e sulla separazione dei compiti."},
+        "en": {"title": "Access control and IAM", "description": "Implement an identity and access management (IAM) system based on the principle of least privilege and separation of duties."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-9.2",
+      "domain": "HR",
+      "translations": {
+        "it": {"title": "Gestione degli asset", "description": "Mantenere un inventario aggiornato degli asset informatici e OT con indicazione dei proprietari, delle classificazioni e dei cicli di vita."},
+        "en": {"title": "Asset management", "description": "Maintain an updated inventory of IT and OT assets with ownership, classification and lifecycle information."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-9.3",
+      "domain": "HR",
+      "translations": {
+        "it": {"title": "Sicurezza delle risorse umane", "description": "Definire procedure di sicurezza per l'assunzione, la gestione e la cessazione del rapporto di lavoro del personale con accesso a sistemi critici."},
+        "en": {"title": "Human resources security", "description": "Define security procedures for hiring, managing and terminating employment of personnel with access to critical systems."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-10.1",
+      "domain": "MFA",
+      "translations": {
+        "it": {"title": "Autenticazione a più fattori (MFA)", "description": "Implementare l'autenticazione a più fattori per l'accesso a sistemi critici, reti, accessi remoti e interfacce amministrative."},
+        "en": {"title": "Multi-factor authentication (MFA)", "description": "Implement multi-factor authentication for access to critical systems, networks, remote access and administrative interfaces."}
+      }
+    },
+    {
+      "external_id": "NIS2-ART21-10.2",
+      "domain": "MFA",
+      "translations": {
+        "it": {"title": "Comunicazioni sicure di emergenza", "description": "Predisporre sistemi di comunicazione sicuri e cifrati per le comunicazioni di emergenza interne all'organizzazione."},
+        "en": {"title": "Secure emergency communications", "description": "Set up secure and encrypted communication systems for emergency communications within the organization."}
+      }
+    }
+  ],
+  "mappings": []
+}

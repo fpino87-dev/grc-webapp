@@ -65,6 +65,8 @@ class ControlMapping(BaseModel):
             ("equivalente", "Equivalente"),
             ("parziale", "Parziale"),
             ("correlato", "Correlato"),
+            ("covers", "Copre"),
+            ("extends", "Estende"),
         ],
     )
 

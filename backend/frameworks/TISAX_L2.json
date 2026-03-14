@@ -1,0 +1,396 @@
+{
+  "code": "TISAX_L2",
+  "name": "TISAX — VDA ISA 6.0 Assessment Level 2 (Alta protezione)",
+  "version": "6.0",
+  "published_at": "2023-03-01",
+  "domains": [
+    {"code": "IS",       "translations": {"it": {"name": "Politica per la Sicurezza delle Informazioni"}, "en": {"name": "Information Security Policy"}},       "order": 1},
+    {"code": "OR",       "translations": {"it": {"name": "Organizzazione della Sicurezza"},               "en": {"name": "Organisation of Information Security"}}, "order": 2},
+    {"code": "HR",       "translations": {"it": {"name": "Sicurezza delle Risorse Umane"},                "en": {"name": "Human Resource Security"}},              "order": 3},
+    {"code": "AM",       "translations": {"it": {"name": "Gestione degli Asset"},                         "en": {"name": "Asset Management"}},                     "order": 4},
+    {"code": "PHYSEC",   "translations": {"it": {"name": "Sicurezza Fisica e Ambientale"},                "en": {"name": "Physical and Environmental Security"}},  "order": 5},
+    {"code": "ITSEC",    "translations": {"it": {"name": "Sicurezza IT e delle Comunicazioni"},           "en": {"name": "IT and Communication Security"}},        "order": 6},
+    {"code": "ACCESS",   "translations": {"it": {"name": "Controllo degli Accessi"},                      "en": {"name": "Access Control"}},                       "order": 7},
+    {"code": "CRYPTO",   "translations": {"it": {"name": "Crittografia"},                                  "en": {"name": "Cryptography"}},                         "order": 8},
+    {"code": "SUPPLIER", "translations": {"it": {"name": "Gestione dei Fornitori"},                       "en": {"name": "Supplier Relationships"}},               "order": 9},
+    {"code": "INCIDENT", "translations": {"it": {"name": "Gestione degli Incidenti"},                     "en": {"name": "Incident Management"}},                  "order": 10},
+    {"code": "BCM",      "translations": {"it": {"name": "Continuità Operativa"},                         "en": {"name": "Business Continuity Management"}},       "order": 11},
+    {"code": "COMPLY",   "translations": {"it": {"name": "Conformità e Audit"},                           "en": {"name": "Compliance and Audit"}},                 "order": 12}
+  ],
+  "controls": [
+    {
+      "external_id": "TISAX-L2-IS-1.1",
+      "domain": "IS",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Politica per la sicurezza delle informazioni", "description": "Una politica per la sicurezza delle informazioni approvata dalla direzione deve essere documentata, comunicata a tutti i dipendenti e rivista almeno annualmente."},
+        "en": {"title": "Information security policy", "description": "A management-approved information security policy must be documented, communicated to all employees, and reviewed at least annually."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-IS-1.2",
+      "domain": "IS",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Gestione del rischio per la sicurezza delle informazioni", "description": "Deve esistere un processo formale di risk assessment per identificare, analizzare e trattare i rischi per la sicurezza delle informazioni, documentato e ripetuto con cadenza regolare."},
+        "en": {"title": "Information security risk management", "description": "A formal risk assessment process must exist to identify, analyze and treat information security risks, documented and repeated on a regular basis."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-IS-1.3",
+      "domain": "IS",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Obiettivi di sicurezza e piani di miglioramento", "description": "Devono essere definiti obiettivi misurabili per la sicurezza delle informazioni e piani d'azione per raggiungere tali obiettivi, con revisione periodica dello stato di avanzamento."},
+        "en": {"title": "Security objectives and improvement plans", "description": "Measurable information security objectives and action plans must be defined, with periodic review of progress."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-OR-2.1",
+      "domain": "OR",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Ruoli e responsabilità per la sicurezza", "description": "I ruoli e le responsabilità in materia di sicurezza delle informazioni devono essere chiaramente definiti, assegnati e comunicati all'interno dell'organizzazione."},
+        "en": {"title": "Information security roles and responsibilities", "description": "Information security roles and responsibilities must be clearly defined, assigned and communicated within the organization."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-OR-2.2",
+      "domain": "OR",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Responsabile della sicurezza delle informazioni (ISM)", "description": "Deve essere nominato un responsabile della sicurezza delle informazioni (ISM/CISO) con autorità e risorse sufficienti per svolgere le proprie funzioni."},
+        "en": {"title": "Information Security Manager (ISM)", "description": "An Information Security Manager (ISM/CISO) must be appointed with sufficient authority and resources to fulfil their functions."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-OR-2.3",
+      "domain": "OR",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Revisione interna della sicurezza", "description": "La sicurezza delle informazioni deve essere oggetto di audit interni o revisioni periodiche per verificare la conformità alle policy e l'efficacia dei controlli implementati."},
+        "en": {"title": "Internal security review", "description": "Information security must be subject to internal audits or periodic reviews to verify compliance with policies and the effectiveness of implemented controls."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-HR-3.1",
+      "domain": "HR",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Screening dei dipendenti", "description": "Prima dell'assunzione, deve essere effettuato uno screening del personale (verifica dei precedenti penali, referenze) in conformità con le leggi applicabili, in particolare per i ruoli con accesso a informazioni riservate."},
+        "en": {"title": "Employee screening", "description": "Prior to employment, personnel screening (background checks, references) must be performed in accordance with applicable laws, particularly for roles with access to confidential information."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-HR-3.2",
+      "domain": "HR",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Formazione e sensibilizzazione sulla sicurezza", "description": "Tutti i dipendenti devono ricevere formazione sulla sicurezza delle informazioni all'assunzione e aggiornamenti regolari. La formazione deve essere documentata e la sua efficacia valutata."},
+        "en": {"title": "Security training and awareness", "description": "All employees must receive information security training at hire and regular updates. Training must be documented and its effectiveness evaluated."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-HR-3.3",
+      "domain": "HR",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Accordi di riservatezza (NDA)", "description": "I dipendenti e i terzi con accesso a informazioni riservate devono firmare accordi di riservatezza (NDA) prima dell'accesso. Il rispetto degli accordi deve essere periodicamente verificato."},
+        "en": {"title": "Confidentiality agreements (NDA)", "description": "Employees and third parties with access to confidential information must sign confidentiality agreements (NDAs) before access. Compliance with agreements must be periodically verified."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-HR-3.4",
+      "domain": "HR",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Procedure di cessazione del rapporto di lavoro", "description": "Devono esistere procedure formali per la cessazione o il cambio di ruolo dei dipendenti, che includano la revoca degli accessi, la restituzione degli asset e un debriefing sulla sicurezza."},
+        "en": {"title": "Employment termination procedures", "description": "Formal procedures must exist for termination or change of employee roles, including revocation of access rights, return of assets and a security debriefing."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-AM-4.1",
+      "domain": "AM",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Inventario degli asset informativi", "description": "Deve essere mantenuto un inventario aggiornato di tutti gli asset informativi (dati, sistemi, applicazioni, hardware) con indicazione del proprietario, della classificazione e dell'importanza per il business."},
+        "en": {"title": "Information asset inventory", "description": "An up-to-date inventory of all information assets (data, systems, applications, hardware) must be maintained, indicating the owner, classification and business importance."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-AM-4.2",
+      "domain": "AM",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Classificazione delle informazioni", "description": "Le informazioni devono essere classificate in base al loro livello di riservatezza (es. pubblica, interna, riservata, confidenziale) e devono essere definite regole per il trattamento di ciascuna categoria."},
+        "en": {"title": "Information classification", "description": "Information must be classified according to its confidentiality level (e.g. public, internal, confidential, strictly confidential) and handling rules must be defined for each category."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-AM-4.3",
+      "domain": "AM",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Smaltimento sicuro degli asset", "description": "Devono essere definite procedure per il smaltimento sicuro di supporti di dati e apparecchiature contenenti informazioni riservate, con distruzione documentata e certificata."},
+        "en": {"title": "Secure asset disposal", "description": "Procedures must be defined for the secure disposal of data carriers and equipment containing confidential information, with documented and certified destruction."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-PHYSEC-5.1",
+      "domain": "PHYSEC",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Perimetro di sicurezza fisico", "description": "Devono essere definiti e implementati perimetri di sicurezza fisici (aree sicure) per proteggere le aree che contengono informazioni sensibili o sistemi critici, con controllo degli accessi alle zone riservate."},
+        "en": {"title": "Physical security perimeter", "description": "Physical security perimeters (secure areas) must be defined and implemented to protect areas containing sensitive information or critical systems, with access control to restricted zones."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-PHYSEC-5.2",
+      "domain": "PHYSEC",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Controllo degli accessi fisici", "description": "L'accesso fisico alle aree sicure deve essere limitato al personale autorizzato tramite meccanismi appropriati (badge, PIN, biometria). I visitatori devono essere accompagnati e registrati."},
+        "en": {"title": "Physical entry controls", "description": "Physical access to secure areas must be restricted to authorized personnel using appropriate mechanisms (badge, PIN, biometrics). Visitors must be escorted and registered."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-PHYSEC-5.3",
+      "domain": "PHYSEC",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Protezione delle apparecchiature", "description": "Le apparecchiature devono essere protette da minacce fisiche e ambientali (alimentazione, temperatura, fumo, acqua). I dispositivi mobili e i supporti rimovibili devono essere protetti da furto e perdita."},
+        "en": {"title": "Equipment protection", "description": "Equipment must be protected from physical and environmental threats (power, temperature, smoke, water). Mobile devices and removable media must be protected from theft and loss."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-PHYSEC-5.4",
+      "domain": "PHYSEC",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Sicurezza degli uffici e sale server", "description": "Gli uffici, le sale server e le altre strutture devono essere fisicamente protetti in modo proporzionale al livello di riservatezza delle informazioni trattate."},
+        "en": {"title": "Security of offices and server rooms", "description": "Offices, server rooms and other facilities must be physically protected proportionate to the level of confidentiality of the information processed."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-ITSEC-6.1",
+      "domain": "ITSEC",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Configurazione sicura dei sistemi", "description": "I sistemi informatici devono essere configurati in modo sicuro secondo baseline di hardening documentate. Le configurazioni non sicure di default devono essere modificate prima del deployment."},
+        "en": {"title": "Secure system configuration", "description": "IT systems must be configured securely according to documented hardening baselines. Insecure default configurations must be changed before deployment."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-ITSEC-6.2",
+      "domain": "ITSEC",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Protezione da malware", "description": "Deve essere implementata una protezione contro il malware su tutti i sistemi pertinenti, con aggiornamenti automatici delle signature e scansioni regolari. Gli incidenti malware devono essere rilevati e gestiti."},
+        "en": {"title": "Malware protection", "description": "Malware protection must be implemented on all relevant systems with automatic signature updates and regular scans. Malware incidents must be detected and managed."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-ITSEC-6.3",
+      "domain": "ITSEC",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Gestione delle patch e delle vulnerabilità", "description": "Deve essere implementato un processo di patch management che garantisca l'applicazione tempestiva delle patch di sicurezza critiche. Le vulnerabilità devono essere identificate, valutate e trattate in base al rischio."},
+        "en": {"title": "Patch and vulnerability management", "description": "A patch management process must be implemented ensuring timely application of critical security patches. Vulnerabilities must be identified, assessed and treated based on risk."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-ITSEC-6.4",
+      "domain": "ITSEC",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Sicurezza della rete", "description": "La rete deve essere segmentata in modo appropriato, con firewall e altri controlli per limitare il traffico non autorizzato. Il traffico di rete deve essere monitorato per rilevare anomalie e attività sospette."},
+        "en": {"title": "Network security", "description": "The network must be appropriately segmented with firewalls and other controls to restrict unauthorized traffic. Network traffic must be monitored for anomalies and suspicious activity."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-ITSEC-6.5",
+      "domain": "ITSEC",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Backup e ripristino dei dati", "description": "Devono essere implementate procedure di backup regolari per le informazioni critiche, con test periodici del ripristino. I backup devono essere archiviati in modo sicuro e protetti dalla stessa classificazione dei dati originali."},
+        "en": {"title": "Data backup and recovery", "description": "Regular backup procedures must be implemented for critical information, with periodic restoration tests. Backups must be stored securely and protected with the same classification as the original data."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-ITSEC-6.6",
+      "domain": "ITSEC",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Logging e monitoraggio", "description": "I log di sicurezza (accessi, modifiche, errori) devono essere generati, protetti e conservati per un periodo adeguato. Devono essere implementate procedure di revisione periodica dei log per rilevare eventi anomali."},
+        "en": {"title": "Logging and monitoring", "description": "Security logs (access, changes, errors) must be generated, protected and retained for an adequate period. Procedures for periodic log review must be implemented to detect anomalous events."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-ITSEC-6.7",
+      "domain": "ITSEC",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Trasferimento sicuro delle informazioni", "description": "Le informazioni riservate devono essere protette durante il trasferimento attraverso canali sicuri (cifratura in transito). Devono esistere policy per l'uso corretto della posta elettronica e di altri canali di comunicazione."},
+        "en": {"title": "Secure information transfer", "description": "Confidential information must be protected during transfer through secure channels (encryption in transit). Policies must exist for the correct use of email and other communication channels."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-ACCESS-7.1",
+      "domain": "ACCESS",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Policy di controllo degli accessi", "description": "Deve esistere una policy formale per il controllo degli accessi basata sul principio del minimo privilegio e della necessità di sapere (need-to-know), con revisione periodica dei diritti di accesso."},
+        "en": {"title": "Access control policy", "description": "A formal access control policy must exist based on the principle of least privilege and need-to-know, with periodic review of access rights."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-ACCESS-7.2",
+      "domain": "ACCESS",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Gestione degli utenti e dei privilegi", "description": "I diritti di accesso devono essere concessi, modificati e revocati attraverso un processo formale. Gli account inattivi devono essere disabilitati e gli accessi privilegiati devono essere strettamente controllati."},
+        "en": {"title": "User and privilege management", "description": "Access rights must be granted, modified and revoked through a formal process. Inactive accounts must be disabled and privileged access must be strictly controlled."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-ACCESS-7.3",
+      "domain": "ACCESS",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Autenticazione e gestione delle password", "description": "Devono essere implementati requisiti di complessità delle password e policy di scadenza. Per i sistemi critici e gli accessi remoti deve essere implementata l'autenticazione a più fattori (MFA)."},
+        "en": {"title": "Authentication and password management", "description": "Password complexity requirements and expiration policies must be implemented. Multi-factor authentication (MFA) must be implemented for critical systems and remote access."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-ACCESS-7.4",
+      "domain": "ACCESS",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Accesso remoto sicuro", "description": "L'accesso remoto ai sistemi deve avvenire attraverso canali sicuri e cifrati (VPN). L'accesso remoto di terze parti (fornitori) deve essere strettamente controllato e limitato nel tempo."},
+        "en": {"title": "Secure remote access", "description": "Remote access to systems must occur through secure and encrypted channels (VPN). Remote access by third parties (vendors) must be strictly controlled and time-limited."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-CRYPTO-8.1",
+      "domain": "CRYPTO",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Policy crittografica", "description": "Deve esistere una policy per l'uso della crittografia che definisca gli algoritmi approvati, le lunghezze delle chiavi e i casi d'uso per la protezione delle informazioni riservate in transito e a riposo."},
+        "en": {"title": "Cryptographic policy", "description": "A cryptography policy must exist defining approved algorithms, key lengths and use cases for protecting confidential information in transit and at rest."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-CRYPTO-8.2",
+      "domain": "CRYPTO",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Gestione delle chiavi crittografiche", "description": "Devono essere implementate procedure per la generazione, distribuzione, archiviazione, rotazione e revoca sicure delle chiavi crittografiche, con protezione delle chiavi da accessi non autorizzati."},
+        "en": {"title": "Cryptographic key management", "description": "Procedures must be implemented for secure generation, distribution, storage, rotation and revocation of cryptographic keys, with protection of keys from unauthorized access."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-SUPPLIER-9.1",
+      "domain": "SUPPLIER",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Policy per la sicurezza nella catena di fornitura", "description": "Deve esistere una policy che definisca i requisiti di sicurezza delle informazioni applicabili ai fornitori e alle terze parti che trattano informazioni riservate del cliente automotive."},
+        "en": {"title": "Supply chain information security policy", "description": "A policy must exist defining information security requirements applicable to suppliers and third parties that process confidential automotive customer information."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-SUPPLIER-9.2",
+      "domain": "SUPPLIER",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Valutazione della sicurezza dei fornitori", "description": "Prima di condividere informazioni riservate, i fornitori devono essere valutati rispetto ai requisiti di sicurezza delle informazioni. La valutazione deve essere documentata e aggiornata periodicamente."},
+        "en": {"title": "Supplier security assessment", "description": "Before sharing confidential information, suppliers must be assessed against information security requirements. The assessment must be documented and updated periodically."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-SUPPLIER-9.3",
+      "domain": "SUPPLIER",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Requisiti contrattuali di sicurezza con i fornitori", "description": "I contratti con i fornitori che trattano informazioni riservate devono includere requisiti di sicurezza adeguati, obblighi di notifica degli incidenti e il diritto di audit."},
+        "en": {"title": "Supplier contractual security requirements", "description": "Contracts with suppliers handling confidential information must include adequate security requirements, incident notification obligations and the right to audit."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-INCIDENT-10.1",
+      "domain": "INCIDENT",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Rilevamento e segnalazione degli incidenti", "description": "Deve essere implementato un processo per il rilevamento e la segnalazione tempestiva di incidenti di sicurezza. Tutti i dipendenti devono essere formati su come riconoscere e segnalare gli incidenti."},
+        "en": {"title": "Incident detection and reporting", "description": "A process must be implemented for the timely detection and reporting of security incidents. All employees must be trained on how to recognize and report incidents."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-INCIDENT-10.2",
+      "domain": "INCIDENT",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Gestione e risposta agli incidenti", "description": "Devono esistere procedure documentate per la gestione degli incidenti di sicurezza, dalla contenimento all'eradicazione e al ripristino. I clienti automotive interessati devono essere notificati tempestivamente."},
+        "en": {"title": "Incident management and response", "description": "Documented procedures must exist for managing security incidents, from containment through eradication and recovery. Affected automotive customers must be notified in a timely manner."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-INCIDENT-10.3",
+      "domain": "INCIDENT",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Analisi post-incidente e lezioni apprese", "description": "Dopo ogni incidente significativo deve essere condotta un'analisi post-incidente per identificare le cause radice e le misure correttive. Le lezioni apprese devono essere documentate e condivise."},
+        "en": {"title": "Post-incident analysis and lessons learned", "description": "After each significant incident, a post-incident analysis must be conducted to identify root causes and corrective actions. Lessons learned must be documented and shared."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-BCM-11.1",
+      "domain": "BCM",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Piano di continuità operativa", "description": "Deve essere definito e testato un piano di continuità operativa (BCP) per garantire la disponibilità dei processi critici e la protezione delle informazioni riservate in caso di interruzione."},
+        "en": {"title": "Business continuity plan", "description": "A business continuity plan (BCP) must be defined and tested to ensure the availability of critical processes and protection of confidential information in the event of disruption."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-BCM-11.2",
+      "domain": "BCM",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Piano di disaster recovery", "description": "Deve esistere un piano di disaster recovery (DR) con obiettivi RTO e RPO definiti per i sistemi critici. Il piano deve essere testato almeno annualmente e aggiornato dopo ogni modifica significativa."},
+        "en": {"title": "Disaster recovery plan", "description": "A disaster recovery (DR) plan must exist with defined RTO and RPO objectives for critical systems. The plan must be tested at least annually and updated after significant changes."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-COMPLY-12.1",
+      "domain": "COMPLY",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Conformità ai requisiti legali e contrattuali", "description": "Devono essere identificati e documentati tutti i requisiti legali, normativi e contrattuali in materia di sicurezza delle informazioni applicabili all'organizzazione. La conformità deve essere verificata periodicamente."},
+        "en": {"title": "Compliance with legal and contractual requirements", "description": "All legal, regulatory and contractual information security requirements applicable to the organization must be identified and documented. Compliance must be periodically verified."}
+      }
+    },
+    {
+      "external_id": "TISAX-L2-COMPLY-12.2",
+      "domain": "COMPLY",
+      "level": "L2",
+      "translations": {
+        "it": {"title": "Audit interni della sicurezza delle informazioni", "description": "Devono essere condotti audit interni periodici della sicurezza delle informazioni per verificare l'efficacia dei controlli. I risultati degli audit devono essere documentati e le non conformità risolte."},
+        "en": {"title": "Internal information security audits", "description": "Periodic internal information security audits must be conducted to verify the effectiveness of controls. Audit results must be documented and non-conformities resolved."}
+      }
+    }
+  ],
+  "mappings": [
+    {"source": "TISAX-L2-IS-1.2",      "target": "NIS2-ART21-1.1", "target_framework": "NIS2", "relationship": "covers"},
+    {"source": "TISAX-L2-IS-1.2",      "target": "NIS2-ART21-1.2", "target_framework": "NIS2", "relationship": "covers"},
+    {"source": "TISAX-L2-INCIDENT-10.1","target": "NIS2-ART21-2.1","target_framework": "NIS2", "relationship": "covers"},
+    {"source": "TISAX-L2-INCIDENT-10.2","target": "NIS2-ART21-2.2","target_framework": "NIS2", "relationship": "covers"},
+    {"source": "TISAX-L2-BCM-11.1",    "target": "NIS2-ART21-3.1", "target_framework": "NIS2", "relationship": "covers"},
+    {"source": "TISAX-L2-BCM-11.2",    "target": "NIS2-ART21-3.2", "target_framework": "NIS2", "relationship": "covers"},
+    {"source": "TISAX-L2-SUPPLIER-9.2","target": "NIS2-ART21-4.1", "target_framework": "NIS2", "relationship": "covers"},
+    {"source": "TISAX-L2-SUPPLIER-9.3","target": "NIS2-ART21-4.2", "target_framework": "NIS2", "relationship": "covers"},
+    {"source": "TISAX-L2-CRYPTO-8.1",  "target": "NIS2-ART21-8.1", "target_framework": "NIS2", "relationship": "covers"},
+    {"source": "TISAX-L2-CRYPTO-8.2",  "target": "NIS2-ART21-8.2", "target_framework": "NIS2", "relationship": "covers"},
+    {"source": "TISAX-L2-ACCESS-7.1",  "target": "NIS2-ART21-9.1", "target_framework": "NIS2", "relationship": "covers"},
+    {"source": "TISAX-L2-ACCESS-7.3",  "target": "NIS2-ART21-10.1","target_framework": "NIS2", "relationship": "covers"}
+  ]
+}

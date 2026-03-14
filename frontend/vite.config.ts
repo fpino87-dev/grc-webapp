@@ -7,16 +7,15 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 3000,
+    allowedHosts: ["grc.sumiriko.it"],
     proxy: {
       "/api": {
-        target: "http://backend:8000",
+        target: "http://grc-webapp-backend-1:8000",
         changeOrigin: true,
-        secure: false
-      }
-    }
+      },
+    },
   },
   build: {
     outDir: "dist"
   }
 });
-

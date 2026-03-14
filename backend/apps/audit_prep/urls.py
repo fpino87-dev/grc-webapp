@@ -1,6 +1,8 @@
-from django.urls import path
 from rest_framework.routers import DefaultRouter
+from .views import AuditPrepViewSet, EvidenceItemViewSet
 
 router = DefaultRouter()
-urlpatterns = router.urls
+router.register("audit-preps", AuditPrepViewSet, basename="audit-prep")
+router.register("evidence-items", EvidenceItemViewSet, basename="evidence-item")
 
+urlpatterns = router.urls

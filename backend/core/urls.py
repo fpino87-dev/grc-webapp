@@ -1,11 +1,16 @@
 from django.contrib import admin
 from django.urls import include, path
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerUIView
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from rest_framework_simplejwt.views import TokenRefreshView
+
+from core.jwt import GrcTokenObtainPairView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("api/token/", GrcTokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("api/docs/", SpectacularSwaggerUIView.as_view(url_name="schema"), name="swagger"),
+    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger"),
     path("api/v1/governance/", include("apps.governance.urls")),
     path("api/v1/plants/", include("apps.plants.urls")),
     path("api/v1/auth/", include("apps.auth_grc.urls")),

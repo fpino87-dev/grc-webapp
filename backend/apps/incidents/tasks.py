@@ -1,23 +1,45 @@
 from celery import shared_task
-
-from core.audit import log_action
-from .models import Incident
+from django.utils import timezone
+import datetime
 
 
 @shared_task
-def nis2_confirmation_check(incident_id):
-    """Dopo 30 minuti: se ancora da_valutare assume sì."""
-    inc = Incident.objects.filter(pk=incident_id, nis2_notifiable="da_valutare").first()
-    if inc:
-        inc.nis2_notifiable = "si"
-        inc.save(update_fields=["nis2_notifiable"])
-        # livello L1 per evento operativo
-        # user è opzionale qui; si può usare un utente di sistema se configurato
-        log_action(
-            user=getattr(inc, "created_by", None),
-            action_code="incidents.nis2_auto_confirm",
-            level="L1",
-            entity=inc,
-            payload={"incident_id": str(inc.id), "auto_confirm": True},
-        )
+def check_nis2_deadlines():
+    """
+    NIS2 requires notification within 24h for significant incidents.
+    Escalates incidents that are nis2_notifiable='da_valutare' and older than 30 minutes.
+    """
+    from .models import Incident
+    from core.audit import log_action
 
+    cutoff = timezone.now() - datetime.timedelta(minutes=30)
+    incidents = Incident.objects.filter(
+        nis2_notifiable="da_valutare",
+        status__in=["aperto", "in_analisi"],
+        detected_at__lte=cutoff,
+    )
+    count = incidents.count()
+    for incident in incidents:
+        user = incident.created_by
+        if user is not None:
+            log_action(
+                user=user,
+                action_code="nis2_evaluation_overdue",
+                level="L1",
+                entity=incident,
+                payload={"incident_id": str(incident.pk), "nis2_notifiable": incident.nis2_notifiable},
+            )
+    return f"Checked {count} NIS2 incidents"
+
+
+@shared_task
+def mark_overdue_incidents():
+    """Mark incidents open > 72h as requiring attention"""
+    from .models import Incident
+
+    cutoff = timezone.now() - datetime.timedelta(hours=72)
+    old_open = Incident.objects.filter(
+        status="aperto",
+        detected_at__lte=cutoff,
+    )
+    return f"Found {old_open.count()} overdue incidents"

@@ -1,6 +1,9 @@
 from django.urls import path
-from rest_framework.routers import DefaultRouter
+from .views import ComplianceSummaryView, RiskSummaryView, IncidentSummaryView, DashboardSummaryView
 
-router = DefaultRouter()
-urlpatterns = router.urls
-
+urlpatterns = [
+    path("compliance/", ComplianceSummaryView.as_view(), name="reporting-compliance"),
+    path("risk/", RiskSummaryView.as_view(), name="reporting-risk"),
+    path("incidents/", IncidentSummaryView.as_view(), name="reporting-incidents"),
+    path("dashboard/", DashboardSummaryView.as_view(), name="reporting-dashboard"),
+]
