@@ -58,7 +58,6 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     from apps.incidents.models import Incident
     from apps.pdca.models import PdcaCycle
     from apps.tasks.models import Task
-    from apps.bcp.services import check_missing_bcp_plans
 
     plant_id = review.plant_id
     today = timezone.now().date()
@@ -161,12 +160,14 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     }
 
     # ── 6. BCP ──
-    class _FakePlant:
-        def __init__(self, pk):
-            self.pk = pk
-            self.id = pk
-
-    missing_bcp = check_missing_bcp_plans(_FakePlant(plant_id)) if plant_id else []
+    from apps.bia.models import CriticalProcess
+    if plant_id:
+        critical_procs = CriticalProcess.objects.filter(
+            plant_id=plant_id, criticality__gte=4, status="approvato", deleted_at__isnull=True
+        )
+        missing_bcp = [p for p in critical_procs if not p.bcp_plans.filter(deleted_at__isnull=True).exists()]
+    else:
+        missing_bcp = []
     bcp_summary = {
         "processi_critici_senza_bcp": len(missing_bcp),
         "nomi": [p.name for p in missing_bcp[:5]],

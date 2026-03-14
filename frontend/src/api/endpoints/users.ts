@@ -33,4 +33,10 @@ export const usersApi = {
     apiClient.post(`/auth/users/${id}/toggle_active/`).then(r => r.data),
   listRoles: () => apiClient.get<GrcRole[]>("/auth/users/list_roles/").then(r => r.data),
   me: () => apiClient.get<GrcUser>("/auth/users/me/").then(r => r.data),
+  resetTestDb: () =>
+    apiClient.post<{ status: string; message: string; detail: string }>(
+      "/auth/reset-test-db/",
+      {},
+      { headers: { "X-Confirm-Reset": "RESET-CONFIRMED" } },
+    ).then(r => r.data),
 };

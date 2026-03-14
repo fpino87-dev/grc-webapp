@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usersApi, type GrcUser, type GrcRole } from "../../api/endpoints/users";
+import { useAuthStore } from "../../store/auth";
 
 const roleColors: Record<string, string> = {
   super_admin: "bg-purple-100 text-purple-800",
@@ -123,9 +124,97 @@ function AssignRoleInline({ user, roles }: { user: GrcUser; roles: GrcRole[] }) 
   );
 }
 
+function DangerZone() {
+  const logout = useAuthStore(s => s.logout);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [isResetting, setIsResetting] = useState(false);
+  const [result, setResult] = useState<{ ok: boolean; msg: string } | null>(null);
+
+  async function handleReset() {
+    setIsResetting(true);
+    setResult(null);
+    try {
+      await usersApi.resetTestDb();
+      setResult({ ok: true, msg: "Reset completato. Reindirizzamento al login..." });
+      setTimeout(() => {
+        logout();
+        window.location.href = "/login";
+      }, 2000);
+    } catch (e: any) {
+      const msg = e?.response?.data?.error || "Errore durante il reset";
+      setResult({ ok: false, msg });
+    } finally {
+      setIsResetting(false);
+    }
+  }
+
+  return (
+    <div className="mt-12 border-2 border-red-300 rounded-lg p-6 bg-red-50">
+      <h3 className="text-red-700 font-bold text-lg mb-2">
+        ⚠️ Zona pericolosa — Solo ambiente di test
+      </h3>
+      <p className="text-sm text-red-600 mb-4">
+        Cancella tutti i dati GRC mantenendo superuser e framework normativi.
+        Questa operazione è irreversibile.
+      </p>
+
+      {result && (
+        <div className={`mb-4 px-4 py-3 rounded text-sm ${result.ok ? "bg-green-100 text-green-800 border border-green-300" : "bg-red-100 text-red-800 border border-red-400"}`}>
+          {result.msg}
+        </div>
+      )}
+
+      {!showConfirm ? (
+        <button
+          onClick={() => setShowConfirm(true)}
+          className="px-4 py-2 bg-red-600 text-white rounded font-medium hover:bg-red-700"
+        >
+          🗑️ Reset database di test
+        </button>
+      ) : (
+        <div className="bg-white border border-red-400 rounded p-4">
+          <p className="font-semibold text-red-700 mb-3">
+            Sei sicuro? Questa azione cancellerà TUTTI i dati GRC.
+            Verranno mantenuti solo il tuo account superuser
+            e i framework normativi.
+          </p>
+          <input
+            placeholder="Scrivi RESET per confermare"
+            value={confirmText}
+            onChange={e => setConfirmText(e.target.value)}
+            className="border rounded px-3 py-2 text-sm w-full mb-3"
+          />
+          <div className="flex gap-3">
+            <button
+              onClick={handleReset}
+              disabled={confirmText !== "RESET" || isResetting}
+              className="px-4 py-2 bg-red-700 text-white rounded disabled:opacity-40 font-medium"
+            >
+              {isResetting ? "Reset in corso..." : "Conferma reset"}
+            </button>
+            <button
+              onClick={() => { setShowConfirm(false); setConfirmText(""); }}
+              className="px-4 py-2 border rounded text-gray-600"
+            >
+              Annulla
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function UsersPage() {
   const [showNew, setShowNew] = useState(false);
   const qc = useQueryClient();
+
+  const { data: me } = useQuery({
+    queryKey: ["users-me"],
+    queryFn: usersApi.me,
+    retry: false,
+  });
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["users"],
@@ -203,6 +292,8 @@ export function UsersPage() {
       </div>
 
       {showNew && <NewUserModal roles={roles} onClose={() => setShowNew(false)} />}
+
+      {me?.is_superuser && <DangerZone />}
     </div>
   );
 }
