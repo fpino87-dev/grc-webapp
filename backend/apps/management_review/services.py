@@ -50,67 +50,153 @@ def complete_review(review: ManagementReview, user) -> ManagementReview:
 def generate_snapshot(review: ManagementReview, user) -> dict:
     """
     Congela i dati di compliance al momento della riunione.
-    Chiama i servizi degli altri moduli e salva in snapshot_data.
     """
-    from apps.controls.services import get_compliance_summary
+    from django.db.models import Count, Q
+    from apps.controls.models import Framework, ControlInstance
+    from apps.documents.models import Document, Evidence
     from apps.risk.models import RiskAssessment
     from apps.incidents.models import Incident
     from apps.pdca.models import PdcaCycle
+    from apps.tasks.models import Task
+    from apps.bcp.services import check_missing_bcp_plans
 
     plant_id = review.plant_id
+    today = timezone.now().date()
+    since_12m = timezone.now() - timezone.timedelta(days=365)
 
-    # Compliance per framework
-    frameworks_data = {}
-    from apps.controls.models import Framework
+    # ── 1. Compliance per framework con dettaglio ──
+    frameworks_detail = {}
     for fw in Framework.objects.filter(archived_at__isnull=True):
-        frameworks_data[fw.code] = get_compliance_summary(plant_id, fw.code)
+        qs = ControlInstance.objects.filter(
+            plant_id=plant_id, control__framework=fw
+        ).select_related("control__domain")
+        total = qs.count()
+        if total == 0:
+            continue
+        by_status = dict(qs.values("status").annotate(n=Count("id")).values_list("status", "n"))
+        compliant = by_status.get("compliant", 0)
 
-    # Rischi aperti per livello
-    risks = RiskAssessment.objects.filter(
+        gap_controls = list(qs.filter(status="gap").values(
+            "id", "control__external_id", "control__translations",
+        )[:20])
+
+        expired_evidence_controls = list(qs.filter(
+            status="compliant",
+            evidences__valid_until__lt=today,
+        ).values("id", "control__external_id")[:10])
+
+        frameworks_detail[fw.code] = {
+            "framework_name": fw.name,
+            "total": total,
+            "by_status": by_status,
+            "pct_compliant": round(compliant / total * 100, 1) if total else 0,
+            "gap_controls": gap_controls,
+            "expired_evidence_count": len(expired_evidence_controls),
+        }
+
+    # ── 2. Documenti ──
+    docs_qs = Document.objects.filter(plant_id=plant_id, deleted_at__isnull=True)
+    docs_summary = {
+        "totale": docs_qs.count(),
+        "approvati": docs_qs.filter(status="approvato").count(),
+        "in_revisione": docs_qs.filter(status__in=["revisione", "approvazione"]).count(),
+        "bozza": docs_qs.filter(status="bozza").count(),
+        "in_scadenza": docs_qs.filter(
+            status="approvato",
+            review_due_date__lte=today + timezone.timedelta(days=90),
+            review_due_date__gte=today,
+        ).count(),
+        "scaduti": docs_qs.filter(status="approvato", review_due_date__lt=today).count(),
+    }
+    ev_scadute = Evidence.objects.filter(
+        plant_id=plant_id, valid_until__lt=today, deleted_at__isnull=True
+    ).count()
+    ev_in_scadenza = Evidence.objects.filter(
+        plant_id=plant_id,
+        valid_until__gte=today,
+        valid_until__lte=today + timezone.timedelta(days=30),
+        deleted_at__isnull=True,
+    ).count()
+
+    # ── 3. Rischi ──
+    risks_qs = RiskAssessment.objects.filter(
         plant_id=plant_id, status="completato", deleted_at__isnull=True
     )
     risk_summary = {
-        "rosso":  risks.filter(score__gt=14).count(),
-        "giallo": risks.filter(score__gt=7, score__lte=14).count(),
-        "verde":  risks.filter(score__lte=7).count(),
+        "rosso":  risks_qs.filter(score__gt=14).count(),
+        "giallo": risks_qs.filter(score__gt=7, score__lte=14).count(),
+        "verde":  risks_qs.filter(score__lte=7).count(),
+        "senza_piano": risks_qs.filter(score__gt=14, mitigation_plans__isnull=True).count(),
+        "senza_owner": risks_qs.filter(owner__isnull=True).count(),
     }
-
-    # Rischi per owner
-    from django.db.models import Count, Q
     risks_by_owner = list(
-        risks.values(
-            "owner__first_name", "owner__last_name", "owner__email"
-        ).annotate(
+        risks_qs.values("owner__first_name", "owner__last_name", "owner__email").annotate(
             totale=Count("id"),
             rossi=Count("id", filter=Q(score__gt=14)),
         ).order_by("-rossi")[:10]
     )
 
-    # Incidenti ultimi 12 mesi
-    since = timezone.now() - timezone.timedelta(days=365)
+    # ── 4. Incidenti ──
     incidents_summary = {
-        "totale":  Incident.objects.filter(plant_id=plant_id, created_at__gte=since).count(),
-        "nis2":    Incident.objects.filter(plant_id=plant_id, nis2_notifiable="si", created_at__gte=since).count(),
-        "aperti":  Incident.objects.filter(plant_id=plant_id, status="aperto").count(),
+        "totale_12m": Incident.objects.filter(plant_id=plant_id, created_at__gte=since_12m).count(),
+        "nis2_notificati": Incident.objects.filter(
+            plant_id=plant_id, nis2_notifiable="si", created_at__gte=since_12m
+        ).count(),
+        "aperti": Incident.objects.filter(plant_id=plant_id, status__in=["aperto", "in_analisi"]).count(),
+        "senza_rca": Incident.objects.filter(
+            plant_id=plant_id, status="chiuso", rca__isnull=True
+        ).count(),
     }
 
-    # PDCA aperti
+    # ── 5. PDCA ──
     pdca_summary = {
-        "aperti":  PdcaCycle.objects.filter(plant_id=plant_id).exclude(fase_corrente="chiuso").count(),
-        "scaduti": PdcaCycle.objects.filter(
+        "aperti": PdcaCycle.objects.filter(plant_id=plant_id).exclude(fase_corrente="chiuso").count(),
+        "bloccati_plan_90gg": PdcaCycle.objects.filter(
             plant_id=plant_id, fase_corrente="plan",
             created_at__lt=timezone.now() - timezone.timedelta(days=90),
+        ).count(),
+        "chiusi_12m": PdcaCycle.objects.filter(
+            plant_id=plant_id, fase_corrente="chiuso", closed_at__gte=since_12m,
+        ).count(),
+    }
+
+    # ── 6. BCP ──
+    class _FakePlant:
+        def __init__(self, pk):
+            self.pk = pk
+            self.id = pk
+
+    missing_bcp = check_missing_bcp_plans(_FakePlant(plant_id)) if plant_id else []
+    bcp_summary = {
+        "processi_critici_senza_bcp": len(missing_bcp),
+        "nomi": [p.name for p in missing_bcp[:5]],
+    }
+
+    # ── 7. Task scaduti ──
+    tasks_summary = {
+        "scaduti": Task.objects.filter(
+            plant_id=plant_id,
+            status__in=["aperto", "in_corso"],
+            due_date__lt=today,
+        ).count(),
+        "critici_aperti": Task.objects.filter(
+            plant_id=plant_id,
+            priority="critica",
+            status__in=["aperto", "in_corso"],
         ).count(),
     }
 
     snapshot = {
         "generated_at":   timezone.now().isoformat(),
         "plant_id":       str(plant_id) if plant_id else None,
-        "frameworks":     frameworks_data,
-        "risk_summary":   risk_summary,
+        "frameworks":     frameworks_detail,
+        "documenti":      {**docs_summary, "evidenze_scadute": ev_scadute, "evidenze_in_scadenza": ev_in_scadenza},
+        "rischi":         risk_summary,
         "risks_by_owner": risks_by_owner,
-        "incidents":      incidents_summary,
+        "incidenti":      incidents_summary,
         "pdca":           pdca_summary,
+        "bcp":            bcp_summary,
+        "task":           tasks_summary,
     }
 
     review.snapshot_data = snapshot

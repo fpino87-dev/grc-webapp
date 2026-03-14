@@ -25,6 +25,12 @@ export interface RiskAssessment {
   score: number | null;
   risk_level: "verde" | "giallo" | "rosso" | null;
   ale_annuo: string | null;
+  ale_calcolato: string | null;
+  weighted_score: number | null;
+  owner: string | null;
+  owner_name: string | null;
+  critical_process: string | null;
+  critical_process_name: string | null;
   risk_accepted: boolean;
   assessed_at: string | null;
   plan_due_date: string | null;

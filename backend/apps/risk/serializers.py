@@ -9,6 +9,10 @@ class RiskAssessmentSerializer(serializers.ModelSerializer):
     assessed_by_username = serializers.CharField(source="assessed_by.username", read_only=True)
     accepted_by_username = serializers.CharField(source="accepted_by.username", read_only=True)
     risk_level = serializers.SerializerMethodField(read_only=True)
+    owner_name = serializers.SerializerMethodField(read_only=True)
+    critical_process_name = serializers.CharField(source="critical_process.name", read_only=True)
+    ale_calcolato = serializers.SerializerMethodField(read_only=True)
+    weighted_score = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = RiskAssessment
@@ -23,8 +27,12 @@ class RiskAssessmentSerializer(serializers.ModelSerializer):
             "status",
             "assessed_by", "assessed_by_username",
             "assessed_at",
+            "owner", "owner_name",
+            "critical_process", "critical_process_name",
             "score",
             "ale_annuo",
+            "ale_calcolato",
+            "weighted_score",
             "risk_accepted",
             "accepted_by", "accepted_by_username",
             "plan_due_date",
@@ -36,10 +44,25 @@ class RiskAssessmentSerializer(serializers.ModelSerializer):
             "plant_name", "asset_name",
             "assessed_by_username", "accepted_by_username",
             "risk_level", "score",
+            "owner_name", "critical_process_name",
+            "ale_calcolato", "weighted_score",
         ]
 
     def get_risk_level(self, obj):
         return obj.risk_level
+
+    def get_owner_name(self, obj):
+        if not obj.owner:
+            return None
+        return f"{obj.owner.first_name} {obj.owner.last_name}".strip() or obj.owner.email
+
+    def get_ale_calcolato(self, obj):
+        from .services import calc_ale
+        val = calc_ale(obj)
+        return str(val) if val else None
+
+    def get_weighted_score(self, obj):
+        return obj.weighted_score
 
 
 class RiskDimensionSerializer(serializers.ModelSerializer):

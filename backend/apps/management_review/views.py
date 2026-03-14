@@ -53,6 +53,30 @@ class ManagementReviewViewSet(viewsets.ModelViewSet):
         except ValidationError as e:
             return Response({"error": e.message}, status=400)
 
+    @action(detail=True, methods=["get"], url_path="report")
+    def report(self, request, pk=None):
+        from django.http import HttpResponse
+        from .report_generator import generate_review_report
+        review = self.get_object()
+        try:
+            html = generate_review_report(review)
+        except ValueError as e:
+            return Response({"error": str(e)}, status=400)
+        filename = f"riesame_{review.id}"
+        if review.review_date:
+            filename += f"_{review.review_date.strftime('%Y%m%d')}"
+        filename += ".html"
+        response = HttpResponse(html, content_type="text/html; charset=utf-8")
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        log_action(
+            user=request.user,
+            action_code="management_review.report_downloaded",
+            level="L1",
+            entity=review,
+            payload={"review_id": str(review.pk)},
+        )
+        return response
+
 
 class ReviewActionViewSet(viewsets.ModelViewSet):
     queryset = ReviewAction.objects.all()

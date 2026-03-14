@@ -25,4 +25,13 @@ export const managementReviewApi = {
     apiClient.post<Record<string, unknown>>(`/management-review/reviews/${id}/generate-snapshot/`).then((r) => r.data),
   approve: (id: string, note: string) =>
     apiClient.post<ManagementReview>(`/management-review/reviews/${id}/approve/`, { note }).then((r) => r.data),
+  downloadReport: async (id: string, filename: string) => {
+    const resp = await apiClient.get(`/management-review/reviews/${id}/report/`, { responseType: "blob" });
+    const url = URL.createObjectURL(new Blob([resp.data as BlobPart], { type: "text/html" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  },
 };

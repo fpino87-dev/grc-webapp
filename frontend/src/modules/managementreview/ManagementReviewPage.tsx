@@ -63,11 +63,40 @@ const APPROVAL_COLORS: Record<string, string> = {
   rifiutato: "bg-red-100 text-red-700",
 };
 
+type SnapFramework = { framework_name: string; total: number; pct_compliant: number; by_status: Record<string, number>; expired_evidence_count: number };
+type SnapOwner = { owner__first_name: string; owner__last_name: string; owner__email: string; totale: number; rossi: number };
+
+function KpiBox({ label, value, color }: { label: string; value: number | string; color?: string }) {
+  return (
+    <div className="bg-gray-50 rounded p-3 text-center">
+      <div className={`text-xl font-bold ${color ?? "text-gray-800"}`}>{value}</div>
+      <div className="text-xs text-gray-500 mt-0.5">{label}</div>
+    </div>
+  );
+}
+
+function SnapSection({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="border border-gray-200 rounded overflow-hidden">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full text-left px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-700 flex justify-between items-center hover:bg-gray-100"
+      >
+        {title}
+        <span className="text-gray-400">{open ? "▲" : "▼"}</span>
+      </button>
+      {open && <div className="px-4 py-3">{children}</div>}
+    </div>
+  );
+}
+
 function ReviewDetail({ review, onClose }: { review: ManagementReview; onClose: () => void }) {
   const qc = useQueryClient();
   const [note, setNote] = useState("");
   const [snapshotError, setSnapshotError] = useState("");
   const [approveError, setApproveError] = useState("");
+  const [downloading, setDownloading] = useState(false);
 
   const snapshotMutation = useMutation({
     mutationFn: () => managementReviewApi.generateSnapshot(review.id),
@@ -81,13 +110,28 @@ function ReviewDetail({ review, onClose }: { review: ManagementReview; onClose: 
     onError: (e: any) => setApproveError(e?.response?.data?.error || "Errore"),
   });
 
+  async function handleDownload() {
+    setDownloading(true);
+    try {
+      const date = review.review_date?.replace(/-/g, "") ?? "";
+      await managementReviewApi.downloadReport(review.id, `riesame_${review.id}_${date}.html`);
+    } finally {
+      setDownloading(false);
+    }
+  }
+
   const snap = review.snapshot_data as Record<string, any>;
-  const riskSum = snap?.risk_summary as Record<string, number> | undefined;
-  const incidents = snap?.incidents as Record<string, number> | undefined;
+  const frameworks = snap?.frameworks as Record<string, SnapFramework> | undefined;
+  const documenti = snap?.documenti as Record<string, number> | undefined;
+  const rischi = snap?.rischi as Record<string, number> | undefined;
+  const ownerList = snap?.risks_by_owner as SnapOwner[] | undefined;
+  const incidenti = snap?.incidenti as Record<string, number> | undefined;
   const pdca = snap?.pdca as Record<string, number> | undefined;
-  const frameworks = snap?.frameworks as Record<string, { pct_compliant: number; total: number }> | undefined;
+  const bcp = snap?.bcp as { processi_critici_senza_bcp: number; nomi: string[] } | undefined;
+  const task = snap?.task as Record<string, number> | undefined;
 
   const isApproved = review.approval_status === "approvato";
+  const hasSnapshot = !!review.snapshot_generated_at;
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
@@ -97,15 +141,26 @@ function ReviewDetail({ review, onClose }: { review: ManagementReview; onClose: 
             <h3 className="text-lg font-semibold text-gray-900">{review.title}</h3>
             <p className="text-xs text-gray-400 mt-0.5">Data riunione: {review.review_date}</p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100">×</button>
+          <div className="flex items-center gap-2">
+            {hasSnapshot && (
+              <button
+                onClick={handleDownload}
+                disabled={downloading}
+                className="px-3 py-1.5 bg-indigo-600 text-white rounded text-xs hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-1"
+              >
+                {downloading ? "Download..." : "Scarica relazione CISO"}
+              </button>
+            )}
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100">×</button>
+          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
 
-          {/* Snapshot */}
+          {/* Snapshot generation */}
           <section>
             <h4 className="text-sm font-semibold text-gray-700 mb-3">Dati riesame</h4>
-            {!review.snapshot_generated_at ? (
+            {!hasSnapshot ? (
               <div className="border border-dashed border-gray-300 rounded p-4 text-center">
                 <p className="text-sm text-gray-500 mb-3">Nessuno snapshot disponibile. Genera i dati da congelare per questa revisione.</p>
                 {snapshotError && <p className="text-xs text-red-600 mb-2">{snapshotError}</p>}
@@ -120,41 +175,106 @@ function ReviewDetail({ review, onClose }: { review: ManagementReview; onClose: 
             ) : (
               <div className="space-y-3">
                 <p className="text-xs text-blue-600 bg-blue-50 rounded px-3 py-2">
-                  Snapshot generato il {new Date(review.snapshot_generated_at).toLocaleString("it-IT")} — questi dati non cambieranno
+                  Snapshot generato il {new Date(review.snapshot_generated_at!).toLocaleString("it-IT")} — questi dati sono congelati
                 </p>
-                {frameworks && (
-                  <div>
-                    <p className="text-xs font-medium text-gray-600 mb-1">Compliance per framework</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {Object.entries(frameworks).map(([code, data]) => (
-                        <div key={code} className="bg-gray-50 rounded px-3 py-2 flex justify-between text-sm">
-                          <span className="font-mono text-xs text-gray-600">{code}</span>
-                          <span className="font-semibold text-gray-800">{data.pct_compliant}%</span>
-                        </div>
-                      ))}
+
+                {frameworks && Object.keys(frameworks).length > 0 && (
+                  <SnapSection title="Compliance per framework">
+                    <div className="space-y-2">
+                      {Object.entries(frameworks).map(([code, fw]) => {
+                        const color = fw.pct_compliant >= 80 ? "bg-green-500" : fw.pct_compliant >= 60 ? "bg-yellow-400" : "bg-red-500";
+                        return (
+                          <div key={code}>
+                            <div className="flex justify-between text-xs mb-0.5">
+                              <span className="font-medium text-gray-700">{code} — {fw.framework_name}</span>
+                              <span className="font-semibold">{fw.pct_compliant}% ({fw.by_status?.compliant ?? 0}/{fw.total})</span>
+                            </div>
+                            <div className="h-2 bg-gray-200 rounded overflow-hidden">
+                              <div className={`h-full ${color}`} style={{ width: `${fw.pct_compliant}%` }} />
+                            </div>
+                            {fw.expired_evidence_count > 0 && (
+                              <p className="text-xs text-amber-600 mt-0.5">{fw.expired_evidence_count} evidenze scadute</p>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
-                  </div>
+                  </SnapSection>
                 )}
-                <div className="grid grid-cols-3 gap-2">
-                  {riskSum && (
-                    <div className="bg-gray-50 rounded px-3 py-2">
-                      <p className="text-xs text-gray-500 mb-1">Rischi</p>
-                      <p className="text-xs"><span className="text-green-600 font-semibold">{riskSum.verde}</span> verdi · <span className="text-yellow-600 font-semibold">{riskSum.giallo}</span> gialli · <span className="text-red-600 font-semibold">{riskSum.rosso}</span> rossi</p>
+
+                {rischi && (
+                  <SnapSection title="Profilo di rischio">
+                    <div className="grid grid-cols-4 gap-2">
+                      <KpiBox label="Critici" value={rischi.rosso ?? 0} color="text-red-600" />
+                      <KpiBox label="Medi" value={rischi.giallo ?? 0} color="text-yellow-600" />
+                      <KpiBox label="Bassi" value={rischi.verde ?? 0} color="text-green-600" />
+                      <KpiBox label="Critici senza piano" value={rischi.senza_piano ?? 0} color="text-red-600" />
                     </div>
-                  )}
-                  {incidents && (
-                    <div className="bg-gray-50 rounded px-3 py-2">
-                      <p className="text-xs text-gray-500 mb-1">Incidenti (12m)</p>
-                      <p className="text-xs"><span className="font-semibold">{incidents.totale}</span> tot · <span className="text-orange-600 font-semibold">{incidents.aperti}</span> aperti · <span className="text-red-600 font-semibold">{incidents.nis2}</span> NIS2</p>
+                    {(rischi.senza_owner ?? 0) > 0 && (
+                      <p className="text-xs text-amber-600 mt-2">{rischi.senza_owner} rischi senza owner assegnato</p>
+                    )}
+                  </SnapSection>
+                )}
+
+                {ownerList && ownerList.length > 0 && (
+                  <SnapSection title="Rischi per owner" defaultOpen={false}>
+                    <table className="w-full text-xs">
+                      <thead><tr className="border-b border-gray-200"><th className="text-left py-1 font-medium text-gray-600">Owner</th><th className="text-right py-1 font-medium text-gray-600">Tot</th><th className="text-right py-1 font-medium text-gray-600">Critici</th></tr></thead>
+                      <tbody>
+                        {ownerList.map((o, i) => {
+                          const name = `${o.owner__first_name} ${o.owner__last_name}`.trim() || o.owner__email || "—";
+                          return (
+                            <tr key={i} className="border-b border-gray-100">
+                              <td className="py-1 text-gray-700">{name}</td>
+                              <td className="py-1 text-right">{o.totale}</td>
+                              <td className="py-1 text-right text-red-600 font-medium">{o.rossi}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </SnapSection>
+                )}
+
+                {documenti && (
+                  <SnapSection title="Documenti e evidenze" defaultOpen={false}>
+                    <div className="grid grid-cols-4 gap-2">
+                      <KpiBox label="Approvati" value={documenti.approvati ?? 0} />
+                      <KpiBox label="In scadenza (90gg)" value={documenti.in_scadenza ?? 0} color="text-yellow-600" />
+                      <KpiBox label="Scaduti" value={documenti.scaduti ?? 0} color="text-red-600" />
+                      <KpiBox label="Evidenze scadute" value={documenti.evidenze_scadute ?? 0} color="text-red-600" />
                     </div>
-                  )}
-                  {pdca && (
-                    <div className="bg-gray-50 rounded px-3 py-2">
-                      <p className="text-xs text-gray-500 mb-1">PDCA</p>
-                      <p className="text-xs"><span className="font-semibold">{pdca.aperti}</span> aperti · <span className="text-red-600 font-semibold">{pdca.scaduti}</span> scaduti</p>
+                  </SnapSection>
+                )}
+
+                {incidenti && (
+                  <SnapSection title="Incidenti (ultimi 12 mesi)" defaultOpen={false}>
+                    <div className="grid grid-cols-4 gap-2">
+                      <KpiBox label="Totale" value={incidenti.totale_12m ?? 0} />
+                      <KpiBox label="NIS2" value={incidenti.nis2_notificati ?? 0} color="text-red-600" />
+                      <KpiBox label="Aperti" value={incidenti.aperti ?? 0} color="text-orange-600" />
+                      <KpiBox label="Chiusi senza RCA" value={incidenti.senza_rca ?? 0} color="text-amber-600" />
                     </div>
-                  )}
-                </div>
+                  </SnapSection>
+                )}
+
+                {pdca && (
+                  <SnapSection title="PDCA e task" defaultOpen={false}>
+                    <div className="grid grid-cols-4 gap-2">
+                      <KpiBox label="PDCA aperti" value={pdca.aperti ?? 0} />
+                      <KpiBox label="Bloccati >90gg" value={pdca.bloccati_plan_90gg ?? 0} color="text-red-600" />
+                      <KpiBox label="Chiusi 12m" value={pdca.chiusi_12m ?? 0} color="text-green-600" />
+                      <KpiBox label="Task scaduti" value={task?.scaduti ?? 0} color="text-red-600" />
+                    </div>
+                  </SnapSection>
+                )}
+
+                {bcp && bcp.processi_critici_senza_bcp > 0 && (
+                  <SnapSection title="BCP" defaultOpen={false}>
+                    <p className="text-xs text-red-600 font-medium">{bcp.processi_critici_senza_bcp} processi critici senza piano BCP</p>
+                    {bcp.nomi.length > 0 && <p className="text-xs text-gray-600 mt-1">{bcp.nomi.join(", ")}</p>}
+                  </SnapSection>
+                )}
               </div>
             )}
           </section>
@@ -185,13 +305,13 @@ function ReviewDetail({ review, onClose }: { review: ManagementReview; onClose: 
                 {approveError && <p className="text-xs text-red-600">{approveError}</p>}
                 <button
                   onClick={() => approveMutation.mutate()}
-                  disabled={approveMutation.isPending || !review.snapshot_generated_at}
-                  title={!review.snapshot_generated_at ? "Genera prima lo snapshot dei dati" : undefined}
+                  disabled={approveMutation.isPending || !hasSnapshot}
+                  title={!hasSnapshot ? "Genera prima lo snapshot dei dati" : undefined}
                   className="px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-50"
                 >
                   {approveMutation.isPending ? "Approvazione..." : "Approva riesame"}
                 </button>
-                {!review.snapshot_generated_at && (
+                {!hasSnapshot && (
                   <p className="text-xs text-amber-600">Genera prima lo snapshot dei dati per poter approvare</p>
                 )}
               </div>

@@ -9,7 +9,9 @@ from .serializers import RiskAssessmentSerializer, RiskDimensionSerializer, Risk
 
 
 class RiskAssessmentViewSet(viewsets.ModelViewSet):
-    queryset = RiskAssessment.objects.select_related("plant", "asset", "assessed_by", "accepted_by")
+    queryset = RiskAssessment.objects.select_related(
+        "plant", "asset", "assessed_by", "accepted_by", "owner", "critical_process"
+    )
     serializer_class = RiskAssessmentSerializer
     filterset_fields = ["plant", "status", "assessment_type"]
 
@@ -63,17 +65,38 @@ class RiskAssessmentViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"], url_path="complete")
     def complete(self, request, pk=None):
         from django.utils import timezone
+        from .services import calc_ale, calc_score_from_dimensions, escalate_red_risk
         assessment = self.get_object()
+
+        # Calcola score dalle dimensioni IT/OT (con fallback a P×I)
+        score = calc_score_from_dimensions(assessment)
+        assessment.score = score
+
+        # Calcola ALE automaticamente dalla BIA se collegato
+        if assessment.critical_process:
+            assessment.ale_annuo = calc_ale(assessment)
+
+        # Genera task se rischio critico
+        if score > 14:
+            escalate_red_risk(assessment, request.user)
+
         assessment.status = "completato"
         assessment.assessed_by = request.user
         assessment.assessed_at = timezone.now()
-        assessment.save(update_fields=["status", "assessed_by", "assessed_at", "updated_at"])
+        assessment.save(update_fields=[
+            "status", "assessed_by", "assessed_at",
+            "score", "ale_annuo", "updated_at",
+        ])
         log_action(
             user=request.user,
             action_code="risk.assessment.complete",
             level="L2",
             entity=assessment,
-            payload={"id": str(assessment.id), "status": "completato"},
+            payload={
+                "id": str(assessment.id),
+                "score": score,
+                "ale_annuo": str(assessment.ale_annuo or 0),
+            },
         )
         serializer = self.get_serializer(assessment)
         return Response(serializer.data)

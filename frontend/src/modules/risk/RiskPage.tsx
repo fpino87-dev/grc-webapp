@@ -2,11 +2,12 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { riskApi, type RiskAssessment, type RiskMitigationPlan, THREAT_CATEGORIES, PROB_LABELS, IMPACT_LABELS } from "../../api/endpoints/risk";
 import { plantsApi } from "../../api/endpoints/plants";
+import { biaApi, type CriticalProcess } from "../../api/endpoints/bia";
+import { usersApi, type GrcUser } from "../../api/endpoints/users";
 import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { AssistenteValutazione } from "../../components/ui/AssistenteValutazione";
 
-// ── Risk matrix cell colour ──────────────────────────────────────────────────
 function matrixColor(p: number, i: number): string {
   const s = p * i;
   if (s <= 4) return "bg-green-100 text-green-800";
@@ -28,7 +29,6 @@ function formatAle(ale: string | null) {
   return isNaN(n) ? ale : new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" }).format(n);
 }
 
-// ── P×I selector ─────────────────────────────────────────────────────────────
 function ProbImpactSelector({
   probability, impact, onChange,
 }: {
@@ -70,7 +70,6 @@ function ProbImpactSelector({
   );
 }
 
-// ── Mitigation plans panel ────────────────────────────────────────────────────
 function MitigationPanel({ assessmentId }: { assessmentId: string }) {
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
@@ -141,11 +140,31 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
   );
 }
 
-// ── New assessment modal ──────────────────────────────────────────────────────
 function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
   const qc = useQueryClient();
-  const [form, setForm] = useState<Partial<RiskAssessment>>({ assessment_type: "IT", probability: null, impact: null });
+  const selectedPlant = useAuthStore(s => s.selectedPlant);
+  const [form, setForm] = useState<Partial<RiskAssessment>>({
+    assessment_type: "IT",
+    probability: null,
+    impact: null,
+    plant: selectedPlant?.id ?? "",
+  });
   const [error, setError] = useState("");
+
+  const plantId = form.plant;
+
+  const { data: processes } = useQuery({
+    queryKey: ["bia-processes", plantId],
+    queryFn: () => biaApi.list(plantId ? { plant: plantId, page_size: "200" } : {}),
+    enabled: !!plantId,
+    retry: false,
+  });
+
+  const { data: users } = useQuery({
+    queryKey: ["users"],
+    queryFn: () => usersApi.list(),
+    retry: false,
+  });
 
   const mutation = useMutation({
     mutationFn: () => riskApi.create(form),
@@ -157,6 +176,24 @@ function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: s
 
   const canSave = !!form.plant && !!form.name && !!form.probability && !!form.impact;
 
+  const selectedProcess = processes?.results?.find(p => p.id === form.critical_process);
+
+  // Estimate ALE locally for display (probability × impact × downtime_cost_hour)
+  function estimateAle(): string | null {
+    if (!selectedProcess?.downtime_cost_hour) return null;
+    if (!form.probability || !form.impact) return null;
+    const oreMap: Record<number, number> = {1:1, 2:4, 3:24, 4:72, 5:168};
+    const probMap: Record<number, number> = {1:0.1, 2:0.3, 3:1.0, 4:3.0, 5:10.0};
+    const ore = oreMap[form.impact] ?? 24;
+    const prob = probMap[form.probability] ?? 1.0;
+    let ale = parseFloat(selectedProcess.downtime_cost_hour) * ore * prob;
+    if (selectedProcess.danno_reputazionale >= 4) ale *= 1.3;
+    if (selectedProcess.danno_normativo >= 4) ale *= 1.2;
+    return new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" }).format(ale);
+  }
+
+  const alePreview = estimateAle();
+
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl flex flex-col max-h-[92vh]">
@@ -166,7 +203,6 @@ function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: s
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-          {/* Scenario */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nome scenario / rischio *</label>
             <input value={form.name ?? ""} onChange={e => set("name", e.target.value)}
@@ -177,7 +213,7 @@ function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: s
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Sito *</label>
-              <select value={form.plant ?? ""} onChange={e => set("plant", e.target.value)} className="w-full border rounded px-3 py-2 text-sm">
+              <select value={form.plant ?? ""} onChange={e => { set("plant", e.target.value); set("critical_process", null); }} className="w-full border rounded px-3 py-2 text-sm">
                 <option value="">— seleziona —</option>
                 {plants.map(p => <option key={p.id} value={p.id}>{p.code} — {p.name}</option>)}
               </select>
@@ -215,6 +251,43 @@ function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: s
             </div>
           </div>
 
+          {/* Owner rischio */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Owner rischio</label>
+            <select value={form.owner ?? ""} onChange={e => set("owner", e.target.value || null)} className="w-full border rounded px-3 py-2 text-sm">
+              <option value="">— nessun owner —</option>
+              {users?.map(u => (
+                <option key={u.id} value={u.id}>
+                  {u.first_name || u.last_name ? `${u.first_name} ${u.last_name}`.trim() : u.username} ({u.email})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Processo BIA collegato */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Processo BIA collegato (opzionale)</label>
+            <select
+              value={form.critical_process ?? ""}
+              onChange={e => set("critical_process", e.target.value || null)}
+              disabled={!plantId}
+              className="w-full border rounded px-3 py-2 text-sm disabled:bg-gray-50"
+            >
+              <option value="">— nessun processo BIA —</option>
+              {processes?.results?.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.name} [criticità {p.criticality}]
+                </option>
+              ))}
+            </select>
+            {selectedProcess && (
+              <div className="mt-1.5 px-3 py-2 bg-blue-50 rounded text-xs text-blue-700 flex gap-3">
+                <span>Costo orario fermo: <strong>{selectedProcess.downtime_cost_hour ? new Intl.NumberFormat("it-IT", {style:"currency",currency:"EUR"}).format(parseFloat(selectedProcess.downtime_cost_hour)) : "—"}</strong></span>
+                <span>Criticità: <strong>{selectedProcess.criticality}</strong>/5</span>
+              </div>
+            )}
+          </div>
+
           {/* P × I */}
           <div className="border border-gray-200 rounded-lg p-4">
             <p className="text-sm font-medium text-gray-700 mb-3">Valutazione del rischio (P × I)</p>
@@ -225,11 +298,23 @@ function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: s
             />
           </div>
 
+          {/* ALE calcolato (readonly) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">ALE annuo stimato (€)</label>
-            <input type="number" min="0" step="1000" value={form.ale_annuo ?? ""} onChange={e => set("ale_annuo", e.target.value || null)}
-              placeholder="Perdita attesa annua — opzionale"
-              className="w-full border rounded px-3 py-2 text-sm" />
+            <label className="block text-sm font-medium text-gray-700 mb-1">ALE calcolato dalla BIA</label>
+            {alePreview ? (
+              <>
+                <div className="w-full border border-dashed border-blue-300 bg-blue-50 rounded px-3 py-2 text-sm font-semibold text-blue-800">
+                  {alePreview}
+                </div>
+                <p className="text-xs text-gray-400 mt-1">Calcolato automaticamente da probabilità × impatto × costo fermo BIA</p>
+              </>
+            ) : (
+              <div className="w-full border border-dashed border-gray-200 bg-gray-50 rounded px-3 py-2 text-sm text-gray-400">
+                {selectedProcess
+                  ? "Seleziona probabilità e impatto per stimare l'ALE"
+                  : "Collega un processo BIA per calcolare l'ALE"}
+              </div>
+            )}
           </div>
         </div>
 
@@ -246,7 +331,6 @@ function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: s
   );
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
 export function RiskPage() {
   const [typeFilter, setTypeFilter] = useState<"" | "IT" | "OT">("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -335,11 +419,11 @@ export function RiskPage() {
                 <th className="text-left px-4 py-3 font-medium text-gray-600 w-8"></th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Scenario</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Minaccia</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Sito</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Owner</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">P × I</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Score</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Weighted</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">ALE</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Trattamento</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Stato</th>
                 <th className="px-4 py-3"></th>
               </tr>
@@ -354,20 +438,24 @@ export function RiskPage() {
                     <td className="px-4 py-3 text-gray-400 text-xs">{expandedId === a.id ? "▼" : "▶"}</td>
                     <td className="px-4 py-3">
                       <div className="font-medium text-gray-800">{a.name || <span className="text-gray-400 italic">—</span>}</div>
-                      <div className="text-xs text-gray-400">{a.assessment_type}</div>
+                      <div className="text-xs text-gray-400">{a.assessment_type}{a.critical_process_name && ` · ${a.critical_process_name}`}</div>
                     </td>
                     <td className="px-4 py-3 text-gray-600 text-xs">
                       {THREAT_CATEGORIES.find(c => c.value === a.threat_category)?.label ?? "—"}
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{a.plant_name || a.plant}</td>
+                    <td className="px-4 py-3 text-gray-600 text-xs">{a.owner_name ?? <span className="text-gray-300">—</span>}</td>
                     <td className="px-4 py-3 text-gray-600">
                       {a.probability && a.impact
                         ? <span className={`text-xs font-mono font-bold px-1.5 py-0.5 rounded ${matrixColor(a.probability, a.impact)}`}>{a.probability}×{a.impact}</span>
                         : <span className="text-gray-400">—</span>}
                     </td>
                     <td className="px-4 py-3"><RiskLevelBadge score={a.score} /></td>
-                    <td className="px-4 py-3 text-gray-600">{formatAle(a.ale_annuo)}</td>
-                    <td className="px-4 py-3 text-gray-600 capitalize text-xs">{a.treatment || "—"}</td>
+                    <td className="px-4 py-3"><RiskLevelBadge score={a.weighted_score} /></td>
+                    <td className="px-4 py-3 text-gray-600 text-xs">
+                      {a.ale_calcolato
+                        ? <span className="text-blue-700 font-medium">{formatAle(a.ale_calcolato)}</span>
+                        : formatAle(a.ale_annuo)}
+                    </td>
                     <td className="px-4 py-3"><StatusBadge status={a.status} /></td>
                     <td className="px-4 py-3 whitespace-nowrap" onClick={e => e.stopPropagation()}>
                       {a.status === "bozza" && !!a.probability && !!a.impact && (
