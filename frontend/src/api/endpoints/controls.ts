@@ -27,6 +27,28 @@ export interface Framework {
   version: string;
 }
 
+export interface EvidenceRef {
+  id: string;
+  title: string;
+  valid_until: string | null;
+  expired: boolean;
+  evidence_type: string;
+}
+
+export interface ControlDetailInfo {
+  control_id: string;
+  title: string;
+  domain: string;
+  framework: string;
+  level: string;
+  description: string;
+  implementation_guidance: string;
+  evidence_examples: string[];
+  mappings: { target_control__framework__code: string; target_control__external_id: string; relationship: string }[];
+  evaluation_history: { timestamp_utc: string; user_email_at_time: string; payload: Record<string, unknown> }[];
+  current_evidences: EvidenceRef[];
+}
+
 export const controlsApi = {
   instances: (params?: Record<string, string>) =>
     apiClient.get<{ results: ControlInstance[]; count: number }>("/controls/instances/", { params: { page_size: "500", ...params } }).then((r) => r.data),
@@ -36,4 +58,12 @@ export const controlsApi = {
     apiClient.patch<ControlInstance>(`/controls/instances/${id}/`, data).then((r) => r.data),
   propagate: (id: string) =>
     apiClient.post<{ propagated_to: number }>(`/controls/instances/${id}/propagate/`).then((r) => r.data),
+  evaluate: (id: string, status: string, note: string) =>
+    apiClient.post(`/controls/instances/${id}/evaluate/`, { status, note }).then((r) => r.data),
+  detailInfo: (id: string, lang = "it") =>
+    apiClient.get<ControlDetailInfo>(`/controls/instances/${id}/detail-info/`, { params: { lang } }).then((r) => r.data),
+  linkEvidence: (instanceId: string, evidenceId: string) =>
+    apiClient.post(`/controls/instances/${instanceId}/link_evidence/`, { evidence_id: evidenceId }).then((r) => r.data),
+  unlinkEvidence: (instanceId: string, evidenceId: string) =>
+    apiClient.post(`/controls/instances/${instanceId}/unlink_evidence/`, { evidence_id: evidenceId }).then((r) => r.data),
 };

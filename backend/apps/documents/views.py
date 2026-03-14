@@ -1,9 +1,11 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
 
-from .models import Document, DocumentVersion
-from .serializers import DocumentApprovalSerializer, DocumentSerializer, DocumentVersionSerializer
+from .models import Document, DocumentVersion, Evidence
+from .serializers import DocumentApprovalSerializer, DocumentSerializer, DocumentVersionSerializer, EvidenceSerializer
 from . import services
 
 
@@ -51,3 +53,28 @@ class DocumentVersionViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(uploaded_by=self.request.user)
+
+
+class EvidenceViewSet(viewsets.ModelViewSet):
+    queryset = Evidence.objects.select_related("plant", "uploaded_by")
+    serializer_class = EvidenceSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ["plant", "evidence_type"]
+    search_fields = ["title", "description"]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        from django.utils import timezone
+        expiry = self.request.query_params.get("expiry")
+        today = timezone.now().date()
+        if expiry == "valide":
+            qs = qs.filter(valid_until__gt=today + timezone.timedelta(days=30))
+        elif expiry == "in_scadenza":
+            qs = qs.filter(valid_until__gte=today, valid_until__lte=today + timezone.timedelta(days=30))
+        elif expiry == "scadute":
+            qs = qs.filter(valid_until__lt=today)
+        return qs
+
+    def perform_create(self, serializer):
+        serializer.save(uploaded_by=self.request.user, created_by=self.request.user)

@@ -1,17 +1,61 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { documentsApi, type Document } from "../../api/endpoints/documents";
+import { documentsApi, type Document, type Evidence, EVIDENCE_TYPE_LABELS } from "../../api/endpoints/documents";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 
-type StatusFilter = "tutti" | "bozza" | "revisione" | "approvazione" | "approvato";
+type MainTab = "documenti" | "evidenze";
 
-const STATUS_FILTERS: { label: string; value: StatusFilter }[] = [
-  { label: "Tutti", value: "tutti" },
-  { label: "Bozza", value: "bozza" },
-  { label: "In revisione", value: "revisione" },
-  { label: "In approvazione", value: "approvazione" },
-  { label: "Approvati", value: "approvato" },
-];
+// ─── Helpers evidenze ────────────────────────────────────────────────────────
+
+function evidenceIcon(type: string): string {
+  const map: Record<string, string> = {
+    screenshot: "📸", log: "📋", report: "📄",
+    verbale: "📝", certificato: "🏆", test_result: "🧪", altro: "📎",
+  };
+  return map[type] ?? "📎";
+}
+
+function ExpiryBadge({ validUntil }: { validUntil: string | null }) {
+  if (!validUntil) return <span className="text-xs text-gray-400">—</span>;
+  const date = new Date(validUntil);
+  const today = new Date();
+  const days = Math.ceil((date.getTime() - today.getTime()) / 86400000);
+  if (days < 0) return (
+    <div className="text-center">
+      <span className="block text-xs px-2 py-0.5 rounded bg-red-100 text-red-700 font-medium">Scaduta</span>
+      <span className="text-xs text-red-500">{Math.abs(days)}g fa</span>
+    </div>
+  );
+  if (days <= 30) return (
+    <div className="text-center">
+      <span className="block text-xs px-2 py-0.5 rounded bg-orange-100 text-orange-700 font-medium">In scadenza</span>
+      <span className="text-xs text-orange-600">in {days}g</span>
+    </div>
+  );
+  return (
+    <div className="text-center">
+      <span className="block text-xs px-2 py-0.5 rounded bg-green-100 text-green-700 font-medium">Valida</span>
+      <span className="text-xs text-green-600">{date.toLocaleDateString("it-IT")}</span>
+    </div>
+  );
+}
+
+function expirySort(a: Evidence, b: Evidence): number {
+  if (!a.valid_until && !b.valid_until) return 0;
+  if (!a.valid_until) return 1;
+  if (!b.valid_until) return -1;
+  const today = new Date();
+  const da = new Date(a.valid_until);
+  const db = new Date(b.valid_until);
+  const daysA = Math.ceil((da.getTime() - today.getTime()) / 86400000);
+  const daysB = Math.ceil((db.getTime() - today.getTime()) / 86400000);
+  // in scadenza prima, poi valide, poi scadute
+  if (daysA >= 0 && daysA <= 30 && !(daysB >= 0 && daysB <= 30)) return -1;
+  if (daysB >= 0 && daysB <= 30 && !(daysA >= 0 && daysA <= 30)) return 1;
+  return daysA - daysB;
+}
+
+// ─── Modal nuovo documento ──────────────────────────────────────────────────
 
 function NewDocumentModal({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
@@ -21,7 +65,7 @@ function NewDocumentModal({ onClose }: { onClose: () => void }) {
   const mutation = useMutation({
     mutationFn: documentsApi.create,
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["documents"] }); onClose(); },
-    onError: (e: any) => setError(e?.response?.data?.detail || "Errore durante il salvataggio"),
+    onError: (e: unknown) => setError((e as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Errore durante il salvataggio"),
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
@@ -38,17 +82,30 @@ function NewDocumentModal({ onClose }: { onClose: () => void }) {
             <label className="block text-sm font-medium text-gray-700 mb-1">Titolo *</label>
             <input name="title" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Categoria *</label>
-            <select name="category" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-              <option value="">— seleziona —</option>
-              <option value="policy">Policy</option>
-              <option value="procedura">Procedura</option>
-              <option value="istruzione">Istruzione operativa</option>
-              <option value="registro">Registro</option>
-              <option value="piano">Piano</option>
-              <option value="evidence">Evidenza</option>
-            </select>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+              <select name="category" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+                <option value="">— seleziona —</option>
+                <option value="politica">Politica</option>
+                <option value="procedura">Procedura</option>
+                <option value="istruzione">Istruzione operativa</option>
+                <option value="registro">Registro</option>
+                <option value="verbale">Verbale</option>
+                <option value="contratto">Contratto</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo documento</label>
+              <select name="document_type" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+                <option value="policy">Policy</option>
+                <option value="procedura">Procedura</option>
+                <option value="manuale">Manuale ISMS</option>
+                <option value="contratto">Contratto/NDA</option>
+                <option value="registro">Registro</option>
+                <option value="altro">Altro</option>
+              </select>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Scadenza revisione</label>
@@ -64,7 +121,7 @@ function NewDocumentModal({ onClose }: { onClose: () => void }) {
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
           <button
             onClick={() => mutation.mutate(form)}
-            disabled={mutation.isPending || !form.title || !form.category}
+            disabled={mutation.isPending || !form.title}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
             {mutation.isPending ? "Salvataggio..." : "Crea documento"}
@@ -75,10 +132,67 @@ function NewDocumentModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-export function DocumentsPage() {
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("tutti");
-  const [showNew, setShowNew] = useState(false);
+// ─── Modal nuova evidenza ─────────────────────────────────────────────────────
+
+function NewEvidenceModal({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
+  const [form, setForm] = useState<Partial<Evidence>>({ evidence_type: "altro" });
+  const [error, setError] = useState("");
+
+  const mutation = useMutation({
+    mutationFn: documentsApi.createEvidence,
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["evidences"] }); onClose(); },
+    onError: (e: unknown) => setError((e as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Errore"),
+  });
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+        <h3 className="text-lg font-semibold mb-4">Nuova evidenza</h3>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Titolo *</label>
+            <input onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="w-full border rounded px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tipo evidenza</label>
+            <select value={form.evidence_type} onChange={e => setForm(p => ({ ...p, evidence_type: e.target.value }))} className="w-full border rounded px-3 py-2 text-sm">
+              {Object.entries(EVIDENCE_TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Valida fino al *</label>
+            <input type="date" onChange={e => setForm(p => ({ ...p, valid_until: e.target.value }))} className="w-full border rounded px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Descrizione</label>
+            <textarea onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={2} className="w-full border rounded px-3 py-2 text-sm resize-none" />
+          </div>
+        </div>
+        {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
+        <div className="flex justify-end gap-2 mt-4">
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
+          <button
+            onClick={() => mutation.mutate(form)}
+            disabled={mutation.isPending || !form.title || !form.valid_until}
+            className="px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-50"
+          >
+            {mutation.isPending ? "Salvataggio..." : "Crea evidenza"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Tab Documenti ────────────────────────────────────────────────────────────
+
+type DocStatusFilter = "tutti" | "bozza" | "revisione" | "approvazione" | "approvato";
+
+function TabDocumenti() {
+  const qc = useQueryClient();
+  const [statusFilter, setStatusFilter] = useState<DocStatusFilter>("tutti");
+  const [showNew, setShowNew] = useState(false);
 
   const params: Record<string, string> = {};
   if (statusFilter !== "tutti") params.status = statusFilter;
@@ -89,46 +203,32 @@ export function DocumentsPage() {
     retry: false,
   });
 
-  const submitMutation = useMutation({
-    mutationFn: (id: string) => documentsApi.submit(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["documents"] }),
-  });
-
-  const approveMutation = useMutation({
-    mutationFn: (id: string) => documentsApi.approve(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["documents"] }),
-  });
-
-  const rejectMutation = useMutation({
-    mutationFn: (id: string) => documentsApi.reject(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["documents"] }),
-  });
+  const submitMutation = useMutation({ mutationFn: documentsApi.submit, onSuccess: () => qc.invalidateQueries({ queryKey: ["documents"] }) });
+  const approveMutation = useMutation({ mutationFn: (id: string) => documentsApi.approve(id), onSuccess: () => qc.invalidateQueries({ queryKey: ["documents"] }) });
+  const rejectMutation = useMutation({ mutationFn: (id: string) => documentsApi.reject(id), onSuccess: () => qc.invalidateQueries({ queryKey: ["documents"] }) });
 
   const documents: Document[] = data?.results ?? [];
+
+  const STATUS_FILTERS: { label: string; value: DocStatusFilter }[] = [
+    { label: "Tutti", value: "tutti" }, { label: "Bozza", value: "bozza" },
+    { label: "In revisione", value: "revisione" }, { label: "In approvazione", value: "approvazione" },
+    { label: "Approvati", value: "approvato" },
+  ];
 
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Documenti</h2>
-        <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700">
+        <div className="flex items-center gap-1 flex-wrap">
+          {STATUS_FILTERS.map(f => (
+            <button key={f.value} onClick={() => setStatusFilter(f.value)}
+              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${statusFilter === f.value ? "bg-primary-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+        <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 shrink-0">
           + Nuovo documento
         </button>
-      </div>
-
-      <div className="mb-4 flex items-center gap-1">
-        {STATUS_FILTERS.map((f) => (
-          <button
-            key={f.value}
-            onClick={() => setStatusFilter(f.value)}
-            className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-              statusFilter === f.value
-                ? "bg-primary-600 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -141,7 +241,7 @@ export function DocumentsPage() {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Titolo</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Categoria</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Tipo</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Stato</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Obbligatorio</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Scadenza revisione</th>
@@ -150,79 +250,25 @@ export function DocumentsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {documents.map((doc) => (
+              {documents.map(doc => (
                 <tr key={doc.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3 font-medium text-gray-800">{doc.title}</td>
-                  <td className="px-4 py-3 text-gray-600">{doc.category}</td>
+                  <td className="px-4 py-3 text-gray-600 capitalize text-xs">{doc.document_type || doc.category}</td>
+                  <td className="px-4 py-3"><StatusBadge status={doc.status} /></td>
                   <td className="px-4 py-3">
-                    <StatusBadge status={doc.status} />
+                    {doc.is_mandatory
+                      ? <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">Obbligatorio</span>
+                      : <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">Facoltativo</span>}
                   </td>
-                  <td className="px-4 py-3">
-                    {doc.is_mandatory ? (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                        Obbligatorio
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">
-                        Facoltativo
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">
-                    {doc.review_due_date
-                      ? new Date(doc.review_due_date).toLocaleDateString("it-IT")
-                      : "—"}
-                  </td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">
-                    {doc.approved_at
-                      ? new Date(doc.approved_at).toLocaleDateString("it-IT")
-                      : "—"}
-                  </td>
+                  <td className="px-4 py-3 text-gray-500 text-xs">{doc.review_due_date ? new Date(doc.review_due_date).toLocaleDateString("it-IT") : "—"}</td>
+                  <td className="px-4 py-3 text-gray-500 text-xs">{doc.approved_at ? new Date(doc.approved_at).toLocaleDateString("it-IT") : "—"}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      {doc.status === "bozza" && (
-                        <button
-                          onClick={() => submitMutation.mutate(doc.id)}
-                          disabled={submitMutation.isPending}
-                          className="text-xs text-gray-500 hover:text-blue-700 border border-gray-300 rounded px-2 py-0.5 hover:border-blue-400 disabled:opacity-50 whitespace-nowrap"
-                        >
-                          Invia per revisione
-                        </button>
-                      )}
-                      {doc.status === "revisione" && (
+                      {doc.status === "bozza" && <button onClick={() => submitMutation.mutate(doc.id)} className="text-xs text-gray-500 hover:text-blue-700 border border-gray-300 rounded px-2 py-0.5 hover:border-blue-400">Invia per revisione</button>}
+                      {(doc.status === "revisione" || doc.status === "approvazione") && (
                         <>
-                          <button
-                            onClick={() => approveMutation.mutate(doc.id)}
-                            disabled={approveMutation.isPending}
-                            className="text-xs text-gray-500 hover:text-green-700 border border-gray-300 rounded px-2 py-0.5 hover:border-green-400 disabled:opacity-50"
-                          >
-                            Approva
-                          </button>
-                          <button
-                            onClick={() => rejectMutation.mutate(doc.id)}
-                            disabled={rejectMutation.isPending}
-                            className="text-xs text-gray-500 hover:text-red-700 border border-gray-300 rounded px-2 py-0.5 hover:border-red-400 disabled:opacity-50"
-                          >
-                            Rifiuta
-                          </button>
-                        </>
-                      )}
-                      {doc.status === "approvazione" && (
-                        <>
-                          <button
-                            onClick={() => approveMutation.mutate(doc.id)}
-                            disabled={approveMutation.isPending}
-                            className="text-xs text-gray-500 hover:text-green-700 border border-gray-300 rounded px-2 py-0.5 hover:border-green-400 disabled:opacity-50"
-                          >
-                            Approva
-                          </button>
-                          <button
-                            onClick={() => rejectMutation.mutate(doc.id)}
-                            disabled={rejectMutation.isPending}
-                            className="text-xs text-gray-500 hover:text-red-700 border border-gray-300 rounded px-2 py-0.5 hover:border-red-400 disabled:opacity-50"
-                          >
-                            Rifiuta
-                          </button>
+                          <button onClick={() => approveMutation.mutate(doc.id)} className="text-xs text-gray-500 hover:text-green-700 border border-gray-300 rounded px-2 py-0.5 hover:border-green-400">Approva</button>
+                          <button onClick={() => rejectMutation.mutate(doc.id)} className="text-xs text-gray-500 hover:text-red-700 border border-gray-300 rounded px-2 py-0.5 hover:border-red-400">Rifiuta</button>
                         </>
                       )}
                     </div>
@@ -235,6 +281,146 @@ export function DocumentsPage() {
       </div>
 
       {showNew && <NewDocumentModal onClose={() => setShowNew(false)} />}
+    </div>
+  );
+}
+
+// ─── Tab Evidenze ─────────────────────────────────────────────────────────────
+
+type ExpiryFilter = "tutti" | "valide" | "in_scadenza" | "scadute";
+
+function TabEvidenze() {
+  const qc = useQueryClient();
+  const [typeFilter, setTypeFilter] = useState("");
+  const [expiryFilter, setExpiryFilter] = useState<ExpiryFilter>("tutti");
+  const [showNew, setShowNew] = useState(false);
+
+  const params: Record<string, string> = {};
+  if (typeFilter) params.evidence_type = typeFilter;
+  if (expiryFilter !== "tutti") params.expiry = expiryFilter;
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["evidences", typeFilter, expiryFilter],
+    queryFn: () => documentsApi.evidences(params),
+    retry: false,
+  });
+
+  const evidences: Evidence[] = [...(data?.results ?? [])].sort(expirySort);
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Filtro scadenza */}
+          {(["tutti", "in_scadenza", "valide", "scadute"] as ExpiryFilter[]).map(f => {
+            const labels = { tutti: "Tutte", valide: "Valide", in_scadenza: "In scadenza", scadute: "Scadute" };
+            const colors = { tutti: "", valide: "text-green-700", in_scadenza: "text-orange-700", scadute: "text-red-700" };
+            return (
+              <button key={f} onClick={() => setExpiryFilter(f)}
+                className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${expiryFilter === f ? "bg-primary-600 text-white" : `bg-gray-100 hover:bg-gray-200 ${colors[f]}`}`}>
+                {labels[f]}
+              </button>
+            );
+          })}
+
+          {/* Filtro tipo */}
+          <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="border rounded px-2 py-1.5 text-sm">
+            <option value="">Tutti i tipi</option>
+            {Object.entries(EVIDENCE_TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+          </select>
+        </div>
+        <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 shrink-0">
+          + Nuova evidenza
+        </button>
+      </div>
+
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        {isLoading ? (
+          <div className="p-8 text-center text-gray-400">Caricamento...</div>
+        ) : evidences.length === 0 ? (
+          <div className="p-8 text-center text-gray-400">Nessuna evidenza trovata</div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Tipo</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Titolo</th>
+                <th className="text-center px-4 py-3 font-medium text-gray-600">Scadenza</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Sito</th>
+                <th className="text-center px-4 py-3 font-medium text-gray-600">Controlli collegati</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Caricata da</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {evidences.map(ev => (
+                <tr key={ev.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-base">{evidenceIcon(ev.evidence_type)}</span>
+                      <span className="text-xs text-gray-500">{EVIDENCE_TYPE_LABELS[ev.evidence_type] ?? ev.evidence_type}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 font-medium text-gray-800 max-w-xs">
+                    <div className="truncate">{ev.title}</div>
+                    {ev.description && <div className="text-xs text-gray-400 truncate">{ev.description}</div>}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <ExpiryBadge validUntil={ev.valid_until} />
+                  </td>
+                  <td className="px-4 py-3 text-gray-600 text-xs">{ev.plant_name || "—"}</td>
+                  <td className="px-4 py-3 text-center">
+                    <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium ${ev.control_instances_count > 0 ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-400"}`}>
+                      {ev.control_instances_count}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-gray-500 text-xs">{ev.uploaded_by_username || "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {showNew && <NewEvidenceModal onClose={() => setShowNew(false)} />}
+    </div>
+  );
+}
+
+// ─── Main page ────────────────────────────────────────────────────────────────
+
+export function DocumentsPage() {
+  const [mainTab, setMainTab] = useState<MainTab>("documenti");
+
+  return (
+    <div>
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">Documenti & Evidenze</h2>
+
+      {/* Tab principali */}
+      <div className="flex gap-1 mb-5 border-b border-gray-200">
+        <button
+          onClick={() => setMainTab("documenti")}
+          className={`px-5 py-2.5 text-sm font-medium transition-colors -mb-px ${
+            mainTab === "documenti"
+              ? "border-b-2 border-primary-600 text-primary-700 bg-primary-50 rounded-t"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          📄 Documenti
+        </button>
+        <button
+          onClick={() => setMainTab("evidenze")}
+          className={`px-5 py-2.5 text-sm font-medium transition-colors -mb-px ${
+            mainTab === "evidenze"
+              ? "border-b-2 border-green-600 text-green-700 bg-green-50 rounded-t"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          🏆 Evidenze
+        </button>
+      </div>
+
+      {mainTab === "documenti" && <TabDocumenti />}
+      {mainTab === "evidenze" && <TabEvidenze />}
     </div>
   );
 }

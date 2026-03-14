@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { controlsApi, type ControlInstance } from "../../api/endpoints/controls";
 import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
+import { ControlDetailDrawer } from "./ControlDetailDrawer";
 
 const STATUS_OPTIONS = ["compliant", "parziale", "gap", "na", "non_valutato"];
 
@@ -92,6 +93,7 @@ function InlineStatusSelect({ instance }: { instance: ControlInstance }) {
 
 export function ControlsList() {
   const [statusFilter, setStatusFilter] = useState("");
+  const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
   const selectedPlant = useAuthStore(s => s.selectedPlant);
 
   const params: Record<string, string> = {};
@@ -172,7 +174,16 @@ export function ControlsList() {
             <tbody className="divide-y divide-gray-100">
               {instances.map((c) => (
                 <tr key={c.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 font-mono text-xs text-gray-500">{c.control_external_id || c.control}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-gray-500">
+                    <div className="flex items-center gap-1">
+                      <span>{c.control_external_id || c.control}</span>
+                      <button
+                        onClick={() => setSelectedInstance(c.id)}
+                        className="ml-1 w-5 h-5 rounded-full bg-gray-200 text-gray-600 text-xs hover:bg-blue-100 hover:text-blue-600 flex items-center justify-center font-bold shrink-0"
+                        title="Dettaglio controllo"
+                      >?</button>
+                    </div>
+                  </td>
                   <td className="px-4 py-3">
                     <span className="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded">
                       {c.framework_code}
@@ -196,6 +207,11 @@ export function ControlsList() {
           </table>
         )}
       </div>
+
+      <ControlDetailDrawer
+        instanceId={selectedInstance}
+        onClose={() => setSelectedInstance(null)}
+      />
     </div>
   );
 }

@@ -7,6 +7,45 @@ from core.audit import log_action
 from .models import Task
 
 
+def create_task(
+    plant,
+    title,
+    description="",
+    priority="media",
+    source_module="M03",
+    source_id=None,
+    due_date=None,
+    assign_type=None,
+    assign_value=None,
+    control_instance=None,
+):
+    """Crea un Task collegato a un modulo sorgente."""
+    from django.contrib.auth import get_user_model
+
+    User = get_user_model()
+    assigned_to = None
+    if assign_type == "user" and assign_value:
+        assigned_to = User.objects.filter(pk=assign_value).first()
+
+    # Mappa source_module al campo source
+    source_map = {
+        "M03": "controllo", "M06": "rischio", "M09": "incidente",
+        "M11": "pdca", "M17": "audit",
+    }
+    source = source_map.get(source_module, "manuale")
+
+    return Task.objects.create(
+        title=title,
+        description=description,
+        plant=plant,
+        priority=priority,
+        source=source,
+        assigned_to=assigned_to,
+        due_date=due_date,
+        control_instance=control_instance,
+    )
+
+
 def complete_task(task, user, notes=""):
     task.status = "completato"
     task.completed_at = timezone.now()

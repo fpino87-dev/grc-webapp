@@ -1,21 +1,51 @@
 from .models import Control, ControlInstance
 
 
-def evaluate_control(instance, status, user, notes=""):
+def evaluate_control(instance, new_status, user, note=""):
+    from django.core.exceptions import ValidationError
     from django.utils import timezone
 
     from core.audit import log_action
 
-    instance.status = status
-    instance.notes = notes
+    # HARD BLOCK: compliant e parziale richiedono evidenza valida
+    if new_status in ("compliant", "parziale"):
+        today = timezone.now().date()
+        valid_evidences = instance.evidences.filter(
+            valid_until__gte=today,
+            deleted_at__isnull=True,
+        )
+        if not valid_evidences.exists():
+            raise ValidationError(
+                "Impossibile impostare lo stato a '{}' senza almeno "
+                "un'evidenza valida collegata. "
+                "Carica un'evidenza con data di validità futura.".format(new_status)
+            )
+
+    # HARD BLOCK: n/a richiede giustificazione scritta
+    if new_status == "na":
+        if not note or len(note.strip()) < 20:
+            raise ValidationError(
+                "Lo stato N/A richiede una giustificazione scritta "
+                "di almeno 20 caratteri."
+            )
+
+    instance.status = new_status
     instance.last_evaluated_at = timezone.now()
-    instance.save(update_fields=["status", "notes", "last_evaluated_at", "updated_at"])
+    instance.last_evaluated_note = note
+    instance.save(update_fields=[
+        "status", "last_evaluated_at", "last_evaluated_note", "updated_at"
+    ])
+
     log_action(
         user=user,
-        action_code=f"control_evaluated:{status}",
+        action_code="control.evaluated",
         level="L2",
         entity=instance,
-        payload={"id": str(instance.id), "status": status},
+        payload={
+            "new_status": new_status,
+            "note": note,
+            "evidences_count": instance.evidences.count(),
+        },
     )
     return instance
 

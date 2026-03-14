@@ -25,8 +25,18 @@ class Document(BaseModel):
         ("archiviato", "Archiviato"),
     ]
 
+    DOCUMENT_TYPE_CHOICES = [
+        ("policy", "Policy"),
+        ("procedura", "Procedura"),
+        ("manuale", "Manuale ISMS"),
+        ("contratto", "Contratto/NDA"),
+        ("registro", "Registro"),
+        ("altro", "Altro"),
+    ]
+
     title = models.CharField(max_length=300)
     category = models.CharField(max_length=30, choices=CATEGORY_CHOICES)
+    document_type = models.CharField(max_length=20, choices=DOCUMENT_TYPE_CHOICES, default="policy")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="bozza")
     plant = models.ForeignKey(
         "plants.Plant",
@@ -113,3 +123,41 @@ class DocumentApproval(BaseModel):
     action = models.CharField(max_length=20, choices=ACTION_CHOICES)
     actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     notes = models.TextField(blank=True)
+
+
+class Evidence(BaseModel):
+    EVIDENCE_TYPE_CHOICES = [
+        ("screenshot", "Screenshot"),
+        ("log", "Log di sistema"),
+        ("report", "Report"),
+        ("verbale", "Verbale"),
+        ("certificato", "Certificato"),
+        ("test_result", "Risultato test"),
+        ("altro", "Altro"),
+    ]
+
+    title = models.CharField(max_length=300)
+    description = models.TextField(blank=True)
+    evidence_type = models.CharField(max_length=20, choices=EVIDENCE_TYPE_CHOICES, default="altro")
+    valid_until = models.DateField(null=True, blank=True)
+    plant = models.ForeignKey(
+        "plants.Plant",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="evidences",
+    )
+    file_path = models.CharField(max_length=500, blank=True)
+    uploaded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="uploaded_evidences",
+    )
+
+    class Meta:
+        ordering = ["valid_until"]
+
+    def __str__(self):
+        return self.title

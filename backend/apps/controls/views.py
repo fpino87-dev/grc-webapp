@@ -64,3 +64,105 @@ class ControlInstanceViewSet(viewsets.ModelViewSet):
         ).update(status=instance.status)
         return Response({"propagated_to": updated})
 
+    @action(detail=True, methods=["post"], url_path="evaluate")
+    def evaluate(self, request, pk=None):
+        """
+        Body: { "status": "compliant", "note": "..." }
+        Chiama services.evaluate_control() — lancia 400 se mancano evidenze valide.
+        """
+        from .services import evaluate_control
+        from django.core.exceptions import ValidationError
+
+        instance = self.get_object()
+        new_status = request.data.get("status")
+        note = request.data.get("note", "")
+        if not new_status:
+            return Response({"error": "Campo 'status' obbligatorio."}, status=400)
+        try:
+            evaluate_control(instance, new_status, request.user, note)
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
+        except ValidationError as e:
+            return Response({"error": e.message}, status=400)
+
+    @action(detail=True, methods=["get"], url_path="detail-info")
+    def detail_info(self, request, pk=None):
+        """
+        Restituisce info complete per il drawer:
+        descrizione, framework mappati, evidenze, storico valutazioni.
+        """
+        from django.utils import timezone
+        from core.audit import AuditLog
+
+        instance = self.get_object()
+        lang = request.query_params.get("lang", "it")
+        control = instance.control
+
+        mappings = list(
+            control.mappings_from.select_related("target_control__framework").values(
+                "target_control__framework__code",
+                "target_control__external_id",
+                "relationship",
+            )
+        )
+
+        history = list(
+            AuditLog.objects.filter(
+                entity_type="controlinstance",
+                entity_id=instance.pk,
+                action_code="control.evaluated",
+            )
+            .order_by("-timestamp_utc")[:10]
+            .values("timestamp_utc", "user_email_at_time", "payload")
+        )
+
+        today = timezone.now().date()
+        current_evidences = [
+            {
+                "id": str(e.id),
+                "title": e.title,
+                "valid_until": str(e.valid_until) if e.valid_until else None,
+                "expired": (e.valid_until < today) if e.valid_until else True,
+                "evidence_type": e.evidence_type,
+            }
+            for e in instance.evidences.all()
+        ]
+
+        return Response({
+            "control_id": control.external_id,
+            "title": control.get_title(lang),
+            "domain": control.domain.get_name(lang) if control.domain else "",
+            "framework": control.framework.code,
+            "level": control.level,
+            "description": control.translations.get(lang, {}).get("description", ""),
+            "implementation_guidance": control.translations.get(lang, {}).get("guidance", ""),
+            "evidence_examples": control.translations.get(lang, {}).get("evidence_examples", []),
+            "mappings": mappings,
+            "evaluation_history": history,
+            "current_evidences": current_evidences,
+        })
+
+    @action(detail=True, methods=["post"], url_path="link_evidence")
+    def link_evidence(self, request, pk=None):
+        from apps.documents.models import Evidence
+        instance = self.get_object()
+        evidence_id = request.data.get("evidence_id")
+        try:
+            evidence = Evidence.objects.get(pk=evidence_id)
+        except Evidence.DoesNotExist:
+            return Response({"error": "Evidenza non trovata."}, status=404)
+        instance.evidences.add(evidence)
+        return Response({"ok": True})
+
+    @action(detail=True, methods=["post"], url_path="unlink_evidence")
+    def unlink_evidence(self, request, pk=None):
+        from apps.documents.models import Evidence
+        instance = self.get_object()
+        evidence_id = request.data.get("evidence_id")
+        try:
+            evidence = Evidence.objects.get(pk=evidence_id)
+        except Evidence.DoesNotExist:
+            return Response({"error": "Evidenza non trovata."}, status=404)
+        instance.evidences.remove(evidence)
+        return Response({"ok": True})
+

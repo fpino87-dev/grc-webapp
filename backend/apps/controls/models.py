@@ -110,6 +110,12 @@ class ControlInstance(BaseModel):
     na_approved_at = models.DateTimeField(null=True, blank=True)
     na_review_by = models.DateField(null=True, blank=True)
     na_justification = models.TextField(blank=True)
+    last_evaluated_note = models.TextField(blank=True)
+    evidences = models.ManyToManyField(
+        "documents.Evidence",
+        blank=True,
+        related_name="control_instances",
+    )
 
     class Meta:
         unique_together = ["plant", "control"]
