@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { riskApi, type RiskAssessment, type RiskMitigationPlan, THREAT_CATEGORIES, PROB_LABELS, IMPACT_LABELS } from "../../api/endpoints/risk";
+import { riskApi, type RiskAssessment, type RiskMitigationPlan, type SuggestResidualResult, THREAT_CATEGORIES, PROB_LABELS, IMPACT_LABELS } from "../../api/endpoints/risk";
 import { plantsApi } from "../../api/endpoints/plants";
 import { biaApi, type CriticalProcess } from "../../api/endpoints/bia";
 import { usersApi, type GrcUser } from "../../api/endpoints/users";
@@ -63,6 +63,158 @@ function ProbImpactSelector({
         <div className="col-span-2">
           <div className={`rounded px-3 py-2 text-center text-sm font-semibold ${matrixColor(probability, impact)}`}>
             Score: {probability} × {impact} = {probability * impact}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const RISK_LEVEL_COLORS: Record<string, string> = {
+  verde:  "bg-green-100 text-green-800",
+  giallo: "bg-yellow-100 text-yellow-800",
+  rosso:  "bg-red-100 text-red-800",
+};
+const RISK_LEVEL_ICONS: Record<string, string> = {
+  verde: "🟢", giallo: "🟡", rosso: "🔴",
+};
+
+function RiskInherentResidualBadges({ assessment }: { assessment: RiskAssessment }) {
+  if (!assessment.inherent_score && !assessment.score) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-3 px-6 py-3 bg-gray-50 border-t border-gray-100">
+      {assessment.inherent_score != null && (
+        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium ${RISK_LEVEL_COLORS[assessment.inherent_risk_level ?? "verde"]}`}>
+          <span>{RISK_LEVEL_ICONS[assessment.inherent_risk_level ?? "verde"]}</span>
+          <span>Inerente: score {assessment.inherent_score}</span>
+        </div>
+      )}
+      {assessment.inherent_score != null && assessment.score != null && (
+        <span className="text-gray-400 text-sm">→</span>
+      )}
+      {assessment.score != null && (
+        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium ${RISK_LEVEL_COLORS[assessment.risk_level ?? "verde"]}`}>
+          <span>{RISK_LEVEL_ICONS[assessment.risk_level ?? "verde"]}</span>
+          <span>Residuo: score {assessment.score}</span>
+        </div>
+      )}
+      {assessment.risk_reduction_pct != null && (
+        <span className="text-xs text-green-700 bg-green-50 border border-green-200 px-2 py-1 rounded">
+          Riduzione: {assessment.risk_reduction_pct}% grazie ai controlli
+        </span>
+      )}
+    </div>
+  );
+}
+
+function SuggestResidualPanel({ assessment }: { assessment: RiskAssessment }) {
+  const qc = useQueryClient();
+  const [suggestion, setSuggestion] = useState<SuggestResidualResult | null>(null);
+
+  const { refetch, isFetching } = useQuery({
+    queryKey: ["suggest-residual", assessment.id],
+    queryFn: () => riskApi.suggestResidual(assessment.id),
+    enabled: false,
+  });
+
+  async function handleSuggest() {
+    const { data } = await refetch();
+    if (data) setSuggestion(data);
+  }
+
+  return (
+    <div className="px-6 py-3 border-t border-gray-100">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={handleSuggest}
+          disabled={isFetching}
+          className="text-xs px-3 py-1.5 border border-indigo-300 text-indigo-600 rounded hover:bg-indigo-50 disabled:opacity-50"
+        >
+          {isFetching ? "Calcolo..." : "💡 Suggerisci rischio residuo"}
+        </button>
+        {suggestion && (
+          <span className="text-xs text-gray-600">{suggestion.reason}</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function FormalAcceptancePanel({ assessment }: { assessment: RiskAssessment }) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [note, setNote] = useState("");
+  const [expiry, setExpiry] = useState("");
+  const [err, setErr] = useState("");
+
+  const mutation = useMutation({
+    mutationFn: () => riskApi.acceptRisk(assessment.id, note, expiry || undefined),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["risk-assessments"] });
+      setOpen(false);
+    },
+    onError: (e: unknown) => {
+      const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? "Errore";
+      setErr(msg);
+    },
+  });
+
+  if (assessment.risk_level === "verde" && !assessment.risk_accepted_formally) return null;
+
+  if (assessment.risk_accepted_formally) {
+    const expDate = assessment.risk_acceptance_expiry ? new Date(assessment.risk_acceptance_expiry) : null;
+    const expired = expDate ? expDate < new Date() : false;
+    return (
+      <div className="px-6 py-3 border-t border-gray-100">
+        <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg ${expired ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"}`}>
+          <span>{expired ? "⚠️" : "✅"}</span>
+          <span>
+            Accettato da <strong>{assessment.accepted_by_name ?? "—"}</strong> il {assessment.risk_accepted_at ? new Date(assessment.risk_accepted_at).toLocaleDateString("it-IT") : "—"}
+            {expDate && <> — {expired ? "scaduto il" : "scade il"} <strong>{expDate.toLocaleDateString("it-IT")}</strong></>}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-6 py-3 border-t border-gray-100">
+      {!open ? (
+        <button
+          onClick={() => setOpen(true)}
+          className="text-xs px-3 py-1.5 border border-yellow-300 text-yellow-700 rounded hover:bg-yellow-50"
+        >
+          ⚠️ Accetta rischio formalmente
+        </button>
+      ) : (
+        <div className="space-y-2 max-w-lg">
+          <p className="text-xs font-medium text-gray-700">Accettazione formale del rischio residuo</p>
+          <textarea
+            value={note}
+            onChange={e => { setNote(e.target.value); setErr(""); }}
+            placeholder={`Nota obbligatoria${assessment.risk_level === "rosso" ? " (min 50 caratteri per rischi critici)" : ""}`}
+            className="w-full border rounded px-2 py-1.5 text-xs resize-none"
+            rows={3}
+          />
+          <input
+            type="date"
+            value={expiry}
+            onChange={e => setExpiry(e.target.value)}
+            className="border rounded px-2 py-1.5 text-xs w-full"
+            placeholder="Scadenza accettazione"
+          />
+          {err && <p className="text-xs text-red-600">⛔ {err}</p>}
+          <div className="flex gap-2">
+            <button
+              onClick={() => mutation.mutate()}
+              disabled={mutation.isPending}
+              className="px-3 py-1.5 bg-yellow-600 text-white text-xs rounded hover:bg-yellow-700 disabled:opacity-50"
+            >
+              {mutation.isPending ? "Salvataggio..." : "Conferma accettazione"}
+            </button>
+            <button onClick={() => setOpen(false)} className="px-3 py-1.5 border rounded text-xs text-gray-600 hover:bg-gray-50">
+              Annulla
+            </button>
           </div>
         </div>
       )}
@@ -288,9 +440,46 @@ function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: s
             )}
           </div>
 
-          {/* P × I */}
+          {/* P × I inerente (prima dei controlli) */}
+          <div className="border border-orange-200 rounded-lg p-4 bg-orange-50/30">
+            <p className="text-sm font-medium text-orange-800 mb-1">Rischio inerente (prima dei controlli)</p>
+            <p className="text-xs text-orange-600 mb-3">Valuta il rischio come se non esistessero controlli di sicurezza</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Probabilità inerente</label>
+                <select
+                  value={form.inherent_probability ?? ""}
+                  onChange={e => set("inherent_probability", e.target.value ? Number(e.target.value) : null)}
+                  className="w-full border rounded px-2 py-1.5 text-sm"
+                >
+                  <option value="">— seleziona —</option>
+                  {[1,2,3,4,5].map(v => <option key={v} value={v}>{PROB_LABELS[v]}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Impatto inerente</label>
+                <select
+                  value={form.inherent_impact ?? ""}
+                  onChange={e => set("inherent_impact", e.target.value ? Number(e.target.value) : null)}
+                  className="w-full border rounded px-2 py-1.5 text-sm"
+                >
+                  <option value="">— seleziona —</option>
+                  {[1,2,3,4,5].map(v => <option key={v} value={v}>{IMPACT_LABELS[v]}</option>)}
+                </select>
+              </div>
+              {form.inherent_probability && form.inherent_impact && (
+                <div className="col-span-2">
+                  <div className={`rounded px-3 py-2 text-center text-sm font-semibold ${matrixColor(form.inherent_probability, form.inherent_impact)}`}>
+                    Score inerente: {form.inherent_probability} × {form.inherent_impact} = {form.inherent_probability * form.inherent_impact}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* P × I residuo */}
           <div className="border border-gray-200 rounded-lg p-4">
-            <p className="text-sm font-medium text-gray-700 mb-3">Valutazione del rischio (P × I)</p>
+            <p className="text-sm font-medium text-gray-700 mb-3">Rischio residuo (P × I dopo i controlli)</p>
             <ProbImpactSelector
               probability={form.probability ?? null}
               impact={form.impact ?? null}
@@ -476,6 +665,9 @@ export function RiskPage() {
                   {expandedId === a.id && (
                     <tr key={`${a.id}-detail`}>
                       <td colSpan={10} className="p-0">
+                        <RiskInherentResidualBadges assessment={a} />
+                        <SuggestResidualPanel assessment={a} />
+                        <FormalAcceptancePanel assessment={a} />
                         <MitigationPanel assessmentId={a.id} />
                       </td>
                     </tr>

@@ -118,6 +118,33 @@ class RiskAssessmentViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
+    @action(detail=True, methods=["get"], url_path="suggest-residual")
+    def suggest_residual(self, request, pk=None):
+        from .services import suggest_residual_score
+        assessment = self.get_object()
+        return Response(suggest_residual_score(assessment))
+
+    @action(detail=True, methods=["post"], url_path="accept-risk")
+    def accept_risk_action(self, request, pk=None):
+        from .services import accept_risk
+        from django.core.exceptions import ValidationError
+        assessment = self.get_object()
+        note = request.data.get("note", "")
+        expiry_str = request.data.get("expiry_date")
+        expiry_date = None
+        if expiry_str:
+            try:
+                from dateutil import parser as dateparser
+                expiry_date = dateparser.parse(expiry_str).date()
+            except Exception:
+                pass
+        try:
+            accept_risk(assessment, request.user, note, expiry_date)
+            return Response({"ok": True})
+        except ValidationError as e:
+            return Response({"error": str(e.message)}, status=400)
+
+
 class RiskDimensionViewSet(viewsets.ModelViewSet):
     queryset = RiskDimension.objects.select_related("assessment")
     serializer_class = RiskDimensionSerializer

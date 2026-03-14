@@ -131,6 +131,42 @@ class ControlInstance(BaseModel):
     na_review_by = models.DateField(null=True, blank=True)
     na_justification = models.TextField(blank=True)
     last_evaluated_note = models.TextField(blank=True)
+
+    # Applicabilità per SOA ISO 27001
+    applicability = models.CharField(
+        max_length=20,
+        choices=[
+            ("applicabile",    "Applicabile"),
+            ("escluso",        "Escluso"),
+            ("non_pertinente", "Non pertinente"),
+        ],
+        default="applicabile",
+    )
+    exclusion_justification = models.TextField(
+        blank=True,
+        help_text="Obbligatorio se applicability=escluso. Motivazione formale per SOA ISO 27001.",
+    )
+
+    # Maturity level per VDA ISA TISAX (0-5)
+    maturity_level = models.IntegerField(
+        null=True, blank=True,
+        help_text="0=non implementato, 1=ad-hoc, 2=pianificato, 3=definito, 4=gestito, 5=ottimizzato",
+    )
+    maturity_level_override = models.BooleanField(
+        default=False,
+        help_text="Se True il maturity_level è stato inserito manualmente e non viene ricalcolato automaticamente",
+    )
+
+    # Approvazione SOA
+    approved_in_soa = models.BooleanField(default=False)
+    soa_approved_at = models.DateTimeField(null=True, blank=True)
+    soa_approved_by = models.ForeignKey(
+        "auth.User",
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name="soa_approved_instances",
+    )
+
     evidences = models.ManyToManyField(
         "documents.Evidence",
         blank=True,
@@ -139,4 +175,22 @@ class ControlInstance(BaseModel):
 
     class Meta:
         unique_together = ["plant", "control"]
+
+    @property
+    def calc_maturity_level(self) -> int:
+        """Calcola maturity level 0-5 da status + evidenze per VDA ISA TISAX."""
+        if self.maturity_level_override and self.maturity_level is not None:
+            return self.maturity_level
+        from django.utils import timezone
+        today = timezone.now().date()
+        status_map = {"non_valutato": 0, "gap": 1, "na": 2}
+        if self.status in status_map:
+            return status_map[self.status]
+        if self.status == "parziale":
+            has_ev = self.evidences.filter(valid_until__gte=today, deleted_at__isnull=True).exists()
+            return 3 if has_ev else 2
+        if self.status == "compliant":
+            ev_count = self.evidences.filter(valid_until__gte=today, deleted_at__isnull=True).count()
+            return 5 if ev_count >= 2 else 4
+        return 0
 

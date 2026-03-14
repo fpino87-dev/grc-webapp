@@ -76,6 +76,37 @@ class RiskAssessment(BaseModel):
         related_name="accepted_risks",
     )
     plan_due_date = models.DateField(null=True, blank=True)
+
+    # Rischio inerente (PRIMA dei controlli)
+    inherent_probability = models.IntegerField(
+        null=True, blank=True,
+        choices=PROB_CHOICES,
+        help_text="Probabilità senza considerare i controlli esistenti",
+    )
+    inherent_impact = models.IntegerField(
+        null=True, blank=True,
+        choices=IMPACT_CHOICES,
+        help_text="Impatto senza considerare i controlli esistenti",
+    )
+    inherent_score = models.IntegerField(
+        null=True, blank=True,
+        help_text="Score inerente = inherent_prob × inherent_impact",
+    )
+
+    # Accettazione formale del rischio residuo
+    risk_accepted_formally = models.BooleanField(default=False)
+    risk_accepted_by = models.ForeignKey(
+        "auth.User",
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name="formally_accepted_risks",
+    )
+    risk_accepted_at = models.DateTimeField(null=True, blank=True)
+    risk_acceptance_note = models.TextField(blank=True)
+    risk_acceptance_expiry = models.DateField(
+        null=True, blank=True,
+        help_text="Data scadenza accettazione rischio — va rinnovata",
+    )
     critical_process = models.ForeignKey(
         "bia.CriticalProcess",
         null=True,
@@ -87,17 +118,43 @@ class RiskAssessment(BaseModel):
     def save(self, *args, **kwargs):
         if self.probability and self.impact:
             self.score = self.probability * self.impact
+        if self.inherent_probability and self.inherent_impact:
+            self.inherent_score = self.inherent_probability * self.inherent_impact
         super().save(*args, **kwargs)
 
     @property
     def risk_level(self):
-        if self.score is None:
+        s = self.weighted_score or self.score
+        if s is None:
             return None
-        if self.score <= 7:
+        if s <= 7:
             return "verde"
-        if self.score <= 14:
+        if s <= 14:
             return "giallo"
         return "rosso"
+
+    @property
+    def inherent_risk_level(self):
+        s = self.inherent_score or 0
+        if s <= 7:
+            return "verde"
+        if s <= 14:
+            return "giallo"
+        return "rosso"
+
+    @property
+    def residual_score(self):
+        """Alias esplicito — il campo score è il rischio residuo."""
+        return self.score
+
+    @property
+    def risk_reduction_pct(self):
+        """Percentuale di riduzione del rischio grazie ai controlli."""
+        if not self.inherent_score or not self.score:
+            return None
+        if self.inherent_score == 0:
+            return 0
+        return round((self.inherent_score - self.score) / self.inherent_score * 100, 1)
 
     @property
     def weighted_score(self):

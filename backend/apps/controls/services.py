@@ -173,6 +173,46 @@ def evaluate_control(instance, new_status, user, note=""):
     return instance
 
 
+def validate_exclusion(instance, applicability: str,
+                       justification: str, user) -> None:
+    """
+    Valida e applica una modifica di applicabilità.
+    Se escluso: richiede giustificazione di almeno 50 caratteri.
+    Aggiorna status a 'na' se escluso.
+    """
+    from django.core.exceptions import ValidationError
+    from django.utils import timezone
+    from core.audit import log_action
+
+    if applicability == "escluso":
+        if not justification or len(justification.strip()) < 50:
+            raise ValidationError(
+                "La giustificazione di esclusione per SOA richiede almeno 50 caratteri. "
+                "Specificare il motivo formale per cui il controllo non è applicabile."
+            )
+
+    instance.applicability = applicability
+    instance.exclusion_justification = justification
+    if applicability == "escluso":
+        instance.status = "na"
+        instance.na_justification = justification
+    instance.save(update_fields=[
+        "applicability", "exclusion_justification",
+        "status", "na_justification", "updated_at",
+    ])
+
+    log_action(
+        user=user,
+        action_code="control.applicability_changed",
+        level="L2",
+        entity=instance,
+        payload={
+            "applicability": applicability,
+            "justification": justification[:100],
+        },
+    )
+
+
 def calc_suggested_status(instance) -> str:
     """
     Inferisce lo stato suggerito in base ai documenti/evidenze collegati.

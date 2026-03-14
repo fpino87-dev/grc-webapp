@@ -89,6 +89,13 @@ export interface ControlDetailInfo {
   current_status: string;
   suggested_status: string;
   suggested_status_reason: string;
+  applicability: string;
+  exclusion_justification: string;
+  maturity_level: number | null;
+  maturity_level_override: boolean;
+  calc_maturity_level: number;
+  approved_in_soa: boolean;
+  soa_approved_at: string | null;
 }
 
 export interface GapEntry {
@@ -141,4 +148,8 @@ export const controlsApi = {
     apiClient.post(`/controls/instances/${instanceId}/unlink-document/`, { document_id: documentId }).then((r) => r.data),
   applySuggestion: (instanceId: string, note: string) =>
     apiClient.post(`/controls/instances/${instanceId}/apply-suggestion/`, { note }).then((r) => r.data),
+  setApplicability: (instanceId: string, applicability: string, justification: string) =>
+    apiClient.post(`/controls/instances/${instanceId}/set-applicability/`, { applicability, justification }).then((r) => r.data),
+  setMaturity: (instanceId: string, maturityLevel: number) =>
+    apiClient.post(`/controls/instances/${instanceId}/set-maturity/`, { maturity_level: maturityLevel }).then((r) => r.data),
 };

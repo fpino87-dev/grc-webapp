@@ -181,6 +181,13 @@ class ControlInstanceViewSet(viewsets.ModelViewSet):
             "current_status": instance.status,
             "suggested_status": suggested_status,
             "suggested_status_reason": _explain_suggestion(instance),
+            "applicability": instance.applicability,
+            "exclusion_justification": instance.exclusion_justification,
+            "maturity_level": instance.maturity_level,
+            "maturity_level_override": instance.maturity_level_override,
+            "calc_maturity_level": instance.calc_maturity_level,
+            "approved_in_soa": instance.approved_in_soa,
+            "soa_approved_at": instance.soa_approved_at.isoformat() if instance.soa_approved_at else None,
             "control_id": control.external_id,
             "title": control.get_title(lang),
             "domain": control.domain.get_name(lang) if control.domain else "",
@@ -235,6 +242,62 @@ class ControlInstanceViewSet(viewsets.ModelViewSet):
             return Response({"error": "Evidenza non trovata."}, status=404)
         instance.evidences.add(evidence)
         return Response({"ok": True})
+
+    @action(detail=True, methods=["post"], url_path="set-applicability")
+    def set_applicability(self, request, pk=None):
+        from .services import validate_exclusion
+        from django.core.exceptions import ValidationError
+        instance = self.get_object()
+        applicability = request.data.get("applicability", "applicabile")
+        justification = request.data.get("justification", "")
+        try:
+            validate_exclusion(instance, applicability, justification, request.user)
+            return Response({"ok": True, "applicability": applicability})
+        except ValidationError as e:
+            return Response({"error": str(e.message)}, status=400)
+
+    @action(detail=True, methods=["post"], url_path="set-maturity")
+    def set_maturity(self, request, pk=None):
+        """Override manuale del maturity level per VDA ISA TISAX."""
+        from core.audit import log_action
+        instance = self.get_object()
+        level = request.data.get("maturity_level")
+        if level is None or not (0 <= int(level) <= 5):
+            return Response({"error": "maturity_level deve essere tra 0 e 5"}, status=400)
+        instance.maturity_level = int(level)
+        instance.maturity_level_override = True
+        instance.save(update_fields=["maturity_level", "maturity_level_override", "updated_at"])
+        log_action(
+            user=request.user,
+            action_code="control.maturity_override",
+            level="L2",
+            entity=instance,
+            payload={"maturity_level": int(level)},
+        )
+        return Response({"ok": True, "maturity_level": int(level)})
+
+    @action(detail=False, methods=["post"], url_path="bulk-approve-soa")
+    def bulk_approve_soa(self, request):
+        """Approva formalmente un gruppo di ControlInstance per il SOA."""
+        from django.utils import timezone
+        from core.audit import log_action
+        ids = request.data.get("instance_ids", [])
+        qs = self.get_queryset().filter(pk__in=ids)
+        now = timezone.now()
+        qs.update(
+            approved_in_soa=True,
+            soa_approved_at=now,
+            soa_approved_by=request.user,
+        )
+        for instance in qs:
+            log_action(
+                user=request.user,
+                action_code="control.soa_approved",
+                level="L1",
+                entity=instance,
+                payload={"framework": instance.control.framework.code},
+            )
+        return Response({"ok": True, "approved_count": qs.count()})
 
     @action(detail=True, methods=["post"], url_path="apply-suggestion")
     def apply_suggestion(self, request, pk=None):

@@ -69,6 +69,81 @@ def calc_score_from_dimensions(assessment: RiskAssessment) -> int:
     return min(25, prob * impact)
 
 
+def suggest_residual_score(assessment) -> dict:
+    """
+    Suggerisce il rischio residuo in base ai controlli compliant collegati al sito.
+    Logica: parte dal rischio inerente, applica riduzione per controllo compliant (-2%, max 60%).
+    """
+    if not assessment.inherent_score:
+        return {"suggested": None, "reason": "Rischio inerente non definito"}
+
+    if not assessment.critical_process:
+        return {
+            "suggested": assessment.inherent_score,
+            "reason": "Nessun processo BIA collegato — nessuna riduzione applicata",
+        }
+
+    from apps.controls.models import ControlInstance
+    plant_controls = ControlInstance.objects.filter(
+        plant=assessment.plant,
+        status="compliant",
+        deleted_at__isnull=True,
+    )
+    compliant_count = plant_controls.count()
+    reduction_pct = min(60, compliant_count * 2)
+    suggested = max(1, round(assessment.inherent_score * (1 - reduction_pct / 100)))
+
+    return {
+        "suggested": suggested,
+        "reduction_pct": reduction_pct,
+        "compliant_controls": compliant_count,
+        "reason": (
+            f"{compliant_count} controlli compliant → "
+            f"riduzione stimata {reduction_pct}% → "
+            f"score residuo suggerito: {suggested}"
+        ),
+    }
+
+
+def accept_risk(assessment, user, note: str, expiry_date=None) -> None:
+    """Accettazione formale del rischio residuo. Richiede nota obbligatoria."""
+    from django.core.exceptions import ValidationError
+    from django.utils import timezone
+    from core.audit import log_action
+
+    risk_lv = assessment.risk_level
+    if risk_lv != "rosso" and not note:
+        raise ValidationError("La nota è obbligatoria per l'accettazione formale del rischio.")
+    if risk_lv == "rosso" and len(note.strip()) < 50:
+        raise ValidationError(
+            "Per rischi critici (rosso) la nota di accettazione deve essere di almeno 50 caratteri."
+        )
+
+    assessment.risk_accepted_formally = True
+    assessment.risk_accepted_by = user
+    assessment.risk_accepted_at = timezone.now()
+    assessment.risk_acceptance_note = note
+    assessment.risk_acceptance_expiry = expiry_date
+    assessment.save(update_fields=[
+        "risk_accepted_formally", "risk_accepted_by",
+        "risk_accepted_at", "risk_acceptance_note",
+        "risk_acceptance_expiry", "updated_at",
+    ])
+
+    log_action(
+        user=user,
+        action_code="risk.accepted_formally",
+        level="L1",
+        entity=assessment,
+        payload={
+            "score": assessment.score,
+            "level": risk_lv,
+            "note": note[:100],
+            "expiry": str(expiry_date) if expiry_date else None,
+        },
+    )
+
+
 def escalate_red_risk(assessment: RiskAssessment, user):
     from apps.tasks.services import create_task
 

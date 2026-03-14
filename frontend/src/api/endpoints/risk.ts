@@ -20,10 +20,15 @@ export interface RiskAssessment {
   assessment_type: "IT" | "OT";
   probability: number | null;
   impact: number | null;
+  inherent_probability: number | null;
+  inherent_impact: number | null;
+  inherent_score: number | null;
+  inherent_risk_level: "verde" | "giallo" | "rosso" | null;
   treatment: string;
   status: "bozza" | "completato" | "archiviato";
   score: number | null;
   risk_level: "verde" | "giallo" | "rosso" | null;
+  risk_reduction_pct: number | null;
   ale_annuo: string | null;
   ale_calcolato: string | null;
   weighted_score: number | null;
@@ -32,8 +37,21 @@ export interface RiskAssessment {
   critical_process: string | null;
   critical_process_name: string | null;
   risk_accepted: boolean;
+  risk_accepted_formally: boolean;
+  risk_accepted_by: string | null;
+  accepted_by_name: string | null;
+  risk_accepted_at: string | null;
+  risk_acceptance_note: string;
+  risk_acceptance_expiry: string | null;
   assessed_at: string | null;
   plan_due_date: string | null;
+}
+
+export interface SuggestResidualResult {
+  suggested: number | null;
+  reduction_pct?: number;
+  compliant_controls?: number;
+  reason: string;
 }
 
 export const THREAT_CATEGORIES = [
@@ -75,4 +93,8 @@ export const riskApi = {
     apiClient.post<RiskMitigationPlan>("/risk/mitigation-plans/", data).then(r => r.data),
   completePlan: (id: string) =>
     apiClient.patch<RiskMitigationPlan>(`/risk/mitigation-plans/${id}/`, { completed_at: new Date().toISOString() }).then(r => r.data),
+  suggestResidual: (id: string) =>
+    apiClient.get<SuggestResidualResult>(`/risk/assessments/${id}/suggest-residual/`).then(r => r.data),
+  acceptRisk: (id: string, note: string, expiryDate?: string) =>
+    apiClient.post(`/risk/assessments/${id}/accept-risk/`, { note, expiry_date: expiryDate }).then(r => r.data),
 };

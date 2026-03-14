@@ -125,6 +125,21 @@ function TabCosa({ info }: { info: NonNullable<ReturnType<typeof useDetailInfo>[
 
 // ─── Tab 2: Valutazione ───────────────────────────────────────────────────────
 
+const MATURITY_LABELS: Record<number, string> = {
+  0: "Non implementato",
+  1: "Ad-hoc",
+  2: "Pianificato",
+  3: "Definito",
+  4: "Gestito",
+  5: "Ottimizzato",
+};
+
+const APPLICABILITY_LABELS: Record<string, string> = {
+  applicabile:    "Applicabile",
+  escluso:        "Escluso",
+  non_pertinente: "Non pertinente",
+};
+
 function TabValutazione({
   instanceId,
   requirements,
@@ -132,6 +147,11 @@ function TabValutazione({
   suggestedStatus,
   suggestedStatusReason,
   evidenceRequirement,
+  applicability,
+  exclusionJustification,
+  calcMaturityLevel,
+  maturityLevelOverride,
+  framework,
 }: {
   instanceId: string;
   requirements: RequirementsCheck;
@@ -139,6 +159,11 @@ function TabValutazione({
   suggestedStatus: string;
   suggestedStatusReason: string;
   evidenceRequirement: EvidenceRequirement;
+  applicability: string;
+  exclusionJustification: string;
+  calcMaturityLevel: number;
+  maturityLevelOverride: boolean;
+  framework: string;
 }) {
   const qc = useQueryClient();
   const [selectedStatus, setSelectedStatus] = useState("");
@@ -147,8 +172,32 @@ function TabValutazione({
   const [applyModalOpen, setApplyModalOpen] = useState(false);
   const [applyNote, setApplyNote] = useState("");
   const [manualOpen, setManualOpen] = useState(false);
+  const [selectedApplicability, setSelectedApplicability] = useState(applicability);
+  const [justification, setJustification] = useState(exclusionJustification);
+  const [applicabilityError, setApplicabilityError] = useState("");
+  const [maturityOverrideVal, setMaturityOverrideVal] = useState(calcMaturityLevel);
 
   const suggestionDiffers = suggestedStatus !== currentStatus;
+
+  const applicabilityMutation = useMutation({
+    mutationFn: () => controlsApi.setApplicability(instanceId, selectedApplicability, justification),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["controls"] });
+      qc.invalidateQueries({ queryKey: ["control-detail", instanceId] });
+      setApplicabilityError("");
+    },
+    onError: (e: unknown) => {
+      const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? "Errore sconosciuto";
+      setApplicabilityError(msg);
+    },
+  });
+
+  const maturityMutation = useMutation({
+    mutationFn: () => controlsApi.setMaturity(instanceId, maturityOverrideVal),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["control-detail", instanceId] });
+    },
+  });
 
   const applyMutation = useMutation({
     mutationFn: () => controlsApi.applySuggestion(instanceId, applyNote),
@@ -268,6 +317,69 @@ function TabValutazione({
               Annulla
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Applicabilità SOA */}
+      <div className="border border-gray-200 rounded-lg p-3 space-y-2">
+        <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Applicabilità SOA (ISO 27001)</p>
+        <select
+          value={selectedApplicability}
+          onChange={e => { setSelectedApplicability(e.target.value); setApplicabilityError(""); }}
+          className="w-full border rounded px-2 py-1.5 text-sm"
+        >
+          {Object.entries(APPLICABILITY_LABELS).map(([v, l]) => (
+            <option key={v} value={v}>{l}</option>
+          ))}
+        </select>
+        {selectedApplicability === "escluso" && (
+          <textarea
+            value={justification}
+            onChange={e => setJustification(e.target.value)}
+            placeholder="Motivazione formale di esclusione (min 50 caratteri) *"
+            className="w-full border rounded px-2 py-1.5 text-xs resize-none"
+            rows={3}
+          />
+        )}
+        {applicabilityError && (
+          <p className="text-xs text-red-600">⛔ {applicabilityError}</p>
+        )}
+        <button
+          onClick={() => applicabilityMutation.mutate()}
+          disabled={applicabilityMutation.isPending}
+          className="w-full py-1.5 bg-gray-700 text-white rounded text-xs hover:bg-gray-800 disabled:opacity-50"
+        >
+          {applicabilityMutation.isPending ? "Salvataggio..." : "Salva applicabilità"}
+        </button>
+      </div>
+
+      {/* Maturity Level — solo per TISAX */}
+      {(framework.includes("TISAX") || framework.includes("VDA")) && (
+        <div className="border border-purple-200 rounded-lg p-3 space-y-2 bg-purple-50/30">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide">Maturity Level VDA ISA TISAX</p>
+            {!maturityLevelOverride && (
+              <span className="text-xs text-gray-400 bg-gray-100 px-1.5 rounded">Calcolato automaticamente</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="range"
+              min={0} max={5} step={1}
+              value={maturityOverrideVal}
+              onChange={e => setMaturityOverrideVal(Number(e.target.value))}
+              className="flex-1 accent-purple-600"
+            />
+            <span className="text-sm font-bold text-purple-700 w-4 text-center">{maturityOverrideVal}</span>
+          </div>
+          <p className="text-xs text-gray-500">{MATURITY_LABELS[maturityOverrideVal]}</p>
+          <button
+            onClick={() => maturityMutation.mutate()}
+            disabled={maturityMutation.isPending}
+            className="w-full py-1.5 bg-purple-600 text-white rounded text-xs hover:bg-purple-700 disabled:opacity-50"
+          >
+            {maturityMutation.isPending ? "Salvataggio..." : "Override manuale maturity"}
+          </button>
         </div>
       )}
 
@@ -796,6 +908,11 @@ export function ControlDetailDrawer({ instanceId, onClose }: Props) {
                   suggestedStatus={info.suggested_status}
                   suggestedStatusReason={info.suggested_status_reason}
                   evidenceRequirement={info.evidence_requirement}
+                  applicability={info.applicability}
+                  exclusionJustification={info.exclusion_justification}
+                  calcMaturityLevel={info.calc_maturity_level}
+                  maturityLevelOverride={info.maturity_level_override}
+                  framework={info.framework}
                 />
               )}
               {tab === "docevidence" && (
