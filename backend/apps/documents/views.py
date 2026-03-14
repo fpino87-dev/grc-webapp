@@ -45,6 +45,23 @@ class DocumentViewSet(viewsets.ModelViewSet):
         )
         return Response(DocumentSerializer(docs, many=True).data)
 
+    @action(detail=True, methods=["post"], url_path="link-controls")
+    def link_controls(self, request, pk=None):
+        """
+        Collega questo documento a una lista di ControlInstance.
+        Body: { "control_instance_ids": ["uuid1", "uuid2"] }
+        """
+        from apps.controls.models import ControlInstance
+        document = self.get_object()
+        ids = request.data.get("control_instance_ids", [])
+        linked = []
+        for cid in ids:
+            ci = ControlInstance.objects.filter(pk=cid).first()
+            if ci:
+                ci.documents.add(document)
+                linked.append(str(ci.pk))
+        return Response({"ok": True, "linked": linked, "count": len(linked)})
+
 
 class DocumentVersionViewSet(viewsets.ModelViewSet):
     queryset = DocumentVersion.objects.select_related("document", "uploaded_by")

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { documentsApi, type Document, type Evidence, EVIDENCE_TYPE_LABELS } from "../../api/endpoints/documents";
+import { controlsApi, type ControlInstance } from "../../api/endpoints/controls";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 
 type MainTab = "documenti" | "evidenze";
@@ -185,6 +186,125 @@ function NewEvidenceModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+// ─── Modal collegamento controlli ─────────────────────────────────────────────
+
+function LinkControlsModal({ doc, onClose }: { doc: Document; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [frameworkFilter, setFrameworkFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [result, setResult] = useState<string | null>(null);
+
+  const { data: frameworks } = useQuery({
+    queryKey: ["frameworks"],
+    queryFn: controlsApi.frameworks,
+    retry: false,
+  });
+
+  const params: Record<string, string> = { page_size: "200" };
+  if (frameworkFilter) params.framework = frameworkFilter;
+  if (statusFilter) params.status = statusFilter;
+
+  const { data: instances } = useQuery({
+    queryKey: ["controls-for-link", frameworkFilter, statusFilter],
+    queryFn: () => controlsApi.instances(params),
+    retry: false,
+  });
+
+  const linkMut = useMutation({
+    mutationFn: () => documentsApi.linkControls(doc.id, Array.from(selected)),
+    onSuccess: (data: { count: number }) => {
+      qc.invalidateQueries({ queryKey: ["documents"] });
+      setResult(`Collegato a ${data.count} controlli`);
+      setSelected(new Set());
+    },
+  });
+
+  const controls: ControlInstance[] = instances?.results ?? [];
+
+  function toggle(id: string) {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  const STATUS_COLORS: Record<string, string> = {
+    compliant: "text-green-700", parziale: "text-yellow-700", gap: "text-red-700",
+    na: "text-gray-500", non_valutato: "text-gray-400",
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl flex flex-col max-h-[85vh]">
+        <div className="flex items-center justify-between px-6 py-4 border-b shrink-0">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Collega controlli</h3>
+            <p className="text-xs text-gray-400 mt-0.5 truncate max-w-md">{doc.title}</p>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 text-2xl w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100">×</button>
+        </div>
+
+        <div className="px-6 py-3 border-b shrink-0 flex gap-3">
+          <select value={frameworkFilter} onChange={e => setFrameworkFilter(e.target.value)} className="border rounded px-2 py-1.5 text-sm flex-1">
+            <option value="">Tutti i framework</option>
+            {(frameworks ?? []).map(fw => <option key={fw.id} value={fw.code}>{fw.code} — {fw.name}</option>)}
+          </select>
+          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="border rounded px-2 py-1.5 text-sm">
+            <option value="">Tutti gli stati</option>
+            <option value="compliant">Compliant</option>
+            <option value="parziale">Parziale</option>
+            <option value="gap">Gap</option>
+            <option value="non_valutato">Non valutato</option>
+          </select>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-4 py-2">
+          {controls.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-8">Nessun controllo trovato</p>
+          ) : (
+            <div className="divide-y divide-gray-100">
+              {controls.map(ci => (
+                <label key={ci.id} className="flex items-center gap-3 py-2 px-2 hover:bg-gray-50 cursor-pointer rounded">
+                  <input
+                    type="checkbox"
+                    checked={selected.has(ci.id)}
+                    onChange={() => toggle(ci.id)}
+                    className="rounded"
+                  />
+                  <span className="text-xs font-mono text-gray-500 w-20 shrink-0">{ci.control_external_id}</span>
+                  <span className="text-xs text-gray-800 flex-1 truncate">{ci.control_title}</span>
+                  <span className="text-xs bg-gray-100 text-gray-600 px-1.5 rounded shrink-0">{ci.framework_code}</span>
+                  <span className={`text-xs font-medium shrink-0 ${STATUS_COLORS[ci.status] ?? ""}`}>{ci.status}</span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="px-6 py-4 border-t shrink-0 flex items-center justify-between gap-3">
+          <div className="text-xs text-gray-500">
+            {selected.size > 0 ? `${selected.size} controlli selezionati` : "Nessuna selezione"}
+          </div>
+          {result && <p className="text-xs text-green-700 font-medium">{result}</p>}
+          <div className="flex gap-2">
+            <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Chiudi</button>
+            <button
+              onClick={() => linkMut.mutate()}
+              disabled={selected.size === 0 || linkMut.isPending}
+              className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50"
+            >
+              {linkMut.isPending ? "Collegamento..." : "Collega selezionati"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Tab Documenti ────────────────────────────────────────────────────────────
 
 type DocStatusFilter = "tutti" | "bozza" | "revisione" | "approvazione" | "approvato";
@@ -193,6 +313,7 @@ function TabDocumenti() {
   const qc = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<DocStatusFilter>("tutti");
   const [showNew, setShowNew] = useState(false);
+  const [linkControlsDoc, setLinkControlsDoc] = useState<Document | null>(null);
 
   const params: Record<string, string> = {};
   if (statusFilter !== "tutti") params.status = statusFilter;
@@ -263,7 +384,7 @@ function TabDocumenti() {
                   <td className="px-4 py-3 text-gray-500 text-xs">{doc.review_due_date ? new Date(doc.review_due_date).toLocaleDateString("it-IT") : "—"}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{doc.approved_at ? new Date(doc.approved_at).toLocaleDateString("it-IT") : "—"}</td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       {doc.status === "bozza" && <button onClick={() => submitMutation.mutate(doc.id)} className="text-xs text-gray-500 hover:text-blue-700 border border-gray-300 rounded px-2 py-0.5 hover:border-blue-400">Invia per revisione</button>}
                       {(doc.status === "revisione" || doc.status === "approvazione") && (
                         <>
@@ -271,6 +392,12 @@ function TabDocumenti() {
                           <button onClick={() => rejectMutation.mutate(doc.id)} className="text-xs text-gray-500 hover:text-red-700 border border-gray-300 rounded px-2 py-0.5 hover:border-red-400">Rifiuta</button>
                         </>
                       )}
+                      <button
+                        onClick={() => setLinkControlsDoc(doc)}
+                        className="text-xs text-indigo-600 hover:text-indigo-800 border border-indigo-200 rounded px-2 py-0.5 hover:border-indigo-400"
+                      >
+                        Collega controlli
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -281,6 +408,7 @@ function TabDocumenti() {
       </div>
 
       {showNew && <NewDocumentModal onClose={() => setShowNew(false)} />}
+      {linkControlsDoc && <LinkControlsModal doc={linkControlsDoc} onClose={() => setLinkControlsDoc(null)} />}
     </div>
   );
 }

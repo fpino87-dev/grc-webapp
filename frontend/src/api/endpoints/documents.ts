@@ -53,4 +53,8 @@ export const documentsApi = {
     apiClient.post<Evidence>("/documents/evidences/", data).then(r => r.data),
   searchEvidences: (search: string) =>
     apiClient.get<{results: Evidence[]}>("/documents/evidences/", {params: {search}}).then(r => r.data),
+  linkControls: (docId: string, controlInstanceIds: string[]) =>
+    apiClient.post(`/documents/documents/${docId}/link-controls/`, { control_instance_ids: controlInstanceIds }).then(r => r.data),
+  searchDocuments: (search: string, plant?: string) =>
+    apiClient.get<{results: Document[]}>("/documents/documents/", {params: {search, ...(plant ? {plant} : {})}}).then(r => r.data),
 };

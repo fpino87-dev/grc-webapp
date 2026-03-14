@@ -59,6 +59,8 @@ class Command(BaseCommand):
                             "domain": dm.get(c.get("domain")),
                             "translations": c["translations"],
                             "level": c.get("level", ""),
+                            "evidence_requirement": c.get("evidence_requirement", {}),
+                            "control_category": c.get("control_category", "procedurale"),
                         },
                     )
                     cm[c["external_id"]] = obj

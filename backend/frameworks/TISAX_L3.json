@@ -4,19 +4,162 @@
   "version": "6.0",
   "published_at": "2023-03-01",
   "domains": [
-    {"code": "IS",       "translations": {"it": {"name": "Politica per la Sicurezza delle Informazioni"}, "en": {"name": "Information Security Policy"}},       "order": 1},
-    {"code": "OR",       "translations": {"it": {"name": "Organizzazione della Sicurezza"},               "en": {"name": "Organisation of Information Security"}}, "order": 2},
-    {"code": "HR",       "translations": {"it": {"name": "Sicurezza delle Risorse Umane"},                "en": {"name": "Human Resource Security"}},              "order": 3},
-    {"code": "AM",       "translations": {"it": {"name": "Gestione degli Asset"},                         "en": {"name": "Asset Management"}},                     "order": 4},
-    {"code": "PHYSEC",   "translations": {"it": {"name": "Sicurezza Fisica e Ambientale"},                "en": {"name": "Physical and Environmental Security"}},  "order": 5},
-    {"code": "ITSEC",    "translations": {"it": {"name": "Sicurezza IT e delle Comunicazioni"},           "en": {"name": "IT and Communication Security"}},        "order": 6},
-    {"code": "ACCESS",   "translations": {"it": {"name": "Controllo degli Accessi"},                      "en": {"name": "Access Control"}},                       "order": 7},
-    {"code": "CRYPTO",   "translations": {"it": {"name": "Crittografia"},                                  "en": {"name": "Cryptography"}},                         "order": 8},
-    {"code": "SUPPLIER", "translations": {"it": {"name": "Gestione dei Fornitori"},                       "en": {"name": "Supplier Relationships"}},               "order": 9},
-    {"code": "INCIDENT", "translations": {"it": {"name": "Gestione degli Incidenti"},                     "en": {"name": "Incident Management"}},                  "order": 10},
-    {"code": "BCM",      "translations": {"it": {"name": "Continuità Operativa"},                         "en": {"name": "Business Continuity Management"}},       "order": 11},
-    {"code": "COMPLY",   "translations": {"it": {"name": "Conformità e Audit"},                           "en": {"name": "Compliance and Audit"}},                 "order": 12},
-    {"code": "PROTO",    "translations": {"it": {"name": "Protezione dei Prototipi"},                     "en": {"name": "Prototype Protection"}},                 "order": 13}
+    {
+      "code": "IS",
+      "translations": {
+        "it": {
+          "name": "Politica per la Sicurezza delle Informazioni"
+        },
+        "en": {
+          "name": "Information Security Policy"
+        }
+      },
+      "order": 1
+    },
+    {
+      "code": "OR",
+      "translations": {
+        "it": {
+          "name": "Organizzazione della Sicurezza"
+        },
+        "en": {
+          "name": "Organisation of Information Security"
+        }
+      },
+      "order": 2
+    },
+    {
+      "code": "HR",
+      "translations": {
+        "it": {
+          "name": "Sicurezza delle Risorse Umane"
+        },
+        "en": {
+          "name": "Human Resource Security"
+        }
+      },
+      "order": 3
+    },
+    {
+      "code": "AM",
+      "translations": {
+        "it": {
+          "name": "Gestione degli Asset"
+        },
+        "en": {
+          "name": "Asset Management"
+        }
+      },
+      "order": 4
+    },
+    {
+      "code": "PHYSEC",
+      "translations": {
+        "it": {
+          "name": "Sicurezza Fisica e Ambientale"
+        },
+        "en": {
+          "name": "Physical and Environmental Security"
+        }
+      },
+      "order": 5
+    },
+    {
+      "code": "ITSEC",
+      "translations": {
+        "it": {
+          "name": "Sicurezza IT e delle Comunicazioni"
+        },
+        "en": {
+          "name": "IT and Communication Security"
+        }
+      },
+      "order": 6
+    },
+    {
+      "code": "ACCESS",
+      "translations": {
+        "it": {
+          "name": "Controllo degli Accessi"
+        },
+        "en": {
+          "name": "Access Control"
+        }
+      },
+      "order": 7
+    },
+    {
+      "code": "CRYPTO",
+      "translations": {
+        "it": {
+          "name": "Crittografia"
+        },
+        "en": {
+          "name": "Cryptography"
+        }
+      },
+      "order": 8
+    },
+    {
+      "code": "SUPPLIER",
+      "translations": {
+        "it": {
+          "name": "Gestione dei Fornitori"
+        },
+        "en": {
+          "name": "Supplier Relationships"
+        }
+      },
+      "order": 9
+    },
+    {
+      "code": "INCIDENT",
+      "translations": {
+        "it": {
+          "name": "Gestione degli Incidenti"
+        },
+        "en": {
+          "name": "Incident Management"
+        }
+      },
+      "order": 10
+    },
+    {
+      "code": "BCM",
+      "translations": {
+        "it": {
+          "name": "Continuità Operativa"
+        },
+        "en": {
+          "name": "Business Continuity Management"
+        }
+      },
+      "order": 11
+    },
+    {
+      "code": "COMPLY",
+      "translations": {
+        "it": {
+          "name": "Conformità e Audit"
+        },
+        "en": {
+          "name": "Compliance and Audit"
+        }
+      },
+      "order": 12
+    },
+    {
+      "code": "PROTO",
+      "translations": {
+        "it": {
+          "name": "Protezione dei Prototipi"
+        },
+        "en": {
+          "name": "Prototype Protection"
+        }
+      },
+      "order": 13
+    }
   ],
   "controls": [
     {
@@ -24,8 +167,40 @@
       "domain": "IS",
       "level": "L3",
       "translations": {
-        "it": {"title": "Politica per la sicurezza delle informazioni (L3)", "description": "Una politica per la sicurezza delle informazioni approvata dalla direzione deve essere documentata, comunicata a tutti i dipendenti e rivista almeno annualmente. Per L3 deve includere esplicitamente i requisiti per la protezione di informazioni altamente riservate e prototipi."},
-        "en": {"title": "Information security policy (L3)", "description": "A management-approved information security policy must be documented, communicated to all employees and reviewed at least annually. For L3 it must explicitly include requirements for the protection of highly confidential information and prototypes."}
+        "it": {
+          "title": "Politica per la sicurezza delle informazioni (L3)",
+          "description": "Una politica per la sicurezza delle informazioni approvata dalla direzione deve essere documentata, comunicata a tutti i dipendenti e rivista almeno annualmente. Per L3 deve includere esplicitamente i requisiti per la protezione di informazioni altamente riservate e prototipi."
+        },
+        "en": {
+          "title": "Information security policy (L3)",
+          "description": "A management-approved information security policy must be documented, communicated to all employees and reviewed at least annually. For L3 it must explicitly include requirements for the protection of highly confidential information and prototypes."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "policy",
+            "mandatory": true,
+            "description": "IS Policy TISAX L3 approvata"
+          },
+          {
+            "type": "manuale",
+            "mandatory": false,
+            "description": "Manuale ISMS formale"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "verbale",
+            "mandatory": true,
+            "max_age_days": 365,
+            "description": "Verbale approvazione top management"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 1,
+        "notes": "TISAX L3: policy + evidenza approvazione entrambi obbligatori"
       }
     },
     {
@@ -33,8 +208,41 @@
       "domain": "IS",
       "level": "L3",
       "translations": {
-        "it": {"title": "Gestione del rischio avanzata", "description": "Il processo di risk assessment deve includere scenari specifici per la perdita o divulgazione non autorizzata di informazioni altamente riservate (es. dati tecnici veicolo, strategie di prodotto). L'analisi deve considerare anche le minacce di spionaggio industriale."},
-        "en": {"title": "Advanced risk management", "description": "The risk assessment process must include specific scenarios for the loss or unauthorized disclosure of highly confidential information (e.g. vehicle technical data, product strategies). The analysis must also consider industrial espionage threats."}
+        "it": {
+          "title": "Gestione del rischio avanzata",
+          "description": "Il processo di risk assessment deve includere scenari specifici per la perdita o divulgazione non autorizzata di informazioni altamente riservate (es. dati tecnici veicolo, strategie di prodotto). L'analisi deve considerare anche le minacce di spionaggio industriale."
+        },
+        "en": {
+          "title": "Advanced risk management",
+          "description": "The risk assessment process must include specific scenarios for the loss or unauthorized disclosure of highly confidential information (e.g. vehicle technical data, product strategies). The analysis must also consider industrial espionage threats."
+        }
+      },
+      "control_category": "organizzativo",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura audit interno IS"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "max_age_days": 365,
+            "description": "Report audit interno più recente"
+          },
+          {
+            "type": "verbale",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Verbale management review"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 1,
+        "notes": "Audit interno annuale obbligatorio per TISAX L3"
       }
     },
     {
@@ -42,8 +250,40 @@
       "domain": "OR",
       "level": "L3",
       "translations": {
-        "it": {"title": "Organizzazione della sicurezza per L3", "description": "Oltre ai requisiti L2, per il trattamento di informazioni L3 devono essere nominati referenti specifici responsabili della protezione di tali informazioni. La direzione deve essere direttamente coinvolta nella supervisione delle misure L3."},
-        "en": {"title": "Security organisation for L3", "description": "In addition to L2 requirements, specific referents responsible for protecting L3 information must be appointed. Management must be directly involved in supervising L3 measures."}
+        "it": {
+          "title": "Organizzazione della sicurezza per L3",
+          "description": "Oltre ai requisiti L2, per il trattamento di informazioni L3 devono essere nominati referenti specifici responsabili della protezione di tali informazioni. La direzione deve essere direttamente coinvolta nella supervisione delle misure L3."
+        },
+        "en": {
+          "title": "Security organisation for L3",
+          "description": "In addition to L2 requirements, specific referents responsible for protecting L3 information must be appointed. Management must be directly involved in supervising L3 measures."
+        }
+      },
+      "control_category": "composito",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "registro",
+            "mandatory": true,
+            "description": "Registro asset con classificazione L3"
+          },
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura ciclo di vita asset"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "max_age_days": 180,
+            "description": "Report inventario asset verificato"
+          }
+        ],
+        "min_documents": 2,
+        "min_evidences": 1,
+        "notes": "L3: inventario + classificazione + verifica periodica obbligatori"
       }
     },
     {
@@ -51,8 +291,41 @@
       "domain": "OR",
       "level": "L3",
       "translations": {
-        "it": {"title": "Segregation of duties per informazioni altamente riservate", "description": "Per le attività che comportano l'accesso a informazioni altamente riservate devono essere applicati principi di separazione dei compiti per ridurre il rischio di abuso interno e di accesso non autorizzato."},
-        "en": {"title": "Segregation of duties for highly confidential information", "description": "Segregation of duties principles must be applied for activities involving access to highly confidential information to reduce the risk of internal abuse and unauthorized access."}
+        "it": {
+          "title": "Segregation of duties per informazioni altamente riservate",
+          "description": "Per le attività che comportano l'accesso a informazioni altamente riservate devono essere applicati principi di separazione dei compiti per ridurre il rischio di abuso interno e di accesso non autorizzato."
+        },
+        "en": {
+          "title": "Segregation of duties for highly confidential information",
+          "description": "Segregation of duties principles must be applied for activities involving access to highly confidential information to reduce the risk of internal abuse and unauthorized access."
+        }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura IAM con MFA obbligatoria"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 60,
+            "description": "Screenshot MFA attiva su tutti i sistemi"
+          },
+          {
+            "type": "log",
+            "mandatory": true,
+            "max_age_days": 7,
+            "description": "Log review accessi privilegiati settimanale"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 2,
+        "notes": "TISAX L3: MFA + review accessi privilegiati frequente"
       }
     },
     {
@@ -60,8 +333,41 @@
       "domain": "HR",
       "level": "L3",
       "translations": {
-        "it": {"title": "Screening avanzato del personale", "description": "Per i ruoli con accesso a informazioni altamente riservate o prototipi, lo screening deve essere più approfondito rispetto all'L2, includendo verifiche estese dei precedenti e valutazioni dell'affidabilità. I risultati dello screening devono essere documentati."},
-        "en": {"title": "Advanced personnel screening", "description": "For roles with access to highly confidential information or prototypes, screening must be more thorough than L2, including extended background checks and reliability assessments. Screening results must be documented."}
+        "it": {
+          "title": "Screening avanzato del personale",
+          "description": "Per i ruoli con accesso a informazioni altamente riservate o prototipi, lo screening deve essere più approfondito rispetto all'L2, includendo verifiche estese dei precedenti e valutazioni dell'affidabilità. I risultati dello screening devono essere documentati."
+        },
+        "en": {
+          "title": "Advanced personnel screening",
+          "description": "For roles with access to highly confidential information or prototypes, screening must be more thorough than L2, including extended background checks and reliability assessments. Screening results must be documented."
+        }
+      },
+      "control_category": "organizzativo",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura screening personale e NDA"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "certificato",
+            "mandatory": true,
+            "max_age_days": 365,
+            "description": "Certificati background check personale chiave"
+          },
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 180,
+            "description": "Report formazione IS personale con accesso dati protetti"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 1,
+        "notes": "TISAX L3: screening obbligatorio per personale con accesso a dati riservati"
       }
     },
     {
@@ -69,8 +375,14 @@
       "domain": "HR",
       "level": "L3",
       "translations": {
-        "it": {"title": "Formazione specifica per la protezione di informazioni altamente riservate", "description": "Il personale con accesso a informazioni L3 deve ricevere formazione specifica sulle misure di protezione aggiuntive, inclusi i requisiti di riservatezza specifici del cliente automotive e le conseguenze in caso di violazione."},
-        "en": {"title": "Training specific to highly confidential information protection", "description": "Personnel with access to L3 information must receive specific training on additional protection measures, including automotive customer-specific confidentiality requirements and consequences of violations."}
+        "it": {
+          "title": "Formazione specifica per la protezione di informazioni altamente riservate",
+          "description": "Il personale con accesso a informazioni L3 deve ricevere formazione specifica sulle misure di protezione aggiuntive, inclusi i requisiti di riservatezza specifici del cliente automotive e le conseguenze in caso di violazione."
+        },
+        "en": {
+          "title": "Training specific to highly confidential information protection",
+          "description": "Personnel with access to L3 information must receive specific training on additional protection measures, including automotive customer-specific confidentiality requirements and consequences of violations."
+        }
       }
     },
     {
@@ -78,8 +390,14 @@
       "domain": "AM",
       "level": "L3",
       "translations": {
-        "it": {"title": "Gestione avanzata degli asset informativi L3", "description": "Gli asset contenenti informazioni altamente riservate devono essere identificati, marcati e tracciati in modo specifico. L'inventario deve includere la posizione fisica e logica di tali asset e il tracking degli accessi."},
-        "en": {"title": "Advanced L3 information asset management", "description": "Assets containing highly confidential information must be specifically identified, marked and tracked. The inventory must include the physical and logical location of such assets and access tracking."}
+        "it": {
+          "title": "Gestione avanzata degli asset informativi L3",
+          "description": "Gli asset contenenti informazioni altamente riservate devono essere identificati, marcati e tracciati in modo specifico. L'inventario deve includere la posizione fisica e logica di tali asset e il tracking degli accessi."
+        },
+        "en": {
+          "title": "Advanced L3 information asset management",
+          "description": "Assets containing highly confidential information must be specifically identified, marked and tracked. The inventory must include the physical and logical location of such assets and access tracking."
+        }
       }
     },
     {
@@ -87,8 +405,14 @@
       "domain": "AM",
       "level": "L3",
       "translations": {
-        "it": {"title": "Smaltimento sicuro certificato per informazioni L3", "description": "Lo smaltimento di supporti contenenti informazioni altamente riservate deve avvenire attraverso metodi certificati (es. distruzione fisica con certificato). Deve essere mantenuto un registro dettagliato di tutte le operazioni di distruzione."},
-        "en": {"title": "Certified secure disposal for L3 information", "description": "Disposal of media containing highly confidential information must use certified methods (e.g. physical destruction with certificate). A detailed log of all destruction operations must be maintained."}
+        "it": {
+          "title": "Smaltimento sicuro certificato per informazioni L3",
+          "description": "Lo smaltimento di supporti contenenti informazioni altamente riservate deve avvenire attraverso metodi certificati (es. distruzione fisica con certificato). Deve essere mantenuto un registro dettagliato di tutte le operazioni di distruzione."
+        },
+        "en": {
+          "title": "Certified secure disposal for L3 information",
+          "description": "Disposal of media containing highly confidential information must use certified methods (e.g. physical destruction with certificate). A detailed log of all destruction operations must be maintained."
+        }
       }
     },
     {
@@ -96,8 +420,14 @@
       "domain": "PHYSEC",
       "level": "L3",
       "translations": {
-        "it": {"title": "Zone di sicurezza fisica rinforzate per L3", "description": "Le aree in cui vengono trattate informazioni altamente riservate o ospitati prototipi devono essere dotate di misure di sicurezza fisica aggiuntive (doppio controllo accessi, allarmi, videosorveglianza con registrazione) rispetto alle aree L2."},
-        "en": {"title": "Reinforced physical security zones for L3", "description": "Areas where highly confidential information is processed or prototypes are hosted must have additional physical security measures (double access control, alarms, video surveillance with recording) compared to L2 areas."}
+        "it": {
+          "title": "Zone di sicurezza fisica rinforzate per L3",
+          "description": "Le aree in cui vengono trattate informazioni altamente riservate o ospitati prototipi devono essere dotate di misure di sicurezza fisica aggiuntive (doppio controllo accessi, allarmi, videosorveglianza con registrazione) rispetto alle aree L2."
+        },
+        "en": {
+          "title": "Reinforced physical security zones for L3",
+          "description": "Areas where highly confidential information is processed or prototypes are hosted must have additional physical security measures (double access control, alarms, video surveillance with recording) compared to L2 areas."
+        }
       }
     },
     {
@@ -105,8 +435,14 @@
       "domain": "PHYSEC",
       "level": "L3",
       "translations": {
-        "it": {"title": "Controllo avanzato degli accessi fisici per L3", "description": "L'accesso alle zone L3 deve essere ulteriormente ristretto rispetto all'L2, con meccanismi di doppia autenticazione, log degli accessi dettagliati e revisione periodica dei diritti di accesso fisico. I tentativi di accesso non autorizzato devono generare alert immediati."},
-        "en": {"title": "Advanced physical access control for L3", "description": "Access to L3 zones must be further restricted compared to L2, with dual authentication mechanisms, detailed access logs and periodic review of physical access rights. Unauthorized access attempts must generate immediate alerts."}
+        "it": {
+          "title": "Controllo avanzato degli accessi fisici per L3",
+          "description": "L'accesso alle zone L3 deve essere ulteriormente ristretto rispetto all'L2, con meccanismi di doppia autenticazione, log degli accessi dettagliati e revisione periodica dei diritti di accesso fisico. I tentativi di accesso non autorizzato devono generare alert immediati."
+        },
+        "en": {
+          "title": "Advanced physical access control for L3",
+          "description": "Access to L3 zones must be further restricted compared to L2, with dual authentication mechanisms, detailed access logs and periodic review of physical access rights. Unauthorized access attempts must generate immediate alerts."
+        }
       }
     },
     {
@@ -114,8 +450,14 @@
       "domain": "PHYSEC",
       "level": "L3",
       "translations": {
-        "it": {"title": "Protezione delle aree di lavoro per informazioni altamente riservate", "description": "Le postazioni di lavoro utilizzate per trattare informazioni L3 devono essere fisicamente protette da visione non autorizzata (privacy screen, posizionamento schermo). Non devono essere possibili fotografie o riprese nelle aree L3."},
-        "en": {"title": "Workspace protection for highly confidential information", "description": "Workstations used to process L3 information must be physically protected from unauthorized viewing (privacy screens, monitor positioning). Photography or filming must not be possible in L3 areas."}
+        "it": {
+          "title": "Protezione delle aree di lavoro per informazioni altamente riservate",
+          "description": "Le postazioni di lavoro utilizzate per trattare informazioni L3 devono essere fisicamente protette da visione non autorizzata (privacy screen, posizionamento schermo). Non devono essere possibili fotografie o riprese nelle aree L3."
+        },
+        "en": {
+          "title": "Workspace protection for highly confidential information",
+          "description": "Workstations used to process L3 information must be physically protected from unauthorized viewing (privacy screens, monitor positioning). Photography or filming must not be possible in L3 areas."
+        }
       }
     },
     {
@@ -123,8 +465,14 @@
       "domain": "ITSEC",
       "level": "L3",
       "translations": {
-        "it": {"title": "Sistemi dedicati o isolati per informazioni L3", "description": "Le informazioni altamente riservate devono essere trattate su sistemi dedicati o in ambienti logicamente isolati dal resto dell'infrastruttura IT. L'accesso a internet da sistemi L3 deve essere fortemente limitato o vietato."},
-        "en": {"title": "Dedicated or isolated systems for L3 information", "description": "Highly confidential information must be processed on dedicated systems or in logically isolated environments from the rest of the IT infrastructure. Internet access from L3 systems must be heavily restricted or prohibited."}
+        "it": {
+          "title": "Sistemi dedicati o isolati per informazioni L3",
+          "description": "Le informazioni altamente riservate devono essere trattate su sistemi dedicati o in ambienti logicamente isolati dal resto dell'infrastruttura IT. L'accesso a internet da sistemi L3 deve essere fortemente limitato o vietato."
+        },
+        "en": {
+          "title": "Dedicated or isolated systems for L3 information",
+          "description": "Highly confidential information must be processed on dedicated systems or in logically isolated environments from the rest of the IT infrastructure. Internet access from L3 systems must be heavily restricted or prohibited."
+        }
       }
     },
     {
@@ -132,8 +480,14 @@
       "domain": "ITSEC",
       "level": "L3",
       "translations": {
-        "it": {"title": "Data Loss Prevention (DLP) per informazioni L3", "description": "Devono essere implementate misure tecniche di Data Loss Prevention per prevenire la fuoriuscita non autorizzata di informazioni L3 (blocco porte USB, controllo stampa, monitoraggio e-mail, cifratura endpoint)."},
-        "en": {"title": "Data Loss Prevention (DLP) for L3 information", "description": "Technical Data Loss Prevention measures must be implemented to prevent the unauthorized leakage of L3 information (USB port blocking, print control, email monitoring, endpoint encryption)."}
+        "it": {
+          "title": "Data Loss Prevention (DLP) per informazioni L3",
+          "description": "Devono essere implementate misure tecniche di Data Loss Prevention per prevenire la fuoriuscita non autorizzata di informazioni L3 (blocco porte USB, controllo stampa, monitoraggio e-mail, cifratura endpoint)."
+        },
+        "en": {
+          "title": "Data Loss Prevention (DLP) for L3 information",
+          "description": "Technical Data Loss Prevention measures must be implemented to prevent the unauthorized leakage of L3 information (USB port blocking, print control, email monitoring, endpoint encryption)."
+        }
       }
     },
     {
@@ -141,8 +495,14 @@
       "domain": "ITSEC",
       "level": "L3",
       "translations": {
-        "it": {"title": "Monitoraggio avanzato e SIEM per L3", "description": "Per i sistemi che trattano informazioni L3 deve essere implementato un monitoraggio avanzato degli eventi di sicurezza con correlazione degli eventi (SIEM) e risposta rapida agli alert. Il monitoraggio deve essere continuo (24/7)."},
-        "en": {"title": "Advanced monitoring and SIEM for L3", "description": "Advanced security event monitoring with event correlation (SIEM) and rapid alert response must be implemented for systems processing L3 information. Monitoring must be continuous (24/7)."}
+        "it": {
+          "title": "Monitoraggio avanzato e SIEM per L3",
+          "description": "Per i sistemi che trattano informazioni L3 deve essere implementato un monitoraggio avanzato degli eventi di sicurezza con correlazione degli eventi (SIEM) e risposta rapida agli alert. Il monitoraggio deve essere continuo (24/7)."
+        },
+        "en": {
+          "title": "Advanced monitoring and SIEM for L3",
+          "description": "Advanced security event monitoring with event correlation (SIEM) and rapid alert response must be implemented for systems processing L3 information. Monitoring must be continuous (24/7)."
+        }
       }
     },
     {
@@ -150,8 +510,14 @@
       "domain": "ACCESS",
       "level": "L3",
       "translations": {
-        "it": {"title": "Controllo degli accessi restrittivo per informazioni L3", "description": "L'accesso a informazioni L3 deve essere basato su un'approvazione esplicita e documentata per ogni singolo utente (no accesso per gruppo). I log di accesso devono essere immutabili e conservati per almeno 3 anni."},
-        "en": {"title": "Restrictive access control for L3 information", "description": "Access to L3 information must be based on explicit and documented approval for each individual user (no group-based access). Access logs must be immutable and retained for at least 3 years."}
+        "it": {
+          "title": "Controllo degli accessi restrittivo per informazioni L3",
+          "description": "L'accesso a informazioni L3 deve essere basato su un'approvazione esplicita e documentata per ogni singolo utente (no accesso per gruppo). I log di accesso devono essere immutabili e conservati per almeno 3 anni."
+        },
+        "en": {
+          "title": "Restrictive access control for L3 information",
+          "description": "Access to L3 information must be based on explicit and documented approval for each individual user (no group-based access). Access logs must be immutable and retained for at least 3 years."
+        }
       }
     },
     {
@@ -159,8 +525,14 @@
       "domain": "ACCESS",
       "level": "L3",
       "translations": {
-        "it": {"title": "Autenticazione forte obbligatoria per L3", "description": "L'accesso a sistemi e informazioni L3 richiede obbligatoriamente l'autenticazione a più fattori (MFA) per tutti gli utenti, senza eccezioni. I metodi di autenticazione devono essere resistenti al phishing."},
-        "en": {"title": "Mandatory strong authentication for L3", "description": "Access to L3 systems and information requires mandatory multi-factor authentication (MFA) for all users without exception. Authentication methods must be phishing-resistant."}
+        "it": {
+          "title": "Autenticazione forte obbligatoria per L3",
+          "description": "L'accesso a sistemi e informazioni L3 richiede obbligatoriamente l'autenticazione a più fattori (MFA) per tutti gli utenti, senza eccezioni. I metodi di autenticazione devono essere resistenti al phishing."
+        },
+        "en": {
+          "title": "Mandatory strong authentication for L3",
+          "description": "Access to L3 systems and information requires mandatory multi-factor authentication (MFA) for all users without exception. Authentication methods must be phishing-resistant."
+        }
       }
     },
     {
@@ -168,8 +540,14 @@
       "domain": "CRYPTO",
       "level": "L3",
       "translations": {
-        "it": {"title": "Cifratura obbligatoria per informazioni L3", "description": "Tutte le informazioni L3 devono essere cifrate sia in transito che a riposo utilizzando algoritmi forti approvati (es. AES-256, RSA-4096). La cifratura deve essere applicata anche ai backup e ai supporti rimovibili."},
-        "en": {"title": "Mandatory encryption for L3 information", "description": "All L3 information must be encrypted both in transit and at rest using approved strong algorithms (e.g. AES-256, RSA-4096). Encryption must also be applied to backups and removable media."}
+        "it": {
+          "title": "Cifratura obbligatoria per informazioni L3",
+          "description": "Tutte le informazioni L3 devono essere cifrate sia in transito che a riposo utilizzando algoritmi forti approvati (es. AES-256, RSA-4096). La cifratura deve essere applicata anche ai backup e ai supporti rimovibili."
+        },
+        "en": {
+          "title": "Mandatory encryption for L3 information",
+          "description": "All L3 information must be encrypted both in transit and at rest using approved strong algorithms (e.g. AES-256, RSA-4096). Encryption must also be applied to backups and removable media."
+        }
       }
     },
     {
@@ -177,8 +555,14 @@
       "domain": "SUPPLIER",
       "level": "L3",
       "translations": {
-        "it": {"title": "Requisiti TISAX obbligatori per i fornitori L3", "description": "I fornitori che devono trattare informazioni L3 devono obbligatoriamente possedere una certificazione TISAX valida con assessment level adeguato prima di ricevere tali informazioni. Non sono ammesse deroghe."},
-        "en": {"title": "Mandatory TISAX requirements for L3 suppliers", "description": "Suppliers that must process L3 information must have a valid TISAX certification with an adequate assessment level before receiving such information. No exceptions are permitted."}
+        "it": {
+          "title": "Requisiti TISAX obbligatori per i fornitori L3",
+          "description": "I fornitori che devono trattare informazioni L3 devono obbligatoriamente possedere una certificazione TISAX valida con assessment level adeguato prima di ricevere tali informazioni. Non sono ammesse deroghe."
+        },
+        "en": {
+          "title": "Mandatory TISAX requirements for L3 suppliers",
+          "description": "Suppliers that must process L3 information must have a valid TISAX certification with an adequate assessment level before receiving such information. No exceptions are permitted."
+        }
       }
     },
     {
@@ -186,8 +570,14 @@
       "domain": "SUPPLIER",
       "level": "L3",
       "translations": {
-        "it": {"title": "Flusso controllato di informazioni L3 verso fornitori", "description": "Il flusso di informazioni L3 verso fornitori deve essere strettamente controllato, limitato al minimo indispensabile e tracciato. Deve essere possibile revocare l'accesso in qualsiasi momento e recuperare o distruggere le informazioni condivise."},
-        "en": {"title": "Controlled flow of L3 information to suppliers", "description": "The flow of L3 information to suppliers must be strictly controlled, limited to the minimum necessary and tracked. It must be possible to revoke access at any time and recover or destroy shared information."}
+        "it": {
+          "title": "Flusso controllato di informazioni L3 verso fornitori",
+          "description": "Il flusso di informazioni L3 verso fornitori deve essere strettamente controllato, limitato al minimo indispensabile e tracciato. Deve essere possibile revocare l'accesso in qualsiasi momento e recuperare o distruggere le informazioni condivise."
+        },
+        "en": {
+          "title": "Controlled flow of L3 information to suppliers",
+          "description": "The flow of L3 information to suppliers must be strictly controlled, limited to the minimum necessary and tracked. It must be possible to revoke access at any time and recover or destroy shared information."
+        }
       }
     },
     {
@@ -195,8 +585,14 @@
       "domain": "BCM",
       "level": "L3",
       "translations": {
-        "it": {"title": "Continuità operativa con protezione L3 garantita", "description": "Il piano di continuità operativa deve garantire che anche in situazioni di emergenza le misure di protezione per le informazioni L3 vengano mantenute. I siti di disaster recovery devono soddisfare gli stessi requisiti fisici e logici delle zone L3."},
-        "en": {"title": "Business continuity with guaranteed L3 protection", "description": "The business continuity plan must ensure that even in emergency situations, protection measures for L3 information are maintained. Disaster recovery sites must meet the same physical and logical requirements as L3 zones."}
+        "it": {
+          "title": "Continuità operativa con protezione L3 garantita",
+          "description": "Il piano di continuità operativa deve garantire che anche in situazioni di emergenza le misure di protezione per le informazioni L3 vengano mantenute. I siti di disaster recovery devono soddisfare gli stessi requisiti fisici e logici delle zone L3."
+        },
+        "en": {
+          "title": "Business continuity with guaranteed L3 protection",
+          "description": "The business continuity plan must ensure that even in emergency situations, protection measures for L3 information are maintained. Disaster recovery sites must meet the same physical and logical requirements as L3 zones."
+        }
       }
     },
     {
@@ -204,8 +600,14 @@
       "domain": "COMPLY",
       "level": "L3",
       "translations": {
-        "it": {"title": "Certificazione TISAX e audit di terze parti", "description": "L'organizzazione deve ottenere e mantenere la certificazione TISAX AL3 attraverso assessment condotti da auditor accreditati ENX. I risultati degli assessment devono essere condivisi con i clienti automotive secondo le modalità previste da ENX."},
-        "en": {"title": "TISAX certification and third-party audit", "description": "The organization must obtain and maintain TISAX AL3 certification through assessments conducted by ENX-accredited auditors. Assessment results must be shared with automotive customers according to ENX procedures."}
+        "it": {
+          "title": "Certificazione TISAX e audit di terze parti",
+          "description": "L'organizzazione deve ottenere e mantenere la certificazione TISAX AL3 attraverso assessment condotti da auditor accreditati ENX. I risultati degli assessment devono essere condivisi con i clienti automotive secondo le modalità previste da ENX."
+        },
+        "en": {
+          "title": "TISAX certification and third-party audit",
+          "description": "The organization must obtain and maintain TISAX AL3 certification through assessments conducted by ENX-accredited auditors. Assessment results must be shared with automotive customers according to ENX procedures."
+        }
       }
     },
     {
@@ -213,8 +615,14 @@
       "domain": "PROTO",
       "level": "L3",
       "translations": {
-        "it": {"title": "Classificazione e marcatura dei prototipi", "description": "I prototipi di veicoli e componenti devono essere classificati in base al loro livello di riservatezza e marcati in modo appropriato (es. etichette fisiche, marcature digitali). Il livello di protezione richiesto deve essere comunicato chiaramente a tutto il personale coinvolto."},
-        "en": {"title": "Prototype classification and marking", "description": "Vehicle and component prototypes must be classified according to their confidentiality level and marked appropriately (e.g. physical labels, digital markings). The required level of protection must be clearly communicated to all involved personnel."}
+        "it": {
+          "title": "Classificazione e marcatura dei prototipi",
+          "description": "I prototipi di veicoli e componenti devono essere classificati in base al loro livello di riservatezza e marcati in modo appropriato (es. etichette fisiche, marcature digitali). Il livello di protezione richiesto deve essere comunicato chiaramente a tutto il personale coinvolto."
+        },
+        "en": {
+          "title": "Prototype classification and marking",
+          "description": "Vehicle and component prototypes must be classified according to their confidentiality level and marked appropriately (e.g. physical labels, digital markings). The required level of protection must be clearly communicated to all involved personnel."
+        }
       }
     },
     {
@@ -222,8 +630,14 @@
       "domain": "PROTO",
       "level": "L3",
       "translations": {
-        "it": {"title": "Aree sicure per i prototipi", "description": "I prototipi devono essere conservati e gestiti in aree fisicamente sicure con controllo degli accessi rafforzato, videosorveglianza attiva e sistemi anti-intrusione. L'accesso alle aree prototipo deve essere strettamente limitato al personale autorizzato."},
-        "en": {"title": "Secure areas for prototypes", "description": "Prototypes must be stored and managed in physically secure areas with reinforced access control, active video surveillance and anti-intrusion systems. Access to prototype areas must be strictly limited to authorized personnel."}
+        "it": {
+          "title": "Aree sicure per i prototipi",
+          "description": "I prototipi devono essere conservati e gestiti in aree fisicamente sicure con controllo degli accessi rafforzato, videosorveglianza attiva e sistemi anti-intrusione. L'accesso alle aree prototipo deve essere strettamente limitato al personale autorizzato."
+        },
+        "en": {
+          "title": "Secure areas for prototypes",
+          "description": "Prototypes must be stored and managed in physically secure areas with reinforced access control, active video surveillance and anti-intrusion systems. Access to prototype areas must be strictly limited to authorized personnel."
+        }
       }
     },
     {
@@ -231,8 +645,14 @@
       "domain": "PROTO",
       "level": "L3",
       "translations": {
-        "it": {"title": "Protezione dei prototipi in ambienti esterni", "description": "Durante i test su strada o in altri ambienti esterni, i prototipi devono essere protetti da misure specifiche: mascheratura, scortа, limitazioni delle aree di test, procedure di sicurezza per il personale. Le riprese fotografiche o video non autorizzate devono essere attivamente prevenute."},
-        "en": {"title": "Prototype protection in external environments", "description": "During road testing or in other external environments, prototypes must be protected by specific measures: camouflage, escort, test area restrictions, personnel security procedures. Unauthorized photography or video recording must be actively prevented."}
+        "it": {
+          "title": "Protezione dei prototipi in ambienti esterni",
+          "description": "Durante i test su strada o in altri ambienti esterni, i prototipi devono essere protetti da misure specifiche: mascheratura, scortа, limitazioni delle aree di test, procedure di sicurezza per il personale. Le riprese fotografiche o video non autorizzate devono essere attivamente prevenute."
+        },
+        "en": {
+          "title": "Prototype protection in external environments",
+          "description": "During road testing or in other external environments, prototypes must be protected by specific measures: camouflage, escort, test area restrictions, personnel security procedures. Unauthorized photography or video recording must be actively prevented."
+        }
       }
     },
     {
@@ -240,8 +660,14 @@
       "domain": "PROTO",
       "level": "L3",
       "translations": {
-        "it": {"title": "Gestione dei visitatori in aree prototipo", "description": "I visitatori (inclusi fornitori e clienti) che accedono ad aree contenenti prototipi devono essere accompagnati da personale autorizzato in ogni momento. Devono firmare NDA specifici per prototipi e non devono essere in possesso di dispositivi fotografici."},
-        "en": {"title": "Visitor management in prototype areas", "description": "Visitors (including suppliers and customers) accessing areas containing prototypes must be accompanied by authorized personnel at all times. They must sign prototype-specific NDAs and must not possess photographic devices."}
+        "it": {
+          "title": "Gestione dei visitatori in aree prototipo",
+          "description": "I visitatori (inclusi fornitori e clienti) che accedono ad aree contenenti prototipi devono essere accompagnati da personale autorizzato in ogni momento. Devono firmare NDA specifici per prototipi e non devono essere in possesso di dispositivi fotografici."
+        },
+        "en": {
+          "title": "Visitor management in prototype areas",
+          "description": "Visitors (including suppliers and customers) accessing areas containing prototypes must be accompanied by authorized personnel at all times. They must sign prototype-specific NDAs and must not possess photographic devices."
+        }
       }
     },
     {
@@ -249,8 +675,14 @@
       "domain": "PROTO",
       "level": "L3",
       "translations": {
-        "it": {"title": "Trasporto sicuro dei prototipi", "description": "Il trasporto di prototipi deve avvenire con misure di sicurezza adeguate: veicoli dedicati o scortati, documentazione di trasporto, tracking GPS, procedure di emergenza in caso di furto o incidente. La pianificazione del trasporto deve minimizzare i rischi di esposizione."},
-        "en": {"title": "Secure prototype transport", "description": "Transport of prototypes must occur with adequate security measures: dedicated or escorted vehicles, transport documentation, GPS tracking, emergency procedures in case of theft or accident. Transport planning must minimize exposure risks."}
+        "it": {
+          "title": "Trasporto sicuro dei prototipi",
+          "description": "Il trasporto di prototipi deve avvenire con misure di sicurezza adeguate: veicoli dedicati o scortati, documentazione di trasporto, tracking GPS, procedure di emergenza in caso di furto o incidente. La pianificazione del trasporto deve minimizzare i rischi di esposizione."
+        },
+        "en": {
+          "title": "Secure prototype transport",
+          "description": "Transport of prototypes must occur with adequate security measures: dedicated or escorted vehicles, transport documentation, GPS tracking, emergency procedures in case of theft or accident. Transport planning must minimize exposure risks."
+        }
       }
     },
     {
@@ -258,8 +690,14 @@
       "domain": "PROTO",
       "level": "L3",
       "translations": {
-        "it": {"title": "Documentazione tecnica e dati CAD dei prototipi", "description": "La documentazione tecnica, i dati CAD e le specifiche relative ai prototipi devono essere classificati come informazioni altamente riservate L3 e trattati con tutte le misure di protezione corrispondenti, incluso l'accesso limitato e la cifratura."},
-        "en": {"title": "Technical documentation and CAD data for prototypes", "description": "Technical documentation, CAD data and specifications relating to prototypes must be classified as L3 highly confidential information and handled with all corresponding protection measures, including restricted access and encryption."}
+        "it": {
+          "title": "Documentazione tecnica e dati CAD dei prototipi",
+          "description": "La documentazione tecnica, i dati CAD e le specifiche relative ai prototipi devono essere classificati come informazioni altamente riservate L3 e trattati con tutte le misure di protezione corrispondenti, incluso l'accesso limitato e la cifratura."
+        },
+        "en": {
+          "title": "Technical documentation and CAD data for prototypes",
+          "description": "Technical documentation, CAD data and specifications relating to prototypes must be classified as L3 highly confidential information and handled with all corresponding protection measures, including restricted access and encryption."
+        }
       }
     },
     {
@@ -267,23 +705,89 @@
       "domain": "PROTO",
       "level": "L3",
       "translations": {
-        "it": {"title": "Distruzione sicura dei prototipi e delle relative informazioni", "description": "Alla fine del ciclo di vita del prototipo, devono essere definite procedure per la distruzione sicura del prototipo stesso e di tutta la documentazione associata. La distruzione deve essere documentata e, se richiesto dal cliente, certificata."},
-        "en": {"title": "Secure destruction of prototypes and related information", "description": "At end of prototype lifecycle, procedures must be defined for the secure destruction of the prototype itself and all associated documentation. Destruction must be documented and, if required by the customer, certified."}
+        "it": {
+          "title": "Distruzione sicura dei prototipi e delle relative informazioni",
+          "description": "Alla fine del ciclo di vita del prototipo, devono essere definite procedure per la distruzione sicura del prototipo stesso e di tutta la documentazione associata. La distruzione deve essere documentata e, se richiesto dal cliente, certificata."
+        },
+        "en": {
+          "title": "Secure destruction of prototypes and related information",
+          "description": "At end of prototype lifecycle, procedures must be defined for the secure destruction of the prototype itself and all associated documentation. Destruction must be documented and, if required by the customer, certified."
+        }
       }
     }
   ],
   "mappings": [
-    {"source": "TISAX-L3-IS-1.2",       "target": "NIS2-ART21-1.1", "target_framework": "NIS2", "relationship": "covers"},
-    {"source": "TISAX-L3-IS-1.2",       "target": "NIS2-ART21-1.2", "target_framework": "NIS2", "relationship": "covers"},
-    {"source": "TISAX-L3-ITSEC-6.3",    "target": "NIS2-ART21-6.2", "target_framework": "NIS2", "relationship": "covers"},
-    {"source": "TISAX-L3-ACCESS-7.2",   "target": "NIS2-ART21-10.1","target_framework": "NIS2", "relationship": "covers"},
-    {"source": "TISAX-L3-CRYPTO-8.1",   "target": "NIS2-ART21-8.1", "target_framework": "NIS2", "relationship": "covers"},
-    {"source": "TISAX-L3-SUPPLIER-9.1", "target": "NIS2-ART21-4.1", "target_framework": "NIS2", "relationship": "covers"},
-    {"source": "TISAX-L3-BCM-11.1",     "target": "NIS2-ART21-3.1", "target_framework": "NIS2", "relationship": "covers"},
-    {"source": "TISAX-L3-IS-1.2",       "target": "TISAX-L2-IS-1.2",        "target_framework": "TISAX_L2", "relationship": "extends"},
-    {"source": "TISAX-L3-ACCESS-7.1",   "target": "TISAX-L2-ACCESS-7.1",    "target_framework": "TISAX_L2", "relationship": "extends"},
-    {"source": "TISAX-L3-ITSEC-6.1",    "target": "TISAX-L2-ITSEC-6.1",     "target_framework": "TISAX_L2", "relationship": "extends"},
-    {"source": "TISAX-L3-PHYSEC-5.1",   "target": "TISAX-L2-PHYSEC-5.1",    "target_framework": "TISAX_L2", "relationship": "extends"},
-    {"source": "TISAX-L3-CRYPTO-8.1",   "target": "TISAX-L2-CRYPTO-8.1",    "target_framework": "TISAX_L2", "relationship": "extends"}
+    {
+      "source": "TISAX-L3-IS-1.2",
+      "target": "NIS2-ART21-1.1",
+      "target_framework": "NIS2",
+      "relationship": "covers"
+    },
+    {
+      "source": "TISAX-L3-IS-1.2",
+      "target": "NIS2-ART21-1.2",
+      "target_framework": "NIS2",
+      "relationship": "covers"
+    },
+    {
+      "source": "TISAX-L3-ITSEC-6.3",
+      "target": "NIS2-ART21-6.2",
+      "target_framework": "NIS2",
+      "relationship": "covers"
+    },
+    {
+      "source": "TISAX-L3-ACCESS-7.2",
+      "target": "NIS2-ART21-10.1",
+      "target_framework": "NIS2",
+      "relationship": "covers"
+    },
+    {
+      "source": "TISAX-L3-CRYPTO-8.1",
+      "target": "NIS2-ART21-8.1",
+      "target_framework": "NIS2",
+      "relationship": "covers"
+    },
+    {
+      "source": "TISAX-L3-SUPPLIER-9.1",
+      "target": "NIS2-ART21-4.1",
+      "target_framework": "NIS2",
+      "relationship": "covers"
+    },
+    {
+      "source": "TISAX-L3-BCM-11.1",
+      "target": "NIS2-ART21-3.1",
+      "target_framework": "NIS2",
+      "relationship": "covers"
+    },
+    {
+      "source": "TISAX-L3-IS-1.2",
+      "target": "TISAX-L2-IS-1.2",
+      "target_framework": "TISAX_L2",
+      "relationship": "extends"
+    },
+    {
+      "source": "TISAX-L3-ACCESS-7.1",
+      "target": "TISAX-L2-ACCESS-7.1",
+      "target_framework": "TISAX_L2",
+      "relationship": "extends"
+    },
+    {
+      "source": "TISAX-L3-ITSEC-6.1",
+      "target": "TISAX-L2-ITSEC-6.1",
+      "target_framework": "TISAX_L2",
+      "relationship": "extends"
+    },
+    {
+      "source": "TISAX-L3-PHYSEC-5.1",
+      "target": "TISAX-L2-PHYSEC-5.1",
+      "target_framework": "TISAX_L2",
+      "relationship": "extends"
+    },
+    {
+      "source": "TISAX-L3-CRYPTO-8.1",
+      "target": "TISAX-L2-CRYPTO-8.1",
+      "target_framework": "TISAX_L2",
+      "relationship": "extends"
+    }
   ]
 }

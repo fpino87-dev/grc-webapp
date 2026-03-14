@@ -130,19 +130,63 @@ class ControlInstanceViewSet(viewsets.ModelViewSet):
             for e in instance.evidences.all()
         ]
 
+        linked_documents = [
+            {
+                "id": str(d.id),
+                "title": d.title,
+                "document_type": d.document_type,
+                "status": d.status,
+                "review_due_date": str(d.review_due_date) if d.review_due_date else None,
+            }
+            for d in instance.documents.filter(deleted_at__isnull=True)
+        ]
+
+        from .services import check_evidence_requirements
+        requirements = check_evidence_requirements(instance)
+
         return Response({
             "control_id": control.external_id,
             "title": control.get_title(lang),
             "domain": control.domain.get_name(lang) if control.domain else "",
             "framework": control.framework.code,
             "level": control.level,
+            "control_category": control.control_category,
+            "evidence_requirement": control.evidence_requirement,
             "description": control.translations.get(lang, {}).get("description", ""),
             "implementation_guidance": control.translations.get(lang, {}).get("guidance", ""),
             "evidence_examples": control.translations.get(lang, {}).get("evidence_examples", []),
             "mappings": mappings,
             "evaluation_history": history,
             "current_evidences": current_evidences,
+            "linked_documents": linked_documents,
+            "requirements": requirements,
         })
+
+    @action(detail=True, methods=["post"], url_path="link-document")
+    def link_document(self, request, pk=None):
+        """Collega un Document a questo ControlInstance."""
+        from apps.documents.models import Document
+        instance = self.get_object()
+        doc_id = request.data.get("document_id")
+        try:
+            doc = Document.objects.get(pk=doc_id, deleted_at__isnull=True)
+            instance.documents.add(doc)
+            return Response({"ok": True, "document_id": str(doc.id)})
+        except Document.DoesNotExist:
+            return Response({"error": "Documento non trovato"}, status=404)
+
+    @action(detail=True, methods=["post"], url_path="unlink-document")
+    def unlink_document(self, request, pk=None):
+        """Scollega un Document da questo ControlInstance."""
+        from apps.documents.models import Document
+        instance = self.get_object()
+        doc_id = request.data.get("document_id")
+        try:
+            doc = Document.objects.get(pk=doc_id)
+            instance.documents.remove(doc)
+            return Response({"ok": True})
+        except Document.DoesNotExist:
+            return Response({"error": "Documento non trovato"}, status=404)
 
     @action(detail=True, methods=["post"], url_path="link_evidence")
     def link_evidence(self, request, pk=None):

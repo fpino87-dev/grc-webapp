@@ -39,6 +39,26 @@ class Control(BaseModel):
     external_id = models.CharField(max_length=50)
     translations = models.JSONField()
     level = models.CharField(max_length=10, blank=True)
+    evidence_requirement = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text=(
+            "Struttura: {documents:[{type,mandatory,description}], "
+            "evidences:[{type,mandatory,max_age_days,description}], "
+            "min_documents, min_evidences, notes}"
+        ),
+    )
+    control_category = models.CharField(
+        max_length=20,
+        choices=[
+            ("tecnico",       "Tecnico"),
+            ("procedurale",   "Procedurale"),
+            ("organizzativo", "Organizzativo"),
+            ("composito",     "Composito"),
+        ],
+        default="procedurale",
+        blank=True,
+    )
 
     class Meta:
         unique_together = ["framework", "external_id"]

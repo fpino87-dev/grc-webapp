@@ -35,18 +35,55 @@ export interface EvidenceRef {
   evidence_type: string;
 }
 
+export interface DocRequirement {
+  type: string;
+  mandatory: boolean;
+  description: string;
+}
+export interface EvRequirement {
+  type: string;
+  mandatory: boolean;
+  max_age_days?: number;
+  description: string;
+}
+export interface EvidenceRequirement {
+  documents: DocRequirement[];
+  evidences: EvRequirement[];
+  min_documents: number;
+  min_evidences: number;
+  notes?: string;
+}
+export interface RequirementsCheck {
+  satisfied: boolean;
+  missing_documents: { type: string; description: string }[];
+  missing_evidences: { type: string; description: string }[];
+  expired_evidences: { id: string; title: string; expired_on: string }[];
+  warnings: string[];
+}
+export interface LinkedDocument {
+  id: string;
+  title: string;
+  document_type: string;
+  status: string;
+  review_due_date: string | null;
+}
+
 export interface ControlDetailInfo {
   control_id: string;
   title: string;
   domain: string;
   framework: string;
   level: string;
+  control_category: string;
+  evidence_requirement: EvidenceRequirement;
   description: string;
   implementation_guidance: string;
   evidence_examples: string[];
   mappings: { target_control__framework__code: string; target_control__external_id: string; relationship: string }[];
   evaluation_history: { timestamp_utc: string; user_email_at_time: string; payload: Record<string, unknown> }[];
   current_evidences: EvidenceRef[];
+  linked_documents: LinkedDocument[];
+  requirements: RequirementsCheck;
 }
 
 export interface GapEntry {
@@ -93,4 +130,8 @@ export const controlsApi = {
     apiClient.post(`/controls/instances/${instanceId}/unlink_evidence/`, { evidence_id: evidenceId }).then((r) => r.data),
   gapAnalysis: (source: string, target: string, plant?: string) =>
     apiClient.get<GapAnalysisResult>("/controls/gap-analysis/", { params: { source, target, ...(plant ? { plant } : {}) } }).then((r) => r.data),
+  linkDocument: (instanceId: string, documentId: string) =>
+    apiClient.post(`/controls/instances/${instanceId}/link-document/`, { document_id: documentId }).then((r) => r.data),
+  unlinkDocument: (instanceId: string, documentId: string) =>
+    apiClient.post(`/controls/instances/${instanceId}/unlink-document/`, { document_id: documentId }).then((r) => r.data),
 };
