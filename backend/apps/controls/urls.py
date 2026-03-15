@@ -10,7 +10,11 @@ from .views import (
     GapAnalysisView,
 )
 
+# DefaultRouter genera un pattern <drf_format_suffix:format> per la api-root
+# che intercetta URL come "export/" prima che raggiungano i path custom.
+# Disabilitiamo la format suffix della root per evitare il conflitto.
 router = DefaultRouter()
+router.include_format_suffixes = False
 router.register("frameworks", FrameworkViewSet, basename="framework")
 router.register("domains", ControlDomainViewSet, basename="control-domain")
 router.register("controls", ControlViewSet, basename="control")

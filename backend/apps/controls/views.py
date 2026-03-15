@@ -356,6 +356,12 @@ class GapAnalysisView(APIView):
 class ComplianceExportView(APIView):
     permission_classes = [IsAuthenticated]
 
+    def get_format_suffix(self, **kwargs):
+        # DRF usa 'format' come URL_FORMAT_OVERRIDE e lo intercetta dai query params.
+        # Il nostro parametro ?format=soa causerebbe Http404 perché non esiste
+        # nessun renderer 'soa'. Restituiamo None per disabilitare questa logica.
+        return None
+
     FORMAT_FILENAMES = {
         "soa":               "SOA",
         "vda_isa":           "VDA_ISA",
@@ -374,7 +380,10 @@ class ComplianceExportView(APIView):
 
         framework_code = request.query_params.get("framework")
         plant_id = request.query_params.get("plant")
-        export_format = request.query_params.get("format", "soa")
+        # Usiamo "fmt" invece di "format" per evitare il conflitto con
+        # DRF URL_FORMAT_OVERRIDE che intercetta "format" nei query params
+        # e tenta di trovare un renderer corrispondente, causando Http404.
+        export_format = request.query_params.get("fmt", "soa")
 
         if not framework_code:
             return Response({"error": "Parametro framework obbligatorio"}, status=400)

@@ -105,7 +105,7 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
   const [exportError, setExportError] = useState("");
 
   async function handleExport(frameworkCode: string, format: string) {
-    const params = new URLSearchParams({ framework: frameworkCode, format });
+    const params = new URLSearchParams({ framework: frameworkCode, fmt: format });
     if (plantId) params.set("plant", plantId);
     try {
       setExporting(format);
