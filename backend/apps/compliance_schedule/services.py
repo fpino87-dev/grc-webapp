@@ -227,13 +227,21 @@ def get_activity_schedule(plant=None, months_ahead: int = 6) -> list[dict]:
     # Audit findings
     try:
         from apps.audit_prep.models import AuditFinding
-        af_qs = AuditFinding.objects.filter(due_date__isnull=False, status__in=["open", "in_progress"])
+        af_qs = AuditFinding.objects.filter(
+            response_deadline__isnull=False,
+            status__in=["open", "in_response"],
+        )
         if plant:
             af_qs = af_qs.filter(audit_prep__plant=plant)
+        rule_map = {
+            "major_nc":    "finding_major",
+            "minor_nc":    "finding_minor",
+            "observation": "finding_observation",
+            "opportunity": "finding_observation",
+        }
         for af in af_qs:
-            rule_map = {"minor": "finding_minor", "major": "finding_major", "observation": "finding_observation"}
             rule_type = rule_map.get(af.finding_type, "finding_minor")
-            _add(rule_type, f"Finding: {af.description[:60]}", af.due_date, af.status, str(af.id))
+            _add(rule_type, f"Finding [{af.finding_type.upper()}]: {af.title}", af.response_deadline, af.status, str(af.id))
     except Exception:
         pass
 

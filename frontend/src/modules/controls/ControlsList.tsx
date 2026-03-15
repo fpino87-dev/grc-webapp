@@ -100,10 +100,41 @@ function InlineStatusSelect({ instance }: { instance: ControlInstance }) {
 }
 
 function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plantId?: string }) {
-  function handleExport(frameworkCode: string, format: string) {
+  const token = useAuthStore(s => s.token);
+  const [exporting, setExporting] = useState<string | null>(null);
+  const [exportError, setExportError] = useState("");
+
+  async function handleExport(frameworkCode: string, format: string) {
     const params = new URLSearchParams({ framework: frameworkCode, format });
     if (plantId) params.set("plant", plantId);
-    window.open(`/api/v1/controls/export/?${params.toString()}`, "_blank");
+    try {
+      setExporting(format);
+      setExportError("");
+      const response = await fetch(
+        `/api/v1/controls/export/?${params.toString()}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!response.ok) {
+        let msg = "Errore download";
+        try { const err = await response.json(); msg = err.error || msg; } catch {}
+        setExportError(msg);
+        return;
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const date = new Date().toISOString().slice(0, 10);
+      a.download = `${format}_${frameworkCode}_${date}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      setExportError("Errore di rete durante il download");
+    } finally {
+      setExporting(null);
+    }
   }
 
   const hasISO = frameworks.some(f => f.code === "ISO27001");
@@ -115,30 +146,41 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
   if (!hasISO && !hasTISAX && !hasNIS2) return null;
 
   return (
-    <div className="flex gap-2 flex-wrap">
-      {hasISO && (
-        <button
-          onClick={() => handleExport("ISO27001", "soa")}
-          className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-        >
-          Scarica SOA
-        </button>
-      )}
-      {hasTISAX && tisaxCode && (
-        <button
-          onClick={() => handleExport(tisaxCode, "vda_isa")}
-          className="px-3 py-1.5 bg-purple-600 text-white text-sm rounded hover:bg-purple-700"
-        >
-          Scarica VDA ISA
-        </button>
-      )}
-      {hasNIS2 && (
-        <button
-          onClick={() => handleExport("NIS2", "compliance_matrix")}
-          className="px-3 py-1.5 bg-green-600 text-white text-sm rounded hover:bg-green-700"
-        >
-          Scarica NIS2 Matrix
-        </button>
+    <div>
+      <div className="flex gap-2 flex-wrap">
+        {hasISO && (
+          <button
+            onClick={() => handleExport("ISO27001", "soa")}
+            disabled={exporting === "soa"}
+            className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-60"
+          >
+            {exporting === "soa" ? "Download..." : "Scarica SOA"}
+          </button>
+        )}
+        {hasTISAX && tisaxCode && (
+          <button
+            onClick={() => handleExport(tisaxCode, "vda_isa")}
+            disabled={exporting === "vda_isa"}
+            className="px-3 py-1.5 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 disabled:opacity-60"
+          >
+            {exporting === "vda_isa" ? "Download..." : "Scarica VDA ISA"}
+          </button>
+        )}
+        {hasNIS2 && (
+          <button
+            onClick={() => handleExport("NIS2", "compliance_matrix")}
+            disabled={exporting === "compliance_matrix"}
+            className="px-3 py-1.5 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-60"
+          >
+            {exporting === "compliance_matrix" ? "Download..." : "Scarica NIS2 Matrix"}
+          </button>
+        )}
+      </div>
+      {exportError && (
+        <p className="text-sm text-red-600 mt-1">
+          {exportError}
+          <button onClick={() => setExportError("")} className="ml-2 underline">Chiudi</button>
+        </p>
       )}
     </div>
   );

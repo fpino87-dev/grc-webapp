@@ -37,6 +37,7 @@ def close_incident(incident: Incident, user):
         source_module="M09",
         source_id=incident.pk,
         created_by=user,
+        identified_by=user,
     )
 
     log_action(
