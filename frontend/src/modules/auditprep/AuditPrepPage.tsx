@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { auditPrepApi, type AuditPrep, type EvidenceItem } from "../../api/endpoints/auditPrep";
+import { auditPrepApi, type AuditFinding, type AuditPrep, type EvidenceItem } from "../../api/endpoints/auditPrep";
 import { plantsApi } from "../../api/endpoints/plants";
 import { apiClient } from "../../api/client";
 import { StatusBadge } from "../../components/ui/StatusBadge";
@@ -16,6 +16,233 @@ function ReadinessBar({ score }: { score: number | null }) {
         <div className={`h-full rounded-full ${color}`} style={{ width: `${score}%` }} />
       </div>
       <span className="text-xs text-gray-600">{score}%</span>
+    </div>
+  );
+}
+
+const FINDING_TYPE_LABELS: Record<string, string> = {
+  major_nc:    "MAJOR NC",
+  minor_nc:    "MINOR NC",
+  observation: "OBS",
+  opportunity: "OPP",
+};
+
+const FINDING_TYPE_COLORS: Record<string, string> = {
+  major_nc:    "bg-red-100 text-red-700",
+  minor_nc:    "bg-orange-100 text-orange-700",
+  observation: "bg-blue-100 text-blue-700",
+  opportunity: "bg-gray-100 text-gray-600",
+};
+
+function FindingPanel({ prepId }: { prepId: string }) {
+  const qc = useQueryClient();
+  const [showForm, setShowForm] = useState(false);
+  const [closingId, setClosingId] = useState<string | null>(null);
+  const [closeNotes, setCloseNotes] = useState("");
+  const [form, setForm] = useState<Record<string, string>>({ finding_type: "major_nc" });
+
+  const { data: findings = [], isLoading } = useQuery({
+    queryKey: ["findings", prepId],
+    queryFn: () => auditPrepApi.findings(prepId),
+    retry: false,
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (data: Record<string, unknown>) => auditPrepApi.createFinding(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["findings", prepId] });
+      setShowForm(false);
+      setForm({ finding_type: "major_nc" });
+    },
+  });
+
+  const closeMutation = useMutation({
+    mutationFn: ({ id, notes }: { id: string; notes: string }) =>
+      auditPrepApi.closeFinding(id, { closure_notes: notes }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["findings", prepId] });
+      setClosingId(null);
+      setCloseNotes("");
+    },
+  });
+
+  const open = findings.filter((f: AuditFinding) => f.status === "open" || f.status === "in_response");
+  const majorOpen = open.filter((f: AuditFinding) => f.finding_type === "major_nc").length;
+  const minorOpen = open.filter((f: AuditFinding) => f.finding_type === "minor_nc").length;
+  const overdue = findings.filter((f: AuditFinding) => f.is_overdue).length;
+
+  return (
+    <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+      {/* Dashboard summary */}
+      {(majorOpen > 0 || minorOpen > 0 || overdue > 0) && (
+        <div className="flex gap-3 mb-4">
+          {majorOpen > 0 && (
+            <span className="px-3 py-1.5 bg-red-100 text-red-700 text-xs font-medium rounded">
+              {majorOpen} Major NC aperte
+            </span>
+          )}
+          {minorOpen > 0 && (
+            <span className="px-3 py-1.5 bg-orange-100 text-orange-700 text-xs font-medium rounded">
+              {minorOpen} Minor NC aperte
+            </span>
+          )}
+          {overdue > 0 && (
+            <span className="px-3 py-1.5 bg-red-200 text-red-800 text-xs font-medium rounded">
+              {overdue} finding scaduti
+            </span>
+          )}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between mb-3">
+        <h4 className="text-sm font-semibold text-gray-700">Finding ({findings.length})</h4>
+        <button
+          onClick={() => setShowForm(s => !s)}
+          className="text-xs px-2 py-1 bg-primary-600 text-white rounded hover:bg-primary-700"
+        >
+          + Aggiungi finding
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="bg-white border border-gray-200 rounded p-3 mb-3 space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">Tipo *</label>
+              <select
+                value={form.finding_type}
+                onChange={e => setForm(p => ({ ...p, finding_type: e.target.value }))}
+                className="w-full border rounded px-2 py-1.5 text-sm"
+              >
+                <option value="major_nc">Major Non Conformity</option>
+                <option value="minor_nc">Minor Non Conformity</option>
+                <option value="observation">Observation</option>
+                <option value="opportunity">Opportunity for Improvement</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">Data audit *</label>
+              <input
+                type="date"
+                value={form.audit_date ?? ""}
+                onChange={e => setForm(p => ({ ...p, audit_date: e.target.value }))}
+                className="w-full border rounded px-2 py-1.5 text-sm"
+              />
+            </div>
+          </div>
+          <input
+            placeholder="Titolo *"
+            value={form.title ?? ""}
+            onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
+            className="w-full border rounded px-2 py-1.5 text-sm"
+          />
+          <textarea
+            placeholder="Descrizione"
+            value={form.description ?? ""}
+            onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
+            rows={2}
+            className="w-full border rounded px-2 py-1.5 text-sm"
+          />
+          <input
+            placeholder="Nome auditor"
+            value={form.auditor_name ?? ""}
+            onChange={e => setForm(p => ({ ...p, auditor_name: e.target.value }))}
+            className="w-full border rounded px-2 py-1.5 text-sm"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={() => createMutation.mutate({ ...form, audit_prep: prepId })}
+              disabled={createMutation.isPending || !form.title || !form.audit_date}
+              className="px-3 py-1.5 bg-primary-600 text-white text-xs rounded hover:bg-primary-700 disabled:opacity-50"
+            >
+              {createMutation.isPending ? "Salvataggio..." : "Crea finding"}
+            </button>
+            <button onClick={() => setShowForm(false)} className="px-3 py-1.5 border rounded text-xs text-gray-600 hover:bg-gray-50">
+              Annulla
+            </button>
+          </div>
+          {createMutation.isError && <p className="text-xs text-red-600">Errore durante il salvataggio</p>}
+        </div>
+      )}
+
+      {isLoading ? (
+        <p className="text-xs text-gray-400">Caricamento...</p>
+      ) : findings.length === 0 ? (
+        <p className="text-xs text-gray-400">Nessun finding registrato</p>
+      ) : (
+        <div className="space-y-2">
+          {findings.map((f: AuditFinding) => (
+            <div key={f.id} className="bg-white border border-gray-200 rounded px-3 py-2 text-sm">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={`text-xs font-bold px-2 py-0.5 rounded ${FINDING_TYPE_COLORS[f.finding_type]}`}>
+                  {FINDING_TYPE_LABELS[f.finding_type]}
+                </span>
+                <span className="font-medium text-gray-800 flex-1">{f.title}</span>
+                <StatusBadge status={f.status} />
+                {f.control_external_id && (
+                  <span className="text-xs font-mono text-gray-500">{f.control_external_id}</span>
+                )}
+                {f.status !== "closed" && f.status !== "accepted_by_auditor" && (
+                  <button
+                    onClick={() => { setClosingId(f.id); setCloseNotes(""); }}
+                    className="text-xs px-2 py-0.5 border rounded text-gray-600 hover:bg-gray-50"
+                  >
+                    Chiudi
+                  </button>
+                )}
+              </div>
+              {f.response_deadline && (
+                <div className="mt-1 text-xs">
+                  <span className={
+                    f.is_overdue ? "text-red-600 font-medium" :
+                    (f.days_remaining !== null && f.days_remaining <= 7) ? "text-orange-600" :
+                    "text-gray-500"
+                  }>
+                    Scadenza: {new Date(f.response_deadline).toLocaleDateString("it-IT")}
+                    {f.is_overdue ? " — SCADUTO" : f.days_remaining !== null ? ` (${f.days_remaining}gg)` : ""}
+                  </span>
+                  {f.pdca_cycle && <span className="ml-2 text-indigo-600">PDCA auto-creato</span>}
+                </div>
+              )}
+              {f.status === "closed" && f.closed_by_name && (
+                <p className="mt-1 text-xs text-green-700">
+                  Chiuso da {f.closed_by_name} il {f.closed_at ? new Date(f.closed_at).toLocaleDateString("it-IT") : "—"}
+                </p>
+              )}
+
+              {/* Modal chiusura inline */}
+              {closingId === f.id && (
+                <div className="mt-2 border-t pt-2 space-y-2">
+                  <textarea
+                    placeholder="Note di chiusura (obbligatorie per Major/Minor, min 20 caratteri)"
+                    value={closeNotes}
+                    onChange={e => setCloseNotes(e.target.value)}
+                    rows={2}
+                    className="w-full border rounded px-2 py-1.5 text-xs"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => closeMutation.mutate({ id: f.id, notes: closeNotes })}
+                      disabled={closeMutation.isPending}
+                      className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 disabled:opacity-50"
+                    >
+                      {closeMutation.isPending ? "..." : "Conferma chiusura"}
+                    </button>
+                    <button onClick={() => setClosingId(null)} className="px-3 py-1 border rounded text-xs text-gray-600">
+                      Annulla
+                    </button>
+                  </div>
+                  {closeMutation.isError && (
+                    <p className="text-xs text-red-600">
+                      Errore: {(closeMutation.error as { response?: { data?: { error?: string } } })?.response?.data?.error ?? "Errore durante la chiusura"}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -225,6 +452,29 @@ function NewPrepModal({ frameworks, plants, onClose }: { frameworks: Framework[]
   );
 }
 
+function ExpandedPanel({ prepId }: { prepId: string }) {
+  const [tab, setTab] = useState<"evidence"|"findings">("findings");
+  return (
+    <div>
+      <div className="flex gap-0 border-t border-gray-200">
+        <button
+          onClick={() => setTab("findings")}
+          className={`px-4 py-2 text-xs font-medium border-b-2 transition-colors ${tab === "findings" ? "border-primary-600 text-primary-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+        >
+          Finding
+        </button>
+        <button
+          onClick={() => setTab("evidence")}
+          className={`px-4 py-2 text-xs font-medium border-b-2 transition-colors ${tab === "evidence" ? "border-primary-600 text-primary-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+        >
+          Evidenze
+        </button>
+      </div>
+      {tab === "findings" ? <FindingPanel prepId={prepId} /> : <EvidencePanel prepId={prepId} />}
+    </div>
+  );
+}
+
 export function AuditPrepPage() {
   const [showNew, setShowNew] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -300,9 +550,9 @@ export function AuditPrepPage() {
                     <td className="px-4 py-3"><StatusBadge status={prep.status} /></td>
                   </tr>
                   {expandedId === prep.id && (
-                    <tr key={`${prep.id}-evidence`}>
+                    <tr key={`${prep.id}-expanded`}>
                       <td colSpan={7} className="p-0">
-                        <EvidencePanel prepId={prep.id} />
+                        <ExpandedPanel prepId={prep.id} />
                       </td>
                     </tr>
                   )}

@@ -13,6 +13,27 @@ export interface EvidenceItem {
   due_date: string | null;
 }
 
+export interface AuditFinding {
+  id: string;
+  audit_prep: string;
+  finding_type: "major_nc"|"minor_nc"|"observation"|"opportunity";
+  title: string;
+  description: string;
+  auditor_name: string;
+  audit_date: string;
+  response_deadline: string | null;
+  status: "open"|"in_response"|"closed"|"accepted_by_auditor";
+  root_cause: string;
+  corrective_action: string;
+  pdca_cycle: string | null;
+  closure_notes: string;
+  closed_at: string | null;
+  closed_by_name: string | null;
+  control_external_id: string | null;
+  is_overdue: boolean;
+  days_remaining: number | null;
+}
+
 export const auditPrepApi = {
   list: (params?: Record<string, string>) =>
     apiClient.get<{ results: AuditPrep[] }>("/audit-prep/audit-preps/", { params }).then(r => r.data),
@@ -26,4 +47,10 @@ export const auditPrepApi = {
     apiClient.post<EvidenceItem>("/audit-prep/evidence-items/", data).then(r => r.data),
   updateEvidence: (id: string, data: Partial<EvidenceItem>) =>
     apiClient.patch<EvidenceItem>(`/audit-prep/evidence-items/${id}/`, data).then(r => r.data),
+  findings: (prepId: string) =>
+    apiClient.get<{ results: AuditFinding[] }>("/audit-prep/findings/", { params: { audit_prep: prepId } }).then(r => r.data.results),
+  createFinding: (data: Record<string, unknown>) =>
+    apiClient.post<AuditFinding>("/audit-prep/findings/", data).then(r => r.data),
+  closeFinding: (id: string, data: { closure_notes: string; evidence_id?: string }) =>
+    apiClient.post<{ ok: boolean; status: string }>(`/audit-prep/findings/${id}/close/`, data).then(r => r.data),
 };

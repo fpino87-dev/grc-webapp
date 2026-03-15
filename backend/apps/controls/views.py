@@ -341,3 +341,61 @@ class GapAnalysisView(APIView):
         result = gap_analysis(source, target, plant_id)
         return Response(result)
 
+
+class ComplianceExportView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    FORMAT_FILENAMES = {
+        "soa":               "SOA",
+        "vda_isa":           "VDA_ISA",
+        "compliance_matrix": "NIS2_Matrix",
+    }
+    FORMAT_FRAMEWORK = {
+        "soa":               ["ISO27001"],
+        "vda_isa":           ["TISAX_L2", "TISAX_L3"],
+        "compliance_matrix": ["NIS2"],
+    }
+
+    def get(self, request):
+        from .export_engine import generate_export
+        from django.http import HttpResponse
+        from django.utils import timezone
+
+        framework_code = request.query_params.get("framework")
+        plant_id = request.query_params.get("plant")
+        export_format = request.query_params.get("format", "soa")
+
+        if not framework_code:
+            return Response({"error": "Parametro framework obbligatorio"}, status=400)
+
+        allowed = self.FORMAT_FRAMEWORK.get(export_format, [])
+        if allowed and framework_code not in allowed:
+            return Response({
+                "error": f"Formato {export_format} non compatibile "
+                         f"con framework {framework_code}. "
+                         f"Usa uno di: {allowed}"
+            }, status=400)
+
+        try:
+            html = generate_export(framework_code, plant_id, export_format, request.user)
+        except ValueError as e:
+            return Response({"error": str(e)}, status=400)
+
+        from core.audit import log_action
+        from apps.plants.models import Plant
+        plant = Plant.objects.filter(pk=plant_id).first()
+        if plant:
+            log_action(
+                user=request.user,
+                action_code=f"export.{export_format}",
+                level="L1",
+                entity=plant,
+                payload={"framework": framework_code, "format": export_format},
+            )
+
+        label = self.FORMAT_FILENAMES.get(export_format, export_format)
+        filename = f"{label}_{framework_code}_{timezone.now().strftime('%Y%m%d')}.html"
+        response = HttpResponse(html, content_type="text/html; charset=utf-8")
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
+

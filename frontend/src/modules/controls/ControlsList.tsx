@@ -99,6 +99,51 @@ function InlineStatusSelect({ instance }: { instance: ControlInstance }) {
   );
 }
 
+function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plantId?: string }) {
+  function handleExport(frameworkCode: string, format: string) {
+    const params = new URLSearchParams({ framework: frameworkCode, format });
+    if (plantId) params.set("plant", plantId);
+    window.open(`/api/v1/controls/export/?${params.toString()}`, "_blank");
+  }
+
+  const hasISO = frameworks.some(f => f.code === "ISO27001");
+  const hasTISAX = frameworks.some(f => f.code === "TISAX_L2" || f.code === "TISAX_L3");
+  const hasNIS2 = frameworks.some(f => f.code === "NIS2");
+  const tisaxCode = frameworks.find(f => f.code === "TISAX_L3")?.code
+    ?? frameworks.find(f => f.code === "TISAX_L2")?.code;
+
+  if (!hasISO && !hasTISAX && !hasNIS2) return null;
+
+  return (
+    <div className="flex gap-2 flex-wrap">
+      {hasISO && (
+        <button
+          onClick={() => handleExport("ISO27001", "soa")}
+          className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+        >
+          Scarica SOA
+        </button>
+      )}
+      {hasTISAX && tisaxCode && (
+        <button
+          onClick={() => handleExport(tisaxCode, "vda_isa")}
+          className="px-3 py-1.5 bg-purple-600 text-white text-sm rounded hover:bg-purple-700"
+        >
+          Scarica VDA ISA
+        </button>
+      )}
+      {hasNIS2 && (
+        <button
+          onClick={() => handleExport("NIS2", "compliance_matrix")}
+          className="px-3 py-1.5 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+        >
+          Scarica NIS2 Matrix
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function ControlsList() {
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
@@ -129,7 +174,10 @@ export function ControlsList() {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-2">Compliance — Controlli</h2>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-xl font-semibold text-gray-900">Compliance — Controlli</h2>
+        <ExportToolbar frameworks={frameworks ?? []} plantId={selectedPlant?.id} />
+      </div>
 
       {frameworks && frameworks.length > 0 && (
         <div className="flex gap-2 mb-4 flex-wrap">
