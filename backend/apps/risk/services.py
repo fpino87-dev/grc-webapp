@@ -144,11 +144,44 @@ def accept_risk(assessment, user, note: str, expiry_date=None) -> None:
     )
 
 
+def get_active_appetite(plant=None, framework_code: str = ""):
+    """
+    Recupera la policy di risk appetite attiva.
+    Priorita': plant-specific > org-wide.
+    """
+    from django.db.models import Q
+    from .models import RiskAppetitePolicy
+
+    today = timezone.now().date()
+    base_qs = RiskAppetitePolicy.objects.filter(
+        valid_from__lte=today,
+        deleted_at__isnull=True,
+    ).filter(
+        Q(valid_until__isnull=True) | Q(valid_until__gte=today)
+    )
+
+    if plant and framework_code:
+        policy = base_qs.filter(plant=plant, framework_code=framework_code).first()
+        if policy:
+            return policy
+
+    if plant:
+        policy = base_qs.filter(plant=plant, framework_code="").first()
+        if policy:
+            return policy
+
+    return base_qs.filter(plant__isnull=True).first()
+
+
 def escalate_red_risk(assessment: RiskAssessment, user):
     from apps.tasks.services import create_task
 
-    if assessment.risk_level != "rosso":
+    appetite = get_active_appetite(plant=assessment.plant)
+    threshold = appetite.max_acceptable_score if appetite else 14
+
+    if not assessment.score or assessment.score <= threshold:
         return
+
     create_task(
         plant=assessment.plant,
         title=f"Piano mitigazione rischio critico — {assessment.asset}",
@@ -159,4 +192,23 @@ def escalate_red_risk(assessment: RiskAssessment, user):
         assign_type="role",
         assign_value="risk_manager",
     )
+
+    # Notifica CISO se troppi rischi rossi
+    if appetite:
+        red_count = assessment.__class__.objects.filter(
+            plant=assessment.plant,
+            score__gt=threshold,
+            deleted_at__isnull=True,
+        ).count()
+        if red_count > appetite.max_red_risks_count:
+            create_task(
+                plant=assessment.plant,
+                title=f"Soglia rischi critici superata ({red_count} rischi)",
+                priority="critica",
+                source_module="M06",
+                source_id=assessment.pk,
+                due_date=timezone.now().date() + timezone.timedelta(days=7),
+                assign_type="role",
+                assign_value="ciso",
+            )
 

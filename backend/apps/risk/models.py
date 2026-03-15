@@ -199,3 +199,55 @@ class RiskMitigationPlan(BaseModel):
         on_delete=models.SET_NULL,
     )
 
+
+class RiskAppetitePolicy(BaseModel):
+    """
+    Soglie di accettazione del rischio approvate dal management.
+    ISO 27001 clausola 6.1.2 / NIS2 Art. 21.
+    """
+    plant = models.ForeignKey(
+        "plants.Plant",
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name="risk_appetite_policies",
+        help_text="Null = policy org-wide valida per tutti i plant"
+    )
+    framework_code = models.CharField(
+        max_length=50, blank=True,
+        help_text="Blank = valida per tutti i framework"
+    )
+    max_acceptable_score = models.IntegerField(
+        default=14,
+        help_text="Score massimo accettabile senza PDCA obbligatorio."
+    )
+    max_red_risks_count = models.IntegerField(
+        default=3,
+        help_text="Numero massimo di rischi rossi tollerabili contemporaneamente."
+    )
+    max_unacceptable_score = models.IntegerField(
+        default=20,
+        help_text="Score oltre il quale il rischio NON puo' essere solo accettato."
+    )
+    review_frequency_months = models.IntegerField(default=12)
+    valid_from = models.DateField()
+    valid_until = models.DateField(null=True, blank=True)
+    approved_by = models.ForeignKey(
+        "auth.User", null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name="approved_risk_policies",
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-valid_from"]
+
+    @property
+    def is_active(self):
+        from django.utils import timezone
+        today = timezone.now().date()
+        return (
+            self.valid_from <= today and
+            (self.valid_until is None or self.valid_until >= today)
+        )
+

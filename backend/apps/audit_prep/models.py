@@ -125,3 +125,63 @@ class AuditFinding(BaseModel):
         if not self.response_deadline:
             return None
         return (self.response_deadline - timezone.now().date()).days
+
+
+class AuditProgram(BaseModel):
+    """
+    Programma annuale di audit interno.
+    ISO 27001 clausola 9.2.
+    """
+    STATUS_CHOICES = [
+        ("bozza",      "Bozza"),
+        ("approvato",  "Approvato"),
+        ("in_corso",   "In corso"),
+        ("completato", "Completato"),
+    ]
+
+    plant = models.ForeignKey(
+        "plants.Plant", on_delete=models.PROTECT,
+        related_name="audit_programs"
+    )
+    year = models.IntegerField()
+    framework = models.ForeignKey(
+        "controls.Framework", on_delete=models.PROTECT,
+        related_name="audit_programs"
+    )
+    title = models.CharField(max_length=200)
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="bozza")
+    objectives = models.TextField(blank=True)
+    scope = models.TextField(blank=True)
+    methodology = models.TextField(blank=True)
+
+    # [{ "quarter": 1, "scope_domains": ["A.9"], "auditor_type": "interno|esterno",
+    #    "auditor_name": "", "planned_date": "2026-03-15", "actual_date": null,
+    #    "audit_prep_id": null, "status": "planned|completed|cancelled" }]
+    planned_audits = models.JSONField(default=list)
+
+    approved_by = models.ForeignKey(
+        "auth.User", null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name="approved_audit_programs",
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-year"]
+        unique_together = ["plant", "framework", "year"]
+
+    @property
+    def completion_pct(self) -> float:
+        total = len(self.planned_audits)
+        completed = sum(1 for a in self.planned_audits if a.get("status") == "completed")
+        return round(completed / total * 100, 1) if total > 0 else 0
+
+    @property
+    def next_planned_audit(self):
+        from datetime import date
+        today = str(date.today())
+        upcoming = [
+            a for a in self.planned_audits
+            if a.get("status") == "planned" and a.get("planned_date", "") >= today
+        ]
+        return min(upcoming, key=lambda x: x.get("planned_date", ""), default=None)

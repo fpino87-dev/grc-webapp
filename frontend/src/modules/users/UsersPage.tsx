@@ -1,7 +1,94 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../api/client";
 import { usersApi, type GrcUser, type GrcRole } from "../../api/endpoints/users";
 import { useAuthStore } from "../../store/auth";
+
+interface CompetencyGap {
+  competency: string; role: string; required_level: number;
+  current_level: number; gap: number; evidence_type: string;
+}
+interface CompetencyWarning { competency: string; expired_on: string; message: string; }
+interface GapAnalysisResult {
+  user_id: string; user_name: string; roles: string[];
+  gaps: CompetencyGap[]; ok: string[]; warnings: CompetencyWarning[];
+  gap_count: number;
+}
+
+function CompetencyPanel({ userId }: { userId: number }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["competency-gap", userId],
+    queryFn: () =>
+      apiClient.get<GapAnalysisResult>(`/auth/user-competencies/gap-analysis/?user=${userId}`)
+        .then(r => r.data),
+    retry: false,
+  });
+
+  if (isLoading) return <p className="text-xs text-gray-400 p-4">Caricamento gap analysis...</p>;
+  if (!data) return null;
+
+  return (
+    <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 text-sm">
+      <div className="flex items-center gap-3 mb-3">
+        <h4 className="font-semibold text-gray-700">Gap Analysis Competenze — {data.user_name}</h4>
+        {data.gap_count > 0 && (
+          <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded">
+            {data.gap_count} gap
+          </span>
+        )}
+        {data.ok.length > 0 && !data.gap_count && (
+          <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">Completo</span>
+        )}
+      </div>
+
+      {data.gaps.length > 0 && (
+        <div className="mb-3">
+          <p className="text-xs font-medium text-red-600 mb-1">Gap da colmare:</p>
+          <div className="space-y-1">
+            {data.gaps.map((g, i) => (
+              <div key={i} className="flex items-center gap-2 bg-red-50 rounded px-3 py-1.5 text-xs">
+                <span className="font-medium text-red-700">{g.competency}</span>
+                <span className="text-gray-500">({g.role})</span>
+                <span className="ml-auto text-red-600">
+                  Livello {g.current_level} → richiesto {g.required_level}
+                </span>
+                <span className="text-gray-400 capitalize">{g.evidence_type}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {data.warnings.length > 0 && (
+        <div className="mb-3">
+          <p className="text-xs font-medium text-orange-600 mb-1">Competenze scadute:</p>
+          <div className="space-y-1">
+            {data.warnings.map((w, i) => (
+              <div key={i} className="flex items-center gap-2 bg-orange-50 rounded px-3 py-1.5 text-xs">
+                <span className="text-orange-700">{w.message}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {data.ok.length > 0 && (
+        <div>
+          <p className="text-xs font-medium text-green-600 mb-1">Competenze OK:</p>
+          <div className="flex flex-wrap gap-1">
+            {data.ok.map((c, i) => (
+              <span key={i} className="bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded">{c}</span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {data.gaps.length === 0 && data.warnings.length === 0 && data.ok.length === 0 && (
+        <p className="text-xs text-gray-400">Nessun requisito di competenza definito per i ruoli di questo utente.</p>
+      )}
+    </div>
+  );
+}
 
 const roleColors: Record<string, string> = {
   super_admin: "bg-purple-100 text-purple-800",
@@ -208,6 +295,7 @@ function DangerZone() {
 
 export function UsersPage() {
   const [showNew, setShowNew] = useState(false);
+  const [expandedCompetency, setExpandedCompetency] = useState<number | null>(null);
   const qc = useQueryClient();
 
   const { data: me } = useQuery({
@@ -264,6 +352,7 @@ export function UsersPage() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {users.map(user => (
+                <>
                 <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3 font-medium text-gray-800">{user.username}</td>
                   <td className="px-4 py-3 text-gray-600">{user.email}</td>
@@ -282,9 +371,23 @@ export function UsersPage() {
                       >
                         {user.is_active ? "Disattiva" : "Attiva"}
                       </button>
+                      <button
+                        onClick={() => setExpandedCompetency(prev => prev === user.id ? null : user.id)}
+                        className="text-xs border border-indigo-200 text-indigo-600 rounded px-2 py-0.5 hover:bg-indigo-50"
+                      >
+                        Competenze
+                      </button>
                     </div>
                   </td>
                 </tr>
+                {expandedCompetency === user.id && (
+                  <tr key={`${user.id}-competency`}>
+                    <td colSpan={6} className="p-0">
+                      <CompetencyPanel userId={user.id} />
+                    </td>
+                  </tr>
+                )}
+                </>
               ))}
             </tbody>
           </table>

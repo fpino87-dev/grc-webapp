@@ -94,3 +94,71 @@ class ExternalAuditorToken(BaseModel):
         n = timezone.now()
         return self.revoked_at is None and self.valid_from <= n <= self.valid_until
 
+
+COMPETENCY_LEVEL_CHOICES = [
+    (1, "1 — Awareness"),
+    (2, "2 — Practitioner"),
+    (3, "3 — Expert"),
+]
+
+EVIDENCE_TYPE_CHOICES = [
+    ("certification",  "Certificazione"),
+    ("training",       "Training completato"),
+    ("experience",     "Esperienza documentata"),
+    ("assessment",     "Assessment interno"),
+]
+
+
+class RoleCompetencyRequirement(BaseModel):
+    """Competenze richieste per ogni ruolo GRC. ISO 27001 clausola 7.2."""
+    grc_role = models.CharField(max_length=50)
+    competency = models.CharField(max_length=200)
+    required_level = models.IntegerField(choices=COMPETENCY_LEVEL_CHOICES, default=2)
+    evidence_type = models.CharField(
+        max_length=20, choices=EVIDENCE_TYPE_CHOICES, default="training"
+    )
+    mandatory = models.BooleanField(default=True)
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        unique_together = ["grc_role", "competency"]
+        ordering = ["grc_role", "competency"]
+
+
+class UserCompetency(BaseModel):
+    """Competenza effettiva di un utente."""
+    user = models.ForeignKey(
+        "auth.User", on_delete=models.CASCADE,
+        related_name="competencies"
+    )
+    competency = models.CharField(max_length=200)
+    level = models.IntegerField(choices=COMPETENCY_LEVEL_CHOICES, default=1)
+    evidence = models.ForeignKey(
+        "documents.Evidence",
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name="competency_evidences",
+    )
+    evidence_type = models.CharField(
+        max_length=20, choices=EVIDENCE_TYPE_CHOICES, default="training"
+    )
+    certification_body = models.CharField(max_length=200, blank=True)
+    obtained_at = models.DateField(null=True, blank=True)
+    valid_until = models.DateField(null=True, blank=True)
+    verified_by = models.ForeignKey(
+        "auth.User", null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name="verified_competencies",
+    )
+
+    class Meta:
+        unique_together = ["user", "competency"]
+        ordering = ["user", "competency"]
+
+    @property
+    def is_valid(self) -> bool:
+        from django.utils import timezone
+        if not self.valid_until:
+            return True
+        return self.valid_until >= timezone.now().date()
+

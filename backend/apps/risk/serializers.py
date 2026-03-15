@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import RiskAssessment, RiskDimension, RiskMitigationPlan
+from .models import RiskAppetitePolicy, RiskAssessment, RiskDimension, RiskMitigationPlan
 
 
 class RiskAssessmentSerializer(serializers.ModelSerializer):
@@ -121,3 +121,18 @@ class RiskMitigationPlanSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at", "owner_username"]
+
+
+class RiskAppetitePolicySerializer(serializers.ModelSerializer):
+    approved_by_name = serializers.SerializerMethodField(read_only=True)
+    is_active = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = RiskAppetitePolicy
+        fields = "__all__"
+
+    def get_approved_by_name(self, obj):
+        if not obj.approved_by:
+            return None
+        u = obj.approved_by
+        return f"{u.first_name} {u.last_name}".strip() or u.email

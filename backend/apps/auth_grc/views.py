@@ -1,12 +1,18 @@
 from io import StringIO
 
 from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import ExternalAuditorToken, UserPlantAccess
-from .serializers import ExternalAuditorTokenSerializer, UserPlantAccessSerializer
+from .models import ExternalAuditorToken, RoleCompetencyRequirement, UserCompetency, UserPlantAccess
+from .serializers import (
+    ExternalAuditorTokenSerializer,
+    RoleCompetencyRequirementSerializer,
+    UserCompetencySerializer,
+    UserPlantAccessSerializer,
+)
 
 
 class ResetTestDbView(APIView):
@@ -51,4 +57,30 @@ class UserPlantAccessViewSet(viewsets.ModelViewSet):
 class ExternalAuditorTokenViewSet(viewsets.ModelViewSet):
     queryset = ExternalAuditorToken.objects.select_related("plant", "user")
     serializer_class = ExternalAuditorTokenSerializer
+
+
+class RoleCompetencyRequirementViewSet(viewsets.ModelViewSet):
+    queryset = RoleCompetencyRequirement.objects.all()
+    serializer_class = RoleCompetencyRequirementSerializer
+    filterset_fields = ["grc_role", "mandatory"]
+
+
+class UserCompetencyViewSet(viewsets.ModelViewSet):
+    queryset = UserCompetency.objects.select_related("user", "verified_by", "evidence")
+    serializer_class = UserCompetencySerializer
+    filterset_fields = ["user"]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    @action(detail=False, methods=["get"], url_path="gap-analysis")
+    def gap_analysis(self, request):
+        from .services import competency_gap_analysis
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        user_id = request.query_params.get("user", request.user.pk)
+        user = User.objects.filter(pk=user_id).first()
+        if not user:
+            return Response({"error": "Utente non trovato"}, status=404)
+        return Response(competency_gap_analysis(user))
 

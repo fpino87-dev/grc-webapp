@@ -53,4 +53,37 @@ export const auditPrepApi = {
     apiClient.post<AuditFinding>("/audit-prep/findings/", data).then(r => r.data),
   closeFinding: (id: string, data: { closure_notes: string; evidence_id?: string }) =>
     apiClient.post<{ ok: boolean; status: string }>(`/audit-prep/findings/${id}/close/`, data).then(r => r.data),
+  programs: (params?: Record<string, string>) =>
+    apiClient.get<{ results: AuditProgram[] }>("/audit-prep/programs/", { params }).then(r => r.data),
+  createProgram: (data: Partial<AuditProgram>) =>
+    apiClient.post<AuditProgram>("/audit-prep/programs/", data).then(r => r.data),
+  approveProgram: (id: string) =>
+    apiClient.post<{ ok: boolean; status: string }>(`/audit-prep/programs/${id}/approve/`).then(r => r.data),
 };
+
+export interface AuditProgram {
+  id: string;
+  plant: string;
+  framework: string;
+  year: number;
+  title: string;
+  status: "bozza"|"approvato"|"in_corso"|"completato";
+  objectives: string;
+  scope: string;
+  planned_audits: PlannedAudit[];
+  completion_pct: number;
+  next_planned_audit: PlannedAudit | null;
+  approved_by_name: string | null;
+  approved_at: string | null;
+}
+
+export interface PlannedAudit {
+  quarter: number;
+  scope_domains: string[];
+  auditor_type: "interno"|"esterno";
+  auditor_name: string;
+  planned_date: string;
+  actual_date: string | null;
+  audit_prep_id: string | null;
+  status: "planned"|"completed"|"cancelled";
+}

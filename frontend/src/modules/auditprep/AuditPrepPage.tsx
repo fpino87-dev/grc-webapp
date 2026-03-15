@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { auditPrepApi, type AuditFinding, type AuditPrep, type EvidenceItem } from "../../api/endpoints/auditPrep";
+import { auditPrepApi, type AuditFinding, type AuditPrep, type AuditProgram, type EvidenceItem, type PlannedAudit } from "../../api/endpoints/auditPrep";
 import { plantsApi } from "../../api/endpoints/plants";
 import { apiClient } from "../../api/client";
 import { StatusBadge } from "../../components/ui/StatusBadge";
@@ -452,6 +452,148 @@ function NewPrepModal({ frameworks, plants, onClose }: { frameworks: Framework[]
   );
 }
 
+const AUDIT_STATUS_COLORS: Record<string, string> = {
+  planned:   "bg-gray-100 text-gray-600",
+  completed: "bg-green-100 text-green-700",
+  cancelled: "bg-red-100 text-red-500",
+};
+
+function AuditProgramSection({ plantId, frameworks }: { plantId?: string; frameworks: Framework[] }) {
+  const qc = useQueryClient();
+  const [showNew, setShowNew] = useState(false);
+  const [form, setForm] = useState<Partial<AuditProgram>>({});
+
+  const params: Record<string, string> = {};
+  if (plantId) params.plant = plantId;
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["audit-programs", plantId],
+    queryFn: () => auditPrepApi.programs(params),
+    retry: false,
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (d: Partial<AuditProgram>) => auditPrepApi.createProgram(d),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["audit-programs"] }); setShowNew(false); setForm({}); },
+  });
+
+  const approveMutation = useMutation({
+    mutationFn: (id: string) => auditPrepApi.approveProgram(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["audit-programs"] }),
+  });
+
+  const programs: AuditProgram[] = data?.results ?? [];
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-base font-semibold text-gray-800">Programma Audit Annuale</h3>
+        <button onClick={() => setShowNew(s => !s)} className="px-3 py-1.5 bg-primary-600 text-white text-sm rounded hover:bg-primary-700">
+          + Nuovo programma
+        </button>
+      </div>
+
+      {showNew && (
+        <div className="bg-white border border-gray-200 rounded p-4 mb-4 space-y-3">
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">Anno *</label>
+              <input type="number" placeholder="2026" value={form.year ?? ""}
+                onChange={e => setForm(p => ({ ...p, year: parseInt(e.target.value) }))}
+                className="w-full border rounded px-2 py-1.5 text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">Framework *</label>
+              <select value={form.framework ?? ""}
+                onChange={e => setForm(p => ({ ...p, framework: e.target.value }))}
+                className="w-full border rounded px-2 py-1.5 text-sm">
+                <option value="">— seleziona —</option>
+                {frameworks.map(f => <option key={f.id} value={f.id}>{f.code}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">Sito *</label>
+              <input placeholder="Plant ID" value={form.plant ?? plantId ?? ""}
+                onChange={e => setForm(p => ({ ...p, plant: e.target.value }))}
+                className="w-full border rounded px-2 py-1.5 text-sm" />
+            </div>
+          </div>
+          <input placeholder="Titolo programma *" value={form.title ?? ""}
+            onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
+            className="w-full border rounded px-2 py-1.5 text-sm" />
+          <textarea placeholder="Obiettivi" value={form.objectives ?? ""} rows={2}
+            onChange={e => setForm(p => ({ ...p, objectives: e.target.value }))}
+            className="w-full border rounded px-2 py-1.5 text-sm" />
+          <div className="flex gap-2">
+            <button onClick={() => createMutation.mutate({ ...form, plant: form.plant || plantId })}
+              disabled={createMutation.isPending || !form.title || !form.year || !form.framework}
+              className="px-3 py-1.5 bg-primary-600 text-white text-xs rounded hover:bg-primary-700 disabled:opacity-50">
+              {createMutation.isPending ? "..." : "Crea programma"}
+            </button>
+            <button onClick={() => setShowNew(false)} className="px-3 py-1.5 border rounded text-xs text-gray-600">Annulla</button>
+          </div>
+        </div>
+      )}
+
+      {isLoading ? <p className="text-sm text-gray-400">Caricamento...</p> : programs.length === 0 ? (
+        <p className="text-sm text-gray-400">Nessun programma di audit definito</p>
+      ) : (
+        <div className="space-y-4">
+          {programs.map(prog => (
+            <div key={prog.id} className="bg-white border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <span className="font-semibold text-gray-800">{prog.title}</span>
+                  <span className="ml-2 text-xs text-gray-500">{prog.year}</span>
+                  <StatusBadge status={prog.status} />
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-gray-500">{prog.completion_pct}% completato</span>
+                  {prog.status === "bozza" && (
+                    <button onClick={() => approveMutation.mutate(prog.id)}
+                      disabled={approveMutation.isPending}
+                      className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50">
+                      Approva
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Griglia 4 trimestri */}
+              <div className="grid grid-cols-4 gap-2">
+                {[1,2,3,4].map(q => {
+                  const qAudits = prog.planned_audits.filter((a: PlannedAudit) => a.quarter === q);
+                  return (
+                    <div key={q} className="border border-gray-100 rounded p-2">
+                      <div className="text-xs font-medium text-gray-500 mb-2">Q{q}</div>
+                      {qAudits.length === 0 ? (
+                        <div className="text-xs text-gray-300 italic">nessun audit</div>
+                      ) : qAudits.map((a: PlannedAudit, i: number) => (
+                        <div key={i} className={`text-xs rounded px-2 py-1 mb-1 ${AUDIT_STATUS_COLORS[a.status] ?? "bg-gray-50"}`}>
+                          <div className="font-medium">{a.planned_date}</div>
+                          <div className="text-gray-500">{a.auditor_type === "esterno" ? "Esterno" : "Interno"}</div>
+                          {a.auditor_name && <div className="truncate">{a.auditor_name}</div>}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {prog.next_planned_audit && (
+                <p className="mt-2 text-xs text-blue-600">
+                  Prossimo audit: {prog.next_planned_audit.planned_date}
+                  {prog.next_planned_audit.auditor_name && ` — ${prog.next_planned_audit.auditor_name}`}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ExpandedPanel({ prepId }: { prepId: string }) {
   const [tab, setTab] = useState<"evidence"|"findings">("findings");
   return (
@@ -478,6 +620,7 @@ function ExpandedPanel({ prepId }: { prepId: string }) {
 export function AuditPrepPage() {
   const [showNew, setShowNew] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [mainTab, setMainTab] = useState<"preps"|"program">("preps");
 
   const { data, isLoading } = useQuery({
     queryKey: ["audit-prep"],
@@ -505,14 +648,32 @@ export function AuditPrepPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3">
         <h2 className="text-xl font-semibold text-gray-900">Compliance — Audit Preparation</h2>
-        <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700">
-          + Nuova preparazione
+        {mainTab === "preps" && (
+          <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700">
+            + Nuova preparazione
+          </button>
+        )}
+      </div>
+
+      {/* Tab navigation */}
+      <div className="flex gap-0 border-b border-gray-200 mb-4">
+        <button onClick={() => setMainTab("preps")}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${mainTab === "preps" ? "border-primary-600 text-primary-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
+          Preparazioni Audit
+        </button>
+        <button onClick={() => setMainTab("program")}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${mainTab === "program" ? "border-primary-600 text-primary-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
+          Programma Annuale
         </button>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      {mainTab === "program" && (
+        <AuditProgramSection frameworks={frameworks} />
+      )}
+
+      {mainTab === "preps" && <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center text-gray-400">Caricamento...</div>
         ) : preps.length === 0 ? (
@@ -561,7 +722,7 @@ export function AuditPrepPage() {
             </tbody>
           </table>
         )}
-      </div>
+      </div>}
 
       {showNew && <NewPrepModal frameworks={frameworks} plants={plants} onClose={() => setShowNew(false)} />}
     </div>

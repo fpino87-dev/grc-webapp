@@ -5,8 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
 from core.audit import log_action
-from .models import AuditPrep, AuditFinding, EvidenceItem
-from .serializers import AuditFindingSerializer, AuditPrepSerializer, EvidenceItemSerializer
+from .models import AuditFinding, AuditPrep, AuditProgram, EvidenceItem
+from .serializers import AuditFindingSerializer, AuditPrepSerializer, AuditProgramSerializer, EvidenceItemSerializer
 from . import services
 
 
@@ -111,3 +111,52 @@ class AuditFindingViewSet(viewsets.ModelViewSet):
             return Response({"ok": True, "status": finding.status})
         except ValidationError as e:
             return Response({"error": str(e.message)}, status=400)
+
+
+class AuditProgramViewSet(viewsets.ModelViewSet):
+    queryset = AuditProgram.objects.select_related("plant", "framework", "approved_by")
+    serializer_class = AuditProgramSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ["plant", "framework", "year", "status"]
+    search_fields = ["title"]
+
+    def perform_create(self, serializer):
+        instance = serializer.save(created_by=self.request.user)
+        log_action(
+            user=self.request.user,
+            action_code="audit_prep.program.create",
+            level="L2",
+            entity=instance,
+            payload={"id": str(instance.id), "year": instance.year},
+        )
+
+    @action(detail=True, methods=["post"])
+    def approve(self, request, pk=None):
+        from django.utils import timezone
+        program = self.get_object()
+        program.status = "approvato"
+        program.approved_by = request.user
+        program.approved_at = timezone.now()
+        program.save(update_fields=["status", "approved_by", "approved_at", "updated_at"])
+        log_action(
+            user=request.user,
+            action_code="audit_prep.program.approved",
+            level="L1",
+            entity=program,
+            payload={"year": program.year},
+        )
+        return Response({"ok": True, "status": program.status})
+
+    @action(detail=True, methods=["post"], url_path="add-audit")
+    def add_audit(self, request, pk=None):
+        """Aggiunge o aggiorna un audit pianificato nel JSON array."""
+        program = self.get_object()
+        audit_entry = request.data.get("audit", {})
+        if not audit_entry:
+            return Response({"error": "Dati audit mancanti"}, status=400)
+        planned = list(program.planned_audits)
+        planned.append(audit_entry)
+        program.planned_audits = planned
+        program.save(update_fields=["planned_audits", "updated_at"])
+        return Response({"ok": True, "planned_audits": program.planned_audits})

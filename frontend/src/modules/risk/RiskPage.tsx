@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../api/client";
 import { riskApi, type RiskAssessment, type RiskMitigationPlan, type SuggestResidualResult, THREAT_CATEGORIES, PROB_LABELS, IMPACT_LABELS } from "../../api/endpoints/risk";
 import { plantsApi } from "../../api/endpoints/plants";
 import { biaApi, type CriticalProcess } from "../../api/endpoints/bia";
@@ -520,6 +521,56 @@ function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: s
   );
 }
 
+interface RiskAppetitePolicy {
+  id: string;
+  max_acceptable_score: number;
+  max_red_risks_count: number;
+  max_unacceptable_score: number;
+  valid_from: string;
+  valid_until: string | null;
+  approved_by_name: string | null;
+  is_active: boolean;
+  framework_code: string;
+}
+
+function RiskAppetiteCard({ plantId }: { plantId?: string }) {
+  const { data: policy, isLoading, isError } = useQuery({
+    queryKey: ["risk-appetite", plantId],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (plantId) params.set("plant", plantId);
+      return apiClient.get<RiskAppetitePolicy>(
+        `/risk/appetite-policies/active/?${params.toString()}`
+      ).then(r => r.data);
+    },
+    retry: false,
+  });
+
+  if (isLoading) return null;
+  if (isError || !policy) return null;
+
+  return (
+    <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex flex-wrap gap-6 items-center text-sm">
+      <div>
+        <span className="text-xs text-blue-500 font-medium uppercase">Risk Appetite Policy</span>
+        {policy.framework_code && <span className="ml-2 text-xs text-blue-400">{policy.framework_code}</span>}
+      </div>
+      <div className="text-gray-700">
+        Score max accettabile: <strong className="text-orange-600">{policy.max_acceptable_score}</strong>
+      </div>
+      <div className="text-gray-700">
+        Max rischi rossi: <strong className="text-red-600">{policy.max_red_risks_count}</strong>
+      </div>
+      <div className="text-gray-700">
+        Valida fino: <strong>{policy.valid_until ? new Date(policy.valid_until).toLocaleDateString("it-IT") : "—"}</strong>
+      </div>
+      {policy.approved_by_name && (
+        <div className="text-gray-500 text-xs">Approvata da: {policy.approved_by_name}</div>
+      )}
+    </div>
+  );
+}
+
 export function RiskPage() {
   const [typeFilter, setTypeFilter] = useState<"" | "IT" | "OT">("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -556,6 +607,7 @@ export function RiskPage() {
 
   return (
     <div>
+      <RiskAppetiteCard plantId={selectedPlant?.id} />
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold text-gray-900">Risk Assessment</h2>
         <div className="flex items-center gap-2">

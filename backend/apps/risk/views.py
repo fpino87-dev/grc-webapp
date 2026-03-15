@@ -4,8 +4,8 @@ from rest_framework.response import Response
 
 from core.audit import log_action
 
-from .models import RiskAssessment, RiskDimension, RiskMitigationPlan
-from .serializers import RiskAssessmentSerializer, RiskDimensionSerializer, RiskMitigationPlanSerializer
+from .models import RiskAppetitePolicy, RiskAssessment, RiskDimension, RiskMitigationPlan
+from .serializers import RiskAppetitePolicySerializer, RiskAssessmentSerializer, RiskDimensionSerializer, RiskMitigationPlanSerializer
 
 
 class RiskAssessmentViewSet(viewsets.ModelViewSet):
@@ -202,3 +202,35 @@ class RiskMitigationPlanViewSet(viewsets.ModelViewSet):
             entity=instance,
             payload={"id": str(instance.id), "completed_at": str(instance.completed_at)},
         )
+
+
+class RiskAppetitePolicyViewSet(viewsets.ModelViewSet):
+    queryset = RiskAppetitePolicy.objects.select_related("plant", "approved_by")
+    serializer_class = RiskAppetitePolicySerializer
+    filterset_fields = ["plant", "framework_code"]
+
+    def perform_create(self, serializer):
+        instance = serializer.save(created_by=self.request.user)
+        log_action(
+            user=self.request.user,
+            action_code="risk.appetite_policy.create",
+            level="L1",
+            entity=instance,
+            payload={
+                "max_acceptable_score": instance.max_acceptable_score,
+                "framework_code": instance.framework_code,
+            },
+        )
+
+    @action(detail=False, methods=["get"], url_path="active")
+    def active(self, request):
+        """Recupera la policy attiva per plant e framework."""
+        from .services import get_active_appetite
+        plant_id = request.query_params.get("plant")
+        framework_code = request.query_params.get("framework", "")
+        from apps.plants.models import Plant
+        plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
+        policy = get_active_appetite(plant=plant, framework_code=framework_code)
+        if not policy:
+            return Response({"detail": "Nessuna policy attiva"}, status=404)
+        return Response(RiskAppetitePolicySerializer(policy).data)
