@@ -1,8 +1,13 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { controlsApi } from "../../api/endpoints/controls";
 import { incidentsApi } from "../../api/endpoints/incidents";
 import { plantsApi } from "../../api/endpoints/plants";
+import { reportingApi } from "../../api/endpoints/reporting";
 import { StatusBadge } from "../../components/ui/StatusBadge";
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+} from "recharts";
 
 function KpiCard({
   label,
@@ -26,6 +31,110 @@ function KpiCard({
       <p className="text-xs font-medium uppercase tracking-wide opacity-70">{label}</p>
       <p className="text-3xl font-bold mt-1">{value}</p>
       {sub && <p className="text-xs mt-1 opacity-60">{sub}</p>}
+    </div>
+  );
+}
+
+const WEEK_OPTIONS = [
+  { label: "3 mesi", weeks: 12 },
+  { label: "6 mesi", weeks: 24 },
+  { label: "12 mesi", weeks: 52 },
+];
+
+function KpiTrendChart() {
+  const [weeks, setWeeks] = useState(12);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["kpi-trend", weeks],
+    queryFn: () => reportingApi.kpiTrend({ framework: "ISO27001", weeks }),
+    retry: false,
+  });
+
+  const snapshots = data?.results ?? [];
+
+  const chartData = snapshots.map(s => ({
+    week: s.week_start,
+    compliant: s.pct_compliant,
+    maturity: s.overall_maturity != null ? parseFloat(s.overall_maturity.toFixed(2)) : null,
+    highRisks: s.high_risks,
+    incidents: s.open_incidents,
+  }));
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-semibold text-gray-700">Trend ISMS settimanale (ISO 27001)</h3>
+        <div className="flex gap-1">
+          {WEEK_OPTIONS.map(opt => (
+            <button
+              key={opt.weeks}
+              onClick={() => setWeeks(opt.weeks)}
+              className={`px-2 py-1 text-xs rounded border ${
+                weeks === opt.weeks
+                  ? "bg-primary-600 text-white border-primary-600"
+                  : "text-gray-600 border-gray-300 hover:bg-gray-50"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="h-48 flex items-center justify-center text-gray-400 text-sm">Caricamento...</div>
+      ) : snapshots.length === 0 ? (
+        <div className="h-48 flex items-center justify-center text-gray-400 text-sm italic">
+          Nessun dato — i snapshot vengono generati ogni lunedì dal task Celery
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={220}>
+          <LineChart data={chartData} margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis
+              dataKey="week"
+              tick={{ fontSize: 10 }}
+              tickFormatter={v => v.slice(5)} // show MM-DD only
+            />
+            <YAxis yAxisId="pct" domain={[0, 100]} tick={{ fontSize: 10 }} unit="%" width={36} />
+            <YAxis yAxisId="count" orientation="right" tick={{ fontSize: 10 }} width={28} />
+            <Tooltip
+              formatter={(value, name) => {
+                if (name === "% Compliant") return [`${value}%`, name];
+                return [value, name];
+              }}
+            />
+            <Legend wrapperStyle={{ fontSize: 11 }} />
+            <Line
+              yAxisId="pct"
+              type="monotone"
+              dataKey="compliant"
+              name="% Compliant"
+              stroke="#16a34a"
+              strokeWidth={2}
+              dot={false}
+            />
+            <Line
+              yAxisId="count"
+              type="monotone"
+              dataKey="highRisks"
+              name="Rischi alti"
+              stroke="#dc2626"
+              strokeWidth={2}
+              dot={false}
+            />
+            <Line
+              yAxisId="count"
+              type="monotone"
+              dataKey="incidents"
+              name="Incidenti aperti"
+              stroke="#f59e0b"
+              strokeWidth={2}
+              dot={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 }
@@ -75,6 +184,10 @@ export function Dashboard() {
           value={openIncidents}
           color={openIncidents > 0 ? "yellow" : "green"}
         />
+      </div>
+
+      <div className="mb-6">
+        <KpiTrendChart />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

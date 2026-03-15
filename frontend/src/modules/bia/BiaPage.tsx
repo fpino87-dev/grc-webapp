@@ -18,6 +18,27 @@ function CriticalityBar({ value }: { value: number }) {
   );
 }
 
+const RTO_STATUS_COLORS: Record<string, string> = {
+  ok: "bg-green-100 text-green-700",
+  warning: "bg-yellow-100 text-yellow-700",
+  critical: "bg-red-100 text-red-700",
+  unknown: "bg-gray-100 text-gray-500",
+};
+const RTO_STATUS_LABELS: Record<string, string> = {
+  ok: "RTO OK",
+  warning: "RTO ⚠",
+  critical: "RTO ✗",
+  unknown: "—",
+};
+
+function RtoBcpBadge({ status }: { status: string }) {
+  return (
+    <span className={`text-xs px-2 py-0.5 rounded font-medium ${RTO_STATUS_COLORS[status] ?? RTO_STATUS_COLORS.unknown}`}>
+      {RTO_STATUS_LABELS[status] ?? "—"}
+    </span>
+  );
+}
+
 function NewProcessModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
   const qc = useQueryClient();
   const [form, setForm] = useState<Partial<CriticalProcess>>({ criticality: 3 });
@@ -28,13 +49,16 @@ function NewProcessModal({ plants, onClose }: { plants: { id: string; code: stri
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
-    const val = e.target.name === "criticality" ? Number(e.target.value) : e.target.value;
+    const numericFields = ["criticality", "mtpd_hours", "mbco_pct", "rto_target_hours", "rpo_target_hours"];
+    const val = numericFields.includes(e.target.name)
+      ? (e.target.value ? Number(e.target.value) : null)
+      : e.target.value;
     setForm(prev => ({ ...prev, [e.target.name]: val }));
   }
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6 max-h-screen overflow-y-auto">
         <h3 className="text-lg font-semibold mb-4">Nuovo processo critico</h3>
         <div className="space-y-3">
           <div>
@@ -58,6 +82,30 @@ function NewProcessModal({ plants, onClose }: { plants: { id: string; code: stri
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Costo downtime/h (€)</label>
               <input name="downtime_cost_hour" type="number" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="0.00" />
+            </div>
+          </div>
+
+          <hr className="my-1" />
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Target BCP/BIA (ISO 22301)</p>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">MTPD (ore)</label>
+              <input name="mtpd_hours" type="number" min="0" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="es. 48" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">MBCO (%)</label>
+              <input name="mbco_pct" type="number" min="0" max="100" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="es. 70" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">RTO target (ore)</label>
+              <input name="rto_target_hours" type="number" min="0" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="es. 24" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">RPO target (ore)</label>
+              <input name="rpo_target_hours" type="number" min="0" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="es. 4" />
             </div>
           </div>
         </div>
@@ -143,10 +191,11 @@ export function BiaPage() {
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Processo</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Criticità</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Stato</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Costo downtime/h</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Rep</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Norm</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Op</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">MTPD</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">RTO</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">RPO</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">MBCO</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">BCP</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
@@ -156,10 +205,11 @@ export function BiaPage() {
                   <td className="px-4 py-3 font-medium text-gray-800">{p.name}</td>
                   <td className="px-4 py-3"><CriticalityBar value={p.criticality} /></td>
                   <td className="px-4 py-3"><StatusBadge status={p.status} /></td>
-                  <td className="px-4 py-3 text-gray-600">{p.downtime_cost_hour ? `€${Number(p.downtime_cost_hour).toLocaleString("it-IT")}` : "—"}</td>
-                  <td className="px-4 py-3 text-gray-600">{p.danno_reputazionale}</td>
-                  <td className="px-4 py-3 text-gray-600">{p.danno_normativo}</td>
-                  <td className="px-4 py-3 text-gray-600">{p.danno_operativo}</td>
+                  <td className="px-4 py-3 text-gray-600 text-xs">{p.mtpd_hours != null ? `${p.mtpd_hours}h` : "—"}</td>
+                  <td className="px-4 py-3 text-gray-600 text-xs">{p.rto_target_hours != null ? `${p.rto_target_hours}h` : "—"}</td>
+                  <td className="px-4 py-3 text-gray-600 text-xs">{p.rpo_target_hours != null ? `${p.rpo_target_hours}h` : "—"}</td>
+                  <td className="px-4 py-3 text-gray-600 text-xs">{p.mbco_pct != null ? `${p.mbco_pct}%` : "—"}</td>
+                  <td className="px-4 py-3"><RtoBcpBadge status={p.rto_bcp_status} /></td>
                   <td className="px-4 py-3">
                     {p.status === "validato" && (
                       <button

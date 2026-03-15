@@ -33,6 +33,25 @@ class CriticalProcess(BaseModel):
     danno_reputazionale = models.IntegerField(default=1)
     danno_normativo = models.IntegerField(default=1)
     danno_operativo = models.IntegerField(default=1)
+
+    # BCP/BIA targets — ISO 22301 & TISAX
+    mtpd_hours = models.IntegerField(
+        null=True, blank=True,
+        help_text="Maximum Tolerable Period of Disruption (hours)",
+    )
+    mbco_pct = models.IntegerField(
+        null=True, blank=True,
+        help_text="Minimum Business Continuity Objective — % of normal capacity",
+    )
+    rto_target_hours = models.IntegerField(
+        null=True, blank=True,
+        help_text="Recovery Time Objective target (hours)",
+    )
+    rpo_target_hours = models.IntegerField(
+        null=True, blank=True,
+        help_text="Recovery Point Objective target (hours)",
+    )
+
     validated_by = models.ForeignKey(
         "auth.User",
         null=True,
@@ -49,6 +68,36 @@ class CriticalProcess(BaseModel):
         related_name="approved_processes",
     )
     approved_at = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def bia_targets_complete(self) -> bool:
+        """True when all four BIA/BCP targets have been set."""
+        return all(
+            v is not None
+            for v in [self.mtpd_hours, self.mbco_pct, self.rto_target_hours, self.rpo_target_hours]
+        )
+
+    @property
+    def rto_bcp_status(self) -> str:
+        """
+        Compare rto_target_hours against the best BCP plan RTO for this process.
+        Returns: 'ok' | 'warning' | 'critical' | 'unknown'
+        """
+        if self.rto_target_hours is None:
+            return "unknown"
+        best_bcp = (
+            self.bcp_plans.filter(deleted_at__isnull=True, rto_hours__isnull=False)
+            .order_by("rto_hours")
+            .first()
+        )
+        if best_bcp is None:
+            return "unknown"
+        ratio = best_bcp.rto_hours / self.rto_target_hours
+        if ratio <= 1.0:
+            return "ok"
+        elif ratio <= 1.5:
+            return "warning"
+        return "critical"
 
 
 class TreatmentOption(BaseModel):

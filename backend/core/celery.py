@@ -12,5 +12,9 @@ app.conf.beat_schedule = {
         "task": "apps.controls.tasks.check_expired_evidences",
         "schedule": crontab(hour=2, minute=0),
     },
+    "generate-weekly-kpi-snapshots": {
+        "task": "apps.reporting.tasks.generate_weekly_kpi_snapshots",
+        "schedule": crontab(hour=6, minute=0, day_of_week=1),  # Monday 06:00
+    },
 }
 

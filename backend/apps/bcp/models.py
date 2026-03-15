@@ -52,9 +52,41 @@ class BcpTest(BaseModel):
         ("parziale", "Parziale"),
         ("fallito", "Fallito"),
     ]
+    TEST_TYPE_CHOICES = [
+        ("tabletop", "Tabletop / Discussione"),
+        ("drill", "Drill / Esercitazione parziale"),
+        ("full_interruption", "Full interruption test"),
+        ("parallel", "Test parallelo"),
+    ]
     plan = models.ForeignKey(BcpPlan, on_delete=models.CASCADE, related_name="tests")
     test_date = models.DateField()
     result = models.CharField(max_length=10, choices=RESULT_CHOICES)
     conducted_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     notes = models.TextField(blank=True)
     lessons_id = models.UUIDField(null=True, blank=True)
+
+    # Structured test data
+    test_type = models.CharField(
+        max_length=20, choices=TEST_TYPE_CHOICES, default="tabletop"
+    )
+    objectives = models.JSONField(
+        default=list,
+        help_text='List of {"text": str, "met": bool} objects',
+    )
+    rto_achieved_hours = models.IntegerField(
+        null=True, blank=True,
+        help_text="Actual RTO achieved during this test (hours)",
+    )
+    rpo_achieved_hours = models.IntegerField(
+        null=True, blank=True,
+        help_text="Actual RPO achieved during this test (hours)",
+    )
+    participants_count = models.IntegerField(default=0)
+
+    @property
+    def objectives_met_pct(self) -> float | None:
+        """Percentage of objectives marked as met. None if no objectives defined."""
+        if not self.objectives:
+            return None
+        met = sum(1 for o in self.objectives if o.get("met"))
+        return round(met / len(self.objectives) * 100, 1)

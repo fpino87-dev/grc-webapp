@@ -7,6 +7,12 @@ export interface CriticalProcess {
   downtime_cost_hour: string | null;
   danno_reputazionale: number; danno_normativo: number; danno_operativo: number;
   validated_at: string | null; approved_at: string | null;
+  mtpd_hours: number | null;
+  mbco_pct: number | null;
+  rto_target_hours: number | null;
+  rpo_target_hours: number | null;
+  bia_targets_complete: boolean;
+  rto_bcp_status: "ok" | "warning" | "critical" | "unknown";
 }
 
 export const biaApi = {

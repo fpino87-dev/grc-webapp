@@ -24,6 +24,19 @@ export interface TaskByOwner {
   completati_30gg: number;
 }
 
+export interface KpiSnapshot {
+  week_start: string;
+  pct_compliant: number;
+  overall_maturity: number | null;
+  open_risks: number;
+  high_risks: number;
+  open_incidents: number;
+  critical_incidents: number;
+  controls_compliant: number;
+  controls_total: number;
+  controls_gap: number;
+}
+
 export const reportingApi = {
   dashboard: (plant?: string) =>
     apiClient.get<{
@@ -44,5 +57,10 @@ export const reportingApi = {
     apiClient.get<{ risks_by_owner: RiskByOwner[]; tasks_by_owner: TaskByOwner[] }>(
       "/reporting/owner-report/",
       { params: plant ? { plant } : {} }
+    ).then(r => r.data),
+  kpiTrend: (params?: { plant?: string; framework?: string; weeks?: number }) =>
+    apiClient.get<{ results: KpiSnapshot[]; framework: string }>(
+      "/reporting/kpi-trend/",
+      { params }
     ).then(r => r.data),
 };

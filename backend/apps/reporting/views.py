@@ -130,6 +130,34 @@ class OwnerReportView(APIView):
         })
 
 
+class KpiTrendView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from .models import IsmsKpiSnapshot
+        plant_id = request.query_params.get("plant")
+        framework_code = request.query_params.get("framework", "ISO27001")
+        try:
+            weeks = int(request.query_params.get("weeks", 12))
+        except ValueError:
+            weeks = 12
+        weeks = min(max(weeks, 1), 52)
+
+        qs = IsmsKpiSnapshot.objects.filter(framework_code=framework_code)
+        if plant_id:
+            qs = qs.filter(plant_id=plant_id)
+        else:
+            qs = qs.filter(plant__isnull=True)
+        qs = qs.order_by("week_start")[:weeks]
+
+        data = list(qs.values(
+            "week_start", "pct_compliant", "overall_maturity",
+            "open_risks", "high_risks", "open_incidents", "critical_incidents",
+            "controls_compliant", "controls_total", "controls_gap",
+        ))
+        return Response({"results": data, "framework": framework_code})
+
+
 class DashboardSummaryView(APIView):
     permission_classes = [IsAuthenticated]
 
