@@ -6,6 +6,8 @@ dallo stesso dato sorgente: ControlInstance.
 Tutti i formati restituiscono HTML stampabile/scaricabile.
 """
 
+import datetime
+
 from django.utils import timezone
 
 
@@ -21,23 +23,30 @@ def generate_export(framework_code: str, plant_id,
     from apps.controls.models import Framework, ControlInstance
     from apps.plants.models import Plant
 
-    plant = Plant.objects.filter(pk=plant_id).first()
+    plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
     fw = Framework.objects.filter(code=framework_code).first()
 
     if not fw:
-        raise ValueError(f"Framework {framework_code} non trovato")
+        raise ValueError(
+            f"Framework '{framework_code}' non trovato nel database. "
+            f"Eseguire: python manage.py load_frameworks"
+        )
 
-    instances = ControlInstance.objects.filter(
-        plant_id=plant_id,
-        control__framework=fw,
-        deleted_at__isnull=True,
-    ).select_related(
-        "control__domain", "control__framework",
-        "owner", "soa_approved_by",
-        "na_approved_by",
-    ).prefetch_related("evidences", "documents").order_by(
-        "control__domain__order", "control__external_id"
-    )
+    # Plant opzionale — se None ritorna queryset vuoto
+    if plant_id:
+        instances = ControlInstance.objects.filter(
+            plant_id=plant_id,
+            control__framework=fw,
+            deleted_at__isnull=True,
+        ).select_related(
+            "control__domain", "control__framework",
+            "owner", "soa_approved_by",
+            "na_approved_by",
+        ).prefetch_related("evidences", "documents").order_by(
+            "control__domain__order", "control__external_id"
+        )
+    else:
+        instances = ControlInstance.objects.none()
 
     if export_format == "soa":
         return _generate_soa(fw, plant, instances, user)
@@ -46,7 +55,10 @@ def generate_export(framework_code: str, plant_id,
     elif export_format == "compliance_matrix":
         return _generate_compliance_matrix(fw, plant, instances, user)
     else:
-        raise ValueError(f"Formato {export_format} non supportato")
+        raise ValueError(
+            f"Formato '{export_format}' non supportato. "
+            f"Usa: soa, vda_isa, compliance_matrix"
+        )
 
 
 def _base_html(title: str, content: str, plant_name: str,
@@ -272,7 +284,7 @@ def _generate_soa_change_section(plant) -> str:
     """Sezione clausola 8.1 — asset con change recenti (ultimi 90gg)."""
     from apps.assets.models import Asset
 
-    since = timezone.now().date() - timezone.timedelta(days=90)
+    since = timezone.now().date() - datetime.timedelta(days=90)
     qs_args = dict(last_change_date__gte=since, deleted_at__isnull=True)
     if plant is not None:
         qs_args["plant"] = plant
