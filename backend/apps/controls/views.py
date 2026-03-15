@@ -188,6 +188,8 @@ class ControlInstanceViewSet(viewsets.ModelViewSet):
             "calc_maturity_level": instance.calc_maturity_level,
             "approved_in_soa": instance.approved_in_soa,
             "soa_approved_at": instance.soa_approved_at.isoformat() if instance.soa_approved_at else None,
+            "needs_revaluation": instance.needs_revaluation,
+            "needs_revaluation_since": str(instance.needs_revaluation_since) if instance.needs_revaluation_since else None,
             "control_id": control.external_id,
             "title": control.get_title(lang),
             "domain": control.domain.get_name(lang) if control.domain else "",
@@ -326,6 +328,15 @@ class ControlInstanceViewSet(viewsets.ModelViewSet):
             return Response({"error": "Evidenza non trovata."}, status=404)
         instance.evidences.remove(evidence)
         return Response({"ok": True})
+
+    @action(detail=False, methods=["get"], url_path="needs-revaluation")
+    def needs_revaluation_list(self, request):
+        """Controlli che richiedono rivalutazione dopo un change."""
+        plant_id = request.query_params.get("plant")
+        qs = self.get_queryset().filter(needs_revaluation=True)
+        if plant_id:
+            qs = qs.filter(plant_id=plant_id)
+        return Response(self.get_serializer(qs, many=True).data)
 
 
 class GapAnalysisView(APIView):

@@ -34,6 +34,46 @@ class Asset(BaseModel):
     )
     notes = models.TextField(blank=True)
 
+    # Riferimento change esterno (ticket Jira, ServiceNow, ecc.)
+    last_change_ref = models.CharField(
+        max_length=100, blank=True,
+        help_text="Riferimento ticket esterno es. JIRA-1234, SN-5678",
+    )
+    last_change_date = models.DateField(
+        null=True, blank=True,
+        help_text="Data dell'ultimo change registrato",
+    )
+    last_change_desc = models.CharField(
+        max_length=300, blank=True,
+        help_text="Descrizione breve del change",
+    )
+    change_portal_url = models.URLField(
+        blank=True,
+        help_text="Link diretto al ticket nel portale change management",
+    )
+    needs_revaluation = models.BooleanField(
+        default=False,
+        help_text="True se il change richiede rivalutazione dei controlli e del risk assessment collegati",
+    )
+    needs_revaluation_since = models.DateField(null=True, blank=True)
+
+    @property
+    def has_recent_change(self) -> bool:
+        """True se c'è stato un change negli ultimi 30 giorni."""
+        if not self.last_change_date:
+            return False
+        from django.utils import timezone
+        delta = timezone.now().date() - self.last_change_date
+        return delta.days <= 30
+
+    @property
+    def change_age_days(self):
+        """Giorni dall'ultimo change registrato."""
+        if not self.last_change_date:
+            return None
+        from django.utils import timezone
+        return (timezone.now().date() - self.last_change_date).days
+
     @property
     def risk_score(self):
         ra = self.risk_assessments.filter(

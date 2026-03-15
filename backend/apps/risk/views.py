@@ -145,6 +145,16 @@ class RiskAssessmentViewSet(viewsets.ModelViewSet):
             return Response({"error": str(e.message)}, status=400)
 
 
+    @action(detail=False, methods=["get"], url_path="needs-revaluation")
+    def needs_revaluation_list(self, request):
+        """Risk assessment che richiedono rivalutazione dopo un change."""
+        plant_id = request.query_params.get("plant")
+        qs = self.get_queryset().filter(needs_revaluation=True)
+        if plant_id:
+            qs = qs.filter(plant_id=plant_id)
+        return Response(self.get_serializer(qs, many=True).data)
+
+
 class RiskDimensionViewSet(viewsets.ModelViewSet):
     queryset = RiskDimension.objects.select_related("assessment")
     serializer_class = RiskDimensionSerializer

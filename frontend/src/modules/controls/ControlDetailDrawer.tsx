@@ -152,6 +152,8 @@ function TabValutazione({
   calcMaturityLevel,
   maturityLevelOverride,
   framework,
+  needsRevaluation,
+  needsRevaluationSince,
 }: {
   instanceId: string;
   requirements: RequirementsCheck;
@@ -164,6 +166,8 @@ function TabValutazione({
   calcMaturityLevel: number;
   maturityLevelOverride: boolean;
   framework: string;
+  needsRevaluation?: boolean;
+  needsRevaluationSince?: string | null;
 }) {
   const qc = useQueryClient();
   const [selectedStatus, setSelectedStatus] = useState("");
@@ -233,6 +237,17 @@ function TabValutazione({
 
   return (
     <div className="space-y-4">
+      {/* Banner rivalutazione da change */}
+      {needsRevaluation && (
+        <div className="border border-amber-300 bg-amber-50 rounded-lg p-3">
+          <p className="text-sm font-medium text-amber-800">Rivalutazione richiesta</p>
+          <p className="text-xs text-amber-700 mt-1">
+            Un change registrato{needsRevaluationSince ? ` dal ${new Date(needsRevaluationSince).toLocaleDateString("it-IT")}` : ""} potrebbe aver
+            impattato questo controllo. Verificare e aggiornare la valutazione.
+          </p>
+        </div>
+      )}
+
       {/* Banner requisiti */}
       {noRequirements ? (
         <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500">
@@ -913,6 +928,8 @@ export function ControlDetailDrawer({ instanceId, onClose }: Props) {
                   calcMaturityLevel={info.calc_maturity_level}
                   maturityLevelOverride={info.maturity_level_override}
                   framework={info.framework}
+                  needsRevaluation={info.needs_revaluation}
+                  needsRevaluationSince={info.needs_revaluation_since}
                 />
               )}
               {tab === "docevidence" && (

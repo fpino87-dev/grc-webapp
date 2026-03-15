@@ -132,6 +132,12 @@ class ControlInstance(BaseModel):
     na_justification = models.TextField(blank=True)
     last_evaluated_note = models.TextField(blank=True)
 
+    needs_revaluation = models.BooleanField(
+        default=False,
+        help_text="True se un change recente richiede rivalutazione",
+    )
+    needs_revaluation_since = models.DateField(null=True, blank=True)
+
     # Applicabilità per SOA ISO 27001
     applicability = models.CharField(
         max_length=20,

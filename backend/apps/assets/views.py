@@ -11,7 +11,7 @@ from .serializers import (
     AssetOTSerializer,
     NetworkZoneSerializer,
 )
-from .services import get_eol_assets
+from .services import get_eol_assets, register_change, clear_revaluation_flag
 
 
 class NetworkZoneViewSet(viewsets.ModelViewSet):
@@ -71,6 +71,35 @@ class AssetITViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data)
 
+    @action(detail=True, methods=["post"], url_path="register-change")
+    def register_change_action(self, request, pk=None):
+        asset = self.get_object()
+        change_ref = request.data.get("change_ref", "")
+        if not change_ref:
+            return Response({"error": "change_ref obbligatorio"}, status=400)
+        result = register_change(
+            asset=asset,
+            user=request.user,
+            change_ref=change_ref,
+            change_desc=request.data.get("change_desc", ""),
+            portal_url=request.data.get("portal_url", ""),
+        )
+        return Response(result)
+
+    @action(detail=True, methods=["post"], url_path="clear-revaluation")
+    def clear_revaluation(self, request, pk=None):
+        asset = self.get_object()
+        clear_revaluation_flag(asset, request.user, request.data.get("notes", ""))
+        return Response({"ok": True})
+
+    @action(detail=False, methods=["get"], url_path="needs-revaluation")
+    def needs_revaluation_list(self, request):
+        plant_id = request.query_params.get("plant")
+        qs = self.get_queryset().filter(needs_revaluation=True)
+        if plant_id:
+            qs = qs.filter(plant_id=plant_id)
+        return Response(self.get_serializer(qs, many=True).data)
+
 
 class AssetOTViewSet(viewsets.ModelViewSet):
     queryset = AssetOT.objects.select_related("plant", "owner", "network_zone")
@@ -96,6 +125,35 @@ class AssetOTViewSet(viewsets.ModelViewSet):
             entity=instance,
             payload={"id": str(instance.id), "name": instance.name},
         )
+
+    @action(detail=True, methods=["post"], url_path="register-change")
+    def register_change_action(self, request, pk=None):
+        asset = self.get_object()
+        change_ref = request.data.get("change_ref", "")
+        if not change_ref:
+            return Response({"error": "change_ref obbligatorio"}, status=400)
+        result = register_change(
+            asset=asset,
+            user=request.user,
+            change_ref=change_ref,
+            change_desc=request.data.get("change_desc", ""),
+            portal_url=request.data.get("portal_url", ""),
+        )
+        return Response(result)
+
+    @action(detail=True, methods=["post"], url_path="clear-revaluation")
+    def clear_revaluation(self, request, pk=None):
+        asset = self.get_object()
+        clear_revaluation_flag(asset, request.user, request.data.get("notes", ""))
+        return Response({"ok": True})
+
+    @action(detail=False, methods=["get"], url_path="needs-revaluation")
+    def needs_revaluation_list(self, request):
+        plant_id = request.query_params.get("plant")
+        qs = self.get_queryset().filter(needs_revaluation=True)
+        if plant_id:
+            qs = qs.filter(plant_id=plant_id)
+        return Response(self.get_serializer(qs, many=True).data)
 
 
 class AssetDependencyViewSet(viewsets.ModelViewSet):

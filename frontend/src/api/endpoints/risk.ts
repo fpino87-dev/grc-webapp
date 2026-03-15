@@ -45,6 +45,8 @@ export interface RiskAssessment {
   risk_acceptance_expiry: string | null;
   assessed_at: string | null;
   plan_due_date: string | null;
+  needs_revaluation: boolean;
+  needs_revaluation_since: string | null;
 }
 
 export interface SuggestResidualResult {

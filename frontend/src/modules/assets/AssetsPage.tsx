@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { assetsApi, type AssetIT, type AssetOT } from "../../api/endpoints/assets";
+import { assetsApi, type AssetIT, type AssetOT, type RegisterChangeResult } from "../../api/endpoints/assets";
 import { plantsApi } from "../../api/endpoints/plants";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 
@@ -13,13 +13,150 @@ function CriticalityBadge({ value }: { value: number }) {
     5: "bg-red-100 text-red-800",
   };
   return (
-    <span
-      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-        colors[value] ?? "bg-gray-100 text-gray-600"
-      }`}
-    >
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${colors[value] ?? "bg-gray-100 text-gray-600"}`}>
       {value}
     </span>
+  );
+}
+
+function ChangeBadges({ asset }: { asset: AssetIT | AssetOT }) {
+  return (
+    <>
+      {asset.has_recent_change && (
+        <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-300 ml-2">
+          Change {asset.change_age_days}gg fa
+        </span>
+      )}
+      {asset.needs_revaluation && (
+        <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-300 ml-2">
+          Da rivalutare
+        </span>
+      )}
+    </>
+  );
+}
+
+function RegisterChangeForm({
+  asset,
+  assetType,
+  onClose,
+}: {
+  asset: AssetIT | AssetOT;
+  assetType: "IT" | "OT";
+  onClose: () => void;
+}) {
+  const qc = useQueryClient();
+  const [changeRef, setChangeRef] = useState("");
+  const [changeDesc, setChangeDesc] = useState("");
+  const [portalUrl, setPortalUrl] = useState("");
+  const [result, setResult] = useState<RegisterChangeResult | null>(null);
+
+  const registerMutation = useMutation({
+    mutationFn: () =>
+      assetsApi.registerChange(asset.id, assetType, {
+        change_ref: changeRef,
+        change_desc: changeDesc,
+        portal_url: portalUrl,
+      }),
+    onSuccess: (res) => {
+      setResult(res);
+      qc.invalidateQueries({ queryKey: [assetType === "IT" ? "assets-it" : "assets-ot"] });
+    },
+  });
+
+  const clearMutation = useMutation({
+    mutationFn: () => assetsApi.clearRevaluation(asset.id, assetType),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [assetType === "IT" ? "assets-it" : "assets-ot"] });
+      onClose();
+    },
+  });
+
+  return (
+    <div className="border border-amber-200 bg-amber-50 rounded-lg p-4 mt-4">
+      {/* Existing change info */}
+      {asset.last_change_ref && (
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-medium text-amber-800 text-sm">Ultimo change registrato</span>
+            {asset.change_portal_url && (
+              <a href={asset.change_portal_url} target="_blank" rel="noreferrer" className="text-blue-600 text-sm hover:underline">
+                Apri ticket →
+              </a>
+            )}
+          </div>
+          <p className="text-sm"><strong>Ref:</strong> {asset.last_change_ref}</p>
+          <p className="text-sm"><strong>Data:</strong> {asset.last_change_date ? new Date(asset.last_change_date).toLocaleDateString("it-IT") : "—"}</p>
+          <p className="text-sm"><strong>Descrizione:</strong> {asset.last_change_desc || "—"}</p>
+          {asset.needs_revaluation && (
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-sm text-red-600">
+                Rivalutazione richiesta dal {asset.needs_revaluation_since ? new Date(asset.needs_revaluation_since).toLocaleDateString("it-IT") : "—"}
+              </span>
+              <button
+                onClick={() => clearMutation.mutate()}
+                disabled={clearMutation.isPending}
+                className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 disabled:opacity-50"
+              >
+                Segna come rivalutato
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Register change form */}
+      {result ? (
+        <div className="bg-white rounded border border-green-200 p-3">
+          <p className="text-sm font-medium text-green-700 mb-1">Change registrato</p>
+          <p className="text-xs text-gray-600">Ref: {result.ref}</p>
+          <p className="text-xs text-gray-600">
+            Impattati: {result.affected.controls} controlli, {result.affected.risks} risk assessment,{" "}
+            {result.affected.processes} processi
+          </p>
+          <button onClick={onClose} className="mt-2 text-xs text-blue-600 hover:underline">Chiudi</button>
+        </div>
+      ) : (
+        <>
+          <p className="text-xs font-semibold text-amber-800 uppercase tracking-wide mb-2">Registra change</p>
+          <div className="space-y-2">
+            <input
+              value={changeRef}
+              onChange={(e) => setChangeRef(e.target.value)}
+              placeholder="Riferimento ticket (es. JIRA-1234) *"
+              className="w-full border rounded px-3 py-1.5 text-sm"
+            />
+            <input
+              value={changeDesc}
+              onChange={(e) => setChangeDesc(e.target.value)}
+              placeholder="Descrizione breve del change"
+              className="w-full border rounded px-3 py-1.5 text-sm"
+            />
+            <input
+              value={portalUrl}
+              onChange={(e) => setPortalUrl(e.target.value)}
+              placeholder="URL ticket (opzionale)"
+              className="w-full border rounded px-3 py-1.5 text-sm"
+            />
+          </div>
+          {registerMutation.isError && (
+            <p className="text-xs text-red-600 mt-1">Errore durante la registrazione</p>
+          )}
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={() => registerMutation.mutate()}
+              disabled={!changeRef || registerMutation.isPending}
+              className="px-3 py-1.5 bg-amber-600 text-white text-sm rounded hover:bg-amber-700 disabled:opacity-50"
+            >
+              {registerMutation.isPending ? "Registrazione..." : "Registra"}
+            </button>
+            <button onClick={onClose} className="px-3 py-1.5 border rounded text-sm text-gray-600 hover:bg-gray-50">
+              Annulla
+            </button>
+          </div>
+        </>
+      )}
+    </div>
   );
 }
 
@@ -117,6 +254,8 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
 }
 
 function ITTab({ search }: { search: string }) {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
   const { data, isLoading } = useQuery({
     queryKey: ["assets-it"],
     queryFn: () => assetsApi.listIT(),
@@ -144,33 +283,48 @@ function ITTab({ search }: { search: string }) {
           <th className="text-left px-4 py-3 font-medium text-gray-600">Criticità</th>
           <th className="text-left px-4 py-3 font-medium text-gray-600">Esposto internet</th>
           <th className="text-left px-4 py-3 font-medium text-gray-600">EOL</th>
+          <th className="px-4 py-3"></th>
         </tr>
       </thead>
       <tbody className="divide-y divide-gray-100">
         {assets.length === 0 ? (
           <tr>
-            <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
+            <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
               Nessun asset IT trovato
             </td>
           </tr>
         ) : (
           assets.map((a) => (
-            <tr key={a.id} className="hover:bg-gray-50 transition-colors">
-              <td className="px-4 py-3 font-medium text-gray-800">{a.name}</td>
-              <td className="px-4 py-3 text-gray-600 font-mono text-xs">{a.fqdn}</td>
-              <td className="px-4 py-3 text-gray-600">{a.os}</td>
-              <td className="px-4 py-3">
-                <CriticalityBadge value={a.criticality} />
-              </td>
-              <td className="px-4 py-3">
-                <StatusBadge status={a.internet_exposed ? "si" : "no"} />
-              </td>
-              <td className="px-4 py-3 text-gray-500 text-xs">
-                {a.eol_date
-                  ? new Date(a.eol_date).toLocaleDateString("it-IT")
-                  : "—"}
-              </td>
-            </tr>
+            <>
+              <tr key={a.id} className="hover:bg-gray-50 transition-colors">
+                <td className="px-4 py-3 font-medium text-gray-800">
+                  {a.name}
+                  <ChangeBadges asset={a} />
+                </td>
+                <td className="px-4 py-3 text-gray-600 font-mono text-xs">{a.fqdn}</td>
+                <td className="px-4 py-3 text-gray-600">{a.os}</td>
+                <td className="px-4 py-3"><CriticalityBadge value={a.criticality} /></td>
+                <td className="px-4 py-3"><StatusBadge status={a.internet_exposed ? "si" : "no"} /></td>
+                <td className="px-4 py-3 text-gray-500 text-xs">
+                  {a.eol_date ? new Date(a.eol_date).toLocaleDateString("it-IT") : "—"}
+                </td>
+                <td className="px-4 py-3">
+                  <button
+                    onClick={() => setExpandedId(expandedId === a.id ? null : a.id)}
+                    className="text-xs text-blue-600 hover:underline border border-blue-200 rounded px-2 py-0.5"
+                  >
+                    {expandedId === a.id ? "Chiudi" : "Change"}
+                  </button>
+                </td>
+              </tr>
+              {expandedId === a.id && (
+                <tr key={`${a.id}-detail`}>
+                  <td colSpan={7} className="px-4 pb-4">
+                    <RegisterChangeForm asset={a} assetType="IT" onClose={() => setExpandedId(null)} />
+                  </td>
+                </tr>
+              )}
+            </>
           ))
         )}
       </tbody>
@@ -179,6 +333,8 @@ function ITTab({ search }: { search: string }) {
 }
 
 function OTTab({ search }: { search: string }) {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
   const { data, isLoading } = useQuery({
     queryKey: ["assets-ot"],
     queryFn: () => assetsApi.listOT(),
@@ -206,33 +362,50 @@ function OTTab({ search }: { search: string }) {
           <th className="text-left px-4 py-3 font-medium text-gray-600">Patchable</th>
           <th className="text-left px-4 py-3 font-medium text-gray-600">Vendor</th>
           <th className="text-left px-4 py-3 font-medium text-gray-600">Criticità</th>
+          <th className="px-4 py-3"></th>
         </tr>
       </thead>
       <tbody className="divide-y divide-gray-100">
         {assets.length === 0 ? (
           <tr>
-            <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
+            <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
               Nessun asset OT trovato
             </td>
           </tr>
         ) : (
           assets.map((a) => (
-            <tr key={a.id} className="hover:bg-gray-50 transition-colors">
-              <td className="px-4 py-3 font-medium text-gray-800">{a.name}</td>
-              <td className="px-4 py-3">
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                  {a.category}
-                </span>
-              </td>
-              <td className="px-4 py-3 text-gray-600">{a.purdue_level}</td>
-              <td className="px-4 py-3">
-                <StatusBadge status={a.patchable ? "si" : "no"} />
-              </td>
-              <td className="px-4 py-3 text-gray-600">{a.vendor}</td>
-              <td className="px-4 py-3">
-                <CriticalityBadge value={a.criticality} />
-              </td>
-            </tr>
+            <>
+              <tr key={a.id} className="hover:bg-gray-50 transition-colors">
+                <td className="px-4 py-3 font-medium text-gray-800">
+                  {a.name}
+                  <ChangeBadges asset={a} />
+                </td>
+                <td className="px-4 py-3">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                    {a.category}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-gray-600">{a.purdue_level}</td>
+                <td className="px-4 py-3"><StatusBadge status={a.patchable ? "si" : "no"} /></td>
+                <td className="px-4 py-3 text-gray-600">{a.vendor}</td>
+                <td className="px-4 py-3"><CriticalityBadge value={a.criticality} /></td>
+                <td className="px-4 py-3">
+                  <button
+                    onClick={() => setExpandedId(expandedId === a.id ? null : a.id)}
+                    className="text-xs text-blue-600 hover:underline border border-blue-200 rounded px-2 py-0.5"
+                  >
+                    {expandedId === a.id ? "Chiudi" : "Change"}
+                  </button>
+                </td>
+              </tr>
+              {expandedId === a.id && (
+                <tr key={`${a.id}-detail`}>
+                  <td colSpan={7} className="px-4 pb-4">
+                    <RegisterChangeForm asset={a} assetType="OT" onClose={() => setExpandedId(null)} />
+                  </td>
+                </tr>
+              )}
+            </>
           ))
         )}
       </tbody>

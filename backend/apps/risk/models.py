@@ -67,6 +67,13 @@ class RiskAssessment(BaseModel):
     assessed_at = models.DateTimeField(null=True, blank=True)
     score = models.IntegerField(null=True, blank=True)
     ale_annuo = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
+
+    needs_revaluation = models.BooleanField(
+        default=False,
+        help_text="True se un change recente richiede rivalutazione",
+    )
+    needs_revaluation_since = models.DateField(null=True, blank=True)
+
     risk_accepted = models.BooleanField(default=False)
     accepted_by = models.ForeignKey(
         "auth.User",

@@ -697,7 +697,14 @@ export function RiskPage() {
                         ? <span className="text-blue-700 font-medium">{formatAle(a.ale_calcolato)}</span>
                         : formatAle(a.ale_annuo)}
                     </td>
-                    <td className="px-4 py-3"><StatusBadge status={a.status} /></td>
+                    <td className="px-4 py-3">
+                      <StatusBadge status={a.status} />
+                      {a.needs_revaluation && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 ml-1">
+                          Rivalutare
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 whitespace-nowrap" onClick={e => e.stopPropagation()}>
                       {a.status === "bozza" && !!a.probability && !!a.impact && (
                         <button onClick={() => completeMutation.mutate(a.id)} disabled={completeMutation.isPending}

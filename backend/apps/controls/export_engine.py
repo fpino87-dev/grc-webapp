@@ -258,10 +258,74 @@ def _generate_soa(fw, plant, instances, user) -> str:
   Versione documento: 1.0
 </div>"""
 
+    # Clausola 8.1 — change management evidence
+    change_section = _generate_soa_change_section(plant)
+    content += change_section
+
     return _base_html(
         f"SOA — {plant_name}",
         content, plant_name, fw.name, user_name
     )
+
+
+def _generate_soa_change_section(plant) -> str:
+    """Sezione clausola 8.1 — asset con change recenti (ultimi 90gg)."""
+    from apps.assets.models import Asset
+
+    since = timezone.now().date() - timezone.timedelta(days=90)
+    qs_args = dict(last_change_date__gte=since, deleted_at__isnull=True)
+    if plant is not None:
+        qs_args["plant"] = plant
+    recent_changes = Asset.objects.filter(**qs_args).order_by("-last_change_date")
+
+    if recent_changes.exists():
+        rows = ""
+        for asset in recent_changes:
+            rivalutato = (
+                '<span class="badge-green">Sì</span>'
+                if not asset.needs_revaluation
+                else '<span class="badge-red">In attesa</span>'
+            )
+            portal_link = (
+                f'<a href="{asset.change_portal_url}" style="color:#1e40af">'
+                f'{asset.last_change_ref}</a>'
+                if asset.change_portal_url
+                else asset.last_change_ref or "—"
+            )
+            rows += f"""
+        <tr>
+          <td>{asset.name}</td>
+          <td>{portal_link}</td>
+          <td>{asset.last_change_date.strftime("%d/%m/%Y") if asset.last_change_date else "—"}</td>
+          <td>{(asset.last_change_desc or "")[:80]}</td>
+          <td>{rivalutato}</td>
+        </tr>"""
+        table_html = f"""
+<table>
+  <tr>
+    <th>Asset</th>
+    <th>Change ref</th>
+    <th>Data</th>
+    <th>Descrizione</th>
+    <th>Rivalutato?</th>
+  </tr>
+  {rows}
+</table>"""
+    else:
+        table_html = "<p style='font-size:9px;color:#6b7280'>Nessun change registrato negli ultimi 90 giorni.</p>"
+
+    return f"""
+<h2>Nota sulla gestione delle modifiche (Clausola 8.1)</h2>
+<p style="font-size:10px">
+  La gestione delle modifiche ai sistemi informativi è gestita tramite il sistema
+  di ticketing aziendale. Il GRC System integra i riferimenti ai change ticket
+  direttamente sugli asset, generando automaticamente alert di rivalutazione per
+  i controlli e i risk assessment impattati. La presente nota costituisce evidenza
+  del processo di controllo delle modifiche ai sensi della clausola 8.1 di
+  ISO/IEC 27001:2022.
+</p>
+<p style="font-size:9px;font-weight:bold">Asset con change recenti (ultimi 90 giorni):</p>
+{table_html}"""
 
 
 def _generate_vda_isa(fw, plant, instances, user) -> str:

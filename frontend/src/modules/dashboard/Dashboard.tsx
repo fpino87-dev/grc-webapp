@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { controlsApi } from "../../api/endpoints/controls";
 import { incidentsApi } from "../../api/endpoints/incidents";
 import { plantsApi } from "../../api/endpoints/plants";
 import { reportingApi } from "../../api/endpoints/reporting";
+import { assetsApi } from "../../api/endpoints/assets";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -139,6 +141,31 @@ function KpiTrendChart() {
   );
 }
 
+function RevaluationAlert() {
+  const navigate = useNavigate();
+  const { data: assetsToReview } = useQuery({
+    queryKey: ["assets-needs-revaluation"],
+    queryFn: () => assetsApi.needsRevaluationIT(),
+    retry: false,
+  });
+  const count = assetsToReview?.length ?? 0;
+  if (!count) return null;
+  return (
+    <div className="border border-amber-300 bg-amber-50 rounded-lg p-4 mb-6">
+      <p className="font-semibold text-amber-800">
+        {count} asset da rivalutare
+      </p>
+      <p className="text-sm text-amber-700">Change registrati non ancora rivalutati</p>
+      <button
+        onClick={() => navigate("/assets")}
+        className="text-sm text-blue-600 hover:underline mt-1"
+      >
+        Vedi lista →
+      </button>
+    </div>
+  );
+}
+
 export function Dashboard() {
   const { data: controlsData } = useQuery({
     queryKey: ["controls-summary"],
@@ -164,6 +191,8 @@ export function Dashboard() {
   return (
     <div>
       <h2 className="text-xl font-semibold text-gray-900 mb-6">Dashboard</h2>
+
+      <RevaluationAlert />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <KpiCard label="Siti attivi" value={plants?.length ?? "—"} color="blue" />

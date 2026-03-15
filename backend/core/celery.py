@@ -16,5 +16,9 @@ app.conf.beat_schedule = {
         "task": "apps.reporting.tasks.generate_weekly_kpi_snapshots",
         "schedule": crontab(hour=6, minute=0, day_of_week=1),  # Monday 06:00
     },
+    "check-unrevalued-changes": {
+        "task": "apps.assets.tasks.check_unrevalued_changes",
+        "schedule": crontab(hour=7, minute=0, day_of_week=1),  # Monday 07:00
+    },
 }
 
