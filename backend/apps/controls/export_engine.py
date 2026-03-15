@@ -32,11 +32,10 @@ def generate_export(framework_code: str, plant_id,
             f"Eseguire: python manage.py load_frameworks"
         )
 
-    # Plant opzionale — se None ritorna queryset vuoto
-    if plant_id:
-        instances = ControlInstance.objects.filter(
+    def _fetch_instances(framework_obj):
+        return ControlInstance.objects.filter(
             plant_id=plant_id,
-            control__framework=fw,
+            control__framework=framework_obj,
             deleted_at__isnull=True,
         ).select_related(
             "control__domain", "control__framework",
@@ -45,12 +44,29 @@ def generate_export(framework_code: str, plant_id,
         ).prefetch_related("evidences", "documents").order_by(
             "control__domain__order", "control__external_id"
         )
+
+    # Plant opzionale — se None ritorna queryset vuoto
+    if plant_id:
+        instances = _fetch_instances(fw)
     else:
         instances = ControlInstance.objects.none()
 
     if export_format == "soa":
         return _generate_soa(fw, plant, instances, user)
     elif export_format == "vda_isa":
+        # TISAX L3 include tutti i controlli L2 + L3
+        if framework_code == "TISAX_L3" and plant_id:
+            fw_l2 = Framework.objects.filter(code="TISAX_L2").first()
+            if fw_l2:
+                instances_l2 = _fetch_instances(fw_l2)
+                # Combina L2 + L3 come lista, ordinate per external_id
+                from itertools import chain
+                import operator
+                combined = sorted(
+                    chain(instances_l2, instances),
+                    key=operator.attrgetter("control.external_id"),
+                )
+                return _generate_vda_isa(fw, plant, combined, user)
         return _generate_vda_isa(fw, plant, instances, user)
     elif export_format == "compliance_matrix":
         return _generate_compliance_matrix(fw, plant, instances, user)
