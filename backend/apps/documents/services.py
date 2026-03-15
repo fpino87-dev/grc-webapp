@@ -23,7 +23,15 @@ def approve_document(document, user, notes=""):
     document.status = "approvato"
     document.approved_at = timezone.now()
     document.approver = user
-    document.save(update_fields=["status", "approved_at", "approver", "updated_at"])
+    # Set review_due_date from configurable schedule policy
+    try:
+        from apps.compliance_schedule.services import get_due_date
+        plant = getattr(document, "plant", None)
+        rule_type = f"document_{document.document_type}"
+        document.review_due_date = get_due_date(rule_type, plant=plant)
+    except Exception:
+        pass
+    document.save(update_fields=["status", "approved_at", "approver", "review_due_date", "updated_at"])
     DocumentApproval.objects.create(
         document=document, action="approve", actor=user, notes=notes
     )

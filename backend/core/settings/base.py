@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "apps.reporting",
     "apps.notifications",
     "apps.ai_engine",
+    "apps.compliance_schedule",
 ]
 
 MIDDLEWARE = [

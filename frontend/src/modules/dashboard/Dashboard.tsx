@@ -6,6 +6,7 @@ import { incidentsApi } from "../../api/endpoints/incidents";
 import { plantsApi } from "../../api/endpoints/plants";
 import { reportingApi } from "../../api/endpoints/reporting";
 import { assetsApi } from "../../api/endpoints/assets";
+import { scheduleApi } from "../../api/endpoints/schedule";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -141,6 +142,47 @@ function KpiTrendChart() {
   );
 }
 
+const URGENCY_DOT: Record<string, string> = {
+  green: "bg-green-500", yellow: "bg-yellow-500", red: "bg-red-500",
+};
+
+function UpcomingDeadlinesWidget() {
+  const navigate = useNavigate();
+  const { data } = useQuery({
+    queryKey: ["activity-schedule-widget"],
+    queryFn: () => scheduleApi.getActivitySchedule({ months: 3 }),
+    retry: false,
+  });
+
+  const items = (data?.results ?? []).slice(0, 6);
+  if (items.length === 0) return null;
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-semibold text-gray-700">Prossime scadenze (3 mesi)</h3>
+        <button
+          onClick={() => navigate("/schedule/activity")}
+          className="text-xs text-blue-600 hover:underline"
+        >
+          Vedi tutte →
+        </button>
+      </div>
+      <div className="space-y-2">
+        {items.map((item, idx) => (
+          <div key={idx} className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <span className={`inline-block w-2 h-2 rounded-full flex-shrink-0 ${URGENCY_DOT[item.urgency]}`} />
+              <span className="text-gray-700 truncate">{item.label}</span>
+            </div>
+            <span className="text-xs text-gray-500 flex-shrink-0 ml-2">{item.due_date}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function RevaluationAlert() {
   const navigate = useNavigate();
   const { data: assetsToReview } = useQuery({
@@ -217,6 +259,10 @@ export function Dashboard() {
 
       <div className="mb-6">
         <KpiTrendChart />
+      </div>
+
+      <div className="mb-6">
+        <UpcomingDeadlinesWidget />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

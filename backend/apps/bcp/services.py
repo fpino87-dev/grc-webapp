@@ -68,7 +68,12 @@ def record_test(
         participants_count=participants_count,
     )
     plan.last_test_date = test.test_date
-    plan.save(update_fields=["last_test_date", "updated_at"])
+    try:
+        from apps.compliance_schedule.services import get_due_date
+        plan.next_test_date = get_due_date("bcp_test", plant=plan.plant, from_date=test.test_date)
+        plan.save(update_fields=["last_test_date", "next_test_date", "updated_at"])
+    except Exception:
+        plan.save(update_fields=["last_test_date", "updated_at"])
     log_action(
         user=user,
         action_code="bcp.plan.test",

@@ -39,6 +39,14 @@ const navGroups = [
     ],
   },
   {
+    label: "Pianificazione",
+    items: [
+      { to: "/schedule/activity",  label: "Activity Schedule", icon: "📅", roles: null },
+      { to: "/schedule/documents", label: "Documenti Obbl.",   icon: "📋", roles: null },
+      { to: "/schedule/policy",    label: "Policy Scadenze",   icon: "⚙",  roles: ["super_admin", "compliance_officer"] },
+    ],
+  },
+  {
     label: "Governance",
     items: [
       { to: "/governance", label: "Governance", icon: "◈", roles: null },

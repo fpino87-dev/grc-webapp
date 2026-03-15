@@ -23,6 +23,9 @@ import { AuditPrepPage } from "./modules/auditprep/AuditPrepPage";
 import { PdcaPage } from "./modules/pdca/PdcaPage";
 import { ManagementReviewPage } from "./modules/managementreview/ManagementReviewPage";
 import { AuditTrailPage } from "./modules/audittrail/AuditTrailPage";
+import { ActivitySchedulePage } from "./modules/schedule/ActivitySchedulePage";
+import { RequiredDocumentsPage } from "./modules/schedule/RequiredDocumentsPage";
+import { SchedulePolicyPage } from "./modules/schedule/SchedulePolicyPage";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
@@ -64,6 +67,9 @@ export function App() {
           <Route path="pdca" element={<PdcaPage />} />
           <Route path="management-review" element={<ManagementReviewPage />} />
           <Route path="audit-trail" element={<AuditTrailPage />} />
+          <Route path="schedule/activity" element={<ActivitySchedulePage />} />
+          <Route path="schedule/documents" element={<RequiredDocumentsPage />} />
+          <Route path="schedule/policy" element={<SchedulePolicyPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

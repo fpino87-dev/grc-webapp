@@ -32,5 +32,6 @@ urlpatterns = [
     path("api/v1/reporting/", include("apps.reporting.urls")),
     path("api/v1/notifications/", include("apps.notifications.urls")),
     path("api/v1/ai/", include("apps.ai_engine.urls")),
+    path("api/v1/schedule/", include("apps.compliance_schedule.urls")),
 ]
 
