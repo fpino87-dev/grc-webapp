@@ -1,12 +1,13 @@
-from rest_framework import viewsets, status
+from django.core.exceptions import ValidationError
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from core.audit import log_action
 
+from . import services
 from .models import PdcaCycle, PdcaPhase
 from .serializers import PdcaCycleSerializer, PdcaPhaseSerializer
-from . import services
 
 
 class PdcaCycleViewSet(viewsets.ModelViewSet):
@@ -28,11 +29,46 @@ class PdcaCycleViewSet(viewsets.ModelViewSet):
             payload={"cycle_id": str(cycle.pk), "title": cycle.title},
         )
 
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], url_path="advance")
     def advance(self, request, pk=None):
+        from apps.documents.models import Evidence
+
         cycle = self.get_object()
-        services.advance_phase(cycle, request.user)
-        return Response(PdcaCycleSerializer(cycle).data)
+        notes = request.data.get("notes", "")
+        outcome = request.data.get("outcome", "")
+        evidence_id = request.data.get("evidence_id")
+        evidence = None
+        if evidence_id:
+            evidence = Evidence.objects.filter(pk=evidence_id).first()
+            if not evidence:
+                return Response({"error": "Evidenza non trovata"}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            cycle = services.advance_phase(
+                cycle,
+                request.user,
+                phase_notes=notes,
+                evidence=evidence,
+                outcome=outcome,
+            )
+            return Response(
+                {
+                    "ok": True,
+                    "fase_corrente": cycle.fase_corrente,
+                    "reopened_as": str(cycle.reopened_as.pk) if cycle.reopened_as else None,
+                }
+            )
+        except ValidationError as exc:
+            return Response({"error": str(exc.message)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=["post"], url_path="close")
+    def close(self, request, pk=None):
+        cycle = self.get_object()
+        act_description = request.data.get("act_description", "")
+        try:
+            cycle = services.close_cycle(cycle, request.user, act_description)
+            return Response({"ok": True, "fase_corrente": "chiuso"})
+        except ValidationError as exc:
+            return Response({"error": str(exc.message)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PdcaPhaseViewSet(viewsets.ModelViewSet):
