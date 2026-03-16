@@ -66,8 +66,12 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     since_12m = timezone.now() - timezone.timedelta(days=365)
 
     # ── 1. Compliance per framework con dettaglio ──
+    from apps.plants.services import get_active_frameworks
+    from apps.plants.models import Plant as PlantModel
+    _plant = PlantModel.objects.filter(pk=plant_id).first() if plant_id else None
+
     frameworks_detail = {}
-    for fw in Framework.objects.filter(archived_at__isnull=True):
+    for fw in get_active_frameworks(_plant):
         qs = ControlInstance.objects.filter(
             plant_id=plant_id, control__framework=fw
         ).select_related("control__domain")

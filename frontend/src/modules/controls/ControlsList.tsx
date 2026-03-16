@@ -203,8 +203,8 @@ export function ControlsList() {
   });
 
   const { data: frameworks } = useQuery({
-    queryKey: ["frameworks"],
-    queryFn: () => controlsApi.frameworks(),
+    queryKey: ["frameworks", selectedPlant?.id],
+    queryFn: () => controlsApi.frameworks(selectedPlant?.id),
     retry: false,
   });
 

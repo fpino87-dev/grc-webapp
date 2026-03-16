@@ -67,8 +67,8 @@ export function GapAnalysisPage() {
   const selectedPlant = useAuthStore(s => s.selectedPlant);
 
   const { data: frameworks } = useQuery({
-    queryKey: ["frameworks"],
-    queryFn: () => controlsApi.frameworks(),
+    queryKey: ["frameworks", selectedPlant?.id],
+    queryFn: () => controlsApi.frameworks(selectedPlant?.id),
     retry: false,
   });
 

@@ -305,6 +305,13 @@ def get_required_documents_status(plant=None, framework: str = "ISO27001") -> li
     For each RequiredDocument of the given framework, check whether a matching
     Document exists in the plant. Returns traffic-light status.
     """
+    # Verifica che il framework sia attivo per questo plant
+    if plant:
+        from apps.plants.services import get_active_framework_codes
+        active_codes = get_active_framework_codes(plant)
+        if framework not in active_codes:
+            return []
+
     from .models import RequiredDocument
     required = RequiredDocument.objects.filter(framework=framework)
     result = []

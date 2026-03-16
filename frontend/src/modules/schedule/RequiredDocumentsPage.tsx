@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { scheduleApi, RequiredDocItem } from "../../api/endpoints/schedule";
 import { plantsApi } from "../../api/endpoints/plants";
+import { controlsApi } from "../../api/endpoints/controls";
 
-const FRAMEWORK_OPTIONS = [
-  { value: "ISO27001", label: "ISO 27001" },
-  { value: "NIS2",     label: "NIS2" },
-  { value: "TISAX_L2", label: "TISAX L2" },
-  { value: "TISAX_L3", label: "TISAX L3" },
-];
+const FRAMEWORK_LABELS: Record<string, string> = {
+  ISO27001: "ISO 27001",
+  NIS2:     "NIS2",
+  TISAX_L2: "TISAX L2",
+  TISAX_L3: "TISAX L3",
+};
 
 const TRAFFIC_LIGHT: Record<string, { bg: string; text: string; label: string }> = {
   green:  { bg: "bg-green-500",  text: "text-white", label: "Presente e approvato" },
@@ -65,6 +66,23 @@ export function RequiredDocumentsPage() {
     retry: false,
   });
 
+  // Carica solo framework attivi per il plant selezionato
+  const { data: activeFrameworks } = useQuery({
+    queryKey: ["frameworks", plantId || undefined],
+    queryFn: () => controlsApi.frameworks(plantId || undefined),
+    retry: false,
+  });
+
+  // Quando cambia il plant, reimposta framework se quello corrente non è attivo
+  useEffect(() => {
+    if (activeFrameworks && activeFrameworks.length > 0) {
+      const codes = activeFrameworks.map(f => f.code);
+      if (!codes.includes(framework)) {
+        setFramework(codes[0]);
+      }
+    }
+  }, [activeFrameworks]);
+
   const { data, isLoading } = useQuery({
     queryKey: ["required-docs-status", plantId, framework],
     queryFn: () => scheduleApi.getRequiredDocumentsStatus({
@@ -99,21 +117,28 @@ export function RequiredDocumentsPage() {
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Framework</label>
-            <div className="flex gap-1">
-              {FRAMEWORK_OPTIONS.map(opt => (
-                <button
-                  key={opt.value}
-                  onClick={() => setFramework(opt.value)}
-                  className={`px-2 py-1 text-xs rounded border ${
-                    framework === opt.value
-                      ? "bg-blue-600 text-white border-blue-600"
-                      : "text-gray-600 border-gray-300 hover:bg-gray-50"
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
+            {activeFrameworks && activeFrameworks.length === 0 ? (
+              <p className="text-xs text-amber-600 border border-amber-300 bg-amber-50 rounded px-2 py-1">
+                Nessun framework assegnato a questo plant.{" "}
+                <span className="underline">Vai in M01 Plant per attivare un framework.</span>
+              </p>
+            ) : (
+              <div className="flex gap-1 flex-wrap">
+                {(activeFrameworks ?? []).map(f => (
+                  <button
+                    key={f.code}
+                    onClick={() => setFramework(f.code)}
+                    className={`px-2 py-1 text-xs rounded border ${
+                      framework === f.code
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "text-gray-600 border-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    {FRAMEWORK_LABELS[f.code] ?? f.code}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Stato</label>

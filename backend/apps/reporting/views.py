@@ -15,6 +15,12 @@ class ComplianceSummaryView(APIView):
         qs = ControlInstance.objects.all()
         if plant_id:
             qs = qs.filter(plant_id=plant_id)
+            if not framework_code:
+                from apps.plants.services import get_active_frameworks
+                from apps.plants.models import Plant
+                plant = Plant.objects.filter(pk=plant_id).first()
+                if plant:
+                    qs = qs.filter(control__framework__in=get_active_frameworks(plant))
         if framework_code:
             qs = qs.filter(control__framework__code=framework_code)
         totals = qs.values("status").annotate(n=Count("id"))

@@ -14,8 +14,18 @@ from .serializers import (
 
 
 class FrameworkViewSet(viewsets.ModelViewSet):
-    queryset = Framework.objects.all()
-    serializer_class = FrameworkSerializer
+    serializer_class   = FrameworkSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        plant_id = self.request.query_params.get("plant")
+        if plant_id:
+            from apps.plants.services import get_active_frameworks
+            from apps.plants.models import Plant
+            plant = Plant.objects.filter(pk=plant_id).first()
+            if plant:
+                return get_active_frameworks(plant)
+        return Framework.objects.filter(archived_at__isnull=True)
 
 
 class ControlDomainViewSet(viewsets.ModelViewSet):
@@ -68,12 +78,19 @@ class ControlInstanceViewSet(viewsets.ModelViewSet):
     serializer_class = ControlInstanceSerializer
 
     def get_queryset(self):
-        qs = super().get_queryset()
-        plant_id = self.request.query_params.get("plant")
-        status = self.request.query_params.get("status")
+        qs        = super().get_queryset()
+        plant_id  = self.request.query_params.get("plant")
+        status    = self.request.query_params.get("status")
         framework = self.request.query_params.get("framework")
+
         if plant_id:
             qs = qs.filter(plant_id=plant_id)
+            if not framework:
+                from apps.plants.services import get_active_frameworks
+                from apps.plants.models import Plant
+                plant = Plant.objects.filter(pk=plant_id).first()
+                if plant:
+                    qs = qs.filter(control__framework__in=get_active_frameworks(plant))
         if status:
             qs = qs.filter(status=status)
         if framework:
@@ -395,6 +412,21 @@ class ComplianceExportView(APIView):
                          f"con framework {framework_code}. "
                          f"Usa uno di: {allowed}"
             }, status=400)
+
+        # Verifica che il framework sia attivo per questo plant
+        if plant_id and framework_code:
+            from apps.plants.services import get_active_framework_codes
+            from apps.plants.models import Plant
+            plant = Plant.objects.filter(pk=plant_id).first()
+            if plant:
+                active_codes = get_active_framework_codes(plant)
+                if framework_code not in active_codes:
+                    return Response({
+                        "error": (
+                            f"Framework '{framework_code}' non attivo per questo plant. "
+                            f"Framework attivi: {active_codes}"
+                        )
+                    }, status=400)
 
         try:
             html = generate_export(framework_code, plant_id, export_format, request.user)

@@ -316,9 +316,16 @@ def gap_analysis(source_framework_code: str, target_framework_code: str, plant_i
 
 
 def get_compliance_summary(plant_id, framework_code=None):
+    from apps.plants.services import get_active_frameworks
+    from apps.plants.models import Plant
+
     qs = ControlInstance.objects.filter(plant_id=plant_id)
     if framework_code:
         qs = qs.filter(control__framework__code=framework_code)
+    else:
+        plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
+        active_fws = get_active_frameworks(plant)
+        qs = qs.filter(control__framework__in=active_fws)
     total = qs.count()
     if total == 0:
         return {"total": 0, "compliant": 0, "gap": 0, "parziale": 0, "na": 0, "non_valutato": 0, "pct_compliant": 0}

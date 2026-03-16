@@ -126,8 +126,11 @@ export interface GapAnalysisResult {
 export const controlsApi = {
   instances: (params?: Record<string, string>) =>
     apiClient.get<{ results: ControlInstance[]; count: number }>("/controls/instances/", { params: { page_size: "500", ...params } }).then((r) => r.data),
-  frameworks: () =>
-    apiClient.get<{ results: Framework[] }>("/controls/frameworks/").then((r) => r.data.results),
+  frameworks: (plantId?: string) =>
+    apiClient.get<{ results: Framework[] }>(
+      "/controls/frameworks/",
+      { params: plantId ? { plant: plantId } : {} }
+    ).then((r) => r.data.results ?? r.data),
   updateInstance: (id: string, data: Partial<ControlInstance>) =>
     apiClient.patch<ControlInstance>(`/controls/instances/${id}/`, data).then((r) => r.data),
   propagate: (id: string) =>
