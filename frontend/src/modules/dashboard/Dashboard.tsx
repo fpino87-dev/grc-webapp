@@ -7,6 +7,7 @@ import { plantsApi } from "../../api/endpoints/plants";
 import { reportingApi } from "../../api/endpoints/reporting";
 import { assetsApi } from "../../api/endpoints/assets";
 import { scheduleApi } from "../../api/endpoints/schedule";
+import { governanceApi } from "../../api/endpoints/governance";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -183,6 +184,56 @@ function UpcomingDeadlinesWidget() {
   );
 }
 
+function CriticalRolesWidget() {
+  const navigate = useNavigate();
+
+  const { data: vacantData } = useQuery({
+    queryKey: ["governance-vacanti"],
+    queryFn: () => governanceApi.vacanti(),
+    retry: false,
+  });
+  const { data: expiringData } = useQuery({
+    queryKey: ["governance-in-scadenza"],
+    queryFn: () => governanceApi.inScadenza(30),
+    retry: false,
+  });
+
+  const hasVacant   = (vacantData?.count ?? 0) > 0;
+  const hasExpiring = (expiringData?.expiring?.length ?? 0) > 0;
+  if (!hasVacant && !hasExpiring) return null;
+
+  return (
+    <div className="space-y-3 mb-6">
+      {hasVacant && (
+        <div className="border border-red-300 bg-red-50 rounded-lg p-4">
+          <p className="font-semibold text-red-700 text-sm">
+            🚨 {vacantData!.count} ruoli obbligatori vacanti
+          </p>
+          <button
+            onClick={() => navigate("/governance")}
+            className="text-xs text-red-600 underline mt-1"
+          >
+            Vai a Governance →
+          </button>
+        </div>
+      )}
+      {hasExpiring && (
+        <div className="border border-amber-300 bg-amber-50 rounded-lg p-4">
+          <p className="font-semibold text-amber-700 text-sm">
+            ⚠ {expiringData!.expiring.length} ruoli in scadenza entro 30gg
+          </p>
+          <button
+            onClick={() => navigate("/governance")}
+            className="text-xs text-amber-600 underline mt-1"
+          >
+            Vai a Governance →
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function RevaluationAlert() {
   const navigate = useNavigate();
   const { data: assetsToReview } = useQuery({
@@ -234,6 +285,7 @@ export function Dashboard() {
     <div>
       <h2 className="text-xl font-semibold text-gray-900 mb-6">Dashboard</h2>
 
+      <CriticalRolesWidget />
       <RevaluationAlert />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
