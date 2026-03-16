@@ -2,7 +2,13 @@ from celery import shared_task
 from django.utils import timezone
 
 
-@shared_task(name="apps.assets.tasks.check_unrevalued_changes")
+@shared_task(
+    name="apps.assets.tasks.check_unrevalued_changes",
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+    retry_jitter=True,
+    retry_kwargs={"max_retries": 3},
+)
 def check_unrevalued_changes():
     """
     Ogni lunedì: verifica asset con change non rivalutati da > 14gg.

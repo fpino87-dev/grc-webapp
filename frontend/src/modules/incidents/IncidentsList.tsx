@@ -4,6 +4,7 @@ import { incidentsApi, type Incident } from "../../api/endpoints/incidents";
 import { plantsApi } from "../../api/endpoints/plants";
 import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
+import { ModuleHelp } from "../../components/ui/ModuleHelp";
 
 function NewIncidentForm({
   plants,
@@ -128,7 +129,28 @@ export function IncidentsList() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Operazioni — Incidenti</h2>
+        <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+          Operazioni — Incidenti
+          <ModuleHelp
+            title="Gestione Incidenti — M09"
+            description="Traccia incidenti di sicurezza con timer NIS2 integrato.
+    La chiusura richiede RCA approvato. Alla chiusura vengono
+    creati automaticamente PDCA e Lesson Learned."
+            steps={[
+              "Apri incidente con severità e flag NIS2 (sì/no/da valutare)",
+              "Timer 24h parte automaticamente per notifica preliminare NIS2",
+              "Cambia stato in 'in_analisi' e assegna team",
+              "Compila RCA (Root Cause Analysis) e fallo approvare",
+              "Chiudi incidente: PDCA post-incidente e Lesson Learned creati automaticamente",
+            ]}
+            connections={[
+              { module: "M11 PDCA", relation: "PDCA post-incidente auto-creato alla chiusura" },
+              { module: "M12 Lessons", relation: "Lesson learned auto-creata con RCA summary" },
+              { module: "M08 Task", relation: "Task RCA auto-creato all'apertura" },
+            ]}
+            configNeeded={["Nominare il contatto NIS2 in M00 Governance"]}
+          />
+        </h2>
         <button
           onClick={() => setShowNew(true)}
           className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700"

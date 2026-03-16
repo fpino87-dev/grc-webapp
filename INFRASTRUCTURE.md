@@ -306,6 +306,10 @@ BEFORE UPDATE OR DELETE ON audit_log
 FOR EACH ROW EXECUTE FUNCTION prevent_audit_mutation();
 ```
 
+Oltre agli indici SQL espliciti, il codice applicativo definisce `db_index=True` sui principali campi di filtro
+(`status`, `due_date`, `score`, `valid_until`, campi di tipo e stato) per `Task`, `Incident`, `ControlInstance`,
+`RiskAssessment`, `Document` ed `Evidence`, così da ottimizzare le query operative usate da dashboard e scadenzario.
+
 ### Backup database
 
 ```bash
@@ -378,6 +382,12 @@ add_header Referrer-Policy strict-origin-when-cross-origin;
 ### Secrets management
 
 In produzione non usare variabili d'ambiente Docker in chiaro. Usare HashiCorp Vault con agent sidecar oppure secret cifrati in Kubernetes (`kind: Secret` con cifratura etcd at-rest abilitata).
+
+#### Sicurezza API e sessioni
+
+- I token JWT usano SimpleJWT con durata **8h** per gli access token e **7 giorni** per i refresh token, con rotazione e blacklist abilitate.
+- Il backend applica rate limiting DRF di base (throttle anonimi/utenti) per mitigare brute force ed abuso degli endpoint pubblici.
+- In `core.settings.prod` sono abilitati `SECURE_HSTS_*`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE` e `SECURE_SSL_REDIRECT` per forzare HTTPS e cookie sicuri in produzione.
 
 ---
 

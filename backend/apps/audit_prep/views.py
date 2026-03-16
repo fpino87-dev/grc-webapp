@@ -1,13 +1,18 @@
-from rest_framework import viewsets, filters
+from rest_framework import filters, viewsets
 from rest_framework.decorators import action
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 
 from core.audit import log_action
-from .models import AuditFinding, AuditPrep, AuditProgram, EvidenceItem
-from .serializers import AuditFindingSerializer, AuditPrepSerializer, AuditProgramSerializer, EvidenceItemSerializer
 from . import services
+from .models import AuditFinding, AuditPrep, AuditProgram, EvidenceItem
+from .serializers import (
+    AuditFindingSerializer,
+    AuditPrepSerializer,
+    AuditProgramSerializer,
+    EvidenceItemSerializer,
+)
 
 
 class AuditPrepViewSet(viewsets.ModelViewSet):
@@ -27,6 +32,60 @@ class AuditPrepViewSet(viewsets.ModelViewSet):
             entity=instance,
             payload={"id": str(instance.id), "title": instance.title},
         )
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        open_findings = instance.findings.filter(
+            status__in=["open", "in_response"]
+        ).count()
+        if open_findings > 0:
+            return Response(
+                {
+                    "error": (
+                        f"Impossibile cancellare: ci sono {open_findings} finding aperti. "
+                        f"Chiudi o archivia i finding prima di procedere."
+                    )
+                },
+                status=400,
+            )
+        instance.soft_delete()
+        log_action(
+            user=request.user,
+            action_code="audit_prep.auditprep.deleted",
+            level="L2",
+            entity=instance,
+            payload={
+                "title": instance.title,
+                "reason": request.data.get("reason", ""),
+            },
+        )
+        return Response(status=204)
+
+    @action(detail=True, methods=["post"], url_path="annulla")
+    def annulla(self, request, pk=None):
+        """Annulla un AuditPrep avviato per errore."""
+        instance = self.get_object()
+        reason = request.data.get("reason", "")
+        if not reason or len(reason.strip()) < 10:
+            return Response(
+                {
+                    "error": "Motivo annullamento obbligatorio (min 10 caratteri)"
+                },
+                status=400,
+            )
+        instance.findings.filter(
+            status__in=["open", "in_response"]
+        ).update(status="closed")
+        instance.status = "archiviato"
+        instance.save(update_fields=["status", "updated_at"])
+        log_action(
+            user=request.user,
+            action_code="audit_prep.auditprep.cancelled",
+            level="L2",
+            entity=instance,
+            payload={"title": instance.title, "reason": reason},
+        )
+        return Response({"ok": True, "status": "archiviato"})
 
     @action(detail=True, methods=["get"])
     def readiness(self, request, pk=None):

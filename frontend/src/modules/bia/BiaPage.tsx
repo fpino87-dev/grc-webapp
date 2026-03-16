@@ -4,6 +4,7 @@ import { biaApi, type CriticalProcess } from "../../api/endpoints/bia";
 import { plantsApi } from "../../api/endpoints/plants";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { AssistenteValutazione } from "../../components/ui/AssistenteValutazione";
+import { ModuleHelp } from "../../components/ui/ModuleHelp";
 
 function CriticalityBar({ value }: { value: number }) {
   const pct = (value / 5) * 100;
@@ -155,7 +156,31 @@ export function BiaPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Rischio — Business Impact Analysis</h2>
+        <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+          Rischio — Business Impact Analysis
+          <ModuleHelp
+            title="Business Impact Analysis — M05"
+            description="Valuta l'impatto economico e operativo del fermo di ogni
+    processo critico. Definisce i target RTO/RPO/MTPD che guidano
+    il BCP e pesano il calcolo dell'ALE nel Risk Assessment."
+            steps={[
+              "Crea il processo critico con owner responsabile",
+              "Inserisci costo orario fermo (€) e fatturato esposto annuo",
+              "Definisci MTPD (ore massime tollerabili), RTO e RPO target",
+              "Valida il processo (compliance officer)",
+              "Approva (management) — da questo momento guida il Risk Assessment",
+              "Il Risk Assessment userà downtime_cost per calcolare l'ALE automaticamente",
+            ]}
+            connections={[
+              { module: "M04 Asset", relation: "Asset collegato al processo" },
+              { module: "M06 Risk", relation: "ALE = downtime_cost × ore × probabilità" },
+              { module: "M16 BCP", relation: "RTO/RPO BIA validano e vincolano il piano BCP" },
+            ]}
+            configNeeded={[
+              "Creare prima i Plant (M01) e gli Asset (M04)",
+            ]}
+          />
+        </h2>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setDrawerOpen(true)}

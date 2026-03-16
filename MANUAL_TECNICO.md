@@ -922,6 +922,12 @@ def test_incident_creation_logs_audit(api_client, plant, db):
 - Rate limiting su endpoint pubblici e su M20 AI
 - Input validation su serializer — mai fidarsi del client
 
+#### JWT, throttling e endpoint di servizio
+
+- I token JWT sono gestiti da `rest_framework_simplejwt` con **ACCESS_TOKEN_LIFETIME=8h** e **REFRESH_TOKEN_LIFETIME=7gg**, rotazione e blacklist attive (vedi `core/settings/base.py` – `SIMPLE_JWT`).
+- Il throttling di base usa `AnonRateThrottle` e `UserRateThrottle` con rate predefinite (`anon=100/min`, `user=1000/min`) — personalizzabili per endpoint sensibili.
+- Alcuni endpoint amministrativi (es. reset DB di test in `auth_grc.ResetTestDbView`) sono esplicitamente bloccati in produzione tramite controllo su `settings.DEBUG` per evitare uso improprio fuori da ambienti di test.
+
 ---
 
 ## Troubleshooting

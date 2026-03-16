@@ -3,19 +3,63 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { assetsApi, type AssetIT, type AssetOT, type RegisterChangeResult } from "../../api/endpoints/assets";
 import { plantsApi } from "../../api/endpoints/plants";
 import { StatusBadge } from "../../components/ui/StatusBadge";
+import { ModuleHelp } from "../../components/ui/ModuleHelp";
 
 function CriticalityBadge({ value }: { value: number }) {
-  const colors: Record<number, string> = {
-    1: "bg-green-100 text-green-800",
-    2: "bg-green-100 text-green-700",
-    3: "bg-yellow-100 text-yellow-800",
-    4: "bg-orange-100 text-orange-800",
-    5: "bg-red-100 text-red-800",
+  const levels: Record<
+    number,
+    { label: string; desc: string; color: string }
+  > = {
+    1: {
+      label: "Trascurabile",
+      color: "bg-green-100 text-green-800",
+      desc: "Asset non critico. Fermo tollerato oltre 7 giorni. Nessun BCP richiesto.",
+    },
+    2: {
+      label: "Bassa",
+      color: "bg-green-100 text-green-700",
+      desc: "Impatto limitato. Fermo tollerato 3-7 giorni. BCP non necessario.",
+    },
+    3: {
+      label: "Media",
+      color: "bg-yellow-100 text-yellow-800",
+      desc: "Impatto operativo. Fermo tollerato 24-72 ore. BCP consigliato.",
+    },
+    4: {
+      label: "Alta",
+      color: "bg-orange-100 text-orange-800",
+      desc: "Impatto significativo su produzione o clienti. Fermo tollerato 4-24 ore. BCP obbligatorio.",
+    },
+    5: {
+      label: "Critica",
+      color: "bg-red-100 text-red-800",
+      desc: "Asset core. Fermo tollerato meno di 4 ore. BCP obbligatorio con test semestrale.",
+    },
   };
+  const lvl =
+    levels[value] ?? {
+      label: String(value),
+      color: "bg-gray-100 text-gray-600",
+      desc: "",
+    };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${colors[value] ?? "bg-gray-100 text-gray-600"}`}>
-      {value}
-    </span>
+    <div className="relative group inline-flex">
+      <span
+        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded
+                        text-xs font-medium cursor-help ${lvl.color}`}
+      >
+        {value} — {lvl.label}
+      </span>
+      {lvl.desc && (
+        <div
+          className="absolute bottom-full left-0 mb-1 w-60 bg-gray-900
+                        text-white text-xs rounded p-2 shadow-lg
+                        hidden group-hover:block z-50 pointer-events-none"
+        >
+          {lvl.desc}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -198,6 +242,37 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
             <select name="criticality" defaultValue="3" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
               {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}
             </select>
+            <details className="mt-2 text-xs">
+              <summary className="text-blue-600 cursor-pointer hover:underline">
+                ℹ️ Come scegliere la criticità
+              </summary>
+              <table className="mt-2 w-full border-collapse text-xs">
+                <thead>
+                  <tr className="bg-gray-50 text-left">
+                    <th className="border px-2 py-1">Valore</th>
+                    <th className="border px-2 py-1">Etichetta</th>
+                    <th className="border px-2 py-1">Downtime tollerato</th>
+                    <th className="border px-2 py-1">BCP</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    [1,"Trascurabile","> 7 giorni","No"],
+                    [2,"Bassa","3–7 giorni","No"],
+                    [3,"Media","24–72 ore","Consigliato"],
+                    [4,"Alta","4–24 ore","Obbligatorio"],
+                    [5,"Critica","< 4 ore","Obbligatorio + test semestrale"],
+                  ].map(([v,l,d,b]) => (
+                    <tr key={v as number}>
+                      <td className="border px-2 py-1 text-center font-bold">{v as number}</td>
+                      <td className="border px-2 py-1">{l as string}</td>
+                      <td className="border px-2 py-1">{d as string}</td>
+                      <td className="border px-2 py-1 text-center">{b as string}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </details>
           </div>
           {assetType === "IT" ? (
             <>
@@ -427,7 +502,31 @@ export function AssetsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Asset IT/OT</h2>
+        <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+          Asset IT/OT
+          <ModuleHelp
+            title="Asset IT e OT — M04"
+            description="Censisce tutti gli asset informatici (server, PC, applicativi)
+    e operativi (PLC, SCADA, HMI). La criticità determina la priorità
+    nelle valutazioni di rischio e l'obbligo di BCP."
+            steps={[
+              "Crea l'asset indicando tipo IT o OT",
+              "Assegna criticità 1-5 (vedi tabella nel form)",
+              "Collega ai processi critici della BIA per calcolare l'ALE",
+              "Registra change esterni con il bottone 'Registra change'",
+              "Il sistema segnala automaticamente gli asset da rivalutare",
+            ]}
+            connections={[
+              { module: "M05 BIA", relation: "Asset collegato a processo critico" },
+              { module: "M06 Risk", relation: "Asset oggetto di risk assessment" },
+              { module: "M16 BCP", relation: "Asset critico (≥4) richiede piano BCP" },
+            ]}
+            configNeeded={[
+              "Creare prima i Plant in M01",
+              "Creare i processi BIA (M05) prima di collegare gli asset",
+            ]}
+          />
+        </h2>
         <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700">
           + Nuovo asset {activeTab}
         </button>

@@ -35,15 +35,26 @@ class Document(BaseModel):
     ]
 
     title = models.CharField(max_length=300)
-    category = models.CharField(max_length=30, choices=CATEGORY_CHOICES)
-    document_type = models.CharField(max_length=20, choices=DOCUMENT_TYPE_CHOICES, default="policy")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="bozza")
+    category = models.CharField(max_length=30, choices=CATEGORY_CHOICES, db_index=True)
+    document_type = models.CharField(
+        max_length=20,
+        choices=DOCUMENT_TYPE_CHOICES,
+        default="policy",
+        db_index=True,
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="bozza",
+        db_index=True,
+    )
     plant = models.ForeignKey(
         "plants.Plant",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="documents",
+        db_index=True,
     )
     framework_refs = models.JSONField(default=list)
     control_refs = models.ManyToManyField(
@@ -73,7 +84,7 @@ class Document(BaseModel):
         related_name="approval_documents",
     )
     approved_at = models.DateTimeField(null=True, blank=True)
-    review_due_date = models.DateField(null=True, blank=True)
+    review_due_date = models.DateField(null=True, blank=True, db_index=True)
     expiry_date = models.DateField(null=True, blank=True)
     is_mandatory = models.BooleanField(default=False)
 
@@ -139,7 +150,7 @@ class Evidence(BaseModel):
     title = models.CharField(max_length=300)
     description = models.TextField(blank=True)
     evidence_type = models.CharField(max_length=20, choices=EVIDENCE_TYPE_CHOICES, default="altro")
-    valid_until = models.DateField(null=True, blank=True)
+    valid_until = models.DateField(null=True, blank=True, db_index=True)
     plant = models.ForeignKey(
         "plants.Plant",
         on_delete=models.SET_NULL,

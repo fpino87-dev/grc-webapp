@@ -1,9 +1,17 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { auditPrepApi, type AuditFinding, type AuditPrep, type AuditProgram, type EvidenceItem, type PlannedAudit } from "../../api/endpoints/auditPrep";
+import {
+  auditPrepApi,
+  type AuditFinding,
+  type AuditPrep,
+  type AuditProgram,
+  type EvidenceItem,
+  type PlannedAudit,
+} from "../../api/endpoints/auditPrep";
 import { plantsApi } from "../../api/endpoints/plants";
 import { apiClient } from "../../api/client";
 import { StatusBadge } from "../../components/ui/StatusBadge";
+import { ModuleHelp } from "../../components/ui/ModuleHelp";
 
 interface Framework { id: string; name: string; code: string; }
 
@@ -620,7 +628,10 @@ function ExpandedPanel({ prepId }: { prepId: string }) {
 export function AuditPrepPage() {
   const [showNew, setShowNew] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [mainTab, setMainTab] = useState<"preps"|"program">("preps");
+  const [mainTab, setMainTab] = useState<"preps" | "program">("preps");
+  const [cancelId, setCancelId] = useState<string | null>(null);
+  const [cancelReason, setCancelReason] = useState("");
+  const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ["audit-prep"],
@@ -640,18 +651,56 @@ export function AuditPrepPage() {
     retry: false,
   });
 
-  const preps = data?.results ?? [];
+  const preps: AuditPrep[] = data?.results ?? [];
+
+  const cancelMutation = useMutation({
+    mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
+      await apiClient.post(`/api/v1/audit-prep/audit-preps/${id}/annulla/`, {
+        reason,
+      });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["audit-prep"] });
+      setCancelId(null);
+      setCancelReason("");
+      // opzionalmente: toast di successo se esiste un sistema di notifiche
+    },
+  });
 
   function toggleExpand(id: string) {
-    setExpandedId(prev => (prev === id ? null : id));
+    setExpandedId((prev) => (prev === id ? null : id));
   }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-xl font-semibold text-gray-900">Compliance — Audit Preparation</h2>
+        <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+          Compliance — Audit Preparation
+          <ModuleHelp
+            title="Preparazione Audit — M17"
+            description="Gestisce la preparazione agli audit esterni e interni.
+    Traccia finding (Major NC, Minor NC, Observation) con
+    workflow di risposta e scadenze automatiche."
+            steps={[
+              "Crea AuditPrep indicando framework, data audit e nome auditor",
+              "Aggiungi EvidenceItem per ogni controllo che vuoi verificare",
+              "Durante o dopo l'audit aggiungi Finding per le non conformità",
+              "Major NC → PDCA automatico + task urgente al Compliance Officer",
+              "Chiudi finding con evidenza → Lesson Learned creata automaticamente",
+              "Per annullare un audit avviato per errore: bottone 'Annulla' con motivo",
+            ]}
+            connections={[
+              { module: "M03 Controlli", relation: "Finding collegato a ControlInstance" },
+              { module: "M11 PDCA", relation: "Major/Minor NC aprono PDCA automatico" },
+              { module: "M12 Lessons", relation: "Chiusura finding crea Lesson Learned" },
+            ]}
+          />
+        </h2>
         {mainTab === "preps" && (
-          <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700">
+          <button
+            onClick={() => setShowNew(true)}
+            className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700"
+          >
             + Nuova preparazione
           </button>
         )}
@@ -673,58 +722,164 @@ export function AuditPrepPage() {
         <AuditProgramSection frameworks={frameworks} />
       )}
 
-      {mainTab === "preps" && <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        {isLoading ? (
-          <div className="p-8 text-center text-gray-400">Caricamento...</div>
-        ) : preps.length === 0 ? (
-          <div className="p-8 text-center text-gray-400">Nessuna preparazione audit registrata</div>
-        ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Titolo</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Sito</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Framework</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Data audit</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Auditor</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Readiness</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Stato</th>
-              </tr>
-            </thead>
-            <tbody>
-              {preps.map(prep => (
-                <>
-                  <tr
-                    key={prep.id}
-                    onClick={() => toggleExpand(prep.id)}
-                    className="hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-100"
-                  >
-                    <td className="px-4 py-3 font-medium text-gray-800">
-                      <span className="mr-2 text-gray-400 text-xs">{expandedId === prep.id ? "▼" : "▶"}</span>
-                      {prep.title}
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">{prep.plant || "—"}</td>
-                    <td className="px-4 py-3 text-gray-600">{prep.framework || "—"}</td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">{prep.audit_date ? new Date(prep.audit_date).toLocaleDateString("it-IT") : "—"}</td>
-                    <td className="px-4 py-3 text-gray-600">{prep.auditor_name || "—"}</td>
-                    <td className="px-4 py-3"><ReadinessBar score={prep.readiness_score} /></td>
-                    <td className="px-4 py-3"><StatusBadge status={prep.status} /></td>
-                  </tr>
-                  {expandedId === prep.id && (
-                    <tr key={`${prep.id}-expanded`}>
-                      <td colSpan={7} className="p-0">
-                        <ExpandedPanel prepId={prep.id} />
+      {mainTab === "preps" && (
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          {isLoading ? (
+            <div className="p-8 text-center text-gray-400">Caricamento...</div>
+          ) : preps.length === 0 ? (
+            <div className="p-8 text-center text-gray-400">
+              Nessuna preparazione audit registrata
+            </div>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">
+                    Titolo
+                  </th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">
+                    Sito
+                  </th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">
+                    Framework
+                  </th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">
+                    Data audit
+                  </th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">
+                    Auditor
+                  </th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">
+                    Readiness
+                  </th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">
+                    Stato
+                  </th>
+                  <th className="px-4 py-3" />
+                </tr>
+              </thead>
+              <tbody>
+                {preps.map((prep) => (
+                  <>
+                    <tr
+                      key={prep.id}
+                      className="hover:bg-gray-50 transition-colors border-b border-gray-100"
+                    >
+                      <td
+                        className="px-4 py-3 font-medium text-gray-800 cursor-pointer"
+                        onClick={() => toggleExpand(prep.id)}
+                      >
+                        <span className="mr-2 text-gray-400 text-xs">
+                          {expandedId === prep.id ? "▼" : "▶"}
+                        </span>
+                        {prep.title}
+                      </td>
+                      <td className="px-4 py-3 text-gray-600">
+                        {prep.plant || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-gray-600">
+                        {prep.framework || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-gray-500 text-xs">
+                        {prep.audit_date
+                          ? new Date(prep.audit_date).toLocaleDateString("it-IT")
+                          : "—"}
+                      </td>
+                      <td className="px-4 py-3 text-gray-600">
+                        {prep.auditor_name || "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <ReadinessBar score={prep.readiness_score} />
+                      </td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={prep.status} />
+                      </td>
+                      <td className="px-4 py-3 text-right space-x-2">
+                        {prep.status === "in_corso" && (
+                          <button
+                            onClick={() => {
+                              setCancelId(prep.id);
+                              setCancelReason("");
+                            }}
+                            className="px-3 py-1 text-xs rounded border border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+                          >
+                            ✕ Annulla
+                          </button>
+                        )}
                       </td>
                     </tr>
-                  )}
-                </>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>}
+                    {expandedId === prep.id && (
+                      <tr key={`${prep.id}-expanded`}>
+                        <td colSpan={8} className="p-0">
+                          <ExpandedPanel prepId={prep.id} />
+                        </td>
+                      </tr>
+                    )}
+                  </>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
 
-      {showNew && <NewPrepModal frameworks={frameworks} plants={plants} onClose={() => setShowNew(false)} />}
+      {showNew && (
+        <NewPrepModal
+          frameworks={frameworks}
+          plants={plants}
+          onClose={() => setShowNew(false)}
+        />
+      )}
+
+      {/* Modal annullamento AuditPrep */}
+      {cancelId && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+            <h3 className="text-lg font-semibold mb-3">
+              Annulla preparazione audit
+            </h3>
+            <p className="text-sm text-gray-700 mb-3">
+              Specifica il motivo dell&apos;annullamento (min 10 caratteri). I
+              finding aperti verranno chiusi automaticamente.
+            </p>
+            <textarea
+              className="w-full border rounded px-3 py-2 text-sm min-h-[100px]"
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              placeholder="Motivo annullamento..."
+            />
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => {
+                  setCancelId(null);
+                  setCancelReason("");
+                }}
+                className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50"
+              >
+                Annulla
+              </button>
+              <button
+                onClick={() =>
+                  cancelMutation.mutate({ id: cancelId, reason: cancelReason })
+                }
+                disabled={
+                  cancelMutation.isPending || cancelReason.trim().length < 10
+                }
+                className="px-4 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 disabled:opacity-50"
+              >
+                {cancelMutation.isPending
+                  ? "Annullamento..."
+                  : "Conferma annullamento"}
+              </button>
+            </div>
+            {cancelMutation.isError && (
+              <p className="mt-2 text-xs text-red-600">
+                Errore durante l&apos;annullamento
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -207,6 +207,15 @@ Vai su **Risk → Asset inventory → Nuovo asset OT**. In aggiunta ai campi com
 
 Nella scheda di un asset trovi il grafico delle dipendenze — mostra gli asset collegati e la propagazione della criticità. Se un processo critico dipende da un asset con score alto, la criticità si propaga verso l'alto.
 
+### Guida alla scelta della criticità
+
+Nel form di creazione/modifica asset trovi:
+
+- Un **badge di criticità** con tooltip che spiega in linguaggio naturale cosa significa ciascun livello 1–5 (es. fermo tollerato, impatto economico, impatto safety).
+- Un riquadro espandibile "**Come scegliere la criticità**" con una tabella di esempio: per casi tipici (server non critico, sistema di produzione, asset safety‑critical) vedi quale livello selezionare.
+
+Usa sempre questa tabella come riferimento per garantire coerenza tra plant diversi.
+
 ---
 
 ## Risk Assessment (M06)
@@ -446,6 +455,15 @@ Quando ricevi un finding da un auditor:
 4. Carica l'**evidenza di chiusura** quando hai risolto il finding
 5. Un finding grave apre automaticamente un ciclo PDCA in M11
 
+### Annullare un audit prep
+
+Se un audit pianificato viene annullato (es. cambio data o scope), puoi usare il pulsante **✕ Annulla** nella tabella degli audit prep:
+
+- Ti verrà chiesto di inserire una **motivazione** (minimo 10 caratteri) che sarà registrata nell'audit trail.
+- L'audit prep viene archiviato e i finding aperti vengono gestiti automaticamente secondo le regole di business; gli oggetti non vengono mai cancellati fisicamente ma solo marcati come archiviati.
+
+L’annullamento è consentito solo quando non ci sono finding critici lasciati aperti.
+
 ---
 
 ## Reporting ed export (M18)
@@ -555,3 +573,17 @@ Per i controlli TISAX L3 lo stato N/A richiede la firma di almeno due ruoli (dop
 
 **Il suggerimento IA non appare più.**
 Il modulo AI potrebbe essere stato disabilitato dall'amministratore per il tuo plant, oppure la funzione specifica non è attiva. Contatta il Compliance Officer o il System Administrator.
+
+---
+
+## Help contestuale sui moduli
+
+Nella maggior parte delle pagine principali (asset, BIA, risk, incidenti, controlli, scadenzario, audit prep, management review) trovi un piccolo pulsante **`?`** vicino al titolo del modulo:
+
+- Cliccandolo si apre un **pannello laterale** con:
+  - una spiegazione breve di cosa fa il modulo,
+  - i passi tipici da seguire,
+  - le connessioni con altri moduli (es. quali task o PDCA vengono creati automaticamente),
+  - l’elenco di prerequisiti consigliati (“Prima di iniziare”).
+
+Usa il pannello di help per orientarti rapidamente su moduli che usi meno spesso o quando introduci il sistema a nuovi colleghi.

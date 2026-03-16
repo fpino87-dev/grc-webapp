@@ -141,6 +141,17 @@ docker compose up -d celery celery-beat
 5. **Completare views mancanti** — alcuni moduli hanno urls.py vuoti
 6. **Test suite** — `docker compose exec backend pytest`
 
+---
+
+## Aggiornamenti recenti (hardening & UX)
+
+- **M17 Audit Preparation**: eliminazione sicura con soft delete e azione di annullamento (`annulla`) che archivia il prep solo se tutti i finding sono chiusi, con audit trail dedicato.
+- **Frontend moduli**: introdotto `ModuleHelp` (pulsante `?` con drawer contestuale) sui principali moduli operativi (asset, BIA, risk, incidenti, controlli, audit prep, management review, scadenzario).
+- **M04 Asset**: badge di criticità con tooltip esplicativi e tabella guida all’interno del form, per scelta coerente dei livelli 1–5.
+- **Core sicurezza**: JWT configurati con durata 8h/7gg, throttling DRF base per anonimi/utenti, header di sicurezza abilitati e `CONN_MAX_AGE` impostato per riuso connessioni.
+- **Robustezza async**: task Celery critici (controlli ed asset) ora con `autoretry` esponenziale; catena hash dell’audit trail serializzata con `select_for_update` per prevenire race condition.
+- **Performance DB**: indici aggiuntivi su campi `status`, `due_date`, `score`, `valid_until` e campi di filtro più usati per `ControlInstance`, `RiskAssessment`, `Task`, `Incident`, `Document` ed `Evidence`.
+
 ## File di riferimento
 
 - `AGENTS.md` — build plan completo con tutto il codice

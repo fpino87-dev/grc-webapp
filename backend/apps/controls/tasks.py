@@ -2,7 +2,12 @@ from celery import shared_task
 from django.utils import timezone
 
 
-@shared_task
+@shared_task(
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+    retry_jitter=True,
+    retry_kwargs={"max_retries": 3},
+)
 def check_expired_evidences():
     """
     Eseguito ogni notte alle 02:00.

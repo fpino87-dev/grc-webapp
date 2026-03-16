@@ -4,24 +4,27 @@ from core.models import BaseModel
 
 
 class Incident(BaseModel):
-    plant = models.ForeignKey("plants.Plant", on_delete=models.CASCADE)
+    plant = models.ForeignKey("plants.Plant", on_delete=models.CASCADE, db_index=True)
     title = models.CharField(max_length=255)
     description = models.TextField()
     detected_at = models.DateTimeField()
     severity = models.CharField(
         max_length=10,
         choices=[("bassa", "bassa"), ("media", "media"), ("alta", "alta"), ("critica", "critica")],
+        db_index=True,
     )
     nis2_notifiable = models.CharField(
         max_length=20,
         choices=[("si", "si"), ("no", "no"), ("da_valutare", "da_valutare")],
         default="da_valutare",
+        db_index=True,
     )
     assets = models.ManyToManyField("assets.Asset", blank=True)
     status = models.CharField(
         max_length=20,
         choices=[("aperto", "aperto"), ("in_analisi", "in_analisi"), ("chiuso", "chiuso")],
         default="aperto",
+        db_index=True,
     )
     closed_at = models.DateTimeField(null=True, blank=True)
     closed_by = models.ForeignKey(

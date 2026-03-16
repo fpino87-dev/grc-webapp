@@ -1,5 +1,6 @@
 from io import StringIO
 
+from django.conf import settings
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -23,6 +24,11 @@ class ResetTestDbView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
     def post(self, request):
+        if not settings.DEBUG:
+            return Response(
+                {"error": "Endpoint disponibile solo in ambiente di test (DEBUG=True)."},
+                status=403,
+            )
         if not request.user.is_superuser:
             return Response(
                 {"error": "Solo il superuser può eseguire questa operazione"},

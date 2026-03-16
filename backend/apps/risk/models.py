@@ -41,6 +41,7 @@ class RiskAssessment(BaseModel):
     assessment_type = models.CharField(
         max_length=5,
         choices=[("IT", "IT"), ("OT", "OT")],
+        db_index=True,
     )
     probability = models.IntegerField(null=True, blank=True, choices=PROB_CHOICES)
     impact = models.IntegerField(null=True, blank=True, choices=IMPACT_CHOICES)
@@ -49,6 +50,7 @@ class RiskAssessment(BaseModel):
         max_length=20,
         choices=[("bozza", "Bozza"), ("completato", "Completato"), ("archiviato", "Archiviato")],
         default="bozza",
+        db_index=True,
     )
     assessed_by = models.ForeignKey(
         "auth.User",
@@ -65,7 +67,7 @@ class RiskAssessment(BaseModel):
         help_text="Responsabile del rischio (diverso da chi lo ha valutato)",
     )
     assessed_at = models.DateTimeField(null=True, blank=True)
-    score = models.IntegerField(null=True, blank=True)
+    score = models.IntegerField(null=True, blank=True, db_index=True)
     ale_annuo = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
 
     needs_revaluation = models.BooleanField(

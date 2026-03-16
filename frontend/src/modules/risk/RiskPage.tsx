@@ -8,6 +8,7 @@ import { usersApi, type GrcUser } from "../../api/endpoints/users";
 import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { AssistenteValutazione } from "../../components/ui/AssistenteValutazione";
+import { ModuleHelp } from "../../components/ui/ModuleHelp";
 
 function matrixColor(p: number, i: number): string {
   const s = p * i;
@@ -609,7 +610,33 @@ export function RiskPage() {
     <div>
       <RiskAppetiteCard plantId={selectedPlant?.id} />
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Risk Assessment</h2>
+        <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+          Risk Assessment
+          <ModuleHelp
+            title="Risk Assessment IT/OT — M06"
+            description="Valuta il rischio di ogni asset con matrice probabilità×impatto
+    (score 1-25). Calcola ALE automaticamente dai dati BIA.
+    Score >14 genera task di mitigazione e PDCA automaticamente."
+            steps={[
+              "Crea assessment collegando asset e processo BIA",
+              "Inserisci rischio inerente (probabilità e impatto SENZA controlli)",
+              "Completa le dimensioni di valutazione IT o OT",
+              "Premi 'Completa assessment': score e ALE vengono calcolati automaticamente",
+              "Se score > soglia policy: task urgente al risk manager",
+              "Accetta formalmente i rischi residui con nota e scadenza revisione",
+            ]}
+            connections={[
+              { module: "M04 Asset", relation: "Asset oggetto della valutazione" },
+              { module: "M05 BIA", relation: "ALE calcolato da downtime_cost BIA" },
+              { module: "M11 PDCA", relation: "Rischio rosso apre PDCA automatico" },
+              { module: "M08 Task", relation: "Task mitigazione auto-creato se score > soglia" },
+            ]}
+            configNeeded={[
+              "Configurare RiskAppetitePolicy per soglie personalizzate",
+              "Collegare processi BIA per calcolo ALE automatico",
+            ]}
+          />
+        </h2>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setDrawerOpen(true)}

@@ -30,13 +30,14 @@ def _compute_hash(payload: dict, prev_hash: str) -> str:
 
 
 def _get_prev_hash(entity_type: str) -> str:
+    # Usa SELECT ... FOR UPDATE per serializzare la catena hash per entity_type
     last = (
-        AuditLog.objects.filter(entity_type=entity_type)
+        AuditLog.objects.select_for_update()
+        .filter(entity_type=entity_type)
         .order_by("-timestamp_utc")
-        .values("record_hash")
         .first()
     )
-    return last["record_hash"] if last else "0" * 64
+    return last.record_hash if last else "0" * 64
 
 
 @transaction.atomic

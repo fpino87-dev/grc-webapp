@@ -218,6 +218,13 @@ Garanzie di sicurezza: nessun PII o valore ALE raggiunge il cloud LLM, sanitizat
 | [MANUAL_UTENTE.md](./MANUAL_UTENTE.md) | Guida per Compliance Officer, Risk Manager, Plant Manager, Auditor |
 | [MANUAL_TECNICO.md](./MANUAL_TECNICO.md) | API, modelli dati, framework, AI Engine, test, convenzioni |
 
+### Stato implementazione ultime feature
+
+- **Hardening backend**: JWT SimpleJWT configurato (8h access token, 7gg refresh rotating), rate limiting DRF di base, header di sicurezza e `CONN_MAX_AGE` per pooling DB in `core.settings.base/prod`.
+- **UX moduli operativi**: help contestuale via componente `ModuleHelp` sulle principali pagine React (asset, BIA, risk, incidenti, controlli, audit prep, management review, scadenzario).
+- **Audit trail & job async**: catena hash dell’audit trail serializzata (`select_for_update`) e task Celery critici con `autoretry` e backoff.
+- **Performance DB**: indici aggiuntivi su campi di filtro frequenti per incidenti, task, controlli, rischi, documenti ed evidenze.
+
 ---
 
 ## Contribuire

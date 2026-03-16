@@ -47,9 +47,20 @@ class Task(BaseModel):
         null=True,
         blank=True,
         related_name="tasks",
+        db_index=True,
     )
-    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default="media")
-    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="aperto")
+    priority = models.CharField(
+        max_length=10,
+        choices=PRIORITY_CHOICES,
+        default="media",
+        db_index=True,
+    )
+    status = models.CharField(
+        max_length=15,
+        choices=STATUS_CHOICES,
+        default="aperto",
+        db_index=True,
+    )
     source = models.CharField(max_length=15, choices=SOURCE_CHOICES, default="manuale")
 
     assigned_role = models.CharField(max_length=50, blank=True)
@@ -60,7 +71,7 @@ class Task(BaseModel):
         blank=True,
         related_name="assigned_tasks",
     )
-    due_date = models.DateField(null=True, blank=True)
+    due_date = models.DateField(null=True, blank=True, db_index=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     completed_by = models.ForeignKey(
         User,

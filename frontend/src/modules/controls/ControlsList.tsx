@@ -4,6 +4,7 @@ import { controlsApi, type ControlInstance } from "../../api/endpoints/controls"
 import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { ControlDetailDrawer } from "./ControlDetailDrawer";
+import { ModuleHelp } from "../../components/ui/ModuleHelp";
 
 const STATUS_OPTIONS = ["compliant", "parziale", "gap", "na", "non_valutato"];
 
@@ -217,7 +218,32 @@ export function ControlsList() {
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-xl font-semibold text-gray-900">Compliance — Controlli</h2>
+        <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+          Compliance — Controlli
+          <ModuleHelp
+            title="Libreria Controlli — M03"
+            description="Gestisce i controlli normativi per ogni framework (ISO 27001,
+    TISAX L2/L3, NIS2). Ogni controllo ha uno stato valutativo e
+    richiede evidenze documentali per raggiungere 'Compliant'."
+            steps={[
+              "I controlli vengono generati automaticamente al caricamento del framework",
+              "Clicca ▶ su ogni controllo per aprire il drawer di gestione",
+              "Collega documenti di policy e evidenze operative",
+              "Il sistema suggerisce lo stato automaticamente dai documenti collegati",
+              "Salva la valutazione — richiede almeno 1 evidenza valida per 'Compliant'",
+              "Scarica SOA (ISO27001), VDA ISA (TISAX) o NIS2 Matrix con i bottoni in alto",
+            ]}
+            connections={[
+              { module: "M07 Documenti", relation: "Policy e evidenze collegate al controllo" },
+              { module: "M17 Audit Prep", relation: "Finding collegati a ControlInstance" },
+              { module: "M06 Risk", relation: "Gap controlli pesano il risk score OT" },
+            ]}
+            configNeeded={[
+              "Eseguire: python manage.py load_frameworks",
+              "Attivare il framework sul Plant in M01",
+            ]}
+          />
+        </h2>
         <ExportToolbar frameworks={frameworks ?? []} plantId={selectedPlant?.id} />
       </div>
 

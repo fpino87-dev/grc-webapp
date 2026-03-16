@@ -104,6 +104,7 @@ class ControlInstance(BaseModel):
             ("non_valutato", "Non valutato"),
         ],
         default="non_valutato",
+        db_index=True,
     )
     owner = models.ForeignKey(
         "auth.User",

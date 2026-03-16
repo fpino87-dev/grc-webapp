@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { managementReviewApi, type ManagementReview } from "../../api/endpoints/managementReview";
 import { plantsApi } from "../../api/endpoints/plants";
 import { StatusBadge } from "../../components/ui/StatusBadge";
+import { ModuleHelp } from "../../components/ui/ModuleHelp";
 
 function NewReviewModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
   const qc = useQueryClient();
@@ -344,7 +345,29 @@ export function ManagementReviewPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Governance — Revisione Direzione</h2>
+        <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+          Governance — Revisione Direzione
+          <ModuleHelp
+            title="Revisione di Direzione — M13"
+            description="Gestisce il riesame periodico del management ISMS.
+    Genera uno snapshot congelato dei dati GRC al momento della riunione
+    e produce la relazione formale del CISO scaricabile."
+            steps={[
+              "Crea la revisione con titolo, plant e data riunione",
+              "Premi 'Genera snapshot dati': i KPI vengono congelati in quel momento",
+              "Presenta i dati in riunione — lo snapshot non cambierà più",
+              "Le delibere vengono registrate come ReviewAction con owner e scadenza",
+              "Approva il riesame con nota formale",
+              "Scarica la relazione CISO in HTML (stampabile/archiviabile)",
+            ]}
+            connections={[
+              { module: "M06 Risk", relation: "Rischi per livello e per owner nello snapshot" },
+              { module: "M09 Incidenti", relation: "Incidenti ultimi 12 mesi nello snapshot" },
+              { module: "M11 PDCA", relation: "PDCA aperti e bloccati nello snapshot" },
+            ]}
+            configNeeded={["Nominare il CISO come chair in M00 Governance"]}
+          />
+        </h2>
         <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700">
           + Nuova revisione
         </button>

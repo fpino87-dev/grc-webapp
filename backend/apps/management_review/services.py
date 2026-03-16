@@ -1,4 +1,6 @@
+from django.db.models import Prefetch
 from django.utils import timezone
+
 from core.audit import log_action
 from .models import ManagementReview
 
@@ -161,11 +163,21 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
 
     # ── 6. BCP ──
     from apps.bia.models import CriticalProcess
+    from apps.bcp.models import BcpPlan
+
     if plant_id:
         critical_procs = CriticalProcess.objects.filter(
-            plant_id=plant_id, criticality__gte=4, status="approvato", deleted_at__isnull=True
+            plant_id=plant_id,
+            criticality__gte=4,
+            status="approvato",
+            deleted_at__isnull=True,
+        ).prefetch_related(
+            Prefetch(
+                "bcp_plans",
+                queryset=BcpPlan.objects.filter(deleted_at__isnull=True),
+            )
         )
-        missing_bcp = [p for p in critical_procs if not p.bcp_plans.filter(deleted_at__isnull=True).exists()]
+        missing_bcp = [p for p in critical_procs if not p.bcp_plans.all()]
     else:
         missing_bcp = []
     bcp_summary = {

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { scheduleApi, ActivityItem } from "../../api/endpoints/schedule";
 import { plantsApi } from "../../api/endpoints/plants";
+import { ModuleHelp } from "../../components/ui/ModuleHelp";
 
 const URGENCY_COLOR: Record<string, string> = {
   green:  "bg-green-100 text-green-800 border-green-200",
@@ -72,7 +73,29 @@ export function ActivitySchedulePage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">Activity Schedule</h2>
+        <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+          Activity Schedule
+          <ModuleHelp
+            title="Activity Schedule"
+            description="Vista calendario aggregata di tutte le scadenze GRC:
+    documenti, evidenze, assessment, test BCP, finding, formazione.
+    Le scadenze sono calcolate dalla Policy configurata."
+            steps={[
+              "Seleziona il plant e il periodo (1-12 mesi)",
+              "Filtra per tipo (documenti, rischi, finding, ecc.) o stato",
+              "Clicca su ogni attività per andare direttamente al modulo",
+              "Configura le scadenze in 'Policy Scadenze' (solo CISO/Admin)",
+            ]}
+            connections={[
+              { module: "Policy Scadenze", relation: "Le regole configurate determinano tutte le scadenze" },
+              { module: "Documenti Obbligatori", relation: "Mostra stato documenti per framework" },
+            ]}
+            configNeeded={[
+              "Configurare Policy Scadenze con 'Crea policy default'",
+              "Caricare i documenti obbligatori con load_required_documents",
+            ]}
+          />
+        </h2>
         <button
           onClick={() => refetch()}
           className="text-sm text-blue-600 hover:underline"

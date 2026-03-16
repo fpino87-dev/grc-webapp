@@ -8,6 +8,7 @@ get_required_documents_status(plant, framework) — traffic-light for required d
 from __future__ import annotations
 
 import datetime
+import logging
 from typing import Optional
 
 from django.utils import timezone
@@ -17,6 +18,8 @@ from .models import (
     DEFAULT_RULES,
     RULE_TYPE_LABELS,
 )
+
+logger = logging.getLogger(__name__)
 
 
 # ─── Internal helpers ─────────────────────────────────────────────────────────
@@ -136,29 +139,39 @@ def get_activity_schedule(plant=None, months_ahead: int = 6) -> list[dict]:
     # Documents expiring
     try:
         from apps.documents.models import Document
-        doc_qs = Document.objects.filter(deleted_at__isnull=True, review_due_date__isnull=False)
+
+        doc_qs = Document.objects.filter(
+            deleted_at__isnull=True,
+            review_due_date__isnull=False,
+        )
         if plant:
             doc_qs = doc_qs.filter(plant=plant)
         for doc in doc_qs:
-            rule = f"document_{doc.document_type}" if f"document_{doc.document_type}" in DEFAULT_RULES else "document_policy"
+            rule = (
+                f"document_{doc.document_type}"
+                if f"document_{doc.document_type}" in DEFAULT_RULES
+                else "document_policy"
+            )
             _add(rule, f"Doc: {doc.title}", doc.review_due_date, doc.status, str(doc.id))
     except Exception:
-        pass
+        logger.exception("Errore nel calcolo delle scadenze documenti", exc_info=True)
 
     # Evidences expiring
     try:
         from apps.documents.models import Evidence
+
         ev_qs = Evidence.objects.filter(valid_until__isnull=False)
         if plant:
             ev_qs = ev_qs.filter(control_instances__plant=plant).distinct()
         for ev in ev_qs:
             _add("control_review", f"Evidenza: {ev.title}", ev.valid_until, "active", str(ev.id))
     except Exception:
-        pass
+        logger.exception("Errore nel calcolo delle scadenze evidenze", exc_info=True)
 
     # Risk assessments — next review due
     try:
         from apps.risk.models import RiskAssessment
+
         risk_qs = RiskAssessment.objects.filter(status="completato", assessed_at__isnull=False)
         if plant:
             risk_qs = risk_qs.filter(**plant_filter)
@@ -167,66 +180,96 @@ def get_activity_schedule(plant=None, months_ahead: int = 6) -> list[dict]:
             next_due = _add_duration(ra.assessed_at.date(), freq_val, freq_unit)
             _add("risk_assessment", f"Rischio: {ra.name}", next_due, ra.status, str(ra.id))
     except Exception:
-        pass
+        logger.exception("Errore nel calcolo delle scadenze risk assessment", exc_info=True)
 
     # BCP plans — next test date
     try:
         from apps.bcp.models import BcpPlan
+
         bcp_qs = BcpPlan.objects.filter(next_test_date__isnull=False)
         if plant:
             bcp_qs = bcp_qs.filter(**plant_filter)
         for plan in bcp_qs:
             _add("bcp_test", f"BCP Test: {plan.name}", plan.next_test_date, plan.status, str(plan.id))
     except Exception:
-        pass
+        logger.exception("Errore nel calcolo delle scadenze BCP", exc_info=True)
 
     # Supplier assessments
     try:
         from apps.suppliers.models import SupplierAssessment
+
         sa_qs = SupplierAssessment.objects.filter(next_assessment_date__isnull=False)
         if plant:
             sa_qs = sa_qs.filter(supplier__plant=plant)
         for sa in sa_qs:
-            _add("supplier_assessment", f"Fornitore: {sa.supplier.name}", sa.next_assessment_date, sa.status, str(sa.id))
+            _add(
+                "supplier_assessment",
+                f"Fornitore: {sa.supplier.name}",
+                sa.next_assessment_date,
+                sa.status,
+                str(sa.id),
+            )
     except Exception:
-        pass
+        logger.exception("Errore nel calcolo delle scadenze assessment fornitori", exc_info=True)
 
     # Supplier contracts expiring
     try:
         from apps.suppliers.models import Supplier
+
         sup_qs = Supplier.objects.filter(contract_expiry__isnull=False, deleted_at__isnull=True)
         if plant:
             sup_qs = sup_qs.filter(**plant_filter)
         for sup in sup_qs:
-            _add("supplier_contract_review", f"Contratto: {sup.name}", sup.contract_expiry, sup.status, str(sup.id))
+            _add(
+                "supplier_contract_review",
+                f"Contratto: {sup.name}",
+                sup.contract_expiry,
+                sup.status,
+                str(sup.id),
+            )
     except Exception:
-        pass
+        logger.exception("Errore nel calcolo delle scadenze contratti fornitori", exc_info=True)
 
     # Training courses deadline
     try:
         from apps.training.models import TrainingCourse
+
         tr_qs = TrainingCourse.objects.filter(deadline__isnull=False, mandatory=True)
         if plant:
             tr_qs = tr_qs.filter(plants=plant)
         for tr in tr_qs:
-            _add("training_mandatory", f"Formazione: {tr.title}", tr.deadline, tr.status, str(tr.id))
+            _add(
+                "training_mandatory",
+                f"Formazione: {tr.title}",
+                tr.deadline,
+                tr.status,
+                str(tr.id),
+            )
     except Exception:
-        pass
+        logger.exception("Errore nel calcolo delle scadenze formazione", exc_info=True)
 
     # Security committee next meeting
     try:
         from apps.governance.models import SecurityCommittee
+
         sc_qs = SecurityCommittee.objects.filter(next_meeting_at__isnull=False)
         if plant:
             sc_qs = sc_qs.filter(plant=plant)
         for sc in sc_qs:
-            _add("security_committee", f"Comitato: {sc.name}", sc.next_meeting_at.date(), "scheduled", str(sc.id))
+            _add(
+                "security_committee",
+                f"Comitato: {sc.name}",
+                sc.next_meeting_at.date(),
+                "scheduled",
+                str(sc.id),
+            )
     except Exception:
-        pass
+        logger.exception("Errore nel calcolo delle scadenze comitato sicurezza", exc_info=True)
 
     # Audit findings
     try:
         from apps.audit_prep.models import AuditFinding
+
         af_qs = AuditFinding.objects.filter(
             response_deadline__isnull=False,
             status__in=["open", "in_response"],
@@ -234,16 +277,22 @@ def get_activity_schedule(plant=None, months_ahead: int = 6) -> list[dict]:
         if plant:
             af_qs = af_qs.filter(audit_prep__plant=plant)
         rule_map = {
-            "major_nc":    "finding_major",
-            "minor_nc":    "finding_minor",
+            "major_nc": "finding_major",
+            "minor_nc": "finding_minor",
             "observation": "finding_observation",
             "opportunity": "finding_observation",
         }
         for af in af_qs:
             rule_type = rule_map.get(af.finding_type, "finding_minor")
-            _add(rule_type, f"Finding [{af.finding_type.upper()}]: {af.title}", af.response_deadline, af.status, str(af.id))
+            _add(
+                rule_type,
+                f"Finding [{af.finding_type.upper()}]: {af.title}",
+                af.response_deadline,
+                af.status,
+                str(af.id),
+            )
     except Exception:
-        pass
+        logger.exception("Errore nel calcolo delle scadenze finding audit", exc_info=True)
 
     activities.sort(key=lambda x: x["due_date"])
     return activities
