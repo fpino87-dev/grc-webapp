@@ -77,7 +77,7 @@ def complete_assessment(
         entity=assessment,
         payload={
             "score_overall": score_overall,
-            "risk_level": assessment.risk_level,
+            "risk_level": assessment.computed_risk_level,
         },
     )
 

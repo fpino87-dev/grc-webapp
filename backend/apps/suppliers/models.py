@@ -76,7 +76,7 @@ class SupplierAssessment(BaseModel):
     next_assessment_date = models.DateField(null=True, blank=True)
 
     @property
-    def risk_level(self):
+    def computed_risk_level(self) -> str:
         if self.score_overall is None:
             return "nd"
         if self.score_overall >= 75:

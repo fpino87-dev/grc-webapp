@@ -85,7 +85,7 @@ type SupplierAssessment = {
   score_governance: number | null;
   score_security: number | null;
   score_bcp: number | null;
-  risk_level: string;
+  computed_risk_level: string;
   reviewed_by: string | null;
   reviewed_at: string | null;
   review_notes: string;
@@ -272,7 +272,7 @@ function AssessmentsTable({ supplierId }: { supplierId: string }) {
               <td className="px-2 py-1">{a.score_bcp ?? "—"}</td>
               <td className="px-2 py-1">{a.score_overall ?? "—"}</td>
               <td className="px-2 py-1">
-                <RiskLevelBadge level={a.risk_level} />
+                <RiskLevelBadge level={a.computed_risk_level} />
               </td>
               <td className="px-2 py-1">
                 <AssessmentStatusBadge status={a.status} />
