@@ -7,11 +7,16 @@ from core.models import BaseModel
 
 class NormativeRole(models.TextChoices):
     CISO = "ciso", _("CISO")
+    COMPLIANCE_OFFICER = "compliance_officer", _("Compliance Officer")
+    RISK_MANAGER = "risk_manager", _("Risk Manager")
+    INTERNAL_AUDITOR = "internal_auditor", _("Auditor Interno")
+    EXTERNAL_AUDITOR = "external_auditor", _("Auditor Esterno")
+    PLANT_MANAGER = "plant_manager", _("Plant Manager")
+    CONTROL_OWNER = "control_owner", _("Control Owner")
     PLANT_SECURITY_OFFICER = "plant_security_officer", _("Plant Security Officer")
     NIS2_CONTACT = "nis2_contact", _("Contatto NIS2")
     DPO = "dpo", _("DPO")
     ISMS_MANAGER = "isms_manager", _("ISMS Manager")
-    INTERNAL_AUDITOR = "internal_auditor", _("Auditor Interno")
     COMITATO_MEMBRO = "comitato_membro", _("Membro Comitato")
     BU_REFERENTE = "bu_referente", _("Referente BU")
     RACI_RESPONSIBLE = "raci_responsible", _("RACI Responsible")

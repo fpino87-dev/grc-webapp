@@ -30,14 +30,23 @@ interface UserCompetency {
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
+// Allineato a NormativeRole (governance M00) — fonte di verità per i ruoli
 const ROLES: { value: string; label: string }[] = [
-  { value: "ciso",                label: "CISO" },
-  { value: "compliance_officer",  label: "Compliance Officer" },
-  { value: "risk_manager",        label: "Risk Manager" },
-  { value: "internal_auditor",    label: "Internal Auditor" },
-  { value: "plant_manager",       label: "Plant Manager" },
-  { value: "control_owner",       label: "Control Owner" },
-  { value: "external_auditor",    label: "External Auditor" },
+  { value: "ciso",                   label: "CISO" },
+  { value: "compliance_officer",     label: "Compliance Officer" },
+  { value: "risk_manager",           label: "Risk Manager" },
+  { value: "internal_auditor",       label: "Auditor Interno" },
+  { value: "external_auditor",       label: "Auditor Esterno" },
+  { value: "plant_manager",          label: "Plant Manager" },
+  { value: "control_owner",          label: "Control Owner" },
+  { value: "plant_security_officer", label: "Plant Security Officer" },
+  { value: "nis2_contact",           label: "Contatto NIS2" },
+  { value: "dpo",                    label: "DPO" },
+  { value: "isms_manager",           label: "ISMS Manager" },
+  { value: "comitato_membro",        label: "Membro Comitato" },
+  { value: "bu_referente",           label: "Referente BU" },
+  { value: "raci_responsible",       label: "RACI Responsible" },
+  { value: "raci_accountable",       label: "RACI Accountable" },
 ];
 
 const EVIDENCE_TYPES = [

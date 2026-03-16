@@ -1,6 +1,7 @@
 from typing import Optional
 
 from django.contrib.auth import get_user_model
+from django.db import models
 
 from apps.plants.models import Plant
 from .models import GrcRole, UserPlantAccess
@@ -22,14 +23,21 @@ def resolve_current_risk_manager(plant: Plant) -> Optional[get_user_model()]:
 
 def competency_gap_analysis(user) -> dict:
     """
-    Confronta le competenze richieste per i ruoli dell'utente
-    con le competenze effettive.
+    Confronta le competenze richieste per i ruoli di governance attivi dell'utente
+    (RoleAssignment M00) con le competenze effettive.
     """
-    from .models import UserPlantAccess, RoleCompetencyRequirement, UserCompetency
+    from .models import RoleCompetencyRequirement, UserCompetency
+    from apps.governance.models import RoleAssignment
+    from django.utils import timezone
 
+    today = timezone.now().date()
     roles = list(
-        UserPlantAccess.objects.filter(
-            user=user, deleted_at__isnull=True
+        RoleAssignment.objects.filter(
+            user=user,
+            deleted_at__isnull=True,
+            valid_from__lte=today,
+        ).filter(
+            models.Q(valid_until__isnull=True) | models.Q(valid_until__gte=today)
         ).values_list("role", flat=True).distinct()
     )
 
@@ -76,9 +84,9 @@ def competency_gap_analysis(user) -> dict:
             ok.append(req.competency)
 
     return {
-        "user_id":   str(user.pk),
-        "user_name": f"{user.first_name} {user.last_name}".strip() or user.email,
-        "roles":     roles,
+        "user_id":        str(user.pk),
+        "user_name":      f"{user.first_name} {user.last_name}".strip() or user.email,
+        "governance_roles": roles,
         "gaps":      gaps,
         "ok":        ok,
         "warnings":  warnings,
