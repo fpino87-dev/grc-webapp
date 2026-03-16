@@ -137,6 +137,7 @@ docker compose up -d celery celery-beat
 1. **Applicare migrazioni GRC** — `docker compose exec backend python manage.py migrate`
 2. **Avviare Celery** — `docker compose up -d celery celery-beat`
 3. **Caricare framework normativi** — `docker compose exec backend python manage.py load_frameworks`
+   **Caricare requisiti competenza** — `docker compose exec backend python manage.py load_competency_requirements`
 4. **Esporre su Nginx Proxy Manager** — proxy host per frontend porta 3001
 5. **Completare views mancanti** — alcuni moduli hanno urls.py vuoti
 6. **Test suite** — `docker compose exec backend pytest`

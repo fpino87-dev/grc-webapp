@@ -1,4 +1,4 @@
-.PHONY: dev migrate test lint load-fw seed shell
+.PHONY: dev migrate test lint load-fw load-competencies seed shell
 
 dev:
 	docker compose up -d db redis minio mailhog
@@ -17,6 +17,9 @@ lint:
 
 load-fw:
 	cd backend && python manage.py load_frameworks
+
+load-competencies:
+	cd backend && python manage.py load_competency_requirements
 
 seed:
 	cd backend && python manage.py seed_demo
