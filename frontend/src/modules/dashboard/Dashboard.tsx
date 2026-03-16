@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { controlsApi } from "../../api/endpoints/controls";
@@ -8,6 +8,7 @@ import { reportingApi } from "../../api/endpoints/reporting";
 import { assetsApi } from "../../api/endpoints/assets";
 import { scheduleApi } from "../../api/endpoints/schedule";
 import { governanceApi } from "../../api/endpoints/governance";
+import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -45,12 +46,38 @@ const WEEK_OPTIONS = [
   { label: "12 mesi", weeks: 52 },
 ];
 
+const FRAMEWORK_LABELS: Record<string, string> = {
+  ISO27001: "ISO 27001",
+  NIS2:     "NIS2",
+  TISAX_L2: "TISAX L2",
+  TISAX_L3: "TISAX L3",
+};
+
 function KpiTrendChart() {
   const [weeks, setWeeks] = useState(12);
+  const [framework, setFramework] = useState("ISO27001");
+  const selectedPlant = useAuthStore(s => s.selectedPlant);
+
+  // Carica framework attivi per il plant selezionato
+  const { data: activeFrameworks } = useQuery({
+    queryKey: ["frameworks", selectedPlant?.id],
+    queryFn: () => controlsApi.frameworks(selectedPlant?.id),
+    retry: false,
+  });
+
+  // Quando cambiano i framework attivi, seleziona automaticamente il primo disponibile
+  useEffect(() => {
+    if (activeFrameworks && activeFrameworks.length > 0) {
+      const codes = activeFrameworks.map(f => f.code);
+      if (!codes.includes(framework)) {
+        setFramework(codes[0]);
+      }
+    }
+  }, [activeFrameworks]);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["kpi-trend", weeks],
-    queryFn: () => reportingApi.kpiTrend({ framework: "ISO27001", weeks }),
+    queryKey: ["kpi-trend", framework, weeks, selectedPlant?.id],
+    queryFn: () => reportingApi.kpiTrend({ framework, weeks }),
     retry: false,
   });
 
@@ -64,11 +91,31 @@ function KpiTrendChart() {
     incidents: s.open_incidents,
   }));
 
+  const fwLabel = FRAMEWORK_LABELS[framework] ?? framework;
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-gray-700">Trend ISMS settimanale (ISO 27001)</h3>
-        <div className="flex gap-1">
+        <h3 className="text-sm font-semibold text-gray-700">Trend ISMS settimanale — {fwLabel}</h3>
+        <div className="flex gap-1 flex-wrap">
+          {/* Selector framework attivi */}
+          {activeFrameworks && activeFrameworks.length > 1 && (
+            <div className="flex gap-1 mr-2">
+              {activeFrameworks.map(f => (
+                <button
+                  key={f.code}
+                  onClick={() => setFramework(f.code)}
+                  className={`px-2 py-1 text-xs rounded border ${
+                    framework === f.code
+                      ? "bg-gray-700 text-white border-gray-700"
+                      : "text-gray-500 border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  {FRAMEWORK_LABELS[f.code] ?? f.code}
+                </button>
+              ))}
+            </div>
+          )}
           {WEEK_OPTIONS.map(opt => (
             <button
               key={opt.weeks}
