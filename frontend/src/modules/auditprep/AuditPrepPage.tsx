@@ -655,7 +655,7 @@ export function AuditPrepPage() {
 
   const cancelMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
-      await apiClient.post(`/api/v1/audit-prep/audit-preps/${id}/annulla/`, {
+      await apiClient.post(`/audit-prep/audit-preps/${id}/annulla/`, {
         reason,
       });
     },

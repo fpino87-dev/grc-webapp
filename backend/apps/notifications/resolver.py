@@ -17,65 +17,45 @@ def _user_has_access_to_plant(access: UserPlantAccess, plant) -> bool:
   return False
 
 
-def resolve_recipients(event_type: str, plant=None, bu=None) -> list[str]:
-  """
-  Trova gli indirizzi email dei destinatari per un evento.
-  Rispetta lo scope: notifica solo chi ha accesso al plant/BU.
-  """
-  from .models import NotificationRule
+def resolve_recipients(event_type: str, plant=None, bu=None) -> list:
+    """
+    Trova i destinatari email per un evento.
+    Usa NotificationRoleProfile invece della config granulare.
+    Rispetta lo scope: notifica solo utenti con accesso al plant.
+    """
+    from .models import NotificationRoleProfile
 
-  rules = NotificationRule.objects.filter(
-      event_type=event_type,
-      enabled=True,
-      deleted_at__isnull=True,
-  )
+    profiles = NotificationRoleProfile.objects.filter(
+        enabled=True,
+        deleted_at__isnull=True,
+    )
 
-  # Filtra regole applicabili allo scope dell'evento
-  applicable_rules = []
-  for rule in rules:
-      if rule.scope_type == "org":
-          applicable_rules.append(rule)
-      elif rule.scope_type == "plant" and plant:
-          if rule.scope_plant_id == plant.pk:
-              applicable_rules.append(rule)
-      elif rule.scope_type == "bu" and bu:
-          if rule.scope_bu_id == getattr(bu, "pk", None):
-              applicable_rules.append(rule)
-      elif rule.scope_type == "bu" and plant and plant.bu_id:
-          if rule.scope_bu_id == plant.bu_id:
-              applicable_rules.append(rule)
+    target_roles = []
+    for profile in profiles:
+        if event_type in profile.get_active_events():
+            target_roles.append(profile.grc_role)
 
-  if not applicable_rules:
-      return []
+    if not target_roles:
+        return []
 
-  # Raccogli tutti i ruoli destinatari dalle regole applicabili
-  target_roles: set[str] = set()
-  for rule in applicable_rules:
-      for role in rule.recipient_roles:
-          target_roles.add(role)
+    emails: set = set()
+    qs = (
+        UserPlantAccess.objects.filter(
+            role__in=target_roles,
+            deleted_at__isnull=True,
+        )
+        .select_related("user", "scope_bu")
+        .prefetch_related("scope_plants")
+    )
 
-  if not target_roles:
-      return []
+    for access in qs:
+        if not access.user.is_active or not access.user.email:
+            continue
+        if plant and not _user_has_access_to_plant(access, plant):
+            continue
+        emails.add(access.user.email)
 
-  # Risolvi utenti reali via UserPlantAccess
-  emails: set[str] = set()
-  qs = (
-      UserPlantAccess.objects.filter(
-          role__in=target_roles,
-          deleted_at__isnull=True,
-      )
-      .select_related("user")
-      .prefetch_related("scope_plants")
-  )
-
-  for access in qs:
-      # Verifica che l'utente abbia accesso al plant dell'evento
-      if plant and not _user_has_access_to_plant(access, plant):
-          continue
-      if access.user.email and access.user.is_active:
-          emails.add(access.user.email)
-
-  return list(emails)
+    return list(emails)
 
 
 def fire_notification(event_type: str, plant=None, bu=None, context: dict | None = None):

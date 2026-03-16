@@ -2,6 +2,7 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (
     EmailConfigurationViewSet,
+    NotificationRoleProfileViewSet,
     NotificationRuleViewSet,
     NotificationSubscriptionViewSet,
 )
@@ -22,6 +23,10 @@ router.register(
     NotificationRuleViewSet,
     basename="notification-rule",
 )
+router.register(
+    "role-profiles",
+    NotificationRoleProfileViewSet,
+    basename="notification-role-profile",
+)
 
 urlpatterns = router.urls
-

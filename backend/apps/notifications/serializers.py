@@ -1,6 +1,12 @@
 from rest_framework import serializers
 
-from .models import EmailConfiguration, NotificationRule, NotificationSubscription
+from .models import (
+    EmailConfiguration,
+    NotificationRule,
+    NotificationRoleProfile,
+    NotificationSubscription,
+    NOTIFICATION_PROFILES,
+)
 
 
 class NotificationSubscriptionSerializer(serializers.ModelSerializer):
@@ -85,3 +91,31 @@ class NotificationRuleSerializer(serializers.ModelSerializer):
             "created_by",
         ]
         read_only_fields = ["id", "created_at", "updated_at", "created_by"]
+
+
+class NotificationRoleProfileSerializer(serializers.ModelSerializer):
+    active_events = serializers.SerializerMethodField(read_only=True)
+    profile_label = serializers.SerializerMethodField(read_only=True)
+
+    def get_active_events(self, obj):
+        return obj.get_active_events()
+
+    def get_profile_label(self, obj):
+        if obj.profile == "custom":
+            return "Personalizzato"
+        return NOTIFICATION_PROFILES.get(obj.profile, {}).get("label", obj.profile)
+
+    class Meta:
+        model = NotificationRoleProfile
+        fields = [
+            "id",
+            "grc_role",
+            "profile",
+            "profile_label",
+            "custom_events",
+            "enabled",
+            "active_events",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
