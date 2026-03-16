@@ -1,15 +1,121 @@
-# GRC Compliance Webapp
+# GRC Compliance Webapp — SumiRiko Italy S.p.A.
+# Aggiornato: marzo 2026
+
 ## Stack
-Backend : Python 3.11 · Django 5 · DRF · Celery 5 · Redis 7 · PostgreSQL 15
-Frontend: React 18 · TypeScript · i18next · Tailwind · Recharts · Vite
-## Regole assolute
-- Tutti i model ereditano da core.models.BaseModel
-- Business logic SOLO in services.py
-- Ogni azione chiama core.audit.log_action()
-- AuditLog append-only — trigger PostgreSQL impedisce UPDATE/DELETE
-- Task assegnati a ruolo (risoluzione dinamica), mai a utente diretto
-- Framework normativi = JSON in backend/frameworks/, non codice
-- Soft delete sempre — mai hard delete
-- Nessuna query N+1 — select_related/prefetch_related obbligatori
-- M20 AI: nessun PII al cloud senza sanitization, human-in-the-loop sempre
+Backend : Python 3.11 · Django 5.1 · DRF · Celery 5 · Redis 7 · PostgreSQL 15
+Frontend: React 18 · TypeScript · Vite 5 · Tailwind · Recharts · i18next · Zustand · TanStack Query
+
+## Moduli implementati (M00–M20 + estensioni)
+M00 Governance       — RoleAssignment, SecurityCommittee, NormativeRole
+M01 Plants           — Plant, BusinessUnit, PlantFramework (max 1 livello nesting)
+M02 RBAC             — GrcRole (7 ruoli), UserPlantAccess, ExternalAuditorToken
+M03 Controls         — Framework, Control, ControlInstance, ControlMapping
+                       export_engine.py → SOA ISO27001 / VDA ISA TISAX / NIS2 Matrix
+M04 Assets           — Asset, AssetIT, AssetOT, NetworkZone, change_ref fields
+M05 BIA              — CriticalProcess (MTPD/MBCO/RTO/RPO), TreatmentOption, RiskDecision
+M06 Risk             — RiskAssessment (inerente+residuo), RiskDimension, RiskMitigationPlan
+                       RiskAppetitePolicy — soglie configurabili
+M07 Documents        — Document (document_type), DocumentVersion, Evidence (evidence_type)
+M08 Tasks            — Task (source_id+source_module), TaskComment, escalation chain
+M09 Incidents        — Incident, RCA, IncidentNotification, close→PDCA+LessonLearned auto
+M10 Audit Trail      — AuditLog (hash chain SHA-256, trigger append-only PostgreSQL)
+M11 PDCA             — PdcaCycle, PdcaPhase, close_cycle→aggiorna sorgente+LessonLearned
+M12 Lessons          — LessonLearned (propagazione cross-plant)
+M13 Management Review— ManagementReview (snapshot dettagliato), report HTML scaricabile
+M14 Suppliers        — Supplier, SupplierAssessment
+M15 Training         — TrainingCourse, TrainingEnrollment, PhishingSimulation (KnowBe4)
+M16 BCP              — BcpPlan (RTO/RPO vs MTPD BIA), BcpTest (test_type+objectives)
+M17 Audit Prep       — AuditPrep (soft delete+annulla), EvidenceItem, AuditFinding
+                       AuditProgram — calendario annuale audit
+M18 Reporting        — ComplianceSummary, RiskSummary, OwnerReport (BarChart)
+M19 Notifications    — NotificationSubscription (3 non disattivabili), WebhookEndpoint
+M20 AI Engine        — AiInteractionLog, Sanitizer (PII), AiRouter (local/cloud)
+
+## Moduli aggiuntivi (oltre M00–M20)
+compliance_schedule  — ComplianceSchedulePolicy, ScheduleRule (23 tipi),
+                       RequiredDocument, get_activity_schedule(), get_due_date()
+                       Frontend: ActivitySchedulePage, RequiredDocumentsPage, SchedulePolicyPage
+
+## Regole architetturali ASSOLUTE — non derogare mai
+1.  Tutti i model ereditano da core.models.BaseModel (UUID pk, soft_delete, timestamps, created_by)
+2.  Business logic SOLO in services.py — mai nelle views o nei serializer
+3.  Ogni azione rilevante chiama core.audit.log_action(action_code, level, entity, payload)
+4.  AuditLog append-only — trigger PostgreSQL + select_for_update() in _get_prev_hash()
+5.  Soft delete sempre (soft_delete()) — mai queryset.delete() diretto
+6.  Nessuna query N+1 — select_related/prefetch_related obbligatori
+7.  Task assegnati a ruolo (risoluzione dinamica via UserPlantAccess), mai a utente diretto
+8.  Framework normativi = JSON in backend/frameworks/ — non hardcodare controlli nel codice
+9.  M20 AI: nessun PII al cloud senza Sanitizer.sanitize(), human-in-the-loop sempre
+10. Scadenze calcolate con compliance_schedule.services.get_due_date() — mai hardcodate
+
+## Pattern obbligatori
+
+### Service pattern
+def my_service(obj, user, **kwargs):
+    # logica business
+    obj.field = value
+    obj.save(update_fields=["field", "updated_at"])
+    log_action(user=user, action_code="module.action",
+               level="L2", entity=obj, payload={...})
+    return obj
+
+### Destroy pattern (mai hard delete)
+def destroy(self, request, *args, **kwargs):
+    instance = self.get_object()
+    # controlla dipendenze prima
+    instance.soft_delete()
+    log_action(..., action_code="module.deleted", level="L2", ...)
+    return Response(status=204)
+
+### Celery task pattern
+@shared_task(bind=True, autoretry_for=(Exception,),
+             max_retries=3, default_retry_delay=60)
+def my_task(self):
+    try:
+        # logica
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Task error: {e}")
+        raise
+
+## Livelli audit log
+L1 — Critico    (conservazione 5 anni): approvazioni formali, chiusura incidenti NIS2,
+                 export SOA/VDA/NIS2, accettazione rischi, token auditor
+L2 — Operativo  (conservazione 3 anni): valutazioni controlli, assessment, task, evidenze
+L3 — Informativo(conservazione 1 anno): accessi lettura, export non formali, operazioni sistema
+
+## Scadenze — usa sempre get_due_date()
+from apps.compliance_schedule.services import get_due_date
+# Esempi:
+evidence.valid_until    = get_due_date("evidence_screenshot", plant=plant)
+finding.deadline        = get_due_date("finding_major", plant=plant)
+supplier.next_assessment= get_due_date("supplier_assessment", plant=plant)
+plan.next_test_date     = get_due_date("bcp_test", plant=plant)
+
+## Sicurezza — impostazioni attive
+JWT: ACCESS=30min, REFRESH=7gg, ROTATE=True
+Rate limiting: anon=20/h, user=500/h
+Security headers: X_FRAME_OPTIONS=DENY, SECURE_CONTENT_TYPE_NOSNIFF=True
+DB pooling: CONN_MAX_AGE=60
+Produzione: settings/prod.py con SECURE_SSL_REDIRECT, HSTS, cookie secure
+
+## Export documenti compliance
+GET /api/v1/controls/export/?framework=ISO27001&format=soa&plant=<uuid>
+GET /api/v1/controls/export/?framework=TISAX_L2&format=vda_isa&plant=<uuid>
+GET /api/v1/controls/export/?framework=NIS2&format=compliance_matrix&plant=<uuid>
+IMPORTANTE: usare fetch() con header Authorization Bearer, NON window.open()
+
+## Porte server (non modificare)
+Backend  : 8001 → 8000
+Frontend : 3001 → 3000
+PostgreSQL: 5433 → 5432
+Redis    : interno
+
 ## Lingue: it (default) · en (fallback) · fr · pl · tr
+
+## File di riferimento
+CLAUDE.md                          — contesto aggiornato per Claude Code
+AGENTS.md                          — build plan originale
+GRC_Specifica_Funzionale_v1.0.docx — specifiche funzionali M00-M20
+MANUAL_TECNICO.md                  — pattern architetturali
+backend/frameworks/*.json          — controlli normativi (ISO27001, NIS2, TISAX L2/L3)
