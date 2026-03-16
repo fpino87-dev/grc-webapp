@@ -26,6 +26,7 @@ import { AuditTrailPage } from "./modules/audittrail/AuditTrailPage";
 import { ActivitySchedulePage } from "./modules/schedule/ActivitySchedulePage";
 import { RequiredDocumentsPage } from "./modules/schedule/RequiredDocumentsPage";
 import { SchedulePolicyPage } from "./modules/schedule/SchedulePolicyPage";
+import { CompetencyPage } from "./modules/competency/CompetencyPage";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
@@ -70,6 +71,7 @@ export function App() {
           <Route path="schedule/activity" element={<ActivitySchedulePage />} />
           <Route path="schedule/documents" element={<RequiredDocumentsPage />} />
           <Route path="schedule/policy" element={<SchedulePolicyPage />} />
+          <Route path="competency" element={<CompetencyPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

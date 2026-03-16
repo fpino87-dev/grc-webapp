@@ -53,6 +53,7 @@ const navGroups = [
       { to: "/management-review", label: "Revisione Dir.", icon: "📝", roles: ["super_admin", "compliance_officer", "risk_manager"] },
       { to: "/plants", label: "Siti", icon: "🏭", roles: ["super_admin", "compliance_officer"] },
       { to: "/users", label: "Utenti", icon: "👥", roles: ["super_admin"] },
+      { to: "/competency", label: "Competenze", icon: "◎", roles: ["super_admin", "compliance_officer", "ciso"] },
       { to: "/audit-trail", label: "Audit Trail", icon: "📜", roles: ["super_admin", "internal_auditor", "external_auditor"] },
     ],
   },
