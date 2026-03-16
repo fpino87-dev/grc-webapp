@@ -7,6 +7,8 @@ export interface RoleAssignment {
   user_name?: string;
   role: string;
   scope_type: "org" | "bu" | "plant";
+  scope_id: string | null;
+  scope_label?: string;
   valid_from: string;
   valid_until: string | null;
   is_active: boolean;

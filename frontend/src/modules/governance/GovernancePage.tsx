@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { governanceApi, type RoleAssignment, type SecurityCommittee } from "../../api/endpoints/governance";
 import { usersApi } from "../../api/endpoints/users";
+import { plantsApi } from "../../api/endpoints/plants";
+import { apiClient } from "../../api/client";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -25,6 +27,27 @@ const ROLE_LABELS: Record<string, string> = {
 const TODAY = new Date().toISOString().slice(0, 10);
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+function scopeBadge(a: RoleAssignment) {
+  if (a.scope_label) {
+    const colors: Record<string, string> = {
+      Globale: "bg-blue-50 text-blue-700 border-blue-200",
+    };
+    const isGlobal = a.scope_type === "org";
+    const isBu = a.scope_type === "bu";
+    const cls = isGlobal
+      ? "bg-blue-50 text-blue-700 border-blue-200"
+      : isBu
+      ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+      : "bg-green-50 text-green-700 border-green-200";
+    return (
+      <span className={`text-xs px-1.5 py-0.5 rounded border ${cls}`}>
+        {a.scope_label}
+      </span>
+    );
+  }
+  return null;
+}
 
 function roleBadge(a: RoleAssignment) {
   if (!a.valid_until) {
@@ -58,20 +81,40 @@ function RoleAssignmentModal({
   onClose,
 }: { users: { id: number; email: string; name: string }[]; onClose: () => void }) {
   const qc = useQueryClient();
-  const [form, setForm] = useState<Partial<RoleAssignment & { valid_from: string }>>({
+  const [form, setForm] = useState<Record<string, any>>({
     scope_type: "org",
     valid_from: TODAY,
   });
   const [error, setError] = useState("");
 
+  const { data: plants } = useQuery({
+    queryKey: ["plants"],
+    queryFn: () => plantsApi.list(),
+    retry: false,
+  });
+  const { data: busData } = useQuery({
+    queryKey: ["business-units"],
+    queryFn: async () => {
+      const res = await apiClient.get("/plants/business-units/");
+      const d = res.data;
+      return Array.isArray(d) ? d : (d?.results ?? []);
+    },
+    retry: false,
+  });
+
   const mutation = useMutation({
-    mutationFn: governanceApi.createRoleAssignment,
+    mutationFn: () => governanceApi.createRoleAssignment(form as any),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["role-assignments"] }); onClose(); },
     onError: (e: any) => setError(e?.response?.data?.detail || JSON.stringify(e?.response?.data) || "Errore"),
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value || null }));
+    const val = e.target.value || null;
+    if (e.target.name === "scope_type") {
+      setForm(prev => ({ ...prev, scope_type: val, scope_id: null }));
+    } else {
+      setForm(prev => ({ ...prev, [e.target.name]: val }));
+    }
   }
 
   return (
@@ -96,11 +139,33 @@ function RoleAssignmentModal({
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Ambito</label>
             <select name="scope_type" defaultValue="org" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-              <option value="org">Organizzazione</option>
-              <option value="bu">Business Unit</option>
-              <option value="plant">Sito</option>
+              <option value="org">Globale — tutta l&apos;organizzazione</option>
+              <option value="bu">Business Unit specifica</option>
+              <option value="plant">Sito specifico</option>
             </select>
           </div>
+          {form.scope_type === "bu" && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Business Unit *</label>
+              <select name="scope_id" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+                <option value="">— seleziona BU —</option>
+                {(busData ?? []).map((b: any) => (
+                  <option key={b.id} value={b.id}>{b.code} — {b.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          {form.scope_type === "plant" && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Sito *</label>
+              <select name="scope_id" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+                <option value="">— seleziona sito —</option>
+                {(plants ?? []).map((p) => (
+                  <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Valido dal *</label>
@@ -118,8 +183,11 @@ function RoleAssignmentModal({
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
           <button
-            onClick={() => mutation.mutate(form)}
-            disabled={mutation.isPending || !form.user || !form.role || !form.valid_from}
+            onClick={() => mutation.mutate()}
+            disabled={
+              mutation.isPending || !form.user || !form.role || !form.valid_from ||
+              (form.scope_type !== "org" && !form.scope_id)
+            }
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
             {mutation.isPending ? "Salvataggio..." : "Assegna ruolo"}
@@ -484,6 +552,7 @@ export function GovernancePage() {
                         {ROLE_LABELS[a.role] ?? a.role}
                       </span>
                       {roleBadge(a)}
+                      {scopeBadge(a)}
                     </div>
                     <div className="text-xs text-gray-500 mt-0.5">
                       {a.user_name ?? a.user_email ?? String(a.user)}

@@ -4,9 +4,10 @@ from .models import CommitteeMeeting, RoleAssignment, SecurityCommittee
 
 
 class RoleAssignmentSerializer(serializers.ModelSerializer):
-    user_email = serializers.SerializerMethodField(read_only=True)
-    user_name  = serializers.SerializerMethodField(read_only=True)
-    is_active  = serializers.SerializerMethodField(read_only=True)
+    user_email  = serializers.SerializerMethodField(read_only=True)
+    user_name   = serializers.SerializerMethodField(read_only=True)
+    is_active   = serializers.SerializerMethodField(read_only=True)
+    scope_label = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model  = RoleAssignment
@@ -22,6 +23,19 @@ class RoleAssignmentSerializer(serializers.ModelSerializer):
 
     def get_is_active(self, obj):
         return obj.is_active
+
+    def get_scope_label(self, obj):
+        if obj.scope_type == "org":
+            return "Globale"
+        if obj.scope_type == "bu" and obj.scope_id:
+            from apps.plants.models import BusinessUnit
+            bu = BusinessUnit.objects.filter(pk=obj.scope_id).first()
+            return f"BU: {bu.code} — {bu.name}" if bu else f"BU: {obj.scope_id}"
+        if obj.scope_type == "plant" and obj.scope_id:
+            from apps.plants.models import Plant
+            plant = Plant.objects.filter(pk=obj.scope_id).first()
+            return f"Sito: {plant.code} — {plant.name}" if plant else f"Sito: {obj.scope_id}"
+        return obj.scope_type or "—"
 
 
 class SecurityCommitteeSerializer(serializers.ModelSerializer):

@@ -334,6 +334,17 @@ export function NotificationSettingsPage() {
         </button>
       </div>
 
+      {/* Nota scope notifiche */}
+      <div className="mb-4 flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm text-blue-800">
+        <span className="mt-0.5 flex-shrink-0">ℹ</span>
+        <span>
+          Le notifiche rispettano lo <strong>scope RBAC (M02)</strong>, non l&apos;ambito del ruolo normativo (M00 Governance).
+          Un CISO con accesso <em>Globale</em> in M02 riceve notifiche per tutti i siti.
+          Un CISO assegnato a un solo sito riceve solo le notifiche di quel sito.
+          Configura gli accessi in <a href="/users" className="underline font-medium">Utenti → Accessi</a>.
+        </span>
+      </div>
+
       {/* Banner email non configurata */}
       {!hasEmailConfig && (
         <div className="mb-4 flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-amber-800">
