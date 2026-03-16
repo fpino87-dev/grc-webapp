@@ -5,64 +5,95 @@ from django.db import connection, transaction
 User = get_user_model()
 
 TABLES_TO_TRUNCATE = [
-    # Audit (prima — ha trigger ma truncate bypassa i vincoli)
+    # Audit
     "audit_log",
     "ai_interaction_log",
-    # Moduli GRC in ordine di dipendenza (figli prima dei padri)
+    # Reporting
+    "reporting_ismskpisnapshot",
+    # Audit Prep (M17)
     "audit_prep_evidenceitem",
+    "audit_prep_auditfinding",
     "audit_prep_auditprep",
+    "audit_prep_auditprogram",
+    # BCP (M16)
     "bcp_bcptest",
     "bcp_bcpplan",
+    # Training (M15)
     "training_phishingsimulation",
     "training_trainingenrollment",
     "training_trainingcourse",
+    # Suppliers (M14)
     "suppliers_supplierassessment",
     "suppliers_supplier",
+    # Management Review (M13)
     "management_review_reviewaction",
     "management_review_managementreview",
+    # Lessons (M12)
     "lessons_lessonlearned",
+    # PDCA (M11)
     "pdca_pdcaphase",
     "pdca_pdcacycle",
+    # Incidents (M09)
     "incidents_rca",
     "incidents_incidentnotification",
     "incidents_incident",
+    # Tasks (M08)
     "tasks_taskcomment",
     "tasks_task",
+    # Documents (M07)
     "documents_evidence",
     "documents_documentapproval",
     "documents_documentversion",
     "documents_document",
+    # Risk (M06)
     "risk_riskmitigationplan",
     "risk_riskdimension",
     "risk_riskassessment",
-    "bia_risktreamentoption",
+    "risk_riskappetitepolicy",
+    # BIA (M05)
+    "bia_treatmentoption",
     "bia_riskdecision",
     "bia_criticalprocess",
+    # Assets (M04)
     "assets_assetdependency",
     "assets_assetot",
     "assets_assetit",
     "assets_asset",
     "assets_networkzone",
+    # Controls (M03) — solo istanze, non libreria
     "controls_controlinstance",
     "controls_controlmapping",
+    # Compliance Schedule (M18b)
+    "compliance_schedule_requireddocument",
+    "compliance_schedule_schedulerule",
+    "compliance_schedule_complianceschedulepolicy",
+    # Notifications
     "notifications_notificationsubscription",
+    "notifications_notificationrule",
+    "notifications_emailconfiguration",
+    # Governance (M00)
     "governance_committeemeeting",
     "governance_securitycommittee",
     "governance_roleassignment",
+    # Auth / RBAC (M02)
+    "auth_grc_usercompetency",
     "auth_grc_externalauditortoken",
     "auth_grc_userplantaccess",
+    # Plants (M01)
     "plants_plantframework",
     "plants_plant",
     "plants_businessunit",
-    # Celery results
+    # Celery
     "django_celery_results_taskresult",
     "django_celery_results_groupresult",
-    "django_celery_beat_periodictask",
+    "django_celery_beat_periodictasks",
 ]
 
 # Tabelle che NON vengono mai toccate:
 # auth_user, auth_group, auth_permission
-# controls_framework, controls_controldomain, controls_control
+# controls_framework, controls_controldomain, controls_control  ← libreria normativa
+# auth_grc_rolecompetencyrequirement                            ← config competenze
+# notifications_notificationroleprofile                         ← profili notifica default
 # django_migrations, django_content_type
 
 
