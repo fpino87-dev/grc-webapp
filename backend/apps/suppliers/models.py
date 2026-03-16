@@ -39,11 +39,48 @@ class Supplier(BaseModel):
 
 
 class SupplierAssessment(BaseModel):
-    STATUS_CHOICES = [("pianificato", "Pianificato"), ("completato", "Completato")]
+    APPROVAL_CHOICES = [
+        ("pianificato", "Pianificato"),
+        ("in_corso", "In corso"),
+        ("completato", "Completato"),
+        ("approvato", "Approvato"),
+        ("rifiutato", "Rifiutato"),
+    ]
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, related_name="assessments")
     assessed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     assessment_date = models.DateField()
-    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="pianificato")
+    status = models.CharField(
+        max_length=15,
+        choices=APPROVAL_CHOICES,
+        default="pianificato",
+    )
+    # Campi approvazione
+    reviewed_by = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="reviewed_supplier_assessments",
+    )
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    review_notes = models.TextField(blank=True)
+
+    # Score strutturato
+    score_governance = models.IntegerField(null=True, blank=True)
+    score_security = models.IntegerField(null=True, blank=True)
+    score_bcp = models.IntegerField(null=True, blank=True)
+    score_overall = models.IntegerField(null=True, blank=True)
     score = models.IntegerField(null=True, blank=True)
+
     findings = models.TextField(blank=True)
     next_assessment_date = models.DateField(null=True, blank=True)
+
+    @property
+    def risk_level(self):
+        if self.score_overall is None:
+            return "nd"
+        if self.score_overall >= 75:
+            return "verde"
+        if self.score_overall >= 50:
+            return "giallo"
+        return "rosso"

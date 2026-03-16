@@ -1,10 +1,12 @@
-from rest_framework import viewsets, filters
+from rest_framework import filters, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 
 from core.audit import log_action
 from .models import Supplier, SupplierAssessment
-from .serializers import SupplierSerializer, SupplierAssessmentSerializer
+from .serializers import SupplierAssessmentSerializer, SupplierSerializer
 
 
 class SupplierViewSet(viewsets.ModelViewSet):
@@ -42,3 +44,51 @@ class SupplierAssessmentViewSet(viewsets.ModelViewSet):
             entity=instance,
             payload={"id": str(instance.id), "supplier_id": str(instance.supplier_id)},
         )
+
+    @action(detail=True, methods=["post"], url_path="complete")
+    def complete(self, request, pk=None):
+        from .services import complete_assessment
+
+        assessment = self.get_object()
+        result = complete_assessment(
+            assessment,
+            request.user,
+            score_overall=request.data.get("score_overall"),
+            score_governance=request.data.get("score_governance"),
+            score_security=request.data.get("score_security"),
+            score_bcp=request.data.get("score_bcp"),
+            findings=request.data.get("findings", ""),
+        )
+        return Response(self.get_serializer(result).data)
+
+    @action(detail=True, methods=["post"], url_path="approve")
+    def approve(self, request, pk=None):
+        from django.core.exceptions import ValidationError
+        from .services import approve_assessment
+
+        assessment = self.get_object()
+        try:
+            result = approve_assessment(
+                assessment,
+                request.user,
+                notes=request.data.get("notes", ""),
+            )
+            return Response({"ok": True, "status": result.status})
+        except ValidationError as exc:
+            return Response({"error": str(exc.message)}, status=400)
+
+    @action(detail=True, methods=["post"], url_path="reject")
+    def reject(self, request, pk=None):
+        from django.core.exceptions import ValidationError
+        from .services import reject_assessment
+
+        assessment = self.get_object()
+        try:
+            result = reject_assessment(
+                assessment,
+                request.user,
+                notes=request.data.get("notes", ""),
+            )
+            return Response({"ok": True, "status": result.status})
+        except ValidationError as exc:
+            return Response({"error": str(exc.message)}, status=400)
