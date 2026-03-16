@@ -212,3 +212,16 @@ def escalate_red_risk(assessment: RiskAssessment, user):
                 assign_value="ciso",
             )
 
+    # Notifica via email secondo le regole configurate
+    try:
+        from apps.notifications.resolver import fire_notification
+
+        fire_notification(
+            "risk_red",
+            plant=assessment.plant,
+            context={"assessment": assessment},
+        )
+    except Exception:
+        # le notifiche non devono mai bloccare la logica principale
+        return
+

@@ -1,13 +1,15 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
 from . import services
-from .models import EmailConfiguration, NotificationSubscription
+from .models import EmailConfiguration, NotificationRule, NotificationSubscription
 from .serializers import (
     EmailConfigurationReadSerializer,
     EmailConfigurationSerializer,
+    NotificationRuleSerializer,
     NotificationSubscriptionSerializer,
 )
 
@@ -57,3 +59,11 @@ class EmailConfigurationViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"], url_path="presets")
     def presets(self, request):
         return Response(EmailConfiguration.PROVIDER_PRESETS)
+
+
+class NotificationRuleViewSet(viewsets.ModelViewSet):
+    queryset = NotificationRule.objects.select_related("scope_bu", "scope_plant")
+    serializer_class = NotificationRuleSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["event_type", "enabled", "scope_type"]

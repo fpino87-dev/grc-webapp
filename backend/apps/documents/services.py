@@ -42,6 +42,17 @@ def approve_document(document, user, notes=""):
         entity=document,
         payload={"id": str(document.pk), "title": document.title, "notes": notes},
     )
+    # notifica eventuali approvatori / stakeholder
+    try:
+        from apps.notifications.resolver import fire_notification
+
+        fire_notification(
+            "document_approval",
+            plant=document.plant,
+            context={"document": document},
+        )
+    except Exception:
+       pass
 
 
 def reject_document(document, user, notes=""):

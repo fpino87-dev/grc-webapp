@@ -118,6 +118,19 @@ def open_finding(audit_prep, finding_type: str, title: str,
             assign_value="compliance_officer",
         )
 
+    # Notifiche configurabili per finding
+    try:
+        from apps.notifications.resolver import fire_notification
+
+        event = "finding_major" if finding_type == "major_nc" else "finding_minor"
+        fire_notification(
+            event,
+            plant=audit_prep.plant,
+            context={"finding": finding},
+        )
+    except Exception:
+        pass
+
     log_action(
         user=user,
         action_code="audit.finding.opened",

@@ -51,4 +51,18 @@ def close_incident(incident: Incident, user):
             "severity": incident.severity,
         },
     )
+
+    # Notifica NIS2 se applicabile
+    if incident.nis2_notifiable == "si":
+        try:
+            from apps.notifications.resolver import fire_notification
+
+            fire_notification(
+                "incident_nis2",
+                plant=incident.plant,
+                context={"incident": incident},
+            )
+        except Exception:
+            pass
+
     return incident

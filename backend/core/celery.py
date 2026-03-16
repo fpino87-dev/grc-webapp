@@ -20,5 +20,13 @@ app.conf.beat_schedule = {
         "task": "apps.assets.tasks.check_unrevalued_changes",
         "schedule": crontab(hour=7, minute=0, day_of_week=1),  # Monday 07:00
     },
+    "notify-expiring-roles": {
+        "task": "apps.governance.tasks.notify_expiring_roles_task",
+        "schedule": crontab(hour=8, minute=0),
+    },
+    "notify-pdca-blocked": {
+        "task": "apps.pdca.tasks.notify_blocked_pdca_task",
+        "schedule": crontab(hour=8, minute=30),
+    },
 }
 

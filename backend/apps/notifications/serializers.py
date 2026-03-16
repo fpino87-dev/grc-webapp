@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import EmailConfiguration, NotificationSubscription
+from .models import EmailConfiguration, NotificationRule, NotificationSubscription
 
 
 class NotificationSubscriptionSerializer(serializers.ModelSerializer):
@@ -66,3 +66,22 @@ class EmailConfigurationReadSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+
+
+class NotificationRuleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NotificationRule
+        fields = [
+            "id",
+            "event_type",
+            "enabled",
+            "recipient_roles",
+            "scope_type",
+            "scope_bu",
+            "scope_plant",
+            "channel",
+            "created_at",
+            "updated_at",
+            "created_by",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at", "created_by"]

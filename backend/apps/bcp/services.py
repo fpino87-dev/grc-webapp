@@ -114,12 +114,24 @@ def record_test(
     # Se fallito o parziale crea PDCA automatico
     if result in ("fallito", "parziale"):
         from apps.pdca.services import create_cycle
+
         create_cycle(
             plant=plan.plant,
             title=f"PDCA BCP test {result} — {plan.title}",
             trigger_type="bcp_test_fallito",
             trigger_source_id=test.pk,
         )
+        # notifica configurabile per test BCP fallito/parziale
+        try:
+            from apps.notifications.resolver import fire_notification
+
+            fire_notification(
+                "bcp_test_failed",
+                plant=plan.plant,
+                context={"plan": plan},
+            )
+        except Exception:
+            pass
 
     # Se RTO sforato crea anche PDCA autonomo
     if warnings and result == "superato":

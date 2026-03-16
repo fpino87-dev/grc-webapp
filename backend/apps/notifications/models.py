@@ -91,3 +91,82 @@ class EmailConfiguration(BaseModel):
         },
     }
 
+
+EVENT_TYPES = [
+    ("risk_red", "Rischio critico (score > soglia)"),
+    ("finding_major", "Finding Major NC aperto"),
+    ("finding_minor", "Finding Minor NC aperto"),
+    ("incident_nis2", "Incidente NIS2 rilevato"),
+    ("incident_closed", "Incidente chiuso"),
+    ("task_assigned", "Task assegnato"),
+    ("task_overdue", "Task scaduto"),
+    ("evidence_expired", "Evidenza scaduta"),
+    ("document_approval", "Documento in attesa approvazione"),
+    ("role_expiring", "Ruolo normativo in scadenza"),
+    ("bcp_test_failed", "Test BCP fallito"),
+    ("pdca_blocked", "PDCA bloccato > 30 giorni"),
+    ("management_review", "Revisione direzione da approvare"),
+    ("supplier_assessment", "Assessment fornitore completato"),
+]
+
+SCOPE_TYPES = [
+    ("org", "Tutta l'organizzazione"),
+    ("bu", "Business Unit"),
+    ("plant", "Sito specifico"),
+]
+
+
+class NotificationRule(BaseModel):
+    """
+    Regola di notifica configurabile da UI.
+    Definisce: per quale evento, a quali ruoli,
+    su quale scope inviare la notifica email.
+    """
+
+    event_type = models.CharField(
+        max_length=50,
+        choices=EVENT_TYPES,
+    )
+    enabled = models.BooleanField(default=True)
+
+    # Ruoli destinatari (lista di GrcRole codes)
+    recipient_roles = models.JSONField(
+        default=list,
+        help_text="Lista ruoli GRC es. ['ciso','risk_manager']",
+    )
+
+    # Scope
+    scope_type = models.CharField(
+        max_length=10,
+        choices=SCOPE_TYPES,
+        default="org",
+    )
+    scope_bu = models.ForeignKey(
+        "plants.BusinessUnit",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="notification_rules",
+    )
+    scope_plant = models.ForeignKey(
+        "plants.Plant",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="notification_rules",
+    )
+
+    # Canale (per ora solo email)
+    channel = models.CharField(
+        max_length=10,
+        choices=[("email", "Email")],
+        default="email",
+    )
+
+    class Meta:
+        ordering = ["event_type"]
+        unique_together = ["event_type", "scope_type", "scope_bu", "scope_plant"]
+
+    def __str__(self) -> str:
+        return f"{self.event_type} → {self.recipient_roles}"
+

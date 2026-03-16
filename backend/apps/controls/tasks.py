@@ -68,4 +68,16 @@ def check_expired_evidences():
                     payload={"degraded_to": "parziale", "date": str(today)},
                 )
 
+            # Notifica configurabile per evidenza scaduta
+            try:
+                from apps.notifications.resolver import fire_notification
+
+                fire_notification(
+                    "evidence_expired",
+                    plant=instance.plant,
+                    context={"instance": instance},
+                )
+            except Exception:
+                pass
+
     return f"check_expired_evidences: {degraded} controlli degradati"
