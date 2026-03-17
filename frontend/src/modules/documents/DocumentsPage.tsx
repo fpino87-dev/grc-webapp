@@ -62,10 +62,21 @@ function NewDocumentModal({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
   const [form, setForm] = useState<Partial<Document>>({ is_mandatory: false });
   const [error, setError] = useState("");
+  const [file, setFile] = useState<File | null>(null);
 
   const mutation = useMutation({
     mutationFn: documentsApi.create,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["documents"] }); onClose(); },
+    onSuccess: async (doc) => {
+      if (file) {
+        try {
+          await documentsApi.uploadVersion(doc.id, file);
+        } catch {
+          // l'errore di upload versione non deve bloccare la creazione del documento
+        }
+      }
+      qc.invalidateQueries({ queryKey: ["documents"] });
+      onClose();
+    },
     onError: (e: unknown) => setError((e as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Errore durante il salvataggio"),
   });
 
@@ -116,13 +127,24 @@ function NewDocumentModal({ onClose }: { onClose: () => void }) {
             <input type="checkbox" id="is_mandatory" name="is_mandatory" onChange={handleChange} className="rounded" />
             <label htmlFor="is_mandatory" className="text-sm text-gray-700">Documento obbligatorio</label>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">File *</label>
+            <input
+              type="file"
+              onChange={e => setFile(e.target.files?.[0] ?? null)}
+              className="w-full text-sm"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Max 50MB. Formati: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg.
+            </p>
+          </div>
         </div>
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
           <button
             onClick={() => mutation.mutate(form)}
-            disabled={mutation.isPending || !form.title}
+            disabled={mutation.isPending || !form.title || !file}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
             {mutation.isPending ? "Salvataggio..." : "Crea documento"}
@@ -139,9 +161,10 @@ function NewEvidenceModal({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
   const [form, setForm] = useState<Partial<Evidence>>({ evidence_type: "altro" });
   const [error, setError] = useState("");
+  const [file, setFile] = useState<File | null>(null);
 
   const mutation = useMutation({
-    mutationFn: documentsApi.createEvidence,
+    mutationFn: (payload: Partial<Evidence> & { file?: File }) => documentsApi.createEvidence(payload),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["evidences"] }); onClose(); },
     onError: (e: unknown) => setError((e as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Errore"),
   });
@@ -169,13 +192,21 @@ function NewEvidenceModal({ onClose }: { onClose: () => void }) {
             <label className="block text-sm font-medium text-gray-700 mb-1">Descrizione</label>
             <textarea onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={2} className="w-full border rounded px-3 py-2 text-sm resize-none" />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">File *</label>
+            <input
+              type="file"
+              onChange={e => setFile(e.target.files?.[0] ?? null)}
+              className="w-full text-sm"
+            />
+          </div>
         </div>
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
           <button
-            onClick={() => mutation.mutate(form)}
-            disabled={mutation.isPending || !form.title || !form.valid_until}
+            onClick={() => mutation.mutate({ ...form, file: file ?? undefined })}
+            disabled={mutation.isPending || !form.title || !form.valid_until || !file}
             className="px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-50"
           >
             {mutation.isPending ? "Salvataggio..." : "Crea evidenza"}
@@ -362,6 +393,7 @@ function TabDocumenti() {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Titolo</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">File</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Tipo</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Stato</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Obbligatorio</th>
@@ -374,6 +406,20 @@ function TabDocumenti() {
               {documents.map(doc => (
                 <tr key={doc.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3 font-medium text-gray-800">{doc.title}</td>
+                  <td className="px-4 py-3 text-xs">
+                    {doc.latest_version && (doc.latest_version.file_url || doc.latest_version.storage_path) ? (
+                      <a
+                        href={doc.latest_version.file_url ?? `/media/${doc.latest_version.storage_path}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-indigo-600 hover:underline"
+                      >
+                        Scarica
+                      </a>
+                    ) : (
+                      <span className="text-gray-400">—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-gray-600 capitalize text-xs">{doc.document_type || doc.category}</td>
                   <td className="px-4 py-3"><StatusBadge status={doc.status} /></td>
                   <td className="px-4 py-3">
@@ -491,6 +537,16 @@ function TabEvidenze() {
                   <td className="px-4 py-3 font-medium text-gray-800 max-w-xs">
                     <div className="truncate">{ev.title}</div>
                     {ev.description && <div className="text-xs text-gray-400 truncate">{ev.description}</div>}
+                    {(ev.file_url || ev.file_path) && (
+                      <a
+                        href={ev.file_url ?? `/media/${ev.file_path}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-1 inline-flex text-xs text-indigo-600 hover:underline"
+                      >
+                        Scarica file
+                      </a>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-center">
                     <ExpiryBadge validUntil={ev.valid_until} />
