@@ -8,6 +8,7 @@ import { GapAnalysisPage } from "./modules/controls/GapAnalysisPage";
 import { IncidentsList } from "./modules/incidents/IncidentsList";
 import { PlantsList } from "./modules/plants/PlantsList";
 import { GovernancePage } from "./modules/governance/GovernancePage";
+import { DocumentWorkflowPage } from "./modules/governance/DocumentWorkflowPage";
 import { AssetsPage } from "./modules/assets/AssetsPage";
 import { RiskPage } from "./modules/risk/RiskPage";
 import { TasksPage } from "./modules/tasks/TasksPage";
@@ -55,6 +56,7 @@ export function App() {
           <Route path="incidents" element={<IncidentsList />} />
           <Route path="plants" element={<PlantsList />} />
           <Route path="governance" element={<GovernancePage />} />
+          <Route path="governance/workflow-documenti" element={<DocumentWorkflowPage />} />
           <Route path="assets" element={<AssetsPage />} />
           <Route path="risk" element={<RiskPage />} />
           <Route path="tasks" element={<TasksPage />} />

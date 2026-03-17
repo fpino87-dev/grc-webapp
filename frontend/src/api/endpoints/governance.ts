@@ -42,6 +42,16 @@ export interface InScadenzaResult {
   expired: ExpiringRole[];
 }
 
+export interface DocumentWorkflowPolicy {
+  id: string;
+  document_type: string;
+  scope_type: "org" | "bu" | "plant";
+  scope_id: string | null;
+  submit_roles: string[];
+  review_roles: string[];
+  approve_roles: string[];
+}
+
 export const governanceApi = {
   roleAssignments: () =>
     apiClient.get<{ results: RoleAssignment[] }>("/governance/role-assignments/").then((r) => r.data.results ?? r.data),
@@ -67,4 +77,22 @@ export const governanceApi = {
     apiClient.get<{ results: SecurityCommittee[] }>("/governance/committees/").then((r) => r.data.results ?? r.data),
   createCommittee: (data: Partial<SecurityCommittee>) =>
     apiClient.post<SecurityCommittee>("/governance/committees/", data).then((r) => r.data),
+
+  // Document workflow policies
+  listDocumentPolicies: () =>
+    apiClient
+      .get<{ results?: DocumentWorkflowPolicy[] } | DocumentWorkflowPolicy[]>(
+        "/governance/document-workflow-policies/",
+      )
+      .then((r) => (Array.isArray(r.data) ? r.data : r.data.results ?? [])),
+  createDocumentPolicy: (data: Partial<DocumentWorkflowPolicy>) =>
+    apiClient
+      .post<DocumentWorkflowPolicy>("/governance/document-workflow-policies/", data)
+      .then((r) => r.data),
+  updateDocumentPolicy: (id: string, data: Partial<DocumentWorkflowPolicy>) =>
+    apiClient
+      .patch<DocumentWorkflowPolicy>(`/governance/document-workflow-policies/${id}/`, data)
+      .then((r) => r.data),
+  deleteDocumentPolicy: (id: string) =>
+    apiClient.delete(`/governance/document-workflow-policies/${id}/`).then((r) => r.data),
 };
