@@ -155,6 +155,73 @@ function NewDocumentModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+// ─── Modal upload nuova versione documento ─────────────────────────────────────
+
+function UploadVersionModal({ doc, onClose }: { doc: Document; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [file, setFile] = useState<File | null>(null);
+  const [changeSummary, setChangeSummary] = useState("");
+  const [error, setError] = useState("");
+
+  const mutation = useMutation({
+    mutationFn: () => {
+      if (!file) throw new Error("Nessun file selezionato");
+      return documentsApi.uploadVersion(doc.id, file, changeSummary || undefined);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["documents"] });
+      onClose();
+    },
+    onError: (e: unknown) => {
+      // @ts-expect-error generic axios-like error shape
+      const msg = e?.response?.data?.error || e?.response?.data?.detail || (e as Error).message;
+      setError(msg || "Errore durante il caricamento del file");
+    },
+  });
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+        <h3 className="text-lg font-semibold mb-1">Nuova versione documento</h3>
+        <p className="text-xs text-gray-500 mb-4 truncate">{doc.title}</p>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">File *</label>
+            <input
+              type="file"
+              onChange={e => setFile(e.target.files?.[0] ?? null)}
+              className="w-full text-sm"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Max 50MB. Formati: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg.
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Note cambio (opzionale)</label>
+            <textarea
+              rows={2}
+              value={changeSummary}
+              onChange={e => setChangeSummary(e.target.value)}
+              className="w-full border rounded px-3 py-2 text-sm resize-none"
+            />
+          </div>
+        </div>
+        {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3 break-words">{error}</p>}
+        <div className="flex justify-end gap-2 mt-4">
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
+          <button
+            onClick={() => mutation.mutate()}
+            disabled={mutation.isPending || !file}
+            className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
+          >
+            {mutation.isPending ? "Caricamento..." : "Carica versione"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Modal nuova evidenza ─────────────────────────────────────────────────────
 
 function NewEvidenceModal({ onClose }: { onClose: () => void }) {
@@ -345,6 +412,7 @@ function TabDocumenti() {
   const [statusFilter, setStatusFilter] = useState<DocStatusFilter>("tutti");
   const [showNew, setShowNew] = useState(false);
   const [linkControlsDoc, setLinkControlsDoc] = useState<Document | null>(null);
+  const [uploadDoc, setUploadDoc] = useState<Document | null>(null);
 
   const params: Record<string, string> = {};
   if (statusFilter !== "tutti") params.status = statusFilter;
@@ -439,6 +507,12 @@ function TabDocumenti() {
                         </>
                       )}
                       <button
+                        onClick={() => setUploadDoc(doc)}
+                        className="text-xs text-gray-500 hover:text-indigo-700 border border-gray-300 rounded px-2 py-0.5 hover:border-indigo-400"
+                      >
+                        Nuova versione
+                      </button>
+                      <button
                         onClick={() => setLinkControlsDoc(doc)}
                         className="text-xs text-indigo-600 hover:text-indigo-800 border border-indigo-200 rounded px-2 py-0.5 hover:border-indigo-400"
                       >
@@ -455,6 +529,7 @@ function TabDocumenti() {
 
       {showNew && <NewDocumentModal onClose={() => setShowNew(false)} />}
       {linkControlsDoc && <LinkControlsModal doc={linkControlsDoc} onClose={() => setLinkControlsDoc(null)} />}
+      {uploadDoc && <UploadVersionModal doc={uploadDoc} onClose={() => setUploadDoc(null)} />}
     </div>
   );
 }
