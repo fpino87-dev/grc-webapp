@@ -2,7 +2,9 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { documentsApi, type Document, type Evidence, EVIDENCE_TYPE_LABELS } from "../../api/endpoints/documents";
 import { controlsApi, type ControlInstance } from "../../api/endpoints/controls";
+import { plantsApi, type Plant } from "../../api/endpoints/plants";
 import { StatusBadge } from "../../components/ui/StatusBadge";
+import { useAuthStore } from "../../store/auth";
 
 type MainTab = "documenti" | "evidenze";
 
@@ -60,12 +62,20 @@ function expirySort(a: Evidence, b: Evidence): number {
 
 function NewDocumentModal({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
+  const selectedPlant = useAuthStore(s => s.selectedPlant);
   const [form, setForm] = useState<Partial<Document>>({ is_mandatory: false });
   const [error, setError] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
   const mutation = useMutation({
-    mutationFn: documentsApi.create,
+    mutationFn: (payload: Partial<Document>) => {
+      const data: Partial<Document> = {
+        ...payload,
+        // collega automaticamente al sito selezionato se presente
+        plant: selectedPlant ? selectedPlant.id : payload.plant ?? null,
+      };
+      return documentsApi.create(data);
+    },
     onSuccess: async (doc) => {
       if (file) {
         try {
@@ -222,16 +232,89 @@ function UploadVersionModal({ doc, onClose }: { doc: Document; onClose: () => vo
   );
 }
 
+// ─── Modal cambio sito documento ───────────────────────────────────────────────
+
+function ChangePlantModal({ doc, onClose }: { doc: Document; onClose: () => void }) {
+  const qc = useQueryClient();
+  const { data: plants } = useQuery({
+    queryKey: ["plants"],
+    queryFn: plantsApi.list,
+    retry: false,
+  });
+  const [plantId, setPlantId] = useState<string>(doc.plant ?? "");
+  const [error, setError] = useState("");
+
+  const mutation = useMutation({
+    mutationFn: () => documentsApi.update(doc.id, { plant: plantId || null }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["documents"] });
+      onClose();
+    },
+    onError: (e: unknown) => {
+      // @ts-expect-error axios-like error
+      const msg = e?.response?.data?.detail || (e as Error).message;
+      setError(msg || "Errore durante l'aggiornamento del sito");
+    },
+  });
+
+  const plantOptions: Plant[] = plants ?? [];
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+        <h3 className="text-lg font-semibold mb-1">Cambia sito documento</h3>
+        <p className="text-xs text-gray-500 mb-4 truncate">{doc.title}</p>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Sito</label>
+            <select
+              value={plantId}
+              onChange={e => setPlantId(e.target.value)}
+              className="w-full border rounded px-3 py-2 text-sm"
+            >
+              <option value="">— Nessun sito —</option>
+              {plantOptions.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.code} — {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3 break-words">{error}</p>}
+        <div className="flex justify-end gap-2 mt-4">
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
+          <button
+            onClick={() => mutation.mutate()}
+            disabled={mutation.isPending}
+            className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
+          >
+            {mutation.isPending ? "Salvataggio..." : "Salva"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Modal nuova evidenza ─────────────────────────────────────────────────────
 
 function NewEvidenceModal({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
+  const selectedPlant = useAuthStore(s => s.selectedPlant);
   const [form, setForm] = useState<Partial<Evidence>>({ evidence_type: "altro" });
   const [error, setError] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
   const mutation = useMutation({
-    mutationFn: (payload: Partial<Evidence> & { file?: File }) => documentsApi.createEvidence(payload),
+    mutationFn: (payload: Partial<Evidence> & { file?: File }) => {
+      const data: Partial<Evidence> & { file?: File } = {
+        ...payload,
+        // collega automaticamente al sito selezionato se presente
+        plant: selectedPlant ? selectedPlant.id : payload.plant ?? null,
+      };
+      return documentsApi.createEvidence(data);
+    },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["evidences"] }); onClose(); },
     onError: (e: unknown) => setError((e as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Errore"),
   });
@@ -409,16 +492,19 @@ type DocStatusFilter = "tutti" | "bozza" | "revisione" | "approvazione" | "appro
 
 function TabDocumenti() {
   const qc = useQueryClient();
+  const selectedPlant = useAuthStore(s => s.selectedPlant);
   const [statusFilter, setStatusFilter] = useState<DocStatusFilter>("tutti");
   const [showNew, setShowNew] = useState(false);
   const [linkControlsDoc, setLinkControlsDoc] = useState<Document | null>(null);
   const [uploadDoc, setUploadDoc] = useState<Document | null>(null);
+  const [filterByPlant, setFilterByPlant] = useState(true);
 
   const params: Record<string, string> = {};
   if (statusFilter !== "tutti") params.status = statusFilter;
+  if (filterByPlant && selectedPlant) params.plant = selectedPlant.id;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["documents", statusFilter],
+    queryKey: ["documents", statusFilter, filterByPlant, selectedPlant?.id],
     queryFn: () => documentsApi.list(params),
     retry: false,
   });
@@ -446,9 +532,22 @@ function TabDocumenti() {
             </button>
           ))}
         </div>
-        <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 shrink-0">
-          + Nuovo documento
-        </button>
+        <div className="flex items-center gap-3">
+          {selectedPlant && (
+            <label className="flex items-center gap-1 text-xs text-gray-600">
+              <input
+                type="checkbox"
+                checked={filterByPlant}
+                onChange={e => setFilterByPlant(e.target.checked)}
+                className="rounded"
+              />
+              <span>Solo sito selezionato</span>
+            </label>
+          )}
+          <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 shrink-0">
+            + Nuovo documento
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -518,6 +617,12 @@ function TabDocumenti() {
                       >
                         Collega controlli
                       </button>
+                      <button
+                        onClick={() => setChangePlantDoc(doc)}
+                        className="text-xs text-gray-500 hover:text-amber-700 border border-gray-300 rounded px-2 py-0.5 hover:border-amber-400"
+                      >
+                        Cambia sito
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -530,6 +635,7 @@ function TabDocumenti() {
       {showNew && <NewDocumentModal onClose={() => setShowNew(false)} />}
       {linkControlsDoc && <LinkControlsModal doc={linkControlsDoc} onClose={() => setLinkControlsDoc(null)} />}
       {uploadDoc && <UploadVersionModal doc={uploadDoc} onClose={() => setUploadDoc(null)} />}
+      {changePlantDoc && <ChangePlantModal doc={changePlantDoc} onClose={() => setChangePlantDoc(null)} />}
     </div>
   );
 }
@@ -540,16 +646,19 @@ type ExpiryFilter = "tutti" | "valide" | "in_scadenza" | "scadute";
 
 function TabEvidenze() {
   const qc = useQueryClient();
+  const selectedPlant = useAuthStore(s => s.selectedPlant);
   const [typeFilter, setTypeFilter] = useState("");
   const [expiryFilter, setExpiryFilter] = useState<ExpiryFilter>("tutti");
   const [showNew, setShowNew] = useState(false);
+  const [filterByPlant, setFilterByPlant] = useState(true);
 
   const params: Record<string, string> = {};
   if (typeFilter) params.evidence_type = typeFilter;
   if (expiryFilter !== "tutti") params.expiry = expiryFilter;
+  if (filterByPlant && selectedPlant) params.plant = selectedPlant.id;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["evidences", typeFilter, expiryFilter],
+    queryKey: ["evidences", typeFilter, expiryFilter, filterByPlant, selectedPlant?.id],
     queryFn: () => documentsApi.evidences(params),
     retry: false,
   });
@@ -578,9 +687,22 @@ function TabEvidenze() {
             {Object.entries(EVIDENCE_TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
           </select>
         </div>
-        <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 shrink-0">
-          + Nuova evidenza
-        </button>
+        <div className="flex items-center gap-3">
+          {selectedPlant && (
+            <label className="flex items-center gap-1 text-xs text-gray-600">
+              <input
+                type="checkbox"
+                checked={filterByPlant}
+                onChange={e => setFilterByPlant(e.target.checked)}
+                className="rounded"
+              />
+              <span>Solo sito selezionato</span>
+            </label>
+          )}
+          <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 shrink-0">
+            + Nuova evidenza
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">

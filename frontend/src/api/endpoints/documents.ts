@@ -54,6 +54,8 @@ export const documentsApi = {
     apiClient.get<{results: Document[]}>("/documents/documents/", {params}).then(r => r.data),
   create: (data: Partial<Document>) =>
     apiClient.post<Document>("/documents/documents/", data).then(r => r.data),
+  update: (id: string, data: Partial<Document>) =>
+    apiClient.patch<Document>(`/documents/documents/${id}/`, data).then(r => r.data),
   uploadVersion: (id: string, file: File, changeSummary?: string) => {
     const form = new FormData();
     form.append("file", file);
