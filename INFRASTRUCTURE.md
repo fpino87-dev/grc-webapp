@@ -175,48 +175,81 @@ Il repository include `.env.example` con tutti i placeholder. Non committare mai
 ### Docker Compose (sviluppo / staging)
 
 ```yaml
-# docker-compose.yml — estratto
+# docker-compose.yml — estratto reale del progetto
+version: '3.9'
+
 services:
   db:
-    image: postgres:16
-    volumes: [pgdata:/var/lib/postgresql/data]
+    image: postgres:16-alpine
     environment:
-      POSTGRES_DB: grc
+      POSTGRES_DB: grc_dev
       POSTGRES_USER: grc
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: grc
+    ports: ["5433:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
 
   redis:
     image: redis:7-alpine
-    command: redis-server --appendonly yes
+    volumes: [redisdata:/data]
+
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports: ["9001:9001"]
+    volumes: [miniodata:/data]
 
   backend:
-    build: ./backend
-    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000 --workers 4
-    depends_on: [db, redis]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes: [./backend:/app]
+    ports: ["8001:8000"]
     env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   celery:
-    build: ./backend
-    command: celery -A core worker -l info --concurrency 4
-    depends_on: [db, redis]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    command: celery -A core worker -l info --concurrency 2
+    volumes: [./backend:/app]
     env_file: .env
+    depends_on: [backend, redis]
 
   celery-beat:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
     command: celery -A core beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    depends_on: [db, redis]
+    volumes: [./backend:/app]
     env_file: .env
+    depends_on: [backend, redis]
 
   frontend:
-    build: ./frontend
-    ports: ["3000:80"]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    volumes: [./frontend:/app, /app/node_modules]
+    ports: ["3001:3000"]
+    environment:
+      - VITE_API_URL=http://localhost:8001
 
-  nginx:
-    image: nginx:alpine
-    ports: ["80:80", "443:443"]
-    volumes:
-      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./infra/nginx/certs:/etc/nginx/certs
+  mailhog:
+    image: mailhog/mailhog
+    ports: ["1026:1025", "8026:8025"]
+
+volumes:
+  pgdata:
+  redisdata:
+  miniodata:
 ```
 
 ### Produzione — passi di deploy
@@ -385,8 +418,8 @@ In produzione non usare variabili d'ambiente Docker in chiaro. Usare HashiCorp V
 
 #### Sicurezza API e sessioni
 
-- I token JWT usano SimpleJWT con durata **8h** per gli access token e **7 giorni** per i refresh token, con rotazione e blacklist abilitate.
-- Il backend applica rate limiting DRF di base (throttle anonimi/utenti) per mitigare brute force ed abuso degli endpoint pubblici.
+- I token JWT usano SimpleJWT con durata **30 minuti** per gli access token e **7 giorni** per i refresh token, con rotazione e blacklist abilitate.
+- Il backend applica rate limiting DRF di base (throttle anonimi/utenti) con valori predefiniti **AnonRateThrottle 20/h** e **UserRateThrottle 500/h** per mitigare brute force ed abuso degli endpoint pubblici.
 - In `core.settings.prod` sono abilitati `SECURE_HSTS_*`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE` e `SECURE_SSL_REDIRECT` per forzare HTTPS e cookie sicuri in produzione.
 
 ---

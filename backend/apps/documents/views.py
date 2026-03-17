@@ -3,9 +3,17 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
+from django.http import FileResponse, Http404
+from django.core.files.storage import default_storage
+import os
 
 from .models import Document, DocumentVersion, Evidence
-from .serializers import DocumentApprovalSerializer, DocumentSerializer, DocumentVersionSerializer, EvidenceSerializer
+from .serializers import (
+    DocumentApprovalSerializer,
+    DocumentSerializer,
+    DocumentVersionSerializer,
+    EvidenceSerializer,
+)
 from . import services
 
 
@@ -19,6 +27,27 @@ class DocumentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
+
+    @action(detail=True, methods=["get"], url_path="download-latest")
+    def download_latest(self, request, pk=None):
+        """
+        Scarica l'ultima versione approvata/caricata del documento usando default_storage.
+        """
+        document = self.get_object()
+        version = document.versions.first()
+        if not version or not version.storage_path:
+            raise Http404("Nessun file disponibile per questo documento.")
+
+        if not default_storage.exists(version.storage_path):
+            raise Http404("File non trovato nello storage.")
+
+        file_handle = default_storage.open(version.storage_path, "rb")
+        filename = version.file_name or os.path.basename(version.storage_path)
+        return FileResponse(
+            file_handle,
+            as_attachment=True,
+            filename=filename,
+        )
 
     @action(detail=True, methods=["post"])
     def submit(self, request, pk=None):
@@ -132,3 +161,23 @@ class EvidenceViewSet(viewsets.ModelViewSet):
                 return Response({"error": str(e.message)}, status=status.HTTP_400_BAD_REQUEST)
 
         return super().create(request, *args, **kwargs)
+
+    @action(detail=True, methods=["get"], url_path="download")
+    def download(self, request, pk=None):
+        """
+        Scarica il file associato all'evidenza usando default_storage.
+        """
+        evidence = self.get_object()
+        if not evidence.file_path:
+            raise Http404("Nessun file associato a questa evidenza.")
+
+        if not default_storage.exists(evidence.file_path):
+            raise Http404("File non trovato nello storage.")
+
+        file_handle = default_storage.open(evidence.file_path, "rb")
+        filename = os.path.basename(evidence.file_path)
+        return FileResponse(
+            file_handle,
+            as_attachment=True,
+            filename=filename,
+        )

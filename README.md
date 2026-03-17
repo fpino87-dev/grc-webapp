@@ -91,7 +91,7 @@ docker compose exec backend python manage.py load_frameworks
 docker compose exec backend python manage.py createsuperuser
 
 # 5. Apri l'app
-open http://localhost:3000
+open http://localhost:3001
 ```
 
 Per la configurazione completa in produzione vedere [INFRASTRUCTURE.md](./INFRASTRUCTURE.md).
@@ -106,7 +106,7 @@ grc-webapp/
 │   ├── apps/
 │   │   ├── governance/         # M00
 │   │   ├── plants/             # M01
-│   │   ├── auth/               # M02
+│   │   ├── auth_grc/           # M02
 │   │   ├── controls/           # M03
 │   │   ├── assets/             # M04
 │   │   ├── bia/                # M05
@@ -134,11 +134,11 @@ grc-webapp/
 │   │   ├── i18n/               # Traduzioni IT EN FR PL TR
 │   │   └── components/         # Componenti condivisi
 ├── infra/                      # IaC — Terraform / Ansible / Docker
-├── docs/
-│   ├── README.md
-│   ├── INFRASTRUCTURE.md
-│   ├── MANUAL_UTENTE.md
-│   └── MANUAL_TECNICO.md
+├── CLAUDE.md
+├── MANUAL_UTENTE.md
+├── MANUAL_TECNICO.md
+├── INFRASTRUCTURE.md
+├── .cursorrules
 ├── scripts/
 │   ├── load_frameworks.py
 │   ├── seed_demo.py
@@ -220,7 +220,7 @@ Garanzie di sicurezza: nessun PII o valore ALE raggiunge il cloud LLM, sanitizat
 
 ### Stato implementazione ultime feature
 
-- **Hardening backend**: JWT SimpleJWT configurato (8h access token, 7gg refresh rotating), rate limiting DRF di base, header di sicurezza e `CONN_MAX_AGE` per pooling DB in `core.settings.base/prod`.
+- **Hardening backend**: JWT SimpleJWT configurato (**ACCESS_TOKEN_LIFETIME=30min**, **REFRESH_TOKEN_LIFETIME=7gg** con rotazione e blacklist), rate limiting DRF di base (**AnonRateThrottle 20/h**, **UserRateThrottle 500/h**), header di sicurezza e `CONN_MAX_AGE` per pooling DB in `core.settings.base/prod`.
 - **UX moduli operativi**: help contestuale via componente `ModuleHelp` sulle principali pagine React (asset, BIA, risk, incidenti, controlli, audit prep, management review, scadenzario).
 - **Audit trail & job async**: catena hash dell’audit trail serializzata (`select_for_update`) e task Celery critici con `autoretry` e backoff.
 - **Performance DB**: indici aggiuntivi su campi di filtro frequenti per incidenti, task, controlli, rischi, documenti ed evidenze.

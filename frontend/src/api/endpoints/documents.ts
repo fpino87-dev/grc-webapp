@@ -75,6 +75,11 @@ export const documentsApi = {
   expiring: () =>
     apiClient.get<Document[]>("/documents/documents/expiring/").then(r => r.data),
 
+  downloadDocument: (id: string) =>
+    apiClient.get<Blob>(`/documents/documents/${id}/download-latest/`, {
+      responseType: "blob",
+    }).then(r => r.data),
+
   // Evidences
   evidences: (params?: Record<string,string>) =>
     apiClient.get<{results: Evidence[]}>("/documents/evidences/", {params}).then(r => r.data),
@@ -96,4 +101,9 @@ export const documentsApi = {
     apiClient.post(`/documents/documents/${docId}/link-controls/`, { control_instance_ids: controlInstanceIds }).then(r => r.data),
   searchDocuments: (search: string, plant?: string) =>
     apiClient.get<{results: Document[]}>("/documents/documents/", {params: {search, ...(plant ? {plant} : {})}}).then(r => r.data),
+
+  downloadEvidence: (id: string) =>
+    apiClient.get<Blob>(`/documents/evidences/${id}/download/`, {
+      responseType: "blob",
+    }).then(r => r.data),
 };

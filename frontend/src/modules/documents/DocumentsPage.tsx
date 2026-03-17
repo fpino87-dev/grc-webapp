@@ -516,6 +516,25 @@ function TabDocumenti() {
 
   const documents: Document[] = data?.results ?? [];
 
+  async function handleDownloadDocument(doc: Document) {
+    try {
+      const blob = await documentsApi.downloadDocument(doc.id);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const filename = doc.latest_version?.file_name || `${doc.title || "documento"}.pdf`;
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      // fallback minimale: niente toast centralizzato qui, ma evitiamo crash UI
+      // eslint-disable-next-line no-alert
+      alert("Impossibile scaricare il documento. Verifica i permessi o riprova più tardi.");
+    }
+  }
+
   const STATUS_FILTERS: { label: string; value: DocStatusFilter }[] = [
     { label: "Tutti", value: "tutti" }, { label: "Bozza", value: "bozza" },
     { label: "In revisione", value: "revisione" }, { label: "In approvazione", value: "approvazione" },
@@ -576,15 +595,14 @@ function TabDocumenti() {
                 <tr key={doc.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3 font-medium text-gray-800">{doc.title}</td>
                   <td className="px-4 py-3 text-xs">
-                    {doc.latest_version && (doc.latest_version.file_url || doc.latest_version.storage_path) ? (
-                      <a
-                        href={doc.latest_version.file_url ?? `/media/${doc.latest_version.storage_path}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    {doc.latest_version ? (
+                      <button
+                        type="button"
+                        onClick={() => handleDownloadDocument(doc)}
                         className="text-indigo-600 hover:underline"
                       >
                         Scarica
-                      </a>
+                      </button>
                     ) : (
                       <span className="text-gray-400">—</span>
                     )}
@@ -656,6 +674,24 @@ function TabEvidenze() {
   const [expiryFilter, setExpiryFilter] = useState<ExpiryFilter>("tutti");
   const [showNew, setShowNew] = useState(false);
   const [filterByPlant, setFilterByPlant] = useState(true);
+
+  async function handleDownloadEvidence(ev: Evidence) {
+    try {
+      const blob = await documentsApi.downloadEvidence(ev.id);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const filename = ev.file_path ? ev.file_path.split("/").pop() || ev.title || "evidenza" : ev.title || "evidenza";
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      // eslint-disable-next-line no-alert
+      alert("Impossibile scaricare il file evidenza. Verifica i permessi o riprova più tardi.");
+    }
+  }
 
   const params: Record<string, string> = {};
   if (typeFilter) params.evidence_type = typeFilter;
@@ -740,14 +776,13 @@ function TabEvidenze() {
                     <div className="truncate">{ev.title}</div>
                     {ev.description && <div className="text-xs text-gray-400 truncate">{ev.description}</div>}
                     {(ev.file_url || ev.file_path) && (
-                      <a
-                        href={ev.file_url ?? `/media/${ev.file_path}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        type="button"
+                        onClick={() => handleDownloadEvidence(ev)}
                         className="mt-1 inline-flex text-xs text-indigo-600 hover:underline"
                       >
                         Scarica file
-                      </a>
+                      </button>
                     )}
                   </td>
                   <td className="px-4 py-3 text-center">

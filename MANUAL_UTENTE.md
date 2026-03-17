@@ -46,7 +46,7 @@ La lingua si applica immediatamente a tutta l'interfaccia, alle email di notific
 
 ### Password e sessione
 
-- La sessione scade dopo 8 ore di inattività
+- La sessione scade dopo un periodo di inattività definito dalle policy aziendali (tipicamente ~30 minuti); potrebbe esserti chiesto di riautenticarti più spesso per motivi di sicurezza.
 - Se usi SSO aziendale non è necessario gestire una password separata
 - Per resettare la password locale: pagina di login → **Password dimenticata**
 
