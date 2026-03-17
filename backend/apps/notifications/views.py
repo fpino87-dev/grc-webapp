@@ -48,9 +48,10 @@ class EmailConfigurationViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"], url_path="test")
     def test_connection(self, request, pk=None):
         config = self.get_object()
-        ok, error = services.test_email_connection(config)
+        recipient = request.data.get("recipient", "")
+        ok, error = services.test_email_connection(config, test_recipient=recipient)
         if ok:
-            return Response({"ok": True, "message": "Email di test inviata correttamente a " + config.username})
+            return Response({"ok": True, "message": f"Email di test inviata a {recipient}"})
         return Response({"ok": False, "error": error}, status=400)
 
     @action(detail=False, methods=["get"], url_path="presets")

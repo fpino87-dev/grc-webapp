@@ -138,7 +138,7 @@ class Command(BaseCommand):
                         self.stdout.write(self.style.WARNING(f"  ⚠ {table}: {e}"))
 
                 # Riabilita trigger
-                cursor.execute("SET session_replication_role = 'DEFAULT';")
+                cursor.execute("SET session_replication_role = 'origin';")
 
             # Ripristina superuser
             User.objects.filter(is_superuser=False).delete()

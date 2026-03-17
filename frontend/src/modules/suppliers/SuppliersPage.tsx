@@ -590,7 +590,7 @@ export function SuppliersPage() {
                   </td>
                   <td className="px-4 py-3">
                     <ExpiryCell date={s.contract_expiry} />
-                    <AssessmentStatusSection supplierId={s.id} />
+                    <AssessmentsTable supplierId={s.id} />
                   </td>
                 </tr>
               ))}

@@ -37,6 +37,7 @@ class EmailConfigurationSerializer(serializers.ModelSerializer):
             "port",
             "use_tls",
             "use_ssl",
+            "use_auth",
             "username",
             "password",
             "from_email",
@@ -47,7 +48,7 @@ class EmailConfigurationSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        extra_kwargs = {"password": {"write_only": True}}
+        extra_kwargs = {"password": {"write_only": True, "required": False, "allow_blank": True}}
 
 
 class EmailConfigurationReadSerializer(serializers.ModelSerializer):
@@ -63,6 +64,7 @@ class EmailConfigurationReadSerializer(serializers.ModelSerializer):
             "port",
             "use_tls",
             "use_ssl",
+            "use_auth",
             "username",
             "from_email",
             "active",

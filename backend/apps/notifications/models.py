@@ -91,8 +91,12 @@ class EmailConfiguration(BaseModel):
     port = models.IntegerField(default=587)
     use_tls = models.BooleanField(default=True)
     use_ssl = models.BooleanField(default=False)
-    username = models.CharField(max_length=255)
-    password = EncryptedCharField(max_length=1024)
+    use_auth = models.BooleanField(
+        default=True,
+        help_text="Disattiva per relay SMTP senza autenticazione (es. porta 25 interno)",
+    )
+    username = models.CharField(max_length=255, blank=True, default="")
+    password = EncryptedCharField(max_length=1024, blank=True, default="")
     from_email = models.CharField(
         max_length=255,
         help_text="Es: GRC Platform <noreply@azienda.com>",

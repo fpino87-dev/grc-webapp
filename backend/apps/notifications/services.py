@@ -6,6 +6,22 @@ from django.core.mail import EmailMultiAlternatives, get_connection
 logger = logging.getLogger(__name__)
 
 
+def _build_connection(config, fail_silently=False):
+    """Costruisce connessione SMTP da un oggetto config.
+    Se use_auth=False (relay senza autenticazione) non passa credenziali
+    → Django non invia il comando AUTH."""
+    return get_connection(
+        backend="django.core.mail.backends.smtp.EmailBackend",
+        host=config.host,
+        port=config.port,
+        username=config.username if config.use_auth else None,
+        password=config.password if config.use_auth else None,
+        use_tls=config.use_tls,
+        use_ssl=config.use_ssl,
+        fail_silently=fail_silently,
+    )
+
+
 def _get_connection():
     """
     Restituisce connessione SMTP dalla config DB.
@@ -17,16 +33,7 @@ def _get_connection():
     if not config:
         return None  # usa settings Django di default
 
-    return get_connection(
-        backend="django.core.mail.backends.smtp.EmailBackend",
-        host=config.host,
-        port=config.port,
-        username=config.username,
-        password=config.password,
-        use_tls=config.use_tls,
-        use_ssl=config.use_ssl,
-        fail_silently=False,
-    )
+    return _build_connection(config)
 
 
 def send_grc_email(
@@ -66,25 +73,20 @@ def send_grc_email(
         return False
 
 
-def test_email_connection(config) -> Tuple[bool, str]:
+def test_email_connection(config, test_recipient: str = "") -> Tuple[bool, str]:
     """
-    Testa la configurazione SMTP inviando una mail di prova
-    all'indirizzo username della config.
+    Testa la configurazione SMTP inviando una mail di prova.
+    test_recipient: indirizzo a cui inviare (obbligatorio).
     Restituisce (success, error_message).
     """
     from django.utils import timezone
 
+    recipient = test_recipient.strip() if test_recipient else ""
+    if not recipient:
+        return False, "Specifica un indirizzo destinatario per il test."
+
     try:
-        connection = get_connection(
-            backend="django.core.mail.backends.smtp.EmailBackend",
-            host=config.host,
-            port=config.port,
-            username=config.username,
-            password=config.password,
-            use_tls=config.use_tls,
-            use_ssl=config.use_ssl,
-            fail_silently=False,
-        )
+        connection = _build_connection(config)
         msg = EmailMultiAlternatives(
             subject="[GRC] Test configurazione email",
             body=(
@@ -94,7 +96,7 @@ def test_email_connection(config) -> Tuple[bool, str]:
                 f"Data test: {timezone.now().strftime('%d/%m/%Y %H:%M')}"
             ),
             from_email=config.from_email,
-            to=[config.username],
+            to=[recipient],
             connection=connection,
         )
         msg.send()

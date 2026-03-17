@@ -20,6 +20,8 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "date_joined", "grc_role", "plant_access"]
 
     def get_grc_role(self, obj):
+        if obj.is_superuser:
+            return "super_admin"
         access = UserPlantAccess.objects.filter(user=obj).first()
         return access.role if access else None
 

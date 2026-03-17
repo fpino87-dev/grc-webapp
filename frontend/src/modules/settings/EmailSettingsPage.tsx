@@ -11,6 +11,7 @@ type EmailConfig = {
   port: number;
   use_tls: boolean;
   use_ssl: boolean;
+  use_auth: boolean;
   username: string;
   from_email: string;
   active: boolean;
@@ -26,6 +27,7 @@ type EmailConfigWrite = {
   port: number;
   use_tls: boolean;
   use_ssl: boolean;
+  use_auth: boolean;
   username: string;
   password?: string;
   from_email: string;
@@ -52,12 +54,14 @@ export function EmailSettingsPage() {
     port: 587,
     use_tls: true,
     use_ssl: false,
+    use_auth: true,
     username: "",
     password: "",
     from_email: "GRC Platform <noreply@azienda.com>",
     active: true,
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [testRecipient, setTestRecipient] = useState("");
   const [banner, setBanner] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const { data: presets } = useQuery<ProviderPresets>({
@@ -72,7 +76,8 @@ export function EmailSettingsPage() {
     queryKey: ["email-config"],
     queryFn: async () => {
       const res = await apiClient.get("/notifications/email-config/");
-      return res.data;
+      const d = res.data;
+      return Array.isArray(d) ? d : (d?.results ?? []);
     },
   });
 
@@ -88,6 +93,7 @@ export function EmailSettingsPage() {
         port: activeConfig.port,
         use_tls: activeConfig.use_tls,
         use_ssl: activeConfig.use_ssl,
+        use_auth: activeConfig.use_auth,
         username: activeConfig.username,
         password: "",
         from_email: activeConfig.from_email,
@@ -121,21 +127,13 @@ export function EmailSettingsPage() {
         ...form,
         port: Number(form.port) || 587,
       };
-      if (!payload.password) {
-        // non inviare il campo se vuoto in modifica
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      if (activeConfig) {
+        // PATCH: invia solo i campi modificati; omette password se vuota
         const { password, ...rest } = payload;
-        if (activeConfig) {
-          await apiClient.put(`/notifications/email-config/${activeConfig.id}/`, rest);
-        } else {
-          await apiClient.post("/notifications/email-config/", rest);
-        }
+        const patchData = password ? payload : rest;
+        await apiClient.patch(`/notifications/email-config/${activeConfig.id}/`, patchData);
       } else {
-        if (activeConfig) {
-          await apiClient.put(`/notifications/email-config/${activeConfig.id}/`, payload);
-        } else {
-          await apiClient.post("/notifications/email-config/", payload);
-        }
+        await apiClient.post("/notifications/email-config/", payload);
       }
     },
     onSuccess: () => {
@@ -151,7 +149,10 @@ export function EmailSettingsPage() {
   const testMutation = useMutation({
     mutationFn: async () => {
       if (!activeConfig) throw new Error("Nessuna configurazione attiva da testare.");
-      const res = await apiClient.post(`/notifications/email-config/${activeConfig.id}/test/`);
+      if (!testRecipient.trim()) throw new Error("Inserisci un indirizzo email destinatario per il test.");
+      const res = await apiClient.post(`/notifications/email-config/${activeConfig.id}/test/`, {
+        recipient: testRecipient.trim(),
+      });
       return res.data as { ok: boolean; message?: string; error?: string };
     },
     onSuccess: (data) => {
@@ -271,7 +272,7 @@ export function EmailSettingsPage() {
           </div>
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-4">
           <label className="inline-flex items-center gap-2 text-sm text-gray-700">
             <input
               type="checkbox"
@@ -288,40 +289,55 @@ export function EmailSettingsPage() {
             />
             Usa SSL
           </label>
+          <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={form.use_auth}
+              onChange={(e) => handleChange("use_auth", e.target.checked)}
+            />
+            Autenticazione SMTP
+          </label>
+          {!form.use_auth && (
+            <span className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+              Relay anonimo — nessun comando AUTH inviato al server
+            </span>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Username / Email mittente account
-            </label>
-            <input
-              type="email"
-              className="w-full border rounded px-3 py-2 text-sm"
-              value={form.username}
-              onChange={(e) => handleChange("username", e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <div className="flex">
+        {form.use_auth && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Username SMTP
+              </label>
               <input
-                type={showPassword ? "text" : "password"}
-                className="w-full border rounded-l px-3 py-2 text-sm"
-                placeholder={activeConfig ? "Lascia vuoto per non modificare" : ""}
-                value={form.password ?? ""}
-                onChange={(e) => handleChange("password", e.target.value)}
+                type="text"
+                className="w-full border rounded px-3 py-2 text-sm"
+                value={form.username}
+                onChange={(e) => handleChange("username", e.target.value)}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword((s) => !s)}
-                className="px-3 border border-l-0 rounded-r text-xs bg-gray-50 hover:bg-gray-100"
-              >
-                {showPassword ? "Nascondi" : "Mostra"}
-              </button>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <div className="flex">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="w-full border rounded-l px-3 py-2 text-sm"
+                  placeholder={activeConfig ? "Lascia vuoto per non modificare" : ""}
+                  value={form.password ?? ""}
+                  onChange={(e) => handleChange("password", e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  className="px-3 border border-l-0 rounded-r text-xs bg-gray-50 hover:bg-gray-100"
+                >
+                  {showPassword ? "Nascondi" : "Mostra"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Indirizzo mittente</label>
@@ -336,16 +352,28 @@ export function EmailSettingsPage() {
           </p>
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+        <div className="pt-4 border-t border-gray-100 space-y-3">
           <p className="text-xs text-gray-500">
             La password SMTP è cifrata con AES-256 nel database. Non viene mai mostrata dopo il salvataggio.
           </p>
-          <div className="flex gap-2">
+          <div className="flex items-end gap-2">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Destinatario email di test
+              </label>
+              <input
+                type="email"
+                className="w-full border rounded px-3 py-2 text-sm"
+                placeholder="tuo@email.com"
+                value={testRecipient}
+                onChange={(e) => setTestRecipient(e.target.value)}
+              />
+            </div>
             <button
               type="button"
               onClick={() => testMutation.mutate()}
-              disabled={!activeConfig || testMutation.isPending}
-              className="px-3 py-1.5 rounded-md text-sm bg-indigo-50 text-indigo-700 hover:bg-indigo-100 disabled:opacity-50"
+              disabled={!activeConfig || !testRecipient.trim() || testMutation.isPending}
+              className="px-3 py-2 rounded-md text-sm bg-indigo-50 text-indigo-700 hover:bg-indigo-100 disabled:opacity-50 whitespace-nowrap"
             >
               {testMutation.isPending ? "Test in corso..." : "Invia email di test"}
             </button>
@@ -353,7 +381,7 @@ export function EmailSettingsPage() {
               type="button"
               onClick={() => saveMutation.mutate()}
               disabled={saveMutation.isPending}
-              className="px-4 py-1.5 rounded-md text-sm bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="px-4 py-2 rounded-md text-sm bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 whitespace-nowrap"
             >
               {saveMutation.isPending ? "Salvataggio..." : "Salva configurazione"}
             </button>
