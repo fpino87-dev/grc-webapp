@@ -29,6 +29,8 @@ class DocumentApprovalSerializer(serializers.ModelSerializer):
 
 class DocumentSerializer(serializers.ModelSerializer):
     latest_version = serializers.SerializerMethodField(read_only=True)
+    plant_name = serializers.CharField(source="plant.name", read_only=True)
+    plant_code = serializers.CharField(source="plant.code", read_only=True)
 
     class Meta:
         model = Document

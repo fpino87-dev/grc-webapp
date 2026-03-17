@@ -562,6 +562,7 @@ function TabDocumenti() {
               <tr>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Titolo</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">File</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Sito</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Tipo</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Stato</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Obbligatorio</th>
@@ -587,6 +588,9 @@ function TabDocumenti() {
                     ) : (
                       <span className="text-gray-400">—</span>
                     )}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600 text-xs">
+                    {doc.plant_code || doc.plant_name || "—"}
                   </td>
                   <td className="px-4 py-3 text-gray-600 capitalize text-xs">{doc.document_type || doc.category}</td>
                   <td className="px-4 py-3"><StatusBadge status={doc.status} /></td>

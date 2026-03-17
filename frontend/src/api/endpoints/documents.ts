@@ -15,6 +15,8 @@ export interface Document {
   document_type: string;
   status: string;
   plant: string | null;
+  plant_name?: string | null;
+  plant_code?: string | null;
   owner: string | null;
   review_due_date: string | null;
   expiry_date: string | null;
