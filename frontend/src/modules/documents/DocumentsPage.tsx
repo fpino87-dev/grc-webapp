@@ -497,6 +497,7 @@ function TabDocumenti() {
   const [showNew, setShowNew] = useState(false);
   const [linkControlsDoc, setLinkControlsDoc] = useState<Document | null>(null);
   const [uploadDoc, setUploadDoc] = useState<Document | null>(null);
+  const [changePlantDoc, setChangePlantDoc] = useState<Document | null>(null);
   const [filterByPlant, setFilterByPlant] = useState(true);
 
   const params: Record<string, string> = {};
