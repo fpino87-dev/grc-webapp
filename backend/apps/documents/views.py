@@ -51,13 +51,27 @@ class DocumentViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"])
     def submit(self, request, pk=None):
+        from apps.governance.services import user_has_document_permission
+
         doc = self.get_object()
+        if not user_has_document_permission(request.user, doc, action="submit"):
+            return Response(
+                {"detail": "Non hai i permessi per inviare in revisione questo documento."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         services.submit_for_review(doc, request.user)
         return Response(DocumentSerializer(doc).data)
 
     @action(detail=True, methods=["post"])
     def approve(self, request, pk=None):
+        from apps.governance.services import user_has_document_permission
+
         doc = self.get_object()
+        if not user_has_document_permission(request.user, doc, action="approve"):
+            return Response(
+                {"detail": "Non hai i permessi per approvare questo documento."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         services.approve_document(doc, request.user, request.data.get("notes", ""))
         return Response(DocumentSerializer(doc).data)
 

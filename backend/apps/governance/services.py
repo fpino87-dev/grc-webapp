@@ -168,3 +168,138 @@ def check_nis2_contact_active(plant) -> bool:
         deleted_at__isnull=True,
     ).filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today)).exists()
 
+
+def _match_policy_for_plant(policies_qs, plant):
+    """
+    Restituisce la policy più specifica applicabile al plant:
+    - prima tenta match plant
+    - poi BU
+    - infine org
+    """
+    if plant:
+        p_plant = policies_qs.filter(scope_type="plant", scope_id=plant.pk).first()
+        if p_plant:
+            return p_plant
+        if getattr(plant, "bu_id", None):
+            p_bu = policies_qs.filter(scope_type="bu", scope_id=plant.bu_id).first()
+            if p_bu:
+                return p_bu
+    return policies_qs.filter(scope_type="org").first()
+
+
+def resolve_document_workflow_policy(document_type: str, plant=None):
+    """
+    Trova la policy di workflow documentale applicabile per tipo documento e plant.
+    """
+    from .models import DocumentWorkflowPolicy
+
+    qs = DocumentWorkflowPolicy.objects.filter(
+        document_type=document_type,
+        deleted_at__isnull=True,
+    )
+    return _match_policy_for_plant(qs, plant)
+
+
+def user_has_document_permission(user, document, action: str) -> bool:
+    """
+    Verifica se l'utente ha il permesso governance per l'azione richiesta
+    sul documento M07 in base a DocumentWorkflowPolicy + RoleAssignment.
+
+    action: "submit" | "review" | "approve"
+    """
+    from .models import NormativeRole, RoleAssignment
+
+    if not user.is_authenticated:
+        return False
+
+    # Superuser Django sempre ammesso
+    if getattr(user, "is_superuser", False):
+        return True
+
+    doc_type = getattr(document, "document_type", None) or "altro"
+    plant = getattr(document, "plant", None)
+    policy = resolve_document_workflow_policy(doc_type, plant)
+    if not policy:
+        # Se non esiste policy esplicita, fallback: nessun blocco aggiuntivo
+        return True
+
+    role_field = {
+        "submit": "submit_roles",
+        "review": "review_roles",
+        "approve": "approve_roles",
+    }.get(action)
+    if not role_field:
+        return False
+
+    target_roles = getattr(policy, role_field, []) or []
+    if not target_roles:
+        # Policy definita ma lista ruoli vuota → nessun vincolo aggiuntivo
+        return True
+
+    today = timezone.now().date()
+    qs = RoleAssignment.objects.filter(
+        user=user,
+        role__in=target_roles,
+        valid_from__lte=today,
+        deleted_at__isnull=True,
+    ).filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today))
+
+    if plant:
+        qs = qs.filter(
+            Q(scope_type="org") |
+            Q(scope_type="plant", scope_id=plant.pk)
+        )
+
+    return qs.exists()
+
+
+def resolve_document_recipients(document, action: str) -> list[str]:
+    """
+    Restituisce le email dei destinatari governance per un documento M07
+    in base a DocumentWorkflowPolicy + RoleAssignment.
+
+    action: "submit" | "review" | "approve"
+    """
+    from django.contrib.auth import get_user_model
+    from .models import RoleAssignment
+
+    User = get_user_model()
+    doc_type = getattr(document, "document_type", None) or "altro"
+    plant = getattr(document, "plant", None)
+    policy = resolve_document_workflow_policy(doc_type, plant)
+    if not policy:
+        return []
+
+    field_map = {
+        "submit": "submit_roles",
+        "review": "review_roles",
+        "approve": "approve_roles",
+    }
+    role_field = field_map.get(action)
+    if not role_field:
+        return []
+
+    target_roles = getattr(policy, role_field, []) or []
+    if not target_roles:
+        return []
+
+    today = timezone.now().date()
+    qs = RoleAssignment.objects.filter(
+        role__in=target_roles,
+        valid_from__lte=today,
+        deleted_at__isnull=True,
+    ).filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today))
+
+    if plant:
+        qs = qs.filter(
+            Q(scope_type="org") |
+            Q(scope_type="plant", scope_id=plant.pk)
+        )
+
+    user_ids = qs.values_list("user_id", flat=True).distinct()
+    users = User.objects.filter(
+        pk__in=user_ids,
+        is_active=True,
+    ).exclude(email__isnull=True).exclude(email__exact="")
+    return list(users.values_list("email", flat=True))
+

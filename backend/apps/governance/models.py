@@ -58,6 +58,58 @@ class RoleAssignment(BaseModel):
         )
 
 
+class DocumentWorkflowPolicy(BaseModel):
+    """
+    Policy di governance per il workflow documentale M07.
+
+    Definisce, per tipo documento e per scope (org / BU / plant),
+    quali ruoli NORMATIVI possono:
+    - creare / inviare in revisione
+    - revisionare
+    - approvare il documento.
+    """
+
+    SCOPE_CHOICES = [
+        ("org", "Org"),
+        ("bu", "BU"),
+        ("plant", "Plant"),
+    ]
+
+    document_type = models.CharField(
+        max_length=20,
+        help_text="Tipo documento M07 (es. policy, procedura, manuale, contratto, registro, altro).",
+    )
+    scope_type = models.CharField(max_length=10, choices=SCOPE_CHOICES, default="org")
+    scope_id = models.UUIDField(
+        null=True,
+        blank=True,
+        help_text="Per scope_type=bu/plant contiene l'UUID della BU o del Plant.",
+    )
+    submit_roles = ArrayField(
+        models.CharField(max_length=50, choices=NormativeRole.choices),
+        default=list,
+        blank=True,
+        help_text="Ruoli che possono creare/inviare in revisione documenti di questo tipo nello scope indicato.",
+    )
+    review_roles = ArrayField(
+        models.CharField(max_length=50, choices=NormativeRole.choices),
+        default=list,
+        blank=True,
+        help_text="Ruoli che possono svolgere la revisione.",
+    )
+    approve_roles = ArrayField(
+        models.CharField(max_length=50, choices=NormativeRole.choices),
+        default=list,
+        blank=True,
+        help_text="Ruoli che possono approvare/mandare in vigore il documento.",
+    )
+
+    class Meta:
+        verbose_name = "Document workflow policy"
+        verbose_name_plural = "Document workflow policies"
+        ordering = ["document_type", "scope_type"]
+
+
 class SecurityCommittee(BaseModel):
     plant = models.ForeignKey(
         "plants.Plant",

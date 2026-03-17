@@ -93,3 +93,33 @@ def competency_gap_analysis(user) -> dict:
         "gap_count": len(gaps),
     }
 
+
+def resolve_plant_member_emails(plant: Plant) -> list[str]:
+    """
+    Restituisce tutte le email degli utenti che hanno accesso al plant
+    tramite UserPlantAccess (qualsiasi ruolo).
+    """
+    User = get_user_model()
+    access_qs = (
+        UserPlantAccess.objects.filter(
+            deleted_at__isnull=True,
+        )
+        .select_related("user", "scope_bu")
+        .prefetch_related("scope_plants")
+    )
+
+    emails: set[str] = set()
+    for access in access_qs:
+        user = access.user
+        if not user or not user.is_active or not user.email:
+            continue
+
+        if access.scope_type == "org":
+            emails.add(user.email)
+        elif access.scope_type == "bu" and access.scope_bu and plant.bu_id == access.scope_bu_id:
+            emails.add(user.email)
+        elif access.scope_type in ("plant_list", "single_plant") and access.scope_plants.filter(pk=plant.pk).exists():
+            emails.add(user.email)
+
+    return list(emails)
+

@@ -50,6 +50,17 @@ def submit_for_review(document, user):
         entity=document,
         payload={"id": str(document.pk), "title": document.title},
     )
+    # Notifica ruoli di revisione definiti in governance
+    try:
+        from apps.governance.services import resolve_document_recipients
+        from apps.notifications.services import notify_document_review_needed
+
+        recipients = resolve_document_recipients(document, action="review")
+        if recipients:
+            notify_document_review_needed(document, recipients)
+    except Exception:
+        # Le notifiche non devono bloccare il flusso documentale
+        pass
 
 
 def approve_document(document, user, notes=""):
@@ -75,17 +86,28 @@ def approve_document(document, user, notes=""):
         entity=document,
         payload={"id": str(document.pk), "title": document.title, "notes": notes},
     )
-    # notifica eventuali approvatori / stakeholder
+    # notifica approvatori / stakeholder definiti in governance
     try:
-        from apps.notifications.resolver import fire_notification
-
-        fire_notification(
-            "document_approval",
-            plant=document.plant,
-            context={"document": document},
+        from apps.governance.services import resolve_document_recipients
+        from apps.notifications.services import (
+            notify_document_approval_needed,
+            notify_document_approved_broadcast,
         )
+        from apps.auth_grc.services import resolve_plant_member_emails
+
+        # 1) Notifica a ruoli di approvazione (es. Plant Manager, CISO)
+        approval_recipients = resolve_document_recipients(document, action="approve")
+        if approval_recipients:
+            notify_document_approval_needed(document, approval_recipients)
+
+        # 2) Broadcast a tutti i membri del sito
+        if document.plant:
+            members = resolve_plant_member_emails(document.plant)
+            if members:
+                notify_document_approved_broadcast(document, members)
     except Exception:
-       pass
+        # Le notifiche non devono bloccare il flusso documentale
+        pass
 
 
 def reject_document(document, user, notes=""):

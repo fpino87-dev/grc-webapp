@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import CommitteeMeeting, RoleAssignment, SecurityCommittee
+from .models import CommitteeMeeting, DocumentWorkflowPolicy, RoleAssignment, SecurityCommittee
 
 
 class RoleAssignmentSerializer(serializers.ModelSerializer):
@@ -38,6 +38,12 @@ class RoleAssignmentSerializer(serializers.ModelSerializer):
         return obj.scope_type or "—"
 
 
+class DocumentWorkflowPolicySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DocumentWorkflowPolicy
+        fields = "__all__"
+
+
 class SecurityCommitteeSerializer(serializers.ModelSerializer):
     class Meta:
         model = SecurityCommittee
@@ -48,4 +54,4 @@ class CommitteeMeetingSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommitteeMeeting
         fields = "__all__"
-
+        

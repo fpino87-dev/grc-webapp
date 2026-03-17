@@ -232,3 +232,38 @@ def notify_document_approval_needed(document, recipients: list[str]):
         recipients=recipients,
     )
 
+
+def notify_document_review_needed(document, recipients: list[str]):
+    """
+    Notifica che un documento è stato inviato in revisione.
+    """
+    send_grc_email(
+        subject=f"[GRC] Revisione richiesta: {document.title}",
+        body=(
+            "Un documento è stato inviato in revisione.\n\n"
+            f"Titolo:  {document.title}\n"
+            f"Tipo:    {document.document_type}\n"
+            f"Plant:   {document.plant.name if document.plant else '—'}\n\n"
+            "Accedi al sistema per revisionare il contenuto."
+        ),
+        recipients=recipients,
+    )
+
+
+def notify_document_approved_broadcast(document, recipients: list[str]):
+    """
+    Notifica a tutti i membri del sito che un nuovo documento è stato approvato.
+    """
+    send_grc_email(
+        subject=f"[GRC] Nuovo documento approvato: {document.title}",
+        body=(
+            "Un nuovo documento è stato approvato ed è ora in vigore.\n\n"
+            f"Titolo:   {document.title}\n"
+            f"Tipo:     {document.document_type}\n"
+            f"Plant:    {document.plant.name if document.plant else '—'}\n"
+            f"Valido da: {document.approved_at}\n\n"
+            "Accedi a Documenti & Evidenze per consultare l'ultima versione."
+        ),
+        recipients=recipients,
+    )
+

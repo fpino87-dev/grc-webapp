@@ -5,9 +5,10 @@ from rest_framework.response import Response
 from django.utils import timezone
 
 from core.audit import log_action
-from .models import CommitteeMeeting, RoleAssignment, SecurityCommittee
+from .models import CommitteeMeeting, DocumentWorkflowPolicy, RoleAssignment, SecurityCommittee
 from .serializers import (
     CommitteeMeetingSerializer,
+    DocumentWorkflowPolicySerializer,
     RoleAssignmentSerializer,
     SecurityCommitteeSerializer,
 )
@@ -150,6 +151,15 @@ class RoleAssignmentViewSet(viewsets.ModelViewSet):
                 for a in result["expired"]
             ],
         })
+
+
+class DocumentWorkflowPolicyViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet per configurare da Governance il workflow documentale M07.
+    """
+
+    queryset = DocumentWorkflowPolicy.objects.all()
+    serializer_class = DocumentWorkflowPolicySerializer
 
 
 class SecurityCommitteeViewSet(viewsets.ModelViewSet):
