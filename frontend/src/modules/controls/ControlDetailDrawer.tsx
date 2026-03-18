@@ -198,6 +198,12 @@ function TabValutazione({
   const [applicabilityError, setApplicabilityError] = useState("");
   const [maturityOverrideVal, setMaturityOverrideVal] = useState(calcMaturityLevel);
 
+  function requirementLabel(kind: "document" | "evidence", type: string, description?: string) {
+    if (type === "any") return description || "";
+    if (kind === "document") return t(`documents.type.${type}`, { defaultValue: description || type });
+    return t(`documents.evidence.types.${type}`, { defaultValue: description || type });
+  }
+
   const suggestionDiffers = suggestedStatus !== currentStatus;
 
   const applicabilityMutation = useMutation({
@@ -276,10 +282,10 @@ function TabValutazione({
         <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-800">
           <p className="font-semibold mb-1">⛔ {t("controls.drawer.evaluation.requirements.not_satisfied")}</p>
           {requirements.missing_documents.map((m, i) => (
-            <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_document")}: {m.description || m.type}</p>
+            <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_document")}: {requirementLabel("document", m.type, m.description)}</p>
           ))}
           {requirements.missing_evidences.map((m, i) => (
-            <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_evidence")}: {m.description || m.type}</p>
+            <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_evidence")}: {requirementLabel("evidence", m.type, m.description)}</p>
           ))}
           {requirements.expired_evidences.map((e, i) => (
             <p key={i}>• {t("controls.drawer.evaluation.requirements.expired_evidence")}: {e.title} ({e.expired_on})</p>
@@ -450,8 +456,8 @@ function TabValutazione({
             {reqNotSatisfied && (
               <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-700">
                 <p className="font-semibold mb-1">⛔ {t("controls.drawer.evaluation.manual_change.req_block")}</p>
-                {requirements.missing_documents.map((m, i) => <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_document")}: {m.description || m.type}</p>)}
-                {requirements.missing_evidences.map((m, i) => <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_evidence")}: {m.description || m.type}</p>)}
+                {requirements.missing_documents.map((m, i) => <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_document")}: {requirementLabel("document", m.type, m.description)}</p>)}
+                {requirements.missing_evidences.map((m, i) => <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_evidence")}: {requirementLabel("evidence", m.type, m.description)}</p>)}
                 {requirements.expired_evidences.map((e, i) => <p key={i}>• {t("controls.drawer.evaluation.requirements.expired_evidence")}: {e.title} ({e.expired_on})</p>)}
               </div>
             )}
@@ -512,6 +518,11 @@ function DocsColumn({
   const [searchQ, setSearchQ] = useState("");
   const debounced = useDebounce(searchQ);
 
+  function requirementLabel(type: string, description?: string) {
+    if (type === "any") return description || "";
+    return t(`documents.type.${type}`, { defaultValue: description || type });
+  }
+
   const { data: searchResults } = useQuery({
     queryKey: ["doc-search", debounced, plant],
     queryFn: () => documentsApi.searchDocuments(debounced, plant ?? undefined),
@@ -543,7 +554,7 @@ function DocsColumn({
           {requirements.missing_documents.map((m, i) => (
             <div key={i} className="flex items-center gap-1.5 text-xs bg-red-50 border border-red-200 rounded px-2 py-1">
               <span className="text-red-500 font-bold shrink-0">!</span>
-              <span className="text-red-700">{m.description || m.type}</span>
+              <span className="text-red-700">{requirementLabel(m.type, m.description)}</span>
               <span className="ml-auto text-xs text-red-500 font-medium shrink-0">{t("controls.drawer.docs.missing")}</span>
             </div>
           ))}
@@ -637,6 +648,11 @@ function EvidencesColumn({
   const debounced = useDebounce(searchQ);
   const today = new Date().toISOString().split("T")[0];
 
+  function requirementLabel(type: string, description?: string) {
+    if (type === "any") return description || "";
+    return t(`documents.evidence.types.${type}`, { defaultValue: description || type });
+  }
+
   const { data: searchResults } = useQuery({
     queryKey: ["ev-search", debounced],
     queryFn: () => documentsApi.searchEvidences(debounced),
@@ -678,7 +694,7 @@ function EvidencesColumn({
           {requirements.missing_evidences.map((m, i) => (
             <div key={i} className="flex items-center gap-1.5 text-xs bg-red-50 border border-red-200 rounded px-2 py-1">
               <span className="text-red-500 font-bold shrink-0">!</span>
-              <span className="text-red-700">{m.description || m.type}</span>
+              <span className="text-red-700">{requirementLabel(m.type, m.description)}</span>
               <span className="ml-auto text-xs text-red-500 font-medium shrink-0">{t("controls.drawer.docs.missing")}</span>
             </div>
           ))}
@@ -803,6 +819,12 @@ function TabDocEvidence({
     (!evidenceRequirement.documents?.length && !evidenceRequirement.evidences?.length &&
      !evidenceRequirement.min_documents && !evidenceRequirement.min_evidences);
 
+  function requirementLabel(kind: "document" | "evidence", type: string, description?: string) {
+    if (type === "any") return description || "";
+    if (kind === "document") return t(`documents.type.${type}`, { defaultValue: description || type });
+    return t(`documents.evidence.types.${type}`, { defaultValue: description || type });
+  }
+
   return (
     <div className="space-y-3">
       {/* Banner requisiti */}
@@ -813,8 +835,8 @@ function TabDocEvidence({
       ) : !requirements.satisfied ? (
         <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-800">
           <p className="font-semibold mb-1">⛔ {t("controls.drawer.docs.requirements.not_satisfied_for_compliant")}</p>
-          {requirements.missing_documents.map((m, i) => <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_document")}: {m.description || m.type}</p>)}
-          {requirements.missing_evidences.map((m, i) => <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_evidence")}: {m.description || m.type}</p>)}
+          {requirements.missing_documents.map((m, i) => <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_document")}: {requirementLabel("document", m.type, m.description)}</p>)}
+          {requirements.missing_evidences.map((m, i) => <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_evidence")}: {requirementLabel("evidence", m.type, m.description)}</p>)}
           {requirements.expired_evidences.map((e, i) => <p key={i}>• {t("controls.drawer.evaluation.requirements.expired_evidence")}: {e.title} ({e.expired_on})</p>)}
         </div>
       ) : requirements.warnings.length > 0 ? (
