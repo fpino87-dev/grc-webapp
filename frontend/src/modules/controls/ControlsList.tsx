@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { controlsApi, type ControlInstance } from "../../api/endpoints/controls";
+import { controlsApi, type ControlInstance, type Framework } from "../../api/endpoints/controls";
 import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { ControlDetailDrawer } from "./ControlDetailDrawer";
@@ -189,6 +189,7 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
 
 export function ControlsList() {
   const [statusFilter, setStatusFilter] = useState("");
+  const [frameworkFilter, setFrameworkFilter] = useState<string>("");
   const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
   const selectedPlant = useAuthStore(s => s.selectedPlant);
 
@@ -210,8 +211,19 @@ export function ControlsList() {
 
   const instances = data?.results ?? [];
 
+  const filteredByFramework =
+    frameworkFilter ? instances.filter((c) => c.framework_code === frameworkFilter) : instances;
+
   const stats = STATUS_OPTIONS.reduce(
-    (acc, s) => ({ ...acc, [s]: instances.filter((c) => c.status === s).length }),
+    (acc, s) => ({ ...acc, [s]: filteredByFramework.filter((c) => c.status === s).length }),
+    {} as Record<string, number>
+  );
+
+  const frameworkStats = instances.reduce(
+    (acc, c) => ({
+      ...acc,
+      [c.framework_code]: (acc[c.framework_code] ?? 0) + 1,
+    }),
     {} as Record<string, number>
   );
 
@@ -248,7 +260,7 @@ export function ControlsList() {
       </div>
 
       {frameworks && frameworks.length > 0 && (
-        <div className="flex gap-2 mb-4 flex-wrap">
+        <div className="flex gap-2 mb-3 flex-wrap">
           {frameworks.map((f) => (
             <span key={f.id} className="text-xs bg-blue-50 border border-blue-200 text-blue-700 px-2 py-1 rounded">
               {f.code} v{f.version}
@@ -257,6 +269,35 @@ export function ControlsList() {
         </div>
       )}
 
+      {/* Filtro per framework */}
+      <div className="flex gap-2 mb-4 flex-wrap">
+        <button
+          onClick={() => setFrameworkFilter("")}
+          className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+            frameworkFilter === ""
+              ? "bg-indigo-600 text-white"
+              : "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
+          }`}
+        >
+          Tutti i framework ({instances.length})
+        </button>
+        {Object.entries(frameworkStats).map(([code, count]) => (
+          <button
+            key={code}
+            onClick={() => setFrameworkFilter(code)}
+            className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+              frameworkFilter === code
+                ? "bg-indigo-600 text-white"
+                : "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
+            }`}
+          >
+            <span className="font-mono mr-1">{code}</span>
+            ({count})
+          </button>
+        ))}
+      </div>
+
+      {/* Filtro per stato */}
       <div className="flex gap-2 mb-4 flex-wrap">
         <button
           onClick={() => setStatusFilter("")}
@@ -264,7 +305,7 @@ export function ControlsList() {
             statusFilter === "" ? "bg-primary-600 text-white" : "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
           }`}
         >
-          Tutti ({instances.length})
+          Tutti ({filteredByFramework.length})
         </button>
         {STATUS_OPTIONS.map((s) => (
           <button
@@ -282,7 +323,7 @@ export function ControlsList() {
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center text-gray-400">Caricamento...</div>
-        ) : instances.length === 0 ? (
+        ) : filteredByFramework.length === 0 ? (
           <div className="p-8 text-center text-gray-400">Nessun controllo trovato</div>
         ) : (
           <table className="w-full text-sm">
@@ -296,7 +337,7 @@ export function ControlsList() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {instances.map((c) => (
+              {filteredByFramework.map((c) => (
                 <tr key={c.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3 font-mono text-xs text-gray-500">
                     <div className="flex items-center gap-1">
