@@ -38,6 +38,7 @@
     "reject": "Rifiuta",
     "confirm": "Conferma",
     "delete": "Elimina",
+    "refresh": "Aggiorna",
     "export": "Esporta",
     "upload": "Carica"
   },
@@ -858,6 +859,68 @@
         "days_ago": "{{days}}g fa",
         "in_days": "in {{days}}g"
       }
+    }
+  }
+  ,
+  "schedule": {
+    "activity": {
+      "title": "Activity Schedule",
+      "help": {
+        "title": "Activity Schedule",
+        "description": "Vista calendario aggregata di tutte le scadenze GRC:\n\tdocumenti, evidenze, assessment, test BCP, finding, formazione.\n\tLe scadenze sono calcolate dalla Policy configurata.",
+        "steps": {
+          "1": "Seleziona il plant e il periodo (1-12 mesi)",
+          "2": "Filtra per tipo (documenti, rischi, finding, ecc.) o stato",
+          "3": "Clicca su ogni attività per andare direttamente al modulo",
+          "4": "Configura le scadenze in 'Policy Scadenze' (solo CISO/Admin)"
+        },
+        "connections": {
+          "policy": { "module": "Policy Scadenze", "relation": "Le regole configurate determinano tutte le scadenze" },
+          "required_docs": { "module": "Documenti Obbligatori", "relation": "Mostra stato documenti per framework" }
+        },
+        "config_needed": {
+          "1": "Configurare Policy Scadenze con 'Crea policy default'",
+          "2": "Caricare i documenti obbligatori con load_required_documents"
+        }
+      },
+      "days": {
+        "today": "Oggi",
+        "overdue": "Scaduto",
+        "in_days": "{{days}}gg"
+      }
+    },
+    "filters": {
+      "plant": "Sito",
+      "all_plants": "Tutti i siti",
+      "horizon": "Orizzonte",
+      "months": {
+        "3": "3 mesi",
+        "6": "6 mesi",
+        "12": "12 mesi"
+      },
+      "urgency": "Urgenza",
+      "urgency_values": {
+        "all": "Tutte",
+        "red": "Critiche",
+        "yellow": "Attenzione",
+        "green": "Ok"
+      }
+    },
+    "kpi": {
+      "critical": "Critiche (<7gg)",
+      "warning": "Attenzione",
+      "on_track": "Nei tempi"
+    },
+    "empty": {
+      "no_deadlines": "Nessuna scadenza nei prossimi {{months}} mesi",
+      "no_deadlines_for_filter": "Nessuna scadenza per il filtro selezionato"
+    },
+    "table": {
+      "activity": "Attività",
+      "category": "Categoria",
+      "due_date": "Scadenza",
+      "days": "Giorni",
+      "status": "Stato"
     }
   }
 }

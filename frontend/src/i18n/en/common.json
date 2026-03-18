@@ -38,6 +38,7 @@
     "reject": "Reject",
     "confirm": "Confirm",
     "delete": "Delete",
+    "refresh": "Refresh",
     "export": "Export",
     "upload": "Upload"
   },
@@ -858,6 +859,68 @@
         "days_ago": "{{days}}d ago",
         "in_days": "in {{days}}d"
       }
+    }
+  }
+  ,
+  "schedule": {
+    "activity": {
+      "title": "Activity schedule",
+      "help": {
+        "title": "Activity schedule",
+        "description": "Aggregated calendar view of all GRC due dates:\n\tdocuments, evidence, assessments, BCP tests, findings, training.\n\tDue dates are computed from the configured policy.",
+        "steps": {
+          "1": "Select the site and the time horizon (1–12 months)",
+          "2": "Filter by type (documents, risks, findings, etc.) or status",
+          "3": "Click an activity to jump directly to the module",
+          "4": "Configure due dates in 'Due date policy' (CISO/Admin only)"
+        },
+        "connections": {
+          "policy": { "module": "Due date policy", "relation": "Configured rules determine all due dates" },
+          "required_docs": { "module": "Required documents", "relation": "Shows required document status by framework" }
+        },
+        "config_needed": {
+          "1": "Configure a due date policy with 'Create default policy'",
+          "2": "Load required documents with load_required_documents"
+        }
+      },
+      "days": {
+        "today": "Today",
+        "overdue": "Overdue",
+        "in_days": "{{days}}d"
+      }
+    },
+    "filters": {
+      "plant": "Site",
+      "all_plants": "All sites",
+      "horizon": "Horizon",
+      "months": {
+        "3": "3 months",
+        "6": "6 months",
+        "12": "12 months"
+      },
+      "urgency": "Urgency",
+      "urgency_values": {
+        "all": "All",
+        "red": "Critical",
+        "yellow": "Warning",
+        "green": "Ok"
+      }
+    },
+    "kpi": {
+      "critical": "Critical (<7d)",
+      "warning": "Warning",
+      "on_track": "On track"
+    },
+    "empty": {
+      "no_deadlines": "No due dates in the next {{months}} months",
+      "no_deadlines_for_filter": "No due dates for the selected filter"
+    },
+    "table": {
+      "activity": "Activity",
+      "category": "Category",
+      "due_date": "Due date",
+      "days": "Days",
+      "status": "Status"
     }
   }
 }

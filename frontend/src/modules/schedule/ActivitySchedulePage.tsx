@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { scheduleApi, ActivityItem } from "../../api/endpoints/schedule";
 import { plantsApi } from "../../api/endpoints/plants";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
+import { useTranslation } from "react-i18next";
 
 const URGENCY_COLOR: Record<string, string> = {
   green:  "bg-green-100 text-green-800 border-green-200",
@@ -16,13 +17,8 @@ const URGENCY_DOT: Record<string, string> = {
   red:    "bg-red-500",
 };
 
-const MONTH_OPTIONS = [
-  { label: "3 mesi",   value: 3 },
-  { label: "6 mesi",   value: 6 },
-  { label: "12 mesi",  value: 12 },
-];
-
 function ActivityRow({ item }: { item: ActivityItem }) {
+  const { t } = useTranslation();
   return (
     <tr className="hover:bg-gray-50">
       <td className="px-4 py-3">
@@ -35,7 +31,11 @@ function ActivityRow({ item }: { item: ActivityItem }) {
       <td className="px-4 py-3 text-sm text-gray-700">{item.due_date}</td>
       <td className="px-4 py-3">
         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${URGENCY_COLOR[item.urgency]}`}>
-          {item.days_left === 0 ? "Oggi" : item.days_left < 0 ? "Scaduto" : `${item.days_left}gg`}
+          {item.days_left === 0
+            ? t("schedule.activity.days.today")
+            : item.days_left < 0
+            ? t("schedule.activity.days.overdue")
+            : t("schedule.activity.days.in_days", { days: item.days_left })}
         </span>
       </td>
       <td className="px-4 py-3 text-sm text-gray-500">{item.status}</td>
@@ -44,6 +44,7 @@ function ActivityRow({ item }: { item: ActivityItem }) {
 }
 
 export function ActivitySchedulePage() {
+  const { t } = useTranslation();
   const [plantId, setPlantId] = useState<string>("");
   const [months, setMonths] = useState(6);
   const [urgencyFilter, setUrgencyFilter] = useState<string>("all");
@@ -70,29 +71,33 @@ export function ActivitySchedulePage() {
   const yellow = activities.filter(a => a.urgency === "yellow").length;
   const green = activities.filter(a => a.urgency === "green").length;
 
+  const monthOptions = [
+    { label: t("schedule.filters.months.3"), value: 3 },
+    { label: t("schedule.filters.months.6"), value: 6 },
+    { label: t("schedule.filters.months.12"), value: 12 },
+  ];
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-          Activity Schedule
+          {t("schedule.activity.title")}
           <ModuleHelp
-            title="Activity Schedule"
-            description="Vista calendario aggregata di tutte le scadenze GRC:
-    documenti, evidenze, assessment, test BCP, finding, formazione.
-    Le scadenze sono calcolate dalla Policy configurata."
+            title={t("schedule.activity.help.title")}
+            description={t("schedule.activity.help.description")}
             steps={[
-              "Seleziona il plant e il periodo (1-12 mesi)",
-              "Filtra per tipo (documenti, rischi, finding, ecc.) o stato",
-              "Clicca su ogni attività per andare direttamente al modulo",
-              "Configura le scadenze in 'Policy Scadenze' (solo CISO/Admin)",
+              t("schedule.activity.help.steps.1"),
+              t("schedule.activity.help.steps.2"),
+              t("schedule.activity.help.steps.3"),
+              t("schedule.activity.help.steps.4"),
             ]}
             connections={[
-              { module: "Policy Scadenze", relation: "Le regole configurate determinano tutte le scadenze" },
-              { module: "Documenti Obbligatori", relation: "Mostra stato documenti per framework" },
+              { module: t("schedule.activity.help.connections.policy.module"), relation: t("schedule.activity.help.connections.policy.relation") },
+              { module: t("schedule.activity.help.connections.required_docs.module"), relation: t("schedule.activity.help.connections.required_docs.relation") },
             ]}
             configNeeded={[
-              "Configurare Policy Scadenze con 'Crea policy default'",
-              "Caricare i documenti obbligatori con load_required_documents",
+              t("schedule.activity.help.config_needed.1"),
+              t("schedule.activity.help.config_needed.2"),
             ]}
           />
         </h2>
@@ -100,7 +105,7 @@ export function ActivitySchedulePage() {
           onClick={() => refetch()}
           className="text-sm text-blue-600 hover:underline"
         >
-          Aggiorna
+          {t("actions.refresh")}
         </button>
       </div>
 
@@ -108,22 +113,22 @@ export function ActivitySchedulePage() {
       <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
         <div className="flex flex-wrap gap-4 items-end">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Sito</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">{t("schedule.filters.plant")}</label>
             <select
               value={plantId}
               onChange={e => setPlantId(e.target.value)}
               className="border border-gray-300 rounded px-2 py-1.5 text-sm"
             >
-              <option value="">Tutti i siti</option>
+              <option value="">{t("schedule.filters.all_plants")}</option>
               {plants?.map(p => (
                 <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Orizzonte</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">{t("schedule.filters.horizon")}</label>
             <div className="flex gap-1">
-              {MONTH_OPTIONS.map(opt => (
+              {monthOptions.map(opt => (
                 <button
                   key={opt.value}
                   onClick={() => setMonths(opt.value)}
@@ -139,13 +144,13 @@ export function ActivitySchedulePage() {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Urgenza</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">{t("schedule.filters.urgency")}</label>
             <div className="flex gap-1">
               {[
-                { value: "all",    label: "Tutte" },
-                { value: "red",    label: "Critiche" },
-                { value: "yellow", label: "Attenzione" },
-                { value: "green",  label: "Ok" },
+                { value: "all",    label: t("schedule.filters.urgency_values.all") },
+                { value: "red",    label: t("schedule.filters.urgency_values.red") },
+                { value: "yellow", label: t("schedule.filters.urgency_values.yellow") },
+                { value: "green",  label: t("schedule.filters.urgency_values.green") },
               ].map(opt => (
                 <button
                   key={opt.value}
@@ -167,15 +172,15 @@ export function ActivitySchedulePage() {
       {/* Summary KPIs */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-xs font-medium text-red-700 uppercase tracking-wide">Critiche (&lt;7gg)</p>
+          <p className="text-xs font-medium text-red-700 uppercase tracking-wide">{t("schedule.kpi.critical")}</p>
           <p className="text-3xl font-bold text-red-700 mt-1">{red}</p>
         </div>
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <p className="text-xs font-medium text-yellow-700 uppercase tracking-wide">Attenzione</p>
+          <p className="text-xs font-medium text-yellow-700 uppercase tracking-wide">{t("schedule.kpi.warning")}</p>
           <p className="text-3xl font-bold text-yellow-700 mt-1">{yellow}</p>
         </div>
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <p className="text-xs font-medium text-green-700 uppercase tracking-wide">Nei tempi</p>
+          <p className="text-xs font-medium text-green-700 uppercase tracking-wide">{t("schedule.kpi.on_track")}</p>
           <p className="text-3xl font-bold text-green-700 mt-1">{green}</p>
         </div>
       </div>
@@ -183,22 +188,22 @@ export function ActivitySchedulePage() {
       {/* Table */}
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         {isLoading ? (
-          <div className="p-8 text-center text-gray-400 text-sm">Caricamento...</div>
+          <div className="p-8 text-center text-gray-400 text-sm">{t("common.loading")}</div>
         ) : filtered.length === 0 ? (
           <div className="p-8 text-center text-gray-400 text-sm italic">
             {activities.length === 0
-              ? "Nessuna scadenza nei prossimi " + months + " mesi"
-              : "Nessuna scadenza per il filtro selezionato"}
+              ? t("schedule.empty.no_deadlines", { months })
+              : t("schedule.empty.no_deadlines_for_filter")}
           </div>
         ) : (
           <table className="w-full text-left">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">Attività</th>
-                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">Categoria</th>
-                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">Scadenza</th>
-                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">Giorni</th>
-                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">Stato</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">{t("schedule.table.activity")}</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">{t("schedule.table.category")}</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">{t("schedule.table.due_date")}</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">{t("schedule.table.days")}</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">{t("schedule.table.status")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
