@@ -112,11 +112,12 @@ function RecordTestModal({ plan, onClose }: { plan: BcpPlan; onClose: () => void
   const [participantsCount, setParticipantsCount] = useState("");
   const [notes, setNotes] = useState("");
   const [objectives, setObjectives] = useState<BcpTestObjective[]>([]);
+  const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
   const [newObjective, setNewObjective] = useState("");
   const [warnings, setWarnings] = useState<string[]>([]);
 
   const mutation = useMutation({
-    mutationFn: (data: Record<string, unknown>) => bcpApi.recordTest(data),
+    mutationFn: (data: Record<string, unknown> | FormData) => bcpApi.recordTest(data),
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ["bcp"] });
       if (res.warnings?.length) {
@@ -143,6 +144,23 @@ function RecordTestModal({ plan, onClose }: { plan: BcpPlan; onClose: () => void
   }
 
   function handleSubmit() {
+    if (evidenceFile) {
+      const fd = new FormData();
+      fd.append("plan", plan.id);
+      fd.append("result", result);
+      fd.append("test_type", testType);
+      fd.append("objectives", JSON.stringify(objectives));
+      fd.append("notes", notes);
+      if (rtoAchieved) fd.append("rto_achieved_hours", rtoAchieved);
+      if (rpoAchieved) fd.append("rpo_achieved_hours", rpoAchieved);
+      fd.append("participants_count", participantsCount ? participantsCount : "0");
+
+      // evidenza del test BCP
+      fd.append("evidence_file", evidenceFile);
+      mutation.mutate(fd);
+      return;
+    }
+
     mutation.mutate({
       plan: plan.id,
       result,
@@ -282,6 +300,17 @@ function RecordTestModal({ plan, onClose }: { plan: BcpPlan; onClose: () => void
               value={notes}
               onChange={e => setNotes(e.target.value)}
               rows={2}
+              className="w-full border rounded px-3 py-2 text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Evidenza del test (opzionale)
+            </label>
+            <input
+              type="file"
+              onChange={(e) => setEvidenceFile(e.target.files?.[0] ?? null)}
               className="w-full border rounded px-3 py-2 text-sm"
             />
           </div>

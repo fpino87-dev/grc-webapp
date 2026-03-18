@@ -1,14 +1,18 @@
-from rest_framework import viewsets, filters
+from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
+from django.utils import timezone
+from django.db.models import Q
 
 from core.audit import log_action
 from apps.bia.serializers import CriticalProcessSerializer
 from .models import BcpPlan, BcpTest
 from .serializers import BcpPlanSerializer, BcpTestSerializer
 from . import services
+from apps.auth_grc.models import GrcRole, UserPlantAccess
+from apps.governance.models import NormativeRole, RoleAssignment
 
 
 class BcpPlanViewSet(viewsets.ModelViewSet):
@@ -49,7 +53,54 @@ class BcpPlanViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def approve(self, request, pk=None):
         plan = self.get_object()
-        plan = services.approve_plan(plan, request.user)
+        user = request.user
+
+        # CISO approval: privilegi su plant (preferenza UserPlantAccess) con fallback su RoleAssignment governance.
+        today = timezone.now().date()
+        has_access = False
+        if user and user.is_authenticated:
+            # 1) Preferenza via UserPlantAccess (ruolo operativo)
+            if user.is_superuser:
+                has_access = True
+            else:
+                access_qs = UserPlantAccess.objects.filter(
+                    user=user,
+                    role=GrcRole.COMPLIANCE_OFFICER,
+                    deleted_at__isnull=True,
+                    valid_from__lte=today,
+                ).filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today))
+
+                if access_qs.filter(scope_type="org").exists():
+                    has_access = True
+                elif plan.bu_id and access_qs.filter(scope_type="bu", scope_bu_id=plan.bu_id).exists():
+                    has_access = True
+                elif access_qs.filter(
+                    scope_type__in=["plant_list", "single_plant"],
+                    scope_plants=plan,
+                ).exists():
+                    has_access = True
+
+            # 2) Fallback via governance RoleAssignment (ruolo NormativeRole.CISO)
+            if not has_access:
+                ra_qs = RoleAssignment.objects.filter(
+                    user=user,
+                    role=NormativeRole.CISO,
+                    deleted_at__isnull=True,
+                    valid_from__lte=today,
+                ).filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today))
+
+                if ra_qs.filter(scope_type="org").exists():
+                    has_access = True
+                elif ra_qs.filter(scope_type="plant", scope_id=plan.pk).exists():
+                    has_access = True
+
+        if not has_access:
+            return Response(
+                {"detail": "Non hai i permessi per approvare questo piano BCP."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        plan = services.approve_plan(plan, user)
         serializer = self.get_serializer(plan)
         return Response(serializer.data)
 
@@ -60,9 +111,37 @@ class BcpPlanViewSet(viewsets.ModelViewSet):
         notes = request.data.get("notes", "")
         test_type = request.data.get("test_type", "tabletop")
         objectives = request.data.get("objectives") or []
-        rto_achieved = request.data.get("rto_achieved_hours")
-        rpo_achieved = request.data.get("rpo_achieved_hours")
-        participants_count = request.data.get("participants_count") or 0
+        if isinstance(objectives, str):
+            try:
+                import json
+
+                objectives = json.loads(objectives) or []
+            except Exception:
+                objectives = []
+
+        evidence_ids = request.data.get("evidence_ids") or []
+        if isinstance(evidence_ids, str):
+            try:
+                import json
+
+                evidence_ids = json.loads(evidence_ids) or []
+            except Exception:
+                evidence_ids = []
+
+        evidence_file = request.FILES.get("evidence_file")
+
+        def _to_int(v):
+            if v is None or v == "":
+                return None
+            try:
+                return int(v)
+            except Exception:
+                return None
+
+        rto_achieved = _to_int(request.data.get("rto_achieved_hours"))
+        rpo_achieved = _to_int(request.data.get("rpo_achieved_hours"))
+        participants_count = _to_int(request.data.get("participants_count")) or 0
+
         try:
             test, warnings = services.record_test(
                 plan,
@@ -74,6 +153,8 @@ class BcpPlanViewSet(viewsets.ModelViewSet):
                 rto_achieved=rto_achieved,
                 rpo_achieved=rpo_achieved,
                 participants_count=participants_count,
+                evidence_ids=evidence_ids,
+                evidence_file=evidence_file,
             )
         except Exception as e:
             from django.core.exceptions import ValidationError
@@ -126,9 +207,36 @@ class BcpTestViewSet(viewsets.ModelViewSet):
         notes = request.data.get("notes", "")
         test_type = request.data.get("test_type", "tabletop")
         objectives = request.data.get("objectives") or []
-        rto_achieved = request.data.get("rto_achieved_hours")
-        rpo_achieved = request.data.get("rpo_achieved_hours")
-        participants_count = request.data.get("participants_count") or 0
+        if isinstance(objectives, str):
+            try:
+                import json
+
+                objectives = json.loads(objectives) or []
+            except Exception:
+                objectives = []
+
+        evidence_ids = request.data.get("evidence_ids") or []
+        if isinstance(evidence_ids, str):
+            try:
+                import json
+
+                evidence_ids = json.loads(evidence_ids) or []
+            except Exception:
+                evidence_ids = []
+
+        evidence_file = request.FILES.get("evidence_file")
+
+        def _to_int(v):
+            if v is None or v == "":
+                return None
+            try:
+                return int(v)
+            except Exception:
+                return None
+
+        rto_achieved = _to_int(request.data.get("rto_achieved_hours"))
+        rpo_achieved = _to_int(request.data.get("rpo_achieved_hours"))
+        participants_count = _to_int(request.data.get("participants_count")) or 0
 
         try:
             test, warnings = services.record_test(
@@ -141,6 +249,8 @@ class BcpTestViewSet(viewsets.ModelViewSet):
                 rto_achieved=rto_achieved,
                 rpo_achieved=rpo_achieved,
                 participants_count=participants_count,
+                evidence_ids=evidence_ids,
+                evidence_file=evidence_file,
             )
         except ValidationError as e:
             return Response({"detail": str(e.message)}, status=400)

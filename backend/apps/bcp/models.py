@@ -83,6 +83,14 @@ class BcpTest(BaseModel):
     )
     participants_count = models.IntegerField(default=0)
 
+    # Evidenze collegate al test BCP (es. output del test, report, screenshot, ecc.)
+    # Le evidenze sono gestite dal modulo documents.Evidence.
+    evidences = models.ManyToManyField(
+        "documents.Evidence",
+        blank=True,
+        related_name="bcp_tests",
+    )
+
     @property
     def objectives_met_pct(self) -> float | None:
         """Percentage of objectives marked as met. None if no objectives defined."""

@@ -28,5 +28,9 @@ app.conf.beat_schedule = {
         "task": "apps.pdca.tasks.notify_blocked_pdca_task",
         "schedule": crontab(hour=8, minute=30),
     },
+    "check-expired-bcp-plans": {
+        "task": "apps.bcp.tasks.check_expired_bcp_plans",
+        "schedule": crontab(hour=2, minute=10),
+    },
 }
 

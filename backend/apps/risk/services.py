@@ -72,7 +72,11 @@ def calc_score_from_dimensions(assessment: RiskAssessment) -> int:
 def suggest_residual_score(assessment) -> dict:
     """
     Suggerisce il rischio residuo in base ai controlli compliant collegati al sito.
-    Logica: parte dal rischio inerente, applica riduzione per controllo compliant (-2%, max 60%).
+    Logica:
+    - parte dal rischio inerente
+    - applica riduzione per controlli compliant (-2%, max 60%)
+    - applica una riduzione extra per un BCP valido "best-match" al processo BIA
+      (+10 / +5 / +0), scegliendo il piano migliore tra quelli approvati e non scaduti.
     """
     if not assessment.inherent_score:
         return {"suggested": None, "reason": "Rischio inerente non definito"}
@@ -91,15 +95,108 @@ def suggest_residual_score(assessment) -> dict:
     )
     compliant_count = plant_controls.count()
     reduction_pct = min(60, compliant_count * 2)
-    suggested = max(1, round(assessment.inherent_score * (1 - reduction_pct / 100)))
+
+    # ─── BCP contribution (best valid plan for this process) ─────────────────
+    bcp_extra_pct = 0
+    best_bcp_title = None
+    best_bcp_strength = 0.0
+    best_rto_ok = None
+    best_rpo_ok = None
+
+    try:
+        import datetime
+        from django.db.models import Q
+        from django.utils import timezone
+
+        from apps.bcp.models import BcpPlan
+
+        process = assessment.critical_process
+        today = timezone.now().date()
+        rto_target = process.rto_target_hours
+        rpo_target = process.rpo_target_hours
+
+        # Considero solo piani BCP approvati e non scaduti, collegati al processo BIA.
+        # Nota: nel tuo modello esistono sia FK (critical_process) sia M2M (critical_processes).
+        valid_plans_qs = (
+            BcpPlan.objects.filter(
+                deleted_at__isnull=True,
+                status="approvato",
+                next_test_date__isnull=False,
+                next_test_date__gte=today,
+            )
+            .filter(Q(critical_process=process) | Q(critical_processes=process))
+            .distinct()
+        )
+
+        best_key = None
+
+        for plan in valid_plans_qs:
+            last_test = (
+                plan.tests.filter(deleted_at__isnull=True).order_by("-test_date").first()
+            )
+
+            rto_ok = None
+            rpo_ok = None
+
+            if rto_target is not None:
+                if last_test and last_test.rto_achieved_hours is not None:
+                    rto_ok = last_test.rto_achieved_hours <= rto_target
+                elif plan.rto_hours is not None:
+                    rto_ok = plan.rto_hours <= rto_target
+
+            if rpo_target is not None:
+                if last_test and last_test.rpo_achieved_hours is not None:
+                    rpo_ok = last_test.rpo_achieved_hours <= rpo_target
+                elif plan.rpo_hours is not None:
+                    rpo_ok = plan.rpo_hours <= rpo_target
+
+            known = sum(v is not None for v in (rto_ok, rpo_ok))
+            strength = ((1 if rto_ok else 0) + (1 if rpo_ok else 0)) / known if known else 0.0
+
+            achieved_data_count = 0
+            if last_test:
+                achieved_data_count = int(
+                    (last_test.rto_achieved_hours is not None)
+                    + (last_test.rpo_achieved_hours is not None)
+                )
+
+            # Tie-breakers: strength -> test più recente -> presenza dati achieved
+            last_test_date = last_test.test_date if last_test else datetime.date.min
+            key = (strength, last_test_date, achieved_data_count)
+
+            if best_key is None or key > best_key:
+                best_key = key
+                best_bcp_strength = strength
+                best_bcp_title = plan.title
+                best_rto_ok = rto_ok
+                best_rpo_ok = rpo_ok
+
+        if best_bcp_title:
+            if best_bcp_strength >= 1.0:
+                bcp_extra_pct = 10
+            elif best_bcp_strength >= 0.5:
+                bcp_extra_pct = 5
+            else:
+                bcp_extra_pct = 0
+
+    except Exception:
+        # Non deve bloccare la UI: se BCP non è disponibile o qualche campo è mancante,
+        # continuiamo con la sola riduzione da controlli.
+        bcp_extra_pct = 0
+
+    total_reduction_pct = min(70, reduction_pct + bcp_extra_pct)
+    suggested = max(1, round(assessment.inherent_score * (1 - total_reduction_pct / 100)))
 
     return {
         "suggested": suggested,
         "reduction_pct": reduction_pct,
         "compliant_controls": compliant_count,
+        "bcp_extra_pct": bcp_extra_pct,
+        "best_bcp_strength": best_bcp_strength,
         "reason": (
             f"{compliant_count} controlli compliant → "
-            f"riduzione stimata {reduction_pct}% → "
+            f"riduzione controlli {reduction_pct}% "
+            f"(extra BCP {bcp_extra_pct}%) → "
             f"score residuo suggerito: {suggested}"
         ),
     }

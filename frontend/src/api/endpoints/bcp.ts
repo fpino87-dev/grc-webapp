@@ -40,8 +40,16 @@ export const bcpApi = {
     apiClient.patch<BcpPlan>(`/bcp/plans/${id}/`, data).then(r => r.data),
   tests: (planId: string) =>
     apiClient.get<{ results: BcpTest[] }>("/bcp/tests/", { params: { plan: planId } }).then(r => r.data.results),
-  recordTest: (data: Record<string, unknown>) =>
-    apiClient.post<{ test: BcpTest; warnings: string[] }>("/bcp/tests/", data).then(r => r.data),
+  recordTest: (data: Record<string, unknown> | FormData) => {
+    const isForm = typeof FormData !== "undefined" && data instanceof FormData;
+    return apiClient
+      .post<{ test: BcpTest; warnings: string[] }>(
+        "/bcp/tests/",
+        data,
+        isForm ? { headers: { "Content-Type": undefined as unknown as string } } : undefined
+      )
+      .then(r => r.data);
+  },
   delete: (id: string) =>
     apiClient.delete(`/bcp/plans/${id}/`).then(() => undefined),
 };

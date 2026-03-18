@@ -53,6 +53,9 @@ def record_test(
     rto_achieved: int | None = None,
     rpo_achieved: int | None = None,
     participants_count: int = 0,
+    evidence_ids: list | None = None,
+    evidence_file=None,
+    evidence_payload: dict | None = None,
 ) -> tuple:
     """
     Record a BCP test and update last_test_date on the plan.
@@ -84,6 +87,34 @@ def record_test(
         plan.save(update_fields=["last_test_date", "next_test_date", "updated_at"])
     except Exception:
         plan.save(update_fields=["last_test_date", "updated_at"])
+
+    try:
+        from apps.documents.models import Evidence
+
+        evidence_ids = evidence_ids or []
+        if evidence_ids:
+            existing_evidences = Evidence.objects.filter(
+                pk__in=evidence_ids,
+                deleted_at__isnull=True,
+            )
+            test.evidences.add(*list(existing_evidences))
+
+        if evidence_file:
+            from apps.documents.services import create_evidence_with_file
+
+            payload = evidence_payload.copy() if evidence_payload else {}
+            payload.setdefault("title", f"BCP test — {plan.title}")
+            payload.setdefault("evidence_type", "test_result")
+            payload.setdefault("description", notes or payload.get("description", ""))
+            payload.setdefault("plant", str(plan.plant_id) if plan.plant_id else None)
+            if plan.next_test_date:
+                payload.setdefault("valid_until", plan.next_test_date.isoformat())
+
+            created_ev = create_evidence_with_file(payload, evidence_file, user)
+            test.evidences.add(created_ev)
+    except Exception:
+        # le evidenze non devono bloccare la registrazione del test
+        pass
     log_action(
         user=user,
         action_code="bcp.plan.test",
