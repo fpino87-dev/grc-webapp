@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { governanceApi, type RoleAssignment, type SecurityCommittee } from "../../api/endpoints/governance";
 import { usersApi } from "../../api/endpoints/users";
 import { plantsApi } from "../../api/endpoints/plants";
 import { apiClient } from "../../api/client";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
+import { DocumentWorkflowSection } from "./DocumentWorkflowPage";
+import { useSearchParams } from "react-router-dom";
 
 const ROLE_LABELS: Record<string, string> = {
   ciso:                   "CISO",
@@ -422,6 +424,16 @@ function CommitteeModal({ onClose }: { onClose: () => void }) {
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export function GovernancePage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") === "workflow" ? "workflow" : "roles";
+  const [tab, setTab] = useState<"roles" | "workflow">(initialTab);
+
+  useEffect(() => {
+    const t = searchParams.get("tab") === "workflow" ? "workflow" : "roles";
+    setTab(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
   const [showRoleModal, setShowRoleModal]         = useState(false);
   const [showCommitteeModal, setShowCommitteeModal] = useState(false);
   const [terminaTarget, setTerminaTarget]         = useState<RoleAssignment | null>(null);
@@ -495,6 +507,75 @@ export function GovernancePage() {
         />
       </div>
 
+      {/* Tabs */}
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex gap-6">
+          <button
+            type="button"
+            onClick={() => {
+              setTab("roles");
+              setSearchParams((prev) => {
+                const next = new URLSearchParams(prev);
+                next.delete("tab");
+                return next;
+              });
+            }}
+            className={
+              tab === "roles"
+                ? "border-primary-600 text-primary-700 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+            }
+          >
+            Ruoli & comitati
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setTab("workflow");
+              setSearchParams((prev) => {
+                const next = new URLSearchParams(prev);
+                next.set("tab", "workflow");
+                return next;
+              });
+            }}
+            className={
+              tab === "workflow"
+                ? "border-primary-600 text-primary-700 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+            }
+          >
+            Workflow documentale (M07)
+          </button>
+        </nav>
+      </div>
+
+      {tab === "workflow" ? (
+        <div className="space-y-4">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Workflow documentale</h3>
+              <p className="text-sm text-gray-500 mt-1">
+                Definisci chi può creare, revisionare e approvare i documenti M07 per tipo e per sito.
+              </p>
+            </div>
+            <ModuleHelp
+              title="Workflow documentale"
+              description="Configura il flusso di approvazione documentale per tipo documento (policy, procedura, manuale...) e plant."
+              steps={[
+                "Scegli il tipo documento e lo scope (org / BU / plant)",
+                "Assegna i ruoli che possono creare/inviare in revisione",
+                "Assegna i ruoli che devono revisionare",
+                "Assegna i ruoli che possono approvare e mandare in vigore",
+              ]}
+              connections={[
+                { module: "M07 Documenti", relation: "Abilita i pulsanti Invia per revisione / Approva" },
+                { module: "M00 Governance", relation: "Usa i ruoli normativi (CISO, Plant Manager, ISMS...)" },
+              ]}
+            />
+          </div>
+          <DocumentWorkflowSection embedded />
+        </div>
+      ) : (
       {/* Alert: ruoli vacanti */}
       {(vacanti?.count ?? 0) > 0 && (
         <div className="border border-red-300 bg-red-50 rounded-lg p-4">
@@ -649,6 +730,7 @@ export function GovernancePage() {
       )}
 
       {toast && <Toast msg={toast} onClose={() => setToast(null)} />}
+      )}
     </div>
   );
 }

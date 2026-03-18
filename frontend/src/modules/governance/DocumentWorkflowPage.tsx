@@ -67,6 +67,10 @@ function RoleMultiSelect({
 }
 
 export function DocumentWorkflowPage() {
+  return <DocumentWorkflowSection embedded={false} />;
+}
+
+export function DocumentWorkflowSection({ embedded }: { embedded?: boolean }) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState<EditingPolicy | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<DocumentWorkflowPolicy | null>(null);
@@ -144,29 +148,31 @@ export function DocumentWorkflowPage() {
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-5">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Workflow documentale</h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Definisci chi può creare, revisionare e approvare i documenti M07 per tipo e per sito.
-          </p>
+    <div className={embedded ? "space-y-5" : "p-6 max-w-5xl mx-auto space-y-5"}>
+      {!embedded && (
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Workflow documentale</h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Definisci chi può creare, revisionare e approvare i documenti M07 per tipo e per sito.
+            </p>
+          </div>
+          <ModuleHelp
+            title="Workflow documentale"
+            description="Configura il flusso di approvazione documentale per tipo documento (policy, procedura, manuale...) e plant."
+            steps={[
+              "Scegli il tipo documento e lo scope (org / BU / plant)",
+              "Assegna i ruoli che possono creare/inviare in revisione",
+              "Assegna i ruoli che devono revisionare",
+              "Assegna i ruoli che possono approvare e mandare in vigore",
+            ]}
+            connections={[
+              { module: "M07 Documenti", relation: "Abilita i pulsanti Invia per revisione / Approva" },
+              { module: "M00 Governance", relation: "Usa i ruoli normativi (CISO, Plant Manager, ISMS...)" },
+            ]}
+          />
         </div>
-        <ModuleHelp
-          title="Workflow documentale"
-          description="Configura il flusso di approvazione documentale per tipo documento (policy, procedura, manuale...) e plant."
-          steps={[
-            "Scegli il tipo documento e lo scope (org / BU / plant)",
-            "Assegna i ruoli che possono creare/inviare in revisione",
-            "Assegna i ruoli che devono revisionare",
-            "Assegna i ruoli che possono approvare e mandare in vigore",
-          ]}
-          connections={[
-            { module: "M07 Documenti", relation: "Abilita i pulsanti Invia per revisione / Approva" },
-            { module: "M00 Governance", relation: "Usa i ruoli normativi (CISO, Plant Manager, ISMS...)" },
-          ]}
-        />
-      </div>
+      )}
 
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-gray-700">Policy configurate</h3>

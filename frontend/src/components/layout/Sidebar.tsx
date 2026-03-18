@@ -50,7 +50,7 @@ const navGroups = [
     label: "Governance",
     items: [
       { to: "/governance", label: "Governance", icon: "◈", roles: null },
-      { to: "/governance/workflow-documenti", label: "Workflow documentale", icon: "📑", roles: ["super_admin", "compliance_officer"] },
+      { to: "/governance?tab=workflow", label: "Workflow documentale", icon: "📑", roles: ["super_admin", "compliance_officer"] },
       { to: "/management-review", label: "Revisione Dir.", icon: "📝", roles: ["super_admin", "compliance_officer", "risk_manager"] },
       { to: "/plants", label: "Siti", icon: "🏭", roles: ["super_admin", "compliance_officer"] },
       { to: "/users", label: "Utenti", icon: "👥", roles: ["super_admin"] },
