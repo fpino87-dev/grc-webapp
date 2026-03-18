@@ -42,6 +42,22 @@ class BcpPlan(BaseModel):
     )
     content = models.JSONField(default=dict)
 
+    TEST_FREQUENCY_UNIT_CHOICES = [
+        ("days", "Giorni"),
+        ("weeks", "Settimane"),
+        ("months", "Mesi"),
+        ("years", "Anni"),
+    ]
+
+    # Frequenza con cui il test BCP deve essere rieseguito.
+    # La `next_test_date` viene calcolata a partire dalla data dell'ultimo test.
+    test_frequency_value = models.PositiveIntegerField(default=1)
+    test_frequency_unit = models.CharField(
+        max_length=10,
+        choices=TEST_FREQUENCY_UNIT_CHOICES,
+        default="years",
+    )
+
     class Meta:
         ordering = ["-created_at"]
 

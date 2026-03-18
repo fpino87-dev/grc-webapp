@@ -72,7 +72,7 @@ class BcpPlanViewSet(viewsets.ModelViewSet):
 
                 if access_qs.filter(scope_type="org").exists():
                     has_access = True
-                elif plan.bu_id and access_qs.filter(scope_type="bu", scope_bu_id=plan.bu_id).exists():
+                elif plan.plant and plan.plant.bu_id and access_qs.filter(scope_type="bu", scope_bu_id=plan.plant.bu_id).exists():
                     has_access = True
                 elif access_qs.filter(
                     scope_type__in=["plant_list", "single_plant"],

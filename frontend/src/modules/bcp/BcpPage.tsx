@@ -8,7 +8,10 @@ import i18n from "../../i18n";
 
 function NewBcpModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
   const qc = useQueryClient();
-  const [form, setForm] = useState<Partial<BcpPlan>>({});
+  const [form, setForm] = useState<Partial<BcpPlan>>({
+    test_frequency_value: 1,
+    test_frequency_unit: "years",
+  });
   const plantId = form.plant;
 
   const { data: processesData } = useQuery({
@@ -26,7 +29,10 @@ function NewBcpModal({ plants, onClose }: { plants: { id: string; code: string; 
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
-    const val = ["rto_hours", "rpo_hours"].includes(e.target.name) ? (e.target.value ? Number(e.target.value) : null) : e.target.value;
+    const numericFields = ["rto_hours", "rpo_hours", "test_frequency_value"];
+    const val = numericFields.includes(e.target.name)
+      ? (e.target.value ? Number(e.target.value) : null)
+      : e.target.value;
     setForm(prev => ({ ...prev, [e.target.name]: val }));
   }
 
@@ -78,6 +84,28 @@ function NewBcpModal({ plants, onClose }: { plants: { id: string; code: string; 
               <label className="block text-sm font-medium text-gray-700 mb-1">RPO (ore)</label>
               <input name="rpo_hours" type="number" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Frequenza test BCP</label>
+            <select
+              className="w-full border rounded px-3 py-2 text-sm"
+              value={`${form.test_frequency_value ?? 1}:${form.test_frequency_unit ?? "years"}`}
+              onChange={(e) => {
+                const [v, u] = e.target.value.split(":");
+                setForm(prev => ({
+                  ...prev,
+                  test_frequency_value: Number(v),
+                  test_frequency_unit: u as "days" | "weeks" | "months" | "years",
+                }));
+              }}
+            >
+              <option value="1:weeks">Settimanale</option>
+              <option value="1:months">Mensile</option>
+              <option value="3:months">Trimestrale</option>
+              <option value="6:months">Semestrale</option>
+              <option value="1:years">Annuale</option>
+            </select>
           </div>
         </div>
         {mutation.isError && <p className="text-sm text-red-600 mt-2">Errore durante il salvataggio</p>}

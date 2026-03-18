@@ -38,11 +38,20 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
     inherent_impact: null,
     treatment: "mitigare",
   });
-  const [bcpForm, setBcpForm] = useState<{ title: string; version: string; rto_hours: string; rpo_hours: string }>({
+  const [bcpForm, setBcpForm] = useState<{
+    title: string;
+    version: string;
+    rto_hours: string;
+    rpo_hours: string;
+    test_frequency_value: number;
+    test_frequency_unit: "days" | "weeks" | "months" | "years";
+  }>({
     title: "",
     version: "1.0",
     rto_hours: "",
     rpo_hours: "",
+    test_frequency_value: 1,
+    test_frequency_unit: "years",
   });
 
   const { data: plants } = useQuery({
@@ -72,6 +81,21 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
     });
   }, [currentUser?.id]);
 
+  // Quando l'utente seleziona un processo esistente (e non sta creando), precompilo i campi editabili.
+  useEffect(() => {
+    if (!state.process) return;
+    if (creatingProcess) return;
+    setProcessForm({
+      name: state.process.name,
+      criticality: state.process.criticality,
+      downtime_cost_hour: state.process.downtime_cost_hour,
+      mtpd_hours: state.process.mtpd_hours,
+      mbco_pct: state.process.mbco_pct,
+      rto_target_hours: state.process.rto_target_hours,
+      rpo_target_hours: state.process.rpo_target_hours,
+    });
+  }, [state.process?.id, creatingProcess]);
+
   const createProcessMutation = useMutation({
     mutationFn: () => biaApi.create({ ...processForm, plant: state.plantId }),
     onSuccess: (proc) => {
@@ -79,6 +103,27 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
       setState(s => ({ ...s, process: proc }));
       setBcpCriticalProcessId(proc.id);
       setCreatingProcess(false);
+      setStep(2);
+    },
+  });
+
+  const updateProcessMutation = useMutation({
+    mutationFn: () => {
+      if (!state.process) return Promise.reject(new Error("Nessun processo selezionato"));
+      return biaApi.update(state.process.id, {
+        name: processForm.name ?? state.process.name,
+        criticality: processForm.criticality ?? state.process.criticality,
+        downtime_cost_hour: processForm.downtime_cost_hour ?? state.process.downtime_cost_hour,
+        mtpd_hours: processForm.mtpd_hours ?? state.process.mtpd_hours,
+        mbco_pct: processForm.mbco_pct ?? state.process.mbco_pct,
+        rto_target_hours: processForm.rto_target_hours ?? state.process.rto_target_hours,
+        rpo_target_hours: processForm.rpo_target_hours ?? state.process.rpo_target_hours,
+      });
+    },
+    onSuccess: (proc) => {
+      qc.invalidateQueries({ queryKey: ["bia"] });
+      setState(s => ({ ...s, process: proc }));
+      setBcpCriticalProcessId(proc.id);
       setStep(2);
     },
   });
@@ -107,6 +152,8 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
         rto_hours: bcpForm.rto_hours ? Number(bcpForm.rto_hours) : null,
         rpo_hours: bcpForm.rpo_hours ? Number(bcpForm.rpo_hours) : null,
         critical_process: bcpCriticalProcessId || state.process?.id || null,
+        test_frequency_value: bcpForm.test_frequency_value,
+        test_frequency_unit: bcpForm.test_frequency_unit,
       }),
     onSuccess: (plan) => {
       qc.invalidateQueries({ queryKey: ["bcp"] });
@@ -332,11 +379,76 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
                   </div>
                 )}
                 {state.process && !creatingProcess && (
-                  <div className="mt-2 text-xs text-gray-600 bg-white border border-gray-200 rounded p-2">
-                    <div className="font-semibold mb-1">Processo selezionato</div>
-                    <div>{state.process.name}</div>
-                    <div className="text-gray-500 mt-1">
-                      Criticità {state.process.criticality}/5 — MTPD {state.process.mtpd_hours ?? "—"}h — RTO {state.process.rto_target_hours ?? "—"}h
+                  <div className="mt-2 text-xs text-gray-600 bg-white border border-gray-200 rounded p-3 space-y-3">
+                    <div className="font-semibold">Modifica processo selezionato</div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Nome processo *</label>
+                      <input
+                        className="w-full border rounded px-3 py-1.5 text-sm"
+                        value={(processForm.name as string) ?? state.process.name ?? ""}
+                        onChange={e => setProcessForm(f => ({ ...f, name: e.target.value }))}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Criticità (1-5)</label>
+                        <select
+                          className="w-full border rounded px-3 py-1.5 text-sm"
+                          value={processForm.criticality ?? state.process.criticality ?? 3}
+                          onChange={e => setProcessForm(f => ({ ...f, criticality: Number(e.target.value) }))}
+                        >
+                          {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Costo downtime/h (€)</label>
+                        <input
+                          type="number"
+                          className="w-full border rounded px-3 py-1.5 text-sm"
+                          value={processForm.downtime_cost_hour as any ?? ""}
+                          onChange={e => setProcessForm(f => ({ ...f, downtime_cost_hour: e.target.value ? Number(e.target.value) : null }))}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">MTPD (ore)</label>
+                        <input
+                          type="number"
+                          className="w-full border rounded px-3 py-1.5 text-sm"
+                          value={processForm.mtpd_hours as any ?? ""}
+                          onChange={e => setProcessForm(f => ({ ...f, mtpd_hours: e.target.value ? Number(e.target.value) : null }))}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">MBCO (%)</label>
+                        <input
+                          type="number"
+                          className="w-full border rounded px-3 py-1.5 text-sm"
+                          value={processForm.mbco_pct as any ?? ""}
+                          onChange={e => setProcessForm(f => ({ ...f, mbco_pct: e.target.value ? Number(e.target.value) : null }))}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">RTO target (ore)</label>
+                        <input
+                          type="number"
+                          className="w-full border rounded px-3 py-1.5 text-sm"
+                          value={processForm.rto_target_hours as any ?? ""}
+                          onChange={e => setProcessForm(f => ({ ...f, rto_target_hours: e.target.value ? Number(e.target.value) : null }))}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">RPO target (ore)</label>
+                        <input
+                          type="number"
+                          className="w-full border rounded px-3 py-1.5 text-sm"
+                          value={processForm.rpo_target_hours as any ?? ""}
+                          onChange={e => setProcessForm(f => ({ ...f, rpo_target_hours: e.target.value ? Number(e.target.value) : null }))}
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
@@ -469,6 +581,28 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
                       </select>
                     </div>
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Frequenza test BCP</label>
+                  <select
+                    className="w-full border rounded px-3 py-2 text-sm"
+                    value={`${bcpForm.test_frequency_value}:${bcpForm.test_frequency_unit}`}
+                    onChange={(e) => {
+                      const [v, u] = e.target.value.split(":");
+                      setBcpForm(f => ({
+                        ...f,
+                        test_frequency_value: Number(v),
+                        test_frequency_unit: u as "days" | "weeks" | "months" | "years",
+                      }));
+                    }}
+                  >
+                    <option value="1:weeks">Settimanale</option>
+                    <option value="1:months">Mensile</option>
+                    <option value="3:months">Trimestrale</option>
+                    <option value="6:months">Semestrale</option>
+                    <option value="1:years">Annuale</option>
+                  </select>
                 </div>
               </div>
 
@@ -632,12 +766,16 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
             )}
             {step === 1 && (
               <button
-                disabled={!state.plantId || (!state.process && !creatingProcess) || (creatingProcess && !processForm.name)}
+                disabled={
+                  !state.plantId
+                  || (!state.process && !creatingProcess)
+                  || (creatingProcess && !processForm.name)
+                }
                 onClick={() => {
                   if (creatingProcess) {
                     createProcessMutation.mutate();
                   } else if (state.process) {
-                    setStep(2);
+                    updateProcessMutation.mutate();
                   }
                 }}
                 className="px-4 py-1.5 text-xs bg-primary-600 text-white rounded hover:bg-primary-700 disabled:opacity-50"

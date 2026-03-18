@@ -81,9 +81,36 @@ def record_test(
         participants_count=participants_count,
     )
     plan.last_test_date = test.test_date
+
+    # Calcolo prossima scadenza test BCP: dipende dalle impostazioni del singolo piano.
+    def _add_duration(base, value: int, unit: str):
+        import datetime as _dt
+
+        if unit == "days":
+            return base + _dt.timedelta(days=value)
+        if unit == "weeks":
+            return base + _dt.timedelta(weeks=value)
+        if unit == "months":
+            month = base.month - 1 + value
+            year = base.year + month // 12
+            month = month % 12 + 1
+            day = min(
+                base.day,
+                [31, 28, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month],
+            )
+            return _dt.date(year, month, day)
+        if unit == "years":
+            try:
+                return base.replace(year=base.year + value)
+            except ValueError:
+                return base.replace(year=base.year + value, day=28)
+        # Fallback: approssimazione
+        return base + _dt.timedelta(days=value * 30)
+
     try:
-        from apps.compliance_schedule.services import get_due_date
-        plan.next_test_date = get_due_date("bcp_test", plant=plan.plant, from_date=test.test_date)
+        value = plan.test_frequency_value or 1
+        unit = plan.test_frequency_unit or "years"
+        plan.next_test_date = _add_duration(test.test_date, value, unit)
         plan.save(update_fields=["last_test_date", "next_test_date", "updated_at"])
     except Exception:
         plan.save(update_fields=["last_test_date", "updated_at"])

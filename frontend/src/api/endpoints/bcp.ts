@@ -8,6 +8,8 @@ export interface BcpPlan {
   owner: string | null;
   critical_process?: string | null;
   critical_processes?: string[];
+  test_frequency_value?: number;
+  test_frequency_unit?: "days" | "weeks" | "months" | "years";
 }
 
 export interface BcpTestObjective {
