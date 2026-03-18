@@ -17,7 +17,14 @@
     "aperto": "Aperto",
     "chiuso": "Chiuso",
     "in_corso": "In corso",
-    "scaduto": "Scaduto"
+    "scaduto": "Scaduto",
+    "bozza": "Bozza",
+    "revisione": "In revisione",
+    "approvazione": "In approvazione",
+    "approvato": "Approvato",
+    "respinto": "Respinto",
+    "completato": "Completato",
+    "annullato": "Annullato"
   },
   "actions": {
     "save": "Salva",

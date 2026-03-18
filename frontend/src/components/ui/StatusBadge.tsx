@@ -2,6 +2,8 @@ interface Props {
   status: string;
 }
 
+import { useTranslation } from "react-i18next";
+
 const styles: Record<string, string> = {
   compliant: "bg-green-100 text-green-800",
   parziale: "bg-yellow-100 text-yellow-800",
@@ -13,6 +15,13 @@ const styles: Record<string, string> = {
   chiuso: "bg-green-100 text-green-700",
   in_corso: "bg-blue-100 text-blue-700",
   scaduto: "bg-red-200 text-red-800",
+  bozza: "bg-gray-100 text-gray-700",
+  revisione: "bg-blue-100 text-blue-700",
+  approvazione: "bg-amber-100 text-amber-800",
+  approvato: "bg-green-100 text-green-700",
+  respinto: "bg-red-100 text-red-700",
+  completato: "bg-green-100 text-green-700",
+  annullato: "bg-gray-100 text-gray-600",
   bassa: "bg-green-100 text-green-700",
   media: "bg-yellow-100 text-yellow-700",
   alta: "bg-orange-100 text-orange-700",
@@ -35,6 +44,13 @@ const labels: Record<string, string> = {
   chiuso: "Chiuso",
   in_corso: "In corso",
   scaduto: "Scaduto",
+  bozza: "Bozza",
+  revisione: "In revisione",
+  approvazione: "In approvazione",
+  approvato: "Approvato",
+  respinto: "Respinto",
+  completato: "Completato",
+  annullato: "Annullato",
   bassa: "Bassa",
   media: "Media",
   alta: "Alta",
@@ -50,13 +66,15 @@ const labels: Record<string, string> = {
 };
 
 export function StatusBadge({ status }: Props) {
+  const { t } = useTranslation();
+  const fallbackLabel = labels[status] ?? status;
   return (
     <span
       className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
         styles[status] ?? "bg-gray-100 text-gray-600"
       }`}
     >
-      {labels[status] ?? status}
+      {t(`status.${status}`, { defaultValue: fallbackLabel })}
     </span>
   );
 }

@@ -621,7 +621,13 @@ function TabDocumenti() {
                   <td className="px-4 py-3 text-gray-600 text-xs">
                     {doc.plant_code || doc.plant_name || "—"}
                   </td>
-                  <td className="px-4 py-3 text-gray-600 capitalize text-xs">{doc.document_type || doc.category}</td>
+                  <td className="px-4 py-3 text-gray-600 capitalize text-xs">
+                    {doc.document_type
+                      ? t(`documents.type.${doc.document_type}`, { defaultValue: doc.document_type })
+                      : doc.category
+                      ? t(`documents.category.${doc.category}`, { defaultValue: doc.category })
+                      : "—"}
+                  </td>
                   <td className="px-4 py-3"><StatusBadge status={doc.status} /></td>
                   <td className="px-4 py-3">
                     {doc.is_mandatory

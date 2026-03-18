@@ -17,7 +17,14 @@
     "aperto": "Open",
     "chiuso": "Closed",
     "in_corso": "In progress",
-    "scaduto": "Overdue"
+    "scaduto": "Overdue",
+    "bozza": "Draft",
+    "revisione": "In review",
+    "approvazione": "In approval",
+    "approvato": "Approved",
+    "respinto": "Rejected",
+    "completato": "Completed",
+    "annullato": "Cancelled"
   },
   "actions": {
     "save": "Save",
