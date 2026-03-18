@@ -184,6 +184,7 @@ function TabValutazione({
   needsRevaluation?: boolean;
   needsRevaluationSince?: string | null;
 }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [selectedStatus, setSelectedStatus] = useState("");
   const [note, setNote] = useState("");
@@ -206,7 +207,7 @@ function TabValutazione({
       setApplicabilityError("");
     },
     onError: (e: unknown) => {
-      const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? "Errore sconosciuto";
+      const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? t("common.error");
       setApplicabilityError(msg);
     },
   });
@@ -226,7 +227,7 @@ function TabValutazione({
       setApplyModalOpen(false);
     },
     onError: (e: unknown) => {
-      const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? "Errore sconosciuto";
+      const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? t("common.error");
       setBlockError(msg);
     },
   });
@@ -239,7 +240,7 @@ function TabValutazione({
       setBlockError("");
     },
     onError: (e: unknown) => {
-      const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? "Errore sconosciuto";
+      const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? t("common.error");
       setBlockError(msg);
     },
   });
@@ -255,10 +256,12 @@ function TabValutazione({
       {/* Banner rivalutazione da change */}
       {needsRevaluation && (
         <div className="border border-amber-300 bg-amber-50 rounded-lg p-3">
-          <p className="text-sm font-medium text-amber-800">Rivalutazione richiesta</p>
+          <p className="text-sm font-medium text-amber-800">{t("controls.drawer.evaluation.revaluation.title")}</p>
           <p className="text-xs text-amber-700 mt-1">
-            Un change registrato{needsRevaluationSince ? ` dal ${new Date(needsRevaluationSince).toLocaleDateString("it-IT")}` : ""} potrebbe aver
-            impattato questo controllo. Verificare e aggiornare la valutazione.
+            {t("controls.drawer.evaluation.revaluation.body", {
+              since: needsRevaluationSince ? new Date(needsRevaluationSince).toLocaleDateString("it-IT") : "",
+              hasSince: Boolean(needsRevaluationSince),
+            })}
           </p>
         </div>
       )}
@@ -266,34 +269,40 @@ function TabValutazione({
       {/* Banner requisiti */}
       {noRequirements ? (
         <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500">
-          ℹ️ Nessun requisito documentale definito per questo controllo.
+          ℹ️ {t("controls.drawer.evaluation.requirements.none")}
         </div>
       ) : !requirements.satisfied ? (
         <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-800">
-          <p className="font-semibold mb-1">⛔ Requisiti non soddisfatti</p>
-          {requirements.missing_documents.map((m, i) => <p key={i}>• Documento mancante: {m.description || m.type}</p>)}
-          {requirements.missing_evidences.map((m, i) => <p key={i}>• Evidenza mancante: {m.description || m.type}</p>)}
-          {requirements.expired_evidences.map((e, i) => <p key={i}>• Evidenza scaduta: {e.title} ({e.expired_on})</p>)}
+          <p className="font-semibold mb-1">⛔ {t("controls.drawer.evaluation.requirements.not_satisfied")}</p>
+          {requirements.missing_documents.map((m, i) => (
+            <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_document")}: {m.description || m.type}</p>
+          ))}
+          {requirements.missing_evidences.map((m, i) => (
+            <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_evidence")}: {m.description || m.type}</p>
+          ))}
+          {requirements.expired_evidences.map((e, i) => (
+            <p key={i}>• {t("controls.drawer.evaluation.requirements.expired_evidence")}: {e.title} ({e.expired_on})</p>
+          ))}
         </div>
       ) : requirements.warnings.length > 0 ? (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 text-xs text-yellow-800">
-          <p className="font-semibold mb-1">⚠️ Attenzione</p>
+          <p className="font-semibold mb-1">⚠️ {t("controls.drawer.evaluation.requirements.warning")}</p>
           {requirements.warnings.map((w, i) => <p key={i}>• {w}</p>)}
         </div>
       ) : (
         <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-xs text-green-800">
-          ✅ Tutti i requisiti soddisfatti
+          ✅ {t("controls.drawer.evaluation.requirements.satisfied")}
         </div>
       )}
 
       {/* Due box: Stato ufficiale / Suggerimento sistema */}
       <div className="grid grid-cols-2 gap-3">
         <div className="border border-gray-200 rounded-lg p-3">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Stato ufficiale</p>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t("controls.drawer.evaluation.official_status")}</p>
           <StatusBadge status={currentStatus} />
         </div>
         <div className="border border-indigo-200 rounded-lg p-3 bg-indigo-50/30">
-          <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide mb-2">Suggerimento sistema</p>
+          <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide mb-2">{t("controls.drawer.evaluation.system_suggestion")}</p>
           <StatusBadge status={suggestedStatus} />
           {suggestedStatusReason && (
             <p className="text-xs text-gray-500 mt-1.5 leading-snug">{suggestedStatusReason}</p>
@@ -310,7 +319,7 @@ function TabValutazione({
           <svg viewBox="0 0 12 12" className="w-3.5 h-3.5 fill-current" aria-hidden="true">
             <path d="M3 2l7 4-7 4V2z" />
           </svg>
-          Applica suggerimento ({suggestedStatus})
+          {t("controls.drawer.evaluation.apply_suggestion", { status: suggestedStatus })}
         </button>
       )}
 
@@ -318,12 +327,12 @@ function TabValutazione({
       {applyModalOpen && (
         <div className="border border-indigo-200 rounded-lg p-3 space-y-2 bg-indigo-50/50">
           <p className="text-sm font-medium text-gray-700">
-            Applica suggerimento: <strong>{suggestedStatus}</strong>
+            {t("controls.drawer.evaluation.apply_suggestion_title")}: <strong>{suggestedStatus}</strong>
           </p>
           <textarea
             value={applyNote}
             onChange={e => setApplyNote(e.target.value)}
-            placeholder="Nota (opzionale)"
+            placeholder={t("controls.drawer.evaluation.note_optional")}
             className="w-full border rounded px-3 py-2 text-sm resize-none"
             rows={2}
           />
@@ -338,13 +347,13 @@ function TabValutazione({
               disabled={applyMutation.isPending}
               className="flex-1 py-1.5 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700 disabled:opacity-50"
             >
-              {applyMutation.isPending ? "Applicazione..." : "Conferma"}
+              {applyMutation.isPending ? t("controls.drawer.evaluation.applying") : t("actions.confirm")}
             </button>
             <button
               onClick={() => { setApplyModalOpen(false); setBlockError(""); }}
               className="px-3 py-1.5 border rounded text-sm text-gray-600 hover:bg-gray-50"
             >
-              Annulla
+              {t("actions.cancel")}
             </button>
           </div>
         </div>
@@ -352,21 +361,21 @@ function TabValutazione({
 
       {/* Applicabilità SOA */}
       <div className="border border-gray-200 rounded-lg p-3 space-y-2">
-        <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Applicabilità SOA (ISO 27001)</p>
+        <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t("controls.drawer.evaluation.applicability.title")}</p>
         <select
           value={selectedApplicability}
           onChange={e => { setSelectedApplicability(e.target.value); setApplicabilityError(""); }}
           className="w-full border rounded px-2 py-1.5 text-sm"
         >
           {Object.entries(APPLICABILITY_LABELS).map(([v, l]) => (
-            <option key={v} value={v}>{l}</option>
+            <option key={v} value={v}>{t(`controls.drawer.evaluation.applicability.options.${v}`, { defaultValue: l })}</option>
           ))}
         </select>
         {selectedApplicability === "escluso" && (
           <textarea
             value={justification}
             onChange={e => setJustification(e.target.value)}
-            placeholder="Motivazione formale di esclusione (min 50 caratteri) *"
+            placeholder={t("controls.drawer.evaluation.applicability.exclusion_placeholder")}
             className="w-full border rounded px-2 py-1.5 text-xs resize-none"
             rows={3}
           />
@@ -379,7 +388,7 @@ function TabValutazione({
           disabled={applicabilityMutation.isPending}
           className="w-full py-1.5 bg-gray-700 text-white rounded text-xs hover:bg-gray-800 disabled:opacity-50"
         >
-          {applicabilityMutation.isPending ? "Salvataggio..." : "Salva applicabilità"}
+          {applicabilityMutation.isPending ? t("common.saving") : t("controls.drawer.evaluation.applicability.save")}
         </button>
       </div>
 
@@ -387,9 +396,9 @@ function TabValutazione({
       {(framework.includes("TISAX") || framework.includes("VDA")) && (
         <div className="border border-purple-200 rounded-lg p-3 space-y-2 bg-purple-50/30">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide">Maturity Level VDA ISA TISAX</p>
+            <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide">{t("controls.drawer.evaluation.maturity.title")}</p>
             {!maturityLevelOverride && (
-              <span className="text-xs text-gray-400 bg-gray-100 px-1.5 rounded">Calcolato automaticamente</span>
+              <span className="text-xs text-gray-400 bg-gray-100 px-1.5 rounded">{t("controls.drawer.evaluation.maturity.auto")}</span>
             )}
           </div>
           <div className="flex items-center gap-2">
@@ -408,7 +417,7 @@ function TabValutazione({
             disabled={maturityMutation.isPending}
             className="w-full py-1.5 bg-purple-600 text-white rounded text-xs hover:bg-purple-700 disabled:opacity-50"
           >
-            {maturityMutation.isPending ? "Salvataggio..." : "Override manuale maturity"}
+            {maturityMutation.isPending ? t("common.saving") : t("controls.drawer.evaluation.maturity.override")}
           </button>
         </div>
       )}
@@ -419,7 +428,7 @@ function TabValutazione({
           onClick={() => setManualOpen(o => !o)}
           className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
-          <span>Cambio manuale stato</span>
+          <span>{t("controls.drawer.evaluation.manual_change.title")}</span>
           <span className="text-gray-400">{manualOpen ? "▲" : "▼"}</span>
         </button>
         {manualOpen && (
@@ -429,23 +438,25 @@ function TabValutazione({
               onChange={e => { setSelectedStatus(e.target.value); setBlockError(""); }}
               className="w-full border rounded px-3 py-2 text-sm"
             >
-              <option value="">— seleziona nuovo stato —</option>
-              {STATUS_GUIDE.map(s => <option key={s.status} value={s.status}>{s.icon} {s.label}</option>)}
+              <option value="">{t("controls.drawer.evaluation.manual_change.select_status")}</option>
+              {STATUS_GUIDE.map(s => (
+                <option key={s.status} value={s.status}>{s.icon} {t(`status.${s.status}`, { defaultValue: s.label })}</option>
+              ))}
             </select>
 
             {reqNotSatisfied && (
               <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-700">
-                <p className="font-semibold mb-1">⛔ Requisiti non soddisfatti — risolvi nel tab "Documenti & Evidenze"</p>
-                {requirements.missing_documents.map((m, i) => <p key={i}>• Documento mancante: {m.description || m.type}</p>)}
-                {requirements.missing_evidences.map((m, i) => <p key={i}>• Evidenza mancante: {m.description || m.type}</p>)}
-                {requirements.expired_evidences.map((e, i) => <p key={i}>• Scaduta: {e.title} ({e.expired_on})</p>)}
+                <p className="font-semibold mb-1">⛔ {t("controls.drawer.evaluation.manual_change.req_block")}</p>
+                {requirements.missing_documents.map((m, i) => <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_document")}: {m.description || m.type}</p>)}
+                {requirements.missing_evidences.map((m, i) => <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_evidence")}: {m.description || m.type}</p>)}
+                {requirements.expired_evidences.map((e, i) => <p key={i}>• {t("controls.drawer.evaluation.requirements.expired_evidence")}: {e.title} ({e.expired_on})</p>)}
               </div>
             )}
 
             <textarea
               value={note}
               onChange={e => setNote(e.target.value)}
-              placeholder="Nota / giustificazione (obbligatoria per N/A, min 20 caratteri)"
+              placeholder={t("controls.drawer.evaluation.manual_change.note_placeholder")}
               className="w-full border rounded px-3 py-2 text-sm resize-none"
               rows={3}
             />
@@ -459,10 +470,10 @@ function TabValutazione({
             <button
               onClick={() => evaluateMutation.mutate()}
               disabled={evaluateMutation.isPending || !selectedStatus || reqNotSatisfied}
-              title={reqNotSatisfied ? "Risolvi i requisiti nel tab Documenti & Evidenze" : undefined}
+              title={reqNotSatisfied ? t("controls.drawer.evaluation.manual_change.req_tooltip") : undefined}
               className="w-full py-2 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
             >
-              {evaluateMutation.isPending ? "Salvataggio..." : "Salva valutazione"}
+              {evaluateMutation.isPending ? t("common.saving") : t("controls.drawer.evaluation.save_evaluation")}
             </button>
           </div>
         )}

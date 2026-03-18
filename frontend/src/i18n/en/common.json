@@ -83,6 +83,50 @@
         "expired_days_ago": "Expired {{days}}d ago",
         "expires_in_days": "Expires in {{days}}d",
         "valid_until": "Valid until {{date}}"
+      },
+      "evaluation": {
+        "revaluation": {
+          "title": "Re-evaluation required",
+          "body": "A recorded change{{hasSince, select, true { since {{since}}} other {}}} may have impacted this control. Please review and update the evaluation."
+        },
+        "requirements": {
+          "none": "No documentary requirements defined for this control.",
+          "not_satisfied": "Requirements not satisfied",
+          "missing_document": "Missing document",
+          "missing_evidence": "Missing evidence",
+          "expired_evidence": "Expired evidence",
+          "warning": "Warning",
+          "satisfied": "All requirements satisfied"
+        },
+        "official_status": "Official status",
+        "system_suggestion": "System suggestion",
+        "apply_suggestion": "Apply suggestion ({{status}})",
+        "apply_suggestion_title": "Apply suggestion",
+        "note_optional": "Note (optional)",
+        "applying": "Applying...",
+        "applicability": {
+          "title": "SOA applicability (ISO 27001)",
+          "save": "Save applicability",
+          "options": {
+            "applicabile": "Applicable",
+            "escluso": "Excluded",
+            "non_pertinente": "Not relevant"
+          },
+          "exclusion_placeholder": "Formal exclusion justification (min 50 characters) *"
+        },
+        "maturity": {
+          "title": "VDA ISA TISAX maturity level",
+          "auto": "Calculated automatically",
+          "override": "Manual maturity override"
+        },
+        "manual_change": {
+          "title": "Manual status change",
+          "select_status": "— select new status —",
+          "req_block": "Requirements not satisfied — fix them in the \"Documents & Evidence\" tab",
+          "note_placeholder": "Note / justification (required for N/A, min 20 characters)",
+          "req_tooltip": "Resolve requirements in the Documents & Evidence tab"
+        },
+        "save_evaluation": "Save evaluation"
       }
     },
     "table": {

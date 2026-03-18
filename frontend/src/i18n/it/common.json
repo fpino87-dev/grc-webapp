@@ -83,6 +83,50 @@
         "expired_days_ago": "Scaduta {{days}}g fa",
         "expires_in_days": "Scade in {{days}}g",
         "valid_until": "Valida fino al {{date}}"
+      },
+      "evaluation": {
+        "revaluation": {
+          "title": "Rivalutazione richiesta",
+          "body": "Un change registrato{{hasSince, select, true { dal {{since}}} other {}}} potrebbe aver impattato questo controllo. Verificare e aggiornare la valutazione."
+        },
+        "requirements": {
+          "none": "Nessun requisito documentale definito per questo controllo.",
+          "not_satisfied": "Requisiti non soddisfatti",
+          "missing_document": "Documento mancante",
+          "missing_evidence": "Evidenza mancante",
+          "expired_evidence": "Evidenza scaduta",
+          "warning": "Attenzione",
+          "satisfied": "Tutti i requisiti soddisfatti"
+        },
+        "official_status": "Stato ufficiale",
+        "system_suggestion": "Suggerimento sistema",
+        "apply_suggestion": "Applica suggerimento ({{status}})",
+        "apply_suggestion_title": "Applica suggerimento",
+        "note_optional": "Nota (opzionale)",
+        "applying": "Applicazione...",
+        "applicability": {
+          "title": "Applicabilità SOA (ISO 27001)",
+          "save": "Salva applicabilità",
+          "options": {
+            "applicabile": "Applicabile",
+            "escluso": "Escluso",
+            "non_pertinente": "Non pertinente"
+          },
+          "exclusion_placeholder": "Motivazione formale di esclusione (min 50 caratteri) *"
+        },
+        "maturity": {
+          "title": "Maturity Level VDA ISA TISAX",
+          "auto": "Calcolato automaticamente",
+          "override": "Override manuale maturity"
+        },
+        "manual_change": {
+          "title": "Cambio manuale stato",
+          "select_status": "— seleziona nuovo stato —",
+          "req_block": "Requisiti non soddisfatti — risolvi nel tab \"Documenti & Evidenze\"",
+          "note_placeholder": "Nota / giustificazione (obbligatoria per N/A, min 20 caratteri)",
+          "req_tooltip": "Risolvi i requisiti nel tab Documenti & Evidenze"
+        },
+        "save_evaluation": "Salva valutazione"
       }
     },
     "table": {
