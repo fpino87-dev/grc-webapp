@@ -14,10 +14,15 @@
     "gap": "Gap",
     "na": "N/A",
     "non_valutato": "Non valutato",
+    "attivo": "Attivo",
     "aperto": "Aperto",
     "chiuso": "Chiuso",
     "in_corso": "In corso",
+    "in_dismissione": "In dismissione",
     "scaduto": "Scaduto",
+    "non_soggetto": "Non soggetto",
+    "importante": "Importante",
+    "essenziale": "Essenziale",
     "bozza": "Bozza",
     "revisione": "In revisione",
     "approvazione": "In approvazione",
@@ -50,6 +55,9 @@
     "saving": "Salvataggio...",
     "save_error": "Errore durante il salvataggio",
     "error": "Errore",
+    "enabled": "attivo",
+    "disabled": "disabilitato",
+    "none": "—",
     "optional": "— opzionale —",
     "select": "— seleziona —"
   },
@@ -168,6 +176,283 @@
       "click_to_edit": "Clicca per modificare",
       "propagate_hint": "Propaga questo stato ai controlli correlati",
       "propagate": "⇒ propaga"
+    }
+  },
+  "gap_analysis": {
+    "title": "Gap Analysis framework",
+    "source_framework": "Framework di partenza",
+    "target_framework": "Framework di destinazione",
+    "loading": "Analisi in corso...",
+    "empty_category": "Nessun controllo in questa categoria",
+    "sections": {
+      "covered": "Coperti",
+      "partial": "Parziali",
+      "gap": "Gap",
+      "not_mapped": "Non mappati"
+    },
+    "actions": {
+      "analyze": "Analizza gap",
+      "download_report": "↓ Scarica report gap analysis"
+    },
+    "errors": {
+      "same_framework": "Seleziona due framework diversi",
+      "load_failed": "Errore nel caricamento dei dati"
+    },
+    "summary": {
+      "controls_from_to": "Controlli {{source}} → {{target}}",
+      "pct_covered": "{{pct}}% coperti",
+      "covered_count": "Coperti: {{count}}",
+      "partial_count": "Parziali: {{count}}",
+      "gap_count": "Gap: {{count}}",
+      "not_mapped_count": "Non mappati: {{count}}"
+    },
+    "export": {
+      "columns": {
+        "category": "Categoria",
+        "id": "ID",
+        "title": "Titolo",
+        "domain": "Dominio",
+        "source_status": "Stato sorgente"
+      }
+    }
+  },
+  "plants": {
+    "title": "Siti produttivi",
+    "empty": "Nessun sito configurato",
+    "table": {
+      "code": "Codice",
+      "name": "Nome",
+      "country": "Paese",
+      "status": "Stato",
+      "nis2": "NIS2",
+      "ot": "OT"
+    },
+    "fields": {
+      "code": "Codice",
+      "name": "Nome",
+      "country": "Paese",
+      "status": "Stato",
+      "nis2_scope": "Perimetro NIS2",
+      "has_ot": "Presenza reti OT / ICS"
+    },
+    "placeholders": {
+      "code": "IT-MIL-01",
+      "country": "IT",
+      "name": "Stabilimento Milano"
+    },
+    "actions": {
+      "edit_title": "Modifica sito",
+      "frameworks": "Framework",
+      "select": "Seleziona"
+    },
+    "new": {
+      "open": "+ Nuovo sito",
+      "first": "Crea il primo sito →",
+      "title": "Nuovo sito produttivo",
+      "submit": "Crea sito"
+    },
+    "edit": {
+      "title": "Modifica sito"
+    },
+    "frameworks": {
+      "title": "Framework normativi",
+      "empty": "Nessun framework assegnato a questo sito.",
+      "assign_new": "Assegna nuovo framework",
+      "select": "— Seleziona framework —",
+      "assign": "Assegna framework",
+      "assigning": "Assegnazione in corso...",
+      "assign_help": "Crea automaticamente tutti i controlli da valutare per questo sito.",
+      "all_assigned": "Tutti i framework disponibili sono già assegnati a questo sito.",
+      "activate": "Attiva",
+      "deactivate": "Disattiva",
+      "level": "livello: {{level}}",
+      "active_from": "dal {{date}}",
+      "remove_confirm": "Rimuovere {{code}}? I controlli valutati rimarranno.",
+      "tisax": {
+        "assessment_level": "Assessment Level {{level}}",
+        "l2_hint": "Alta protezione — informazioni riservate",
+        "l3_hint": "Altissima protezione + prototipi (include tutti i controlli L2)",
+        "l3_notice": "Verranno assegnati sia TISAX_L2 che TISAX_L3 — {{l2}} + {{l3}} = {{total}} controlli totali."
+      },
+      "nis2": {
+        "essential_hint": "Supervisione proattiva · sanzioni fino a €10M",
+        "important_hint": "Supervisione reattiva · sanzioni fino a €7M"
+      },
+      "generic": {
+        "base": "Base — requisiti minimi obbligatori",
+        "advanced": "Avanzato — con misure opzionali",
+        "complete": "Completo — implementazione piena"
+      }
+    }
+  },
+  "users": {
+    "title": "Governance — Utenti",
+    "empty": "Nessun utente trovato",
+    "table": {
+      "username": "Username",
+      "email": "Email",
+      "name": "Nome",
+      "grc_role": "Ruolo GRC",
+      "active": "Attivo",
+      "actions": "Azioni"
+    },
+    "fields": {
+      "username": "Username",
+      "email": "Email",
+      "first_name": "Nome",
+      "last_name": "Cognome",
+      "password": "Password",
+      "grc_role": "Ruolo GRC",
+      "grc_role_none": "— nessuno —"
+    },
+    "actions": {
+      "assign_role": "Assegna ruolo",
+      "activate": "Attiva",
+      "deactivate": "Disattiva",
+      "competency": "Competenze"
+    },
+    "new": {
+      "open": "+ Nuovo utente",
+      "title": "Nuovo utente",
+      "submit": "Crea utente"
+    },
+    "competency_gap": {
+      "loading": "Caricamento gap analysis...",
+      "title": "Gap Analysis Competenze — {{name}}",
+      "gap_count": "{{count}} gap",
+      "complete": "Completo",
+      "to_fill": "Gap da colmare:",
+      "level_from_to": "Livello {{current}} → richiesto {{required}}",
+      "expired": "Competenze scadute:",
+      "ok": "Competenze OK:",
+      "none": "Nessun requisito di competenza definito per i ruoli di questo utente."
+    },
+    "danger": {
+      "title": "⚠️ Zona pericolosa — Solo ambiente di test",
+      "body": "Cancella tutti i dati GRC mantenendo superuser e framework normativi. Questa operazione è irreversibile.",
+      "open": "🗑️ Reset database di test",
+      "confirm_body": "Sei sicuro? Questa azione cancellerà TUTTI i dati GRC. Verranno mantenuti solo il tuo account superuser e i framework normativi.",
+      "confirm_placeholder": "Scrivi RESET per confermare",
+      "resetting": "Reset in corso...",
+      "confirm": "Conferma reset",
+      "reset_success": "Reset completato. Reindirizzamento al login...",
+      "reset_error": "Errore durante il reset"
+    }
+  },
+  "governance": {
+    "title": "Governance",
+    "subtitle": "Ruoli normativi, comitati e successione incarichi",
+    "tabs": {
+      "roles": "Ruoli & comitati",
+      "workflow": "Workflow documentale (M07)"
+    },
+    "workflow": {
+      "title": "Workflow documentale",
+      "subtitle": "Definisci chi può creare, revisionare e approvare i documenti M07 per tipo e per sito."
+    },
+    "sections": {
+      "roles": "Ruoli normativi",
+      "committees": "Comitati per la sicurezza"
+    },
+    "empty": {
+      "roles": "Nessun ruolo assegnato",
+      "committees": "Nessun comitato configurato"
+    },
+    "alerts": {
+      "vacant_roles": "🚨 {{count}} ruoli obbligatori senza titolare attivo",
+      "expiring_roles": "⚠ {{count}} ruoli in scadenza nei prossimi 30 giorni"
+    },
+    "expires_on": "scade il {{date}}",
+    "valid_until": "fino al {{date}}",
+    "badges": {
+      "expires_in_days": "Scade in {{days}}gg"
+    },
+    "actions": {
+      "replace": "Sostituisci",
+      "terminate": "Termina"
+    },
+    "roles": {
+      "ciso": "CISO",
+      "compliance_officer": "Compliance Officer",
+      "risk_manager": "Risk Manager",
+      "internal_auditor": "Auditor Interno",
+      "external_auditor": "Auditor Esterno",
+      "plant_manager": "Plant Manager",
+      "control_owner": "Control Owner",
+      "plant_security_officer": "Plant Security Officer",
+      "nis2_contact": "Contatto NIS2",
+      "dpo": "DPO",
+      "isms_manager": "ISMS Manager",
+      "comitato_membro": "Membro Comitato",
+      "bu_referente": "Referente BU",
+      "raci_responsible": "RACI Responsible",
+      "raci_accountable": "RACI Accountable"
+    },
+    "scopes": {
+      "org": "Globale — tutta l'organizzazione",
+      "bu": "Business Unit specifica",
+      "plant": "Sito specifico"
+    },
+    "roles_assign": {
+      "open": "+ Assegna",
+      "modal_title": "Nuova assegnazione ruolo",
+      "user": "Utente",
+      "role": "Ruolo",
+      "scope": "Ambito",
+      "business_unit": "Business Unit",
+      "plant": "Sito",
+      "select_bu": "— seleziona BU —",
+      "select_plant": "— seleziona sito —",
+      "valid_from": "Valido dal",
+      "valid_until": "Valido fino al",
+      "submit": "Assegna ruolo"
+    },
+    "committees": {
+      "new": {
+        "open": "+ Nuovo",
+        "title": "Nuovo comitato",
+        "submit": "Crea comitato"
+      },
+      "fields": {
+        "name": "Nome",
+        "type": "Tipo",
+        "frequency": "Frequenza",
+        "next_meeting": "Prossima riunione"
+      },
+      "placeholders": {
+        "name": "es. Comitato per la Sicurezza"
+      },
+      "types": {
+        "centrale": "Centrale",
+        "bu": "BU"
+      },
+      "frequencies": {
+        "mensile": "Mensile",
+        "trimestrale": "Trimestrale",
+        "semestrale": "Semestrale"
+      },
+      "frequency": "Frequenza: {{value}}",
+      "next_meeting": "prossima:"
+    },
+    "terminate": {
+      "title": "Termina ruolo",
+      "body": "Stai per terminare il ruolo {{role}} di {{user}}.",
+      "end_date": "Data fine",
+      "reason": "Motivo",
+      "reason_placeholder": "min 5 caratteri...",
+      "pending": "Terminazione...",
+      "confirm": "Conferma terminazione",
+      "error": "Errore durante la terminazione."
+    },
+    "replace": {
+      "title": "Successione ruolo",
+      "body": "Ruolo: {{role}} — titolare attuale: {{user}}",
+      "new_owner": "Nuovo titolare",
+      "handover_date": "Data passaggio",
+      "reason": "Motivo / note",
+      "pending": "Successione...",
+      "confirm": "Conferma successione",
+      "error": "Errore durante la successione."
     }
   },
   "sidebar": {

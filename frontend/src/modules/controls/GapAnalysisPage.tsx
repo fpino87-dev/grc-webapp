@@ -2,11 +2,12 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { controlsApi, type GapEntry, type GapAnalysisResult } from "../../api/endpoints/controls";
 import { useAuthStore } from "../../store/auth";
+import { useTranslation } from "react-i18next";
 
 function Section({
-  icon, label, color, items, defaultOpen,
+  icon, label, color, items, emptyText, defaultOpen,
 }: {
-  icon: string; label: string; color: string; items: GapEntry[]; defaultOpen?: boolean;
+  icon: string; label: string; color: string; items: GapEntry[]; emptyText: string; defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(!!defaultOpen);
   return (
@@ -36,20 +37,28 @@ function Section({
         </table>
       )}
       {open && items.length === 0 && (
-        <p className="px-4 py-3 text-sm text-gray-400">Nessun controllo in questa categoria</p>
+        <p className="px-4 py-3 text-sm text-gray-400">
+          {emptyText}
+        </p>
       )}
     </div>
   );
 }
 
-function exportCsv(result: GapAnalysisResult) {
-  const rows: string[][] = [["Categoria", "ID", "Titolo", "Dominio", "Stato sorgente"]];
+function exportCsv(result: GapAnalysisResult, t: (key: string, opts?: any) => string) {
+  const rows: string[][] = [[
+    t("gap_analysis.export.columns.category"),
+    t("gap_analysis.export.columns.id"),
+    t("gap_analysis.export.columns.title"),
+    t("gap_analysis.export.columns.domain"),
+    t("gap_analysis.export.columns.source_status"),
+  ]];
   const add = (cat: string, items: GapEntry[]) =>
     items.forEach(e => rows.push([cat, e.external_id, e.title, e.domain, e.source_status ?? ""]));
-  add("Coperto", result.covered);
-  add("Parziale", result.partial);
-  add("Gap", result.gap);
-  add("Non mappato", result.not_mapped);
+  add(t("gap_analysis.sections.covered"), result.covered);
+  add(t("gap_analysis.sections.partial"), result.partial);
+  add(t("gap_analysis.sections.gap"), result.gap);
+  add(t("gap_analysis.sections.not_mapped"), result.not_mapped);
   const csv = rows.map(r => r.map(c => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
@@ -61,6 +70,7 @@ function exportCsv(result: GapAnalysisResult) {
 }
 
 export function GapAnalysisPage() {
+  const { t } = useTranslation();
   const [source, setSource] = useState("");
   const [target, setTarget] = useState("");
   const [triggered, setTriggered] = useState(false);
@@ -85,32 +95,36 @@ export function GapAnalysisPage() {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">Gap Analysis framework</h2>
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">{t("gap_analysis.title")}</h2>
 
       {/* Selettori */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
         <div className="flex flex-wrap items-end gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Framework di partenza</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t("gap_analysis.source_framework")}
+            </label>
             <select
               value={source}
               onChange={e => { setSource(e.target.value); setTriggered(false); }}
               className="border rounded px-3 py-2 text-sm min-w-[180px]"
             >
-              <option value="">— Seleziona —</option>
+              <option value="">{t("common.select")}</option>
               {frameworks?.map(f => (
                 <option key={f.id} value={f.code}>{f.code} — {f.name}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Framework di destinazione</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t("gap_analysis.target_framework")}
+            </label>
             <select
               value={target}
               onChange={e => { setTarget(e.target.value); setTriggered(false); }}
               className="border rounded px-3 py-2 text-sm min-w-[180px]"
             >
-              <option value="">— Seleziona —</option>
+              <option value="">{t("common.select")}</option>
               {frameworks?.map(f => (
                 <option key={f.id} value={f.code}>{f.code} — {f.name}</option>
               ))}
@@ -121,24 +135,24 @@ export function GapAnalysisPage() {
             disabled={!source || !target || source === target}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
-            Analizza gap
+            {t("gap_analysis.actions.analyze")}
           </button>
           {result && (
             <button
-              onClick={() => exportCsv(result)}
+              onClick={() => exportCsv(result, t)}
               className="px-4 py-2 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50"
             >
-              ↓ Scarica report gap analysis
+              {t("gap_analysis.actions.download_report")}
             </button>
           )}
         </div>
         {source === target && source && (
-          <p className="text-sm text-red-500 mt-2">Seleziona due framework diversi</p>
+          <p className="text-sm text-red-500 mt-2">{t("gap_analysis.errors.same_framework")}</p>
         )}
       </div>
 
-      {isLoading && <div className="p-8 text-center text-gray-400">Analisi in corso...</div>}
-      {error && <div className="p-4 text-red-600 bg-red-50 rounded">Errore nel caricamento dei dati</div>}
+      {isLoading && <div className="p-8 text-center text-gray-400">{t("gap_analysis.loading")}</div>}
+      {error && <div className="p-4 text-red-600 bg-red-50 rounded">{t("gap_analysis.errors.load_failed")}</div>}
 
       {result && (
         <div className="space-y-4">
@@ -146,9 +160,11 @@ export function GapAnalysisPage() {
           <div className="bg-white border border-gray-200 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700">
-                Controlli {result.source_framework} → {result.target_framework}
+                {t("gap_analysis.summary.controls_from_to", { source: result.source_framework, target: result.target_framework })}
               </span>
-              <span className="text-lg font-bold text-primary-600">{result.summary.pct_ready}% coperti</span>
+              <span className="text-lg font-bold text-primary-600">
+                {t("gap_analysis.summary.pct_covered", { pct: result.summary.pct_ready })}
+              </span>
             </div>
             <div className="flex rounded overflow-hidden h-4 bg-gray-100">
               {result.summary.total > 0 && (
@@ -177,18 +193,55 @@ export function GapAnalysisPage() {
               )}
             </div>
             <div className="flex gap-4 mt-2 text-xs text-gray-500">
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block" />Coperti: {result.summary.covered}</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-400 inline-block" />Parziali: {result.summary.partial}</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500 inline-block" />Gap: {result.summary.gap}</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gray-300 inline-block" />Non mappati: {result.summary.not_mapped}</span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
+                {t("gap_analysis.summary.covered_count", { count: result.summary.covered })}
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-yellow-400 inline-block" />
+                {t("gap_analysis.summary.partial_count", { count: result.summary.partial })}
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-red-500 inline-block" />
+                {t("gap_analysis.summary.gap_count", { count: result.summary.gap })}
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-gray-300 inline-block" />
+                {t("gap_analysis.summary.not_mapped_count", { count: result.summary.not_mapped })}
+              </span>
             </div>
           </div>
 
           {/* Sezioni collassabili */}
-          <Section icon="✅" label="Coperti" color="text-green-700" items={result.covered} defaultOpen />
-          <Section icon="🟡" label="Parziali" color="text-yellow-700" items={result.partial} />
-          <Section icon="🔴" label="Gap" color="text-red-700" items={result.gap} />
-          <Section icon="⬜" label="Non mappati" color="text-gray-600" items={result.not_mapped} />
+          <Section
+            icon="✅"
+            label={t("gap_analysis.sections.covered")}
+            color="text-green-700"
+            items={result.covered}
+            emptyText={t("gap_analysis.empty_category")}
+            defaultOpen
+          />
+          <Section
+            icon="🟡"
+            label={t("gap_analysis.sections.partial")}
+            color="text-yellow-700"
+            items={result.partial}
+            emptyText={t("gap_analysis.empty_category")}
+          />
+          <Section
+            icon="🔴"
+            label={t("gap_analysis.sections.gap")}
+            color="text-red-700"
+            items={result.gap}
+            emptyText={t("gap_analysis.empty_category")}
+          />
+          <Section
+            icon="⬜"
+            label={t("gap_analysis.sections.not_mapped")}
+            color="text-gray-600"
+            items={result.not_mapped}
+            emptyText={t("gap_analysis.empty_category")}
+          />
         </div>
       )}
     </div>

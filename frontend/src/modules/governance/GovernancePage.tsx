@@ -7,23 +7,24 @@ import { apiClient } from "../../api/client";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
 import { DocumentWorkflowSection } from "./DocumentWorkflowPage";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
-const ROLE_LABELS: Record<string, string> = {
-  ciso:                   "CISO",
-  compliance_officer:     "Compliance Officer",
-  risk_manager:           "Risk Manager",
-  internal_auditor:       "Auditor Interno",
-  external_auditor:       "Auditor Esterno",
-  plant_manager:          "Plant Manager",
-  control_owner:          "Control Owner",
-  plant_security_officer: "Plant Security Officer",
-  nis2_contact:           "Contatto NIS2",
-  dpo:                    "DPO",
-  isms_manager:           "ISMS Manager",
-  comitato_membro:        "Membro Comitato",
-  bu_referente:           "Referente BU",
-  raci_responsible:       "RACI Responsible",
-  raci_accountable:       "RACI Accountable",
+const ROLE_KEYS: Record<string, string> = {
+  ciso:                   "ciso",
+  compliance_officer:     "compliance_officer",
+  risk_manager:           "risk_manager",
+  internal_auditor:       "internal_auditor",
+  external_auditor:       "external_auditor",
+  plant_manager:          "plant_manager",
+  control_owner:          "control_owner",
+  plant_security_officer: "plant_security_officer",
+  nis2_contact:           "nis2_contact",
+  dpo:                    "dpo",
+  isms_manager:           "isms_manager",
+  comitato_membro:        "comitato_membro",
+  bu_referente:           "bu_referente",
+  raci_responsible:       "raci_responsible",
+  raci_accountable:       "raci_accountable",
 };
 
 const TODAY = new Date().toISOString().slice(0, 10);
@@ -51,18 +52,34 @@ function scopeBadge(a: RoleAssignment) {
   return null;
 }
 
-function roleBadge(a: RoleAssignment) {
+function roleBadge(a: RoleAssignment, t: (k: string, opts?: any) => string) {
   if (!a.valid_until) {
-    return <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Attivo</span>;
+    return (
+      <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+        {t("status.attivo")}
+      </span>
+    );
   }
   const days = Math.ceil((new Date(a.valid_until).getTime() - Date.now()) / 86400000);
   if (days < 0) {
-    return <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Scaduto</span>;
+    return (
+      <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
+        {t("status.scaduto")}
+      </span>
+    );
   }
   if (days <= 30) {
-    return <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Scade in {days}gg</span>;
+    return (
+      <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+        {t("governance.badges.expires_in_days", { days })}
+      </span>
+    );
   }
-  return <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Attivo</span>;
+  return (
+    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+      {t("status.attivo")}
+    </span>
+  );
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
@@ -82,6 +99,7 @@ function RoleAssignmentModal({
   users,
   onClose,
 }: { users: { id: number; email: string; name: string }[]; onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [form, setForm] = useState<Record<string, any>>({
     scope_type: "org",
@@ -107,7 +125,7 @@ function RoleAssignmentModal({
   const mutation = useMutation({
     mutationFn: () => governanceApi.createRoleAssignment(form as any),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["role-assignments"] }); onClose(); },
-    onError: (e: any) => setError(e?.response?.data?.detail || JSON.stringify(e?.response?.data) || "Errore"),
+    onError: (e: any) => setError(e?.response?.data?.detail || JSON.stringify(e?.response?.data) || t("common.error")),
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
@@ -122,35 +140,37 @@ function RoleAssignmentModal({
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-        <h3 className="text-lg font-semibold mb-4">Nuova assegnazione ruolo</h3>
+        <h3 className="text-lg font-semibold mb-4">{t("governance.roles_assign.modal_title")}</h3>
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Utente *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.roles_assign.user")} *</label>
             <select name="user" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-              <option value="">— seleziona —</option>
+              <option value="">{t("common.select")}</option>
               {users.map(u => <option key={u.id} value={u.id}>{u.name || u.email}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Ruolo *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.roles_assign.role")} *</label>
             <select name="role" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-              <option value="">— seleziona —</option>
-              {Object.entries(ROLE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+              <option value="">{t("common.select")}</option>
+              {Object.keys(ROLE_KEYS).map((k) => (
+                <option key={k} value={k}>{t(`governance.roles.${ROLE_KEYS[k]}`)}</option>
+              ))}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Ambito</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.roles_assign.scope")}</label>
             <select name="scope_type" defaultValue="org" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-              <option value="org">Globale — tutta l&apos;organizzazione</option>
-              <option value="bu">Business Unit specifica</option>
-              <option value="plant">Sito specifico</option>
+              <option value="org">{t("governance.scopes.org")}</option>
+              <option value="bu">{t("governance.scopes.bu")}</option>
+              <option value="plant">{t("governance.scopes.plant")}</option>
             </select>
           </div>
           {form.scope_type === "bu" && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Business Unit *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.roles_assign.business_unit")} *</label>
               <select name="scope_id" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-                <option value="">— seleziona BU —</option>
+                <option value="">{t("governance.roles_assign.select_bu")}</option>
                 {(busData ?? []).map((b: any) => (
                   <option key={b.id} value={b.id}>{b.code} — {b.name}</option>
                 ))}
@@ -159,9 +179,9 @@ function RoleAssignmentModal({
           )}
           {form.scope_type === "plant" && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Sito *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.roles_assign.plant")} *</label>
               <select name="scope_id" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-                <option value="">— seleziona sito —</option>
+                <option value="">{t("governance.roles_assign.select_plant")}</option>
                 {(plants ?? []).map((p) => (
                   <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>
                 ))}
@@ -170,12 +190,12 @@ function RoleAssignmentModal({
           )}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Valido dal *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.roles_assign.valid_from")} *</label>
               <input type="date" name="valid_from" defaultValue={TODAY} onChange={handleChange}
                 className="w-full border rounded px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Valido fino al</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.roles_assign.valid_until")}</label>
               <input type="date" name="valid_until" onChange={handleChange}
                 className="w-full border rounded px-3 py-2 text-sm" />
             </div>
@@ -183,7 +203,7 @@ function RoleAssignmentModal({
         </div>
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
-          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("actions.cancel")}</button>
           <button
             onClick={() => mutation.mutate()}
             disabled={
@@ -192,7 +212,7 @@ function RoleAssignmentModal({
             }
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
-            {mutation.isPending ? "Salvataggio..." : "Assegna ruolo"}
+            {mutation.isPending ? t("common.saving") : t("governance.roles_assign.submit")}
           </button>
         </div>
       </div>
@@ -207,10 +227,16 @@ function TerminaModal({
   onClose,
   onSuccess,
 }: { assignment: RoleAssignment; onClose: () => void; onSuccess: (msg: string) => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [reason, setReason] = useState("");
   const [date, setDate] = useState(TODAY);
   const [error, setError] = useState("");
+
+  function roleLabel(role: string) {
+    const key = ROLE_KEYS[role] ?? role;
+    return t(`governance.roles.${key}`, { defaultValue: role });
+  }
 
   const mutation = useMutation({
     mutationFn: () => governanceApi.terminaRole(assignment.id, { reason, termination_date: date }),
@@ -221,42 +247,43 @@ function TerminaModal({
       onSuccess(data.message);
       onClose();
     },
-    onError: (e: any) => setError(e?.response?.data?.error || "Errore durante la terminazione."),
+    onError: (e: any) => setError(e?.response?.data?.error || t("governance.terminate.error")),
   });
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 space-y-4">
-        <h3 className="text-lg font-semibold">Termina ruolo</h3>
+        <h3 className="text-lg font-semibold">{t("governance.terminate.title")}</h3>
         <p className="text-sm text-gray-600">
-          Stai per terminare il ruolo{" "}
-          <strong>{ROLE_LABELS[assignment.role] ?? assignment.role}</strong>{" "}
-          di <strong>{assignment.user_name ?? assignment.user_email}</strong>.
+          {t("governance.terminate.body", {
+            role: roleLabel(assignment.role),
+            user: assignment.user_name ?? assignment.user_email,
+          })}
         </p>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Data fine</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.terminate.end_date")}</label>
           <input type="date" value={date} onChange={e => setDate(e.target.value)}
             className="w-full border rounded px-3 py-2 text-sm" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Motivo *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.terminate.reason")} *</label>
           <textarea
             value={reason}
             onChange={e => setReason(e.target.value)}
             rows={3}
-            placeholder="min 5 caratteri..."
+            placeholder={t("governance.terminate.reason_placeholder")}
             className="w-full border rounded px-3 py-2 text-sm"
           />
         </div>
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">{error}</p>}
         <div className="flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("actions.cancel")}</button>
           <button
             onClick={() => mutation.mutate()}
             disabled={mutation.isPending || reason.trim().length < 5}
             className="px-4 py-2 bg-orange-600 text-white rounded text-sm hover:bg-orange-700 disabled:opacity-50"
           >
-            {mutation.isPending ? "Terminazione..." : "Conferma terminazione"}
+            {mutation.isPending ? t("governance.terminate.pending") : t("governance.terminate.confirm")}
           </button>
         </div>
       </div>
@@ -277,11 +304,17 @@ function SostituisciModal({
   onClose: () => void;
   onSuccess: (msg: string) => void;
 }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [newUserId, setNewUserId] = useState<number | "">("");
   const [reason, setReason] = useState("");
   const [date, setDate] = useState(TODAY);
   const [error, setError] = useState("");
+
+  function roleLabel(role: string) {
+    const key = ROLE_KEYS[role] ?? role;
+    return t(`governance.roles.${key}`, { defaultValue: role });
+  }
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -297,54 +330,56 @@ function SostituisciModal({
       onSuccess(data.message);
       onClose();
     },
-    onError: (e: any) => setError(e?.response?.data?.error || "Errore durante la successione."),
+    onError: (e: any) => setError(e?.response?.data?.error || t("governance.replace.error")),
   });
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 space-y-4">
-        <h3 className="text-lg font-semibold">Successione ruolo</h3>
+        <h3 className="text-lg font-semibold">{t("governance.replace.title")}</h3>
         <p className="text-sm text-gray-600">
-          Ruolo: <strong>{ROLE_LABELS[assignment.role] ?? assignment.role}</strong>
-          {" "}— titolare attuale: <strong>{assignment.user_name ?? assignment.user_email}</strong>
+          {t("governance.replace.body", {
+            role: roleLabel(assignment.role),
+            user: assignment.user_name ?? assignment.user_email,
+          })}
         </p>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Nuovo titolare *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.replace.new_owner")} *</label>
           <select
             value={newUserId}
             onChange={e => setNewUserId(Number(e.target.value))}
             className="w-full border rounded px-3 py-2 text-sm"
           >
-            <option value="">— seleziona —</option>
+            <option value="">{t("common.select")}</option>
             {users.filter(u => u.id !== assignment.user).map(u => (
               <option key={u.id} value={u.id}>{u.name || u.email}</option>
             ))}
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Data passaggio</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.replace.handover_date")}</label>
           <input type="date" value={date} onChange={e => setDate(e.target.value)}
             className="w-full border rounded px-3 py-2 text-sm" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Motivo / note</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.replace.reason")}</label>
           <textarea
             value={reason}
             onChange={e => setReason(e.target.value)}
             rows={2}
-            placeholder="Opzionale..."
+            placeholder={t("common.optional")}
             className="w-full border rounded px-3 py-2 text-sm"
           />
         </div>
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">{error}</p>}
         <div className="flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("actions.cancel")}</button>
           <button
             onClick={() => mutation.mutate()}
             disabled={mutation.isPending || !newUserId}
             className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50"
           >
-            {mutation.isPending ? "Successione..." : "Conferma successione"}
+            {mutation.isPending ? t("governance.replace.pending") : t("governance.replace.confirm")}
           </button>
         </div>
       </div>
@@ -355,6 +390,7 @@ function SostituisciModal({
 // ── Modal: Comitato ───────────────────────────────────────────────────────────
 
 function CommitteeModal({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [form, setForm] = useState<Partial<SecurityCommittee>>({ committee_type: "centrale", frequency: "trimestrale" });
   const [error, setError] = useState("");
@@ -362,7 +398,7 @@ function CommitteeModal({ onClose }: { onClose: () => void }) {
   const mutation = useMutation({
     mutationFn: governanceApi.createCommittee,
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["committees"] }); onClose(); },
-    onError: (e: any) => setError(e?.response?.data?.detail || "Errore"),
+    onError: (e: any) => setError(e?.response?.data?.detail || t("common.error")),
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
@@ -372,48 +408,48 @@ function CommitteeModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-        <h3 className="text-lg font-semibold mb-4">Nuovo comitato</h3>
+        <h3 className="text-lg font-semibold mb-4">{t("governance.committees.new.title")}</h3>
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.committees.fields.name")} *</label>
             <input name="name" onChange={handleChange}
               className="w-full border rounded px-3 py-2 text-sm"
-              placeholder="es. Comitato per la Sicurezza" />
+              placeholder={t("governance.committees.placeholders.name")} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.committees.fields.type")}</label>
               <select name="committee_type" defaultValue="centrale" onChange={handleChange}
                 className="w-full border rounded px-3 py-2 text-sm">
-                <option value="centrale">Centrale</option>
-                <option value="bu">BU</option>
+                <option value="centrale">{t("governance.committees.types.centrale")}</option>
+                <option value="bu">{t("governance.committees.types.bu")}</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Frequenza</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.committees.fields.frequency")}</label>
               <select name="frequency" defaultValue="trimestrale" onChange={handleChange}
                 className="w-full border rounded px-3 py-2 text-sm">
-                <option value="mensile">Mensile</option>
-                <option value="trimestrale">Trimestrale</option>
-                <option value="semestrale">Semestrale</option>
+                <option value="mensile">{t("governance.committees.frequencies.mensile")}</option>
+                <option value="trimestrale">{t("governance.committees.frequencies.trimestrale")}</option>
+                <option value="semestrale">{t("governance.committees.frequencies.semestrale")}</option>
               </select>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Prossima riunione</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.committees.fields.next_meeting")}</label>
             <input type="datetime-local" name="next_meeting_at" onChange={handleChange}
               className="w-full border rounded px-3 py-2 text-sm" />
           </div>
         </div>
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
-          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("actions.cancel")}</button>
           <button
             onClick={() => mutation.mutate(form)}
             disabled={mutation.isPending || !form.name}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
-            {mutation.isPending ? "Salvataggio..." : "Crea comitato"}
+            {mutation.isPending ? t("common.saving") : t("governance.committees.new.submit")}
           </button>
         </div>
       </div>
@@ -424,6 +460,7 @@ function CommitteeModal({ onClose }: { onClose: () => void }) {
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export function GovernancePage() {
+  const { t, i18n } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") === "workflow" ? "workflow" : "roles";
   const [tab, setTab] = useState<"roles" | "workflow">(initialTab);
@@ -476,6 +513,15 @@ export function GovernancePage() {
     name:  `${u.first_name} ${u.last_name}`.trim() || u.username || u.email,
   }));
 
+  function roleLabel(role: string) {
+    const key = ROLE_KEYS[role] ?? role;
+    return t(`governance.roles.${key}`, { defaultValue: role });
+  }
+
+  function formatDate(dateStr: string) {
+    return new Date(dateStr).toLocaleDateString(i18n.language);
+  }
+
   function showToast(msg: string) {
     setToast(msg);
     setTimeout(() => setToast(null), 4000);
@@ -486,8 +532,8 @@ export function GovernancePage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Governance</h2>
-          <p className="text-sm text-gray-500 mt-1">Ruoli normativi, comitati e successione incarichi</p>
+          <h2 className="text-2xl font-bold text-gray-900">{t("governance.title")}</h2>
+          <p className="text-sm text-gray-500 mt-1">{t("governance.subtitle")}</p>
         </div>
         <ModuleHelp
           title="Governance — M00"
@@ -526,7 +572,7 @@ export function GovernancePage() {
                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
             }
           >
-            Ruoli & comitati
+            {t("governance.tabs.roles")}
           </button>
           <button
             type="button"
@@ -544,7 +590,7 @@ export function GovernancePage() {
                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
             }
           >
-            Workflow documentale (M07)
+            {t("governance.tabs.workflow")}
           </button>
         </nav>
       </div>
@@ -553,9 +599,9 @@ export function GovernancePage() {
         <div className="space-y-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Workflow documentale</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{t("governance.workflow.title")}</h3>
               <p className="text-sm text-gray-500 mt-1">
-                Definisci chi può creare, revisionare e approvare i documenti M07 per tipo e per sito.
+                {t("governance.workflow.subtitle")}
               </p>
             </div>
             <ModuleHelp
@@ -581,11 +627,11 @@ export function GovernancePage() {
           {(vacanti?.count ?? 0) > 0 && (
             <div className="border border-red-300 bg-red-50 rounded-lg p-4">
               <p className="font-semibold text-red-700">
-                🚨 {vacanti!.count} ruoli obbligatori senza titolare attivo
+                {t("governance.alerts.vacant_roles", { count: vacanti!.count })}
               </p>
               <ul className="mt-2 text-sm text-red-600 space-y-0.5">
                 {vacanti!.vacant_roles.map((r) => (
-                  <li key={r}>• {ROLE_LABELS[r] ?? r}</li>
+                  <li key={r}>• {roleLabel(r)}</li>
                 ))}
               </ul>
             </div>
@@ -595,12 +641,12 @@ export function GovernancePage() {
           {(inScadenza?.expiring?.length ?? 0) > 0 && (
             <div className="border border-amber-300 bg-amber-50 rounded-lg p-4">
               <p className="font-semibold text-amber-700">
-                ⚠ {inScadenza!.expiring.length} ruoli in scadenza nei prossimi 30 giorni
+                {t("governance.alerts.expiring_roles", { count: inScadenza!.expiring.length })}
               </p>
               <ul className="mt-2 text-sm text-amber-600 space-y-0.5">
                 {inScadenza!.expiring.map((r) => (
                   <li key={r.id}>
-                    • {ROLE_LABELS[r.role] ?? r.role} — {r.user} (scade il {r.valid_until})
+                    • {roleLabel(r.role)} — {r.user} ({t("governance.expires_on", { date: formatDate(r.valid_until) })})
                   </li>
                 ))}
               </ul>
@@ -611,19 +657,19 @@ export function GovernancePage() {
             {/* Ruoli normativi */}
             <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-gray-700">Ruoli normativi</h3>
+            <h3 className="text-sm font-semibold text-gray-700">{t("governance.sections.roles")}</h3>
             <button
               onClick={() => setShowRoleModal(true)}
               className="text-xs px-2 py-1 bg-primary-600 text-white rounded hover:bg-primary-700"
             >
-              + Assegna
+              {t("governance.roles_assign.open")}
             </button>
           </div>
 
           {loadingAssign ? (
-            <p className="text-sm text-gray-400">Caricamento...</p>
+            <p className="text-sm text-gray-400">{t("common.loading")}</p>
           ) : !assignments?.length ? (
-            <p className="text-sm text-gray-400 italic">Nessun ruolo assegnato</p>
+            <p className="text-sm text-gray-400 italic">{t("governance.empty.roles")}</p>
           ) : (
             <div className="space-y-1">
               {assignments.map((a) => (
@@ -631,16 +677,16 @@ export function GovernancePage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium text-gray-800 text-sm">
-                        {ROLE_LABELS[a.role] ?? a.role}
+                        {roleLabel(a.role)}
                       </span>
-                      {roleBadge(a)}
+                      {roleBadge(a, t)}
                       {scopeBadge(a)}
                     </div>
                     <div className="text-xs text-gray-500 mt-0.5">
                       {a.user_name ?? a.user_email ?? String(a.user)}
                       {a.valid_until && (
                         <span className="ml-2 text-gray-400">
-                          fino al {new Date(a.valid_until).toLocaleDateString("it-IT")}
+                          {t("governance.valid_until", { date: formatDate(a.valid_until) })}
                         </span>
                       )}
                     </div>
@@ -650,13 +696,13 @@ export function GovernancePage() {
                       onClick={() => setSostituisciTarget(a)}
                       className="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 border border-blue-200"
                     >
-                      Sostituisci
+                      {t("governance.actions.replace")}
                     </button>
                     <button
                       onClick={() => setTerminaTarget(a)}
                       className="text-xs px-2 py-1 bg-orange-50 text-orange-700 rounded hover:bg-orange-100 border border-orange-200"
                     >
-                      Termina
+                      {t("governance.actions.terminate")}
                     </button>
                   </div>
                 </div>
@@ -668,18 +714,18 @@ export function GovernancePage() {
         {/* Comitati */}
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-gray-700">Comitati per la sicurezza</h3>
+            <h3 className="text-sm font-semibold text-gray-700">{t("governance.sections.committees")}</h3>
             <button
               onClick={() => setShowCommitteeModal(true)}
               className="text-xs px-2 py-1 bg-primary-600 text-white rounded hover:bg-primary-700"
             >
-              + Nuovo
+              {t("governance.committees.new.open")}
             </button>
           </div>
           {loadingComm ? (
-            <p className="text-sm text-gray-400">Caricamento...</p>
+            <p className="text-sm text-gray-400">{t("common.loading")}</p>
           ) : !committees?.length ? (
-            <p className="text-sm text-gray-400 italic">Nessun comitato configurato</p>
+            <p className="text-sm text-gray-400 italic">{t("governance.empty.committees")}</p>
           ) : (
             <div className="space-y-3">
               {committees.map((c) => (
@@ -691,11 +737,11 @@ export function GovernancePage() {
                     </span>
                   </div>
                   <div className="text-xs text-gray-500 mt-1">
-                    Frequenza: {c.frequency}
+                    {t("governance.committees.frequency", { value: c.frequency })}
                     {c.next_meeting_at && (
-                      <> — prossima:{" "}
+                      <> — {t("governance.committees.next_meeting")}{" "}
                         <span className="font-medium">
-                          {new Date(c.next_meeting_at).toLocaleDateString("it-IT")}
+                          {new Date(c.next_meeting_at).toLocaleDateString(i18n.language)}
                         </span>
                       </>
                     )}
