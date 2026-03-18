@@ -145,6 +145,8 @@
         "new_evidence_title_placeholder": "Titolo *",
         "validity_date_label": "Data validità *",
         "upload_and_link": "Carica e collega"
+        ,
+        "review_abbrev": "rev."
       },
       "history": {
         "empty": "Nessuna valutazione registrata.",
@@ -157,6 +159,15 @@
       "title": "Titolo",
       "status": "Stato",
       "last_evaluated": "Ultima valutazione"
+    },
+    "status_filter": {
+      "all": "Tutti"
+    },
+    "actions": {
+      "open_drawer": "Gestione controllo",
+      "click_to_edit": "Clicca per modificare",
+      "propagate_hint": "Propaga questo stato ai controlli correlati",
+      "propagate": "⇒ propaga"
     }
   },
   "sidebar": {

@@ -565,7 +565,9 @@ function DocsColumn({
                       {t(`status.${d.status}`, { defaultValue: d.status })}
                     </span>
                     {d.review_due_date && (
-                      <span className="text-xs text-gray-400">rev. {new Date(d.review_due_date).toLocaleDateString("it-IT")}</span>
+                      <span className="text-xs text-gray-400">
+                        {t("controls.drawer.docs.review_abbrev")} {new Date(d.review_due_date).toLocaleDateString("it-IT")}
+                      </span>
                     )}
                   </div>
                 </div>

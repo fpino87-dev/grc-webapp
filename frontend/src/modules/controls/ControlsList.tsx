@@ -39,6 +39,7 @@ function InlineStatusSelect({ instance }: { instance: ControlInstance }) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [propagated, setPropagated] = useState<number | null>(null);
+  const { t } = useTranslation();
 
   const updateMutation = useMutation({
     mutationFn: (status: string) => controlsApi.updateInstance(instance.id, { status: status as ControlInstance["status"] }),
@@ -75,7 +76,11 @@ function InlineStatusSelect({ instance }: { instance: ControlInstance }) {
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      <button onClick={() => setEditing(true)} title="Clicca per modificare" className="group flex items-center gap-1">
+      <button
+        onClick={() => setEditing(true)}
+        title={t("controls.actions.click_to_edit")}
+        className="group flex items-center gap-1"
+      >
         <StatusBadge status={instance.status} />
         <span className="text-gray-300 group-hover:text-gray-500 text-xs">✎</span>
       </button>
@@ -91,10 +96,14 @@ function InlineStatusSelect({ instance }: { instance: ControlInstance }) {
         <button
           onClick={() => propagateMutation.mutate()}
           disabled={propagateMutation.isPending}
-          title="Propaga questo stato ai controlli correlati"
+          title={t("controls.actions.propagate_hint")}
           className="text-xs text-indigo-500 hover:text-indigo-700 border border-indigo-200 rounded px-1.5 py-0.5 hover:bg-indigo-50 disabled:opacity-50"
         >
-          {propagateMutation.isPending ? "..." : propagated !== null ? `✓ ${propagated}` : "⇒ propaga"}
+          {propagateMutation.isPending
+            ? "..."
+            : propagated !== null
+            ? `✓ ${propagated}`
+            : t("controls.actions.propagate")}
         </button>
       )}
     </div>
@@ -305,7 +314,7 @@ export function ControlsList() {
             statusFilter === "" ? "bg-primary-600 text-white" : "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
           }`}
         >
-          Tutti ({filteredByFramework.length})
+          {t("controls.status_filter.all")} ({filteredByFramework.length})
         </button>
         {STATUS_OPTIONS.map((s) => (
           <button
@@ -345,7 +354,7 @@ export function ControlsList() {
                       <button
                         onClick={() => setSelectedInstance(c.id)}
                         className="ml-1 w-5 h-5 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 flex items-center justify-center shrink-0"
-                        title="Gestione controllo"
+                        title={t("controls.actions.open_drawer")}
                       >
                         <svg viewBox="0 0 12 12" className="w-3 h-3 fill-current" aria-hidden="true">
                           <path d="M3 2l7 4-7 4V2z" />

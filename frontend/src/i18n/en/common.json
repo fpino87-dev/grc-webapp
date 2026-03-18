@@ -145,6 +145,8 @@
         "new_evidence_title_placeholder": "Title *",
         "validity_date_label": "Validity date *",
         "upload_and_link": "Upload and link"
+        ,
+        "review_abbrev": "rev."
       },
       "history": {
         "empty": "No evaluations recorded.",
@@ -157,6 +159,15 @@
       "title": "Title",
       "status": "Status",
       "last_evaluated": "Last evaluated"
+    },
+    "status_filter": {
+      "all": "All"
+    },
+    "actions": {
+      "open_drawer": "Open control",
+      "click_to_edit": "Click to edit",
+      "propagate_hint": "Propagate this status to related controls",
+      "propagate": "⇒ propagate"
     }
   },
   "sidebar": {
