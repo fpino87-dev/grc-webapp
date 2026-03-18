@@ -124,6 +124,167 @@ function NewBcpModal({ plants, onClose }: { plants: { id: string; code: string; 
   );
 }
 
+function EditBcpModal({
+  plants,
+  plan,
+  onClose,
+}: {
+  plants: { id: string; code: string; name: string }[];
+  plan: BcpPlan;
+  onClose: () => void;
+}) {
+  const qc = useQueryClient();
+  const plantInfo = plants.find(p => p.id === plan.plant) ?? null;
+
+  const [form, setForm] = useState<Partial<BcpPlan>>({
+    title: plan.title,
+    version: plan.version,
+    plant: plan.plant,
+    rto_hours: plan.rto_hours,
+    rpo_hours: plan.rpo_hours,
+    critical_process: plan.critical_process ?? (plan.critical_processes?.[0] ?? null),
+    test_frequency_value: plan.test_frequency_value ?? 1,
+    test_frequency_unit: plan.test_frequency_unit ?? "years",
+  });
+
+  const plantId = plan.plant;
+
+  const { data: processesData } = useQuery({
+    queryKey: ["bia-processes", plantId],
+    queryFn: () => biaApi.list(plantId ? { plant: plantId, page_size: "200" } : {}),
+    enabled: !!plantId,
+    retry: false,
+  });
+
+  const processes = processesData?.results ?? [];
+
+  const mutation = useMutation({
+    mutationFn: () => {
+      const payload = {
+        title: form.title,
+        version: form.version,
+        rto_hours: form.rto_hours ?? null,
+        rpo_hours: form.rpo_hours ?? null,
+        critical_process: (form.critical_process ?? "") || null,
+        test_frequency_value: form.test_frequency_value ?? 1,
+        test_frequency_unit: form.test_frequency_unit ?? "years",
+      };
+      return bcpApi.update(plan.id, payload);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["bcp"] });
+      onClose();
+    },
+  });
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
+    if (e.target.name === "critical_process") {
+      setForm(prev => ({ ...prev, critical_process: e.target.value || null }));
+      return;
+    }
+
+    const numericFields = ["rto_hours", "rpo_hours", "test_frequency_value"];
+    const val = numericFields.includes(e.target.name)
+      ? (e.target.value ? Number(e.target.value) : null)
+      : e.target.value;
+    setForm(prev => ({ ...prev, [e.target.name]: val }));
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6 max-h-screen overflow-y-auto">
+        <h3 className="text-lg font-semibold mb-4">Modifica piano BCP</h3>
+
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Titolo *</label>
+            <input name="title" value={form.title ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Sito</label>
+              <div className="w-full border rounded px-3 py-2 text-sm text-gray-700 bg-gray-50">
+                {plantInfo ? `${plantInfo.code} — ${plantInfo.name}` : plan.plant}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Versione</label>
+              <input name="version" value={form.version ?? ""} onChange={handleChange} placeholder="1.0" className="w-full border rounded px-3 py-2 text-sm" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Processo BIA collegato *</label>
+            <select
+              name="critical_process"
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2 text-sm"
+              value={form.critical_process ?? ""}
+            >
+              <option value="">— seleziona —</option>
+              {processes.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.name} [criticità {p.criticality}]
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">RTO (ore)</label>
+              <input name="rto_hours" type="number" value={form.rto_hours ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">RPO (ore)</label>
+              <input name="rpo_hours" type="number" value={form.rpo_hours ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Frequenza test BCP</label>
+            <select
+              name="test_frequency_value"
+              value={`${form.test_frequency_value ?? 1}:${form.test_frequency_unit ?? "years"}`}
+              onChange={(e) => {
+                const [v, u] = e.target.value.split(":");
+                setForm(prev => ({
+                  ...prev,
+                  test_frequency_value: Number(v),
+                  test_frequency_unit: u as "days" | "weeks" | "months" | "years",
+                }));
+              }}
+              className="w-full border rounded px-3 py-2 text-sm"
+            >
+              <option value="1:weeks">Settimanale</option>
+              <option value="1:months">Mensile</option>
+              <option value="3:months">Trimestrale</option>
+              <option value="6:months">Semestrale</option>
+              <option value="1:years">Annuale</option>
+            </select>
+          </div>
+        </div>
+
+        {mutation.isError && <p className="text-sm text-red-600 mt-3">Errore durante il salvataggio</p>}
+
+        <div className="flex justify-end gap-2 mt-4">
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">
+            Annulla
+          </button>
+          <button
+            onClick={() => mutation.mutate()}
+            disabled={mutation.isPending || !form.title || !form.critical_process}
+            className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
+          >
+            {mutation.isPending ? "Salvataggio..." : "Salva modifiche"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const TEST_TYPE_LABELS: Record<string, string> = {
   tabletop: "Tabletop / Discussione",
   drill: "Drill / Esercitazione parziale",
@@ -364,6 +525,7 @@ function RecordTestModal({ plan, onClose }: { plan: BcpPlan; onClose: () => void
 export function BcpPage() {
   const [showNew, setShowNew] = useState(false);
   const [testPlan, setTestPlan] = useState<BcpPlan | null>(null);
+  const [editPlan, setEditPlan] = useState<BcpPlan | null>(null);
   const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -432,6 +594,14 @@ export function BcpPage() {
                   <td className="px-4 py-3 text-gray-500 text-xs">{plan.next_test_date ? new Date(plan.next_test_date).toLocaleDateString(i18n.language || "it") : "—"}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
+                      {plan.status !== "archiviato" && (
+                        <button
+                          onClick={() => setEditPlan(plan)}
+                          className="text-xs text-blue-700 border border-blue-300 rounded px-2 py-0.5 hover:bg-blue-50"
+                        >
+                          Modifica
+                        </button>
+                      )}
                       {plan.status === "bozza" && (
                         <button
                           onClick={() => approveMutation.mutate(plan.id)}
@@ -469,6 +639,7 @@ export function BcpPage() {
       </div>
 
       {showNew && plants && <NewBcpModal plants={plants} onClose={() => setShowNew(false)} />}
+      {editPlan && plants && <EditBcpModal plants={plants} plan={editPlan} onClose={() => setEditPlan(null)} />}
       {testPlan && <RecordTestModal plan={testPlan} onClose={() => setTestPlan(null)} />}
     </div>
   );

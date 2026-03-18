@@ -69,7 +69,14 @@ function NewProcessModal({
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
-    const numericFields = ["criticality", "mtpd_hours", "mbco_pct", "rto_target_hours", "rpo_target_hours"];
+    const numericFields = [
+      "criticality",
+      "mtpd_hours",
+      "mbco_pct",
+      "downtime_cost_hour",
+      "rto_target_hours",
+      "rpo_target_hours",
+    ];
     const val = numericFields.includes(e.target.name)
       ? (e.target.value ? Number(e.target.value) : null)
       : e.target.value;
@@ -188,7 +195,18 @@ function NewProcessModal({
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
           <button
-            onClick={() => mutation.mutate(form)}
+            onClick={() =>
+              mutation.mutate({
+                plant: (form as any).plant,
+                name: form.name,
+                criticality: form.criticality,
+                downtime_cost_hour: form.downtime_cost_hour,
+                mtpd_hours: form.mtpd_hours,
+                mbco_pct: form.mbco_pct,
+                rto_target_hours: form.rto_target_hours,
+                rpo_target_hours: form.rpo_target_hours,
+              })
+            }
             disabled={mutation.isPending}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
@@ -327,14 +345,12 @@ export function BiaPage() {
                   <td className="px-4 py-3"><RtoBcpBadge status={p.rto_bcp_status} /></td>
                   <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
                     <div className="flex gap-2">
-                      {p.status === "bozza" && (
-                        <button
-                          onClick={() => setEditProcess(p)}
-                          className="text-xs text-blue-700 border border-blue-300 rounded px-2 py-0.5 hover:bg-blue-50"
-                        >
-                          Modifica
-                        </button>
-                      )}
+                      <button
+                        onClick={() => setEditProcess(p)}
+                        className="text-xs text-blue-700 border border-blue-300 rounded px-2 py-0.5 hover:bg-blue-50"
+                      >
+                        Modifica
+                      </button>
                       {p.status === "bozza" && (
                         <button
                           onClick={() => validateMutation.mutate(p.id)}

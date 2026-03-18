@@ -33,6 +33,57 @@ class BcpPlanViewSet(viewsets.ModelViewSet):
             payload={"id": str(instance.id), "title": instance.title},
         )
 
+    def perform_update(self, serializer):
+        instance = serializer.save()
+
+        # Se l'utente aggiorna la frequenza, ricalcolo anche la prossima scadenza
+        # partendo da `last_test_date` (non dalla compliance schedule globale).
+        try:
+            data = getattr(self.request, "data", {}) or {}
+            frequency_changed = (
+                "test_frequency_value" in data or "test_frequency_unit" in data
+            )
+            if frequency_changed and instance.last_test_date:
+                def _add_duration(base, value: int, unit: str):
+                    import datetime as _dt
+
+                    if unit == "days":
+                        return base + _dt.timedelta(days=value)
+                    if unit == "weeks":
+                        return base + _dt.timedelta(weeks=value)
+                    if unit == "months":
+                        month = base.month - 1 + value
+                        year = base.year + month // 12
+                        month = month % 12 + 1
+                        day = min(
+                            base.day,
+                            [31, 28, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month],
+                        )
+                        return _dt.date(year, month, day)
+                    if unit == "years":
+                        try:
+                            return base.replace(year=base.year + value)
+                        except ValueError:
+                            return base.replace(year=base.year + value, day=28)
+                    # Fallback: approssimazione
+                    return base + _dt.timedelta(days=value * 30)
+
+                value = instance.test_frequency_value or 1
+                unit = instance.test_frequency_unit or "years"
+                instance.next_test_date = _add_duration(instance.last_test_date, value, unit)
+                instance.save(update_fields=["next_test_date", "updated_at"])
+        except Exception:
+            # Non deve bloccare l'update del piano.
+            pass
+
+        log_action(
+            user=self.request.user,
+            action_code="bcp.plan.update",
+            level="L2",
+            entity=instance,
+            payload={"id": str(instance.id), "title": instance.title},
+        )
+
     @action(detail=False, methods=["get"], url_path="missing-plans")
     def missing_plans(self, request):
         """GET /api/v1/bcp/plans/missing-plans/?plant=<uuid>
