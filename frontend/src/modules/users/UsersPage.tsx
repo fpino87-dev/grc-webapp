@@ -241,12 +241,9 @@ function ResetPasswordModal({ user, onClose }: { user: GrcUser; onClose: () => v
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-        <h3 className="text-lg font-semibold mb-3">
+        <h3 className="text-lg font-semibold mb-4">
           {t("users.actions.reset_password")} — {user.username}
         </h3>
-        <p className="text-xs text-gray-500 mb-3">
-          {t("users.actions.reset_password_hint")}
-        </p>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           {t("users.fields.password")} (min 8)
         </label>
@@ -272,6 +269,101 @@ function ResetPasswordModal({ user, onClose }: { user: GrcUser; onClose: () => v
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
             {mutation.isPending ? t("common.saving") : t("users.actions.reset_password")}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EditUserModal({ user, onClose }: { user: GrcUser; onClose: () => void }) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [form, setForm] = useState({
+    email: user.email,
+    first_name: user.first_name,
+    last_name: user.last_name,
+  });
+  const [error, setError] = useState("");
+
+  const mutation = useMutation({
+    mutationFn: () =>
+      usersApi.update(user.id, {
+        email: form.email,
+        first_name: form.first_name,
+        last_name: form.last_name,
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["users"] });
+      onClose();
+    },
+    onError: () => setError(t("common.save_error")),
+  });
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+        <h3 className="text-lg font-semibold mb-4">
+          {t("users.edit.title")} — {user.username}
+        </h3>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t("users.fields.email")} *
+            </label>
+            <input
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2 text-sm"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("users.fields.first_name")}
+              </label>
+              <input
+                name="first_name"
+                value={form.first_name}
+                onChange={handleChange}
+                className="w-full border rounded px-3 py-2 text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("users.fields.last_name")}
+              </label>
+              <input
+                name="last_name"
+                value={form.last_name}
+                onChange={handleChange}
+                className="w-full border rounded px-3 py-2 text-sm"
+              />
+            </div>
+          </div>
+        </div>
+        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        <div className="flex justify-end gap-2 mt-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50"
+          >
+            {t("actions.cancel")}
+          </button>
+          <button
+            type="button"
+            disabled={mutation.isPending}
+            onClick={() => mutation.mutate()}
+            className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
+          >
+            {mutation.isPending ? t("common.saving") : t("actions.save")}
           </button>
         </div>
       </div>
@@ -363,6 +455,7 @@ export function UsersPage() {
   const { t } = useTranslation();
   const [showNew, setShowNew] = useState(false);
   const [expandedCompetency, setExpandedCompetency] = useState<number | null>(null);
+  const [editUser, setEditUser] = useState<GrcUser | null>(null);
   const [resetUser, setResetUser] = useState<GrcUser | null>(null);
   const qc = useQueryClient();
 
@@ -447,6 +540,15 @@ export function UsersPage() {
                         >
                           {t("users.actions.competency")}
                         </button>
+                        {me?.grc_role === "super_admin" && (
+                          <button
+                            type="button"
+                            onClick={() => setEditUser(user)}
+                            className="text-xs border border-gray-200 text-gray-700 rounded px-2 py-0.5 hover:bg-gray-50"
+                          >
+                            {t("actions.edit")}
+                          </button>
+                        )}
                         {me?.grc_role === "super_admin" && !user.is_superuser && (
                           <button
                             type="button"
@@ -474,7 +576,7 @@ export function UsersPage() {
       </div>
 
       {showNew && <NewUserModal roles={roles} onClose={() => setShowNew(false)} />}
-
+      {editUser && <EditUserModal user={editUser} onClose={() => setEditUser(null)} />}
       {resetUser && <ResetPasswordModal user={resetUser} onClose={() => setResetUser(null)} />}
 
       {me?.is_superuser && <DangerZone />}
