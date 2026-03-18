@@ -84,6 +84,13 @@
         "expires_in_days": "Scade in {{days}}g",
         "valid_until": "Valida fino al {{date}}"
       }
+    },
+    "table": {
+      "control_id": "ID Controllo",
+      "framework": "Framework",
+      "title": "Titolo",
+      "status": "Stato",
+      "last_evaluated": "Ultima valutazione"
     }
   },
   "sidebar": {

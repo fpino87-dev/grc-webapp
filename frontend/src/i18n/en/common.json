@@ -84,6 +84,13 @@
         "expires_in_days": "Expires in {{days}}d",
         "valid_until": "Valid until {{date}}"
       }
+    },
+    "table": {
+      "control_id": "Control ID",
+      "framework": "Framework",
+      "title": "Title",
+      "status": "Status",
+      "last_evaluated": "Last evaluated"
     }
   },
   "sidebar": {

@@ -329,11 +329,11 @@ export function ControlsList() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">ID Controllo</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Framework</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Titolo</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Stato</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Ultima valutazione</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("controls.table.control_id")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("controls.table.framework")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("controls.table.title")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("controls.table.status")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("controls.table.last_evaluated")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
