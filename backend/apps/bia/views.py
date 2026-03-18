@@ -6,7 +6,7 @@ from core.audit import log_action
 
 from .models import CriticalProcess, RiskDecision, TreatmentOption
 from .serializers import CriticalProcessSerializer, RiskDecisionSerializer, TreatmentOptionSerializer
-from .services import approve_process
+from .services import approve_process, get_process_risk_bcp_snapshot
 
 
 class CriticalProcessViewSet(viewsets.ModelViewSet):
@@ -47,6 +47,16 @@ class CriticalProcessViewSet(viewsets.ModelViewSet):
         )
         serializer = self.get_serializer(process)
         return Response(serializer.data)
+
+    @action(detail=True, methods=["get"], url_path="snapshot")
+    def snapshot(self, request, pk=None):
+        """
+        Vista read-only BIA + Risk + BCP per un singolo processo critico.
+        Non modifica lo stato, usata solo dalla UI per mostrare la correlazione.
+        """
+        process = self.get_object()
+        data = get_process_risk_bcp_snapshot(process)
+        return Response(data)
 
 
 class TreatmentOptionViewSet(viewsets.ModelViewSet):

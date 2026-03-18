@@ -6,6 +6,8 @@ export interface BcpPlan {
   rto_hours: number | null; rpo_hours: number | null;
   last_test_date: string | null; next_test_date: string | null;
   owner: string | null;
+  critical_process?: string | null;
+  critical_processes?: string[];
 }
 
 export interface BcpTestObjective {
@@ -34,6 +36,8 @@ export const bcpApi = {
     apiClient.post(`/bcp/plans/${id}/approve/`).then(r => r.data),
   create: (data: Partial<BcpPlan>) =>
     apiClient.post<BcpPlan>("/bcp/plans/", data).then(r => r.data),
+  update: (id: string, data: Partial<BcpPlan>) =>
+    apiClient.patch<BcpPlan>(`/bcp/plans/${id}/`, data).then(r => r.data),
   tests: (planId: string) =>
     apiClient.get<{ results: BcpTest[] }>("/bcp/tests/", { params: { plan: planId } }).then(r => r.data.results),
   recordTest: (data: Record<string, unknown>) =>

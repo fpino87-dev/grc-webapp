@@ -56,6 +56,16 @@ export interface SuggestResidualResult {
   reason: string;
 }
 
+export interface RiskContext {
+  risk: Record<string, unknown>;
+  bia: Record<string, unknown> | null;
+  bcp_plans: Array<Record<string, unknown>>;
+  bcp_summary: {
+    has_bcp_covering_process: boolean;
+    best_rto_vs_mtpd_status: string;
+  } | null;
+}
+
 export const THREAT_CATEGORIES = [
   { value: "accesso_non_autorizzato", label: "Accesso non autorizzato" },
   { value: "malware_ransomware",      label: "Malware / Ransomware" },
@@ -99,4 +109,6 @@ export const riskApi = {
     apiClient.get<SuggestResidualResult>(`/risk/assessments/${id}/suggest-residual/`).then(r => r.data),
   acceptRisk: (id: string, note: string, expiryDate?: string) =>
     apiClient.post(`/risk/assessments/${id}/accept-risk/`, { note, expiry_date: expiryDate }).then(r => r.data),
+  context: (id: string) =>
+    apiClient.get<RiskContext>(`/risk/assessments/${id}/context/`).then(r => r.data),
 };

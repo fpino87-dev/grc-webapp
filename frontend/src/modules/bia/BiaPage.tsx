@@ -40,13 +40,32 @@ function RtoBcpBadge({ status }: { status: string }) {
   );
 }
 
-function NewProcessModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
+function NewProcessModal({
+  plants,
+  onClose,
+  initial,
+}: {
+  plants: { id: string; code: string; name: string }[];
+  onClose: () => void;
+  initial?: CriticalProcess | null;
+}) {
   const qc = useQueryClient();
-  const [form, setForm] = useState<Partial<CriticalProcess>>({ criticality: 3 });
+  const [form, setForm] = useState<Partial<CriticalProcess>>(
+    initial
+      ? {
+          ...initial,
+          plant: initial.plant,
+        }
+      : { criticality: 3 }
+  );
 
   const mutation = useMutation({
-    mutationFn: biaApi.create,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["bia"] }); onClose(); },
+    mutationFn: (data: Partial<CriticalProcess>) =>
+      initial ? biaApi.update(initial.id, data) : biaApi.create(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["bia"] });
+      onClose();
+    },
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
@@ -118,7 +137,7 @@ function NewProcessModal({ plants, onClose }: { plants: { id: string; code: stri
             disabled={mutation.isPending}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
-            {mutation.isPending ? "Salvataggio..." : "Crea processo"}
+            {mutation.isPending ? "Salvataggio..." : initial ? "Salva modifiche" : "Crea processo"}
           </button>
         </div>
       </div>
@@ -130,6 +149,8 @@ export function BiaPage() {
   const [showNew, setShowNew] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState("");
+  const [selectedProcessId, setSelectedProcessId] = useState<string | null>(null);
+  const [editProcess, setEditProcess] = useState<CriticalProcess | null>(null);
   const qc = useQueryClient();
 
   const params = filterStatus ? { status: filterStatus } : undefined;
@@ -226,7 +247,11 @@ export function BiaPage() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {processes.map(p => (
-                <tr key={p.id} className="hover:bg-gray-50 transition-colors">
+                <tr
+                  key={p.id}
+                  className="hover:bg-gray-50 transition-colors cursor-pointer"
+                  onClick={() => setSelectedProcessId(p.id)}
+                >
                   <td className="px-4 py-3 font-medium text-gray-800">{p.name}</td>
                   <td className="px-4 py-3"><CriticalityBar value={p.criticality} /></td>
                   <td className="px-4 py-3"><StatusBadge status={p.status} /></td>
@@ -235,16 +260,26 @@ export function BiaPage() {
                   <td className="px-4 py-3 text-gray-600 text-xs">{p.rpo_target_hours != null ? `${p.rpo_target_hours}h` : "—"}</td>
                   <td className="px-4 py-3 text-gray-600 text-xs">{p.mbco_pct != null ? `${p.mbco_pct}%` : "—"}</td>
                   <td className="px-4 py-3"><RtoBcpBadge status={p.rto_bcp_status} /></td>
-                  <td className="px-4 py-3">
-                    {p.status === "validato" && (
-                      <button
-                        onClick={() => approveMutation.mutate(p.id)}
-                        disabled={approveMutation.isPending}
-                        className="text-xs text-green-700 border border-green-300 rounded px-2 py-0.5 hover:bg-green-50 disabled:opacity-50"
-                      >
-                        Approva
-                      </button>
-                    )}
+                  <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
+                    <div className="flex gap-2">
+                      {p.status === "bozza" && (
+                        <button
+                          onClick={() => setEditProcess(p)}
+                          className="text-xs text-blue-700 border border-blue-300 rounded px-2 py-0.5 hover:bg-blue-50"
+                        >
+                          Modifica
+                        </button>
+                      )}
+                      {p.status === "validato" && (
+                        <button
+                          onClick={() => approveMutation.mutate(p.id)}
+                          disabled={approveMutation.isPending}
+                          className="text-xs text-green-700 border border-green-300 rounded px-2 py-0.5 hover:bg-green-50 disabled:opacity-50"
+                        >
+                          Approva
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -254,6 +289,13 @@ export function BiaPage() {
       </div>
 
       {showNew && plants && <NewProcessModal plants={plants} onClose={() => setShowNew(false)} />}
+      {editProcess && plants && (
+        <NewProcessModal
+          plants={plants}
+          initial={editProcess}
+          onClose={() => setEditProcess(null)}
+        />
+      )}
       <AssistenteValutazione open={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </div>
   );

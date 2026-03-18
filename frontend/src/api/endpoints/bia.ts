@@ -15,6 +15,18 @@ export interface CriticalProcess {
   rto_bcp_status: "ok" | "warning" | "critical" | "unknown";
 }
 
+export interface CriticalProcessSnapshot {
+  process_id: string;
+  bia: Record<string, unknown>;
+  risks: Array<Record<string, unknown>>;
+  bcp_plans: Array<Record<string, unknown>>;
+  summary: {
+    rto_bcp_status: string;
+    has_bcp_plan: boolean;
+    has_high_risks_without_plan: boolean;
+  };
+}
+
 export const biaApi = {
   list: (params?: Record<string, string>) =>
     apiClient.get<{ results: CriticalProcess[] }>("/bia/processes/", { params }).then(r => r.data),
@@ -22,4 +34,8 @@ export const biaApi = {
     apiClient.post(`/bia/processes/${id}/approve/`).then(r => r.data),
   create: (data: Partial<CriticalProcess>) =>
     apiClient.post<CriticalProcess>("/bia/processes/", data).then(r => r.data),
+  update: (id: string, data: Partial<CriticalProcess>) =>
+    apiClient.patch<CriticalProcess>(`/bia/processes/${id}/`, data).then(r => r.data),
+  snapshot: (id: string) =>
+    apiClient.get<CriticalProcessSnapshot>(`/bia/processes/${id}/snapshot/`).then(r => r.data),
 };

@@ -6,6 +6,7 @@ from core.audit import log_action
 
 from .models import RiskAppetitePolicy, RiskAssessment, RiskDimension, RiskMitigationPlan
 from .serializers import RiskAppetitePolicySerializer, RiskAssessmentSerializer, RiskDimensionSerializer, RiskMitigationPlanSerializer
+from .services import get_risk_bia_bcp_context
 
 
 class RiskAssessmentViewSet(viewsets.ModelViewSet):
@@ -153,6 +154,16 @@ class RiskAssessmentViewSet(viewsets.ModelViewSet):
         if plant_id:
             qs = qs.filter(plant_id=plant_id)
         return Response(self.get_serializer(qs, many=True).data)
+
+    @action(detail=True, methods=["get"], url_path="context")
+    def context(self, request, pk=None):
+        """
+        Vista di contesto per un singolo risk assessment:
+        include BIA del processo collegato e BCP che lo coprono.
+        """
+        assessment = self.get_object()
+        data = get_risk_bia_bcp_context(assessment)
+        return Response(data)
 
 
 class RiskDimensionViewSet(viewsets.ModelViewSet):
