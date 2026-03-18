@@ -15,9 +15,12 @@ import i18n from "../../i18n";
 
 function matrixColor(p: number, i: number): string {
   const s = p * i;
-  if (s <= 4) return "bg-green-100 text-green-800";
-  if (s <= 9) return "bg-yellow-100 text-yellow-800";
-  if (s <= 14) return "bg-orange-100 text-orange-800";
+  // Allineamento con la logica backend di RiskAssessment.risk_level:
+  // - <= 7 verde
+  // - <= 14 giallo
+  // - > 14 rosso
+  if (s <= 7) return "bg-green-100 text-green-800";
+  if (s <= 14) return "bg-yellow-100 text-yellow-800";
   return "bg-red-100 text-red-800";
 }
 
@@ -1114,7 +1117,9 @@ export function RiskPage() {
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Scenario</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Minaccia</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Owner</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">P × I (Residuo / Inerente)</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">
+                  Inerente → Mitigo → Residuo (P×I)
+                </th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Score</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Weighted (pesato)</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">ALE (da BIA)</th>
@@ -1141,20 +1146,23 @@ export function RiskPage() {
                     <td className="px-4 py-3 text-gray-600">
                       <div className="space-y-1">
                         <div>
-                          {a.probability && a.impact
+                          {a.inherent_probability && a.inherent_impact
                             ? (
-                              <span className={`text-xs font-mono font-bold px-1.5 py-0.5 rounded inline-block ${matrixColor(a.probability, a.impact)}`}>
-                                {a.probability}×{a.impact}
+                              <span className={`text-xs font-mono font-bold px-1.5 py-0.5 rounded inline-block ${matrixColor(a.inherent_probability, a.inherent_impact)}`}>
+                                {a.inherent_probability}×{a.inherent_impact}
                               </span>
                             )
                             : <span className="text-gray-400">—</span>}
                         </div>
                         <div className="text-xs text-gray-500">
-                          Inerente:&nbsp;
-                          {a.inherent_probability && a.inherent_impact
+                          Mitigo:&nbsp;
+                          {a.risk_reduction_pct != null ? `${a.risk_reduction_pct}%` : "—"}
+                        </div>
+                        <div>
+                          {a.probability && a.impact
                             ? (
-                              <span className={`font-mono px-1.5 py-0.5 rounded inline-block ${matrixColor(a.inherent_probability, a.inherent_impact)}`}>
-                                {a.inherent_probability}×{a.inherent_impact}
+                              <span className={`text-xs font-mono font-bold px-1.5 py-0.5 rounded inline-block ${matrixColor(a.probability, a.impact)}`}>
+                                {a.probability}×{a.impact}
                               </span>
                             )
                             : <span className="text-gray-400">—</span>}
