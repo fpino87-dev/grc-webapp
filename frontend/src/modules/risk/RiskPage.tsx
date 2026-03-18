@@ -140,6 +140,19 @@ function SuggestResidualPanel({ assessment }: { assessment: RiskAssessment }) {
           <span className="text-xs text-gray-600">{suggestion.reason}</span>
         )}
       </div>
+      {suggestion && (
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <span className="text-xs text-green-700 bg-green-50 border border-green-200 px-2 py-1 rounded">
+            Riduzione controlli: {suggestion.reduction_pct ?? 0}%
+          </span>
+          <span className="text-xs text-green-800 bg-green-50 border border-green-200 px-2 py-1 rounded">
+            Extra BCP: {suggestion.bcp_extra_pct ?? 0}%
+          </span>
+          <span className="text-xs text-gray-700 bg-gray-50 border border-gray-200 px-2 py-1 rounded">
+            Totale: {Math.min(70, (suggestion.reduction_pct ?? 0) + (suggestion.bcp_extra_pct ?? 0))}%
+          </span>
+        </div>
+      )}
     </div>
   );
 }

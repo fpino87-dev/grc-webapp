@@ -5,6 +5,7 @@ import { plantsApi } from "../../api/endpoints/plants";
 import { biaApi } from "../../api/endpoints/bia";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import i18n from "../../i18n";
+import { useAuthStore } from "../../store/auth";
 
 function NewBcpModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
   const qc = useQueryClient();
@@ -528,9 +529,12 @@ export function BcpPage() {
   const [editPlan, setEditPlan] = useState<BcpPlan | null>(null);
   const qc = useQueryClient();
 
+  const selectedPlant = useAuthStore(s => s.selectedPlant);
+  const listParams = selectedPlant?.id ? { plant: selectedPlant.id } : undefined;
+
   const { data, isLoading } = useQuery({
-    queryKey: ["bcp"],
-    queryFn: () => bcpApi.list(),
+    queryKey: ["bcp", selectedPlant?.id],
+    queryFn: () => bcpApi.list(listParams),
     retry: false,
   });
 
@@ -539,6 +543,19 @@ export function BcpPage() {
     queryFn: () => plantsApi.list(),
     retry: false,
   });
+
+  function resolvePlantLabel(plantField: string | undefined | null) {
+    if (!plantField) return "—";
+    if (!plants) return plantField;
+
+    // Alcune risposte vecchie/imperfette possono contenere "nome ... <uuid>".
+    const uuidMatch = plantField.match(
+      /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/
+    );
+    const candidatePlantId = uuidMatch ? uuidMatch[0] : plantField;
+    const plant = plants.find(p => p.id === candidatePlantId);
+    return plant ? `${plant.code} — ${plant.name}` : plantField;
+  }
 
   const approveMutation = useMutation({
     mutationFn: bcpApi.approve,
@@ -585,7 +602,7 @@ export function BcpPage() {
               {plans.map(plan => (
                 <tr key={plan.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3 font-medium text-gray-800">{plan.title}</td>
-                  <td className="px-4 py-3 text-gray-600">{plan.plant}</td>
+                  <td className="px-4 py-3 text-gray-600">{resolvePlantLabel(plan.plant)}</td>
                   <td className="px-4 py-3 text-gray-600">{plan.version}</td>
                   <td className="px-4 py-3"><StatusBadge status={plan.status} /></td>
                   <td className="px-4 py-3 text-gray-600">{plan.rto_hours ?? "—"}</td>

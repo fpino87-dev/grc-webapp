@@ -53,6 +53,8 @@ export interface SuggestResidualResult {
   suggested: number | null;
   reduction_pct?: number;
   compliant_controls?: number;
+  bcp_extra_pct?: number;
+  best_bcp_strength?: number;
   reason: string;
 }
 

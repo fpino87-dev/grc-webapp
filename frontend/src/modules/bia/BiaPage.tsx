@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { biaApi, type CriticalProcess } from "../../api/endpoints/bia";
 import { plantsApi } from "../../api/endpoints/plants";
+import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { AssistenteValutazione } from "../../components/ui/AssistenteValutazione";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
@@ -226,11 +227,16 @@ export function BiaPage() {
   const [editProcess, setEditProcess] = useState<CriticalProcess | null>(null);
   const qc = useQueryClient();
 
-  const params = filterStatus ? { status: filterStatus } : undefined;
+  const selectedPlant = useAuthStore(s => s.selectedPlant);
+  const params = {
+    ...(filterStatus ? { status: filterStatus } : {}),
+    ...(selectedPlant?.id ? { plant: selectedPlant.id } : {}),
+  };
+  const listParams = Object.keys(params).length ? params : undefined;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["bia", filterStatus],
-    queryFn: () => biaApi.list(params),
+    queryKey: ["bia", filterStatus, selectedPlant?.id],
+    queryFn: () => biaApi.list(listParams),
     retry: false,
   });
 
