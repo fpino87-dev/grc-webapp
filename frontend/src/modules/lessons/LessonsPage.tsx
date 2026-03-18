@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { lessonsApi, type LessonLearned } from "../../api/endpoints/lessons";
 import { StatusBadge } from "../../components/ui/StatusBadge";
+import i18n from "../../i18n";
 
 function NewLessonModal({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
@@ -110,7 +111,7 @@ export function LessonsPage() {
                   <td className="px-4 py-3 text-gray-600">{lesson.category || "—"}</td>
                   <td className="px-4 py-3"><StatusBadge status={lesson.status} /></td>
                   <td className="px-4 py-3 text-gray-600">{lesson.plant}</td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{new Date(lesson.created_at).toLocaleDateString("it-IT")}</td>
+                  <td className="px-4 py-3 text-gray-500 text-xs">{new Date(lesson.created_at).toLocaleDateString(i18n.language || "it")}</td>
                   <td className="px-4 py-3">
                     {lesson.status === "bozza" && (
                       <button

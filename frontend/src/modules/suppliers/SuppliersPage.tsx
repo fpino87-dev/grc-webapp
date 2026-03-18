@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { suppliersApi, type Supplier } from "../../api/endpoints/suppliers";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { apiClient } from "../../api/client";
+import i18n from "../../i18n";
 
 function NewSupplierModal({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
@@ -71,7 +72,7 @@ function ExpiryCell({ date }: { date: string | null }) {
   const isNear = daysLeft < 30;
   return (
     <span className={isNear ? "text-red-600 font-medium" : "text-gray-600"}>
-      {new Date(date).toLocaleDateString("it-IT")}
+      {new Date(date).toLocaleDateString(i18n.language || "it")}
       {isNear && <span className="ml-1 text-xs">({daysLeft}gg)</span>}
     </span>
   );
@@ -264,7 +265,7 @@ function AssessmentsTable({ supplierId }: { supplierId: string }) {
             <tr key={a.id} className="border-t border-gray-100">
               <td className="px-2 py-1">
                 {a.assessment_date
-                  ? new Date(a.assessment_date).toLocaleDateString("it-IT")
+                  ? new Date(a.assessment_date).toLocaleDateString(i18n.language || "it")
                   : "—"}
               </td>
               <td className="px-2 py-1">{a.score_governance ?? "—"}</td>
@@ -309,7 +310,7 @@ function AssessmentsTable({ supplierId }: { supplierId: string }) {
                   <span className="text-[11px] text-green-700">
                     Approvato il{" "}
                     {a.reviewed_at
-                      ? new Date(a.reviewed_at).toLocaleDateString("it-IT")
+                      ? new Date(a.reviewed_at).toLocaleDateString(i18n.language || "it")
                       : ""}
                   </span>
                 )}

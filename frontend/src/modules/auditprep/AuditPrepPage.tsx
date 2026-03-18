@@ -12,6 +12,7 @@ import { plantsApi } from "../../api/endpoints/plants";
 import { apiClient } from "../../api/client";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
+import i18n from "../../i18n";
 
 interface Framework { id: string; name: string; code: string; }
 
@@ -201,12 +202,14 @@ function FindingPanel({ prepId }: { prepId: string }) {
               </div>
               {f.response_deadline && (
                 <div className="mt-1 text-xs">
-                  <span className={
-                    f.is_overdue ? "text-red-600 font-medium" :
-                    (f.days_remaining !== null && f.days_remaining <= 7) ? "text-orange-600" :
-                    "text-gray-500"
-                  }>
-                    Scadenza: {new Date(f.response_deadline).toLocaleDateString("it-IT")}
+                  <span
+                    className={
+                      f.is_overdue ? "text-red-600 font-medium" :
+                      (f.days_remaining !== null && f.days_remaining <= 7) ? "text-orange-600" :
+                      "text-gray-500"
+                    }
+                  >
+                    Scadenza: {new Date(f.response_deadline).toLocaleDateString(i18n.language || "it")}
                     {f.is_overdue ? " — SCADUTO" : f.days_remaining !== null ? ` (${f.days_remaining}gg)` : ""}
                   </span>
                   {f.pdca_cycle && <span className="ml-2 text-indigo-600">PDCA auto-creato</span>}
@@ -214,7 +217,7 @@ function FindingPanel({ prepId }: { prepId: string }) {
               )}
               {f.status === "closed" && f.closed_by_name && (
                 <p className="mt-1 text-xs text-green-700">
-                  Chiuso da {f.closed_by_name} il {f.closed_at ? new Date(f.closed_at).toLocaleDateString("it-IT") : "—"}
+                  Chiuso da {f.closed_by_name} il {f.closed_at ? new Date(f.closed_at).toLocaleDateString(i18n.language || "it") : "—"}
                 </p>
               )}
 
@@ -348,7 +351,7 @@ function EvidencePanel({ prepId }: { prepId: string }) {
               <span className="text-gray-700 flex-1">{item.description}</span>
               {item.due_date && (
                 <span className="text-gray-400 text-xs shrink-0">
-                  scad. {new Date(item.due_date).toLocaleDateString("it-IT")}
+                  scad. {new Date(item.due_date).toLocaleDateString(i18n.language || "it")}
                 </span>
               )}
             </div>
@@ -782,7 +785,7 @@ export function AuditPrepPage() {
                       </td>
                       <td className="px-4 py-3 text-gray-500 text-xs">
                         {prep.audit_date
-                          ? new Date(prep.audit_date).toLocaleDateString("it-IT")
+                          ? new Date(prep.audit_date).toLocaleDateString(i18n.language || "it")
                           : "—"}
                       </td>
                       <td className="px-4 py-3 text-gray-600">

@@ -4,6 +4,7 @@ import { managementReviewApi, type ManagementReview } from "../../api/endpoints/
 import { plantsApi } from "../../api/endpoints/plants";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
+import i18n from "../../i18n";
 
 function NewReviewModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
   const qc = useQueryClient();
@@ -176,7 +177,7 @@ function ReviewDetail({ review, onClose }: { review: ManagementReview; onClose: 
             ) : (
               <div className="space-y-3">
                 <p className="text-xs text-blue-600 bg-blue-50 rounded px-3 py-2">
-                  Snapshot generato il {new Date(review.snapshot_generated_at!).toLocaleString("it-IT")} — questi dati sono congelati
+                  Snapshot generato il {new Date(review.snapshot_generated_at!).toLocaleString(i18n.language || "it")} — questi dati sono congelati
                 </p>
 
                 {frameworks && Object.keys(frameworks).length > 0 && (
@@ -289,7 +290,7 @@ function ReviewDetail({ review, onClose }: { review: ManagementReview; onClose: 
               </span>
               {isApproved && review.approved_at && (
                 <span className="text-xs text-gray-500">
-                  Approvato il {new Date(review.approved_at).toLocaleString("it-IT")}
+                  Approvato il {new Date(review.approved_at).toLocaleString(i18n.language || "it")}
                   {review.approval_note && ` — ${review.approval_note}`}
                 </span>
               )}
@@ -405,7 +406,7 @@ export function ManagementReviewPage() {
                   </td>
                   <td className="px-4 py-3 text-xs text-gray-500">
                     {r.snapshot_generated_at
-                      ? <span className="text-green-600">✓ {new Date(r.snapshot_generated_at).toLocaleDateString("it-IT")}</span>
+                      ? <span className="text-green-600">✓ {new Date(r.snapshot_generated_at).toLocaleDateString(i18n.language || "it")}</span>
                       : <span className="text-gray-400">—</span>}
                   </td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{r.review_date}</td>

@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { bcpApi, type BcpPlan, type BcpTestObjective } from "../../api/endpoints/bcp";
 import { plantsApi } from "../../api/endpoints/plants";
 import { StatusBadge } from "../../components/ui/StatusBadge";
+import i18n from "../../i18n";
 
 function NewBcpModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
   const qc = useQueryClient();
@@ -337,8 +338,8 @@ export function BcpPage() {
                   <td className="px-4 py-3"><StatusBadge status={plan.status} /></td>
                   <td className="px-4 py-3 text-gray-600">{plan.rto_hours ?? "—"}</td>
                   <td className="px-4 py-3 text-gray-600">{plan.rpo_hours ?? "—"}</td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{plan.last_test_date ? new Date(plan.last_test_date).toLocaleDateString("it-IT") : "—"}</td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{plan.next_test_date ? new Date(plan.next_test_date).toLocaleDateString("it-IT") : "—"}</td>
+                  <td className="px-4 py-3 text-gray-500 text-xs">{plan.last_test_date ? new Date(plan.last_test_date).toLocaleDateString(i18n.language || "it") : "—"}</td>
+                  <td className="px-4 py-3 text-gray-500 text-xs">{plan.next_test_date ? new Date(plan.next_test_date).toLocaleDateString(i18n.language || "it") : "—"}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
                       {plan.status === "bozza" && (

@@ -5,6 +5,7 @@ import { plantsApi } from "../../api/endpoints/plants";
 import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
 
 type StatusFilter = "tutti" | "aperto" | "in_corso" | "completato" | "scaduto";
 
@@ -213,7 +214,7 @@ export function TasksPage() {
                     <td className="px-4 py-3 text-xs">
                       {task.due_date ? (
                         <span className={overdue ? "text-red-600 font-medium" : "text-gray-500"}>
-                          {new Date(task.due_date).toLocaleDateString("it-IT")}
+                          {new Date(task.due_date).toLocaleDateString(i18n.language || "it")}
                         </span>
                       ) : (
                         <span className="text-gray-400">—</span>

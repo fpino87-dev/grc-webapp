@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "../../api/client";
 import { auditTrailApi, type AuditLogEntry } from "../../api/endpoints/auditTrail";
+import i18n from "../../i18n";
 
 const LEVEL_COLORS: Record<string, string> = {
   L1: "bg-red-100 text-red-800",
@@ -261,7 +262,7 @@ export function AuditTrailPage() {
               {entries.map(e => (
                 <tr key={e.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3 text-gray-500 text-xs font-mono whitespace-nowrap">
-                    {new Date(e.timestamp_utc).toLocaleString("it-IT")}
+                    {new Date(e.timestamp_utc).toLocaleString(i18n.language || "it")}
                   </td>
                   <td className="px-4 py-3 text-gray-700 text-xs">{e.user_email_at_time}</td>
                   <td className="px-4 py-3 font-mono text-xs text-gray-600">{e.action_code}</td>

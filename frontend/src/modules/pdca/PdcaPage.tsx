@@ -4,6 +4,7 @@ import { pdcaApi, type PdcaCycle } from "../../api/endpoints/pdca";
 import { plantsApi } from "../../api/endpoints/plants";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { apiClient } from "../../api/client";
+import i18n from "../../i18n";
 
 function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
   const qc = useQueryClient();
@@ -339,7 +340,7 @@ function AdvanceButtons({
     return (
       <>
         <p className="text-xs text-gray-500">
-          Chiuso il {new Date(cycle.closed_at || cycle.updated_at).toLocaleDateString("it-IT")}
+          Chiuso il {new Date(cycle.closed_at || cycle.updated_at).toLocaleDateString(i18n.language || "it")}
         </p>
         {cycle.act_description && (
           <p className="mt-1 text-xs text-gray-700 whitespace-pre-wrap">{cycle.act_description}</p>
@@ -445,7 +446,7 @@ export function PdcaPage() {
                     <AdvanceButtons cycle={c as any} onUpdated={() => {}} />
                   </td>
                   <td className="px-4 py-3 text-gray-500 text-xs">
-                    {new Date(c.created_at).toLocaleDateString("it-IT")}
+                    {new Date(c.created_at).toLocaleDateString(i18n.language || "it")}
                   </td>
                 </tr>
               ))}
