@@ -353,7 +353,7 @@ export function BiaPage() {
                           Approva
                         </button>
                       )}
-                      {(p.status === "bozza" || p.status === "validato") && (
+                      {(p.status === "bozza" || p.status === "validato" || p.status === "approvato") && (
                         <button
                           onClick={() => {
                             if (window.confirm("Eliminare questo processo BIA? L'operazione è consentita solo se non ci sono rischi, BCP o asset collegati.")) {
