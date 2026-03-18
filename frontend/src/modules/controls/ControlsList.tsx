@@ -259,43 +259,40 @@ export function ControlsList() {
         <ExportToolbar frameworks={frameworks ?? []} plantId={selectedPlant?.id} />
       </div>
 
+      {/* Filtro per framework (singola barra) */}
       {frameworks && frameworks.length > 0 && (
-        <div className="flex gap-2 mb-3 flex-wrap">
-          {frameworks.map((f) => (
-            <span key={f.id} className="text-xs bg-blue-50 border border-blue-200 text-blue-700 px-2 py-1 rounded">
-              {f.code} v{f.version}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Filtro per framework */}
-      <div className="flex gap-2 mb-4 flex-wrap">
-        <button
-          onClick={() => setFrameworkFilter("")}
-          className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-            frameworkFilter === ""
-              ? "bg-indigo-600 text-white"
-              : "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
-          }`}
-        >
-          Tutti i framework ({instances.length})
-        </button>
-        {Object.entries(frameworkStats).map(([code, count]) => (
+        <div className="flex gap-2 mb-4 flex-wrap">
           <button
-            key={code}
-            onClick={() => setFrameworkFilter(code)}
-            className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-              frameworkFilter === code
-                ? "bg-indigo-600 text-white"
-                : "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
+            onClick={() => setFrameworkFilter("")}
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
+              frameworkFilter === ""
+                ? "bg-indigo-600 text-white border-indigo-600"
+                : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
             }`}
           >
-            <span className="font-mono mr-1">{code}</span>
-            ({count})
+            Tutti i framework ({instances.length})
           </button>
-        ))}
-      </div>
+          {frameworks.map((f) => {
+            const count = frameworkStats[f.code] ?? 0;
+            const active = frameworkFilter === f.code;
+            return (
+              <button
+                key={f.id}
+                onClick={() => setFrameworkFilter(f.code)}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border flex items-center gap-1 ${
+                  active
+                    ? "bg-indigo-600 text-white border-indigo-600"
+                    : "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+                }`}
+              >
+                <span className="font-mono">{f.code}</span>
+                <span className="text-[10px] opacity-80">v{f.version}</span>
+                <span className="ml-1 text-[11px]">({count})</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Filtro per stato */}
       <div className="flex gap-2 mb-4 flex-wrap">
