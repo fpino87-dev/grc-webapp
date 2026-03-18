@@ -59,6 +59,10 @@ def record_test(
     Returns (BcpTest, list[str]) — the test instance and any warning messages.
     """
     from django.utils import timezone
+    from django.core.exceptions import ValidationError
+
+    if plan.status == "approvato":
+        raise ValidationError("Impossibile registrare un test su un piano BCP approvato.")
 
     test = BcpTest.objects.create(
         plan=plan,
@@ -150,3 +154,27 @@ def record_test(
         )
 
     return test, warnings
+
+
+def delete_bcp_plan(plan: BcpPlan, user) -> None:
+    """Soft delete del piano BCP e dei test associati."""
+    from core.audit import log_action
+
+    for test in plan.tests.all():
+        test.soft_delete()
+        log_action(
+            user=user,
+            action_code="bcp.test.deleted",
+            level="L2",
+            entity=test,
+            payload={"id": str(test.id), "result": test.result},
+        )
+
+    plan.soft_delete()
+    log_action(
+        user=user,
+        action_code="bcp.plan.deleted",
+        level="L2",
+        entity=plan,
+        payload={"id": str(plan.id), "title": plan.title},
+    )

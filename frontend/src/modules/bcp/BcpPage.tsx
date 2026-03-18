@@ -298,6 +298,11 @@ export function BcpPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["bcp"] }),
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => bcpApi.delete(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["bcp"] }),
+  });
+
   const plans = data?.results ?? [];
 
   return (
@@ -353,9 +358,21 @@ export function BcpPage() {
                       )}
                       <button
                         onClick={() => setTestPlan(plan)}
-                        className="text-xs text-blue-700 border border-blue-300 rounded px-2 py-0.5 hover:bg-blue-50"
+                        disabled={plan.status === "approvato"}
+                        className="text-xs text-blue-700 border border-blue-300 rounded px-2 py-0.5 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        + Test
+                        {plan.status === "approvato" ? "Test bloccato" : "+ Test"}
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (window.confirm("Eliminare questo piano BCP (con i test)?")) {
+                            deleteMutation.mutate(plan.id);
+                          }
+                        }}
+                        disabled={deleteMutation.isPending}
+                        className="text-xs text-red-700 border border-red-300 rounded px-2 py-0.5 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Elimina
                       </button>
                     </div>
                   </td>

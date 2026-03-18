@@ -42,4 +42,6 @@ export const bcpApi = {
     apiClient.get<{ results: BcpTest[] }>("/bcp/tests/", { params: { plan: planId } }).then(r => r.data.results),
   recordTest: (data: Record<string, unknown>) =>
     apiClient.post<{ test: BcpTest; warnings: string[] }>("/bcp/tests/", data).then(r => r.data),
+  delete: (id: string) =>
+    apiClient.delete(`/bcp/plans/${id}/`).then(() => undefined),
 };

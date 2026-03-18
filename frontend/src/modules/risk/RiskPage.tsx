@@ -607,6 +607,11 @@ export function RiskPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["risk-assessments"] }),
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => riskApi.delete(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["risk-assessments"] }),
+  });
+
   const assessments: RiskAssessment[] = data?.results ?? [];
 
   return (
@@ -755,6 +760,17 @@ export function RiskPage() {
                         </button>
                       )}
                       {a.risk_accepted && <span className="text-xs text-green-600 font-medium">✓ Accettato</span>}
+                      <button
+                        onClick={() => {
+                          if (window.confirm("Eliminare questo Risk Assessment?")) {
+                            deleteMutation.mutate(a.id);
+                          }
+                        }}
+                        disabled={deleteMutation.isPending}
+                        className="ml-2 text-xs text-red-700 border border-red-300 rounded px-2 py-0.5 hover:bg-red-50 disabled:opacity-50 whitespace-nowrap"
+                      >
+                        Elimina
+                      </button>
                     </td>
                   </tr>
                   {expandedId === a.id && (

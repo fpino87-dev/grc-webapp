@@ -233,7 +233,7 @@ export function BiaPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => biaApi.delete(id),
+    mutationFn: (id: string) => biaApi.deleteWithCascade(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["bia"] }),
   });
 
@@ -356,7 +356,7 @@ export function BiaPage() {
                       {(p.status === "bozza" || p.status === "validato" || p.status === "approvato") && (
                         <button
                           onClick={() => {
-                            if (window.confirm("Eliminare questo processo BIA? L'operazione è consentita solo se non ci sono rischi, BCP o asset collegati.")) {
+                            if (window.confirm("Eliminare questo processo BIA con dipendenze (pulizia prova)?")) {
                               deleteMutation.mutate(p.id);
                             }
                           }}

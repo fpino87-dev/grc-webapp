@@ -111,4 +111,6 @@ export const riskApi = {
     apiClient.post(`/risk/assessments/${id}/accept-risk/`, { note, expiry_date: expiryDate }).then(r => r.data),
   context: (id: string) =>
     apiClient.get<RiskContext>(`/risk/assessments/${id}/context/`).then(r => r.data),
+  delete: (id: string) =>
+    apiClient.delete(`/risk/assessments/${id}/`).then(() => undefined),
 };

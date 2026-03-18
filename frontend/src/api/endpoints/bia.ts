@@ -41,5 +41,7 @@ export const biaApi = {
   snapshot: (id: string) =>
     apiClient.get<CriticalProcessSnapshot>(`/bia/processes/${id}/snapshot/`).then(r => r.data),
   delete: (id: string) =>
-    apiClient.delete(`/bia/processes/${id}/`).then(r => r.data),
+    apiClient.delete(`/bia/processes/${id}/`).then(() => undefined),
+  deleteWithCascade: (id: string) =>
+    apiClient.delete(`/bia/processes/${id}/`, { params: { cascade: "true" } }).then(() => undefined),
 };

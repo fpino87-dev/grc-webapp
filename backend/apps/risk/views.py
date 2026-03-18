@@ -7,6 +7,7 @@ from core.audit import log_action
 from .models import RiskAppetitePolicy, RiskAssessment, RiskDimension, RiskMitigationPlan
 from .serializers import RiskAppetitePolicySerializer, RiskAssessmentSerializer, RiskDimensionSerializer, RiskMitigationPlanSerializer
 from .services import get_risk_bia_bcp_context
+from .services import delete_risk_assessment
 
 
 class RiskAssessmentViewSet(viewsets.ModelViewSet):
@@ -15,6 +16,11 @@ class RiskAssessmentViewSet(viewsets.ModelViewSet):
     )
     serializer_class = RiskAssessmentSerializer
     filterset_fields = ["plant", "status", "assessment_type"]
+
+    def destroy(self, request, *args, **kwargs):
+        assessment = self.get_object()
+        delete_risk_assessment(assessment, request.user)
+        return Response(status=204)
 
     def get_queryset(self):
         qs = super().get_queryset()

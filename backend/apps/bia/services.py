@@ -122,3 +122,131 @@ def get_process_risk_bcp_snapshot(process: CriticalProcess) -> dict:
         "bcp_plans": bcp_plans,
         "summary": summary,
     }
+
+
+def delete_process(process: CriticalProcess, user, cascade: bool = False) -> None:
+    """
+    Elimina (soft delete) un processo BIA.
+
+    - cascade=false: elimina solo se non ci sono dipendenze attive.
+    - cascade=true: elimina anche dipendenze correlate (RiskAssessment, BCP, ecc.) per pulizia di prova.
+    """
+    from django.core.exceptions import ValidationError
+    from django.db.models import Q
+    from core.audit import log_action
+
+    from apps.risk.models import RiskAssessment
+    from apps.bcp.models import BcpPlan
+    from apps.assets.models import Asset
+
+    from .models import RiskDecision, TreatmentOption
+
+    if not cascade:
+        has_risks = RiskAssessment.objects.filter(critical_process=process, deleted_at__isnull=True).exists()
+        has_bcp_fk = process.bcp_plans.filter(deleted_at__isnull=True).exists()
+        has_bcp_m2m = BcpPlan.objects.filter(deleted_at__isnull=True, critical_processes=process).exists()
+        has_treatments = process.treatment_options.filter(deleted_at__isnull=True).exists()
+        has_decisions = process.risk_decisions.filter(deleted_at__isnull=True).exists()
+        has_assets = Asset.objects.filter(deleted_at__isnull=True, processes=process).exists()
+
+        if any([has_risks, has_bcp_fk, has_bcp_m2m, has_treatments, has_decisions, has_assets]):
+            raise ValidationError(
+                "Impossibile eliminare il processo: esistono valutazioni rischio, BCP, opzioni di trattamento, decisioni o asset collegati."
+            )
+
+        process.soft_delete()
+        log_action(
+            user=user,
+            action_code="bia.critical_process.deleted",
+            level="L2",
+            entity=process,
+            payload={"id": str(process.id), "name": process.name},
+        )
+        return
+
+    # Cascade: delete dependencies first.
+    risk_assessments = (
+        RiskAssessment.objects.filter(critical_process=process, deleted_at__isnull=True)
+        .prefetch_related("dimensions", "mitigation_plans")
+    )
+    for assessment in risk_assessments:
+        for dim in assessment.dimensions.all():
+            dim.soft_delete()
+            log_action(
+                user=user,
+                action_code="risk.dimension.deleted",
+                level="L2",
+                entity=dim,
+                payload={"id": str(dim.id), "dimension_code": dim.dimension_code},
+            )
+        for mp in assessment.mitigation_plans.all():
+            mp.soft_delete()
+            log_action(
+                user=user,
+                action_code="risk.mitigation_plan.deleted",
+                level="L2",
+                entity=mp,
+                payload={"id": str(mp.id), "due_date": str(mp.due_date)},
+            )
+        assessment.soft_delete()
+        log_action(
+            user=user,
+            action_code="risk.assessment.deleted",
+            level="L2",
+            entity=assessment,
+            payload={"id": str(assessment.id), "name": assessment.name},
+        )
+
+    for decision in process.risk_decisions.all():
+        decision.soft_delete()
+        log_action(
+            user=user,
+            action_code="bia.risk_decision.deleted",
+            level="L2",
+            entity=decision,
+            payload={"id": str(decision.id)},
+        )
+
+    for option in process.treatment_options.all():
+        option.soft_delete()
+        log_action(
+            user=user,
+            action_code="bia.treatment_option.deleted",
+            level="L2",
+            entity=option,
+            payload={"id": str(option.id), "title": option.title},
+        )
+
+    bcp_plans = (
+        BcpPlan.objects.filter(deleted_at__isnull=True)
+        .filter(Q(critical_process=process) | Q(critical_processes=process))
+        .distinct()
+        .prefetch_related("tests")
+    )
+    for plan in bcp_plans:
+        for test in plan.tests.all():
+            test.soft_delete()
+            log_action(
+                user=user,
+                action_code="bcp.test.deleted",
+                level="L2",
+                entity=test,
+                payload={"id": str(test.id), "result": test.result},
+            )
+        plan.soft_delete()
+        log_action(
+            user=user,
+            action_code="bcp.plan.deleted",
+            level="L2",
+            entity=plan,
+            payload={"id": str(plan.id), "title": plan.title},
+        )
+
+    process.soft_delete()
+    log_action(
+        user=user,
+        action_code="bia.critical_process.deleted",
+        level="L2",
+        entity=process,
+        payload={"id": str(process.id), "name": process.name, "cascade": True},
+    )

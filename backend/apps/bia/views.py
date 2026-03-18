@@ -6,7 +6,7 @@ from core.audit import log_action
 
 from .models import CriticalProcess, RiskDecision, TreatmentOption
 from .serializers import CriticalProcessSerializer, RiskDecisionSerializer, TreatmentOptionSerializer
-from .services import approve_process, get_process_risk_bcp_snapshot, validate_process
+from .services import approve_process, get_process_risk_bcp_snapshot, validate_process, delete_process
 
 
 class CriticalProcessViewSet(viewsets.ModelViewSet):
@@ -16,44 +16,19 @@ class CriticalProcessViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         """
-        Soft delete consentito solo se il processo non ha dipendenze attive.
-        Usato per cleanup BIA di prova.
+        Soft delete del processo BIA.
+
+        Parametri query:
+        - `cascade=true`: elimina anche dipendenze (RiskAssessment, BCP, ecc.) per pulizia di prova.
         """
-        instance = self.get_object()
+        from django.core.exceptions import ValidationError
 
-        has_risks = instance.risk_assessments.filter(deleted_at__isnull=True).exists()
-        has_bcp_fk = instance.bcp_plans.filter(deleted_at__isnull=True).exists()
-        from apps.bcp.models import BcpPlan
-
-        has_bcp_m2m = BcpPlan.objects.filter(
-            deleted_at__isnull=True,
-            critical_processes=instance,
-        ).exists()
-        has_treatments = instance.treatment_options.filter(deleted_at__isnull=True).exists()
-        has_decisions = instance.risk_decisions.filter(deleted_at__isnull=True).exists()
-        from apps.assets.models import Asset
-
-        has_assets = Asset.objects.filter(
-            deleted_at__isnull=True,
-            processes=instance,
-        ).exists()
-
-        if any([has_risks, has_bcp_fk, has_bcp_m2m, has_treatments, has_decisions, has_assets]):
-            return Response(
-                {
-                    "detail": "Impossibile eliminare il processo: esistono valutazioni rischio, BCP, opzioni di trattamento, decisioni o asset collegati."
-                },
-                status=400,
-            )
-
-        instance.soft_delete()
-        log_action(
-            user=request.user,
-            action_code="bia.critical_process.deleted",
-            level="L2",
-            entity=instance,
-            payload={"id": str(instance.id), "name": instance.name},
-        )
+        process = self.get_object()
+        cascade = request.query_params.get("cascade") == "true"
+        try:
+            delete_process(process, request.user, cascade=cascade)
+        except ValidationError as e:
+            return Response({"detail": str(e.message)}, status=400)
         return Response(status=204)
 
     def perform_create(self, serializer):

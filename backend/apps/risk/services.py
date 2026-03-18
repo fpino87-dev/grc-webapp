@@ -317,3 +317,40 @@ def get_risk_bia_bcp_context(assessment: RiskAssessment) -> dict:
         "bcp_summary": bcp_summary,
     }
 
+
+def delete_risk_assessment(assessment: RiskAssessment, user) -> None:
+    """
+    Soft delete del RiskAssessment e delle sue entità dipendenti (dimensions, mitigation_plans).
+    """
+    from core.audit import log_action
+
+    # Dimensions + mitigation plans sono collegate via FK e soft delete rispettando l'audit trail.
+    for dim in assessment.dimensions.all():
+        dim.soft_delete()
+        log_action(
+            user=user,
+            action_code="risk.dimension.deleted",
+            level="L2",
+            entity=dim,
+            payload={"id": str(dim.id), "dimension_code": dim.dimension_code},
+        )
+
+    for mp in assessment.mitigation_plans.all():
+        mp.soft_delete()
+        log_action(
+            user=user,
+            action_code="risk.mitigation_plan.deleted",
+            level="L2",
+            entity=mp,
+            payload={"id": str(mp.id), "due_date": str(mp.due_date)},
+        )
+
+    assessment.soft_delete()
+    log_action(
+        user=user,
+        action_code="risk.assessment.deleted",
+        level="L2",
+        entity=assessment,
+        payload={"id": str(assessment.id), "name": assessment.name},
+    )
+
