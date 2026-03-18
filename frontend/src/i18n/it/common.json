@@ -85,14 +85,96 @@
         "max_downtime": "Downtime max",
         "example": "Esempio"
       },
+      "levels": {
+        "1": { "label": "Trascurabile", "downtime": "> 7 giorni", "example": "Archivio storico documentale" },
+        "2": { "label": "Bassa", "downtime": "3–7 giorni", "example": "Reportistica interna" },
+        "3": { "label": "Media", "downtime": "24–72 ore", "example": "ERP secondario, gestione fornitori" },
+        "4": { "label": "Alta", "downtime": "4–24 ore", "example": "Linea produzione, qualità, logistica" },
+        "5": { "label": "Critica", "downtime": "< 4 ore", "example": "Linea produzione principale, sistemi safety" }
+      },
+      "questions": {
+        "economic": {
+          "label": "Impatto economico del fermo",
+          "low": "Trascurabile (<1k€/h)",
+          "high": "Devastante (>50k€/h)"
+        },
+        "customers": {
+          "label": "Impatto su clienti/contratti",
+          "low": "Nessuno",
+          "high": "Perdita contratti, penali, fermo consegne"
+        },
+        "regulatory": {
+          "label": "Impatto normativo/reputazionale",
+          "low": "Nessuno",
+          "high": "Notifica autorità, danno reputazionale grave"
+        }
+      },
       "guided_estimate_title": "Stima guidata della criticità",
       "suggested_title": "Criticità suggerita",
       "suggested_downtime": "Downtime max tollerato: {{downtime}}"
     },
     "risk": {
       "matrix_title": "Matrice P×I (Probabilità × Impatto)",
+      "zones": {
+        "green": {
+          "label": "Verde",
+          "range": "Score 1–7",
+          "desc": "Rischio accettabile — monitora annualmente"
+        },
+        "yellow": {
+          "label": "Giallo",
+          "range": "Score 8–14",
+          "desc": "Rischio moderato — piano di mitigazione entro 90 giorni"
+        },
+        "red": {
+          "label": "Rosso",
+          "range": "Score 15–25",
+          "desc": "Rischio critico — azione immediata, task autogenerato, PDCA obbligatorio"
+        }
+      },
       "it_dimensions_title": "Dimensioni asset IT",
+      "it_dimensions": {
+        "exposure": {
+          "label": "Esposizione",
+          "desc": "Quanto è raggiungibile dall'esterno o da reti non fidate"
+        },
+        "cve": {
+          "label": "CVE Score",
+          "desc": "Vulnerabilità note non patchate — fonte: NVD/CVE database"
+        },
+        "threat": {
+          "label": "Minaccia",
+          "desc": "Probabilità di attacco basata su threat intelligence di settore"
+        },
+        "controls_gap": {
+          "label": "Gap Controlli",
+          "desc": "Quanti controlli ISO27001/TISAX collegati sono in stato Gap"
+        }
+      },
       "ot_dimensions_title": "Dimensioni asset OT"
+      ,
+      "ot_dimensions": {
+        "purdue": {
+          "label": "Connettività Purdue",
+          "desc": "Livello di isolamento nella gerarchia Purdue — L0 più critico"
+        },
+        "patchability": {
+          "label": "Patchability",
+          "desc": "Possibilità tecnica di aggiornare il firmware/OS"
+        },
+        "physical_impact": {
+          "label": "Impatto fisico",
+          "desc": "Conseguenze fisiche di un attacco: fermo linea, danni, safety"
+        },
+        "segmentation": {
+          "label": "Segmentazione",
+          "desc": "Isolamento dalla rete IT e da internet"
+        },
+        "detection": {
+          "label": "Rilevabilità",
+          "desc": "Capacità di rilevare una compromissione in tempo reale"
+        }
+      }
     },
     "connections": {
       "chain_title": "Catena logica dei moduli",

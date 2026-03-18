@@ -85,14 +85,96 @@
         "max_downtime": "Max downtime",
         "example": "Example"
       },
+      "levels": {
+        "1": { "label": "Negligible", "downtime": "> 7 days", "example": "Historical document archive" },
+        "2": { "label": "Low", "downtime": "3–7 days", "example": "Internal reporting" },
+        "3": { "label": "Medium", "downtime": "24–72 hours", "example": "Secondary ERP, supplier management" },
+        "4": { "label": "High", "downtime": "4–24 hours", "example": "Production line, quality, logistics" },
+        "5": { "label": "Critical", "downtime": "< 4 hours", "example": "Main production line, safety systems" }
+      },
+      "questions": {
+        "economic": {
+          "label": "Economic impact of downtime",
+          "low": "Negligible (<€1k/h)",
+          "high": "Devastating (>€50k/h)"
+        },
+        "customers": {
+          "label": "Impact on customers/contracts",
+          "low": "None",
+          "high": "Contract loss, penalties, delivery stop"
+        },
+        "regulatory": {
+          "label": "Regulatory/reputational impact",
+          "low": "None",
+          "high": "Authority notification, severe reputational damage"
+        }
+      },
       "guided_estimate_title": "Guided criticality estimate",
       "suggested_title": "Suggested criticality",
       "suggested_downtime": "Max tolerated downtime: {{downtime}}"
     },
     "risk": {
       "matrix_title": "P×I matrix (Probability × Impact)",
+      "zones": {
+        "green": {
+          "label": "Green",
+          "range": "Score 1–7",
+          "desc": "Acceptable risk — review annually"
+        },
+        "yellow": {
+          "label": "Yellow",
+          "range": "Score 8–14",
+          "desc": "Moderate risk — mitigation plan within 90 days"
+        },
+        "red": {
+          "label": "Red",
+          "range": "Score 15–25",
+          "desc": "Critical risk — immediate action, auto-generated task, mandatory PDCA"
+        }
+      },
       "it_dimensions_title": "IT asset dimensions",
+      "it_dimensions": {
+        "exposure": {
+          "label": "Exposure",
+          "desc": "How reachable it is from outside or from untrusted networks"
+        },
+        "cve": {
+          "label": "CVE score",
+          "desc": "Known unpatched vulnerabilities — source: NVD/CVE database"
+        },
+        "threat": {
+          "label": "Threat",
+          "desc": "Attack likelihood based on sector threat intelligence"
+        },
+        "controls_gap": {
+          "label": "Controls gap",
+          "desc": "How many linked ISO27001/TISAX controls are in Gap status"
+        }
+      },
       "ot_dimensions_title": "OT asset dimensions"
+      ,
+      "ot_dimensions": {
+        "purdue": {
+          "label": "Purdue connectivity",
+          "desc": "Isolation level in the Purdue hierarchy — L0 is most critical"
+        },
+        "patchability": {
+          "label": "Patchability",
+          "desc": "Technical ability to update firmware/OS"
+        },
+        "physical_impact": {
+          "label": "Physical impact",
+          "desc": "Physical consequences of an attack: line stop, damage, safety"
+        },
+        "segmentation": {
+          "label": "Segmentation",
+          "desc": "Isolation from the IT network and the internet"
+        },
+        "detection": {
+          "label": "Detectability",
+          "desc": "Ability to detect a compromise in real time"
+        }
+      }
     },
     "connections": {
       "chain_title": "Module logic chain",

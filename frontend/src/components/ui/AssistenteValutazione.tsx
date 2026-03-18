@@ -1,24 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "../../api/client";
 import { useAuthStore } from "../../store/auth";
 import { useTranslation } from "react-i18next";
 
-// ─── Dati statici BIA ────────────────────────────────────────────────────────
-
-const BIA_LEVELS = [
-  { value: 1, label: "Trascurabile", downtime: "> 7 giorni",    color: "bg-green-100 text-green-800 border-green-200",  example: "Archivio storico documentale" },
-  { value: 2, label: "Bassa",        downtime: "3–7 giorni",    color: "bg-yellow-100 text-yellow-800 border-yellow-200", example: "Reportistica interna" },
-  { value: 3, label: "Media",        downtime: "24–72 ore",     color: "bg-orange-100 text-orange-800 border-orange-200", example: "ERP secondario, gestione fornitori" },
-  { value: 4, label: "Alta",         downtime: "4–24 ore",      color: "bg-red-100 text-red-800 border-red-200",          example: "Linea produzione, qualità, logistica" },
-  { value: 5, label: "Critica",      downtime: "< 4 ore",       color: "bg-red-200 text-red-900 border-red-300",          example: "Linea produzione principale, sistemi safety" },
-];
-
-const SLIDER_QUESTIONS = [
-  { id: "economico",      label: "Impatto economico del fermo",        low: "Trascurabile (<1k€/h)",        high: "Devastante (>50k€/h)" },
-  { id: "clienti",        label: "Impatto su clienti/contratti",        low: "Nessuno",                      high: "Perdita contratti, penali, fermo consegne" },
-  { id: "normativo",      label: "Impatto normativo/reputazionale",     low: "Nessuno",                      high: "Notifica autorità, danno reputazionale grave" },
-];
+// ─── Dati statici BIA/Risk (testi via i18n) ──────────────────────────────────
 
 const CRITICALITY_COLORS: Record<number, string> = {
   1: "text-green-700",
@@ -27,29 +13,6 @@ const CRITICALITY_COLORS: Record<number, string> = {
   4: "text-red-600",
   5: "text-red-800 font-bold",
 };
-
-// ─── Dati statici Risk ───────────────────────────────────────────────────────
-
-const RISK_ZONES = [
-  { label: "Verde",   range: "Score 1–7",   desc: "Rischio accettabile — monitora annualmente",                                     bg: "bg-green-100",  text: "text-green-800" },
-  { label: "Giallo",  range: "Score 8–14",  desc: "Rischio moderato — piano di mitigazione entro 90 giorni",                        bg: "bg-yellow-100", text: "text-yellow-800" },
-  { label: "Rosso",   range: "Score 15–25", desc: "Rischio critico — azione immediata, task autogenerato, PDCA obbligatorio",       bg: "bg-red-100",    text: "text-red-800" },
-];
-
-const IT_DIMENSIONS = [
-  { code: "esposizione",  label: "Esposizione",      weight: "30%", desc: "Quanto è raggiungibile dall'esterno o da reti non fidate" },
-  { code: "cve",          label: "CVE Score",        weight: "25%", desc: "Vulnerabilità note non patchate — fonte: NVD/CVE database" },
-  { code: "minaccia",     label: "Minaccia",         weight: "25%", desc: "Probabilità di attacco basata su threat intelligence di settore" },
-  { code: "gap_ctrl",     label: "Gap Controlli",    weight: "20%", desc: "Quanti controlli ISO27001/TISAX collegati sono in stato Gap" },
-];
-
-const OT_DIMENSIONS = [
-  { code: "purdue",       label: "Connettività Purdue", weight: "25%", desc: "Livello di isolamento nella gerarchia Purdue — L0 più critico" },
-  { code: "patchability", label: "Patchability",         weight: "20%", desc: "Possibilità tecnica di aggiornare il firmware/OS" },
-  { code: "impatto_fis",  label: "Impatto fisico",       weight: "25%", desc: "Conseguenze fisiche di un attacco: fermo linea, danni, safety" },
-  { code: "segmentaz",    label: "Segmentazione",        weight: "15%", desc: "Isolamento dalla rete IT e da internet" },
-  { code: "rilevabilita", label: "Rilevabilità",         weight: "15%", desc: "Capacità di rilevare una compromissione in tempo reale" },
-];
 
 // ─── Helper: cella heatmap ───────────────────────────────────────────────────
 
@@ -65,8 +28,22 @@ function TabBia() {
   const { t } = useTranslation();
   const [sliders, setSliders] = useState<Record<string, number>>({ economico: 3, clienti: 3, normativo: 3 });
 
-  const avg = Math.round(Object.values(sliders).reduce((a, b) => a + b, 0) / SLIDER_QUESTIONS.length);
-  const suggested = BIA_LEVELS.find(l => l.value === avg) ?? BIA_LEVELS[2];
+  const biaLevels = useMemo(() => ([
+    { value: 1, label: t("eval_assistant.bia.levels.1.label"), downtime: t("eval_assistant.bia.levels.1.downtime"), color: "bg-green-100 text-green-800 border-green-200", example: t("eval_assistant.bia.levels.1.example") },
+    { value: 2, label: t("eval_assistant.bia.levels.2.label"), downtime: t("eval_assistant.bia.levels.2.downtime"), color: "bg-yellow-100 text-yellow-800 border-yellow-200", example: t("eval_assistant.bia.levels.2.example") },
+    { value: 3, label: t("eval_assistant.bia.levels.3.label"), downtime: t("eval_assistant.bia.levels.3.downtime"), color: "bg-orange-100 text-orange-800 border-orange-200", example: t("eval_assistant.bia.levels.3.example") },
+    { value: 4, label: t("eval_assistant.bia.levels.4.label"), downtime: t("eval_assistant.bia.levels.4.downtime"), color: "bg-red-100 text-red-800 border-red-200", example: t("eval_assistant.bia.levels.4.example") },
+    { value: 5, label: t("eval_assistant.bia.levels.5.label"), downtime: t("eval_assistant.bia.levels.5.downtime"), color: "bg-red-200 text-red-900 border-red-300", example: t("eval_assistant.bia.levels.5.example") },
+  ]), [t]);
+
+  const sliderQuestions = useMemo(() => ([
+    { id: "economico", label: t("eval_assistant.bia.questions.economic.label"), low: t("eval_assistant.bia.questions.economic.low"), high: t("eval_assistant.bia.questions.economic.high") },
+    { id: "clienti", label: t("eval_assistant.bia.questions.customers.label"), low: t("eval_assistant.bia.questions.customers.low"), high: t("eval_assistant.bia.questions.customers.high") },
+    { id: "normativo", label: t("eval_assistant.bia.questions.regulatory.label"), low: t("eval_assistant.bia.questions.regulatory.low"), high: t("eval_assistant.bia.questions.regulatory.high") },
+  ]), [t]);
+
+  const avg = Math.round(Object.values(sliders).reduce((a, b) => a + b, 0) / sliderQuestions.length);
+  const suggested = biaLevels.find(l => l.value === avg) ?? biaLevels[2];
 
   return (
     <div className="space-y-5">
@@ -83,7 +60,7 @@ function TabBia() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {BIA_LEVELS.map(l => (
+              {biaLevels.map(l => (
                 <tr key={l.value} className="hover:bg-gray-50">
                   <td className="px-3 py-2">
                     <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded border text-xs font-medium ${l.color}`}>
@@ -103,7 +80,7 @@ function TabBia() {
       <div>
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">{t("eval_assistant.bia.guided_estimate_title")}</p>
         <div className="space-y-4">
-          {SLIDER_QUESTIONS.map(q => (
+          {sliderQuestions.map(q => (
             <div key={q.id}>
               <div className="flex justify-between mb-1">
                 <span className="text-sm font-medium text-gray-700">{q.label}</span>
@@ -137,6 +114,27 @@ function TabBia() {
 
 function TabRisk() {
   const { t } = useTranslation();
+  const riskZones = useMemo(() => ([
+    { key: "green", label: t("eval_assistant.risk.zones.green.label"), range: t("eval_assistant.risk.zones.green.range"), desc: t("eval_assistant.risk.zones.green.desc"), bg: "bg-green-100", text: "text-green-800" },
+    { key: "yellow", label: t("eval_assistant.risk.zones.yellow.label"), range: t("eval_assistant.risk.zones.yellow.range"), desc: t("eval_assistant.risk.zones.yellow.desc"), bg: "bg-yellow-100", text: "text-yellow-800" },
+    { key: "red", label: t("eval_assistant.risk.zones.red.label"), range: t("eval_assistant.risk.zones.red.range"), desc: t("eval_assistant.risk.zones.red.desc"), bg: "bg-red-100", text: "text-red-800" },
+  ]), [t]);
+
+  const itDimensions = useMemo(() => ([
+    { code: "esposizione", label: t("eval_assistant.risk.it_dimensions.exposure.label"), weight: "30%", desc: t("eval_assistant.risk.it_dimensions.exposure.desc") },
+    { code: "cve", label: t("eval_assistant.risk.it_dimensions.cve.label"), weight: "25%", desc: t("eval_assistant.risk.it_dimensions.cve.desc") },
+    { code: "minaccia", label: t("eval_assistant.risk.it_dimensions.threat.label"), weight: "25%", desc: t("eval_assistant.risk.it_dimensions.threat.desc") },
+    { code: "gap_ctrl", label: t("eval_assistant.risk.it_dimensions.controls_gap.label"), weight: "20%", desc: t("eval_assistant.risk.it_dimensions.controls_gap.desc") },
+  ]), [t]);
+
+  const otDimensions = useMemo(() => ([
+    { code: "purdue", label: t("eval_assistant.risk.ot_dimensions.purdue.label"), weight: "25%", desc: t("eval_assistant.risk.ot_dimensions.purdue.desc") },
+    { code: "patchability", label: t("eval_assistant.risk.ot_dimensions.patchability.label"), weight: "20%", desc: t("eval_assistant.risk.ot_dimensions.patchability.desc") },
+    { code: "impatto_fis", label: t("eval_assistant.risk.ot_dimensions.physical_impact.label"), weight: "25%", desc: t("eval_assistant.risk.ot_dimensions.physical_impact.desc") },
+    { code: "segmentaz", label: t("eval_assistant.risk.ot_dimensions.segmentation.label"), weight: "15%", desc: t("eval_assistant.risk.ot_dimensions.segmentation.desc") },
+    { code: "rilevabilita", label: t("eval_assistant.risk.ot_dimensions.detection.label"), weight: "15%", desc: t("eval_assistant.risk.ot_dimensions.detection.desc") },
+  ]), [t]);
+
   return (
     <div className="space-y-5">
       {/* Heatmap 5×5 */}
@@ -171,8 +169,8 @@ function TabRisk() {
         </div>
 
         <div className="mt-2 flex gap-2">
-          {RISK_ZONES.map(z => (
-            <div key={z.label} className={`flex-1 rounded px-2 py-1.5 text-xs ${z.bg} ${z.text}`}>
+          {riskZones.map(z => (
+            <div key={z.key} className={`flex-1 rounded px-2 py-1.5 text-xs ${z.bg} ${z.text}`}>
               <span className="font-semibold">{z.label}</span> <span className="opacity-75">{z.range}</span>
             </div>
           ))}
@@ -181,8 +179,8 @@ function TabRisk() {
 
       {/* Zone e significato */}
       <div className="space-y-2">
-        {RISK_ZONES.map(z => (
-          <div key={z.label} className={`rounded-lg px-3 py-2 border ${z.bg} border-opacity-50`}>
+        {riskZones.map(z => (
+          <div key={z.key} className={`rounded-lg px-3 py-2 border ${z.bg} border-opacity-50`}>
             <span className={`font-semibold text-sm ${z.text}`}>{z.label} — {z.range}</span>
             <p className="text-xs text-gray-600 mt-0.5">{z.desc}</p>
           </div>
@@ -193,7 +191,7 @@ function TabRisk() {
       <div>
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t("eval_assistant.risk.it_dimensions_title")}</p>
         <div className="space-y-1.5">
-          {IT_DIMENSIONS.map(d => (
+          {itDimensions.map(d => (
             <div key={d.code} className="flex gap-2 items-start bg-blue-50 rounded px-3 py-2">
               <span className="text-xs font-mono font-bold text-blue-700 shrink-0 w-24">{d.label} <span className="text-blue-400">({d.weight})</span></span>
               <span className="text-xs text-gray-600">{d.desc}</span>
@@ -206,7 +204,7 @@ function TabRisk() {
       <div>
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t("eval_assistant.risk.ot_dimensions_title")}</p>
         <div className="space-y-1.5">
-          {OT_DIMENSIONS.map(d => (
+          {otDimensions.map(d => (
             <div key={d.code} className="flex gap-2 items-start bg-orange-50 rounded px-3 py-2">
               <span className="text-xs font-mono font-bold text-orange-700 shrink-0 w-24">{d.label} <span className="text-orange-400">({d.weight})</span></span>
               <span className="text-xs text-gray-600">{d.desc}</span>
