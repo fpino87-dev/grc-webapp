@@ -879,8 +879,6 @@ function TabStorico({ history }: { history: NonNullable<ReturnType<typeof useDet
 
 // ─── Custom hook ──────────────────────────────────────────────────────────────
 
-import i18n from "../../i18n";
-
 function useDetailInfo(instanceId: string | null) {
   return useQuery({
     queryKey: ["control-detail", instanceId, i18n.language],
