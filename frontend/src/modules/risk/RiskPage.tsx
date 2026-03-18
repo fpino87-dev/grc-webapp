@@ -23,8 +23,12 @@ function matrixColor(p: number, i: number): string {
 
 function RiskLevelBadge({ score }: { score: number | null }) {
   if (score === null) return <span className="text-gray-400 text-xs">—</span>;
-  const cls = score > 14 ? "bg-red-100 text-red-800" : score > 7 ? "bg-orange-100 text-orange-800" : score > 4 ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800";
-  const label = score > 14 ? "Critico" : score > 7 ? "Alto" : score > 4 ? "Medio" : "Basso";
+  // Allineamento con il backend (RiskAssessment.risk_level):
+  // - <= 7 verde
+  // - <= 14 giallo
+  // - > 14 rosso
+  const cls = score > 14 ? "bg-red-100 text-red-800" : score > 7 ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800";
+  const label = score > 14 ? "Critico" : score > 7 ? "Medio" : "Basso";
   return <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${cls}`}>{score} — {label}</span>;
 }
 
@@ -1199,6 +1203,20 @@ export function RiskPage() {
                           {a.status === "completato" && !a.risk_accepted && "Pronto: accetta il rischio residuo"}
                           {a.status === "completato" && a.risk_accepted && "Rischio accettato"}
                           {a.status === "archiviato" && "Archiviato"}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Trattamento:{" "}
+                          {a.treatment
+                            ? a.treatment === "mitigare"
+                              ? "Mitigare"
+                              : a.treatment === "accettare"
+                                ? "Accettare"
+                                : a.treatment === "trasferire"
+                                  ? "Trasferire"
+                                  : a.treatment === "evitare"
+                                    ? "Evitare"
+                                    : a.treatment
+                            : "—"}
                         </div>
                       </div>
                     </td>
