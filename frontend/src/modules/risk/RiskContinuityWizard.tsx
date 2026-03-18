@@ -187,6 +187,30 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
                       </p>
                     </div>
                   )}
+
+                  <div className="border border-gray-200 bg-white rounded-lg p-3">
+                    <div className="text-[11px] font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+                      Legenda sigle e criticità
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-[11px] text-gray-600">
+                        <strong>MTPD</strong> = ore massime di interruzione tollerabili
+                      </div>
+                      <div className="text-[11px] text-gray-600">
+                        <strong>MBCO</strong> = % minima di continuità richiesta
+                      </div>
+                      <div className="text-[11px] text-gray-600">
+                        <strong>RTO</strong> = ore per il ripristino
+                      </div>
+                      <div className="text-[11px] text-gray-600">
+                        <strong>RPO</strong> = ore di perdita accettabile
+                      </div>
+                      <div className="pt-2 border-t border-gray-100 text-[11px] text-gray-600">
+                        <strong>Criticità 1–5</strong>:
+                        <span className="ml-1">1 bassa</span>, <span>3 media</span>, <span>5 critica</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
