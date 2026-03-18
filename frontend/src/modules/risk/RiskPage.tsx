@@ -243,11 +243,19 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<Partial<RiskMitigationPlan>>({});
+  const { data: riskContext } = useQuery({
+    queryKey: ["risk-context", assessmentId],
+    queryFn: () => riskApi.context(assessmentId),
+  });
 
   const { data: plans = [] } = useQuery({
     queryKey: ["mitigation-plans", assessmentId],
     queryFn: () => riskApi.mitigationPlans(assessmentId),
   });
+
+  const bcpPlans = riskContext?.bcp_plans ?? [];
+  const selectedBcpPlan = bcpPlans.find(p => p.id === form.bcp_plan) ?? null;
+  const todayStr = new Date().toISOString().slice(0, 10);
 
   const createMutation = useMutation({
     mutationFn: () => riskApi.createPlan({ ...form, assessment: assessmentId }),
@@ -276,10 +284,39 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
             onChange={e => setForm(p => ({ ...p, action: e.target.value }))}
             className="w-full border rounded px-2 py-1.5 text-sm" rows={2}
           />
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Collega a un BCP (opzionale)</label>
+            <select
+              value={form.bcp_plan ?? ""}
+              onChange={e => {
+                const id = e.target.value || null;
+                const chosen = bcpPlans.find(p => p.id === id) ?? null;
+                setForm(prev => ({
+                  ...prev,
+                  bcp_plan: id,
+                  // Coerenza: per la mitigazione usiamo la "data dell'ultimo test valido".
+                  due_date: chosen?.last_test_date ?? prev.due_date,
+                }));
+              }}
+              className="w-full border rounded px-2 py-1.5 text-sm"
+            >
+              <option value="">— Nessun BCP —</option>
+              {bcpPlans.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.title} · {p.status} · valido fino {p.next_test_date ?? "—"}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="flex gap-2">
-            <input type="date" placeholder="Scadenza *" value={form.due_date ?? ""}
+            <input
+              type="date"
+              placeholder="Data ultimo test valido *"
+              value={form.due_date ?? ""}
               onChange={e => setForm(p => ({ ...p, due_date: e.target.value }))}
-              className="border rounded px-2 py-1.5 text-sm flex-1" />
+              disabled={!!selectedBcpPlan?.last_test_date}
+              className="border rounded px-2 py-1.5 text-sm flex-1 disabled:bg-gray-50"
+            />
             <button onClick={() => createMutation.mutate()} disabled={createMutation.isPending || !form.action || !form.due_date}
               className="px-3 py-1.5 bg-primary-600 text-white text-xs rounded hover:bg-primary-700 disabled:opacity-50">Salva</button>
             <button onClick={() => setShowForm(false)} className="px-3 py-1.5 border rounded text-xs text-gray-600 hover:bg-gray-50">Annulla</button>
@@ -292,16 +329,30 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
       ) : (
         <div className="space-y-2">
           {plans.map(plan => (
+            (() => {
+              const bcpValid =
+                plan.bcp_plan_next_test_date
+                  ? plan.bcp_plan_next_test_date >= todayStr
+                  : plan.due_date >= todayStr;
+              const isDone = !!plan.completed_at;
+              const dotColor = isDone ? "bg-green-500" : (bcpValid ? "bg-green-400" : "bg-orange-400");
+              return (
             <div key={plan.id} className="flex items-center gap-3 bg-white rounded border border-gray-200 px-3 py-2 text-sm">
-              <span className={`w-2 h-2 rounded-full shrink-0 ${plan.completed_at ? "bg-green-500" : "bg-orange-400"}`} />
+              <span className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
               <span className="flex-1 text-gray-700">{plan.action}</span>
-              <span className="text-xs text-gray-400 shrink-0">scad. {new Date(plan.due_date).toLocaleDateString(i18n.language || "it")}</span>
+              <span className="text-xs text-gray-400 shrink-0">
+                {plan.bcp_plan_next_test_date
+                  ? `valido fino ${new Date(plan.bcp_plan_next_test_date).toLocaleDateString(i18n.language || "it")} · ultimo test ${new Date(plan.due_date).toLocaleDateString(i18n.language || "it")}`
+                  : `scad. ${new Date(plan.due_date).toLocaleDateString(i18n.language || "it")}`}
+              </span>
               {!plan.completed_at ? (
                 <button onClick={() => completeMutation.mutate(plan.id)} className="text-xs text-green-700 hover:underline shrink-0">Completa</button>
               ) : (
                 <span className="text-xs text-green-600 shrink-0">✓ Completato</span>
               )}
             </div>
+              );
+            })()
           ))}
         </div>
       )}

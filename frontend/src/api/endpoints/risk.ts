@@ -7,6 +7,11 @@ export interface RiskMitigationPlan {
   owner: string | null;
   due_date: string;
   completed_at: string | null;
+  bcp_plan?: string | null;
+  bcp_plan_title?: string | null;
+  bcp_plan_status?: string | null;
+  bcp_plan_last_test_date?: string | null;
+  bcp_plan_next_test_date?: string | null;
 }
 
 export interface RiskAssessment {

@@ -252,6 +252,16 @@ class RiskMitigationPlan(BaseModel):
         on_delete=models.SET_NULL,
     )
     due_date = models.DateField()
+    # Collega il piano di mitigazione a un BCP: la mitigazione vale finché il BCP
+    # resta "valid" (next_test_date >= oggi) e quindi può perdere valore
+    # automaticamente quando il test BCP scade.
+    bcp_plan = models.ForeignKey(
+        "bcp.BcpPlan",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="risk_mitigation_plans",
+    )
     completed_at = models.DateTimeField(null=True, blank=True)
     control_instance = models.ForeignKey(
         "controls.ControlInstance",

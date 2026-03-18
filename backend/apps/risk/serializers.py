@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from .models import RiskAppetitePolicy, RiskAssessment, RiskDimension, RiskMitigationPlan
+from apps.bcp.models import BcpPlan
 
 
 class RiskAssessmentSerializer(serializers.ModelSerializer):
@@ -105,6 +106,16 @@ class RiskDimensionSerializer(serializers.ModelSerializer):
 
 class RiskMitigationPlanSerializer(serializers.ModelSerializer):
     owner_username = serializers.CharField(source="owner.username", read_only=True)
+    bcp_plan = serializers.PrimaryKeyRelatedField(
+        queryset=BcpPlan.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+
+    bcp_plan_title = serializers.SerializerMethodField(read_only=True)
+    bcp_plan_status = serializers.SerializerMethodField(read_only=True)
+    bcp_plan_last_test_date = serializers.SerializerMethodField(read_only=True)
+    bcp_plan_next_test_date = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = RiskMitigationPlan
@@ -115,12 +126,37 @@ class RiskMitigationPlanSerializer(serializers.ModelSerializer):
             "owner",
             "owner_username",
             "due_date",
+            "bcp_plan",
+            "bcp_plan_title",
+            "bcp_plan_status",
+            "bcp_plan_last_test_date",
+            "bcp_plan_next_test_date",
             "completed_at",
             "control_instance",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["id", "created_at", "updated_at", "owner_username"]
+        read_only_fields = ["id", "created_at", "updated_at", "owner_username", "bcp_plan_title", "bcp_plan_status", "bcp_plan_last_test_date", "bcp_plan_next_test_date"]
+
+    def get_bcp_plan_title(self, obj):
+        if not obj.bcp_plan:
+            return None
+        return obj.bcp_plan.title
+
+    def get_bcp_plan_status(self, obj):
+        if not obj.bcp_plan:
+            return None
+        return obj.bcp_plan.status
+
+    def get_bcp_plan_last_test_date(self, obj):
+        if not obj.bcp_plan:
+            return None
+        return obj.bcp_plan.last_test_date
+
+    def get_bcp_plan_next_test_date(self, obj):
+        if not obj.bcp_plan:
+            return None
+        return obj.bcp_plan.next_test_date
 
 
 class RiskAppetitePolicySerializer(serializers.ModelSerializer):
