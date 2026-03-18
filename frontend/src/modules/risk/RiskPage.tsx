@@ -9,6 +9,7 @@ import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { AssistenteValutazione } from "../../components/ui/AssistenteValutazione";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
+import { RiskContinuityWizard } from "./RiskContinuityWizard";
 import i18n from "../../i18n";
 
 function matrixColor(p: number, i: number): string {
@@ -579,6 +580,7 @@ export function RiskPage() {
   const [showNew, setShowNew] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showWizard, setShowWizard] = useState(false);
   const selectedPlant = useAuthStore(s => s.selectedPlant);
   const qc = useQueryClient();
 
@@ -639,6 +641,12 @@ export function RiskPage() {
           />
         </h2>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowWizard(true)}
+            className="flex items-center gap-2 px-4 py-2 border border-primary-200 text-primary-700 rounded-lg hover:bg-primary-50 text-sm font-medium"
+          >
+            <span>🧭</span> Wizard BIA → Risk → BCP
+          </button>
           <button
             onClick={() => setDrawerOpen(true)}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
@@ -768,6 +776,7 @@ export function RiskPage() {
 
       {showNew && plants && <NewAssessmentModal plants={plants} onClose={() => setShowNew(false)} />}
       <AssistenteValutazione open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      {showWizard && <RiskContinuityWizard onClose={() => setShowWizard(false)} />}
     </div>
   );
 }
