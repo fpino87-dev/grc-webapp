@@ -6,6 +6,7 @@ import { StatusBadge } from "../../components/ui/StatusBadge";
 import { ControlDetailDrawer } from "./ControlDetailDrawer";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
 import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
 
 const STATUS_OPTIONS = ["compliant", "parziale", "gap", "na", "non_valutato"];
 
@@ -374,7 +375,7 @@ export function ControlsList() {
                   </td>
                   <td className="px-4 py-3 text-gray-500 text-xs">
                     {c.last_evaluated_at
-                      ? new Date(c.last_evaluated_at).toLocaleDateString("it-IT")
+                      ? new Date(c.last_evaluated_at).toLocaleDateString(i18n.language || "it")
                       : "—"}
                   </td>
                 </tr>

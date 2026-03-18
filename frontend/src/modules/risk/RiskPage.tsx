@@ -9,6 +9,7 @@ import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { AssistenteValutazione } from "../../components/ui/AssistenteValutazione";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
+import i18n from "../../i18n";
 
 function matrixColor(p: number, i: number): string {
   const s = p * i;
@@ -171,8 +172,8 @@ function FormalAcceptancePanel({ assessment }: { assessment: RiskAssessment }) {
         <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg ${expired ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"}`}>
           <span>{expired ? "⚠️" : "✅"}</span>
           <span>
-            Accettato da <strong>{assessment.accepted_by_name ?? "—"}</strong> il {assessment.risk_accepted_at ? new Date(assessment.risk_accepted_at).toLocaleDateString("it-IT") : "—"}
-            {expDate && <> — {expired ? "scaduto il" : "scade il"} <strong>{expDate.toLocaleDateString("it-IT")}</strong></>}
+            Accettato da <strong>{assessment.accepted_by_name ?? "—"}</strong> il {assessment.risk_accepted_at ? new Date(assessment.risk_accepted_at).toLocaleDateString(i18n.language || "it") : "—"}
+            {expDate && <> — {expired ? "scaduto il" : "scade il"} <strong>{expDate.toLocaleDateString(i18n.language || "it")}</strong></>}
           </span>
         </div>
       </div>
@@ -280,7 +281,7 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
             <div key={plan.id} className="flex items-center gap-3 bg-white rounded border border-gray-200 px-3 py-2 text-sm">
               <span className={`w-2 h-2 rounded-full shrink-0 ${plan.completed_at ? "bg-green-500" : "bg-orange-400"}`} />
               <span className="flex-1 text-gray-700">{plan.action}</span>
-              <span className="text-xs text-gray-400 shrink-0">scad. {new Date(plan.due_date).toLocaleDateString("it-IT")}</span>
+              <span className="text-xs text-gray-400 shrink-0">scad. {new Date(plan.due_date).toLocaleDateString(i18n.language || "it")}</span>
               {!plan.completed_at ? (
                 <button onClick={() => completeMutation.mutate(plan.id)} className="text-xs text-green-700 hover:underline shrink-0">Completa</button>
               ) : (
@@ -563,7 +564,7 @@ function RiskAppetiteCard({ plantId }: { plantId?: string }) {
         Max rischi rossi: <strong className="text-red-600">{policy.max_red_risks_count}</strong>
       </div>
       <div className="text-gray-700">
-        Valida fino: <strong>{policy.valid_until ? new Date(policy.valid_until).toLocaleDateString("it-IT") : "—"}</strong>
+        Valida fino: <strong>{policy.valid_until ? new Date(policy.valid_until).toLocaleDateString(i18n.language || "it") : "—"}</strong>
       </div>
       {policy.approved_by_name && (
         <div className="text-gray-500 text-xs">Approvata da: {policy.approved_by_name}</div>

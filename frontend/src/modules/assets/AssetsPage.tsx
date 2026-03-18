@@ -4,6 +4,7 @@ import { assetsApi, type AssetIT, type AssetOT, type RegisterChangeResult } from
 import { plantsApi } from "../../api/endpoints/plants";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
+import i18n from "../../i18n";
 
 function CriticalityBadge({ value }: { value: number }) {
   const levels: Record<
@@ -130,12 +131,12 @@ function RegisterChangeForm({
             )}
           </div>
           <p className="text-sm"><strong>Ref:</strong> {asset.last_change_ref}</p>
-          <p className="text-sm"><strong>Data:</strong> {asset.last_change_date ? new Date(asset.last_change_date).toLocaleDateString("it-IT") : "—"}</p>
+          <p className="text-sm"><strong>Data:</strong> {asset.last_change_date ? new Date(asset.last_change_date).toLocaleDateString(i18n.language || "it") : "—"}</p>
           <p className="text-sm"><strong>Descrizione:</strong> {asset.last_change_desc || "—"}</p>
           {asset.needs_revaluation && (
             <div className="mt-2 flex items-center gap-2">
               <span className="text-sm text-red-600">
-                Rivalutazione richiesta dal {asset.needs_revaluation_since ? new Date(asset.needs_revaluation_since).toLocaleDateString("it-IT") : "—"}
+                Rivalutazione richiesta dal {asset.needs_revaluation_since ? new Date(asset.needs_revaluation_since).toLocaleDateString(i18n.language || "it") : "—"}
               </span>
               <button
                 onClick={() => clearMutation.mutate()}
@@ -381,7 +382,7 @@ function ITTab({ search }: { search: string }) {
                 <td className="px-4 py-3"><CriticalityBadge value={a.criticality} /></td>
                 <td className="px-4 py-3"><StatusBadge status={a.internet_exposed ? "si" : "no"} /></td>
                 <td className="px-4 py-3 text-gray-500 text-xs">
-                  {a.eol_date ? new Date(a.eol_date).toLocaleDateString("it-IT") : "—"}
+                  {a.eol_date ? new Date(a.eol_date).toLocaleDateString(i18n.language || "it") : "—"}
                 </td>
                 <td className="px-4 py-3">
                   <button
