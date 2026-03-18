@@ -6,6 +6,7 @@ import { plantsApi } from "../../api/endpoints/plants";
 import { biaApi, type CriticalProcess } from "../../api/endpoints/bia";
 import { usersApi, type GrcUser } from "../../api/endpoints/users";
 import { useAuthStore } from "../../store/auth";
+import { bcpApi, type BcpPlan } from "../../api/endpoints/bcp";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { AssistenteValutazione } from "../../components/ui/AssistenteValutazione";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
@@ -245,6 +246,8 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
   const [form, setForm] = useState<Partial<RiskMitigationPlan>>({});
   const [editPlan, setEditPlan] = useState<RiskMitigationPlan | null>(null);
   const [editForm, setEditForm] = useState<Partial<RiskMitigationPlan>>({});
+  const selectedPlant = useAuthStore(s => s.selectedPlant);
+
   const { data: riskContext } = useQuery({
     queryKey: ["risk-context", assessmentId],
     queryFn: () => riskApi.context(assessmentId),
@@ -255,9 +258,31 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
     queryFn: () => riskApi.mitigationPlans(assessmentId),
   });
 
-  const bcpPlans = riskContext?.bcp_plans ?? [];
-  const selectedBcpPlan = bcpPlans.find(p => p.id === form.bcp_plan) ?? null;
   const todayStr = new Date().toISOString().slice(0, 10);
+
+  // Preferiamo i BCP "coerenti" trovati dal contesto (cioè legati al processo BIA del risk).
+  // Se sono vuoti (es. risk senza critical_process collegato o BCP non legato al processo),
+  // facciamo fallback mostrando i BCP del sito corrente.
+  const contextBcpPlans = (riskContext?.bcp_plans ?? []) as Array<{
+    id: string;
+    title: string;
+    status: string;
+    last_test_date?: string | null;
+    next_test_date?: string | null;
+  }>;
+
+  const { data: bcpFallbackResp } = useQuery({
+    queryKey: ["bcp-fallback", selectedPlant?.id],
+    queryFn: () => bcpApi.list(selectedPlant?.id ? { plant: selectedPlant.id } : {}),
+    enabled: !!selectedPlant?.id,
+    retry: false,
+  });
+
+  const fallbackBcpPlans = (bcpFallbackResp?.results ?? []) as BcpPlan[];
+
+  const availableBcpPlans = contextBcpPlans.length ? contextBcpPlans : fallbackBcpPlans;
+  const selectedBcpPlan =
+    availableBcpPlans.find(p => p.id === (form.bcp_plan ?? "")) ?? null;
 
   const createMutation = useMutation({
     mutationFn: () => riskApi.createPlan({ ...form, assessment: assessmentId }),
@@ -315,7 +340,7 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
               className="w-full border rounded px-2 py-1.5 text-sm"
             >
               <option value="">— Nessun BCP —</option>
-              {bcpPlans.map(p => (
+              {availableBcpPlans.map(p => (
                 <option key={p.id} value={p.id}>
                   {p.title} · {p.status} · valido fino {p.next_test_date ?? "—"}
                 </option>
@@ -352,7 +377,7 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
               value={editForm.bcp_plan ?? editPlan.bcp_plan ?? ""}
               onChange={e => {
                 const id = e.target.value || null;
-                const chosen = bcpPlans.find(p => p.id === id) ?? null;
+                const chosen = availableBcpPlans.find(p => p.id === id) ?? null;
                 setEditForm(prev => ({
                   ...prev,
                   bcp_plan: id,
@@ -362,7 +387,7 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
               className="w-full border rounded px-2 py-1.5 text-sm"
             >
               <option value="">— Nessun BCP —</option>
-              {bcpPlans.map(p => (
+              {availableBcpPlans.map(p => (
                 <option key={p.id} value={p.id}>
                   {p.title} · {p.status} · valido fino {p.next_test_date ?? "—"}
                 </option>
@@ -375,7 +400,7 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
               placeholder="Data ultimo test valido *"
               value={editForm.due_date ?? editPlan.due_date ?? ""}
               onChange={e => setEditForm(p => ({ ...p, due_date: e.target.value }))}
-              disabled={!!(bcpPlans.find(p => p.id === (editForm.bcp_plan ?? editPlan.bcp_plan))?.last_test_date)}
+              disabled={!!(availableBcpPlans.find(p => p.id === (editForm.bcp_plan ?? editPlan.bcp_plan))?.last_test_date)}
               className="border rounded px-2 py-1.5 text-sm flex-1 disabled:bg-gray-50"
             />
             <button
