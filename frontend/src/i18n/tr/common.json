@@ -42,6 +42,7 @@
   "actions": {
     "save": "Kaydet",
     "cancel": "İptal",
+    "edit": "Düzenle",
     "approve": "Onayla",
     "reject": "Reddet",
     "confirm": "Onayla",

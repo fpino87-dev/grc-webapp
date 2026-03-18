@@ -42,6 +42,7 @@
   "actions": {
     "save": "Save",
     "cancel": "Cancel",
+    "edit": "Edit",
     "approve": "Approve",
     "reject": "Reject",
     "confirm": "Confirm",

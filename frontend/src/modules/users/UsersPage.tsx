@@ -495,7 +495,7 @@ export function UsersPage() {
         </button>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-lg border border-gray-200">
         {isLoading ? (
           <div className="p-8 text-center text-gray-400">{t("common.loading")}</div>
         ) : users.length === 0 ? (
