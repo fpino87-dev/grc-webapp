@@ -27,6 +27,62 @@ class FrameworkViewSet(viewsets.ModelViewSet):
                 return get_active_frameworks(plant)
         return Framework.objects.filter(archived_at__isnull=True)
 
+    @action(detail=False, methods=["get"], url_path="governance")
+    def governance_list(self, request):
+        """
+        Governance list: framework metadata + counts + available languages.
+        """
+        from .services import list_framework_governance_metadata
+        return Response({"results": list_framework_governance_metadata()})
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="import-preview",
+    )
+    def import_preview(self, request):
+        """
+        Preview import (validate + summary). Expects JSON body.
+        """
+        from django.utils.translation import gettext as _
+        from django.core.exceptions import ValidationError
+        from .services import preview_framework_import
+
+        if not request.user.is_superuser:
+            return Response({"error": _("Solo il superuser può importare framework.")}, status=403)
+        try:
+            return Response(preview_framework_import(request.data))
+        except ValidationError as e:
+            return Response({"error": str(e.message)}, status=400)
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="import",
+    )
+    def import_framework(self, request):
+        """
+        Import framework JSON. Expects JSON body with optional 'sha256' for confirmation.
+        """
+        from django.utils.translation import gettext as _
+        from django.core.exceptions import ValidationError
+        from .services import preview_framework_import, import_framework_payload
+
+        if not request.user.is_superuser:
+            return Response({"error": _("Solo il superuser può importare framework.")}, status=403)
+
+        # If client sends sha256, verify matches preview for the provided payload
+        client_sha = request.data.get("sha256")
+        payload = dict(request.data)
+        payload.pop("sha256", None)
+        try:
+            preview = preview_framework_import(payload)
+            if client_sha and client_sha != preview.get("sha256"):
+                return Response({"error": _("Conferma import non valida (sha256 mismatch).")}, status=400)
+            return Response(import_framework_payload(payload, request.user))
+        except ValidationError as e:
+            return Response({"error": str(e.message)}, status=400)
+
 
 class ControlDomainViewSet(viewsets.ModelViewSet):
     queryset = ControlDomain.objects.select_related("framework")

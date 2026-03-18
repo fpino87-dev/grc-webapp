@@ -528,7 +528,8 @@
     "subtitle": "Ruoli normativi, comitati e successione incarichi",
     "tabs": {
       "roles": "Ruoli & comitati",
-      "workflow": "Workflow documentale (M07)"
+      "workflow": "Workflow documentale (M07)",
+      "frameworks": "Framework normativi"
     },
     "workflow": {
       "title": "Workflow documentale",
@@ -668,6 +669,38 @@
       "connections": {
         "documents": "Abilita i pulsanti \"Invia per revisione\" / \"Approva\" nel modulo Documenti.",
         "governance": "Usa i ruoli normativi (CISO, Plant Manager, ISMS...) configurati in Governance."
+      }
+    }
+    ,
+    "frameworks": {
+      "title": "Framework normativi",
+      "subtitle": "Gestisci versioni e import dei framework (JSON) usati per controlli e mappature.",
+      "note": "Fonte di verità: JSON in backend/frameworks/. Import richiede superuser.",
+      "empty": "Nessun framework trovato",
+      "domains_short": "domini",
+      "controls_short": "controlli",
+      "mappings_short": "mappature",
+      "table": {
+        "code": "Codice",
+        "name": "Nome",
+        "version": "Versione",
+        "published_at": "Pubblicato",
+        "controls": "Copertura",
+        "languages": "Lingue"
+      },
+      "import_title": "Import framework (JSON)",
+      "import_placeholder": "Incolla qui il JSON completo del framework oppure carica un file .json…",
+      "import_missing_json": "Inserisci un JSON prima di continuare.",
+      "import_invalid_json": "JSON non valido.",
+      "preview_action": "Anteprima",
+      "import_confirm": "Importa",
+      "import_success": "Import completato.",
+      "preview_title": "Anteprima import",
+      "preview": {
+        "framework": "Framework",
+        "version": "Versione",
+        "counts": "Conteggi",
+        "languages": "Lingue"
       }
     }
   },

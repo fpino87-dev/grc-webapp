@@ -32,6 +32,8 @@ def generate_export(framework_code: str, plant_id,
             f"Eseguire: python manage.py load_frameworks"
         )
 
+    # N.B. export engine può essere usato con translation.override(lang)
+
     def _fetch_instances(framework_obj):
         return ControlInstance.objects.filter(
             plant_id=plant_id,
@@ -80,9 +82,11 @@ def generate_export(framework_code: str, plant_id,
 def _base_html(title: str, content: str, plant_name: str,
                fw_name: str, user_name: str) -> str:
     """Template HTML base condiviso da tutti i formati."""
+    from django.utils import translation
+    lang = translation.get_language() or "it"
     now = timezone.now().strftime("%d/%m/%Y %H:%M")
     return f"""<!DOCTYPE html>
-<html lang="it">
+<html lang="{lang}">
 <head>
   <meta charset="UTF-8">
   <title>{title}</title>
@@ -139,27 +143,31 @@ def _base_html(title: str, content: str, plant_name: str,
 
 
 def _status_badge(status: str) -> str:
+    from django.utils.translation import gettext as _
     badges = {
-        "compliant":    '<span class="badge-green">Compliant</span>',
-        "parziale":     '<span class="badge-yellow">Parziale</span>',
-        "gap":          '<span class="badge-red">Gap</span>',
-        "na":           '<span class="badge-gray">N/A</span>',
-        "non_valutato": '<span class="badge-gray">Non valutato</span>',
+        "compliant":    f'<span class="badge-green">{_("Compliant")}</span>',
+        "parziale":     f'<span class="badge-yellow">{_("Parziale")}</span>',
+        "gap":          f'<span class="badge-red">{_("Gap")}</span>',
+        "na":           f'<span class="badge-gray">{_("N/A")}</span>',
+        "non_valutato": f'<span class="badge-gray">{_("Non valutato")}</span>',
     }
     return badges.get(status, status)
 
 
 def _applicability_badge(applicability: str) -> str:
+    from django.utils.translation import gettext as _
     badges = {
-        "applicabile":    '<span class="badge-green">Applicabile</span>',
-        "escluso":        '<span class="badge-red">Escluso</span>',
-        "non_pertinente": '<span class="badge-gray">Non pertinente</span>',
+        "applicabile":    f'<span class="badge-green">{_("Applicabile")}</span>',
+        "escluso":        f'<span class="badge-red">{_("Escluso")}</span>',
+        "non_pertinente": f'<span class="badge-gray">{_("Non pertinente")}</span>',
     }
     return badges.get(applicability, applicability)
 
 
 def _generate_soa(fw, plant, instances, user) -> str:
     """Statement of Applicability — ISO 27001 clausola 6.1.3"""
+    from django.utils import translation
+    lang = translation.get_language() or "it"
     total = instances.count()
     by_app = {}
     by_status = {}
@@ -175,8 +183,7 @@ def _generate_soa(fw, plant, instances, user) -> str:
 
     domains = {}
     for inst in instances:
-        domain = inst.control.domain.get_name("it") \
-            if inst.control.domain else "Altro"
+        domain = inst.control.domain.get_name(lang) if inst.control.domain else "Altro"
         if domain not in domains:
             domains[domain] = []
         domains[domain].append(inst)
@@ -204,7 +211,7 @@ def _generate_soa(fw, plant, instances, user) -> str:
             rows_html += f"""
         <tr>
           <td><strong>{inst.control.external_id}</strong></td>
-          <td>{inst.control.get_title("it")[:60]}</td>
+          <td>{inst.control.get_title(lang)[:60]}</td>
           <td>{_applicability_badge(inst.applicability)}</td>
           <td>{_status_badge(inst.status)}</td>
           <td>{justif}</td>
@@ -465,14 +472,15 @@ def _generate_vda_isa(fw, plant, instances, user) -> str:
 
 def _generate_compliance_matrix(fw, plant, instances, user) -> str:
     """Compliance Matrix NIS2"""
+    from django.utils import translation
+    lang = translation.get_language() or "it"
     plant_name = plant.name if plant else "Organizzazione"
     user_name = (f"{user.first_name} {user.last_name}".strip() or user.email)
     nis2_scope = getattr(plant, "nis2_scope", "—") if plant else "—"
 
     rows_html = ""
     for inst in instances:
-        domain = inst.control.domain.get_name("it") \
-            if inst.control.domain else ""
+        domain = inst.control.domain.get_name(lang) if inst.control.domain else ""
         owner_name = ""
         if inst.owner:
             owner_name = (
@@ -499,7 +507,7 @@ def _generate_compliance_matrix(fw, plant, instances, user) -> str:
         <tr>
           <td><strong>{inst.control.external_id}</strong></td>
           <td>{domain}</td>
-          <td>{inst.control.get_title("it")[:80]}</td>
+          <td>{inst.control.get_title(lang)[:80]}</td>
           <td>{_status_badge(inst.status)}</td>
           <td>{note}</td>
           <td>{mapping_str}</td>

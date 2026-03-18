@@ -34,7 +34,9 @@ class ControlInstanceSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def get_control_title(self, obj):
-        return obj.control.get_title("it")
+        request = self.context.get("request")
+        lang = getattr(request, "LANGUAGE_CODE", None) if request else None
+        return obj.control.get_title(lang or "it")
 
     def get_suggested_status(self, obj):
         from .services import calc_suggested_status

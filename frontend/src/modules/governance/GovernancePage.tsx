@@ -6,6 +6,7 @@ import { plantsApi } from "../../api/endpoints/plants";
 import { apiClient } from "../../api/client";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
 import { DocumentWorkflowSection } from "./DocumentWorkflowPage";
+import { FrameworkGovernanceTab } from "./FrameworkGovernanceTab";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -462,12 +463,24 @@ function CommitteeModal({ onClose }: { onClose: () => void }) {
 export function GovernancePage() {
   const { t, i18n } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialTab = searchParams.get("tab") === "workflow" ? "workflow" : "roles";
-  const [tab, setTab] = useState<"roles" | "workflow">(initialTab);
+  const tabParam = searchParams.get("tab");
+  const initialTab =
+    tabParam === "workflow"
+      ? "workflow"
+      : tabParam === "frameworks"
+      ? "frameworks"
+      : "roles";
+  const [tab, setTab] = useState<"roles" | "workflow" | "frameworks">(initialTab);
 
   useEffect(() => {
-    const t = searchParams.get("tab") === "workflow" ? "workflow" : "roles";
-    setTab(t);
+    const tabParam = searchParams.get("tab");
+    const next =
+      tabParam === "workflow"
+        ? "workflow"
+        : tabParam === "frameworks"
+        ? "frameworks"
+        : "roles";
+    setTab(next);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
@@ -592,10 +605,30 @@ export function GovernancePage() {
           >
             {t("governance.tabs.workflow")}
           </button>
+          <button
+            type="button"
+            onClick={() => {
+              setTab("frameworks");
+              setSearchParams((prev) => {
+                const next = new URLSearchParams(prev);
+                next.set("tab", "frameworks");
+                return next;
+              });
+            }}
+            className={
+              tab === "frameworks"
+                ? "border-primary-600 text-primary-700 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+            }
+          >
+            {t("governance.tabs.frameworks")}
+          </button>
         </nav>
       </div>
 
-      {tab === "workflow" ? (
+      {tab === "frameworks" ? (
+        <FrameworkGovernanceTab />
+      ) : tab === "workflow" ? (
         <div className="space-y-4">
           <div className="flex items-start justify-between gap-4">
             <div>

@@ -528,7 +528,8 @@
     "subtitle": "Normative roles, committees and role succession",
     "tabs": {
       "roles": "Roles & committees",
-      "workflow": "Document workflow (M07)"
+      "workflow": "Document workflow (M07)",
+      "frameworks": "Normative frameworks"
     },
     "workflow": {
       "title": "Document workflow",
@@ -668,6 +669,38 @@
       "connections": {
         "documents": "Enables \"Send for review\" / \"Approve\" buttons in the Documents module.",
         "governance": "Uses normative roles (CISO, Plant Manager, ISMS...) configured in Governance."
+      }
+    }
+    ,
+    "frameworks": {
+      "title": "Normative frameworks",
+      "subtitle": "Manage versions and imports of the JSON frameworks used for controls and mappings.",
+      "note": "Source of truth: JSON files in backend/frameworks/. Import requires superuser.",
+      "empty": "No frameworks found",
+      "domains_short": "domains",
+      "controls_short": "controls",
+      "mappings_short": "mappings",
+      "table": {
+        "code": "Code",
+        "name": "Name",
+        "version": "Version",
+        "published_at": "Published",
+        "controls": "Coverage",
+        "languages": "Languages"
+      },
+      "import_title": "Import framework (JSON)",
+      "import_placeholder": "Paste the full framework JSON here or upload a .json file…",
+      "import_missing_json": "Provide a JSON payload before continuing.",
+      "import_invalid_json": "Invalid JSON.",
+      "preview_action": "Preview",
+      "import_confirm": "Import",
+      "import_success": "Import completed.",
+      "preview_title": "Import preview",
+      "preview": {
+        "framework": "Framework",
+        "version": "Version",
+        "counts": "Counts",
+        "languages": "Languages"
       }
     }
   },

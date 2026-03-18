@@ -146,6 +146,27 @@ msgstr "Termination reason is required (min 5 characters)."
 msgid "new_user_id obbligatorio."
 msgstr "new_user_id is required."
 
+msgid "Framework JSON non valido: campi mancanti: %(fields)s"
+msgstr "Invalid framework JSON: missing fields: %(fields)s"
+
+msgid "Framework JSON non valido: 'controls' deve essere una lista."
+msgstr "Invalid framework JSON: 'controls' must be a list."
+
+msgid "Framework JSON non valido: ogni control deve essere un oggetto."
+msgstr "Invalid framework JSON: each control must be an object."
+
+msgid "Framework JSON non valido: control senza campo '%(field)s'."
+msgstr "Invalid framework JSON: control missing '%(field)s'."
+
+msgid "Framework '%(code)s' importato (v%(version)s)."
+msgstr "Framework '%(code)s' imported (v%(version)s)."
+
+msgid "Solo il superuser può importare framework."
+msgstr "Only the superuser can import frameworks."
+
+msgid "Conferma import non valida (sha256 mismatch)."
+msgstr "Import confirmation invalid (sha256 mismatch)."
+
 msgid "Nessun requisito documentale definito per questo controllo."
 msgstr "No documentary requirements defined for this control."
 

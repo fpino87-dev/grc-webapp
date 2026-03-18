@@ -29,6 +29,25 @@ export interface Framework {
   version: string;
 }
 
+export interface FrameworkGovernanceMeta {
+  id: string;
+  code: string;
+  name: string;
+  version: string;
+  published_at: string;
+  archived_at: string | null;
+  controls_count: number;
+  domains_count: number;
+  languages: string[];
+}
+
+export interface FrameworkImportPreview {
+  sha256: string;
+  framework: { code: string; name: string; version: string; published_at: string };
+  counts: { domains: number; controls: number; mappings: number };
+  languages: string[];
+}
+
 export interface EvidenceRef {
   id: string;
   title: string;
@@ -131,6 +150,17 @@ export const controlsApi = {
       "/controls/frameworks/",
       { params: plantId ? { plant: plantId } : {} }
     ).then((r) => r.data.results ?? r.data),
+  frameworksGovernance: () =>
+    apiClient.get<{ results: FrameworkGovernanceMeta[] }>(
+      "/controls/frameworks/governance/",
+    ).then((r) => r.data.results ?? r.data),
+  previewFrameworkImport: (payload: Record<string, unknown>) =>
+    apiClient.post<FrameworkImportPreview>("/controls/frameworks/import-preview/", payload).then((r) => r.data),
+  importFramework: (payload: Record<string, unknown>) =>
+    apiClient.post<{ ok: boolean; framework: { id: string; code: string; name: string; version: string }; message: string }>(
+      "/controls/frameworks/import/",
+      payload,
+    ).then((r) => r.data),
   updateInstance: (id: string, data: Partial<ControlInstance>) =>
     apiClient.patch<ControlInstance>(`/controls/instances/${id}/`, data).then((r) => r.data),
   propagate: (id: string) =>
