@@ -29,7 +29,15 @@
     "approvato": "Approved",
     "respinto": "Rejected",
     "completato": "Completed",
-    "annullato": "Cancelled"
+    "annullato": "Cancelled",
+    "bassa": "Low",
+    "media": "Medium",
+    "alta": "High",
+    "critica": "Critical",
+    "si": "Yes",
+    "no": "No",
+    "da_valutare": "To be assessed",
+    "in_analisi": "In analysis"
   },
   "actions": {
     "save": "Save",
@@ -954,6 +962,49 @@
       "duration": "Duration (min)",
       "deadline": "Deadline",
       "status": "Status"
+    }
+  },
+  "incidents": {
+    "title": "Operations — Incidents",
+    "empty": "No incidents recorded",
+    "table": {
+      "title": "Title",
+      "severity": "Severity",
+      "nis2": "NIS2",
+      "status": "Status",
+      "detected_at": "Detected at"
+    },
+    "fields": {
+      "plant": "Site",
+      "title": "Title",
+      "description": "Description",
+      "severity": "Severity",
+      "nis2_notifiable": "NIS2 notification",
+      "detected_at": "Detected at"
+    },
+    "new": {
+      "open": "+ New incident",
+      "title": "New incident",
+      "submit": "Create incident"
+    },
+    "help": {
+      "title": "Incident management — M09",
+      "description": "Track security incidents with an integrated NIS2 timer.\nClosing requires an approved RCA. On close, a PDCA and a Lesson Learned are created automatically.",
+      "steps": {
+        "1": "Open an incident with severity and NIS2 flag (yes/no/to be assessed)",
+        "2": "A 24h timer starts automatically for the preliminary NIS2 notification",
+        "3": "Change status to \"in_analisi\" and assign a team",
+        "4": "Fill in the RCA (Root Cause Analysis) and get it approved",
+        "5": "Close the incident: post-incident PDCA and Lesson Learned are created automatically"
+      },
+      "connections": {
+        "pdca": { "module": "M11 PDCA", "relation": "Post-incident PDCA auto-created on close" },
+        "lessons": { "module": "M12 Lessons", "relation": "Lesson learned auto-created with RCA summary" },
+        "tasks": { "module": "M08 Task", "relation": "RCA task auto-created on open" }
+      },
+      "config_needed": {
+        "1": "Appoint the NIS2 contact in M00 Governance"
+      }
     }
   }
 }
