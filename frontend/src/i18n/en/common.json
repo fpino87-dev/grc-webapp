@@ -45,6 +45,7 @@
     "suggestion_label": "AI Suggestion",
     "accept": "Use this",
     "edit_and_use": "Edit and use",
+    "save_edits": "Save edits",
     "ignore": "Ignore",
     "ai_badge": "AI"
   },
@@ -60,6 +61,54 @@
     "none": "—",
     "optional": "— optional —",
     "select": "— select —"
+  },
+  "help": {
+    "open_title": "Help for this module",
+    "close_aria": "Close module help",
+    "sections": {
+      "what_is": "What is it",
+      "how_to": "How to use",
+      "connected_to": "Connected to",
+      "before_start": "Before you start"
+    }
+  },
+  "eval_assistant": {
+    "title": "Evaluation guide",
+    "subtitle": "BIA · Risk · Logic chain",
+    "tabs": {
+      "connections": "Connections"
+    },
+    "bia": {
+      "scale_title": "Criticality scale",
+      "columns": {
+        "level": "Level",
+        "max_downtime": "Max downtime",
+        "example": "Example"
+      },
+      "guided_estimate_title": "Guided criticality estimate",
+      "suggested_title": "Suggested criticality",
+      "suggested_downtime": "Max tolerated downtime: {{downtime}}"
+    },
+    "risk": {
+      "matrix_title": "P×I matrix (Probability × Impact)",
+      "it_dimensions_title": "IT asset dimensions",
+      "ot_dimensions_title": "OT asset dimensions"
+    },
+    "connections": {
+      "chain_title": "Module logic chain",
+      "realtime_alerts_title": "Real-time alerts",
+      "select_plant_hint": "Select a site in the menu to see site-specific alerts",
+      "missing_bcp": {
+        "title": "{{count}} {{count, plural, one {critical process} other {critical processes}}} without a BCP plan",
+        "body": "Processes with criticality ≥ 4 and status \"approved\" without an active BCP plan.",
+        "ok": "All critical processes have a BCP plan"
+      },
+      "missing_pdca": {
+        "title": "{{count}} {{count, plural, one {critical risk} other {critical risks}}} without an open PDCA cycle",
+        "body": "Scenarios with score > 14 that do not have an ongoing PDCA cycle.",
+        "ok": "All critical risks have an open PDCA cycle"
+      }
+    }
   },
   "controls": {
     "title": "Compliance — Controls",

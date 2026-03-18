@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface ModuleHelpProps {
   title: string;
@@ -15,6 +16,7 @@ export function ModuleHelp({
   connections,
   configNeeded,
 }: ModuleHelpProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   return (
@@ -22,7 +24,7 @@ export function ModuleHelp({
       <button
         type="button"
         className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-xs font-bold hover:bg-blue-200 flex items-center justify-center ml-2"
-        title="Aiuto su questo modulo"
+        title={t("help.open_title")}
         onClick={() => setOpen(true)}
       >
         ?
@@ -41,7 +43,7 @@ export function ModuleHelp({
                 type="button"
                 onClick={() => setOpen(false)}
                 className="w-7 h-7 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-800"
-                aria-label="Chiudi aiuto modulo"
+                aria-label={t("help.close_aria")}
               >
                 ×
               </button>
@@ -50,7 +52,7 @@ export function ModuleHelp({
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4 text-sm">
               <section>
                 <h4 className="text-xs font-semibold tracking-wide text-gray-500 uppercase mb-1">
-                  Cos&apos;è
+                  {t("help.sections.what_is")}
                 </h4>
                 <p className="text-gray-700 whitespace-pre-line">{description}</p>
               </section>
@@ -58,7 +60,7 @@ export function ModuleHelp({
               {steps.length > 0 && (
                 <section>
                   <h4 className="text-xs font-semibold tracking-wide text-gray-500 uppercase mb-1">
-                    Come si usa
+                    {t("help.sections.how_to")}
                   </h4>
                   <ol className="list-decimal list-inside space-y-1 text-gray-700">
                     {steps.map((step, idx) => (
@@ -71,7 +73,7 @@ export function ModuleHelp({
               {connections.length > 0 && (
                 <section>
                   <h4 className="text-xs font-semibold tracking-wide text-gray-500 uppercase mb-1">
-                    Collegato a
+                    {t("help.sections.connected_to")}
                   </h4>
                   <ul className="space-y-1">
                     {connections.map((c, idx) => (
@@ -89,7 +91,7 @@ export function ModuleHelp({
               {configNeeded && configNeeded.length > 0 && (
                 <section>
                   <h4 className="text-xs font-semibold tracking-wide text-gray-500 uppercase mb-1">
-                    Prima di iniziare
+                    {t("help.sections.before_start")}
                   </h4>
                   <ul className="list-disc list-inside space-y-1 text-gray-700 text-xs">
                     {configNeeded.map((item, idx) => (

@@ -45,6 +45,7 @@
     "suggestion_label": "Suggerimento IA",
     "accept": "Usa questo",
     "edit_and_use": "Modifica e usa",
+    "save_edits": "Salva modifiche",
     "ignore": "Ignora",
     "ai_badge": "IA"
   },
@@ -60,6 +61,54 @@
     "none": "—",
     "optional": "— opzionale —",
     "select": "— seleziona —"
+  },
+  "help": {
+    "open_title": "Aiuto su questo modulo",
+    "close_aria": "Chiudi aiuto modulo",
+    "sections": {
+      "what_is": "Cos'è",
+      "how_to": "Come si usa",
+      "connected_to": "Collegato a",
+      "before_start": "Prima di iniziare"
+    }
+  },
+  "eval_assistant": {
+    "title": "Guida alla valutazione",
+    "subtitle": "BIA · Risk · Catena logica",
+    "tabs": {
+      "connections": "Connessioni"
+    },
+    "bia": {
+      "scale_title": "Scala di criticità",
+      "columns": {
+        "level": "Livello",
+        "max_downtime": "Downtime max",
+        "example": "Esempio"
+      },
+      "guided_estimate_title": "Stima guidata della criticità",
+      "suggested_title": "Criticità suggerita",
+      "suggested_downtime": "Downtime max tollerato: {{downtime}}"
+    },
+    "risk": {
+      "matrix_title": "Matrice P×I (Probabilità × Impatto)",
+      "it_dimensions_title": "Dimensioni asset IT",
+      "ot_dimensions_title": "Dimensioni asset OT"
+    },
+    "connections": {
+      "chain_title": "Catena logica dei moduli",
+      "realtime_alerts_title": "Alert in tempo reale",
+      "select_plant_hint": "Seleziona un sito nel menu per vedere alert specifici",
+      "missing_bcp": {
+        "title": "{{count}} {{count, plural, one {processo critico} other {processi critici}}} senza piano BCP",
+        "body": "Processi con criticità ≥ 4 e stato \"approvato\" privi di BCP Plan attivo.",
+        "ok": "Tutti i processi critici hanno un BCP plan"
+      },
+      "missing_pdca": {
+        "title": "{{count}} {{count, plural, one {rischio critico} other {rischi critici}}} senza ciclo PDCA aperto",
+        "body": "Scenari con score > 14 che non hanno un ciclo PDCA in corso.",
+        "ok": "Tutti i rischi critici hanno un ciclo PDCA aperto"
+      }
+    }
   },
   "controls": {
     "title": "Compliance — Controlli",

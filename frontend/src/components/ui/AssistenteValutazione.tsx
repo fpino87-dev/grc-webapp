@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "../../api/client";
 import { useAuthStore } from "../../store/auth";
+import { useTranslation } from "react-i18next";
 
 // ─── Dati statici BIA ────────────────────────────────────────────────────────
 
@@ -61,6 +62,7 @@ function cellColor(score: number): string {
 // ─── TAB 1: BIA ──────────────────────────────────────────────────────────────
 
 function TabBia() {
+  const { t } = useTranslation();
   const [sliders, setSliders] = useState<Record<string, number>>({ economico: 3, clienti: 3, normativo: 3 });
 
   const avg = Math.round(Object.values(sliders).reduce((a, b) => a + b, 0) / SLIDER_QUESTIONS.length);
@@ -70,14 +72,14 @@ function TabBia() {
     <div className="space-y-5">
       {/* Tabella criticità */}
       <div>
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Scala di criticità</p>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t("eval_assistant.bia.scale_title")}</p>
         <div className="rounded-lg border border-gray-200 overflow-hidden text-sm">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Livello</th>
-                <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Downtime max</th>
-                <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Esempio</th>
+                <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">{t("eval_assistant.bia.columns.level")}</th>
+                <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">{t("eval_assistant.bia.columns.max_downtime")}</th>
+                <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">{t("eval_assistant.bia.columns.example")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -99,7 +101,7 @@ function TabBia() {
 
       {/* Slider guida */}
       <div>
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Stima guidata della criticità</p>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">{t("eval_assistant.bia.guided_estimate_title")}</p>
         <div className="space-y-4">
           {SLIDER_QUESTIONS.map(q => (
             <div key={q.id}>
@@ -122,9 +124,9 @@ function TabBia() {
         </div>
 
         <div className={`mt-4 rounded-lg px-4 py-3 border ${suggested.color}`}>
-          <p className="text-xs font-semibold uppercase tracking-wide mb-0.5">Criticità suggerita</p>
+          <p className="text-xs font-semibold uppercase tracking-wide mb-0.5">{t("eval_assistant.bia.suggested_title")}</p>
           <p className="text-lg font-bold">{suggested.value} — {suggested.label}</p>
-          <p className="text-xs mt-0.5">Downtime max tollerato: {suggested.downtime}</p>
+          <p className="text-xs mt-0.5">{t("eval_assistant.bia.suggested_downtime", { downtime: suggested.downtime })}</p>
         </div>
       </div>
     </div>
@@ -134,11 +136,12 @@ function TabBia() {
 // ─── TAB 2: Risk ─────────────────────────────────────────────────────────────
 
 function TabRisk() {
+  const { t } = useTranslation();
   return (
     <div className="space-y-5">
       {/* Heatmap 5×5 */}
       <div>
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Matrice P×I (Probabilità × Impatto)</p>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t("eval_assistant.risk.matrix_title")}</p>
         <div className="overflow-auto">
           <table className="text-xs border-collapse">
             <thead>
@@ -188,7 +191,7 @@ function TabRisk() {
 
       {/* Dimensioni IT */}
       <div>
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Dimensioni asset IT</p>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t("eval_assistant.risk.it_dimensions_title")}</p>
         <div className="space-y-1.5">
           {IT_DIMENSIONS.map(d => (
             <div key={d.code} className="flex gap-2 items-start bg-blue-50 rounded px-3 py-2">
@@ -201,7 +204,7 @@ function TabRisk() {
 
       {/* Dimensioni OT */}
       <div>
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Dimensioni asset OT</p>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t("eval_assistant.risk.ot_dimensions_title")}</p>
         <div className="space-y-1.5">
           {OT_DIMENSIONS.map(d => (
             <div key={d.code} className="flex gap-2 items-start bg-orange-50 rounded px-3 py-2">
@@ -218,6 +221,7 @@ function TabRisk() {
 // ─── TAB 3: Connessioni ───────────────────────────────────────────────────────
 
 function TabConnessioni() {
+  const { t } = useTranslation();
   const selectedPlant = useAuthStore(s => s.selectedPlant);
   const plantId = selectedPlant?.id;
 
@@ -241,7 +245,7 @@ function TabConnessioni() {
     <div className="space-y-5">
       {/* Diagramma SVG */}
       <div>
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Catena logica dei moduli</p>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">{t("eval_assistant.connections.chain_title")}</p>
         <div className="bg-gray-50 rounded-lg p-3 overflow-auto">
           <svg viewBox="0 0 420 280" className="w-full text-xs" style={{ minWidth: 360 }}>
             {/* Nodi */}
@@ -311,24 +315,24 @@ function TabConnessioni() {
 
       {/* Alert dinamici */}
       <div className="space-y-2">
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Alert in tempo reale</p>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{t("eval_assistant.connections.realtime_alerts_title")}</p>
 
         {missingCount > 0 ? (
           <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5">
             <span className="text-lg shrink-0">⚠️</span>
             <div>
               <p className="text-sm font-semibold text-amber-800">
-                {missingCount} process{missingCount === 1 ? "o critico" : "i critici"} senza piano BCP
+                {t("eval_assistant.connections.missing_bcp.title", { count: missingCount })}
               </p>
               <p className="text-xs text-amber-600 mt-0.5">
-                Processi con criticità ≥ 4 e stato "approvato" privi di BCP Plan attivo.
+                {t("eval_assistant.connections.missing_bcp.body")}
               </p>
             </div>
           </div>
         ) : (
           <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2.5">
             <span className="text-lg">✅</span>
-            <p className="text-sm text-green-700">Tutti i processi critici hanno un BCP plan</p>
+            <p className="text-sm text-green-700">{t("eval_assistant.connections.missing_bcp.ok")}</p>
           </div>
         )}
 
@@ -337,23 +341,23 @@ function TabConnessioni() {
             <span className="text-lg shrink-0">🔴</span>
             <div>
               <p className="text-sm font-semibold text-red-800">
-                {redCount} rischio{redCount === 1 ? " critico" : " critici"} senza ciclo PDCA aperto
+                {t("eval_assistant.connections.missing_pdca.title", { count: redCount })}
               </p>
               <p className="text-xs text-red-600 mt-0.5">
-                Scenari con score &gt; 14 che non hanno un ciclo PDCA in corso.
+                {t("eval_assistant.connections.missing_pdca.body")}
               </p>
             </div>
           </div>
         ) : (
           <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2.5">
             <span className="text-lg">✅</span>
-            <p className="text-sm text-green-700">Tutti i rischi critici hanno un ciclo PDCA aperto</p>
+            <p className="text-sm text-green-700">{t("eval_assistant.connections.missing_pdca.ok")}</p>
           </div>
         )}
 
         {!plantId && (
           <p className="text-xs text-gray-400 text-center mt-1">
-            Seleziona un sito nel menu per vedere alert specifici
+            {t("eval_assistant.connections.select_plant_hint")}
           </p>
         )}
       </div>
@@ -371,6 +375,7 @@ interface Props {
 }
 
 export function AssistenteValutazione({ open, onClose }: Props) {
+  const { t: tt } = useTranslation();
   const [tab, setTab] = useState<Tab>("bia");
 
   return (
@@ -392,8 +397,8 @@ export function AssistenteValutazione({ open, onClose }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0 bg-gradient-to-r from-blue-600 to-blue-700">
           <div>
-            <h2 className="text-white font-semibold text-base">Guida alla valutazione</h2>
-            <p className="text-blue-200 text-xs mt-0.5">BIA · Risk · Catena logica</p>
+            <h2 className="text-white font-semibold text-base">{tt("eval_assistant.title")}</h2>
+            <p className="text-blue-200 text-xs mt-0.5">{tt("eval_assistant.subtitle")}</p>
           </div>
           <button
             onClick={onClose}
@@ -405,17 +410,17 @@ export function AssistenteValutazione({ open, onClose }: Props) {
 
         {/* Tabs */}
         <div className="flex border-b border-gray-200 shrink-0">
-          {(["bia", "risk", "connessioni"] as Tab[]).map(t => (
+          {(["bia", "risk", "connessioni"] as Tab[]).map(tabKey => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
+              key={tabKey}
+              onClick={() => setTab(tabKey)}
               className={`flex-1 py-2.5 text-sm font-medium transition-colors capitalize ${
-                tab === t
+                tab === tabKey
                   ? "border-b-2 border-blue-600 text-blue-700 bg-blue-50"
                   : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               }`}
             >
-              {t === "connessioni" ? "Connessioni" : t.toUpperCase()}
+              {tabKey === "connessioni" ? tt("eval_assistant.tabs.connections") : tabKey.toUpperCase()}
             </button>
           ))}
         </div>

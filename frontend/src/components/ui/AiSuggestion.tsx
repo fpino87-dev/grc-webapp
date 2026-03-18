@@ -51,7 +51,7 @@ export function AiSuggestion({ suggestionId, output, onAccept, onIgnore }: Props
             onClick={() => onAccept(edited)}
             className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
           >
-            Salva modifiche
+            {t("ai.save_edits")}
           </button>
         )}
         <button
