@@ -60,6 +60,8 @@
     "enabled": "enabled",
     "disabled": "disabled",
     "none": "—",
+    "yes": "Yes",
+    "no": "No",
     "optional": "— optional —",
     "select": "— select —"
   },
@@ -920,6 +922,37 @@
       "category": "Category",
       "due_date": "Due date",
       "days": "Days",
+      "status": "Status"
+    }
+  }
+  ,
+  "training": {
+    "title": "Operations — Training",
+    "empty": "No courses recorded",
+    "sources": {
+      "interno": "internal",
+      "kb4": "kb4",
+      "esterno": "external"
+    },
+    "new": {
+      "open": "+ New course",
+      "title": "New course",
+      "submit": "Create course"
+    },
+    "fields": {
+      "title": "Title",
+      "description": "Description",
+      "source": "Source",
+      "duration_minutes": "Duration (minutes)",
+      "deadline": "Deadline",
+      "mandatory": "Mandatory"
+    },
+    "table": {
+      "title": "Course title",
+      "source": "Source",
+      "mandatory": "Mandatory",
+      "duration": "Duration (min)",
+      "deadline": "Deadline",
       "status": "Status"
     }
   }

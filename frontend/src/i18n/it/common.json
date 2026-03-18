@@ -60,6 +60,8 @@
     "enabled": "attivo",
     "disabled": "disabilitato",
     "none": "—",
+    "yes": "Sì",
+    "no": "No",
     "optional": "— opzionale —",
     "select": "— seleziona —"
   },
@@ -920,6 +922,37 @@
       "category": "Categoria",
       "due_date": "Scadenza",
       "days": "Giorni",
+      "status": "Stato"
+    }
+  }
+  ,
+  "training": {
+    "title": "Operazioni — Formazione",
+    "empty": "Nessun corso registrato",
+    "sources": {
+      "interno": "interno",
+      "kb4": "kb4",
+      "esterno": "esterno"
+    },
+    "new": {
+      "open": "+ Nuovo corso",
+      "title": "Nuovo corso",
+      "submit": "Crea corso"
+    },
+    "fields": {
+      "title": "Titolo",
+      "description": "Descrizione",
+      "source": "Fonte",
+      "duration_minutes": "Durata (minuti)",
+      "deadline": "Scadenza",
+      "mandatory": "Obbligatorio"
+    },
+    "table": {
+      "title": "Titolo corso",
+      "source": "Fonte",
+      "mandatory": "Obbligatorio",
+      "duration": "Durata (min)",
+      "deadline": "Scadenza",
       "status": "Stato"
     }
   }
