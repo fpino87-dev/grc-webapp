@@ -457,6 +457,7 @@ export function UsersPage() {
   const [expandedCompetency, setExpandedCompetency] = useState<number | null>(null);
   const [editUser, setEditUser] = useState<GrcUser | null>(null);
   const [resetUser, setResetUser] = useState<GrcUser | null>(null);
+  const [menuUserId, setMenuUserId] = useState<number | null>(null);
   const qc = useQueryClient();
 
   const { data: me } = useQuery({
@@ -525,39 +526,67 @@ export function UsersPage() {
                       <span className={`inline-block w-2.5 h-2.5 rounded-full ${user.is_active ? "bg-green-500" : "bg-red-400"}`} />
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-3 flex-wrap">
                         <AssignRoleInline user={user} roles={roles} />
-                        <button
-                          onClick={() => toggleMutation.mutate(user.id)}
-                          disabled={toggleMutation.isPending}
-                          className={`text-xs border rounded px-2 py-0.5 disabled:opacity-50 ${user.is_active ? "text-red-600 border-red-200 hover:bg-red-50" : "text-green-600 border-green-200 hover:bg-green-50"}`}
-                        >
-                          {user.is_active ? t("users.actions.deactivate") : t("users.actions.activate")}
-                        </button>
-                        <button
-                          onClick={() => setExpandedCompetency(prev => prev === user.id ? null : user.id)}
-                          className="text-xs border border-indigo-200 text-indigo-600 rounded px-2 py-0.5 hover:bg-indigo-50"
-                        >
-                          {t("users.actions.competency")}
-                        </button>
-                        {me?.grc_role === "super_admin" && (
+                        <div className="relative">
                           <button
                             type="button"
-                            onClick={() => setEditUser(user)}
-                            className="text-xs border border-gray-200 text-gray-700 rounded px-2 py-0.5 hover:bg-gray-50"
+                            onClick={() => setMenuUserId(prev => (prev === user.id ? null : user.id))}
+                            className="inline-flex items-center gap-1 border border-gray-300 rounded px-2 py-0.5 text-xs text-gray-700 hover:bg-gray-50"
                           >
-                            {t("actions.edit")}
+                            <span>Azioni</span>
+                            <span className="text-[10px]">{menuUserId === user.id ? "▲" : "▼"}</span>
                           </button>
-                        )}
-                        {me?.grc_role === "super_admin" && !user.is_superuser && (
-                          <button
-                            type="button"
-                            onClick={() => setResetUser(user)}
-                            className="text-xs border border-gray-200 text-gray-700 rounded px-2 py-0.5 hover:bg-gray-50"
-                          >
-                            {t("users.actions.reset_password")}
-                          </button>
-                        )}
+                          {menuUserId === user.id && (
+                            <div className="absolute right-0 mt-1 w-40 bg-white border border-gray-200 rounded shadow-md z-10 text-xs">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  toggleMutation.mutate(user.id);
+                                  setMenuUserId(null);
+                                }}
+                                disabled={toggleMutation.isPending}
+                                className="w-full text-left px-3 py-1.5 hover:bg-gray-50"
+                              >
+                                {user.is_active ? t("users.actions.deactivate") : t("users.actions.activate")}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setExpandedCompetency(prev => (prev === user.id ? null : user.id));
+                                  setMenuUserId(null);
+                                }}
+                                className="w-full text-left px-3 py-1.5 hover:bg-gray-50"
+                              >
+                                {t("users.actions.competency")}
+                              </button>
+                              {me?.grc_role === "super_admin" && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setEditUser(user);
+                                    setMenuUserId(null);
+                                  }}
+                                  className="w-full text-left px-3 py-1.5 hover:bg-gray-50"
+                                >
+                                  {t("actions.edit")}
+                                </button>
+                              )}
+                              {me?.grc_role === "super_admin" && !user.is_superuser && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setResetUser(user);
+                                    setMenuUserId(null);
+                                  }}
+                                  className="w-full text-left px-3 py-1.5 hover:bg-gray-50"
+                                >
+                                  {t("users.actions.reset_password")}
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </td>
                   </tr>

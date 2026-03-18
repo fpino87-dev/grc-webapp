@@ -515,35 +515,36 @@
     }
   },
   "users": {
-    "title": "Governance — Users",
-    "empty": "No users found",
+    "title": "Governance — Użytkownicy",
+    "empty": "Nie znaleziono użytkowników",
     "table": {
-      "username": "Username",
+      "username": "Nazwa użytkownika",
       "email": "Email",
-      "name": "Name",
-      "grc_role": "GRC role",
-      "active": "Active",
-      "actions": "Actions"
+      "name": "Imię i nazwisko",
+      "grc_role": "Rola GRC",
+      "active": "Aktywny",
+      "actions": "Akcje"
     },
     "fields": {
-      "username": "Username",
+      "username": "Nazwa użytkownika",
       "email": "Email",
-      "first_name": "First name",
-      "last_name": "Last name",
-      "password": "Password",
-      "grc_role": "GRC role",
-      "grc_role_none": "— none —"
+      "first_name": "Imię",
+      "last_name": "Nazwisko",
+      "password": "Hasło",
+      "grc_role": "Rola GRC",
+      "grc_role_none": "— brak —"
     },
     "actions": {
-      "assign_role": "Assign role",
-      "activate": "Activate",
-      "deactivate": "Deactivate",
-      "competency": "Competency"
+      "assign_role": "Przypisz rolę",
+      "activate": "Aktywuj",
+      "deactivate": "Dezaktywuj",
+      "competency": "Kompetencje",
+      "reset_password": "Resetuj hasło"
     },
     "new": {
-      "open": "+ New user",
-      "title": "New user",
-      "submit": "Create user"
+      "open": "+ Nowy użytkownik",
+      "title": "Nowy użytkownik",
+      "submit": "Utwórz użytkownika"
     },
     "competency_gap": {
       "loading": "Loading gap analysis...",

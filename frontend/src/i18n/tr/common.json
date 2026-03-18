@@ -515,35 +515,36 @@
     }
   },
   "users": {
-    "title": "Governance — Users",
-    "empty": "No users found",
+    "title": "Governance — Kullanıcılar",
+    "empty": "Kullanıcı bulunamadı",
     "table": {
-      "username": "Username",
+      "username": "Kullanıcı adı",
       "email": "Email",
-      "name": "Name",
-      "grc_role": "GRC role",
-      "active": "Active",
-      "actions": "Actions"
+      "name": "Ad Soyad",
+      "grc_role": "GRC rolü",
+      "active": "Aktif",
+      "actions": "İşlemler"
     },
     "fields": {
-      "username": "Username",
+      "username": "Kullanıcı adı",
       "email": "Email",
-      "first_name": "First name",
-      "last_name": "Last name",
-      "password": "Password",
-      "grc_role": "GRC role",
-      "grc_role_none": "— none —"
+      "first_name": "Ad",
+      "last_name": "Soyad",
+      "password": "Parola",
+      "grc_role": "GRC rolü",
+      "grc_role_none": "— yok —"
     },
     "actions": {
-      "assign_role": "Assign role",
-      "activate": "Activate",
-      "deactivate": "Deactivate",
-      "competency": "Competency"
+      "assign_role": "Rol ata",
+      "activate": "Aktifleştir",
+      "deactivate": "Pasifleştir",
+      "competency": "Yeterlilikler",
+      "reset_password": "Parolayı sıfırla"
     },
     "new": {
-      "open": "+ New user",
-      "title": "New user",
-      "submit": "Create user"
+      "open": "+ Yeni kullanıcı",
+      "title": "Yeni kullanıcı",
+      "submit": "Kullanıcı oluştur"
     },
     "competency_gap": {
       "loading": "Loading gap analysis...",

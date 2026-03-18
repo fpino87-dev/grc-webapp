@@ -508,7 +508,8 @@
       "assign_role": "Assegna ruolo",
       "activate": "Attiva",
       "deactivate": "Disattiva",
-      "competency": "Competenze"
+      "competency": "Competenze",
+      "reset_password": "Reset password"
     },
     "new": {
       "open": "+ Nuovo utente",
