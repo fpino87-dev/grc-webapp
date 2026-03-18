@@ -127,6 +127,28 @@
           "req_tooltip": "Risolvi i requisiti nel tab Documenti & Evidenze"
         },
         "save_evaluation": "Salva valutazione"
+      },
+      "docs": {
+        "requirements": {
+          "not_satisfied_for_compliant": "Requisiti non soddisfatti per Compliant"
+        },
+        "policy_docs": "Documenti di policy",
+        "operational_evidence": "Evidenze operative",
+        "missing": "Mancante",
+        "none_linked": "Nessun documento collegato",
+        "no_evidence_linked": "Nessuna evidenza collegata",
+        "unlink": "Scollega",
+        "link_doc": "Collega documento",
+        "link_existing_evidence": "Collega evidenza esistente",
+        "search_placeholder": "Cerca per titolo...",
+        "upload_new_evidence": "Carica nuova evidenza",
+        "new_evidence_title_placeholder": "Titolo *",
+        "validity_date_label": "Data validità *",
+        "upload_and_link": "Carica e collega"
+      },
+      "history": {
+        "empty": "Nessuna valutazione registrata.",
+        "set_status": "ha impostato"
       }
     },
     "table": {

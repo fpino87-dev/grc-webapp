@@ -504,6 +504,7 @@ function DocsColumn({
   requirements: RequirementsCheck;
   plant: string | null;
 }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [searchQ, setSearchQ] = useState("");
   const debounced = useDebounce(searchQ);
@@ -529,7 +530,7 @@ function DocsColumn({
     <div className="space-y-3">
       <div className="flex items-center gap-2 mb-1">
         <span className="text-base">📄</span>
-        <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Documenti di policy</span>
+        <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">{t("controls.drawer.docs.policy_docs")}</span>
         <span className="ml-auto text-xs bg-gray-100 text-gray-600 px-1.5 rounded">{documents.length}</span>
       </div>
 
@@ -540,7 +541,7 @@ function DocsColumn({
             <div key={i} className="flex items-center gap-1.5 text-xs bg-red-50 border border-red-200 rounded px-2 py-1">
               <span className="text-red-500 font-bold shrink-0">!</span>
               <span className="text-red-700">{m.description || m.type}</span>
-              <span className="ml-auto text-xs text-red-500 font-medium shrink-0">Mancante</span>
+              <span className="ml-auto text-xs text-red-500 font-medium shrink-0">{t("controls.drawer.docs.missing")}</span>
             </div>
           ))}
         </div>
@@ -548,7 +549,7 @@ function DocsColumn({
 
       {/* Lista documenti collegati */}
       {documents.length === 0 ? (
-        <p className="text-xs text-gray-400 italic">Nessun documento collegato</p>
+        <p className="text-xs text-gray-400 italic">{t("controls.drawer.docs.none_linked")}</p>
       ) : (
         <div className="space-y-1.5">
           {documents.map(d => (
@@ -557,8 +558,12 @@ function DocsColumn({
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-gray-800 truncate">{d.title}</p>
                   <div className="flex items-center gap-1 mt-0.5 flex-wrap">
-                    <span className="text-xs bg-indigo-50 text-indigo-700 px-1 rounded">{d.document_type}</span>
-                    <span className={`text-xs px-1 rounded ${docStatusColor(d.status)}`}>{d.status}</span>
+                    <span className="text-xs bg-indigo-50 text-indigo-700 px-1 rounded">
+                      {t(`documents.type.${d.document_type}`, { defaultValue: d.document_type })}
+                    </span>
+                    <span className={`text-xs px-1 rounded ${docStatusColor(d.status)}`}>
+                      {t(`status.${d.status}`, { defaultValue: d.status })}
+                    </span>
                     {d.review_due_date && (
                       <span className="text-xs text-gray-400">rev. {new Date(d.review_due_date).toLocaleDateString("it-IT")}</span>
                     )}
@@ -568,7 +573,7 @@ function DocsColumn({
                   onClick={() => unlinkMut.mutate(d.id)}
                   disabled={unlinkMut.isPending}
                   className="text-red-400 hover:text-red-600 text-xs shrink-0 ml-1"
-                  title="Scollega"
+                  title={t("controls.drawer.docs.unlink")}
                 >
                   ✕
                 </button>
@@ -580,12 +585,12 @@ function DocsColumn({
 
       {/* Collega documento */}
       <div className="border border-dashed border-gray-300 rounded p-2 space-y-1.5">
-        <p className="text-xs font-medium text-gray-500">Collega documento</p>
+        <p className="text-xs font-medium text-gray-500">{t("controls.drawer.docs.link_doc")}</p>
         <input
           type="text"
           value={searchQ}
           onChange={e => setSearchQ(e.target.value)}
-          placeholder="Cerca per titolo..."
+          placeholder={t("controls.drawer.docs.search_placeholder")}
           className="w-full border rounded px-2 py-1 text-xs"
         />
         {searchResults && searchResults.results.length > 0 && (
@@ -599,7 +604,9 @@ function DocsColumn({
               >
                 <span className="text-gray-400">📄</span>
                 <span className="truncate flex-1">{d.title}</span>
-                <span className={`shrink-0 px-1 rounded text-xs ${docStatusColor(d.status)}`}>{d.status}</span>
+                <span className={`shrink-0 px-1 rounded text-xs ${docStatusColor(d.status)}`}>
+                  {t(`status.${d.status}`, { defaultValue: d.status })}
+                </span>
               </button>
             ))}
           </div>
@@ -618,6 +625,7 @@ function EvidencesColumn({
   evidences: EvidenceRef[];
   requirements: RequirementsCheck;
 }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [searchQ, setSearchQ] = useState("");
   const [newEv, setNewEv] = useState({ title: "", evidence_type: "altro", valid_until: "" });
@@ -655,7 +663,7 @@ function EvidencesColumn({
     <div className="space-y-3">
       <div className="flex items-center gap-2 mb-1">
         <span className="text-base">🔬</span>
-        <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Evidenze operative</span>
+        <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">{t("controls.drawer.docs.operational_evidence")}</span>
         <span className="ml-auto text-xs bg-gray-100 text-gray-600 px-1.5 rounded">{evidences.length}</span>
       </div>
 
@@ -666,7 +674,7 @@ function EvidencesColumn({
             <div key={i} className="flex items-center gap-1.5 text-xs bg-red-50 border border-red-200 rounded px-2 py-1">
               <span className="text-red-500 font-bold shrink-0">!</span>
               <span className="text-red-700">{m.description || m.type}</span>
-              <span className="ml-auto text-xs text-red-500 font-medium shrink-0">Mancante</span>
+              <span className="ml-auto text-xs text-red-500 font-medium shrink-0">{t("controls.drawer.docs.missing")}</span>
             </div>
           ))}
         </div>
@@ -674,7 +682,7 @@ function EvidencesColumn({
 
       {/* Lista evidenze collegate */}
       {evidences.length === 0 ? (
-        <p className="text-xs text-gray-400 italic">Nessuna evidenza collegata</p>
+        <p className="text-xs text-gray-400 italic">{t("controls.drawer.docs.no_evidence_linked")}</p>
       ) : (
         <div className="space-y-1.5">
           {evidences.map(e => (
@@ -692,7 +700,7 @@ function EvidencesColumn({
                   onClick={() => unlinkMut.mutate(e.id)}
                   disabled={unlinkMut.isPending}
                   className="text-red-400 hover:text-red-600 text-xs shrink-0 ml-1"
-                  title="Scollega"
+                  title={t("controls.drawer.docs.unlink")}
                 >
                   ✕
                 </button>
@@ -704,12 +712,12 @@ function EvidencesColumn({
 
       {/* Collega evidenza esistente */}
       <div className="border border-dashed border-gray-300 rounded p-2 space-y-1.5">
-        <p className="text-xs font-medium text-gray-500">Collega evidenza esistente</p>
+        <p className="text-xs font-medium text-gray-500">{t("controls.drawer.docs.link_existing_evidence")}</p>
         <input
           type="text"
           value={searchQ}
           onChange={e => setSearchQ(e.target.value)}
-          placeholder="Cerca per titolo..."
+          placeholder={t("controls.drawer.docs.search_placeholder")}
           className="w-full border rounded px-2 py-1 text-xs"
         />
         {searchResults && searchResults.results.length > 0 && (
@@ -732,10 +740,10 @@ function EvidencesColumn({
 
       {/* Carica nuova evidenza */}
       <div className="border border-dashed border-green-300 rounded p-2 space-y-1.5">
-        <p className="text-xs font-medium text-green-700">Carica nuova evidenza</p>
+        <p className="text-xs font-medium text-green-700">{t("controls.drawer.docs.upload_new_evidence")}</p>
         <input
           type="text"
-          placeholder="Titolo *"
+          placeholder={t("controls.drawer.docs.new_evidence_title_placeholder")}
           value={newEv.title}
           onChange={e => setNewEv(p => ({ ...p, title: e.target.value }))}
           className="w-full border rounded px-2 py-1 text-xs"
@@ -750,7 +758,7 @@ function EvidencesColumn({
           ))}
         </select>
         <div>
-          <label className="text-xs text-gray-500 block mb-0.5">Data validità * (non passata)</label>
+          <label className="text-xs text-gray-500 block mb-0.5">{t("controls.drawer.docs.validity_date_label")}</label>
           <input
             type="date"
             min={today}
@@ -764,7 +772,7 @@ function EvidencesColumn({
           disabled={createAndLinkMut.isPending || !newEv.title || !newEv.valid_until}
           className="w-full py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 disabled:opacity-50"
         >
-          {createAndLinkMut.isPending ? "Caricamento..." : "Carica e collega"}
+          {createAndLinkMut.isPending ? t("common.loading") : t("controls.drawer.docs.upload_and_link")}
         </button>
       </div>
     </div>
@@ -784,6 +792,7 @@ function TabDocEvidence({
   requirements: RequirementsCheck;
   evidenceRequirement: EvidenceRequirement;
 }) {
+  const { t } = useTranslation();
   const plant = useAuthStore(s => s.selectedPlant?.id ?? null);
   const noRequirements = !evidenceRequirement ||
     (!evidenceRequirement.documents?.length && !evidenceRequirement.evidences?.length &&
@@ -794,23 +803,23 @@ function TabDocEvidence({
       {/* Banner requisiti */}
       {noRequirements ? (
         <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500">
-          ℹ️ Nessun requisito documentale definito per questo controllo.
+          ℹ️ {t("controls.drawer.evaluation.requirements.none")}
         </div>
       ) : !requirements.satisfied ? (
         <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-800">
-          <p className="font-semibold mb-1">⛔ Requisiti non soddisfatti per Compliant</p>
-          {requirements.missing_documents.map((m, i) => <p key={i}>• Documento mancante: {m.description || m.type}</p>)}
-          {requirements.missing_evidences.map((m, i) => <p key={i}>• Evidenza mancante: {m.description || m.type}</p>)}
-          {requirements.expired_evidences.map((e, i) => <p key={i}>• Evidenza scaduta: {e.title} ({e.expired_on})</p>)}
+          <p className="font-semibold mb-1">⛔ {t("controls.drawer.docs.requirements.not_satisfied_for_compliant")}</p>
+          {requirements.missing_documents.map((m, i) => <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_document")}: {m.description || m.type}</p>)}
+          {requirements.missing_evidences.map((m, i) => <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_evidence")}: {m.description || m.type}</p>)}
+          {requirements.expired_evidences.map((e, i) => <p key={i}>• {t("controls.drawer.evaluation.requirements.expired_evidence")}: {e.title} ({e.expired_on})</p>)}
         </div>
       ) : requirements.warnings.length > 0 ? (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 text-xs text-yellow-800">
-          <p className="font-semibold mb-1">⚠️ Attenzione</p>
+          <p className="font-semibold mb-1">⚠️ {t("controls.drawer.evaluation.requirements.warning")}</p>
           {requirements.warnings.map((w, i) => <p key={i}>• {w}</p>)}
         </div>
       ) : (
         <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-xs text-green-800">
-          ✅ Tutti i requisiti soddisfatti
+          ✅ {t("controls.drawer.evaluation.requirements.satisfied")}
         </div>
       )}
 
@@ -826,8 +835,9 @@ function TabDocEvidence({
 // ─── Tab 4: Storico ───────────────────────────────────────────────────────────
 
 function TabStorico({ history }: { history: NonNullable<ReturnType<typeof useDetailInfo>["data"]>["evaluation_history"] }) {
+  const { t } = useTranslation();
   if (history.length === 0) {
-    return <p className="text-sm text-gray-400 italic">Nessuna valutazione registrata.</p>;
+    return <p className="text-sm text-gray-400 italic">{t("controls.drawer.history.empty")}</p>;
   }
   const statusIcon: Record<string, string> = {
     compliant: "🟢", parziale: "🟡", gap: "🔴", na: "⚪", non_valutato: "⬜",
@@ -850,7 +860,7 @@ function TabStorico({ history }: { history: NonNullable<ReturnType<typeof useDet
                   <span className="text-xs text-gray-400">{new Date(h.timestamp_utc).toLocaleString("it-IT")}</span>
                 </div>
                 <p className="text-xs text-gray-600">
-                  ha impostato <strong>{status}</strong>
+                  {t("controls.drawer.history.set_status")} <strong>{t(`status.${status}`, { defaultValue: status })}</strong>
                   {note && <> — <em>"{note}"</em></>}
                 </p>
               </div>

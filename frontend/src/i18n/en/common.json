@@ -127,6 +127,28 @@
           "req_tooltip": "Resolve requirements in the Documents & Evidence tab"
         },
         "save_evaluation": "Save evaluation"
+      },
+      "docs": {
+        "requirements": {
+          "not_satisfied_for_compliant": "Requirements not satisfied for Compliant"
+        },
+        "policy_docs": "Policy documents",
+        "operational_evidence": "Operational evidence",
+        "missing": "Missing",
+        "none_linked": "No linked documents",
+        "no_evidence_linked": "No linked evidence",
+        "unlink": "Unlink",
+        "link_doc": "Link document",
+        "link_existing_evidence": "Link existing evidence",
+        "search_placeholder": "Search by title...",
+        "upload_new_evidence": "Upload new evidence",
+        "new_evidence_title_placeholder": "Title *",
+        "validity_date_label": "Validity date *",
+        "upload_and_link": "Upload and link"
+      },
+      "history": {
+        "empty": "No evaluations recorded.",
+        "set_status": "set"
       }
     },
     "table": {
