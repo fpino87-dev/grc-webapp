@@ -34,7 +34,13 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
-    grc_role = serializers.ChoiceField(choices=GrcRole.choices, required=False, write_only=True)
+    # esponiamo solo un sottoinsieme dei ruoli GRC per la UI
+    EXPOSED_ROLES = [
+        (GrcRole.SUPER_ADMIN, "Super Admin"),
+        (GrcRole.PLANT_MANAGER, "Plant Admin"),
+        (GrcRole.CONTROL_OWNER, "User"),
+    ]
+    grc_role = serializers.ChoiceField(choices=[r[0] for r in EXPOSED_ROLES], required=False, write_only=True)
 
     class Meta:
         model = User
@@ -56,7 +62,9 @@ class SetPasswordSerializer(serializers.Serializer):
 
 
 class AssignRoleSerializer(serializers.Serializer):
-    role = serializers.ChoiceField(choices=GrcRole.choices)
+    # stessi ruoli esposti in creazione
+    EXPOSED_ROLES = UserCreateSerializer.EXPOSED_ROLES
+    role = serializers.ChoiceField(choices=[r[0] for r in EXPOSED_ROLES])
     scope_type = serializers.ChoiceField(
         choices=["org", "bu", "plant_list", "single_plant"],
         default="org"
@@ -113,4 +121,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
     def list_roles(self, request):
-        return Response([{"value": k, "label": v} for k, v in GrcRole.choices])
+        # restituiamo solo il sottoinsieme di ruoli GRC usati per la gestione utenti
+        return Response(
+            [{"value": value, "label": label} for value, label in UserCreateSerializer.EXPOSED_ROLES]
+        )

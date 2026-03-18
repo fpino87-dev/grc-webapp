@@ -219,6 +219,66 @@ function AssignRoleInline({ user, roles }: { user: GrcUser; roles: GrcRole[] }) 
   );
 }
 
+function ResetPasswordModal({ user, onClose }: { user: GrcUser; onClose: () => void }) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const mutation = useMutation({
+    mutationFn: () => usersApi.setPassword(user.id, password),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["users"] });
+      onClose();
+    },
+    onError: () => {
+      setError(t("common.save_error"));
+    },
+  });
+
+  const disabled = password.length < 8 || mutation.isPending;
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+        <h3 className="text-lg font-semibold mb-3">
+          {t("users.actions.reset_password")} — {user.username}
+        </h3>
+        <p className="text-xs text-gray-500 mb-3">
+          {t("users.actions.reset_password_hint")}
+        </p>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          {t("users.fields.password")} (min 8)
+        </label>
+        <input
+          type="password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          className="w-full border rounded px-3 py-2 text-sm"
+        />
+        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        <div className="flex justify-end gap-2 mt-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50"
+          >
+            {t("actions.cancel")}
+          </button>
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => mutation.mutate()}
+            className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
+          >
+            {mutation.isPending ? t("common.saving") : t("users.actions.reset_password")}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DangerZone() {
   const { t } = useTranslation();
   const logout = useAuthStore(s => s.logout);
@@ -303,6 +363,7 @@ export function UsersPage() {
   const { t } = useTranslation();
   const [showNew, setShowNew] = useState(false);
   const [expandedCompetency, setExpandedCompetency] = useState<number | null>(null);
+  const [resetUser, setResetUser] = useState<GrcUser | null>(null);
   const qc = useQueryClient();
 
   const { data: me } = useQuery({
@@ -386,6 +447,15 @@ export function UsersPage() {
                         >
                           {t("users.actions.competency")}
                         </button>
+                        {me?.grc_role === "super_admin" && !user.is_superuser && (
+                          <button
+                            type="button"
+                            onClick={() => setResetUser(user)}
+                            className="text-xs border border-gray-200 text-gray-700 rounded px-2 py-0.5 hover:bg-gray-50"
+                          >
+                            {t("users.actions.reset_password")}
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -404,6 +474,8 @@ export function UsersPage() {
       </div>
 
       {showNew && <NewUserModal roles={roles} onClose={() => setShowNew(false)} />}
+
+      {resetUser && <ResetPasswordModal user={resetUser} onClose={() => setResetUser(null)} />}
 
       {me?.is_superuser && <DangerZone />}
     </div>
