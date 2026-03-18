@@ -1,12 +1,34 @@
 from .models import Control, ControlInstance
 
 
-def check_evidence_requirements(instance) -> dict:
+def _pick_translation(value, lang: str | None) -> str:
+    """
+    Supporta evidence_requirement.description come:
+    - stringa
+    - dict { "it": "...", "en": "...", ... }
+    """
+    if value is None:
+        return ""
+    if isinstance(value, dict):
+        if lang and value.get(lang):
+            return str(value.get(lang))
+        # fallback: prefer en, then first available value
+        if value.get("en"):
+            return str(value.get("en"))
+        for v in value.values():
+            if v:
+                return str(v)
+        return ""
+    return str(value)
+
+
+def check_evidence_requirements(instance, lang: str | None = None) -> dict:
     """
     Verifica se ControlInstance soddisfa i requisiti definiti
     in Control.evidence_requirement.
     """
     from django.utils import timezone
+    from django.utils.translation import gettext as _
 
     today = timezone.now().date()
     req = instance.control.evidence_requirement or {}
@@ -32,7 +54,7 @@ def check_evidence_requirements(instance) -> dict:
             result["satisfied"] = False
             result["missing_documents"].append({
                 "type": doc_type,
-                "description": doc_req.get("description", ""),
+                "description": _pick_translation(doc_req.get("description"), lang),
             })
 
     # Controlla evidenze richieste
@@ -41,7 +63,7 @@ def check_evidence_requirements(instance) -> dict:
             continue
         ev_type = ev_req.get("type")
         max_age = ev_req.get("max_age_days")
-        description = ev_req.get("description", "")
+        description = _pick_translation(ev_req.get("description"), lang)
 
         ev_qs = instance.evidences.filter(
             evidence_type=ev_type,
@@ -67,8 +89,11 @@ def check_evidence_requirements(instance) -> dict:
                 age = (today - ev.created_at.date()).days
                 if age > max_age:
                     result["warnings"].append(
-                        f"Evidenza '{ev.title}' ha {age} giorni "
-                        f"(max consigliato: {max_age}gg)"
+                        _("Evidenza '%(title)s' ha %(age)s giorni (max consigliato: %(max_age)s gg)") % {
+                            "title": ev.title,
+                            "age": age,
+                            "max_age": max_age,
+                        }
                     )
 
     # Controlla minimi
@@ -82,7 +107,7 @@ def check_evidence_requirements(instance) -> dict:
             result["satisfied"] = False
             result["missing_documents"].append({
                 "type": "any",
-                "description": f"Richiesti almeno {min_docs} documenti approvati",
+                "description": _("Richiesti almeno %(count)s documenti approvati") % {"count": min_docs},
             })
     if min_evs > 0:
         count = instance.evidences.filter(
@@ -92,7 +117,7 @@ def check_evidence_requirements(instance) -> dict:
             result["satisfied"] = False
             result["missing_evidences"].append({
                 "type": "any",
-                "description": f"Richieste almeno {min_evs} evidenze valide",
+                "description": _("Richieste almeno %(count)s evidenze valide") % {"count": min_evs},
             })
 
     return result
@@ -101,6 +126,7 @@ def check_evidence_requirements(instance) -> dict:
 def evaluate_control(instance, new_status, user, note=""):
     from django.core.exceptions import ValidationError
     from django.utils import timezone
+    from django.utils.translation import gettext as _
 
     from core.audit import log_action
 
@@ -110,22 +136,26 @@ def evaluate_control(instance, new_status, user, note=""):
         if new_status == "compliant" and not req_check["satisfied"]:
             msgs = []
             for md in req_check["missing_documents"]:
-                msgs.append(f"• Documento mancante: {md['description'] or md['type']}")
+                msgs.append(_("• Documento mancante: %(desc)s") % {"desc": md["description"] or md["type"]})
             for me in req_check["missing_evidences"]:
-                msgs.append(f"• Evidenza mancante: {me['description'] or me['type']}")
+                msgs.append(_("• Evidenza mancante: %(desc)s") % {"desc": me["description"] or me["type"]})
             for ee in req_check["expired_evidences"]:
-                msgs.append(f"• Evidenza scaduta: {ee['title']} (scaduta il {ee['expired_on']})")
+                msgs.append(
+                    _("• Evidenza scaduta: %(title)s (scaduta il %(date)s)") % {
+                        "title": ee["title"],
+                        "date": ee["expired_on"],
+                    }
+                )
             # Fallback: if no evidence_requirement defined, require at least one valid evidence
             if not msgs:
                 today = timezone.now().date()
                 if not instance.evidences.filter(valid_until__gte=today, deleted_at__isnull=True).exists():
                     raise ValidationError(
-                        "Impossibile impostare lo stato a 'compliant' senza almeno "
-                        "un'evidenza valida collegata."
+                        _("Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata.")
                     )
             else:
                 raise ValidationError(
-                    "Requisiti non soddisfatti per stato Compliant:\n" + "\n".join(msgs)
+                    _("Requisiti non soddisfatti per stato Compliant:\n") + "\n".join(msgs)
                 )
 
         if new_status == "parziale":
@@ -140,15 +170,13 @@ def evaluate_control(instance, new_status, user, note=""):
             )
             if not has_any:
                 raise ValidationError(
-                    "Almeno un documento approvato o un'evidenza valida "
-                    "richiesti per stato Parziale."
+                    _("Almeno un documento approvato o un'evidenza valida richiesti per stato Parziale.")
                 )
 
     if new_status == "na":
         if not note or len(note.strip()) < 20:
             raise ValidationError(
-                "Lo stato N/A richiede una giustificazione scritta "
-                "di almeno 20 caratteri."
+                _("Lo stato N/A richiede una giustificazione scritta di almeno 20 caratteri.")
             )
 
     instance.status = new_status
@@ -182,13 +210,13 @@ def validate_exclusion(instance, applicability: str,
     """
     from django.core.exceptions import ValidationError
     from django.utils import timezone
+    from django.utils.translation import gettext as _
     from core.audit import log_action
 
     if applicability == "escluso":
         if not justification or len(justification.strip()) < 50:
             raise ValidationError(
-                "La giustificazione di esclusione per SOA richiede almeno 50 caratteri. "
-                "Specificare il motivo formale per cui il controllo non è applicabile."
+                _("La giustificazione di esclusione per SOA richiede almeno 50 caratteri. Specificare il motivo formale per cui il controllo non è applicabile.")
             )
 
     instance.applicability = applicability
@@ -242,7 +270,7 @@ def calc_suggested_status(instance) -> str:
     return "gap"
 
 
-def gap_analysis(source_framework_code: str, target_framework_code: str, plant_id) -> dict:
+def gap_analysis(source_framework_code: str, target_framework_code: str, plant_id, lang: str | None = None) -> dict:
     """
     Confronta due framework e mostra cosa manca per passare dall'uno all'altro.
     """
@@ -271,8 +299,8 @@ def gap_analysis(source_framework_code: str, target_framework_code: str, plant_i
             result["not_mapped"].append({
                 "id": str(tc.pk),
                 "external_id": tc.external_id,
-                "title": tc.get_title("it"),
-                "domain": tc.domain.get_name("it") if tc.domain else "",
+                "title": tc.get_title(lang or "it"),
+                "domain": tc.domain.get_name(lang or "it") if tc.domain else "",
             })
             continue
 
@@ -292,8 +320,8 @@ def gap_analysis(source_framework_code: str, target_framework_code: str, plant_i
         entry = {
             "id": str(tc.pk),
             "external_id": tc.external_id,
-            "title": tc.get_title("it"),
-            "domain": tc.domain.get_name("it") if tc.domain else "",
+            "title": tc.get_title(lang or "it"),
+            "domain": tc.domain.get_name(lang or "it") if tc.domain else "",
             "source_status": best_status,
         }
         if best_status == "compliant":

@@ -40,6 +40,7 @@ class ControlViewSet(viewsets.ModelViewSet):
 
 def _explain_suggestion(instance) -> str:
     from .services import calc_suggested_status, check_evidence_requirements
+    from django.utils.translation import gettext as _
 
     req = instance.control.evidence_requirement or {}
     has_req = bool(
@@ -47,22 +48,27 @@ def _explain_suggestion(instance) -> str:
         or req.get("min_documents") or req.get("min_evidences")
     )
     if not has_req:
-        return "Nessun requisito documentale definito per questo controllo."
+        return _("Nessun requisito documentale definito per questo controllo.")
 
     suggested = calc_suggested_status(instance)
     if suggested == "compliant":
-        return "Tutti i requisiti documentali sono soddisfatti."
+        return _("Tutti i requisiti documentali sono soddisfatti.")
 
     check = check_evidence_requirements(instance)
     msgs = []
     for md in check["missing_documents"]:
-        msgs.append(f"Documento mancante: {md['description'] or md['type']}")
+        msgs.append(_("Documento mancante: %(desc)s") % {"desc": md["description"] or md["type"]})
     for me in check["missing_evidences"]:
-        msgs.append(f"Evidenza mancante: {me['description'] or me['type']}")
+        msgs.append(_("Evidenza mancante: %(desc)s") % {"desc": me["description"] or me["type"]})
     for ee in check["expired_evidences"]:
-        msgs.append(f"Evidenza scaduta: {ee['title']} (scaduta il {ee['expired_on']})")
+        msgs.append(
+            _("Evidenza scaduta: %(title)s (scaduta il %(date)s)") % {
+                "title": ee["title"],
+                "date": ee["expired_on"],
+            }
+        )
 
-    prefix = "Requisiti parzialmente soddisfatti." if suggested == "parziale" else "Nessuna documentazione presente."
+    prefix = _("Requisiti parzialmente soddisfatti.") if suggested == "parziale" else _("Nessuna documentazione presente.")
     return (prefix + " " + "; ".join(msgs)) if msgs else prefix
 
 
@@ -126,7 +132,8 @@ class ControlInstanceViewSet(viewsets.ModelViewSet):
         new_status = request.data.get("status")
         note = request.data.get("note", "")
         if not new_status:
-            return Response({"error": "Campo 'status' obbligatorio."}, status=400)
+            from django.utils.translation import gettext as _
+            return Response({"error": _("Campo 'status' obbligatorio.")}, status=400)
         try:
             evaluate_control(instance, new_status, request.user, note)
             serializer = self.get_serializer(instance)
@@ -143,8 +150,10 @@ class ControlInstanceViewSet(viewsets.ModelViewSet):
         from django.utils import timezone
         from core.audit import AuditLog
 
+        from django.utils import translation
+
         instance = self.get_object()
-        lang = request.query_params.get("lang", "it")
+        lang = request.query_params.get("lang") or getattr(request, "LANGUAGE_CODE", None) or "it"
         control = instance.control
 
         mappings = list(
@@ -189,45 +198,48 @@ class ControlInstanceViewSet(viewsets.ModelViewSet):
         ]
 
         from .services import check_evidence_requirements
-        requirements = check_evidence_requirements(instance)
+        with translation.override(lang):
+            requirements = check_evidence_requirements(instance, lang=lang)
 
         from .services import calc_suggested_status
         suggested_status = calc_suggested_status(instance)
 
-        return Response({
-            "current_status": instance.status,
-            "suggested_status": suggested_status,
-            "suggested_status_reason": _explain_suggestion(instance),
-            "applicability": instance.applicability,
-            "exclusion_justification": instance.exclusion_justification,
-            "maturity_level": instance.maturity_level,
-            "maturity_level_override": instance.maturity_level_override,
-            "calc_maturity_level": instance.calc_maturity_level,
-            "approved_in_soa": instance.approved_in_soa,
-            "soa_approved_at": instance.soa_approved_at.isoformat() if instance.soa_approved_at else None,
-            "needs_revaluation": instance.needs_revaluation,
-            "needs_revaluation_since": str(instance.needs_revaluation_since) if instance.needs_revaluation_since else None,
-            "control_id": control.external_id,
-            "title": control.get_title(lang),
-            "domain": control.domain.get_name(lang) if control.domain else "",
-            "framework": control.framework.code,
-            "level": control.level,
-            "control_category": control.control_category,
-            "evidence_requirement": control.evidence_requirement,
-            "description": control.translations.get(lang, {}).get("description", ""),
-            "implementation_guidance": control.translations.get(lang, {}).get("guidance", ""),
-            "evidence_examples": control.translations.get(lang, {}).get("evidence_examples", []),
-            "mappings": mappings,
-            "evaluation_history": history,
-            "current_evidences": current_evidences,
-            "linked_documents": linked_documents,
-            "requirements": requirements,
-        })
+        with translation.override(lang):
+            return Response({
+                "current_status": instance.status,
+                "suggested_status": suggested_status,
+                "suggested_status_reason": _explain_suggestion(instance),
+                "applicability": instance.applicability,
+                "exclusion_justification": instance.exclusion_justification,
+                "maturity_level": instance.maturity_level,
+                "maturity_level_override": instance.maturity_level_override,
+                "calc_maturity_level": instance.calc_maturity_level,
+                "approved_in_soa": instance.approved_in_soa,
+                "soa_approved_at": instance.soa_approved_at.isoformat() if instance.soa_approved_at else None,
+                "needs_revaluation": instance.needs_revaluation,
+                "needs_revaluation_since": str(instance.needs_revaluation_since) if instance.needs_revaluation_since else None,
+                "control_id": control.external_id,
+                "title": control.get_title(lang),
+                "domain": control.domain.get_name(lang) if control.domain else "",
+                "framework": control.framework.code,
+                "level": control.level,
+                "control_category": control.control_category,
+                "evidence_requirement": control.evidence_requirement,
+                "description": control.translations.get(lang, {}).get("description", ""),
+                "implementation_guidance": control.translations.get(lang, {}).get("guidance", ""),
+                "evidence_examples": control.translations.get(lang, {}).get("evidence_examples", []),
+                "mappings": mappings,
+                "evaluation_history": history,
+                "current_evidences": current_evidences,
+                "linked_documents": linked_documents,
+                "requirements": requirements,
+            })
 
     @action(detail=True, methods=["post"], url_path="link-document")
     def link_document(self, request, pk=None):
         """Collega un Document a questo ControlInstance."""
         from apps.documents.models import Document
+        from django.utils.translation import gettext as _
         instance = self.get_object()
         doc_id = request.data.get("document_id")
         try:
@@ -235,12 +247,13 @@ class ControlInstanceViewSet(viewsets.ModelViewSet):
             instance.documents.add(doc)
             return Response({"ok": True, "document_id": str(doc.id)})
         except Document.DoesNotExist:
-            return Response({"error": "Documento non trovato"}, status=404)
+            return Response({"error": _("Documento non trovato")}, status=404)
 
     @action(detail=True, methods=["post"], url_path="unlink-document")
     def unlink_document(self, request, pk=None):
         """Scollega un Document da questo ControlInstance."""
         from apps.documents.models import Document
+        from django.utils.translation import gettext as _
         instance = self.get_object()
         doc_id = request.data.get("document_id")
         try:
@@ -248,17 +261,18 @@ class ControlInstanceViewSet(viewsets.ModelViewSet):
             instance.documents.remove(doc)
             return Response({"ok": True})
         except Document.DoesNotExist:
-            return Response({"error": "Documento non trovato"}, status=404)
+            return Response({"error": _("Documento non trovato")}, status=404)
 
     @action(detail=True, methods=["post"], url_path="link_evidence")
     def link_evidence(self, request, pk=None):
         from apps.documents.models import Evidence
+        from django.utils.translation import gettext as _
         instance = self.get_object()
         evidence_id = request.data.get("evidence_id")
         try:
             evidence = Evidence.objects.get(pk=evidence_id)
         except Evidence.DoesNotExist:
-            return Response({"error": "Evidenza non trovata."}, status=404)
+            return Response({"error": _("Evidenza non trovata.")}, status=404)
         instance.evidences.add(evidence)
         return Response({"ok": True})
 
@@ -279,10 +293,11 @@ class ControlInstanceViewSet(viewsets.ModelViewSet):
     def set_maturity(self, request, pk=None):
         """Override manuale del maturity level per VDA ISA TISAX."""
         from core.audit import log_action
+        from django.utils.translation import gettext as _
         instance = self.get_object()
         level = request.data.get("maturity_level")
         if level is None or not (0 <= int(level) <= 5):
-            return Response({"error": "maturity_level deve essere tra 0 e 5"}, status=400)
+            return Response({"error": _("maturity_level deve essere tra 0 e 5")}, status=400)
         instance.maturity_level = int(level)
         instance.maturity_level_override = True
         instance.save(update_fields=["maturity_level", "maturity_level_override", "updated_at"])
@@ -337,12 +352,13 @@ class ControlInstanceViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"], url_path="unlink_evidence")
     def unlink_evidence(self, request, pk=None):
         from apps.documents.models import Evidence
+        from django.utils.translation import gettext as _
         instance = self.get_object()
         evidence_id = request.data.get("evidence_id")
         try:
             evidence = Evidence.objects.get(pk=evidence_id)
         except Evidence.DoesNotExist:
-            return Response({"error": "Evidenza non trovata."}, status=404)
+            return Response({"error": _("Evidenza non trovata.")}, status=404)
         instance.evidences.remove(evidence)
         return Response({"ok": True})
 
@@ -361,12 +377,14 @@ class GapAnalysisView(APIView):
 
     def get(self, request):
         from .services import gap_analysis
+        from django.utils.translation import gettext as _
         source = request.query_params.get("source")
         target = request.query_params.get("target")
         plant_id = request.query_params.get("plant")
         if not source or not target:
-            return Response({"error": "Parametri 'source' e 'target' obbligatori."}, status=400)
-        result = gap_analysis(source, target, plant_id)
+            return Response({"error": _("Parametri 'source' e 'target' obbligatori.")}, status=400)
+        lang = request.query_params.get("lang") or getattr(request, "LANGUAGE_CODE", None) or "it"
+        result = gap_analysis(source, target, plant_id, lang=lang)
         return Response(result)
 
 

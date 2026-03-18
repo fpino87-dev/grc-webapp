@@ -1,0 +1,82 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: grc-webapp\\n"
+"POT-Creation-Date: 2026-03-18 00:00+0000\\n"
+"PO-Revision-Date: 2026-03-18 00:00+0000\\n"
+"Last-Translator: \\n"
+"Language-Team: \\n"
+"Language: en\\n"
+"MIME-Version: 1.0\\n"
+"Content-Type: text/plain; charset=UTF-8\\n"
+"Content-Transfer-Encoding: 8bit\\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\\n"
+
+msgid "Evidenza '%(title)s' ha %(age)s giorni (max consigliato: %(max_age)s gg)"
+msgstr "Evidence '%(title)s' is %(age)s days old (recommended max: %(max_age)s days)"
+
+msgid "Richiesti almeno %(count)s documenti approvati"
+msgstr "At least %(count)s approved documents required"
+
+msgid "Richieste almeno %(count)s evidenze valide"
+msgstr "At least %(count)s valid evidences required"
+
+msgid "• Documento mancante: %(desc)s"
+msgstr "• Missing document: %(desc)s"
+
+msgid "• Evidenza mancante: %(desc)s"
+msgstr "• Missing evidence: %(desc)s"
+
+msgid "• Evidenza scaduta: %(title)s (scaduta il %(date)s)"
+msgstr "• Expired evidence: %(title)s (expired on %(date)s)"
+
+msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata."
+msgstr "Cannot set status to 'compliant' without at least one linked valid evidence."
+
+msgid "Requisiti non soddisfatti per stato Compliant:\\n"
+msgstr "Requirements not satisfied for Compliant status:\\n"
+
+msgid "Almeno un documento approvato o un'evidenza valida richiesti per stato Parziale."
+msgstr "At least one approved document or one valid evidence is required for Partial status."
+
+msgid "Lo stato N/A richiede una giustificazione scritta di almeno 20 caratteri."
+msgstr "N/A status requires a written justification of at least 20 characters."
+
+msgid "La giustificazione di esclusione per SOA richiede almeno 50 caratteri. Specificare il motivo formale per cui il controllo non è applicabile."
+msgstr "SOA exclusion justification requires at least 50 characters. Provide the formal reason why the control is not applicable."
+
+msgid "Nessun requisito documentale definito per questo controllo."
+msgstr "No documentary requirements defined for this control."
+
+msgid "Tutti i requisiti documentali sono soddisfatti."
+msgstr "All documentary requirements are satisfied."
+
+msgid "Documento mancante: %(desc)s"
+msgstr "Missing document: %(desc)s"
+
+msgid "Evidenza mancante: %(desc)s"
+msgstr "Missing evidence: %(desc)s"
+
+msgid "Evidenza scaduta: %(title)s (scaduta il %(date)s)"
+msgstr "Expired evidence: %(title)s (expired on %(date)s)"
+
+msgid "Requisiti parzialmente soddisfatti."
+msgstr "Partially satisfied requirements."
+
+msgid "Nessuna documentazione presente."
+msgstr "No documentation present."
+
+msgid "Campo 'status' obbligatorio."
+msgstr "Field 'status' is required."
+
+msgid "Documento non trovato"
+msgstr "Document not found"
+
+msgid "Evidenza non trovata."
+msgstr "Evidence not found."
+
+msgid "maturity_level deve essere tra 0 e 5"
+msgstr "maturity_level must be between 0 and 5"
+
+msgid "Parametri 'source' e 'target' obbligatori."
+msgstr "Parameters 'source' and 'target' are required."
+
