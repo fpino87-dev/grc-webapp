@@ -22,6 +22,7 @@ def approve_plan(plan: BcpPlan, user) -> BcpPlan:
 def check_missing_bcp_plans(plant):
     """Restituisce processi critici (criticality >= 4) senza BCP plan attivo."""
     from apps.bia.models import CriticalProcess
+    from .models import BcpPlan
 
     processes = CriticalProcess.objects.filter(
         plant=plant,
@@ -31,7 +32,12 @@ def check_missing_bcp_plans(plant):
     )
     missing = []
     for p in processes:
-        has_bcp = p.bcp_plans.filter(deleted_at__isnull=True).exists()
+        has_direct_bcp = p.bcp_plans.filter(deleted_at__isnull=True).exists()
+        has_m2m_bcp = BcpPlan.objects.filter(
+            deleted_at__isnull=True,
+            critical_processes=p,
+        ).exists()
+        has_bcp = has_direct_bcp or has_m2m_bcp
         if not has_bcp:
             missing.append(p)
     return missing

@@ -85,8 +85,16 @@ class CriticalProcess(BaseModel):
         """
         if self.rto_target_hours is None:
             return "unknown"
+        from apps.bcp.models import BcpPlan
+
+        direct_qs = self.bcp_plans.filter(deleted_at__isnull=True, rto_hours__isnull=False)
+        m2m_qs = BcpPlan.objects.filter(
+            deleted_at__isnull=True,
+            rto_hours__isnull=False,
+            critical_processes=self,
+        )
         best_bcp = (
-            self.bcp_plans.filter(deleted_at__isnull=True, rto_hours__isnull=False)
+            direct_qs.union(m2m_qs)
             .order_by("rto_hours")
             .first()
         )

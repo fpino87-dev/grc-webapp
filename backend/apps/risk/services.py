@@ -226,3 +226,94 @@ def escalate_red_risk(assessment: RiskAssessment, user):
         # le notifiche non devono mai bloccare la logica principale
         return
 
+
+def get_risk_bia_bcp_context(assessment: RiskAssessment) -> dict:
+    """
+    Vista integrata per una singola valutazione di rischio:
+    Rischio + BIA del processo collegato + BCP che coprono quel processo.
+    Nessun side-effect, solo read-model.
+    """
+    from apps.bia.models import CriticalProcess
+    from apps.bcp.models import BcpPlan
+
+    risk_data = {
+        "id": str(assessment.pk),
+        "name": assessment.name,
+        "assessment_type": assessment.assessment_type,
+        "asset_id": str(assessment.asset_id) if assessment.asset_id else None,
+        "probability": assessment.probability,
+        "impact": assessment.impact,
+        "score": assessment.score,
+        "inherent_probability": assessment.inherent_probability,
+        "inherent_impact": assessment.inherent_impact,
+        "inherent_score": assessment.inherent_score,
+        "residual_score": assessment.residual_score,
+        "risk_level": assessment.risk_level,
+        "inherent_risk_level": assessment.inherent_risk_level,
+        "risk_reduction_pct": assessment.risk_reduction_pct,
+        "status": assessment.status,
+        "treatment": assessment.treatment,
+        "risk_accepted_formally": assessment.risk_accepted_formally,
+        "risk_acceptance_expiry": assessment.risk_acceptance_expiry,
+        "needs_revaluation": assessment.needs_revaluation,
+        "needs_revaluation_since": assessment.needs_revaluation_since,
+    }
+
+    bia_data = None
+    bcp_plans = []
+    bcp_summary = None
+
+    process: CriticalProcess | None = assessment.critical_process
+    if process:
+        bia_data = {
+            "process_id": str(process.pk),
+            "process_name": process.name,
+            "plant_id": str(process.plant_id),
+            "criticality": process.criticality,
+            "mtpd_hours": process.mtpd_hours,
+            "rto_target_hours": process.rto_target_hours,
+            "rpo_target_hours": process.rpo_target_hours,
+            "downtime_cost_hour": process.downtime_cost_hour,
+            "danno_reputazionale": process.danno_reputazionale,
+            "danno_normativo": process.danno_normativo,
+            "danno_operativo": process.danno_operativo,
+            "status": process.status,
+        }
+
+        direct_plans = BcpPlan.objects.filter(
+            deleted_at__isnull=True,
+            critical_process=process,
+        )
+        m2m_plans = BcpPlan.objects.filter(
+            deleted_at__isnull=True,
+            critical_processes=process,
+        ).exclude(pk__in=direct_plans.values_list("pk", flat=True))
+
+        plans_qs = direct_plans.union(m2m_plans).select_related("plant")
+
+        for p in plans_qs:
+            bcp_plans.append(
+                {
+                    "id": str(p.pk),
+                    "title": p.title,
+                    "plant_id": str(p.plant_id),
+                    "status": p.status,
+                    "rto_hours": p.rto_hours,
+                    "rpo_hours": p.rpo_hours,
+                    "last_test_date": p.last_test_date,
+                    "next_test_date": p.next_test_date,
+                }
+            )
+
+        bcp_summary = {
+            "has_bcp_covering_process": len(bcp_plans) > 0,
+            "best_rto_vs_mtpd_status": process.rto_bcp_status,
+        }
+
+    return {
+        "risk": risk_data,
+        "bia": bia_data,
+        "bcp_plans": bcp_plans,
+        "bcp_summary": bcp_summary,
+    }
+

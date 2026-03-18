@@ -27,6 +27,58 @@ IMPACT_CHOICES = [(1,"1 – Trascurabile"),(2,"2 – Minore"),(3,"3 – Moderato
 TREATMENT_CHOICES = [("mitigare","Mitigare"),("accettare","Accettare"),("trasferire","Trasferire"),("evitare","Evitare")]
 
 
+class RiskScenario(BaseModel):
+    """
+    Nodo centrale scenario di rischio (plant + processo + asset + minaccia).
+    Leggero e retro-compatibile: non sostituisce RiskAssessment ma lo affianca.
+    """
+    plant = models.ForeignKey(
+        "plants.Plant",
+        on_delete=models.CASCADE,
+        related_name="risk_scenarios",
+    )
+    critical_process = models.ForeignKey(
+        "bia.CriticalProcess",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="risk_scenarios",
+    )
+    asset = models.ForeignKey(
+        "assets.Asset",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="risk_scenarios",
+    )
+    threat_category = models.CharField(
+        max_length=50,
+        blank=True,
+        default="",
+        choices=THREAT_CATEGORIES,
+    )
+    likelihood = models.IntegerField(
+        null=True,
+        blank=True,
+        choices=PROB_CHOICES,
+        help_text="Probabilità scenario (1-5)",
+    )
+    impact = models.IntegerField(
+        null=True,
+        blank=True,
+        choices=IMPACT_CHOICES,
+        help_text="Impatto scenario (1-5)",
+    )
+    risk_score = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="Score scenario = likelihood × impact",
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
 class RiskAssessment(BaseModel):
     plant = models.ForeignKey("plants.Plant", on_delete=models.CASCADE)
     asset = models.ForeignKey(
