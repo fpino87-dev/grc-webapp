@@ -39,7 +39,12 @@
   "common": {
     "loading": "Caricamento...",
     "downloading": "Download...",
-    "close": "Chiudi"
+    "close": "Chiudi",
+    "saving": "Salvataggio...",
+    "save_error": "Errore durante il salvataggio",
+    "error": "Errore",
+    "optional": "— opzionale —",
+    "select": "— seleziona —"
   },
   "controls": {
     "title": "Compliance — Controlli",
@@ -157,6 +162,174 @@
     "sites": {
       "title": "Siti",
       "empty": "Nessun sito configurato"
+    }
+  }
+  ,
+  "tasks": {
+    "title": "Task",
+    "empty": "Nessun task trovato",
+    "filters": {
+      "all": "Tutti",
+      "open": "Aperti",
+      "in_progress": "In corso",
+      "completed": "Completati",
+      "overdue": "Scaduti"
+    },
+    "new": {
+      "title": "Nuovo task",
+      "submit": "Crea task"
+    },
+    "fields": {
+      "title": "Titolo",
+      "priority": "Priorità",
+      "due_date": "Scadenza",
+      "plant": "Sito"
+    },
+    "priority": {
+      "bassa": "bassa",
+      "media": "media",
+      "alta": "alta",
+      "critica": "critica"
+    },
+    "table": {
+      "title": "Titolo",
+      "priority": "Priorità",
+      "status": "Stato",
+      "due_date": "Scadenza",
+      "source": "Fonte",
+      "escalation": "Escalation"
+    },
+    "actions": {
+      "complete": "Completa"
+    }
+  },
+  "documents": {
+    "title": "Documenti & Evidenze",
+    "tabs": {
+      "documents": "Documenti",
+      "evidences": "Evidenze"
+    },
+    "empty": "Nessun documento trovato",
+    "file_help": "Max 50MB. Formati: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg.",
+    "filters": {
+      "all": "Tutti",
+      "draft": "Bozza",
+      "in_review": "In revisione",
+      "in_approval": "In approvazione",
+      "approved": "Approvati"
+    },
+    "filter": {
+      "only_selected_plant": "Solo sito selezionato"
+    },
+    "fields": {
+      "title": "Titolo",
+      "category": "Categoria",
+      "document_type": "Tipo documento",
+      "review_due_date": "Scadenza revisione",
+      "mandatory": "Documento obbligatorio",
+      "file": "File",
+      "plant": "Sito",
+      "description": "Descrizione"
+    },
+    "new": {
+      "title": "Nuovo documento",
+      "submit": "Crea documento"
+    },
+    "upload": {
+      "title": "Nuova versione documento",
+      "submit": "Carica versione",
+      "change_notes": "Note cambio (opzionale)"
+    },
+    "change_plant": {
+      "title": "Cambia sito documento",
+      "none": "— Nessun sito —"
+    },
+    "category": {
+      "politica": "Politica",
+      "procedura": "Procedura",
+      "istruzione": "Istruzione operativa",
+      "registro": "Registro",
+      "verbale": "Verbale",
+      "contratto": "Contratto"
+    },
+    "type": {
+      "policy": "Policy",
+      "procedura": "Procedura",
+      "manuale": "Manuale ISMS",
+      "contratto": "Contratto/NDA",
+      "registro": "Registro",
+      "altro": "Altro"
+    },
+    "mandatory": {
+      "yes": "Obbligatorio",
+      "no": "Facoltativo"
+    },
+    "table": {
+      "title": "Titolo",
+      "file": "File",
+      "plant": "Sito",
+      "type": "Tipo",
+      "status": "Stato",
+      "mandatory": "Obbligatorio",
+      "review_due_date": "Scadenza revisione",
+      "approved_at": "Approvato il"
+    },
+    "actions": {
+      "download": "Scarica",
+      "submit_for_review": "Invia per revisione",
+      "new_version": "Nuova versione",
+      "link_controls": "Collega controlli",
+      "change_plant": "Cambia sito"
+    },
+    "errors": {
+      "download_failed": "Impossibile scaricare il documento. Verifica i permessi o riprova più tardi.",
+      "evidence_download_failed": "Impossibile scaricare il file evidenza. Verifica i permessi o riprova più tardi.",
+      "no_file_selected": "Nessun file selezionato",
+      "upload_failed": "Errore durante il caricamento del file",
+      "update_plant_failed": "Errore durante l'aggiornamento del sito"
+    },
+    "controls_link": {
+      "all_statuses": "Tutti gli stati",
+      "selected_count": "{{count}} controlli selezionati",
+      "none_selected": "Nessuna selezione",
+      "linking": "Collegamento...",
+      "submit": "Collega selezionati"
+    },
+    "evidence": {
+      "empty": "Nessuna evidenza trovata",
+      "new": {
+        "title": "Nuova evidenza",
+        "submit": "Crea evidenza"
+      },
+      "fields": {
+        "type": "Tipo evidenza",
+        "valid_until": "Valida fino al"
+      },
+      "filters": {
+        "all": "Tutte",
+        "valid": "Valide",
+        "expiring": "In scadenza",
+        "expired": "Scadute",
+        "all_types": "Tutti i tipi"
+      },
+      "table": {
+        "type": "Tipo",
+        "title": "Titolo",
+        "expiry": "Scadenza",
+        "plant": "Sito",
+        "linked_controls": "Controlli collegati",
+        "uploaded_by": "Caricata da"
+      },
+      "actions": {
+        "download_file": "Scarica file"
+      },
+      "expiry": {
+        "expired": "Scaduta",
+        "expiring": "In scadenza",
+        "valid": "Valida",
+        "days_ago": "{{days}}g fa",
+        "in_days": "in {{days}}g"
+      }
     }
   }
 }

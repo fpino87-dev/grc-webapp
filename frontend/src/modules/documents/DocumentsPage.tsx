@@ -5,6 +5,7 @@ import { controlsApi, type ControlInstance } from "../../api/endpoints/controls"
 import { plantsApi, type Plant } from "../../api/endpoints/plants";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { useAuthStore } from "../../store/auth";
+import { useTranslation } from "react-i18next";
 
 type MainTab = "documenti" | "evidenze";
 
@@ -19,25 +20,26 @@ function evidenceIcon(type: string): string {
 }
 
 function ExpiryBadge({ validUntil }: { validUntil: string | null }) {
+  const { t } = useTranslation();
   if (!validUntil) return <span className="text-xs text-gray-400">—</span>;
   const date = new Date(validUntil);
   const today = new Date();
   const days = Math.ceil((date.getTime() - today.getTime()) / 86400000);
   if (days < 0) return (
     <div className="text-center">
-      <span className="block text-xs px-2 py-0.5 rounded bg-red-100 text-red-700 font-medium">Scaduta</span>
-      <span className="text-xs text-red-500">{Math.abs(days)}g fa</span>
+      <span className="block text-xs px-2 py-0.5 rounded bg-red-100 text-red-700 font-medium">{t("documents.evidence.expiry.expired")}</span>
+      <span className="text-xs text-red-500">{t("documents.evidence.expiry.days_ago", { days: Math.abs(days) })}</span>
     </div>
   );
   if (days <= 30) return (
     <div className="text-center">
-      <span className="block text-xs px-2 py-0.5 rounded bg-orange-100 text-orange-700 font-medium">In scadenza</span>
-      <span className="text-xs text-orange-600">in {days}g</span>
+      <span className="block text-xs px-2 py-0.5 rounded bg-orange-100 text-orange-700 font-medium">{t("documents.evidence.expiry.expiring")}</span>
+      <span className="text-xs text-orange-600">{t("documents.evidence.expiry.in_days", { days })}</span>
     </div>
   );
   return (
     <div className="text-center">
-      <span className="block text-xs px-2 py-0.5 rounded bg-green-100 text-green-700 font-medium">Valida</span>
+      <span className="block text-xs px-2 py-0.5 rounded bg-green-100 text-green-700 font-medium">{t("documents.evidence.expiry.valid")}</span>
       <span className="text-xs text-green-600">{date.toLocaleDateString("it-IT")}</span>
     </div>
   );
@@ -61,6 +63,7 @@ function expirySort(a: Evidence, b: Evidence): number {
 // ─── Modal nuovo documento ──────────────────────────────────────────────────
 
 function NewDocumentModal({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const selectedPlant = useAuthStore(s => s.selectedPlant);
   const [form, setForm] = useState<Partial<Document>>({ is_mandatory: false });
@@ -87,7 +90,7 @@ function NewDocumentModal({ onClose }: { onClose: () => void }) {
       qc.invalidateQueries({ queryKey: ["documents"] });
       onClose();
     },
-    onError: (e: unknown) => setError((e as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Errore durante il salvataggio"),
+    onError: (e: unknown) => setError((e as { response?: { data?: { detail?: string } } })?.response?.data?.detail || t("common.save_error")),
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
@@ -98,66 +101,66 @@ function NewDocumentModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-        <h3 className="text-lg font-semibold mb-4">Nuovo documento</h3>
+        <h3 className="text-lg font-semibold mb-4">{t("documents.new.title")}</h3>
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Titolo *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.fields.title")} *</label>
             <input name="title" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.fields.category")}</label>
               <select name="category" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-                <option value="">— seleziona —</option>
-                <option value="politica">Politica</option>
-                <option value="procedura">Procedura</option>
-                <option value="istruzione">Istruzione operativa</option>
-                <option value="registro">Registro</option>
-                <option value="verbale">Verbale</option>
-                <option value="contratto">Contratto</option>
+                <option value="">{t("common.select")}</option>
+                <option value="politica">{t("documents.category.politica")}</option>
+                <option value="procedura">{t("documents.category.procedura")}</option>
+                <option value="istruzione">{t("documents.category.istruzione")}</option>
+                <option value="registro">{t("documents.category.registro")}</option>
+                <option value="verbale">{t("documents.category.verbale")}</option>
+                <option value="contratto">{t("documents.category.contratto")}</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo documento</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.fields.document_type")}</label>
               <select name="document_type" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-                <option value="policy">Policy</option>
-                <option value="procedura">Procedura</option>
-                <option value="manuale">Manuale ISMS</option>
-                <option value="contratto">Contratto/NDA</option>
-                <option value="registro">Registro</option>
-                <option value="altro">Altro</option>
+                <option value="policy">{t("documents.type.policy")}</option>
+                <option value="procedura">{t("documents.type.procedura")}</option>
+                <option value="manuale">{t("documents.type.manuale")}</option>
+                <option value="contratto">{t("documents.type.contratto")}</option>
+                <option value="registro">{t("documents.type.registro")}</option>
+                <option value="altro">{t("documents.type.altro")}</option>
               </select>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Scadenza revisione</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.fields.review_due_date")}</label>
             <input type="date" name="review_due_date" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
           </div>
           <div className="flex items-center gap-2">
             <input type="checkbox" id="is_mandatory" name="is_mandatory" onChange={handleChange} className="rounded" />
-            <label htmlFor="is_mandatory" className="text-sm text-gray-700">Documento obbligatorio</label>
+            <label htmlFor="is_mandatory" className="text-sm text-gray-700">{t("documents.fields.mandatory")}</label>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">File *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.fields.file")} *</label>
             <input
               type="file"
               onChange={e => setFile(e.target.files?.[0] ?? null)}
               className="w-full text-sm"
             />
             <p className="mt-1 text-xs text-gray-500">
-              Max 50MB. Formati: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg.
+              {t("documents.file_help")}
             </p>
           </div>
         </div>
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
-          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("actions.cancel")}</button>
           <button
             onClick={() => mutation.mutate(form)}
             disabled={mutation.isPending || !form.title || !file}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
-            {mutation.isPending ? "Salvataggio..." : "Crea documento"}
+            {mutation.isPending ? t("common.saving") : t("documents.new.submit")}
           </button>
         </div>
       </div>
@@ -168,6 +171,7 @@ function NewDocumentModal({ onClose }: { onClose: () => void }) {
 // ─── Modal upload nuova versione documento ─────────────────────────────────────
 
 function UploadVersionModal({ doc, onClose }: { doc: Document; onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [file, setFile] = useState<File | null>(null);
   const [changeSummary, setChangeSummary] = useState("");
@@ -175,7 +179,7 @@ function UploadVersionModal({ doc, onClose }: { doc: Document; onClose: () => vo
 
   const mutation = useMutation({
     mutationFn: () => {
-      if (!file) throw new Error("Nessun file selezionato");
+      if (!file) throw new Error(t("documents.errors.no_file_selected"));
       return documentsApi.uploadVersion(doc.id, file, changeSummary || undefined);
     },
     onSuccess: () => {
@@ -185,29 +189,29 @@ function UploadVersionModal({ doc, onClose }: { doc: Document; onClose: () => vo
     onError: (e: unknown) => {
       // @ts-expect-error generic axios-like error shape
       const msg = e?.response?.data?.error || e?.response?.data?.detail || (e as Error).message;
-      setError(msg || "Errore durante il caricamento del file");
+      setError(msg || t("documents.errors.upload_failed"));
     },
   });
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-        <h3 className="text-lg font-semibold mb-1">Nuova versione documento</h3>
+        <h3 className="text-lg font-semibold mb-1">{t("documents.upload.title")}</h3>
         <p className="text-xs text-gray-500 mb-4 truncate">{doc.title}</p>
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">File *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.fields.file")} *</label>
             <input
               type="file"
               onChange={e => setFile(e.target.files?.[0] ?? null)}
               className="w-full text-sm"
             />
             <p className="mt-1 text-xs text-gray-500">
-              Max 50MB. Formati: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg.
+              {t("documents.file_help")}
             </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Note cambio (opzionale)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.upload.change_notes")}</label>
             <textarea
               rows={2}
               value={changeSummary}
@@ -218,13 +222,13 @@ function UploadVersionModal({ doc, onClose }: { doc: Document; onClose: () => vo
         </div>
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3 break-words">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
-          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("actions.cancel")}</button>
           <button
             onClick={() => mutation.mutate()}
             disabled={mutation.isPending || !file}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
-            {mutation.isPending ? "Caricamento..." : "Carica versione"}
+            {mutation.isPending ? t("common.loading") : t("documents.upload.submit")}
           </button>
         </div>
       </div>
@@ -235,6 +239,7 @@ function UploadVersionModal({ doc, onClose }: { doc: Document; onClose: () => vo
 // ─── Modal cambio sito documento ───────────────────────────────────────────────
 
 function ChangePlantModal({ doc, onClose }: { doc: Document; onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const { data: plants } = useQuery({
     queryKey: ["plants"],
@@ -253,7 +258,7 @@ function ChangePlantModal({ doc, onClose }: { doc: Document; onClose: () => void
     onError: (e: unknown) => {
       // @ts-expect-error axios-like error
       const msg = e?.response?.data?.detail || (e as Error).message;
-      setError(msg || "Errore durante l'aggiornamento del sito");
+      setError(msg || t("documents.errors.update_plant_failed"));
     },
   });
 
@@ -262,17 +267,17 @@ function ChangePlantModal({ doc, onClose }: { doc: Document; onClose: () => void
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-        <h3 className="text-lg font-semibold mb-1">Cambia sito documento</h3>
+        <h3 className="text-lg font-semibold mb-1">{t("documents.change_plant.title")}</h3>
         <p className="text-xs text-gray-500 mb-4 truncate">{doc.title}</p>
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Sito</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.fields.plant")}</label>
             <select
               value={plantId}
               onChange={e => setPlantId(e.target.value)}
               className="w-full border rounded px-3 py-2 text-sm"
             >
-              <option value="">— Nessun sito —</option>
+              <option value="">{t("documents.change_plant.none")}</option>
               {plantOptions.map(p => (
                 <option key={p.id} value={p.id}>
                   {p.code} — {p.name}
@@ -283,13 +288,13 @@ function ChangePlantModal({ doc, onClose }: { doc: Document; onClose: () => void
         </div>
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3 break-words">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
-          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("actions.cancel")}</button>
           <button
             onClick={() => mutation.mutate()}
             disabled={mutation.isPending}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
-            {mutation.isPending ? "Salvataggio..." : "Salva"}
+            {mutation.isPending ? t("common.saving") : t("actions.save")}
           </button>
         </div>
       </div>
@@ -300,6 +305,7 @@ function ChangePlantModal({ doc, onClose }: { doc: Document; onClose: () => void
 // ─── Modal nuova evidenza ─────────────────────────────────────────────────────
 
 function NewEvidenceModal({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const selectedPlant = useAuthStore(s => s.selectedPlant);
   const [form, setForm] = useState<Partial<Evidence>>({ evidence_type: "altro" });
@@ -316,34 +322,34 @@ function NewEvidenceModal({ onClose }: { onClose: () => void }) {
       return documentsApi.createEvidence(data);
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["evidences"] }); onClose(); },
-    onError: (e: unknown) => setError((e as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Errore"),
+    onError: (e: unknown) => setError((e as { response?: { data?: { detail?: string } } })?.response?.data?.detail || t("common.error")),
   });
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-        <h3 className="text-lg font-semibold mb-4">Nuova evidenza</h3>
+        <h3 className="text-lg font-semibold mb-4">{t("documents.evidence.new.title")}</h3>
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Titolo *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.fields.title")} *</label>
             <input onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="w-full border rounded px-3 py-2 text-sm" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tipo evidenza</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.evidence.fields.type")}</label>
             <select value={form.evidence_type} onChange={e => setForm(p => ({ ...p, evidence_type: e.target.value }))} className="w-full border rounded px-3 py-2 text-sm">
               {Object.entries(EVIDENCE_TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Valida fino al *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.evidence.fields.valid_until")} *</label>
             <input type="date" onChange={e => setForm(p => ({ ...p, valid_until: e.target.value }))} className="w-full border rounded px-3 py-2 text-sm" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Descrizione</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.fields.description")}</label>
             <textarea onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={2} className="w-full border rounded px-3 py-2 text-sm resize-none" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">File *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.fields.file")} *</label>
             <input
               type="file"
               onChange={e => setFile(e.target.files?.[0] ?? null)}
@@ -353,13 +359,13 @@ function NewEvidenceModal({ onClose }: { onClose: () => void }) {
         </div>
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
-          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("actions.cancel")}</button>
           <button
             onClick={() => mutation.mutate({ ...form, file: file ?? undefined })}
             disabled={mutation.isPending || !form.title || !form.valid_until || !file}
             className="px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-50"
           >
-            {mutation.isPending ? "Salvataggio..." : "Crea evidenza"}
+            {mutation.isPending ? t("common.saving") : t("documents.evidence.new.submit")}
           </button>
         </div>
       </div>
@@ -370,6 +376,7 @@ function NewEvidenceModal({ onClose }: { onClose: () => void }) {
 // ─── Modal collegamento controlli ─────────────────────────────────────────────
 
 function LinkControlsModal({ doc, onClose }: { doc: Document; onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [frameworkFilter, setFrameworkFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -430,21 +437,21 @@ function LinkControlsModal({ doc, onClose }: { doc: Document; onClose: () => voi
 
         <div className="px-6 py-3 border-b shrink-0 flex gap-3">
           <select value={frameworkFilter} onChange={e => setFrameworkFilter(e.target.value)} className="border rounded px-2 py-1.5 text-sm flex-1">
-            <option value="">Tutti i framework</option>
+            <option value="">{t("controls.framework_filter.all")}</option>
             {(frameworks ?? []).map(fw => <option key={fw.id} value={fw.code}>{fw.code} — {fw.name}</option>)}
           </select>
           <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="border rounded px-2 py-1.5 text-sm">
-            <option value="">Tutti gli stati</option>
-            <option value="compliant">Compliant</option>
-            <option value="parziale">Parziale</option>
-            <option value="gap">Gap</option>
-            <option value="non_valutato">Non valutato</option>
+            <option value="">{t("documents.controls_link.all_statuses")}</option>
+            <option value="compliant">{t("status.compliant")}</option>
+            <option value="parziale">{t("status.parziale")}</option>
+            <option value="gap">{t("status.gap")}</option>
+            <option value="non_valutato">{t("status.non_valutato")}</option>
           </select>
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-2">
           {controls.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-8">Nessun controllo trovato</p>
+            <p className="text-sm text-gray-400 text-center py-8">{t("controls.empty")}</p>
           ) : (
             <div className="divide-y divide-gray-100">
               {controls.map(ci => (
@@ -467,17 +474,19 @@ function LinkControlsModal({ doc, onClose }: { doc: Document; onClose: () => voi
 
         <div className="px-6 py-4 border-t shrink-0 flex items-center justify-between gap-3">
           <div className="text-xs text-gray-500">
-            {selected.size > 0 ? `${selected.size} controlli selezionati` : "Nessuna selezione"}
+            {selected.size > 0
+              ? t("documents.controls_link.selected_count", { count: selected.size })
+              : t("documents.controls_link.none_selected")}
           </div>
           {result && <p className="text-xs text-green-700 font-medium">{result}</p>}
           <div className="flex gap-2">
-            <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Chiudi</button>
+            <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("common.close")}</button>
             <button
               onClick={() => linkMut.mutate()}
               disabled={selected.size === 0 || linkMut.isPending}
               className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50"
             >
-              {linkMut.isPending ? "Collegamento..." : "Collega selezionati"}
+              {linkMut.isPending ? t("documents.controls_link.linking") : t("documents.controls_link.submit")}
             </button>
           </div>
         </div>
@@ -491,6 +500,7 @@ function LinkControlsModal({ doc, onClose }: { doc: Document; onClose: () => voi
 type DocStatusFilter = "tutti" | "bozza" | "revisione" | "approvazione" | "approvato";
 
 function TabDocumenti() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const selectedPlant = useAuthStore(s => s.selectedPlant);
   const [statusFilter, setStatusFilter] = useState<DocStatusFilter>("tutti");
@@ -529,16 +539,17 @@ function TabDocumenti() {
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch {
-      // fallback minimale: niente toast centralizzato qui, ma evitiamo crash UI
       // eslint-disable-next-line no-alert
-      alert("Impossibile scaricare il documento. Verifica i permessi o riprova più tardi.");
+      alert(t("documents.errors.download_failed"));
     }
   }
 
   const STATUS_FILTERS: { label: string; value: DocStatusFilter }[] = [
-    { label: "Tutti", value: "tutti" }, { label: "Bozza", value: "bozza" },
-    { label: "In revisione", value: "revisione" }, { label: "In approvazione", value: "approvazione" },
-    { label: "Approvati", value: "approvato" },
+    { label: t("documents.filters.all"), value: "tutti" },
+    { label: t("documents.filters.draft"), value: "bozza" },
+    { label: t("documents.filters.in_review"), value: "revisione" },
+    { label: t("documents.filters.in_approval"), value: "approvazione" },
+    { label: t("documents.filters.approved"), value: "approvato" },
   ];
 
   return (
@@ -561,32 +572,32 @@ function TabDocumenti() {
                 onChange={e => setFilterByPlant(e.target.checked)}
                 className="rounded"
               />
-              <span>Solo sito selezionato</span>
+              <span>{t("documents.filter.only_selected_plant")}</span>
             </label>
           )}
           <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 shrink-0">
-            + Nuovo documento
+            + {t("documents.new.submit")}
           </button>
         </div>
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {isLoading ? (
-          <div className="p-8 text-center text-gray-400">Caricamento...</div>
+          <div className="p-8 text-center text-gray-400">{t("common.loading")}</div>
         ) : documents.length === 0 ? (
-          <div className="p-8 text-center text-gray-400">Nessun documento trovato</div>
+          <div className="p-8 text-center text-gray-400">{t("documents.empty")}</div>
         ) : (
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Titolo</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">File</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Sito</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Tipo</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Stato</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Obbligatorio</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Scadenza revisione</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Approvato il</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.table.title")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.table.file")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.table.plant")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.table.type")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.table.status")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.table.mandatory")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.table.review_due_date")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.table.approved_at")}</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
@@ -601,7 +612,7 @@ function TabDocumenti() {
                         onClick={() => handleDownloadDocument(doc)}
                         className="text-indigo-600 hover:underline"
                       >
-                        Scarica
+                        {t("documents.actions.download")}
                       </button>
                     ) : (
                       <span className="text-gray-400">—</span>
@@ -614,37 +625,37 @@ function TabDocumenti() {
                   <td className="px-4 py-3"><StatusBadge status={doc.status} /></td>
                   <td className="px-4 py-3">
                     {doc.is_mandatory
-                      ? <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">Obbligatorio</span>
-                      : <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">Facoltativo</span>}
+                      ? <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">{t("documents.mandatory.yes")}</span>
+                      : <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">{t("documents.mandatory.no")}</span>}
                   </td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{doc.review_due_date ? new Date(doc.review_due_date).toLocaleDateString("it-IT") : "—"}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{doc.approved_at ? new Date(doc.approved_at).toLocaleDateString("it-IT") : "—"}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2 flex-wrap">
-                      {doc.status === "bozza" && <button onClick={() => submitMutation.mutate(doc.id)} className="text-xs text-gray-500 hover:text-blue-700 border border-gray-300 rounded px-2 py-0.5 hover:border-blue-400">Invia per revisione</button>}
+                      {doc.status === "bozza" && <button onClick={() => submitMutation.mutate(doc.id)} className="text-xs text-gray-500 hover:text-blue-700 border border-gray-300 rounded px-2 py-0.5 hover:border-blue-400">{t("documents.actions.submit_for_review")}</button>}
                       {(doc.status === "revisione" || doc.status === "approvazione") && (
                         <>
-                          <button onClick={() => approveMutation.mutate(doc.id)} className="text-xs text-gray-500 hover:text-green-700 border border-gray-300 rounded px-2 py-0.5 hover:border-green-400">Approva</button>
-                          <button onClick={() => rejectMutation.mutate(doc.id)} className="text-xs text-gray-500 hover:text-red-700 border border-gray-300 rounded px-2 py-0.5 hover:border-red-400">Rifiuta</button>
+                          <button onClick={() => approveMutation.mutate(doc.id)} className="text-xs text-gray-500 hover:text-green-700 border border-gray-300 rounded px-2 py-0.5 hover:border-green-400">{t("actions.approve")}</button>
+                          <button onClick={() => rejectMutation.mutate(doc.id)} className="text-xs text-gray-500 hover:text-red-700 border border-gray-300 rounded px-2 py-0.5 hover:border-red-400">{t("actions.reject")}</button>
                         </>
                       )}
                       <button
                         onClick={() => setUploadDoc(doc)}
                         className="text-xs text-gray-500 hover:text-indigo-700 border border-gray-300 rounded px-2 py-0.5 hover:border-indigo-400"
                       >
-                        Nuova versione
+                        {t("documents.actions.new_version")}
                       </button>
                       <button
                         onClick={() => setLinkControlsDoc(doc)}
                         className="text-xs text-indigo-600 hover:text-indigo-800 border border-indigo-200 rounded px-2 py-0.5 hover:border-indigo-400"
                       >
-                        Collega controlli
+                        {t("documents.actions.link_controls")}
                       </button>
                       <button
                         onClick={() => setChangePlantDoc(doc)}
                         className="text-xs text-gray-500 hover:text-amber-700 border border-gray-300 rounded px-2 py-0.5 hover:border-amber-400"
                       >
-                        Cambia sito
+                        {t("documents.actions.change_plant")}
                       </button>
                     </div>
                   </td>
@@ -668,6 +679,7 @@ function TabDocumenti() {
 type ExpiryFilter = "tutti" | "valide" | "in_scadenza" | "scadute";
 
 function TabEvidenze() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const selectedPlant = useAuthStore(s => s.selectedPlant);
   const [typeFilter, setTypeFilter] = useState("");
@@ -689,7 +701,7 @@ function TabEvidenze() {
       window.URL.revokeObjectURL(url);
     } catch {
       // eslint-disable-next-line no-alert
-      alert("Impossibile scaricare il file evidenza. Verifica i permessi o riprova più tardi.");
+      alert(t("documents.errors.evidence_download_failed"));
     }
   }
 
@@ -712,7 +724,12 @@ function TabEvidenze() {
         <div className="flex items-center gap-2 flex-wrap">
           {/* Filtro scadenza */}
           {(["tutti", "in_scadenza", "valide", "scadute"] as ExpiryFilter[]).map(f => {
-            const labels = { tutti: "Tutte", valide: "Valide", in_scadenza: "In scadenza", scadute: "Scadute" };
+            const labels = {
+              tutti: t("documents.evidence.filters.all"),
+              valide: t("documents.evidence.filters.valid"),
+              in_scadenza: t("documents.evidence.filters.expiring"),
+              scadute: t("documents.evidence.filters.expired"),
+            };
             const colors = { tutti: "", valide: "text-green-700", in_scadenza: "text-orange-700", scadute: "text-red-700" };
             return (
               <button key={f} onClick={() => setExpiryFilter(f)}
@@ -724,7 +741,7 @@ function TabEvidenze() {
 
           {/* Filtro tipo */}
           <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="border rounded px-2 py-1.5 text-sm">
-            <option value="">Tutti i tipi</option>
+            <option value="">{t("documents.evidence.filters.all_types")}</option>
             {Object.entries(EVIDENCE_TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
           </select>
         </div>
@@ -737,30 +754,30 @@ function TabEvidenze() {
                 onChange={e => setFilterByPlant(e.target.checked)}
                 className="rounded"
               />
-              <span>Solo sito selezionato</span>
+              <span>{t("documents.filter.only_selected_plant")}</span>
             </label>
           )}
           <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 shrink-0">
-            + Nuova evidenza
+            + {t("documents.evidence.new.submit")}
           </button>
         </div>
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {isLoading ? (
-          <div className="p-8 text-center text-gray-400">Caricamento...</div>
+          <div className="p-8 text-center text-gray-400">{t("common.loading")}</div>
         ) : evidences.length === 0 ? (
-          <div className="p-8 text-center text-gray-400">Nessuna evidenza trovata</div>
+          <div className="p-8 text-center text-gray-400">{t("documents.evidence.empty")}</div>
         ) : (
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Tipo</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Titolo</th>
-                <th className="text-center px-4 py-3 font-medium text-gray-600">Scadenza</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Sito</th>
-                <th className="text-center px-4 py-3 font-medium text-gray-600">Controlli collegati</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Caricata da</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.evidence.table.type")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.evidence.table.title")}</th>
+                <th className="text-center px-4 py-3 font-medium text-gray-600">{t("documents.evidence.table.expiry")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.evidence.table.plant")}</th>
+                <th className="text-center px-4 py-3 font-medium text-gray-600">{t("documents.evidence.table.linked_controls")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.evidence.table.uploaded_by")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -781,7 +798,7 @@ function TabEvidenze() {
                         onClick={() => handleDownloadEvidence(ev)}
                         className="mt-1 inline-flex text-xs text-indigo-600 hover:underline"
                       >
-                        Scarica file
+                        {t("documents.evidence.actions.download_file")}
                       </button>
                     )}
                   </td>
@@ -810,11 +827,12 @@ function TabEvidenze() {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export function DocumentsPage() {
+  const { t } = useTranslation();
   const [mainTab, setMainTab] = useState<MainTab>("documenti");
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">Documenti & Evidenze</h2>
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">{t("documents.title")}</h2>
 
       {/* Tab principali */}
       <div className="flex gap-1 mb-5 border-b border-gray-200">
@@ -826,7 +844,7 @@ export function DocumentsPage() {
               : "text-gray-500 hover:text-gray-700"
           }`}
         >
-          📄 Documenti
+          📄 {t("documents.tabs.documents")}
         </button>
         <button
           onClick={() => setMainTab("evidenze")}
@@ -836,7 +854,7 @@ export function DocumentsPage() {
               : "text-gray-500 hover:text-gray-700"
           }`}
         >
-          🏆 Evidenze
+          🏆 {t("documents.tabs.evidences")}
         </button>
       </div>
 

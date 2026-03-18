@@ -39,7 +39,12 @@
   "common": {
     "loading": "Loading...",
     "downloading": "Downloading...",
-    "close": "Close"
+    "close": "Close",
+    "saving": "Saving...",
+    "save_error": "Error while saving",
+    "error": "Error",
+    "optional": "— optional —",
+    "select": "— select —"
   },
   "controls": {
     "title": "Compliance — Controls",
@@ -157,6 +162,174 @@
     "sites": {
       "title": "Sites",
       "empty": "No sites configured"
+    }
+  }
+  ,
+  "tasks": {
+    "title": "Tasks",
+    "empty": "No tasks found",
+    "filters": {
+      "all": "All",
+      "open": "Open",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "overdue": "Overdue"
+    },
+    "new": {
+      "title": "New task",
+      "submit": "Create task"
+    },
+    "fields": {
+      "title": "Title",
+      "priority": "Priority",
+      "due_date": "Due date",
+      "plant": "Site"
+    },
+    "priority": {
+      "bassa": "low",
+      "media": "medium",
+      "alta": "high",
+      "critica": "critical"
+    },
+    "table": {
+      "title": "Title",
+      "priority": "Priority",
+      "status": "Status",
+      "due_date": "Due date",
+      "source": "Source",
+      "escalation": "Escalation"
+    },
+    "actions": {
+      "complete": "Complete"
+    }
+  },
+  "documents": {
+    "title": "Documents & Evidence",
+    "tabs": {
+      "documents": "Documents",
+      "evidences": "Evidence"
+    },
+    "empty": "No documents found",
+    "file_help": "Max 50MB. Formats: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg.",
+    "filters": {
+      "all": "All",
+      "draft": "Draft",
+      "in_review": "In review",
+      "in_approval": "In approval",
+      "approved": "Approved"
+    },
+    "filter": {
+      "only_selected_plant": "Only selected site"
+    },
+    "fields": {
+      "title": "Title",
+      "category": "Category",
+      "document_type": "Document type",
+      "review_due_date": "Review due date",
+      "mandatory": "Mandatory document",
+      "file": "File",
+      "plant": "Site",
+      "description": "Description"
+    },
+    "new": {
+      "title": "New document",
+      "submit": "Create document"
+    },
+    "upload": {
+      "title": "New document version",
+      "submit": "Upload version",
+      "change_notes": "Change notes (optional)"
+    },
+    "change_plant": {
+      "title": "Change document site",
+      "none": "— No site —"
+    },
+    "category": {
+      "politica": "Policy",
+      "procedura": "Procedure",
+      "istruzione": "Work instruction",
+      "registro": "Register",
+      "verbale": "Minutes",
+      "contratto": "Contract"
+    },
+    "type": {
+      "policy": "Policy",
+      "procedura": "Procedure",
+      "manuale": "ISMS manual",
+      "contratto": "Contract/NDA",
+      "registro": "Register",
+      "altro": "Other"
+    },
+    "mandatory": {
+      "yes": "Mandatory",
+      "no": "Optional"
+    },
+    "table": {
+      "title": "Title",
+      "file": "File",
+      "plant": "Site",
+      "type": "Type",
+      "status": "Status",
+      "mandatory": "Mandatory",
+      "review_due_date": "Review due date",
+      "approved_at": "Approved on"
+    },
+    "actions": {
+      "download": "Download",
+      "submit_for_review": "Submit for review",
+      "new_version": "New version",
+      "link_controls": "Link controls",
+      "change_plant": "Change site"
+    },
+    "errors": {
+      "download_failed": "Unable to download the document. Check permissions or try again later.",
+      "evidence_download_failed": "Unable to download the evidence file. Check permissions or try again later.",
+      "no_file_selected": "No file selected",
+      "upload_failed": "Error while uploading the file",
+      "update_plant_failed": "Error while updating the site"
+    },
+    "controls_link": {
+      "all_statuses": "All statuses",
+      "selected_count": "{{count}} controls selected",
+      "none_selected": "No selection",
+      "linking": "Linking...",
+      "submit": "Link selected"
+    },
+    "evidence": {
+      "empty": "No evidence found",
+      "new": {
+        "title": "New evidence",
+        "submit": "Create evidence"
+      },
+      "fields": {
+        "type": "Evidence type",
+        "valid_until": "Valid until"
+      },
+      "filters": {
+        "all": "All",
+        "valid": "Valid",
+        "expiring": "Expiring",
+        "expired": "Expired",
+        "all_types": "All types"
+      },
+      "table": {
+        "type": "Type",
+        "title": "Title",
+        "expiry": "Expiry",
+        "plant": "Site",
+        "linked_controls": "Linked controls",
+        "uploaded_by": "Uploaded by"
+      },
+      "actions": {
+        "download_file": "Download file"
+      },
+      "expiry": {
+        "expired": "Expired",
+        "expiring": "Expiring",
+        "valid": "Valid",
+        "days_ago": "{{days}}d ago",
+        "in_days": "in {{days}}d"
+      }
     }
   }
 }
