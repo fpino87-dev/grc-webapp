@@ -421,21 +421,19 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
                 </div>
               </span>
               <span className="shrink-0 flex items-center gap-2">
-                {!plan.completed_at && (
-                  <button
-                    onClick={() => {
-                      setEditPlan(plan);
-                      setEditForm({
-                        action: plan.action,
-                        due_date: plan.due_date,
-                        bcp_plan: plan.bcp_plan ?? null,
-                      });
-                    }}
-                    className="text-xs text-purple-700 border border-purple-300 rounded px-2 py-0.5 hover:bg-purple-50 whitespace-nowrap"
-                  >
-                    Modifica
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    setEditPlan(plan);
+                    setEditForm({
+                      action: plan.action,
+                      due_date: plan.due_date,
+                      bcp_plan: plan.bcp_plan ?? null,
+                    });
+                  }}
+                  className="text-xs text-purple-700 border border-purple-300 rounded px-2 py-0.5 hover:bg-purple-50 whitespace-nowrap"
+                >
+                  Modifica
+                </button>
               </span>
               {!plan.completed_at ? (
                 <button onClick={() => completeMutation.mutate(plan.id)} className="text-xs text-green-700 hover:underline shrink-0">Completa</button>
