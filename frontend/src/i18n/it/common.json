@@ -63,6 +63,27 @@
       "soa": "Scarica SOA",
       "vda_isa": "Scarica VDA ISA",
       "nis2_matrix": "Scarica NIS2 Matrix"
+    },
+    "drawer": {
+      "title": "Gestione controllo",
+      "tabs": {
+        "about": "Cos'è",
+        "evaluation": "Valutazione",
+        "documents_evidence": "Documenti & Evidenze",
+        "history": "Storico"
+      },
+      "about": {
+        "no_description": "Nessuna descrizione disponibile per questa lingua.",
+        "guidance": "Linee guida implementazione",
+        "evidence_examples": "Esempi di evidenza accettabile",
+        "mappings": "Mappature cross-framework"
+      },
+      "expiry": {
+        "none": "Nessuna scadenza",
+        "expired_days_ago": "Scaduta {{days}}g fa",
+        "expires_in_days": "Scade in {{days}}g",
+        "valid_until": "Valida fino al {{date}}"
+      }
     }
   },
   "sidebar": {

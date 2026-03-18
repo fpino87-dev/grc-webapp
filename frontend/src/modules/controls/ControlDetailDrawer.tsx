@@ -4,6 +4,7 @@ import { controlsApi, type EvidenceRef, type LinkedDocument, type RequirementsCh
 import { documentsApi, EVIDENCE_TYPE_LABELS } from "../../api/endpoints/documents";
 import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
+import { useTranslation } from "react-i18next";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -27,13 +28,26 @@ function docStatusColor(status: string): string {
 }
 
 function ExpiryBadge({ validUntil }: { validUntil: string | null }) {
-  if (!validUntil) return <span className="text-gray-400 text-xs">Nessuna scadenza</span>;
+  const { t } = useTranslation();
+  if (!validUntil) return <span className="text-gray-400 text-xs">{t("controls.drawer.expiry.none")}</span>;
   const date = new Date(validUntil);
   const today = new Date();
   const days = Math.ceil((date.getTime() - today.getTime()) / 86400000);
-  if (days < 0) return <span className="text-xs px-1.5 py-0.5 rounded bg-red-100 text-red-700 font-medium">Scaduta {Math.abs(days)}g fa</span>;
-  if (days <= 30) return <span className="text-xs px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 font-medium">Scade in {days}g</span>;
-  return <span className="text-xs px-1.5 py-0.5 rounded bg-green-100 text-green-700 font-medium">Valida fino al {date.toLocaleDateString("it-IT")}</span>;
+  if (days < 0) return (
+    <span className="text-xs px-1.5 py-0.5 rounded bg-red-100 text-red-700 font-medium">
+      {t("controls.drawer.expiry.expired_days_ago", { days: Math.abs(days) })}
+    </span>
+  );
+  if (days <= 30) return (
+    <span className="text-xs px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 font-medium">
+      {t("controls.drawer.expiry.expires_in_days", { days })}
+    </span>
+  );
+  return (
+    <span className="text-xs px-1.5 py-0.5 rounded bg-green-100 text-green-700 font-medium">
+      {t("controls.drawer.expiry.valid_until", { date: date.toLocaleDateString("it-IT") })}
+    </span>
+  );
 }
 
 const STATUS_GUIDE = [
@@ -49,6 +63,7 @@ type Tab = "cosa" | "valutazione" | "docevidence" | "storico";
 // ─── Tab 1: Cos'è ─────────────────────────────────────────────────────────────
 
 function TabCosa({ info }: { info: NonNullable<ReturnType<typeof useDetailInfo>["data"]> }) {
+  const { t } = useTranslation();
   const [guidanceOpen, setGuidanceOpen] = useState(false);
   return (
     <div className="space-y-4">
@@ -68,7 +83,7 @@ function TabCosa({ info }: { info: NonNullable<ReturnType<typeof useDetailInfo>[
           {info.description}
         </div>
       ) : (
-        <p className="text-sm text-gray-400 italic">Nessuna descrizione disponibile per questa lingua.</p>
+        <p className="text-sm text-gray-400 italic">{t("controls.drawer.about.no_description")}</p>
       )}
 
       {info.implementation_guidance && (
@@ -77,7 +92,7 @@ function TabCosa({ info }: { info: NonNullable<ReturnType<typeof useDetailInfo>[
             onClick={() => setGuidanceOpen(o => !o)}
             className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
-            <span>Linee guida implementazione</span>
+            <span>{t("controls.drawer.about.guidance")}</span>
             <span className="text-gray-400">{guidanceOpen ? "▲" : "▼"}</span>
           </button>
           {guidanceOpen && (
@@ -90,7 +105,7 @@ function TabCosa({ info }: { info: NonNullable<ReturnType<typeof useDetailInfo>[
 
       {info.evidence_examples.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Esempi di evidenza accettabile</p>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t("controls.drawer.about.evidence_examples")}</p>
           <div className="space-y-1.5">
             {info.evidence_examples.map((ex, i) => {
               const icon = ex.toLowerCase().includes("screenshot") ? "📸"
@@ -109,7 +124,7 @@ function TabCosa({ info }: { info: NonNullable<ReturnType<typeof useDetailInfo>[
 
       {info.mappings.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Mappature cross-framework</p>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t("controls.drawer.about.mappings")}</p>
           <div className="flex flex-wrap gap-1.5">
             {info.mappings.map((m, i) => (
               <span key={i} className="text-xs bg-indigo-50 border border-indigo-100 text-indigo-700 px-2 py-0.5 rounded">
@@ -857,16 +872,17 @@ interface Props {
 }
 
 export function ControlDetailDrawer({ instanceId, onClose }: Props) {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("cosa");
   const { data: info, isLoading } = useDetailInfo(instanceId);
   const qc = useQueryClient();
   const open = !!instanceId;
 
   const tabs: [Tab, string][] = [
-    ["cosa",        "Cos'è"],
-    ["valutazione", "Valutazione"],
-    ["docevidence", "Documenti & Evidenze"],
-    ["storico",     "Storico"],
+    ["cosa",        t("controls.drawer.tabs.about")],
+    ["valutazione", t("controls.drawer.tabs.evaluation")],
+    ["docevidence", t("controls.drawer.tabs.documents_evidence")],
+    ["storico",     t("controls.drawer.tabs.history")],
   ];
 
   return (
@@ -880,9 +896,9 @@ export function ControlDetailDrawer({ instanceId, onClose }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0 bg-gradient-to-r from-slate-700 to-slate-800">
           <div>
-            <h2 className="text-white font-semibold text-base">Gestione controllo</h2>
+            <h2 className="text-white font-semibold text-base">{t("controls.drawer.title")}</h2>
             <p className="text-slate-300 text-xs mt-0.5">
-              {isLoading ? "Caricamento..." : info ? `${info.control_id} — ${info.framework}` : "—"}
+              {isLoading ? t("common.loading") : info ? `${info.control_id} — ${info.framework}` : "—"}
             </p>
           </div>
           <button onClick={onClose} className="text-white/80 hover:text-white w-8 h-8 flex items-center justify-center rounded hover:bg-white/10 text-xl">×</button>
@@ -913,7 +929,7 @@ export function ControlDetailDrawer({ instanceId, onClose }: Props) {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
-          {isLoading && <div className="text-center text-gray-400 py-8">Caricamento...</div>}
+          {isLoading && <div className="text-center text-gray-400 py-8">{t("common.loading")}</div>}
           {!isLoading && info && (
             <>
               {tab === "cosa"        && <TabCosa info={info} />}

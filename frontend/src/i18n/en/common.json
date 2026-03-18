@@ -63,6 +63,27 @@
       "soa": "Download SOA",
       "vda_isa": "Download VDA ISA",
       "nis2_matrix": "Download NIS2 Matrix"
+    },
+    "drawer": {
+      "title": "Control management",
+      "tabs": {
+        "about": "About",
+        "evaluation": "Evaluation",
+        "documents_evidence": "Documents & Evidence",
+        "history": "History"
+      },
+      "about": {
+        "no_description": "No description available for this language.",
+        "guidance": "Implementation guidance",
+        "evidence_examples": "Examples of acceptable evidence",
+        "mappings": "Cross-framework mappings"
+      },
+      "expiry": {
+        "none": "No expiry",
+        "expired_days_ago": "Expired {{days}}d ago",
+        "expires_in_days": "Expires in {{days}}d",
+        "valid_until": "Valid until {{date}}"
+      }
     }
   },
   "sidebar": {
