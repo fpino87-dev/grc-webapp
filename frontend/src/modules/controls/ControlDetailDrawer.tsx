@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { controlsApi, type EvidenceRef, type LinkedDocument, type RequirementsCheck, type EvidenceRequirement } from "../../api/endpoints/controls";
-import { documentsApi, EVIDENCE_TYPE_LABELS } from "../../api/endpoints/documents";
+import { documentsApi } from "../../api/endpoints/documents";
 import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -45,17 +46,17 @@ function ExpiryBadge({ validUntil }: { validUntil: string | null }) {
   );
   return (
     <span className="text-xs px-1.5 py-0.5 rounded bg-green-100 text-green-700 font-medium">
-      {t("controls.drawer.expiry.valid_until", { date: date.toLocaleDateString("it-IT") })}
+      {t("controls.drawer.expiry.valid_until", { date: date.toLocaleDateString(i18n.language || "it") })}
     </span>
   );
 }
 
 const STATUS_GUIDE = [
-  { status: "compliant",    icon: "🟢", label: "Compliant",     req: "Evidenza valida non scaduta + data ultima verifica", badge: "bg-green-100 text-green-800" },
-  { status: "parziale",     icon: "🟡", label: "Parziale",      req: "Evidenza anche parziale + piano di remediation (task M08)", badge: "bg-yellow-100 text-yellow-800" },
-  { status: "gap",          icon: "🔴", label: "Gap",           req: "Nessuno per salvare — task remediation generato automaticamente", badge: "bg-red-100 text-red-800" },
-  { status: "na",           icon: "⚪", label: "N/A",           req: "Giustificazione scritta min 20 caratteri. TISAX L3: doppia approvazione", badge: "bg-gray-100 text-gray-600" },
-  { status: "non_valutato", icon: "⬜", label: "Non valutato",  req: "Abbassa il compliance score del plant", badge: "bg-gray-50 text-gray-500" },
+  { status: "compliant",    icon: "🟢", label: "Compliant",    reqKey: "controls.drawer.evaluation.status_guide.compliant", badge: "bg-green-100 text-green-800" },
+  { status: "parziale",     icon: "🟡", label: "Partial",      reqKey: "controls.drawer.evaluation.status_guide.parziale", badge: "bg-yellow-100 text-yellow-800" },
+  { status: "gap",          icon: "🔴", label: "Gap",          reqKey: "controls.drawer.evaluation.status_guide.gap", badge: "bg-red-100 text-red-800" },
+  { status: "na",           icon: "⚪", label: "N/A",          reqKey: "controls.drawer.evaluation.status_guide.na", badge: "bg-gray-100 text-gray-600" },
+  { status: "non_valutato", icon: "⬜", label: "Not assessed", reqKey: "controls.drawer.evaluation.status_guide.non_valutato", badge: "bg-gray-50 text-gray-500" },
 ];
 
 type Tab = "cosa" | "valutazione" | "docevidence" | "storico";
@@ -141,12 +142,12 @@ function TabCosa({ info }: { info: NonNullable<ReturnType<typeof useDetailInfo>[
 // ─── Tab 2: Valutazione ───────────────────────────────────────────────────────
 
 const MATURITY_LABELS: Record<number, string> = {
-  0: "Non implementato",
+  0: "Not implemented",
   1: "Ad-hoc",
-  2: "Pianificato",
-  3: "Definito",
-  4: "Gestito",
-  5: "Ottimizzato",
+  2: "Planned",
+  3: "Defined",
+  4: "Managed",
+  5: "Optimized",
 };
 
 const APPLICABILITY_LABELS: Record<string, string> = {
@@ -259,7 +260,7 @@ function TabValutazione({
           <p className="text-sm font-medium text-amber-800">{t("controls.drawer.evaluation.revaluation.title")}</p>
           <p className="text-xs text-amber-700 mt-1">
             {t("controls.drawer.evaluation.revaluation.body", {
-              since: needsRevaluationSince ? new Date(needsRevaluationSince).toLocaleDateString("it-IT") : "",
+              since: needsRevaluationSince ? new Date(needsRevaluationSince).toLocaleDateString(i18n.language || "it") : "",
               hasSince: Boolean(needsRevaluationSince),
             })}
           </p>
@@ -411,7 +412,9 @@ function TabValutazione({
             />
             <span className="text-sm font-bold text-purple-700 w-4 text-center">{maturityOverrideVal}</span>
           </div>
-          <p className="text-xs text-gray-500">{MATURITY_LABELS[maturityOverrideVal]}</p>
+          <p className="text-xs text-gray-500">
+            {t(`controls.drawer.evaluation.maturity.levels.${maturityOverrideVal}`, { defaultValue: MATURITY_LABELS[maturityOverrideVal] })}
+          </p>
           <button
             onClick={() => maturityMutation.mutate()}
             disabled={maturityMutation.isPending}
@@ -566,7 +569,7 @@ function DocsColumn({
                     </span>
                     {d.review_due_date && (
                       <span className="text-xs text-gray-400">
-                        {t("controls.drawer.docs.review_abbrev")} {new Date(d.review_due_date).toLocaleDateString("it-IT")}
+                        {t("controls.drawer.docs.review_abbrev")} {new Date(d.review_due_date).toLocaleDateString(i18n.language || "it")}
                       </span>
                     )}
                   </div>
@@ -755,8 +758,8 @@ function EvidencesColumn({
           onChange={e => setNewEv(p => ({ ...p, evidence_type: e.target.value }))}
           className="w-full border rounded px-2 py-1 text-xs"
         >
-          {Object.entries(EVIDENCE_TYPE_LABELS).map(([v, l]) => (
-            <option key={v} value={v}>{evidenceIcon(v)} {l}</option>
+          {["screenshot", "log", "report", "verbale", "certificato", "test_result", "altro"].map((v) => (
+            <option key={v} value={v}>{evidenceIcon(v)} {t(`documents.evidence.types.${v}`)}</option>
           ))}
         </select>
         <div>
@@ -859,7 +862,7 @@ function TabStorico({ history }: { history: NonNullable<ReturnType<typeof useDet
               <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
                 <div className="flex items-center justify-between mb-0.5">
                   <span className="text-xs font-medium text-gray-700">{h.user_email_at_time}</span>
-                  <span className="text-xs text-gray-400">{new Date(h.timestamp_utc).toLocaleString("it-IT")}</span>
+                  <span className="text-xs text-gray-400">{new Date(h.timestamp_utc).toLocaleString(i18n.language || "it")}</span>
                 </div>
                 <p className="text-xs text-gray-600">
                   {t("controls.drawer.history.set_status")} <strong>{t(`status.${status}`, { defaultValue: status })}</strong>

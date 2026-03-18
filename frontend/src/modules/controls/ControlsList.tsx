@@ -245,26 +245,24 @@ export function ControlsList() {
         <h2 className="text-xl font-semibold text-gray-900 flex items-center">
           {t("controls.title")}
           <ModuleHelp
-            title="Libreria Controlli — M03"
-            description="Gestisce i controlli normativi per ogni framework (ISO 27001,
-    TISAX L2/L3, NIS2). Ogni controllo ha uno stato valutativo e
-    richiede evidenze documentali per raggiungere 'Compliant'."
+            title={t("controls.help.title")}
+            description={t("controls.help.description")}
             steps={[
-              "I controlli vengono generati automaticamente al caricamento del framework",
-              "Clicca ▶ su ogni controllo per aprire il drawer di gestione",
-              "Collega documenti di policy e evidenze operative",
-              "Il sistema suggerisce lo stato automaticamente dai documenti collegati",
-              "Salva la valutazione — richiede almeno 1 evidenza valida per 'Compliant'",
-              "Scarica SOA (ISO27001), VDA ISA (TISAX) o NIS2 Matrix con i bottoni in alto",
+              t("controls.help.steps.1"),
+              t("controls.help.steps.2"),
+              t("controls.help.steps.3"),
+              t("controls.help.steps.4"),
+              t("controls.help.steps.5"),
+              t("controls.help.steps.6"),
             ]}
             connections={[
-              { module: "M07 Documenti", relation: "Policy e evidenze collegate al controllo" },
-              { module: "M17 Audit Prep", relation: "Finding collegati a ControlInstance" },
-              { module: "M06 Risk", relation: "Gap controlli pesano il risk score OT" },
+              { module: t("controls.help.connections.documents.module"), relation: t("controls.help.connections.documents.relation") },
+              { module: t("controls.help.connections.audit_prep.module"), relation: t("controls.help.connections.audit_prep.relation") },
+              { module: t("controls.help.connections.risk.module"), relation: t("controls.help.connections.risk.relation") },
             ]}
             configNeeded={[
-              "Eseguire: python manage.py load_frameworks",
-              "Attivare il framework sul Plant in M01",
+              t("controls.help.config_needed.1"),
+              t("controls.help.config_needed.2"),
             ]}
           />
         </h2>

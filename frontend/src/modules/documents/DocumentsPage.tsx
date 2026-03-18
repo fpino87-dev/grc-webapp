@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { documentsApi, type Document, type Evidence, EVIDENCE_TYPE_LABELS } from "../../api/endpoints/documents";
+import { documentsApi, type Document, type Evidence } from "../../api/endpoints/documents";
 import { controlsApi, type ControlInstance } from "../../api/endpoints/controls";
 import { plantsApi, type Plant } from "../../api/endpoints/plants";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { useAuthStore } from "../../store/auth";
 import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
 
 type MainTab = "documenti" | "evidenze";
 
@@ -40,10 +41,12 @@ function ExpiryBadge({ validUntil }: { validUntil: string | null }) {
   return (
     <div className="text-center">
       <span className="block text-xs px-2 py-0.5 rounded bg-green-100 text-green-700 font-medium">{t("documents.evidence.expiry.valid")}</span>
-      <span className="text-xs text-green-600">{date.toLocaleDateString("it-IT")}</span>
+      <span className="text-xs text-green-600">{date.toLocaleDateString(i18n.language || "it")}</span>
     </div>
   );
 }
+
+const EVIDENCE_TYPES = ["screenshot", "log", "report", "verbale", "certificato", "test_result", "altro"] as const;
 
 function expirySort(a: Evidence, b: Evidence): number {
   if (!a.valid_until && !b.valid_until) return 0;
@@ -337,7 +340,7 @@ function NewEvidenceModal({ onClose }: { onClose: () => void }) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.evidence.fields.type")}</label>
             <select value={form.evidence_type} onChange={e => setForm(p => ({ ...p, evidence_type: e.target.value }))} className="w-full border rounded px-3 py-2 text-sm">
-              {Object.entries(EVIDENCE_TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              {EVIDENCE_TYPES.map((v) => <option key={v} value={v}>{t(`documents.evidence.types.${v}`)}</option>)}
             </select>
           </div>
           <div>
@@ -403,7 +406,7 @@ function LinkControlsModal({ doc, onClose }: { doc: Document; onClose: () => voi
     mutationFn: () => documentsApi.linkControls(doc.id, Array.from(selected)),
     onSuccess: (data: { count: number }) => {
       qc.invalidateQueries({ queryKey: ["documents"] });
-      setResult(`Collegato a ${data.count} controlli`);
+      setResult(t("documents.controls_link.result_linked", { count: data.count }));
       setSelected(new Set());
     },
   });
@@ -429,7 +432,7 @@ function LinkControlsModal({ doc, onClose }: { doc: Document; onClose: () => voi
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl flex flex-col max-h-[85vh]">
         <div className="flex items-center justify-between px-6 py-4 border-b shrink-0">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Collega controlli</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t("documents.controls_link.title")}</h3>
             <p className="text-xs text-gray-400 mt-0.5 truncate max-w-md">{doc.title}</p>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-700 text-2xl w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100">×</button>
@@ -465,7 +468,7 @@ function LinkControlsModal({ doc, onClose }: { doc: Document; onClose: () => voi
                   <span className="text-xs font-mono text-gray-500 w-20 shrink-0">{ci.control_external_id}</span>
                   <span className="text-xs text-gray-800 flex-1 truncate">{ci.control_title}</span>
                   <span className="text-xs bg-gray-100 text-gray-600 px-1.5 rounded shrink-0">{ci.framework_code}</span>
-                  <span className={`text-xs font-medium shrink-0 ${STATUS_COLORS[ci.status] ?? ""}`}>{ci.status}</span>
+                  <span className="shrink-0"><StatusBadge status={ci.status} /></span>
                 </label>
               ))}
             </div>
@@ -634,8 +637,8 @@ function TabDocumenti() {
                       ? <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">{t("documents.mandatory.yes")}</span>
                       : <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">{t("documents.mandatory.no")}</span>}
                   </td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{doc.review_due_date ? new Date(doc.review_due_date).toLocaleDateString("it-IT") : "—"}</td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{doc.approved_at ? new Date(doc.approved_at).toLocaleDateString("it-IT") : "—"}</td>
+                  <td className="px-4 py-3 text-gray-500 text-xs">{doc.review_due_date ? new Date(doc.review_due_date).toLocaleDateString(i18n.language || "it") : "—"}</td>
+                  <td className="px-4 py-3 text-gray-500 text-xs">{doc.approved_at ? new Date(doc.approved_at).toLocaleDateString(i18n.language || "it") : "—"}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2 flex-wrap">
                       {doc.status === "bozza" && <button onClick={() => submitMutation.mutate(doc.id)} className="text-xs text-gray-500 hover:text-blue-700 border border-gray-300 rounded px-2 py-0.5 hover:border-blue-400">{t("documents.actions.submit_for_review")}</button>}
@@ -748,7 +751,7 @@ function TabEvidenze() {
           {/* Filtro tipo */}
           <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="border rounded px-2 py-1.5 text-sm">
             <option value="">{t("documents.evidence.filters.all_types")}</option>
-            {Object.entries(EVIDENCE_TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              {EVIDENCE_TYPES.map((v) => <option key={v} value={v}>{t(`documents.evidence.types.${v}`)}</option>)}
           </select>
         </div>
         <div className="flex items-center gap-3">
@@ -792,7 +795,7 @@ function TabEvidenze() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1.5">
                       <span className="text-base">{evidenceIcon(ev.evidence_type)}</span>
-                      <span className="text-xs text-gray-500">{EVIDENCE_TYPE_LABELS[ev.evidence_type] ?? ev.evidence_type}</span>
+                      <span className="text-xs text-gray-500">{t(`documents.evidence.types.${ev.evidence_type}`, { defaultValue: ev.evidence_type })}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3 font-medium text-gray-800 max-w-xs">
