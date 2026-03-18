@@ -1037,7 +1037,7 @@ export function RiskPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap" onClick={e => e.stopPropagation()}>
-                      {a.status === "bozza" && (
+                      {a.status !== "archiviato" && (
                         <button
                           onClick={() => setEditAssessment(a)}
                           className="text-xs text-purple-700 border border-purple-300 rounded px-2 py-0.5 hover:bg-purple-50 disabled:opacity-50 whitespace-nowrap"

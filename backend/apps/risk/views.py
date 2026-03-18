@@ -61,6 +61,18 @@ class RiskAssessmentViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         instance = serializer.save()
+        # Se l'utente aggiorna campi che cambiano la valutazione,
+        # segnaliamo che serve rivalutazione (anche se lo stato non torna a "bozza").
+        try:
+            from .services import mark_needs_revaluation_if_risk_changed
+
+            changed_fields = set(getattr(serializer, "validated_data", {}) or {}).union(
+                set(getattr(self.request, "data", {}) or {})
+            )
+            mark_needs_revaluation_if_risk_changed(instance, changed_fields)
+        except Exception:
+            # Non bloccare l'update della UI.
+            pass
         log_action(
             user=self.request.user,
             action_code="risk.assessment.update",

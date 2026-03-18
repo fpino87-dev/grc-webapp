@@ -5,6 +5,30 @@ from django.utils import timezone
 from .models import IMPACT_MAP, PROB_MAP, RiskAssessment
 
 
+def mark_needs_revaluation_if_risk_changed(assessment: RiskAssessment, changed_fields: set[str]) -> None:
+    """
+    Se l'utente modifica campi che impattano score/ALE, segnala che serve rivalutazione.
+    """
+    if assessment.status == "archiviato":
+        return
+
+    risk_fields = {
+        "assessment_type",
+        "critical_process",
+        "treatment",
+        "probability",
+        "impact",
+        "inherent_probability",
+        "inherent_impact",
+    }
+    if not (risk_fields & changed_fields):
+        return
+
+    assessment.needs_revaluation = True
+    assessment.needs_revaluation_since = timezone.now().date()
+    assessment.save(update_fields=["needs_revaluation", "needs_revaluation_since", "updated_at"])
+
+
 IT_WEIGHTS = {
     "esposizione": 0.30,
     "cve": 0.25,
