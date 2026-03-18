@@ -243,6 +243,8 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<Partial<RiskMitigationPlan>>({});
+  const [editPlan, setEditPlan] = useState<RiskMitigationPlan | null>(null);
+  const [editForm, setEditForm] = useState<Partial<RiskMitigationPlan>>({});
   const { data: riskContext } = useQuery({
     queryKey: ["risk-context", assessmentId],
     queryFn: () => riskApi.context(assessmentId),
@@ -265,6 +267,18 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
   const completeMutation = useMutation({
     mutationFn: (id: string) => riskApi.completePlan(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["mitigation-plans", assessmentId] }),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: () => {
+      if (!editPlan) return Promise.reject(new Error("No plan selected"));
+      return riskApi.updatePlan(editPlan.id, editForm);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["mitigation-plans", assessmentId] });
+      setEditPlan(null);
+      setEditForm({});
+    },
   });
 
   return (
@@ -324,6 +338,60 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
         </div>
       )}
 
+      {editPlan && (
+        <div className="bg-white border border-gray-200 rounded p-3 mb-3 space-y-2">
+          <textarea
+            placeholder="Descrizione azione *"
+            value={editForm.action ?? editPlan.action ?? ""}
+            onChange={e => setEditForm(p => ({ ...p, action: e.target.value }))}
+            className="w-full border rounded px-2 py-1.5 text-sm" rows={2}
+          />
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Collega a un BCP (opzionale)</label>
+            <select
+              value={editForm.bcp_plan ?? editPlan.bcp_plan ?? ""}
+              onChange={e => {
+                const id = e.target.value || null;
+                const chosen = bcpPlans.find(p => p.id === id) ?? null;
+                setEditForm(prev => ({
+                  ...prev,
+                  bcp_plan: id,
+                  due_date: chosen?.last_test_date ?? prev.due_date,
+                }));
+              }}
+              className="w-full border rounded px-2 py-1.5 text-sm"
+            >
+              <option value="">— Nessun BCP —</option>
+              {bcpPlans.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.title} · {p.status} · valido fino {p.next_test_date ?? "—"}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="date"
+              placeholder="Data ultimo test valido *"
+              value={editForm.due_date ?? editPlan.due_date ?? ""}
+              onChange={e => setEditForm(p => ({ ...p, due_date: e.target.value }))}
+              disabled={!!(bcpPlans.find(p => p.id === (editForm.bcp_plan ?? editPlan.bcp_plan))?.last_test_date)}
+              className="border rounded px-2 py-1.5 text-sm flex-1 disabled:bg-gray-50"
+            />
+            <button
+              onClick={() => updateMutation.mutate()}
+              disabled={updateMutation.isPending || !((editForm.action ?? editPlan.action) && (editForm.due_date ?? editPlan.due_date))}
+              className="px-3 py-1.5 bg-primary-600 text-white text-xs rounded hover:bg-primary-700 disabled:opacity-50"
+            >
+              {updateMutation.isPending ? "Salvataggio..." : "Salva modifiche"}
+            </button>
+            <button onClick={() => { setEditPlan(null); setEditForm({}); }} className="px-3 py-1.5 border rounded text-xs text-gray-600 hover:bg-gray-50">
+              Annulla
+            </button>
+          </div>
+        </div>
+      )}
+
       {plans.length === 0 ? (
         <p className="text-xs text-gray-400">Nessun piano di mitigazione registrato</p>
       ) : (
@@ -341,9 +409,33 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
               <span className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
               <span className="flex-1 text-gray-700">{plan.action}</span>
               <span className="text-xs text-gray-400 shrink-0">
-                {plan.bcp_plan_next_test_date
-                  ? `valido fino ${new Date(plan.bcp_plan_next_test_date).toLocaleDateString(i18n.language || "it")} · ultimo test ${new Date(plan.due_date).toLocaleDateString(i18n.language || "it")}`
-                  : `scad. ${new Date(plan.due_date).toLocaleDateString(i18n.language || "it")}`}
+                <div className="space-y-1">
+                  <div>
+                    Ultimo test: {plan.due_date ? new Date(plan.due_date).toLocaleDateString(i18n.language || "it") : "—"}
+                  </div>
+                  <div>
+                    {plan.bcp_plan_next_test_date
+                      ? `Prossimo test: ${new Date(plan.bcp_plan_next_test_date).toLocaleDateString(i18n.language || "it")}`
+                      : "Prossimo test: — (collega un BCP)"}
+                  </div>
+                </div>
+              </span>
+              <span className="shrink-0 flex items-center gap-2">
+                {!plan.completed_at && (
+                  <button
+                    onClick={() => {
+                      setEditPlan(plan);
+                      setEditForm({
+                        action: plan.action,
+                        due_date: plan.due_date,
+                        bcp_plan: plan.bcp_plan ?? null,
+                      });
+                    }}
+                    className="text-xs text-purple-700 border border-purple-300 rounded px-2 py-0.5 hover:bg-purple-50 whitespace-nowrap"
+                  >
+                    Modifica
+                  </button>
+                )}
               </span>
               {!plan.completed_at ? (
                 <button onClick={() => completeMutation.mutate(plan.id)} className="text-xs text-green-700 hover:underline shrink-0">Completa</button>
