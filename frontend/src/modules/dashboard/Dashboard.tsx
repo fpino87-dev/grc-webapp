@@ -13,6 +13,7 @@ import { StatusBadge } from "../../components/ui/StatusBadge";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
+import { useTranslation } from "react-i18next";
 
 function KpiCard({
   label,
@@ -54,6 +55,7 @@ const FRAMEWORK_LABELS: Record<string, string> = {
 };
 
 function KpiTrendChart() {
+  const { t } = useTranslation();
   const [weeks, setWeeks] = useState(12);
   const [framework, setFramework] = useState("ISO27001");
   const selectedPlant = useAuthStore(s => s.selectedPlant);
@@ -96,7 +98,7 @@ function KpiTrendChart() {
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-gray-700">Trend ISMS settimanale — {fwLabel}</h3>
+        <h3 className="text-sm font-semibold text-gray-700">{t("dashboard.trend.title", { framework: fwLabel })}</h3>
         <div className="flex gap-1 flex-wrap">
           {/* Selector framework attivi */}
           {activeFrameworks && activeFrameworks.length > 1 && (
@@ -133,10 +135,10 @@ function KpiTrendChart() {
       </div>
 
       {isLoading ? (
-        <div className="h-48 flex items-center justify-center text-gray-400 text-sm">Caricamento...</div>
+        <div className="h-48 flex items-center justify-center text-gray-400 text-sm">{t("common.loading")}</div>
       ) : snapshots.length === 0 ? (
         <div className="h-48 flex items-center justify-center text-gray-400 text-sm italic">
-          Nessun dato — i snapshot vengono generati ogni lunedì dal task Celery
+          {t("dashboard.trend.empty")}
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={220}>
@@ -195,6 +197,7 @@ const URGENCY_DOT: Record<string, string> = {
 };
 
 function UpcomingDeadlinesWidget() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data } = useQuery({
     queryKey: ["activity-schedule-widget"],
@@ -208,12 +211,12 @@ function UpcomingDeadlinesWidget() {
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-gray-700">Prossime scadenze (3 mesi)</h3>
+        <h3 className="text-sm font-semibold text-gray-700">{t("dashboard.deadlines.title")}</h3>
         <button
           onClick={() => navigate("/schedule/activity")}
           className="text-xs text-blue-600 hover:underline"
         >
-          Vedi tutte →
+          {t("dashboard.see_all")} →
         </button>
       </div>
       <div className="space-y-2">
@@ -232,6 +235,7 @@ function UpcomingDeadlinesWidget() {
 }
 
 function CriticalRolesWidget() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const { data: vacantData } = useQuery({
@@ -254,26 +258,26 @@ function CriticalRolesWidget() {
       {hasVacant && (
         <div className="border border-red-300 bg-red-50 rounded-lg p-4">
           <p className="font-semibold text-red-700 text-sm">
-            🚨 {vacantData!.count} ruoli obbligatori vacanti
+            🚨 {t("dashboard.governance.vacant_roles", { count: vacantData!.count })}
           </p>
           <button
             onClick={() => navigate("/governance")}
             className="text-xs text-red-600 underline mt-1"
           >
-            Vai a Governance →
+            {t("dashboard.governance.go_to")} →
           </button>
         </div>
       )}
       {hasExpiring && (
         <div className="border border-amber-300 bg-amber-50 rounded-lg p-4">
           <p className="font-semibold text-amber-700 text-sm">
-            ⚠ {expiringData!.expiring.length} ruoli in scadenza entro 30gg
+            ⚠ {t("dashboard.governance.expiring_roles", { count: expiringData!.expiring.length })}
           </p>
           <button
             onClick={() => navigate("/governance")}
             className="text-xs text-amber-600 underline mt-1"
           >
-            Vai a Governance →
+            {t("dashboard.governance.go_to")} →
           </button>
         </div>
       )}
@@ -282,6 +286,7 @@ function CriticalRolesWidget() {
 }
 
 function RevaluationAlert() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: assetsToReview } = useQuery({
     queryKey: ["assets-needs-revaluation"],
@@ -293,20 +298,21 @@ function RevaluationAlert() {
   return (
     <div className="border border-amber-300 bg-amber-50 rounded-lg p-4 mb-6">
       <p className="font-semibold text-amber-800">
-        {count} asset da rivalutare
+        {t("dashboard.assets.needs_revaluation", { count })}
       </p>
-      <p className="text-sm text-amber-700">Change registrati non ancora rivalutati</p>
+      <p className="text-sm text-amber-700">{t("dashboard.assets.needs_revaluation_sub")}</p>
       <button
         onClick={() => navigate("/assets")}
         className="text-sm text-blue-600 hover:underline mt-1"
       >
-        Vedi lista →
+        {t("dashboard.assets.see_list")} →
       </button>
     </div>
   );
 }
 
 export function Dashboard() {
+  const { t } = useTranslation();
   const { data: controlsData } = useQuery({
     queryKey: ["controls-summary"],
     queryFn: () => controlsApi.instances(),
@@ -330,27 +336,27 @@ export function Dashboard() {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">Dashboard</h2>
+      <h2 className="text-xl font-semibold text-gray-900 mb-6">{t("dashboard.title")}</h2>
 
       <CriticalRolesWidget />
       <RevaluationAlert />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <KpiCard label="Siti attivi" value={plants?.length ?? "—"} color="blue" />
+        <KpiCard label={t("dashboard.kpi.active_sites")} value={plants?.length ?? "—"} color="blue" />
         <KpiCard
-          label="Controlli compliant"
+          label={t("dashboard.kpi.compliant_controls")}
           value={controls.length ? `${Math.round((compliant / controls.length) * 100)}%` : "—"}
           sub={`${compliant} / ${controls.length}`}
           color="green"
         />
         <KpiCard
-          label="Controlli in gap"
+          label={t("dashboard.kpi.gap_controls")}
           value={gap}
-          sub="richiedono azione"
+          sub={t("dashboard.kpi.gap_controls_sub")}
           color={gap > 0 ? "red" : "green"}
         />
         <KpiCard
-          label="Incidenti aperti"
+          label={t("dashboard.kpi.open_incidents")}
           value={openIncidents}
           color={openIncidents > 0 ? "yellow" : "green"}
         />
@@ -366,9 +372,9 @@ export function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">Ultimi controlli in gap</h3>
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">{t("dashboard.latest_gaps.title")}</h3>
           {gap === 0 ? (
-            <p className="text-sm text-gray-400 italic">Nessun gap rilevato</p>
+            <p className="text-sm text-gray-400 italic">{t("dashboard.latest_gaps.empty")}</p>
           ) : (
             <div className="space-y-2">
               {controls
@@ -387,9 +393,9 @@ export function Dashboard() {
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">Siti</h3>
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">{t("dashboard.sites.title")}</h3>
           {!plants?.length ? (
-            <p className="text-sm text-gray-400 italic">Nessun sito configurato</p>
+            <p className="text-sm text-gray-400 italic">{t("dashboard.sites.empty")}</p>
           ) : (
             <div className="space-y-2">
               {plants.slice(0, 6).map((p) => (

@@ -108,6 +108,56 @@
       "enabled": "attivo",
       "disabled": "disabilitato"
     }
+  },
+  "app": {
+    "name": "GRC Platform"
+  },
+  "auth": {
+    "login": {
+      "subtitle": "Accedi al tuo account",
+      "email_label": "Email / Username",
+      "email_placeholder": "admin@esempio.it",
+      "password_label": "Password",
+      "submit": "Accedi",
+      "signing_in": "Accesso in corso...",
+      "invalid_credentials": "Credenziali non valide. Riprovare."
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "see_all": "Vedi tutte",
+    "trend": {
+      "title": "Trend ISMS settimanale — {{framework}}",
+      "empty": "Nessun dato — i snapshot vengono generati ogni lunedì dal task Celery"
+    },
+    "deadlines": {
+      "title": "Prossime scadenze (3 mesi)"
+    },
+    "governance": {
+      "vacant_roles": "{{count}} ruoli obbligatori vacanti",
+      "expiring_roles": "{{count}} ruoli in scadenza entro 30gg",
+      "go_to": "Vai a Governance"
+    },
+    "assets": {
+      "needs_revaluation": "{{count}} asset da rivalutare",
+      "needs_revaluation_sub": "Change registrati non ancora rivalutati",
+      "see_list": "Vedi lista"
+    },
+    "kpi": {
+      "active_sites": "Siti attivi",
+      "compliant_controls": "Controlli compliant",
+      "gap_controls": "Controlli in gap",
+      "gap_controls_sub": "richiedono azione",
+      "open_incidents": "Incidenti aperti"
+    },
+    "latest_gaps": {
+      "title": "Ultimi controlli in gap",
+      "empty": "Nessun gap rilevato"
+    },
+    "sites": {
+      "title": "Siti",
+      "empty": "Nessun sito configurato"
+    }
   }
 }
 
