@@ -1160,7 +1160,6 @@ export function RiskPage() {
                             )
                             : <span className="text-gray-400">—</span>}
                         </div>
-                        <div className="text-xs text-gray-500">Inerente</div>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-gray-600">
@@ -1174,18 +1173,11 @@ export function RiskPage() {
                             )
                             : <span className="text-gray-400">—</span>}
                         </div>
-                        <div className="text-xs text-gray-500">
-                          Residuo{a.risk_reduction_pct != null ? ` · Riduzione: ${a.risk_reduction_pct}%` : ""}
-                        </div>
                       </div>
                     </td>
                     <td className="px-4 py-3">
                       <div className="space-y-1">
                         <RiskLevelBadge score={a.score} />
-                        <div className="text-xs text-gray-500">
-                          Inerente: {a.inherent_score ?? "—"}
-                          {a.risk_reduction_pct != null && <> • Riduzione: {a.risk_reduction_pct}%</>}
-                        </div>
                       </div>
                     </td>
                     <td className="px-4 py-3">
