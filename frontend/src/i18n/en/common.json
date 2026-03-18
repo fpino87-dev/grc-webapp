@@ -35,6 +35,79 @@
     "edit_and_use": "Edit and use",
     "ignore": "Ignore",
     "ai_badge": "AI"
+  },
+  "common": {
+    "loading": "Loading...",
+    "downloading": "Downloading...",
+    "close": "Close"
+  },
+  "controls": {
+    "title": "Compliance — Controls",
+    "empty": "No controls found",
+    "framework_filter": {
+      "all": "All frameworks"
+    },
+    "export": {
+      "soa": "Download SOA",
+      "vda_isa": "Download VDA ISA",
+      "nis2_matrix": "Download NIS2 Matrix"
+    }
+  },
+  "sidebar": {
+    "groups": {
+      "main": "Main",
+      "compliance": "Compliance",
+      "risk": "Risk",
+      "operations": "Operations",
+      "planning": "Planning",
+      "governance": "Governance"
+    },
+    "items": {
+      "dashboard": "Dashboard",
+      "reporting": "Reporting",
+      "tasks": "Tasks",
+      "controls": "Controls",
+      "gap_analysis": "Gap Analysis",
+      "documents": "Documents",
+      "audit_prep": "Audit Prep",
+      "risk": "Risk",
+      "assets": "IT/OT Assets",
+      "bia": "BIA",
+      "bcp": "BCP",
+      "incidents": "Incidents",
+      "lessons": "Lessons",
+      "suppliers": "Suppliers",
+      "training": "Training",
+      "pdca": "PDCA",
+      "activity_schedule": "Activity Schedule",
+      "required_documents": "Required Docs",
+      "schedule_policy": "Due date policy",
+      "governance": "Governance",
+      "management_review": "Management Review",
+      "plants": "Sites",
+      "users": "Users",
+      "competency": "Competency",
+      "audit_trail": "Audit Trail",
+      "email_settings": "Email settings",
+      "notification_rules": "Notification rules"
+    }
+  },
+  "topbar": {
+    "language": {
+      "label": "Language"
+    },
+    "logout": "Logout",
+    "plant": {
+      "none_selected": "No site selected",
+      "all": "All sites",
+      "none_configured": "No sites configured"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "empty": "No subscriptions configured",
+      "enabled": "enabled",
+      "disabled": "disabled"
+    }
   }
 }
 

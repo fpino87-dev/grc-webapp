@@ -35,6 +35,79 @@
     "edit_and_use": "Modifica e usa",
     "ignore": "Ignora",
     "ai_badge": "IA"
+  },
+  "common": {
+    "loading": "Caricamento...",
+    "downloading": "Download...",
+    "close": "Chiudi"
+  },
+  "controls": {
+    "title": "Compliance — Controlli",
+    "empty": "Nessun controllo trovato",
+    "framework_filter": {
+      "all": "Tutti i framework"
+    },
+    "export": {
+      "soa": "Scarica SOA",
+      "vda_isa": "Scarica VDA ISA",
+      "nis2_matrix": "Scarica NIS2 Matrix"
+    }
+  },
+  "sidebar": {
+    "groups": {
+      "main": "Principale",
+      "compliance": "Compliance",
+      "risk": "Rischio",
+      "operations": "Operazioni",
+      "planning": "Pianificazione",
+      "governance": "Governance"
+    },
+    "items": {
+      "dashboard": "Dashboard",
+      "reporting": "Reporting",
+      "tasks": "Task",
+      "controls": "Controlli",
+      "gap_analysis": "Gap Analysis",
+      "documents": "Documenti",
+      "audit_prep": "Audit Prep",
+      "risk": "Risk",
+      "assets": "Asset IT/OT",
+      "bia": "BIA",
+      "bcp": "BCP",
+      "incidents": "Incidenti",
+      "lessons": "Lessons",
+      "suppliers": "Fornitori",
+      "training": "Formazione",
+      "pdca": "PDCA",
+      "activity_schedule": "Activity Schedule",
+      "required_documents": "Documenti Obbl.",
+      "schedule_policy": "Policy Scadenze",
+      "governance": "Governance",
+      "management_review": "Revisione Dir.",
+      "plants": "Siti",
+      "users": "Utenti",
+      "competency": "Competenze",
+      "audit_trail": "Audit Trail",
+      "email_settings": "Config. Email",
+      "notification_rules": "Regole Notifiche"
+    }
+  },
+  "topbar": {
+    "language": {
+      "label": "Lingua"
+    },
+    "logout": "Esci",
+    "plant": {
+      "none_selected": "Nessun sito selezionato",
+      "all": "Tutti i siti",
+      "none_configured": "Nessun sito configurato"
+    },
+    "notifications": {
+      "title": "Notifiche",
+      "empty": "Nessuna sottoscrizione configurata",
+      "enabled": "attivo",
+      "disabled": "disabilitato"
+    }
   }
 }
 

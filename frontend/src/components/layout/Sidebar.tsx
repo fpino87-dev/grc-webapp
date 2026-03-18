@@ -1,68 +1,73 @@
 import { NavLink } from "react-router-dom";
 import { useAuthStore } from "../../store/auth";
+import { useTranslation } from "react-i18next";
 
-const navGroups = [
+type NavItem = { to: string; labelKey: string; icon: string; roles: string[] | null };
+type NavGroup = { labelKey: string; items: NavItem[] };
+
+const navGroups: NavGroup[] = [
   {
-    label: "Principale",
+    labelKey: "sidebar.groups.main",
     items: [
-      { to: "/", label: "Dashboard", icon: "⊞", roles: null },
-      { to: "/reporting", label: "Reporting", icon: "📊", roles: null },
-      { to: "/tasks", label: "Task", icon: "☑", roles: null },
+      { to: "/", labelKey: "sidebar.items.dashboard", icon: "⊞", roles: null },
+      { to: "/reporting", labelKey: "sidebar.items.reporting", icon: "📊", roles: null },
+      { to: "/tasks", labelKey: "sidebar.items.tasks", icon: "☑", roles: null },
     ],
   },
   {
-    label: "Compliance",
+    labelKey: "sidebar.groups.compliance",
     items: [
-      { to: "/controls", label: "Controlli", icon: "✓", roles: null },
-      { to: "/gap-analysis", label: "Gap Analysis", icon: "⇌", roles: null },
-      { to: "/documents", label: "Documenti", icon: "📄", roles: null },
-      { to: "/audit-prep", label: "Audit Prep", icon: "📋", roles: null },
+      { to: "/controls", labelKey: "sidebar.items.controls", icon: "✓", roles: null },
+      { to: "/gap-analysis", labelKey: "sidebar.items.gap_analysis", icon: "⇌", roles: null },
+      { to: "/documents", labelKey: "sidebar.items.documents", icon: "📄", roles: null },
+      { to: "/audit-prep", labelKey: "sidebar.items.audit_prep", icon: "📋", roles: null },
     ],
   },
   {
-    label: "Rischio",
+    labelKey: "sidebar.groups.risk",
     items: [
-      { to: "/risk", label: "Risk", icon: "⬡", roles: null },
-      { to: "/assets", label: "Asset IT/OT", icon: "⚙", roles: null },
-      { to: "/bia", label: "BIA", icon: "📉", roles: null },
-      { to: "/bcp", label: "BCP", icon: "🛡", roles: null },
+      { to: "/risk", labelKey: "sidebar.items.risk", icon: "⬡", roles: null },
+      { to: "/assets", labelKey: "sidebar.items.assets", icon: "⚙", roles: null },
+      { to: "/bia", labelKey: "sidebar.items.bia", icon: "📉", roles: null },
+      { to: "/bcp", labelKey: "sidebar.items.bcp", icon: "🛡", roles: null },
     ],
   },
   {
-    label: "Operazioni",
+    labelKey: "sidebar.groups.operations",
     items: [
-      { to: "/incidents", label: "Incidenti", icon: "⚠", roles: null },
-      { to: "/lessons", label: "Lessons", icon: "💡", roles: null },
-      { to: "/suppliers", label: "Fornitori", icon: "🏢", roles: null },
-      { to: "/training", label: "Formazione", icon: "🎓", roles: null },
-      { to: "/pdca", label: "PDCA", icon: "↻", roles: null },
+      { to: "/incidents", labelKey: "sidebar.items.incidents", icon: "⚠", roles: null },
+      { to: "/lessons", labelKey: "sidebar.items.lessons", icon: "💡", roles: null },
+      { to: "/suppliers", labelKey: "sidebar.items.suppliers", icon: "🏢", roles: null },
+      { to: "/training", labelKey: "sidebar.items.training", icon: "🎓", roles: null },
+      { to: "/pdca", labelKey: "sidebar.items.pdca", icon: "↻", roles: null },
     ],
   },
   {
-    label: "Pianificazione",
+    labelKey: "sidebar.groups.planning",
     items: [
-      { to: "/schedule/activity",  label: "Activity Schedule", icon: "📅", roles: null },
-      { to: "/schedule/documents", label: "Documenti Obbl.",   icon: "📋", roles: null },
-      { to: "/schedule/policy",    label: "Policy Scadenze",   icon: "⚙",  roles: ["super_admin", "compliance_officer"] },
+      { to: "/schedule/activity", labelKey: "sidebar.items.activity_schedule", icon: "📅", roles: null },
+      { to: "/schedule/documents", labelKey: "sidebar.items.required_documents", icon: "📋", roles: null },
+      { to: "/schedule/policy", labelKey: "sidebar.items.schedule_policy", icon: "⚙", roles: ["super_admin", "compliance_officer"] },
     ],
   },
   {
-    label: "Governance",
+    labelKey: "sidebar.groups.governance",
     items: [
-      { to: "/governance", label: "Governance", icon: "◈", roles: null },
-      { to: "/management-review", label: "Revisione Dir.", icon: "📝", roles: ["super_admin", "compliance_officer", "risk_manager"] },
-      { to: "/plants", label: "Siti", icon: "🏭", roles: ["super_admin", "compliance_officer"] },
-      { to: "/users", label: "Utenti", icon: "👥", roles: ["super_admin"] },
-      { to: "/competency", label: "Competenze", icon: "◎", roles: ["super_admin", "compliance_officer", "ciso"] },
-      { to: "/audit-trail", label: "Audit Trail", icon: "📜", roles: ["super_admin", "internal_auditor", "external_auditor"] },
-      { to: "/settings/email", label: "Config. Email", icon: "✉️", roles: ["super_admin", "compliance_officer"] },
-      { to: "/settings/notifications", label: "Regole Notifiche", icon: "🔔", roles: ["super_admin", "compliance_officer"] },
+      { to: "/governance", labelKey: "sidebar.items.governance", icon: "◈", roles: null },
+      { to: "/management-review", labelKey: "sidebar.items.management_review", icon: "📝", roles: ["super_admin", "compliance_officer", "risk_manager"] },
+      { to: "/plants", labelKey: "sidebar.items.plants", icon: "🏭", roles: ["super_admin", "compliance_officer"] },
+      { to: "/users", labelKey: "sidebar.items.users", icon: "👥", roles: ["super_admin"] },
+      { to: "/competency", labelKey: "sidebar.items.competency", icon: "◎", roles: ["super_admin", "compliance_officer", "ciso"] },
+      { to: "/audit-trail", labelKey: "sidebar.items.audit_trail", icon: "📜", roles: ["super_admin", "internal_auditor", "external_auditor"] },
+      { to: "/settings/email", labelKey: "sidebar.items.email_settings", icon: "✉️", roles: ["super_admin", "compliance_officer"] },
+      { to: "/settings/notifications", labelKey: "sidebar.items.notification_rules", icon: "🔔", roles: ["super_admin", "compliance_officer"] },
     ],
   },
 ];
 
 export function Sidebar() {
   const userRole = useAuthStore(s => s.user?.role ?? "");
+  const { t } = useTranslation();
 
   function isVisible(roles: string[] | null): boolean {
     if (!roles) return true;
@@ -80,9 +85,9 @@ export function Sidebar() {
           const visibleItems = group.items.filter(item => isVisible(item.roles));
           if (visibleItems.length === 0) return null;
           return (
-            <div key={group.label}>
+            <div key={group.labelKey}>
               <p className="px-3 mb-1 text-xs font-semibold uppercase tracking-wider text-primary-400">
-                {group.label}
+                {t(group.labelKey)}
               </p>
               <div className="space-y-0.5">
                 {visibleItems.map(item => (
@@ -99,7 +104,7 @@ export function Sidebar() {
                     }
                   >
                     <span className="text-base w-5 text-center">{item.icon}</span>
-                    {item.label}
+                    {t(item.labelKey)}
                   </NavLink>
                 ))}
               </div>

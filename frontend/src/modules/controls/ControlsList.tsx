@@ -5,6 +5,7 @@ import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { ControlDetailDrawer } from "./ControlDetailDrawer";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
+import { useTranslation } from "react-i18next";
 
 const STATUS_OPTIONS = ["compliant", "parziale", "gap", "na", "non_valutato"];
 
@@ -104,6 +105,7 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
   const token = useAuthStore(s => s.token);
   const [exporting, setExporting] = useState<string | null>(null);
   const [exportError, setExportError] = useState("");
+  const { t } = useTranslation();
 
   async function handleExport(frameworkCode: string, format: string) {
     const params = new URLSearchParams({ framework: frameworkCode, fmt: format });
@@ -155,7 +157,7 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
             disabled={exporting === "soa"}
             className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-60"
           >
-            {exporting === "soa" ? "Download..." : "Scarica SOA"}
+            {exporting === "soa" ? t("common.downloading") : t("controls.export.soa")}
           </button>
         )}
         {hasTISAX && tisaxCode && (
@@ -164,7 +166,7 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
             disabled={exporting === "vda_isa"}
             className="px-3 py-1.5 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 disabled:opacity-60"
           >
-            {exporting === "vda_isa" ? "Download..." : "Scarica VDA ISA"}
+            {exporting === "vda_isa" ? t("common.downloading") : t("controls.export.vda_isa")}
           </button>
         )}
         {hasNIS2 && (
@@ -173,14 +175,14 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
             disabled={exporting === "compliance_matrix"}
             className="px-3 py-1.5 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-60"
           >
-            {exporting === "compliance_matrix" ? "Download..." : "Scarica NIS2 Matrix"}
+            {exporting === "compliance_matrix" ? t("common.downloading") : t("controls.export.nis2_matrix")}
           </button>
         )}
       </div>
       {exportError && (
         <p className="text-sm text-red-600 mt-1">
           {exportError}
-          <button onClick={() => setExportError("")} className="ml-2 underline">Chiudi</button>
+          <button onClick={() => setExportError("")} className="ml-2 underline">{t("common.close")}</button>
         </p>
       )}
     </div>
@@ -188,6 +190,7 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
 }
 
 export function ControlsList() {
+  const { t } = useTranslation();
   const [statusFilter, setStatusFilter] = useState("");
   const [frameworkFilter, setFrameworkFilter] = useState<string>("");
   const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
@@ -231,7 +234,7 @@ export function ControlsList() {
     <div>
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-          Compliance — Controlli
+          {t("controls.title")}
           <ModuleHelp
             title="Libreria Controlli — M03"
             description="Gestisce i controlli normativi per ogni framework (ISO 27001,
@@ -270,7 +273,7 @@ export function ControlsList() {
                 : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
             }`}
           >
-            Tutti i framework ({instances.length})
+            {t("controls.framework_filter.all")} ({instances.length})
           </button>
           {frameworks.map((f) => {
             const count = frameworkStats[f.code] ?? 0;
@@ -319,9 +322,9 @@ export function ControlsList() {
 
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {isLoading ? (
-          <div className="p-8 text-center text-gray-400">Caricamento...</div>
+          <div className="p-8 text-center text-gray-400">{t("common.loading")}</div>
         ) : filteredByFramework.length === 0 ? (
-          <div className="p-8 text-center text-gray-400">Nessun controllo trovato</div>
+          <div className="p-8 text-center text-gray-400">{t("controls.empty")}</div>
         ) : (
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">

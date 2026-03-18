@@ -4,8 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { plantsApi } from "../../api/endpoints/plants";
 import { notificationsApi } from "../../api/endpoints/notifications";
+import i18n from "../../i18n";
+import { useTranslation } from "react-i18next";
 
 function NotificationBell() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -30,7 +33,7 @@ function NotificationBell() {
       <button
         onClick={() => setOpen(o => !o)}
         className="relative text-gray-500 hover:text-gray-700 p-1 rounded transition-colors"
-        title="Notifiche"
+        title={t("topbar.notifications.title")}
       >
         <span className="text-lg">🔔</span>
         {enabledCount > 0 && (
@@ -43,10 +46,10 @@ function NotificationBell() {
       {open && (
         <div className="absolute right-0 top-full mt-1 w-72 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
           <div className="px-4 py-3 border-b border-gray-100">
-            <p className="text-sm font-semibold text-gray-800">Notifiche</p>
+            <p className="text-sm font-semibold text-gray-800">{t("topbar.notifications.title")}</p>
           </div>
           {subs.length === 0 ? (
-            <p className="px-4 py-6 text-sm text-gray-400 text-center">Nessuna sottoscrizione configurata</p>
+            <p className="px-4 py-6 text-sm text-gray-400 text-center">{t("topbar.notifications.empty")}</p>
           ) : (
             <div className="max-h-64 overflow-y-auto py-1">
               {subs.map(s => (
@@ -56,7 +59,7 @@ function NotificationBell() {
                     <p className="text-xs text-gray-400">{s.channel}</p>
                   </div>
                   <span className={`text-xs px-2 py-0.5 rounded ${s.enabled ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
-                    {s.enabled ? "attivo" : "disabilitato"}
+                    {s.enabled ? t("topbar.notifications.enabled") : t("topbar.notifications.disabled")}
                   </span>
                 </div>
               ))}
@@ -69,10 +72,12 @@ function NotificationBell() {
 }
 
 export function Topbar() {
+  const { t } = useTranslation();
   const { user, selectedPlant, setPlant, logout } = useAuthStore();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [lang, setLang] = useState<string>(i18n.language || localStorage.getItem("grc_lang") || "it");
 
   const { data: plants } = useQuery({
     queryKey: ["plants"],
@@ -95,6 +100,12 @@ export function Topbar() {
     navigate("/login");
   }
 
+  function handleLanguageChange(next: string) {
+    setLang(next);
+    i18n.changeLanguage(next);
+    localStorage.setItem("grc_lang", next);
+  }
+
   return (
     <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6">
       {/* Plant selector */}
@@ -108,7 +119,7 @@ export function Topbar() {
               {selectedPlant.code} — {selectedPlant.name}
             </span>
           ) : (
-            <span className="text-gray-400 italic">Nessun sito selezionato</span>
+            <span className="text-gray-400 italic">{t("topbar.plant.none_selected")}</span>
           )}
           <span className="text-gray-400 text-xs">▾</span>
         </button>
@@ -119,7 +130,7 @@ export function Topbar() {
               onClick={() => { setPlant({ id: "", code: "", name: "" }); setDropdownOpen(false); }}
               className="w-full text-left px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 italic"
             >
-              Tutti i siti
+              {t("topbar.plant.all")}
             </button>
             <div className="border-t border-gray-100 my-1" />
             {(plants ?? []).map(p => (
@@ -135,14 +146,35 @@ export function Topbar() {
               </button>
             ))}
             {(plants ?? []).length === 0 && (
-              <p className="px-4 py-2 text-sm text-gray-400">Nessun sito configurato</p>
+              <p className="px-4 py-2 text-sm text-gray-400">{t("topbar.plant.none_configured")}</p>
             )}
           </div>
         )}
       </div>
 
-      {/* Right side: notifications + user info + logout */}
+      {/* Right side: language, notifications, user info, logout */}
       <div className="flex items-center gap-4">
+        {/* Language switcher */}
+        <div className="flex items-center gap-1 text-xs text-gray-500">
+          <span className="hidden sm:inline text-gray-400">{t("topbar.language.label")}</span>
+          <div className="inline-flex items-center gap-1 bg-gray-100 rounded-full px-1 py-0.5">
+            {["it", "en", "fr", "pl", "tr"].map((code) => (
+              <button
+                key={code}
+                type="button"
+                onClick={() => handleLanguageChange(code)}
+                className={`px-1.5 py-0.5 rounded-full uppercase ${
+                  lang === code
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-500 hover:text-gray-800"
+                } text-[11px]`}
+              >
+                {code}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <NotificationBell />
         {user && (
           <span className="text-sm text-gray-700">
@@ -156,7 +188,7 @@ export function Topbar() {
           onClick={handleLogout}
           className="text-sm text-gray-500 hover:text-red-600 transition-colors"
         >
-          Esci
+          {t("topbar.logout")}
         </button>
       </div>
     </header>
