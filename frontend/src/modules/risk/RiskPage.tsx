@@ -93,6 +93,13 @@ const RISK_LEVEL_ICONS: Record<string, string> = {
 
 function RiskInherentResidualBadges({ assessment }: { assessment: RiskAssessment }) {
   if (!assessment.inherent_score && !assessment.score) return null;
+
+  function riskLevelFromScore(score: number): "verde" | "giallo" | "rosso" {
+    if (score <= 7) return "verde";
+    if (score <= 14) return "giallo";
+    return "rosso";
+  }
+
   return (
     <div className="flex flex-wrap items-center gap-3 px-6 py-3 bg-gray-50 border-t border-gray-100">
       {assessment.inherent_score != null && (
@@ -105,14 +112,16 @@ function RiskInherentResidualBadges({ assessment }: { assessment: RiskAssessment
         <span className="text-gray-400 text-sm">→</span>
       )}
       {assessment.score != null && (
-        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium ${RISK_LEVEL_COLORS[assessment.risk_level ?? "verde"]}`}>
-          <span>{RISK_LEVEL_ICONS[assessment.risk_level ?? "verde"]}</span>
+        <div
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium ${RISK_LEVEL_COLORS[riskLevelFromScore(assessment.score)]}`}
+        >
+          <span>{RISK_LEVEL_ICONS[riskLevelFromScore(assessment.score)]}</span>
           <span>Residuo: score {assessment.score}</span>
         </div>
       )}
       {assessment.risk_reduction_pct != null && (
         <span className="text-xs text-green-700 bg-green-50 border border-green-200 px-2 py-1 rounded">
-          Riduzione: {assessment.risk_reduction_pct}% grazie ai controlli
+          Riduzione complessiva: {assessment.risk_reduction_pct}% (Inerente → Residuo)
         </span>
       )}
     </div>
@@ -158,6 +167,9 @@ function SuggestResidualPanel({ assessment }: { assessment: RiskAssessment }) {
           </span>
           <span className="text-xs text-gray-700 bg-gray-50 border border-gray-200 px-2 py-1 rounded">
             Totale: {Math.min(70, (suggestion.reduction_pct ?? 0) + (suggestion.bcp_extra_pct ?? 0))}%
+          </span>
+          <span className="text-xs text-gray-500">
+            (Il suggeritore ricalcola da `inerente` usando controlli `compliant` e BCP validi: se risultano 0 o scaduti, la riduzione suggerita può differire dal valore attuale.)
           </span>
         </div>
       )}
