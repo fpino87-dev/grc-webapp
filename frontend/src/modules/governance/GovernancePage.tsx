@@ -576,39 +576,40 @@ export function GovernancePage() {
           <DocumentWorkflowSection embedded />
         </div>
       ) : (
-      {/* Alert: ruoli vacanti */}
-      {(vacanti?.count ?? 0) > 0 && (
-        <div className="border border-red-300 bg-red-50 rounded-lg p-4">
-          <p className="font-semibold text-red-700">
-            🚨 {vacanti!.count} ruoli obbligatori senza titolare attivo
-          </p>
-          <ul className="mt-2 text-sm text-red-600 space-y-0.5">
-            {vacanti!.vacant_roles.map(r => (
-              <li key={r}>• {ROLE_LABELS[r] ?? r}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+        <>
+          {/* Alert: ruoli vacanti */}
+          {(vacanti?.count ?? 0) > 0 && (
+            <div className="border border-red-300 bg-red-50 rounded-lg p-4">
+              <p className="font-semibold text-red-700">
+                🚨 {vacanti!.count} ruoli obbligatori senza titolare attivo
+              </p>
+              <ul className="mt-2 text-sm text-red-600 space-y-0.5">
+                {vacanti!.vacant_roles.map((r) => (
+                  <li key={r}>• {ROLE_LABELS[r] ?? r}</li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-      {/* Alert: ruoli in scadenza */}
-      {(inScadenza?.expiring?.length ?? 0) > 0 && (
-        <div className="border border-amber-300 bg-amber-50 rounded-lg p-4">
-          <p className="font-semibold text-amber-700">
-            ⚠ {inScadenza!.expiring.length} ruoli in scadenza nei prossimi 30 giorni
-          </p>
-          <ul className="mt-2 text-sm text-amber-600 space-y-0.5">
-            {inScadenza!.expiring.map(r => (
-              <li key={r.id}>
-                • {ROLE_LABELS[r.role] ?? r.role} — {r.user} (scade il {r.valid_until})
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+          {/* Alert: ruoli in scadenza */}
+          {(inScadenza?.expiring?.length ?? 0) > 0 && (
+            <div className="border border-amber-300 bg-amber-50 rounded-lg p-4">
+              <p className="font-semibold text-amber-700">
+                ⚠ {inScadenza!.expiring.length} ruoli in scadenza nei prossimi 30 giorni
+              </p>
+              <ul className="mt-2 text-sm text-amber-600 space-y-0.5">
+                {inScadenza!.expiring.map((r) => (
+                  <li key={r.id}>
+                    • {ROLE_LABELS[r.role] ?? r.role} — {r.user} (scade il {r.valid_until})
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Ruoli normativi */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Ruoli normativi */}
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-gray-700">Ruoli normativi</h3>
             <button
@@ -703,33 +704,34 @@ export function GovernancePage() {
               ))}
             </div>
           )}
-        </div>
-      </div>
+            </div>
+          </div>
 
-      {/* Modali */}
-      {showRoleModal && (
-        <RoleAssignmentModal users={userList} onClose={() => setShowRoleModal(false)} />
-      )}
-      {showCommitteeModal && (
-        <CommitteeModal onClose={() => setShowCommitteeModal(false)} />
-      )}
-      {terminaTarget && (
-        <TerminaModal
-          assignment={terminaTarget}
-          onClose={() => setTerminaTarget(null)}
-          onSuccess={showToast}
-        />
-      )}
-      {sostituisciTarget && (
-        <SostituisciModal
-          assignment={sostituisciTarget}
-          users={userList}
-          onClose={() => setSostituisciTarget(null)}
-          onSuccess={showToast}
-        />
-      )}
+          {/* Modali */}
+          {showRoleModal && (
+            <RoleAssignmentModal users={userList} onClose={() => setShowRoleModal(false)} />
+          )}
+          {showCommitteeModal && (
+            <CommitteeModal onClose={() => setShowCommitteeModal(false)} />
+          )}
+          {terminaTarget && (
+            <TerminaModal
+              assignment={terminaTarget}
+              onClose={() => setTerminaTarget(null)}
+              onSuccess={showToast}
+            />
+          )}
+          {sostituisciTarget && (
+            <SostituisciModal
+              assignment={sostituisciTarget}
+              users={userList}
+              onClose={() => setSostituisciTarget(null)}
+              onSuccess={showToast}
+            />
+          )}
 
-      {toast && <Toast msg={toast} onClose={() => setToast(null)} />}
+          {toast && <Toast msg={toast} onClose={() => setToast(null)} />}
+        </>
       )}
     </div>
   );
