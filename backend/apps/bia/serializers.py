@@ -8,6 +8,7 @@ class CriticalProcessSerializer(serializers.ModelSerializer):
     owner_username = serializers.CharField(source="owner.username", read_only=True)
     approved_by_username = serializers.CharField(source="approved_by.username", read_only=True)
     validated_by_username = serializers.CharField(source="validated_by.username", read_only=True)
+    rto_bcp_status = serializers.CharField(source="rto_bcp_status", read_only=True)
 
     class Meta:
         model = CriticalProcess
@@ -29,6 +30,7 @@ class CriticalProcessSerializer(serializers.ModelSerializer):
             "mbco_pct",
             "rto_target_hours",
             "rpo_target_hours",
+            "rto_bcp_status",
             "validated_by",
             "validated_by_username",
             "validated_at",
