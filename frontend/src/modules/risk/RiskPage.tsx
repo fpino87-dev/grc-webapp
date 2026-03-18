@@ -105,7 +105,7 @@ function RiskInherentResidualBadges({ assessment }: { assessment: RiskAssessment
       {assessment.inherent_score != null && (
         <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium ${RISK_LEVEL_COLORS[assessment.inherent_risk_level ?? "verde"]}`}>
           <span>{RISK_LEVEL_ICONS[assessment.inherent_risk_level ?? "verde"]}</span>
-          <span>{assessment.inherent_score}</span>
+          <span>Inerente: score {assessment.inherent_score}</span>
         </div>
       )}
       {assessment.inherent_score != null && assessment.score != null && (
@@ -116,7 +116,7 @@ function RiskInherentResidualBadges({ assessment }: { assessment: RiskAssessment
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium ${RISK_LEVEL_COLORS[riskLevelFromScore(assessment.score)]}`}
         >
           <span>{RISK_LEVEL_ICONS[riskLevelFromScore(assessment.score)]}</span>
-          <span>{assessment.score}</span>
+          <span>Residuo: score {assessment.score}</span>
         </div>
       )}
     </div>
