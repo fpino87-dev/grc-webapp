@@ -212,7 +212,7 @@ function AssignRoleInline({ user, roles }: { user: GrcUser; roles: GrcRole[] }) 
         disabled={mutation.isPending}
         className="text-xs bg-primary-600 text-white rounded px-2 py-0.5 hover:bg-primary-700 disabled:opacity-50"
       >
-        OK
+        {t("actions.confirm")}
       </button>
       <button onClick={() => setOpen(false)} className="text-xs text-gray-500 hover:text-gray-700">✕</button>
     </div>

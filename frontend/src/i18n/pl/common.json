@@ -1,0 +1,66 @@
+{
+  "nav": {
+    "dashboard": "Pulpit",
+    "compliance": "Zgodność",
+    "risk": "Ryzyko",
+    "operations": "Operacje",
+    "governance": "Ład korporacyjny",
+    "audit": "Audyt",
+    "settings": "Ustawienia"
+  },
+  "status": {
+    "compliant": "Zgodny",
+    "parziale": "Częściowy",
+    "gap": "Luka",
+    "na": "N/A",
+    "non_valutato": "Nieoceniony",
+    "attivo": "Aktywny",
+    "aperto": "Otwarty",
+    "chiuso": "Zamknięty",
+    "in_corso": "W toku",
+    "in_dismissione": "Wycofywany",
+    "scaduto": "Przeterminowany",
+    "non_soggetto": "Poza zakresem",
+    "importante": "Ważny",
+    "essenziale": "Kluczowy"
+  },
+  "actions": {
+    "save": "Zapisz",
+    "cancel": "Anuluj",
+    "approve": "Zatwierdź",
+    "reject": "Odrzuć",
+    "confirm": "Potwierdź",
+    "delete": "Usuń",
+    "refresh": "Odśwież",
+    "export": "Eksportuj",
+    "upload": "Prześlij"
+  },
+  "common": {
+    "loading": "Ładowanie...",
+    "downloading": "Pobieranie...",
+    "close": "Zamknij",
+    "saving": "Zapisywanie...",
+    "save_error": "Błąd podczas zapisywania",
+    "error": "Błąd",
+    "enabled": "aktywny",
+    "disabled": "wyłączony",
+    "none": "—",
+    "yes": "Tak",
+    "no": "Nie",
+    "optional": "— opcjonalne —",
+    "select": "— wybierz —"
+  },
+  "help": {
+    "open_title": "Pomoc dla tego modułu",
+    "close_aria": "Zamknij pomoc modułu",
+    "sections": {
+      "what_is": "Co to jest",
+      "how_to": "Jak używać",
+      "connected_to": "Powiązane z",
+      "before_start": "Zanim zaczniesz"
+    }
+  },
+  "app": {
+    "name": "Platforma GRC"
+  }
+}

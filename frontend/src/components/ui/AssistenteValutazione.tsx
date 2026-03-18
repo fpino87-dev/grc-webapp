@@ -250,13 +250,21 @@ function TabConnessioni() {
             <g>
               {/* BIA */}
               <rect x="10" y="10" width="120" height="40" rx="6" fill="#dbeafe" stroke="#3b82f6" strokeWidth="1.5"/>
-              <text x="70" y="26" textAnchor="middle" fill="#1e40af" fontWeight="bold" fontSize="11">M05 Processo BIA</text>
-              <text x="70" y="42" textAnchor="middle" fill="#3b82f6" fontSize="9">criticality 1–5</text>
+              <text x="70" y="26" textAnchor="middle" fill="#1e40af" fontWeight="bold" fontSize="11">
+                {t("eval_assistant.connections.nodes.bia_title")}
+              </text>
+              <text x="70" y="42" textAnchor="middle" fill="#3b82f6" fontSize="9">
+                {t("eval_assistant.connections.nodes.bia_subtitle")}
+              </text>
 
               {/* Risk */}
               <rect x="200" y="10" width="130" height="40" rx="6" fill="#fef3c7" stroke="#d97706" strokeWidth="1.5"/>
-              <text x="265" y="26" textAnchor="middle" fill="#92400e" fontWeight="bold" fontSize="11">M06 Risk Assessment</text>
-              <text x="265" y="42" textAnchor="middle" fill="#d97706" fontSize="9">weighted_score</text>
+              <text x="265" y="26" textAnchor="middle" fill="#92400e" fontWeight="bold" fontSize="11">
+                {t("eval_assistant.connections.nodes.risk_title")}
+              </text>
+              <text x="265" y="42" textAnchor="middle" fill="#d97706" fontSize="9">
+                {t("eval_assistant.connections.nodes.risk_subtitle")}
+              </text>
 
               {/* BCP */}
               <rect x="10" y="120" width="120" height="40" rx="6" fill="#d1fae5" stroke="#10b981" strokeWidth="1.5"/>

@@ -1,5 +1,6 @@
 from django.db.models import Prefetch
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from core.audit import log_action
 from .models import ManagementReview
@@ -236,10 +237,10 @@ def approve_review(review: ManagementReview, user, note="") -> ManagementReview:
 
     if not review.snapshot_generated_at:
         raise ValidationError(
-            "Generare lo snapshot dei dati prima di approvare il riesame."
+            _("Generare lo snapshot dei dati prima di approvare il riesame.")
         )
     if review.approval_status == "approvato":
-        raise ValidationError("Il riesame è già approvato.")
+        raise ValidationError(_("Il riesame è già approvato."))
 
     review.approval_status = "approvato"
     review.approved_by = user

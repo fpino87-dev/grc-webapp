@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext as _
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -41,7 +42,7 @@ class PdcaCycleViewSet(viewsets.ModelViewSet):
         if evidence_id:
             evidence = Evidence.objects.filter(pk=evidence_id).first()
             if not evidence:
-                return Response({"error": "Evidenza non trovata"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"error": _("Evidenza non trovata")}, status=status.HTTP_404_NOT_FOUND)
         try:
             cycle = services.advance_phase(
                 cycle,

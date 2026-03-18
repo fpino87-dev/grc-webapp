@@ -44,6 +44,108 @@ msgstr "N/A status requires a written justification of at least 20 characters."
 msgid "La giustificazione di esclusione per SOA richiede almeno 50 caratteri. Specificare il motivo formale per cui il controllo non è applicabile."
 msgstr "SOA exclusion justification requires at least 50 characters. Provide the formal reason why the control is not applicable."
 
+msgid "Solo assessment completati possono essere approvati."
+msgstr "Only completed assessments can be approved."
+
+msgid "Motivazione rifiuto obbligatoria (min 10 caratteri)."
+msgstr "Rejection reason is mandatory (min 10 characters)."
+
+msgid "La nota è obbligatoria per l'accettazione formale del rischio."
+msgstr "A note is required for formal risk acceptance."
+
+msgid "Per rischi critici (rosso) la nota di accettazione deve essere di almeno 50 caratteri."
+msgstr "For critical (red) risks, the acceptance note must be at least 50 characters long."
+
+msgid "Il ciclo è già chiuso."
+msgstr "The cycle is already closed."
+
+msgid "Per avanzare da PLAN a DO è obbligatorio descrivere l'azione pianificata (minimo 20 caratteri)."
+msgstr "To move from PLAN to DO you must describe the planned action (minimum 20 characters)."
+
+msgid "Per avanzare da DO a CHECK è obbligatorio allegare un'evidenza dell'implementazione."
+msgstr "To move from DO to CHECK you must attach evidence of the implementation."
+
+msgid "Per avanzare da CHECK ad ACT è obbligatorio descrivere il risultato della verifica."
+msgstr "To move from CHECK to ACT you must describe the verification result."
+
+msgid "Per avanzare da CHECK ad ACT è obbligatorio indicare l'esito: ok / partial / ko."
+msgstr "To move from CHECK to ACT you must indicate the outcome: ok / partial / ko."
+
+msgid "Usa close_cycle() per chiudere dalla fase ACT."
+msgstr "Use close_cycle() to close from the ACT phase."
+
+msgid "Il ciclo è in fase %(phase)s. Avanza fino ad ACT prima di chiudere."
+msgstr "The cycle is in phase %(phase)s. Move to ACT before closing."
+
+msgid "Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata (minimo 20 caratteri)."
+msgstr "To close the cycle you must describe the standardized action (minimum 20 characters)."
+
+msgid "File troppo grande. Dimensione massima: 50MB."
+msgstr "File too large. Maximum size: 50MB."
+
+msgid "Estensione file non consentita. Formati ammessi: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
+msgstr "File extension not allowed. Allowed formats: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
+
+msgid "Generare lo snapshot dei dati prima di approvare il riesame."
+msgstr "Generate the data snapshot before approving the review."
+
+msgid "Il riesame è già approvato."
+msgstr "The review has already been approved."
+
+msgid "RCA approvato obbligatorio per chiudere l'incidente."
+msgstr "An approved RCA is required to close the incident."
+
+msgid "Policy predefinita"
+msgstr "Default policy"
+
+msgid "Plant non trovato"
+msgstr "Plant not found"
+
+msgid "rule_type obbligatorio"
+msgstr "rule_type is required"
+
+msgid "Endpoint disponibile solo in ambiente di test (DEBUG=True)."
+msgstr "Endpoint available only in test environment (DEBUG=True)."
+
+msgid "Solo il superuser può eseguire questa operazione"
+msgstr "Only the superuser can perform this operation"
+
+msgid "Header X-Confirm-Reset: RESET-CONFIRMED richiesto"
+msgstr "Header X-Confirm-Reset: RESET-CONFIRMED required"
+
+msgid "Utente non trovato"
+msgstr "User not found"
+
+msgid "Evidenza non trovata"
+msgstr "Evidence not found"
+
+msgid "Non hai i permessi per inviare in revisione questo documento."
+msgstr "You do not have permission to submit this document for review."
+
+msgid "Non hai i permessi per approvare questo documento."
+msgstr "You do not have permission to approve this document."
+
+msgid "Nessun file fornito."
+msgstr "No file provided."
+
+msgid "Nessun file associato a questa evidenza."
+msgstr "No file associated with this evidence."
+
+msgid "File non trovato nello storage."
+msgstr "File not found in storage."
+
+msgid "change_ref obbligatorio"
+msgstr "change_ref is required"
+
+msgid "Questo ruolo è già terminato."
+msgstr "This role has already ended."
+
+msgid "Motivo terminazione obbligatorio (min 5 caratteri)."
+msgstr "Termination reason is required (min 5 characters)."
+
+msgid "new_user_id obbligatorio."
+msgstr "new_user_id is required."
+
 msgid "Nessun requisito documentale definito per questo controllo."
 msgstr "No documentary requirements defined for this control."
 

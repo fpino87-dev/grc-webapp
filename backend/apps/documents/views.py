@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import FileResponse, Http404
 from django.core.files.storage import default_storage
+from django.utils.translation import gettext as _
 import os
 
 from .models import Document, DocumentVersion, Evidence
@@ -56,7 +57,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
         doc = self.get_object()
         if not user_has_document_permission(request.user, doc, action="submit"):
             return Response(
-                {"detail": "Non hai i permessi per inviare in revisione questo documento."},
+                {"detail": _("Non hai i permessi per inviare in revisione questo documento.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
         services.submit_for_review(doc, request.user)
@@ -69,7 +70,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
         doc = self.get_object()
         if not user_has_document_permission(request.user, doc, action="approve"):
             return Response(
-                {"detail": "Non hai i permessi per approvare questo documento."},
+                {"detail": _("Non hai i permessi per approvare questo documento.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
         services.approve_document(doc, request.user, request.data.get("notes", ""))
@@ -119,7 +120,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
         document = self.get_object()
         uploaded_file = request.FILES.get("file")
         if not uploaded_file:
-            return Response({"error": "Nessun file fornito."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": _("Nessun file fornito.")}, status=status.HTTP_400_BAD_REQUEST)
 
         change_summary = request.data.get("change_summary", "")
         try:
@@ -183,10 +184,10 @@ class EvidenceViewSet(viewsets.ModelViewSet):
         """
         evidence = self.get_object()
         if not evidence.file_path:
-            raise Http404("Nessun file associato a questa evidenza.")
+            raise Http404(_("Nessun file associato a questa evidenza."))
 
         if not default_storage.exists(evidence.file_path):
-            raise Http404("File non trovato nello storage.")
+            raise Http404(_("File non trovato nello storage."))
 
         file_handle = default_storage.open(evidence.file_path, "rb")
         filename = os.path.basename(evidence.file_path)

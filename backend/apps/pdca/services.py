@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from core.audit import log_action
 
@@ -30,7 +31,7 @@ def advance_phase(cycle, user, phase_notes: str = "", evidence=None, outcome: st
     Ogni transizione ha requisiti obbligatori.
     """
     if cycle.fase_corrente == "chiuso":
-        raise ValidationError("Il ciclo è già chiuso.")
+        raise ValidationError(_("Il ciclo è già chiuso."))
 
     current = cycle.fase_corrente
 
@@ -38,25 +39,33 @@ def advance_phase(cycle, user, phase_notes: str = "", evidence=None, outcome: st
     if current == "plan":
         if not phase_notes or len(phase_notes.strip()) < 20:
             raise ValidationError(
-                "Per avanzare da PLAN a DO è obbligatorio descrivere "
-                "l'azione pianificata (minimo 20 caratteri)."
+                _(
+                    "Per avanzare da PLAN a DO è obbligatorio descrivere "
+                    "l'azione pianificata (minimo 20 caratteri)."
+                )
             )
     elif current == "do":
         if evidence is None:
             raise ValidationError(
-                "Per avanzare da DO a CHECK è obbligatorio "
-                "allegare un'evidenza dell'implementazione."
+                _(
+                    "Per avanzare da DO a CHECK è obbligatorio "
+                    "allegare un'evidenza dell'implementazione."
+                )
             )
     elif current == "check":
         if not phase_notes or len(phase_notes.strip()) < 10:
             raise ValidationError(
-                "Per avanzare da CHECK ad ACT è obbligatorio "
-                "descrivere il risultato della verifica."
+                _(
+                    "Per avanzare da CHECK ad ACT è obbligatorio "
+                    "descrivere il risultato della verifica."
+                )
             )
         if outcome not in ("ok", "partial", "ko"):
             raise ValidationError(
-                "Per avanzare da CHECK ad ACT è obbligatorio "
-                "indicare l'esito: ok / partial / ko."
+                _(
+                    "Per avanzare da CHECK ad ACT è obbligatorio "
+                    "indicare l'esito: ok / partial / ko."
+                )
             )
 
     # Aggiorna la fase corrente con i dati inseriti
@@ -80,7 +89,7 @@ def advance_phase(cycle, user, phase_notes: str = "", evidence=None, outcome: st
     }
     next_phase = next_phase_map.get(current)
     if not next_phase:
-        raise ValidationError("Usa close_cycle() per chiudere dalla fase ACT.")
+        raise ValidationError(_("Usa close_cycle() per chiudere dalla fase ACT."))
 
     cycle.fase_corrente = next_phase
 
@@ -131,13 +140,17 @@ def close_cycle(cycle, user, act_description: str = "") -> PdcaCycle:
     """
     if cycle.fase_corrente != "act":
         raise ValidationError(
-            f"Il ciclo è in fase {cycle.fase_corrente}. "
-            "Avanza fino ad ACT prima di chiudere."
+            _(
+                "Il ciclo è in fase %(phase)s. Avanza fino ad ACT prima di chiudere."
+            )
+            % {"phase": cycle.fase_corrente}
         )
     if not act_description or len(act_description.strip()) < 20:
         raise ValidationError(
-            "Per chiudere il ciclo è obbligatorio descrivere "
-            "l'azione standardizzata (minimo 20 caratteri)."
+            _(
+                "Per chiudere il ciclo è obbligatorio descrivere "
+                "l'azione standardizzata (minimo 20 caratteri)."
+            )
         )
 
     cycle.fase_corrente = "chiuso"

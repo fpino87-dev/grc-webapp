@@ -191,6 +191,12 @@
       "chain_title": "Module logic chain",
       "realtime_alerts_title": "Real-time alerts",
       "select_plant_hint": "Select a site in the menu to see site-specific alerts",
+      "nodes": {
+        "bia_title": "M05 BIA process",
+        "bia_subtitle": "criticality 1–5",
+        "risk_title": "M06 Risk Assessment",
+        "risk_subtitle": "weighted_score"
+      },
       "missing_bcp": {
         "title": "{{count}} {{count, plural, one {critical process} other {critical processes}}} without a BCP plan",
         "body": "Processes with criticality ≥ 4 and status \"approved\" without an active BCP plan.",
@@ -631,6 +637,38 @@
       "pending": "Replacing...",
       "confirm": "Confirm succession",
       "error": "Error while replacing."
+    },
+    "help": {
+      "title": "Governance — M00",
+      "description": "Manages normative roles (CISO, NIS2 contact, DPO, etc.) with validity periods. Expired or vacant roles trigger automatic alerts because they impact NIS2 and ISO 27001 compliance.",
+      "steps": {
+        "assign_role": "Assign a role to a user with a start and end date.",
+        "replace_role": "To replace a role owner, use \"Replace\" — succession is atomic.",
+        "terminate_role": "To terminate without a successor, use \"Terminate\" with a reason.",
+        "vacant_roles_alert": "Mandatory vacant roles (CISO, NIS2, DPO, ISMS) trigger alerts at the top.",
+        "link_nomination_doc": "Link the nomination document to keep formal evidence."
+      },
+      "connections": {
+        "rbac": "Normative role is distinct from the application role.",
+        "management_review": "Vacant roles appear in the Management Review snapshot."
+      },
+      "config": {
+        "create_users_m02": "Create users in M02 first."
+      }
+    },
+    "workflow_help": {
+      "title": "Document workflow",
+      "description": "Configure the document approval flow by document type (policy, procedure, manual...) and site.",
+      "steps": {
+        "choose_type_and_scope": "Choose the document type and scope (org / BU / plant).",
+        "assign_creators": "Assign roles that can create and send for review.",
+        "assign_reviewers": "Assign roles that must review.",
+        "assign_approvers": "Assign roles that can approve and put documents into effect."
+      },
+      "connections": {
+        "documents": "Enables \"Send for review\" / \"Approve\" buttons in the Documents module.",
+        "governance": "Uses normative roles (CISO, Plant Manager, ISMS...) configured in Governance."
+      }
     }
   },
   "sidebar": {

@@ -7,6 +7,8 @@ from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.utils import timezone
 
+from django.utils.translation import gettext as _
+
 from core.audit import log_action
 
 from .models import Document, DocumentApproval, DocumentVersion, Evidence
@@ -29,14 +31,16 @@ ALLOWED_EXTENSIONS = {
 
 def validate_uploaded_file(uploaded_file):
     if uploaded_file.size > MAX_FILE_SIZE_BYTES:
-        raise ValidationError("File troppo grande. Dimensione massima: 50MB.")
+        raise ValidationError(_("File troppo grande. Dimensione massima: 50MB."))
 
     _, ext = os.path.splitext(getattr(uploaded_file, "name", "") or "")
     ext = ext.lstrip(".").lower()
     if not ext or ext not in ALLOWED_EXTENSIONS:
         raise ValidationError(
-            "Estensione file non consentita. "
-            "Formati ammessi: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
+            _(
+                "Estensione file non consentita. "
+                "Formati ammessi: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
+            )
         )
 
 

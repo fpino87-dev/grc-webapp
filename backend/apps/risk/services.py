@@ -109,14 +109,15 @@ def accept_risk(assessment, user, note: str, expiry_date=None) -> None:
     """Accettazione formale del rischio residuo. Richiede nota obbligatoria."""
     from django.core.exceptions import ValidationError
     from django.utils import timezone
+    from django.utils.translation import gettext as _
     from core.audit import log_action
 
     risk_lv = assessment.risk_level
     if risk_lv != "rosso" and not note:
-        raise ValidationError("La nota è obbligatoria per l'accettazione formale del rischio.")
+        raise ValidationError(_("La nota è obbligatoria per l'accettazione formale del rischio."))
     if risk_lv == "rosso" and len(note.strip()) < 50:
         raise ValidationError(
-            "Per rischi critici (rosso) la nota di accettazione deve essere di almeno 50 caratteri."
+            _("Per rischi critici (rosso) la nota di accettazione deve essere di almeno 50 caratteri.")
         )
 
     assessment.risk_accepted_formally = True

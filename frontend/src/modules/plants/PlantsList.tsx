@@ -23,7 +23,13 @@ function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void 
   const mutation = useMutation({
     mutationFn: (data: Partial<Plant>) => plantsApi.update(plant.id, data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["plants"] }); onClose(); },
-    onError: (e: any) => setError(e?.response?.data?.error || e?.response?.data?.detail || JSON.stringify(e?.response?.data) || "Errore"),
+    onError: (e: any) =>
+      setError(
+        e?.response?.data?.error ||
+        e?.response?.data?.detail ||
+        JSON.stringify(e?.response?.data) ||
+        t("common.error"),
+      ),
   });
 
   function set(field: string, value: unknown) {
@@ -104,7 +110,12 @@ function PlantModal({ onClose }: { onClose: () => void }) {
   const mutation = useMutation({
     mutationFn: plantsApi.create,
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["plants"] }); onClose(); },
-    onError: (e: any) => setError(e?.response?.data?.detail || JSON.stringify(e?.response?.data) || "Errore durante il salvataggio"),
+    onError: (e: any) =>
+      setError(
+        e?.response?.data?.detail ||
+        JSON.stringify(e?.response?.data) ||
+        t("common.save_error"),
+      ),
   });
 
   function set(field: string, value: unknown) {
@@ -242,7 +253,12 @@ function FrameworkPanel({ plant, onClose }: { plant: Plant; onClose: () => void 
       setSelectedKey("");
       setError("");
     },
-    onError: (e: any) => setError(e?.response?.data?.detail || JSON.stringify(e?.response?.data) || "Errore"),
+    onError: (e: any) =>
+      setError(
+        e?.response?.data?.detail ||
+        JSON.stringify(e?.response?.data) ||
+        t("common.error"),
+      ),
   });
 
   const toggleMutation = useMutation({

@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.utils.translation import gettext as _
 
 from .models import ComplianceSchedulePolicy, ScheduleRule, RequiredDocument, DEFAULT_RULES, RULE_TYPE_LABELS, RULE_CATEGORIES
 from .serializers import (
@@ -29,14 +30,14 @@ class ComplianceSchedulePolicyViewSet(viewsets.ModelViewSet):
         """Create a policy with all default rules for a plant (or global)."""
         from .services import create_default_policy
         plant_id = request.data.get("plant_id")
-        name = request.data.get("name", "Policy predefinita")
+        name = request.data.get("name", _("Policy predefinita"))
         plant = None
         if plant_id:
             from apps.plants.models import Plant
             try:
                 plant = Plant.objects.get(pk=plant_id)
             except Plant.DoesNotExist:
-                return Response({"error": "Plant non trovato"}, status=404)
+                return Response({"error": _("Plant non trovato")}, status=404)
         policy = create_default_policy(plant=plant, name=name)
         return Response(ComplianceSchedulePolicySerializer(policy).data, status=201)
 
@@ -46,7 +47,7 @@ class ComplianceSchedulePolicyViewSet(viewsets.ModelViewSet):
         policy = self.get_object()
         rule_type = request.data.get("rule_type")
         if not rule_type:
-            return Response({"error": "rule_type obbligatorio"}, status=400)
+            return Response({"error": _("rule_type obbligatorio")}, status=400)
         rule, _ = ScheduleRule.objects.get_or_create(
             policy=policy,
             rule_type=rule_type,

@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from core.audit import log_action
 from .models import Incident
@@ -11,7 +12,7 @@ def close_incident(incident: Incident, user):
     except Exception:
         rca = None
     if rca is None or rca.approved_at is None:
-        raise ValidationError("RCA approvato obbligatorio per chiudere l'incidente.")
+        raise ValidationError(_("RCA approvato obbligatorio per chiudere l'incidente."))
 
     incident.status = "chiuso"
     incident.closed_at = timezone.now()

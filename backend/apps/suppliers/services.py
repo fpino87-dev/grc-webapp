@@ -97,10 +97,11 @@ def complete_assessment(
 
 def approve_assessment(assessment, user, notes: str = ""):
     from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
     from core.audit import log_action
 
     if assessment.status != "completato":
-        raise ValidationError("Solo assessment completati possono essere approvati.")
+        raise ValidationError(_("Solo assessment completati possono essere approvati."))
 
     assessment.status = "approvato"
     assessment.reviewed_by = user
@@ -133,10 +134,11 @@ def approve_assessment(assessment, user, notes: str = ""):
 
 def reject_assessment(assessment, user, notes: str = ""):
     from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
     from core.audit import log_action
 
     if not notes or len(notes.strip()) < 10:
-        raise ValidationError("Motivazione rifiuto obbligatoria (min 10 caratteri).")
+        raise ValidationError(_("Motivazione rifiuto obbligatoria (min 10 caratteri)."))
 
     assessment.status = "rifiutato"
     assessment.reviewed_by = user

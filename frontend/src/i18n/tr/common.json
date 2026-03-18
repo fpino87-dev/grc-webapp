@@ -1,0 +1,66 @@
+{
+  "nav": {
+    "dashboard": "Gösterge Paneli",
+    "compliance": "Uyumluluk",
+    "risk": "Risk",
+    "operations": "Operasyonlar",
+    "governance": "Yönetişim",
+    "audit": "Denetim",
+    "settings": "Ayarlar"
+  },
+  "status": {
+    "compliant": "Uyumlu",
+    "parziale": "Kısmi",
+    "gap": "Açık",
+    "na": "N/A",
+    "non_valutato": "Değerlendirilmedi",
+    "attivo": "Aktif",
+    "aperto": "Açık",
+    "chiuso": "Kapalı",
+    "in_corso": "Devam ediyor",
+    "in_dismissione": "Devreden çıkarılıyor",
+    "scaduto": "Süresi dolmuş",
+    "non_soggetto": "Kapsam dışı",
+    "importante": "Önemli",
+    "essenziale": "Kritik"
+  },
+  "actions": {
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "approve": "Onayla",
+    "reject": "Reddet",
+    "confirm": "Onayla",
+    "delete": "Sil",
+    "refresh": "Yenile",
+    "export": "Dışa aktar",
+    "upload": "Yükle"
+  },
+  "common": {
+    "loading": "Yükleniyor...",
+    "downloading": "İndiriliyor...",
+    "close": "Kapat",
+    "saving": "Kaydediliyor...",
+    "save_error": "Kaydederken hata oluştu",
+    "error": "Hata",
+    "enabled": "aktif",
+    "disabled": "devre dışı",
+    "none": "—",
+    "yes": "Evet",
+    "no": "Hayır",
+    "optional": "— isteğe bağlı —",
+    "select": "— seç —"
+  },
+  "help": {
+    "open_title": "Bu modül için yardım",
+    "close_aria": "Modül yardımını kapat",
+    "sections": {
+      "what_is": "Bu nedir",
+      "how_to": "Nasıl kullanılır",
+      "connected_to": "İlişkili",
+      "before_start": "Başlamadan önce"
+    }
+  },
+  "app": {
+    "name": "GRC Platformu"
+  }
+}

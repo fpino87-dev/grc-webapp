@@ -191,6 +191,12 @@
       "chain_title": "Catena logica dei moduli",
       "realtime_alerts_title": "Alert in tempo reale",
       "select_plant_hint": "Seleziona un sito nel menu per vedere alert specifici",
+      "nodes": {
+        "bia_title": "M05 Processo BIA",
+        "bia_subtitle": "criticità 1–5",
+        "risk_title": "M06 Risk Assessment",
+        "risk_subtitle": "weighted_score"
+      },
       "missing_bcp": {
         "title": "{{count}} {{count, plural, one {processo critico} other {processi critici}}} senza piano BCP",
         "body": "Processi con criticità ≥ 4 e stato \"approvato\" privi di BCP Plan attivo.",
@@ -631,6 +637,38 @@
       "pending": "Successione...",
       "confirm": "Conferma successione",
       "error": "Errore durante la successione."
+    },
+    "help": {
+      "title": "Governance — M00",
+      "description": "Gestisce i ruoli normativi (CISO, contatto NIS2, DPO ecc.) con validità temporale. I ruoli scaduti o vacanti generano alert automatici perché impattano la conformità NIS2 e ISO 27001.",
+      "steps": {
+        "assign_role": "Assegna un ruolo a un utente con data di inizio e fine.",
+        "replace_role": "Per sostituire un titolare usa \"Sostituisci\" — la successione è atomica.",
+        "terminate_role": "Per terminare senza successore usa \"Termina\" con un motivo.",
+        "vacant_roles_alert": "I ruoli obbligatori vacanti (CISO, NIS2, DPO, ISMS) generano alert in cima.",
+        "link_nomination_doc": "Collega il documento di nomina per avere evidenza formale."
+      },
+      "connections": {
+        "rbac": "Ruolo normativo distinto dal ruolo applicativo.",
+        "management_review": "I ruoli vacanti compaiono nello snapshot di Management Review."
+      },
+      "config": {
+        "create_users_m02": "Creare prima gli utenti in M02."
+      }
+    },
+    "workflow_help": {
+      "title": "Workflow documentale",
+      "description": "Configura il flusso di approvazione documentale per tipo documento (policy, procedura, manuale...) e plant.",
+      "steps": {
+        "choose_type_and_scope": "Scegli il tipo documento e lo scope (org / BU / plant).",
+        "assign_creators": "Assegna i ruoli che possono creare e inviare in revisione.",
+        "assign_reviewers": "Assegna i ruoli che devono revisionare.",
+        "assign_approvers": "Assegna i ruoli che possono approvare e mandare in vigore."
+      },
+      "connections": {
+        "documents": "Abilita i pulsanti \"Invia per revisione\" / \"Approva\" nel modulo Documenti.",
+        "governance": "Usa i ruoli normativi (CISO, Plant Manager, ISMS...) configurati in Governance."
+      }
     }
   },
   "sidebar": {

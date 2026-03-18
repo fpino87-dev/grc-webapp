@@ -536,20 +536,20 @@ export function GovernancePage() {
           <p className="text-sm text-gray-500 mt-1">{t("governance.subtitle")}</p>
         </div>
         <ModuleHelp
-          title="Governance — M00"
-          description="Gestisce i ruoli normativi (CISO, contatto NIS2, DPO ecc.) con validità temporale. I ruoli scaduti o vacanti generano alert automatici perché impattano la conformità NIS2 e ISO 27001."
+          title={t("governance.help.title")}
+          description={t("governance.help.description")}
           steps={[
-            "Assegna un ruolo a un utente con data inizio e fine",
-            "Per sostituire un titolare usa 'Sostituisci' — la successione è atomica",
-            "Per terminare senza successore usa 'Termina' con motivo",
-            "I ruoli obbligatori vacanti (CISO, NIS2, DPO, ISMS) generano alert in cima",
-            "Collega il documento di nomina per avere evidenza formale",
+            t("governance.help.steps.assign_role"),
+            t("governance.help.steps.replace_role"),
+            t("governance.help.steps.terminate_role"),
+            t("governance.help.steps.vacant_roles_alert"),
+            t("governance.help.steps.link_nomination_doc"),
           ]}
           connections={[
-            { module: "M02 RBAC",              relation: "Ruolo normativo distinto dal ruolo applicativo" },
-            { module: "M13 Management Review", relation: "Ruoli vacanti compaiono nello snapshot" },
+            { module: "M02 RBAC",              relation: t("governance.help.connections.rbac") },
+            { module: "M13 Management Review", relation: t("governance.help.connections.management_review") },
           ]}
-          configNeeded={["Creare prima gli utenti in M02"]}
+          configNeeded={[t("governance.help.config.create_users_m02")]}
         />
       </div>
 
@@ -605,18 +605,18 @@ export function GovernancePage() {
               </p>
             </div>
             <ModuleHelp
-              title="Workflow documentale"
-              description="Configura il flusso di approvazione documentale per tipo documento (policy, procedura, manuale...) e plant."
-              steps={[
-                "Scegli il tipo documento e lo scope (org / BU / plant)",
-                "Assegna i ruoli che possono creare/inviare in revisione",
-                "Assegna i ruoli che devono revisionare",
-                "Assegna i ruoli che possono approvare e mandare in vigore",
-              ]}
-              connections={[
-                { module: "M07 Documenti", relation: "Abilita i pulsanti Invia per revisione / Approva" },
-                { module: "M00 Governance", relation: "Usa i ruoli normativi (CISO, Plant Manager, ISMS...)" },
-              ]}
+                title={t("governance.workflow.help.title")}
+                description={t("governance.workflow.help.description")}
+                steps={[
+                  t("governance.workflow.help.steps.choose_type_and_scope"),
+                  t("governance.workflow.help.steps.assign_creators"),
+                  t("governance.workflow.help.steps.assign_reviewers"),
+                  t("governance.workflow.help.steps.assign_approvers"),
+                ]}
+                connections={[
+                  { module: "M07 Documenti", relation: t("governance.workflow.help.connections.documents") },
+                  { module: "M00 Governance", relation: t("governance.workflow.help.connections.governance") },
+                ]}
             />
           </div>
           <DocumentWorkflowSection embedded />

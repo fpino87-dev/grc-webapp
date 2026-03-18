@@ -1,6 +1,7 @@
 from io import StringIO
 
 from django.conf import settings
+from django.utils.translation import gettext as _
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -26,18 +27,18 @@ class ResetTestDbView(APIView):
     def post(self, request):
         if not settings.DEBUG:
             return Response(
-                {"error": "Endpoint disponibile solo in ambiente di test (DEBUG=True)."},
+                {"error": _("Endpoint disponibile solo in ambiente di test (DEBUG=True).")},
                 status=403,
             )
         if not request.user.is_superuser:
             return Response(
-                {"error": "Solo il superuser può eseguire questa operazione"},
+                {"error": _("Solo il superuser può eseguire questa operazione")},
                 status=403,
             )
         confirm = request.headers.get("X-Confirm-Reset", "")
         if confirm != "RESET-CONFIRMED":
             return Response(
-                {"error": "Header X-Confirm-Reset: RESET-CONFIRMED richiesto"},
+                {"error": _("Header X-Confirm-Reset: RESET-CONFIRMED richiesto")},
                 status=400,
             )
 
@@ -87,6 +88,6 @@ class UserCompetencyViewSet(viewsets.ModelViewSet):
         user_id = request.query_params.get("user", request.user.pk)
         user = User.objects.filter(pk=user_id).first()
         if not user:
-            return Response({"error": "Utente non trovato"}, status=404)
+            return Response({"error": _("Utente non trovato")}, status=404)
         return Response(competency_gap_analysis(user))
 

@@ -1,0 +1,66 @@
+{
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "compliance": "Conformité",
+    "risk": "Risque",
+    "operations": "Opérations",
+    "governance": "Gouvernance",
+    "audit": "Audit",
+    "settings": "Paramètres"
+  },
+  "status": {
+    "compliant": "Conforme",
+    "parziale": "Partiel",
+    "gap": "Écart",
+    "na": "N/A",
+    "non_valutato": "Non évalué",
+    "attivo": "Actif",
+    "aperto": "Ouvert",
+    "chiuso": "Fermé",
+    "in_corso": "En cours",
+    "in_dismissione": "En décommissionnement",
+    "scaduto": "Échu",
+    "non_soggetto": "Hors périmètre",
+    "importante": "Important",
+    "essenziale": "Essentiel"
+  },
+  "actions": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "confirm": "Confirmer",
+    "delete": "Supprimer",
+    "refresh": "Rafraîchir",
+    "export": "Exporter",
+    "upload": "Téléverser"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "downloading": "Téléchargement...",
+    "close": "Fermer",
+    "saving": "Enregistrement...",
+    "save_error": "Erreur lors de l'enregistrement",
+    "error": "Erreur",
+    "enabled": "actif",
+    "disabled": "désactivé",
+    "none": "—",
+    "yes": "Oui",
+    "no": "Non",
+    "optional": "— optionnel —",
+    "select": "— sélectionner —"
+  },
+  "help": {
+    "open_title": "Aide pour ce module",
+    "close_aria": "Fermer l'aide du module",
+    "sections": {
+      "what_is": "Qu'est-ce que c'est",
+      "how_to": "Comment l'utiliser",
+      "connected_to": "Lié à",
+      "before_start": "Avant de commencer"
+    }
+  },
+  "app": {
+    "name": "Plateforme GRC"
+  }
+}

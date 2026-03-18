@@ -1,6 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.utils.translation import gettext as _
 
 from core.audit import log_action
 
@@ -76,7 +77,7 @@ class AssetITViewSet(viewsets.ModelViewSet):
         asset = self.get_object()
         change_ref = request.data.get("change_ref", "")
         if not change_ref:
-            return Response({"error": "change_ref obbligatorio"}, status=400)
+            return Response({"error": _("change_ref obbligatorio")}, status=400)
         result = register_change(
             asset=asset,
             user=request.user,
@@ -131,7 +132,7 @@ class AssetOTViewSet(viewsets.ModelViewSet):
         asset = self.get_object()
         change_ref = request.data.get("change_ref", "")
         if not change_ref:
-            return Response({"error": "change_ref obbligatorio"}, status=400)
+            return Response({"error": _("change_ref obbligatorio")}, status=400)
         result = register_change(
             asset=asset,
             user=request.user,

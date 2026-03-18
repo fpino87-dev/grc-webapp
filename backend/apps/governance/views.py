@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from core.audit import log_action
 from .models import CommitteeMeeting, DocumentWorkflowPolicy, RoleAssignment, SecurityCommittee
@@ -37,12 +38,12 @@ class RoleAssignmentViewSet(viewsets.ModelViewSet):
         assignment = self.get_object()
 
         if assignment.valid_until and assignment.valid_until < timezone.now().date():
-            return Response({"error": "Questo ruolo è già terminato."}, status=400)
+            return Response({"error": _("Questo ruolo è già terminato.")}, status=400)
 
         reason = request.data.get("reason", "")
         if not reason or len(reason.strip()) < 5:
             return Response(
-                {"error": "Motivo terminazione obbligatorio (min 5 caratteri)."},
+                {"error": _("Motivo terminazione obbligatorio (min 5 caratteri).")},
                 status=400,
             )
 
@@ -74,10 +75,10 @@ class RoleAssignmentViewSet(viewsets.ModelViewSet):
         reason      = request.data.get("reason", "")
 
         if not new_user_id:
-            return Response({"error": "new_user_id obbligatorio."}, status=400)
+            return Response({"error": _("new_user_id obbligatorio.")}, status=400)
         new_user = User.objects.filter(pk=new_user_id).first()
         if not new_user:
-            return Response({"error": "Utente non trovato."}, status=404)
+            return Response({"error": _("Utente non trovato.")}, status=404)
 
         handover_date = None
         date_str = request.data.get("handover_date")
