@@ -40,4 +40,6 @@ export const biaApi = {
     apiClient.patch<CriticalProcess>(`/bia/processes/${id}/`, data).then(r => r.data),
   snapshot: (id: string) =>
     apiClient.get<CriticalProcessSnapshot>(`/bia/processes/${id}/snapshot/`).then(r => r.data),
+  delete: (id: string) =>
+    apiClient.delete(`/bia/processes/${id}/`).then(r => r.data),
 };

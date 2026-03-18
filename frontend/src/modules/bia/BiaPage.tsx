@@ -232,6 +232,11 @@ export function BiaPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["bia"] }),
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => biaApi.delete(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["bia"] }),
+  });
+
   const processes = data?.results ?? [];
 
   return (
@@ -346,6 +351,19 @@ export function BiaPage() {
                           className="text-xs text-green-700 border border-green-300 rounded px-2 py-0.5 hover:bg-green-50 disabled:opacity-50"
                         >
                           Approva
+                        </button>
+                      )}
+                      {(p.status === "bozza" || p.status === "validato") && (
+                        <button
+                          onClick={() => {
+                            if (window.confirm("Eliminare questo processo BIA? L'operazione è consentita solo se non ci sono rischi, BCP o asset collegati.")) {
+                              deleteMutation.mutate(p.id);
+                            }
+                          }}
+                          disabled={deleteMutation.isPending}
+                          className="text-xs text-red-700 border border-red-300 rounded px-2 py-0.5 hover:bg-red-50 disabled:opacity-50"
+                        >
+                          Elimina
                         </button>
                       )}
                     </div>

@@ -14,6 +14,48 @@ class CriticalProcessViewSet(viewsets.ModelViewSet):
     serializer_class = CriticalProcessSerializer
     filterset_fields = ["plant", "status"]
 
+    def destroy(self, request, *args, **kwargs):
+        """
+        Soft delete consentito solo se il processo non ha dipendenze attive.
+        Usato per cleanup BIA di prova.
+        """
+        instance = self.get_object()
+
+        has_risks = instance.risk_assessments.filter(deleted_at__isnull=True).exists()
+        has_bcp_fk = instance.bcp_plans.filter(deleted_at__isnull=True).exists()
+        from apps.bcp.models import BcpPlan
+
+        has_bcp_m2m = BcpPlan.objects.filter(
+            deleted_at__isnull=True,
+            critical_processes=instance,
+        ).exists()
+        has_treatments = instance.treatment_options.filter(deleted_at__isnull=True).exists()
+        has_decisions = instance.risk_decisions.filter(deleted_at__isnull=True).exists()
+        from apps.assets.models import Asset
+
+        has_assets = Asset.objects.filter(
+            deleted_at__isnull=True,
+            processes=instance,
+        ).exists()
+
+        if any([has_risks, has_bcp_fk, has_bcp_m2m, has_treatments, has_decisions, has_assets]):
+            return Response(
+                {
+                    "detail": "Impossibile eliminare il processo: esistono valutazioni rischio, BCP, opzioni di trattamento, decisioni o asset collegati."
+                },
+                status=400,
+            )
+
+        instance.soft_delete()
+        log_action(
+            user=request.user,
+            action_code="bia.critical_process.deleted",
+            level="L2",
+            entity=instance,
+            payload={"id": str(instance.id), "name": instance.name},
+        )
+        return Response(status=204)
+
     def perform_create(self, serializer):
         instance = serializer.save()
         log_action(
