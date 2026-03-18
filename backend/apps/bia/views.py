@@ -6,7 +6,7 @@ from core.audit import log_action
 
 from .models import CriticalProcess, RiskDecision, TreatmentOption
 from .serializers import CriticalProcessSerializer, RiskDecisionSerializer, TreatmentOptionSerializer
-from .services import approve_process, get_process_risk_bcp_snapshot
+from .services import approve_process, get_process_risk_bcp_snapshot, validate_process
 
 
 class CriticalProcessViewSet(viewsets.ModelViewSet):
@@ -42,6 +42,23 @@ class CriticalProcessViewSet(viewsets.ModelViewSet):
             user=request.user,
             action_code="bia.critical_process.approve",
             level="L3",
+            entity=process,
+            payload={"id": str(process.id), "name": process.name},
+        )
+        serializer = self.get_serializer(process)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["post"], url_path="validate")
+    def validate(self, request, pk=None):
+        """
+        Transizione da bozza a validato.
+        """
+        process = self.get_object()
+        validate_process(process, request.user)
+        log_action(
+            user=request.user,
+            action_code="bia.critical_process.validate",
+            level="L2",
             entity=process,
             payload={"id": str(process.id), "name": process.name},
         )

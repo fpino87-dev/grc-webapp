@@ -83,25 +83,47 @@ function NewProcessModal({
         <div className="space-y-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Sito *</label>
-            <select name="plant" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+            <select
+              name="plant"
+              value={(form as any).plant ?? ""}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2 text-sm"
+            >
               <option value="">— seleziona —</option>
               {plants.map(p => <option key={p.id} value={p.id}>{p.code} — {p.name}</option>)}
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nome processo *</label>
-            <input name="name" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
+            <input
+              name="name"
+              value={(form.name as string) ?? ""}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2 text-sm"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Criticità (1-5)</label>
-              <select name="criticality" defaultValue="3" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+              <select
+                name="criticality"
+                value={form.criticality ?? 3}
+                onChange={handleChange}
+                className="w-full border rounded px-3 py-2 text-sm"
+              >
                 {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Costo downtime/h (€)</label>
-              <input name="downtime_cost_hour" type="number" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="0.00" />
+              <input
+                name="downtime_cost_hour"
+                type="number"
+                value={form.downtime_cost_hour as any ?? ""}
+                onChange={handleChange}
+                className="w-full border rounded px-3 py-2 text-sm"
+                placeholder="0.00"
+              />
             </div>
           </div>
 
@@ -111,21 +133,54 @@ function NewProcessModal({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">MTPD (ore)</label>
-              <input name="mtpd_hours" type="number" min="0" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="es. 48" />
+              <input
+                name="mtpd_hours"
+                type="number"
+                min="0"
+                value={form.mtpd_hours as any ?? ""}
+                onChange={handleChange}
+                className="w-full border rounded px-3 py-2 text-sm"
+                placeholder="es. 48"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">MBCO (%)</label>
-              <input name="mbco_pct" type="number" min="0" max="100" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="es. 70" />
+              <input
+                name="mbco_pct"
+                type="number"
+                min="0"
+                max="100"
+                value={form.mbco_pct as any ?? ""}
+                onChange={handleChange}
+                className="w-full border rounded px-3 py-2 text-sm"
+                placeholder="es. 70"
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">RTO target (ore)</label>
-              <input name="rto_target_hours" type="number" min="0" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="es. 24" />
+              <input
+                name="rto_target_hours"
+                type="number"
+                min="0"
+                value={form.rto_target_hours as any ?? ""}
+                onChange={handleChange}
+                className="w-full border rounded px-3 py-2 text-sm"
+                placeholder="es. 24"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">RPO target (ore)</label>
-              <input name="rpo_target_hours" type="number" min="0" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="es. 4" />
+              <input
+                name="rpo_target_hours"
+                type="number"
+                min="0"
+                value={form.rpo_target_hours as any ?? ""}
+                onChange={handleChange}
+                className="w-full border rounded px-3 py-2 text-sm"
+                placeholder="es. 4"
+              />
             </div>
           </div>
         </div>
@@ -159,6 +214,11 @@ export function BiaPage() {
     queryKey: ["bia", filterStatus],
     queryFn: () => biaApi.list(params),
     retry: false,
+  });
+
+  const validateMutation = useMutation({
+    mutationFn: biaApi.validate,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["bia"] }),
   });
 
   const { data: plants } = useQuery({
@@ -268,6 +328,15 @@ export function BiaPage() {
                           className="text-xs text-blue-700 border border-blue-300 rounded px-2 py-0.5 hover:bg-blue-50"
                         >
                           Modifica
+                        </button>
+                      )}
+                      {p.status === "bozza" && (
+                        <button
+                          onClick={() => validateMutation.mutate(p.id)}
+                          disabled={validateMutation.isPending}
+                          className="text-xs text-indigo-700 border border-indigo-300 rounded px-2 py-0.5 hover:bg-indigo-50 disabled:opacity-50"
+                        >
+                          Valida
                         </button>
                       )}
                       {p.status === "validato" && (

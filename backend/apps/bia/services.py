@@ -19,6 +19,15 @@ def approve_process(process, user):
     process.save(update_fields=["status", "approved_by", "approved_at", "updated_at"])
 
 
+def validate_process(process, user):
+    from django.utils import timezone
+
+    process.status = "validato"
+    process.validated_by = user
+    process.validated_at = timezone.now()
+    process.save(update_fields=["status", "validated_by", "validated_at", "updated_at"])
+
+
 def get_process_risk_bcp_snapshot(process: CriticalProcess) -> dict:
     """
     Ritorna una vista integrata BIA + Risk + BCP per un processo critico.
