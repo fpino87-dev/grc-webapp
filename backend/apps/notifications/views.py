@@ -1,8 +1,10 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from apps.auth_grc.permissions import IsGrcSuperAdmin
 
 from . import services
 from .models import (
@@ -38,7 +40,7 @@ class NotificationSubscriptionViewSet(viewsets.ModelViewSet):
 class EmailConfigurationViewSet(viewsets.ModelViewSet):
     queryset = EmailConfiguration.objects.all()
     serializer_class = EmailConfigurationSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated, IsGrcSuperAdmin]
 
     def get_serializer_class(self):
         if self.action in ("list", "retrieve"):
@@ -62,7 +64,7 @@ class EmailConfigurationViewSet(viewsets.ModelViewSet):
 class NotificationRuleViewSet(viewsets.ModelViewSet):
     queryset = NotificationRule.objects.select_related("scope_bu", "scope_plant")
     serializer_class = NotificationRuleSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated, IsGrcSuperAdmin]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["event_type", "enabled", "scope_type"]
 
@@ -70,7 +72,7 @@ class NotificationRuleViewSet(viewsets.ModelViewSet):
 class NotificationRoleProfileViewSet(viewsets.ModelViewSet):
     queryset = NotificationRoleProfile.objects.all()
     serializer_class = NotificationRoleProfileSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated, IsGrcSuperAdmin]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["grc_role", "profile", "enabled"]
 

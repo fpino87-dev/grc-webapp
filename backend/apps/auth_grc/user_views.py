@@ -2,8 +2,10 @@ from django.contrib.auth import get_user_model
 from rest_framework import viewsets, status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated
+
 from .models import UserPlantAccess, GrcRole
+from .permissions import IsGrcSuperAdmin
 
 User = get_user_model()
 
@@ -74,7 +76,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ["me", "list_roles"]:
             return [IsAuthenticated()]
-        return [IsAdminUser()]
+        return [IsAuthenticated(), IsGrcSuperAdmin()]
 
     @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
     def me(self, request):
