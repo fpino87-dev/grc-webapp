@@ -1117,9 +1117,8 @@ export function RiskPage() {
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Scenario</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Minaccia</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Owner</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">
-                  Inerente → Mitigo → Residuo (P×I)
-                </th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Rischio Inerente (P×I)</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Rischio Residuo (P×I)</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Score</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Weighted (pesato)</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">ALE (da BIA)</th>
@@ -1154,10 +1153,11 @@ export function RiskPage() {
                             )
                             : <span className="text-gray-400">—</span>}
                         </div>
-                        <div className="text-xs text-gray-500">
-                          Mitigo:&nbsp;
-                          {a.risk_reduction_pct != null ? `${a.risk_reduction_pct}%` : "—"}
-                        </div>
+                        <div className="text-xs text-gray-500">Inerente</div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">
+                      <div className="space-y-1">
                         <div>
                           {a.probability && a.impact
                             ? (
@@ -1166,6 +1166,9 @@ export function RiskPage() {
                               </span>
                             )
                             : <span className="text-gray-400">—</span>}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Residuo{a.risk_reduction_pct != null ? ` · Riduzione: ${a.risk_reduction_pct}%` : ""}
                         </div>
                       </div>
                     </td>
@@ -1265,7 +1268,7 @@ export function RiskPage() {
                   </tr>
                   {expandedId === a.id && (
                     <tr key={`${a.id}-detail`}>
-                      <td colSpan={10} className="p-0">
+                      <td colSpan={11} className="p-0">
                         <RiskInherentResidualBadges assessment={a} />
                         <SuggestResidualPanel assessment={a} />
                         <FormalAcceptancePanel assessment={a} />
