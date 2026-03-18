@@ -1,8 +1,217 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: grc-webapp\n"
+"POT-Creation-Date: 2026-03-18 00:00+0000\n"
+"PO-Revision-Date: 2026-03-18 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2));\n"
+
+msgid "Evidenza '%(title)s' ha %(age)s giorni (max consigliato: %(max_age)s gg)"
+msgstr "Dowód „%(title)s” ma %(age)s dni (zalecane maksimum: %(max_age)s dni)"
+
+msgid "Richiesti almeno %(count)s documenti approvati"
+msgstr "Wymagane jest co najmniej %(count)s zatwierdzonych dokumentów"
+
+msgid "Richieste almeno %(count)s evidenze valide"
+msgstr "Wymagane jest co najmniej %(count)s ważnych dowodów"
+
+msgid "• Documento mancante: %(desc)s"
+msgstr "• Brakujący dokument: %(desc)s"
+
+msgid "• Evidenza mancante: %(desc)s"
+msgstr "• Brakujący dowód: %(desc)s"
+
+msgid "• Evidenza scaduta: %(title)s (scaduta il %(date)s)"
+msgstr "• Przedawniony dowód: %(title)s (wygasł %(date)s)"
+
+msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata."
+msgstr "Nie można ustawić stanu na „zgodny” bez co najmniej jednego powiązanego ważnego dowodu."
+
+msgid "Requisiti non soddisfatti per stato Compliant:\\n"
+msgstr "Wymagania niespełnione dla stanu Zgodny:\\n"
+
+msgid "Almeno un documento approvato o un'evidenza valida richiesti per stato Parziale."
+msgstr "Co najmniej jeden zatwierdzony dokument lub ważny dowód jest wymagany dla stanu Częściowy."
+
+msgid "Lo stato N/A richiede una giustificazione scritta di almeno 20 caratteri."
+msgstr "Stan N/A wymaga pisemnego uzasadnienia o długości co najmniej 20 znaków."
+
+msgid "La giustificazione di esclusione per SOA richiede almeno 50 caratteri. Specificare il motivo formale per cui il controllo non è applicabile."
+msgstr "Uzasadnienie wyłączenia w SOA musi mieć co najmniej 50 znaków. Podaj formalny powód, dla którego kontrola nie ma zastosowania."
+
+msgid "Solo assessment completati possono essere approvati."
+msgstr "Tylko zakończone oceny mogą zostać zatwierdzone."
+
+msgid "Motivazione rifiuto obbligatoria (min 10 caratteri)."
+msgstr "Uzasadnienie odrzucenia jest obowiązkowe (minimum 10 znaków)."
+
+msgid "La nota è obbligatoria per l'accettazione formale del rischio."
+msgstr "Notatka jest obowiązkowa przy formalnej akceptacji ryzyka."
+
+msgid "Per rischi critici (rosso) la nota di accettazione deve essere di almeno 50 caratteri."
+msgstr "Dla ryzyk krytycznych (czerwonych) notatka akceptacyjna musi mieć co najmniej 50 znaków."
+
+msgid "Il ciclo è già chiuso."
+msgstr "Cykl jest już zamknięty."
+
+msgid "Per avanzare da PLAN a DO è obbligatorio descrivere l'azione pianificata (minimo 20 caratteri)."
+msgstr "Aby przejść z PLAN do DO, należy opisać zaplanowane działanie (minimum 20 znaków)."
+
+msgid "Per avanzare da DO a CHECK è obbligatorio allegare un'evidenza dell'implementazione."
+msgstr "Aby przejść z DO do CHECK, należy dołączyć dowód wdrożenia."
+
+msgid "Per avanzare da CHECK ad ACT è obbligatorio descrivere il risultato della verifica."
+msgstr "Aby przejść z CHECK do ACT, należy opisać wynik weryfikacji."
+
+msgid "Per avanzare da CHECK ad ACT è obbligatorio indicare l'esito: ok / partial / ko."
+msgstr "Aby przejść z CHECK do ACT, należy wskazać wynik: ok / partial / ko."
+
+msgid "Usa close_cycle() per chiudere dalla fase ACT."
+msgstr "Użyj close_cycle(), aby zamknąć cykl z fazy ACT."
+
+msgid "Il ciclo è in fase %(phase)s. Avanza fino ad ACT prima di chiudere."
+msgstr "Cykl znajduje się w fazie %(phase)s. Przejdź do ACT przed zamknięciem."
+
+msgid "Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata (minimo 20 caratteri)."
+msgstr "Aby zamknąć cykl, należy opisać znormalizowane działanie (minimum 20 znaków)."
+
+msgid "File troppo grande. Dimensione massima: 50MB."
+msgstr "Plik jest zbyt duży. Maksymalny rozmiar: 50 MB."
+
+msgid "Estensione file non consentita. Formati ammessi: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
+msgstr "Niedozwolone rozszerzenie pliku. Dozwolone formaty: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
+
+msgid "Generare lo snapshot dei dati prima di approvare il riesame."
+msgstr "Wygeneruj snapshot danych przed zatwierdzeniem przeglądu."
+
+msgid "Il riesame è già approvato."
+msgstr "Przegląd jest już zatwierdzony."
+
+msgid "RCA approvato obbligatorio per chiudere l'incidente."
+msgstr "Zatwierdzony RCA jest wymagany do zamknięcia incydentu."
+
+msgid "Policy predefinita"
+msgstr "Domyślna polityka"
+
+msgid "Plant non trovato"
+msgstr "Zakład nie został znaleziony"
+
+msgid "rule_type obbligatorio"
+msgstr "rule_type jest wymagany"
+
+msgid "Endpoint disponibile solo in ambiente di test (DEBUG=True)."
+msgstr "Endpoint dostępny tylko w środowisku testowym (DEBUG=True)."
+
+msgid "Solo il superuser può eseguire questa operazione"
+msgstr "Tylko superużytkownik może wykonać tę operację"
+
+msgid "Header X-Confirm-Reset: RESET-CONFIRMED richiesto"
+msgstr "Nagłówek X-Confirm-Reset: RESET-CONFIRMED jest wymagany"
+
+msgid "Utente non trovato"
+msgstr "Użytkownik nie został znaleziony"
+
+msgid "Evidenza non trovata"
+msgstr "Dowód nie został znaleziony"
+
+msgid "Non hai i permessi per inviare in revisione questo documento."
+msgstr "Nie masz uprawnień, aby wysłać ten dokument do przeglądu."
+
+msgid "Non hai i permessi per approvare questo documento."
+msgstr "Nie masz uprawnień, aby zatwierdzić ten dokument."
+
+msgid "Nessun file fornito."
+msgstr "Nie dostarczono żadnego pliku."
+
+msgid "Nessun file associato a questa evidenza."
+msgstr "Brak pliku powiązanego z tym dowodem."
+
+msgid "File non trovato nello storage."
+msgstr "Plik nie został znaleziony w magazynie."
+
+msgid "change_ref obbligatorio"
+msgstr "change_ref jest wymagany"
+
+msgid "Questo ruolo è già terminato."
+msgstr "Ta rola jest już zakończona."
+
+msgid "Motivo terminazione obbligatorio (min 5 caratteri)."
+msgstr "Powód zakończenia jest obowiązkowy (minimum 5 znaków)."
+
+msgid "new_user_id obbligatorio."
+msgstr "new_user_id jest wymagany."
+
+msgid "Framework JSON non valido: campi mancanti: %(fields)s"
+msgstr "Nieprawidłowy JSON frameworka: brakujące pola: %(fields)s"
+
+msgid "Framework JSON non valido: 'controls' deve essere una lista."
+msgstr "Nieprawidłowy JSON frameworka: „controls” musi być listą."
+
+msgid "Framework JSON non valido: ogni control deve essere un oggetto."
+msgstr "Nieprawidłowy JSON frameworka: każdy control musi być obiektem."
+
+msgid "Framework JSON non valido: control senza campo '%(field)s'."
+msgstr "Nieprawidłowy JSON frameworka: control bez pola „%(field)s”."
+
+msgid "Framework '%(code)s' importato (v%(version)s)."
+msgstr "Framework „%(code)s” został zaimportowany (v%(version)s)."
+
+msgid "Solo il superuser può importare framework."
+msgstr "Tylko superużytkownik może importować frameworki."
+
+msgid "Conferma import non valida (sha256 mismatch)."
+msgstr "Nieprawidłowe potwierdzenie importu (sha256 mismatch)."
+
+msgid "Nessun requisito documentale definito per questo controllo."
+msgstr "Brak wymogów dokumentacyjnych zdefiniowanych dla tej kontroli."
+
+msgid "Tutti i requisiti documentali sono soddisfatti."
+msgstr "Wszystkie wymogi dokumentacyjne są spełnione."
+
+msgid "Documento mancante: %(desc)s"
+msgstr "Brakujący dokument: %(desc)s"
+
+msgid "Evidenza mancante: %(desc)s"
+msgstr "Brakujący dowód: %(desc)s"
+
+msgid "Evidenza scaduta: %(title)s (scaduta il %(date)s)"
+msgstr "Przedawniony dowód: %(title)s (wygasł %(date)s)"
+
+msgid "Requisiti parzialmente soddisfatti."
+msgstr "Wymagania częściowo spełnione."
+
+msgid "Nessuna documentazione presente."
+msgstr "Brak dokumentacji."
+
+msgid "Campo 'status' obbligatorio."
+msgstr "Pole „status” jest obowiązkowe."
+
+msgid "Documento non trovato"
+msgstr "Dokument nie został znaleziony"
+
+msgid "Evidenza non trovata."
+msgstr "Dowód nie został znaleziony."
+
+msgid "maturity_level deve essere tra 0 e 5"
+msgstr "maturity_level musi być pomiędzy 0 a 5"
+
+msgid "Parametri 'source' e 'target' obbligatori."
+msgstr "Parametry „source” i „target” są obowiązkowe."
+
+msgid "Parametro 'framework' obbligatorio."
+msgstr "Parametr „framework” jest obowiązkowy."
+
+msgid "Formato %(fmt)s non compatibile con framework %(fw)s. Usa uno di: %(allowed)s"
+msgstr "Format %(fmt)s nie jest kompatybilny z frameworkiem %(fw)s. Użyj jednego z: %(allowed)s"
+
+msgid "Framework '%(fw)s' non attivo per questo sito. Framework attivi: %(active)s"
+msgstr "Framework „%(fw)s” nie jest aktywny dla tego zakładu. Aktywne frameworki: %(active)s"
+
+msgid "Errore generazione documento: %(err)s"
+msgstr "Błąd podczas generowania dokumentu: %(err)s"
 

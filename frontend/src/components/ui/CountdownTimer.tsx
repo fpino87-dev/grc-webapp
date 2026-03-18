@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   deadlineISO: string;
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export function CountdownTimer({ deadlineISO, label, urgentMinutes = 120 }: Props) {
+  const { t } = useTranslation();
   const [remaining, setRemaining] = useState(0);
 
   useEffect(() => {
@@ -18,7 +20,11 @@ export function CountdownTimer({ deadlineISO, label, urgentMinutes = 120 }: Prop
   }, [deadlineISO]);
 
   if (remaining === 0)
-    return <span className="text-red-600 font-bold">SCADUTO — {label}</span>;
+    return (
+      <span className="text-red-600 font-bold">
+        {t("countdown.expired")} — {label}
+      </span>
+    );
 
   const totalMinutes = remaining / 60000;
   const color =
@@ -32,7 +38,7 @@ export function CountdownTimer({ deadlineISO, label, urgentMinutes = 120 }: Prop
   const h = Math.floor((remaining % 86400000) / 3600000);
   const m = Math.floor((remaining % 3600000) / 60000);
   const s = Math.floor((remaining % 60000) / 1000);
-  const fmt = `${d > 0 ? d + "g " : ""}${String(h).padStart(2, "0")}:${String(
+  const fmt = `${d > 0 ? `${d}d ` : ""}${String(h).padStart(2, "0")}:${String(
     m
   ).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 

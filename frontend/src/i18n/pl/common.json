@@ -62,5 +62,48 @@
   },
   "app": {
     "name": "Platforma GRC"
+  },
+  "countdown": {
+    "expired": "WYGASŁO"
+  },
+  "eval_assistant": {
+    "title": "Przewodnik oceny",
+    "subtitle": "BIA · Ryzyko · Łańcuch logiczny",
+    "tabs": {
+      "connections": "Połączenia"
+    },
+    "connections": {
+      "chain_title": "Łańcuch logiczny modułów",
+      "realtime_alerts_title": "Alerty w czasie rzeczywistym",
+      "select_plant_hint": "Wybierz zakład w menu, aby zobaczyć specyficzne alerty",
+      "nodes": {
+        "bia_title": "M05 Proces BIA",
+        "bia_subtitle": "krytyczność 1–5",
+        "risk_title": "M06 Ocena ryzyka",
+        "risk_subtitle": "weighted_score",
+        "bcp_title": "M16 Plan BCP",
+        "bcp_subtitle": "RTO / RPO",
+        "score_title": "Wynik > 14?",
+        "score_subtitle": "ryzyko czerwone",
+        "pdca_title": "M11 PDCA",
+        "pdca_subtitle": "cykl obowiązkowy",
+        "lesson_title": "M12 Lesson",
+        "lesson_subtitle": "Learned"
+      },
+      "edges": {
+        "criticality": "krytyczność",
+        "rto_rpo": "RTO/RPO"
+      },
+      "missing_bcp": {
+        "title": "{{count}} {{count, plural, one {krytyczny proces} other {krytyczne procesy}}} bez planu BCP",
+        "body": "Procesy o krytyczności ≥ 4 i statusie \"zatwierdzony\" bez aktywnego planu BCP.",
+        "ok": "Wszystkie krytyczne procesy mają plan BCP"
+      },
+      "missing_pdca": {
+        "title": "{{count}} {{count, plural, one {krytyczne ryzyko} other {krytyczne ryzyka}}} bez otwartego cyklu PDCA",
+        "body": "Scenariusze z wynikiem > 14, które nie mają trwającego cyklu PDCA.",
+        "ok": "Wszystkie krytyczne ryzyka mają otwarty cykl PDCA"
+      }
+    }
   }
 }

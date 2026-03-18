@@ -62,5 +62,48 @@
   },
   "app": {
     "name": "GRC Platformu"
+  },
+  "countdown": {
+    "expired": "SÜRESİ DOLMUŞ"
+  },
+  "eval_assistant": {
+    "title": "Değerlendirme rehberi",
+    "subtitle": "BIA · Risk · Mantık zinciri",
+    "tabs": {
+      "connections": "Bağlantılar"
+    },
+    "connections": {
+      "chain_title": "Modül mantık zinciri",
+      "realtime_alerts_title": "Gerçek zamanlı uyarılar",
+      "select_plant_hint": "Özel uyarıları görmek için menüden bir tesis seçin",
+      "nodes": {
+        "bia_title": "M05 BIA Süreci",
+        "bia_subtitle": "kritiklik 1–5",
+        "risk_title": "M06 Risk Değerlendirmesi",
+        "risk_subtitle": "weighted_score",
+        "bcp_title": "M16 BCP Planı",
+        "bcp_subtitle": "RTO / RPO",
+        "score_title": "Skor > 14?",
+        "score_subtitle": "kırmızı risk",
+        "pdca_title": "M11 PDCA",
+        "pdca_subtitle": "zorunlu döngü",
+        "lesson_title": "M12 Lesson",
+        "lesson_subtitle": "Learned"
+      },
+      "edges": {
+        "criticality": "kritiklik",
+        "rto_rpo": "RTO/RPO"
+      },
+      "missing_bcp": {
+        "title": "{{count}} {{count, plural, one {kritik süreç} other {kritik süreç}}} BCP planı olmadan",
+        "body": "Kritiklik ≥ 4 ve durumu \"onaylandı\" olan ancak aktif BCP planı olmayan süreçler.",
+        "ok": "Tüm kritik süreçlerin bir BCP planı var"
+      },
+      "missing_pdca": {
+        "title": "{{count}} {{count, plural, one {kritik risk} other {kritik risk}}} açık PDCA döngüsü olmadan",
+        "body": "Skoru > 14 olan ve devam eden PDCA döngüsü bulunmayan senaryolar.",
+        "ok": "Tüm kritik risklerin açık bir PDCA döngüsü var"
+      }
+    }
   }
 }

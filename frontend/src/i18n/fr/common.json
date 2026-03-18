@@ -62,5 +62,48 @@
   },
   "app": {
     "name": "Plateforme GRC"
+  },
+  "countdown": {
+    "expired": "EXPIRÉ"
+  },
+  "eval_assistant": {
+    "title": "Guide d'évaluation",
+    "subtitle": "BIA · Risque · Chaîne logique",
+    "tabs": {
+      "connections": "Connexions"
+    },
+    "connections": {
+      "chain_title": "Chaîne logique des modules",
+      "realtime_alerts_title": "Alertes en temps réel",
+      "select_plant_hint": "Sélectionnez un site dans le menu pour voir les alertes spécifiques",
+      "nodes": {
+        "bia_title": "M05 Processus BIA",
+        "bia_subtitle": "criticité 1–5",
+        "risk_title": "M06 Analyse de risque",
+        "risk_subtitle": "weighted_score",
+        "bcp_title": "M16 Plan BCP",
+        "bcp_subtitle": "RTO / RPO",
+        "score_title": "Score > 14 ?",
+        "score_subtitle": "risque rouge",
+        "pdca_title": "M11 PDCA",
+        "pdca_subtitle": "cycle obligatoire",
+        "lesson_title": "M12 Lesson",
+        "lesson_subtitle": "Learned"
+      },
+      "edges": {
+        "criticality": "criticité",
+        "rto_rpo": "RTO/RPO"
+      },
+      "missing_bcp": {
+        "title": "{{count}} {{count, plural, one {processus critique} other {processus critiques}}} sans plan BCP",
+        "body": "Processus avec criticité ≥ 4 et statut \"approuvé\" sans plan BCP actif.",
+        "ok": "Tous les processus critiques ont un plan BCP"
+      },
+      "missing_pdca": {
+        "title": "{{count}} {{count, plural, one {risque critique} other {risques critiques}}} sans cycle PDCA ouvert",
+        "body": "Scénarios avec un score > 14 sans cycle PDCA en cours.",
+        "ok": "Tous les risques critiques ont un cycle PDCA ouvert"
+      }
+    }
   }
 }

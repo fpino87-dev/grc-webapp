@@ -268,23 +268,39 @@ function TabConnessioni() {
 
               {/* BCP */}
               <rect x="10" y="120" width="120" height="40" rx="6" fill="#d1fae5" stroke="#10b981" strokeWidth="1.5"/>
-              <text x="70" y="136" textAnchor="middle" fill="#065f46" fontWeight="bold" fontSize="11">M16 BCP Plan</text>
-              <text x="70" y="152" textAnchor="middle" fill="#10b981" fontSize="9">RTO / RPO</text>
+              <text x="70" y="136" textAnchor="middle" fill="#065f46" fontWeight="bold" fontSize="11">
+                {t("eval_assistant.connections.nodes.bcp_title")}
+              </text>
+              <text x="70" y="152" textAnchor="middle" fill="#10b981" fontSize="9">
+                {t("eval_assistant.connections.nodes.bcp_subtitle")}
+              </text>
 
               {/* Score > 14 */}
               <rect x="200" y="120" width="130" height="40" rx="6" fill="#fee2e2" stroke="#ef4444" strokeWidth="1.5"/>
-              <text x="265" y="136" textAnchor="middle" fill="#991b1b" fontWeight="bold" fontSize="11">Score &gt; 14?</text>
-              <text x="265" y="152" textAnchor="middle" fill="#ef4444" fontSize="9">rischio rosso</text>
+              <text x="265" y="136" textAnchor="middle" fill="#991b1b" fontWeight="bold" fontSize="11">
+                {t("eval_assistant.connections.nodes.score_title")}
+              </text>
+              <text x="265" y="152" textAnchor="middle" fill="#ef4444" fontSize="9">
+                {t("eval_assistant.connections.nodes.score_subtitle")}
+              </text>
 
               {/* PDCA */}
               <rect x="200" y="220" width="130" height="40" rx="6" fill="#f3e8ff" stroke="#8b5cf6" strokeWidth="1.5"/>
-              <text x="265" y="236" textAnchor="middle" fill="#5b21b6" fontWeight="bold" fontSize="11">M11 PDCA</text>
-              <text x="265" y="252" textAnchor="middle" fill="#8b5cf6" fontSize="9">ciclo obbligatorio</text>
+              <text x="265" y="236" textAnchor="middle" fill="#5b21b6" fontWeight="bold" fontSize="11">
+                {t("eval_assistant.connections.nodes.pdca_title")}
+              </text>
+              <text x="265" y="252" textAnchor="middle" fill="#8b5cf6" fontSize="9">
+                {t("eval_assistant.connections.nodes.pdca_subtitle")}
+              </text>
 
               {/* Lesson Learned */}
               <rect x="10" y="220" width="120" height="40" rx="6" fill="#fce7f3" stroke="#ec4899" strokeWidth="1.5"/>
-              <text x="70" y="236" textAnchor="middle" fill="#9d174d" fontWeight="bold" fontSize="11">M12 Lesson</text>
-              <text x="70" y="252" textAnchor="middle" fill="#ec4899" fontSize="9">Learned</text>
+              <text x="70" y="236" textAnchor="middle" fill="#9d174d" fontWeight="bold" fontSize="11">
+                {t("eval_assistant.connections.nodes.lesson_title")}
+              </text>
+              <text x="70" y="252" textAnchor="middle" fill="#ec4899" fontSize="9">
+                {t("eval_assistant.connections.nodes.lesson_subtitle")}
+              </text>
             </g>
 
             {/* Frecce */}
@@ -295,7 +311,9 @@ function TabConnessioni() {
             </defs>
             {/* BIA → Risk */}
             <line x1="130" y1="30" x2="198" y2="30" stroke="#6b7280" strokeWidth="1.5" markerEnd="url(#arr)"/>
-            <text x="164" y="24" textAnchor="middle" fill="#6b7280" fontSize="8">criticality</text>
+            <text x="164" y="24" textAnchor="middle" fill="#6b7280" fontSize="8">
+              {t("eval_assistant.connections.edges.criticality")}
+            </text>
 
             {/* BIA ↓ BCP */}
             <line x1="70" y1="50" x2="70" y2="118" stroke="#6b7280" strokeWidth="1.5" markerEnd="url(#arr)"/>
@@ -308,7 +326,9 @@ function TabConnessioni() {
 
             {/* Score → BCP */}
             <line x1="200" y1="140" x2="132" y2="140" stroke="#6b7280" strokeWidth="1.5" markerEnd="url(#arr)"/>
-            <text x="166" y="134" textAnchor="middle" fill="#6b7280" fontSize="8">RTO/RPO</text>
+            <text x="166" y="134" textAnchor="middle" fill="#6b7280" fontSize="8">
+              {t("eval_assistant.connections.edges.rto_rpo")}
+            </text>
 
             {/* PDCA → Lesson */}
             <line x1="200" y1="240" x2="132" y2="240" stroke="#6b7280" strokeWidth="1.5" markerEnd="url(#arr)"/>

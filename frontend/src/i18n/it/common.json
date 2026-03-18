@@ -58,6 +58,9 @@
     "ignore": "Ignora",
     "ai_badge": "IA"
   },
+  "countdown": {
+    "expired": "SCADUTO"
+  },
   "common": {
     "loading": "Caricamento...",
     "downloading": "Download...",
@@ -195,7 +198,19 @@
         "bia_title": "M05 Processo BIA",
         "bia_subtitle": "criticità 1–5",
         "risk_title": "M06 Risk Assessment",
-        "risk_subtitle": "weighted_score"
+        "risk_subtitle": "weighted_score",
+        "bcp_title": "M16 BCP Plan",
+        "bcp_subtitle": "RTO / RPO",
+        "score_title": "Score > 14?",
+        "score_subtitle": "rischio rosso",
+        "pdca_title": "M11 PDCA",
+        "pdca_subtitle": "ciclo obbligatorio",
+        "lesson_title": "M12 Lesson",
+        "lesson_subtitle": "Learned"
+      },
+      "edges": {
+        "criticality": "criticality",
+        "rto_rpo": "RTO/RPO"
       },
       "missing_bcp": {
         "title": "{{count}} {{count, plural, one {processo critico} other {processi critici}}} senza piano BCP",
