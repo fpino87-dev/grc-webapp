@@ -944,10 +944,10 @@ export function RiskPage() {
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Scenario</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Minaccia</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Owner</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">P × I</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">P × I (Residuo / Inerente)</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Score</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Weighted</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">ALE</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Weighted (pesato)</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">ALE (da BIA)</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Stato</th>
                 <th className="px-4 py-3"></th>
               </tr>
@@ -969,24 +969,72 @@ export function RiskPage() {
                     </td>
                     <td className="px-4 py-3 text-gray-600 text-xs">{a.owner_name ?? <span className="text-gray-300">—</span>}</td>
                     <td className="px-4 py-3 text-gray-600">
-                      {a.probability && a.impact
-                        ? <span className={`text-xs font-mono font-bold px-1.5 py-0.5 rounded ${matrixColor(a.probability, a.impact)}`}>{a.probability}×{a.impact}</span>
-                        : <span className="text-gray-400">—</span>}
-                    </td>
-                    <td className="px-4 py-3"><RiskLevelBadge score={a.score} /></td>
-                    <td className="px-4 py-3"><RiskLevelBadge score={a.weighted_score} /></td>
-                    <td className="px-4 py-3 text-gray-600 text-xs">
-                      {a.ale_calcolato
-                        ? <span className="text-blue-700 font-medium">{formatAle(a.ale_calcolato)}</span>
-                        : formatAle(a.ale_annuo)}
+                      <div className="space-y-1">
+                        <div>
+                          {a.probability && a.impact
+                            ? (
+                              <span className={`text-xs font-mono font-bold px-1.5 py-0.5 rounded inline-block ${matrixColor(a.probability, a.impact)}`}>
+                                {a.probability}×{a.impact}
+                              </span>
+                            )
+                            : <span className="text-gray-400">—</span>}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Inerente:&nbsp;
+                          {a.inherent_probability && a.inherent_impact
+                            ? (
+                              <span className={`font-mono px-1.5 py-0.5 rounded inline-block ${matrixColor(a.inherent_probability, a.inherent_impact)}`}>
+                                {a.inherent_probability}×{a.inherent_impact}
+                              </span>
+                            )
+                            : <span className="text-gray-400">—</span>}
+                        </div>
+                      </div>
                     </td>
                     <td className="px-4 py-3">
-                      <StatusBadge status={a.status} />
-                      {a.needs_revaluation && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 ml-1">
-                          Rivalutare
-                        </span>
-                      )}
+                      <div className="space-y-1">
+                        <RiskLevelBadge score={a.score} />
+                        <div className="text-xs text-gray-500">
+                          Inerente: {a.inherent_score ?? "—"}
+                          {a.risk_reduction_pct != null && <> • Riduzione: {a.risk_reduction_pct}%</>}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="space-y-1">
+                        <RiskLevelBadge score={a.weighted_score} />
+                        <div className="text-xs text-gray-500">Pesato sulla criticità BIA</div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-gray-600 text-xs">
+                      <div className="space-y-1">
+                        {a.ale_calcolato
+                          ? <span className="text-blue-700 font-medium">{formatAle(a.ale_calcolato)}</span>
+                          : <span>{formatAle(a.ale_annuo)}</span>}
+                        <div className="text-xs text-gray-500">
+                          {a.critical_process_name
+                            ? (a.ale_calcolato ? "Calcolato da downtime_cost BIA" : "Stima (mancano dati BIA)")
+                            : "BIA non collegata"}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <StatusBadge status={a.status} />
+                          {a.needs_revaluation && (
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+                              Rivalutare
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {a.status === "bozza" && "In bozza (completa per calcolare score/ALE)"}
+                          {a.status === "completato" && !a.risk_accepted && "Pronto: accetta il rischio residuo"}
+                          {a.status === "completato" && a.risk_accepted && "Rischio accettato"}
+                          {a.status === "archiviato" && "Archiviato"}
+                        </div>
+                      </div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap" onClick={e => e.stopPropagation()}>
                       {a.status === "bozza" && (
