@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { plantsApi } from "../../api/endpoints/plants";
 import { biaApi, type CriticalProcess } from "../../api/endpoints/bia";
 import { riskApi, type RiskAssessment } from "../../api/endpoints/risk";
 import { bcpApi } from "../../api/endpoints/bcp";
+import { usersApi, type GrcUser } from "../../api/endpoints/users";
 import { useAuthStore } from "../../store/auth";
 
 type Step = 1 | 2 | 3 | 4;
@@ -18,6 +19,7 @@ interface WizardState {
 export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
   const selectedPlant = useAuthStore(s => s.selectedPlant);
+  const currentUser = useAuthStore(s => s.user);
   const [step, setStep] = useState<Step>(1);
   const [state, setState] = useState<WizardState>({
     plantId: selectedPlant?.id ?? "",
@@ -25,12 +27,16 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
     risk: null,
     bcpPlanId: null,
   });
+  const [bcpCriticalProcessId, setBcpCriticalProcessId] = useState<string>("");
   const [creatingProcess, setCreatingProcess] = useState(false);
   const [processForm, setProcessForm] = useState<Partial<CriticalProcess>>({
     criticality: 3,
   });
   const [riskForm, setRiskForm] = useState<Partial<RiskAssessment>>({
     assessment_type: "IT",
+    inherent_probability: null,
+    inherent_impact: null,
+    treatment: "mitigare",
   });
   const [bcpForm, setBcpForm] = useState<{ title: string; version: string; rto_hours: string; rpo_hours: string }>({
     title: "",
@@ -45,6 +51,12 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
     retry: false,
   });
 
+  const { data: users } = useQuery({
+    queryKey: ["users"],
+    queryFn: () => usersApi.list(),
+    retry: false,
+  });
+
   const { data: processesData } = useQuery({
     queryKey: ["bia-wizard-processes", state.plantId],
     queryFn: () => biaApi.list(state.plantId ? { plant: state.plantId, page_size: "200" } : {}),
@@ -52,11 +64,20 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
     retry: false,
   });
 
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    setRiskForm(f => {
+      if (f.owner != null) return f; // non sovrascrive una scelta manuale
+      return { ...f, owner: currentUser.id };
+    });
+  }, [currentUser?.id]);
+
   const createProcessMutation = useMutation({
     mutationFn: () => biaApi.create({ ...processForm, plant: state.plantId }),
     onSuccess: (proc) => {
       qc.invalidateQueries({ queryKey: ["bia"] });
       setState(s => ({ ...s, process: proc }));
+      setBcpCriticalProcessId(proc.id);
       setCreatingProcess(false);
       setStep(2);
     },
@@ -68,6 +89,7 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
         ...riskForm,
         plant: state.plantId,
         critical_process: state.process?.id,
+        owner: riskForm.owner ?? currentUser?.id ?? null,
       }),
     onSuccess: (risk) => {
       qc.invalidateQueries({ queryKey: ["risk-assessments"] });
@@ -84,7 +106,7 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
         version: bcpForm.version,
         rto_hours: bcpForm.rto_hours ? Number(bcpForm.rto_hours) : null,
         rpo_hours: bcpForm.rpo_hours ? Number(bcpForm.rpo_hours) : null,
-        critical_process: state.process?.id ?? null,
+        critical_process: bcpCriticalProcessId || state.process?.id || null,
       }),
     onSuccess: (plan) => {
       qc.invalidateQueries({ queryKey: ["bcp"] });
@@ -94,6 +116,8 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
   });
 
   const processes = processesData?.results ?? [];
+  const selectedBcpProcess =
+    processes.find(p => p.id === (bcpCriticalProcessId || state.process?.id || "")) ?? state.process;
 
   function resetAndClose() {
     setStep(1);
@@ -173,6 +197,7 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
                         onChange={e => {
                           const proc = processes.find(p => p.id === e.target.value) ?? null;
                           setState(s => ({ ...s, process: proc }));
+                          setBcpCriticalProcessId(proc?.id ?? "");
                         }}
                       >
                         <option value="">— nessun processo selezionato —</option>
@@ -358,6 +383,66 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
                     </select>
                   </div>
                 </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Trattamento previsto</label>
+                    <select
+                      className="w-full border rounded px-3 py-1.5 text-sm"
+                      value={riskForm.treatment ?? "mitigare"}
+                      onChange={e => setRiskForm(f => ({ ...f, treatment: e.target.value }))}
+                    >
+                      <option value="mitigare">Mitigare</option>
+                      <option value="accettare">Accettare</option>
+                      <option value="trasferire">Trasferire</option>
+                      <option value="evitare">Evitare</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Owner</label>
+                    <select
+                      className="w-full border rounded px-3 py-2 text-sm"
+                      value={(riskForm.owner as string | null) ?? ""}
+                      onChange={e => setRiskForm(f => ({ ...f, owner: e.target.value || null }))}
+                    >
+                      <option value="">— seleziona —</option>
+                      {(users as GrcUser[] | undefined)?.map(u => (
+                        <option key={u.id} value={String(u.id)}>
+                          {u.first_name || u.last_name ? `${u.first_name} ${u.last_name}`.trim() : u.username} ({u.email})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="border border-orange-200 rounded-lg p-3 bg-orange-50/30">
+                  <p className="text-xs font-medium text-orange-800 mb-2">Rischio inerente (prima dei controlli)</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Probabilità inerente *</label>
+                      <select
+                        className="w-full border rounded px-2 py-1.5 text-sm"
+                        value={riskForm.inherent_probability as any ?? ""}
+                        onChange={e => setRiskForm(f => ({ ...f, inherent_probability: e.target.value ? Number(e.target.value) : null }))}
+                      >
+                        <option value="">— seleziona —</option>
+                        {[1,2,3,4,5].map(v => <option key={v} value={v}>{v}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Impatto inerente *</label>
+                      <select
+                        className="w-full border rounded px-2 py-1.5 text-sm"
+                        value={riskForm.inherent_impact as any ?? ""}
+                        onChange={e => setRiskForm(f => ({ ...f, inherent_impact: e.target.value ? Number(e.target.value) : null }))}
+                      >
+                        <option value="">— seleziona —</option>
+                        {[1,2,3,4,5].map(v => <option key={v} value={v}>{v}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="border border-gray-200 rounded-lg p-3">
                   <p className="text-xs font-medium text-gray-700 mb-2">Rischio residuo (P × I dopo i controlli)</p>
                   <div className="grid grid-cols-2 gap-3">
@@ -407,6 +492,20 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-gray-800">3. Piano BCP per il processo</h4>
                 <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Processo BIA da associare al BCP *</label>
+                  <select
+                    className="w-full border rounded px-3 py-2 text-sm"
+                    value={bcpCriticalProcessId || state.process.id}
+                    onChange={e => setBcpCriticalProcessId(e.target.value)}
+                  >
+                    {processes.map(p => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} [criticità {p.criticality}]
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Titolo piano *</label>
                   <input
                     className="w-full border rounded px-3 py-1.5 text-sm"
@@ -449,13 +548,13 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
 
               <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 text-xs text-gray-700 space-y-2">
                 <h4 className="text-sm font-semibold text-gray-800">Verifica coerenza con BIA</h4>
-                <p><strong>Processo:</strong> {state.process.name}</p>
-                <p>MTPD: <strong>{state.process.mtpd_hours ?? "—"} h</strong></p>
-                <p>RTO target: <strong>{state.process.rto_target_hours ?? "—"} h</strong></p>
+                <p><strong>Processo:</strong> {selectedBcpProcess?.name}</p>
+                <p>MTPD: <strong>{selectedBcpProcess?.mtpd_hours ?? "—"} h</strong></p>
+                <p>RTO target: <strong>{selectedBcpProcess?.rto_target_hours ?? "—"} h</strong></p>
                 <p>
                   RTO piano inserito:{" "}
                   <strong>{bcpForm.rto_hours || "—"} h</strong>
-                  {state.process.rto_target_hours && bcpForm.rto_hours && Number(bcpForm.rto_hours) > state.process.rto_target_hours && (
+                  {selectedBcpProcess?.rto_target_hours && bcpForm.rto_hours && Number(bcpForm.rto_hours) > (selectedBcpProcess?.rto_target_hours ?? 0) && (
                     <span className="ml-1 text-red-600">
                       (⚠ supera il target BIA)
                     </span>
@@ -474,11 +573,11 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-700">
                 <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
                   <div className="font-semibold text-gray-800 mb-1">Processo BIA</div>
-                  {state.process ? (
+                  {selectedBcpProcess ? (
                     <>
-                      <p>{state.process.name}</p>
+                      <p>{selectedBcpProcess.name}</p>
                       <p className="text-gray-500 mt-1">
-                        Criticità {state.process.criticality}/5 • MTPD {state.process.mtpd_hours ?? "—"}h • RTO {state.process.rto_target_hours ?? "—"}h
+                        Criticità {selectedBcpProcess.criticality}/5 • MTPD {selectedBcpProcess.mtpd_hours ?? "—"}h • RTO {selectedBcpProcess.rto_target_hours ?? "—"}h
                       </p>
                     </>
                   ) : (
@@ -548,7 +647,14 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
             )}
             {step === 2 && (
               <button
-                disabled={!riskForm.name || !riskForm.probability || !riskForm.impact}
+                disabled={
+                  !riskForm.name ||
+                  !riskForm.threat_category ||
+                  riskForm.inherent_probability == null ||
+                  riskForm.inherent_impact == null ||
+                  !riskForm.probability ||
+                  !riskForm.impact
+                }
                 onClick={() => createRiskMutation.mutate()}
                 className="px-4 py-1.5 text-xs bg-primary-600 text-white rounded hover:bg-primary-700 disabled:opacity-50"
               >

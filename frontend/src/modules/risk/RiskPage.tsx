@@ -524,6 +524,234 @@ function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: s
   );
 }
 
+function EditAssessmentModal({
+  assessment,
+  onClose,
+}: {
+  assessment: RiskAssessment;
+  onClose: () => void;
+}) {
+  const qc = useQueryClient();
+  const plantId = assessment.plant;
+
+  const [form, setForm] = useState<Partial<RiskAssessment>>({
+    name: assessment.name,
+    threat_category: assessment.threat_category,
+    assessment_type: assessment.assessment_type,
+    owner: assessment.owner,
+    critical_process: assessment.critical_process,
+    treatment: assessment.treatment,
+    inherent_probability: assessment.inherent_probability,
+    inherent_impact: assessment.inherent_impact,
+    probability: assessment.probability,
+    impact: assessment.impact,
+  });
+
+  const [error, setError] = useState("");
+
+  const { data: processes } = useQuery({
+    queryKey: ["bia-processes", plantId],
+    queryFn: () => biaApi.list(plantId ? { plant: plantId, page_size: "200" } : {}),
+    enabled: !!plantId,
+    retry: false,
+  });
+
+  const { data: users } = useQuery({
+    queryKey: ["users"],
+    queryFn: () => usersApi.list(),
+    retry: false,
+  });
+
+  const mutation = useMutation({
+    mutationFn: () => {
+      const payload = {
+        name: form.name,
+        threat_category: form.threat_category,
+        assessment_type: form.assessment_type,
+        owner: form.owner ?? null,
+        critical_process: form.critical_process ?? null,
+        treatment: form.treatment ?? "",
+        inherent_probability: form.inherent_probability ?? null,
+        inherent_impact: form.inherent_impact ?? null,
+        probability: form.probability ?? null,
+        impact: form.impact ?? null,
+      };
+      return riskApi.update(assessment.id, payload);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["risk-assessments"] });
+      onClose();
+    },
+    onError: (e: any) => setError(e?.response?.data?.detail || JSON.stringify(e?.response?.data) || "Errore"),
+  });
+
+  const selectedProcess = processes?.results?.find(p => p.id === form.critical_process);
+
+  function set(field: string, value: unknown) {
+    setForm(f => ({ ...f, [field]: value }));
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl flex flex-col max-h-[92vh]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
+          <h3 className="text-lg font-semibold">Modifica scenario rischio</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 text-2xl w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nome scenario / rischio *</label>
+            <input
+              value={form.name ?? ""}
+              onChange={e => set("name", e.target.value)}
+              className="w-full border rounded px-3 py-2 text-sm"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Categoria minaccia</label>
+              <select
+                value={form.threat_category ?? ""}
+                onChange={e => set("threat_category", e.target.value)}
+                className="w-full border rounded px-3 py-2 text-sm"
+              >
+                {THREAT_CATEGORIES.map(c => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo asset</label>
+              <select
+                value={form.assessment_type ?? "IT"}
+                onChange={e => set("assessment_type", e.target.value)}
+                className="w-full border rounded px-3 py-2 text-sm"
+              >
+                <option value="IT">IT</option>
+                <option value="OT">OT</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Trattamento previsto</label>
+              <select
+                value={form.treatment ?? ""}
+                onChange={e => set("treatment", e.target.value)}
+                className="w-full border rounded px-3 py-2 text-sm"
+              >
+                <option value="mitigare">Mitigare</option>
+                <option value="accettare">Accettare</option>
+                <option value="trasferire">Trasferire</option>
+                <option value="evitare">Evitare</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Owner</label>
+              <select
+                value={form.owner ?? ""}
+                onChange={e => set("owner", e.target.value || null)}
+                className="w-full border rounded px-3 py-2 text-sm"
+              >
+                <option value="">— nessun owner —</option>
+                {users?.map(u => (
+                  <option key={u.id} value={u.id}>
+                    {u.first_name || u.last_name ? `${u.first_name} ${u.last_name}`.trim() : u.username} ({u.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Processo BIA collegato</label>
+            <select
+              value={form.critical_process ?? ""}
+              onChange={e => set("critical_process", e.target.value || null)}
+              disabled={!plantId}
+              className="w-full border rounded px-3 py-2 text-sm disabled:bg-gray-50"
+            >
+              <option value="">— nessun processo BIA —</option>
+              {processes?.results?.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.name} [criticità {p.criticality}]
+                </option>
+              ))}
+            </select>
+            {selectedProcess && (
+              <p className="mt-2 text-xs text-gray-500">
+                MTPD {selectedProcess.mtpd_hours ?? "—"}h • RTO target {selectedProcess.rto_target_hours ?? "—"}h
+              </p>
+            )}
+          </div>
+
+          <div className="border border-orange-200 rounded-lg p-4 bg-orange-50/30">
+            <p className="text-sm font-medium text-orange-800 mb-2">Rischio inerente (prima dei controlli)</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Probabilità inerente</label>
+                <select
+                  value={form.inherent_probability ?? ""}
+                  onChange={e => set("inherent_probability", e.target.value ? Number(e.target.value) : null)}
+                  className="w-full border rounded px-3 py-2 text-sm"
+                >
+                  <option value="">—</option>
+                  {[1,2,3,4,5].map(v => <option key={v} value={v}>{v}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Impatto inerente</label>
+                <select
+                  value={form.inherent_impact ?? ""}
+                  onChange={e => set("inherent_impact", e.target.value ? Number(e.target.value) : null)}
+                  className="w-full border rounded px-3 py-2 text-sm"
+                >
+                  <option value="">—</option>
+                  {[1,2,3,4,5].map(v => <option key={v} value={v}>{v}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="border border-gray-200 rounded-lg p-4">
+            <p className="text-sm font-medium text-gray-700 mb-3">Rischio residuo (P × I dopo i controlli)</p>
+            <ProbImpactSelector
+              probability={form.probability ?? null}
+              impact={form.impact ?? null}
+              onChange={(field, value) => set(field, value)}
+            />
+          </div>
+        </div>
+
+        {error && <p className="text-sm text-red-600 bg-red-50 px-6 py-2">{error}</p>}
+
+        <div className="flex justify-end gap-2 px-6 py-4 border-t border-gray-100 shrink-0">
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">
+            Annulla
+          </button>
+          <button
+            onClick={() => mutation.mutate()}
+            disabled={mutation.isPending}
+            className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
+          >
+            {mutation.isPending ? "Salvataggio..." : "Salva modifiche"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface RiskAppetitePolicy {
   id: string;
   max_acceptable_score: number;
@@ -581,6 +809,7 @@ export function RiskPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showWizard, setShowWizard] = useState(false);
+  const [editAssessment, setEditAssessment] = useState<RiskAssessment | null>(null);
   const selectedPlant = useAuthStore(s => s.selectedPlant);
   const qc = useQueryClient();
 
@@ -747,6 +976,14 @@ export function RiskPage() {
                       )}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap" onClick={e => e.stopPropagation()}>
+                      {a.status === "bozza" && (
+                        <button
+                          onClick={() => setEditAssessment(a)}
+                          className="text-xs text-purple-700 border border-purple-300 rounded px-2 py-0.5 hover:bg-purple-50 disabled:opacity-50 whitespace-nowrap"
+                        >
+                          Modifica
+                        </button>
+                      )}
                       {a.status === "bozza" && !!a.probability && !!a.impact && (
                         <button onClick={() => completeMutation.mutate(a.id)} disabled={completeMutation.isPending}
                           className="text-xs text-blue-700 border border-blue-300 rounded px-2 py-0.5 hover:bg-blue-50 disabled:opacity-50 whitespace-nowrap">
@@ -793,6 +1030,12 @@ export function RiskPage() {
       {showNew && plants && <NewAssessmentModal plants={plants} onClose={() => setShowNew(false)} />}
       <AssistenteValutazione open={drawerOpen} onClose={() => setDrawerOpen(false)} />
       {showWizard && <RiskContinuityWizard onClose={() => setShowWizard(false)} />}
+      {editAssessment && (
+        <EditAssessmentModal
+          assessment={editAssessment}
+          onClose={() => setEditAssessment(null)}
+        />
+      )}
     </div>
   );
 }

@@ -2,12 +2,23 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { bcpApi, type BcpPlan, type BcpTestObjective } from "../../api/endpoints/bcp";
 import { plantsApi } from "../../api/endpoints/plants";
+import { biaApi } from "../../api/endpoints/bia";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import i18n from "../../i18n";
 
 function NewBcpModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
   const qc = useQueryClient();
   const [form, setForm] = useState<Partial<BcpPlan>>({});
+  const plantId = form.plant;
+
+  const { data: processesData } = useQuery({
+    queryKey: ["bia-processes", plantId],
+    queryFn: () => biaApi.list(plantId ? { plant: plantId, page_size: "200" } : {}),
+    enabled: !!plantId,
+    retry: false,
+  });
+
+  const processes = processesData?.results ?? [];
 
   const mutation = useMutation({
     mutationFn: bcpApi.create,
@@ -41,6 +52,23 @@ function NewBcpModal({ plants, onClose }: { plants: { id: string; code: string; 
               <input name="version" onChange={handleChange} placeholder="1.0" className="w-full border rounded px-3 py-2 text-sm" />
             </div>
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Processo BIA collegato *</label>
+            <select
+              name="critical_process"
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2 text-sm"
+              value={form.critical_process ?? ""}
+            >
+              <option value="">— seleziona —</option>
+              {processes.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.name} [criticità {p.criticality}]
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">RTO (ore)</label>
@@ -57,7 +85,7 @@ function NewBcpModal({ plants, onClose }: { plants: { id: string; code: string; 
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
           <button
             onClick={() => mutation.mutate(form)}
-            disabled={mutation.isPending}
+            disabled={mutation.isPending || !form.plant || !form.title || !form.critical_process}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
             {mutation.isPending ? "Salvataggio..." : "Crea piano"}
