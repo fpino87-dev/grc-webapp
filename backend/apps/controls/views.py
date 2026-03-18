@@ -412,6 +412,7 @@ class ComplianceExportView(APIView):
         from .export_engine import generate_export
         from django.http import HttpResponse
         from django.utils import timezone
+        from django.utils.translation import gettext as _
 
         framework_code = request.query_params.get("framework")
         plant_id = request.query_params.get("plant")
@@ -421,14 +422,18 @@ class ComplianceExportView(APIView):
         export_format = request.query_params.get("fmt", "soa")
 
         if not framework_code:
-            return Response({"error": "Parametro framework obbligatorio"}, status=400)
+            return Response({"error": _("Parametro 'framework' obbligatorio.")}, status=400)
 
         allowed = self.FORMAT_FRAMEWORK.get(export_format, [])
         if allowed and framework_code not in allowed:
             return Response({
-                "error": f"Formato {export_format} non compatibile "
-                         f"con framework {framework_code}. "
-                         f"Usa uno di: {allowed}"
+                "error": _(
+                    "Formato %(fmt)s non compatibile con framework %(fw)s. Usa uno di: %(allowed)s"
+                ) % {
+                    "fmt": export_format,
+                    "fw": framework_code,
+                    "allowed": ", ".join(allowed),
+                }
             }, status=400)
 
         # Verifica che il framework sia attivo per questo plant
@@ -441,8 +446,8 @@ class ComplianceExportView(APIView):
                 if framework_code not in active_codes:
                     return Response({
                         "error": (
-                            f"Framework '{framework_code}' non attivo per questo plant. "
-                            f"Framework attivi: {active_codes}"
+                            _("Framework '%(fw)s' non attivo per questo sito. Framework attivi: %(active)s")
+                            % {"fw": framework_code, "active": ", ".join(active_codes)}
                         )
                     }, status=400)
 
@@ -456,7 +461,7 @@ class ComplianceExportView(APIView):
             logger = logging.getLogger(__name__)
             logger.error(f"Export error [{export_format}/{framework_code}]: {traceback.format_exc()}")
             return Response(
-                {"error": f"Errore generazione documento: {str(e)}"},
+                {"error": _("Errore generazione documento: %(err)s") % {"err": str(e)}},
                 status=500,
             )
 

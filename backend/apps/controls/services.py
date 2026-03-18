@@ -28,7 +28,11 @@ def check_evidence_requirements(instance, lang: str | None = None) -> dict:
     in Control.evidence_requirement.
     """
     from django.utils import timezone
+    from django.utils import translation
     from django.utils.translation import gettext as _
+
+    if lang is None:
+        lang = translation.get_language() or "it"
 
     today = timezone.now().date()
     req = instance.control.evidence_requirement or {}

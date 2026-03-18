@@ -80,3 +80,15 @@ msgstr "maturity_level must be between 0 and 5"
 msgid "Parametri 'source' e 'target' obbligatori."
 msgstr "Parameters 'source' and 'target' are required."
 
+msgid "Parametro 'framework' obbligatorio."
+msgstr "Parameter 'framework' is required."
+
+msgid "Formato %(fmt)s non compatibile con framework %(fw)s. Usa uno di: %(allowed)s"
+msgstr "Format %(fmt)s is not compatible with framework %(fw)s. Use one of: %(allowed)s"
+
+msgid "Framework '%(fw)s' non attivo per questo sito. Framework attivi: %(active)s"
+msgstr "Framework '%(fw)s' is not active for this site. Active frameworks: %(active)s"
+
+msgid "Errore generazione documento: %(err)s"
+msgstr "Document generation error: %(err)s"
+
