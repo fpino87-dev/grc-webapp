@@ -648,6 +648,12 @@ function ITTab({ search }: { search: string }) {
     queryFn: () => assetsApi.listIT(),
     retry: false,
   });
+  const { data: procData } = useQuery({
+    queryKey: ["critical-processes"],
+    queryFn: () => biaApi.list({ status: "approvato" }),
+    retry: false,
+  });
+  const processes: CriticalProcess[] = procData?.results ?? [];
 
   const assets: AssetIT[] = (data?.results ?? []).filter((a) => {
     if (!search) return true;
@@ -675,6 +681,7 @@ function ITTab({ search }: { search: string }) {
           <th className="text-left px-4 py-3 font-medium text-gray-600">OS</th>
           <th className="text-left px-4 py-3 font-medium text-gray-600">Criticità</th>
           <th className="text-left px-4 py-3 font-medium text-gray-600">Esposto internet</th>
+          <th className="text-left px-4 py-3 font-medium text-gray-600">Processi BIA</th>
           <th className="text-left px-4 py-3 font-medium text-gray-600">EOL</th>
           <th className="px-4 py-3"></th>
         </tr>
@@ -682,7 +689,7 @@ function ITTab({ search }: { search: string }) {
       <tbody className="divide-y divide-gray-100">
         {assets.length === 0 ? (
           <tr>
-            <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
+            <td colSpan={8} className="px-4 py-8 text-center text-gray-400">
               Nessun asset IT trovato
             </td>
           </tr>
@@ -712,6 +719,12 @@ function ITTab({ search }: { search: string }) {
                 <td className="px-4 py-3 text-gray-600">{a.os}</td>
                 <td className="px-4 py-3"><CriticalityBadge value={a.criticality} /></td>
                 <td className="px-4 py-3"><StatusBadge status={a.internet_exposed ? "si" : "no"} /></td>
+                <td className="px-4 py-3 text-gray-600 text-xs">
+                  {(() => {
+                    const linked = processes.filter((p) => (a.processes || []).includes(p.id));
+                    return linked.length ? linked.map((p) => p.name).join(", ") : "—";
+                  })()}
+                </td>
                 <td className="px-4 py-3 text-gray-500 text-xs">
                   {a.eol_date ? new Date(a.eol_date).toLocaleDateString(i18n.language || "it") : "—"}
                 </td>
@@ -755,6 +768,12 @@ function OTTab({ search }: { search: string }) {
     queryFn: () => assetsApi.listOT(),
     retry: false,
   });
+  const { data: procData } = useQuery({
+    queryKey: ["critical-processes"],
+    queryFn: () => biaApi.list({ status: "approvato" }),
+    retry: false,
+  });
+  const processes: CriticalProcess[] = procData?.results ?? [];
 
   const assets: AssetOT[] = (data?.results ?? []).filter(
     (a) =>
@@ -777,13 +796,14 @@ function OTTab({ search }: { search: string }) {
           <th className="text-left px-4 py-3 font-medium text-gray-600">Patchable</th>
           <th className="text-left px-4 py-3 font-medium text-gray-600">Vendor</th>
           <th className="text-left px-4 py-3 font-medium text-gray-600">Criticità</th>
+          <th className="text-left px-4 py-3 font-medium text-gray-600">Processi BIA</th>
           <th className="px-4 py-3"></th>
         </tr>
       </thead>
       <tbody className="divide-y divide-gray-100">
         {assets.length === 0 ? (
           <tr>
-            <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
+            <td colSpan={8} className="px-4 py-8 text-center text-gray-400">
               Nessun asset OT trovato
             </td>
           </tr>
@@ -804,6 +824,12 @@ function OTTab({ search }: { search: string }) {
                 <td className="px-4 py-3"><StatusBadge status={a.patchable ? "si" : "no"} /></td>
                 <td className="px-4 py-3 text-gray-600">{a.vendor}</td>
                 <td className="px-4 py-3"><CriticalityBadge value={a.criticality} /></td>
+                <td className="px-4 py-3 text-gray-600 text-xs">
+                  {(() => {
+                    const linked = processes.filter((p) => (a.processes || []).includes(p.id));
+                    return linked.length ? linked.map((p) => p.name).join(", ") : "—";
+                  })()}
+                </td>
                 <td className="px-4 py-3">
                   <button
                     onClick={() => setExpandedId(expandedId === a.id ? null : a.id)}
