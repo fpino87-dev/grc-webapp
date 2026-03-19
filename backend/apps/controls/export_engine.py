@@ -306,7 +306,9 @@ def _generate_soa(fw, plant, instances, user) -> str:
     change_section = _generate_soa_change_section(plant)
     content += change_section
 
-    logo_url = getattr(plant, "logo_url", None) if plant is not None else None
+    logo_url = None
+    if plant is not None and plant.logo_url:
+        logo_url = f"/api/v1/plants/plants/{plant.id}/logo/"
     return _base_html(
         f"SOA — {plant_name}",
         content, plant_name, fw.name, user_name, logo_url
@@ -474,7 +476,9 @@ def _generate_vda_isa(fw, plant, instances, user) -> str:
   Data: __________________
 </div>"""
 
-    logo_url = getattr(plant, "logo_url", None) if plant is not None else None
+    logo_url = None
+    if plant is not None and plant.logo_url:
+        logo_url = f"/api/v1/plants/plants/{plant.id}/logo/"
     return _base_html(
         f"VDA ISA — {plant_name}",
         content, plant_name, fw.name, user_name, logo_url
@@ -603,7 +607,9 @@ def _generate_compliance_matrix(fw, plant, instances, user) -> str:
   Data: __________________
 </div>"""
 
-    logo_url = getattr(plant, "logo_url", None) if plant is not None else None
+    logo_url = None
+    if plant is not None and plant.logo_url:
+        logo_url = f"/api/v1/plants/plants/{plant.id}/logo/"
     return _base_html(
         f"NIS2 Compliance Matrix — {plant_name}",
         content, plant_name, fw.name, user_name, logo_url
