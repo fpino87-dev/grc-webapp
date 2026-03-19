@@ -545,6 +545,15 @@ export function GovernancePage() {
     setTimeout(() => setToast(null), 4000);
   }
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => governanceApi.deleteRoleAssignment(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["role-assignments"] });
+      qc.invalidateQueries({ queryKey: ["governance-vacanti"] });
+      qc.invalidateQueries({ queryKey: ["governance-in-scadenza"] });
+    },
+  });
+
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
       {/* Header */}
@@ -761,6 +770,16 @@ export function GovernancePage() {
                       className="text-xs px-2 py-1 bg-orange-50 text-orange-700 rounded hover:bg-orange-100 border border-orange-200"
                     >
                       {t("governance.actions.terminate")}
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (window.confirm(t("governance.actions.delete_confirm"))) {
+                          deleteMutation.mutate(a.id);
+                        }
+                      }}
+                      className="text-xs px-2 py-1 bg-red-50 text-red-700 rounded hover:bg-red-100 border border-red-200"
+                    >
+                      {t("actions.delete")}
                     </button>
                   </div>
                 </div>

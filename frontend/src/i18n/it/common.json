@@ -596,7 +596,8 @@
     },
     "actions": {
       "replace": "Sostituisci",
-      "terminate": "Termina"
+      "terminate": "Termina",
+      "delete_confirm": "Eliminare definitivamente questa assegnazione di ruolo? Operazione consigliata solo in fase di test o per errori di inserimento."
     },
     "roles": {
       "ciso": "CISO",

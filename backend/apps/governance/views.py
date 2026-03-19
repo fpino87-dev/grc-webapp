@@ -29,6 +29,22 @@ class RoleAssignmentViewSet(viewsets.ModelViewSet):
             payload={"id": str(instance.id)},
         )
 
+    def destroy(self, request, *args, **kwargs):
+        """
+        Soft delete di una assegnazione di ruolo, con audit trail.
+        Usare per pulizia dati / test, non per la gestione ordinaria (dove si usa 'termina' o 'sostituisci').
+        """
+        instance = self.get_object()
+        instance.soft_delete()
+        log_action(
+            user=request.user,
+            action_code="governance.role_assignment.delete",
+            level="L2",
+            entity=instance,
+            payload={"id": str(instance.id)},
+        )
+        return Response(status=204)
+
     @action(detail=True, methods=["post"], url_path="termina")
     def termina(self, request, pk=None):
         """Termina un ruolo impostando valid_until."""

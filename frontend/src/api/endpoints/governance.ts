@@ -57,6 +57,8 @@ export const governanceApi = {
     apiClient.get<{ results: RoleAssignment[] }>("/governance/role-assignments/").then((r) => r.data.results ?? r.data),
   createRoleAssignment: (data: Partial<RoleAssignment>) =>
     apiClient.post<RoleAssignment>("/governance/role-assignments/", data).then((r) => r.data),
+  deleteRoleAssignment: (id: string) =>
+    apiClient.delete(`/governance/role-assignments/${id}/`).then((r) => r.data),
   terminaRole: (id: string, data: { reason: string; termination_date?: string }) =>
     apiClient.post<{ ok: boolean; valid_until: string; message: string }>(
       `/governance/role-assignments/${id}/termina/`, data
