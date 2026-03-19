@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { assetsApi, type AssetIT, type AssetOT, type RegisterChangeResult } from "../../api/endpoints/assets";
 import { plantsApi } from "../../api/endpoints/plants";
+import { biaApi, type CriticalProcess } from "../../api/endpoints/bia";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
 import i18n from "../../i18n";
@@ -210,6 +211,13 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
   const [form, setForm] = useState<Record<string, unknown>>({ asset_type: assetType, criticality: 3 });
   const [error, setError] = useState("");
 
+  const { data: processesData } = useQuery({
+    queryKey: ["critical-processes"],
+    queryFn: () => biaApi.list({ status: "approvato" }),
+    retry: false,
+  });
+  const processes: CriticalProcess[] = processesData?.results ?? [];
+
   const mutation = useMutation({
     mutationFn: assetType === "IT" ? assetsApi.createIT : assetsApi.createOT,
     onSuccess: () => { qc.invalidateQueries({ queryKey: [assetType === "IT" ? "assets-it" : "assets-ot"] }); onClose(); },
@@ -217,9 +225,18 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
-    const v = e.target.type === "checkbox" ? (e.target as HTMLInputElement).checked
-      : e.target.type === "number" ? Number(e.target.value) : e.target.value;
-    setForm(prev => ({ ...prev, [e.target.name]: v }));
+    const v =
+      e.target.type === "checkbox"
+        ? (e.target as HTMLInputElement).checked
+        : e.target.type === "number"
+        ? Number(e.target.value)
+        : e.target.value;
+    setForm((prev) => ({ ...prev, [e.target.name]: v }));
+  }
+
+  function handleProcessesChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const selected = Array.from(e.target.selectedOptions).map((o) => o.value);
+    setForm((prev) => ({ ...prev, processes: selected }));
   }
 
   return (
@@ -237,6 +254,24 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
             <input name="name" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Processi BIA collegati</label>
+            <select
+              multiple
+              name="processes"
+              onChange={handleProcessesChange}
+              className="w-full border rounded px-3 py-2 text-sm h-28"
+            >
+              {processes.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-gray-500">
+              Seleziona uno o più processi BIA che dipendono da questo asset (IT o OT).
+            </p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Criticità (1-5)</label>
@@ -321,6 +356,17 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Data EOL (fine supporto)</label>
+                  <input
+                    type="date"
+                    name="eol_date"
+                    onChange={handleChange}
+                    className="w-full border rounded px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Classificazione dati</label>
                   <select
                     name="data_classification"
@@ -382,6 +428,7 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
 
 function ITTab({ search }: { search: string }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [editAsset, setEditAsset] = useState<AssetIT | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["assets-it"],
@@ -461,6 +508,12 @@ function ITTab({ search }: { search: string }) {
                   >
                     {expandedId === a.id ? "Chiudi" : "Change"}
                   </button>
+                  <button
+                    onClick={() => setEditAsset(a)}
+                    className="ml-2 text-xs text-gray-700 hover:underline border border-gray-200 rounded px-2 py-0.5"
+                  >
+                    Modifica
+                  </button>
                 </td>
               </tr>
               {expandedId === a.id && (
@@ -475,6 +528,7 @@ function ITTab({ search }: { search: string }) {
         )}
       </tbody>
     </table>
+    {/* TODO: Modale di modifica asset IT può riusare NewAssetModal con form precompilato, da implementare in uno step successivo */}
   );
 }
 

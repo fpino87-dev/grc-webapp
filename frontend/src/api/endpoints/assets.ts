@@ -12,16 +12,39 @@ export interface AssetChangeFields {
 }
 
 export interface AssetIT extends AssetChangeFields {
-  id: string; plant: string; name: string; asset_type: "IT";
-  criticality: number; fqdn: string; ip_address: string | null;
-  os: string; eol_date: string | null; internet_exposed: boolean;
-  cve_score_max: number | null; owner: string | null; notes: string;
+  id: string;
+  plant: string;
+  name: string;
+  asset_type: "IT";
+  criticality: number;
+  fqdn: string;
+  ip_address: string | null;
+  os: string;
+  eol_date: string | null;
+  internet_exposed: boolean;
+  cve_score_max: number | null;
+  owner: string | null;
+  notes: string;
+  processes: string[];
+  deployment_type: "on_prem" | "iaas" | "paas" | "saas";
+  provider: string | null;
+  service_name: string | null;
+  data_classification: string | null;
 }
+
 export interface AssetOT extends AssetChangeFields {
-  id: string; plant: string; name: string; asset_type: "OT";
-  criticality: number; purdue_level: number;
-  category: "PLC"|"SCADA"|"HMI"|"RTU"|"sensore"|"altro";
-  patchable: boolean; vendor: string; owner: string | null;
+  id: string;
+  plant: string;
+  name: string;
+  asset_type: "OT";
+  criticality: number;
+  purdue_level: number;
+  category: "PLC" | "SCADA" | "HMI" | "RTU" | "sensore" | "altro";
+  patchable: boolean;
+  vendor: string;
+  owner: string | null;
+  notes: string;
+  processes: string[];
 }
 
 export interface RegisterChangeResult {

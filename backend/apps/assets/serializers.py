@@ -24,6 +24,12 @@ class NetworkZoneSerializer(serializers.ModelSerializer):
 class AssetITSerializer(serializers.ModelSerializer):
     plant_name = serializers.CharField(source="plant.name", read_only=True)
     owner_username = serializers.CharField(source="owner.username", read_only=True)
+    processes = serializers.PrimaryKeyRelatedField(
+        many=True,
+        read_only=False,
+        queryset=Asset._meta.get_field("processes").remote_field.model.objects.all(),
+        required=False,
+    )
 
     class Meta:
         model = AssetIT
@@ -37,6 +43,7 @@ class AssetITSerializer(serializers.ModelSerializer):
             "owner",
             "owner_username",
             "notes",
+            "processes",
             "fqdn",
             "ip_address",
             "os",
@@ -57,6 +64,12 @@ class AssetOTSerializer(serializers.ModelSerializer):
     plant_name = serializers.CharField(source="plant.name", read_only=True)
     owner_username = serializers.CharField(source="owner.username", read_only=True)
     network_zone_name = serializers.CharField(source="network_zone.name", read_only=True)
+    processes = serializers.PrimaryKeyRelatedField(
+        many=True,
+        read_only=False,
+        queryset=Asset._meta.get_field("processes").remote_field.model.objects.all(),
+        required=False,
+    )
 
     class Meta:
         model = AssetOT
@@ -70,6 +83,7 @@ class AssetOTSerializer(serializers.ModelSerializer):
             "owner",
             "owner_username",
             "notes",
+            "processes",
             "purdue_level",
             "category",
             "patchable",
