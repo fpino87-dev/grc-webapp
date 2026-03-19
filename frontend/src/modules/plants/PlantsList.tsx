@@ -8,6 +8,14 @@ import { useTranslation } from "react-i18next";
 
 const COUNTRIES = ["IT", "DE", "FR", "PL", "TR", "ES", "UK", "US", "RO", "CZ"];
 
+function resolvePlantLogoSrc(plantId: string, logoUrl?: string | null) {
+  if (!logoUrl) return "";
+  const value = logoUrl.trim();
+  if (!value) return "";
+  if (value.startsWith("http://") || value.startsWith("https://")) return value;
+  return `/api/v1/plants/plants/${plantId}/logo/`;
+}
+
 function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -129,7 +137,7 @@ function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void 
               </label>
               {form.logo_url && (
                 <img
-                  src={form.logo_url}
+                  src={resolvePlantLogoSrc(plant.id, form.logo_url)}
                   alt="Logo preview"
                   className="h-8 w-auto rounded border border-gray-200 bg-white object-contain"
                 />
@@ -563,7 +571,7 @@ export function PlantsList() {
                   <td className="px-4 py-3">
                     {p.logo_url ? (
                       <img
-                        src={p.logo_url}
+                        src={resolvePlantLogoSrc(p.id, p.logo_url)}
                         alt={p.name}
                         className="h-6 w-auto object-contain rounded-sm border border-gray-200 bg-white"
                       />

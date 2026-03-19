@@ -1,5 +1,8 @@
+import os
+
 from django.utils import timezone
 from django.core.files.storage import default_storage
+from django.http import FileResponse, Http404, HttpResponseRedirect
 from rest_framework import viewsets, status, parsers
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -77,6 +80,32 @@ class PlantViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(plant)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["get"], url_path="logo")
+    def logo(self, request, pk=None):
+        """
+        Restituisce il logo del plant passando sempre dal proxy API.
+        Se logo_url è esterno effettua redirect; se è relativo/locale serve il file da default_storage.
+        """
+        plant = self.get_object()
+        logo_url = (plant.logo_url or "").strip()
+        if not logo_url:
+            raise Http404(_("Nessun logo configurato per questo sito."))
+
+        if logo_url.startswith("http://") or logo_url.startswith("https://"):
+            return HttpResponseRedirect(logo_url)
+
+        storage_path = logo_url
+        if "/media/" in logo_url:
+            storage_path = logo_url.split("/media/", 1)[1]
+        storage_path = storage_path.lstrip("/")
+
+        if not storage_path or not default_storage.exists(storage_path):
+            raise Http404(_("Logo non trovato nello storage."))
+
+        file_handle = default_storage.open(storage_path, "rb")
+        filename = os.path.basename(storage_path) or "logo"
+        return FileResponse(file_handle, as_attachment=False, filename=filename)
 
 
 class PlantFrameworkViewSet(viewsets.ModelViewSet):
