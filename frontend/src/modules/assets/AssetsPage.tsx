@@ -528,7 +528,6 @@ function ITTab({ search }: { search: string }) {
         )}
       </tbody>
     </table>
-    {/* TODO: Modale di modifica asset IT può riusare NewAssetModal con form precompilato, da implementare in uno step successivo */}
   );
 }
 
