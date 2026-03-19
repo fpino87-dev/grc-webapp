@@ -80,11 +80,19 @@ def generate_export(framework_code: str, plant_id,
 
 
 def _base_html(title: str, content: str, plant_name: str,
-               fw_name: str, user_name: str) -> str:
+               fw_name: str, user_name: str, logo_url: str | None = None) -> str:
     """Template HTML base condiviso da tutti i formati."""
     from django.utils import translation
     lang = translation.get_language() or "it"
     now = timezone.now().strftime("%d/%m/%Y %H:%M")
+    logo_img = ""
+    if logo_url:
+        logo_img = (
+            f'<div style="text-align:right;margin-bottom:10px;">'
+            f'<img src="{logo_url}" alt="Logo" '
+            f'style="max-height:40px;max-width:160px;object-fit:contain;"/>'
+            f"</div>"
+        )
     return f"""<!DOCTYPE html>
 <html lang="{lang}">
 <head>
@@ -133,6 +141,7 @@ def _base_html(title: str, content: str, plant_name: str,
   </style>
 </head>
 <body>
+{logo_img}
 {content}
 <div class="footer">
   Generato da GRC System il {now} — Utente: {user_name} —
@@ -297,9 +306,10 @@ def _generate_soa(fw, plant, instances, user) -> str:
     change_section = _generate_soa_change_section(plant)
     content += change_section
 
+    logo_url = getattr(plant, "logo_url", None) if plant is not None else None
     return _base_html(
         f"SOA — {plant_name}",
-        content, plant_name, fw.name, user_name
+        content, plant_name, fw.name, user_name, logo_url
     )
 
 
@@ -464,9 +474,10 @@ def _generate_vda_isa(fw, plant, instances, user) -> str:
   Data: __________________
 </div>"""
 
+    logo_url = getattr(plant, "logo_url", None) if plant is not None else None
     return _base_html(
         f"VDA ISA — {plant_name}",
-        content, plant_name, fw.name, user_name
+        content, plant_name, fw.name, user_name, logo_url
     )
 
 
@@ -592,7 +603,8 @@ def _generate_compliance_matrix(fw, plant, instances, user) -> str:
   Data: __________________
 </div>"""
 
+    logo_url = getattr(plant, "logo_url", None) if plant is not None else None
     return _base_html(
         f"NIS2 Compliance Matrix — {plant_name}",
-        content, plant_name, fw.name, user_name
+        content, plant_name, fw.name, user_name, logo_url
     )
