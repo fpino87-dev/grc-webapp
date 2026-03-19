@@ -55,9 +55,10 @@ class Plant(BaseModel):
     )
     address = models.TextField(blank=True)
     timezone = models.CharField(max_length=50, default="Europe/Rome")
-    logo_url = models.URLField(
+    logo_url = models.CharField(
+        max_length=500,
         blank=True,
-        help_text="URL del logo per questo sito (usato in report/export).",
+        help_text="URL del logo per questo sito (usato in report/export). Può essere assoluto o relativo (es. /media/...).",
     )
 
     class Meta:

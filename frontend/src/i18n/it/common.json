@@ -456,7 +456,8 @@
       "country": "Paese",
       "status": "Stato",
       "nis2_scope": "Perimetro NIS2",
-      "has_ot": "Presenza reti OT / ICS"
+      "has_ot": "Presenza reti OT / ICS",
+      "logo_upload_label": "Carica logo"
     },
     "placeholders": {
       "code": "IT-MIL-01",
