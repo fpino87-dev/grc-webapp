@@ -463,6 +463,7 @@ function CommitteeModal({ onClose }: { onClose: () => void }) {
 
 export function GovernancePage() {
   const { t, i18n } = useTranslation();
+  const qc = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
   const initialTab =
