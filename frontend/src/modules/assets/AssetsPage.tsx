@@ -451,7 +451,14 @@ function EditAssetModalIT({ asset, onClose }: { asset: AssetIT; onClose: () => v
   const processes: CriticalProcess[] = processesData?.results ?? [];
 
   const mutation = useMutation({
-    mutationFn: (payload: Partial<AssetIT>) => assetsApi.updateIT(asset.id, payload),
+    mutationFn: (payload: Partial<AssetIT>) => {
+      const normalized: Partial<AssetIT> = {
+        ...payload,
+        // normalizza date vuote a null per evitare errori DRF
+        eol_date: (payload.eol_date as string) || null,
+      };
+      return assetsApi.updateIT(asset.id, normalized);
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["assets-it"] });
       onClose();
