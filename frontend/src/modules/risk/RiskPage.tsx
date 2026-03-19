@@ -1135,7 +1135,8 @@ export function RiskPage() {
             <tbody>
               {assessments.map(a => (
                 <>
-                  <tr key={a.id}
+                  <tr
+                    key={a.id}
                     onClick={() => setExpandedId(prev => prev === a.id ? null : a.id)}
                     className="hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-100"
                   >
