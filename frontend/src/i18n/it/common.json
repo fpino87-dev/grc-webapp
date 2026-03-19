@@ -191,6 +191,29 @@
         }
       }
     },
+    "risk_module": {
+      "title": "Risk Assessment IT/OT — M06",
+      "description": "Inerente = probabilità×impatto SENZA controlli; Residuo = probabilità×impatto DOPO i controlli e BCP; Weighted = score residuo pesato sulla criticità BIA per dare priorità ai rischi con impatto maggiore sul business. Le policy di Risk Appetite definiscono le soglie (score max accettabile, numero massimo di rischi rossi, score non accettabile) che il management ha approvato.",
+      "steps": {
+        "1": "Crea un nuovo assessment collegando asset e processo BIA (se disponibile)",
+        "2": "Compila il rischio INERENTE inserendo probabilità e impatto prima dei controlli",
+        "3": "Compila il rischio RESIDUO inserendo probabilità e impatto dopo i controlli e le misure BCP",
+        "4": "Completa le dimensioni IT/OT e premi 'Completa assessment' per calcolare score, weighted e ALE",
+        "5": "Confronta score e weighted con le soglie di Risk Appetite per decidere mitigazione, trasferimento o accettazione",
+        "6": "Accetta formalmente i rischi residui (quando consentito dalla policy) indicando nota e scadenza revisione"
+      },
+      "connections": {
+        "assets": "Asset oggetto della valutazione",
+        "bia": "Weighted e ALE usano criticità e costi BIA",
+        "governance": "Risk Appetite definisce le soglie approvate dal management",
+        "pdca": "Rischi sopra soglia possono aprire PDCA automatici",
+        "tasks": "Task di mitigazione generati per i rischi oltre i limiti di appetito"
+      },
+      "config_needed": {
+        "1": "Configura le soglie in Governance → Risk Appetite",
+        "2": "Collega i processi BIA per il calcolo automatico di ALE e weighted"
+      }
+    },
     "connections": {
       "chain_title": "Catena logica dei moduli",
       "realtime_alerts_title": "Alert in tempo reale",
@@ -546,7 +569,8 @@
     "tabs": {
       "roles": "Ruoli & comitati",
       "workflow": "Workflow documentale (M07)",
-      "frameworks": "Framework normativi"
+      "frameworks": "Framework normativi",
+      "risk_appetite": "Risk Appetite"
     },
     "workflow": {
       "title": "Workflow documentale",
@@ -718,6 +742,31 @@
         "version": "Versione",
         "counts": "Conteggi",
         "languages": "Lingue"
+      }
+    },
+    "risk_appetite": {
+      "title": "Risk Appetite",
+      "subtitle": "Definisci le soglie di rischio accettabile per plant e framework: score massimo accettabile, limiti sui rischi rossi e score non accettabile.",
+      "note": "Per ogni combinazione Plant/Framework è usata la policy attiva più recente (per data di inizio); queste soglie vengono applicate in M06 per confrontare Inerente, Residuo e Weighted.",
+      "table_title": "Policy di Risk Appetite",
+      "empty": "Nessuna policy configurata. Definisci almeno una soglia org-wide o per plant.",
+      "new": "+ Nuova policy",
+      "edit_title": "Modifica policy Risk Appetite",
+      "new_title": "Nuova policy Risk Appetite",
+      "delete_title": "Elimina policy",
+      "delete_body": "Sei sicuro di voler eliminare questa policy di Risk Appetite? Le valutazioni M06 useranno eventuali altre policy attive.",
+      "org_wide": "Org-wide (tutti i plant)",
+      "framework_all": "Tutti i framework",
+      "columns": {
+        "plant": "Plant",
+        "framework": "Framework",
+        "max_acceptable": "Score max accettabile",
+        "max_red": "Max rischi rossi",
+        "max_unacceptable": "Score non accettabile",
+        "valid_from": "Valido da",
+        "valid_until": "Valido fino",
+        "status": "Stato",
+        "actions": "Azioni"
       }
     }
   },

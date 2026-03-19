@@ -237,6 +237,29 @@
           "desc": "Ability to detect a compromise in real time"
         }
       }
+    },
+    "risk_module": {
+      "title": "Risk Assessment IT/OT — M06",
+      "description": "Inherent = probability×impact BEFORE controls; Residual = probability×impact AFTER controls and BCP; Weighted = residual score weighted by BIA criticality to prioritise risks with the highest business impact. Risk Appetite policies define the thresholds (max acceptable score, maximum number of red risks, unacceptable score) formally approved by management.",
+      "steps": {
+        "1": "Create a new assessment linking the asset and BIA process (where available)",
+        "2": "Fill in the INHERENT risk by entering probability and impact before controls",
+        "3": "Fill in the RESIDUAL risk by entering probability and impact after controls and BCP measures",
+        "4": "Complete IT/OT dimensions and click 'Complete assessment' to calculate score, weighted score and ALE",
+        "5": "Compare score and weighted score with Risk Appetite thresholds to decide mitigation, transfer or acceptance",
+        "6": "Formally accept residual risks (when allowed by policy), providing a note and review due date"
+      },
+      "connections": {
+        "assets": "Assets being assessed",
+        "bia": "Weighted score and ALE use BIA criticality and cost data",
+        "governance": "Risk Appetite defines the thresholds approved by management",
+        "pdca": "Risks above threshold can open automatic PDCA cycles",
+        "tasks": "Mitigation tasks generated for risks beyond appetite limits"
+      },
+      "config_needed": {
+        "1": "Configure thresholds in Governance → Risk Appetite",
+        "2": "Link BIA processes for automatic ALE and weighted score calculation"
+      }
     }
   },
   "ai": {

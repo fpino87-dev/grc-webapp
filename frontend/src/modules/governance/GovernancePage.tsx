@@ -7,6 +7,7 @@ import { apiClient } from "../../api/client";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
 import { DocumentWorkflowSection } from "./DocumentWorkflowPage";
 import { FrameworkGovernanceTab } from "./FrameworkGovernanceTab";
+import { RiskAppetiteGovernanceTab } from "./RiskAppetiteGovernanceTab";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -469,8 +470,10 @@ export function GovernancePage() {
       ? "workflow"
       : tabParam === "frameworks"
       ? "frameworks"
+      : tabParam === "risk-appetite"
+      ? "risk-appetite"
       : "roles";
-  const [tab, setTab] = useState<"roles" | "workflow" | "frameworks">(initialTab);
+  const [tab, setTab] = useState<"roles" | "workflow" | "frameworks" | "risk-appetite">(initialTab);
 
   useEffect(() => {
     const tabParam = searchParams.get("tab");
@@ -479,6 +482,8 @@ export function GovernancePage() {
         ? "workflow"
         : tabParam === "frameworks"
         ? "frameworks"
+        : tabParam === "risk-appetite"
+        ? "risk-appetite"
         : "roles";
     setTab(next);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -623,6 +628,24 @@ export function GovernancePage() {
           >
             {t("governance.tabs.frameworks")}
           </button>
+          <button
+            type="button"
+            onClick={() => {
+              setTab("risk-appetite");
+              setSearchParams((prev) => {
+                const next = new URLSearchParams(prev);
+                next.set("tab", "risk-appetite");
+                return next;
+              });
+            }}
+            className={
+              tab === "risk-appetite"
+                ? "border-primary-600 text-primary-700 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+            }
+          >
+            {t("governance.tabs.risk_appetite", { defaultValue: "Risk Appetite" })}
+          </button>
         </nav>
       </div>
 
@@ -654,6 +677,8 @@ export function GovernancePage() {
           </div>
           <DocumentWorkflowSection embedded />
         </div>
+      ) : tab === "risk-appetite" ? (
+        <RiskAppetiteGovernanceTab />
       ) : (
         <>
           {/* Alert: ruoli vacanti */}

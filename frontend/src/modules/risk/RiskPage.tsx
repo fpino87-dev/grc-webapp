@@ -1043,27 +1043,26 @@ export function RiskPage() {
         <h2 className="text-xl font-semibold text-gray-900 flex items-center">
           Risk Assessment
           <ModuleHelp
-            title="Risk Assessment IT/OT — M06"
-            description="Valuta il rischio di ogni asset con matrice probabilità×impatto
-    (score 1-25). Calcola ALE automaticamente dai dati BIA.
-    Score >14 genera task di mitigazione e PDCA automaticamente."
+            title={i18n.t("eval_assistant.risk_module.title")}
+            description={i18n.t("eval_assistant.risk_module.description")}
             steps={[
-              "Crea assessment collegando asset e processo BIA",
-              "Inserisci rischio inerente (probabilità e impatto SENZA controlli)",
-              "Completa le dimensioni di valutazione IT o OT",
-              "Premi 'Completa assessment': score e ALE vengono calcolati automaticamente",
-              "Se score > soglia policy: task urgente al risk manager",
-              "Accetta formalmente i rischi residui con nota e scadenza revisione",
+              i18n.t("eval_assistant.risk_module.steps.1"),
+              i18n.t("eval_assistant.risk_module.steps.2"),
+              i18n.t("eval_assistant.risk_module.steps.3"),
+              i18n.t("eval_assistant.risk_module.steps.4"),
+              i18n.t("eval_assistant.risk_module.steps.5"),
+              i18n.t("eval_assistant.risk_module.steps.6"),
             ]}
             connections={[
-              { module: "M04 Asset", relation: "Asset oggetto della valutazione" },
-              { module: "M05 BIA", relation: "ALE calcolato da downtime_cost BIA" },
-              { module: "M11 PDCA", relation: "Rischio rosso apre PDCA automatico" },
-              { module: "M08 Task", relation: "Task mitigazione auto-creato se score > soglia" },
+              { module: "M04 Asset", relation: i18n.t("eval_assistant.risk_module.connections.assets") },
+              { module: "M05 BIA", relation: i18n.t("eval_assistant.risk_module.connections.bia") },
+              { module: "M00 Governance", relation: i18n.t("eval_assistant.risk_module.connections.governance") },
+              { module: "M11 PDCA", relation: i18n.t("eval_assistant.risk_module.connections.pdca") },
+              { module: "M08 Task", relation: i18n.t("eval_assistant.risk_module.connections.tasks") },
             ]}
             configNeeded={[
-              "Configurare RiskAppetitePolicy per soglie personalizzate",
-              "Collegare processi BIA per calcolo ALE automatico",
+              i18n.t("eval_assistant.risk_module.config_needed.1"),
+              i18n.t("eval_assistant.risk_module.config_needed.2"),
             ]}
           />
         </h2>

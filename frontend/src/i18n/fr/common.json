@@ -237,6 +237,29 @@
           "desc": "Ability to detect a compromise in real time"
         }
       }
+    },
+    "risk_module": {
+      "title": "Risk Assessment IT/OT — M06",
+      "description": "Inhérent = probabilité×impact AVANT contrôles ; Résiduel = probabilité×impact APRÈS contrôles et BCP ; Weighted = score résiduel pondéré par la criticité BIA pour prioriser les risques avec le plus fort impact métier. Les politiques de Risk Appetite définissent les seuils (score max acceptable, nombre maximum de risques rouges, score inacceptable) approuvés par le management.",
+      "steps": {
+        "1": "Créer une nouvelle analyse en liant l'actif et le processus BIA (si disponible)",
+        "2": "Renseigner le risque INHÉRENT en saisissant probabilité et impact avant contrôles",
+        "3": "Renseigner le risque RÉSIDUEL en saisissant probabilité et impact après contrôles et mesures BCP",
+        "4": "Compléter les dimensions IT/OT et cliquer sur \"Compléter l'analyse\" pour calculer score, weighted et ALE",
+        "5": "Comparer score et weighted avec les seuils de Risk Appetite pour décider mitigation, transfert ou acceptation",
+        "6": "Accepter formellement les risques résiduels (si autorisé par la politique) en indiquant une note et une date de révision"
+      },
+      "connections": {
+        "assets": "Actifs objets de l'analyse",
+        "bia": "Weighted et ALE utilisent la criticité et les coûts BIA",
+        "governance": "Risk Appetite définit les seuils approuvés par le management",
+        "pdca": "Les risques au‑dessus des seuils peuvent ouvrir automatiquement des PDCA",
+        "tasks": "Tâches de mitigation générées pour les risques au‑delà des limites d'appétence"
+      },
+      "config_needed": {
+        "1": "Configurer les seuils dans Governance → Risk Appetite",
+        "2": "Lier les processus BIA pour le calcul automatique d'ALE et du score pondéré"
+      }
     }
   },
   "ai": {
