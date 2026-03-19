@@ -278,6 +278,40 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
           {assetType === "IT" ? (
             <>
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo deployment *</label>
+                <select
+                  name="deployment_type"
+                  defaultValue="on_prem"
+                  onChange={handleChange}
+                  className="w-full border rounded px-3 py-2 text-sm"
+                >
+                  <option value="on_prem">On-premise</option>
+                  <option value="iaas">IaaS (VM, network in cloud)</option>
+                  <option value="paas">PaaS (DB, storage, funzioni)</option>
+                  <option value="saas">SaaS (applicazione cloud)</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Provider</label>
+                  <input
+                    name="provider"
+                    onChange={handleChange}
+                    className="w-full border rounded px-3 py-2 text-sm"
+                    placeholder="Microsoft, AWS, SAP…"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nome servizio</label>
+                  <input
+                    name="service_name"
+                    onChange={handleChange}
+                    className="w-full border rounded px-3 py-2 text-sm"
+                    placeholder="Microsoft 365, Salesforce, SAP S/4HANA…"
+                  />
+                </div>
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">FQDN</label>
                 <input name="fqdn" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="server.dominio.it" />
               </div>
@@ -285,9 +319,26 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
                 <label className="block text-sm font-medium text-gray-700 mb-1">Sistema operativo</label>
                 <input name="os" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="Windows Server 2022" />
               </div>
-              <div className="flex items-center gap-2">
-                <input type="checkbox" id="internet_exposed" name="internet_exposed" onChange={handleChange} className="rounded" />
-                <label htmlFor="internet_exposed" className="text-sm text-gray-700">Esposto su Internet</label>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Classificazione dati</label>
+                  <select
+                    name="data_classification"
+                    defaultValue=""
+                    onChange={handleChange}
+                    className="w-full border rounded px-3 py-2 text-sm"
+                  >
+                    <option value="">— seleziona —</option>
+                    <option value="public">Public</option>
+                    <option value="internal">Internal</option>
+                    <option value="confidential">Confidential</option>
+                    <option value="restricted">Restricted</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-2 mt-6">
+                  <input type="checkbox" id="internet_exposed" name="internet_exposed" onChange={handleChange} className="rounded" />
+                  <label htmlFor="internet_exposed" className="text-sm text-gray-700">Esposto su Internet</label>
+                </div>
               </div>
             </>
           ) : (
@@ -338,12 +389,16 @@ function ITTab({ search }: { search: string }) {
     retry: false,
   });
 
-  const assets: AssetIT[] = (data?.results ?? []).filter(
-    (a) =>
-      !search ||
-      a.name.toLowerCase().includes(search.toLowerCase()) ||
-      a.fqdn.toLowerCase().includes(search.toLowerCase())
-  );
+  const assets: AssetIT[] = (data?.results ?? []).filter((a) => {
+    if (!search) return true;
+    const s = search.toLowerCase();
+    return (
+      a.name.toLowerCase().includes(s) ||
+      (a.fqdn || "").toLowerCase().includes(s) ||
+      (a.service_name || "").toLowerCase().includes(s) ||
+      (a.provider || "").toLowerCase().includes(s)
+    );
+  });
 
   if (isLoading) {
     return <div className="p-8 text-center text-gray-400">Caricamento...</div>;
@@ -354,6 +409,7 @@ function ITTab({ search }: { search: string }) {
       <thead className="bg-gray-50 border-b border-gray-200">
         <tr>
           <th className="text-left px-4 py-3 font-medium text-gray-600">Nome</th>
+          <th className="text-left px-4 py-3 font-medium text-gray-600">Deployment</th>
           <th className="text-left px-4 py-3 font-medium text-gray-600">FQDN</th>
           <th className="text-left px-4 py-3 font-medium text-gray-600">OS</th>
           <th className="text-left px-4 py-3 font-medium text-gray-600">Criticità</th>
@@ -376,6 +432,20 @@ function ITTab({ search }: { search: string }) {
                 <td className="px-4 py-3 font-medium text-gray-800">
                   {a.name}
                   <ChangeBadges asset={a} />
+                </td>
+                <td className="px-4 py-3 text-gray-600 text-xs">
+                  {a.deployment_type === "saas"
+                    ? "SaaS"
+                    : a.deployment_type === "paas"
+                    ? "PaaS"
+                    : a.deployment_type === "iaas"
+                    ? "IaaS"
+                    : "On-prem"}
+                  {(a.provider || a.service_name) && (
+                    <div className="text-[11px] text-gray-500">
+                      {[a.provider, a.service_name].filter(Boolean).join(" — ")}
+                    </div>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-gray-600 font-mono text-xs">{a.fqdn}</td>
                 <td className="px-4 py-3 text-gray-600">{a.os}</td>
@@ -507,24 +577,25 @@ export function AssetsPage() {
           Asset IT/OT
           <ModuleHelp
             title="Asset IT e OT — M04"
-            description="Censisce tutti gli asset informatici (server, PC, applicativi)
+            description="Censisce tutti gli asset informatici (server, servizi cloud, database)
     e operativi (PLC, SCADA, HMI). La criticità determina la priorità
     nelle valutazioni di rischio e l'obbligo di BCP."
             steps={[
-              "Crea l'asset indicando tipo IT o OT",
-              "Assegna criticità 1-5 (vedi tabella nel form)",
-              "Collega ai processi critici della BIA per calcolare l'ALE",
-              "Registra change esterni con il bottone 'Registra change'",
-              "Il sistema segnala automaticamente gli asset da rivalutare",
+              "Classifica l'asset come IT (inclusi servizi cloud) o OT",
+              "Per gli asset IT imposta il tipo di deployment (on-prem, IaaS, PaaS, SaaS) e, se cloud, provider e nome servizio",
+              "Assegna criticità 1-5 (vedi tabella nel form) e collega i processi critici della BIA",
+              "Usa 'Registra change' per collegare i ticket di change management e marcare gli asset da rivalutare",
+              "Rivedi periodicamente l'elenco per aggiungere nuovi servizi cloud critici o modifiche architetturali",
             ]}
             connections={[
               { module: "M05 BIA", relation: "Asset collegato a processo critico" },
-              { module: "M06 Risk", relation: "Asset oggetto di risk assessment" },
-              { module: "M16 BCP", relation: "Asset critico (≥4) richiede piano BCP" },
+              { module: "M06 Risk", relation: "Asset (on-prem o cloud) oggetto di risk assessment e weighted score" },
+              { module: "M16 BCP", relation: "Asset critico (≥4) richiede piano BCP e test periodici" },
             ]}
             configNeeded={[
               "Creare prima i Plant in M01",
               "Creare i processi BIA (M05) prima di collegare gli asset",
+              "Mantenere allineato l'elenco dei servizi SaaS/PaaS/IaaS critici con il catalogo IT",
             ]}
           />
         </h2>

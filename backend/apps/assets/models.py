@@ -100,6 +100,32 @@ class AssetIT(Asset):
     eol_date = models.DateField(null=True, blank=True)
     cve_score_max = models.FloatField(null=True, blank=True)
     internet_exposed = models.BooleanField(default=False)
+    deployment_type = models.CharField(
+        max_length=10,
+        choices=[
+            ("on_prem", "On-premise"),
+            ("iaas", "IaaS"),
+            ("paas", "PaaS"),
+            ("saas", "SaaS"),
+        ],
+        default="on_prem",
+        help_text="Modalità di erogazione: on-premise, IaaS, PaaS o SaaS.",
+    )
+    provider = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Cloud/service provider es. Microsoft, AWS, SAP.",
+    )
+    service_name = models.CharField(
+        max_length=150,
+        blank=True,
+        help_text="Nome del servizio es. Microsoft 365, Salesforce, SAP S/4HANA Cloud.",
+    )
+    data_classification = models.CharField(
+        max_length=20,
+        blank=True,
+        help_text="Classificazione dati principale (es. internal, confidential, restricted).",
+    )
 
     @property
     def is_eol(self):

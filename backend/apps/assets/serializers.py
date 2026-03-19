@@ -43,6 +43,10 @@ class AssetITSerializer(serializers.ModelSerializer):
             "eol_date",
             "cve_score_max",
             "internet_exposed",
+            "deployment_type",
+            "provider",
+            "service_name",
+            "data_classification",
             "created_at",
             "updated_at",
         ]
