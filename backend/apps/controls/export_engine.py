@@ -6,8 +6,10 @@ dallo stesso dato sorgente: ControlInstance.
 Tutti i formati restituiscono HTML stampabile/scaricabile.
 """
 
+import base64
 import datetime
 
+from django.core.files.storage import default_storage
 from django.utils import timezone
 
 
@@ -79,17 +81,42 @@ def generate_export(framework_code: str, plant_id,
         )
 
 
+def _get_logo_src_for_plant(plant) -> str | None:
+    """
+    Restituisce un data URI del logo del plant, se configurato e presente nello storage.
+    Usa default_storage partendo da logo_url (tipicamente /media/...).
+    """
+    if plant is None or not getattr(plant, "logo_url", None):
+        return None
+    logo_url = plant.logo_url.strip()
+    if not logo_url:
+        return None
+
+    # Deriva lo storage_path da logo_url (es. /media/plant-logos/...)
+    storage_path = logo_url
+    if "/media/" in logo_url:
+        storage_path = logo_url.split("/media/", 1)[1]
+    storage_path = storage_path.lstrip("/")
+    if not storage_path or not default_storage.exists(storage_path):
+        return None
+
+    with default_storage.open(storage_path, "rb") as f:
+        data = f.read()
+    b64 = base64.b64encode(data).decode("ascii")
+    return f"data:image/png;base64,{b64}"
+
+
 def _base_html(title: str, content: str, plant_name: str,
-               fw_name: str, user_name: str, logo_url: str | None = None) -> str:
+               fw_name: str, user_name: str, logo_src: str | None = None) -> str:
     """Template HTML base condiviso da tutti i formati."""
     from django.utils import translation
     lang = translation.get_language() or "it"
     now = timezone.now().strftime("%d/%m/%Y %H:%M")
     logo_img = ""
-    if logo_url:
+    if logo_src:
         logo_img = (
             f'<div style="text-align:right;margin-bottom:10px;">'
-            f'<img src="{logo_url}" alt="Logo" '
+            f'<img src="{logo_src}" alt="Logo" '
             f'style="max-height:40px;max-width:160px;object-fit:contain;"/>'
             f"</div>"
         )
@@ -306,12 +333,10 @@ def _generate_soa(fw, plant, instances, user) -> str:
     change_section = _generate_soa_change_section(plant)
     content += change_section
 
-    logo_url = None
-    if plant is not None and plant.logo_url:
-        logo_url = f"/api/v1/plants/plants/{plant.id}/logo/"
+    logo_src = _get_logo_src_for_plant(plant)
     return _base_html(
         f"SOA — {plant_name}",
-        content, plant_name, fw.name, user_name, logo_url
+        content, plant_name, fw.name, user_name, logo_src
     )
 
 
@@ -476,12 +501,10 @@ def _generate_vda_isa(fw, plant, instances, user) -> str:
   Data: __________________
 </div>"""
 
-    logo_url = None
-    if plant is not None and plant.logo_url:
-        logo_url = f"/api/v1/plants/plants/{plant.id}/logo/"
+    logo_src = _get_logo_src_for_plant(plant)
     return _base_html(
         f"VDA ISA — {plant_name}",
-        content, plant_name, fw.name, user_name, logo_url
+        content, plant_name, fw.name, user_name, logo_src
     )
 
 
@@ -607,10 +630,8 @@ def _generate_compliance_matrix(fw, plant, instances, user) -> str:
   Data: __________________
 </div>"""
 
-    logo_url = None
-    if plant is not None and plant.logo_url:
-        logo_url = f"/api/v1/plants/plants/{plant.id}/logo/"
+    logo_src = _get_logo_src_for_plant(plant)
     return _base_html(
         f"NIS2 Compliance Matrix — {plant_name}",
-        content, plant_name, fw.name, user_name, logo_url
+        content, plant_name, fw.name, user_name, logo_src
     )
