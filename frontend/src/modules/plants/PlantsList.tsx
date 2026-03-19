@@ -20,6 +20,7 @@ function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void 
     logo_url: plant.logo_url ?? "",
   });
   const [error, setError] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   const mutation = useMutation({
     mutationFn: (data: Partial<Plant>) => plantsApi.update(plant.id, data),
@@ -36,6 +37,26 @@ function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void 
   function set(field: string, value: unknown) {
     setForm(f => ({ ...f, [field]: value }));
   }
+
+  const uploadMutation = useMutation({
+    mutationFn: (file: File) => plantsApi.uploadLogo(plant.id, file),
+    onMutate: () => {
+      setUploading(true);
+      setError("");
+    },
+    onSuccess: (updated) => {
+      setForm(f => ({ ...f, logo_url: updated.logo_url ?? "" }));
+      qc.invalidateQueries({ queryKey: ["plants"] });
+    },
+    onError: (e: any) =>
+      setError(
+        e?.response?.data?.error ||
+        e?.response?.data?.detail ||
+        JSON.stringify(e?.response?.data) ||
+        t("common.error"),
+      ),
+    onSettled: () => setUploading(false),
+  });
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -91,6 +112,29 @@ function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void 
             <p className="mt-1 text-xs text-gray-500">
               URL del logo del sito (usato in report/export). Consigliato PNG/SVG su sfondo trasparente.
             </p>
+            <div className="mt-2 flex items-center gap-3">
+              <label className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white cursor-pointer hover:bg-gray-50">
+                <span>{uploading ? t("common.uploading") : t("plants.fields.logo_upload_label") ?? "Carica file"}</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      uploadMutation.mutate(file);
+                    }
+                  }}
+                />
+              </label>
+              {form.logo_url && (
+                <img
+                  src={form.logo_url}
+                  alt="Logo preview"
+                  className="h-8 w-auto rounded border border-gray-200 bg-white object-contain"
+                />
+              )}
+            </div>
           </div>
         </div>
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}

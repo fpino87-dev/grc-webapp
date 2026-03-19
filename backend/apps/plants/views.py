@@ -1,8 +1,11 @@
 from django.utils import timezone
-from rest_framework import viewsets
+from django.core.files.storage import default_storage
+from rest_framework import viewsets, status, parsers
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.utils.translation import gettext as _
 
+from core.audit import log_action
 from .models import BusinessUnit, Plant, PlantFramework
 from .serializers import BusinessUnitSerializer, PlantFrameworkSerializer, PlantSerializer
 
@@ -40,6 +43,40 @@ class PlantViewSet(viewsets.ModelViewSet):
             data = dict(data)
             data["_warning"] = f"Questo sito ha {open_incidents} incidente/i aperti."
         return Response(data)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="upload-logo",
+        parser_classes=[parsers.MultiPartParser],
+    )
+    def upload_logo(self, request, pk=None):
+        """
+        Carica un file logo per il Plant usando lo stesso storage centralizzato dei documenti.
+        Il file viene salvato e l'URL risultante viene scritto in Plant.logo_url.
+        """
+        plant = self.get_object()
+        uploaded_file = request.FILES.get("file")
+        if not uploaded_file:
+            return Response({"error": _("Nessun file fornito.")}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Salva nel default_storage sotto una cartella dedicata ai plant
+        path = default_storage.save(f"plant-logos/{plant.id}/{uploaded_file.name}", uploaded_file)
+        logo_url = default_storage.url(path)
+
+        plant.logo_url = logo_url
+        plant.save(update_fields=["logo_url", "updated_at"])
+
+        log_action(
+            user=request.user,
+            action_code="plants.logo.upload",
+            level="L2",
+            entity=plant,
+            payload={"logo_url": plant.logo_url},
+        )
+
+        serializer = self.get_serializer(plant)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class PlantFrameworkViewSet(viewsets.ModelViewSet):

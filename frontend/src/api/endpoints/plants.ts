@@ -33,6 +33,13 @@ export const plantsApi = {
   get: (id: string) => apiClient.get<Plant>(`/plants/plants/${id}/`).then((r) => r.data),
   create: (data: Partial<Plant>) => apiClient.post<Plant>("/plants/plants/", data).then((r) => r.data),
   update: (id: string, data: Partial<Plant>) => apiClient.patch<Plant>(`/plants/plants/${id}/`, data).then((r) => r.data),
+  uploadLogo: (id: string, file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return apiClient.post<Plant>(`/plants/plants/${id}/upload-logo/`, form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }).then((r) => r.data);
+  },
   businessUnits: () =>
     apiClient.get<{ results: BusinessUnit[] }>("/plants/business-units/").then((r) => r.data.results),
   createBusinessUnit: (data: Partial<BusinessUnit>) =>
