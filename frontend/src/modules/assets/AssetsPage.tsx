@@ -426,6 +426,212 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
   );
 }
 
+function EditAssetModalIT({ asset, onClose }: { asset: AssetIT; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [form, setForm] = useState<Partial<AssetIT>>({
+    name: asset.name,
+    criticality: asset.criticality,
+    deployment_type: asset.deployment_type,
+    provider: asset.provider ?? "",
+    service_name: asset.service_name ?? "",
+    fqdn: asset.fqdn,
+    os: asset.os,
+    eol_date: asset.eol_date ?? "",
+    data_classification: asset.data_classification ?? "",
+    internet_exposed: asset.internet_exposed,
+    processes: asset.processes ?? [],
+  });
+  const [error, setError] = useState("");
+
+  const { data: processesData } = useQuery({
+    queryKey: ["critical-processes"],
+    queryFn: () => biaApi.list({ status: "approvato" }),
+    retry: false,
+  });
+  const processes: CriticalProcess[] = processesData?.results ?? [];
+
+  const mutation = useMutation({
+    mutationFn: (payload: Partial<AssetIT>) => assetsApi.updateIT(asset.id, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["assets-it"] });
+      onClose();
+    },
+    onError: (e: any) => setError(e?.response?.data?.detail || "Errore durante il salvataggio"),
+  });
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
+    const v =
+      e.target.type === "checkbox"
+        ? (e.target as HTMLInputElement).checked
+        : e.target.type === "number"
+        ? Number(e.target.value)
+        : e.target.value;
+    setForm((prev) => ({ ...prev, [e.target.name]: v }));
+  }
+
+  function handleProcessesChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const selected = Array.from(e.target.selectedOptions).map((o) => o.value);
+    setForm((prev) => ({ ...prev, processes: selected }));
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+        <h3 className="text-lg font-semibold mb-4">Modifica asset IT</h3>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+            <input
+              name="name"
+              value={form.name ?? ""}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Processi BIA collegati</label>
+            <select
+              multiple
+              name="processes"
+              value={(form.processes as string[]) ?? []}
+              onChange={handleProcessesChange}
+              className="w-full border rounded px-3 py-2 text-sm h-28"
+            >
+              {processes.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Criticità (1-5)</label>
+            <select
+              name="criticality"
+              value={form.criticality ?? 3}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2 text-sm"
+            >
+              {[1, 2, 3, 4, 5].map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tipo deployment *</label>
+            <select
+              name="deployment_type"
+              value={form.deployment_type ?? "on_prem"}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2 text-sm"
+            >
+              <option value="on_prem">On-premise</option>
+              <option value="iaas">IaaS (VM, network in cloud)</option>
+              <option value="paas">PaaS (DB, storage, funzioni)</option>
+              <option value="saas">SaaS (applicazione cloud)</option>
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Provider</label>
+              <input
+                name="provider"
+                value={form.provider ?? ""}
+                onChange={handleChange}
+                className="w-full border rounded px-3 py-2 text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nome servizio</label>
+              <input
+                name="service_name"
+                value={form.service_name ?? ""}
+                onChange={handleChange}
+                className="w-full border rounded px-3 py-2 text-sm"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">FQDN</label>
+            <input
+              name="fqdn"
+              value={form.fqdn ?? ""}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2 text-sm"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Sistema operativo</label>
+              <input
+                name="os"
+                value={form.os ?? ""}
+                onChange={handleChange}
+                className="w-full border rounded px-3 py-2 text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Data EOL</label>
+              <input
+                type="date"
+                name="eol_date"
+                value={form.eol_date ?? ""}
+                onChange={handleChange}
+                className="w-full border rounded px-3 py-2 text-sm"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Classificazione dati</label>
+              <select
+                name="data_classification"
+                value={form.data_classification ?? ""}
+                onChange={handleChange}
+                className="w-full border rounded px-3 py-2 text-sm"
+              >
+                <option value="">— seleziona —</option>
+                <option value="public">Public</option>
+                <option value="internal">Internal</option>
+                <option value="confidential">Confidential</option>
+                <option value="restricted">Restricted</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-2 mt-6">
+              <input
+                type="checkbox"
+                id="edit_internet_exposed"
+                name="internet_exposed"
+                checked={!!form.internet_exposed}
+                onChange={handleChange}
+                className="rounded"
+              />
+              <label htmlFor="edit_internet_exposed" className="text-sm text-gray-700">
+                Esposto su Internet
+              </label>
+            </div>
+          </div>
+        </div>
+        {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
+        <div className="flex justify-end gap-2 mt-4">
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">
+            Annulla
+          </button>
+          <button
+            onClick={() => mutation.mutate(form)}
+            disabled={mutation.isPending || !form.name}
+            className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
+          >
+            {mutation.isPending ? "Salvataggio..." : "Salva modifiche"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ITTab({ search }: { search: string }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editAsset, setEditAsset] = useState<AssetIT | null>(null);
@@ -452,6 +658,7 @@ function ITTab({ search }: { search: string }) {
   }
 
   return (
+    <>
     <table className="w-full text-sm">
       <thead className="bg-gray-50 border-b border-gray-200">
         <tr>
@@ -528,6 +735,8 @@ function ITTab({ search }: { search: string }) {
         )}
       </tbody>
     </table>
+    {editAsset && <EditAssetModalIT asset={editAsset} onClose={() => setEditAsset(null)} />}
+    </>
   );
 }
 

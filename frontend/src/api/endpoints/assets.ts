@@ -61,6 +61,10 @@ export const assetsApi = {
     apiClient.post<AssetIT>("/assets/it/", data).then(r => r.data),
   createOT: (data: Partial<AssetOT>) =>
     apiClient.post<AssetOT>("/assets/ot/", data).then(r => r.data),
+  updateIT: (id: string, data: Partial<AssetIT>) =>
+    apiClient.patch<AssetIT>(`/assets/it/${id}/`, data).then(r => r.data),
+  updateOT: (id: string, data: Partial<AssetOT>) =>
+    apiClient.patch<AssetOT>(`/assets/ot/${id}/`, data).then(r => r.data),
   registerChange: (id: string, type: "IT" | "OT", data: { change_ref: string; change_desc?: string; portal_url?: string }) =>
     apiClient.post<RegisterChangeResult>(`/assets/${type === "IT" ? "it" : "ot"}/${id}/register-change/`, data).then(r => r.data),
   clearRevaluation: (id: string, type: "IT" | "OT", notes?: string) =>
