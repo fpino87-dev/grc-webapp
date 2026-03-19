@@ -55,6 +55,10 @@ class Plant(BaseModel):
     )
     address = models.TextField(blank=True)
     timezone = models.CharField(max_length=50, default="Europe/Rome")
+    logo_url = models.URLField(
+        blank=True,
+        help_text="URL del logo per questo sito (usato in report/export).",
+    )
 
     class Meta:
         ordering = ["code"]

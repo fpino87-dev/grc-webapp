@@ -8,6 +8,7 @@ export interface Plant {
   nis2_scope: "essenziale" | "importante" | "non_soggetto";
   status: "attivo" | "in_dismissione" | "chiuso";
   has_ot: boolean;
+  logo_url?: string | null;
 }
 
 export interface BusinessUnit {

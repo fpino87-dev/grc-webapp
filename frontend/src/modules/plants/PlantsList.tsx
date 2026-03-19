@@ -17,6 +17,7 @@ function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void 
     nis2_scope: plant.nis2_scope,
     status: plant.status,
     has_ot: plant.has_ot,
+    logo_url: plant.logo_url ?? "",
   });
   const [error, setError] = useState("");
 
@@ -79,6 +80,18 @@ function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void 
               onChange={e => set("has_ot", e.target.checked)} className="rounded" />
             <label htmlFor="edit_has_ot" className="text-sm text-gray-700">{t("plants.fields.has_ot")}</label>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Logo URL</label>
+            <input
+              value={form.logo_url ?? ""}
+              onChange={e => set("logo_url", e.target.value)}
+              className="w-full border rounded px-3 py-2 text-sm"
+              placeholder="https://.../logo.png"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              URL del logo del sito (usato in report/export). Consigliato PNG/SVG su sfondo trasparente.
+            </p>
+          </div>
         </div>
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
@@ -97,8 +110,13 @@ function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void 
 }
 
 const EMPTY: Partial<Plant> = {
-  code: "", name: "", country: "IT",
-  nis2_scope: "non_soggetto", status: "attivo", has_ot: false,
+  code: "",
+  name: "",
+  country: "IT",
+  nis2_scope: "non_soggetto",
+  status: "attivo",
+  has_ot: false,
+  logo_url: "",
 };
 
 function PlantModal({ onClose }: { onClose: () => void }) {
@@ -168,6 +186,15 @@ function PlantModal({ onClose }: { onClose: () => void }) {
             <input type="checkbox" id="has_ot" checked={!!form.has_ot}
               onChange={e => set("has_ot", e.target.checked)} className="rounded" />
             <label htmlFor="has_ot" className="text-sm text-gray-700">{t("plants.fields.has_ot")}</label>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Logo URL</label>
+            <input
+              value={form.logo_url ?? ""}
+              onChange={e => set("logo_url", e.target.value)}
+              className="w-full border rounded px-3 py-2 text-sm"
+              placeholder="https://.../logo.png"
+            />
           </div>
         </div>
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
@@ -476,6 +503,7 @@ export function PlantsList() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
+                <th className="text-left px-4 py-3 font-medium text-gray-600"></th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("plants.table.code")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("plants.table.name")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("plants.table.country")}</th>
@@ -488,6 +516,17 @@ export function PlantsList() {
             <tbody className="divide-y divide-gray-100">
               {plants.map((p) => (
                 <tr key={p.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3">
+                    {p.logo_url ? (
+                      <img
+                        src={p.logo_url}
+                        alt={p.name}
+                        className="h-6 w-auto object-contain rounded-sm border border-gray-200 bg-white"
+                      />
+                    ) : (
+                      <span className="text-xs text-gray-300">—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 font-mono text-xs font-bold text-gray-700">{p.code}</td>
                   <td className="px-4 py-3 font-medium text-gray-800">{p.name}</td>
                   <td className="px-4 py-3 text-gray-500 uppercase text-xs">{p.country}</td>
