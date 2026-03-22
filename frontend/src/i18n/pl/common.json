@@ -23,21 +23,21 @@
     "non_soggetto": "Poza zakresem",
     "importante": "Ważny",
     "essenziale": "Kluczowy",
-    "bozza": "Draft",
-    "revisione": "In review",
-    "approvazione": "In approval",
-    "approvato": "Approved",
-    "respinto": "Rejected",
-    "completato": "Completed",
-    "annullato": "Cancelled",
-    "bassa": "Low",
-    "media": "Medium",
-    "alta": "High",
-    "critica": "Critical",
-    "si": "Yes",
+    "bozza": "Szkic",
+    "revisione": "W przeglądzie",
+    "approvazione": "W zatwierdzaniu",
+    "approvato": "Zatwierdzone",
+    "respinto": "Odrzucone",
+    "completato": "Ukończone",
+    "annullato": "Anulowane",
+    "bassa": "Niski",
+    "media": "Średni",
+    "alta": "Wysoki",
+    "critica": "Krytyczny",
+    "si": "Tak",
     "no": "No",
-    "da_valutare": "To be assessed",
-    "in_analisi": "In analysis"
+    "da_valutare": "Do oceny",
+    "in_analisi": "W analizie"
   },
   "actions": {
     "save": "Zapisz",
@@ -49,7 +49,8 @@
     "delete": "Usuń",
     "refresh": "Odśwież",
     "export": "Eksportuj",
-    "upload": "Prześlij"
+    "upload": "Prześlij",
+    "back": "Wstecz"
   },
   "common": {
     "loading": "Ładowanie...",
@@ -64,7 +65,13 @@
     "yes": "Tak",
     "no": "Nie",
     "optional": "— opcjonalne —",
-    "select": "— wybierz —"
+    "select": "— wybierz —",
+    "freq_weekly": "Tygodniowy",
+    "freq_monthly": "Miesięczny",
+    "freq_quarterly": "Kwartalny",
+    "freq_biannual": "Półroczny",
+    "freq_annual": "Roczny",
+    "finish": "Zakończ"
   },
   "help": {
     "open_title": "Pomoc dla tego modułu",
@@ -122,419 +129,502 @@
       }
     },
     "bia": {
-      "scale_title": "Criticality scale",
+      "scale_title": "Skala krytyczności",
       "columns": {
-        "level": "Level",
-        "max_downtime": "Max downtime",
-        "example": "Example"
+        "level": "Poziom",
+        "max_downtime": "Maks. przestój",
+        "example": "Przykład"
       },
       "levels": {
         "1": {
-          "label": "Negligible",
-          "downtime": "> 7 days",
-          "example": "Historical document archive"
+          "label": "Pomijalny",
+          "downtime": "> 7 dni",
+          "example": "Historyczne archiwum dokumentów"
         },
         "2": {
-          "label": "Low",
-          "downtime": "3–7 days",
-          "example": "Internal reporting"
+          "label": "Niski",
+          "downtime": "3–7 dni",
+          "example": "Raportowanie wewnętrzne"
         },
         "3": {
-          "label": "Medium",
-          "downtime": "24–72 hours",
-          "example": "Secondary ERP, supplier management"
+          "label": "Średni",
+          "downtime": "24–72 godziny",
+          "example": "Pomocniczy ERP, zarządzanie dostawcami"
         },
         "4": {
-          "label": "High",
-          "downtime": "4–24 hours",
-          "example": "Production line, quality, logistics"
+          "label": "Wysoki",
+          "downtime": "4–24 godziny",
+          "example": "Linia produkcyjna, jakość, logistyka"
         },
         "5": {
-          "label": "Critical",
-          "downtime": "< 4 hours",
-          "example": "Main production line, safety systems"
+          "label": "Krytyczny",
+          "downtime": "< 4 godziny",
+          "example": "Główny ERP, MES, SCADA, AD/LDAP"
         }
       },
       "questions": {
         "economic": {
-          "label": "Economic impact of downtime",
-          "low": "Negligible (<€1k/h)",
-          "high": "Devastating (>€50k/h)"
+          "label": "Ekonomiczny wpływ przestoju",
+          "low": "Pomijalny (<1k€/h)",
+          "high": "Druzgocący (>50k€/h)"
         },
         "customers": {
-          "label": "Impact on customers/contracts",
-          "low": "None",
-          "high": "Contract loss, penalties, delivery stop"
+          "label": "Wpływ na klientów/umowy",
+          "low": "Żaden",
+          "high": "Utrata kontraktów, kary, wstrzymanie dostaw"
         },
         "regulatory": {
-          "label": "Regulatory/reputational impact",
-          "low": "None",
-          "high": "Authority notification, severe reputational damage"
+          "label": "Wpływ regulacyjny/reputacyjny",
+          "low": "Żaden",
+          "high": "Powiadomienie organu, poważne uszkodzenie reputacji"
         }
       },
-      "guided_estimate_title": "Guided criticality estimate",
-      "suggested_title": "Suggested criticality",
-      "suggested_downtime": "Max tolerated downtime: {{downtime}}"
+      "guided_estimate_title": "Kierowane szacowanie krytyczności",
+      "suggested_title": "Sugerowana krytyczność",
+      "suggested_downtime": "Maks. tolerowany przestój: {{downtime}}"
     },
     "risk": {
-      "matrix_title": "P×I matrix (Probability × Impact)",
+      "matrix_title": "Macierz P×I (Prawdopodobieństwo × Wpływ)",
       "zones": {
         "green": {
-          "label": "Green",
+          "label": "Zielony",
           "range": "Score 1–7",
-          "desc": "Acceptable risk — review annually"
+          "desc": "Ryzyko akceptowalne — przegląd roczny"
         },
         "yellow": {
-          "label": "Yellow",
+          "label": "Żółty",
           "range": "Score 8–14",
-          "desc": "Moderate risk — mitigation plan within 90 days"
+          "desc": "Ryzyko umiarkowane — plan mitygacji w 90 dni"
         },
         "red": {
-          "label": "Red",
+          "label": "Czerwony",
           "range": "Score 15–25",
-          "desc": "Critical risk — immediate action, auto-generated task, mandatory PDCA"
+          "desc": "Ryzyko krytyczne — natychmiastowe działanie, zadanie automatyczne, obowiązkowy PDCA"
         }
       },
-      "it_dimensions_title": "IT asset dimensions",
+      "it_dimensions_title": "Wymiary zasobu IT",
       "it_dimensions": {
         "exposure": {
-          "label": "Exposure",
-          "desc": "How reachable it is from outside or from untrusted networks"
+          "label": "Ekspozycja",
+          "desc": "Dostępność z zewnątrz lub niezaufanych sieci"
         },
         "cve": {
-          "label": "CVE score",
-          "desc": "Known unpatched vulnerabilities — source: NVD/CVE database"
+          "label": "Wynik CVE",
+          "desc": "Znane niezałatane luki — źródło: baza NVD/CVE"
         },
         "threat": {
-          "label": "Threat",
-          "desc": "Attack likelihood based on sector threat intelligence"
+          "label": "Zagrożenie",
+          "desc": "Prawdopodobieństwo ataku na podstawie threat intelligence sektora"
         },
         "controls_gap": {
-          "label": "Controls gap",
-          "desc": "How many linked ISO27001/TISAX controls are in Gap status"
+          "label": "Luka w kontrolach",
+          "desc": "Liczba powiązanych kontroli ISO27001/TISAX w statusie Luka"
         }
       },
-      "ot_dimensions_title": "OT asset dimensions",
+      "ot_dimensions_title": "Wymiary zasobu OT",
       "ot_dimensions": {
         "purdue": {
-          "label": "Purdue connectivity",
-          "desc": "Isolation level in the Purdue hierarchy — L0 is most critical"
+          "label": "Łączność Purdue",
+          "desc": "Poziom izolacji w hierarchii Purdue — L0 najbardziej krytyczny"
         },
         "patchability": {
           "label": "Patchability",
-          "desc": "Technical ability to update firmware/OS"
+          "desc": "Techniczna możliwość aktualizacji firmware/OS"
         },
         "physical_impact": {
-          "label": "Physical impact",
-          "desc": "Physical consequences of an attack: line stop, damage, safety"
+          "label": "Wpływ fizyczny",
+          "desc": "Fizyczne konsekwencje ataku: zatrzymanie linii, uszkodzenia, bezpieczeństwo"
         },
         "segmentation": {
-          "label": "Segmentation",
-          "desc": "Isolation from the IT network and the internet"
+          "label": "Segmentacja",
+          "desc": "Izolacja od sieci IT i internetu"
         },
         "detection": {
-          "label": "Detectability",
-          "desc": "Ability to detect a compromise in real time"
+          "label": "Wykrywalność",
+          "desc": "Zdolność do wykrycia kompromitacji w czasie rzeczywistym"
+        }
+      },
+      "scale_title": "Matryca ryzyka (5×5)",
+      "columns": {
+        "likelihood": "Prawdopodobieństwo",
+        "impact": "Wpływ",
+        "score": "Wynik",
+        "level": "Poziom",
+        "examples": "Przykłady"
+      },
+      "levels": {
+        "1": {
+          "label": "Bardzo niski",
+          "likelihood": "Praktycznie niemożliwe",
+          "impact": "Minimalne zakłócenie, < 1 godz."
+        },
+        "2": {
+          "label": "Niski",
+          "likelihood": "Mało prawdopodobne, 1–2 razy w roku",
+          "impact": "Ograniczony wpływ, < 1 dzień"
+        },
+        "3": {
+          "label": "Średni",
+          "likelihood": "Możliwe, co miesiąc",
+          "impact": "Znaczące zakłócenie, < 1 tydzień"
+        },
+        "4": {
+          "label": "Wysoki",
+          "likelihood": "Prawdopodobne, co tydzień",
+          "impact": "Poważny wpływ, < 1 miesiąc"
+        },
+        "5": {
+          "label": "Krytyczny",
+          "likelihood": "Bardzo prawdopodobne, codziennie",
+          "impact": "Katastrofalny wpływ, > 1 miesiąc"
         }
       }
     },
     "risk_module": {
-      "title": "Risk Assessment IT/OT — M06",
-      "description": "Inherent = probability×impact BEFORE controls; Residual = probability×impact AFTER controls and BCP; Weighted = residual score weighted by BIA criticality to prioritise risks with the highest business impact. Risk Appetite policies define the thresholds (max acceptable score, maximum number of red risks, unacceptable score) formally approved by management.",
+      "title": "Ocena ryzyka IT/OT — M06",
+      "description": "Nieodłączne = prawdopodobieństwo×wpływ PRZED kontrolami; Rezydualne = prawdopodobieństwo×wpływ PO kontrolach i BCP; Ważone = wynik rezydualny ważony krytycznością BIA dla priorytetyzacji ryzyk o największym wpływie biznesowym. Polityki apetytu na ryzyko definiują progi formalnie zatwierdzone przez zarząd.",
       "steps": {
-        "1": "Create a new assessment linking the asset and BIA process (where available)",
-        "2": "Fill in the INHERENT risk by entering probability and impact before controls",
-        "3": "Fill in the RESIDUAL risk by entering probability and impact after controls and BCP measures",
-        "4": "Complete IT/OT dimensions and click 'Complete assessment' to calculate score, weighted score and ALE",
-        "5": "Compare score and weighted score with Risk Appetite thresholds to decide mitigation, transfer or acceptance",
-        "6": "Formally accept residual risks (when allowed by policy), providing a note and review due date"
+        "1": "Utwórz nową ocenę łącząc zasób i proces BIA (jeśli dostępny)",
+        "2": "Wypełnij ryzyko NIEODŁĄCZNE podając prawdopodobieństwo i wpływ przed kontrolami",
+        "3": "Wypełnij ryzyko REZYDUALNE podając prawdopodobieństwo i wpływ po kontrolach i BCP",
+        "4": "Uzupełnij wymiary IT/OT i kliknij 'Zakończ ocenę' aby wyliczyć wynik, wynik ważony i ALE",
+        "5": "Porównaj wynik i wynik ważony z progami apetytu na ryzyko, aby zdecydować o mitygacji, transferze lub akceptacji",
+        "6": "Formalnie zaakceptuj ryzyka rezydualne (gdy polityka pozwala), podając notatkę i datę przeglądu"
       },
       "connections": {
-        "assets": "Assets being assessed",
-        "bia": "Weighted score and ALE use BIA criticality and cost data",
-        "governance": "Risk Appetite defines the thresholds approved by management",
-        "pdca": "Risks above threshold can open automatic PDCA cycles",
-        "tasks": "Mitigation tasks generated for risks beyond appetite limits"
+        "assets": "Zasoby objęte oceną",
+        "bia": "Wynik ważony i ALE używają krytyczności BIA i danych kosztowych",
+        "governance": "Apetyt na ryzyko definiuje progi zatwierdzone przez zarząd",
+        "pdca": "Ryzyka powyżej progu mogą otwierać automatyczne cykle PDCA",
+        "tasks": "Zadania mitygacji generowane dla ryzyk przekraczających limity apetytu"
       },
       "config_needed": {
-        "1": "Configure thresholds in Governance → Risk Appetite",
-        "2": "Link BIA processes for automatic ALE and weighted score calculation"
+        "1": "Skonfiguruj progi w Governance → Apetyt na ryzyko",
+        "2": "Połącz procesy BIA dla automatycznego obliczania ALE i wyniku ważonego"
+      }
+    },
+    "controls": {
+      "scale_title": "Przewodnik oceny kontroli",
+      "columns": {
+        "status": "Status",
+        "meaning": "Znaczenie",
+        "requirements": "Minimalne wymagania"
+      },
+      "statuses": {
+        "compliant": "Zgodny",
+        "parziale": "Częściowy",
+        "gap": "Luka",
+        "na": "N/D",
+        "non_valutato": "Nie ocenione"
+      },
+      "meanings": {
+        "compliant": "Kontrola w pełni wdrożona z dowodami",
+        "parziale": "Częściowa implementacja lub niewystarczające dowody",
+        "gap": "Brak kontroli lub nieskuteczna",
+        "na": "Nie dotyczy z formalnym uzasadnieniem",
+        "non_valutato": "Jeszcze nie ocenione"
+      },
+      "requirements": {
+        "compliant": "Ważny dowód + data ostatniej weryfikacji",
+        "parziale": "Częściowy dowód + plan naprawczy (zadanie M08)",
+        "gap": "Brak wymagań — zadanie naprawcze generowane automatycznie",
+        "na": "Uzasadnienie min 20 znaków. TISAX L3: podwójne zatwierdzenie",
+        "non_valutato": "Obniża wynik zgodności zakładu"
       }
     }
   },
   "ai": {
-    "suggestion_label": "AI Suggestion",
-    "accept": "Use this",
-    "edit_and_use": "Edit and use",
-    "save_edits": "Save edits",
-    "ignore": "Ignore",
+    "suggestion_label": "Sugestia AI",
+    "accept": "Użyj tego",
+    "edit_and_use": "Edytuj i użyj",
+    "save_edits": "Zapisz zmiany",
+    "ignore": "Ignoruj",
     "ai_badge": "AI"
   },
   "controls": {
-    "title": "Compliance — Controls",
-    "empty": "No controls found",
+    "title": "Zgodność — Kontrole",
+    "empty": "Brak kontroli",
     "framework_filter": {
-      "all": "All frameworks"
+      "all": "Wszystkie ramy"
     },
     "export": {
-      "soa": "Download SOA",
-      "vda_isa": "Download VDA ISA",
-      "nis2_matrix": "Download NIS2 Matrix"
+      "soa": "Pobierz SOA",
+      "vda_isa": "Pobierz VDA ISA",
+      "nis2_matrix": "Pobierz Macierz NIS2"
     },
     "drawer": {
-      "title": "Control management",
+      "title": "Zarządzanie kontrolą",
       "tabs": {
-        "about": "About",
-        "evaluation": "Evaluation",
-        "documents_evidence": "Documents & Evidence",
-        "history": "History"
+        "about": "O kontroli",
+        "evaluation": "Ocena",
+        "documents_evidence": "Dokumenty i Dowody",
+        "history": "Historia"
       },
       "about": {
-        "no_description": "No description available for this language.",
-        "guidance": "Implementation guidance",
-        "evidence_examples": "Examples of acceptable evidence",
-        "mappings": "Cross-framework mappings"
+        "no_description": "Brak opisu dla tego języka.",
+        "guidance": "Wskazówki implementacji",
+        "evidence_examples": "Przykłady akceptowalnych dowodów",
+        "mappings": "Mapowania między ramami"
       },
       "expiry": {
-        "none": "No expiry",
-        "expired_days_ago": "Expired {{days}}d ago",
-        "expires_in_days": "Expires in {{days}}d",
-        "valid_until": "Valid until {{date}}"
+        "none": "Brak daty wygaśnięcia",
+        "expired_days_ago": "Wygasło {{days}}d temu",
+        "expires_in_days": "Wygasa za {{days}}d",
+        "valid_until": "Ważne do {{date}}"
       },
       "evaluation": {
         "revaluation": {
-          "title": "Re-evaluation required",
-          "body": "A recorded change{{hasSince, select, true { since {{since}}} other {}}} may have impacted this control. Please review and update the evaluation."
+          "title": "Wymagana ponowna ocena",
+          "body": "Zarejestrowana zmiana{{hasSince, select, true { od {{since}}} other {}}} mogła wpłynąć na tę kontrolę. Sprawdź i zaktualizuj ocenę."
         },
         "requirements": {
-          "none": "No documentary requirements defined for this control.",
-          "not_satisfied": "Requirements not satisfied",
-          "missing_document": "Missing document",
-          "missing_evidence": "Missing evidence",
-          "expired_evidence": "Expired evidence",
-          "warning": "Warning",
-          "satisfied": "All requirements satisfied"
+          "none": "Brak wymagań dokumentacyjnych dla tej kontroli.",
+          "not_satisfied": "Wymagania niespełnione",
+          "missing_document": "Brakujący dokument",
+          "missing_evidence": "Brakujący dowód",
+          "expired_evidence": "Wygasły dowód",
+          "warning": "Ostrzeżenie",
+          "satisfied": "Wszystkie wymagania spełnione"
         },
-        "official_status": "Official status",
-        "system_suggestion": "System suggestion",
-        "apply_suggestion": "Apply suggestion ({{status}})",
-        "apply_suggestion_title": "Apply suggestion",
-        "note_optional": "Note (optional)",
-        "applying": "Applying...",
+        "official_status": "Oficjalny status",
+        "system_suggestion": "Sugestia systemu",
+        "apply_suggestion": "Zastosuj sugestię ({{status}})",
+        "apply_suggestion_title": "Zastosuj sugestię",
+        "note_optional": "Notatka (opcjonalna)",
+        "applying": "Stosowanie...",
         "applicability": {
-          "title": "SOA applicability (ISO 27001)",
-          "save": "Save applicability",
+          "title": "Stosowność SOA (ISO 27001)",
+          "save": "Zapisz stosowność",
           "options": {
-            "applicabile": "Applicable",
-            "escluso": "Excluded",
-            "non_pertinente": "Not relevant"
+            "applicabile": "Ma zastosowanie",
+            "escluso": "Wyłączone",
+            "non_pertinente": "Nie dotyczy"
           },
-          "exclusion_placeholder": "Formal exclusion justification (min 50 characters) *"
+          "exclusion_placeholder": "Formalne uzasadnienie wyłączenia (min 50 znaków) *"
         },
         "maturity": {
-          "title": "VDA ISA TISAX maturity level",
-          "auto": "Calculated automatically",
-          "override": "Manual maturity override",
+          "title": "Poziom dojrzałości VDA ISA TISAX",
+          "auto": "Obliczane automatycznie",
+          "override": "Ręczne nadpisanie dojrzałości",
           "levels": {
-            "0": "Not implemented",
+            "0": "Nie wdrożone",
             "1": "Ad-hoc",
-            "2": "Planned",
-            "3": "Defined",
-            "4": "Managed",
-            "5": "Optimized"
+            "2": "Zaplanowane",
+            "3": "Zdefiniowane",
+            "4": "Zarządzane",
+            "5": "Zoptymalizowane"
           }
         },
         "status_guide": {
-          "compliant": "Valid non-expired evidence + last verification date",
-          "parziale": "Some evidence + remediation plan (task M08)",
-          "gap": "None required to save — remediation task auto-generated",
-          "na": "Written justification min 20 characters. TISAX L3: double approval",
-          "non_valutato": "Lowers the site's compliance score"
+          "compliant": "Ważny dowód + data ostatniej weryfikacji",
+          "parziale": "Częściowy dowód + plan naprawczy (zadanie M08)",
+          "gap": "Brak wymagań — zadanie naprawcze generowane automatycznie",
+          "na": "Uzasadnienie min 20 znaków. TISAX L3: podwójne zatwierdzenie",
+          "non_valutato": "Obniża wynik zgodności zakładu"
         },
         "manual_change": {
-          "title": "Manual status change",
-          "select_status": "— select new status —",
-          "req_block": "Requirements not satisfied — fix them in the \"Documents & Evidence\" tab",
-          "note_placeholder": "Note / justification (required for N/A, min 20 characters)",
-          "req_tooltip": "Resolve requirements in the Documents & Evidence tab"
+          "title": "Ręczna zmiana statusu",
+          "select_status": "— wybierz nowy status —",
+          "req_block": "Wymagania niespełnione — rozwiąż je w zakładce \"Dokumenty i Dowody\"",
+          "note_placeholder": "Notatka / uzasadnienie (wymagane dla N/D, min 20 znaków)",
+          "req_tooltip": "Rozwiąż wymagania w zakładce Dokumenty i Dowody"
         },
-        "save_evaluation": "Save evaluation"
+        "save_evaluation": "Zapisz ocenę"
       },
       "docs": {
         "requirements": {
-          "not_satisfied_for_compliant": "Requirements not satisfied for Compliant"
+          "not_satisfied_for_compliant": "Wymagania niespełnione dla Zgodnego"
         },
-        "policy_docs": "Policy documents",
-        "operational_evidence": "Operational evidence",
-        "missing": "Missing",
-        "none_linked": "No linked documents",
-        "no_evidence_linked": "No linked evidence",
-        "unlink": "Unlink",
-        "link_doc": "Link document",
-        "link_existing_evidence": "Link existing evidence",
-        "search_placeholder": "Search by title...",
-        "upload_new_evidence": "Upload new evidence",
-        "new_evidence_title_placeholder": "Title *",
-        "validity_date_label": "Validity date *",
-        "upload_and_link": "Upload and link",
+        "policy_docs": "Dokumenty polityki",
+        "operational_evidence": "Dowody operacyjne",
+        "missing": "Brakujący",
+        "none_linked": "Brak powiązanych dokumentów",
+        "no_evidence_linked": "Brak powiązanych dowodów",
+        "unlink": "Odłącz",
+        "link_doc": "Powiąż dokument",
+        "link_existing_evidence": "Powiąż istniejący dowód",
+        "search_placeholder": "Szukaj po tytule...",
+        "upload_new_evidence": "Prześlij nowy dowód",
+        "new_evidence_title_placeholder": "Tytuł *",
+        "validity_date_label": "Data ważności *",
+        "upload_and_link": "Prześlij i powiąż",
         "review_abbrev": "rev."
       },
       "history": {
-        "empty": "No evaluations recorded.",
-        "set_status": "set"
+        "empty": "Brak zarejestrowanych ocen.",
+        "set_status": "ustawił/a"
       }
     },
     "table": {
-      "control_id": "Control ID",
+      "control_id": "ID Kontroli",
       "framework": "Framework",
-      "title": "Title",
+      "title": "Tytuł",
       "status": "Status",
-      "last_evaluated": "Last evaluated"
+      "last_evaluated": "Ostatnia ocena"
     },
     "status_filter": {
-      "all": "All"
+      "all": "Wszystkie"
     },
     "actions": {
-      "open_drawer": "Open control",
-      "click_to_edit": "Click to edit",
-      "propagate_hint": "Propagate this status to related controls",
-      "propagate": "⇒ propagate"
+      "open_drawer": "Otwórz kontrolę",
+      "click_to_edit": "Kliknij aby edytować",
+      "propagate_hint": "Propaguj ten status do powiązanych kontroli",
+      "propagate": "⇒ propaguj"
     },
+    "maturity_0": "Nie wdrożone",
+    "maturity_1": "Ad-hoc",
+    "maturity_2": "Zaplanowane",
+    "maturity_3": "Zdefiniowane",
+    "maturity_4": "Zarządzane",
+    "maturity_5": "Zoptymalizowane",
+    "applicability_applicable": "Ma zastosowanie",
+    "applicability_excluded": "Wyłączone",
+    "applicability_not_relevant": "Nieistotne",
+    "rel_copre": "obejmuje",
+    "rel_estende": "rozszerza",
+    "rel_equivale": "równoważny",
+    "rel_subset": "podzbiór",
+    "rel_related": "powiązany",
+    "download_error": "Błąd pobierania",
+    "download_network_error": "Błąd sieci podczas pobierania",
     "help": {
-      "title": "Controls library — M03",
-      "description": "Manages regulatory controls for each framework (ISO 27001, TISAX L2/L3, NIS2). Each control has an assessment status and requires documentary evidence to reach \"Compliant\".",
+      "title": "Biblioteka kontroli — M03",
+      "description": "Zarządza kontrolami regulacyjnymi według ramy (ISO 27001, TISAX L2/L3, NIS2). Każda kontrola ma status oceny i wymaga dokumentacyjnych dowodów do osiągnięcia \"Zgodny\".",
       "steps": {
-        "1": "Controls are generated automatically when a framework is loaded",
-        "2": "Click ▶ on a control to open the management drawer",
-        "3": "Link policy documents and operational evidence",
-        "4": "The system suggests the status automatically from linked documents",
-        "5": "Save the evaluation — requires at least 1 valid evidence for \"Compliant\"",
-        "6": "Download SOA (ISO27001), VDA ISA (TISAX) or NIS2 Matrix using the buttons at the top"
+        "1": "Kontrole są generowane automatycznie podczas ładowania ramy",
+        "2": "Kliknij ▶ na kontrolę, aby otworzyć panel zarządzania",
+        "3": "Połącz dokumenty polityki i dowody operacyjne",
+        "4": "System automatycznie sugeruje status z powiązanych dokumentów",
+        "5": "Zapisz ocenę — wymaga co najmniej 1 ważnego dowodu dla \"Zgodny\"",
+        "6": "Pobierz SOA (ISO27001), VDA ISA (TISAX) lub Macierz NIS2 przyciskami na górze"
       },
       "connections": {
         "documents": {
-          "module": "M07 Documents",
-          "relation": "Policy and evidence linked to the control"
+          "module": "M07 Dokumenty",
+          "relation": "Polityka i dowody powiązane z kontrolą"
         },
         "audit_prep": {
           "module": "M17 Audit Prep",
-          "relation": "Findings linked to ControlInstance"
+          "relation": "Wyniki powiązane z ControlInstance"
         },
         "risk": {
           "module": "M06 Risk",
-          "relation": "Control gaps affect the OT risk score"
+          "relation": "Luki w kontrolach wpływają na wynik ryzyka OT"
         }
       },
       "config_needed": {
-        "1": "Run: python manage.py load_frameworks",
-        "2": "Enable the framework on the Site in M01"
+        "1": "Uruchom: python manage.py load_frameworks",
+        "2": "Aktywuj ramy w zakładzie w M01"
       }
     }
   },
   "gap_analysis": {
-    "title": "Framework gap analysis",
-    "source_framework": "Source framework",
-    "target_framework": "Target framework",
-    "loading": "Analyzing...",
-    "empty_category": "No controls in this category",
+    "title": "Analiza luk frameworku",
+    "source_framework": "Framework źródłowy",
+    "target_framework": "Framework docelowy",
+    "loading": "Analizowanie...",
+    "empty_category": "Brak kontroli w tej kategorii",
     "sections": {
-      "covered": "Covered",
-      "partial": "Partial",
+      "covered": "Pokryte",
+      "partial": "Częściowe",
       "gap": "Gap",
-      "not_mapped": "Not mapped"
+      "not_mapped": "Niezamapowane"
     },
     "actions": {
-      "analyze": "Analyze gap",
-      "download_report": "↓ Download gap analysis report"
+      "analyze": "Analizuj lukę",
+      "download_report": "↓ Pobierz raport analizy luk"
     },
     "errors": {
-      "same_framework": "Select two different frameworks",
-      "load_failed": "Error while loading data"
+      "same_framework": "Wybierz dwa różne frameworki",
+      "load_failed": "Błąd podczas ładowania danych"
     },
     "summary": {
-      "controls_from_to": "Controls {{source}} → {{target}}",
-      "pct_covered": "{{pct}}% covered",
-      "covered_count": "Covered: {{count}}",
-      "partial_count": "Partial: {{count}}",
+      "controls_from_to": "Kontrole {{source}} → {{target}}",
+      "pct_covered": "{{pct}}% pokrytych",
+      "covered_count": "Pokryte: {{count}}",
+      "partial_count": "Częściowe: {{count}}",
       "gap_count": "Gap: {{count}}",
-      "not_mapped_count": "Not mapped: {{count}}"
+      "not_mapped_count": "Niezamapowane: {{count}}"
     },
     "export": {
       "columns": {
-        "category": "Category",
+        "category": "Kategoria",
         "id": "ID",
-        "title": "Title",
-        "domain": "Domain",
-        "source_status": "Source status"
+        "title": "Tytuł",
+        "domain": "Domena",
+        "source_status": "Status źródłowy"
       }
     }
   },
   "plants": {
-    "title": "Sites",
-    "empty": "No sites configured",
+    "title": "Zakłady produkcyjne",
+    "empty": "Brak skonfigurowanych zakładów",
     "table": {
-      "code": "Code",
-      "name": "Name",
-      "country": "Country",
+      "code": "Kod",
+      "name": "Nazwa",
+      "country": "Kraj",
       "status": "Status",
       "nis2": "NIS2",
       "ot": "OT"
     },
     "fields": {
-      "code": "Code",
-      "name": "Name",
-      "country": "Country",
+      "code": "Kod",
+      "name": "Nazwa",
+      "country": "Kraj",
       "status": "Status",
-      "nis2_scope": "NIS2 scope",
-      "has_ot": "OT / ICS networks present"
+      "nis2_scope": "Zakres NIS2",
+      "has_ot": "Obecność sieci OT / ICS"
     },
     "placeholders": {
       "code": "IT-MIL-01",
       "country": "IT",
-      "name": "Milan plant"
+      "name": "Zakład w Mediolanie"
     },
     "actions": {
-      "edit_title": "Edit site",
-      "frameworks": "Frameworks",
-      "select": "Select"
+      "edit_title": "Edytuj zakład",
+      "frameworks": "Ramy normatywne",
+      "select": "Wybierz"
     },
     "new": {
-      "open": "+ New site",
-      "first": "Create the first site →",
-      "title": "New production site",
-      "submit": "Create site"
+      "open": "+ Nowy zakład",
+      "first": "Utwórz pierwszy zakład →",
+      "title": "Nowy zakład produkcyjny",
+      "submit": "Utwórz zakład"
     },
     "edit": {
-      "title": "Edit site"
+      "title": "Edytuj zakład"
     },
+    "logo_url_label": "URL logo",
+    "logo_url_hint": "URL logo zakładu (używane w raportach/eksporcie). Zalecany PNG/SVG z przezroczystym tłem.",
+    "tisax_framework_label": "TISAX — VDA ISA 6.0",
     "frameworks": {
-      "title": "Compliance frameworks",
-      "empty": "No frameworks assigned to this site.",
-      "assign_new": "Assign new framework",
-      "select": "— Select framework —",
-      "assign": "Assign framework",
-      "assigning": "Assigning...",
-      "assign_help": "Automatically creates all controls to evaluate for this site.",
-      "all_assigned": "All available frameworks are already assigned to this site.",
-      "activate": "Activate",
-      "deactivate": "Deactivate",
-      "level": "level: {{level}}",
-      "active_from": "from {{date}}",
-      "remove_confirm": "Remove {{code}}? Evaluated controls will remain.",
+      "title": "Ramy normatywne",
+      "empty": "Brak przypisanych ram do tego zakładu.",
+      "assign_new": "Przypisz nowe ramy",
+      "select": "— Wybierz ramy —",
+      "assign": "Przypisz ramy",
+      "assigning": "Przypisywanie...",
+      "assign_help": "Automatycznie tworzy wszystkie kontrole do oceny dla tego zakładu.",
+      "all_assigned": "Wszystkie dostępne ramy są już przypisane do tego zakładu.",
+      "activate": "Aktywuj",
+      "deactivate": "Dezaktywuj",
+      "level": "poziom: {{level}}",
+      "active_from": "od {{date}}",
+      "remove_confirm": "Usunąć {{code}}? Ocenione kontrole zostaną zachowane.",
       "tisax": {
         "assessment_level": "Assessment Level {{level}}",
-        "l2_hint": "High protection — confidential information",
-        "l3_hint": "Very high protection + prototypes (includes all L2 controls)",
-        "l3_notice": "Both TISAX_L2 and TISAX_L3 will be assigned — {{l2}} + {{l3}} = {{total}} total controls."
+        "l2_hint": "Wysoka ochrona — informacje poufne",
+        "l3_hint": "Bardzo wysoka ochrona + prototypy (obejmuje wszystkie kontrole L2)",
+        "l3_notice": "Zostaną przypisane TISAX_L2 i TISAX_L3 — {{l2}} + {{l3}} = {{total}} kontroli łącznie."
       },
       "nis2": {
-        "essential_hint": "Proactive supervision · penalties up to €10M",
-        "important_hint": "Reactive supervision · penalties up to €7M"
+        "essential_hint": "Nadzór proaktywny · kary do 10 mln €",
+        "important_hint": "Nadzór reaktywny · kary do 7 mln €"
       },
       "generic": {
-        "base": "Base — mandatory minimum requirements",
-        "advanced": "Advanced — with optional measures",
-        "complete": "Complete — full implementation"
+        "base": "Podstawowy — minimalne wymagania obowiązkowe",
+        "advanced": "Zaawansowany — z opcjonalnymi środkami",
+        "complete": "Kompletny — pełna implementacja"
       }
     }
   },
@@ -571,636 +661,1094 @@
       "submit": "Utwórz użytkownika"
     },
     "competency_gap": {
-      "loading": "Loading gap analysis...",
-      "title": "Competency gap analysis — {{name}}",
-      "gap_count": "{{count}} gaps",
-      "complete": "Complete",
-      "to_fill": "Gaps to fill:",
-      "level_from_to": "Level {{current}} → required {{required}}",
-      "expired": "Expired competencies:",
-      "ok": "Competencies OK:",
-      "none": "No competency requirements defined for this user's roles."
+      "loading": "Ładowanie analizy luk...",
+      "title": "Analiza luk kompetencyjnych — {{name}}",
+      "gap_count": "{{count}} luk",
+      "complete": "Kompletny",
+      "to_fill": "Luki do wypełnienia:",
+      "level_from_to": "Poziom {{current}} → wymagany {{required}}",
+      "expired": "Wygasłe kompetencje:",
+      "ok": "Kompetencje OK:",
+      "none": "Brak wymagań kompetencyjnych dla ról tego użytkownika."
     },
     "danger": {
-      "title": "⚠️ Danger zone — Test environment only",
-      "body": "Deletes all GRC data while keeping the superuser and compliance frameworks. This operation is irreversible.",
-      "open": "🗑️ Reset test database",
-      "confirm_body": "Are you sure? This will delete ALL GRC data. Only your superuser account and compliance frameworks will be preserved.",
-      "confirm_placeholder": "Type RESET to confirm",
-      "resetting": "Resetting...",
-      "confirm": "Confirm reset",
-      "reset_success": "Reset completed. Redirecting to login...",
-      "reset_error": "Error while resetting"
+      "title": "⚠️ Strefa niebezpieczna — tylko środowisko testowe",
+      "body": "Usuwa wszystkie dane GRC zachowując superużytkownika i ramy normatywne. Ta operacja jest nieodwracalna.",
+      "open": "🗑️ Zresetuj bazę testową",
+      "confirm_body": "Czy jesteś pewien? To usunie WSZYSTKIE dane GRC. Zachowany zostanie tylko konto superużytkownika i ramy normatywne.",
+      "confirm_placeholder": "Wpisz RESET aby potwierdzić",
+      "resetting": "Resetowanie...",
+      "confirm": "Potwierdź reset",
+      "reset_success": "Reset zakończony. Przekierowanie do logowania...",
+      "reset_error": "Błąd podczas resetowania"
     }
   },
   "governance": {
     "title": "Governance",
-    "subtitle": "Normative roles, committees and role succession",
+    "subtitle": "Role normatywne, komitety i sukcesja stanowisk",
     "tabs": {
-      "roles": "Roles & committees",
-      "workflow": "Document workflow (M07)",
-      "frameworks": "Normative frameworks"
+      "roles": "Role i komitety",
+      "workflow": "Obieg dokumentów (M07)",
+      "frameworks": "Ramy normatywne",
+      "risk_appetite": "Risk Appetite"
     },
     "workflow": {
-      "title": "Document workflow",
-      "subtitle": "Define who can create, review and approve M07 documents by type and site."
+      "title": "Obieg dokumentów",
+      "subtitle": "Zdefiniuj, kto może tworzyć, przeglądać i zatwierdzać dokumenty M07 według typu i zakładu.",
+      "configured_policies": "Skonfigurowane polityki",
+      "new_policy": "+ Nowa polityka",
+      "no_policies": "Brak skonfigurowanych polityk. Utwórz jedną dla każdego typu dokumentu.",
+      "who_can_submit": "Kto może przesłać",
+      "who_reviews": "Kto weryfikuje",
+      "who_approves": "Kto zatwierdza",
+      "actions_col": "Akcje",
+      "scope_org": "Organizacja",
+      "scope_bu": "Jednostka biznesowa (ID)",
+      "scope_site_prefix": "Zakład:",
+      "scope_site_id": "Zakład (ID)",
+      "modal_edit": "Edytuj politykę",
+      "modal_new": "Nowa polityka",
+      "scope_label": "Zakres",
+      "site_label": "Zakład",
+      "site_select": "— wybierz zakład —",
+      "scope_org_option": "Organizacja",
+      "scope_site_option": "Konkretny zakład",
+      "who_can_create_submit": "Kto może tworzyć / przesyłać do weryfikacji",
+      "saving": "Zapisywanie...",
+      "save_policy": "Zapisz politykę",
+      "delete_title": "Usuń politykę",
+      "delete_confirm": "Czy na pewno chcesz usunąć politykę dla",
+      "deleting": "Usuwanie...",
+      "doc_type_col": "Typ dokumentu",
+      "doc_types": {
+        "policy": "Polityka",
+        "procedura": "Procedura",
+        "manuale": "Podręcznik ISMS",
+        "contratto": "Umowa/NDA",
+        "registro": "Rejestr",
+        "altro": "Inne"
+      }
     },
     "sections": {
-      "roles": "Normative roles",
-      "committees": "Security committees"
+      "roles": "Role normatywne",
+      "committees": "Komitety bezpieczeństwa"
     },
     "empty": {
-      "roles": "No assigned roles",
-      "committees": "No committees configured"
+      "roles": "Brak przypisanych ról",
+      "committees": "Brak skonfigurowanych komitetów"
     },
     "alerts": {
-      "vacant_roles": "🚨 {{count}} mandatory roles without an active owner",
-      "expiring_roles": "⚠ {{count}} roles expiring in the next 30 days"
+      "vacant_roles": "🚨 {{count}} obowiązkowych ról bez aktywnego właściciela",
+      "expiring_roles": "⚠ {{count}} ról wygasających w ciągu 30 dni"
     },
-    "expires_on": "expires on {{date}}",
-    "valid_until": "until {{date}}",
+    "expires_on": "wygasa {{date}}",
+    "valid_until": "do {{date}}",
     "badges": {
-      "expires_in_days": "Expires in {{days}}d"
+      "expires_in_days": "Wygasa za {{days}}d"
     },
     "actions": {
-      "replace": "Replace",
-      "terminate": "Terminate"
+      "replace": "Zastąp",
+      "terminate": "Zakończ"
     },
     "roles": {
       "ciso": "CISO",
       "compliance_officer": "Compliance Officer",
       "risk_manager": "Risk Manager",
-      "internal_auditor": "Internal Auditor",
-      "external_auditor": "External Auditor",
+      "internal_auditor": "Audytor Wewnętrzny",
+      "external_auditor": "Audytor Zewnętrzny",
       "plant_manager": "Plant Manager",
       "control_owner": "Control Owner",
       "plant_security_officer": "Plant Security Officer",
-      "nis2_contact": "NIS2 contact",
+      "nis2_contact": "Kontakt NIS2",
       "dpo": "DPO",
       "isms_manager": "ISMS Manager",
-      "comitato_membro": "Committee member",
-      "bu_referente": "BU contact",
+      "comitato_membro": "Członek komitetu",
+      "bu_referente": "Referent BU",
       "raci_responsible": "RACI Responsible",
       "raci_accountable": "RACI Accountable"
     },
     "scopes": {
-      "org": "Global — whole organization",
-      "bu": "Specific business unit",
-      "plant": "Specific site"
+      "org": "Globalny — cała organizacja",
+      "bu": "Konkretna jednostka biznesowa",
+      "plant": "Konkretny zakład"
     },
     "roles_assign": {
-      "open": "+ Assign",
-      "modal_title": "New role assignment",
-      "user": "User",
-      "role": "Role",
-      "scope": "Scope",
+      "open": "+ Przypisz",
+      "modal_title": "Nowe przypisanie roli",
+      "user": "Użytkownik",
+      "role": "Rola",
+      "scope": "Zakres",
       "business_unit": "Business Unit",
-      "plant": "Site",
-      "select_bu": "— select BU —",
-      "select_plant": "— select site —",
-      "valid_from": "Valid from",
-      "valid_until": "Valid until",
-      "submit": "Assign role"
+      "plant": "Zakład",
+      "select_bu": "— wybierz BU —",
+      "select_plant": "— wybierz zakład —",
+      "valid_from": "Ważne od",
+      "valid_until": "Ważne do",
+      "submit": "Przypisz rolę"
     },
     "committees": {
       "new": {
-        "open": "+ New",
-        "title": "New committee",
-        "submit": "Create committee"
+        "open": "+ Nowy",
+        "title": "Nowy komitet",
+        "submit": "Utwórz komitet"
       },
       "fields": {
-        "name": "Name",
-        "type": "Type",
-        "frequency": "Frequency",
-        "next_meeting": "Next meeting"
+        "name": "Nazwa",
+        "type": "Typ",
+        "frequency": "Częstotliwość",
+        "next_meeting": "Następne spotkanie"
       },
       "placeholders": {
-        "name": "e.g. Security Committee"
+        "name": "np. Komitet ds. Bezpieczeństwa"
       },
       "types": {
-        "centrale": "Central",
+        "centrale": "Centralny",
         "bu": "BU"
       },
       "frequencies": {
-        "mensile": "Monthly",
-        "trimestrale": "Quarterly",
-        "semestrale": "Semiannual"
+        "mensile": "Miesięczna",
+        "trimestrale": "Kwartalna",
+        "semestrale": "Półroczna"
       },
-      "frequency": "Frequency: {{value}}",
-      "next_meeting": "next:"
+      "frequency": "Częstotliwość: {{value}}",
+      "next_meeting": "następna:"
     },
     "terminate": {
-      "title": "Terminate role",
-      "body": "You are about to terminate the role {{role}} for {{user}}.",
-      "end_date": "End date",
-      "reason": "Reason",
-      "reason_placeholder": "min 5 characters...",
-      "pending": "Terminating...",
-      "confirm": "Confirm termination",
-      "error": "Error while terminating."
+      "title": "Zakończ rolę",
+      "body": "Zamierzasz zakończyć rolę {{role}} użytkownika {{user}}.",
+      "end_date": "Data zakończenia",
+      "reason": "Powód",
+      "reason_placeholder": "min 5 znaków...",
+      "pending": "Kończenie...",
+      "confirm": "Potwierdź zakończenie",
+      "error": "Błąd podczas kończenia."
     },
     "replace": {
-      "title": "Role succession",
-      "body": "Role: {{role}} — current owner: {{user}}",
-      "new_owner": "New owner",
-      "handover_date": "Handover date",
-      "reason": "Reason / notes",
-      "pending": "Replacing...",
-      "confirm": "Confirm succession",
-      "error": "Error while replacing."
+      "title": "Zastąp rolę",
+      "body": "Wybierz nowego właściciela roli {{role}}.",
+      "new_owner": "Nowy właściciel",
+      "handover_date": "Data przekazania",
+      "reason": "Powód / notatki",
+      "pending": "Zastępowanie...",
+      "confirm": "Potwierdź sukcesję",
+      "error": "Błąd podczas zastępowania.",
+      "new_user": "Nowy użytkownik",
+      "new_valid_from": "Nowe obowiązuje od",
+      "new_valid_until": "Nowe obowiązuje do",
+      "submit": "Potwierdź zastąpienie"
     },
     "help": {
       "title": "Governance — M00",
-      "description": "Manages normative roles (CISO, NIS2 contact, DPO, etc.) with validity periods. Expired or vacant roles trigger automatic alerts because they impact NIS2 and ISO 27001 compliance.",
+      "description": "Zarządza rolami normatywnymi (CISO, kontakt NIS2, DPO itp.) z ważnością czasową. Wygasłe lub nieobsadzone role generują automatyczne alerty.",
       "steps": {
-        "assign_role": "Assign a role to a user with a start and end date.",
-        "replace_role": "To replace a role owner, use \"Replace\" — succession is atomic.",
-        "terminate_role": "To terminate without a successor, use \"Terminate\" with a reason.",
-        "vacant_roles_alert": "Mandatory vacant roles (CISO, NIS2, DPO, ISMS) trigger alerts at the top.",
-        "link_nomination_doc": "Link the nomination document to keep formal evidence."
+        "assign_role": "Przypisz rolę użytkownikowi z datą początku i końca.",
+        "replace_role": "Aby zastąpić właściciela, użyj \"Zastąp\" — sukcesja jest atomowa.",
+        "terminate_role": "Aby zakończyć bez następcy, użyj \"Zakończ\" z powodem.",
+        "vacant_roles_alert": "Obowiązkowe nieobsadzone role (CISO, NIS2, DPO, ISMS) generują alerty na górze.",
+        "link_nomination_doc": "Połącz dokument nominacji dla formalnego dowodu."
       },
       "connections": {
-        "rbac": "Normative role is distinct from the application role.",
-        "management_review": "Vacant roles appear in the Management Review snapshot."
+        "rbac": "Rola normatywna odróżnia się od roli aplikacyjnej.",
+        "management_review": "Nieobsadzone role pojawiają się w snapshocie Przeglądu Zarządzania."
       },
       "config": {
-        "create_users_m02": "Create users in M02 first."
+        "create_users_m02": "Najpierw utwórz użytkowników w M02."
       }
     },
     "workflow_help": {
-      "title": "Document workflow",
-      "description": "Configure the document approval flow by document type (policy, procedure, manual...) and site.",
+      "title": "Obieg dokumentów",
+      "description": "Skonfiguruj przepływ zatwierdzania dokumentów według typu (polityka, procedura, podręcznik...) i zakładu.",
       "steps": {
-        "choose_type_and_scope": "Choose the document type and scope (org / BU / plant).",
-        "assign_creators": "Assign roles that can create and send for review.",
-        "assign_reviewers": "Assign roles that must review.",
-        "assign_approvers": "Assign roles that can approve and put documents into effect."
+        "choose_type_and_scope": "Wybierz typ dokumentu i zakres (org / BU / zakład).",
+        "assign_creators": "Przypisz role mogące tworzyć i wysyłać do przeglądu.",
+        "assign_reviewers": "Przypisz role, które muszą przeglądać.",
+        "assign_approvers": "Przypisz role mogące zatwierdzać i wdrażać."
       },
       "connections": {
-        "documents": "Enables \"Send for review\" / \"Approve\" buttons in the Documents module.",
-        "governance": "Uses normative roles (CISO, Plant Manager, ISMS...) configured in Governance."
+        "documents": "Aktywuje przyciski \"Wyślij do przeglądu\" / \"Zatwierdź\" w module Dokumenty.",
+        "governance": "Używa ról normatywnych (CISO, Plant Manager, ISMS...) skonfigurowanych w Governance."
       }
     },
     "frameworks": {
-      "title": "Normative frameworks",
-      "subtitle": "Manage versions and imports of the JSON frameworks used for controls and mappings.",
-      "note": "Source of truth: JSON files in backend/frameworks/. Import requires superuser.",
-      "empty": "No frameworks found",
-      "domains_short": "domains",
-      "controls_short": "controls",
-      "mappings_short": "mappings",
+      "title": "Ramy normatywne",
+      "subtitle": "Wizualizuj pokrycie zgodności według ramy normatywnej.",
+      "note": "Źródło prawdy: pliki JSON w backend/frameworks/. Import wymaga superużytkownika.",
+      "empty": "Brak frameworków",
+      "domains_short": "domeny",
+      "controls_short": "kontrole",
+      "mappings_short": "mapowania",
       "table": {
-        "code": "Code",
-        "name": "Name",
-        "version": "Version",
-        "published_at": "Published",
-        "controls": "Coverage",
-        "languages": "Languages"
+        "code": "Kod",
+        "name": "Nazwa",
+        "version": "Wersja",
+        "published_at": "Opublikowano",
+        "controls": "Pokrycie",
+        "languages": "Języki"
       },
       "import_title": "Import framework (JSON)",
-      "import_placeholder": "Paste the full framework JSON here or upload a .json file…",
-      "import_missing_json": "Provide a JSON payload before continuing.",
-      "import_invalid_json": "Invalid JSON.",
-      "preview_action": "Preview",
-      "import_confirm": "Import",
-      "import_success": "Import completed.",
-      "preview_title": "Import preview",
+      "import_placeholder": "Wklej pełny JSON frameworku lub prześlij plik .json…",
+      "import_missing_json": "Przed kontynuowaniem dostarcz JSON.",
+      "import_invalid_json": "Nieprawidłowy JSON.",
+      "preview_action": "Podgląd",
+      "import_confirm": "Importuj",
+      "import_success": "Import zakończony.",
+      "preview_title": "Podgląd importu",
       "preview": {
         "framework": "Framework",
-        "version": "Version",
-        "counts": "Counts",
-        "languages": "Languages"
-      }
-    }
+        "version": "Wersja",
+        "counts": "Liczniki",
+        "languages": "Języki"
+      },
+      "framework": "Ramy",
+      "compliant": "Zgodne",
+      "partial": "Częściowe",
+      "gap": "Luka",
+      "not_evaluated": "Nie ocenione",
+      "risk_appetite": "Apetyt na ryzyko"
+    },
+    "risk_appetite": {
+      "title": "Apetyt na ryzyko",
+      "subtitle": "Zdefiniuj progi akceptowalności ryzyka według obszaru.",
+      "note": "Dla każdej kombinacji Zakład/Framework używana jest najnowsza aktywna polityka (po dacie początku); progi te są stosowane w M06 do porównania Nieodłącznego, Rezydualnego i Ważonego.",
+      "table_title": "Polityki apetytu na ryzyko",
+      "empty": "Brak skonfigurowanej polityki. Zdefiniuj co najmniej jeden próg org-wide lub per-zakład.",
+      "new": "+ Nowa polityka",
+      "edit_title": "Edytuj politykę apetytu na ryzyko",
+      "new_title": "Nowa polityka apetytu na ryzyko",
+      "delete_title": "Usuń politykę",
+      "delete_body": "Czy na pewno chcesz usunąć tę politykę apetytu na ryzyko? Oceny M06 będą używać innych aktywnych polityk.",
+      "org_wide": "Org-wide (wszystkie zakłady)",
+      "framework_all": "Wszystkie ramy",
+      "columns": {
+        "plant": "Zakład",
+        "framework": "Framework",
+        "max_acceptable": "Maks. akceptowalny wynik",
+        "max_red": "Maks. czerwone ryzyka",
+        "max_unacceptable": "Nieakceptowalny wynik",
+        "valid_from": "Ważne od",
+        "valid_until": "Ważne do",
+        "status": "Status",
+        "actions": "Akcje"
+      },
+      "domain": "Obszar",
+      "threshold": "Próg akceptowalności",
+      "current": "Aktualny",
+      "save": "Zapisz",
+      "saved": "Apetyt na ryzyko zapisany"
+    },
+    "appetite_notes_placeholder": "Uwagi dotyczące zatwierdzenia, odniesienia do uchwał zarządu, itp."
   },
   "sidebar": {
     "groups": {
-      "main": "Main",
+      "main": "Główne",
       "compliance": "Compliance",
-      "risk": "Risk",
-      "operations": "Operations",
-      "planning": "Planning",
+      "risk": "Ryzyko",
+      "operations": "Operacje",
+      "planning": "Planowanie",
       "governance": "Governance"
     },
     "items": {
       "dashboard": "Dashboard",
       "reporting": "Reporting",
-      "tasks": "Tasks",
-      "controls": "Controls",
+      "tasks": "Zadania",
+      "controls": "Kontrole",
       "gap_analysis": "Gap Analysis",
-      "documents": "Documents",
+      "documents": "Dokumenty",
       "audit_prep": "Audit Prep",
       "risk": "Risk",
-      "assets": "IT/OT Assets",
+      "assets": "Zasoby IT/OT",
       "bia": "BIA",
       "bcp": "BCP",
-      "incidents": "Incidents",
+      "incidents": "Incydenty",
       "lessons": "Lessons",
-      "suppliers": "Suppliers",
-      "training": "Training",
+      "suppliers": "Dostawcy",
+      "training": "Szkolenia",
       "pdca": "PDCA",
       "activity_schedule": "Activity Schedule",
-      "required_documents": "Required Docs",
-      "schedule_policy": "Due date policy",
+      "required_documents": "Wymagane dok.",
+      "schedule_policy": "Polityka terminów",
       "governance": "Governance",
-      "management_review": "Management Review",
-      "plants": "Sites",
-      "users": "Users",
-      "competency": "Competency",
+      "management_review": "Przegląd zarządu",
+      "plants": "Zakłady",
+      "users": "Użytkownicy",
+      "competency": "Kompetencje",
       "audit_trail": "Audit Trail",
-      "email_settings": "Email settings",
-      "notification_rules": "Notification rules"
+      "email_settings": "Ustawienia e-mail",
+      "notification_rules": "Reguły powiadomień"
     }
   },
   "topbar": {
     "language": {
-      "label": "Language"
+      "label": "Język"
     },
-    "logout": "Logout",
+    "logout": "Wyloguj",
     "plant": {
-      "none_selected": "No site selected",
-      "all": "All sites",
-      "none_configured": "No sites configured"
+      "none_selected": "Brak wybranego zakładu",
+      "all": "Wszystkie zakłady",
+      "none_configured": "Brak skonfigurowanych zakładów"
     },
     "notifications": {
-      "title": "Notifications",
-      "empty": "No subscriptions configured",
-      "enabled": "enabled",
-      "disabled": "disabled"
+      "title": "Powiadomienia",
+      "empty": "Brak skonfigurowanych subskrypcji",
+      "enabled": "aktywny",
+      "disabled": "nieaktywny"
     }
   },
   "auth": {
     "login": {
-      "subtitle": "Sign in to your account",
+      "subtitle": "Zaloguj się na swoje konto",
       "email_label": "Email / Username",
-      "email_placeholder": "admin@example.com",
+      "email_placeholder": "admin@przyklad.pl",
       "password_label": "Password",
-      "submit": "Sign in",
-      "signing_in": "Signing in...",
-      "invalid_credentials": "Invalid credentials. Please try again."
+      "submit": "Zaloguj się",
+      "signing_in": "Logowanie...",
+      "invalid_credentials": "Nieprawidłowe dane logowania. Spróbuj ponownie."
     }
   },
   "dashboard": {
     "title": "Dashboard",
-    "see_all": "See all",
+    "see_all": "Zobacz wszystkie",
     "trend": {
-      "title": "Weekly ISMS trend — {{framework}}",
-      "empty": "No data — snapshots are generated every Monday by the Celery task"
+      "title": "Tygodniowy trend ISMS — {{framework}}",
+      "empty": "Brak danych — snapshoty są generowane co poniedziałek przez zadanie Celery"
     },
     "deadlines": {
-      "title": "Upcoming deadlines (3 months)"
+      "title": "Nadchodzące terminy (3 miesiące)"
     },
     "governance": {
-      "vacant_roles": "{{count}} mandatory roles vacant",
-      "expiring_roles": "{{count}} roles expiring within 30 days",
-      "go_to": "Go to Governance"
+      "vacant_roles": "{{count}} obowiązkowych ról nieobsadzonych",
+      "expiring_roles": "{{count}} ról wygasających w ciągu 30 dni",
+      "go_to": "Przejdź do Governance"
     },
     "assets": {
-      "needs_revaluation": "{{count}} assets to re-evaluate",
-      "needs_revaluation_sub": "Recorded changes not yet re-evaluated",
-      "see_list": "See list"
+      "needs_revaluation": "{{count}} zasobów do ponownej oceny",
+      "needs_revaluation_sub": "Zarejestrowane zmiany jeszcze nie reewaluowane",
+      "see_list": "Zobacz listę"
     },
     "kpi": {
-      "active_sites": "Active sites",
-      "compliant_controls": "Compliant controls",
-      "gap_controls": "Controls in gap",
-      "gap_controls_sub": "require action",
-      "open_incidents": "Open incidents"
+      "active_sites": "Aktywne zakłady",
+      "compliant_controls": "Zgodne kontrole",
+      "gap_controls": "Kontrole z luką",
+      "gap_controls_sub": "wymagają działania",
+      "open_incidents": "Otwarte incydenty"
     },
     "latest_gaps": {
-      "title": "Latest controls in gap",
-      "empty": "No gaps detected"
+      "title": "Ostatnie kontrole z luką",
+      "empty": "Brak wykrytych luk"
     },
     "sites": {
-      "title": "Sites",
-      "empty": "No sites configured"
-    }
+      "title": "Zakłady",
+      "empty": "Brak skonfigurowanych zakładów"
+    },
+    "chart_risks_high": "Wysokie ryzyka",
+    "chart_incidents_open": "Otwarte incydenty"
   },
   "tasks": {
-    "title": "Tasks",
-    "empty": "No tasks found",
+    "title": "Zadania",
+    "empty": "Brak zadań",
     "filters": {
-      "all": "All",
-      "open": "Open",
-      "in_progress": "In progress",
-      "completed": "Completed",
-      "overdue": "Overdue"
+      "all": "Wszystkie",
+      "open": "Otwarte",
+      "in_progress": "W toku",
+      "completed": "Ukończone",
+      "overdue": "Przeterminowane"
     },
     "new": {
-      "title": "New task",
-      "submit": "Create task"
+      "title": "Nowe zadanie",
+      "submit": "Utwórz zadanie"
     },
     "fields": {
-      "title": "Title",
-      "priority": "Priority",
-      "due_date": "Due date",
-      "plant": "Site"
+      "title": "Tytuł",
+      "priority": "Priorytet",
+      "due_date": "Termin",
+      "plant": "Zakład"
     },
     "priority": {
-      "bassa": "low",
-      "media": "medium",
-      "alta": "high",
-      "critica": "critical"
+      "bassa": "niska",
+      "media": "średnia",
+      "alta": "wysoka",
+      "critica": "krytyczna"
     },
     "table": {
-      "title": "Title",
-      "priority": "Priority",
+      "title": "Tytuł",
+      "priority": "Priorytet",
       "status": "Status",
-      "due_date": "Due date",
-      "source": "Source",
+      "due_date": "Termin",
+      "source": "Źródło",
       "escalation": "Escalation"
     },
     "actions": {
-      "complete": "Complete"
+      "complete": "Ukończ"
     }
   },
   "documents": {
-    "title": "Documents & Evidence",
+    "title": "Dokumenty i Dowody",
     "tabs": {
-      "documents": "Documents",
-      "evidences": "Evidence"
+      "documents": "Dokumenty",
+      "evidences": "Dowody"
     },
-    "empty": "No documents found",
-    "file_help": "Max 50MB. Formats: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg.",
+    "empty": "Brak dokumentów",
+    "file_help": "Max 50 MB. Formaty: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg.",
     "filters": {
-      "all": "All",
-      "draft": "Draft",
-      "in_review": "In review",
-      "in_approval": "In approval",
-      "approved": "Approved"
+      "all": "Wszystkie",
+      "draft": "Szkic",
+      "in_review": "W przeglądzie",
+      "in_approval": "W zatwierdzaniu",
+      "approved": "Zatwierdzone"
     },
     "filter": {
-      "only_selected_plant": "Only selected site"
+      "only_selected_plant": "Tylko wybrany zakład"
     },
     "fields": {
-      "title": "Title",
-      "category": "Category",
-      "document_type": "Document type",
-      "review_due_date": "Review due date",
-      "mandatory": "Mandatory document",
+      "title": "Tytuł",
+      "category": "Kategoria",
+      "document_type": "Typ dokumentu",
+      "review_due_date": "Termin przeglądu",
+      "mandatory": "Dokument obowiązkowy",
       "file": "File",
-      "plant": "Site",
-      "description": "Description"
+      "plant": "Zakład",
+      "description": "Opis"
     },
     "new": {
-      "title": "New document",
-      "submit": "Create document"
+      "title": "Nowy dokument",
+      "submit": "Utwórz dokument"
     },
     "upload": {
-      "title": "New document version",
-      "submit": "Upload version",
-      "change_notes": "Change notes (optional)"
+      "title": "Nowa wersja dokumentu",
+      "submit": "Prześlij wersję",
+      "change_notes": "Notatki zmian (opcjonalne)"
     },
     "change_plant": {
-      "title": "Change document site",
-      "none": "— No site —"
+      "title": "Zmień zakład dokumentu",
+      "none": "— Brak zakładu —"
     },
     "category": {
-      "politica": "Policy",
-      "procedura": "Procedure",
-      "istruzione": "Work instruction",
-      "registro": "Register",
-      "verbale": "Minutes",
-      "contratto": "Contract"
+      "politica": "Polityka",
+      "procedura": "Procedura",
+      "istruzione": "Instrukcja robocza",
+      "registro": "Rejestr",
+      "verbale": "Protokół",
+      "contratto": "Umowa"
     },
     "type": {
       "policy": "Policy",
-      "procedura": "Procedure",
-      "manuale": "ISMS manual",
-      "contratto": "Contract/NDA",
-      "registro": "Register",
-      "altro": "Other"
+      "procedura": "Procedura",
+      "manuale": "Podręcznik ISMS",
+      "contratto": "Umowa/NDA",
+      "registro": "Rejestr",
+      "altro": "Inne"
     },
     "mandatory": {
-      "yes": "Mandatory",
-      "no": "Optional"
+      "yes": "Obowiązkowy",
+      "no": "Opcjonalny"
     },
     "table": {
-      "title": "Title",
+      "title": "Tytuł",
       "file": "File",
-      "plant": "Site",
-      "type": "Type",
+      "plant": "Zakład",
+      "type": "Typ",
       "status": "Status",
-      "mandatory": "Mandatory",
-      "review_due_date": "Review due date",
-      "approved_at": "Approved on"
+      "mandatory": "Obowiązkowy",
+      "review_due_date": "Termin przeglądu",
+      "approved_at": "Zatwierdzone dnia"
     },
     "actions": {
-      "download": "Download",
-      "submit_for_review": "Submit for review",
-      "new_version": "New version",
-      "link_controls": "Link controls",
-      "change_plant": "Change site"
+      "download": "Pobierz",
+      "submit_for_review": "Prześlij do przeglądu",
+      "new_version": "Nowa wersja",
+      "link_controls": "Powiąż kontrole",
+      "change_plant": "Zmień zakład"
     },
     "errors": {
-      "download_failed": "Unable to download the document. Check permissions or try again later.",
-      "evidence_download_failed": "Unable to download the evidence file. Check permissions or try again later.",
-      "no_file_selected": "No file selected",
-      "upload_failed": "Error while uploading the file",
-      "update_plant_failed": "Error while updating the site"
+      "download_failed": "Nie można pobrać dokumentu. Sprawdź uprawnienia lub spróbuj ponownie później.",
+      "evidence_download_failed": "Nie można pobrać pliku dowodu. Sprawdź uprawnienia lub spróbuj ponownie później.",
+      "no_file_selected": "Brak wybranego pliku",
+      "upload_failed": "Błąd podczas przesyłania pliku",
+      "update_plant_failed": "Błąd podczas aktualizacji zakładu"
     },
     "controls_link": {
-      "all_statuses": "All statuses",
-      "selected_count": "{{count}} controls selected",
-      "none_selected": "No selection",
-      "linking": "Linking...",
-      "submit": "Link selected",
-      "title": "Link controls",
-      "result_linked": "Linked to {{count}} controls"
+      "all_statuses": "Wszystkie statusy",
+      "selected_count": "{{count}} kontroli wybranych",
+      "none_selected": "Brak wyboru",
+      "linking": "Łączenie...",
+      "submit": "Powiąż wybrane",
+      "title": "Powiąż kontrole",
+      "result_linked": "Powiązano z {{count}} kontrolami"
     },
     "evidence": {
-      "empty": "No evidence found",
+      "empty": "Brak dowodów",
       "new": {
-        "title": "New evidence",
-        "submit": "Create evidence"
+        "title": "Nowy dowód",
+        "submit": "Utwórz dowód"
       },
       "fields": {
-        "type": "Evidence type",
-        "valid_until": "Valid until"
+        "type": "Typ dowodu",
+        "valid_until": "Ważne do"
       },
       "types": {
         "screenshot": "Screenshot",
-        "log": "System log",
+        "log": "Log systemowy",
         "report": "Report",
-        "verbale": "Minutes",
-        "certificato": "Certificate",
-        "test_result": "Test result",
-        "altro": "Other"
+        "verbale": "Protokół",
+        "certificato": "Certyfikat",
+        "test_result": "Wynik testu",
+        "altro": "Inne"
       },
       "filters": {
-        "all": "All",
-        "valid": "Valid",
-        "expiring": "Expiring",
-        "expired": "Expired",
-        "all_types": "All types"
+        "all": "Wszystkie",
+        "valid": "Ważne",
+        "expiring": "Wygasające",
+        "expired": "Wygasłe",
+        "all_types": "Wszystkie typy"
       },
       "table": {
-        "type": "Type",
-        "title": "Title",
-        "expiry": "Expiry",
-        "plant": "Site",
-        "linked_controls": "Linked controls",
-        "uploaded_by": "Uploaded by"
+        "type": "Typ",
+        "title": "Tytuł",
+        "expiry": "Wygaśnięcie",
+        "plant": "Zakład",
+        "linked_controls": "Powiązane kontrole",
+        "uploaded_by": "Przesłane przez"
       },
       "actions": {
-        "download_file": "Download file"
+        "download_file": "Pobierz plik"
       },
       "expiry": {
-        "expired": "Expired",
-        "expiring": "Expiring",
-        "valid": "Valid",
-        "days_ago": "{{days}}d ago",
-        "in_days": "in {{days}}d"
+        "expired": "Wygasłe",
+        "expiring": "Wygasające",
+        "valid": "Ważne",
+        "days_ago": "{{days}}d temu",
+        "in_days": "za {{days}}d"
       }
     }
   },
   "schedule": {
     "activity": {
-      "title": "Activity schedule",
+      "title": "Harmonogram aktywności",
       "help": {
-        "title": "Activity schedule",
-        "description": "Aggregated calendar view of all GRC due dates:\n\tdocuments, evidence, assessments, BCP tests, findings, training.\n\tDue dates are computed from the configured policy.",
+        "title": "Harmonogram aktywności",
+        "description": "Zagregowany widok kalendarza wszystkich terminów GRC:",
         "steps": {
-          "1": "Select the site and the time horizon (1–12 months)",
-          "2": "Filter by type (documents, risks, findings, etc.) or status",
-          "3": "Click an activity to jump directly to the module",
-          "4": "Configure due dates in 'Due date policy' (CISO/Admin only)"
+          "1": "Wybierz zakład i horyzont czasowy (1–12 miesięcy)",
+          "2": "Filtruj według typu (dokumenty, ryzyko, wyniki, itp.) lub statusu",
+          "3": "Kliknij aktywność, aby przejść bezpośrednio do modułu",
+          "4": "Skonfiguruj terminy w 'Polityce terminów' (tylko CISO/Admin)"
         },
         "connections": {
           "policy": {
-            "module": "Due date policy",
-            "relation": "Configured rules determine all due dates"
+            "module": "Polityka terminów",
+            "relation": "Skonfigurowane reguły określają wszystkie terminy"
           },
           "required_docs": {
-            "module": "Required documents",
-            "relation": "Shows required document status by framework"
+            "module": "Wymagane dokumenty",
+            "relation": "Pokazuje status wymaganych dokumentów według ramy"
           }
         },
         "config_needed": {
-          "1": "Configure a due date policy with 'Create default policy'",
-          "2": "Load required documents with load_required_documents"
+          "1": "Skonfiguruj politykę terminów za pomocą 'Utwórz domyślną politykę'",
+          "2": "Załaduj wymagane dokumenty za pomocą load_required_documents"
         }
       },
       "days": {
-        "today": "Today",
-        "overdue": "Overdue",
+        "today": "Dzisiaj",
+        "overdue": "Przeterminowane",
         "in_days": "{{days}}d"
       }
     },
     "filters": {
-      "plant": "Site",
-      "all_plants": "All sites",
-      "horizon": "Horizon",
+      "plant": "Zakład",
+      "all_plants": "Wszystkie zakłady",
+      "horizon": "Horyzont",
       "months": {
-        "3": "3 months",
-        "6": "6 months",
-        "12": "12 months"
+        "3": "3 miesiące",
+        "6": "6 miesięcy",
+        "12": "12 miesięcy"
       },
-      "urgency": "Urgency",
+      "urgency": "Pilność",
       "urgency_values": {
-        "all": "All",
-        "red": "Critical",
-        "yellow": "Warning",
+        "all": "Wszystkie",
+        "red": "Krytyczne",
+        "yellow": "Uwaga",
         "green": "Ok"
       }
     },
     "kpi": {
-      "critical": "Critical (<7d)",
-      "warning": "Warning",
-      "on_track": "On track"
+      "critical": "Krytyczne (<7d)",
+      "warning": "Uwaga",
+      "on_track": "Na czas"
     },
     "empty": {
-      "no_deadlines": "No due dates in the next {{months}} months",
-      "no_deadlines_for_filter": "No due dates for the selected filter"
+      "no_deadlines": "Brak terminów w ciągu najbliższych {{months}} miesięcy",
+      "no_deadlines_for_filter": "Brak terminów dla wybranego filtru"
     },
     "table": {
-      "activity": "Activity",
-      "category": "Category",
-      "due_date": "Due date",
-      "days": "Days",
+      "activity": "Aktywność",
+      "category": "Kategoria",
+      "due_date": "Termin",
+      "days": "Dni",
       "status": "Status"
+    },
+    "units": {
+      "days": "dni",
+      "weeks": "tygodnie",
+      "months": "miesiące",
+      "years": "lata"
+    },
+    "categories": {
+      "Controlli": "Kontrole",
+      "Documenti": "Dokumenty",
+      "Rischi": "Ryzyka",
+      "BCP": "BCP",
+      "Incidenti": "Incydenty",
+      "Fornitori": "Dostawcy",
+      "Formazione": "Szkolenia",
+      "Governance": "Zarządzanie",
+      "Audit": "Audyt",
+      "PDCA": "PDCA",
+      "Reporting": "Raportowanie"
+    },
+    "policy": {
+      "title": "Polityka terminów",
+      "new_policy": "+ Nowa polityka",
+      "create_title": "Utwórz politykę z domyślnymi regułami",
+      "site_optional": "Zakład (opcjonalnie)",
+      "global": "Globalny (wszystkie zakłady)",
+      "all": "Wszystkie",
+      "policy_name": "Nazwa polityki",
+      "create_btn": "Utwórz",
+      "create_error": "Błąd tworzenia. Spróbuj ponownie.",
+      "site_label": "Zakład",
+      "policy_label": "Polityka",
+      "active_suffix": "(aktywna)",
+      "no_policy": "Brak skonfigurowanej polityki. Utwórz nową politykę z domyślnymi regułami.",
+      "days_before": "dni wcześniej",
+      "col_rule": "Reguła",
+      "col_frequency": "Częstotliwość",
+      "col_alert": "Alert",
+      "col_active": "Aktywna"
+    },
+    "required_docs": {
+      "title": "Wymagane dokumenty",
+      "all_sites": "Wszystkie zakłady",
+      "no_framework": "Brak frameworka przypisanego do tego zakładu. Przejdź do M01 Zakład, aby aktywować framework.",
+      "status_all": "Wszystkie",
+      "status_red": "Brakujące",
+      "status_yellow": "Niekompletne",
+      "status_green": "OK",
+      "approved_label": "Zatwierdzone",
+      "total_suffix": "z {{total}} łącznie",
+      "incomplete_label": "Niekompletne",
+      "missing_label": "Brakujące",
+      "traffic_present_approved": "Obecny i zatwierdzony",
+      "traffic_draft": "Obecny (szkic/weryfikacja)",
+      "traffic_missing": "Brakujący",
+      "mandatory_badge": "Obow.",
+      "no_doc": "— brak powiązanego dokumentu",
+      "review_date": "Przegląd: {{date}}",
+      "no_results_framework": "Brak wymaganych dokumentów dla tego frameworka",
+      "no_results_filter": "Brak wyników dla wybranego filtru",
+      "col_doc": "Dokument",
+      "col_type": "Typ",
+      "col_clause": "Klauzula",
+      "col_present": "Dokument obecny",
+      "col_status": "Status"
     }
   },
   "training": {
-    "title": "Operations — Training",
-    "empty": "No courses recorded",
+    "title": "Operacje — Szkolenia",
+    "empty": "Brak zarejestrowanych kursów",
     "sources": {
-      "interno": "internal",
+      "interno": "wewnętrzne",
       "kb4": "kb4",
-      "esterno": "external"
+      "esterno": "zewnętrzne"
     },
     "new": {
-      "open": "+ New course",
-      "title": "New course",
-      "submit": "Create course"
+      "open": "+ Nowy kurs",
+      "title": "Nowy kurs",
+      "submit": "Utwórz kurs"
     },
     "fields": {
-      "title": "Title",
-      "description": "Description",
-      "source": "Source",
-      "duration_minutes": "Duration (minutes)",
-      "deadline": "Deadline",
-      "mandatory": "Mandatory"
+      "title": "Tytuł",
+      "description": "Opis",
+      "source": "Źródło",
+      "duration_minutes": "Czas trwania (minuty)",
+      "deadline": "Termin",
+      "mandatory": "Obowiązkowy"
     },
     "table": {
-      "title": "Course title",
-      "source": "Source",
-      "mandatory": "Mandatory",
-      "duration": "Duration (min)",
-      "deadline": "Deadline",
+      "title": "Tytuł kursu",
+      "source": "Źródło",
+      "mandatory": "Obowiązkowy",
+      "duration": "Czas trwania (min)",
+      "deadline": "Termin",
       "status": "Status"
     }
   },
   "incidents": {
-    "title": "Operations — Incidents",
-    "empty": "No incidents recorded",
+    "title": "Operacje — Incydenty",
+    "empty": "Brak zarejestrowanych incydentów",
     "table": {
-      "title": "Title",
-      "severity": "Severity",
+      "title": "Tytuł",
+      "severity": "Dotkliwość",
       "nis2": "NIS2",
       "status": "Status",
-      "detected_at": "Detected at"
+      "detected_at": "Wykryto"
     },
     "fields": {
-      "plant": "Site",
-      "title": "Title",
-      "description": "Description",
-      "severity": "Severity",
-      "nis2_notifiable": "NIS2 notification",
-      "detected_at": "Detected at"
+      "plant": "Zakład",
+      "title": "Tytuł",
+      "description": "Opis",
+      "severity": "Dotkliwość",
+      "nis2_notifiable": "Powiadomienie NIS2",
+      "detected_at": "Wykryto"
     },
     "new": {
-      "open": "+ New incident",
-      "title": "New incident",
-      "submit": "Create incident"
+      "open": "+ Nowy incydent",
+      "title": "Nowy incydent",
+      "submit": "Utwórz incydent"
     },
     "help": {
-      "title": "Incident management — M09",
-      "description": "Track security incidents with an integrated NIS2 timer.\nClosing requires an approved RCA. On close, a PDCA and a Lesson Learned are created automatically.",
+      "title": "Zarządzanie incydentami — M09",
+      "description": "Śledź incydenty bezpieczeństwa ze zintegrowanym licznikiem NIS2.",
       "steps": {
-        "1": "Open an incident with severity and NIS2 flag (yes/no/to be assessed)",
-        "2": "A 24h timer starts automatically for the preliminary NIS2 notification",
-        "3": "Change status to \"in_analisi\" and assign a team",
-        "4": "Fill in the RCA (Root Cause Analysis) and get it approved",
-        "5": "Close the incident: post-incident PDCA and Lesson Learned are created automatically"
+        "1": "Otwórz incydent z dotkliwością i flagą NIS2 (tak/nie/do oceny)",
+        "2": "Automatycznie uruchamia się 24-godzinny timer dla wstępnego powiadomienia NIS2",
+        "3": "Zmień status na \"w analizie\" i przypisz zespół",
+        "4": "Wypełnij ARN (Analiza Przyczyny Źródłowej) i uzyskaj zatwierdzenie",
+        "5": "Zamknij incydent: PDCA post-incydentu i Lekcja wyuczona tworzone automatycznie"
       },
       "connections": {
         "pdca": {
           "module": "M11 PDCA",
-          "relation": "Post-incident PDCA auto-created on close"
+          "relation": "PDCA post-incydentu automatycznie tworzony przy zamknięciu"
         },
         "lessons": {
           "module": "M12 Lessons",
-          "relation": "Lesson learned auto-created with RCA summary"
+          "relation": "Lekcja wyuczona automatycznie tworzona z podsumowaniem ARN"
         },
         "tasks": {
           "module": "M08 Task",
-          "relation": "RCA task auto-created on open"
+          "relation": "Zadanie ARN automatycznie tworzone przy otwarciu"
         }
       },
       "config_needed": {
-        "1": "Appoint the NIS2 contact in M00 Governance"
+        "1": "Wyznaczyć kontakt NIS2 w M00 Governance"
       }
     }
+  },
+  "competency": {
+    "title": "Kompetencje",
+    "subtitle": "ISO 27001 § 7.2 — Wymagania kompetencyjne dla ról i śledzenie kompetencji indywidualnych.",
+    "tabs": {
+      "requirements": "Wymagania dla ról",
+      "users": "Kompetencje użytkowników"
+    },
+    "levels": {
+      "1": "1 — Świadomość",
+      "2": "2 — Praktyk",
+      "3": "3 — Ekspert"
+    },
+    "evidence_types": {
+      "certification": "Certyfikacja",
+      "training": "Szkolenie",
+      "experience": "Doświadczenie",
+      "assessment": "Ocena"
+    },
+    "all_roles": "Wszystkie role",
+    "add_requirement": "+ Nowe wymaganie",
+    "requirements_count": "{{count}} wymagań",
+    "no_requirements": "Nie znaleziono wymagań.",
+    "req_modal_edit": "Edytuj wymaganie",
+    "req_modal_new": "Nowe wymaganie",
+    "role_label": "Rola",
+    "level_required": "Wymagany poziom",
+    "competency_label": "Kompetencja",
+    "competency_placeholder": "np. ISO 27001 Lead Implementer",
+    "evidence_type_label": "Typ dowodu",
+    "mandatory_label": "Obowiązkowe",
+    "notes_label": "Notatki",
+    "save_error": "Błąd podczas zapisywania.",
+    "col_competency": "Kompetencja",
+    "col_level": "Poziom",
+    "col_evidence": "Dowód",
+    "col_mandatory": "Obow.",
+    "delete_requirement": "Usunąć to wymaganie?",
+    "all_users": "Wszyscy użytkownicy",
+    "add_competency": "+ Dodaj kompetencję",
+    "comp_modal_edit": "Edytuj kompetencję",
+    "comp_modal_new": "Dodaj kompetencję użytkownika",
+    "user_label": "Użytkownik",
+    "level_label": "Poziom",
+    "cert_body_label": "Organ certyfikujący",
+    "cert_body_placeholder": "np. BSI, Bureau Veritas",
+    "obtained_at_label": "Data uzyskania",
+    "valid_until_label": "Wygaśnięcie",
+    "delete_competency": "Usunąć tę kompetencję?",
+    "no_competencies": "Brak zarejestrowanych kompetencji.",
+    "col_user": "Użytkownik",
+    "col_obtained": "Uzyskano",
+    "col_validity": "Ważność",
+    "col_verified_by": "Zweryfikowane przez",
+    "validity_expired": "Wygasła",
+    "validity_expiring": "Wygasa za {{days}} dni",
+    "validity_valid": "Ważna"
+  },
+  "notification_settings": {
+    "title": "Profile powiadomień e-mail",
+    "subtitle": "Wybierz, ile alertów otrzymuje każda rola. Powiadomienia są wysyłane do użytkowników z tą rolą i dostępem do witryny zdarzenia.",
+    "reset_defaults": "Zresetuj wszystko do wartości domyślnych",
+    "scope_note": "Powiadomienia respektują zakres RBAC (M02), a nie zakres roli normatywnej (M00 Zarządzanie).",
+    "no_email_config": "Serwer e-mail nie jest skonfigurowany — powiadomienia nie będą wysyłane.",
+    "configure_email": "Skonfiguruj e-mail →",
+    "what_profile_includes": "Co zawiera każdy profil?",
+    "profiles": {
+      "silenzioso": "Cichy",
+      "essenziale": "Podstawowy",
+      "standard": "Standardowy",
+      "completo": "Pełny",
+      "custom": "Niestandardowy"
+    },
+    "event_groups": {
+      "risks_security": "Ryzyka i bezpieczeństwo",
+      "operations": "Operacje",
+      "governance": "Zarządzanie",
+      "suppliers_risk": "Dostawcy i ryzyko"
+    },
+    "col_role": "Rola GRC",
+    "col_profile": "Profil",
+    "col_status": "Status",
+    "events_count": "{{count}} zdarzeń",
+    "customize": "Dostosuj",
+    "customize_title": "Dostosuj powiadomienia — {{role}}",
+    "customize_subtitle": "Wybierz dokładnie, które zdarzenia chcesz otrzymywać dla tej roli.",
+    "reset_to_standard": "Przywróć profil Standard",
+    "save_custom": "Zapisz dostosowanie",
+    "save_error": "Błąd podczas zapisywania.",
+    "confirm_reset_title": "Czy jesteś pewien?",
+    "confirm_reset_body": "Wszystkie niestandardowe profile zostaną utracone i zresetowane do wartości domyślnych.",
+    "reset_confirm": "Resetuj",
+    "event_col": "Zdarzenie",
+    "loading": "Ładowanie..."
+  },
+  "email_settings": {
+    "title": "Konfiguracja e-mail",
+    "no_permission": "Nie masz uprawnień do dostępu do tej strony.",
+    "status_not_tested": "Nie przetestowano",
+    "status_ok": "Połączenie zweryfikowane",
+    "status_failed": "Ostatni test nieudany",
+    "provider_label": "Dostawca",
+    "config_name_label": "Nazwa konfiguracji",
+    "smtp_host_label": "Host SMTP",
+    "port_label": "Port",
+    "use_tls": "Użyj TLS",
+    "use_ssl": "Użyj SSL",
+    "use_auth": "Uwierzytelnianie SMTP",
+    "anonymous_relay": "Anonimowy przekaźnik — żadna komenda AUTH nie jest wysyłana do serwera",
+    "smtp_username": "Nazwa użytkownika SMTP",
+    "password_label": "Hasło",
+    "password_placeholder": "Pozostaw puste, aby nie zmieniać",
+    "from_email_label": "Adres nadawcy",
+    "from_email_hint": "Będzie wyświetlany jako nadawca w e-mailach (np. GRC Platform <noreply@firma.com>).",
+    "password_security_note": "Hasło SMTP jest zaszyfrowane AES-256 w bazie danych. Nigdy nie jest wyświetlane po zapisaniu.",
+    "test_recipient_label": "Odbiorca testowego e-maila",
+    "test_recipient_placeholder": "twoj@email.com",
+    "send_test": "Wyślij testowy e-mail",
+    "testing": "Testowanie...",
+    "save_config": "Zapisz konfigurację",
+    "saving": "Zapisywanie...",
+    "save_success": "Konfiguracja e-mail zapisana pomyślnie.",
+    "save_error": "Błąd podczas zapisywania konfiguracji.",
+    "test_success": "Testowy e-mail wysłany pomyślnie.",
+    "test_failed": "Test konfiguracji nieudany.",
+    "test_error": "Błąd podczas testu konfiguracji.",
+    "no_config_error": "Brak aktywnej konfiguracji do przetestowania.",
+    "no_recipient_error": "Wprowadź adres e-mail odbiorcy do testu.",
+    "show_password": "Pokaż",
+    "hide_password": "Ukryj",
+    "provider_office365": "Microsoft Office 365",
+    "provider_gmail": "Google Gmail / Workspace"
+  },
+  "bia": {
+    "rto_ok": "RTO OK",
+    "rto_warning": "RTO ⚠",
+    "rto_critical": "RTO ✗",
+    "new_process_title": "Nowy proces krytyczny",
+    "site_label": "Zakład *",
+    "process_name_label": "Nazwa procesu *",
+    "criticality_label": "Krytyczność (1-5)",
+    "downtime_cost_label": "Koszt przestoju/godz. (€)",
+    "bcp_bia_section": "Cele BCP/BIA (ISO 22301)",
+    "mtpd_label": "MTPD (godziny)",
+    "mbco_label": "MBCO (%)",
+    "rto_label": "Cel RTO (godziny)",
+    "rpo_label": "Cel RPO (godziny)",
+    "save_error": "Błąd podczas zapisywania",
+    "save_changes": "Zapisz zmiany",
+    "create_process": "Utwórz proces",
+    "filter_all": "Wszystkie",
+    "filter_validated": "Zwalidowano",
+    "mtpd_placeholder": "np. 48",
+    "mbco_placeholder": "np. 70",
+    "rto_placeholder": "np. 24",
+    "rpo_placeholder": "np. 4"
+  },
+  "assets": {
+    "criticality_1_label": "Znikomy",
+    "criticality_2_label": "Niska",
+    "criticality_3_label": "Średnia",
+    "criticality_4_label": "Wysoka",
+    "criticality_5_label": "Krytyczna",
+    "criticality_1_desc": "Zasób niekrytyczny. Przestój tolerowany powyżej 7 dni. BCP nie wymagane.",
+    "criticality_2_desc": "Ograniczony wpływ. Przestój tolerowany 3-7 dni. BCP nie konieczne.",
+    "criticality_3_desc": "Wpływ operacyjny. Przestój tolerowany 24-72 godziny. BCP zalecane.",
+    "criticality_4_desc": "Znaczący wpływ na produkcję lub klientów. Przestój tolerowany 4-24 godziny. BCP obowiązkowe.",
+    "criticality_5_desc": "Zasób podstawowy. Przestój tolerowany mniej niż 4 godziny. BCP obowiązkowe z testem półrocznym.",
+    "change_days_ago": "Zmiana {{days}} dni temu",
+    "reassessment_required": "Wymagana ponowna ocena",
+    "last_change_registered": "Ostatnia zarejestrowana zmiana",
+    "open_ticket": "Otwórz zgłoszenie →",
+    "ref_label": "Ref:",
+    "date_label": "Data:",
+    "description_label": "Opis:",
+    "reassessment_since": "Ponowna ocena wymagana od {{date}}",
+    "mark_reassessed": "Oznacz jako ponownie oceniony",
+    "change_registered_title": "Zmiana zarejestrowana",
+    "register_change_title": "Zarejestruj zmianę",
+    "register_change_btn": "Zarejestruj",
+    "registering": "Rejestrowanie...",
+    "register_error": "Błąd podczas rejestracji",
+    "new_asset_title": "Nowy zasób {{type}}",
+    "bia_processes_label": "Powiązane procesy BIA",
+    "bia_processes_hint": "Wybierz jeden lub więcej procesów BIA zależnych od tego zasobu (IT lub OT).",
+    "criticality_guide_title": "ℹ️ Jak wybrać krytyczność",
+    "criticality_table_value": "Wartość",
+    "criticality_table_label": "Etykieta",
+    "criticality_table_downtime": "Tolerowany przestój",
+    "criticality_table_bcp": "BCP",
+    "bcp_not_required": "Nie",
+    "bcp_recommended": "Zalecane",
+    "bcp_mandatory": "Obowiązkowe",
+    "downtime_7d_plus": "> 7 dni",
+    "downtime_3_7d": "3–7 dni",
+    "downtime_24_72h": "24–72 godziny",
+    "downtime_4_24h": "4–24 godziny",
+    "downtime_sub_4h": "< 4 godziny",
+    "change_ticket_placeholder": "Odniesienie do zgłoszenia (np. JIRA-1234) *",
+    "change_desc_placeholder": "Krótki opis zmiany",
+    "change_url_placeholder": "URL zgłoszenia (opcjonalne)",
+    "deployment_label": "Typ wdrożenia *",
+    "deploy_on_prem": "On-premise",
+    "deploy_iaas": "IaaS (VM, sieć w chmurze)",
+    "deploy_paas": "PaaS (DB, pamięć, funkcje)",
+    "deploy_saas": "SaaS (aplikacja chmurowa)",
+    "provider_label": "Dostawca",
+    "provider_placeholder": "Microsoft, AWS, SAP…",
+    "service_name_label": "Nazwa usługi",
+    "service_placeholder": "Microsoft 365, Salesforce, SAP S/4HANA…",
+    "fqdn_label": "FQDN",
+    "fqdn_placeholder": "serwer.domena.pl",
+    "os_label": "System operacyjny",
+    "os_placeholder": "Windows Server 2022",
+    "eol_label": "Data EOL (koniec wsparcia)",
+    "data_classification_label": "Klasyfikacja danych",
+    "data_class_public": "Publiczny",
+    "data_class_internal": "Wewnętrzny",
+    "data_class_confidential": "Poufny",
+    "data_class_restricted": "Zastrzeżony",
+    "internet_exposed_label": "Eksponowany w Internecie",
+    "ot_category_label": "Kategoria *",
+    "purdue_level_label": "Poziom Purdue *",
+    "vendor_label": "Dostawca"
+  },
+  "audit_prep": {
+    "finding_major": "MAJOR NC",
+    "finding_minor": "MINOR NC",
+    "finding_obs": "Obserwacja",
+    "finding_opp": "Szansa",
+    "kpi_major_open": "Otwarte MAJOR NC",
+    "kpi_minor_open": "Otwarte Minor NC",
+    "kpi_overdue": "przeterminowane wyniki",
+    "add_finding": "+ Dodaj wynik",
+    "type_label": "Typ *",
+    "audit_date_label": "Data audytu *",
+    "title_label": "Tytuł *",
+    "description_label": "Opis",
+    "auditor_label": "Nazwa audytora",
+    "create_finding": "Utwórz wynik",
+    "no_findings": "Brak zarejestrowanych wyników",
+    "close_notes_placeholder": "Uwagi o zamknięciu (obowiązkowe dla Major/Minor, min 20 znaków)",
+    "evidence_desc_placeholder": "Opis dowodu *",
+    "evidence_missing": "Brakujący",
+    "evidence_present": "Obecny",
+    "evidence_expired": "Wygasły",
+    "evidence_expiry_placeholder": "Wygaśnięcie",
+    "program_plant_placeholder": "ID zakładu",
+    "program_title_placeholder": "Tytuł programu *",
+    "program_objectives_placeholder": "Cele"
+  },
+  "risk": {
+    "no_process_selected": "Nie wybrano procesu",
+    "level_critical": "Krytyczny",
+    "score_inherent": "Nieodłączne: wynik {{score}}",
+    "score_residual": "Resztkowe: wynik {{score}}",
+    "suggest_residual": "💡 Zasugeruj ryzyko resztkowe",
+    "controls_reduction": "Redukcja kontroli:",
+    "bcp_extra": "Dodatkowe BCP:",
+    "total_label": "Łącznie:",
+    "accepted_by_on": "Zaakceptowane przez {{name}} dnia {{date}}",
+    "expired_on": "wygasło dnia",
+    "expires_on": "wygasa dnia",
+    "accept_risk_prompt": "⚠️ Formalnie zaakceptuj ryzyko",
+    "accept_risk_title": "Formalna akceptacja ryzyka resztkowego",
+    "accept_note_label": "Obowiązkowa notatka",
+    "accept_note_critical_hint": "(min 50 znaków dla ryzyk krytycznych)",
+    "confirm_acceptance": "Potwierdź akceptację",
+    "treatment_mitigare": "Ograniczć",
+    "treatment_accettare": "Zaakceptować",
+    "treatment_trasferire": "Przenieść",
+    "treatment_trasferire_ext": "Przenieść (np. ubezpieczenie)",
+    "treatment_evitare": "Unikać",
+    "filter_all": "Wszystkie",
+    "status_archiviato": "Zarchiwizowane",
+    "probability_label": "Prawdopodobieństwo *",
+    "impact_label": "Wpływ *",
+    "acceptance_expiry_placeholder": "Wygaśnięcie akceptacji",
+    "action_desc_placeholder": "Opis działania *",
+    "bcp_test_date_placeholder": "Data ostatniego ważnego testu *",
+    "scenario_placeholder": "np. Ransomware na serwerze produkcyjnym MES",
+    "error_generic": "Błąd",
+    "wizard_title": "Kreator BIA → Ryzyko → BCP",
+    "wizard_subtitle": "Utwórz kolejno: proces krytyczny, scenariusz ryzyka i spójny plan BCP.",
+    "wizard_step_bia": "Proces BIA",
+    "wizard_step_risk": "Scenariusz ryzyka",
+    "wizard_step_bcp": "Plan BCP",
+    "wizard_create_new": "Utwórz nowy",
+    "wizard_bcp_process_label": "Proces:",
+    "wizard_bcp_created": "Plan utworzony i połączony z procesem.",
+    "wizard_criticality_legend": "Krytyczność 1–5:",
+    "wizard_continue_risk": "Kontynuuj z ryzykiem",
+    "wizard_save_risk_continue": "Zapisz ryzyko i kontynuuj",
+    "wizard_create_bcp": "Utwórz plan BCP"
+  },
+  "pdca": {
+    "source_incident": "Incydent",
+    "source_audit": "Audyt",
+    "source_management_review": "Przegląd zarządzania",
+    "source_risk": "Ryzyko",
+    "source_manual": "Ręcznie",
+    "scope_plant": "Zakład",
+    "scope_org": "Organizacja",
+    "scope_process": "Proces"
+  },
+  "bcp": {
+    "test_frequency_label": "Częstotliwość testu",
+    "status_superato": "Zaliczony"
+  },
+  "audit_trail": {
+    "levels_guide": "Przewodnik po poziomach",
+    "filter_all": "Wszystkie",
+    "entity_placeholder": "np. zakład"
+  },
+  "suppliers": {
+    "filter_all": "Wszystkie"
   }
 }
