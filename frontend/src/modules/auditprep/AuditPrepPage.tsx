@@ -17,6 +17,14 @@ import i18n from "../../i18n";
 
 interface Framework { id: string; name: string; code: string; }
 
+/** Human-readable label for framework codes, with TISAX L3 unified scope note. */
+function fwLabel(code: string | undefined | null): string {
+  if (!code) return "—";
+  if (code === "TISAX_L3") return "TISAX AL3 (L2+L3)";
+  if (code === "TISAX_L2") return "TISAX AL2";
+  return code;
+}
+
 function ReadinessBar({ score }: { score: number | null }) {
   if (score === null) return <span className="text-gray-400 text-xs">—</span>;
   const color = score >= 80 ? "bg-green-500" : score >= 50 ? "bg-yellow-400" : "bg-red-500";
@@ -425,17 +433,27 @@ function NewPrepModal({ frameworks, plants, onClose }: { frameworks: Framework[]
 
           {/* TISAX level sub-selector */}
           {fwKey === "TISAX" && (
-            <div className="flex gap-3">
-              {(["L2", "L3"] as const).map(l => (
-                <label key={l} className={`flex-1 flex items-start gap-2 border rounded-lg px-3 py-2 cursor-pointer transition-colors ${tisaxLevel === l ? "border-primary-500 bg-primary-50" : "border-gray-200 hover:border-gray-300"}`}>
-                  <input type="radio" name="tisax_al" value={l} checked={tisaxLevel === l} onChange={() => setTisaxLevel(l)} className="mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-800">Assessment Level {l}</p>
-                    <p className="text-xs text-gray-500">{l === "L2" ? "Alta protezione" : "Altissima protezione + prototipi"}</p>
-                  </div>
-                </label>
-              ))}
-            </div>
+            <>
+              <div className="flex gap-3">
+                {(["L2", "L3"] as const).map(l => (
+                  <label key={l} className={`flex-1 flex items-start gap-2 border rounded-lg px-3 py-2 cursor-pointer transition-colors ${tisaxLevel === l ? "border-primary-500 bg-primary-50" : "border-gray-200 hover:border-gray-300"}`}>
+                    <input type="radio" name="tisax_al" value={l} checked={tisaxLevel === l} onChange={() => setTisaxLevel(l)} className="mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-800">Assessment Level {l}</p>
+                      <p className="text-xs text-gray-500">{l === "L2" ? "Alta protezione — 40 controlli" : "Altissima protezione + prototipi — 68 controlli (L2+L3)"}</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+              {tisaxLevel === "L3" && (
+                <div className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-xs text-blue-800">
+                  <span className="mt-0.5 shrink-0">ℹ</span>
+                  <span>
+                    <strong>Perimetro audit AL3 = L2 + L3.</strong> L'audit deve coprire tutti e 68 i controlli (40 AL2 + 28 AL3). I finding possono riferirsi a controlli di entrambi i livelli.
+                  </span>
+                </div>
+              )}
+            </>
           )}
 
           <div className="grid grid-cols-2 gap-3">
@@ -475,6 +493,20 @@ function AuditProgramSection({ plantId, frameworks }: { plantId?: string; framew
   const qc = useQueryClient();
   const [showNew, setShowNew] = useState(false);
   const [form, setForm] = useState<Partial<AuditProgram>>({});
+  const [progFwKey, setProgFwKey] = useState("");      // "TISAX" | framework.id | ""
+  const [progTisaxLevel, setProgTisaxLevel] = useState<"L2" | "L3">("L2");
+
+  const hasTisax = frameworks.some(f => f.code.startsWith("TISAX"));
+  const nonTisax = frameworks.filter(f => !f.code.startsWith("TISAX"));
+
+  function resolvedProgFrameworkId(): string | undefined {
+    if (!progFwKey) return undefined;
+    if (progFwKey === "TISAX") {
+      const code = progTisaxLevel === "L2" ? "TISAX_L2" : "TISAX_L3";
+      return frameworks.find(f => f.code === code)?.id;
+    }
+    return progFwKey;
+  }
 
   const params: Record<string, string> = {};
   if (plantId) params.plant = plantId;
@@ -517,11 +549,12 @@ function AuditProgramSection({ plantId, frameworks }: { plantId?: string; framew
             </div>
             <div>
               <label className="block text-xs text-gray-600 mb-1">Framework *</label>
-              <select value={form.framework ?? ""}
-                onChange={e => setForm(p => ({ ...p, framework: e.target.value }))}
+              <select value={progFwKey}
+                onChange={e => setProgFwKey(e.target.value)}
                 className="w-full border rounded px-2 py-1.5 text-sm">
                 <option value="">— seleziona —</option>
-                {frameworks.map(f => <option key={f.id} value={f.id}>{f.code}</option>)}
+                {hasTisax && <option value="TISAX">TISAX — VDA ISA 6.0</option>}
+                {nonTisax.map(f => <option key={f.id} value={f.id}>{f.code} — {f.name}</option>)}
               </select>
             </div>
             <div>
@@ -531,6 +564,28 @@ function AuditProgramSection({ plantId, frameworks }: { plantId?: string; framew
                 className="w-full border rounded px-2 py-1.5 text-sm" />
             </div>
           </div>
+          {/* TISAX level sub-selector */}
+          {progFwKey === "TISAX" && (
+            <>
+              <div className="flex gap-2">
+                {(["L2", "L3"] as const).map(l => (
+                  <label key={l} className={`flex-1 flex items-start gap-2 border rounded px-2 py-1.5 cursor-pointer transition-colors ${progTisaxLevel === l ? "border-primary-500 bg-primary-50" : "border-gray-200 hover:border-gray-300"}`}>
+                    <input type="radio" name="prog_tisax_al" value={l} checked={progTisaxLevel === l} onChange={() => setProgTisaxLevel(l)} className="mt-0.5" />
+                    <div>
+                      <p className="text-xs font-medium text-gray-800">Assessment Level {l}</p>
+                      <p className="text-xs text-gray-500">{l === "L2" ? "40 controlli" : "68 controlli (L2+L3)"}</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+              {progTisaxLevel === "L3" && (
+                <div className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded px-2 py-1.5 text-xs text-blue-800">
+                  <span className="shrink-0">ℹ</span>
+                  <span><strong>Programma AL3 = perimetro L2+L3.</strong> Il programma annuale deve pianificare la copertura di tutti e 68 i controlli.</span>
+                </div>
+              )}
+            </>
+          )}
           <input placeholder="Titolo programma *" value={form.title ?? ""}
             onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
             className="w-full border rounded px-2 py-1.5 text-sm" />
@@ -538,8 +593,8 @@ function AuditProgramSection({ plantId, frameworks }: { plantId?: string; framew
             onChange={e => setForm(p => ({ ...p, objectives: e.target.value }))}
             className="w-full border rounded px-2 py-1.5 text-sm" />
           <div className="flex gap-2">
-            <button onClick={() => createMutation.mutate({ ...form, plant: form.plant || plantId })}
-              disabled={createMutation.isPending || !form.title || !form.year || !form.framework}
+            <button onClick={() => createMutation.mutate({ ...form, plant: form.plant || plantId, framework: resolvedProgFrameworkId() })}
+              disabled={createMutation.isPending || !form.title || !form.year || !progFwKey}
               className="px-3 py-1.5 bg-primary-600 text-white text-xs rounded hover:bg-primary-700 disabled:opacity-50">
               {createMutation.isPending ? "..." : "Crea programma"}
             </button>
@@ -783,7 +838,7 @@ export function AuditPrepPage() {
                         {prep.plant || "—"}
                       </td>
                       <td className="px-4 py-3 text-gray-600">
-                        {prep.framework || "—"}
+                        {fwLabel(prep.framework_code)}
                       </td>
                       <td className="px-4 py-3 text-gray-500 text-xs">
                         {prep.audit_date

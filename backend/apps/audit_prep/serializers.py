@@ -10,10 +10,14 @@ class EvidenceItemSerializer(serializers.ModelSerializer):
 
 class AuditPrepSerializer(serializers.ModelSerializer):
     evidence_items = EvidenceItemSerializer(many=True, read_only=True)
+    framework_code = serializers.SerializerMethodField()
 
     class Meta:
         model = AuditPrep
         fields = "__all__"
+
+    def get_framework_code(self, obj):
+        return obj.framework.code if obj.framework_id else None
 
 
 class AuditFindingSerializer(serializers.ModelSerializer):
@@ -42,10 +46,14 @@ class AuditProgramSerializer(serializers.ModelSerializer):
     completion_pct = serializers.FloatField(read_only=True)
     next_planned_audit = serializers.SerializerMethodField(read_only=True)
     approved_by_name = serializers.SerializerMethodField(read_only=True)
+    framework_code = serializers.SerializerMethodField()
 
     class Meta:
         model = AuditProgram
         fields = "__all__"
+
+    def get_framework_code(self, obj):
+        return obj.framework.code if obj.framework_id else None
 
     def get_next_planned_audit(self, obj):
         return obj.next_planned_audit

@@ -1,7 +1,7 @@
 import { apiClient } from "../client";
 
 export interface AuditPrep {
-  id: string; plant: string; framework: string;
+  id: string; plant: string; framework: string; framework_code: string;
   title: string; audit_date: string | null; auditor_name: string;
   status: "in_corso"|"completato"|"archiviato";
   readiness_score: number | null; owner: string | null;
@@ -65,6 +65,7 @@ export interface AuditProgram {
   id: string;
   plant: string;
   framework: string;
+  framework_code: string;
   year: number;
   title: string;
   status: "bozza"|"approvato"|"in_corso"|"completato";
