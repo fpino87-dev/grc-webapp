@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../../api/client";
 
@@ -21,26 +22,7 @@ type ProfilesCatalog = {
 
 // ── Costanti ────────────────────────────────────────────────────────────────
 
-const ROLE_LABELS: Record<string, string> = {
-  ciso:               "CISO",
-  compliance_officer: "Compliance Officer",
-  risk_manager:       "Risk Manager",
-  plant_manager:      "Plant Manager",
-  control_owner:      "Control Owner",
-  internal_auditor:   "Auditor Interno",
-  external_auditor:   "Auditor Esterno",
-  nis2_contact:       "Contatto NIS2",
-  isms_manager:       "ISMS Manager",
-  dpo:                "DPO",
-};
-
-const PROFILE_OPTIONS = [
-  { value: "silenzioso", label: "Silenzioso" },
-  { value: "essenziale", label: "Essenziale" },
-  { value: "standard",   label: "Standard" },
-  { value: "completo",   label: "Completo" },
-  { value: "custom",     label: "Personalizzato" },
-];
+const PROFILE_VALUES = ["silenzioso", "essenziale", "standard", "completo", "custom"] as const;
 
 const PROFILE_COLOR: Record<string, string> = {
   silenzioso: "bg-gray-100 text-gray-600",
@@ -51,21 +33,21 @@ const PROFILE_COLOR: Record<string, string> = {
 };
 
 // Gruppi eventi per il modal personalizzazione
-const EVENT_GROUPS = [
+const EVENT_GROUPS_KEYS = [
   {
-    label: "Rischi e Sicurezza",
+    labelKey: "risks_security" as const,
     events: ["risk_red", "finding_major", "finding_minor", "incident_nis2", "incident_closed"],
   },
   {
-    label: "Operatività",
+    labelKey: "operations" as const,
     events: ["task_assigned", "task_overdue", "evidence_expired", "document_approval", "bcp_test_failed"],
   },
   {
-    label: "Governance",
+    labelKey: "governance" as const,
     events: ["role_expiring", "role_vacant", "pdca_blocked", "management_review"],
   },
   {
-    label: "Fornitori e Rischio",
+    labelKey: "suppliers_risk" as const,
     events: ["supplier_assessment", "risk_accepted"],
   },
 ];
@@ -81,6 +63,7 @@ function CustomModal({
   eventLabels: Record<string, string>;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [selected, setSelected] = useState<string[]>(
     rp.profile === "custom" ? rp.custom_events : rp.active_events
@@ -96,7 +79,7 @@ function CustomModal({
       onClose();
     },
     onError: (e: any) => {
-      setError(e?.response?.data?.error || "Errore nel salvataggio.");
+      setError(e?.response?.data?.error || t("notification_settings.save_error"));
     },
   });
 
@@ -120,17 +103,17 @@ function CustomModal({
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
         <h3 className="text-lg font-semibold mb-1">
-          Personalizza notifiche — {ROLE_LABELS[rp.grc_role] ?? rp.grc_role}
+          {t("notification_settings.customize_title", { role: t(`governance.roles.${rp.grc_role}`, rp.grc_role) })}
         </h3>
         <p className="text-xs text-gray-500 mb-4">
-          Seleziona esattamente quali eventi vuoi ricevere per questo ruolo.
+          {t("notification_settings.customize_subtitle")}
         </p>
 
         <div className="space-y-4">
-          {EVENT_GROUPS.map((group) => (
-            <div key={group.label}>
+          {EVENT_GROUPS_KEYS.map((group) => (
+            <div key={group.labelKey}>
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                {group.label}
+                {t(`notification_settings.event_groups.${group.labelKey}`)}
               </p>
               <div className="space-y-1.5">
                 {group.events.map((ev) => {
@@ -163,7 +146,7 @@ function CustomModal({
             disabled={resetMutation.isPending}
             className="text-xs text-gray-500 hover:text-gray-700 underline"
           >
-            Ripristina profilo Standard
+            {t("notification_settings.reset_to_standard")}
           </button>
           <div className="flex gap-2">
             <button
@@ -171,7 +154,7 @@ function CustomModal({
               onClick={onClose}
               className="px-3 py-1.5 border rounded text-sm text-gray-600 hover:bg-gray-50"
             >
-              Annulla
+              {t("actions.cancel")}
             </button>
             <button
               type="button"
@@ -179,7 +162,7 @@ function CustomModal({
               disabled={saveMutation.isPending}
               className="px-3 py-1.5 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
             >
-              {saveMutation.isPending ? "Salvataggio..." : "Salva personalizzazione"}
+              {saveMutation.isPending ? t("governance.workflow.saving") : t("notification_settings.save_custom")}
             </button>
           </div>
         </div>
@@ -198,6 +181,7 @@ const ALL_EVENTS_ORDERED = [
 ];
 
 function ProfilesAccordion({ catalog }: { catalog: ProfilesCatalog }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const profiles = ["essenziale", "standard", "completo"];
 
@@ -208,7 +192,7 @@ function ProfilesAccordion({ catalog }: { catalog: ProfilesCatalog }) {
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 text-sm font-medium text-gray-700"
       >
-        <span>Cosa include ogni profilo?</span>
+        <span>{t("notification_settings.what_profile_includes")}</span>
         <span className="text-gray-400">{open ? "▲" : "▼"}</span>
       </button>
       {open && (
@@ -216,7 +200,7 @@ function ProfilesAccordion({ catalog }: { catalog: ProfilesCatalog }) {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-white border-b border-gray-100">
-                <th className="text-left px-4 py-2 text-xs text-gray-500 font-medium">Evento</th>
+                <th className="text-left px-4 py-2 text-xs text-gray-500 font-medium">{t("notification_settings.event_col")}</th>
                 {profiles.map((p) => (
                   <th key={p} className="px-4 py-2 text-xs font-medium text-center">
                     <span className={`px-2 py-0.5 rounded-full ${PROFILE_COLOR[p]}`}>
@@ -255,6 +239,7 @@ function ProfilesAccordion({ catalog }: { catalog: ProfilesCatalog }) {
 // ── Pagina principale ────────────────────────────────────────────────────────
 
 export function NotificationSettingsPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [customModal, setCustomModal] = useState<RoleProfile | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
@@ -319,10 +304,9 @@ export function NotificationSettingsPage() {
     <div>
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">Profili di Notifica Email</h2>
+          <h2 className="text-xl font-semibold text-gray-900">{t("notification_settings.title")}</h2>
           <p className="text-sm text-gray-500 mt-1">
-            Scegli quanti avvisi riceve ogni ruolo. Le notifiche vengono inviate agli utenti
-            con quel ruolo e accesso al sito dell&apos;evento.
+            {t("notification_settings.subtitle")}
           </p>
         </div>
         <button
@@ -330,7 +314,7 @@ export function NotificationSettingsPage() {
           onClick={() => setConfirmReset(true)}
           className="px-3 py-1.5 border border-gray-300 text-sm text-gray-600 rounded hover:bg-gray-50"
         >
-          Reimposta tutti i default
+          {t("notification_settings.reset_defaults")}
         </button>
       </div>
 
@@ -338,10 +322,7 @@ export function NotificationSettingsPage() {
       <div className="mb-4 flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm text-blue-800">
         <span className="mt-0.5 flex-shrink-0">ℹ</span>
         <span>
-          Le notifiche rispettano lo <strong>scope RBAC (M02)</strong>, non l&apos;ambito del ruolo normativo (M00 Governance).
-          Un CISO con accesso <em>Globale</em> in M02 riceve notifiche per tutti i siti.
-          Un CISO assegnato a un solo sito riceve solo le notifiche di quel sito.
-          Configura gli accessi in <a href="/users" className="underline font-medium">Utenti → Accessi</a>.
+          {t("notification_settings.scope_note")}
         </span>
       </div>
 
@@ -350,9 +331,9 @@ export function NotificationSettingsPage() {
         <div className="mb-4 flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-amber-800">
           <span>⚠</span>
           <span>
-            Server email non configurato — le notifiche non verranno inviate.{" "}
+            {t("notification_settings.no_email_config")}{" "}
             <a href="/settings/email" className="underline font-medium">
-              Configura email →
+              {t("notification_settings.configure_email")}
             </a>
           </span>
         </div>
@@ -366,11 +347,11 @@ export function NotificationSettingsPage() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Ruolo GRC</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Profilo</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Stato</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-600">{t("notification_settings.col_role")}</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-600">{t("notification_settings.col_profile")}</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-600">{t("notification_settings.col_status")}</th>
               <th className="text-left px-4 py-3 font-medium text-gray-600">
-                <span className="sr-only">Personalizza</span>
+                <span className="sr-only">{t("notification_settings.customize")}</span>
               </th>
             </tr>
           </thead>
@@ -378,14 +359,14 @@ export function NotificationSettingsPage() {
             {isLoading && (
               <tr>
                 <td colSpan={4} className="px-4 py-8 text-center text-gray-400 text-sm">
-                  Caricamento...
+                  {t("notification_settings.loading")}
                 </td>
               </tr>
             )}
             {(profiles ?? []).map((rp) => (
               <tr key={rp.id} className="hover:bg-gray-50">
                 <td className="px-4 py-3 font-medium text-gray-800">
-                  {ROLE_LABELS[rp.grc_role] ?? rp.grc_role}
+                  {t(`governance.roles.${rp.grc_role}`, rp.grc_role)}
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
@@ -394,15 +375,15 @@ export function NotificationSettingsPage() {
                       onChange={(e) => handleProfileChange(rp, e.target.value)}
                       className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-primary-500"
                     >
-                      {PROFILE_OPTIONS.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
+                      {PROFILE_VALUES.map((val) => (
+                        <option key={val} value={val}>
+                          {t(`notification_settings.profiles.${val}`)}
                         </option>
                       ))}
                     </select>
                     {rp.profile !== "silenzioso" && (
                       <span className="text-xs text-gray-400">
-                        {rp.active_events.length} eventi
+                        {t("notification_settings.events_count", { count: rp.active_events.length })}
                       </span>
                     )}
                   </div>
@@ -431,7 +412,7 @@ export function NotificationSettingsPage() {
                         : "border-gray-200 text-gray-500 hover:bg-gray-50"
                     }`}
                   >
-                    Personalizza
+                    {t("notification_settings.customize")}
                   </button>
                 </td>
               </tr>
@@ -453,9 +434,9 @@ export function NotificationSettingsPage() {
       {confirmReset && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-6">
-            <h3 className="text-base font-semibold mb-2">Sei sicuro?</h3>
+            <h3 className="text-base font-semibold mb-2">{t("notification_settings.confirm_reset_title")}</h3>
             <p className="text-sm text-gray-600 mb-4">
-              Tutti i profili personalizzati verranno persi e reimpostati ai valori default.
+              {t("notification_settings.confirm_reset_body")}
             </p>
             <div className="flex justify-end gap-2">
               <button
@@ -463,7 +444,7 @@ export function NotificationSettingsPage() {
                 onClick={() => setConfirmReset(false)}
                 className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50"
               >
-                Annulla
+                {t("actions.cancel")}
               </button>
               <button
                 type="button"
@@ -471,7 +452,7 @@ export function NotificationSettingsPage() {
                 disabled={resetAllMutation.isPending}
                 className="px-4 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 disabled:opacity-50"
               >
-                {resetAllMutation.isPending ? "..." : "Reimposta"}
+                {resetAllMutation.isPending ? "..." : t("notification_settings.reset_confirm")}
               </button>
             </div>
           </div>

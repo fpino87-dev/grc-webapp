@@ -11,6 +11,7 @@ import { StatusBadge } from "../../components/ui/StatusBadge";
 import { AssistenteValutazione } from "../../components/ui/AssistenteValutazione";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
 import { RiskContinuityWizard } from "./RiskContinuityWizard";
+import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
 
 function matrixColor(p: number, i: number): string {
@@ -25,13 +26,14 @@ function matrixColor(p: number, i: number): string {
 }
 
 function RiskLevelBadge({ score }: { score: number | null }) {
+  const { t } = useTranslation();
   if (score === null) return <span className="text-gray-400 text-xs">—</span>;
   // Allineamento con il backend (RiskAssessment.risk_level):
   // - <= 7 verde
   // - <= 14 giallo
   // - > 14 rosso
   const cls = score > 14 ? "bg-red-100 text-red-800" : score > 7 ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800";
-  const label = score > 14 ? "Critico" : score > 7 ? "Medio" : "Basso";
+  const label = score > 14 ? t("risk.level_critical") : score > 7 ? t("eval_assistant.risk.zones.yellow.label") : t("eval_assistant.risk.zones.green.label");
   return <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${cls}`}>{score} — {label}</span>;
 }
 
@@ -47,10 +49,11 @@ function ProbImpactSelector({
   probability: number | null; impact: number | null;
   onChange: (field: "probability" | "impact", value: number) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="grid grid-cols-2 gap-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Probabilità *</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t("risk.probability_label")}</label>
         <div className="space-y-1">
           {[1,2,3,4,5].map(v => (
             <label key={v} className={`flex items-center gap-2 px-3 py-1.5 rounded cursor-pointer border text-sm transition-colors ${probability === v ? "border-primary-500 bg-primary-50 font-medium" : "border-gray-200 hover:border-gray-300"}`}>
@@ -61,7 +64,7 @@ function ProbImpactSelector({
         </div>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Impatto *</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t("risk.impact_label")}</label>
         <div className="space-y-1">
           {[1,2,3,4,5].map(v => (
             <label key={v} className={`flex items-center gap-2 px-3 py-1.5 rounded cursor-pointer border text-sm transition-colors ${impact === v ? "border-primary-500 bg-primary-50 font-medium" : "border-gray-200 hover:border-gray-300"}`}>
@@ -92,6 +95,7 @@ const RISK_LEVEL_ICONS: Record<string, string> = {
 };
 
 function RiskInherentResidualBadges({ assessment }: { assessment: RiskAssessment }) {
+  const { t } = useTranslation();
   if (!assessment.inherent_score && !assessment.score) return null;
 
   function riskLevelFromScore(score: number): "verde" | "giallo" | "rosso" {
@@ -105,7 +109,7 @@ function RiskInherentResidualBadges({ assessment }: { assessment: RiskAssessment
       {assessment.inherent_score != null && (
         <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium ${RISK_LEVEL_COLORS[assessment.inherent_risk_level ?? "verde"]}`}>
           <span>{RISK_LEVEL_ICONS[assessment.inherent_risk_level ?? "verde"]}</span>
-          <span>Inerente: score {assessment.inherent_score}</span>
+          <span>{t("risk.score_inherent", { score: assessment.inherent_score })}</span>
         </div>
       )}
       {assessment.inherent_score != null && assessment.score != null && (
@@ -116,7 +120,7 @@ function RiskInherentResidualBadges({ assessment }: { assessment: RiskAssessment
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium ${RISK_LEVEL_COLORS[riskLevelFromScore(assessment.score)]}`}
         >
           <span>{RISK_LEVEL_ICONS[riskLevelFromScore(assessment.score)]}</span>
-          <span>Residuo: score {assessment.score}</span>
+          <span>{t("risk.score_residual", { score: assessment.score })}</span>
         </div>
       )}
     </div>
@@ -124,6 +128,7 @@ function RiskInherentResidualBadges({ assessment }: { assessment: RiskAssessment
 }
 
 function SuggestResidualPanel({ assessment }: { assessment: RiskAssessment }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [suggestion, setSuggestion] = useState<SuggestResidualResult | null>(null);
 
@@ -146,7 +151,7 @@ function SuggestResidualPanel({ assessment }: { assessment: RiskAssessment }) {
           disabled={isFetching}
           className="text-xs px-3 py-1.5 border border-indigo-300 text-indigo-600 rounded hover:bg-indigo-50 disabled:opacity-50"
         >
-          {isFetching ? "Calcolo..." : "💡 Suggerisci rischio residuo"}
+          {isFetching ? t("common.loading") : t("risk.suggest_residual")}
         </button>
         {suggestion && (
           <span className="text-xs text-gray-600">{suggestion.reason}</span>
@@ -155,13 +160,13 @@ function SuggestResidualPanel({ assessment }: { assessment: RiskAssessment }) {
       {suggestion && (
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <span className="text-xs text-green-700 bg-green-50 border border-green-200 px-2 py-1 rounded">
-            Riduzione controlli: {suggestion.reduction_pct ?? 0}%
+            {t("risk.controls_reduction")} {suggestion.reduction_pct ?? 0}%
           </span>
           <span className="text-xs text-green-800 bg-green-50 border border-green-200 px-2 py-1 rounded">
-            Extra BCP: {suggestion.bcp_extra_pct ?? 0}%
+            {t("risk.bcp_extra")} {suggestion.bcp_extra_pct ?? 0}%
           </span>
           <span className="text-xs text-gray-700 bg-gray-50 border border-gray-200 px-2 py-1 rounded">
-            Totale: {Math.min(70, (suggestion.reduction_pct ?? 0) + (suggestion.bcp_extra_pct ?? 0))}%
+            {t("risk.total_label")} {Math.min(70, (suggestion.reduction_pct ?? 0) + (suggestion.bcp_extra_pct ?? 0))}%
           </span>
           <span className="text-xs text-gray-500">
             (Il suggeritore ricalcola da `inerente` usando controlli `compliant` e BCP validi: se risultano 0 o scaduti, la riduzione suggerita può differire dal valore attuale.)
@@ -173,6 +178,7 @@ function SuggestResidualPanel({ assessment }: { assessment: RiskAssessment }) {
 }
 
 function FormalAcceptancePanel({ assessment }: { assessment: RiskAssessment }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState("");
@@ -186,7 +192,7 @@ function FormalAcceptancePanel({ assessment }: { assessment: RiskAssessment }) {
       setOpen(false);
     },
     onError: (e: unknown) => {
-      const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? "Errore";
+      const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? t("risk.error_generic");
       setErr(msg);
     },
   });
@@ -201,8 +207,8 @@ function FormalAcceptancePanel({ assessment }: { assessment: RiskAssessment }) {
         <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg ${expired ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"}`}>
           <span>{expired ? "⚠️" : "✅"}</span>
           <span>
-            Accettato da <strong>{assessment.accepted_by_name ?? "—"}</strong> il {assessment.risk_accepted_at ? new Date(assessment.risk_accepted_at).toLocaleDateString(i18n.language || "it") : "—"}
-            {expDate && <> — {expired ? "scaduto il" : "scade il"} <strong>{expDate.toLocaleDateString(i18n.language || "it")}</strong></>}
+            {t("risk.accepted_by_on", { name: assessment.accepted_by_name ?? "—", date: assessment.risk_accepted_at ? new Date(assessment.risk_accepted_at).toLocaleDateString(i18n.language || "it") : "—" })}
+            {expDate && <> — {expired ? t("risk.expired_on") : t("risk.expires_on")} <strong>{expDate.toLocaleDateString(i18n.language || "it")}</strong></>}
           </span>
         </div>
       </div>
@@ -216,15 +222,15 @@ function FormalAcceptancePanel({ assessment }: { assessment: RiskAssessment }) {
           onClick={() => setOpen(true)}
           className="text-xs px-3 py-1.5 border border-yellow-300 text-yellow-700 rounded hover:bg-yellow-50"
         >
-          ⚠️ Accetta rischio formalmente
+          {t("risk.accept_risk_prompt")}
         </button>
       ) : (
         <div className="space-y-2 max-w-lg">
-          <p className="text-xs font-medium text-gray-700">Accettazione formale del rischio residuo</p>
+          <p className="text-xs font-medium text-gray-700">{t("risk.accept_risk_title")}</p>
           <textarea
             value={note}
             onChange={e => { setNote(e.target.value); setErr(""); }}
-            placeholder={`Nota obbligatoria${assessment.risk_level === "rosso" ? " (min 50 caratteri per rischi critici)" : ""}`}
+            placeholder={`${t("risk.accept_note_label")}${assessment.risk_level === "rosso" ? ` ${t("risk.accept_note_critical_hint")}` : ""}`}
             className="w-full border rounded px-2 py-1.5 text-xs resize-none"
             rows={3}
           />
@@ -233,7 +239,7 @@ function FormalAcceptancePanel({ assessment }: { assessment: RiskAssessment }) {
             value={expiry}
             onChange={e => setExpiry(e.target.value)}
             className="border rounded px-2 py-1.5 text-xs w-full"
-            placeholder="Scadenza accettazione"
+            placeholder={t("risk.acceptance_expiry_placeholder")}
           />
           {err && <p className="text-xs text-red-600">⛔ {err}</p>}
           <div className="flex gap-2">
@@ -242,10 +248,10 @@ function FormalAcceptancePanel({ assessment }: { assessment: RiskAssessment }) {
               disabled={mutation.isPending}
               className="px-3 py-1.5 bg-yellow-600 text-white text-xs rounded hover:bg-yellow-700 disabled:opacity-50"
             >
-              {mutation.isPending ? "Salvataggio..." : "Conferma accettazione"}
+              {mutation.isPending ? t("common.saving") : t("risk.confirm_acceptance")}
             </button>
             <button onClick={() => setOpen(false)} className="px-3 py-1.5 border rounded text-xs text-gray-600 hover:bg-gray-50">
-              Annulla
+              {t("actions.cancel")}
             </button>
           </div>
         </div>
@@ -255,6 +261,7 @@ function FormalAcceptancePanel({ assessment }: { assessment: RiskAssessment }) {
 }
 
 function MitigationPanel({ assessmentId }: { assessmentId: string }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<Partial<RiskMitigationPlan>>({});
@@ -332,7 +339,7 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
       {showForm && (
         <div className="bg-white border border-gray-200 rounded p-3 mb-3 space-y-2">
           <textarea
-            placeholder="Descrizione azione *"
+            placeholder={t("risk.action_desc_placeholder")}
             value={form.action ?? ""}
             onChange={e => setForm(p => ({ ...p, action: e.target.value }))}
             className="w-full border rounded px-2 py-1.5 text-sm" rows={2}
@@ -364,15 +371,15 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
           <div className="flex gap-2">
             <input
               type="date"
-              placeholder="Data ultimo test valido *"
+              placeholder={t("risk.bcp_test_date_placeholder")}
               value={form.due_date ?? ""}
               onChange={e => setForm(p => ({ ...p, due_date: e.target.value }))}
               disabled={!!selectedBcpPlan?.last_test_date}
               className="border rounded px-2 py-1.5 text-sm flex-1 disabled:bg-gray-50"
             />
             <button onClick={() => createMutation.mutate()} disabled={createMutation.isPending || !form.action || !form.due_date}
-              className="px-3 py-1.5 bg-primary-600 text-white text-xs rounded hover:bg-primary-700 disabled:opacity-50">Salva</button>
-            <button onClick={() => setShowForm(false)} className="px-3 py-1.5 border rounded text-xs text-gray-600 hover:bg-gray-50">Annulla</button>
+              className="px-3 py-1.5 bg-primary-600 text-white text-xs rounded hover:bg-primary-700 disabled:opacity-50">{t("actions.save")}</button>
+            <button onClick={() => setShowForm(false)} className="px-3 py-1.5 border rounded text-xs text-gray-600 hover:bg-gray-50">{t("actions.cancel")}</button>
           </div>
         </div>
       )}
@@ -380,7 +387,7 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
       {editPlan && (
         <div className="bg-white border border-gray-200 rounded p-3 mb-3 space-y-2">
           <textarea
-            placeholder="Descrizione azione *"
+            placeholder={t("risk.action_desc_placeholder")}
             value={editForm.action ?? editPlan.action ?? ""}
             onChange={e => setEditForm(p => ({ ...p, action: e.target.value }))}
             className="w-full border rounded px-2 py-1.5 text-sm" rows={2}
@@ -411,7 +418,7 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
           <div className="flex gap-2">
             <input
               type="date"
-              placeholder="Data ultimo test valido *"
+              placeholder={t("risk.bcp_test_date_placeholder")}
               value={editForm.due_date ?? editPlan.due_date ?? ""}
               onChange={e => setEditForm(p => ({ ...p, due_date: e.target.value }))}
               disabled={!!(availableBcpPlans.find(p => p.id === (editForm.bcp_plan ?? editPlan.bcp_plan))?.last_test_date)}
@@ -422,10 +429,10 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
               disabled={updateMutation.isPending || !((editForm.action ?? editPlan.action) && (editForm.due_date ?? editPlan.due_date))}
               className="px-3 py-1.5 bg-primary-600 text-white text-xs rounded hover:bg-primary-700 disabled:opacity-50"
             >
-              {updateMutation.isPending ? "Salvataggio..." : "Salva modifiche"}
+              {updateMutation.isPending ? t("common.saving") : t("actions.save")}
             </button>
             <button onClick={() => { setEditPlan(null); setEditForm({}); }} className="px-3 py-1.5 border rounded text-xs text-gray-600 hover:bg-gray-50">
-              Annulla
+              {t("actions.cancel")}
             </button>
           </div>
         </div>
@@ -490,6 +497,7 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
 }
 
 function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const selectedPlant = useAuthStore(s => s.selectedPlant);
   const [form, setForm] = useState<Partial<RiskAssessment>>({
@@ -518,7 +526,7 @@ function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: s
   const mutation = useMutation({
     mutationFn: () => riskApi.create(form),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["risk-assessments"] }); onClose(); },
-    onError: (e: any) => setError(e?.response?.data?.detail || JSON.stringify(e?.response?.data) || "Errore"),
+    onError: (e: any) => setError(e?.response?.data?.detail || JSON.stringify(e?.response?.data) || t("risk.error_generic")),
   });
 
   function set(field: string, value: unknown) { setForm(f => ({ ...f, [field]: value })); }
@@ -555,7 +563,7 @@ function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: s
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nome scenario / rischio *</label>
             <input value={form.name ?? ""} onChange={e => set("name", e.target.value)}
-              placeholder="es. Ransomware su server di produzione MES"
+              placeholder={t("risk.scenario_placeholder")}
               className="w-full border rounded px-3 py-2 text-sm" />
           </div>
 
@@ -591,11 +599,11 @@ function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: s
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Trattamento previsto</label>
               <select value={form.treatment ?? ""} onChange={e => set("treatment", e.target.value)} className="w-full border rounded px-3 py-2 text-sm">
-                <option value="">— seleziona —</option>
-                <option value="mitigare">Mitigare</option>
-                <option value="accettare">Accettare</option>
-                <option value="trasferire">Trasferire (es. assicurazione)</option>
-                <option value="evitare">Evitare</option>
+                <option value="">{t("common.select")}</option>
+                <option value="mitigare">{t("risk.treatment_mitigare")}</option>
+                <option value="accettare">{t("risk.treatment_accettare")}</option>
+                <option value="trasferire">{t("risk.treatment_trasferire_ext")}</option>
+                <option value="evitare">{t("risk.treatment_evitare")}</option>
               </select>
             </div>
           </div>
@@ -706,10 +714,10 @@ function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: s
 
         {error && <p className="text-sm text-red-600 bg-red-50 px-6 py-2">{error}</p>}
         <div className="flex justify-end gap-2 px-6 py-4 border-t border-gray-100 shrink-0">
-          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("actions.cancel")}</button>
           <button onClick={() => mutation.mutate()} disabled={mutation.isPending || !canSave}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50">
-            {mutation.isPending ? "Salvataggio..." : "Crea scenario"}
+            {mutation.isPending ? t("common.saving") : "Crea scenario"}
           </button>
         </div>
       </div>
@@ -724,6 +732,7 @@ function EditAssessmentModal({
   assessment: RiskAssessment;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const plantId = assessment.plant;
 
@@ -775,7 +784,7 @@ function EditAssessmentModal({
       qc.invalidateQueries({ queryKey: ["risk-assessments"] });
       onClose();
     },
-    onError: (e: any) => setError(e?.response?.data?.detail || JSON.stringify(e?.response?.data) || "Errore"),
+    onError: (e: any) => setError(e?.response?.data?.detail || JSON.stringify(e?.response?.data) || t("risk.error_generic")),
   });
 
   const selectedProcess = processes?.results?.find(p => p.id === form.critical_process);
@@ -843,10 +852,10 @@ function EditAssessmentModal({
                 onChange={e => set("treatment", e.target.value)}
                 className="w-full border rounded px-3 py-2 text-sm"
               >
-                <option value="mitigare">Mitigare</option>
-                <option value="accettare">Accettare</option>
-                <option value="trasferire">Trasferire</option>
-                <option value="evitare">Evitare</option>
+                <option value="mitigare">{t("risk.treatment_mitigare")}</option>
+                <option value="accettare">{t("risk.treatment_accettare")}</option>
+                <option value="trasferire">{t("risk.treatment_trasferire")}</option>
+                <option value="evitare">{t("risk.treatment_evitare")}</option>
               </select>
             </div>
             <div>
@@ -930,14 +939,14 @@ function EditAssessmentModal({
 
         <div className="flex justify-end gap-2 px-6 py-4 border-t border-gray-100 shrink-0">
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">
-            Annulla
+            {t("actions.cancel")}
           </button>
           <button
             onClick={() => mutation.mutate()}
             disabled={mutation.isPending}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
-            {mutation.isPending ? "Salvataggio..." : "Salva modifiche"}
+            {mutation.isPending ? t("common.saving") : t("actions.save")}
           </button>
         </div>
       </div>
@@ -996,6 +1005,7 @@ function RiskAppetiteCard({ plantId }: { plantId?: string }) {
 }
 
 export function RiskPage() {
+  const { t } = useTranslation();
   const [typeFilter, setTypeFilter] = useState<"" | "IT" | "OT">("");
   const [statusFilter, setStatusFilter] = useState("");
   const [showNew, setShowNew] = useState(false);
@@ -1071,7 +1081,7 @@ export function RiskPage() {
             onClick={() => setShowWizard(true)}
             className="flex items-center gap-2 px-4 py-2 border border-primary-200 text-primary-700 rounded-lg hover:bg-primary-50 text-sm font-medium"
           >
-            <span>🧭</span> Wizard BIA → Risk → BCP
+            <span>🧭</span> {t("risk.wizard_title")}
           </button>
           <button
             onClick={() => setDrawerOpen(true)}
@@ -1090,7 +1100,7 @@ export function RiskPage() {
           <label className="text-xs text-gray-500 mr-1">Tipo:</label>
           <select value={typeFilter} onChange={e => setTypeFilter(e.target.value as "" | "IT" | "OT")}
             className="border rounded px-2 py-1.5 text-sm">
-            <option value="">Tutti</option>
+            <option value="">{t("risk.filter_all")}</option>
             <option value="IT">IT</option>
             <option value="OT">OT</option>
           </select>
@@ -1099,10 +1109,10 @@ export function RiskPage() {
           <label className="text-xs text-gray-500 mr-1">Stato:</label>
           <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
             className="border rounded px-2 py-1.5 text-sm">
-            <option value="">Tutti</option>
-            <option value="bozza">Bozza</option>
-            <option value="completato">Completato</option>
-            <option value="archiviato">Archiviato</option>
+            <option value="">{t("risk.filter_all")}</option>
+            <option value="bozza">{t("status.bozza")}</option>
+            <option value="completato">{t("status.completato")}</option>
+            <option value="archiviato">{t("risk.status_archiviato")}</option>
           </select>
         </div>
       </div>
@@ -1218,13 +1228,13 @@ export function RiskPage() {
                           Trattamento:{" "}
                           {a.treatment
                             ? a.treatment === "mitigare"
-                              ? "Mitigare"
+                              ? t("risk.treatment_mitigare")
                               : a.treatment === "accettare"
-                                ? "Accettare"
+                                ? t("risk.treatment_accettare")
                                 : a.treatment === "trasferire"
-                                  ? "Trasferire"
+                                  ? t("risk.treatment_trasferire")
                                   : a.treatment === "evitare"
-                                    ? "Evitare"
+                                    ? t("risk.treatment_evitare")
                                     : a.treatment
                             : "—"}
                         </div>

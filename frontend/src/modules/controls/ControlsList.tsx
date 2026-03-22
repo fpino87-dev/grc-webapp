@@ -10,28 +10,34 @@ import i18n from "../../i18n";
 
 const STATUS_OPTIONS = ["compliant", "parziale", "gap", "na", "non_valutato"];
 
-const RELATIONSHIP_LABEL: Record<string, string> = {
-  covers:      "copre",
-  extends:     "estende",
-  equivalente: "≡",
-  parziale:    "⊂",
-  correlato:   "~",
+const RELATIONSHIP_KEYS: Record<string, string> = {
+  covers:      "controls.rel_copre",
+  extends:     "controls.rel_estende",
+  equivalente: "controls.rel_equivale",
+  parziale:    "controls.rel_subset",
+  correlato:   "controls.rel_related",
 };
 
 function MappingBadges({ mappings }: { mappings: ControlInstance["mapped_controls"] }) {
+  const { t } = useTranslation();
   if (!mappings?.length) return null;
   return (
     <div className="flex flex-wrap gap-1 mt-1">
-      {mappings.map((m, i) => (
-        <span
-          key={i}
-          title={`${RELATIONSHIP_LABEL[m.relationship] ?? m.relationship} ${m.external_id}`}
-          className="inline-flex items-center gap-0.5 text-xs bg-indigo-50 text-indigo-600 border border-indigo-100 rounded px-1.5 py-0.5"
-        >
-          <span className="opacity-60">{RELATIONSHIP_LABEL[m.relationship] ?? m.relationship}</span>
-          <span className="font-mono">{m.framework_code}</span>
-        </span>
-      ))}
+      {mappings.map((m, i) => {
+        const relLabel = RELATIONSHIP_KEYS[m.relationship]
+          ? t(RELATIONSHIP_KEYS[m.relationship])
+          : m.relationship;
+        return (
+          <span
+            key={i}
+            title={`${relLabel} ${m.external_id}`}
+            className="inline-flex items-center gap-0.5 text-xs bg-indigo-50 text-indigo-600 border border-indigo-100 rounded px-1.5 py-0.5"
+          >
+            <span className="opacity-60">{relLabel}</span>
+            <span className="font-mono">{m.framework_code}</span>
+          </span>
+        );
+      })}
     </div>
   );
 }
@@ -128,7 +134,7 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!response.ok) {
-        let msg = "Errore download";
+        let msg = t("controls.download_error");
         try { const err = await response.json(); msg = err.error || msg; } catch {}
         setExportError(msg);
         return;
@@ -144,7 +150,7 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch {
-      setExportError("Errore di rete durante il download");
+      setExportError(t("controls.download_network_error"));
     } finally {
       setExporting(null);
     }

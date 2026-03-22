@@ -5,45 +5,25 @@ import { plantsApi } from "../../api/endpoints/plants";
 import { biaApi, type CriticalProcess } from "../../api/endpoints/bia";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
+import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
 
 function CriticalityBadge({ value }: { value: number }) {
-  const levels: Record<
-    number,
-    { label: string; desc: string; color: string }
-  > = {
-    1: {
-      label: "Trascurabile",
-      color: "bg-green-100 text-green-800",
-      desc: "Asset non critico. Fermo tollerato oltre 7 giorni. Nessun BCP richiesto.",
-    },
-    2: {
-      label: "Bassa",
-      color: "bg-green-100 text-green-700",
-      desc: "Impatto limitato. Fermo tollerato 3-7 giorni. BCP non necessario.",
-    },
-    3: {
-      label: "Media",
-      color: "bg-yellow-100 text-yellow-800",
-      desc: "Impatto operativo. Fermo tollerato 24-72 ore. BCP consigliato.",
-    },
-    4: {
-      label: "Alta",
-      color: "bg-orange-100 text-orange-800",
-      desc: "Impatto significativo su produzione o clienti. Fermo tollerato 4-24 ore. BCP obbligatorio.",
-    },
-    5: {
-      label: "Critica",
-      color: "bg-red-100 text-red-800",
-      desc: "Asset core. Fermo tollerato meno di 4 ore. BCP obbligatorio con test semestrale.",
-    },
+  const { t } = useTranslation();
+  const colors: Record<number, string> = {
+    1: "bg-green-100 text-green-800",
+    2: "bg-green-100 text-green-700",
+    3: "bg-yellow-100 text-yellow-800",
+    4: "bg-orange-100 text-orange-800",
+    5: "bg-red-100 text-red-800",
   };
-  const lvl =
-    levels[value] ?? {
-      label: String(value),
-      color: "bg-gray-100 text-gray-600",
-      desc: "",
-    };
+  const labelKey = value >= 1 && value <= 5 ? `assets.criticality_${value}_label` : null;
+  const descKey = value >= 1 && value <= 5 ? `assets.criticality_${value}_desc` : null;
+  const lvl = {
+    label: labelKey ? t(labelKey) : String(value),
+    color: colors[value] ?? "bg-gray-100 text-gray-600",
+    desc: descKey ? t(descKey) : "",
+  };
   return (
     <div className="relative group inline-flex">
       <span
@@ -66,16 +46,17 @@ function CriticalityBadge({ value }: { value: number }) {
 }
 
 function ChangeBadges({ asset }: { asset: AssetIT | AssetOT }) {
+  const { t } = useTranslation();
   return (
     <>
       {asset.has_recent_change && (
         <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-300 ml-2">
-          Change {asset.change_age_days}gg fa
+          {t("assets.change_days_ago", { days: asset.change_age_days })}
         </span>
       )}
       {asset.needs_revaluation && (
         <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-300 ml-2">
-          Da rivalutare
+          {t("assets.reassessment_required")}
         </span>
       )}
     </>
@@ -91,6 +72,7 @@ function RegisterChangeForm({
   assetType: "IT" | "OT";
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [changeRef, setChangeRef] = useState("");
   const [changeDesc, setChangeDesc] = useState("");
@@ -124,27 +106,27 @@ function RegisterChangeForm({
       {asset.last_change_ref && (
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="font-medium text-amber-800 text-sm">Ultimo change registrato</span>
+            <span className="font-medium text-amber-800 text-sm">{t("assets.last_change_registered")}</span>
             {asset.change_portal_url && (
               <a href={asset.change_portal_url} target="_blank" rel="noreferrer" className="text-blue-600 text-sm hover:underline">
-                Apri ticket →
+                {t("assets.open_ticket")}
               </a>
             )}
           </div>
-          <p className="text-sm"><strong>Ref:</strong> {asset.last_change_ref}</p>
-          <p className="text-sm"><strong>Data:</strong> {asset.last_change_date ? new Date(asset.last_change_date).toLocaleDateString(i18n.language || "it") : "—"}</p>
-          <p className="text-sm"><strong>Descrizione:</strong> {asset.last_change_desc || "—"}</p>
+          <p className="text-sm"><strong>{t("assets.ref_label")}</strong> {asset.last_change_ref}</p>
+          <p className="text-sm"><strong>{t("assets.date_label")}</strong> {asset.last_change_date ? new Date(asset.last_change_date).toLocaleDateString(i18n.language || "it") : "—"}</p>
+          <p className="text-sm"><strong>{t("assets.description_label")}</strong> {asset.last_change_desc || "—"}</p>
           {asset.needs_revaluation && (
             <div className="mt-2 flex items-center gap-2">
               <span className="text-sm text-red-600">
-                Rivalutazione richiesta dal {asset.needs_revaluation_since ? new Date(asset.needs_revaluation_since).toLocaleDateString(i18n.language || "it") : "—"}
+                {t("assets.reassessment_since", { date: asset.needs_revaluation_since ? new Date(asset.needs_revaluation_since).toLocaleDateString(i18n.language || "it") : "—" })}
               </span>
               <button
                 onClick={() => clearMutation.mutate()}
                 disabled={clearMutation.isPending}
                 className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 disabled:opacity-50"
               >
-                Segna come rivalutato
+                {t("assets.mark_reassessed")}
               </button>
             </div>
           )}
@@ -154,17 +136,17 @@ function RegisterChangeForm({
       {/* Register change form */}
       {result ? (
         <div className="bg-white rounded border border-green-200 p-3">
-          <p className="text-sm font-medium text-green-700 mb-1">Change registrato</p>
-          <p className="text-xs text-gray-600">Ref: {result.ref}</p>
+          <p className="text-sm font-medium text-green-700 mb-1">{t("assets.change_registered_title")}</p>
+          <p className="text-xs text-gray-600">{t("assets.ref_label")} {result.ref}</p>
           <p className="text-xs text-gray-600">
             Impattati: {result.affected.controls} controlli, {result.affected.risks} risk assessment,{" "}
             {result.affected.processes} processi
           </p>
-          <button onClick={onClose} className="mt-2 text-xs text-blue-600 hover:underline">Chiudi</button>
+          <button onClick={onClose} className="mt-2 text-xs text-blue-600 hover:underline">{t("common.close")}</button>
         </div>
       ) : (
         <>
-          <p className="text-xs font-semibold text-amber-800 uppercase tracking-wide mb-2">Registra change</p>
+          <p className="text-xs font-semibold text-amber-800 uppercase tracking-wide mb-2">{t("assets.register_change_title")}</p>
           <div className="space-y-2">
             <input
               value={changeRef}
@@ -186,7 +168,7 @@ function RegisterChangeForm({
             />
           </div>
           {registerMutation.isError && (
-            <p className="text-xs text-red-600 mt-1">Errore durante la registrazione</p>
+            <p className="text-xs text-red-600 mt-1">{t("assets.register_error")}</p>
           )}
           <div className="flex gap-2 mt-3">
             <button
@@ -194,10 +176,10 @@ function RegisterChangeForm({
               disabled={!changeRef || registerMutation.isPending}
               className="px-3 py-1.5 bg-amber-600 text-white text-sm rounded hover:bg-amber-700 disabled:opacity-50"
             >
-              {registerMutation.isPending ? "Registrazione..." : "Registra"}
+              {registerMutation.isPending ? t("assets.registering") : t("assets.register_change_btn")}
             </button>
             <button onClick={onClose} className="px-3 py-1.5 border rounded text-sm text-gray-600 hover:bg-gray-50">
-              Annulla
+              {t("actions.cancel")}
             </button>
           </div>
         </>
@@ -207,6 +189,7 @@ function RegisterChangeForm({
 }
 
 function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT"; plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [form, setForm] = useState<Record<string, unknown>>({ asset_type: assetType, criticality: 3 });
   const [error, setError] = useState("");
@@ -221,7 +204,7 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
   const mutation = useMutation({
     mutationFn: assetType === "IT" ? assetsApi.createIT : assetsApi.createOT,
     onSuccess: () => { qc.invalidateQueries({ queryKey: [assetType === "IT" ? "assets-it" : "assets-ot"] }); onClose(); },
-    onError: (e: any) => setError(e?.response?.data?.detail || "Errore durante il salvataggio"),
+    onError: (e: any) => setError(e?.response?.data?.detail || t("common.save_error")),
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
@@ -242,21 +225,21 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-        <h3 className="text-lg font-semibold mb-4">Nuovo asset {assetType}</h3>
+        <h3 className="text-lg font-semibold mb-4">{t("assets.new_asset_title", { type: assetType })}</h3>
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Sito *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("tasks.fields.plant")} *</label>
             <select name="plant" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-              <option value="">— seleziona —</option>
+              <option value="">{t("common.select")}</option>
               {plants.map(p => <option key={p.id} value={p.id}>{p.code} — {p.name}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.name")} *</label>
             <input name="name" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Processi BIA collegati</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.bia_processes_label")}</label>
             <select
               multiple
               name="processes"
@@ -270,40 +253,40 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
               ))}
             </select>
             <p className="mt-1 text-xs text-gray-500">
-              Seleziona uno o più processi BIA che dipendono da questo asset (IT o OT).
+              {t("assets.bia_processes_hint")}
             </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Criticità (1-5)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("eval_assistant.bia.columns.level")} (1-5)</label>
             <select name="criticality" defaultValue="3" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
               {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}
             </select>
             <details className="mt-2 text-xs">
               <summary className="text-blue-600 cursor-pointer hover:underline">
-                ℹ️ Come scegliere la criticità
+                {t("assets.criticality_guide_title")}
               </summary>
               <table className="mt-2 w-full border-collapse text-xs">
                 <thead>
                   <tr className="bg-gray-50 text-left">
-                    <th className="border px-2 py-1">Valore</th>
-                    <th className="border px-2 py-1">Etichetta</th>
-                    <th className="border px-2 py-1">Downtime tollerato</th>
-                    <th className="border px-2 py-1">BCP</th>
+                    <th className="border px-2 py-1">{t("assets.criticality_table_value")}</th>
+                    <th className="border px-2 py-1">{t("assets.criticality_table_label")}</th>
+                    <th className="border px-2 py-1">{t("assets.criticality_table_downtime")}</th>
+                    <th className="border px-2 py-1">{t("assets.criticality_table_bcp")}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {[
-                    [1,"Trascurabile","> 7 giorni","No"],
-                    [2,"Bassa","3–7 giorni","No"],
-                    [3,"Media","24–72 ore","Consigliato"],
-                    [4,"Alta","4–24 ore","Obbligatorio"],
-                    [5,"Critica","< 4 ore","Obbligatorio + test semestrale"],
-                  ].map(([v,l,d,b]) => (
-                    <tr key={v as number}>
-                      <td className="border px-2 py-1 text-center font-bold">{v as number}</td>
-                      <td className="border px-2 py-1">{l as string}</td>
-                      <td className="border px-2 py-1">{d as string}</td>
-                      <td className="border px-2 py-1 text-center">{b as string}</td>
+                  {([
+                    [1, t("assets.criticality_1_label"), t("assets.downtime_7d_plus"), t("assets.bcp_not_required")],
+                    [2, t("assets.criticality_2_label"), t("assets.downtime_3_7d"), t("assets.bcp_not_required")],
+                    [3, t("assets.criticality_3_label"), t("assets.downtime_24_72h"), t("assets.bcp_recommended")],
+                    [4, t("assets.criticality_4_label"), t("assets.downtime_4_24h"), t("assets.bcp_mandatory")],
+                    [5, t("assets.criticality_5_label"), t("assets.downtime_sub_4h"), t("assets.bcp_mandatory")],
+                  ] as [number, string, string, string][]).map(([v,l,d,b]) => (
+                    <tr key={v}>
+                      <td className="border px-2 py-1 text-center font-bold">{v}</td>
+                      <td className="border px-2 py-1">{l}</td>
+                      <td className="border px-2 py-1">{d}</td>
+                      <td className="border px-2 py-1 text-center">{b}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -313,50 +296,50 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
           {assetType === "IT" ? (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo deployment *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.deployment_label")}</label>
                 <select
                   name="deployment_type"
                   defaultValue="on_prem"
                   onChange={handleChange}
                   className="w-full border rounded px-3 py-2 text-sm"
                 >
-                  <option value="on_prem">On-premise</option>
-                  <option value="iaas">IaaS (VM, network in cloud)</option>
-                  <option value="paas">PaaS (DB, storage, funzioni)</option>
-                  <option value="saas">SaaS (applicazione cloud)</option>
+                  <option value="on_prem">{t("assets.deploy_on_prem")}</option>
+                  <option value="iaas">{t("assets.deploy_iaas")}</option>
+                  <option value="paas">{t("assets.deploy_paas")}</option>
+                  <option value="saas">{t("assets.deploy_saas")}</option>
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Provider</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.provider_label")}</label>
                   <input
                     name="provider"
                     onChange={handleChange}
                     className="w-full border rounded px-3 py-2 text-sm"
-                    placeholder="Microsoft, AWS, SAP…"
+                    placeholder={t("assets.provider_placeholder")}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nome servizio</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.service_name_label")}</label>
                   <input
                     name="service_name"
                     onChange={handleChange}
                     className="w-full border rounded px-3 py-2 text-sm"
-                    placeholder="Microsoft 365, Salesforce, SAP S/4HANA…"
+                    placeholder={t("assets.service_placeholder")}
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">FQDN</label>
-                <input name="fqdn" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="server.dominio.it" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.fqdn_label")}</label>
+                <input name="fqdn" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder={t("assets.fqdn_placeholder")} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Sistema operativo</label>
-                <input name="os" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="Windows Server 2022" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.os_label")}</label>
+                <input name="os" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder={t("assets.os_placeholder")} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Data EOL (fine supporto)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.eol_label")}</label>
                   <input
                     type="date"
                     name="eol_date"
@@ -367,44 +350,44 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Classificazione dati</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.data_classification_label")}</label>
                   <select
                     name="data_classification"
                     defaultValue=""
                     onChange={handleChange}
                     className="w-full border rounded px-3 py-2 text-sm"
                   >
-                    <option value="">— seleziona —</option>
-                    <option value="public">Public</option>
-                    <option value="internal">Internal</option>
-                    <option value="confidential">Confidential</option>
-                    <option value="restricted">Restricted</option>
+                    <option value="">— {t("common.select")} —</option>
+                    <option value="public">{t("assets.data_class_public")}</option>
+                    <option value="internal">{t("assets.data_class_internal")}</option>
+                    <option value="confidential">{t("assets.data_class_confidential")}</option>
+                    <option value="restricted">{t("assets.data_class_restricted")}</option>
                   </select>
                 </div>
                 <div className="flex items-center gap-2 mt-6">
                   <input type="checkbox" id="internet_exposed" name="internet_exposed" onChange={handleChange} className="rounded" />
-                  <label htmlFor="internet_exposed" className="text-sm text-gray-700">Esposto su Internet</label>
+                  <label htmlFor="internet_exposed" className="text-sm text-gray-700">{t("assets.internet_exposed_label")}</label>
                 </div>
               </div>
             </>
           ) : (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Categoria *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.ot_category_label")}</label>
                 <select name="category" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-                  <option value="">— seleziona —</option>
+                  <option value="">— {t("common.select")} —</option>
                   {["PLC","SCADA","HMI","RTU","sensore","altro"].map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Livello Purdue *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.purdue_level_label")}</label>
                 <select name="purdue_level" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-                  <option value="">— seleziona —</option>
+                  <option value="">— {t("common.select")} —</option>
                   {[0,1,2,3,4].map(n => <option key={n} value={n}>L{n}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Vendor</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.vendor_label")}</label>
                 <input name="vendor" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
               </div>
             </>
@@ -412,13 +395,13 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
         </div>
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
-          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("actions.cancel")}</button>
           <button
             onClick={() => mutation.mutate(form as any)}
             disabled={mutation.isPending || !form.plant || !form.name}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
-            {mutation.isPending ? "Salvataggio..." : "Crea asset"}
+            {mutation.isPending ? t("common.saving") : t("actions.save")}
           </button>
         </div>
       </div>
@@ -427,6 +410,7 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
 }
 
 function EditAssetModalIT({ asset, onClose }: { asset: AssetIT; onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [form, setForm] = useState<Partial<AssetIT>>({
     name: asset.name,
@@ -463,7 +447,7 @@ function EditAssetModalIT({ asset, onClose }: { asset: AssetIT; onClose: () => v
       qc.invalidateQueries({ queryKey: ["assets-it"] });
       onClose();
     },
-    onError: (e: any) => setError(e?.response?.data?.detail || "Errore durante il salvataggio"),
+    onError: (e: any) => setError(e?.response?.data?.detail || t("common.save_error")),
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
@@ -484,10 +468,10 @@ function EditAssetModalIT({ asset, onClose }: { asset: AssetIT; onClose: () => v
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-        <h3 className="text-lg font-semibold mb-4">Modifica asset IT</h3>
+        <h3 className="text-lg font-semibold mb-4">{t("actions.edit")} asset IT</h3>
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.name")} *</label>
             <input
               name="name"
               value={form.name ?? ""}
@@ -496,7 +480,7 @@ function EditAssetModalIT({ asset, onClose }: { asset: AssetIT; onClose: () => v
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Processi BIA collegati</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.bia_processes_label")}</label>
             <select
               multiple
               name="processes"
@@ -527,22 +511,22 @@ function EditAssetModalIT({ asset, onClose }: { asset: AssetIT; onClose: () => v
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tipo deployment *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.deployment_label")}</label>
             <select
               name="deployment_type"
               value={form.deployment_type ?? "on_prem"}
               onChange={handleChange}
               className="w-full border rounded px-3 py-2 text-sm"
             >
-              <option value="on_prem">On-premise</option>
-              <option value="iaas">IaaS (VM, network in cloud)</option>
-              <option value="paas">PaaS (DB, storage, funzioni)</option>
-              <option value="saas">SaaS (applicazione cloud)</option>
+              <option value="on_prem">{t("assets.deploy_on_prem")}</option>
+              <option value="iaas">{t("assets.deploy_iaas")}</option>
+              <option value="paas">{t("assets.deploy_paas")}</option>
+              <option value="saas">{t("assets.deploy_saas")}</option>
             </select>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Provider</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.provider_label")}</label>
               <input
                 name="provider"
                 value={form.provider ?? ""}
@@ -551,7 +535,7 @@ function EditAssetModalIT({ asset, onClose }: { asset: AssetIT; onClose: () => v
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nome servizio</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.service_name_label")}</label>
               <input
                 name="service_name"
                 value={form.service_name ?? ""}
@@ -561,7 +545,7 @@ function EditAssetModalIT({ asset, onClose }: { asset: AssetIT; onClose: () => v
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">FQDN</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.fqdn_label")}</label>
             <input
               name="fqdn"
               value={form.fqdn ?? ""}
@@ -571,7 +555,7 @@ function EditAssetModalIT({ asset, onClose }: { asset: AssetIT; onClose: () => v
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Sistema operativo</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.os_label")}</label>
               <input
                 name="os"
                 value={form.os ?? ""}
@@ -580,7 +564,7 @@ function EditAssetModalIT({ asset, onClose }: { asset: AssetIT; onClose: () => v
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Data EOL</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.eol_label")}</label>
               <input
                 type="date"
                 name="eol_date"
@@ -592,18 +576,18 @@ function EditAssetModalIT({ asset, onClose }: { asset: AssetIT; onClose: () => v
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Classificazione dati</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.data_classification_label")}</label>
               <select
                 name="data_classification"
                 value={form.data_classification ?? ""}
                 onChange={handleChange}
                 className="w-full border rounded px-3 py-2 text-sm"
               >
-                <option value="">— seleziona —</option>
-                <option value="public">Public</option>
-                <option value="internal">Internal</option>
-                <option value="confidential">Confidential</option>
-                <option value="restricted">Restricted</option>
+                <option value="">— {t("common.select")} —</option>
+                <option value="public">{t("assets.data_class_public")}</option>
+                <option value="internal">{t("assets.data_class_internal")}</option>
+                <option value="confidential">{t("assets.data_class_confidential")}</option>
+                <option value="restricted">{t("assets.data_class_restricted")}</option>
               </select>
             </div>
             <div className="flex items-center gap-2 mt-6">
@@ -616,7 +600,7 @@ function EditAssetModalIT({ asset, onClose }: { asset: AssetIT; onClose: () => v
                 className="rounded"
               />
               <label htmlFor="edit_internet_exposed" className="text-sm text-gray-700">
-                Esposto su Internet
+                {t("assets.internet_exposed_label")}
               </label>
             </div>
           </div>
@@ -624,14 +608,14 @@ function EditAssetModalIT({ asset, onClose }: { asset: AssetIT; onClose: () => v
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">
-            Annulla
+            {t("actions.cancel")}
           </button>
           <button
             onClick={() => mutation.mutate(form)}
             disabled={mutation.isPending || !form.name}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
-            {mutation.isPending ? "Salvataggio..." : "Salva modifiche"}
+            {mutation.isPending ? t("common.saving") : t("actions.save")}
           </button>
         </div>
       </div>

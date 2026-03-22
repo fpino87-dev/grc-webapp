@@ -12,6 +12,7 @@ import { plantsApi } from "../../api/endpoints/plants";
 import { apiClient } from "../../api/client";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
+import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
 
 interface Framework { id: string; name: string; code: string; }
@@ -44,6 +45,7 @@ const FINDING_TYPE_COLORS: Record<string, string> = {
 };
 
 function FindingPanel({ prepId }: { prepId: string }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [closingId, setClosingId] = useState<string | null>(null);
@@ -87,17 +89,17 @@ function FindingPanel({ prepId }: { prepId: string }) {
         <div className="flex gap-3 mb-4">
           {majorOpen > 0 && (
             <span className="px-3 py-1.5 bg-red-100 text-red-700 text-xs font-medium rounded">
-              {majorOpen} Major NC aperte
+              {majorOpen} {t("audit_prep.kpi_major_open")}
             </span>
           )}
           {minorOpen > 0 && (
             <span className="px-3 py-1.5 bg-orange-100 text-orange-700 text-xs font-medium rounded">
-              {minorOpen} Minor NC aperte
+              {minorOpen} {t("audit_prep.kpi_minor_open")}
             </span>
           )}
           {overdue > 0 && (
             <span className="px-3 py-1.5 bg-red-200 text-red-800 text-xs font-medium rounded">
-              {overdue} finding scaduti
+              {overdue} {t("audit_prep.kpi_overdue")}
             </span>
           )}
         </div>
@@ -109,7 +111,7 @@ function FindingPanel({ prepId }: { prepId: string }) {
           onClick={() => setShowForm(s => !s)}
           className="text-xs px-2 py-1 bg-primary-600 text-white rounded hover:bg-primary-700"
         >
-          + Aggiungi finding
+          {t("audit_prep.add_finding")}
         </button>
       </div>
 
@@ -117,20 +119,20 @@ function FindingPanel({ prepId }: { prepId: string }) {
         <div className="bg-white border border-gray-200 rounded p-3 mb-3 space-y-2">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-xs text-gray-600 mb-1">Tipo *</label>
+              <label className="block text-xs text-gray-600 mb-1">{t("audit_prep.type_label")}</label>
               <select
                 value={form.finding_type}
                 onChange={e => setForm(p => ({ ...p, finding_type: e.target.value }))}
                 className="w-full border rounded px-2 py-1.5 text-sm"
               >
-                <option value="major_nc">Major Non Conformity</option>
-                <option value="minor_nc">Minor Non Conformity</option>
-                <option value="observation">Observation</option>
-                <option value="opportunity">Opportunity for Improvement</option>
+                <option value="major_nc">{t("audit_prep.finding_major")}</option>
+                <option value="minor_nc">{t("audit_prep.finding_minor")}</option>
+                <option value="observation">{t("audit_prep.finding_obs")}</option>
+                <option value="opportunity">{t("audit_prep.finding_opp")}</option>
               </select>
             </div>
             <div>
-              <label className="block text-xs text-gray-600 mb-1">Data audit *</label>
+              <label className="block text-xs text-gray-600 mb-1">{t("audit_prep.audit_date_label")}</label>
               <input
                 type="date"
                 value={form.audit_date ?? ""}
@@ -140,20 +142,20 @@ function FindingPanel({ prepId }: { prepId: string }) {
             </div>
           </div>
           <input
-            placeholder="Titolo *"
+            placeholder={t("audit_prep.title_label")}
             value={form.title ?? ""}
             onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
             className="w-full border rounded px-2 py-1.5 text-sm"
           />
           <textarea
-            placeholder="Descrizione"
+            placeholder={t("audit_prep.description_label")}
             value={form.description ?? ""}
             onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
             rows={2}
             className="w-full border rounded px-2 py-1.5 text-sm"
           />
           <input
-            placeholder="Nome auditor"
+            placeholder={t("audit_prep.auditor_label")}
             value={form.auditor_name ?? ""}
             onChange={e => setForm(p => ({ ...p, auditor_name: e.target.value }))}
             className="w-full border rounded px-2 py-1.5 text-sm"
@@ -164,20 +166,20 @@ function FindingPanel({ prepId }: { prepId: string }) {
               disabled={createMutation.isPending || !form.title || !form.audit_date}
               className="px-3 py-1.5 bg-primary-600 text-white text-xs rounded hover:bg-primary-700 disabled:opacity-50"
             >
-              {createMutation.isPending ? "Salvataggio..." : "Crea finding"}
+              {createMutation.isPending ? t("common.saving") : t("audit_prep.create_finding")}
             </button>
             <button onClick={() => setShowForm(false)} className="px-3 py-1.5 border rounded text-xs text-gray-600 hover:bg-gray-50">
-              Annulla
+              {t("actions.cancel")}
             </button>
           </div>
-          {createMutation.isError && <p className="text-xs text-red-600">Errore durante il salvataggio</p>}
+          {createMutation.isError && <p className="text-xs text-red-600">{t("common.save_error")}</p>}
         </div>
       )}
 
       {isLoading ? (
-        <p className="text-xs text-gray-400">Caricamento...</p>
+        <p className="text-xs text-gray-400">{t("common.loading")}</p>
       ) : findings.length === 0 ? (
-        <p className="text-xs text-gray-400">Nessun finding registrato</p>
+        <p className="text-xs text-gray-400">{t("audit_prep.no_findings")}</p>
       ) : (
         <div className="space-y-2">
           {findings.map((f: AuditFinding) => (
@@ -196,7 +198,7 @@ function FindingPanel({ prepId }: { prepId: string }) {
                     onClick={() => { setClosingId(f.id); setCloseNotes(""); }}
                     className="text-xs px-2 py-0.5 border rounded text-gray-600 hover:bg-gray-50"
                   >
-                    Chiudi
+                    {t("common.close")}
                   </button>
                 )}
               </div>
@@ -237,10 +239,10 @@ function FindingPanel({ prepId }: { prepId: string }) {
                       disabled={closeMutation.isPending}
                       className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 disabled:opacity-50"
                     >
-                      {closeMutation.isPending ? "..." : "Conferma chiusura"}
+                      {closeMutation.isPending ? "..." : t("actions.confirm")}
                     </button>
                     <button onClick={() => setClosingId(null)} className="px-3 py-1 border rounded text-xs text-gray-600">
-                      Annulla
+                      {t("actions.cancel")}
                     </button>
                   </div>
                   {closeMutation.isError && (

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../../api/client";
 import { usersApi, type GrcUser } from "../../api/endpoints/users";
@@ -31,36 +32,25 @@ interface UserCompetency {
 // ── Constants ────────────────────────────────────────────────────────────────
 
 // Allineato a NormativeRole (governance M00) — fonte di verità per i ruoli
-const ROLES: { value: string; label: string }[] = [
-  { value: "ciso",                   label: "CISO" },
-  { value: "compliance_officer",     label: "Compliance Officer" },
-  { value: "risk_manager",           label: "Risk Manager" },
-  { value: "internal_auditor",       label: "Auditor Interno" },
-  { value: "external_auditor",       label: "Auditor Esterno" },
-  { value: "plant_manager",          label: "Plant Manager" },
-  { value: "control_owner",          label: "Control Owner" },
-  { value: "plant_security_officer", label: "Plant Security Officer" },
-  { value: "nis2_contact",           label: "Contatto NIS2" },
-  { value: "dpo",                    label: "DPO" },
-  { value: "isms_manager",           label: "ISMS Manager" },
-  { value: "comitato_membro",        label: "Membro Comitato" },
-  { value: "bu_referente",           label: "Referente BU" },
-  { value: "raci_responsible",       label: "RACI Responsible" },
-  { value: "raci_accountable",       label: "RACI Accountable" },
-];
+const ROLES_KEYS = [
+  "ciso",
+  "compliance_officer",
+  "risk_manager",
+  "internal_auditor",
+  "external_auditor",
+  "plant_manager",
+  "control_owner",
+  "plant_security_officer",
+  "nis2_contact",
+  "dpo",
+  "isms_manager",
+  "comitato_membro",
+  "bu_referente",
+  "raci_responsible",
+  "raci_accountable",
+] as const;
 
-const EVIDENCE_TYPES = [
-  { value: "certification",  label: "Certificazione" },
-  { value: "training",       label: "Training" },
-  { value: "experience",     label: "Esperienza" },
-  { value: "assessment",     label: "Assessment" },
-];
-
-const LEVEL_LABELS: Record<number, string> = {
-  1: "1 — Awareness",
-  2: "2 — Practitioner",
-  3: "3 — Expert",
-};
+const EVIDENCE_TYPE_KEYS = ["certification", "training", "experience", "assessment"] as const;
 
 const LEVEL_COLORS: Record<number, string> = {
   1: "bg-blue-100 text-blue-800",
@@ -97,9 +87,10 @@ const ucApi = {
 // ── Level badge ───────────────────────────────────────────────────────────────
 
 function LevelBadge({ level }: { level: number }) {
+  const { t } = useTranslation();
   return (
     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${LEVEL_COLORS[level] ?? "bg-gray-100 text-gray-700"}`}>
-      {LEVEL_LABELS[level] ?? level}
+      {t(`competency.levels.${level}`, String(level))}
     </span>
   );
 }
@@ -107,6 +98,7 @@ function LevelBadge({ level }: { level: number }) {
 // ── Tab 1: Requisiti per ruolo ────────────────────────────────────────────────
 
 function RequirementsTab() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const { data: requirements = [], isLoading } = useQuery({
     queryKey: ["competency-requirements"],
@@ -125,10 +117,10 @@ function RequirementsTab() {
     ? requirements.filter(r => r.grc_role === filterRole)
     : requirements;
 
-  const grouped = ROLES.map(role => ({
-    role,
-    items: filtered.filter(r => r.grc_role === role.value),
-  })).filter(g => !filterRole || g.role.value === filterRole || g.items.length > 0);
+  const grouped = ROLES_KEYS.map(roleKey => ({
+    roleKey,
+    items: filtered.filter(r => r.grc_role === roleKey),
+  })).filter(g => !filterRole || g.roleKey === filterRole || g.items.length > 0);
 
   const saveMutation = useMutation({
     mutationFn: () =>
@@ -164,7 +156,7 @@ function RequirementsTab() {
     setShowForm(true);
   }
 
-  if (isLoading) return <p className="text-sm text-gray-500 p-4">Caricamento...</p>;
+  if (isLoading) return <p className="text-sm text-gray-500 p-4">{t("competency.no_requirements")}</p>;
 
   return (
     <div className="space-y-4">
@@ -175,14 +167,14 @@ function RequirementsTab() {
           onChange={e => setFilterRole(e.target.value)}
           className="border rounded px-3 py-1.5 text-sm"
         >
-          <option value="">Tutti i ruoli</option>
-          {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+          <option value="">{t("competency.all_roles")}</option>
+          {ROLES_KEYS.map(rk => <option key={rk} value={rk}>{t(`governance.roles.${rk}`)}</option>)}
         </select>
         <button
           onClick={openNew}
           className="ml-auto bg-primary-600 text-white px-3 py-1.5 rounded text-sm hover:bg-primary-700"
         >
-          + Nuovo requisito
+          {t("competency.add_requirement")}
         </button>
       </div>
 
@@ -191,49 +183,49 @@ function RequirementsTab() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg space-y-4">
             <h3 className="font-semibold text-lg">
-              {editItem ? "Modifica requisito" : "Nuovo requisito"}
+              {editItem ? t("competency.req_modal_edit") : t("competency.req_modal_new")}
             </h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Ruolo</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{t("competency.role_label")}</label>
                 <select
                   value={form.grc_role}
                   onChange={e => setForm(f => ({ ...f, grc_role: e.target.value }))}
                   className="border rounded px-2 py-1.5 text-sm w-full"
                 >
                   <option value="">— seleziona —</option>
-                  {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+                  {ROLES_KEYS.map(rk => <option key={rk} value={rk}>{t(`governance.roles.${rk}`)}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Livello richiesto</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{t("competency.level_required")}</label>
                 <select
                   value={form.required_level}
                   onChange={e => setForm(f => ({ ...f, required_level: Number(e.target.value) }))}
                   className="border rounded px-2 py-1.5 text-sm w-full"
                 >
-                  {[1, 2, 3].map(l => <option key={l} value={l}>{LEVEL_LABELS[l]}</option>)}
+                  {[1, 2, 3].map(l => <option key={l} value={l}>{t(`competency.levels.${l}`)}</option>)}
                 </select>
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Competenza</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">{t("competency.competency_label")}</label>
               <input
                 value={form.competency}
                 onChange={e => setForm(f => ({ ...f, competency: e.target.value }))}
                 className="border rounded px-2 py-1.5 text-sm w-full"
-                placeholder="es. ISO 27001 Lead Implementer"
+                placeholder={t("competency.competency_placeholder")}
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Tipo evidenza</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{t("competency.evidence_type_label")}</label>
                 <select
                   value={form.evidence_type}
                   onChange={e => setForm(f => ({ ...f, evidence_type: e.target.value }))}
                   className="border rounded px-2 py-1.5 text-sm w-full"
                 >
-                  {EVIDENCE_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  {EVIDENCE_TYPE_KEYS.map(ek => <option key={ek} value={ek}>{t(`competency.evidence_types.${ek}`)}</option>)}
                 </select>
               </div>
               <div className="flex items-center gap-2 mt-5">
@@ -243,11 +235,11 @@ function RequirementsTab() {
                   checked={form.mandatory}
                   onChange={e => setForm(f => ({ ...f, mandatory: e.target.checked }))}
                 />
-                <label htmlFor="mandatory" className="text-sm">Obbligatorio</label>
+                <label htmlFor="mandatory" className="text-sm">{t("competency.mandatory_label")}</label>
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Note</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">{t("competency.notes_label")}</label>
               <textarea
                 value={form.notes}
                 onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
@@ -260,42 +252,40 @@ function RequirementsTab() {
                 onClick={() => { setShowForm(false); setEditItem(null); }}
                 className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50"
               >
-                Annulla
+                {t("actions.cancel")}
               </button>
               <button
                 onClick={() => saveMutation.mutate()}
                 disabled={!form.grc_role || !form.competency || saveMutation.isPending}
                 className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded hover:bg-primary-700 disabled:opacity-50"
               >
-                {saveMutation.isPending ? "Salvataggio..." : "Salva"}
+                {saveMutation.isPending ? t("governance.workflow.saving") : t("actions.save")}
               </button>
             </div>
             {saveMutation.isError && (
-              <p className="text-red-600 text-xs">Errore durante il salvataggio.</p>
+              <p className="text-red-600 text-xs">{t("competency.save_error")}</p>
             )}
           </div>
         </div>
       )}
 
       {/* Tables by role */}
-      {grouped.map(({ role, items }) => {
-        const shown = filterRole ? filtered : items;
-        const rows = filterRole ? shown : items;
-        if (rows.length === 0 && filterRole) return null;
+      {grouped.map(({ roleKey, items }) => {
+        const rows = filterRole ? filtered.filter(r => r.grc_role === roleKey) : items;
         if (rows.length === 0) return null;
         return (
-          <div key={role.value} className="bg-white rounded-lg border">
+          <div key={roleKey} className="bg-white rounded-lg border">
             <div className="px-4 py-2 border-b bg-gray-50 flex items-center justify-between">
-              <span className="font-semibold text-sm text-gray-700">{role.label}</span>
-              <span className="text-xs text-gray-400">{rows.length} requisiti</span>
+              <span className="font-semibold text-sm text-gray-700">{t(`governance.roles.${roleKey}`)}</span>
+              <span className="text-xs text-gray-400">{t("competency.requirements_count", { count: rows.length })}</span>
             </div>
             <table className="w-full text-sm">
               <thead className="text-xs text-gray-500 border-b">
                 <tr>
-                  <th className="text-left px-4 py-2">Competenza</th>
-                  <th className="text-left px-4 py-2">Livello</th>
-                  <th className="text-left px-4 py-2">Evidenza</th>
-                  <th className="text-left px-4 py-2">Obbl.</th>
+                  <th className="text-left px-4 py-2">{t("competency.col_competency")}</th>
+                  <th className="text-left px-4 py-2">{t("competency.col_level")}</th>
+                  <th className="text-left px-4 py-2">{t("competency.col_evidence")}</th>
+                  <th className="text-left px-4 py-2">{t("competency.col_mandatory")}</th>
                   <th className="px-4 py-2"></th>
                 </tr>
               </thead>
@@ -305,7 +295,7 @@ function RequirementsTab() {
                     <td className="px-4 py-2 font-medium">{r.competency}</td>
                     <td className="px-4 py-2"><LevelBadge level={r.required_level} /></td>
                     <td className="px-4 py-2 text-gray-600">
-                      {EVIDENCE_TYPES.find(t => t.value === r.evidence_type)?.label ?? r.evidence_type}
+                      {t(`competency.evidence_types.${r.evidence_type}`, r.evidence_type)}
                     </td>
                     <td className="px-4 py-2">
                       {r.mandatory
@@ -317,15 +307,15 @@ function RequirementsTab() {
                         onClick={() => openEdit(r)}
                         className="text-xs text-blue-600 hover:underline"
                       >
-                        Modifica
+                        {t("actions.edit")}
                       </button>
                       <button
                         onClick={() => {
-                          if (confirm("Eliminare questo requisito?")) deleteMutation.mutate(r.id);
+                          if (confirm(t("competency.delete_requirement"))) deleteMutation.mutate(r.id);
                         }}
                         className="text-xs text-red-500 hover:underline"
                       >
-                        Elimina
+                        {t("actions.delete")}
                       </button>
                     </td>
                   </tr>
@@ -337,7 +327,7 @@ function RequirementsTab() {
       })}
 
       {filtered.length === 0 && (
-        <p className="text-sm text-gray-500 text-center py-8">Nessun requisito trovato.</p>
+        <p className="text-sm text-gray-500 text-center py-8">{t("competency.no_requirements")}</p>
       )}
     </div>
   );
@@ -346,6 +336,7 @@ function RequirementsTab() {
 // ── Tab 2: Competenze utenti ──────────────────────────────────────────────────
 
 function UserCompetenciesTab() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const { data: competencies = [], isLoading: loadingComp } = useQuery({
     queryKey: ["user-competencies"],
@@ -431,12 +422,12 @@ function UserCompetenciesTab() {
   function validityBadge(c: UserCompetency) {
     if (!c.valid_until) return null;
     const days = Math.ceil((new Date(c.valid_until).getTime() - Date.now()) / 86400000);
-    if (days < 0) return <span className="px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-700">Scaduta</span>;
-    if (days < 90) return <span className="px-2 py-0.5 rounded-full text-xs bg-orange-100 text-orange-700">Scade in {days}gg</span>;
-    return <span className="px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700">Valida</span>;
+    if (days < 0) return <span className="px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-700">{t("competency.validity_expired")}</span>;
+    if (days < 90) return <span className="px-2 py-0.5 rounded-full text-xs bg-orange-100 text-orange-700">{t("competency.validity_expiring", { days })}</span>;
+    return <span className="px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700">{t("competency.validity_valid")}</span>;
   }
 
-  if (loadingComp || loadingUsers) return <p className="text-sm text-gray-500 p-4">Caricamento...</p>;
+  if (loadingComp || loadingUsers) return <p className="text-sm text-gray-500 p-4">{t("notification_settings.loading")}</p>;
 
   return (
     <div className="space-y-4">
@@ -447,7 +438,7 @@ function UserCompetenciesTab() {
           onChange={e => setFilterUser(e.target.value ? Number(e.target.value) : "")}
           className="border rounded px-3 py-1.5 text-sm"
         >
-          <option value="">Tutti gli utenti</option>
+          <option value="">{t("competency.all_users")}</option>
           {users.map(u => (
             <option key={u.id} value={u.id}>
               {`${u.first_name} ${u.last_name}`.trim() || u.username || u.email}
@@ -458,7 +449,7 @@ function UserCompetenciesTab() {
           onClick={openNew}
           className="ml-auto bg-primary-600 text-white px-3 py-1.5 rounded text-sm hover:bg-primary-700"
         >
-          + Aggiungi competenza
+          {t("competency.add_competency")}
         </button>
       </div>
 
@@ -467,11 +458,11 @@ function UserCompetenciesTab() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg space-y-4">
             <h3 className="font-semibold text-lg">
-              {editItem ? "Modifica competenza" : "Aggiungi competenza utente"}
+              {editItem ? t("competency.comp_modal_edit") : t("competency.comp_modal_new")}
             </h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Utente</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{t("competency.user_label")}</label>
                 <select
                   value={form.user}
                   onChange={e => setForm(f => ({ ...f, user: Number(e.target.value) }))}
@@ -487,49 +478,49 @@ function UserCompetenciesTab() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Livello</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{t("competency.level_label")}</label>
                 <select
                   value={form.level}
                   onChange={e => setForm(f => ({ ...f, level: Number(e.target.value) }))}
                   className="border rounded px-2 py-1.5 text-sm w-full"
                 >
-                  {[1, 2, 3].map(l => <option key={l} value={l}>{LEVEL_LABELS[l]}</option>)}
+                  {[1, 2, 3].map(l => <option key={l} value={l}>{t(`competency.levels.${l}`)}</option>)}
                 </select>
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Competenza</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">{t("competency.competency_label")}</label>
               <input
                 value={form.competency}
                 onChange={e => setForm(f => ({ ...f, competency: e.target.value }))}
                 className="border rounded px-2 py-1.5 text-sm w-full"
-                placeholder="es. ISO 27001 Lead Implementer"
+                placeholder={t("competency.competency_placeholder")}
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Tipo evidenza</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{t("competency.evidence_type_label")}</label>
                 <select
                   value={form.evidence_type}
                   onChange={e => setForm(f => ({ ...f, evidence_type: e.target.value }))}
                   className="border rounded px-2 py-1.5 text-sm w-full"
                 >
-                  {EVIDENCE_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  {EVIDENCE_TYPE_KEYS.map(ek => <option key={ek} value={ek}>{t(`competency.evidence_types.${ek}`)}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Ente certificatore</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{t("competency.cert_body_label")}</label>
                 <input
                   value={form.certification_body}
                   onChange={e => setForm(f => ({ ...f, certification_body: e.target.value }))}
                   className="border rounded px-2 py-1.5 text-sm w-full"
-                  placeholder="es. BSI, Bureau Veritas"
+                  placeholder={t("competency.cert_body_placeholder")}
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Data conseguimento</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{t("competency.obtained_at_label")}</label>
                 <input
                   type="date"
                   value={form.obtained_at}
@@ -538,7 +529,7 @@ function UserCompetenciesTab() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Scadenza</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{t("competency.valid_until_label")}</label>
                 <input
                   type="date"
                   value={form.valid_until}
@@ -552,18 +543,18 @@ function UserCompetenciesTab() {
                 onClick={() => { setShowForm(false); setEditItem(null); }}
                 className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50"
               >
-                Annulla
+                {t("actions.cancel")}
               </button>
               <button
                 onClick={() => saveMutation.mutate()}
                 disabled={!form.user || !form.competency || saveMutation.isPending}
                 className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded hover:bg-primary-700 disabled:opacity-50"
               >
-                {saveMutation.isPending ? "Salvataggio..." : "Salva"}
+                {saveMutation.isPending ? t("governance.workflow.saving") : t("actions.save")}
               </button>
             </div>
             {saveMutation.isError && (
-              <p className="text-red-600 text-xs">Errore durante il salvataggio.</p>
+              <p className="text-red-600 text-xs">{t("competency.save_error")}</p>
             )}
           </div>
         </div>
@@ -574,13 +565,13 @@ function UserCompetenciesTab() {
         <table className="w-full text-sm">
           <thead className="text-xs text-gray-500 border-b bg-gray-50">
             <tr>
-              <th className="text-left px-4 py-2">Utente</th>
-              <th className="text-left px-4 py-2">Competenza</th>
-              <th className="text-left px-4 py-2">Livello</th>
-              <th className="text-left px-4 py-2">Evidenza</th>
-              <th className="text-left px-4 py-2">Conseguita</th>
-              <th className="text-left px-4 py-2">Validità</th>
-              <th className="text-left px-4 py-2">Verificata da</th>
+              <th className="text-left px-4 py-2">{t("competency.col_user")}</th>
+              <th className="text-left px-4 py-2">{t("competency.col_competency")}</th>
+              <th className="text-left px-4 py-2">{t("competency.col_level")}</th>
+              <th className="text-left px-4 py-2">{t("competency.col_evidence")}</th>
+              <th className="text-left px-4 py-2">{t("competency.col_obtained")}</th>
+              <th className="text-left px-4 py-2">{t("competency.col_validity")}</th>
+              <th className="text-left px-4 py-2">{t("competency.col_verified_by")}</th>
               <th className="px-4 py-2"></th>
             </tr>
           </thead>
@@ -588,7 +579,7 @@ function UserCompetenciesTab() {
             {filtered.length === 0 && (
               <tr>
                 <td colSpan={8} className="text-center py-8 text-gray-400 text-sm">
-                  Nessuna competenza registrata.
+                  {t("competency.no_competencies")}
                 </td>
               </tr>
             )}
@@ -598,7 +589,7 @@ function UserCompetenciesTab() {
                 <td className="px-4 py-2">{c.competency}</td>
                 <td className="px-4 py-2"><LevelBadge level={c.level} /></td>
                 <td className="px-4 py-2 text-gray-600">
-                  {EVIDENCE_TYPES.find(t => t.value === c.evidence_type)?.label ?? c.evidence_type}
+                  {t(`competency.evidence_types.${c.evidence_type}`, c.evidence_type)}
                   {c.certification_body && <span className="text-gray-400 ml-1">({c.certification_body})</span>}
                 </td>
                 <td className="px-4 py-2 text-gray-600">
@@ -615,15 +606,15 @@ function UserCompetenciesTab() {
                     onClick={() => openEdit(c)}
                     className="text-xs text-blue-600 hover:underline"
                   >
-                    Modifica
+                    {t("actions.edit")}
                   </button>
                   <button
                     onClick={() => {
-                      if (confirm("Eliminare questa competenza?")) deleteMutation.mutate(c.id);
+                      if (confirm(t("competency.delete_competency"))) deleteMutation.mutate(c.id);
                     }}
                     className="text-xs text-red-500 hover:underline"
                   >
-                    Elimina
+                    {t("actions.delete")}
                   </button>
                 </td>
               </tr>
@@ -638,30 +629,31 @@ function UserCompetenciesTab() {
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export function CompetencyPage() {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<"requirements" | "users">("requirements");
 
   return (
     <div className="p-6 space-y-6 max-w-6xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Competenze</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t("competency.title")}</h1>
         <p className="text-sm text-gray-500 mt-1">
-          ISO 27001 § 7.2 — Requisiti di competenza per ruolo e tracciamento competenze individuali.
+          {t("competency.subtitle")}
         </p>
       </div>
 
       {/* Tabs */}
       <div className="border-b flex gap-0">
-        {(["requirements", "users"] as const).map(t => (
+        {(["requirements", "users"] as const).map(tabKey => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={tabKey}
+            onClick={() => setTab(tabKey)}
             className={`px-5 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-              tab === t
+              tab === tabKey
                 ? "border-primary-600 text-primary-700"
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
-            {t === "requirements" ? "Requisiti per ruolo" : "Competenze utenti"}
+            {t(`competency.tabs.${tabKey}`)}
           </button>
         ))}
       </div>

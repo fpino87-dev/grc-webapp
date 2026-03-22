@@ -141,19 +141,19 @@ function TabCosa({ info }: { info: NonNullable<ReturnType<typeof useDetailInfo>[
 
 // ─── Tab 2: Valutazione ───────────────────────────────────────────────────────
 
-const MATURITY_LABELS: Record<number, string> = {
-  0: "Not implemented",
-  1: "Ad-hoc",
-  2: "Planned",
-  3: "Defined",
-  4: "Managed",
-  5: "Optimized",
+const MATURITY_KEYS: Record<number, string> = {
+  0: "controls.maturity_0",
+  1: "controls.maturity_1",
+  2: "controls.maturity_2",
+  3: "controls.maturity_3",
+  4: "controls.maturity_4",
+  5: "controls.maturity_5",
 };
 
-const APPLICABILITY_LABELS: Record<string, string> = {
-  applicabile:    "Applicabile",
-  escluso:        "Escluso",
-  non_pertinente: "Non pertinente",
+const APPLICABILITY_KEYS: Record<string, string> = {
+  applicabile:    "controls.applicability_applicable",
+  escluso:        "controls.applicability_excluded",
+  non_pertinente: "controls.applicability_not_relevant",
 };
 
 function TabValutazione({
@@ -374,8 +374,8 @@ function TabValutazione({
           onChange={e => { setSelectedApplicability(e.target.value); setApplicabilityError(""); }}
           className="w-full border rounded px-2 py-1.5 text-sm"
         >
-          {Object.entries(APPLICABILITY_LABELS).map(([v, l]) => (
-            <option key={v} value={v}>{t(`controls.drawer.evaluation.applicability.options.${v}`, { defaultValue: l })}</option>
+          {Object.entries(APPLICABILITY_KEYS).map(([v, key]) => (
+            <option key={v} value={v}>{t(key)}</option>
           ))}
         </select>
         {selectedApplicability === "escluso" && (
@@ -419,7 +419,7 @@ function TabValutazione({
             <span className="text-sm font-bold text-purple-700 w-4 text-center">{maturityOverrideVal}</span>
           </div>
           <p className="text-xs text-gray-500">
-            {t(`controls.drawer.evaluation.maturity.levels.${maturityOverrideVal}`, { defaultValue: MATURITY_LABELS[maturityOverrideVal] })}
+            {t(MATURITY_KEYS[maturityOverrideVal] ?? `controls.drawer.evaluation.maturity.levels.${maturityOverrideVal}`)}
           </p>
           <button
             onClick={() => maturityMutation.mutate()}

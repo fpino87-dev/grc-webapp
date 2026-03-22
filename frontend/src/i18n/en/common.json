@@ -49,7 +49,8 @@
     "delete": "Delete",
     "refresh": "Refresh",
     "export": "Export",
-    "upload": "Upload"
+    "upload": "Upload",
+    "back": "Back"
   },
   "ai": {
     "suggestion_label": "AI Suggestion",
@@ -75,7 +76,13 @@
     "yes": "Yes",
     "no": "No",
     "optional": "— optional —",
-    "select": "— select —"
+    "select": "— select —",
+    "freq_weekly": "Weekly",
+    "freq_monthly": "Monthly",
+    "freq_quarterly": "Quarterly",
+    "freq_biannual": "Semi-annual",
+    "freq_annual": "Annual",
+    "finish": "Finish"
   },
   "help": {
     "open_title": "Help for this module",
@@ -101,11 +108,31 @@
         "example": "Example"
       },
       "levels": {
-        "1": { "label": "Negligible", "downtime": "> 7 days", "example": "Historical document archive" },
-        "2": { "label": "Low", "downtime": "3–7 days", "example": "Internal reporting" },
-        "3": { "label": "Medium", "downtime": "24–72 hours", "example": "Secondary ERP, supplier management" },
-        "4": { "label": "High", "downtime": "4–24 hours", "example": "Production line, quality, logistics" },
-        "5": { "label": "Critical", "downtime": "< 4 hours", "example": "Main production line, safety systems" }
+        "1": {
+          "label": "Negligible",
+          "downtime": "> 7 days",
+          "example": "Historical document archive"
+        },
+        "2": {
+          "label": "Low",
+          "downtime": "3–7 days",
+          "example": "Internal reporting"
+        },
+        "3": {
+          "label": "Medium",
+          "downtime": "24–72 hours",
+          "example": "Secondary ERP, supplier management"
+        },
+        "4": {
+          "label": "High",
+          "downtime": "4–24 hours",
+          "example": "Production line, quality, logistics"
+        },
+        "5": {
+          "label": "Critical",
+          "downtime": "< 4 hours",
+          "example": "Main production line, safety systems"
+        }
       },
       "questions": {
         "economic": {
@@ -166,8 +193,7 @@
           "desc": "How many linked ISO27001/TISAX controls are in Gap status"
         }
       },
-      "ot_dimensions_title": "OT asset dimensions"
-      ,
+      "ot_dimensions_title": "OT asset dimensions",
       "ot_dimensions": {
         "purdue": {
           "label": "Purdue connectivity",
@@ -312,23 +338,23 @@
         "maturity": {
           "title": "VDA ISA TISAX maturity level",
           "auto": "Calculated automatically",
-        "override": "Manual maturity override",
-        "levels": {
-          "0": "Not implemented",
-          "1": "Ad-hoc",
-          "2": "Planned",
-          "3": "Defined",
-          "4": "Managed",
-          "5": "Optimized"
-        }
+          "override": "Manual maturity override",
+          "levels": {
+            "0": "Not implemented",
+            "1": "Ad-hoc",
+            "2": "Planned",
+            "3": "Defined",
+            "4": "Managed",
+            "5": "Optimized"
+          }
         },
-      "status_guide": {
-        "compliant": "Valid non-expired evidence + last verification date",
-        "parziale": "Some evidence + remediation plan (task M08)",
-        "gap": "None required to save — remediation task auto-generated",
-        "na": "Written justification min 20 characters. TISAX L3: double approval",
-        "non_valutato": "Lowers the site's compliance score"
-      },
+        "status_guide": {
+          "compliant": "Valid non-expired evidence + last verification date",
+          "parziale": "Some evidence + remediation plan (task M08)",
+          "gap": "None required to save — remediation task auto-generated",
+          "na": "Written justification min 20 characters. TISAX L3: double approval",
+          "non_valutato": "Lowers the site's compliance score"
+        },
         "manual_change": {
           "title": "Manual status change",
           "select_status": "— select new status —",
@@ -354,8 +380,7 @@
         "upload_new_evidence": "Upload new evidence",
         "new_evidence_title_placeholder": "Title *",
         "validity_date_label": "Validity date *",
-        "upload_and_link": "Upload and link"
-        ,
+        "upload_and_link": "Upload and link",
         "review_abbrev": "rev."
       },
       "history": {
@@ -379,6 +404,22 @@
       "propagate_hint": "Propagate this status to related controls",
       "propagate": "⇒ propagate"
     },
+    "maturity_0": "Not implemented",
+    "maturity_1": "Ad-hoc",
+    "maturity_2": "Planned",
+    "maturity_3": "Defined",
+    "maturity_4": "Managed",
+    "maturity_5": "Optimized",
+    "applicability_applicable": "Applicable",
+    "applicability_excluded": "Excluded",
+    "applicability_not_relevant": "Not relevant",
+    "rel_copre": "covers",
+    "rel_estende": "extends",
+    "rel_equivale": "equivalent",
+    "rel_subset": "subset",
+    "rel_related": "related",
+    "download_error": "Download error",
+    "download_network_error": "Network error during download",
     "help": {
       "title": "Controls library — M03",
       "description": "Manages regulatory controls for each framework (ISO 27001, TISAX L2/L3, NIS2). Each control has an assessment status and requires documentary evidence to reach \"Compliant\".",
@@ -391,9 +432,18 @@
         "6": "Download SOA (ISO27001), VDA ISA (TISAX) or NIS2 Matrix using the buttons at the top"
       },
       "connections": {
-        "documents": { "module": "M07 Documents", "relation": "Policy and evidence linked to the control" },
-        "audit_prep": { "module": "M17 Audit Prep", "relation": "Findings linked to ControlInstance" },
-        "risk": { "module": "M06 Risk", "relation": "Control gaps affect the OT risk score" }
+        "documents": {
+          "module": "M07 Documents",
+          "relation": "Policy and evidence linked to the control"
+        },
+        "audit_prep": {
+          "module": "M17 Audit Prep",
+          "relation": "Findings linked to ControlInstance"
+        },
+        "risk": {
+          "module": "M06 Risk",
+          "relation": "Control gaps affect the OT risk score"
+        }
       },
       "config_needed": {
         "1": "Run: python manage.py load_frameworks",
@@ -477,6 +527,9 @@
     "edit": {
       "title": "Edit site"
     },
+    "logo_url_label": "Logo URL",
+    "logo_url_hint": "Site logo URL (used in reports/export). Recommended PNG/SVG with transparent background.",
+    "tisax_framework_label": "TISAX — VDA ISA 6.0",
     "frameworks": {
       "title": "Compliance frameworks",
       "empty": "No frameworks assigned to this site.",
@@ -574,7 +627,40 @@
     },
     "workflow": {
       "title": "Document workflow",
-      "subtitle": "Define who can create, review and approve M07 documents by type and site."
+      "subtitle": "Define who can create, review and approve M07 documents by type and site.",
+      "configured_policies": "Configured policies",
+      "new_policy": "+ New policy",
+      "no_policies": "No policy configured. Create one per document type.",
+      "who_can_submit": "Who can submit",
+      "who_reviews": "Who reviews",
+      "who_approves": "Who approves",
+      "actions_col": "Actions",
+      "scope_org": "Organization",
+      "scope_bu": "Business Unit (ID)",
+      "scope_site_prefix": "Site:",
+      "scope_site_id": "Site (ID)",
+      "modal_edit": "Edit policy",
+      "modal_new": "New policy",
+      "scope_label": "Scope",
+      "site_label": "Site",
+      "site_select": "— select site —",
+      "scope_org_option": "Organization",
+      "scope_site_option": "Specific site",
+      "who_can_create_submit": "Who can create / submit for review",
+      "saving": "Saving...",
+      "save_policy": "Save policy",
+      "delete_title": "Delete policy",
+      "delete_confirm": "Are you sure you want to delete the policy for",
+      "deleting": "Deleting...",
+      "doc_type_col": "Document type",
+      "doc_types": {
+        "policy": "Policy",
+        "procedura": "Procedure",
+        "manuale": "ISMS Manual",
+        "contratto": "Contract/NDA",
+        "registro": "Register",
+        "altro": "Other"
+      }
     },
     "sections": {
       "roles": "Normative roles",
@@ -711,8 +797,7 @@
         "documents": "Enables \"Send for review\" / \"Approve\" buttons in the Documents module.",
         "governance": "Uses normative roles (CISO, Plant Manager, ISMS...) configured in Governance."
       }
-    }
-    ,
+    },
     "frameworks": {
       "title": "Normative frameworks",
       "subtitle": "Manage versions and imports of the JSON frameworks used for controls and mappings.",
@@ -768,7 +853,8 @@
         "status": "Status",
         "actions": "Actions"
       }
-    }
+    },
+    "appetite_notes_placeholder": "Approval notes, management resolution references, etc."
   },
   "sidebar": {
     "groups": {
@@ -874,9 +960,10 @@
     "sites": {
       "title": "Sites",
       "empty": "No sites configured"
-    }
-  }
-  ,
+    },
+    "chart_risks_high": "High risks",
+    "chart_incidents_open": "Open incidents"
+  },
   "tasks": {
     "title": "Tasks",
     "empty": "No tasks found",
@@ -1054,8 +1141,7 @@
         "in_days": "in {{days}}d"
       }
     }
-  }
-  ,
+  },
   "schedule": {
     "activity": {
       "title": "Activity schedule",
@@ -1069,8 +1155,14 @@
           "4": "Configure due dates in 'Due date policy' (CISO/Admin only)"
         },
         "connections": {
-          "policy": { "module": "Due date policy", "relation": "Configured rules determine all due dates" },
-          "required_docs": { "module": "Required documents", "relation": "Shows required document status by framework" }
+          "policy": {
+            "module": "Due date policy",
+            "relation": "Configured rules determine all due dates"
+          },
+          "required_docs": {
+            "module": "Required documents",
+            "relation": "Shows required document status by framework"
+          }
         },
         "config_needed": {
           "1": "Configure a due date policy with 'Create default policy'",
@@ -1115,9 +1207,73 @@
       "due_date": "Due date",
       "days": "Days",
       "status": "Status"
+    },
+    "units": {
+      "days": "days",
+      "weeks": "weeks",
+      "months": "months",
+      "years": "years"
+    },
+    "categories": {
+      "Controlli": "Controls",
+      "Documenti": "Documents",
+      "Rischi": "Risks",
+      "BCP": "BCP",
+      "Incidenti": "Incidents",
+      "Fornitori": "Suppliers",
+      "Formazione": "Training",
+      "Governance": "Governance",
+      "Audit": "Audit",
+      "PDCA": "PDCA",
+      "Reporting": "Reporting"
+    },
+    "policy": {
+      "title": "Deadline Policy",
+      "new_policy": "+ New policy",
+      "create_title": "Create policy with default rules",
+      "site_optional": "Site (optional)",
+      "global": "Global (all sites)",
+      "all": "All",
+      "policy_name": "Policy name",
+      "create_btn": "Create",
+      "create_error": "Creation error. Please retry.",
+      "site_label": "Site",
+      "policy_label": "Policy",
+      "active_suffix": "(active)",
+      "no_policy": "No policy configured. Create a new policy with the default rules.",
+      "days_before": "days before",
+      "col_rule": "Rule",
+      "col_frequency": "Frequency",
+      "col_alert": "Alert",
+      "col_active": "Active"
+    },
+    "required_docs": {
+      "title": "Required Documents",
+      "all_sites": "All sites",
+      "no_framework": "No framework assigned to this plant. Go to M01 Plant to activate a framework.",
+      "status_all": "All",
+      "status_red": "Missing",
+      "status_yellow": "Incomplete",
+      "status_green": "OK",
+      "approved_label": "Approved",
+      "total_suffix": "out of {{total}} total",
+      "incomplete_label": "Incomplete",
+      "missing_label": "Missing",
+      "traffic_present_approved": "Present and approved",
+      "traffic_draft": "Present (draft/review)",
+      "traffic_missing": "Missing",
+      "mandatory_badge": "Mand.",
+      "no_doc": "— no document linked",
+      "review_date": "Review: {{date}}",
+      "no_results_framework": "No required documents for this framework",
+      "no_results_filter": "No results for the selected filter",
+      "col_doc": "Document",
+      "col_type": "Type",
+      "col_clause": "Clause",
+      "col_present": "Document present",
+      "col_status": "Status"
     }
-  }
-  ,
+  },
   "training": {
     "title": "Operations — Training",
     "empty": "No courses recorded",
@@ -1182,14 +1338,338 @@
         "5": "Close the incident: post-incident PDCA and Lesson Learned are created automatically"
       },
       "connections": {
-        "pdca": { "module": "M11 PDCA", "relation": "Post-incident PDCA auto-created on close" },
-        "lessons": { "module": "M12 Lessons", "relation": "Lesson learned auto-created with RCA summary" },
-        "tasks": { "module": "M08 Task", "relation": "RCA task auto-created on open" }
+        "pdca": {
+          "module": "M11 PDCA",
+          "relation": "Post-incident PDCA auto-created on close"
+        },
+        "lessons": {
+          "module": "M12 Lessons",
+          "relation": "Lesson learned auto-created with RCA summary"
+        },
+        "tasks": {
+          "module": "M08 Task",
+          "relation": "RCA task auto-created on open"
+        }
       },
       "config_needed": {
         "1": "Appoint the NIS2 contact in M00 Governance"
       }
     }
+  },
+  "competency": {
+    "title": "Competencies",
+    "subtitle": "ISO 27001 § 7.2 — Role competency requirements and individual competency tracking.",
+    "tabs": {
+      "requirements": "Role requirements",
+      "users": "User competencies"
+    },
+    "levels": {
+      "1": "1 — Awareness",
+      "2": "2 — Practitioner",
+      "3": "3 — Expert"
+    },
+    "evidence_types": {
+      "certification": "Certification",
+      "training": "Training",
+      "experience": "Experience",
+      "assessment": "Assessment"
+    },
+    "all_roles": "All roles",
+    "add_requirement": "+ New requirement",
+    "requirements_count": "{{count}} requirements",
+    "no_requirements": "No requirements found.",
+    "req_modal_edit": "Edit requirement",
+    "req_modal_new": "New requirement",
+    "role_label": "Role",
+    "level_required": "Required level",
+    "competency_label": "Competency",
+    "competency_placeholder": "e.g. ISO 27001 Lead Implementer",
+    "evidence_type_label": "Evidence type",
+    "mandatory_label": "Mandatory",
+    "notes_label": "Notes",
+    "save_error": "Error during save.",
+    "col_competency": "Competency",
+    "col_level": "Level",
+    "col_evidence": "Evidence",
+    "col_mandatory": "Mand.",
+    "delete_requirement": "Delete this requirement?",
+    "all_users": "All users",
+    "add_competency": "+ Add competency",
+    "comp_modal_edit": "Edit competency",
+    "comp_modal_new": "Add user competency",
+    "user_label": "User",
+    "level_label": "Level",
+    "cert_body_label": "Certification body",
+    "cert_body_placeholder": "e.g. BSI, Bureau Veritas",
+    "obtained_at_label": "Obtained on",
+    "valid_until_label": "Expiry",
+    "delete_competency": "Delete this competency?",
+    "no_competencies": "No competencies recorded.",
+    "col_user": "User",
+    "col_obtained": "Obtained",
+    "col_validity": "Validity",
+    "col_verified_by": "Verified by",
+    "validity_expired": "Expired",
+    "validity_expiring": "Expires in {{days}}d",
+    "validity_valid": "Valid"
+  },
+  "notification_settings": {
+    "title": "Email Notification Profiles",
+    "subtitle": "Choose how many alerts each role receives. Notifications are sent to users with that role and access to the event's site.",
+    "reset_defaults": "Reset all to defaults",
+    "scope_note": "Notifications follow the RBAC scope (M02), not the normative role scope (M00 Governance).",
+    "no_email_config": "Email server not configured — notifications will not be sent.",
+    "configure_email": "Configure email →",
+    "what_profile_includes": "What does each profile include?",
+    "profiles": {
+      "silenzioso": "Silent",
+      "essenziale": "Essential",
+      "standard": "Standard",
+      "completo": "Complete",
+      "custom": "Custom"
+    },
+    "event_groups": {
+      "risks_security": "Risks & Security",
+      "operations": "Operations",
+      "governance": "Governance",
+      "suppliers_risk": "Suppliers & Risk"
+    },
+    "col_role": "GRC Role",
+    "col_profile": "Profile",
+    "col_status": "Status",
+    "events_count": "{{count}} events",
+    "customize": "Customize",
+    "customize_title": "Customize notifications — {{role}}",
+    "customize_subtitle": "Select exactly which events you want to receive for this role.",
+    "reset_to_standard": "Reset to Standard profile",
+    "save_custom": "Save customization",
+    "save_error": "Error saving.",
+    "confirm_reset_title": "Are you sure?",
+    "confirm_reset_body": "All custom profiles will be lost and reset to default values.",
+    "reset_confirm": "Reset",
+    "event_col": "Event",
+    "loading": "Loading..."
+  },
+  "email_settings": {
+    "title": "Email Configuration",
+    "no_permission": "You do not have permission to access this page.",
+    "status_not_tested": "Not tested",
+    "status_ok": "Connection verified",
+    "status_failed": "Last test failed",
+    "provider_label": "Provider",
+    "config_name_label": "Configuration name",
+    "smtp_host_label": "SMTP Host",
+    "port_label": "Port",
+    "use_tls": "Use TLS",
+    "use_ssl": "Use SSL",
+    "use_auth": "SMTP Authentication",
+    "anonymous_relay": "Anonymous relay — no AUTH command sent to server",
+    "smtp_username": "SMTP Username",
+    "password_label": "Password",
+    "password_placeholder": "Leave blank to keep unchanged",
+    "from_email_label": "Sender address",
+    "from_email_hint": "This will appear as the sender in emails (e.g. GRC Platform <noreply@company.com>).",
+    "password_security_note": "The SMTP password is AES-256 encrypted in the database. It is never shown after saving.",
+    "test_recipient_label": "Test email recipient",
+    "test_recipient_placeholder": "your@email.com",
+    "send_test": "Send test email",
+    "testing": "Testing...",
+    "save_config": "Save configuration",
+    "saving": "Saving...",
+    "save_success": "Email configuration saved successfully.",
+    "save_error": "Error saving configuration.",
+    "test_success": "Test email sent successfully.",
+    "test_failed": "Configuration test failed.",
+    "test_error": "Error during configuration test.",
+    "no_config_error": "No active configuration to test.",
+    "no_recipient_error": "Please enter a recipient email address for the test.",
+    "show_password": "Show",
+    "hide_password": "Hide",
+    "provider_office365": "Microsoft Office 365",
+    "provider_gmail": "Google Gmail / Workspace"
+  },
+  "bia": {
+    "rto_ok": "RTO OK",
+    "rto_warning": "RTO ⚠",
+    "rto_critical": "RTO ✗",
+    "new_process_title": "New critical process",
+    "site_label": "Site *",
+    "process_name_label": "Process name *",
+    "criticality_label": "Criticality (1-5)",
+    "downtime_cost_label": "Downtime cost/h (€)",
+    "bcp_bia_section": "BCP/BIA targets (ISO 22301)",
+    "mtpd_label": "MTPD (hours)",
+    "mbco_label": "MBCO (%)",
+    "rto_label": "RTO target (hours)",
+    "rpo_label": "RPO target (hours)",
+    "save_error": "Error during save",
+    "save_changes": "Save changes",
+    "create_process": "Create process",
+    "filter_all": "All",
+    "filter_validated": "Validated",
+    "mtpd_placeholder": "e.g. 48",
+    "mbco_placeholder": "e.g. 70",
+    "rto_placeholder": "e.g. 24",
+    "rpo_placeholder": "e.g. 4"
+  },
+  "assets": {
+    "criticality_1_label": "Negligible",
+    "criticality_2_label": "Low",
+    "criticality_3_label": "Medium",
+    "criticality_4_label": "High",
+    "criticality_5_label": "Critical",
+    "criticality_1_desc": "Non-critical asset. Downtime tolerated over 7 days. No BCP required.",
+    "criticality_2_desc": "Limited impact. Downtime tolerated 3-7 days. BCP not necessary.",
+    "criticality_3_desc": "Operational impact. Downtime tolerated 24-72 hours. BCP recommended.",
+    "criticality_4_desc": "Significant impact on production or clients. Downtime tolerated 4-24 hours. BCP mandatory.",
+    "criticality_5_desc": "Core asset. Downtime tolerated less than 4 hours. BCP mandatory with semi-annual testing.",
+    "change_days_ago": "Change {{days}}d ago",
+    "reassessment_required": "Reassessment required",
+    "last_change_registered": "Last registered change",
+    "open_ticket": "Open ticket →",
+    "ref_label": "Ref:",
+    "date_label": "Date:",
+    "description_label": "Description:",
+    "reassessment_since": "Reassessment required since {{date}}",
+    "mark_reassessed": "Mark as reassessed",
+    "change_registered_title": "Change registered",
+    "register_change_title": "Register change",
+    "register_change_btn": "Register",
+    "registering": "Registering...",
+    "register_error": "Error during registration",
+    "new_asset_title": "New {{type}} asset",
+    "bia_processes_label": "Linked BIA processes",
+    "bia_processes_hint": "Select one or more BIA processes that depend on this asset (IT or OT).",
+    "criticality_guide_title": "ℹ️ How to choose criticality",
+    "criticality_table_value": "Value",
+    "criticality_table_label": "Label",
+    "criticality_table_downtime": "Tolerated downtime",
+    "criticality_table_bcp": "BCP",
+    "bcp_not_required": "No",
+    "bcp_recommended": "Recommended",
+    "bcp_mandatory": "Mandatory",
+    "downtime_7d_plus": "> 7 days",
+    "downtime_3_7d": "3–7 days",
+    "downtime_24_72h": "24–72 hours",
+    "downtime_4_24h": "4–24 hours",
+    "downtime_sub_4h": "< 4 hours",
+    "change_ticket_placeholder": "Ticket reference (e.g. JIRA-1234) *",
+    "change_desc_placeholder": "Brief change description",
+    "change_url_placeholder": "Ticket URL (optional)",
+    "deployment_label": "Deployment type *",
+    "deploy_on_prem": "On-premise",
+    "deploy_iaas": "IaaS (VM, network in cloud)",
+    "deploy_paas": "PaaS (DB, storage, functions)",
+    "deploy_saas": "SaaS (cloud application)",
+    "provider_label": "Provider",
+    "provider_placeholder": "Microsoft, AWS, SAP…",
+    "service_name_label": "Service name",
+    "service_placeholder": "Microsoft 365, Salesforce, SAP S/4HANA…",
+    "fqdn_label": "FQDN",
+    "fqdn_placeholder": "server.domain.com",
+    "os_label": "Operating system",
+    "os_placeholder": "Windows Server 2022",
+    "eol_label": "EOL date (end of support)",
+    "data_classification_label": "Data classification",
+    "data_class_public": "Public",
+    "data_class_internal": "Internal",
+    "data_class_confidential": "Confidential",
+    "data_class_restricted": "Restricted",
+    "internet_exposed_label": "Internet exposed",
+    "ot_category_label": "Category *",
+    "purdue_level_label": "Purdue level *",
+    "vendor_label": "Vendor"
+  },
+  "audit_prep": {
+    "finding_major": "MAJOR NC",
+    "finding_minor": "MINOR NC",
+    "finding_obs": "Observation",
+    "finding_opp": "Opportunity",
+    "kpi_major_open": "Open MAJOR NC",
+    "kpi_minor_open": "Open Minor NC",
+    "kpi_overdue": "overdue findings",
+    "add_finding": "+ Add finding",
+    "type_label": "Type *",
+    "audit_date_label": "Audit date *",
+    "title_label": "Title *",
+    "description_label": "Description",
+    "auditor_label": "Auditor name",
+    "create_finding": "Create finding",
+    "no_findings": "No findings recorded",
+    "close_notes_placeholder": "Closing notes (mandatory for Major/Minor, min 20 chars)",
+    "evidence_desc_placeholder": "Evidence description *",
+    "evidence_missing": "Missing",
+    "evidence_present": "Present",
+    "evidence_expired": "Expired",
+    "evidence_expiry_placeholder": "Expiry",
+    "program_plant_placeholder": "Plant ID",
+    "program_title_placeholder": "Program title *",
+    "program_objectives_placeholder": "Objectives"
+  },
+  "risk": {
+    "no_process_selected": "No process selected",
+    "level_critical": "Critical",
+    "score_inherent": "Inherent: score {{score}}",
+    "score_residual": "Residual: score {{score}}",
+    "suggest_residual": "💡 Suggest residual risk",
+    "controls_reduction": "Controls reduction:",
+    "bcp_extra": "Extra BCP:",
+    "total_label": "Total:",
+    "accepted_by_on": "Accepted by {{name}} on {{date}}",
+    "expired_on": "expired on",
+    "expires_on": "expires on",
+    "accept_risk_prompt": "⚠️ Accept risk formally",
+    "accept_risk_title": "Formal acceptance of residual risk",
+    "accept_note_label": "Mandatory note",
+    "accept_note_critical_hint": "(min 50 chars for critical risks)",
+    "confirm_acceptance": "Confirm acceptance",
+    "treatment_mitigare": "Mitigate",
+    "treatment_accettare": "Accept",
+    "treatment_trasferire": "Transfer",
+    "treatment_trasferire_ext": "Transfer (e.g. insurance)",
+    "treatment_evitare": "Avoid",
+    "filter_all": "All",
+    "status_archiviato": "Archived",
+    "probability_label": "Probability *",
+    "impact_label": "Impact *",
+    "acceptance_expiry_placeholder": "Acceptance expiry",
+    "action_desc_placeholder": "Action description *",
+    "bcp_test_date_placeholder": "Last valid test date *",
+    "scenario_placeholder": "e.g. Ransomware on MES production server",
+    "error_generic": "Error",
+    "wizard_title": "Wizard BIA → Risk → BCP",
+    "wizard_subtitle": "Create in sequence: critical process, risk scenario, and coherent BCP plan.",
+    "wizard_step_bia": "BIA Process",
+    "wizard_step_risk": "Risk scenario",
+    "wizard_step_bcp": "BCP Plan",
+    "wizard_create_new": "Create new",
+    "wizard_bcp_process_label": "Process:",
+    "wizard_bcp_created": "Plan created and linked to process.",
+    "wizard_criticality_legend": "Criticality 1–5:",
+    "wizard_continue_risk": "Continue with risk",
+    "wizard_save_risk_continue": "Save risk and continue",
+    "wizard_create_bcp": "Create BCP plan"
+  },
+  "pdca": {
+    "source_incident": "Incident",
+    "source_audit": "Audit",
+    "source_management_review": "Management review",
+    "source_risk": "Risk",
+    "source_manual": "Manual",
+    "scope_plant": "Site",
+    "scope_org": "Organization",
+    "scope_process": "Process"
+  },
+  "bcp": {
+    "test_frequency_label": "Test frequency",
+    "status_superato": "Passed"
+  },
+  "audit_trail": {
+    "levels_guide": "Levels guide",
+    "filter_all": "All",
+    "entity_placeholder": "e.g. plant"
+  },
+  "suppliers": {
+    "filter_all": "All"
   }
 }
-

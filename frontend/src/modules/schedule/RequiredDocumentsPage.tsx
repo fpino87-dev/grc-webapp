@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { scheduleApi, RequiredDocItem } from "../../api/endpoints/schedule";
 import { plantsApi } from "../../api/endpoints/plants";
@@ -11,22 +12,32 @@ const FRAMEWORK_LABELS: Record<string, string> = {
   TISAX_L3: "TISAX L3",
 };
 
-const TRAFFIC_LIGHT: Record<string, { bg: string; text: string; label: string }> = {
-  green:  { bg: "bg-green-500",  text: "text-white", label: "Presente e approvato" },
-  yellow: { bg: "bg-yellow-400", text: "text-gray-900", label: "Presente (bozza/revisione)" },
-  red:    { bg: "bg-red-500",    text: "text-white", label: "Mancante" },
+const TRAFFIC_LIGHT_COLORS: Record<string, { bg: string; text: string }> = {
+  green:  { bg: "bg-green-500",  text: "text-white" },
+  yellow: { bg: "bg-yellow-400", text: "text-gray-900" },
+  red:    { bg: "bg-red-500",    text: "text-white" },
 };
 
 function DocRow({ item }: { item: RequiredDocItem }) {
-  const tl = TRAFFIC_LIGHT[item.traffic_light];
+  const { t } = useTranslation();
+  const tl = TRAFFIC_LIGHT_COLORS[item.traffic_light] ?? TRAFFIC_LIGHT_COLORS.red;
+  const tlLabelKey = item.traffic_light === "green"
+    ? "schedule.required_docs.traffic_present_approved"
+    : item.traffic_light === "yellow"
+    ? "schedule.required_docs.traffic_draft"
+    : "schedule.required_docs.traffic_missing";
+  const tlLabel = t(tlLabelKey);
+
   return (
     <tr className="hover:bg-gray-50">
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className={`inline-block w-3 h-3 rounded-full ${tl.bg}`} title={tl.label} />
+          <span className={`inline-block w-3 h-3 rounded-full ${tl.bg}`} title={tlLabel} />
           <span className="text-sm font-medium text-gray-900">{item.description}</span>
           {item.mandatory && (
-            <span className="text-xs bg-red-100 text-red-700 px-1 py-0.5 rounded">Obbl.</span>
+            <span className="text-xs bg-red-100 text-red-700 px-1 py-0.5 rounded">
+              {t("schedule.required_docs.mandatory_badge")}
+            </span>
           )}
         </div>
       </td>
@@ -38,17 +49,17 @@ function DocRow({ item }: { item: RequiredDocItem }) {
             <span className="text-gray-800">{item.document.title}</span>
             {item.document.review_due_date && (
               <span className="block text-xs text-gray-500 mt-0.5">
-                Revisione: {item.document.review_due_date}
+                {t("schedule.required_docs.review_date", { date: item.document.review_due_date })}
               </span>
             )}
           </div>
         ) : (
-          <span className="text-red-500 italic text-xs">— nessun documento collegato</span>
+          <span className="text-red-500 italic text-xs">{t("schedule.required_docs.no_doc")}</span>
         )}
       </td>
       <td className="px-4 py-3">
         <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${tl.bg} ${tl.text}`}>
-          {tl.label}
+          {tlLabel}
         </span>
       </td>
     </tr>
@@ -56,6 +67,7 @@ function DocRow({ item }: { item: RequiredDocItem }) {
 }
 
 export function RequiredDocumentsPage() {
+  const { t } = useTranslation();
   const [plantId, setPlantId] = useState<string>("");
   const [framework, setFramework] = useState("ISO27001");
   const [filter, setFilter] = useState<"all" | "red" | "yellow" | "green">("all");
@@ -95,21 +107,28 @@ export function RequiredDocumentsPage() {
   const results = data?.results ?? [];
   const filtered = filter === "all" ? results : results.filter(r => r.traffic_light === filter);
 
+  const statusFilterOptions = [
+    { value: "all",    labelKey: "schedule.required_docs.status_all" },
+    { value: "red",    labelKey: "schedule.required_docs.status_red" },
+    { value: "yellow", labelKey: "schedule.required_docs.status_yellow" },
+    { value: "green",  labelKey: "schedule.required_docs.status_green" },
+  ] as const;
+
   return (
     <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">Documenti Obbligatori</h2>
+      <h2 className="text-xl font-semibold text-gray-900 mb-6">{t("schedule.required_docs.title")}</h2>
 
       {/* Filters */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
         <div className="flex flex-wrap gap-4 items-end">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Sito</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">{t("schedule.required_docs.col_doc").replace("Documento", "Sito")}</label>
             <select
               value={plantId}
               onChange={e => setPlantId(e.target.value)}
               className="border border-gray-300 rounded px-2 py-1.5 text-sm"
             >
-              <option value="">Tutti i siti</option>
+              <option value="">{t("schedule.required_docs.all_sites")}</option>
               {plants?.map(p => (
                 <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>
               ))}
@@ -119,8 +138,7 @@ export function RequiredDocumentsPage() {
             <label className="block text-xs font-medium text-gray-600 mb-1">Framework</label>
             {activeFrameworks && activeFrameworks.length === 0 ? (
               <p className="text-xs text-amber-600 border border-amber-300 bg-amber-50 rounded px-2 py-1">
-                Nessun framework assegnato a questo plant.{" "}
-                <span className="underline">Vai in M01 Plant per attivare un framework.</span>
+                {t("schedule.required_docs.no_framework")}
               </p>
             ) : (
               <div className="flex gap-1 flex-wrap">
@@ -141,14 +159,9 @@ export function RequiredDocumentsPage() {
             )}
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Stato</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">{t("schedule.required_docs.col_status")}</label>
             <div className="flex gap-1">
-              {[
-                { value: "all",    label: "Tutti" },
-                { value: "red",    label: "Mancanti" },
-                { value: "yellow", label: "Incompleti" },
-                { value: "green",  label: "Ok" },
-              ].map(opt => (
+              {statusFilterOptions.map(opt => (
                 <button
                   key={opt.value}
                   onClick={() => setFilter(opt.value as typeof filter)}
@@ -158,7 +171,7 @@ export function RequiredDocumentsPage() {
                       : "text-gray-600 border-gray-300 hover:bg-gray-50"
                   }`}
                 >
-                  {opt.label}
+                  {t(opt.labelKey)}
                 </button>
               ))}
             </div>
@@ -170,16 +183,16 @@ export function RequiredDocumentsPage() {
       {data && (
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <p className="text-xs font-medium text-green-700 uppercase tracking-wide">Approvati</p>
+            <p className="text-xs font-medium text-green-700 uppercase tracking-wide">{t("schedule.required_docs.approved_label")}</p>
             <p className="text-3xl font-bold text-green-700 mt-1">{data.green}</p>
-            <p className="text-xs text-green-600 mt-1">su {data.total} totali</p>
+            <p className="text-xs text-green-600 mt-1">{t("schedule.required_docs.total_suffix", { total: data.total })}</p>
           </div>
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <p className="text-xs font-medium text-yellow-700 uppercase tracking-wide">Incompleti</p>
+            <p className="text-xs font-medium text-yellow-700 uppercase tracking-wide">{t("schedule.required_docs.incomplete_label")}</p>
             <p className="text-3xl font-bold text-yellow-700 mt-1">{data.yellow}</p>
           </div>
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-xs font-medium text-red-700 uppercase tracking-wide">Mancanti</p>
+            <p className="text-xs font-medium text-red-700 uppercase tracking-wide">{t("schedule.required_docs.missing_label")}</p>
             <p className="text-3xl font-bold text-red-700 mt-1">{data.red}</p>
           </div>
         </div>
@@ -188,20 +201,22 @@ export function RequiredDocumentsPage() {
       {/* Table */}
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         {isLoading ? (
-          <div className="p-8 text-center text-gray-400 text-sm">Caricamento...</div>
+          <div className="p-8 text-center text-gray-400 text-sm">{t("notification_settings.loading")}</div>
         ) : filtered.length === 0 ? (
           <div className="p-8 text-center text-gray-400 text-sm italic">
-            {results.length === 0 ? "Nessun documento richiesto per questo framework" : "Nessun risultato per il filtro selezionato"}
+            {results.length === 0
+              ? t("schedule.required_docs.no_results_framework")
+              : t("schedule.required_docs.no_results_filter")}
           </div>
         ) : (
           <table className="w-full text-left">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">Documento</th>
-                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">Tipo</th>
-                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">Clausola</th>
-                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">Documento presente</th>
-                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">Stato</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">{t("schedule.required_docs.col_doc")}</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">{t("schedule.required_docs.col_type")}</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">{t("schedule.required_docs.col_clause")}</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">{t("schedule.required_docs.col_present")}</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">{t("schedule.required_docs.col_status")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">

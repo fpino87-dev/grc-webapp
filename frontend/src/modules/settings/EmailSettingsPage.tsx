@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../../api/client";
 import { useAuthStore } from "../../store/auth";
@@ -45,6 +46,7 @@ type ProviderPresets = Record<
 >;
 
 export function EmailSettingsPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const userRole = useAuthStore((s) => s.user?.role);
   const [form, setForm] = useState<EmailConfigWrite>({
@@ -137,19 +139,19 @@ export function EmailSettingsPage() {
       }
     },
     onSuccess: () => {
-      setBanner({ type: "success", message: "Configurazione email salvata correttamente." });
+      setBanner({ type: "success", message: t("email_settings.save_success") });
       queryClient.invalidateQueries({ queryKey: ["email-config"] });
     },
     onError: (err: any) => {
-      const msg = err?.response?.data?.detail || "Errore nel salvataggio configurazione.";
+      const msg = err?.response?.data?.detail || t("email_settings.save_error");
       setBanner({ type: "error", message: String(msg) });
     },
   });
 
   const testMutation = useMutation({
     mutationFn: async () => {
-      if (!activeConfig) throw new Error("Nessuna configurazione attiva da testare.");
-      if (!testRecipient.trim()) throw new Error("Inserisci un indirizzo email destinatario per il test.");
+      if (!activeConfig) throw new Error(t("email_settings.no_config_error"));
+      if (!testRecipient.trim()) throw new Error(t("email_settings.no_recipient_error"));
       const res = await apiClient.post(`/notifications/email-config/${activeConfig.id}/test/`, {
         recipient: testRecipient.trim(),
       });
@@ -159,18 +161,18 @@ export function EmailSettingsPage() {
       if (data.ok) {
         setBanner({
           type: "success",
-          message: data.message || "Email di test inviata correttamente.",
+          message: data.message || t("email_settings.test_success"),
         });
       } else {
         setBanner({
           type: "error",
-          message: data.error || "Test configurazione fallito.",
+          message: data.error || t("email_settings.test_failed"),
         });
       }
       queryClient.invalidateQueries({ queryKey: ["email-config"] });
     },
     onError: (err: any) => {
-      const msg = err?.response?.data?.error || "Errore durante il test configurazione.";
+      const msg = err?.response?.data?.error || err?.message || t("email_settings.test_error");
       setBanner({ type: "error", message: String(msg) });
     },
   });
@@ -180,7 +182,7 @@ export function EmailSettingsPage() {
       return (
         <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
           <span className="text-base">⚪</span>
-          Non testato
+          {t("email_settings.status_not_tested")}
         </span>
       );
     }
@@ -188,14 +190,14 @@ export function EmailSettingsPage() {
       return (
         <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">
           <span className="text-base">🟢</span>
-          Connessione verificata
+          {t("email_settings.status_ok")}
         </span>
       );
     }
     return (
       <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-red-100 text-red-800">
         <span className="text-base">🔴</span>
-        Ultimo test fallito
+        {t("email_settings.status_failed")}
       </span>
     );
   })();
@@ -203,8 +205,8 @@ export function EmailSettingsPage() {
   if (userRole !== "super_admin" && userRole !== "compliance_officer") {
     return (
       <div className="p-6">
-        <h2 className="text-lg font-semibold mb-2">Configurazione Email</h2>
-        <p className="text-sm text-gray-600">Non hai i permessi per accedere a questa pagina.</p>
+        <h2 className="text-lg font-semibold mb-2">{t("email_settings.title")}</h2>
+        <p className="text-sm text-gray-600">{t("email_settings.no_permission")}</p>
       </div>
     );
   }
@@ -212,7 +214,7 @@ export function EmailSettingsPage() {
   return (
     <div className="p-6 max-w-3xl">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">Configurazione Email</h2>
+        <h2 className="text-xl font-semibold">{t("email_settings.title")}</h2>
         {statusBadge}
       </div>
 
@@ -229,7 +231,7 @@ export function EmailSettingsPage() {
       <div className="space-y-4 bg-white rounded-lg border border-gray-200 p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Provider</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("email_settings.provider_label")}</label>
             <select
               className="w-full border rounded px-3 py-2 text-sm"
               value={form.provider}
@@ -241,7 +243,7 @@ export function EmailSettingsPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nome configurazione</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("email_settings.config_name_label")}</label>
             <input
               type="text"
               className="w-full border rounded px-3 py-2 text-sm"
@@ -253,7 +255,7 @@ export function EmailSettingsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Host SMTP</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("email_settings.smtp_host_label")}</label>
             <input
               type="text"
               className="w-full border rounded px-3 py-2 text-sm"
@@ -262,7 +264,7 @@ export function EmailSettingsPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Porta</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("email_settings.port_label")}</label>
             <input
               type="number"
               className="w-full border rounded px-3 py-2 text-sm"
@@ -279,7 +281,7 @@ export function EmailSettingsPage() {
               checked={form.use_tls}
               onChange={(e) => handleChange("use_tls", e.target.checked)}
             />
-            Usa TLS
+            {t("email_settings.use_tls")}
           </label>
           <label className="inline-flex items-center gap-2 text-sm text-gray-700">
             <input
@@ -287,7 +289,7 @@ export function EmailSettingsPage() {
               checked={form.use_ssl}
               onChange={(e) => handleChange("use_ssl", e.target.checked)}
             />
-            Usa SSL
+            {t("email_settings.use_ssl")}
           </label>
           <label className="inline-flex items-center gap-2 text-sm text-gray-700">
             <input
@@ -295,11 +297,11 @@ export function EmailSettingsPage() {
               checked={form.use_auth}
               onChange={(e) => handleChange("use_auth", e.target.checked)}
             />
-            Autenticazione SMTP
+            {t("email_settings.use_auth")}
           </label>
           {!form.use_auth && (
             <span className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
-              Relay anonimo — nessun comando AUTH inviato al server
+              {t("email_settings.anonymous_relay")}
             </span>
           )}
         </div>
@@ -308,7 +310,7 @@ export function EmailSettingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Username SMTP
+                {t("email_settings.smtp_username")}
               </label>
               <input
                 type="text"
@@ -318,12 +320,12 @@ export function EmailSettingsPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("email_settings.password_label")}</label>
               <div className="flex">
                 <input
                   type={showPassword ? "text" : "password"}
                   className="w-full border rounded-l px-3 py-2 text-sm"
-                  placeholder={activeConfig ? "Lascia vuoto per non modificare" : ""}
+                  placeholder={activeConfig ? t("email_settings.password_placeholder") : ""}
                   value={form.password ?? ""}
                   onChange={(e) => handleChange("password", e.target.value)}
                 />
@@ -332,7 +334,7 @@ export function EmailSettingsPage() {
                   onClick={() => setShowPassword((s) => !s)}
                   className="px-3 border border-l-0 rounded-r text-xs bg-gray-50 hover:bg-gray-100"
                 >
-                  {showPassword ? "Nascondi" : "Mostra"}
+                  {showPassword ? t("email_settings.hide_password") : t("email_settings.show_password")}
                 </button>
               </div>
             </div>
@@ -340,7 +342,7 @@ export function EmailSettingsPage() {
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Indirizzo mittente</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t("email_settings.from_email_label")}</label>
           <input
             type="text"
             className="w-full border rounded px-3 py-2 text-sm"
@@ -348,23 +350,23 @@ export function EmailSettingsPage() {
             onChange={(e) => handleChange("from_email", e.target.value)}
           />
           <p className="mt-1 text-xs text-gray-500">
-            Questo apparirà come mittente nelle email (es. GRC Platform &lt;noreply@azienda.com&gt;).
+            {t("email_settings.from_email_hint")}
           </p>
         </div>
 
         <div className="pt-4 border-t border-gray-100 space-y-3">
           <p className="text-xs text-gray-500">
-            La password SMTP è cifrata con AES-256 nel database. Non viene mai mostrata dopo il salvataggio.
+            {t("email_settings.password_security_note")}
           </p>
           <div className="flex items-end gap-2">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Destinatario email di test
+                {t("email_settings.test_recipient_label")}
               </label>
               <input
                 type="email"
                 className="w-full border rounded px-3 py-2 text-sm"
-                placeholder="tuo@email.com"
+                placeholder={t("email_settings.test_recipient_placeholder")}
                 value={testRecipient}
                 onChange={(e) => setTestRecipient(e.target.value)}
               />
@@ -375,7 +377,7 @@ export function EmailSettingsPage() {
               disabled={!activeConfig || !testRecipient.trim() || testMutation.isPending}
               className="px-3 py-2 rounded-md text-sm bg-indigo-50 text-indigo-700 hover:bg-indigo-100 disabled:opacity-50 whitespace-nowrap"
             >
-              {testMutation.isPending ? "Test in corso..." : "Invia email di test"}
+              {testMutation.isPending ? t("email_settings.testing") : t("email_settings.send_test")}
             </button>
             <button
               type="button"
@@ -383,7 +385,7 @@ export function EmailSettingsPage() {
               disabled={saveMutation.isPending}
               className="px-4 py-2 rounded-md text-sm bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 whitespace-nowrap"
             >
-              {saveMutation.isPending ? "Salvataggio..." : "Salva configurazione"}
+              {saveMutation.isPending ? t("email_settings.saving") : t("email_settings.save_config")}
             </button>
           </div>
         </div>
@@ -391,4 +393,3 @@ export function EmailSettingsPage() {
     </div>
   );
 }
-

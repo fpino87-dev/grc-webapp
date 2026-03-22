@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { plantsApi } from "../../api/endpoints/plants";
 import { biaApi, type CriticalProcess } from "../../api/endpoints/bia";
@@ -17,6 +18,7 @@ interface WizardState {
 }
 
 export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const selectedPlant = useAuthStore(s => s.selectedPlant);
   const currentUser = useAuthStore(s => s.user);
@@ -109,7 +111,7 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
 
   const updateProcessMutation = useMutation({
     mutationFn: () => {
-      if (!state.process) return Promise.reject(new Error("Nessun processo selezionato"));
+      if (!state.process) return Promise.reject(new Error(t("risk.no_process_selected")));
       return biaApi.update(state.process.id, {
         name: processForm.name ?? state.process.name,
         criticality: processForm.criticality ?? state.process.criticality,
@@ -176,9 +178,9 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Wizard BIA → Rischio → BCP</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t("risk.wizard_title")}</h3>
             <p className="text-xs text-gray-500 mt-0.5">
-              Crea in sequenza processo critico, scenario di rischio e piano BCP coerente.
+              {t("risk.wizard_subtitle")}
             </p>
           </div>
           <button
@@ -196,21 +198,21 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
               <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] ${
                 step > 1 ? "bg-green-600 text-white" : step === 1 ? "bg-primary-600 text-white" : "bg-gray-200 text-gray-600"
               }`}>1</span>
-              <span>Processo BIA</span>
+              <span>{t("risk.wizard_step_bia")}</span>
             </div>
             <div className="h-px flex-1 bg-gray-200" />
             <div className={`flex items-center gap-2 ${step === 2 ? "text-primary-700" : step > 2 ? "text-green-700" : ""}`}>
               <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] ${
                 step > 2 ? "bg-green-600 text-white" : step === 2 ? "bg-primary-600 text-white" : "bg-gray-200 text-gray-600"
               }`}>2</span>
-              <span>Scenario di rischio</span>
+              <span>{t("risk.wizard_step_risk")}</span>
             </div>
             <div className="h-px flex-1 bg-gray-200" />
             <div className={`flex items-center gap-2 ${step === 3 ? "text-primary-700" : step > 3 ? "text-green-700" : ""}`}>
               <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] ${
                 step > 3 ? "bg-green-600 text-white" : step === 3 ? "bg-primary-600 text-white" : "bg-gray-200 text-gray-600"
               }`}>3</span>
-              <span>Piano BCP</span>
+              <span>{t("risk.wizard_step_bcp")}</span>
             </div>
           </div>
         </div>
@@ -297,7 +299,7 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
                       onChange={e => setCreatingProcess(e.target.checked)}
                       disabled={!state.plantId}
                     />
-                    <span>Crea nuovo</span>
+                    <span>{t("risk.wizard_create_new")}</span>
                   </label>
                 </div>
                 {!state.plantId && (
@@ -466,7 +468,7 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
                     className="w-full border rounded px-3 py-1.5 text-sm"
                     value={riskForm.name as string ?? ""}
                     onChange={e => setRiskForm(f => ({ ...f, name: e.target.value }))}
-                    placeholder="es. Ransomware su server di produzione MES"
+                    placeholder={t("risk.scenario_placeholder")}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -504,10 +506,10 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
                       value={riskForm.treatment ?? "mitigare"}
                       onChange={e => setRiskForm(f => ({ ...f, treatment: e.target.value }))}
                     >
-                      <option value="mitigare">Mitigare</option>
-                      <option value="accettare">Accettare</option>
-                      <option value="trasferire">Trasferire</option>
-                      <option value="evitare">Evitare</option>
+                      <option value="mitigare">{t("risk.treatment_mitigare")}</option>
+                      <option value="accettare">{t("risk.treatment_accettare")}</option>
+                      <option value="trasferire">{t("risk.treatment_trasferire")}</option>
+                      <option value="evitare">{t("risk.treatment_evitare")}</option>
                     </select>
                   </div>
                   <div>
@@ -597,11 +599,11 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
                       }));
                     }}
                   >
-                    <option value="1:weeks">Settimanale</option>
-                    <option value="1:months">Mensile</option>
-                    <option value="3:months">Trimestrale</option>
-                    <option value="6:months">Semestrale</option>
-                    <option value="1:years">Annuale</option>
+                    <option value="1:weeks">{t("common.freq_weekly")}</option>
+                    <option value="1:months">{t("common.freq_monthly")}</option>
+                    <option value="3:months">{t("common.freq_quarterly")}</option>
+                    <option value="6:months">{t("common.freq_biannual")}</option>
+                    <option value="1:years">{t("common.freq_annual")}</option>
                   </select>
                 </div>
               </div>
@@ -753,7 +755,7 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
             onClick={resetAndClose}
             className="px-3 py-1.5 text-xs text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
           >
-            Chiudi
+            {t("common.close")}
           </button>
           <div className="flex gap-2">
             {step > 1 && step < 4 && (
@@ -761,7 +763,7 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
                 onClick={() => setStep((s) => (s - 1) as Step)}
                 className="px-3 py-1.5 text-xs border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
               >
-                Indietro
+                {t("actions.back")}
               </button>
             )}
             {step === 1 && (
@@ -780,7 +782,7 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
                 }}
                 className="px-4 py-1.5 text-xs bg-primary-600 text-white rounded hover:bg-primary-700 disabled:opacity-50"
               >
-                Continua con rischio
+                {t("risk.wizard_continue_risk")}
               </button>
             )}
             {step === 2 && (
@@ -796,7 +798,7 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
                 onClick={() => createRiskMutation.mutate()}
                 className="px-4 py-1.5 text-xs bg-primary-600 text-white rounded hover:bg-primary-700 disabled:opacity-50"
               >
-                Salva rischio e continua
+                {t("risk.wizard_save_risk_continue")}
               </button>
             )}
             {step === 3 && (
@@ -805,7 +807,7 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
                 onClick={() => createBcpMutation.mutate()}
                 className="px-4 py-1.5 text-xs bg-primary-600 text-white rounded hover:bg-primary-700 disabled:opacity-50"
               >
-                Crea piano BCP
+                {t("risk.wizard_create_bcp")}
               </button>
             )}
             {step === 4 && (
@@ -813,7 +815,7 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
                 onClick={resetAndClose}
                 className="px-4 py-1.5 text-xs bg-primary-600 text-white rounded hover:bg-primary-700"
               >
-                Fine
+                {t("common.finish")}
               </button>
             )}
           </div>

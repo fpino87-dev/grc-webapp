@@ -110,7 +110,7 @@ function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void 
             <label htmlFor="edit_has_ot" className="text-sm text-gray-700">{t("plants.fields.has_ot")}</label>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Logo URL</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.logo_url_label")}</label>
             <input
               value={form.logo_url ?? ""}
               onChange={e => set("logo_url", e.target.value)}
@@ -118,7 +118,7 @@ function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void 
               placeholder="https://.../logo.png"
             />
             <p className="mt-1 text-xs text-gray-500">
-              URL del logo del sito (usato in report/export). Consigliato PNG/SVG su sfondo trasparente.
+              {t("plants.logo_url_hint")}
             </p>
             <div className="mt-2 flex items-center gap-3">
               <label className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white cursor-pointer hover:bg-gray-50">
@@ -240,7 +240,7 @@ function PlantModal({ onClose }: { onClose: () => void }) {
             <label htmlFor="has_ot" className="text-sm text-gray-700">{t("plants.fields.has_ot")}</label>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Logo URL</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.logo_url_label")}</label>
             <input
               value={form.logo_url ?? ""}
               onChange={e => set("logo_url", e.target.value)}
@@ -267,13 +267,13 @@ function PlantModal({ onClose }: { onClose: () => void }) {
 // Raggruppa TISAX_L2 e TISAX_L3 come voce unica "TISAX"
 type FwGroup = { key: string; label: string; isTisax: boolean; ids: Record<string, string> };
 
-function buildGroups(frameworks: { id: string; code: string; name: string }[], assignedCodes: Set<string>): FwGroup[] {
+function buildGroups(frameworks: { id: string; code: string; name: string }[], assignedCodes: Set<string>, tisaxLabel: string): FwGroup[] {
   const groups: FwGroup[] = [];
   const tisaxL2 = frameworks.find(f => f.code === "TISAX_L2");
   const tisaxL3 = frameworks.find(f => f.code === "TISAX_L3");
   const tisaxBothAssigned = assignedCodes.has("TISAX_L2") && assignedCodes.has("TISAX_L3");
   if ((tisaxL2 || tisaxL3) && !tisaxBothAssigned) {
-    groups.push({ key: "TISAX", label: "TISAX — VDA ISA 6.0", isTisax: true, ids: { L2: tisaxL2?.id ?? "", L3: tisaxL3?.id ?? "" } });
+    groups.push({ key: "TISAX", label: tisaxLabel, isTisax: true, ids: { L2: tisaxL2?.id ?? "", L3: tisaxL3?.id ?? "" } });
   }
   for (const f of frameworks) {
     if (f.code.startsWith("TISAX")) continue;
@@ -355,7 +355,7 @@ function FrameworkPanel({ plant, onClose }: { plant: Plant; onClose: () => void 
   });
 
   const assignedCodes = new Set(assigned.map(a => a.framework_code));
-  const groups = buildGroups(frameworks, assignedCodes);
+  const groups = buildGroups(frameworks, assignedCodes, t("plants.tisax_framework_label"));
   const selectedIsNis = selectedKey !== "TISAX" && frameworks.find(f => f.id === selectedKey)?.code.startsWith("NIS2");
 
   return (

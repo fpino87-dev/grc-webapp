@@ -42,9 +42,9 @@ function KpiCard({
 }
 
 const WEEK_OPTIONS = [
-  { label: "3 mesi", weeks: 12 },
-  { label: "6 mesi", weeks: 24 },
-  { label: "12 mesi", weeks: 52 },
+  { labelKey: "schedule.filters.months.3", weeks: 12 },
+  { labelKey: "schedule.filters.months.6", weeks: 24 },
+  { labelKey: "schedule.filters.months.12", weeks: 52 },
 ];
 
 const FRAMEWORK_LABELS: Record<string, string> = {
@@ -128,7 +128,7 @@ function KpiTrendChart() {
                   : "text-gray-600 border-gray-300 hover:bg-gray-50"
               }`}
             >
-              {opt.label}
+              {t(opt.labelKey)}
             </button>
           ))}
         </div>
@@ -171,7 +171,7 @@ function KpiTrendChart() {
               yAxisId="count"
               type="monotone"
               dataKey="highRisks"
-              name="Rischi alti"
+              name={t("dashboard.chart_risks_high")}
               stroke="#dc2626"
               strokeWidth={2}
               dot={false}
@@ -180,7 +180,7 @@ function KpiTrendChart() {
               yAxisId="count"
               type="monotone"
               dataKey="incidents"
-              name="Incidenti aperti"
+              name={t("dashboard.chart_incidents_open")}
               stroke="#f59e0b"
               strokeWidth={2}
               dot={false}

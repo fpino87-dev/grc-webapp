@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { biaApi, type CriticalProcess } from "../../api/endpoints/bia";
 import { plantsApi } from "../../api/endpoints/plants";
@@ -26,17 +27,17 @@ const RTO_STATUS_COLORS: Record<string, string> = {
   critical: "bg-red-100 text-red-700",
   unknown: "bg-gray-100 text-gray-500",
 };
-const RTO_STATUS_LABELS: Record<string, string> = {
-  ok: "RTO OK",
-  warning: "RTO ⚠",
-  critical: "RTO ✗",
-  unknown: "—",
-};
 
 function RtoBcpBadge({ status }: { status: string }) {
+  const { t } = useTranslation();
+  const labelMap: Record<string, string> = {
+    ok: t("bia.rto_ok"),
+    warning: t("bia.rto_warning"),
+    critical: t("bia.rto_critical"),
+  };
   return (
     <span className={`text-xs px-2 py-0.5 rounded font-medium ${RTO_STATUS_COLORS[status] ?? RTO_STATUS_COLORS.unknown}`}>
-      {RTO_STATUS_LABELS[status] ?? "—"}
+      {labelMap[status] ?? "—"}
     </span>
   );
 }
@@ -50,6 +51,7 @@ function NewProcessModal({
   onClose: () => void;
   initial?: CriticalProcess | null;
 }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [form, setForm] = useState<Partial<CriticalProcess>>(
     initial
@@ -87,10 +89,10 @@ function NewProcessModal({
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6 max-h-screen overflow-y-auto">
-        <h3 className="text-lg font-semibold mb-4">Nuovo processo critico</h3>
+        <h3 className="text-lg font-semibold mb-4">{t("bia.new_process_title")}</h3>
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Sito *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("bia.site_label")}</label>
             <select
               name="plant"
               value={(form as any).plant ?? ""}
@@ -102,7 +104,7 @@ function NewProcessModal({
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nome processo *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("bia.process_name_label")}</label>
             <input
               name="name"
               value={(form.name as string) ?? ""}
@@ -112,7 +114,7 @@ function NewProcessModal({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Criticità (1-5)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("bia.criticality_label")}</label>
               <select
                 name="criticality"
                 value={form.criticality ?? 3}
@@ -123,7 +125,7 @@ function NewProcessModal({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Costo downtime/h (€)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("bia.downtime_cost_label")}</label>
               <input
                 name="downtime_cost_hour"
                 type="number"
@@ -136,11 +138,11 @@ function NewProcessModal({
           </div>
 
           <hr className="my-1" />
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Target BCP/BIA (ISO 22301)</p>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{t("bia.bcp_bia_section")}</p>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">MTPD (ore)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("bia.mtpd_label")}</label>
               <input
                 name="mtpd_hours"
                 type="number"
@@ -152,7 +154,7 @@ function NewProcessModal({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">MBCO (%)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("bia.mbco_label")}</label>
               <input
                 name="mbco_pct"
                 type="number"
@@ -167,7 +169,7 @@ function NewProcessModal({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">RTO target (ore)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("bia.rto_label")}</label>
               <input
                 name="rto_target_hours"
                 type="number"
@@ -179,7 +181,7 @@ function NewProcessModal({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">RPO target (ore)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("bia.rpo_label")}</label>
               <input
                 name="rpo_target_hours"
                 type="number"
@@ -192,9 +194,9 @@ function NewProcessModal({
             </div>
           </div>
         </div>
-        {mutation.isError && <p className="text-sm text-red-600 mt-2">Errore durante il salvataggio</p>}
+        {mutation.isError && <p className="text-sm text-red-600 mt-2">{t("bia.save_error")}</p>}
         <div className="flex justify-end gap-2 mt-4">
-          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("actions.cancel")}</button>
           <button
             onClick={() =>
               mutation.mutate({
@@ -211,7 +213,7 @@ function NewProcessModal({
             disabled={mutation.isPending}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
-            {mutation.isPending ? "Salvataggio..." : initial ? "Salva modifiche" : "Crea processo"}
+            {mutation.isPending ? t("governance.workflow.saving") : initial ? t("bia.save_changes") : t("bia.create_process")}
           </button>
         </div>
       </div>

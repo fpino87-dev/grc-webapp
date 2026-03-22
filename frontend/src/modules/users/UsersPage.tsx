@@ -534,7 +534,7 @@ export function UsersPage() {
                             onClick={() => setMenuUserId(prev => (prev === user.id ? null : user.id))}
                             className="inline-flex items-center gap-1 border border-gray-300 rounded px-2 py-0.5 text-xs text-gray-700 hover:bg-gray-50"
                           >
-                            <span>Azioni</span>
+                            <span>{t("users.table.actions")}</span>
                             <span className="text-[10px]">{menuUserId === user.id ? "▲" : "▼"}</span>
                           </button>
                           {menuUserId === user.id && (
