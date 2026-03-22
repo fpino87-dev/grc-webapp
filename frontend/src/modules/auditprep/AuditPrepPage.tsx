@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   auditPrepApi,
@@ -9,6 +9,7 @@ import {
   type PlannedAudit,
 } from "../../api/endpoints/auditPrep";
 import { plantsApi } from "../../api/endpoints/plants";
+import { useAuthStore } from "../../store/auth";
 import { apiClient } from "../../api/client";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
@@ -372,11 +373,27 @@ function EvidencePanel({ prepId }: { prepId: string }) {
   );
 }
 
-function NewPrepModal({ frameworks, plants, onClose }: { frameworks: Framework[]; plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
+function NewPrepModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
   const qc = useQueryClient();
   const [form, setForm] = useState<Partial<AuditPrep>>({});
   const [fwKey, setFwKey] = useState("");          // "TISAX" | framework.id | ""
   const [tisaxLevel, setTisaxLevel] = useState<"L2" | "L3">("L2");
+
+  const { data: plantFws = [] } = useQuery({
+    queryKey: ["plant-frameworks", form.plant],
+    queryFn: () => plantsApi.plantFrameworks(form.plant!),
+    enabled: !!form.plant,
+  });
+
+  // Derive available frameworks from plant assignment
+  const frameworks: Framework[] = plantFws.map(pf => ({
+    id: pf.framework,
+    code: pf.framework_code,
+    name: pf.framework_name,
+  }));
+
+  // Reset framework selection when plant changes
+  useEffect(() => { setFwKey(""); setTisaxLevel("L2"); }, [form.plant]);
 
   const hasTisax = frameworks.some(f => f.code.startsWith("TISAX"));
   const nonTisax = frameworks.filter(f => !f.code.startsWith("TISAX"));
@@ -392,7 +409,7 @@ function NewPrepModal({ frameworks, plants, onClose }: { frameworks: Framework[]
   }
 
   const mutation = useMutation({
-    mutationFn: () => auditPrepApi.create({ ...form, framework: resolvedFrameworkId() }),
+    mutationFn: () => auditPrepApi.create({ ...form, framework: resolvedFrameworkId() ?? undefined }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["audit-prep"] }); onClose(); },
   });
 
@@ -422,11 +439,19 @@ function NewPrepModal({ frameworks, plants, onClose }: { frameworks: Framework[]
               <select
                 value={fwKey}
                 onChange={e => setFwKey(e.target.value)}
-                className="w-full border rounded px-3 py-2 text-sm"
+                disabled={!form.plant}
+                className="w-full border rounded px-3 py-2 text-sm disabled:bg-gray-50 disabled:text-gray-400"
               >
-                <option value="">— opzionale —</option>
-                {hasTisax && <option value="TISAX">TISAX — VDA ISA 6.0</option>}
-                {nonTisax.map(f => <option key={f.id} value={f.id}>{f.code} — {f.name}</option>)}
+                {!form.plant
+                  ? <option value="">— seleziona prima un sito —</option>
+                  : frameworks.length === 0
+                    ? <option value="">Nessun framework assegnato</option>
+                    : <>
+                        <option value="">— seleziona —</option>
+                        {hasTisax && <option value="TISAX">TISAX — VDA ISA 6.0</option>}
+                        {nonTisax.map(f => <option key={f.id} value={f.id}>{f.code} — {f.name}</option>)}
+                      </>
+                }
               </select>
             </div>
           </div>
@@ -489,12 +514,24 @@ const AUDIT_STATUS_COLORS: Record<string, string> = {
   cancelled: "bg-red-100 text-red-500",
 };
 
-function AuditProgramSection({ plantId, frameworks }: { plantId?: string; frameworks: Framework[] }) {
+function AuditProgramSection({ plantId }: { plantId?: string }) {
   const qc = useQueryClient();
   const [showNew, setShowNew] = useState(false);
   const [form, setForm] = useState<Partial<AuditProgram>>({});
   const [progFwKey, setProgFwKey] = useState("");      // "TISAX" | framework.id | ""
   const [progTisaxLevel, setProgTisaxLevel] = useState<"L2" | "L3">("L2");
+
+  const { data: plantFws = [] } = useQuery({
+    queryKey: ["plant-frameworks", plantId],
+    queryFn: () => plantsApi.plantFrameworks(plantId!),
+    enabled: !!plantId,
+  });
+
+  const frameworks: Framework[] = plantFws.map(pf => ({
+    id: pf.framework,
+    code: pf.framework_code,
+    name: pf.framework_name,
+  }));
 
   const hasTisax = frameworks.some(f => f.code.startsWith("TISAX"));
   const nonTisax = frameworks.filter(f => !f.code.startsWith("TISAX"));
@@ -692,16 +729,11 @@ export function AuditPrepPage() {
   const [cancelId, setCancelId] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState("");
   const qc = useQueryClient();
+  const selectedPlant = useAuthStore(s => s.selectedPlant);
 
   const { data, isLoading } = useQuery({
     queryKey: ["audit-prep"],
     queryFn: () => auditPrepApi.list(),
-    retry: false,
-  });
-
-  const { data: frameworks = [] } = useQuery({
-    queryKey: ["frameworks"],
-    queryFn: () => apiClient.get<{ results: Framework[] }>("/controls/frameworks/").then(r => r.data.results),
     retry: false,
   });
 
@@ -779,7 +811,7 @@ export function AuditPrepPage() {
       </div>
 
       {mainTab === "program" && (
-        <AuditProgramSection frameworks={frameworks} />
+        <AuditProgramSection plantId={selectedPlant?.id} />
       )}
 
       {mainTab === "preps" && (
@@ -885,7 +917,6 @@ export function AuditPrepPage() {
 
       {showNew && (
         <NewPrepModal
-          frameworks={frameworks}
           plants={plants}
           onClose={() => setShowNew(false)}
         />
