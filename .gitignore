@@ -41,6 +41,7 @@ yarn-error.log*
 .env
 .env.*
 !.env.example
+!.env.prod.example
 
 # Cursor / tooling
 .cursor/

@@ -124,8 +124,21 @@ docker compose exec backend python manage.py createsuperuser
 docker compose up -d --build backend
 docker compose up -d --build frontend
 
-# Avvia Celery (non ancora avviato)
+# Celery (già configurato e avviato)
 docker compose up -d celery celery-beat
+
+# Produzione — usa docker-compose.prod.yml
+docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml exec backend \
+  python manage.py migrate
+docker compose -f docker-compose.prod.yml exec backend \
+  python manage.py load_frameworks
+docker compose -f docker-compose.prod.yml exec backend \
+  python manage.py load_notification_profiles
+docker compose -f docker-compose.prod.yml exec backend \
+  python manage.py load_competency_requirements
+docker compose -f docker-compose.prod.yml exec backend \
+  python manage.py createsuperuser
 ```
 
 ## Porte in uso su questo server
