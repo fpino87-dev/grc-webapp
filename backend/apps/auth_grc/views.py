@@ -60,6 +60,27 @@ class UserPlantAccessViewSet(viewsets.ModelViewSet):
     queryset = UserPlantAccess.objects.select_related("scope_bu")
     serializer_class = UserPlantAccessSerializer
 
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path=r"users/(?P<user_pk>[^/.]+)/anonymize",
+        permission_classes=[IsAuthenticated, IsAdminUser],
+    )
+    def anonymize_user(self, request, user_pk=None):
+        from django.contrib.auth import get_user_model
+        from .services import anonymize_user
+        User = get_user_model()
+        user = User.objects.filter(pk=user_pk).first()
+        if not user:
+            return Response({"error": _("Utente non trovato")}, status=404)
+        reason = request.data.get("reason", "")
+        if not reason or len(reason.strip()) < 10:
+            return Response({
+                "error": _("Motivazione obbligatoria (min 10 caratteri) per richiesta GDPR Art. 17")
+            }, status=400)
+        anonymize_user(user, request.user)
+        return Response({"ok": True, "message": _("Utente anonimizzato (GDPR Art. 17)")})
+
 
 class ExternalAuditorTokenViewSet(viewsets.ModelViewSet):
     queryset = ExternalAuditorToken.objects.select_related("plant", "user")

@@ -1,5 +1,10 @@
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
+
+
+class LoginRateThrottle(AnonRateThrottle):
+    scope = "login"
 
 
 class GrcTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -17,3 +22,4 @@ class GrcTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class GrcTokenObtainPairView(TokenObtainPairView):
     serializer_class = GrcTokenObtainPairSerializer
+    throttle_classes = [LoginRateThrottle]

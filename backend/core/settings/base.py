@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     "django_filters",
     "django_celery_beat",
@@ -113,17 +114,19 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.UserRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "100/minute",
-        "user": "1000/minute",
+        "anon":  "20/hour",
+        "user":  "500/hour",
+        "login": "5/minute",
     },
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(hours=8),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    "ROTATE_REFRESH_TOKENS": True,
+    "ACCESS_TOKEN_LIFETIME":    timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME":   timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS":    True,
     "BLACKLIST_AFTER_ROTATION": True,
-    "AUTH_HEADER_TYPES": ("Bearer",),
+    "UPDATE_LAST_LOGIN":        True,
+    "AUTH_HEADER_TYPES":        ("Bearer",),
 }
 
 LANGUAGE_CODE = "it"
@@ -174,5 +177,46 @@ AUDIT_RETENTION = {
     "L1": env.int("AUDIT_TRAIL_RETENTION_L1_YEARS", default=5),
     "L2": env.int("AUDIT_TRAIL_RETENTION_L2_YEARS", default=3),
     "L3": env.int("AUDIT_TRAIL_RETENTION_L3_YEARS", default=1),
+}
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 12},
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
+]
+
+FERNET_KEYS = [env("FERNET_KEY", default="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")]
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process} {thread} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "django":  {"handlers": ["console"], "level": "WARNING"},
+        "apps":    {"handlers": ["console"], "level": "INFO"},
+        "core":    {"handlers": ["console"], "level": "INFO"},
+        "celery":  {"handlers": ["console"], "level": "WARNING"},
+    },
 }
 

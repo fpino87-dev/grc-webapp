@@ -1,12 +1,26 @@
 from django.contrib import admin
+from django.http import JsonResponse
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from core.jwt import GrcTokenObtainPairView
 
+
+def health_check(request):
+    from django.db import connection
+    try:
+        connection.ensure_connection()
+        db_ok = True
+    except Exception:
+        db_ok = False
+    status = 200 if db_ok else 503
+    return JsonResponse({"status": "ok" if db_ok else "error", "db": db_ok}, status=status)
+
+
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("api/health/", health_check, name="health-check"),
     path("api/token/", GrcTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

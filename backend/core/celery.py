@@ -32,5 +32,13 @@ app.conf.beat_schedule = {
         "task": "apps.bcp.tasks.check_expired_bcp_plans",
         "schedule": crontab(hour=2, minute=10),
     },
+    "cleanup-audit-logs": {
+        "task": "apps.audit_trail.tasks.cleanup_expired_audit_logs",
+        "schedule": crontab(hour=3, minute=0, day_of_month=1),
+    },
+    "cleanup-celery-results": {
+        "task": "apps.audit_trail.tasks.cleanup_celery_results",
+        "schedule": crontab(hour=3, minute=30),
+    },
 }
 

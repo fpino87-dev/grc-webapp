@@ -6,7 +6,6 @@ from django.http import FileResponse, Http404, HttpResponseRedirect
 from rest_framework import viewsets, status, parsers
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
 from django.utils.translation import gettext as _
 
 from core.audit import log_action
@@ -82,7 +81,7 @@ class PlantViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(plant)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=["get"], url_path="logo", permission_classes=[AllowAny])
+    @action(detail=True, methods=["get"], url_path="logo")
     def logo(self, request, pk=None):
         """
         Restituisce il logo del plant passando sempre dal proxy API.

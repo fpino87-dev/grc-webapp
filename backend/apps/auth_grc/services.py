@@ -94,6 +94,48 @@ def competency_gap_analysis(user) -> dict:
     }
 
 
+def anonymize_user(user, requesting_user) -> None:
+    """
+    Anonimizza i dati personali di un utente rimosso.
+    GDPR Art. 17 — Diritto alla cancellazione.
+    Preserva i record di audit trail (obbligo legale)
+    ma rimuove i dati identificativi.
+    """
+    import uuid
+    from django.utils import timezone
+    from core.audit import log_action
+
+    anon_id = str(uuid.uuid4())[:8]
+    anon_email = f"deleted_{anon_id}@anonymized.invalid"
+
+    # Anonimizza utente Django
+    user.first_name = "Utente"
+    user.last_name = "Rimosso"
+    user.email = anon_email
+    user.username = anon_email
+    user.is_active = False
+    user.set_unusable_password()
+    user.save()
+
+    # Soft delete accessi GRC
+    UserPlantAccess.objects.filter(user=user).update(deleted_at=timezone.now())
+
+    # Anonimizza nei log (preserva action_code e payload
+    # ma rimuove l'email identificativa)
+    from core.models import AuditLog
+    AuditLog.objects.filter(
+        user_email_at_time=user.email
+    ).update(user_email_at_time=anon_email)
+
+    log_action(
+        user=requesting_user,
+        action_code="auth.user.anonymized",
+        level="L1",
+        entity=user,
+        payload={"anon_id": anon_id, "gdpr_request": True},
+    )
+
+
 def resolve_plant_member_emails(plant: Plant) -> list[str]:
     """
     Restituisce tutte le email degli utenti che hanno accesso al plant

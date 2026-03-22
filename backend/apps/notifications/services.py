@@ -66,10 +66,10 @@ def send_grc_email(
         if html_body:
             msg.attach_alternative(html_body, "text/html")
         msg.send()
-        logger.info("Email inviata a %s: %s", recipients, subject)
+        logger.info("Email inviata a %d destinatari: %s", len(recipients), subject)
         return True
     except Exception as exc:  # noqa: BLE001
-        logger.error("Errore invio email a %s: %s", recipients, exc)
+        logger.error("Errore invio email a %d destinatari [%s]: %s", len(recipients), subject, exc)
         return False
 
 

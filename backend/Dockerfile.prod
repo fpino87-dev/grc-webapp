@@ -1,0 +1,47 @@
+FROM python:3.11-slim
+
+# Utente non-root per sicurezza
+RUN groupadd -r grc && useradd -r -g grc grc
+
+WORKDIR /app
+
+# Dipendenze sistema per python-magic e Pillow
+RUN apt-get update && apt-get install -y \
+    libmagic1 \
+    libjpeg-dev \
+    libpng-dev \
+    libpq-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Dipendenze Python
+COPY requirements/ requirements/
+RUN pip install --no-cache-dir -r requirements/prod.txt
+
+# Codice sorgente
+COPY . .
+
+# Colleziona static files (SECRET_KEY placeholder solo per il build step)
+ENV DJANGO_SETTINGS_MODULE=core.settings.prod \
+    SECRET_KEY=collectstatic-build-placeholder \
+    DATABASE_URL=postgresql://x:x@x:5432/x \
+    REDIS_URL=redis://x:6379/0 \
+    FERNET_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+RUN python manage.py collectstatic --noinput
+
+# Utente non-root
+RUN chown -R grc:grc /app
+USER grc
+
+EXPOSE 8000
+
+CMD ["gunicorn", "core.wsgi:application", \
+     "--bind", "0.0.0.0:8000", \
+     "--workers", "4", \
+     "--worker-class", "gthread", \
+     "--threads", "2", \
+     "--timeout", "120", \
+     "--max-requests", "1000", \
+     "--max-requests-jitter", "50", \
+     "--access-logfile", "-", \
+     "--error-logfile", "-"]

@@ -16,11 +16,12 @@ Compliance: TISAX L2/L3, NIS2, ISO 27001.
 - Frontend React/Vite: **UP** porta 3001
 - PostgreSQL: **UP** porta 5433
 - Redis: **UP**
-- Migrazioni Django base: **applicate** (admin, auth, celery-beat, celery-results, sessions)
-- Migrazioni GRC apps: **create ma NON ancora applicate** — eseguire `python manage.py migrate`
+- Migrazioni GRC apps: **applicate** (inclusa token_blacklist)
 - Superuser: `admin@azienda.it`
-- Celery worker/beat: **non ancora avviati**
+- Celery worker/beat: **configurati e avviati**
 - Framework normativi JSON: **presenti** in `backend/frameworks/` (ISO27001, NIS2, TISAX_L2, TISAX_L3)
+- Docker produzione: **Dockerfile.prod** + **docker-compose.prod.yml** pronti
+- ⚠️ Traduzione UI: solo IT/EN — FR/PL/TR in sviluppo
 
 ## Regole architetturali — NON derogare mai
 
@@ -34,6 +35,18 @@ Compliance: TISAX L2/L3, NIS2, ISO 27001.
 8. Framework normativi = JSON in `backend/frameworks/` — non hardcodare controlli nel codice
 9. M20 AI Engine: nessun PII inviato al cloud senza `Sanitizer.sanitize()`, human-in-the-loop sempre prima di applicare output AI
 10. Soft delete manager è il default — usare `.all_with_deleted()` solo dove esplicitamente necessario
+11. Mai loggare dati personali (email, CF, telefono) nei log di sistema — loggare solo conteggi o identificatori anonimi
+12. File upload: sempre `validate_uploaded_file()` con MIME check (python-magic)
+13. Produzione: usare `docker-compose.prod.yml` e `Dockerfile.prod`
+
+## Sicurezza (configurazione attuale)
+- **JWT**: ACCESS=30min, REFRESH=7gg, ROTATE=True, BLACKLIST=True (token_blacklist app attiva)
+- **Rate limiting**: anon=20/h, user=500/h, login=5/min (LoginRateThrottle su GrcTokenObtainPairView)
+- **File upload**: whitelist estensioni + MIME type reale (python-magic)
+- **Password**: min 12 caratteri + CommonPassword + NumericPassword + UserAttributeSimilarity
+- **FERNET**: cifratura AES-256 per credenziali SMTP (FERNET_KEY in env)
+- **GDPR**: `anonymize_user()` disponibile in `auth_grc/services.py`, retention automatica audit log mensile
+- **Health check**: `GET /api/health/` — status DB incluso
 
 ## Struttura backend/apps/ — moduli implementati
 
@@ -134,13 +147,10 @@ docker compose up -d celery celery-beat
 
 ## Prossime attività prioritarie
 
-1. **Applicare migrazioni GRC** — `docker compose exec backend python manage.py migrate`
-2. **Avviare Celery** — `docker compose up -d celery celery-beat`
-3. **Caricare framework normativi** — `docker compose exec backend python manage.py load_frameworks`
-   **Caricare requisiti competenza** — `docker compose exec backend python manage.py load_competency_requirements`
-4. **Esporre su Nginx Proxy Manager** — proxy host per frontend porta 3001
-5. **Completare views mancanti** — alcuni moduli hanno urls.py vuoti
-6. **Test suite** — `docker compose exec backend pytest`
+- **DA FARE**: Traduzioni FR/PL/TR
+- **DA FARE**: Test suite (coverage target ≥ 70%) — `docker compose exec backend pytest`
+- **DA FARE**: Sentry integration per error monitoring
+- **DA FARE**: Backup automatico PostgreSQL (cron + pg_dump, retention 30gg)
 
 ---
 
@@ -149,7 +159,7 @@ docker compose up -d celery celery-beat
 - **M17 Audit Preparation**: eliminazione sicura con soft delete e azione di annullamento (`annulla`) che archivia il prep solo se tutti i finding sono chiusi, con audit trail dedicato.
 - **Frontend moduli**: introdotto `ModuleHelp` (pulsante `?` con drawer contestuale) sui principali moduli operativi (asset, BIA, risk, incidenti, controlli, audit prep, management review, scadenzario).
 - **M04 Asset**: badge di criticità con tooltip esplicativi e tabella guida all’interno del form, per scelta coerente dei livelli 1–5.
-- **Core sicurezza**: JWT configurati con durata 8h/7gg, throttling DRF base per anonimi/utenti, header di sicurezza abilitati e `CONN_MAX_AGE` impostato per riuso connessioni.
+- **Security hardening**: JWT 30min/7gg con blacklist, throttle login 5/min, MIME check upload (python-magic), password validators 12+ char, FERNET_KEY per credenziali SMTP, GDPR anonymize_user(), retention audit log automatica.
 - **Robustezza async**: task Celery critici (controlli ed asset) ora con `autoretry` esponenziale; catena hash dell’audit trail serializzata con `select_for_update` per prevenire race condition.
 - **Performance DB**: indici aggiuntivi su campi `status`, `due_date`, `score`, `valid_until` e campi di filtro più usati per `ControlInstance`, `RiskAssessment`, `Task`, `Incident`, `Document` ed `Evidence`.
 

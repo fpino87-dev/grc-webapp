@@ -28,7 +28,9 @@ M16 BCP              — BcpPlan (RTO/RPO vs MTPD BIA), BcpTest (test_type+objec
 M17 Audit Prep       — AuditPrep (soft delete+annulla), EvidenceItem, AuditFinding
                        AuditProgram — calendario annuale audit
 M18 Reporting        — ComplianceSummary, RiskSummary, OwnerReport (BarChart)
-M19 Notifications    — NotificationSubscription (3 non disattivabili), WebhookEndpoint
+M19 Notifications    — EmailConfiguration (SMTP cifrata Fernet), NotificationSubscription,
+                       NotificationRoleProfile (silenzioso/essenziale/standard/completo/custom),
+                       NotificationRule (regole granulari), WebhookEndpoint, resolver.py
 M20 AI Engine        — AiInteractionLog, Sanitizer (PII), AiRouter (local/cloud)
 
 ## Moduli aggiuntivi (oltre M00–M20)
@@ -47,6 +49,9 @@ compliance_schedule  — ComplianceSchedulePolicy, ScheduleRule (23 tipi),
 8.  Framework normativi = JSON in backend/frameworks/ — non hardcodare controlli nel codice
 9.  M20 AI: nessun PII al cloud senza Sanitizer.sanitize(), human-in-the-loop sempre
 10. Scadenze calcolate con compliance_schedule.services.get_due_date() — mai hardcodate
+11. Mai loggare dati personali (email, CF, telefono) — loggare solo conteggi o identificatori anonimi
+12. File upload: sempre validate_uploaded_file() con MIME check (python-magic)
+13. Produzione: usare docker-compose.prod.yml e Dockerfile.prod
 
 ## Pattern obbligatori
 
@@ -93,11 +98,15 @@ supplier.next_assessment= get_due_date("supplier_assessment", plant=plant)
 plan.next_test_date     = get_due_date("bcp_test", plant=plant)
 
 ## Sicurezza — impostazioni attive
-JWT: ACCESS=30min, REFRESH=7gg, ROTATE=True
-Rate limiting: anon=20/h, user=500/h
+JWT: ACCESS=30min, REFRESH=7gg, ROTATE=True, BLACKLIST=True (token_blacklist app)
+Rate limiting: anon=20/h, user=500/h, login=5/min (LoginRateThrottle su GrcTokenObtainPairView)
+File upload: whitelist estensioni + python-magic MIME type reale
+Password: AUTH_PASSWORD_VALIDATORS — min 12 char + CommonPassword + NumericPassword
+Fernet: FERNET_KEY in env per EncryptedCharField (credenziali SMTP)
+GDPR: anonymize_user() per Art.17 (auth_grc/services.py), cleanup_expired_audit_logs() mensile
 Security headers: X_FRAME_OPTIONS=DENY, SECURE_CONTENT_TYPE_NOSNIFF=True
 DB pooling: CONN_MAX_AGE=60
-Produzione: settings/prod.py con SECURE_SSL_REDIRECT, HSTS, cookie secure
+Produzione: settings/prod.py con SECURE_SSL_REDIRECT, HSTS, cookie secure, Celery→Redis backend
 
 ## Export documenti compliance
 GET /api/v1/controls/export/?framework=ISO27001&format=soa&plant=<uuid>
