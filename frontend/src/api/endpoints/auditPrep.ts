@@ -59,6 +59,10 @@ export const auditPrepApi = {
     apiClient.post<AuditProgram>("/audit-prep/programs/", data).then(r => r.data),
   approveProgram: (id: string) =>
     apiClient.post<{ ok: boolean; status: string }>(`/audit-prep/programs/${id}/approve/`).then(r => r.data),
+  deletePrep: (id: string) =>
+    apiClient.delete(`/audit-prep/audit-preps/${id}/`),
+  deleteProgram: (id: string) =>
+    apiClient.delete(`/audit-prep/programs/${id}/`),
 };
 
 export interface AuditProgram {

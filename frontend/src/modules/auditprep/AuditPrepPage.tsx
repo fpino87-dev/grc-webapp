@@ -514,7 +514,7 @@ const AUDIT_STATUS_COLORS: Record<string, string> = {
   cancelled: "bg-red-100 text-red-500",
 };
 
-function AuditProgramSection({ plantId }: { plantId?: string }) {
+function AuditProgramSection({ plantId, onDeleteProgram }: { plantId?: string; onDeleteProgram: (id: string) => void }) {
   const qc = useQueryClient();
   const [showNew, setShowNew] = useState(false);
   const [form, setForm] = useState<Partial<AuditProgram>>({});
@@ -661,6 +661,13 @@ function AuditProgramSection({ plantId }: { plantId?: string }) {
                       Approva
                     </button>
                   )}
+                  <button
+                    onClick={() => onDeleteProgram(prog.id)}
+                    className="px-2 py-1 text-xs rounded border border-gray-200 bg-gray-50 text-gray-500 hover:bg-red-50 hover:text-red-700 hover:border-red-200"
+                    title="Elimina programma"
+                  >
+                    🗑
+                  </button>
                 </div>
               </div>
 
@@ -728,6 +735,8 @@ export function AuditPrepPage() {
   const [mainTab, setMainTab] = useState<"preps" | "program">("preps");
   const [cancelId, setCancelId] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState("");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteProgramId, setDeleteProgramId] = useState<string | null>(null);
   const qc = useQueryClient();
   const selectedPlant = useAuthStore(s => s.selectedPlant);
 
@@ -747,15 +756,28 @@ export function AuditPrepPage() {
 
   const cancelMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
-      await apiClient.post(`/audit-prep/audit-preps/${id}/annulla/`, {
-        reason,
-      });
+      await apiClient.post(`/audit-prep/audit-preps/${id}/annulla/`, { reason });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["audit-prep"] });
       setCancelId(null);
       setCancelReason("");
-      // opzionalmente: toast di successo se esiste un sistema di notifiche
+    },
+  });
+
+  const deletePrepMutation = useMutation({
+    mutationFn: (id: string) => auditPrepApi.deletePrep(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["audit-prep"] });
+      setDeleteId(null);
+    },
+  });
+
+  const deleteProgramMutation = useMutation({
+    mutationFn: (id: string) => auditPrepApi.deleteProgram(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["audit-programs"] });
+      setDeleteProgramId(null);
     },
   });
 
@@ -811,7 +833,7 @@ export function AuditPrepPage() {
       </div>
 
       {mainTab === "program" && (
-        <AuditProgramSection plantId={selectedPlant?.id} />
+        <AuditProgramSection plantId={selectedPlant?.id} onDeleteProgram={setDeleteProgramId} />
       )}
 
       {mainTab === "preps" && (
@@ -889,15 +911,19 @@ export function AuditPrepPage() {
                       <td className="px-4 py-3 text-right space-x-2">
                         {prep.status === "in_corso" && (
                           <button
-                            onClick={() => {
-                              setCancelId(prep.id);
-                              setCancelReason("");
-                            }}
+                            onClick={() => { setCancelId(prep.id); setCancelReason(""); }}
                             className="px-3 py-1 text-xs rounded border border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
                           >
                             ✕ Annulla
                           </button>
                         )}
+                        <button
+                          onClick={() => setDeleteId(prep.id)}
+                          className="px-3 py-1 text-xs rounded border border-gray-200 bg-gray-50 text-gray-500 hover:bg-red-50 hover:text-red-700 hover:border-red-200"
+                          title="Elimina preparazione"
+                        >
+                          🗑
+                        </button>
                       </td>
                     </tr>
                     {expandedId === prep.id && (
@@ -968,6 +994,59 @@ export function AuditPrepPage() {
                 Errore durante l&apos;annullamento
               </p>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal conferma eliminazione AuditPrep */}
+      {deleteId && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-6">
+            <h3 className="text-lg font-semibold mb-2">Elimina preparazione</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Questa operazione è irreversibile. La preparazione e tutti i suoi finding verranno eliminati.
+            </p>
+            {deletePrepMutation.isError && (
+              <p className="text-xs text-red-600 mb-3">
+                {(deletePrepMutation.error as { response?: { data?: { error?: string } } })?.response?.data?.error || "Errore durante l'eliminazione"}
+              </p>
+            )}
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setDeleteId(null)} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">
+                Annulla
+              </button>
+              <button
+                onClick={() => deletePrepMutation.mutate(deleteId)}
+                disabled={deletePrepMutation.isPending}
+                className="px-4 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 disabled:opacity-50"
+              >
+                {deletePrepMutation.isPending ? "Eliminazione..." : "Elimina"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal conferma eliminazione AuditProgram */}
+      {deleteProgramId && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-6">
+            <h3 className="text-lg font-semibold mb-2">Elimina programma</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Questa operazione è irreversibile. Il programma annuale verrà eliminato.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setDeleteProgramId(null)} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">
+                Annulla
+              </button>
+              <button
+                onClick={() => deleteProgramMutation.mutate(deleteProgramId)}
+                disabled={deleteProgramMutation.isPending}
+                className="px-4 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleteProgramMutation.isPending ? "Eliminazione..." : "Elimina"}
+              </button>
+            </div>
           </div>
         </div>
       )}

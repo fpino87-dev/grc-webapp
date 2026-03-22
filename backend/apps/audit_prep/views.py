@@ -190,6 +190,18 @@ class AuditProgramViewSet(viewsets.ModelViewSet):
             payload={"id": str(instance.id), "year": instance.year},
         )
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.soft_delete()
+        log_action(
+            user=request.user,
+            action_code="audit_prep.program.deleted",
+            level="L2",
+            entity=instance,
+            payload={"title": instance.title, "year": instance.year},
+        )
+        return Response(status=204)
+
     @action(detail=True, methods=["post"])
     def approve(self, request, pk=None):
         from django.utils import timezone
