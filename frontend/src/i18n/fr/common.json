@@ -1750,5 +1750,50 @@
   },
   "suppliers": {
     "filter_all": "Tous"
+  },
+  "reporting": {
+    "title": "Reporting & Tableau de bord",
+    "tabs": {
+      "compliance": "Conformité",
+      "owner": "Par responsable"
+    },
+    "loading_kpi": "Chargement des KPI...",
+    "loading_compliance": "Chargement de la conformité...",
+    "loading": "Chargement...",
+    "no_compliance_data": "Aucune donnée de conformité disponible",
+    "no_data": "Aucune donnée disponible",
+    "kpi": {
+      "active_sites": "Sites actifs",
+      "open_incidents": "Incidents ouverts",
+      "total_controls": "Contrôles totaux",
+      "pct_compliant": "% Conforme",
+      "gap_controls": "Contrôles en écart"
+    },
+    "compliance": {
+      "distribution_title": "Distribution conformité ({{total}} contrôles)",
+      "by_status_title": "Contrôles par statut",
+      "bar_label": "Contrôles"
+    },
+    "status": {
+      "parziale": "Partiel",
+      "non_valutato": "Non évalué"
+    },
+    "owner": {
+      "risks_chart_title": "Risques par responsable (empilé)",
+      "risks_table_title": "Détail par responsable",
+      "tasks_table_title": "Tâches par responsable",
+      "col_owner": "Responsable",
+      "col_critical_processes": "Processus critiques",
+      "col_total_risks": "Risques totaux",
+      "col_red": "Rouges",
+      "col_yellow": "Jaunes",
+      "col_green": "Verts",
+      "col_open_tasks": "Tâches ouvertes",
+      "col_overdue": "En retard",
+      "col_completed_30d": "Terminées (30j)",
+      "bar_green": "Verts",
+      "bar_yellow": "Jaunes",
+      "bar_red": "Rouges"
+    }
   }
 }

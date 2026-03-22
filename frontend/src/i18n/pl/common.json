@@ -1750,5 +1750,50 @@
   },
   "suppliers": {
     "filter_all": "Wszystkie"
+  },
+  "reporting": {
+    "title": "Raportowanie & Dashboard",
+    "tabs": {
+      "compliance": "Zgodność",
+      "owner": "Wg właściciela"
+    },
+    "loading_kpi": "Ładowanie KPI...",
+    "loading_compliance": "Ładowanie zgodności...",
+    "loading": "Ładowanie...",
+    "no_compliance_data": "Brak danych zgodności",
+    "no_data": "Brak danych",
+    "kpi": {
+      "active_sites": "Aktywne zakłady",
+      "open_incidents": "Otwarte incydenty",
+      "total_controls": "Wszystkie kontrole",
+      "pct_compliant": "% Zgodnych",
+      "gap_controls": "Kontrole z luką"
+    },
+    "compliance": {
+      "distribution_title": "Rozkład zgodności ({{total}} kontroli)",
+      "by_status_title": "Kontrole wg statusu",
+      "bar_label": "Kontrole"
+    },
+    "status": {
+      "parziale": "Częściowy",
+      "non_valutato": "Nie ocenione"
+    },
+    "owner": {
+      "risks_chart_title": "Ryzyka wg właściciela (skumulowane)",
+      "risks_table_title": "Szczegóły wg właściciela",
+      "tasks_table_title": "Zadania wg właściciela",
+      "col_owner": "Właściciel",
+      "col_critical_processes": "Procesy krytyczne",
+      "col_total_risks": "Ryzyka razem",
+      "col_red": "Czerwone",
+      "col_yellow": "Żółte",
+      "col_green": "Zielone",
+      "col_open_tasks": "Otwarte zadania",
+      "col_overdue": "Przeterminowane",
+      "col_completed_30d": "Ukończone (30d)",
+      "bar_green": "Zielone",
+      "bar_yellow": "Żółte",
+      "bar_red": "Czerwone"
+    }
   }
 }

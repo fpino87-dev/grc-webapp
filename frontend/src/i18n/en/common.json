@@ -1671,5 +1671,50 @@
   },
   "suppliers": {
     "filter_all": "All"
+  },
+  "reporting": {
+    "title": "Reporting & Dashboard",
+    "tabs": {
+      "compliance": "Compliance",
+      "owner": "By Owner"
+    },
+    "loading_kpi": "Loading KPIs...",
+    "loading_compliance": "Loading compliance...",
+    "loading": "Loading...",
+    "no_compliance_data": "No compliance data available",
+    "no_data": "No data available",
+    "kpi": {
+      "active_sites": "Active sites",
+      "open_incidents": "Open incidents",
+      "total_controls": "Total controls",
+      "pct_compliant": "% Compliant",
+      "gap_controls": "Controls in gap"
+    },
+    "compliance": {
+      "distribution_title": "Compliance distribution ({{total}} controls)",
+      "by_status_title": "Controls by status",
+      "bar_label": "Controls"
+    },
+    "status": {
+      "parziale": "Partial",
+      "non_valutato": "Not evaluated"
+    },
+    "owner": {
+      "risks_chart_title": "Risks by owner (stacked)",
+      "risks_table_title": "Detail by owner",
+      "tasks_table_title": "Tasks by owner",
+      "col_owner": "Owner",
+      "col_critical_processes": "Critical processes",
+      "col_total_risks": "Total risks",
+      "col_red": "Red",
+      "col_yellow": "Yellow",
+      "col_green": "Green",
+      "col_open_tasks": "Open tasks",
+      "col_overdue": "Overdue",
+      "col_completed_30d": "Completed (30d)",
+      "bar_green": "Green",
+      "bar_yellow": "Yellow",
+      "bar_red": "Red"
+    }
   }
 }

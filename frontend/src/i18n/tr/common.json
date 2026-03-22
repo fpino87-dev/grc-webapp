@@ -1750,5 +1750,50 @@
   },
   "suppliers": {
     "filter_all": "Tümü"
+  },
+  "reporting": {
+    "title": "Raporlama & Dashboard",
+    "tabs": {
+      "compliance": "Uyum",
+      "owner": "Sahibe göre"
+    },
+    "loading_kpi": "KPI'ler yükleniyor...",
+    "loading_compliance": "Uyum yükleniyor...",
+    "loading": "Yükleniyor...",
+    "no_compliance_data": "Uyum verisi yok",
+    "no_data": "Veri yok",
+    "kpi": {
+      "active_sites": "Aktif siteler",
+      "open_incidents": "Açık olaylar",
+      "total_controls": "Toplam kontroller",
+      "pct_compliant": "% Uyumlu",
+      "gap_controls": "Eksik kontroller"
+    },
+    "compliance": {
+      "distribution_title": "Uyum dağılımı ({{total}} kontrol)",
+      "by_status_title": "Duruma göre kontroller",
+      "bar_label": "Kontroller"
+    },
+    "status": {
+      "parziale": "Kısmi",
+      "non_valutato": "Değerlendirilmemiş"
+    },
+    "owner": {
+      "risks_chart_title": "Sahibe göre riskler (yığılmış)",
+      "risks_table_title": "Sahibe göre detay",
+      "tasks_table_title": "Sahibe göre görevler",
+      "col_owner": "Sahip",
+      "col_critical_processes": "Kritik süreçler",
+      "col_total_risks": "Toplam riskler",
+      "col_red": "Kırmızı",
+      "col_yellow": "Sarı",
+      "col_green": "Yeşil",
+      "col_open_tasks": "Açık görevler",
+      "col_overdue": "Gecikmiş",
+      "col_completed_30d": "Tamamlanan (30g)",
+      "bar_green": "Yeşil",
+      "bar_yellow": "Sarı",
+      "bar_red": "Kırmızı"
+    }
   }
 }

@@ -1673,5 +1673,50 @@
   },
   "suppliers": {
     "filter_all": "Tutti"
+  },
+  "reporting": {
+    "title": "Reporting & Dashboard",
+    "tabs": {
+      "compliance": "Compliance",
+      "owner": "Per Owner"
+    },
+    "loading_kpi": "Caricamento KPI...",
+    "loading_compliance": "Caricamento compliance...",
+    "loading": "Caricamento...",
+    "no_compliance_data": "Nessun dato di compliance disponibile",
+    "no_data": "Nessun dato disponibile",
+    "kpi": {
+      "active_sites": "Siti attivi",
+      "open_incidents": "Incidenti aperti",
+      "total_controls": "Controlli totali",
+      "pct_compliant": "% Compliant",
+      "gap_controls": "Controlli in gap"
+    },
+    "compliance": {
+      "distribution_title": "Distribuzione compliance ({{total}} controlli)",
+      "by_status_title": "Controlli per stato",
+      "bar_label": "Controlli"
+    },
+    "status": {
+      "parziale": "Parziale",
+      "non_valutato": "Non valutato"
+    },
+    "owner": {
+      "risks_chart_title": "Rischi per owner (impilato)",
+      "risks_table_title": "Dettaglio per owner",
+      "tasks_table_title": "Task per owner",
+      "col_owner": "Owner",
+      "col_critical_processes": "Processi critici",
+      "col_total_risks": "Rischi totali",
+      "col_red": "Rossi",
+      "col_yellow": "Gialli",
+      "col_green": "Verdi",
+      "col_open_tasks": "Task aperti",
+      "col_overdue": "Scaduti",
+      "col_completed_30d": "Completati (30gg)",
+      "bar_green": "Verdi",
+      "bar_yellow": "Gialli",
+      "bar_red": "Rossi"
+    }
   }
 }
