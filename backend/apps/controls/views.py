@@ -153,6 +153,17 @@ class ControlInstanceViewSet(viewsets.ModelViewSet):
                 plant = Plant.objects.filter(pk=plant_id).first()
                 if plant:
                     qs = qs.filter(control__framework__in=get_active_frameworks(plant))
+        else:
+            # Without plant filter, only return instances whose framework is actually
+            # assigned to the plant (prevents showing orphaned instances as duplicates)
+            from apps.plants.models import PlantFramework
+            from django.db.models import OuterRef, Exists
+            assigned = PlantFramework.objects.filter(
+                plant=OuterRef("plant"),
+                framework=OuterRef("control__framework"),
+                deleted_at__isnull=True,
+            )
+            qs = qs.filter(Exists(assigned))
         if status:
             qs = qs.filter(status=status)
         if framework:

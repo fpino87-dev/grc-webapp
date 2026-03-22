@@ -147,6 +147,23 @@ class PlantFrameworkViewSet(viewsets.ModelViewSet):
         if instances:
             ControlInstance.objects.bulk_create(instances)
 
+    def perform_destroy(self, instance):
+        from apps.controls.models import ControlInstance
+        # Soft-delete all ControlInstances for this plant+framework that have no evaluations
+        ControlInstance.objects.filter(
+            plant=instance.plant,
+            control__framework=instance.framework,
+            status="non_valutato",
+        ).update(deleted_at=timezone.now())
+        log_action(
+            user=self.request.user,
+            action_code="plants.framework.remove",
+            level="L2",
+            entity=instance.plant,
+            payload={"framework": instance.framework.code},
+        )
+        instance.delete()
+
     @action(detail=True, methods=["post"])
     def toggle_active(self, request, pk=None):
         pf = self.get_object()
