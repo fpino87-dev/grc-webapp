@@ -49,6 +49,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/health/", health_check, name="health-check"),
     path("api/manual/<str:manual_type>/", serve_manual, name="manual"),
+    path("api/v1/manual/<str:manual_type>/", serve_manual, name="manual-v1"),
     path("api/token/", GrcTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

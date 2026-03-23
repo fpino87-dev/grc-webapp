@@ -34,7 +34,10 @@ services:
       dockerfile: Dockerfile.dev
     command: python manage.py runserver 0.0.0.0:8000
     restart: unless-stopped
-    volumes: [./backend:/app]
+    volumes:
+      - ./backend:/app
+      - ./MANUAL_UTENTE.md:/app/MANUAL_UTENTE.md:ro
+      - ./MANUAL_TECNICO.md:/app/MANUAL_TECNICO.md:ro
     ports: ["8001:8000"]
     env_file: .env
     depends_on:
