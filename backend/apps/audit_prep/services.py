@@ -1,5 +1,5 @@
 import datetime
-import random
+import hashlib
 import uuid
 
 from django.utils import timezone
@@ -266,7 +266,7 @@ def suggest_audit_plan(plant, frameworks, year: int,
             gap_pct = domain.gap_count / domain.total_count * 100
             domain_scores.append({
                 "domain_id":    str(domain.pk),
-                "domain_code":  domain.code,
+                "domain_code":  domain.code or domain.external_id or str(domain.pk),
                 "domain_name":  domain.get_name("it"),
                 "framework":    fw.code,
                 "gap_count":    domain.gap_count,
@@ -325,92 +325,108 @@ def launch_audit_from_program(program, audit_entry: dict, user) -> "AuditPrep":
     """
     Crea un AuditPrep collegato a un audit pianificato nel programma annuale.
     Precompila gli EvidenceItem in base ai domini e coverage_type.
+    Atomico: se un qualsiasi passo fallisce nessun record viene persistito.
     """
+    import random as _rnd
+    from django.db import transaction
+    from django.db.models import Q
     from apps.controls.models import ControlInstance, Framework
     from .models import EvidenceItem
 
-    fw_codes = audit_entry.get("framework_codes", [])
-    frameworks = list(Framework.objects.filter(code__in=fw_codes))
-    primary_fw = frameworks[0] if frameworks else None
+    with transaction.atomic():
+        fw_codes = audit_entry.get("framework_codes", [])
+        frameworks = list(Framework.objects.filter(code__in=fw_codes))
+        primary_fw = frameworks[0] if frameworks else None
 
-    prep = AuditPrep.objects.create(
-        plant=program.plant,
-        framework=primary_fw,
-        title=audit_entry["title"],
-        audit_date=audit_entry.get("planned_date") or None,
-        auditor_name=audit_entry.get("auditor_name", ""),
-        status="in_corso",
-        audit_program=program,
-        audit_entry_id=audit_entry["id"],
-        coverage_type=audit_entry.get("coverage_type", "campione"),
-        created_by=user,
-    )
-
-    scope_domains = audit_entry.get("scope_domains", [])
-    coverage_type = audit_entry.get("coverage_type", "campione")
-
-    for fw in frameworks:
-        instances = ControlInstance.objects.filter(
+        prep = AuditPrep.objects.create(
             plant=program.plant,
-            control__framework=fw,
-            deleted_at__isnull=True,
-        ).select_related("control__domain")
+            framework=primary_fw,
+            title=audit_entry["title"],
+            audit_date=audit_entry.get("planned_date") or None,
+            auditor_name=audit_entry.get("auditor_name", ""),
+            status="in_corso",
+            audit_program=program,
+            audit_entry_id=audit_entry["id"],
+            coverage_type=audit_entry.get("coverage_type", "campione"),
+            created_by=user,
+        )
 
-        if scope_domains:
-            instances = instances.filter(
-                control__domain__code__in=scope_domains
-            )
+        scope_domains = audit_entry.get("scope_domains", [])
+        coverage_type = audit_entry.get("coverage_type", "campione")
 
-        instance_list = list(instances)
+        # Seed deterministico: stessa selezione campione per questo audit
+        seed_str = f"{program.pk}-{audit_entry.get('quarter', 1)}"
+        seed = int(hashlib.md5(seed_str.encode()).hexdigest(), 16) % (2 ** 31)
+        rng = _rnd.Random(seed)
 
-        if coverage_type == "campione" and len(instance_list) > 10:
-            gaps = [i for i in instance_list if i.status in ("gap", "parziale")]
-            others = [i for i in instance_list if i.status not in ("gap", "parziale")]
-            random.shuffle(others)
-            target = max(5, len(instance_list) // 4)
-            instance_list = gaps[:target] + others[:max(0, target - len(gaps))]
-        elif coverage_type == "esteso" and len(instance_list) > 10:
-            gaps = [i for i in instance_list if i.status in ("gap", "parziale")]
-            others = [i for i in instance_list if i.status not in ("gap", "parziale")]
-            random.shuffle(others)
-            target = max(5, len(instance_list) // 2)
-            instance_list = gaps[:target] + others[:max(0, target - len(gaps))]
+        items_to_create = []
+        for fw in frameworks:
+            instances = ControlInstance.objects.filter(
+                plant=program.plant,
+                control__framework=fw,
+                deleted_at__isnull=True,
+            ).select_related("control__domain")
 
-        for inst in instance_list:
-            EvidenceItem.objects.create(
-                audit_prep=prep,
-                control_instance=inst,
-                description=(
-                    f"{inst.control.external_id} — "
-                    f"{inst.control.get_title('it')}"
-                ),
-                status="mancante",
-                created_by=user,
-            )
+            if scope_domains:
+                # Fix 3: fallback a external_id se domain.code è None
+                instances = instances.filter(
+                    Q(control__domain__code__in=scope_domains) |
+                    Q(control__domain__external_id__in=scope_domains)
+                )
 
-    # Aggiorna audit_prep_id nel JSON del programma
-    audits = list(program.planned_audits)
-    for a in audits:
-        if a.get("id") == audit_entry["id"]:
-            a["audit_prep_id"] = str(prep.pk)
-            a["status"] = "in_progress"
-            a["actual_date"] = str(prep.audit_date or "")
-            break
-    program.planned_audits = audits
-    program.save(update_fields=["planned_audits", "updated_at"])
+            instance_list = list(instances)
 
-    log_action(
-        user=user,
-        action_code="audit_prep.launched_from_program",
-        level="L2",
-        entity=prep,
-        payload={
-            "program_id": str(program.pk),
-            "quarter": audit_entry["quarter"],
-            "coverage": coverage_type,
-            "controls_count": prep.evidence_items.count(),
-        },
-    )
+            if coverage_type == "campione" and len(instance_list) > 10:
+                gaps = [i for i in instance_list if i.status in ("gap", "parziale")]
+                others = [i for i in instance_list if i.status not in ("gap", "parziale")]
+                rng.shuffle(others)
+                target = max(5, len(instance_list) // 4)
+                instance_list = gaps[:target] + others[:max(0, target - len(gaps))]
+            elif coverage_type == "esteso" and len(instance_list) > 10:
+                gaps = [i for i in instance_list if i.status in ("gap", "parziale")]
+                others = [i for i in instance_list if i.status not in ("gap", "parziale")]
+                rng.shuffle(others)
+                target = max(5, len(instance_list) // 2)
+                instance_list = gaps[:target] + others[:max(0, target - len(gaps))]
+
+            for inst in instance_list:
+                items_to_create.append(EvidenceItem(
+                    audit_prep=prep,
+                    control_instance=inst,
+                    description=(
+                        f"{inst.control.external_id} — "
+                        f"{inst.control.get_title('it')}"
+                    ),
+                    status="mancante",
+                    created_by=user,
+                ))
+
+        # Un singolo INSERT invece di N INSERT separati
+        EvidenceItem.objects.bulk_create(items_to_create, ignore_conflicts=True)
+
+        # Aggiorna audit_prep_id nel JSON del programma
+        audits = list(program.planned_audits)
+        for a in audits:
+            if a.get("id") == audit_entry["id"]:
+                a["audit_prep_id"] = str(prep.pk)
+                a["status"] = "in_progress"
+                a["actual_date"] = str(prep.audit_date or "")
+                break
+        program.planned_audits = audits
+        program.save(update_fields=["planned_audits", "updated_at"])
+
+        log_action(
+            user=user,
+            action_code="audit_prep.launched_from_program",
+            level="L2",
+            entity=prep,
+            payload={
+                "program_id": str(program.pk),
+                "quarter": audit_entry["quarter"],
+                "coverage": coverage_type,
+                "controls_count": len(items_to_create),
+            },
+        )
     return prep
 
 
@@ -451,13 +467,22 @@ def generate_audit_report(prep: "AuditPrep") -> str:
             f"</tr>"
         )
 
-    findings = prep.findings.all()
+    findings = list(
+        prep.findings.select_related("control_instance__control").all()
+    )
+
+    # Contatori pre-calcolati in memoria — nessuna query aggiuntiva
+    major_count = sum(1 for f in findings if f.finding_type == "major_nc")
+    minor_count = sum(1 for f in findings if f.finding_type == "minor_nc")
+    obs_count   = sum(1 for f in findings if f.finding_type == "observation")
+    opp_count   = sum(1 for f in findings if f.finding_type == "opportunity")
+
+    type_colors = {
+        "major_nc": "#dc2626", "minor_nc": "#d97706",
+        "observation": "#2563eb", "opportunity": "#6b7280",
+    }
     finding_rows = ""
     for f in findings:
-        type_colors = {
-            "major_nc": "#dc2626", "minor_nc": "#d97706",
-            "observation": "#2563eb", "opportunity": "#6b7280",
-        }
         color = type_colors.get(f.finding_type, "#6b7280")
         finding_rows += (
             f"<tr><td style='color:{color};font-weight:bold'>{f.finding_type.upper()}</td>"
@@ -467,11 +492,6 @@ def generate_audit_report(prep: "AuditPrep") -> str:
             f"<td><span style='color:{'#dc2626' if f.is_overdue else '#16a34a'}'>{f.status}</span></td>"
             f"</tr>"
         )
-
-    major_count = findings.filter(finding_type="major_nc").count()
-    minor_count = findings.filter(finding_type="minor_nc").count()
-    obs_count   = findings.filter(finding_type="observation").count()
-    opp_count   = findings.filter(finding_type="opportunity").count()
     coverage_label = dict(AuditPrep.COVERAGE_CHOICES).get(prep.coverage_type, "—")
 
     return f"""<!DOCTYPE html>

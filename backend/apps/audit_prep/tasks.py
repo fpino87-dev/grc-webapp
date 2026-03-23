@@ -5,6 +5,21 @@ from django.utils import timezone
 logger = logging.getLogger(__name__)
 
 
+def _task_exists(plant, source_module: str, source_id, title_prefix: str) -> bool:
+    """
+    Verifica se esiste già un task aperto con lo stesso source e titolo simile.
+    Evita duplicati da run multipli del beat (riavvio Celery, task manuale, ecc.).
+    """
+    from apps.tasks.models import Task
+    return Task.objects.filter(
+        plant=plant,
+        source_module=source_module,
+        source_id=source_id,
+        status__in=["aperto", "in_corso"],
+        title__startswith=str(title_prefix)[:30],
+    ).exists()
+
+
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, max_retries=3)
 def check_upcoming_audits(self):
     """
@@ -44,67 +59,76 @@ def check_upcoming_audits(self):
             quarter = audit.get("quarter", "?")
 
             if days_left == 30:
-                create_task(
-                    plant=program.plant,
-                    title=f"Preparazione audit Q{quarter}: {audit_title}",
-                    description=(
-                        f"L'audit pianificato si svolgerà il "
-                        f"{planned_date.strftime('%d/%m/%Y')}. "
-                        f"Inizia la raccolta delle evidenze e "
-                        f"verifica la disponibilità dell'auditor."
-                    ),
-                    priority="media",
-                    source_module="M17",
-                    due_date=planned_date,
-                    assign_type="role",
-                    assign_value="compliance_officer",
-                )
-                created += 1
+                prefix = f"Preparazione audit Q{quarter}"
+                if not _task_exists(program.plant, "M17", program.pk, prefix):
+                    create_task(
+                        plant=program.plant,
+                        title=f"Preparazione audit Q{quarter}: {audit_title}",
+                        description=(
+                            f"L'audit pianificato si svolgerà il "
+                            f"{planned_date.strftime('%d/%m/%Y')}. "
+                            f"Inizia la raccolta delle evidenze e "
+                            f"verifica la disponibilità dell'auditor."
+                        ),
+                        priority="media",
+                        source_module="M17",
+                        source_id=program.pk,
+                        due_date=planned_date,
+                        assign_type="role",
+                        assign_value="compliance_officer",
+                    )
+                    created += 1
 
             elif days_left == 7 and not has_prep:
-                create_task(
-                    plant=program.plant,
-                    title=f"⚠️ Avvia AuditPrep Q{quarter}: {audit_title}",
-                    description=(
-                        f"Mancano 7 giorni all'audit del "
-                        f"{planned_date.strftime('%d/%m/%Y')} "
-                        f"e non è ancora stato aperto il prep. "
-                        f"Vai in Audit Prep e clicca 'Avvia audit' sul programma."
-                    ),
-                    priority="alta",
-                    source_module="M17",
-                    due_date=planned_date,
-                    assign_type="role",
-                    assign_value="compliance_officer",
-                )
-                try:
-                    from apps.notifications.resolver import fire_notification
-                    fire_notification(
-                        "audit_upcoming",
+                prefix = "⚠️ Avvia AuditPrep Q"
+                if not _task_exists(program.plant, "M17", program.pk, prefix):
+                    create_task(
                         plant=program.plant,
-                        context={"program": program, "audit": audit, "days_left": 7},
+                        title=f"⚠️ Avvia AuditPrep Q{quarter}: {audit_title}",
+                        description=(
+                            f"Mancano 7 giorni all'audit del "
+                            f"{planned_date.strftime('%d/%m/%Y')} "
+                            f"e non è ancora stato aperto il prep. "
+                            f"Vai in Audit Prep e clicca 'Avvia audit' sul programma."
+                        ),
+                        priority="alta",
+                        source_module="M17",
+                        source_id=program.pk,
+                        due_date=planned_date,
+                        assign_type="role",
+                        assign_value="compliance_officer",
                     )
-                except Exception as e:
-                    logger.warning("Notifica audit_upcoming fallita: %s", e)
-                created += 1
+                    try:
+                        from apps.notifications.resolver import fire_notification
+                        fire_notification(
+                            "audit_upcoming",
+                            plant=program.plant,
+                            context={"program": program, "audit": audit, "days_left": 7},
+                        )
+                    except Exception as e:
+                        logger.warning("Notifica audit_upcoming fallita: %s", e)
+                    created += 1
 
             elif days_left == -1 and not has_prep:
-                create_task(
-                    plant=program.plant,
-                    title=f"🚨 Audit Q{quarter} non avviato: {audit_title}",
-                    description=(
-                        f"L'audit pianificato per il "
-                        f"{planned_date.strftime('%d/%m/%Y')} "
-                        f"non è stato avviato. "
-                        f"Aprire subito un AuditPrep o segnare l'audit come annullato."
-                    ),
-                    priority="critica",
-                    source_module="M17",
-                    due_date=today + timezone.timedelta(days=3),
-                    assign_type="role",
-                    assign_value="compliance_officer",
-                )
-                created += 1
+                prefix = "🚨 Audit Q"
+                if not _task_exists(program.plant, "M17", program.pk, prefix):
+                    create_task(
+                        plant=program.plant,
+                        title=f"🚨 Audit Q{quarter} non avviato: {audit_title}",
+                        description=(
+                            f"L'audit pianificato per il "
+                            f"{planned_date.strftime('%d/%m/%Y')} "
+                            f"non è stato avviato. "
+                            f"Aprire subito un AuditPrep o segnare l'audit come annullato."
+                        ),
+                        priority="critica",
+                        source_module="M17",
+                        source_id=program.pk,
+                        due_date=today + timezone.timedelta(days=3),
+                        assign_type="role",
+                        assign_value="compliance_officer",
+                    )
+                    created += 1
 
     return f"check_upcoming_audits: {created} task creati"
 
@@ -132,23 +156,26 @@ def check_overdue_findings(self):
         days_overdue = (today - finding.response_deadline).days
         if days_overdue not in (1, 7, 14):
             continue
-        create_task(
-            plant=finding.audit_prep.plant,
-            title=f"🚨 Finding scaduto da {days_overdue}gg: {finding.title}",
-            description=(
-                f"Tipo: {finding.finding_type.upper()}\n"
-                f"Scadenza: {finding.response_deadline.strftime('%d/%m/%Y')}\n"
-                f"Scaduto da: {days_overdue} giorni\n\n"
-                f"Completare la risposta e chiudere il finding."
-            ),
-            priority="critica",
-            source_module="M17",
-            due_date=today + timezone.timedelta(days=3),
-            assign_type="role",
-            assign_value="compliance_officer",
-        )
-        created += 1
-        logger.info("Task finding scaduto creato: %d giorni", days_overdue)
+        prefix = "🚨 Finding scaduto"
+        if not _task_exists(finding.audit_prep.plant, "M17", finding.pk, prefix):
+            create_task(
+                plant=finding.audit_prep.plant,
+                title=f"🚨 Finding scaduto da {days_overdue}gg: {finding.title}",
+                description=(
+                    f"Tipo: {finding.finding_type.upper()}\n"
+                    f"Scadenza: {finding.response_deadline.strftime('%d/%m/%Y')}\n"
+                    f"Scaduto da: {days_overdue} giorni\n\n"
+                    f"Completare la risposta e chiudere il finding."
+                ),
+                priority="critica",
+                source_module="M17",
+                source_id=finding.pk,
+                due_date=today + timezone.timedelta(days=3),
+                assign_type="role",
+                assign_value="compliance_officer",
+            )
+            created += 1
+            logger.info("Task finding scaduto creato: %d giorni", days_overdue)
 
     return f"check_overdue_findings: {created} task creati"
 
