@@ -38,6 +38,7 @@ Compliance: TISAX L2/L3, NIS2, ISO 27001.
 11. Mai loggare dati personali (email, CF, telefono) nei log di sistema — loggare solo conteggi o identificatori anonimi
 12. File upload: sempre `validate_uploaded_file()` con MIME check (python-magic)
 13. Produzione: usare `docker-compose.prod.yml` e `Dockerfile.prod`
+14. **Traduzioni obbligatorie**: ogni nuova chiave i18n aggiunta in `it/common.json` o `en/common.json` DEVE essere tradotta contestualmente in **tutte e 5 le lingue** — IT, EN, FR, PL, TR — nei rispettivi file `frontend/src/i18n/<lang>/common.json`. Non lasciare mai chiavi parzialmente tradotte.
 
 ## Sicurezza (configurazione attuale)
 - **JWT**: ACCESS=30min, REFRESH=7gg, ROTATE=True, BLACKLIST=True (token_blacklist app attiva)
