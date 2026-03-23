@@ -277,6 +277,17 @@ def suggest_audit_plan(plant, frameworks, year: int,
                                  else "bassa"),
             })
 
+    # Deduplicazione domini presenti in più framework:
+    # mantieni il record con gap_pct più alto e concatena i framework
+    seen_domains: dict = {}
+    for ds in domain_scores:
+        key = ds["domain_code"]
+        if key not in seen_domains or ds["gap_pct"] > seen_domains[key]["gap_pct"]:
+            if key in seen_domains:
+                existing_fw = seen_domains[key].get("framework", "")
+                ds["framework"] = f"{existing_fw}+{ds['framework']}"
+            seen_domains[key] = ds
+    domain_scores = list(seen_domains.values())
     domain_scores.sort(key=lambda x: x["gap_pct"], reverse=True)
 
     total_domains = len(domain_scores)

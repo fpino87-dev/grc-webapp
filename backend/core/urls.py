@@ -1,5 +1,8 @@
+import os
+
+from django.conf import settings
 from django.contrib import admin
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -18,9 +21,34 @@ def health_check(request):
     return JsonResponse({"status": "ok" if db_ok else "error", "db": db_ok}, status=status)
 
 
+def serve_manual(request, manual_type):
+    """Serve il contenuto del manuale Markdown come JSON."""
+    filename_map = {
+        "utente":  "MANUAL_UTENTE.md",
+        "tecnico": "MANUAL_TECNICO.md",
+    }
+    filename = filename_map.get(manual_type)
+    if not filename:
+        raise Http404("Manuale non trovato")
+
+    # Cerca il file nella root del progetto (un livello sopra BASE_DIR /app/backend)
+    for base in (
+        os.path.join(settings.BASE_DIR, "..", ".."),
+        os.path.join(settings.BASE_DIR, ".."),
+        settings.BASE_DIR,
+    ):
+        candidate = os.path.normpath(os.path.join(base, filename))
+        if os.path.exists(candidate):
+            with open(candidate, "r", encoding="utf-8") as f:
+                return JsonResponse({"type": manual_type, "content": f.read()})
+
+    raise Http404("File manuale non trovato")
+
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/health/", health_check, name="health-check"),
+    path("api/manual/<str:manual_type>/", serve_manual, name="manual"),
     path("api/token/", GrcTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

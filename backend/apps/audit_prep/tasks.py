@@ -58,7 +58,10 @@ def check_upcoming_audits(self):
             audit_title = audit.get("title", "Audit pianificato")
             quarter = audit.get("quarter", "?")
 
-            if days_left == 30:
+            # Range di giorni per gestire il task settimanale (lunedì)
+            # vs date a metà settimana: evita che un audit pianificato
+            # per martedì venga saltato se il lunedì è festivo.
+            if 28 <= days_left <= 32:
                 prefix = f"Preparazione audit Q{quarter}"
                 if not _task_exists(program.plant, "M17", program.pk, prefix):
                     create_task(
@@ -79,14 +82,14 @@ def check_upcoming_audits(self):
                     )
                     created += 1
 
-            elif days_left == 7 and not has_prep:
+            elif 5 <= days_left <= 9 and not has_prep:
                 prefix = "⚠️ Avvia AuditPrep Q"
                 if not _task_exists(program.plant, "M17", program.pk, prefix):
                     create_task(
                         plant=program.plant,
                         title=f"⚠️ Avvia AuditPrep Q{quarter}: {audit_title}",
                         description=(
-                            f"Mancano 7 giorni all'audit del "
+                            f"Mancano {days_left} giorni all'audit del "
                             f"{planned_date.strftime('%d/%m/%Y')} "
                             f"e non è ancora stato aperto il prep. "
                             f"Vai in Audit Prep e clicca 'Avvia audit' sul programma."
@@ -103,13 +106,13 @@ def check_upcoming_audits(self):
                         fire_notification(
                             "audit_upcoming",
                             plant=program.plant,
-                            context={"program": program, "audit": audit, "days_left": 7},
+                            context={"program": program, "audit": audit, "days_left": days_left},
                         )
                     except Exception as e:
                         logger.warning("Notifica audit_upcoming fallita: %s", e)
                     created += 1
 
-            elif days_left == -1 and not has_prep:
+            elif -3 <= days_left <= 0 and not has_prep:
                 prefix = "🚨 Audit Q"
                 if not _task_exists(program.plant, "M17", program.pk, prefix):
                     create_task(

@@ -171,24 +171,66 @@ class DashboardSummaryView(APIView):
         from apps.controls.models import ControlInstance
         from apps.incidents.models import Incident
         from apps.plants.models import Plant
+        from apps.plants.services import get_active_framework_codes
+        from apps.risk.models import RiskAssessment
+        from apps.tasks.models import Task
+        from apps.pdca.models import PdcaCycle
+        from apps.governance.services import get_vacant_mandatory_roles
+
         plant_id = request.query_params.get("plant")
+        plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
+        today = timezone.now().date()
+        fw_codes = get_active_framework_codes(plant) if plant else []
 
-        plants_qs = Plant.objects.filter(status="attivo")
-        incidents_open = Incident.objects.filter(status__in=["aperto", "in_analisi"])
-        controls_qs = ControlInstance.objects.all()
+        ci_qs = ControlInstance.objects.filter(deleted_at__isnull=True)
+        if plant:
+            ci_qs = ci_qs.filter(
+                plant=plant,
+                control__framework__code__in=fw_codes,
+            )
+        total_ci = ci_qs.count()
+        compliant = ci_qs.filter(status="compliant").count()
+        gap = ci_qs.filter(status="gap").count()
 
-        if plant_id:
-            incidents_open = incidents_open.filter(plant_id=plant_id)
-            controls_qs = controls_qs.filter(plant_id=plant_id)
+        risk_qs = RiskAssessment.objects.filter(
+            status="completato", deleted_at__isnull=True
+        )
+        if plant:
+            risk_qs = risk_qs.filter(plant=plant)
 
-        total_controls = controls_qs.count()
-        compliant = controls_qs.filter(status="compliant").count()
+        inc_qs = Incident.objects.filter(status__in=["aperto", "in_analisi"])
+        if plant:
+            inc_qs = inc_qs.filter(plant=plant)
+
+        task_qs = Task.objects.filter(
+            status__in=["aperto", "in_corso"],
+            due_date__lt=today,
+        )
+        if plant:
+            task_qs = task_qs.filter(plant=plant)
+
+        pdca_qs = PdcaCycle.objects.exclude(fase_corrente="chiuso")
+        if plant:
+            pdca_qs = pdca_qs.filter(plant=plant)
 
         return Response({
-            "plants_active": plants_qs.count(),
-            "incidents_open": incidents_open.count(),
-            "controls_total": total_controls,
-            "controls_compliant": compliant,
-            "controls_gap": controls_qs.filter(status="gap").count(),
-            "pct_compliant": round(compliant / total_controls * 100, 1) if total_controls else 0,
+            "plant_id": plant_id,
+            "frameworks": fw_codes,
+            "compliance": {
+                "total": total_ci,
+                "compliant": compliant,
+                "gap": gap,
+                "pct": round(compliant / total_ci * 100, 1) if total_ci > 0 else 0,
+            },
+            "risks": {
+                "red": risk_qs.filter(score__gt=14).count(),
+                "yellow": risk_qs.filter(score__gt=7, score__lte=14).count(),
+            },
+            "incidents": {
+                "open": inc_qs.count(),
+                "nis2": inc_qs.filter(nis2_notifiable="si").count(),
+            },
+            "tasks_overdue": task_qs.count(),
+            "pdca_open": pdca_qs.count(),
+            "vacant_roles": get_vacant_mandatory_roles(plant) if plant else [],
         })

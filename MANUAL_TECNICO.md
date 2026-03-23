@@ -1,4 +1,4 @@
-# MANUAL_TECNICO.md — GRC Compliance Webapp
+# Manuale Tecnico — GRC Platform
 
 > Guida per sviluppatori: architettura, modelli dati, API, framework normativi, AI Engine, test e convenzioni.
 
@@ -6,24 +6,56 @@
 
 ## Indice
 
-- [Architettura applicativa](#architettura-applicativa)
-- [Setup ambiente di sviluppo](#setup-ambiente-di-sviluppo)
-- [Struttura backend](#struttura-backend)
-- [Modelli dati principali](#modelli-dati-principali)
-- [API REST](#api-rest)
+- [Stack e versioni](#stack-e-versioni)
+- [Architettura](#architettura)
+- [Struttura repository](#struttura-repository)
+- [Modelli principali](#modelli-principali)
+- [API](#api)
+- [Sicurezza](#sicurezza)
+- [Privacy e GDPR](#privacy-e-gdpr)
 - [Audit trail — append-only con hash chain](#audit-trail--append-only-con-hash-chain)
+- [Audit Preparation — logica tecnica](#audit-preparation--logica-tecnica)
+- [Compliance Schedule (M08)](#compliance-schedule-m08)
 - [Aggiungere un framework normativo](#aggiungere-un-framework-normativo)
 - [Aggiungere un modulo](#aggiungere-un-modulo)
 - [AI Engine M20 — integrazione tecnica](#ai-engine-m20--integrazione-tecnica)
 - [Integrazioni esterne](#integrazioni-esterne)
 - [i18n — internazionalizzazione](#i18n--internazionalizzazione)
+- [Frontend](#frontend)
 - [Test](#test)
+- [Management commands](#management-commands)
+- [Variabili ambiente](#variabili-ambiente)
 - [Convenzioni di sviluppo](#convenzioni-di-sviluppo)
 - [Troubleshooting](#troubleshooting)
 
 ---
 
-## Architettura applicativa
+## Stack e versioni
+
+| Componente | Tecnologia | Versione |
+|-----------|-----------|---------|
+| Runtime backend | Python | 3.11 |
+| Framework web | Django | 5.1 |
+| API REST | Django REST Framework | 3.15 |
+| Task queue | Celery | 5.x |
+| Cache/Broker | Redis | 7 |
+| Database | PostgreSQL | 15 |
+| Server produzione | Gunicorn | — |
+| Framework frontend | React | 18.3 |
+| Build tool | Vite | 5.4 |
+| CSS | Tailwind CSS | 3.4 |
+| State management | Zustand | 5.0 |
+| Data fetching | TanStack Query | 5.56 |
+| Router | React Router | 7 |
+| i18n frontend | i18next | 23.10 |
+| Markdown | react-markdown | 9.0 |
+| Container | Docker Compose | v2 |
+
+---
+
+## Architettura
+
+### Flusso architetturale
 
 ```
 frontend (React SPA)
@@ -43,7 +75,85 @@ backend (Django + DRF)
         Celery Beat    scheduler ricorrenti: scadenze, digest email, sync
 ```
 
-**Principi architetturali vincolanti:**
+### Principi architetturali (da CLAUDE.md)
+
+I seguenti principi sono vincolanti per tutto il codice del progetto. Non è mai consentito derogarvi.
+
+**1. BaseModel** — tutti i modelli ereditano da `core.models.BaseModel`
+
+```python
+class MyModel(BaseModel):
+    name = models.CharField(max_length=100)
+    # Eredita: id (UUID pk), created_at, updated_at, deleted_at, created_by, soft_delete()
+```
+
+**2. Business logic in services.py** — mai nelle view o nei serializer
+
+```python
+# ✅ Corretto
+# apps/mymodule/services.py
+def create_something(plant, user, data):
+    obj = MyModel.objects.create(plant=plant, created_by=user, **data)
+    log_action(user=user, action_code="mymodule.created", level="L2", entity=obj, payload={...})
+    return obj
+
+# ❌ Sbagliato — logica nella view
+def perform_create(self, serializer):
+    obj = MyModel.objects.create(...)  # logica qui = violazione
+```
+
+**3. Audit log obbligatorio** — ogni azione rilevante chiama `log_action`
+
+```python
+from core.audit import log_action
+log_action(
+    user=request.user,
+    action_code="mymodule.entity.action",  # formato: app.entity.action
+    level="L2",  # L1=sicurezza (5anni), L2=compliance (3anni), L3=operativo (1anno)
+    entity=instance,
+    payload={"key": "value"},  # NO PII, solo conteggi/ID
+)
+```
+
+**4. Soft delete** — mai `queryset.delete()` diretto
+
+```python
+# ✅ Corretto
+instance.soft_delete()
+
+# ❌ Sbagliato
+instance.delete()
+MyModel.objects.filter(...).delete()
+```
+
+**5. No N+1** — `select_related` e `prefetch_related` obbligatori
+
+```python
+# ✅ Corretto
+queryset = MyModel.objects.select_related("plant", "created_by").prefetch_related("items")
+
+# ❌ Sbagliato
+for obj in MyModel.objects.all():
+    print(obj.plant.name)  # N+1!
+```
+
+**6. Task assegnati a ruolo** (risoluzione dinamica via `UserPlantAccess`), mai a utente diretto.
+
+**7. Framework normativi = JSON** in `backend/frameworks/` — non hardcodare controlli nel codice.
+
+**8. M20 AI Engine**: sempre `Sanitizer.sanitize()` prima di inviare al cloud LLM; human-in-the-loop prima di applicare qualsiasi output AI.
+
+**9. Soft delete manager** è il default — `.all_with_deleted()` solo dove esplicitamente necessario.
+
+**10. Mai loggare PII** — solo conteggi o identificatori anonimi nei log di sistema.
+
+**11. File upload**: sempre `validate_uploaded_file()` con MIME check (python-magic).
+
+**12. Produzione**: `docker-compose.prod.yml` e `Dockerfile.prod`.
+
+**13. Traduzioni obbligatorie**: ogni chiave i18n aggiunta in `it/common.json` o `en/common.json` deve essere tradotta contestualmente in tutte e 5 le lingue (IT, EN, FR, PL, TR).
+
+Ulteriori principi vincolanti:
 
 - Framework as data: i controlli sono JSON, non codice. Aggiungere DORA non richiede deploy.
 - Table inheritance IT/OT: `Asset` base + `AssetIT` e `AssetOT` — nessuna colonna nullable inutile.
@@ -52,20 +162,80 @@ backend (Django + DRF)
 - Task assegnati a ruolo con risoluzione dinamica: cambio di personale non richiede riallocazione manuale.
 - Versioni framework immutabili: archiviate, mai eliminate.
 
----
+### Pattern obbligatori con esempi
 
-## Setup ambiente di sviluppo
+**Service pattern completo:**
 
-### Prerequisiti
+```python
+# apps/mymodule/services.py
+from django.db import transaction
+from core.audit import log_action
+
+def create_entity(plant, user, title: str, **kwargs):
+    with transaction.atomic():
+        entity = MyEntity.objects.create(
+            plant=plant,
+            title=title,
+            created_by=user,
+            **kwargs,
+        )
+        log_action(
+            user=user,
+            action_code="mymodule.entity.created",
+            level="L2",
+            entity=entity,
+            payload={"title": title[:100]},
+        )
+    return entity
+```
+
+**Celery task con autoretry:**
+
+```python
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, max_retries=3)
+def my_scheduled_task(self):
+    # logica task
+    return "done"
+```
+
+**Destroy pattern (soft delete):**
+
+```python
+def destroy(self, request, *args, **kwargs):
+    instance = self.get_object()
+    instance.soft_delete()
+    log_action(
+        user=request.user,
+        action_code="mymodule.entity.deleted",
+        level="L2",
+        entity=instance,
+        payload={},
+    )
+    return Response(status=204)
+```
+
+### Flusso dati principale
+
+```
+BIA.downtime_cost → RiskAssessment.ale_eur (calcolato)
+RiskAssessment(score > 14) → Task urgente + PDCA automatico
+Incident.close() → PDCA + LessonLearned automatici
+AuditFinding.close() → PDCA + LessonLearned automatici
+BcpTest(fallito) → PDCA automatico
+PDCA.close() → aggiorna modulo sorgente + LessonLearned
+```
+
+### Setup ambiente di sviluppo
+
+#### Prerequisiti
 
 ```bash
-# Verifica versioni
 python --version     # >= 3.11
 node --version       # >= 20
 docker --version     # >= 4.x
 ```
 
-### Primo avvio
+#### Primo avvio
 
 ```bash
 git clone https://github.com/org/grc-webapp.git
@@ -92,7 +262,7 @@ npm install
 npm run dev
 ```
 
-### Comandi Makefile
+#### Comandi Makefile
 
 ```bash
 make dev          # docker compose up + runserver + npm run dev
@@ -107,7 +277,51 @@ make celery       # avvia worker Celery in foreground
 
 ---
 
-## Struttura backend
+## Struttura repository
+
+### Backend
+
+```
+backend/
+├── core/
+│   ├── settings/
+│   │   ├── base.py          # settings condivisi (JWT, DRF, INSTALLED_APPS, CELERY)
+│   │   ├── dev.py           # override sviluppo (DEBUG=True, SQLite opzionale)
+│   │   └── prod.py          # override produzione (ALLOWED_HOSTS, SECURE_*, logging)
+│   ├── models.py            # BaseModel, SoftDeleteManager
+│   ├── audit.py             # log_action(), compute_hash()
+│   ├── validators.py        # validate_uploaded_file() con MIME check
+│   ├── permissions.py       # ModulePermission, PlantScopedPermission
+│   ├── middleware.py        # PlantContextMiddleware, RequestLoggingMiddleware
+│   └── urls.py              # URL root con include per ogni app
+├── apps/
+│   ├── governance/          # M00 — Governance & Ruoli
+│   ├── plants/              # M01 — Plant Registry
+│   ├── auth_grc/            # M02 — RBAC + JWT
+│   ├── controls/            # M03 — Libreria Controlli + load_frameworks cmd
+│   ├── assets/              # M04 — Asset IT/OT
+│   ├── bia/                 # M05 — BIA
+│   ├── risk/                # M06 — Risk Assessment
+│   ├── documents/           # M07 — Documenti
+│   ├── tasks/               # M08 — Task Management + Compliance Schedule
+│   ├── incidents/           # M09 — Incidenti NIS2
+│   ├── audit_trail/         # M10 — Audit Trail (read-only views)
+│   ├── pdca/                # M11 — PDCA
+│   ├── lessons/             # M12 — Lesson Learned
+│   ├── management_review/   # M13 — Revisione Direzione
+│   ├── suppliers/           # M14 — Fornitori
+│   ├── training/            # M15 — Training/KnowBe4
+│   ├── bcp/                 # M16 — BCP
+│   ├── audit_prep/          # M17 — Audit Readiness
+│   ├── reporting/           # M18 — Reporting (no model, solo views aggregate)
+│   ├── notifications/       # M19 — Notifiche
+│   └── ai_engine/           # M20 — AI Engine + Sanitizer
+└── frameworks/
+    ├── iso27001.json
+    ├── nis2.json
+    ├── tisax_l2.json
+    └── tisax_l3.json
+```
 
 ### Struttura di un'app modulo
 
@@ -130,9 +344,49 @@ apps/incidents/          # M09 — Gestione Incidenti
     └── test_services.py
 ```
 
-La business logic non va mai nelle view — sta in `services.py`. Le view chiamano solo serializer e service.
+### Frontend
 
-### Modello base
+```
+frontend/src/
+├── App.tsx                    # Router completo — tutte le route definite
+├── main.tsx                   # Entry point con QueryClientProvider + i18n
+├── store/
+│   └── auth.ts                # Zustand: user, token, selectedPlant
+├── api/
+│   ├── client.ts              # axios con JWT interceptor + refresh automatico
+│   └── endpoints/             # un file per ogni modulo (20 file)
+├── components/
+│   ├── layout/
+│   │   ├── Shell.tsx          # Layout principale con sidebar
+│   │   ├── Sidebar.tsx        # Navigazione laterale con voci per M00–M20
+│   │   ├── Topbar.tsx         # Barra superiore con selezione plant e lingua
+│   │   └── BottomBar.tsx      # Barra inferiore mobile
+│   └── ui/
+│       ├── AiSuggestion.tsx   # Banner IA con Accept/Edit/Ignore
+│       ├── CountdownTimer.tsx # Countdown NIS2 real-time
+│       ├── StatusBadge.tsx    # Badge colorato per stati compliance
+│       └── ManualDrawer.tsx   # Drawer contestuale manuali (? button)
+├── modules/                   # Una cartella per modulo (M00–M20)
+│   ├── dashboard/Dashboard.tsx
+│   ├── controls/ControlsList.tsx
+│   ├── incidents/IncidentsList.tsx
+│   └── ...
+├── pages/
+│   └── LoginPage.tsx
+└── i18n/
+    ├── index.ts               # configurazione i18next
+    ├── it/common.json
+    ├── en/common.json
+    ├── fr/common.json
+    ├── pl/common.json
+    └── tr/common.json
+```
+
+---
+
+## Modelli principali
+
+### BaseModel
 
 ```python
 # core/models.py
@@ -147,15 +401,82 @@ class BaseModel(models.Model):
 
     objects = SoftDeleteManager()  # filtra deleted_at is null di default
 
+    def soft_delete(self):
+        self.deleted_at = timezone.now()
+        self.save(update_fields=["deleted_at"])
+
     class Meta:
         abstract = True
 ```
 
-Tutti i modelli dell'applicazione ereditano da `BaseModel`. Non usare mai `delete()` diretto — usare il manager `soft_delete()`.
+Tutti i modelli dell'applicazione ereditano da `BaseModel`. Non usare mai `delete()` diretto — usare `soft_delete()`.
 
----
+### AuditLog
 
-## Modelli dati principali
+```python
+class AuditLog(models.Model):
+    # Non eredita da BaseModel — non ha soft delete, non ha updated_at
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    timestamp_utc = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    # Chi
+    user_id = models.UUIDField()
+    user_email_at_time = models.CharField(max_length=255)
+    user_role_at_time = models.CharField(max_length=50)   # snapshot ruolo al momento
+
+    # Cosa
+    action_code = models.CharField(max_length=100)        # es. incident.created
+    level = models.CharField(max_length=2)                # L1 | L2 | L3
+    entity_type = models.CharField(max_length=50)
+    entity_id = models.UUIDField()
+    payload = models.JSONField()                          # dati rilevanti dell'azione
+
+    # Hash chain SHA-256
+    prev_hash = models.CharField(max_length=64)
+    record_hash = models.CharField(max_length=64)
+
+    class Meta:
+        db_table = 'audit_log'
+        # partitioned by RANGE (timestamp_utc) — definito nella migrazione
+```
+
+Proprietà chiave dell'AuditLog:
+
+- Hash chain SHA-256: ogni record ha `prev_hash` + `record_hash`
+- Trigger PostgreSQL impedisce UPDATE/DELETE
+- `select_for_update()` in `_get_prev_hash()` per prevenire race condition
+- Livelli L1/L2/L3 con retention 5/3/1 anni
+- Verifica: `python manage.py verify_audit_trail_integrity`
+
+### ControlInstance
+
+- Campo `applicability` per SOA ISO 27001
+- `calc_maturity_level()` per VDA ISA (scala 0-5)
+- `needs_revaluation` per change management (M04)
+
+```python
+class ControlInstance(BaseModel):
+    plant = models.ForeignKey('plants.Plant', on_delete=models.CASCADE)
+    control = models.ForeignKey(Control, on_delete=models.CASCADE)
+    status = models.CharField(
+        max_length=20,
+        choices=[('compliant','Compliant'),('parziale','Parziale'),
+                 ('gap','Gap'),('na','N/A'),('non_valutato','Non valutato')]
+    )
+    owner = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    na_approved_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, related_name='+')
+    na_approved_at = models.DateTimeField(null=True)
+    na_review_by = models.DateField(null=True)            # max 12 mesi per TISAX L3
+    notes = models.TextField(blank=True)
+    last_evaluated_at = models.DateTimeField(null=True)
+```
+
+### RiskAssessment
+
+- Rischio inerente vs residuo (6 dimensioni IT + 4 OT)
+- `weighted_score` con moltiplicatore BIA (`downtime_cost`)
+- `risk_level`: verde ≤7, giallo ≤14, rosso >14
+- Trigger PDCA automatico se score > 14
 
 ### M00 — Governance
 
@@ -199,39 +520,6 @@ class PlantFramework(BaseModel):
 
     class Meta:
         unique_together = ['plant', 'framework']
-```
-
-### M03 — Controlli
-
-```python
-class Framework(BaseModel):
-    code = models.CharField(max_length=50, unique=True)   # VDA_ISA_6_0, NIS2, ISO_27001_2022
-    name = models.CharField(max_length=200)
-    version = models.CharField(max_length=20)
-    published_at = models.DateField()
-    archived_at = models.DateField(null=True)             # mai cancellato, solo archiviato
-
-class Control(BaseModel):
-    framework = models.ForeignKey(Framework, on_delete=models.CASCADE)
-    external_id = models.CharField(max_length=50)         # es. "VDA-5.1.1"
-    domain = models.CharField(max_length=100)
-    translations = models.JSONField()
-    # { "it": {"title": "...", "guidance": "..."}, "en": {...}, "fr": {...}, "pl": {...}, "tr": {...} }
-
-class ControlInstance(BaseModel):
-    plant = models.ForeignKey('plants.Plant', on_delete=models.CASCADE)
-    control = models.ForeignKey(Control, on_delete=models.CASCADE)
-    status = models.CharField(
-        max_length=20,
-        choices=[('compliant','Compliant'),('parziale','Parziale'),
-                 ('gap','Gap'),('na','N/A'),('non_valutato','Non valutato')]
-    )
-    owner = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
-    na_approved_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, related_name='+')
-    na_approved_at = models.DateTimeField(null=True)
-    na_review_by = models.DateField(null=True)            # max 12 mesi per TISAX L3
-    notes = models.TextField(blank=True)
-    last_evaluated_at = models.DateTimeField(null=True)
 ```
 
 ### M04 — Asset
@@ -291,7 +579,7 @@ class Incident(BaseModel):
 
 ---
 
-## API REST
+## API
 
 ### Autenticazione
 
@@ -299,7 +587,7 @@ class Incident(BaseModel):
 Authorization: Bearer <JWT-token>
 ```
 
-I token JWT scadono dopo 8 ore. Il refresh avviene automaticamente se l'utente è attivo. Gli auditor esterni usano token speciali con scope e scadenza limitati (generati da M02).
+I token JWT hanno scadenza ACCESS=30min. Il refresh avviene automaticamente tramite interceptor axios se l'utente è attivo (REFRESH=7gg). Gli auditor esterni usano token speciali con scope e scadenza limitati (generati da M02).
 
 ### Convenzioni URL
 
@@ -317,6 +605,37 @@ POST   /api/v1/documents/{id}/approve/
 POST   /api/v1/controls/{id}/evaluate/
 ```
 
+### Endpoint principali
+
+Base URL: `/api/v1/`
+
+| Endpoint | Metodi | Descrizione |
+|----------|--------|-------------|
+| `governance/roles/` | GET, POST, PUT, DELETE | Ruoli normativi M00 |
+| `plants/` | GET, POST | Plant registry M01 |
+| `auth/users/` | GET, POST | Utenti M02 |
+| `controls/instances/` | GET, PUT | Controlli M03 |
+| `controls/export/` | GET | Export SOA/VDA/NIS2 |
+| `assets/` | GET, POST | Asset IT/OT M04 |
+| `bia/processes/` | GET, POST | BIA M05 |
+| `risk/assessments/` | GET, POST | Risk M06 |
+| `documents/` | GET, POST | Documenti M07 |
+| `tasks/` | GET, POST | Task M08 |
+| `incidents/` | GET, POST | Incidenti M09 |
+| `audit-trail/` | GET | Audit trail M10 (read-only) |
+| `pdca/` | GET, POST | PDCA M11 |
+| `lessons/` | GET, POST | Lesson Learned M12 |
+| `management-review/` | GET, POST | Revisione Direzione M13 |
+| `suppliers/` | GET, POST | Fornitori M14 |
+| `training/` | GET, POST | Formazione M15 |
+| `bcp/` | GET, POST | BCP M16 |
+| `audit-prep/preps/` | GET, POST | Audit Prep M17 |
+| `audit-prep/programs/` | GET, POST | Programmi audit M17 |
+| `reporting/dashboard-summary/` | GET | Dashboard aggregato M18 |
+| `reporting/kpi-trend/` | GET | KPI trend M18 |
+| `notifications/` | GET | Notifiche M19 |
+| `manual/<type>/` | GET | Manuali (utente/tecnico) |
+
 ### Filtri e paginazione
 
 ```
@@ -324,6 +643,7 @@ GET /api/v1/controls/?framework=VDA_ISA_6_0&plant=PLT-001&status=gap&page=2&page
 ```
 
 Tutti gli endpoint lista supportano:
+
 - `page` e `page_size` (default 25, max 100)
 - `ordering` (es. `ordering=-created_at`)
 - filtri specifici del modulo documentati in `/api/v1/schema/` (OpenAPI 3.0)
@@ -353,6 +673,22 @@ Tutti gli endpoint lista supportano:
 
 Codici HTTP usati: 200, 201, 204, 400, 401, 403, 404, 409 (conflitto di stato), 422 (errore business logic), 500.
 
+### Export compliance
+
+Il download di file richiede il JWT nell'header. Non usare `window.open()` che non porta il token.
+
+```typescript
+// ✅ Corretto — usa fetch() con header Authorization
+const response = await fetch(
+  `/api/v1/controls/export/?framework=ISO27001&format=soa&plant=${plantId}`,
+  { headers: { Authorization: `Bearer ${token}` } }
+);
+const blob = await response.blob();
+
+// ❌ Sbagliato — window.open() non passa il JWT
+window.open(`/api/v1/controls/export/?framework=ISO27001`);
+```
+
 ### API pubblica uscente (M19)
 
 ```
@@ -366,40 +702,96 @@ Rate limit: 100 req/min per chiave
 
 ---
 
+## Sicurezza
+
+### Configurazione JWT
+
+```python
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+}
+```
+
+### Throttling
+
+Il throttling di base usa `AnonRateThrottle` e `UserRateThrottle`:
+
+- `AnonRateThrottle`: 20/h
+- `UserRateThrottle`: 500/h
+- `LoginRateThrottle`: 5/min (su `GrcTokenObtainPairView`)
+
+Personalizzabile per endpoint sensibili sovrascrivendo `throttle_classes` nel ViewSet.
+
+### File upload sicuro
+
+```python
+from core.validators import validate_uploaded_file
+
+# Verifica: dimensione + estensione whitelist + MIME type reale (python-magic)
+validate_uploaded_file(request.FILES["file"])
+```
+
+### Cifratura credenziali SMTP
+
+```python
+# EncryptedCharField usa Fernet AES-256
+# FERNET_KEY obbligatoria in .env — nessun default sicuro
+class EmailConfiguration(BaseModel):
+    smtp_password = EncryptedCharField(max_length=500)
+```
+
+### Password policy
+
+- Minimo 12 caratteri
+- `CommonPasswordValidator`
+- `NumericPasswordValidator`
+- `UserAttributeSimilarityValidator`
+
+### Endpoint di servizio
+
+Alcuni endpoint amministrativi (es. reset DB di test in `auth_grc.ResetTestDbView`) sono esplicitamente bloccati in produzione tramite controllo su `settings.DEBUG` per evitare uso improprio fuori da ambienti di test.
+
+---
+
+## Privacy e GDPR
+
+### Anonimizzazione utenti (Art. 17 GDPR)
+
+```python
+from apps.auth_grc.services import anonymize_user
+
+anonymize_user(user_id)
+# Rimuove nome, email, telefono — preserva integrità audit trail
+# Endpoint: POST /api/v1/auth/users/{id}/anonymize/
+```
+
+### AI Sanitizer
+
+```python
+from apps.ai_engine.sanitizer import Sanitizer
+
+safe_text = Sanitizer.sanitize(raw_text)
+# Rimuove: email, IP, P.IVA, CF, telefono, nomi plant
+# SEMPRE usare prima di inviare a cloud LLM
+```
+
+### Retention automatica audit log
+
+- L1 (sicurezza): 5 anni
+- L2 (compliance): 3 anni
+- L3 (operativo): 1 anno
+- Schedulato: 1° del mese alle 03:00 (task `cleanup_expired_audit_logs`)
+
+---
+
 ## Audit trail — append-only con hash chain
 
 ### Principio
 
 Ogni azione rilevante scrive un record `AuditLog`. Il record è immutabile: il trigger PostgreSQL rifiuta UPDATE e DELETE. Ogni record contiene `prev_hash` e `record_hash = SHA256(json_payload + prev_hash)`, formando una catena verificabile.
-
-### Struttura record
-
-```python
-class AuditLog(models.Model):
-    # Non eredita da BaseModel — non ha soft delete, non ha updated_at
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    timestamp_utc = models.DateTimeField(auto_now_add=True, db_index=True)
-
-    # Chi
-    user_id = models.UUIDField()
-    user_email_at_time = models.CharField(max_length=255)
-    user_role_at_time = models.CharField(max_length=50)   # snapshot ruolo al momento
-
-    # Cosa
-    action_code = models.CharField(max_length=100)        # codice neutro — es. incident.created
-    level = models.CharField(max_length=2)                # L1 | L2 | L3
-    entity_type = models.CharField(max_length=50)
-    entity_id = models.UUIDField()
-    payload = models.JSONField()                          # dati rilevanti dell'azione
-
-    # Hash chain
-    prev_hash = models.CharField(max_length=64)
-    record_hash = models.CharField(max_length=64)
-
-    class Meta:
-        db_table = 'audit_log'
-        # partitioned by RANGE (timestamp_utc) — definito nella migrazione
-```
 
 ### Come loggare un'azione
 
@@ -421,19 +813,60 @@ log_action(
 ```
 
 Il modulo `core.audit` gestisce automaticamente:
+
 - Snapshot `user_role_at_time` al momento della chiamata
 - Calcolo `prev_hash` (legge l'ultimo record per entity_type) e `record_hash`
-- Scrittura transazionale (se il log fallisce, viene sollevata eccezione)
+- Scrittura transazionale con `select_for_update()` per prevenire race condition
+- Se il log fallisce, viene sollevata eccezione (la transazione viene annullata)
 
 ### Verifica integrità
 
 ```bash
-python manage.py verify_audit_trail_integrity
 # Controlla l'intera catena: ricalcola ogni hash e confronta
-# Output: OK se la catena è integra, FAIL con primo record corrotto se no
+python manage.py verify_audit_trail_integrity
+
+# Trova il primo record corrotto
+python manage.py verify_audit_trail_integrity --verbose
 
 # Job notturno (Celery Beat — già configurato)
 # Invia alert se catena rotta
+```
+
+---
+
+## Audit Preparation — logica tecnica
+
+### suggest_audit_plan()
+
+- Prioritizza domini con gap aperti (`gap_pct` più alto)
+- Seed deterministico (MD5 hash `program_id` + `quarter`) per campione riproducibile tra esecuzioni
+- Deduplicazione domini cross-framework tramite dizionario `seen_domains`
+- Distribuzione campione: `campione`=25%, `esteso`=50%, `full`=100%
+
+### launch_audit_from_program()
+
+- `transaction.atomic()` — operazione completamente atomica
+- `bulk_create` per EvidenceItem (un solo INSERT invece di N)
+- `sync_program_completion()` chiamato automaticamente in `perform_update()`
+
+### Task reminder (check_upcoming_audits)
+
+- Range ±4 giorni per gestire task settimanale vs date a metà settimana
+- 28-32 giorni prima: task di preparazione
+- 5-9 giorni prima: task urgente se AuditPrep non ancora avviato
+- 0-3 giorni dopo la data: alert critico se AuditPrep non avviato
+
+---
+
+## Compliance Schedule (M08)
+
+### Calcolo scadenze
+
+```python
+from apps.compliance_schedule.services import get_due_date
+
+due = get_due_date("finding_major", plant=plant, from_date=date.today())
+# 23 tipi di regola configurabili da UI admin
 ```
 
 ---
@@ -503,8 +936,7 @@ python manage.py load_frameworks --file frameworks/nist_csf_2_0.json
 # 2. Crea le ControlMapping con gli altri framework
 # 3. NON genera ControlInstance (si generano quando si attiva il framework su un plant)
 
-# Attivare il framework su un plant
-# Via admin o API:
+# Attivare il framework su un plant (via admin o API)
 POST /api/v1/plant-frameworks/
 { "plant": "PLT-001", "framework": "NIST_CSF_2_0", "active_from": "2026-03-13" }
 # → genera automaticamente ControlInstance in stato non_valutato per ogni controllo
@@ -540,30 +972,32 @@ INSTALLED_APPS = [
     'apps.new_module',
 ]
 
-# 3. Registra le URL
-# backend/core/urls.py
+# 3. Registra le URL in backend/core/urls.py
 path('api/v1/new-module/', include('apps.new_module.urls')),
+```
 
-# 4. Struttura minima obbligatoria
-# apps/new_module/
-#   models.py        — ereditare da BaseModel
-#   serializers.py
-#   views.py         — ViewSet con permessi
-#   urls.py          — router.register
-#   services.py      — business logic
-#   tasks.py         — Celery tasks se necessario
-#   signals.py       — per audit trail
-#   tests/
+Struttura minima obbligatoria:
+
+```
+apps/new_module/
+  models.py        — ereditare da BaseModel
+  serializers.py
+  views.py         — ViewSet con permessi
+  urls.py          — router.register
+  services.py      — business logic
+  tasks.py         — Celery tasks se necessario
+  signals.py       — per audit trail
+  tests/
 ```
 
 **Checklist per ogni nuovo modulo:**
 
 - [ ] Tutti i modelli ereditano da `BaseModel` (UUID, soft delete, timestamp)
-- [ ] Ogni azione rilevante chiama `log_action()` nei signal o nei service
+- [ ] Ogni azione rilevante chiama `log_action()` nei service
 - [ ] Le view usano `ModulePermission` per il controllo accessi
-- [ ] Sono presenti test per modelli, API e service (coverage >= 80%)
+- [ ] Sono presenti test per modelli, API e service (coverage >= 70%)
 - [ ] Gli action code sono registrati nel catalogo `core/audit/action_codes.py`
-- [ ] Le traduzioni delle label UI sono aggiunte ai file i18n in `frontend/src/i18n/`
+- [ ] Le traduzioni delle label UI sono aggiunte ai file i18n in `frontend/src/i18n/` in tutte e 5 le lingue
 
 ---
 
@@ -609,7 +1043,6 @@ class AiInteractionLog(BaseModel):
 
 ```python
 # apps/ai_engine/sanitizer.py
-
 class Sanitizer:
     """
     Anonimizza il contesto prima di inviarlo al cloud LLM.
@@ -677,7 +1110,6 @@ POST /api/v1/ai/confirm/
 
 ```python
 # apps/training/kb4_client.py
-
 class KnowBe4Client:
     BASE_URL = settings.KNOWBE4_API_URL
 
@@ -736,7 +1168,7 @@ class ControlInstance(BaseModel):
     )
 ```
 
-Le traduzioni backend stanno in `backend/locale/{lingua}/LC_MESSAGES/django.po`. Per aggiungere stringhe:
+Le traduzioni backend stanno in `backend/locale/{lingua}/LC_MESSAGES/django.po`:
 
 ```bash
 python manage.py makemessages -l pl
@@ -746,16 +1178,15 @@ python manage.py compilemessages
 
 ### Frontend — i18next
 
+File di traduzione:
+
 ```
 frontend/src/i18n/
-├── it/
-│   ├── common.json          # stringhe UI generali
-│   ├── incidents.json        # M09
-│   └── controls.json         # M03
-├── en/
-├── fr/
-├── pl/
-└── tr/
+├── it/common.json
+├── en/common.json
+├── fr/common.json
+├── pl/common.json
+└── tr/common.json
 ```
 
 Struttura file namespace:
@@ -778,19 +1209,20 @@ Struttura file namespace:
 
 Uso nel componente React:
 
-```jsx
-import { useTranslation } from 'react-i18next';
+```typescript
+import { useTranslation } from "react-i18next"
 
-function ControlStatus({ status }) {
-  const { t } = useTranslation('controls');
-  return <span>{t(`status.${status}`)}</span>;
+function ControlStatus({ status }: { status: string }) {
+  const { t } = useTranslation()
+  return <span>{t(`status.${status}`)}</span>
 }
 ```
+
+**Regola**: ogni chiave aggiunta in `it/common.json` o `en/common.json` deve essere aggiunta contestualmente in tutti e 5 i file. Non lasciare mai chiavi mancanti in una lingua.
 
 ### Controlli — traduzioni nel JSON framework
 
 ```json
-// frameworks/vda_isa_6_0.json — controllo con 5 lingue
 {
   "external_id": "VDA-5.1.1",
   "translations": {
@@ -806,7 +1238,7 @@ function ControlStatus({ status }) {
 Il serializer restituisce automaticamente la traduzione nella lingua del richiedente:
 
 ```python
-# In controls/serializers.py
+# controls/serializers.py
 def get_title(self, obj):
     lang = self.context['request'].user.profile.language  # it | en | fr | pl | tr
     return obj.translations.get(lang, {}).get('title') or obj.translations['en']['title']
@@ -814,35 +1246,80 @@ def get_title(self, obj):
 
 ---
 
+## Frontend
+
+### State management
+
+```typescript
+import { useAuthStore } from "../store/auth"
+
+const { user, token, selectedPlant } = useAuthStore()
+```
+
+### TanStack Query
+
+```typescript
+const { data, isLoading } = useQuery({
+  queryKey: ["audit-preps", plantId],
+  queryFn: () => apiClient.get("/audit-prep/preps/").then(r => r.data),
+})
+```
+
+Cache automatica, invalidation su mutation, retry esponenziale su errori di rete.
+
+### API client con refresh automatico
+
+```typescript
+// api/client.ts — interceptor JWT
+apiClient.interceptors.response.use(
+  r => r,
+  async error => {
+    if (error.response?.status === 401) {
+      // refresh token automatico via /api/auth/token/refresh/
+      // se il refresh fallisce, logout e redirect a /login
+    }
+  }
+)
+```
+
+### Internazionalizzazione
+
+```typescript
+import { useTranslation } from "react-i18next"
+
+const { t } = useTranslation()
+// File: frontend/src/i18n/{it,en,fr,pl,tr}/common.json
+// Regola: aggiungere in TUTTE e 5 le lingue contemporaneamente
+```
+
+---
+
 ## Test
 
-### Struttura
-
-```
-tests/
-├── unit/           # test modelli e service, no DB
-├── integration/    # test API con DB, usa pytest-django
-└── e2e/            # Playwright — flussi utente end-to-end
-```
-
-### Eseguire i test
+### Esecuzione
 
 ```bash
-# Test suite completa
-pytest
+# Suite completa backend
+docker compose exec backend pytest
+docker compose exec backend pytest --cov=apps --cov-report=html
 
-# Solo un modulo
-pytest tests/integration/test_incidents.py -v
+# Test singolo modulo
+docker compose exec backend pytest apps/audit_prep/
 
-# Con coverage
-pytest --cov=apps --cov-report=html
-open htmlcov/index.html
-
-# Solo i test veloci (no DB)
+# Solo test veloci (no DB)
 pytest -m "not slow" tests/unit/
 
 # Frontend
 cd frontend && npm test
+```
+
+### Struttura
+
+```
+apps/{modulo}/tests/
+  test_models.py     — unit test modelli e servizi
+  test_api.py        — test endpoint API con APIClient
+  test_services.py   — test business logic isolata
 ```
 
 ### Fixtures standard
@@ -885,6 +1362,48 @@ def test_incident_creation_logs_audit(api_client, plant, db):
     assert log.record_hash == compute_hash(log.payload, log.prev_hash)
 ```
 
+### Coverage target: >= 70%
+
+Moduli con test esistenti: `auth_grc`, `governance`, `controls`, `audit_trail`
+
+Moduli da coprire: `risk`, `incidents`, `pdca`, `audit_prep`, `notifications`
+
+---
+
+## Management commands
+
+| Comando | Descrizione | Quando eseguire |
+|---------|-------------|-----------------|
+| `migrate` | Applica migrazioni DB | Dopo ogni deploy |
+| `load_frameworks` | Importa JSON framework normativi | Setup iniziale + aggiornamento framework |
+| `load_notification_profiles` | Profili notifica default | Setup iniziale |
+| `load_competency_requirements` | Requisiti competenze M15 | Setup iniziale |
+| `load_required_documents` | Documenti obbligatori | Setup iniziale |
+| `verify_audit_trail_integrity` | Verifica hash chain audit trail | Mensile + dopo restore |
+| `check --deploy` | Verifica configurazione produzione | Prima di ogni deploy |
+| `createsuperuser` | Crea primo admin | Setup iniziale |
+| `seed_demo` | Carica dati demo | Solo ambiente di sviluppo |
+| `makemessages -l <lang>` | Estrae stringhe i18n backend | Dopo aggiunta nuove stringhe |
+| `compilemessages` | Compila file .po in .mo | Dopo traduzione |
+| `sync_knowbe4 --full` | Sync manuale KnowBe4 | Recovery dopo errore |
+
+---
+
+## Variabili ambiente
+
+| Nome | Tipo | Default dev | Descrizione | Obbligatoria |
+|------|------|------------|-------------|-------------|
+| `SECRET_KEY` | string | — | Chiave crittografica Django | Sì |
+| `FERNET_KEY` | string | — | AES-256 per credenziali SMTP | Sì |
+| `DEBUG` | bool | True | False in produzione | No |
+| `ALLOWED_HOSTS` | string | localhost | Host ammessi (comma-separated) | Sì in prod |
+| `DATABASE_URL` | string | postgresql://grc:grc@db:5432/grc_dev | PostgreSQL URL | Sì |
+| `REDIS_URL` | string | redis://redis:6379/0 | Redis URL | Sì |
+| `FRONTEND_URL` | string | http://localhost:3001 | URL frontend | Sì |
+| `CORS_ALLOWED_ORIGINS` | string | http://localhost:3001 | CORS origins | No |
+| `AI_ENGINE_ENABLED` | bool | False | Abilita M20 AI Engine | No |
+| `KNOWBE4_API_KEY` | string | — | API key KnowBe4 | Solo se M15 attivo |
+
 ---
 
 ## Convenzioni di sviluppo
@@ -921,12 +1440,6 @@ def test_incident_creation_logs_audit(api_client, plant, db):
 - CSRF token su tutte le mutation
 - Rate limiting su endpoint pubblici e su M20 AI
 - Input validation su serializer — mai fidarsi del client
-
-#### JWT, throttling e endpoint di servizio
-
-- I token JWT sono gestiti da `rest_framework_simplejwt` con **ACCESS_TOKEN_LIFETIME=30min** e **REFRESH_TOKEN_LIFETIME=7gg**, rotazione e blacklist attive (vedi `core/settings/base.py` – `SIMPLE_JWT`).
-- Il throttling di base usa `AnonRateThrottle` e `UserRateThrottle` con rate predefinite (**anon=20/h**, **user=500/h**) — personalizzabili per endpoint sensibili.
-- Alcuni endpoint amministrativi (es. reset DB di test in `auth_grc.ResetTestDbView`) sono esplicitamente bloccati in produzione tramite controllo su `settings.DEBUG` per evitare uso improprio fuori da ambienti di test.
 
 ---
 
@@ -978,3 +1491,32 @@ python manage.py sync_knowbe4 --full
 2. Controlla che l'API key sia configurata e non scaduta
 3. Verifica che il sanitizer non stia generando errori: `grep "sanitizer" logs/app.log | tail -20`
 4. In caso di errore persistente, il sistema fa fallback al modello locale se disponibile
+
+### Migrazione fallisce in produzione
+
+```bash
+# Verifica lo stato delle migrazioni prima di applicare
+docker compose -f docker-compose.prod.yml exec backend python manage.py showmigrations
+
+# Applica con output verboso
+docker compose -f docker-compose.prod.yml exec backend python manage.py migrate --verbosity=2
+
+# In caso di migrazione bloccata, verifica lock sul DB
+# Connettersi a PostgreSQL e controllare pg_stat_activity
+```
+
+### Frontend non riceve il token refreshato
+
+Verificare che il cookie `refresh_token` non sia scaduto e che il dominio corrisponda. In sviluppo, assicurarsi che `CORS_ALLOW_CREDENTIALS = True` e che `FRONTEND_URL` sia impostato correttamente.
+
+### Health check fallisce
+
+```bash
+# Verifica stato servizi
+curl http://localhost:8001/api/health/
+# Risposta attesa: {"status": "ok", "db": "ok"}
+
+# Se db=error, verificare connessione PostgreSQL
+docker compose ps db
+docker compose logs db --tail=20
+```

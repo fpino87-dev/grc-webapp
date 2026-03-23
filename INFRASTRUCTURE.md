@@ -1,4 +1,4 @@
-# INFRASTRUCTURE.md — GRC Compliance Webapp
+# INFRASTRUCTURE.md — GRC Compliance Platform
 
 > Architettura infrastrutturale, stack tecnologico, deployment, database, sicurezza, backup e monitoraggio.
 
@@ -8,10 +8,13 @@
 
 - [Panoramica architetturale](#panoramica-architetturale)
 - [Stack tecnologico](#stack-tecnologico)
-- [Ambienti e variabili](#ambienti-e-variabili)
-- [Deployment](#deployment)
+- [Porte in uso](#porte-in-uso)
+- [Variabili d'ambiente obbligatorie](#variabili-dambiente-obbligatorie)
+- [Deployment produzione — step by step](#deployment-produzione--step-by-step)
+- [Nginx Proxy Manager](#nginx-proxy-manager)
 - [Database](#database)
 - [Storage file](#storage-file)
+- [Celery — task schedulati](#celery--task-schedulati)
 - [Sicurezza infrastrutturale](#sicurezza-infrastrutturale)
 - [Backup e disaster recovery](#backup-e-disaster-recovery)
 - [Monitoraggio e alerting](#monitoraggio-e-alerting)
@@ -24,32 +27,33 @@
 ## Panoramica architetturale
 
 ```
-  Browser ──► Load Balancer (NGINX / Traefik)
-                  │               │
+  Browser --> Nginx Proxy Manager (80/443)
+                  |               |
              Frontend          Backend API
              React SPA         Django + DRF
-             (static)          porta 8000
-                                    │
-                      ┌─────────────┼─────────────┐
-                      │             │             │
-                 PostgreSQL       Redis        S3 / MinIO
-                 Primary +        Cache +      Documenti
-                 Replica          Broker       Evidenze
+             porta 3001        porta 8001
+                                    |
+                      +-------------+-----------+
+                      |             |           |
+                 PostgreSQL       Redis      S3 / MinIO
+                 Primary +        Cache +    Documenti
+                 Replica          Broker     Evidenze
+                 porta 5433
 
-                      │
+                      |
               Celery Worker + Beat
               (task async, sync KB4,
                notifiche, audit job)
 
-                      │
-              ┌───────┴────────┐
-              │  AI Engine M20 │  ← opzionale
-              │  Ollama/vLLM   │
-              │  + Sanitizer   │──► Cloud LLM
-              └────────────────┘   (solo dati anonimi)
+                      |
+              +-------+--------+
+              |  AI Engine M20 |  <- opzionale
+              |  Ollama/vLLM   |
+              |  + Sanitizer   |--> Cloud LLM
+              +----------------+   (solo dati anonimi)
 
   Integrazioni esterne:
-  KnowBe4 API · SMTP · SSO/SAML · SIEM webhook · ACN email
+  KnowBe4 API . SMTP aziendale . SSO/SAML . SIEM webhook . ACN email
 ```
 
 ---
@@ -61,22 +65,28 @@
 | Componente | Tecnologia | Versione |
 |-----------|-----------|---------|
 | Runtime | Python | 3.11+ |
-| Framework | Django + Django REST Framework | 5.x |
+| Framework | Django + Django REST Framework | 5.1 |
 | Task queue | Celery | 5.x |
 | Broker / cache | Redis | 7.x |
+| Auth JWT | SimpleJWT | latest |
 | Auth SSO | django-allauth | latest |
 | i18n | Django i18n built-in | — |
+| Cifratura | cryptography (Fernet) | latest |
+| MIME check | python-magic | latest |
 
 ### Frontend
 
 | Componente | Tecnologia | Versione |
 |-----------|-----------|---------|
 | Framework | React | 18+ |
-| State management | Zustand o Redux Toolkit | — |
+| Language | TypeScript | 5.x |
+| Build | Vite | 5.x |
+| State management | Zustand | — |
+| Data fetching | TanStack Query | — |
+| Router | React Router | v6 |
 | i18n | i18next + react-i18next | — |
 | UI components | Tailwind CSS + shadcn/ui | — |
 | Charts | Recharts | — |
-| Build | Vite | — |
 
 ### Database e storage
 
@@ -92,8 +102,8 @@
 | Componente | Tecnologia |
 |-----------|-----------|
 | Container | Docker + Compose |
-| Orchestrazione (produzione) | Kubernetes o Docker Swarm |
-| Reverse proxy | NGINX o Traefik |
+| Reverse proxy | Nginx Proxy Manager |
+| Orchestrazione avanzata | Kubernetes o Docker Swarm |
 | IaC | Terraform |
 | Config management | Ansible |
 | CI/CD | GitLab CI o GitHub Actions |
@@ -101,13 +111,68 @@
 
 ---
 
-## Ambienti e variabili
+## Porte in uso
 
-### Variabili d'ambiente principali
+| Servizio | Porta host dev | Porta host prod | Porta container |
+|----------|---------------|----------------|----------------|
+| Backend Django | 8001 | 8001 | 8000 |
+| Frontend Vite/Nginx | 3001 | 3001 | 3000 |
+| PostgreSQL GRC | 5433 | 5433 | 5432 |
+| Redis GRC | — | — | 6379 |
+| MinIO console | 9001 | — | 9001 |
+| Mailhog SMTP | 1026 | — (non in prod) | 1025 |
+| Mailhog UI | 8026 | — (non in prod) | 8025 |
+
+**Altri container sul server (non toccare):**
+- `ai-docintel-*` — progetto separato
+- `npm` — Nginx Proxy Manager su 80/443
+- `budget-db`, `sitebudget`, `siteciso`, `sitebb`
+
+---
+
+## Variabili d'ambiente obbligatorie
+
+Il repository include `.env.example` (sviluppo) e `.env.prod.example` (produzione) con tutti i placeholder. Non committare mai i file `.env` o `.env.prod` — sono in `.gitignore`.
+
+### Tabella variabili principali
+
+| Variabile | Obbligatoria | Default dev | Descrizione |
+|-----------|-------------|-------------|-------------|
+| `SECRET_KEY` | Si | — | Chiave Django (min 50 char, generare con `secrets.token_urlsafe(50)`) |
+| `FERNET_KEY` | Si | — | Cifratura AES-256 credenziali SMTP (generare con `Fernet.generate_key()`) |
+| `DEBUG` | No | `True` | Impostare `False` in produzione |
+| `ALLOWED_HOSTS` | Si in prod | `localhost` | Host ammessi separati da virgola |
+| `DATABASE_URL` | Si | `postgresql://grc:grc@db:5432/grc_dev` | URL connessione PostgreSQL |
+| `REDIS_URL` | Si | `redis://redis:6379/0` | URL connessione Redis |
+| `FRONTEND_URL` | Si | `http://localhost:3001` | URL frontend (per CORS e link nelle email) |
+| `STORAGE_BACKEND` | No | `local` | `local` o `s3` |
+| `S3_ENDPOINT_URL` | Se S3 | — | Endpoint MinIO o AWS S3 |
+| `S3_BUCKET_NAME` | Se S3 | — | Nome bucket documenti |
+| `S3_ACCESS_KEY` | Se S3 | — | Access key S3/MinIO |
+| `S3_SECRET_KEY` | Se S3 | — | Secret key S3/MinIO |
+| `EMAIL_HOST` | No | — | Server SMTP |
+| `EMAIL_PORT` | No | 587 | Porta SMTP |
+| `EMAIL_USE_TLS` | No | `True` | TLS per SMTP |
+| `EMAIL_HOST_USER` | No | — | Utente SMTP |
+| `EMAIL_HOST_PASSWORD` | No | — | Password SMTP (cifrata con FERNET_KEY in DB) |
+| `SSO_ENABLED` | No | `False` | Abilita autenticazione SSO |
+| `SAML_METADATA_URL` | Se SSO | — | URL metadata IdP SAML |
+| `KNOWBE4_API_KEY` | Se M15 | — | API key KnowBe4 |
+| `AI_ENGINE_ENABLED` | No | `False` | Master switch AI Engine M20 |
+| `AZURE_OPENAI_KEY` | Se AI cloud | — | API key Azure OpenAI |
+| `ANTHROPIC_API_KEY` | Se AI cloud | — | API key Anthropic |
+| `AUDIT_TRAIL_RETENTION_L1_YEARS` | No | `5` | Retention log sicurezza (anni) |
+| `AUDIT_TRAIL_RETENTION_L2_YEARS` | No | `3` | Retention log compliance (anni) |
+| `AUDIT_TRAIL_RETENTION_L3_YEARS` | No | `1` | Retention log operativo (anni) |
+| `SESSION_COOKIE_SECURE` | No | `False` | Impostare `True` in produzione (HTTPS) |
+| `CSRF_COOKIE_SECURE` | No | `False` | Impostare `True` in produzione (HTTPS) |
+
+### Riferimento completo `.env`
 
 ```bash
 # ── Core ──────────────────────────────────────────────────────────────
-SECRET_KEY=<stringa-256bit-generata>
+SECRET_KEY=<stringa-generata-min-50-char>
+FERNET_KEY=<chiave-fernet-generata>
 DEBUG=false
 ALLOWED_HOSTS=grc.azienda.com
 FRONTEND_URL=https://grc.azienda.com
@@ -166,13 +231,97 @@ SESSION_COOKIE_SECURE=true
 CSRF_COOKIE_SECURE=true
 ```
 
-Il repository include `.env.example` con tutti i placeholder. Non committare mai il file `.env` — è in `.gitignore`.
-
 ---
 
-## Deployment
+## Deployment produzione — step by step
 
-### Docker Compose (sviluppo / staging)
+### Requisiti server minimi
+
+- 4 CPU, 8 GB RAM, 100 GB SSD
+- Docker Engine >= 24.x + Docker Compose v2
+- Sistema operativo: Ubuntu 22.04 LTS o Debian 12 (consigliati)
+- Accesso SSH con utente non-root sudoer
+
+### Procedura completa
+
+**1. Installazione Docker Engine + Docker Compose v2**
+
+```bash
+# Ubuntu 22.04
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+# Logout e login per applicare il gruppo
+docker --version && docker compose version
+```
+
+**2. Clone repository**
+
+```bash
+git clone https://github.com/org/grc-webapp.git
+cd grc-webapp
+```
+
+**3. Configurazione variabili produzione**
+
+```bash
+cp .env.prod.example .env.prod
+# Compilare TUTTI i valori — non lasciare placeholder
+nano .env.prod
+```
+
+**4. Generazione chiavi sicure**
+
+```bash
+# SECRET_KEY Django (min 50 caratteri)
+python3 -c "import secrets; print(secrets.token_urlsafe(50))"
+
+# FERNET_KEY per cifratura AES-256 credenziali SMTP
+python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
+Inserire i valori generati in `.env.prod`.
+
+**5. Build immagini produzione**
+
+```bash
+make prod-build
+```
+
+**6. Avvio stack**
+
+```bash
+make prod-up
+```
+
+**7. Migrazioni database**
+
+```bash
+make prod-migrate
+```
+
+**8. Dati iniziali (frameworks, profili notifica, competenze, documenti richiesti)**
+
+```bash
+make prod-seed
+```
+
+**9. Creazione superuser iniziale**
+
+```bash
+docker compose -f docker-compose.prod.yml exec backend python manage.py createsuperuser
+```
+
+**10. Configurazione Nginx Proxy Manager** (vedi sezione dedicata sotto)
+
+**11. Verifica deploy**
+
+```bash
+make prod-check
+# Verifica anche l'endpoint di health
+curl http://localhost:8001/api/health/
+```
+
+### Docker Compose sviluppo — estratto
 
 ```yaml
 # docker-compose.yml — estratto reale del progetto
@@ -252,41 +401,38 @@ volumes:
   miniodata:
 ```
 
-### Produzione — passi di deploy
+---
 
-```bash
-# 1. Build e push immagini sul registry privato
-docker compose -f docker-compose.prod.yml build
-docker push registry.internal/grc-backend:v1.x.x
-docker push registry.internal/grc-frontend:v1.x.x
+## Nginx Proxy Manager
 
-# 2. Verifica migrazioni pending
-kubectl exec -it deploy/grc-backend -- python manage.py migrate --check
+Nginx Proxy Manager (NPM) gestisce il routing HTTPS e il proxy verso i servizi interni. E' già in esecuzione sul server come container `npm` sulla porta 80/443.
 
-# 3. Applica migrazioni
-kubectl exec -it deploy/grc-backend -- python manage.py migrate
+### Configurazione proxy host
 
-# 4. Rollout progressivo
-kubectl set image deployment/grc-backend backend=registry.internal/grc-backend:v1.x.x
-kubectl rollout status deployment/grc-backend
+**Frontend (React SPA):**
+- Forward hostname/IP: `localhost`
+- Forward port: `3001`
+- Dominio pubblico: `grc.azienda.com`
+- SSL: Let's Encrypt — attivare "Force SSL" e "HTTP/2 Support"
 
-# 5. Verifica health
-curl https://grc.azienda.com/api/health/
+**Backend API:**
+- Forward hostname/IP: `localhost`
+- Forward port: `8001`
+- Dominio pubblico: `grc.azienda.com`
+- Location: `/api/` (proxy solo percorsi `/api/*`)
+- SSL: stesso certificato del frontend
+
+**Custom location header consigliato per l'API:**
+
+```nginx
+proxy_set_header Host $host;
+proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header X-Forwarded-Proto $scheme;
+client_max_body_size 50m;
 ```
 
-### Makefile — comandi rapidi
-
-```bash
-make dev          # Avvia stack sviluppo locale
-make migrate      # Esegui migrazioni
-make test         # Esegui test suite completa
-make lint         # Linting backend + frontend
-make load-fw      # Importa framework normativi JSON
-make seed         # Carica dati demo
-make backup       # Backup manuale DB + storage
-make shell        # Shell Django interattiva
-make logs         # Tail log di tutti i servizi
-```
+SSL Let's Encrypt con auto-renewal automatico gestito da NPM.
 
 ---
 
@@ -330,7 +476,7 @@ CREATE INDEX idx_risk_score        ON risk_assessments(plant_id, score DESC)
 CREATE OR REPLACE FUNCTION prevent_audit_mutation()
 RETURNS TRIGGER AS $$
 BEGIN
-  RAISE EXCEPTION 'Audit trail is append-only — UPDATE and DELETE are not allowed';
+  RAISE EXCEPTION 'Audit trail is append-only -- UPDATE and DELETE are not allowed';
 END;
 $$ LANGUAGE plpgsql;
 
@@ -339,22 +485,7 @@ BEFORE UPDATE OR DELETE ON audit_log
 FOR EACH ROW EXECUTE FUNCTION prevent_audit_mutation();
 ```
 
-Oltre agli indici SQL espliciti, il codice applicativo definisce `db_index=True` sui principali campi di filtro
-(`status`, `due_date`, `score`, `valid_until`, campi di tipo e stato) per `Task`, `Incident`, `ControlInstance`,
-`RiskAssessment`, `Document` ed `Evidence`, così da ottimizzare le query operative usate da dashboard e scadenzario.
-
-### Backup database
-
-```bash
-# Backup completo
-pg_dump -Fc grc_prod > backup_$(date +%Y%m%d_%H%M).dump
-
-# Restore su ambiente di test
-pg_restore -d grc_restore backup_20260313_0200.dump
-
-# Verifica integrità hash chain dopo restore
-python manage.py verify_audit_trail_integrity
-```
+Oltre agli indici SQL espliciti, il codice applicativo definisce `db_index=True` sui principali campi di filtro (`status`, `due_date`, `score`, `valid_until`, campi di tipo e stato) per `Task`, `Incident`, `ControlInstance`, `RiskAssessment`, `Document` ed `Evidence`, per ottimizzare le query operative usate da dashboard e scadenzario.
 
 ---
 
@@ -367,7 +498,7 @@ grc-documents/
 ├── documents/{plant_id}/{doc_id}/v{major}.{minor}_{hash}.pdf
 ├── evidences/{plant_id}/{control_instance_id}/{evidence_id}_{filename}
 ├── audit-exports/{year}/{month}/export_{timestamp}_{hash}.zip
-└── ai-temp/{request_id}/                     ← eliminati dopo 24h (lifecycle rule)
+└── ai-temp/{request_id}/                     <- eliminati dopo 24h (lifecycle rule)
 ```
 
 ### Policy di retention
@@ -378,6 +509,40 @@ grc-documents/
 | Evidenze valide | Illimitata | Scadute: archiviate dopo 1 anno |
 | Export audit | 5 anni | Allineato a audit trail L1 |
 | Temp AI (M20) | 24 ore | Auto-delete via bucket lifecycle |
+
+---
+
+## Celery — task schedulati
+
+Tutti i task sono gestiti da Celery Beat con scheduler basato su database (`django_celery_beat`). I task critici usano `autoretry` con backoff esponenziale per gestire errori transitori.
+
+| Task | Schedule | Descrizione | Modulo |
+|------|----------|-------------|--------|
+| `check_expired_evidences` | Ogni notte 02:00 | Marca evidenze scadute e notifica i responsabili | M07 |
+| `generate_weekly_kpi_snapshots` | Lunedi 06:00 | Snapshot KPI settimanale per dashboard M18 | M18 |
+| `check_unrevalued_changes` | Lunedi 07:00 | Asset con change non rivalutati in risk assessment | M04 |
+| `check_upcoming_audits` | Lunedi 07:30 | Reminder audit pianificati (range ±4 giorni) | M17 |
+| `notify_expiring_roles` | Ogni giorno 08:00 | Ruoli in scadenza nei prossimi 30/7/1 giorni | M00 |
+| `notify_pdca_blocked` | Ogni giorno 08:30 | PDCA bloccati senza aggiornamenti | M11 |
+| `check_overdue_findings` | Ogni giorno 08:00 | Finding scaduti da 1/7/14 giorni | M17 |
+| `check_stale_audit_preps` | Lunedi 08:15 | AuditPrep bloccati senza aggiornamenti da >30gg | M17 |
+| `check_expired_bcp_plans` | Ogni notte 02:10 | Piani BCP scaduti o in scadenza | M16 |
+| `cleanup_expired_audit_logs` | 1° del mese 03:00 | Retention differenziata: L1=5anni, L2=3anni, L3=1anno | M10 |
+| `cleanup_celery_results` | Ogni notte 03:30 | Pulizia risultati task Celery scaduti dal DB | — |
+
+### Verifica stato Celery
+
+```bash
+# Verifica worker attivi
+docker compose exec backend celery -A core inspect active
+
+# Verifica task schedulati
+docker compose exec backend celery -A core inspect scheduled
+
+# Monitor in tempo reale
+docker compose logs celery --tail=50 -f
+docker compose logs celery-beat --tail=50 -f
+```
 
 ---
 
@@ -412,15 +577,17 @@ add_header Referrer-Policy strict-origin-when-cross-origin;
 | 443 | Sanitizer | Azure / Anthropic | AI cloud M20 (solo anonimi) |
 | 443 | Celery | KnowBe4 API | Sync M15 |
 
+### Sicurezza API e sessioni
+
+- I token JWT usano SimpleJWT con durata **30 minuti** per gli access token e **7 giorni** per i refresh token, con rotazione e blacklist abilitate.
+- Rate limiting DRF: **AnonRateThrottle 20/h**, **UserRateThrottle 500/h**, **LoginRateThrottle 5/min** su `GrcTokenObtainPairView`.
+- In `core.settings.prod` sono abilitati `SECURE_HSTS_*`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE` e `SECURE_SSL_REDIRECT`.
+- File upload: whitelist estensioni + MIME type reale verificato con python-magic.
+- Password: minimo 12 caratteri + validatori CommonPassword, NumericPassword, UserAttributeSimilarity.
+
 ### Secrets management
 
 In produzione non usare variabili d'ambiente Docker in chiaro. Usare HashiCorp Vault con agent sidecar oppure secret cifrati in Kubernetes (`kind: Secret` con cifratura etcd at-rest abilitata).
-
-#### Sicurezza API e sessioni
-
-- I token JWT usano SimpleJWT con durata **30 minuti** per gli access token e **7 giorni** per i refresh token, con rotazione e blacklist abilitate.
-- Il backend applica rate limiting DRF di base (throttle anonimi/utenti) con valori predefiniti **AnonRateThrottle 20/h** e **UserRateThrottle 500/h** per mitigare brute force ed abuso degli endpoint pubblici.
-- In `core.settings.prod` sono abilitati `SECURE_HSTS_*`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE` e `SECURE_SSL_REDIRECT` per forzare HTTPS e cookie sicuri in produzione.
 
 ---
 
@@ -433,8 +600,34 @@ In produzione non usare variabili d'ambiente Docker in chiaro. Usare HashiCorp V
 | Failure singolo nodo | 0 (replica sincrona) | < 2 min |
 | Corruzione dati | Ultimo backup (max 24h) | < 4 ore |
 | Disaster completo datacenter | Ultimo backup (max 24h) | < 8 ore |
+| Ripristino DB < 10 GB (Docker) | 24h (backup giornaliero) | 15-30 min |
 
-### Script di backup
+### Backup automatico — crontab host
+
+Configurare sul server host (non nei container):
+
+```bash
+# Aprire crontab dell'utente che esegue Docker
+crontab -e
+
+# Backup giornaliero PostgreSQL — ogni notte alle 01:00
+0 1 * * * docker exec grc-webapp-db-1 pg_dump -U grc grc_prod | gzip > /backup/grc_$(date +\%Y\%m\%d).sql.gz
+
+# Pulizia backup più vecchi di 30 giorni — ogni notte alle 02:00
+0 2 * * * find /backup -name "grc_*.sql.gz" -mtime +30 -delete
+
+# Backup file media — ogni notte alle 03:00
+0 3 * * * docker cp grc-webapp-backend-1:/app/media /backup/media_$(date +\%Y\%m\%d)/
+```
+
+Assicurarsi che `/backup` esista e abbia spazio sufficiente:
+
+```bash
+mkdir -p /backup
+df -h /backup
+```
+
+### Script di backup completo
 
 ```bash
 #!/usr/bin/env bash
@@ -457,7 +650,7 @@ echo "Storage sync OK"
 
 # 3. Verifica integrità dump
 pg_restore --list "${BACKUP_DIR}/db.dump" > /dev/null
-echo "Verifica integrità OK"
+echo "Verifica integrita OK"
 
 # 4. Cleanup backup scaduti
 find /backups -maxdepth 1 -type d -mtime "+${RETENTION_DAYS}" -exec rm -rf {} +
@@ -467,11 +660,14 @@ echo "Backup completato: ${BACKUP_DIR}"
 
 ### Procedura test restore mensile
 
-Eseguire ogni primo lunedì del mese:
+Eseguire ogni primo lunedi del mese. Documentare il risultato come evidenza in M16 BCP.
 
 ```bash
-# 1. Restore in ambiente isolato
-pg_restore -d grc_test_restore "${LATEST_BACKUP}/db.dump"
+# 1. Verifica restore in ambiente isolato
+gunzip -c /backup/grc_YYYYMMDD.sql.gz | psql -U grc grc_test
+
+# Oppure con formato custom pg_dump:
+# pg_restore -d grc_test_restore "${LATEST_BACKUP}/db.dump"
 
 # 2. Verifica hash chain audit trail
 python manage.py verify_audit_trail_integrity --db grc_test_restore
@@ -490,9 +686,9 @@ python manage.py test tests.smoke --keepdb --settings=core.settings.test_restore
 
 ```
 GET /api/health/
-→ { "status": "ok", "db": "ok", "redis": "ok", "storage": "ok", "version": "1.2.0" }
+-> { "status": "ok", "db": "ok", "redis": "ok", "storage": "ok", "version": "1.2.0" }
 
-GET /api/health/detailed/    # solo IP interni — include metriche Celery e sync KB4
+GET /api/health/detailed/    # solo IP interni -- include metriche Celery e sync KB4
 ```
 
 ### Metriche chiave (Prometheus)
@@ -561,8 +757,8 @@ spec:
 I job pesanti (M18 export report, M17 evidence pack) vengono indirizzati alla replica di lettura — nessun impatto sulle operazioni transazionali OLTP.
 
 ```
-Primary (write)  ──►  Replica 1  (read — dashboard M18, export M17)
-                 └──►  Replica 2  (read — audit trail queries M10)
+Primary (write)  -->  Replica 1  (read -- dashboard M18, export M17)
+                 -->  Replica 2  (read -- audit trail queries M10)
 ```
 
 ---
@@ -577,30 +773,30 @@ curl -fsSL https://ollama.ai/install.sh | sh
 systemctl enable ollama && systemctl start ollama
 
 # Download modello in base alla RAM disponibile
-ollama pull llama3.1:8b      # 8 GB — classificazioni rapide
-ollama pull llama3.1:70b     # 40 GB — analisi testo complessa
+ollama pull llama3.1:8b      # 8 GB -- classificazioni rapide
+ollama pull llama3.1:70b     # 40 GB -- analisi testo complessa
 
 # Test
 curl http://localhost:11434/api/generate \
-  -d '{"model":"llama3.1:8b","prompt":"Classifica questa severità: accesso non autorizzato a PLC","stream":false}'
+  -d '{"model":"llama3.1:8b","prompt":"Classifica questa severita: accesso non autorizzato a PLC","stream":false}'
 ```
 
-### Regole sanitization (dati → cloud)
+### Regole sanitization (dati verso cloud)
 
 | Tipo dato | Trasformazione | Esempio |
 |-----------|---------------|---------|
-| Nome plant | Token fisso | "Stabilimento Milano" → `[PLANT_A]` |
-| Nome persona | Token numerato | "Mario Rossi" → `[PERSON_1]` |
-| Valore ALE | Range ordinale | "450.000 €" → `[VALORE_ALTO]` |
-| IP / hostname | Offuscato | "192.168.1.50" → `[IP_INTERNAL]` |
-| P.IVA / C.F. | Rimosso | → `[REMOVED]` |
-| Nome fornitore | Token fisso | "Fornitore X S.r.l." → `[SUPPLIER_A]` |
+| Nome plant | Token fisso | "Stabilimento Milano" -> `[PLANT_A]` |
+| Nome persona | Token numerato | "Mario Rossi" -> `[PERSON_1]` |
+| Valore ALE | Range ordinale | "450.000 euro" -> `[VALORE_ALTO]` |
+| IP / hostname | Offuscato | "192.168.1.50" -> `[IP_INTERNAL]` |
+| P.IVA / C.F. | Rimosso | -> `[REMOVED]` |
+| Nome fornitore | Token fisso | "Fornitore X S.r.l." -> `[SUPPLIER_A]` |
 
 ### Configurazione per funzione (settings/ai_engine.py)
 
 ```python
 AI_ENGINE_CONFIG = {
-    "enabled": False,                    # master switch — off di default
+    "enabled": False,                    # master switch -- off di default
     "functions": {
         "classification":    {"enabled": False, "model": "local"},
         "text_analysis":     {"enabled": False, "model": "cloud"},
@@ -628,26 +824,32 @@ AI_ENGINE_CONFIG = {
 ### Sicurezza
 
 - [ ] TLS 1.2+ configurato, certificato valido e non scaduto
-- [ ] Header di sicurezza HTTP presenti (HSTS, CSP, X-Frame-Options)
+- [ ] Header di sicurezza HTTP presenti (HSTS, CSP, X-Frame-Options, X-Content-Type-Options)
 - [ ] `DEBUG=false` e `SECRET_KEY` generato (non il valore di default)
+- [ ] `FERNET_KEY` generato e configurato
 - [ ] Database non esposto all'esterno della rete interna
 - [ ] Secrets non in chiaro nelle variabili d'ambiente Docker
 - [ ] Firewall configurato (solo porte necessarie aperte)
 - [ ] SSO configurato, testato e con fallback locale disabilitato
 - [ ] Scadenza token auditor esterno configurata in M02
+- [ ] Rate limiting verificato: login 5/min, utenti 500/h
 
 ### Operatività
 
-- [ ] Backup automatico configurato e testato con restore verificato
+- [ ] Backup automatico configurato (crontab host) e testato con restore verificato
 - [ ] Monitoraggio e alerting attivi (P1 su audit trail e NIS2 timer)
 - [ ] Log centralizzati (ELK / Loki / CloudWatch)
-- [ ] Health check risponde correttamente su tutti i componenti
+- [ ] Health check risponde correttamente su tutti i componenti: `curl /api/health/`
 - [ ] Celery beat attivo: `celery -A core inspect scheduled`
-- [ ] Job notturno verifica integrità audit trail: `python manage.py verify_audit_trail_integrity`
+- [ ] Tutti i task schedulati presenti nella tabella Celery Beat
+- [ ] Job verifica integrità audit trail: `python manage.py verify_audit_trail_integrity`
 
 ### Framework normativi e dati
 
 - [ ] VDA ISA 6.0, NIS2 Art.21, ISO 27001:2022 importati via `load_frameworks`
+- [ ] `load_notification_profiles` eseguito
+- [ ] `load_competency_requirements` eseguito
+- [ ] `load_required_documents` eseguito
 - [ ] `ControlInstance` generate per tutti i plant attivi
 - [ ] `nis2_scope` configurato correttamente per ogni plant
 - [ ] Almeno un CISO con `RoleAssignment` attiva in M00

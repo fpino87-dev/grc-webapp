@@ -34,6 +34,22 @@ class AuditPrepViewSet(viewsets.ModelViewSet):
             payload={"id": str(instance.id), "title": instance.title},
         )
 
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        if instance.audit_program_id:
+            from .services import sync_program_completion
+            try:
+                sync_program_completion(instance.audit_program)
+            except Exception:
+                pass
+        log_action(
+            user=self.request.user,
+            action_code="audit_prep.updated",
+            level="L2",
+            entity=instance,
+            payload={"status": instance.status},
+        )
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         open_findings = instance.findings.filter(

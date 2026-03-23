@@ -6,6 +6,7 @@ urlpatterns = [
     path("risk/", RiskSummaryView.as_view(), name="reporting-risk"),
     path("incidents/", IncidentSummaryView.as_view(), name="reporting-incidents"),
     path("dashboard/", DashboardSummaryView.as_view(), name="reporting-dashboard"),
+    path("dashboard-summary/", DashboardSummaryView.as_view(), name="dashboard-summary"),
     path("owner-report/", OwnerReportView.as_view(), name="reporting-owner"),
     path("kpi-trend/", KpiTrendView.as_view(), name="reporting-kpi-trend"),
 ]
