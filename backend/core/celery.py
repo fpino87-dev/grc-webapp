@@ -40,5 +40,17 @@ app.conf.beat_schedule = {
         "task": "apps.audit_trail.tasks.cleanup_celery_results",
         "schedule": crontab(hour=3, minute=30),
     },
+    "check-upcoming-audits": {
+        "task": "apps.audit_prep.tasks.check_upcoming_audits",
+        "schedule": crontab(hour=7, minute=30, day_of_week=1),
+    },
+    "check-overdue-findings": {
+        "task": "apps.audit_prep.tasks.check_overdue_findings",
+        "schedule": crontab(hour=8, minute=0),
+    },
+    "check-stale-audit-preps": {
+        "task": "apps.audit_prep.tasks.check_stale_audit_preps",
+        "schedule": crontab(hour=8, minute=15, day_of_week=1),
+    },
 }
 

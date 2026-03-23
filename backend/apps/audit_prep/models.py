@@ -11,11 +11,17 @@ class AuditPrep(BaseModel):
         ("completato", "Completato"),
         ("archiviato", "Archiviato"),
     ]
+    COVERAGE_CHOICES = [
+        ("campione", "Campione 25%"),
+        ("esteso",   "Esteso 50%"),
+        ("full",     "Full 100%"),
+    ]
     plant = models.ForeignKey(
         "plants.Plant", on_delete=models.PROTECT, related_name="audit_preps"
     )
     framework = models.ForeignKey(
-        "controls.Framework", on_delete=models.PROTECT, related_name="audit_preps"
+        "controls.Framework", on_delete=models.PROTECT,
+        related_name="audit_preps", null=True, blank=True,
     )
     title = models.CharField(max_length=200)
     audit_date = models.DateField(null=True, blank=True)
@@ -23,6 +29,18 @@ class AuditPrep(BaseModel):
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="in_corso")
     readiness_score = models.IntegerField(null=True, blank=True)
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    audit_program = models.ForeignKey(
+        "AuditProgram", null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="preps",
+        help_text="Programma annuale di provenienza",
+    )
+    audit_entry_id = models.CharField(
+        max_length=36, blank=True,
+        help_text="ID audit pianificato nel programma (UUID JSON)",
+    )
+    coverage_type = models.CharField(
+        max_length=10, choices=COVERAGE_CHOICES, default="campione",
+    )
 
     class Meta:
         ordering = ["-created_at"]
@@ -138,6 +156,11 @@ class AuditProgram(BaseModel):
         ("in_corso",   "In corso"),
         ("completato", "Completato"),
     ]
+    COVERAGE_CHOICES = [
+        ("campione", "Campione (20-30% dei controlli)"),
+        ("esteso",   "Esteso (50% dei controlli)"),
+        ("full",     "Full (100% dei controlli)"),
+    ]
 
     plant = models.ForeignKey(
         "plants.Plant", on_delete=models.PROTECT,
@@ -146,7 +169,18 @@ class AuditProgram(BaseModel):
     year = models.IntegerField()
     framework = models.ForeignKey(
         "controls.Framework", on_delete=models.PROTECT,
-        related_name="audit_programs"
+        related_name="audit_programs_primary",
+        null=True, blank=True,
+        help_text="Framework primario (legacy — usa frameworks M2M)",
+    )
+    frameworks = models.ManyToManyField(
+        "controls.Framework",
+        related_name="audit_programs",
+        blank=True,
+        help_text="Framework coperti dal programma (multi-framework)",
+    )
+    coverage_type = models.CharField(
+        max_length=10, choices=COVERAGE_CHOICES, default="campione",
     )
     title = models.CharField(max_length=200)
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="bozza")
@@ -154,9 +188,6 @@ class AuditProgram(BaseModel):
     scope = models.TextField(blank=True)
     methodology = models.TextField(blank=True)
 
-    # [{ "quarter": 1, "scope_domains": ["A.9"], "auditor_type": "interno|esterno",
-    #    "auditor_name": "", "planned_date": "2026-03-15", "actual_date": null,
-    #    "audit_prep_id": null, "status": "planned|completed|cancelled" }]
     planned_audits = models.JSONField(default=list)
 
     approved_by = models.ForeignKey(
@@ -168,7 +199,6 @@ class AuditProgram(BaseModel):
 
     class Meta:
         ordering = ["-year"]
-        unique_together = ["plant", "framework", "year"]
 
     @property
     def completion_pct(self) -> float:

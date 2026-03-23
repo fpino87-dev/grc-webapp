@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import filters, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -92,6 +93,50 @@ class AuditPrepViewSet(viewsets.ModelViewSet):
         audit_prep = self.get_object()
         score = services.calc_readiness_score(audit_prep)
         return Response({"id": str(audit_prep.id), "readiness_score": score})
+
+    @action(detail=True, methods=["post"], url_path="complete")
+    def complete(self, request, pk=None):
+        """Marca un AuditPrep come completato."""
+        prep = self.get_object()
+        open_majors = prep.findings.filter(
+            finding_type="major_nc", status__in=["open", "in_response"]
+        ).count()
+        if open_majors > 0:
+            return Response(
+                {"error": f"Non puoi completare con {open_majors} Major NC aperti."},
+                status=400,
+            )
+        prep.status = "completato"
+        prep.save(update_fields=["status", "updated_at"])
+        log_action(
+            user=request.user,
+            action_code="audit_prep.auditprep.completed",
+            level="L1", entity=prep,
+            payload={"title": prep.title},
+        )
+        return Response({"ok": True, "status": "completato"})
+
+    @action(detail=True, methods=["get"], url_path="report")
+    def report(self, request, pk=None):
+        """Scarica relazione HTML dell'AuditPrep."""
+        from .services import generate_audit_report
+        from django.http import HttpResponse
+        prep = self.get_object()
+        html = generate_audit_report(prep)
+        filename = (
+            f"AuditReport_{prep.audit_date or 'draft'}_"
+            f"{timezone.now().strftime('%Y%m%d')}.html"
+        )
+        log_action(
+            user=request.user,
+            action_code="audit_prep.report_downloaded",
+            level="L2", entity=prep,
+            payload={"filename": filename},
+        )
+        from django.http import HttpResponse
+        resp = HttpResponse(html, content_type="text/html; charset=utf-8")
+        resp["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return resp
 
 
 class EvidenceItemViewSet(viewsets.ModelViewSet):
@@ -231,3 +276,123 @@ class AuditProgramViewSet(viewsets.ModelViewSet):
         program.planned_audits = planned
         program.save(update_fields=["planned_audits", "updated_at"])
         return Response({"ok": True, "planned_audits": program.planned_audits})
+
+    @action(detail=False, methods=["post"], url_path="suggest")
+    def suggest(self, request):
+        """Genera piano annuale suggerito dal sistema."""
+        from .services import suggest_audit_plan
+        from apps.controls.models import Framework
+        from apps.plants.models import Plant
+        plant_id = request.data.get("plant")
+        framework_codes = request.data.get("framework_codes", [])
+        year = int(request.data.get("year", 2026))
+        coverage_type = request.data.get("coverage_type", "campione")
+        plant = Plant.objects.filter(pk=plant_id).first()
+        frameworks = Framework.objects.filter(code__in=framework_codes)
+        if not plant or not frameworks.exists():
+            return Response({"error": "plant e framework_codes obbligatori"}, status=400)
+        plan = suggest_audit_plan(plant, frameworks, year, coverage_type)
+        return Response({"suggested_plan": plan})
+
+    @action(detail=True, methods=["post"], url_path="launch-audit")
+    def launch_audit(self, request, pk=None):
+        """Lancia un AuditPrep da un audit pianificato."""
+        from .services import launch_audit_from_program
+        program = self.get_object()
+        audit_id = request.data.get("audit_id")
+        audit_entry = next(
+            (a for a in program.planned_audits if a.get("id") == audit_id), None
+        )
+        if not audit_entry:
+            return Response({"error": "Audit non trovato nel programma"}, status=404)
+        if audit_entry.get("audit_prep_id"):
+            return Response({"error": "Questo audit ha già un AuditPrep collegato"}, status=400)
+        prep = launch_audit_from_program(program, audit_entry, request.user)
+        return Response({
+            "ok": True,
+            "audit_prep_id": str(prep.pk),
+            "controls_count": prep.evidence_items.count(),
+        })
+
+    @action(detail=True, methods=["post"], url_path="update-audit")
+    def update_audit(self, request, pk=None):
+        """Aggiorna un audit pianificato nel JSON."""
+        program = self.get_object()
+        audit_id = request.data.get("audit_id")
+        updates = request.data.get("updates", {})
+        audits = list(program.planned_audits)
+        ALLOWED = ["title", "planned_date", "auditor_type", "auditor_name",
+                   "scope_domains", "coverage_type", "notes", "status"]
+        for a in audits:
+            if a.get("id") == audit_id:
+                for k, v in updates.items():
+                    if k in ALLOWED:
+                        a[k] = v
+                break
+        program.planned_audits = audits
+        program.save(update_fields=["planned_audits", "updated_at"])
+        return Response({"ok": True, "planned_audits": audits})
+
+    @action(detail=True, methods=["post"], url_path="sync-completion")
+    def sync_completion(self, request, pk=None):
+        """Ricalcola % completamento dai AuditPrep reali."""
+        from .services import sync_program_completion
+        program = self.get_object()
+        pct = sync_program_completion(program)
+        return Response({"ok": True, "completion_pct": pct, "status": program.status})
+
+    @action(detail=True, methods=["get"], url_path="report")
+    def report(self, request, pk=None):
+        """Relazione HTML del programma annuale."""
+        from django.http import HttpResponse
+        program = self.get_object()
+        preps = AuditPrep.objects.filter(
+            audit_program=program
+        ).prefetch_related("evidence_items", "findings")
+
+        rows = ""
+        for audit in program.planned_audits:
+            prep_id = audit.get("audit_prep_id")
+            prep = preps.filter(pk=prep_id).first() if prep_id else None
+            score = prep.readiness_score if prep else None
+            status = audit.get("status", "planned")
+            status_colors = {
+                "planned": "#6b7280", "in_progress": "#2563eb",
+                "completed": "#16a34a", "cancelled": "#dc2626",
+            }
+            color = status_colors.get(status, "#6b7280")
+            rows += (
+                f"<tr><td>Q{audit['quarter']}</td>"
+                f"<td>{audit.get('title', '—')}</td>"
+                f"<td>{', '.join(audit.get('framework_codes', []))}</td>"
+                f"<td>{audit.get('planned_date', '—')}</td>"
+                f"<td>{audit.get('auditor_name', '—')}</td>"
+                f"<td style='color:{color};font-weight:bold'>{status.replace('_', ' ').title()}</td>"
+                f"<td style='font-weight:bold'>{f'{score}/100' if score is not None else '—'}</td></tr>"
+            )
+
+        from django.utils import timezone as tz
+        html = f"""<!DOCTYPE html>
+<html lang="it"><head><meta charset="UTF-8">
+<title>Programma Audit {program.year}</title>
+<style>
+body{{font-family:Arial,sans-serif;font-size:10px;margin:24px}}
+h1{{font-size:16px;color:#1e40af;border-bottom:2px solid #1e40af;padding-bottom:6px}}
+table{{width:100%;border-collapse:collapse;margin:12px 0}}
+th{{background:#1e40af;color:white;padding:5px 6px;text-align:left}}
+td{{padding:4px 6px;border-bottom:1px solid #e5e7eb}}
+tr:nth-child(even){{background:#f9fafb}}
+</style></head><body>
+<h1>Programma Audit Annuale {program.year}</h1>
+<p><strong>Sito:</strong> {program.plant.name} &nbsp;
+   <strong>Stato:</strong> {program.status} &nbsp;
+   <strong>Completamento:</strong> {program.completion_pct}%</p>
+<table>
+<tr><th>Q</th><th>Titolo</th><th>Framework</th><th>Data</th><th>Auditor</th><th>Stato</th><th>Score</th></tr>
+{rows}
+</table></body></html>"""
+
+        filename = f"ProgrammaAudit_{program.year}_{tz.now().strftime('%Y%m%d')}.html"
+        resp = HttpResponse(html, content_type="text/html; charset=utf-8")
+        resp["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return resp
