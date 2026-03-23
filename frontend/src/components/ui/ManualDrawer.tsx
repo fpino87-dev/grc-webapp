@@ -70,8 +70,9 @@ export function ManualDrawer({ type, onClose }: ManualDrawerProps) {
             <div className="prose prose-sm max-w-none
               prose-headings:text-blue-800
               prose-h1:text-xl prose-h2:text-lg prose-h3:text-base
-              prose-code:bg-gray-100 prose-code:px-1 prose-code:rounded
-              prose-pre:bg-gray-900 prose-pre:text-gray-100
+              prose-code:bg-blue-50 prose-code:text-blue-900 prose-code:px-1 prose-code:rounded prose-code:border prose-code:border-blue-200
+              prose-pre:bg-white prose-pre:text-gray-800 prose-pre:border prose-pre:border-gray-300 prose-pre:rounded-md
+              [&_pre_code]:bg-transparent [&_pre_code]:border-0 [&_pre_code]:text-gray-800
               prose-table:text-xs
               prose-a:text-blue-600">
               <ReactMarkdown>{data}</ReactMarkdown>
