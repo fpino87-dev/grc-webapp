@@ -20,6 +20,18 @@ export interface Incident {
   cross_border_impact?: boolean;
   critical_infrastructure_impact?: boolean;
   is_significant?: boolean | null;
+  axis_operational?: number | null;
+  axis_economic?: number | null;
+  axis_people?: number | null;
+  axis_confidentiality?: number | null;
+  axis_reputational?: number | null;
+  axis_recurrence?: number | null;
+  acn_is_category?: string;
+  pta_nis2?: number | null;
+  ptnr_nis2?: number | null;
+  pt_gdpr?: number | null;
+  requires_csirt_notification?: boolean | null;
+  requires_gdpr_notification?: boolean | null;
 }
 
 export interface NIS2TimelineStep {
@@ -72,6 +84,8 @@ export interface ClassificationMethod {
       affected_users_count: number;
       service_disruption_hours: number;
       financial_impact_eur: number;
+      ptnr_trigger_csirt?: number;
+      pt_gdpr_trigger?: number;
     };
     criteria: Array<{
       key: string;
@@ -80,6 +94,20 @@ export interface ClassificationMethod {
       operator?: string;
       threshold?: number;
     }>;
+  };
+  scores?: {
+    axis_operational?: number | null;
+    axis_economic?: number | null;
+    axis_people?: number | null;
+    axis_confidentiality?: number | null;
+    axis_reputational?: number | null;
+    axis_recurrence?: number | null;
+    pta_nis2?: number | null;
+    ptnr_nis2?: number | null;
+    pt_gdpr?: number | null;
+    acn_is_category?: string;
+    requires_csirt_notification?: boolean | null;
+    requires_gdpr_notification?: boolean | null;
   };
 }
 

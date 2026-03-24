@@ -685,6 +685,18 @@ export function IncidentsList() {
                 </div>
 
                 <div className="rounded border p-3">
+                  <div className="text-sm font-medium mb-2">Punteggi correnti e obblighi</div>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>PTA NIS2: <strong>{classificationMethod?.scores?.pta_nis2 ?? "—"}</strong></div>
+                    <div>PTNR NIS2: <strong>{classificationMethod?.scores?.ptnr_nis2 ?? "—"}</strong></div>
+                    <div>PT GDPR: <strong>{classificationMethod?.scores?.pt_gdpr ?? "—"}</strong></div>
+                    <div>Categoria ACN: <strong>{classificationMethod?.scores?.acn_is_category || "—"}</strong></div>
+                    <div>Obbligo CSIRT: <strong>{classificationMethod?.scores?.requires_csirt_notification ? "Sì" : "No"}</strong></div>
+                    <div>Valutazione Garante Privacy: <strong>{classificationMethod?.scores?.requires_gdpr_notification ? "Sì" : "No"}</strong></div>
+                  </div>
+                </div>
+
+                <div className="rounded border p-3">
                   <div className="text-sm font-medium mb-2">Valutazione corrente incidente selezionato</div>
                   <div className="overflow-auto">
                     <table className="w-full text-xs">

@@ -51,6 +51,14 @@ ENISA_SUBCATEGORIES = {
 
 
 class Incident(BaseModel):
+    ACN_IS_CATEGORIES = [
+        ("", "Nessuna"),
+        ("IS-1", "IS-1 (Perdita riservatezza verso esterno)"),
+        ("IS-2", "IS-2 (Perdita integrita con impatto esterno)"),
+        ("IS-3", "IS-3 (Violazione livelli di servizio/SLA)"),
+        ("IS-4", "IS-4 (Accesso non autorizzato/abuso privilegi)"),
+    ]
+
     plant = models.ForeignKey("plants.Plant", on_delete=models.CASCADE, db_index=True)
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -99,6 +107,33 @@ class Incident(BaseModel):
     cross_border_impact = models.BooleanField(default=False, help_text="Impatto su piu stati membri UE")
     critical_infrastructure_impact = models.BooleanField(
         default=False, help_text="Impatto su infrastrutture critiche"
+    )
+    axis_operational = models.PositiveSmallIntegerField(null=True, blank=True, help_text="Asse 1 (1-5)")
+    axis_economic = models.PositiveSmallIntegerField(null=True, blank=True, help_text="Asse 2 (1-5)")
+    axis_people = models.PositiveSmallIntegerField(null=True, blank=True, help_text="Asse 3 (1-5)")
+    axis_confidentiality = models.PositiveSmallIntegerField(null=True, blank=True, help_text="Asse 4 (1-5)")
+    axis_reputational = models.PositiveSmallIntegerField(null=True, blank=True, help_text="Asse 5 (1-5)")
+    axis_recurrence = models.PositiveSmallIntegerField(default=0, help_text="Asse 6 (0 oppure 2)")
+    is_recurrent = models.BooleanField(default=False, help_text="Evento ricorrente negli ultimi 6 mesi")
+    acn_is_category = models.CharField(
+        max_length=10,
+        choices=ACN_IS_CATEGORIES,
+        blank=True,
+        default="",
+        help_text="Classificazione ACN IS-1/IS-2/IS-3/IS-4",
+    )
+    pta_nis2 = models.PositiveSmallIntegerField(null=True, blank=True, help_text="PTA NIS2 = max assi 1..5")
+    ptnr_nis2 = models.PositiveSmallIntegerField(
+        null=True, blank=True, help_text="PTNR NIS2 = PTA + Asse ricorrenza"
+    )
+    pt_gdpr = models.PositiveSmallIntegerField(
+        null=True, blank=True, help_text="PT GDPR = Asse 4 * presenza dati personali (0/1)"
+    )
+    requires_csirt_notification = models.BooleanField(
+        null=True, help_text="True se incidente con obbligo notifica CSIRT"
+    )
+    requires_gdpr_notification = models.BooleanField(
+        null=True, help_text="True se probabile obbligo notifica Garante Privacy"
     )
     is_significant = models.BooleanField(
         null=True,

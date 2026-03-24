@@ -16,24 +16,131 @@ def _e(value) -> str:
 
 
 def classify_significance(incident: Incident) -> bool:
-    """Classificazione automatica significativita NIS2 Art.23."""
-    if incident.significance_override is not None:
-        return incident.significance_override
-
+    """Classificazione significativita con metodo CISOs4AI (PTA/PTNR/PT GDPR)."""
     config = NIS2Configuration.objects.filter(plant=incident.plant).first()
     threshold_users = config.threshold_users if config else 100
     threshold_hours = config.threshold_hours if config else 4.0
     threshold_eur = config.threshold_financial if config else 100000
+    users = int(incident.affected_users_count or 0)
+    hours = float(incident.service_disruption_hours or 0)
+    eur = float(incident.financial_impact_eur or 0)
 
-    criteria = [
-        incident.cross_border_impact,
-        incident.critical_infrastructure_impact,
-        incident.personal_data_involved,
-        (incident.affected_users_count or 0) >= threshold_users,
-        (incident.service_disruption_hours or 0) >= threshold_hours,
-        (incident.financial_impact_eur or 0) >= threshold_eur,
-    ]
-    return any(criteria)
+    axis_operational = incident.axis_operational
+    if axis_operational is None:
+        if hours >= float(threshold_hours) * 3:
+            axis_operational = 5
+        elif hours >= float(threshold_hours) * 2:
+            axis_operational = 4
+        elif hours >= float(threshold_hours):
+            axis_operational = 3
+        elif hours > 0:
+            axis_operational = 2
+        else:
+            axis_operational = 1
+
+    axis_economic = incident.axis_economic
+    if axis_economic is None:
+        if eur >= float(threshold_eur) * 3:
+            axis_economic = 5
+        elif eur >= float(threshold_eur) * 2:
+            axis_economic = 4
+        elif eur >= float(threshold_eur):
+            axis_economic = 3
+        elif eur > 0:
+            axis_economic = 2
+        else:
+            axis_economic = 1
+
+    axis_people = incident.axis_people
+    if axis_people is None:
+        if users >= int(threshold_users) * 3:
+            axis_people = 5
+        elif users >= int(threshold_users) * 2:
+            axis_people = 4
+        elif users >= int(threshold_users):
+            axis_people = 3
+        elif users > 0:
+            axis_people = 2
+        else:
+            axis_people = 1
+
+    axis_confidentiality = incident.axis_confidentiality
+    if axis_confidentiality is None:
+        if incident.personal_data_involved and incident.incident_category == "data_breach":
+            axis_confidentiality = 4
+        elif incident.personal_data_involved:
+            axis_confidentiality = 3
+        elif incident.incident_category in ("intrusion", "data_breach"):
+            axis_confidentiality = 2
+        else:
+            axis_confidentiality = 1
+
+    axis_reputational = incident.axis_reputational
+    if axis_reputational is None:
+        if incident.cross_border_impact and incident.critical_infrastructure_impact:
+            axis_reputational = 5
+        elif incident.cross_border_impact or incident.critical_infrastructure_impact:
+            axis_reputational = 4
+        elif incident.severity in ("alta", "critica"):
+            axis_reputational = 3
+        else:
+            axis_reputational = 1
+
+    axis_recurrence = 2 if incident.is_recurrent else 0
+    pta_nis2 = max(axis_operational, axis_economic, axis_people, axis_confidentiality, axis_reputational)
+    ptnr_nis2 = pta_nis2 + axis_recurrence
+    pt_gdpr = axis_confidentiality * (1 if incident.personal_data_involved else 0)
+
+    if incident.acn_is_category:
+        acn_category = incident.acn_is_category
+    else:
+        acn_map = {
+            "data_breach": "IS-1",
+            "availability_attack": "IS-3",
+            "intrusion": "IS-4",
+            "intrusion_attempt": "IS-4",
+            "malicious_code": "IS-2",
+            "supply_chain": "IS-2",
+        }
+        acn_category = acn_map.get(incident.incident_category or "", "")
+
+    auto_significant = ptnr_nis2 >= 4 and bool(acn_category)
+    is_significant = incident.significance_override if incident.significance_override is not None else auto_significant
+
+    incident.axis_operational = axis_operational
+    incident.axis_economic = axis_economic
+    incident.axis_people = axis_people
+    incident.axis_confidentiality = axis_confidentiality
+    incident.axis_reputational = axis_reputational
+    incident.axis_recurrence = axis_recurrence
+    incident.pta_nis2 = pta_nis2
+    incident.ptnr_nis2 = ptnr_nis2
+    incident.pt_gdpr = pt_gdpr
+    incident.acn_is_category = acn_category
+    incident.requires_csirt_notification = bool(is_significant)
+    incident.requires_gdpr_notification = pt_gdpr >= 4
+    incident.is_significant = bool(is_significant)
+    incident.nis2_notifiable = "si" if incident.is_significant else "no"
+    incident.save(
+        update_fields=[
+            "axis_operational",
+            "axis_economic",
+            "axis_people",
+            "axis_confidentiality",
+            "axis_reputational",
+            "axis_recurrence",
+            "pta_nis2",
+            "ptnr_nis2",
+            "pt_gdpr",
+            "acn_is_category",
+            "requires_csirt_notification",
+            "requires_gdpr_notification",
+            "is_significant",
+            "nis2_notifiable",
+            "updated_at",
+        ]
+    )
+    return incident.is_significant
 
 
 def get_classification_method(incident: Incident) -> dict:
@@ -52,18 +159,41 @@ def get_classification_method(incident: Incident) -> dict:
         for key, values in ENISA_SUBCATEGORIES.items()
     }
 
+    current_scores = {
+        "axis_operational": incident.axis_operational,
+        "axis_economic": incident.axis_economic,
+        "axis_people": incident.axis_people,
+        "axis_confidentiality": incident.axis_confidentiality,
+        "axis_reputational": incident.axis_reputational,
+        "axis_recurrence": incident.axis_recurrence,
+        "pta_nis2": incident.pta_nis2,
+        "ptnr_nis2": incident.ptnr_nis2,
+        "pt_gdpr": incident.pt_gdpr,
+        "acn_is_category": incident.acn_is_category or "",
+        "requires_csirt_notification": incident.requires_csirt_notification,
+        "requires_gdpr_notification": incident.requires_gdpr_notification,
+    }
+
     return {
         "taxonomy": {
             "categories": categories,
             "subcategories": subcategories,
+            "acn_is_categories": [
+                {"code": "IS-1", "label": "Perdita di riservatezza verso esterno"},
+                {"code": "IS-2", "label": "Perdita di integrita con impatto esterno"},
+                {"code": "IS-3", "label": "Violazione SLA/livelli di servizio"},
+                {"code": "IS-4", "label": "Accesso non autorizzato o abuso privilegi"},
+            ],
         },
         "nis2_method": {
-            "logic": "OR",
-            "rule": "Incidente significativo se almeno un criterio e soddisfatto; override manuale con motivazione ha precedenza.",
+            "logic": "PTNR>=4 + categoria ACN IS-X",
+            "rule": "Livello 1: PTA=max(assi1..5), PTNR=PTA+asse6; Livello 2: classificazione ACN IS-X. Obbligo CSIRT se PTNR>=4 e categoria IS-X; override manuale ha precedenza.",
             "thresholds": {
                 "affected_users_count": threshold_users,
                 "service_disruption_hours": threshold_hours,
                 "financial_impact_eur": threshold_financial,
+                "ptnr_trigger_csirt": 4,
+                "pt_gdpr_trigger": 4,
             },
             "criteria": [
                 {"key": "cross_border_impact", "label": "Impatto cross-border", "type": "boolean"},
@@ -92,6 +222,7 @@ def get_classification_method(incident: Incident) -> dict:
                 },
             ],
         },
+        "scores": current_scores,
     }
 
 

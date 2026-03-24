@@ -64,6 +64,15 @@ class IncidentViewSet(viewsets.ModelViewSet):
         override = request.data.get("override")
         reason = request.data.get("reason", "")
 
+        if isinstance(override, str):
+            normalized = override.strip().lower()
+            if normalized in ("true", "1", "yes", "si"):
+                override = True
+            elif normalized in ("false", "0", "no"):
+                override = False
+            else:
+                override = None
+
         if override is not None:
             if not reason and override != incident.is_significant:
                 return response.Response({"error": "Motivazione obbligatoria per override"}, status=400)
