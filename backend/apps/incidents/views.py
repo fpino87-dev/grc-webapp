@@ -24,14 +24,20 @@ class IncidentViewSet(viewsets.ModelViewSet):
     @decorators.action(detail=True, methods=["post"])
     def confirm_nis2(self, request, pk=None):
         incident = self.get_object()
-        incident.nis2_notifiable = request.data.get("nis2_notifiable", "si")
-        incident.save(update_fields=["nis2_notifiable"])
+        new_value = request.data.get("nis2_notifiable", "si")
+        incident.nis2_notifiable = new_value
+        incident.save(update_fields=["nis2_notifiable", "updated_at"])
+
+        if new_value == "si":
+            from .nis2_services import set_nis2_deadlines
+            set_nis2_deadlines(incident)
+
         log_action(
             user=request.user,
             action_code="incidents.confirm_nis2",
-            level="L2",
+            level="L1",
             entity=incident,
-            payload={"nis2_notifiable": incident.nis2_notifiable},
+            payload={"nis2_notifiable": new_value},
         )
         return response.Response(self.get_serializer(incident).data)
 

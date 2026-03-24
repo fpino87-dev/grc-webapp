@@ -1,3 +1,4 @@
+import html as html_module
 from datetime import timedelta
 
 from django.utils import timezone
@@ -5,6 +6,13 @@ from django.utils import timezone
 from apps.plants.models import CSIRT_BY_COUNTRY
 
 from .models import ENISA_INCIDENT_CATEGORIES, Incident, NIS2Configuration, NIS2Notification
+
+
+def _e(value) -> str:
+    """Escape HTML per prevenire XSS nel documento generato."""
+    if value is None:
+        return "—"
+    return html_module.escape(str(value))
 
 
 def classify_significance(incident: Incident) -> bool:
@@ -123,7 +131,7 @@ def generate_nis2_document(incident: Incident, notification_type: str, user) -> 
         f"<tr><td>Infrastrutture critiche</td><td>{'Si' if incident.critical_infrastructure_impact else 'No'}</td></tr>"
     )
 
-    assets_preview = ", ".join([a.name for a in incident.assets.all()[:5]]) or "Da specificare"
+    assets_preview = ", ".join([_e(a.name) for a in incident.assets.all()[:5]]) or "Da specificare"
 
     extra_sections = ""
     if notification_type == "early_warning":
@@ -135,8 +143,8 @@ def generate_nis2_document(incident: Incident, notification_type: str, user) -> 
     dall'Art. 23(1) NIS2 per entita essenziali.
   </p>
   <table>
-    <tr><td>Incidente rilevato</td><td>{detected}</td></tr>
-    <tr><td>Classificazione preliminare</td><td>{cat_label}</td></tr>
+    <tr><td>Incidente rilevato</td><td>{_e(detected)}</td></tr>
+    <tr><td>Classificazione preliminare</td><td>{_e(cat_label)}</td></tr>
     <tr><td>Impatto inizialmente stimato</td><td>Da valutare — informazioni preliminari</td></tr>
   </table>
 </div>
@@ -146,9 +154,9 @@ def generate_nis2_document(incident: Incident, notification_type: str, user) -> 
 <div class="section">
   <h2>Dettaglio Tecnico dell'Incidente</h2>
   <table>
-    <tr><td>Descrizione</td><td>{incident.description[:300]}</td></tr>
-    <tr><td>Asset coinvolti</td><td>{assets_preview}</td></tr>
-    <tr><td>Vettore di attacco</td><td>{incident.incident_subcategory or 'Da specificare'}</td></tr>
+    <tr><td>Descrizione</td><td>{_e(incident.description[:300])}</td></tr>
+    <tr><td>Asset coinvolti</td><td>{_e(assets_preview)}</td></tr>
+    <tr><td>Vettore di attacco</td><td>{_e(incident.incident_subcategory or 'Da specificare')}</td></tr>
   </table>
 </div>
 <div class="section">
@@ -163,7 +171,7 @@ def generate_nis2_document(incident: Incident, notification_type: str, user) -> 
     elif notification_type == "final_report":
         rca = getattr(incident, "rca", None)
         rca_content = (
-            f"<p>{rca.summary}</p>"
+            f"<p>{_e(rca.summary)}</p>"
             if rca and rca.approved_at
             else "<p class='warning'>RCA non ancora approvato. Completare prima di inviare il Report Finale.</p>"
         )
@@ -190,7 +198,7 @@ def generate_nis2_document(incident: Incident, notification_type: str, user) -> 
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>{doc_title}</title>
+  <title>{_e(doc_title)}</title>
   <style>
     body {{ font-family: Arial, sans-serif; font-size: 11px; color: #1f2937; margin: 24px; }}
     h1 {{ font-size: 16px; color: #dc2626; border-bottom: 3px solid #dc2626; padding-bottom: 8px; }}
@@ -211,35 +219,35 @@ def generate_nis2_document(incident: Incident, notification_type: str, user) -> 
 </head>
 <body>
 <div class="header-box">
-  <h1>{doc_title}</h1>
-  <p><strong>Generato il:</strong> {now_str} | <strong>Da:</strong> {user.get_full_name() or user.email} | <strong>Scadenza:</strong> {deadline_str}</p>
+  <h1>{_e(doc_title)}</h1>
+  <p><strong>Generato il:</strong> {_e(now_str)} | <strong>Da:</strong> {_e(user.get_full_name() or user.email)} | <strong>Scadenza:</strong> {_e(deadline_str)}</p>
 </div>
 <div class="csirt-box">
-  <strong>Destinatario: {csirt.get("name", "CSIRT Nazionale")}</strong><br>
-  Portale: <a href="{csirt.get("portal", "")}">{csirt.get("portal", "—")}</a><br>
-  Email: {csirt.get("email", "—")}
+  <strong>Destinatario: {_e(csirt.get("name", "CSIRT Nazionale"))}</strong><br>
+  Portale: <a href="{_e(csirt.get("portal", ""))}">{_e(csirt.get("portal", "—"))}</a><br>
+  Email: {_e(csirt.get("email", "—"))}
 </div>
 <div class="section">
   <h2>1. Entita Notificante</h2>
   <table>
-    <tr><td>Ragione sociale</td><td>{legal_name}</td></tr>
-    <tr><td>Partita IVA / VAT</td><td>{legal_vat}</td></tr>
-    <tr><td>Sito / Stabilimento</td><td>{plant.name if plant else "—"} ({plant.code if plant else "—"})</td></tr>
-    <tr><td>Paese</td><td>{plant.get_country_display() if plant else "—"}</td></tr>
-    <tr><td>Classificazione NIS2</td><td><span class="sig-badge">{entity_type.upper()}</span></td></tr>
-    <tr><td>Settore NIS2</td><td>{sector}</td></tr>
-    <tr><td>Referente NIS2</td><td>{contact_name} — {contact_email}{(" — " + contact_phone) if contact_phone else ""}</td></tr>
+    <tr><td>Ragione sociale</td><td>{_e(legal_name)}</td></tr>
+    <tr><td>Partita IVA / VAT</td><td>{_e(legal_vat)}</td></tr>
+    <tr><td>Sito / Stabilimento</td><td>{_e(plant.name) if plant else "—"} ({_e(plant.code) if plant else "—"})</td></tr>
+    <tr><td>Paese</td><td>{_e(plant.get_country_display()) if plant else "—"}</td></tr>
+    <tr><td>Classificazione NIS2</td><td><span class="sig-badge">{_e(entity_type.upper())}</span></td></tr>
+    <tr><td>Settore NIS2</td><td>{_e(sector)}</td></tr>
+    <tr><td>Referente NIS2</td><td>{_e(contact_name)} — {_e(contact_email)}{_e(" — " + contact_phone) if contact_phone else ""}</td></tr>
   </table>
 </div>
 <div class="section">
   <h2>2. Identificazione Incidente</h2>
   <table>
-    <tr><td>ID Interno</td><td><strong>{str(incident.pk)[:8].upper()}</strong></td></tr>
-    <tr><td>Riferimento CSIRT</td><td>{incident.nis2_incident_ref or "[DA COMPILARE dopo ricezione dal CSIRT]"}</td></tr>
-    <tr><td>Titolo</td><td>{incident.title}</td></tr>
-    <tr><td>Data/ora rilevamento</td><td>{detected}</td></tr>
-    <tr><td>Categoria ENISA</td><td>{cat_label}</td></tr>
-    <tr><td>Severita</td><td>{incident.severity.upper()}</td></tr>
+    <tr><td>ID Interno</td><td><strong>{_e(str(incident.pk)[:8].upper())}</strong></td></tr>
+    <tr><td>Riferimento CSIRT</td><td>{_e(incident.nis2_incident_ref or "[DA COMPILARE dopo ricezione dal CSIRT]")}</td></tr>
+    <tr><td>Titolo</td><td>{_e(incident.title)}</td></tr>
+    <tr><td>Data/ora rilevamento</td><td>{_e(detected)}</td></tr>
+    <tr><td>Categoria ENISA</td><td>{_e(cat_label)}</td></tr>
+    <tr><td>Severita</td><td>{_e(incident.severity.upper())}</td></tr>
     <tr><td>Classificazione</td><td><span class="sig-badge">SIGNIFICATIVO</span></td></tr>
   </table>
 </div>
@@ -252,9 +260,9 @@ def generate_nis2_document(incident: Incident, notification_type: str, user) -> 
   <h2>Timeline Notifiche</h2>
   <table>
     <tr><th>Tipo</th><th>Scadenza</th><th>Stato</th></tr>
-    {("<tr><td>Early Warning (T+24h)</td><td>" + (incident.early_warning_deadline.strftime("%d/%m/%Y %H:%M") if incident.early_warning_deadline else "N/A - Entita Importante") + "</td><td>—</td></tr>") if entity_type == "essenziale" else ""}
-    <tr><td>Notifica Formale (T+72h)</td><td>{incident.formal_notification_deadline.strftime("%d/%m/%Y %H:%M") if incident.formal_notification_deadline else "—"}</td><td>—</td></tr>
-    <tr><td>Report Finale (T+1 mese)</td><td>{incident.final_report_deadline or "—"}</td><td>—</td></tr>
+    {("<tr><td>Early Warning (T+24h)</td><td>" + _e(incident.early_warning_deadline.strftime("%d/%m/%Y %H:%M") if incident.early_warning_deadline else "N/A - Entita Importante") + "</td><td>—</td></tr>") if entity_type == "essenziale" else ""}
+    <tr><td>Notifica Formale (T+72h)</td><td>{_e(incident.formal_notification_deadline.strftime("%d/%m/%Y %H:%M") if incident.formal_notification_deadline else "—")}</td><td>—</td></tr>
+    <tr><td>Report Finale (T+1 mese)</td><td>{_e(incident.final_report_deadline or "—")}</td><td>—</td></tr>
   </table>
 </div>
 <div class="signature">

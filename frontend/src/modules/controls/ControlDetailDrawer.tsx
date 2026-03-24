@@ -4,6 +4,7 @@ import { controlsApi, type EvidenceRef, type LinkedDocument, type RequirementsCh
 import { documentsApi } from "../../api/endpoints/documents";
 import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
+import { AiSuggestionBanner } from "../../components/ui/AiSuggestionBanner";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
 
@@ -197,6 +198,7 @@ function TabValutazione({
   const [justification, setJustification] = useState(exclusionJustification);
   const [applicabilityError, setApplicabilityError] = useState("");
   const [maturityOverrideVal, setMaturityOverrideVal] = useState(calcMaturityLevel);
+  const [gapActions, setGapActions] = useState<Array<{ title?: string; priority?: string; description?: string }>>([]);
 
   function requirementLabel(kind: "document" | "evidence", type: string, description?: string) {
     if (type === "any") return description || "";
@@ -432,6 +434,31 @@ function TabValutazione({
       )}
 
       {/* Cambio manuale — collassabile */}
+      {currentStatus === "gap" && (
+        <div className="space-y-2">
+          <AiSuggestionBanner
+            taskType="gap_actions"
+            entityId={instanceId}
+            autoTrigger={false}
+            onAccept={(res) => {
+              const parsed = res as { actions?: Array<{ title?: string; priority?: string; description?: string }> };
+              setGapActions(parsed.actions ?? []);
+            }}
+            onIgnore={() => setGapActions([])}
+          />
+          {gapActions.length > 0 && (
+            <div className="border rounded p-2 bg-slate-50">
+              <p className="text-xs font-semibold text-slate-700 mb-1">Azioni suggerite</p>
+              {gapActions.map((a, i) => (
+                <p key={i} className="text-xs text-slate-700">
+                  - [{a.priority ?? "n/a"}] {a.title ?? "Azione"}: {a.description ?? ""}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="border border-gray-200 rounded-lg">
         <button
           onClick={() => setManualOpen(o => !o)}

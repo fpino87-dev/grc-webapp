@@ -974,7 +974,8 @@
       "competency": "Compétences",
       "audit_trail": "Audit Trail",
       "email_settings": "Config. Email",
-      "notification_rules": "Règles notifications"
+      "notification_rules": "Règles notifications",
+      "ai_engine": "AI Engine"
     }
   },
   "topbar": {

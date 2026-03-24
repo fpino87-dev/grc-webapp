@@ -14,6 +14,41 @@ def close_incident(incident: Incident, user):
     if rca is None or rca.approved_at is None:
         raise ValidationError(_("RCA approvato obbligatorio per chiudere l'incidente."))
 
+    if incident.is_significant:
+        formal_sent = incident.nis2_notifications.filter(notification_type="formal_notification").exists()
+        if not formal_sent:
+            log_action(
+                user=user,
+                action_code="incident.closed_without_nis2_notification",
+                level="L1",
+                entity=incident,
+                payload={
+                    "warning": "Incidente NIS2 significativo chiuso senza notifica formale al CSIRT",
+                    "incident_id": str(incident.pk),
+                },
+            )
+            from apps.tasks.services import create_task
+
+            create_task(
+                plant=incident.plant,
+                title=f"NIS2: notifica formale mancante — {incident.title}",
+                description=(
+                    f"L'incidente '{incident.title}' e stato chiuso senza aver inviato "
+                    "la notifica formale NIS2 al CSIRT.\n"
+                    f"Inviare il documento entro la scadenza: {incident.formal_notification_deadline}"
+                ),
+                priority="critica",
+                source_module="M09",
+                source_id=incident.pk,
+                due_date=(
+                    incident.formal_notification_deadline.date()
+                    if incident.formal_notification_deadline
+                    else timezone.now().date()
+                ),
+                assign_type="role",
+                assign_value="compliance_officer",
+            )
+
     incident.status = "chiuso"
     incident.closed_at = timezone.now()
     incident.closed_by = user

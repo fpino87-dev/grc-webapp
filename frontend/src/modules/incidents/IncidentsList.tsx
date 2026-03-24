@@ -10,6 +10,7 @@ import {
 import { plantsApi } from "../../api/endpoints/plants";
 import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
+import { AiSuggestionBanner } from "../../components/ui/AiSuggestionBanner";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
@@ -370,6 +371,20 @@ export function IncidentsList() {
 
             {activeTab === "gestione" && (
               <div className="p-4 space-y-3">
+                <AiSuggestionBanner
+                  taskType="incident_classify"
+                  entityId={selected.id}
+                  autoTrigger={true}
+                  onAccept={(res) => {
+                    const r = res as { category?: string; severity?: Incident["severity"] };
+                    setSelected({
+                      ...selected,
+                      incident_category: r.category ?? selected.incident_category,
+                      severity: r.severity ?? selected.severity,
+                    });
+                  }}
+                  onIgnore={() => {}}
+                />
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs text-gray-600">Categoria ENISA</label>
@@ -477,6 +492,16 @@ export function IncidentsList() {
                       ))}
                     </tbody>
                   </table>
+                </div>
+                <div className="border rounded p-3">
+                  <div className="text-sm font-medium mb-2">Bozza RCA con AI</div>
+                  <AiSuggestionBanner
+                    taskType="rca_draft"
+                    entityId={selected.id}
+                    autoTrigger={false}
+                    onAccept={() => {}}
+                    onIgnore={() => {}}
+                  />
                 </div>
               </div>
             )}

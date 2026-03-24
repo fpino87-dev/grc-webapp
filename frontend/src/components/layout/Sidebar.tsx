@@ -61,6 +61,7 @@ const navGroups: NavGroup[] = [
       { to: "/audit-trail", labelKey: "sidebar.items.audit_trail", icon: "📜", roles: ["super_admin", "internal_auditor", "external_auditor"] },
       { to: "/settings/email", labelKey: "sidebar.items.email_settings", icon: "✉️", roles: ["super_admin", "compliance_officer"] },
       { to: "/settings/notifications", labelKey: "sidebar.items.notification_rules", icon: "🔔", roles: ["super_admin", "compliance_officer"] },
+      { to: "/settings/ai", labelKey: "sidebar.items.ai_engine", icon: "🤖", roles: ["super_admin", "compliance_officer"] },
     ],
   },
 ];

@@ -974,7 +974,8 @@
       "competency": "Yetkinlikler",
       "audit_trail": "Audit Trail",
       "email_settings": "E-posta ayarları",
-      "notification_rules": "Bildirim kuralları"
+      "notification_rules": "Bildirim kuralları",
+      "ai_engine": "AI Engine"
     }
   },
   "topbar": {

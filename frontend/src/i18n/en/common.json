@@ -892,7 +892,8 @@
       "competency": "Competency",
       "audit_trail": "Audit Trail",
       "email_settings": "Email settings",
-      "notification_rules": "Notification rules"
+      "notification_rules": "Notification rules",
+      "ai_engine": "AI Engine"
     }
   },
   "topbar": {
