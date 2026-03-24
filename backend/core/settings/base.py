@@ -151,7 +151,17 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CORS_ALLOWED_ORIGINS = [env("FRONTEND_URL", default="http://localhost:3000")]
+_FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:3000")
+CORS_ALLOWED_ORIGINS = [_FRONTEND_URL]
+
+# CSRF_TRUSTED_ORIGINS: necessario quando Django è dietro un reverse proxy (NPM, Nginx, ecc.)
+# con HTTPS. Include il dominio pubblico + il frontend per i form del wizard 2FA.
+# Aggiungere qui ogni dominio da cui arrivano POST (incluso il dominio NPM).
+_extra_csrf = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+CSRF_TRUSTED_ORIGINS = list({_FRONTEND_URL, *_extra_csrf} - {""})
+
+# Quando Django è dietro NPM/Nginx usa X-Forwarded-Host per costruire URL assoluti corretti
+USE_X_FORWARDED_HOST = True
 
 # Punta il login al wizard 2FA di django-two-factor-auth (non al default /accounts/login/)
 LOGIN_URL = "two_factor:login"
