@@ -29,8 +29,8 @@ services:
 
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile.prod
+      context: .
+      dockerfile: backend/Dockerfile.prod
     restart: unless-stopped
     env_file: .env.prod
     environment:

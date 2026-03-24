@@ -14,12 +14,13 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Dipendenze Python
-COPY requirements/ requirements/
+# Dipendenze Python (context = project root)
+COPY backend/requirements/ requirements/
 RUN pip install --no-cache-dir -r requirements/prod.txt
 
-# Codice sorgente
-COPY . .
+# Codice sorgente backend + manuali multilingua
+COPY backend/ .
+COPY manual/ manual/
 
 # Colleziona static files (SECRET_KEY placeholder solo per il build step)
 ENV DJANGO_SETTINGS_MODULE=core.settings.prod \

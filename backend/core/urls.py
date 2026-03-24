@@ -5,6 +5,7 @@ from django.contrib import admin
 from django.http import Http404, JsonResponse
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from core.jwt import GrcTokenObtainPairView
@@ -21,39 +22,60 @@ def health_check(request):
     return JsonResponse({"status": "ok" if db_ok else "error", "db": db_ok}, status=status)
 
 
+# Whitelist completa tipo+lingua → nome file esatto.
+# Nessun input utente viene mai usato per costruire il path.
+_MANUAL_FILES = {
+    ("utente",  "it"): "MANUAL_UTENTE_it.md",
+    ("utente",  "en"): "MANUAL_UTENTE_en.md",
+    ("utente",  "fr"): "MANUAL_UTENTE_fr.md",
+    ("utente",  "pl"): "MANUAL_UTENTE_pl.md",
+    ("utente",  "tr"): "MANUAL_UTENTE_tr.md",
+    ("tecnico", "it"): "MANUAL_TECNICO_it.md",
+    ("tecnico", "en"): "MANUAL_TECNICO_en.md",
+    ("tecnico", "fr"): "MANUAL_TECNICO_fr.md",
+    ("tecnico", "pl"): "MANUAL_TECNICO_pl.md",
+    ("tecnico", "tr"): "MANUAL_TECNICO_tr.md",
+}
+
+
 def serve_manual(request, manual_type):
     """
     Serve il contenuto del manuale Markdown come JSON.
-    Usa Accept-Language header per la lingua, fallback a italiano.
-    I file risiedono in <project_root>/manual/MANUAL_<TYPE>_<lang>.md
+    Richiede JWT valido. Path completamente whitelist-based — nessun
+    input utente nel filename (defense-in-depth contro path traversal).
     """
-    base_map = {
-        "utente":  "MANUAL_UTENTE",
-        "tecnico": "MANUAL_TECNICO",
-    }
-    base_name = base_map.get(manual_type)
-    if not base_name:
-        raise Http404("Manuale non trovato")
+    # Autenticazione JWT obbligatoria
+    try:
+        result = JWTAuthentication().authenticate(request)
+        if result is None:
+            return JsonResponse({"error": "Autenticazione richiesta"}, status=401)
+    except Exception:
+        return JsonResponse({"error": "Token non valido o scaduto"}, status=401)
 
-    # Lingua dalla header Accept-Language (es. "en", "fr", "pl", "tr", "it")
+    # Lingua dall'header Accept-Language — solo whitelist
     accept_lang = request.headers.get("Accept-Language", "it")
     lang = accept_lang.split(",")[0].split("-")[0].strip().lower()
     if lang not in ("it", "en", "fr", "pl", "tr"):
         lang = "it"
 
-    # Cartella manual/ montata dentro il container come /app/manual/
-    manual_dir = os.path.join(settings.BASE_DIR, "manual")
-    candidates = [f"{base_name}_{lang}.md"]
-    if lang != "it":
-        candidates.append(f"{base_name}_it.md")  # fallback italiano
+    # Lookup nella whitelist — fallback italiano se la combo non esiste
+    fname = _MANUAL_FILES.get((manual_type, lang)) or _MANUAL_FILES.get((manual_type, "it"))
+    if not fname:
+        raise Http404("Manuale non trovato")
 
-    for fname in candidates:
-        candidate = os.path.normpath(os.path.join(manual_dir, fname))
-        if os.path.exists(candidate):
-            with open(candidate, "r", encoding="utf-8") as f:
-                return JsonResponse({"type": manual_type, "lang": lang, "content": f.read()})
+    # Path costruito solo da costanti — nessun input utente
+    manual_dir = os.path.realpath(os.path.join(settings.BASE_DIR, "manual"))
+    filepath    = os.path.realpath(os.path.join(manual_dir, fname))
 
-    raise Http404("File manuale non trovato")
+    # Verifica difensiva (defense-in-depth): il file è dentro manual_dir
+    if not filepath.startswith(manual_dir + os.sep):
+        raise Http404("Accesso negato")
+
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            return JsonResponse({"type": manual_type, "lang": lang, "content": f.read()})
+    except FileNotFoundError:
+        raise Http404("File manuale non trovato")
 
 
 urlpatterns = [
