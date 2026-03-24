@@ -6,7 +6,20 @@ import { StatusBadge } from "../../components/ui/StatusBadge";
 import { useAuthStore } from "../../store/auth";
 import { useTranslation } from "react-i18next";
 
-const COUNTRIES = ["IT", "DE", "FR", "PL", "TR", "ES", "UK", "US", "RO", "CZ"];
+const EU_COUNTRIES_EU = [["AT","Austria"],["BE","Belgio"],
+  ["BG","Bulgaria"],["CY","Cipro"],["CZ","Repubblica Ceca"],
+  ["DE","Germania"],["DK","Danimarca"],["EE","Estonia"],
+  ["ES","Spagna"],["FI","Finlandia"],["FR","Francia"],
+  ["GR","Grecia"],["HR","Croazia"],["HU","Ungheria"],
+  ["IE","Irlanda"],["IT","Italia"],["LT","Lituania"],
+  ["LU","Lussemburgo"],["LV","Lettonia"],["MT","Malta"],
+  ["NL","Paesi Bassi"],["PL","Polonia"],["PT","Portogallo"],
+  ["RO","Romania"],["SE","Svezia"],["SI","Slovenia"],
+  ["SK","Slovacchia"]];
+const EU_COUNTRIES_EXTRA = [["GB","Regno Unito"],
+  ["NO","Norvegia"],["CH","Svizzera"],["TR","Turchia"],
+  ["US","Stati Uniti"],["JP","Giappone"],["CN","Cina"],
+  ["OTHER","Altro"]];
 
 function resolvePlantLogoSrc(plantId: string, logoUrl?: string | null) {
   if (!logoUrl) return "";
@@ -80,9 +93,18 @@ function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.country")}</label>
-              <select value={form.country ?? ""} onChange={e => set("country", e.target.value)}
+              <select value={form.country ?? "IT"} onChange={e => set("country", e.target.value)}
                 className="w-full border rounded px-3 py-2 text-sm">
-                {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                <optgroup label="Unione Europea">
+                  {EU_COUNTRIES_EU.map(([code, name]) => (
+                    <option key={code} value={code}>{code} — {name}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Extra UE (non soggetti NIS2)">
+                  {EU_COUNTRIES_EXTRA.map(([code, name]) => (
+                    <option key={code} value={code}>{code} — {name}</option>
+                  ))}
+                </optgroup>
               </select>
             </div>
             <div>
@@ -205,8 +227,22 @@ function PlantModal({ onClose }: { onClose: () => void }) {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.country")}</label>
-              <input value={form.country} onChange={e => set("country", e.target.value.toUpperCase())}
-                maxLength={2} className="w-full border rounded px-3 py-2 text-sm" placeholder={t("plants.placeholders.country")} />
+              <select
+                value={form.country ?? "IT"}
+                onChange={e => set("country", e.target.value)}
+                className="w-full border rounded px-3 py-2 text-sm"
+              >
+                <optgroup label="Unione Europea">
+                  {EU_COUNTRIES_EU.map(([code, name]) => (
+                    <option key={code} value={code}>{code} — {name}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Extra UE (non soggetti NIS2)">
+                  {EU_COUNTRIES_EXTRA.map(([code, name]) => (
+                    <option key={code} value={code}>{code} — {name}</option>
+                  ))}
+                </optgroup>
+              </select>
             </div>
           </div>
           <div>

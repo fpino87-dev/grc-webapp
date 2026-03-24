@@ -4,6 +4,108 @@ from django.utils.translation import gettext_lazy as _
 
 from core.models import BaseModel
 
+EU_COUNTRIES = [
+    ("AT", "Austria"),
+    ("BE", "Belgio"),
+    ("BG", "Bulgaria"),
+    ("CY", "Cipro"),
+    ("CZ", "Repubblica Ceca"),
+    ("DE", "Germania"),
+    ("DK", "Danimarca"),
+    ("EE", "Estonia"),
+    ("ES", "Spagna"),
+    ("FI", "Finlandia"),
+    ("FR", "Francia"),
+    ("GR", "Grecia"),
+    ("HR", "Croazia"),
+    ("HU", "Ungheria"),
+    ("IE", "Irlanda"),
+    ("IT", "Italia"),
+    ("LT", "Lituania"),
+    ("LU", "Lussemburgo"),
+    ("LV", "Lettonia"),
+    ("MT", "Malta"),
+    ("NL", "Paesi Bassi"),
+    ("PL", "Polonia"),
+    ("PT", "Portogallo"),
+    ("RO", "Romania"),
+    ("SE", "Svezia"),
+    ("SI", "Slovenia"),
+    ("SK", "Slovacchia"),
+    # Non UE — non soggetti NIS2
+    ("GB", "Regno Unito"),
+    ("NO", "Norvegia"),
+    ("CH", "Svizzera"),
+    ("TR", "Turchia"),
+    ("US", "Stati Uniti"),
+    ("JP", "Giappone"),
+    ("CN", "Cina"),
+    ("OTHER", "Altro"),
+]
+
+CSIRT_BY_COUNTRY = {
+    "IT": {
+        "name": "ACN — Agenzia Cybersicurezza Nazionale",
+        "portal": "https://www.acn.gov.it/portale/nis/notifica-incidenti",
+        "email": "cert@acn.gov.it",
+        "country": "Italia",
+    },
+    "DE": {
+        "name": "BSI — Bundesamt fur Sicherheit in der Informationstechnik",
+        "portal": "https://www.bsi.bund.de/EN/Topics/KRITIS/NIS2/nis2_node.html",
+        "email": "nis2@bsi.bund.de",
+        "country": "Germania",
+    },
+    "FR": {
+        "name": "ANSSI — Agence Nationale de la Securite des Systemes d'Information",
+        "portal": "https://www.ssi.gouv.fr/en/",
+        "email": "cert-fr@ssi.gouv.fr",
+        "country": "Francia",
+    },
+    "PL": {
+        "name": "CERT Polska / NASK",
+        "portal": "https://incydent.cert.pl/",
+        "email": "incydent@cert.pl",
+        "country": "Polonia",
+    },
+    "BE": {
+        "name": "CCN / CERT.be",
+        "portal": "https://cert.be/en/report-incident",
+        "email": "cert@cert.be",
+        "country": "Belgio",
+    },
+    "NL": {
+        "name": "NCSC-NL",
+        "portal": "https://www.ncsc.nl/contact",
+        "email": "ncsc@ncsc.nl",
+        "country": "Paesi Bassi",
+    },
+    "ES": {
+        "name": "CCN-CERT / INCIBE",
+        "portal": "https://www.incibe.es/incibe-cert/alerta-temprana",
+        "email": "incidencias@incibe.es",
+        "country": "Spagna",
+    },
+    "AT": {
+        "name": "CERT.at / GovCERT Austria",
+        "portal": "https://www.cert.at/en/reporting/",
+        "email": "reports@cert.at",
+        "country": "Austria",
+    },
+    "SE": {
+        "name": "NCSC-SE / CERT-SE",
+        "portal": "https://www.cert.se/anmal-incident",
+        "email": "cert@cert.se",
+        "country": "Svezia",
+    },
+    "CZ": {
+        "name": "NUKIB — Narodni urad pro kybernetickou a informacni bezpecnost",
+        "portal": "https://www.nukib.cz/cs/infoservis/",
+        "email": "incident@nukib.cz",
+        "country": "Repubblica Ceca",
+    },
+}
+
 
 class BusinessUnit(BaseModel):
     code = models.CharField(max_length=20, unique=True)
@@ -19,7 +121,12 @@ class BusinessUnit(BaseModel):
 class Plant(BaseModel):
     code = models.CharField(max_length=20, unique=True)
     name = models.CharField(max_length=200)
-    country = models.CharField(max_length=2)
+    country = models.CharField(
+        max_length=10,
+        choices=EU_COUNTRIES,
+        default="IT",
+        help_text="Paese del sito — determina il CSIRT NIS2 competente",
+    )
     bu = models.ForeignKey(
         BusinessUnit,
         null=True,
