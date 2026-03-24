@@ -11,12 +11,12 @@ logger = logging.getLogger(__name__)
 
 
 def _call_ollama(prompt: str, model: str, endpoint: str, system: str = "") -> str:
-    import requests
+    import httpx
 
     payload = {"model": model, "prompt": prompt, "stream": False}
     if system:
         payload["system"] = system
-    resp = requests.post(f"{endpoint}/api/generate", json=payload, timeout=60)
+    resp = httpx.post(f"{endpoint}/api/generate", json=payload, timeout=60)
     resp.raise_for_status()
     return resp.json().get("response", "")
 
