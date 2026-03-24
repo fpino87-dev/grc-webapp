@@ -29,7 +29,8 @@ def test_scenario1_ransomware_lungo_importante():
     r = run_full_classification(incident_data, CONFIG_IMPORTANTE, "importante", False)
     assert r["scores"]["operativo"]["score"] == 4
     assert r["scores"]["economico"]["score"] == 2
-    assert r["scores"]["persone"]["score"] == 3
+    # 200 utenti, soglia 100: [100,200) → 3; v=200 è ≥100×2 → fascia 4 (non strettamente <200)
+    assert r["scores"]["persone"]["score"] == 4
     assert r["scores"]["riservatezza"]["score"] == 1
     assert r["scores"]["reputazionale"]["score"] == 3
     assert r["pta_ptnr"]["PTA"] == 4
