@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GRC Platform — Accesso sicuro</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.08);
+      padding: 40px 44px;
+      width: 100%;
+      max-width: 420px;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .logo h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e3a5f;
+      letter-spacing: -.3px;
+    }
+    .logo p {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    .step-badge {
+      display: inline-block;
+      background: #eff6ff;
+      color: #1e3a5f;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+    }
+    h2 { font-size: 18px; color: #1e293b; margin-bottom: 6px; }
+    .subtitle { font-size: 13px; color: #64748b; margin-bottom: 24px; }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+    input[type=text], input[type=password] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 7px;
+      font-size: 14px;
+      color: #111827;
+      transition: border-color .15s;
+      margin-bottom: 16px;
+    }
+    input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+    }
+    .btn {
+      width: 100%;
+      padding: 11px;
+      background: #1e3a5f;
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+      margin-top: 4px;
+    }
+    .btn:hover { background: #163059; }
+    .errorlist {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      border-radius: 7px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      list-style: none;
+      font-size: 13px;
+      color: #b91c1c;
+    }
+    .info-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 7px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #1e40af;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+    {% block extra_style %}{% endblock %}
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <h1>GRC Platform</h1>
+    <p>Compliance &amp; Risk Management</p>
+  </div>
+
+  {% if wizard.steps.current == 'auth' %}
+    <span class="step-badge">Passo 1 di {{ wizard.steps.count }}</span>
+    <h2>Accesso amministratore</h2>
+    <p class="subtitle">Inserisci le credenziali del tuo account.</p>
+  {% elif wizard.steps.current == 'token' %}
+    <span class="step-badge">Passo 2 di {{ wizard.steps.count }}</span>
+    <h2>Verifica identità</h2>
+    <p class="subtitle">Inserisci il codice dalla tua app autenticatore (Google Authenticator, Authy, ecc.).</p>
+    <div class="info-box">Il codice è valido per 30 secondi. Se scaduto, attendi il prossimo.</div>
+  {% elif wizard.steps.current == 'backup' %}
+    <span class="step-badge">Codice di recupero</span>
+    <h2>Codice di emergenza</h2>
+    <p class="subtitle">Inserisci uno dei codici di recupero monouso generati al momento del setup 2FA.</p>
+  {% endif %}
+
+  <form method="post" autocomplete="off">
+    {% csrf_token %}
+    {{ wizard.management_form }}
+
+    {% if form.errors %}
+      <ul class="errorlist">
+        {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        {% for field in form %}
+          {% for error in field.errors %}
+            <li>{{ field.label }}: {{ error }}</li>
+          {% endfor %}
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% for field in form.visible_fields %}
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+    {% endfor %}
+
+    <button type="submit" class="btn">
+      {% if wizard.steps.current == 'auth' %}Continua{% else %}Verifica{% endif %}
+    </button>
+  </form>
+
+  <div class="footer">Accesso riservato al personale autorizzato</div>
+</div>
+</body>
+</html>

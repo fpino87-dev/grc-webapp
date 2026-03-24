@@ -7,8 +7,15 @@ from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenRefreshView
+from two_factor.admin import AdminSiteOTPRequired
+from two_factor.urls import urlpatterns as tf_urls
 
 from core.jwt import GrcTokenObtainPairView
+
+# Forza il 2FA TOTP sull'intera Django Admin.
+# La tecnica __class__ swap non richiede di re-registrare nessun model:
+# tutte le app esistenti che usano admin.site.register() continuano a funzionare.
+admin.site.__class__ = AdminSiteOTPRequired
 
 
 def health_check(request):
@@ -82,6 +89,8 @@ def serve_manual(request, manual_type):
 _admin_url = getattr(settings, "ADMIN_URL", "admin/")
 
 urlpatterns = [
+    # 2FA login wizard — deve stare PRIMA dell'admin per intercettare il login
+    path("", include(tf_urls)),
     path(_admin_url, admin.site.urls),
     path("api/health/", health_check, name="health-check"),
     path("api/manual/<str:manual_type>/", serve_manual, name="manual"),

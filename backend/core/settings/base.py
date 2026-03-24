@@ -19,6 +19,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
+    # 2FA — ordine vincolato: otp_core prima dei plugin, two_factor dopo
+    "django_otp",
+    "django_otp.plugins.otp_totp",
+    "django_otp.plugins.otp_static",  # backup codes monouso
+    "two_factor",
+    "formtools",                       # wizard multi-step (dipendenza two_factor)
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
@@ -62,6 +68,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django_otp.middleware.OTPMiddleware",   # dopo AuthenticationMiddleware: aggiunge is_verified()
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -145,6 +152,10 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOWED_ORIGINS = [env("FRONTEND_URL", default="http://localhost:3000")]
+
+# Punta il login al wizard 2FA di django-two-factor-auth (non al default /accounts/login/)
+LOGIN_URL = "two_factor:login"
+LOGOUT_REDIRECT_URL = "/"
 
 CONN_MAX_AGE = 60
 
