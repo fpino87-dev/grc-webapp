@@ -88,7 +88,7 @@ function TabCompliance() {
           <KpiCard label={t("reporting.kpi.active_sites")} value={dash.plants_active} />
           <KpiCard label={t("reporting.kpi.open_incidents")} value={dash.incidents_open} highlight={dash.incidents_open > 0} />
           <KpiCard label={t("reporting.kpi.total_controls")} value={dash.controls_total} />
-          <KpiCard label={t("reporting.kpi.pct_compliant")} value={`${dash.pct_compliant.toFixed(1)}%`} sub={`${dash.controls_compliant} / ${dash.controls_total}`} highlight />
+          <KpiCard label={t("reporting.kpi.pct_compliant")} value={`${(dash.pct_compliant ?? 0).toFixed(1)}%`} sub={`${dash.controls_compliant ?? 0} / ${dash.controls_total ?? 0}`} highlight />
           <KpiCard label={t("reporting.kpi.gap_controls")} value={dash.controls_gap} highlight={dash.controls_gap > 0} />
         </div>
       ) : null}
