@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { plantsApi, type Plant } from "../../api/endpoints/plants";
 import { controlsApi } from "../../api/endpoints/controls";
 import { StatusBadge } from "../../components/ui/StatusBadge";
+import { AuthenticatedImage } from "../../components/ui/AuthenticatedImage";
 import { useAuthStore } from "../../store/auth";
 import { useTranslation } from "react-i18next";
 
@@ -220,7 +221,7 @@ function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void 
                     />
                   </label>
                   {form.logo_url && (
-                    <img
+                    <AuthenticatedImage
                       src={resolvePlantLogoSrc(plant.id, form.logo_url)}
                       alt="Logo preview"
                       className="h-8 w-auto max-w-[120px] rounded border border-gray-200 bg-white object-contain"
@@ -744,7 +745,7 @@ export function PlantsList() {
                 <tr key={p.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3">
                     {p.logo_url ? (
-                      <img
+                      <AuthenticatedImage
                         src={resolvePlantLogoSrc(p.id, p.logo_url)}
                         alt={p.name}
                         className="h-6 w-auto object-contain rounded-sm border border-gray-200 bg-white"

@@ -1,5 +1,6 @@
 import os
 
+import magic
 from django.utils import timezone
 from django.core.files.storage import default_storage
 from django.http import FileResponse, Http404, HttpResponseRedirect
@@ -7,10 +8,39 @@ from rest_framework import viewsets, status, parsers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils.translation import gettext as _
+from rest_framework.exceptions import ValidationError
 
 from core.audit import log_action
 from .models import BusinessUnit, Plant, PlantFramework
 from .serializers import BusinessUnitSerializer, PlantFrameworkSerializer, PlantSerializer
+
+_LOGO_MAX_SIZE = 2 * 1024 * 1024  # 2 MB
+_LOGO_ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp", "svg"}
+_LOGO_ALLOWED_MIME_TYPES = {
+    "image/png", "image/jpeg", "image/gif", "image/webp", "image/svg+xml",
+}
+
+
+def _validate_logo_file(uploaded_file):
+    """Valida dimensione, estensione e MIME type reale del file logo."""
+    if uploaded_file.size > _LOGO_MAX_SIZE:
+        raise ValidationError(_("Logo troppo grande. Dimensione massima: 2 MB."))
+
+    _, ext = os.path.splitext(getattr(uploaded_file, "name", "") or "")
+    ext = ext.lstrip(".").lower()
+    if not ext or ext not in _LOGO_ALLOWED_EXTENSIONS:
+        raise ValidationError(
+            _("Estensione non consentita. Formati ammessi: png, jpg, jpeg, gif, webp, svg.")
+        )
+
+    uploaded_file.seek(0)
+    header = uploaded_file.read(2048)
+    uploaded_file.seek(0)
+    mime_type = magic.from_buffer(header, mime=True)
+    if mime_type not in _LOGO_ALLOWED_MIME_TYPES:
+        raise ValidationError(
+            _("Tipo di file non consentito. Il contenuto non corrisponde all'estensione.")
+        )
 
 
 class BusinessUnitViewSet(viewsets.ModelViewSet):
@@ -63,8 +93,12 @@ class PlantViewSet(viewsets.ModelViewSet):
         if not uploaded_file:
             return Response({"error": _("Nessun file fornito.")}, status=status.HTTP_400_BAD_REQUEST)
 
+        _validate_logo_file(uploaded_file)
+
         # Salva nel default_storage sotto una cartella dedicata ai plant
-        path = default_storage.save(f"plant-logos/{plant.id}/{uploaded_file.name}", uploaded_file)
+        # Il nome file viene sanificato: solo basename senza path traversal
+        safe_name = os.path.basename(uploaded_file.name)
+        path = default_storage.save(f"plant-logos/{plant.id}/{safe_name}", uploaded_file)
         logo_url = default_storage.url(path)
 
         plant.logo_url = logo_url
