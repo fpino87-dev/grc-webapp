@@ -6,7 +6,6 @@ import { plantsApi } from "../../api/endpoints/plants";
 import { notificationsApi } from "../../api/endpoints/notifications";
 import i18n from "../../i18n";
 import { useTranslation } from "react-i18next";
-import { ManualDrawer } from "../ui/ManualDrawer";
 
 function NotificationBell() {
   const { t } = useTranslation();
@@ -79,7 +78,6 @@ export function Topbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [lang, setLang] = useState<string>(i18n.language || localStorage.getItem("grc_lang") || "it");
-  const [openManual, setOpenManual] = useState<"utente" | "tecnico" | null>(null);
 
   const { data: plants } = useQuery({
     queryKey: ["plants"],
@@ -178,24 +176,6 @@ export function Topbar() {
           </div>
         </div>
 
-        {/* Manual buttons */}
-        <div className="flex items-center gap-1 border-l border-gray-200 pl-4">
-          <button
-            onClick={() => setOpenManual("utente")}
-            className="text-gray-400 hover:text-blue-600 transition-colors p-1 rounded text-base"
-            title="Manuale Utente"
-          >
-            📖
-          </button>
-          <button
-            onClick={() => setOpenManual("tecnico")}
-            className="text-gray-400 hover:text-blue-600 transition-colors p-1 rounded text-base"
-            title="Manuale Tecnico"
-          >
-            🔧
-          </button>
-        </div>
-
         <NotificationBell />
         {user && (
           <span className="text-sm text-gray-700">
@@ -214,9 +194,6 @@ export function Topbar() {
       </div>
     </header>
 
-      {openManual && (
-        <ManualDrawer type={openManual} onClose={() => setOpenManual(null)} />
-      )}
     </>
   );
 }

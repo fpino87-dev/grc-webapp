@@ -80,7 +80,7 @@ export function Sidebar() {
         <h1 className="text-lg font-bold tracking-tight">GRC Platform</h1>
         <p className="text-xs text-primary-300 mt-0.5">Compliance & Risk</p>
       </div>
-      <nav className="flex-1 px-2 py-4 space-y-4 overflow-y-auto">
+      <nav className="flex-1 px-2 py-4 space-y-4 overflow-y-auto pb-10">
         {navGroups.map(group => {
           const visibleItems = group.items.filter(item => isVisible(item.roles));
           if (visibleItems.length === 0) return null;
