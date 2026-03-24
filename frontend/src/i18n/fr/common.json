@@ -1402,6 +1402,18 @@
       "nis2_notifiable": "Notification NIS2",
       "detected_at": "Détecté le"
     },
+    "views": {
+      "list": "Liste des incidents",
+      "nis2_config": "Configuration NIS2"
+    },
+    "nis2_config_select_plant": "Sélectionnez un site dans le menu en haut pour modifier les paramètres de calcul de la significativité.",
+    "nis2_config_plant_note": "Secteur NIS2, sous-secteur, raison sociale, TVA et description d’activité se configurent dans M01 Sites. Le contact pour les notifications est le rôle « Contact NIS2 » assigné au site dans M00 Gouvernance (ne pas dupliquer ici).",
+    "nis2_config_save": "Enregistrer les paramètres de calcul",
+    "nis2_config_labels": {
+      "threshold_users": "Seuil utilisateurs/systèmes (n.)",
+      "threshold_hours": "Seuil heures d’interruption de service",
+      "threshold_financial": "Seuil impact financier (€)"
+    },
     "new": {
       "open": "+ Nouvel incident",
       "title": "Nouvel incident",
@@ -1432,9 +1444,10 @@
         }
       },
       "config_needed": {
-        "1": "Nommer le contact NIS2 dans M00 Gouvernance"
-      },
-      "nis2_classification": {
+        "1": "Configurer les seuils de calcul dans Incidents → Configuration NIS2 ; fiche site et contact NIS2 dans M01 / M00"
+      }
+    },
+    "nis2_classification": {
         "classify_success": "Décision de classification enregistrée.",
         "classify_error": "Échec de la classification. Vérifiez les données.",
         "scope_label": "Périmètre NIS2 du site",
@@ -1502,7 +1515,6 @@
           "recurrence_note": "Le système vérifie un incident fermé de même catégorie sur les N derniers jours sur ce site.",
           "activity_desc": "Description d'activité NIS2 (documents officiels)"
         }
-      }
     }
   },
   "competency": {

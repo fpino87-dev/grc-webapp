@@ -9,6 +9,11 @@ export interface Plant {
   status: "attivo" | "in_dismissione" | "chiuso";
   has_ot: boolean;
   logo_url?: string | null;
+  nis2_sector?: string;
+  nis2_subsector?: string;
+  legal_entity_name?: string;
+  legal_entity_vat?: string;
+  nis2_activity_description?: string;
 }
 
 export interface BusinessUnit {

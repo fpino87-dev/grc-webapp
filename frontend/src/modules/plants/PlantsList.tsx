@@ -39,6 +39,11 @@ function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void 
     status: plant.status,
     has_ot: plant.has_ot,
     logo_url: plant.logo_url ?? "",
+    nis2_sector: plant.nis2_sector ?? "",
+    nis2_subsector: plant.nis2_subsector ?? "",
+    legal_entity_name: plant.legal_entity_name ?? "",
+    legal_entity_vat: plant.legal_entity_vat ?? "",
+    nis2_activity_description: plant.nis2_activity_description ?? "",
   });
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -131,6 +136,57 @@ function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void 
               onChange={e => set("has_ot", e.target.checked)} className="rounded" />
             <label htmlFor="edit_has_ot" className="text-sm text-gray-700">{t("plants.fields.has_ot")}</label>
           </div>
+          <div className="border-t border-gray-100 pt-3 space-y-3">
+            <div className="text-xs font-semibold text-gray-800">{t("plants.nis2_entity.section_title")}</div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_sector")}</label>
+                <input
+                  value={form.nis2_sector ?? ""}
+                  onChange={e => set("nis2_sector", e.target.value)}
+                  className="w-full border rounded px-3 py-2 text-sm"
+                  placeholder={t("plants.placeholders.nis2_sector")}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_subsector")}</label>
+                <input
+                  value={form.nis2_subsector ?? ""}
+                  onChange={e => set("nis2_subsector", e.target.value)}
+                  className="w-full border rounded px-3 py-2 text-sm"
+                  placeholder={t("plants.placeholders.nis2_subsector")}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.legal_entity_name")}</label>
+                <input
+                  value={form.legal_entity_name ?? ""}
+                  onChange={e => set("legal_entity_name", e.target.value)}
+                  className="w-full border rounded px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.legal_entity_vat")}</label>
+                <input
+                  value={form.legal_entity_vat ?? ""}
+                  onChange={e => set("legal_entity_vat", e.target.value)}
+                  className="w-full border rounded px-3 py-2 text-sm"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_activity_description")}</label>
+              <textarea
+                value={form.nis2_activity_description ?? ""}
+                onChange={e => set("nis2_activity_description", e.target.value)}
+                rows={3}
+                className="w-full border rounded px-3 py-2 text-sm"
+              />
+            </div>
+            <p className="text-xs text-gray-500">{t("plants.nis2_entity.contact_hint")}</p>
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.logo_url_label")}</label>
             <input
@@ -191,6 +247,11 @@ const EMPTY: Partial<Plant> = {
   status: "attivo",
   has_ot: false,
   logo_url: "",
+  nis2_sector: "",
+  nis2_subsector: "",
+  legal_entity_name: "",
+  legal_entity_vat: "",
+  nis2_activity_description: "",
 };
 
 function PlantModal({ onClose }: { onClose: () => void }) {
@@ -274,6 +335,57 @@ function PlantModal({ onClose }: { onClose: () => void }) {
             <input type="checkbox" id="has_ot" checked={!!form.has_ot}
               onChange={e => set("has_ot", e.target.checked)} className="rounded" />
             <label htmlFor="has_ot" className="text-sm text-gray-700">{t("plants.fields.has_ot")}</label>
+          </div>
+          <div className="border-t border-gray-100 pt-3 space-y-3">
+            <div className="text-xs font-semibold text-gray-800">{t("plants.nis2_entity.section_title")}</div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_sector")}</label>
+                <input
+                  value={form.nis2_sector ?? ""}
+                  onChange={e => set("nis2_sector", e.target.value)}
+                  className="w-full border rounded px-3 py-2 text-sm"
+                  placeholder={t("plants.placeholders.nis2_sector")}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_subsector")}</label>
+                <input
+                  value={form.nis2_subsector ?? ""}
+                  onChange={e => set("nis2_subsector", e.target.value)}
+                  className="w-full border rounded px-3 py-2 text-sm"
+                  placeholder={t("plants.placeholders.nis2_subsector")}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.legal_entity_name")}</label>
+                <input
+                  value={form.legal_entity_name ?? ""}
+                  onChange={e => set("legal_entity_name", e.target.value)}
+                  className="w-full border rounded px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.legal_entity_vat")}</label>
+                <input
+                  value={form.legal_entity_vat ?? ""}
+                  onChange={e => set("legal_entity_vat", e.target.value)}
+                  className="w-full border rounded px-3 py-2 text-sm"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_activity_description")}</label>
+              <textarea
+                value={form.nis2_activity_description ?? ""}
+                onChange={e => set("nis2_activity_description", e.target.value)}
+                rows={3}
+                className="w-full border rounded px-3 py-2 text-sm"
+              />
+            </div>
+            <p className="text-xs text-gray-500">{t("plants.nis2_entity.contact_hint")}</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.logo_url_label")}</label>

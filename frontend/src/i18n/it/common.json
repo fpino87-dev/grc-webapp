@@ -507,12 +507,23 @@
       "status": "Stato",
       "nis2_scope": "Perimetro NIS2",
       "has_ot": "Presenza reti OT / ICS",
-      "logo_upload_label": "Carica logo"
+      "logo_upload_label": "Carica logo",
+      "nis2_sector": "Settore NIS2",
+      "nis2_subsector": "Sottosettore NIS2",
+      "legal_entity_name": "Ragione sociale (notifiche)",
+      "legal_entity_vat": "P.IVA / VAT",
+      "nis2_activity_description": "Descrizione attività NIS2 (documenti formali)"
+    },
+    "nis2_entity": {
+      "section_title": "NIS2 e entità legale",
+      "contact_hint": "Il referente operativo per le notifiche è l’utente con incarico «Contatto NIS2» su questo sito (M00 Governance)."
     },
     "placeholders": {
       "code": "IT-MIL-01",
       "country": "IT",
-      "name": "Stabilimento Milano"
+      "name": "Stabilimento Milano",
+      "nis2_sector": "es. Manifattura — Automotive",
+      "nis2_subsector": "es. Produzione componenti"
     },
     "actions": {
       "edit_title": "Modifica sito",
@@ -1325,6 +1336,18 @@
       "nis2_notifiable": "Notifica NIS2",
       "detected_at": "Rilevato il"
     },
+    "views": {
+      "list": "Elenco incidenti",
+      "nis2_config": "Configurazione NIS2"
+    },
+    "nis2_config_select_plant": "Seleziona un sito dal menu in alto per modificare i parametri di calcolo della significatività.",
+    "nis2_config_plant_note": "Settore NIS2, sottosettore, ragione sociale, P.IVA e descrizione attività si configurano in M01 Siti. Il referente per le notifiche è l’incarico «Contatto NIS2» assegnato al sito in M00 Governance (non va duplicato qui).",
+    "nis2_config_save": "Salva parametri calcolo",
+    "nis2_config_labels": {
+      "threshold_users": "Soglia utenti/sistemi (n.)",
+      "threshold_hours": "Soglia ore interruzione servizio",
+      "threshold_financial": "Soglia impatto finanziario (€)"
+    },
     "new": {
       "open": "+ Nuovo incidente",
       "title": "Nuovo incidente",
@@ -1355,9 +1378,10 @@
         }
       },
       "config_needed": {
-        "1": "Nominare il contatto NIS2 in M00 Governance"
-      },
-      "nis2_classification": {
+        "1": "Configurare soglie calcolo in Incidenti → Configurazione NIS2; anagrafica sito e Contatto NIS2 in M01 / M00"
+      }
+    },
+    "nis2_classification": {
         "classify_success": "Decisione di classificazione registrata con successo.",
         "classify_error": "Errore durante la classificazione. Verificare i dati e riprovare.",
         "scope_label": "Perimetro NIS2 del sito",
@@ -1425,7 +1449,6 @@
           "recurrence_note": "Il sistema verifica automaticamente se esiste un incidente chiuso della stessa categoria negli ultimi N giorni sullo stesso sito.",
           "activity_desc": "Descrizione attività NIS2 (documenti formali)"
         }
-      }
     }
   },
   "competency": {

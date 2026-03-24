@@ -1323,6 +1323,18 @@
       "nis2_notifiable": "NIS2 notification",
       "detected_at": "Detected at"
     },
+    "views": {
+      "list": "Incident list",
+      "nis2_config": "NIS2 configuration"
+    },
+    "nis2_config_select_plant": "Select a site from the menu above to edit significance calculation parameters.",
+    "nis2_config_plant_note": "NIS2 sector, subsector, legal name, VAT, and activity description are configured in M01 Sites. The notification contact is the “NIS2 Contact” role assignment for the site in M00 Governance (do not duplicate here).",
+    "nis2_config_save": "Save calculation parameters",
+    "nis2_config_labels": {
+      "threshold_users": "Users/systems threshold (n.)",
+      "threshold_hours": "Service outage hours threshold",
+      "threshold_financial": "Financial impact threshold (€)"
+    },
     "new": {
       "open": "+ New incident",
       "title": "New incident",
@@ -1353,9 +1365,10 @@
         }
       },
       "config_needed": {
-        "1": "Appoint the NIS2 contact in M00 Governance"
-      },
-      "nis2_classification": {
+        "1": "Configure calculation thresholds under Incidents → NIS2 configuration; site details and NIS2 Contact in M01 / M00"
+      }
+    },
+    "nis2_classification": {
         "classify_success": "Classification decision saved successfully.",
         "classify_error": "Classification failed. Check the data and try again.",
         "scope_label": "Site NIS2 scope",
@@ -1423,7 +1436,6 @@
           "recurrence_note": "The system checks for a closed incident with the same category in the last N days at this site.",
           "activity_desc": "NIS2 activity description (formal documents)"
         }
-      }
     }
   },
   "competency": {

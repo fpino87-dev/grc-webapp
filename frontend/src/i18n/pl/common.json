@@ -1402,6 +1402,18 @@
       "nis2_notifiable": "Powiadomienie NIS2",
       "detected_at": "Wykryto"
     },
+    "views": {
+      "list": "Lista incydentów",
+      "nis2_config": "Konfiguracja NIS2"
+    },
+    "nis2_config_select_plant": "Wybierz zakład z menu u góry, aby edytować parametry obliczania znaczenia.",
+    "nis2_config_plant_note": "Sektor NIS2, podsektor, nazwa firmy, NIP i opis działalności konfiguruje się w M01 Zakłady. Kontakt do powiadomień to rola „Kontakt NIS2” przypisana do zakładu w M00 Governance (nie duplikuj tutaj).",
+    "nis2_config_save": "Zapisz parametry obliczeń",
+    "nis2_config_labels": {
+      "threshold_users": "Próg użytkowników/systemów (n.)",
+      "threshold_hours": "Próg godzin przerwy w świadczeniu usługi",
+      "threshold_financial": "Próg wpływu finansowego (€)"
+    },
     "new": {
       "open": "+ Nowy incydent",
       "title": "Nowy incydent",
@@ -1432,9 +1444,10 @@
         }
       },
       "config_needed": {
-        "1": "Wyznaczyć kontakt NIS2 w M00 Governance"
-      },
-      "nis2_classification": {
+        "1": "Skonfiguruj progi obliczeń w Incydenty → Konfiguracja NIS2; dane zakładu i Kontakt NIS2 w M01 / M00"
+      }
+    },
+    "nis2_classification": {
         "classify_success": "Decyzja klasyfikacji zapisana pomyślnie.",
         "classify_error": "Klasyfikacja nie powiodła się. Sprawdź dane.",
         "scope_label": "Zakres NIS2 zakładu",
@@ -1502,7 +1515,6 @@
           "recurrence_note": "System sprawdza zamknięty incydent z tej samej kategorii w ostatnich N dniach w tym zakładzie.",
           "activity_desc": "Opis działalności NIS2 (dokumenty formalne)"
         }
-      }
     }
   },
   "competency": {

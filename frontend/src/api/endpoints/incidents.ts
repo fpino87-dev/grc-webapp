@@ -71,14 +71,8 @@ export interface NIS2Configuration {
   recurrence_window_days?: number;
   recurrence_score_bonus?: number;
   ptnr_threshold?: number;
-  nis2_activity_description?: string;
-  nis2_sector?: string;
-  nis2_subsector?: string;
-  internal_contact_name?: string;
-  internal_contact_email?: string;
-  internal_contact_phone?: string;
-  legal_entity_name?: string;
-  legal_entity_vat?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ClassificationAxisBreakdown {

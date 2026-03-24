@@ -1402,6 +1402,18 @@
       "nis2_notifiable": "NIS2 bildirimi",
       "detected_at": "Algılandı"
     },
+    "views": {
+      "list": "Olay listesi",
+      "nis2_config": "NIS2 yapılandırması"
+    },
+    "nis2_config_select_plant": "Önemlilik hesaplama parametrelerini düzenlemek için üstteki menüden bir site seçin.",
+    "nis2_config_plant_note": "NIS2 sektörü, alt sektör, tüzel unvan, KDV ve faaliyet açıklaması M01 Siteler’de yapılandırılır. Bildirim iletişimi, M00 Yönetişim’de siteye atanan «NIS2 İletişim» rolüdür (burada tekrarlamayın).",
+    "nis2_config_save": "Hesaplama parametrelerini kaydet",
+    "nis2_config_labels": {
+      "threshold_users": "Kullanıcı/sistem eşiği (sayı)",
+      "threshold_hours": "Hizmet kesintisi saat eşiği",
+      "threshold_financial": "Finansal etki eşiği (€)"
+    },
     "new": {
       "open": "+ Yeni olay",
       "title": "Yeni olay",
@@ -1432,9 +1444,10 @@
         }
       },
       "config_needed": {
-        "1": "M00 Yönetişim'de NIS2 iletişim kişisi atayın"
-      },
-      "nis2_classification": {
+        "1": "Hesaplama eşiklerini Olaylar → NIS2 yapılandırması altında ayarlayın; site bilgisi ve NIS2 iletişimi M01 / M00"
+      }
+    },
+    "nis2_classification": {
         "classify_success": "Sınıflandırma kararı kaydedildi.",
         "classify_error": "Sınıflandırma başarısız. Verileri kontrol edin.",
         "scope_label": "Site NIS2 kapsamı",
@@ -1502,7 +1515,6 @@
           "recurrence_note": "Sistem bu sitede son N gün içinde aynı kategoride kapatılmış olay arar.",
           "activity_desc": "NIS2 faaliyet açıklaması (resmi belgeler)"
         }
-      }
     }
   },
   "competency": {

@@ -167,6 +167,30 @@ class Plant(BaseModel):
         blank=True,
         help_text="URL del logo per questo sito (usato in report/export). Può essere assoluto o relativo (es. /media/...).",
     )
+    nis2_sector = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Settore NIS2 (es. Manifattura - Automotive) — usato in notifiche CSIRT",
+    )
+    nis2_subsector = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Sottosettore NIS2 — usato in notifiche CSIRT",
+    )
+    legal_entity_name = models.CharField(
+        max_length=300,
+        blank=True,
+        help_text="Ragione sociale per notifiche formali NIS2",
+    )
+    legal_entity_vat = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Partita IVA / VAT per notifiche formali NIS2",
+    )
+    nis2_activity_description = models.TextField(
+        blank=True,
+        help_text="Descrizione attività NIS2 del sito per documenti formali",
+    )
 
     class Meta:
         ordering = ["code"]

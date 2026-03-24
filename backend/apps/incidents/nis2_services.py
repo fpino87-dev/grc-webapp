@@ -16,6 +16,33 @@ def _e(value) -> str:
     return html_module.escape(str(value))
 
 
+def _plant_nis2_contact_lines(plant):
+    """Nome e email referente da incarico Governance (ruolo nis2_contact sul plant)."""
+    if not plant:
+        return "—", "—"
+    from django.db.models import Q
+
+    from apps.governance.models import RoleAssignment
+
+    today = timezone.now().date()
+    ra = (
+        RoleAssignment.objects.filter(
+            role="nis2_contact",
+            scope_type="plant",
+            scope_id=plant.pk,
+            valid_from__lte=today,
+            deleted_at__isnull=True,
+        )
+        .filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today))
+        .select_related("user")
+        .first()
+    )
+    if ra and ra.user:
+        u = ra.user
+        return (u.get_full_name() or u.email or "—", u.email or "—")
+    return "—", "—"
+
+
 def _config_dict_from_obj(config_obj: NIS2Configuration | None) -> dict:
     return {
         "threshold_hours": float(config_obj.threshold_hours) if config_obj else 4.0,
@@ -359,12 +386,16 @@ def generate_nis2_document(incident: Incident, notification_type: str, user) -> 
         else (str(deadline) if deadline else "—")
     )
 
-    legal_name = config.legal_entity_name if config and config.legal_entity_name else (plant.name if plant else "—")
-    legal_vat = config.legal_entity_vat if config and config.legal_entity_vat else "—"
-    sector = config.nis2_sector if config and config.nis2_sector else "Manifattura"
-    contact_name = config.internal_contact_name if config else "—"
-    contact_email = config.internal_contact_email if config else "—"
-    contact_phone = config.internal_contact_phone if config else "—"
+    legal_name = (
+        (plant.legal_entity_name if plant else "")
+        or (config.legal_entity_name if config else "")
+        or (plant.name if plant else "")
+        or "—"
+    )
+    legal_vat = (plant.legal_entity_vat if plant else "") or (config.legal_entity_vat if config else "") or "—"
+    sector = (plant.nis2_sector if plant else "") or (config.nis2_sector if config else "") or "Manifattura"
+    subsector = (plant.nis2_subsector if plant else "") or (config.nis2_subsector if config else "")
+    contact_name, contact_email = _plant_nis2_contact_lines(plant)
 
     impact_rows = ""
     if incident.affected_users_count is not None:
@@ -448,6 +479,10 @@ def generate_nis2_document(incident: Incident, notification_type: str, user) -> 
 </div>
 """
 
+    subsector_row = (
+        f"<tr><td>Sottosettore NIS2</td><td>{_e(subsector)}</td></tr>" if subsector else ""
+    )
+
     return f"""<!DOCTYPE html>
 <html lang="it">
 <head>
@@ -490,7 +525,8 @@ def generate_nis2_document(incident: Incident, notification_type: str, user) -> 
     <tr><td>Paese</td><td>{_e(plant.get_country_display()) if plant else "—"}</td></tr>
     <tr><td>Classificazione NIS2</td><td><span class="sig-badge">{_e(entity_type.upper())}</span></td></tr>
     <tr><td>Settore NIS2</td><td>{_e(sector)}</td></tr>
-    <tr><td>Referente NIS2</td><td>{_e(contact_name)} — {_e(contact_email)}{_e(" — " + contact_phone) if contact_phone else ""}</td></tr>
+    {subsector_row}
+    <tr><td>Referente NIS2</td><td>{_e(contact_name)} — {_e(contact_email)} (incarico M00 Governance)</td></tr>
   </table>
 </div>
 <div class="section">

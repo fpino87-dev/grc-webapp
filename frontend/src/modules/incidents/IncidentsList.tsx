@@ -128,7 +128,8 @@ export function IncidentsList() {
   const { t } = useTranslation();
   const [showNew, setShowNew] = useState(false);
   const [selected, setSelected] = useState<Incident | null>(null);
-  const [activeTab, setActiveTab] = useState<"gestione" | "classificazione" | "metodo" | "timeline" | "config">("gestione");
+  const [moduleView, setModuleView] = useState<"list" | "nis2_config">("list");
+  const [activeTab, setActiveTab] = useState<"gestione" | "classificazione" | "metodo" | "timeline">("gestione");
   const [sentType, setSentType] = useState("formal_notification");
   const [protocolRef, setProtocolRef] = useState("");
   const [authorityResponse, setAuthorityResponse] = useState("");
@@ -235,7 +236,7 @@ export function IncidentsList() {
   const { data: configData } = useQuery({
     queryKey: ["nis2-config", selectedPlant?.id],
     queryFn: () => incidentsApi.listConfig(selectedPlant?.id ?? ""),
-    enabled: !!selectedPlant?.id && canSeeConfig,
+    enabled: !!selectedPlant?.id && canSeeConfig && moduleView === "nis2_config",
   });
   const currentConfig = configData?.[0];
   const [configForm, setConfigForm] = useState<Partial<NIS2Configuration>>({
@@ -264,6 +265,12 @@ export function IncidentsList() {
   useEffect(() => {
     setPreviewBreakdown(null);
   }, [selected?.id]);
+
+  useEffect(() => {
+    if (moduleView === "nis2_config") {
+      setSelected(null);
+    }
+  }, [moduleView]);
 
   useEffect(() => {
     if (!selected?.plant || activeTab !== "classificazione") return;
@@ -325,14 +332,6 @@ export function IncidentsList() {
       ptnr_threshold: currentConfig.ptnr_threshold ?? 4,
       recurrence_window_days: currentConfig.recurrence_window_days ?? 90,
       recurrence_score_bonus: currentConfig.recurrence_score_bonus ?? 2,
-      nis2_activity_description: currentConfig.nis2_activity_description ?? "",
-      nis2_sector: currentConfig.nis2_sector,
-      nis2_subsector: currentConfig.nis2_subsector,
-      internal_contact_name: currentConfig.internal_contact_name,
-      internal_contact_email: currentConfig.internal_contact_email,
-      internal_contact_phone: currentConfig.internal_contact_phone,
-      legal_entity_name: currentConfig.legal_entity_name,
-      legal_entity_vat: currentConfig.legal_entity_vat,
     });
   }, [currentConfig]);
 
@@ -489,35 +488,62 @@ export function IncidentsList() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-          {t("incidents.title")}
-          <ModuleHelp
-            title={t("incidents.help.title")}
-            description={t("incidents.help.description")}
-            steps={[
-              t("incidents.help.steps.1"),
-              t("incidents.help.steps.2"),
-              t("incidents.help.steps.3"),
-              t("incidents.help.steps.4"),
-              t("incidents.help.steps.5"),
-            ]}
-            connections={[
-              { module: t("incidents.help.connections.pdca.module"), relation: t("incidents.help.connections.pdca.relation") },
-              { module: t("incidents.help.connections.lessons.module"), relation: t("incidents.help.connections.lessons.relation") },
-              { module: t("incidents.help.connections.tasks.module"), relation: t("incidents.help.connections.tasks.relation") },
-            ]}
-            configNeeded={[t("incidents.help.config_needed.1")]}
-          />
-        </h2>
-        <button
-          onClick={() => setShowNew(true)}
-          className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700"
-        >
-          {t("incidents.new.open")}
-        </button>
+      <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+            {t("incidents.title")}
+            <ModuleHelp
+              title={t("incidents.help.title")}
+              description={t("incidents.help.description")}
+              steps={[
+                t("incidents.help.steps.1"),
+                t("incidents.help.steps.2"),
+                t("incidents.help.steps.3"),
+                t("incidents.help.steps.4"),
+                t("incidents.help.steps.5"),
+              ]}
+              connections={[
+                { module: t("incidents.help.connections.pdca.module"), relation: t("incidents.help.connections.pdca.relation") },
+                { module: t("incidents.help.connections.lessons.module"), relation: t("incidents.help.connections.lessons.relation") },
+                { module: t("incidents.help.connections.tasks.module"), relation: t("incidents.help.connections.tasks.relation") },
+              ]}
+              configNeeded={[t("incidents.help.config_needed.1")]}
+            />
+          </h2>
+          <div className="flex rounded-lg border border-gray-200 bg-gray-50 p-0.5 w-fit">
+            <button
+              type="button"
+              onClick={() => setModuleView("list")}
+              className={`px-3 py-1.5 text-xs rounded-md whitespace-nowrap ${
+                moduleView === "list" ? "bg-white shadow text-primary-700 font-medium" : "text-gray-600 hover:text-gray-800"
+              }`}
+            >
+              {t("incidents.views.list")}
+            </button>
+            {canSeeConfig && (
+              <button
+                type="button"
+                onClick={() => setModuleView("nis2_config")}
+                className={`px-3 py-1.5 text-xs rounded-md whitespace-nowrap ${
+                  moduleView === "nis2_config" ? "bg-white shadow text-primary-700 font-medium" : "text-gray-600 hover:text-gray-800"
+                }`}
+              >
+                {t("incidents.views.nis2_config")}
+              </button>
+            )}
+          </div>
+        </div>
+        {moduleView === "list" && (
+          <button
+            onClick={() => setShowNew(true)}
+            className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 w-fit"
+          >
+            {t("incidents.new.open")}
+          </button>
+        )}
       </div>
 
+      {moduleView === "list" && (
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center text-gray-400">{t("common.loading")}</div>
@@ -575,8 +601,122 @@ export function IncidentsList() {
           </table>
         )}
       </div>
+      )}
 
-      {showNew && plants && (
+      {moduleView === "nis2_config" && canSeeConfig && !selectedPlant && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          {t("incidents.nis2_config_select_plant")}
+        </div>
+      )}
+
+      {moduleView === "nis2_config" && canSeeConfig && selectedPlant && (
+        <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-3 max-w-4xl">
+          <div className="text-sm font-semibold">{t("incidents.nis2_classification.config.calc_title")}</div>
+          <p className="text-xs text-gray-500 bg-blue-50 border border-blue-100 rounded p-2">{t("incidents.nis2_classification.config.ptnr_note")}</p>
+          <p className="text-xs text-gray-600">{t("incidents.nis2_config_plant_note")}</p>
+          <div className="text-xs font-semibold text-gray-700 pt-1">{t("incidents.nis2_classification.config.base_title")}</div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-600">{t("incidents.nis2_config_labels.threshold_users")}</label>
+              <input
+                className="w-full border rounded px-2 py-1.5 text-sm"
+                type="number"
+                value={configForm.threshold_users ?? currentConfig?.threshold_users ?? 100}
+                onChange={(e) => setConfigForm((f) => ({ ...f, threshold_users: Number(e.target.value) }))}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-600">{t("incidents.nis2_config_labels.threshold_hours")}</label>
+              <input
+                className="w-full border rounded px-2 py-1.5 text-sm"
+                type="number"
+                step="0.01"
+                value={configForm.threshold_hours ?? currentConfig?.threshold_hours ?? 4}
+                onChange={(e) => setConfigForm((f) => ({ ...f, threshold_hours: Number(e.target.value) }))}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-600">{t("incidents.nis2_config_labels.threshold_financial")}</label>
+              <input
+                className="w-full border rounded px-2 py-1.5 text-sm"
+                type="number"
+                value={configForm.threshold_financial ?? currentConfig?.threshold_financial ?? 100000}
+                onChange={(e) => setConfigForm((f) => ({ ...f, threshold_financial: Number(e.target.value) }))}
+              />
+            </div>
+          </div>
+          <div className="text-xs font-semibold text-gray-700 pt-2">{t("incidents.nis2_classification.config.multiplier_title")}</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-600">{t("incidents.nis2_classification.config.multiplier_m")}</label>
+              <input
+                className="w-full border rounded px-2 py-1.5 text-sm"
+                type="number"
+                step="0.01"
+                value={configForm.multiplier_medium ?? currentConfig?.multiplier_medium ?? 2}
+                onChange={(e) => setConfigForm((f) => ({ ...f, multiplier_medium: Number(e.target.value) }))}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-600">{t("incidents.nis2_classification.config.multiplier_h")}</label>
+              <input
+                className="w-full border rounded px-2 py-1.5 text-sm"
+                type="number"
+                step="0.01"
+                value={configForm.multiplier_high ?? currentConfig?.multiplier_high ?? 3}
+                onChange={(e) => setConfigForm((f) => ({ ...f, multiplier_high: Number(e.target.value) }))}
+              />
+            </div>
+          </div>
+          <p className="text-xs text-gray-500">{t("incidents.nis2_classification.config.multiplier_note")}</p>
+          <div className="text-xs font-semibold text-gray-700 pt-2">{t("incidents.nis2_classification.config.rule_title")}</div>
+          <div className="max-w-xs space-y-1">
+            <label className="text-xs font-medium text-gray-600">{t("incidents.nis2_classification.config.ptnr_threshold")}</label>
+            <input
+              className="w-full border rounded px-2 py-1.5 text-sm"
+              type="number"
+              value={configForm.ptnr_threshold ?? currentConfig?.ptnr_threshold ?? 4}
+              onChange={(e) => setConfigForm((f) => ({ ...f, ptnr_threshold: Number(e.target.value) }))}
+            />
+          </div>
+          <div className="text-xs font-semibold text-gray-700 pt-2">{t("incidents.nis2_classification.config.recurrence_title")}</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-600">{t("incidents.nis2_classification.config.recurrence_window")}</label>
+              <input
+                className="w-full border rounded px-2 py-1.5 text-sm"
+                type="number"
+                value={configForm.recurrence_window_days ?? currentConfig?.recurrence_window_days ?? 90}
+                onChange={(e) => setConfigForm((f) => ({ ...f, recurrence_window_days: Number(e.target.value) }))}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-600">{t("incidents.nis2_classification.config.recurrence_bonus")}</label>
+              <input
+                className="w-full border rounded px-2 py-1.5 text-sm"
+                type="number"
+                value={configForm.recurrence_score_bonus ?? currentConfig?.recurrence_score_bonus ?? 2}
+                onChange={(e) => setConfigForm((f) => ({ ...f, recurrence_score_bonus: Number(e.target.value) }))}
+              />
+            </div>
+          </div>
+          <p className="text-xs text-gray-500">{t("incidents.nis2_classification.config.recurrence_note")}</p>
+          <button
+            type="button"
+            onClick={() => configMutation.mutate()}
+            className="px-3 py-2 text-xs bg-primary-600 text-white rounded"
+          >
+            {t("incidents.nis2_config_save")}
+          </button>
+          <div className="text-xs text-gray-600 border rounded p-2 bg-gray-50">
+            CSIRT competente: <strong>{CSIRT_BY_COUNTRY[selectedPlantCountry]?.name ?? "CSIRT Nazionale"}</strong>
+            <br />
+            Portale: {CSIRT_BY_COUNTRY[selectedPlantCountry]?.portal ?? "—"}
+          </div>
+        </div>
+      )}
+
+      {moduleView === "list" && showNew && plants && (
         <NewIncidentForm plants={plants} onClose={() => setShowNew(false)} />
       )}
 
@@ -587,14 +727,21 @@ export function IncidentsList() {
               <h3 className="text-lg font-semibold">{selected.title}</h3>
               <button onClick={() => setSelected(null)} className="text-gray-500">×</button>
             </div>
-            <div className="px-4 pt-3 flex gap-2">
-              {(["gestione","classificazione","metodo","timeline","config"] as const).map(tab => (
+            <div className="px-4 pt-3 flex flex-wrap gap-2">
+              {(["gestione", "classificazione", "metodo", "timeline"] as const).map((tab) => (
                 <button
                   key={tab}
+                  type="button"
                   onClick={() => setActiveTab(tab)}
                   className={`px-3 py-1.5 text-xs rounded ${activeTab === tab ? "bg-primary-600 text-white" : "bg-gray-100 text-gray-600"}`}
                 >
-                  {tab === "gestione" ? "Gestione" : tab === "classificazione" ? "Classificazione NIS2" : tab === "metodo" ? "Metodo di classificazione" : tab === "timeline" ? "Timeline NIS2 & Notifiche" : "Configurazione NIS2"}
+                  {tab === "gestione"
+                    ? "Gestione"
+                    : tab === "classificazione"
+                      ? "Classificazione NIS2"
+                      : tab === "metodo"
+                        ? "Metodo di classificazione"
+                        : "Timeline NIS2 & Notifiche"}
                 </button>
               ))}
             </div>
@@ -1148,144 +1295,6 @@ export function IncidentsList() {
               </div>
             )}
 
-            {activeTab === "config" && !canSeeConfig && (
-              <div className="p-4 text-sm text-gray-500">Permessi insufficienti per la configurazione NIS2.</div>
-            )}
-            {activeTab === "config" && canSeeConfig && !selectedPlant && (
-              <div className="p-4 text-sm text-amber-700 bg-amber-50 rounded m-4 border border-amber-200">
-                Seleziona un sito dal menu in alto per configurare i parametri NIS2.
-              </div>
-            )}
-            {activeTab === "config" && canSeeConfig && selectedPlant && (
-              <div className="p-4 space-y-3">
-                <div className="text-sm font-semibold">{t("incidents.nis2_classification.config.calc_title")}</div>
-                <div className="text-xs text-gray-500 bg-blue-50 border border-blue-100 rounded p-2">
-                  {t("incidents.nis2_classification.config.ptnr_note")}
-                </div>
-                <div className="text-xs font-semibold text-gray-700 pt-1">{t("incidents.nis2_classification.config.base_title")}</div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-600">Utenti/sistemi colpiti (n°)</label>
-                    <input className="w-full border rounded px-2 py-1.5 text-sm" value={configForm.threshold_users ?? currentConfig?.threshold_users ?? 100} onChange={e => setConfigForm(f => ({ ...f, threshold_users: Number(e.target.value) }))} />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-600">Ore di interruzione servizio</label>
-                    <input className="w-full border rounded px-2 py-1.5 text-sm" value={configForm.threshold_hours ?? currentConfig?.threshold_hours ?? 4} onChange={e => setConfigForm(f => ({ ...f, threshold_hours: Number(e.target.value) }))} />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-600">Impatto finanziario (€)</label>
-                    <input className="w-full border rounded px-2 py-1.5 text-sm" value={configForm.threshold_financial ?? currentConfig?.threshold_financial ?? 100000} onChange={e => setConfigForm(f => ({ ...f, threshold_financial: Number(e.target.value) }))} />
-                  </div>
-                </div>
-                <div className="text-xs font-semibold text-gray-700 pt-2">{t("incidents.nis2_classification.config.multiplier_title")}</div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-600">{t("incidents.nis2_classification.config.multiplier_m")}</label>
-                    <input
-                      className="w-full border rounded px-2 py-1.5 text-sm"
-                      type="number"
-                      step="0.01"
-                      value={configForm.multiplier_medium ?? currentConfig?.multiplier_medium ?? 2}
-                      onChange={(e) => setConfigForm((f) => ({ ...f, multiplier_medium: Number(e.target.value) }))}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-600">{t("incidents.nis2_classification.config.multiplier_h")}</label>
-                    <input
-                      className="w-full border rounded px-2 py-1.5 text-sm"
-                      type="number"
-                      step="0.01"
-                      value={configForm.multiplier_high ?? currentConfig?.multiplier_high ?? 3}
-                      onChange={(e) => setConfigForm((f) => ({ ...f, multiplier_high: Number(e.target.value) }))}
-                    />
-                  </div>
-                </div>
-                <p className="text-xs text-gray-500">{t("incidents.nis2_classification.config.multiplier_note")}</p>
-                <div className="text-xs font-semibold text-gray-700 pt-2">{t("incidents.nis2_classification.config.rule_title")}</div>
-                <div className="max-w-xs space-y-1">
-                  <label className="text-xs font-medium text-gray-600">{t("incidents.nis2_classification.config.ptnr_threshold")}</label>
-                  <input
-                    className="w-full border rounded px-2 py-1.5 text-sm"
-                    type="number"
-                    value={configForm.ptnr_threshold ?? currentConfig?.ptnr_threshold ?? 4}
-                    onChange={(e) => setConfigForm((f) => ({ ...f, ptnr_threshold: Number(e.target.value) }))}
-                  />
-                </div>
-                <div className="text-xs font-semibold text-gray-700 pt-2">{t("incidents.nis2_classification.config.recurrence_title")}</div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-600">{t("incidents.nis2_classification.config.recurrence_window")}</label>
-                    <input
-                      className="w-full border rounded px-2 py-1.5 text-sm"
-                      type="number"
-                      value={configForm.recurrence_window_days ?? currentConfig?.recurrence_window_days ?? 90}
-                      onChange={(e) => setConfigForm((f) => ({ ...f, recurrence_window_days: Number(e.target.value) }))}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-600">{t("incidents.nis2_classification.config.recurrence_bonus")}</label>
-                    <input
-                      className="w-full border rounded px-2 py-1.5 text-sm"
-                      type="number"
-                      value={configForm.recurrence_score_bonus ?? currentConfig?.recurrence_score_bonus ?? 2}
-                      onChange={(e) => setConfigForm((f) => ({ ...f, recurrence_score_bonus: Number(e.target.value) }))}
-                    />
-                  </div>
-                </div>
-                <p className="text-xs text-gray-500">{t("incidents.nis2_classification.config.recurrence_note")}</p>
-                <div className="space-y-1 pt-1">
-                  <label className="text-xs font-medium text-gray-600">{t("incidents.nis2_classification.config.activity_desc")}</label>
-                  <textarea
-                    className="w-full border rounded px-2 py-1.5 text-sm"
-                    rows={2}
-                    value={configForm.nis2_activity_description ?? currentConfig?.nis2_activity_description ?? ""}
-                    onChange={(e) => setConfigForm((f) => ({ ...f, nis2_activity_description: e.target.value }))}
-                  />
-                </div>
-                <div className="text-xs font-semibold text-gray-700 pt-2 border-t border-gray-100 mt-2">Configurazione NIS2 per sito</div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-600">Settore NIS2</label>
-                    <input className="w-full border rounded px-2 py-1.5 text-sm" placeholder="es. Trasporti, Energia..." value={configForm.nis2_sector ?? currentConfig?.nis2_sector ?? ""} onChange={e => setConfigForm(f => ({ ...f, nis2_sector: e.target.value }))} />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-600">Sottosettore NIS2</label>
-                    <input className="w-full border rounded px-2 py-1.5 text-sm" placeholder="es. Automotive, Manifatturiero..." value={configForm.nis2_subsector ?? currentConfig?.nis2_subsector ?? ""} onChange={e => setConfigForm(f => ({ ...f, nis2_subsector: e.target.value }))} />
-                  </div>
-                </div>
-                <div className="text-xs font-medium text-gray-600 pt-1">Referente NIS2 interno</div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-xs text-gray-500">Nome</label>
-                    <input className="w-full border rounded px-2 py-1.5 text-sm" value={configForm.internal_contact_name ?? currentConfig?.internal_contact_name ?? ""} onChange={e => setConfigForm(f => ({ ...f, internal_contact_name: e.target.value }))} />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs text-gray-500">Email</label>
-                    <input className="w-full border rounded px-2 py-1.5 text-sm" value={configForm.internal_contact_email ?? currentConfig?.internal_contact_email ?? ""} onChange={e => setConfigForm(f => ({ ...f, internal_contact_email: e.target.value }))} />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs text-gray-500">Telefono</label>
-                    <input className="w-full border rounded px-2 py-1.5 text-sm" value={configForm.internal_contact_phone ?? currentConfig?.internal_contact_phone ?? ""} onChange={e => setConfigForm(f => ({ ...f, internal_contact_phone: e.target.value }))} />
-                  </div>
-                </div>
-                <div className="text-xs font-medium text-gray-600 pt-1">Entità legale</div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-xs text-gray-500">Ragione sociale</label>
-                    <input className="w-full border rounded px-2 py-1.5 text-sm" value={configForm.legal_entity_name ?? currentConfig?.legal_entity_name ?? ""} onChange={e => setConfigForm(f => ({ ...f, legal_entity_name: e.target.value }))} />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs text-gray-500">Partita IVA / VAT</label>
-                    <input className="w-full border rounded px-2 py-1.5 text-sm" value={configForm.legal_entity_vat ?? currentConfig?.legal_entity_vat ?? ""} onChange={e => setConfigForm(f => ({ ...f, legal_entity_vat: e.target.value }))} />
-                  </div>
-                </div>
-                <button onClick={() => configMutation.mutate()} className="px-3 py-2 text-xs bg-primary-600 text-white rounded">Salva configurazione</button>
-                <div className="text-xs text-gray-600 border rounded p-2 bg-gray-50">
-                  CSIRT competente: <strong>{CSIRT_BY_COUNTRY[selectedPlantCountry]?.name ?? "CSIRT Nazionale"}</strong><br />
-                  Portale: {CSIRT_BY_COUNTRY[selectedPlantCountry]?.portal ?? "—"}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       )}

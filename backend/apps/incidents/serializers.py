@@ -28,7 +28,23 @@ class NIS2NotificationSerializer(serializers.ModelSerializer):
 
 
 class NIS2ConfigurationSerializer(serializers.ModelSerializer):
+    """Solo parametri di calcolo significatività — anagrafica NIS2 è sul Plant (M01)."""
+
     class Meta:
         model = NIS2Configuration
-        fields = "__all__"
+        fields = [
+            "id",
+            "plant",
+            "threshold_users",
+            "threshold_hours",
+            "threshold_financial",
+            "multiplier_medium",
+            "multiplier_high",
+            "recurrence_window_days",
+            "recurrence_score_bonus",
+            "ptnr_threshold",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
 
