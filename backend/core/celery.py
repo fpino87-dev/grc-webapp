@@ -52,5 +52,13 @@ app.conf.beat_schedule = {
         "task": "apps.audit_prep.tasks.check_stale_audit_preps",
         "schedule": crontab(hour=8, minute=15, day_of_week=1),
     },
+    "check-nis2-deadlines": {
+        "task": "apps.incidents.tasks.check_nis2_deadlines",
+        "schedule": crontab(minute="*/30"),
+    },
+    "check-final-report-deadlines": {
+        "task": "apps.incidents.tasks.check_final_report_deadlines",
+        "schedule": crontab(hour=9, minute=0),
+    },
 }
 
