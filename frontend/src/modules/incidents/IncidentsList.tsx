@@ -522,18 +522,59 @@ export function IncidentsList() {
             {activeTab === "config" && canSeeConfig && selectedPlant && (
               <div className="p-4 space-y-3">
                 <div className="text-sm font-semibold">Configurazione NIS2 per sito</div>
-                <div className="grid grid-cols-3 gap-3">
-                  <input className="border rounded px-2 py-1.5 text-sm" placeholder="Soglia utenti" value={configForm.threshold_users ?? currentConfig?.threshold_users ?? 100} onChange={e => setConfigForm(f => ({ ...f, threshold_users: Number(e.target.value) }))} />
-                  <input className="border rounded px-2 py-1.5 text-sm" placeholder="Soglia ore" value={configForm.threshold_hours ?? currentConfig?.threshold_hours ?? 4} onChange={e => setConfigForm(f => ({ ...f, threshold_hours: Number(e.target.value) }))} />
-                  <input className="border rounded px-2 py-1.5 text-sm" placeholder="Soglia EUR" value={configForm.threshold_financial ?? currentConfig?.threshold_financial ?? 100000} onChange={e => setConfigForm(f => ({ ...f, threshold_financial: Number(e.target.value) }))} />
+                <div className="text-xs text-gray-500 bg-blue-50 border border-blue-100 rounded p-2">
+                  Soglie di significatività: se l'incidente supera anche solo uno di questi valori, viene classificato come <strong>significativo NIS2</strong> con obbligo di notifica al CSIRT.
                 </div>
-                <input className="w-full border rounded px-2 py-1.5 text-sm" placeholder="Settore NIS2" value={configForm.nis2_sector ?? currentConfig?.nis2_sector ?? ""} onChange={e => setConfigForm(f => ({ ...f, nis2_sector: e.target.value }))} />
-                <input className="w-full border rounded px-2 py-1.5 text-sm" placeholder="Sottosettore NIS2" value={configForm.nis2_subsector ?? currentConfig?.nis2_subsector ?? ""} onChange={e => setConfigForm(f => ({ ...f, nis2_subsector: e.target.value }))} />
-                <input className="w-full border rounded px-2 py-1.5 text-sm" placeholder="Referente NIS2 - Nome" value={configForm.internal_contact_name ?? currentConfig?.internal_contact_name ?? ""} onChange={e => setConfigForm(f => ({ ...f, internal_contact_name: e.target.value }))} />
-                <input className="w-full border rounded px-2 py-1.5 text-sm" placeholder="Referente NIS2 - Email" value={configForm.internal_contact_email ?? currentConfig?.internal_contact_email ?? ""} onChange={e => setConfigForm(f => ({ ...f, internal_contact_email: e.target.value }))} />
-                <input className="w-full border rounded px-2 py-1.5 text-sm" placeholder="Referente NIS2 - Telefono" value={configForm.internal_contact_phone ?? currentConfig?.internal_contact_phone ?? ""} onChange={e => setConfigForm(f => ({ ...f, internal_contact_phone: e.target.value }))} />
-                <input className="w-full border rounded px-2 py-1.5 text-sm" placeholder="Ragione sociale" value={configForm.legal_entity_name ?? currentConfig?.legal_entity_name ?? ""} onChange={e => setConfigForm(f => ({ ...f, legal_entity_name: e.target.value }))} />
-                <input className="w-full border rounded px-2 py-1.5 text-sm" placeholder="Partita IVA / VAT" value={configForm.legal_entity_vat ?? currentConfig?.legal_entity_vat ?? ""} onChange={e => setConfigForm(f => ({ ...f, legal_entity_vat: e.target.value }))} />
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-600">Utenti/sistemi colpiti (n°)</label>
+                    <input className="w-full border rounded px-2 py-1.5 text-sm" value={configForm.threshold_users ?? currentConfig?.threshold_users ?? 100} onChange={e => setConfigForm(f => ({ ...f, threshold_users: Number(e.target.value) }))} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-600">Ore di interruzione servizio</label>
+                    <input className="w-full border rounded px-2 py-1.5 text-sm" value={configForm.threshold_hours ?? currentConfig?.threshold_hours ?? 4} onChange={e => setConfigForm(f => ({ ...f, threshold_hours: Number(e.target.value) }))} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-600">Impatto finanziario (€)</label>
+                    <input className="w-full border rounded px-2 py-1.5 text-sm" value={configForm.threshold_financial ?? currentConfig?.threshold_financial ?? 100000} onChange={e => setConfigForm(f => ({ ...f, threshold_financial: Number(e.target.value) }))} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-600">Settore NIS2</label>
+                    <input className="w-full border rounded px-2 py-1.5 text-sm" placeholder="es. Trasporti, Energia..." value={configForm.nis2_sector ?? currentConfig?.nis2_sector ?? ""} onChange={e => setConfigForm(f => ({ ...f, nis2_sector: e.target.value }))} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-600">Sottosettore NIS2</label>
+                    <input className="w-full border rounded px-2 py-1.5 text-sm" placeholder="es. Automotive, Manifatturiero..." value={configForm.nis2_subsector ?? currentConfig?.nis2_subsector ?? ""} onChange={e => setConfigForm(f => ({ ...f, nis2_subsector: e.target.value }))} />
+                  </div>
+                </div>
+                <div className="text-xs font-medium text-gray-600 pt-1">Referente NIS2 interno</div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs text-gray-500">Nome</label>
+                    <input className="w-full border rounded px-2 py-1.5 text-sm" value={configForm.internal_contact_name ?? currentConfig?.internal_contact_name ?? ""} onChange={e => setConfigForm(f => ({ ...f, internal_contact_name: e.target.value }))} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs text-gray-500">Email</label>
+                    <input className="w-full border rounded px-2 py-1.5 text-sm" value={configForm.internal_contact_email ?? currentConfig?.internal_contact_email ?? ""} onChange={e => setConfigForm(f => ({ ...f, internal_contact_email: e.target.value }))} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs text-gray-500">Telefono</label>
+                    <input className="w-full border rounded px-2 py-1.5 text-sm" value={configForm.internal_contact_phone ?? currentConfig?.internal_contact_phone ?? ""} onChange={e => setConfigForm(f => ({ ...f, internal_contact_phone: e.target.value }))} />
+                  </div>
+                </div>
+                <div className="text-xs font-medium text-gray-600 pt-1">Entità legale</div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs text-gray-500">Ragione sociale</label>
+                    <input className="w-full border rounded px-2 py-1.5 text-sm" value={configForm.legal_entity_name ?? currentConfig?.legal_entity_name ?? ""} onChange={e => setConfigForm(f => ({ ...f, legal_entity_name: e.target.value }))} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs text-gray-500">Partita IVA / VAT</label>
+                    <input className="w-full border rounded px-2 py-1.5 text-sm" value={configForm.legal_entity_vat ?? currentConfig?.legal_entity_vat ?? ""} onChange={e => setConfigForm(f => ({ ...f, legal_entity_vat: e.target.value }))} />
+                  </div>
+                </div>
                 <button onClick={() => configMutation.mutate()} className="px-3 py-2 text-xs bg-primary-600 text-white rounded">Salva configurazione</button>
                 <div className="text-xs text-gray-600 border rounded p-2 bg-gray-50">
                   CSIRT competente: <strong>{CSIRT_BY_COUNTRY[selectedPlantCountry]?.name ?? "CSIRT Nazionale"}</strong><br />
