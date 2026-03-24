@@ -1,3 +1,5 @@
+# Versioni con lower bound esplicito per sicurezza supply-chain.
+# Aggiornare regolarmente e verificare CVE con: pip-audit
 Django==5.1.*
 djangorestframework==3.15.*
 django-environ==0.11.*
@@ -14,7 +16,11 @@ openpyxl==3.1.*
 djangorestframework-simplejwt==5.3.*
 drf-spectacular==0.27.*
 python-dateutil==2.9.*
-cryptography>=42.0
+# cryptography: versione minima con fix CVE critici
+cryptography>=43.0.0
+# python-magic: MIME detection per upload sicuro
 python-magic==0.4.*
 anthropic>=0.40.0
 openai>=1.52.0
+# pip-audit: analisi vulnerabilità dipendenze (usare in CI/CD)
+pip-audit>=2.7.0

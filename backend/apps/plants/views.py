@@ -3,7 +3,7 @@ import os
 import magic
 from django.utils import timezone
 from django.core.files.storage import default_storage
-from django.http import FileResponse, Http404, HttpResponseRedirect
+from django.http import FileResponse, Http404
 from rest_framework import viewsets, status, parsers
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -118,28 +118,44 @@ class PlantViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["get"], url_path="logo")
     def logo(self, request, pk=None):
         """
-        Restituisce il logo del plant passando sempre dal proxy API.
-        Se logo_url è esterno effettua redirect; se è relativo/locale serve il file da default_storage.
+        Serve il logo del plant direttamente dallo storage interno.
+        Non viene mai eseguito un redirect verso URL esterne per prevenire
+        open redirect (CWE-601). Se logo_url è un URL assoluto esterno
+        restituisce 404 — il logo deve essere caricato tramite upload-logo.
         """
         plant = self.get_object()
         logo_url = (plant.logo_url or "").strip()
         if not logo_url:
             raise Http404(_("Nessun logo configurato per questo sito."))
 
+        # Rifiuta URL esterne: impedisce open redirect e SSRF
         if logo_url.startswith("http://") or logo_url.startswith("https://"):
-            return HttpResponseRedirect(logo_url)
+            raise Http404(_("Logo non disponibile: usa l'upload file per i loghi del sito."))
 
         storage_path = logo_url
         if "/media/" in logo_url:
             storage_path = logo_url.split("/media/", 1)[1]
         storage_path = storage_path.lstrip("/")
 
-        if not storage_path or not default_storage.exists(storage_path):
+        # Prevenzione path traversal: il path deve stare sotto plant-logos/
+        safe_prefix = f"plant-logos/{plant.id}/"
+        if not storage_path.startswith(safe_prefix):
             raise Http404(_("Logo non trovato nello storage."))
 
+        if not default_storage.exists(storage_path):
+            raise Http404(_("Logo non trovato nello storage."))
+
+        import mimetypes
         file_handle = default_storage.open(storage_path, "rb")
         filename = os.path.basename(storage_path) or "logo"
-        return FileResponse(file_handle, as_attachment=False, filename=filename)
+        content_type, _ = mimetypes.guess_type(filename)
+        content_type = content_type or "application/octet-stream"
+        return FileResponse(
+            file_handle,
+            as_attachment=False,
+            filename=filename,
+            content_type=content_type,
+        )
 
 
 class PlantFrameworkViewSet(viewsets.ModelViewSet):

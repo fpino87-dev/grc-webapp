@@ -39,11 +39,17 @@ class DocumentViewSet(viewsets.ModelViewSet):
         if not version or not version.storage_path:
             raise Http404("Nessun file disponibile per questo documento.")
 
-        if not default_storage.exists(version.storage_path):
+        # Prevenzione path traversal: il basename non deve contenere ".."
+        storage_path = version.storage_path
+        if ".." in storage_path or storage_path.startswith("/"):
+            raise Http404("Percorso file non valido.")
+
+        if not default_storage.exists(storage_path):
             raise Http404("File non trovato nello storage.")
 
-        file_handle = default_storage.open(version.storage_path, "rb")
-        filename = version.file_name or os.path.basename(version.storage_path)
+        file_handle = default_storage.open(storage_path, "rb")
+        # Usa solo il basename per il filename nel Content-Disposition
+        filename = os.path.basename(version.file_name or storage_path)
         return FileResponse(
             file_handle,
             as_attachment=True,
@@ -186,11 +192,15 @@ class EvidenceViewSet(viewsets.ModelViewSet):
         if not evidence.file_path:
             raise Http404(_("Nessun file associato a questa evidenza."))
 
-        if not default_storage.exists(evidence.file_path):
+        file_path = evidence.file_path
+        if ".." in file_path or file_path.startswith("/"):
+            raise Http404(_("Percorso file non valido."))
+
+        if not default_storage.exists(file_path):
             raise Http404(_("File non trovato nello storage."))
 
-        file_handle = default_storage.open(evidence.file_path, "rb")
-        filename = os.path.basename(evidence.file_path)
+        file_handle = default_storage.open(file_path, "rb")
+        filename = os.path.basename(file_path)
         return FileResponse(
             file_handle,
             as_attachment=True,

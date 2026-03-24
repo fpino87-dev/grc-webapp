@@ -5,6 +5,25 @@ import uuid
 from django.db import models, transaction
 
 
+def _pseudonymize_email(email: str) -> str:
+    """
+    Pseudonimizza l'email per l'audit trail (GDPR Art. 25 — privacy by design).
+    Mantiene la parte locale visibile fino a 3 char + dominio oscurato,
+    sufficiente per auditing senza esporre l'indirizzo completo.
+    Esempio: "mario.rossi@azienda.com" → "mar***@***.com"
+    """
+    if not email or "@" not in email:
+        return "***"
+    local, domain = email.rsplit("@", 1)
+    local_masked = local[:3] + "***" if len(local) > 3 else "***"
+    domain_parts = domain.rsplit(".", 1)
+    if len(domain_parts) == 2:
+        domain_masked = "***." + domain_parts[1]
+    else:
+        domain_masked = "***"
+    return f"{local_masked}@{domain_masked}"
+
+
 class AuditLog(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     timestamp_utc = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -47,7 +66,10 @@ def log_action(*, user, action_code: str, level: str, entity, payload: dict) -> 
     record_hash = _compute_hash(payload, prev_hash)
     return AuditLog.objects.create(
         user_id=user.pk,
-        user_email_at_time=user.email,
+        # Email pseudonimizzata (GDPR Art. 25 — privacy by design).
+        # L'identità completa è ricavabile tramite user_id se necessario per audit legale.
+        user_email_at_time=_pseudonymize_email(user.email),
+        user_role_at_time=getattr(user, "role", "") or "",
         action_code=action_code,
         level=level,
         entity_type=entity_type,

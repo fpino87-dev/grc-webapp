@@ -106,7 +106,19 @@ class UserCompetencyViewSet(viewsets.ModelViewSet):
         from .services import competency_gap_analysis
         from django.contrib.auth import get_user_model
         User = get_user_model()
-        user_id = request.query_params.get("user", request.user.pk)
+        user_id = request.query_params.get("user", str(request.user.pk))
+
+        # Controllo IDOR: un utente normale può vedere solo il proprio gap analysis.
+        # Solo super_admin, compliance_officer e internal_auditor possono
+        # richiedere l'analisi di altri utenti.
+        privileged_roles = {"super_admin", "compliance_officer", "internal_auditor"}
+        requesting_role = getattr(request.user, "role", "") or ""
+        if str(user_id) != str(request.user.pk) and requesting_role not in privileged_roles:
+            return Response(
+                {"error": _("Non sei autorizzato a visualizzare il gap analysis di altri utenti.")},
+                status=403,
+            )
+
         user = User.objects.filter(pk=user_id).first()
         if not user:
             return Response({"error": _("Utente non trovato")}, status=404)

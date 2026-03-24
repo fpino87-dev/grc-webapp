@@ -42,6 +42,12 @@ yarn-error.log*
 .env.*
 !.env.example
 !.env.prod.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+.secrets/
 
 # Cursor / tooling
 .cursor/

@@ -78,15 +78,26 @@ def serve_manual(request, manual_type):
         raise Http404("File manuale non trovato")
 
 
+# Admin URL: in produzione viene letto da settings.ADMIN_URL (configurato via .env)
+_admin_url = getattr(settings, "ADMIN_URL", "admin/")
+
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path(_admin_url, admin.site.urls),
     path("api/health/", health_check, name="health-check"),
     path("api/manual/<str:manual_type>/", serve_manual, name="manual"),
     path("api/v1/manual/<str:manual_type>/", serve_manual, name="manual-v1"),
     path("api/token/", GrcTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger"),
+]
+
+# Swagger/OpenAPI: esposto solo se DEBUG=True o SHOW_API_DOCS=True (non in produzione)
+if settings.DEBUG or getattr(settings, "SHOW_API_DOCS", False):
+    urlpatterns += [
+        path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+        path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger"),
+    ]
+
+urlpatterns += [
     path("api/v1/governance/", include("apps.governance.urls")),
     path("api/v1/plants/", include("apps.plants.urls")),
     path("api/v1/auth/", include("apps.auth_grc.urls")),
