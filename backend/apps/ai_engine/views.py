@@ -1,10 +1,11 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.auth_grc.permissions import IsGrcSuperAdmin
 from core.audit import log_action
 
 from .models import MODELS_BY_PROVIDER, AiProviderConfig
@@ -14,7 +15,7 @@ from .serializers import AiProviderConfigReadSerializer, AiProviderConfigSeriali
 class AiProviderConfigViewSet(viewsets.ModelViewSet):
     queryset = AiProviderConfig.objects.all()
     serializer_class = AiProviderConfigSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated, IsGrcSuperAdmin]
     filter_backends = [DjangoFilterBackend]
 
     def get_serializer_class(self):
