@@ -165,6 +165,8 @@ USE_X_FORWARDED_HOST = True
 
 # Punta il login al wizard 2FA di django-two-factor-auth (non al default /accounts/login/)
 LOGIN_URL = "two_factor:login"
+# Dopo login senza parametro ?next=, vai all'admin (non al default /accounts/profile/)
+LOGIN_REDIRECT_URL = "/admin/"
 LOGOUT_REDIRECT_URL = "/"
 
 CONN_MAX_AGE = 60
