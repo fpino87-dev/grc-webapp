@@ -5,7 +5,7 @@ from django.utils import timezone
 
 from apps.plants.models import CSIRT_BY_COUNTRY
 
-from .models import ENISA_INCIDENT_CATEGORIES, Incident, NIS2Configuration, NIS2Notification
+from .models import ENISA_INCIDENT_CATEGORIES, ENISA_SUBCATEGORIES, Incident, NIS2Configuration, NIS2Notification
 
 
 def _e(value) -> str:
@@ -34,6 +34,65 @@ def classify_significance(incident: Incident) -> bool:
         (incident.financial_impact_eur or 0) >= threshold_eur,
     ]
     return any(criteria)
+
+
+def get_classification_method(incident: Incident) -> dict:
+    """Restituisce metodo esplicito di classificazione ENISA + NIS2."""
+    config = NIS2Configuration.objects.filter(plant=incident.plant).first()
+    threshold_users = int(config.threshold_users) if config else 100
+    threshold_hours = float(config.threshold_hours) if config else 4.0
+    threshold_financial = float(config.threshold_financial) if config else 100000.0
+
+    categories = [
+        {"code": code, "label": label, "description": description}
+        for code, label, description in ENISA_INCIDENT_CATEGORIES
+    ]
+    subcategories = {
+        key: [{"code": code, "label": label} for code, label in values]
+        for key, values in ENISA_SUBCATEGORIES.items()
+    }
+
+    return {
+        "taxonomy": {
+            "categories": categories,
+            "subcategories": subcategories,
+        },
+        "nis2_method": {
+            "logic": "OR",
+            "rule": "Incidente significativo se almeno un criterio e soddisfatto; override manuale con motivazione ha precedenza.",
+            "thresholds": {
+                "affected_users_count": threshold_users,
+                "service_disruption_hours": threshold_hours,
+                "financial_impact_eur": threshold_financial,
+            },
+            "criteria": [
+                {"key": "cross_border_impact", "label": "Impatto cross-border", "type": "boolean"},
+                {"key": "critical_infrastructure_impact", "label": "Impatto su infrastrutture critiche", "type": "boolean"},
+                {"key": "personal_data_involved", "label": "Coinvolgimento dati personali", "type": "boolean"},
+                {
+                    "key": "affected_users_count",
+                    "label": "Utenti/sistemi coinvolti",
+                    "type": "threshold",
+                    "operator": ">=",
+                    "threshold": threshold_users,
+                },
+                {
+                    "key": "service_disruption_hours",
+                    "label": "Ore di interruzione servizio",
+                    "type": "threshold",
+                    "operator": ">=",
+                    "threshold": threshold_hours,
+                },
+                {
+                    "key": "financial_impact_eur",
+                    "label": "Impatto finanziario",
+                    "type": "threshold",
+                    "operator": ">=",
+                    "threshold": threshold_financial,
+                },
+            ],
+        },
+    }
 
 
 def set_nis2_deadlines(incident: Incident) -> Incident:

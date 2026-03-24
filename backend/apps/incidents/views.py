@@ -9,6 +9,7 @@ from .models import Incident, NIS2Configuration
 from .nis2_services import (
     classify_significance as classify_significance_service,
     generate_nis2_document,
+    get_classification_method,
     mark_notification_sent,
     set_nis2_deadlines,
     update_pdca_with_nis2_evidence,
@@ -144,6 +145,11 @@ class IncidentViewSet(viewsets.ModelViewSet):
         incident = self.get_object()
         notifs = incident.nis2_notifications.all()
         return response.Response(NIS2NotificationSerializer(notifs, many=True).data)
+
+    @decorators.action(detail=True, methods=["get"], url_path="classification-method")
+    def classification_method(self, request, pk=None):
+        incident = self.get_object()
+        return response.Response(get_classification_method(incident))
 
 
 class NIS2ConfigurationViewSet(viewsets.ModelViewSet):

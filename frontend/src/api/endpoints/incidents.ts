@@ -60,6 +60,29 @@ export interface NIS2Configuration {
   legal_entity_vat?: string;
 }
 
+export interface ClassificationMethod {
+  taxonomy: {
+    categories: Array<{ code: string; label: string; description: string }>;
+    subcategories: Record<string, Array<{ code: string; label: string }>>;
+  };
+  nis2_method: {
+    logic: "OR";
+    rule: string;
+    thresholds: {
+      affected_users_count: number;
+      service_disruption_hours: number;
+      financial_impact_eur: number;
+    };
+    criteria: Array<{
+      key: string;
+      label: string;
+      type: "boolean" | "threshold";
+      operator?: string;
+      threshold?: number;
+    }>;
+  };
+}
+
 export const incidentsApi = {
   list: (params?: Record<string, string>) =>
     apiClient.get<{ results: Incident[]; count: number }>("/incidents/incidents/", { params }).then((r) => r.data),
@@ -76,6 +99,8 @@ export const incidentsApi = {
     apiClient.post(`/incidents/incidents/${id}/classify-significance/`, data ?? {}).then((r) => r.data),
   timeline: (id: string) =>
     apiClient.get<NIS2Timeline>(`/incidents/incidents/${id}/nis2-timeline/`).then((r) => r.data),
+  classificationMethod: (id: string) =>
+    apiClient.get<ClassificationMethod>(`/incidents/incidents/${id}/classification-method/`).then((r) => r.data),
   notifications: (id: string) =>
     apiClient.get<NIS2Notification[]>(`/incidents/incidents/${id}/nis2-notifications/`).then((r) => r.data),
   markSent: (

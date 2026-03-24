@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   incidentsApi,
+  type ClassificationMethod,
   type Incident,
   type NIS2Configuration,
   type NIS2Notification,
@@ -14,41 +15,6 @@ import { AiSuggestionBanner } from "../../components/ui/AiSuggestionBanner";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
-
-const ENISA_CATEGORIES = [
-  { value: "malicious_code", label: "Malicious Code" },
-  { value: "availability_attack", label: "Availability Attack" },
-  { value: "information_gathering", label: "Information Gathering" },
-  { value: "intrusion_attempt", label: "Intrusion Attempt" },
-  { value: "intrusion", label: "Intrusion" },
-  { value: "data_breach", label: "Information Security Breach" },
-  { value: "fraud", label: "Fraud" },
-  { value: "supply_chain", label: "Supply Chain Attack" },
-  { value: "insider_threat", label: "Insider Threat" },
-  { value: "physical", label: "Physical Attack" },
-  { value: "other", label: "Other" },
-];
-
-const ENISA_SUBCATEGORIES: Record<string, { value: string; label: string }[]> = {
-  malicious_code: [
-    { value: "ransomware", label: "Ransomware" },
-    { value: "virus", label: "Virus/Worm" },
-    { value: "trojan", label: "Trojan/Backdoor" },
-  ],
-  availability_attack: [
-    { value: "ddos", label: "DDoS" },
-    { value: "dos", label: "DoS" },
-    { value: "power_outage", label: "Interruzione alimentazione" },
-  ],
-  intrusion: [
-    { value: "account_compromise", label: "Compromissione account" },
-    { value: "system_compromise", label: "Compromissione sistema" },
-  ],
-  data_breach: [
-    { value: "personal_data", label: "Dati personali (GDPR)" },
-    { value: "credentials", label: "Credenziali di accesso" },
-  ],
-};
 
 const CSIRT_BY_COUNTRY: Record<string, { name: string; portal: string }> = {
   IT: {
@@ -160,10 +126,15 @@ export function IncidentsList() {
   const { t } = useTranslation();
   const [showNew, setShowNew] = useState(false);
   const [selected, setSelected] = useState<Incident | null>(null);
-  const [activeTab, setActiveTab] = useState<"gestione" | "classificazione" | "timeline" | "config">("gestione");
+  const [activeTab, setActiveTab] = useState<"gestione" | "classificazione" | "metodo" | "timeline" | "config">("gestione");
   const [sentType, setSentType] = useState("formal_notification");
   const [protocolRef, setProtocolRef] = useState("");
   const [authorityResponse, setAuthorityResponse] = useState("");
+  const [overrideEnabled, setOverrideEnabled] = useState(false);
+  const [overrideValue, setOverrideValue] = useState<"significant" | "not_significant">("significant");
+  const [overrideReason, setOverrideReason] = useState("");
+  const [rcaDraftText, setRcaDraftText] = useState("");
+  const [rcaDraftData, setRcaDraftData] = useState<Record<string, unknown> | null>(null);
   const qc = useQueryClient();
   const selectedPlant = useAuthStore(s => s.selectedPlant);
   const user = useAuthStore(s => s.user);
@@ -199,7 +170,8 @@ export function IncidentsList() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["incidents"] }),
   });
   const classifyMutation = useMutation({
-    mutationFn: (id: string) => incidentsApi.classifySignificance(id),
+    mutationFn: ({ id, data }: { id: string; data?: { override?: boolean; reason?: string } }) =>
+      incidentsApi.classifySignificance(id, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["incidents"] }),
   });
   const markSentMutation = useMutation({
@@ -223,6 +195,11 @@ export function IncidentsList() {
   const { data: timeline } = useQuery({
     queryKey: ["nis2-timeline", selected?.id],
     queryFn: () => incidentsApi.timeline(selected?.id ?? ""),
+    enabled: !!selected,
+  });
+  const { data: classificationMethod } = useQuery({
+    queryKey: ["classification-method", selected?.id],
+    queryFn: () => incidentsApi.classificationMethod(selected?.id ?? ""),
     enabled: !!selected,
   });
   const { data: notifications } = useQuery({
@@ -254,6 +231,16 @@ export function IncidentsList() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["nis2-config", selectedPlant?.id] }),
   });
   const dateLocale = i18n.language || "it";
+  const thresholdUsers = Number(classificationMethod?.nis2_method.thresholds.affected_users_count ?? currentConfig?.threshold_users ?? 100);
+  const thresholdHours = Number(classificationMethod?.nis2_method.thresholds.service_disruption_hours ?? currentConfig?.threshold_hours ?? 4);
+  const thresholdFinancial = Number(classificationMethod?.nis2_method.thresholds.financial_impact_eur ?? currentConfig?.threshold_financial ?? 100000);
+  const enisaCategories = (classificationMethod?.taxonomy.categories ?? []).map((c) => ({ value: c.code, label: c.label }));
+  const enisaSubcategories: Record<string, { value: string; label: string }[]> = Object.fromEntries(
+    Object.entries(classificationMethod?.taxonomy.subcategories ?? {}).map(([key, values]) => [
+      key,
+      values.map((entry) => ({ value: entry.code, label: entry.label })),
+    ])
+  );
 
   const selectedPlantCountry = useMemo(() => {
     return plants?.find(p => p.id === selectedPlant?.id)?.country ?? "IT";
@@ -274,6 +261,145 @@ export function IncidentsList() {
       legal_entity_vat: currentConfig.legal_entity_vat,
     });
   }, [currentConfig]);
+
+  function formatRcaText(result: unknown): string {
+    const data = result as Record<string, unknown>;
+    const list = (value: unknown) =>
+      Array.isArray(value) && value.length > 0 ? value.map((v) => `- ${String(v)}`).join("\n") : "- —";
+    return [
+      "1) Sommario esecutivo",
+      String(data?.summary ?? "—"),
+      "",
+      "2) Causa radice",
+      String(data?.root_cause ?? "—"),
+      "",
+      "3) Fattori contributivi",
+      list(data?.contributing_factors),
+      "",
+      "4) Timeline",
+      list(data?.timeline),
+      "",
+      "5) Azioni correttive immediate",
+      list(data?.immediate_actions),
+      "",
+      "6) Azioni preventive lungo termine",
+      list(data?.preventive_actions),
+      "",
+      "7) Lessons learned",
+      String(data?.lessons_learned ?? "—"),
+    ].join("\n");
+  }
+
+  function listText(value: unknown): string {
+    return Array.isArray(value) && value.length > 0 ? value.map((v) => `• ${String(v)}`).join("\n") : "—";
+  }
+
+  function exportClassificationMethodHtml() {
+    if (!selected || !classificationMethod) return;
+
+    const rows = (classificationMethod.nis2_method.criteria ?? [])
+      .map((criterion) => {
+        const satisfied = isCriterionSatisfied(criterion, selected);
+        const incidentRaw = (selected as Record<string, unknown>)[criterion.key];
+        const incidentDisplay =
+          criterion.type === "boolean" ? (incidentRaw ? "Si" : "No") : String(incidentRaw ?? 0);
+        const sourceLabel =
+          criterion.type === "threshold" ? "input utente + soglia sito" : "flag booleano";
+        return `
+          <tr>
+            <td>${satisfied ? "OK" : "NO"}</td>
+            <td>${criterion.label}</td>
+            <td>${incidentDisplay}</td>
+            <td>${criterion.type === "threshold" ? String(criterion.threshold ?? "—") : "—"}</td>
+            <td>${sourceLabel}</td>
+          </tr>
+        `;
+      })
+      .join("");
+
+    const taxRows = (classificationMethod.taxonomy.categories ?? [])
+      .map((category) => {
+        const subs =
+          (classificationMethod.taxonomy.subcategories[category.code] ?? [])
+            .map((sub) => sub.label)
+            .join(", ") || "non definite";
+        return `
+          <tr>
+            <td>${category.code}</td>
+            <td>${category.label}</td>
+            <td>${category.description}</td>
+            <td>${subs}</td>
+          </tr>
+        `;
+      })
+      .join("");
+
+    const expected = (classificationMethod.nis2_method.criteria ?? []).some((criterion) =>
+      isCriterionSatisfied(criterion, selected)
+    )
+      ? "SIGNIFICATIVO"
+      : "NON significativo";
+
+    const html = `<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Metodo Classificazione NIS2</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; color: #111827; font-size: 12px; }
+    h1 { font-size: 18px; margin-bottom: 4px; }
+    h2 { font-size: 14px; margin-top: 20px; margin-bottom: 8px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { border: 1px solid #d1d5db; padding: 6px 8px; vertical-align: top; }
+    th { background: #f3f4f6; text-align: left; }
+    .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; background: #e5e7eb; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>Metodo di classificazione NIS2</h1>
+  <div>Incidente: <strong>${selected.title}</strong></div>
+  <div>Data export: ${new Date().toLocaleString(dateLocale)}</div>
+  <div style="margin-top: 8px;">Regola: ${classificationMethod.nis2_method.rule}</div>
+  <div style="margin-top: 8px;">Esito automatico atteso: <span class="badge">${expected}</span></div>
+
+  <h2>Valutazione corrente</h2>
+  <table>
+    <thead>
+      <tr><th>Esito</th><th>Criterio</th><th>Valore corrente</th><th>Soglia</th><th>Fonte</th></tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+
+  <h2>Tassonomia ENISA</h2>
+  <table>
+    <thead>
+      <tr><th>Codice</th><th>Categoria</th><th>Descrizione</th><th>Sottocategorie</th></tr>
+    </thead>
+    <tbody>${taxRows}</tbody>
+  </table>
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `NIS2_METODO_${selected.id.slice(0, 8)}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function isCriterionSatisfied(
+    criterion: ClassificationMethod["nis2_method"]["criteria"][number],
+    incident: Incident
+  ): boolean {
+    if (criterion.type === "boolean") {
+      return Boolean((incident as Record<string, unknown>)[criterion.key]);
+    }
+    const incidentValue = Number((incident as Record<string, unknown>)[criterion.key] ?? 0);
+    const threshold = Number(criterion.threshold ?? 0);
+    return incidentValue >= threshold;
+  }
 
   return (
     <div>
@@ -376,13 +502,13 @@ export function IncidentsList() {
               <button onClick={() => setSelected(null)} className="text-gray-500">×</button>
             </div>
             <div className="px-4 pt-3 flex gap-2">
-              {(["gestione","classificazione","timeline","config"] as const).map(tab => (
+              {(["gestione","classificazione","metodo","timeline","config"] as const).map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`px-3 py-1.5 text-xs rounded ${activeTab === tab ? "bg-primary-600 text-white" : "bg-gray-100 text-gray-600"}`}
                 >
-                  {tab === "gestione" ? "Gestione" : tab === "classificazione" ? "Classificazione NIS2" : tab === "timeline" ? "Timeline NIS2 & Notifiche" : "Configurazione NIS2"}
+                  {tab === "gestione" ? "Gestione" : tab === "classificazione" ? "Classificazione NIS2" : tab === "metodo" ? "Metodo di classificazione" : tab === "timeline" ? "Timeline NIS2 & Notifiche" : "Configurazione NIS2"}
                 </button>
               ))}
             </div>
@@ -405,39 +531,39 @@ export function IncidentsList() {
                 />
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs text-gray-600">Categoria ENISA</label>
+                    <label className="text-xs text-gray-600">Classificazione ENISA</label>
                     <select
                       className="w-full border rounded px-3 py-2 text-sm"
                       value={selected.incident_category ?? ""}
                       onChange={e => setSelected({ ...selected, incident_category: e.target.value, incident_subcategory: "" })}
                     >
                       <option value="">— seleziona —</option>
-                      {ENISA_CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                      {enisaCategories.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-600">Sottocategoria</label>
+                    <label className="text-xs text-gray-600">Dettaglio categoria</label>
                     <select
                       className="w-full border rounded px-3 py-2 text-sm"
                       value={selected.incident_subcategory ?? ""}
                       onChange={e => setSelected({ ...selected, incident_subcategory: e.target.value })}
                     >
                       <option value="">— seleziona —</option>
-                      {(ENISA_SUBCATEGORIES[selected.incident_category ?? ""] ?? []).map(s => (
+                      {(enisaSubcategories[selected.incident_category ?? ""] ?? []).map(s => (
                         <option key={s.value} value={s.value}>{s.label}</option>
                       ))}
                     </select>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
-                  <input className="border rounded px-3 py-2 text-sm" placeholder="Utenti/sistemi colpiti" value={selected.affected_users_count ?? ""} onChange={e => setSelected({ ...selected, affected_users_count: e.target.value ? Number(e.target.value) : null })} />
-                  <input className="border rounded px-3 py-2 text-sm" placeholder="Ore di interruzione" value={selected.service_disruption_hours ?? ""} onChange={e => setSelected({ ...selected, service_disruption_hours: e.target.value || null })} />
-                  <input className="border rounded px-3 py-2 text-sm" placeholder="Impatto finanziario EUR" value={selected.financial_impact_eur ?? ""} onChange={e => setSelected({ ...selected, financial_impact_eur: e.target.value || null })} />
+                  <input className="border rounded px-3 py-2 text-sm" placeholder="Utenti o sistemi coinvolti (n.)" value={selected.affected_users_count ?? ""} onChange={e => setSelected({ ...selected, affected_users_count: e.target.value ? Number(e.target.value) : null })} />
+                  <input className="border rounded px-3 py-2 text-sm" placeholder="Durata interruzione servizio (ore)" value={selected.service_disruption_hours ?? ""} onChange={e => setSelected({ ...selected, service_disruption_hours: e.target.value || null })} />
+                  <input className="border rounded px-3 py-2 text-sm" placeholder="Impatto economico stimato (EUR)" value={selected.financial_impact_eur ?? ""} onChange={e => setSelected({ ...selected, financial_impact_eur: e.target.value || null })} />
                 </div>
                 <div className="flex gap-4 text-sm">
-                  <label><input type="checkbox" checked={!!selected.personal_data_involved} onChange={e => setSelected({ ...selected, personal_data_involved: e.target.checked })} /> Dati personali coinvolti</label>
-                  <label><input type="checkbox" checked={!!selected.cross_border_impact} onChange={e => setSelected({ ...selected, cross_border_impact: e.target.checked })} /> Impatto cross-border</label>
-                  <label><input type="checkbox" checked={!!selected.critical_infrastructure_impact} onChange={e => setSelected({ ...selected, critical_infrastructure_impact: e.target.checked })} /> Infrastrutture critiche</label>
+                  <label><input type="checkbox" checked={!!selected.personal_data_involved} onChange={e => setSelected({ ...selected, personal_data_involved: e.target.checked })} /> Coinvolgimento dati personali</label>
+                  <label><input type="checkbox" checked={!!selected.cross_border_impact} onChange={e => setSelected({ ...selected, cross_border_impact: e.target.checked })} /> Impatto multi-paese (cross-border)</label>
+                  <label><input type="checkbox" checked={!!selected.critical_infrastructure_impact} onChange={e => setSelected({ ...selected, critical_infrastructure_impact: e.target.checked })} /> Impatto su infrastrutture critiche</label>
                 </div>
                 <div className="flex items-center gap-3">
                   <button
@@ -445,20 +571,179 @@ export function IncidentsList() {
                     disabled={updateMutation.isPending}
                     className="px-3 py-2 text-xs bg-primary-600 text-white rounded disabled:opacity-50"
                   >
-                    {updateMutation.isPending ? "Salvataggio..." : "Salva gestione"}
+                    {updateMutation.isPending ? "Aggiornamento in corso..." : "Salva aggiornamento gestione"}
                   </button>
-                  {updateMutation.isSuccess && <span className="text-xs text-green-600">✓ Salvato</span>}
-                  {updateMutation.isError && <span className="text-xs text-red-500">Errore nel salvataggio</span>}
+                  {updateMutation.isSuccess && <span className="text-xs text-green-600">✓ Aggiornamento registrato</span>}
+                  {updateMutation.isError && <span className="text-xs text-red-500">Errore durante l'aggiornamento</span>}
                 </div>
               </div>
             )}
 
             {activeTab === "classificazione" && (
               <div className="p-4 space-y-3">
-                {selected.is_significant === true && <div className="px-3 py-2 bg-red-50 text-red-700 rounded text-sm">Incidente SIGNIFICATIVO — obbligo di notifica NIS2</div>}
-                {selected.is_significant === false && <div className="px-3 py-2 bg-green-50 text-green-700 rounded text-sm">Incidente non significativo — nessun obbligo</div>}
-                {selected.is_significant == null && <div className="px-3 py-2 bg-yellow-50 text-yellow-700 rounded text-sm">Classificazione in attesa</div>}
-                <button onClick={() => classifyMutation.mutate(selected.id)} className="px-3 py-2 text-xs bg-primary-600 text-white rounded">Classifica automaticamente</button>
+                {selected.is_significant === true && <div className="px-3 py-2 bg-red-50 text-red-700 rounded text-sm">Incidente classificato SIGNIFICATIVO: obbligo di notifica NIS2.</div>}
+                {selected.is_significant === false && <div className="px-3 py-2 bg-green-50 text-green-700 rounded text-sm">Incidente classificato NON significativo: monitoraggio interno.</div>}
+                {selected.is_significant == null && <div className="px-3 py-2 bg-yellow-50 text-yellow-700 rounded text-sm">Classificazione non ancora definita.</div>}
+                <button onClick={() => classifyMutation.mutate({ id: selected.id })} className="px-3 py-2 text-xs bg-primary-600 text-white rounded">Esegui valutazione automatica</button>
+                <div className="rounded border p-3 space-y-1">
+                  <div className="text-xs font-medium text-gray-700">Criteri decisionali (soglie sito)</div>
+                  <div className="text-xs">
+                    {(selected.affected_users_count ?? 0) >= thresholdUsers ? "✅" : "❌"} Utenti colpiti: {selected.affected_users_count ?? 0} (soglia: {thresholdUsers})
+                  </div>
+                  <div className="text-xs">
+                    {Number(selected.service_disruption_hours ?? 0) >= thresholdHours ? "✅" : "❌"} Ore interruzione: {selected.service_disruption_hours ?? 0}h (soglia: {thresholdHours}h)
+                  </div>
+                  <div className="text-xs">
+                    {Number(selected.financial_impact_eur ?? 0) >= thresholdFinancial ? "✅" : "❌"} Impatto finanziario: {selected.financial_impact_eur ?? 0} EUR (soglia: {thresholdFinancial} EUR)
+                  </div>
+                  <div className="text-xs">{selected.personal_data_involved ? "✅" : "❌"} Dati personali coinvolti</div>
+                  <div className="text-xs">{selected.cross_border_impact ? "✅" : "❌"} Impatto cross-border</div>
+                  <div className="text-xs">{selected.critical_infrastructure_impact ? "✅" : "❌"} Infrastrutture critiche</div>
+                </div>
+                <div className="rounded border p-3 space-y-2">
+                  <label className="text-xs flex items-center gap-2">
+                    <input type="checkbox" checked={overrideEnabled} onChange={(e) => setOverrideEnabled(e.target.checked)} />
+                    Applica decisione manuale (override)
+                  </label>
+                  {overrideEnabled && (
+                    <>
+                      <select
+                        value={overrideValue}
+                        onChange={(e) => setOverrideValue(e.target.value as "significant" | "not_significant")}
+                        className="w-full border rounded px-2 py-1.5 text-sm"
+                      >
+                        <option value="significant">Esito manuale: Significativo</option>
+                        <option value="not_significant">Esito manuale: Non significativo</option>
+                      </select>
+                      <textarea
+                        rows={2}
+                        value={overrideReason}
+                        onChange={(e) => setOverrideReason(e.target.value)}
+                        className="w-full border rounded px-2 py-1.5 text-sm"
+                        placeholder="Business rationale della decisione (obbligatoria)"
+                      />
+                      <button
+                        onClick={() => classifyMutation.mutate({
+                          id: selected.id,
+                          data: {
+                            override: overrideValue === "significant",
+                            reason: overrideReason,
+                          },
+                        })}
+                        disabled={!overrideReason.trim()}
+                        className="px-3 py-2 text-xs bg-amber-600 text-white rounded disabled:opacity-50"
+                      >
+                        Conferma decisione manuale
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === "metodo" && (
+              <div className="p-4 space-y-4">
+                <div className="flex justify-end">
+                  <button
+                    onClick={exportClassificationMethodHtml}
+                    disabled={!selected || !classificationMethod}
+                    className="px-3 py-1.5 text-xs border rounded disabled:opacity-50"
+                  >
+                    Esporta metodo (HTML)
+                  </button>
+                </div>
+                <div className="rounded border bg-blue-50 border-blue-100 p-3">
+                  <div className="text-sm font-medium text-blue-900">Metodo di classificazione NIS2</div>
+                  <div className="text-xs text-blue-900 mt-1">
+                    {classificationMethod?.nis2_method.rule ??
+                      "Incidente significativo se almeno un criterio risulta soddisfatto; override manuale con motivazione ha precedenza."}
+                  </div>
+                </div>
+
+                <div className="rounded border p-3">
+                  <div className="text-sm font-medium mb-2">Valutazione corrente incidente selezionato</div>
+                  <div className="overflow-auto">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="text-left text-gray-500 border-b">
+                          <th className="py-1 pr-2">Esito</th>
+                          <th className="py-1 pr-2">Criterio</th>
+                          <th className="py-1 pr-2">Valore corrente</th>
+                          <th className="py-1 pr-2">Soglia</th>
+                          <th className="py-1 pr-2">Fonte</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                    {(classificationMethod?.nis2_method.criteria ?? []).map((criterion) => {
+                      const satisfied = isCriterionSatisfied(criterion, selected);
+                      const incidentRaw = (selected as Record<string, unknown>)[criterion.key];
+                      const incidentDisplay =
+                        criterion.type === "boolean"
+                          ? (incidentRaw ? "Sì" : "No")
+                          : String(incidentRaw ?? 0);
+                      const sourceLabel = criterion.type === "threshold" ? "input utente + soglia sito" : "flag booleano";
+                      return (
+                        <tr key={`eval-${criterion.key}`} className="border-b last:border-b-0">
+                          <td className="py-1 pr-2">{satisfied ? "✅" : "❌"}</td>
+                          <td className="py-1 pr-2 text-gray-700">{criterion.label}</td>
+                          <td className="py-1 pr-2 text-gray-700">{incidentDisplay}</td>
+                          <td className="py-1 pr-2 text-gray-700">
+                            {criterion.type === "threshold" ? String(criterion.threshold ?? "—") : "—"}
+                          </td>
+                          <td className="py-1 pr-2 text-gray-600">{sourceLabel}</td>
+                        </tr>
+                      );
+                    })}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="mt-2 text-xs font-medium">
+                    Esito automatico atteso:{" "}
+                    {(classificationMethod?.nis2_method.criteria ?? []).some((criterion) =>
+                      isCriterionSatisfied(criterion, selected)
+                    )
+                      ? "SIGNIFICATIVO (almeno un criterio soddisfatto)"
+                      : "NON significativo (nessun criterio soddisfatto)"}
+                  </div>
+                  {selected.significance_override !== null && selected.significance_override !== undefined && (
+                    <div className="mt-1 text-xs text-amber-700">
+                      Override manuale attivo: prevale l'esito manuale con motivazione.
+                    </div>
+                  )}
+                </div>
+
+                <div className="rounded border p-3">
+                  <div className="text-sm font-medium mb-2">Criteri decisionali e soglie</div>
+                  <div className="space-y-1">
+                    {(classificationMethod?.nis2_method.criteria ?? []).map((criterion) => (
+                      <div key={criterion.key} className="text-xs text-gray-700">
+                        {criterion.type === "threshold"
+                          ? `- ${criterion.label}: valore ${criterion.operator} ${criterion.threshold}`
+                          : `- ${criterion.label}: criterio booleano`}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded border p-3">
+                  <div className="text-sm font-medium mb-2">Tassonomia ENISA ufficiale</div>
+                  <div className="space-y-2">
+                    {(classificationMethod?.taxonomy.categories ?? []).map((category) => (
+                      <div key={category.code} className="rounded border bg-gray-50 p-2">
+                        <div className="text-xs font-semibold">
+                          {category.code} — {category.label}
+                        </div>
+                        <div className="text-xs text-gray-600">{category.description}</div>
+                        <div className="mt-1 text-xs text-gray-700">
+                          Sottocategorie:{" "}
+                          {(classificationMethod?.taxonomy.subcategories[category.code] ?? [])
+                            .map((sub) => sub.label)
+                            .join(", ") || "non definite"}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -467,8 +752,8 @@ export function IncidentsList() {
                 {(timeline as NIS2Timeline | undefined)?.steps?.map(step => (
                   <div key={step.step} className="border rounded p-3">
                     <div className="font-medium text-sm">{step.label}</div>
-                    <div className="text-xs text-gray-500">Scadenza: {step.deadline ? new Date(step.deadline).toLocaleString(dateLocale) : "—"}</div>
-                    <div className="text-xs">Stato: <strong>{step.status}</strong></div>
+                    <div className="text-xs text-gray-500">Scadenza regolatoria: {step.deadline ? new Date(step.deadline).toLocaleString(dateLocale) : "—"}</div>
+                    <div className="text-xs">Stato avanzamento: <strong>{step.status}</strong></div>
                     <div className="mt-2 flex gap-2">
                       <button
                         onClick={async () => {
@@ -487,26 +772,26 @@ export function IncidentsList() {
                         }}
                         className="text-xs border rounded px-2 py-1"
                       >
-                        Genera documento
+                        Genera documento ufficiale
                       </button>
-                      <button onClick={() => setSentType(step.step)} className="text-xs border rounded px-2 py-1">Seleziona invio</button>
+                      <button onClick={() => setSentType(step.step)} className="text-xs border rounded px-2 py-1">Prepara registrazione invio</button>
                     </div>
                   </div>
                 ))}
                 <div className="border rounded p-3 space-y-2">
-                  <div className="text-sm font-medium">Segna come inviato</div>
+                  <div className="text-sm font-medium">Registra invio verso autorita</div>
                   <select value={sentType} onChange={e => setSentType(e.target.value)} className="w-full border rounded px-2 py-1.5 text-sm">
                     <option value="early_warning">Early Warning</option>
                     <option value="formal_notification">Notifica formale</option>
                     <option value="final_report">Report finale</option>
                     <option value="update">Aggiornamento</option>
                   </select>
-                  <input className="w-full border rounded px-2 py-1.5 text-sm" placeholder="Numero protocollo" value={protocolRef} onChange={e => setProtocolRef(e.target.value)} />
-                  <textarea className="w-full border rounded px-2 py-1.5 text-sm" rows={2} placeholder="Note risposta autorita" value={authorityResponse} onChange={e => setAuthorityResponse(e.target.value)} />
-                  <button onClick={() => markSentMutation.mutate(selected.id)} className="px-3 py-2 text-xs bg-primary-600 text-white rounded">Conferma invio</button>
+                  <input className="w-full border rounded px-2 py-1.5 text-sm" placeholder="Protocollo autorita / riferimento pratica" value={protocolRef} onChange={e => setProtocolRef(e.target.value)} />
+                  <textarea className="w-full border rounded px-2 py-1.5 text-sm" rows={2} placeholder="Esito o note dell'autorita competente" value={authorityResponse} onChange={e => setAuthorityResponse(e.target.value)} />
+                  <button onClick={() => markSentMutation.mutate(selected.id)} className="px-3 py-2 text-xs bg-primary-600 text-white rounded">Conferma registrazione invio</button>
                 </div>
                 <div className="border rounded p-3">
-                  <div className="text-sm font-medium mb-2">Registro notifiche</div>
+                  <div className="text-sm font-medium mb-2">Registro notifiche ufficiali</div>
                   <table className="w-full text-xs">
                     <thead><tr><th className="text-left">Tipo</th><th className="text-left">CSIRT</th><th className="text-left">Data invio</th><th className="text-left">Protocollo</th></tr></thead>
                     <tbody>
@@ -517,13 +802,49 @@ export function IncidentsList() {
                   </table>
                 </div>
                 <div className="border rounded p-3">
-                  <div className="text-sm font-medium mb-2">Bozza RCA con AI</div>
+                  <div className="text-sm font-medium mb-2">Bozza RCA assistita da AI</div>
                   <AiSuggestionBanner
                     taskType="rca_draft"
                     entityId={selected.id}
                     autoTrigger={false}
-                    onAccept={() => {}}
+                    onAccept={(res) => {
+                      setRcaDraftData((res as Record<string, unknown>) ?? null);
+                      setRcaDraftText(formatRcaText(res));
+                    }}
                     onIgnore={() => {}}
+                  />
+                  {rcaDraftData && (
+                    <div className="mt-3 rounded border border-indigo-100 bg-indigo-50 p-3 text-xs text-gray-800 space-y-2">
+                      <div className="text-sm font-semibold text-indigo-900">Executive RCA Preview</div>
+                      <div>
+                        <div className="font-medium">Sommario esecutivo</div>
+                        <div>{String(rcaDraftData.summary ?? "—")}</div>
+                      </div>
+                      <div>
+                        <div className="font-medium">Causa radice</div>
+                        <div>{String(rcaDraftData.root_cause ?? "—")}</div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <div className="font-medium">Azioni immediate</div>
+                          <div className="whitespace-pre-wrap">{listText(rcaDraftData.immediate_actions)}</div>
+                        </div>
+                        <div>
+                          <div className="font-medium">Azioni preventive</div>
+                          <div className="whitespace-pre-wrap">{listText(rcaDraftData.preventive_actions)}</div>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="font-medium">Lessons learned</div>
+                        <div>{String(rcaDraftData.lessons_learned ?? "—")}</div>
+                      </div>
+                    </div>
+                  )}
+                  <textarea
+                    className="mt-3 w-full border rounded px-3 py-2 text-xs min-h-40"
+                    value={rcaDraftText}
+                    onChange={(e) => setRcaDraftText(e.target.value)}
+                    placeholder="Bozza RCA editabile in formato operativo."
                   />
                 </div>
               </div>
