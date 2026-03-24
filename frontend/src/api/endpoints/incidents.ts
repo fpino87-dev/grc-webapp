@@ -20,6 +20,9 @@ export interface Incident {
   cross_border_impact?: boolean;
   critical_infrastructure_impact?: boolean;
   is_significant?: boolean | null;
+  is_recurrent?: boolean;
+  significance_override?: boolean | null;
+  significance_override_reason?: string;
   axis_operational?: number | null;
   axis_economic?: number | null;
   axis_people?: number | null;
@@ -63,6 +66,12 @@ export interface NIS2Configuration {
   threshold_users: number;
   threshold_hours: number;
   threshold_financial: number;
+  multiplier_medium?: number;
+  multiplier_high?: number;
+  recurrence_window_days?: number;
+  recurrence_score_bonus?: number;
+  ptnr_threshold?: number;
+  nis2_activity_description?: string;
   nis2_sector?: string;
   nis2_subsector?: string;
   internal_contact_name?: string;
@@ -70,6 +79,46 @@ export interface NIS2Configuration {
   internal_contact_phone?: string;
   legal_entity_name?: string;
   legal_entity_vat?: string;
+}
+
+export interface ClassificationAxisBreakdown {
+  score: number;
+  value: number | null;
+  threshold: number | null;
+  note: string;
+}
+
+export interface ClassificationBreakdown {
+  scores: Record<string, ClassificationAxisBreakdown>;
+  pta_ptnr: {
+    PTA: number;
+    PTNR: number;
+    ricorrenza_bonus: number;
+    is_recurrent: boolean;
+    asse_dominante: string;
+  };
+  fattispecie: Record<
+    string,
+    { active: boolean; applicable: boolean; label: string; description: string }
+  >;
+  decision: {
+    is_significant: boolean;
+    requires_csirt_notification?: boolean;
+    nis2_notifiable: string;
+    rationale: string;
+    active_fattispecie: string[];
+    by_ptnr?: boolean;
+    by_fattispecie?: boolean;
+  };
+  config_used?: Record<string, unknown>;
+  recurrence?: {
+    auto_detected: boolean;
+    manual_toggle: boolean;
+    bonus_applied: number;
+    last_similar_closed_at: string | null;
+  };
+  nis2_scope?: string;
+  message?: string;
 }
 
 export interface ClassificationMethod {
@@ -125,6 +174,14 @@ export const incidentsApi = {
     apiClient.post(`/incidents/incidents/${id}/close/`).then((r) => r.data),
   classifySignificance: (id: string, data?: { override?: boolean; reason?: string }) =>
     apiClient.post(`/incidents/incidents/${id}/classify-significance/`, data ?? {}).then((r) => r.data),
+  classificationBreakdown: (id: string) =>
+    apiClient
+      .get<ClassificationBreakdown>(`/incidents/incidents/${id}/classification-breakdown/`)
+      .then((r) => r.data),
+  classificationPreview: (payload: Record<string, unknown>) =>
+    apiClient
+      .post<ClassificationBreakdown>(`/incidents/incidents/classification-preview/`, payload)
+      .then((r) => r.data),
   timeline: (id: string) =>
     apiClient.get<NIS2Timeline>(`/incidents/incidents/${id}/nis2-timeline/`).then((r) => r.data),
   classificationMethod: (id: string) =>

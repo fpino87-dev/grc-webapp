@@ -6,6 +6,7 @@ from django.utils import timezone
 from apps.plants.models import CSIRT_BY_COUNTRY
 
 from .models import ENISA_INCIDENT_CATEGORIES, ENISA_SUBCATEGORIES, Incident, NIS2Configuration, NIS2Notification
+from .nis2_classification import run_full_classification
 
 
 def _e(value) -> str:
@@ -15,112 +16,117 @@ def _e(value) -> str:
     return html_module.escape(str(value))
 
 
-def classify_significance(incident: Incident) -> bool:
-    """Classificazione significativita con metodo CISOs4AI (PTA/PTNR/PT GDPR)."""
-    config = NIS2Configuration.objects.filter(plant=incident.plant).first()
-    threshold_users = config.threshold_users if config else 100
-    threshold_hours = config.threshold_hours if config else 4.0
-    threshold_eur = config.threshold_financial if config else 100000
-    users = int(incident.affected_users_count or 0)
-    hours = float(incident.service_disruption_hours or 0)
-    eur = float(incident.financial_impact_eur or 0)
+def _config_dict_from_obj(config_obj: NIS2Configuration | None) -> dict:
+    return {
+        "threshold_hours": float(config_obj.threshold_hours) if config_obj else 4.0,
+        "threshold_financial": float(config_obj.threshold_financial) if config_obj else 100_000.0,
+        "threshold_users": int(config_obj.threshold_users) if config_obj else 100,
+        "multiplier_medium": float(config_obj.multiplier_medium) if config_obj else 2.0,
+        "multiplier_high": float(config_obj.multiplier_high) if config_obj else 3.0,
+        "ptnr_threshold": int(config_obj.ptnr_threshold) if config_obj else 4,
+        "recurrence_score_bonus": int(config_obj.recurrence_score_bonus) if config_obj else 2,
+        "recurrence_window_days": int(config_obj.recurrence_window_days) if config_obj else 90,
+    }
 
-    axis_operational = incident.axis_operational
-    if axis_operational is None:
-        if hours >= float(threshold_hours) * 3:
-            axis_operational = 5
-        elif hours >= float(threshold_hours) * 2:
-            axis_operational = 4
-        elif hours >= float(threshold_hours):
-            axis_operational = 3
-        elif hours > 0:
-            axis_operational = 2
-        else:
-            axis_operational = 1
 
-    axis_economic = incident.axis_economic
-    if axis_economic is None:
-        if eur >= float(threshold_eur) * 3:
-            axis_economic = 5
-        elif eur >= float(threshold_eur) * 2:
-            axis_economic = 4
-        elif eur >= float(threshold_eur):
-            axis_economic = 3
-        elif eur > 0:
-            axis_economic = 2
-        else:
-            axis_economic = 1
+def _incident_data_dict(incident: Incident) -> dict:
+    return {
+        "service_disruption_hours": incident.service_disruption_hours,
+        "financial_impact_eur": incident.financial_impact_eur,
+        "affected_users_count": incident.affected_users_count,
+        "personal_data_involved": incident.personal_data_involved,
+        "cross_border_impact": incident.cross_border_impact,
+        "critical_infrastructure_impact": incident.critical_infrastructure_impact,
+        "incident_category": incident.incident_category,
+        "severity": incident.severity,
+    }
 
-    axis_people = incident.axis_people
-    if axis_people is None:
-        if users >= int(threshold_users) * 3:
-            axis_people = 5
-        elif users >= int(threshold_users) * 2:
-            axis_people = 4
-        elif users >= int(threshold_users):
-            axis_people = 3
-        elif users > 0:
-            axis_people = 2
-        else:
-            axis_people = 1
 
-    axis_confidentiality = incident.axis_confidentiality
-    if axis_confidentiality is None:
-        if incident.personal_data_involved and incident.incident_category == "data_breach":
-            axis_confidentiality = 4
-        elif incident.personal_data_involved:
-            axis_confidentiality = 3
-        elif incident.incident_category in ("intrusion", "data_breach"):
-            axis_confidentiality = 2
-        else:
-            axis_confidentiality = 1
+def _recurrence_similar_queryset(incident: Incident, config: dict):
+    if not incident.incident_category or not incident.plant_id:
+        return Incident.objects.none()
 
-    axis_reputational = incident.axis_reputational
-    if axis_reputational is None:
-        if incident.cross_border_impact and incident.critical_infrastructure_impact:
-            axis_reputational = 5
-        elif incident.cross_border_impact or incident.critical_infrastructure_impact:
-            axis_reputational = 4
-        elif incident.severity in ("alta", "critica"):
-            axis_reputational = 3
-        else:
-            axis_reputational = 1
+    window = int(config.get("recurrence_window_days", 90))
+    cutoff = timezone.now() - timedelta(days=window)
 
-    axis_recurrence = 2 if incident.is_recurrent else 0
-    pta_nis2 = max(axis_operational, axis_economic, axis_people, axis_confidentiality, axis_reputational)
-    ptnr_nis2 = pta_nis2 + axis_recurrence
-    pt_gdpr = axis_confidentiality * (1 if incident.personal_data_involved else 0)
+    return Incident.objects.filter(
+        plant=incident.plant,
+        incident_category=incident.incident_category,
+        status="chiuso",
+        detected_at__gte=cutoff,
+        deleted_at__isnull=True,
+    ).exclude(pk=incident.pk)
 
-    if incident.acn_is_category:
-        acn_category = incident.acn_is_category
-    else:
-        acn_map = {
-            "data_breach": "IS-1",
-            "availability_attack": "IS-3",
-            "intrusion": "IS-4",
-            "intrusion_attempt": "IS-4",
-            "malicious_code": "IS-2",
-            "supply_chain": "IS-2",
-        }
-        acn_category = acn_map.get(incident.incident_category or "", "")
 
-    auto_significant = ptnr_nis2 >= 4 and bool(acn_category)
-    is_significant = incident.significance_override if incident.significance_override is not None else auto_significant
+def _check_recurrence(incident: Incident, config: dict) -> bool:
+    """
+    Verifica automatica ricorrenza:
+    esiste un incidente chiuso degli ultimi N giorni
+    sullo stesso plant con la stessa categoria ENISA?
+    """
+    return _recurrence_similar_queryset(incident, config).exists()
 
-    incident.axis_operational = axis_operational
-    incident.axis_economic = axis_economic
-    incident.axis_people = axis_people
-    incident.axis_confidentiality = axis_confidentiality
-    incident.axis_reputational = axis_reputational
-    incident.axis_recurrence = axis_recurrence
-    incident.pta_nis2 = pta_nis2
-    incident.ptnr_nis2 = ptnr_nis2
-    incident.pt_gdpr = pt_gdpr
-    incident.acn_is_category = acn_category
-    incident.requires_csirt_notification = bool(is_significant)
-    incident.requires_gdpr_notification = pt_gdpr >= 4
-    incident.is_significant = bool(is_significant)
-    incident.nis2_notifiable = "si" if incident.is_significant else "no"
+
+def _last_similar_closed_at(incident: Incident, config: dict):
+    qs = _recurrence_similar_queryset(incident, config).order_by("-closed_at", "-detected_at")
+    prev = qs.first()
+    return prev.closed_at or prev.detected_at if prev else None
+
+
+def _apply_classification_result(incident: Incident, result: dict) -> None:
+    scores = result["scores"]
+    pta_ptnr = result["pta_ptnr"]
+    decision = result["decision"]
+    fatt = result["fattispecie"]
+    active_codes = [k for k, v in fatt.items() if v["active"] and v["applicable"]]
+    acn_str = ",".join(active_codes) if active_codes else ""
+
+    incident.axis_operational = scores["operativo"]["score"]
+    incident.axis_economic = scores["economico"]["score"]
+    incident.axis_people = scores["persone"]["score"]
+    incident.axis_confidentiality = scores["riservatezza"]["score"]
+    incident.axis_reputational = scores["reputazionale"]["score"]
+    incident.axis_recurrence = pta_ptnr["ricorrenza_bonus"]
+    incident.pta_nis2 = pta_ptnr["PTA"]
+    incident.ptnr_nis2 = pta_ptnr["PTNR"]
+    incident.pt_gdpr = scores["riservatezza"]["score"] * (1 if incident.personal_data_involved else 0)
+    incident.acn_is_category = acn_str or ""
+    incident.requires_csirt_notification = bool(decision["requires_csirt_notification"])
+    incident.requires_gdpr_notification = incident.pt_gdpr >= 4
+    incident.is_significant = bool(decision["is_significant"])
+    incident.nis2_notifiable = decision["nis2_notifiable"]
+
+
+def classify_significance(incident: Incident) -> dict:
+    """
+    Thin wrapper: legge dal DB, chiama il motore puro,
+    salva i risultati sul modello.
+    Restituisce il breakdown completo.
+    """
+    plant = incident.plant
+    nis2_scope = plant.nis2_scope if plant else "importante"
+
+    config_obj = NIS2Configuration.objects.filter(plant=plant).first() if plant else None
+    config = _config_dict_from_obj(config_obj)
+
+    is_recurrent_auto = _check_recurrence(incident, config)
+    is_recurrent_manual = bool(getattr(incident, "is_recurrent", False))
+    is_recurrent = is_recurrent_auto or is_recurrent_manual
+
+    incident_data = _incident_data_dict(incident)
+    result = run_full_classification(incident_data, config, nis2_scope, is_recurrent)
+
+    if incident.significance_override is not None:
+        result["decision"]["is_significant"] = incident.significance_override
+        result["decision"]["requires_csirt_notification"] = incident.significance_override
+        result["decision"]["nis2_notifiable"] = "si" if incident.significance_override else "no"
+        result["decision"]["rationale"] = (
+            f"Override manuale: "
+            f"{'significativo' if incident.significance_override else 'non significativo'}. "
+            f"Motivazione: {incident.significance_override_reason or '—'}"
+        )
+
+    _apply_classification_result(incident, result)
     incident.save(
         update_fields=[
             "axis_operational",
@@ -140,7 +146,53 @@ def classify_significance(incident: Incident) -> bool:
             "updated_at",
         ]
     )
-    return incident.is_significant
+
+    if result["decision"]["is_significant"]:
+        set_nis2_deadlines(incident)
+
+    last_similar = _last_similar_closed_at(incident, config)
+    result["recurrence"] = {
+        "auto_detected": is_recurrent_auto,
+        "manual_toggle": is_recurrent_manual,
+        "bonus_applied": result["pta_ptnr"]["ricorrenza_bonus"],
+        "last_similar_closed_at": last_similar.isoformat() if last_similar else None,
+    }
+    return result
+
+
+def get_classification_breakdown(incident: Incident) -> dict:
+    """Breakdown calcolato senza persistere (salvataggio solo in classify_significance)."""
+    plant = incident.plant
+    nis2_scope = plant.nis2_scope if plant else "importante"
+
+    config_obj = NIS2Configuration.objects.filter(plant=plant).first() if plant else None
+    config = _config_dict_from_obj(config_obj)
+
+    is_recurrent_auto = _check_recurrence(incident, config)
+    is_recurrent_manual = bool(getattr(incident, "is_recurrent", False))
+    is_recurrent = is_recurrent_auto or is_recurrent_manual
+
+    incident_data = _incident_data_dict(incident)
+    result = run_full_classification(incident_data, config, nis2_scope, is_recurrent)
+
+    if incident.significance_override is not None:
+        result["decision"]["is_significant"] = incident.significance_override
+        result["decision"]["requires_csirt_notification"] = incident.significance_override
+        result["decision"]["nis2_notifiable"] = "si" if incident.significance_override else "no"
+        result["decision"]["rationale"] = (
+            f"Override manuale: "
+            f"{'significativo' if incident.significance_override else 'non significativo'}. "
+            f"Motivazione: {incident.significance_override_reason or '—'}"
+        )
+
+    last_similar = _last_similar_closed_at(incident, config)
+    result["recurrence"] = {
+        "auto_detected": is_recurrent_auto,
+        "manual_toggle": is_recurrent_manual,
+        "bonus_applied": result["pta_ptnr"]["ricorrenza_bonus"],
+        "last_similar_closed_at": last_similar.isoformat() if last_similar else None,
+    }
+    return result
 
 
 def get_classification_method(incident: Incident) -> dict:
@@ -149,6 +201,10 @@ def get_classification_method(incident: Incident) -> dict:
     threshold_users = int(config.threshold_users) if config else 100
     threshold_hours = float(config.threshold_hours) if config else 4.0
     threshold_financial = float(config.threshold_financial) if config else 100000.0
+    multiplier_medium = float(config.multiplier_medium) if config else 2.0
+    multiplier_high = float(config.multiplier_high) if config else 3.0
+    ptnr_threshold = int(config.ptnr_threshold) if config else 4
+    recurrence_window_days = int(config.recurrence_window_days) if config else 90
 
     categories = [
         {"code": code, "label": label, "description": description}
@@ -186,14 +242,22 @@ def get_classification_method(incident: Incident) -> dict:
             ],
         },
         "nis2_method": {
-            "logic": "PTNR>=4 + categoria ACN IS-X",
-            "rule": "Livello 1: PTA=max(assi1..5), PTNR=PTA+asse6; Livello 2: classificazione ACN IS-X. Obbligo CSIRT se PTNR>=4 e categoria IS-X; override manuale ha precedenza.",
+            "logic": "OR",
+            "rule": (
+                "PTA=max(5 assi); PTNR=PTA+bonus ricorrenza (se ricorrente). "
+                "Significativo se PTNR≥soglia OPPURE almeno una fattispecie ACN attiva "
+                "(IS-1…IS-4 in base a scope sito). Moltiplicatori M/H su soglie base per assi 1–3. "
+                "Override manuale ha precedenza."
+            ),
             "thresholds": {
                 "affected_users_count": threshold_users,
                 "service_disruption_hours": threshold_hours,
                 "financial_impact_eur": threshold_financial,
-                "ptnr_trigger_csirt": 4,
+                "multiplier_medium": multiplier_medium,
+                "multiplier_high": multiplier_high,
+                "ptnr_trigger_csirt": ptnr_threshold,
                 "pt_gdpr_trigger": 4,
+                "recurrence_window_days": recurrence_window_days,
             },
             "criteria": [
                 {"key": "cross_border_impact", "label": "Impatto cross-border", "type": "boolean"},
@@ -527,7 +591,7 @@ def update_pdca_with_nis2_evidence(incident: Incident, notification: NIS2Notific
             title=f"Report Finale NIS2 — {incident.title}",
             evidence_type="report",
             plant=incident.plant,
-            valid_until=timezone.now().date() + timezone.timedelta(days=365),
+            valid_until=timezone.now().date() + timedelta(days=365),
             uploaded_by=notification.sent_by or incident.created_by,
             created_by=notification.sent_by or incident.created_by,
         )

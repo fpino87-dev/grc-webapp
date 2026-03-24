@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import {
   incidentsApi,
+  type ClassificationBreakdown,
   type ClassificationMethod,
   type Incident,
   type NIS2Configuration,
@@ -134,6 +135,7 @@ export function IncidentsList() {
   const [overrideEnabled, setOverrideEnabled] = useState(false);
   const [overrideValue, setOverrideValue] = useState<"significant" | "not_significant">("significant");
   const [overrideReason, setOverrideReason] = useState("");
+  const [previewBreakdown, setPreviewBreakdown] = useState<ClassificationBreakdown | null>(null);
   const [rcaDraftText, setRcaDraftText] = useState("");
   const [rcaDraftData, setRcaDraftData] = useState<Record<string, unknown> | null>(null);
   const qc = useQueryClient();
@@ -168,13 +170,19 @@ export function IncidentsList() {
   });
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: Partial<Incident> }) => incidentsApi.update(id, payload),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["incidents"] }),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ["incidents"] });
+      qc.invalidateQueries({ queryKey: ["classification-breakdown", variables.id] });
+      setPreviewBreakdown(null);
+    },
   });
   const classifyMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data?: { override?: boolean; reason?: string } }) =>
       incidentsApi.classifySignificance(id, data),
-    onSuccess: (res: { is_significant?: boolean }) => {
+    onSuccess: (res: { is_significant?: boolean }, variables) => {
       qc.invalidateQueries({ queryKey: ["incidents"] });
+      qc.invalidateQueries({ queryKey: ["classification-breakdown", variables.id] });
+      setPreviewBreakdown(null);
       if (selected && typeof res?.is_significant === "boolean") {
         setSelected({
           ...selected,
@@ -218,6 +226,11 @@ export function IncidentsList() {
     queryFn: () => incidentsApi.notifications(selected?.id ?? ""),
     enabled: !!selected,
   });
+  const { data: serverBreakdown } = useQuery({
+    queryKey: ["classification-breakdown", selected?.id],
+    queryFn: () => incidentsApi.classificationBreakdown(selected!.id),
+    enabled: !!selected?.id,
+  });
   const canSeeConfig = user?.role === "super_admin" || user?.role === "compliance_officer";
   const { data: configData } = useQuery({
     queryKey: ["nis2-config", selectedPlant?.id],
@@ -229,6 +242,11 @@ export function IncidentsList() {
     threshold_users: 100,
     threshold_hours: 4,
     threshold_financial: 100000,
+    multiplier_medium: 2,
+    multiplier_high: 3,
+    ptnr_threshold: 4,
+    recurrence_window_days: 90,
+    recurrence_score_bonus: 2,
   });
   const configMutation = useMutation({
     mutationFn: () => {
@@ -242,6 +260,45 @@ export function IncidentsList() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["nis2-config", selectedPlant?.id] }),
   });
   const dateLocale = i18n.language || "it";
+
+  useEffect(() => {
+    setPreviewBreakdown(null);
+  }, [selected?.id]);
+
+  useEffect(() => {
+    if (!selected?.plant || activeTab !== "classificazione") return;
+    const t = window.setTimeout(() => {
+      incidentsApi
+        .classificationPreview({
+          plant_id: selected.plant,
+          service_disruption_hours: selected.service_disruption_hours ?? null,
+          financial_impact_eur: selected.financial_impact_eur ?? null,
+          affected_users_count: selected.affected_users_count ?? null,
+          personal_data_involved: selected.personal_data_involved ?? false,
+          cross_border_impact: selected.cross_border_impact ?? false,
+          critical_infrastructure_impact: selected.critical_infrastructure_impact ?? false,
+          incident_category: selected.incident_category ?? "",
+          severity: selected.severity ?? "bassa",
+          is_recurrent_override: selected.is_recurrent ?? false,
+        })
+        .then(setPreviewBreakdown)
+        .catch(() => setPreviewBreakdown(null));
+    }, 600);
+    return () => clearTimeout(t);
+  }, [
+    activeTab,
+    selected?.plant,
+    selected?.service_disruption_hours,
+    selected?.financial_impact_eur,
+    selected?.affected_users_count,
+    selected?.personal_data_involved,
+    selected?.cross_border_impact,
+    selected?.critical_infrastructure_impact,
+    selected?.incident_category,
+    selected?.severity,
+    selected?.is_recurrent,
+  ]);
+
   const thresholdUsers = Number(classificationMethod?.nis2_method.thresholds.affected_users_count ?? currentConfig?.threshold_users ?? 100);
   const thresholdHours = Number(classificationMethod?.nis2_method.thresholds.service_disruption_hours ?? currentConfig?.threshold_hours ?? 4);
   const thresholdFinancial = Number(classificationMethod?.nis2_method.thresholds.financial_impact_eur ?? currentConfig?.threshold_financial ?? 100000);
@@ -263,6 +320,12 @@ export function IncidentsList() {
       threshold_users: currentConfig.threshold_users,
       threshold_hours: currentConfig.threshold_hours,
       threshold_financial: currentConfig.threshold_financial,
+      multiplier_medium: currentConfig.multiplier_medium ?? 2,
+      multiplier_high: currentConfig.multiplier_high ?? 3,
+      ptnr_threshold: currentConfig.ptnr_threshold ?? 4,
+      recurrence_window_days: currentConfig.recurrence_window_days ?? 90,
+      recurrence_score_bonus: currentConfig.recurrence_score_bonus ?? 2,
+      nis2_activity_description: currentConfig.nis2_activity_description ?? "",
       nis2_sector: currentConfig.nis2_sector,
       nis2_subsector: currentConfig.nis2_subsector,
       internal_contact_name: currentConfig.internal_contact_name,
@@ -411,6 +474,18 @@ export function IncidentsList() {
     const threshold = Number(criterion.threshold ?? 0);
     return incidentValue >= threshold;
   }
+
+  const breakdown = previewBreakdown ?? serverBreakdown ?? undefined;
+  const plantNis2Scope = plants?.find((p) => p.id === selected?.plant)?.nis2_scope;
+
+  function axisBarClass(score: number): string {
+    if (score <= 2) return "bg-emerald-500";
+    if (score === 3) return "bg-amber-400";
+    if (score === 4) return "bg-orange-500";
+    return "bg-red-600";
+  }
+
+  const axisOrder = ["operativo", "economico", "persone", "riservatezza", "reputazionale"] as const;
 
   return (
     <div>
@@ -591,43 +666,226 @@ export function IncidentsList() {
             )}
 
             {activeTab === "classificazione" && (
-              <div className="p-4 space-y-3">
+              <div className="p-4 space-y-4">
                 {classifyMutation.isSuccess && (
                   <div className="px-3 py-2 bg-emerald-50 text-emerald-700 rounded text-sm">
-                    Decisione di classificazione registrata con successo.
+                    {t("incidents.nis2_classification.classify_success")}
                   </div>
                 )}
                 {classifyMutation.isError && (
                   <div className="px-3 py-2 bg-red-50 text-red-700 rounded text-sm">
                     {(
                       (classifyMutation.error as AxiosError<{ error?: string }>)?.response?.data?.error ??
-                      "Errore durante la classificazione. Verificare i dati e riprovare."
+                      t("incidents.nis2_classification.classify_error")
                     )}
                   </div>
                 )}
-                {selected.is_significant === true && <div className="px-3 py-2 bg-red-50 text-red-700 rounded text-sm">Incidente classificato SIGNIFICATIVO: obbligo di notifica NIS2.</div>}
-                {selected.is_significant === false && <div className="px-3 py-2 bg-green-50 text-green-700 rounded text-sm">Incidente classificato NON significativo: monitoraggio interno.</div>}
-                {selected.is_significant == null && <div className="px-3 py-2 bg-yellow-50 text-yellow-700 rounded text-sm">Classificazione non ancora definita.</div>}
-                <button onClick={() => classifyMutation.mutate({ id: selected.id })} className="px-3 py-2 text-xs bg-primary-600 text-white rounded">Esegui valutazione automatica</button>
-                <div className="rounded border p-3 space-y-1">
-                  <div className="text-xs font-medium text-gray-700">Criteri decisionali (soglie sito)</div>
-                  <div className="text-xs">
-                    {(selected.affected_users_count ?? 0) >= thresholdUsers ? "✅" : "❌"} Utenti colpiti: {selected.affected_users_count ?? 0} (soglia: {thresholdUsers})
-                  </div>
-                  <div className="text-xs">
-                    {Number(selected.service_disruption_hours ?? 0) >= thresholdHours ? "✅" : "❌"} Ore interruzione: {selected.service_disruption_hours ?? 0}h (soglia: {thresholdHours}h)
-                  </div>
-                  <div className="text-xs">
-                    {Number(selected.financial_impact_eur ?? 0) >= thresholdFinancial ? "✅" : "❌"} Impatto finanziario: {selected.financial_impact_eur ?? 0} EUR (soglia: {thresholdFinancial} EUR)
-                  </div>
-                  <div className="text-xs">{selected.personal_data_involved ? "✅" : "❌"} Dati personali coinvolti</div>
-                  <div className="text-xs">{selected.cross_border_impact ? "✅" : "❌"} Impatto cross-border</div>
-                  <div className="text-xs">{selected.critical_infrastructure_impact ? "✅" : "❌"} Infrastrutture critiche</div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-medium text-gray-600">{t("incidents.nis2_classification.scope_label")}</span>
+                  {plantNis2Scope === "essenziale" && (
+                    <span className="px-2 py-0.5 rounded text-xs font-semibold bg-red-900 text-white">
+                      {t("incidents.nis2_classification.scope.essenziale")}
+                    </span>
+                  )}
+                  {plantNis2Scope === "importante" && (
+                    <span className="px-2 py-0.5 rounded text-xs font-semibold bg-orange-600 text-white">
+                      {t("incidents.nis2_classification.scope.importante")}
+                    </span>
+                  )}
+                  {plantNis2Scope === "non_soggetto" && (
+                    <span className="px-2 py-0.5 rounded text-xs font-semibold bg-gray-500 text-white">
+                      {t("incidents.nis2_classification.scope.non_soggetto")}
+                    </span>
+                  )}
                 </div>
+
+                {plantNis2Scope === "non_soggetto" ? (
+                  <div className="rounded border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
+                    {t("incidents.nis2_classification.site_non_subject")}
+                  </div>
+                ) : !breakdown || (!breakdown.scores && !breakdown.message) ? (
+                  <div className="text-sm text-gray-500">{t("common.loading")}</div>
+                ) : breakdown.message && !breakdown.scores ? (
+                  <div className="rounded border border-gray-200 bg-gray-50 p-3 text-sm">{breakdown.message}</div>
+                ) : breakdown.scores && breakdown.pta_ptnr && breakdown.decision ? (
+                  <>
+                    <div className="flex items-center justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={() => classifyMutation.mutate({ id: selected.id })}
+                        className="px-3 py-2 text-xs bg-primary-600 text-white rounded"
+                      >
+                        {t("incidents.nis2_classification.run_auto")}
+                      </button>
+                      {previewBreakdown && (
+                        <span className="text-xs text-amber-700">{t("incidents.nis2_classification.preview_live")}</span>
+                      )}
+                    </div>
+
+                    <div className="overflow-x-auto rounded border border-gray-200">
+                      <table className="w-full text-xs">
+                        <thead className="bg-gray-50 border-b border-gray-200">
+                          <tr>
+                            <th className="text-left px-3 py-2 font-medium text-gray-700">{t("incidents.nis2_classification.table.axis")}</th>
+                            <th className="text-left px-3 py-2 font-medium text-gray-700">{t("incidents.nis2_classification.table.value")}</th>
+                            <th className="text-left px-3 py-2 font-medium text-gray-700">{t("incidents.nis2_classification.table.threshold")}</th>
+                            <th className="text-left px-3 py-2 font-medium text-gray-700">{t("incidents.nis2_classification.table.score")}</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                          {axisOrder.map((key) => {
+                            const row = breakdown.scores![key];
+                            if (!row) return null;
+                            const valDisplay =
+                              key === "operativo"
+                                ? `${row.value ?? 0}h`
+                                : key === "economico"
+                                  ? `€${Number(row.value ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+                                  : key === "persone"
+                                    ? String(row.value ?? 0)
+                                    : "—";
+                            const thr =
+                              row.threshold != null
+                                ? key === "operativo"
+                                  ? `${row.threshold}h`
+                                  : key === "economico"
+                                    ? `€${Number(row.threshold).toLocaleString()}`
+                                    : String(row.threshold)
+                                : "—";
+                            return (
+                              <tr key={key}>
+                                <td className="px-3 py-2 align-top font-medium text-gray-800">
+                                  {t(`incidents.nis2_classification.axis.${key}`)}
+                                </td>
+                                <td className="px-3 py-2 align-top text-gray-700">{valDisplay}</td>
+                                <td className="px-3 py-2 align-top text-gray-600">{thr}</td>
+                                <td className="px-3 py-2 align-top">
+                                  <div className="flex items-center gap-2">
+                                    <div className="flex gap-0.5">
+                                      {[1, 2, 3, 4, 5].map((i) => (
+                                        <div
+                                          key={i}
+                                          className={`h-2 w-5 rounded-sm ${i <= row.score ? axisBarClass(row.score) : "bg-gray-200"}`}
+                                        />
+                                      ))}
+                                    </div>
+                                    <span className="text-gray-700 whitespace-nowrap">
+                                      {row.score}/5
+                                      {key === "riservatezza" && row.score >= 4 ? " ⚠️" : ""}
+                                    </span>
+                                  </div>
+                                  <div className="mt-1 text-[11px] text-gray-500">{row.note}</div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="rounded border border-indigo-100 bg-indigo-50/80 p-3 space-y-1 text-xs text-gray-800">
+                      <div>
+                        <strong>PTA</strong> = {breakdown.pta_ptnr.PTA} ({t("incidents.nis2_classification.dominant")}:{" "}
+                        {t(`incidents.nis2_classification.axis.${breakdown.pta_ptnr.asse_dominante}`)})
+                      </div>
+                      <div>
+                        {t("incidents.nis2_classification.recurrence.label")}:{" "}
+                        {breakdown.pta_ptnr.is_recurrent
+                          ? t("incidents.nis2_classification.recurrence.yes_bonus", { n: breakdown.pta_ptnr.ricorrenza_bonus })
+                          : t("incidents.nis2_classification.recurrence.no_bonus")}
+                        {breakdown.recurrence?.auto_detected && (
+                          <span className="ml-1 text-amber-800">({t("incidents.nis2_classification.recurrence.auto")})</span>
+                        )}
+                        {breakdown.recurrence?.manual_toggle && !breakdown.recurrence?.auto_detected && (
+                          <span className="ml-1 text-amber-800">({t("incidents.nis2_classification.recurrence.manual")})</span>
+                        )}
+                      </div>
+                      <div>
+                        <strong>PTNR</strong> = {breakdown.pta_ptnr.PTNR}
+                      </div>
+                    </div>
+
+                    <div className="rounded border border-gray-200 p-3 space-y-2">
+                      <div className="text-xs font-semibold text-gray-800">{t("incidents.nis2_classification.fattispecie_title")}</div>
+                      <div className="space-y-1">
+                        {Object.entries(breakdown.fattispecie).map(([code, spec]) => (
+                          <div key={code} className="flex items-start gap-2 text-xs text-gray-700">
+                            <span>
+                              {spec.active && spec.applicable ? "✅" : spec.applicable ? "⬜" : "🔒"}
+                            </span>
+                            <span>
+                              {code} — {spec.label}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div
+                      className={`rounded border p-3 space-y-2 ${
+                        breakdown.decision.is_significant
+                          ? "border-red-700 bg-red-50"
+                          : "border-emerald-200 bg-emerald-50"
+                      }`}
+                    >
+                      {breakdown.decision.is_significant ? (
+                        <>
+                          <div className="text-sm font-bold text-red-800">{t("incidents.nis2_classification.decision.significant_title")}</div>
+                          <div className="text-xs text-red-900">{t("incidents.nis2_classification.decision.significant_sub")}</div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-sm font-bold text-emerald-800">{t("incidents.nis2_classification.decision.not_significant_title")}</div>
+                          <div className="text-xs text-emerald-900">{t("incidents.nis2_classification.decision.not_significant_sub")}</div>
+                          <div className="text-xs text-gray-600">{t("incidents.nis2_classification.decision.voluntary_note")}</div>
+                        </>
+                      )}
+                      <div className="text-xs text-gray-800 whitespace-pre-wrap">{breakdown.decision.rationale}</div>
+                      {breakdown.decision.is_significant && (
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab("timeline")}
+                          className="mt-1 px-3 py-1.5 text-xs bg-red-800 text-white rounded"
+                        >
+                          {t("incidents.nis2_classification.timeline_cta")}
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="rounded border border-dashed border-gray-300 p-3 space-y-2 text-xs text-gray-700">
+                      <div className="font-medium text-gray-800">{t("incidents.nis2_classification.recurrence.section_title")}</div>
+                      <p>
+                        {breakdown.recurrence?.auto_detected
+                          ? t("incidents.nis2_classification.recurrence.auto_yes")
+                          : t("incidents.nis2_classification.recurrence.auto_no")}
+                        {breakdown.recurrence?.last_similar_closed_at && (
+                          <>
+                            {" "}
+                            {new Date(breakdown.recurrence.last_similar_closed_at).toLocaleString(dateLocale)}
+                          </>
+                        )}
+                      </p>
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={!!selected.is_recurrent}
+                          onChange={(e) => {
+                            const v = e.target.checked;
+                            setSelected({ ...selected, is_recurrent: v });
+                            updateMutation.mutate({ id: selected.id, payload: { is_recurrent: v } });
+                          }}
+                        />
+                        {t("incidents.nis2_classification.recurrence.manual_toggle")}
+                      </label>
+                    </div>
+                  </>
+                ) : null}
+
                 <div className="rounded border p-3 space-y-2">
                   <label className="text-xs flex items-center gap-2">
                     <input type="checkbox" checked={overrideEnabled} onChange={(e) => setOverrideEnabled(e.target.checked)} />
-                    Applica decisione manuale (override)
+                    {t("incidents.nis2_classification.override_toggle")}
                   </label>
                   {overrideEnabled && (
                     <>
@@ -636,29 +894,33 @@ export function IncidentsList() {
                         onChange={(e) => setOverrideValue(e.target.value as "significant" | "not_significant")}
                         className="w-full border rounded px-2 py-1.5 text-sm"
                       >
-                        <option value="significant">Esito manuale: Significativo</option>
-                        <option value="not_significant">Esito manuale: Non significativo</option>
+                        <option value="significant">{t("incidents.nis2_classification.override_significant")}</option>
+                        <option value="not_significant">{t("incidents.nis2_classification.override_not_significant")}</option>
                       </select>
                       <textarea
                         rows={2}
                         value={overrideReason}
                         onChange={(e) => setOverrideReason(e.target.value)}
                         className="w-full border rounded px-2 py-1.5 text-sm"
-                        placeholder="Business rationale della decisione (obbligatoria)"
+                        placeholder={t("incidents.nis2_classification.override_reason_ph")}
                       />
                       <button
-                        onClick={() => classifyMutation.mutate({
-                          id: selected.id,
-                          data: {
-                            override: overrideValue === "significant",
-                            reason: overrideReason,
-                          },
-                        })}
+                        type="button"
+                        onClick={() =>
+                          classifyMutation.mutate({
+                            id: selected.id,
+                            data: {
+                              override: overrideValue === "significant",
+                              reason: overrideReason,
+                            },
+                          })
+                        }
                         disabled={!overrideReason.trim()}
                         className="px-3 py-2 text-xs bg-amber-600 text-white rounded disabled:opacity-50"
                       >
-                        Conferma decisione manuale
+                        {t("incidents.nis2_classification.override_apply")}
                       </button>
+                      <p className="text-[11px] text-gray-500">{t("incidents.nis2_classification.override_note")}</p>
                     </>
                   )}
                 </div>
@@ -896,10 +1158,11 @@ export function IncidentsList() {
             )}
             {activeTab === "config" && canSeeConfig && selectedPlant && (
               <div className="p-4 space-y-3">
-                <div className="text-sm font-semibold">Configurazione NIS2 per sito</div>
+                <div className="text-sm font-semibold">{t("incidents.nis2_classification.config.calc_title")}</div>
                 <div className="text-xs text-gray-500 bg-blue-50 border border-blue-100 rounded p-2">
-                  Soglie di significatività: se l'incidente supera anche solo uno di questi valori, viene classificato come <strong>significativo NIS2</strong> con obbligo di notifica al CSIRT.
+                  {t("incidents.nis2_classification.config.ptnr_note")}
                 </div>
+                <div className="text-xs font-semibold text-gray-700 pt-1">{t("incidents.nis2_classification.config.base_title")}</div>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-gray-600">Utenti/sistemi colpiti (n°)</label>
@@ -914,6 +1177,72 @@ export function IncidentsList() {
                     <input className="w-full border rounded px-2 py-1.5 text-sm" value={configForm.threshold_financial ?? currentConfig?.threshold_financial ?? 100000} onChange={e => setConfigForm(f => ({ ...f, threshold_financial: Number(e.target.value) }))} />
                   </div>
                 </div>
+                <div className="text-xs font-semibold text-gray-700 pt-2">{t("incidents.nis2_classification.config.multiplier_title")}</div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-600">{t("incidents.nis2_classification.config.multiplier_m")}</label>
+                    <input
+                      className="w-full border rounded px-2 py-1.5 text-sm"
+                      type="number"
+                      step="0.01"
+                      value={configForm.multiplier_medium ?? currentConfig?.multiplier_medium ?? 2}
+                      onChange={(e) => setConfigForm((f) => ({ ...f, multiplier_medium: Number(e.target.value) }))}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-600">{t("incidents.nis2_classification.config.multiplier_h")}</label>
+                    <input
+                      className="w-full border rounded px-2 py-1.5 text-sm"
+                      type="number"
+                      step="0.01"
+                      value={configForm.multiplier_high ?? currentConfig?.multiplier_high ?? 3}
+                      onChange={(e) => setConfigForm((f) => ({ ...f, multiplier_high: Number(e.target.value) }))}
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500">{t("incidents.nis2_classification.config.multiplier_note")}</p>
+                <div className="text-xs font-semibold text-gray-700 pt-2">{t("incidents.nis2_classification.config.rule_title")}</div>
+                <div className="max-w-xs space-y-1">
+                  <label className="text-xs font-medium text-gray-600">{t("incidents.nis2_classification.config.ptnr_threshold")}</label>
+                  <input
+                    className="w-full border rounded px-2 py-1.5 text-sm"
+                    type="number"
+                    value={configForm.ptnr_threshold ?? currentConfig?.ptnr_threshold ?? 4}
+                    onChange={(e) => setConfigForm((f) => ({ ...f, ptnr_threshold: Number(e.target.value) }))}
+                  />
+                </div>
+                <div className="text-xs font-semibold text-gray-700 pt-2">{t("incidents.nis2_classification.config.recurrence_title")}</div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-600">{t("incidents.nis2_classification.config.recurrence_window")}</label>
+                    <input
+                      className="w-full border rounded px-2 py-1.5 text-sm"
+                      type="number"
+                      value={configForm.recurrence_window_days ?? currentConfig?.recurrence_window_days ?? 90}
+                      onChange={(e) => setConfigForm((f) => ({ ...f, recurrence_window_days: Number(e.target.value) }))}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-600">{t("incidents.nis2_classification.config.recurrence_bonus")}</label>
+                    <input
+                      className="w-full border rounded px-2 py-1.5 text-sm"
+                      type="number"
+                      value={configForm.recurrence_score_bonus ?? currentConfig?.recurrence_score_bonus ?? 2}
+                      onChange={(e) => setConfigForm((f) => ({ ...f, recurrence_score_bonus: Number(e.target.value) }))}
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500">{t("incidents.nis2_classification.config.recurrence_note")}</p>
+                <div className="space-y-1 pt-1">
+                  <label className="text-xs font-medium text-gray-600">{t("incidents.nis2_classification.config.activity_desc")}</label>
+                  <textarea
+                    className="w-full border rounded px-2 py-1.5 text-sm"
+                    rows={2}
+                    value={configForm.nis2_activity_description ?? currentConfig?.nis2_activity_description ?? ""}
+                    onChange={(e) => setConfigForm((f) => ({ ...f, nis2_activity_description: e.target.value }))}
+                  />
+                </div>
+                <div className="text-xs font-semibold text-gray-700 pt-2 border-t border-gray-100 mt-2">Configurazione NIS2 per sito</div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-gray-600">Settore NIS2</label>

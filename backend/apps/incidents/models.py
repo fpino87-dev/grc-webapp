@@ -281,6 +281,34 @@ class NIS2Configuration(BaseModel):
     threshold_financial = models.DecimalField(
         max_digits=12, decimal_places=2, default=100000, help_text="Soglia impatto finanziario EUR per classificare significativo"
     )
+    multiplier_medium = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        default=2.0,
+        help_text="Moltiplicatore soglia per punteggio 4 (default ×2)",
+    )
+    multiplier_high = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        default=3.0,
+        help_text="Moltiplicatore soglia per punteggio 5 (default ×3)",
+    )
+    recurrence_window_days = models.IntegerField(
+        default=90,
+        help_text="Finestra temporale per rilevamento ricorrenza (gg)",
+    )
+    recurrence_score_bonus = models.IntegerField(
+        default=2,
+        help_text="Punti aggiuntivi al PTNR se incidente ricorrente",
+    )
+    ptnr_threshold = models.IntegerField(
+        default=4,
+        help_text="PTNR minimo per classificare come significativo",
+    )
+    nis2_activity_description = models.TextField(
+        blank=True,
+        help_text="Descrizione attività NIS2 per i documenti formali",
+    )
     nis2_sector = models.CharField(max_length=100, blank=True, help_text="Settore NIS2 es. 'Manifattura - Automotive'")
     nis2_subsector = models.CharField(max_length=100, blank=True, help_text="Sottosettore es. 'Produzione veicoli a motore'")
     internal_contact_name = models.CharField(max_length=200, blank=True)

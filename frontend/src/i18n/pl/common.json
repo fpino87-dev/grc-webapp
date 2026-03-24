@@ -1433,6 +1433,75 @@
       },
       "config_needed": {
         "1": "Wyznaczyć kontakt NIS2 w M00 Governance"
+      },
+      "nis2_classification": {
+        "classify_success": "Decyzja klasyfikacji zapisana pomyślnie.",
+        "classify_error": "Klasyfikacja nie powiodła się. Sprawdź dane.",
+        "scope_label": "Zakres NIS2 zakładu",
+        "scope": {
+          "essenziale": "Podmiot istotny",
+          "importante": "Podmiot ważny",
+          "non_soggetto": "Poza zakresem NIS2"
+        },
+        "site_non_subject": "Zakład nie podlega obowiązkom NIS2.",
+        "run_auto": "Uruchom ocenę automatyczną",
+        "preview_live": "Podgląd na żywo (niezapisany)",
+        "table": {
+          "axis": "Oś",
+          "value": "Wartość",
+          "threshold": "Próg",
+          "score": "Wynik"
+        },
+        "axis": {
+          "operativo": "Operacyjna",
+          "economico": "Ekonomiczna",
+          "persone": "Osoby / systemy",
+          "riservatezza": "Poufność",
+          "reputazionale": "Reputacja"
+        },
+        "dominant": "Oś dominująca",
+        "recurrence": {
+          "label": "Powtarzalność",
+          "yes_bonus": "Tak (+{{n}})",
+          "no_bonus": "Nie (+0)",
+          "auto": "auto",
+          "manual": "ręcznie",
+          "section_title": "Powtarzalność",
+          "auto_yes": "Wykryto podobny zamknięty incydent z dnia",
+          "auto_no": "Brak zamkniętego precedensu w skonfigurowanym oknie (auto).",
+          "manual_toggle": "Zdarzenie powtarzalne (ręcznie)"
+        },
+        "fattispecie_title": "Przesłanki ACN",
+        "decision": {
+          "significant_title": "Incydent znaczący",
+          "significant_sub": "Obowiązek zgłoszenia NIS2 do CSIRT",
+          "not_significant_title": "Nieznaczący",
+          "not_significant_sub": "Brak obowiązkowego zgłoszenia NIS2",
+          "voluntary_note": "Możesz nadal zgłosić dobrowolnie."
+        },
+        "timeline_cta": "Otwórz oś czasu NIS2",
+        "override_toggle": "Nadpisanie klasyfikacji",
+        "override_significant": "Znaczący",
+        "override_not_significant": "Nieznaczący",
+        "override_reason_ph": "Uzasadnienie (wymagane)",
+        "override_apply": "Zastosuj nadpisanie",
+        "override_note": "Nadpisanie zastępuje obliczenia automatyczne i jest rejestrowane w śladzie audytu.",
+        "config": {
+          "calc_title": "Parametry obliczania znaczenia",
+          "base_title": "Progi bazowe",
+          "multiplier_title": "Mnożniki skali",
+          "multiplier_m": "Mnożnik średni (×M dla wyniku 4)",
+          "multiplier_h": "Mnożnik wysoki (×H dla wyniku 5)",
+          "multiplier_note": "Wynik 3 = między progiem a progiem×M. Wynik 4 = między progiem×M a progiem×H. Wynik 5 = powyżej progu×H.",
+          "rule_title": "Reguła decyzji",
+          "ptnr_threshold": "Próg PTNR dla znaczenia",
+          "ptnr_note": "Znaczący, jeśli PTNR ≥ próg lub co najmniej jedna aktywna przesłanka ACN.",
+          "recurrence_title": "Powtarzalność",
+          "recurrence_window": "Okno powtarzalności (dni)",
+          "recurrence_bonus": "Bonus PTNR za powtarzalność",
+          "recurrence_note": "System sprawdza zamknięty incydent z tej samej kategorii w ostatnich N dniach w tym zakładzie.",
+          "activity_desc": "Opis działalności NIS2 (dokumenty formalne)"
+        }
       }
     }
   },

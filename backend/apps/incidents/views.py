@@ -6,12 +6,14 @@ from rest_framework.permissions import IsAuthenticated
 
 from core.audit import log_action
 from .models import Incident, NIS2Configuration
+from apps.plants.models import Plant
+
 from .nis2_services import (
     classify_significance as classify_significance_service,
     generate_nis2_document,
+    get_classification_breakdown,
     get_classification_method,
     mark_notification_sent,
-    set_nis2_deadlines,
     update_pdca_with_nis2_evidence,
 )
 from .serializers import IncidentSerializer, NIS2ConfigurationSerializer, NIS2NotificationSerializer
@@ -86,12 +88,9 @@ class IncidentViewSet(viewsets.ModelViewSet):
                 ]
             )
 
-        is_sig = classify_significance_service(incident)
-        incident.is_significant = is_sig
-        incident.nis2_notifiable = "si" if is_sig else "no"
-        incident.save(update_fields=["is_significant", "nis2_notifiable", "updated_at"])
-        if is_sig:
-            set_nis2_deadlines(incident)
+        breakdown = classify_significance_service(incident)
+        incident.refresh_from_db()
+        is_sig = breakdown["decision"]["is_significant"]
 
         log_action(
             user=request.user,
@@ -159,6 +158,101 @@ class IncidentViewSet(viewsets.ModelViewSet):
     def classification_method(self, request, pk=None):
         incident = self.get_object()
         return response.Response(get_classification_method(incident))
+
+    @decorators.action(detail=True, methods=["get"], url_path="classification-breakdown")
+    def classification_breakdown(self, request, pk=None):
+        """
+        GET — Breakdown completo dopo salvataggio.
+        Ricalcolo senza doppio salvataggio sulla stessa richiesta.
+        """
+        incident = self.get_object()
+        plant = incident.plant
+        if not plant or plant.nis2_scope == "non_soggetto":
+            return response.Response(
+                {
+                    "nis2_scope": plant.nis2_scope if plant else "non_soggetto",
+                    "message": "Sito non soggetto a NIS2.",
+                    "decision": {"is_significant": False, "nis2_notifiable": "no"},
+                }
+            )
+
+        breakdown = get_classification_breakdown(incident)
+        return response.Response(breakdown)
+
+    @decorators.action(detail=False, methods=["post"], url_path="classification-preview")
+    def classification_preview(self, request):
+        """
+        POST — Preview in tempo reale senza salvare.
+        Body: subset di campi incidente (anche parziale).
+        Richiede plant_id per leggere la config.
+        """
+        from .nis2_classification import run_full_classification
+
+        plant_id = request.data.get("plant_id")
+        if not plant_id:
+            return response.Response({"error": "plant_id obbligatorio"}, status=400)
+
+        plant = Plant.objects.filter(pk=plant_id).first()
+        if not plant:
+            return response.Response({"error": "Plant non trovato"}, status=404)
+
+        nis2_scope = plant.nis2_scope
+
+        if nis2_scope == "non_soggetto":
+            return response.Response(
+                {
+                    "nis2_scope": "non_soggetto",
+                    "message": "Sito non soggetto a NIS2.",
+                    "decision": {"is_significant": False, "nis2_notifiable": "no"},
+                }
+            )
+
+        config_obj = NIS2Configuration.objects.filter(plant=plant).first()
+
+        def _float(v, default=None):
+            if v is None or v == "":
+                return default
+            try:
+                return float(v)
+            except (TypeError, ValueError):
+                return default
+
+        def _int(v, default=None):
+            if v is None or v == "":
+                return default
+            try:
+                return int(v)
+            except (TypeError, ValueError):
+                return default
+
+        config = {
+            "threshold_hours": float(config_obj.threshold_hours) if config_obj else 4.0,
+            "threshold_financial": float(config_obj.threshold_financial) if config_obj else 100_000,
+            "threshold_users": int(config_obj.threshold_users) if config_obj else 100,
+            "multiplier_medium": float(config_obj.multiplier_medium) if config_obj else 2.0,
+            "multiplier_high": float(config_obj.multiplier_high) if config_obj else 3.0,
+            "ptnr_threshold": int(config_obj.ptnr_threshold) if config_obj else 4,
+            "recurrence_score_bonus": int(config_obj.recurrence_score_bonus) if config_obj else 2,
+            "recurrence_window_days": int(config_obj.recurrence_window_days) if config_obj else 90,
+        }
+
+        incident_data = {
+            "service_disruption_hours": _float(request.data.get("service_disruption_hours"), 0.0),
+            "financial_impact_eur": _float(request.data.get("financial_impact_eur"), 0.0),
+            "affected_users_count": _int(request.data.get("affected_users_count"), 0),
+            "personal_data_involved": bool(request.data.get("personal_data_involved", False)),
+            "cross_border_impact": bool(request.data.get("cross_border_impact", False)),
+            "critical_infrastructure_impact": bool(request.data.get("critical_infrastructure_impact", False)),
+            "incident_category": request.data.get("incident_category", "") or "",
+            "severity": request.data.get("severity", "bassa") or "bassa",
+        }
+
+        is_recurrent = bool(
+            request.data.get("is_recurrent_override", request.data.get("is_recurrent", False))
+        )
+
+        breakdown = run_full_classification(incident_data, config, nis2_scope, is_recurrent)
+        return response.Response(breakdown)
 
 
 class NIS2ConfigurationViewSet(viewsets.ModelViewSet):

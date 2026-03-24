@@ -1354,6 +1354,75 @@
       },
       "config_needed": {
         "1": "Appoint the NIS2 contact in M00 Governance"
+      },
+      "nis2_classification": {
+        "classify_success": "Classification decision saved successfully.",
+        "classify_error": "Classification failed. Check the data and try again.",
+        "scope_label": "Site NIS2 scope",
+        "scope": {
+          "essenziale": "Essential entity",
+          "importante": "Important entity",
+          "non_soggetto": "Not in NIS2 scope"
+        },
+        "site_non_subject": "This site is not subject to NIS2 obligations.",
+        "run_auto": "Run automatic assessment",
+        "preview_live": "Live preview (unsaved)",
+        "table": {
+          "axis": "Axis",
+          "value": "Input value",
+          "threshold": "Threshold",
+          "score": "Score"
+        },
+        "axis": {
+          "operativo": "Operational",
+          "economico": "Economic",
+          "persone": "People / systems",
+          "riservatezza": "Confidentiality",
+          "reputazionale": "Reputational"
+        },
+        "dominant": "Dominant axis",
+        "recurrence": {
+          "label": "Recurrence",
+          "yes_bonus": "Yes (+{{n}})",
+          "no_bonus": "No (+0)",
+          "auto": "auto",
+          "manual": "manual",
+          "section_title": "Recurrence",
+          "auto_yes": "The system detected a similar closed incident on",
+          "auto_no": "No closed precedent in the configured window (auto).",
+          "manual_toggle": "Recurrent event (manual)"
+        },
+        "fattispecie_title": "ACN fact patterns",
+        "decision": {
+          "significant_title": "Significant incident",
+          "significant_sub": "NIS2 notification to CSIRT required",
+          "not_significant_title": "Not significant",
+          "not_significant_sub": "No mandatory NIS2 notification",
+          "voluntary_note": "You may still notify voluntarily."
+        },
+        "timeline_cta": "Open NIS2 timeline",
+        "override_toggle": "Override classification",
+        "override_significant": "Significant",
+        "override_not_significant": "Not significant",
+        "override_reason_ph": "Reason (required)",
+        "override_apply": "Apply override",
+        "override_note": "Override replaces automatic calculation and is recorded in the audit trail.",
+        "config": {
+          "calc_title": "Significance calculation parameters",
+          "base_title": "Base thresholds",
+          "multiplier_title": "Scale multipliers",
+          "multiplier_m": "Medium multiplier (×M for score 4)",
+          "multiplier_h": "High multiplier (×H for score 5)",
+          "multiplier_note": "Score 3 = between threshold and threshold×M. Score 4 = between threshold×M and threshold×H. Score 5 = beyond threshold×H.",
+          "rule_title": "Decision rule",
+          "ptnr_threshold": "PTNR threshold for significance",
+          "ptnr_note": "Significant if PTNR ≥ threshold or at least one active ACN fact pattern.",
+          "recurrence_title": "Recurrence",
+          "recurrence_window": "Recurrence window (days)",
+          "recurrence_bonus": "PTNR bonus for recurrence",
+          "recurrence_note": "The system checks for a closed incident with the same category in the last N days at this site.",
+          "activity_desc": "NIS2 activity description (formal documents)"
+        }
       }
     }
   },
