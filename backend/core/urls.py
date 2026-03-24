@@ -7,15 +7,37 @@ from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenRefreshView
+from django.shortcuts import redirect
 from two_factor.admin import AdminSiteOTPRequired
 from two_factor.urls import urlpatterns as tf_urls
+from django_otp import devices_for_user
 
 from core.jwt import GrcTokenObtainPairView
 
-# Forza il 2FA TOTP sull'intera Django Admin.
-# La tecnica __class__ swap non richiede di re-registrare nessun model:
-# tutte le app esistenti che usano admin.site.register() continuano a funzionare.
-admin.site.__class__ = AdminSiteOTPRequired
+
+class AdminSiteOTPRequiredOrSetup(AdminSiteOTPRequired):
+    """
+    Estende AdminSiteOTPRequired per gestire il caso in cui un utente è
+    autenticato ma non ha ancora configurato nessun device TOTP:
+    - Nessun device → redirect alla pagina di setup 2FA
+    - Device configurato ma non verificato in sessione → redirect al login 2FA
+    Questo rompe il loop infinito che si crea quando un admin loggato senza
+    device viene rimandato al wizard che non chiede OTP (nessun device → skip).
+    """
+
+    def login(self, request, extra_context=None):
+        if request.user.is_authenticated and not request.user.is_verified():
+            # Se l'utente è loggato ma non ha device → forza il setup
+            if not list(devices_for_user(request.user)):
+                from django.urls import reverse
+                setup_url = reverse("two_factor:setup")
+                next_url = request.get_full_path()
+                return redirect(f"{setup_url}?next={next_url}")
+        return super().login(request, extra_context)
+
+
+# Tecnica __class__ swap: nessun model deve essere re-registrato.
+admin.site.__class__ = AdminSiteOTPRequiredOrSetup
 
 
 def health_check(request):
