@@ -81,16 +81,11 @@ export const incidentsApi = {
     payload: { notification_type: string; protocol_ref?: string; authority_response?: string }
   ) => apiClient.post(`/incidents/incidents/${id}/mark-sent/`, payload).then((r) => r.data),
   generateDocument: async (id: string, type: string) => {
-    const res = await fetch(
-      `${(apiClient.defaults.baseURL ?? "").replace(/\/$/, "")}/incidents/incidents/${id}/generate-document/?type=${type}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access") ?? ""}`,
-        },
-      }
-    );
-    const text = await res.text();
-    return { ok: res.ok, text };
+    const res = await apiClient.get(`/incidents/incidents/${id}/generate-document/`, {
+      params: { type },
+      responseType: "text",
+    });
+    return { ok: true, text: res.data as string };
   },
   listConfig: (plant: string) =>
     apiClient

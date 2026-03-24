@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   incidentsApi,
@@ -214,18 +214,18 @@ export function IncidentsList() {
   const incidents = data?.results ?? [];
   const { data: timeline } = useQuery({
     queryKey: ["nis2-timeline", selected?.id],
-    queryFn: () => incidentsApi.timeline(selected!.id),
+    queryFn: () => incidentsApi.timeline(selected?.id ?? ""),
     enabled: !!selected,
   });
   const { data: notifications } = useQuery({
     queryKey: ["nis2-notifications", selected?.id],
-    queryFn: () => incidentsApi.notifications(selected!.id),
+    queryFn: () => incidentsApi.notifications(selected?.id ?? ""),
     enabled: !!selected,
   });
   const canSeeConfig = user?.role === "super_admin" || user?.role === "compliance_officer";
   const { data: configData } = useQuery({
     queryKey: ["nis2-config", selectedPlant?.id],
-    queryFn: () => incidentsApi.listConfig(selectedPlant!.id),
+    queryFn: () => incidentsApi.listConfig(selectedPlant?.id ?? ""),
     enabled: !!selectedPlant?.id && canSeeConfig,
   });
   const currentConfig = configData?.[0];
@@ -236,7 +236,10 @@ export function IncidentsList() {
   });
   const configMutation = useMutation({
     mutationFn: () => {
-      const payload = { ...configForm, plant: selectedPlant!.id } as NIS2Configuration;
+      if (!selectedPlant?.id) {
+        throw new Error("Plant non selezionato");
+      }
+      const payload = { ...configForm, plant: selectedPlant.id } as NIS2Configuration;
       if (currentConfig?.id) return incidentsApi.updateConfig(currentConfig.id, payload);
       return incidentsApi.createConfig(payload);
     },
@@ -247,6 +250,22 @@ export function IncidentsList() {
   const selectedPlantCountry = useMemo(() => {
     return plants?.find(p => p.id === selectedPlant?.id)?.country ?? "IT";
   }, [plants, selectedPlant?.id]);
+
+  useEffect(() => {
+    if (!currentConfig) return;
+    setConfigForm({
+      threshold_users: currentConfig.threshold_users,
+      threshold_hours: currentConfig.threshold_hours,
+      threshold_financial: currentConfig.threshold_financial,
+      nis2_sector: currentConfig.nis2_sector,
+      nis2_subsector: currentConfig.nis2_subsector,
+      internal_contact_name: currentConfig.internal_contact_name,
+      internal_contact_email: currentConfig.internal_contact_email,
+      internal_contact_phone: currentConfig.internal_contact_phone,
+      legal_entity_name: currentConfig.legal_entity_name,
+      legal_entity_vat: currentConfig.legal_entity_vat,
+    });
+  }, [currentConfig]);
 
   return (
     <div>
@@ -309,7 +328,10 @@ export function IncidentsList() {
                   <td className="px-4 py-3">
                     {inc.status !== "chiuso" && (
                       <button
-                        onClick={() => closeMutation.mutate(inc.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          closeMutation.mutate(inc.id);
+                        }}
                         className="text-xs text-gray-500 hover:text-red-600 border border-gray-300 rounded px-2 py-0.5 hover:border-red-300"
                       >
                         {t("common.close")}
@@ -412,8 +434,8 @@ export function IncidentsList() {
                     <div className="mt-2 flex gap-2">
                       <button
                         onClick={async () => {
-                          const out = await incidentsApi.generateDocument(selected.id, step.step);
-                          if (out.ok) {
+                          try {
+                            const out = await incidentsApi.generateDocument(selected.id, step.step);
                             const blob = new Blob([out.text], { type: "text/html;charset=utf-8" });
                             const url = URL.createObjectURL(blob);
                             const a = document.createElement("a");
@@ -421,6 +443,8 @@ export function IncidentsList() {
                             a.download = `NIS2_${step.step}_${selected.id.slice(0, 8)}.html`;
                             a.click();
                             URL.revokeObjectURL(url);
+                          } catch {
+                            // Keep UX simple: errors are visible in network/console.
                           }
                         }}
                         className="text-xs border rounded px-2 py-1"
