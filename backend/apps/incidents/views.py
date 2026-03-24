@@ -21,6 +21,16 @@ class IncidentViewSet(viewsets.ModelViewSet):
     queryset = Incident.objects.select_related("plant", "closed_by").prefetch_related("assets", "nis2_notifications")
     serializer_class = IncidentSerializer
 
+    def perform_destroy(self, instance):
+        log_action(
+            user=self.request.user,
+            action_code="incident.deleted",
+            level="L2",
+            entity=instance,
+            payload={"title": instance.title, "severity": instance.severity},
+        )
+        instance.soft_delete()
+
     @decorators.action(detail=True, methods=["post"])
     def confirm_nis2(self, request, pk=None):
         incident = self.get_object()

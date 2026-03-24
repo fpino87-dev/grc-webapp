@@ -187,6 +187,13 @@ export function IncidentsList() {
     mutationFn: incidentsApi.close,
     onSuccess: () => qc.invalidateQueries({ queryKey: ["incidents"] }),
   });
+  const deleteMutation = useMutation({
+    mutationFn: incidentsApi.delete,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["incidents"] });
+      setSelected(null);
+    },
+  });
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: Partial<Incident> }) => incidentsApi.update(id, payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["incidents"] }),
@@ -327,17 +334,28 @@ export function IncidentsList() {
                     {new Date(inc.detected_at).toLocaleString(dateLocale)}
                   </td>
                   <td className="px-4 py-3">
-                    {inc.status !== "chiuso" && (
+                    <div className="flex gap-1">
+                      {inc.status !== "chiuso" && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            closeMutation.mutate(inc.id);
+                          }}
+                          className="text-xs text-gray-500 hover:text-red-600 border border-gray-300 rounded px-2 py-0.5 hover:border-red-300"
+                        >
+                          {t("common.close")}
+                        </button>
+                      )}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          closeMutation.mutate(inc.id);
+                          if (confirm(`Eliminare l'incidente "${inc.title}"?`)) deleteMutation.mutate(inc.id);
                         }}
-                        className="text-xs text-gray-500 hover:text-red-600 border border-gray-300 rounded px-2 py-0.5 hover:border-red-300"
+                        className="text-xs text-gray-400 hover:text-red-600 border border-gray-200 rounded px-2 py-0.5 hover:border-red-300"
                       >
-                        {t("common.close")}
+                        🗑
                       </button>
-                    )}
+                    </div>
                   </td>
                 </tr>
               ))}
