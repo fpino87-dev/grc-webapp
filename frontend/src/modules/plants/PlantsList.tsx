@@ -85,146 +85,159 @@ function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void 
   });
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-        <h3 className="text-lg font-semibold mb-1">{t("plants.edit.title")}</h3>
-        <p className="text-xs text-gray-400 mb-4 font-mono">{plant.code}</p>
-        <div className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.name")} *</label>
-            <input value={form.name ?? ""} onChange={e => set("name", e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm" />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.country")}</label>
-              <select value={form.country ?? "IT"} onChange={e => set("country", e.target.value)}
-                className="w-full border rounded px-3 py-2 text-sm">
-                <optgroup label="Unione Europea">
-                  {EU_COUNTRIES_EU.map(([code, name]) => (
-                    <option key={code} value={code}>{code} — {name}</option>
-                  ))}
-                </optgroup>
-                <optgroup label="Extra UE (non soggetti NIS2)">
-                  {EU_COUNTRIES_EXTRA.map(([code, name]) => (
-                    <option key={code} value={code}>{code} — {name}</option>
-                  ))}
-                </optgroup>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.status")}</label>
-              <select value={form.status ?? ""} onChange={e => set("status", e.target.value)}
-                className="w-full border rounded px-3 py-2 text-sm">
-                <option value="attivo">{t("status.attivo")}</option>
-                <option value="in_dismissione">{t("status.in_dismissione")}</option>
-                <option value="chiuso">{t("status.chiuso")}</option>
-              </select>
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_scope")}</label>
-            <select value={form.nis2_scope ?? ""} onChange={e => set("nis2_scope", e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm">
-              <option value="non_soggetto">{t("status.non_soggetto")}</option>
-              <option value="importante">{t("status.importante")}</option>
-              <option value="essenziale">{t("status.essenziale")}</option>
-            </select>
-          </div>
-          <div className="flex items-center gap-2">
-            <input type="checkbox" id="edit_has_ot" checked={!!form.has_ot}
-              onChange={e => set("has_ot", e.target.checked)} className="rounded" />
-            <label htmlFor="edit_has_ot" className="text-sm text-gray-700">{t("plants.fields.has_ot")}</label>
-          </div>
-          <div className="border-t border-gray-100 pt-3 space-y-3">
-            <div className="text-xs font-semibold text-gray-800">{t("plants.nis2_entity.section_title")}</div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 sm:p-6">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl xl:max-w-5xl flex flex-col max-h-[min(92vh,920px)] my-auto">
+        <div className="px-5 sm:px-6 pt-5 pb-3 shrink-0 border-b border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900">{t("plants.edit.title")}</h3>
+          <p className="text-xs text-gray-400 mt-0.5 font-mono">{plant.code}</p>
+        </div>
+
+        <div className="px-5 sm:px-6 py-4 flex-1 overflow-y-auto min-h-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+            <div className="space-y-3 min-w-0">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_sector")}</label>
-                <input
-                  value={form.nis2_sector ?? ""}
-                  onChange={e => set("nis2_sector", e.target.value)}
-                  className="w-full border rounded px-3 py-2 text-sm"
-                  placeholder={t("plants.placeholders.nis2_sector")}
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.name")} *</label>
+                <input value={form.name ?? ""} onChange={e => set("name", e.target.value)}
+                  className="w-full border rounded px-3 py-2 text-sm" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.country")}</label>
+                  <select value={form.country ?? "IT"} onChange={e => set("country", e.target.value)}
+                    className="w-full border rounded px-3 py-2 text-sm">
+                    <optgroup label="Unione Europea">
+                      {EU_COUNTRIES_EU.map(([code, name]) => (
+                        <option key={code} value={code}>{code} — {name}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Extra UE (non soggetti NIS2)">
+                      {EU_COUNTRIES_EXTRA.map(([code, name]) => (
+                        <option key={code} value={code}>{code} — {name}</option>
+                      ))}
+                    </optgroup>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.status")}</label>
+                  <select value={form.status ?? ""} onChange={e => set("status", e.target.value)}
+                    className="w-full border rounded px-3 py-2 text-sm">
+                    <option value="attivo">{t("status.attivo")}</option>
+                    <option value="in_dismissione">{t("status.in_dismissione")}</option>
+                    <option value="chiuso">{t("status.chiuso")}</option>
+                  </select>
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_subsector")}</label>
-                <input
-                  value={form.nis2_subsector ?? ""}
-                  onChange={e => set("nis2_subsector", e.target.value)}
-                  className="w-full border rounded px-3 py-2 text-sm"
-                  placeholder={t("plants.placeholders.nis2_subsector")}
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_scope")}</label>
+                <select value={form.nis2_scope ?? ""} onChange={e => set("nis2_scope", e.target.value)}
+                  className="w-full border rounded px-3 py-2 text-sm">
+                  <option value="non_soggetto">{t("status.non_soggetto")}</option>
+                  <option value="importante">{t("status.importante")}</option>
+                  <option value="essenziale">{t("status.essenziale")}</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="edit_has_ot" checked={!!form.has_ot}
+                  onChange={e => set("has_ot", e.target.checked)} className="rounded" />
+                <label htmlFor="edit_has_ot" className="text-sm text-gray-700">{t("plants.fields.has_ot")}</label>
               </div>
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+
+            <div className="space-y-3 min-w-0 border-t border-gray-100 pt-4 lg:border-t-0 lg:pt-0">
+              <div className="text-xs font-semibold text-gray-800">{t("plants.nis2_entity.section_title")}</div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_sector")}</label>
+                  <input
+                    value={form.nis2_sector ?? ""}
+                    onChange={e => set("nis2_sector", e.target.value)}
+                    className="w-full border rounded px-3 py-2 text-sm"
+                    placeholder={t("plants.placeholders.nis2_sector")}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_subsector")}</label>
+                  <input
+                    value={form.nis2_subsector ?? ""}
+                    onChange={e => set("nis2_subsector", e.target.value)}
+                    className="w-full border rounded px-3 py-2 text-sm"
+                    placeholder={t("plants.placeholders.nis2_subsector")}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.legal_entity_name")}</label>
+                  <input
+                    value={form.legal_entity_name ?? ""}
+                    onChange={e => set("legal_entity_name", e.target.value)}
+                    className="w-full border rounded px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.legal_entity_vat")}</label>
+                  <input
+                    value={form.legal_entity_vat ?? ""}
+                    onChange={e => set("legal_entity_vat", e.target.value)}
+                    className="w-full border rounded px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.legal_entity_name")}</label>
-                <input
-                  value={form.legal_entity_name ?? ""}
-                  onChange={e => set("legal_entity_name", e.target.value)}
-                  className="w-full border rounded px-3 py-2 text-sm"
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_activity_description")}</label>
+                <textarea
+                  value={form.nis2_activity_description ?? ""}
+                  onChange={e => set("nis2_activity_description", e.target.value)}
+                  rows={3}
+                  className="w-full border rounded px-3 py-2 text-sm max-h-40 resize-y min-h-[4.5rem]"
                 />
               </div>
+              <p className="text-xs text-gray-500">{t("plants.nis2_entity.contact_hint")}</p>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.legal_entity_vat")}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.logo_url_label")}</label>
                 <input
-                  value={form.legal_entity_vat ?? ""}
-                  onChange={e => set("legal_entity_vat", e.target.value)}
+                  value={form.logo_url ?? ""}
+                  onChange={e => set("logo_url", e.target.value)}
                   className="w-full border rounded px-3 py-2 text-sm"
+                  placeholder="https://.../logo.png"
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  {t("plants.logo_url_hint")}
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <label className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white cursor-pointer hover:bg-gray-50">
+                    <span>{uploading ? t("common.uploading") : t("plants.fields.logo_upload_label") ?? "Carica file"}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          uploadMutation.mutate(file);
+                        }
+                      }}
+                    />
+                  </label>
+                  {form.logo_url && (
+                    <img
+                      src={resolvePlantLogoSrc(plant.id, form.logo_url)}
+                      alt="Logo preview"
+                      className="h-8 w-auto max-w-[120px] rounded border border-gray-200 bg-white object-contain"
+                    />
+                  )}
+                </div>
               </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_activity_description")}</label>
-              <textarea
-                value={form.nis2_activity_description ?? ""}
-                onChange={e => set("nis2_activity_description", e.target.value)}
-                rows={3}
-                className="w-full border rounded px-3 py-2 text-sm"
-              />
-            </div>
-            <p className="text-xs text-gray-500">{t("plants.nis2_entity.contact_hint")}</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.logo_url_label")}</label>
-            <input
-              value={form.logo_url ?? ""}
-              onChange={e => set("logo_url", e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm"
-              placeholder="https://.../logo.png"
-            />
-            <p className="mt-1 text-xs text-gray-500">
-              {t("plants.logo_url_hint")}
-            </p>
-            <div className="mt-2 flex items-center gap-3">
-              <label className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white cursor-pointer hover:bg-gray-50">
-                <span>{uploading ? t("common.uploading") : t("plants.fields.logo_upload_label") ?? "Carica file"}</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={e => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      uploadMutation.mutate(file);
-                    }
-                  }}
-                />
-              </label>
-              {form.logo_url && (
-                <img
-                  src={resolvePlantLogoSrc(plant.id, form.logo_url)}
-                  alt="Logo preview"
-                  className="h-8 w-auto rounded border border-gray-200 bg-white object-contain"
-                />
-              )}
             </div>
           </div>
         </div>
-        {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
-        <div className="flex justify-end gap-2 mt-4">
+
+        {error && (
+          <div className="px-5 sm:px-6 shrink-0">
+            <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">{error}</p>
+          </div>
+        )}
+        <div className="px-5 sm:px-6 py-4 border-t border-gray-100 shrink-0 flex justify-end gap-2 bg-gray-50/90 rounded-b-lg">
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("actions.cancel")}</button>
           <button
             onClick={() => mutation.mutate(form)}
@@ -276,129 +289,142 @@ function PlantModal({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-        <h3 className="text-lg font-semibold mb-4">{t("plants.new.title")}</h3>
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.code")} *</label>
-              <input value={form.code} onChange={e => set("code", e.target.value.toUpperCase())}
-                className="w-full border rounded px-3 py-2 text-sm font-mono" placeholder={t("plants.placeholders.code")} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.country")}</label>
-              <select
-                value={form.country ?? "IT"}
-                onChange={e => set("country", e.target.value)}
-                className="w-full border rounded px-3 py-2 text-sm"
-              >
-                <optgroup label="Unione Europea">
-                  {EU_COUNTRIES_EU.map(([code, name]) => (
-                    <option key={code} value={code}>{code} — {name}</option>
-                  ))}
-                </optgroup>
-                <optgroup label="Extra UE (non soggetti NIS2)">
-                  {EU_COUNTRIES_EXTRA.map(([code, name]) => (
-                    <option key={code} value={code}>{code} — {name}</option>
-                  ))}
-                </optgroup>
-              </select>
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.name")} *</label>
-            <input value={form.name} onChange={e => set("name", e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm" placeholder={t("plants.placeholders.name")} />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.status")}</label>
-              <select value={form.status} onChange={e => set("status", e.target.value)}
-                className="w-full border rounded px-3 py-2 text-sm">
-                <option value="attivo">{t("status.attivo")}</option>
-                <option value="in_dismissione">{t("status.in_dismissione")}</option>
-                <option value="chiuso">{t("status.chiuso")}</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_scope")}</label>
-              <select value={form.nis2_scope} onChange={e => set("nis2_scope", e.target.value)}
-                className="w-full border rounded px-3 py-2 text-sm">
-                <option value="non_soggetto">{t("status.non_soggetto")}</option>
-                <option value="importante">{t("status.importante")}</option>
-                <option value="essenziale">{t("status.essenziale")}</option>
-              </select>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <input type="checkbox" id="has_ot" checked={!!form.has_ot}
-              onChange={e => set("has_ot", e.target.checked)} className="rounded" />
-            <label htmlFor="has_ot" className="text-sm text-gray-700">{t("plants.fields.has_ot")}</label>
-          </div>
-          <div className="border-t border-gray-100 pt-3 space-y-3">
-            <div className="text-xs font-semibold text-gray-800">{t("plants.nis2_entity.section_title")}</div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_sector")}</label>
-                <input
-                  value={form.nis2_sector ?? ""}
-                  onChange={e => set("nis2_sector", e.target.value)}
-                  className="w-full border rounded px-3 py-2 text-sm"
-                  placeholder={t("plants.placeholders.nis2_sector")}
-                />
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 sm:p-6">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl xl:max-w-5xl flex flex-col max-h-[min(92vh,920px)] my-auto">
+        <div className="px-5 sm:px-6 pt-5 pb-3 shrink-0 border-b border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900">{t("plants.new.title")}</h3>
+        </div>
+
+        <div className="px-5 sm:px-6 py-4 flex-1 overflow-y-auto min-h-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+            <div className="space-y-3 min-w-0">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.code")} *</label>
+                  <input value={form.code} onChange={e => set("code", e.target.value.toUpperCase())}
+                    className="w-full border rounded px-3 py-2 text-sm font-mono" placeholder={t("plants.placeholders.code")} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.country")}</label>
+                  <select
+                    value={form.country ?? "IT"}
+                    onChange={e => set("country", e.target.value)}
+                    className="w-full border rounded px-3 py-2 text-sm"
+                  >
+                    <optgroup label="Unione Europea">
+                      {EU_COUNTRIES_EU.map(([code, name]) => (
+                        <option key={code} value={code}>{code} — {name}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Extra UE (non soggetti NIS2)">
+                      {EU_COUNTRIES_EXTRA.map(([code, name]) => (
+                        <option key={code} value={code}>{code} — {name}</option>
+                      ))}
+                    </optgroup>
+                  </select>
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_subsector")}</label>
-                <input
-                  value={form.nis2_subsector ?? ""}
-                  onChange={e => set("nis2_subsector", e.target.value)}
-                  className="w-full border rounded px-3 py-2 text-sm"
-                  placeholder={t("plants.placeholders.nis2_subsector")}
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.name")} *</label>
+                <input value={form.name} onChange={e => set("name", e.target.value)}
+                  className="w-full border rounded px-3 py-2 text-sm" placeholder={t("plants.placeholders.name")} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.status")}</label>
+                  <select value={form.status} onChange={e => set("status", e.target.value)}
+                    className="w-full border rounded px-3 py-2 text-sm">
+                    <option value="attivo">{t("status.attivo")}</option>
+                    <option value="in_dismissione">{t("status.in_dismissione")}</option>
+                    <option value="chiuso">{t("status.chiuso")}</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_scope")}</label>
+                  <select value={form.nis2_scope} onChange={e => set("nis2_scope", e.target.value)}
+                    className="w-full border rounded px-3 py-2 text-sm">
+                    <option value="non_soggetto">{t("status.non_soggetto")}</option>
+                    <option value="importante">{t("status.importante")}</option>
+                    <option value="essenziale">{t("status.essenziale")}</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="has_ot" checked={!!form.has_ot}
+                  onChange={e => set("has_ot", e.target.checked)} className="rounded" />
+                <label htmlFor="has_ot" className="text-sm text-gray-700">{t("plants.fields.has_ot")}</label>
               </div>
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+
+            <div className="space-y-3 min-w-0 border-t border-gray-100 pt-4 lg:border-t-0 lg:pt-0">
+              <div className="text-xs font-semibold text-gray-800">{t("plants.nis2_entity.section_title")}</div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_sector")}</label>
+                  <input
+                    value={form.nis2_sector ?? ""}
+                    onChange={e => set("nis2_sector", e.target.value)}
+                    className="w-full border rounded px-3 py-2 text-sm"
+                    placeholder={t("plants.placeholders.nis2_sector")}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_subsector")}</label>
+                  <input
+                    value={form.nis2_subsector ?? ""}
+                    onChange={e => set("nis2_subsector", e.target.value)}
+                    className="w-full border rounded px-3 py-2 text-sm"
+                    placeholder={t("plants.placeholders.nis2_subsector")}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.legal_entity_name")}</label>
+                  <input
+                    value={form.legal_entity_name ?? ""}
+                    onChange={e => set("legal_entity_name", e.target.value)}
+                    className="w-full border rounded px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.legal_entity_vat")}</label>
+                  <input
+                    value={form.legal_entity_vat ?? ""}
+                    onChange={e => set("legal_entity_vat", e.target.value)}
+                    className="w-full border rounded px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.legal_entity_name")}</label>
-                <input
-                  value={form.legal_entity_name ?? ""}
-                  onChange={e => set("legal_entity_name", e.target.value)}
-                  className="w-full border rounded px-3 py-2 text-sm"
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_activity_description")}</label>
+                <textarea
+                  value={form.nis2_activity_description ?? ""}
+                  onChange={e => set("nis2_activity_description", e.target.value)}
+                  rows={3}
+                  className="w-full border rounded px-3 py-2 text-sm max-h-40 resize-y min-h-[4.5rem]"
                 />
               </div>
+              <p className="text-xs text-gray-500">{t("plants.nis2_entity.contact_hint")}</p>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.legal_entity_vat")}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.logo_url_label")}</label>
                 <input
-                  value={form.legal_entity_vat ?? ""}
-                  onChange={e => set("legal_entity_vat", e.target.value)}
+                  value={form.logo_url ?? ""}
+                  onChange={e => set("logo_url", e.target.value)}
                   className="w-full border rounded px-3 py-2 text-sm"
+                  placeholder="https://.../logo.png"
                 />
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.nis2_activity_description")}</label>
-              <textarea
-                value={form.nis2_activity_description ?? ""}
-                onChange={e => set("nis2_activity_description", e.target.value)}
-                rows={3}
-                className="w-full border rounded px-3 py-2 text-sm"
-              />
-            </div>
-            <p className="text-xs text-gray-500">{t("plants.nis2_entity.contact_hint")}</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.logo_url_label")}</label>
-            <input
-              value={form.logo_url ?? ""}
-              onChange={e => set("logo_url", e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm"
-              placeholder="https://.../logo.png"
-            />
           </div>
         </div>
-        {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
-        <div className="flex justify-end gap-2 mt-4">
+
+        {error && (
+          <div className="px-5 sm:px-6 shrink-0">
+            <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">{error}</p>
+          </div>
+        )}
+        <div className="px-5 sm:px-6 py-4 border-t border-gray-100 shrink-0 flex justify-end gap-2 bg-gray-50/90 rounded-b-lg">
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">
             {t("actions.cancel")}
           </button>
