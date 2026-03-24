@@ -232,6 +232,7 @@ def get_classification_method(incident: Incident) -> dict:
     multiplier_high = float(config.multiplier_high) if config else 3.0
     ptnr_threshold = int(config.ptnr_threshold) if config else 4
     recurrence_window_days = int(config.recurrence_window_days) if config else 90
+    recurrence_score_bonus = int(config.recurrence_score_bonus) if config else 2
 
     categories = [
         {"code": code, "label": label, "description": description}
@@ -269,12 +270,17 @@ def get_classification_method(incident: Incident) -> dict:
             ],
         },
         "nis2_method": {
-            "logic": "OR",
+            "decision_model": "ptnr_or_fattispecie",
             "rule": (
                 "PTA=max(5 assi); PTNR=PTA+bonus ricorrenza (se ricorrente). "
                 "Significativo se PTNR≥soglia OPPURE almeno una fattispecie ACN attiva "
                 "(IS-1…IS-4 in base a scope sito). Moltiplicatori M/H su soglie base per assi 1–3. "
                 "Override manuale ha precedenza."
+            ),
+            "criteria_disclaimer": (
+                "L'elenco criteri è una descrizione sintetica degli input. "
+                "La decisione di significatività non è la somma logica OR di queste righe: "
+                "si applica il motore PTA/PTNR e le fattispecie ACN come nella rule."
             ),
             "thresholds": {
                 "affected_users_count": threshold_users,
@@ -285,6 +291,7 @@ def get_classification_method(incident: Incident) -> dict:
                 "ptnr_trigger_csirt": ptnr_threshold,
                 "pt_gdpr_trigger": 4,
                 "recurrence_window_days": recurrence_window_days,
+                "recurrence_score_bonus": recurrence_score_bonus,
             },
             "criteria": [
                 {"key": "cross_border_impact", "label": "Impatto cross-border", "type": "boolean"},

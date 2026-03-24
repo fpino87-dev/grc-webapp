@@ -227,7 +227,11 @@ export function IncidentsList() {
     queryFn: () => incidentsApi.notifications(selected?.id ?? ""),
     enabled: !!selected,
   });
-  const { data: serverBreakdown } = useQuery({
+  const {
+    data: serverBreakdown,
+    isFetching: breakdownFetching,
+    isError: breakdownError,
+  } = useQuery({
     queryKey: ["classification-breakdown", selected?.id],
     queryFn: () => incidentsApi.classificationBreakdown(selected!.id),
     enabled: !!selected?.id,
@@ -367,8 +371,19 @@ export function IncidentsList() {
     return Array.isArray(value) && value.length > 0 ? value.map((v) => `• ${String(v)}`).join("\n") : "—";
   }
 
+  function escapeHtml(s: string): string {
+    return s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
   function exportClassificationMethodHtml() {
     if (!selected || !classificationMethod) return;
+
+    const th = classificationMethod.nis2_method.thresholds;
+    const dec = serverBreakdown?.decision;
 
     const rows = (classificationMethod.nis2_method.criteria ?? [])
       .map((criterion) => {
@@ -378,11 +393,12 @@ export function IncidentsList() {
           criterion.type === "boolean" ? (incidentRaw ? "Si" : "No") : String(incidentRaw ?? 0);
         const sourceLabel =
           criterion.type === "threshold" ? "input utente + soglia sito" : "flag booleano";
+        const reachCell = criterion.type === "boolean" ? "—" : satisfied ? "Sì" : "No";
         return `
           <tr>
-            <td>${satisfied ? "OK" : "NO"}</td>
-            <td>${criterion.label}</td>
-            <td>${incidentDisplay}</td>
+            <td>${reachCell}</td>
+            <td>${escapeHtml(criterion.label)}</td>
+            <td>${escapeHtml(incidentDisplay)}</td>
             <td>${criterion.type === "threshold" ? String(criterion.threshold ?? "—") : "—"}</td>
             <td>${sourceLabel}</td>
           </tr>
@@ -398,26 +414,49 @@ export function IncidentsList() {
             .join(", ") || "non definite";
         return `
           <tr>
-            <td>${category.code}</td>
-            <td>${category.label}</td>
-            <td>${category.description}</td>
-            <td>${subs}</td>
+            <td>${escapeHtml(category.code)}</td>
+            <td>${escapeHtml(category.label)}</td>
+            <td>${escapeHtml(category.description)}</td>
+            <td>${escapeHtml(subs)}</td>
           </tr>
         `;
       })
       .join("");
 
-    const expected = (classificationMethod.nis2_method.criteria ?? []).some((criterion) =>
-      isCriterionSatisfied(criterion, selected)
-    )
-      ? "SIGNIFICATIVO"
-      : "NON significativo";
+    const expectedLabel =
+      dec != null
+        ? dec.is_significant
+          ? t("incidents.nis2_classification.method_tab.export_significant")
+          : t("incidents.nis2_classification.method_tab.export_not_significant")
+        : t("incidents.nis2_classification.method_tab.export_no_breakdown");
+    const rationaleHtml = dec?.rationale
+      ? `<div style="margin-top:8px;"><strong>${t("incidents.nis2_classification.method_tab.export_rationale")}:</strong> ${escapeHtml(dec.rationale)}</div>`
+      : "";
+    const ptnrLine =
+      serverBreakdown?.pta_ptnr != null
+        ? `<div style="margin-top:8px;">PTA=${serverBreakdown.pta_ptnr.PTA}, PTNR=${serverBreakdown.pta_ptnr.PTNR}</div>`
+        : "";
+
+    const configBlock = `
+  <h2>${t("incidents.nis2_classification.method_tab.export_config_h2")}</h2>
+  <table>
+    <tbody>
+      <tr><th>${t("incidents.nis2_classification.method_tab.config_users")}</th><td>${th.affected_users_count}</td></tr>
+      <tr><th>${t("incidents.nis2_classification.method_tab.config_hours")}</th><td>${th.service_disruption_hours}</td></tr>
+      <tr><th>${t("incidents.nis2_classification.method_tab.config_financial")}</th><td>${th.financial_impact_eur}</td></tr>
+      <tr><th>${t("incidents.nis2_classification.method_tab.config_mult_m")}</th><td>${th.multiplier_medium ?? "—"}</td></tr>
+      <tr><th>${t("incidents.nis2_classification.method_tab.config_mult_h")}</th><td>${th.multiplier_high ?? "—"}</td></tr>
+      <tr><th>${t("incidents.nis2_classification.method_tab.config_ptnr")}</th><td>${th.ptnr_trigger_csirt ?? "—"}</td></tr>
+      <tr><th>${t("incidents.nis2_classification.method_tab.config_rec_window")}</th><td>${th.recurrence_window_days ?? "—"}</td></tr>
+      <tr><th>${t("incidents.nis2_classification.method_tab.config_rec_bonus")}</th><td>${th.recurrence_score_bonus ?? "—"}</td></tr>
+    </tbody>
+  </table>`;
 
     const html = `<!DOCTYPE html>
-<html lang="it">
+<html lang="${i18n.language || "it"}">
 <head>
   <meta charset="UTF-8" />
-  <title>Metodo Classificazione NIS2</title>
+  <title>${t("incidents.nis2_classification.method_tab.export_doc_title")}</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; color: #111827; font-size: 12px; }
     h1 { font-size: 18px; margin-bottom: 4px; }
@@ -429,24 +468,34 @@ export function IncidentsList() {
   </style>
 </head>
 <body>
-  <h1>Metodo di classificazione NIS2</h1>
-  <div>Incidente: <strong>${selected.title}</strong></div>
-  <div>Data export: ${new Date().toLocaleString(dateLocale)}</div>
-  <div style="margin-top: 8px;">Regola: ${classificationMethod.nis2_method.rule}</div>
-  <div style="margin-top: 8px;">Esito automatico atteso: <span class="badge">${expected}</span></div>
+  <h1>${t("incidents.nis2_classification.method_tab.export_h1")}</h1>
+  <div>${t("incidents.nis2_classification.method_tab.export_incident")}: <strong>${escapeHtml(selected.title)}</strong></div>
+  <div>${t("incidents.nis2_classification.method_tab.export_date")}: ${new Date().toLocaleString(dateLocale)}</div>
+  <div style="margin-top: 8px;"><strong>${t("incidents.nis2_classification.method_tab.export_rule_label")}:</strong> ${escapeHtml(classificationMethod.nis2_method.rule)}</div>
+  <div style="margin-top: 8px;"><strong>${t("incidents.nis2_classification.method_tab.export_model_label")}:</strong> ${classificationMethod.nis2_method.decision_model ?? "ptnr_or_fattispecie"}</div>
+  ${
+    classificationMethod.nis2_method.criteria_disclaimer
+      ? `<p style="margin-top:8px; font-size:11px; color:#4b5563;">${escapeHtml(classificationMethod.nis2_method.criteria_disclaimer)}</p>`
+      : ""
+  }
+  <div style="margin-top: 8px;"><strong>${t("incidents.nis2_classification.method_tab.export_engine_label")}:</strong> <span class="badge">${escapeHtml(expectedLabel)}</span></div>
+  ${ptnrLine}
+  ${rationaleHtml}
+  ${configBlock}
+  <p style="margin-top:12px; font-size:11px; color:#4b5563;">${t("incidents.nis2_classification.method_tab.export_inputs_note")}</p>
 
-  <h2>Valutazione corrente</h2>
+  <h2>${t("incidents.nis2_classification.method_tab.export_inputs_h2")}</h2>
   <table>
     <thead>
-      <tr><th>Esito</th><th>Criterio</th><th>Valore corrente</th><th>Soglia</th><th>Fonte</th></tr>
+      <tr><th>${t("incidents.nis2_classification.method_tab.col_reaches_base")}</th><th>${t("incidents.nis2_classification.method_tab.export_col_criterion")}</th><th>${t("incidents.nis2_classification.method_tab.export_col_value")}</th><th>${t("incidents.nis2_classification.method_tab.export_col_threshold")}</th><th>${t("incidents.nis2_classification.method_tab.export_col_source")}</th></tr>
     </thead>
     <tbody>${rows}</tbody>
   </table>
 
-  <h2>Tassonomia ENISA</h2>
+  <h2>${t("incidents.nis2_classification.method_tab.export_taxonomy_h2")}</h2>
   <table>
     <thead>
-      <tr><th>Codice</th><th>Categoria</th><th>Descrizione</th><th>Sottocategorie</th></tr>
+      <tr><th>${t("incidents.nis2_classification.method_tab.export_col_code")}</th><th>${t("incidents.nis2_classification.method_tab.export_col_category")}</th><th>${t("incidents.nis2_classification.method_tab.export_col_desc")}</th><th>${t("incidents.nis2_classification.method_tab.export_col_subs")}</th></tr>
     </thead>
     <tbody>${taxRows}</tbody>
   </table>
@@ -1082,19 +1131,111 @@ export function IncidentsList() {
                     disabled={!selected || !classificationMethod}
                     className="px-3 py-1.5 text-xs border rounded disabled:opacity-50"
                   >
-                    Esporta metodo (HTML)
+                    {t("incidents.nis2_classification.method_tab.export_button")}
                   </button>
                 </div>
                 <div className="rounded border bg-blue-50 border-blue-100 p-3">
-                  <div className="text-sm font-medium text-blue-900">Metodo di classificazione NIS2</div>
-                  <div className="text-xs text-blue-900 mt-1">
-                    {classificationMethod?.nis2_method.rule ??
-                      "Incidente significativo se almeno un criterio risulta soddisfatto; override manuale con motivazione ha precedenza."}
+                  <div className="text-sm font-medium text-blue-900">
+                    {t("incidents.nis2_classification.method_tab.page_title")}
                   </div>
+                  {classificationMethod?.nis2_method.decision_model && (
+                    <div className="text-[11px] text-blue-800 mt-1 font-mono">
+                      {t("incidents.nis2_classification.method_tab.decision_model_label")}:{" "}
+                      {classificationMethod.nis2_method.decision_model}
+                    </div>
+                  )}
+                  <div className="text-xs text-blue-900 mt-1">
+                    {classificationMethod?.nis2_method.rule ?? t("incidents.nis2_classification.method_tab.rule_fallback")}
+                  </div>
+                  {classificationMethod?.nis2_method.criteria_disclaimer && (
+                    <p className="text-[11px] text-blue-900/90 mt-2 leading-relaxed">
+                      {t("incidents.nis2_classification.method_tab.criteria_disclaimer")}
+                    </p>
+                  )}
                 </div>
 
+                {classificationMethod?.nis2_method.thresholds && (
+                  <div className="rounded border p-3 bg-gray-50/80">
+                    <div className="text-sm font-medium mb-2">
+                      {t("incidents.nis2_classification.method_tab.config_title")}
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-800">
+                      <div>
+                        {t("incidents.nis2_classification.method_tab.config_users")}:{" "}
+                        <strong>{classificationMethod.nis2_method.thresholds.affected_users_count}</strong>
+                      </div>
+                      <div>
+                        {t("incidents.nis2_classification.method_tab.config_hours")}:{" "}
+                        <strong>{classificationMethod.nis2_method.thresholds.service_disruption_hours}</strong>
+                      </div>
+                      <div>
+                        {t("incidents.nis2_classification.method_tab.config_financial")}:{" "}
+                        <strong>{classificationMethod.nis2_method.thresholds.financial_impact_eur}</strong>
+                      </div>
+                      <div>
+                        {t("incidents.nis2_classification.method_tab.config_mult_m")}:{" "}
+                        <strong>{classificationMethod.nis2_method.thresholds.multiplier_medium ?? "—"}</strong>
+                      </div>
+                      <div>
+                        {t("incidents.nis2_classification.method_tab.config_mult_h")}:{" "}
+                        <strong>{classificationMethod.nis2_method.thresholds.multiplier_high ?? "—"}</strong>
+                      </div>
+                      <div>
+                        {t("incidents.nis2_classification.method_tab.config_ptnr")}:{" "}
+                        <strong>{classificationMethod.nis2_method.thresholds.ptnr_trigger_csirt ?? "—"}</strong>
+                      </div>
+                      <div>
+                        {t("incidents.nis2_classification.method_tab.config_rec_window")}:{" "}
+                        <strong>{classificationMethod.nis2_method.thresholds.recurrence_window_days ?? "—"}</strong>
+                      </div>
+                      <div>
+                        {t("incidents.nis2_classification.method_tab.config_rec_bonus")}:{" "}
+                        <strong>{classificationMethod.nis2_method.thresholds.recurrence_score_bonus ?? "—"}</strong>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {breakdownError ? (
+                  <div className="text-xs text-red-700 rounded border border-red-200 bg-red-50 p-2">
+                    {t("incidents.nis2_classification.method_tab.engine_unavailable")}
+                  </div>
+                ) : serverBreakdown?.decision ? (
+                  <div className="rounded border border-emerald-200 bg-emerald-50 p-3">
+                    <div className="text-sm font-medium text-emerald-900">
+                      {t("incidents.nis2_classification.method_tab.engine_title")}
+                    </div>
+                    <div className="text-base font-semibold text-emerald-950 mt-1">
+                      {serverBreakdown.decision.is_significant
+                        ? t("incidents.nis2_classification.decision.significant_title")
+                        : t("incidents.nis2_classification.decision.not_significant_title")}
+                    </div>
+                    <div className="text-xs text-emerald-900 mt-1">
+                      PTA {serverBreakdown.pta_ptnr.PTA} · PTNR {serverBreakdown.pta_ptnr.PTNR} ·{" "}
+                      {t("incidents.nis2_classification.config.ptnr_threshold")}{" "}
+                      {String(
+                        (serverBreakdown.config_used?.ptnr_threshold as number | undefined) ??
+                          classificationMethod?.nis2_method.thresholds.ptnr_trigger_csirt ??
+                          "—"
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-800 mt-2 leading-relaxed">{serverBreakdown.decision.rationale}</p>
+                  </div>
+                ) : (
+                  <div className="text-xs text-gray-500 rounded border border-dashed p-2">
+                    {breakdownFetching
+                      ? t("incidents.nis2_classification.method_tab.engine_loading")
+                      : t("incidents.nis2_classification.method_tab.engine_unavailable")}
+                  </div>
+                )}
+
                 <div className="rounded border p-3">
-                  <div className="text-sm font-medium mb-2">Punteggi correnti e obblighi</div>
+                  <div className="text-sm font-medium mb-1">
+                    {t("incidents.nis2_classification.method_tab.scores_snapshot_title")}
+                  </div>
+                  <p className="text-[11px] text-gray-500 mb-2">
+                    {t("incidents.nis2_classification.method_tab.scores_snapshot_note")}
+                  </p>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>PTA NIS2: <strong>{classificationMethod?.scores?.pta_nis2 ?? "—"}</strong></div>
                     <div>PTNR NIS2: <strong>{classificationMethod?.scores?.ptnr_nis2 ?? "—"}</strong></div>
@@ -1106,16 +1247,17 @@ export function IncidentsList() {
                 </div>
 
                 <div className="rounded border p-3">
-                  <div className="text-sm font-medium mb-2">Valutazione corrente incidente selezionato</div>
+                  <div className="text-sm font-medium mb-1">{t("incidents.nis2_classification.method_tab.raw_inputs_title")}</div>
+                  <p className="text-[11px] text-gray-600 mb-2">{t("incidents.nis2_classification.method_tab.raw_inputs_note")}</p>
                   <div className="overflow-auto">
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="text-left text-gray-500 border-b">
-                          <th className="py-1 pr-2">Esito</th>
-                          <th className="py-1 pr-2">Criterio</th>
-                          <th className="py-1 pr-2">Valore corrente</th>
-                          <th className="py-1 pr-2">Soglia</th>
-                          <th className="py-1 pr-2">Fonte</th>
+                          <th className="py-1 pr-2">{t("incidents.nis2_classification.method_tab.col_reaches_base")}</th>
+                          <th className="py-1 pr-2">{t("incidents.nis2_classification.method_tab.col_criterion")}</th>
+                          <th className="py-1 pr-2">{t("incidents.nis2_classification.method_tab.col_value")}</th>
+                          <th className="py-1 pr-2">{t("incidents.nis2_classification.method_tab.col_threshold")}</th>
+                          <th className="py-1 pr-2">{t("incidents.nis2_classification.method_tab.col_source")}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1126,10 +1268,18 @@ export function IncidentsList() {
                         criterion.type === "boolean"
                           ? (incidentRaw ? "Sì" : "No")
                           : String(incidentRaw ?? 0);
-                      const sourceLabel = criterion.type === "threshold" ? "input utente + soglia sito" : "flag booleano";
+                      const sourceLabel = criterion.type === "threshold"
+                        ? t("incidents.nis2_classification.method_tab.source_threshold")
+                        : t("incidents.nis2_classification.method_tab.source_flag");
+                      const reachCell =
+                        criterion.type === "boolean"
+                          ? t("incidents.nis2_classification.method_tab.boolean_na")
+                          : satisfied
+                            ? t("common.yes")
+                            : t("common.no");
                       return (
                         <tr key={`eval-${criterion.key}`} className="border-b last:border-b-0">
-                          <td className="py-1 pr-2">{satisfied ? "✅" : "❌"}</td>
+                          <td className="py-1 pr-2 text-gray-800">{reachCell}</td>
                           <td className="py-1 pr-2 text-gray-700">{criterion.label}</td>
                           <td className="py-1 pr-2 text-gray-700">{incidentDisplay}</td>
                           <td className="py-1 pr-2 text-gray-700">
@@ -1142,23 +1292,17 @@ export function IncidentsList() {
                       </tbody>
                     </table>
                   </div>
-                  <div className="mt-2 text-xs font-medium">
-                    Esito automatico atteso:{" "}
-                    {(classificationMethod?.nis2_method.criteria ?? []).some((criterion) =>
-                      isCriterionSatisfied(criterion, selected)
-                    )
-                      ? "SIGNIFICATIVO (almeno un criterio soddisfatto)"
-                      : "NON significativo (nessun criterio soddisfatto)"}
-                  </div>
                   {selected.significance_override !== null && selected.significance_override !== undefined && (
-                    <div className="mt-1 text-xs text-amber-700">
-                      Override manuale attivo: prevale l'esito manuale con motivazione.
+                    <div className="mt-2 text-xs text-amber-700">
+                      {t("incidents.nis2_classification.method_tab.override_active")}
                     </div>
                   )}
                 </div>
 
                 <div className="rounded border p-3">
-                  <div className="text-sm font-medium mb-2">Criteri decisionali e soglie</div>
+                  <div className="text-sm font-medium mb-1">{t("incidents.nis2_classification.method_tab.criteria_list_title")}</div>
+                  <p className="text-[11px] text-gray-500 mb-2">{t("incidents.nis2_classification.method_tab.criteria_list_note")}</p>
+                  <p className="text-[11px] text-gray-600 mb-2">{t("incidents.nis2_classification.config.multiplier_note")}</p>
                   <div className="space-y-1">
                     {(classificationMethod?.nis2_method.criteria ?? []).map((criterion) => (
                       <div key={criterion.key} className="text-xs text-gray-700">

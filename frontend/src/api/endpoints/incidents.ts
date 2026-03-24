@@ -121,14 +121,21 @@ export interface ClassificationMethod {
     subcategories: Record<string, Array<{ code: string; label: string }>>;
   };
   nis2_method: {
-    logic: "OR";
+    decision_model?: "ptnr_or_fattispecie";
+    /** @deprecated API legacy; use decision_model */
+    logic?: "OR";
     rule: string;
+    criteria_disclaimer?: string;
     thresholds: {
       affected_users_count: number;
       service_disruption_hours: number;
       financial_impact_eur: number;
+      multiplier_medium?: number;
+      multiplier_high?: number;
       ptnr_trigger_csirt?: number;
       pt_gdpr_trigger?: number;
+      recurrence_window_days?: number;
+      recurrence_score_bonus?: number;
     };
     criteria: Array<{
       key: string;
