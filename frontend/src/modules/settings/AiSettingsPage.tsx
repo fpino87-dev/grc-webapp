@@ -91,7 +91,11 @@ export function AiSettingsPage() {
           <select
             className="border rounded px-2 py-2 text-sm"
             value={form.cloud_provider}
-            onChange={(e) => setForm((f) => ({ ...f, cloud_provider: e.target.value }))}
+            onChange={(e) => {
+              const newProvider = e.target.value;
+              const firstModel = catalog?.[newProvider]?.[0]?.[0] ?? "";
+              setForm((f) => ({ ...f, cloud_provider: newProvider, cloud_model: firstModel }));
+            }}
           >
             {Object.keys(catalog ?? {}).filter((k) => k !== "ollama").map((provider) => (
               <option key={provider} value={provider}>{provider}</option>
