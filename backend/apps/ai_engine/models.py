@@ -1,7 +1,7 @@
 import uuid
 
 from django.db import models
-from fernet_fields import EncryptedCharField
+from apps.notifications.models import EncryptedCharField
 
 from core.models import BaseModel
 
