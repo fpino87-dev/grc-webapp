@@ -55,10 +55,10 @@ export function AiSuggestionBanner({
   });
 
   useEffect(() => {
-    if (autoTrigger && entityId && !result && !suggestMutation.isPending) {
+    if (autoTrigger && entityId && !result && !suggestMutation.isPending && !suggestMutation.isError) {
       suggestMutation.mutate();
     }
-  }, [autoTrigger, entityId, result, suggestMutation]);
+  }, [autoTrigger, entityId, result, suggestMutation.isPending, suggestMutation.isError]);
 
   const providerBadge = useMemo(() => {
     const isLocal = provider === "ollama";
@@ -72,8 +72,9 @@ export function AiSuggestionBanner({
   return (
     <div className="border rounded-lg p-3 bg-white">
       {suggestMutation.isError && (
-        <div className="mb-2 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          Errore AI. Riprovare.
+        <div className="mb-2 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 flex items-center justify-between">
+          <span>Errore AI (provider non raggiungibile). Riprovare o verificare la configurazione AI.</span>
+          <button onClick={() => suggestMutation.mutate()} className="ml-3 px-2 py-0.5 text-xs border border-red-300 rounded hover:bg-red-100">Riprova</button>
         </div>
       )}
       {usedFallback && (

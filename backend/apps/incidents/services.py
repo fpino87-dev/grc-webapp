@@ -1,6 +1,6 @@
-from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from rest_framework.exceptions import ValidationError
 
 from core.audit import log_action
 from .models import Incident

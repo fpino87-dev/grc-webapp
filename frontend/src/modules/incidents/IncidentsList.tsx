@@ -421,12 +421,17 @@ export function IncidentsList() {
                   <label><input type="checkbox" checked={!!selected.cross_border_impact} onChange={e => setSelected({ ...selected, cross_border_impact: e.target.checked })} /> Impatto cross-border</label>
                   <label><input type="checkbox" checked={!!selected.critical_infrastructure_impact} onChange={e => setSelected({ ...selected, critical_infrastructure_impact: e.target.checked })} /> Infrastrutture critiche</label>
                 </div>
-                <button
-                  onClick={() => updateMutation.mutate({ id: selected.id, payload: selected })}
-                  className="px-3 py-2 text-xs bg-primary-600 text-white rounded"
-                >
-                  Salva gestione
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => updateMutation.mutate({ id: selected.id, payload: selected })}
+                    disabled={updateMutation.isPending}
+                    className="px-3 py-2 text-xs bg-primary-600 text-white rounded disabled:opacity-50"
+                  >
+                    {updateMutation.isPending ? "Salvataggio..." : "Salva gestione"}
+                  </button>
+                  {updateMutation.isSuccess && <span className="text-xs text-green-600">✓ Salvato</span>}
+                  {updateMutation.isError && <span className="text-xs text-red-500">Errore nel salvataggio</span>}
+                </div>
               </div>
             )}
 
@@ -506,6 +511,14 @@ export function IncidentsList() {
               </div>
             )}
 
+            {activeTab === "config" && !canSeeConfig && (
+              <div className="p-4 text-sm text-gray-500">Permessi insufficienti per la configurazione NIS2.</div>
+            )}
+            {activeTab === "config" && canSeeConfig && !selectedPlant && (
+              <div className="p-4 text-sm text-amber-700 bg-amber-50 rounded m-4 border border-amber-200">
+                Seleziona un sito dal menu in alto per configurare i parametri NIS2.
+              </div>
+            )}
             {activeTab === "config" && canSeeConfig && selectedPlant && (
               <div className="p-4 space-y-3">
                 <div className="text-sm font-semibold">Configurazione NIS2 per sito</div>
