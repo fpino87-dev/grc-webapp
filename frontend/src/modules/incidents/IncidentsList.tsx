@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 import {
   incidentsApi,
   type ClassificationMethod,
@@ -172,7 +173,17 @@ export function IncidentsList() {
   const classifyMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data?: { override?: boolean; reason?: string } }) =>
       incidentsApi.classifySignificance(id, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["incidents"] }),
+    onSuccess: (res: { is_significant?: boolean }) => {
+      qc.invalidateQueries({ queryKey: ["incidents"] });
+      if (selected && typeof res?.is_significant === "boolean") {
+        setSelected({
+          ...selected,
+          is_significant: res.is_significant,
+          nis2_notifiable: res.is_significant ? "si" : "no",
+        });
+      }
+      setOverrideEnabled(false);
+    },
   });
   const markSentMutation = useMutation({
     mutationFn: (id: string) =>
@@ -581,6 +592,19 @@ export function IncidentsList() {
 
             {activeTab === "classificazione" && (
               <div className="p-4 space-y-3">
+                {classifyMutation.isSuccess && (
+                  <div className="px-3 py-2 bg-emerald-50 text-emerald-700 rounded text-sm">
+                    Decisione di classificazione registrata con successo.
+                  </div>
+                )}
+                {classifyMutation.isError && (
+                  <div className="px-3 py-2 bg-red-50 text-red-700 rounded text-sm">
+                    {(
+                      (classifyMutation.error as AxiosError<{ error?: string }>)?.response?.data?.error ??
+                      "Errore durante la classificazione. Verificare i dati e riprovare."
+                    )}
+                  </div>
+                )}
                 {selected.is_significant === true && <div className="px-3 py-2 bg-red-50 text-red-700 rounded text-sm">Incidente classificato SIGNIFICATIVO: obbligo di notifica NIS2.</div>}
                 {selected.is_significant === false && <div className="px-3 py-2 bg-green-50 text-green-700 rounded text-sm">Incidente classificato NON significativo: monitoraggio interno.</div>}
                 {selected.is_significant == null && <div className="px-3 py-2 bg-yellow-50 text-yellow-700 rounded text-sm">Classificazione non ancora definita.</div>}
