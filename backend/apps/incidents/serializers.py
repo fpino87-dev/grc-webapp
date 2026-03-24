@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Incident, IncidentNotification, RCA
+from .models import Incident, IncidentNotification, NIS2Configuration, NIS2Notification, RCA
 
 
 class IncidentSerializer(serializers.ModelSerializer):
@@ -18,5 +18,17 @@ class IncidentNotificationSerializer(serializers.ModelSerializer):
 class RCASerializer(serializers.ModelSerializer):
     class Meta:
         model = RCA
+        fields = "__all__"
+
+
+class NIS2NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NIS2Notification
+        fields = "__all__"
+
+
+class NIS2ConfigurationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NIS2Configuration
         fields = "__all__"
 
