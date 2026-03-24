@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import ReactMarkdown from "react-markdown"
 import { apiClient } from "../../api/client"
+import { useTranslation } from "react-i18next"
+import i18n from "../../i18n"
 
 interface ManualDrawerProps {
   type: "utente" | "tecnico"
@@ -8,17 +10,30 @@ interface ManualDrawerProps {
 }
 
 export function ManualDrawer({ type, onClose }: ManualDrawerProps) {
-  const label = type === "utente" ? "Manuale Utente" : "Manuale Tecnico"
+  const { t } = useTranslation()
+  const label = type === "utente" ? t("manual.user_manual", "Manuale Utente") : t("manual.tech_manual", "Manuale Tecnico")
   const icon  = type === "utente" ? "📖" : "🔧"
+  const lang  = i18n.language || "it"
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["manual", type],
+    queryKey: ["manual", type, lang],
     queryFn: async () => {
       const res = await apiClient.get(`/manual/${type}/`)
       return res.data.content as string
     },
-    staleTime: Infinity,
+    staleTime: 5 * 60 * 1000, // 5 min — si aggiorna al cambio lingua
   })
+
+  function handleDownload() {
+    if (!data) return
+    const blob = new Blob([data], { type: "text/markdown;charset=utf-8" })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement("a")
+    a.href     = url
+    a.download = `${label}_${lang}.md`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
   return (
     <>
@@ -36,15 +51,16 @@ export function ManualDrawer({ type, onClose }: ManualDrawerProps) {
           <div className="flex items-center gap-2">
             <span className="text-xl">{icon}</span>
             <h2 className="text-lg font-semibold text-gray-800">{label}</h2>
+            <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded uppercase font-mono">{lang}</span>
           </div>
           <div className="flex items-center gap-3">
-            <a
-              href={`/api/manual/${type}/`}
-              download={`${label}.md`}
-              className="text-sm text-blue-600 hover:underline"
+            <button
+              onClick={handleDownload}
+              disabled={!data}
+              className="text-sm text-blue-600 hover:underline disabled:opacity-40"
             >
-              ⬇ Scarica
-            </a>
+              ⬇ {t("manual.download", "Scarica")}
+            </button>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none"
@@ -58,12 +74,12 @@ export function ManualDrawer({ type, onClose }: ManualDrawerProps) {
         <div className="flex-1 overflow-y-auto px-8 py-6">
           {isLoading && (
             <div className="flex items-center justify-center h-40">
-              <span className="text-gray-400">Caricamento manuale...</span>
+              <span className="text-gray-400">{t("manual.loading", "Caricamento manuale...")}</span>
             </div>
           )}
           {isError && (
             <div className="text-red-500 text-sm p-4 bg-red-50 rounded">
-              Errore nel caricamento del manuale.
+              {t("manual.error", "Errore nel caricamento del manuale.")}
             </div>
           )}
           {data && (

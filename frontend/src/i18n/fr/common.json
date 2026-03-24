@@ -1936,5 +1936,12 @@
       "bar_yellow": "Jaunes",
       "bar_red": "Rouges"
     }
+  },
+  "manual": {
+    "user_manual": "Manuel Utilisateur",
+    "tech_manual": "Manuel Technique",
+    "download": "Télécharger",
+    "loading": "Chargement du manuel...",
+    "error": "Erreur lors du chargement du manuel."
   }
 }

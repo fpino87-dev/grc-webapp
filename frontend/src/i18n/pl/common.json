@@ -1936,5 +1936,12 @@
       "bar_yellow": "Żółte",
       "bar_red": "Czerwone"
     }
+  },
+  "manual": {
+    "user_manual": "Podręcznik Użytkownika",
+    "tech_manual": "Podręcznik Techniczny",
+    "download": "Pobierz",
+    "loading": "Ładowanie podręcznika...",
+    "error": "Błąd podczas ładowania podręcznika."
   }
 }

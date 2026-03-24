@@ -22,25 +22,36 @@ def health_check(request):
 
 
 def serve_manual(request, manual_type):
-    """Serve il contenuto del manuale Markdown come JSON."""
-    filename_map = {
-        "utente":  "MANUAL_UTENTE.md",
-        "tecnico": "MANUAL_TECNICO.md",
+    """
+    Serve il contenuto del manuale Markdown come JSON.
+    Usa Accept-Language header per la lingua, fallback a italiano.
+    I file risiedono in <project_root>/manual/MANUAL_<TYPE>_<lang>.md
+    """
+    base_map = {
+        "utente":  "MANUAL_UTENTE",
+        "tecnico": "MANUAL_TECNICO",
     }
-    filename = filename_map.get(manual_type)
-    if not filename:
+    base_name = base_map.get(manual_type)
+    if not base_name:
         raise Http404("Manuale non trovato")
 
-    # Cerca il file nella root del progetto (un livello sopra BASE_DIR /app/backend)
-    for base in (
-        os.path.join(settings.BASE_DIR, "..", ".."),
-        os.path.join(settings.BASE_DIR, ".."),
-        settings.BASE_DIR,
-    ):
-        candidate = os.path.normpath(os.path.join(base, filename))
+    # Lingua dalla header Accept-Language (es. "en", "fr", "pl", "tr", "it")
+    accept_lang = request.headers.get("Accept-Language", "it")
+    lang = accept_lang.split(",")[0].split("-")[0].strip().lower()
+    if lang not in ("it", "en", "fr", "pl", "tr"):
+        lang = "it"
+
+    # Cartella manual/ montata dentro il container come /app/manual/
+    manual_dir = os.path.join(settings.BASE_DIR, "manual")
+    candidates = [f"{base_name}_{lang}.md"]
+    if lang != "it":
+        candidates.append(f"{base_name}_it.md")  # fallback italiano
+
+    for fname in candidates:
+        candidate = os.path.normpath(os.path.join(manual_dir, fname))
         if os.path.exists(candidate):
             with open(candidate, "r", encoding="utf-8") as f:
-                return JsonResponse({"type": manual_type, "content": f.read()})
+                return JsonResponse({"type": manual_type, "lang": lang, "content": f.read()})
 
     raise Http404("File manuale non trovato")
 

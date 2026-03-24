@@ -36,8 +36,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./backend:/app
-      - ./MANUAL_UTENTE.md:/app/MANUAL_UTENTE.md:ro
-      - ./MANUAL_TECNICO.md:/app/MANUAL_TECNICO.md:ro
+      - ./manual:/app/manual:ro
     ports: ["8001:8000"]
     env_file: .env
     depends_on:

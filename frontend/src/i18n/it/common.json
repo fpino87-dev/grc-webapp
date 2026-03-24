@@ -1859,5 +1859,12 @@
       "bar_yellow": "Gialli",
       "bar_red": "Rossi"
     }
+  },
+  "manual": {
+    "user_manual": "Manuale Utente",
+    "tech_manual": "Manuale Tecnico",
+    "download": "Scarica",
+    "loading": "Caricamento manuale...",
+    "error": "Errore nel caricamento del manuale."
   }
 }

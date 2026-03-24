@@ -1936,5 +1936,12 @@
       "bar_yellow": "Sarı",
       "bar_red": "Kırmızı"
     }
+  },
+  "manual": {
+    "user_manual": "Kullanıcı Kılavuzu",
+    "tech_manual": "Teknik Kılavuz",
+    "download": "İndir",
+    "loading": "Kılavuz yükleniyor...",
+    "error": "Kılavuz yüklenirken hata oluştu."
   }
 }

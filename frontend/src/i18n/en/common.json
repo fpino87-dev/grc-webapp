@@ -1857,5 +1857,12 @@
       "bar_yellow": "Yellow",
       "bar_red": "Red"
     }
+  },
+  "manual": {
+    "user_manual": "User Manual",
+    "tech_manual": "Technical Manual",
+    "download": "Download",
+    "loading": "Loading manual...",
+    "error": "Error loading the manual."
   }
 }
