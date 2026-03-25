@@ -50,7 +50,8 @@
     "refresh": "Aggiorna",
     "export": "Esporta",
     "upload": "Carica",
-    "back": "Indietro"
+    "back": "Indietro",
+    "close": "Chiudi"
   },
   "ai": {
     "suggestion_label": "Suggerimento IA",
@@ -601,7 +602,10 @@
         "audit_programs": "Programmi audit",
         "schedule_policies": "Policy scadenzario",
         "role_assignments": "Assegnazioni ruolo"
-      }
+      },
+      "force_hint": "Solo superuser: puoi forzare l'eliminazione del sito insieme a tutti gli elementi collegati (operazione irreversibile).",
+      "force_action": "Forza eliminazione",
+      "force_confirm": "ATTENZIONE: tutti gli elementi collegati verranno eliminati definitivamente insieme al sito. Procedere?"
     }
   },
   "users": {

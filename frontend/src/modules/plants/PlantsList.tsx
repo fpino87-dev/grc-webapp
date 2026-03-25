@@ -707,15 +707,18 @@ export function PlantsList() {
   });
   const { setPlant } = useAuthStore();
 
-  const [deleteBlocked, setDeleteBlocked] = useState<Record<string, number> | null>(null);
+  const [deleteBlocked, setDeleteBlocked] = useState<{ id: string; blocking: Record<string, number> } | null>(null);
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => plantsApi.remove(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["plants"] }),
-    onError: (e: any) => {
+    mutationFn: ({ id, force }: { id: string; force?: boolean }) => plantsApi.remove(id, force),
+    onSuccess: () => {
+      setDeleteBlocked(null);
+      qc.invalidateQueries({ queryKey: ["plants"] });
+    },
+    onError: (e: any, vars) => {
       const blocking = e?.response?.data?.blocking;
       if (blocking && Object.keys(blocking).length > 0) {
-        setDeleteBlocked(blocking);
+        setDeleteBlocked({ id: vars.id, blocking });
       } else {
         window.alert(e?.response?.data?.detail || t("common.error"));
       }
@@ -793,7 +796,7 @@ export function PlantsList() {
                         onClick={() => {
                           const ok = window.confirm(t("plants.actions.delete_confirm", { name: p.name }));
                           if (!ok) return;
-                          deleteMutation.mutate(p.id);
+                          deleteMutation.mutate({ id: p.id });
                         }}
                         disabled={deleteMutation.isPending}
                         className="text-xs text-red-600 hover:text-red-700 border border-red-200 rounded px-1.5 py-0.5 hover:bg-red-50 disabled:opacity-50"
@@ -829,8 +832,8 @@ export function PlantsList() {
               {t("plants.delete_blocked.title")}
             </h3>
             <p className="text-sm text-gray-600 mb-4">{t("plants.delete_blocked.intro")}</p>
-            <ul className="space-y-1 mb-6">
-              {Object.entries(deleteBlocked).map(([key, count]) => (
+            <ul className="space-y-1 mb-4">
+              {Object.entries(deleteBlocked.blocking).map(([key, count]) => (
                 <li key={key} className="flex items-center justify-between text-sm px-3 py-1.5 bg-red-50 border border-red-100 rounded">
                   <span className="text-gray-700">
                     {t(`plants.delete_blocked.deps.${key}`, { defaultValue: key })}
@@ -839,12 +842,23 @@ export function PlantsList() {
                 </li>
               ))}
             </ul>
-            <div className="flex justify-end">
+            <p className="text-xs text-gray-500 mb-5">{t("plants.delete_blocked.force_hint")}</p>
+            <div className="flex justify-between gap-3">
               <button
                 onClick={() => setDeleteBlocked(null)}
-                className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md text-gray-700 font-medium"
+                className="px-4 py-2 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
               >
-                {t("actions.close")}
+                {t("actions.cancel")}
+              </button>
+              <button
+                onClick={() => {
+                  if (!window.confirm(t("plants.delete_blocked.force_confirm"))) return;
+                  deleteMutation.mutate({ id: deleteBlocked.id, force: true });
+                }}
+                disabled={deleteMutation.isPending}
+                className="px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-md font-medium disabled:opacity-50"
+              >
+                {deleteMutation.isPending ? "..." : t("plants.delete_blocked.force_action")}
               </button>
             </div>
           </div>

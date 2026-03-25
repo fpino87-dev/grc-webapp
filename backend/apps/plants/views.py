@@ -86,8 +86,9 @@ class PlantViewSet(viewsets.ModelViewSet):
         from django.core.exceptions import ValidationError
 
         plant = self.get_object()
+        force = request.query_params.get("force") == "true"
         try:
-            delete_plant(plant, request.user)
+            delete_plant(plant, request.user, force=force)
         except ValidationError as e:
             data = {"detail": str(e.message)}
             if getattr(e, "params", None) and "blocking" in e.params:

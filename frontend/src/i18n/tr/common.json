@@ -50,7 +50,8 @@
     "refresh": "Yenile",
     "export": "Dışa aktar",
     "upload": "Yükle",
-    "back": "Geri"
+    "back": "Geri",
+    "close": "Kapat"
   },
   "common": {
     "loading": "Yükleniyor...",
@@ -668,7 +669,10 @@
         "audit_programs": "Denetim programları",
         "schedule_policies": "Takvim politikaları",
         "role_assignments": "Rol atamaları"
-      }
+      },
+      "force_hint": "Yalnızca süper kullanıcı: tüm bağlantılı öğelerle birlikte tesisi zorla silebilirsiniz (geri alınamaz işlem).",
+      "force_action": "Zorla sil",
+      "force_confirm": "UYARI: tüm bağlantılı öğeler tesisle birlikte kalıcı olarak silinecek. Devam edilsin mi?"
     }
   },
   "users": {

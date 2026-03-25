@@ -27,14 +27,73 @@ def get_nis2_plants() -> QuerySet[Plant]:
     return Plant.objects.filter(nis2_scope__in=["essenziale", "importante"], deleted_at__isnull=True)
 
 
-def delete_plant(plant: Plant, user) -> None:
+def _cascade_delete_plant(plant: Plant, user) -> None:
+    """Soft-delete in cascata di tutte le dipendenze del plant, poi del plant stesso."""
+    from django.utils import timezone
+    from apps.controls.models import ControlInstance
+    from apps.assets.models import Asset
+    from apps.bia.models import CriticalProcess
+    from apps.risk.models import RiskAssessment
+    from apps.documents.models import Document, Evidence
+    from apps.tasks.models import Task
+    from apps.incidents.models import Incident
+    from apps.pdca.models import PdcaCycle
+    from apps.lessons.models import LessonLearned
+    from apps.management_review.models import ManagementReview
+    from apps.bcp.models import BcpPlan
+    from apps.audit_prep.models import AuditPrep, AuditProgram
+    from apps.compliance_schedule.models import ComplianceSchedulePolicy
+    from apps.governance.models import RoleAssignment
+    from core.audit import log_action
+
+    now = timezone.now()
+
+    ControlInstance.objects.filter(plant=plant, deleted_at__isnull=True).update(deleted_at=now)
+    Asset.objects.filter(plant=plant, deleted_at__isnull=True).update(deleted_at=now)
+    CriticalProcess.objects.filter(plant=plant, deleted_at__isnull=True).update(deleted_at=now)
+    RiskAssessment.objects.filter(plant=plant, deleted_at__isnull=True).update(deleted_at=now)
+    Document.objects.filter(plant=plant, deleted_at__isnull=True).update(deleted_at=now)
+    Evidence.objects.filter(plant=plant, deleted_at__isnull=True).update(deleted_at=now)
+    Task.objects.filter(plant=plant, deleted_at__isnull=True).update(deleted_at=now)
+    Incident.objects.filter(plant=plant, deleted_at__isnull=True).update(deleted_at=now)
+    PdcaCycle.objects.filter(plant=plant, deleted_at__isnull=True).update(deleted_at=now)
+    LessonLearned.objects.filter(plant=plant, deleted_at__isnull=True).update(deleted_at=now)
+    ManagementReview.objects.filter(plant=plant, deleted_at__isnull=True).update(deleted_at=now)
+    BcpPlan.objects.filter(plant=plant, deleted_at__isnull=True).update(deleted_at=now)
+    AuditPrep.objects.filter(plant=plant, deleted_at__isnull=True).update(deleted_at=now)
+    AuditProgram.objects.filter(plant=plant, deleted_at__isnull=True).update(deleted_at=now)
+    ComplianceSchedulePolicy.objects.filter(plant=plant, deleted_at__isnull=True).update(deleted_at=now)
+    RoleAssignment.objects.filter(scope_type="plant", scope_id=plant.pk, deleted_at__isnull=True).update(deleted_at=now)
+    plant.frameworks.filter(deleted_at__isnull=True).update(deleted_at=now)
+    plant.sub_plants.filter(deleted_at__isnull=True).update(deleted_at=now)
+
+    log_action(
+        user=user,
+        action_code="plants.force_delete",
+        level="L1",
+        entity=plant,
+        payload={"id": str(plant.id), "code": plant.code, "name": plant.name},
+    )
+    plant.soft_delete()
+
+
+def delete_plant(plant: Plant, user, force: bool = False) -> None:
     """
     Soft delete di un Plant.
 
-    Per sicurezza, l'eliminazione è consentita solo se non esistono dipendenze attive
-    (asset, controlli, documenti, incidenti, task, ecc.) collegate al sito.
+    Se force=False (default) blocca se esistono dipendenze attive.
+    Se force=True (solo superuser) elimina in cascata tutte le dipendenze
+    con soft delete, poi elimina il plant.
     """
     from django.core.exceptions import ValidationError
+    from django.utils import timezone
+
+    if force and not getattr(user, "is_superuser", False):
+        raise ValidationError("Solo il superuser può forzare l'eliminazione del sito.")
+
+    if force:
+        _cascade_delete_plant(plant, user)
+        return
 
     dependency_counts: dict[str, int] = {}
 

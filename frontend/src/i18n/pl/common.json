@@ -50,7 +50,8 @@
     "refresh": "Odśwież",
     "export": "Eksportuj",
     "upload": "Prześlij",
-    "back": "Wstecz"
+    "back": "Wstecz",
+    "close": "Zamknij"
   },
   "common": {
     "loading": "Ładowanie...",
@@ -668,7 +669,10 @@
         "audit_programs": "Programy audytów",
         "schedule_policies": "Polityki harmonogramu",
         "role_assignments": "Przypisania ról"
-      }
+      },
+      "force_hint": "Tylko superużytkownik: możesz wymusić usunięcie lokalizacji wraz ze wszystkimi powiązanymi elementami (operacja nieodwracalna).",
+      "force_action": "Wymuś usunięcie",
+      "force_confirm": "UWAGA: wszystkie powiązane elementy zostaną trwale usunięte wraz z lokalizacją. Kontynuować?"
     }
   },
   "users": {

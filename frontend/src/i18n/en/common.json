@@ -50,7 +50,8 @@
     "refresh": "Refresh",
     "export": "Export",
     "upload": "Upload",
-    "back": "Back"
+    "back": "Back",
+    "close": "Close"
   },
   "ai": {
     "suggestion_label": "AI Suggestion",
@@ -601,7 +602,10 @@
         "audit_programs": "Audit programs",
         "schedule_policies": "Schedule policies",
         "role_assignments": "Role assignments"
-      }
+      },
+      "force_hint": "Superuser only: you can force-delete the site along with all linked elements (irreversible operation).",
+      "force_action": "Force delete",
+      "force_confirm": "WARNING: all linked elements will be permanently deleted along with the site. Proceed?"
     }
   },
   "users": {

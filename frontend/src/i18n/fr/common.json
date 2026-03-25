@@ -50,7 +50,8 @@
     "refresh": "Rafraîchir",
     "export": "Exporter",
     "upload": "Téléverser",
-    "back": "Retour"
+    "back": "Retour",
+    "close": "Fermer"
   },
   "common": {
     "loading": "Chargement...",
@@ -668,7 +669,10 @@
         "audit_programs": "Programmes d'audit",
         "schedule_policies": "Politiques d'échéancier",
         "role_assignments": "Attributions de rôles"
-      }
+      },
+      "force_hint": "Superutilisateur uniquement : vous pouvez forcer la suppression du site avec tous les éléments liés (opération irréversible).",
+      "force_action": "Forcer la suppression",
+      "force_confirm": "ATTENTION : tous les éléments liés seront définitivement supprimés avec le site. Continuer ?"
     }
   },
   "users": {
