@@ -57,12 +57,12 @@ const navGroups: NavGroup[] = [
       { to: "/management-review", labelKey: "sidebar.items.management_review", icon: "📝", roles: ["super_admin", "compliance_officer", "risk_manager"] },
       { to: "/plants", labelKey: "sidebar.items.plants", icon: "🏭", roles: ["super_admin", "compliance_officer"] },
       { to: "/users", labelKey: "sidebar.items.users", icon: "👥", roles: ["super_admin"] },
+      { to: "/settings/mfa", labelKey: "sidebar.items.mfa", icon: "🔐", roles: null },
       { to: "/competency", labelKey: "sidebar.items.competency", icon: "◎", roles: ["super_admin", "compliance_officer", "ciso"] },
       { to: "/audit-trail", labelKey: "sidebar.items.audit_trail", icon: "📜", roles: ["super_admin", "internal_auditor", "external_auditor"] },
       { to: "/settings/email", labelKey: "sidebar.items.email_settings", icon: "✉️", roles: ["super_admin", "compliance_officer"] },
       { to: "/settings/notifications", labelKey: "sidebar.items.notification_rules", icon: "🔔", roles: ["super_admin", "compliance_officer"] },
       { to: "/settings/ai", labelKey: "sidebar.items.ai_engine", icon: "🤖", roles: ["super_admin", "compliance_officer"] },
-      { to: "/settings/mfa", labelKey: "sidebar.items.mfa", icon: "🔐", roles: null },
     ],
   },
 ];
