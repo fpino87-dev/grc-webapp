@@ -916,10 +916,11 @@
     "groups": {
       "main": "Main",
       "compliance": "Compliance",
-      "risk": "Risk",
+      "risk_continuity": "Risk & continuity",
       "operations": "Operations",
       "planning": "Planning",
-      "governance": "Governance"
+      "organisation": "Organization & review",
+      "settings": "Settings"
     },
     "items": {
       "dashboard": "Dashboard",

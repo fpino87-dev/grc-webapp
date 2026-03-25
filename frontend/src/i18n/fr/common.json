@@ -998,10 +998,11 @@
     "groups": {
       "main": "Principal",
       "compliance": "Compliance",
-      "risk": "Risque",
+      "risk_continuity": "Risque et continuité",
       "operations": "Opérations",
       "planning": "Planification",
-      "governance": "Governance"
+      "organisation": "Organisation et revue",
+      "settings": "Paramètres"
     },
     "items": {
       "dashboard": "Dashboard",

@@ -998,10 +998,11 @@
     "groups": {
       "main": "Ana",
       "compliance": "Compliance",
-      "risk": "Risk",
+      "risk_continuity": "Risk ve süreklilik",
       "operations": "Operasyonlar",
       "planning": "Planlama",
-      "governance": "Governance"
+      "organisation": "Organizasyon ve gözden geçirme",
+      "settings": "Ayarlar"
     },
     "items": {
       "dashboard": "Dashboard",
