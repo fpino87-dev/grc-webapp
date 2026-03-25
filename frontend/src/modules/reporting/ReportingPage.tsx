@@ -49,6 +49,7 @@ const BAR_COLORS: Record<string, string> = {
 
 function TabCompliance() {
   const { t } = useTranslation();
+  const selectedPlant = useAuthStore(s => s.selectedPlant);
 
   const STATUS_LABELS: Record<string, string> = {
     compliant: "Compliant",
@@ -59,14 +60,14 @@ function TabCompliance() {
   };
 
   const { data: dash, isLoading: dashLoading } = useQuery({
-    queryKey: ["reporting-dashboard"],
-    queryFn: () => reportingApi.dashboard(),
+    queryKey: ["reporting-dashboard", selectedPlant?.id],
+    queryFn: () => reportingApi.dashboard(selectedPlant?.id),
     retry: false,
   });
 
   const { data: comp, isLoading: compLoading } = useQuery({
-    queryKey: ["reporting-compliance"],
-    queryFn: () => reportingApi.compliance(),
+    queryKey: ["reporting-compliance", selectedPlant?.id],
+    queryFn: () => reportingApi.compliance(selectedPlant?.id ? { plant: selectedPlant.id } : undefined),
     retry: false,
   });
 

@@ -79,7 +79,7 @@ function KpiTrendChart() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["kpi-trend", framework, weeks, selectedPlant?.id],
-    queryFn: () => reportingApi.kpiTrend({ framework, weeks }),
+    queryFn: () => reportingApi.kpiTrend({ framework, weeks, plant: selectedPlant?.id }),
     retry: false,
   });
 
@@ -199,9 +199,10 @@ const URGENCY_DOT: Record<string, string> = {
 function UpcomingDeadlinesWidget() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const selectedPlant = useAuthStore(s => s.selectedPlant);
   const { data } = useQuery({
-    queryKey: ["activity-schedule-widget"],
-    queryFn: () => scheduleApi.getActivitySchedule({ months: 3 }),
+    queryKey: ["activity-schedule-widget", selectedPlant?.id],
+    queryFn: () => scheduleApi.getActivitySchedule({ months: 3, plant: selectedPlant?.id }),
     retry: false,
   });
 
@@ -288,9 +289,10 @@ function CriticalRolesWidget() {
 function RevaluationAlert() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const selectedPlant = useAuthStore(s => s.selectedPlant);
   const { data: assetsToReview } = useQuery({
-    queryKey: ["assets-needs-revaluation"],
-    queryFn: () => assetsApi.needsRevaluationIT(),
+    queryKey: ["assets-needs-revaluation", selectedPlant?.id],
+    queryFn: () => assetsApi.needsRevaluationIT(selectedPlant?.id),
     retry: false,
   });
   const count = assetsToReview?.length ?? 0;
@@ -313,14 +315,16 @@ function RevaluationAlert() {
 
 export function Dashboard() {
   const { t } = useTranslation();
+  const selectedPlant = useAuthStore(s => s.selectedPlant);
+
   const { data: controlsData } = useQuery({
-    queryKey: ["controls-summary"],
-    queryFn: () => controlsApi.instances(),
+    queryKey: ["controls-summary", selectedPlant?.id],
+    queryFn: () => controlsApi.instances(selectedPlant?.id ? { plant: selectedPlant.id } : undefined),
     retry: false,
   });
   const { data: incidentsData } = useQuery({
-    queryKey: ["incidents-summary"],
-    queryFn: () => incidentsApi.list({ status: "aperto" }),
+    queryKey: ["incidents-summary", selectedPlant?.id],
+    queryFn: () => incidentsApi.list({ status: "aperto", ...(selectedPlant?.id ? { plant: selectedPlant.id } : {}) }),
     retry: false,
   });
   const { data: plants } = useQuery({
