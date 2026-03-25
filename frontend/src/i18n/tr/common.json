@@ -642,6 +642,33 @@
         "advanced": "Gelişmiş — isteğe bağlı önlemlerle",
         "complete": "Tam — eksiksiz uygulama"
       }
+    },
+    "delete_blocked": {
+      "title": "Tesis silinemez",
+      "intro": "Devam etmeden önce kaldırılması gereken bağlantılı öğeler var:",
+      "deps": {
+        "sub_plants": "Alt tesisler",
+        "plant_frameworks": "Atanmış çerçeveler",
+        "control_instances": "Kontrol örnekleri",
+        "assets": "Varlıklar",
+        "bia_processes": "BIA süreçleri",
+        "risk_assessments": "Risk değerlendirmeleri",
+        "documents": "Belgeler",
+        "evidences": "Kanıtlar",
+        "tasks": "Görevler",
+        "incidents": "Olaylar",
+        "pdca_cycles": "PDCA döngüleri",
+        "lessons": "Öğrenilen dersler",
+        "management_reviews": "Yönetim gözden geçirmeleri",
+        "suppliers": "Tedarikçiler",
+        "training_courses": "Eğitim kursları",
+        "phishing_simulations": "Kimlik avı simülasyonları",
+        "bcp_plans": "BCP planları",
+        "audit_preps": "Denetim hazırlıkları",
+        "audit_programs": "Denetim programları",
+        "schedule_policies": "Takvim politikaları",
+        "role_assignments": "Rol atamaları"
+      }
     }
   },
   "users": {

@@ -575,6 +575,33 @@
         "advanced": "Avanzato — con misure opzionali",
         "complete": "Completo — implementazione piena"
       }
+    },
+    "delete_blocked": {
+      "title": "Impossibile eliminare il sito",
+      "intro": "Sono presenti elementi collegati che devono essere rimossi prima di procedere:",
+      "deps": {
+        "sub_plants": "Sotto-siti",
+        "plant_frameworks": "Framework assegnati",
+        "control_instances": "Istanze di controllo",
+        "assets": "Asset",
+        "bia_processes": "Processi BIA",
+        "risk_assessments": "Valutazioni del rischio",
+        "documents": "Documenti",
+        "evidences": "Evidenze",
+        "tasks": "Task",
+        "incidents": "Incidenti",
+        "pdca_cycles": "Cicli PDCA",
+        "lessons": "Lesson learned",
+        "management_reviews": "Revisioni direzione",
+        "suppliers": "Fornitori",
+        "training_courses": "Corsi di formazione",
+        "phishing_simulations": "Simulazioni phishing",
+        "bcp_plans": "Piani BCP",
+        "audit_preps": "Preparazioni audit",
+        "audit_programs": "Programmi audit",
+        "schedule_policies": "Policy scadenzario",
+        "role_assignments": "Assegnazioni ruolo"
+      }
     }
   },
   "users": {

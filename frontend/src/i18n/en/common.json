@@ -575,6 +575,33 @@
         "advanced": "Advanced — with optional measures",
         "complete": "Complete — full implementation"
       }
+    },
+    "delete_blocked": {
+      "title": "Cannot delete site",
+      "intro": "There are linked elements that must be removed before proceeding:",
+      "deps": {
+        "sub_plants": "Sub-sites",
+        "plant_frameworks": "Assigned frameworks",
+        "control_instances": "Control instances",
+        "assets": "Assets",
+        "bia_processes": "BIA processes",
+        "risk_assessments": "Risk assessments",
+        "documents": "Documents",
+        "evidences": "Evidences",
+        "tasks": "Tasks",
+        "incidents": "Incidents",
+        "pdca_cycles": "PDCA cycles",
+        "lessons": "Lessons learned",
+        "management_reviews": "Management reviews",
+        "suppliers": "Suppliers",
+        "training_courses": "Training courses",
+        "phishing_simulations": "Phishing simulations",
+        "bcp_plans": "BCP plans",
+        "audit_preps": "Audit preparations",
+        "audit_programs": "Audit programs",
+        "schedule_policies": "Schedule policies",
+        "role_assignments": "Role assignments"
+      }
     }
   },
   "users": {

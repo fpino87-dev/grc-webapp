@@ -642,6 +642,33 @@
         "advanced": "Zaawansowany — z opcjonalnymi środkami",
         "complete": "Kompletny — pełna implementacja"
       }
+    },
+    "delete_blocked": {
+      "title": "Nie można usunąć lokalizacji",
+      "intro": "Istnieją powiązane elementy, które należy usunąć przed kontynuowaniem:",
+      "deps": {
+        "sub_plants": "Podlokalizacje",
+        "plant_frameworks": "Przypisane frameworki",
+        "control_instances": "Instancje kontroli",
+        "assets": "Zasoby",
+        "bia_processes": "Procesy BIA",
+        "risk_assessments": "Oceny ryzyka",
+        "documents": "Dokumenty",
+        "evidences": "Dowody",
+        "tasks": "Zadania",
+        "incidents": "Incydenty",
+        "pdca_cycles": "Cykle PDCA",
+        "lessons": "Wnioski",
+        "management_reviews": "Przeglądy kierownictwa",
+        "suppliers": "Dostawcy",
+        "training_courses": "Szkolenia",
+        "phishing_simulations": "Symulacje phishingu",
+        "bcp_plans": "Plany BCP",
+        "audit_preps": "Przygotowania do audytu",
+        "audit_programs": "Programy audytów",
+        "schedule_policies": "Polityki harmonogramu",
+        "role_assignments": "Przypisania ról"
+      }
     }
   },
   "users": {

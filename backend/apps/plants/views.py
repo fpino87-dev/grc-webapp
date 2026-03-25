@@ -89,7 +89,10 @@ class PlantViewSet(viewsets.ModelViewSet):
         try:
             delete_plant(plant, request.user)
         except ValidationError as e:
-            return Response({"detail": str(e.message)}, status=400)
+            data = {"detail": str(e.message)}
+            if getattr(e, "params", None) and "blocking" in e.params:
+                data["blocking"] = e.params["blocking"]
+            return Response(data, status=400)
         return Response(status=204)
 
     @action(

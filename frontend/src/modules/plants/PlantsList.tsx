@@ -707,16 +707,18 @@ export function PlantsList() {
   });
   const { setPlant } = useAuthStore();
 
+  const [deleteBlocked, setDeleteBlocked] = useState<Record<string, number> | null>(null);
+
   const deleteMutation = useMutation({
     mutationFn: (id: string) => plantsApi.remove(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["plants"] }),
     onError: (e: any) => {
-      const msg =
-        e?.response?.data?.detail ||
-        e?.response?.data?.error ||
-        JSON.stringify(e?.response?.data) ||
-        t("common.error");
-      window.alert(msg);
+      const blocking = e?.response?.data?.blocking;
+      if (blocking && Object.keys(blocking).length > 0) {
+        setDeleteBlocked(blocking);
+      } else {
+        window.alert(e?.response?.data?.detail || t("common.error"));
+      }
     },
   });
 
@@ -819,6 +821,35 @@ export function PlantsList() {
       {showNew && <PlantModal onClose={() => setShowNew(false)} />}
       {editPlant && <EditPlantModal plant={editPlant} onClose={() => setEditPlant(null)} />}
       {frameworkPlant && <FrameworkPanel plant={frameworkPlant} onClose={() => setFrameworkPlant(null)} />}
+
+      {deleteBlocked && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              {t("plants.delete_blocked.title")}
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">{t("plants.delete_blocked.intro")}</p>
+            <ul className="space-y-1 mb-6">
+              {Object.entries(deleteBlocked).map(([key, count]) => (
+                <li key={key} className="flex items-center justify-between text-sm px-3 py-1.5 bg-red-50 border border-red-100 rounded">
+                  <span className="text-gray-700">
+                    {t(`plants.delete_blocked.deps.${key}`, { defaultValue: key })}
+                  </span>
+                  <span className="font-semibold text-red-700">{count}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setDeleteBlocked(null)}
+                className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md text-gray-700 font-medium"
+              >
+                {t("actions.close")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

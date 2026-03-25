@@ -642,6 +642,33 @@
         "advanced": "Avancé — avec mesures optionnelles",
         "complete": "Complet — implémentation totale"
       }
+    },
+    "delete_blocked": {
+      "title": "Impossible de supprimer le site",
+      "intro": "Des éléments liés doivent être supprimés avant de continuer :",
+      "deps": {
+        "sub_plants": "Sous-sites",
+        "plant_frameworks": "Référentiels assignés",
+        "control_instances": "Instances de contrôle",
+        "assets": "Actifs",
+        "bia_processes": "Processus BIA",
+        "risk_assessments": "Évaluations des risques",
+        "documents": "Documents",
+        "evidences": "Preuves",
+        "tasks": "Tâches",
+        "incidents": "Incidents",
+        "pdca_cycles": "Cycles PDCA",
+        "lessons": "Retours d'expérience",
+        "management_reviews": "Revues de direction",
+        "suppliers": "Fournisseurs",
+        "training_courses": "Formations",
+        "phishing_simulations": "Simulations phishing",
+        "bcp_plans": "Plans BCP",
+        "audit_preps": "Préparations d'audit",
+        "audit_programs": "Programmes d'audit",
+        "schedule_policies": "Politiques d'échéancier",
+        "role_assignments": "Attributions de rôles"
+      }
     }
   },
   "users": {

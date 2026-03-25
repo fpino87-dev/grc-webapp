@@ -105,10 +105,12 @@ def delete_plant(plant: Plant, user) -> None:
 
     blocking = {k: v for k, v in dependency_counts.items() if v}
     if blocking:
-        parts = [f"{k}={v}" for k, v in sorted(blocking.items())]
-        raise ValidationError(
-            "Impossibile eliminare il sito: sono presenti dipendenze collegate (" + ", ".join(parts) + ")."
+        err = ValidationError(
+            "Impossibile eliminare il sito: sono presenti dipendenze collegate.",
+            code="blocking_dependencies",
+            params={"blocking": blocking},
         )
+        raise err
 
     plant.soft_delete()
 
