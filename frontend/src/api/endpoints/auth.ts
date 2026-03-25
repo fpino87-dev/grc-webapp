@@ -24,7 +24,7 @@ export async function refreshTokenApi(refresh: string) {
 }
 
 export async function getMfaStatusApi(): Promise<{ enabled: boolean }> {
-  const res = await apiClient.get("/api/v1/auth/mfa/status/");
+  const res = await apiClient.get("/auth/mfa/status/");
   return res.data;
 }
 
@@ -33,14 +33,14 @@ export async function getMfaSetupApi(): Promise<{
   otpauth_url: string;
   qr_png: string;
 }> {
-  const res = await apiClient.get("/api/v1/auth/mfa/setup/");
+  const res = await apiClient.get("/auth/mfa/setup/");
   return res.data;
 }
 
 export async function confirmMfaApi(code: string): Promise<void> {
-  await apiClient.post("/api/v1/auth/mfa/setup/", { code });
+  await apiClient.post("/auth/mfa/setup/", { code });
 }
 
 export async function disableMfaApi(code: string): Promise<void> {
-  await apiClient.delete("/api/v1/auth/mfa/device/", { data: { code } });
+  await apiClient.delete("/auth/mfa/device/", { data: { code } });
 }
