@@ -143,6 +143,8 @@ make prod-check
 
 Vedere [INFRASTRUCTURE.md](./INFRASTRUCTURE.md) per la guida completa step-by-step al deployment produzione.
 
+**English — full Ubuntu install (firewall, reverse proxy, TLS, env):** [manual/HowtoDeploy.md](./manual/HowtoDeploy.md)
+
 ---
 
 ## Architettura
@@ -394,6 +396,7 @@ Per la strategia completa di backup, crontab host, pulizia automatica, backup fi
 | [INFRASTRUCTURE.md](./INFRASTRUCTURE.md) | Stack tecnologico, deployment step-by-step, DB, backup, sicurezza, monitoraggio, Celery tasks |
 | [manual/MANUAL_UTENTE_it.md](./manual/MANUAL_UTENTE_it.md) | Manuale utente (IT; versioni EN/FR/PL/TR in `manual/`) |
 | [manual/MANUAL_TECNICO_it.md](./manual/MANUAL_TECNICO_it.md) | Manuale tecnico — API, modelli, framework, AI Engine, test (IT; altre lingue in `manual/`) |
+| [manual/HowtoDeploy.md](./manual/HowtoDeploy.md) | **Deploy (English)** — Ubuntu server, Docker, firewall, reverse proxy, TLS, environment variables |
 | [CLAUDE.md](./CLAUDE.md) | Istruzioni architetturali per agenti AI e sviluppatori |
 
 ### Stato implementazione ultime feature
