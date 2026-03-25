@@ -22,6 +22,7 @@ It is **generic**: replace every placeholder domain, password, and path with val
 12. [Health checks and smoke tests](#12-health-checks-and-smoke-tests)
 13. [Backups and operations](#13-backups-and-operations)
 14. [Troubleshooting](#14-troubleshooting)
+15. [First-time application configuration](#15-first-time-application-configuration)
 
 ---
 
@@ -342,6 +343,97 @@ Log in through the browser, verify login, language switch, and a sample API call
 | Celery tasks not running | `celery` and `celery-beat` containers up; Redis password matches |
 
 For deeper infrastructure notes, see [`../INFRASTRUCTURE.md`](../INFRASTRUCTURE.md).
+
+---
+
+## 15. First-time application configuration
+
+This section assumes the **containers are running**, **migrations and CLI seeds from section 10 are complete**, the app is reachable over **HTTPS**, and at least one **Django superuser** exists.
+
+The goal is a **minimal working configuration**: users can select a site (plant), see **controls** for that site, and receive **notifications** according to your policies.
+
+### 15.1 Sign in and baseline checks
+
+1. Open the public URL of the application (e.g. `https://app.example.com`).
+2. Sign in with the **superuser** account created via `createsuperuser`.
+3. Confirm the **plant selector** (top bar) appears. If you have no plants yet, it may be empty until you create one (next steps).
+4. Switch **language** (top bar) once to verify i18n loads.
+
+### 15.2 Multi-factor authentication (MFA) — strongly recommended
+
+1. Go to **MFA** / two-factor settings (sidebar: *MFA* / authenticator setup — path may be `/settings/mfa` depending on your build).
+2. Enrol **TOTP** (authenticator app) for the superuser account.
+3. Log out and log back in to confirm the MFA step works.
+
+Repeat for other privileged accounts after they are created.
+
+### 15.3 Outbound email (SMTP)
+
+1. Ensure `.env.prod` already defines **SMTP** (`EMAIL_HOST`, `EMAIL_PORT`, TLS, credentials, `DEFAULT_FROM_EMAIL`).
+2. As **super_admin**, open **Settings → Email** (if available in your build) and verify or complete the configuration.
+3. Trigger a flow that sends mail (e.g. password reset or a notification test, if the UI provides one) and confirm delivery.
+
+Without working SMTP, **digest and alert emails** will not be delivered (in-app notifications may still work depending on configuration).
+
+### 15.4 Create the first site (plant)
+
+1. Open **Sites** / **Plant registry** (sidebar, e.g. `/plants`).
+2. Create a **plant**: code, name, address fields, and **NIS2 scope** (or equivalent) as required by your organisation.
+3. Save. This site becomes the scope for controls, assets, risks, documents, and other modules.
+
+### 15.5 Attach regulatory frameworks to the plant
+
+Catalogue data was loaded by **`load_frameworks`** (section 10). You must **link** frameworks to each plant so that **control instances** are generated.
+
+1. On the plant list, open the **frameworks** action for the new plant (or the plant detail UI where frameworks are managed).
+2. **Assign** at least one framework (e.g. ISO 27001, NIS2, TISAX) with the correct **level** / options for your case.
+3. On save, the application **creates control instances** for that plant and framework.
+
+4. Open **Controls** (`/controls`), select the **plant** in the top bar, and confirm that **control rows** appear (status may be “not evaluated” initially).
+
+If no controls appear, verify that frameworks are **active** for the plant and not archived.
+
+### 15.6 Organisation and risk appetite (optional but typical)
+
+1. Open **Governance** (`/governance`) and complete any **organisational** data your process requires (e.g. roles, workflow, risk appetite / thresholds if your deployment uses them).
+2. Adjust **risk appetite** or compliance thresholds **per plant / framework** if your UI exposes them — this affects how risk and reporting behave later.
+
+Exact fields depend on your GRC process; skip what your organisation does not use in phase one.
+
+### 15.7 Users, roles, and plant access
+
+1. Open **Users** (`/users`) — typically **super_admin** only for creation.
+2. **Create** operational accounts (compliance, plant managers, etc.).
+3. Assign each user a **GRC role** and **access to the relevant plant(s)** (multi-plant users need each site linked).
+
+Without plant access, users may not see data scoped to a site.
+
+### 15.8 Notification profiles
+
+Default profiles were loaded by **`load_notification_profiles`** (section 10).
+
+1. As **super_admin**, open **Settings → Notification rules** (or equivalent).
+2. Review **channels** (e.g. email), **frequencies**, and **roles** targeted by each rule.
+3. Tune rules so the right people receive deadlines and escalations for your organisation.
+
+### 15.9 Backups (recommended before going live)
+
+If you have not already run:
+
+```bash
+docker compose -f docker-compose.prod.yml exec backend python manage.py schedule_backup_task
+```
+
+schedule the **automatic backup** task according to your operations guide, and verify backup files or retention in your chosen storage.
+
+### 15.10 Smoke test of a “ready” tenant
+
+1. **Plant** selected in the top bar matches the site you configured.
+2. **Controls** list shows instances for assigned frameworks.
+3. **Dashboard** or **Reporting** loads without errors for that plant.
+4. A **non–superuser** test account (with plant access) can log in and see the same plant scope.
+
+You can then roll out further modules (assets, BIA, risk, documents, incidents) following your internal methodology.
 
 ---
 
