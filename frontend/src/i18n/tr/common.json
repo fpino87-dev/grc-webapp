@@ -573,12 +573,24 @@
       "country": "Ülke",
       "status": "Durum",
       "nis2_scope": "NIS2 kapsamı",
-      "has_ot": "OT / ICS ağları mevcut"
+      "has_ot": "OT / ICS ağları mevcut",
+      "logo_upload_label": "Logo yükle",
+      "nis2_sector": "NIS2 sektörü",
+      "nis2_subsector": "NIS2 alt sektörü",
+      "legal_entity_name": "Ticari unvan (bildirimler)",
+      "legal_entity_vat": "Vergi no / KDV",
+      "nis2_activity_description": "NIS2 faaliyet açıklaması (resmi belgeler)"
+    },
+    "nis2_entity": {
+      "section_title": "NIS2 ve tüzel kişilik",
+      "contact_hint": "Bildirimler için operasyonel iletişim kişisi, bu tesiste «NIS2 iletişim» görevi atanan kullanıcıdır (M00 Governance)."
     },
     "placeholders": {
       "code": "IT-MIL-01",
       "country": "IT",
-      "name": "Milano tesisi"
+      "name": "Milano tesisi",
+      "nis2_sector": "örn. İmalat — Otomotiv",
+      "nis2_subsector": "örn. Bileşen üretimi"
     },
     "actions": {
       "edit_title": "Siteyi düzenle",
@@ -748,7 +760,8 @@
     },
     "actions": {
       "replace": "Değiştir",
-      "terminate": "Sonlandır"
+      "terminate": "Sonlandır",
+      "delete_confirm": "Bu rol ataması kalıcı olarak silinsin mi? Yalnızca test ortamında veya hatalı giriş düzeltmesi için önerilir."
     },
     "roles": {
       "ciso": "CISO",

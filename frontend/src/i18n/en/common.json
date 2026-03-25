@@ -506,12 +506,24 @@
       "country": "Country",
       "status": "Status",
       "nis2_scope": "NIS2 scope",
-      "has_ot": "OT / ICS networks present"
+      "has_ot": "OT / ICS networks present",
+      "logo_upload_label": "Upload logo",
+      "nis2_sector": "NIS2 sector",
+      "nis2_subsector": "NIS2 subsector",
+      "legal_entity_name": "Legal name (notifications)",
+      "legal_entity_vat": "VAT / VAT ID",
+      "nis2_activity_description": "NIS2 activity description (formal documents)"
+    },
+    "nis2_entity": {
+      "section_title": "NIS2 and legal entity",
+      "contact_hint": "The operational contact for notifications is the user with the «NIS2 contact» assignment on this site (M00 Governance)."
     },
     "placeholders": {
       "code": "IT-MIL-01",
       "country": "IT",
-      "name": "Milan plant"
+      "name": "Milan plant",
+      "nis2_sector": "e.g. Manufacturing — Automotive",
+      "nis2_subsector": "e.g. Component production"
     },
     "actions": {
       "edit_title": "Edit site",
@@ -681,7 +693,8 @@
     },
     "actions": {
       "replace": "Replace",
-      "terminate": "Terminate"
+      "terminate": "Terminate",
+      "delete_confirm": "Permanently delete this role assignment? Recommended only in test environments or to correct data entry errors."
     },
     "roles": {
       "ciso": "CISO",

@@ -23,7 +23,7 @@ Compliance: TISAX L2/L3, NIS2, ISO 27001.
 - Docker produzione: **Dockerfile.prod** + **docker-compose.prod.yml** pronti
 - Test suite: **368 test, coverage 70.05%** ✅
 - Sentry: **integrato** backend + frontend (attivo se `SENTRY_DSN` impostato in `.env`) ✅
-- ⚠️ Traduzione UI: FR/PL/TR presenti ma 11 chiavi mancanti in tutte le lingue (plants.fields.*, governance.actions.delete_confirm)
+- Traduzione UI: IT/EN/FR/PL/TR allineate per `plants.*` e `governance.actions.delete_confirm` ✅
 - Backup automatico: **schedulato** ogni notte alle 02:00, retention 30gg, eliminazione manuale disponibile ✅
 
 ## Regole architetturali — NON derogare mai
@@ -166,10 +166,11 @@ docker compose -f docker-compose.prod.yml exec backend \
 
 ## Prossime attività prioritarie
 
-- **DA FARE**: Fix 11 chiavi i18n mancanti in EN/FR/PL/TR — `plants.fields.*` (nis2_sector, nis2_subsector, legal_entity_*, logo_upload_label, nis2_activity_description, nis2_entity.*) + `governance.actions.delete_confirm`
+- ✅ ~~Fix chiavi i18n EN/FR/PL/TR~~ — `plants.fields.*`, `plants.nis2_entity.*`, `plants.placeholders` (nis2_sector/nis2_subsector), `governance.actions.delete_confirm` (2026-03-25)
 - ✅ ~~Backup automatico~~ — `auto_backup_task` schedulato ogni notte alle 02:00 via `schedule_backup_task` management command (2026-03-25)
 - ✅ ~~Test suite (coverage target ≥ 70%)~~ — 368 test, 70.05% (2026-03-25)
 - ✅ ~~Sentry integration~~ — backend + frontend integrati, ENV vars in `.env` / `.env.prod` (2026-03-25)
+- **Backlog attuale**: tutte le priorità elencate sopra sono completate; nessun item aperto qui. Nuove attività da backlog prodotto / specifiche.
 
 ---
 

@@ -573,12 +573,24 @@
       "country": "Pays",
       "status": "Statut",
       "nis2_scope": "Périmètre NIS2",
-      "has_ot": "Réseaux OT / ICS présents"
+      "has_ot": "Réseaux OT / ICS présents",
+      "logo_upload_label": "Télécharger le logo",
+      "nis2_sector": "Secteur NIS2",
+      "nis2_subsector": "Sous-secteur NIS2",
+      "legal_entity_name": "Raison sociale (notifications)",
+      "legal_entity_vat": "N° TVA / VAT",
+      "nis2_activity_description": "Description de l'activité NIS2 (documents officiels)"
+    },
+    "nis2_entity": {
+      "section_title": "NIS2 et entité légale",
+      "contact_hint": "Le contact opérationnel pour les notifications est l'utilisateur avec le mandat « Contact NIS2 » sur ce site (M00 Governance)."
     },
     "placeholders": {
       "code": "IT-MIL-01",
       "country": "IT",
-      "name": "Usine de Milan"
+      "name": "Usine de Milan",
+      "nis2_sector": "ex. Fabrication — Automobile",
+      "nis2_subsector": "ex. Production de composants"
     },
     "actions": {
       "edit_title": "Modifier le site",
@@ -748,7 +760,8 @@
     },
     "actions": {
       "replace": "Remplacer",
-      "terminate": "Terminer"
+      "terminate": "Terminer",
+      "delete_confirm": "Supprimer définitivement cette attribution de rôle ? Opération recommandée uniquement en environnement de test ou pour corriger une erreur de saisie."
     },
     "roles": {
       "ciso": "CISO",

@@ -573,12 +573,24 @@
       "country": "Kraj",
       "status": "Status",
       "nis2_scope": "Zakres NIS2",
-      "has_ot": "Obecność sieci OT / ICS"
+      "has_ot": "Obecność sieci OT / ICS",
+      "logo_upload_label": "Prześlij logo",
+      "nis2_sector": "Sektor NIS2",
+      "nis2_subsector": "Podsektor NIS2",
+      "legal_entity_name": "Pełna nazwa prawna (powiadomienia)",
+      "legal_entity_vat": "NIP / VAT",
+      "nis2_activity_description": "Opis działalności NIS2 (dokumenty formalne)"
+    },
+    "nis2_entity": {
+      "section_title": "NIS2 i podmiot prawny",
+      "contact_hint": "Operacyjny kontakt ds. powiadomień to użytkownik z przypisaniem „Kontakt NIS2” w tym zakładzie (M00 Governance)."
     },
     "placeholders": {
       "code": "IT-MIL-01",
       "country": "IT",
-      "name": "Zakład w Mediolanie"
+      "name": "Zakład w Mediolanie",
+      "nis2_sector": "np. Produkcja — motoryzacja",
+      "nis2_subsector": "np. Produkcja komponentów"
     },
     "actions": {
       "edit_title": "Edytuj zakład",
@@ -748,7 +760,8 @@
     },
     "actions": {
       "replace": "Zastąp",
-      "terminate": "Zakończ"
+      "terminate": "Zakończ",
+      "delete_confirm": "Trwale usunąć to przypisanie roli? Zalecane tylko w środowisku testowym lub w celu korekty błędnego wpisu."
     },
     "roles": {
       "ciso": "CISO",
