@@ -100,7 +100,7 @@ def delete_plant(plant: Plant, user) -> None:
         plant=plant, deleted_at__isnull=True
     ).count()
     dependency_counts["role_assignments"] = RoleAssignment.objects.filter(
-        plant=plant, deleted_at__isnull=True
+        scope_type="plant", scope_id=plant.pk, deleted_at__isnull=True
     ).count()
 
     blocking = {k: v for k, v in dependency_counts.items() if v}
