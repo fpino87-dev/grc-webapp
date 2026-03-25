@@ -190,7 +190,7 @@ def get_activity_schedule(plant=None, months_ahead: int = 6) -> list[dict]:
         if plant:
             bcp_qs = bcp_qs.filter(**plant_filter)
         for plan in bcp_qs:
-            _add("bcp_test", f"BCP Test: {plan.name}", plan.next_test_date, plan.status, str(plan.id))
+            _add("bcp_test", f"BCP Test: {plan.title}", plan.next_test_date, plan.status, str(plan.id))
     except Exception:
         logger.exception("Errore nel calcolo delle scadenze BCP", exc_info=True)
 

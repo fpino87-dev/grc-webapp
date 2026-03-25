@@ -976,7 +976,8 @@
       "email_settings": "Ustawienia e-mail",
       "notification_rules": "Reguły powiadomień",
       "ai_engine": "AI Engine",
-      "mfa": "Uwierzytelnianie MFA"
+      "mfa": "Uwierzytelnianie MFA",
+      "backups": "Kopia zapasowa & Przywracanie"
     }
   },
   "topbar": {
@@ -1015,6 +1016,7 @@
       "verifying": "Weryfikowanie...",
       "back": "← Wróć do logowania",
       "invalid_code": "Nieprawidłowy lub wygasły kod OTP.",
+      "trust_device": "Zapamiętaj to urządzenie przez 30 dni",
       "status_active": "MFA aktywne",
       "status_inactive": "MFA nieaktywne",
       "enable": "Włącz",
@@ -1026,6 +1028,55 @@
       "activate": "Aktywuj MFA",
       "setup_success": "MFA zostało pomyślnie aktywowane.",
       "disable_success": "MFA zostało wyłączone."
+    }
+  },
+  "backups": {
+    "title": "Kopia zapasowa & Przywracanie",
+    "subtitle": "Zarządzaj kopiami zapasowymi bazy danych. Automatyczna kopia uruchamia się codziennie o 02:00.",
+    "create": "Utwórz kopię zapasową",
+    "creating": "Tworzenie...",
+    "empty": "Brak dostępnych kopii zapasowych. Utwórz pierwszą ręczną kopię.",
+    "retention_info": "Kopie zapasowe są przechowywane przez 30 dni. Automatyczna kopia uruchamia się każdej nocy o 02:00.",
+    "col": {
+      "date": "Data",
+      "filename": "Plik",
+      "size": "Rozmiar",
+      "type": "Typ",
+      "status": "Status",
+      "created_by": "Utworzone przez",
+      "actions": "Akcje"
+    },
+    "status": {
+      "pending": "Oczekuje",
+      "running": "W toku",
+      "completed": "Ukończono",
+      "failed": "Nieudane",
+      "restored": "Przywrócono"
+    },
+    "type": {
+      "auto": "Automatyczny",
+      "manual": "Ręczny"
+    },
+    "action": {
+      "download": "Pobierz",
+      "restore": "Przywróć",
+      "delete": "Usuń"
+    },
+    "confirm_restore": {
+      "title": "Potwierdź przywrócenie",
+      "message": "Zamierzasz przywrócić bazę danych z kopii zapasowej \"{{filename}}\". Wszystkie bieżące dane zostaną nadpisane. Tej operacji nie można cofnąć. Kontynuować?"
+    },
+    "confirm_delete": {
+      "title": "Usuń kopię zapasową",
+      "message": "Trwale usunąć kopię zapasową \"{{filename}}\"? Plik zostanie usunięty z serwera."
+    },
+    "feedback": {
+      "created": "Kopia zapasowa została pomyślnie uruchomiona.",
+      "create_error": "Błąd podczas tworzenia kopii zapasowej.",
+      "restored": "Baza danych została pomyślnie przywrócona.",
+      "restore_error": "Błąd podczas przywracania bazy danych.",
+      "deleted": "Kopia zapasowa usunięta.",
+      "delete_error": "Błąd podczas usuwania kopii zapasowej."
     }
   },
   "dashboard": {

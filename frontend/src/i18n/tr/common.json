@@ -976,7 +976,8 @@
       "email_settings": "E-posta ayarları",
       "notification_rules": "Bildirim kuralları",
       "ai_engine": "AI Engine",
-      "mfa": "MFA Kimlik Doğrulama"
+      "mfa": "MFA Kimlik Doğrulama",
+      "backups": "Yedekleme & Geri Yükleme"
     }
   },
   "topbar": {
@@ -1015,6 +1016,7 @@
       "verifying": "Doğrulanıyor...",
       "back": "← Girişe geri dön",
       "invalid_code": "Geçersiz veya süresi dolmuş OTP kodu.",
+      "trust_device": "Bu cihazı 30 gün boyunca hatırla",
       "status_active": "MFA aktif",
       "status_inactive": "MFA etkin değil",
       "enable": "Etkinleştir",
@@ -1026,6 +1028,55 @@
       "activate": "MFA'yı Etkinleştir",
       "setup_success": "MFA başarıyla etkinleştirildi.",
       "disable_success": "MFA devre dışı bırakıldı."
+    }
+  },
+  "backups": {
+    "title": "Yedekleme & Geri Yükleme",
+    "subtitle": "Veritabanı yedeklerini yönetin. Otomatik yedekleme her gün saat 02:00'de çalışır.",
+    "create": "Yedek oluştur",
+    "creating": "Oluşturuluyor...",
+    "empty": "Kullanılabilir yedek yok. İlk manuel yedeği oluşturun.",
+    "retention_info": "Yedekler 30 gün boyunca saklanır. Otomatik yedekleme her gece saat 02:00'de çalışır.",
+    "col": {
+      "date": "Tarih",
+      "filename": "Dosya",
+      "size": "Boyut",
+      "type": "Tür",
+      "status": "Durum",
+      "created_by": "Oluşturan",
+      "actions": "İşlemler"
+    },
+    "status": {
+      "pending": "Bekliyor",
+      "running": "Çalışıyor",
+      "completed": "Tamamlandı",
+      "failed": "Başarısız",
+      "restored": "Geri yüklendi"
+    },
+    "type": {
+      "auto": "Otomatik",
+      "manual": "Manuel"
+    },
+    "action": {
+      "download": "İndir",
+      "restore": "Geri yükle",
+      "delete": "Sil"
+    },
+    "confirm_restore": {
+      "title": "Geri yüklemeyi onayla",
+      "message": "\"{{filename}}\" yedeğinden veritabanını geri yüklemek üzeresiniz. Tüm mevcut veriler üzerine yazılacak. Bu işlem geri alınamaz. Devam edilsin mi?"
+    },
+    "confirm_delete": {
+      "title": "Yedeği sil",
+      "message": "\"{{filename}}\" yedeğini kalıcı olarak sil? Dosya sunucudan kaldırılacak."
+    },
+    "feedback": {
+      "created": "Yedekleme başarıyla başlatıldı.",
+      "create_error": "Yedek oluşturulurken hata oluştu.",
+      "restored": "Veritabanı başarıyla geri yüklendi.",
+      "restore_error": "Veritabanı geri yüklenirken hata oluştu.",
+      "deleted": "Yedek silindi.",
+      "delete_error": "Yedek silinirken hata oluştu."
     }
   },
   "dashboard": {

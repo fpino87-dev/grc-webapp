@@ -96,7 +96,7 @@ class CriticalProcessViewSet(viewsets.ModelViewSet):
 class TreatmentOptionViewSet(viewsets.ModelViewSet):
     queryset = TreatmentOption.objects.select_related("process")
     serializer_class = TreatmentOptionSerializer
-    filterset_fields = ["plant"]
+    filterset_fields = []
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -119,7 +119,7 @@ class TreatmentOptionViewSet(viewsets.ModelViewSet):
 class RiskDecisionViewSet(viewsets.ModelViewSet):
     queryset = RiskDecision.objects.select_related("process", "decided_by", "treatment")
     serializer_class = RiskDecisionSerializer
-    filterset_fields = ["plant"]
+    filterset_fields = []
 
     def get_queryset(self):
         qs = super().get_queryset()

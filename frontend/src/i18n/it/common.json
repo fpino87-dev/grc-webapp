@@ -907,7 +907,8 @@
       "email_settings": "Config. Email",
       "notification_rules": "Regole Notifiche",
       "ai_engine": "AI Engine",
-      "mfa": "Autenticazione MFA"
+      "mfa": "Autenticazione MFA",
+      "backups": "Backup & Restore"
     }
   },
   "topbar": {
@@ -949,6 +950,7 @@
       "verifying": "Verifica in corso...",
       "back": "← Torna al login",
       "invalid_code": "Codice OTP non valido o scaduto.",
+      "trust_device": "Ricorda questo dispositivo per 30 giorni",
       "status_active": "MFA attivo",
       "status_inactive": "MFA non attivo",
       "enable": "Attiva",
@@ -960,6 +962,55 @@
       "activate": "Attiva MFA",
       "setup_success": "MFA attivato con successo.",
       "disable_success": "MFA disabilitato."
+    }
+  },
+  "backups": {
+    "title": "Backup & Restore",
+    "subtitle": "Gestisci i backup del database. Il backup automatico viene eseguito ogni giorno alle 02:00.",
+    "create": "Crea backup",
+    "creating": "Creazione in corso...",
+    "empty": "Nessun backup disponibile. Crea il primo backup manuale.",
+    "retention_info": "I backup vengono conservati per 30 giorni. Il backup automatico viene eseguito ogni notte alle 02:00.",
+    "col": {
+      "date": "Data",
+      "filename": "File",
+      "size": "Dimensione",
+      "type": "Tipo",
+      "status": "Stato",
+      "created_by": "Creato da",
+      "actions": "Azioni"
+    },
+    "status": {
+      "pending": "In attesa",
+      "running": "In corso",
+      "completed": "Completato",
+      "failed": "Fallito",
+      "restored": "Ripristinato"
+    },
+    "type": {
+      "auto": "Automatico",
+      "manual": "Manuale"
+    },
+    "action": {
+      "download": "Scarica",
+      "restore": "Ripristina",
+      "delete": "Elimina"
+    },
+    "confirm_restore": {
+      "title": "Conferma ripristino",
+      "message": "Stai per ripristinare il database dal backup \"{{filename}}\". Tutti i dati attuali verranno sovrascritti. Questa operazione non è reversibile. Continuare?"
+    },
+    "confirm_delete": {
+      "title": "Elimina backup",
+      "message": "Eliminare definitivamente il backup \"{{filename}}\"? Il file verrà rimosso dal server."
+    },
+    "feedback": {
+      "created": "Backup avviato con successo.",
+      "create_error": "Errore durante la creazione del backup.",
+      "restored": "Database ripristinato con successo.",
+      "restore_error": "Errore durante il ripristino del database.",
+      "deleted": "Backup eliminato.",
+      "delete_error": "Errore durante l'eliminazione del backup."
     }
   },
   "dashboard": {

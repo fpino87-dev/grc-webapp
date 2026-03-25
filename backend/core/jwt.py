@@ -57,6 +57,13 @@ class GrcTokenObtainPairView(TokenObtainPairView):
 
         user = serializer.user
         if list(devices_for_user(user)):
+            # Controlla se il dispositivo è già fidato (bypass MFA per 30 giorni)
+            device_token = request.data.get("device_token", "")
+            if device_token:
+                from apps.auth_grc.models import TrustedDevice
+                if TrustedDevice.verify(user, device_token):
+                    return Response(_issue_jwt(user), status=status.HTTP_200_OK)
+
             # Utente ha MFA attivo: emetti un token temporaneo, NON il JWT
             mfa_token = signing.dumps(
                 {"uid": str(user.pk)},
@@ -124,4 +131,13 @@ class MfaVerifyView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        return Response(_issue_jwt(user), status=status.HTTP_200_OK)
+        response_data = _issue_jwt(user)
+
+        # Se il client chiede di fidarsi di questo dispositivo, emetti un token da 30 giorni
+        if request.data.get("trust_device"):
+            device_name = request.META.get("HTTP_USER_AGENT", "")[:200]
+            from apps.auth_grc.models import TrustedDevice
+            _, raw_token = TrustedDevice.create_for_user(user, device_name)
+            response_data["device_token"] = raw_token
+
+        return Response(response_data, status=status.HTTP_200_OK)

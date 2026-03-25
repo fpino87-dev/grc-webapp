@@ -976,7 +976,8 @@
       "email_settings": "Config. Email",
       "notification_rules": "Règles notifications",
       "ai_engine": "AI Engine",
-      "mfa": "Authentification MFA"
+      "mfa": "Authentification MFA",
+      "backups": "Sauvegarde & Restauration"
     }
   },
   "topbar": {
@@ -1015,6 +1016,7 @@
       "verifying": "Vérification...",
       "back": "← Retour à la connexion",
       "invalid_code": "Code OTP invalide ou expiré.",
+      "trust_device": "Se souvenir de cet appareil pendant 30 jours",
       "status_active": "MFA actif",
       "status_inactive": "MFA inactif",
       "enable": "Activer",
@@ -1026,6 +1028,55 @@
       "activate": "Activer le MFA",
       "setup_success": "MFA activé avec succès.",
       "disable_success": "MFA désactivé."
+    }
+  },
+  "backups": {
+    "title": "Sauvegarde & Restauration",
+    "subtitle": "Gérez les sauvegardes de la base de données. La sauvegarde automatique s'exécute chaque jour à 02h00.",
+    "create": "Créer une sauvegarde",
+    "creating": "Création en cours...",
+    "empty": "Aucune sauvegarde disponible. Créez la première sauvegarde manuelle.",
+    "retention_info": "Les sauvegardes sont conservées pendant 30 jours. La sauvegarde automatique s'exécute chaque nuit à 02h00.",
+    "col": {
+      "date": "Date",
+      "filename": "Fichier",
+      "size": "Taille",
+      "type": "Type",
+      "status": "Statut",
+      "created_by": "Créé par",
+      "actions": "Actions"
+    },
+    "status": {
+      "pending": "En attente",
+      "running": "En cours",
+      "completed": "Terminé",
+      "failed": "Échoué",
+      "restored": "Restauré"
+    },
+    "type": {
+      "auto": "Automatique",
+      "manual": "Manuel"
+    },
+    "action": {
+      "download": "Télécharger",
+      "restore": "Restaurer",
+      "delete": "Supprimer"
+    },
+    "confirm_restore": {
+      "title": "Confirmer la restauration",
+      "message": "Vous êtes sur le point de restaurer la base de données depuis la sauvegarde \"{{filename}}\". Toutes les données actuelles seront écrasées. Cette opération est irréversible. Continuer ?"
+    },
+    "confirm_delete": {
+      "title": "Supprimer la sauvegarde",
+      "message": "Supprimer définitivement la sauvegarde \"{{filename}}\" ? Le fichier sera supprimé du serveur."
+    },
+    "feedback": {
+      "created": "Sauvegarde démarrée avec succès.",
+      "create_error": "Erreur lors de la création de la sauvegarde.",
+      "restored": "Base de données restaurée avec succès.",
+      "restore_error": "Erreur lors de la restauration de la base de données.",
+      "deleted": "Sauvegarde supprimée.",
+      "delete_error": "Erreur lors de la suppression de la sauvegarde."
     }
   },
   "dashboard": {

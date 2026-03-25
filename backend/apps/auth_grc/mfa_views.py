@@ -135,4 +135,10 @@ class MfaDisableView(APIView):
             return Response({"detail": "Codice OTP non valido."}, status=status.HTTP_401_UNAUTHORIZED)
 
         TOTPDevice.objects.filter(user=request.user).delete()
+
+        # Revoca tutti i dispositivi fidati
+        from apps.auth_grc.models import TrustedDevice
+        for td in TrustedDevice.objects.filter(user=request.user):
+            td.revoke()
+
         return Response({"detail": "MFA disabilitato."}, status=status.HTTP_200_OK)

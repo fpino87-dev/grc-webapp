@@ -42,6 +42,7 @@ services:
         condition: service_healthy
     volumes:
       - ./manual:/app/manual:ro
+      - backupdata:/app/backups
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/api/health/ || exit 1"]
       interval: 30s
@@ -52,8 +53,8 @@ services:
 
   celery:
     build:
-      context: ./backend
-      dockerfile: Dockerfile.prod
+      context: .
+      dockerfile: backend/Dockerfile.prod
     restart: unless-stopped
     command: >
       celery -A core worker -l warning
@@ -62,6 +63,8 @@ services:
     env_file: .env.prod
     environment:
       DJANGO_SETTINGS_MODULE: core.settings.prod
+    volumes:
+      - backupdata:/app/backups
     depends_on:
       - backend
       - redis
@@ -85,6 +88,12 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
+      args:
+        VITE_API_URL: ${VITE_API_URL:-}
+        VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
+        VITE_SENTRY_ENVIRONMENT: ${VITE_SENTRY_ENVIRONMENT:-production}
+        VITE_SENTRY_TRACES_RATE: ${VITE_SENTRY_TRACES_RATE:-0.1}
+        VITE_APP_VERSION: ${VITE_APP_VERSION:-unknown}
     restart: unless-stopped
     ports:
       - "3001:80"
@@ -94,3 +103,4 @@ services:
 volumes:
   pgdata:
   redisdata:
+  backupdata:

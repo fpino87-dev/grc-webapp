@@ -21,7 +21,10 @@ Compliance: TISAX L2/L3, NIS2, ISO 27001.
 - Celery worker/beat: **configurati e avviati**
 - Framework normativi JSON: **presenti** in `backend/frameworks/` (ISO27001, NIS2, TISAX_L2, TISAX_L3)
 - Docker produzione: **Dockerfile.prod** + **docker-compose.prod.yml** pronti
-- ⚠️ Traduzione UI: solo IT/EN — FR/PL/TR in sviluppo
+- Test suite: **368 test, coverage 70.05%** ✅
+- Sentry: **integrato** backend + frontend (attivo se `SENTRY_DSN` impostato in `.env`) ✅
+- ⚠️ Traduzione UI: FR/PL/TR presenti ma 11 chiavi mancanti in tutte le lingue (plants.fields.*, governance.actions.delete_confirm)
+- Backup automatico: **schedulato** ogni notte alle 02:00, retention 30gg, eliminazione manuale disponibile ✅
 
 ## Regole architetturali — NON derogare mai
 
@@ -140,6 +143,8 @@ docker compose -f docker-compose.prod.yml exec backend \
   python manage.py load_competency_requirements
 docker compose -f docker-compose.prod.yml exec backend \
   python manage.py createsuperuser
+docker compose -f docker-compose.prod.yml exec backend \
+  python manage.py schedule_backup_task
 ```
 
 ## Porte in uso su questo server
@@ -161,15 +166,17 @@ docker compose -f docker-compose.prod.yml exec backend \
 
 ## Prossime attività prioritarie
 
-- **DA FARE**: Traduzioni FR/PL/TR
-- **DA FARE**: Test suite (coverage target ≥ 70%) — `docker compose exec backend pytest`
-- **DA FARE**: Sentry integration per error monitoring
-- **DA FARE**: Backup automatico PostgreSQL (cron + pg_dump, retention 30gg)
+- **DA FARE**: Fix 11 chiavi i18n mancanti in EN/FR/PL/TR — `plants.fields.*` (nis2_sector, nis2_subsector, legal_entity_*, logo_upload_label, nis2_activity_description, nis2_entity.*) + `governance.actions.delete_confirm`
+- ✅ ~~Backup automatico~~ — `auto_backup_task` schedulato ogni notte alle 02:00 via `schedule_backup_task` management command (2026-03-25)
+- ✅ ~~Test suite (coverage target ≥ 70%)~~ — 368 test, 70.05% (2026-03-25)
+- ✅ ~~Sentry integration~~ — backend + frontend integrati, ENV vars in `.env` / `.env.prod` (2026-03-25)
 
 ---
 
 ## Aggiornamenti recenti (hardening & UX)
 
+- **Sentry**: integrazione error monitoring su backend (Django+Celery+Redis) e frontend (React+BrowserTracing+SessionReplay). GDPR-safe: `sendDefaultPii=false`, `maskAllText=true`, strip header Authorization. Attivo se `SENTRY_DSN` valorizzato in `.env`.
+- **Test suite**: 368 test pytest, coverage 70.05% su `apps/` + `core/`. Target ≥ 70% rispettato (`--cov-fail-under=70` in pytest.ini).
 - **M17 Audit Preparation**: eliminazione sicura con soft delete e azione di annullamento (`annulla`) che archivia il prep solo se tutti i finding sono chiusi, con audit trail dedicato.
 - **Frontend moduli**: introdotto `ModuleHelp` (pulsante `?` con drawer contestuale) sui principali moduli operativi (asset, BIA, risk, incidenti, controlli, audit prep, management review, scadenzario).
 - **M04 Asset**: badge di criticità con tooltip esplicativi e tabella guida all’interno del form, per scelta coerente dei livelli 1–5.

@@ -95,6 +95,52 @@ class ExternalAuditorToken(BaseModel):
         return self.revoked_at is None and self.valid_from <= n <= self.valid_until
 
 
+class TrustedDevice(BaseModel):
+    """
+    Dispositivo fidato: memorizza il token (hashed) per saltare MFA per 30 giorni.
+    Il token grezzo viene restituito UNA SOLA VOLTA al frontend e poi dimenticato.
+    """
+    user = models.ForeignKey(
+        "auth.User",
+        on_delete=models.CASCADE,
+        related_name="trusted_devices",
+    )
+    token_hash = models.CharField(max_length=64, db_index=True)
+    device_name = models.CharField(max_length=200, blank=True)
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    @classmethod
+    def create_for_user(cls, user, device_name=""):
+        from django.utils import timezone
+        raw = secrets.token_urlsafe(32)
+        hashed = hashlib.sha256(raw.encode()).hexdigest()
+        obj = cls.objects.create(
+            user=user,
+            token_hash=hashed,
+            device_name=device_name[:200],
+            expires_at=timezone.now() + timezone.timedelta(days=30),
+        )
+        return obj, raw  # raw mostrato UNA SOLA VOLTA
+
+    @classmethod
+    def verify(cls, user, raw_token: str) -> bool:
+        from django.utils import timezone
+        if not raw_token:
+            return False
+        hashed = hashlib.sha256(raw_token.encode()).hexdigest()
+        return cls.objects.filter(
+            user=user,
+            token_hash=hashed,
+            expires_at__gt=timezone.now(),
+        ).exists()
+
+    def revoke(self):
+        self.soft_delete()
+
+
 COMPETENCY_LEVEL_CHOICES = [
     (1, "1 — Awareness"),
     (2, "2 — Practitioner"),

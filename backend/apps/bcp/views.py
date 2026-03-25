@@ -118,8 +118,7 @@ class BcpPlanViewSet(viewsets.ModelViewSet):
                     user=user,
                     role=GrcRole.COMPLIANCE_OFFICER,
                     deleted_at__isnull=True,
-                    valid_from__lte=today,
-                ).filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today))
+                )
 
                 if access_qs.filter(scope_type="org").exists():
                     has_access = True
@@ -127,7 +126,7 @@ class BcpPlanViewSet(viewsets.ModelViewSet):
                     has_access = True
                 elif access_qs.filter(
                     scope_type__in=["plant_list", "single_plant"],
-                    scope_plants=plan,
+                    scope_plants=plan.plant,
                 ).exists():
                     has_access = True
 

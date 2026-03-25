@@ -38,3 +38,7 @@ if _parsed.scheme not in ("http", "https"):
     raise ImproperlyConfigured("FRONTEND_URL deve usare schema http o https.")
 CORS_ALLOWED_ORIGINS = [_frontend_url.rstrip("/")]
 
+# Sentry: in produzione forziamo environment=production e sample rate più alto
+# Il DSN e gli altri parametri sono già letti da env in base.py.
+# Nessuna ulteriore configurazione necessaria — SENTRY_ENVIRONMENT=production in .env.
+

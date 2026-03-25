@@ -59,16 +59,7 @@ def complete_assessment(
             supplier.risk_level = "medio"
         else:
             supplier.risk_level = "alto"
-        supplier.last_assessment_date = assessment.assessment_date
-        supplier.last_assessment_score = score_overall
-        supplier.save(
-            update_fields=[
-                "risk_level",
-                "last_assessment_date",
-                "last_assessment_score",
-                "updated_at",
-            ]
-        )
+        supplier.save(update_fields=["risk_level", "updated_at"])
 
     log_action(
         user=user,
@@ -117,11 +108,6 @@ def approve_assessment(assessment, user, notes: str = ""):
         ]
     )
 
-    # Aggiorna approval_status sul Supplier
-    supplier = assessment.supplier
-    supplier.approval_status = "approved"
-    supplier.save(update_fields=["approval_status", "updated_at"])
-
     log_action(
         user=user,
         action_code="supplier.assessment.approved",
@@ -153,10 +139,6 @@ def reject_assessment(assessment, user, notes: str = ""):
             "updated_at",
         ]
     )
-
-    supplier = assessment.supplier
-    supplier.approval_status = "rejected"
-    supplier.save(update_fields=["approval_status", "updated_at"])
 
     log_action(
         user=user,

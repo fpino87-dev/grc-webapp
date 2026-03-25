@@ -4,6 +4,8 @@ import { useAuthStore } from "../store/auth";
 import { loginApi, verifyMfaApi } from "../api/endpoints/auth";
 import { useTranslation } from "react-i18next";
 
+const DEVICE_TOKEN_KEY = "grc_device_token";
+
 export function LoginPage() {
   const { t } = useTranslation();
   const [email, setEmail]       = useState("");
@@ -12,8 +14,9 @@ export function LoginPage() {
   const [loading, setLoading]   = useState(false);
 
   // Step MFA
-  const [mfaToken, setMfaToken] = useState<string | null>(null);
-  const [otpCode, setOtpCode]   = useState("");
+  const [mfaToken, setMfaToken]     = useState<string | null>(null);
+  const [otpCode, setOtpCode]       = useState("");
+  const [trustDevice, setTrustDevice] = useState(false);
   const otpRef = useRef<HTMLInputElement>(null);
 
   const { setUser } = useAuthStore();
@@ -38,7 +41,8 @@ export function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      const result = await loginApi(email, password);
+      const savedToken = localStorage.getItem(DEVICE_TOKEN_KEY) ?? undefined;
+      const result = await loginApi(email, password, savedToken);
       if (result.mfa_required) {
         setMfaToken(result.mfa_token);
         setTimeout(() => otpRef.current?.focus(), 50);
@@ -58,8 +62,11 @@ export function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      const { access } = await verifyMfaApi(mfaToken, otpCode);
-      finishLogin(access);
+      const result = await verifyMfaApi(mfaToken, otpCode, trustDevice);
+      if (trustDevice && result.device_token) {
+        localStorage.setItem(DEVICE_TOKEN_KEY, result.device_token);
+      }
+      finishLogin(result.access);
     } catch {
       setError(t("auth.mfa.invalid_code"));
       setOtpCode("");
@@ -79,12 +86,13 @@ export function LoginPage() {
 
         {!mfaToken ? (
           /* ── Step 1: credenziali ── */
-          <form onSubmit={handleCredentials} className="space-y-4">
+          <form onSubmit={handleCredentials} className="space-y-4" noValidate>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 mb-1">
                 {t("auth.login.email_label")}
               </label>
               <input
+                id="login-email"
                 type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -94,10 +102,11 @@ export function LoginPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 mb-1">
                 {t("auth.login.password_label")}
               </label>
               <input
+                id="login-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -146,6 +155,15 @@ export function LoginPage() {
                 placeholder="000000"
               />
             </div>
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={trustDevice}
+                onChange={(e) => setTrustDevice(e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+              />
+              <span className="text-sm text-gray-600">{t("auth.mfa.trust_device")}</span>
+            </label>
             {error && (
               <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">{error}</p>
             )}
@@ -158,7 +176,7 @@ export function LoginPage() {
             </button>
             <button
               type="button"
-              onClick={() => { setMfaToken(null); setOtpCode(""); setError(""); }}
+              onClick={() => { setMfaToken(null); setOtpCode(""); setError(""); setTrustDevice(false); }}
               className="w-full text-sm text-gray-500 hover:text-gray-700 py-1"
             >
               {t("auth.mfa.back")}

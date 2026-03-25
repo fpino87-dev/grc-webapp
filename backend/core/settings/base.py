@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import timedelta
+from celery.schedules import crontab
 
 import environ
 
@@ -57,6 +58,7 @@ INSTALLED_APPS = [
     "apps.notifications",
     "apps.ai_engine",
     "apps.compliance_schedule",
+    "apps.backups",
 ]
 
 MIDDLEWARE = [
@@ -99,6 +101,15 @@ CELERY_RESULT_BACKEND = "django-db"
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_TASK_SERIALIZER = "json"
 CELERY_TIMEZONE = "Europe/Rome"
+CELERY_BEAT_SCHEDULE = {
+    "auto-backup-daily": {
+        "task": "apps.backups.tasks.auto_backup_task",
+        "schedule": crontab(hour=2, minute=0),
+    },
+}
+
+# Directory dove vengono salvati i file di backup (montata come volume Docker)
+BACKUP_DIR = env("BACKUP_DIR", default="/app/backups")
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -225,6 +236,48 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 FERNET_KEYS = [env("FERNET_KEY")]
+
+# ─── Sentry ───────────────────────────────────────────────────────────────────
+def _sentry_before_send(event, hint):
+    """Strip any residual PII from Sentry events before sending."""
+    # Rimuovi header Authorization e Cookie da request data
+    request = event.get("request", {})
+    headers = request.get("headers", {})
+    for h in ("Authorization", "Cookie", "X-Csrftoken"):
+        headers.pop(h, None)
+        headers.pop(h.lower(), None)
+    return event
+
+
+_SENTRY_DSN = env("SENTRY_DSN", default="")
+if _SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.celery import CeleryIntegration
+    from sentry_sdk.integrations.redis import RedisIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+    import logging as _logging
+
+    sentry_sdk.init(
+        dsn=_SENTRY_DSN,
+        integrations=[
+            DjangoIntegration(),
+            CeleryIntegration(monitor_beat_tasks=True),
+            RedisIntegration(),
+            LoggingIntegration(
+                level=_logging.INFO,        # cattura INFO e superiori come breadcrumb
+                event_level=_logging.ERROR, # invia come evento solo ERROR+
+            ),
+        ],
+        traces_sample_rate=env.float("SENTRY_TRACES_SAMPLE_RATE", default=0.1),
+        profiles_sample_rate=env.float("SENTRY_PROFILES_SAMPLE_RATE", default=0.0),
+        environment=env("SENTRY_ENVIRONMENT", default="development"),
+        release=env("APP_VERSION", default="unknown"),
+        # GDPR: non inviare dati personali
+        send_default_pii=False,
+        before_send=_sentry_before_send,
+    )
+
 
 LOGGING = {
     "version": 1,

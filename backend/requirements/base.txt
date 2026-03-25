@@ -25,6 +25,9 @@ openai>=1.52.0
 # pip-audit: analisi vulnerabilità dipendenze (usare in CI/CD)
 pip-audit>=2.7.0
 
+# Sentry: error monitoring e performance tracing
+sentry-sdk[django]==2.*
+
 # 2FA TOTP per Django Admin (Google Authenticator / Authy)
 django-two-factor-auth==1.18.*
 django-otp==1.7.*

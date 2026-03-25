@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from .models import Task, TaskComment
 from .serializers import TaskCommentSerializer, TaskSerializer
 from . import services
-from django.utils import timezone
 from django.db.models import Q
+from django.utils import timezone
 from apps.auth_grc.models import UserPlantAccess
 from apps.plants.models import Plant
 
@@ -38,14 +38,11 @@ class TaskViewSet(viewsets.ModelViewSet):
         if getattr(user, "is_superuser", False):
             return qs
 
-        today = timezone.now().date()
         access_qs = (
             UserPlantAccess.objects.filter(
                 user=user,
                 deleted_at__isnull=True,
-                valid_from__lte=today,
             )
-            .filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today))
             .prefetch_related("scope_plants", "scope_bu")
         )
         if not access_qs.exists():

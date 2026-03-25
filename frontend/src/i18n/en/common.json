@@ -894,7 +894,8 @@
       "email_settings": "Email settings",
       "notification_rules": "Notification rules",
       "ai_engine": "AI Engine",
-      "mfa": "MFA Authentication"
+      "mfa": "MFA Authentication",
+      "backups": "Backup & Restore"
     }
   },
   "topbar": {
@@ -936,6 +937,7 @@
       "verifying": "Verifying...",
       "back": "← Back to login",
       "invalid_code": "Invalid or expired OTP code.",
+      "trust_device": "Remember this device for 30 days",
       "status_active": "MFA active",
       "status_inactive": "MFA not active",
       "enable": "Enable",
@@ -947,6 +949,55 @@
       "activate": "Activate MFA",
       "setup_success": "MFA activated successfully.",
       "disable_success": "MFA disabled."
+    }
+  },
+  "backups": {
+    "title": "Backup & Restore",
+    "subtitle": "Manage database backups. Automatic backup runs every day at 02:00.",
+    "create": "Create backup",
+    "creating": "Creating...",
+    "empty": "No backups available. Create the first manual backup.",
+    "retention_info": "Backups are retained for 30 days. Automatic backup runs every night at 02:00.",
+    "col": {
+      "date": "Date",
+      "filename": "File",
+      "size": "Size",
+      "type": "Type",
+      "status": "Status",
+      "created_by": "Created by",
+      "actions": "Actions"
+    },
+    "status": {
+      "pending": "Pending",
+      "running": "Running",
+      "completed": "Completed",
+      "failed": "Failed",
+      "restored": "Restored"
+    },
+    "type": {
+      "auto": "Automatic",
+      "manual": "Manual"
+    },
+    "action": {
+      "download": "Download",
+      "restore": "Restore",
+      "delete": "Delete"
+    },
+    "confirm_restore": {
+      "title": "Confirm restore",
+      "message": "You are about to restore the database from backup \"{{filename}}\". All current data will be overwritten. This operation cannot be undone. Continue?"
+    },
+    "confirm_delete": {
+      "title": "Delete backup",
+      "message": "Permanently delete backup \"{{filename}}\"? The file will be removed from the server."
+    },
+    "feedback": {
+      "created": "Backup started successfully.",
+      "create_error": "Error creating backup.",
+      "restored": "Database restored successfully.",
+      "restore_error": "Error restoring the database.",
+      "deleted": "Backup deleted.",
+      "delete_error": "Error deleting backup."
     }
   },
   "dashboard": {
