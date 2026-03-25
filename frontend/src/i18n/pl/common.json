@@ -469,7 +469,9 @@
       "open_drawer": "Otwórz kontrolę",
       "click_to_edit": "Kliknij aby edytować",
       "propagate_hint": "Propaguj ten status do powiązanych kontroli",
-      "propagate": "⇒ propaguj"
+      "propagate": "⇒ propaguj",
+      "delete_title": "Usuń instancję kontroli",
+      "delete_confirm": "Usunąć instancję kontroli {{id}}? Dozwolone tylko, jeśli nie została jeszcze oceniona (oprócz superużytkownika)."
     },
     "maturity_0": "Nie wdrożone",
     "maturity_1": "Ad-hoc",
@@ -594,6 +596,8 @@
     },
     "actions": {
       "edit_title": "Edytuj zakład",
+      "delete_title": "Usuń zakład",
+      "delete_confirm": "Usunąć zakład „{{name}}”? Dozwolone tylko, jeśli nie ma powiązanych danych.",
       "frameworks": "Ramy normatywne",
       "select": "Wybierz"
     },
@@ -665,7 +669,9 @@
       "activate": "Aktywuj",
       "deactivate": "Dezaktywuj",
       "competency": "Kompetencje",
-      "reset_password": "Resetuj hasło"
+      "reset_password": "Resetuj hasło",
+      "delete": "Usuń dostęp użytkownika",
+      "delete_confirm": "Dezaktywować użytkownika {{username}} i cofnąć dostępy GRC?"
     },
     "new": {
       "open": "+ Nowy użytkownik",
@@ -917,7 +923,10 @@
       "partial": "Częściowe",
       "gap": "Luka",
       "not_evaluated": "Nie ocenione",
-      "risk_appetite": "Apetyt na ryzyko"
+      "risk_appetite": "Apetyt na ryzyko",
+      "archive_title": "Archiwizuj framework",
+      "archive_confirm": "Archiwizować framework {{code}}? Ukryje go z listy i zablokuje nowe mapowania; nie usuwa danych historycznych.",
+      "archived_badge": "Zarchiwizowany"
     },
     "risk_appetite": {
       "title": "Apetyt na ryzyko",
@@ -1244,7 +1253,9 @@
       "submit_for_review": "Prześlij do przeglądu",
       "new_version": "Nowa wersja",
       "link_controls": "Powiąż kontrole",
-      "change_plant": "Zmień zakład"
+      "change_plant": "Zmień zakład",
+      "delete_title": "Usuń dokument",
+      "delete_confirm": "Usunąć dokument „{{title}}”? Zabronione dla dokumentów w zatwierdzaniu lub zatwierdzonych (oprócz superużytkownika)."
     },
     "errors": {
       "download_failed": "Nie można pobrać dokumentu. Sprawdź uprawnienia lub spróbuj ponownie później.",
@@ -1297,7 +1308,9 @@
         "uploaded_by": "Przesłane przez"
       },
       "actions": {
-        "download_file": "Pobierz plik"
+        "download_file": "Pobierz plik",
+        "delete_title": "Usuń dowód",
+        "delete_confirm": "Usunąć dowód „{{title}}”? Zabronione, jeśli powiązany z ocenionymi kontrolami (oprócz superużytkownika)."
       },
       "expiry": {
         "expired": "Wygasłe",
@@ -1882,7 +1895,11 @@
     "internet_exposed_label": "Eksponowany w Internecie",
     "ot_category_label": "Kategoria *",
     "purdue_level_label": "Poziom Purdue *",
-    "vendor_label": "Dostawca"
+    "vendor_label": "Dostawca",
+    "actions": {
+      "delete_title": "Usuń aktywo",
+      "delete_confirm": "Usunąć aktywo „{{name}}”? Zabronione przy aktywnych ryzykach lub zależnościach między aktywami."
+    }
   },
   "audit_prep": {
     "finding_major": "MAJOR NC",

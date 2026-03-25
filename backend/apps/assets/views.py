@@ -1,4 +1,5 @@
-from rest_framework import viewsets
+from django.core.exceptions import ValidationError
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils.translation import gettext as _
@@ -12,7 +13,7 @@ from .serializers import (
     AssetOTSerializer,
     NetworkZoneSerializer,
 )
-from .services import get_eol_assets, register_change, clear_revaluation_flag
+from .services import clear_revaluation_flag, delete_asset, get_eol_assets, register_change
 
 
 class NetworkZoneViewSet(viewsets.ModelViewSet):
@@ -65,6 +66,17 @@ class AssetITViewSet(viewsets.ModelViewSet):
             entity=instance,
             payload={"id": str(instance.id), "name": instance.name},
         )
+
+    def destroy(self, request, *args, **kwargs):
+        asset = self.get_object()
+        try:
+            delete_asset(asset, request.user)
+        except ValidationError as e:
+            return Response(
+                {"detail": e.messages[0] if getattr(e, "messages", None) else str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=["get"], url_path="eol")
     def eol(self, request):
@@ -126,6 +138,17 @@ class AssetOTViewSet(viewsets.ModelViewSet):
             entity=instance,
             payload={"id": str(instance.id), "name": instance.name},
         )
+
+    def destroy(self, request, *args, **kwargs):
+        asset = self.get_object()
+        try:
+            delete_asset(asset, request.user)
+        except ValidationError as e:
+            return Response(
+                {"detail": e.messages[0] if getattr(e, "messages", None) else str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["post"], url_path="register-change")
     def register_change_action(self, request, pk=None):

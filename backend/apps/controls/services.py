@@ -604,3 +604,74 @@ def get_compliance_summary(plant_id, framework_code=None):
         "non_valutato": result.get("non_valutato", 0),
         "pct_compliant": round(compliant / total * 100, 1),
     }
+
+
+def delete_control_instance(instance, user) -> None:
+    """
+    Soft delete di un'istanza controllo per plant.
+    Consentita solo se lo stato è ancora «non_valutato», salvo superuser.
+    """
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    if instance.status != "non_valutato" and not getattr(user, "is_superuser", False):
+        raise ValidationError(
+            _("Eliminazione consentita solo per controlli non ancora valutati.")
+        )
+
+    instance.documents.clear()
+    instance.evidences.clear()
+    instance.soft_delete()
+
+    log_action(
+        user=user,
+        action_code="controls.instance.delete",
+        level="L2",
+        entity=instance,
+        payload={
+            "id": str(instance.id),
+            "plant_id": str(instance.plant_id),
+            "control_id": str(instance.control_id),
+            "framework": instance.control.framework.code,
+            "external_id": instance.control.external_id,
+        },
+    )
+
+
+def archive_framework(framework, user) -> None:
+    """
+    Archivia un framework normativo (non elimina i dati catalogo).
+    Bloccato se assegnato ad almeno un sito.
+    """
+    from django.core.exceptions import ValidationError
+    from django.utils import timezone
+    from django.utils.translation import gettext as _
+
+    from apps.plants.models import PlantFramework
+    from core.audit import log_action
+
+    if not getattr(user, "is_superuser", False):
+        raise ValidationError(_("Solo il superuser può archiviare un framework."))
+
+    assigned = PlantFramework.objects.filter(
+        framework=framework,
+        deleted_at__isnull=True,
+        plant__deleted_at__isnull=True,
+    ).exists()
+    if assigned:
+        raise ValidationError(
+            _("Impossibile archiviare: il framework è ancora assegnato a uno o più siti.")
+        )
+
+    framework.archived_at = timezone.now().date()
+    framework.save(update_fields=["archived_at", "updated_at"])
+
+    log_action(
+        user=user,
+        action_code="controls.framework.archive",
+        level="L1",
+        entity=framework,
+        payload={"id": str(framework.id), "code": framework.code},
+    )

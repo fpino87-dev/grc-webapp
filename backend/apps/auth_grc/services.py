@@ -94,6 +94,38 @@ def competency_gap_analysis(user) -> dict:
     }
 
 
+def deactivate_grc_user(user, actor) -> None:
+    """
+    Disattiva un utente GRC (revoca accesso) senza anonimizzazione GDPR.
+    Soft-delete degli UserPlantAccess attivi.
+    """
+    from django.core.exceptions import ValidationError
+    from django.utils import timezone
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    if user.pk == actor.pk:
+        raise ValidationError(_("Non puoi disattivare il tuo account da qui."))
+    if user.is_superuser and not actor.is_superuser:
+        raise ValidationError(_("Operazione non consentita su un account superuser."))
+
+    user.is_active = False
+    user.save(update_fields=["is_active"])
+
+    UserPlantAccess.objects.filter(user=user, deleted_at__isnull=True).update(
+        deleted_at=timezone.now()
+    )
+
+    log_action(
+        user=actor,
+        action_code="auth.user.deactivated",
+        level="L2",
+        entity=user,
+        payload={"user_id": user.pk},
+    )
+
+
 def anonymize_user(user, requesting_user) -> None:
     """
     Anonimizza i dati personali di un utente rimosso.

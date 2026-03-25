@@ -469,7 +469,9 @@
       "open_drawer": "Ouvrir le contrôle",
       "click_to_edit": "Cliquer pour modifier",
       "propagate_hint": "Propager ce statut aux contrôles liés",
-      "propagate": "⇒ propager"
+      "propagate": "⇒ propager",
+      "delete_title": "Supprimer l'instance de contrôle",
+      "delete_confirm": "Supprimer l'instance de contrôle {{id}} ? Autorisé uniquement si le statut est « non évalué » (sauf superuser)."
     },
     "maturity_0": "Non implémenté",
     "maturity_1": "Ad-hoc",
@@ -594,6 +596,8 @@
     },
     "actions": {
       "edit_title": "Modifier le site",
+      "delete_title": "Supprimer le site",
+      "delete_confirm": "Supprimer le site « {{name}} » ? Autorisé uniquement s’il n’a aucune donnée associée.",
       "frameworks": "Cadres normatifs",
       "select": "Sélectionner"
     },
@@ -665,7 +669,9 @@
       "activate": "Activer",
       "deactivate": "Désactiver",
       "competency": "Compétences",
-      "reset_password": "Réinitialiser le mot de passe"
+      "reset_password": "Réinitialiser le mot de passe",
+      "delete": "Retirer l'accès utilisateur",
+      "delete_confirm": "Désactiver l'utilisateur {{username}} et révoquer les accès GRC ?"
     },
     "new": {
       "open": "+ Nouvel utilisateur",
@@ -912,6 +918,9 @@
         "counts": "Comptages",
         "languages": "Langues"
       },
+      "archive_title": "Archiver le cadre",
+      "archive_action": "Archiver",
+      "archive_confirm": "Archiver le cadre {{code}} ? Nécessite un superuser et aucun site ne doit encore l'avoir assigné.",
       "framework": "Cadre",
       "compliant": "Conforme",
       "partial": "Partiel",
@@ -1244,7 +1253,9 @@
       "submit_for_review": "Soumettre pour révision",
       "new_version": "Nouvelle version",
       "link_controls": "Lier des contrôles",
-      "change_plant": "Changer de site"
+      "change_plant": "Changer de site",
+      "delete_title": "Supprimer le document",
+      "delete_confirm": "Supprimer le document « {{title}} » ? Interdit pour les documents en approbation ou approuvés (sauf superuser)."
     },
     "errors": {
       "download_failed": "Impossible de télécharger le document. Vérifiez les permissions ou réessayez plus tard.",
@@ -1297,7 +1308,9 @@
         "uploaded_by": "Téléversé par"
       },
       "actions": {
-        "download_file": "Télécharger le fichier"
+        "download_file": "Télécharger le fichier",
+        "delete_title": "Supprimer la preuve",
+        "delete_confirm": "Supprimer la preuve « {{title}} » ? Interdit si liée à des contrôles déjà évalués (sauf superuser)."
       },
       "expiry": {
         "expired": "Expirée",
@@ -1882,7 +1895,11 @@
     "internet_exposed_label": "Exposé sur Internet",
     "ot_category_label": "Catégorie *",
     "purdue_level_label": "Niveau Purdue *",
-    "vendor_label": "Fournisseur"
+    "vendor_label": "Fournisseur",
+    "actions": {
+      "delete_title": "Supprimer l'actif",
+      "delete_confirm": "Supprimer l'actif « {{name}} » ? Interdit s'il existe des risques actifs ou des dépendances entre actifs."
+    }
   },
   "audit_prep": {
     "finding_major": "MAJOR NC",

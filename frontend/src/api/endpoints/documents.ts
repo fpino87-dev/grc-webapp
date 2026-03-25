@@ -106,4 +106,7 @@ export const documentsApi = {
     apiClient.get<Blob>(`/documents/evidences/${id}/download/`, {
       responseType: "blob",
     }).then(r => r.data),
+
+  remove: (id: string) => apiClient.delete(`/documents/documents/${id}/`),
+  removeEvidence: (id: string) => apiClient.delete(`/documents/evidences/${id}/`),
 };

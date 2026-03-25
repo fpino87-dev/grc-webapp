@@ -526,6 +526,11 @@ function TabDocumenti() {
   const submitMutation = useMutation({ mutationFn: documentsApi.submit, onSuccess: () => qc.invalidateQueries({ queryKey: ["documents"] }) });
   const approveMutation = useMutation({ mutationFn: (id: string) => documentsApi.approve(id), onSuccess: () => qc.invalidateQueries({ queryKey: ["documents"] }) });
   const rejectMutation = useMutation({ mutationFn: (id: string) => documentsApi.reject(id), onSuccess: () => qc.invalidateQueries({ queryKey: ["documents"] }) });
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => documentsApi.remove(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["documents"] }),
+    onError: (e: any) => window.alert(e?.response?.data?.detail || t("common.error")),
+  });
 
   const documents: Document[] = data?.results ?? [];
 
@@ -666,6 +671,18 @@ function TabDocumenti() {
                       >
                         {t("documents.actions.change_plant")}
                       </button>
+                      <button
+                        type="button"
+                        title={t("documents.actions.delete_title")}
+                        onClick={() => {
+                          if (!window.confirm(t("documents.actions.delete_confirm", { title: doc.title }))) return;
+                          deleteMutation.mutate(doc.id);
+                        }}
+                        disabled={deleteMutation.isPending}
+                        className="text-xs text-red-600 hover:text-red-800 border border-red-200 rounded px-2 py-0.5 disabled:opacity-50"
+                      >
+                        🗑
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -723,6 +740,12 @@ function TabEvidenze() {
     queryKey: ["evidences", typeFilter, expiryFilter, filterByPlant, selectedPlant?.id],
     queryFn: () => documentsApi.evidences(params),
     retry: false,
+  });
+
+  const deleteEvidenceMutation = useMutation({
+    mutationFn: (id: string) => documentsApi.removeEvidence(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["evidences"] }),
+    onError: (e: any) => window.alert(e?.response?.data?.detail || t("common.error")),
   });
 
   const evidences: Evidence[] = [...(data?.results ?? [])].sort(expirySort);
@@ -787,6 +810,7 @@ function TabEvidenze() {
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.evidence.table.plant")}</th>
                 <th className="text-center px-4 py-3 font-medium text-gray-600">{t("documents.evidence.table.linked_controls")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.evidence.table.uploaded_by")}</th>
+                <th className="px-4 py-3 w-10"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -821,6 +845,20 @@ function TabEvidenze() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{ev.uploaded_by_username || "—"}</td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      type="button"
+                      title={t("documents.evidence.actions.delete_title")}
+                      onClick={() => {
+                        if (!window.confirm(t("documents.evidence.actions.delete_confirm", { title: ev.title }))) return;
+                        deleteEvidenceMutation.mutate(ev.id);
+                      }}
+                      disabled={deleteEvidenceMutation.isPending}
+                      className="text-xs text-red-600 border border-red-200 rounded px-1.5 py-0.5 hover:bg-red-50 disabled:opacity-50"
+                    >
+                      🗑
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

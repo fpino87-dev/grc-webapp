@@ -2,7 +2,7 @@ from django.utils import timezone
 
 from core.audit import log_action
 
-from .models import Asset, AssetIT, AssetOT
+from .models import Asset, AssetDependency, AssetIT, AssetOT
 
 
 def get_assets_by_plant(plant_id):
@@ -130,4 +130,51 @@ def clear_revaluation_flag(asset, user, notes: str = "") -> None:
         level="L2",
         entity=asset,
         payload={"notes": notes[:100]},
+    )
+
+
+def delete_asset(asset: Asset, user) -> None:
+    """
+    Soft delete di un asset IT/OT. Bloccato se esistono rischi o dipendenze attive.
+    """
+    from django.core.exceptions import ValidationError
+    from django.db.models import Q
+    from django.utils.translation import gettext as _
+
+    from apps.risk.models import RiskAssessment, RiskScenario
+
+    if RiskAssessment.objects.filter(asset=asset, deleted_at__isnull=True).exclude(
+        status="archiviato"
+    ).exists():
+        raise ValidationError(
+            _("Impossibile eliminare: esistono valutazioni rischio attive collegate all'asset.")
+        )
+
+    if RiskScenario.objects.filter(asset=asset, deleted_at__isnull=True).exists():
+        raise ValidationError(
+            _("Impossibile eliminare: esistono scenari di rischio collegati all'asset.")
+        )
+
+    if AssetDependency.objects.filter(
+        Q(from_asset=asset) | Q(to_asset=asset),
+        deleted_at__isnull=True,
+    ).exists():
+        raise ValidationError(
+            _("Impossibile eliminare: rimuovere prima le dipendenze tra asset.")
+        )
+
+    asset.processes.clear()
+    asset.soft_delete()
+
+    log_action(
+        user=user,
+        action_code="assets.asset.delete",
+        level="L2",
+        entity=asset,
+        payload={
+            "id": str(asset.id),
+            "name": asset.name,
+            "asset_type": asset.asset_type,
+            "plant_id": str(asset.plant_id),
+        },
     )

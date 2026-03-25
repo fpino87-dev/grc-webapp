@@ -483,6 +483,12 @@ export function UsersPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["users"] }),
   });
 
+  const removeUserMutation = useMutation({
+    mutationFn: (id: number) => usersApi.remove(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["users"] }),
+    onError: (e: any) => window.alert(e?.response?.data?.detail || t("common.error")),
+  });
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -582,6 +588,20 @@ export function UsersPage() {
                                   className="w-full text-left px-3 py-1.5 hover:bg-gray-50"
                                 >
                                   {t("users.actions.reset_password")}
+                                </button>
+                              )}
+                              {me?.grc_role === "super_admin" && me?.id !== user.id && !user.is_superuser && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (!window.confirm(t("users.actions.delete_confirm", { username: user.username }))) return;
+                                    removeUserMutation.mutate(user.id);
+                                    setMenuUserId(null);
+                                  }}
+                                  disabled={removeUserMutation.isPending}
+                                  className="w-full text-left px-3 py-1.5 hover:bg-red-50 text-red-700 disabled:opacity-50"
+                                >
+                                  {t("users.actions.delete")}
                                 </button>
                               )}
                             </div>

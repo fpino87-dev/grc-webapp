@@ -402,7 +402,9 @@
       "open_drawer": "Gestione controllo",
       "click_to_edit": "Clicca per modificare",
       "propagate_hint": "Propaga questo stato ai controlli correlati",
-      "propagate": "⇒ propaga"
+      "propagate": "⇒ propaga",
+      "delete_title": "Elimina istanza controllo",
+      "delete_confirm": "Eliminare l'istanza controllo {{id}}? Consentito solo se non ancora valutata (salvo superuser)."
     },
     "maturity_0": "Non implementato",
     "maturity_1": "Ad-hoc",
@@ -527,6 +529,8 @@
     },
     "actions": {
       "edit_title": "Modifica sito",
+      "delete_title": "Elimina sito",
+      "delete_confirm": "Eliminare il sito \"{{name}}\"? L'operazione è consentita solo se il sito non ha dati collegati.",
       "frameworks": "Framework",
       "select": "Seleziona"
     },
@@ -598,7 +602,9 @@
       "activate": "Attiva",
       "deactivate": "Disattiva",
       "competency": "Competenze",
-      "reset_password": "Reset password"
+      "reset_password": "Reset password",
+      "delete": "Rimuovi accesso utente",
+      "delete_confirm": "Disattivare l'utente {{username}} e revocare gli accessi GRC?"
     },
     "new": {
       "open": "+ Nuovo utente",
@@ -840,7 +846,10 @@
         "version": "Versione",
         "counts": "Conteggi",
         "languages": "Lingue"
-      }
+      },
+      "archive_title": "Archivia framework",
+      "archive_action": "Archivia",
+      "archive_confirm": "Archiviare il framework {{code}}? Richiede superuser e nessun sito deve averlo ancora assegnato."
     },
     "risk_appetite": {
       "title": "Risk Appetite",
@@ -1165,7 +1174,9 @@
       "submit_for_review": "Invia per revisione",
       "new_version": "Nuova versione",
       "link_controls": "Collega controlli",
-      "change_plant": "Cambia sito"
+      "change_plant": "Cambia sito",
+      "delete_title": "Elimina documento",
+      "delete_confirm": "Eliminare il documento «{{title}}»? Non consentito per documenti in approvazione o approvati (salvo superuser)."
     },
     "errors": {
       "download_failed": "Impossibile scaricare il documento. Verifica i permessi o riprova più tardi.",
@@ -1218,7 +1229,9 @@
         "uploaded_by": "Caricata da"
       },
       "actions": {
-        "download_file": "Scarica file"
+        "download_file": "Scarica file",
+        "delete_title": "Elimina evidenza",
+        "delete_confirm": "Eliminare l'evidenza «{{title}}»? Non consentita se collegata a controlli già valutati (salvo superuser)."
       },
       "expiry": {
         "expired": "Scaduta",
@@ -1803,7 +1816,11 @@
     "internet_exposed_label": "Esposto su Internet",
     "ot_category_label": "Categoria *",
     "purdue_level_label": "Livello Purdue *",
-    "vendor_label": "Vendor"
+    "vendor_label": "Vendor",
+    "actions": {
+      "delete_title": "Elimina asset",
+      "delete_confirm": "Eliminare l'asset «{{name}}»? Non consentito se esistono rischi attivi o dipendenze tra asset."
+    }
   },
   "audit_prep": {
     "finding_major": "MAJOR NC",

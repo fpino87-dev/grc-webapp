@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -26,6 +26,21 @@ class FrameworkViewSet(viewsets.ModelViewSet):
             if plant:
                 return get_active_frameworks(plant)
         return Framework.objects.filter(archived_at__isnull=True)
+
+    def destroy(self, request, *args, **kwargs):
+        from django.core.exceptions import ValidationError
+
+        from .services import archive_framework
+
+        fw = self.get_object()
+        try:
+            archive_framework(fw, request.user)
+        except ValidationError as e:
+            return Response(
+                {"detail": e.messages[0] if getattr(e, "messages", None) else str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=["get"], url_path="governance")
     def governance_list(self, request):
@@ -138,6 +153,21 @@ class ControlInstanceViewSet(viewsets.ModelViewSet):
         "evidences",
     )
     serializer_class = ControlInstanceSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        from django.core.exceptions import ValidationError
+
+        from .services import delete_control_instance
+
+        instance = self.get_object()
+        try:
+            delete_control_instance(instance, request.user)
+        except ValidationError as e:
+            return Response(
+                {"detail": e.messages[0] if getattr(e, "messages", None) else str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_queryset(self):
         qs        = super().get_queryset()

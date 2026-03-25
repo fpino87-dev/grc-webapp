@@ -303,3 +303,55 @@ def create_evidence_with_file(data, uploaded_file, user):
     )
 
     return evidence
+
+
+def delete_document(document, user) -> None:
+    """
+    Soft delete di un documento M07. Rimuove i collegamenti ai controlli.
+    Documenti approvati: solo superuser.
+    """
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+
+    if document.status in ("approvazione", "approvato") and not user.is_superuser:
+        raise ValidationError(
+            _("Eliminazione non consentita per documenti in approvazione o già approvati.")
+        )
+
+    document.control_refs.clear()
+    document.soft_delete()
+
+    log_action(
+        user=user,
+        action_code="document.deleted",
+        level="L2",
+        entity=document,
+        payload={"id": str(document.pk), "title": document.title, "status": document.status},
+    )
+
+
+def delete_evidence(evidence, user) -> None:
+    """Soft delete evidenza e rimozione collegamenti ai ControlInstance."""
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+
+    from apps.controls.models import ControlInstance
+
+    linked = ControlInstance.objects.filter(evidences=evidence, deleted_at__isnull=True).exclude(
+        status="non_valutato"
+    )
+    if linked.exists() and not user.is_superuser:
+        raise ValidationError(
+            _("Eliminazione non consentita: l'evidenza è collegata a controlli già valutati.")
+        )
+
+    evidence.control_instances.clear()
+    evidence.soft_delete()
+
+    log_action(
+        user=user,
+        action_code="evidence.deleted",
+        level="L2",
+        entity=evidence,
+        payload={"id": str(evidence.pk), "title": evidence.title},
+    )

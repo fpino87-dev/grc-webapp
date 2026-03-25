@@ -13,6 +13,7 @@ from rest_framework.exceptions import ValidationError
 from core.audit import log_action
 from .models import BusinessUnit, Plant, PlantFramework
 from .serializers import BusinessUnitSerializer, PlantFrameworkSerializer, PlantSerializer
+from .services import delete_plant
 
 _LOGO_MAX_SIZE = 2 * 1024 * 1024  # 2 MB
 _LOGO_ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp", "svg"}
@@ -76,6 +77,20 @@ class PlantViewSet(viewsets.ModelViewSet):
             data = dict(data)
             data["_warning"] = f"Questo sito ha {open_incidents} incidente/i aperti."
         return Response(data)
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Soft delete del sito produttivo (Plant).
+        L'operazione è bloccata se esistono dipendenze attive collegate al plant.
+        """
+        from django.core.exceptions import ValidationError
+
+        plant = self.get_object()
+        try:
+            delete_plant(plant, request.user)
+        except ValidationError as e:
+            return Response({"detail": str(e.message)}, status=400)
+        return Response(status=204)
 
     @action(
         detail=True,

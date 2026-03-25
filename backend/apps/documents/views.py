@@ -29,6 +29,19 @@ class DocumentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
+    def destroy(self, request, *args, **kwargs):
+        from django.core.exceptions import ValidationError
+
+        document = self.get_object()
+        try:
+            services.delete_document(document, request.user)
+        except ValidationError as e:
+            return Response(
+                {"detail": e.messages[0] if getattr(e, "messages", None) else str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(detail=True, methods=["get"], url_path="download-latest")
     def download_latest(self, request, pk=None):
         """
@@ -167,6 +180,19 @@ class EvidenceViewSet(viewsets.ModelViewSet):
         elif expiry == "scadute":
             qs = qs.filter(valid_until__lt=today)
         return qs
+
+    def destroy(self, request, *args, **kwargs):
+        from django.core.exceptions import ValidationError
+
+        evidence = self.get_object()
+        try:
+            services.delete_evidence(evidence, request.user)
+        except ValidationError as e:
+            return Response(
+                {"detail": e.messages[0] if getattr(e, "messages", None) else str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def create(self, request, *args, **kwargs):
         from django.core.exceptions import ValidationError

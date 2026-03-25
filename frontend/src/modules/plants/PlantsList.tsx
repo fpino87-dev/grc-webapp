@@ -696,6 +696,7 @@ function FrameworkPanel({ plant, onClose }: { plant: Plant; onClose: () => void 
 
 export function PlantsList() {
   const { t } = useTranslation();
+  const qc = useQueryClient();
   const [showNew, setShowNew] = useState(false);
   const [editPlant, setEditPlant] = useState<Plant | null>(null);
   const [frameworkPlant, setFrameworkPlant] = useState<Plant | null>(null);
@@ -705,6 +706,19 @@ export function PlantsList() {
     retry: false,
   });
   const { setPlant } = useAuthStore();
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => plantsApi.remove(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["plants"] }),
+    onError: (e: any) => {
+      const msg =
+        e?.response?.data?.detail ||
+        e?.response?.data?.error ||
+        JSON.stringify(e?.response?.data) ||
+        t("common.error");
+      window.alert(msg);
+    },
+  });
 
   return (
     <div>
@@ -773,6 +787,18 @@ export function PlantsList() {
                       <button onClick={() => setEditPlant(p)}
                         className="text-xs text-gray-500 hover:text-gray-700 border border-gray-200 rounded px-1.5 py-0.5 hover:bg-gray-50"
                         title={t("plants.actions.edit_title")}>✏</button>
+                      <button
+                        onClick={() => {
+                          const ok = window.confirm(t("plants.actions.delete_confirm", { name: p.name }));
+                          if (!ok) return;
+                          deleteMutation.mutate(p.id);
+                        }}
+                        disabled={deleteMutation.isPending}
+                        className="text-xs text-red-600 hover:text-red-700 border border-red-200 rounded px-1.5 py-0.5 hover:bg-red-50 disabled:opacity-50"
+                        title={t("plants.actions.delete_title")}
+                      >
+                        🗑
+                      </button>
                       <button onClick={() => setFrameworkPlant(p)}
                         className="text-xs text-indigo-600 hover:underline">
                         {t("plants.actions.frameworks")}

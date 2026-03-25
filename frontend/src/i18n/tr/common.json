@@ -469,7 +469,9 @@
       "open_drawer": "Kontrolü aç",
       "click_to_edit": "Düzenlemek için tıklayın",
       "propagate_hint": "Bu durumu ilgili kontrollere yay",
-      "propagate": "⇒ yay"
+      "propagate": "⇒ yay",
+      "delete_title": "Kontrol örneğini sil",
+      "delete_confirm": "{{id}} kontrol örneği silinsin mi? Yalnızca henüz değerlendirilmemişse izin verilir (süper kullanıcı hariç)."
     },
     "maturity_0": "Uygulanmamış",
     "maturity_1": "Ad-hoc",
@@ -594,6 +596,8 @@
     },
     "actions": {
       "edit_title": "Siteyi düzenle",
+      "delete_title": "Siteyi sil",
+      "delete_confirm": "“{{name}}” sitesini silmek istiyor musunuz? Yalnızca bağlı veri yoksa izin verilir.",
       "frameworks": "Çerçeveler",
       "select": "Seç"
     },
@@ -665,7 +669,9 @@
       "activate": "Aktifleştir",
       "deactivate": "Pasifleştir",
       "competency": "Yeterlilikler",
-      "reset_password": "Parolayı sıfırla"
+      "reset_password": "Parolayı sıfırla",
+      "delete": "Kullanıcı erişimini kaldır",
+      "delete_confirm": "{{username}} kullanıcısı devre dışı bırakılsın ve GRC erişimleri iptal edilsin mi?"
     },
     "new": {
       "open": "+ Yeni kullanıcı",
@@ -917,7 +923,10 @@
       "partial": "Kısmi",
       "gap": "Boşluk",
       "not_evaluated": "Değerlendirilmemiş",
-      "risk_appetite": "Risk iştahı"
+      "risk_appetite": "Risk iştahı",
+      "archive_title": "Çerçeveyi arşivle",
+      "archive_confirm": "{{code}} çerçevesi arşivlensin mi? Listeden gizlenir ve yeni eşleştirmeleri engeller; geçmiş verileri silmez.",
+      "archived_badge": "Arşivlendi"
     },
     "risk_appetite": {
       "title": "Risk iştahı",
@@ -1244,7 +1253,9 @@
       "submit_for_review": "İncelemeye gönder",
       "new_version": "Yeni sürüm",
       "link_controls": "Kontrolleri bağla",
-      "change_plant": "Site değiştir"
+      "change_plant": "Site değiştir",
+      "delete_title": "Belgeyi sil",
+      "delete_confirm": "«{{title}}» belgesi silinsin mi? Onay sürecinde veya onaylanmış belgeler için yasaktır (süper kullanıcı hariç)."
     },
     "errors": {
       "download_failed": "Belge indirilemedi. İzinleri kontrol edin veya daha sonra tekrar deneyin.",
@@ -1297,7 +1308,9 @@
         "uploaded_by": "Yükleyen"
       },
       "actions": {
-        "download_file": "Dosyayı indir"
+        "download_file": "Dosyayı indir",
+        "delete_title": "Kanıtı sil",
+        "delete_confirm": "«{{title}}» kanıtı silinsin mi? Değerlendirilmiş kontrollerle bağlıysa yasaktır (süper kullanıcı hariç)."
       },
       "expiry": {
         "expired": "Süresi doldu",
@@ -1882,7 +1895,11 @@
     "internet_exposed_label": "İnternete açık",
     "ot_category_label": "Kategori *",
     "purdue_level_label": "Purdue seviyesi *",
-    "vendor_label": "Satıcı"
+    "vendor_label": "Satıcı",
+    "actions": {
+      "delete_title": "Varlığı sil",
+      "delete_confirm": "«{{name}}» varlığı silinsin mi? Aktif riskler veya varlıklar arası bağımlılıklar varsa engellenir."
+    }
   },
   "audit_prep": {
     "finding_major": "MAJOR NC",

@@ -40,6 +40,17 @@ export function FrameworkGovernanceTab() {
     },
   });
 
+  const archiveMutation = useMutation({
+    mutationFn: (id: string) => controlsApi.archiveFramework(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["frameworks-governance"] });
+      qc.invalidateQueries({ queryKey: ["frameworks"] });
+    },
+    onError: (e: any) => {
+      window.alert(e?.response?.data?.detail || t("common.error"));
+    },
+  });
+
   const importMutation = useMutation({
     mutationFn: ({ payload, sha256 }: { payload: Record<string, unknown>; sha256: string }) =>
       controlsApi.importFramework({ ...payload, sha256 }),
@@ -120,6 +131,7 @@ export function FrameworkGovernanceTab() {
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("governance.frameworks.table.published_at")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("governance.frameworks.table.controls")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("governance.frameworks.table.languages")}</th>
+                <th className="px-4 py-3 w-24"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -145,6 +157,20 @@ export function FrameworkGovernanceTab() {
                     ) : (
                       <span className="text-xs text-gray-400">—</span>
                     )}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      type="button"
+                      title={t("governance.frameworks.archive_title")}
+                      onClick={() => {
+                        if (!window.confirm(t("governance.frameworks.archive_confirm", { code: r.code }))) return;
+                        archiveMutation.mutate(r.id);
+                      }}
+                      disabled={archiveMutation.isPending || !!r.archived_at}
+                      className="text-xs text-red-600 hover:text-red-800 border border-red-200 rounded px-2 py-0.5 disabled:opacity-40"
+                    >
+                      {t("governance.frameworks.archive_action")}
+                    </button>
                   </td>
                 </tr>
               ))}

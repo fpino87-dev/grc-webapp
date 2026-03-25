@@ -38,6 +38,7 @@ export const plantsApi = {
   get: (id: string) => apiClient.get<Plant>(`/plants/plants/${id}/`).then((r) => r.data),
   create: (data: Partial<Plant>) => apiClient.post<Plant>("/plants/plants/", data).then((r) => r.data),
   update: (id: string, data: Partial<Plant>) => apiClient.patch<Plant>(`/plants/plants/${id}/`, data).then((r) => r.data),
+  remove: (id: string) => apiClient.delete(`/plants/plants/${id}/`),
   uploadLogo: (id: string, file: File) => {
     const form = new FormData();
     form.append("file", file);

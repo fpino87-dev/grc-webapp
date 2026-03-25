@@ -402,7 +402,9 @@
       "open_drawer": "Open control",
       "click_to_edit": "Click to edit",
       "propagate_hint": "Propagate this status to related controls",
-      "propagate": "⇒ propagate"
+      "propagate": "⇒ propagate",
+      "delete_title": "Delete control instance",
+      "delete_confirm": "Delete control instance {{id}}? Allowed only when status is «not evaluated» (except superuser)."
     },
     "maturity_0": "Not implemented",
     "maturity_1": "Ad-hoc",
@@ -527,6 +529,8 @@
     },
     "actions": {
       "edit_title": "Edit site",
+      "delete_title": "Delete site",
+      "delete_confirm": "Delete the site \"{{name}}\"? This is only allowed if the site has no linked data.",
       "frameworks": "Frameworks",
       "select": "Select"
     },
@@ -598,7 +602,9 @@
       "activate": "Activate",
       "deactivate": "Deactivate",
       "competency": "Competency",
-      "reset_password": "Reset password"
+      "reset_password": "Reset password",
+      "delete": "Remove user access",
+      "delete_confirm": "Deactivate user {{username}} and revoke GRC access?"
     },
     "new": {
       "open": "+ New user",
@@ -840,7 +846,10 @@
         "version": "Version",
         "counts": "Counts",
         "languages": "Languages"
-      }
+      },
+      "archive_title": "Archive framework",
+      "archive_action": "Archive",
+      "archive_confirm": "Archive framework {{code}}? Requires superuser and no site may still have it assigned."
     },
     "risk_appetite": {
       "title": "Risk Appetite",
@@ -1165,7 +1174,9 @@
       "submit_for_review": "Submit for review",
       "new_version": "New version",
       "link_controls": "Link controls",
-      "change_plant": "Change site"
+      "change_plant": "Change site",
+      "delete_title": "Delete document",
+      "delete_confirm": "Delete document «{{title}}»? Not allowed for documents in approval or approved (except superuser)."
     },
     "errors": {
       "download_failed": "Unable to download the document. Check permissions or try again later.",
@@ -1218,7 +1229,9 @@
         "uploaded_by": "Uploaded by"
       },
       "actions": {
-        "download_file": "Download file"
+        "download_file": "Download file",
+        "delete_title": "Delete evidence",
+        "delete_confirm": "Delete evidence «{{title}}»? Not allowed if linked to evaluated controls (except superuser)."
       },
       "expiry": {
         "expired": "Expired",
@@ -1803,7 +1816,11 @@
     "internet_exposed_label": "Internet exposed",
     "ot_category_label": "Category *",
     "purdue_level_label": "Purdue level *",
-    "vendor_label": "Vendor"
+    "vendor_label": "Vendor",
+    "actions": {
+      "delete_title": "Delete asset",
+      "delete_confirm": "Delete asset «{{name}}»? Not allowed if active risks or asset dependencies exist."
+    }
   },
   "audit_prep": {
     "finding_major": "MAJOR NC",

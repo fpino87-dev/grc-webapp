@@ -624,8 +624,16 @@ function EditAssetModalIT({ asset, onClose }: { asset: AssetIT; onClose: () => v
 }
 
 function ITTab({ search }: { search: string }) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editAsset, setEditAsset] = useState<AssetIT | null>(null);
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => assetsApi.deleteIT(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["assets-it"] }),
+    onError: (e: any) => window.alert(e?.response?.data?.detail || t("common.error")),
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: ["assets-it"],
@@ -725,6 +733,18 @@ function ITTab({ search }: { search: string }) {
                   >
                     Modifica
                   </button>
+                  <button
+                    type="button"
+                    title={t("assets.actions.delete_title")}
+                    onClick={() => {
+                      if (!window.confirm(t("assets.actions.delete_confirm", { name: a.name }))) return;
+                      deleteMutation.mutate(a.id);
+                    }}
+                    disabled={deleteMutation.isPending}
+                    className="ml-2 text-xs text-red-600 border border-red-200 rounded px-2 py-0.5 hover:bg-red-50 disabled:opacity-50"
+                  >
+                    🗑
+                  </button>
                 </td>
               </tr>
               {expandedId === a.id && (
@@ -745,7 +765,15 @@ function ITTab({ search }: { search: string }) {
 }
 
 function OTTab({ search }: { search: string }) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => assetsApi.deleteOT(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["assets-ot"] }),
+    onError: (e: any) => window.alert(e?.response?.data?.detail || t("common.error")),
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: ["assets-ot"],
@@ -821,11 +849,23 @@ function OTTab({ search }: { search: string }) {
                   >
                     {expandedId === a.id ? "Chiudi" : "Change"}
                   </button>
+                  <button
+                    type="button"
+                    title={t("assets.actions.delete_title")}
+                    onClick={() => {
+                      if (!window.confirm(t("assets.actions.delete_confirm", { name: a.name }))) return;
+                      deleteMutation.mutate(a.id);
+                    }}
+                    disabled={deleteMutation.isPending}
+                    className="ml-2 text-xs text-red-600 border border-red-200 rounded px-2 py-0.5 hover:bg-red-50 disabled:opacity-50"
+                  >
+                    🗑
+                  </button>
                 </td>
               </tr>
               {expandedId === a.id && (
                 <tr key={`${a.id}-detail`}>
-                  <td colSpan={7} className="px-4 pb-4">
+                  <td colSpan={8} className="px-4 pb-4">
                     <RegisterChangeForm asset={a} assetType="OT" onClose={() => setExpandedId(null)} />
                   </td>
                 </tr>

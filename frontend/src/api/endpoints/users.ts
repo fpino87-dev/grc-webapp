@@ -33,6 +33,7 @@ export const usersApi = {
     apiClient.post(`/auth/users/${id}/toggle_active/`).then(r => r.data),
   listRoles: () => apiClient.get<GrcRole[]>("/auth/users/list_roles/").then(r => r.data),
   me: () => apiClient.get<GrcUser>("/auth/users/me/").then(r => r.data),
+  remove: (id: number) => apiClient.delete(`/auth/users/${id}/`),
   resetTestDb: () =>
     apiClient.post<{ status: string; message: string; detail: string }>(
       "/auth/reset-test-db/",

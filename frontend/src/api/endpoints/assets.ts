@@ -71,4 +71,6 @@ export const assetsApi = {
     apiClient.post<{ ok: boolean }>(`/assets/${type === "IT" ? "it" : "ot"}/${id}/clear-revaluation/`, { notes: notes ?? "" }).then(r => r.data),
   needsRevaluationIT: (plant?: string) =>
     apiClient.get<AssetIT[]>("/assets/it/needs-revaluation/", { params: plant ? { plant } : {} }).then(r => r.data),
+  deleteIT: (id: string) => apiClient.delete(`/assets/it/${id}/`),
+  deleteOT: (id: string) => apiClient.delete(`/assets/ot/${id}/`),
 };
