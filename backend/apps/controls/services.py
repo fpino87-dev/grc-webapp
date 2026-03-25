@@ -640,6 +640,41 @@ def delete_control_instance(instance, user) -> None:
     )
 
 
+def delete_framework(framework, user) -> None:
+    """
+    Elimina definitivamente (soft delete) un framework normativo.
+    Bloccato se assegnato ad almeno un sito attivo.
+    Solo superuser.
+    """
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+
+    from apps.plants.models import PlantFramework
+    from core.audit import log_action
+
+    if not getattr(user, "is_superuser", False):
+        raise ValidationError(_("Solo il superuser può eliminare un framework."))
+
+    assigned = PlantFramework.objects.filter(
+        framework=framework,
+        deleted_at__isnull=True,
+        plant__deleted_at__isnull=True,
+    ).exists()
+    if assigned:
+        raise ValidationError(
+            _("Impossibile eliminare: il framework è ancora assegnato a uno o più siti.")
+        )
+
+    log_action(
+        user=user,
+        action_code="controls.framework.delete",
+        level="L1",
+        entity=framework,
+        payload={"id": str(framework.id), "code": framework.code},
+    )
+    framework.soft_delete()
+
+
 def archive_framework(framework, user) -> None:
     """
     Archivia un framework normativo (non elimina i dati catalogo).

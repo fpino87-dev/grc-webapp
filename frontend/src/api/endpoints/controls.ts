@@ -187,4 +187,5 @@ export const controlsApi = {
     apiClient.post(`/controls/instances/${instanceId}/set-maturity/`, { maturity_level: maturityLevel }).then((r) => r.data),
   deleteInstance: (id: string) => apiClient.delete(`/controls/instances/${id}/`),
   archiveFramework: (id: string) => apiClient.delete(`/controls/frameworks/${id}/`),
+  deleteFramework: (id: string) => apiClient.delete(`/controls/frameworks/${id}/delete/`),
 };

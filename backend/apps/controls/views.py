@@ -42,6 +42,22 @@ class FrameworkViewSet(viewsets.ModelViewSet):
             )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @action(detail=True, methods=["delete"], url_path="delete")
+    def delete_framework(self, request, pk=None):
+        from django.core.exceptions import ValidationError
+
+        from .services import delete_framework
+
+        fw = self.get_object()
+        try:
+            delete_framework(fw, request.user)
+        except ValidationError as e:
+            return Response(
+                {"detail": e.messages[0] if getattr(e, "messages", None) else str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(detail=False, methods=["get"], url_path="governance")
     def governance_list(self, request):
         """

@@ -51,6 +51,17 @@ export function FrameworkGovernanceTab() {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => controlsApi.deleteFramework(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["frameworks-governance"] });
+      qc.invalidateQueries({ queryKey: ["frameworks"] });
+    },
+    onError: (e: any) => {
+      window.alert(e?.response?.data?.detail || t("common.error"));
+    },
+  });
+
   const importMutation = useMutation({
     mutationFn: ({ payload, sha256 }: { payload: Record<string, unknown>; sha256: string }) =>
       controlsApi.importFramework({ ...payload, sha256 }),
@@ -159,18 +170,32 @@ export function FrameworkGovernanceTab() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button
-                      type="button"
-                      title={t("governance.frameworks.archive_title")}
-                      onClick={() => {
-                        if (!window.confirm(t("governance.frameworks.archive_confirm", { code: r.code }))) return;
-                        archiveMutation.mutate(r.id);
-                      }}
-                      disabled={archiveMutation.isPending || !!r.archived_at}
-                      className="text-xs text-red-600 hover:text-red-800 border border-red-200 rounded px-2 py-0.5 disabled:opacity-40"
-                    >
-                      {t("governance.frameworks.archive_action")}
-                    </button>
+                    <div className="flex justify-end gap-2">
+                      <button
+                        type="button"
+                        title={t("governance.frameworks.archive_title")}
+                        onClick={() => {
+                          if (!window.confirm(t("governance.frameworks.archive_confirm", { code: r.code }))) return;
+                          archiveMutation.mutate(r.id);
+                        }}
+                        disabled={archiveMutation.isPending || deleteMutation.isPending || !!r.archived_at}
+                        className="text-xs text-amber-600 hover:text-amber-800 border border-amber-200 rounded px-2 py-0.5 disabled:opacity-40"
+                      >
+                        {t("governance.frameworks.archive_action")}
+                      </button>
+                      <button
+                        type="button"
+                        title={t("governance.frameworks.delete_title")}
+                        onClick={() => {
+                          if (!window.confirm(t("governance.frameworks.delete_confirm", { code: r.code }))) return;
+                          deleteMutation.mutate(r.id);
+                        }}
+                        disabled={archiveMutation.isPending || deleteMutation.isPending}
+                        className="text-xs text-red-600 hover:text-red-800 border border-red-300 rounded px-2 py-0.5 disabled:opacity-40"
+                      >
+                        {t("governance.frameworks.delete_action")}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
