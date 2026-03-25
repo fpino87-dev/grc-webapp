@@ -39,7 +39,7 @@
 | API REST | Django REST Framework | 3.15 |
 | Kolejka zadań | Celery | 5.x |
 | Cache/Broker | Redis | 7 |
-| Baza danych | PostgreSQL | 15 |
+| Baza danych | PostgreSQL | 16 (Docker dev) |
 | Serwer produkcyjny | Gunicorn | — |
 | Framework frontend | React | 18.3 |
 | Narzędzie budowania | Vite | 5.4 |
@@ -238,7 +238,7 @@ docker --version     # >= 4.x
 #### Pierwsze uruchomienie
 
 ```bash
-git clone https://github.com/org/grc-webapp.git
+git clone https://github.com/fpino87-dev/grc-webapp.git
 cd grc-webapp
 
 # Backend
@@ -348,13 +348,13 @@ apps/incidents/          # M09 — Zarządzanie Incydentami
 
 ```
 frontend/src/
-├── App.tsx                    # Kompletny Router — wszystkie trasy zdefiniowane
+├── App.tsx                    # Router — moduły, harmonogram, ustawienia
 ├── main.tsx                   # Punkt wejścia z QueryClientProvider + i18n
 ├── store/
 │   └── auth.ts                # Zustand: user, token, selectedPlant
 ├── api/
 │   ├── client.ts              # axios z interceptorem JWT + automatycznym odświeżaniem
-│   └── endpoints/             # jeden plik na moduł (20 plików)
+│   └── endpoints/             # klient API TypeScript (~24 pliki)
 ├── components/
 │   ├── layout/
 │   │   ├── Shell.tsx          # Główny layout z paskiem bocznym
@@ -1364,9 +1364,7 @@ def test_incident_creation_logs_audit(api_client, plant, db):
 
 ### Cel pokrycia: >= 70%
 
-Moduły z istniejącymi testami: `auth_grc`, `governance`, `controls`, `audit_trail`
-
-Moduły do pokrycia: `risk`, `incidents`, `pdca`, `audit_prep`, `notifications`
+Suite pytest (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=70`) obejmuje większość aplikacji; globalne pokrycie jest monitorowane w CI (aktualne liczby w `CLAUDE.md`).
 
 ---
 

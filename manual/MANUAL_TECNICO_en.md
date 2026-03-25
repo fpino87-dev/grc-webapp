@@ -39,7 +39,7 @@
 | REST API | Django REST Framework | 3.15 |
 | Task queue | Celery | 5.x |
 | Cache/Broker | Redis | 7 |
-| Database | PostgreSQL | 15 |
+| Database | PostgreSQL | 16 (Docker dev) |
 | Production server | Gunicorn | — |
 | Frontend framework | React | 18.3 |
 | Build tool | Vite | 5.4 |
@@ -238,7 +238,7 @@ docker --version     # >= 4.x
 #### First start
 
 ```bash
-git clone https://github.com/org/grc-webapp.git
+git clone https://github.com/fpino87-dev/grc-webapp.git
 cd grc-webapp
 
 # Backend
@@ -267,8 +267,8 @@ npm run dev
 ```bash
 make dev          # docker compose up + runserver + npm run dev
 make migrate      # python manage.py migrate
-make test         # pytest + jest
-make lint         # ruff + eslint
+make test         # pytest (backend) + npm test / vitest (frontend)
+make lint         # ruff (backend)
 make load-fw      # python manage.py load_frameworks
 make seed         # python manage.py seed_demo
 make shell        # python manage.py shell_plus
@@ -348,13 +348,13 @@ apps/incidents/          # M09 — Incident Management
 
 ```
 frontend/src/
-├── App.tsx                    # Full router — all routes defined
+├── App.tsx                    # Router — modules, schedule, settings
 ├── main.tsx                   # Entry point with QueryClientProvider + i18n
 ├── store/
 │   └── auth.ts                # Zustand: user, token, selectedPlant
 ├── api/
 │   ├── client.ts              # axios with JWT interceptor + automatic refresh
-│   └── endpoints/             # one file per module (20 files)
+│   └── endpoints/             # TypeScript API client (~24 files)
 ├── components/
 │   ├── layout/
 │   │   ├── Shell.tsx          # Main layout with sidebar
@@ -1364,9 +1364,7 @@ def test_incident_creation_logs_audit(api_client, plant, db):
 
 ### Coverage target: >= 70%
 
-Modules with existing tests: `auth_grc`, `governance`, `controls`, `audit_trail`
-
-Modules to cover: `risk`, `incidents`, `pdca`, `audit_prep`, `notifications`
+The pytest suite (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=70`) covers most apps; global coverage is tracked in CI (see `CLAUDE.md` for current stats).
 
 ---
 

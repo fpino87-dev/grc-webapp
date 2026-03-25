@@ -39,7 +39,7 @@
 | REST API | Django REST Framework | 3.15 |
 | Görev kuyruğu | Celery | 5.x |
 | Önbellek/Broker | Redis | 7 |
-| Veritabanı | PostgreSQL | 15 |
+| Veritabanı | PostgreSQL | 16 (Docker dev) |
 | Üretim sunucusu | Gunicorn | — |
 | Frontend çerçevesi | React | 18.3 |
 | Derleme aracı | Vite | 5.4 |
@@ -238,7 +238,7 @@ docker --version     # >= 4.x
 #### İlk başlatma
 
 ```bash
-git clone https://github.com/org/grc-webapp.git
+git clone https://github.com/fpino87-dev/grc-webapp.git
 cd grc-webapp
 
 # Backend
@@ -267,8 +267,8 @@ npm run dev
 ```bash
 make dev          # docker compose up + runserver + npm run dev
 make migrate      # python manage.py migrate
-make test         # pytest + jest
-make lint         # ruff + eslint
+make test         # pytest (backend) + npm test / vitest (frontend)
+make lint         # ruff (backend)
 make load-fw      # python manage.py load_frameworks
 make seed         # python manage.py seed_demo
 make shell        # python manage.py shell_plus
@@ -348,13 +348,13 @@ apps/incidents/          # M09 — Olay Yönetimi
 
 ```
 frontend/src/
-├── App.tsx                    # Tam Router — tüm route'lar tanımlı
+├── App.tsx                    # Router — modüller, takvim, ayarlar
 ├── main.tsx                   # QueryClientProvider + i18n ile giriş noktası
 ├── store/
 │   └── auth.ts                # Zustand: user, token, selectedPlant
 ├── api/
 │   ├── client.ts              # JWT interceptor + otomatik yenileme ile axios
-│   └── endpoints/             # her modül için bir dosya (20 dosya)
+│   └── endpoints/             # TypeScript API istemcisi (~24 dosya)
 ├── components/
 │   ├── layout/
 │   │   ├── Shell.tsx          # Kenar çubuğu ile ana düzen
@@ -1362,11 +1362,9 @@ def test_incident_creation_logs_audit(api_client, plant, db):
     assert log.record_hash == compute_hash(log.payload, log.prev_hash)
 ```
 
-### Coverage hedefi: >= %70
+### Coverage hedefi: >= 70%
 
-Mevcut testlere sahip modüller: `auth_grc`, `governance`, `controls`, `audit_trail`
-
-Kapsanması gereken modüller: `risk`, `incidents`, `pdca`, `audit_prep`, `notifications`
+pytest paketi (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=70`) çoğu uygulamayı kapsar; genel coverage CI’da izlenir (güncel rakamlar için `CLAUDE.md`).
 
 ---
 

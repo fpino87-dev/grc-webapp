@@ -6,8 +6,8 @@ Compliance: TISAX L2/L3, NIS2, ISO 27001.
 21 moduli M00-M20. Multilingua: IT (default) / EN / FR / PL / TR.
 
 ## Stack
-- **Backend**: Python 3.11, Django 5.1, DRF, Celery 5, PostgreSQL 15, Redis 7
-- **Frontend**: React 18, TypeScript, Vite 5, Tailwind CSS, i18next, Zustand, TanStack Query, React Router v6
+- **Backend**: Python 3.11, Django 5.1, DRF, Celery 5, PostgreSQL 16 (Docker dev), Redis 7
+- **Frontend**: React 18, TypeScript, Vite 5, Tailwind CSS, i18next, Zustand, TanStack Query, React Router v7
 - **Infra**: Docker Compose, Nginx Proxy Manager
 - **Test**: pytest, factory-boy, coverage ≥ 70%
 
@@ -57,7 +57,7 @@ Compliance: TISAX L2/L3, NIS2, ISO 27001.
 | App | Modulo | Stato |
 |-----|--------|-------|
 | `governance` | M00 Governance & Ruoli | models + services + serializers + views + urls + tests |
-| `plants` | M01 Plant Registry | models + services + serializers + views + urls |
+| `plants` | M01 Plant Registry | models + services + serializers + views + urls + tests |
 | `auth_grc` | M02 RBAC | models + services + views + urls + tests |
 | `controls` | M03 Libreria Controlli | models + services + load_frameworks cmd + tests |
 | `assets` | M04 Asset IT/OT | models + serializers + views + urls |
@@ -82,12 +82,12 @@ Compliance: TISAX L2/L3, NIS2, ISO 27001.
 
 ```
 src/
-├── App.tsx                    # Router completo — tutte le 20 route definite
+├── App.tsx                    # Router — route per moduli M00–M20, scadenzario, impostazioni
 ├── main.tsx                   # Entry point con QueryClientProvider + i18n
 ├── store/auth.ts              # Zustand: user, token, selectedPlant
 ├── api/
 │   ├── client.ts              # axios con JWT interceptor + refresh
-│   └── endpoints/             # un file per ogni modulo (20 file)
+│   └── endpoints/             # client API TypeScript (~24 file: moduli, auth, schedule, backup, …)
 ├── components/
 │   ├── layout/Shell.tsx       # Layout principale con sidebar
 │   ├── layout/Sidebar.tsx
@@ -96,16 +96,19 @@ src/
 │       ├── AiSuggestion.tsx   # Banner IA con Accept/Edit/Ignore
 │       ├── CountdownTimer.tsx # Countdown NIS2 real-time
 │       └── StatusBadge.tsx    # Badge colorato per stati compliance
-├── modules/                   # Una cartella per modulo
+├── modules/                   # Una cartella per area funzionale / modulo
 │   ├── dashboard/Dashboard.tsx
 │   ├── controls/ControlsList.tsx
 │   ├── incidents/IncidentsList.tsx
-│   └── ... (20 moduli totali)
+│   └── ...
 ├── pages/LoginPage.tsx
 └── i18n/
     ├── index.ts
     ├── it/common.json
-    └── en/common.json
+    ├── en/common.json
+    ├── fr/common.json
+    ├── pl/common.json
+    └── tr/common.json
 ```
 
 ## Comandi Docker utili
@@ -184,11 +187,11 @@ docker compose -f docker-compose.prod.yml exec backend \
 - **Security hardening**: JWT 30min/7gg con blacklist, throttle login 5/min, MIME check upload (python-magic), password validators 12+ char, FERNET_KEY per credenziali SMTP, GDPR anonymize_user(), retention audit log automatica.
 - **Robustezza async**: task Celery critici (controlli ed asset) ora con `autoretry` esponenziale; catena hash dell’audit trail serializzata con `select_for_update` per prevenire race condition.
 - **Performance DB**: indici aggiuntivi su campi `status`, `due_date`, `score`, `valid_until` e campi di filtro più usati per `ControlInstance`, `RiskAssessment`, `Task`, `Incident`, `Document` ed `Evidence`.
+- **Soft delete / rimozione accesso**: eliminazione logica (istanze controlli, documenti ed evidenze, asset, plant, archiviazione framework; rimozione accesso utente GRC) con logica in `services.py` e vincoli dove documentato in UI.
 
 ## File di riferimento
 
-- `AGENTS.md` — build plan completo con tutto il codice
 - `GRC_Specifica_Funzionale_v1.0.docx` — specifiche funzionali M00-M20
-- `MANUAL_TECNICO.md` — pattern architetturali dettagliati
+- `manual/MANUAL_TECNICO_it.md` — pattern architetturali dettagliati (altre lingue in `manual/`)
 - `INFRASTRUCTURE.md` — infrastruttura e deployment
 - `backend/frameworks/*.json` — controlli normativi (ISO27001, NIS2, TISAX L2/L3)

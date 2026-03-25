@@ -2,7 +2,7 @@
 
 > Piattaforma GRC (Governance, Risk & Compliance) per aziende manifatturiere con certificazioni TISAX L2/L3, NIS2 e ISO 27001:2022.
 
-![Python](https://img.shields.io/badge/Python-3.11-blue) ![Django](https://img.shields.io/badge/Django-5.1-green) ![React](https://img.shields.io/badge/React-18-blue) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue) ![Docker](https://img.shields.io/badge/Docker-Compose-blue)
+![Python](https://img.shields.io/badge/Python-3.11-blue) ![Django](https://img.shields.io/badge/Django-5.1-green) ![React](https://img.shields.io/badge/React-18-blue) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![Docker](https://img.shields.io/badge/Docker-Compose-blue)
 
 ---
 
@@ -85,7 +85,7 @@ La piattaforma GRC consolida in un'unica soluzione la gestione di tutti i framew
 
 ```bash
 # 1. Clona e configura ambiente
-git clone https://github.com/org/grc-webapp.git
+git clone https://github.com/fpino87-dev/grc-webapp.git
 cd grc-webapp
 cp .env.example .env
 
@@ -150,7 +150,7 @@ Vedere [INFRASTRUCTURE.md](./INFRASTRUCTURE.md) per la guida completa step-by-st
 ```
 Browser → Nginx Proxy Manager → Frontend React/Vite (porta 3001)
                               → Backend Django/Gunicorn (porta 8001)
-                                       → PostgreSQL 15 (porta 5433)
+                                       → PostgreSQL 16 (porta 5433)
                                        → Redis 7
                                               → Celery Worker
                                               → Celery Beat
@@ -190,26 +190,26 @@ grc-webapp/
 │   │   ├── audit_prep/         # M17
 │   │   ├── reporting/          # M18
 │   │   ├── notifications/      # M19
+│   │   ├── backups/            # Backup DB (API + task)
+│   │   ├── compliance_schedule/  # M08 — scadenze cross-modulo
 │   │   └── ai_engine/          # M20 — opzionale
 │   ├── core/                   # Settings, middleware, modelli base, audit
 │   ├── frameworks/             # JSON framework normativi (ISO27001, NIS2, TISAX L2/L3)
+│   ├── tests/                  # pytest — integrazione audit trail, ecc.
 │   └── requirements/
 ├── frontend/                   # React SPA
-│   ├── src/
-│   │   ├── modules/            # Un folder per modulo (M00-M20)
-│   │   ├── i18n/               # Traduzioni IT EN FR PL TR
-│   │   └── components/         # Componenti condivisi (Shell, Sidebar, UI)
-├── infra/                      # IaC — Terraform / Ansible / Docker
+│   └── src/
+│       ├── modules/            # Pagine per modulo (M00–M20) e impostazioni
+│       ├── api/endpoints/      # Client API (~24 file TS)
+│       ├── i18n/               # Traduzioni IT / EN / FR / PL / TR
+│       └── components/         # Shell, Sidebar, UI condivise
+├── manual/                     # Manuali utente e tecnici (multi-lingua)
+│   ├── MANUAL_UTENTE_{it,en,fr,pl,tr}.md
+│   └── MANUAL_TECNICO_{it,en,fr,pl,tr}.md
 ├── CLAUDE.md                   # Istruzioni architetturali per agenti AI
-├── MANUAL_UTENTE.md
-├── MANUAL_TECNICO.md
 ├── INFRASTRUCTURE.md
 ├── .cursorrules
-├── scripts/
-│   ├── load_frameworks.py
-│   ├── seed_demo.py
-│   └── backup.sh
-├── tests/                      # unit / integration / e2e
+├── scripts/                    # Utility i18n (apply_translations, check hardcoded, ecc.)
 ├── .env.example
 ├── .env.prod.example
 ├── docker-compose.yml
@@ -227,7 +227,7 @@ grc-webapp/
 - NIS2 (UE 2022/2555) — misure Art.21
 - IEC 62443 (semplificato) — score OT in M06
 
-I framework sono dati, non codice: aggiungere un nuovo standard (DORA, NIST CSF 2.0, ecc.) non richiede deploy. Vedere `backend/frameworks/` e la sezione [Aggiungere un framework](./MANUAL_TECNICO.md#aggiungere-un-framework) nel manuale tecnico.
+I framework sono dati, non codice: aggiungere un nuovo standard (DORA, NIST CSF 2.0, ecc.) non richiede deploy. Vedere `backend/frameworks/` e la sezione [Aggiungere un framework normativo](./manual/MANUAL_TECNICO_it.md#aggiungere-un-framework-normativo) nel manuale tecnico (IT; altre lingue in `manual/`).
 
 | Framework | Versione | Controlli | Stato |
 |-----------|----------|-----------|-------|
@@ -392,12 +392,13 @@ Per la strategia completa di backup, crontab host, pulizia automatica, backup fi
 |------|-----------|
 | [README.md](./README.md) | Questo file — panoramica, quick start, moduli, architettura |
 | [INFRASTRUCTURE.md](./INFRASTRUCTURE.md) | Stack tecnologico, deployment step-by-step, DB, backup, sicurezza, monitoraggio, Celery tasks |
-| [MANUAL_UTENTE.md](./MANUAL_UTENTE.md) | Guida per Compliance Officer, Risk Manager, Plant Manager, Auditor |
-| [MANUAL_TECNICO.md](./MANUAL_TECNICO.md) | API, modelli dati, framework, AI Engine, test, convenzioni di sviluppo |
+| [manual/MANUAL_UTENTE_it.md](./manual/MANUAL_UTENTE_it.md) | Manuale utente (IT; versioni EN/FR/PL/TR in `manual/`) |
+| [manual/MANUAL_TECNICO_it.md](./manual/MANUAL_TECNICO_it.md) | Manuale tecnico — API, modelli, framework, AI Engine, test (IT; altre lingue in `manual/`) |
 | [CLAUDE.md](./CLAUDE.md) | Istruzioni architetturali per agenti AI e sviluppatori |
 
 ### Stato implementazione ultime feature
 
+- **Soft delete e rimozione accesso**: eliminazione logica (soft delete) con regole di business in `services.py` per istanze controlli, documenti ed evidenze, asset IT/OT, plant, archiviazione framework; rimozione accesso GRC utente (super_admin) con audit dove previsto.
 - **M17 Audit Preparation**: eliminazione sicura con soft delete e azione di annullamento (`annulla`) che archivia il prep solo se tutti i finding sono chiusi, con audit trail dedicato.
 - **Hardening backend**: JWT SimpleJWT (**ACCESS_TOKEN_LIFETIME=30min**, **REFRESH_TOKEN_LIFETIME=7gg** con rotazione e blacklist), rate limiting DRF (**AnonRateThrottle 20/h**, **UserRateThrottle 500/h**), header sicurezza e `CONN_MAX_AGE` per pooling DB.
 - **UX moduli operativi**: help contestuale via componente `ModuleHelp` sulle principali pagine React (asset, BIA, risk, incidenti, controlli, audit prep, management review, scadenzario).
@@ -414,4 +415,4 @@ Per la strategia completa di backup, crontab host, pulizia automatica, backup fi
 - Merge su `main` solo via PR approvata + CI verde
 - Seguire le regole architetturali in [CLAUDE.md](./CLAUDE.md) — mai derogare
 
-Convenzioni di codice, struttura modelli e API in [MANUAL_TECNICO.md](./MANUAL_TECNICO.md#convenzioni-di-sviluppo).
+Convenzioni di codice, struttura modelli e API in [MANUAL_TECNICO_it.md](./manual/MANUAL_TECNICO_it.md#convenzioni-di-sviluppo).

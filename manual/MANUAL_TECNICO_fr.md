@@ -39,7 +39,7 @@
 | API REST | Django REST Framework | 3.15 |
 | File d'attente de tâches | Celery | 5.x |
 | Cache/Broker | Redis | 7 |
-| Base de données | PostgreSQL | 15 |
+| Base de données | PostgreSQL | 16 (Docker dev) |
 | Serveur de production | Gunicorn | — |
 | Framework frontend | React | 18.3 |
 | Outil de build | Vite | 5.4 |
@@ -238,7 +238,7 @@ docker --version     # >= 4.x
 #### Premier démarrage
 
 ```bash
-git clone https://github.com/org/grc-webapp.git
+git clone https://github.com/fpino87-dev/grc-webapp.git
 cd grc-webapp
 
 # Backend
@@ -267,8 +267,8 @@ npm run dev
 ```bash
 make dev          # docker compose up + runserver + npm run dev
 make migrate      # python manage.py migrate
-make test         # pytest + jest
-make lint         # ruff + eslint
+make test         # pytest (backend) + npm test / vitest (frontend)
+make lint         # ruff (backend)
 make load-fw      # python manage.py load_frameworks
 make seed         # python manage.py seed_demo
 make shell        # python manage.py shell_plus
@@ -348,13 +348,13 @@ apps/incidents/          # M09 — Gestion des incidents
 
 ```
 frontend/src/
-├── App.tsx                    # Routeur complet — toutes les routes définies
+├── App.tsx                    # Routeur — modules, planning, paramètres
 ├── main.tsx                   # Point d'entrée avec QueryClientProvider + i18n
 ├── store/
 │   └── auth.ts                # Zustand : user, token, selectedPlant
 ├── api/
 │   ├── client.ts              # axios avec intercepteur JWT + refresh automatique
-│   └── endpoints/             # un fichier par module (20 fichiers)
+│   └── endpoints/             # client API TypeScript (~24 fichiers)
 ├── components/
 │   ├── layout/
 │   │   ├── Shell.tsx          # Layout principal avec sidebar
@@ -1364,9 +1364,7 @@ def test_incident_creation_logs_audit(api_client, plant, db):
 
 ### Objectif de couverture : >= 70%
 
-Modules avec tests existants : `auth_grc`, `governance`, `controls`, `audit_trail`
-
-Modules à couvrir : `risk`, `incidents`, `pdca`, `audit_prep`, `notifications`
+La suite pytest (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=70`) couvre la plupart des apps ; la couverture globale est suivie en CI (voir `CLAUDE.md` pour les chiffres à jour).
 
 ---
 

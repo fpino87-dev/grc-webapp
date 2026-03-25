@@ -92,7 +92,7 @@
 
 | Componente | Tecnologia | Versione |
 |-----------|-----------|---------|
-| Database principale | PostgreSQL | 15+ |
+| Database principale | PostgreSQL | 16+ (immagine dev: `postgres:16-alpine`) |
 | Full-text search | PostgreSQL FTS nativo | — |
 | Cache / broker | Redis | 7+ |
 | Object storage | MinIO (on-prem) o AWS S3 | — |
@@ -257,7 +257,7 @@ docker --version && docker compose version
 **2. Clone repository**
 
 ```bash
-git clone https://github.com/org/grc-webapp.git
+git clone https://github.com/fpino87-dev/grc-webapp.git
 cd grc-webapp
 ```
 
