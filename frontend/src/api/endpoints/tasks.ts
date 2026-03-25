@@ -15,4 +15,6 @@ export const tasksApi = {
     apiClient.post(`/tasks/tasks/${id}/complete/`, {notes}).then(r => r.data),
   create: (data: Partial<Task>) =>
     apiClient.post<Task>("/tasks/tasks/", data).then(r => r.data),
+  delete: (id: string) =>
+    apiClient.delete(`/tasks/tasks/${id}/`).then(r => r.data),
 };

@@ -19,6 +19,17 @@ class TaskViewSet(viewsets.ModelViewSet):
     filterset_fields = ["plant", "status", "priority", "source", "assigned_to"]
     search_fields = ["title", "description"]
 
+    def perform_destroy(self, instance):
+        from core.audit import log_action
+        log_action(
+            user=self.request.user,
+            action_code="task.deleted",
+            level="L1",
+            entity=instance,
+            payload={"id": str(instance.pk), "title": instance.title},
+        )
+        instance.soft_delete()
+
     def get_queryset(self):
         qs = self.queryset
         user = self.request.user

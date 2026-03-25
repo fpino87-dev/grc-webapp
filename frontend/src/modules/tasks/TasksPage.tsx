@@ -130,9 +130,19 @@ export function TasksPage() {
     retry: false,
   });
 
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
   const completeMutation = useMutation({
     mutationFn: (id: string) => tasksApi.complete(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => tasksApi.delete(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+      setConfirmDeleteId(null);
+    },
   });
 
   const tasks: Task[] = data?.results ?? [];
@@ -229,15 +239,42 @@ export function TasksPage() {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      {(task.status === "aperto" || task.status === "in_corso") && (
-                        <button
-                          onClick={() => completeMutation.mutate(task.id)}
-                          disabled={completeMutation.isPending}
-                          className="text-xs text-gray-500 hover:text-green-700 border border-gray-300 rounded px-2 py-0.5 hover:border-green-400 disabled:opacity-50"
-                        >
-                          {t("tasks.actions.complete")}
-                        </button>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {(task.status === "aperto" || task.status === "in_corso") && (
+                          <button
+                            onClick={() => completeMutation.mutate(task.id)}
+                            disabled={completeMutation.isPending}
+                            className="text-xs text-gray-500 hover:text-green-700 border border-gray-300 rounded px-2 py-0.5 hover:border-green-400 disabled:opacity-50"
+                          >
+                            {t("tasks.actions.complete")}
+                          </button>
+                        )}
+                        {confirmDeleteId === task.id ? (
+                          <>
+                            <button
+                              onClick={() => deleteMutation.mutate(task.id)}
+                              disabled={deleteMutation.isPending}
+                              className="text-xs text-white bg-red-600 hover:bg-red-700 rounded px-2 py-0.5 disabled:opacity-50"
+                            >
+                              {t("actions.confirm")}
+                            </button>
+                            <button
+                              onClick={() => setConfirmDeleteId(null)}
+                              className="text-xs text-gray-500 hover:text-gray-700"
+                            >
+                              {t("actions.cancel")}
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => setConfirmDeleteId(task.id)}
+                            className="text-xs text-gray-400 hover:text-red-600"
+                            title={t("actions.delete")}
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
