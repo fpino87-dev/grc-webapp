@@ -906,7 +906,8 @@
       "audit_trail": "Audit Trail",
       "email_settings": "Config. Email",
       "notification_rules": "Regole Notifiche",
-      "ai_engine": "AI Engine"
+      "ai_engine": "AI Engine",
+      "mfa": "Autenticazione MFA"
     }
   },
   "topbar": {
@@ -938,6 +939,27 @@
       "submit": "Accedi",
       "signing_in": "Accesso in corso...",
       "invalid_credentials": "Credenziali non valide. Riprovare."
+    },
+    "mfa": {
+      "title": "Autenticazione a due fattori (MFA)",
+      "description": "Proteggi il tuo account con un secondo fattore di autenticazione tramite app TOTP (Google Authenticator, Authy, ecc.).",
+      "prompt": "Inserisci il codice a 6 cifre dalla tua app autenticatore.",
+      "code_label": "Codice OTP",
+      "verify": "Verifica",
+      "verifying": "Verifica in corso...",
+      "back": "← Torna al login",
+      "invalid_code": "Codice OTP non valido o scaduto.",
+      "status_active": "MFA attivo",
+      "status_inactive": "MFA non attivo",
+      "enable": "Attiva",
+      "disable": "Disabilita",
+      "setup_instructions": "Scansiona il QR code con la tua app autenticatore (Google Authenticator, Authy, ecc.), poi clicca su Fatto.",
+      "scanned": "Ho scansionato il QR code →",
+      "enter_first_code": "Inserisci il codice generato dall'app per confermare la configurazione.",
+      "enter_code_to_disable": "Inserisci il codice OTP corrente per confermare la disattivazione.",
+      "activate": "Attiva MFA",
+      "setup_success": "MFA attivato con successo.",
+      "disable_success": "MFA disabilitato."
     }
   },
   "dashboard": {

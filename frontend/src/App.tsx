@@ -30,6 +30,7 @@ import { CompetencyPage } from "./modules/competency/CompetencyPage";
 import { EmailSettingsPage } from "./modules/settings/EmailSettingsPage";
 import { NotificationSettingsPage } from "./modules/settings/NotificationSettingsPage";
 import { AiSettingsPage } from "./modules/settings/AiSettingsPage";
+import { MfaSettingsPage } from "./modules/settings/MfaSettingsPage";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
@@ -79,6 +80,7 @@ export function App() {
           <Route path="settings/email" element={<EmailSettingsPage />} />
           <Route path="settings/notifications" element={<NotificationSettingsPage />} />
           <Route path="settings/ai" element={<AiSettingsPage />} />
+          <Route path="settings/mfa" element={<MfaSettingsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

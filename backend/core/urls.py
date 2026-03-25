@@ -12,7 +12,7 @@ from two_factor.admin import AdminSiteOTPRequired
 from two_factor.urls import urlpatterns as tf_urls
 from django_otp import devices_for_user
 
-from core.jwt import GrcTokenObtainPairView
+from core.jwt import GrcTokenObtainPairView, MfaVerifyView
 
 
 class AdminSiteOTPRequiredOrSetup(AdminSiteOTPRequired):
@@ -117,8 +117,9 @@ urlpatterns = [
     path("api/health/", health_check, name="health-check"),
     path("api/manual/<str:manual_type>/", serve_manual, name="manual"),
     path("api/v1/manual/<str:manual_type>/", serve_manual, name="manual-v1"),
-    path("api/token/", GrcTokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/token/",         GrcTokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/refresh/", TokenRefreshView.as_view(),        name="token_refresh"),
+    path("api/token/mfa/",     MfaVerifyView.as_view(),           name="token_mfa_verify"),
 ]
 
 # Swagger/OpenAPI: esposto solo se DEBUG=True o SHOW_API_DOCS=True (non in produzione)

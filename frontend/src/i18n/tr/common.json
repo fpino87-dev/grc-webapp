@@ -975,7 +975,8 @@
       "audit_trail": "Audit Trail",
       "email_settings": "E-posta ayarları",
       "notification_rules": "Bildirim kuralları",
-      "ai_engine": "AI Engine"
+      "ai_engine": "AI Engine",
+      "mfa": "MFA Kimlik Doğrulama"
     }
   },
   "topbar": {
@@ -1004,6 +1005,27 @@
       "submit": "Giriş yap",
       "signing_in": "Giriş yapılıyor...",
       "invalid_credentials": "Geçersiz kimlik bilgileri. Lütfen tekrar deneyin."
+    },
+    "mfa": {
+      "title": "İki Faktörlü Kimlik Doğrulama (MFA)",
+      "description": "Hesabınızı TOTP uygulaması (Google Authenticator, Authy vb.) ile ikinci faktörle koruyun.",
+      "prompt": "Kimlik doğrulama uygulamanızdaki 6 haneli kodu girin.",
+      "code_label": "OTP Kodu",
+      "verify": "Doğrula",
+      "verifying": "Doğrulanıyor...",
+      "back": "← Girişe geri dön",
+      "invalid_code": "Geçersiz veya süresi dolmuş OTP kodu.",
+      "status_active": "MFA aktif",
+      "status_inactive": "MFA etkin değil",
+      "enable": "Etkinleştir",
+      "disable": "Devre dışı bırak",
+      "setup_instructions": "QR kodunu uygulamanızla (Google Authenticator, Authy vb.) tarayın, ardından Tamam'a tıklayın.",
+      "scanned": "QR kodunu taradım →",
+      "enter_first_code": "Kurulumu onaylamak için uygulama tarafından oluşturulan kodu girin.",
+      "enter_code_to_disable": "Devre dışı bırakmayı onaylamak için mevcut OTP kodunuzu girin.",
+      "activate": "MFA'yı Etkinleştir",
+      "setup_success": "MFA başarıyla etkinleştirildi.",
+      "disable_success": "MFA devre dışı bırakıldı."
     }
   },
   "dashboard": {

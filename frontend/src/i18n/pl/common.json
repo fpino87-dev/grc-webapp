@@ -975,7 +975,8 @@
       "audit_trail": "Audit Trail",
       "email_settings": "Ustawienia e-mail",
       "notification_rules": "Reguły powiadomień",
-      "ai_engine": "AI Engine"
+      "ai_engine": "AI Engine",
+      "mfa": "Uwierzytelnianie MFA"
     }
   },
   "topbar": {
@@ -1004,6 +1005,27 @@
       "submit": "Zaloguj się",
       "signing_in": "Logowanie...",
       "invalid_credentials": "Nieprawidłowe dane logowania. Spróbuj ponownie."
+    },
+    "mfa": {
+      "title": "Uwierzytelnianie dwuskładnikowe (MFA)",
+      "description": "Chroń swoje konto za pomocą drugiego czynnika uwierzytelniania w aplikacji TOTP (Google Authenticator, Authy itp.).",
+      "prompt": "Wprowadź 6-cyfrowy kod z aplikacji uwierzytelniającej.",
+      "code_label": "Kod OTP",
+      "verify": "Weryfikuj",
+      "verifying": "Weryfikowanie...",
+      "back": "← Wróć do logowania",
+      "invalid_code": "Nieprawidłowy lub wygasły kod OTP.",
+      "status_active": "MFA aktywne",
+      "status_inactive": "MFA nieaktywne",
+      "enable": "Włącz",
+      "disable": "Wyłącz",
+      "setup_instructions": "Zeskanuj kod QR aplikacją (Google Authenticator, Authy itp.), następnie kliknij Gotowe.",
+      "scanned": "Zeskanowałem kod QR →",
+      "enter_first_code": "Wprowadź kod wygenerowany przez aplikację, aby potwierdzić konfigurację.",
+      "enter_code_to_disable": "Wprowadź aktualny kod OTP, aby potwierdzić dezaktywację.",
+      "activate": "Aktywuj MFA",
+      "setup_success": "MFA zostało pomyślnie aktywowane.",
+      "disable_success": "MFA zostało wyłączone."
     }
   },
   "dashboard": {
