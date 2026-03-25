@@ -1395,7 +1395,7 @@ La suite pytest (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=7
 | `FERNET_KEY` | string | — | AES-256 per credenziali SMTP | Sì |
 | `DEBUG` | bool | True | False in produzione | No |
 | `ALLOWED_HOSTS` | string | localhost | Host ammessi (comma-separated) | Sì in prod |
-| `DATABASE_URL` | string | postgresql://grc:grc@db:5432/grc_dev | PostgreSQL URL | Sì |
+| `DATABASE_URL` | string | postgresql://grc:REPLACE_DB_PASSWORD@db:5432/grc_dev | PostgreSQL URL | Sì |
 | `REDIS_URL` | string | redis://redis:6379/0 | Redis URL | Sì |
 | `FRONTEND_URL` | string | http://localhost:3001 | URL frontend | Sì |
 | `CORS_ALLOWED_ORIGINS` | string | http://localhost:3001 | CORS origins | No |

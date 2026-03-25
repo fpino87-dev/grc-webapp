@@ -142,7 +142,7 @@ Il repository include `.env.example` (sviluppo) e `.env.prod.example` (produzion
 | `FERNET_KEY` | Si | — | Cifratura AES-256 credenziali SMTP (generare con `Fernet.generate_key()`) |
 | `DEBUG` | No | `True` | Impostare `False` in produzione |
 | `ALLOWED_HOSTS` | Si in prod | `localhost` | Host ammessi separati da virgola |
-| `DATABASE_URL` | Si | `postgresql://grc:grc@db:5432/grc_dev` | URL connessione PostgreSQL |
+| `DATABASE_URL` | Si | `postgresql://grc:REPLACE_DB_PASSWORD@db:5432/grc_dev` | URL connessione PostgreSQL |
 | `REDIS_URL` | Si | `redis://redis:6379/0` | URL connessione Redis |
 | `FRONTEND_URL` | Si | `http://localhost:3001` | URL frontend (per CORS e link nelle email) |
 | `STORAGE_BACKEND` | No | `local` | `local` o `s3` |
@@ -178,7 +178,7 @@ ALLOWED_HOSTS=grc.azienda.com
 FRONTEND_URL=https://grc.azienda.com
 
 # ── Database ──────────────────────────────────────────────────────────
-DATABASE_URL=postgresql://grc:password@db:5432/grc_prod
+DATABASE_URL=postgresql://grc:REPLACE_DB_PASSWORD@db:5432/grc_prod
 
 # ── Redis ─────────────────────────────────────────────────────────────
 REDIS_URL=redis://redis:6379/0
@@ -333,7 +333,7 @@ services:
     environment:
       POSTGRES_DB: grc_dev
       POSTGRES_USER: grc
-      POSTGRES_PASSWORD: grc
+      POSTGRES_PASSWORD: REPLACE_DB_PASSWORD
     ports: ["5433:5432"]
     volumes: [pgdata:/var/lib/postgresql/data]
 
@@ -345,8 +345,8 @@ services:
     image: minio/minio
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: minio_root_user
+      MINIO_ROOT_PASSWORD: REPLACE_MINIO_ROOT_PASSWORD
     ports: ["9001:9001"]
     volumes: [miniodata:/data]
 

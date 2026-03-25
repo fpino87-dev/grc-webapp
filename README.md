@@ -281,7 +281,7 @@ Il repository include `.env.example` (sviluppo) e `.env.prod.example` (produzion
 | `FERNET_KEY` | Si | — | Cifratura AES-256 credenziali SMTP (generare con `Fernet.generate_key()`) |
 | `DEBUG` | No | `True` | Impostare `False` in produzione |
 | `ALLOWED_HOSTS` | Si in prod | `localhost` | Host ammessi separati da virgola |
-| `DATABASE_URL` | Si | `postgresql://grc:grc@db:5432/grc_dev` | URL connessione PostgreSQL |
+| `DATABASE_URL` | Si | `postgresql://grc:REPLACE_DB_PASSWORD@db:5432/grc_dev` | URL connessione PostgreSQL |
 | `REDIS_URL` | Si | `redis://redis:6379/0` | URL connessione Redis |
 | `FRONTEND_URL` | Si | `http://localhost:3001` | URL frontend (usato per CORS e link nelle email) |
 

@@ -28,7 +28,8 @@ ENV DJANGO_SETTINGS_MODULE=core.settings.prod \
     SECRET_KEY=collectstatic-build-placeholder \
     DATABASE_URL=postgresql://x:x@x:5432/x \
     REDIS_URL=redis://x:6379/0 \
-    FERNET_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+    # Placeholder only for collectstatic/build; real FERNET_KEY must be provided at runtime.
+    FERNET_KEY=
 RUN python manage.py collectstatic --noinput
 
 # Utente non-root

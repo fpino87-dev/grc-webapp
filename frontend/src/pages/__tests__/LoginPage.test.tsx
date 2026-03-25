@@ -59,8 +59,8 @@ describe("LoginPage", () => {
   it("login senza MFA naviga alla home", async () => {
     mockLoginApi.mockResolvedValue({
       mfa_required: false,
-      access: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMSIsInJvbGUiOiJ1c2VyIiwiZW1haWwiOiJ0QHQuY29tIn0.sig",
-      refresh: "refresh_token",
+      access: "mock-access-token",
+      refresh: "mock-refresh-token",
     });
 
     renderLogin();
@@ -74,7 +74,7 @@ describe("LoginPage", () => {
   it("login con MFA mostra step OTP", async () => {
     mockLoginApi.mockResolvedValue({
       mfa_required: true,
-      mfa_token: "test-mfa-token",
+      mfa_token: "mock-mfa-token",
     });
 
     renderLogin();
@@ -90,7 +90,7 @@ describe("LoginPage", () => {
   it("step OTP mostra checkbox trust device", async () => {
     mockLoginApi.mockResolvedValue({
       mfa_required: true,
-      mfa_token: "test-mfa-token",
+      mfa_token: "mock-mfa-token",
     });
 
     renderLogin();
@@ -102,8 +102,11 @@ describe("LoginPage", () => {
   });
 
   it("verifica OTP valido naviga alla home", async () => {
-    mockLoginApi.mockResolvedValue({ mfa_required: true, mfa_token: "tok" });
-    mockVerifyMfaApi.mockResolvedValue({ access: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMSIsInJvbGUiOiJ1c2VyIiwiZW1haWwiOiJ0QHQuY29tIn0.sig", refresh: "r" });
+    mockLoginApi.mockResolvedValue({ mfa_required: true, mfa_token: "mock-mfa-token" });
+    mockVerifyMfaApi.mockResolvedValue({
+      access: "mock-access-token",
+      refresh: "mock-refresh-token",
+    });
 
     renderLogin();
     fireEvent.click(screen.getByRole("button", { name: "auth.login.submit" }));
@@ -118,11 +121,11 @@ describe("LoginPage", () => {
   });
 
   it("OTP con trust device salva device_token in localStorage", async () => {
-    mockLoginApi.mockResolvedValue({ mfa_required: true, mfa_token: "tok" });
+    mockLoginApi.mockResolvedValue({ mfa_required: true, mfa_token: "mock-mfa-token" });
     mockVerifyMfaApi.mockResolvedValue({
-      access: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMSIsInJvbGUiOiJ1c2VyIiwiZW1haWwiOiJ0QHQuY29tIn0.sig",
-      refresh: "r",
-      device_token: "dt-abc123",
+      access: "mock-access-token",
+      refresh: "mock-refresh-token",
+      device_token: "mock-device-token",
     });
 
     renderLogin();
@@ -139,12 +142,12 @@ describe("LoginPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "auth.mfa.verify" }));
 
     await waitFor(() => {
-      expect(localStorage.getItem("grc_device_token")).toBe("dt-abc123");
+      expect(localStorage.getItem("grc_device_token")).toBe("mock-device-token");
     });
   });
 
   it("codice OTP errato mostra errore", async () => {
-    mockLoginApi.mockResolvedValue({ mfa_required: true, mfa_token: "tok" });
+    mockLoginApi.mockResolvedValue({ mfa_required: true, mfa_token: "mock-mfa-token" });
     mockVerifyMfaApi.mockRejectedValue(new Error("Invalid OTP"));
 
     renderLogin();
@@ -160,7 +163,7 @@ describe("LoginPage", () => {
   });
 
   it("bottone back riporta allo step credenziali", async () => {
-    mockLoginApi.mockResolvedValue({ mfa_required: true, mfa_token: "tok" });
+    mockLoginApi.mockResolvedValue({ mfa_required: true, mfa_token: "mock-mfa-token" });
 
     renderLogin();
     fireEvent.click(screen.getByRole("button", { name: "auth.login.submit" }));
@@ -174,8 +177,8 @@ describe("LoginPage", () => {
   });
 
   it("invio device_token salvato nel login successivo", async () => {
-    localStorage.setItem("grc_device_token", "saved-dt");
-    mockLoginApi.mockResolvedValue({ mfa_required: false, access: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMSIsInJvbGUiOiJ1c2VyIiwiZW1haWwiOiJ0QHQuY29tIn0.sig", refresh: "r" });
+    localStorage.setItem("grc_device_token", "mock-saved-device-token");
+    mockLoginApi.mockResolvedValue({ mfa_required: false, access: "mock-access-token", refresh: "mock-refresh-token" });
 
     renderLogin();
     fireEvent.click(screen.getByRole("button", { name: "auth.login.submit" }));
@@ -184,7 +187,7 @@ describe("LoginPage", () => {
       expect(mockLoginApi).toHaveBeenCalledWith(
         expect.any(String),
         expect.any(String),
-        "saved-dt",
+        "mock-saved-device-token",
       );
     });
   });

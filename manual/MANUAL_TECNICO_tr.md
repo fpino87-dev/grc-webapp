@@ -1395,7 +1395,7 @@ pytest paketi (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=70`
 | `FERNET_KEY` | string | — | SMTP kimlik bilgileri için AES-256 | Evet |
 | `DEBUG` | bool | True | Üretimde False | Hayır |
 | `ALLOWED_HOSTS` | string | localhost | İzin verilen host'lar (virgülle ayrılmış) | Üretimde Evet |
-| `DATABASE_URL` | string | postgresql://grc:grc@db:5432/grc_dev | PostgreSQL URL | Evet |
+| `DATABASE_URL` | string | postgresql://grc:REPLACE_DB_PASSWORD@db:5432/grc_dev | PostgreSQL URL | Evet |
 | `REDIS_URL` | string | redis://redis:6379/0 | Redis URL | Evet |
 | `FRONTEND_URL` | string | http://localhost:3001 | Frontend URL | Evet |
 | `CORS_ALLOWED_ORIGINS` | string | http://localhost:3001 | CORS origin'leri | Hayır |
