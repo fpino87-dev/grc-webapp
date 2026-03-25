@@ -1,5 +1,5 @@
 import axios from "axios";
-import apiClient from "../client";
+import { apiClient } from "../client";
 
 export type LoginResult =
   | { mfa_required: false; access: string; refresh: string }
