@@ -1021,7 +1021,8 @@
       "type": "Tipo",
       "status": "Stato",
       "created_by": "Creato da",
-      "actions": "Azioni"
+      "actions": "Azioni",
+      "completed": "Completato il"
     },
     "status": {
       "pending": "In attesa",

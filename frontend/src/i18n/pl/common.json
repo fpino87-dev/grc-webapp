@@ -1100,7 +1100,8 @@
       "type": "Typ",
       "status": "Status",
       "created_by": "Utworzone przez",
-      "actions": "Akcje"
+      "actions": "Akcje",
+      "completed": "Ukończono"
     },
     "status": {
       "pending": "Oczekuje",

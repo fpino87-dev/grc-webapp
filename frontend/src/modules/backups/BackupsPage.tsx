@@ -11,11 +11,10 @@ import {
 } from "../../api/endpoints/backups";
 import { useAuthStore } from "../../store/auth";
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function formatBytes(bytes: number | null): string {
   if (bytes == null) return "—";
-  if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
@@ -31,17 +30,26 @@ function formatDate(iso: string | null): string {
 // ── Status badge ──────────────────────────────────────────────────────────────
 
 const STATUS_STYLES: Record<string, string> = {
-  completed: "bg-green-100 text-green-800",
-  running:   "bg-blue-100 text-blue-800",
-  pending:   "bg-yellow-100 text-yellow-800",
-  failed:    "bg-red-100 text-red-800",
-  restored:  "bg-purple-100 text-purple-800",
+  completed: "bg-green-100 text-green-800 border-green-200",
+  running:   "bg-blue-100  text-blue-800  border-blue-200",
+  pending:   "bg-yellow-100 text-yellow-800 border-yellow-200",
+  failed:    "bg-red-100   text-red-800   border-red-200",
+  restored:  "bg-purple-100 text-purple-800 border-purple-200",
+};
+
+const STATUS_DOT: Record<string, string> = {
+  completed: "bg-green-500",
+  running:   "bg-blue-500 animate-pulse",
+  pending:   "bg-yellow-500 animate-pulse",
+  failed:    "bg-red-500",
+  restored:  "bg-purple-500",
 };
 
 function StatusBadge({ status }: { status: BackupRecord["status"] }) {
   const { t } = useTranslation();
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_STYLES[status] ?? "bg-gray-100 text-gray-700"}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${STATUS_STYLES[status] ?? "bg-gray-100 text-gray-700 border-gray-200"}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[status] ?? "bg-gray-400"}`} />
       {t(`backups.status.${status}`)}
     </span>
   );
@@ -50,39 +58,128 @@ function StatusBadge({ status }: { status: BackupRecord["status"] }) {
 // ── Confirm modal ─────────────────────────────────────────────────────────────
 
 function ConfirmModal({
-  title,
-  message,
-  confirmLabel,
-  danger,
-  onConfirm,
-  onCancel,
+  title, message, confirmLabel, danger, onConfirm, onCancel,
 }: {
-  title: string;
-  message: string;
-  confirmLabel: string;
-  danger?: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
+  title: string; message: string; confirmLabel: string;
+  danger?: boolean; onConfirm: () => void; onCancel: () => void;
 }) {
+  const { t } = useTranslation();
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
-        <p className="text-sm text-gray-600 mb-6">{message}</p>
+        <p className="text-sm text-gray-600 mb-6 leading-relaxed">{message}</p>
         <div className="flex justify-end gap-3">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
-          >
-            Annulla
+          <button onClick={onCancel}
+            className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 text-gray-700">
+            {t("actions.cancel")}
           </button>
-          <button
-            onClick={onConfirm}
-            className={`px-4 py-2 text-sm rounded-md text-white font-medium ${
-              danger ? "bg-red-600 hover:bg-red-700" : "bg-primary-600 hover:bg-primary-700"
-            }`}
-          >
+          <button onClick={onConfirm}
+            className={`px-4 py-2 text-sm rounded-md text-white font-medium ${danger ? "bg-red-600 hover:bg-red-700" : "bg-primary-600 hover:bg-primary-700"}`}>
             {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Backup card ───────────────────────────────────────────────────────────────
+
+function BackupCard({
+  backup,
+  onRestore,
+  onDelete,
+  onDownload,
+  isBusy,
+}: {
+  backup: BackupRecord;
+  onRestore: () => void;
+  onDelete: () => void;
+  onDownload: () => void;
+  isBusy: boolean;
+}) {
+  const { t } = useTranslation();
+  const isCompleted = backup.status === "completed";
+  const isRunning   = backup.status === "running" || backup.status === "pending";
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-sm transition-shadow">
+      {/* Row 1 — status + data + tipo */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2 flex-wrap">
+          <StatusBadge status={backup.status} />
+          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+            backup.backup_type === "auto" ? "bg-gray-100 text-gray-600" : "bg-indigo-100 text-indigo-700"
+          }`}>
+            {t(`backups.type.${backup.backup_type}`)}
+          </span>
+        </div>
+        <span className="text-xs text-gray-400 whitespace-nowrap">{formatDate(backup.created_at)}</span>
+      </div>
+
+      {/* Row 2 — filename */}
+      <p className="font-mono text-xs text-gray-600 bg-gray-50 rounded px-2 py-1.5 mb-3 break-all">
+        {backup.filename || "—"}
+      </p>
+
+      {/* Row 3 — dimensione + utente */}
+      <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
+        <span>
+          <span className="font-medium text-gray-700">{t("backups.col.size")}:</span>{" "}
+          {formatBytes(backup.size_bytes)}
+        </span>
+        {backup.created_by_email && (
+          <span>
+            <span className="font-medium text-gray-700">{t("backups.col.created_by")}:</span>{" "}
+            {backup.created_by_email}
+          </span>
+        )}
+        {backup.completed_at && (
+          <span>
+            <span className="font-medium text-gray-700">{t("backups.col.completed")}:</span>{" "}
+            {formatDate(backup.completed_at)}
+          </span>
+        )}
+      </div>
+
+      {/* Errore (se failed) */}
+      {backup.status === "failed" && backup.error_message && (
+        <div className="mb-3 px-3 py-2 bg-red-50 border border-red-100 rounded text-xs text-red-700 break-all">
+          {backup.error_message}
+        </div>
+      )}
+
+      {/* Row 4 — azioni */}
+      <div className="flex items-center gap-2 flex-wrap pt-1 border-t border-gray-100">
+        {isCompleted && (
+          <>
+            <button
+              onClick={onDownload}
+              disabled={isBusy}
+              className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50 text-gray-700 disabled:opacity-50"
+            >
+              ⬇ {t("backups.action.download")}
+            </button>
+            <button
+              onClick={onRestore}
+              disabled={isBusy}
+              className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-md border border-amber-400 hover:bg-amber-50 text-amber-700 font-medium disabled:opacity-50"
+            >
+              ↩ {t("backups.action.restore")}
+            </button>
+          </>
+        )}
+        {isRunning && (
+          <span className="text-xs text-blue-600 italic">{t("backups.creating")}</span>
+        )}
+        <div className="ml-auto">
+          <button
+            onClick={onDelete}
+            disabled={isBusy || isRunning}
+            className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-md border border-red-300 hover:bg-red-50 text-red-600 font-medium disabled:opacity-50"
+          >
+            🗑 {t("backups.action.delete")}
           </button>
         </div>
       </div>
@@ -106,8 +203,7 @@ export function BackupsPage() {
     queryFn: listBackupsApi,
     refetchInterval: (q) => {
       const data = q.state.data as BackupRecord[] | undefined;
-      const hasRunning = data?.some(b => b.status === "running" || b.status === "pending");
-      return hasRunning ? 3000 : false;
+      return data?.some(b => b.status === "running" || b.status === "pending") ? 3000 : false;
     },
   });
 
@@ -118,19 +214,13 @@ export function BackupsPage() {
 
   const createMut = useMutation({
     mutationFn: createBackupApi,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["backups"] });
-      showFeedback("ok", t("backups.feedback.created"));
-    },
-    onError: () => showFeedback("err", t("backups.feedback.create_error")),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["backups"] }); showFeedback("ok", t("backups.feedback.created")); },
+    onError:   () => showFeedback("err", t("backups.feedback.create_error")),
   });
 
   const restoreMut = useMutation({
     mutationFn: (id: string) => restoreBackupApi(id),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["backups"] });
-      showFeedback("ok", t("backups.feedback.restored"));
-    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["backups"] }); showFeedback("ok", t("backups.feedback.restored")); },
     onError: (e: unknown) => {
       const msg = (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
       showFeedback("err", msg ?? t("backups.feedback.restore_error"));
@@ -139,27 +229,18 @@ export function BackupsPage() {
 
   const deleteMut = useMutation({
     mutationFn: (id: string) => deleteBackupApi(id),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["backups"] });
-      showFeedback("ok", t("backups.feedback.deleted"));
-    },
-    onError: () => showFeedback("err", t("backups.feedback.delete_error")),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["backups"] }); showFeedback("ok", t("backups.feedback.deleted")); },
+    onError:   () => showFeedback("err", t("backups.feedback.delete_error")),
   });
 
   const handleDownload = (backup: BackupRecord) => {
-    const a = document.createElement("a");
-    a.href = backupDownloadUrl(backup.id);
-    if (token) a.setAttribute("data-token", token); // handled by apiClient interceptor via direct link
-    a.download = backup.filename;
-    // Il download usa il token JWT come Authorization header; per link diretti
-    // usiamo fetch + blob per rispettare l'autenticazione
-    fetch(backupDownloadUrl(backup.id), {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    fetch(backupDownloadUrl(backup.id), { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.blob())
       .then(blob => {
         const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
         a.href = url;
+        a.download = backup.filename;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -169,10 +250,17 @@ export function BackupsPage() {
 
   const isBusy = createMut.isPending || restoreMut.isPending || deleteMut.isPending;
 
+  // Ordine: running/pending in cima, poi per data desc
+  const sorted = [...backups].sort((a, b) => {
+    const priority = (s: string) => (s === "running" || s === "pending") ? 0 : 1;
+    if (priority(a.status) !== priority(b.status)) return priority(a.status) - priority(b.status);
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-6 max-w-3xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-start justify-between mb-6 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{t("backups.title")}</h1>
           <p className="text-sm text-gray-500 mt-1">{t("backups.subtitle")}</p>
@@ -180,9 +268,9 @@ export function BackupsPage() {
         <button
           onClick={() => createMut.mutate()}
           disabled={isBusy}
-          className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50"
+          className="shrink-0 flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50"
         >
-          {createMut.isPending ? t("backups.creating") : t("backups.create")}
+          {createMut.isPending ? t("backups.creating") : `💾 ${t("backups.create")}`}
         </button>
       </div>
 
@@ -198,115 +286,58 @@ export function BackupsPage() {
       )}
 
       {/* Info retention */}
-      <div className="mb-4 bg-blue-50 border border-blue-200 rounded-md px-4 py-3 text-sm text-blue-800">
-        {t("backups.retention_info")}
+      <div className="mb-6 bg-blue-50 border border-blue-200 rounded-md px-4 py-3 text-sm text-blue-800">
+        ℹ {t("backups.retention_info")}
       </div>
 
-      {/* Tabella */}
+      {/* Conteggio */}
+      {!isLoading && backups.length > 0 && (
+        <p className="text-xs text-gray-400 mb-3">{backups.length} backup</p>
+      )}
+
+      {/* Lista card */}
       {isLoading ? (
         <p className="text-sm text-gray-500">{t("common.loading")}</p>
-      ) : backups.length === 0 ? (
+      ) : sorted.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
-          <p className="text-4xl mb-3">💾</p>
+          <p className="text-5xl mb-3">💾</p>
           <p className="text-sm">{t("backups.empty")}</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left font-medium text-gray-500">{t("backups.col.date")}</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-500">{t("backups.col.filename")}</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-500">{t("backups.col.size")}</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-500">{t("backups.col.type")}</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-500">{t("backups.col.status")}</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-500">{t("backups.col.created_by")}</th>
-                <th className="px-4 py-3 text-right font-medium text-gray-500">{t("backups.col.actions")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {backups.map(b => (
-                <tr key={b.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-gray-700 whitespace-nowrap">{formatDate(b.created_at)}</td>
-                  <td className="px-4 py-3 text-gray-600 font-mono text-xs max-w-[200px] truncate">{b.filename}</td>
-                  <td className="px-4 py-3 text-gray-600">{formatBytes(b.size_bytes)}</td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                      b.backup_type === "auto"
-                        ? "bg-gray-100 text-gray-600"
-                        : "bg-indigo-100 text-indigo-700"
-                    }`}>
-                      {t(`backups.type.${b.backup_type}`)}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3"><StatusBadge status={b.status} /></td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{b.created_by_email ?? "—"}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex justify-end gap-2">
-                      {b.status === "completed" && (
-                        <>
-                          <button
-                            onClick={() => handleDownload(b)}
-                            className="text-xs px-2 py-1 rounded border border-gray-300 hover:bg-gray-50 text-gray-600"
-                          >
-                            {t("backups.action.download")}
-                          </button>
-                          <button
-                            onClick={() => setConfirmRestore(b)}
-                            disabled={isBusy}
-                            className="text-xs px-2 py-1 rounded border border-amber-400 hover:bg-amber-50 text-amber-700 disabled:opacity-50"
-                          >
-                            {t("backups.action.restore")}
-                          </button>
-                        </>
-                      )}
-                      {b.status === "failed" && (
-                        <span className="text-xs text-red-500 max-w-[180px] truncate" title={b.error_message}>
-                          {b.error_message.slice(0, 60)}…
-                        </span>
-                      )}
-                      <button
-                        onClick={() => setConfirmDelete(b)}
-                        disabled={isBusy || b.status === "running"}
-                        className="text-xs px-2 py-1 rounded border border-red-300 hover:bg-red-50 text-red-600 disabled:opacity-50"
-                      >
-                        {t("backups.action.delete")}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="space-y-3">
+          {sorted.map(b => (
+            <BackupCard
+              key={b.id}
+              backup={b}
+              isBusy={isBusy}
+              onDownload={() => handleDownload(b)}
+              onRestore={() => setConfirmRestore(b)}
+              onDelete={() => setConfirmDelete(b)}
+            />
+          ))}
         </div>
       )}
 
-      {/* Modale conferma restore */}
+      {/* Modale restore */}
       {confirmRestore && (
         <ConfirmModal
           title={t("backups.confirm_restore.title")}
           message={t("backups.confirm_restore.message", { filename: confirmRestore.filename })}
           confirmLabel={t("backups.action.restore")}
           danger
-          onConfirm={() => {
-            restoreMut.mutate(confirmRestore.id);
-            setConfirmRestore(null);
-          }}
+          onConfirm={() => { restoreMut.mutate(confirmRestore.id); setConfirmRestore(null); }}
           onCancel={() => setConfirmRestore(null)}
         />
       )}
 
-      {/* Modale conferma elimina */}
+      {/* Modale elimina */}
       {confirmDelete && (
         <ConfirmModal
           title={t("backups.confirm_delete.title")}
           message={t("backups.confirm_delete.message", { filename: confirmDelete.filename })}
           confirmLabel={t("backups.action.delete")}
           danger
-          onConfirm={() => {
-            deleteMut.mutate(confirmDelete.id);
-            setConfirmDelete(null);
-          }}
+          onConfirm={() => { deleteMut.mutate(confirmDelete.id); setConfirmDelete(null); }}
           onCancel={() => setConfirmDelete(null)}
         />
       )}

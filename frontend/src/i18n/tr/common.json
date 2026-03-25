@@ -1100,7 +1100,8 @@
       "type": "Tür",
       "status": "Durum",
       "created_by": "Oluşturan",
-      "actions": "İşlemler"
+      "actions": "İşlemler",
+      "completed": "Tamamlandı"
     },
     "status": {
       "pending": "Bekliyor",

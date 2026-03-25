@@ -1021,7 +1021,8 @@
       "type": "Type",
       "status": "Status",
       "created_by": "Created by",
-      "actions": "Actions"
+      "actions": "Actions",
+      "completed": "Completed at"
     },
     "status": {
       "pending": "Pending",
