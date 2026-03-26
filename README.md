@@ -324,11 +324,6 @@ Per l'elenco completo di tutte le variabili (storage, email, SSO, KnowBe4, AI En
 | Mailhog SMTP | 1026 | 1025 |
 | Mailhog UI | 8026 | 8025 |
 
-**Altri container sul server (non toccare):**
-- `ai-docintel-*` — progetto separato
-- `npm` — Nginx Proxy Manager su 80/443
-- `budget-db`, `sitebudget`, `siteciso`, `sitebb`
-
 ---
 
 ## Integrazioni

@@ -162,10 +162,6 @@ docker compose -f docker-compose.prod.yml exec backend \
 | Mailhog SMTP | 1026 | 1025 |
 | Mailhog UI | 8026 | 8025 |
 
-**Altri container sul server (non toccare):**
-- `ai-docintel-*` — progetto separato
-- `npm` — Nginx Proxy Manager su 80/443
-- `budget-db`, `sitebudget`, `siteciso`, `sitebb`
 
 ## Prossime attività prioritarie
 
