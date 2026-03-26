@@ -701,8 +701,8 @@
       "deactivate": "Désactiver",
       "competency": "Compétences",
       "reset_password": "Réinitialiser le mot de passe",
-      "delete": "Retirer l'accès utilisateur",
-      "delete_confirm": "Désactiver l'utilisateur {{username}} et révoquer les accès GRC ?"
+      "delete": "Supprimer l'utilisateur",
+      "delete_confirm": "Supprimer l'utilisateur {{username}} et révoquer tous les accès GRC ?"
     },
     "new": {
       "open": "+ Nouvel utilisateur",

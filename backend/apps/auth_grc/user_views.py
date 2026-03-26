@@ -74,7 +74,7 @@ class AssignRoleSerializer(serializers.Serializer):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all().order_by("username")
+    queryset = User.objects.filter(is_active=True).order_by("username")
     filterset_fields = ["is_active", "is_staff"]
     search_fields = ["username", "email", "first_name", "last_name"]
 

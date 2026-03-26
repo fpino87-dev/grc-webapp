@@ -701,8 +701,8 @@
       "deactivate": "Pasifleştir",
       "competency": "Yeterlilikler",
       "reset_password": "Parolayı sıfırla",
-      "delete": "Kullanıcı erişimini kaldır",
-      "delete_confirm": "{{username}} kullanıcısı devre dışı bırakılsın ve GRC erişimleri iptal edilsin mi?"
+      "delete": "Kullanıcıyı sil",
+      "delete_confirm": "{{username}} kullanıcısını silinsin ve tüm GRC erişimleri iptal edilsin mi?"
     },
     "new": {
       "open": "+ Yeni kullanıcı",

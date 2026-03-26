@@ -634,8 +634,8 @@
       "deactivate": "Deactivate",
       "competency": "Competency",
       "reset_password": "Reset password",
-      "delete": "Remove user access",
-      "delete_confirm": "Deactivate user {{username}} and revoke GRC access?"
+      "delete": "Delete user",
+      "delete_confirm": "Delete user {{username}} and revoke all GRC access?"
     },
     "new": {
       "open": "+ New user",

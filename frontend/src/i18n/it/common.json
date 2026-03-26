@@ -634,8 +634,8 @@
       "deactivate": "Disattiva",
       "competency": "Competenze",
       "reset_password": "Reset password",
-      "delete": "Rimuovi accesso utente",
-      "delete_confirm": "Disattivare l'utente {{username}} e revocare gli accessi GRC?"
+      "delete": "Elimina utente",
+      "delete_confirm": "Eliminare l'utente {{username}} e revocare tutti gli accessi GRC?"
     },
     "new": {
       "open": "+ Nuovo utente",
