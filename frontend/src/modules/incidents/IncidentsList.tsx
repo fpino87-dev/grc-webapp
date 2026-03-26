@@ -1211,7 +1211,9 @@ export function IncidentsList() {
                         : t("incidents.nis2_classification.decision.not_significant_title")}
                     </div>
                     <div className="text-xs text-emerald-900 mt-1">
-                      PTA {serverBreakdown.pta_ptnr.PTA} · PTNR {serverBreakdown.pta_ptnr.PTNR} ·{" "}
+                      {serverBreakdown.pta_ptnr != null && (
+                        <>PTA {serverBreakdown.pta_ptnr.PTA} · PTNR {serverBreakdown.pta_ptnr.PTNR} · </>
+                      )}
                       {t("incidents.nis2_classification.config.ptnr_threshold")}{" "}
                       {String(
                         (serverBreakdown.config_used?.ptnr_threshold as number | undefined) ??
