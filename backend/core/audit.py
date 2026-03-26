@@ -59,13 +59,23 @@ def _get_prev_hash(entity_type: str) -> str:
     return last.record_hash if last else "0" * 64
 
 
+def _pk_to_uuid(pk) -> uuid.UUID:
+    """Converte qualsiasi pk (UUID o intero) in uuid.UUID per il campo entity_id/user_id."""
+    if isinstance(pk, uuid.UUID):
+        return pk
+    try:
+        return uuid.UUID(str(pk))
+    except (ValueError, AttributeError):
+        return uuid.UUID(int=int(pk))
+
+
 @transaction.atomic
 def log_action(*, user, action_code: str, level: str, entity, payload: dict) -> AuditLog:
     entity_type = entity.__class__.__name__.lower()
     prev_hash = _get_prev_hash(entity_type)
     record_hash = _compute_hash(payload, prev_hash)
     return AuditLog.objects.create(
-        user_id=user.pk,
+        user_id=_pk_to_uuid(user.pk),
         # Email pseudonimizzata (GDPR Art. 25 — privacy by design).
         # L'identità completa è ricavabile tramite user_id se necessario per audit legale.
         user_email_at_time=_pseudonymize_email(user.email),
@@ -73,7 +83,7 @@ def log_action(*, user, action_code: str, level: str, entity, payload: dict) -> 
         action_code=action_code,
         level=level,
         entity_type=entity_type,
-        entity_id=str(entity.pk),
+        entity_id=_pk_to_uuid(entity.pk),
         payload=payload,
         prev_hash=prev_hash,
         record_hash=record_hash,
