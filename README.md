@@ -414,3 +414,11 @@ Per la strategia completa di backup, crontab host, pulizia automatica, backup fi
 - Seguire le regole architetturali in [CLAUDE.md](./CLAUDE.md) — mai derogare
 
 Convenzioni di codice, struttura modelli e API in [MANUAL_TECNICO_it.md](./manual/MANUAL_TECNICO_it.md#convenzioni-di-sviluppo).
+
+---
+
+## Riconoscimenti
+
+Il modello decisionale NIS2 per la classificazione degli incidenti (M09 — motore PTA/PTNR e fattispecie ACN) è stato sviluppato con riferimento al progetto open source:
+
+> **NIS2 Incident Management and Reporting** — [CISOs4AI](https://github.com/CISOs4AI/NIS2-Incident-Management-and-Reporting)
