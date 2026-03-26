@@ -485,7 +485,9 @@ export function UsersPage() {
 
   const removeUserMutation = useMutation({
     mutationFn: (id: number) => usersApi.remove(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["users"] }),
+    onSuccess: (_data, id) => {
+      qc.setQueryData<any[]>(["users"], (old) => (old ?? []).filter((u) => u.id !== id));
+    },
     onError: (e: any) => window.alert(e?.response?.data?.detail || t("common.error")),
   });
 
