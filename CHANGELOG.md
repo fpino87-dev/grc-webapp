@@ -8,6 +8,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ## [Unreleased]
 
+### Fixed
+- Documenti obbligatori (M08/M18): tutti i documenti di tipo `procedure` e `record` risultavano sempre "Mancanti" anche se caricati — causato da disallineamento tra le chiavi inglesi di `RequiredDocument` (`procedure`/`record`) e le chiavi italiane di `Document.document_type` (`procedura`/`registro`). Aggiunta mappatura `_TYPE_MAP` in `get_required_documents_status`.
+
 ### Added
 - Compliance Schedule: task Celery notturno `check_schedule_deadlines` (02:30) che crea automaticamente task in M08 per ogni attività in scadenza (urgency red/yellow) su tutti i plant attivi, con dedup su `source_id` e assegnazione per ruolo in base alla categoria
 - M18 Reporting: nuovo tab KPI con quattro sezioni — copertura documenti obbligatori per framework, MTTR (finding audit / incidenti / task), completamento formazione obbligatoria (perimetro utenti GRC), stato NDA fornitori (ok/in scadenza/scaduto/mancante)
