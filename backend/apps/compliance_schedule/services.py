@@ -323,13 +323,14 @@ def get_required_documents_status(plant=None, framework: str = "ISO27001") -> li
     for req in required:
         try:
             from apps.documents.models import Document
+            from django.db.models import Q
             doc_type = _TYPE_MAP.get(req.document_type, req.document_type)
             doc_qs = Document.objects.filter(
                 document_type=doc_type,
                 deleted_at__isnull=True,
             )
             if plant:
-                doc_qs = doc_qs.filter(plant=plant)
+                doc_qs = doc_qs.filter(Q(plant=plant) | Q(shared_plants=plant))
             doc = doc_qs.order_by("-updated_at").first()
         except Exception:
             doc = None
