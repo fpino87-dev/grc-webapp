@@ -1439,6 +1439,7 @@
       "mandatory_badge": "Obbl.",
       "no_doc": "— nessun documento collegato",
       "review_date": "Revisione: {{date}}",
+      "select_plant": "Seleziona un sito per visualizzare i documenti obbligatori del framework attivo.",
       "no_results_framework": "Nessun documento richiesto per questo framework",
       "no_results_filter": "Nessun risultato per il filtro selezionato",
       "col_doc": "Documento",

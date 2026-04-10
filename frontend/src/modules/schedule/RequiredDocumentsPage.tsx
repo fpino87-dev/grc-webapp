@@ -69,7 +69,7 @@ function DocRow({ item }: { item: RequiredDocItem }) {
 export function RequiredDocumentsPage() {
   const { t } = useTranslation();
   const [plantId, setPlantId] = useState<string>("");
-  const [framework, setFramework] = useState("ISO27001");
+  const [framework, setFramework] = useState("");
   const [filter, setFilter] = useState<"all" | "red" | "yellow" | "green">("all");
 
   const { data: plants } = useQuery({
@@ -85,13 +85,15 @@ export function RequiredDocumentsPage() {
     retry: false,
   });
 
-  // Quando cambia il plant, reimposta framework se quello corrente non è attivo
+  // Quando cambia il plant, aggiorna il framework al primo attivo disponibile
   useEffect(() => {
     if (activeFrameworks && activeFrameworks.length > 0) {
       const codes = activeFrameworks.map(f => f.code);
       if (!codes.includes(framework)) {
         setFramework(codes[0]);
       }
+    } else if (activeFrameworks && activeFrameworks.length === 0) {
+      setFramework("");
     }
   }, [activeFrameworks]);
 
@@ -101,6 +103,7 @@ export function RequiredDocumentsPage() {
       plant: plantId || undefined,
       framework,
     }),
+    enabled: !!plantId && !!framework,
     retry: false,
   });
 
@@ -200,7 +203,11 @@ export function RequiredDocumentsPage() {
 
       {/* Table */}
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        {isLoading ? (
+        {!plantId ? (
+          <div className="p-8 text-center text-gray-400 text-sm italic">
+            {t("schedule.required_docs.select_plant")}
+          </div>
+        ) : isLoading ? (
           <div className="p-8 text-center text-gray-400 text-sm">{t("notification_settings.loading")}</div>
         ) : filtered.length === 0 ? (
           <div className="p-8 text-center text-gray-400 text-sm italic">

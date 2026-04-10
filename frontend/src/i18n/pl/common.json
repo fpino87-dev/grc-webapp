@@ -1518,6 +1518,7 @@
       "mandatory_badge": "Obow.",
       "no_doc": "— brak powiązanego dokumentu",
       "review_date": "Przegląd: {{date}}",
+      "select_plant": "Wybierz zakład, aby wyświetlić obowiązkowe dokumenty dla aktywnego frameworka.",
       "no_results_framework": "Brak wymaganych dokumentów dla tego frameworka",
       "no_results_filter": "Brak wyników dla wybranego filtru",
       "col_doc": "Dokument",

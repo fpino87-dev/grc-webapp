@@ -1518,6 +1518,7 @@
       "mandatory_badge": "Oblig.",
       "no_doc": "— aucun document lié",
       "review_date": "Révision : {{date}}",
+      "select_plant": "Sélectionnez un site pour afficher les documents obligatoires du cadre actif.",
       "no_results_framework": "Aucun document requis pour ce cadre",
       "no_results_filter": "Aucun résultat pour le filtre sélectionné",
       "col_doc": "Document",

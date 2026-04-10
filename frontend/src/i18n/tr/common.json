@@ -1518,6 +1518,7 @@
       "mandatory_badge": "Zor.",
       "no_doc": "— bağlı belge yok",
       "review_date": "İnceleme: {{date}}",
+      "select_plant": "Aktif çerçevenin zorunlu belgelerini görüntülemek için bir tesis seçin.",
       "no_results_framework": "Bu çerçeve için gerekli belge yok",
       "no_results_filter": "Seçilen filtre için sonuç yok",
       "col_doc": "Belge",

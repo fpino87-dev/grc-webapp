@@ -1439,6 +1439,7 @@
       "mandatory_badge": "Mand.",
       "no_doc": "— no document linked",
       "review_date": "Review: {{date}}",
+      "select_plant": "Select a site to view the mandatory documents for its active framework.",
       "no_results_framework": "No required documents for this framework",
       "no_results_filter": "No results for the selected filter",
       "col_doc": "Document",
