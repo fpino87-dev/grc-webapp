@@ -68,5 +68,9 @@ app.conf.beat_schedule = {
         "task": "apps.suppliers.tasks.check_questionnaire_followups_task",
         "schedule": crontab(hour=9, minute=0),
     },
+    "check-schedule-deadlines": {
+        "task": "apps.compliance_schedule.tasks.check_schedule_deadlines",
+        "schedule": crontab(hour=2, minute=30),  # 02:30 ogni giorno
+    },
 }
 
