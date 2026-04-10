@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.db.models import Count, Q, Avg
+from django.db.models import Count, Q, Avg, ExpressionWrapper, F, DurationField
 from django.utils import timezone
 
 
@@ -499,3 +499,235 @@ class DashboardSummaryView(APIView):
             "incidents_nis2": inc_qs.filter(nis2_notifiable="si").count(),
             "vacant_roles": get_vacant_mandatory_roles(plant) if plant else [],
         })
+
+
+class KpiOverviewView(APIView):
+    """
+    GET /reporting/kpi-overview/?plant=<uuid>
+
+    Restituisce i KPI di governance GRC:
+    - required_docs: copertura documenti obbligatori per framework attivo
+    - mttr: tempo medio di risoluzione (finding audit, incidenti, task)
+    - training: completamento formazione obbligatoria (perimetro utenti GRC)
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        plant_id = request.query_params.get("plant")
+        plant = None
+        if plant_id:
+            from apps.plants.models import Plant
+            plant = Plant.objects.filter(pk=plant_id).first()
+
+        return Response({
+            "required_docs": self._required_docs(plant),
+            "mttr": self._mttr(plant_id),
+            "training": self._training(plant),
+        })
+
+    # ------------------------------------------------------------------ #
+    # 1. Required documents coverage                                       #
+    # ------------------------------------------------------------------ #
+    def _required_docs(self, plant):
+        from apps.compliance_schedule.services import get_required_documents_status
+        from apps.plants.services import get_active_framework_codes
+
+        ALL_FRAMEWORKS = ["ISO27001", "NIS2", "TISAX_L2", "TISAX_L3"]
+
+        if plant:
+            frameworks = get_active_framework_codes(plant)
+        else:
+            frameworks = ALL_FRAMEWORKS
+
+        result = []
+        for fw in frameworks:
+            items = get_required_documents_status(plant=plant, framework=fw)
+            if not items:
+                continue
+            total = len(items)
+            green = sum(1 for i in items if i["traffic_light"] == "green")
+            yellow = sum(1 for i in items if i["traffic_light"] == "yellow")
+            red = sum(1 for i in items if i["traffic_light"] == "red")
+            mandatory_total = sum(1 for i in items if i["mandatory"])
+            mandatory_ok = sum(1 for i in items if i["mandatory"] and i["traffic_light"] == "green")
+            result.append({
+                "framework": fw,
+                "total": total,
+                "green": green,
+                "yellow": yellow,
+                "red": red,
+                "pct_coverage": round(green / total * 100, 1) if total else 0,
+                "mandatory_total": mandatory_total,
+                "mandatory_ok": mandatory_ok,
+                "pct_mandatory": round(mandatory_ok / mandatory_total * 100, 1) if mandatory_total else 0,
+            })
+        return result
+
+    # ------------------------------------------------------------------ #
+    # 2. Mean Time To Remediate                                            #
+    # ------------------------------------------------------------------ #
+    def _mttr(self, plant_id):
+        from apps.audit_prep.models import AuditFinding
+        from apps.incidents.models import Incident
+        from apps.tasks.models import Task
+
+        duration_expr = ExpressionWrapper(
+            F("closed_at") - F("created_at"),
+            output_field=DurationField(),
+        )
+        task_duration_expr = ExpressionWrapper(
+            F("completed_at") - F("created_at"),
+            output_field=DurationField(),
+        )
+
+        def td_to_days(td):
+            if td is None:
+                return None
+            return round(td.total_seconds() / 86400, 1)
+
+        # --- Findings ---
+        f_base = AuditFinding.objects.filter(
+            closed_at__isnull=False,
+            deleted_at__isnull=True,
+        )
+        if plant_id:
+            f_base = f_base.filter(audit_prep__plant_id=plant_id)
+
+        findings = {}
+        for ftype in ("major", "minor", "observation"):
+            agg = f_base.filter(finding_type=ftype).annotate(dur=duration_expr).aggregate(
+                count=Count("id"), avg=Avg("dur")
+            )
+            findings[ftype] = {
+                "count": agg["count"],
+                "avg_days": td_to_days(agg["avg"]),
+            }
+        findings["all"] = {
+            "count": f_base.count(),
+            "avg_days": td_to_days(
+                f_base.annotate(dur=duration_expr).aggregate(avg=Avg("dur"))["avg"]
+            ),
+        }
+
+        # --- Incidents ---
+        i_base = Incident.objects.filter(
+            closed_at__isnull=False,
+            deleted_at__isnull=True,
+        )
+        if plant_id:
+            i_base = i_base.filter(plant_id=plant_id)
+
+        incidents_all = i_base.annotate(dur=duration_expr).aggregate(
+            count=Count("id"), avg=Avg("dur")
+        )
+        incidents_by_sev = {}
+        for sev in ("critica", "alta", "media", "bassa"):
+            agg = i_base.filter(severity=sev).annotate(dur=duration_expr).aggregate(
+                count=Count("id"), avg=Avg("dur")
+            )
+            if agg["count"]:
+                incidents_by_sev[sev] = {
+                    "count": agg["count"],
+                    "avg_days": td_to_days(agg["avg"]),
+                }
+
+        # --- Tasks ---
+        t_base = Task.objects.filter(
+            status="completato",
+            completed_at__isnull=False,
+            deleted_at__isnull=True,
+        )
+        if plant_id:
+            t_base = t_base.filter(plant_id=plant_id)
+
+        tasks_all = t_base.annotate(dur=task_duration_expr).aggregate(
+            count=Count("id"), avg=Avg("dur")
+        )
+
+        return {
+            "findings": findings,
+            "incidents": {
+                "all": {
+                    "count": incidents_all["count"],
+                    "avg_days": td_to_days(incidents_all["avg"]),
+                },
+                "by_severity": incidents_by_sev,
+            },
+            "tasks": {
+                "all": {
+                    "count": tasks_all["count"],
+                    "avg_days": td_to_days(tasks_all["avg"]),
+                },
+            },
+        }
+
+    # ------------------------------------------------------------------ #
+    # 3. Training completion (GRC users perimeter)                        #
+    # ------------------------------------------------------------------ #
+    def _training(self, plant):
+        from apps.training.models import TrainingCourse, TrainingEnrollment
+        from apps.auth_grc.models import UserPlantAccess
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+
+        # Perimetro: utenti con almeno un accesso GRC attivo
+        user_qs = User.objects.filter(
+            plant_access__deleted_at__isnull=True,
+        ).distinct()
+        if plant:
+            user_qs = user_qs.filter(
+                plant_access__scope_plants=plant,
+                plant_access__deleted_at__isnull=True,
+            ).distinct()
+
+        total_users = user_qs.count()
+        user_ids = list(user_qs.values_list("id", flat=True))
+
+        # Corsi obbligatori attivi
+        course_qs = TrainingCourse.objects.filter(mandatory=True, status="attivo")
+        if plant:
+            course_qs = course_qs.filter(plants=plant)
+
+        mandatory_courses = []
+        mandatory_course_ids = list(course_qs.values_list("id", flat=True))
+
+        for course in course_qs.order_by("title"):
+            enrolled = TrainingEnrollment.objects.filter(
+                course=course, user_id__in=user_ids
+            ).count()
+            completed = TrainingEnrollment.objects.filter(
+                course=course, user_id__in=user_ids, status="completato"
+            ).count()
+            mandatory_courses.append({
+                "id": str(course.id),
+                "title": course.title,
+                "source": course.source,
+                "deadline": str(course.deadline) if course.deadline else None,
+                "enrolled": enrolled,
+                "completed": completed,
+                "pct_completed": round(completed / enrolled * 100, 1) if enrolled else 0,
+                "not_enrolled": total_users - enrolled,
+            })
+
+        # Utenti che hanno completato TUTTI i corsi obbligatori
+        if mandatory_course_ids and user_ids:
+            users_all_done = 0
+            for uid in user_ids:
+                completed_count = TrainingEnrollment.objects.filter(
+                    user_id=uid,
+                    course_id__in=mandatory_course_ids,
+                    status="completato",
+                ).values("course_id").distinct().count()
+                if completed_count >= len(mandatory_course_ids):
+                    users_all_done += 1
+        else:
+            users_all_done = 0
+
+        return {
+            "total_users": total_users,
+            "mandatory_courses_count": len(mandatory_course_ids),
+            "users_all_mandatory_completed": users_all_done,
+            "pct_all_mandatory": round(users_all_done / total_users * 100, 1) if total_users else 0,
+            "courses": mandatory_courses,
+        }

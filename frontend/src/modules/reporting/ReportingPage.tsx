@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { reportingApi, type BiaBcpRow, type TopRisk, type ThreatBreakdown, type Nis2CategoryBreakdown, type HeatmapCell } from "../../api/endpoints/reporting";
+import { reportingApi, type BiaBcpRow, type TopRisk, type ThreatBreakdown, type Nis2CategoryBreakdown, type HeatmapCell, type RequiredDocsCoverage } from "../../api/endpoints/reporting";
+import { plantsApi } from "../../api/endpoints/plants";
 import { useAuthStore } from "../../store/auth";
 import {
   BarChart,
@@ -607,9 +608,255 @@ function TabRiskBiaBcp() {
   );
 }
 
+// ── KPI Overview tab ──────────────────────────────────────────────────────────
+
+const FW_LABELS: Record<string, string> = {
+  ISO27001: "ISO 27001", NIS2: "NIS2", TISAX_L2: "TISAX L2", TISAX_L3: "TISAX L3",
+};
+
+function CoverageBar({ pct, colorClass }: { pct: number; colorClass: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+        <div className={`h-2 rounded-full ${colorClass}`} style={{ width: `${Math.min(pct, 100)}%` }} />
+      </div>
+      <span className="text-xs font-semibold w-10 text-right">{pct}%</span>
+    </div>
+  );
+}
+
+function MttrBadge({ days }: { days: number | null }) {
+  if (days === null) return <span className="text-xs text-gray-400">—</span>;
+  const color = days <= 14 ? "text-green-600" : days <= 30 ? "text-yellow-600" : "text-red-600";
+  return <span className={`text-sm font-semibold ${color}`}>{days}gg</span>;
+}
+
+function TabKpi() {
+  const { t } = useTranslation();
+  const [plantId, setPlantId] = useState<string>("");
+
+  const { data: plants } = useQuery({ queryKey: ["plants"], queryFn: () => plantsApi.list(), retry: false });
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["kpi-overview", plantId],
+    queryFn: () => reportingApi.kpiOverview(plantId || undefined),
+    retry: false,
+  });
+
+  return (
+    <div className="space-y-8">
+      {/* Plant filter */}
+      <div className="flex items-center gap-3">
+        <label className="text-xs font-medium text-gray-600">{t("reporting.kpi.plant_label")}</label>
+        <select
+          value={plantId}
+          onChange={e => setPlantId(e.target.value)}
+          className="border border-gray-300 rounded px-2 py-1.5 text-sm"
+        >
+          <option value="">{t("reporting.kpi.all_plants")}</option>
+          {plants?.map(p => <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>)}
+        </select>
+      </div>
+
+      {isLoading && <div className="text-sm text-gray-400 py-8 text-center">{t("notification_settings.loading")}</div>}
+
+      {data && (
+        <>
+          {/* ── 1. Required docs coverage ── */}
+          <section>
+            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+              {t("reporting.kpi.section_docs")}
+            </h3>
+            {data.required_docs.length === 0 ? (
+              <p className="text-sm text-gray-400 italic">{t("reporting.kpi.no_frameworks")}</p>
+            ) : (
+              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                      <th className="px-4 py-3 text-left">{t("reporting.kpi.col_framework")}</th>
+                      <th className="px-4 py-3 text-right">{t("reporting.kpi.col_total")}</th>
+                      <th className="px-4 py-3 text-right">
+                        <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-1" />
+                        {t("reporting.kpi.col_approved")}
+                      </th>
+                      <th className="px-4 py-3 text-right">
+                        <span className="inline-block w-2 h-2 rounded-full bg-yellow-400 mr-1" />
+                        {t("reporting.kpi.col_draft")}
+                      </th>
+                      <th className="px-4 py-3 text-right">
+                        <span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-1" />
+                        {t("reporting.kpi.col_missing")}
+                      </th>
+                      <th className="px-4 py-3 text-left w-48">{t("reporting.kpi.col_coverage")}</th>
+                      <th className="px-4 py-3 text-left w-48">{t("reporting.kpi.col_mandatory")}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {data.required_docs.map((row: RequiredDocsCoverage) => (
+                      <tr key={row.framework} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 font-medium text-gray-900">{FW_LABELS[row.framework] ?? row.framework}</td>
+                        <td className="px-4 py-3 text-right text-gray-600">{row.total}</td>
+                        <td className="px-4 py-3 text-right text-green-700 font-medium">{row.green}</td>
+                        <td className="px-4 py-3 text-right text-yellow-600 font-medium">{row.yellow}</td>
+                        <td className="px-4 py-3 text-right text-red-600 font-medium">{row.red}</td>
+                        <td className="px-4 py-3"><CoverageBar pct={row.pct_coverage} colorClass="bg-blue-500" /></td>
+                        <td className="px-4 py-3"><CoverageBar pct={row.pct_mandatory} colorClass={row.pct_mandatory >= 100 ? "bg-green-500" : row.pct_mandatory >= 70 ? "bg-yellow-400" : "bg-red-500"} /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+
+          {/* ── 2. MTTR ── */}
+          <section>
+            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+              {t("reporting.kpi.section_mttr")}
+              <span className="ml-2 text-xs text-gray-400 normal-case font-normal">{t("reporting.kpi.mttr_hint")}</span>
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Findings */}
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">{t("reporting.kpi.mttr_findings")}</p>
+                <div className="space-y-2">
+                  {(["major", "minor", "observation"] as const).map(type => (
+                    <div key={type} className="flex justify-between items-center">
+                      <span className="text-xs text-gray-600 capitalize">{t(`reporting.kpi.finding_${type}`)}</span>
+                      <div className="text-right">
+                        <MttrBadge days={data.mttr.findings[type].avg_days} />
+                        <span className="block text-xs text-gray-400">({data.mttr.findings[type].count} {t("reporting.kpi.closed")})</span>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="border-t border-gray-100 pt-2 flex justify-between items-center">
+                    <span className="text-xs font-semibold text-gray-700">{t("reporting.kpi.total")}</span>
+                    <div className="text-right">
+                      <MttrBadge days={data.mttr.findings.all.avg_days} />
+                      <span className="block text-xs text-gray-400">({data.mttr.findings.all.count})</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Incidents */}
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">{t("reporting.kpi.mttr_incidents")}</p>
+                <div className="space-y-2">
+                  {(["critica", "alta", "media", "bassa"] as const).map(sev => {
+                    const entry = data.mttr.incidents.by_severity[sev];
+                    if (!entry) return null;
+                    return (
+                      <div key={sev} className="flex justify-between items-center">
+                        <span className="text-xs text-gray-600 capitalize">{t(`reporting.kpi.severity_${sev}`)}</span>
+                        <div className="text-right">
+                          <MttrBadge days={entry.avg_days} />
+                          <span className="block text-xs text-gray-400">({entry.count})</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div className="border-t border-gray-100 pt-2 flex justify-between items-center">
+                    <span className="text-xs font-semibold text-gray-700">{t("reporting.kpi.total")}</span>
+                    <div className="text-right">
+                      <MttrBadge days={data.mttr.incidents.all.avg_days} />
+                      <span className="block text-xs text-gray-400">({data.mttr.incidents.all.count})</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tasks */}
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">{t("reporting.kpi.mttr_tasks")}</p>
+                <div className="flex justify-between items-center mt-2">
+                  <span className="text-xs text-gray-600">{t("reporting.kpi.tasks_completed")}</span>
+                  <div className="text-right">
+                    <MttrBadge days={data.mttr.tasks.all.avg_days} />
+                    <span className="block text-xs text-gray-400">({data.mttr.tasks.all.count})</span>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-400 mt-4">{t("reporting.kpi.mttr_tasks_note")}</p>
+              </div>
+            </div>
+          </section>
+
+          {/* ── 3. Training ── */}
+          <section>
+            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+              {t("reporting.kpi.section_training")}
+            </h3>
+            {/* Summary card */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <p className="text-xs text-gray-500 uppercase tracking-wide">{t("reporting.kpi.training_users")}</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">{data.training.total_users}</p>
+                <p className="text-xs text-gray-400 mt-1">{t("reporting.kpi.training_grc_perimeter")}</p>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <p className="text-xs text-gray-500 uppercase tracking-wide">{t("reporting.kpi.training_mandatory_courses")}</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">{data.training.mandatory_courses_count}</p>
+              </div>
+              <div className={`bg-white border rounded-lg p-4 ${data.training.pct_all_mandatory >= 80 ? "border-green-300" : data.training.pct_all_mandatory >= 50 ? "border-yellow-300" : "border-red-300"}`}>
+                <p className="text-xs text-gray-500 uppercase tracking-wide">{t("reporting.kpi.training_all_done")}</p>
+                <p className={`text-3xl font-bold mt-1 ${data.training.pct_all_mandatory >= 80 ? "text-green-600" : data.training.pct_all_mandatory >= 50 ? "text-yellow-600" : "text-red-600"}`}>
+                  {data.training.pct_all_mandatory}%
+                </p>
+                <p className="text-xs text-gray-400 mt-1">{data.training.users_all_mandatory_completed}/{data.training.total_users} {t("reporting.kpi.training_users_suffix")}</p>
+              </div>
+            </div>
+
+            {/* Per-course table */}
+            {data.training.courses.length === 0 ? (
+              <p className="text-sm text-gray-400 italic">{t("reporting.kpi.no_mandatory_courses")}</p>
+            ) : (
+              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                      <th className="px-4 py-3 text-left">{t("reporting.kpi.col_course")}</th>
+                      <th className="px-4 py-3 text-center">{t("reporting.kpi.col_source")}</th>
+                      <th className="px-4 py-3 text-right">{t("reporting.kpi.col_enrolled")}</th>
+                      <th className="px-4 py-3 text-right">{t("reporting.kpi.col_completed")}</th>
+                      <th className="px-4 py-3 text-right">{t("reporting.kpi.col_not_enrolled")}</th>
+                      <th className="px-4 py-3 text-left w-40">{t("reporting.kpi.col_completion")}</th>
+                      <th className="px-4 py-3 text-right">{t("reporting.kpi.col_deadline")}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {data.training.courses.map(c => (
+                      <tr key={c.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 font-medium text-gray-900">{c.title}</td>
+                        <td className="px-4 py-3 text-center">
+                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{c.source}</span>
+                        </td>
+                        <td className="px-4 py-3 text-right text-gray-600">{c.enrolled}</td>
+                        <td className="px-4 py-3 text-right text-green-700 font-medium">{c.completed}</td>
+                        <td className="px-4 py-3 text-right text-red-600">{c.not_enrolled}</td>
+                        <td className="px-4 py-3">
+                          <CoverageBar
+                            pct={c.pct_completed}
+                            colorClass={c.pct_completed >= 80 ? "bg-green-500" : c.pct_completed >= 50 ? "bg-yellow-400" : "bg-red-500"}
+                          />
+                        </td>
+                        <td className="px-4 py-3 text-right text-xs text-gray-500">{c.deadline ?? "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        </>
+      )}
+    </div>
+  );
+}
+
 export function ReportingPage() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<"compliance" | "owner" | "risk_bia_bcp">("compliance");
+  const [tab, setTab] = useState<"compliance" | "owner" | "risk_bia_bcp" | "kpi">("compliance");
 
   return (
     <div>
@@ -618,7 +865,7 @@ export function ReportingPage() {
       </div>
 
       <div className="flex gap-1 mb-6 border-b border-gray-200">
-        {(["compliance", "owner", "risk_bia_bcp"] as const).map(tabKey => (
+        {(["compliance", "owner", "risk_bia_bcp", "kpi"] as const).map(tabKey => (
           <button
             key={tabKey}
             onClick={() => setTab(tabKey)}
@@ -634,6 +881,7 @@ export function ReportingPage() {
       {tab === "compliance" && <TabCompliance />}
       {tab === "owner" && <TabOwner />}
       {tab === "risk_bia_bcp" && <TabRiskBiaBcp />}
+      {tab === "kpi" && <TabKpi />}
     </div>
   );
 }

@@ -10,6 +10,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ### Added
 - Compliance Schedule: task Celery notturno `check_schedule_deadlines` (02:30) che crea automaticamente task in M08 per ogni attività in scadenza (urgency red/yellow) su tutti i plant attivi, con dedup su `source_id` e assegnazione per ruolo in base alla categoria
+- M18 Reporting: nuovo tab KPI con tre sezioni — copertura documenti obbligatori per framework, MTTR (finding audit / incidenti / task), completamento formazione obbligatoria (perimetro utenti GRC)
+- Endpoint `GET /reporting/kpi-overview/?plant=<uuid>`
 
 ---
 

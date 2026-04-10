@@ -115,6 +115,60 @@ export interface RiskBiaBcpData {
   bia_bcp_table: BiaBcpRow[];
 }
 
+// ── KPI Overview ──────────────────────────────────────────────────────────────
+
+export interface RequiredDocsCoverage {
+  framework: string;
+  total: number;
+  green: number;
+  yellow: number;
+  red: number;
+  pct_coverage: number;
+  mandatory_total: number;
+  mandatory_ok: number;
+  pct_mandatory: number;
+}
+
+export interface MttrEntry {
+  count: number;
+  avg_days: number | null;
+}
+
+export interface KpiOverviewData {
+  required_docs: RequiredDocsCoverage[];
+  mttr: {
+    findings: {
+      all: MttrEntry;
+      major: MttrEntry;
+      minor: MttrEntry;
+      observation: MttrEntry;
+    };
+    incidents: {
+      all: MttrEntry;
+      by_severity: Record<string, MttrEntry>;
+    };
+    tasks: {
+      all: MttrEntry;
+    };
+  };
+  training: {
+    total_users: number;
+    mandatory_courses_count: number;
+    users_all_mandatory_completed: number;
+    pct_all_mandatory: number;
+    courses: {
+      id: string;
+      title: string;
+      source: string;
+      deadline: string | null;
+      enrolled: number;
+      completed: number;
+      pct_completed: number;
+      not_enrolled: number;
+    }[];
+  };
+}
+
 export const reportingApi = {
   dashboard: (plant?: string) =>
     apiClient.get<{
@@ -144,6 +198,11 @@ export const reportingApi = {
   riskBiaBcp: (plant?: string) =>
     apiClient.get<RiskBiaBcpData>(
       "/reporting/risk-bia-bcp/",
+      { params: plant ? { plant } : {} }
+    ).then(r => r.data),
+  kpiOverview: (plant?: string) =>
+    apiClient.get<KpiOverviewData>(
+      "/reporting/kpi-overview/",
       { params: plant ? { plant } : {} }
     ).then(r => r.data),
 };
