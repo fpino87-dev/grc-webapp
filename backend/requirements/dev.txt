@@ -1,0 +1,10 @@
+-r base.txt
+pytest==8.*
+pytest-django==4.*
+pytest-cov==5.*
+factory-boy==3.*
+faker==26.*
+ruff==0.6.*
+ipython==8.*
+django-extensions==3.*
+

@@ -1,0 +1,35 @@
+# Versioni con lower bound esplicito per sicurezza supply-chain.
+# Aggiornare regolarmente e verificare CVE con: pip-audit
+Django==5.1.*
+djangorestframework==3.15.*
+django-environ==0.11.*
+django-cors-headers==4.4.*
+django-filter==24.*
+celery==5.4.*
+redis==5.0.*
+django-celery-beat==2.7.*
+django-celery-results==2.5.*
+psycopg2-binary==2.9.*
+boto3==1.35.*
+django-storages==1.14.*
+openpyxl==3.1.*
+djangorestframework-simplejwt==5.3.*
+drf-spectacular==0.27.*
+python-dateutil==2.9.*
+# cryptography: versione minima con fix CVE critici
+cryptography>=43.0.0
+# python-magic: MIME detection per upload sicuro
+python-magic==0.4.*
+anthropic>=0.40.0
+openai>=1.52.0
+# pip-audit: analisi vulnerabilità dipendenze (usare in CI/CD)
+pip-audit>=2.7.0
+
+# Sentry: error monitoring e performance tracing
+sentry-sdk[django]==2.*
+
+# 2FA TOTP per Django Admin (Google Authenticator / Authy)
+django-two-factor-auth==1.18.*
+django-otp==1.7.*
+qrcode[pil]==8.*
+django-formtools==2.5.*

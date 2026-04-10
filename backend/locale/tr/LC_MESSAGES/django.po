@@ -1,0 +1,217 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: grc-webapp\n"
+"POT-Creation-Date: 2026-03-18 00:00+0000\n"
+"PO-Revision-Date: 2026-03-18 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: tr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Evidenza '%(title)s' ha %(age)s giorni (max consigliato: %(max_age)s gg)"
+msgstr "'%(title)s' kanıtı %(age)s günlük (önerilen en fazla: %(max_age)s gün)"
+
+msgid "Richiesti almeno %(count)s documenti approvati"
+msgstr "En az %(count)s onaylı doküman gereklidir"
+
+msgid "Richieste almeno %(count)s evidenze valide"
+msgstr "En az %(count)s geçerli kanıt gereklidir"
+
+msgid "• Documento mancante: %(desc)s"
+msgstr "• Eksik doküman: %(desc)s"
+
+msgid "• Evidenza mancante: %(desc)s"
+msgstr "• Eksik kanıt: %(desc)s"
+
+msgid "• Evidenza scaduta: %(title)s (scaduta il %(date)s)"
+msgstr "• Süresi dolmuş kanıt: %(title)s (%(date)s tarihinde süresi doldu)"
+
+msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata."
+msgstr "En az bir geçerli kanıt iliştirilmeden durum 'uyumlu' olarak ayarlanamaz."
+
+msgid "Requisiti non soddisfatti per stato Compliant:\\n"
+msgstr "Uyumlu durumu için karşılanmayan gereksinimler:\\n"
+
+msgid "Almeno un documento approvato o un'evidenza valida richiesti per stato Parziale."
+msgstr "Kısmi durumu için en az bir onaylı doküman veya geçerli kanıt gereklidir."
+
+msgid "Lo stato N/A richiede una giustificazione scritta di almeno 20 caratteri."
+msgstr "N/A durumu için en az 20 karakterlik yazılı bir gerekçe gereklidir."
+
+msgid "La giustificazione di esclusione per SOA richiede almeno 50 caratteri. Specificare il motivo formale per cui il controllo non è applicabile."
+msgstr "SOA dışlama gerekçesi en az 50 karakter olmalıdır. Kontrolün neden uygulanabilir olmadığını resmi olarak belirtin."
+
+msgid "Solo assessment completati possono essere approvati."
+msgstr "Yalnızca tamamlanmış değerlendirmeler onaylanabilir."
+
+msgid "Motivazione rifiuto obbligatoria (min 10 caratteri)."
+msgstr "Reddetme gerekçesi zorunludur (en az 10 karakter)."
+
+msgid "La nota è obbligatoria per l'accettazione formale del rischio."
+msgstr "Riskin resmi olarak kabulü için not zorunludur."
+
+msgid "Per rischi critici (rosso) la nota di accettazione deve essere di almeno 50 caratteri."
+msgstr "Kritik (kırmızı) riskler için kabul notu en az 50 karakter olmalıdır."
+
+msgid "Il ciclo è già chiuso."
+msgstr "Döngü zaten kapatılmış."
+
+msgid "Per avanzare da PLAN a DO è obbligatorio descrivere l'azione pianificata (minimo 20 caratteri)."
+msgstr "PLAN'dan DO'ya geçmek için planlanan eylemin tanımlanması zorunludur (en az 20 karakter)."
+
+msgid "Per avanzare da DO a CHECK è obbligatorio allegare un'evidenza dell'implementazione."
+msgstr "DO'dan CHECK'e geçmek için uygulamaya dair bir kanıt iliştirilmesi zorunludur."
+
+msgid "Per avanzare da CHECK ad ACT è obbligatorio descrivere il risultato della verifica."
+msgstr "CHECK'ten ACT'e geçmek için doğrulama sonucunun tanımlanması zorunludur."
+
+msgid "Per avanzare da CHECK ad ACT è obbligatorio indicare l'esito: ok / partial / ko."
+msgstr "CHECK'ten ACT'e geçmek için sonucu belirtmek zorunludur: ok / partial / ko."
+
+msgid "Usa close_cycle() per chiudere dalla fase ACT."
+msgstr "Döngüyü ACT aşamasından kapatmak için close_cycle() kullanın."
+
+msgid "Il ciclo è in fase %(phase)s. Avanza fino ad ACT prima di chiudere."
+msgstr "Döngü şu aşamada: %(phase)s. Kapatmadan önce ACT aşamasına ilerleyin."
+
+msgid "Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata (minimo 20 caratteri)."
+msgstr "Döngüyü kapatmak için standartlaştırılmış eylemi tanımlamak zorunludur (en az 20 karakter)."
+
+msgid "File troppo grande. Dimensione massima: 50MB."
+msgstr "Dosya çok büyük. Maksimum boyut: 50 MB."
+
+msgid "Estensione file non consentita. Formati ammessi: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
+msgstr "Dosya uzantısına izin verilmiyor. İzin verilen formatlar: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
+
+msgid "Generare lo snapshot dei dati prima di approvare il riesame."
+msgstr "Gözden geçirmeyi onaylamadan önce veri snapshot'ını oluşturun."
+
+msgid "Il riesame è già approvato."
+msgstr "Gözden geçirme zaten onaylanmış."
+
+msgid "RCA approvato obbligatorio per chiudere l'incidente."
+msgstr "Olayı kapatmak için onaylanmış bir RCA zorunludur."
+
+msgid "Policy predefinita"
+msgstr "Varsayılan politika"
+
+msgid "Plant non trovato"
+msgstr "Tesis bulunamadı"
+
+msgid "rule_type obbligatorio"
+msgstr "rule_type zorunludur"
+
+msgid "Endpoint disponibile solo in ambiente di test (DEBUG=True)."
+msgstr "Endpoint yalnızca test ortamında kullanılabilir (DEBUG=True)."
+
+msgid "Solo il superuser può eseguire questa operazione"
+msgstr "Bu işlemi yalnızca süper kullanıcı gerçekleştirebilir"
+
+msgid "Header X-Confirm-Reset: RESET-CONFIRMED richiesto"
+msgstr "X-Confirm-Reset başlığı: RESET-CONFIRMED zorunludur"
+
+msgid "Utente non trovato"
+msgstr "Kullanıcı bulunamadı"
+
+msgid "Evidenza non trovata"
+msgstr "Kanıt bulunamadı"
+
+msgid "Non hai i permessi per inviare in revisione questo documento."
+msgstr "Bu dokümanı incelemeye göndermek için izniniz yok."
+
+msgid "Non hai i permessi per approvare questo documento."
+msgstr "Bu dokümanı onaylamak için izniniz yok."
+
+msgid "Nessun file fornito."
+msgstr "Herhangi bir dosya sağlanmadı."
+
+msgid "Nessun file associato a questa evidenza."
+msgstr "Bu kanıtla iliştirilmiş bir dosya yok."
+
+msgid "File non trovato nello storage."
+msgstr "Dosya depolamada bulunamadı."
+
+msgid "change_ref obbligatorio"
+msgstr "change_ref zorunludur"
+
+msgid "Questo ruolo è già terminato."
+msgstr "Bu rol zaten sonlandırılmış."
+
+msgid "Motivo terminazione obbligatorio (min 5 caratteri)."
+msgstr "Sonlandırma gerekçesi zorunludur (en az 5 karakter)."
+
+msgid "new_user_id obbligatorio."
+msgstr "new_user_id zorunludur."
+
+msgid "Framework JSON non valido: campi mancanti: %(fields)s"
+msgstr "Geçersiz framework JSON: eksik alanlar: %(fields)s"
+
+msgid "Framework JSON non valido: 'controls' deve essere una lista."
+msgstr "Geçersiz framework JSON: 'controls' bir liste olmalıdır."
+
+msgid "Framework JSON non valido: ogni control deve essere un oggetto."
+msgstr "Geçersiz framework JSON: her control bir nesne olmalıdır."
+
+msgid "Framework JSON non valido: control senza campo '%(field)s'."
+msgstr "Geçersiz framework JSON: control '%(field)s' alanına sahip değil."
+
+msgid "Framework '%(code)s' importato (v%(version)s)."
+msgstr "'%(code)s' framework'ü içe aktarıldı (v%(version)s)."
+
+msgid "Solo il superuser può importare framework."
+msgstr "Framework içe aktarmayı yalnızca süper kullanıcı yapabilir."
+
+msgid "Conferma import non valida (sha256 mismatch)."
+msgstr "Geçersiz içe aktarma onayı (sha256 uyuşmazlığı)."
+
+msgid "Nessun requisito documentale definito per questo controllo."
+msgstr "Bu kontrol için tanımlanmış dokümantasyon gereksinimi yok."
+
+msgid "Tutti i requisiti documentali sono soddisfatti."
+msgstr "Tüm dokümantasyon gereksinimleri karşılanmıştır."
+
+msgid "Documento mancante: %(desc)s"
+msgstr "Eksik doküman: %(desc)s"
+
+msgid "Evidenza mancante: %(desc)s"
+msgstr "Eksik kanıt: %(desc)s"
+
+msgid "Evidenza scaduta: %(title)s (scaduta il %(date)s)"
+msgstr "Süresi dolmuş kanıt: %(title)s (%(date)s tarihinde süresi doldu)"
+
+msgid "Requisiti parzialmente soddisfatti."
+msgstr "Gereksinimler kısmen karşılandı."
+
+msgid "Nessuna documentazione presente."
+msgstr "Herhangi bir dokümantasyon mevcut değil."
+
+msgid "Campo 'status' obbligatorio."
+msgstr "'status' alanı zorunludur."
+
+msgid "Documento non trovato"
+msgstr "Doküman bulunamadı"
+
+msgid "Evidenza non trovata."
+msgstr "Kanıt bulunamadı."
+
+msgid "maturity_level deve essere tra 0 e 5"
+msgstr "maturity_level 0 ile 5 arasında olmalıdır"
+
+msgid "Parametri 'source' e 'target' obbligatori."
+msgstr "'source' ve 'target' parametreleri zorunludur."
+
+msgid "Parametro 'framework' obbligatorio."
+msgstr "'framework' parametresi zorunludur."
+
+msgid "Formato %(fmt)s non compatibile con framework %(fw)s. Usa uno di: %(allowed)s"
+msgstr "%(fmt)s formatı %(fw)s framework'ü ile uyumlu değil. Şunlardan birini kullanın: %(allowed)s"
+
+msgid "Framework '%(fw)s' non attivo per questo sito. Framework attivi: %(active)s"
+msgstr "'%(fw)s' framework'ü bu tesis için aktif değil. Aktif framework'ler: %(active)s"
+
+msgid "Errore generazione documento: %(err)s"
+msgstr "Doküman oluşturma hatası: %(err)s"
+

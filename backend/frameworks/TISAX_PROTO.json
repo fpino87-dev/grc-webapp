@@ -1,0 +1,863 @@
+{
+  "code": "TISAX_PROTO",
+  "name": "TISAX — VDA ISA 6.0 Prototype Protection",
+  "version": "6.0",
+  "published_at": "2023-03-01",
+  "domains": [
+    {
+      "code": "P-PHYSEC",
+      "translations": {
+        "en": {
+          "name": "Physical & Environmental Security"
+        },
+        "it": {
+          "name": "Sicurezza Fisica e Ambientale"
+        }
+      },
+      "order": 1
+    },
+    {
+      "code": "P-ORG",
+      "translations": {
+        "en": {
+          "name": "Organisational Requirements"
+        },
+        "it": {
+          "name": "Requisiti Organizzativi"
+        }
+      },
+      "order": 2
+    },
+    {
+      "code": "P-VEHICLES",
+      "translations": {
+        "en": {
+          "name": "Handling Vehicles & Components"
+        },
+        "it": {
+          "name": "Gestione Veicoli e Componenti"
+        }
+      },
+      "order": 3
+    },
+    {
+      "code": "P-TRIALS",
+      "translations": {
+        "en": {
+          "name": "Requirements for Trial Vehicles"
+        },
+        "it": {
+          "name": "Requisiti per Veicoli Sperimentali"
+        }
+      },
+      "order": 4
+    },
+    {
+      "code": "P-EVENTS",
+      "translations": {
+        "en": {
+          "name": "Requirements for Events & Shootings"
+        },
+        "it": {
+          "name": "Requisiti per Eventi e Riprese"
+        }
+      },
+      "order": 5
+    }
+  ],
+  "controls": [
+    {
+      "external_id": "ISA-8.1.1",
+      "domain": "P-PHYSEC",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent is a security concept available describing minimum requirements regarding the physical and environmental security for prototype protection?",
+          "description": "Requisiti (must):\n+ A security concept under consideration of the following aspects is established: \n - stability of outer skin,\n - view and sight protection,\n - protection against unauthorized entry and access control,\n - intrusion monitoring,\n - documented visitor management,\n - client segregation.\n\nRequisiti (should):\n+ Perimeter security."
+        },
+        "it": {
+          "title": "In che misura è disponibile un concetto di sicurezza che descriva i requisiti minimi relativi ai prototipi?",
+          "description": "Requisiti (must):\n+ A security concept under consideration of the following aspects is established: \n - stability of outer skin,\n - view and sight protection,\n - protection against unauthorized entry and access control,\n - intrusion monitoring,\n - documented visitor management,\n - client segregation.\n\nRequisiti (should):\n+ Perimeter security."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "policy",
+            "mandatory": true,
+            "description": "Policy/Procedura applicabile documentata e approvata"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.1.1: To what extent is a security concept available describing minimum requirements regarding the physica"
+      }
+    },
+    {
+      "external_id": "ISA-8.1.2",
+      "domain": "P-PHYSEC",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent is perimeter security existent preventing unauthorized access to protected property objects?",
+          "description": "Requisiti (must):\n+ Unauthorized access to properties is not possible.\n\nRequisiti (should):\n+ Suitable barriers are in place such as:\n  - artificial barriers (fence systems, walls),\n  - technical barriers (detection),\n  - natural barriers (growth, vegetation)."
+        },
+        "it": {
+          "title": "In che misura esiste una sicurezza perimetrale che impedisce l'accesso non autorizzato alle aree protette?",
+          "description": "Requisiti (must):\n+ Unauthorized access to properties is not possible.\n\nRequisiti (should):\n+ Suitable barriers are in place such as:\n  - artificial barriers (fence systems, walls),\n  - technical barriers (detection),\n  - natural barriers (growth, vegetation)."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.1.2: To what extent is perimeter security existent preventing unauthorized access to protected property o"
+      }
+    },
+    {
+      "external_id": "ISA-8.1.3",
+      "domain": "P-PHYSEC",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent is the outer skin of the protected buildings constructed such as to prevent removal or opening of outer-skin components using standard tools?",
+          "description": "Requisiti (must):\n+ Unauthorized access to buildings/security areas is not possible.\n\nRequisiti (should):\n+ Solid construction (masonry, concrete, reinforced concrete, or prestressed concrete).\n+ Windows and doors in the outer skin are to be built in compliance with RC2 or better."
+        },
+        "it": {
+          "title": "In che misura l'involucro esterno degli edifici protetti è costruito in modo da resistere all'accesso non autorizzato?",
+          "description": "Requisiti (must):\n+ Unauthorized access to buildings/security areas is not possible.\n\nRequisiti (should):\n+ Solid construction (masonry, concrete, reinforced concrete, or prestressed concrete).\n+ Windows and doors in the outer skin are to be built in compliance with RC2 or better."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "policy",
+            "mandatory": true,
+            "description": "Policy/Procedura applicabile documentata e approvata"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.1.3: To what extent is the outer skin of the protected buildings constructed such as to prevent removal o"
+      }
+    },
+    {
+      "external_id": "ISA-8.1.4",
+      "domain": "P-PHYSEC",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent is view and sight protection ensured in defined security areas?",
+          "description": "Requisiti (must):\n+ Unauthorized viewing of new developments needing high or very high protection is not possible.\n\nRequisiti (should):\n+ Sight protection through relevant glass surfaces is ensured.\n+ View into defined security areas through open doors/gates/windows is prevented.\n\nRequisiti aggiuntivi per alta protezione:\n+ The spatial situation is also suitable for protecting vehicles classified as requiring protection against unauthorized view."
+        },
+        "it": {
+          "title": "In che misura è garantita la protezione visiva e dalla vista nelle aree di sicurezza definite?",
+          "description": "Requisiti (must):\n+ Unauthorized viewing of new developments needing high or very high protection is not possible.\n\nRequisiti (should):\n+ Sight protection through relevant glass surfaces is ensured.\n+ View into defined security areas through open doors/gates/windows is prevented.\n\nRequisiti aggiuntivi per alta protezione:\n+ The spatial situation is also suitable for protecting vehicles classified as requiring protection against unauthorized view."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.1.4: To what extent is view and sight protection ensured in defined security areas?"
+      }
+    },
+    {
+      "external_id": "ISA-8.1.5",
+      "domain": "P-PHYSEC",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent is the protection against unauthorized entry regulated in the form of access control?",
+          "description": "Requisiti (must):\n+ At least one of the following three requirements must be implemented:\n  - mechanical locks with documented key assignment,\n  - electronic access systems with documented authorization assignment,\n  - personal access control including documentation.\n\nRequisiti aggiuntivi per alta protezione:\n+ The spatial situation is also suitable for protecting vehicles classified as requiring protection against unauthorized access."
+        },
+        "it": {
+          "title": "In che misura la protezione contro l'ingresso non autorizzato è regolamentata nelle forme richieste?",
+          "description": "Requisiti (must):\n+ At least one of the following three requirements must be implemented:\n  - mechanical locks with documented key assignment,\n  - electronic access systems with documented authorization assignment,\n  - personal access control including documentation.\n\nRequisiti aggiuntivi per alta protezione:\n+ The spatial situation is also suitable for protecting vehicles classified as requiring protection against unauthorized access."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.1.5: To what extent is the protection against unauthorized entry regulated in the form of access control?"
+      }
+    },
+    {
+      "external_id": "ISA-8.1.6",
+      "domain": "P-PHYSEC",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent are the premises to be secured monitored for intrusion?",
+          "description": "Requisiti (must):\n+ Intrusion monitoring of the premises to be secured is ensured:\n  - An intrusion detection system exists which complies with DIN EN 50131 or conforms to VDS or similar and functions with alarm tracking to a certified security service or control unit (e.g., according to DIN 77200, VdS 3138),\n  - or 24/7 guarding by a certified security service.\n+ Alarm plans are available.\n+ Timely alarm processing is ensured."
+        },
+        "it": {
+          "title": "In che misura i locali da proteggere sono monitorati per rilevare intrusioni?",
+          "description": "Requisiti (must):\n+ Intrusion monitoring of the premises to be secured is ensured:\n  - An intrusion detection system exists which complies with DIN EN 50131 or conforms to VDS or similar and functions with alarm tracking to a certified security service or control unit (e.g., according to DIN 77200, VdS 3138),\n  - or 24/7 guarding by a certified security service.\n+ Alarm plans are available.\n+ Timely alarm processing is ensured."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 90,
+            "description": "Screenshot o export del sistema di monitoraggio"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.1.6: To what extent are the premises to be secured monitored for intrusion?"
+      }
+    },
+    {
+      "external_id": "ISA-8.1.7",
+      "domain": "P-PHYSEC",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent is a documented visitor management in place?",
+          "description": "Requisiti (must):\n+ Registration obligation for all visitors.\n+ Documented non-disclosure obligation prior to access.\n+ Publication of security and visitor regulations.\n+ Country-specific legal provisions regarding data protection are to be observed."
+        },
+        "it": {
+          "title": "In che misura è in atto una gestione documentata dei visitatori?",
+          "description": "Requisiti (must):\n+ Registration obligation for all visitors.\n+ Documented non-disclosure obligation prior to access.\n+ Publication of security and visitor regulations.\n+ Country-specific legal provisions regarding data protection are to be observed."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.1.7: To what extent is a documented visitor management in place?"
+      }
+    },
+    {
+      "external_id": "ISA-8.1.8",
+      "domain": "P-PHYSEC",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent is on-site client segregation existent?",
+          "description": "Requisiti (must):\n+ Spatial separation by staff-related or technical measures is in effect according to the following aspects:\n  - customers, and/or\n  - projects,\n  - where segregation is not in effect, explicit approval by the customer is required.\n\nRequisiti aggiuntivi per alta protezione:\n+ The spatial situation is also suitable for implementing client segregation for vehicles classified as requiring protection."
+        },
+        "it": {
+          "title": "In che misura esiste una segregazione dei clienti in loco?",
+          "description": "Requisiti (must):\n+ Spatial separation by staff-related or technical measures is in effect according to the following aspects:\n  - customers, and/or\n  - projects,\n  - where segregation is not in effect, explicit approval by the customer is required.\n\nRequisiti aggiuntivi per alta protezione:\n+ The spatial situation is also suitable for implementing client segregation for vehicles classified as requiring protection."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.1.8: To what extent is on-site client segregation existent?"
+      }
+    },
+    {
+      "external_id": "ISA-8.2.1",
+      "domain": "P-ORG",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent are non-disclosure agreements/obligations existent according to the valid contractual law?",
+          "description": "Requisiti (must):\n+ A non-disclosure agreement: \n  - between contractor and customer (company level),\n  - with all employees and project members (personal obligation).\n+ Country-specific legal provisions regarding data protection are to be observed."
+        },
+        "it": {
+          "title": "In che misura esistono accordi/obblighi di riservatezza in conformità ai requisiti del cliente?",
+          "description": "Requisiti (must):\n+ A non-disclosure agreement: \n  - between contractor and customer (company level),\n  - with all employees and project members (personal obligation).\n+ Country-specific legal provisions regarding data protection are to be observed."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "policy",
+            "mandatory": true,
+            "description": "Policy/Procedura applicabile documentata e approvata"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.2.1: To what extent are non-disclosure agreements/obligations existent according to the valid contractual"
+      }
+    },
+    {
+      "external_id": "ISA-8.2.2",
+      "domain": "P-ORG",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent are requirements for commissioning subcontractors known and fulfilled?",
+          "description": "Requisiti (must):\n+ Approval by the original customer.\n+ contractually valid non-disclosure agreement exists:\n  - between contractor and subcontractor (company level),\n  - with all employees and project members of the subcontractor (personal obligation).\n+ Ensuring compliance with the security requirements of the actual customer (proof is obtained).\n+ Proof of the subcontractor’s compliance with minimum requirements for prototype protection (e.g., certificate, attestation) is provided."
+        },
+        "it": {
+          "title": "In che misura i requisiti per l'incarico di subappaltatori sono noti e soddisfatti?",
+          "description": "Requisiti (must):\n+ Approval by the original customer.\n+ contractually valid non-disclosure agreement exists:\n  - between contractor and subcontractor (company level),\n  - with all employees and project members of the subcontractor (personal obligation).\n+ Ensuring compliance with the security requirements of the actual customer (proof is obtained).\n+ Proof of the subcontractor’s compliance with minimum requirements for prototype protection (e.g., certificate, attestation) is provided."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.2.2: To what extent are requirements for commissioning subcontractors known and fulfilled?"
+      }
+    },
+    {
+      "external_id": "ISA-8.2.3",
+      "domain": "P-ORG",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent do employees and project members evidently participate in training and awareness measures regarding the handling of prototypes?",
+          "description": "Requisiti (must):\n+ Ensuring execution of trainings / awareness programs by the management.\n+ Training of employees and project members when joining the project regarding the handling of prototypes.\n+ Regular (at least annual) training of employees regarding the handling of prototypes.\n+ Ensuring knowledge among employees and project members regarding the respective protection needs and the resulting measures within the company.\n+ Mandatory participation of each employee and project member in the trainings and awareness measures.\n+ The completed measures are to be documented. \n+ The training concept for prototype protection is an integral part of the general training concept (see also control question 2.1.3 Information Security)."
+        },
+        "it": {
+          "title": "In che misura i dipendenti e i membri del progetto partecipano evidentemente a formazioni specifiche?",
+          "description": "Requisiti (must):\n+ Ensuring execution of trainings / awareness programs by the management.\n+ Training of employees and project members when joining the project regarding the handling of prototypes.\n+ Regular (at least annual) training of employees regarding the handling of prototypes.\n+ Ensuring knowledge among employees and project members regarding the respective protection needs and the resulting measures within the company.\n+ Mandatory participation of each employee and project member in the trainings and awareness measures.\n+ The completed measures are to be documented. \n+ The training concept for prototype protection is an integral part of the general training concept (see also control question 2.1.3 Information Security)."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "attestato",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Attestati di formazione / partecipazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.2.3: To what extent do employees and project members evidently participate in training and awareness meas"
+      }
+    },
+    {
+      "external_id": "ISA-8.2.4",
+      "domain": "P-ORG",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent are security classifications of the project and the resulting security measures known?",
+          "description": "Requisiti (must):\n+ Ensuring that the security classification and requirements in relation to the project progress are made known to each project member.\n+ Consideration of step-by-step plans, measures for secrecy and camouflage, development policies.\n+ The requirements are considered as a requirement regarding the information security of the project (see Controls 1.2.3 and 7.1.1 Information Security)."
+        },
+        "it": {
+          "title": "In che misura sono note le classificazioni di sicurezza del progetto e le misure di sicurezza derivanti?",
+          "description": "Requisiti (must):\n+ Ensuring that the security classification and requirements in relation to the project progress are made known to each project member.\n+ Consideration of step-by-step plans, measures for secrecy and camouflage, development policies.\n+ The requirements are considered as a requirement regarding the information security of the project (see Controls 1.2.3 and 7.1.1 Information Security)."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura/Metodologia documentata"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.2.4: To what extent are security classifications of the project and the resulting security measures known"
+      }
+    },
+    {
+      "external_id": "ISA-8.2.5",
+      "domain": "P-ORG",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent is a process defined for granting access to security areas?",
+          "description": "Requisiti (must):\n+ Responsibilities for access authorization are clearly specified and documented.\n+ A process for new assignments, changes and revocations of access rights is in place.\n+ Code of conduct in case of the loss/theft of access control means."
+        },
+        "it": {
+          "title": "In che misura è definito un processo per la concessione dell'accesso alle aree di sicurezza?",
+          "description": "Requisiti (must):\n+ Responsibilities for access authorization are clearly specified and documented.\n+ A process for new assignments, changes and revocations of access rights is in place.\n+ Code of conduct in case of the loss/theft of access control means."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.2.5: To what extent is a process defined for granting access to security areas?"
+      }
+    },
+    {
+      "external_id": "ISA-8.2.6",
+      "domain": "P-ORG",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent are regulations for image recording and handling of created image material existent?",
+          "description": "Requisiti (must):\n+ Approval procedures for image recording.\n+ Specification for classification/categorization of image material.\n+ Secure storage of image material.\n+ Secure deletion/disposal of image material no longer required.\n+ Secured transmission/shipping of image material to authorized recipients only."
+        },
+        "it": {
+          "title": "In che misura esistono regolamenti per la registrazione di immagini e la gestione delle immagini create?",
+          "description": "Requisiti (must):\n+ Approval procedures for image recording.\n+ Specification for classification/categorization of image material.\n+ Secure storage of image material.\n+ Secure deletion/disposal of image material no longer required.\n+ Secured transmission/shipping of image material to authorized recipients only."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "description": "Report/Registro documentato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.2.6: To what extent are regulations for image recording and handling of created image material existent?"
+      }
+    },
+    {
+      "external_id": "ISA-8.2.7",
+      "domain": "P-ORG",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent is a process for carrying along and using mobile video and photography devices in(to) defined security areas established?",
+          "description": "Requisiti (must):\n+ Specification for carrying along (e.g., sealed/unsealed, etc.).\n+ Specification for use (e.g., phone calls, photography, etc.)."
+        },
+        "it": {
+          "title": "In che misura esiste un processo per portare e utilizzare dispositivi mobili di registrazione video e fotografica?",
+          "description": "Requisiti (must):\n+ Specification for carrying along (e.g., sealed/unsealed, etc.).\n+ Specification for use (e.g., phone calls, photography, etc.)."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.2.7: To what extent is a process for carrying along and using mobile video and photography devices in(to)"
+      }
+    },
+    {
+      "external_id": "ISA-8.3.1",
+      "domain": "P-VEHICLES",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent are transports of vehicles, components or parts classified as requiring protection arranged according to the customer requirements?",
+          "description": "Requisiti (must):\n+ A process for obtaining customer-specific requirements for the transport of vehicles, components and parts classified as requiring protection is described and implemented. \n+ The security requirements defined by the customer are known and observed.\n+ The logistics/transport companies explicitly approved by the customer are commissioned.\n+ A process for reporting any security-relevant events to the customer is described and implemented."
+        },
+        "it": {
+          "title": "In che misura i trasporti di veicoli, componenti o parti sono classificati come richiesto?",
+          "description": "Requisiti (must):\n+ A process for obtaining customer-specific requirements for the transport of vehicles, components and parts classified as requiring protection is described and implemented. \n+ The security requirements defined by the customer are known and observed.\n+ The logistics/transport companies explicitly approved by the customer are commissioned.\n+ A process for reporting any security-relevant events to the customer is described and implemented."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.3.1: To what extent are transports of vehicles, components or parts classified as requiring protection ar"
+      }
+    },
+    {
+      "external_id": "ISA-8.3.2",
+      "domain": "P-VEHICLES",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent is it ensured that vehicles, components, and parts classified as requiring protection are parked/stored in accordance with customer requirements?",
+          "description": "Requisiti (must):\n+ The customer-specific requirements for parking/storage are verifiably known and observed."
+        },
+        "it": {
+          "title": "In che misura è garantito che veicoli, componenti e parti classificati come richiesto siano protetti?",
+          "description": "Requisiti (must):\n+ The customer-specific requirements for parking/storage are verifiably known and observed."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.3.2: To what extent is it ensured that vehicles, components, and parts classified as requiring protection"
+      }
+    },
+    {
+      "external_id": "ISA-8.4.1",
+      "domain": "P-TRIALS",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent are the predefined camouflage regulations implemented by the project members?",
+          "description": "Requisiti (must):\n+ The requirements for using the respective camouflage are known to the project members.\n+ Any changes to the camouflage are made upon documented agreement with the customer.\n+ A process for the immediate reporting of any damages to the camouflage is described and implemented."
+        },
+        "it": {
+          "title": "In che misura le normative di mimetismo predefinite sono attuate dal progetto?",
+          "description": "Requisiti (must):\n+ The requirements for using the respective camouflage are known to the project members.\n+ Any changes to the camouflage are made upon documented agreement with the customer.\n+ A process for the immediate reporting of any damages to the camouflage is described and implemented."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.4.1: To what extent are the predefined camouflage regulations implemented by the project members?"
+      }
+    },
+    {
+      "external_id": "ISA-8.4.2",
+      "domain": "P-TRIALS",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent are measures for protecting approved test and trial grounds observed/implemented?",
+          "description": "Requisiti (must):\n+ A process for obtaining customer-specific requirements for the use of trial vehicles classified as requiring protection on test and trial grounds is described and implemented. \n+ The following aspects must be known to users of test and trial grounds: \n  - a current list of customer-approved test and trial grounds\n  - code of conduct for ensuring undisturbed trial operation \n  - customer-defined protective measures These are implemented."
+        },
+        "it": {
+          "title": "In che misura sono osservate le misure per la protezione dei campi prova e di prova approvati?",
+          "description": "Requisiti (must):\n+ A process for obtaining customer-specific requirements for the use of trial vehicles classified as requiring protection on test and trial grounds is described and implemented. \n+ The following aspects must be known to users of test and trial grounds: \n  - a current list of customer-approved test and trial grounds\n  - code of conduct for ensuring undisturbed trial operation \n  - customer-defined protective measures These are implemented."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Report di verifica/audit"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.4.2: To what extent are measures for protecting approved test and trial grounds observed/implemented?"
+      }
+    },
+    {
+      "external_id": "ISA-8.4.3",
+      "domain": "P-TRIALS",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent are protective measures for approved test and trial drives in public observed/implemented?",
+          "description": "Requisiti (must):\n+ A process for obtaining customer-specific requirements for the operation of test vehicles classified as requiring protection on public roads is described and implemented.\n+ Protective measures defined by the customer are known and observed.\n+ The code of conduct in case of special incidents (e.g., breakdown, accident, theft...) is known and observed."
+        },
+        "it": {
+          "title": "In che misura sono attuate le misure protettive per le prove su strada approvate in aree pubbliche?",
+          "description": "Requisiti (must):\n+ A process for obtaining customer-specific requirements for the operation of test vehicles classified as requiring protection on public roads is described and implemented.\n+ Protective measures defined by the customer are known and observed.\n+ The code of conduct in case of special incidents (e.g., breakdown, accident, theft...) is known and observed."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Report di verifica/audit"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.4.3: To what extent are protective measures for approved test and trial drives in public observed/impleme"
+      }
+    },
+    {
+      "external_id": "ISA-8.5.1",
+      "domain": "P-EVENTS",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent are security requirements for presentations and events involving vehicles, components or parts classified as requiring protection known?",
+          "description": "Requisiti (must):\n+ A process for obtaining customer-specific requirements for presentations and events involving vehicles, components or parts classified as requiring protection is described and implemented.\n+ Established and customer-approved security concepts (organizationally, technically,\nstaff-related).\n+ Code of conduct in case of special incidents."
+        },
+        "it": {
+          "title": "In che misura sono soddisfatti i requisiti di sicurezza per presentazioni ed eventi che coinvolgono prototipi?",
+          "description": "Requisiti (must):\n+ A process for obtaining customer-specific requirements for presentations and events involving vehicles, components or parts classified as requiring protection is described and implemented.\n+ Established and customer-approved security concepts (organizationally, technically,\nstaff-related).\n+ Code of conduct in case of special incidents."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.5.1: To what extent are security requirements for presentations and events involving vehicles, components"
+      }
+    },
+    {
+      "external_id": "ISA-8.5.2",
+      "domain": "P-EVENTS",
+      "level": "PROTO",
+      "translations": {
+        "en": {
+          "title": "To what extent are the protective measures for film and photo shootings involving vehicles, components or parts classified as requiring protection known?",
+          "description": "Requisiti (must):\n+ A process for obtaining customer-specific requirements for film and photo shootings involving vehicles, components or parts classified as requiring protection is described and implemented.\n+ Proof of approval for the presumably used premises.\n+ Established and customer-approved security concepts (organizationally, technically,\nstaff-related).\n+ Code of conduct in case of special incidents."
+        },
+        "it": {
+          "title": "In che misura sono attuate le misure protettive per riprese fotografiche e cinematografiche che coinvolgono prototipi?",
+          "description": "Requisiti (must):\n+ A process for obtaining customer-specific requirements for film and photo shootings involving vehicles, components or parts classified as requiring protection is described and implemented.\n+ Proof of approval for the presumably used premises.\n+ Established and customer-approved security concepts (organizationally, technically,\nstaff-related).\n+ Code of conduct in case of special incidents."
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 8.5.2: To what extent are the protective measures for film and photo shootings involving vehicles, componen"
+      }
+    }
+  ],
+  "mappings": []
+}

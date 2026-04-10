@@ -1,0 +1,2335 @@
+{
+  "nav": {
+    "dashboard": "Gösterge Paneli",
+    "compliance": "Uyumluluk",
+    "risk": "Risk",
+    "operations": "Operasyonlar",
+    "governance": "Yönetişim",
+    "audit": "Denetim",
+    "settings": "Ayarlar"
+  },
+  "status": {
+    "compliant": "Uyumlu",
+    "parziale": "Kısmi",
+    "gap": "Açık",
+    "na": "N/A",
+    "non_valutato": "Değerlendirilmedi",
+    "attivo": "Aktif",
+    "aperto": "Açık",
+    "chiuso": "Kapalı",
+    "in_corso": "Devam ediyor",
+    "in_dismissione": "Devreden çıkarılıyor",
+    "scaduto": "Süresi dolmuş",
+    "non_soggetto": "Kapsam dışı",
+    "importante": "Önemli",
+    "essenziale": "Kritik",
+    "bozza": "Taslak",
+    "revisione": "İncelemede",
+    "approvazione": "Onayda",
+    "approvato": "Onaylandı",
+    "respinto": "Reddedildi",
+    "completato": "Tamamlandı",
+    "annullato": "İptal edildi",
+    "bassa": "Düşük",
+    "media": "Orta",
+    "alta": "Yüksek",
+    "critica": "Kritik",
+    "si": "Evet",
+    "no": "No",
+    "da_valutare": "Değerlendirilecek",
+    "in_analisi": "Analizde"
+  },
+  "actions": {
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "edit": "Düzenle",
+    "approve": "Onayla",
+    "reject": "Reddet",
+    "confirm": "Onayla",
+    "delete": "Sil",
+    "refresh": "Yenile",
+    "export": "Dışa aktar",
+    "upload": "Yükle",
+    "back": "Geri",
+    "close": "Kapat"
+  },
+  "common": {
+    "loading": "Yükleniyor...",
+    "downloading": "İndiriliyor...",
+    "close": "Kapat",
+    "saving": "Kaydediliyor...",
+    "save_error": "Kaydederken hata oluştu",
+    "error": "Hata",
+    "enabled": "aktif",
+    "disabled": "devre dışı",
+    "none": "—",
+    "yes": "Evet",
+    "no": "Hayır",
+    "optional": "— isteğe bağlı —",
+    "select": "— seç —",
+    "freq_weekly": "Haftalık",
+    "freq_monthly": "Aylık",
+    "freq_quarterly": "Üç aylık",
+    "freq_biannual": "Yarıyıllık",
+    "freq_annual": "Yıllık",
+    "finish": "Bitir"
+  },
+  "help": {
+    "open_title": "Bu modül için yardım",
+    "close_aria": "Modül yardımını kapat",
+    "sections": {
+      "what_is": "Bu nedir",
+      "how_to": "Nasıl kullanılır",
+      "connected_to": "İlişkili",
+      "before_start": "Başlamadan önce"
+    }
+  },
+  "app": {
+    "name": "GRC Platformu"
+  },
+  "countdown": {
+    "expired": "SÜRESİ DOLMUŞ"
+  },
+  "eval_assistant": {
+    "title": "Değerlendirme rehberi",
+    "subtitle": "BIA · Risk · Mantık zinciri",
+    "tabs": {
+      "connections": "Bağlantılar"
+    },
+    "connections": {
+      "chain_title": "Modül mantık zinciri",
+      "realtime_alerts_title": "Gerçek zamanlı uyarılar",
+      "select_plant_hint": "Özel uyarıları görmek için menüden bir tesis seçin",
+      "nodes": {
+        "bia_title": "M05 BIA Süreci",
+        "bia_subtitle": "kritiklik 1–5",
+        "risk_title": "M06 Risk Değerlendirmesi",
+        "risk_subtitle": "weighted_score",
+        "bcp_title": "M16 BCP Planı",
+        "bcp_subtitle": "RTO / RPO",
+        "score_title": "Skor > 14?",
+        "score_subtitle": "kırmızı risk",
+        "pdca_title": "M11 PDCA",
+        "pdca_subtitle": "zorunlu döngü",
+        "lesson_title": "M12 Lesson",
+        "lesson_subtitle": "Learned"
+      },
+      "edges": {
+        "criticality": "kritiklik",
+        "rto_rpo": "RTO/RPO"
+      },
+      "missing_bcp": {
+        "title": "{{count}} {{count, plural, one {kritik süreç} other {kritik süreç}}} BCP planı olmadan",
+        "body": "Kritiklik ≥ 4 ve durumu \"onaylandı\" olan ancak aktif BCP planı olmayan süreçler.",
+        "ok": "Tüm kritik süreçlerin bir BCP planı var"
+      },
+      "missing_pdca": {
+        "title": "{{count}} {{count, plural, one {kritik risk} other {kritik risk}}} açık PDCA döngüsü olmadan",
+        "body": "Skoru > 14 olan ve devam eden PDCA döngüsü bulunmayan senaryolar.",
+        "ok": "Tüm kritik risklerin açık bir PDCA döngüsü var"
+      }
+    },
+    "bia": {
+      "scale_title": "Kritiklik ölçeği",
+      "columns": {
+        "level": "Seviye",
+        "max_downtime": "Maks. kesinti",
+        "example": "Örnek"
+      },
+      "levels": {
+        "1": {
+          "label": "Önemsiz",
+          "downtime": "> 7 gün",
+          "example": "Tarihsel belge arşivi"
+        },
+        "2": {
+          "label": "Düşük",
+          "downtime": "3–7 gün",
+          "example": "İç raporlama"
+        },
+        "3": {
+          "label": "Orta",
+          "downtime": "24–72 saat",
+          "example": "İkincil ERP, tedarikçi yönetimi"
+        },
+        "4": {
+          "label": "Yüksek",
+          "downtime": "4–24 saat",
+          "example": "Üretim hattı, kalite, lojistik"
+        },
+        "5": {
+          "label": "Kritik",
+          "downtime": "< 4 saat",
+          "example": "Ana ERP, MES, SCADA, AD/LDAP"
+        }
+      },
+      "questions": {
+        "economic": {
+          "label": "Kesintinin ekonomik etkisi",
+          "low": "Önemsiz (<1k€/h)",
+          "high": "Yıkıcı (>50k€/h)"
+        },
+        "customers": {
+          "label": "Müşterilere/sözleşmelere etkisi",
+          "low": "Yok",
+          "high": "Sözleşme kaybı, cezalar, teslimat durması"
+        },
+        "regulatory": {
+          "label": "Düzenleyici/itibar etkisi",
+          "low": "Yok",
+          "high": "Otorite bildirimi, ciddi itibar hasarı"
+        }
+      },
+      "guided_estimate_title": "Rehberli kritiklik tahmini",
+      "suggested_title": "Önerilen kritiklik",
+      "suggested_downtime": "Maks. tolere edilen kesinti: {{downtime}}"
+    },
+    "risk": {
+      "matrix_title": "P×I matrisi (Olasılık × Etki)",
+      "zones": {
+        "green": {
+          "label": "Yeşil",
+          "range": "Score 1–7",
+          "desc": "Kabul edilebilir risk — yıllık gözden geçirme"
+        },
+        "yellow": {
+          "label": "Sarı",
+          "range": "Score 8–14",
+          "desc": "Orta risk — 90 gün içinde azaltma planı"
+        },
+        "red": {
+          "label": "Kırmızı",
+          "range": "Score 15–25",
+          "desc": "Kritik risk — acil eylem, otomatik görev, zorunlu PDCA"
+        }
+      },
+      "it_dimensions_title": "IT varlık boyutları",
+      "it_dimensions": {
+        "exposure": {
+          "label": "Maruz kalma",
+          "desc": "Dışarıdan veya güvenilmez ağlardan erişilebilirlik"
+        },
+        "cve": {
+          "label": "CVE Puanı",
+          "desc": "Bilinen yamalı olmayan güvenlik açıkları — kaynak: NVD/CVE"
+        },
+        "threat": {
+          "label": "Tehdit",
+          "desc": "Sektör tehdit istihbaratına dayalı saldırı olasılığı"
+        },
+        "controls_gap": {
+          "label": "Kontrol boşluğu",
+          "desc": "Gap durumundaki bağlı ISO27001/TISAX kontrol sayısı"
+        }
+      },
+      "ot_dimensions_title": "OT varlık boyutları",
+      "ot_dimensions": {
+        "purdue": {
+          "label": "Purdue bağlantısı",
+          "desc": "Purdue hiyerarşisinde izolasyon seviyesi — L0 en kritik"
+        },
+        "patchability": {
+          "label": "Patchability",
+          "desc": "Firmware/OS güncelleme teknik kapasitesi"
+        },
+        "physical_impact": {
+          "label": "Fiziksel etki",
+          "desc": "Saldırının fiziksel sonuçları: hat durması, hasar, güvenlik"
+        },
+        "segmentation": {
+          "label": "Segmentasyon",
+          "desc": "BT ağından ve internetten izolasyon"
+        },
+        "detection": {
+          "label": "Tespit edilebilirlik",
+          "desc": "Gerçek zamanlı tehlikeyi tespit etme kapasitesi"
+        }
+      },
+      "scale_title": "Risk değerlendirme matrisi (5×5)",
+      "columns": {
+        "likelihood": "Olasılık",
+        "impact": "Etki",
+        "score": "Puan",
+        "level": "Seviye",
+        "examples": "Örnekler"
+      },
+      "levels": {
+        "1": {
+          "label": "Çok düşük",
+          "likelihood": "Neredeyse imkânsız",
+          "impact": "Küçük kesinti, < 1 saat"
+        },
+        "2": {
+          "label": "Düşük",
+          "likelihood": "Düşük ihtimal, yılda 1–2 kez",
+          "impact": "Sınırlı etki, < 1 gün"
+        },
+        "3": {
+          "label": "Orta",
+          "likelihood": "Mümkün, aylık",
+          "impact": "Önemli kesinti, < 1 hafta"
+        },
+        "4": {
+          "label": "Yüksek",
+          "likelihood": "Muhtemel, haftalık",
+          "impact": "Büyük etki, < 1 ay"
+        },
+        "5": {
+          "label": "Kritik",
+          "likelihood": "Çok muhtemel, günlük",
+          "impact": "Felaket etkisi, > 1 ay"
+        }
+      }
+    },
+    "risk_module": {
+      "title": "IT/OT Risk Değerlendirmesi — M06",
+      "description": "Kalıtsal = olasılık×etki kontroller ÖNCESİ; Kalıntı = olasılık×etki kontroller VE BCP SONRASI; Ağırlıklı = en yüksek iş etkili riskleri önceliklendirmek için BIA kritikliğiyle ağırlıklandırılmış kalıntı puan. Risk iştahı politikaları yönetim tarafından onaylanan eşikleri tanımlar.",
+      "steps": {
+        "1": "Varlığı ve BIA sürecini (varsa) bağlayarak yeni değerlendirme oluşturun",
+        "2": "Kontroller öncesi olasılık ve etkiyi girerek KALITSAL riski doldurun",
+        "3": "Kontroller ve BCP sonrası olasılık ve etkiyi girerek KALINTI riski doldurun",
+        "4": "IT/OT boyutlarını tamamlayın ve puan, ağırlıklı puan ve ALE hesaplamak için 'Değerlendirmeyi tamamla'ya tıklayın",
+        "5": "Azaltma, transfer veya kabul kararı için puanı ve ağırlıklı puanı Risk İştahı eşikleriyle karşılaştırın",
+        "6": "Kalıntı riskleri (politika izin veriyorsa) not ve inceleme tarihi ile resmi olarak kabul edin"
+      },
+      "connections": {
+        "assets": "Değerlendirilen varlıklar",
+        "bia": "Ağırlıklı puan ve ALE, BIA kritikliği ve maliyet verilerini kullanır",
+        "governance": "Risk iştahı, yönetim tarafından onaylanan eşikleri tanımlar",
+        "pdca": "Eşik üzerindeki riskler otomatik PDCA döngüleri açabilir",
+        "tasks": "İştah sınırlarını aşan riskler için azaltma görevleri oluşturulur"
+      },
+      "config_needed": {
+        "1": "Yönetişim → Risk İştahı'nda eşikleri yapılandırın",
+        "2": "Otomatik ALE ve ağırlıklı puan hesaplaması için BIA süreçlerini bağlayın"
+      }
+    },
+    "controls": {
+      "scale_title": "Kontrol değerlendirme kılavuzu",
+      "columns": {
+        "status": "Durum",
+        "meaning": "Anlam",
+        "requirements": "Minimum gereksinimler"
+      },
+      "statuses": {
+        "compliant": "Uyumlu",
+        "parziale": "Kısmi",
+        "gap": "Boşluk",
+        "na": "N/A",
+        "non_valutato": "Değerlendirilmemiş"
+      },
+      "meanings": {
+        "compliant": "Kanıtlarla tam uygulanan kontrol",
+        "parziale": "Kısmi uygulama veya yetersiz kanıt",
+        "gap": "Eksik veya etkisiz kontrol",
+        "na": "Resmi gerekçeyle geçerli değil",
+        "non_valutato": "Henüz değerlendirilmemiş"
+      },
+      "requirements": {
+        "compliant": "Geçerli kanıt + son doğrulama tarihi",
+        "parziale": "Kısmi kanıt + iyileştirme planı (görev M08)",
+        "gap": "Gereksinim yok — iyileştirme görevi otomatik oluşturulur",
+        "na": "Yazılı gerekçe min 20 karakter. TISAX L3: çift onay",
+        "non_valutato": "Sitenin uyum puanını düşürür"
+      }
+    }
+  },
+  "ai": {
+    "suggestion_label": "AI Önerisi",
+    "accept": "Bunu kullan",
+    "edit_and_use": "Düzenle ve kullan",
+    "save_edits": "Değişiklikleri kaydet",
+    "ignore": "Yoksay",
+    "ai_badge": "AI"
+  },
+  "controls": {
+    "title": "Uyum — Kontroller",
+    "empty": "Kontrol bulunamadı",
+    "framework_filter": {
+      "all": "Tüm çerçeveler"
+    },
+    "export": {
+      "soa": "SOA İndir",
+      "vda_isa": "VDA ISA İndir",
+      "proto_vda_isa": "VDA ISA Prototip İndir",
+      "nis2_matrix": "NIS2 Matrisi İndir"
+    },
+    "drawer": {
+      "title": "Kontrol yönetimi",
+      "tabs": {
+        "about": "Hakkında",
+        "evaluation": "Değerlendirme",
+        "documents_evidence": "Belgeler & Kanıtlar",
+        "history": "Geçmiş"
+      },
+      "about": {
+        "no_description": "Bu dil için açıklama yok.",
+        "guidance": "Uygulama kılavuzu",
+        "evidence_examples": "Kabul edilebilir kanıt örnekleri",
+        "mappings": "Çerçeveler arası eşleştirmeler",
+        "ai_summary_title": "Pratikte ne yapmalı",
+        "ai_generate": "AI açıklaması oluştur",
+        "ai_regenerate": "Yeniden oluştur",
+        "ai_generating": "Oluşturuluyor…",
+        "ai_summary_empty": "Basit bir açıklama almak için \"Oluştur\"a tıklayın.",
+        "what_is_needed": "Bu kontrolü karşılamak için gerekenler",
+        "req_doc": "Gerekli belge",
+        "req_evidence": "Gerekli kanıt",
+        "req_max_age": "maks. {{days}} gün",
+        "req_min_docs": "En az {{count}} onaylı belge",
+        "req_min_evidences": "En az {{count}} geçerli kanıt"
+      },
+      "expiry": {
+        "none": "Süre sonu yok",
+        "expired_days_ago": "{{days}}g önce sona erdi",
+        "expires_in_days": "{{days}}g içinde sona erer",
+        "valid_until": "{{date}} tarihine kadar geçerli"
+      },
+      "evaluation": {
+        "revaluation": {
+          "title": "Yeniden değerlendirme gerekli",
+          "body": "Kayıtlı bir değişiklik{{hasSince, select, true { {{since}} tarihinden beri} other {}}} bu kontrolü etkilemiş olabilir. Lütfen değerlendirmeyi gözden geçirin."
+        },
+        "requirements": {
+          "none": "Bu kontrol için belgesel gereksinim tanımlanmamış.",
+          "not_satisfied": "Gereksinimler karşılanmadı",
+          "missing_document": "Eksik belge",
+          "missing_evidence": "Eksik kanıt",
+          "expired_evidence": "Süresi dolmuş kanıt",
+          "warning": "Uyarı",
+          "satisfied": "Tüm gereksinimler karşılandı"
+        },
+        "official_status": "Resmi durum",
+        "system_suggestion": "Sistem önerisi",
+        "apply_suggestion": "Öneriyi uygula ({{status}})",
+        "apply_suggestion_title": "Öneriyi uygula",
+        "note_optional": "Not (isteğe bağlı)",
+        "applying": "Uygulanıyor...",
+        "applicability": {
+          "title": "SOA uygulanabilirliği (ISO 27001)",
+          "save": "Uygulanabilirliği kaydet",
+          "options": {
+            "applicabile": "Uygulanabilir",
+            "escluso": "Dışlandı",
+            "non_pertinente": "İlgili değil"
+          },
+          "exclusion_placeholder": "Resmi dışlama gerekçesi (min 50 karakter) *"
+        },
+        "maturity": {
+          "title": "VDA ISA TISAX olgunluk seviyesi",
+          "auto": "Otomatik hesaplanır",
+          "override": "Manuel olgunluk geçersiz kılma",
+          "levels": {
+            "0": "Uygulanmadı",
+            "1": "Ad-hoc",
+            "2": "Planlandı",
+            "3": "Tanımlandı",
+            "4": "Yönetildi",
+            "5": "Optimize edildi"
+          }
+        },
+        "status_guide": {
+          "compliant": "Geçerli kanıt + son doğrulama tarihi",
+          "parziale": "Kısmi kanıt + iyileştirme planı (görev M08)",
+          "gap": "Gereksinim yok — iyileştirme görevi otomatik oluşturulur",
+          "na": "Yazılı gerekçe min 20 karakter. TISAX L3: çift onay",
+          "non_valutato": "Sitenin uyum puanını düşürür"
+        },
+        "manual_change": {
+          "title": "Manuel durum değişikliği",
+          "select_status": "— yeni durum seçin —",
+          "req_block": "Gereksinimler karşılanmadı — \"Belgeler & Kanıtlar\" sekmesinde çözün",
+          "note_placeholder": "Not / gerekçe (N/A için zorunlu, min 20 karakter)",
+          "req_tooltip": "Belge & Kanıt sekmesindeki gereksinimleri çözün"
+        },
+        "save_evaluation": "Değerlendirmeyi kaydet"
+      },
+      "docs": {
+        "requirements": {
+          "not_satisfied_for_compliant": "Uyumlu için gereksinimler karşılanmadı"
+        },
+        "policy_docs": "Politika belgeleri",
+        "operational_evidence": "Operasyonel kanıtlar",
+        "missing": "Eksik",
+        "none_linked": "Bağlı belge yok",
+        "no_evidence_linked": "Bağlı kanıt yok",
+        "unlink": "Bağlantıyı kes",
+        "link_doc": "Belge bağla",
+        "link_existing_evidence": "Mevcut kanıtı bağla",
+        "search_placeholder": "Başlığa göre ara...",
+        "upload_new_evidence": "Yeni kanıt yükle",
+        "new_evidence_title_placeholder": "Başlık *",
+        "validity_date_label": "Geçerlilik tarihi *",
+        "upload_and_link": "Yükle ve bağla",
+        "review_abbrev": "rev.",
+        "dropzone_hint": "Dosyaları buraya sürükleyin, otomatik olarak yüklensin ve bağlansın",
+        "dropzone_or_browse": "veya göz atmak için tıklayın",
+        "upload_queue_title": "Yüklenecek dosyalar ({{count}})",
+        "upload_all_link": "Tümünü yükle ve bağla ({{count}})",
+        "uploading_progress": "Yükleniyor {{current}}/{{total}}…"
+      },
+      "history": {
+        "empty": "Kayıtlı değerlendirme yok.",
+        "set_status": "ayarladı"
+      }
+    },
+    "table": {
+      "control_id": "Kontrol ID",
+      "framework": "Framework",
+      "title": "Başlık",
+      "maturity_level": "Olgunluk",
+      "status": "Durum",
+      "owner": "Sahip",
+      "last_evaluated": "Son değerlendirme"
+    },
+    "owner_none": "— sahip yok —",
+    "owner_save_error": "Sahip kaydedilirken hata",
+    "notes_label": "Ek notlar",
+    "notes_placeholder": "Bu kontrol hakkında serbest notlar (VDA/SOA'ya aktarılmaz)…",
+    "notes_save": "Notları kaydet",
+    "status_filter": {
+      "all": "Tümü"
+    },
+    "actions": {
+      "open_drawer": "Kontrolü aç",
+      "click_to_edit": "Düzenlemek için tıklayın",
+      "propagate_hint": "Bu durumu ilgili kontrollere yay",
+      "propagate": "⇒ yay",
+      "delete_title": "Kontrol örneğini sil",
+      "delete_confirm": "{{id}} kontrol örneği silinsin mi? Yalnızca henüz değerlendirilmemişse izin verilir (süper kullanıcı hariç)."
+    },
+    "maturity_0": "0 — Uygulanmamış",
+    "maturity_1": "1 — Ad-hoc / Gayri resmi",
+    "maturity_2": "2 — Planlandı",
+    "maturity_3": "3 — Tanımlandı ve belgelendi",
+    "maturity_4": "4 — Yönetilen ve ölçülen",
+    "maturity_5": "5 — Optimize edildi",
+    "applicability_applicable": "Uygulanabilir",
+    "applicability_excluded": "Dışlandı",
+    "applicability_not_relevant": "İlgili değil",
+    "rel_copre": "kapsıyor",
+    "rel_estende": "genişletiyor",
+    "rel_equivale": "eşdeğer",
+    "rel_subset": "alt küme",
+    "rel_related": "ilgili",
+    "download_error": "İndirme hatası",
+    "download_network_error": "İndirme sırasında ağ hatası",
+    "help": {
+      "title": "Kontrol kütüphanesi — M03",
+      "description": "Her çerçeve için düzenleyici kontrolleri yönetir (ISO 27001, TISAX L2/L3, NIS2). Her kontrolün değerlendirme durumu vardır ve \"Uyumlu\" ulaşmak için belgesel kanıt gerektirir.",
+      "steps": {
+        "1": "Çerçeve yüklendiğinde kontroller otomatik oluşturulur",
+        "2": "Yönetim panelini açmak için bir kontrolde ▶'ye tıklayın",
+        "3": "Politika belgeleri ve operasyonel kanıtları bağlayın",
+        "4": "Sistem bağlı belgelerden durumu otomatik önerir",
+        "5": "Değerlendirmeyi kaydedin — \"Uyumlu\" için en az 1 geçerli kanıt gerektirir",
+        "6": "Üstteki düğmelerle SOA (ISO27001), VDA ISA (TISAX) veya NIS2 Matrisini indirin"
+      },
+      "connections": {
+        "documents": {
+          "module": "M07 Belgeler",
+          "relation": "Kontrole bağlı politika ve kanıtlar"
+        },
+        "audit_prep": {
+          "module": "M17 Audit Prep",
+          "relation": "ControlInstance'a bağlı bulgular"
+        },
+        "risk": {
+          "module": "M06 Risk",
+          "relation": "Kontrol boşlukları OT risk puanını etkiler"
+        }
+      },
+      "config_needed": {
+        "1": "Çalıştır: python manage.py load_frameworks",
+        "2": "M01'de Siteye çerçeveyi etkinleştirin"
+      }
+    }
+  },
+  "gap_analysis": {
+    "title": "Çerçeve boşluk analizi",
+    "source_framework": "Kaynak çerçeve",
+    "target_framework": "Hedef çerçeve",
+    "loading": "Analiz ediliyor...",
+    "empty_category": "Bu kategoride kontrol yok",
+    "sections": {
+      "covered": "Kapsananlar",
+      "partial": "Kısmi",
+      "gap": "Gap",
+      "not_mapped": "Eşleştirilmemiş"
+    },
+    "actions": {
+      "analyze": "Boşluk analizi yap",
+      "download_report": "↓ Boşluk analizi raporunu indir"
+    },
+    "errors": {
+      "same_framework": "İki farklı çerçeve seçin",
+      "load_failed": "Veri yüklenirken hata"
+    },
+    "summary": {
+      "controls_from_to": "Kontroller {{source}} → {{target}}",
+      "pct_covered": "{{pct}}% kapsandı",
+      "covered_count": "Kapsanan: {{count}}",
+      "partial_count": "Kısmi: {{count}}",
+      "gap_count": "Gap: {{count}}",
+      "not_mapped_count": "Eşleştirilmemiş: {{count}}"
+    },
+    "export": {
+      "columns": {
+        "category": "Kategori",
+        "id": "ID",
+        "title": "Başlık",
+        "domain": "Alan",
+        "source_status": "Kaynak durumu"
+      }
+    }
+  },
+  "plants": {
+    "title": "Üretim siteleri",
+    "empty": "Yapılandırılmış site yok",
+    "table": {
+      "code": "Kod",
+      "name": "Ad",
+      "country": "Ülke",
+      "status": "Durum",
+      "nis2": "NIS2",
+      "ot": "OT"
+    },
+    "fields": {
+      "code": "Kod",
+      "name": "Ad",
+      "country": "Ülke",
+      "status": "Durum",
+      "nis2_scope": "NIS2 kapsamı",
+      "has_ot": "OT / ICS ağları mevcut",
+      "logo_upload_label": "Logo yükle",
+      "nis2_sector": "NIS2 sektörü",
+      "nis2_subsector": "NIS2 alt sektörü",
+      "legal_entity_name": "Ticari unvan (bildirimler)",
+      "legal_entity_vat": "Vergi no / KDV",
+      "nis2_activity_description": "NIS2 faaliyet açıklaması (resmi belgeler)"
+    },
+    "nis2_entity": {
+      "section_title": "NIS2 ve tüzel kişilik",
+      "contact_hint": "Bildirimler için operasyonel iletişim kişisi, bu tesiste «NIS2 iletişim» görevi atanan kullanıcıdır (M00 Governance)."
+    },
+    "placeholders": {
+      "code": "IT-MIL-01",
+      "country": "IT",
+      "name": "Milano tesisi",
+      "nis2_sector": "örn. İmalat — Otomotiv",
+      "nis2_subsector": "örn. Bileşen üretimi"
+    },
+    "actions": {
+      "edit_title": "Siteyi düzenle",
+      "delete_title": "Siteyi sil",
+      "delete_confirm": "“{{name}}” sitesini silmek istiyor musunuz? Yalnızca bağlı veri yoksa izin verilir.",
+      "frameworks": "Çerçeveler",
+      "select": "Seç"
+    },
+    "new": {
+      "open": "+ Yeni site",
+      "first": "İlk siteyi oluştur →",
+      "title": "Yeni üretim sitesi",
+      "submit": "Site oluştur"
+    },
+    "edit": {
+      "title": "Siteyi düzenle"
+    },
+    "logo_url_label": "Logo URL",
+    "logo_url_hint": "Tesis logo URL'si (raporlarda/dışa aktarmada kullanılır). Şeffaf arka planlı PNG/SVG önerilir.",
+    "tisax_framework_label": "TISAX — VDA ISA 6.0",
+    "frameworks": {
+      "title": "Uyum çerçeveleri",
+      "empty": "Bu siteye atanmış çerçeve yok.",
+      "assign_new": "Yeni çerçeve ata",
+      "select": "— Çerçeve seçin —",
+      "assign": "Çerçeve ata",
+      "assigning": "Atanıyor...",
+      "assign_help": "Bu site için değerlendirilecek tüm kontrolleri otomatik oluşturur.",
+      "all_assigned": "Tüm mevcut çerçeveler zaten bu siteye atanmış.",
+      "activate": "Etkinleştir",
+      "deactivate": "Devre dışı bırak",
+      "level": "seviye: {{level}}",
+      "active_from": "{{date}} tarihinden itibaren",
+      "remove_confirm": "{{code}} kaldırılsın mı? Değerlendirilen kontroller kalacak.",
+      "tisax": {
+        "assessment_level": "Assessment Level {{level}}",
+        "l2_hint": "Yüksek koruma — gizli bilgiler",
+        "l3_hint": "Çok yüksek koruma (tüm L2 kontrolleri içerir)",
+        "proto_hint": "Prototip koruması — VDA ISA Bölüm 8",
+        "l3_proto_label": "Assessment Level 3 + Prototip Koruması",
+        "l3_proto_hint": "Çok yüksek koruma + prototipler (L2, L3 ve VDA ISA Bölüm 8 içerir)",
+        "l3_notice": "TISAX_L2 ve TISAX_L3 atanacak — {{l2}} + {{l3}} = {{total}} toplam kontrol.",
+        "l3_proto_notice": "TISAX_L2 + TISAX_L3 + TISAX_PROTO atanacak — {{l2}} + {{l3}} + {{proto}} = {{total}} toplam kontrol."
+      },
+      "nis2": {
+        "essential_hint": "Proaktif denetim · 10 milyon €'ya kadar ceza",
+        "important_hint": "Reaktif denetim · 7 milyon €'ya kadar ceza"
+      },
+      "generic": {
+        "base": "Temel — zorunlu minimum gereksinimler",
+        "advanced": "Gelişmiş — isteğe bağlı önlemlerle",
+        "complete": "Tam — eksiksiz uygulama"
+      }
+    },
+    "delete_blocked": {
+      "title": "Tesis silinemez",
+      "intro": "Devam etmeden önce kaldırılması gereken bağlantılı öğeler var:",
+      "deps": {
+        "sub_plants": "Alt tesisler",
+        "plant_frameworks": "Atanmış çerçeveler",
+        "control_instances": "Kontrol örnekleri",
+        "assets": "Varlıklar",
+        "bia_processes": "BIA süreçleri",
+        "risk_assessments": "Risk değerlendirmeleri",
+        "documents": "Belgeler",
+        "evidences": "Kanıtlar",
+        "tasks": "Görevler",
+        "incidents": "Olaylar",
+        "pdca_cycles": "PDCA döngüleri",
+        "lessons": "Öğrenilen dersler",
+        "management_reviews": "Yönetim gözden geçirmeleri",
+        "suppliers": "Tedarikçiler",
+        "training_courses": "Eğitim kursları",
+        "phishing_simulations": "Kimlik avı simülasyonları",
+        "bcp_plans": "BCP planları",
+        "audit_preps": "Denetim hazırlıkları",
+        "audit_programs": "Denetim programları",
+        "schedule_policies": "Takvim politikaları",
+        "role_assignments": "Rol atamaları"
+      },
+      "force_hint": "Yalnızca süper kullanıcı: tüm bağlantılı öğelerle birlikte tesisi zorla silebilirsiniz (geri alınamaz işlem).",
+      "force_action": "Zorla sil",
+      "force_confirm": "UYARI: tüm bağlantılı öğeler tesisle birlikte kalıcı olarak silinecek. Devam edilsin mi?"
+    }
+  },
+  "users": {
+    "title": "Governance — Kullanıcılar",
+    "empty": "Kullanıcı bulunamadı",
+    "table": {
+      "username": "Kullanıcı adı",
+      "email": "Email",
+      "name": "Ad Soyad",
+      "grc_role": "GRC rolü",
+      "active": "Aktif",
+      "actions": "İşlemler"
+    },
+    "fields": {
+      "username": "Kullanıcı adı",
+      "email": "Email",
+      "first_name": "Ad",
+      "last_name": "Soyad",
+      "password": "Parola",
+      "grc_role": "GRC rolü",
+      "grc_role_none": "— yok —"
+    },
+    "actions": {
+      "assign_role": "Rol ata",
+      "activate": "Aktifleştir",
+      "deactivate": "Pasifleştir",
+      "competency": "Yeterlilikler",
+      "reset_password": "Parolayı sıfırla",
+      "delete": "Kullanıcıyı sil",
+      "delete_confirm": "{{username}} kullanıcısını silinsin ve tüm GRC erişimleri iptal edilsin mi?"
+    },
+    "new": {
+      "open": "+ Yeni kullanıcı",
+      "title": "Yeni kullanıcı",
+      "submit": "Kullanıcı oluştur"
+    },
+    "competency_gap": {
+      "loading": "Boşluk analizi yükleniyor...",
+      "title": "Yetkinlik boşluk analizi — {{name}}",
+      "gap_count": "{{count}} boşluk",
+      "complete": "Tam",
+      "to_fill": "Doldurulacak boşluklar:",
+      "level_from_to": "Seviye {{current}} → gerekli {{required}}",
+      "expired": "Süresi dolmuş yetkinlikler:",
+      "ok": "Yetkinlikler Tamam:",
+      "none": "Bu kullanıcının rolleri için tanımlanmış yetkinlik gereksinimi yok."
+    },
+    "danger": {
+      "title": "⚠️ Tehlikeli bölge — Yalnızca test ortamı",
+      "body": "Süper kullanıcıyı ve uyum çerçevelerini koruyarak tüm GRC verilerini siler. Bu işlem geri alınamaz.",
+      "open": "🗑️ Test veritabanını sıfırla",
+      "confirm_body": "Emin misiniz? Bu tüm GRC verilerini silecek. Yalnızca süper kullanıcı hesabınız ve uyum çerçeveleri korunacak.",
+      "confirm_placeholder": "Onaylamak için RESET yazın",
+      "resetting": "Sıfırlanıyor...",
+      "confirm": "Sıfırlamayı onayla",
+      "reset_success": "Sıfırlama tamamlandı. Girişe yönlendiriliyor...",
+      "reset_error": "Sıfırlama sırasında hata"
+    }
+  },
+  "governance": {
+    "title": "Governance",
+    "subtitle": "Normatif roller, komiteler ve görev devrimi",
+    "tabs": {
+      "roles": "Roller ve komiteler",
+      "workflow": "Belge iş akışı (M07)",
+      "frameworks": "Normatif çerçeveler",
+      "risk_appetite": "Risk Appetite"
+    },
+    "workflow": {
+      "title": "Belge iş akışı",
+      "subtitle": "M07 belgelerini türe ve siteye göre kimin oluşturabileceğini, inceleyebileceğini ve onaylayabileceğini tanımlayın.",
+      "configured_policies": "Yapılandırılmış politikalar",
+      "new_policy": "+ Yeni politika",
+      "no_policies": "Yapılandırılmış politika yok. Her belge türü için bir tane oluşturun.",
+      "who_can_submit": "Kim gönderebilir",
+      "who_reviews": "Kim inceler",
+      "who_approves": "Kim onaylar",
+      "actions_col": "İşlemler",
+      "scope_org": "Organizasyon",
+      "scope_bu": "İş Birimi (ID)",
+      "scope_site_prefix": "Tesis:",
+      "scope_site_id": "Site (ID)",
+      "modal_edit": "Politikayı düzenle",
+      "modal_new": "Yeni politika",
+      "scope_label": "Kapsam",
+      "site_label": "Site",
+      "site_select": "— tesis seçin —",
+      "scope_org_option": "Organizasyon",
+      "scope_site_option": "Belirli tesis",
+      "who_can_create_submit": "Kim oluşturabilir / incelemeye gönderebilir",
+      "saving": "Kaydediliyor...",
+      "save_policy": "Politikayı kaydet",
+      "delete_title": "Politikayı sil",
+      "delete_confirm": "Bu politikayı silmek istediğinizden emin misiniz:",
+      "deleting": "Siliniyor...",
+      "doc_type_col": "Belge türü",
+      "doc_types": {
+        "policy": "Politika",
+        "procedura": "Prosedür",
+        "manuale": "ISMS El Kitabı",
+        "contratto": "Sözleşme/NDA",
+        "registro": "Kayıt",
+        "altro": "Diğer"
+      }
+    },
+    "sections": {
+      "roles": "Normatif roller",
+      "committees": "Güvenlik komiteleri"
+    },
+    "empty": {
+      "roles": "Atanmış rol yok",
+      "committees": "Yapılandırılmış komite yok"
+    },
+    "alerts": {
+      "vacant_roles": "🚨 {{count}} zorunlu rol aktif sahipsiz",
+      "expiring_roles": "⚠ {{count}} rol 30 gün içinde sona eriyor"
+    },
+    "expires_on": "{{date}} tarihinde sona eriyor",
+    "valid_until": "{{date}} tarihine kadar",
+    "badges": {
+      "expires_in_days": "{{days}}g içinde sona erer"
+    },
+    "actions": {
+      "replace": "Değiştir",
+      "terminate": "Sonlandır",
+      "delete_confirm": "Bu rol ataması kalıcı olarak silinsin mi? Yalnızca test ortamında veya hatalı giriş düzeltmesi için önerilir."
+    },
+    "roles": {
+      "ciso": "CISO",
+      "compliance_officer": "Compliance Officer",
+      "risk_manager": "Risk Manager",
+      "internal_auditor": "İç Denetçi",
+      "external_auditor": "Dış Denetçi",
+      "plant_manager": "Plant Manager",
+      "control_owner": "Control Owner",
+      "plant_security_officer": "Plant Security Officer",
+      "nis2_contact": "NIS2 iletişim",
+      "dpo": "DPO",
+      "isms_manager": "ISMS Manager",
+      "comitato_membro": "Komite üyesi",
+      "bu_referente": "BU temsilcisi",
+      "raci_responsible": "RACI Responsible",
+      "raci_accountable": "RACI Accountable"
+    },
+    "scopes": {
+      "org": "Küresel — tüm organizasyon",
+      "bu": "Belirli iş birimi",
+      "plant": "Belirli site"
+    },
+    "roles_assign": {
+      "open": "+ Ata",
+      "modal_title": "Yeni rol ataması",
+      "user": "Kullanıcı",
+      "role": "Rol",
+      "scope": "Kapsam",
+      "business_unit": "Business Unit",
+      "plant": "Site",
+      "select_bu": "— BU seçin —",
+      "select_plant": "— site seçin —",
+      "valid_from": "Geçerlilik başlangıcı",
+      "valid_until": "Geçerlilik sonu",
+      "submit": "Rol ata"
+    },
+    "committees": {
+      "new": {
+        "open": "+ Yeni",
+        "title": "Yeni komite",
+        "submit": "Komite oluştur"
+      },
+      "fields": {
+        "name": "Ad",
+        "type": "Tür",
+        "frequency": "Sıklık",
+        "next_meeting": "Sonraki toplantı"
+      },
+      "placeholders": {
+        "name": "örn. Güvenlik Komitesi"
+      },
+      "types": {
+        "centrale": "Merkezi",
+        "bu": "BU"
+      },
+      "frequencies": {
+        "mensile": "Aylık",
+        "trimestrale": "Üç aylık",
+        "semestrale": "Altı aylık"
+      },
+      "frequency": "Sıklık: {{value}}",
+      "next_meeting": "sonraki:"
+    },
+    "terminate": {
+      "title": "Rolü sonlandır",
+      "body": "{{user}} kullanıcısının {{role}} rolünü sonlandırmak üzeresiniz.",
+      "end_date": "Bitiş tarihi",
+      "reason": "Sebep",
+      "reason_placeholder": "min 5 karakter...",
+      "pending": "Sonlandırılıyor...",
+      "confirm": "Sonlandırmayı onayla",
+      "error": "Sonlandırma sırasında hata."
+    },
+    "replace": {
+      "title": "Rolü değiştir",
+      "body": "{{role}} rolü için yeni bir sahip seçin.",
+      "new_owner": "Yeni sahip",
+      "handover_date": "Devir tarihi",
+      "reason": "Sebep / notlar",
+      "pending": "Değiştiriliyor...",
+      "confirm": "Devri onayla",
+      "error": "Değiştirme sırasında hata.",
+      "new_user": "Yeni kullanıcı",
+      "new_valid_from": "Yeni geçerlilik başlangıcı",
+      "new_valid_until": "Yeni geçerlilik sonu",
+      "submit": "Değiştirmeyi onayla"
+    },
+    "help": {
+      "title": "Governance — M00",
+      "description": "Normatif rolleri (CISO, NIS2 iletişim, DPO vb.) geçerlilik süreleriyle yönetir. Süresi dolmuş veya boş roller otomatik uyarı oluşturur.",
+      "steps": {
+        "assign_role": "Bir kullanıcıya başlangıç ve bitiş tarihiyle rol atayın.",
+        "replace_role": "Rol sahibini değiştirmek için \"Değiştir\" kullanın — devir atomiktir.",
+        "terminate_role": "Halef olmadan sonlandırmak için gerekçeyle \"Sonlandır\" kullanın.",
+        "vacant_roles_alert": "Zorunlu boş roller (CISO, NIS2, DPO, ISMS) üstte uyarı oluşturur.",
+        "link_nomination_doc": "Resmi kanıt için atama belgesini bağlayın."
+      },
+      "connections": {
+        "rbac": "Normatif rol, uygulama rolünden farklıdır.",
+        "management_review": "Boş roller Yönetim Gözden Geçirme anlık görüntüsünde görünür."
+      },
+      "config": {
+        "create_users_m02": "Önce M02'de kullanıcıları oluşturun."
+      }
+    },
+    "workflow_help": {
+      "title": "Belge iş akışı",
+      "description": "Belge türüne (politika, prosedür, kılavuz...) ve siteye göre belge onay akışını yapılandırın.",
+      "steps": {
+        "choose_type_and_scope": "Belge türünü ve kapsamı seçin (org / BU / site).",
+        "assign_creators": "Oluşturabilecek ve incelemeye gönderebilecek rolleri atayın.",
+        "assign_reviewers": "İncelemesi gereken rolleri atayın.",
+        "assign_approvers": "Onaylayabilecek ve yürürlüğe koyabilecek rolleri atayın."
+      },
+      "connections": {
+        "documents": "Belgeler modülünde \"İncelemeye gönder\" / \"Onayla\" düğmelerini etkinleştirir.",
+        "governance": "Yönetişim'de yapılandırılan normatif rolleri (CISO, Plant Manager, ISMS...) kullanır."
+      }
+    },
+    "frameworks": {
+      "title": "Normatif çerçeveler",
+      "subtitle": "Normatif çerçeveye göre uyum kapsamını görüntüleyin.",
+      "note": "Gerçeğin kaynağı: backend/frameworks/ içindeki JSON dosyaları. İçe aktarma süper kullanıcı gerektirir.",
+      "empty": "Çerçeve bulunamadı",
+      "domains_short": "alanlar",
+      "controls_short": "kontroller",
+      "mappings_short": "eşleştirmeler",
+      "table": {
+        "code": "Kod",
+        "name": "Ad",
+        "version": "Sürüm",
+        "published_at": "Yayınlandı",
+        "controls": "Kapsam",
+        "languages": "Diller"
+      },
+      "import_title": "Import framework (JSON)",
+      "import_placeholder": "Tam çerçeve JSON'ını buraya yapıştırın veya .json dosyası yükleyin…",
+      "import_missing_json": "Devam etmeden önce JSON sağlayın.",
+      "import_invalid_json": "Geçersiz JSON.",
+      "preview_action": "Önizleme",
+      "import_confirm": "İçe aktar",
+      "import_success": "İçe aktarma tamamlandı.",
+      "preview_title": "İçe aktarma önizlemesi",
+      "preview": {
+        "framework": "Framework",
+        "version": "Sürüm",
+        "counts": "Sayımlar",
+        "languages": "Diller"
+      },
+      "framework": "Çerçeve",
+      "compliant": "Uyumlu",
+      "partial": "Kısmi",
+      "gap": "Boşluk",
+      "not_evaluated": "Değerlendirilmemiş",
+      "risk_appetite": "Risk iştahı",
+      "archive_title": "Çerçeveyi arşivle",
+      "archive_confirm": "{{code}} çerçevesi arşivlensin mi? Listeden gizlenir ve yeni eşleştirmeleri engeller; geçmiş verileri silmez.",
+      "archived_badge": "Arşivlendi",
+      "delete_title": "Çerçeveyi sil",
+      "delete_action": "Sil",
+      "delete_confirm": "\"{{code}}\" çerçevesini kalıcı olarak silmek istiyor musunuz? İlişkili tüm kontroller ve alanlar kaldırılacak. Bu işlem geri alınamaz."
+    },
+    "risk_appetite": {
+      "title": "Risk iştahı",
+      "subtitle": "Alan bazında risk kabul eşiklerini tanımlayın.",
+      "note": "Her Site/Çerçeve kombinasyonu için en son etkin politika (başlangıç tarihine göre) kullanılır; bu eşikler M06'da İçsel, Kalıntı ve Ağırlıklı karşılaştırmak için uygulanır.",
+      "table_title": "Risk iştahı politikaları",
+      "empty": "Politika yapılandırılmamış. En az bir org-wide veya site bazlı eşik tanımlayın.",
+      "new": "+ Yeni politika",
+      "edit_title": "Risk iştahı politikasını düzenle",
+      "new_title": "Yeni risk iştahı politikası",
+      "delete_title": "Politikayı sil",
+      "delete_body": "Bu risk iştahı politikasını silmek istediğinizden emin misiniz? M06 değerlendirmeleri diğer aktif politikaları kullanacak.",
+      "org_wide": "Org-wide (tüm siteler)",
+      "framework_all": "Tüm çerçeveler",
+      "columns": {
+        "plant": "Site",
+        "framework": "Framework",
+        "max_acceptable": "Maks. kabul edilebilir puan",
+        "max_red": "Maks. kırmızı riskler",
+        "max_unacceptable": "Kabul edilemez puan",
+        "valid_from": "Geçerlilik başlangıcı",
+        "valid_until": "Geçerlilik sonu",
+        "status": "Durum",
+        "actions": "İşlemler"
+      },
+      "domain": "Alan",
+      "threshold": "Kabul eşiği",
+      "current": "Mevcut",
+      "save": "Kaydet",
+      "saved": "Risk iştahı kaydedildi"
+    },
+    "appetite_notes_placeholder": "Onay notları, yönetim kararı referansları, vb."
+  },
+  "sidebar": {
+    "groups": {
+      "main": "Ana",
+      "compliance": "Compliance",
+      "risk_continuity": "Risk ve süreklilik",
+      "operations": "Operasyonlar",
+      "planning": "Planlama",
+      "organisation": "Organizasyon ve gözden geçirme",
+      "settings": "Ayarlar"
+    },
+    "items": {
+      "dashboard": "Dashboard",
+      "reporting": "Reporting",
+      "tasks": "Görevler",
+      "controls": "Kontroller",
+      "gap_analysis": "Gap Analysis",
+      "documents": "Belgeler",
+      "audit_prep": "Audit Prep",
+      "risk": "Risk",
+      "assets": "IT/OT Varlıkları",
+      "bia": "BIA",
+      "bcp": "BCP",
+      "incidents": "Olaylar",
+      "lessons": "Lessons",
+      "suppliers": "Tedarikçiler",
+      "training": "Eğitim",
+      "pdca": "PDCA",
+      "activity_schedule": "Activity Schedule",
+      "required_documents": "Zorunlu Belgeler",
+      "schedule_policy": "Son tarih politikası",
+      "governance": "Governance",
+      "management_review": "Yönetim gözden geçirmesi",
+      "plants": "Siteler",
+      "users": "Kullanıcılar",
+      "competency": "Yetkinlikler",
+      "audit_trail": "Audit Trail",
+      "email_settings": "E-posta ayarları",
+      "notification_rules": "Bildirim kuralları",
+      "ai_engine": "AI Engine",
+      "mfa": "MFA Kimlik Doğrulama",
+      "backups": "Yedekleme & Geri Yükleme"
+    }
+  },
+  "topbar": {
+    "language": {
+      "label": "Dil"
+    },
+    "logout": "Çıkış",
+    "plant": {
+      "none_selected": "Site seçilmedi",
+      "all": "Tüm siteler",
+      "none_configured": "Yapılandırılmış site yok"
+    },
+    "notifications": {
+      "title": "Bildirimler",
+      "empty": "Yapılandırılmış abonelik yok",
+      "enabled": "etkin",
+      "disabled": "devre dışı"
+    }
+  },
+  "auth": {
+    "login": {
+      "subtitle": "Hesabınıza giriş yapın",
+      "email_label": "Email / Username",
+      "email_placeholder": "admin@ornek.com",
+      "password_label": "Password",
+      "submit": "Giriş yap",
+      "signing_in": "Giriş yapılıyor...",
+      "invalid_credentials": "Geçersiz kimlik bilgileri. Lütfen tekrar deneyin."
+    },
+    "mfa": {
+      "title": "İki Faktörlü Kimlik Doğrulama (MFA)",
+      "description": "Hesabınızı TOTP uygulaması (Google Authenticator, Authy vb.) ile ikinci faktörle koruyun.",
+      "prompt": "Kimlik doğrulama uygulamanızdaki 6 haneli kodu girin.",
+      "code_label": "OTP Kodu",
+      "verify": "Doğrula",
+      "verifying": "Doğrulanıyor...",
+      "back": "← Girişe geri dön",
+      "invalid_code": "Geçersiz veya süresi dolmuş OTP kodu.",
+      "trust_device": "Bu cihazı 30 gün boyunca hatırla",
+      "status_active": "MFA aktif",
+      "status_inactive": "MFA etkin değil",
+      "enable": "Etkinleştir",
+      "disable": "Devre dışı bırak",
+      "setup_instructions": "QR kodunu uygulamanızla (Google Authenticator, Authy vb.) tarayın, ardından Tamam'a tıklayın.",
+      "scanned": "QR kodunu taradım →",
+      "enter_first_code": "Kurulumu onaylamak için uygulama tarafından oluşturulan kodu girin.",
+      "enter_code_to_disable": "Devre dışı bırakmayı onaylamak için mevcut OTP kodunuzu girin.",
+      "activate": "MFA'yı Etkinleştir",
+      "setup_success": "MFA başarıyla etkinleştirildi.",
+      "disable_success": "MFA devre dışı bırakıldı."
+    }
+  },
+  "backups": {
+    "title": "Yedekleme & Geri Yükleme",
+    "subtitle": "Veritabanı yedeklerini yönetin. Otomatik yedekleme her gün saat 02:00'de çalışır.",
+    "create": "Yedek oluştur",
+    "creating": "Oluşturuluyor...",
+    "empty": "Kullanılabilir yedek yok. İlk manuel yedeği oluşturun.",
+    "retention_info": "Yedekler 30 gün boyunca saklanır. Otomatik yedekleme her gece saat 02:00'de çalışır.",
+    "col": {
+      "date": "Tarih",
+      "filename": "Dosya",
+      "size": "Boyut",
+      "type": "Tür",
+      "status": "Durum",
+      "created_by": "Oluşturan",
+      "actions": "İşlemler",
+      "completed": "Tamamlandı"
+    },
+    "status": {
+      "pending": "Bekliyor",
+      "running": "Çalışıyor",
+      "completed": "Tamamlandı",
+      "failed": "Başarısız",
+      "restored": "Geri yüklendi"
+    },
+    "type": {
+      "auto": "Otomatik",
+      "manual": "Manuel"
+    },
+    "action": {
+      "download": "İndir",
+      "restore": "Geri yükle",
+      "delete": "Sil"
+    },
+    "confirm_restore": {
+      "title": "Geri yüklemeyi onayla",
+      "message": "\"{{filename}}\" yedeğinden veritabanını geri yüklemek üzeresiniz. Tüm mevcut veriler üzerine yazılacak. Bu işlem geri alınamaz. Devam edilsin mi?"
+    },
+    "confirm_delete": {
+      "title": "Yedeği sil",
+      "message": "\"{{filename}}\" yedeğini kalıcı olarak sil? Dosya sunucudan kaldırılacak."
+    },
+    "feedback": {
+      "created": "Yedekleme başarıyla başlatıldı.",
+      "create_error": "Yedek oluşturulurken hata oluştu.",
+      "restored": "Veritabanı başarıyla geri yüklendi.",
+      "restore_error": "Veritabanı geri yüklenirken hata oluştu.",
+      "deleted": "Yedek silindi.",
+      "delete_error": "Yedek silinirken hata oluştu."
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "see_all": "Tümünü gör",
+    "trend": {
+      "title": "Haftalık ISMS trendi — {{framework}}",
+      "empty": "Veri yok — anlık görüntüler her Pazartesi Celery görevi tarafından oluşturulur"
+    },
+    "deadlines": {
+      "title": "Yaklaşan son tarihler (3 ay)"
+    },
+    "governance": {
+      "vacant_roles": "{{count}} zorunlu rol boş",
+      "expiring_roles": "{{count}} rol 30 gün içinde sona eriyor",
+      "go_to": "Yönetime git"
+    },
+    "assets": {
+      "needs_revaluation": "{{count}} varlık yeniden değerlendirilmeli",
+      "needs_revaluation_sub": "Kayıtlı değişiklikler henüz yeniden değerlendirilmedi",
+      "see_list": "Listeye bak"
+    },
+    "kpi": {
+      "active_sites": "Aktif siteler",
+      "compliant_controls": "Uyumlu kontroller",
+      "gap_controls": "Eksik kontroller",
+      "gap_controls_sub": "işlem gerektirir",
+      "open_incidents": "Açık olaylar"
+    },
+    "latest_gaps": {
+      "title": "Son eksik kontroller",
+      "empty": "Boşluk tespit edilmedi"
+    },
+    "sites": {
+      "title": "Siteler",
+      "empty": "Yapılandırılmış site yok"
+    },
+    "chart_risks_high": "Yüksek riskler",
+    "chart_incidents_open": "Açık olaylar"
+  },
+  "tasks": {
+    "title": "Görevler",
+    "empty": "Görev bulunamadı",
+    "filters": {
+      "all": "Tümü",
+      "open": "Açık",
+      "in_progress": "Devam ediyor",
+      "completed": "Tamamlandı",
+      "overdue": "Gecikmiş"
+    },
+    "new": {
+      "title": "Yeni görev",
+      "submit": "Görev oluştur"
+    },
+    "fields": {
+      "title": "Başlık",
+      "priority": "Öncelik",
+      "due_date": "Son tarih",
+      "plant": "Site"
+    },
+    "priority": {
+      "bassa": "düşük",
+      "media": "orta",
+      "alta": "yüksek",
+      "critica": "kritik"
+    },
+    "table": {
+      "title": "Başlık",
+      "priority": "Öncelik",
+      "status": "Durum",
+      "due_date": "Son tarih",
+      "source": "Kaynak",
+      "escalation": "Escalation"
+    },
+    "actions": {
+      "complete": "Tamamla"
+    }
+  },
+  "documents": {
+    "title": "Belgeler & Kanıtlar",
+    "tabs": {
+      "documents": "Belgeler",
+      "evidences": "Kanıtlar"
+    },
+    "empty": "Belge bulunamadı",
+    "file_help": "Maks 50 MB. Formatlar: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg.",
+    "filters": {
+      "all": "Tümü",
+      "draft": "Taslak",
+      "in_review": "İncelemede",
+      "in_approval": "Onayda",
+      "approved": "Onaylananlar"
+    },
+    "filter": {
+      "only_selected_plant": "Yalnızca seçili site"
+    },
+    "fields": {
+      "title": "Başlık",
+      "category": "Kategori",
+      "document_type": "Belge türü",
+      "review_due_date": "İnceleme son tarihi",
+      "mandatory": "Zorunlu belge",
+      "file": "File",
+      "plant": "Site",
+      "description": "Açıklama"
+    },
+    "new": {
+      "title": "Yeni belge",
+      "submit": "Belge oluştur"
+    },
+    "upload": {
+      "title": "Yeni belge sürümü",
+      "submit": "Sürümü yükle",
+      "change_notes": "Değişiklik notları (isteğe bağlı)"
+    },
+    "change_plant": {
+      "title": "Belge sitesini değiştir",
+      "none": "— Site yok —"
+    },
+    "category": {
+      "politica": "Politika",
+      "procedura": "Prosedür",
+      "istruzione": "İş talimatı",
+      "registro": "Kayıt",
+      "verbale": "Tutanak",
+      "contratto": "Sözleşme"
+    },
+    "type": {
+      "policy": "Policy",
+      "procedura": "Prosedür",
+      "manuale": "ISMS kılavuzu",
+      "contratto": "Sözleşme/NDA",
+      "registro": "Kayıt",
+      "altro": "Diğer"
+    },
+    "mandatory": {
+      "yes": "Zorunlu",
+      "no": "İsteğe bağlı"
+    },
+    "table": {
+      "title": "Başlık",
+      "file": "File",
+      "plant": "Site",
+      "type": "Tür",
+      "status": "Durum",
+      "mandatory": "Zorunlu",
+      "review_due_date": "İnceleme son tarihi",
+      "approved_at": "Onay tarihi"
+    },
+    "actions": {
+      "download": "İndir",
+      "submit_for_review": "İncelemeye gönder",
+      "new_version": "Yeni sürüm",
+      "link_controls": "Kontrolleri bağla",
+      "change_type": "Türü değiştir",
+      "change_plant": "Site değiştir",
+      "delete_title": "Belgeyi sil",
+      "delete_confirm": "«{{title}}» belgesi silinsin mi? Onay sürecinde veya onaylanmış belgeler için yasaktır (süper kullanıcı hariç)."
+    },
+    "errors": {
+      "download_failed": "Belge indirilemedi. İzinleri kontrol edin veya daha sonra tekrar deneyin.",
+      "evidence_download_failed": "Kanıt dosyası indirilemedi. İzinleri kontrol edin veya daha sonra tekrar deneyin.",
+      "no_file_selected": "Dosya seçilmedi",
+      "upload_failed": "Dosya yüklenirken hata",
+      "update_plant_failed": "Site güncellenirken hata"
+    },
+    "controls_link": {
+      "all_statuses": "Tüm durumlar",
+      "selected_count": "{{count}} kontrol seçildi",
+      "none_selected": "Seçim yok",
+      "linking": "Bağlanıyor...",
+      "submit": "Seçilenleri bağla",
+      "title": "Kontrolleri bağla",
+      "result_linked": "{{count}} kontrole bağlandı"
+    },
+    "evidence": {
+      "empty": "Kanıt bulunamadı",
+      "link_controls": {
+        "title": "Kanıtı kontrollere bağla",
+        "result_linked": "{{count}} kontrole bağlandı"
+      },
+      "new": {
+        "title": "Yeni kanıt",
+        "submit": "Kanıt oluştur"
+      },
+      "fields": {
+        "type": "Kanıt türü",
+        "valid_until": "Geçerlilik sonu"
+      },
+      "types": {
+        "screenshot": "Screenshot",
+        "log": "Sistem günlüğü",
+        "report": "Report",
+        "verbale": "Tutanak",
+        "certificato": "Sertifika",
+        "test_result": "Test sonucu",
+        "altro": "Diğer"
+      },
+      "filters": {
+        "all": "Tümü",
+        "valid": "Geçerli",
+        "expiring": "Süresi dolmak üzere",
+        "expired": "Süresi dolmuş",
+        "all_types": "Tüm türler"
+      },
+      "table": {
+        "type": "Tür",
+        "title": "Başlık",
+        "expiry": "Son kullanma",
+        "plant": "Site",
+        "linked_controls": "Bağlı kontroller",
+        "uploaded_by": "Yükleyen"
+      },
+      "actions": {
+        "download_file": "Dosyayı indir",
+        "link_controls": "Kontrole bağla",
+        "delete_title": "Kanıtı sil",
+        "delete_confirm": "«{{title}}» kanıtı silinsin mi? Değerlendirilmiş kontrollerle bağlıysa yasaktır (süper kullanıcı hariç)."
+      },
+      "expiry": {
+        "expired": "Süresi doldu",
+        "expiring": "Süresi dolmak üzere",
+        "valid": "Geçerli",
+        "days_ago": "{{days}}g önce",
+        "in_days": "{{days}}g içinde"
+      },
+      "toggle_grouped": "Kontrole göre grupla",
+      "toggle_flat": "Liste görünümü",
+      "group_unassigned": "Hiçbir kontrole atanmamış",
+      "group_count": "{{count}} kanıt"
+    }
+  },
+  "schedule": {
+    "activity": {
+      "title": "Aktivite takvimi",
+      "help": {
+        "title": "Aktivite takvimi",
+        "description": "Tüm GRC son tarihlerinin toplu takvim görünümü:",
+        "steps": {
+          "1": "Siteyi ve zaman ufkunu seçin (1–12 ay)",
+          "2": "Türe (belgeler, riskler, bulgular vb.) veya duruma göre filtreleyin",
+          "3": "Doğrudan modüle gitmek için bir aktiviteye tıklayın",
+          "4": "Son tarihleri 'Son tarih politikası'nda yapılandırın (yalnızca CISO/Admin)"
+        },
+        "connections": {
+          "policy": {
+            "module": "Son tarih politikası",
+            "relation": "Yapılandırılmış kurallar tüm son tarihleri belirler"
+          },
+          "required_docs": {
+            "module": "Zorunlu belgeler",
+            "relation": "Çerçeveye göre zorunlu belge durumunu gösterir"
+          }
+        },
+        "config_needed": {
+          "1": "'Varsayılan politika oluştur' ile son tarih politikası yapılandırın",
+          "2": "Zorunlu belgeleri load_required_documents ile yükleyin"
+        }
+      },
+      "days": {
+        "today": "Bugün",
+        "overdue": "Gecikmiş",
+        "in_days": "{{days}}g"
+      }
+    },
+    "filters": {
+      "plant": "Site",
+      "all_plants": "Tüm siteler",
+      "horizon": "Ufuk",
+      "months": {
+        "3": "3 ay",
+        "6": "6 ay",
+        "12": "12 ay"
+      },
+      "urgency": "Aciliyet",
+      "urgency_values": {
+        "all": "Tümü",
+        "red": "Kritik",
+        "yellow": "Uyarı",
+        "green": "Ok"
+      }
+    },
+    "kpi": {
+      "critical": "Kritik (<7g)",
+      "warning": "Uyarı",
+      "on_track": "Zamanında"
+    },
+    "empty": {
+      "no_deadlines": "Önümüzdeki {{months}} ayda son tarih yok",
+      "no_deadlines_for_filter": "Seçili filtre için son tarih yok"
+    },
+    "table": {
+      "activity": "Aktivite",
+      "category": "Kategori",
+      "due_date": "Son tarih",
+      "days": "Günler",
+      "status": "Durum"
+    },
+    "units": {
+      "days": "gün",
+      "weeks": "hafta",
+      "months": "ay",
+      "years": "yıl"
+    },
+    "categories": {
+      "Controlli": "Kontroller",
+      "Documenti": "Belgeler",
+      "Rischi": "Riskler",
+      "BCP": "BCP",
+      "Incidenti": "Olaylar",
+      "Fornitori": "Tedarikçiler",
+      "Formazione": "Eğitim",
+      "Governance": "Yönetim",
+      "Audit": "Denetim",
+      "PDCA": "PDCA",
+      "Reporting": "Raporlama"
+    },
+    "policy": {
+      "title": "Son Tarih Politikası",
+      "new_policy": "+ Yeni politika",
+      "create_title": "Varsayılan kurallarla politika oluştur",
+      "site_optional": "Tesis (isteğe bağlı)",
+      "global": "Global (tüm tesisler)",
+      "all": "Tümü",
+      "policy_name": "Politika adı",
+      "create_btn": "Oluştur",
+      "create_error": "Oluşturma hatası. Lütfen tekrar deneyin.",
+      "site_label": "Site",
+      "policy_label": "Politika",
+      "active_suffix": "(etkin)",
+      "no_policy": "Yapılandırılmış politika yok. Varsayılan kurallarla yeni bir politika oluşturun.",
+      "days_before": "gün önce",
+      "col_rule": "Kural",
+      "col_frequency": "Sıklık",
+      "col_alert": "Uyarı",
+      "col_active": "Aktif"
+    },
+    "required_docs": {
+      "title": "Zorunlu Belgeler",
+      "all_sites": "Tüm tesisler",
+      "no_framework": "Bu tesise atanmış çerçeve yok. Bir çerçeveyi etkinleştirmek için M01 Tesis'e gidin.",
+      "status_all": "Tümü",
+      "status_red": "Eksik",
+      "status_yellow": "Eksik",
+      "status_green": "Tamam",
+      "approved_label": "Onaylandı",
+      "total_suffix": "toplam {{total}} içinden",
+      "incomplete_label": "Tamamlanmamış",
+      "missing_label": "Eksik",
+      "traffic_present_approved": "Mevcut ve onaylı",
+      "traffic_draft": "Mevcut (taslak/inceleme)",
+      "traffic_missing": "Eksik",
+      "mandatory_badge": "Zor.",
+      "no_doc": "— bağlı belge yok",
+      "review_date": "İnceleme: {{date}}",
+      "no_results_framework": "Bu çerçeve için gerekli belge yok",
+      "no_results_filter": "Seçilen filtre için sonuç yok",
+      "col_doc": "Belge",
+      "col_type": "Tür",
+      "col_clause": "Madde",
+      "col_present": "Belge mevcut",
+      "col_status": "Durum"
+    }
+  },
+  "training": {
+    "title": "Operasyonlar — Eğitim",
+    "empty": "Kayıtlı kurs yok",
+    "sources": {
+      "interno": "dahili",
+      "kb4": "kb4",
+      "esterno": "harici"
+    },
+    "new": {
+      "open": "+ Yeni kurs",
+      "title": "Yeni kurs",
+      "submit": "Kurs oluştur"
+    },
+    "fields": {
+      "title": "Başlık",
+      "description": "Açıklama",
+      "source": "Kaynak",
+      "duration_minutes": "Süre (dakika)",
+      "deadline": "Son tarih",
+      "mandatory": "Zorunlu"
+    },
+    "table": {
+      "title": "Kurs başlığı",
+      "source": "Kaynak",
+      "mandatory": "Zorunlu",
+      "duration": "Süre (dk)",
+      "deadline": "Son tarih",
+      "status": "Durum"
+    }
+  },
+  "incidents": {
+    "title": "Operasyonlar — Olaylar",
+    "empty": "Kayıtlı olay yok",
+    "table": {
+      "title": "Başlık",
+      "severity": "Önem",
+      "nis2": "NIS2",
+      "status": "Durum",
+      "detected_at": "Algılandı"
+    },
+    "fields": {
+      "plant": "Site",
+      "title": "Başlık",
+      "description": "Açıklama",
+      "severity": "Önem",
+      "nis2_notifiable": "NIS2 bildirimi",
+      "detected_at": "Algılandı"
+    },
+    "views": {
+      "list": "Olay listesi",
+      "nis2_config": "NIS2 yapılandırması"
+    },
+    "nis2_config_select_plant": "Önemlilik hesaplama parametrelerini düzenlemek için üstteki menüden bir site seçin.",
+    "nis2_config_plant_note": "NIS2 sektörü, alt sektör, tüzel unvan, KDV ve faaliyet açıklaması M01 Siteler’de yapılandırılır. Bildirim iletişimi, M00 Yönetişim’de siteye atanan «NIS2 İletişim» rolüdür (burada tekrarlamayın).",
+    "nis2_config_save": "Hesaplama parametrelerini kaydet",
+    "nis2_config_labels": {
+      "threshold_users": "Kullanıcı/sistem eşiği (sayı)",
+      "threshold_hours": "Hizmet kesintisi saat eşiği",
+      "threshold_financial": "Finansal etki eşiği (€)"
+    },
+    "new": {
+      "open": "+ Yeni olay",
+      "title": "Yeni olay",
+      "submit": "Olay oluştur"
+    },
+    "help": {
+      "title": "Olay yönetimi — M09",
+      "description": "Entegre NIS2 zamanlayıcısı ile güvenlik olaylarını takip edin.",
+      "steps": {
+        "1": "Önem ve NIS2 bayrağıyla olay açın (evet/hayır/değerlendirilecek)",
+        "2": "Ön NIS2 bildirimi için 24 saatlik zamanlayıcı otomatik başlar",
+        "3": "Durumu \"analizde\" olarak değiştirin ve ekip atayın",
+        "4": "RCA'yı (Kök Neden Analizi) doldurun ve onaylayın",
+        "5": "Olayı kapatın: Olay sonrası PDCA ve Öğrenilen Ders otomatik oluşturulur"
+      },
+      "connections": {
+        "pdca": {
+          "module": "M11 PDCA",
+          "relation": "Kapanışta olay sonrası PDCA otomatik oluşturulur"
+        },
+        "lessons": {
+          "module": "M12 Lessons",
+          "relation": "ARN özeti ile öğrenilen ders otomatik oluşturulur"
+        },
+        "tasks": {
+          "module": "M08 Task",
+          "relation": "Açılışta ARN görevi otomatik oluşturulur"
+        }
+      },
+      "config_needed": {
+        "1": "Hesaplama eşiklerini Olaylar → NIS2 yapılandırması altında ayarlayın; site bilgisi ve NIS2 iletişimi M01 / M00"
+      }
+    },
+    "nis2_classification": {
+      "classify_success": "Sınıflandırma kararı kaydedildi.",
+      "classify_error": "Sınıflandırma başarısız. Verileri kontrol edin.",
+      "scope_label": "Site NIS2 kapsamı",
+      "scope": {
+        "essenziale": "Temel varlık",
+        "importante": "Önemli varlık",
+        "non_soggetto": "NIS2 kapsamı dışı"
+      },
+      "site_non_subject": "Site NIS2 yükümlülüklerine tabi değildir.",
+      "run_auto": "Otomatik değerlendirme çalıştır",
+      "preview_live": "Canlı önizleme (kaydedilmedi)",
+      "table": {
+        "axis": "Eksen",
+        "value": "Girilen değer",
+        "threshold": "Eşik",
+        "score": "Puan"
+      },
+      "axis": {
+        "operativo": "Operasyonel",
+        "economico": "Ekonomik",
+        "persone": "Kişiler / sistemler",
+        "riservatezza": "Gizlilik",
+        "reputazionale": "İtibar"
+      },
+      "dominant": "Baskın eksen",
+      "recurrence": {
+        "label": "Tekrar",
+        "yes_bonus": "Evet (+{{n}})",
+        "no_bonus": "Hayır (+0)",
+        "auto": "otomatik",
+        "manual": "manuel",
+        "section_title": "Tekrar",
+        "auto_yes": "Benzer kapatılmış olay tespit edildi:",
+        "auto_no": "Yapılandırılmış pencerede kapatılmış önceki yok (otomatik).",
+        "manual_toggle": "Tekrarlayan olay (manuel)"
+      },
+      "fattispecie_title": "ACN olay şekilleri",
+      "decision": {
+        "significant_title": "Önemli olay",
+        "significant_sub": "CSIRT'e NIS2 bildirimi zorunludur",
+        "not_significant_title": "Önemli değil",
+        "not_significant_sub": "Zorunlu NIS2 bildirimi yok",
+        "voluntary_note": "İsterseniz gönüllü bildirim yapabilirsiniz."
+      },
+      "timeline_cta": "NIS2 zaman çizelgesini aç",
+      "override_toggle": "Sınıflandırmayı geçersiz kıl",
+      "override_significant": "Önemli",
+      "override_not_significant": "Önemli değil",
+      "override_reason_ph": "Gerekçe (zorunlu)",
+      "override_apply": "Geçersiz kılmayı uygula",
+      "override_note": "Geçersiz kılma otomatik hesaplamanın yerine geçer ve denetim izine kaydedilir.",
+      "method_tab": {
+        "export_button": "Yöntemi dışa aktar (HTML)",
+        "page_title": "NIS2 sınıflandırma yöntemi",
+        "decision_model_label": "Karar modeli",
+        "rule_fallback": "PTA=maks(5 eksen); PTNR=PTA+yinelenme bonusu. PTNR≥eşik veya aktif ACN olay şekli (site kapsamı) ise anlamlı. Taban eşiklerde M/H çarpanları. Manuel geçersiz kılma önceliklidir.",
+        "criteria_disclaimer": "Aşağıdaki ölçüt listesi girdileri tanımlar; karar bu satırların mantıksal VEYA’sı değil, PTA/PTNR motoru ve ACN olay şekilleridir.",
+        "config_title": "Site NIS2 yapılandırmasından parametreler",
+        "config_users": "Kullanıcı/sistem eşiği (sayı)",
+        "config_hours": "Hizmet kesintisi saat eşiği",
+        "config_financial": "Finansal etki eşiği (€)",
+        "config_mult_m": "Orta çarpan (×M)",
+        "config_mult_h": "Yüksek çarpan (×H)",
+        "config_ptnr": "Anlamlılık için PTNR eşiği",
+        "config_rec_window": "Yineleme penceresi (gün)",
+        "config_rec_bonus": "Yineleme için PTNR bonusu",
+        "engine_title": "Sınıflandırma sonucu (güncel motor)",
+        "engine_loading": "Hesaplanıyor…",
+        "engine_unavailable": "Hesaplanan sonucu görmek için NIS2 Sınıflandırma sekmesini açın veya yeniden deneyin.",
+        "scores_snapshot_title": "Olayda saklanan değerler (PTA/PTNR/yükümlülükler)",
+        "scores_snapshot_note": "Güncel hesaplama için NIS2 Sınıflandırma sekmesini kullanın; otomatik değerlendirmeden sonra alanlar hizalanır.",
+        "raw_inputs_title": "Olay girdileri ve temel eşikler",
+        "raw_inputs_note": "Sayısal eksenler için «≥ temel eşik» yalnızca değerin eşiğe ulaşıp ulaşmadığını gösterir; 1–5 puan çarpanlı bantlar kullanır. Bayraklar gizlilik/itibar eksenlerini besler.",
+        "col_reaches_base": "≥ temel eşik",
+        "col_criterion": "Ölçüt",
+        "col_value": "Güncel değer",
+        "col_threshold": "Eşik",
+        "col_source": "Kaynak",
+        "source_threshold": "kullanıcı girdisi + site eşiği",
+        "source_flag": "boolean bayrak",
+        "boolean_na": "—",
+        "override_active": "Manuel geçersiz kılma etkin: gerekçeli manuel sonuç önceliklidir.",
+        "criteria_list_title": "Ölçütler ve eşikler (girdi referansı)",
+        "criteria_list_note": "Anlamlılık tek satırda «değer ≥ eşik» değildir: saat, euro ve kullanıcılar eksen başına puana dönüşür; ardından PTA, PTNR ve ACN olay şekilleri.",
+        "export_doc_title": "NIS2 sınıflandırma yöntemi",
+        "export_h1": "NIS2 sınıflandırma yöntemi",
+        "export_incident": "Olay",
+        "export_date": "Dışa aktarma tarihi",
+        "export_rule_label": "Kural",
+        "export_model_label": "Karar modeli",
+        "export_engine_label": "Motor sonucu (PTNR + olay şekilleri)",
+        "export_significant": "ANLAMLI",
+        "export_not_significant": "ANLAMLI DEĞİL",
+        "export_no_breakdown": "— (hesaplamak için sınıflandırmayı çalıştırın / açın)",
+        "export_rationale": "Gerekçe",
+        "export_config_h2": "NIS2 yapılandırma parametreleri (site)",
+        "export_inputs_note": "Aşağıdaki tablo yalnızca girdileri ve temel eşik karşılaştırmasını gösterir; rozet sonucu PTA/PTNR ve olay şekli motorundandır.",
+        "export_inputs_h2": "Girdiler ve temel eşikler",
+        "export_taxonomy_h2": "ENISA taksonomisi",
+        "export_col_criterion": "Ölçüt",
+        "export_col_value": "Güncel değer",
+        "export_col_threshold": "Eşik",
+        "export_col_source": "Kaynak",
+        "export_col_code": "Kod",
+        "export_col_category": "Kategori",
+        "export_col_desc": "Açıklama",
+        "export_col_subs": "Alt kategoriler"
+      },
+      "config": {
+        "calc_title": "Önemlilik hesaplama parametreleri",
+        "base_title": "Temel eşikler",
+        "multiplier_title": "Ölçek çarpanları",
+        "multiplier_m": "Orta çarpan (4 puan için ×M)",
+        "multiplier_h": "Yüksek çarpan (5 puan için ×H)",
+        "multiplier_note": "Puan 3 = eşik ile eşik×M arası. Puan 4 = eşik×M ile eşik×H arası. Puan 5 = eşik×H üzeri.",
+        "rule_title": "Karar kuralı",
+        "ptnr_threshold": "Önemlilik için PTNR eşiği",
+        "ptnr_note": "PTNR ≥ eşik veya en az bir aktif ACN olay şekli varsa önemlidir.",
+        "recurrence_title": "Tekrar",
+        "recurrence_window": "Tekrar penceresi (gün)",
+        "recurrence_bonus": "Tekrar için PTNR bonusu",
+        "recurrence_note": "Sistem bu sitede son N gün içinde aynı kategoride kapatılmış olay arar.",
+        "activity_desc": "NIS2 faaliyet açıklaması (resmi belgeler)"
+      }
+    }
+  },
+  "competency": {
+    "title": "Yetkinlikler",
+    "subtitle": "ISO 27001 § 7.2 — Rol yetkinlik gereksinimleri ve bireysel yetkinlik takibi.",
+    "tabs": {
+      "requirements": "Rol gereksinimleri",
+      "users": "Kullanıcı yetkinlikleri"
+    },
+    "levels": {
+      "1": "1 — Farkındalık",
+      "2": "2 — Uygulayıcı",
+      "3": "3 — Uzman"
+    },
+    "evidence_types": {
+      "certification": "Sertifikasyon",
+      "training": "Eğitim",
+      "experience": "Deneyim",
+      "assessment": "Değerlendirme"
+    },
+    "all_roles": "Tüm roller",
+    "add_requirement": "+ Yeni gereksinim",
+    "requirements_count": "{{count}} gereksinim",
+    "no_requirements": "Gereksinim bulunamadı.",
+    "req_modal_edit": "Gereksinimi düzenle",
+    "req_modal_new": "Yeni gereksinim",
+    "role_label": "Rol",
+    "level_required": "Gerekli seviye",
+    "competency_label": "Yetkinlik",
+    "competency_placeholder": "örn. ISO 27001 Lead Implementer",
+    "evidence_type_label": "Kanıt türü",
+    "mandatory_label": "Zorunlu",
+    "notes_label": "Notlar",
+    "save_error": "Kaydetme sırasında hata oluştu.",
+    "col_competency": "Yetkinlik",
+    "col_level": "Seviye",
+    "col_evidence": "Kanıt",
+    "col_mandatory": "Zor.",
+    "delete_requirement": "Bu gereksinim silinsin mi?",
+    "all_users": "Tüm kullanıcılar",
+    "add_competency": "+ Yetkinlik ekle",
+    "comp_modal_edit": "Yetkinliği düzenle",
+    "comp_modal_new": "Kullanıcı yetkinliği ekle",
+    "user_label": "Kullanıcı",
+    "level_label": "Seviye",
+    "cert_body_label": "Sertifika kuruluşu",
+    "cert_body_placeholder": "örn. BSI, Bureau Veritas",
+    "obtained_at_label": "Alınma tarihi",
+    "valid_until_label": "Son kullanma tarihi",
+    "delete_competency": "Bu yetkinlik silinsin mi?",
+    "no_competencies": "Kayıtlı yetkinlik yok.",
+    "col_user": "Kullanıcı",
+    "col_obtained": "Alındı",
+    "col_validity": "Geçerlilik",
+    "col_verified_by": "Doğrulayan",
+    "validity_expired": "Süresi dolmuş",
+    "validity_expiring": "{{days}} günde sona eriyor",
+    "validity_valid": "Geçerli"
+  },
+  "notification_settings": {
+    "title": "E-posta Bildirim Profilleri",
+    "subtitle": "Her rolün kaç uyarı alacağını seçin. Bildirimler, o role sahip ve etkinliğin sitesine erişimi olan kullanıcılara gönderilir.",
+    "reset_defaults": "Tümünü varsayılana sıfırla",
+    "scope_note": "Bildirimler, normatif rol kapsamını (M00 Yönetim) değil, RBAC kapsamını (M02) takip eder.",
+    "no_email_config": "E-posta sunucusu yapılandırılmamış — bildirimler gönderilmeyecek.",
+    "configure_email": "E-postayı yapılandır →",
+    "what_profile_includes": "Her profil neyi içerir?",
+    "profiles": {
+      "silenzioso": "Sessiz",
+      "essenziale": "Temel",
+      "standard": "Standart",
+      "completo": "Tam",
+      "custom": "Özel"
+    },
+    "event_groups": {
+      "risks_security": "Riskler ve Güvenlik",
+      "operations": "Operasyonlar",
+      "governance": "Yönetim",
+      "suppliers_risk": "Tedarikçiler ve Risk"
+    },
+    "col_role": "GRC Rolü",
+    "col_profile": "Profil",
+    "col_status": "Durum",
+    "events_count": "{{count}} olay",
+    "customize": "Özelleştir",
+    "customize_title": "Bildirimleri özelleştir — {{role}}",
+    "customize_subtitle": "Bu rol için tam olarak hangi olayları almak istediğinizi seçin.",
+    "reset_to_standard": "Standart profile sıfırla",
+    "save_custom": "Özelleştirmeyi kaydet",
+    "save_error": "Kaydetme hatası.",
+    "confirm_reset_title": "Emin misiniz?",
+    "confirm_reset_body": "Tüm özel profiller kaybolacak ve varsayılan değerlere sıfırlanacak.",
+    "reset_confirm": "Sıfırla",
+    "event_col": "Olay",
+    "loading": "Yükleniyor..."
+  },
+  "email_settings": {
+    "title": "E-posta Yapılandırması",
+    "no_permission": "Bu sayfaya erişim izniniz yok.",
+    "status_not_tested": "Test edilmedi",
+    "status_ok": "Bağlantı doğrulandı",
+    "status_failed": "Son test başarısız",
+    "provider_label": "Sağlayıcı",
+    "config_name_label": "Yapılandırma adı",
+    "smtp_host_label": "SMTP Sunucusu",
+    "port_label": "Port",
+    "use_tls": "TLS kullan",
+    "use_ssl": "SSL kullan",
+    "use_auth": "SMTP Kimlik Doğrulaması",
+    "anonymous_relay": "Anonim röle — sunucuya AUTH komutu gönderilmez",
+    "smtp_username": "SMTP Kullanıcı Adı",
+    "password_label": "Parola",
+    "password_placeholder": "Değiştirmemek için boş bırakın",
+    "from_email_label": "Gönderici adresi",
+    "from_email_hint": "Bu, e-postalarda gönderici olarak görünecek (örn. GRC Platform <noreply@sirket.com>).",
+    "password_security_note": "SMTP parolası veritabanında AES-256 ile şifrelenir. Kaydedildikten sonra hiçbir zaman gösterilmez.",
+    "test_recipient_label": "Test e-posta alıcısı",
+    "test_recipient_placeholder": "siz@email.com",
+    "send_test": "Test e-postası gönder",
+    "testing": "Test yapılıyor...",
+    "save_config": "Yapılandırmayı kaydet",
+    "saving": "Kaydediliyor...",
+    "save_success": "E-posta yapılandırması başarıyla kaydedildi.",
+    "save_error": "Yapılandırma kaydedilirken hata oluştu.",
+    "test_success": "Test e-postası başarıyla gönderildi.",
+    "test_failed": "Yapılandırma testi başarısız.",
+    "test_error": "Yapılandırma testi sırasında hata oluştu.",
+    "no_config_error": "Test edilecek aktif yapılandırma yok.",
+    "no_recipient_error": "Test için bir alıcı e-posta adresi girin.",
+    "show_password": "Göster",
+    "hide_password": "Gizle",
+    "provider_office365": "Microsoft Office 365",
+    "provider_gmail": "Google Gmail / Workspace"
+  },
+  "bia": {
+    "rto_ok": "RTO Tamam",
+    "rto_warning": "RTO ⚠",
+    "rto_critical": "RTO ✗",
+    "new_process_title": "Yeni kritik süreç",
+    "site_label": "Site *",
+    "process_name_label": "Süreç adı *",
+    "criticality_label": "Kritiklik (1-5)",
+    "downtime_cost_label": "Kesinti maliyeti/saat (€)",
+    "bcp_bia_section": "BCP/BIA hedefleri (ISO 22301)",
+    "mtpd_label": "MTPD (saat)",
+    "mbco_label": "MBCO (%)",
+    "rto_label": "RTO hedefi (saat)",
+    "rpo_label": "RPO hedefi (saat)",
+    "save_error": "Kaydetme sırasında hata oluştu",
+    "save_changes": "Değişiklikleri kaydet",
+    "create_process": "Süreci oluştur",
+    "filter_all": "Tümü",
+    "filter_validated": "Doğrulnadı",
+    "mtpd_placeholder": "örn. 48",
+    "mbco_placeholder": "örn. 70",
+    "rto_placeholder": "örn. 24",
+    "rpo_placeholder": "örn. 4"
+  },
+  "assets": {
+    "criticality_1_label": "İhmal edilebilir",
+    "criticality_2_label": "Düşük",
+    "criticality_3_label": "Orta",
+    "criticality_4_label": "Yüksek",
+    "criticality_5_label": "Kritik",
+    "criticality_1_desc": "Kritik olmayan varlık. 7 günden fazla kesinti tolere edilir. BCP gerekli değil.",
+    "criticality_2_desc": "Sınırlı etki. 3-7 gün kesinti tolere edilir. BCP gerekli değil.",
+    "criticality_3_desc": "Operasyonel etki. 24-72 saat kesinti tolere edilir. BCP önerilir.",
+    "criticality_4_desc": "Üretim veya müşteriler üzerinde önemli etki. 4-24 saat kesinti tolere edilir. BCP zorunlu.",
+    "criticality_5_desc": "Temel varlık. 4 saatten az kesinti tolere edilir. BCP yarıyıllık test ile zorunlu.",
+    "change_days_ago": "{{days}} gün önce değişiklik",
+    "reassessment_required": "Yeniden değerlendirme gerekli",
+    "last_change_registered": "Son kayıtlı değişiklik",
+    "open_ticket": "Bilet aç →",
+    "ref_label": "Ref:",
+    "date_label": "Tarih:",
+    "description_label": "Açıklama:",
+    "reassessment_since": "{{date}} tarihinden beri yeniden değerlendirme gerekli",
+    "mark_reassessed": "Yeniden değerlendirildi olarak işaretle",
+    "change_registered_title": "Değişiklik kaydedildi",
+    "register_change_title": "Değişikliği kaydet",
+    "register_change_btn": "Kaydet",
+    "registering": "Kaydediliyor...",
+    "register_error": "Kayıt sırasında hata",
+    "new_asset_title": "Yeni {{type}} varlık",
+    "bia_processes_label": "Bağlı BIA süreçleri",
+    "bia_processes_hint": "Bu varlığa (BT veya OT) bağımlı bir veya daha fazla BIA süreci seçin.",
+    "criticality_guide_title": "ℹ️ Kritiklik nasıl seçilir",
+    "criticality_table_value": "Değer",
+    "criticality_table_label": "Etiket",
+    "criticality_table_downtime": "Tolere edilen kesinti",
+    "criticality_table_bcp": "BCP",
+    "bcp_not_required": "Hayır",
+    "bcp_recommended": "Önerilir",
+    "bcp_mandatory": "Zorunlu",
+    "downtime_7d_plus": "> 7 gün",
+    "downtime_3_7d": "3–7 gün",
+    "downtime_24_72h": "24–72 saat",
+    "downtime_4_24h": "4–24 saat",
+    "downtime_sub_4h": "< 4 saat",
+    "change_ticket_placeholder": "Bilet referansı (örn. JIRA-1234) *",
+    "change_desc_placeholder": "Kısa değişiklik açıklaması",
+    "change_url_placeholder": "Bilet URL'si (isteğe bağlı)",
+    "deployment_label": "Dağıtım türü *",
+    "deploy_on_prem": "On-premise",
+    "deploy_iaas": "IaaS (VM, bulutta ağ)",
+    "deploy_paas": "PaaS (DB, depolama, işlevler)",
+    "deploy_saas": "SaaS (bulut uygulaması)",
+    "provider_label": "Sağlayıcı",
+    "provider_placeholder": "Microsoft, AWS, SAP…",
+    "service_name_label": "Hizmet adı",
+    "service_placeholder": "Microsoft 365, Salesforce, SAP S/4HANA…",
+    "fqdn_label": "FQDN",
+    "fqdn_placeholder": "sunucu.alan.com",
+    "os_label": "İşletim sistemi",
+    "os_placeholder": "Windows Server 2022",
+    "eol_label": "EOL tarihi (destek sonu)",
+    "data_classification_label": "Veri sınıflandırması",
+    "data_class_public": "Genel",
+    "data_class_internal": "İç",
+    "data_class_confidential": "Gizli",
+    "data_class_restricted": "Kısıtlı",
+    "internet_exposed_label": "İnternete açık",
+    "ot_category_label": "Kategori *",
+    "purdue_level_label": "Purdue seviyesi *",
+    "vendor_label": "Satıcı",
+    "sw": {
+      "new_title": "Yeni yazılım (ASL)",
+      "name_placeholder": "Arxivar, SAP ERP, Microsoft 365…",
+      "version_label": "Sürüm",
+      "approval_status_label": "Onay durumu",
+      "status_approvato": "Onaylandı",
+      "status_in_valutazione": "Değerlendirmede",
+      "status_deprecato": "Kullanımdan kaldırıldı",
+      "status_vietato": "Yasak",
+      "license_type_label": "Lisans türü",
+      "license_commerciale": "Ticari",
+      "license_open_source": "Açık Kaynak",
+      "eos_label": "Destek sonu (EOS)",
+      "eos_expired": "EOS süresi doldu",
+      "eos_in_days": "EOS {{days}} gün içinde",
+      "external_ref_label": "Harici ITAM ref.",
+      "external_ref_placeholder": "Lansweeper ID 4521, ServiceNow CI-00123…",
+      "empty": "Onaylı yazılım listesinde yazılım yok"
+    },
+    "actions": {
+      "delete_title": "Varlığı sil",
+      "delete_confirm": "«{{name}}» varlığı silinsin mi? Aktif riskler veya varlıklar arası bağımlılıklar varsa engellenir."
+    }
+  },
+  "audit_prep": {
+    "finding_major": "MAJOR NC",
+    "finding_minor": "MINOR NC",
+    "finding_obs": "Gözlem",
+    "finding_opp": "Fırsat",
+    "kpi_major_open": "Açık MAJOR NC",
+    "kpi_minor_open": "Açık Minor NC",
+    "kpi_overdue": "gecikmiş bulgular",
+    "add_finding": "+ Bulgu ekle",
+    "type_label": "Tür *",
+    "audit_date_label": "Denetim tarihi *",
+    "title_label": "Başlık *",
+    "description_label": "Açıklama",
+    "auditor_label": "Denetçi adı",
+    "create_finding": "Bulgu oluştur",
+    "no_findings": "Kayıtlı bulgu yok",
+    "close_notes_placeholder": "Kapanış notları (Major/Minor için zorunlu, min 20 karakter)",
+    "evidence_desc_placeholder": "Kanıt açıklaması *",
+    "evidence_missing": "Eksik",
+    "evidence_present": "Mevcut",
+    "evidence_expired": "Süresi dolmuş",
+    "evidence_expiry_placeholder": "Son kullanma",
+    "program_plant_placeholder": "Tesis ID",
+    "program_title_placeholder": "Program başlığı *",
+    "program_objectives_placeholder": "Hedefler",
+    "coverage_sample": "Örnek %25",
+    "coverage_extended": "Genişletilmiş %50",
+    "coverage_full": "Tam %100",
+    "coverage_sample_long": "Örnek (%25) — BOŞLUK veya KISMİ durumundaki öncelikli kontrolleri doğrular",
+    "coverage_extended_long": "Genişletilmiş (%50) — tüm alanlarda dengeli kapsam",
+    "coverage_full_long": "Tam (%100) — tüm kontroller doğrulandı, hiçbir alan hariç tutulmadı",
+    "coverage_campione": "Örnek %25",
+    "coverage_esteso": "Genişletilmiş %50",
+    "coverage_campione_long": "Örnek (%25) — BOŞLUK veya KISMİ durumundaki öncelikli kontrolleri doğrular",
+    "coverage_esteso_long": "Genişletilmiş (%50) — tüm alanlarda dengeli kapsam",
+    "quarter_1": "Oca–Mar",
+    "quarter_2": "Nis–Haz",
+    "quarter_3": "Tem–Eyl",
+    "quarter_4": "Eki–Ara",
+    "status_planned": "Planlandı",
+    "status_in_progress": "Devam ediyor",
+    "status_completed": "Tamamlandı",
+    "status_cancelled": "İptal edildi",
+    "tab_checklist": "Kontrol listesi",
+    "tab_findings": "Bulgular ({{count}})",
+    "tab_info": "Denetim bilgileri",
+    "annual_program_tag": "Yıllık prog.",
+    "no_evidence": "Yüklenen kanıt yok",
+    "ev_missing_opt": "❌ Eksik",
+    "ev_present_opt": "✅ Mevcut",
+    "ev_expired_opt": "⚠️ Süresi dolmuş",
+    "finding_overdue": "⚠️ Gecikmiş",
+    "finding_deadline": "Son tarih:",
+    "finding_control": "Kontrol:",
+    "major_nc_open_count": "{{count}} açık Major NC",
+    "save_finding": "Bulguyu kaydet",
+    "complete_audit_btn": "✅ Denetimi tamamla",
+    "cancel_audit_btn": "✕ Denetimi iptal et",
+    "cannot_complete": "{{count}} açık Major NC ile tamamlanamaz",
+    "download_report": "📄 Raporu indir",
+    "cancel_prep_modal_title": "Denetim hazırlığını iptal et",
+    "cancel_prep_modal_desc": "Gerekçe (min 10 karakter). Açık bulgular kapatılacak.",
+    "cancel_reason_placeholder": "İptal gerekçesi...",
+    "confirm_cancel_btn": "İptali onayla",
+    "create_program_title": "Yıllık Denetim Programı Oluştur",
+    "step_indicator": "Adım {{step}}/4",
+    "step1_title": "Temel yapılandırma",
+    "year_label": "Yıl *",
+    "site_label": "Tesis",
+    "program_title_optional": "Program başlığı (isteğe bağlı)",
+    "coverage_type_default_label": "Denetim kapsamı (varsayılan)",
+    "coverage_hint": "Kaç kontrolün doğrulanacağını belirler. Adım 3'te her çeyrek için özelleştirilebilir.",
+    "step2_title": "Çerçeveler",
+    "multi_fw_label": "Çok çerçeveli denetim",
+    "multi_fw_hint": "Tek bir denetim, aynı çeyrekteki tüm seçili çerçeveleri kapsar",
+    "step3_title": "Sistem tarafından önerilen plan",
+    "regenerate_plan": "🔄 Öneriyi yeniden oluştur",
+    "calculating": "Hesaplanıyor...",
+    "generate_plan_hint": "Açık boşluklara göre önerilen planı oluştur",
+    "calculating_long": "Hesaplama devam ediyor...",
+    "generate_plan_btn": "Önerilen planı oluştur",
+    "edit_btn": "✏️ Düzenle",
+    "close_edit_btn": "Kapat",
+    "date_col": "Tarih:",
+    "framework_col": "Çerçeve:",
+    "coverage_col": "Kapsam:",
+    "domains_col": "Alanlar:",
+    "auditor_col": "Denetçi:",
+    "auditor_name_placeholder": "Denetçi adı",
+    "save_btn": "Kaydet",
+    "plan_priority_hint": "Sistem, BOŞLUK veya KISMİ durumundaki en fazla kontrole sahip alanlara öncelik verdi.",
+    "step4_title": "Özet ve onay",
+    "year_recap": "Yıl:",
+    "title_recap": "Başlık:",
+    "framework_recap": "Çerçeve:",
+    "coverage_default_recap": "Varsayılan kapsam:",
+    "table_q": "Ç",
+    "table_date": "Tarih",
+    "table_framework": "Çerçeve",
+    "table_coverage": "Kapsam",
+    "table_domains": "Alanlar",
+    "table_auditor": "Denetçi",
+    "approve_now_label": "Programı şimdi onayla",
+    "create_program_error": "Program oluşturulurken hata",
+    "back_btn": "← Geri",
+    "next_btn": "İleri →",
+    "creating": "Oluşturuluyor...",
+    "create_program_btn": "✅ Program oluştur",
+    "launch_audit_btn": "▶ Denetimi başlat",
+    "go_to_prep_btn": "→ Hazırlığa git",
+    "launch_audit_title": "Ç{{quarter}} denetimini başlat",
+    "not_planned": "Planlanmadı",
+    "launching": "Başlatılıyor...",
+    "launch_btn": "Başlat",
+    "edit_audit_title": "Ç{{quarter}} denetimini düzenle",
+    "planned_date_label": "Planlanan tarih",
+    "coverage_type_edit_label": "Kapsam",
+    "auditor_type_label": "Denetçi türü",
+    "internal_opt": "İç",
+    "external_opt": "Dış",
+    "internal_auditor_opt": "İç denetçi",
+    "external_auditor_opt": "Dış denetçi",
+    "notes_label": "Notlar",
+    "save_changes_btn": "Değişiklikleri kaydet",
+    "program_tag_short": "Prog.",
+    "open_btn": "Aç",
+    "findings_btn": "Bulgular",
+    "new_prep_title": "Yeni denetim hazırlığı",
+    "optional_placeholder": "— isteğe bağlı —",
+    "select_site_first": "— önce bir tesis seçin —",
+    "select_placeholder": "— seçin —",
+    "no_frameworks_assigned": "Atanmış çerçeve yok",
+    "tisax_high_protection": "Yüksek koruma — 45 kontrol",
+    "tisax_very_high_protection": "Çok yüksek koruma — 57 kontrol (L2+L3)",
+    "save_error": "Kaydedilirken hata",
+    "saving": "Kaydediliyor...",
+    "create_prep_btn": "Hazırlık oluştur",
+    "page_title": "Denetim Hazırlığı",
+    "new_prep_btn": "+ Yeni hazırlık",
+    "tab_program": "📅 Yıllık Program",
+    "tab_in_progress": "🔍 Devam eden denetimler",
+    "loading": "Yükleniyor...",
+    "no_program_title": "Yıllık program yok",
+    "no_program_desc": "Yıllık program her çeyrekte yapılacak denetimleri tanımlar. Yılı planlamak için ilkini oluşturun.",
+    "create_annual_program_btn": "Yıllık program oluştur",
+    "select_site_topbar": "Üst çubukta bir tesis seçin",
+    "approve_btn": "Onayla",
+    "sync_btn": "🔄 Sync",
+    "report_btn": "📄 Rapor",
+    "add_annual_program_btn": "+ Yıllık program ekle",
+    "no_preps": "Denetim hazırlığı yok",
+    "delete_prep_title": "Hazırlığı sil",
+    "delete_prep_desc": "Geri alınamaz işlem. Bulgular silinecek.",
+    "delete_program_title": "Programı sil",
+    "delete_program_desc": "Geri alınamaz işlem. Yıllık program silinecek.",
+    "delete_btn": "Sil",
+    "cancel_btn": "İptal",
+    "error_generic": "Hata",
+    "help_description": "Yıllık denetim programını ve bireysel denetim yürütmesini yönetir. Program her çeyrekte neyin denetleneceğini planlar; hazırlıklar somut yürütmedir.",
+    "help_step1": "Sihirbazla yıllık programı oluşturun (yıl başı)",
+    "help_step2": "Sistem, açık boşluklara göre denetlenecek alanları önerir",
+    "help_step3": "Çeyrekten önce: hazırlığı açmak için 'Denetimi başlat'a tıklayın",
+    "help_step4": "Denetim sırasında: kanıtları doldurun ve bulgular ekleyin",
+    "help_step5": "Major NC → otomatik PDCA açıldı",
+    "help_step6": "Denetimi tamamlayın → indirilebilir rapor",
+    "help_step7": "Program tamamlanma %'sini otomatik günceller"
+  },
+  "risk": {
+    "no_process_selected": "Hiçbir süreç seçilmedi",
+    "level_critical": "Kritik",
+    "score_inherent": "İçsel: skor {{score}}",
+    "score_residual": "Artık: skor {{score}}",
+    "suggest_residual": "💡 Artık riski öner",
+    "controls_reduction": "Kontrol azaltımı:",
+    "bcp_extra": "Ekstra BCP:",
+    "total_label": "Toplam:",
+    "accepted_by_on": "{{name}} tarafından {{date}} tarihinde kabul edildi",
+    "expired_on": "sona erdi",
+    "expires_on": "sona eriyor",
+    "accept_risk_prompt": "⚠️ Riski resmi olarak kabul et",
+    "accept_risk_title": "Artık riskin resmi kabulü",
+    "accept_note_label": "Zorunlu not",
+    "accept_note_critical_hint": "(kritik riskler için min 50 karakter)",
+    "confirm_acceptance": "Kabulü onayla",
+    "treatment_mitigare": "Azalt",
+    "treatment_accettare": "Kabul et",
+    "treatment_trasferire": "Transfer et",
+    "treatment_trasferire_ext": "Transfer et (örn. sigorta)",
+    "treatment_evitare": "Kaçın",
+    "filter_all": "Tümü",
+    "status_archiviato": "Arşivlendi",
+    "probability_label": "Olasılık *",
+    "impact_label": "Etki *",
+    "acceptance_expiry_placeholder": "Kabul son tarihi",
+    "action_desc_placeholder": "Eylem açıklaması *",
+    "bcp_test_date_placeholder": "Son geçerli test tarihi *",
+    "scenario_placeholder": "örn. MES üretim sunucusunda Ransomware",
+    "error_generic": "Hata",
+    "wizard_title": "Sihirbaz BIA → Risk → BCP",
+    "wizard_subtitle": "Sırayla oluşturun: kritik süreç, risk senaryosu ve tutarlı BCP planı.",
+    "wizard_step_bia": "BIA Süreci",
+    "wizard_step_risk": "Risk senaryosu",
+    "wizard_step_bcp": "BCP Planı",
+    "wizard_create_new": "Yeni oluştur",
+    "wizard_bcp_process_label": "Süreç:",
+    "wizard_bcp_created": "Plan oluşturuldu ve sürece bağlandı.",
+    "wizard_criticality_legend": "Kritiklik 1–5:",
+    "wizard_continue_risk": "Riskle devam et",
+    "wizard_save_risk_continue": "Riski kaydet ve devam et",
+    "wizard_create_bcp": "BCP planı oluştur",
+    "cause_label": "Neden",
+    "cause_placeholder": "Riskin nedeni veya kaynağı",
+    "consequence_label": "Sonuç",
+    "consequence_placeholder": "Risk gerçekleşirse beklenen etki",
+    "nis2_section": "NIS2 Sınıflandırması",
+    "nis2_art21_label": "NIS2 Madde 21 Kategorisi",
+    "nis2_relevance_label": "NIS2 Önemi",
+    "impacted_systems_label": "Etkilenen Sistemler / Hizmetler",
+    "impacted_systems_placeholder": "örn. ERP / Kurumsal BT / VPN",
+    "export_excel": "Excel'e Aktar",
+    "renew_acceptance": "Son tarihi yenile",
+    "renew_confirm": "Yenilemeyi onayla",
+    "reset_acceptance": "Yeniden değerlendir (kabulü iptal et)",
+    "reset_acceptance_confirm": "Resmi kabulü iptal edip yeniden değerlendirmeyi başlatmak istiyor musunuz? Bu işlem denetim kaydına eklenir."
+  },
+  "pdca": {
+    "source_incident": "Olay",
+    "source_audit": "Denetim",
+    "source_management_review": "Yönetim gözden geçirmesi",
+    "source_risk": "Risk",
+    "source_manual": "Manuel",
+    "scope_plant": "Site",
+    "scope_org": "Organizasyon",
+    "scope_process": "Süreç"
+  },
+  "bcp": {
+    "test_frequency_label": "Test sıklığı",
+    "status_superato": "Başarılı"
+  },
+  "audit_trail": {
+    "levels_guide": "Seviye kılavuzu",
+    "filter_all": "Tümü",
+    "entity_placeholder": "örn. tesis"
+  },
+  "suppliers": {
+    "filter_all": "Tümü"
+  },
+  "reporting": {
+    "title": "Raporlama & Dashboard",
+    "tabs": {
+      "compliance": "Uyum",
+      "owner": "Sahibe göre",
+      "risk_bia_bcp": "Risk / BIA / BCP"
+    },
+    "loading_kpi": "KPI'ler yükleniyor...",
+    "loading_compliance": "Uyum yükleniyor...",
+    "loading": "Yükleniyor...",
+    "no_compliance_data": "Uyum verisi yok",
+    "no_data": "Veri yok",
+    "kpi": {
+      "active_sites": "Aktif siteler",
+      "open_incidents": "Açık olaylar",
+      "total_controls": "Toplam kontroller",
+      "pct_compliant": "% Uyumlu",
+      "gap_controls": "Eksik kontroller"
+    },
+    "compliance": {
+      "distribution_title": "Uyum dağılımı ({{total}} kontrol)",
+      "by_status_title": "Duruma göre kontroller",
+      "bar_label": "Kontroller"
+    },
+    "status": {
+      "parziale": "Kısmi",
+      "non_valutato": "Değerlendirilmemiş"
+    },
+    "owner": {
+      "risks_chart_title": "Sahibe göre riskler (yığılmış)",
+      "risks_table_title": "Sahibe göre detay",
+      "tasks_table_title": "Sahibe göre görevler",
+      "col_owner": "Sahip",
+      "col_critical_processes": "Kritik süreçler",
+      "col_total_risks": "Toplam riskler",
+      "col_red": "Kırmızı",
+      "col_yellow": "Sarı",
+      "col_green": "Yeşil",
+      "col_open_tasks": "Açık görevler",
+      "col_overdue": "Gecikmiş",
+      "col_completed_30d": "Tamamlanan (30g)",
+      "bar_green": "Yeşil",
+      "bar_yellow": "Sarı",
+      "bar_red": "Kırmızı"
+    },
+    "risk_bia_bcp": {
+      "kpi_total": "Toplam risk",
+      "kpi_red": "Kırmızı riskler",
+      "kpi_yellow": "Sarı riskler",
+      "kpi_revaluation": "Yeniden değerlendirilecek",
+      "kpi_revaluation_sub": "yeniden değerlendirme gerekli",
+      "kpi_accepted": "Resmi kabul edilmiş",
+      "kpi_bia_no_bcp": "BCP'siz kritik",
+      "kpi_bia_no_bcp_sub": "kritiklik ≥ 4",
+      "kpi_bcp_overdue": "Gecikmiş BCP testleri",
+      "kpi_bcp_overdue_sub": "test yapılmamış",
+      "heatmap_title": "Risk ısı haritası (olasılık × etki)",
+      "probability": "Olasılık",
+      "impact": "Etki",
+      "risks": "risk",
+      "legend_red": "Yüksek",
+      "legend_yellow": "Orta",
+      "legend_green": "Düşük",
+      "top_risks_title": "Skora göre ilk 10 risk",
+      "col_risk": "Senaryo",
+      "col_owner": "Sahip",
+      "col_score_residual": "Kalıntı skor",
+      "col_score_inherent": "İçsel skor",
+      "col_treatment": "İşlem",
+      "threat_chart_title": "Tehdit kategorisine göre ortalama skor (içsel - kalıntı)",
+      "bar_inherent": "İçsel",
+      "bar_residual": "Kalıntı",
+      "threat_chart_note": "İçsel ve kalıntı arasındaki fark, mevcut kontrollerin etkinliğini gösterir.",
+      "nis2_chart_title": "NIS2 riskleri Art.21 kategorisine göre",
+      "nis2_sig": "Önemli",
+      "nis2_pot": "Pot. önemli",
+      "nis2_non": "Önemsiz",
+      "bia_bcp_table_title": "BIA Süreçleri – Riskler – BCP Planları korelasyonu",
+      "col_process": "Kritik süreç",
+      "col_criticality": "Krit.",
+      "col_last_test": "Son BCP testi",
+      "next_test": "Sonraki test"
+    }
+  },
+  "manual": {
+    "user_manual": "Kullanıcı Kılavuzu",
+    "tech_manual": "Teknik Kılavuz",
+    "download": "İndir",
+    "loading": "Kılavuz yükleniyor...",
+    "error": "Kılavuz yüklenirken hata oluştu."
+  }
+}

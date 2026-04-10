@@ -1,0 +1,572 @@
+import { useState, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { controlsApi, type ControlInstance, type Framework } from "../../api/endpoints/controls";
+import { governanceApi } from "../../api/endpoints/governance";
+import { useAuthStore } from "../../store/auth";
+import { StatusBadge } from "../../components/ui/StatusBadge";
+import { ControlDetailDrawer } from "./ControlDetailDrawer";
+import { ModuleHelp } from "../../components/ui/ModuleHelp";
+import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
+
+const STATUS_OPTIONS = ["compliant", "parziale", "gap", "na", "non_valutato"];
+
+const RELATIONSHIP_KEYS: Record<string, string> = {
+  covers:      "controls.rel_copre",
+  extends:     "controls.rel_estende",
+  equivalente: "controls.rel_equivale",
+  parziale:    "controls.rel_subset",
+  correlato:   "controls.rel_related",
+};
+
+function MappingBadges({ mappings }: { mappings: ControlInstance["mapped_controls"] }) {
+  const { t } = useTranslation();
+  if (!mappings?.length) return null;
+  return (
+    <div className="flex flex-wrap gap-1 mt-1">
+      {mappings.map((m, i) => {
+        const relLabel = RELATIONSHIP_KEYS[m.relationship]
+          ? t(RELATIONSHIP_KEYS[m.relationship])
+          : m.relationship;
+        return (
+          <span
+            key={i}
+            title={`${relLabel} ${m.external_id}`}
+            className="inline-flex items-center gap-0.5 text-xs bg-indigo-50 text-indigo-600 border border-indigo-100 rounded px-1.5 py-0.5"
+          >
+            <span className="opacity-60">{relLabel}</span>
+            <span className="font-mono">{m.framework_code}</span>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+function InlineStatusSelect({ instance }: { instance: ControlInstance }) {
+  const qc = useQueryClient();
+  const [editing, setEditing] = useState(false);
+  const [propagated, setPropagated] = useState<number | null>(null);
+  const [crossPlant, setCrossPlant] = useState(false);
+  const { t } = useTranslation();
+
+  const updateMutation = useMutation({
+    mutationFn: (status: string) => controlsApi.updateInstance(instance.id, { status: status as ControlInstance["status"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["controls"] });
+      setEditing(false);
+    },
+  });
+
+  const propagateMutation = useMutation({
+    mutationFn: () => controlsApi.propagate(instance.id, crossPlant),
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ["controls"] });
+      setPropagated(data.propagated_to);
+      setTimeout(() => setPropagated(null), 3000);
+    },
+  });
+
+  const hasMappings = instance.mapped_controls?.length > 0;
+  // Solo compliant e na sono propagabili
+  const canPropagate = hasMappings && (instance.status === "compliant" || instance.status === "na");
+
+  if (editing) {
+    return (
+      <select
+        autoFocus
+        defaultValue={instance.status}
+        onChange={e => updateMutation.mutate(e.target.value)}
+        onBlur={() => setEditing(false)}
+        className="border rounded px-1 py-0.5 text-xs"
+      >
+        {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+      </select>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <button
+        onClick={() => setEditing(true)}
+        title={t("controls.actions.click_to_edit")}
+        className="group flex items-center gap-1"
+      >
+        <StatusBadge status={instance.status} />
+        <span className="text-gray-300 group-hover:text-gray-500 text-xs">✎</span>
+      </button>
+      {instance.suggestion_differs && instance.suggested_status && (
+        <span
+          title={`Suggerimento sistema: ${instance.suggested_status}`}
+          className="text-xs px-1.5 py-0.5 rounded border border-dashed border-indigo-300 text-indigo-500"
+        >
+          → {instance.suggested_status}
+        </span>
+      )}
+      {canPropagate && (
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => propagateMutation.mutate()}
+            disabled={propagateMutation.isPending}
+            title={crossPlant
+              ? t("controls.actions.propagate_hint_cross_plant", { defaultValue: "Propaga a tutti i plant con questo controllo" })
+              : t("controls.actions.propagate_hint")}
+            className="text-xs text-indigo-500 hover:text-indigo-700 border border-indigo-200 rounded px-1.5 py-0.5 hover:bg-indigo-50 disabled:opacity-50"
+          >
+            {propagateMutation.isPending
+              ? "..."
+              : propagated !== null
+              ? `✓ ${propagated}`
+              : t("controls.actions.propagate")}
+          </button>
+          <label
+            title={t("controls.actions.cross_plant_label", { defaultValue: "Includi tutti i plant" })}
+            className="flex items-center gap-0.5 cursor-pointer text-xs text-gray-400 hover:text-gray-600"
+          >
+            <input
+              type="checkbox"
+              checked={crossPlant}
+              onChange={e => setCrossPlant(e.target.checked)}
+              className="w-3 h-3 accent-indigo-500"
+            />
+            <span>tutti plant</span>
+          </label>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const MATURITY_COLORS: Record<number, string> = {
+  0: "bg-red-100 text-red-700 border-red-200",
+  1: "bg-orange-100 text-orange-700 border-orange-200",
+  2: "bg-yellow-100 text-yellow-700 border-yellow-200",
+  3: "bg-blue-100 text-blue-700 border-blue-200",
+  4: "bg-teal-100 text-teal-700 border-teal-200",
+  5: "bg-green-100 text-green-700 border-green-200",
+};
+
+function MaturityBadge({ level }: { level: number }) {
+  const { t } = useTranslation();
+  const color = MATURITY_COLORS[level] ?? "bg-gray-100 text-gray-600 border-gray-200";
+  const label = t(`controls.maturity_${level}`, { defaultValue: String(level) });
+  return (
+    <span
+      title={label}
+      className={`inline-flex items-center text-xs border rounded px-1.5 py-0.5 ${color}`}
+    >
+      {label}
+    </span>
+  );
+}
+
+function InlineOwnerSelect({ instance }: { instance: ControlInstance }) {
+  const qc = useQueryClient();
+  const [editing, setEditing] = useState(false);
+  const { t } = useTranslation();
+
+  const { data: assignments } = useQuery({
+    queryKey: ["governance-role-assignments"],
+    queryFn: () => governanceApi.roleAssignments(),
+    enabled: editing,
+    staleTime: 60_000,
+  });
+
+  // Dedupe by user, keep only active assignments
+  const userOptions = useMemo(() => {
+    if (!assignments) return [];
+    const seen = new Set<number>();
+    const result: { id: number; label: string; role: string }[] = [];
+    for (const a of assignments) {
+      if (!a.is_active) continue;
+      if (seen.has(a.user as number)) continue;
+      seen.add(a.user as number);
+      const name = a.user_name || a.user_email || String(a.user);
+      result.push({ id: a.user as number, label: name, role: a.role });
+    }
+    return result.sort((a, b) => a.label.localeCompare(b.label));
+  }, [assignments]);
+
+  const updateMutation = useMutation({
+    mutationFn: (ownerId: number | null) =>
+      controlsApi.updateInstance(instance.id, { owner: ownerId }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["controls"] });
+      setEditing(false);
+    },
+  });
+
+  if (editing) {
+    return (
+      <select
+        autoFocus
+        defaultValue={instance.owner ?? ""}
+        onChange={e => {
+          const val = e.target.value;
+          updateMutation.mutate(val === "" ? null : Number(val));
+        }}
+        onBlur={() => setEditing(false)}
+        className="border rounded px-1 py-0.5 text-xs min-w-[140px]"
+      >
+        <option value="">{t("controls.owner_none")}</option>
+        {userOptions.map(u => (
+          <option key={u.id} value={u.id}>
+            {u.label} [{u.role}]
+          </option>
+        ))}
+      </select>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => setEditing(true)}
+      title={t("controls.actions.click_to_edit")}
+      className="group flex items-center gap-1 text-xs text-gray-600 hover:text-gray-900"
+    >
+      <span>{instance.owner_display ?? <span className="text-gray-300">—</span>}</span>
+      <span className="text-gray-300 group-hover:text-gray-500">✎</span>
+    </button>
+  );
+}
+
+function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plantId?: string }) {
+  const token = useAuthStore(s => s.token);
+  const [exporting, setExporting] = useState<string | null>(null);
+  const [exportError, setExportError] = useState("");
+  const { t } = useTranslation();
+
+  async function handleExport(frameworkCode: string, format: string) {
+    const params = new URLSearchParams({ framework: frameworkCode, fmt: format });
+    if (plantId) params.set("plant", plantId);
+    try {
+      setExporting(format);
+      setExportError("");
+      const response = await fetch(
+        `/api/v1/controls/export/?${params.toString()}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!response.ok) {
+        let msg = t("controls.download_error");
+        try { const err = await response.json(); msg = err.error || msg; } catch {}
+        setExportError(msg);
+        return;
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const date = new Date().toISOString().slice(0, 10);
+      a.download = `${format}_${frameworkCode}_${date}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      setExportError(t("controls.download_network_error"));
+    } finally {
+      setExporting(null);
+    }
+  }
+
+  const hasISO = frameworks.some(f => f.code === "ISO27001");
+  const hasTISAX = frameworks.some(f => f.code === "TISAX_L2" || f.code === "TISAX_L3");
+  const hasProto = frameworks.some(f => f.code === "TISAX_PROTO");
+  const hasNIS2 = frameworks.some(f => f.code === "NIS2");
+  const tisaxCode = frameworks.find(f => f.code === "TISAX_L3")?.code
+    ?? frameworks.find(f => f.code === "TISAX_L2")?.code;
+
+  if (!hasISO && !hasTISAX && !hasProto && !hasNIS2) return null;
+
+  return (
+    <div>
+      <div className="flex gap-2 flex-wrap">
+        {hasISO && (
+          <button
+            onClick={() => handleExport("ISO27001", "soa")}
+            disabled={exporting === "soa"}
+            className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-60"
+          >
+            {exporting === "soa" ? t("common.downloading") : t("controls.export.soa")}
+          </button>
+        )}
+        {hasTISAX && tisaxCode && (
+          <button
+            onClick={() => handleExport(tisaxCode, "vda_isa")}
+            disabled={exporting === "vda_isa"}
+            className="px-3 py-1.5 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 disabled:opacity-60"
+          >
+            {exporting === "vda_isa" ? t("common.downloading") : t("controls.export.vda_isa")}
+          </button>
+        )}
+        {hasProto && (
+          <button
+            onClick={() => handleExport("TISAX_PROTO", "vda_isa")}
+            disabled={exporting === "vda_isa"}
+            className="px-3 py-1.5 bg-violet-600 text-white text-sm rounded hover:bg-violet-700 disabled:opacity-60"
+          >
+            {exporting === "vda_isa" ? t("common.downloading") : t("controls.export.proto_vda_isa")}
+          </button>
+        )}
+        {hasNIS2 && (
+          <button
+            onClick={() => handleExport("NIS2", "compliance_matrix")}
+            disabled={exporting === "compliance_matrix"}
+            className="px-3 py-1.5 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-60"
+          >
+            {exporting === "compliance_matrix" ? t("common.downloading") : t("controls.export.nis2_matrix")}
+          </button>
+        )}
+      </div>
+      {exportError && (
+        <p className="text-sm text-red-600 mt-1">
+          {exportError}
+          <button onClick={() => setExportError("")} className="ml-2 underline">{t("common.close")}</button>
+        </p>
+      )}
+    </div>
+  );
+}
+
+export function ControlsList() {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [statusFilter, setStatusFilter] = useState("");
+  const [frameworkFilter, setFrameworkFilter] = useState<string>("");
+  const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
+  const selectedPlant = useAuthStore(s => s.selectedPlant);
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => controlsApi.deleteInstance(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["controls"] }),
+    onError: (e: any) => {
+      const msg = e?.response?.data?.detail || t("common.error");
+      window.alert(msg);
+    },
+  });
+
+  const params: Record<string, string> = {};
+  if (statusFilter) params.status = statusFilter;
+  if (selectedPlant?.id) params.plant = selectedPlant.id;
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["controls", statusFilter, selectedPlant?.id],
+    queryFn: () => controlsApi.instances(Object.keys(params).length ? params : undefined),
+    retry: false,
+  });
+
+  const { data: frameworks } = useQuery({
+    queryKey: ["frameworks", selectedPlant?.id],
+    queryFn: () => controlsApi.frameworks(selectedPlant?.id),
+    retry: false,
+  });
+
+  const instances = data?.results ?? [];
+
+  const filteredByFramework = useMemo(() => {
+    const list = frameworkFilter
+      ? instances.filter((c) => c.framework_code === frameworkFilter)
+      : instances;
+    function fwGroupKey(code: string): string {
+      if (code.startsWith("TISAX")) return "TISAX";
+      return code;
+    }
+    return [...list].sort((a, b) => {
+      const fw = fwGroupKey(a.framework_code).localeCompare(fwGroupKey(b.framework_code));
+      if (fw !== 0) return fw;
+      return (a.control_external_id ?? "").localeCompare(
+        b.control_external_id ?? "",
+        undefined,
+        { numeric: true, sensitivity: "base" },
+      );
+    });
+  }, [instances, frameworkFilter]);
+
+  const stats = STATUS_OPTIONS.reduce(
+    (acc, s) => ({ ...acc, [s]: filteredByFramework.filter((c) => c.status === s).length }),
+    {} as Record<string, number>
+  );
+
+  const frameworkStats = instances.reduce(
+    (acc, c) => ({
+      ...acc,
+      [c.framework_code]: (acc[c.framework_code] ?? 0) + 1,
+    }),
+    {} as Record<string, number>
+  );
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+          {t("controls.title")}
+          <ModuleHelp
+            title={t("controls.help.title")}
+            description={t("controls.help.description")}
+            steps={[
+              t("controls.help.steps.1"),
+              t("controls.help.steps.2"),
+              t("controls.help.steps.3"),
+              t("controls.help.steps.4"),
+              t("controls.help.steps.5"),
+              t("controls.help.steps.6"),
+            ]}
+            connections={[
+              { module: t("controls.help.connections.documents.module"), relation: t("controls.help.connections.documents.relation") },
+              { module: t("controls.help.connections.audit_prep.module"), relation: t("controls.help.connections.audit_prep.relation") },
+              { module: t("controls.help.connections.risk.module"), relation: t("controls.help.connections.risk.relation") },
+            ]}
+            configNeeded={[
+              t("controls.help.config_needed.1"),
+              t("controls.help.config_needed.2"),
+            ]}
+          />
+        </h2>
+        <ExportToolbar frameworks={frameworks ?? []} plantId={selectedPlant?.id} />
+      </div>
+
+      {/* Filtro per framework (singola barra) */}
+      {frameworks && frameworks.length > 0 && (
+        <div className="flex gap-2 mb-4 flex-wrap">
+          <button
+            onClick={() => setFrameworkFilter("")}
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
+              frameworkFilter === ""
+                ? "bg-indigo-600 text-white border-indigo-600"
+                : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+            }`}
+          >
+            {t("controls.framework_filter.all")} ({instances.length})
+          </button>
+          {frameworks.map((f) => {
+            const count = frameworkStats[f.code] ?? 0;
+            const active = frameworkFilter === f.code;
+            return (
+              <button
+                key={f.id}
+                onClick={() => setFrameworkFilter(f.code)}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border flex items-center gap-1 ${
+                  active
+                    ? "bg-indigo-600 text-white border-indigo-600"
+                    : "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+                }`}
+              >
+                <span className="font-mono">{f.code}</span>
+                <span className="text-[10px] opacity-80">v{f.version}</span>
+                <span className="ml-1 text-[11px]">({count})</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Filtro per stato */}
+      <div className="flex gap-2 mb-4 flex-wrap">
+        <button
+          onClick={() => setStatusFilter("")}
+          className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+            statusFilter === "" ? "bg-primary-600 text-white" : "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
+          }`}
+        >
+          {t("controls.status_filter.all")} ({filteredByFramework.length})
+        </button>
+        {STATUS_OPTIONS.map((s) => (
+          <button
+            key={s}
+            onClick={() => setStatusFilter(s)}
+            className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+              statusFilter === s ? "bg-primary-600 text-white" : "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
+            }`}
+          >
+            <StatusBadge status={s} /> ({stats[s] ?? 0})
+          </button>
+        ))}
+      </div>
+
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        {isLoading ? (
+          <div className="p-8 text-center text-gray-400">{t("common.loading")}</div>
+        ) : filteredByFramework.length === 0 ? (
+          <div className="p-8 text-center text-gray-400">{t("controls.empty")}</div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("controls.table.control_id")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("controls.table.framework")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("controls.table.title")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("controls.table.maturity_level")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("controls.table.status")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("controls.table.owner")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("controls.table.last_evaluated")}</th>
+                <th className="px-4 py-3 w-10"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {filteredByFramework.map((c) => (
+                <tr key={c.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3 font-mono text-xs text-gray-500">
+                    <div className="flex items-center gap-1">
+                      <span>{c.control_external_id || c.control}</span>
+                      <button
+                        onClick={() => setSelectedInstance(c.id)}
+                        className="ml-1 w-5 h-5 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 flex items-center justify-center shrink-0"
+                        title={t("controls.actions.open_drawer")}
+                      >
+                        <svg viewBox="0 0 12 12" className="w-3 h-3 fill-current" aria-hidden="true">
+                          <path d="M3 2l7 4-7 4V2z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded">
+                      {c.framework_code}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 max-w-xs">
+                    <div className="text-gray-700 truncate">{c.control_title || "—"}</div>
+                    <MappingBadges mappings={c.mapped_controls} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <MaturityBadge level={c.calc_maturity_level} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <InlineStatusSelect instance={c} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <InlineOwnerSelect instance={c} />
+                  </td>
+                  <td className="px-4 py-3 text-gray-500 text-xs">
+                    {c.last_evaluated_at
+                      ? new Date(c.last_evaluated_at).toLocaleDateString(i18n.language || "it")
+                      : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      type="button"
+                      title={t("controls.actions.delete_title")}
+                      onClick={() => {
+                        if (!window.confirm(t("controls.actions.delete_confirm", { id: c.control_external_id || c.id }))) return;
+                        deleteMutation.mutate(c.id);
+                      }}
+                      disabled={deleteMutation.isPending}
+                      className="text-xs text-red-600 hover:text-red-800 border border-red-200 rounded px-1.5 py-0.5 disabled:opacity-50"
+                    >
+                      🗑
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      <ControlDetailDrawer
+        instanceId={selectedInstance}
+        onClose={() => setSelectedInstance(null)}
+      />
+    </div>
+  );
+}

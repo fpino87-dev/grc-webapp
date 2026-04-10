@@ -1,0 +1,552 @@
+{
+  "code": "TISAX_L3",
+  "name": "TISAX — VDA ISA 6.0 Assessment Level 3 (Very High Protection Need)",
+  "version": "6.0",
+  "published_at": "2023-03-01",
+  "domains": [
+    {
+      "code": "IS",
+      "translations": {
+        "en": {
+          "name": "Information Security Policy & Organisation"
+        },
+        "it": {
+          "name": "Politica e Organizzazione della Sicurezza delle Informazioni"
+        }
+      },
+      "order": 1
+    },
+    {
+      "code": "IAM",
+      "translations": {
+        "en": {
+          "name": "Identity & Access Management"
+        },
+        "it": {
+          "name": "Gestione Identità e Accessi"
+        }
+      },
+      "order": 4
+    },
+    {
+      "code": "ITSEC",
+      "translations": {
+        "en": {
+          "name": "IT Security Operations"
+        },
+        "it": {
+          "name": "Operazioni di Sicurezza IT"
+        }
+      },
+      "order": 5
+    }
+  ],
+  "controls": [
+    {
+      "external_id": "ISA-1.3.4-VH",
+      "domain": "IS",
+      "level": "L3",
+      "translations": {
+        "en": {
+          "title": "To what extent is it ensured that only evaluated and approved software is used for processing the organization’s information assets? (Very High Protection)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §1.3.4):\n+ Additional requirements for software use (e.g., need for control or monitoring of usage) are determined (if any) (C, I, A)"
+        },
+        "it": {
+          "title": "In che misura è garantito che venga utilizzato solo software valutato e approvato? (Protezione Molto Alta)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §1.3.4):\n+ Additional requirements for software use (e.g., need for control or monitoring of usage) are determined (if any) (C, I, A)"
+        }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 1.3.4: To what extent is it ensured that only evaluated and approved software is used for processing the or"
+      }
+    },
+    {
+      "external_id": "ISA-1.6.1-VH",
+      "domain": "IS",
+      "level": "L3",
+      "translations": {
+        "en": {
+          "title": "To what extent are information security relevant events or observations reported? (Very High Protection)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §1.6.1):\n+ Tests and exercises of event and observation reporting are conducted regularly. (C, I, A)"
+        },
+        "it": {
+          "title": "In che misura sono segnalati gli eventi o le osservazioni rilevanti per la sicurezza? (Protezione Molto Alta)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §1.6.1):\n+ Tests and exercises of event and observation reporting are conducted regularly. (C, I, A)"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "description": "Report/Registro documentato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 1.6.1: To what extent are information security relevant events or observations reported?"
+      }
+    },
+    {
+      "external_id": "ISA-1.6.2-VH",
+      "domain": "IS",
+      "level": "L3",
+      "translations": {
+        "en": {
+          "title": "To what extent are reported security events managed? (Very High Protection)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §1.6.2):\n+ Handling of events in different categories and priorities is regularly tested. (A)\n  - Exercise or simulation of rarely occurring categories and priorities\n  - Exercise or simulation include escalation mechanisms"
+        },
+        "it": {
+          "title": "In che misura sono gestiti gli eventi di sicurezza segnalati? (Protezione Molto Alta)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §1.6.2):\n+ Handling of events in different categories and priorities is regularly tested. (A)\n  - Exercise or simulation of rarely occurring categories and priorities\n  - Exercise or simulation include escalation mechanisms"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "description": "Report/Registro documentato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 1.6.2: To what extent are reported security events managed?"
+      }
+    },
+    {
+      "external_id": "ISA-1.6.3-VH",
+      "domain": "IS",
+      "level": "L3",
+      "translations": {
+        "en": {
+          "title": "To what extent is the organization prepared to handle crisis situations? (Very High Protection)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §1.6.3):\n+ Crisis exercises and simulations involving all relevant persons, decision makers are conducted regularly. (A)"
+        },
+        "it": {
+          "title": "In che misura l'organizzazione è preparata a gestire situazioni di crisi? (Protezione Molto Alta)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §1.6.3):\n+ Crisis exercises and simulations involving all relevant persons, decision makers are conducted regularly. (A)"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 1.6.3: To what extent is the organization prepared to handle crisis situations?"
+      }
+    },
+    {
+      "external_id": "ISA-4.1.2-VH",
+      "domain": "IAM",
+      "level": "L3",
+      "translations": {
+        "en": {
+          "title": "To what extent is the user access to IT services and IT systems secured? (Very High Protection)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §4.1.2):\n+ Before gaining access to data of very high protection needs, users are authenticated by means of strong authentication (e.g. two-factor authentication) according to the state of the art. (C, I)"
+        },
+        "it": {
+          "title": "In che misura è garantito l'accesso degli utenti ai servizi e ai sistemi IT? (Protezione Molto Alta)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §4.1.2):\n+ Before gaining access to data of very high protection needs, users are authenticated by means of strong authentication (e.g. two-factor authentication) according to the state of the art. (C, I)"
+        }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 4.1.2: To what extent is the user access to IT services and IT systems secured?"
+      }
+    },
+    {
+      "external_id": "ISA-4.2.1-VH",
+      "domain": "IAM",
+      "level": "L3",
+      "translations": {
+        "en": {
+          "title": "To what extent are access rights assigned and managed? (Very High Protection)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §4.2.1):\n+ Prevention of unauthorized persons gaining access and information (privileged users): (C)\n  - Information is stored in encrypted form at content level (e.g. file level).\n  - Where encryption is not feasible, information shall be protected by similarly effective measures. \n+ Existing access rights are regularly reviewed at shorter intervals (e.g. quarterly) (C)"
+        },
+        "it": {
+          "title": "In che misura i diritti di accesso sono assegnati e gestiti? (Protezione Molto Alta)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §4.2.1):\n+ Prevention of unauthorized persons gaining access and information (privileged users): (C)\n  - Information is stored in encrypted form at content level (e.g. file level).\n  - Where encryption is not feasible, information shall be protected by similarly effective measures. \n+ Existing access rights are regularly reviewed at shorter intervals (e.g. quarterly) (C)"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 4.2.1: To what extent are access rights assigned and managed?"
+      }
+    },
+    {
+      "external_id": "ISA-5.1.2-VH",
+      "domain": "ITSEC",
+      "level": "L3",
+      "translations": {
+        "en": {
+          "title": "To what extent is information protected during transfer? (Very High Protection)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §5.1.2):\n+ Information is transported or transferred in content-encrypted form. (C)"
+        },
+        "it": {
+          "title": "In che misura le informazioni sono protette durante il trasferimento? (Protezione Molto Alta)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §5.1.2):\n+ Information is transported or transferred in content-encrypted form. (C)"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 5.1.2: To what extent is information protected during transfer?"
+      }
+    },
+    {
+      "external_id": "ISA-5.2.4-VH",
+      "domain": "ITSEC",
+      "level": "L3",
+      "translations": {
+        "en": {
+          "title": "To what extent are event logs recorded and analysed? (Very High Protection)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §5.2.4):\n+ Logging of any access to data of very high protection needs as far as technically feasible and as permissible according to legal and organizational provisions. (C, I)"
+        },
+        "it": {
+          "title": "In che misura i log degli eventi sono registrati e analizzati? (Protezione Molto Alta)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §5.2.4):\n+ Logging of any access to data of very high protection needs as far as technically feasible and as permissible according to legal and organizational provisions. (C, I)"
+        }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "description": "Report/Registro documentato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 90,
+            "description": "Screenshot o export del sistema di monitoraggio"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 5.2.4: To what extent are event logs recorded and analysed?"
+      }
+    },
+    {
+      "external_id": "ISA-5.2.6-VH",
+      "domain": "ITSEC",
+      "level": "L3",
+      "translations": {
+        "en": {
+          "title": "To what extent are IT systems and services technically checked (system and service audit)? (Very High Protection)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §5.2.6):\n+ IT systems and services are regularly scanned for vulnerabilities. (A)\n      - Suitable protective measures must be implemented for systems and services that may not be scanned."
+        },
+        "it": {
+          "title": "In che misura i sistemi e i servizi IT sono verificati tecnicamente? (Protezione Molto Alta)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §5.2.6):\n+ IT systems and services are regularly scanned for vulnerabilities. (A)\n      - Suitable protective measures must be implemented for systems and services that may not be scanned."
+        }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "description": "Report/Registro documentato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Report di verifica/audit"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 5.2.6: To what extent are IT systems and services technically checked (system and service audit)?"
+      }
+    },
+    {
+      "external_id": "ISA-5.2.8-VH",
+      "domain": "ITSEC",
+      "level": "L3",
+      "translations": {
+        "en": {
+          "title": "To what extent is continuity planning for IT services in place? (Very High Protection)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §5.2.8):\n+ Continuity planning is coordinated with the continuity plans of relevant external service providers. (A)\n+ Continuance of essential mission and business functions with minimal or no loss of operational continuity is possible. The plan for continuance of essential mission and business functions considers the following aspects:\n  - Alternate operation strategies and necessary separated standby systems to retain and/or resume operation to the extent possible if critical IT services become unavailable. (A)\n  - Alternate storage and backup sites that provide controls equivalent to that of the primary site. (C, I, A)\n+ Continuity planning is tested regularly. Tests and any lessons learned are documented. (I, A)"
+        },
+        "it": {
+          "title": "In che misura è in atto una pianificazione della continuità per i servizi IT? (Protezione Molto Alta)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §5.2.8):\n+ Continuity planning is coordinated with the continuity plans of relevant external service providers. (A)\n+ Continuance of essential mission and business functions with minimal or no loss of operational continuity is possible. The plan for continuance of essential mission and business functions considers the following aspects:\n  - Alternate operation strategies and necessary separated standby systems to retain and/or resume operation to the extent possible if critical IT services become unavailable. (A)\n  - Alternate storage and backup sites that provide controls equivalent to that of the primary site. (C, I, A)\n+ Continuity planning is tested regularly. Tests and any lessons learned are documented. (I, A)"
+        }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "policy",
+            "mandatory": true,
+            "description": "Policy/Procedura applicabile documentata e approvata"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 5.2.8: To what extent is continuity planning for IT services in place?"
+      }
+    },
+    {
+      "external_id": "ISA-5.2.9-VH",
+      "domain": "ITSEC",
+      "level": "L3",
+      "translations": {
+        "en": {
+          "title": "To what extent is the backup and recovery of data and IT services ensured? (Very High Protection)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §5.2.9):\n+ (Additional) Backups are performed via offline procedures, immutable backups or by using isolated IAM technology. (I, A)\n+ Restore procedures are technically tested in a methodical way at regular intervals. (I, A)\n+ Geographical redundancy is considered in data backup and recovery concepts. (A)"
+        },
+        "it": {
+          "title": "In che misura è garantito il backup e il ripristino di dati e servizi IT? (Protezione Molto Alta)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §5.2.9):\n+ (Additional) Backups are performed via offline procedures, immutable backups or by using isolated IAM technology. (I, A)\n+ Restore procedures are technically tested in a methodical way at regular intervals. (I, A)\n+ Geographical redundancy is considered in data backup and recovery concepts. (A)"
+        }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 5.2.9: To what extent is the backup and recovery of data and IT services ensured?"
+      }
+    },
+    {
+      "external_id": "ISA-5.3.1-VH",
+      "domain": "ITSEC",
+      "level": "L3",
+      "translations": {
+        "en": {
+          "title": "To what extent is information security considered in new or further developed IT systems? (Very High Protection)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §5.3.1):\n+ The security of purpose built software or significantly customized software is tested (e.g. penetration testing) (C, I, A)\n   - during commissioning\n   - in case of significant changes\n   - or at regular intervals"
+        },
+        "it": {
+          "title": "In che misura la sicurezza delle informazioni è considerata in sistemi IT nuovi o sviluppati ulteriormente? (Protezione Molto Alta)",
+          "description": "Requisiti aggiuntivi per protezione molto alta (VDA ISA §5.3.1):\n+ The security of purpose built software or significantly customized software is tested (e.g. penetration testing) (C, I, A)\n   - during commissioning\n   - in case of significant changes\n   - or at regular intervals"
+        }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Documentazione del controllo implementato"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di implementazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "ISA 5.3.1: To what extent is information security considered in new or further developed IT systems?"
+      }
+    }
+  ],
+  "mappings": [
+    {
+      "source": "ISA-1.3.4-VH",
+      "target": "ISA-1.3.4",
+      "target_framework": "TISAX_L2",
+      "relationship": "extends"
+    },
+    {
+      "source": "ISA-1.6.1-VH",
+      "target": "ISA-1.6.1",
+      "target_framework": "TISAX_L2",
+      "relationship": "extends"
+    },
+    {
+      "source": "ISA-1.6.2-VH",
+      "target": "ISA-1.6.2",
+      "target_framework": "TISAX_L2",
+      "relationship": "extends"
+    },
+    {
+      "source": "ISA-1.6.3-VH",
+      "target": "ISA-1.6.3",
+      "target_framework": "TISAX_L2",
+      "relationship": "extends"
+    },
+    {
+      "source": "ISA-4.1.2-VH",
+      "target": "ISA-4.1.2",
+      "target_framework": "TISAX_L2",
+      "relationship": "extends"
+    },
+    {
+      "source": "ISA-4.2.1-VH",
+      "target": "ISA-4.2.1",
+      "target_framework": "TISAX_L2",
+      "relationship": "extends"
+    },
+    {
+      "source": "ISA-5.1.2-VH",
+      "target": "ISA-5.1.2",
+      "target_framework": "TISAX_L2",
+      "relationship": "extends"
+    },
+    {
+      "source": "ISA-5.2.4-VH",
+      "target": "ISA-5.2.4",
+      "target_framework": "TISAX_L2",
+      "relationship": "extends"
+    },
+    {
+      "source": "ISA-5.2.6-VH",
+      "target": "ISA-5.2.6",
+      "target_framework": "TISAX_L2",
+      "relationship": "extends"
+    },
+    {
+      "source": "ISA-5.2.8-VH",
+      "target": "ISA-5.2.8",
+      "target_framework": "TISAX_L2",
+      "relationship": "extends"
+    },
+    {
+      "source": "ISA-5.2.9-VH",
+      "target": "ISA-5.2.9",
+      "target_framework": "TISAX_L2",
+      "relationship": "extends"
+    },
+    {
+      "source": "ISA-5.3.1-VH",
+      "target": "ISA-5.3.1",
+      "target_framework": "TISAX_L2",
+      "relationship": "extends"
+    }
+  ]
+}

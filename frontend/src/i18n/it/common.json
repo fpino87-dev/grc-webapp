@@ -1,0 +1,2256 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "compliance": "Compliance",
+    "risk": "Risk",
+    "operations": "Operazioni",
+    "governance": "Governance",
+    "audit": "Audit",
+    "settings": "Impostazioni"
+  },
+  "status": {
+    "compliant": "Compliant",
+    "parziale": "Parziale",
+    "gap": "Gap",
+    "na": "N/A",
+    "non_valutato": "Non valutato",
+    "attivo": "Attivo",
+    "aperto": "Aperto",
+    "chiuso": "Chiuso",
+    "in_corso": "In corso",
+    "in_dismissione": "In dismissione",
+    "scaduto": "Scaduto",
+    "non_soggetto": "Non soggetto",
+    "importante": "Importante",
+    "essenziale": "Essenziale",
+    "bozza": "Bozza",
+    "revisione": "In revisione",
+    "approvazione": "In approvazione",
+    "approvato": "Approvato",
+    "respinto": "Respinto",
+    "completato": "Completato",
+    "annullato": "Annullato",
+    "bassa": "Bassa",
+    "media": "Media",
+    "alta": "Alta",
+    "critica": "Critica",
+    "si": "Sì",
+    "no": "No",
+    "da_valutare": "Da valutare",
+    "in_analisi": "In analisi"
+  },
+  "actions": {
+    "save": "Salva",
+    "cancel": "Annulla",
+    "edit": "Modifica",
+    "approve": "Approva",
+    "reject": "Rifiuta",
+    "confirm": "Conferma",
+    "delete": "Elimina",
+    "refresh": "Aggiorna",
+    "export": "Esporta",
+    "upload": "Carica",
+    "back": "Indietro",
+    "close": "Chiudi"
+  },
+  "ai": {
+    "suggestion_label": "Suggerimento IA",
+    "accept": "Usa questo",
+    "edit_and_use": "Modifica e usa",
+    "save_edits": "Salva modifiche",
+    "ignore": "Ignora",
+    "ai_badge": "IA"
+  },
+  "countdown": {
+    "expired": "SCADUTO"
+  },
+  "common": {
+    "loading": "Caricamento...",
+    "downloading": "Download...",
+    "close": "Chiudi",
+    "saving": "Salvataggio...",
+    "save_error": "Errore durante il salvataggio",
+    "error": "Errore",
+    "enabled": "attivo",
+    "disabled": "disabilitato",
+    "none": "—",
+    "yes": "Sì",
+    "no": "No",
+    "optional": "— opzionale —",
+    "select": "— seleziona —",
+    "freq_weekly": "Settimanale",
+    "freq_monthly": "Mensile",
+    "freq_quarterly": "Trimestrale",
+    "freq_biannual": "Semestrale",
+    "freq_annual": "Annuale",
+    "finish": "Fine"
+  },
+  "help": {
+    "open_title": "Aiuto su questo modulo",
+    "close_aria": "Chiudi aiuto modulo",
+    "sections": {
+      "what_is": "Cos'è",
+      "how_to": "Come si usa",
+      "connected_to": "Collegato a",
+      "before_start": "Prima di iniziare"
+    }
+  },
+  "eval_assistant": {
+    "title": "Guida alla valutazione",
+    "subtitle": "BIA · Risk · Catena logica",
+    "tabs": {
+      "connections": "Connessioni"
+    },
+    "bia": {
+      "scale_title": "Scala di criticità",
+      "columns": {
+        "level": "Livello",
+        "max_downtime": "Downtime max",
+        "example": "Esempio"
+      },
+      "levels": {
+        "1": {
+          "label": "Trascurabile",
+          "downtime": "> 7 giorni",
+          "example": "Archivio storico documentale"
+        },
+        "2": {
+          "label": "Bassa",
+          "downtime": "3–7 giorni",
+          "example": "Reportistica interna"
+        },
+        "3": {
+          "label": "Media",
+          "downtime": "24–72 ore",
+          "example": "ERP secondario, gestione fornitori"
+        },
+        "4": {
+          "label": "Alta",
+          "downtime": "4–24 ore",
+          "example": "Linea produzione, qualità, logistica"
+        },
+        "5": {
+          "label": "Critica",
+          "downtime": "< 4 ore",
+          "example": "Linea produzione principale, sistemi safety"
+        }
+      },
+      "questions": {
+        "economic": {
+          "label": "Impatto economico del fermo",
+          "low": "Trascurabile (<1k€/h)",
+          "high": "Devastante (>50k€/h)"
+        },
+        "customers": {
+          "label": "Impatto su clienti/contratti",
+          "low": "Nessuno",
+          "high": "Perdita contratti, penali, fermo consegne"
+        },
+        "regulatory": {
+          "label": "Impatto normativo/reputazionale",
+          "low": "Nessuno",
+          "high": "Notifica autorità, danno reputazionale grave"
+        }
+      },
+      "guided_estimate_title": "Stima guidata della criticità",
+      "suggested_title": "Criticità suggerita",
+      "suggested_downtime": "Downtime max tollerato: {{downtime}}"
+    },
+    "risk": {
+      "matrix_title": "Matrice P×I (Probabilità × Impatto)",
+      "zones": {
+        "green": {
+          "label": "Verde",
+          "range": "Score 1–7",
+          "desc": "Rischio accettabile — monitora annualmente"
+        },
+        "yellow": {
+          "label": "Giallo",
+          "range": "Score 8–14",
+          "desc": "Rischio moderato — piano di mitigazione entro 90 giorni"
+        },
+        "red": {
+          "label": "Rosso",
+          "range": "Score 15–25",
+          "desc": "Rischio critico — azione immediata, task autogenerato, PDCA obbligatorio"
+        }
+      },
+      "it_dimensions_title": "Dimensioni asset IT",
+      "it_dimensions": {
+        "exposure": {
+          "label": "Esposizione",
+          "desc": "Quanto è raggiungibile dall'esterno o da reti non fidate"
+        },
+        "cve": {
+          "label": "CVE Score",
+          "desc": "Vulnerabilità note non patchate — fonte: NVD/CVE database"
+        },
+        "threat": {
+          "label": "Minaccia",
+          "desc": "Probabilità di attacco basata su threat intelligence di settore"
+        },
+        "controls_gap": {
+          "label": "Gap Controlli",
+          "desc": "Quanti controlli ISO27001/TISAX collegati sono in stato Gap"
+        }
+      },
+      "ot_dimensions_title": "Dimensioni asset OT",
+      "ot_dimensions": {
+        "purdue": {
+          "label": "Connettività Purdue",
+          "desc": "Livello di isolamento nella gerarchia Purdue — L0 più critico"
+        },
+        "patchability": {
+          "label": "Patchability",
+          "desc": "Possibilità tecnica di aggiornare il firmware/OS"
+        },
+        "physical_impact": {
+          "label": "Impatto fisico",
+          "desc": "Conseguenze fisiche di un attacco: fermo linea, danni, safety"
+        },
+        "segmentation": {
+          "label": "Segmentazione",
+          "desc": "Isolamento dalla rete IT e da internet"
+        },
+        "detection": {
+          "label": "Rilevabilità",
+          "desc": "Capacità di rilevare una compromissione in tempo reale"
+        }
+      }
+    },
+    "risk_module": {
+      "title": "Risk Assessment IT/OT — M06",
+      "description": "Inerente = probabilità×impatto SENZA controlli; Residuo = probabilità×impatto DOPO i controlli e BCP; Weighted = score residuo pesato sulla criticità BIA per dare priorità ai rischi con impatto maggiore sul business. Le policy di Risk Appetite definiscono le soglie (score max accettabile, numero massimo di rischi rossi, score non accettabile) che il management ha approvato.",
+      "steps": {
+        "1": "Crea un nuovo assessment collegando asset e processo BIA (se disponibile)",
+        "2": "Compila il rischio INERENTE inserendo probabilità e impatto prima dei controlli",
+        "3": "Compila il rischio RESIDUO inserendo probabilità e impatto dopo i controlli e le misure BCP",
+        "4": "Completa le dimensioni IT/OT e premi 'Completa assessment' per calcolare score, weighted e ALE",
+        "5": "Confronta score e weighted con le soglie di Risk Appetite per decidere mitigazione, trasferimento o accettazione",
+        "6": "Accetta formalmente i rischi residui (quando consentito dalla policy) indicando nota e scadenza revisione"
+      },
+      "connections": {
+        "assets": "Asset oggetto della valutazione",
+        "bia": "Weighted e ALE usano criticità e costi BIA",
+        "governance": "Risk Appetite definisce le soglie approvate dal management",
+        "pdca": "Rischi sopra soglia possono aprire PDCA automatici",
+        "tasks": "Task di mitigazione generati per i rischi oltre i limiti di appetito"
+      },
+      "config_needed": {
+        "1": "Configura le soglie in Governance → Risk Appetite",
+        "2": "Collega i processi BIA per il calcolo automatico di ALE e weighted"
+      }
+    },
+    "connections": {
+      "chain_title": "Catena logica dei moduli",
+      "realtime_alerts_title": "Alert in tempo reale",
+      "select_plant_hint": "Seleziona un sito nel menu per vedere alert specifici",
+      "nodes": {
+        "bia_title": "M05 Processo BIA",
+        "bia_subtitle": "criticità 1–5",
+        "risk_title": "M06 Risk Assessment",
+        "risk_subtitle": "weighted_score",
+        "bcp_title": "M16 BCP Plan",
+        "bcp_subtitle": "RTO / RPO",
+        "score_title": "Score > 14?",
+        "score_subtitle": "rischio rosso",
+        "pdca_title": "M11 PDCA",
+        "pdca_subtitle": "ciclo obbligatorio",
+        "lesson_title": "M12 Lesson",
+        "lesson_subtitle": "Learned"
+      },
+      "edges": {
+        "criticality": "criticality",
+        "rto_rpo": "RTO/RPO"
+      },
+      "missing_bcp": {
+        "title": "{{count}} {{count, plural, one {processo critico} other {processi critici}}} senza piano BCP",
+        "body": "Processi con criticità ≥ 4 e stato \"approvato\" privi di BCP Plan attivo.",
+        "ok": "Tutti i processi critici hanno un BCP plan"
+      },
+      "missing_pdca": {
+        "title": "{{count}} {{count, plural, one {rischio critico} other {rischi critici}}} senza ciclo PDCA aperto",
+        "body": "Scenari con score > 14 che non hanno un ciclo PDCA in corso.",
+        "ok": "Tutti i rischi critici hanno un ciclo PDCA aperto"
+      }
+    }
+  },
+  "controls": {
+    "title": "Compliance — Controlli",
+    "empty": "Nessun controllo trovato",
+    "framework_filter": {
+      "all": "Tutti i framework"
+    },
+    "export": {
+      "soa": "Scarica SOA",
+      "vda_isa": "Scarica VDA ISA",
+      "proto_vda_isa": "Scarica VDA ISA Prototipi",
+      "nis2_matrix": "Scarica NIS2 Matrix"
+    },
+    "drawer": {
+      "title": "Gestione controllo",
+      "tabs": {
+        "about": "Cos'è",
+        "evaluation": "Valutazione",
+        "documents_evidence": "Documenti & Evidenze",
+        "history": "Storico"
+      },
+      "about": {
+        "no_description": "Nessuna descrizione disponibile per questa lingua.",
+        "guidance": "Linee guida implementazione",
+        "evidence_examples": "Esempi di evidenza accettabile",
+        "mappings": "Mappature cross-framework",
+        "ai_summary_title": "In pratica, cosa fare",
+        "ai_generate": "Genera spiegazione AI",
+        "ai_regenerate": "Rigenera",
+        "ai_generating": "Generazione in corso…",
+        "ai_summary_empty": "Clicca \"Genera\" per ottenere una spiegazione semplice di cosa fare per soddisfare questo controllo.",
+        "what_is_needed": "Cosa serve per soddisfare questo controllo",
+        "req_doc": "Documento richiesto",
+        "req_evidence": "Evidenza richiesta",
+        "req_max_age": "max {{days}} gg",
+        "req_min_docs": "Almeno {{count}} documento/i approvato/i",
+        "req_min_evidences": "Almeno {{count}} evidenza/e valida/e"
+      },
+      "expiry": {
+        "none": "Nessuna scadenza",
+        "expired_days_ago": "Scaduta {{days}}g fa",
+        "expires_in_days": "Scade in {{days}}g",
+        "valid_until": "Valida fino al {{date}}"
+      },
+      "evaluation": {
+        "revaluation": {
+          "title": "Rivalutazione richiesta",
+          "body": "Un change registrato{{hasSince, select, true { dal {{since}}} other {}}} potrebbe aver impattato questo controllo. Verificare e aggiornare la valutazione."
+        },
+        "requirements": {
+          "none": "Nessun requisito documentale definito per questo controllo.",
+          "not_satisfied": "Requisiti non soddisfatti",
+          "missing_document": "Documento mancante",
+          "missing_evidence": "Evidenza mancante",
+          "expired_evidence": "Evidenza scaduta",
+          "warning": "Attenzione",
+          "satisfied": "Tutti i requisiti soddisfatti"
+        },
+        "official_status": "Stato ufficiale",
+        "system_suggestion": "Suggerimento sistema",
+        "apply_suggestion": "Applica suggerimento ({{status}})",
+        "apply_suggestion_title": "Applica suggerimento",
+        "note_optional": "Nota (opzionale)",
+        "applying": "Applicazione...",
+        "applicability": {
+          "title": "Applicabilità SOA (ISO 27001)",
+          "save": "Salva applicabilità",
+          "options": {
+            "applicabile": "Applicabile",
+            "escluso": "Escluso",
+            "non_pertinente": "Non pertinente"
+          },
+          "exclusion_placeholder": "Motivazione formale di esclusione (min 50 caratteri) *"
+        },
+        "maturity": {
+          "title": "Maturity Level VDA ISA TISAX",
+          "auto": "Calcolato automaticamente",
+          "override": "Override manuale maturity",
+          "levels": {
+            "0": "Non implementato",
+            "1": "Ad-hoc",
+            "2": "Pianificato",
+            "3": "Definito",
+            "4": "Gestito",
+            "5": "Ottimizzato"
+          }
+        },
+        "status_guide": {
+          "compliant": "Evidenza valida non scaduta + data ultima verifica",
+          "parziale": "Evidenza anche parziale + piano di remediation (task M08)",
+          "gap": "Nessuno per salvare — task remediation generato automaticamente",
+          "na": "Giustificazione scritta min 20 caratteri. TISAX L3: doppia approvazione",
+          "non_valutato": "Abbassa il compliance score del plant"
+        },
+        "manual_change": {
+          "title": "Cambio manuale stato",
+          "select_status": "— seleziona nuovo stato —",
+          "req_block": "Requisiti non soddisfatti — risolvi nel tab \"Documenti & Evidenze\"",
+          "note_placeholder": "Nota / giustificazione (obbligatoria per N/A, min 20 caratteri)",
+          "req_tooltip": "Risolvi i requisiti nel tab Documenti & Evidenze"
+        },
+        "save_evaluation": "Salva valutazione"
+      },
+      "docs": {
+        "requirements": {
+          "not_satisfied_for_compliant": "Requisiti non soddisfatti per Compliant"
+        },
+        "policy_docs": "Documenti di policy",
+        "operational_evidence": "Evidenze operative",
+        "missing": "Mancante",
+        "none_linked": "Nessun documento collegato",
+        "no_evidence_linked": "Nessuna evidenza collegata",
+        "unlink": "Scollega",
+        "link_doc": "Collega documento",
+        "link_existing_evidence": "Collega evidenza esistente",
+        "search_placeholder": "Cerca per titolo...",
+        "upload_new_evidence": "Carica nuova evidenza",
+        "new_evidence_title_placeholder": "Titolo *",
+        "validity_date_label": "Data validità *",
+        "upload_and_link": "Carica e collega",
+        "review_abbrev": "rev.",
+        "dropzone_hint": "Trascina file qui per caricarli e collegarli automaticamente",
+        "dropzone_or_browse": "oppure clicca per sfogliare",
+        "upload_queue_title": "File da caricare ({{count}})",
+        "upload_all_link": "Carica tutti e collega ({{count}})",
+        "uploading_progress": "Caricamento {{current}}/{{total}}…"
+      },
+      "history": {
+        "empty": "Nessuna valutazione registrata.",
+        "set_status": "ha impostato"
+      }
+    },
+    "table": {
+      "control_id": "ID Controllo",
+      "framework": "Framework",
+      "title": "Titolo",
+      "maturity_level": "Maturity",
+      "status": "Stato",
+      "owner": "Owner",
+      "last_evaluated": "Ultima valutazione"
+    },
+    "owner_none": "— nessun owner —",
+    "owner_save_error": "Errore salvataggio owner",
+    "notes_label": "Note aggiuntive",
+    "notes_placeholder": "Note libere sul controllo (non esportate in VDA/SOA)…",
+    "notes_save": "Salva note",
+    "status_filter": {
+      "all": "Tutti"
+    },
+    "actions": {
+      "open_drawer": "Gestione controllo",
+      "click_to_edit": "Clicca per modificare",
+      "propagate_hint": "Propaga questo stato ai controlli correlati",
+      "propagate": "⇒ propaga",
+      "delete_title": "Elimina istanza controllo",
+      "delete_confirm": "Eliminare l'istanza controllo {{id}}? Consentito solo se non ancora valutata (salvo superuser)."
+    },
+    "maturity_0": "0 — Non implementato",
+    "maturity_1": "1 — Ad-hoc / Informale",
+    "maturity_2": "2 — Pianificato",
+    "maturity_3": "3 — Definito e documentato",
+    "maturity_4": "4 — Gestito e misurato",
+    "maturity_5": "5 — Ottimizzato",
+    "applicability_applicable": "Applicabile",
+    "applicability_excluded": "Escluso",
+    "applicability_not_relevant": "Non pertinente",
+    "rel_copre": "copre",
+    "rel_estende": "estende",
+    "rel_equivale": "equivale",
+    "rel_subset": "sottoinsieme",
+    "rel_related": "correlato",
+    "download_error": "Errore download",
+    "download_network_error": "Errore di rete durante il download",
+    "help": {
+      "title": "Libreria Controlli — M03",
+      "description": "Gestisce i controlli normativi per ogni framework (ISO 27001, TISAX L2/L3, NIS2). Ogni controllo ha uno stato valutativo e richiede evidenze documentali per raggiungere \"Compliant\".",
+      "steps": {
+        "1": "I controlli vengono generati automaticamente al caricamento del framework",
+        "2": "Clicca ▶ su ogni controllo per aprire il drawer di gestione",
+        "3": "Collega documenti di policy e evidenze operative",
+        "4": "Il sistema suggerisce lo stato automaticamente dai documenti collegati",
+        "5": "Salva la valutazione — richiede almeno 1 evidenza valida per \"Compliant\"",
+        "6": "Scarica SOA (ISO27001), VDA ISA (TISAX) o NIS2 Matrix con i bottoni in alto"
+      },
+      "connections": {
+        "documents": {
+          "module": "M07 Documenti",
+          "relation": "Policy e evidenze collegate al controllo"
+        },
+        "audit_prep": {
+          "module": "M17 Audit Prep",
+          "relation": "Finding collegati a ControlInstance"
+        },
+        "risk": {
+          "module": "M06 Risk",
+          "relation": "Gap controlli pesano il risk score OT"
+        }
+      },
+      "config_needed": {
+        "1": "Eseguire: python manage.py load_frameworks",
+        "2": "Attivare il framework sul Plant in M01"
+      }
+    }
+  },
+  "gap_analysis": {
+    "title": "Gap Analysis framework",
+    "source_framework": "Framework di partenza",
+    "target_framework": "Framework di destinazione",
+    "loading": "Analisi in corso...",
+    "empty_category": "Nessun controllo in questa categoria",
+    "sections": {
+      "covered": "Coperti",
+      "partial": "Parziali",
+      "gap": "Gap",
+      "not_mapped": "Non mappati"
+    },
+    "actions": {
+      "analyze": "Analizza gap",
+      "download_report": "↓ Scarica report gap analysis"
+    },
+    "errors": {
+      "same_framework": "Seleziona due framework diversi",
+      "load_failed": "Errore nel caricamento dei dati"
+    },
+    "summary": {
+      "controls_from_to": "Controlli {{source}} → {{target}}",
+      "pct_covered": "{{pct}}% coperti",
+      "covered_count": "Coperti: {{count}}",
+      "partial_count": "Parziali: {{count}}",
+      "gap_count": "Gap: {{count}}",
+      "not_mapped_count": "Non mappati: {{count}}"
+    },
+    "export": {
+      "columns": {
+        "category": "Categoria",
+        "id": "ID",
+        "title": "Titolo",
+        "domain": "Dominio",
+        "source_status": "Stato sorgente"
+      }
+    }
+  },
+  "plants": {
+    "title": "Siti produttivi",
+    "empty": "Nessun sito configurato",
+    "table": {
+      "code": "Codice",
+      "name": "Nome",
+      "country": "Paese",
+      "status": "Stato",
+      "nis2": "NIS2",
+      "ot": "OT"
+    },
+    "fields": {
+      "code": "Codice",
+      "name": "Nome",
+      "country": "Paese",
+      "status": "Stato",
+      "nis2_scope": "Perimetro NIS2",
+      "has_ot": "Presenza reti OT / ICS",
+      "logo_upload_label": "Carica logo",
+      "nis2_sector": "Settore NIS2",
+      "nis2_subsector": "Sottosettore NIS2",
+      "legal_entity_name": "Ragione sociale (notifiche)",
+      "legal_entity_vat": "P.IVA / VAT",
+      "nis2_activity_description": "Descrizione attività NIS2 (documenti formali)"
+    },
+    "nis2_entity": {
+      "section_title": "NIS2 e entità legale",
+      "contact_hint": "Il referente operativo per le notifiche è l’utente con incarico «Contatto NIS2» su questo sito (M00 Governance)."
+    },
+    "placeholders": {
+      "code": "IT-MIL-01",
+      "country": "IT",
+      "name": "Stabilimento Milano",
+      "nis2_sector": "es. Manifattura — Automotive",
+      "nis2_subsector": "es. Produzione componenti"
+    },
+    "actions": {
+      "edit_title": "Modifica sito",
+      "delete_title": "Elimina sito",
+      "delete_confirm": "Eliminare il sito \"{{name}}\"? L'operazione è consentita solo se il sito non ha dati collegati.",
+      "frameworks": "Framework",
+      "select": "Seleziona"
+    },
+    "new": {
+      "open": "+ Nuovo sito",
+      "first": "Crea il primo sito →",
+      "title": "Nuovo sito produttivo",
+      "submit": "Crea sito"
+    },
+    "edit": {
+      "title": "Modifica sito"
+    },
+    "logo_url_label": "Logo URL",
+    "logo_url_hint": "URL del logo del sito (usato in report/export). Consigliato PNG/SVG su sfondo trasparente.",
+    "tisax_framework_label": "TISAX — VDA ISA 6.0",
+    "frameworks": {
+      "title": "Framework normativi",
+      "empty": "Nessun framework assegnato a questo sito.",
+      "assign_new": "Assegna nuovo framework",
+      "select": "— Seleziona framework —",
+      "assign": "Assegna framework",
+      "assigning": "Assegnazione in corso...",
+      "assign_help": "Crea automaticamente tutti i controlli da valutare per questo sito.",
+      "all_assigned": "Tutti i framework disponibili sono già assegnati a questo sito.",
+      "activate": "Attiva",
+      "deactivate": "Disattiva",
+      "level": "livello: {{level}}",
+      "active_from": "dal {{date}}",
+      "remove_confirm": "Rimuovere {{code}}? I controlli valutati rimarranno.",
+      "tisax": {
+        "assessment_level": "Assessment Level {{level}}",
+        "l2_hint": "Alta protezione — informazioni riservate",
+        "l3_hint": "Altissima protezione — Very High Protection (include tutti i controlli L2)",
+        "proto_hint": "Protezione prototipi — Capitolo 8 VDA ISA",
+        "l3_proto_label": "Assessment Level 3 + Protezione Prototipi",
+        "l3_proto_hint": "Altissima protezione + prototipi (include L2, L3 e Capitolo 8 VDA ISA)",
+        "l3_notice": "Verranno assegnati sia TISAX_L2 che TISAX_L3 — {{l2}} + {{l3}} = {{total}} controlli totali.",
+        "l3_proto_notice": "Verranno assegnati TISAX_L2 + TISAX_L3 + TISAX_PROTO — {{l2}} + {{l3}} + {{proto}} = {{total}} controlli totali."
+      },
+      "nis2": {
+        "essential_hint": "Supervisione proattiva · sanzioni fino a €10M",
+        "important_hint": "Supervisione reattiva · sanzioni fino a €7M"
+      },
+      "generic": {
+        "base": "Base — requisiti minimi obbligatori",
+        "advanced": "Avanzato — con misure opzionali",
+        "complete": "Completo — implementazione piena"
+      }
+    },
+    "delete_blocked": {
+      "title": "Impossibile eliminare il sito",
+      "intro": "Sono presenti elementi collegati che devono essere rimossi prima di procedere:",
+      "deps": {
+        "sub_plants": "Sotto-siti",
+        "plant_frameworks": "Framework assegnati",
+        "control_instances": "Istanze di controllo",
+        "assets": "Asset",
+        "bia_processes": "Processi BIA",
+        "risk_assessments": "Valutazioni del rischio",
+        "documents": "Documenti",
+        "evidences": "Evidenze",
+        "tasks": "Task",
+        "incidents": "Incidenti",
+        "pdca_cycles": "Cicli PDCA",
+        "lessons": "Lesson learned",
+        "management_reviews": "Revisioni direzione",
+        "suppliers": "Fornitori",
+        "training_courses": "Corsi di formazione",
+        "phishing_simulations": "Simulazioni phishing",
+        "bcp_plans": "Piani BCP",
+        "audit_preps": "Preparazioni audit",
+        "audit_programs": "Programmi audit",
+        "schedule_policies": "Policy scadenzario",
+        "role_assignments": "Assegnazioni ruolo"
+      },
+      "force_hint": "Solo superuser: puoi forzare l'eliminazione del sito insieme a tutti gli elementi collegati (operazione irreversibile).",
+      "force_action": "Forza eliminazione",
+      "force_confirm": "ATTENZIONE: tutti gli elementi collegati verranno eliminati definitivamente insieme al sito. Procedere?"
+    }
+  },
+  "users": {
+    "title": "Governance — Utenti",
+    "empty": "Nessun utente trovato",
+    "table": {
+      "username": "Username",
+      "email": "Email",
+      "name": "Nome",
+      "grc_role": "Ruolo GRC",
+      "active": "Attivo",
+      "actions": "Azioni"
+    },
+    "fields": {
+      "username": "Username",
+      "email": "Email",
+      "first_name": "Nome",
+      "last_name": "Cognome",
+      "password": "Password",
+      "grc_role": "Ruolo GRC",
+      "grc_role_none": "— nessuno —"
+    },
+    "actions": {
+      "assign_role": "Assegna ruolo",
+      "activate": "Attiva",
+      "deactivate": "Disattiva",
+      "competency": "Competenze",
+      "reset_password": "Reset password",
+      "delete": "Elimina utente",
+      "delete_confirm": "Eliminare l'utente {{username}} e revocare tutti gli accessi GRC?"
+    },
+    "new": {
+      "open": "+ Nuovo utente",
+      "title": "Nuovo utente",
+      "submit": "Crea utente"
+    },
+    "competency_gap": {
+      "loading": "Caricamento gap analysis...",
+      "title": "Gap Analysis Competenze — {{name}}",
+      "gap_count": "{{count}} gap",
+      "complete": "Completo",
+      "to_fill": "Gap da colmare:",
+      "level_from_to": "Livello {{current}} → richiesto {{required}}",
+      "expired": "Competenze scadute:",
+      "ok": "Competenze OK:",
+      "none": "Nessun requisito di competenza definito per i ruoli di questo utente."
+    },
+    "danger": {
+      "title": "⚠️ Zona pericolosa — Solo ambiente di test",
+      "body": "Cancella tutti i dati GRC mantenendo superuser e framework normativi. Questa operazione è irreversibile.",
+      "open": "🗑️ Reset database di test",
+      "confirm_body": "Sei sicuro? Questa azione cancellerà TUTTI i dati GRC. Verranno mantenuti solo il tuo account superuser e i framework normativi.",
+      "confirm_placeholder": "Scrivi RESET per confermare",
+      "resetting": "Reset in corso...",
+      "confirm": "Conferma reset",
+      "reset_success": "Reset completato. Reindirizzamento al login...",
+      "reset_error": "Errore durante il reset"
+    }
+  },
+  "governance": {
+    "title": "Governance",
+    "subtitle": "Ruoli normativi, comitati e successione incarichi",
+    "tabs": {
+      "roles": "Ruoli & comitati",
+      "workflow": "Workflow documentale (M07)",
+      "frameworks": "Framework normativi",
+      "risk_appetite": "Risk Appetite"
+    },
+    "workflow": {
+      "title": "Workflow documentale",
+      "subtitle": "Definisci chi può creare, revisionare e approvare i documenti M07 per tipo e per sito.",
+      "configured_policies": "Policy configurate",
+      "new_policy": "+ Nuova policy",
+      "no_policies": "Nessuna policy configurata. Creane una per tipo documento.",
+      "who_can_submit": "Chi può inviare",
+      "who_reviews": "Chi revisiona",
+      "who_approves": "Chi approva",
+      "actions_col": "Azioni",
+      "scope_org": "Organizzazione",
+      "scope_bu": "Business Unit (ID)",
+      "scope_site_prefix": "Sito:",
+      "scope_site_id": "Sito (ID)",
+      "modal_edit": "Modifica policy",
+      "modal_new": "Nuova policy",
+      "scope_label": "Scope",
+      "site_label": "Sito",
+      "site_select": "— seleziona sito —",
+      "scope_org_option": "Organizzazione",
+      "scope_site_option": "Sito specifico",
+      "who_can_create_submit": "Chi può creare / inviare in revisione",
+      "saving": "Salvataggio...",
+      "save_policy": "Salva policy",
+      "delete_title": "Elimina policy",
+      "delete_confirm": "Sei sicuro di voler eliminare la policy per",
+      "deleting": "Eliminazione...",
+      "doc_type_col": "Tipo documento",
+      "doc_types": {
+        "policy": "Policy",
+        "procedura": "Procedura",
+        "manuale": "Manuale ISMS",
+        "contratto": "Contratto/NDA",
+        "registro": "Registro",
+        "altro": "Altro"
+      }
+    },
+    "sections": {
+      "roles": "Ruoli normativi",
+      "committees": "Comitati per la sicurezza"
+    },
+    "empty": {
+      "roles": "Nessun ruolo assegnato",
+      "committees": "Nessun comitato configurato"
+    },
+    "alerts": {
+      "vacant_roles": "🚨 {{count}} ruoli obbligatori senza titolare attivo",
+      "expiring_roles": "⚠ {{count}} ruoli in scadenza nei prossimi 30 giorni"
+    },
+    "expires_on": "scade il {{date}}",
+    "valid_until": "fino al {{date}}",
+    "badges": {
+      "expires_in_days": "Scade in {{days}}gg"
+    },
+    "actions": {
+      "replace": "Sostituisci",
+      "terminate": "Termina",
+      "delete_confirm": "Eliminare definitivamente questa assegnazione di ruolo? Operazione consigliata solo in fase di test o per errori di inserimento."
+    },
+    "roles": {
+      "ciso": "CISO",
+      "compliance_officer": "Compliance Officer",
+      "risk_manager": "Risk Manager",
+      "internal_auditor": "Auditor Interno",
+      "external_auditor": "Auditor Esterno",
+      "plant_manager": "Plant Manager",
+      "control_owner": "Control Owner",
+      "plant_security_officer": "Plant Security Officer",
+      "nis2_contact": "Contatto NIS2",
+      "dpo": "DPO",
+      "isms_manager": "ISMS Manager",
+      "comitato_membro": "Membro Comitato",
+      "bu_referente": "Referente BU",
+      "raci_responsible": "RACI Responsible",
+      "raci_accountable": "RACI Accountable"
+    },
+    "scopes": {
+      "org": "Globale — tutta l'organizzazione",
+      "bu": "Business Unit specifica",
+      "plant": "Sito specifico"
+    },
+    "roles_assign": {
+      "open": "+ Assegna",
+      "modal_title": "Nuova assegnazione ruolo",
+      "user": "Utente",
+      "role": "Ruolo",
+      "scope": "Ambito",
+      "business_unit": "Business Unit",
+      "plant": "Sito",
+      "select_bu": "— seleziona BU —",
+      "select_plant": "— seleziona sito —",
+      "valid_from": "Valido dal",
+      "valid_until": "Valido fino al",
+      "submit": "Assegna ruolo"
+    },
+    "committees": {
+      "new": {
+        "open": "+ Nuovo",
+        "title": "Nuovo comitato",
+        "submit": "Crea comitato"
+      },
+      "fields": {
+        "name": "Nome",
+        "type": "Tipo",
+        "frequency": "Frequenza",
+        "next_meeting": "Prossima riunione"
+      },
+      "placeholders": {
+        "name": "es. Comitato per la Sicurezza"
+      },
+      "types": {
+        "centrale": "Centrale",
+        "bu": "BU"
+      },
+      "frequencies": {
+        "mensile": "Mensile",
+        "trimestrale": "Trimestrale",
+        "semestrale": "Semestrale"
+      },
+      "frequency": "Frequenza: {{value}}",
+      "next_meeting": "prossima:"
+    },
+    "terminate": {
+      "title": "Termina ruolo",
+      "body": "Stai per terminare il ruolo {{role}} di {{user}}.",
+      "end_date": "Data fine",
+      "reason": "Motivo",
+      "reason_placeholder": "min 5 caratteri...",
+      "pending": "Terminazione...",
+      "confirm": "Conferma terminazione",
+      "error": "Errore durante la terminazione."
+    },
+    "replace": {
+      "title": "Successione ruolo",
+      "body": "Ruolo: {{role}} — titolare attuale: {{user}}",
+      "new_owner": "Nuovo titolare",
+      "handover_date": "Data passaggio",
+      "reason": "Motivo / note",
+      "pending": "Successione...",
+      "confirm": "Conferma successione",
+      "error": "Errore durante la successione."
+    },
+    "help": {
+      "title": "Governance — M00",
+      "description": "Gestisce i ruoli normativi (CISO, contatto NIS2, DPO ecc.) con validità temporale. I ruoli scaduti o vacanti generano alert automatici perché impattano la conformità NIS2 e ISO 27001.",
+      "steps": {
+        "assign_role": "Assegna un ruolo a un utente con data di inizio e fine.",
+        "replace_role": "Per sostituire un titolare usa \"Sostituisci\" — la successione è atomica.",
+        "terminate_role": "Per terminare senza successore usa \"Termina\" con un motivo.",
+        "vacant_roles_alert": "I ruoli obbligatori vacanti (CISO, NIS2, DPO, ISMS) generano alert in cima.",
+        "link_nomination_doc": "Collega il documento di nomina per avere evidenza formale."
+      },
+      "connections": {
+        "rbac": "Ruolo normativo distinto dal ruolo applicativo.",
+        "management_review": "I ruoli vacanti compaiono nello snapshot di Management Review."
+      },
+      "config": {
+        "create_users_m02": "Creare prima gli utenti in M02."
+      }
+    },
+    "workflow_help": {
+      "title": "Workflow documentale",
+      "description": "Configura il flusso di approvazione documentale per tipo documento (policy, procedura, manuale...) e plant.",
+      "steps": {
+        "choose_type_and_scope": "Scegli il tipo documento e lo scope (org / BU / plant).",
+        "assign_creators": "Assegna i ruoli che possono creare e inviare in revisione.",
+        "assign_reviewers": "Assegna i ruoli che devono revisionare.",
+        "assign_approvers": "Assegna i ruoli che possono approvare e mandare in vigore."
+      },
+      "connections": {
+        "documents": "Abilita i pulsanti \"Invia per revisione\" / \"Approva\" nel modulo Documenti.",
+        "governance": "Usa i ruoli normativi (CISO, Plant Manager, ISMS...) configurati in Governance."
+      }
+    },
+    "frameworks": {
+      "title": "Framework normativi",
+      "subtitle": "Gestisci versioni e import dei framework (JSON) usati per controlli e mappature.",
+      "note": "Fonte di verità: JSON in backend/frameworks/. Import richiede superuser.",
+      "empty": "Nessun framework trovato",
+      "domains_short": "domini",
+      "controls_short": "controlli",
+      "mappings_short": "mappature",
+      "table": {
+        "code": "Codice",
+        "name": "Nome",
+        "version": "Versione",
+        "published_at": "Pubblicato",
+        "controls": "Copertura",
+        "languages": "Lingue"
+      },
+      "import_title": "Import framework (JSON)",
+      "import_placeholder": "Incolla qui il JSON completo del framework oppure carica un file .json…",
+      "import_missing_json": "Inserisci un JSON prima di continuare.",
+      "import_invalid_json": "JSON non valido.",
+      "preview_action": "Anteprima",
+      "import_confirm": "Importa",
+      "import_success": "Import completato.",
+      "preview_title": "Anteprima import",
+      "preview": {
+        "framework": "Framework",
+        "version": "Versione",
+        "counts": "Conteggi",
+        "languages": "Lingue"
+      },
+      "archive_title": "Archivia framework",
+      "archive_action": "Archivia",
+      "archive_confirm": "Archiviare il framework {{code}}? Richiede superuser e nessun sito deve averlo ancora assegnato.",
+      "delete_title": "Elimina framework",
+      "delete_action": "Elimina",
+      "delete_confirm": "Eliminare definitivamente il framework \"{{code}}\"? Tutti i controlli e i domini associati verranno rimossi. Operazione irreversibile."
+    },
+    "risk_appetite": {
+      "title": "Risk Appetite",
+      "subtitle": "Definisci le soglie di rischio accettabile per plant e framework: score massimo accettabile, limiti sui rischi rossi e score non accettabile.",
+      "note": "Per ogni combinazione Plant/Framework è usata la policy attiva più recente (per data di inizio); queste soglie vengono applicate in M06 per confrontare Inerente, Residuo e Weighted.",
+      "table_title": "Policy di Risk Appetite",
+      "empty": "Nessuna policy configurata. Definisci almeno una soglia org-wide o per plant.",
+      "new": "+ Nuova policy",
+      "edit_title": "Modifica policy Risk Appetite",
+      "new_title": "Nuova policy Risk Appetite",
+      "delete_title": "Elimina policy",
+      "delete_body": "Sei sicuro di voler eliminare questa policy di Risk Appetite? Le valutazioni M06 useranno eventuali altre policy attive.",
+      "org_wide": "Org-wide (tutti i plant)",
+      "framework_all": "Tutti i framework",
+      "columns": {
+        "plant": "Plant",
+        "framework": "Framework",
+        "max_acceptable": "Score max accettabile",
+        "max_red": "Max rischi rossi",
+        "max_unacceptable": "Score non accettabile",
+        "valid_from": "Valido da",
+        "valid_until": "Valido fino",
+        "status": "Stato",
+        "actions": "Azioni"
+      }
+    },
+    "appetite_notes_placeholder": "Note approvazione, riferimenti a delibere management, ecc."
+  },
+  "sidebar": {
+    "groups": {
+      "main": "Principale",
+      "compliance": "Compliance",
+      "risk_continuity": "Rischio e continuità",
+      "operations": "Operazioni",
+      "planning": "Pianificazione",
+      "organisation": "Organizzazione e revisione",
+      "settings": "Impostazioni"
+    },
+    "items": {
+      "dashboard": "Dashboard",
+      "reporting": "Reporting",
+      "tasks": "Task",
+      "controls": "Controlli",
+      "gap_analysis": "Gap Analysis",
+      "documents": "Documenti",
+      "audit_prep": "Audit Prep",
+      "risk": "Risk",
+      "assets": "Asset IT/OT",
+      "bia": "BIA",
+      "bcp": "BCP",
+      "incidents": "Incidenti",
+      "lessons": "Lessons",
+      "suppliers": "Fornitori",
+      "training": "Formazione",
+      "pdca": "PDCA",
+      "activity_schedule": "Activity Schedule",
+      "required_documents": "Documenti Obbl.",
+      "schedule_policy": "Policy Scadenze",
+      "governance": "Governance",
+      "management_review": "Revisione Dir.",
+      "plants": "Siti",
+      "users": "Utenti",
+      "competency": "Competenze",
+      "audit_trail": "Audit Trail",
+      "email_settings": "Config. Email",
+      "notification_rules": "Regole Notifiche",
+      "ai_engine": "AI Engine",
+      "mfa": "Autenticazione MFA",
+      "backups": "Backup & Restore"
+    }
+  },
+  "topbar": {
+    "language": {
+      "label": "Lingua"
+    },
+    "logout": "Esci",
+    "plant": {
+      "none_selected": "Nessun sito selezionato",
+      "all": "Tutti i siti",
+      "none_configured": "Nessun sito configurato"
+    },
+    "notifications": {
+      "title": "Notifiche",
+      "empty": "Nessuna sottoscrizione configurata",
+      "enabled": "attivo",
+      "disabled": "disabilitato"
+    }
+  },
+  "app": {
+    "name": "GRC Platform"
+  },
+  "auth": {
+    "login": {
+      "subtitle": "Accedi al tuo account",
+      "email_label": "Email / Username",
+      "email_placeholder": "admin@esempio.it",
+      "password_label": "Password",
+      "submit": "Accedi",
+      "signing_in": "Accesso in corso...",
+      "invalid_credentials": "Credenziali non valide. Riprovare."
+    },
+    "mfa": {
+      "title": "Autenticazione a due fattori (MFA)",
+      "description": "Proteggi il tuo account con un secondo fattore di autenticazione tramite app TOTP (Google Authenticator, Authy, ecc.).",
+      "prompt": "Inserisci il codice a 6 cifre dalla tua app autenticatore.",
+      "code_label": "Codice OTP",
+      "verify": "Verifica",
+      "verifying": "Verifica in corso...",
+      "back": "← Torna al login",
+      "invalid_code": "Codice OTP non valido o scaduto.",
+      "trust_device": "Ricorda questo dispositivo per 30 giorni",
+      "status_active": "MFA attivo",
+      "status_inactive": "MFA non attivo",
+      "enable": "Attiva",
+      "disable": "Disabilita",
+      "setup_instructions": "Scansiona il QR code con la tua app autenticatore (Google Authenticator, Authy, ecc.), poi clicca su Fatto.",
+      "scanned": "Ho scansionato il QR code →",
+      "enter_first_code": "Inserisci il codice generato dall'app per confermare la configurazione.",
+      "enter_code_to_disable": "Inserisci il codice OTP corrente per confermare la disattivazione.",
+      "activate": "Attiva MFA",
+      "setup_success": "MFA attivato con successo.",
+      "disable_success": "MFA disabilitato."
+    }
+  },
+  "backups": {
+    "title": "Backup & Restore",
+    "subtitle": "Gestisci i backup del database. Il backup automatico viene eseguito ogni giorno alle 02:00.",
+    "create": "Crea backup",
+    "creating": "Creazione in corso...",
+    "empty": "Nessun backup disponibile. Crea il primo backup manuale.",
+    "retention_info": "I backup vengono conservati per 30 giorni. Il backup automatico viene eseguito ogni notte alle 02:00.",
+    "col": {
+      "date": "Data",
+      "filename": "File",
+      "size": "Dimensione",
+      "type": "Tipo",
+      "status": "Stato",
+      "created_by": "Creato da",
+      "actions": "Azioni",
+      "completed": "Completato il"
+    },
+    "status": {
+      "pending": "In attesa",
+      "running": "In corso",
+      "completed": "Completato",
+      "failed": "Fallito",
+      "restored": "Ripristinato"
+    },
+    "type": {
+      "auto": "Automatico",
+      "manual": "Manuale"
+    },
+    "action": {
+      "download": "Scarica",
+      "restore": "Ripristina",
+      "delete": "Elimina"
+    },
+    "confirm_restore": {
+      "title": "Conferma ripristino",
+      "message": "Stai per ripristinare il database dal backup \"{{filename}}\". Tutti i dati attuali verranno sovrascritti. Questa operazione non è reversibile. Continuare?"
+    },
+    "confirm_delete": {
+      "title": "Elimina backup",
+      "message": "Eliminare definitivamente il backup \"{{filename}}\"? Il file verrà rimosso dal server."
+    },
+    "feedback": {
+      "created": "Backup avviato con successo.",
+      "create_error": "Errore durante la creazione del backup.",
+      "restored": "Database ripristinato con successo.",
+      "restore_error": "Errore durante il ripristino del database.",
+      "deleted": "Backup eliminato.",
+      "delete_error": "Errore durante l'eliminazione del backup."
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "see_all": "Vedi tutte",
+    "trend": {
+      "title": "Trend ISMS settimanale — {{framework}}",
+      "empty": "Nessun dato — i snapshot vengono generati ogni lunedì dal task Celery"
+    },
+    "deadlines": {
+      "title": "Prossime scadenze (3 mesi)"
+    },
+    "governance": {
+      "vacant_roles": "{{count}} ruoli obbligatori vacanti",
+      "expiring_roles": "{{count}} ruoli in scadenza entro 30gg",
+      "go_to": "Vai a Governance"
+    },
+    "assets": {
+      "needs_revaluation": "{{count}} asset da rivalutare",
+      "needs_revaluation_sub": "Change registrati non ancora rivalutati",
+      "see_list": "Vedi lista"
+    },
+    "kpi": {
+      "active_sites": "Siti attivi",
+      "compliant_controls": "Controlli compliant",
+      "gap_controls": "Controlli in gap",
+      "gap_controls_sub": "richiedono azione",
+      "open_incidents": "Incidenti aperti"
+    },
+    "latest_gaps": {
+      "title": "Ultimi controlli in gap",
+      "empty": "Nessun gap rilevato"
+    },
+    "sites": {
+      "title": "Siti",
+      "empty": "Nessun sito configurato"
+    },
+    "chart_risks_high": "Rischi alti",
+    "chart_incidents_open": "Incidenti aperti"
+  },
+  "tasks": {
+    "title": "Task",
+    "empty": "Nessun task trovato",
+    "filters": {
+      "all": "Tutti",
+      "open": "Aperti",
+      "in_progress": "In corso",
+      "completed": "Completati",
+      "overdue": "Scaduti"
+    },
+    "new": {
+      "title": "Nuovo task",
+      "submit": "Crea task"
+    },
+    "fields": {
+      "title": "Titolo",
+      "priority": "Priorità",
+      "due_date": "Scadenza",
+      "plant": "Sito"
+    },
+    "priority": {
+      "bassa": "bassa",
+      "media": "media",
+      "alta": "alta",
+      "critica": "critica"
+    },
+    "table": {
+      "title": "Titolo",
+      "priority": "Priorità",
+      "status": "Stato",
+      "due_date": "Scadenza",
+      "source": "Fonte",
+      "escalation": "Escalation"
+    },
+    "actions": {
+      "complete": "Completa"
+    }
+  },
+  "documents": {
+    "title": "Documenti & Evidenze",
+    "tabs": {
+      "documents": "Documenti",
+      "evidences": "Evidenze"
+    },
+    "empty": "Nessun documento trovato",
+    "file_help": "Max 50MB. Formati: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg.",
+    "filters": {
+      "all": "Tutti",
+      "draft": "Bozza",
+      "in_review": "In revisione",
+      "in_approval": "In approvazione",
+      "approved": "Approvati"
+    },
+    "filter": {
+      "only_selected_plant": "Solo sito selezionato"
+    },
+    "fields": {
+      "title": "Titolo",
+      "category": "Categoria",
+      "document_type": "Tipo documento",
+      "review_due_date": "Scadenza revisione",
+      "mandatory": "Documento obbligatorio",
+      "file": "File",
+      "plant": "Sito",
+      "description": "Descrizione"
+    },
+    "new": {
+      "title": "Nuovo documento",
+      "submit": "Crea documento"
+    },
+    "upload": {
+      "title": "Nuova versione documento",
+      "submit": "Carica versione",
+      "change_notes": "Note cambio (opzionale)"
+    },
+    "change_plant": {
+      "title": "Cambia sito documento",
+      "none": "— Nessun sito —"
+    },
+    "category": {
+      "politica": "Politica",
+      "procedura": "Procedura",
+      "istruzione": "Istruzione operativa",
+      "registro": "Registro",
+      "verbale": "Verbale",
+      "contratto": "Contratto"
+    },
+    "type": {
+      "policy": "Policy",
+      "procedura": "Procedura",
+      "manuale": "Manuale ISMS",
+      "contratto": "Contratto/NDA",
+      "registro": "Registro",
+      "altro": "Altro"
+    },
+    "mandatory": {
+      "yes": "Obbligatorio",
+      "no": "Facoltativo"
+    },
+    "table": {
+      "title": "Titolo",
+      "file": "File",
+      "plant": "Sito",
+      "type": "Tipo",
+      "status": "Stato",
+      "mandatory": "Obbligatorio",
+      "review_due_date": "Scadenza revisione",
+      "approved_at": "Approvato il"
+    },
+    "actions": {
+      "download": "Scarica",
+      "submit_for_review": "Invia per revisione",
+      "new_version": "Nuova versione",
+      "link_controls": "Collega controlli",
+      "change_type": "Cambia tipo",
+      "change_plant": "Cambia sito",
+      "delete_title": "Elimina documento",
+      "delete_confirm": "Eliminare il documento «{{title}}»? Non consentito per documenti in approvazione o approvati (salvo superuser)."
+    },
+    "errors": {
+      "download_failed": "Impossibile scaricare il documento. Verifica i permessi o riprova più tardi.",
+      "evidence_download_failed": "Impossibile scaricare il file evidenza. Verifica i permessi o riprova più tardi.",
+      "no_file_selected": "Nessun file selezionato",
+      "upload_failed": "Errore durante il caricamento del file",
+      "update_plant_failed": "Errore durante l'aggiornamento del sito"
+    },
+    "controls_link": {
+      "all_statuses": "Tutti gli stati",
+      "selected_count": "{{count}} controlli selezionati",
+      "none_selected": "Nessuna selezione",
+      "linking": "Collegamento...",
+      "submit": "Collega selezionati",
+      "title": "Collega controlli",
+      "result_linked": "Collegato a {{count}} controlli"
+    },
+    "evidence": {
+      "empty": "Nessuna evidenza trovata",
+      "link_controls": {
+        "title": "Collega evidenza a controlli",
+        "result_linked": "Collegata a {{count}} controlli"
+      },
+      "new": {
+        "title": "Nuova evidenza",
+        "submit": "Crea evidenza"
+      },
+      "fields": {
+        "type": "Tipo evidenza",
+        "valid_until": "Valida fino al"
+      },
+      "types": {
+        "screenshot": "Screenshot",
+        "log": "Log di sistema",
+        "report": "Report",
+        "verbale": "Verbale",
+        "certificato": "Certificato",
+        "test_result": "Risultato test",
+        "altro": "Altro"
+      },
+      "filters": {
+        "all": "Tutte",
+        "valid": "Valide",
+        "expiring": "In scadenza",
+        "expired": "Scadute",
+        "all_types": "Tutti i tipi"
+      },
+      "table": {
+        "type": "Tipo",
+        "title": "Titolo",
+        "expiry": "Scadenza",
+        "plant": "Sito",
+        "linked_controls": "Controlli collegati",
+        "uploaded_by": "Caricata da"
+      },
+      "actions": {
+        "download_file": "Scarica file",
+        "link_controls": "Collega a controllo",
+        "delete_title": "Elimina evidenza",
+        "delete_confirm": "Eliminare l'evidenza «{{title}}»? Non consentita se collegata a controlli già valutati (salvo superuser)."
+      },
+      "expiry": {
+        "expired": "Scaduta",
+        "expiring": "In scadenza",
+        "valid": "Valida",
+        "days_ago": "{{days}}g fa",
+        "in_days": "in {{days}}g"
+      },
+      "toggle_grouped": "Raggruppa per controllo",
+      "toggle_flat": "Vista elenco",
+      "group_unassigned": "Non assegnate a nessun controllo",
+      "group_count": "{{count}} evidenze"
+    }
+  },
+  "schedule": {
+    "activity": {
+      "title": "Activity Schedule",
+      "help": {
+        "title": "Activity Schedule",
+        "description": "Vista calendario aggregata di tutte le scadenze GRC:\n\tdocumenti, evidenze, assessment, test BCP, finding, formazione.\n\tLe scadenze sono calcolate dalla Policy configurata.",
+        "steps": {
+          "1": "Seleziona il plant e il periodo (1-12 mesi)",
+          "2": "Filtra per tipo (documenti, rischi, finding, ecc.) o stato",
+          "3": "Clicca su ogni attività per andare direttamente al modulo",
+          "4": "Configura le scadenze in 'Policy Scadenze' (solo CISO/Admin)"
+        },
+        "connections": {
+          "policy": {
+            "module": "Policy Scadenze",
+            "relation": "Le regole configurate determinano tutte le scadenze"
+          },
+          "required_docs": {
+            "module": "Documenti Obbligatori",
+            "relation": "Mostra stato documenti per framework"
+          }
+        },
+        "config_needed": {
+          "1": "Configurare Policy Scadenze con 'Crea policy default'",
+          "2": "Caricare i documenti obbligatori con load_required_documents"
+        }
+      },
+      "days": {
+        "today": "Oggi",
+        "overdue": "Scaduto",
+        "in_days": "{{days}}gg"
+      }
+    },
+    "filters": {
+      "plant": "Sito",
+      "all_plants": "Tutti i siti",
+      "horizon": "Orizzonte",
+      "months": {
+        "3": "3 mesi",
+        "6": "6 mesi",
+        "12": "12 mesi"
+      },
+      "urgency": "Urgenza",
+      "urgency_values": {
+        "all": "Tutte",
+        "red": "Critiche",
+        "yellow": "Attenzione",
+        "green": "Ok"
+      }
+    },
+    "kpi": {
+      "critical": "Critiche (<7gg)",
+      "warning": "Attenzione",
+      "on_track": "Nei tempi"
+    },
+    "empty": {
+      "no_deadlines": "Nessuna scadenza nei prossimi {{months}} mesi",
+      "no_deadlines_for_filter": "Nessuna scadenza per il filtro selezionato"
+    },
+    "table": {
+      "activity": "Attività",
+      "category": "Categoria",
+      "due_date": "Scadenza",
+      "days": "Giorni",
+      "status": "Stato"
+    },
+    "units": {
+      "days": "giorni",
+      "weeks": "settimane",
+      "months": "mesi",
+      "years": "anni"
+    },
+    "categories": {
+      "Controlli": "Controlli",
+      "Documenti": "Documenti",
+      "Rischi": "Rischi",
+      "BCP": "BCP",
+      "Incidenti": "Incidenti",
+      "Fornitori": "Fornitori",
+      "Formazione": "Formazione",
+      "Governance": "Governance",
+      "Audit": "Audit",
+      "PDCA": "PDCA",
+      "Reporting": "Reporting"
+    },
+    "policy": {
+      "title": "Policy Scadenze",
+      "new_policy": "+ Nuova policy",
+      "create_title": "Crea policy con regole predefinite",
+      "site_optional": "Sito (opzionale)",
+      "global": "Globale (tutti i siti)",
+      "all": "Tutti",
+      "policy_name": "Nome policy",
+      "create_btn": "Crea",
+      "create_error": "Errore nella creazione. Riprova.",
+      "site_label": "Sito",
+      "policy_label": "Policy",
+      "active_suffix": "(attiva)",
+      "no_policy": "Nessuna policy configurata. Crea una nuova policy con le regole predefinite.",
+      "days_before": "giorni prima",
+      "col_rule": "Regola",
+      "col_frequency": "Frequenza",
+      "col_alert": "Alert",
+      "col_active": "Attiva"
+    },
+    "required_docs": {
+      "title": "Documenti Obbligatori",
+      "all_sites": "Tutti i siti",
+      "no_framework": "Nessun framework assegnato a questo plant. Vai in M01 Plant per attivare un framework.",
+      "status_all": "Tutti",
+      "status_red": "Mancanti",
+      "status_yellow": "Incompleti",
+      "status_green": "Ok",
+      "approved_label": "Approvati",
+      "total_suffix": "su {{total}} totali",
+      "incomplete_label": "Incompleti",
+      "missing_label": "Mancanti",
+      "traffic_present_approved": "Presente e approvato",
+      "traffic_draft": "Presente (bozza/revisione)",
+      "traffic_missing": "Mancante",
+      "mandatory_badge": "Obbl.",
+      "no_doc": "— nessun documento collegato",
+      "review_date": "Revisione: {{date}}",
+      "no_results_framework": "Nessun documento richiesto per questo framework",
+      "no_results_filter": "Nessun risultato per il filtro selezionato",
+      "col_doc": "Documento",
+      "col_type": "Tipo",
+      "col_clause": "Clausola",
+      "col_present": "Documento presente",
+      "col_status": "Stato"
+    }
+  },
+  "training": {
+    "title": "Operazioni — Formazione",
+    "empty": "Nessun corso registrato",
+    "sources": {
+      "interno": "interno",
+      "kb4": "kb4",
+      "esterno": "esterno"
+    },
+    "new": {
+      "open": "+ Nuovo corso",
+      "title": "Nuovo corso",
+      "submit": "Crea corso"
+    },
+    "fields": {
+      "title": "Titolo",
+      "description": "Descrizione",
+      "source": "Fonte",
+      "duration_minutes": "Durata (minuti)",
+      "deadline": "Scadenza",
+      "mandatory": "Obbligatorio"
+    },
+    "table": {
+      "title": "Titolo corso",
+      "source": "Fonte",
+      "mandatory": "Obbligatorio",
+      "duration": "Durata (min)",
+      "deadline": "Scadenza",
+      "status": "Stato"
+    }
+  },
+  "incidents": {
+    "title": "Operazioni — Incidenti",
+    "empty": "Nessun incidente registrato",
+    "table": {
+      "title": "Titolo",
+      "severity": "Gravità",
+      "nis2": "NIS2",
+      "status": "Stato",
+      "detected_at": "Rilevato il"
+    },
+    "fields": {
+      "plant": "Sito",
+      "title": "Titolo",
+      "description": "Descrizione",
+      "severity": "Gravità",
+      "nis2_notifiable": "Notifica NIS2",
+      "detected_at": "Rilevato il"
+    },
+    "views": {
+      "list": "Elenco incidenti",
+      "nis2_config": "Configurazione NIS2"
+    },
+    "nis2_config_select_plant": "Seleziona un sito dal menu in alto per modificare i parametri di calcolo della significatività.",
+    "nis2_config_plant_note": "Settore NIS2, sottosettore, ragione sociale, P.IVA e descrizione attività si configurano in M01 Siti. Il referente per le notifiche è l’incarico «Contatto NIS2» assegnato al sito in M00 Governance (non va duplicato qui).",
+    "nis2_config_save": "Salva parametri calcolo",
+    "nis2_config_labels": {
+      "threshold_users": "Soglia utenti/sistemi (n.)",
+      "threshold_hours": "Soglia ore interruzione servizio",
+      "threshold_financial": "Soglia impatto finanziario (€)"
+    },
+    "new": {
+      "open": "+ Nuovo incidente",
+      "title": "Nuovo incidente",
+      "submit": "Crea incidente"
+    },
+    "help": {
+      "title": "Gestione Incidenti — M09",
+      "description": "Traccia incidenti di sicurezza con timer NIS2 integrato.\nLa chiusura richiede RCA approvato. Alla chiusura vengono creati automaticamente PDCA e Lesson Learned.",
+      "steps": {
+        "1": "Apri incidente con severità e flag NIS2 (sì/no/da valutare)",
+        "2": "Timer 24h parte automaticamente per notifica preliminare NIS2",
+        "3": "Cambia stato in \"in_analisi\" e assegna team",
+        "4": "Compila RCA (Root Cause Analysis) e fallo approvare",
+        "5": "Chiudi incidente: PDCA post-incidente e Lesson Learned creati automaticamente"
+      },
+      "connections": {
+        "pdca": {
+          "module": "M11 PDCA",
+          "relation": "PDCA post-incidente auto-creato alla chiusura"
+        },
+        "lessons": {
+          "module": "M12 Lessons",
+          "relation": "Lesson learned auto-creata con RCA summary"
+        },
+        "tasks": {
+          "module": "M08 Task",
+          "relation": "Task RCA auto-creato all'apertura"
+        }
+      },
+      "config_needed": {
+        "1": "Configurare soglie calcolo in Incidenti → Configurazione NIS2; anagrafica sito e Contatto NIS2 in M01 / M00"
+      }
+    },
+    "nis2_classification": {
+      "classify_success": "Decisione di classificazione registrata con successo.",
+      "classify_error": "Errore durante la classificazione. Verificare i dati e riprovare.",
+      "scope_label": "Perimetro NIS2 del sito",
+      "scope": {
+        "essenziale": "Entità essenziale",
+        "importante": "Entità importante",
+        "non_soggetto": "Non soggetto NIS2"
+      },
+      "site_non_subject": "Il sito non è soggetto agli obblighi NIS2.",
+      "run_auto": "Esegui valutazione automatica",
+      "preview_live": "Anteprima in tempo reale (non salvata)",
+      "table": {
+        "axis": "Asse",
+        "value": "Valore inserito",
+        "threshold": "Soglia",
+        "score": "Punteggio"
+      },
+      "axis": {
+        "operativo": "Operativo",
+        "economico": "Economico",
+        "persone": "Persone / sistemi",
+        "riservatezza": "Riservatezza",
+        "reputazionale": "Reputazionale"
+      },
+      "dominant": "Asse dominante",
+      "recurrence": {
+        "label": "Ricorrenza",
+        "yes_bonus": "Sì (+{{n}})",
+        "no_bonus": "No (+0)",
+        "auto": "auto",
+        "manual": "manuale",
+        "section_title": "Ricorrenza",
+        "auto_yes": "Il sistema ha rilevato un incidente simile chiuso il",
+        "auto_no": "Nessun precedente chiuso negli ultimi giorni configurati (auto).",
+        "manual_toggle": "Evento ricorrente (manuale)"
+      },
+      "fattispecie_title": "Fattispecie ACN",
+      "decision": {
+        "significant_title": "Incidente significativo",
+        "significant_sub": "Obbligo di notifica NIS2 al CSIRT",
+        "not_significant_title": "Non significativo",
+        "not_significant_sub": "Nessun obbligo di notifica NIS2",
+        "voluntary_note": "Puoi comunque notificare volontariamente."
+      },
+      "timeline_cta": "Avvia timeline NIS2",
+      "override_toggle": "Override classificazione",
+      "override_significant": "Significativo",
+      "override_not_significant": "Non significativo",
+      "override_reason_ph": "Motivazione (obbligatoria)",
+      "override_apply": "Applica override",
+      "override_note": "L'override sovrascrive il calcolo automatico ed è registrato nell'audit trail.",
+      "method_tab": {
+        "export_button": "Esporta metodo (HTML)",
+        "page_title": "Metodo di classificazione NIS2",
+        "decision_model_label": "Modello decisionale",
+        "rule_fallback": "PTA=max(5 assi); PTNR=PTA+bonus ricorrenza. Significativo se PTNR≥soglia o fattispecie ACN attiva (scope sito). Moltiplicatori M/H sulle soglie base. Override manuale ha precedenza.",
+        "criteria_disclaimer": "L’elenco criteri sotto descrive gli input; la decisione non è la somma logica OR di queste righe ma il motore PTA/PTNR e le fattispecie ACN.",
+        "config_title": "Parametri dalla configurazione NIS2 del sito",
+        "config_users": "Soglia utenti/sistemi (n.)",
+        "config_hours": "Soglia ore interruzione servizio",
+        "config_financial": "Soglia impatto finanziario (€)",
+        "config_mult_m": "Moltiplicatore medio (×M)",
+        "config_mult_h": "Moltiplicatore alto (×H)",
+        "config_ptnr": "Soglia PTNR per significatività",
+        "config_rec_window": "Finestra ricorrenza (giorni)",
+        "config_rec_bonus": "Bonus PTNR per ricorrenza",
+        "engine_title": "Esito classificazione (motore attuale)",
+        "engine_loading": "Calcolo in corso…",
+        "engine_unavailable": "Apri il tab Classificazione NIS2 o riprova per vedere l’esito calcolato.",
+        "scores_snapshot_title": "Valori persistiti sull’incidente (PTA/PTNR/obblighi)",
+        "scores_snapshot_note": "Per il calcolo aggiornato usa il tab Classificazione NIS2; dopo la valutazione automatica questi campi si allineano.",
+        "raw_inputs_title": "Input incidente e confronto con soglie base",
+        "raw_inputs_note": "Per gli assi numerici la colonna «≥ soglia base» indica solo se il valore raggiunge la soglia configurata; il punteggio 1–5 usa bande con moltiplicatori (vedi sotto). I flag alimentano gli assi riservatezza/reputazionale.",
+        "col_reaches_base": "≥ soglia base",
+        "col_criterion": "Criterio",
+        "col_value": "Valore corrente",
+        "col_threshold": "Soglia",
+        "col_source": "Fonte",
+        "source_threshold": "input utente + soglia sito",
+        "source_flag": "flag booleano",
+        "boolean_na": "—",
+        "override_active": "Override manuale attivo: prevale l’esito manuale con motivazione.",
+        "criteria_list_title": "Criteri e soglie (riferimento input)",
+        "criteria_list_note": "La decisione di significatività non è «valore ≥ soglia» su una singola riga: ore, euro e utenti diventano punteggi per asse; poi PTA, PTNR e fattispecie ACN.",
+        "export_doc_title": "Metodo classificazione NIS2",
+        "export_h1": "Metodo di classificazione NIS2",
+        "export_incident": "Incidente",
+        "export_date": "Data export",
+        "export_rule_label": "Regola",
+        "export_model_label": "Modello decisionale",
+        "export_engine_label": "Esito motore (PTNR + fattispecie)",
+        "export_significant": "SIGNIFICATIVO",
+        "export_not_significant": "NON significativo",
+        "export_no_breakdown": "— (eseguire / aprire classificazione per il calcolo)",
+        "export_rationale": "Motivazione",
+        "export_config_h2": "Parametri configurazione NIS2 (sito)",
+        "export_inputs_note": "La tabella seguente mostra solo input e confronto con soglie base; l’esito in badge è quello del motore PTA/PTNR e fattispecie.",
+        "export_inputs_h2": "Input e soglie base",
+        "export_taxonomy_h2": "Tassonomia ENISA",
+        "export_col_criterion": "Criterio",
+        "export_col_value": "Valore corrente",
+        "export_col_threshold": "Soglia",
+        "export_col_source": "Fonte",
+        "export_col_code": "Codice",
+        "export_col_category": "Categoria",
+        "export_col_desc": "Descrizione",
+        "export_col_subs": "Sottocategorie"
+      },
+      "config": {
+        "calc_title": "Parametri calcolo significatività",
+        "base_title": "Soglie base",
+        "multiplier_title": "Moltiplicatori scala",
+        "multiplier_m": "Moltiplicatore medio (×M per punteggio 4)",
+        "multiplier_h": "Moltiplicatore alto (×H per punteggio 5)",
+        "multiplier_note": "Punteggio 3 = tra soglia e soglia×M. Punteggio 4 = tra soglia×M e soglia×H. Punteggio 5 = oltre soglia×H.",
+        "rule_title": "Regola decisione",
+        "ptnr_threshold": "Soglia PTNR per significatività",
+        "ptnr_note": "Significativo se PTNR ≥ soglia oppure almeno una fattispecie ACN attiva.",
+        "recurrence_title": "Ricorrenza",
+        "recurrence_window": "Finestra ricorrenza (giorni)",
+        "recurrence_bonus": "Bonus PTNR per ricorrenza",
+        "recurrence_note": "Il sistema verifica automaticamente se esiste un incidente chiuso della stessa categoria negli ultimi N giorni sullo stesso sito.",
+        "activity_desc": "Descrizione attività NIS2 (documenti formali)"
+      }
+    }
+  },
+  "competency": {
+    "title": "Competenze",
+    "subtitle": "ISO 27001 § 7.2 — Requisiti di competenza per ruolo e tracciamento competenze individuali.",
+    "tabs": {
+      "requirements": "Requisiti per ruolo",
+      "users": "Competenze utenti"
+    },
+    "levels": {
+      "1": "1 — Awareness",
+      "2": "2 — Practitioner",
+      "3": "3 — Expert"
+    },
+    "evidence_types": {
+      "certification": "Certificazione",
+      "training": "Training",
+      "experience": "Esperienza",
+      "assessment": "Assessment"
+    },
+    "all_roles": "Tutti i ruoli",
+    "add_requirement": "+ Nuovo requisito",
+    "requirements_count": "{{count}} requisiti",
+    "no_requirements": "Nessun requisito trovato.",
+    "req_modal_edit": "Modifica requisito",
+    "req_modal_new": "Nuovo requisito",
+    "role_label": "Ruolo",
+    "level_required": "Livello richiesto",
+    "competency_label": "Competenza",
+    "competency_placeholder": "es. ISO 27001 Lead Implementer",
+    "evidence_type_label": "Tipo evidenza",
+    "mandatory_label": "Obbligatorio",
+    "notes_label": "Note",
+    "save_error": "Errore durante il salvataggio.",
+    "col_competency": "Competenza",
+    "col_level": "Livello",
+    "col_evidence": "Evidenza",
+    "col_mandatory": "Obbl.",
+    "delete_requirement": "Eliminare questo requisito?",
+    "all_users": "Tutti gli utenti",
+    "add_competency": "+ Aggiungi competenza",
+    "comp_modal_edit": "Modifica competenza",
+    "comp_modal_new": "Aggiungi competenza utente",
+    "user_label": "Utente",
+    "level_label": "Livello",
+    "cert_body_label": "Ente certificatore",
+    "cert_body_placeholder": "es. BSI, Bureau Veritas",
+    "obtained_at_label": "Data conseguimento",
+    "valid_until_label": "Scadenza",
+    "delete_competency": "Eliminare questa competenza?",
+    "no_competencies": "Nessuna competenza registrata.",
+    "col_user": "Utente",
+    "col_obtained": "Conseguita",
+    "col_validity": "Validità",
+    "col_verified_by": "Verificata da",
+    "validity_expired": "Scaduta",
+    "validity_expiring": "Scade in {{days}}gg",
+    "validity_valid": "Valida"
+  },
+  "notification_settings": {
+    "title": "Profili di Notifica Email",
+    "subtitle": "Scegli quanti avvisi riceve ogni ruolo. Le notifiche vengono inviate agli utenti con quel ruolo e accesso al sito dell'evento.",
+    "reset_defaults": "Reimposta tutti i default",
+    "scope_note": "Le notifiche rispettano lo scope RBAC (M02), non l'ambito del ruolo normativo (M00 Governance).",
+    "no_email_config": "Server email non configurato — le notifiche non verranno inviate.",
+    "configure_email": "Configura email →",
+    "what_profile_includes": "Cosa include ogni profilo?",
+    "profiles": {
+      "silenzioso": "Silenzioso",
+      "essenziale": "Essenziale",
+      "standard": "Standard",
+      "completo": "Completo",
+      "custom": "Personalizzato"
+    },
+    "event_groups": {
+      "risks_security": "Rischi e Sicurezza",
+      "operations": "Operatività",
+      "governance": "Governance",
+      "suppliers_risk": "Fornitori e Rischio"
+    },
+    "col_role": "Ruolo GRC",
+    "col_profile": "Profilo",
+    "col_status": "Stato",
+    "events_count": "{{count}} eventi",
+    "customize": "Personalizza",
+    "customize_title": "Personalizza notifiche — {{role}}",
+    "customize_subtitle": "Seleziona esattamente quali eventi vuoi ricevere per questo ruolo.",
+    "reset_to_standard": "Ripristina profilo Standard",
+    "save_custom": "Salva personalizzazione",
+    "save_error": "Errore nel salvataggio.",
+    "confirm_reset_title": "Sei sicuro?",
+    "confirm_reset_body": "Tutti i profili personalizzati verranno persi e reimpostati ai valori default.",
+    "reset_confirm": "Reimposta",
+    "event_col": "Evento",
+    "loading": "Caricamento..."
+  },
+  "email_settings": {
+    "title": "Configurazione Email",
+    "no_permission": "Non hai i permessi per accedere a questa pagina.",
+    "status_not_tested": "Non testato",
+    "status_ok": "Connessione verificata",
+    "status_failed": "Ultimo test fallito",
+    "provider_label": "Provider",
+    "config_name_label": "Nome configurazione",
+    "smtp_host_label": "Host SMTP",
+    "port_label": "Porta",
+    "use_tls": "Usa TLS",
+    "use_ssl": "Usa SSL",
+    "use_auth": "Autenticazione SMTP",
+    "anonymous_relay": "Relay anonimo — nessun comando AUTH inviato al server",
+    "smtp_username": "Username SMTP",
+    "password_label": "Password",
+    "password_placeholder": "Lascia vuoto per non modificare",
+    "from_email_label": "Indirizzo mittente",
+    "from_email_hint": "Questo apparirà come mittente nelle email (es. GRC Platform <noreply@azienda.com>).",
+    "password_security_note": "La password SMTP è cifrata con AES-256 nel database. Non viene mai mostrata dopo il salvataggio.",
+    "test_recipient_label": "Destinatario email di test",
+    "test_recipient_placeholder": "tuo@email.com",
+    "send_test": "Invia email di test",
+    "testing": "Test in corso...",
+    "save_config": "Salva configurazione",
+    "saving": "Salvataggio...",
+    "save_success": "Configurazione email salvata correttamente.",
+    "save_error": "Errore nel salvataggio configurazione.",
+    "test_success": "Email di test inviata correttamente.",
+    "test_failed": "Test configurazione fallito.",
+    "test_error": "Errore durante il test configurazione.",
+    "no_config_error": "Nessuna configurazione attiva da testare.",
+    "no_recipient_error": "Inserisci un indirizzo email destinatario per il test.",
+    "show_password": "Mostra",
+    "hide_password": "Nascondi",
+    "provider_office365": "Microsoft Office 365",
+    "provider_gmail": "Google Gmail / Workspace"
+  },
+  "bia": {
+    "rto_ok": "RTO OK",
+    "rto_warning": "RTO ⚠",
+    "rto_critical": "RTO ✗",
+    "new_process_title": "Nuovo processo critico",
+    "site_label": "Sito *",
+    "process_name_label": "Nome processo *",
+    "criticality_label": "Criticità (1-5)",
+    "downtime_cost_label": "Costo downtime/h (€)",
+    "bcp_bia_section": "Target BCP/BIA (ISO 22301)",
+    "mtpd_label": "MTPD (ore)",
+    "mbco_label": "MBCO (%)",
+    "rto_label": "RTO target (ore)",
+    "rpo_label": "RPO target (ore)",
+    "save_error": "Errore durante il salvataggio",
+    "save_changes": "Salva modifiche",
+    "create_process": "Crea processo",
+    "filter_all": "Tutti",
+    "filter_validated": "Validato",
+    "mtpd_placeholder": "es. 48",
+    "mbco_placeholder": "es. 70",
+    "rto_placeholder": "es. 24",
+    "rpo_placeholder": "es. 4"
+  },
+  "assets": {
+    "criticality_1_label": "Trascurabile",
+    "criticality_2_label": "Bassa",
+    "criticality_3_label": "Media",
+    "criticality_4_label": "Alta",
+    "criticality_5_label": "Critica",
+    "criticality_1_desc": "Asset non critico. Fermo tollerato oltre 7 giorni. Nessun BCP richiesto.",
+    "criticality_2_desc": "Impatto limitato. Fermo tollerato 3-7 giorni. BCP non necessario.",
+    "criticality_3_desc": "Impatto operativo. Fermo tollerato 24-72 ore. BCP consigliato.",
+    "criticality_4_desc": "Impatto significativo su produzione o clienti. Fermo tollerato 4-24 ore. BCP obbligatorio.",
+    "criticality_5_desc": "Asset core. Fermo tollerato meno di 4 ore. BCP obbligatorio con test semestrale.",
+    "change_days_ago": "Change {{days}}gg fa",
+    "reassessment_required": "Da rivalutare",
+    "last_change_registered": "Ultimo change registrato",
+    "open_ticket": "Apri ticket →",
+    "ref_label": "Ref:",
+    "date_label": "Data:",
+    "description_label": "Descrizione:",
+    "reassessment_since": "Rivalutazione richiesta dal {{date}}",
+    "mark_reassessed": "Segna come rivalutato",
+    "change_registered_title": "Change registrato",
+    "register_change_title": "Registra change",
+    "register_change_btn": "Registra",
+    "registering": "Registrazione...",
+    "register_error": "Errore durante la registrazione",
+    "new_asset_title": "Nuovo asset {{type}}",
+    "bia_processes_label": "Processi BIA collegati",
+    "bia_processes_hint": "Seleziona uno o più processi BIA che dipendono da questo asset (IT o OT).",
+    "criticality_guide_title": "ℹ️ Come scegliere la criticità",
+    "criticality_table_value": "Valore",
+    "criticality_table_label": "Etichetta",
+    "criticality_table_downtime": "Downtime tollerato",
+    "criticality_table_bcp": "BCP",
+    "bcp_not_required": "No",
+    "bcp_recommended": "Consigliato",
+    "bcp_mandatory": "Obbligatorio",
+    "downtime_7d_plus": "> 7 giorni",
+    "downtime_3_7d": "3–7 giorni",
+    "downtime_24_72h": "24–72 ore",
+    "downtime_4_24h": "4–24 ore",
+    "downtime_sub_4h": "< 4 ore",
+    "change_ticket_placeholder": "Riferimento ticket (es. JIRA-1234) *",
+    "change_desc_placeholder": "Descrizione breve del change",
+    "change_url_placeholder": "URL ticket (opzionale)",
+    "deployment_label": "Tipo deployment *",
+    "deploy_on_prem": "On-premise",
+    "deploy_iaas": "IaaS (VM, rete in cloud)",
+    "deploy_paas": "PaaS (DB, storage, funzioni)",
+    "deploy_saas": "SaaS (applicazione cloud)",
+    "provider_label": "Provider",
+    "provider_placeholder": "Microsoft, AWS, SAP…",
+    "service_name_label": "Nome servizio",
+    "service_placeholder": "Microsoft 365, Salesforce, SAP S/4HANA…",
+    "fqdn_label": "FQDN",
+    "fqdn_placeholder": "server.dominio.it",
+    "os_label": "Sistema operativo",
+    "os_placeholder": "Windows Server 2022",
+    "eol_label": "Data EOL (fine supporto)",
+    "data_classification_label": "Classificazione dati",
+    "data_class_public": "Public",
+    "data_class_internal": "Internal",
+    "data_class_confidential": "Confidential",
+    "data_class_restricted": "Restricted",
+    "internet_exposed_label": "Esposto su Internet",
+    "ot_category_label": "Categoria *",
+    "purdue_level_label": "Livello Purdue *",
+    "vendor_label": "Vendor",
+    "sw": {
+      "new_title": "Nuovo software (ASL)",
+      "name_placeholder": "Arxivar, SAP ERP, Microsoft 365…",
+      "version_label": "Versione",
+      "approval_status_label": "Stato approvazione",
+      "status_approvato": "Approvato",
+      "status_in_valutazione": "In valutazione",
+      "status_deprecato": "Deprecato",
+      "status_vietato": "Vietato",
+      "license_type_label": "Tipo licenza",
+      "license_commerciale": "Commerciale",
+      "license_open_source": "Open Source",
+      "eos_label": "Fine supporto (EOS)",
+      "eos_expired": "EOS scaduto",
+      "eos_in_days": "EOS tra {{days}}gg",
+      "external_ref_label": "Rif. ITAM esterno",
+      "external_ref_placeholder": "Lansweeper ID 4521, ServiceNow CI-00123…",
+      "empty": "Nessun software nell'Approved Software List"
+    },
+    "actions": {
+      "delete_title": "Elimina asset",
+      "delete_confirm": "Eliminare l'asset «{{name}}»? Non consentito se esistono rischi attivi o dipendenze tra asset."
+    }
+  },
+  "audit_prep": {
+    "finding_major": "MAJOR NC",
+    "finding_minor": "MINOR NC",
+    "finding_obs": "Osservazione",
+    "finding_opp": "Opportunità",
+    "kpi_major_open": "MAJOR NC aperte",
+    "kpi_minor_open": "Minor NC aperte",
+    "kpi_overdue": "finding scaduti",
+    "add_finding": "+ Aggiungi finding",
+    "type_label": "Tipo *",
+    "audit_date_label": "Data audit *",
+    "title_label": "Titolo *",
+    "description_label": "Descrizione",
+    "auditor_label": "Nome auditor",
+    "create_finding": "Crea finding",
+    "no_findings": "Nessun finding registrato",
+    "close_notes_placeholder": "Note di chiusura (obbligatorie per Major/Minor, min 20 caratteri)",
+    "evidence_desc_placeholder": "Descrizione evidenza *",
+    "evidence_missing": "Mancante",
+    "evidence_present": "Presente",
+    "evidence_expired": "Scaduto",
+    "evidence_expiry_placeholder": "Scadenza",
+    "program_plant_placeholder": "Plant ID",
+    "program_title_placeholder": "Titolo programma *",
+    "program_objectives_placeholder": "Obiettivi",
+    "coverage_sample": "Campione 25%",
+    "coverage_extended": "Esteso 50%",
+    "coverage_full": "Completo 100%",
+    "coverage_sample_long": "Campione (25%) — verifica i controlli prioritari in stato GAP o PARZIALE",
+    "coverage_extended_long": "Esteso (50%) — copertura bilanciata su tutti i domini",
+    "coverage_full_long": "Completo (100%) — tutti i controlli verificati, nessun dominio escluso",
+    "coverage_campione": "Campione 25%",
+    "coverage_esteso": "Esteso 50%",
+    "coverage_campione_long": "Campione (25%) — verifica i controlli prioritari in stato GAP o PARZIALE",
+    "coverage_esteso_long": "Esteso (50%) — copertura bilanciata su tutti i domini",
+    "quarter_1": "Gen–Mar",
+    "quarter_2": "Apr–Giu",
+    "quarter_3": "Lug–Set",
+    "quarter_4": "Ott–Dic",
+    "status_planned": "Pianificato",
+    "status_in_progress": "In corso",
+    "status_completed": "Completato",
+    "status_cancelled": "Annullato",
+    "tab_checklist": "Checklist controlli",
+    "tab_findings": "Finding ({{count}})",
+    "tab_info": "Info audit",
+    "annual_program_tag": "Prog. annuale",
+    "no_evidence": "Nessuna evidenza caricata",
+    "ev_missing_opt": "❌ Mancante",
+    "ev_present_opt": "✅ Presente",
+    "ev_expired_opt": "⚠️ Scaduto",
+    "finding_overdue": "⚠️ Scaduto",
+    "finding_deadline": "Scadenza:",
+    "finding_control": "Controllo:",
+    "major_nc_open_count": "{{count}} Major NC aperti",
+    "save_finding": "Salva finding",
+    "complete_audit_btn": "✅ Completa audit",
+    "cancel_audit_btn": "✕ Annulla audit",
+    "cannot_complete": "Non puoi completare con {{count}} Major NC aperti",
+    "download_report": "📄 Scarica relazione",
+    "cancel_prep_modal_title": "Annulla preparazione audit",
+    "cancel_prep_modal_desc": "Motivo (min 10 caratteri). I finding aperti verranno chiusi.",
+    "cancel_reason_placeholder": "Motivo annullamento...",
+    "confirm_cancel_btn": "Conferma annullamento",
+    "create_program_title": "Crea Programma Audit Annuale",
+    "step_indicator": "Step {{step}}/4",
+    "step1_title": "Configurazione base",
+    "year_label": "Anno *",
+    "site_label": "Sito",
+    "program_title_optional": "Titolo programma (opzionale)",
+    "coverage_type_default_label": "Ampiezza audit (default)",
+    "coverage_hint": "Definisce quanti controlli verificare. Puoi personalizzarla per ogni trimestre allo step 3.",
+    "step2_title": "Framework",
+    "multi_fw_label": "Audit multi-framework",
+    "multi_fw_hint": "Un unico audit copre tutti i framework selezionati nello stesso trimestre",
+    "step3_title": "Piano suggerito dal sistema",
+    "regenerate_plan": "🔄 Rigenera suggerimento",
+    "calculating": "Calcolo...",
+    "generate_plan_hint": "Genera il piano suggerito basato sui gap aperti",
+    "calculating_long": "Calcolo in corso...",
+    "generate_plan_btn": "Genera piano suggerito",
+    "edit_btn": "✏️ Modifica",
+    "close_edit_btn": "Chiudi",
+    "date_col": "Data:",
+    "framework_col": "Framework:",
+    "coverage_col": "Copertura:",
+    "domains_col": "Domini:",
+    "auditor_col": "Auditor:",
+    "auditor_name_placeholder": "Nome auditor",
+    "save_btn": "Salva",
+    "plan_priority_hint": "Il sistema ha prioritizzato i domini con più controlli in stato GAP o PARZIALE.",
+    "step4_title": "Riepilogo e conferma",
+    "year_recap": "Anno:",
+    "title_recap": "Titolo:",
+    "framework_recap": "Framework:",
+    "coverage_default_recap": "Copertura default:",
+    "table_q": "Q",
+    "table_date": "Data",
+    "table_framework": "Framework",
+    "table_coverage": "Copertura",
+    "table_domains": "Domini",
+    "table_auditor": "Auditor",
+    "approve_now_label": "Approva subito il programma",
+    "create_program_error": "Errore durante la creazione del programma",
+    "back_btn": "← Indietro",
+    "next_btn": "Avanti →",
+    "creating": "Creazione...",
+    "create_program_btn": "✅ Crea programma",
+    "launch_audit_btn": "▶ Avvia audit",
+    "go_to_prep_btn": "→ Vai al prep",
+    "launch_audit_title": "Avvia audit Q{{quarter}}",
+    "not_planned": "Non pianificato",
+    "launching": "Avvio...",
+    "launch_btn": "Avvia",
+    "edit_audit_title": "Modifica audit Q{{quarter}}",
+    "planned_date_label": "Data pianificata",
+    "coverage_type_edit_label": "Copertura",
+    "auditor_type_label": "Tipo auditor",
+    "internal_opt": "Interno",
+    "external_opt": "Esterno",
+    "internal_auditor_opt": "Auditor interno",
+    "external_auditor_opt": "Auditor esterno",
+    "notes_label": "Note",
+    "save_changes_btn": "Salva modifiche",
+    "program_tag_short": "Prog.",
+    "open_btn": "Apri",
+    "findings_btn": "Finding",
+    "new_prep_title": "Nuova preparazione audit",
+    "optional_placeholder": "— opzionale —",
+    "select_site_first": "— seleziona prima un sito —",
+    "select_placeholder": "— seleziona —",
+    "no_frameworks_assigned": "Nessun framework assegnato",
+    "tisax_high_protection": "Alta protezione — 45 controlli",
+    "tisax_very_high_protection": "Altissima protezione — 57 controlli (L2+L3)",
+    "save_error": "Errore durante il salvataggio",
+    "saving": "Salvataggio...",
+    "create_prep_btn": "Crea preparazione",
+    "page_title": "Audit Preparation",
+    "new_prep_btn": "+ Nuova preparazione",
+    "tab_program": "📅 Programma Annuale",
+    "tab_in_progress": "🔍 Audit in corso",
+    "loading": "Caricamento...",
+    "no_program_title": "Nessun programma annuale",
+    "no_program_desc": "Il programma annuale definisce gli audit da eseguire nei 4 trimestri. Crea il primo per pianificare l'anno.",
+    "create_annual_program_btn": "Crea programma annuale",
+    "select_site_topbar": "Seleziona un sito nel topbar",
+    "approve_btn": "Approva",
+    "sync_btn": "🔄 Sync",
+    "report_btn": "📄 Relazione",
+    "add_annual_program_btn": "+ Aggiungi programma annuale",
+    "no_preps": "Nessuna preparazione audit",
+    "delete_prep_title": "Elimina preparazione",
+    "delete_prep_desc": "Operazione irreversibile. I finding verranno eliminati.",
+    "delete_program_title": "Elimina programma",
+    "delete_program_desc": "Operazione irreversibile. Il programma annuale verrà eliminato.",
+    "delete_btn": "Elimina",
+    "cancel_btn": "Annulla",
+    "error_generic": "Errore",
+    "help_description": "Gestisce il programma audit annuale e l'esecuzione dei singoli audit. Il programma pianifica cosa auditare in ogni trimestre; i prep sono l'esecuzione concreta.",
+    "help_step1": "Crea il Programma Annuale con il wizard (inizio anno)",
+    "help_step2": "Il sistema suggerisce i domini da auditare in base ai gap",
+    "help_step3": "Prima del trimestre: clicca 'Avvia audit' per aprire il prep",
+    "help_step4": "Durante l'audit: compila le evidenze e aggiungi i finding",
+    "help_step5": "Major NC → PDCA automatico aperto",
+    "help_step6": "Completa l'audit → relazione scaricabile",
+    "help_step7": "Il programma aggiorna automaticamente il % completamento"
+  },
+  "risk": {
+    "no_process_selected": "Nessun processo selezionato",
+    "level_critical": "Critico",
+    "score_inherent": "Inerente: score {{score}}",
+    "score_residual": "Residuo: score {{score}}",
+    "suggest_residual": "💡 Suggerisci rischio residuo",
+    "controls_reduction": "Riduzione controlli:",
+    "bcp_extra": "Extra BCP:",
+    "total_label": "Totale:",
+    "accepted_by_on": "Accettato da {{name}} il {{date}}",
+    "expired_on": "scaduto il",
+    "expires_on": "scade il",
+    "accept_risk_prompt": "⚠️ Accetta rischio formalmente",
+    "accept_risk_title": "Accettazione formale del rischio residuo",
+    "accept_note_label": "Nota obbligatoria",
+    "accept_note_critical_hint": "(min 50 caratteri per rischi critici)",
+    "confirm_acceptance": "Conferma accettazione",
+    "treatment_mitigare": "Mitigare",
+    "treatment_accettare": "Accettare",
+    "treatment_trasferire": "Trasferire",
+    "treatment_trasferire_ext": "Trasferire (es. assicurazione)",
+    "treatment_evitare": "Evitare",
+    "filter_all": "Tutti",
+    "status_archiviato": "Archiviato",
+    "probability_label": "Probabilità *",
+    "impact_label": "Impatto *",
+    "acceptance_expiry_placeholder": "Scadenza accettazione",
+    "action_desc_placeholder": "Descrizione azione *",
+    "bcp_test_date_placeholder": "Data ultimo test valido *",
+    "scenario_placeholder": "es. Ransomware su server di produzione MES",
+    "error_generic": "Errore",
+    "wizard_title": "Wizard BIA → Rischio → BCP",
+    "wizard_subtitle": "Crea in sequenza processo critico, scenario di rischio e piano BCP coerente.",
+    "wizard_step_bia": "Processo BIA",
+    "wizard_step_risk": "Scenario di rischio",
+    "wizard_step_bcp": "Piano BCP",
+    "wizard_create_new": "Crea nuovo",
+    "wizard_bcp_process_label": "Processo:",
+    "wizard_bcp_created": "Piano creato e collegato al processo.",
+    "wizard_criticality_legend": "Criticità 1–5:",
+    "wizard_continue_risk": "Continua con rischio",
+    "wizard_save_risk_continue": "Salva rischio e continua",
+    "wizard_create_bcp": "Crea piano BCP",
+    "cause_label": "Causa",
+    "cause_placeholder": "Causa o fonte del rischio",
+    "consequence_label": "Conseguenza",
+    "consequence_placeholder": "Impatto atteso se il rischio si concretizza",
+    "nis2_section": "Classificazione NIS2",
+    "nis2_art21_label": "Articolo NIS2 Art.21",
+    "nis2_relevance_label": "Rilevanza NIS2",
+    "impacted_systems_label": "Sistemi/Servizi impattati",
+    "impacted_systems_placeholder": "es. ERP / Corporate IT / VPN",
+    "export_excel": "Esporta Excel",
+    "renew_acceptance": "Rinnova scadenza",
+    "renew_confirm": "Conferma rinnovo",
+    "reset_acceptance": "Rivaluta (annulla accettazione)",
+    "reset_acceptance_confirm": "Annullare l'accettazione formale e avviare la rivalutazione? L'azione è tracciata in audit trail."
+  },
+  "pdca": {
+    "source_incident": "Incidente",
+    "source_audit": "Audit",
+    "source_management_review": "Revisione direzione",
+    "source_risk": "Rischio",
+    "source_manual": "Manuale",
+    "scope_plant": "Sito",
+    "scope_org": "Organizzazione",
+    "scope_process": "Processo"
+  },
+  "bcp": {
+    "test_frequency_label": "Frequenza test",
+    "status_superato": "Superato"
+  },
+  "audit_trail": {
+    "levels_guide": "Guida ai livelli",
+    "filter_all": "Tutti",
+    "entity_placeholder": "es. plant"
+  },
+  "suppliers": {
+    "filter_all": "Tutti"
+  },
+  "reporting": {
+    "title": "Reporting & Dashboard",
+    "loading_kpi": "Caricamento KPI...",
+    "loading_compliance": "Caricamento compliance...",
+    "loading": "Caricamento...",
+    "no_compliance_data": "Nessun dato di compliance disponibile",
+    "no_data": "Nessun dato disponibile",
+    "kpi": {
+      "active_sites": "Siti attivi",
+      "open_incidents": "Incidenti aperti",
+      "total_controls": "Controlli totali",
+      "pct_compliant": "% Compliant",
+      "gap_controls": "Controlli in gap"
+    },
+    "compliance": {
+      "distribution_title": "Distribuzione compliance ({{total}} controlli)",
+      "by_status_title": "Controlli per stato",
+      "bar_label": "Controlli"
+    },
+    "status": {
+      "parziale": "Parziale",
+      "non_valutato": "Non valutato"
+    },
+    "owner": {
+      "risks_chart_title": "Rischi per owner (impilato)",
+      "risks_table_title": "Dettaglio per owner",
+      "tasks_table_title": "Task per owner",
+      "col_owner": "Owner",
+      "col_critical_processes": "Processi critici",
+      "col_total_risks": "Rischi totali",
+      "col_red": "Rossi",
+      "col_yellow": "Gialli",
+      "col_green": "Verdi",
+      "col_open_tasks": "Task aperti",
+      "col_overdue": "Scaduti",
+      "col_completed_30d": "Completati (30gg)",
+      "bar_green": "Verdi",
+      "bar_yellow": "Gialli",
+      "bar_red": "Rossi"
+    },
+    "tabs": {
+      "compliance": "Compliance",
+      "owner": "Per Owner",
+      "risk_bia_bcp": "Risk / BIA / BCP"
+    },
+    "risk_bia_bcp": {
+      "kpi_total": "Rischi totali",
+      "kpi_red": "Rischi rossi",
+      "kpi_yellow": "Rischi gialli",
+      "kpi_revaluation": "Da rivalutare",
+      "kpi_revaluation_sub": "needs revaluation",
+      "kpi_accepted": "Accettati formalmente",
+      "kpi_bia_no_bcp": "Critici senza BCP",
+      "kpi_bia_no_bcp_sub": "criticità ≥ 4",
+      "kpi_bcp_overdue": "Test BCP scaduti",
+      "kpi_bcp_overdue_sub": "test non eseguito",
+      "heatmap_title": "Heatmap rischio (probabilità × impatto)",
+      "probability": "Probabilità",
+      "impact": "Impatto",
+      "risks": "rischi",
+      "legend_red": "Alto",
+      "legend_yellow": "Medio",
+      "legend_green": "Basso",
+      "top_risks_title": "Top 10 rischi per score",
+      "col_risk": "Scenario",
+      "col_owner": "Owner",
+      "col_score_residual": "Score residuo",
+      "col_score_inherent": "Score inerente",
+      "col_treatment": "Trattamento",
+      "threat_chart_title": "Score medio per categoria minaccia (inerente vs residuo)",
+      "bar_inherent": "Inerente",
+      "bar_residual": "Residuo",
+      "threat_chart_note": "Il gap tra inerente e residuo mostra l'efficacia dei controlli esistenti.",
+      "nis2_chart_title": "Rischi NIS2 per categoria Art.21",
+      "nis2_sig": "Significativo",
+      "nis2_pot": "Pot. significativo",
+      "nis2_non": "Non significativo",
+      "bia_bcp_table_title": "Correlazione Processi BIA – Rischi – Piani BCP",
+      "col_process": "Processo critico",
+      "col_criticality": "Crit.",
+      "col_last_test": "Ultimo test BCP",
+      "next_test": "Prossimo test"
+    }
+  },
+  "manual": {
+    "user_manual": "Manuale Utente",
+    "tech_manual": "Manuale Tecnico",
+    "download": "Scarica",
+    "loading": "Caricamento manuale...",
+    "error": "Errore nel caricamento del manuale."
+  }
+}
