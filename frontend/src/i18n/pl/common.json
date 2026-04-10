@@ -2240,7 +2240,30 @@
     "entity_placeholder": "np. zakład"
   },
   "suppliers": {
-    "filter_all": "Wszystkie"
+    "filter_all": "Wszystkie",
+    "nda": {
+      "tab": "NDA / Umowy",
+      "tab_assessments": "Oceny",
+      "upload_btn": "Prześlij NDA",
+      "no_nda": "Brak przesłanych dokumentów NDA/umów.",
+      "upload_title": "Prześlij dokument NDA",
+      "title_placeholder": "np. NDA z Dostawcą XYZ 2026",
+      "status_ok": "OK",
+      "status_expiring": "Wygasa wkrótce",
+      "status_expired": "Wygasłe",
+      "status_draft": "Szkic",
+      "status_missing": "Brak",
+      "overview_title": "Status NDA według dostawcy",
+      "col_supplier": "Dostawca",
+      "col_risk": "Ryzyko",
+      "col_status": "Status NDA",
+      "col_expiry": "Wygaśnięcie NDA",
+      "kpi_covered": "Z aktywnym NDA",
+      "kpi_expiring": "Wygasa (90 dni)",
+      "kpi_expired": "NDA wygasłe",
+      "kpi_missing": "Bez NDA",
+      "no_suppliers": "Brak aktywnych dostawców."
+    }
   },
   "reporting": {
     "title": "Raportowanie & Dashboard",
@@ -2290,7 +2313,9 @@
       "col_completed": "Ukończone",
       "col_not_enrolled": "Niezapisani",
       "col_completion": "Ukończenie",
-      "col_deadline": "Termin"
+      "col_deadline": "Termin",
+      "section_nda": "NDA Dostawców",
+      "nda_hint": "status NDA aktywnych dostawców"
     },
     "loading_kpi": "Ładowanie KPI...",
     "loading_compliance": "Ładowanie zgodności...",

@@ -22,6 +22,114 @@ class SupplierViewSet(viewsets.ModelViewSet):
     filterset_fields = ["risk_level", "status"]
     search_fields = ["name", "vat_number"]
 
+    @action(detail=True, methods=["get"], url_path="nda")
+    def nda_list(self, request, pk=None):
+        """GET /suppliers/<id>/nda/ — lista documenti NDA/contratto collegati al fornitore."""
+        from apps.documents.models import Document
+        supplier = self.get_object()
+        docs = Document.objects.filter(
+            supplier=supplier,
+            document_type="contratto",
+            deleted_at__isnull=True,
+        ).order_by("-created_at")
+        data = [
+            {
+                "id": str(d.id),
+                "title": d.title,
+                "status": d.status,
+                "expiry_date": str(d.expiry_date) if d.expiry_date else None,
+                "review_due_date": str(d.review_due_date) if d.review_due_date else None,
+                "created_at": d.created_at.date().isoformat(),
+                "has_file": d.versions.exists(),
+                "latest_version": self._version_info(d),
+            }
+            for d in docs
+        ]
+        return Response({"results": data, "count": len(data)})
+
+    @action(detail=True, methods=["post"], url_path="nda/upload", parser_classes=None)
+    def nda_upload(self, request, pk=None):
+        """
+        POST /suppliers/<id>/nda/upload/
+        multipart/form-data: file, title, expiry_date (opt), notes (opt)
+        Crea un Document con document_type="contratto" collegato al fornitore.
+        """
+        from apps.documents.models import Document
+        from apps.documents.services import add_version_with_file
+        from rest_framework.parsers import MultiPartParser, FormParser
+        from core.audit import log_action
+        import datetime
+
+        supplier = self.get_object()
+        uploaded_file = request.FILES.get("file")
+        title = request.data.get("title", "").strip()
+        expiry_date_str = request.data.get("expiry_date", "")
+        notes = request.data.get("notes", "")
+
+        if not uploaded_file:
+            return Response({"error": "Il file è obbligatorio."}, status=400)
+        if not title:
+            return Response({"error": "Il titolo è obbligatorio."}, status=400)
+
+        expiry_date = None
+        if expiry_date_str:
+            try:
+                expiry_date = datetime.date.fromisoformat(expiry_date_str)
+            except ValueError:
+                return Response({"error": "Formato data non valido (YYYY-MM-DD)."}, status=400)
+
+        doc = Document.objects.create(
+            title=title,
+            category="contratto",
+            document_type="contratto",
+            status="bozza",
+            supplier=supplier,
+            plant=None,
+            expiry_date=expiry_date,
+            notes=notes,
+            owner=request.user,
+            created_by=request.user,
+        )
+
+        try:
+            add_version_with_file(doc, uploaded_file, request.user, change_summary="Caricamento iniziale NDA")
+        except Exception as e:
+            doc.delete()
+            return Response({"error": str(e)}, status=400)
+
+        log_action(
+            user=request.user,
+            action_code="suppliers.nda.upload",
+            level="L2",
+            entity=doc,
+            payload={
+                "supplier_id": str(supplier.id),
+                "supplier_name": supplier.name,
+                "document_id": str(doc.id),
+                "title": title,
+                "expiry_date": expiry_date_str or None,
+            },
+        )
+
+        return Response({
+            "id": str(doc.id),
+            "title": doc.title,
+            "status": doc.status,
+            "expiry_date": str(doc.expiry_date) if doc.expiry_date else None,
+            "created_at": doc.created_at.date().isoformat(),
+        }, status=201)
+
+    def _version_info(self, doc):
+        v = doc.versions.first()
+        if not v:
+            return None
+        return {
+            "file_name": v.file_name,
+            "file_size": v.file_size,
+            "sha256": v.sha256[:12] + "…",
+            "version_number": v.version_number,
+        }
+
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)
         log_action(

@@ -523,6 +523,7 @@ class KpiOverviewView(APIView):
             "required_docs": self._required_docs(plant),
             "mttr": self._mttr(plant_id),
             "training": self._training(plant),
+            "supplier_nda": self._supplier_nda(plant),
         })
 
     # ------------------------------------------------------------------ #
@@ -730,4 +731,92 @@ class KpiOverviewView(APIView):
             "users_all_mandatory_completed": users_all_done,
             "pct_all_mandatory": round(users_all_done / total_users * 100, 1) if total_users else 0,
             "courses": mandatory_courses,
+        }
+
+    # ------------------------------------------------------------------ #
+    # 4. Supplier NDA coverage                                            #
+    # ------------------------------------------------------------------ #
+    def _supplier_nda(self, plant):
+        from apps.suppliers.models import Supplier
+        from apps.documents.models import Document
+        from django.utils import timezone
+
+        today = timezone.now().date()
+        threshold_90 = today + timezone.timedelta(days=90)
+
+        supplier_qs = Supplier.objects.filter(status="attivo", deleted_at__isnull=True)
+        if plant:
+            supplier_qs = supplier_qs.filter(plants=plant)
+
+        total = supplier_qs.count()
+
+        # Fornitori con almeno un NDA approvato
+        with_approved = supplier_qs.filter(
+            nda_documents__document_type="contratto",
+            nda_documents__status="approvato",
+            nda_documents__deleted_at__isnull=True,
+        ).distinct().count()
+
+        # Fornitori con NDA approvato ma in scadenza entro 90 giorni
+        expiring = supplier_qs.filter(
+            nda_documents__document_type="contratto",
+            nda_documents__status="approvato",
+            nda_documents__deleted_at__isnull=True,
+            nda_documents__expiry_date__lte=threshold_90,
+            nda_documents__expiry_date__gte=today,
+        ).distinct().count()
+
+        # Fornitori con NDA scaduto
+        expired = supplier_qs.filter(
+            nda_documents__document_type="contratto",
+            nda_documents__status="approvato",
+            nda_documents__deleted_at__isnull=True,
+            nda_documents__expiry_date__lt=today,
+        ).distinct().count()
+
+        without_nda = total - supplier_qs.filter(
+            nda_documents__document_type="contratto",
+            nda_documents__deleted_at__isnull=True,
+        ).distinct().count()
+
+        # Tabella per KPI: tutti i fornitori con stato NDA
+        suppliers_detail = []
+        for s in supplier_qs.prefetch_related("nda_documents").order_by("name"):
+            ndas = [
+                d for d in s.nda_documents.all()
+                if d.document_type == "contratto" and d.deleted_at is None
+            ]
+            approved_ndas = [d for d in ndas if d.status == "approvato"]
+            latest = approved_ndas[0] if approved_ndas else (ndas[0] if ndas else None)
+
+            if not ndas:
+                nda_status = "missing"
+            elif approved_ndas:
+                if latest.expiry_date and latest.expiry_date < today:
+                    nda_status = "expired"
+                elif latest.expiry_date and latest.expiry_date <= threshold_90:
+                    nda_status = "expiring"
+                else:
+                    nda_status = "ok"
+            else:
+                nda_status = "draft"
+
+            suppliers_detail.append({
+                "id": str(s.id),
+                "name": s.name,
+                "risk_level": s.risk_level,
+                "nda_status": nda_status,
+                "nda_title": latest.title if latest else None,
+                "nda_expiry": str(latest.expiry_date) if latest and latest.expiry_date else None,
+                "nda_doc_status": latest.status if latest else None,
+            })
+
+        return {
+            "total": total,
+            "with_approved_nda": with_approved,
+            "expiring_90d": expiring,
+            "expired": expired,
+            "without_nda": without_nda,
+            "pct_covered": round(with_approved / total * 100, 1) if total else 0,
+            "suppliers": suppliers_detail,
         }

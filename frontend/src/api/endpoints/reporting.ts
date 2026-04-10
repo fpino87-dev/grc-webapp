@@ -134,6 +134,15 @@ export interface MttrEntry {
   avg_days: number | null;
 }
 
+export interface SupplierNdaEntry {
+  id: string;
+  name: string;
+  risk_level: string;
+  nda_status: "ok" | "expiring" | "expired" | "draft" | "missing";
+  expiry_date: string | null;
+  days_to_expiry: number | null;
+}
+
 export interface KpiOverviewData {
   required_docs: RequiredDocsCoverage[];
   mttr: {
@@ -166,6 +175,13 @@ export interface KpiOverviewData {
       pct_completed: number;
       not_enrolled: number;
     }[];
+  };
+  supplier_nda: {
+    covered: number;
+    expiring_soon: number;
+    expired: number;
+    without_nda: number;
+    suppliers: SupplierNdaEntry[];
   };
 }
 

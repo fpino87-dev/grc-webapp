@@ -93,6 +93,13 @@ class Document(BaseModel):
     review_due_date = models.DateField(null=True, blank=True, db_index=True)
     expiry_date = models.DateField(null=True, blank=True)
     is_mandatory = models.BooleanField(default=False)
+    supplier = models.ForeignKey(
+        "suppliers.Supplier",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="nda_documents",
+    )
 
     class Meta:
         ordering = ["-created_at"]

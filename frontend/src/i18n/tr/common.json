@@ -2240,7 +2240,30 @@
     "entity_placeholder": "örn. tesis"
   },
   "suppliers": {
-    "filter_all": "Tümü"
+    "filter_all": "Tümü",
+    "nda": {
+      "tab": "NDA / Sözleşmeler",
+      "tab_assessments": "Değerlendirmeler",
+      "upload_btn": "NDA Yükle",
+      "no_nda": "Yüklenmiş NDA/sözleşme belgesi yok.",
+      "upload_title": "NDA belgesi yükle",
+      "title_placeholder": "örn. XYZ Tedarikçisi ile NDA 2026",
+      "status_ok": "Tamam",
+      "status_expiring": "Süresi dolmak üzere",
+      "status_expired": "Süresi dolmuş",
+      "status_draft": "Taslak",
+      "status_missing": "Eksik",
+      "overview_title": "Tedarikçiye göre NDA durumu",
+      "col_supplier": "Tedarikçi",
+      "col_risk": "Risk",
+      "col_status": "NDA durumu",
+      "col_expiry": "NDA son tarihi",
+      "kpi_covered": "Aktif NDA ile",
+      "kpi_expiring": "Sona eriyor (90 gün)",
+      "kpi_expired": "NDA süresi dolmuş",
+      "kpi_missing": "NDA yok",
+      "no_suppliers": "Aktif tedarikçi yok."
+    }
   },
   "reporting": {
     "title": "Raporlama & Dashboard",
@@ -2290,7 +2313,9 @@
       "col_completed": "Tamamlanan",
       "col_not_enrolled": "Kayıtsız",
       "col_completion": "Tamamlanma",
-      "col_deadline": "Son tarih"
+      "col_deadline": "Son tarih",
+      "section_nda": "Tedarikçi NDA",
+      "nda_hint": "aktif tedarikçilerin NDA durumu"
     },
     "loading_kpi": "KPI'ler yükleniyor...",
     "loading_compliance": "Uyum yükleniyor...",

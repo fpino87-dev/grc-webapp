@@ -2240,7 +2240,30 @@
     "entity_placeholder": "ex. site"
   },
   "suppliers": {
-    "filter_all": "Tous"
+    "filter_all": "Tous",
+    "nda": {
+      "tab": "NDA / Contrats",
+      "tab_assessments": "Évaluations",
+      "upload_btn": "Charger NDA",
+      "no_nda": "Aucun document NDA/contrat chargé.",
+      "upload_title": "Charger un document NDA",
+      "title_placeholder": "ex. NDA avec Fournisseur XYZ 2026",
+      "status_ok": "OK",
+      "status_expiring": "Expire bientôt",
+      "status_expired": "Expiré",
+      "status_draft": "Brouillon",
+      "status_missing": "Manquant",
+      "overview_title": "Statut NDA par fournisseur",
+      "col_supplier": "Fournisseur",
+      "col_risk": "Risque",
+      "col_status": "Statut NDA",
+      "col_expiry": "Expiration NDA",
+      "kpi_covered": "Avec NDA actif",
+      "kpi_expiring": "Expire bientôt (90j)",
+      "kpi_expired": "NDA expiré",
+      "kpi_missing": "Sans NDA",
+      "no_suppliers": "Aucun fournisseur actif."
+    }
   },
   "reporting": {
     "title": "Reporting & Tableau de bord",
@@ -2290,7 +2313,9 @@
       "col_completed": "Complétés",
       "col_not_enrolled": "Non inscrits",
       "col_completion": "Achèvement",
-      "col_deadline": "Échéance"
+      "col_deadline": "Échéance",
+      "section_nda": "NDA Fournisseurs",
+      "nda_hint": "statut NDA des fournisseurs actifs"
     },
     "loading_kpi": "Chargement des KPI...",
     "loading_compliance": "Chargement de la conformité...",

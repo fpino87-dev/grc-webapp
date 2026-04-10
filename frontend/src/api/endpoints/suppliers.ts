@@ -41,6 +41,22 @@ export interface SupplierQuestionnaire {
   notes: string;
 }
 
+export interface NdaDocument {
+  id: string;
+  title: string;
+  status: string;
+  expiry_date: string | null;
+  review_due_date: string | null;
+  created_at: string;
+  has_file: boolean;
+  latest_version: {
+    file_name: string;
+    file_size: number | null;
+    sha256: string;
+    version_number: number;
+  } | null;
+}
+
 export const suppliersApi = {
   list: (params?: Record<string, string>) =>
     apiClient.get<{ results: Supplier[] }>("/suppliers/suppliers/", { params }).then(r => r.data),
@@ -74,5 +90,13 @@ export const suppliersApi = {
   evaluateQuestionnaire: (id: string, evaluation_date: string, risk_result: string, notes?: string) =>
     apiClient.post<SupplierQuestionnaire>(`/suppliers/questionnaires/${id}/evaluate/`, {
       evaluation_date, risk_result, notes: notes ?? "",
+    }).then(r => r.data),
+
+  // NDA / Contracts
+  ndaList: (supplierId: string) =>
+    apiClient.get<{ results: NdaDocument[]; count: number }>(`/suppliers/suppliers/${supplierId}/nda/`).then(r => r.data),
+  ndaUpload: (supplierId: string, formData: FormData) =>
+    apiClient.post<NdaDocument>(`/suppliers/suppliers/${supplierId}/nda/upload/`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     }).then(r => r.data),
 };

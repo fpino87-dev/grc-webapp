@@ -2161,7 +2161,30 @@
     "entity_placeholder": "es. plant"
   },
   "suppliers": {
-    "filter_all": "Tutti"
+    "filter_all": "Tutti",
+    "nda": {
+      "tab": "NDA / Contratti",
+      "tab_assessments": "Valutazioni",
+      "upload_btn": "Carica NDA",
+      "no_nda": "Nessun documento NDA/contratto caricato.",
+      "upload_title": "Carica documento NDA",
+      "title_placeholder": "es. NDA con Fornitore XYZ 2026",
+      "status_ok": "OK",
+      "status_expiring": "In scadenza",
+      "status_expired": "Scaduto",
+      "status_draft": "Bozza",
+      "status_missing": "Mancante",
+      "overview_title": "Stato NDA per fornitore",
+      "col_supplier": "Fornitore",
+      "col_risk": "Rischio",
+      "col_status": "Stato NDA",
+      "col_expiry": "Scadenza NDA",
+      "kpi_covered": "Con NDA attivo",
+      "kpi_expiring": "In scadenza (90gg)",
+      "kpi_expired": "NDA scaduto",
+      "kpi_missing": "Senza NDA",
+      "no_suppliers": "Nessun fornitore attivo."
+    }
   },
   "reporting": {
     "title": "Reporting & Dashboard",
@@ -2249,7 +2272,9 @@
       "col_completed": "Completati",
       "col_not_enrolled": "Non iscritti",
       "col_completion": "Completamento",
-      "col_deadline": "Scadenza"
+      "col_deadline": "Scadenza",
+      "section_nda": "NDA Fornitori",
+      "nda_hint": "stato NDA sui fornitori attivi"
     },
     "risk_bia_bcp": {
       "kpi_total": "Rischi totali",

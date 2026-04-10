@@ -2161,7 +2161,30 @@
     "entity_placeholder": "e.g. plant"
   },
   "suppliers": {
-    "filter_all": "All"
+    "filter_all": "All",
+    "nda": {
+      "tab": "NDA / Contracts",
+      "tab_assessments": "Assessments",
+      "upload_btn": "Upload NDA",
+      "no_nda": "No NDA/contract documents uploaded.",
+      "upload_title": "Upload NDA document",
+      "title_placeholder": "e.g. NDA with Supplier XYZ 2026",
+      "status_ok": "OK",
+      "status_expiring": "Expiring",
+      "status_expired": "Expired",
+      "status_draft": "Draft",
+      "status_missing": "Missing",
+      "overview_title": "NDA status by supplier",
+      "col_supplier": "Supplier",
+      "col_risk": "Risk",
+      "col_status": "NDA status",
+      "col_expiry": "NDA expiry",
+      "kpi_covered": "With active NDA",
+      "kpi_expiring": "Expiring (90d)",
+      "kpi_expired": "NDA expired",
+      "kpi_missing": "Without NDA",
+      "no_suppliers": "No active suppliers."
+    }
   },
   "reporting": {
     "title": "Reporting & Dashboard",
@@ -2211,7 +2234,9 @@
       "col_completed": "Completed",
       "col_not_enrolled": "Not enrolled",
       "col_completion": "Completion",
-      "col_deadline": "Deadline"
+      "col_deadline": "Deadline",
+      "section_nda": "Supplier NDA",
+      "nda_hint": "NDA status across active suppliers"
     },
     "loading_kpi": "Loading KPIs...",
     "loading_compliance": "Loading compliance...",

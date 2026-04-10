@@ -10,8 +10,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ### Added
 - Compliance Schedule: task Celery notturno `check_schedule_deadlines` (02:30) che crea automaticamente task in M08 per ogni attività in scadenza (urgency red/yellow) su tutti i plant attivi, con dedup su `source_id` e assegnazione per ruolo in base alla categoria
-- M18 Reporting: nuovo tab KPI con tre sezioni — copertura documenti obbligatori per framework, MTTR (finding audit / incidenti / task), completamento formazione obbligatoria (perimetro utenti GRC)
-- Endpoint `GET /reporting/kpi-overview/?plant=<uuid>`
+- M18 Reporting: nuovo tab KPI con quattro sezioni — copertura documenti obbligatori per framework, MTTR (finding audit / incidenti / task), completamento formazione obbligatoria (perimetro utenti GRC), stato NDA fornitori (ok/in scadenza/scaduto/mancante)
+- Endpoint `GET /reporting/kpi-overview/?plant=<uuid>` — include sezione `supplier_nda` con contatori e dettaglio per fornitore
+- M14 Fornitori: tab "NDA / Contratti" nell'espansione riga fornitore — lista documenti con stato e scadenza, upload NDA (multipart) con versioning SHA-256
+- M14 Fornitori: tab "Stato NDA" a livello pagina — visione trasversale di tutti i fornitori attivi con semaforo stato NDA
+- API endpoint `GET /suppliers/suppliers/<id>/nda/` e `POST /suppliers/suppliers/<id>/nda/upload/`
+- `Document.supplier` FK (nullable) per collegare documenti NDA al fornitore (migrazione `0005_document_supplier_fk`)
 
 ---
 

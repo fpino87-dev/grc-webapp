@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { reportingApi, type BiaBcpRow, type TopRisk, type ThreatBreakdown, type Nis2CategoryBreakdown, type HeatmapCell, type RequiredDocsCoverage } from "../../api/endpoints/reporting";
+import { reportingApi, type BiaBcpRow, type TopRisk, type ThreatBreakdown, type Nis2CategoryBreakdown, type HeatmapCell, type RequiredDocsCoverage, type SupplierNdaEntry } from "../../api/endpoints/reporting";
 import { plantsApi } from "../../api/endpoints/plants";
 import { useAuthStore } from "../../store/auth";
 import {
@@ -631,6 +631,28 @@ function MttrBadge({ days }: { days: number | null }) {
   return <span className={`text-sm font-semibold ${color}`}>{days}gg</span>;
 }
 
+function NdaStatusBadgeReport({ status }: { status: SupplierNdaEntry["nda_status"] }) {
+  const map: Record<string, { label: string; classes: string }> = {
+    ok:       { label: "OK",         classes: "bg-green-100 text-green-800" },
+    expiring: { label: "In scadenza",classes: "bg-yellow-100 text-yellow-800" },
+    expired:  { label: "Scaduto",    classes: "bg-red-100 text-red-800" },
+    draft:    { label: "Bozza",      classes: "bg-gray-100 text-gray-700" },
+    missing:  { label: "Mancante",   classes: "bg-red-50 text-red-600 border border-red-200" },
+  };
+  const cfg = map[status] ?? map.missing;
+  return <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${cfg.classes}`}>{cfg.label}</span>;
+}
+
+function NdaRiskBadge({ level }: { level: string }) {
+  const map: Record<string, string> = {
+    basso:   "bg-green-100 text-green-800",
+    medio:   "bg-amber-100 text-amber-800",
+    alto:    "bg-red-100 text-red-800",
+    critico: "bg-red-200 text-red-900 font-bold",
+  };
+  return <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${map[level] ?? "bg-gray-100 text-gray-600"}`}>{level}</span>;
+}
+
 function TabKpi() {
   const { t } = useTranslation();
   const [plantId, setPlantId] = useState<string>("");
@@ -781,6 +803,63 @@ function TabKpi() {
               </div>
             </div>
           </section>
+
+          {/* ── 4. Supplier NDA ── */}
+          {data.supplier_nda && (
+            <section>
+              <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+                {t("reporting.kpi.section_nda")}
+                <span className="ml-2 text-xs text-gray-400 normal-case font-normal">{t("reporting.kpi.nda_hint")}</span>
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div className="bg-white border border-green-300 rounded-lg p-4">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">{t("suppliers.nda.kpi_covered")}</p>
+                  <p className="text-3xl font-bold text-green-600 mt-1">{data.supplier_nda.covered}</p>
+                </div>
+                <div className="bg-white border border-yellow-300 rounded-lg p-4">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">{t("suppliers.nda.kpi_expiring")}</p>
+                  <p className="text-3xl font-bold text-yellow-600 mt-1">{data.supplier_nda.expiring_soon}</p>
+                </div>
+                <div className="bg-white border border-red-300 rounded-lg p-4">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">{t("suppliers.nda.kpi_expired")}</p>
+                  <p className="text-3xl font-bold text-red-600 mt-1">{data.supplier_nda.expired}</p>
+                </div>
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">{t("suppliers.nda.kpi_missing")}</p>
+                  <p className="text-3xl font-bold text-gray-600 mt-1">{data.supplier_nda.without_nda}</p>
+                </div>
+              </div>
+              {data.supplier_nda.suppliers.length > 0 && (
+                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                        <th className="px-4 py-3 text-left">{t("suppliers.nda.col_supplier")}</th>
+                        <th className="px-4 py-3 text-left">{t("suppliers.nda.col_risk")}</th>
+                        <th className="px-4 py-3 text-left">{t("suppliers.nda.col_status")}</th>
+                        <th className="px-4 py-3 text-left">{t("suppliers.nda.col_expiry")}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {data.supplier_nda.suppliers.map(s => (
+                        <tr key={s.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 font-medium text-gray-900">{s.name}</td>
+                          <td className="px-4 py-3"><NdaRiskBadge level={s.risk_level} /></td>
+                          <td className="px-4 py-3"><NdaStatusBadgeReport status={s.nda_status} /></td>
+                          <td className="px-4 py-3 text-xs text-gray-500">
+                            {s.expiry_date
+                              ? <>{s.expiry_date}{s.days_to_expiry !== null && s.days_to_expiry <= 90 && <span className="ml-1 text-orange-600">({s.days_to_expiry}gg)</span>}</>
+                              : "—"
+                            }
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+          )}
 
           {/* ── 3. Training ── */}
           <section>
