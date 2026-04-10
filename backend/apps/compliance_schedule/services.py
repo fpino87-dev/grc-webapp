@@ -316,11 +316,16 @@ def get_required_documents_status(plant=None, framework: str = "ISO27001") -> li
     required = RequiredDocument.objects.filter(framework=framework)
     result = []
 
+    # RequiredDocument usa chiavi inglesi (policy/procedure/record),
+    # Document.document_type usa chiavi italiane (policy/procedura/registro).
+    _TYPE_MAP = {"procedure": "procedura", "record": "registro"}
+
     for req in required:
         try:
             from apps.documents.models import Document
+            doc_type = _TYPE_MAP.get(req.document_type, req.document_type)
             doc_qs = Document.objects.filter(
-                document_type=req.document_type,
+                document_type=doc_type,
                 deleted_at__isnull=True,
             )
             if plant:
