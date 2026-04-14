@@ -36,7 +36,7 @@ Internet → HTTPS (443) → Reverse proxy (Nginx / Nginx Proxy Manager)
                               └─→ Backend API (Django, e.g. path /api/ → backend :8000)
 ```
 
-The production compose file (`docker-compose.prod.yml`) publishes the **frontend** on host port **3001** by default. The **backend** service has **no** host port in the default file; you should bind the backend to **loopback only** so only the reverse proxy on the same host can reach it (see [section 8](#8-expose-services-for-the-reverse-proxy)).
+The production compose file (`docker-compose.prod.yml`) publishes the **frontend** on host port **3001** by default. It references `backend/Dockerfile.prod` and `frontend/Dockerfile.prod` — both exist in the repository; do not look for a `Dockerfile.prod` at the root. The **backend** service has **no** host port in the default file; you should bind the backend to **loopback only** so only the reverse proxy on the same host can reach it (see [section 8](#8-expose-services-for-the-reverse-proxy)).
 
 The SPA calls the API with a **relative** base path `/api/v1` when frontend and API are served under the **same public hostname** (recommended). Set `VITE_API_URL` empty in that case.
 
@@ -205,6 +205,8 @@ services:
 
 This keeps the API off the public interface while allowing Nginx (or NPM) on the host to connect to `http://127.0.0.1:8000`.
 
+> **Important**: Docker Compose only auto-loads `docker-compose.override.yml` when using the default file name. Because all production commands use `-f docker-compose.prod.yml` explicitly, you must **always** append `-f docker-compose.override.yml` to every `docker compose` command from this point on (see section 9).
+
 Alternatively, attach a reverse proxy **inside** the same Docker network (advanced; not covered in detail here).
 
 ---
@@ -214,15 +216,15 @@ Alternatively, attach a reverse proxy **inside** the same Docker network (advanc
 From the repository root (load variables for build-time `VITE_*` args):
 
 ```bash
-docker compose --env-file .env.prod -f docker-compose.prod.yml build
-docker compose --env-file .env.prod -f docker-compose.prod.yml up -d
+docker compose --env-file .env.prod -f docker-compose.prod.yml -f docker-compose.override.yml build
+docker compose --env-file .env.prod -f docker-compose.prod.yml -f docker-compose.override.yml up -d
 ```
 
 Check containers:
 
 ```bash
-docker compose -f docker-compose.prod.yml ps
-docker compose -f docker-compose.prod.yml logs -f --tail=50 backend
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml ps
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml logs -f --tail=50 backend
 ```
 
 ---
@@ -230,24 +232,24 @@ docker compose -f docker-compose.prod.yml logs -f --tail=50 backend
 ## 10. Database migrations and seed data
 
 ```bash
-docker compose -f docker-compose.prod.yml exec backend python manage.py migrate
-docker compose -f docker-compose.prod.yml exec backend python manage.py load_frameworks
-docker compose -f docker-compose.prod.yml exec backend python manage.py load_notification_profiles
-docker compose -f docker-compose.prod.yml exec backend python manage.py load_competency_requirements
-docker compose -f docker-compose.prod.yml exec backend python manage.py load_required_documents
-docker compose -f docker-compose.prod.yml exec backend python manage.py createsuperuser
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py migrate
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py load_frameworks
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py load_notification_profiles
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py load_competency_requirements
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py load_required_documents
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py createsuperuser
 ```
 
 Optional: schedule backups (if your project provides a management command):
 
 ```bash
-docker compose -f docker-compose.prod.yml exec backend python manage.py schedule_backup_task
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py schedule_backup_task
 ```
 
 Run `check --deploy`:
 
 ```bash
-docker compose -f docker-compose.prod.yml exec backend python manage.py check --deploy
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py check --deploy
 ```
 
 ---
@@ -316,7 +318,7 @@ Obtain certificates with **Certbot** (`certbot --nginx`) or DNS validation.
 ## 12. Health checks and smoke tests
 
 ```bash
-curl -fsS http://127.0.0.1:8000/api/health/
+curl -fsS http://127.0.0.1:8000/api/health/   # requires the override file applied in section 8
 curl -fsSI https://grc.example.com/
 ```
 
@@ -327,7 +329,7 @@ Log in through the browser, verify login, language switch, and a sample API call
 ## 13. Backups and operations
 
 - **Database**: schedule `pg_dump` from the PostgreSQL container or host (see `INFRASTRUCTURE.md` for retention ideas).
-- **Uploaded files**: if `STORAGE_BACKEND=local`, include the media path in backups; if `s3`, rely on bucket versioning/replication.
+- **Uploaded files**: the current build uses local filesystem storage (`STORAGE_BACKEND=local` in `.env.prod`). Include the backend media volume in your backup plan (e.g. `pg_dump` covers the database; the file store on disk must be backed up separately). S3/object storage is not yet implemented.
 - **Secrets**: store `.env.prod` outside version control; restrict file permissions (`chmod 600 .env.prod`).
 
 ---
@@ -421,7 +423,7 @@ Default profiles were loaded by **`load_notification_profiles`** (section 10).
 If you have not already run:
 
 ```bash
-docker compose -f docker-compose.prod.yml exec backend python manage.py schedule_backup_task
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py schedule_backup_task
 ```
 
 schedule the **automatic backup** task according to your operations guide, and verify backup files or retention in your chosen storage.
