@@ -82,11 +82,11 @@ def check_evidence_requirements(instance, lang: str | None = None) -> dict:
         max_age = ev_req.get("max_age_days")
         description = _pick_translation(ev_req.get("description"), lang)
 
-        ev_qs = instance.evidences.filter(
+        ev_qs = list(instance.evidences.filter(
             evidence_type=ev_type,
             deleted_at__isnull=True,
-        )
-        if not ev_qs.exists():
+        ))
+        if not ev_qs:
             result["satisfied"] = False
             result["missing_evidences"].append({
                 "type": ev_type,
@@ -94,24 +94,33 @@ def check_evidence_requirements(instance, lang: str | None = None) -> dict:
             })
             continue
 
-        for ev in ev_qs:
-            if ev.valid_until and ev.valid_until < today:
+        # Separa evidenze valide da scadute
+        valid_evs = [ev for ev in ev_qs if not ev.valid_until or ev.valid_until >= today]
+        expired_evs = [ev for ev in ev_qs if ev.valid_until and ev.valid_until < today]
+
+        if valid_evs:
+            # Requisito soddisfatto — controlla max_age sulle evidenze valide (solo avviso)
+            if max_age:
+                for ev in valid_evs:
+                    if ev.created_at:
+                        age = (today - ev.created_at.date()).days
+                        if age > max_age:
+                            result["warnings"].append(
+                                _("Evidenza '%(title)s' ha %(age)s giorni (max consigliato: %(max_age)s gg)") % {
+                                    "title": ev.title,
+                                    "age": age,
+                                    "max_age": max_age,
+                                }
+                            )
+        else:
+            # Nessuna evidenza valida: requisito non soddisfatto
+            result["satisfied"] = False
+            for ev in expired_evs:
                 result["expired_evidences"].append({
                     "id": str(ev.id),
                     "title": ev.title,
                     "expired_on": str(ev.valid_until),
                 })
-                result["satisfied"] = False
-            elif max_age and ev.created_at:
-                age = (today - ev.created_at.date()).days
-                if age > max_age:
-                    result["warnings"].append(
-                        _("Evidenza '%(title)s' ha %(age)s giorni (max consigliato: %(max_age)s gg)") % {
-                            "title": ev.title,
-                            "age": age,
-                            "max_age": max_age,
-                        }
-                    )
 
     # Controlla minimi
     min_docs = req.get("min_documents", 0)

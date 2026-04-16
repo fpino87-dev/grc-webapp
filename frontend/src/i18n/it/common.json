@@ -1159,7 +1159,8 @@
       "escalation": "Escalation"
     },
     "actions": {
-      "complete": "Completa"
+      "complete": "Completa",
+      "open_control": "Vai al controllo"
     }
   },
   "documents": {
@@ -1468,7 +1469,8 @@
       "source": "Fonte",
       "duration_minutes": "Durata (minuti)",
       "deadline": "Scadenza",
-      "mandatory": "Obbligatorio"
+      "mandatory": "Obbligatorio",
+      "status": "Stato"
     },
     "table": {
       "title": "Titolo corso",
@@ -1477,6 +1479,15 @@
       "duration": "Durata (min)",
       "deadline": "Scadenza",
       "status": "Stato"
+    },
+    "edit": {
+      "title": "Modifica corso",
+      "submit": "Salva modifiche"
+    },
+    "delete_confirm": "Sei sicuro di voler eliminare il corso \"{{title}}\"?",
+    "statuses": {
+      "attivo": "Attivo",
+      "archiviato": "Archiviato"
     }
   },
   "incidents": {
@@ -2194,45 +2205,6 @@
     "no_compliance_data": "Nessun dato di compliance disponibile",
     "no_data": "Nessun dato disponibile",
     "kpi": {
-      "active_sites": "Siti attivi",
-      "open_incidents": "Incidenti aperti",
-      "total_controls": "Controlli totali",
-      "pct_compliant": "% Compliant",
-      "gap_controls": "Controlli in gap"
-    },
-    "compliance": {
-      "distribution_title": "Distribuzione compliance ({{total}} controlli)",
-      "by_status_title": "Controlli per stato",
-      "bar_label": "Controlli"
-    },
-    "status": {
-      "parziale": "Parziale",
-      "non_valutato": "Non valutato"
-    },
-    "owner": {
-      "risks_chart_title": "Rischi per owner (impilato)",
-      "risks_table_title": "Dettaglio per owner",
-      "tasks_table_title": "Task per owner",
-      "col_owner": "Owner",
-      "col_critical_processes": "Processi critici",
-      "col_total_risks": "Rischi totali",
-      "col_red": "Rossi",
-      "col_yellow": "Gialli",
-      "col_green": "Verdi",
-      "col_open_tasks": "Task aperti",
-      "col_overdue": "Scaduti",
-      "col_completed_30d": "Completati (30gg)",
-      "bar_green": "Verdi",
-      "bar_yellow": "Gialli",
-      "bar_red": "Rossi"
-    },
-    "tabs": {
-      "compliance": "Compliance",
-      "owner": "Per Owner",
-      "risk_bia_bcp": "Risk / BIA / BCP",
-      "kpi": "KPI"
-    },
-    "kpi": {
       "plant_label": "Sito",
       "all_plants": "Tutti i siti",
       "no_frameworks": "Nessun framework attivo per il sito selezionato.",
@@ -2275,6 +2247,38 @@
       "col_deadline": "Scadenza",
       "section_nda": "NDA Fornitori",
       "nda_hint": "stato NDA sui fornitori attivi"
+    },
+    "compliance": {
+      "distribution_title": "Distribuzione compliance ({{total}} controlli)",
+      "by_status_title": "Controlli per stato",
+      "bar_label": "Controlli"
+    },
+    "status": {
+      "parziale": "Parziale",
+      "non_valutato": "Non valutato"
+    },
+    "owner": {
+      "risks_chart_title": "Rischi per owner (impilato)",
+      "risks_table_title": "Dettaglio per owner",
+      "tasks_table_title": "Task per owner",
+      "col_owner": "Owner",
+      "col_critical_processes": "Processi critici",
+      "col_total_risks": "Rischi totali",
+      "col_red": "Rossi",
+      "col_yellow": "Gialli",
+      "col_green": "Verdi",
+      "col_open_tasks": "Task aperti",
+      "col_overdue": "Scaduti",
+      "col_completed_30d": "Completati (30gg)",
+      "bar_green": "Verdi",
+      "bar_yellow": "Gialli",
+      "bar_red": "Rossi"
+    },
+    "tabs": {
+      "compliance": "Compliance",
+      "owner": "Per Owner",
+      "risk_bia_bcp": "Risk / BIA / BCP",
+      "kpi": "KPI"
     },
     "risk_bia_bcp": {
       "kpi_total": "Rischi totali",

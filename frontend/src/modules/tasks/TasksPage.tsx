@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { tasksApi, type Task } from "../../api/endpoints/tasks";
 import { plantsApi } from "../../api/endpoints/plants";
 import { useAuthStore } from "../../store/auth";
@@ -115,6 +116,7 @@ function isDuePast(due_date: string | null): boolean {
 
 export function TasksPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("tutti");
   const [showNew, setShowNew] = useState(false);
   const qc = useQueryClient();
@@ -214,7 +216,19 @@ export function TasksPage() {
                       overdue ? "bg-red-50 hover:bg-red-100" : "hover:bg-gray-50"
                     }`}
                   >
-                    <td className="px-4 py-3 font-medium text-gray-800">{task.title}</td>
+                    <td className="px-4 py-3 font-medium text-gray-800">
+                      {task.source_module === "M03" && task.control_instance ? (
+                        <button
+                          onClick={() => navigate("/controls", { state: { openControlInstance: task.control_instance } })}
+                          className="text-left text-primary-700 hover:underline hover:text-primary-900 font-medium"
+                          title={t("tasks.actions.open_control")}
+                        >
+                          {task.title}
+                        </button>
+                      ) : (
+                        task.title
+                      )}
+                    </td>
                     <td className="px-4 py-3">
                       <StatusBadge status={task.priority} />
                     </td>

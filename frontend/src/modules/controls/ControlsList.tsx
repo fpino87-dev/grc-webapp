@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "react-router-dom";
 import { controlsApi, type ControlInstance, type Framework } from "../../api/endpoints/controls";
 import { governanceApi } from "../../api/endpoints/governance";
 import { useAuthStore } from "../../store/auth";
@@ -331,10 +332,19 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
 export function ControlsList() {
   const { t } = useTranslation();
   const qc = useQueryClient();
+  const location = useLocation();
   const [statusFilter, setStatusFilter] = useState("");
   const [frameworkFilter, setFrameworkFilter] = useState<string>("");
   const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
   const selectedPlant = useAuthStore(s => s.selectedPlant);
+
+  // Apri automaticamente il drawer se si arriva dalla task page
+  useEffect(() => {
+    const state = location.state as { openControlInstance?: string } | null;
+    if (state?.openControlInstance) {
+      setSelectedInstance(state.openControlInstance);
+    }
+  }, [location.state]);
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => controlsApi.deleteInstance(id),

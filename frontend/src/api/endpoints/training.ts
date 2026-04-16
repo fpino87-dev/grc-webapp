@@ -19,4 +19,8 @@ export const trainingApi = {
     apiClient.get<{ results: TrainingEnrollment[] }>("/training/enrollments/", { params }).then(r => r.data.results),
   createCourse: (data: Partial<TrainingCourse>) =>
     apiClient.post<TrainingCourse>("/training/courses/", data).then(r => r.data),
+  updateCourse: (id: string, data: Partial<TrainingCourse>) =>
+    apiClient.patch<TrainingCourse>(`/training/courses/${id}/`, data).then(r => r.data),
+  deleteCourse: (id: string) =>
+    apiClient.delete(`/training/courses/${id}/`),
 };

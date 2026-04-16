@@ -1238,7 +1238,8 @@
       "escalation": "Escalation"
     },
     "actions": {
-      "complete": "Terminer"
+      "complete": "Terminer",
+      "open_control": "Aller au contrôle"
     }
   },
   "documents": {
@@ -1547,7 +1548,8 @@
       "source": "Source",
       "duration_minutes": "Durée (minutes)",
       "deadline": "Échéance",
-      "mandatory": "Obligatoire"
+      "mandatory": "Obligatoire",
+      "status": "Statut"
     },
     "table": {
       "title": "Titre du cours",
@@ -1556,6 +1558,15 @@
       "duration": "Durée (min)",
       "deadline": "Échéance",
       "status": "Statut"
+    },
+    "edit": {
+      "title": "Modifier le cours",
+      "submit": "Enregistrer les modifications"
+    },
+    "delete_confirm": "Voulez-vous vraiment supprimer le cours \"{{title}}\" ?",
+    "statuses": {
+      "attivo": "Actif",
+      "archiviato": "Archivé"
     }
   },
   "incidents": {
@@ -2274,61 +2285,17 @@
       "kpi": "KPI"
     },
     "kpi": {
-      "plant_label": "Site",
-      "all_plants": "Tous les sites",
-      "no_frameworks": "Aucun cadre actif pour le site sélectionné.",
-      "no_mandatory_courses": "Aucune formation obligatoire active.",
-      "section_docs": "Couverture des documents obligatoires",
-      "section_mttr": "Délai moyen de résolution (MTTR)",
-      "section_training": "Achèvement de la formation obligatoire",
-      "mttr_hint": "calculé sur les éléments clôturés",
-      "col_framework": "Cadre",
-      "col_total": "Total",
-      "col_approved": "Approuvés",
-      "col_draft": "Brouillon/Révision",
-      "col_missing": "Manquants",
-      "col_coverage": "Couverture totale",
-      "col_mandatory": "Obligatoires uniquement",
-      "mttr_findings": "Constatations d'audit",
-      "mttr_incidents": "Incidents",
-      "mttr_tasks": "Tâches",
-      "mttr_tasks_note": "De la création à la clôture, toutes les tâches.",
-      "finding_major": "Majeur",
-      "finding_minor": "Mineur",
-      "finding_observation": "Observation",
-      "severity_critica": "Critique",
-      "severity_alta": "Élevée",
-      "severity_media": "Moyenne",
-      "severity_bassa": "Faible",
-      "closed": "clôturés",
-      "total": "Total",
-      "training_users": "Utilisateurs GRC",
-      "training_grc_perimeter": "utilisateurs avec accès à la plateforme",
-      "training_mandatory_courses": "Formations obligatoires",
-      "training_all_done": "Toutes les formations complétées",
-      "training_users_suffix": "utilisateurs",
-      "col_course": "Formation",
-      "col_source": "Source",
-      "col_enrolled": "Inscrits",
-      "col_completed": "Complétés",
-      "col_not_enrolled": "Non inscrits",
-      "col_completion": "Achèvement",
-      "col_deadline": "Échéance",
-      "section_nda": "NDA Fournisseurs",
-      "nda_hint": "statut NDA des fournisseurs actifs"
-    },
-    "loading_kpi": "Chargement des KPI...",
-    "loading_compliance": "Chargement de la conformité...",
-    "loading": "Chargement...",
-    "no_compliance_data": "Aucune donnée de conformité disponible",
-    "no_data": "Aucune donnée disponible",
-    "kpi": {
       "active_sites": "Sites actifs",
       "open_incidents": "Incidents ouverts",
       "total_controls": "Contrôles totaux",
       "pct_compliant": "% Conforme",
       "gap_controls": "Contrôles en écart"
     },
+    "loading_kpi": "Chargement des KPI...",
+    "loading_compliance": "Chargement de la conformité...",
+    "loading": "Chargement...",
+    "no_compliance_data": "Aucune donnée de conformité disponible",
+    "no_data": "Aucune donnée disponible",
     "compliance": {
       "distribution_title": "Distribution conformité ({{total}} contrôles)",
       "by_status_title": "Contrôles par statut",

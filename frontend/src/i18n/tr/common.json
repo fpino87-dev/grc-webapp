@@ -1238,7 +1238,8 @@
       "escalation": "Escalation"
     },
     "actions": {
-      "complete": "Tamamla"
+      "complete": "Tamamla",
+      "open_control": "Kontrole git"
     }
   },
   "documents": {
@@ -1547,7 +1548,8 @@
       "source": "Kaynak",
       "duration_minutes": "Süre (dakika)",
       "deadline": "Son tarih",
-      "mandatory": "Zorunlu"
+      "mandatory": "Zorunlu",
+      "status": "Durum"
     },
     "table": {
       "title": "Kurs başlığı",
@@ -1556,6 +1558,15 @@
       "duration": "Süre (dk)",
       "deadline": "Son tarih",
       "status": "Durum"
+    },
+    "edit": {
+      "title": "Kursu düzenle",
+      "submit": "Değişiklikleri kaydet"
+    },
+    "delete_confirm": "\"{{title}}\" kursunu silmek istediğinizden emin misiniz?",
+    "statuses": {
+      "attivo": "Aktif",
+      "archiviato": "Arşivlendi"
     }
   },
   "incidents": {
@@ -2274,61 +2285,17 @@
       "kpi": "KPI"
     },
     "kpi": {
-      "plant_label": "Tesis",
-      "all_plants": "Tüm tesisler",
-      "no_frameworks": "Seçilen tesis için aktif çerçeve yok.",
-      "no_mandatory_courses": "Aktif zorunlu eğitim yok.",
-      "section_docs": "Zorunlu belge kapsamı",
-      "section_mttr": "Ortalama Çözüm Süresi (MTTR)",
-      "section_training": "Zorunlu eğitim tamamlanma durumu",
-      "mttr_hint": "kapatılan öğeler üzerinden hesaplanır",
-      "col_framework": "Çerçeve",
-      "col_total": "Toplam",
-      "col_approved": "Onaylanan",
-      "col_draft": "Taslak/İnceleme",
-      "col_missing": "Eksik",
-      "col_coverage": "Toplam kapsam",
-      "col_mandatory": "Yalnızca zorunlu",
-      "mttr_findings": "Denetim bulguları",
-      "mttr_incidents": "Olaylar",
-      "mttr_tasks": "Görevler",
-      "mttr_tasks_note": "Oluşturmadan tamamlamaya, tüm görevler.",
-      "finding_major": "Büyük",
-      "finding_minor": "Küçük",
-      "finding_observation": "Gözlem",
-      "severity_critica": "Kritik",
-      "severity_alta": "Yüksek",
-      "severity_media": "Orta",
-      "severity_bassa": "Düşük",
-      "closed": "kapatıldı",
-      "total": "Toplam",
-      "training_users": "GRC Kullanıcıları",
-      "training_grc_perimeter": "platforma erişimi olan kullanıcılar",
-      "training_mandatory_courses": "Zorunlu eğitimler",
-      "training_all_done": "Tüm eğitimler tamamlandı",
-      "training_users_suffix": "kullanıcı",
-      "col_course": "Eğitim",
-      "col_source": "Kaynak",
-      "col_enrolled": "Kayıtlı",
-      "col_completed": "Tamamlanan",
-      "col_not_enrolled": "Kayıtsız",
-      "col_completion": "Tamamlanma",
-      "col_deadline": "Son tarih",
-      "section_nda": "Tedarikçi NDA",
-      "nda_hint": "aktif tedarikçilerin NDA durumu"
-    },
-    "loading_kpi": "KPI'ler yükleniyor...",
-    "loading_compliance": "Uyum yükleniyor...",
-    "loading": "Yükleniyor...",
-    "no_compliance_data": "Uyum verisi yok",
-    "no_data": "Veri yok",
-    "kpi": {
       "active_sites": "Aktif siteler",
       "open_incidents": "Açık olaylar",
       "total_controls": "Toplam kontroller",
       "pct_compliant": "% Uyumlu",
       "gap_controls": "Eksik kontroller"
     },
+    "loading_kpi": "KPI'ler yükleniyor...",
+    "loading_compliance": "Uyum yükleniyor...",
+    "loading": "Yükleniyor...",
+    "no_compliance_data": "Uyum verisi yok",
+    "no_data": "Veri yok",
     "compliance": {
       "distribution_title": "Uyum dağılımı ({{total}} kontrol)",
       "by_status_title": "Duruma göre kontroller",

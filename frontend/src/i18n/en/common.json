@@ -1159,7 +1159,8 @@
       "escalation": "Escalation"
     },
     "actions": {
-      "complete": "Complete"
+      "complete": "Complete",
+      "open_control": "Go to control"
     }
   },
   "documents": {
@@ -1468,7 +1469,8 @@
       "source": "Source",
       "duration_minutes": "Duration (minutes)",
       "deadline": "Deadline",
-      "mandatory": "Mandatory"
+      "mandatory": "Mandatory",
+      "status": "Status"
     },
     "table": {
       "title": "Course title",
@@ -1477,6 +1479,15 @@
       "duration": "Duration (min)",
       "deadline": "Deadline",
       "status": "Status"
+    },
+    "edit": {
+      "title": "Edit course",
+      "submit": "Save changes"
+    },
+    "delete_confirm": "Are you sure you want to delete the course \"{{title}}\"?",
+    "statuses": {
+      "attivo": "Active",
+      "archiviato": "Archived"
     }
   },
   "incidents": {
@@ -2195,61 +2206,17 @@
       "kpi": "KPI"
     },
     "kpi": {
-      "plant_label": "Site",
-      "all_plants": "All sites",
-      "no_frameworks": "No active framework for the selected site.",
-      "no_mandatory_courses": "No active mandatory courses.",
-      "section_docs": "Mandatory documents coverage",
-      "section_mttr": "Mean Time To Remediate (MTTR)",
-      "section_training": "Mandatory training completion",
-      "mttr_hint": "calculated on closed items",
-      "col_framework": "Framework",
-      "col_total": "Total",
-      "col_approved": "Approved",
-      "col_draft": "Draft/Review",
-      "col_missing": "Missing",
-      "col_coverage": "Total coverage",
-      "col_mandatory": "Mandatory only",
-      "mttr_findings": "Audit findings",
-      "mttr_incidents": "Incidents",
-      "mttr_tasks": "Tasks",
-      "mttr_tasks_note": "From creation to completion, all tasks.",
-      "finding_major": "Major",
-      "finding_minor": "Minor",
-      "finding_observation": "Observation",
-      "severity_critica": "Critical",
-      "severity_alta": "High",
-      "severity_media": "Medium",
-      "severity_bassa": "Low",
-      "closed": "closed",
-      "total": "Total",
-      "training_users": "GRC Users",
-      "training_grc_perimeter": "users with platform access",
-      "training_mandatory_courses": "Mandatory courses",
-      "training_all_done": "All courses completed",
-      "training_users_suffix": "users",
-      "col_course": "Course",
-      "col_source": "Source",
-      "col_enrolled": "Enrolled",
-      "col_completed": "Completed",
-      "col_not_enrolled": "Not enrolled",
-      "col_completion": "Completion",
-      "col_deadline": "Deadline",
-      "section_nda": "Supplier NDA",
-      "nda_hint": "NDA status across active suppliers"
-    },
-    "loading_kpi": "Loading KPIs...",
-    "loading_compliance": "Loading compliance...",
-    "loading": "Loading...",
-    "no_compliance_data": "No compliance data available",
-    "no_data": "No data available",
-    "kpi": {
       "active_sites": "Active sites",
       "open_incidents": "Open incidents",
       "total_controls": "Total controls",
       "pct_compliant": "% Compliant",
       "gap_controls": "Controls in gap"
     },
+    "loading_kpi": "Loading KPIs...",
+    "loading_compliance": "Loading compliance...",
+    "loading": "Loading...",
+    "no_compliance_data": "No compliance data available",
+    "no_data": "No data available",
     "compliance": {
       "distribution_title": "Compliance distribution ({{total}} controls)",
       "by_status_title": "Controls by status",

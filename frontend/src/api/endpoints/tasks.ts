@@ -6,6 +6,8 @@ export interface Task {
   status: "aperto"|"in_corso"|"completato"|"annullato"|"scaduto";
   source: string; due_date: string | null;
   assigned_to: string | null; recurrence: string; escalation_level: number;
+  source_module: string; source_id: string | null;
+  control_instance: string | null;
 }
 
 export const tasksApi = {
