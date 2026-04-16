@@ -8,25 +8,30 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ## [Unreleased]
 
-### Fixed
-- M03 Controlli: `check_evidence_requirements` degradava un controllo a "parziale" anche quando aveva evidenze valide — la logica iterava su tutte le evidenze di un tipo e marcava il requisito come non soddisfatto se qualsiasi di esse era scaduta, ignorando le altre valide. Ora il requisito è soddisfatto se esiste almeno un'evidenza non scaduta.
-- M08 Task: i titoli dei task generati automaticamente da M03 (evidenze scadute) ora sono cliccabili e portano direttamente al drawer del controllo corrispondente in M03 Controls.
-- Documenti obbligatori (M08/M18): tutti i documenti di tipo `procedure` e `record` risultavano sempre "Mancanti" anche se caricati — causato da disallineamento tra le chiavi inglesi di `RequiredDocument` (`procedure`/`record`) e le chiavi italiane di `Document.document_type` (`procedura`/`registro`). Aggiunta mappatura `_TYPE_MAP` in `get_required_documents_status`.
-- Documenti obbligatori (M08/M18): documenti condivisi via `shared_plants` non venivano considerati — il filtro cercava solo `plant=plant`, ignorando il campo M2M. Corretto con `Q(plant=plant) | Q(shared_plants=plant)`.
+---
+
+## [0.2.0] - 2026-04-16
 
 ### Added
 - M14 Fornitori: nuovi campi ACN per conformità alla Delibera ACN n. 127434 del 13/04/2026 — `description` (descrizione fornitura), `cpv_codes` (Codici CPV, JSON list), `nis2_relevant` (flag NIS2), `nis2_relevance_criterion` (criterio ICT strutturale / non fungibilità / entrambi), `supply_concentration_pct` (% concentrazione fornitura) con property derivata `concentration_threshold` (bassa/media/critica secondo soglie TPRM <20%/20-50%/>50%); `vat_number` (CF/P.IVA) ora obbligatorio; migrazione `0006_supplier_acn_nis2_fields`
 - M14 Fornitori: suggerimento codici CPV tramite AI (M20 AI Engine) — la descrizione della fornitura viene sanitizzata con `Sanitizer` prima dell'invio, il nome del fornitore non è mai inviato al cloud; human-in-the-loop obbligatorio (revisione prima dell'accettazione)
 - M14 Fornitori: export CSV fornitori con tutti i campi ACN — endpoint `GET /suppliers/export-csv/` con parametro `?nis2_only=true` per filtrare ai soli fornitori NIS2 rilevanti; BOM UTF-8 per compatibilità Excel
 - M14 Fornitori: filtro "Solo NIS2 rilevanti" in lista fornitori; colonne NIS2 e Concentrazione fornitura nella tabella; badge visivi per criterio e soglia TPRM
-- M15 Formazione: le righe della tabella corsi sono ora modificabili ed eliminabili dagli utenti con ruolo `super_admin` — pulsanti matita e cestino per riga, modale di modifica pre-compilata con tutti i campi (titolo, descrizione, fonte, stato, durata, scadenza, obbligatorio)
-- Compliance Schedule: task Celery notturno `check_schedule_deadlines` (02:30) che crea automaticamente task in M08 per ogni attività in scadenza (urgency red/yellow) su tutti i plant attivi, con dedup su `source_id` e assegnazione per ruolo in base alla categoria
-- M18 Reporting: nuovo tab KPI con quattro sezioni — copertura documenti obbligatori per framework, MTTR (finding audit / incidenti / task), completamento formazione obbligatoria (perimetro utenti GRC), stato NDA fornitori (ok/in scadenza/scaduto/mancante)
-- Endpoint `GET /reporting/kpi-overview/?plant=<uuid>` — include sezione `supplier_nda` con contatori e dettaglio per fornitore
 - M14 Fornitori: tab "NDA / Contratti" nell'espansione riga fornitore — lista documenti con stato e scadenza, upload NDA (multipart) con versioning SHA-256
 - M14 Fornitori: tab "Stato NDA" a livello pagina — visione trasversale di tutti i fornitori attivi con semaforo stato NDA
 - API endpoint `GET /suppliers/suppliers/<id>/nda/` e `POST /suppliers/suppliers/<id>/nda/upload/`
 - `Document.supplier` FK (nullable) per collegare documenti NDA al fornitore (migrazione `0005_document_supplier_fk`)
+- M15 Formazione: le righe della tabella corsi sono ora modificabili ed eliminabili dagli utenti con ruolo `super_admin` — pulsanti matita e cestino per riga, modale di modifica pre-compilata con tutti i campi (titolo, descrizione, fonte, stato, durata, scadenza, obbligatorio)
+- Compliance Schedule: task Celery notturno `check_schedule_deadlines` (02:30) che crea automaticamente task in M08 per ogni attività in scadenza (urgency red/yellow) su tutti i plant attivi, con dedup su `source_id` e assegnazione per ruolo in base alla categoria
+- M18 Reporting: nuovo tab KPI con quattro sezioni — copertura documenti obbligatori per framework, MTTR (finding audit / incidenti / task), completamento formazione obbligatoria (perimetro utenti GRC), stato NDA fornitori (ok/in scadenza/scaduto/mancante)
+- Endpoint `GET /reporting/kpi-overview/?plant=<uuid>` — include sezione `supplier_nda` con contatori e dettaglio per fornitore
+- AI Engine: `cpv_suggestion` aggiunto ai task routing con default `cloud`; voce visibile in Impostazioni → AI Engine → Routing per Task
+
+### Fixed
+- M03 Controlli: `check_evidence_requirements` degradava un controllo a "parziale" anche quando aveva evidenze valide — la logica iterava su tutte le evidenze di un tipo e marcava il requisito come non soddisfatto se qualsiasi di esse era scaduta, ignorando le altre valide. Ora il requisito è soddisfatto se esiste almeno un'evidenza non scaduta.
+- M08 Task: i titoli dei task generati automaticamente da M03 (evidenze scadute) ora sono cliccabili e portano direttamente al drawer del controllo corrispondente in M03 Controls.
+- Documenti obbligatori (M08/M18): tutti i documenti di tipo `procedure` e `record` risultavano sempre "Mancanti" anche se caricati — causato da disallineamento tra le chiavi inglesi di `RequiredDocument` (`procedure`/`record`) e le chiavi italiane di `Document.document_type` (`procedura`/`registro`). Aggiunta mappatura `_TYPE_MAP` in `get_required_documents_status`.
+- Documenti obbligatori (M08/M18): documenti condivisi via `shared_plants` non venivano considerati — il filtro cercava solo `plant=plant`, ignorando il campo M2M. Corretto con `Q(plant=plant) | Q(shared_plants=plant)`.
 
 ---
 

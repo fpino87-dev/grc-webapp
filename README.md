@@ -2,7 +2,7 @@
 
 > Piattaforma GRC (Governance, Risk & Compliance) per aziende manifatturiere con certificazioni TISAX L2/L3, NIS2 e ISO 27001:2022.
 
-![Version](https://img.shields.io/badge/version-0.1.0-informational) ![License](https://img.shields.io/badge/license-AGPL--3.0-blue) ![Python](https://img.shields.io/badge/Python-3.11-blue) ![Django](https://img.shields.io/badge/Django-5.1-green) ![React](https://img.shields.io/badge/React-18-blue) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![Docker](https://img.shields.io/badge/Docker-Compose-blue)
+![Version](https://img.shields.io/badge/version-0.2.0-informational) ![License](https://img.shields.io/badge/license-AGPL--3.0-blue) ![Python](https://img.shields.io/badge/Python-3.11-blue) ![Django](https://img.shields.io/badge/Django-5.1-green) ![React](https://img.shields.io/badge/React-18-blue) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![Docker](https://img.shields.io/badge/Docker-Compose-blue)
 
 ---
 
