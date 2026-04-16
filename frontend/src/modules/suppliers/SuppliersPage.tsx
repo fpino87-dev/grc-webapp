@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   suppliersApi,
   type Supplier,
+  type CpvCode,
   type QuestionnaireTemplate,
   type SupplierQuestionnaire,
   type NdaDocument,
@@ -70,6 +71,187 @@ function QStatus({ status, sendCount }: { status: string; sendCount: number }) {
   if (sendCount >= 3) return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-200 text-red-900">3° invio — contatto diretto</span>;
   if (sendCount === 2) return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">2° invio</span>;
   return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">In attesa</span>;
+}
+
+// ─── ACN / NIS2 badge helpers ────────────────────────────────────────────────
+
+function Nis2Badge({ relevant }: { relevant: boolean }) {
+  if (!relevant) return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">—</span>;
+  return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">NIS2</span>;
+}
+
+function ConcentrationBadge({ threshold }: { threshold: string }) {
+  const map: Record<string, { label: string; classes: string }> = {
+    bassa:   { label: "Bassa",   classes: "bg-green-100 text-green-700" },
+    media:   { label: "Media",   classes: "bg-amber-100 text-amber-800" },
+    critica: { label: "Critica", classes: "bg-red-200 text-red-900 font-bold" },
+    nd:      { label: "N/D",     classes: "bg-gray-100 text-gray-500" },
+  };
+  const cfg = map[threshold] ?? map.nd;
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${cfg.classes}`}>
+      {cfg.label}
+    </span>
+  );
+}
+
+// ─── CPV tag input con AI suggest ────────────────────────────────────────────
+
+function CpvInput({
+  value,
+  onChange,
+  description,
+}: {
+  value: CpvCode[];
+  onChange: (codes: CpvCode[]) => void;
+  description: string;
+}) {
+  const [codeInput, setCodeInput] = useState("");
+  const [labelInput, setLabelInput] = useState("");
+  const [aiOpen, setAiOpen] = useState(false);
+  const [suggestions, setSuggestions] = useState<CpvCode[]>([]);
+  const [aiError, setAiError] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+
+  function addCode() {
+    const code = codeInput.trim();
+    const label = labelInput.trim();
+    if (!code) return;
+    if (value.some(c => c.code === code)) return;
+    onChange([...value, { code, label }]);
+    setCodeInput("");
+    setLabelInput("");
+  }
+
+  function removeCode(code: string) {
+    onChange(value.filter(c => c.code !== code));
+  }
+
+  async function fetchSuggestions() {
+    if (!description.trim()) {
+      setAiError("Inserisci prima una descrizione del fornitore per ottenere suggerimenti.");
+      setAiOpen(true);
+      return;
+    }
+    setAiLoading(true);
+    setAiError("");
+    setAiOpen(true);
+    setSuggestions([]);
+    try {
+      const res = await suppliersApi.suggestCpv(description);
+      setSuggestions(res.suggestions ?? []);
+    } catch (e: any) {
+      setAiError(e?.response?.data?.error || "Errore durante il suggerimento AI.");
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
+  function acceptSuggestion(s: CpvCode) {
+    if (!value.some(c => c.code === s.code)) {
+      onChange([...value, s]);
+    }
+  }
+
+  return (
+    <div>
+      {/* Tag esistenti */}
+      {value.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-2">
+          {value.map(c => (
+            <span key={c.code} className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-800 text-xs px-2 py-0.5 rounded-full border border-indigo-200">
+              <span className="font-mono font-medium">{c.code}</span>
+              {c.label && <span className="text-indigo-600">— {c.label}</span>}
+              <button onClick={() => removeCode(c.code)} className="ml-0.5 text-indigo-400 hover:text-red-500 font-bold leading-none">&times;</button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Input aggiunta manuale */}
+      <div className="flex gap-1.5 items-end">
+        <div>
+          <label className="block text-xs text-gray-500 mb-0.5">Codice CPV (8 cifre)</label>
+          <input
+            type="text"
+            value={codeInput}
+            onChange={e => setCodeInput(e.target.value.replace(/\D/g, "").slice(0, 8))}
+            onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addCode())}
+            placeholder="72000000"
+            className="w-28 border rounded px-2 py-1 text-xs font-mono"
+          />
+        </div>
+        <div className="flex-1">
+          <label className="block text-xs text-gray-500 mb-0.5">Descrizione (opzionale)</label>
+          <input
+            type="text"
+            value={labelInput}
+            onChange={e => setLabelInput(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addCode())}
+            placeholder="es. Servizi informatici"
+            className="w-full border rounded px-2 py-1 text-xs"
+          />
+        </div>
+        <button
+          type="button"
+          onClick={addCode}
+          disabled={codeInput.length !== 8}
+          className="px-2 py-1 text-xs bg-indigo-600 text-white rounded disabled:opacity-40 whitespace-nowrap"
+        >
+          + Aggiungi
+        </button>
+        <button
+          type="button"
+          onClick={fetchSuggestions}
+          title="Suggerisci codici CPV con AI (usa la descrizione del fornitore, senza dati identificativi)"
+          className="px-2 py-1 text-xs border border-violet-300 text-violet-700 rounded hover:bg-violet-50 whitespace-nowrap flex items-center gap-1"
+        >
+          <span>✦</span> AI
+        </button>
+      </div>
+
+      {/* Pannello suggerimenti AI */}
+      {aiOpen && (
+        <div className="mt-2 p-3 bg-violet-50 border border-violet-200 rounded-lg">
+          <div className="flex items-center justify-between mb-1.5">
+            <p className="text-xs font-medium text-violet-800">Suggerimenti AI — revisiona e accetta</p>
+            <button onClick={() => setAiOpen(false)} className="text-xs text-violet-400 hover:text-violet-700">&times; Chiudi</button>
+          </div>
+          <p className="text-xs text-violet-500 mb-2">
+            La descrizione viene inviata all'AI <strong>senza</strong> il nome del fornitore (tutela privacy).
+            Verifica i codici prima di accettarli.
+          </p>
+          {aiLoading && <p className="text-xs text-violet-600 animate-pulse">Elaborazione in corso...</p>}
+          {aiError && <p className="text-xs text-red-600">{aiError}</p>}
+          {!aiLoading && suggestions.length > 0 && (
+            <div className="space-y-1">
+              {suggestions.map(s => {
+                const alreadyAdded = value.some(c => c.code === s.code);
+                return (
+                  <div key={s.code} className="flex items-center justify-between bg-white border border-violet-100 rounded px-2 py-1">
+                    <span className="text-xs">
+                      <span className="font-mono font-semibold text-indigo-700">{s.code}</span>
+                      {s.label && <span className="text-gray-600 ml-2">{s.label}</span>}
+                    </span>
+                    <button
+                      onClick={() => acceptSuggestion(s)}
+                      disabled={alreadyAdded}
+                      className={`text-xs px-2 py-0.5 rounded border ${alreadyAdded ? "border-gray-200 text-gray-400 bg-gray-50" : "border-green-300 text-green-700 hover:bg-green-50"}`}
+                    >
+                      {alreadyAdded ? "Aggiunto" : "Accetta"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {!aiLoading && suggestions.length === 0 && !aiError && (
+            <p className="text-xs text-violet-500 italic">Nessun suggerimento disponibile.</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
 // ─── AssessmentsTable (existing, unchanged) ──────────────────────────────────
@@ -548,39 +730,61 @@ function NdaTab() {
 
 function NewSupplierModal({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
-  const [form, setForm] = useState<Partial<Supplier>>({ risk_level: "basso", status: "attivo" });
+  const [form, setForm] = useState<Partial<Supplier>>({
+    risk_level: "basso",
+    status: "attivo",
+    nis2_relevant: false,
+    cpv_codes: [],
+  });
+  const [error, setError] = useState("");
 
   const mutation = useMutation({
     mutationFn: suppliersApi.create,
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["suppliers"] }); onClose(); },
+    onError: (e: any) => {
+      const data = e?.response?.data;
+      if (data?.vat_number) setError(data.vat_number[0]);
+      else if (data?.nis2_relevance_criterion) setError(data.nis2_relevance_criterion[0]);
+      else if (data?.non_field_errors) setError(data.non_field_errors[0]);
+      else setError("Errore durante il salvataggio.");
+    },
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value, type } = e.target;
+    if (type === "checkbox") {
+      setForm(prev => ({ ...prev, [name]: (e.target as HTMLInputElement).checked }));
+    } else {
+      setForm(prev => ({ ...prev, [name]: value }));
+    }
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 overflow-y-auto py-6">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-xl mx-4 p-6">
         <h3 className="text-lg font-semibold mb-4">Nuovo fornitore</h3>
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Denominazione (ragione sociale) *</label>
             <input name="name" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">P.IVA</label>
-              <input name="vat_number" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
+              <label className="block text-sm font-medium text-gray-700 mb-1">CF / P.IVA *</label>
+              <input name="vat_number" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="es. 01234567890" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Paese</label>
-              <input name="country" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="IT" />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Paese sede legale *</label>
+              <input name="country" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="IT" maxLength={2} />
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email fornitore *</label>
             <input name="email" type="email" required onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="contatto@fornitore.it" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Descrizione fornitura</label>
+            <textarea name="description" rows={2} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="Descrivere i servizi/prodotti forniti (usato per suggerimento CPV AI)" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -594,11 +798,75 @@ function NewSupplierModal({ onClose }: { onClose: () => void }) {
               <input name="evaluation_date" type="date" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
             </div>
           </div>
+
+          {/* Sezione ACN / NIS2 */}
+          <div className="border-t border-gray-200 pt-3">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">ACN — Delibera 127434 del 13/04/2026</p>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Codici CPV della fornitura</label>
+              <CpvInput
+                value={form.cpv_codes ?? []}
+                onChange={codes => setForm(prev => ({ ...prev, cpv_codes: codes }))}
+                description={form.description ?? ""}
+              />
+            </div>
+            <div className="flex items-center gap-2 mt-3">
+              <input
+                type="checkbox"
+                name="nis2_relevant"
+                id="new_nis2_relevant"
+                checked={!!form.nis2_relevant}
+                onChange={handleChange}
+                className="h-4 w-4 text-purple-600 border-gray-300 rounded"
+              />
+              <label htmlFor="new_nis2_relevant" className="text-sm font-medium text-gray-700">
+                Fornitore rilevante NIS2
+              </label>
+            </div>
+            {form.nis2_relevant && (
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Criterio di rilevanza *</label>
+                  <select name="nis2_relevance_criterion" value={form.nis2_relevance_criterion ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+                    <option value="">— seleziona —</option>
+                    <option value="ict">Fornitura ICT strutturale (a)</option>
+                    <option value="non_fungibile">Non fungibilità (b)</option>
+                    <option value="entrambi">Entrambi (a + b)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">% Concentrazione fornitura</label>
+                  <div className="relative">
+                    <input
+                      name="supply_concentration_pct"
+                      type="number"
+                      min={0}
+                      max={100}
+                      step={0.01}
+                      onChange={handleChange}
+                      className="w-full border rounded px-3 py-2 text-sm pr-8"
+                      placeholder="es. 35.00"
+                    />
+                    <span className="absolute right-2 top-2 text-gray-400 text-sm">%</span>
+                  </div>
+                  {form.supply_concentration_pct !== undefined && form.supply_concentration_pct !== null && (
+                    <p className="text-xs mt-0.5 text-gray-500">
+                      Soglia: {Number(form.supply_concentration_pct) < 20 ? "Bassa" : Number(form.supply_concentration_pct) <= 50 ? "Media" : "Critica"}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-        {mutation.isError && <p className="text-sm text-red-600 mt-2">Errore durante il salvataggio</p>}
+        {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
-          <button onClick={() => mutation.mutate(form)} disabled={mutation.isPending || !form.name || !form.email} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50">
+          <button
+            onClick={() => { setError(""); mutation.mutate(form); }}
+            disabled={mutation.isPending || !form.name || !form.email}
+            className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
+          >
             {mutation.isPending ? "Salvataggio..." : "Crea fornitore"}
           </button>
         </div>
@@ -609,39 +877,56 @@ function NewSupplierModal({ onClose }: { onClose: () => void }) {
 
 function EditSupplierModal({ supplier, onClose }: { supplier: Supplier; onClose: () => void }) {
   const qc = useQueryClient();
-  const [form, setForm] = useState<Partial<Supplier>>({ ...supplier });
+  const [form, setForm] = useState<Partial<Supplier>>({ ...supplier, cpv_codes: supplier.cpv_codes ?? [] });
+  const [error, setError] = useState("");
 
   const mutation = useMutation({
     mutationFn: () => suppliersApi.update(supplier.id, form),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["suppliers"] }); onClose(); },
+    onError: (e: any) => {
+      const data = e?.response?.data;
+      if (data?.vat_number) setError(data.vat_number[0]);
+      else if (data?.nis2_relevance_criterion) setError(data.nis2_relevance_criterion[0]);
+      else if (data?.non_field_errors) setError(data.non_field_errors[0]);
+      else setError("Errore durante il salvataggio.");
+    },
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value, type } = e.target;
+    if (type === "checkbox") {
+      setForm(prev => ({ ...prev, [name]: (e.target as HTMLInputElement).checked }));
+    } else {
+      setForm(prev => ({ ...prev, [name]: value }));
+    }
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 overflow-y-auto py-6">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-xl mx-4 p-6">
         <h3 className="text-lg font-semibold mb-4">Modifica fornitore</h3>
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Denominazione (ragione sociale) *</label>
             <input name="name" value={form.name ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">P.IVA</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">CF / P.IVA *</label>
               <input name="vat_number" value={form.vat_number ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Paese</label>
-              <input name="country" value={form.country ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="IT" />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Paese sede legale *</label>
+              <input name="country" value={form.country ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="IT" maxLength={2} />
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email fornitore *</label>
             <input name="email" type="email" required value={form.email ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="contatto@fornitore.it" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Descrizione fornitura</label>
+            <textarea name="description" rows={2} value={form.description ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="Descrivere i servizi/prodotti forniti (usato per suggerimento CPV AI)" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -661,11 +946,76 @@ function EditSupplierModal({ supplier, onClose }: { supplier: Supplier; onClose:
             <label className="block text-sm font-medium text-gray-700 mb-1">Data di Valutazione</label>
             <input name="evaluation_date" type="date" value={form.evaluation_date ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
           </div>
+
+          {/* Sezione ACN / NIS2 */}
+          <div className="border-t border-gray-200 pt-3">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">ACN — Delibera 127434 del 13/04/2026</p>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Codici CPV della fornitura</label>
+              <CpvInput
+                value={form.cpv_codes ?? []}
+                onChange={codes => setForm(prev => ({ ...prev, cpv_codes: codes }))}
+                description={form.description ?? ""}
+              />
+            </div>
+            <div className="flex items-center gap-2 mt-3">
+              <input
+                type="checkbox"
+                name="nis2_relevant"
+                id="edit_nis2_relevant"
+                checked={!!form.nis2_relevant}
+                onChange={handleChange}
+                className="h-4 w-4 text-purple-600 border-gray-300 rounded"
+              />
+              <label htmlFor="edit_nis2_relevant" className="text-sm font-medium text-gray-700">
+                Fornitore rilevante NIS2
+              </label>
+            </div>
+            {form.nis2_relevant && (
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Criterio di rilevanza *</label>
+                  <select name="nis2_relevance_criterion" value={form.nis2_relevance_criterion ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+                    <option value="">— seleziona —</option>
+                    <option value="ict">Fornitura ICT strutturale (a)</option>
+                    <option value="non_fungibile">Non fungibilità (b)</option>
+                    <option value="entrambi">Entrambi (a + b)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">% Concentrazione fornitura</label>
+                  <div className="relative">
+                    <input
+                      name="supply_concentration_pct"
+                      type="number"
+                      min={0}
+                      max={100}
+                      step={0.01}
+                      value={form.supply_concentration_pct ?? ""}
+                      onChange={handleChange}
+                      className="w-full border rounded px-3 py-2 text-sm pr-8"
+                      placeholder="es. 35.00"
+                    />
+                    <span className="absolute right-2 top-2 text-gray-400 text-sm">%</span>
+                  </div>
+                  {form.supply_concentration_pct !== null && form.supply_concentration_pct !== undefined && form.supply_concentration_pct !== "" && (
+                    <p className="text-xs mt-0.5 text-gray-500">
+                      Soglia: {Number(form.supply_concentration_pct) < 20 ? "Bassa" : Number(form.supply_concentration_pct) <= 50 ? "Media" : "Critica"}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-        {mutation.isError && <p className="text-sm text-red-600 mt-2">Errore durante il salvataggio</p>}
+        {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
-          <button onClick={() => mutation.mutate()} disabled={mutation.isPending || !form.name} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50">
+          <button
+            onClick={() => { setError(""); mutation.mutate(); }}
+            disabled={mutation.isPending || !form.name}
+            className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
+          >
             {mutation.isPending ? "Salvataggio..." : "Aggiorna fornitore"}
           </button>
         </div>
@@ -753,6 +1103,8 @@ function ForniториTab() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filterRisk, setFilterRisk] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [filterNis2, setFilterNis2] = useState("");
+  const [exportLoading, setExportLoading] = useState(false);
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => suppliersApi.delete(id),
@@ -763,17 +1115,29 @@ function ForniториTab() {
   const params: Record<string, string> = {};
   if (filterRisk) params.risk_level = filterRisk;
   if (filterStatus) params.status = filterStatus;
+  if (filterNis2) params.nis2_relevant = filterNis2;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["suppliers", filterRisk, filterStatus],
+    queryKey: ["suppliers", filterRisk, filterStatus, filterNis2],
     queryFn: () => suppliersApi.list(Object.keys(params).length ? params : undefined),
   });
   const suppliers = data?.results ?? [];
 
+  async function handleExport(nis2Only: boolean) {
+    setExportLoading(true);
+    try {
+      await suppliersApi.exportCsv(nis2Only);
+    } catch {
+      window.alert("Errore durante l'esportazione.");
+    } finally {
+      setExportLoading(false);
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <select value={filterRisk} onChange={e => setFilterRisk(e.target.value)} className="border rounded px-3 py-1.5 text-sm">
             <option value="">Tutti i rischi</option>
             {["basso","medio","alto","critico"].map(r => <option key={r} value={r}>{r}</option>)}
@@ -782,17 +1146,47 @@ function ForniториTab() {
             <option value="">Tutti gli stati</option>
             {["attivo","sospeso","terminato"].map(s => <option key={s} value={s}>{s}</option>)}
           </select>
+          <select value={filterNis2} onChange={e => setFilterNis2(e.target.value)} className="border rounded px-3 py-1.5 text-sm">
+            <option value="">Tutti (NIS2)</option>
+            <option value="true">Solo NIS2 rilevanti</option>
+            <option value="false">Non NIS2</option>
+          </select>
         </div>
-        <button onClick={() => setNewModal(true)} className="px-4 py-2 bg-primary-600 text-white text-sm rounded hover:bg-primary-700">
-          + Nuovo fornitore
-        </button>
+        <div className="flex gap-2">
+          {/* Export dropdown */}
+          <div className="relative group">
+            <button
+              disabled={exportLoading}
+              className="px-3 py-1.5 text-sm border border-gray-300 rounded text-gray-700 hover:bg-gray-50 disabled:opacity-50 flex items-center gap-1"
+            >
+              {exportLoading ? "Esportazione..." : "↓ Esporta CSV"}
+            </button>
+            <div className="absolute right-0 top-full mt-1 w-52 bg-white border border-gray-200 rounded-lg shadow-lg z-10 hidden group-hover:block">
+              <button
+                onClick={() => handleExport(false)}
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              >
+                Tutti i fornitori
+              </button>
+              <button
+                onClick={() => handleExport(true)}
+                className="w-full text-left px-4 py-2 text-sm text-purple-700 hover:bg-purple-50 font-medium"
+              >
+                Solo NIS2 rilevanti
+              </button>
+            </div>
+          </div>
+          <button onClick={() => setNewModal(true)} className="px-4 py-2 bg-primary-600 text-white text-sm rounded hover:bg-primary-700">
+            + Nuovo fornitore
+          </button>
+        </div>
       </div>
 
       {newModal && <NewSupplierModal onClose={() => setNewModal(false)} />}
       {editModal && <EditSupplierModal supplier={editModal} onClose={() => setEditModal(null)} />}
       {sendModal && <SendQuestionnaireModal supplier={sendModal} onClose={() => setSendModal(null)} />}
 
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
         {isLoading ? (
           <div className="p-8 text-center text-gray-400">Caricamento...</div>
         ) : suppliers.length === 0 ? (
@@ -801,13 +1195,14 @@ function ForniториTab() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Nome</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">P.IVA</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Denominazione</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">CF / P.IVA</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Paese</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Email</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">NIS2</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Concentraz.</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Rischio</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Stato</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Data Valutazione</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Val.</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Scadenza</th>
                 <th className="px-4 py-3 w-36"></th>
               </tr>
@@ -821,20 +1216,43 @@ function ForniториTab() {
                         {s.name}
                       </button>
                     </td>
-                    <td className="px-4 py-3 text-gray-500">{s.vat_number || "—"}</td>
+                    <td className="px-4 py-3 text-gray-500 font-mono text-xs">{s.vat_number || <span className="text-red-400 font-sans">mancante</span>}</td>
                     <td className="px-4 py-3 text-gray-500">{s.country}</td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">{s.email || <span className="text-gray-300">—</span>}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col gap-0.5">
+                        <Nis2Badge relevant={s.nis2_relevant} />
+                        {s.nis2_relevant && s.nis2_relevance_criterion && (
+                          <span className="text-xs text-purple-600">
+                            {s.nis2_relevance_criterion === "ict" ? "ICT (a)" : s.nis2_relevance_criterion === "non_fungibile" ? "Non fung. (b)" : "a+b"}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      {s.supply_concentration_pct !== null && s.supply_concentration_pct !== undefined
+                        ? <div className="flex flex-col gap-0.5">
+                            <ConcentrationBadge threshold={s.concentration_threshold} />
+                            <span className="text-xs text-gray-400">{s.supply_concentration_pct}%</span>
+                          </div>
+                        : <span className="text-gray-300">—</span>
+                      }
+                    </td>
                     <td className="px-4 py-3"><RiskBadge level={s.risk_level} /></td>
                     <td className="px-4 py-3"><StatusBadge status={s.status} /></td>
                     <td className="px-4 py-3"><EvalDateCell date={s.evaluation_date} /></td>
                     <td className="px-4 py-3"><ExpiryDateCell evaluationDate={s.evaluation_date} /></td>
                     <td className="px-4 py-3 text-right space-x-1">
                       <button
-                        onClick={() => setSendModal(s)}
-                        title="Invia questionario"
-                        className="text-xs text-indigo-600 border border-indigo-200 rounded px-2 py-1 hover:bg-indigo-50"
+                        onClick={() => s.latest_questionnaire_status !== "inviato" && setSendModal(s)}
+                        disabled={s.latest_questionnaire_status === "inviato"}
+                        title={s.latest_questionnaire_status === "inviato" ? "Questionario già inviato — gestisci dal tab Questionari" : "Invia questionario"}
+                        className={`text-xs border rounded px-2 py-1 ${
+                          s.latest_questionnaire_status === "inviato"
+                            ? "text-gray-400 border-gray-200 bg-gray-50 cursor-not-allowed"
+                            : "text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                        }`}
                       >
-                        Questionario
+                        {s.latest_questionnaire_status === "inviato" ? "Inviato" : "Quest."}
                       </button>
                       <button
                         onClick={() => setEditModal(s)}
@@ -855,7 +1273,7 @@ function ForniториTab() {
                   </tr>
                   {expandedId === s.id && (
                     <tr key={`${s.id}-expand`}>
-                      <td colSpan={9} className="bg-gray-50">
+                      <td colSpan={10} className="bg-gray-50">
                         <ExpandedSupplierRow supplierId={s.id} />
                       </td>
                     </tr>

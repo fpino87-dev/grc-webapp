@@ -1,3 +1,7 @@
+import csv
+import json
+
+from django.http import HttpResponse
 from rest_framework import filters, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -19,7 +23,7 @@ class SupplierViewSet(viewsets.ModelViewSet):
     serializer_class = SupplierSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ["risk_level", "status"]
+    filterset_fields = ["risk_level", "status", "nis2_relevant"]
     search_fields = ["name", "vat_number"]
 
     @action(detail=True, methods=["get"], url_path="nda")
@@ -129,6 +133,168 @@ class SupplierViewSet(viewsets.ModelViewSet):
             "sha256": v.sha256[:12] + "…",
             "version_number": v.version_number,
         }
+
+    @action(detail=False, methods=["post"], url_path="suggest-cpv")
+    def suggest_cpv(self, request):
+        """
+        POST /suppliers/suggest-cpv/
+        Body: {description: str}
+        Invia la descrizione (sanitizzata, senza nome fornitore) all'AI e restituisce
+        una lista di codici CPV suggeriti con descrizione.
+        Human-in-the-loop: l'output è sempre revisionato dall'utente prima dell'applicazione.
+        """
+        from apps.ai_engine.router import route
+        from apps.ai_engine.sanitizer import Sanitizer
+
+        description = (request.data.get("description") or "").strip()
+        if not description:
+            return Response({"error": "La descrizione è obbligatoria."}, status=400)
+        if len(description) > 2000:
+            return Response({"error": "La descrizione non può superare 2000 caratteri."}, status=400)
+
+        sanitizer = Sanitizer()
+        sanitized_ctx, _ = sanitizer.sanitize({"text": description})
+        safe_description = sanitized_ctx["text"]
+
+        system = (
+            "Sei un esperto di appalti pubblici europei. "
+            "Rispondi SOLO con un array JSON valido. "
+            "Non aggiungere testo prima o dopo il JSON."
+        )
+        prompt = (
+            f"Sulla base di questa descrizione di fornitura:\n\n\"{safe_description}\"\n\n"
+            "Suggerisci i 3-5 codici CPV (Common Procurement Vocabulary) più appropriati. "
+            "Rispondi ESCLUSIVAMENTE con un array JSON nel formato:\n"
+            '[{"code": "XXXXXXXX", "label": "Descrizione in italiano"}]\n'
+            "I codici devono essere a 8 cifre. Non aggiungere altro testo."
+        )
+
+        try:
+            result = route(
+                task_type="cpv_suggestion",
+                prompt=prompt,
+                system=system,
+                user=request.user,
+                module_source="M14",
+                sanitize=False,  # già sanitizzato manualmente sopra
+            )
+        except ValueError as exc:
+            return Response({"error": str(exc)}, status=503)
+        except Exception as exc:
+            import logging
+            logging.getLogger(__name__).error("suggest_cpv AI error: %s", exc)
+            return Response(
+                {"error": f"Errore AI ({type(exc).__name__}): controlla la configurazione AI Engine o il budget disponibile."},
+                status=503,
+            )
+
+        raw_text = result.get("text", "")
+        suggestions = []
+        try:
+            # Estrai solo il JSON dall'output (l'AI potrebbe aggiungere testo)
+            start = raw_text.find("[")
+            end = raw_text.rfind("]") + 1
+            if start >= 0 and end > start:
+                raw_suggestions = json.loads(raw_text[start:end])
+                # Normalizza: CPV standard = 8 cifre, rimuovi suffisso "-X" aggiunto da alcuni LLM
+                for item in raw_suggestions:
+                    if isinstance(item, dict) and "code" in item:
+                        item["code"] = item["code"].split("-")[0].strip()
+                suggestions = raw_suggestions
+        except (json.JSONDecodeError, ValueError):
+            pass
+
+        log_action(
+            user=request.user,
+            action_code="suppliers.cpv.suggest",
+            level="L1",
+            entity=request.user,
+            payload={
+                "description_len": len(description),
+                "suggestions_count": len(suggestions),
+                "interaction_id": result.get("interaction_id"),
+            },
+        )
+
+        return Response({
+            "suggestions": suggestions,
+            "interaction_id": result.get("interaction_id"),
+            "provider": result.get("provider"),
+        })
+
+    @action(detail=False, methods=["get"], url_path="export-csv")
+    def export_csv(self, request):
+        """
+        GET /suppliers/export-csv/?nis2_only=true
+        Esporta i fornitori in CSV con tutti i campi richiesti da ACN Delibera 127434.
+        """
+        nis2_only = request.query_params.get("nis2_only", "false").lower() == "true"
+        qs = Supplier.objects.filter(deleted_at__isnull=True).order_by("name")
+        if nis2_only:
+            qs = qs.filter(nis2_relevant=True)
+
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
+        filename = "fornitori_nis2.csv" if nis2_only else "fornitori.csv"
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        response.write("\ufeff")  # BOM per Excel
+
+        CRITERION_LABELS = {
+            "ict": "Fornitura ICT strutturale (a)",
+            "non_fungibile": "Non fungibilità (b)",
+            "entrambi": "Entrambi (a+b)",
+            "": "",
+        }
+        THRESHOLD_LABELS = {
+            "bassa": "Bassa (<20%)",
+            "media": "Media (20-50%)",
+            "critica": "Critica (>50%)",
+            "nd": "N/D",
+        }
+
+        writer = csv.writer(response)
+        writer.writerow([
+            "Denominazione",
+            "Codice Fiscale / P.IVA",
+            "Paese sede legale",
+            "Codici CPV",
+            "Rilevante NIS2",
+            "Criterio rilevanza NIS2",
+            "% Concentrazione fornitura",
+            "Soglia TPRM",
+            "Livello rischio TPRM",
+            "Stato",
+            "Data ultima valutazione",
+            "Email",
+        ])
+
+        for s in qs:
+            cpv_str = "; ".join(
+                f"{c.get('code', '')} - {c.get('label', '')}" if isinstance(c, dict) else str(c)
+                for c in (s.cpv_codes or [])
+            )
+            writer.writerow([
+                s.name,
+                s.vat_number,
+                s.country,
+                cpv_str,
+                "Sì" if s.nis2_relevant else "No",
+                CRITERION_LABELS.get(s.nis2_relevance_criterion, s.nis2_relevance_criterion),
+                f"{s.supply_concentration_pct}%" if s.supply_concentration_pct is not None else "",
+                THRESHOLD_LABELS.get(s.concentration_threshold, ""),
+                s.risk_level,
+                s.status,
+                str(s.evaluation_date) if s.evaluation_date else "",
+                s.email,
+            ])
+
+        log_action(
+            user=request.user,
+            action_code="suppliers.export.csv",
+            level="L2",
+            entity=request.user,
+            payload={"nis2_only": nis2_only, "count": qs.count()},
+        )
+        return response
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)

@@ -1,15 +1,28 @@
 import { apiClient } from "../client";
 
+export interface CpvCode {
+  code: string;
+  label: string;
+}
+
 export interface Supplier {
   id: string;
   name: string;
   vat_number: string;
   country: string;
   email: string;
+  description: string;
   risk_level: "basso" | "medio" | "alto" | "critico";
   status: "attivo" | "sospeso" | "terminato";
   evaluation_date: string | null;
   notes: string;
+  latest_questionnaire_status: "inviato" | "risposto" | "scaduto" | null;
+  // Campi ACN Delibera 127434
+  cpv_codes: CpvCode[];
+  nis2_relevant: boolean;
+  nis2_relevance_criterion: "ict" | "non_fungibile" | "entrambi" | "";
+  supply_concentration_pct: string | null;
+  concentration_threshold: "bassa" | "media" | "critica" | "nd";
 }
 
 export interface QuestionnaireTemplate {
@@ -99,4 +112,23 @@ export const suppliersApi = {
     apiClient.post<NdaDocument>(`/suppliers/suppliers/${supplierId}/nda/upload/`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     }).then(r => r.data),
+
+  // ACN / NIS2
+  suggestCpv: (description: string) =>
+    apiClient.post<{ suggestions: CpvCode[]; interaction_id: string; provider: string }>(
+      "/suppliers/suppliers/suggest-cpv/",
+      { description }
+    ).then(r => r.data),
+
+  exportCsv: (nis2Only: boolean) => {
+    const url = `/suppliers/suppliers/export-csv/${nis2Only ? "?nis2_only=true" : ""}`;
+    return apiClient.get(url, { responseType: "blob" }).then(r => {
+      const blob = new Blob([r.data], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = nis2Only ? "fornitori_nis2.csv" : "fornitori.csv";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    });
+  },
 };

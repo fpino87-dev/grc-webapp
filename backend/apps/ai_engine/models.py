@@ -144,6 +144,7 @@ class AiProviderConfig(BaseModel):
             "review_summary": "cloud",
             "chatbot": "cloud",
             "control_explain": "cloud",
+            "cpv_suggestion": "cloud",
         }
         routing = self.task_routing or {}
         return routing.get(task_type, defaults.get(task_type, "ollama"))

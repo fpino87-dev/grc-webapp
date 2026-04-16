@@ -17,9 +17,16 @@ class Supplier(BaseModel):
         ("sospeso", "Sospeso"),
         ("terminato", "Terminato"),
     ]
+    NIS2_CRITERION_CHOICES = [
+        ("ict", "Fornitura ICT strutturale (criterio a)"),
+        ("non_fungibile", "Non fungibilità (criterio b)"),
+        ("entrambi", "Entrambi (a + b)"),
+    ]
+
     name = models.CharField(max_length=200)
     vat_number = models.CharField(max_length=50, blank=True)
     country = models.CharField(max_length=2, default="IT")
+    description = models.TextField(blank=True)
     risk_level = models.CharField(max_length=10, choices=RISK_CHOICES, default="medio")
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="attivo")
     owner = models.ForeignKey(
@@ -35,8 +42,44 @@ class Supplier(BaseModel):
     email = models.EmailField(blank=True)
     evaluation_date = models.DateField(null=True, blank=True)
 
+    # Campi ACN Delibera 127434 del 13/04/2026
+    cpv_codes = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Lista di oggetti {code, label} — Codici CPV della fornitura",
+    )
+    nis2_relevant = models.BooleanField(
+        default=False,
+        help_text="Fornitore rilevante ai fini NIS2 (ACN Delibera 127434)",
+    )
+    nis2_relevance_criterion = models.CharField(
+        max_length=20,
+        blank=True,
+        choices=NIS2_CRITERION_CHOICES,
+        help_text="Criterio di rilevanza NIS2: ICT strutturale (a), non fungibilità (b), o entrambi",
+    )
+    supply_concentration_pct = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="% di concentrazione della fornitura — soglia TPRM: <20% bassa, 20-50% media, >50% critica",
+    )
+
     class Meta:
         ordering = ["name"]
+
+    @property
+    def concentration_threshold(self) -> str:
+        """Soglia TPRM derivata dalla % di concentrazione (ACN Delibera 127434)."""
+        if self.supply_concentration_pct is None:
+            return "nd"
+        pct = float(self.supply_concentration_pct)
+        if pct < 20:
+            return "bassa"
+        if pct <= 50:
+            return "media"
+        return "critica"
 
 
 class SupplierAssessment(BaseModel):

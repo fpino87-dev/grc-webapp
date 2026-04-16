@@ -9,6 +9,7 @@ const TASKS = [
   ["rca_draft", "Bozza RCA"],
   ["review_summary", "Sintesi Management Review"],
   ["chatbot", "Chatbot"],
+  ["cpv_suggestion", "Suggerimento codici CPV (M14 Fornitori)"],
 ] as const;
 
 export function AiSettingsPage() {
