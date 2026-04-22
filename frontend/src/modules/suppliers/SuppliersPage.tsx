@@ -13,6 +13,7 @@ import { StatusBadge } from "../../components/ui/StatusBadge";
 import { apiClient } from "../../api/client";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
+import { InternalEvaluationSection } from "./InternalEvaluationSection";
 
 // ─── Shared badge components ─────────────────────────────────────────────────
 
@@ -629,15 +630,21 @@ function NdaSection({ supplierId }: { supplierId: string }) {
 }
 
 function ExpandedSupplierRow({ supplierId }: { supplierId: string }) {
-  const [subTab, setSubTab] = useState<"assessments" | "nda">("assessments");
+  const [subTab, setSubTab] = useState<"internal" | "assessments" | "nda">("internal");
   return (
     <div>
       <div className="flex border-b border-gray-200 px-4 pt-2">
         <button
+          onClick={() => setSubTab("internal")}
+          className={`px-3 py-1.5 text-xs font-medium border-b-2 -mb-px transition-colors ${subTab === "internal" ? "border-indigo-600 text-indigo-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+        >
+          Valutazione interna
+        </button>
+        <button
           onClick={() => setSubTab("assessments")}
           className={`px-3 py-1.5 text-xs font-medium border-b-2 -mb-px transition-colors ${subTab === "assessments" ? "border-indigo-600 text-indigo-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
         >
-          Valutazioni
+          Assessment esterni
         </button>
         <button
           onClick={() => setSubTab("nda")}
@@ -646,7 +653,9 @@ function ExpandedSupplierRow({ supplierId }: { supplierId: string }) {
           NDA / Contratti
         </button>
       </div>
-      {subTab === "assessments" ? <AssessmentsTable supplierId={supplierId} /> : <NdaSection supplierId={supplierId} />}
+      {subTab === "internal" && <InternalEvaluationSection supplierId={supplierId} />}
+      {subTab === "assessments" && <AssessmentsTable supplierId={supplierId} />}
+      {subTab === "nda" && <NdaSection supplierId={supplierId} />}
     </div>
   );
 }
@@ -1209,7 +1218,7 @@ function ForniториTab() {
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Paese</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">NIS2</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Concentraz.</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Rischio</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600" title="Rischio Adj = worst-case interno/esterno (+ bump NIS2)">Rischio Adj</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Stato</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Val.</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Scadenza</th>
@@ -1246,7 +1255,20 @@ function ForniториTab() {
                         : <span className="text-gray-300">—</span>
                       }
                     </td>
-                    <td className="px-4 py-3"><RiskBadge level={s.risk_level} /></td>
+                    <td className="px-4 py-3">
+                      {s.risk_adj ? (
+                        <div className="flex flex-col gap-0.5">
+                          <RiskBadge level={s.risk_adj} />
+                          {s.internal_risk_level && s.internal_risk_level !== s.risk_adj && (
+                            <span className="text-[10px] text-gray-400" title="Classe interna (pre-bump / worst-case)">
+                              int: {s.internal_risk_level}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-gray-400 italic">non valutato</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3"><StatusBadge status={s.status} /></td>
                     <td className="px-4 py-3"><EvalDateCell date={s.evaluation_date} /></td>
                     <td className="px-4 py-3"><ExpiryDateCell evaluationDate={s.evaluation_date} /></td>

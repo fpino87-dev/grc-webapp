@@ -5,6 +5,8 @@ export interface CpvCode {
   label: string;
 }
 
+export type RiskClass = "basso" | "medio" | "alto" | "critico";
+
 export interface Supplier {
   id: string;
   name: string;
@@ -12,7 +14,7 @@ export interface Supplier {
   country: string;
   email: string;
   description: string;
-  risk_level: "basso" | "medio" | "alto" | "critico";
+  risk_level: RiskClass;
   status: "attivo" | "sospeso" | "terminato";
   evaluation_date: string | null;
   notes: string;
@@ -23,6 +25,42 @@ export interface Supplier {
   nis2_relevance_criterion: "ict" | "non_fungibile" | "entrambi" | "";
   supply_concentration_pct: string | null;
   concentration_threshold: "bassa" | "media" | "critica" | "nd";
+  // Campi calcolati (read-only)
+  internal_risk_level: RiskClass | "";
+  risk_adj: RiskClass | "";
+  risk_adj_updated_at: string | null;
+}
+
+export interface InternalEvaluation {
+  id: string;
+  supplier: string;
+  score_impatto: number;
+  score_accesso: number;
+  score_dati: number;
+  score_dipendenza: number;
+  score_integrazione: number;
+  score_compliance: number;
+  weighted_score: string;
+  risk_class: RiskClass;
+  weights_snapshot: Record<string, number>;
+  thresholds_snapshot: Record<string, number>;
+  is_current: boolean;
+  evaluated_by: number | null;
+  evaluated_by_display: string | null;
+  evaluated_at: string;
+  notes: string;
+}
+
+export interface EvaluationConfig {
+  weights: Record<"impatto" | "accesso" | "dati" | "dipendenza" | "integrazione" | "compliance", number>;
+  parameter_labels: Record<
+    "impatto" | "accesso" | "dati" | "dipendenza" | "integrazione" | "compliance",
+    { name: string; levels: string[] }
+  >;
+  risk_thresholds: Record<"medio" | "alto" | "critico", number>;
+  assessment_validity_months: number;
+  nis2_concentration_bump: boolean;
+  updated_at: string;
 }
 
 export interface QuestionnaireTemplate {
@@ -119,6 +157,41 @@ export const suppliersApi = {
       "/suppliers/suppliers/suggest-cpv/",
       { description }
     ).then(r => r.data),
+
+  // Internal evaluation
+  getCurrentEvaluation: (supplierId: string) =>
+    apiClient.get<InternalEvaluation>(`/suppliers/suppliers/${supplierId}/internal-evaluation/`)
+      .then(r => r.data)
+      .catch(err => {
+        if (err.response?.status === 404) return null;
+        throw err;
+      }),
+  createEvaluation: (
+    supplierId: string,
+    scores: {
+      score_impatto: number;
+      score_accesso: number;
+      score_dati: number;
+      score_dipendenza: number;
+      score_integrazione: number;
+      score_compliance: number;
+    },
+    notes?: string,
+  ) =>
+    apiClient.post<InternalEvaluation>(
+      `/suppliers/suppliers/${supplierId}/internal-evaluation/`,
+      { ...scores, notes: notes ?? "" },
+    ).then(r => r.data),
+  listEvaluationHistory: (supplierId: string) =>
+    apiClient.get<{ results: InternalEvaluation[]; count: number }>(
+      `/suppliers/suppliers/${supplierId}/internal-evaluation/history/`,
+    ).then(r => r.data),
+
+  // Evaluation config (singleton)
+  getEvaluationConfig: () =>
+    apiClient.get<EvaluationConfig>("/suppliers/evaluation-config/").then(r => r.data),
+  updateEvaluationConfig: (data: Partial<EvaluationConfig>) =>
+    apiClient.put<EvaluationConfig>("/suppliers/evaluation-config/", data).then(r => r.data),
 
   exportCsv: (nis2Only: boolean) => {
     const url = `/suppliers/suppliers/export-csv/${nis2Only ? "?nis2_only=true" : ""}`;

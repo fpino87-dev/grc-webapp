@@ -34,7 +34,7 @@ class SupplierViewSet(viewsets.ModelViewSet):
     serializer_class = SupplierSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ["risk_level", "status", "nis2_relevant"]
+    filterset_fields = ["risk_level", "risk_adj", "status", "nis2_relevant"]
     search_fields = ["name", "vat_number"]
 
     @action(detail=True, methods=["get"], url_path="nda")

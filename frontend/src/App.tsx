@@ -31,6 +31,7 @@ import { EmailSettingsPage } from "./modules/settings/EmailSettingsPage";
 import { NotificationSettingsPage } from "./modules/settings/NotificationSettingsPage";
 import { AiSettingsPage } from "./modules/settings/AiSettingsPage";
 import { MfaSettingsPage } from "./modules/settings/MfaSettingsPage";
+import { SupplierEvaluationSettingsPage } from "./modules/settings/SupplierEvaluationSettingsPage";
 import { BackupsPage } from "./modules/backups/BackupsPage";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -83,6 +84,7 @@ export function App() {
           <Route path="settings/ai" element={<AiSettingsPage />} />
           <Route path="settings/mfa" element={<MfaSettingsPage />} />
           <Route path="settings/backups" element={<BackupsPage />} />
+          <Route path="settings/supplier-evaluation" element={<SupplierEvaluationSettingsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

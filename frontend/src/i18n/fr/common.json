@@ -1061,6 +1061,7 @@
       "email_settings": "Config. Email",
       "notification_rules": "Règles notifications",
       "ai_engine": "AI Engine",
+      "supplier_evaluation": "Évaluation fournisseurs",
       "mfa": "Authentification MFA",
       "backups": "Sauvegarde & Restauration"
     }
