@@ -8,6 +8,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ## [Unreleased]
 
+### Added
+- M14 Fornitori — Valutazione interna del rischio (Fase 1/7): nuovo model singleton `SupplierEvaluationConfig` per gestire pesi, label dei 6 parametri (Impatto, Accesso, Dati, Dipendenza, Integrazione, Compliance), soglie di classificazione (basso/medio/alto/critico), validità assessment esterno (default 12 mesi) e flag bump NIS2 — tutto editabile via UI Impostazioni, nessun valore hardcoded. Endpoint `GET /suppliers/evaluation-config/` (auth) e `PUT` (super_admin GRC) con audit trail. Management command `load_supplier_evaluation_config` per seeding/reset. Migrazione `0007_supplierevaluationconfig`. Pesi default: Impatto 0.30, Accesso 0.20, Dati 0.20, Compliance 0.15, Dipendenza 0.10, Integrazione 0.05 (somma 1.00). Categorie Compliance riscritte per riflettere certificazioni cyber rilevanti per NIS2/TISAX/ISO27001 (rimossi IATF e "Base" generici).
+
 ### Fixed
 - M14 Fornitori: codici CPV ora gestiti nel formato standard `XXXXXXXX-Y` (8 cifre + cifra di controllo ufficiale UE, es. `79211100-0`) sia in input manuale, sia nei suggerimenti AI; precedentemente la cifra di controllo veniva troncata. La cifra di controllo proviene dal catalogo ufficiale CPV (Reg. CE 213/2008) e non viene mai inferita o defaultata: i suggerimenti AI privi di check digit valido vengono scartati.
 - M14 Fornitori: export CSV — codice CPV e descrizione ora in due colonne distinte (`Codici CPV` e `Descrizione CPV`) per agevolare filtri e analisi su Excel.

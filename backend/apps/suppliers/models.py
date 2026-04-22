@@ -82,6 +82,119 @@ class Supplier(BaseModel):
         return "critica"
 
 
+class SupplierEvaluationConfig(models.Model):
+    """
+    Configurazione singleton per la valutazione interna fornitori.
+
+    Mantiene pesi, label dei parametri, soglie di classificazione e parametri
+    operativi (validità assessment esterno, bump NIS2). Tutto editabile via UI
+    Impostazioni — nessun valore è hardcoded nel codice applicativo.
+    """
+
+    DEFAULT_WEIGHTS = {
+        "impatto": 0.30,
+        "accesso": 0.20,
+        "dati": 0.20,
+        "compliance": 0.15,
+        "dipendenza": 0.10,
+        "integrazione": 0.05,
+    }
+
+    DEFAULT_PARAMETER_LABELS = {
+        "impatto": {
+            "name": "Impatto business",
+            "levels": ["Nessuno", "Minimo", "Degrado", "Interruzione", "Blocco"],
+        },
+        "accesso": {
+            "name": "Accesso sistemi",
+            "levels": ["Nessuno", "Limitato", "User", "Critico", "Admin"],
+        },
+        "dati": {
+            "name": "Dati trattati",
+            "levels": ["Pubblici", "Interni", "Sensibili", "Clienti", "Critici"],
+        },
+        "dipendenza": {
+            "name": "Dipendenza fornitore",
+            "levels": ["Facile", "Rapida", "Media", "Difficile", "Lock-in"],
+        },
+        "integrazione": {
+            "name": "Integrazione IT",
+            "levels": ["Nessuna", "Base", "API", "App", "Core"],
+        },
+        "compliance": {
+            "name": "Compliance certificazioni cyber",
+            "levels": [
+                "TISAX L3 / ISO27001 + TISAX L2",
+                "TISAX L2 / ISO27001",
+                "ISO27001 in iter / SOC 2 / equivalenti",
+                "Autocertificazione / policy interne",
+                "Nessuna evidenza",
+            ],
+        },
+    }
+
+    DEFAULT_RISK_THRESHOLDS = {"medio": 2.0, "alto": 3.0, "critico": 4.0}
+
+    weights = models.JSONField(
+        default=dict,
+        help_text="Pesi per ciascuno dei 6 parametri (somma = 1.00)",
+    )
+    parameter_labels = models.JSONField(
+        default=dict,
+        help_text="Nome parametro e label dei 5 livelli (1=basso rischio … 5=alto rischio)",
+    )
+    risk_thresholds = models.JSONField(
+        default=dict,
+        help_text="Soglie weighted_score per classificazione (>=)",
+    )
+    assessment_validity_months = models.PositiveSmallIntegerField(
+        default=12,
+        help_text="Mesi di validità di un assessment esterno approvato. Oltre, scade e non partecipa al risk_adj.",
+    )
+    nis2_concentration_bump = models.BooleanField(
+        default=True,
+        help_text="Se True, fornitori NIS2-rilevanti con concentrazione critica subiscono bump +1 classe sul risk_adj.",
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+
+    class Meta:
+        verbose_name = "Configurazione valutazione fornitori"
+        verbose_name_plural = "Configurazione valutazione fornitori"
+
+    def __str__(self):
+        return "Configurazione valutazione fornitori (singleton)"
+
+    @classmethod
+    def get_solo(cls) -> "SupplierEvaluationConfig":
+        """Ritorna l'unica istanza, creandola con i default se non esiste."""
+        obj = cls.objects.first()
+        if obj is None:
+            obj = cls.objects.create(
+                weights=cls.DEFAULT_WEIGHTS.copy(),
+                parameter_labels={k: v.copy() for k, v in cls.DEFAULT_PARAMETER_LABELS.items()},
+                risk_thresholds=cls.DEFAULT_RISK_THRESHOLDS.copy(),
+            )
+        return obj
+
+    def classify(self, weighted_score: float) -> str:
+        """Restituisce la classe di rischio (basso/medio/alto/critico) per un weighted_score."""
+        thr = self.risk_thresholds or self.DEFAULT_RISK_THRESHOLDS
+        if weighted_score >= float(thr.get("critico", 4.0)):
+            return "critico"
+        if weighted_score >= float(thr.get("alto", 3.0)):
+            return "alto"
+        if weighted_score >= float(thr.get("medio", 2.0)):
+            return "medio"
+        return "basso"
+
+
 class SupplierAssessment(BaseModel):
     APPROVAL_CHOICES = [
         ("pianificato", "Pianificato"),

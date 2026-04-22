@@ -7,12 +7,20 @@ from rest_framework import filters, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 
 from core.audit import log_action
-from .models import Supplier, SupplierAssessment, QuestionnaireTemplate, SupplierQuestionnaire
+from .models import (
+    Supplier,
+    SupplierAssessment,
+    SupplierEvaluationConfig,
+    QuestionnaireTemplate,
+    SupplierQuestionnaire,
+)
 from .serializers import (
     SupplierAssessmentSerializer,
+    SupplierEvaluationConfigSerializer,
     SupplierSerializer,
     QuestionnaireTemplateSerializer,
     SupplierQuestionnaireSerializer,
@@ -338,6 +346,46 @@ class SupplierViewSet(viewsets.ModelViewSet):
             payload={"name": instance.name},
         )
         return Response(status=204)
+
+
+class SupplierEvaluationConfigView(APIView):
+    """
+    GET  /suppliers/evaluation-config/  → restituisce la config corrente (read = ogni utente autenticato).
+    PUT  /suppliers/evaluation-config/  → aggiorna pesi/label/soglie (write = solo super_admin GRC).
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        config = SupplierEvaluationConfig.get_solo()
+        return Response(SupplierEvaluationConfigSerializer(config).data)
+
+    def put(self, request):
+        from apps.auth_grc.permissions import IsGrcSuperAdmin
+
+        if not IsGrcSuperAdmin().has_permission(request, self):
+            return Response(
+                {"error": "Solo super_admin GRC possono modificare la configurazione."},
+                status=403,
+            )
+
+        config = SupplierEvaluationConfig.get_solo()
+        serializer = SupplierEvaluationConfigSerializer(config, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(updated_by=request.user)
+
+        log_action(
+            user=request.user,
+            action_code="suppliers.evaluation_config.update",
+            level="L1",
+            entity=config,
+            payload={
+                "weights": config.weights,
+                "risk_thresholds": config.risk_thresholds,
+                "assessment_validity_months": config.assessment_validity_months,
+                "nis2_concentration_bump": config.nis2_concentration_bump,
+            },
+        )
+        return Response(serializer.data)
 
 
 class SupplierAssessmentViewSet(viewsets.ModelViewSet):
