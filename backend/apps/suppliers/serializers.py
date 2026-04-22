@@ -27,6 +27,7 @@ class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
         model = Supplier
         fields = "__all__"
+        read_only_fields = ["internal_risk_level", "risk_adj", "risk_adj_updated_at"]
 
     def get_latest_questionnaire_status(self, obj):
         q = obj.questionnaires.order_by("-sent_at").first()

@@ -15,12 +15,14 @@ from .models import (
     Supplier,
     SupplierAssessment,
     SupplierEvaluationConfig,
+    SupplierInternalEvaluation,
     QuestionnaireTemplate,
     SupplierQuestionnaire,
 )
 from .serializers import (
     SupplierAssessmentSerializer,
     SupplierEvaluationConfigSerializer,
+    SupplierInternalEvaluationSerializer,
     SupplierSerializer,
     QuestionnaireTemplateSerializer,
     SupplierQuestionnaireSerializer,
@@ -321,6 +323,55 @@ class SupplierViewSet(viewsets.ModelViewSet):
             payload={"nis2_only": nis2_only, "count": qs.count()},
         )
         return response
+
+    @action(detail=True, methods=["get", "post"], url_path="internal-evaluation")
+    def internal_evaluation(self, request, pk=None):
+        """
+        GET  /suppliers/<id>/internal-evaluation/  → valutazione corrente (is_current=True) o 404 se assente.
+        POST /suppliers/<id>/internal-evaluation/  → crea nuova valutazione (marca la precedente come storico).
+        """
+        from django.core.exceptions import ValidationError
+        from .services import create_internal_evaluation
+
+        supplier = self.get_object()
+
+        if request.method == "GET":
+            current = SupplierInternalEvaluation.objects.filter(
+                supplier=supplier, is_current=True, deleted_at__isnull=True
+            ).first()
+            if not current:
+                return Response({"detail": "Nessuna valutazione interna corrente."}, status=404)
+            return Response(SupplierInternalEvaluationSerializer(current).data)
+
+        scores = {
+            "impatto": request.data.get("score_impatto"),
+            "accesso": request.data.get("score_accesso"),
+            "dati": request.data.get("score_dati"),
+            "dipendenza": request.data.get("score_dipendenza"),
+            "integrazione": request.data.get("score_integrazione"),
+            "compliance": request.data.get("score_compliance"),
+        }
+        try:
+            scores = {k: int(v) for k, v in scores.items() if v is not None}
+        except (TypeError, ValueError):
+            return Response({"error": "Score devono essere interi 1–5."}, status=400)
+
+        notes = request.data.get("notes", "")
+        try:
+            ev = create_internal_evaluation(supplier, scores, request.user, notes=notes)
+        except ValidationError as exc:
+            return Response({"error": exc.messages if hasattr(exc, "messages") else str(exc)}, status=400)
+        return Response(SupplierInternalEvaluationSerializer(ev).data, status=201)
+
+    @action(detail=True, methods=["get"], url_path="internal-evaluation/history")
+    def internal_evaluation_history(self, request, pk=None):
+        """GET /suppliers/<id>/internal-evaluation/history/ — storico completo valutazioni interne."""
+        supplier = self.get_object()
+        qs = SupplierInternalEvaluation.objects.filter(
+            supplier=supplier, deleted_at__isnull=True
+        ).order_by("-evaluated_at")
+        data = SupplierInternalEvaluationSerializer(qs, many=True).data
+        return Response({"results": data, "count": len(data)})
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)
