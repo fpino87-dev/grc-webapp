@@ -1,5 +1,6 @@
 import csv
 import json
+import re
 
 from django.http import HttpResponse
 from rest_framework import filters, viewsets
@@ -163,10 +164,16 @@ class SupplierViewSet(viewsets.ModelViewSet):
         )
         prompt = (
             f"Sulla base di questa descrizione di fornitura:\n\n\"{safe_description}\"\n\n"
-            "Suggerisci i 3-5 codici CPV (Common Procurement Vocabulary) più appropriati. "
+            "Suggerisci i 3-5 codici CPV (Common Procurement Vocabulary) più appropriati "
+            "secondo il Regolamento (CE) n. 213/2008 e successivi aggiornamenti. "
             "Rispondi ESCLUSIVAMENTE con un array JSON nel formato:\n"
-            '[{"code": "XXXXXXXX", "label": "Descrizione in italiano"}]\n'
-            "I codici devono essere a 8 cifre. Non aggiungere altro testo."
+            '[{"code": "XXXXXXXX-Y", "label": "Descrizione in italiano"}]\n'
+            "REQUISITI OBBLIGATORI sul codice:\n"
+            "- Formato standard CPV completo: 8 cifre + trattino + 1 cifra di controllo (es. 79211100-0, 72000000-5, 50000000-5).\n"
+            "- La cifra di controllo Y NON è arbitraria: è quella ufficiale assegnata dall'UE al codice nel catalogo CPV. "
+            "Non inventare la cifra di controllo: se non sei certo, NON includere il codice.\n"
+            "- Restituisci esclusivamente codici CPV reali, presenti nel catalogo ufficiale.\n"
+            "Non aggiungere altro testo prima o dopo l'array JSON."
         )
 
         try:
@@ -190,17 +197,22 @@ class SupplierViewSet(viewsets.ModelViewSet):
 
         raw_text = result.get("text", "")
         suggestions = []
+        # Pattern CPV standard: 8 cifre + trattino + 1 cifra di controllo (Reg. CE 213/2008).
+        # La cifra di controllo è assegnata dall'UE nel catalogo ufficiale e NON è calcolabile
+        # né defaultabile: se l'AI non la fornisce, scartiamo il suggerimento.
+        cpv_re = re.compile(r"^\d{8}-\d$")
         try:
             # Estrai solo il JSON dall'output (l'AI potrebbe aggiungere testo)
             start = raw_text.find("[")
             end = raw_text.rfind("]") + 1
             if start >= 0 and end > start:
                 raw_suggestions = json.loads(raw_text[start:end])
-                # Normalizza: CPV standard = 8 cifre, rimuovi suffisso "-X" aggiunto da alcuni LLM
                 for item in raw_suggestions:
-                    if isinstance(item, dict) and "code" in item:
-                        item["code"] = item["code"].split("-")[0].strip()
-                suggestions = raw_suggestions
+                    if not isinstance(item, dict) or "code" not in item:
+                        continue
+                    code = str(item["code"]).strip()
+                    if cpv_re.match(code):
+                        suggestions.append({"code": code, "label": item.get("label", "")})
         except (json.JSONDecodeError, ValueError):
             pass
 
@@ -257,6 +269,7 @@ class SupplierViewSet(viewsets.ModelViewSet):
             "Codice Fiscale / P.IVA",
             "Paese sede legale",
             "Codici CPV",
+            "Descrizione CPV",
             "Rilevante NIS2",
             "Criterio rilevanza NIS2",
             "% Concentrazione fornitura",
@@ -268,15 +281,20 @@ class SupplierViewSet(viewsets.ModelViewSet):
         ])
 
         for s in qs:
-            cpv_str = "; ".join(
-                f"{c.get('code', '')} - {c.get('label', '')}" if isinstance(c, dict) else str(c)
+            cpv_codes_str = "; ".join(
+                (c.get("code", "") if isinstance(c, dict) else str(c))
+                for c in (s.cpv_codes or [])
+            )
+            cpv_labels_str = "; ".join(
+                (c.get("label", "") if isinstance(c, dict) else "")
                 for c in (s.cpv_codes or [])
             )
             writer.writerow([
                 s.name,
                 s.vat_number,
                 s.country,
-                cpv_str,
+                cpv_codes_str,
+                cpv_labels_str,
                 "Sì" if s.nis2_relevant else "No",
                 CRITERION_LABELS.get(s.nis2_relevance_criterion, s.nis2_relevance_criterion),
                 f"{s.supply_concentration_pct}%" if s.supply_concentration_pct is not None else "",

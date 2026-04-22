@@ -113,10 +113,19 @@ function CpvInput({
   const [aiError, setAiError] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
 
+  // CPV standard: 8 cifre + trattino + 1 cifra di controllo (es. 79211100-0)
+  const CPV_PATTERN = /^\d{8}-\d$/;
+
+  function formatCpv(raw: string): string {
+    const digits = raw.replace(/\D/g, "").slice(0, 9);
+    if (digits.length <= 8) return digits;
+    return `${digits.slice(0, 8)}-${digits.slice(8)}`;
+  }
+
   function addCode() {
     const code = codeInput.trim();
     const label = labelInput.trim();
-    if (!code) return;
+    if (!CPV_PATTERN.test(code)) return;
     if (value.some(c => c.code === code)) return;
     onChange([...value, { code, label }]);
     setCodeInput("");
@@ -171,14 +180,14 @@ function CpvInput({
       {/* Input aggiunta manuale */}
       <div className="flex gap-1.5 items-end">
         <div>
-          <label className="block text-xs text-gray-500 mb-0.5">Codice CPV (8 cifre)</label>
+          <label className="block text-xs text-gray-500 mb-0.5">Codice CPV (8 cifre + cifra controllo)</label>
           <input
             type="text"
             value={codeInput}
-            onChange={e => setCodeInput(e.target.value.replace(/\D/g, "").slice(0, 8))}
+            onChange={e => setCodeInput(formatCpv(e.target.value))}
             onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addCode())}
-            placeholder="72000000"
-            className="w-28 border rounded px-2 py-1 text-xs font-mono"
+            placeholder="79211100-0"
+            className="w-32 border rounded px-2 py-1 text-xs font-mono"
           />
         </div>
         <div className="flex-1">
@@ -195,7 +204,7 @@ function CpvInput({
         <button
           type="button"
           onClick={addCode}
-          disabled={codeInput.length !== 8}
+          disabled={!CPV_PATTERN.test(codeInput)}
           className="px-2 py-1 text-xs bg-indigo-600 text-white rounded disabled:opacity-40 whitespace-nowrap"
         >
           + Aggiungi
