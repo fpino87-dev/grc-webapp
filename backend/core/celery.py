@@ -68,6 +68,10 @@ app.conf.beat_schedule = {
         "task": "apps.suppliers.tasks.check_questionnaire_followups_task",
         "schedule": crontab(hour=9, minute=0),
     },
+    "recompute-supplier-risk-adj": {
+        "task": "apps.suppliers.tasks.recompute_expired_risk_adj_task",
+        "schedule": crontab(hour=2, minute=45),  # 02:45 ogni giorno
+    },
     "check-schedule-deadlines": {
         "task": "apps.compliance_schedule.tasks.check_schedule_deadlines",
         "schedule": crontab(hour=2, minute=30),  # 02:30 ogni giorno

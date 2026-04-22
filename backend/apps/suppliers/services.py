@@ -198,6 +198,10 @@ def approve_assessment(assessment, user, notes: str = ""):
         ]
     )
 
+    # Ricalcolo risk_adj — l'assessment approvato partecipa al worst-case
+    from .risk_adj import recompute_risk_adj
+    recompute_risk_adj(assessment.supplier)
+
     log_action(
         user=user,
         action_code="supplier.assessment.approved",

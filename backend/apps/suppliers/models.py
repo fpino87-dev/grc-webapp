@@ -66,6 +66,23 @@ class Supplier(BaseModel):
         help_text="% di concentrazione della fornitura — soglia TPRM: <20% bassa, 20-50% media, >50% critica",
     )
 
+    # Campi calcolati (derivati dai service — non editabili direttamente)
+    internal_risk_level = models.CharField(
+        max_length=10,
+        choices=RISK_CHOICES,
+        blank=True,
+        default="",
+        help_text="Classe di rischio da valutazione interna corrente (calcolato, read-only)",
+    )
+    risk_adj = models.CharField(
+        max_length=10,
+        choices=RISK_CHOICES,
+        blank=True,
+        default="",
+        help_text="Rischio aggiustato: max(interno, assessment esterno valido) + bump NIS2 se applicabile (calcolato, read-only)",
+    )
+    risk_adj_updated_at = models.DateTimeField(null=True, blank=True)
+
     class Meta:
         ordering = ["name"]
 
