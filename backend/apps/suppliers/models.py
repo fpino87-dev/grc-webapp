@@ -243,6 +243,63 @@ class SupplierAssessment(BaseModel):
         return "rosso"
 
 
+class SupplierInternalEvaluation(BaseModel):
+    """
+    Valutazione interna del rischio fornitore.
+
+    Conserva i 6 score 1–5 (Impatto/Accesso/Dati/Dipendenza/Integrazione/Compliance),
+    lo weighted_score calcolato con i pesi vigenti al momento della valutazione, e la
+    classe di rischio derivata. Le valutazioni precedenti sono mantenute per audit
+    trail (storico); solo una è marcata is_current=True per ogni fornitore.
+    """
+
+    RISK_CLASS_CHOICES = [
+        ("basso", "Basso"),
+        ("medio", "Medio"),
+        ("alto", "Alto"),
+        ("critico", "Critico"),
+    ]
+
+    SCORE_VALIDATORS = {"min": 1, "max": 5}
+
+    supplier = models.ForeignKey(
+        Supplier, on_delete=models.CASCADE, related_name="internal_evaluations"
+    )
+    score_impatto = models.PositiveSmallIntegerField()
+    score_accesso = models.PositiveSmallIntegerField()
+    score_dati = models.PositiveSmallIntegerField()
+    score_dipendenza = models.PositiveSmallIntegerField()
+    score_integrazione = models.PositiveSmallIntegerField()
+    score_compliance = models.PositiveSmallIntegerField()
+
+    weighted_score = models.DecimalField(max_digits=4, decimal_places=3)
+    risk_class = models.CharField(max_length=10, choices=RISK_CLASS_CHOICES)
+
+    # Snapshot dei pesi/soglie usati al momento della valutazione (audit trail)
+    weights_snapshot = models.JSONField(default=dict)
+    thresholds_snapshot = models.JSONField(default=dict)
+
+    is_current = models.BooleanField(default=True, db_index=True)
+    evaluated_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    evaluated_at = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-evaluated_at"]
+        indexes = [
+            models.Index(fields=["supplier", "is_current"]),
+        ]
+
+    def __str__(self):
+        return f"{self.supplier.name} — {self.risk_class} ({self.weighted_score})"
+
+
 class QuestionnaireTemplate(BaseModel):
     name = models.CharField(max_length=200)
     subject = models.CharField(max_length=300)

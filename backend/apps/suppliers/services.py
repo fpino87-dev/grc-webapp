@@ -1,8 +1,15 @@
 import datetime
+from decimal import Decimal
 
+from django.db import transaction
 from django.utils import timezone
 
-from .models import Supplier, SupplierQuestionnaire
+from .models import (
+    Supplier,
+    SupplierEvaluationConfig,
+    SupplierInternalEvaluation,
+    SupplierQuestionnaire,
+)
 
 
 def get_expiring_contracts(days: int = 60):
@@ -20,6 +27,96 @@ def get_expiring_contracts(days: int = 60):
 def get_high_risk_suppliers():
     """Return suppliers with risk_level alto or critico."""
     return Supplier.objects.filter(risk_level__in=["alto", "critico"], status="attivo")
+
+
+PARAMETER_KEYS = ("impatto", "accesso", "dati", "dipendenza", "integrazione", "compliance")
+
+
+def _compute_weighted_score(scores: dict, weights: dict) -> float:
+    """Calcola weighted_score = Σ score_i × weight_i. Restituisce float arrotondato a 3 decimali."""
+    total = 0.0
+    for key in PARAMETER_KEYS:
+        score = float(scores[key])
+        weight = float(weights[key])
+        total += score * weight
+    return round(total, 3)
+
+
+@transaction.atomic
+def create_internal_evaluation(
+    supplier: Supplier,
+    scores: dict,
+    user,
+    notes: str = "",
+) -> SupplierInternalEvaluation:
+    """
+    Crea una nuova valutazione interna del rischio fornitore.
+
+    - `scores`: dict con chiavi PARAMETER_KEYS, valori 1–5.
+    - Marca la precedente valutazione corrente come is_current=False (storico).
+    - Calcola weighted_score con i pesi correnti di SupplierEvaluationConfig.
+    - Classifica con le soglie correnti.
+    - Aggiorna Supplier.internal_risk_level e ricalcola Supplier.risk_adj.
+    - Emette audit log L2.
+    """
+    from django.core.exceptions import ValidationError
+    from core.audit import log_action
+
+    missing = [k for k in PARAMETER_KEYS if k not in scores]
+    if missing:
+        raise ValidationError(f"Score mancanti: {missing}")
+    for k in PARAMETER_KEYS:
+        v = scores[k]
+        if not isinstance(v, int) or not (1 <= v <= 5):
+            raise ValidationError(f"Score '{k}' deve essere intero 1–5 (ricevuto: {v!r}).")
+
+    config = SupplierEvaluationConfig.get_solo()
+    weighted = _compute_weighted_score(scores, config.weights)
+    risk_class = config.classify(weighted)
+
+    SupplierInternalEvaluation.objects.filter(
+        supplier=supplier, is_current=True, deleted_at__isnull=True
+    ).update(is_current=False)
+
+    evaluation = SupplierInternalEvaluation.objects.create(
+        supplier=supplier,
+        score_impatto=scores["impatto"],
+        score_accesso=scores["accesso"],
+        score_dati=scores["dati"],
+        score_dipendenza=scores["dipendenza"],
+        score_integrazione=scores["integrazione"],
+        score_compliance=scores["compliance"],
+        weighted_score=Decimal(str(weighted)),
+        risk_class=risk_class,
+        weights_snapshot=dict(config.weights),
+        thresholds_snapshot=dict(config.risk_thresholds),
+        is_current=True,
+        evaluated_by=user,
+        notes=notes,
+        created_by=user,
+    )
+
+    # Hook Fase 3 — aggiornamento internal_risk_level + ricalcolo risk_adj
+    try:
+        from .risk_adj import recompute_risk_adj
+        recompute_risk_adj(supplier)
+    except ImportError:
+        pass
+
+    log_action(
+        user=user,
+        action_code="suppliers.internal_evaluation.create",
+        level="L2",
+        entity=evaluation,
+        payload={
+            "supplier_id": str(supplier.id),
+            "supplier_name": supplier.name,
+            "scores": {k: scores[k] for k in PARAMETER_KEYS},
+            "weighted_score": weighted,
+            "risk_class": risk_class,
+        },
+    )
+    return evaluation
 
 
 def complete_assessment(

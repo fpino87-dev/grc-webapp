@@ -3,6 +3,7 @@ from .models import (
     Supplier,
     SupplierAssessment,
     SupplierEvaluationConfig,
+    SupplierInternalEvaluation,
     QuestionnaireTemplate,
     SupplierQuestionnaire,
 )
@@ -47,6 +48,44 @@ class SupplierSerializer(serializers.ModelSerializer):
                 {"nis2_relevance_criterion": "Il criterio di rilevanza NIS2 è obbligatorio quando il fornitore è marcato come NIS2 rilevante."}
             )
         return data
+
+
+class SupplierInternalEvaluationSerializer(serializers.ModelSerializer):
+    evaluated_by_display = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = SupplierInternalEvaluation
+        fields = [
+            "id",
+            "supplier",
+            "score_impatto",
+            "score_accesso",
+            "score_dati",
+            "score_dipendenza",
+            "score_integrazione",
+            "score_compliance",
+            "weighted_score",
+            "risk_class",
+            "weights_snapshot",
+            "thresholds_snapshot",
+            "is_current",
+            "evaluated_by",
+            "evaluated_by_display",
+            "evaluated_at",
+            "notes",
+        ]
+        read_only_fields = [
+            "id", "weighted_score", "risk_class", "weights_snapshot",
+            "thresholds_snapshot", "is_current", "evaluated_by", "evaluated_at",
+        ]
+
+    def get_evaluated_by_display(self, obj):
+        if not obj.evaluated_by:
+            return None
+        return (
+            f"{obj.evaluated_by.first_name} {obj.evaluated_by.last_name}".strip()
+            or obj.evaluated_by.email
+        )
 
 
 class SupplierEvaluationConfigSerializer(serializers.ModelSerializer):
