@@ -2247,7 +2247,8 @@
       "col_completion": "Completamento",
       "col_deadline": "Scadenza",
       "section_nda": "NDA Fornitori",
-      "nda_hint": "stato NDA sui fornitori attivi"
+      "nda_hint": "stato NDA sui fornitori attivi",
+      "no_required_docs_configured": "Nessun documento obbligatorio configurato per questo framework"
     },
     "compliance": {
       "distribution_title": "Distribuzione compliance ({{total}} controlli)",

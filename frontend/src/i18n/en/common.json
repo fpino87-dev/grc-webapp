@@ -2211,7 +2211,8 @@
       "open_incidents": "Open incidents",
       "total_controls": "Total controls",
       "pct_compliant": "% Compliant",
-      "gap_controls": "Controls in gap"
+      "gap_controls": "Controls in gap",
+      "no_required_docs_configured": "No required documents configured for this framework"
     },
     "loading_kpi": "Loading KPIs...",
     "loading_compliance": "Loading compliance...",

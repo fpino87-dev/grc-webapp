@@ -2290,7 +2290,8 @@
       "open_incidents": "Incidents ouverts",
       "total_controls": "Contrôles totaux",
       "pct_compliant": "% Conforme",
-      "gap_controls": "Contrôles en écart"
+      "gap_controls": "Contrôles en écart",
+      "no_required_docs_configured": "Aucun document obligatoire configuré pour ce référentiel"
     },
     "loading_kpi": "Chargement des KPI...",
     "loading_compliance": "Chargement de la conformité...",

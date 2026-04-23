@@ -2290,7 +2290,8 @@
       "open_incidents": "Açık olaylar",
       "total_controls": "Toplam kontroller",
       "pct_compliant": "% Uyumlu",
-      "gap_controls": "Eksik kontroller"
+      "gap_controls": "Eksik kontroller",
+      "no_required_docs_configured": "Bu çerçeve için yapılandırılmış zorunlu belge yok"
     },
     "loading_kpi": "KPI'ler yükleniyor...",
     "loading_compliance": "Uyum yükleniyor...",

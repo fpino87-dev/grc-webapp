@@ -533,7 +533,7 @@ class KpiOverviewView(APIView):
         from apps.compliance_schedule.services import get_required_documents_status
         from apps.plants.services import get_active_framework_codes
 
-        ALL_FRAMEWORKS = ["ISO27001", "NIS2", "TISAX_L2", "TISAX_L3"]
+        ALL_FRAMEWORKS = ["ISO27001", "NIS2", "ACN_NIS2", "TISAX_L2", "TISAX_L3"]
 
         if plant:
             frameworks = get_active_framework_codes(plant)
@@ -543,8 +543,6 @@ class KpiOverviewView(APIView):
         result = []
         for fw in frameworks:
             items = get_required_documents_status(plant=plant, framework=fw)
-            if not items:
-                continue
             total = len(items)
             green = sum(1 for i in items if i["traffic_light"] == "green")
             yellow = sum(1 for i in items if i["traffic_light"] == "yellow")
@@ -561,6 +559,7 @@ class KpiOverviewView(APIView):
                 "mandatory_total": mandatory_total,
                 "mandatory_ok": mandatory_ok,
                 "pct_mandatory": round(mandatory_ok / mandatory_total * 100, 1) if mandatory_total else 0,
+                "no_required_docs": total == 0,
             })
         return result
 
@@ -672,14 +671,19 @@ class KpiOverviewView(APIView):
 
         User = get_user_model()
 
-        # Perimetro: utenti con almeno un accesso GRC attivo
-        user_qs = User.objects.filter(
-            plant_access__deleted_at__isnull=True,
-        ).distinct()
+        # Perimetro: utenti attivi con almeno un accesso GRC non eliminato.
+        # scope_plants vuoto = accesso a tutti i plant; scope_plants pieno = accesso limitato.
         if plant:
-            user_qs = user_qs.filter(
-                plant_access__scope_plants=plant,
+            accessible_ids = (
+                UserPlantAccess.objects.filter(deleted_at__isnull=True)
+                .filter(Q(scope_plants=plant) | Q(scope_plants__isnull=True))
+                .values_list("user_id", flat=True)
+            )
+            user_qs = User.objects.filter(id__in=accessible_ids, is_active=True).distinct()
+        else:
+            user_qs = User.objects.filter(
                 plant_access__deleted_at__isnull=True,
+                is_active=True,
             ).distinct()
 
         total_users = user_qs.count()
@@ -746,7 +750,10 @@ class KpiOverviewView(APIView):
 
         supplier_qs = Supplier.objects.filter(status="attivo", deleted_at__isnull=True)
         if plant:
-            supplier_qs = supplier_qs.filter(plants=plant)
+            # include fornitori esplicitamente associati al plant + quelli globali (plants=[])
+            supplier_qs = supplier_qs.filter(
+                Q(plants=plant) | Q(plants__isnull=True)
+            ).distinct()
 
         total = supplier_qs.count()
 
@@ -801,22 +808,26 @@ class KpiOverviewView(APIView):
             else:
                 nda_status = "draft"
 
+            expiry_date = latest.expiry_date if latest else None
+            if expiry_date:
+                days_to_expiry = (expiry_date - today).days
+            else:
+                days_to_expiry = None
+
             suppliers_detail.append({
                 "id": str(s.id),
                 "name": s.name,
                 "risk_level": s.risk_level,
                 "nda_status": nda_status,
-                "nda_title": latest.title if latest else None,
-                "nda_expiry": str(latest.expiry_date) if latest and latest.expiry_date else None,
-                "nda_doc_status": latest.status if latest else None,
+                "expiry_date": str(expiry_date) if expiry_date else None,
+                "days_to_expiry": days_to_expiry,
             })
 
         return {
             "total": total,
-            "with_approved_nda": with_approved,
-            "expiring_90d": expiring,
+            "covered": with_approved,
+            "expiring_soon": expiring,
             "expired": expired,
             "without_nda": without_nda,
-            "pct_covered": round(with_approved / total * 100, 1) if total else 0,
             "suppliers": suppliers_detail,
         }

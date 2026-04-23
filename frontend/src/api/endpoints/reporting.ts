@@ -127,6 +127,7 @@ export interface RequiredDocsCoverage {
   mandatory_total: number;
   mandatory_ok: number;
   pct_mandatory: number;
+  no_required_docs: boolean;
 }
 
 export interface MttrEntry {

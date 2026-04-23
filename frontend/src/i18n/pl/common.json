@@ -2290,7 +2290,8 @@
       "open_incidents": "Otwarte incydenty",
       "total_controls": "Wszystkie kontrole",
       "pct_compliant": "% Zgodnych",
-      "gap_controls": "Kontrole z luką"
+      "gap_controls": "Kontrole z luką",
+      "no_required_docs_configured": "Brak wymaganych dokumentów skonfigurowanych dla tego frameworku"
     },
     "loading_kpi": "Ładowanie KPI...",
     "loading_compliance": "Ładowanie zgodności...",
