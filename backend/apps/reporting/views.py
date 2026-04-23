@@ -544,6 +544,32 @@ class KpiOverviewView(APIView):
         for fw in frameworks:
             items = get_required_documents_status(plant=plant, framework=fw)
             total = len(items)
+            if total == 0:
+                # Nessun RequiredDocument configurato: mostra la copertura dei controlli
+                from apps.controls.models import ControlInstance
+                ci_qs = ControlInstance.objects.filter(
+                    control__framework__code=fw,
+                    deleted_at__isnull=True,
+                )
+                if plant:
+                    ci_qs = ci_qs.filter(plant=plant)
+                ci_total = ci_qs.count()
+                ci_compliant = ci_qs.filter(status="compliant").count()
+                ci_gap = ci_qs.filter(status="gap").count()
+                ci_other = ci_total - ci_compliant - ci_gap
+                result.append({
+                    "framework": fw,
+                    "total": ci_total,
+                    "green": ci_compliant,
+                    "yellow": ci_other,
+                    "red": ci_gap,
+                    "pct_coverage": round(ci_compliant / ci_total * 100, 1) if ci_total else 0,
+                    "mandatory_total": 0,
+                    "mandatory_ok": 0,
+                    "pct_mandatory": 0,
+                    "no_required_docs": True,
+                })
+                continue
             green = sum(1 for i in items if i["traffic_light"] == "green")
             yellow = sum(1 for i in items if i["traffic_light"] == "yellow")
             red = sum(1 for i in items if i["traffic_light"] == "red")
@@ -559,7 +585,7 @@ class KpiOverviewView(APIView):
                 "mandatory_total": mandatory_total,
                 "mandatory_ok": mandatory_ok,
                 "pct_mandatory": round(mandatory_ok / mandatory_total * 100, 1) if mandatory_total else 0,
-                "no_required_docs": total == 0,
+                "no_required_docs": False,
             })
         return result
 

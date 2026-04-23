@@ -718,24 +718,31 @@ function TabKpi() {
                     {data.required_docs.map((row: RequiredDocsCoverage) => (
                       <tr key={row.framework} className="hover:bg-gray-50">
                         <td className="px-4 py-3 font-medium text-gray-900">{FW_LABELS[row.framework] ?? row.framework}</td>
-                        {row.no_required_docs ? (
-                          <td colSpan={6} className="px-4 py-3 text-xs text-gray-400 italic">
-                            {t("reporting.kpi.no_required_docs_configured")}
-                          </td>
-                        ) : (
-                          <>
-                            <td className="px-4 py-3 text-right text-gray-600">{row.total}</td>
-                            <td className="px-4 py-3 text-right text-green-700 font-medium">{row.green}</td>
-                            <td className="px-4 py-3 text-right text-yellow-600 font-medium">{row.yellow}</td>
-                            <td className="px-4 py-3 text-right text-red-600 font-medium">{row.red}</td>
-                            <td className="px-4 py-3"><CoverageBar pct={row.pct_coverage} colorClass="bg-blue-500" /></td>
-                            <td className="px-4 py-3"><CoverageBar pct={row.pct_mandatory} colorClass={row.pct_mandatory >= 100 ? "bg-green-500" : row.pct_mandatory >= 70 ? "bg-yellow-400" : "bg-red-500"} /></td>
-                          </>
-                        )}
+                        <td className="px-4 py-3 text-right text-gray-600">
+                          {row.total}
+                          {row.no_required_docs && (
+                            <span className="ml-1 text-xs text-gray-400" title={t("reporting.kpi.no_required_docs_configured")}>*</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-right text-green-700 font-medium">{row.green}</td>
+                        <td className="px-4 py-3 text-right text-yellow-600 font-medium">{row.yellow}</td>
+                        <td className="px-4 py-3 text-right text-red-600 font-medium">{row.red}</td>
+                        <td className="px-4 py-3"><CoverageBar pct={row.pct_coverage} colorClass="bg-blue-500" /></td>
+                        <td className="px-4 py-3">
+                          {row.no_required_docs
+                            ? <span className="text-xs text-gray-400 italic">—</span>
+                            : <CoverageBar pct={row.pct_mandatory} colorClass={row.pct_mandatory >= 100 ? "bg-green-500" : row.pct_mandatory >= 70 ? "bg-yellow-400" : "bg-red-500"} />
+                          }
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+                {data.required_docs.some((r: RequiredDocsCoverage) => r.no_required_docs) && (
+                  <p className="text-xs text-gray-400 mt-2 px-1">
+                    * {t("reporting.kpi.no_required_docs_configured")}
+                  </p>
+                )}
               </div>
             )}
           </section>
