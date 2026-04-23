@@ -506,7 +506,8 @@ function FrameworkPanel({ plant, onClose }: { plant: Plant; onClose: () => void 
             await plantsApi.assignFramework({ plant: plant.id, framework: tisaxProtoId, level: "PROTO" });
         }
       } else {
-        const isNis = frameworks.find(f => f.id === selectedKey)?.code.startsWith("NIS2");
+        const fwCode = frameworks.find(f => f.id === selectedKey)?.code ?? "";
+        const isNis = fwCode === "NIS2" || fwCode === "ACN_NIS2";
         const level = isNis ? nisLevel : genericLevel;
         await plantsApi.assignFramework({ plant: plant.id, framework: selectedKey, level });
       }
@@ -541,7 +542,8 @@ function FrameworkPanel({ plant, onClose }: { plant: Plant; onClose: () => void 
 
   const assignedCodes = new Set(assigned.map(a => a.framework_code));
   const groups = buildGroups(frameworks, assignedCodes, t("plants.tisax_framework_label"));
-  const selectedIsNis = selectedKey !== "TISAX" && frameworks.find(f => f.id === selectedKey)?.code.startsWith("NIS2");
+  const selectedFwCode = selectedKey !== "TISAX" ? (frameworks.find(f => f.id === selectedKey)?.code ?? "") : "";
+  const selectedIsNis = selectedFwCode === "NIS2" || selectedFwCode === "ACN_NIS2";
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
