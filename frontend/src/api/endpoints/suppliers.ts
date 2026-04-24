@@ -58,6 +58,7 @@ export interface EvaluationConfig {
     { name: string; levels: string[] }
   >;
   risk_thresholds: Record<"medio" | "alto" | "critico", number>;
+  questionnaire_validity_months: number;
   assessment_validity_months: number;
   nis2_concentration_bump: boolean;
   updated_at: string;

@@ -377,7 +377,12 @@
         "req_evidence": "Preuve requise",
         "req_max_age": "max {{days}} j",
         "req_min_docs": "Au moins {{count}} document(s) approuvé(s)",
-        "req_min_evidences": "Au moins {{count}} preuve(s) valide(s)"
+        "req_min_evidences": "Au moins {{count}} preuve(s) valide(s)",
+        "generate_doc_title": "Générer un document de procédure",
+        "generate_doc_btn": "Générer procédure (.docx)",
+        "generating_doc": "Génération en cours…",
+        "generate_doc_hint": "Génère une procédure opérationnelle formelle au format Word basée sur les exigences du référentiel.",
+        "generate_doc_error": "Une erreur est survenue lors de la génération du document."
       },
       "expiry": {
         "none": "Aucune expiration",

@@ -143,6 +143,47 @@ class ControlViewSet(viewsets.ModelViewSet):
             logging.getLogger(__name__).error(f"explain_control error: {e}")
             return Response({"error": _("Generazione spiegazione non riuscita: %(err)s") % {"err": str(e)}}, status=500)
 
+    @action(detail=True, methods=["post"], url_path="generate-document")
+    def generate_document(self, request, pk=None):
+        """
+        Genera un documento .docx di procedura operativa per il controllo via AI.
+        Body: { "lang": "it" }
+        """
+        import logging
+        from django.http import HttpResponse
+        from django.utils.translation import gettext as _
+        from core.audit import log_action
+        from .services import generate_procedure_document
+
+        control = self.get_object()
+        lang = request.data.get("lang", "it")
+        try:
+            docx_bytes = generate_procedure_document(control, lang, request.user)
+        except ValueError as e:
+            return Response({"error": str(e)}, status=400)
+        except Exception as e:
+            logging.getLogger(__name__).error(f"generate_document error [{control.external_id}]: {e}")
+            return Response(
+                {"error": _("Generazione documento non riuscita: %(err)s") % {"err": str(e)}},
+                status=500,
+            )
+
+        log_action(
+            user=request.user,
+            action_code="control.document_generated",
+            level="L1",
+            entity=control,
+            payload={"lang": lang},
+        )
+
+        filename = f"{control.external_id}_procedura.docx"
+        response = HttpResponse(
+            docx_bytes,
+            content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        )
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
+
 
 def _explain_suggestion(instance) -> str:
     from .services import calc_suggested_status, check_evidence_requirements

@@ -61,6 +61,7 @@ export function SupplierEvaluationSettingsPage() {
       weights: form!.weights,
       parameter_labels: form!.parameter_labels,
       risk_thresholds: form!.risk_thresholds,
+      questionnaire_validity_months: form!.questionnaire_validity_months,
       assessment_validity_months: form!.assessment_validity_months,
       nis2_concentration_bump: form!.nis2_concentration_bump,
     });
@@ -156,15 +157,50 @@ export function SupplierEvaluationSettingsPage() {
           </div>
         </section>
 
+        {/* Formula risk_adj — box informativo */}
+        <section className="bg-indigo-50 rounded border border-indigo-200 p-4">
+          <h2 className="text-sm font-semibold text-indigo-800 mb-2">Come viene calcolato il Rischio Adj</h2>
+          <div className="text-xs text-indigo-900 space-y-1">
+            <p><span className="font-mono bg-indigo-100 px-1 rounded">base = max(interno, questionario*, audit*)</span> — worst-case tra le sorgenti presenti</p>
+            <p><span className="font-mono bg-indigo-100 px-1 rounded">risk_adj = base + bump</span> — dove bump = +1 classe se NIS2 rilevante e concentrazione &gt;50%</p>
+            <ul className="mt-2 space-y-0.5 list-none pl-2 border-l-2 border-indigo-300">
+              <li><strong>Interno</strong> — ultima valutazione interna (sempre attiva, nessuna scadenza)</li>
+              <li><strong>Questionario *</strong> — ultimo questionario risposto non scaduto (validità configurabile sotto)</li>
+              <li><strong>Audit terze parti *</strong> — ultimo audit approvato entro finestra configurabile</li>
+            </ul>
+            <p className="text-indigo-600 mt-1">* sorgente opzionale: partecipa solo se presente e valida</p>
+          </div>
+        </section>
+
         {/* Validità + Bump NIS2 */}
         <section className="bg-white rounded border border-gray-200 p-4">
-          <h2 className="text-base font-semibold mb-2">
+          <h2 className="text-base font-semibold mb-3">
             {t("suppliers.settings.operational", "Parametri operativi")}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <label className="text-sm">
-              <span className="block text-gray-700 mb-1">
-                {t("suppliers.settings.validity", "Validità assessment esterno (mesi)")}
+              <span className="block text-gray-700 font-medium mb-0.5">
+                Validità questionario (mesi)
+              </span>
+              <span className="block text-xs text-gray-400 mb-1">
+                Durata del risultato del questionario. Determina l'<span className="font-mono">expires_at</span> al momento della registrazione della risposta.
+              </span>
+              <input
+                type="number"
+                min="1"
+                max="60"
+                value={form.questionnaire_validity_months}
+                disabled={!canEdit}
+                onChange={e => setForm(f => f && ({ ...f, questionnaire_validity_months: parseInt(e.target.value) || 12 }))}
+                className="w-full border border-gray-300 rounded px-2 py-1 text-sm font-mono"
+              />
+            </label>
+            <label className="text-sm">
+              <span className="block text-gray-700 font-medium mb-0.5">
+                {t("suppliers.settings.validity", "Validità audit terze parti (mesi)")}
+              </span>
+              <span className="block text-xs text-gray-400 mb-1">
+                Finestra di validità per gli audit terze parti approvati. Oltre questa soglia l'audit non partecipa al calcolo del risk_adj.
               </span>
               <input
                 type="number"
@@ -176,22 +212,22 @@ export function SupplierEvaluationSettingsPage() {
                 className="w-full border border-gray-300 rounded px-2 py-1 text-sm font-mono"
               />
             </label>
-            <label className="text-sm flex items-start gap-2 pt-5">
-              <input
-                type="checkbox"
-                checked={form.nis2_concentration_bump}
-                disabled={!canEdit}
-                onChange={e => setForm(f => f && ({ ...f, nis2_concentration_bump: e.target.checked }))}
-                className="mt-1"
-              />
-              <div>
-                <div className="text-gray-700">{t("suppliers.settings.bump_nis2", "Bump NIS2 + concentrazione critica")}</div>
-                <div className="text-xs text-gray-500">
-                  {t("suppliers.settings.bump_nis2_help", "Aggiunge +1 classe al rischio aggiustato per fornitori NIS2 rilevanti con concentrazione >50%.")}
-                </div>
-              </div>
-            </label>
           </div>
+          <label className="text-sm flex items-start gap-2">
+            <input
+              type="checkbox"
+              checked={form.nis2_concentration_bump}
+              disabled={!canEdit}
+              onChange={e => setForm(f => f && ({ ...f, nis2_concentration_bump: e.target.checked }))}
+              className="mt-1"
+            />
+            <div>
+              <div className="text-gray-700 font-medium">{t("suppliers.settings.bump_nis2", "Bump NIS2 + concentrazione critica")}</div>
+              <div className="text-xs text-gray-500">
+                Aggiunge +1 classe al risk_adj per fornitori con <span className="font-mono">nis2_relevant=True</span> e concentrazione fornitura &gt;50% (soglia TPRM "critica"). Saturazione a "critico".
+              </div>
+            </div>
+          </label>
         </section>
 
         {/* Label parametri — read-only per ora, verrà mostrato in tabella */}

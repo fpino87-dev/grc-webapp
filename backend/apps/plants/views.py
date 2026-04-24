@@ -197,20 +197,23 @@ class PlantFrameworkViewSet(viewsets.ModelViewSet):
 
     def _create_control_instances(self, plant_framework):
         from apps.controls.models import Control, ControlInstance
+        plant = plant_framework.plant
         controls = Control.objects.filter(
             framework=plant_framework.framework,
             deleted_at__isnull=True,
         )
+        if plant_framework.framework.code == "ACN_NIS2" and plant.nis2_scope == "importante":
+            controls = controls.filter(level="")
         instances = [
             ControlInstance(
-                plant=plant_framework.plant,
+                plant=plant,
                 control=control,
                 status="non_valutato",
                 created_by=self.request.user,
             )
             for control in controls
             if not ControlInstance.objects.filter(
-                plant=plant_framework.plant, control=control
+                plant=plant, control=control
             ).exists()
         ]
         if instances:
@@ -218,11 +221,11 @@ class PlantFrameworkViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance):
         from apps.controls.models import ControlInstance
-        # Soft-delete all ControlInstances for this plant+framework that have no evaluations
+        # Soft-delete tutte le ControlInstances del plant+framework, incluse quelle già valutate
         ControlInstance.objects.filter(
             plant=instance.plant,
             control__framework=instance.framework,
-            status="non_valutato",
+            deleted_at__isnull=True,
         ).update(deleted_at=timezone.now())
         log_action(
             user=self.request.user,

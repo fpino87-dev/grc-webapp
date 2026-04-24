@@ -310,7 +310,12 @@
         "req_evidence": "Evidenza richiesta",
         "req_max_age": "max {{days}} gg",
         "req_min_docs": "Almeno {{count}} documento/i approvato/i",
-        "req_min_evidences": "Almeno {{count}} evidenza/e valida/e"
+        "req_min_evidences": "Almeno {{count}} evidenza/e valida/e",
+        "generate_doc_title": "Genera documento procedura",
+        "generate_doc_btn": "Genera Procedura (.docx)",
+        "generating_doc": "Generazione in corso…",
+        "generate_doc_hint": "Genera una procedura operativa formale in formato Word basata sui requisiti del framework.",
+        "generate_doc_error": "Errore durante la generazione del documento."
       },
       "expiry": {
         "none": "Nessuna scadenza",

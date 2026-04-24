@@ -68,7 +68,6 @@ const navGroups: NavGroup[] = [
       { to: "/settings/email", labelKey: "sidebar.items.email_settings", icon: "✉️", roles: ["super_admin"] },
       { to: "/settings/notifications", labelKey: "sidebar.items.notification_rules", icon: "🔔", roles: ["super_admin"] },
       { to: "/settings/ai", labelKey: "sidebar.items.ai_engine", icon: "🤖", roles: ["super_admin"] },
-      { to: "/settings/supplier-evaluation", labelKey: "sidebar.items.supplier_evaluation", icon: "🏷️", roles: ["super_admin"] },
       { to: "/settings/backups", labelKey: "sidebar.items.backups", icon: "💾", roles: ["super_admin"] },
     ],
   },

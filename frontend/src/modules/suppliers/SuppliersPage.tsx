@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   suppliersApi,
@@ -14,6 +14,7 @@ import { apiClient } from "../../api/client";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
 import { InternalEvaluationSection } from "./InternalEvaluationSection";
+import { SupplierEvaluationSettingsPage } from "../settings/SupplierEvaluationSettingsPage";
 
 // ─── Shared badge components ─────────────────────────────────────────────────
 
@@ -264,7 +265,7 @@ function CpvInput({
   );
 }
 
-// ─── AssessmentsTable (existing, unchanged) ──────────────────────────────────
+// ─── AssessmentsTable — Audit terze parti ────────────────────────────────────
 
 function AssessmentsTable({ supplierId }: { supplierId: string }) {
   const qc = useQueryClient();
@@ -338,22 +339,30 @@ function AssessmentsTable({ supplierId }: { supplierId: string }) {
     onError: (e: any) => setError(e?.response?.data?.error || "Errore"),
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => apiClient.delete(`/suppliers/assessments/${id}/`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["supplier-assessments", supplierId] });
+      qc.invalidateQueries({ queryKey: ["suppliers"] });
+    },
+  });
+
   return (
     <div className="px-4 pb-4 pt-2">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Assessment interni</span>
+        <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Audit terze parti</span>
         {!showNewForm && (
           <button
             onClick={() => setShowNewForm(true)}
             className="text-xs text-indigo-600 border border-indigo-200 rounded px-2 py-0.5 hover:bg-indigo-50"
           >
-            + Nuovo assessment
+            + Nuovo audit
           </button>
         )}
       </div>
       {showNewForm && (
         <div className="flex items-center gap-2 mb-3 p-2 bg-indigo-50 rounded">
-          <label className="text-xs text-gray-600 shrink-0">Data assessment *</label>
+          <label className="text-xs text-gray-600 shrink-0">Data audit *</label>
           <input
             type="date"
             value={newDate}
@@ -365,7 +374,7 @@ function AssessmentsTable({ supplierId }: { supplierId: string }) {
             disabled={newAssessmentMutation.isPending || !newDate}
             className="text-xs bg-indigo-600 text-white rounded px-2 py-1 disabled:opacity-50"
           >
-            {newAssessmentMutation.isPending ? "..." : "Crea"}
+            {newAssessmentMutation.isPending ? "..." : "Registra"}
           </button>
           <button onClick={() => { setShowNewForm(false); setNewDate(""); }} className="text-xs text-gray-500 hover:text-gray-700">
             Annulla
@@ -374,7 +383,7 @@ function AssessmentsTable({ supplierId }: { supplierId: string }) {
         </div>
       )}
       {assessments.length === 0 ? (
-        <p className="text-xs text-gray-400 italic">Nessun assessment registrato.</p>
+        <p className="text-xs text-gray-400 italic">Nessun audit terze parti registrato.</p>
       ) : (
         <table className="w-full text-xs">
           <thead><tr className="text-gray-500 border-b">
@@ -396,9 +405,17 @@ function AssessmentsTable({ supplierId }: { supplierId: string }) {
               <td className="py-1 pr-3 font-semibold">{a.score_overall ?? "—"}</td>
               <td className="py-1 pr-3"><RiskBadge level={a.computed_risk_level} /></td>
               <td className="py-1 pr-3"><AssessmentStatusBadge status={a.status} /></td>
-              <td className="py-1 space-x-1">
+              <td className="py-1 space-x-1 whitespace-nowrap">
                 {a.status === "pianificato" && <button onClick={() => { setModal({ type: "complete", assessment: a }); setError(""); setScores({ score_governance: "", score_security: "", score_bcp: "", score_overall: "", findings: "", notes: "" }); }} className="text-blue-600 hover:underline">Completa</button>}
                 {a.status === "completato"  && <><button onClick={() => { setModal({ type: "approve", assessment: a }); setError(""); setScores(p => ({...p, notes: ""})); }} className="text-green-600 hover:underline">Approva</button><button onClick={() => { setModal({ type: "reject", assessment: a }); setError(""); setScores(p => ({...p, notes: ""})); }} className="ml-1 text-red-600 hover:underline">Rifiuta</button></>}
+                <button
+                  onClick={() => { if (window.confirm("Eliminare questo audit terze parti?")) deleteMutation.mutate(a.id); }}
+                  disabled={deleteMutation.isPending}
+                  className="ml-1 text-red-400 hover:text-red-600 disabled:opacity-40"
+                  title="Elimina"
+                >
+                  ✕
+                </button>
               </td>
             </tr>
           ))}</tbody>
@@ -410,7 +427,7 @@ function AssessmentsTable({ supplierId }: { supplierId: string }) {
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-5">
             {modal.type === "complete" && (
               <>
-                <h3 className="text-base font-semibold mb-3">Completa assessment</h3>
+                <h3 className="text-base font-semibold mb-3">Completa audit terze parti</h3>
                 {["score_governance","score_security","score_bcp"].map(field => (
                   <div key={field} className="mb-2">
                     <label className="block text-xs font-medium text-gray-700 mb-0.5 capitalize">{field.replace("score_","").replace("_"," ")} (0-100)</label>
@@ -436,7 +453,7 @@ function AssessmentsTable({ supplierId }: { supplierId: string }) {
             )}
             {(modal.type === "approve" || modal.type === "reject") && (
               <>
-                <h3 className="text-base font-semibold mb-3">{modal.type === "approve" ? "Approva" : "Rifiuta"} assessment</h3>
+                <h3 className="text-base font-semibold mb-3">{modal.type === "approve" ? "Approva" : "Rifiuta"} audit terze parti</h3>
                 <div className="mb-3">
                   <label className="block text-xs font-medium text-gray-700 mb-0.5">Note {modal.type === "reject" && "(min 10 caratteri) *"}</label>
                   <textarea value={scores.notes} onChange={e => setScores(p => ({...p, notes: e.target.value}))} className="w-full border rounded px-2 py-1 text-sm" rows={3} />
@@ -485,6 +502,26 @@ function NdaSection({ supplierId }: { supplierId: string }) {
     queryFn: () => suppliersApi.ndaList(supplierId),
   });
   const docs: NdaDocument[] = data?.results ?? [];
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => apiClient.delete(`/documents/documents/${id}/`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["supplier-nda", supplierId] }),
+  });
+
+  const approveMutation = useMutation({
+    mutationFn: (id: string) => apiClient.patch(`/documents/documents/${id}/`, { status: "approvato" }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["supplier-nda", supplierId] }),
+  });
+
+  async function downloadNda(docId: string, fileName: string) {
+    const res = await apiClient.get(`/documents/documents/${docId}/download-latest/`, { responseType: "blob" });
+    const url = URL.createObjectURL(res.data);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   const uploadMutation = useMutation({
     mutationFn: () => {
@@ -595,7 +632,8 @@ function NdaSection({ supplierId }: { supplierId: string }) {
               <th className="text-left py-1 pr-3">Stato</th>
               <th className="text-left py-1 pr-3">Scadenza</th>
               <th className="text-left py-1 pr-3">File</th>
-              <th className="py-1 pr-3">Versione</th>
+              <th className="py-1 pr-3 text-center">Ver.</th>
+              <th className="py-1"></th>
             </tr>
           </thead>
           <tbody>
@@ -619,6 +657,35 @@ function NdaSection({ supplierId }: { supplierId: string }) {
                 </td>
                 <td className="py-1.5 pr-3 text-center text-gray-500">
                   {doc.latest_version ? `v${doc.latest_version.version_number}` : "—"}
+                </td>
+                <td className="py-1.5 whitespace-nowrap space-x-2">
+                  {doc.status !== "approvato" && (
+                    <button
+                      onClick={() => approveMutation.mutate(doc.id)}
+                      disabled={approveMutation.isPending}
+                      className="text-green-600 hover:underline disabled:opacity-40"
+                      title="Segna come approvato"
+                    >
+                      Approva
+                    </button>
+                  )}
+                  {doc.latest_version && (
+                    <button
+                      onClick={() => downloadNda(doc.id, doc.latest_version!.file_name)}
+                      className="text-indigo-600 hover:underline"
+                      title="Scarica"
+                    >
+                      ↓ Scarica
+                    </button>
+                  )}
+                  <button
+                    onClick={() => { if (window.confirm(`Eliminare "${doc.title}"?`)) deleteMutation.mutate(doc.id); }}
+                    disabled={deleteMutation.isPending}
+                    className="text-red-400 hover:text-red-600 disabled:opacity-40"
+                    title="Elimina"
+                  >
+                    ✕
+                  </button>
                 </td>
               </tr>
             ))}
@@ -644,7 +711,7 @@ function ExpandedSupplierRow({ supplierId }: { supplierId: string }) {
           onClick={() => setSubTab("assessments")}
           className={`px-3 py-1.5 text-xs font-medium border-b-2 -mb-px transition-colors ${subTab === "assessments" ? "border-indigo-600 text-indigo-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
         >
-          Assessment esterni
+          Audit terze parti
         </button>
         <button
           onClick={() => setSubTab("nda")}
@@ -688,7 +755,7 @@ function NdaTab() {
       {isLoading && <div className="py-8 text-center text-gray-400 text-sm">Caricamento...</div>}
       {nda && (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="bg-white border border-green-300 rounded-lg p-4">
               <p className="text-xs text-gray-500 uppercase tracking-wide">Con NDA attivo</p>
               <p className="text-3xl font-bold text-green-600 mt-1">{nda.covered}</p>
@@ -698,12 +765,9 @@ function NdaTab() {
               <p className="text-3xl font-bold text-yellow-600 mt-1">{nda.expiring_soon}</p>
             </div>
             <div className="bg-white border border-red-300 rounded-lg p-4">
-              <p className="text-xs text-gray-500 uppercase tracking-wide">NDA scaduto</p>
-              <p className="text-3xl font-bold text-red-600 mt-1">{nda.expired}</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <p className="text-xs text-gray-500 uppercase tracking-wide">Senza NDA</p>
-              <p className="text-3xl font-bold text-gray-600 mt-1">{nda.without_nda}</p>
+              <p className="text-xs text-gray-500 uppercase tracking-wide">Scaduto / Mancante</p>
+              <p className="text-3xl font-bold text-red-600 mt-1">{nda.expired + nda.without_nda}</p>
+              <p className="text-xs text-gray-400 mt-1">{nda.expired} scad. · {nda.without_nda} mancanti</p>
             </div>
           </div>
 
@@ -1227,8 +1291,8 @@ function ForniториTab() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {suppliers.map(s => (
-                <>
-                  <tr key={s.id} className="hover:bg-gray-50 transition-colors">
+                <Fragment key={s.id}>
+                  <tr className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3 font-medium text-gray-800">
                       <button onClick={() => setExpandedId(expandedId === s.id ? null : s.id)} className="hover:underline text-left">
                         {s.name}
@@ -1303,13 +1367,13 @@ function ForniториTab() {
                     </td>
                   </tr>
                   {expandedId === s.id && (
-                    <tr key={`${s.id}-expand`}>
+                    <tr>
                       <td colSpan={10} className="bg-gray-50">
                         <ExpandedSupplierRow supplierId={s.id} />
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>
@@ -1599,16 +1663,17 @@ function TemplateTab() {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
-type Tab = "fornitori" | "questionari" | "template" | "nda";
+type Tab = "fornitori" | "questionari" | "template" | "nda" | "impostazioni";
 
 export function SuppliersPage() {
   const [tab, setTab] = useState<Tab>("fornitori");
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: "fornitori",   label: "Fornitori" },
-    { id: "questionari", label: "Questionari" },
-    { id: "template",    label: "Template questionario" },
-    { id: "nda",         label: "Stato NDA" },
+    { id: "fornitori",    label: "Fornitori" },
+    { id: "questionari",  label: "Questionari" },
+    { id: "template",     label: "Template questionario" },
+    { id: "nda",          label: "Stato NDA" },
+    { id: "impostazioni", label: "Impostazioni valutazione" },
   ];
 
   return (
@@ -1632,10 +1697,11 @@ export function SuppliersPage() {
         ))}
       </div>
 
-      {tab === "fornitori"   && <ForniториTab />}
-      {tab === "questionari" && <QuestionariTab />}
-      {tab === "template"    && <TemplateTab />}
-      {tab === "nda"         && <NdaTab />}
+      {tab === "fornitori"    && <ForniториTab />}
+      {tab === "questionari"  && <QuestionariTab />}
+      {tab === "template"     && <TemplateTab />}
+      {tab === "nda"          && <NdaTab />}
+      {tab === "impostazioni" && <SupplierEvaluationSettingsPage />}
     </div>
   );
 }

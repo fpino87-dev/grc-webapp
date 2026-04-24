@@ -198,7 +198,7 @@ def approve_assessment(assessment, user, notes: str = ""):
         ]
     )
 
-    # Ricalcolo risk_adj — l'assessment approvato partecipa al worst-case
+    # Ricalcolo risk_adj — l'audit terze parti approvato partecipa al worst-case
     from .risk_adj import recompute_risk_adj
     recompute_risk_adj(assessment.supplier)
 
@@ -346,12 +346,14 @@ def resend_questionnaire(questionnaire, user) -> "SupplierQuestionnaire":
 
 def register_evaluation(questionnaire, evaluation_date, risk_result, user, notes: str = "") -> "SupplierQuestionnaire":
     """
-    Record the received evaluation: sets evaluation_date, risk_result, expires_at (+1 year).
+    Record the received evaluation: sets evaluation_date, risk_result, expires_at.
+    expires_at = evaluation_date + questionnaire_validity_months (da SupplierEvaluationConfig).
     Updates supplier.risk_level and supplier.evaluation_date.
     """
     from core.audit import log_action
 
-    expires_at = evaluation_date + datetime.timedelta(days=365)
+    config = SupplierEvaluationConfig.get_solo()
+    expires_at = evaluation_date + datetime.timedelta(days=config.questionnaire_validity_months * 30)
 
     questionnaire.evaluation_date = evaluation_date
     questionnaire.risk_result = risk_result
@@ -370,6 +372,10 @@ def register_evaluation(questionnaire, evaluation_date, risk_result, user, notes
     supplier.risk_level = risk_result
     supplier.evaluation_date = evaluation_date
     supplier.save(update_fields=["risk_level", "evaluation_date", "updated_at"])
+
+    # Ricalcolo risk_adj — il questionario valutato contribuisce al worst-case
+    from .risk_adj import recompute_risk_adj
+    recompute_risk_adj(supplier)
 
     log_action(
         user=user,

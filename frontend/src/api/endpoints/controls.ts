@@ -206,4 +206,10 @@ export const controlsApi = {
       `/controls/controls/${controlId}/explain/`,
       { lang },
     ).then((r) => r.data),
+  generateDocument: (controlId: string, lang = "it") =>
+    apiClient.post(
+      `/controls/controls/${controlId}/generate-document/`,
+      { lang },
+      { responseType: "blob", timeout: 300_000 },
+    ).then((r) => r.data as Blob),
 };

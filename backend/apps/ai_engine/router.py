@@ -10,23 +10,23 @@ from django.utils import timezone
 logger = logging.getLogger(__name__)
 
 
-def _call_ollama(prompt: str, model: str, endpoint: str, system: str = "") -> str:
+def _call_ollama(prompt: str, model: str, endpoint: str, system: str = "", timeout: int = 60) -> str:
     import httpx
 
     payload = {"model": model, "prompt": prompt, "stream": False}
     if system:
         payload["system"] = system
-    resp = httpx.post(f"{endpoint}/api/generate", json=payload, timeout=60)
+    resp = httpx.post(f"{endpoint}/api/generate", json=payload, timeout=timeout)
     resp.raise_for_status()
     return resp.json().get("response", "")
 
 
-def _call_anthropic(prompt: str, model: str, api_key: str, system: str = "") -> tuple[str, int]:
+def _call_anthropic(prompt: str, model: str, api_key: str, system: str = "", max_tokens: int = 2048) -> tuple[str, int]:
     import anthropic
 
     client = anthropic.Anthropic(api_key=api_key)
     msgs = [{"role": "user", "content": prompt}]
-    kwargs = {"model": model, "max_tokens": 2048, "messages": msgs}
+    kwargs = {"model": model, "max_tokens": max_tokens, "messages": msgs}
     if system:
         kwargs["system"] = system
     resp = client.messages.create(**kwargs)
@@ -35,7 +35,7 @@ def _call_anthropic(prompt: str, model: str, api_key: str, system: str = "") -> 
 
 
 def _call_openai_compatible(
-    prompt: str, model: str, api_key: str, base_url: str, system: str = ""
+    prompt: str, model: str, api_key: str, base_url: str, system: str = "", max_tokens: int = 2048
 ) -> tuple[str, int]:
     from openai import OpenAI
 
@@ -44,7 +44,7 @@ def _call_openai_compatible(
     if system:
         messages.append({"role": "system", "content": system})
     messages.append({"role": "user", "content": prompt})
-    resp = client.chat.completions.create(model=model, messages=messages, max_tokens=2048)
+    resp = client.chat.completions.create(model=model, messages=messages, max_tokens=max_tokens)
     tokens = resp.usage.total_tokens if resp.usage else 0
     return resp.choices[0].message.content, tokens
 
@@ -66,6 +66,8 @@ def route(
     module_source: str = "M20",
     sanitize: bool = True,
     plant_ids: list | None = None,
+    max_tokens: int = 2048,
+    timeout: int = 60,
 ) -> dict:
     from .models import AiInteractionLog, AiProviderConfig
 
@@ -101,7 +103,7 @@ def route(
 
     if task_provider == "cloud":
         try:
-            text, tokens_used = _call_cloud(config, prompt_to_send, system)
+            text, tokens_used = _call_cloud(config, prompt_to_send, system, max_tokens)
             provider_used = config.cloud_provider
             model_used = config.cloud_model
             config.tokens_used_month += tokens_used
@@ -112,7 +114,7 @@ def route(
             task_provider = "ollama"
 
     if task_provider == "ollama":
-        text = _call_ollama(prompt_to_send, config.local_model, config.local_endpoint, system)
+        text = _call_ollama(prompt_to_send, config.local_model, config.local_endpoint, system, timeout)
         provider_used = "ollama"
         model_used = config.local_model
         tokens_used = 0
@@ -145,15 +147,15 @@ def route(
     }
 
 
-def _call_cloud(config, prompt: str, system: str) -> tuple[str, int]:
+def _call_cloud(config, prompt: str, system: str, max_tokens: int = 2048) -> tuple[str, int]:
     provider = config.cloud_provider
     model = config.cloud_model
     api_key = config.api_key
 
     if provider == "anthropic":
-        return _call_anthropic(prompt, model, api_key, system)
+        return _call_anthropic(prompt, model, api_key, system, max_tokens)
     if provider in BASE_URLS:
-        return _call_openai_compatible(prompt, model, api_key, BASE_URLS[provider], system)
+        return _call_openai_compatible(prompt, model, api_key, BASE_URLS[provider], system, max_tokens)
     raise ValueError(f"Provider {provider} non supportato")
 
 

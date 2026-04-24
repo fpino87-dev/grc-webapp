@@ -30,9 +30,22 @@ def check_expired_evidences():
     today = timezone.now().date()
     system_user = User.objects.filter(is_superuser=True).first()
 
+    from django.db.models import Exists, OuterRef
+    from apps.plants.models import PlantFramework
+
+    # Salta istanze il cui plant non ha più il framework associato (es. dopo rimozione PlantFramework)
+    active_pf = PlantFramework.objects.filter(
+        plant=OuterRef("plant"),
+        framework=OuterRef("control__framework"),
+    )
+
     instances = ControlInstance.objects.filter(
         status="compliant",
         deleted_at__isnull=True,
+    ).annotate(
+        has_active_pf=Exists(active_pf),
+    ).filter(
+        has_active_pf=True,
     ).select_related("control", "plant", "owner").prefetch_related("evidences", "documents")
 
     degraded = 0

@@ -377,7 +377,12 @@
         "req_evidence": "Wymagany dowód",
         "req_max_age": "maks. {{days}} dni",
         "req_min_docs": "Co najmniej {{count}} zatwierdzony/e dokument/y",
-        "req_min_evidences": "Co najmniej {{count}} ważny/e dowód/y"
+        "req_min_evidences": "Co najmniej {{count}} ważny/e dowód/y",
+        "generate_doc_title": "Generuj dokument procedury",
+        "generate_doc_btn": "Generuj procedurę (.docx)",
+        "generating_doc": "Generowanie…",
+        "generate_doc_hint": "Generuje formalną procedurę operacyjną w formacie Word na podstawie wymagań frameworka.",
+        "generate_doc_error": "Wystąpił błąd podczas generowania dokumentu."
       },
       "expiry": {
         "none": "Brak daty wygaśnięcia",

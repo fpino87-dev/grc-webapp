@@ -1,0 +1,1718 @@
+{
+  "code": "ACN_NIS2",
+  "name": "ACN NIS2 — Misure di sicurezza D.Lgs. 138/2024",
+  "version": "1.0",
+  "published_at": "2025-01-01",
+  "domains": [
+    {
+      "code": "GV",
+      "order": 1,
+      "translations": {
+        "it": {"name": "Governance"},
+        "en": {"name": "Governance"},
+        "fr": {"name": "Gouvernance"},
+        "pl": {"name": "Zarządzanie"},
+        "tr": {"name": "Yönetişim"}
+      }
+    },
+    {
+      "code": "ID",
+      "order": 2,
+      "translations": {
+        "it": {"name": "Identificazione"},
+        "en": {"name": "Identify"},
+        "fr": {"name": "Identification"},
+        "pl": {"name": "Identyfikacja"},
+        "tr": {"name": "Tanımlama"}
+      }
+    },
+    {
+      "code": "PR",
+      "order": 3,
+      "translations": {
+        "it": {"name": "Protezione"},
+        "en": {"name": "Protect"},
+        "fr": {"name": "Protection"},
+        "pl": {"name": "Ochrona"},
+        "tr": {"name": "Koruma"}
+      }
+    },
+    {
+      "code": "DE",
+      "order": 4,
+      "translations": {
+        "it": {"name": "Rilevamento"},
+        "en": {"name": "Detect"},
+        "fr": {"name": "Détection"},
+        "pl": {"name": "Wykrywanie"},
+        "tr": {"name": "Tespit"}
+      }
+    },
+    {
+      "code": "RS",
+      "order": 5,
+      "translations": {
+        "it": {"name": "Risposta"},
+        "en": {"name": "Respond"},
+        "fr": {"name": "Réponse"},
+        "pl": {"name": "Reagowanie"},
+        "tr": {"name": "Müdahale"}
+      }
+    },
+    {
+      "code": "RC",
+      "order": 6,
+      "translations": {
+        "it": {"name": "Ripristino"},
+        "en": {"name": "Recover"},
+        "fr": {"name": "Rétablissement"},
+        "pl": {"name": "Odtwarzanie"},
+        "tr": {"name": "Kurtarma"}
+      }
+    }
+  ],
+  "controls": [
+    {
+      "external_id": "ACN-NIS2-GV.OC-04",
+      "domain": "GV",
+      "level": "",
+      "control_category": "organizzativo",
+      "translations": {
+        "it": {
+          "title": "Contesto organizzativo per la cybersecurity",
+          "description": "La missione, gli obiettivi, gli stakeholder e le attività dell'organizzazione sono compresi e utilizzati dal vertice aziendale per le decisioni di gestione del rischio di cybersecurity."
+        },
+        "en": {
+          "title": "Organizational context for cybersecurity",
+          "description": "The organization's mission, objectives, stakeholders, and activities are understood and used by leadership to make cybersecurity risk management decisions."
+        },
+        "fr": {
+          "title": "Contexte organisationnel pour la cybersécurité",
+          "description": "La mission, les objectifs, les parties prenantes et les activités de l'organisation sont compris et utilisés par la direction pour prendre des décisions en matière de gestion des risques de cybersécurité."
+        },
+        "pl": {
+          "title": "Kontekst organizacyjny dla cyberbezpieczeństwa",
+          "description": "Misja, cele, interesariusze i działania organizacji są rozumiane i wykorzystywane przez kierownictwo do podejmowania decyzji w zakresie zarządzania ryzykiem cyberbezpieczeństwa."
+        },
+        "tr": {
+          "title": "Siber güvenlik için organizasyonel bağlam",
+          "description": "Organizasyonun misyonu, hedefleri, paydaşları ve faaliyetleri, liderlik tarafından siber güvenlik risk yönetimi kararları almak için anlaşılır ve kullanılır."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "policy", "mandatory": true, "description": "Documento di contesto organizzativo e obiettivi di sicurezza approvato dal vertice"}
+        ],
+        "evidences": [
+          {"type": "verbale", "mandatory": false, "max_age_days": 365, "description": "Verbale CdA o organo equivalente con approvazione obiettivi cybersecurity"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24 D.Lgs. 138/2024 — Il vertice aziendale deve comprendere e approvare le decisioni di rischio cyber."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-GV.RM-03",
+      "domain": "GV",
+      "level": "",
+      "control_category": "organizzativo",
+      "translations": {
+        "it": {
+          "title": "Integrazione del risk management nella strategia",
+          "description": "I risultati della gestione del rischio di cybersecurity sono utilizzati per definire, adattare e raffinare la strategia organizzativa e le priorità di investimento in sicurezza."
+        },
+        "en": {
+          "title": "Integration of risk management into strategy",
+          "description": "Cybersecurity risk management results are used to define, adapt, and refine organizational strategy and security investment priorities."
+        },
+        "fr": {
+          "title": "Intégration de la gestion des risques dans la stratégie",
+          "description": "Les résultats de la gestion des risques de cybersécurité sont utilisés pour définir, adapter et affiner la stratégie organisationnelle et les priorités d'investissement en sécurité."
+        },
+        "pl": {
+          "title": "Integracja zarządzania ryzykiem ze strategią",
+          "description": "Wyniki zarządzania ryzykiem cyberbezpieczeństwa są wykorzystywane do definiowania, dostosowywania i doskonalenia strategii organizacyjnej oraz priorytetów inwestycji w bezpieczeństwo."
+        },
+        "tr": {
+          "title": "Risk yönetiminin stratejiye entegrasyonu",
+          "description": "Siber güvenlik risk yönetimi sonuçları, organizasyonel stratejiyi ve güvenlik yatırım önceliklerini tanımlamak, uyarlamak ve geliştirmek için kullanılır."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "piano", "mandatory": true, "description": "Piano strategico di sicurezza informatica con allocazione risorse"}
+        ],
+        "evidences": [],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24 D.Lgs. 138/2024 — La strategia di sicurezza deve derivare dai risultati di risk assessment."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-GV.RR-02",
+      "domain": "GV",
+      "level": "",
+      "control_category": "organizzativo",
+      "translations": {
+        "it": {
+          "title": "Ruoli e responsabilità per la cybersecurity",
+          "description": "Ruoli, responsabilità e autorità per la gestione del rischio di cybersecurity sono definiti, comunicati, compresi e applicati all'interno dell'organizzazione."
+        },
+        "en": {
+          "title": "Cybersecurity roles and responsibilities",
+          "description": "Roles, responsibilities, and authorities for cybersecurity risk management are established, communicated, understood, and enforced within the organization."
+        },
+        "fr": {
+          "title": "Rôles et responsabilités en matière de cybersécurité",
+          "description": "Les rôles, responsabilités et autorités pour la gestion des risques de cybersécurité sont définis, communiqués, compris et appliqués au sein de l'organisation."
+        },
+        "pl": {
+          "title": "Role i odpowiedzialności w zakresie cyberbezpieczeństwa",
+          "description": "Role, odpowiedzialności i uprawnienia w zakresie zarządzania ryzykiem cyberbezpieczeństwa są ustanowione, komunikowane, rozumiane i egzekwowane w organizacji."
+        },
+        "tr": {
+          "title": "Siber güvenlik rolleri ve sorumlulukları",
+          "description": "Siber güvenlik risk yönetimi için roller, sorumluluklar ve yetkiler tanımlanır, iletilir, anlaşılır ve organizasyon içinde uygulanır."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "organigramma", "mandatory": true, "description": "Organigramma o matrice RACI con ruoli cybersecurity esplicitati"}
+        ],
+        "evidences": [],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24 D.Lgs. 138/2024 — Il vertice aziendale è responsabile dell'approvazione e supervisione delle misure di sicurezza."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-GV.RR-04",
+      "domain": "GV",
+      "level": "",
+      "control_category": "procedurale",
+      "translations": {
+        "it": {
+          "title": "Cybersecurity nelle pratiche HR",
+          "description": "La cybersecurity è integrata nelle pratiche di gestione delle risorse umane: onboarding, offboarding, cambio di ruolo, sanzioni disciplinari e azioni del personale con accesso privilegiato."
+        },
+        "en": {
+          "title": "Cybersecurity in HR practices",
+          "description": "Cybersecurity is integrated into human resources practices including onboarding, offboarding, role changes, disciplinary actions, and management of personnel with privileged access."
+        },
+        "fr": {
+          "title": "Cybersécurité dans les pratiques RH",
+          "description": "La cybersécurité est intégrée dans les pratiques de gestion des ressources humaines : intégration, départ, changement de rôle, sanctions disciplinaires et gestion du personnel ayant des accès privilégiés."
+        },
+        "pl": {
+          "title": "Cyberbezpieczeństwo w praktykach HR",
+          "description": "Cyberbezpieczeństwo jest zintegrowane z praktykami zarządzania zasobami ludzkimi: onboarding, offboarding, zmiana roli, działania dyscyplinarne i zarządzanie personelem z dostępem uprzywilejowanym."
+        },
+        "tr": {
+          "title": "İK uygulamalarında siber güvenlik",
+          "description": "Siber güvenlik, işe alım, işten çıkarma, rol değişikliği, disiplin işlemleri ve ayrıcalıklı erişime sahip personel yönetimi dahil insan kaynakları uygulamalarına entegre edilmiştir."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "procedura", "mandatory": true, "description": "Procedura di gestione del ciclo di vita del personale con riferimenti alla sicurezza informatica"}
+        ],
+        "evidences": [],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24 D.Lgs. 138/2024 — Sicurezza delle risorse umane integrata nel ciclo di vita del personale."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-GV.PO-01",
+      "domain": "GV",
+      "level": "",
+      "control_category": "procedurale",
+      "translations": {
+        "it": {
+          "title": "Policy di gestione del rischio di cybersecurity",
+          "description": "Una policy per la gestione del rischio di cybersecurity è definita sulla base del contesto organizzativo, della strategia e delle priorità; è comunicata a tutto il personale e applicata."
+        },
+        "en": {
+          "title": "Cybersecurity risk management policy",
+          "description": "A cybersecurity risk management policy is established based on organizational context, strategy, and priorities; it is communicated to all personnel and enforced."
+        },
+        "fr": {
+          "title": "Politique de gestion des risques de cybersécurité",
+          "description": "Une politique de gestion des risques de cybersécurité est définie sur la base du contexte organisationnel, de la stratégie et des priorités ; elle est communiquée à tout le personnel et appliquée."
+        },
+        "pl": {
+          "title": "Polityka zarządzania ryzykiem cyberbezpieczeństwa",
+          "description": "Polityka zarządzania ryzykiem cyberbezpieczeństwa jest ustanowiona w oparciu o kontekst organizacyjny, strategię i priorytety; jest komunikowana całemu personelowi i egzekwowana."
+        },
+        "tr": {
+          "title": "Siber güvenlik risk yönetimi politikası",
+          "description": "Organizasyonel bağlam, strateji ve önceliklere dayalı bir siber güvenlik risk yönetimi politikası oluşturulur; tüm personele iletilir ve uygulanır."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "policy", "mandatory": true, "description": "Policy di sicurezza informatica approvata dal vertice aziendale"},
+          {"type": "registro", "mandatory": false, "description": "Evidenza di comunicazione interna della policy"}
+        ],
+        "evidences": [],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24 D.Lgs. 138/2024 — Policy obbligatoria approvata dall'organo di vertice."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-GV.PO-02",
+      "domain": "GV",
+      "level": "",
+      "control_category": "procedurale",
+      "translations": {
+        "it": {
+          "title": "Revisione e aggiornamento della policy di sicurezza",
+          "description": "La policy di gestione del rischio di cybersecurity è rivista, aggiornata, comunicata e applicata per riflettere i cambiamenti nei requisiti normativi, nelle minacce, nelle tecnologie e nella missione organizzativa."
+        },
+        "en": {
+          "title": "Security policy review and update",
+          "description": "The cybersecurity risk management policy is reviewed, updated, communicated, and enforced to reflect changes in regulatory requirements, threats, technology, and organizational mission."
+        },
+        "fr": {
+          "title": "Révision et mise à jour de la politique de sécurité",
+          "description": "La politique de gestion des risques de cybersécurité est révisée, mise à jour, communiquée et appliquée pour refléter les changements dans les exigences réglementaires, les menaces, les technologies et la mission organisationnelle."
+        },
+        "pl": {
+          "title": "Przegląd i aktualizacja polityki bezpieczeństwa",
+          "description": "Polityka zarządzania ryzykiem cyberbezpieczeństwa jest przeglądana, aktualizowana, komunikowana i egzekwowana w celu odzwierciedlenia zmian w wymaganiach regulacyjnych, zagrożeniach, technologii i misji organizacyjnej."
+        },
+        "tr": {
+          "title": "Güvenlik politikasının gözden geçirilmesi ve güncellenmesi",
+          "description": "Siber güvenlik risk yönetimi politikası, düzenleyici gereksinimlerdeki, tehditlerdeki, teknolojideki ve organizasyonel misyondaki değişiklikleri yansıtmak için gözden geçirilir, güncellenir, iletilir ve uygulanır."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "policy", "mandatory": true, "description": "Policy di sicurezza con data di ultima revisione e approvazione"}
+        ],
+        "evidences": [
+          {"type": "verbale", "mandatory": false, "max_age_days": 365, "description": "Verbale di revisione periodica della policy"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24 D.Lgs. 138/2024 — La policy deve essere rivista almeno annualmente o a fronte di cambiamenti significativi."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-GV.SC-01",
+      "domain": "GV",
+      "level": "",
+      "control_category": "procedurale",
+      "translations": {
+        "it": {
+          "title": "Programma di gestione del rischio supply chain",
+          "description": "Un programma, una strategia, obiettivi, policy e processi per la gestione del rischio di cybersecurity nella catena di fornitura sono definiti e concordati dagli stakeholder interni."
+        },
+        "en": {
+          "title": "Supply chain risk management program",
+          "description": "A cybersecurity supply chain risk management program, strategy, objectives, policies, and processes are established and agreed to by organizational stakeholders."
+        },
+        "fr": {
+          "title": "Programme de gestion des risques de la chaîne d'approvisionnement",
+          "description": "Un programme, une stratégie, des objectifs, des politiques et des processus de gestion des risques de cybersécurité dans la chaîne d'approvisionnement sont définis et convenus par les parties prenantes internes."
+        },
+        "pl": {
+          "title": "Program zarządzania ryzykiem łańcucha dostaw",
+          "description": "Program, strategia, cele, polityki i procesy zarządzania ryzykiem cyberbezpieczeństwa w łańcuchu dostaw są ustanowione i uzgodnione przez wewnętrznych interesariuszy."
+        },
+        "tr": {
+          "title": "Tedarik zinciri risk yönetimi programı",
+          "description": "Tedarik zincirinde siber güvenlik risk yönetimi programı, stratejisi, hedefleri, politikaları ve süreçleri organizasyonel paydaşlar tarafından oluşturulur ve üzerinde mutabık kalınır."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "policy", "mandatory": true, "description": "Policy o procedura di gestione del rischio supply chain (TPRM)"}
+        ],
+        "evidences": [],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(d) D.Lgs. 138/2024 — Sicurezza della catena di approvvigionamento obbligatoria."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-GV.SC-02",
+      "domain": "GV",
+      "level": "",
+      "control_category": "organizzativo",
+      "translations": {
+        "it": {
+          "title": "Ruoli e responsabilità nella supply chain",
+          "description": "I ruoli e le responsabilità di cybersecurity per fornitori, clienti e partner sono definiti, comunicati e coordinati sia internamente che esternamente."
+        },
+        "en": {
+          "title": "Cybersecurity roles in the supply chain",
+          "description": "Cybersecurity roles and responsibilities for suppliers, customers, and partners are established, communicated, and coordinated internally and externally."
+        },
+        "fr": {
+          "title": "Rôles et responsabilités dans la chaîne d'approvisionnement",
+          "description": "Les rôles et responsabilités en matière de cybersécurité pour les fournisseurs, les clients et les partenaires sont définis, communiqués et coordonnés en interne et en externe."
+        },
+        "pl": {
+          "title": "Role i odpowiedzialności w łańcuchu dostaw",
+          "description": "Role i odpowiedzialności w zakresie cyberbezpieczeństwa dla dostawców, klientów i partnerów są ustanowione, komunikowane i koordynowane wewnętrznie i zewnętrznie."
+        },
+        "tr": {
+          "title": "Tedarik zincirinde siber güvenlik rolleri",
+          "description": "Tedarikçiler, müşteriler ve ortaklar için siber güvenlik rolleri ve sorumlulukları oluşturulur, iletilir ve hem dahili hem de harici olarak koordine edilir."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "procedura", "mandatory": true, "description": "Procedura di qualifica e gestione dei fornitori con requisiti di sicurezza"}
+        ],
+        "evidences": [],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(d) D.Lgs. 138/2024 — Responsabilità cyber definite nei confronti di terze parti."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-GV.SC-04",
+      "domain": "GV",
+      "level": "",
+      "control_category": "organizzativo",
+      "translations": {
+        "it": {
+          "title": "Censimento e prioritizzazione fornitori",
+          "description": "I fornitori sono censiti e classificati per criticità in base al rischio che rappresentano per la sicurezza delle reti e dei sistemi informativi dell'organizzazione."
+        },
+        "en": {
+          "title": "Supplier inventory and prioritization",
+          "description": "Suppliers are known and prioritized by criticality based on the risk they pose to the organization's network and information systems security."
+        },
+        "fr": {
+          "title": "Inventaire et priorisation des fournisseurs",
+          "description": "Les fournisseurs sont recensés et classés par criticité en fonction du risque qu'ils représentent pour la sécurité des réseaux et systèmes d'information de l'organisation."
+        },
+        "pl": {
+          "title": "Inwentaryzacja i priorytetyzacja dostawców",
+          "description": "Dostawcy są zinwentaryzowani i sklasyfikowani według krytyczności na podstawie ryzyka, jakie stwarzają dla bezpieczeństwa sieci i systemów informatycznych organizacji."
+        },
+        "tr": {
+          "title": "Tedarikçi envanteri ve önceliklendirme",
+          "description": "Tedarikçiler, organizasyonun ağ ve bilgi sistemleri güvenliğine yönelik sundukları riske göre tanınır ve kritikliğe göre önceliklendirilir."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "registro", "mandatory": true, "description": "Registro fornitori con classificazione per criticità e livello di rischio"}
+        ],
+        "evidences": [],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(d) D.Lgs. 138/2024 — Censimento e classificazione dei fornitori critici."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-GV.SC-05",
+      "domain": "GV",
+      "level": "",
+      "control_category": "procedurale",
+      "translations": {
+        "it": {
+          "title": "Requisiti di sicurezza nei contratti con fornitori",
+          "description": "I requisiti per affrontare i rischi di cybersecurity nella catena di fornitura sono definiti, prioritizzati e integrati nei contratti e negli accordi con i fornitori e le terze parti rilevanti."
+        },
+        "en": {
+          "title": "Security requirements in supplier contracts",
+          "description": "Requirements to address cybersecurity risks in supply chains are established, prioritized, and integrated into contracts and other types of agreements with suppliers and other relevant third parties."
+        },
+        "fr": {
+          "title": "Exigences de sécurité dans les contrats fournisseurs",
+          "description": "Les exigences pour traiter les risques de cybersécurité dans la chaîne d'approvisionnement sont définies, priorisées et intégrées dans les contrats et accords avec les fournisseurs et les tiers concernés."
+        },
+        "pl": {
+          "title": "Wymagania bezpieczeństwa w umowach z dostawcami",
+          "description": "Wymagania dotyczące zarządzania ryzykiem cyberbezpieczeństwa w łańcuchu dostaw są ustanowione, priorytetyzowane i włączone do umów i porozumień z dostawcami oraz innymi odpowiednimi stronami trzecimi."
+        },
+        "tr": {
+          "title": "Tedarikçi sözleşmelerinde güvenlik gereksinimleri",
+          "description": "Tedarik zincirlerindeki siber güvenlik risklerini ele almaya yönelik gereksinimler oluşturulur, önceliklendirilir ve tedarikçilerle ve diğer ilgili üçüncü taraflarla yapılan sözleşmelere entegre edilir."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "contratto", "mandatory": true, "description": "Modello contrattuale o clausole standard di sicurezza per i fornitori"}
+        ],
+        "evidences": [],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(d) D.Lgs. 138/2024 — Obblighi contrattuali di sicurezza verso i fornitori."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-GV.SC-07",
+      "domain": "GV",
+      "level": "",
+      "control_category": "procedurale",
+      "translations": {
+        "it": {
+          "title": "Monitoraggio continuo del rischio terze parti",
+          "description": "I rischi posti dai fornitori, dai loro prodotti e servizi e da altre terze parti sono compresi, registrati, prioritizzati, valutati, gestiti e monitorati per tutta la durata del rapporto."
+        },
+        "en": {
+          "title": "Continuous third-party risk monitoring",
+          "description": "The risks posed by suppliers, their products and services, and other third parties are understood, recorded, prioritized, assessed, responded to, and monitored over the course of the relationship."
+        },
+        "fr": {
+          "title": "Surveillance continue des risques tiers",
+          "description": "Les risques posés par les fournisseurs, leurs produits et services, et d'autres tiers sont compris, enregistrés, priorisés, évalués, gérés et surveillés tout au long de la relation."
+        },
+        "pl": {
+          "title": "Ciągłe monitorowanie ryzyka stron trzecich",
+          "description": "Ryzyka stwarzane przez dostawców, ich produkty i usługi oraz inne strony trzecie są rozumiane, rejestrowane, priorytetyzowane, oceniane, zarządzane i monitorowane przez cały czas trwania relacji."
+        },
+        "tr": {
+          "title": "Üçüncü taraf risklerinin sürekli izlenmesi",
+          "description": "Tedarikçilerin, ürün ve hizmetlerinin ve diğer üçüncü tarafların oluşturduğu riskler anlaşılır, kaydedilir, önceliklendirilir, değerlendirilir, yönetilir ve ilişki boyunca izlenir."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "registro", "mandatory": true, "description": "Registro di valutazione del rischio dei fornitori con esiti periodici"}
+        ],
+        "evidences": [
+          {"type": "report", "mandatory": false, "max_age_days": 365, "description": "Report di revisione annuale dei fornitori critici"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(d) D.Lgs. 138/2024 — Monitoraggio continuo del rischio nella catena di fornitura."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-ID.AM-01",
+      "domain": "ID",
+      "level": "",
+      "control_category": "tecnico",
+      "translations": {
+        "it": {
+          "title": "Inventario asset hardware",
+          "description": "Un inventario degli asset hardware gestiti dall'organizzazione è mantenuto aggiornato, con indicazione di proprietario, ubicazione e stato."
+        },
+        "en": {
+          "title": "Hardware asset inventory",
+          "description": "An inventory of hardware managed by the organization is maintained and kept up-to-date, including owner, location, and status information."
+        },
+        "fr": {
+          "title": "Inventaire des actifs matériels",
+          "description": "Un inventaire des actifs matériels gérés par l'organisation est maintenu à jour, avec indication du propriétaire, de l'emplacement et de l'état."
+        },
+        "pl": {
+          "title": "Inwentarz zasobów sprzętowych",
+          "description": "Inwentarz zasobów sprzętowych zarządzanych przez organizację jest utrzymywany i aktualizowany, z uwzględnieniem właściciela, lokalizacji i stanu."
+        },
+        "tr": {
+          "title": "Donanım varlık envanteri",
+          "description": "Organizasyon tarafından yönetilen donanımların envanteri, sahip, konum ve durum bilgileri dahil olmak üzere güncel tutulur."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "registro", "mandatory": true, "description": "Inventario hardware aggiornato (CMDB o equivalente)"}
+        ],
+        "evidences": [],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24 D.Lgs. 138/2024 — Inventario asset obbligatorio per la gestione del rischio."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-ID.AM-02",
+      "domain": "ID",
+      "level": "",
+      "control_category": "tecnico",
+      "translations": {
+        "it": {
+          "title": "Inventario software, servizi e sistemi",
+          "description": "Un inventario del software, dei servizi e dei sistemi informativi gestiti dall'organizzazione è mantenuto aggiornato, con indicazione di versione, licenza e proprietario."
+        },
+        "en": {
+          "title": "Software, services, and systems inventory",
+          "description": "Inventories of software, services, and systems managed by the organization are maintained and kept up-to-date, including version, license, and owner information."
+        },
+        "fr": {
+          "title": "Inventaire des logiciels, services et systèmes",
+          "description": "Un inventaire des logiciels, services et systèmes gérés par l'organisation est maintenu à jour, avec indication de la version, de la licence et du propriétaire."
+        },
+        "pl": {
+          "title": "Inwentarz oprogramowania, usług i systemów",
+          "description": "Inwentarz oprogramowania, usług i systemów informatycznych zarządzanych przez organizację jest utrzymywany i aktualizowany, z uwzględnieniem wersji, licencji i właściciela."
+        },
+        "tr": {
+          "title": "Yazılım, hizmet ve sistem envanteri",
+          "description": "Organizasyon tarafından yönetilen yazılım, hizmetler ve sistemlerin envanteri, sürüm, lisans ve sahip bilgileri dahil olmak üzere güncel tutulur."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "registro", "mandatory": true, "description": "Inventario software e servizi aggiornato"}
+        ],
+        "evidences": [],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24 D.Lgs. 138/2024 — Inventario software indispensabile per la gestione delle vulnerabilità."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-ID.AM-03",
+      "domain": "ID",
+      "level": "essential",
+      "control_category": "tecnico",
+      "translations": {
+        "it": {
+          "title": "Mappa dei flussi di rete e dati",
+          "description": "Rappresentazioni aggiornate dei flussi di comunicazione di rete autorizzati e dei flussi di dati interni ed esterni sono mantenute e documentate. [Solo soggetti essenziali]"
+        },
+        "en": {
+          "title": "Network and data flow mapping",
+          "description": "Representations of the organization's authorized network communication and internal and external network data flows are maintained and documented. [Essential entities only]"
+        },
+        "fr": {
+          "title": "Cartographie des flux réseau et données",
+          "description": "Des représentations des flux de communication réseau autorisés et des flux de données internes et externes de l'organisation sont maintenues et documentées. [Entités essentielles uniquement]"
+        },
+        "pl": {
+          "title": "Mapowanie przepływów sieciowych i danych",
+          "description": "Reprezentacje autoryzowanych przepływów komunikacji sieciowej oraz wewnętrznych i zewnętrznych przepływów danych organizacji są utrzymywane i dokumentowane. [Tylko podmioty kluczowe]"
+        },
+        "tr": {
+          "title": "Ağ ve veri akışı haritalama",
+          "description": "Organizasyonun yetkili ağ iletişim akışlarının ve dahili/harici veri akışlarının temsilleri günceli tutulur ve belgelenir. [Yalnızca temel varlıklar]"
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "diagramma", "mandatory": true, "description": "Diagramma architetturale con flussi di rete e dati aggiornato"}
+        ],
+        "evidences": [],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24 D.Lgs. 138/2024 — Obbligatorio solo per soggetti essenziali. Flussi di rete documentati per rilevare anomalie."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-ID.AM-04",
+      "domain": "ID",
+      "level": "",
+      "control_category": "organizzativo",
+      "translations": {
+        "it": {
+          "title": "Inventario servizi fornitori",
+          "description": "Un inventario dei servizi forniti da terze parti (cloud, managed services, SaaS, outsourcing IT) è mantenuto aggiornato, con indicazione del fornitore, del servizio e del livello di criticità."
+        },
+        "en": {
+          "title": "Supplier services inventory",
+          "description": "An inventory of services provided by suppliers (cloud, managed services, SaaS, IT outsourcing) is maintained and kept up-to-date, including supplier, service, and criticality level information."
+        },
+        "fr": {
+          "title": "Inventaire des services fournisseurs",
+          "description": "Un inventaire des services fournis par des tiers (cloud, services gérés, SaaS, externalisation IT) est maintenu à jour, avec indication du fournisseur, du service et du niveau de criticité."
+        },
+        "pl": {
+          "title": "Inwentarz usług dostawców",
+          "description": "Inwentarz usług świadczonych przez strony trzecie (chmura, usługi zarządzane, SaaS, outsourcing IT) jest utrzymywany i aktualizowany, z uwzględnieniem dostawcy, usługi i poziomu krytyczności."
+        },
+        "tr": {
+          "title": "Tedarikçi hizmetleri envanteri",
+          "description": "Tedarikçiler tarafından sağlanan hizmetlerin (bulut, yönetilen hizmetler, SaaS, BT dış kaynak kullanımı) envanteri, tedarikçi, hizmet ve kritiklik seviyesi bilgileri dahil olmak üzere güncel tutulur."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "registro", "mandatory": true, "description": "Inventario servizi terze parti con classificazione di criticità"}
+        ],
+        "evidences": [],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(d) D.Lgs. 138/2024 — Visibilità completa sui servizi erogati da terze parti."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-ID.RA-01",
+      "domain": "ID",
+      "level": "",
+      "control_category": "procedurale",
+      "translations": {
+        "it": {
+          "title": "Identificazione e registrazione delle vulnerabilità",
+          "description": "Le vulnerabilità negli asset sono identificate, validate e registrate in modo sistematico, attraverso scansioni periodiche, fonti di threat intelligence e segnalazioni interne/esterne."
+        },
+        "en": {
+          "title": "Vulnerability identification and recording",
+          "description": "Vulnerabilities in assets are identified, validated, and recorded systematically through periodic scans, threat intelligence sources, and internal/external reports."
+        },
+        "fr": {
+          "title": "Identification et enregistrement des vulnérabilités",
+          "description": "Les vulnérabilités dans les actifs sont identifiées, validées et enregistrées de manière systématique, via des analyses périodiques, des sources de renseignements sur les menaces et des signalements internes/externes."
+        },
+        "pl": {
+          "title": "Identyfikacja i rejestrowanie podatności",
+          "description": "Podatności w zasobach są systematycznie identyfikowane, weryfikowane i rejestrowane poprzez okresowe skanowania, źródła informacji o zagrożeniach oraz raporty wewnętrzne/zewnętrzne."
+        },
+        "tr": {
+          "title": "Güvenlik açıklarının tanımlanması ve kaydedilmesi",
+          "description": "Varlıklardaki güvenlik açıkları, periyodik taramalar, tehdit istihbarat kaynakları ve dahili/harici raporlar aracılığıyla sistematik olarak tanımlanır, doğrulanır ve kaydedilir."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "procedura", "mandatory": true, "description": "Procedura di vulnerability management con periodicità e responsabilità"}
+        ],
+        "evidences": [
+          {"type": "report", "mandatory": true, "max_age_days": 180, "description": "Report di vulnerability scan recente"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 1,
+        "notes": "Art. 24(2)(e) D.Lgs. 138/2024 — Valutazione e gestione delle vulnerabilità obbligatoria."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-ID.RA-05",
+      "domain": "ID",
+      "level": "",
+      "control_category": "procedurale",
+      "translations": {
+        "it": {
+          "title": "Analisi del rischio: probabilità e impatto",
+          "description": "Minacce, vulnerabilità, probabilità di accadimento e impatti potenziali sono analizzati e utilizzati per comprendere il rischio residuo e definire le priorità di risposta."
+        },
+        "en": {
+          "title": "Risk analysis: likelihood and impact",
+          "description": "Threats, vulnerabilities, likelihoods, and potential impacts are analyzed and used to understand residual risk and inform risk response prioritization."
+        },
+        "fr": {
+          "title": "Analyse des risques : probabilité et impact",
+          "description": "Les menaces, vulnérabilités, probabilités d'occurrence et impacts potentiels sont analysés et utilisés pour comprendre le risque résiduel et définir les priorités de réponse."
+        },
+        "pl": {
+          "title": "Analiza ryzyka: prawdopodobieństwo i wpływ",
+          "description": "Zagrożenia, podatności, prawdopodobieństwa wystąpienia i potencjalne skutki są analizowane i wykorzystywane do zrozumienia ryzyka rezydualnego i ustalania priorytetów odpowiedzi."
+        },
+        "tr": {
+          "title": "Risk analizi: olasılık ve etki",
+          "description": "Tehditler, güvenlik açıkları, olasılıklar ve potansiyel etkiler, artık riski anlamak ve risk yanıt önceliklendirmesini bilgilendirmek için analiz edilir ve kullanılır."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "registro", "mandatory": true, "description": "Risk register con valutazione di probabilità e impatto per ogni rischio identificato"}
+        ],
+        "evidences": [],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(a) D.Lgs. 138/2024 — Analisi dei rischi obbligatoria."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-ID.RA-06",
+      "domain": "ID",
+      "level": "",
+      "control_category": "procedurale",
+      "translations": {
+        "it": {
+          "title": "Piano di risposta al rischio",
+          "description": "Le risposte al rischio sono scelte, prioritizzate, pianificate, tracciate e comunicate, con definizione di responsabilità, tempistiche e risorse necessarie."
+        },
+        "en": {
+          "title": "Risk response planning",
+          "description": "Risk responses are chosen, prioritized, planned, tracked, and communicated, with assignment of responsibilities, timelines, and required resources."
+        },
+        "fr": {
+          "title": "Planification de la réponse au risque",
+          "description": "Les réponses aux risques sont choisies, priorisées, planifiées, suivies et communiquées, avec définition des responsabilités, des délais et des ressources nécessaires."
+        },
+        "pl": {
+          "title": "Planowanie odpowiedzi na ryzyko",
+          "description": "Odpowiedzi na ryzyko są wybierane, priorytetyzowane, planowane, śledzone i komunikowane, z przypisaniem odpowiedzialności, harmonogramów i niezbędnych zasobów."
+        },
+        "tr": {
+          "title": "Risk yanıt planlaması",
+          "description": "Risk yanıtları, sorumlulukların, zaman çizelgelerinin ve gerekli kaynakların atanmasıyla seçilir, önceliklendirilir, planlanır, izlenir ve iletilir."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "piano", "mandatory": true, "description": "Piano di trattamento del rischio (Risk Treatment Plan) con azioni, responsabili e scadenze"}
+        ],
+        "evidences": [],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(a) D.Lgs. 138/2024 — Il piano di trattamento del rischio deve essere documentato e monitorato."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-ID.RA-08",
+      "domain": "ID",
+      "level": "",
+      "control_category": "procedurale",
+      "translations": {
+        "it": {
+          "title": "Gestione delle segnalazioni di vulnerabilità",
+          "description": "Processi per ricevere, analizzare e rispondere alle segnalazioni di vulnerabilità (vulnerability disclosure) da fonti interne ed esterne sono definiti e operativi."
+        },
+        "en": {
+          "title": "Vulnerability disclosure management",
+          "description": "Processes for receiving, analyzing, and responding to vulnerability disclosures from internal and external sources are established and operational."
+        },
+        "fr": {
+          "title": "Gestion des divulgations de vulnérabilités",
+          "description": "Des processus pour recevoir, analyser et répondre aux divulgations de vulnérabilités (vulnerability disclosure) de sources internes et externes sont définis et opérationnels."
+        },
+        "pl": {
+          "title": "Zarządzanie zgłoszeniami podatności",
+          "description": "Procesy odbierania, analizowania i reagowania na zgłoszenia podatności (vulnerability disclosure) ze źródeł wewnętrznych i zewnętrznych są zdefiniowane i operacyjne."
+        },
+        "tr": {
+          "title": "Güvenlik açığı ifşa yönetimi",
+          "description": "İç ve dış kaynaklardan gelen güvenlik açığı bildirimlerini almak, analiz etmek ve yanıtlamak için süreçler oluşturulur ve işlevseldir."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "procedura", "mandatory": true, "description": "Procedura di vulnerability disclosure con canali di ricezione e tempi di risposta"}
+        ],
+        "evidences": [],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(e) D.Lgs. 138/2024 — Canale di segnalazione vulnerabilità obbligatorio."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-ID.IM-01",
+      "domain": "ID",
+      "level": "",
+      "control_category": "procedurale",
+      "translations": {
+        "it": {
+          "title": "Miglioramento continuo dalla valutazione",
+          "description": "I miglioramenti alle misure di sicurezza sono identificati e implementati a partire dai risultati di audit, esercitazioni, incidenti e revisioni periodiche della postura di sicurezza."
+        },
+        "en": {
+          "title": "Continuous improvement from evaluation",
+          "description": "Security measure improvements are identified and implemented based on results from audits, exercises, incidents, and periodic security posture reviews."
+        },
+        "fr": {
+          "title": "Amélioration continue à partir de l'évaluation",
+          "description": "Les améliorations des mesures de sécurité sont identifiées et mises en œuvre à partir des résultats des audits, exercices, incidents et révisions périodiques de la posture de sécurité."
+        },
+        "pl": {
+          "title": "Ciągłe doskonalenie w oparciu o ocenę",
+          "description": "Ulepszenia środków bezpieczeństwa są identyfikowane i wdrażane na podstawie wyników audytów, ćwiczeń, incydentów i okresowych przeglądów postawy bezpieczeństwa."
+        },
+        "tr": {
+          "title": "Değerlendirmeden sürekli iyileştirme",
+          "description": "Güvenlik önlemlerine yönelik iyileştirmeler, denetimler, tatbikatlar, olaylar ve periyodik güvenlik duruşu incelemelerinin sonuçlarına dayanılarak tanımlanır ve uygulanır."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "piano", "mandatory": true, "description": "Piano di miglioramento continuo con azioni correttive da audit/incidenti"}
+        ],
+        "evidences": [],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(f) D.Lgs. 138/2024 — Valutazione dell'efficacia delle misure adottate."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-ID.IM-04",
+      "domain": "ID",
+      "level": "",
+      "control_category": "procedurale",
+      "translations": {
+        "it": {
+          "title": "Piano di risposta agli incidenti",
+          "description": "I piani di risposta agli incidenti di cybersecurity e altri piani operativi correlati sono definiti, comunicati, mantenuti aggiornati e migliorati in base all'esperienza acquisita."
+        },
+        "en": {
+          "title": "Incident response plan",
+          "description": "Cybersecurity incident response plans and other related operational plans are established, communicated, maintained, and improved based on experience gained."
+        },
+        "fr": {
+          "title": "Plan de réponse aux incidents",
+          "description": "Les plans de réponse aux incidents de cybersécurité et autres plans opérationnels connexes sont définis, communiqués, maintenus à jour et améliorés en fonction de l'expérience acquise."
+        },
+        "pl": {
+          "title": "Plan reagowania na incydenty",
+          "description": "Plany reagowania na incydenty cyberbezpieczeństwa i inne powiązane plany operacyjne są ustanowione, komunikowane, utrzymywane i doskonalone w oparciu o zdobyte doświadczenia."
+        },
+        "tr": {
+          "title": "Olay müdahale planı",
+          "description": "Siber güvenlik olay müdahale planları ve diğer ilgili operasyonel planlar, kazanılan deneyime dayanılarak oluşturulur, iletilir, günceli tutulur ve iyileştirilir."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "piano", "mandatory": true, "description": "Piano di risposta agli incidenti (IRP) documentato e approvato"}
+        ],
+        "evidences": [
+          {"type": "verbale", "mandatory": false, "max_age_days": 365, "description": "Verbale di esercitazione del piano di risposta agli incidenti"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(b) D.Lgs. 138/2024 — Piano di gestione degli incidenti obbligatorio."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-PR.AA-01",
+      "domain": "PR",
+      "level": "",
+      "control_category": "tecnico",
+      "translations": {
+        "it": {
+          "title": "Gestione delle identità e delle credenziali",
+          "description": "Le identità e le credenziali degli utenti, dei servizi e dei dispositivi autorizzati sono gestite in modo centralizzato, con procedure di provisioning, deprovisioning e revisione periodica."
+        },
+        "en": {
+          "title": "Identity and credential management",
+          "description": "Identities and credentials for authorized users, services, and hardware are managed centrally, with provisioning, deprovisioning, and periodic review procedures."
+        },
+        "fr": {
+          "title": "Gestion des identités et des informations d'identification",
+          "description": "Les identités et les informations d'identification des utilisateurs, services et matériels autorisés sont gérées de manière centralisée, avec des procédures de provisionnement, déprovisionnement et révision périodique."
+        },
+        "pl": {
+          "title": "Zarządzanie tożsamościami i poświadczeniami",
+          "description": "Tożsamości i poświadczenia autoryzowanych użytkowników, usług i urządzeń są zarządzane centralnie, z procedurami prowizjonowania, deprowizjonowania i okresowego przeglądu."
+        },
+        "tr": {
+          "title": "Kimlik ve kimlik bilgisi yönetimi",
+          "description": "Yetkili kullanıcıların, hizmetlerin ve donanımların kimlikleri ve kimlik bilgileri, sağlama, kaldırma ve periyodik gözden geçirme prosedürleriyle merkezi olarak yönetilir."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "procedura", "mandatory": true, "description": "Procedura di gestione degli accessi e delle identità (IAM)"}
+        ],
+        "evidences": [
+          {"type": "report", "mandatory": false, "max_age_days": 180, "description": "Report di revisione periodica degli account attivi"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(i) D.Lgs. 138/2024 — Autenticazione e controllo degli accessi."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-PR.AA-03",
+      "domain": "PR",
+      "level": "",
+      "control_category": "tecnico",
+      "translations": {
+        "it": {
+          "title": "Autenticazione di utenti, servizi e dispositivi",
+          "description": "Utenti, servizi e dispositivi hardware sono autenticati prima di consentire l'accesso alle reti e ai sistemi, con utilizzo di autenticazione a più fattori (MFA) per gli accessi critici."
+        },
+        "en": {
+          "title": "Authentication of users, services, and hardware",
+          "description": "Users, services, and hardware are authenticated before granting access to networks and systems, with use of multi-factor authentication (MFA) for critical access."
+        },
+        "fr": {
+          "title": "Authentification des utilisateurs, services et matériels",
+          "description": "Les utilisateurs, services et matériels sont authentifiés avant d'autoriser l'accès aux réseaux et systèmes, avec utilisation de l'authentification multifacteur (MFA) pour les accès critiques."
+        },
+        "pl": {
+          "title": "Uwierzytelnianie użytkowników, usług i urządzeń",
+          "description": "Użytkownicy, usługi i urządzenia sprzętowe są uwierzytelniane przed przyznaniem dostępu do sieci i systemów, z wykorzystaniem uwierzytelniania wieloskładnikowego (MFA) dla dostępów krytycznych."
+        },
+        "tr": {
+          "title": "Kullanıcı, hizmet ve donanım kimlik doğrulaması",
+          "description": "Kritik erişimler için çok faktörlü kimlik doğrulama (MFA) kullanımıyla, ağlara ve sistemlere erişim izni verilmeden önce kullanıcılar, hizmetler ve donanımlar doğrulanır."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "policy", "mandatory": true, "description": "Policy di autenticazione con requisiti MFA per accessi privilegiati e remoti"}
+        ],
+        "evidences": [
+          {"type": "screenshot", "mandatory": false, "max_age_days": 180, "description": "Evidenza di configurazione MFA sui sistemi critici"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(i) D.Lgs. 138/2024 — MFA obbligatoria per autenticazione sicura."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-PR.AA-05",
+      "domain": "PR",
+      "level": "",
+      "control_category": "tecnico",
+      "translations": {
+        "it": {
+          "title": "Gestione dei permessi e controllo degli accessi",
+          "description": "I permessi, i diritti e le autorizzazioni di accesso sono definiti in una policy, gestiti, applicati e periodicamente rivisti, secondo i principi di minimo privilegio e separazione dei compiti."
+        },
+        "en": {
+          "title": "Access permissions and access control management",
+          "description": "Access permissions, entitlements, and authorizations are defined in a policy, managed, enforced, and reviewed, incorporating the principles of least privilege and separation of duties."
+        },
+        "fr": {
+          "title": "Gestion des permissions et contrôle des accès",
+          "description": "Les permissions, droits et autorisations d'accès sont définis dans une politique, gérés, appliqués et périodiquement révisés, selon les principes du moindre privilège et de séparation des tâches."
+        },
+        "pl": {
+          "title": "Zarządzanie uprawnieniami i kontrola dostępu",
+          "description": "Uprawnienia dostępu, prawa i autoryzacje są zdefiniowane w polityce, zarządzane, egzekwowane i okresowo przeglądane, zgodnie z zasadami minimalnych uprawnień i podziału obowiązków."
+        },
+        "tr": {
+          "title": "Erişim izinleri ve erişim kontrolü yönetimi",
+          "description": "Erişim izinleri, haklar ve yetkiler, en az ayrıcalık ve görevler ayrılığı ilkelerini içererek bir politikada tanımlanır, yönetilir, uygulanır ve gözden geçirilir."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "policy", "mandatory": true, "description": "Policy di controllo degli accessi con principio del minimo privilegio"}
+        ],
+        "evidences": [
+          {"type": "report", "mandatory": false, "max_age_days": 180, "description": "Report di revisione dei diritti di accesso privilegiati"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(i) D.Lgs. 138/2024 — Politiche di controllo degli accessi e gestione degli asset."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-PR.AA-06",
+      "domain": "PR",
+      "level": "",
+      "control_category": "fisico",
+      "translations": {
+        "it": {
+          "title": "Controllo degli accessi fisici agli asset",
+          "description": "L'accesso fisico agli asset critici (server room, data center, apparati di rete) è gestito, monitorato e limitato al personale autorizzato, con registrazione degli accessi."
+        },
+        "en": {
+          "title": "Physical access control to assets",
+          "description": "Physical access to critical assets (server rooms, data centers, network equipment) is managed, monitored, and restricted to authorized personnel, with access logging."
+        },
+        "fr": {
+          "title": "Contrôle des accès physiques aux actifs",
+          "description": "L'accès physique aux actifs critiques (salles serveurs, centres de données, équipements réseau) est géré, surveillé et limité au personnel autorisé, avec enregistrement des accès."
+        },
+        "pl": {
+          "title": "Kontrola dostępu fizycznego do zasobów",
+          "description": "Dostęp fizyczny do krytycznych zasobów (serwerownie, centra danych, urządzenia sieciowe) jest zarządzany, monitorowany i ograniczony do autoryzowanego personelu, z rejestrowaniem dostępów."
+        },
+        "tr": {
+          "title": "Varlıklara fiziksel erişim kontrolü",
+          "description": "Kritik varlıklara (sunucu odaları, veri merkezleri, ağ ekipmanları) fiziksel erişim, erişim günlükleme ile yetkili personelle sınırlı olarak yönetilir ve izlenir."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "procedura", "mandatory": true, "description": "Procedura di controllo degli accessi fisici con registro visitatori e badge"}
+        ],
+        "evidences": [
+          {"type": "registro", "mandatory": false, "max_age_days": 90, "description": "Registro accessi fisici all'area server/CED"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(g) D.Lgs. 138/2024 — Sicurezza fisica degli asset ICT."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-PR.AT-01",
+      "domain": "PR",
+      "level": "",
+      "control_category": "organizzativo",
+      "translations": {
+        "it": {
+          "title": "Formazione e awareness cybersecurity del personale",
+          "description": "Tutto il personale riceve formazione e sensibilizzazione periodica sulla cybersecurity, sulle minacce (phishing, social engineering) e sui comportamenti sicuri, con verifiche dell'apprendimento."
+        },
+        "en": {
+          "title": "Cybersecurity awareness and training for all personnel",
+          "description": "All personnel receive periodic cybersecurity awareness and training on threats (phishing, social engineering) and safe behaviors, with learning verification."
+        },
+        "fr": {
+          "title": "Formation et sensibilisation à la cybersécurité du personnel",
+          "description": "Tout le personnel reçoit une formation et une sensibilisation périodique à la cybersécurité, aux menaces (hameçonnage, ingénierie sociale) et aux comportements sécurisés, avec vérification des apprentissages."
+        },
+        "pl": {
+          "title": "Szkolenie i świadomość cyberbezpieczeństwa dla całego personelu",
+          "description": "Cały personel otrzymuje okresowe szkolenia i podnoszenie świadomości w zakresie cyberbezpieczeństwa, zagrożeń (phishing, inżynieria społeczna) i bezpiecznych zachowań, z weryfikacją wiedzy."
+        },
+        "tr": {
+          "title": "Tüm personel için siber güvenlik farkındalık ve eğitimi",
+          "description": "Tüm personel, öğrenme doğrulamasıyla tehditler (kimlik avı, sosyal mühendislik) ve güvenli davranışlar üzerine periyodik siber güvenlik farkındalık ve eğitimi alır."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "piano", "mandatory": true, "description": "Piano annuale di formazione cybersecurity con contenuti e target audience"}
+        ],
+        "evidences": [
+          {"type": "attestato", "mandatory": true, "max_age_days": 365, "description": "Attestati o registri di partecipazione alla formazione cybersecurity"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 1,
+        "notes": "Art. 24(2)(g) D.Lgs. 138/2024 — Formazione obbligatoria su igiene informatica e cybersecurity."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-PR.AT-02",
+      "domain": "PR",
+      "level": "essential",
+      "control_category": "organizzativo",
+      "translations": {
+        "it": {
+          "title": "Formazione specialistica per ruoli critici",
+          "description": "Il personale con ruoli specialistici (amministratori di sistema, security team, sviluppatori) riceve formazione tecnica avanzata e aggiornamento continuo sulle tematiche di cybersecurity rilevanti per il proprio ruolo. [Solo soggetti essenziali]"
+        },
+        "en": {
+          "title": "Specialized training for critical roles",
+          "description": "Personnel in specialized roles (system administrators, security team, developers) receive advanced technical training and continuous updates on cybersecurity topics relevant to their role. [Essential entities only]"
+        },
+        "fr": {
+          "title": "Formation spécialisée pour les rôles critiques",
+          "description": "Le personnel ayant des rôles spécialisés (administrateurs système, équipe sécurité, développeurs) reçoit une formation technique avancée et une mise à jour continue sur les thèmes de cybersécurité pertinents pour leur rôle. [Entités essentielles uniquement]"
+        },
+        "pl": {
+          "title": "Specjalistyczne szkolenie dla ról krytycznych",
+          "description": "Personel pełniący specjalistyczne role (administratorzy systemów, zespół bezpieczeństwa, deweloperzy) otrzymuje zaawansowane szkolenia techniczne i ciągłą aktualizację wiedzy na temat cyberbezpieczeństwa istotnego dla swojej roli. [Tylko podmioty kluczowe]"
+        },
+        "tr": {
+          "title": "Kritik roller için uzmanlaşmış eğitim",
+          "description": "Uzman rollerdeki personel (sistem yöneticileri, güvenlik ekibi, geliştiriciler), rolleriyle ilgili siber güvenlik konularında gelişmiş teknik eğitim ve sürekli güncelleme alır. [Yalnızca temel varlıklar]"
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "piano", "mandatory": true, "description": "Piano di formazione specialistica per figure tecniche e di sicurezza"}
+        ],
+        "evidences": [
+          {"type": "attestato", "mandatory": true, "max_age_days": 365, "description": "Certificazioni o attestati di formazione tecnica avanzata (es. CISSP, CEH, formazione vendor-specific)"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 1,
+        "notes": "Art. 24(2)(g) D.Lgs. 138/2024 — Obbligatorio solo per soggetti essenziali. Formazione avanzata per ruoli specialistici."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-PR.DS-01",
+      "domain": "PR",
+      "level": "",
+      "control_category": "tecnico",
+      "translations": {
+        "it": {
+          "title": "Protezione dei dati a riposo",
+          "description": "La riservatezza, l'integrità e la disponibilità dei dati a riposo sono protette mediante crittografia, controllo degli accessi e meccanismi di integrità appropriati alla classificazione dei dati."
+        },
+        "en": {
+          "title": "Protection of data at rest",
+          "description": "The confidentiality, integrity, and availability of data at rest are protected through encryption, access control, and integrity mechanisms appropriate to data classification."
+        },
+        "fr": {
+          "title": "Protection des données au repos",
+          "description": "La confidentialité, l'intégrité et la disponibilité des données au repos sont protégées par chiffrement, contrôle d'accès et mécanismes d'intégrité appropriés à la classification des données."
+        },
+        "pl": {
+          "title": "Ochrona danych w spoczynku",
+          "description": "Poufność, integralność i dostępność danych w spoczynku są chronione poprzez szyfrowanie, kontrolę dostępu i mechanizmy integralności odpowiednie do klasyfikacji danych."
+        },
+        "tr": {
+          "title": "Durağan veri koruması",
+          "description": "Durağan verilerin gizliliği, bütünlüğü ve kullanılabilirliği, veri sınıflandırmasına uygun şifreleme, erişim kontrolü ve bütünlük mekanizmaları aracılığıyla korunur."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "policy", "mandatory": true, "description": "Policy di crittografia e protezione dati con indicazione delle tecnologie adottate"}
+        ],
+        "evidences": [
+          {"type": "report", "mandatory": false, "max_age_days": 365, "description": "Evidenza di configurazione della crittografia sui sistemi critici (es. full-disk encryption, TDE)"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(h) D.Lgs. 138/2024 — Crittografia e cifratura obbligatoria per dati critici."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-PR.DS-02",
+      "domain": "PR",
+      "level": "",
+      "control_category": "tecnico",
+      "translations": {
+        "it": {
+          "title": "Protezione dei dati in transito",
+          "description": "La riservatezza, l'integrità e la disponibilità dei dati in transito sono protette mediante protocolli crittografici sicuri (TLS 1.2+, VPN), con disabilitazione dei protocolli obsoleti."
+        },
+        "en": {
+          "title": "Protection of data in transit",
+          "description": "The confidentiality, integrity, and availability of data in transit are protected through secure cryptographic protocols (TLS 1.2+, VPN), with disabling of obsolete protocols."
+        },
+        "fr": {
+          "title": "Protection des données en transit",
+          "description": "La confidentialité, l'intégrité et la disponibilité des données en transit sont protégées par des protocoles cryptographiques sécurisés (TLS 1.2+, VPN), avec désactivation des protocoles obsolètes."
+        },
+        "pl": {
+          "title": "Ochrona danych w tranzycie",
+          "description": "Poufność, integralność i dostępność danych w tranzycie są chronione poprzez bezpieczne protokoły kryptograficzne (TLS 1.2+, VPN), z wyłączeniem przestarzałych protokołów."
+        },
+        "tr": {
+          "title": "Aktarımdaki veri koruması",
+          "description": "Aktarımdaki verilerin gizliliği, bütünlüğü ve kullanılabilirliği, eski protokollerin devre dışı bırakılmasıyla güvenli kriptografik protokoller (TLS 1.2+, VPN) aracılığıyla korunur."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "policy", "mandatory": true, "description": "Policy di sicurezza nelle comunicazioni con requisiti di crittografia in transito"}
+        ],
+        "evidences": [
+          {"type": "report", "mandatory": false, "max_age_days": 365, "description": "Scan o verifica della configurazione TLS sui servizi esposti"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(h) D.Lgs. 138/2024 — Comunicazioni sicure cifrate obbligatorie."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-PR.DS-11",
+      "domain": "PR",
+      "level": "",
+      "control_category": "tecnico",
+      "translations": {
+        "it": {
+          "title": "Backup dei dati",
+          "description": "Backup dei dati critici sono creati, protetti con crittografia e controllo degli accessi, mantenuti in posizioni separate (incluso off-site o cloud) e testati periodicamente per verificarne il ripristino."
+        },
+        "en": {
+          "title": "Data backup",
+          "description": "Backups of critical data are created, protected with encryption and access control, maintained in separate locations (including off-site or cloud), and periodically tested to verify restoration."
+        },
+        "fr": {
+          "title": "Sauvegarde des données",
+          "description": "Des sauvegardes des données critiques sont créées, protégées par chiffrement et contrôle d'accès, maintenues dans des emplacements séparés (y compris hors site ou cloud) et testées périodiquement pour vérifier la restauration."
+        },
+        "pl": {
+          "title": "Kopie zapasowe danych",
+          "description": "Kopie zapasowe krytycznych danych są tworzone, chronione szyfrowaniem i kontrolą dostępu, przechowywane w oddzielnych lokalizacjach (w tym poza siedzibą lub w chmurze) i okresowo testowane w celu weryfikacji przywracania."
+        },
+        "tr": {
+          "title": "Veri yedekleme",
+          "description": "Kritik verilerin yedekleri oluşturulur, şifreleme ve erişim kontrolüyle korunur, ayrı konumlarda (site dışı veya bulut dahil) tutulur ve geri yüklemeyi doğrulamak için periyodik olarak test edilir."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "procedura", "mandatory": true, "description": "Procedura di backup con frequenza, tipologia (completo/incrementale), retention e test di ripristino"}
+        ],
+        "evidences": [
+          {"type": "report", "mandatory": true, "max_age_days": 90, "description": "Report di test di ripristino da backup"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 1,
+        "notes": "Art. 24(2)(c) D.Lgs. 138/2024 — Continuità operativa: backup e disaster recovery obbligatori."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-PR.PS-01",
+      "domain": "PR",
+      "level": "essential",
+      "control_category": "tecnico",
+      "translations": {
+        "it": {
+          "title": "Gestione della configurazione (Configuration Management)",
+          "description": "Pratiche di gestione della configurazione sicura sono definite e applicate a tutti i sistemi: hardening, configurazioni baseline, gestione delle modifiche, rilevamento delle deviazioni. [Solo soggetti essenziali]"
+        },
+        "en": {
+          "title": "Configuration management",
+          "description": "Secure configuration management practices are established and applied to all systems: hardening, baseline configurations, change management, and deviation detection. [Essential entities only]"
+        },
+        "fr": {
+          "title": "Gestion de la configuration (Configuration Management)",
+          "description": "Des pratiques de gestion de configuration sécurisée sont définies et appliquées à tous les systèmes : durcissement, configurations de référence, gestion des changements, détection des écarts. [Entités essentielles uniquement]"
+        },
+        "pl": {
+          "title": "Zarządzanie konfiguracją (Configuration Management)",
+          "description": "Praktyki bezpiecznego zarządzania konfiguracją są zdefiniowane i stosowane do wszystkich systemów: hardening, konfiguracje bazowe, zarządzanie zmianami, wykrywanie odchyleń. [Tylko podmioty kluczowe]"
+        },
+        "tr": {
+          "title": "Yapılandırma yönetimi (Configuration Management)",
+          "description": "Güvenli yapılandırma yönetimi uygulamaları, sertleştirme, temel yapılandırmalar, değişiklik yönetimi ve sapma tespiti ile tüm sistemlere uygulanır. [Yalnızca temel varlıklar]"
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "procedura", "mandatory": true, "description": "Procedura di gestione della configurazione con baseline di hardening documentate"}
+        ],
+        "evidences": [
+          {"type": "report", "mandatory": false, "max_age_days": 180, "description": "Report di compliance scanning (CIS Benchmark o equivalente)"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24 D.Lgs. 138/2024 — Obbligatorio solo per soggetti essenziali. Hardening sistematico di tutti i sistemi."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-PR.PS-02",
+      "domain": "PR",
+      "level": "",
+      "control_category": "tecnico",
+      "translations": {
+        "it": {
+          "title": "Manutenzione e aggiornamento del software",
+          "description": "Il software è mantenuto aggiornato mediante patch management sistematico; il software non più supportato è sostituito o isolato. Le patch critiche di sicurezza sono applicate entro tempi definiti."
+        },
+        "en": {
+          "title": "Software maintenance and updates",
+          "description": "Software is kept up-to-date through systematic patch management; unsupported software is replaced or isolated. Critical security patches are applied within defined timeframes."
+        },
+        "fr": {
+          "title": "Maintenance et mise à jour des logiciels",
+          "description": "Le logiciel est maintenu à jour grâce à une gestion systématique des correctifs ; les logiciels non pris en charge sont remplacés ou isolés. Les correctifs de sécurité critiques sont appliqués dans des délais définis."
+        },
+        "pl": {
+          "title": "Konserwacja i aktualizacja oprogramowania",
+          "description": "Oprogramowanie jest aktualizowane poprzez systematyczne zarządzanie poprawkami; oprogramowanie bez wsparcia jest zastępowane lub izolowane. Krytyczne poprawki bezpieczeństwa są stosowane w zdefiniowanych terminach."
+        },
+        "tr": {
+          "title": "Yazılım bakımı ve güncellemeleri",
+          "description": "Yazılım, sistematik yama yönetimi aracılığıyla güncel tutulur; desteklenmeyen yazılım değiştirilir veya izole edilir. Kritik güvenlik yamaları tanımlanan zaman dilimleri içinde uygulanır."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "procedura", "mandatory": true, "description": "Procedura di patch management con SLA per le patch critiche"}
+        ],
+        "evidences": [
+          {"type": "report", "mandatory": true, "max_age_days": 90, "description": "Report di stato delle patch sui sistemi critici"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 1,
+        "notes": "Art. 24(2)(e) D.Lgs. 138/2024 — Gestione delle vulnerabilità: patch management obbligatorio."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-PR.PS-03",
+      "domain": "PR",
+      "level": "essential",
+      "control_category": "tecnico",
+      "translations": {
+        "it": {
+          "title": "Manutenzione e aggiornamento dell'hardware",
+          "description": "L'hardware è mantenuto, riparato e sostituito in base al rischio; i dispositivi a fine vita (EoL) sono identificati, isolati e dismissi in modo sicuro con cancellazione garantita dei dati. [Solo soggetti essenziali]"
+        },
+        "en": {
+          "title": "Hardware maintenance and replacement",
+          "description": "Hardware is maintained, repaired, and replaced based on risk; end-of-life (EoL) devices are identified, isolated, and securely decommissioned with guaranteed data erasure. [Essential entities only]"
+        },
+        "fr": {
+          "title": "Maintenance et remplacement du matériel",
+          "description": "Le matériel est entretenu, réparé et remplacé en fonction du risque ; les appareils en fin de vie (EoL) sont identifiés, isolés et mis hors service de manière sécurisée avec effacement garanti des données. [Entités essentielles uniquement]"
+        },
+        "pl": {
+          "title": "Konserwacja i wymiana sprzętu",
+          "description": "Sprzęt jest konserwowany, naprawiany i zastępowany w oparciu o ryzyko; urządzenia po zakończeniu cyklu życia (EoL) są identyfikowane, izolowane i bezpiecznie wycofywane z gwarantowanym usunięciem danych. [Tylko podmioty kluczowe]"
+        },
+        "tr": {
+          "title": "Donanım bakımı ve değişimi",
+          "description": "Donanım, riske göre bakıma alınır, onarılır ve değiştirilir; kullanım ömrü sona eren (EoL) cihazlar tanımlanır, izole edilir ve garantili veri silme ile güvenli şekilde hizmet dışı bırakılır. [Yalnızca temel varlıklar]"
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "procedura", "mandatory": true, "description": "Procedura di gestione hardware con tracciamento EoL e dismissione sicura"}
+        ],
+        "evidences": [
+          {"type": "registro", "mandatory": false, "max_age_days": 365, "description": "Registro dei dispositivi EoL in uso con piano di sostituzione"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24 D.Lgs. 138/2024 — Obbligatorio solo per soggetti essenziali. Dismissione sicura dei dispositivi."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-PR.PS-04",
+      "domain": "PR",
+      "level": "",
+      "control_category": "tecnico",
+      "translations": {
+        "it": {
+          "title": "Log e registri per il monitoraggio continuo",
+          "description": "I log di sistema, di rete e di applicazione sono generati, protetti dall'alterazione e resi disponibili per il monitoraggio continuo e l'analisi degli incidenti, con retention adeguata."
+        },
+        "en": {
+          "title": "Logs for continuous monitoring",
+          "description": "System, network, and application logs are generated, protected from tampering, and made available for continuous monitoring and incident analysis, with adequate retention."
+        },
+        "fr": {
+          "title": "Journaux pour la surveillance continue",
+          "description": "Les journaux système, réseau et applicatifs sont générés, protégés contre la falsification et rendus disponibles pour la surveillance continue et l'analyse des incidents, avec une rétention adéquate."
+        },
+        "pl": {
+          "title": "Logi do ciągłego monitorowania",
+          "description": "Logi systemowe, sieciowe i aplikacyjne są generowane, chronione przed manipulacją i udostępniane do ciągłego monitorowania i analizy incydentów, z odpowiednią retencją."
+        },
+        "tr": {
+          "title": "Sürekli izleme için günlükler",
+          "description": "Sistem, ağ ve uygulama günlükleri oluşturulur, kurcalamaya karşı korunur ve yeterli saklama süresiyle sürekli izleme ve olay analizi için kullanılabilir hale getirilir."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "policy", "mandatory": true, "description": "Policy di logging con tipologie di log, retention e protezione dell'integrità"}
+        ],
+        "evidences": [
+          {"type": "report", "mandatory": false, "max_age_days": 90, "description": "Evidenza della configurazione del sistema di log centralizzato (SIEM o log collector)"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24 D.Lgs. 138/2024 — Audit log obbligatori per rilevamento e analisi degli incidenti."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-PR.PS-06",
+      "domain": "PR",
+      "level": "",
+      "control_category": "procedurale",
+      "translations": {
+        "it": {
+          "title": "Sviluppo software sicuro (Secure SDLC)",
+          "description": "Le pratiche di sviluppo software sicuro (SSDLC) sono integrate nel ciclo di sviluppo: code review, SAST/DAST, dependency check, gestione sicura dei segreti e test di penetrazione prima della produzione."
+        },
+        "en": {
+          "title": "Secure software development (Secure SDLC)",
+          "description": "Secure software development practices (SSDLC) are integrated into the development lifecycle: code review, SAST/DAST, dependency checks, secure secrets management, and penetration testing before production."
+        },
+        "fr": {
+          "title": "Développement logiciel sécurisé (Secure SDLC)",
+          "description": "Les pratiques de développement logiciel sécurisé (SSDLC) sont intégrées dans le cycle de développement : revue de code, SAST/DAST, vérification des dépendances, gestion sécurisée des secrets et tests d'intrusion avant la mise en production."
+        },
+        "pl": {
+          "title": "Bezpieczne wytwarzanie oprogramowania (Secure SDLC)",
+          "description": "Praktyki bezpiecznego wytwarzania oprogramowania (SSDLC) są zintegrowane z cyklem wytwarzania: przeglądy kodu, SAST/DAST, sprawdzanie zależności, bezpieczne zarządzanie sekretami i testy penetracyjne przed produkcją."
+        },
+        "tr": {
+          "title": "Güvenli yazılım geliştirme (Secure SDLC)",
+          "description": "Güvenli yazılım geliştirme uygulamaları (SSDLC), kod incelemesi, SAST/DAST, bağımlılık kontrolleri, güvenli gizli bilgi yönetimi ve üretime geçmeden önce sızma testi ile geliştirme yaşam döngüsüne entegre edilir."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "procedura", "mandatory": true, "description": "Procedura o linee guida di sviluppo sicuro (SSDLC)"}
+        ],
+        "evidences": [
+          {"type": "report", "mandatory": false, "max_age_days": 365, "description": "Report di SAST/DAST o penetration test su applicazioni critiche"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(e) D.Lgs. 138/2024 — Sicurezza nello sviluppo e manutenzione del software."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-PR.IR-01",
+      "domain": "PR",
+      "level": "",
+      "control_category": "tecnico",
+      "translations": {
+        "it": {
+          "title": "Segmentazione e protezione delle reti",
+          "description": "Le reti e gli ambienti informativi sono protetti dall'accesso logico non autorizzato mediante segmentazione, firewall, DMZ, VLAN e principio di deny-all di default per i flussi non esplicitamente autorizzati."
+        },
+        "en": {
+          "title": "Network segmentation and protection",
+          "description": "Networks and information environments are protected from unauthorized logical access through segmentation, firewalls, DMZ, VLANs, and a default deny-all principle for non-explicitly authorized traffic flows."
+        },
+        "fr": {
+          "title": "Segmentation et protection des réseaux",
+          "description": "Les réseaux et environnements informatifs sont protégés des accès logiques non autorisés par segmentation, pare-feu, DMZ, VLAN et principe de deny-all par défaut pour les flux non explicitement autorisés."
+        },
+        "pl": {
+          "title": "Segmentacja i ochrona sieci",
+          "description": "Sieci i środowiska informatyczne są chronione przed nieautoryzowanym dostępem logicznym poprzez segmentację, zapory sieciowe, DMZ, VLAN i zasadę domyślnego blokowania (deny-all) dla przepływów nieautoryzowanych."
+        },
+        "tr": {
+          "title": "Ağ segmentasyonu ve koruması",
+          "description": "Ağlar ve bilgi ortamları, segmentasyon, güvenlik duvarları, DMZ, VLAN'lar ve açıkça yetkili olmayan trafik akışları için varsayılan deny-all ilkesi aracılığıyla yetkisiz mantıksal erişimden korunur."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "diagramma", "mandatory": true, "description": "Diagramma architetturale di rete con segmentazione e controlli di sicurezza"}
+        ],
+        "evidences": [
+          {"type": "report", "mandatory": false, "max_age_days": 365, "description": "Report di revisione delle regole firewall e degli ACL"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24 D.Lgs. 138/2024 — Sicurezza delle reti e dei sistemi informativi: segmentazione obbligatoria."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-PR.IR-03",
+      "domain": "PR",
+      "level": "essential",
+      "control_category": "tecnico",
+      "translations": {
+        "it": {
+          "title": "Resilienza dell'infrastruttura tecnologica",
+          "description": "Meccanismi di resilienza sono implementati per garantire la continuità operativa in condizioni normali e avverse: ridondanza, failover, alta disponibilità e capacità di recupero rapido. [Solo soggetti essenziali]"
+        },
+        "en": {
+          "title": "Technology infrastructure resilience",
+          "description": "Resilience mechanisms are implemented to ensure operational continuity in normal and adverse conditions: redundancy, failover, high availability, and rapid recovery capabilities. [Essential entities only]"
+        },
+        "fr": {
+          "title": "Résilience de l'infrastructure technologique",
+          "description": "Des mécanismes de résilience sont mis en œuvre pour garantir la continuité opérationnelle en conditions normales et défavorables : redondance, basculement, haute disponibilité et capacités de récupération rapide. [Entités essentielles uniquement]"
+        },
+        "pl": {
+          "title": "Odporność infrastruktury technologicznej",
+          "description": "Mechanizmy odporności są wdrażane w celu zapewnienia ciągłości operacyjnej w warunkach normalnych i niekorzystnych: redundancja, failover, wysoka dostępność i szybkie możliwości odtwarzania. [Tylko podmioty kluczowe]"
+        },
+        "tr": {
+          "title": "Teknoloji altyapısı dayanıklılığı",
+          "description": "Normal ve olumsuz koşullarda operasyonel sürekliliği sağlamak için dayanıklılık mekanizmaları uygulanır: yedeklilik, yük devretme, yüksek kullanılabilirlik ve hızlı kurtarma yetenekleri. [Yalnızca temel varlıklar]"
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "piano", "mandatory": true, "description": "Piano di continuità IT con architettura di alta disponibilità e RTO/RPO definiti"}
+        ],
+        "evidences": [
+          {"type": "verbale", "mandatory": false, "max_age_days": 365, "description": "Verbale di test di failover o esercitazione DR"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(c) D.Lgs. 138/2024 — Obbligatorio solo per soggetti essenziali. Resilienza e continuità operativa avanzata."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-DE.CM-01",
+      "domain": "DE",
+      "level": "",
+      "control_category": "tecnico",
+      "translations": {
+        "it": {
+          "title": "Monitoraggio continuo della rete",
+          "description": "Le reti e i servizi di rete sono monitorati in modo continuo per rilevare eventi potenzialmente avversi: anomalie di traffico, accessi non autorizzati, attività di scansione e lateral movement."
+        },
+        "en": {
+          "title": "Continuous network monitoring",
+          "description": "Networks and network services are continuously monitored to detect potentially adverse events: traffic anomalies, unauthorized access, scanning activity, and lateral movement."
+        },
+        "fr": {
+          "title": "Surveillance continue du réseau",
+          "description": "Les réseaux et services réseau sont surveillés en continu pour détecter des événements potentiellement défavorables : anomalies de trafic, accès non autorisés, activités de balayage et déplacement latéral."
+        },
+        "pl": {
+          "title": "Ciągłe monitorowanie sieci",
+          "description": "Sieci i usługi sieciowe są stale monitorowane w celu wykrywania potencjalnie niekorzystnych zdarzeń: anomalii ruchu, nieautoryzowanych dostępów, aktywności skanowania i ruchu bocznego (lateral movement)."
+        },
+        "tr": {
+          "title": "Sürekli ağ izleme",
+          "description": "Ağlar ve ağ hizmetleri, trafik anomalileri, yetkisiz erişim, tarama faaliyeti ve yanal hareket gibi potansiyel olumsuz olayları tespit etmek için sürekli izlenir."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "procedura", "mandatory": true, "description": "Procedura di monitoraggio della rete con strumenti, alert e escalation"}
+        ],
+        "evidences": [
+          {"type": "report", "mandatory": false, "max_age_days": 90, "description": "Report o dashboard di monitoraggio rete con alert recenti"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24 D.Lgs. 138/2024 — Monitoraggio continuo obbligatorio per rilevare anomalie e incidenti."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-DE.CM-09",
+      "domain": "DE",
+      "level": "",
+      "control_category": "tecnico",
+      "translations": {
+        "it": {
+          "title": "Monitoraggio di sistemi, applicazioni e runtime",
+          "description": "I sistemi di elaborazione, il software, gli ambienti runtime e i loro dati sono monitorati per rilevare eventi avversi: comportamenti anomali, malware, accessi non autorizzati e modifiche non autorizzate."
+        },
+        "en": {
+          "title": "Monitoring of systems, applications, and runtime environments",
+          "description": "Computing hardware, software, runtime environments, and their data are monitored to detect adverse events: anomalous behavior, malware, unauthorized access, and unauthorized modifications."
+        },
+        "fr": {
+          "title": "Surveillance des systèmes, applications et environnements d'exécution",
+          "description": "Le matériel informatique, les logiciels, les environnements d'exécution et leurs données sont surveillés pour détecter des événements défavorables : comportements anormaux, logiciels malveillants, accès non autorisés et modifications non autorisées."
+        },
+        "pl": {
+          "title": "Monitorowanie systemów, aplikacji i środowisk runtime",
+          "description": "Sprzęt komputerowy, oprogramowanie, środowiska runtime i ich dane są monitorowane w celu wykrywania niekorzystnych zdarzeń: anomalnych zachowań, złośliwego oprogramowania, nieautoryzowanych dostępów i nieautoryzowanych modyfikacji."
+        },
+        "tr": {
+          "title": "Sistemlerin, uygulamaların ve çalışma ortamlarının izlenmesi",
+          "description": "Bilgisayar donanımı, yazılımı, çalışma ortamları ve verileri, anormal davranış, kötü amaçlı yazılım, yetkisiz erişim ve yetkisiz değişiklikler gibi olumsuz olayları tespit etmek için izlenir."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "procedura", "mandatory": true, "description": "Procedura di monitoraggio degli endpoint e dei sistemi con EDR/AV e analisi dei log"}
+        ],
+        "evidences": [
+          {"type": "report", "mandatory": false, "max_age_days": 90, "description": "Report EDR/AV con alert e interventi degli ultimi 90 giorni"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24 D.Lgs. 138/2024 — Rilevamento degli incidenti tramite monitoraggio sistemi e applicazioni."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-RS.MA-01",
+      "domain": "RS",
+      "level": "",
+      "control_category": "procedurale",
+      "translations": {
+        "it": {
+          "title": "Esecuzione del piano di risposta agli incidenti",
+          "description": "Il piano di risposta agli incidenti è eseguito in coordinamento con le terze parti rilevanti (CSIRT, autorità competente, fornitori) non appena un incidente significativo è dichiarato."
+        },
+        "en": {
+          "title": "Incident response plan execution",
+          "description": "The incident response plan is executed in coordination with relevant third parties (CSIRT, competent authority, suppliers) once a significant incident is declared."
+        },
+        "fr": {
+          "title": "Exécution du plan de réponse aux incidents",
+          "description": "Le plan de réponse aux incidents est exécuté en coordination avec les tiers pertinents (CSIRT, autorité compétente, fournisseurs) dès qu'un incident significatif est déclaré."
+        },
+        "pl": {
+          "title": "Wykonanie planu reagowania na incydenty",
+          "description": "Plan reagowania na incydenty jest realizowany w koordynacji z odpowiednimi stronami trzecimi (CSIRT, właściwy organ, dostawcy) po zadeklarowaniu znaczącego incydentu."
+        },
+        "tr": {
+          "title": "Olay müdahale planı yürütme",
+          "description": "Olay müdahale planı, önemli bir olay ilan edildiğinde ilgili üçüncü taraflarla (CSIRT, yetkili makam, tedarikçiler) koordineli olarak yürütülür."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "piano", "mandatory": true, "description": "Piano di risposta agli incidenti con ruoli, procedure di escalation e contatti CSIRT-IT"}
+        ],
+        "evidences": [
+          {"type": "verbale", "mandatory": false, "max_age_days": 365, "description": "Verbale di esercitazione o post-mortem di incidente gestito"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(b) D.Lgs. 138/2024 — Gestione degli incidenti: procedure di risposta obbligatorie."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-RS.CO-02",
+      "domain": "RS",
+      "level": "",
+      "control_category": "procedurale",
+      "translations": {
+        "it": {
+          "title": "Notifica degli incidenti significativi",
+          "description": "Gli stakeholder interni e le autorità competenti (ACN/CSIRT-IT) sono notificati tempestivamente degli incidenti significativi, secondo le tempistiche previste dal D.Lgs. 138/2024: pre-notifica entro 24h, notifica entro 72h, relazione finale entro 1 mese."
+        },
+        "en": {
+          "title": "Significant incident notification",
+          "description": "Internal stakeholders and competent authorities (ACN/CSIRT-IT) are notified in a timely manner of significant incidents, following the timelines of D.Lgs. 138/2024: pre-notification within 24h, notification within 72h, final report within 1 month."
+        },
+        "fr": {
+          "title": "Notification des incidents significatifs",
+          "description": "Les parties prenantes internes et les autorités compétentes (ACN/CSIRT-IT) sont notifiées en temps opportun des incidents significatifs, selon les délais prévus par le D.Lgs. 138/2024 : pré-notification dans les 24h, notification dans les 72h, rapport final dans le mois."
+        },
+        "pl": {
+          "title": "Powiadomienie o znaczących incydentach",
+          "description": "Wewnętrzni interesariusze i właściwe organy (ACN/CSIRT-IT) są terminowo powiadamiani o znaczących incydentach, zgodnie z terminami D.Lgs. 138/2024: wstępne powiadomienie w ciągu 24h, powiadomienie w ciągu 72h, raport końcowy w ciągu 1 miesiąca."
+        },
+        "tr": {
+          "title": "Önemli olay bildirimi",
+          "description": "İç paydaşlar ve yetkili makamlar (ACN/CSIRT-IT), D.Lgs. 138/2024'ün zaman çizelgelerine göre önemli olaylardan zamanında haberdar edilir: 24 saat içinde ön bildirim, 72 saat içinde bildirim, 1 ay içinde nihai rapor."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "procedura", "mandatory": true, "description": "Procedura di notifica incidenti con tempistiche NIS2 e template di segnalazione ad ACN/CSIRT-IT"}
+        ],
+        "evidences": [],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 23 D.Lgs. 138/2024 — Obbligo di notifica incidenti significativi ad ACN entro 24h (pre-notifica) e 72h (notifica)."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-RC.RP-01",
+      "domain": "RC",
+      "level": "",
+      "control_category": "procedurale",
+      "translations": {
+        "it": {
+          "title": "Esecuzione del piano di ripristino",
+          "description": "La parte di ripristino del piano di risposta agli incidenti è eseguita non appena avviata dal processo di risposta agli incidenti, con obiettivi di RTO e RPO definiti e verificati."
+        },
+        "en": {
+          "title": "Recovery plan execution",
+          "description": "The recovery portion of the incident response plan is executed once initiated from the incident response process, with defined and verified RTO and RPO objectives."
+        },
+        "fr": {
+          "title": "Exécution du plan de reprise",
+          "description": "La partie reprise du plan de réponse aux incidents est exécutée dès qu'elle est déclenchée par le processus de réponse aux incidents, avec des objectifs RTO et RPO définis et vérifiés."
+        },
+        "pl": {
+          "title": "Wykonanie planu odtwarzania",
+          "description": "Część odtwarzania planu reagowania na incydenty jest realizowana po uruchomieniu przez proces reagowania na incydenty, ze zdefiniowanymi i zweryfikowanymi celami RTO i RPO."
+        },
+        "tr": {
+          "title": "Kurtarma planı yürütme",
+          "description": "Olay müdahale planının kurtarma bölümü, olay müdahale sürecinden başlatıldıktan sonra, tanımlanmış ve doğrulanmış RTO ve RPO hedefleriyle yürütülür."
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "piano", "mandatory": true, "description": "Piano di ripristino (DRP/BCP) con RTO, RPO e procedure di recupero documentate"}
+        ],
+        "evidences": [
+          {"type": "verbale", "mandatory": false, "max_age_days": 365, "description": "Verbale di esercitazione DR o test di ripristino"}
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 24(2)(c) D.Lgs. 138/2024 — Continuità operativa e disaster recovery obbligatori."
+      }
+    },
+    {
+      "external_id": "ACN-NIS2-RC.CO-03",
+      "domain": "RC",
+      "level": "essential",
+      "control_category": "procedurale",
+      "translations": {
+        "it": {
+          "title": "Comunicazione durante il ripristino",
+          "description": "Le attività di ripristino e i progressi nel recupero delle capacità operative sono comunicati tempestivamente agli stakeholder interni designati e alle autorità esterne competenti. [Solo soggetti essenziali]"
+        },
+        "en": {
+          "title": "Recovery communication",
+          "description": "Recovery activities and progress in restoring operational capabilities are communicated in a timely manner to designated internal stakeholders and competent external authorities. [Essential entities only]"
+        },
+        "fr": {
+          "title": "Communication pendant la reprise",
+          "description": "Les activités de reprise et les progrès dans le rétablissement des capacités opérationnelles sont communiqués en temps opportun aux parties prenantes internes désignées et aux autorités externes compétentes. [Entités essentielles uniquement]"
+        },
+        "pl": {
+          "title": "Komunikacja podczas odtwarzania",
+          "description": "Działania odtwarzające i postępy w przywracaniu zdolności operacyjnych są terminowo komunikowane wyznaczonym wewnętrznym interesariuszom i właściwym zewnętrznym organom. [Tylko podmioty kluczowe]"
+        },
+        "tr": {
+          "title": "Kurtarma sürecinde iletişim",
+          "description": "Kurtarma faaliyetleri ve operasyonel yeteneklerin yeniden sağlanmasındaki ilerleme, belirlenen iç paydaşlara ve yetkili dış makamlara zamanında iletilir. [Yalnızca temel varlıklar]"
+        }
+      },
+      "evidence_requirement": {
+        "documents": [
+          {"type": "procedura", "mandatory": true, "description": "Procedura di crisis communication durante e dopo un incidente significativo"}
+        ],
+        "evidences": [],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Art. 23 D.Lgs. 138/2024 — Obbligatorio solo per soggetti essenziali. Aggiornamenti periodici ad ACN durante il ripristino."
+      }
+    }
+  ]
+}

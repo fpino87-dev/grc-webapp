@@ -1,12 +1,16 @@
 """
 Risk Adj service — Fase 3.
 
-Calcola il rischio aggiustato (`Supplier.risk_adj`) combinando:
-  - rischio interno corrente (ultima `SupplierInternalEvaluation` con is_current=True)
-  - rischio esterno dall'ultimo assessment approvato entro validità configurata
+Calcola il rischio aggiustato (`Supplier.risk_adj`) combinando tre sorgenti opzionali:
+  1. Rischio interno corrente  — ultima `SupplierInternalEvaluation` (is_current=True)
+  2. Rischio questionario      — ultimo `SupplierQuestionnaire` risposto e non scaduto
+  3. Audit terze parti         — ultimo `SupplierAssessment` approvato entro validità configurata
 
-Formula B (max conservativo):
-    base_class = max(rischio_interno, rischio_esterno_se_valido)
+Formula worst-case:
+    base_class = max delle sorgenti presenti
+
+Ogni sorgente è opzionale: partecipa solo se presente. Se nessuna sorgente è disponibile,
+risk_adj resta vuoto.
 
 Bump NIS2 (se config.nis2_concentration_bump = True):
     Se supplier.nis2_relevant AND supplier.concentration_threshold == "critica"
@@ -30,6 +34,7 @@ from .models import (
     SupplierAssessment,
     SupplierEvaluationConfig,
     SupplierInternalEvaluation,
+    SupplierQuestionnaire,
 )
 
 
@@ -47,8 +52,30 @@ def _class_from_rank(rank: int) -> str:
     return _CLASS_ORDER[rank]
 
 
+def _latest_valid_questionnaire_class(supplier: Supplier) -> Optional[str]:
+    """
+    Ritorna la classe di rischio dall'ultimo questionario risposto e non scaduto.
+    None se nessun questionario valido disponibile.
+    """
+    today = timezone.now().date()
+    latest = (
+        SupplierQuestionnaire.objects.filter(
+            supplier=supplier,
+            status="risposto",
+            risk_result__isnull=False,
+            expires_at__gte=today,
+            deleted_at__isnull=True,
+        )
+        .order_by("-evaluation_date")
+        .first()
+    )
+    if latest is None:
+        return None
+    return latest.risk_result
+
+
 def _assessment_to_class(score_overall: Optional[int]) -> Optional[str]:
-    """Mappa lo `score_overall` (0–100) alla classe di rischio interna (basso/medio/alto/critico)."""
+    """Mappa lo score_overall (0–100) alla classe di rischio (basso/medio/alto/critico)."""
     if score_overall is None:
         return None
     if score_overall >= 75:
@@ -60,10 +87,11 @@ def _assessment_to_class(score_overall: Optional[int]) -> Optional[str]:
     return "critico"
 
 
-def _latest_valid_external_class(supplier: Supplier, validity_months: int) -> Optional[str]:
+def _latest_valid_audit_class(supplier: Supplier, validity_months: int) -> Optional[str]:
     """
-    Ritorna la classe di rischio dall'ultimo assessment APPROVATO entro validità.
-    None se nessun assessment valido disponibile.
+    Ritorna la classe di rischio dall'ultimo audit terze parti (SupplierAssessment approvato)
+    entro la finestra di validità configurata.
+    None se nessun audit valido disponibile.
     """
     cutoff = timezone.now().date() - datetime.timedelta(days=validity_months * 30)
     latest = (
@@ -98,17 +126,18 @@ def recompute_risk_adj(supplier: Supplier) -> Supplier:
     Ricalcola `supplier.internal_risk_level` e `supplier.risk_adj`.
 
     - internal_risk_level = classe della valutazione interna corrente (o "" se assente)
-    - risk_adj = max(interno, esterno_valido) + bump NIS2 se applicabile
-      Se non c'è né interno né esterno valido, risk_adj resta vuoto.
+    - risk_adj = max(interno, questionario_valido, audit_terze_parti_valido) + bump NIS2
+      Ogni sorgente è opzionale. Se nessuna disponibile, risk_adj resta vuoto.
     """
     config = SupplierEvaluationConfig.get_solo()
 
     internal_class = _current_internal_class(supplier)
-    external_class = _latest_valid_external_class(supplier, config.assessment_validity_months)
+    questionnaire_class = _latest_valid_questionnaire_class(supplier)
+    audit_class = _latest_valid_audit_class(supplier, config.assessment_validity_months)
 
     supplier.internal_risk_level = internal_class or ""
 
-    candidates = [c for c in (internal_class, external_class) if c]
+    candidates = [c for c in (internal_class, questionnaire_class, audit_class) if c]
     if not candidates:
         supplier.risk_adj = ""
         supplier.risk_adj_updated_at = timezone.now()

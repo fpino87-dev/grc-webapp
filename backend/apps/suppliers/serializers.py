@@ -99,6 +99,7 @@ class SupplierEvaluationConfigSerializer(serializers.ModelSerializer):
             "weights",
             "parameter_labels",
             "risk_thresholds",
+            "questionnaire_validity_months",
             "assessment_validity_months",
             "nis2_concentration_bump",
             "updated_at",
@@ -165,6 +166,11 @@ class SupplierEvaluationConfigSerializer(serializers.ModelSerializer):
                 "(medio < alto < critico)."
             )
         return nums
+
+    def validate_questionnaire_validity_months(self, value):
+        if value < 1 or value > 60:
+            raise serializers.ValidationError("Validità in mesi tra 1 e 60.")
+        return value
 
     def validate_assessment_validity_months(self, value):
         if value < 1 or value > 60:

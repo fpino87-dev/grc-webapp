@@ -33,3 +33,9 @@ django-two-factor-auth==1.18.*
 django-otp==1.7.*
 qrcode[pil]==8.*
 django-formtools==2.5.*
+
+# PDF generation (audit-ready reports — M14 fornitori)
+reportlab>=4.2.0
+
+# DOCX generation (procedure documents — M03 AI generate)
+python-docx==1.1.*

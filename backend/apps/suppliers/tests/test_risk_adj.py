@@ -1,4 +1,10 @@
-"""Test risk_adj — Fase 3 (worst-case + bump NIS2)."""
+"""Test risk_adj — Fase 3 (worst-case + bump NIS2).
+
+Sorgenti di rischio (tutte opzionali, worst-case):
+  1. Valutazione interna: SupplierInternalEvaluation (is_current=True)
+  2. Questionario:        SupplierQuestionnaire (status='risposto', expires_at >= oggi)
+  3. Audit terze parti:   SupplierAssessment (status='approvato', entro validità config)
+"""
 import datetime
 
 import pytest
@@ -9,9 +15,15 @@ from apps.suppliers.models import (
     Supplier,
     SupplierAssessment,
     SupplierEvaluationConfig,
+    SupplierQuestionnaire,
+    QuestionnaireTemplate,
 )
 from apps.suppliers.risk_adj import recompute_risk_adj, recompute_expired_risk_adj
-from apps.suppliers.services import create_internal_evaluation
+from apps.suppliers.services import (
+    approve_assessment,
+    create_internal_evaluation,
+    register_evaluation,
+)
 
 User = get_user_model()
 
@@ -33,24 +45,45 @@ def config(db):
     return SupplierEvaluationConfig.get_solo()
 
 
+@pytest.fixture
+def template(db, user):
+    return QuestionnaireTemplate.objects.create(
+        name="T1",
+        subject="Test",
+        body="Body",
+        form_url="https://example.com/form",
+        created_by=user,
+    )
+
+
 def _eval(supplier, user, level):
-    """Helper: crea una valutazione interna che produce risk_class desiderata.
-    level ∈ {1..5} — stesso score su tutti e 6 i parametri."""
+    """Helper: crea una valutazione interna con risk_class basata su level (1–5)."""
     scores = {k: level for k in ("impatto", "accesso", "dati", "dipendenza", "integrazione", "compliance")}
     return create_internal_evaluation(supplier, scores, user)
 
 
-def _approved_assessment(supplier, user, score_overall, assessment_date=None):
-    assessment_date = assessment_date or timezone.now().date()
-    return SupplierAssessment.objects.create(
+def _questionnaire(supplier, user, template, risk_result, evaluation_date=None, expired=False):
+    """Helper: crea un questionario risposto con risk_result desiderato."""
+    evaluation_date = evaluation_date or timezone.now().date()
+    if expired:
+        expires_at = evaluation_date - datetime.timedelta(days=1)
+    else:
+        expires_at = evaluation_date + datetime.timedelta(days=365)
+    return SupplierQuestionnaire.objects.create(
         supplier=supplier,
-        assessed_by=user,
-        assessment_date=assessment_date,
-        status="approvato",
-        score_overall=score_overall,
-        score=score_overall,
-        reviewed_by=user,
-        reviewed_at=timezone.now(),
+        template=template,
+        subject_snapshot="Test",
+        body_snapshot="Body",
+        form_url_snapshot="https://example.com/form",
+        sent_at=timezone.now(),
+        last_sent_at=timezone.now(),
+        sent_to=supplier.email or "test@example.com",
+        sent_by=user,
+        send_count=1,
+        status="risposto",
+        evaluation_date=evaluation_date,
+        risk_result=risk_result,
+        expires_at=expires_at,
         created_by=user,
     )
 
@@ -58,7 +91,7 @@ def _approved_assessment(supplier, user, score_overall, assessment_date=None):
 # ── Nessun dato → risk_adj vuoto ─────────────────────────────────────────
 
 @pytest.mark.django_db
-def test_no_internal_no_external_produces_empty_risk_adj(supplier):
+def test_no_internal_no_questionnaire_produces_empty_risk_adj(supplier):
     recompute_risk_adj(supplier)
     supplier.refresh_from_db()
     assert supplier.internal_risk_level == ""
@@ -75,11 +108,11 @@ def test_internal_only_sets_risk_adj(supplier, user):
     assert supplier.risk_adj == "basso"
 
 
-# ── Solo esterno ─────────────────────────────────────────────────────────
+# ── Solo questionario ─────────────────────────────────────────────────────
 
 @pytest.mark.django_db
-def test_external_only_within_validity(supplier, user):
-    _approved_assessment(supplier, user, score_overall=80)  # >=75 → basso
+def test_questionnaire_only_within_validity(supplier, user, template):
+    _questionnaire(supplier, user, template, risk_result="basso")
     recompute_risk_adj(supplier)
     supplier.refresh_from_db()
     assert supplier.internal_risk_level == ""
@@ -87,20 +120,19 @@ def test_external_only_within_validity(supplier, user):
 
 
 @pytest.mark.django_db
-def test_external_expired_does_not_contribute(supplier, user, config):
-    old_date = timezone.now().date() - datetime.timedelta(days=config.assessment_validity_months * 30 + 10)
-    _approved_assessment(supplier, user, score_overall=10, assessment_date=old_date)
+def test_questionnaire_expired_does_not_contribute(supplier, user, template):
+    _questionnaire(supplier, user, template, risk_result="critico", expired=True)
     recompute_risk_adj(supplier)
     supplier.refresh_from_db()
-    assert supplier.risk_adj == ""  # scaduto → non contribuisce, niente interno → vuoto
+    assert supplier.risk_adj == ""  # scaduto → non contribuisce
 
 
 # ── Worst-case (max) ─────────────────────────────────────────────────────
 
 @pytest.mark.django_db
-def test_worst_case_external_higher(supplier, user):
+def test_worst_case_questionnaire_higher(supplier, user, template):
     _eval(supplier, user, 1)  # interno basso
-    _approved_assessment(supplier, user, score_overall=10)  # esterno critico
+    _questionnaire(supplier, user, template, risk_result="critico")
     recompute_risk_adj(supplier)
     supplier.refresh_from_db()
     assert supplier.internal_risk_level == "basso"
@@ -108,9 +140,9 @@ def test_worst_case_external_higher(supplier, user):
 
 
 @pytest.mark.django_db
-def test_worst_case_internal_higher(supplier, user):
+def test_worst_case_internal_higher(supplier, user, template):
     _eval(supplier, user, 5)  # interno critico
-    _approved_assessment(supplier, user, score_overall=90)  # esterno basso
+    _questionnaire(supplier, user, template, risk_result="basso")
     recompute_risk_adj(supplier)
     supplier.refresh_from_db()
     assert supplier.internal_risk_level == "critico"
@@ -194,12 +226,86 @@ def test_signal_recomputes_on_nis2_change(supplier, user):
     assert supplier.risk_adj == "alto"  # bump applicato automaticamente
 
 
-# ── Hook approve_assessment ──────────────────────────────────────────────
+# ── Hook register_evaluation triggera ricalcolo ──────────────────────────
+
+@pytest.mark.django_db
+def test_register_evaluation_triggers_recompute(supplier, user, template):
+    _eval(supplier, user, 1)  # interno basso
+    q = SupplierQuestionnaire.objects.create(
+        supplier=supplier,
+        template=template,
+        subject_snapshot="Test",
+        body_snapshot="Body",
+        form_url_snapshot="https://example.com/form",
+        sent_at=timezone.now(),
+        last_sent_at=timezone.now(),
+        sent_to="test@example.com",
+        sent_by=user,
+        send_count=1,
+        status="inviato",
+        created_by=user,
+    )
+    register_evaluation(q, timezone.now().date(), "critico", user)
+    supplier.refresh_from_db()
+    assert supplier.risk_adj == "critico"
+
+
+# ── Audit terze parti (SupplierAssessment approvato) ─────────────────────
+
+def _approved_assessment(supplier, user, score_overall, assessment_date=None):
+    return SupplierAssessment.objects.create(
+        supplier=supplier,
+        assessed_by=user,
+        assessment_date=assessment_date or timezone.now().date(),
+        status="approvato",
+        score_overall=score_overall,
+        score=score_overall,
+        reviewed_by=user,
+        reviewed_at=timezone.now(),
+        created_by=user,
+    )
+
+
+@pytest.mark.django_db
+def test_audit_only_within_validity(supplier, user):
+    _approved_assessment(supplier, user, score_overall=80)  # >=75 → basso
+    recompute_risk_adj(supplier)
+    supplier.refresh_from_db()
+    assert supplier.internal_risk_level == ""
+    assert supplier.risk_adj == "basso"
+
+
+@pytest.mark.django_db
+def test_audit_expired_does_not_contribute(supplier, user, config):
+    old_date = timezone.now().date() - datetime.timedelta(days=config.assessment_validity_months * 30 + 10)
+    _approved_assessment(supplier, user, score_overall=10, assessment_date=old_date)
+    recompute_risk_adj(supplier)
+    supplier.refresh_from_db()
+    assert supplier.risk_adj == ""  # scaduto → non partecipa
+
+
+@pytest.mark.django_db
+def test_worst_case_three_sources(supplier, user, template):
+    _eval(supplier, user, 1)                                    # interno → basso
+    _questionnaire(supplier, user, template, risk_result="medio")  # questionario → medio
+    _approved_assessment(supplier, user, score_overall=10)      # audit → critico
+    recompute_risk_adj(supplier)
+    supplier.refresh_from_db()
+    assert supplier.risk_adj == "critico"  # audit vince
+
+
+@pytest.mark.django_db
+def test_worst_case_questionnaire_beats_audit(supplier, user, template):
+    _eval(supplier, user, 1)                                      # interno → basso
+    _questionnaire(supplier, user, template, risk_result="critico")  # questionario → critico
+    _approved_assessment(supplier, user, score_overall=80)        # audit → basso
+    recompute_risk_adj(supplier)
+    supplier.refresh_from_db()
+    assert supplier.risk_adj == "critico"  # questionario vince
+
 
 @pytest.mark.django_db
 def test_approve_assessment_triggers_recompute(supplier, user):
-    from apps.suppliers.services import approve_assessment
-
     _eval(supplier, user, 1)  # interno basso
     assessment = SupplierAssessment.objects.create(
         supplier=supplier,
@@ -215,11 +321,25 @@ def test_approve_assessment_triggers_recompute(supplier, user):
     assert supplier.risk_adj == "critico"
 
 
+@pytest.mark.django_db
+def test_soft_delete_assessment_triggers_recompute(supplier, user):
+    _eval(supplier, user, 1)  # interno basso
+    assessment = _approved_assessment(supplier, user, score_overall=10)  # audit critico
+    recompute_risk_adj(supplier)
+    supplier.refresh_from_db()
+    assert supplier.risk_adj == "critico"
+
+    # Elimina l'audit → risk_adj torna al solo interno
+    assessment.soft_delete()
+    recompute_risk_adj(supplier)
+    supplier.refresh_from_db()
+    assert supplier.risk_adj == "basso"
+
+
 # ── Task nightly ─────────────────────────────────────────────────────────
 
 @pytest.mark.django_db
 def test_recompute_expired_risk_adj_runs_without_error(supplier, user):
     _eval(supplier, user, 3)
     count = recompute_expired_risk_adj()
-    # Non deve sollevare; il conteggio dipende dallo stato pre-esistente
     assert count >= 0

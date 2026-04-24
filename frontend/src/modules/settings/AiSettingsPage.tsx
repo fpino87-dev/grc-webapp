@@ -10,6 +10,7 @@ const TASKS = [
   ["review_summary", "Sintesi Management Review"],
   ["chatbot", "Chatbot"],
   ["cpv_suggestion", "Suggerimento codici CPV (M14 Fornitori)"],
+  ["generate_procedure", "Genera documento procedura (M03 Controlli)"],
 ] as const;
 
 export function AiSettingsPage() {

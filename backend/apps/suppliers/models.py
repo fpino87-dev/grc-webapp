@@ -79,7 +79,7 @@ class Supplier(BaseModel):
         choices=RISK_CHOICES,
         blank=True,
         default="",
-        help_text="Rischio aggiustato: max(interno, assessment esterno valido) + bump NIS2 se applicabile (calcolato, read-only)",
+        help_text="Rischio aggiustato: max(interno, questionario valutato non scaduto, audit terze parti approvato entro validità) + bump NIS2 (calcolato, read-only)",
     )
     risk_adj_updated_at = models.DateTimeField(null=True, blank=True)
 
@@ -164,9 +164,13 @@ class SupplierEvaluationConfig(models.Model):
         default=dict,
         help_text="Soglie weighted_score per classificazione (>=)",
     )
+    questionnaire_validity_months = models.PositiveSmallIntegerField(
+        default=12,
+        help_text="Mesi di validità di un questionario valutato. Determina l'expires_at al momento della registrazione della risposta.",
+    )
     assessment_validity_months = models.PositiveSmallIntegerField(
         default=12,
-        help_text="Mesi di validità di un assessment esterno approvato. Oltre, scade e non partecipa al risk_adj.",
+        help_text="Mesi di validità di un audit terze parti (SupplierAssessment approvato). Oltre la finestra, non partecipa al calcolo risk_adj.",
     )
     nis2_concentration_bump = models.BooleanField(
         default=True,

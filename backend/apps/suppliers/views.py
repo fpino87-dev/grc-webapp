@@ -62,7 +62,7 @@ class SupplierViewSet(viewsets.ModelViewSet):
         ]
         return Response({"results": data, "count": len(data)})
 
-    @action(detail=True, methods=["post"], url_path="nda/upload", parser_classes=None)
+    @action(detail=True, methods=["post"], url_path="nda/upload")
     def nda_upload(self, request, pk=None):
         """
         POST /suppliers/<id>/nda/upload/
@@ -97,11 +97,10 @@ class SupplierViewSet(viewsets.ModelViewSet):
             title=title,
             category="contratto",
             document_type="contratto",
-            status="bozza",
+            status="approvato",
             supplier=supplier,
             plant=None,
             expiry_date=expiry_date,
-            notes=notes,
             owner=request.user,
             created_by=request.user,
         )
@@ -440,7 +439,9 @@ class SupplierEvaluationConfigView(APIView):
 
 
 class SupplierAssessmentViewSet(viewsets.ModelViewSet):
-    queryset = SupplierAssessment.objects.all()
+    queryset = SupplierAssessment.objects.filter(
+        deleted_at__isnull=True
+    ).select_related("supplier", "assessed_by", "reviewed_by")
     serializer_class = SupplierAssessmentSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
@@ -455,6 +456,25 @@ class SupplierAssessmentViewSet(viewsets.ModelViewSet):
             entity=instance,
             payload={"id": str(instance.id), "supplier_id": str(instance.supplier_id)},
         )
+
+    def destroy(self, request, *args, **kwargs):
+        from .risk_adj import recompute_risk_adj
+        instance = self.get_object()
+        supplier = instance.supplier
+        instance.soft_delete()
+        recompute_risk_adj(supplier)
+        log_action(
+            user=request.user,
+            action_code="suppliers.assessment.delete",
+            level="L2",
+            entity=instance,
+            payload={
+                "supplier_id": str(supplier.id),
+                "supplier_name": supplier.name,
+                "status": instance.status,
+            },
+        )
+        return Response(status=204)
 
     @action(detail=True, methods=["post"], url_path="complete")
     def complete(self, request, pk=None):

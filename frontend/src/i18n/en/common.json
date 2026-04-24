@@ -310,7 +310,12 @@
         "req_evidence": "Required evidence",
         "req_max_age": "max {{days}} days",
         "req_min_docs": "At least {{count}} approved document(s)",
-        "req_min_evidences": "At least {{count}} valid evidence(s)"
+        "req_min_evidences": "At least {{count}} valid evidence(s)",
+        "generate_doc_title": "Generate procedure document",
+        "generate_doc_btn": "Generate Procedure (.docx)",
+        "generating_doc": "Generating…",
+        "generate_doc_hint": "Generate a formal operational procedure in Word format based on the framework requirements.",
+        "generate_doc_error": "An error occurred while generating the document."
       },
       "expiry": {
         "none": "No expiry",

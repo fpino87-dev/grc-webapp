@@ -377,7 +377,12 @@
         "req_evidence": "Gerekli kanıt",
         "req_max_age": "maks. {{days}} gün",
         "req_min_docs": "En az {{count}} onaylı belge",
-        "req_min_evidences": "En az {{count}} geçerli kanıt"
+        "req_min_evidences": "En az {{count}} geçerli kanıt",
+        "generate_doc_title": "Prosedür belgesi oluştur",
+        "generate_doc_btn": "Prosedür Oluştur (.docx)",
+        "generating_doc": "Oluşturuluyor…",
+        "generate_doc_hint": "Çerçeve gereksinimlerine dayalı Word formatında resmi bir operasyonel prosedür oluşturur.",
+        "generate_doc_error": "Belge oluşturulurken bir hata oluştu."
       },
       "expiry": {
         "none": "Süre sonu yok",

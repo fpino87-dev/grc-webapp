@@ -69,6 +69,7 @@ function TabCosa({ info }: { info: NonNullable<ReturnType<typeof useDetailInfo>[
   const qc = useQueryClient();
   const [guidanceOpen, setGuidanceOpen] = useState(false);
   const [summaryText, setSummaryText] = useState(info.practical_summary || "");
+  const [docError, setDocError] = useState("");
 
   const explainMut = useMutation({
     mutationFn: () => controlsApi.explainControl(info.control_uuid, i18n.language || "it"),
@@ -76,6 +77,20 @@ function TabCosa({ info }: { info: NonNullable<ReturnType<typeof useDetailInfo>[
       setSummaryText(data.summary);
       qc.invalidateQueries({ queryKey: ["control-detail", info.control_id] });
     },
+  });
+
+  const generateDocMut = useMutation({
+    mutationFn: () => controlsApi.generateDocument(info.control_uuid, i18n.language || "it"),
+    onSuccess: (blob) => {
+      setDocError("");
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${info.control_id}_procedura.docx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    onError: () => setDocError(t("controls.drawer.about.generate_doc_error")),
   });
 
   return (
@@ -184,6 +199,36 @@ function TabCosa({ info }: { info: NonNullable<ReturnType<typeof useDetailInfo>[
           </ul>
         </div>
       )}
+
+      {/* Genera documento procedura */}
+      <div className="border border-emerald-200 rounded-lg overflow-hidden">
+        <div className="flex items-center justify-between px-3 py-2 bg-emerald-50">
+          <span className="text-xs font-semibold text-emerald-700 flex items-center gap-1.5">
+            📄 {t("controls.drawer.about.generate_doc_title")}
+          </span>
+          <button
+            onClick={() => generateDocMut.mutate()}
+            disabled={generateDocMut.isPending}
+            className="text-xs px-2 py-0.5 rounded bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-1"
+          >
+            {generateDocMut.isPending && (
+              <svg className="animate-spin w-3 h-3" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+            )}
+            {generateDocMut.isPending
+              ? t("controls.drawer.about.generating_doc")
+              : t("controls.drawer.about.generate_doc_btn")}
+          </button>
+        </div>
+        <div className="px-3 py-2 text-xs text-gray-500">
+          {t("controls.drawer.about.generate_doc_hint")}
+        </div>
+        {docError && (
+          <p className="px-3 pb-2 text-xs text-red-600">⛔ {docError}</p>
+        )}
+      </div>
 
       {info.implementation_guidance && (
         <div className="border border-gray-200 rounded-lg">
