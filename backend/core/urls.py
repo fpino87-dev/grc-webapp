@@ -153,5 +153,6 @@ urlpatterns += [
     path("api/v1/ai/", include("apps.ai_engine.urls")),
     path("api/v1/schedule/", include("apps.compliance_schedule.urls")),
     path("api/v1/backups/",  include("apps.backups.urls")),
+    path("api/v1/osint/", include("apps.osint.urls")),
 ]
 

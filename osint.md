@@ -20,12 +20,12 @@
 - [x] Step 0 — Prerequisiti campi dominio (Plant/Supplier/AssetSW) — COMPLETATO 2026-04-24
 - [x] Step 1 — App `osint`: modelli + migrazioni + admin — COMPLETATO 2026-04-24
 - [x] Step 2 — Aggregator service — COMPLETATO 2026-04-24
-- [ ] Step 3 — Enrichment engine
-- [ ] Step 4 — Score engine
-- [ ] Step 5 — Alert engine
-- [ ] Step 6 — Scheduler Celery
-- [ ] Step 7 — AnonymizationService
-- [ ] Step 8 — API REST + integrazione AI Engine
+- [x] Step 3 — Enrichment engine — COMPLETATO 2026-04-24
+- [x] Step 4 — Score engine — COMPLETATO 2026-04-24
+- [x] Step 5 — Alert engine — COMPLETATO 2026-04-24
+- [x] Step 6 — Scheduler Celery — COMPLETATO 2026-04-24
+- [x] Step 7 — AnonymizationService — COMPLETATO 2026-04-24
+- [x] Step 8 — API REST + integrazione AI Engine — COMPLETATO 2026-04-24
 - [ ] Step 9 — Dashboard frontend
 - [ ] Step 10 — Test integrazione finale
 

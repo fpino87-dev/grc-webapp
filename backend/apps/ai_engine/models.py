@@ -78,6 +78,9 @@ TASK_TYPES = [
     ("review_summary", "Sintesi Management Review"),
     ("chatbot", "Chatbot Ask GRC"),
     ("control_explain", "Spiegazione plain-language controllo"),
+    ("osint_attack_surface", "OSINT: Analisi superficie di attacco"),
+    ("osint_suppliers_nis2", "OSINT: Briefing fornitori NIS2"),
+    ("osint_board_report", "OSINT: Report per Board/Audit"),
 ]
 
 FALLBACK_MODES = [

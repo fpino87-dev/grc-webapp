@@ -39,3 +39,7 @@ reportlab>=4.2.0
 
 # DOCX generation (procedure documents — M03 AI generate)
 python-docx==1.1.*
+
+# OSINT module — enrichment engine
+dnspython==2.7.*
+python-whois==0.9.*
