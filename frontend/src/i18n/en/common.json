@@ -2395,7 +2395,8 @@
       "otx_pulses": "Present in {{count}} threat intelligence indicators (OTX)",
       "gsb_unsafe": "Google Safe Browsing: {{status}}",
       "enricher_error": "Partial data: enrichers {{names}} did not complete",
-      "ssl_unreachable": "Port 443 unreachable on {{domain}} — no SSL certificate detected"
+      "ssl_unreachable": "Port 443 unreachable on {{domain}} — no SSL certificate detected",
+      "ssl_no_https": "No HTTPS detected on {{domain}} — domain does not expose web services (normal for email-only or internal domains)"
     },
     "ai": {
       "title": "AI Analysis",

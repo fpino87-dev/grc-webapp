@@ -2432,7 +2432,8 @@
       "otx_pulses": "Presente in {{count}} indicatori di minaccia (OTX)",
       "gsb_unsafe": "Google Safe Browsing: {{status}}",
       "enricher_error": "Dati parziali: enricher {{names}} non completati",
-      "ssl_unreachable": "Porta 443 non raggiungibile su {{domain}} — nessun certificato SSL rilevato"
+      "ssl_unreachable": "Porta 443 non raggiungibile su {{domain}} — nessun certificato SSL rilevato",
+      "ssl_no_https": "Nessun HTTPS rilevato su {{domain}} — il dominio non espone servizi web (normale per domini solo email o interni)"
     },
     "ai": {
       "title": "Analisi AI",

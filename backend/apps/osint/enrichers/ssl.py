@@ -98,6 +98,9 @@ def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> 
     domain = entity.domain
     try:
         cert = _get_tls_cert(domain)
+        if cert is None and not domain.startswith("www."):
+            cert = _get_tls_cert(f"www.{domain}")
+
         if cert:
             ssl_valid, expiry, days, issuer, wildcard = _parse_cert(cert)
             scan.ssl_valid = ssl_valid
@@ -105,9 +108,7 @@ def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> 
             scan.ssl_days_remaining = days
             scan.ssl_issuer = issuer[:255]
             scan.ssl_wildcard = wildcard
-        else:
-            scan.ssl_valid = False
-            scan.ssl_days_remaining = None
+        # else: nessun HTTPS su domain né www.domain → ssl_valid rimane None (non applicabile)
 
         subdomains = _get_crtsh_subdomains(domain)
         # Aggiorna OsintSubdomain — aggiungi solo nuovi

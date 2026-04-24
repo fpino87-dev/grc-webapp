@@ -44,8 +44,11 @@ function ScanFindings({ entity }: { entity: OsintEntityDetail }) {
 
   // SSL
   const issuerSuffix = scan.ssl_issuer ? ` (CA: ${scan.ssl_issuer})` : "";
-  if (scan.ssl_valid === false && scan.ssl_expiry_date === null && scan.ssl_days_remaining === null) {
-    // TLS non raggiungibile — porta 443 chiusa o nessun cert installato
+  if (scan.ssl_valid === null && !scan.enricher_errors?.ssl) {
+    // Check eseguito ma nessun HTTPS trovato — non è un errore
+    findings.push({ icon: "ℹ️", text: t("osint.findings.ssl_no_https", { domain: entity.domain }) });
+  } else if (scan.ssl_valid === false && scan.ssl_expiry_date === null && scan.ssl_days_remaining === null) {
+    // Dati legacy: TLS non raggiungibile
     findings.push({ icon: "❌", text: t("osint.findings.ssl_unreachable", { domain: entity.domain }) });
   } else if (scan.ssl_valid === false || (scan.ssl_days_remaining !== null && scan.ssl_days_remaining <= 0)) {
     findings.push({ icon: "❌", text: t("osint.findings.ssl_expired", { date: scan.ssl_expiry_date ?? "N/D" }) + issuerSuffix });
@@ -55,22 +58,24 @@ function ScanFindings({ entity }: { entity: OsintEntityDetail }) {
     findings.push({ icon: "✅", text: t("osint.findings.ssl_ok", { days: scan.ssl_days_remaining ?? "?" }) + issuerSuffix });
   }
 
-  // DMARC
-  if (scan.dmarc_present === false) {
-    findings.push({ icon: "❌", text: t("osint.findings.dmarc_missing") });
-  } else if (scan.dmarc_present === true && scan.dmarc_policy === "none") {
-    findings.push({ icon: "⚠️", text: t("osint.findings.dmarc_none") });
-  } else if (scan.dmarc_present === true) {
-    findings.push({ icon: "✅", text: t("osint.findings.dmarc_ok", { policy: scan.dmarc_policy }) });
-  }
+  // DMARC e SPF — rilevanti solo se il dominio ha un mail server
+  const hasMx = scan.mx_present !== false;
+  if (hasMx) {
+    if (scan.dmarc_present === false) {
+      findings.push({ icon: "❌", text: t("osint.findings.dmarc_missing") });
+    } else if (scan.dmarc_present === true && scan.dmarc_policy === "none") {
+      findings.push({ icon: "⚠️", text: t("osint.findings.dmarc_none") });
+    } else if (scan.dmarc_present === true) {
+      findings.push({ icon: "✅", text: t("osint.findings.dmarc_ok", { policy: scan.dmarc_policy }) });
+    }
 
-  // SPF
-  if (scan.spf_present === false) {
-    findings.push({ icon: "❌", text: t("osint.findings.spf_missing") });
-  } else if (scan.spf_present === true && scan.spf_policy === "+all") {
-    findings.push({ icon: "⚠️", text: t("osint.findings.spf_plus_all") });
-  } else if (scan.spf_present === true) {
-    findings.push({ icon: "✅", text: t("osint.findings.spf_ok") });
+    if (scan.spf_present === false) {
+      findings.push({ icon: "❌", text: t("osint.findings.spf_missing") });
+    } else if (scan.spf_present === true && scan.spf_policy === "+all") {
+      findings.push({ icon: "⚠️", text: t("osint.findings.spf_plus_all") });
+    } else if (scan.spf_present === true) {
+      findings.push({ icon: "✅", text: t("osint.findings.spf_ok") });
+    }
   }
 
   // DNSSEC

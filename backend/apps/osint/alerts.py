@@ -100,7 +100,7 @@ def _trigger_ssl(entity, scan, settings, created_alerts):
     domain = entity.domain
     issuer_info = f" | CA: {scan.ssl_issuer}" if scan.ssl_issuer else ""
 
-    if not valid or (days is not None and days <= 0):
+    if valid is False or (days is not None and days <= 0):
         if not _has_active_alert(entity, AlertType.SSL_EXPIRED):
             if scan.ssl_expiry_date:
                 desc = (
@@ -146,6 +146,8 @@ def _trigger_dmarc(entity, scan, settings, created_alerts):
     from apps.osint.models import AlertType, AlertSeverity
     if scan.dmarc_present is not False:
         return
+    if scan.mx_present is False:
+        return  # nessun mail server: DMARC non applicabile
     if _has_active_alert(entity, AlertType.DMARC_MISSING):
         return
     alert = _create_alert(

@@ -2474,7 +2474,8 @@
       "otx_pulses": "Obecny w {{count}} wskaźnikach zagrożeń (OTX)",
       "gsb_unsafe": "Google Safe Browsing: {{status}}",
       "enricher_error": "Częściowe dane: enrichery {{names}} nie ukończone",
-      "ssl_unreachable": "Port 443 niedostępny na {{domain}} — nie wykryto certyfikatu SSL"
+      "ssl_unreachable": "Port 443 niedostępny na {{domain}} — nie wykryto certyfikatu SSL",
+      "ssl_no_https": "Nie wykryto HTTPS na {{domain}} — domena nie udostępnia usług web (normalne dla domen tylko e-mail lub wewnętrznych)"
     },
     "ai": {
       "title": "Analiza AI",

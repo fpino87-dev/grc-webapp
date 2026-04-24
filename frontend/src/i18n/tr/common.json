@@ -2474,7 +2474,8 @@
       "otx_pulses": "{{count}} tehdit istihbarat göstergesinde mevcut (OTX)",
       "gsb_unsafe": "Google Safe Browsing: {{status}}",
       "enricher_error": "Kısmi veri: {{names}} zenginleştiricileri tamamlanmadı",
-      "ssl_unreachable": "{{domain}} üzerinde port 443 erişilemiyor — SSL sertifikası algılanamadı"
+      "ssl_unreachable": "{{domain}} üzerinde port 443 erişilemiyor — SSL sertifikası algılanamadı",
+      "ssl_no_https": "{{domain}} üzerinde HTTPS tespit edilmedi — domain web hizmeti sunmuyor (yalnızca e-posta veya dahili domainler için normal)"
     },
     "ai": {
       "title": "Yapay Zeka Analizi",

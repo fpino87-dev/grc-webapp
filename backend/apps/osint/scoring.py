@@ -19,10 +19,12 @@ logger = logging.getLogger(__name__)
 
 
 def _score_ssl(scan: "OsintScan") -> int:
-    if scan.ssl_valid is False or scan.ssl_days_remaining is None:
+    if scan.ssl_valid is None:
+        return 0  # nessun HTTPS rilevato: non applicabile, non penalizzare
+    if scan.ssl_valid is False:
         return 100
     days = scan.ssl_days_remaining
-    if days <= 0:
+    if days is None or days <= 0:
         return 100
     if days <= 14:
         return 90
@@ -37,16 +39,16 @@ def _score_ssl(scan: "OsintScan") -> int:
 
 def _score_dns(scan: "OsintScan") -> int:
     base = 0
-    if scan.spf_present is False:
-        base += 40
-    elif scan.spf_policy == "+all":
-        base += 20  # misconfigured
-    if scan.dmarc_present is False:
-        base += 30
-    elif scan.dmarc_policy == "none":
-        base += 15  # solo monitoring
-    if scan.mx_present is False:
-        base += 10
+    # SPF e DMARC rilevanti solo se il dominio ha un mail server
+    if scan.mx_present is not False:
+        if scan.spf_present is False:
+            base += 40
+        elif scan.spf_policy == "+all":
+            base += 20
+        if scan.dmarc_present is False:
+            base += 30
+        elif scan.dmarc_policy == "none":
+            base += 15
     return min(base, 100)
 
 
