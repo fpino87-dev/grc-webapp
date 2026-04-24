@@ -27,6 +27,13 @@ from .models import (
 logger = logging.getLogger(__name__)
 
 
+def domain_from_email(email: str | None) -> str:
+    """Estrae il dominio da un indirizzo email. 'user@example.com' → 'example.com'."""
+    if not email or "@" not in email:
+        return ""
+    return email.strip().split("@")[-1].lower().strip()
+
+
 def extract_domain(raw: str | None) -> str:
     """Estrae l'hostname (lowercase) da una URL o stringa dominio.
 
@@ -156,7 +163,7 @@ def _sync_plants(settings: OsintSettings, result: AggregationResult) -> None:
 def _sync_suppliers(settings: OsintSettings, result: AggregationResult) -> None:
     kept: set = set()
     for sup in Supplier.objects.all():
-        domain = extract_domain(sup.website)
+        domain = extract_domain(sup.website) or domain_from_email(sup.email)
         if not domain:
             continue
         is_nis2 = bool(getattr(sup, "nis2_relevant", False))
