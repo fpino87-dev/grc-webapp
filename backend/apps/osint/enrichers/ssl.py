@@ -46,8 +46,17 @@ def _parse_cert(cert: dict) -> tuple[bool, date | None, int | None, str, bool]:
         days_remaining = (expiry.date() - now.date()).days
         ssl_valid = days_remaining > 0
 
-        issuer_dict = dict(x[0] for x in cert.get("issuer", []))
-        issuer = issuer_dict.get("organizationName", "") or issuer_dict.get("commonName", "")
+        # Estrae issuer in modo robusto: ogni RDN può contenere 1+ attributi
+        issuer = ""
+        for rdn in cert.get("issuer", []):
+            for attr_key, attr_val in rdn:
+                if attr_key in ("organizationName", "O"):
+                    issuer = attr_val
+                    break
+                if attr_key in ("commonName", "CN") and not issuer:
+                    issuer = attr_val
+            if issuer:
+                break
 
         subject_alt = cert.get("subjectAltName", [])
         wildcard = any(v.startswith("*.") for _, v in subject_alt)

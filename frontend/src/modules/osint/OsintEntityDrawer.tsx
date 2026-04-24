@@ -149,9 +149,14 @@ function TechDataRow({ label, value }: { label: string; value: React.ReactNode }
   );
 }
 
-function bool(v: boolean | null | undefined): string {
+function secBool(v: boolean | null | undefined): string {
   if (v === null || v === undefined) return "—";
   return v ? "✅" : "❌";
+}
+
+function yesNo(v: boolean | null | undefined): string {
+  if (v === null || v === undefined) return "—";
+  return v ? "Sì" : "No";
 }
 
 function ScanTechData({ scan }: { scan: OsintScanDetail }) {
@@ -170,18 +175,21 @@ function ScanTechData({ scan }: { scan: OsintScanDetail }) {
       {open && (
         <div className="px-4 py-2 bg-white">
           <p className="text-xs font-semibold text-gray-500 uppercase mb-1 mt-1">SSL</p>
-          <TechDataRow label={t("osint.detail.ssl_issuer")} value={scan.ssl_issuer || "—"} />
-          <TechDataRow label={t("osint.detail.ssl_wildcard")} value={bool(scan.ssl_wildcard)} />
+          <TechDataRow
+            label={t("osint.detail.ssl_issuer")}
+            value={scan.ssl_issuer || (scan.ssl_valid ? "(non rilevato)" : "—")}
+          />
+          <TechDataRow label={t("osint.detail.ssl_wildcard")} value={yesNo(scan.ssl_wildcard)} />
 
           <p className="text-xs font-semibold text-gray-500 uppercase mb-1 mt-3">WHOIS</p>
           <TechDataRow label={t("osint.detail.domain_expiry")} value={scan.domain_expiry_date ?? "—"} />
           <TechDataRow label={t("osint.detail.domain_registrar")} value={scan.domain_registrar || "—"} />
           <TechDataRow label={t("osint.detail.registrar_country")} value={scan.registrar_country || "—"} />
-          <TechDataRow label={t("osint.detail.whois_privacy")} value={bool(scan.whois_privacy)} />
+          <TechDataRow label={t("osint.detail.whois_privacy")} value={yesNo(scan.whois_privacy)} />
 
           <p className="text-xs font-semibold text-gray-500 uppercase mb-1 mt-3">DNS</p>
-          <TechDataRow label={t("osint.detail.dnssec")} value={bool(scan.dnssec_enabled)} />
-          <TechDataRow label={t("osint.detail.mx")} value={bool(scan.mx_present)} />
+          <TechDataRow label={t("osint.detail.dnssec")} value={secBool(scan.dnssec_enabled)} />
+          <TechDataRow label={t("osint.detail.mx")} value={yesNo(scan.mx_present)} />
 
           <p className="text-xs font-semibold text-gray-500 uppercase mb-1 mt-3">Reputation</p>
           <TechDataRow label="VirusTotal suspicious" value={scan.vt_suspicious ?? "—"} />
