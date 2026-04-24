@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 class OsintEntityViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
+    pagination_class = None
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ["entity_type", "is_active", "is_nis2_critical", "scan_frequency"]
     search_fields = ["domain", "display_name"]
