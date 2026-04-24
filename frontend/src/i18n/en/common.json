@@ -2398,7 +2398,9 @@
       "status_ignored": "Ignored",
       "include": "Include",
       "ignore": "Ignore",
-      "reset": "Reset"
+      "reset": "Reset",
+      "tab_pending": "To classify",
+      "tab_all": "All subdomains"
     },
     "settings": {
       "title": "OSINT Settings",

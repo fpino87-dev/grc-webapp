@@ -2435,7 +2435,9 @@
       "status_ignored": "Ignorato",
       "include": "Includi",
       "ignore": "Ignora",
-      "reset": "Ripristina"
+      "reset": "Ripristina",
+      "tab_pending": "Da classificare",
+      "tab_all": "Tutti i sottodomini"
     },
     "settings": {
       "title": "Impostazioni OSINT",

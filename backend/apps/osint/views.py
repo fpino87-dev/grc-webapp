@@ -160,6 +160,13 @@ class OsintSubdomainViewSet(viewsets.GenericViewSet):
     def get_queryset(self):
         return OsintSubdomain.objects.filter(deleted_at__isnull=True).select_related("entity")
 
+    def list(self, request):
+        status_filter = request.query_params.get("status")
+        qs = self.get_queryset().order_by("status", "subdomain")
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+        return Response(self.get_serializer(qs, many=True).data)
+
     @action(detail=False, methods=["get"])
     def pending(self, request):
         qs = self.get_queryset().filter(status=SubdomainStatus.PENDING).order_by("subdomain")
@@ -172,7 +179,7 @@ class OsintSubdomainViewSet(viewsets.GenericViewSet):
             return Response({"detail": "Non trovato."}, status=status.HTTP_404_NOT_FOUND)
 
         new_status = request.data.get("status")
-        if new_status not in [SubdomainStatus.INCLUDED, SubdomainStatus.IGNORED]:
+        if new_status not in [SubdomainStatus.INCLUDED, SubdomainStatus.IGNORED, SubdomainStatus.PENDING]:
             return Response({"detail": "Stato non valido."}, status=status.HTTP_400_BAD_REQUEST)
 
         sub.status = new_status

@@ -2477,7 +2477,9 @@
       "status_ignored": "Yoksayıldı",
       "include": "Dahil et",
       "ignore": "Yoksay",
-      "reset": "Sıfırla"
+      "reset": "Sıfırla",
+      "tab_pending": "Sınıflandırılacak",
+      "tab_all": "Tüm alt alanlar"
     },
     "settings": {
       "title": "OSINT Ayarları",

@@ -2477,7 +2477,9 @@
       "status_ignored": "Ignoré",
       "include": "Inclure",
       "ignore": "Ignorer",
-      "reset": "Réinitialiser"
+      "reset": "Réinitialiser",
+      "tab_pending": "À classer",
+      "tab_all": "Tous les sous-domaines"
     },
     "settings": {
       "title": "Paramètres OSINT",

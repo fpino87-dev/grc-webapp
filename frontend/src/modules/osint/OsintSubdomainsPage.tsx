@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -75,45 +76,24 @@ function SubdomainRow({
 export function OsintSubdomainsPage() {
   const { t } = useTranslation();
   const qc = useQueryClient();
+  const [tab, setTab] = useState<"pending" | "all">("pending");
 
   const { data: subdomains = [], isLoading } = useQuery({
-    queryKey: ["osint-subdomains-all"],
-    queryFn: () => osintApi.entities().then(() => osintApi.pendingSubdomains()),
-  });
-
-  const { data: allSubdomains = [] } = useQuery({
-    queryKey: ["osint-subdomains-all-list"],
-    queryFn: async () => {
-      const entities = await osintApi.entities();
-      const results: OsintSubdomain[] = [];
-      for (const e of entities.slice(0, 20)) {
-        try {
-          const detail = await osintApi.entity(e.id);
-          if (detail.pending_subdomains_count > 0) {
-            const pending = await osintApi.pendingSubdomains();
-            results.push(...pending);
-            break;
-          }
-        } catch { /* ignore */ }
-      }
-      return results;
-    },
+    queryKey: ["osint-subdomains-page", tab],
+    queryFn: () => tab === "pending" ? osintApi.subdomains("pending") : osintApi.subdomains(),
   });
 
   const classifyMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: SubdomainStatus }) =>
       osintApi.classifySubdomain(id, status),
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["osint-subdomains-page"] });
       qc.invalidateQueries({ queryKey: ["osint-subdomains-pending"] });
-      qc.invalidateQueries({ queryKey: ["osint-subdomains-all"] });
-      qc.invalidateQueries({ queryKey: ["osint-subdomains-all-list"] });
+      qc.invalidateQueries({ queryKey: ["osint-summary"] });
     },
   });
 
-  const pending = subdomains.filter(s => s.status === "pending");
-  const processed = [...subdomains, ...allSubdomains.filter(
-    s => !subdomains.find(x => x.id === s.id)
-  )].filter(s => s.status !== "pending");
+  const pendingCount = tab === "pending" ? subdomains.length : subdomains.filter(s => s.status === "pending").length;
 
   return (
     <div className="p-4 sm:p-6 space-y-4 max-w-4xl">
@@ -125,17 +105,36 @@ export function OsintSubdomainsPage() {
 
       <p className="text-sm text-gray-500">{t("osint.subdomains.subtitle")}</p>
 
+      {/* Tab */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => setTab("pending")}
+          className={`px-4 py-1.5 text-sm rounded-full border ${tab === "pending" ? "bg-yellow-500 text-white border-yellow-500" : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"}`}
+        >
+          {t("osint.subdomains.tab_pending")}
+          {pendingCount > 0 && tab !== "pending" && (
+            <span className="ml-1.5 bg-yellow-500 text-white text-xs rounded-full px-1.5">{pendingCount}</span>
+          )}
+        </button>
+        <button
+          onClick={() => setTab("all")}
+          className={`px-4 py-1.5 text-sm rounded-full border ${tab === "all" ? "bg-primary-600 text-white border-primary-600" : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"}`}
+        >
+          {t("osint.subdomains.tab_all")}
+        </button>
+      </div>
+
       {isLoading && <div className="text-gray-400 text-sm">{t("common.loading")}</div>}
 
-      {/* Pending */}
-      {pending.length > 0 && (
+      {!isLoading && subdomains.length === 0 && (
+        <div className="border rounded-xl p-8 text-center bg-white">
+          <p className="text-2xl mb-2">✅</p>
+          <p className="text-gray-500 text-sm">{t("osint.subdomains.all_classified")}</p>
+        </div>
+      )}
+
+      {subdomains.length > 0 && (
         <div className="border rounded-xl overflow-hidden bg-white">
-          <div className="px-4 py-3 border-b bg-yellow-50 flex items-center gap-2">
-            <span>⚠️</span>
-            <h2 className="font-semibold text-yellow-800 text-sm">
-              {t("osint.subdomains.pending_count", { count: pending.length })}
-            </h2>
-          </div>
           <table className="min-w-full divide-y divide-gray-100">
             <thead className="bg-gray-50">
               <tr>
@@ -147,7 +146,7 @@ export function OsintSubdomainsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {pending.map(sub => (
+              {subdomains.map(sub => (
                 <SubdomainRow
                   key={sub.id}
                   sub={sub}
@@ -157,13 +156,6 @@ export function OsintSubdomainsPage() {
               ))}
             </tbody>
           </table>
-        </div>
-      )}
-
-      {!isLoading && pending.length === 0 && (
-        <div className="border rounded-xl p-8 text-center bg-white">
-          <p className="text-2xl mb-2">✅</p>
-          <p className="text-gray-500 text-sm">{t("osint.subdomains.all_classified")}</p>
         </div>
       )}
     </div>

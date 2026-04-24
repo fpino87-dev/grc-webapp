@@ -152,6 +152,8 @@ export const osintApi = {
   escalateAlert: (id: string, action: "incident" | "task" | "ignore") =>
     apiClient.post<OsintAlert>(`/osint/alerts/${id}/escalate/`, { action }).then(r => r.data),
 
+  subdomains: (status?: SubdomainStatus) =>
+    apiClient.get<OsintSubdomain[]>("/osint/subdomains/", { params: status ? { status } : {} }).then(r => r.data),
   pendingSubdomains: () =>
     apiClient.get<OsintSubdomain[]>("/osint/subdomains/pending/").then(r => r.data),
   classifySubdomain: (id: string, status: SubdomainStatus) =>
