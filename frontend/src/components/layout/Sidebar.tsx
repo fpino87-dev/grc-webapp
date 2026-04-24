@@ -63,6 +63,12 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
+    labelKey: "sidebar.groups.security",
+    items: [
+      { to: "/osint", labelKey: "sidebar.items.osint", icon: "🔍", roles: ["super_admin", "ciso", "compliance_officer"] },
+    ],
+  },
+  {
     labelKey: "sidebar.groups.settings",
     items: [
       { to: "/settings/email", labelKey: "sidebar.items.email_settings", icon: "✉️", roles: ["super_admin"] },

@@ -62,3 +62,7 @@ CLAUDE.md
 
 # Local agent handover notes (keep untracked)
 newmodelrisk.md
+osint.md
+
+# Database backups (generati dal task Celery, non da versionare)
+backend/backups/

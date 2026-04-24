@@ -1042,7 +1042,8 @@
       "operations": "Operacje",
       "planning": "Planowanie",
       "organisation": "Organizacja i przegląd",
-      "settings": "Ustawienia"
+      "settings": "Ustawienia",
+      "security": "Bezpieczeństwo"
     },
     "items": {
       "dashboard": "Dashboard",
@@ -1075,7 +1076,8 @@
       "ai_engine": "AI Engine",
       "supplier_evaluation": "Ocena dostawców",
       "mfa": "Uwierzytelnianie MFA",
-      "backups": "Kopia zapasowa & Przywracanie"
+      "backups": "Kopia zapasowa & Przywracanie",
+      "osint": "OSINT Monitor"
     }
   },
   "topbar": {
@@ -2381,5 +2383,124 @@
     "download": "Pobierz",
     "loading": "Ładowanie podręcznika...",
     "error": "Błąd podczas ładowania podręcznika."
+  },
+  "osint": {
+    "title": "OSINT Monitor",
+    "subtitle": "Monitorowanie powierzchni ataku i reputacji domen",
+    "search_placeholder": "Szukaj encji lub domeny…",
+    "sort_by": "Sortuj według",
+    "sort": {
+      "score": "Wynik",
+      "name": "Nazwa"
+    },
+    "kpi": {
+      "entities": "Monitorowane encje",
+      "critical": "Krytyczne",
+      "warning": "Ostrzeżenia",
+      "last_scan": "Ostatnie skanowanie",
+      "pending_subdomains": "Subdomeny do klasyfikacji"
+    },
+    "filters": {
+      "all": "Wszystkie",
+      "my_domain": "Moje domeny",
+      "supplier": "Dostawcy",
+      "asset": "Zasoby",
+      "with_alert": "Z alertem"
+    },
+    "table": {
+      "entity": "Encja",
+      "type": "Typ",
+      "score": "Wynik",
+      "reputation": "Reputacja",
+      "no_entities": "Nie znaleziono encji"
+    },
+    "entity_type": {
+      "my_domain": "Moja domena",
+      "supplier": "Dostawca",
+      "asset": "Zasób"
+    },
+    "detail": {
+      "no_scan": "Brak dostępnego skanowania",
+      "total_score": "Wynik całkowity",
+      "vs_last_week": "vs ostatni tydzień",
+      "last_scan": "Ostatnie skanowanie",
+      "reputation": "Reputacja",
+      "history": "Historia wyników",
+      "findings": "Wyniki",
+      "active_alerts": "Aktywne alerty",
+      "linked_incident": "Powiązany incydent",
+      "linked_task": "Powiązane zadanie",
+      "force_scan": "Wymuś skanowanie"
+    },
+    "findings": {
+      "ssl_expired": "SSL wygasł {{date}}",
+      "ssl_expiry_soon": "SSL wygasa za {{days}} dni",
+      "ssl_ok": "SSL ważny, wygasa za {{days}} dni",
+      "dmarc_missing": "DMARC nie skonfigurowany",
+      "dmarc_none": "DMARC obecny, ale polityka = none (brak ochrony)",
+      "dmarc_ok": "DMARC skonfigurowany (polityka: {{policy}})",
+      "spf_missing": "SPF nie skonfigurowany",
+      "spf_plus_all": "SPF skonfigurowany z +all (polityka permisywna)",
+      "spf_ok": "SPF poprawnie skonfigurowany",
+      "blacklist": "Domena na czarnej liście: {{sources}}",
+      "no_blacklist": "Brak czarnej listy",
+      "vt_malicious": "VirusTotal: {{count}} silniki oznaczają jako złośliwe",
+      "breach": "{{count}} naruszenie/naruszenia wykryte (HaveIBeenPwned)"
+    },
+    "ai": {
+      "title": "Analiza AI",
+      "description": "AI przeanalizuje zebrane dane OSINT, aby wygenerować szczegółowy raport. Dane są anonimizowane przed wysłaniem.",
+      "attack_surface": "Analiza powierzchni ataku",
+      "suppliers_nis2": "Briefing dostawców NIS2",
+      "board_report": "Raport dla Zarządu / Audytu",
+      "start": "Rozpocznij analizę",
+      "loading": "Analiza w toku, proszę czekać…",
+      "error": "Błąd podczas analizy AI. Spróbuj ponownie.",
+      "copy": "Kopiuj",
+      "download": "Pobierz",
+      "regenerate": "Regeneruj"
+    },
+    "subdomains": {
+      "title": "Zarządzanie subdomenami",
+      "subtitle": "Klasyfikuj nowo wykryte subdomeny: dołącz je do monitorowania lub zignoruj.",
+      "pending_banner": "{{count}} nowych subdomen oczekuje na klasyfikację",
+      "view_arrow": "Klasyfikuj →",
+      "pending_count": "{{count}} subdomen oczekuje",
+      "all_classified": "Wszystkie subdomeny zostały sklasyfikowane.",
+      "col_subdomain": "Subdomena",
+      "col_entity": "Encja nadrzędna",
+      "col_status": "Status",
+      "col_first_seen": "Pierwsze wykrycie",
+      "status_pending": "Oczekuje",
+      "status_included": "Włączona",
+      "status_ignored": "Zignorowana",
+      "include": "Włącz",
+      "ignore": "Ignoruj",
+      "reset": "Resetuj"
+    },
+    "settings": {
+      "title": "Ustawienia OSINT",
+      "thresholds": "Progi wyników",
+      "thresholds_hint": "Wynik od 0 (doskonały) do 100 (krytyczny). Ustaw progi generowania alertów.",
+      "threshold_critical": "Próg krytyczny (≥)",
+      "threshold_warning": "Próg ostrzeżenia (≥)",
+      "frequency": "Częstotliwość skanowania",
+      "freq_my_domains": "Moje domeny",
+      "freq_suppliers_critical": "Krytyczni dostawcy NIS2",
+      "freq_suppliers_other": "Pozostali dostawcy",
+      "freq_weekly": "Tygodniowo",
+      "freq_monthly": "Miesięcznie",
+      "subdomain_policy": "Polityka subdomen",
+      "subdomain_policy_hint": "Określa sposób automatycznej obsługi nowo wykrytych subdomen.",
+      "subdomain_yes": "Dołącz automatycznie",
+      "subdomain_no": "Ignoruj automatycznie",
+      "subdomain_ask": "Poproś o potwierdzenie (panel)",
+      "anonymization": "Anonimizacja dla AI",
+      "anonymization_hint": "Domeny i wrażliwe dane są zastępowane symbolami zastępczymi przed wysłaniem do AI. Zalecane.",
+      "api_keys": "Klucze API enrichera",
+      "api_keys_hint": "Klucze są szyfrowane w spoczynku. Pozostaw puste, aby zachować bieżącą wartość.",
+      "key_saved": "Klucz zapisany",
+      "key_placeholder": "Wprowadź klucz API…"
+    }
   }
 }

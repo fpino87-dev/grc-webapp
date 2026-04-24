@@ -1042,7 +1042,8 @@
       "operations": "Operasyonlar",
       "planning": "Planlama",
       "organisation": "Organizasyon ve gözden geçirme",
-      "settings": "Ayarlar"
+      "settings": "Ayarlar",
+      "security": "Güvenlik"
     },
     "items": {
       "dashboard": "Dashboard",
@@ -1075,7 +1076,8 @@
       "ai_engine": "AI Engine",
       "supplier_evaluation": "Tedarikçi Değerlendirmesi",
       "mfa": "MFA Kimlik Doğrulama",
-      "backups": "Yedekleme & Geri Yükleme"
+      "backups": "Yedekleme & Geri Yükleme",
+      "osint": "OSINT Monitor"
     }
   },
   "topbar": {
@@ -2381,5 +2383,124 @@
     "download": "İndir",
     "loading": "Kılavuz yükleniyor...",
     "error": "Kılavuz yüklenirken hata oluştu."
+  },
+  "osint": {
+    "title": "OSINT Monitor",
+    "subtitle": "Saldırı yüzeyi ve alan adı itibarı izleme",
+    "search_placeholder": "Varlık veya alan adı ara…",
+    "sort_by": "Sırala",
+    "sort": {
+      "score": "Puan",
+      "name": "Ad"
+    },
+    "kpi": {
+      "entities": "İzlenen varlıklar",
+      "critical": "Kritik",
+      "warning": "Uyarı",
+      "last_scan": "Son tarama",
+      "pending_subdomains": "Sınıflandırılacak alt alanlar"
+    },
+    "filters": {
+      "all": "Tümü",
+      "my_domain": "Alan adlarım",
+      "supplier": "Tedarikçiler",
+      "asset": "Varlıklar",
+      "with_alert": "Uyarılı"
+    },
+    "table": {
+      "entity": "Varlık",
+      "type": "Tür",
+      "score": "Puan",
+      "reputation": "İtibar",
+      "no_entities": "Varlık bulunamadı"
+    },
+    "entity_type": {
+      "my_domain": "Alan adım",
+      "supplier": "Tedarikçi",
+      "asset": "Varlık"
+    },
+    "detail": {
+      "no_scan": "Tarama mevcut değil",
+      "total_score": "Toplam puan",
+      "vs_last_week": "geçen haftaya göre",
+      "last_scan": "Son tarama",
+      "reputation": "İtibar",
+      "history": "Puan geçmişi",
+      "findings": "Bulgular",
+      "active_alerts": "Aktif uyarılar",
+      "linked_incident": "Bağlı olay",
+      "linked_task": "Bağlı görev",
+      "force_scan": "Taramayı zorla"
+    },
+    "findings": {
+      "ssl_expired": "SSL {{date}} tarihinde sona erdi",
+      "ssl_expiry_soon": "SSL {{days}} gün içinde sona erecek",
+      "ssl_ok": "SSL geçerli, {{days}} gün içinde sona erecek",
+      "dmarc_missing": "DMARC yapılandırılmamış",
+      "dmarc_none": "DMARC mevcut ancak politika = none (koruma yok)",
+      "dmarc_ok": "DMARC yapılandırılmış (politika: {{policy}})",
+      "spf_missing": "SPF yapılandırılmamış",
+      "spf_plus_all": "SPF +all ile yapılandırılmış (izin verici politika)",
+      "spf_ok": "SPF doğru yapılandırılmış",
+      "blacklist": "Alan adı kara listede: {{sources}}",
+      "no_blacklist": "Kara liste algılanmadı",
+      "vt_malicious": "VirusTotal: {{count}} motor zararlı olarak işaretliyor",
+      "breach": "{{count}} ihlal tespit edildi (HaveIBeenPwned)"
+    },
+    "ai": {
+      "title": "Yapay Zeka Analizi",
+      "description": "Yapay zeka, ayrıntılı bir rapor oluşturmak için toplanan OSINT verilerini analiz edecek. Veriler gönderilmeden önce anonimleştirilir.",
+      "attack_surface": "Saldırı yüzeyi analizi",
+      "suppliers_nis2": "NIS2 tedarikçi brifinge",
+      "board_report": "Yönetim Kurulu / Denetim raporu",
+      "start": "Analizi başlat",
+      "loading": "Analiz sürüyor, lütfen bekleyin…",
+      "error": "Yapay zeka analizi sırasında hata. Lütfen tekrar deneyin.",
+      "copy": "Kopyala",
+      "download": "İndir",
+      "regenerate": "Yeniden oluştur"
+    },
+    "subdomains": {
+      "title": "Alt alan yönetimi",
+      "subtitle": "Yeni tespit edilen alt alanları sınıflandırın: izlemeye ekleyin veya yoksayın.",
+      "pending_banner": "{{count}} yeni alt alan sınıflandırma bekliyor",
+      "view_arrow": "Sınıflandır →",
+      "pending_count": "{{count}} alt alan bekliyor",
+      "all_classified": "Tüm alt alanlar sınıflandırıldı.",
+      "col_subdomain": "Alt alan",
+      "col_entity": "Üst varlık",
+      "col_status": "Durum",
+      "col_first_seen": "İlk tespit",
+      "status_pending": "Beklemede",
+      "status_included": "Dahil edildi",
+      "status_ignored": "Yoksayıldı",
+      "include": "Dahil et",
+      "ignore": "Yoksay",
+      "reset": "Sıfırla"
+    },
+    "settings": {
+      "title": "OSINT Ayarları",
+      "thresholds": "Puan eşikleri",
+      "thresholds_hint": "Puan 0 (mükemmel) ile 100 (kritik) arasındadır. Uyarı oluşturma eşiklerini ayarlayın.",
+      "threshold_critical": "Kritik eşik (≥)",
+      "threshold_warning": "Uyarı eşiği (≥)",
+      "frequency": "Tarama sıklığı",
+      "freq_my_domains": "Alan adlarım",
+      "freq_suppliers_critical": "Kritik NIS2 tedarikçiler",
+      "freq_suppliers_other": "Diğer tedarikçiler",
+      "freq_weekly": "Haftalık",
+      "freq_monthly": "Aylık",
+      "subdomain_policy": "Alt alan politikası",
+      "subdomain_policy_hint": "Yeni tespit edilen alt alanların otomatik olarak nasıl yönetileceğini tanımlar.",
+      "subdomain_yes": "Otomatik dahil et",
+      "subdomain_no": "Otomatik yoksay",
+      "subdomain_ask": "Onay iste (panel)",
+      "anonymization": "Yapay zeka için anonimleştirme",
+      "anonymization_hint": "Alan adları ve hassas veriler yapay zekaya gönderilmeden önce yer tutucularla değiştirilir. Önerilir.",
+      "api_keys": "Zenginleştirici API anahtarları",
+      "api_keys_hint": "Anahtarlar beklerken şifrelenir. Mevcut değeri korumak için boş bırakın.",
+      "key_saved": "Anahtar kaydedildi",
+      "key_placeholder": "API anahtarını girin…"
+    }
   }
 }

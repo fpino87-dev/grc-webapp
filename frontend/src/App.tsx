@@ -32,6 +32,9 @@ import { NotificationSettingsPage } from "./modules/settings/NotificationSetting
 import { AiSettingsPage } from "./modules/settings/AiSettingsPage";
 import { MfaSettingsPage } from "./modules/settings/MfaSettingsPage";
 import { BackupsPage } from "./modules/backups/BackupsPage";
+import { OsintDashboard } from "./modules/osint/OsintDashboard";
+import { OsintSettingsPage } from "./modules/osint/OsintSettings";
+import { OsintSubdomainsPage } from "./modules/osint/OsintSubdomainsPage";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
@@ -83,6 +86,9 @@ export function App() {
           <Route path="settings/ai" element={<AiSettingsPage />} />
           <Route path="settings/mfa" element={<MfaSettingsPage />} />
           <Route path="settings/backups" element={<BackupsPage />} />
+          <Route path="osint" element={<OsintDashboard />} />
+          <Route path="osint/settings" element={<OsintSettingsPage />} />
+          <Route path="osint/subdomains" element={<OsintSubdomainsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
