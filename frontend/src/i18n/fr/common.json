@@ -2473,7 +2473,8 @@
       "abuseipdb_flagged": "AbuseIPDB : score {{score}} ({{reports}} signalements)",
       "otx_pulses": "Présent dans {{count}} indicateurs de menace (OTX)",
       "gsb_unsafe": "Google Safe Browsing : {{status}}",
-      "enricher_error": "Données partielles : enrichisseurs {{names}} non terminés"
+      "enricher_error": "Données partielles : enrichisseurs {{names}} non terminés",
+      "ssl_unreachable": "Port 443 injoignable sur {{domain}} — aucun certificat SSL détecté"
     },
     "ai": {
       "title": "Analyse IA",

@@ -97,21 +97,30 @@ def _trigger_ssl(entity, scan, settings, created_alerts):
     from apps.osint.models import AlertType, AlertSeverity
     days = scan.ssl_days_remaining
     valid = scan.ssl_valid
+    domain = entity.domain
+    issuer_info = f" | CA: {scan.ssl_issuer}" if scan.ssl_issuer else ""
 
     if not valid or (days is not None and days <= 0):
         if not _has_active_alert(entity, AlertType.SSL_EXPIRED):
-            alert = _create_alert(
-                entity, scan,
-                AlertType.SSL_EXPIRED, AlertSeverity.CRITICAL,
-                "Certificato SSL scaduto o non valido. Accesso HTTPS compromesso.",
-            )
+            if scan.ssl_expiry_date:
+                desc = (
+                    f"Certificato SSL scaduto il {scan.ssl_expiry_date}{issuer_info}. "
+                    f"Dominio: {domain}. Rinnovare il certificato per ripristinare l'accesso HTTPS."
+                )
+            else:
+                desc = (
+                    f"Porta 443 non raggiungibile o nessun certificato SSL su {domain}. "
+                    f"Verificare che il server risponda su HTTPS e che il certificato sia installato."
+                )
+            alert = _create_alert(entity, scan, AlertType.SSL_EXPIRED, AlertSeverity.CRITICAL, desc)
             created_alerts.append(alert)
     elif days is not None and days <= 30:
         if not _has_active_alert(entity, AlertType.SSL_EXPIRY):
             alert = _create_alert(
                 entity, scan,
                 AlertType.SSL_EXPIRY, AlertSeverity.WARNING,
-                f"Certificato SSL in scadenza tra {days} giorni (entro il {scan.ssl_expiry_date}).",
+                f"Certificato SSL in scadenza tra {days} giorni (entro il {scan.ssl_expiry_date}){issuer_info}. "
+                f"Dominio: {domain}.",
             )
             created_alerts.append(alert)
 
@@ -214,7 +223,8 @@ def _route_alert(alert: "OsintAlert", entity: "OsintEntity") -> None:
         _create_incident(alert, entity)
 
     elif entity.entity_type in (EntityType.SUPPLIER, EntityType.ASSET):
-        if severity in (AlertSeverity.CRITICAL, AlertSeverity.WARNING):
+        # Solo alert CRITICAL → task automatico; WARNING rimane alert manuale
+        if severity == AlertSeverity.CRITICAL:
             if _has_ot_asset_linked(entity):
                 alert.status = AlertStatus.PENDING_ESCALATION
                 alert.save(update_fields=["status", "updated_at"])

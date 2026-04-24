@@ -2394,7 +2394,8 @@
       "abuseipdb_flagged": "AbuseIPDB: score {{score}} ({{reports}} reports)",
       "otx_pulses": "Present in {{count}} threat intelligence indicators (OTX)",
       "gsb_unsafe": "Google Safe Browsing: {{status}}",
-      "enricher_error": "Partial data: enrichers {{names}} did not complete"
+      "enricher_error": "Partial data: enrichers {{names}} did not complete",
+      "ssl_unreachable": "Port 443 unreachable on {{domain}} — no SSL certificate detected"
     },
     "ai": {
       "title": "AI Analysis",

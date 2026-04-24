@@ -2473,7 +2473,8 @@
       "abuseipdb_flagged": "AbuseIPDB: skor {{score}} ({{reports}} rapor)",
       "otx_pulses": "{{count}} tehdit istihbarat göstergesinde mevcut (OTX)",
       "gsb_unsafe": "Google Safe Browsing: {{status}}",
-      "enricher_error": "Kısmi veri: {{names}} zenginleştiricileri tamamlanmadı"
+      "enricher_error": "Kısmi veri: {{names}} zenginleştiricileri tamamlanmadı",
+      "ssl_unreachable": "{{domain}} üzerinde port 443 erişilemiyor — SSL sertifikası algılanamadı"
     },
     "ai": {
       "title": "Yapay Zeka Analizi",

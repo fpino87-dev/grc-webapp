@@ -43,12 +43,16 @@ function ScanFindings({ entity }: { entity: OsintEntityDetail }) {
   const findings: { icon: string; text: string }[] = [];
 
   // SSL
-  if (scan.ssl_valid === false || (scan.ssl_days_remaining !== null && scan.ssl_days_remaining <= 0)) {
-    findings.push({ icon: "❌", text: t("osint.findings.ssl_expired", { date: scan.ssl_expiry_date ?? "N/D" }) });
+  const issuerSuffix = scan.ssl_issuer ? ` (CA: ${scan.ssl_issuer})` : "";
+  if (scan.ssl_valid === false && scan.ssl_expiry_date === null && scan.ssl_days_remaining === null) {
+    // TLS non raggiungibile — porta 443 chiusa o nessun cert installato
+    findings.push({ icon: "❌", text: t("osint.findings.ssl_unreachable", { domain: entity.domain }) });
+  } else if (scan.ssl_valid === false || (scan.ssl_days_remaining !== null && scan.ssl_days_remaining <= 0)) {
+    findings.push({ icon: "❌", text: t("osint.findings.ssl_expired", { date: scan.ssl_expiry_date ?? "N/D" }) + issuerSuffix });
   } else if (scan.ssl_days_remaining !== null && scan.ssl_days_remaining <= 30) {
-    findings.push({ icon: "⚠️", text: t("osint.findings.ssl_expiry_soon", { days: scan.ssl_days_remaining }) });
+    findings.push({ icon: "⚠️", text: t("osint.findings.ssl_expiry_soon", { days: scan.ssl_days_remaining }) + issuerSuffix });
   } else if (scan.ssl_valid === true) {
-    findings.push({ icon: "✅", text: t("osint.findings.ssl_ok", { days: scan.ssl_days_remaining ?? "?" }) });
+    findings.push({ icon: "✅", text: t("osint.findings.ssl_ok", { days: scan.ssl_days_remaining ?? "?" }) + issuerSuffix });
   }
 
   // DMARC
