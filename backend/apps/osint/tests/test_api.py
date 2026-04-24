@@ -104,6 +104,35 @@ class TestEntityAPI:
         assert resp.status_code == 401
 
 
+class TestEntityAPI2:
+    def test_search_by_domain(self, auth_client, entity):
+        resp = auth_client.get("/api/v1/osint/entities/?search=apitest")
+        assert resp.status_code == 200
+        assert any(e["domain"] == "apitest.example.com" for e in resp.json())
+
+    def test_search_no_match(self, auth_client, entity):
+        resp = auth_client.get("/api/v1/osint/entities/?search=notexist99")
+        assert resp.status_code == 200
+        assert resp.json() == []
+
+    def test_force_scan_404(self, auth_client):
+        resp = auth_client.post("/api/v1/osint/entities/00000000-0000-0000-0000-000000000000/scan/")
+        assert resp.status_code == 404
+
+    def test_detail_has_active_alerts(self, auth_client, entity, alert):
+        resp = auth_client.get(f"/api/v1/osint/entities/{entity.id}/")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "active_alerts" in data
+        assert len(data["active_alerts"]) == 1
+        assert data["active_alerts"][0]["alert_type"] == "ssl_expired"
+
+    def test_history_empty_without_scan(self, auth_client, entity):
+        resp = auth_client.get(f"/api/v1/osint/entities/{entity.id}/history/")
+        assert resp.status_code == 200
+        assert resp.json() == []
+
+
 class TestAlertAPI:
     def test_list_alerts(self, auth_client, alert):
         resp = auth_client.get("/api/v1/osint/alerts/")
@@ -137,6 +166,55 @@ class TestAlertAPI:
         )
         assert resp.status_code == 400
 
+    def test_filter_by_severity(self, auth_client, alert):
+        resp = auth_client.get("/api/v1/osint/alerts/?severity=critical")
+        assert resp.status_code == 200
+        assert all(a["severity"] == "critical" for a in resp.json())
+
+    def test_filter_by_status(self, auth_client, alert):
+        resp = auth_client.get("/api/v1/osint/alerts/?status=new")
+        assert resp.status_code == 200
+        assert any(str(alert.id) == a["id"] for a in resp.json())
+
+    def test_escalate_ignore(self, auth_client, entity):
+        pending_alert = OsintAlert.objects.create(
+            entity=entity,
+            alert_type=AlertType.NEW_SUBDOMAIN,
+            severity=AlertSeverity.WARNING,
+            description="Nuovo sottodominio",
+            status=AlertStatus.PENDING_ESCALATION,
+        )
+        resp = auth_client.post(
+            f"/api/v1/osint/alerts/{pending_alert.id}/escalate/",
+            {"action": "ignore"},
+            format="json",
+        )
+        assert resp.status_code == 200
+        assert resp.json()["status"] == "resolved"
+
+    def test_escalate_invalid_action(self, auth_client, entity):
+        pending_alert = OsintAlert.objects.create(
+            entity=entity,
+            alert_type=AlertType.NEW_SUBDOMAIN,
+            severity=AlertSeverity.WARNING,
+            description="test",
+            status=AlertStatus.PENDING_ESCALATION,
+        )
+        resp = auth_client.post(
+            f"/api/v1/osint/alerts/{pending_alert.id}/escalate/",
+            {"action": "delete"},
+            format="json",
+        )
+        assert resp.status_code == 400
+
+    def test_escalate_non_pending_returns_404(self, auth_client, alert):
+        resp = auth_client.post(
+            f"/api/v1/osint/alerts/{alert.id}/escalate/",
+            {"action": "ignore"},
+            format="json",
+        )
+        assert resp.status_code == 404
+
 
 class TestSubdomainAPI:
     def test_pending_subdomains(self, auth_client, entity):
@@ -161,6 +239,40 @@ class TestSubdomainAPI:
         assert resp.status_code == 200
         assert resp.json()["status"] == "included"
 
+    def test_classify_subdomain_ignored(self, auth_client, entity):
+        sub = OsintSubdomain.objects.create(
+            entity=entity, subdomain="y.apitest.example.com",
+            status=SubdomainStatus.PENDING,
+        )
+        resp = auth_client.patch(
+            f"/api/v1/osint/subdomains/{sub.id}/",
+            {"status": "ignored"},
+            format="json",
+        )
+        assert resp.status_code == 200
+        assert resp.json()["status"] == "ignored"
+
+    def test_classify_invalid_status(self, auth_client, entity):
+        sub = OsintSubdomain.objects.create(
+            entity=entity, subdomain="z.apitest.example.com",
+            status=SubdomainStatus.PENDING,
+        )
+        resp = auth_client.patch(
+            f"/api/v1/osint/subdomains/{sub.id}/",
+            {"status": "pending"},
+            format="json",
+        )
+        assert resp.status_code == 400
+
+    def test_included_subdomain_not_in_pending(self, auth_client, entity):
+        OsintSubdomain.objects.create(
+            entity=entity, subdomain="included.apitest.example.com",
+            status=SubdomainStatus.INCLUDED,
+        )
+        resp = auth_client.get("/api/v1/osint/subdomains/pending/")
+        assert resp.status_code == 200
+        assert not any(s["subdomain"] == "included.apitest.example.com" for s in resp.json())
+
 
 class TestDashboardAPI:
     def test_summary(self, auth_client, entity, scan):
@@ -170,6 +282,20 @@ class TestDashboardAPI:
         assert "total_entities" in data
         assert "critical_count" in data
         assert "pending_subdomains" in data
+
+    def test_summary_critical_count(self, auth_client, entity, scan):
+        # scan ha score_total=75 ≥ soglia critica default 70
+        resp = auth_client.get("/api/v1/osint/dashboard/summary/")
+        data = resp.json()
+        assert data["critical_count"] >= 1
+
+    def test_summary_counts_pending_subdomains(self, auth_client, entity, scan):
+        OsintSubdomain.objects.create(
+            entity=entity, subdomain="pending.apitest.example.com",
+            status=SubdomainStatus.PENDING,
+        )
+        resp = auth_client.get("/api/v1/osint/dashboard/summary/")
+        assert resp.json()["pending_subdomains"] >= 1
 
 
 class TestSettingsAPI:
@@ -194,3 +320,58 @@ class TestSettingsAPI:
         resp = auth_client.get("/api/v1/osint/settings/")
         assert "hibp_api_key" not in resp.json()
         assert resp.json()["has_hibp_key"] is True
+
+    def test_patch_warning_threshold(self, auth_client):
+        resp = auth_client.patch(
+            "/api/v1/osint/settings/",
+            {"score_threshold_warning": 40},
+            format="json",
+        )
+        assert resp.status_code == 200
+        assert resp.json()["score_threshold_warning"] == 40
+
+    def test_patch_subdomain_policy(self, auth_client):
+        for policy in ("yes", "no", "ask"):
+            resp = auth_client.patch(
+                "/api/v1/osint/settings/",
+                {"subdomain_auto_include": policy},
+                format="json",
+            )
+            assert resp.status_code == 200
+            assert resp.json()["subdomain_auto_include"] == policy
+
+    def test_patch_anonymization_toggle(self, auth_client):
+        resp = auth_client.patch(
+            "/api/v1/osint/settings/",
+            {"anonymization_enabled": False},
+            format="json",
+        )
+        assert resp.status_code == 200
+        assert resp.json()["anonymization_enabled"] is False
+
+
+class TestAggregatorEmailFallback:
+    def test_supplier_domain_from_email(self, db):
+        from apps.osint.services import domain_from_email, aggregate_entities
+        from apps.suppliers.models import Supplier
+
+        sup = Supplier.objects.create(
+            name="Test Supplier",
+            email="contact@smeup.com",
+            website="",
+            risk_level="basso",
+            status="attivo",
+        )
+        result = aggregate_entities()
+        from apps.osint.models import OsintEntity
+        entity = OsintEntity.objects.filter(source_id=sup.id).first()
+        assert entity is not None
+        assert entity.domain == "smeup.com"
+
+    def test_domain_from_email_helper(self):
+        from apps.osint.services import domain_from_email
+        assert domain_from_email("user@example.com") == "example.com"
+        assert domain_from_email("USER@EXAMPLE.COM") == "example.com"
+        assert domain_from_email("") == ""
+        assert domain_from_email(None) == ""
+        assert domain_from_email("notanemail") == ""
