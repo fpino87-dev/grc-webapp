@@ -2352,7 +2352,24 @@
       "active_alerts": "Active alerts",
       "linked_incident": "Linked incident",
       "linked_task": "Linked task",
-      "force_scan": "Force scan"
+      "force_scan": "Force scan",
+      "tech_data": "Technical data",
+      "show_tech": "Show technical data",
+      "hide_tech": "Hide technical data",
+      "ssl_issuer": "SSL Issuer",
+      "ssl_wildcard": "Wildcard",
+      "domain_expiry": "Domain expiry",
+      "domain_registrar": "Registrar",
+      "registrar_country": "Reg. country",
+      "whois_privacy": "WHOIS privacy",
+      "dnssec": "DNSSEC",
+      "mx": "MX record",
+      "abuseipdb": "AbuseIPDB score",
+      "otx_pulses": "OTX Pulses",
+      "gsb": "Google Safe Browsing",
+      "hibp_last": "Last breach",
+      "hibp_types": "Exposed data",
+      "enricher_errors": "Enricher errors"
     },
     "findings": {
       "ssl_expired": "SSL expired on {{date}}",
@@ -2367,7 +2384,17 @@
       "blacklist": "Domain in blacklist: {{sources}}",
       "no_blacklist": "No blacklist detected",
       "vt_malicious": "VirusTotal: {{count}} engines flag as malicious",
-      "breach": "{{count}} breach(es) found (HaveIBeenPwned)"
+      "breach": "{{count}} breach(es) found (HaveIBeenPwned)",
+      "domain_expiry_soon": "Domain expires in {{days}} days ({{date}})",
+      "domain_expiry_ok": "Domain valid until {{date}}",
+      "domain_expiry_unknown": "Domain expiry date unavailable",
+      "dnssec_ok": "DNSSEC enabled",
+      "dnssec_missing": "DNSSEC not enabled",
+      "abuseipdb_clean": "No AbuseIPDB reports",
+      "abuseipdb_flagged": "AbuseIPDB: score {{score}} ({{reports}} reports)",
+      "otx_pulses": "Present in {{count}} threat intelligence indicators (OTX)",
+      "gsb_unsafe": "Google Safe Browsing: {{status}}",
+      "enricher_error": "Partial data: enrichers {{names}} did not complete"
     },
     "ai": {
       "title": "AI Analysis",
@@ -2400,7 +2427,8 @@
       "ignore": "Ignore",
       "reset": "Reset",
       "tab_pending": "To classify",
-      "tab_all": "All subdomains"
+      "tab_all": "All subdomains",
+      "classified_hint": "{{count}} classified — visible in the \"All subdomains\" tab"
     },
     "settings": {
       "title": "OSINT Settings",

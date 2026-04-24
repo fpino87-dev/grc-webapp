@@ -78,10 +78,18 @@ export function OsintSubdomainsPage() {
   const qc = useQueryClient();
   const [tab, setTab] = useState<"pending" | "all">("pending");
 
-  const { data: subdomains = [], isLoading } = useQuery({
-    queryKey: ["osint-subdomains-page", tab],
-    queryFn: () => tab === "pending" ? osintApi.subdomains("pending") : osintApi.subdomains(),
+  const { data: pendingSubdomains = [], isLoading: pendingLoading } = useQuery({
+    queryKey: ["osint-subdomains-page", "pending"],
+    queryFn: () => osintApi.subdomains("pending"),
   });
+
+  const { data: allSubdomains = [], isLoading: allLoading } = useQuery({
+    queryKey: ["osint-subdomains-page", "all"],
+    queryFn: () => osintApi.subdomains(),
+  });
+
+  const subdomains = tab === "pending" ? pendingSubdomains : allSubdomains;
+  const isLoading = tab === "pending" ? pendingLoading : allLoading;
 
   const classifyMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: SubdomainStatus }) =>
@@ -93,7 +101,7 @@ export function OsintSubdomainsPage() {
     },
   });
 
-  const pendingCount = tab === "pending" ? subdomains.length : subdomains.filter(s => s.status === "pending").length;
+  const classifiedCount = allSubdomains.filter(s => s.status !== "pending").length;
 
   return (
     <div className="p-4 sm:p-6 space-y-4 max-w-4xl">
@@ -112,8 +120,8 @@ export function OsintSubdomainsPage() {
           className={`px-4 py-1.5 text-sm rounded-full border ${tab === "pending" ? "bg-yellow-500 text-white border-yellow-500" : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"}`}
         >
           {t("osint.subdomains.tab_pending")}
-          {pendingCount > 0 && tab !== "pending" && (
-            <span className="ml-1.5 bg-yellow-500 text-white text-xs rounded-full px-1.5">{pendingCount}</span>
+          {pendingSubdomains.length > 0 && (
+            <span className="ml-1.5 bg-yellow-600 text-white text-xs rounded-full px-1.5">{pendingSubdomains.length}</span>
           )}
         </button>
         <button
@@ -121,14 +129,40 @@ export function OsintSubdomainsPage() {
           className={`px-4 py-1.5 text-sm rounded-full border ${tab === "all" ? "bg-primary-600 text-white border-primary-600" : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"}`}
         >
           {t("osint.subdomains.tab_all")}
+          {allSubdomains.length > 0 && (
+            <span className={`ml-1.5 text-xs rounded-full px-1.5 ${tab === "all" ? "bg-primary-700 text-white" : "bg-gray-200 text-gray-600"}`}>
+              {allSubdomains.length}
+            </span>
+          )}
         </button>
       </div>
 
       {isLoading && <div className="text-gray-400 text-sm">{t("common.loading")}</div>}
 
-      {!isLoading && subdomains.length === 0 && (
+      {/* Empty state: pending tab con 0 pending ma classificati esistenti */}
+      {!isLoading && tab === "pending" && pendingSubdomains.length === 0 && (
         <div className="border rounded-xl p-8 text-center bg-white">
           <p className="text-2xl mb-2">✅</p>
+          <p className="text-gray-500 text-sm">{t("osint.subdomains.all_classified")}</p>
+          {classifiedCount > 0 && (
+            <p className="text-xs text-gray-400 mt-2">
+              {t("osint.subdomains.classified_hint", { count: classifiedCount })}
+              {" "}
+              <button
+                onClick={() => setTab("all")}
+                className="text-primary-600 hover:underline font-medium"
+              >
+                {t("osint.subdomains.tab_all")} →
+              </button>
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Empty state: all tab vuoto */}
+      {!isLoading && tab === "all" && allSubdomains.length === 0 && (
+        <div className="border rounded-xl p-8 text-center bg-white">
+          <p className="text-2xl mb-2">📭</p>
           <p className="text-gray-500 text-sm">{t("osint.subdomains.all_classified")}</p>
         </div>
       )}

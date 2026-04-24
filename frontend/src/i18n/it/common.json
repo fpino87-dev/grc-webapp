@@ -2389,7 +2389,24 @@
       "active_alerts": "Alert attivi",
       "linked_incident": "Incidente collegato",
       "linked_task": "Task collegato",
-      "force_scan": "Forza scansione"
+      "force_scan": "Forza scansione",
+      "tech_data": "Dati tecnici",
+      "show_tech": "Mostra dati tecnici",
+      "hide_tech": "Nascondi dati tecnici",
+      "ssl_issuer": "Emittente SSL",
+      "ssl_wildcard": "Wildcard",
+      "domain_expiry": "Scad. dominio",
+      "domain_registrar": "Registrar",
+      "registrar_country": "Paese reg.",
+      "whois_privacy": "Privacy WHOIS",
+      "dnssec": "DNSSEC",
+      "mx": "Record MX",
+      "abuseipdb": "AbuseIPDB score",
+      "otx_pulses": "OTX Pulses",
+      "gsb": "Google Safe Browsing",
+      "hibp_last": "Ultima breach",
+      "hibp_types": "Dati esposti",
+      "enricher_errors": "Enricher con errori"
     },
     "findings": {
       "ssl_expired": "SSL scaduto il {{date}}",
@@ -2404,7 +2421,17 @@
       "blacklist": "Dominio presente in blacklist: {{sources}}",
       "no_blacklist": "Nessuna blacklist rilevata",
       "vt_malicious": "VirusTotal: {{count}} engine segnalano come malevolo",
-      "breach": "{{count}} breach rilevati (HaveIBeenPwned)"
+      "breach": "{{count}} breach rilevati (HaveIBeenPwned)",
+      "domain_expiry_soon": "Dominio scade tra {{days}} giorni ({{date}})",
+      "domain_expiry_ok": "Dominio valido fino al {{date}}",
+      "domain_expiry_unknown": "Scadenza dominio non disponibile",
+      "dnssec_ok": "DNSSEC abilitato",
+      "dnssec_missing": "DNSSEC non abilitato",
+      "abuseipdb_clean": "Nessuna segnalazione AbuseIPDB",
+      "abuseipdb_flagged": "AbuseIPDB: score {{score}} ({{reports}} segnalazioni)",
+      "otx_pulses": "Presente in {{count}} indicatori di minaccia (OTX)",
+      "gsb_unsafe": "Google Safe Browsing: {{status}}",
+      "enricher_error": "Dati parziali: enricher {{names}} non completati"
     },
     "ai": {
       "title": "Analisi AI",
@@ -2437,7 +2464,8 @@
       "ignore": "Ignora",
       "reset": "Ripristina",
       "tab_pending": "Da classificare",
-      "tab_all": "Tutti i sottodomini"
+      "tab_all": "Tutti i sottodomini",
+      "classified_hint": "{{count}} classificati — visibili nel tab \"Tutti i sottodomini\""
     },
     "settings": {
       "title": "Impostazioni OSINT",

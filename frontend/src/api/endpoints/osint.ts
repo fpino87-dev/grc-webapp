@@ -53,14 +53,17 @@ export interface OsintScanDetail extends OsintScanBrief {
   domain_expiry_date: string | null;
   domain_registrar: string;
   whois_privacy: boolean | null;
+  registrar_country: string;
   vt_malicious: number | null;
   vt_suspicious: number | null;
   abuseipdb_score: number | null;
+  abuseipdb_reports: number | null;
   otx_pulses: number | null;
   gsb_status: string;
   in_blacklist: boolean;
   blacklist_sources: string[];
   hibp_breaches: number | null;
+  hibp_latest_breach: string | null;
   hibp_data_types: string[];
   enricher_errors: Record<string, string>;
 }

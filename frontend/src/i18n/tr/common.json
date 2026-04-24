@@ -2431,7 +2431,24 @@
       "active_alerts": "Aktif uyarılar",
       "linked_incident": "Bağlı olay",
       "linked_task": "Bağlı görev",
-      "force_scan": "Taramayı zorla"
+      "force_scan": "Taramayı zorla",
+      "tech_data": "Teknik veriler",
+      "show_tech": "Teknik verileri göster",
+      "hide_tech": "Teknik verileri gizle",
+      "ssl_issuer": "SSL Düzenleyici",
+      "ssl_wildcard": "Wildcard",
+      "domain_expiry": "Domain son tarihi",
+      "domain_registrar": "Kayıt kuruluşu",
+      "registrar_country": "Kayıt ülkesi",
+      "whois_privacy": "WHOIS gizliliği",
+      "dnssec": "DNSSEC",
+      "mx": "MX kaydı",
+      "abuseipdb": "AbuseIPDB skoru",
+      "otx_pulses": "OTX Pulses",
+      "gsb": "Google Safe Browsing",
+      "hibp_last": "Son ihlal",
+      "hibp_types": "Açığa çıkan veriler",
+      "enricher_errors": "Zenginleştirici hataları"
     },
     "findings": {
       "ssl_expired": "SSL {{date}} tarihinde sona erdi",
@@ -2446,7 +2463,17 @@
       "blacklist": "Alan adı kara listede: {{sources}}",
       "no_blacklist": "Kara liste algılanmadı",
       "vt_malicious": "VirusTotal: {{count}} motor zararlı olarak işaretliyor",
-      "breach": "{{count}} ihlal tespit edildi (HaveIBeenPwned)"
+      "breach": "{{count}} ihlal tespit edildi (HaveIBeenPwned)",
+      "domain_expiry_soon": "Domain {{days}} gün içinde sona eriyor ({{date}})",
+      "domain_expiry_ok": "Domain {{date}} tarihine kadar geçerli",
+      "domain_expiry_unknown": "Domain son kullanma tarihi mevcut değil",
+      "dnssec_ok": "DNSSEC etkin",
+      "dnssec_missing": "DNSSEC etkin değil",
+      "abuseipdb_clean": "AbuseIPDB raporu yok",
+      "abuseipdb_flagged": "AbuseIPDB: skor {{score}} ({{reports}} rapor)",
+      "otx_pulses": "{{count}} tehdit istihbarat göstergesinde mevcut (OTX)",
+      "gsb_unsafe": "Google Safe Browsing: {{status}}",
+      "enricher_error": "Kısmi veri: {{names}} zenginleştiricileri tamamlanmadı"
     },
     "ai": {
       "title": "Yapay Zeka Analizi",
@@ -2479,7 +2506,8 @@
       "ignore": "Yoksay",
       "reset": "Sıfırla",
       "tab_pending": "Sınıflandırılacak",
-      "tab_all": "Tüm alt alanlar"
+      "tab_all": "Tüm alt alanlar",
+      "classified_hint": "{{count}} sınıflandırıldı — \"Tüm subdomain\" sekmesinde görünür"
     },
     "settings": {
       "title": "OSINT Ayarları",

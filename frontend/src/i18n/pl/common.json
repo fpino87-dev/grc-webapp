@@ -2431,7 +2431,24 @@
       "active_alerts": "Aktywne alerty",
       "linked_incident": "Powiązany incydent",
       "linked_task": "Powiązane zadanie",
-      "force_scan": "Wymuś skanowanie"
+      "force_scan": "Wymuś skanowanie",
+      "tech_data": "Dane techniczne",
+      "show_tech": "Pokaż dane techniczne",
+      "hide_tech": "Ukryj dane techniczne",
+      "ssl_issuer": "Wystawca SSL",
+      "ssl_wildcard": "Wildcard",
+      "domain_expiry": "Wyg. domeny",
+      "domain_registrar": "Rejestrator",
+      "registrar_country": "Kraj rej.",
+      "whois_privacy": "Prywatność WHOIS",
+      "dnssec": "DNSSEC",
+      "mx": "Rekord MX",
+      "abuseipdb": "Wynik AbuseIPDB",
+      "otx_pulses": "OTX Pulses",
+      "gsb": "Google Safe Browsing",
+      "hibp_last": "Ostatnie naruszenie",
+      "hibp_types": "Ujawnione dane",
+      "enricher_errors": "Błędy enricherów"
     },
     "findings": {
       "ssl_expired": "SSL wygasł {{date}}",
@@ -2446,7 +2463,17 @@
       "blacklist": "Domena na czarnej liście: {{sources}}",
       "no_blacklist": "Brak czarnej listy",
       "vt_malicious": "VirusTotal: {{count}} silniki oznaczają jako złośliwe",
-      "breach": "{{count}} naruszenie/naruszenia wykryte (HaveIBeenPwned)"
+      "breach": "{{count}} naruszenie/naruszenia wykryte (HaveIBeenPwned)",
+      "domain_expiry_soon": "Domena wygasa za {{days}} dni ({{date}})",
+      "domain_expiry_ok": "Domena ważna do {{date}}",
+      "domain_expiry_unknown": "Data wygaśnięcia domeny niedostępna",
+      "dnssec_ok": "DNSSEC włączony",
+      "dnssec_missing": "DNSSEC nie włączony",
+      "abuseipdb_clean": "Brak zgłoszeń AbuseIPDB",
+      "abuseipdb_flagged": "AbuseIPDB: wynik {{score}} ({{reports}} zgłoszeń)",
+      "otx_pulses": "Obecny w {{count}} wskaźnikach zagrożeń (OTX)",
+      "gsb_unsafe": "Google Safe Browsing: {{status}}",
+      "enricher_error": "Częściowe dane: enrichery {{names}} nie ukończone"
     },
     "ai": {
       "title": "Analiza AI",
@@ -2479,7 +2506,8 @@
       "ignore": "Ignoruj",
       "reset": "Resetuj",
       "tab_pending": "Do klasyfikacji",
-      "tab_all": "Wszystkie subdomeny"
+      "tab_all": "Wszystkie subdomeny",
+      "classified_hint": "{{count}} sklasyfikowanych — widoczne w zakładce \"Wszystkie subdomeny\""
     },
     "settings": {
       "title": "Ustawienia OSINT",

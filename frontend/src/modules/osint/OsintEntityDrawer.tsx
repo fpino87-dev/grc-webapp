@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
@@ -6,7 +7,7 @@ import {
 } from "recharts";
 import {
   osintApi, classifyScore, scoreBadgeColor, deltaArrow, deltaColor,
-  type OsintEntityDetail, type HistoryPoint,
+  type OsintEntityDetail, type HistoryPoint, type OsintScanDetail,
 } from "../../api/endpoints/osint";
 
 function ScorePill({ label, score }: { label: string; score: number }) {
@@ -41,47 +42,173 @@ function ScanFindings({ entity }: { entity: OsintEntityDetail }) {
 
   const findings: { icon: string; text: string }[] = [];
 
+  // SSL
   if (scan.ssl_valid === false || (scan.ssl_days_remaining !== null && scan.ssl_days_remaining <= 0)) {
     findings.push({ icon: "❌", text: t("osint.findings.ssl_expired", { date: scan.ssl_expiry_date ?? "N/D" }) });
   } else if (scan.ssl_days_remaining !== null && scan.ssl_days_remaining <= 30) {
     findings.push({ icon: "⚠️", text: t("osint.findings.ssl_expiry_soon", { days: scan.ssl_days_remaining }) });
-  } else if (scan.ssl_valid) {
-    findings.push({ icon: "✅", text: t("osint.findings.ssl_ok", { days: scan.ssl_days_remaining }) });
+  } else if (scan.ssl_valid === true) {
+    findings.push({ icon: "✅", text: t("osint.findings.ssl_ok", { days: scan.ssl_days_remaining ?? "?" }) });
   }
 
-  if (!scan.dmarc_present) {
+  // DMARC
+  if (scan.dmarc_present === false) {
     findings.push({ icon: "❌", text: t("osint.findings.dmarc_missing") });
-  } else if (scan.dmarc_policy === "none") {
+  } else if (scan.dmarc_present === true && scan.dmarc_policy === "none") {
     findings.push({ icon: "⚠️", text: t("osint.findings.dmarc_none") });
-  } else {
+  } else if (scan.dmarc_present === true) {
     findings.push({ icon: "✅", text: t("osint.findings.dmarc_ok", { policy: scan.dmarc_policy }) });
   }
 
-  if (!scan.spf_present) {
+  // SPF
+  if (scan.spf_present === false) {
     findings.push({ icon: "❌", text: t("osint.findings.spf_missing") });
-  } else if (scan.spf_policy === "+all") {
+  } else if (scan.spf_present === true && scan.spf_policy === "+all") {
     findings.push({ icon: "⚠️", text: t("osint.findings.spf_plus_all") });
-  } else {
+  } else if (scan.spf_present === true) {
     findings.push({ icon: "✅", text: t("osint.findings.spf_ok") });
   }
 
+  // DNSSEC
+  if (scan.dnssec_enabled === true) {
+    findings.push({ icon: "✅", text: t("osint.findings.dnssec_ok") });
+  } else if (scan.dnssec_enabled === false) {
+    findings.push({ icon: "⚠️", text: t("osint.findings.dnssec_missing") });
+  }
+
+  // Domain expiry
+  if (scan.domain_expiry_date) {
+    const expiry = new Date(scan.domain_expiry_date);
+    const daysLeft = Math.ceil((expiry.getTime() - Date.now()) / 86400000);
+    if (daysLeft <= 30) {
+      findings.push({ icon: "⚠️", text: t("osint.findings.domain_expiry_soon", { days: daysLeft, date: scan.domain_expiry_date }) });
+    } else {
+      findings.push({ icon: "✅", text: t("osint.findings.domain_expiry_ok", { date: scan.domain_expiry_date }) });
+    }
+  }
+
+  // Blacklist
   if (scan.in_blacklist) {
-    findings.push({ icon: "❌", text: t("osint.findings.blacklist", { sources: (scan.blacklist_sources || []).join(", ") }) });
+    findings.push({ icon: "❌", text: t("osint.findings.blacklist", { sources: (scan.blacklist_sources || []).join(", ") || "N/D" }) });
   } else {
     findings.push({ icon: "✅", text: t("osint.findings.no_blacklist") });
   }
 
+  // VirusTotal
   if (scan.vt_malicious && scan.vt_malicious > 0) {
     findings.push({ icon: "⚠️", text: t("osint.findings.vt_malicious", { count: scan.vt_malicious }) });
   }
 
+  // AbuseIPDB
+  if (scan.abuseipdb_score !== null && scan.abuseipdb_score !== undefined) {
+    if (scan.abuseipdb_score > 0) {
+      findings.push({ icon: "⚠️", text: t("osint.findings.abuseipdb_flagged", { score: scan.abuseipdb_score, reports: scan.abuseipdb_reports ?? 0 }) });
+    } else {
+      findings.push({ icon: "✅", text: t("osint.findings.abuseipdb_clean") });
+    }
+  }
+
+  // OTX
+  if (scan.otx_pulses && scan.otx_pulses > 0) {
+    findings.push({ icon: "⚠️", text: t("osint.findings.otx_pulses", { count: scan.otx_pulses }) });
+  }
+
+  // GSB
+  if (scan.gsb_status && scan.gsb_status !== "" && scan.gsb_status !== "safe") {
+    findings.push({ icon: "❌", text: t("osint.findings.gsb_unsafe", { status: scan.gsb_status }) });
+  }
+
+  // HIBP
   if (scan.hibp_breaches && scan.hibp_breaches > 0) {
     findings.push({ icon: "🔓", text: t("osint.findings.breach", { count: scan.hibp_breaches }) });
+  }
+
+  // Enricher errors
+  const errorNames = Object.keys(scan.enricher_errors || {});
+  if (errorNames.length > 0) {
+    findings.push({ icon: "⚪", text: t("osint.findings.enricher_error", { names: errorNames.join(", ") }) });
+  }
+
+  if (findings.length === 0) {
+    return <p className="text-sm text-gray-400">{t("osint.detail.no_scan")}</p>;
   }
 
   return (
     <div className="space-y-0.5">
       {findings.map((f, i) => <FindingRow key={i} icon={f.icon} text={f.text} />)}
+    </div>
+  );
+}
+
+function TechDataRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex justify-between items-center py-1 border-b border-gray-50 text-sm">
+      <span className="text-gray-500 shrink-0 mr-3">{label}</span>
+      <span className="text-gray-800 text-right font-mono text-xs truncate max-w-[55%]">{value}</span>
+    </div>
+  );
+}
+
+function bool(v: boolean | null | undefined): string {
+  if (v === null || v === undefined) return "—";
+  return v ? "✅" : "❌";
+}
+
+function ScanTechData({ scan }: { scan: OsintScanDetail }) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="border rounded-lg overflow-hidden">
+      <button
+        className="w-full flex items-center justify-between px-4 py-2.5 bg-gray-50 hover:bg-gray-100 text-sm font-medium text-gray-700"
+        onClick={() => setOpen(o => !o)}
+      >
+        <span>🔬 {t("osint.detail.tech_data")}</span>
+        <span className="text-gray-400">{open ? "▲" : "▼"}</span>
+      </button>
+      {open && (
+        <div className="px-4 py-2 bg-white">
+          <p className="text-xs font-semibold text-gray-500 uppercase mb-1 mt-1">SSL</p>
+          <TechDataRow label={t("osint.detail.ssl_issuer")} value={scan.ssl_issuer || "—"} />
+          <TechDataRow label={t("osint.detail.ssl_wildcard")} value={bool(scan.ssl_wildcard)} />
+
+          <p className="text-xs font-semibold text-gray-500 uppercase mb-1 mt-3">WHOIS</p>
+          <TechDataRow label={t("osint.detail.domain_expiry")} value={scan.domain_expiry_date ?? "—"} />
+          <TechDataRow label={t("osint.detail.domain_registrar")} value={scan.domain_registrar || "—"} />
+          <TechDataRow label={t("osint.detail.registrar_country")} value={scan.registrar_country || "—"} />
+          <TechDataRow label={t("osint.detail.whois_privacy")} value={bool(scan.whois_privacy)} />
+
+          <p className="text-xs font-semibold text-gray-500 uppercase mb-1 mt-3">DNS</p>
+          <TechDataRow label={t("osint.detail.dnssec")} value={bool(scan.dnssec_enabled)} />
+          <TechDataRow label={t("osint.detail.mx")} value={bool(scan.mx_present)} />
+
+          <p className="text-xs font-semibold text-gray-500 uppercase mb-1 mt-3">Reputation</p>
+          <TechDataRow label="VirusTotal suspicious" value={scan.vt_suspicious ?? "—"} />
+          <TechDataRow label={t("osint.detail.abuseipdb")} value={scan.abuseipdb_score !== null ? `${scan.abuseipdb_score} (${scan.abuseipdb_reports ?? 0} rep.)` : "—"} />
+          <TechDataRow label={t("osint.detail.otx_pulses")} value={scan.otx_pulses ?? "—"} />
+          <TechDataRow label={t("osint.detail.gsb")} value={scan.gsb_status || "—"} />
+
+          {(scan.hibp_breaches ?? 0) > 0 && (
+            <>
+              <p className="text-xs font-semibold text-gray-500 uppercase mb-1 mt-3">HIBP</p>
+              <TechDataRow label={t("osint.detail.hibp_last")} value={scan.hibp_latest_breach ?? "—"} />
+              <TechDataRow label={t("osint.detail.hibp_types")} value={(scan.hibp_data_types || []).join(", ") || "—"} />
+            </>
+          )}
+
+          {Object.keys(scan.enricher_errors || {}).length > 0 && (
+            <>
+              <p className="text-xs font-semibold text-red-500 uppercase mb-1 mt-3">{t("osint.detail.enricher_errors")}</p>
+              {Object.entries(scan.enricher_errors).map(([name, err]) => (
+                <div key={name} className="text-xs text-red-600 py-0.5">
+                  <span className="font-medium">{name}:</span> {err}
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -217,6 +344,9 @@ export function OsintEntityDrawer({ entityId, onClose }: { entityId: string; onC
             <h3 className="text-sm font-semibold text-gray-700 mb-2">{t("osint.detail.findings")}</h3>
             <ScanFindings entity={entity} />
           </div>
+
+          {/* Dati tecnici (collassabile) */}
+          {scan && <ScanTechData scan={scan} />}
 
           {/* Grafico storico */}
           {history.length > 0 && (

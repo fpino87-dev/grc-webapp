@@ -2431,7 +2431,24 @@
       "active_alerts": "Alertes actives",
       "linked_incident": "Incident lié",
       "linked_task": "Tâche liée",
-      "force_scan": "Forcer l'analyse"
+      "force_scan": "Forcer l'analyse",
+      "tech_data": "Données techniques",
+      "show_tech": "Afficher les données techniques",
+      "hide_tech": "Masquer les données techniques",
+      "ssl_issuer": "Émetteur SSL",
+      "ssl_wildcard": "Wildcard",
+      "domain_expiry": "Exp. domaine",
+      "domain_registrar": "Registrar",
+      "registrar_country": "Pays reg.",
+      "whois_privacy": "Confidentialité WHOIS",
+      "dnssec": "DNSSEC",
+      "mx": "Enregistrement MX",
+      "abuseipdb": "Score AbuseIPDB",
+      "otx_pulses": "OTX Pulses",
+      "gsb": "Google Safe Browsing",
+      "hibp_last": "Dernière violation",
+      "hibp_types": "Données exposées",
+      "enricher_errors": "Erreurs enrichisseurs"
     },
     "findings": {
       "ssl_expired": "SSL expiré le {{date}}",
@@ -2446,7 +2463,17 @@
       "blacklist": "Domaine en liste noire : {{sources}}",
       "no_blacklist": "Aucune liste noire détectée",
       "vt_malicious": "VirusTotal : {{count}} moteurs signalent comme malveillant",
-      "breach": "{{count}} violation(s) détectée(s) (HaveIBeenPwned)"
+      "breach": "{{count}} violation(s) détectée(s) (HaveIBeenPwned)",
+      "domain_expiry_soon": "Le domaine expire dans {{days}} jours ({{date}})",
+      "domain_expiry_ok": "Domaine valide jusqu'au {{date}}",
+      "domain_expiry_unknown": "Date d'expiration du domaine indisponible",
+      "dnssec_ok": "DNSSEC activé",
+      "dnssec_missing": "DNSSEC non activé",
+      "abuseipdb_clean": "Aucun signalement AbuseIPDB",
+      "abuseipdb_flagged": "AbuseIPDB : score {{score}} ({{reports}} signalements)",
+      "otx_pulses": "Présent dans {{count}} indicateurs de menace (OTX)",
+      "gsb_unsafe": "Google Safe Browsing : {{status}}",
+      "enricher_error": "Données partielles : enrichisseurs {{names}} non terminés"
     },
     "ai": {
       "title": "Analyse IA",
@@ -2479,7 +2506,8 @@
       "ignore": "Ignorer",
       "reset": "Réinitialiser",
       "tab_pending": "À classer",
-      "tab_all": "Tous les sous-domaines"
+      "tab_all": "Tous les sous-domaines",
+      "classified_hint": "{{count}} classifiés — visibles dans l'onglet \"Tous les sous-domaines\""
     },
     "settings": {
       "title": "Paramètres OSINT",

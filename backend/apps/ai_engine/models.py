@@ -149,6 +149,9 @@ class AiProviderConfig(BaseModel):
             "control_explain": "cloud",
             "cpv_suggestion": "cloud",
             "generate_procedure": "cloud",
+            "osint_attack_surface": "cloud",
+            "osint_suppliers_nis2": "cloud",
+            "osint_board_report": "cloud",
         }
         routing = self.task_routing or {}
         return routing.get(task_type, defaults.get(task_type, "ollama"))
