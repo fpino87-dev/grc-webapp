@@ -45,6 +45,8 @@ function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void 
     legal_entity_name: plant.legal_entity_name ?? "",
     legal_entity_vat: plant.legal_entity_vat ?? "",
     nis2_activity_description: plant.nis2_activity_description ?? "",
+    domain: plant.domain ?? "",
+    additional_domains: plant.additional_domains ?? [],
   });
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -194,6 +196,29 @@ function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void 
                 />
               </div>
               <p className="text-xs text-gray-500">{t("plants.nis2_entity.contact_hint")}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.domain")}</label>
+                  <input
+                    value={form.domain ?? ""}
+                    onChange={e => set("domain", e.target.value)}
+                    className="w-full border rounded px-3 py-2 text-sm"
+                    placeholder="azienda.it"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">{t("plants.hints.domain")}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.additional_domains")}</label>
+                  <textarea
+                    value={(form.additional_domains ?? []).join("\n")}
+                    onChange={e => set("additional_domains", e.target.value.split("\n").map(s => s.trim()).filter(Boolean))}
+                    rows={3}
+                    className="w-full border rounded px-3 py-2 text-sm resize-y"
+                    placeholder={t("plants.placeholders.additional_domains")}
+                  />
+                  <p className="mt-1 text-xs text-gray-500">{t("plants.hints.additional_domains")}</p>
+                </div>
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.logo_url_label")}</label>
                 <input
@@ -266,6 +291,8 @@ const EMPTY: Partial<Plant> = {
   legal_entity_name: "",
   legal_entity_vat: "",
   nis2_activity_description: "",
+  domain: "",
+  additional_domains: [],
 };
 
 function PlantModal({ onClose }: { onClose: () => void }) {
@@ -407,6 +434,29 @@ function PlantModal({ onClose }: { onClose: () => void }) {
                 />
               </div>
               <p className="text-xs text-gray-500">{t("plants.nis2_entity.contact_hint")}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.domain")}</label>
+                  <input
+                    value={form.domain ?? ""}
+                    onChange={e => set("domain", e.target.value)}
+                    className="w-full border rounded px-3 py-2 text-sm"
+                    placeholder="azienda.it"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">{t("plants.hints.domain")}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.additional_domains")}</label>
+                  <textarea
+                    value={(form.additional_domains ?? []).join("\n")}
+                    onChange={e => set("additional_domains", e.target.value.split("\n").map(s => s.trim()).filter(Boolean))}
+                    rows={3}
+                    className="w-full border rounded px-3 py-2 text-sm resize-y"
+                    placeholder={t("plants.placeholders.additional_domains")}
+                  />
+                  <p className="mt-1 text-xs text-gray-500">{t("plants.hints.additional_domains")}</p>
+                </div>
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.logo_url_label")}</label>
                 <input

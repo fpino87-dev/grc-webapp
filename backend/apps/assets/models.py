@@ -213,6 +213,11 @@ class AssetSW(Asset):
         blank=True,
         help_text="Riferimento nel sistema ITAM esterno (es. Lansweeper ID 4521, ServiceNow CI-00123).",
     )
+    vendor_url = models.URLField(
+        max_length=500,
+        blank=True,
+        help_text="URL del vendor del software — usato dal modulo OSINT per monitoraggio passivo del dominio fornitore.",
+    )
 
     @property
     def is_eos(self):

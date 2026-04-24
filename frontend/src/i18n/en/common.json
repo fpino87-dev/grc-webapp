@@ -544,7 +544,9 @@
       "nis2_subsector": "NIS2 subsector",
       "legal_entity_name": "Legal name (notifications)",
       "legal_entity_vat": "VAT / VAT ID",
-      "nis2_activity_description": "NIS2 activity description (formal documents)"
+      "nis2_activity_description": "NIS2 activity description (formal documents)",
+      "domain": "Primary domain",
+      "additional_domains": "Additional domains / Plant"
     },
     "nis2_entity": {
       "section_title": "NIS2 and legal entity",
@@ -555,7 +557,8 @@
       "country": "IT",
       "name": "Milan plant",
       "nis2_sector": "e.g. Manufacturing — Automotive",
-      "nis2_subsector": "e.g. Component production"
+      "nis2_subsector": "e.g. Component production",
+      "additional_domains": "plant-milano.company.com\nrome-office.company.com"
     },
     "actions": {
       "edit_title": "Edit site",
@@ -639,6 +642,10 @@
       "force_hint": "Superuser only: you can force-delete the site along with all linked elements (irreversible operation).",
       "force_action": "Force delete",
       "force_confirm": "WARNING: all linked elements will be permanently deleted along with the site. Proceed?"
+    },
+    "hints": {
+      "domain": "Site internet domain, used by the OSINT module for passive monitoring.",
+      "additional_domains": "One per line. Read by the OSINT module like the primary domain."
     }
   },
   "users": {

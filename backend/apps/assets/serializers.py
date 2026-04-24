@@ -129,6 +129,7 @@ class AssetSWSerializer(serializers.ModelSerializer):
             "license_type",
             "end_of_support",
             "external_ref",
+            "vendor_url",
             "is_eos",
             "days_to_eos",
             "created_at",

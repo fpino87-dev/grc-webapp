@@ -611,7 +611,9 @@
       "nis2_subsector": "Podsektor NIS2",
       "legal_entity_name": "Pełna nazwa prawna (powiadomienia)",
       "legal_entity_vat": "NIP / VAT",
-      "nis2_activity_description": "Opis działalności NIS2 (dokumenty formalne)"
+      "nis2_activity_description": "Opis działalności NIS2 (dokumenty formalne)",
+      "domain": "Domena główna",
+      "additional_domains": "Dodatkowe domeny / Zakład"
     },
     "nis2_entity": {
       "section_title": "NIS2 i podmiot prawny",
@@ -622,7 +624,8 @@
       "country": "IT",
       "name": "Zakład w Mediolanie",
       "nis2_sector": "np. Produkcja — motoryzacja",
-      "nis2_subsector": "np. Produkcja komponentów"
+      "nis2_subsector": "np. Produkcja komponentów",
+      "additional_domains": "zaklad-warszawa.firma.pl\nsiedziba-krakow.firma.pl"
     },
     "actions": {
       "edit_title": "Edytuj zakład",
@@ -706,6 +709,10 @@
       "force_hint": "Tylko superużytkownik: możesz wymusić usunięcie lokalizacji wraz ze wszystkimi powiązanymi elementami (operacja nieodwracalna).",
       "force_action": "Wymuś usunięcie",
       "force_confirm": "UWAGA: wszystkie powiązane elementy zostaną trwale usunięte wraz z lokalizacją. Kontynuować?"
+    },
+    "hints": {
+      "domain": "Domena internetowa zakładu, używana przez moduł OSINT do pasywnego monitorowania.",
+      "additional_domains": "Jedna na linię. Odczytywane przez moduł OSINT jak domena główna."
     }
   },
   "users": {

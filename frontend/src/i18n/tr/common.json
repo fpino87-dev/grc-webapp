@@ -611,7 +611,9 @@
       "nis2_subsector": "NIS2 alt sektörü",
       "legal_entity_name": "Ticari unvan (bildirimler)",
       "legal_entity_vat": "Vergi no / KDV",
-      "nis2_activity_description": "NIS2 faaliyet açıklaması (resmi belgeler)"
+      "nis2_activity_description": "NIS2 faaliyet açıklaması (resmi belgeler)",
+      "domain": "Ana alan adı",
+      "additional_domains": "Ek alan adları / Tesis"
     },
     "nis2_entity": {
       "section_title": "NIS2 ve tüzel kişilik",
@@ -622,7 +624,8 @@
       "country": "IT",
       "name": "Milano tesisi",
       "nis2_sector": "örn. İmalat — Otomotiv",
-      "nis2_subsector": "örn. Bileşen üretimi"
+      "nis2_subsector": "örn. Bileşen üretimi",
+      "additional_domains": "fabrika-istanbul.sirket.com\nofis-ankara.sirket.com"
     },
     "actions": {
       "edit_title": "Siteyi düzenle",
@@ -706,6 +709,10 @@
       "force_hint": "Yalnızca süper kullanıcı: tüm bağlantılı öğelerle birlikte tesisi zorla silebilirsiniz (geri alınamaz işlem).",
       "force_action": "Zorla sil",
       "force_confirm": "UYARI: tüm bağlantılı öğeler tesisle birlikte kalıcı olarak silinecek. Devam edilsin mi?"
+    },
+    "hints": {
+      "domain": "Tesis internet alan adı, OSINT modülü tarafından pasif izleme için kullanılır.",
+      "additional_domains": "Satır başına bir adet. Ana alan adı gibi OSINT modülü tarafından okunur."
     }
   },
   "users": {

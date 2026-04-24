@@ -191,6 +191,16 @@ class Plant(BaseModel):
         blank=True,
         help_text="Descrizione attività NIS2 del sito per documenti formali",
     )
+    domain = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Dominio internet principale del sito (es. azienda.it) — usato dal modulo OSINT per monitoraggio passivo.",
+    )
+    additional_domains = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Domini aggiuntivi associati al sito (es. plant-milano.azienda.it). Array di stringhe. Letti dal modulo OSINT.",
+    )
 
     class Meta:
         ordering = ["code"]

@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "apps.ai_engine",
     "apps.compliance_schedule",
     "apps.backups",
+    "apps.osint",
 ]
 
 MIDDLEWARE = [

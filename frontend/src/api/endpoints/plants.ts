@@ -14,6 +14,8 @@ export interface Plant {
   legal_entity_name?: string;
   legal_entity_vat?: string;
   nis2_activity_description?: string;
+  domain?: string;
+  additional_domains?: string[];
 }
 
 export interface BusinessUnit {

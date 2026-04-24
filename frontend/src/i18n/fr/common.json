@@ -611,7 +611,9 @@
       "nis2_subsector": "Sous-secteur NIS2",
       "legal_entity_name": "Raison sociale (notifications)",
       "legal_entity_vat": "N° TVA / VAT",
-      "nis2_activity_description": "Description de l'activité NIS2 (documents officiels)"
+      "nis2_activity_description": "Description de l'activité NIS2 (documents officiels)",
+      "domain": "Domaine principal",
+      "additional_domains": "Domaines supplémentaires / Site"
     },
     "nis2_entity": {
       "section_title": "NIS2 et entité légale",
@@ -622,7 +624,8 @@
       "country": "IT",
       "name": "Usine de Milan",
       "nis2_sector": "ex. Fabrication — Automobile",
-      "nis2_subsector": "ex. Production de composants"
+      "nis2_subsector": "ex. Production de composants",
+      "additional_domains": "usine-milan.entreprise.com\nsiege-paris.entreprise.com"
     },
     "actions": {
       "edit_title": "Modifier le site",
@@ -706,6 +709,10 @@
       "force_hint": "Superutilisateur uniquement : vous pouvez forcer la suppression du site avec tous les éléments liés (opération irréversible).",
       "force_action": "Forcer la suppression",
       "force_confirm": "ATTENTION : tous les éléments liés seront définitivement supprimés avec le site. Continuer ?"
+    },
+    "hints": {
+      "domain": "Domaine internet du site, utilisé par le module OSINT pour la surveillance passive.",
+      "additional_domains": "Un par ligne. Lu par le module OSINT comme le domaine principal."
     }
   },
   "users": {

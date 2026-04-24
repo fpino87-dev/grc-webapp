@@ -40,6 +40,11 @@ class Supplier(BaseModel):
     framework_refs = models.JSONField(default=list)
     notes = models.TextField(blank=True)
     email = models.EmailField(blank=True)
+    website = models.URLField(
+        max_length=500,
+        blank=True,
+        help_text="Sito web / dominio principale del fornitore — usato dal modulo OSINT per monitoraggio passivo.",
+    )
     evaluation_date = models.DateField(null=True, blank=True)
 
     # Campi ACN Delibera 127434 del 13/04/2026
