@@ -91,9 +91,22 @@ export function OsintDashboard() {
           <h1 className="text-xl font-bold text-gray-900">{t("osint.title")}</h1>
           <p className="text-sm text-gray-500">{t("osint.subtitle")}</p>
         </div>
-        <Link to="/osint/settings" className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50">
-          ⚙ {t("osint.settings.title")}
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/osint/subdomains"
+            className="relative px-3 py-1.5 text-sm border rounded hover:bg-gray-50"
+          >
+            🌐 {t("osint.subdomains.title")}
+            {(summary?.pending_subdomains ?? 0) > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 bg-yellow-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                {summary!.pending_subdomains}
+              </span>
+            )}
+          </Link>
+          <Link to="/osint/settings" className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50">
+            ⚙ {t("osint.settings.title")}
+          </Link>
+        </div>
       </div>
 
       {/* KPI cards */}
