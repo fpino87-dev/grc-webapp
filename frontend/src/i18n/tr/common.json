@@ -58,6 +58,7 @@
     "downloading": "İndiriliyor...",
     "close": "Kapat",
     "saving": "Kaydediliyor...",
+    "saved": "Kaydedildi",
     "save_error": "Kaydederken hata oluştu",
     "error": "Hata",
     "enabled": "aktif",
