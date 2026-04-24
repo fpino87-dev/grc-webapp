@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { aiApi, type AiProviderConfig } from "../../api/endpoints/ai";
 import { useAuthStore } from "../../store/auth";
+import { ModuleHelp } from "../../components/ui/ModuleHelp";
 
 const TASKS = [
   ["incident_classify", "Classificazione incidente"],
@@ -84,7 +85,34 @@ export function AiSettingsPage() {
 
   return (
     <div className="p-6 max-w-4xl space-y-4">
-      <h2 className="text-xl font-semibold">AI Engine</h2>
+      <div className="flex items-center gap-2">
+        <h2 className="text-xl font-semibold">AI Engine</h2>
+        <ModuleHelp
+          title="AI Engine — M20"
+          description="Configura il provider AI usato da tutti i moduli della piattaforma (classificazione incidenti, gap analysis, RCA, chatbot, generazione documenti, analisi OSINT)."
+          steps={[
+            "Scegli provider Cloud (Anthropic/OpenAI) o locale (Ollama).",
+            "Per Anthropic: vai su console.anthropic.com → API Keys → Create Key. Modelli consigliati: claude-haiku-4-5-20251001 (economico) o claude-sonnet-4-6 (qualità superiore).",
+            "Per OpenAI: vai su platform.openai.com → API Keys → Create new secret key.",
+            "Per Ollama (locale): installa Ollama sul server, scarica il modello desiderato con 'ollama pull <modello>', imposta l'endpoint.",
+            "Imposta il budget mensile token per controllare i costi.",
+            "Usa il routing per-task per assegnare modelli diversi a task diversi.",
+            "Clicca 'Testa' per verificare la connessione prima di salvare.",
+          ]}
+          connections={[
+            { module: "M03 Controlli", relation: "Genera documenti procedura (.docx)" },
+            { module: "M06 Risk", relation: "Suggerimenti RCA e azioni correttive" },
+            { module: "M09 Incidenti", relation: "Classificazione automatica incidente" },
+            { module: "M14 Fornitori", relation: "Suggerimento codici CPV" },
+            { module: "OSINT Monitor", relation: "Analisi superficie attacco, briefing NIS2, report board" },
+          ]}
+          configNeeded={[
+            "API Key Anthropic: console.anthropic.com → API Keys",
+            "API Key OpenAI: platform.openai.com → API Keys",
+            "Ollama (locale): installare il binario da ollama.com, nessuna API key richiesta",
+          ]}
+        />
+      </div>
 
       {/* Provider Cloud */}
       <div className="bg-white border rounded p-4 space-y-3">

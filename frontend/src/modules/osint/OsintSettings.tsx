@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { osintApi, type OsintSettings, type ScanFrequency } from "../../api/endpoints/osint";
+import { ModuleHelp } from "../../components/ui/ModuleHelp";
 
 type SubdomainPolicy = "yes" | "no" | "ask";
 
@@ -89,6 +90,31 @@ export function OsintSettingsPage() {
         <Link to="/osint" className="text-sm text-gray-500 hover:text-gray-700">← {t("osint.title")}</Link>
         <span className="text-gray-300">/</span>
         <h1 className="text-xl font-bold text-gray-900">{t("osint.settings.title")}</h1>
+        <ModuleHelp
+          title="OSINT Monitor — Chiavi API enricher"
+          description="Le chiavi API abilitano arricchimenti aggiuntivi durante le scansioni. Tutte sono opzionali: il modulo funziona anche senza, usando solo SSL/DNS/WHOIS (gratuiti e senza registrazione)."
+          steps={[
+            "HaveIBeenPwned (HIBP) — Breach email: haveibeenpwned.com/API/Key → piano a pagamento (~3,50$/mese). Solo per 'Miei domini'.",
+            "VirusTotal — Reputazione dominio/IP: virustotal.com/gui/join-us → piano Free (1000 req/giorno). API Key in 'My API Key'.",
+            "AbuseIPDB — Blacklist IP: abuseipdb.com/register → piano Free (1000 req/giorno). API Key nel profilo.",
+            "Google Safe Browsing — URL malevoli: console.cloud.google.com → Abilita 'Safe Browsing API' → Credenziali → Chiave API.",
+            "AlienVault OTX — Threat intelligence: otx.alienvault.com → Registrati gratis → Profilo → OTX Key. Nessun costo.",
+          ]}
+          connections={[
+            { module: "Plants", relation: "Dominio principale e domini aggiuntivi monitorati" },
+            { module: "M14 Fornitori", relation: "Sito web fornitore → entità OSINT tipo supplier" },
+            { module: "M09 Incidenti", relation: "Alert critici su miei domini → incidente automatico" },
+            { module: "M08 Task", relation: "Alert su fornitori → task di verifica" },
+            { module: "AI Engine M20", relation: "Analisi AI con dati anonimizzati" },
+          ]}
+          configNeeded={[
+            "VirusTotal Free: virustotal.com/gui/join-us",
+            "AbuseIPDB Free: abuseipdb.com/register",
+            "AlienVault OTX Free: otx.alienvault.com (registrazione gratuita)",
+            "Google Safe Browsing: console.cloud.google.com (serve progetto GCP)",
+            "HaveIBeenPwned: haveibeenpwned.com/API/Key (a pagamento, ~3,50$/mese)",
+          ]}
+        />
       </div>
 
       {/* Score thresholds */}
