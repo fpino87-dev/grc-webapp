@@ -1,6 +1,15 @@
 services:
   db:
-    image: postgres:15-alpine
+    # Allineato a dev (postgres:16-alpine) per evitare divergenze su JSONB ops,
+    # generated columns e planner cost — newfix R3.
+    # Migrazione 15 → 16 su prod esistente: il volume `pgdata` formattato per
+    # PG15 NON viene letto da PG16. Procedura una tantum prima del deploy:
+    #   1. docker compose -f docker-compose.prod.yml exec db pg_dumpall -U ${POSTGRES_USER} > /tmp/dump.sql
+    #   2. docker compose -f docker-compose.prod.yml down
+    #   3. docker volume rm grc-webapp_pgdata   (oppure rinominalo per backup)
+    #   4. docker compose -f docker-compose.prod.yml up -d db
+    #   5. cat /tmp/dump.sql | docker compose -f docker-compose.prod.yml exec -T db psql -U ${POSTGRES_USER}
+    image: postgres:16-alpine
     restart: unless-stopped
     environment:
       POSTGRES_DB:       ${POSTGRES_DB}

@@ -9,6 +9,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 ## [Unreleased]
 
 ### Changed
+- **Postgres prod allineato a 16-alpine** (newfix R3) — `docker-compose.prod.yml` ora usa `postgres:16-alpine` come dev, eliminando la divergenza dev/prod su JSONB ops e planner cost. **Operazione richiesta una tantum sul deploy esistente**: dump del volume pgdata con `pg_dumpall`, recreate volume, restore (procedura completa nei commenti del file). Senza questo passaggio PG16 rifiuta i data dir formattati per PG15.
 - **JWT claims multi-ruolo** (newfix R2) — `core/jwt.py::GrcTokenObtainPairSerializer.get_token` ora espone `roles` (lista deduplicata di tutti i ruoli dell'utente) e `roles_by_plant` (mappa `plant_id → [role,...]` con chiavi speciali `__org__`/`bu:<id>` per scope organizzativi). Il claim legacy `role` resta per retro-compatibilità UI come "ruolo dominante" calcolato via gerarchia (super_admin > compliance_officer > internal_auditor > external_auditor > risk_manager > plant_manager > control_owner). Prima il backend chiamava `UserPlantAccess.objects.filter(user=user).first()` e ne perdeva tutti gli altri: un Risk Manager su Plant A + Internal Auditor su Plant B aveva un solo ruolo arbitrario nel token. UserPlantAccess soft-deleted ora esclusi.
 
 ### Fixed

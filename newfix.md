@@ -116,7 +116,7 @@
 **Fix**: il claim `role` deve essere una **lista** `roles_by_plant: {plant_id: role}` o `roles: ["risk_manager", "internal_auditor"]`. Frontend leggerà la combinazione e selezionerà il ruolo "più alto" per la nav, mostrando lo switcher per plant.
 
 ### R3 — Postgres dev (16) ≠ prod (15)
-**Stato**: `[ ]`
+**Stato**: `[x]` (2026-04-27 — `docker-compose.prod.yml` allineato a `postgres:16-alpine`. Aggiunte istruzioni inline per migrazione volume pgdata 15 → 16 (pg_dumpall + recreate volume + restore). **NON deploy automatico**: serve passaggio manuale una tantum prima del primo deploy del nuovo image.)
 **Severity**: media.
 **File**: `docker-compose.yml`, `docker-compose.prod.yml`.
 **Problema**: sviluppi su 16, deploi su 15. JSONB ops, generated columns, planner cost differenze. Migrazioni testate possono regredire.
