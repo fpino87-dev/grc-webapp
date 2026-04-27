@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
+from core.scoping import PlantScopedQuerysetMixin
+
 from .models import Control, ControlDomain, ControlInstance, Framework
 from .serializers import (
     ControlDomainSerializer,
@@ -219,7 +221,7 @@ def _explain_suggestion(instance) -> str:
     return (prefix + " " + "; ".join(msgs)) if msgs else prefix
 
 
-class ControlInstanceViewSet(viewsets.ModelViewSet):
+class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = ControlInstance.objects.select_related(
         "plant", "control__framework", "control__domain", "owner"
     ).prefetch_related(
@@ -229,6 +231,7 @@ class ControlInstanceViewSet(viewsets.ModelViewSet):
         "evidences",
     ).order_by("control__framework__code", "control__external_id")
     serializer_class = ControlInstanceSerializer
+    plant_field = "plant"
 
     def destroy(self, request, *args, **kwargs):
         from django.core.exceptions import ValidationError

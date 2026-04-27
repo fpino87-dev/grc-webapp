@@ -5,18 +5,20 @@ from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
 from core.audit import log_action
+from core.scoping import PlantScopedQuerysetMixin
 from .models import ManagementReview, ReviewAction
 from .serializers import ManagementReviewSerializer, ReviewActionSerializer
 from . import services
 
 
-class ManagementReviewViewSet(viewsets.ModelViewSet):
+class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = ManagementReview.objects.all()
     serializer_class = ManagementReviewSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["plant", "status"]
     search_fields = ["title"]
+    plant_field = "plant"
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)
@@ -88,12 +90,13 @@ class ManagementReviewViewSet(viewsets.ModelViewSet):
         return response
 
 
-class ReviewActionViewSet(viewsets.ModelViewSet):
+class ReviewActionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = ReviewAction.objects.all()
     serializer_class = ReviewActionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["review"]
+    plant_field = "review__plant"
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)

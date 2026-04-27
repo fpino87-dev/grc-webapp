@@ -13,7 +13,11 @@ URL_INSTANCES = "/api/v1/controls/instances/"
 
 @pytest.fixture
 def user(db):
-    return User.objects.create_user(username="ctrl_user", email="ctrl@test.com", password="test")
+    """Utente con scope org (vede tutte le control instances)."""
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    u = User.objects.create_user(username="ctrl_user", email="ctrl@test.com", password="test")
+    UserPlantAccess.objects.create(user=u, role=GrcRole.COMPLIANCE_OFFICER, scope_type="org")
+    return u
 
 
 @pytest.fixture
@@ -255,3 +259,39 @@ def test_instances_needs_revaluation_action(client):
 def test_framework_governance_action(client, framework):
     resp = client.get(f"{URL_FRAMEWORKS}governance/")
     assert resp.status_code == 200
+
+
+# ── RBAC plant scoping (S1) ───────────────────────────────────────────────────
+
+@pytest.mark.django_db
+def test_pm_does_not_see_control_instance_of_other_plant(db, framework, control):
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    from apps.controls.models import ControlInstance
+    from apps.plants.models import Plant, PlantFramework
+    from datetime import date
+
+    plant_a = Plant.objects.create(
+        code="CT-SC-A", name="A", country="IT",
+        nis2_scope="non_soggetto", status="attivo",
+    )
+    plant_b = Plant.objects.create(
+        code="CT-SC-B", name="B", country="IT",
+        nis2_scope="non_soggetto", status="attivo",
+    )
+    PlantFramework.objects.create(plant=plant_a, framework=framework, active_from=date.today(), active=True)
+    PlantFramework.objects.create(plant=plant_b, framework=framework, active_from=date.today(), active=True)
+    ControlInstance.objects.create(plant=plant_a, control=control)
+    ControlInstance.objects.create(plant=plant_b, control=control)
+
+    pm = User.objects.create_user(username="pm_a_ctrl", email="pmctrl@test", password="x")
+    access = UserPlantAccess.objects.create(
+        user=pm, role=GrcRole.PLANT_MANAGER, scope_type="single_plant",
+    )
+    access.scope_plants.set([plant_a])
+
+    c = APIClient()
+    c.force_authenticate(user=pm)
+    resp = c.get(URL_INSTANCES)
+    assert resp.status_code == 200
+    plant_ids = {str(item["plant"]) for item in resp.data["results"]}
+    assert plant_ids == {str(plant_a.id)}

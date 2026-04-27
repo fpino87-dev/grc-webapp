@@ -10,7 +10,11 @@ URL = "/api/v1/incidents/incidents/"
 
 @pytest.fixture
 def user(db):
-    return User.objects.create_user(username="inc_user", email="inc@test.com", password="test")
+    """Utente di test con scope org (vede tutti i plant)."""
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    u = User.objects.create_user(username="inc_user", email="inc@test.com", password="test")
+    UserPlantAccess.objects.create(user=u, role=GrcRole.COMPLIANCE_OFFICER, scope_type="org")
+    return u
 
 
 @pytest.fixture
@@ -168,3 +172,87 @@ def test_filter_by_severity(client, plant, incident):
     )
     resp = client.get(f"{URL}?severity=media")
     assert resp.status_code == 200
+
+
+# ── RBAC plant scoping (S1) ───────────────────────────────────────────────────
+
+@pytest.mark.django_db
+def test_plant_manager_does_not_see_incidents_of_other_plant(db):
+    """PM dello stabilimento A non deve vedere incidenti di Plant B."""
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    from apps.incidents.models import Incident
+    from apps.plants.models import Plant
+
+    plant_a = Plant.objects.create(
+        code="SCOPE-A", name="Plant A", country="IT",
+        nis2_scope="non_soggetto", status="attivo",
+    )
+    plant_b = Plant.objects.create(
+        code="SCOPE-B", name="Plant B", country="IT",
+        nis2_scope="non_soggetto", status="attivo",
+    )
+    Incident.objects.create(
+        plant=plant_a, title="Inc A", detected_at="2026-03-20T10:00:00Z",
+        severity="media", nis2_notifiable="da_valutare",
+    )
+    Incident.objects.create(
+        plant=plant_b, title="Inc B", detected_at="2026-03-20T10:00:00Z",
+        severity="media", nis2_notifiable="da_valutare",
+    )
+    pm_a = User.objects.create_user(username="pm_a_inc", email="pm_a@inc.test", password="x")
+    access = UserPlantAccess.objects.create(
+        user=pm_a, role=GrcRole.PLANT_MANAGER, scope_type="single_plant",
+    )
+    access.scope_plants.set([plant_a])
+
+    c = APIClient()
+    c.force_authenticate(user=pm_a)
+    resp = c.get(URL)
+    assert resp.status_code == 200
+    titles = {item["title"] for item in resp.data["results"]}
+    assert titles == {"Inc A"}
+
+
+@pytest.mark.django_db
+def test_plant_manager_cannot_retrieve_incident_of_other_plant(db):
+    """Accesso diretto via /incidents/{id}/ a un incidente di Plant B → 404."""
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    from apps.incidents.models import Incident
+    from apps.plants.models import Plant
+
+    plant_a = Plant.objects.create(
+        code="SCOPE-RA", name="Plant RA", country="IT",
+        nis2_scope="non_soggetto", status="attivo",
+    )
+    plant_b = Plant.objects.create(
+        code="SCOPE-RB", name="Plant RB", country="IT",
+        nis2_scope="non_soggetto", status="attivo",
+    )
+    inc_b = Incident.objects.create(
+        plant=plant_b, title="Inc B forbidden",
+        detected_at="2026-03-20T10:00:00Z",
+        severity="media", nis2_notifiable="da_valutare",
+    )
+    pm_a = User.objects.create_user(username="pm_ra", email="pm_ra@inc.test", password="x")
+    access = UserPlantAccess.objects.create(
+        user=pm_a, role=GrcRole.PLANT_MANAGER, scope_type="single_plant",
+    )
+    access.scope_plants.set([plant_a])
+
+    c = APIClient()
+    c.force_authenticate(user=pm_a)
+    resp = c.get(f"{URL}{inc_b.id}/")
+    assert resp.status_code == 404
+
+
+@pytest.mark.django_db
+def test_user_without_access_sees_no_incidents(db, plant, incident):
+    """Utente senza UserPlantAccess → lista vuota."""
+    no_access = User.objects.create_user(
+        username="noaccinc", email="noaccinc@inc.test", password="x",
+    )
+    c = APIClient()
+    c.force_authenticate(user=no_access)
+    resp = c.get(URL)
+    assert resp.status_code == 200
+    assert resp.data["results"] == []

@@ -11,7 +11,11 @@ URL_EVIDENCES = "/api/v1/documents/evidences/"
 
 @pytest.fixture
 def user(db):
-    return User.objects.create_user(username="doc_user", email="doc@test.com", password="test")
+    """Utente con scope org (vede tutti i documenti)."""
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    u = User.objects.create_user(username="doc_user", email="doc@test.com", password="test")
+    UserPlantAccess.objects.create(user=u, role=GrcRole.COMPLIANCE_OFFICER, scope_type="org")
+    return u
 
 
 @pytest.fixture
@@ -111,3 +115,43 @@ def test_filter_documents_by_status(client, document):
 def test_list_evidences(client):
     resp = client.get(URL_EVIDENCES)
     assert resp.status_code == 200
+
+
+# ── RBAC plant scoping (S1) ───────────────────────────────────────────────────
+
+@pytest.mark.django_db
+def test_pm_does_not_see_documents_of_other_plant(db):
+    """PM A vede documenti di Plant A + condivisi con A + org-wide; non vede solo Plant B."""
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    from apps.documents.models import Document
+    from apps.plants.models import Plant
+
+    plant_a = Plant.objects.create(
+        code="DOC-A", name="A", country="IT",
+        nis2_scope="non_soggetto", status="attivo",
+    )
+    plant_b = Plant.objects.create(
+        code="DOC-B", name="B", country="IT",
+        nis2_scope="non_soggetto", status="attivo",
+    )
+    Document.objects.create(plant=plant_a, title="Doc A", category="policy", status="bozza")
+    Document.objects.create(plant=plant_b, title="Doc B", category="policy", status="bozza")
+    Document.objects.create(plant=None, title="Doc Global", category="policy", status="bozza")
+    shared = Document.objects.create(plant=plant_b, title="Doc Shared", category="policy", status="bozza")
+    shared.shared_plants.add(plant_a)
+
+    pm = User.objects.create_user(username="pm_doc", email="pmdoc@test", password="x")
+    access = UserPlantAccess.objects.create(
+        user=pm, role=GrcRole.PLANT_MANAGER, scope_type="single_plant",
+    )
+    access.scope_plants.set([plant_a])
+
+    c = APIClient()
+    c.force_authenticate(user=pm)
+    resp = c.get(URL_DOCS)
+    assert resp.status_code == 200
+    titles = {item["title"] for item in resp.data["results"]}
+    assert "Doc A" in titles
+    assert "Doc Global" in titles
+    assert "Doc Shared" in titles
+    assert "Doc B" not in titles

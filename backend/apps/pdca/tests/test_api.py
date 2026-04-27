@@ -10,7 +10,10 @@ URL_CYCLES = "/api/v1/pdca/cycles/"
 
 @pytest.fixture
 def user(db):
-    return User.objects.create_user(username="pdca_user", email="pdca@test.com", password="test")
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    u = User.objects.create_user(username="pdca_user", email="pdca@test.com", password="test")
+    UserPlantAccess.objects.create(user=u, role=GrcRole.COMPLIANCE_OFFICER, scope_type="org")
+    return u
 
 
 @pytest.fixture
@@ -115,3 +118,36 @@ def test_create_cycle_creates_all_phases(plant, user):
     cycle = create_cycle(plant=plant, title="Full Phases", trigger_type="rischio")
     phases = PdcaPhase.objects.filter(cycle=cycle).values_list("phase", flat=True)
     assert set(phases) == {"plan", "do", "check", "act"}
+
+
+# ── RBAC plant scoping (S1) ───────────────────────────────────────────────────
+
+@pytest.mark.django_db
+def test_pm_does_not_see_pdca_cycles_of_other_plant(db):
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    from apps.pdca.models import PdcaCycle
+    from apps.plants.models import Plant
+
+    plant_a = Plant.objects.create(
+        code="PD-A", name="A", country="IT",
+        nis2_scope="non_soggetto", status="attivo",
+    )
+    plant_b = Plant.objects.create(
+        code="PD-B", name="B", country="IT",
+        nis2_scope="non_soggetto", status="attivo",
+    )
+    PdcaCycle.objects.create(plant=plant_a, title="Cycle A", trigger_type="rischio")
+    PdcaCycle.objects.create(plant=plant_b, title="Cycle B", trigger_type="rischio")
+
+    pm = User.objects.create_user(username="pm_pdca", email="pmpdca@test", password="x")
+    access = UserPlantAccess.objects.create(
+        user=pm, role=GrcRole.PLANT_MANAGER, scope_type="single_plant",
+    )
+    access.scope_plants.set([plant_a])
+
+    c = APIClient()
+    c.force_authenticate(user=pm)
+    resp = c.get(URL_CYCLES)
+    assert resp.status_code == 200
+    titles = {item["title"] for item in resp.data["results"]}
+    assert titles == {"Cycle A"}

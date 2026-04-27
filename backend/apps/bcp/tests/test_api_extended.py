@@ -12,7 +12,10 @@ URL_TESTS = "/api/v1/bcp/tests/"
 
 @pytest.fixture
 def user(db):
-    return User.objects.create_user(username="bcpx_user", email="bcpx@test.com", password="test")
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    u = User.objects.create_user(username="bcpx_user", email="bcpx@test.com", password="test")
+    UserPlantAccess.objects.create(user=u, role=GrcRole.COMPLIANCE_OFFICER, scope_type="org")
+    return u
 
 
 @pytest.fixture

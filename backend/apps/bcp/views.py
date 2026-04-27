@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.db.models import Q
 
 from core.audit import log_action
+from core.scoping import PlantScopedQuerysetMixin
 from apps.bia.serializers import CriticalProcessSerializer
 from .models import BcpPlan, BcpTest
 from .serializers import BcpPlanSerializer, BcpTestSerializer
@@ -15,13 +16,14 @@ from apps.auth_grc.models import GrcRole, UserPlantAccess
 from apps.governance.models import NormativeRole, RoleAssignment
 
 
-class BcpPlanViewSet(viewsets.ModelViewSet):
+class BcpPlanViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = BcpPlan.objects.all()
     serializer_class = BcpPlanSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["plant", "status"]
     search_fields = ["title"]
+    plant_field = "plant"
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)
@@ -221,12 +223,13 @@ class BcpPlanViewSet(viewsets.ModelViewSet):
         return Response(status=204)
 
 
-class BcpTestViewSet(viewsets.ModelViewSet):
+class BcpTestViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = BcpTest.objects.all()
     serializer_class = BcpTestSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["plan"]
+    plant_field = "plan__plant"
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)

@@ -8,6 +8,8 @@ from django.core.files.storage import default_storage
 from django.utils.translation import gettext as _
 import os
 
+from core.scoping import PlantScopedQuerysetMixin, get_user_plant_ids
+
 from .models import Document, DocumentVersion, Evidence
 from .serializers import (
     DocumentApprovalSerializer,
@@ -29,6 +31,19 @@ class DocumentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         from django.db.models import Q
         qs = super().get_queryset().filter(deleted_at__isnull=True)
+
+        # RBAC plant scoping (S1): un utente vede solo i documenti del proprio
+        # plant, condivisi col proprio plant, o org-wide (plant=null).
+        plant_ids = get_user_plant_ids(self.request.user)
+        if plant_ids is not None:
+            if not plant_ids:
+                return qs.none()
+            qs = qs.filter(
+                Q(plant_id__in=plant_ids)
+                | Q(shared_plants__in=plant_ids)
+                | Q(plant__isnull=True)
+            ).distinct()
+
         plant_id = self.request.query_params.get("plant")
         if plant_id:
             # plant proprietario OPPURE condiviso con questo plant OPPURE org-wide (plant=null)
@@ -189,16 +204,18 @@ class DocumentViewSet(viewsets.ModelViewSet):
             return Response({"error": str(e.message)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class DocumentVersionViewSet(viewsets.ModelViewSet):
+class DocumentVersionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = DocumentVersion.objects.select_related("document", "uploaded_by")
     serializer_class = DocumentVersionSerializer
     filterset_fields = ["document"]
+    plant_field = "document__plant"
+    allow_null_plant = True  # versioni di documenti org-wide visibili a tutti
 
     def perform_create(self, serializer):
         serializer.save(uploaded_by=self.request.user)
 
 
-class EvidenceViewSet(viewsets.ModelViewSet):
+class EvidenceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = Evidence.objects.select_related("plant", "uploaded_by").prefetch_related(
         "control_instances__control__framework"
     )
@@ -208,6 +225,8 @@ class EvidenceViewSet(viewsets.ModelViewSet):
     filterset_fields = ["evidence_type"]
     search_fields = ["title", "description"]
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
+    plant_field = "plant"
+    allow_null_plant = True  # evidenze org-wide (plant=null) visibili a tutti
 
     def get_queryset(self):
         from django.db.models import Q

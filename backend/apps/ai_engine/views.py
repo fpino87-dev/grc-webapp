@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 
 from apps.auth_grc.permissions import IsGrcSuperAdmin
 from core.audit import log_action
+from core.scoping import scope_queryset_by_plant
 
 from .models import MODELS_BY_PROVIDER, AiProviderConfig
 from .serializers import AiProviderConfigReadSerializer, AiProviderConfigSerializer
@@ -74,24 +75,28 @@ class AiSuggestView(APIView):
         if not task_type or not entity_id:
             return Response({"error": "task_type e entity_id obbligatori"}, status=400)
 
-        try:
-            if task_type == "incident_classify":
-                from apps.incidents.models import Incident
+        from apps.controls.models import ControlInstance
+        from apps.incidents.models import Incident
 
-                entity = Incident.objects.get(pk=entity_id)
+        try:
+            # RBAC plant scoping (S1/F7): impedisce a un utente di chiedere
+            # all'AI di analizzare entità di plant cui non ha accesso.
+            if task_type == "incident_classify":
+                qs = scope_queryset_by_plant(Incident.objects.all(), request.user)
+                entity = qs.get(pk=entity_id)
                 result = classify_incident(entity, request.user)
             elif task_type == "gap_actions":
-                from apps.controls.models import ControlInstance
-
-                entity = ControlInstance.objects.get(pk=entity_id)
+                qs = scope_queryset_by_plant(ControlInstance.objects.all(), request.user)
+                entity = qs.get(pk=entity_id)
                 result = suggest_gap_actions(entity, request.user)
             elif task_type == "rca_draft":
-                from apps.incidents.models import Incident
-
-                entity = Incident.objects.get(pk=entity_id)
+                qs = scope_queryset_by_plant(Incident.objects.all(), request.user)
+                entity = qs.get(pk=entity_id)
                 result = draft_rca(entity, request.user)
             else:
                 return Response({"error": f"task_type '{task_type}' non supportato"}, status=400)
+        except (Incident.DoesNotExist, ControlInstance.DoesNotExist):
+            return Response({"error": "Entità non trovata o non accessibile."}, status=404)
         except Exception as exc:
             return Response({"error": f"Errore AI: {str(exc)[:200]}"}, status=500)
 

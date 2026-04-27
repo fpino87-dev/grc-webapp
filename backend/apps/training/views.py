@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from core.audit import log_action
+from core.scoping import PlantScopedQuerysetMixin
 
 from .models import PhishingSimulation, TrainingCourse, TrainingEnrollment
 from .serializers import (
@@ -52,8 +53,10 @@ class TrainingEnrollmentViewSet(viewsets.ModelViewSet):
         )
 
 
-class PhishingSimulationViewSet(viewsets.ModelViewSet):
+class PhishingSimulationViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = PhishingSimulation.objects.select_related("user", "plant")
     serializer_class = PhishingSimulationSerializer
     filterset_fields = ["plant", "result", "user"]
     search_fields = ["user__username", "kb4_simulation_id"]
+    plant_field = "plant"
+    allow_null_plant = True  # simulazioni cross-plant (campagne aziendali) senza plant

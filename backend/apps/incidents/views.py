@@ -5,6 +5,7 @@ from rest_framework import decorators, response, viewsets
 from rest_framework.permissions import IsAuthenticated
 
 from core.audit import log_action
+from core.scoping import PlantScopedQuerysetMixin
 from .models import Incident, NIS2Configuration
 from apps.plants.models import Plant
 
@@ -20,7 +21,7 @@ from .serializers import IncidentSerializer, NIS2ConfigurationSerializer, NIS2No
 from .services import close_incident
 
 
-class IncidentViewSet(viewsets.ModelViewSet):
+class IncidentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = Incident.objects.select_related("plant", "closed_by").prefetch_related("assets", "nis2_notifications")
     serializer_class = IncidentSerializer
 
@@ -255,7 +256,7 @@ class IncidentViewSet(viewsets.ModelViewSet):
         return response.Response(breakdown)
 
 
-class NIS2ConfigurationViewSet(viewsets.ModelViewSet):
+class NIS2ConfigurationViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = NIS2Configuration.objects.select_related("plant")
     serializer_class = NIS2ConfigurationSerializer
     permission_classes = [IsAuthenticated]

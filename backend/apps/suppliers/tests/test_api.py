@@ -11,7 +11,11 @@ URL_ASSESSMENTS = "/api/v1/suppliers/assessments/"
 
 @pytest.fixture
 def user(db):
-    return User.objects.create_user(username="sup_user", email="sup@test.com", password="test")
+    """Utente con scope org (vede tutti i fornitori)."""
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    u = User.objects.create_user(username="sup_user", email="sup@test.com", password="test")
+    UserPlantAccess.objects.create(user=u, role=GrcRole.COMPLIANCE_OFFICER, scope_type="org")
+    return u
 
 
 @pytest.fixture
@@ -154,3 +158,73 @@ def test_reject_assessment_action(client, assessment):
     assessment.save()
     resp = client.post(f"{URL_ASSESSMENTS}{assessment.id}/reject/", {"notes": "Non sufficiente"}, format="json")
     assert resp.status_code in (200, 201, 400)
+
+
+# ── RBAC plant scoping (S1) ───────────────────────────────────────────────────
+
+@pytest.mark.django_db
+def test_plant_manager_does_not_see_supplier_of_other_plant(db):
+    """PM A non vede fornitori legati esclusivamente a Plant B."""
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    from apps.plants.models import Plant
+    from apps.suppliers.models import Supplier
+
+    plant_a = Plant.objects.create(
+        code="SUP-A", name="A", country="IT",
+        nis2_scope="non_soggetto", status="attivo",
+    )
+    plant_b = Plant.objects.create(
+        code="SUP-B", name="B", country="IT",
+        nis2_scope="non_soggetto", status="attivo",
+    )
+    sup_a = Supplier.objects.create(name="OnlyA", risk_level="medio", status="attivo")
+    sup_a.plants.add(plant_a)
+    sup_b = Supplier.objects.create(name="OnlyB", risk_level="medio", status="attivo")
+    sup_b.plants.add(plant_b)
+    sup_global = Supplier.objects.create(
+        name="Global", risk_level="basso", status="attivo",
+    )  # nessun plant → cross-plant
+
+    pm_a = User.objects.create_user(username="pm_a_sup", email="pmasup@test", password="x")
+    access = UserPlantAccess.objects.create(
+        user=pm_a, role=GrcRole.PLANT_MANAGER, scope_type="single_plant",
+    )
+    access.scope_plants.set([plant_a])
+
+    c = APIClient()
+    c.force_authenticate(user=pm_a)
+    resp = c.get(URL_SUPPLIERS)
+    assert resp.status_code == 200
+    names = {item["name"] for item in resp.data["results"]}
+    assert "OnlyA" in names
+    assert "OnlyB" not in names
+    assert "Global" in names  # cross-plant supplier visibile
+
+
+@pytest.mark.django_db
+def test_plant_manager_cannot_retrieve_supplier_of_other_plant(db):
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    from apps.plants.models import Plant
+    from apps.suppliers.models import Supplier
+
+    plant_a = Plant.objects.create(
+        code="SUP-RA", name="A", country="IT",
+        nis2_scope="non_soggetto", status="attivo",
+    )
+    plant_b = Plant.objects.create(
+        code="SUP-RB", name="B", country="IT",
+        nis2_scope="non_soggetto", status="attivo",
+    )
+    sup_b = Supplier.objects.create(name="ForbiddenB", risk_level="medio", status="attivo")
+    sup_b.plants.add(plant_b)
+
+    pm_a = User.objects.create_user(username="pm_ra_sup", email="pmra@test", password="x")
+    access = UserPlantAccess.objects.create(
+        user=pm_a, role=GrcRole.PLANT_MANAGER, scope_type="single_plant",
+    )
+    access.scope_plants.set([plant_a])
+
+    c = APIClient()
+    c.force_authenticate(user=pm_a)
+    resp = c.get(f"{URL_SUPPLIERS}{sup_b.id}/")
+    assert resp.status_code == 404

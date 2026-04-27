@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from core.audit import log_action
+from core.scoping import PlantScopedQuerysetMixin
 
 from .models import RiskAppetitePolicy, RiskAssessment, RiskDimension, RiskMitigationPlan
 from .serializers import RiskAppetitePolicySerializer, RiskAssessmentSerializer, RiskDimensionSerializer, RiskMitigationPlanSerializer
@@ -10,12 +11,13 @@ from .services import get_risk_bia_bcp_context
 from .services import delete_risk_assessment
 
 
-class RiskAssessmentViewSet(viewsets.ModelViewSet):
+class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = RiskAssessment.objects.select_related(
         "plant", "asset", "assessed_by", "accepted_by", "owner", "critical_process"
     )
     serializer_class = RiskAssessmentSerializer
     filterset_fields = ["plant", "status", "assessment_type"]
+    plant_field = "plant"
 
     def destroy(self, request, *args, **kwargs):
         assessment = self.get_object()
@@ -451,10 +453,11 @@ class RiskAssessmentViewSet(viewsets.ModelViewSet):
         return response
 
 
-class RiskDimensionViewSet(viewsets.ModelViewSet):
+class RiskDimensionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = RiskDimension.objects.select_related("assessment")
     serializer_class = RiskDimensionSerializer
     filterset_fields = ["plant"]
+    plant_field = "assessment__plant"
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -474,10 +477,11 @@ class RiskDimensionViewSet(viewsets.ModelViewSet):
         )
 
 
-class RiskMitigationPlanViewSet(viewsets.ModelViewSet):
+class RiskMitigationPlanViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = RiskMitigationPlan.objects.select_related("assessment", "owner", "control_instance")
     serializer_class = RiskMitigationPlanSerializer
     filterset_fields = ["assessment"]
+    plant_field = "assessment__plant"
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -510,10 +514,12 @@ class RiskMitigationPlanViewSet(viewsets.ModelViewSet):
         )
 
 
-class RiskAppetitePolicyViewSet(viewsets.ModelViewSet):
+class RiskAppetitePolicyViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = RiskAppetitePolicy.objects.select_related("plant", "approved_by")
     serializer_class = RiskAppetitePolicySerializer
     filterset_fields = ["plant", "framework_code"]
+    plant_field = "plant"
+    allow_null_plant = True  # plant=null = policy org-wide valida per tutti i plant
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)

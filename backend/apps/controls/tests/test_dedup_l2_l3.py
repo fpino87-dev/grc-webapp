@@ -13,7 +13,10 @@ URL_INSTANCES = "/api/v1/controls/instances/"
 
 @pytest.fixture
 def user(db):
-    return User.objects.create_user(username="dedup_user", email="dedup@test.com", password="test")
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    u = User.objects.create_user(username="dedup_user", email="dedup@test.com", password="test")
+    UserPlantAccess.objects.create(user=u, role=GrcRole.COMPLIANCE_OFFICER, scope_type="org")
+    return u
 
 
 @pytest.fixture
@@ -115,7 +118,9 @@ def test_l2_only_visible_without_l3(db, plant):
     )
     ControlInstance.objects.create(plant=plant, control=ctrl)
 
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
     user = User.objects.create_user(username="solo_user2", email="solo2@test.com", password="test")
+    UserPlantAccess.objects.create(user=user, role=GrcRole.COMPLIANCE_OFFICER, scope_type="org")
     c = APIClient()
     c.force_authenticate(user=user)
     resp = c.get(URL_INSTANCES, {"plant": plant.id})

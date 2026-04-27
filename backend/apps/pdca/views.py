@@ -5,17 +5,19 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from core.audit import log_action
+from core.scoping import PlantScopedQuerysetMixin
 
 from . import services
 from .models import PdcaCycle, PdcaPhase
 from .serializers import PdcaCycleSerializer, PdcaPhaseSerializer
 
 
-class PdcaCycleViewSet(viewsets.ModelViewSet):
+class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = PdcaCycle.objects.select_related("plant").prefetch_related("phases")
     serializer_class = PdcaCycleSerializer
     filterset_fields = ["plant", "fase_corrente"]
     search_fields = ["title"]
+    plant_field = "plant"
 
     def perform_create(self, serializer):
         cycle = serializer.save(created_by=self.request.user)
@@ -72,7 +74,8 @@ class PdcaCycleViewSet(viewsets.ModelViewSet):
             return Response({"error": str(exc.message)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class PdcaPhaseViewSet(viewsets.ModelViewSet):
+class PdcaPhaseViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = PdcaPhase.objects.select_related("cycle")
     serializer_class = PdcaPhaseSerializer
     filterset_fields = ["cycle", "phase"]
+    plant_field = "cycle__plant"

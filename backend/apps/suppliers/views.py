@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 
 from core.audit import log_action
+from core.scoping import PlantScopedQuerysetMixin
 from .models import (
     Supplier,
     SupplierAssessment,
@@ -29,13 +30,17 @@ from .serializers import (
 )
 
 
-class SupplierViewSet(viewsets.ModelViewSet):
+class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = Supplier.objects.all()
     serializer_class = SupplierSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["risk_level", "risk_adj", "status", "nis2_relevant"]
     search_fields = ["name", "vat_number"]
+    # Supplier ha M2M `plants`; supplier senza alcun plant assegnato = cross-plant
+    # (fornitore organizzativo) → visibile a tutti gli utenti con almeno un accesso.
+    plant_field = "plants"
+    allow_null_plant = True
 
     @action(detail=True, methods=["get"], url_path="nda")
     def nda_list(self, request, pk=None):
@@ -438,7 +443,7 @@ class SupplierEvaluationConfigView(APIView):
         return Response(serializer.data)
 
 
-class SupplierAssessmentViewSet(viewsets.ModelViewSet):
+class SupplierAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = SupplierAssessment.objects.filter(
         deleted_at__isnull=True
     ).select_related("supplier", "assessed_by", "reviewed_by")
@@ -446,6 +451,8 @@ class SupplierAssessmentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["supplier"]
+    plant_field = "supplier__plants"
+    allow_null_plant = True  # supplier organizzativi (no plants) restano visibili
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)
@@ -528,7 +535,7 @@ class QuestionnaireTemplateViewSet(viewsets.ModelViewSet):
         return Response(status=204)
 
 
-class SupplierQuestionnaireViewSet(viewsets.ModelViewSet):
+class SupplierQuestionnaireViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = SupplierQuestionnaire.objects.filter(
         deleted_at__isnull=True
     ).select_related("supplier", "template", "sent_by")
@@ -536,6 +543,8 @@ class SupplierQuestionnaireViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["supplier", "status"]
+    plant_field = "supplier__plants"
+    allow_null_plant = True
 
     @action(detail=False, methods=["post"], url_path="send")
     def send_questionnaire(self, request):

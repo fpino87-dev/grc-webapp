@@ -12,7 +12,11 @@ URL_DECISIONS = "/api/v1/bia/risk-decisions/"
 
 @pytest.fixture
 def user(db):
-    return User.objects.create_user(username="bia_user", email="bia@test.com", password="test")
+    """Utente con scope org (vede tutti i processi BIA)."""
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    u = User.objects.create_user(username="bia_user", email="bia@test.com", password="test")
+    UserPlantAccess.objects.create(user=u, role=GrcRole.COMPLIANCE_OFFICER, scope_type="org")
+    return u
 
 
 @pytest.fixture
@@ -167,3 +171,36 @@ def test_create_risk_decision(client, process, user):
     }
     resp = client.post(URL_DECISIONS, payload, format="json")
     assert resp.status_code == 201
+
+
+# ── RBAC plant scoping (S1) ───────────────────────────────────────────────────
+
+@pytest.mark.django_db
+def test_plant_manager_does_not_see_process_of_other_plant(db):
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    from apps.bia.models import CriticalProcess
+    from apps.plants.models import Plant
+
+    plant_a = Plant.objects.create(
+        code="BIA-SC-A", name="A", country="IT",
+        nis2_scope="essenziale", status="attivo",
+    )
+    plant_b = Plant.objects.create(
+        code="BIA-SC-B", name="B", country="IT",
+        nis2_scope="essenziale", status="attivo",
+    )
+    CriticalProcess.objects.create(plant=plant_a, name="Proc A", criticality=4, status="bozza")
+    CriticalProcess.objects.create(plant=plant_b, name="Proc B", criticality=4, status="bozza")
+
+    pm = User.objects.create_user(username="pm_a_bia", email="pmbia@test", password="x")
+    access = UserPlantAccess.objects.create(
+        user=pm, role=GrcRole.PLANT_MANAGER, scope_type="single_plant",
+    )
+    access.scope_plants.set([plant_a])
+
+    c = APIClient()
+    c.force_authenticate(user=pm)
+    resp = c.get(URL_PROCESSES)
+    assert resp.status_code == 200
+    names = {item["name"] for item in resp.data["results"]}
+    assert names == {"Proc A"}

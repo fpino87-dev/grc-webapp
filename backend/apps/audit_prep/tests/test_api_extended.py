@@ -14,7 +14,10 @@ URL_EVIDENCES = "/api/v1/audit-prep/evidence-items/"
 
 @pytest.fixture
 def user(db):
-    return User.objects.create_user(username="apx_user", email="apx@test.com", password="test")
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    u = User.objects.create_user(username="apx_user", email="apx@test.com", password="test")
+    UserPlantAccess.objects.create(user=u, role=GrcRole.COMPLIANCE_OFFICER, scope_type="org")
+    return u
 
 
 @pytest.fixture

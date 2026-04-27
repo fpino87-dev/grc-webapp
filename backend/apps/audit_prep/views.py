@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 
 from core.audit import log_action
+from core.scoping import PlantScopedQuerysetMixin
 from . import services
 from .models import AuditFinding, AuditPrep, AuditProgram, EvidenceItem
 from .serializers import (
@@ -16,13 +17,14 @@ from .serializers import (
 )
 
 
-class AuditPrepViewSet(viewsets.ModelViewSet):
+class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = AuditPrep.objects.all()
     serializer_class = AuditPrepSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["plant", "status", "framework"]
     search_fields = ["title", "auditor_name"]
+    plant_field = "plant"
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)
@@ -155,12 +157,13 @@ class AuditPrepViewSet(viewsets.ModelViewSet):
         return resp
 
 
-class EvidenceItemViewSet(viewsets.ModelViewSet):
+class EvidenceItemViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = EvidenceItem.objects.all()
     serializer_class = EvidenceItemSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["audit_prep", "status"]
+    plant_field = "audit_prep__plant"
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)
@@ -176,7 +179,7 @@ class EvidenceItemViewSet(viewsets.ModelViewSet):
         )
 
 
-class AuditFindingViewSet(viewsets.ModelViewSet):
+class AuditFindingViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = AuditFinding.objects.select_related(
         "audit_prep__plant", "control_instance__control",
         "pdca_cycle", "closed_by", "lesson_learned",
@@ -186,6 +189,7 @@ class AuditFindingViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["audit_prep", "finding_type", "status", "audit_prep__plant"]
     search_fields = ["title", "description"]
+    plant_field = "audit_prep__plant"
 
     def perform_create(self, serializer):
         data = self.request.data
@@ -233,13 +237,14 @@ class AuditFindingViewSet(viewsets.ModelViewSet):
             return Response({"error": str(e.message)}, status=400)
 
 
-class AuditProgramViewSet(viewsets.ModelViewSet):
+class AuditProgramViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = AuditProgram.objects.select_related("plant", "framework", "approved_by")
     serializer_class = AuditProgramSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["plant", "framework", "year", "status"]
     search_fields = ["title"]
+    plant_field = "plant"
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)

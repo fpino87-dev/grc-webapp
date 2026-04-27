@@ -3,16 +3,18 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from core.audit import log_action
+from core.scoping import PlantScopedQuerysetMixin
 
 from .models import CriticalProcess, RiskDecision, TreatmentOption
 from .serializers import CriticalProcessSerializer, RiskDecisionSerializer, TreatmentOptionSerializer
 from .services import approve_process, get_process_risk_bcp_snapshot, validate_process, delete_process
 
 
-class CriticalProcessViewSet(viewsets.ModelViewSet):
+class CriticalProcessViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = CriticalProcess.objects.select_related("plant", "owner", "approved_by", "validated_by")
     serializer_class = CriticalProcessSerializer
     filterset_fields = ["plant", "status"]
+    plant_field = "plant"
 
     def destroy(self, request, *args, **kwargs):
         """
@@ -93,10 +95,11 @@ class CriticalProcessViewSet(viewsets.ModelViewSet):
         return Response(data)
 
 
-class TreatmentOptionViewSet(viewsets.ModelViewSet):
+class TreatmentOptionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = TreatmentOption.objects.select_related("process")
     serializer_class = TreatmentOptionSerializer
     filterset_fields = []
+    plant_field = "process__plant"
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -116,10 +119,11 @@ class TreatmentOptionViewSet(viewsets.ModelViewSet):
         )
 
 
-class RiskDecisionViewSet(viewsets.ModelViewSet):
+class RiskDecisionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = RiskDecision.objects.select_related("process", "decided_by", "treatment")
     serializer_class = RiskDecisionSerializer
     filterset_fields = []
+    plant_field = "process__plant"
 
     def get_queryset(self):
         qs = super().get_queryset()

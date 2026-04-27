@@ -99,3 +99,41 @@ def test_delete_assessment_soft(sa_client, assessment):
     # Soft delete: non più visibile
     res2 = sa_client.get(f"/api/v1/risk/assessments/{assessment.pk}/")
     assert res2.status_code == 404
+
+
+# ── RBAC plant scoping (S1) ───────────────────────────────────────────────────
+
+@pytest.mark.django_db
+def test_plant_manager_does_not_see_risk_of_other_plant(db):
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    from apps.plants.models import Plant
+    from apps.risk.models import RiskAssessment
+
+    plant_a = Plant.objects.create(
+        code="RA-SC-A", name="A", country="IT",
+        nis2_scope="non_soggetto", status="attivo",
+    )
+    plant_b = Plant.objects.create(
+        code="RA-SC-B", name="B", country="IT",
+        nis2_scope="non_soggetto", status="attivo",
+    )
+    RiskAssessment.objects.create(
+        plant=plant_a, name="Risk A", assessment_type="IT",
+        threat_category="malware_ransomware", probability=2, impact=3,
+    )
+    RiskAssessment.objects.create(
+        plant=plant_b, name="Risk B", assessment_type="IT",
+        threat_category="malware_ransomware", probability=2, impact=3,
+    )
+    pm = User.objects.create_user(username="pm_a_risk", email="pmrisk@test", password="x")
+    access = UserPlantAccess.objects.create(
+        user=pm, role=GrcRole.PLANT_MANAGER, scope_type="single_plant",
+    )
+    access.scope_plants.set([plant_a])
+
+    c = APIClient()
+    c.force_authenticate(user=pm)
+    resp = c.get("/api/v1/risk/assessments/")
+    assert resp.status_code == 200
+    names = {item["name"] for item in resp.data["results"]}
+    assert names == {"Risk A"}

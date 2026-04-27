@@ -5,18 +5,20 @@ from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
 from core.audit import log_action
+from core.scoping import PlantScopedQuerysetMixin
 from .models import LessonLearned
 from .serializers import LessonLearnedSerializer
 from . import services
 
 
-class LessonLearnedViewSet(viewsets.ModelViewSet):
+class LessonLearnedViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = LessonLearned.objects.all()
     serializer_class = LessonLearnedSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["plant", "status", "category"]
     search_fields = ["title", "description"]
+    plant_field = "plant"
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)
