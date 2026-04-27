@@ -15,15 +15,64 @@ class LoginRateThrottle(AnonRateThrottle):
     scope = "login"
 
 
+# Gerarchia ruoli (newfix R2): determina il "ruolo dominante" da esporre come
+# `role` legacy quando l'utente ha piu' UserPlantAccess. L'ordine va dal piu'
+# alto al piu' basso; chi compare prima nella lista vince.
+_ROLE_HIERARCHY = (
+    "super_admin",
+    "compliance_officer",
+    "internal_auditor",
+    "external_auditor",
+    "risk_manager",
+    "plant_manager",
+    "control_owner",
+)
+
+
+def _highest_role(roles):
+    for r in _ROLE_HIERARCHY:
+        if r in roles:
+            return r
+    return next(iter(roles), "user")
+
+
 class GrcTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
         token["email"] = user.email
         token["is_superuser"] = user.is_superuser
+
+        # newfix R2 — espone TUTTI i ruoli e la mappa role-per-plant.
+        # Il claim `role` resta per retro-compatibilita' UI: e' il "ruolo piu'
+        # alto" secondo _ROLE_HIERARCHY tra tutti i UserPlantAccess attivi.
         from apps.auth_grc.models import UserPlantAccess
-        access = UserPlantAccess.objects.filter(user=user).first()
-        token["role"] = access.role if access else ("super_admin" if user.is_superuser else "user")
+
+        access_qs = UserPlantAccess.objects.filter(
+            user=user, deleted_at__isnull=True,
+        ).prefetch_related("scope_plants")
+
+        roles = sorted({a.role for a in access_qs})
+        roles_by_plant: dict[str, list[str]] = {}
+        for access in access_qs:
+            if access.scope_type == "org":
+                roles_by_plant.setdefault("__org__", []).append(access.role)
+            elif access.scope_type == "bu" and access.scope_bu_id:
+                roles_by_plant.setdefault(f"bu:{access.scope_bu_id}", []).append(access.role)
+            elif access.scope_type in ("plant_list", "single_plant"):
+                for plant in access.scope_plants.all():
+                    roles_by_plant.setdefault(str(plant.pk), []).append(access.role)
+
+        if roles:
+            token["roles"] = roles
+            token["role"] = _highest_role(roles)
+        elif user.is_superuser:
+            token["roles"] = ["super_admin"]
+            token["role"] = "super_admin"
+        else:
+            token["roles"] = []
+            token["role"] = "user"
+        token["roles_by_plant"] = roles_by_plant
         return token
 
 
