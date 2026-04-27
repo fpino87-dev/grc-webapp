@@ -32,6 +32,12 @@ import { loginApi, verifyMfaApi } from "../../api/endpoints/auth";
 const mockLoginApi = vi.mocked(loginApi);
 const mockVerifyMfaApi = vi.mocked(verifyMfaApi);
 
+// JWT minimale (header.payload.signature in base64url) — basta che sia
+// decodificabile da finishLogin che chiama atob su token.split(".")[1].
+const MOCK_JWT_HEADER = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
+const MOCK_JWT_PAYLOAD = btoa(JSON.stringify({ user_id: 1, role: "user" }));
+const MOCK_JWT = `${MOCK_JWT_HEADER}.${MOCK_JWT_PAYLOAD}.signature`;
+
 // ── Helper ────────────────────────────────────────────────────────────────────
 
 function renderLogin() {
@@ -59,7 +65,7 @@ describe("LoginPage", () => {
   it("login senza MFA naviga alla home", async () => {
     mockLoginApi.mockResolvedValue({
       mfa_required: false,
-      access: "mock-access-token",
+      access: MOCK_JWT,
       refresh: "mock-refresh-token",
     });
 
@@ -104,7 +110,7 @@ describe("LoginPage", () => {
   it("verifica OTP valido naviga alla home", async () => {
     mockLoginApi.mockResolvedValue({ mfa_required: true, mfa_token: "mock-mfa-token" });
     mockVerifyMfaApi.mockResolvedValue({
-      access: "mock-access-token",
+      access: MOCK_JWT,
       refresh: "mock-refresh-token",
     });
 
@@ -123,7 +129,7 @@ describe("LoginPage", () => {
   it("OTP con trust device salva device_token in localStorage", async () => {
     mockLoginApi.mockResolvedValue({ mfa_required: true, mfa_token: "mock-mfa-token" });
     mockVerifyMfaApi.mockResolvedValue({
-      access: "mock-access-token",
+      access: MOCK_JWT,
       refresh: "mock-refresh-token",
       device_token: "mock-device-token",
     });

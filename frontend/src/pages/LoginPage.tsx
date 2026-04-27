@@ -22,7 +22,7 @@ export function LoginPage() {
   const { setUser } = useAuthStore();
   const navigate    = useNavigate();
 
-  function finishLogin(access: string) {
+  function finishLogin(access: string, refresh: string | null) {
     const payload = JSON.parse(atob(access.split(".")[1]));
     setUser(
       {
@@ -31,7 +31,8 @@ export function LoginPage() {
         role:     payload.role ?? "user",
         language: "it",
       },
-      access
+      access,
+      refresh,
     );
     navigate("/");
   }
@@ -47,7 +48,7 @@ export function LoginPage() {
         setMfaToken(result.mfa_token);
         setTimeout(() => otpRef.current?.focus(), 50);
       } else {
-        finishLogin(result.access);
+        finishLogin(result.access, result.refresh);
       }
     } catch {
       setError(t("auth.login.invalid_credentials"));
@@ -66,7 +67,7 @@ export function LoginPage() {
       if (trustDevice && result.device_token) {
         localStorage.setItem(DEVICE_TOKEN_KEY, result.device_token);
       }
-      finishLogin(result.access);
+      finishLogin(result.access, result.refresh);
     } catch {
       setError(t("auth.mfa.invalid_code"));
       setOtpCode("");
