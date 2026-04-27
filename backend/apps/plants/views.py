@@ -1,6 +1,5 @@
 import os
 
-import magic
 from django.utils import timezone
 from django.core.files.storage import default_storage
 from django.http import FileResponse, Http404
@@ -8,40 +7,27 @@ from rest_framework import viewsets, status, parsers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils.translation import gettext as _
-from rest_framework.exceptions import ValidationError
 
 from core.audit import log_action
+from core.uploads import validate_uploaded_file
 from .models import BusinessUnit, Plant, PlantFramework
 from .serializers import BusinessUnitSerializer, PlantFrameworkSerializer, PlantSerializer
 from .services import delete_plant
 
-_LOGO_MAX_SIZE = 2 * 1024 * 1024  # 2 MB
-_LOGO_ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp", "svg"}
-_LOGO_ALLOWED_MIME_TYPES = {
-    "image/png", "image/jpeg", "image/gif", "image/webp", "image/svg+xml",
-}
+# Logo plant: solo immagini, max 2MB. SVG escluso per evitare XSS via inline script.
+_LOGO_MAX_SIZE = 2 * 1024 * 1024
+_LOGO_ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
+_LOGO_ALLOWED_MIME_TYPES = {"image/png", "image/jpeg", "image/gif", "image/webp"}
 
 
 def _validate_logo_file(uploaded_file):
-    """Valida dimensione, estensione e MIME type reale del file logo."""
-    if uploaded_file.size > _LOGO_MAX_SIZE:
-        raise ValidationError(_("Logo troppo grande. Dimensione massima: 2 MB."))
-
-    _, ext = os.path.splitext(getattr(uploaded_file, "name", "") or "")
-    ext = ext.lstrip(".").lower()
-    if not ext or ext not in _LOGO_ALLOWED_EXTENSIONS:
-        raise ValidationError(
-            _("Estensione non consentita. Formati ammessi: png, jpg, jpeg, gif, webp, svg.")
-        )
-
-    uploaded_file.seek(0)
-    header = uploaded_file.read(2048)
-    uploaded_file.seek(0)
-    mime_type = magic.from_buffer(header, mime=True)
-    if mime_type not in _LOGO_ALLOWED_MIME_TYPES:
-        raise ValidationError(
-            _("Tipo di file non consentito. Il contenuto non corrisponde all'estensione.")
-        )
+    """Wrapper sopra core.uploads con whitelist logo-specific."""
+    validate_uploaded_file(
+        uploaded_file,
+        allowed_extensions=_LOGO_ALLOWED_EXTENSIONS,
+        allowed_mimes=_LOGO_ALLOWED_MIME_TYPES,
+        max_bytes=_LOGO_MAX_SIZE,
+    )
 
 
 class BusinessUnitViewSet(viewsets.ModelViewSet):

@@ -8,17 +8,32 @@ from .models import GrcRole, UserPlantAccess
 
 
 def resolve_current_risk_manager(plant: Plant) -> Optional[get_user_model()]:
-    """Risoluzione dinamica del ruolo su plant."""
-    access = (
-        UserPlantAccess.objects.filter(
-            role=GrcRole.RISK_MANAGER,
-            scope_type__in=["org", "single_plant", "plant_list"],
-            deleted_at__isnull=True,
-        )
-        .select_related("user")
-        .first()
-    )
-    return access.user if access else None
+    """
+    Risolve il Risk Manager competente per il plant dato, in ordine di priorità:
+    1. Plant-specific (scope_type single_plant/plant_list con plant nello scope)
+    2. Business Unit (scope_type bu con scope_bu == plant.bu)
+    3. Org-wide (scope_type org)
+    Restituisce None se nessun RM è assegnato al plant.
+    """
+    base_qs = UserPlantAccess.objects.filter(
+        role=GrcRole.RISK_MANAGER,
+        deleted_at__isnull=True,
+    ).select_related("user").filter(user__is_active=True)
+
+    plant_specific = base_qs.filter(
+        scope_type__in=["single_plant", "plant_list"],
+        scope_plants=plant,
+    ).first()
+    if plant_specific:
+        return plant_specific.user
+
+    if plant.bu_id:
+        bu_match = base_qs.filter(scope_type="bu", scope_bu_id=plant.bu_id).first()
+        if bu_match:
+            return bu_match.user
+
+    org_wide = base_qs.filter(scope_type="org").first()
+    return org_wide.user if org_wide else None
 
 
 def competency_gap_analysis(user) -> dict:
@@ -130,34 +145,32 @@ def anonymize_user(user, requesting_user) -> None:
     """
     Anonimizza i dati personali di un utente rimosso.
     GDPR Art. 17 — Diritto alla cancellazione.
-    Preserva i record di audit trail (obbligo legale)
-    ma rimuove i dati identificativi.
+
+    L'audit trail è append-only (trigger PostgreSQL `audit_no_mutation`) e
+    contiene già email pseudonimizzate via `_pseudonymize_email` al momento
+    dell'evento (es. "mar***@***.com"): non è quindi necessario — né
+    consentito senza bypassare il trigger — riscrivere i record storici.
+    L'identità completa è ricavabile solo via `user_id`, che dopo
+    l'anonimizzazione non è più mappato all'utente reale nel DB User.
     """
     import uuid
+    from django.db import transaction
     from django.utils import timezone
     from core.audit import log_action
 
     anon_id = str(uuid.uuid4())[:8]
     anon_email = f"deleted_{anon_id}@anonymized.invalid"
 
-    # Anonimizza utente Django
-    user.first_name = "Utente"
-    user.last_name = "Rimosso"
-    user.email = anon_email
-    user.username = anon_email
-    user.is_active = False
-    user.set_unusable_password()
-    user.save()
+    with transaction.atomic():
+        user.first_name = "Utente"
+        user.last_name = "Rimosso"
+        user.email = anon_email
+        user.username = anon_email
+        user.is_active = False
+        user.set_unusable_password()
+        user.save()
 
-    # Soft delete accessi GRC
-    UserPlantAccess.objects.filter(user=user).update(deleted_at=timezone.now())
-
-    # Anonimizza nei log (preserva action_code e payload
-    # ma rimuove l'email identificativa)
-    from core.models import AuditLog
-    AuditLog.objects.filter(
-        user_email_at_time=user.email
-    ).update(user_email_at_time=anon_email)
+        UserPlantAccess.objects.filter(user=user).update(deleted_at=timezone.now())
 
     log_action(
         user=requesting_user,

@@ -1,13 +1,12 @@
-import hashlib
-import json
-
 import pytest
 
-from core.audit import AuditLog, log_action
+from core.audit import AuditLog, compute_record_hash, log_action
 
 
 @pytest.mark.django_db
 def test_hash_chain_valid(co_user, plant_nis2):
+    """Catena hash tamper-evident (S2): include user_id, action_code, level,
+    entity_type, entity_id, timestamp_utc, payload — vedi core.audit._compute_hash."""
     for i in range(5):
         log_action(
             user=co_user,
@@ -18,10 +17,7 @@ def test_hash_chain_valid(co_user, plant_nis2):
         )
     logs = AuditLog.objects.filter(entity_type="plant").order_by("timestamp_utc")
     for log in logs:
-        expected = hashlib.sha256(
-            (json.dumps(log.payload, sort_keys=True, default=str) + log.prev_hash).encode()
-        ).hexdigest()
-        assert expected == log.record_hash
+        assert compute_record_hash(log) == log.record_hash
 
 
 @pytest.mark.django_db

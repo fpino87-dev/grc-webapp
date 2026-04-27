@@ -9,9 +9,36 @@ URL_LOGS = "/api/v1/audit-trail/audit-logs/"
 URL_VERIFY = "/api/v1/audit-trail/verify-integrity/"
 
 
+def _grant_role(user, role):
+    from apps.auth_grc.models import UserPlantAccess
+    UserPlantAccess.objects.create(user=user, role=role, scope_type="org")
+
+
 @pytest.fixture
 def user(db):
-    return User.objects.create_user(username="aud_user", email="aud@test.com", password="test")
+    """Utente con ruolo COMPLIANCE_OFFICER — autorizzato a leggere e verificare."""
+    from apps.auth_grc.models import GrcRole
+    u = User.objects.create_user(username="aud_user", email="aud@test.com", password="test")
+    _grant_role(u, GrcRole.COMPLIANCE_OFFICER)
+    return u
+
+
+@pytest.fixture
+def auditor_user(db):
+    """Auditor interno — può leggere ma NON verificare integrità."""
+    from apps.auth_grc.models import GrcRole
+    u = User.objects.create_user(username="auditor", email="auditor@test.com", password="test")
+    _grant_role(u, GrcRole.INTERNAL_AUDITOR)
+    return u
+
+
+@pytest.fixture
+def plant_manager_user(db):
+    """Plant manager — NON deve poter leggere l'audit log."""
+    from apps.auth_grc.models import GrcRole
+    u = User.objects.create_user(username="pm", email="pm@test.com", password="test")
+    _grant_role(u, GrcRole.PLANT_MANAGER)
+    return u
 
 
 @pytest.fixture
@@ -43,6 +70,32 @@ def test_list_audit_logs_authenticated(client, audit_entry):
 def test_list_audit_logs_unauthenticated():
     resp = APIClient().get(URL_LOGS)
     assert resp.status_code == 401
+
+
+@pytest.mark.django_db
+def test_list_audit_logs_forbidden_for_plant_manager(plant_manager_user, audit_entry):
+    """ISO 27001 A.12.4.2 — solo personale di sicurezza autorizzato vede i log."""
+    c = APIClient()
+    c.force_authenticate(user=plant_manager_user)
+    resp = c.get(URL_LOGS)
+    assert resp.status_code == 403
+
+
+@pytest.mark.django_db
+def test_list_audit_logs_allowed_for_internal_auditor(auditor_user, audit_entry):
+    c = APIClient()
+    c.force_authenticate(user=auditor_user)
+    resp = c.get(URL_LOGS)
+    assert resp.status_code == 200
+
+
+@pytest.mark.django_db
+def test_verify_integrity_forbidden_for_internal_auditor(auditor_user, audit_entry):
+    """Verifica integrità: solo SUPER_ADMIN / COMPLIANCE_OFFICER."""
+    c = APIClient()
+    c.force_authenticate(user=auditor_user)
+    resp = c.get(URL_VERIFY)
+    assert resp.status_code == 403
 
 
 @pytest.mark.django_db

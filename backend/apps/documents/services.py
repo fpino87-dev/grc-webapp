@@ -2,8 +2,6 @@ import datetime
 import hashlib
 import os
 
-import magic
-
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
@@ -12,64 +10,14 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from core.audit import log_action
+from core.uploads import (
+    DEFAULT_MAX_FILE_SIZE_BYTES as MAX_FILE_SIZE_BYTES,
+    OFFICE_EXTENSIONS as ALLOWED_EXTENSIONS,
+    OFFICE_MIME_TYPES as ALLOWED_MIME_TYPES,
+    validate_uploaded_file,
+)
 
 from .models import Document, DocumentApproval, DocumentVersion, Evidence
-
-
-MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024  # 50 MB
-ALLOWED_EXTENSIONS = {
-    "doc",
-    "docx",
-    "xls",
-    "xlsx",
-    "ppt",
-    "pptx",
-    "pdf",
-    "png",
-    "jpg",
-    "jpeg",
-}
-ALLOWED_MIME_TYPES = {
-    "application/pdf",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "application/vnd.ms-excel",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "application/vnd.ms-powerpoint",
-    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    "image/png",
-    "image/jpeg",
-}
-
-
-def validate_uploaded_file(uploaded_file):
-    # 1. Dimensione
-    if uploaded_file.size > MAX_FILE_SIZE_BYTES:
-        raise ValidationError(_("File troppo grande. Dimensione massima: 50MB."))
-
-    # 2. Estensione (whitelist)
-    _, ext = os.path.splitext(getattr(uploaded_file, "name", "") or "")
-    ext = ext.lstrip(".").lower()
-    if not ext or ext not in ALLOWED_EXTENSIONS:
-        raise ValidationError(
-            _(
-                "Estensione file non consentita. "
-                "Formati ammessi: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
-            )
-        )
-
-    # 3. MIME type reale (contrasto extension spoofing)
-    uploaded_file.seek(0)
-    header = uploaded_file.read(2048)
-    uploaded_file.seek(0)
-    mime_type = magic.from_buffer(header, mime=True)
-    if mime_type not in ALLOWED_MIME_TYPES:
-        raise ValidationError(
-            _(
-                "Tipo di file non consentito. "
-                "Il contenuto del file non corrisponde all'estensione."
-            )
-        )
 
 
 def submit_for_review(document, user):
