@@ -388,7 +388,7 @@ export function IncidentsList() {
     const rows = (classificationMethod.nis2_method.criteria ?? [])
       .map((criterion) => {
         const satisfied = isCriterionSatisfied(criterion, selected);
-        const incidentRaw = (selected as Record<string, unknown>)[criterion.key];
+        const incidentRaw = (selected as unknown as Record<string, unknown>)[criterion.key];
         const incidentDisplay =
           criterion.type === "boolean" ? (incidentRaw ? "Si" : "No") : String(incidentRaw ?? 0);
         const sourceLabel =
@@ -516,9 +516,9 @@ export function IncidentsList() {
     incident: Incident
   ): boolean {
     if (criterion.type === "boolean") {
-      return Boolean((incident as Record<string, unknown>)[criterion.key]);
+      return Boolean((incident as unknown as Record<string, unknown>)[criterion.key]);
     }
-    const incidentValue = Number((incident as Record<string, unknown>)[criterion.key] ?? 0);
+    const incidentValue = Number((incident as unknown as Record<string, unknown>)[criterion.key] ?? 0);
     const threshold = Number(criterion.threshold ?? 0);
     return incidentValue >= threshold;
   }
@@ -1265,7 +1265,7 @@ export function IncidentsList() {
                       <tbody>
                     {(classificationMethod?.nis2_method.criteria ?? []).map((criterion) => {
                       const satisfied = isCriterionSatisfied(criterion, selected);
-                      const incidentRaw = (selected as Record<string, unknown>)[criterion.key];
+                      const incidentRaw = (selected as unknown as Record<string, unknown>)[criterion.key];
                       const incidentDisplay =
                         criterion.type === "boolean"
                           ? (incidentRaw ? "Sì" : "No")

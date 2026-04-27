@@ -74,15 +74,18 @@ class TestScoreDNS:
         assert _score_dns(_scan(dmarc_policy="none")) == 15
 
     def test_no_mx(self):
-        assert _score_dns(_scan(mx_present=False)) == 10
+        # Senza mail server, SPF/DMARC non sono applicabili → score DNS = 0.
+        # (Comportamento corretto introdotto dal fix "no falsi positivi su domini
+        # senza servizi mail" — vedi commit 85d4915.)
+        assert _score_dns(_scan(mx_present=False)) == 0
 
-    def test_all_bad_capped_100(self):
-        s = _scan(spf_present=False, dmarc_present=False, mx_present=False)
-        assert _score_dns(s) == min(40 + 30 + 10, 100)
+    def test_all_bad_capped_100_with_mx(self):
+        s = _scan(spf_present=False, dmarc_present=False, mx_present=True)
+        assert _score_dns(s) == min(40 + 30, 100)
 
-    def test_no_spf_no_dmarc_spf_plus_all(self):
-        s = _scan(spf_present=True, spf_policy="+all", dmarc_present=False, mx_present=False)
-        assert _score_dns(s) == min(20 + 30 + 10, 60)
+    def test_spf_plus_all_with_mx(self):
+        s = _scan(spf_present=True, spf_policy="+all", dmarc_present=False, mx_present=True)
+        assert _score_dns(s) == 20 + 30
 
 
 class TestScoreReputation:
@@ -158,18 +161,17 @@ class TestComputeScores:
         scan.spf_policy = ""
         scan.dmarc_present = False
         scan.dmarc_policy = ""
-        scan.mx_present = False
+        scan.mx_present = True  # con MX, SPF/DMARC vengono valutati
         scan.gsb_status = "safe"
         scan.in_blacklist = False
         scan.vt_malicious = 0
         scan.abuseipdb_score = 0
         scan.otx_pulses = 0
         compute_scores(entity, scan)
-        # SSL=100, DNS=80(spf+dmarc+mx), Rep=0, GRC includes is_nis2=20
+        # SSL=100, DNS=70 (spf_missing+dmarc_missing), Rep=0, GRC ≥ 0
         assert scan.score_ssl == 100
-        expected_dns = min(40 + 30 + 10, 100)
-        assert scan.score_dns == expected_dns
-        # total = 100*0.25 + 80*0.25 + 0*0.30 + grc*0.20
+        assert scan.score_dns == min(40 + 30, 100)
+        # total = 100*0.25 + 70*0.25 + 0*0.30 + grc*0.20 > 0
         assert scan.score_total > 0
 
 

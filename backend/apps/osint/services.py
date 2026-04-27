@@ -126,11 +126,16 @@ def _upsert_entity(
 
 
 def _deactivate_missing(source_module: str, kept: set, result: AggregationResult) -> None:
+    """Disattiva entità non più presenti nella sorgente.
+
+    Itera e salva per ognuna invece di `qs.update()` per rispettare il pattern
+    di soft-delete/audit (regola architetturale CLAUDE.md #5).
+    """
     qs = OsintEntity.objects.filter(source_module=source_module, is_active=True).exclude(pk__in=kept)
-    count = qs.count()
-    if count:
-        qs.update(is_active=False)
-        result.deactivated += count
+    for entity in qs.iterator():
+        entity.is_active = False
+        entity.save(update_fields=["is_active", "updated_at"])
+        result.deactivated += 1
 
 
 def _sync_plants(settings: OsintSettings, result: AggregationResult) -> None:

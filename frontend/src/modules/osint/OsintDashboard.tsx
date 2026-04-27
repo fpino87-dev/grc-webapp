@@ -56,6 +56,16 @@ export function OsintDashboard() {
     queryFn: osintApi.pendingSubdomains,
   });
 
+  const { data: findingsSummary } = useQuery({
+    queryKey: ["osint-findings-summary"],
+    queryFn: osintApi.findingsSummary,
+    refetchInterval: 60_000,
+  });
+
+  const totalOpenFindings = (findingsSummary?.open_critical ?? 0)
+    + (findingsSummary?.open_warning ?? 0)
+    + (findingsSummary?.open_info ?? 0);
+
   // Filtro locale
   const filtered = entities
     .filter(e => {
@@ -100,6 +110,19 @@ export function OsintDashboard() {
             {(summary?.pending_subdomains ?? 0) > 0 && (
               <span className="absolute -top-1.5 -right-1.5 bg-yellow-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
                 {summary!.pending_subdomains}
+              </span>
+            )}
+          </Link>
+          <Link
+            to="/osint/remediation"
+            className="relative px-3 py-1.5 text-sm border rounded hover:bg-gray-50"
+          >
+            🛠 {t("osint.remediation.title", "Risoluzione")}
+            {totalOpenFindings > 0 && (
+              <span className={`absolute -top-1.5 -right-1.5 text-white text-xs rounded-full min-w-[1.1rem] h-[1.1rem] px-1 flex items-center justify-center font-bold ${
+                (findingsSummary?.open_critical ?? 0) > 0 ? "bg-red-600" : "bg-orange-500"
+              }`}>
+                {totalOpenFindings}
               </span>
             )}
           </Link>
@@ -219,6 +242,9 @@ export function OsintDashboard() {
         </div>
       </div>
 
+      {/* Heatmap entità × dimensione */}
+      <OsintHeatmap entities={filtered} onSelect={id => setSelectedEntityId(id)} />
+
       {/* Drawer dettaglio entità */}
       {selectedEntityId && (
         <OsintEntityDrawer
@@ -242,6 +268,72 @@ function KpiCard({ label, value, valueClass = "text-gray-900", icon = "" }: {
     <div className="bg-white border rounded-lg p-3 text-center">
       <div className={`text-2xl font-bold ${valueClass}`}>{icon} {value}</div>
       <div className="text-xs text-gray-500 mt-0.5">{label}</div>
+    </div>
+  );
+}
+
+function heatmapCellColor(value: number | null | undefined): string {
+  if (value == null) return "bg-gray-100 text-gray-400";
+  if (value >= 70) return "bg-red-500 text-white";
+  if (value >= 50) return "bg-orange-400 text-white";
+  if (value >= 30) return "bg-yellow-300 text-gray-900";
+  return "bg-green-400 text-white";
+}
+
+function OsintHeatmap({ entities, onSelect }: { entities: OsintEntity[]; onSelect: (id: string) => void }) {
+  const { t } = useTranslation();
+  if (entities.length === 0) return null;
+  const dims: Array<{ key: "score_ssl" | "score_dns" | "score_reputation" | "score_grc_context"; label: string }> = [
+    { key: "score_ssl", label: t("osint.heatmap.ssl") },
+    { key: "score_dns", label: t("osint.heatmap.dns") },
+    { key: "score_reputation", label: t("osint.heatmap.reputation") },
+    { key: "score_grc_context", label: t("osint.heatmap.grc") },
+  ];
+  return (
+    <div className="border rounded-lg bg-white p-4">
+      <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase">
+        🗺 {t("osint.heatmap.title")}
+      </h3>
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-xs">
+          <thead>
+            <tr>
+              <th className="text-left px-2 py-1 text-gray-500 font-medium">{t("osint.table.entity")}</th>
+              {dims.map(d => (
+                <th key={d.key} className="text-center px-2 py-1 text-gray-500 font-medium">{d.label}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {entities.map(e => {
+              const scan = e.last_scan;
+              return (
+                <tr
+                  key={e.id}
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => onSelect(e.id)}
+                >
+                  <td className="px-2 py-1.5 truncate max-w-[220px]">
+                    <span className="font-medium text-gray-800">{e.display_name}</span>
+                    <span className="text-gray-400 ml-1">{e.domain}</span>
+                  </td>
+                  {dims.map(d => {
+                    const v = scan ? (scan[d.key] as number | null | undefined) : null;
+                    return (
+                      <td key={d.key} className="px-1 py-1 text-center">
+                        <span className={`inline-block w-10 h-7 rounded text-xs font-mono leading-7 ${heatmapCellColor(v)}`}>
+                          {v == null ? "—" : v}
+                        </span>
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <p className="text-xs text-gray-400 mt-2">{t("osint.heatmap.legend")}</p>
     </div>
   );
 }

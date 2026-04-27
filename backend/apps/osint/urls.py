@@ -6,6 +6,7 @@ from .views import (
     OsintAlertViewSet,
     OsintDashboardView,
     OsintEntityViewSet,
+    OsintFindingViewSet,
     OsintSettingsViewSet,
     OsintSubdomainViewSet,
 )
@@ -13,6 +14,7 @@ from .views import (
 router = DefaultRouter()
 router.register("entities", OsintEntityViewSet, basename="osint-entity")
 router.register("alerts", OsintAlertViewSet, basename="osint-alert")
+router.register("findings", OsintFindingViewSet, basename="osint-finding")
 router.register("subdomains", OsintSubdomainViewSet, basename="osint-subdomain")
 router.register("dashboard", OsintDashboardView, basename="osint-dashboard")
 router.register("settings", OsintSettingsViewSet, basename="osint-settings")

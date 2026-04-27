@@ -2448,7 +2448,12 @@
       "gsb": "Google Safe Browsing",
       "hibp_last": "Son ihlal",
       "hibp_types": "Açığa çıkan veriler",
-      "enricher_errors": "Zenginleştirici hataları"
+      "enricher_errors": "Zenginleştirici hataları",
+      "tooltip": {
+        "dnssec": "DNSSEC, DNS yanıtlarını kriptografik olarak imzalayarak DNS ele geçirme ve önbellek zehirlemesini önler. DNSSEC olmadan saldırgan trafiği kötü amaçlı sunuculara yönlendirebilir.",
+        "spf": "Sender Policy Framework: alan adı için posta göndermeye yetkili SMTP sunucularını listeleyen DNS kaydı. SPF eksikse (veya +all ise) herkes alan adını phishing kampanyalarında taklit edebilir.",
+        "dmarc": "Domain-based Message Authentication: SPF/DKIM kontrolünden geçemeyen mesajlar için posta sunucularına ne yapacağını söyler. DMARC olmadan alan adı phishing ve iş e-postası dolandırıcılığına açıktır."
+      }
     },
     "findings": {
       "ssl_expired": "SSL {{date}} tarihinde sona erdi",
@@ -2534,6 +2539,56 @@
       "api_keys_hint": "Anahtarlar beklerken şifrelenir. Mevcut değeri korumak için boş bırakın.",
       "key_saved": "Anahtar kaydedildi",
       "key_placeholder": "API anahtarını girin…"
+    },
+    "remediation": {
+      "title": "Düzeltme",
+      "subtitle": "Tespit edilen tüm sorunlar, adım adım çözüm rehberi ve uyumluluk kontrollerine eşleme ile.",
+      "empty": "Açık sorun yok. Her şey kontrol altında.",
+      "export_csv": "CSV'yi dışa aktar",
+      "bulk_task": "{{count}} görev oluştur",
+      "create_task": "Görev oluştur",
+      "mark_resolved": "Çözüldü olarak işaretle",
+      "acknowledge": "Üstlen",
+      "accept_risk": "Riski kabul et",
+      "first_seen": "Tespit edildi",
+      "what": "Nedir",
+      "impact": "Etki",
+      "compliance": "Uyumluluk referansları",
+      "fix_steps": "Nasıl çözülür",
+      "refs": "Daha fazla bilgi",
+      "show_resolved": "Çözülenleri göster",
+      "group_by": "Grupla",
+      "group": {
+        "code": "Sorun türü",
+        "entity": "Varlık"
+      },
+      "kpi": {
+        "critical": "Açık kritik",
+        "warning": "Açık uyarı",
+        "info": "Açık bilgi",
+        "resolved_7d": "Çözülen (7g)"
+      },
+      "filter": {
+        "all": "Tümü",
+        "critical": "Kritik",
+        "warning": "Uyarı",
+        "info": "Bilgi"
+      },
+      "status": {
+        "open": "Açık",
+        "acknowledged": "Üstlenildi",
+        "in_progress": "Devam ediyor",
+        "resolved": "Çözüldü",
+        "accepted_risk": "Risk kabul edildi"
+      }
+    },
+    "heatmap": {
+      "title": "Risk boyutu ısı haritası",
+      "ssl": "SSL",
+      "dns": "DNS",
+      "reputation": "İtibar",
+      "grc": "GRC",
+      "legend": "Yeşil 0–29 iyi · Sarı 30–49 dikkat · Turuncu 50–69 uyarı · Kırmızı 70+ kritik"
     }
   }
 }

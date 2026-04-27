@@ -340,7 +340,7 @@ function AdvanceButtons({
     return (
       <>
         <p className="text-xs text-gray-500">
-          Chiuso il {new Date(cycle.closed_at || cycle.updated_at).toLocaleDateString(i18n.language || "it")}
+          Chiuso il {new Date(cycle.closed_at || cycle.updated_at || cycle.created_at).toLocaleDateString(i18n.language || "it")}
         </p>
         {cycle.act_description && (
           <p className="mt-1 text-xs text-gray-700 whitespace-pre-wrap">{cycle.act_description}</p>

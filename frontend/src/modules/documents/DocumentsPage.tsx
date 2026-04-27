@@ -513,7 +513,7 @@ function LinkControlsModal({ doc, onClose }: { doc: Document; onClose: () => voi
 
   const { data: frameworks } = useQuery({
     queryKey: ["frameworks"],
-    queryFn: controlsApi.frameworks,
+    queryFn: () => controlsApi.frameworks(),
     retry: false,
   });
 

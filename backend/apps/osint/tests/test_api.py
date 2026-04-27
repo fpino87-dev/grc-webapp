@@ -16,7 +16,9 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def user(db):
-    return User.objects.create_user(username="osintuser", password="testpass", email="o@test.com")
+    # Superuser: bypassa OsintReadPermission/OsintWritePermission senza dover
+    # creare un UserPlantAccess. Per i test API è sufficiente.
+    return User.objects.create_superuser(username="osintuser", password="testpass", email="o@test.com")
 
 
 @pytest.fixture
@@ -259,7 +261,7 @@ class TestSubdomainAPI:
         )
         resp = auth_client.patch(
             f"/api/v1/osint/subdomains/{sub.id}/",
-            {"status": "pending"},
+            {"status": "not_a_real_status"},
             format="json",
         )
         assert resp.status_code == 400

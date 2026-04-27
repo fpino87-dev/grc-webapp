@@ -2369,7 +2369,12 @@
       "gsb": "Google Safe Browsing",
       "hibp_last": "Last breach",
       "hibp_types": "Exposed data",
-      "enricher_errors": "Enricher errors"
+      "enricher_errors": "Enricher errors",
+      "tooltip": {
+        "dnssec": "DNSSEC cryptographically signs DNS responses to prevent DNS hijacking and cache poisoning. Without DNSSEC an attacker can redirect traffic to malicious servers.",
+        "spf": "Sender Policy Framework: a DNS record listing SMTP servers authorized to send mail for the domain. Missing SPF (or +all) lets anyone spoof the domain in phishing campaigns.",
+        "dmarc": "Domain-based Message Authentication: tells receiving mail servers what to do with messages that fail SPF/DKIM. Missing DMARC leaves the domain open to phishing and business email compromise."
+      }
     },
     "findings": {
       "ssl_expired": "SSL expired on {{date}}",
@@ -2455,6 +2460,56 @@
       "api_keys_hint": "Keys are encrypted at rest. Leave blank to keep the current value.",
       "key_saved": "Key saved",
       "key_placeholder": "Enter API key…"
+    },
+    "remediation": {
+      "title": "Remediation",
+      "subtitle": "All detected issues with step-by-step remediation guidance and mapping to compliance controls.",
+      "empty": "No open issues. Everything is under control.",
+      "export_csv": "Export CSV",
+      "bulk_task": "Create {{count}} tasks",
+      "create_task": "Create task",
+      "mark_resolved": "Mark as resolved",
+      "acknowledge": "Acknowledge",
+      "accept_risk": "Accept risk",
+      "first_seen": "Detected on",
+      "what": "What it is",
+      "impact": "Impact",
+      "compliance": "Compliance references",
+      "fix_steps": "How to fix",
+      "refs": "Further reading",
+      "show_resolved": "Show resolved",
+      "group_by": "Group by",
+      "group": {
+        "code": "Issue type",
+        "entity": "Entity"
+      },
+      "kpi": {
+        "critical": "Open critical",
+        "warning": "Open warning",
+        "info": "Open info",
+        "resolved_7d": "Resolved (7d)"
+      },
+      "filter": {
+        "all": "All",
+        "critical": "Critical",
+        "warning": "Warning",
+        "info": "Info"
+      },
+      "status": {
+        "open": "Open",
+        "acknowledged": "Acknowledged",
+        "in_progress": "In progress",
+        "resolved": "Resolved",
+        "accepted_risk": "Risk accepted"
+      }
+    },
+    "heatmap": {
+      "title": "Risk dimension heatmap",
+      "ssl": "SSL",
+      "dns": "DNS",
+      "reputation": "Reputation",
+      "grc": "GRC",
+      "legend": "Green 0–29 ok · Yellow 30–49 attention · Orange 50–69 warning · Red 70+ critical"
     }
   }
 }

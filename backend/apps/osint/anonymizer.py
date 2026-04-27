@@ -31,7 +31,7 @@ class AnonymizationService:
         final_text = svc.deanonymize(response_text)
     """
 
-    PLACEHOLDER_RE = re.compile(r"\[(DOM|SUP|SITE|ASSET|IP)_\d{3}\]")
+    PLACEHOLDER_RE = re.compile(r"\[(DOM|SUP|SITE|ASSET|IP)_\d{3,}\]")
 
     def __init__(self):
         self._counters: dict[str, int] = {}

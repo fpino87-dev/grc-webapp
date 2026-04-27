@@ -19,7 +19,12 @@ TIMEOUT = 15
 
 
 def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> bool:
+    from apps.osint.validators import assert_public_or_log
+
     domain = entity.domain
+    if not assert_public_or_log(domain, "otx"):
+        scan.enricher_errors["otx"] = "non_public_target"
+        return False
     try:
         headers = {}
         if settings.otx_api_key:

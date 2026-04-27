@@ -201,8 +201,9 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
   });
   const processes: CriticalProcess[] = processesData?.results ?? [];
 
-  const mutation = useMutation({
-    mutationFn: assetType === "IT" ? assetsApi.createIT : assetsApi.createOT,
+  const mutation = useMutation<AssetIT | AssetOT, any, Partial<AssetIT> & Partial<AssetOT>>({
+    mutationFn: (data) =>
+      assetType === "IT" ? assetsApi.createIT(data) : assetsApi.createOT(data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: [assetType === "IT" ? "assets-it" : "assets-ot"] }); onClose(); },
     onError: (e: any) => setError(e?.response?.data?.detail || t("common.save_error")),
   });

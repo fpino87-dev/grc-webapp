@@ -22,6 +22,11 @@ logger = logging.getLogger(__name__)
 CRTSH_URL = "https://crt.sh/?q=%.{domain}&output=json"
 CRTSH_TIMEOUT = 20
 TLS_TIMEOUT = 10
+# Cap difensivo sul numero di sottodomini importati da CT log per scan.
+# Domini molto popolari (es. cdn, ad-network, brand globali) possono restituire
+# decine di migliaia di entry; importarle tutte gonfia OsintSubdomain e
+# rallenta dashboard / aggregator.
+CRTSH_MAX_SUBDOMAINS = 1000
 
 
 def _get_tls_cert(domain: str) -> dict | None:
@@ -91,11 +96,22 @@ def _get_crtsh_subdomains(domain: str) -> set[str]:
                 continue
             if name.endswith(f".{domain}") or name == domain:
                 subdomains.add(name)
+                if len(subdomains) >= CRTSH_MAX_SUBDOMAINS:
+                    logger.info(
+                        "crt.sh CT log truncated for %s at %d entries (cap reached)",
+                        domain, CRTSH_MAX_SUBDOMAINS,
+                    )
+                    return subdomains
     return subdomains
 
 
 def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> bool:
+    from apps.osint.validators import assert_public_or_log
+
     domain = entity.domain
+    if not assert_public_or_log(domain, "ssl"):
+        scan.enricher_errors["ssl"] = "non_public_target"
+        return False
     try:
         cert = _get_tls_cert(domain)
         if cert is None and not domain.startswith("www."):
@@ -129,17 +145,24 @@ def _sync_subdomains(entity: "OsintEntity", found: set[str], settings: "OsintSet
 
     auto = settings.subdomain_auto_include
     now = timezone.now()
+    initial_status = (
+        SubdomainStatus.INCLUDED if auto == SubdomainAutoInclude.YES else SubdomainStatus.PENDING
+    )
 
-    for sub in found:
-        obj, created = OsintSubdomain.objects.get_or_create(
-            entity=entity,
-            subdomain=sub,
-            defaults={"status": SubdomainStatus.PENDING},
-        )
-        if not created:
+    existing_qs = OsintSubdomain.objects.filter(
+        entity=entity, subdomain__in=found, deleted_at__isnull=True,
+    ).only("id", "subdomain", "last_seen")
+    existing_map = {o.subdomain: o for o in existing_qs}
+
+    new_objs = [
+        OsintSubdomain(entity=entity, subdomain=sub, status=initial_status, last_seen=now)
+        for sub in found if sub not in existing_map
+    ]
+    if new_objs:
+        OsintSubdomain.objects.bulk_create(new_objs, ignore_conflicts=True, batch_size=500)
+
+    if existing_map:
+        to_touch = list(existing_map.values())
+        for obj in to_touch:
             obj.last_seen = now
-            obj.save(update_fields=["last_seen", "updated_at"])
-        else:
-            if auto == SubdomainAutoInclude.YES:
-                obj.status = SubdomainStatus.INCLUDED
-                obj.save(update_fields=["status", "updated_at"])
+        OsintSubdomain.objects.bulk_update(to_touch, ["last_seen"], batch_size=500)

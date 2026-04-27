@@ -127,6 +127,61 @@ export interface OsintSettings {
   updated_at: string;
 }
 
+export type FindingStatus = "open" | "acknowledged" | "in_progress" | "resolved" | "accepted_risk";
+export type FindingCode =
+  | "ssl_expiry" | "ssl_expired"
+  | "dmarc_missing" | "dmarc_none"
+  | "spf_missing" | "spf_plus_all"
+  | "dnssec_missing"
+  | "domain_expiry_soon"
+  | "blacklist" | "vt_malicious" | "gsb_unsafe"
+  | "breach"
+  | "headers_missing"
+  | "new_subdomain"
+  | "lookalike_domains";
+
+export interface FindingPlaybook {
+  title: string;
+  what: string;
+  impact: string;
+  compliance: { framework: string; control: string }[];
+  owner_role: string;
+  fix_steps: string[];
+  fix_template?: string;
+  verification?: string;
+  external_refs?: { label: string; url: string }[];
+  estimated_effort_h?: number;
+}
+
+export interface OsintFinding {
+  id: string;
+  entity: string;
+  entity_domain: string;
+  entity_display_name: string;
+  entity_type: EntityType;
+  is_nis2_critical: boolean;
+  scan: string | null;
+  code: FindingCode;
+  severity: AlertSeverity;
+  params: Record<string, unknown>;
+  status: FindingStatus;
+  first_seen: string;
+  last_seen: string;
+  resolved_at: string | null;
+  resolution_note: string;
+  accepted_risk_until: string | null;
+  linked_task_id: string | null;
+  playbook: FindingPlaybook | null;
+}
+
+export interface FindingsSummary {
+  open_critical: number;
+  open_warning: number;
+  open_info: number;
+  resolved_last_7d: number;
+  by_code: { code: FindingCode; severity: AlertSeverity; c: number }[];
+}
+
 export interface HistoryPoint {
   scan_id: string;
   scan_date: string;
@@ -172,6 +227,19 @@ export const osintApi = {
 
   aiAnalyze: (type: "attack_surface" | "suppliers_nis2" | "board_report") =>
     apiClient.post<{ analysis: string }>("/osint/ai/analyze/", { type }).then(r => r.data),
+
+  findings: (params?: Record<string, string>) =>
+    apiClient.get<OsintFinding[]>("/osint/findings/", { params }).then(r => r.data),
+  finding: (id: string) =>
+    apiClient.get<OsintFinding>(`/osint/findings/${id}/`).then(r => r.data),
+  updateFinding: (id: string, data: Partial<Pick<OsintFinding, "status" | "resolution_note" | "accepted_risk_until">>) =>
+    apiClient.patch<OsintFinding>(`/osint/findings/${id}/`, data).then(r => r.data),
+  createTaskFromFinding: (id: string) =>
+    apiClient.post<{ task_id: string; finding: OsintFinding }>(`/osint/findings/${id}/create-task/`).then(r => r.data),
+  bulkTaskFindings: (ids: string[]) =>
+    apiClient.post<{ created: number }>(`/osint/findings/bulk-task/`, { finding_ids: ids }).then(r => r.data),
+  findingsSummary: () =>
+    apiClient.get<FindingsSummary>("/osint/findings/summary/").then(r => r.data),
 };
 
 export function classifyScore(score: number): ScoreClass {

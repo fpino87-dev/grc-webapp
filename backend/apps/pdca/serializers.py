@@ -24,9 +24,16 @@ class PdcaCycleSerializer(serializers.ModelSerializer):
             "scope_type",
             "scope_id",
             "fase_corrente",
+            "act_description",
+            "check_outcome",
+            "reopened_as",
+            "closed_at",
             "phases",
             "created_at",
             "updated_at",
             "created_by",
         ]
-        read_only_fields = ["id", "fase_corrente", "created_at", "updated_at", "created_by"]
+        read_only_fields = [
+            "id", "fase_corrente", "reopened_as", "closed_at",
+            "created_at", "updated_at", "created_by",
+        ]

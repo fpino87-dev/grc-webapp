@@ -5,7 +5,6 @@ Risolve il dominio in IP se necessario, poi interroga AbuseIPDB.
 from __future__ import annotations
 
 import logging
-import socket
 from typing import TYPE_CHECKING
 
 import requests
@@ -19,23 +18,21 @@ ABUSEIPDB_URL = "https://api.abuseipdb.com/api/v2/check"
 TIMEOUT = 10
 
 
-def _resolve_ip(domain: str) -> str | None:
-    try:
-        return socket.gethostbyname(domain)
-    except Exception:
-        return None
-
-
 def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> bool:
+    from apps.osint.validators import assert_public_or_log, safe_resolve_public_ip
+
     api_key = settings.abuseipdb_api_key
     if not api_key:
         return True  # saltato silenziosamente
 
     domain = entity.domain
+    if not assert_public_or_log(domain, "abuseipdb"):
+        scan.enricher_errors["abuseipdb"] = "non_public_target"
+        return False
     try:
-        ip = _resolve_ip(domain)
+        ip = safe_resolve_public_ip(domain)
         if not ip:
-            return True  # non risolvibile → skip
+            return True  # non risolvibile a IP pubblico → skip
 
         resp = requests.get(
             ABUSEIPDB_URL,

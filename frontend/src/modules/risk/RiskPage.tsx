@@ -402,7 +402,7 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
               value={form.bcp_plan ?? ""}
               onChange={e => {
                 const id = e.target.value || null;
-                const chosen = bcpPlans.find(p => p.id === id) ?? null;
+                const chosen = availableBcpPlans.find(p => p.id === id) ?? null;
                 setForm(prev => ({
                   ...prev,
                   bcp_plan: id,

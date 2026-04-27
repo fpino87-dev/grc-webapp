@@ -19,11 +19,16 @@ VT_TIMEOUT = 15
 
 
 def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> bool:
+    from apps.osint.validators import assert_public_or_log
+
     api_key = settings.virustotal_api_key
     if not api_key:
         return True  # saltato silenziosamente
 
     domain = entity.domain
+    if not assert_public_or_log(domain, "virustotal"):
+        scan.enricher_errors["virustotal"] = "non_public_target"
+        return False
     try:
         resp = requests.get(
             VT_URL.format(domain=domain),

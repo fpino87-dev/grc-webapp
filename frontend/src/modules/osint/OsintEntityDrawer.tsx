@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
@@ -149,10 +149,21 @@ function ScanFindings({ entity }: { entity: OsintEntityDetail }) {
   );
 }
 
-function TechDataRow({ label, value }: { label: string; value: React.ReactNode }) {
+function TechDataRow({ label, value, tooltip }: { label: string; value: React.ReactNode; tooltip?: string }) {
   return (
     <div className="flex justify-between items-center py-1 border-b border-gray-50 text-sm">
-      <span className="text-gray-500 shrink-0 mr-3">{label}</span>
+      <span className="text-gray-500 shrink-0 mr-3 inline-flex items-center gap-1">
+        {label}
+        {tooltip && (
+          <span
+            title={tooltip}
+            className="cursor-help text-gray-400 hover:text-gray-600 text-[11px] border border-gray-300 rounded-full w-4 h-4 inline-flex items-center justify-center leading-none"
+            aria-label={tooltip}
+          >
+            ?
+          </span>
+        )}
+      </span>
       <span className="text-gray-800 text-right font-mono text-xs truncate max-w-[55%]">{value}</span>
     </div>
   );
@@ -197,8 +208,22 @@ function ScanTechData({ scan }: { scan: OsintScanDetail }) {
           <TechDataRow label={t("osint.detail.whois_privacy")} value={yesNo(scan.whois_privacy)} />
 
           <p className="text-xs font-semibold text-gray-500 uppercase mb-1 mt-3">DNS</p>
-          <TechDataRow label={t("osint.detail.dnssec")} value={secBool(scan.dnssec_enabled)} />
+          <TechDataRow
+            label={t("osint.detail.dnssec")}
+            value={secBool(scan.dnssec_enabled)}
+            tooltip={t("osint.detail.tooltip.dnssec")}
+          />
           <TechDataRow label={t("osint.detail.mx")} value={yesNo(scan.mx_present)} />
+          <TechDataRow
+            label="SPF"
+            value={scan.spf_present === null || scan.spf_present === undefined ? "—" : (scan.spf_present ? (scan.spf_policy || "✅") : "❌")}
+            tooltip={t("osint.detail.tooltip.spf")}
+          />
+          <TechDataRow
+            label="DMARC"
+            value={scan.dmarc_present === null || scan.dmarc_present === undefined ? "—" : (scan.dmarc_present ? (scan.dmarc_policy || "✅") : "❌")}
+            tooltip={t("osint.detail.tooltip.dmarc")}
+          />
 
           <p className="text-xs font-semibold text-gray-500 uppercase mb-1 mt-3">Reputation</p>
           <TechDataRow label="VirusTotal suspicious" value={scan.vt_suspicious ?? "—"} />
@@ -270,11 +295,26 @@ function HistoryChart({ data }: { data: HistoryPoint[] }) {
 export function OsintEntityDrawer({ entityId, onClose }: { entityId: string; onClose: () => void }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
+  const [isScanning, setIsScanning] = useState(false);
+  const pollingRef = useRef<{ initialScanDate: string | null; attempts: number } | null>(null);
 
   const { data: entity, isLoading } = useQuery({
     queryKey: ["osint-entity", entityId],
     queryFn: () => osintApi.entity(entityId),
+    refetchInterval: isScanning ? 4000 : false,
   });
+
+  // Quando arriva un nuovo scan_date diverso da quello iniziale → fine polling.
+  if (isScanning && pollingRef.current && entity?.last_scan?.scan_date) {
+    const currentDate = entity.last_scan.scan_date;
+    const initial = pollingRef.current.initialScanDate;
+    pollingRef.current.attempts += 1;
+    const elapsedAttempts = pollingRef.current.attempts;
+    if (currentDate !== initial || elapsedAttempts > 30 /* ~2min */) {
+      pollingRef.current = null;
+      setIsScanning(false);
+    }
+  }
 
   const { data: history = [] } = useQuery({
     queryKey: ["osint-entity-history", entityId],
@@ -284,7 +324,11 @@ export function OsintEntityDrawer({ entityId, onClose }: { entityId: string; onC
   const scanMutation = useMutation({
     mutationFn: () => osintApi.forceScan(entityId),
     onSuccess: () => {
-      setTimeout(() => qc.invalidateQueries({ queryKey: ["osint-entity", entityId] }), 2000);
+      pollingRef.current = {
+        initialScanDate: entity?.last_scan?.scan_date ?? null,
+        attempts: 0,
+      };
+      setIsScanning(true);
     },
   });
 
@@ -316,10 +360,10 @@ export function OsintEntityDrawer({ entityId, onClose }: { entityId: string; onC
           <div className="flex items-center gap-2">
             <button
               onClick={() => scanMutation.mutate()}
-              disabled={scanMutation.isPending}
+              disabled={scanMutation.isPending || isScanning}
               className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50"
             >
-              {scanMutation.isPending ? "⏳" : "🔄"} {t("osint.detail.force_scan")}
+              {(scanMutation.isPending || isScanning) ? "⏳" : "🔄"} {t("osint.detail.force_scan")}
             </button>
             <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded">✕</button>
           </div>

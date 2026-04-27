@@ -9,22 +9,25 @@ from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import (
     AlertStatus,
+    FindingStatus,
     OsintAlert,
     OsintEntity,
+    OsintFinding,
     OsintScan,
     OsintSettings,
     OsintSubdomain,
     SubdomainStatus,
 )
+from .permissions import OsintReadPermission, OsintWritePermission
 from .serializers import (
     OsintAlertSerializer,
     OsintEntityDetailSerializer,
     OsintEntityListSerializer,
+    OsintFindingSerializer,
     OsintScanDetailSerializer,
     OsintSettingsSerializer,
     OsintSubdomainSerializer,
@@ -34,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 
 class OsintEntityViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [OsintReadPermission]
     pagination_class = None
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ["entity_type", "is_active", "is_nis2_critical", "scan_frequency"]
@@ -43,9 +46,19 @@ class OsintEntityViewSet(viewsets.ReadOnlyModelViewSet):
     ordering = ["display_name"]
 
     def get_queryset(self):
+        from django.db.models import Prefetch
+        last_completed = (
+            OsintScan.objects.filter(status="completed")
+            .order_by("-scan_date")
+        )
+        # Solo gli ultimi 2 scan servono per last_scan + delta — taglia la N+1.
+        # Il limit per-entità non è esprimibile in una sola query Postgres con Prefetch:
+        # accettiamo `prefetch_related("scans")` con order, e gli adattatori prendono [:2].
         return (
             OsintEntity.objects.filter(is_active=True, deleted_at__isnull=True)
-            .prefetch_related("scans", "alerts", "subdomains")
+            .prefetch_related(
+                Prefetch("scans", queryset=last_completed, to_attr="_recent_completed_scans"),
+            )
         )
 
     def get_serializer_class(self):
@@ -85,17 +98,59 @@ class OsintEntityViewSet(viewsets.ReadOnlyModelViewSet):
             return Response({"detail": "Scan non trovato."}, status=status.HTTP_404_NOT_FOUND)
         return Response(OsintScanDetailSerializer(scan).data)
 
-    @action(detail=True, methods=["post"])
+    @action(detail=False, methods=["get"], url_path="export")
+    def export_csv(self, request):
+        """Export CSV evidence audit (entità + ultimo scan)."""
+        import csv
+        from io import StringIO
+        buf = StringIO()
+        w = csv.writer(buf)
+        w.writerow([
+            "domain", "display_name", "entity_type", "is_nis2_critical",
+            "scan_frequency", "last_scan_at", "last_score_total",
+            "active_alerts_count",
+        ])
+        for e in self.get_queryset():
+            w.writerow([
+                e.domain, e.display_name, e.entity_type, e.is_nis2_critical,
+                e.scan_frequency,
+                e.last_scan_at.isoformat() if e.last_scan_at else "",
+                e.last_score_total if e.last_score_total is not None else "",
+                e.active_alerts_count_cached,
+            ])
+        from django.http import HttpResponse
+        resp = HttpResponse(buf.getvalue(), content_type="text/csv")
+        resp["Content-Disposition"] = 'attachment; filename="osint_entities.csv"'
+        return resp
+
+    @action(detail=True, methods=["post"], permission_classes=[OsintWritePermission])
     def scan(self, request, pk=None):
-        """Forza rescan immediato (asincrono)."""
+        """Forza rescan immediato (asincrono). Lock per entità, TTL 5 min."""
         entity = self.get_object()
+        from django.core.cache import cache
+        lock_key = f"osint:scan_lock:{entity.pk}"
+        if not cache.add(lock_key, "1", timeout=300):
+            return Response(
+                {"detail": "Scan già in corso per questa entità. Riprova fra qualche minuto."},
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        from core.audit import log_action
+        log_action(
+            user=request.user,
+            action_code="osint.force_scan",
+            level="L1",
+            entity=entity,
+            payload={"domain": entity.domain},
+        )
+
         from apps.osint.tasks import run_entity_scan
         job = run_entity_scan.delay(str(entity.pk))
         return Response({"job_id": job.id, "status": "queued"}, status=status.HTTP_202_ACCEPTED)
 
 
 class OsintAlertViewSet(viewsets.GenericViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [OsintWritePermission]
     serializer_class = OsintAlertSerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ["status", "severity", "alert_type"]
@@ -120,10 +175,25 @@ class OsintAlertViewSet(viewsets.GenericViewSet):
         if new_status not in [AlertStatus.ACKNOWLEDGED, AlertStatus.RESOLVED]:
             return Response({"detail": "Stato non valido."}, status=status.HTTP_400_BAD_REQUEST)
 
+        prev_status = alert.status
         alert.status = new_status
         if new_status == AlertStatus.RESOLVED:
             alert.resolved_at = timezone.now()
         alert.save(update_fields=["status", "resolved_at", "updated_at"])
+
+        from core.audit import log_action
+        log_action(
+            user=request.user,
+            action_code="osint.alert_status_changed",
+            level="L1",
+            entity=alert,
+            payload={
+                "alert_type": alert.alert_type,
+                "domain": alert.entity.domain,
+                "from": prev_status,
+                "to": new_status,
+            },
+        )
         return Response(self.get_serializer(alert).data)
 
     @action(detail=True, methods=["post"])
@@ -150,11 +220,24 @@ class OsintAlertViewSet(viewsets.GenericViewSet):
             alert.resolved_at = timezone.now()
 
         alert.save(update_fields=["status", "resolved_at", "linked_incident_id", "linked_task_id", "updated_at"])
+
+        from core.audit import log_action
+        log_action(
+            user=request.user,
+            action_code="osint.alert_escalated",
+            level="L2",
+            entity=alert,
+            payload={
+                "alert_type": alert.alert_type,
+                "domain": alert.entity.domain,
+                "decision": action_choice,
+            },
+        )
         return Response(self.get_serializer(alert).data)
 
 
 class OsintSubdomainViewSet(viewsets.GenericViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [OsintWritePermission]
     serializer_class = OsintSubdomainSerializer
 
     def get_queryset(self):
@@ -182,33 +265,46 @@ class OsintSubdomainViewSet(viewsets.GenericViewSet):
         if new_status not in [SubdomainStatus.INCLUDED, SubdomainStatus.IGNORED, SubdomainStatus.PENDING]:
             return Response({"detail": "Stato non valido."}, status=status.HTTP_400_BAD_REQUEST)
 
+        prev_status = sub.status
         sub.status = new_status
         sub.save(update_fields=["status", "updated_at"])
+
+        from core.audit import log_action
+        log_action(
+            user=request.user,
+            action_code="osint.subdomain_classified",
+            level="L1",
+            entity=sub,
+            payload={
+                "subdomain": sub.subdomain,
+                "from": prev_status,
+                "to": new_status,
+            },
+        )
         return Response(self.get_serializer(sub).data)
 
 
 class OsintDashboardView(viewsets.GenericViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [OsintReadPermission]
 
     @action(detail=False, methods=["get"])
     def summary(self, request):
-        from apps.osint.services import aggregate_entities
-        aggregate_entities()  # aggiorna entità prima di mostrare summary
+        # Niente aggregator qui — viene chiamato da signal/POST sync esplicito.
+        from django.db.models import Count, Q
+        from apps.osint.scoring import classify_score
 
         entities = OsintEntity.objects.filter(is_active=True, deleted_at__isnull=True)
         total = entities.count()
 
+        # Score classification via campo denormalizzato.
         critical_count = 0
         warning_count = 0
-        from apps.osint.scoring import classify_score
-        for e in entities.prefetch_related("scans"):
-            last = e.scans.filter(status="completed").order_by("-scan_date").first()
-            if last:
-                cls = classify_score(last.score_total)
-                if cls == "critical":
-                    critical_count += 1
-                elif cls == "warning":
-                    warning_count += 1
+        for score in entities.exclude(last_score_total__isnull=True).values_list("last_score_total", flat=True):
+            cls = classify_score(score)
+            if cls == "critical":
+                critical_count += 1
+            elif cls == "warning":
+                warning_count += 1
 
         last_scan = (
             OsintScan.objects.filter(status="completed").order_by("-scan_date").values_list("scan_date", flat=True).first()
@@ -232,9 +328,36 @@ class OsintDashboardView(viewsets.GenericViewSet):
             "pending_subdomains": pending_subdomains,
         })
 
+    @action(detail=False, methods=["post"], permission_classes=[OsintWritePermission])
+    def sync(self, request):
+        """Sincronizza esplicitamente le entità OSINT con i moduli sorgente."""
+        from apps.osint.services import aggregate_entities
+        result = aggregate_entities()
+
+        from core.audit import log_action
+        from apps.osint.models import OsintSettings
+        log_action(
+            user=request.user,
+            action_code="osint.entities_synced",
+            level="L1",
+            entity=OsintSettings.load(),
+            payload={
+                "created": result.created,
+                "updated": result.updated,
+                "reactivated": result.reactivated,
+                "deactivated": result.deactivated,
+            },
+        )
+        return Response({
+            "created": result.created,
+            "updated": result.updated,
+            "reactivated": result.reactivated,
+            "deactivated": result.deactivated,
+        })
+
 
 class OsintSettingsViewSet(viewsets.GenericViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [OsintWritePermission]
     serializer_class = OsintSettingsSerializer
 
     def _get_settings(self):
@@ -250,11 +373,28 @@ class OsintSettingsViewSet(viewsets.GenericViewSet):
         serializer = self.get_serializer(settings, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        # Logga senza esporre le API key (anche tronche).
+        sensitive = {"hibp_api_key", "virustotal_api_key", "abuseipdb_api_key", "gsb_api_key", "otx_api_key"}
+        changed_keys = [k for k in request.data.keys() if k not in sensitive]
+        api_key_touched = any(k in sensitive for k in request.data.keys())
+
+        from core.audit import log_action
+        log_action(
+            user=request.user,
+            action_code="osint.settings_updated",
+            level="L2",
+            entity=settings,
+            payload={
+                "fields_changed": sorted(changed_keys),
+                "api_keys_touched": api_key_touched,
+            },
+        )
         return Response(serializer.data)
 
 
 class OsintAiView(viewsets.GenericViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [OsintWritePermission]
 
     @action(detail=False, methods=["post"])
     def analyze(self, request):
@@ -266,6 +406,20 @@ class OsintAiView(viewsets.GenericViewSet):
         from apps.osint.anonymizer import AnonymizationService, OSINT_SYSTEM_PROMPT
         from apps.osint.scoring import classify_score
         from apps.ai_engine.router import route
+
+        def _strip_unsafe(value: str, max_len: int = 80) -> str:
+            """Rimuove caratteri di controllo e neutralizza i delimitatori di placeholder.
+
+            Defense-in-depth contro prompt injection: anche con anonimizzazione
+            attiva un nome utente-controllato non deve poter chiudere/aprire
+            placeholder o iniettare istruzioni con caratteri di controllo.
+            """
+            if not isinstance(value, str):
+                return value
+            # Caratteri di controllo (incluso \n, \r, \t) eliminati.
+            cleaned = "".join(ch for ch in value if ch.isprintable())
+            cleaned = cleaned.replace("[", "(").replace("]", ")")
+            return cleaned[:max_len].strip()
 
         task_type_map = {
             "attack_surface": "osint_attack_surface",
@@ -293,8 +447,8 @@ class OsintAiView(viewsets.GenericViewSet):
                 continue
             entity_data.append({
                 "entity_type": e.entity_type,
-                "domain": e.domain,
-                "display_name": e.display_name,
+                "domain": _strip_unsafe(e.domain, max_len=255),
+                "display_name": _strip_unsafe(e.display_name),
                 "is_nis2_critical": e.is_nis2_critical,
                 "score_total": last.score_total,
                 "score_ssl": last.score_ssl,
@@ -358,3 +512,188 @@ class OsintAiView(viewsets.GenericViewSet):
         except Exception as exc:
             logger.error("OSINT AI analyze failed: %s", exc)
             return Response({"detail": "Errore chiamata AI. Verifica configurazione AI Engine."}, status=status.HTTP_502_BAD_GATEWAY)
+
+
+class OsintFindingViewSet(viewsets.GenericViewSet):
+    """API per i finding persistenti (menù Risoluzione)."""
+    permission_classes = [OsintWritePermission]
+    serializer_class = OsintFindingSerializer
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ["status", "severity", "code", "entity"]
+    ordering_fields = ["last_seen", "severity", "first_seen"]
+    ordering = ["-last_seen"]
+
+    def get_queryset(self):
+        return (
+            OsintFinding.objects.filter(deleted_at__isnull=True)
+            .select_related("entity", "scan")
+        )
+
+    def list(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        # Filtro speciale "open_only" — esclude resolved/accepted_risk per default UI.
+        if request.query_params.get("open_only") in ("1", "true"):
+            qs = qs.filter(status__in=[FindingStatus.OPEN, FindingStatus.ACKNOWLEDGED, FindingStatus.IN_PROGRESS])
+        return Response(self.get_serializer(qs, many=True).data)
+
+    def retrieve(self, request, pk=None):
+        try:
+            obj = self.get_queryset().get(pk=pk)
+        except OsintFinding.DoesNotExist:
+            return Response({"detail": "Non trovato."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(self.get_serializer(obj).data)
+
+    def partial_update(self, request, pk=None):
+        try:
+            finding = self.get_queryset().get(pk=pk)
+        except OsintFinding.DoesNotExist:
+            return Response({"detail": "Non trovato."}, status=status.HTTP_404_NOT_FOUND)
+
+        new_status = request.data.get("status")
+        if new_status and new_status not in [c[0] for c in FindingStatus.choices]:
+            return Response({"detail": "Stato non valido."}, status=status.HTTP_400_BAD_REQUEST)
+
+        prev_status = finding.status
+        if new_status:
+            finding.status = new_status
+            if new_status == FindingStatus.RESOLVED:
+                finding.resolved_at = timezone.now()
+
+        if "resolution_note" in request.data:
+            note = (request.data.get("resolution_note") or "").strip()[:2000]
+            finding.resolution_note = note
+
+        if "accepted_risk_until" in request.data:
+            finding.accepted_risk_until = request.data.get("accepted_risk_until") or None
+
+        finding.save()
+
+        from core.audit import log_action
+        log_action(
+            user=request.user,
+            action_code="osint.finding_updated",
+            level="L1",
+            entity=finding,
+            payload={
+                "code": finding.code,
+                "domain": finding.entity.domain,
+                "from": prev_status,
+                "to": finding.status,
+            },
+        )
+        return Response(self.get_serializer(finding).data)
+
+    @action(detail=True, methods=["post"], url_path="create-task")
+    def create_task(self, request, pk=None):
+        """Genera un task M08 per la risoluzione del finding."""
+        try:
+            finding = self.get_queryset().get(pk=pk)
+        except OsintFinding.DoesNotExist:
+            return Response({"detail": "Non trovato."}, status=status.HTTP_404_NOT_FOUND)
+
+        from datetime import timedelta
+        from apps.tasks.models import Task
+        from apps.osint.findings import get_playbook
+        playbook = get_playbook(finding.code) or {}
+        title_short = playbook.get("title", finding.get_code_display())
+        steps = playbook.get("fix_steps", [])
+        steps_md = "\n".join(f"- {s}" for s in steps) if steps else ""
+        task = Task.objects.create(
+            title=f"OSINT: {title_short} — {finding.entity.display_name}",
+            description=(
+                f"[Generato dal modulo OSINT — Risoluzione]\n\n"
+                f"Dominio: {finding.entity.domain}\n"
+                f"Code: {finding.code}\n"
+                f"Severità: {finding.severity}\n\n"
+                f"## Cosa\n{playbook.get('what', '')}\n\n"
+                f"## Impatto\n{playbook.get('impact', '')}\n\n"
+                f"## Passi\n{steps_md}\n"
+            ),
+            priority="alta" if finding.severity == "critical" else "media",
+            due_date=(timezone.now() + timedelta(days=14)).date(),
+            source="manuale",
+            source_module="osint",
+            source_id=finding.pk,
+            status="aperto",
+        )
+        finding.linked_task_id = task.pk
+        if finding.status == FindingStatus.OPEN:
+            finding.status = FindingStatus.IN_PROGRESS
+        finding.save(update_fields=["linked_task_id", "status", "updated_at"])
+
+        from core.audit import log_action
+        log_action(
+            user=request.user,
+            action_code="osint.finding_task_created",
+            level="L1",
+            entity=finding,
+            payload={"task_id": str(task.pk), "code": finding.code},
+        )
+        return Response({"task_id": str(task.pk), "finding": self.get_serializer(finding).data})
+
+    @action(detail=False, methods=["post"], url_path="bulk-task")
+    def bulk_task(self, request):
+        """Genera un task per ogni finding nella lista."""
+        ids = request.data.get("finding_ids") or []
+        if not isinstance(ids, list) or not ids:
+            return Response({"detail": "finding_ids vuoto o non valido."}, status=status.HTTP_400_BAD_REQUEST)
+
+        results = []
+        for fid in ids[:100]:  # cap difensivo
+            req = type("R", (), {"user": request.user, "data": {}})()
+            resp = self.create_task(req, pk=fid)
+            results.append({"finding_id": fid, "status_code": resp.status_code})
+        return Response({"created": len([r for r in results if r["status_code"] == 200]), "results": results})
+
+    @action(detail=False, methods=["get"])
+    def summary(self, request):
+        from django.db.models import Count
+        qs = self.get_queryset().filter(
+            status__in=[FindingStatus.OPEN, FindingStatus.ACKNOWLEDGED, FindingStatus.IN_PROGRESS],
+        )
+        by_severity = {row["severity"]: row["c"] for row in qs.values("severity").annotate(c=Count("id"))}
+        by_code = list(
+            qs.values("code", "severity").annotate(c=Count("id")).order_by("-c")
+        )
+
+        # Risolti negli ultimi 7 giorni
+        from datetime import timedelta
+        recent_resolved = OsintFinding.objects.filter(
+            status=FindingStatus.RESOLVED,
+            resolved_at__gte=timezone.now() - timedelta(days=7),
+            deleted_at__isnull=True,
+        ).count()
+
+        return Response({
+            "open_critical": by_severity.get("critical", 0),
+            "open_warning": by_severity.get("warning", 0),
+            "open_info": by_severity.get("info", 0),
+            "resolved_last_7d": recent_resolved,
+            "by_code": by_code,
+        })
+
+    @action(detail=False, methods=["get"], url_path="export")
+    def export_csv(self, request):
+        """Export CSV per audit GRC."""
+        import csv
+        from io import StringIO
+        buf = StringIO()
+        w = csv.writer(buf)
+        w.writerow([
+            "code", "severity", "status", "entity_domain", "entity_display_name",
+            "is_nis2_critical", "first_seen", "last_seen", "resolved_at",
+            "resolution_note", "linked_task_id",
+        ])
+        for f in self.get_queryset():
+            w.writerow([
+                f.code, f.severity, f.status, f.entity.domain, f.entity.display_name,
+                f.entity.is_nis2_critical,
+                f.first_seen.isoformat(), f.last_seen.isoformat(),
+                f.resolved_at.isoformat() if f.resolved_at else "",
+                (f.resolution_note or "").replace("\n", " "),
+                str(f.linked_task_id) if f.linked_task_id else "",
+            ])
+        from django.http import HttpResponse
+        resp = HttpResponse(buf.getvalue(), content_type="text/csv")
+        resp["Content-Disposition"] = 'attachment; filename="osint_findings.csv"'
+        return resp

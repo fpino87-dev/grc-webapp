@@ -4,6 +4,7 @@ from rest_framework import serializers
 from .models import (
     OsintAlert,
     OsintEntity,
+    OsintFinding,
     OsintScan,
     OsintSettings,
     OsintSubdomain,
@@ -25,7 +26,7 @@ class OsintScanBriefSerializer(serializers.ModelSerializer):
 class OsintEntityListSerializer(serializers.ModelSerializer):
     last_scan = serializers.SerializerMethodField()
     delta = serializers.SerializerMethodField()
-    active_alerts_count = serializers.SerializerMethodField()
+    active_alerts_count = serializers.IntegerField(source="active_alerts_count_cached", read_only=True)
 
     class Meta:
         model = OsintEntity
@@ -36,18 +37,23 @@ class OsintEntityListSerializer(serializers.ModelSerializer):
             "created_at", "updated_at",
         ]
 
+    def _get_prefetched_last_scan(self, obj):
+        cached = getattr(obj, "_recent_completed_scans", None)
+        if cached is not None:
+            return cached[0] if cached else None
+        return obj.scans.filter(status="completed").order_by("-scan_date").first()
+
     def get_last_scan(self, obj):
-        scan = obj.scans.filter(status="completed").order_by("-scan_date").first()
+        scan = self._get_prefetched_last_scan(obj)
         return OsintScanBriefSerializer(scan).data if scan else None
 
     def get_delta(self, obj):
-        scan = obj.scans.filter(status="completed").order_by("-scan_date").first()
-        if scan is None:
+        # Usa i campi denormalizzati: zero query.
+        if obj.last_score_total is None:
             return None
-        return score_delta(obj, scan)
-
-    def get_active_alerts_count(self, obj):
-        return obj.alerts.filter(status__in=["new", "acknowledged"]).count()
+        if obj.prev_score_total is None:
+            return 0
+        return obj.last_score_total - obj.prev_score_total
 
 
 class OsintScanDetailSerializer(serializers.ModelSerializer):
@@ -151,3 +157,31 @@ class OsintSettingsSerializer(serializers.ModelSerializer):
     def get_has_abuseipdb_key(self, obj): return bool(obj.abuseipdb_api_key)
     def get_has_gsb_key(self, obj): return bool(obj.gsb_api_key)
     def get_has_otx_key(self, obj): return bool(obj.otx_api_key)
+
+
+class OsintFindingSerializer(serializers.ModelSerializer):
+    entity_domain = serializers.CharField(source="entity.domain", read_only=True)
+    entity_display_name = serializers.CharField(source="entity.display_name", read_only=True)
+    entity_type = serializers.CharField(source="entity.entity_type", read_only=True)
+    is_nis2_critical = serializers.BooleanField(source="entity.is_nis2_critical", read_only=True)
+    playbook = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OsintFinding
+        fields = [
+            "id", "entity", "entity_domain", "entity_display_name", "entity_type",
+            "is_nis2_critical",
+            "scan", "code", "severity", "params", "status",
+            "first_seen", "last_seen", "resolved_at", "resolution_note",
+            "accepted_risk_until", "linked_task_id",
+            "playbook", "created_at", "updated_at",
+        ]
+        read_only_fields = [
+            "id", "entity", "scan", "code", "severity", "params",
+            "first_seen", "last_seen", "resolved_at",
+            "playbook", "created_at", "updated_at",
+        ]
+
+    def get_playbook(self, obj):
+        from apps.osint.findings import get_playbook
+        return get_playbook(obj.code)

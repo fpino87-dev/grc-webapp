@@ -2448,7 +2448,12 @@
       "gsb": "Google Safe Browsing",
       "hibp_last": "Dernière violation",
       "hibp_types": "Données exposées",
-      "enricher_errors": "Erreurs enrichisseurs"
+      "enricher_errors": "Erreurs enrichisseurs",
+      "tooltip": {
+        "dnssec": "DNSSEC signe cryptographiquement les réponses DNS pour empêcher le détournement et l'empoisonnement du cache. Sans DNSSEC, un attaquant peut rediriger le trafic vers des serveurs malveillants.",
+        "spf": "Sender Policy Framework : enregistrement DNS listant les serveurs SMTP autorisés à envoyer du courrier pour le domaine. Sans SPF (ou avec +all), n'importe qui peut usurper le domaine dans des campagnes de phishing.",
+        "dmarc": "Domain-based Message Authentication : indique aux serveurs de messagerie quoi faire avec les messages qui échouent aux contrôles SPF/DKIM. Sans DMARC, le domaine est vulnérable au phishing et au BEC."
+      }
     },
     "findings": {
       "ssl_expired": "SSL expiré le {{date}}",
@@ -2534,6 +2539,56 @@
       "api_keys_hint": "Les clés sont chiffrées au repos. Laisser vide pour conserver la valeur actuelle.",
       "key_saved": "Clé sauvegardée",
       "key_placeholder": "Entrer la clé API…"
+    },
+    "remediation": {
+      "title": "Résolution",
+      "subtitle": "Tous les problèmes détectés avec un guide de résolution étape par étape et la correspondance avec les contrôles de conformité.",
+      "empty": "Aucun problème ouvert. Tout est sous contrôle.",
+      "export_csv": "Exporter CSV",
+      "bulk_task": "Créer {{count}} tâches",
+      "create_task": "Créer une tâche",
+      "mark_resolved": "Marquer comme résolu",
+      "acknowledge": "Prendre en charge",
+      "accept_risk": "Accepter le risque",
+      "first_seen": "Détecté le",
+      "what": "De quoi s'agit-il",
+      "impact": "Impact",
+      "compliance": "Références normatives",
+      "fix_steps": "Comment résoudre",
+      "refs": "Pour aller plus loin",
+      "show_resolved": "Afficher résolus",
+      "group_by": "Grouper par",
+      "group": {
+        "code": "Type de problème",
+        "entity": "Entité"
+      },
+      "kpi": {
+        "critical": "Critiques ouverts",
+        "warning": "Avertissements ouverts",
+        "info": "Infos ouvertes",
+        "resolved_7d": "Résolus (7j)"
+      },
+      "filter": {
+        "all": "Tous",
+        "critical": "Critiques",
+        "warning": "Avertissements",
+        "info": "Infos"
+      },
+      "status": {
+        "open": "Ouvert",
+        "acknowledged": "Pris en charge",
+        "in_progress": "En cours",
+        "resolved": "Résolu",
+        "accepted_risk": "Risque accepté"
+      }
+    },
+    "heatmap": {
+      "title": "Heatmap des dimensions de risque",
+      "ssl": "SSL",
+      "dns": "DNS",
+      "reputation": "Réputation",
+      "grc": "GRC",
+      "legend": "Vert 0–29 ok · Jaune 30–49 attention · Orange 50–69 avertissement · Rouge 70+ critique"
     }
   }
 }

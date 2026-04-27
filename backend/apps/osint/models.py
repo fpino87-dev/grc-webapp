@@ -77,6 +77,12 @@ class OsintEntity(BaseModel):
         choices=ScanFrequency.choices,
         default=ScanFrequency.WEEKLY,
     )
+    # Cache denormalizzata aggiornata da segnali post_save su OsintScan / OsintAlert.
+    # Evita N+1 nella dashboard list e nel summary.
+    last_scan_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    last_score_total = models.IntegerField(null=True, blank=True, db_index=True)
+    prev_score_total = models.IntegerField(null=True, blank=True)
+    active_alerts_count_cached = models.IntegerField(default=0)
 
     class Meta:
         unique_together = [("source_module", "source_id", "domain")]
@@ -159,6 +165,15 @@ class OsintScan(BaseModel):
     hibp_latest_breach = models.DateField(null=True, blank=True)
     hibp_data_types = models.JSONField(default=list, blank=True)
 
+    # HTTP security headers — populato da enrichers/http_headers.py
+    # Schema: {"hsts": bool, "csp": bool, "xfo": bool, "xcto": bool,
+    #          "referrer_policy": bool, "permissions_policy": bool, "raw": {...}}
+    security_headers = models.JSONField(default=dict, blank=True)
+
+    # Domini lookalike rilevati da dnstwist (E2). Lista di dict
+    # {"domain": "...", "fuzzer": "...", "ips": [...]}. Vuoto se non eseguito.
+    lookalike_domains = models.JSONField(default=list, blank=True)
+
     # Score
     score_ssl = models.IntegerField(default=0)
     score_dns = models.IntegerField(default=0)
@@ -220,6 +235,78 @@ class OsintAlert(BaseModel):
 
     def __str__(self) -> str:
         return f"{self.severity}:{self.alert_type} — {self.entity.domain}"
+
+
+class FindingCode(models.TextChoices):
+    SSL_EXPIRY = "ssl_expiry", "SSL in scadenza"
+    SSL_EXPIRED = "ssl_expired", "SSL scaduto/non raggiungibile"
+    DMARC_MISSING = "dmarc_missing", "DMARC assente"
+    DMARC_NONE = "dmarc_none", "DMARC p=none"
+    SPF_MISSING = "spf_missing", "SPF assente"
+    SPF_PLUS_ALL = "spf_plus_all", "SPF +all (insicuro)"
+    DNSSEC_MISSING = "dnssec_missing", "DNSSEC non abilitato"
+    DOMAIN_EXPIRY_SOON = "domain_expiry_soon", "Dominio in scadenza"
+    BLACKLIST = "blacklist", "Dominio in blacklist"
+    VT_MALICIOUS = "vt_malicious", "Segnalato da VirusTotal"
+    GSB_UNSAFE = "gsb_unsafe", "Segnalato da Google Safe Browsing"
+    BREACH = "breach", "Breach rilevato (HIBP)"
+    HEADERS_MISSING = "headers_missing", "Header HTTP di sicurezza mancanti"
+    NEW_SUBDOMAIN = "new_subdomain", "Nuovi sottodomini in attesa"
+    LOOKALIKE = "lookalike_domains", "Domini sosia attivi"
+
+
+class FindingStatus(models.TextChoices):
+    OPEN = "open", "Aperto"
+    ACKNOWLEDGED = "acknowledged", "Preso in carico"
+    IN_PROGRESS = "in_progress", "In risoluzione"
+    RESOLVED = "resolved", "Risolto"
+    ACCEPTED_RISK = "accepted_risk", "Rischio accettato"
+
+
+class OsintFinding(BaseModel):
+    """Problema persistente rilevato sull'entità.
+
+    Differenza con OsintAlert: l'alert è una "notifica" (snapshot del momento
+    in cui il problema viene scoperto), il finding è un'entità persistente con
+    ciclo di vita open→resolved che traccia la remediation lato GRC.
+    """
+
+    entity = models.ForeignKey(OsintEntity, on_delete=models.CASCADE, related_name="findings")
+    scan = models.ForeignKey(
+        OsintScan, on_delete=models.SET_NULL, null=True, blank=True, related_name="findings",
+        help_text="Ultimo scan in cui il problema è stato rilevato",
+    )
+    code = models.CharField(max_length=40, choices=FindingCode.choices)
+    severity = models.CharField(max_length=10, choices=AlertSeverity.choices)
+    params = models.JSONField(default=dict, blank=True, help_text="{'days': 12, 'issuer': '...'}")
+    status = models.CharField(max_length=20, choices=FindingStatus.choices, default=FindingStatus.OPEN)
+    first_seen = models.DateTimeField(auto_now_add=True)
+    last_seen = models.DateTimeField(auto_now=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolution_note = models.TextField(blank=True)
+    accepted_risk_until = models.DateField(null=True, blank=True)
+    linked_task_id = models.UUIDField(null=True, blank=True)
+
+    class Meta:
+        # Un solo finding "non chiuso" per coppia entità+codice; quando viene
+        # risolto, un nuovo problema dello stesso tipo crea un nuovo record
+        # (mantiene storia delle remediation precedenti).
+        constraints = [
+            models.UniqueConstraint(
+                fields=["entity", "code"],
+                condition=models.Q(status__in=["open", "acknowledged", "in_progress"]),
+                name="osint_finding_one_open_per_code",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["entity", "status"]),
+            models.Index(fields=["code", "status"]),
+            models.Index(fields=["severity", "status"]),
+        ]
+        ordering = ["-last_seen"]
+
+    def __str__(self) -> str:
+        return f"{self.code} on {self.entity.domain} [{self.status}]"
 
 
 class OsintSettings(BaseModel):

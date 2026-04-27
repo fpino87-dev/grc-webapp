@@ -408,7 +408,7 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
                           type="number"
                           className="w-full border rounded px-3 py-1.5 text-sm"
                           value={processForm.downtime_cost_hour as any ?? ""}
-                          onChange={e => setProcessForm(f => ({ ...f, downtime_cost_hour: e.target.value ? Number(e.target.value) : null }))}
+                          onChange={e => setProcessForm(f => ({ ...f, downtime_cost_hour: e.target.value || null }))}
                         />
                       </div>
                     </div>
