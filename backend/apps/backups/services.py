@@ -6,10 +6,14 @@ from pathlib import Path
 from django.conf import settings
 from django.utils import timezone
 
+from . import encryption
+
 logger = logging.getLogger("apps.backups")
 
 BACKUP_DIR = Path(getattr(settings, "BACKUP_DIR", "/app/backups"))
 BACKUP_RETENTION_DAYS = 30
+# Suffisso applicato al file pg_dump dopo cifratura (newfix R4).
+ENCRYPTED_SUFFIX = ".enc"
 
 
 def _ensure_backup_dir():
@@ -69,19 +73,45 @@ def create_backup(user, backup_type: str = "manual"):
             record.save(update_fields=["status", "error_message", "completed_at", "updated_at"])
             logger.error("Backup fallito: %s", result.stderr[:500])
         else:
+            # newfix R4: cifratura at-rest se BACKUP_ENCRYPTION_KEY e' settata.
+            encrypted = False
+            if encryption.is_encryption_enabled():
+                try:
+                    enc_path = filepath.with_name(filepath.name + ENCRYPTED_SUFFIX)
+                    encryption.encrypt_file(filepath, enc_path)
+                    filepath = enc_path
+                    record.filename = filepath.name
+                    encrypted = True
+                except Exception as exc:
+                    record.status = BackupRecord.Status.FAILED
+                    record.error_message = f"Cifratura fallita: {exc}"[:2000]
+                    record.completed_at = timezone.now()
+                    record.save(update_fields=["status", "error_message", "completed_at", "updated_at"])
+                    logger.exception("Cifratura backup fallita")
+                    return record
+            else:
+                logger.warning(
+                    "BACKUP_ENCRYPTION_KEY non configurata: backup salvato in chiaro. "
+                    "In produzione e' obbligatorio cifrare (TISAX L3 / ISO 27001 A.8.24).",
+                )
+
             size = filepath.stat().st_size if filepath.exists() else 0
             record.status       = BackupRecord.Status.COMPLETED
             record.size_bytes   = size
             record.completed_at = timezone.now()
-            record.save(update_fields=["status", "size_bytes", "completed_at", "updated_at"])
+            record.encrypted    = encrypted
+            record.save(update_fields=["status", "size_bytes", "completed_at", "encrypted", "filename", "updated_at"])
             log_action(
                 user=user,
                 action_code="BACKUP_CREATED",
                 level="L2",
                 entity=record,
-                payload={"filename": filename, "size_bytes": size, "type": backup_type},
+                payload={
+                    "filename": record.filename, "size_bytes": size,
+                    "type": backup_type, "encrypted": encrypted,
+                },
             )
-            logger.info("Backup completato: %s (%d bytes)", filename, size)
+            logger.info("Backup completato: %s (%d bytes, encrypted=%s)", record.filename, size, encrypted)
     except subprocess.TimeoutExpired:
         record.status        = BackupRecord.Status.FAILED
         record.error_message = "Timeout: pg_dump ha impiegato più di 5 minuti."
@@ -110,6 +140,17 @@ def restore_backup(backup_id, user):
     if not filepath.exists():
         raise FileNotFoundError(f"File non trovato sul server: {record.filename}")
 
+    # newfix R4: decifra in un file temporaneo prima del restore.
+    plain_filepath = filepath
+    decrypted_temp: Path | None = None
+    if record.encrypted:
+        decrypted_temp = filepath.with_suffix(filepath.suffix + ".restore")
+        try:
+            encryption.decrypt_file(filepath, decrypted_temp)
+        except Exception as exc:
+            raise RuntimeError(f"Decifratura backup fallita: {exc}") from exc
+        plain_filepath = decrypted_temp
+
     db = _db_params()
     env = os.environ.copy()
     env["PGPASSWORD"] = db["password"]
@@ -124,12 +165,17 @@ def restore_backup(backup_id, user):
         "--if-exists",
         "--no-owner",
         "--no-privileges",
-        str(filepath),
+        str(plain_filepath),
     ]
 
-    result = subprocess.run(
-        cmd, env=env, capture_output=True, text=True, timeout=600
-    )
+    try:
+        result = subprocess.run(
+            cmd, env=env, capture_output=True, text=True, timeout=600
+        )
+    finally:
+        # Pulisci sempre il plain temporaneo, anche se pg_restore fallisce.
+        if decrypted_temp is not None and decrypted_temp.exists():
+            decrypted_temp.unlink()
     # pg_restore restituisce returncode=1 anche per warning non fatali
     # Consideriamo fallimento solo se non c'è output o stderr contiene ERROR
     if result.returncode > 1 or "ERROR" in result.stderr:

@@ -115,6 +115,10 @@ CELERY_BEAT_SCHEDULE = {
 
 # Directory dove vengono salvati i file di backup (montata come volume Docker)
 BACKUP_DIR = env("BACKUP_DIR", default="/app/backups")
+# Cifratura at-rest dei backup pg_dump (newfix R4). Se vuota, i backup sono in
+# chiaro (dev/test); in produzione DEVE essere valorizzata con una passphrase
+# separata da FERNET_KEY (TISAX L3 / ISO 27001 A.8.24).
+BACKUP_ENCRYPTION_KEY = env("BACKUP_ENCRYPTION_KEY", default="")
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [

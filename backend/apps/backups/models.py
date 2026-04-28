@@ -29,6 +29,8 @@ class BackupRecord(BaseModel):
     notes         = models.TextField(blank=True)
     error_message = models.TextField(blank=True)
     completed_at  = models.DateTimeField(null=True, blank=True)
+    # newfix R4: True se il file pg_dump e' cifrato AES-256-GCM at rest.
+    encrypted     = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-created_at"]
