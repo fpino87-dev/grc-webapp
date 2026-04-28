@@ -175,9 +175,30 @@ class PlantFrameworkViewSet(viewsets.ModelViewSet):
         return qs
 
     def perform_create(self, serializer):
+        # newfix S10 — se esiste un PlantFramework soft-deleted con stesso
+        # (plant, framework) lo "ri-attiviamo" invece di tentare l'INSERT
+        # (il vincolo unique_together sul DB ignora il soft-delete e farebbe
+        # raise IntegrityError).
+        plant = serializer.validated_data.get("plant")
+        framework = serializer.validated_data.get("framework")
+        active_from = serializer.validated_data.get("active_from") or timezone.now().date()
+        existing = (
+            PlantFramework.objects.all_with_deleted()
+            .filter(plant=plant, framework=framework, deleted_at__isnull=False)
+            .first()
+        )
+        if existing is not None:
+            existing.deleted_at = None
+            existing.active = True
+            existing.active_from = active_from
+            existing.level = serializer.validated_data.get("level", "")
+            existing.save(update_fields=["deleted_at", "active", "active_from", "level", "updated_at"])
+            self._create_control_instances(existing)
+            serializer.instance = existing
+            return
         pf = serializer.save(
             created_by=self.request.user,
-            active_from=serializer.validated_data.get("active_from") or timezone.now().date(),
+            active_from=active_from,
         )
         self._create_control_instances(pf)
 
@@ -220,7 +241,10 @@ class PlantFrameworkViewSet(viewsets.ModelViewSet):
             entity=instance.plant,
             payload={"framework": instance.framework.code},
         )
-        instance.delete()
+        # newfix S10 — soft-delete invece di hard-delete (CLAUDE.md regola #5).
+        # Un PlantFramework rimosso resta tracciabile per audit; la riassegna-
+        # zione successiva lo "riattiva" via perform_create.
+        instance.soft_delete()
 
     @action(detail=True, methods=["post"])
     def toggle_active(self, request, pk=None):
