@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 
 from core.audit import log_action
+from core.jwt import ExportRateThrottle
 from core.scoping import PlantScopedQuerysetMixin
 from .models import (
     Supplier,
@@ -248,7 +249,10 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             "provider": result.get("provider"),
         })
 
-    @action(detail=False, methods=["get"], url_path="export-csv")
+    @action(
+        detail=False, methods=["get"], url_path="export-csv",
+        throttle_classes=[ExportRateThrottle],
+    )
     def export_csv(self, request):
         """
         GET /suppliers/export-csv/?nis2_only=true

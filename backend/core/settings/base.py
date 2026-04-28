@@ -144,8 +144,15 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_THROTTLE_RATES": {
         "anon":  "20/hour",
-        "user":  "2000/hour",
+        # newfix S11 — abbassato da 2000 a 500/h come documentato in
+        # CLAUDE.md. Un account compromesso non puo' piu' scrapare l'intero
+        # database in mezza giornata. Per scenari batch / export pesanti
+        # esistono scope dedicati (es. "export" 10/h).
+        "user":  "500/hour",
         "login": "5/minute",
+        # Scope dedicato per endpoint di export bulk (CSV/Excel/PDF). I view
+        # sensibili devono usare ScopedRateThrottle con throttle_scope="export".
+        "export": "10/hour",
     },
 }
 

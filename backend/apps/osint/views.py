@@ -22,6 +22,8 @@ from .models import (
     OsintSubdomain,
     SubdomainStatus,
 )
+from core.jwt import ExportRateThrottle
+
 from .permissions import OsintReadPermission, OsintWritePermission
 from .serializers import (
     OsintAlertSerializer,
@@ -98,7 +100,10 @@ class OsintEntityViewSet(viewsets.ReadOnlyModelViewSet):
             return Response({"detail": "Scan non trovato."}, status=status.HTTP_404_NOT_FOUND)
         return Response(OsintScanDetailSerializer(scan).data)
 
-    @action(detail=False, methods=["get"], url_path="export")
+    @action(
+        detail=False, methods=["get"], url_path="export",
+        throttle_classes=[ExportRateThrottle],
+    )
     def export_csv(self, request):
         """Export CSV evidence audit (entità + ultimo scan)."""
         import csv
@@ -672,7 +677,10 @@ class OsintFindingViewSet(viewsets.GenericViewSet):
             "by_code": by_code,
         })
 
-    @action(detail=False, methods=["get"], url_path="export")
+    @action(
+        detail=False, methods=["get"], url_path="export",
+        throttle_classes=[ExportRateThrottle],
+    )
     def export_csv(self, request):
         """Export CSV per audit GRC."""
         import csv

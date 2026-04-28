@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from core.audit import log_action
+from core.jwt import ExportRateThrottle
 from core.scoping import PlantScopedQuerysetMixin
 
 from .models import RiskAppetitePolicy, RiskAssessment, RiskDimension, RiskMitigationPlan
@@ -257,7 +258,10 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         data = get_risk_bia_bcp_context(assessment)
         return Response(data)
 
-    @action(detail=False, methods=["get"], url_path="export")
+    @action(
+        detail=False, methods=["get"], url_path="export",
+        throttle_classes=[ExportRateThrottle],
+    )
     def export(self, request):
         """
         Export Excel del registro rischi filtrato per plant.

@@ -2,7 +2,7 @@ from django.core import signing
 from django_otp import devices_for_user
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.throttling import AnonRateThrottle
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.views import APIView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -30,6 +30,16 @@ def _mfa_lock_key(user_pk) -> str:
 
 class LoginRateThrottle(AnonRateThrottle):
     scope = "login"
+
+
+class ExportRateThrottle(UserRateThrottle):
+    """
+    newfix S11 — throttle dedicato per export bulk (CSV/Excel/PDF).
+    Default 10/h (vedi `DEFAULT_THROTTLE_RATES["export"]`). Usato su
+    endpoint sensibili (registro rischi, fornitori NIS2, OSINT findings)
+    per impedire scraping massivo da account compromesso.
+    """
+    scope = "export"
 
 
 def _fingerprint_source(request) -> str:
