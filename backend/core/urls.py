@@ -122,11 +122,27 @@ urlpatterns = [
     path("api/token/mfa/",     MfaVerifyView.as_view(),           name="token_mfa_verify"),
 ]
 
-# Swagger/OpenAPI: esposto solo se DEBUG=True o SHOW_API_DOCS=True (non in produzione)
+# Swagger/OpenAPI: esposto solo se DEBUG=True o SHOW_API_DOCS=True.
+# newfix S13 — gating con IsAdminUser anche in DEBUG. Prima `/api/docs/` era
+# accessibile a chiunque potesse raggiungere il backend in dev/staging,
+# esponendo l'intera API surface (endpoint, parametri, esempi) a osservatori
+# non autorizzati. Ora qualunque utente non admin riceve 403 / 401.
 if settings.DEBUG or getattr(settings, "SHOW_API_DOCS", False):
+    from rest_framework.permissions import IsAdminUser
     urlpatterns += [
-        path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-        path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger"),
+        path(
+            "api/schema/",
+            SpectacularAPIView.as_view(permission_classes=[IsAdminUser]),
+            name="schema",
+        ),
+        path(
+            "api/docs/",
+            SpectacularSwaggerView.as_view(
+                url_name="schema",
+                permission_classes=[IsAdminUser],
+            ),
+            name="swagger",
+        ),
     ]
 
 urlpatterns += [
