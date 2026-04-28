@@ -158,6 +158,85 @@ def test_login_with_expired_device_token_requires_mfa(user_with_mfa):
     assert res.status_code == 202  # MFA richiesto
 
 
+# ── newfix S9 — lock per-utente su MfaVerifyView ─────────────────────────────
+
+
+@pytest.fixture
+def clean_cache():
+    """Pulisce la cache prima e dopo ogni test che usa il lock per-utente."""
+    from django.core.cache import cache
+    cache.clear()
+    yield cache
+    cache.clear()
+
+
+@pytest.mark.django_db
+def test_mfa_per_user_lock_after_threshold(user_with_mfa, clean_cache):
+    """10 tentativi falliti consecutivi -> 429 + utente bloccato 1h."""
+    client = APIClient()
+    res = client.post("/api/token/", {"username": "mfa@test.com", "password": "StrongPass123!"})
+    mfa_token = res.data["mfa_token"]
+
+    with patch("core.jwt.devices_for_user") as mock_devices:
+        mock_devices.return_value = [type("D", (), {"verify_token": lambda self, c: False})()]
+        # Primi 9 tentativi: 401 (codice errato).
+        for i in range(9):
+            r = client.post("/api/token/mfa/", {"mfa_token": mfa_token, "otp_code": "000000"})
+            assert r.status_code == 401, f"attempt {i+1} expected 401, got {r.status_code}"
+        # 10esimo tentativo: scatta il lock -> 429.
+        r10 = client.post("/api/token/mfa/", {"mfa_token": mfa_token, "otp_code": "000000"})
+        assert r10.status_code == 429
+
+        # Anche il tentativo 11 (con OTP valido) viene rifiutato dal lock.
+        mock_devices.return_value = [type("D", (), {"verify_token": lambda self, c: True})()]
+        r11 = client.post("/api/token/mfa/", {"mfa_token": mfa_token, "otp_code": "123456"})
+        assert r11.status_code == 429
+
+
+@pytest.mark.django_db
+def test_mfa_success_resets_attempts_counter(user_with_mfa, clean_cache):
+    """OTP corretto azzera il counter dei tentativi falliti."""
+    from core.jwt import _mfa_attempts_key
+
+    client = APIClient()
+    res = client.post("/api/token/", {"username": "mfa@test.com", "password": "StrongPass123!"})
+    mfa_token = res.data["mfa_token"]
+
+    # 3 tentativi falliti.
+    with patch("core.jwt.devices_for_user") as mock_devices:
+        mock_devices.return_value = [type("D", (), {"verify_token": lambda self, c: False})()]
+        for _ in range(3):
+            client.post("/api/token/mfa/", {"mfa_token": mfa_token, "otp_code": "000000"})
+
+    assert clean_cache.get(_mfa_attempts_key(user_with_mfa.pk)) == 3
+
+    # 1 tentativo valido -> counter azzerato.
+    with patch("core.jwt.devices_for_user") as mock_devices:
+        mock_devices.return_value = [type("D", (), {"verify_token": lambda self, c: True})()]
+        r = client.post("/api/token/mfa/", {"mfa_token": mfa_token, "otp_code": "123456"})
+        assert r.status_code == 200
+
+    assert clean_cache.get(_mfa_attempts_key(user_with_mfa.pk)) is None
+
+
+@pytest.mark.django_db
+def test_mfa_locked_user_rejected_immediately(user_with_mfa, clean_cache):
+    """Lock pre-esistente in cache -> 429 senza nemmeno provare il codice."""
+    from core.jwt import _mfa_lock_key
+
+    clean_cache.set(_mfa_lock_key(user_with_mfa.pk), 1, timeout=3600)
+
+    client = APIClient()
+    res = client.post("/api/token/", {"username": "mfa@test.com", "password": "StrongPass123!"})
+    mfa_token = res.data["mfa_token"]
+
+    with patch("core.jwt.devices_for_user") as mock_devices:
+        # Anche con codice corretto: rifiutato dal lock.
+        mock_devices.return_value = [type("D", (), {"verify_token": lambda self, c: True})()]
+        r = client.post("/api/token/mfa/", {"mfa_token": mfa_token, "otp_code": "123456"})
+    assert r.status_code == 429
+
+
 @pytest.mark.django_db
 def test_login_with_device_token_from_different_browser_requires_mfa(user_with_mfa):
     """newfix S8: device_token rubato e replayato da UA diverso -> MFA."""

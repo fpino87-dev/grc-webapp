@@ -10,6 +10,23 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 _MFA_SALT = "grc-mfa-token"
 _MFA_TTL = 300  # 5 minuti
 
+# newfix S9 — lock per-utente su MfaVerifyView. Il throttle DRF e' per-IP:
+# una botnet distribuita aggira 5/min con N bot, e con OTP a 6 cifre lo spazio
+# si esaurisce in poche ore. Aggiungiamo un counter per-utente in cache Redis
+# (incr+expire) che blocca l'utente per 1h dopo `_MFA_LOCK_THRESHOLD`
+# tentativi falliti nella finestra `_MFA_LOCK_WINDOW`.
+_MFA_LOCK_THRESHOLD = 10        # tentativi falliti
+_MFA_LOCK_WINDOW = 60 * 60       # 1 ora
+_MFA_LOCK_DURATION = 60 * 60     # 1 ora di lock
+
+
+def _mfa_attempts_key(user_pk) -> str:
+    return f"mfa:attempts:{user_pk}"
+
+
+def _mfa_lock_key(user_pk) -> str:
+    return f"mfa:lock:{user_pk}"
+
 
 class LoginRateThrottle(AnonRateThrottle):
     scope = "login"
@@ -188,6 +205,15 @@ class MfaVerifyView(APIView):
         except (User.DoesNotExist, KeyError):
             return Response({"detail": "Utente non trovato."}, status=status.HTTP_401_UNAUTHORIZED)
 
+        # newfix S9 — lock per-utente: se gia' bloccato, rifiuta subito.
+        from django.core.cache import cache
+        lock_key = _mfa_lock_key(user.pk)
+        if cache.get(lock_key):
+            return Response(
+                {"detail": "Account temporaneamente bloccato per troppi tentativi MFA. Riprova piu' tardi."},
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
         # Verifica il codice OTP su tutti i device confermati dell'utente
         verified = False
         for device in devices_for_user(user):
@@ -196,10 +222,50 @@ class MfaVerifyView(APIView):
                 break
 
         if not verified:
+            # newfix S9 — incrementa counter per-utente; al raggiungimento
+            # della soglia attiva il lock 1h e logga l'evento.
+            attempts_key = _mfa_attempts_key(user.pk)
+            try:
+                attempts = cache.incr(attempts_key)
+            except ValueError:
+                # Chiave non esiste: la inizializziamo con TTL.
+                cache.set(attempts_key, 1, timeout=_MFA_LOCK_WINDOW)
+                attempts = 1
+            else:
+                # Garantisce che il TTL venga (ri)applicato al primo incr.
+                if attempts == 1:
+                    cache.touch(attempts_key, _MFA_LOCK_WINDOW)
+
+            if attempts >= _MFA_LOCK_THRESHOLD:
+                cache.set(lock_key, 1, timeout=_MFA_LOCK_DURATION)
+                cache.delete(attempts_key)
+                try:
+                    from core.audit import log_action
+                    log_action(
+                        user=None,
+                        action_code="AUTH_MFA_LOCKED",
+                        level="L2",
+                        entity=user,
+                        payload={
+                            "user_id": user.pk,
+                            "attempts": attempts,
+                            "lock_seconds": _MFA_LOCK_DURATION,
+                        },
+                    )
+                except Exception:
+                    pass
+                return Response(
+                    {"detail": "Account temporaneamente bloccato per troppi tentativi MFA. Riprova piu' tardi."},
+                    status=status.HTTP_429_TOO_MANY_REQUESTS,
+                )
+
             return Response(
                 {"detail": "Codice OTP non valido o scaduto."},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
+
+        # OTP corretto: azzera il counter di tentativi falliti.
+        cache.delete(_mfa_attempts_key(user.pk))
 
         response_data = _issue_jwt(user)
 
