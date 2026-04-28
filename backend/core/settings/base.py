@@ -120,6 +120,24 @@ BACKUP_DIR = env("BACKUP_DIR", default="/app/backups")
 # separata da FERNET_KEY (TISAX L3 / ISO 27001 A.8.24).
 BACKUP_ENCRYPTION_KEY = env("BACKUP_ENCRYPTION_KEY", default="")
 
+# newfix S12 — limiti upload e body size. Django default e' 2.5 MB con JSON
+# body unbounded -> denial of memory possibile. Allinea il prodotto alle
+# raccomandazioni OWASP API Security (API4:2023 Unrestricted Resource
+# Consumption).
+#
+# - DATA_UPLOAD_MAX_MEMORY_SIZE  : limite del corpo NON-multipart (JSON, form
+#   classico). 5 MB e' largo per qualunque payload GRC realistico (le
+#   evidenze multimediali passano per multipart, non per JSON).
+# - FILE_UPLOAD_MAX_MEMORY_SIZE  : soglia in cui i file vengono streamati su
+#   disco invece di stare in RAM. 50 MB e' sufficiente per evidenze
+#   PDF/DOCX/PNG; oltre questa soglia il file finisce su /tmp.
+# - DATA_UPLOAD_MAX_NUMBER_FIELDS: tetto al numero di campi POST/GET per
+#   richiesta (default 1000 e' OK ma e' meglio fissarlo esplicitamente per
+#   evidenziare la scelta in code review).
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024     # 5 MB JSON / form
+FILE_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024    # 50 MB soglia in-memory
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
