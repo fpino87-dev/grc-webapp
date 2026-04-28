@@ -1,0 +1,79 @@
+name: security-audit
+
+# newfix S14 — esegue pip-audit e npm audit ogni notte e ad ogni PR.
+# Il job NON fallisce automaticamente sui findings di npm audit (alta rumorosita'
+# del registry), ma carica il report come artifact per revisione manuale.
+# pip-audit gira invece in modalita' --strict: una vulnerabilita' Python
+# blocca la build (i pacchetti backend sono pochi e curati).
+
+on:
+  schedule:
+    # Ogni notte alle 03:30 UTC (04:30/05:30 ora italiana).
+    - cron: "30 3 * * *"
+  pull_request:
+    branches: [main]
+    paths:
+      - "backend/requirements/**"
+      - "frontend/package.json"
+      - "frontend/package-lock.json"
+      - ".github/workflows/security-audit.yml"
+  workflow_dispatch:
+
+jobs:
+  pip-audit:
+    name: pip-audit (backend)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements/base.txt
+      - name: Install pip-audit
+        run: pip install --upgrade "pip-audit>=2.7.0"
+      - name: Audit backend deps (strict)
+        run: |
+          pip-audit --strict \
+            --requirement backend/requirements/base.txt \
+            --disable-pip
+      - name: Audit dev deps (warning-only)
+        if: always()
+        run: |
+          pip-audit \
+            --requirement backend/requirements/dev.txt \
+            --disable-pip || true
+
+  npm-audit:
+    name: npm audit (frontend)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: npm ci
+        working-directory: frontend
+        run: npm ci --no-audit --no-fund
+      - name: npm audit (production)
+        working-directory: frontend
+        run: |
+          # Fail solo su high/critical in dipendenze di produzione.
+          # Il registry npm e' rumoroso: low/moderate sono accettabili in
+          # attesa di patch upstream, ma vanno tracciate via report artifact.
+          npm audit --omit=dev --audit-level=high
+      - name: Save full audit report (always)
+        if: always()
+        working-directory: frontend
+        run: npm audit --omit=dev --json > npm-audit-report.json || true
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: frontend/npm-audit-report.json
+          retention-days: 30
