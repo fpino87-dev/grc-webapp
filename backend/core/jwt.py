@@ -15,6 +15,22 @@ class LoginRateThrottle(AnonRateThrottle):
     scope = "login"
 
 
+def _fingerprint_source(request) -> str:
+    """
+    Costruisce la stringa input per `compute_device_fingerprint` (newfix S8).
+    Combina User-Agent e Accept-Language (header presenti su qualunque browser
+    reale). NON include l'IP: cambia troppo spesso (mobile, VPN aziendali) e
+    aprirebbe falsi negativi su utenti legittimi.
+
+    Formato `ua\x01lang` per evitare collisioni su separatori naturali.
+    """
+    ua = (request.META.get("HTTP_USER_AGENT") or "")[:500]
+    lang = (request.META.get("HTTP_ACCEPT_LANGUAGE") or "")[:200]
+    if not ua and not lang:
+        return ""
+    return f"{ua}\x01{lang}"
+
+
 # Gerarchia ruoli (newfix R2): determina il "ruolo dominante" da esporre come
 # `role` legacy quando l'utente ha piu' UserPlantAccess. L'ordine va dal piu'
 # alto al piu' basso; chi compare prima nella lista vince.
@@ -110,7 +126,12 @@ class GrcTokenObtainPairView(TokenObtainPairView):
             device_token = request.data.get("device_token", "")
             if device_token:
                 from apps.auth_grc.models import TrustedDevice
-                if TrustedDevice.verify(user, device_token):
+                # newfix S8: verify richiede anche match del fingerprint del
+                # browser (UA + Accept-Language + SECRET_KEY pepper). Token
+                # legacy senza fingerprint_hash sono rifiutati.
+                if TrustedDevice.verify(
+                    user, device_token, fingerprint_source=_fingerprint_source(request),
+                ):
                     return Response(_issue_jwt(user), status=status.HTTP_200_OK)
 
             # Utente ha MFA attivo: emetti un token temporaneo, NON il JWT
@@ -186,7 +207,12 @@ class MfaVerifyView(APIView):
         if request.data.get("trust_device"):
             device_name = request.META.get("HTTP_USER_AGENT", "")[:200]
             from apps.auth_grc.models import TrustedDevice
-            _, raw_token = TrustedDevice.create_for_user(user, device_name)
+            # newfix S8 — il fingerprint viene legato all'emissione e
+            # richiesto identico nelle verify successive.
+            _, raw_token = TrustedDevice.create_for_user(
+                user, device_name,
+                fingerprint_source=_fingerprint_source(request),
+            )
             response_data["device_token"] = raw_token
 
         return Response(response_data, status=status.HTTP_200_OK)

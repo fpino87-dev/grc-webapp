@@ -95,10 +95,35 @@ class ExternalAuditorToken(BaseModel):
         return self.revoked_at is None and self.valid_from <= n <= self.valid_until
 
 
+def compute_device_fingerprint(fingerprint_source: str) -> str:
+    """
+    Hash server-side del fingerprint del browser (newfix S8).
+
+    `fingerprint_source` deve essere costruito dal chiamante come
+    `User-Agent || \\n || Accept-Language` (vedi `core.jwt._fingerprint_source`).
+    Il SECRET_KEY del backend e' incluso nell'hash come pepper: senza il
+    secret, un attaccante che ha solo il device_token non puo' ricalcolare
+    l'hash atteso anche se conosce UA/lingua della vittima.
+
+    Restituisce hex SHA-256 a 64 char (compatibile con il campo esistente).
+    """
+    from django.conf import settings
+    if not fingerprint_source:
+        return ""
+    pepper = getattr(settings, "SECRET_KEY", "")
+    payload = f"{fingerprint_source}\x00{pepper}".encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
 class TrustedDevice(BaseModel):
     """
     Dispositivo fidato: memorizza il token (hashed) per saltare MFA per 30 giorni.
     Il token grezzo viene restituito UNA SOLA VOLTA al frontend e poi dimenticato.
+
+    newfix S8 — token legato a fingerprint (User-Agent + Accept-Language +
+    SECRET_KEY pepper). Un device_token rubato via XSS non e' utilizzabile da
+    un browser/lingua diversi. Su rotazione password tutti i TrustedDevice
+    vengono revocati (signal in apps.auth_grc.signals).
     """
     user = models.ForeignKey(
         "auth.User",
@@ -108,12 +133,16 @@ class TrustedDevice(BaseModel):
     token_hash = models.CharField(max_length=64, db_index=True)
     device_name = models.CharField(max_length=200, blank=True)
     expires_at = models.DateTimeField()
+    # newfix S8 — hash del fingerprint del browser (UA + Accept-Language +
+    # SECRET_KEY). Vuoto solo per record legacy pre-S8 che non sono piu'
+    # accettati da `verify()`.
+    fingerprint_hash = models.CharField(max_length=64, blank=True, db_index=True)
 
     class Meta:
         ordering = ["-created_at"]
 
     @classmethod
-    def create_for_user(cls, user, device_name=""):
+    def create_for_user(cls, user, device_name="", fingerprint_source=""):
         from django.utils import timezone
         raw = secrets.token_urlsafe(32)
         hashed = hashlib.sha256(raw.encode()).hexdigest()
@@ -122,23 +151,45 @@ class TrustedDevice(BaseModel):
             token_hash=hashed,
             device_name=device_name[:200],
             expires_at=timezone.now() + timezone.timedelta(days=30),
+            fingerprint_hash=compute_device_fingerprint(fingerprint_source),
         )
         return obj, raw  # raw mostrato UNA SOLA VOLTA
 
     @classmethod
-    def verify(cls, user, raw_token: str) -> bool:
+    def verify(cls, user, raw_token: str, fingerprint_source: str = "") -> bool:
+        """
+        Verifica un device_token. newfix S8: richiede anche che il fingerprint
+        della richiesta corrente coincida con quello salvato all'emissione.
+        Record legacy senza fingerprint_hash NON sono piu' accettati: forzano
+        un nuovo step MFA (degradazione di sicurezza voluta dopo l'upgrade).
+        """
         from django.utils import timezone
         if not raw_token:
             return False
         hashed = hashlib.sha256(raw_token.encode()).hexdigest()
+        expected_fp = compute_device_fingerprint(fingerprint_source)
+        if not expected_fp:
+            # Senza UA/lingua nella request non possiamo bindare: rifiuta.
+            return False
         return cls.objects.filter(
             user=user,
             token_hash=hashed,
+            fingerprint_hash=expected_fp,
             expires_at__gt=timezone.now(),
         ).exists()
 
     def revoke(self):
         self.soft_delete()
+
+    @classmethod
+    def revoke_all_for_user(cls, user) -> int:
+        """
+        Revoca (soft-delete) tutti i TrustedDevice di un utente. Usata dal
+        signal di cambio password e da MFA disable. Restituisce il numero di
+        record toccati.
+        """
+        from django.utils import timezone
+        return cls.objects.filter(user=user).update(deleted_at=timezone.now())
 
 
 COMPETENCY_LEVEL_CHOICES = [

@@ -114,17 +114,26 @@ def test_mfa_verify_missing_fields_returns_400():
 
 # ── Trust device (bypass MFA 30 giorni) ──────────────────────────────────────
 
+_FP_HEADERS = {
+    "HTTP_USER_AGENT": "Mozilla/5.0 PytestBrowser",
+    "HTTP_ACCEPT_LANGUAGE": "it-IT,it;q=0.9",
+}
+_FP_SOURCE = f"{_FP_HEADERS['HTTP_USER_AGENT']}\x01{_FP_HEADERS['HTTP_ACCEPT_LANGUAGE']}"
+
+
 @pytest.mark.django_db
 def test_login_with_valid_device_token_skips_mfa(user_with_mfa):
     from apps.auth_grc.models import TrustedDevice
-    _, raw = TrustedDevice.create_for_user(user_with_mfa, device_name="Test Browser")
+    _, raw = TrustedDevice.create_for_user(
+        user_with_mfa, device_name="Test Browser", fingerprint_source=_FP_SOURCE,
+    )
 
     client = APIClient()
-    res = client.post("/api/token/", {
-        "username": "mfa@test.com",
-        "password": "StrongPass123!",
-        "device_token": raw,
-    })
+    res = client.post(
+        "/api/token/",
+        {"username": "mfa@test.com", "password": "StrongPass123!", "device_token": raw},
+        **_FP_HEADERS,
+    )
     assert res.status_code == 200
     assert "access" in res.data
 
@@ -134,19 +143,35 @@ def test_login_with_expired_device_token_requires_mfa(user_with_mfa):
     from apps.auth_grc.models import TrustedDevice
     from django.utils import timezone
 
-    _, raw = TrustedDevice.create_for_user(user_with_mfa)
+    _, raw = TrustedDevice.create_for_user(user_with_mfa, fingerprint_source=_FP_SOURCE)
     # Scade il token manualmente
     TrustedDevice.objects.filter(user=user_with_mfa).update(
         expires_at=timezone.now() - timezone.timedelta(days=1)
     )
 
     client = APIClient()
-    res = client.post("/api/token/", {
-        "username": "mfa@test.com",
-        "password": "StrongPass123!",
-        "device_token": raw,
-    })
+    res = client.post(
+        "/api/token/",
+        {"username": "mfa@test.com", "password": "StrongPass123!", "device_token": raw},
+        **_FP_HEADERS,
+    )
     assert res.status_code == 202  # MFA richiesto
+
+
+@pytest.mark.django_db
+def test_login_with_device_token_from_different_browser_requires_mfa(user_with_mfa):
+    """newfix S8: device_token rubato e replayato da UA diverso -> MFA."""
+    from apps.auth_grc.models import TrustedDevice
+    _, raw = TrustedDevice.create_for_user(user_with_mfa, fingerprint_source=_FP_SOURCE)
+
+    client = APIClient()
+    res = client.post(
+        "/api/token/",
+        {"username": "mfa@test.com", "password": "StrongPass123!", "device_token": raw},
+        HTTP_USER_AGENT="curl/8.0",
+        HTTP_ACCEPT_LANGUAGE="en-US",
+    )
+    assert res.status_code == 202  # MFA richiesto perche' fingerprint mismatch
 
 
 @pytest.mark.django_db
