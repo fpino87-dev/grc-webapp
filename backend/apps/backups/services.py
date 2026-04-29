@@ -72,6 +72,21 @@ def create_backup(user, backup_type: str = "manual"):
             record.completed_at  = timezone.now()
             record.save(update_fields=["status", "error_message", "completed_at", "updated_at"])
             logger.error("Backup fallito: %s", result.stderr[:500])
+            # newfix F2 — il fallimento di un backup e' un evento privileged
+            # (operazione di backup avviata da super_admin/scheduler) che deve
+            # comparire nell'audit trail anche se non e' andato a buon fine.
+            log_action(
+                user=user,
+                action_code="BACKUP_FAILED",
+                level="L2",
+                entity=record,
+                payload={
+                    "filename": record.filename,
+                    "type": backup_type,
+                    "error": (result.stderr or "")[:500],
+                    "stage": "pg_dump",
+                },
+            )
         else:
             # newfix R4: cifratura at-rest se BACKUP_ENCRYPTION_KEY e' settata.
             encrypted = False
@@ -88,6 +103,18 @@ def create_backup(user, backup_type: str = "manual"):
                     record.completed_at = timezone.now()
                     record.save(update_fields=["status", "error_message", "completed_at", "updated_at"])
                     logger.exception("Cifratura backup fallita")
+                    log_action(
+                        user=user,
+                        action_code="BACKUP_FAILED",
+                        level="L2",
+                        entity=record,
+                        payload={
+                            "filename": record.filename,
+                            "type": backup_type,
+                            "error": str(exc)[:500],
+                            "stage": "encryption",
+                        },
+                    )
                     return record
             else:
                 logger.warning(
@@ -117,12 +144,36 @@ def create_backup(user, backup_type: str = "manual"):
         record.error_message = "Timeout: pg_dump ha impiegato più di 5 minuti."
         record.completed_at  = timezone.now()
         record.save(update_fields=["status", "error_message", "completed_at", "updated_at"])
+        log_action(
+            user=user,
+            action_code="BACKUP_FAILED",
+            level="L2",
+            entity=record,
+            payload={
+                "filename": record.filename,
+                "type": backup_type,
+                "error": "timeout_300s",
+                "stage": "pg_dump",
+            },
+        )
     except Exception as exc:
         record.status        = BackupRecord.Status.FAILED
         record.error_message = str(exc)[:2000]
         record.completed_at  = timezone.now()
         record.save(update_fields=["status", "error_message", "completed_at", "updated_at"])
         logger.exception("Errore imprevisto durante il backup")
+        log_action(
+            user=user,
+            action_code="BACKUP_FAILED",
+            level="L2",
+            entity=record,
+            payload={
+                "filename": record.filename,
+                "type": backup_type,
+                "error": str(exc)[:500],
+                "stage": "unexpected",
+            },
+        )
 
     return record
 
@@ -148,6 +199,18 @@ def restore_backup(backup_id, user):
         try:
             encryption.decrypt_file(filepath, decrypted_temp)
         except Exception as exc:
+            # newfix F2 — fallimento restore (decifratura) e' privileged.
+            log_action(
+                user=user,
+                action_code="BACKUP_RESTORE_FAILED",
+                level="L3",
+                entity=record,
+                payload={
+                    "filename": record.filename,
+                    "error": str(exc)[:500],
+                    "stage": "decryption",
+                },
+            )
             raise RuntimeError(f"Decifratura backup fallita: {exc}") from exc
         plain_filepath = decrypted_temp
 
@@ -179,6 +242,18 @@ def restore_backup(backup_id, user):
     # pg_restore restituisce returncode=1 anche per warning non fatali
     # Consideriamo fallimento solo se non c'è output o stderr contiene ERROR
     if result.returncode > 1 or "ERROR" in result.stderr:
+        # newfix F2 — fallimento restore (pg_restore) e' privileged.
+        log_action(
+            user=user,
+            action_code="BACKUP_RESTORE_FAILED",
+            level="L3",
+            entity=record,
+            payload={
+                "filename": record.filename,
+                "error": (result.stderr or "")[:500],
+                "stage": "pg_restore",
+            },
+        )
         raise RuntimeError(result.stderr[:2000] or "Errore sconosciuto durante il restore.")
 
     record.status = BackupRecord.Status.RESTORED

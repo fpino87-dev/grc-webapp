@@ -51,6 +51,7 @@ def test_create_backup_success(admin_user, tmp_path):
 @pytest.mark.django_db
 def test_create_backup_pg_dump_failure(admin_user):
     from apps.backups.services import create_backup
+    from core.audit import AuditLog
 
     mock_result = MagicMock()
     mock_result.returncode = 1
@@ -61,18 +62,29 @@ def test_create_backup_pg_dump_failure(admin_user):
 
     assert record.status == "failed"
     assert "connection to server" in record.error_message
+    # newfix F2 — il fallimento deve produrre un audit BACKUP_FAILED.
+    audit = AuditLog.objects.filter(
+        action_code="BACKUP_FAILED", entity_id=record.pk,
+    ).first()
+    assert audit is not None
+    assert audit.payload.get("stage") == "pg_dump"
 
 
 @pytest.mark.django_db
 def test_create_backup_timeout(admin_user):
     import subprocess
     from apps.backups.services import create_backup
+    from core.audit import AuditLog
 
     with patch("apps.backups.services.subprocess.run", side_effect=subprocess.TimeoutExpired("pg_dump", 300)):
         record = create_backup(admin_user)
 
     assert record.status == "failed"
     assert "Timeout" in record.error_message
+    # newfix F2 — anche il timeout produce un audit con stage='pg_dump'.
+    assert AuditLog.objects.filter(
+        action_code="BACKUP_FAILED", entity_id=record.pk,
+    ).exists()
 
 
 @pytest.mark.django_db

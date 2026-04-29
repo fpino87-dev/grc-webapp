@@ -141,7 +141,7 @@ def deactivate_grc_user(user, actor) -> None:
     )
 
 
-def anonymize_user(user, requesting_user) -> None:
+def anonymize_user(user, requesting_user, *, reason: str = "") -> None:
     """
     Anonimizza i dati personali di un utente rimosso.
     GDPR Art. 17 — Diritto alla cancellazione.
@@ -172,12 +172,17 @@ def anonymize_user(user, requesting_user) -> None:
 
         UserPlantAccess.objects.filter(user=user).update(deleted_at=timezone.now())
 
+    payload = {"anon_id": anon_id, "gdpr_request": True}
+    # newfix F2 — la motivazione (richiesta GDPR Art. 17) e' richiesta dal
+    # caller e va loggata per traceability dell'auditor.
+    if reason:
+        payload["reason"] = reason[:500]
     log_action(
         user=requesting_user,
         action_code="auth.user.anonymized",
         level="L1",
         entity=user,
-        payload={"anon_id": anon_id, "gdpr_request": True},
+        payload=payload,
     )
 
 

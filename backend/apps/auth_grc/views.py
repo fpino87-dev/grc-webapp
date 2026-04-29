@@ -8,6 +8,8 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.audit import log_action
+
 from .models import ExternalAuditorToken, RoleCompetencyRequirement, UserCompetency, UserPlantAccess
 from .serializers import (
     ExternalAuditorTokenSerializer,
@@ -15,6 +17,22 @@ from .serializers import (
     UserCompetencySerializer,
     UserPlantAccessSerializer,
 )
+
+
+# newfix F2 — assegnazione/revoca ruoli e' privileged (ISO 27001 A.9.2.2 +
+# A.9.4.4): tracciamo create/update/destroy con un payload sintetico (mai il
+# nome utente in chiaro, solo user_id + role + scope) cosi' un auditor puo'
+# ricostruire la storia degli accessi a partire dall'audit trail.
+def _user_plant_access_payload(instance: "UserPlantAccess", event: str) -> dict:
+    return {
+        "event": event,
+        "access_id": str(instance.pk),
+        "user_id": str(instance.user_id),
+        "role": instance.role,
+        "scope_type": instance.scope_type,
+        "scope_bu_id": str(instance.scope_bu_id) if instance.scope_bu_id else None,
+        "scope_plant_ids": [str(pk) for pk in instance.scope_plants.values_list("pk", flat=True)],
+    }
 
 
 class ResetTestDbView(APIView):
@@ -60,6 +78,42 @@ class UserPlantAccessViewSet(viewsets.ModelViewSet):
     queryset = UserPlantAccess.objects.select_related("scope_bu")
     serializer_class = UserPlantAccessSerializer
 
+    def perform_create(self, serializer):
+        instance = serializer.save(created_by=self.request.user)
+        log_action(
+            user=self.request.user,
+            action_code="auth.access.granted",
+            level="L2",
+            entity=instance,
+            payload=_user_plant_access_payload(instance, "granted"),
+        )
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        log_action(
+            user=self.request.user,
+            action_code="auth.access.modified",
+            level="L2",
+            entity=instance,
+            payload=_user_plant_access_payload(instance, "modified"),
+        )
+
+    def perform_destroy(self, instance):
+        # Cattura il payload PRIMA della cancellazione: dopo soft_delete()
+        # i M2M restano leggibili, ma teniamo il pattern uniforme.
+        payload = _user_plant_access_payload(instance, "revoked")
+        log_action(
+            user=self.request.user,
+            action_code="auth.access.revoked",
+            level="L2",
+            entity=instance,
+            payload=payload,
+        )
+        if hasattr(instance, "soft_delete"):
+            instance.soft_delete()
+        else:
+            instance.delete()
+
     @action(
         detail=False,
         methods=["post"],
@@ -78,7 +132,7 @@ class UserPlantAccessViewSet(viewsets.ModelViewSet):
             return Response({
                 "error": _("Motivazione obbligatoria (min 10 caratteri) per richiesta GDPR Art. 17")
             }, status=400)
-        anonymize_user(user, request.user)
+        anonymize_user(user, request.user, reason=reason.strip())
         return Response({"ok": True, "message": _("Utente anonimizzato (GDPR Art. 17)")})
 
 
