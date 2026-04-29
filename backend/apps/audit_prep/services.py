@@ -53,7 +53,8 @@ def update_readiness_score(audit_prep: AuditPrep) -> AuditPrep:
 def open_finding(audit_prep, finding_type: str, title: str,
                  description: str, audit_date, user,
                  control_instance=None,
-                 auditor_name: str = "") -> AuditFinding:
+                 auditor_name: str = "",
+                 auto_generated: bool = False) -> AuditFinding:
     """
     Crea un AuditFinding e genera automaticamente:
     - PDCA (obbligatorio per major/minor)
@@ -85,6 +86,7 @@ def open_finding(audit_prep, finding_type: str, title: str,
         audit_date=audit_date,
         response_deadline=deadline,
         status="open",
+        auto_generated=auto_generated,
         created_by=user,
     )
 

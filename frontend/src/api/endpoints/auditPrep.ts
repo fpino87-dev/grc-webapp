@@ -45,6 +45,18 @@ export interface AuditFinding {
   control_external_id: string | null;
   is_overdue: boolean;
   days_remaining: number | null;
+  auto_generated: boolean;
+}
+
+export interface AutoValidateResult {
+  ok: boolean;
+  evaluated: number;
+  presente: number;
+  scaduto: number;
+  mancante: number;
+  findings_created: number;
+  findings_skipped_existing: number;
+  readiness_score: number;
 }
 
 export interface PlannedAudit {
@@ -134,4 +146,8 @@ export const auditPrepApi = {
     apiClient.delete(`/audit-prep/programs/${id}/`),
   annulla: (id: string, reason: string) =>
     apiClient.post(`/audit-prep/audit-preps/${id}/annulla/`, { reason }),
+  autoValidate: (id: string) =>
+    apiClient.post<AutoValidateResult>(
+      `/audit-prep/audit-preps/${id}/auto-validate/`
+    ).then(r => r.data),
 };

@@ -134,6 +134,22 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         )
         return Response({"ok": True, "status": "completato"})
 
+    @action(detail=True, methods=["post"], url_path="auto-validate")
+    def auto_validate(self, request, pk=None):
+        """Esegue la validazione automatica del prep: valuta evidenze/documenti
+        per ogni control_instance, aggiorna lo stato degli evidence_item e
+        apre i finding minor_nc per gli item mancante/scaduto.
+        Idempotente: rilanciata non duplica i finding gia' auto-generati aperti."""
+        from .validation import auto_validate_prep
+        prep = self.get_object()
+        if prep.status == "archiviato":
+            return Response(
+                {"error": "Prep archiviato: validazione automatica non disponibile."},
+                status=400,
+            )
+        summary = auto_validate_prep(prep, request.user)
+        return Response({"ok": True, **summary})
+
     @action(detail=True, methods=["get"], url_path="report")
     def report(self, request, pk=None):
         """Scarica relazione HTML dell'AuditPrep."""

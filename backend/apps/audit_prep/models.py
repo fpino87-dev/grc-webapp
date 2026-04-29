@@ -123,6 +123,10 @@ class AuditFinding(BaseModel):
         on_delete=models.SET_NULL,
         related_name="closed_findings",
     )
+    auto_generated = models.BooleanField(
+        default=False, db_index=True,
+        help_text="True se il finding e' stato creato automaticamente da auto_validate_prep",
+    )
 
     class Meta:
         ordering = ["-audit_date", "finding_type"]

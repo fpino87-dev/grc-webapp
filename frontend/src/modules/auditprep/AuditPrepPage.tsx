@@ -6,6 +6,7 @@ import {
   type AuditFinding,
   type AuditPrep,
   type AuditProgram,
+  type AutoValidateResult,
   type EvidenceItem,
   type PlannedAudit,
 } from "../../api/endpoints/auditPrep";
@@ -62,6 +63,8 @@ function PrepDrawer({ prep, onClose }: { prep: AuditPrep; onClose: () => void })
   const [completingId, setCompletingId] = useState(false);
   const [cancelModal, setCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [autoValidateModal, setAutoValidateModal] = useState(false);
+  const [autoValidateResult, setAutoValidateResult] = useState<AutoValidateResult | null>(null);
 
   const { data: evidences = [] } = useQuery<EvidenceItem[]>({
     queryKey: ["evidence", prep.id],
@@ -95,6 +98,17 @@ function PrepDrawer({ prep, onClose }: { prep: AuditPrep; onClose: () => void })
   const cancelMutation = useMutation({
     mutationFn: () => auditPrepApi.annulla(prep.id, cancelReason),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["audit-prep"] }); onClose(); },
+  });
+
+  const autoValidateMutation = useMutation({
+    mutationFn: () => auditPrepApi.autoValidate(prep.id),
+    onSuccess: (result) => {
+      setAutoValidateResult(result);
+      setAutoValidateModal(false);
+      qc.invalidateQueries({ queryKey: ["evidence", prep.id] });
+      qc.invalidateQueries({ queryKey: ["findings", prep.id] });
+      qc.invalidateQueries({ queryKey: ["audit-prep"] });
+    },
   });
 
   const openMajors = findings.filter(f => f.finding_type === "major_nc" && ["open", "in_response"].includes(f.status)).length;
@@ -138,6 +152,43 @@ function PrepDrawer({ prep, onClose }: { prep: AuditPrep; onClose: () => void })
           {tab === "checklist" && (
             <div>
               <ReadinessBar score={prep.readiness_score} />
+
+              {prep.status === "in_corso" && evidences.length > 0 && (
+                <div className="mt-3 flex justify-end">
+                  <button
+                    onClick={() => { setAutoValidateResult(null); setAutoValidateModal(true); }}
+                    className="px-3 py-1.5 bg-indigo-600 text-white text-xs rounded hover:bg-indigo-700 flex items-center gap-1.5"
+                    title={t("audit_prep.auto_validate.tooltip")}
+                  >
+                    <span>🤖</span>{t("audit_prep.auto_validate.button")}
+                  </button>
+                </div>
+              )}
+
+              {autoValidateResult && (
+                <div className="mt-3 rounded-lg border border-indigo-200 bg-indigo-50 p-3 text-xs">
+                  <div className="flex items-start justify-between">
+                    <div className="font-semibold text-indigo-800 mb-1">
+                      {t("audit_prep.auto_validate.summary_title")}
+                    </div>
+                    <button onClick={() => setAutoValidateResult(null)} className="text-indigo-400 hover:text-indigo-600">✕</button>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    <span>✅ {t("audit_prep.ev_present_opt")}: <b>{autoValidateResult.presente}</b></span>
+                    <span>⚠️ {t("audit_prep.ev_expired_opt")}: <b>{autoValidateResult.scaduto}</b></span>
+                    <span>❌ {t("audit_prep.ev_missing_opt")}: <b>{autoValidateResult.mancante}</b></span>
+                  </div>
+                  <div className="mt-2 text-indigo-700">
+                    {t("audit_prep.auto_validate.findings_created", { count: autoValidateResult.findings_created })}
+                    {autoValidateResult.findings_skipped_existing > 0 && (
+                      <> · {t("audit_prep.auto_validate.findings_skipped", { count: autoValidateResult.findings_skipped_existing })}</>
+                    )}
+                    {" · "}
+                    Readiness: <b>{autoValidateResult.readiness_score}/100</b>
+                  </div>
+                </div>
+              )}
+
               <div className="mt-4 space-y-1">
                 {evidences.length === 0 && (
                   <p className="text-sm text-gray-400 text-center py-8">{t("audit_prep.no_evidence")}</p>
@@ -225,8 +276,16 @@ function PrepDrawer({ prep, onClose }: { prep: AuditPrep; onClose: () => void })
                 {findings.map(f => (
                   <div key={f.id} className="border rounded-lg p-3">
                     <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className={`text-xs px-2 py-0.5 rounded font-medium ${FINDING_TYPE_COLORS[f.finding_type]}`}>{f.finding_type.replace("_", " ").toUpperCase()}</span>
+                        {f.auto_generated && (
+                          <span
+                            className="text-xs px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 font-medium"
+                            title={t("audit_prep.auto_validate.finding_auto_tooltip")}
+                          >
+                            🤖 {t("audit_prep.auto_validate.finding_auto_badge")}
+                          </span>
+                        )}
                         <span className="text-sm font-medium text-gray-800">{f.title}</span>
                         {f.is_overdue && <span className="text-xs text-red-600">{t("audit_prep.finding_overdue")}</span>}
                       </div>
@@ -295,6 +354,51 @@ function PrepDrawer({ prep, onClose }: { prep: AuditPrep; onClose: () => void })
           </button>
         </div>
       </div>
+
+      {/* Modal conferma validazione automatica */}
+      {autoValidateModal && (
+        <div className="fixed inset-0 z-60 bg-black/50 flex items-center justify-center">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <span>🤖</span>{t("audit_prep.auto_validate.modal_title")}
+            </h3>
+            <p className="text-sm text-gray-600 mb-3">
+              {t("audit_prep.auto_validate.modal_intro", { count: evidences.length })}
+            </p>
+            <ul className="text-xs text-gray-600 list-disc list-inside space-y-1 bg-gray-50 rounded p-3 mb-3">
+              <li>{t("audit_prep.auto_validate.rule_present")}</li>
+              <li>{t("audit_prep.auto_validate.rule_expired")}</li>
+              <li>{t("audit_prep.auto_validate.rule_missing")}</li>
+              <li>{t("audit_prep.auto_validate.rule_idempotent")}</li>
+            </ul>
+            {autoValidateMutation.isError && (
+              <p className="text-xs text-red-600 mb-2">
+                {(autoValidateMutation.error as { response?: { data?: { error?: string } } })?.response?.data?.error || t("audit_prep.error_generic")}
+              </p>
+            )}
+            <div className="flex justify-end gap-2 mt-3">
+              <button
+                onClick={() => setAutoValidateModal(false)}
+                disabled={autoValidateMutation.isPending}
+                className="px-4 py-2 border rounded text-sm text-gray-600"
+              >
+                {t("audit_prep.cancel_btn")}
+              </button>
+              <button
+                onClick={() => autoValidateMutation.mutate()}
+                disabled={autoValidateMutation.isPending}
+                className="px-4 py-2 bg-indigo-600 text-white text-sm rounded disabled:opacity-50 flex items-center gap-1.5"
+              >
+                {autoValidateMutation.isPending ? (
+                  <>{t("audit_prep.auto_validate.in_progress")}</>
+                ) : (
+                  <>🤖 {t("audit_prep.auto_validate.confirm_btn")}</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal annulla */}
       {cancelModal && (
