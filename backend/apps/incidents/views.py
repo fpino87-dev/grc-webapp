@@ -2,11 +2,11 @@ from django.http import HttpResponse
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import decorators, response, viewsets
-from rest_framework.permissions import IsAuthenticated
 
 from core.audit import log_action
 from core.scoping import PlantScopedQuerysetMixin
 from .models import Incident, NIS2Configuration
+from .permissions import IncidentPermission, NIS2ConfigurationPermission
 from apps.plants.models import Plant
 
 from .nis2_services import (
@@ -24,6 +24,7 @@ from .services import close_incident
 class IncidentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = Incident.objects.select_related("plant", "closed_by").prefetch_related("assets", "nis2_notifications")
     serializer_class = IncidentSerializer
+    permission_classes = [IncidentPermission]
 
     def perform_destroy(self, instance):
         log_action(
@@ -259,7 +260,7 @@ class IncidentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 class NIS2ConfigurationViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = NIS2Configuration.objects.select_related("plant")
     serializer_class = NIS2ConfigurationSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [NIS2ConfigurationPermission]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["plant"]
 

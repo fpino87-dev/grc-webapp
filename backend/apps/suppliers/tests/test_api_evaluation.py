@@ -17,7 +17,10 @@ URL_CONFIG = "/api/v1/suppliers/evaluation-config/"
 
 @pytest.fixture
 def user(db):
-    return User.objects.create_user(username="ev_api", email="ev_api@test.com", password="x")
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    u = User.objects.create_user(username="ev_api", email="ev_api@test.com", password="x")
+    UserPlantAccess.objects.create(user=u, role=GrcRole.COMPLIANCE_OFFICER, scope_type="org")
+    return u
 
 
 @pytest.fixture

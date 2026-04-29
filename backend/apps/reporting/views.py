@@ -1,12 +1,13 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from django.db.models import Count, Q, Avg, ExpressionWrapper, F, DurationField
 from django.utils import timezone
 
+from .permissions import ReportingPermission
+
 
 class ComplianceSummaryView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ReportingPermission]
 
     def get(self, request):
         from apps.controls.models import ControlInstance
@@ -35,7 +36,7 @@ class ComplianceSummaryView(APIView):
 
 
 class RiskSummaryView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ReportingPermission]
 
     def get(self, request):
         from apps.risk.models import RiskAssessment
@@ -50,7 +51,7 @@ class RiskSummaryView(APIView):
 
 
 class IncidentSummaryView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ReportingPermission]
 
     def get(self, request):
         from apps.incidents.models import Incident
@@ -64,7 +65,7 @@ class IncidentSummaryView(APIView):
 
 
 class OwnerReportView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ReportingPermission]
 
     def get(self, request):
         from apps.risk.models import RiskAssessment
@@ -137,7 +138,7 @@ class OwnerReportView(APIView):
 
 
 class KpiTrendView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ReportingPermission]
 
     def get(self, request):
         from .models import IsmsKpiSnapshot
@@ -169,7 +170,7 @@ class RiskBiaBcpView(APIView):
     Endpoint unificato Risk + BIA + BCP per il tab dedicato nel Reporting.
     GET /reporting/risk-bia-bcp/?plant=<uuid>
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ReportingPermission]
 
     def get(self, request):
         from apps.risk.models import (
@@ -430,7 +431,7 @@ class RiskBiaBcpView(APIView):
 
 
 class DashboardSummaryView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ReportingPermission]
 
     def get(self, request):
         from apps.controls.models import ControlInstance
@@ -510,7 +511,7 @@ class KpiOverviewView(APIView):
     - mttr: tempo medio di risoluzione (finding audit, incidenti, task)
     - training: completamento formazione obbligatoria (perimetro utenti GRC)
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ReportingPermission]
 
     def get(self, request):
         plant_id = request.query_params.get("plant")

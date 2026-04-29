@@ -247,12 +247,11 @@ def test_plant_manager_cannot_retrieve_incident_of_other_plant(db):
 
 @pytest.mark.django_db
 def test_user_without_access_sees_no_incidents(db, plant, incident):
-    """Utente senza UserPlantAccess → lista vuota."""
+    """Utente senza UserPlantAccess → 403 (RBAC permission F1)."""
     no_access = User.objects.create_user(
         username="noaccinc", email="noaccinc@inc.test", password="x",
     )
     c = APIClient()
     c.force_authenticate(user=no_access)
     resp = c.get(URL)
-    assert resp.status_code == 200
-    assert resp.data["results"] == []
+    assert resp.status_code == 403

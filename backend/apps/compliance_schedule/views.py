@@ -1,11 +1,11 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.utils.translation import gettext as _
 
 from .models import ComplianceSchedulePolicy, ScheduleRule, RequiredDocument, DEFAULT_RULES, RULE_TYPE_LABELS, RULE_CATEGORIES
+from .permissions import CompliancePolicyPermission
 from .serializers import (
     ComplianceSchedulePolicySerializer,
     ScheduleRuleSerializer,
@@ -16,7 +16,7 @@ from .serializers import (
 class ComplianceSchedulePolicyViewSet(viewsets.ModelViewSet):
     queryset = ComplianceSchedulePolicy.objects.prefetch_related("rules")
     serializer_class = ComplianceSchedulePolicySerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CompliancePolicyPermission]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -66,7 +66,7 @@ class ComplianceSchedulePolicyViewSet(viewsets.ModelViewSet):
 class RequiredDocumentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = RequiredDocument.objects.all()
     serializer_class = RequiredDocumentSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CompliancePolicyPermission]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -77,7 +77,7 @@ class RequiredDocumentViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class ActivityScheduleView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CompliancePolicyPermission]
 
     def get(self, request):
         from .services import get_activity_schedule
@@ -92,7 +92,7 @@ class ActivityScheduleView(APIView):
 
 
 class RequiredDocumentsStatusView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CompliancePolicyPermission]
 
     def get(self, request):
         from .services import get_required_documents_status
@@ -117,7 +117,7 @@ class RequiredDocumentsStatusView(APIView):
 
 
 class RuleTypeCatalogueView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CompliancePolicyPermission]
 
     def get(self, request):
         return Response({

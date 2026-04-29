@@ -15,7 +15,10 @@ URL_RULE_TYPES = "/api/v1/schedule/rule-types/"
 
 @pytest.fixture
 def user(db):
-    return User.objects.create_user(username="csx_user", email="csx@test.com", password="test")
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    u = User.objects.create_user(username="csx_user", email="csx@test.com", password="test")
+    UserPlantAccess.objects.create(user=u, role=GrcRole.COMPLIANCE_OFFICER, scope_type="org")
+    return u
 
 
 @pytest.fixture

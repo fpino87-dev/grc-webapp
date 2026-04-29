@@ -1,7 +1,6 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -10,13 +9,14 @@ from core.audit import log_action
 from core.scoping import scope_queryset_by_plant
 
 from .models import MODELS_BY_PROVIDER, AiProviderConfig
+from .permissions import AiEnginePermission
 from .serializers import AiProviderConfigReadSerializer, AiProviderConfigSerializer
 
 
 class AiProviderConfigViewSet(viewsets.ModelViewSet):
     queryset = AiProviderConfig.objects.all()
     serializer_class = AiProviderConfigSerializer
-    permission_classes = [IsAuthenticated, IsGrcSuperAdmin]
+    permission_classes = [IsGrcSuperAdmin]
     filter_backends = [DjangoFilterBackend]
 
     def get_serializer_class(self):
@@ -65,7 +65,7 @@ class AiProviderConfigViewSet(viewsets.ModelViewSet):
 
 
 class AiSuggestView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AiEnginePermission]
 
     def post(self, request):
         from .tasks_ai import classify_incident, draft_rca, suggest_gap_actions
@@ -113,7 +113,7 @@ class AiSuggestView(APIView):
 
 
 class AiConfirmView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AiEnginePermission]
 
     def post(self, request):
         from .router import confirm_output, ignore_output

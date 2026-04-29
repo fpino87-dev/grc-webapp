@@ -1,12 +1,12 @@
 from rest_framework import viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
 from core.audit import log_action
 from core.scoping import PlantScopedQuerysetMixin
 from .models import LessonLearned
+from .permissions import LessonLearnedPermission
 from .serializers import LessonLearnedSerializer
 from . import services
 
@@ -14,7 +14,7 @@ from . import services
 class LessonLearnedViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = LessonLearned.objects.all()
     serializer_class = LessonLearnedSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [LessonLearnedPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["plant", "status", "category"]
     search_fields = ["title", "description"]

@@ -1,7 +1,6 @@
 from rest_framework import viewsets, status, filters, parsers
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import FileResponse, Http404
 from django.core.files.storage import default_storage
@@ -11,6 +10,7 @@ import os
 from core.scoping import PlantScopedQuerysetMixin, get_user_plant_ids
 
 from .models import Document, DocumentVersion, Evidence
+from .permissions import DocumentPermission
 from .serializers import (
     DocumentApprovalSerializer,
     DocumentSerializer,
@@ -25,6 +25,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
         "plant", "owner", "reviewer", "approver"
     ).prefetch_related("versions", "shared_plants")
     serializer_class = DocumentSerializer
+    permission_classes = [DocumentPermission]
     filterset_fields = ["status", "category", "is_mandatory"]
     search_fields = ["title"]
 
@@ -207,6 +208,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
 class DocumentVersionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = DocumentVersion.objects.select_related("document", "uploaded_by")
     serializer_class = DocumentVersionSerializer
+    permission_classes = [DocumentPermission]
     filterset_fields = ["document"]
     plant_field = "document__plant"
     allow_null_plant = True  # versioni di documenti org-wide visibili a tutti
@@ -220,7 +222,7 @@ class EvidenceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         "control_instances__control__framework"
     )
     serializer_class = EvidenceSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [DocumentPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["evidence_type"]
     search_fields = ["title", "description"]

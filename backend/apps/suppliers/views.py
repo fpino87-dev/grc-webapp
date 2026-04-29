@@ -5,7 +5,6 @@ import re
 from django.http import HttpResponse
 from rest_framework import filters, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
@@ -21,6 +20,7 @@ from .models import (
     QuestionnaireTemplate,
     SupplierQuestionnaire,
 )
+from .permissions import SupplierPermission
 from .serializers import (
     SupplierAssessmentSerializer,
     SupplierEvaluationConfigSerializer,
@@ -34,7 +34,7 @@ from .serializers import (
 class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = Supplier.objects.all()
     serializer_class = SupplierSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [SupplierPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["risk_level", "risk_adj", "status", "nis2_relevant"]
     search_fields = ["name", "vat_number"]
@@ -409,10 +409,10 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 
 class SupplierEvaluationConfigView(APIView):
     """
-    GET  /suppliers/evaluation-config/  → restituisce la config corrente (read = ogni utente autenticato).
+    GET  /suppliers/evaluation-config/  → restituisce la config corrente (read = ruoli governance fornitori).
     PUT  /suppliers/evaluation-config/  → aggiorna pesi/label/soglie (write = solo super_admin GRC).
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [SupplierPermission]
 
     def get(self, request):
         config = SupplierEvaluationConfig.get_solo()
@@ -452,7 +452,7 @@ class SupplierAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet)
         deleted_at__isnull=True
     ).select_related("supplier", "assessed_by", "reviewed_by")
     serializer_class = SupplierAssessmentSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [SupplierPermission]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["supplier"]
     plant_field = "supplier__plants"
@@ -528,7 +528,7 @@ class SupplierAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet)
 class QuestionnaireTemplateViewSet(viewsets.ModelViewSet):
     queryset = QuestionnaireTemplate.objects.filter(deleted_at__isnull=True)
     serializer_class = QuestionnaireTemplateSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [SupplierPermission]
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
@@ -544,7 +544,7 @@ class SupplierQuestionnaireViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewS
         deleted_at__isnull=True
     ).select_related("supplier", "template", "sent_by")
     serializer_class = SupplierQuestionnaireSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [SupplierPermission]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["supplier", "status"]
     plant_field = "supplier__plants"

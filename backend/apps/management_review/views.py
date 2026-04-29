@@ -1,12 +1,12 @@
 from rest_framework import viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
 from core.audit import log_action
 from core.scoping import PlantScopedQuerysetMixin
 from .models import ManagementReview, ReviewAction
+from .permissions import ManagementReviewPermission
 from .serializers import ManagementReviewSerializer, ReviewActionSerializer
 from . import services
 
@@ -14,7 +14,7 @@ from . import services
 class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = ManagementReview.objects.all()
     serializer_class = ManagementReviewSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ManagementReviewPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["plant", "status"]
     search_fields = ["title"]
@@ -93,7 +93,7 @@ class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 class ReviewActionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = ReviewAction.objects.all()
     serializer_class = ReviewActionSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ManagementReviewPermission]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["review"]
     plant_field = "review__plant"

@@ -2,11 +2,15 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
 
 from core.scoping import PlantScopedQuerysetMixin
 
 from .models import Control, ControlDomain, ControlInstance, Framework
+from .permissions import (
+    ControlInstancePermission,
+    ControlsReportPermission,
+    FrameworkPermission,
+)
 from .serializers import (
     ControlDomainSerializer,
     ControlInstanceSerializer,
@@ -17,7 +21,7 @@ from .serializers import (
 
 class FrameworkViewSet(viewsets.ModelViewSet):
     serializer_class   = FrameworkSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [FrameworkPermission]
 
     def get_queryset(self):
         plant_id = self.request.query_params.get("plant")
@@ -120,11 +124,13 @@ class FrameworkViewSet(viewsets.ModelViewSet):
 class ControlDomainViewSet(viewsets.ModelViewSet):
     queryset = ControlDomain.objects.select_related("framework")
     serializer_class = ControlDomainSerializer
+    permission_classes = [FrameworkPermission]
 
 
 class ControlViewSet(viewsets.ModelViewSet):
     queryset = Control.objects.select_related("framework", "domain")
     serializer_class = ControlSerializer
+    permission_classes = [FrameworkPermission]
 
     @action(detail=True, methods=["post"], url_path="explain")
     def explain(self, request, pk=None):
@@ -231,6 +237,7 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         "evidences",
     ).order_by("control__framework__code", "control__external_id")
     serializer_class = ControlInstanceSerializer
+    permission_classes = [ControlInstancePermission]
     plant_field = "plant"
 
     def destroy(self, request, *args, **kwargs):
@@ -563,7 +570,7 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 
 
 class GapAnalysisView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ControlsReportPermission]
 
     def get(self, request):
         from .services import gap_analysis
@@ -579,7 +586,7 @@ class GapAnalysisView(APIView):
 
 
 class ComplianceExportView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ControlsReportPermission]
 
     def get_format_suffix(self, **kwargs):
         # DRF usa 'format' come URL_FORMAT_OVERRIDE e lo intercetta dai query params.

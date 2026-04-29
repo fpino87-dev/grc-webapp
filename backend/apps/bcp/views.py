@@ -1,7 +1,6 @@
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from django.db.models import Q
@@ -10,6 +9,7 @@ from core.audit import log_action
 from core.scoping import PlantScopedQuerysetMixin
 from apps.bia.serializers import CriticalProcessSerializer
 from .models import BcpPlan, BcpTest
+from .permissions import BcpPermission
 from .serializers import BcpPlanSerializer, BcpTestSerializer
 from . import services
 from apps.auth_grc.models import GrcRole, UserPlantAccess
@@ -19,7 +19,7 @@ from apps.governance.models import NormativeRole, RoleAssignment
 class BcpPlanViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = BcpPlan.objects.all()
     serializer_class = BcpPlanSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [BcpPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["plant", "status"]
     search_fields = ["title"]
@@ -226,7 +226,7 @@ class BcpPlanViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 class BcpTestViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = BcpTest.objects.all()
     serializer_class = BcpTestSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [BcpPermission]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["plan"]
     plant_field = "plan__plant"
