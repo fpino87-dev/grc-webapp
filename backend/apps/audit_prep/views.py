@@ -28,6 +28,31 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)
+        # Seeding automatico per i framework TISAX gerarchici (L3/PROTO):
+        # gli EvidenceItem coprono anche il livello inferiore (L2 estesa da L3,
+        # L2+L3 estesi da PROTO). Per gli altri framework il seed resta opzionale
+        # e a carico dell'utente, per non alterare il flusso manuale esistente.
+        fw_code = instance.framework.code if instance.framework_id else None
+        if fw_code in ("TISAX_L3", "TISAX_PROTO"):
+            from .framework_hierarchy import expand_tisax
+            from .services import seed_evidence_items_for_prep
+            seed_evidence_items_for_prep(
+                instance,
+                framework_codes=[fw_code],
+                coverage_type=instance.coverage_type or "campione",
+                user=self.request.user,
+            )
+            log_action(
+                user=self.request.user,
+                action_code="audit_prep.evidence.auto_seeded",
+                level="L2",
+                entity=instance,
+                payload={
+                    "frameworks_requested": [fw_code],
+                    "frameworks_expanded": expand_tisax([fw_code]),
+                    "items_count": instance.evidence_items.count(),
+                },
+            )
         log_action(
             user=self.request.user,
             action_code="audit_prep.auditprep.create",
@@ -133,6 +158,67 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             payload={"title": prep.title},
         )
         return Response({"ok": True, "status": "completato"})
+
+    @action(detail=True, methods=["post"], url_path="sync-controls")
+    def sync_controls(self, request, pk=None):
+        """Allinea il prep ai controlli previsti dall'espansione gerarchica
+        del framework. Tipico caso d'uso: prep TISAX_L3 creato prima della fix
+        contiene solo i controlli L3 — questa azione aggiunge gli `EvidenceItem`
+        per i controlli L2 (e PROTO->L2+L3) ancora mancanti, senza toccare
+        quelli gia' presenti. Idempotente.
+        """
+        from .framework_hierarchy import expand_tisax
+        from .services import seed_evidence_items_for_prep
+
+        prep = self.get_object()
+        if prep.status == "archiviato":
+            return Response(
+                {"error": "Prep archiviato: sincronizzazione non disponibile."},
+                status=400,
+            )
+
+        fw_code = prep.framework.code if prep.framework_id else None
+        if not fw_code:
+            return Response(
+                {"error": "Prep senza framework: impossibile espandere la gerarchia."},
+                status=400,
+            )
+
+        expanded = expand_tisax([fw_code])
+        if len(expanded) <= 1:
+            return Response({
+                "ok": True,
+                "added": 0,
+                "frameworks_requested": [fw_code],
+                "frameworks_expanded": expanded,
+                "note": "Framework non gerarchico: nessun controllo da aggiungere.",
+            })
+
+        added = seed_evidence_items_for_prep(
+            prep,
+            framework_codes=[fw_code],
+            coverage_type=prep.coverage_type or "campione",
+            user=request.user,
+            only_missing=True,
+        )
+
+        log_action(
+            user=request.user,
+            action_code="audit_prep.evidence.synced",
+            level="L2",
+            entity=prep,
+            payload={
+                "frameworks_requested": [fw_code],
+                "frameworks_expanded": expanded,
+                "items_added": added,
+            },
+        )
+        return Response({
+            "ok": True,
+            "added": added,
+            "frameworks_requested": [fw_code],
+            "frameworks_expanded": expanded,
+        })
 
     @action(detail=True, methods=["post"], url_path="auto-validate")
     def auto_validate(self, request, pk=None):

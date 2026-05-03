@@ -2084,7 +2084,17 @@
       "findings_created": "Otwarto ustaleń: {{count}}",
       "findings_skipped": "Już istniejących: {{count}}",
       "finding_auto_badge": "Auto",
-      "finding_auto_tooltip": "Ustalenie wygenerowane automatycznie przez walidację — sprawdź i uzasadnij, jeśli wciąż otwarte"
+      "finding_auto_tooltip": "Ustalenie wygenerowane automatycznie przez walidację — sprawdź i uzasadnij, jeśli wciąż otwarte",
+      "warning_missing_extended_title": "Brak kontroli rozszerzonego frameworka",
+      "warning_missing_extended_body": "Prep dotyczy {{requested}}, ale nie zawiera EvidenceItem dla frameworków {{missing}}. Walidacja może pominąć kontrole już spełnione na niższym poziomie. Użyj „Wyrównaj kontrole rozszerzonego frameworka” i uruchom ponownie."
+    },
+    "sync_controls": {
+      "button": "Wyrównaj kontrole rozszerzonego frameworka",
+      "tooltip": "Dodaje rekordy EvidenceItem dla brakujących kontroli L2 (oraz PROTO→L2+L3), zgodnie z hierarchią TISAX",
+      "in_progress": "Wyrównywanie…",
+      "summary_title": "Kontrole wyrównane",
+      "added": "Dodano kontroli: {{count}}",
+      "expanded": "Rozszerzone frameworki"
     },
     "no_evidence": "Brak przesłanych dowodów",
     "ev_missing_opt": "❌ Brakujący",
@@ -2272,7 +2282,19 @@
     "source_manual": "Ręcznie",
     "scope_plant": "Zakład",
     "scope_org": "Organizacja",
-    "scope_process": "Proces"
+    "scope_process": "Proces",
+    "delete": {
+      "button": "Usuń cykl",
+      "tooltip": "Logiczne usunięcie cyklu PDCA. Zablokowane, jeśli powiązane są otwarte ustalenia lub cykl jest już zamknięty.",
+      "modal_title": "Usuń cykl PDCA",
+      "modal_intro": "Zaraz logicznie usuniesz cykl „{{title}}”. Fazy zostaną usunięte kaskadowo; zamknięte ustalenia zachowują historię.",
+      "reason_label": "Powód usunięcia (min 10 znaków) *",
+      "reason_placeholder": "Np.: cykl utworzony przez pomyłkę, duplikat innego PDCA…",
+      "cancel_btn": "Anuluj",
+      "confirm_btn": "Potwierdź usunięcie",
+      "in_progress": "Usuwanie…",
+      "error_generic": "Błąd podczas usuwania cyklu."
+    }
   },
   "bcp": {
     "test_frequency_label": "Częstotliwość testu",

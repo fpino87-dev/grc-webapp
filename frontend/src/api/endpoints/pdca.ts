@@ -20,4 +20,6 @@ export const pdcaApi = {
     apiClient.get<{ results: PdcaCycle[] }>("/pdca/cycles/", { params }).then((r) => r.data),
   create: (data: Partial<PdcaCycle>) =>
     apiClient.post<PdcaCycle>("/pdca/cycles/", data).then((r) => r.data),
+  remove: (id: string, reason: string) =>
+    apiClient.delete(`/pdca/cycles/${id}/`, { data: { reason } }),
 };

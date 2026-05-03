@@ -71,12 +71,171 @@ def test_retrieve_cycle(client, cycle):
 
 
 @pytest.mark.django_db
-def test_delete_cycle(client, cycle):
+def test_delete_cycle_requires_reason(client, cycle):
+    """Cancellazione senza motivo (o motivo troppo corto) -> 400."""
     resp = client.delete(f"{URL_CYCLES}{cycle.id}/")
+    assert resp.status_code == 400
+
+    resp_short = client.delete(
+        f"{URL_CYCLES}{cycle.id}/",
+        data={"reason": "x"},
+        format="json",
+    )
+    assert resp_short.status_code == 400
+
+
+@pytest.mark.django_db
+def test_delete_cycle_soft_deletes_cycle_and_phases(client, cycle):
+    """Soft delete OK: ciclo e fasi marcate deleted_at, GET ritorna 404."""
+    from apps.pdca.models import PdcaCycle, PdcaPhase
+
+    assert cycle.phases.count() == 4
+    resp = client.delete(
+        f"{URL_CYCLES}{cycle.id}/",
+        data={"reason": "creato per errore — annullamento"},
+        format="json",
+    )
     assert resp.status_code == 204
-    # After delete, GET should return 404
+
+    # Default manager filtra deleted_at -> 404 in GET
     resp2 = client.get(f"{URL_CYCLES}{cycle.id}/")
     assert resp2.status_code == 404
+
+    # Recuperabile via all_with_deleted con flag valorizzato
+    raw = PdcaCycle.objects.all_with_deleted().get(pk=cycle.pk)
+    assert raw.deleted_at is not None
+
+    # Cascade: tutte le fasi sono soft-deleted
+    phases_remaining = PdcaPhase.objects.filter(cycle=cycle).count()
+    assert phases_remaining == 0
+    phases_all = PdcaPhase.objects.all_with_deleted().filter(cycle=cycle)
+    assert phases_all.count() == 4
+    assert all(p.deleted_at is not None for p in phases_all)
+
+
+@pytest.mark.django_db
+def test_delete_cycle_blocked_when_closed(client, cycle, user):
+    """Ciclo gia' chiuso -> 400, lesson learned dipende dal cycle.pk."""
+    cycle.fase_corrente = "chiuso"
+    cycle.save(update_fields=["fase_corrente"])
+    resp = client.delete(
+        f"{URL_CYCLES}{cycle.id}/",
+        data={"reason": "non importa, dovrebbe rifiutare"},
+        format="json",
+    )
+    assert resp.status_code == 400
+    assert "chiuso" in resp.json()["error"].lower()
+
+
+@pytest.mark.django_db
+def test_delete_cycle_blocked_with_open_finding(client, cycle, plant, user):
+    """Finding aperto collegato -> 400."""
+    from apps.audit_prep.models import AuditFinding, AuditPrep
+    from datetime import date
+
+    prep = AuditPrep.objects.create(
+        plant=plant, title="Audit",
+        audit_date=date.today(), status="in_corso", created_by=user,
+    )
+    AuditFinding.objects.create(
+        audit_prep=prep, pdca_cycle=cycle,
+        finding_type="major_nc", title="open finding",
+        description="d", audit_date=date.today(),
+        status="open", created_by=user,
+    )
+    resp = client.delete(
+        f"{URL_CYCLES}{cycle.id}/",
+        data={"reason": "non importa, dovrebbe rifiutare"},
+        format="json",
+    )
+    assert resp.status_code == 400
+    assert "finding" in resp.json()["error"].lower()
+
+
+@pytest.mark.django_db
+def test_delete_cycle_cascades_auto_generated_open_finding(client, cycle, plant, user):
+    """Finding aperti `auto_generated=True` non bloccano: vengono soft-deleted
+    insieme al ciclo (sono parte della stessa catena di auto-validazione)."""
+    from apps.audit_prep.models import AuditFinding, AuditPrep
+    from datetime import date
+
+    prep = AuditPrep.objects.create(
+        plant=plant, title="Audit",
+        audit_date=date.today(), status="in_corso", created_by=user,
+    )
+    auto_finding = AuditFinding.objects.create(
+        audit_prep=prep, pdca_cycle=cycle,
+        finding_type="minor_nc", title="auto-generated finding",
+        description="d", audit_date=date.today(),
+        status="open", auto_generated=True, created_by=user,
+    )
+    resp = client.delete(
+        f"{URL_CYCLES}{cycle.id}/",
+        data={"reason": "ciclo auto-generato non piu' necessario"},
+        format="json",
+    )
+    assert resp.status_code == 204
+
+    auto_finding.refresh_from_db()
+    assert auto_finding.deleted_at is not None
+
+
+@pytest.mark.django_db
+def test_delete_cycle_blocked_with_manual_open_finding_even_with_auto(
+    client, cycle, plant, user,
+):
+    """Mix: 1 manuale + 1 auto-generato aperti -> blocco a causa del manuale.
+    Il messaggio di errore deve specificare 'manuali'."""
+    from apps.audit_prep.models import AuditFinding, AuditPrep
+    from datetime import date
+
+    prep = AuditPrep.objects.create(
+        plant=plant, title="Audit",
+        audit_date=date.today(), status="in_corso", created_by=user,
+    )
+    AuditFinding.objects.create(
+        audit_prep=prep, pdca_cycle=cycle,
+        finding_type="major_nc", title="manual finding",
+        description="d", audit_date=date.today(),
+        status="open", auto_generated=False, created_by=user,
+    )
+    AuditFinding.objects.create(
+        audit_prep=prep, pdca_cycle=cycle,
+        finding_type="minor_nc", title="auto finding",
+        description="d", audit_date=date.today(),
+        status="open", auto_generated=True, created_by=user,
+    )
+    resp = client.delete(
+        f"{URL_CYCLES}{cycle.id}/",
+        data={"reason": "ciclo non piu' utile"},
+        format="json",
+    )
+    assert resp.status_code == 400
+    assert "manuali" in resp.json()["error"].lower()
+
+
+@pytest.mark.django_db
+def test_delete_cycle_allowed_with_only_closed_findings(client, cycle, plant, user):
+    """Finding gia' chiusi non bloccano la cancellazione."""
+    from apps.audit_prep.models import AuditFinding, AuditPrep
+    from datetime import date
+
+    prep = AuditPrep.objects.create(
+        plant=plant, title="Audit",
+        audit_date=date.today(), status="in_corso", created_by=user,
+    )
+    AuditFinding.objects.create(
+        audit_prep=prep, pdca_cycle=cycle,
+        finding_type="minor_nc", title="closed finding",
+        description="d", audit_date=date.today(),
+        status="closed", created_by=user,
+    )
+    resp = client.delete(
+        f"{URL_CYCLES}{cycle.id}/",
+        data={"reason": "ciclo doppio per errore"},
+        format="json",
+    )
+    assert resp.status_code == 204
 
 
 # ── advance action ────────────────────────────────────────────────────────

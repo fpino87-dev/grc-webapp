@@ -2084,7 +2084,17 @@
       "findings_created": "{{count}} constats ouverts",
       "findings_skipped": "{{count}} déjà présents",
       "finding_auto_badge": "Auto",
-      "finding_auto_tooltip": "Constat généré automatiquement par la validation — à revoir et motiver s'il est encore ouvert"
+      "finding_auto_tooltip": "Constat généré automatiquement par la validation — à revoir et motiver s'il est encore ouvert",
+      "warning_missing_extended_title": "Contrôles du référentiel étendu manquants",
+      "warning_missing_extended_body": "Le prep porte sur {{requested}} mais ne contient aucun EvidenceItem pour les référentiels {{missing}}. La validation peut donc ignorer les contrôles déjà couverts au niveau inférieur. Utilisez « Aligner les contrôles du référentiel étendu » puis relancez."
+    },
+    "sync_controls": {
+      "button": "Aligner les contrôles du référentiel étendu",
+      "tooltip": "Ajoute les EvidenceItem des contrôles L2 (et PROTO→L2+L3) encore manquants dans le prep, selon la hiérarchie TISAX",
+      "in_progress": "Alignement en cours…",
+      "summary_title": "Contrôles alignés",
+      "added": "{{count}} contrôles ajoutés",
+      "expanded": "Référentiels étendus"
     },
     "no_evidence": "Aucune preuve téléchargée",
     "ev_missing_opt": "❌ Manquant",
@@ -2272,7 +2282,19 @@
     "source_manual": "Manuel",
     "scope_plant": "Site",
     "scope_org": "Organisation",
-    "scope_process": "Processus"
+    "scope_process": "Processus",
+    "delete": {
+      "button": "Supprimer le cycle",
+      "tooltip": "Suppression logique du cycle PDCA. Bloquée si des constats ouverts y sont rattachés ou si le cycle est déjà clôturé.",
+      "modal_title": "Supprimer le cycle PDCA",
+      "modal_intro": "Vous êtes sur le point de supprimer logiquement le cycle « {{title}} ». Les phases sont supprimées en cascade ; les constats clôturés conservent leur historique.",
+      "reason_label": "Motif de suppression (min 10 caractères) *",
+      "reason_placeholder": "Ex. : cycle créé par erreur, doublon d'un autre PDCA…",
+      "cancel_btn": "Annuler",
+      "confirm_btn": "Confirmer la suppression",
+      "in_progress": "Suppression…",
+      "error_generic": "Erreur lors de la suppression du cycle."
+    }
   },
   "bcp": {
     "test_frequency_label": "Fréquence de test",

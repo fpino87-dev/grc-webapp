@@ -48,6 +48,14 @@ export interface AuditFinding {
   auto_generated: boolean;
 }
 
+export interface AutoValidateWarning {
+  code: "missing_extended_controls";
+  framework_requested: string;
+  frameworks_expanded: string[];
+  missing_frameworks: string[];
+  hint: string;
+}
+
 export interface AutoValidateResult {
   ok: boolean;
   evaluated: number;
@@ -57,6 +65,15 @@ export interface AutoValidateResult {
   findings_created: number;
   findings_skipped_existing: number;
   readiness_score: number;
+  warning?: AutoValidateWarning;
+}
+
+export interface SyncControlsResult {
+  ok: boolean;
+  added: number;
+  frameworks_requested: string[];
+  frameworks_expanded: string[];
+  note?: string;
 }
 
 export interface PlannedAudit {
@@ -149,5 +166,9 @@ export const auditPrepApi = {
   autoValidate: (id: string) =>
     apiClient.post<AutoValidateResult>(
       `/audit-prep/audit-preps/${id}/auto-validate/`
+    ).then(r => r.data),
+  syncControls: (id: string) =>
+    apiClient.post<SyncControlsResult>(
+      `/audit-prep/audit-preps/${id}/sync-controls/`
     ).then(r => r.data),
 };

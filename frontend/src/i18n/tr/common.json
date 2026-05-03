@@ -2084,7 +2084,17 @@
       "findings_created": "{{count}} bulgu açıldı",
       "findings_skipped": "{{count}} zaten mevcut",
       "finding_auto_badge": "Auto",
-      "finding_auto_tooltip": "Bulgu, hazırlık doğrulaması tarafından otomatik olarak oluşturuldu — hâlâ açıksa gözden geçir ve gerekçelendir"
+      "finding_auto_tooltip": "Bulgu, hazırlık doğrulaması tarafından otomatik olarak oluşturuldu — hâlâ açıksa gözden geçir ve gerekçelendir",
+      "warning_missing_extended_title": "Genişletilmiş çerçeve kontrolleri eksik",
+      "warning_missing_extended_body": "Hazırlık {{requested}} hedefinde ama {{missing}} çerçeveleri için EvidenceItem yok. Bu nedenle doğrulama, alt seviyede zaten karşılanmış kontrolleri gözden kaçırabilir. \"Genişletilmiş çerçeve kontrollerini hizala\" butonunu kullan ve yeniden çalıştır."
+    },
+    "sync_controls": {
+      "button": "Genişletilmiş çerçeve kontrollerini hizala",
+      "tooltip": "TISAX hiyerarşisine göre hazırlıkta hâlâ eksik olan L2 (ve PROTO→L2+L3) kontrolleri için EvidenceItem ekler",
+      "in_progress": "Hizalanıyor…",
+      "summary_title": "Kontroller hizalandı",
+      "added": "{{count}} kontrol eklendi",
+      "expanded": "Genişletilmiş çerçeveler"
     },
     "no_evidence": "Yüklenen kanıt yok",
     "ev_missing_opt": "❌ Eksik",
@@ -2272,7 +2282,19 @@
     "source_manual": "Manuel",
     "scope_plant": "Site",
     "scope_org": "Organizasyon",
-    "scope_process": "Süreç"
+    "scope_process": "Süreç",
+    "delete": {
+      "button": "Döngüyü sil",
+      "tooltip": "PDCA döngüsünün mantıksal silinmesi. Açık bulgular bağlıysa veya döngü zaten kapalıysa engellenir.",
+      "modal_title": "PDCA döngüsünü sil",
+      "modal_intro": "“{{title}}” döngüsünü mantıksal olarak silmek üzeresiniz. Fazlar kademeli olarak silinir; kapalı bulgular geçmişini korur.",
+      "reason_label": "Silme nedeni (min. 10 karakter) *",
+      "reason_placeholder": "Örn.: yanlışlıkla oluşturulan döngü, başka bir PDCA'nın kopyası…",
+      "cancel_btn": "İptal",
+      "confirm_btn": "Silmeyi onayla",
+      "in_progress": "Siliniyor…",
+      "error_generic": "Döngü silinirken hata oluştu."
+    }
   },
   "bcp": {
     "test_frequency_label": "Test sıklığı",

@@ -31,10 +31,73 @@ from django.utils import timezone
 
 from core.audit import log_action
 
+from .framework_hierarchy import expand_tisax
 from .models import AuditFinding, AuditPrep, EvidenceItem
 from .services import open_finding, update_readiness_score
 
 logger = logging.getLogger(__name__)
+
+
+def _detect_missing_extended_frameworks(prep: AuditPrep) -> dict | None:
+    """
+    Se il prep e' su un framework gerarchico (TISAX_L3/PROTO) e mancano
+    EvidenceItem dei livelli inferiori implicati, restituisce un payload di
+    warning. None se tutto OK (o framework non gerarchico).
+    """
+    if not prep.framework_id:
+        return None
+    code = prep.framework.code
+    expanded = expand_tisax([code])
+    if len(expanded) <= 1:
+        return None
+
+    covered_codes = set(
+        prep.evidence_items
+        .filter(deleted_at__isnull=True, control_instance__isnull=False)
+        .values_list("control_instance__control__framework__code", flat=True)
+    )
+    missing = [c for c in expanded if c not in covered_codes]
+    if not missing:
+        return None
+    return {
+        "code": "missing_extended_controls",
+        "framework_requested": code,
+        "frameworks_expanded": expanded,
+        "missing_frameworks": missing,
+        "hint": (
+            "Il prep e' su un framework gerarchico (L3/PROTO) ma non contiene "
+            "EvidenceItem per i livelli implicati. Usa 'sync-controls' per "
+            "allineare prima della validazione."
+        ),
+    }
+
+
+def _collect_validation_sources(ci):
+    """
+    Restituisce le `ControlInstance` da considerare come fonti valide per
+    questo controllo: l'istanza stessa + le istanze, sullo stesso plant, di
+    eventuali controlli che la estendono via `ControlMapping(relationship=
+    "extends")` (es. TISAX L3 estende L2 — un'evidenza L3 vale anche per L2).
+
+    La direzione e' una sola: L3 -> L2 (chi estende copre l'esteso). L'inverso
+    non vale: un'evidenza L2 non sostituisce un L3 piu' stringente.
+    """
+    from apps.controls.models import ControlInstance
+
+    sources = [ci]
+    extender_control_ids = list(
+        ci.control.mappings_to.filter(
+            relationship="extends",
+        ).values_list("source_control_id", flat=True)
+    )
+    if extender_control_ids:
+        extenders = ControlInstance.objects.filter(
+            plant=ci.plant,
+            control_id__in=extender_control_ids,
+            deleted_at__isnull=True,
+        ).select_related("control")
+        sources.extend(extenders)
+    return sources
 
 
 def _evaluate_evidence_item(item: EvidenceItem) -> tuple[str, list[str]]:
@@ -43,6 +106,9 @@ def _evaluate_evidence_item(item: EvidenceItem) -> tuple[str, list[str]]:
     "presente" / "scaduto" / "mancante". `reasons` e' una lista di
     bullet che spiega perche' (utile per audit log e UI).
     """
+    from apps.controls.models import ControlInstance
+    from apps.documents.models import Document, Evidence
+
     today = timezone.now().date()
     ci = item.control_instance
     reasons: list[str] = []
@@ -50,34 +116,42 @@ def _evaluate_evidence_item(item: EvidenceItem) -> tuple[str, list[str]]:
     if ci is None:
         return "mancante", ["Evidence item non collegato a nessun control_instance"]
 
+    sources = _collect_validation_sources(ci)
+    source_ci_ids = [s.pk for s in sources]
+    extender_codes = [
+        s.control.external_id for s in sources if s.pk != ci.pk
+    ]
+
     # Evidenza "valida" = senza scadenza (= permanente) oppure non ancora scaduta.
-    valid_evidences = ci.evidences.filter(deleted_at__isnull=True).filter(
-        Q(valid_until__isnull=True) | Q(valid_until__gte=today)
-    )
+    valid_evidences = Evidence.objects.filter(
+        control_instances__in=source_ci_ids,
+        deleted_at__isnull=True,
+    ).filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today)).distinct()
     has_valid_evidence = valid_evidences.exists()
 
-    expired_evidences = ci.evidences.filter(
+    expired_evidences = Evidence.objects.filter(
+        control_instances__in=source_ci_ids,
         deleted_at__isnull=True,
         valid_until__isnull=False,
         valid_until__lt=today,
-    )
+    ).distinct()
     has_expired_evidence = expired_evidences.exists()
 
     # Documento "valido" = approvato + (no expiry oppure expiry futura).
-    valid_docs = ci.documents.filter(
+    valid_docs = Document.objects.filter(
+        control_refs__in=source_ci_ids,
         deleted_at__isnull=True,
         status="approvato",
-    ).filter(
-        Q(expiry_date__isnull=True) | Q(expiry_date__gte=today)
-    )
+    ).filter(Q(expiry_date__isnull=True) | Q(expiry_date__gte=today)).distinct()
     has_valid_doc = valid_docs.exists()
 
-    expired_docs = ci.documents.filter(
+    expired_docs = Document.objects.filter(
+        control_refs__in=source_ci_ids,
         deleted_at__isnull=True,
         status="approvato",
         expiry_date__isnull=False,
         expiry_date__lt=today,
-    )
+    ).distinct()
     has_expired_doc = expired_docs.exists()
 
     open_major = AuditFinding.objects.filter(
@@ -94,6 +168,10 @@ def _evaluate_evidence_item(item: EvidenceItem) -> tuple[str, list[str]]:
     if has_valid_evidence and has_valid_doc:
         reasons.append(f"{valid_evidences.count()} evidenza/e valida/e")
         reasons.append(f"{valid_docs.count()} documento/i approvato/i e validi")
+        if extender_codes:
+            reasons.append(
+                "Coperto anche da controlli estendenti: " + ", ".join(extender_codes)
+            )
         return "presente", reasons
 
     if has_expired_evidence or has_expired_doc:
@@ -214,6 +292,10 @@ def auto_validate_prep(prep: AuditPrep, user) -> dict:
         update_readiness_score(prep)
         counters["readiness_score"] = prep.readiness_score or 0
 
+        warning = _detect_missing_extended_frameworks(prep)
+        if warning:
+            counters["warning"] = warning
+
         log_action(
             user=user,
             action_code="audit_prep.auto_validation.run",
@@ -221,7 +303,8 @@ def auto_validate_prep(prep: AuditPrep, user) -> dict:
             entity=prep,
             payload={
                 "title": prep.title,
-                **counters,
+                **{k: v for k, v in counters.items() if k != "warning"},
+                "warning_code": warning["code"] if warning else None,
             },
         )
 

@@ -9,6 +9,7 @@ import {
   type AutoValidateResult,
   type EvidenceItem,
   type PlannedAudit,
+  type SyncControlsResult,
 } from "../../api/endpoints/auditPrep";
 import { plantsApi } from "../../api/endpoints/plants";
 import { useAuthStore } from "../../store/auth";
@@ -65,6 +66,7 @@ function PrepDrawer({ prep, onClose }: { prep: AuditPrep; onClose: () => void })
   const [cancelReason, setCancelReason] = useState("");
   const [autoValidateModal, setAutoValidateModal] = useState(false);
   const [autoValidateResult, setAutoValidateResult] = useState<AutoValidateResult | null>(null);
+  const [syncResult, setSyncResult] = useState<SyncControlsResult | null>(null);
 
   const { data: evidences = [] } = useQuery<EvidenceItem[]>({
     queryKey: ["evidence", prep.id],
@@ -111,6 +113,17 @@ function PrepDrawer({ prep, onClose }: { prep: AuditPrep; onClose: () => void })
     },
   });
 
+  const syncControlsMutation = useMutation({
+    mutationFn: () => auditPrepApi.syncControls(prep.id),
+    onSuccess: (result) => {
+      setSyncResult(result);
+      qc.invalidateQueries({ queryKey: ["evidence", prep.id] });
+      qc.invalidateQueries({ queryKey: ["audit-prep"] });
+    },
+  });
+
+  const isHierarchicalFramework = prep.framework_code === "TISAX_L3" || prep.framework_code === "TISAX_PROTO";
+
   const openMajors = findings.filter(f => f.finding_type === "major_nc" && ["open", "in_response"].includes(f.status)).length;
 
   return (
@@ -153,15 +166,47 @@ function PrepDrawer({ prep, onClose }: { prep: AuditPrep; onClose: () => void })
             <div>
               <ReadinessBar score={prep.readiness_score} />
 
-              {prep.status === "in_corso" && evidences.length > 0 && (
-                <div className="mt-3 flex justify-end">
-                  <button
-                    onClick={() => { setAutoValidateResult(null); setAutoValidateModal(true); }}
-                    className="px-3 py-1.5 bg-indigo-600 text-white text-xs rounded hover:bg-indigo-700 flex items-center gap-1.5"
-                    title={t("audit_prep.auto_validate.tooltip")}
-                  >
-                    <span>🤖</span>{t("audit_prep.auto_validate.button")}
-                  </button>
+              {prep.status === "in_corso" && (
+                <div className="mt-3 flex flex-wrap justify-end gap-2">
+                  {isHierarchicalFramework && (
+                    <button
+                      onClick={() => syncControlsMutation.mutate()}
+                      disabled={syncControlsMutation.isPending}
+                      className="px-3 py-1.5 bg-amber-600 text-white text-xs rounded hover:bg-amber-700 disabled:opacity-50 flex items-center gap-1.5"
+                      title={t("audit_prep.sync_controls.tooltip")}
+                    >
+                      <span>🔁</span>
+                      {syncControlsMutation.isPending
+                        ? t("audit_prep.sync_controls.in_progress")
+                        : t("audit_prep.sync_controls.button")}
+                    </button>
+                  )}
+                  {evidences.length > 0 && (
+                    <button
+                      onClick={() => { setAutoValidateResult(null); setAutoValidateModal(true); }}
+                      className="px-3 py-1.5 bg-indigo-600 text-white text-xs rounded hover:bg-indigo-700 flex items-center gap-1.5"
+                      title={t("audit_prep.auto_validate.tooltip")}
+                    >
+                      <span>🤖</span>{t("audit_prep.auto_validate.button")}
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {syncResult && (
+                <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs">
+                  <div className="flex items-start justify-between">
+                    <div className="font-semibold text-amber-800 mb-1">
+                      {t("audit_prep.sync_controls.summary_title")}
+                    </div>
+                    <button onClick={() => setSyncResult(null)} className="text-amber-400 hover:text-amber-600">✕</button>
+                  </div>
+                  <div className="text-amber-800">
+                    {t("audit_prep.sync_controls.added", { count: syncResult.added })}
+                    {" · "}
+                    {t("audit_prep.sync_controls.expanded")}: <b>{syncResult.frameworks_expanded.join(", ")}</b>
+                  </div>
+                  {syncResult.note && <div className="text-amber-600 mt-1">{syncResult.note}</div>}
                 </div>
               )}
 
@@ -186,6 +231,17 @@ function PrepDrawer({ prep, onClose }: { prep: AuditPrep; onClose: () => void })
                     {" · "}
                     Readiness: <b>{autoValidateResult.readiness_score}/100</b>
                   </div>
+                  {autoValidateResult.warning?.code === "missing_extended_controls" && (
+                    <div className="mt-3 rounded border border-amber-300 bg-amber-50 p-2 text-amber-800">
+                      <div className="font-semibold mb-1">⚠️ {t("audit_prep.auto_validate.warning_missing_extended_title")}</div>
+                      <div>
+                        {t("audit_prep.auto_validate.warning_missing_extended_body", {
+                          requested: autoValidateResult.warning.framework_requested,
+                          missing: autoValidateResult.warning.missing_frameworks.join(", "),
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

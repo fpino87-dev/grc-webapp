@@ -5,6 +5,7 @@ import uuid
 from django.utils import timezone
 from core.audit import log_action
 
+from .framework_hierarchy import expand_tisax
 from .models import AuditPrep, AuditFinding
 
 DEADLINE_DAYS = {
@@ -334,23 +335,122 @@ def suggest_audit_plan(plant, frameworks, year: int,
     return planned
 
 
-def launch_audit_from_program(program, audit_entry: dict, user) -> "AuditPrep":
+def seed_evidence_items_for_prep(
+    prep: "AuditPrep",
+    framework_codes: list[str],
+    *,
+    scope_domains: list[str] | None = None,
+    coverage_type: str = "campione",
+    user=None,
+    seed_key: str | None = None,
+    only_missing: bool = False,
+) -> int:
     """
-    Crea un AuditPrep collegato a un audit pianificato nel programma annuale.
-    Precompila gli EvidenceItem in base ai domini e coverage_type.
-    Atomico: se un qualsiasi passo fallisce nessun record viene persistito.
+    Genera (o integra) gli `EvidenceItem` di un `AuditPrep` a partire dai
+    `ControlInstance` del plant, applicando l'espansione gerarchica TISAX.
+
+    - `framework_codes`: codici richiesti dall'utente (es. ["TISAX_L3"]). La
+      gerarchia TISAX viene applicata via `expand_tisax`.
+    - `scope_domains`: opzionale, restringe ai domini specificati (per code
+      o external_id).
+    - `coverage_type`: "campione" (~25%), "esteso" (~50%), "full" (100%).
+    - `seed_key`: chiave per il random deterministico (stessa scelta a parità
+      di chiave). Default: pk del prep.
+    - `only_missing`: se True, non crea EvidenceItem per ControlInstance gia'
+      presenti nel prep — usato dal sync per allineare prep esistenti.
+
+    Restituisce il numero di EvidenceItem creati.
     """
     import random as _rnd
-    from django.db import transaction
     from django.db.models import Q
     from apps.controls.models import ControlInstance, Framework
     from .models import EvidenceItem
 
+    expanded_codes = expand_tisax(framework_codes)
+    frameworks = list(Framework.objects.filter(code__in=expanded_codes))
+    if not frameworks:
+        return 0
+
+    seed_str = seed_key or str(prep.pk)
+    seed = int(hashlib.md5(seed_str.encode()).hexdigest(), 16) % (2 ** 31)
+    rng = _rnd.Random(seed)
+
+    existing_ci_ids: set = set()
+    if only_missing:
+        existing_ci_ids = set(
+            prep.evidence_items
+            .filter(deleted_at__isnull=True, control_instance__isnull=False)
+            .values_list("control_instance_id", flat=True)
+        )
+
+    items_to_create = []
+    for fw in frameworks:
+        instances = ControlInstance.objects.filter(
+            plant=prep.plant,
+            control__framework=fw,
+            deleted_at__isnull=True,
+        ).select_related("control__domain")
+
+        if scope_domains:
+            instances = instances.filter(
+                Q(control__domain__code__in=scope_domains) |
+                Q(control__domain__external_id__in=scope_domains)
+            )
+
+        instance_list = list(instances)
+
+        if coverage_type == "campione" and len(instance_list) > 10:
+            gaps = [i for i in instance_list if i.status in ("gap", "parziale")]
+            others = [i for i in instance_list if i.status not in ("gap", "parziale")]
+            rng.shuffle(others)
+            target = max(5, len(instance_list) // 4)
+            instance_list = gaps[:target] + others[:max(0, target - len(gaps))]
+        elif coverage_type == "esteso" and len(instance_list) > 10:
+            gaps = [i for i in instance_list if i.status in ("gap", "parziale")]
+            others = [i for i in instance_list if i.status not in ("gap", "parziale")]
+            rng.shuffle(others)
+            target = max(5, len(instance_list) // 2)
+            instance_list = gaps[:target] + others[:max(0, target - len(gaps))]
+
+        for inst in instance_list:
+            if only_missing and inst.pk in existing_ci_ids:
+                continue
+            items_to_create.append(EvidenceItem(
+                audit_prep=prep,
+                control_instance=inst,
+                description=(
+                    f"{inst.control.external_id} — "
+                    f"{inst.control.get_title('it')}"
+                ),
+                status="mancante",
+                created_by=user,
+            ))
+
+    EvidenceItem.objects.bulk_create(items_to_create, ignore_conflicts=True)
+    return len(items_to_create)
+
+
+def launch_audit_from_program(program, audit_entry: dict, user) -> "AuditPrep":
+    """
+    Crea un AuditPrep collegato a un audit pianificato nel programma annuale.
+    Precompila gli EvidenceItem applicando l'espansione gerarchica TISAX
+    (L3 -> L2+L3, PROTO -> L2+L3+PROTO) e il coverage_type richiesto.
+    Atomico: se un qualsiasi passo fallisce nessun record viene persistito.
+    """
+    from django.db import transaction
+    from apps.controls.models import Framework
+
     with transaction.atomic():
         fw_codes = audit_entry.get("framework_codes", [])
-        frameworks = list(Framework.objects.filter(code__in=fw_codes))
-        primary_fw = frameworks[0] if frameworks else None
+        # Primary framework = primo dei richiesti originali (non espansi):
+        # mantiene il "livello" scelto dall'utente nel titolo del prep.
+        primary_fw = None
+        for code in fw_codes:
+            primary_fw = Framework.objects.filter(code=code).first()
+            if primary_fw:
+                break
 
+        coverage_type = audit_entry.get("coverage_type", "campione")
         prep = AuditPrep.objects.create(
             plant=program.plant,
             framework=primary_fw,
@@ -360,62 +460,18 @@ def launch_audit_from_program(program, audit_entry: dict, user) -> "AuditPrep":
             status="in_corso",
             audit_program=program,
             audit_entry_id=audit_entry["id"],
-            coverage_type=audit_entry.get("coverage_type", "campione"),
+            coverage_type=coverage_type,
             created_by=user,
         )
 
-        scope_domains = audit_entry.get("scope_domains", [])
-        coverage_type = audit_entry.get("coverage_type", "campione")
-
-        # Seed deterministico: stessa selezione campione per questo audit
-        seed_str = f"{program.pk}-{audit_entry.get('quarter', 1)}"
-        seed = int(hashlib.md5(seed_str.encode()).hexdigest(), 16) % (2 ** 31)
-        rng = _rnd.Random(seed)
-
-        items_to_create = []
-        for fw in frameworks:
-            instances = ControlInstance.objects.filter(
-                plant=program.plant,
-                control__framework=fw,
-                deleted_at__isnull=True,
-            ).select_related("control__domain")
-
-            if scope_domains:
-                # Fix 3: fallback a external_id se domain.code è None
-                instances = instances.filter(
-                    Q(control__domain__code__in=scope_domains) |
-                    Q(control__domain__external_id__in=scope_domains)
-                )
-
-            instance_list = list(instances)
-
-            if coverage_type == "campione" and len(instance_list) > 10:
-                gaps = [i for i in instance_list if i.status in ("gap", "parziale")]
-                others = [i for i in instance_list if i.status not in ("gap", "parziale")]
-                rng.shuffle(others)
-                target = max(5, len(instance_list) // 4)
-                instance_list = gaps[:target] + others[:max(0, target - len(gaps))]
-            elif coverage_type == "esteso" and len(instance_list) > 10:
-                gaps = [i for i in instance_list if i.status in ("gap", "parziale")]
-                others = [i for i in instance_list if i.status not in ("gap", "parziale")]
-                rng.shuffle(others)
-                target = max(5, len(instance_list) // 2)
-                instance_list = gaps[:target] + others[:max(0, target - len(gaps))]
-
-            for inst in instance_list:
-                items_to_create.append(EvidenceItem(
-                    audit_prep=prep,
-                    control_instance=inst,
-                    description=(
-                        f"{inst.control.external_id} — "
-                        f"{inst.control.get_title('it')}"
-                    ),
-                    status="mancante",
-                    created_by=user,
-                ))
-
-        # Un singolo INSERT invece di N INSERT separati
-        EvidenceItem.objects.bulk_create(items_to_create, ignore_conflicts=True)
+        items_count = seed_evidence_items_for_prep(
+            prep,
+            framework_codes=fw_codes,
+            scope_domains=audit_entry.get("scope_domains", []),
+            coverage_type=coverage_type,
+            user=user,
+            seed_key=f"{program.pk}-{audit_entry.get('quarter', 1)}",
+        )
 
         # Aggiorna audit_prep_id nel JSON del programma
         audits = list(program.planned_audits)
@@ -437,7 +493,9 @@ def launch_audit_from_program(program, audit_entry: dict, user) -> "AuditPrep":
                 "program_id": str(program.pk),
                 "quarter": audit_entry["quarter"],
                 "coverage": coverage_type,
-                "controls_count": len(items_to_create),
+                "controls_count": items_count,
+                "frameworks_requested": list(fw_codes),
+                "frameworks_expanded": expand_tisax(fw_codes),
             },
         )
     return prep

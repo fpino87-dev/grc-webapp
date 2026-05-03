@@ -1,10 +1,87 @@
 import { useState, Fragment } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { pdcaApi, type PdcaCycle } from "../../api/endpoints/pdca";
 import { plantsApi } from "../../api/endpoints/plants";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { apiClient } from "../../api/client";
 import i18n from "../../i18n";
+
+function DeleteCycleButton({ cycle }: { cycle: PdcaCycle }) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const [error, setError] = useState("");
+
+  const deleteMutation = useMutation({
+    mutationFn: () => pdcaApi.remove(cycle.id, reason.trim()),
+    onSuccess: () => {
+      setOpen(false);
+      setReason("");
+      setError("");
+      qc.invalidateQueries({ queryKey: ["pdca"] });
+    },
+    onError: (e: unknown) => {
+      const msg =
+        (e as { response?: { data?: { error?: string } } })?.response?.data?.error
+        || t("pdca.delete.error_generic");
+      setError(String(msg));
+    },
+  });
+
+  if (cycle.fase_corrente === "chiuso") return null;
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => { setError(""); setOpen(true); }}
+        title={t("pdca.delete.tooltip")}
+        className="px-2 py-1 text-[11px] rounded-md text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200"
+      >
+        🗑 {t("pdca.delete.button")}
+      </button>
+      {open && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+            <h3 className="text-lg font-semibold mb-2">{t("pdca.delete.modal_title")}</h3>
+            <p className="text-sm text-gray-600 mb-3">{t("pdca.delete.modal_intro", { title: cycle.title })}</p>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t("pdca.delete.reason_label")}
+            </label>
+            <textarea
+              className="w-full border rounded px-3 py-2 text-sm min-h-[80px]"
+              value={reason}
+              onChange={e => setReason(e.target.value)}
+              placeholder={t("pdca.delete.reason_placeholder")}
+            />
+            {error && (
+              <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-2">{error}</p>
+            )}
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                type="button"
+                onClick={() => { setOpen(false); setError(""); }}
+                className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50"
+              >
+                {t("pdca.delete.cancel_btn")}
+              </button>
+              <button
+                type="button"
+                onClick={() => deleteMutation.mutate()}
+                disabled={reason.trim().length < 10 || deleteMutation.isPending}
+                className="px-4 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleteMutation.isPending ? t("pdca.delete.in_progress") : t("pdca.delete.confirm_btn")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
 
 function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
   const qc = useQueryClient();
@@ -443,7 +520,10 @@ export function PdcaPage() {
                     <PhaseStepper cycle={c as any} />
                   </td>
                   <td className="px-4 py-3">
-                    <AdvanceButtons cycle={c as any} onUpdated={() => {}} />
+                    <div className="flex flex-col gap-2 items-start">
+                      <AdvanceButtons cycle={c as any} onUpdated={() => {}} />
+                      <DeleteCycleButton cycle={c} />
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-gray-500 text-xs">
                     {new Date(c.created_at).toLocaleDateString(i18n.language || "it")}

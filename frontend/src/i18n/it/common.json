@@ -2005,7 +2005,17 @@
       "findings_created": "{{count}} finding aperti",
       "findings_skipped": "{{count}} già presenti",
       "finding_auto_badge": "Auto",
-      "finding_auto_tooltip": "Finding generato automaticamente dalla validazione del prep — rivedi e motiva se ancora aperto"
+      "finding_auto_tooltip": "Finding generato automaticamente dalla validazione del prep — rivedi e motiva se ancora aperto",
+      "warning_missing_extended_title": "Controlli del framework esteso mancanti",
+      "warning_missing_extended_body": "Il prep è su {{requested}} ma non contiene EvidenceItem per i framework {{missing}}. La validazione potrebbe quindi non riflettere i controlli già completi al livello inferiore. Usa \"Allinea controlli framework esteso\" e rilancia."
+    },
+    "sync_controls": {
+      "button": "Allinea controlli framework esteso",
+      "tooltip": "Aggiunge gli EvidenceItem dei controlli L2 (e PROTO→L2+L3) ancora mancanti nel prep, secondo la gerarchia TISAX",
+      "in_progress": "Allineamento in corso…",
+      "summary_title": "Allineamento controlli completato",
+      "added": "{{count}} controlli aggiunti",
+      "expanded": "Framework espansi"
     },
     "no_evidence": "Nessuna evidenza caricata",
     "ev_missing_opt": "❌ Mancante",
@@ -2193,7 +2203,19 @@
     "source_manual": "Manuale",
     "scope_plant": "Sito",
     "scope_org": "Organizzazione",
-    "scope_process": "Processo"
+    "scope_process": "Processo",
+    "delete": {
+      "button": "Cancella ciclo",
+      "tooltip": "Cancellazione logica del ciclo PDCA. Bloccata se ci sono finding aperti collegati o se il ciclo è già chiuso.",
+      "modal_title": "Cancella ciclo PDCA",
+      "modal_intro": "Stai per cancellare logicamente il ciclo «{{title}}». Le fasi vengono soft-deleted in cascata; i finding chiusi mantengono lo storico.",
+      "reason_label": "Motivo cancellazione (min 10 caratteri) *",
+      "reason_placeholder": "Es: ciclo creato per errore, duplicato di un altro PDCA…",
+      "cancel_btn": "Annulla",
+      "confirm_btn": "Conferma cancellazione",
+      "in_progress": "Cancellazione…",
+      "error_generic": "Errore durante la cancellazione del ciclo."
+    }
   },
   "bcp": {
     "test_frequency_label": "Frequenza test",

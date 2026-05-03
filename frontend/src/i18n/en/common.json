@@ -2005,7 +2005,17 @@
       "findings_created": "{{count}} findings opened",
       "findings_skipped": "{{count}} already present",
       "finding_auto_badge": "Auto",
-      "finding_auto_tooltip": "Finding generated automatically by prep validation — review and justify if still open"
+      "finding_auto_tooltip": "Finding generated automatically by prep validation — review and justify if still open",
+      "warning_missing_extended_title": "Extended framework controls missing",
+      "warning_missing_extended_body": "The prep targets {{requested}} but contains no EvidenceItem for frameworks {{missing}}. Validation may therefore overlook controls already fulfilled at the lower level. Use \"Sync extended framework controls\" and re-run."
+    },
+    "sync_controls": {
+      "button": "Sync extended framework controls",
+      "tooltip": "Adds EvidenceItem records for L2 (and PROTO→L2+L3) controls still missing in the prep, per TISAX hierarchy",
+      "in_progress": "Syncing…",
+      "summary_title": "Controls synced",
+      "added": "{{count}} controls added",
+      "expanded": "Expanded frameworks"
     },
     "no_evidence": "No evidence uploaded",
     "ev_missing_opt": "❌ Missing",
@@ -2193,7 +2203,19 @@
     "source_manual": "Manual",
     "scope_plant": "Site",
     "scope_org": "Organization",
-    "scope_process": "Process"
+    "scope_process": "Process",
+    "delete": {
+      "button": "Delete cycle",
+      "tooltip": "Soft-delete of the PDCA cycle. Blocked if open findings reference it or the cycle is already closed.",
+      "modal_title": "Delete PDCA cycle",
+      "modal_intro": "You are about to soft-delete the cycle “{{title}}”. Phases are cascaded; closed findings keep their history.",
+      "reason_label": "Deletion reason (min 10 characters) *",
+      "reason_placeholder": "E.g.: cycle created by mistake, duplicate of another PDCA…",
+      "cancel_btn": "Cancel",
+      "confirm_btn": "Confirm deletion",
+      "in_progress": "Deleting…",
+      "error_generic": "Error while deleting the cycle."
+    }
   },
   "bcp": {
     "test_frequency_label": "Test frequency",
