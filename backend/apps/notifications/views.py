@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.auth_grc.permissions import IsGrcSuperAdmin
+from core.audit import log_action
 
 from . import services
 from .models import (
@@ -37,6 +38,27 @@ class NotificationSubscriptionViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user, created_by=self.request.user)
 
 
+# newfix F2 — campi sensibili la cui modifica deve produrre audit `notif.smtp.config.changed`.
+# Il payload non contiene mai la password (campo write-only nel serializer + censurato qui).
+_SMTP_AUDITED_FIELDS = (
+    "host", "port", "username", "use_tls", "use_ssl",
+    "from_email", "reply_to", "use_auth", "blank_username",
+)
+
+
+def _smtp_audit_payload(config: "EmailConfiguration", event: str) -> dict:
+    return {
+        "event": event,
+        "config_id": str(config.pk),
+        "host": config.host,
+        "port": config.port,
+        "username_present": bool((config.username or "").strip()),
+        "use_tls": config.use_tls,
+        "use_ssl": config.use_ssl,
+        "from_email": config.from_email,
+    }
+
+
 class EmailConfigurationViewSet(viewsets.ModelViewSet):
     queryset = EmailConfiguration.objects.all()
     serializer_class = EmailConfigurationSerializer
@@ -46,6 +68,36 @@ class EmailConfigurationViewSet(viewsets.ModelViewSet):
         if self.action in ("list", "retrieve"):
             return EmailConfigurationReadSerializer
         return EmailConfigurationSerializer
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        log_action(
+            user=self.request.user,
+            action_code="notif.smtp.config.changed",
+            level="L2",
+            entity=instance,
+            payload=_smtp_audit_payload(instance, "created"),
+        )
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        log_action(
+            user=self.request.user,
+            action_code="notif.smtp.config.changed",
+            level="L2",
+            entity=instance,
+            payload=_smtp_audit_payload(instance, "updated"),
+        )
+
+    def perform_destroy(self, instance):
+        log_action(
+            user=self.request.user,
+            action_code="notif.smtp.config.changed",
+            level="L2",
+            entity=instance,
+            payload=_smtp_audit_payload(instance, "deleted"),
+        )
+        instance.delete()
 
     @action(detail=True, methods=["post"], url_path="test")
     def test_connection(self, request, pk=None):
@@ -67,6 +119,30 @@ class NotificationRuleViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsGrcSuperAdmin]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["event_type", "enabled", "scope_type"]
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        log_action(
+            user=self.request.user,
+            action_code="notif.smtp.config.changed",
+            level="L2",
+            entity=instance,
+            payload={"event": "rule_created", "rule_id": str(instance.pk),
+                     "event_type": instance.event_type, "enabled": instance.enabled,
+                     "scope_type": instance.scope_type},
+        )
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        log_action(
+            user=self.request.user,
+            action_code="notif.smtp.config.changed",
+            level="L2",
+            entity=instance,
+            payload={"event": "rule_updated", "rule_id": str(instance.pk),
+                     "event_type": instance.event_type, "enabled": instance.enabled,
+                     "scope_type": instance.scope_type},
+        )
 
 
 class NotificationRoleProfileViewSet(viewsets.ModelViewSet):

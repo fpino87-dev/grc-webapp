@@ -28,6 +28,45 @@ def _mfa_lock_key(user_pk) -> str:
     return f"mfa:lock:{user_pk}"
 
 
+# newfix F2 — audit logging su accessi privilegiati (ISO 27001 A.9.4.4 + A.12.4.3).
+# `auth.login.success` traccia ogni emissione di JWT (path: senza MFA / con MFA /
+# bypass via TrustedDevice). `auth.login.failure` traccia tentativi falliti per
+# account esistenti (le email mai registrate non producono record per non
+# generare rumore + non esporre la lista utenti via differenza di logging).
+def _audit_login(user, *, success: bool, request=None, extra: dict | None = None) -> None:
+    if user is None:
+        return
+    try:
+        from core.audit import log_action
+        payload = {
+            "ip": (request.META.get("REMOTE_ADDR") or "") if request is not None else "",
+            "user_agent": (request.META.get("HTTP_USER_AGENT") or "")[:200] if request is not None else "",
+        }
+        if extra:
+            payload.update(extra)
+        log_action(
+            user=user,
+            action_code="auth.login.success" if success else "auth.login.failure",
+            level="L1" if success else "L2",
+            entity=user,
+            payload=payload,
+        )
+    except Exception:
+        # L'audit non deve bloccare il login: se il DB e' indisponibile, l'evento
+        # finisce comunque a Sentry tramite il middleware di error monitoring.
+        pass
+
+
+def _resolve_user_by_email(email: str):
+    """Ritorna l'utente con email matching o None. Usato per audit fallimenti
+    login: solo gli account registrati producono `auth.login.failure`."""
+    if not email:
+        return None
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    return User.objects.filter(email__iexact=email).first()
+
+
 class LoginRateThrottle(AnonRateThrottle):
     scope = "login"
 
@@ -142,6 +181,14 @@ class GrcTokenObtainPairView(TokenObtainPairView):
         try:
             serializer.is_valid(raise_exception=True)
         except Exception:
+            # newfix F2 — log fallimento login (solo se l'email corrisponde a un
+            # utente esistente, per non generare rumore/leak su email random).
+            email_attempted = (request.data.get("email") or request.data.get("username") or "")
+            failed_user = _resolve_user_by_email(email_attempted)
+            _audit_login(
+                failed_user, success=False, request=request,
+                extra={"reason": "invalid_credentials"},
+            )
             return Response(
                 {"detail": "Credenziali non valide."},
                 status=status.HTTP_401_UNAUTHORIZED,
@@ -159,6 +206,10 @@ class GrcTokenObtainPairView(TokenObtainPairView):
                 if TrustedDevice.verify(
                     user, device_token, fingerprint_source=_fingerprint_source(request),
                 ):
+                    _audit_login(
+                        user, success=True, request=request,
+                        extra={"path": "trusted_device"},
+                    )
                     return Response(_issue_jwt(user), status=status.HTTP_200_OK)
 
             # Utente ha MFA attivo: emetti un token temporaneo, NON il JWT
@@ -172,6 +223,7 @@ class GrcTokenObtainPairView(TokenObtainPairView):
             )
 
         # Nessun device — emetti JWT direttamente
+        _audit_login(user, success=True, request=request, extra={"path": "no_mfa"})
         return Response(_issue_jwt(user), status=status.HTTP_200_OK)
 
 
@@ -232,6 +284,12 @@ class MfaVerifyView(APIView):
                 break
 
         if not verified:
+            # newfix F2 — log fallimento OTP (audit prima del lockout, cosi'
+            # l'auditor vede la sequenza di tentativi falliti).
+            _audit_login(
+                user, success=False, request=request,
+                extra={"reason": "mfa_otp_invalid"},
+            )
             # newfix S9 — incrementa counter per-utente; al raggiungimento
             # della soglia attiva il lock 1h e logga l'evento.
             attempts_key = _mfa_attempts_key(user.pk)
@@ -276,6 +334,9 @@ class MfaVerifyView(APIView):
 
         # OTP corretto: azzera il counter di tentativi falliti.
         cache.delete(_mfa_attempts_key(user.pk))
+
+        # newfix F2 — log MFA success (path distinto dal "no_mfa" per audit).
+        _audit_login(user, success=True, request=request, extra={"path": "mfa_otp"})
 
         response_data = _issue_jwt(user)
 

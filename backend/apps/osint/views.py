@@ -115,7 +115,8 @@ class OsintEntityViewSet(viewsets.ReadOnlyModelViewSet):
             "scan_frequency", "last_scan_at", "last_score_total",
             "active_alerts_count",
         ])
-        for e in self.get_queryset():
+        qs = list(self.get_queryset())
+        for e in qs:
             w.writerow([
                 e.domain, e.display_name, e.entity_type, e.is_nis2_critical,
                 e.scan_frequency,
@@ -123,6 +124,20 @@ class OsintEntityViewSet(viewsets.ReadOnlyModelViewSet):
                 e.last_score_total if e.last_score_total is not None else "",
                 e.active_alerts_count_cached,
             ])
+        # newfix F2 — audit export bulk; se la lista e' vuota saltiamo (nessun
+        # dato esfiltrato → niente da loggare per ISO 27001 A.12.4.3).
+        if qs:
+            from core.audit import log_action
+            try:
+                log_action(
+                    user=request.user,
+                    action_code="reporting.export.osint_entities",
+                    level="L2",
+                    entity=qs[0],
+                    payload={"rows": len(qs), "format": "csv"},
+                )
+            except Exception:
+                pass
         from django.http import HttpResponse
         resp = HttpResponse(buf.getvalue(), content_type="text/csv")
         resp["Content-Disposition"] = 'attachment; filename="osint_entities.csv"'
@@ -692,7 +707,8 @@ class OsintFindingViewSet(viewsets.GenericViewSet):
             "is_nis2_critical", "first_seen", "last_seen", "resolved_at",
             "resolution_note", "linked_task_id",
         ])
-        for f in self.get_queryset():
+        qs = list(self.get_queryset())
+        for f in qs:
             w.writerow([
                 f.code, f.severity, f.status, f.entity.domain, f.entity.display_name,
                 f.entity.is_nis2_critical,
@@ -701,6 +717,19 @@ class OsintFindingViewSet(viewsets.GenericViewSet):
                 (f.resolution_note or "").replace("\n", " "),
                 str(f.linked_task_id) if f.linked_task_id else "",
             ])
+        # newfix F2 — audit export findings.
+        if qs:
+            from core.audit import log_action
+            try:
+                log_action(
+                    user=request.user,
+                    action_code="reporting.export.osint_findings",
+                    level="L2",
+                    entity=qs[0],
+                    payload={"rows": len(qs), "format": "csv"},
+                )
+            except Exception:
+                pass
         from django.http import HttpResponse
         resp = HttpResponse(buf.getvalue(), content_type="text/csv")
         resp["Content-Disposition"] = 'attachment; filename="osint_findings.csv"'
