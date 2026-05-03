@@ -219,3 +219,59 @@ class AuditProgram(BaseModel):
             if a.get("status") == "planned" and a.get("planned_date", "") >= today
         ]
         return min(upcoming, key=lambda x: x.get("planned_date", ""), default=None)
+
+
+class AuditPack(BaseModel):
+    """
+    Pacchetto di evidence per audit di terza parte (ISO/TISAX/NIS2).
+
+    Genera un ZIP contenente lo stato dei controlli, documenti, evidenze, risk
+    register, BIA/BCP, incidenti, audit trail, training, governance e ultima
+    revisione di direzione approvata. Un manifest con sha256 di ogni file
+    rende il pack tamper-evident in caso di contestazione.
+
+    Generazione asincrona via Celery: l'utente fa polling su `status` e scarica
+    quando `status="ready"`. File salvato in `BACKUP_DIR` (volume montato),
+    soft-delete sul record dopo `expires_at`.
+    """
+    STATUS_CHOICES = [
+        ("queued",     "In coda"),
+        ("running",    "In generazione"),
+        ("ready",      "Pronto"),
+        ("failed",     "Fallito"),
+        ("expired",    "Scaduto"),
+    ]
+    plant = models.ForeignKey(
+        "plants.Plant", on_delete=models.PROTECT, related_name="audit_packs",
+    )
+    # Framework "richiesti" dall'utente (es. ["TISAX_L3"]); l'espansione
+    # gerarchica TISAX (L3 -> L2+L3, PROTO -> L2+L3+PROTO) e' applicata in
+    # `frameworks_expanded`.
+    frameworks_requested = models.JSONField(default=list)
+    frameworks_expanded = models.JSONField(default=list)
+    # Categorie incluse: subset di
+    # {controls, documents, evidences, risk, bia_bcp, incidents,
+    #  training, governance, management_review, audit_trail}.
+    scope = models.JSONField(default=list)
+    # Filtro temporale opzionale (es. solo incidenti/audit trail dopo X).
+    since = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="queued")
+    filename = models.CharField(max_length=255, blank=True)
+    size_bytes = models.BigIntegerField(default=0)
+    # SHA-256 dell'intero ZIP (non del manifest interno) per verifica esterna.
+    pack_sha256 = models.CharField(max_length=64, blank=True)
+    error_message = models.TextField(blank=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    # Token monouso per il download (HMAC su pk+secret) — verificato lato view,
+    # non persistito in chiaro qui.
+    expires_at = models.DateTimeField(null=True, blank=True)
+    downloaded_at = models.DateTimeField(null=True, blank=True)
+    downloaded_by = models.ForeignKey(
+        User, null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name="downloaded_audit_packs",
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
