@@ -240,6 +240,16 @@ export const osintApi = {
     apiClient.post<{ created: number }>(`/osint/findings/bulk-task/`, { finding_ids: ids }).then(r => r.data),
   findingsSummary: () =>
     apiClient.get<FindingsSummary>("/osint/findings/summary/").then(r => r.data),
+
+  exportFindingsCsv: () =>
+    apiClient.get("/osint/findings/export/", { responseType: "blob" }).then(r => {
+      const blob = new Blob([r.data], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "osint_findings.csv";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }),
 };
 
 export function classifyScore(score: number): ScoreClass {

@@ -266,6 +266,10 @@ export function OsintRemediationPage() {
     },
   });
 
+  const exportMutation = useMutation({
+    mutationFn: () => osintApi.exportFindingsCsv(),
+  });
+
   function toggleExpanded(id: string) {
     setExpanded(prev => {
       const next = new Set(prev);
@@ -346,14 +350,14 @@ export function OsintRemediationPage() {
               ✅ {t("osint.remediation.bulk_task", { count: selected.size })}
             </button>
           )}
-          <a
-            href="/api/v1/osint/findings/export/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-3 py-1.5 text-xs border rounded hover:bg-gray-50"
+          <button
+            type="button"
+            onClick={() => exportMutation.mutate()}
+            disabled={exportMutation.isPending}
+            className="px-3 py-1.5 text-xs border rounded hover:bg-gray-50 disabled:opacity-50"
           >
-            ⬇ {t("osint.remediation.export_csv")}
-          </a>
+            ⬇ {exportMutation.isPending ? t("common.loading") : t("osint.remediation.export_csv")}
+          </button>
         </div>
       </div>
 
