@@ -2193,7 +2193,11 @@
     "renew_acceptance": "Rinnova scadenza",
     "renew_confirm": "Conferma rinnovo",
     "reset_acceptance": "Rivaluta (annulla accettazione)",
-    "reset_acceptance_confirm": "Annullare l'accettazione formale e avviare la rivalutazione? L'azione è tracciata in audit trail."
+    "reset_acceptance_confirm": "Annullare l'accettazione formale e avviare la rivalutazione? L'azione è tracciata in audit trail.",
+    "plan_due_date_label": "Scadenza piano di trattamento",
+    "plan_due_date_help": "Data entro cui il trattamento scelto (mitigare/accettare/trasferire/evitare) deve essere applicato",
+    "plan_due_date_overdue": "Scaduto",
+    "plan_due_date_soon": "In scadenza"
   },
   "pdca": {
     "source_incident": "Incidente",
@@ -2372,7 +2376,11 @@
       "col_process": "Processo critico",
       "col_criticality": "Crit.",
       "col_last_test": "Ultimo test BCP",
-      "next_test": "Prossimo test"
+      "next_test": "Prossimo test",
+      "test_pass": "✓ Superato",
+      "test_partial": "⚠ Parziale",
+      "test_fail": "✗ Fallito",
+      "test_overdue": "⚠ Scaduto"
     }
   },
   "manual": {

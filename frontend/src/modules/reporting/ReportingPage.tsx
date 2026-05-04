@@ -498,9 +498,11 @@ function BiaBcpTable({ rows }: { rows: BiaBcpRow[] }) {
   };
 
   const testResult = (result: string | null, overdue: boolean) => {
-    if (!result && overdue) return <span className="text-xs text-orange-600 font-medium">⚠ Scaduto</span>;
+    if (!result && overdue) return <span className="text-xs text-orange-600 font-medium">{t("reporting.risk_bia_bcp.test_overdue")}</span>;
     if (!result) return <span className="text-gray-300 text-xs">—</span>;
-    return <span className={`text-xs font-medium ${result === "pass" ? "text-green-600" : "text-red-600"}`}>{result === "pass" ? "✓ Pass" : "✗ Fail"}</span>;
+    if (result === "superato") return <span className="text-xs font-medium text-green-600">{t("reporting.risk_bia_bcp.test_pass")}</span>;
+    if (result === "parziale") return <span className="text-xs font-medium text-yellow-600">{t("reporting.risk_bia_bcp.test_partial")}</span>;
+    return <span className="text-xs font-medium text-red-600">{t("reporting.risk_bia_bcp.test_fail")}</span>;
   };
 
   return (

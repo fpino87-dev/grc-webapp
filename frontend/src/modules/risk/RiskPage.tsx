@@ -675,6 +675,18 @@ function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: s
             </div>
           </div>
 
+          {/* Scadenza piano di trattamento */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("risk.plan_due_date_label")}</label>
+            <input
+              type="date"
+              value={form.plan_due_date ?? ""}
+              onChange={e => set("plan_due_date", e.target.value || null)}
+              className="w-full border rounded px-3 py-2 text-sm"
+            />
+            <p className="text-xs text-gray-500 mt-1">{t("risk.plan_due_date_help")}</p>
+          </div>
+
           {/* Owner rischio */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Owner rischio</label>
@@ -843,6 +855,7 @@ function EditAssessmentModal({
     owner: assessment.owner,
     critical_process: assessment.critical_process,
     treatment: assessment.treatment,
+    plan_due_date: assessment.plan_due_date,
     inherent_probability: assessment.inherent_probability,
     inherent_impact: assessment.inherent_impact,
     probability: assessment.probability,
@@ -878,6 +891,7 @@ function EditAssessmentModal({
         owner: form.owner ?? null,
         critical_process: form.critical_process ?? null,
         treatment: form.treatment ?? "",
+        plan_due_date: form.plan_due_date ?? null,
         inherent_probability: form.inherent_probability ?? null,
         inherent_impact: form.inherent_impact ?? null,
         probability: form.probability ?? null,
@@ -984,20 +998,31 @@ function EditAssessmentModal({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Owner</label>
-              <select
-                value={form.owner ?? ""}
-                onChange={e => set("owner", e.target.value || null)}
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("risk.plan_due_date_label")}</label>
+              <input
+                type="date"
+                value={form.plan_due_date ?? ""}
+                onChange={e => set("plan_due_date", e.target.value || null)}
                 className="w-full border rounded px-3 py-2 text-sm"
-              >
-                <option value="">— nessun owner —</option>
-                {users?.map(u => (
-                  <option key={u.id} value={u.id}>
-                    {u.first_name || u.last_name ? `${u.first_name} ${u.last_name}`.trim() : u.username} ({u.email})
-                  </option>
-                ))}
-              </select>
+              />
+              <p className="text-xs text-gray-500 mt-1">{t("risk.plan_due_date_help")}</p>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Owner</label>
+            <select
+              value={form.owner ?? ""}
+              onChange={e => set("owner", e.target.value || null)}
+              className="w-full border rounded px-3 py-2 text-sm"
+            >
+              <option value="">— nessun owner —</option>
+              {users?.map(u => (
+                <option key={u.id} value={u.id}>
+                  {u.first_name || u.last_name ? `${u.first_name} ${u.last_name}`.trim() : u.username} ({u.email})
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
@@ -1417,6 +1442,29 @@ export function RiskPage() {
                                     : a.treatment
                             : "—"}
                         </div>
+                        {a.plan_due_date && (() => {
+                          const due = new Date(a.plan_due_date);
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          const diffDays = Math.floor((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                          const overdue = diffDays < 0 && a.status !== "archiviato";
+                          const soon = diffDays >= 0 && diffDays <= 14 && a.status !== "archiviato";
+                          return (
+                            <div className={`text-xs flex items-center gap-1 ${overdue ? "text-red-600 font-medium" : soon ? "text-amber-600" : "text-gray-500"}`}>
+                              <span>{t("risk.plan_due_date_label")}: {a.plan_due_date}</span>
+                              {overdue && (
+                                <span className="px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-semibold">
+                                  {t("risk.plan_due_date_overdue")}
+                                </span>
+                              )}
+                              {soon && (
+                                <span className="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-semibold">
+                                  {t("risk.plan_due_date_soon")}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
                     </td>
                     <td className="px-4 py-3 bg-blue-50/30" onClick={e => e.stopPropagation()}>

@@ -2272,7 +2272,11 @@
     "renew_acceptance": "Renouveler l'échéance",
     "renew_confirm": "Confirmer le renouvellement",
     "reset_acceptance": "Réévaluer (annuler l'acceptation)",
-    "reset_acceptance_confirm": "Annuler l'acceptation formelle et lancer la réévaluation ? Cette action est tracée dans l'audit trail."
+    "reset_acceptance_confirm": "Annuler l'acceptation formelle et lancer la réévaluation ? Cette action est tracée dans l'audit trail.",
+    "plan_due_date_label": "Échéance du plan de traitement",
+    "plan_due_date_help": "Date à laquelle le traitement choisi (atténuer/accepter/transférer/éviter) doit être appliqué",
+    "plan_due_date_overdue": "Échu",
+    "plan_due_date_soon": "Bientôt à échéance"
   },
   "pdca": {
     "source_incident": "Incident",
@@ -2414,7 +2418,11 @@
       "col_process": "Processus critique",
       "col_criticality": "Crit.",
       "col_last_test": "Dernier test BCP",
-      "next_test": "Prochain test"
+      "next_test": "Prochain test",
+      "test_pass": "✓ Réussi",
+      "test_partial": "⚠ Partiel",
+      "test_fail": "✗ Échoué",
+      "test_overdue": "⚠ En retard"
     }
   },
   "manual": {

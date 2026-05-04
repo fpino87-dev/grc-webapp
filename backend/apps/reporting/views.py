@@ -1,3 +1,5 @@
+from datetime import date
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models import Count, Q, Avg, ExpressionWrapper, F, DurationField
@@ -372,14 +374,25 @@ class RiskBiaBcpView(APIView):
             scores = risk_by_proc.get(proc.id, [])
             bcp_plans = bcp_by_proc.get(proc.id, [])
 
-            # Find best BCP (approvato > in_revisione > bozza)
+            # Find best BCP (approvato > in_revisione > bozza).
+            # Tra piani con lo stesso stato preferiamo quello con dati di test
+            # più informativi: prima last_test_date più recente, poi next_test_date
+            # più recente. Evita di selezionare un piano "vuoto" quando ne esiste
+            # uno effettivamente testato per lo stesso processo.
             best_bcp = None
             for priority_status in ("approvato", "in_revisione", "bozza"):
-                for b in bcp_plans:
-                    if b["status"] == priority_status:
-                        best_bcp = b
-                        break
-                if best_bcp:
+                candidates = [b for b in bcp_plans if b["status"] == priority_status]
+                if candidates:
+                    candidates.sort(
+                        key=lambda b: (
+                            b["last_test_date"] is not None,
+                            b["last_test_date"] or date.min,
+                            b["next_test_date"] is not None,
+                            b["next_test_date"] or date.min,
+                        ),
+                        reverse=True,
+                    )
+                    best_bcp = candidates[0]
                     break
 
             last_test = None

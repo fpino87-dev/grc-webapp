@@ -2272,7 +2272,11 @@
     "renew_acceptance": "Odnów termin ważności",
     "renew_confirm": "Potwierdź odnowienie",
     "reset_acceptance": "Ponowna ocena (anuluj akceptację)",
-    "reset_acceptance_confirm": "Anulować formalną akceptację i rozpocząć ponowną ocenę? Akcja jest rejestrowana w dzienniku audytu."
+    "reset_acceptance_confirm": "Anulować formalną akceptację i rozpocząć ponowną ocenę? Akcja jest rejestrowana w dzienniku audytu.",
+    "plan_due_date_label": "Termin planu postępowania",
+    "plan_due_date_help": "Data, do której wybrane postępowanie (ograniczanie/akceptacja/przenoszenie/unikanie) musi zostać zastosowane",
+    "plan_due_date_overdue": "Zaległy",
+    "plan_due_date_soon": "Zbliża się termin"
   },
   "pdca": {
     "source_incident": "Incydent",
@@ -2414,7 +2418,11 @@
       "col_process": "Proces krytyczny",
       "col_criticality": "Kryt.",
       "col_last_test": "Ostatni test BCP",
-      "next_test": "Następny test"
+      "next_test": "Następny test",
+      "test_pass": "✓ Zaliczony",
+      "test_partial": "⚠ Częściowy",
+      "test_fail": "✗ Niezaliczony",
+      "test_overdue": "⚠ Zaległy"
     }
   },
   "manual": {

@@ -424,7 +424,18 @@ def _generate_soa_change_section(plant) -> str:
 
 
 def _generate_vda_isa(fw, plant, instances, user) -> str:
-    """VDA ISA Export — TISAX, maturity level 0-5"""
+    """VDA ISA Export — TISAX, maturity level 0-5.
+
+    Quando il framework esportato è TISAX_L3 il chiamante passa un chain
+    di L2 (base) + L3 (estensioni `-VH`). In TISAX/VDA ISA il controllo
+    è uno solo (es. ISA-1.6.3) con requisiti progressivamente più
+    stringenti per High (L2) e Very High (L3): qui le coppie base+VH
+    vengono fuse in un'unica riga "L2 + L3 (VH)" che riflette la
+    conformità complessiva al requisito esteso. La valutazione è presa
+    dal VH perché il dedup lato API (vedi controls/views.py) nasconde
+    il base quando esiste l'estensione, quindi è lì che owner / status /
+    ML / justification vengono effettivamente registrati.
+    """
     plant_name = plant.name if plant else "Organizzazione"
     user_name = (f"{user.first_name} {user.last_name}".strip() or user.email)
 
@@ -441,35 +452,59 @@ def _generate_vda_isa(fw, plant, instances, user) -> str:
         3: "#fef3c7", 4: "#dcfce7", 5: "#bbf7d0",
     }
 
+    grouped: dict[str, dict] = {}
+    for inst in instances:
+        ext_id = inst.control.external_id
+        is_vh = ext_id.endswith("-VH")
+        base_id = ext_id[:-3] if is_vh else ext_id
+        slot = grouped.setdefault(base_id, {"base": None, "vh": None})
+        slot["vh" if is_vh else "base"] = inst
+
     rows_html = ""
     total_ml = 0
     count_with = 0
 
-    for inst in instances:
-        ml = inst.calc_maturity_level
+    for base_id in sorted(grouped.keys(), key=_isa_sort_key):
+        pair = grouped[base_id]
+        base = pair["base"]
+        vh = pair["vh"]
+
+        if base and vh:
+            eval_inst = vh
+            title_ctrl = base.control
+            level_tag = "L2 + L3 (VH)"
+        elif base:
+            eval_inst = base
+            title_ctrl = base.control
+            level_tag = base.control.level or "L2"
+        else:
+            eval_inst = vh
+            title_ctrl = vh.control
+            level_tag = "L3 (VH)"
+
+        ml = eval_inst.calc_maturity_level
         ml_label = MATURITY_LABELS.get(ml, str(ml))
         ml_color = MATURITY_COLORS.get(ml, "#f3f4f6")
-        level_tag = inst.control.level or "L2"
         owner_name = ""
-        if inst.owner:
+        if eval_inst.owner:
             owner_name = (
-                f"{inst.owner.first_name} {inst.owner.last_name}".strip()
-                or inst.owner.email
+                f"{eval_inst.owner.first_name} {eval_inst.owner.last_name}".strip()
+                or eval_inst.owner.email
             )
-        justif = (inst.na_justification or
-                  inst.exclusion_justification or "")[:100]
-        if inst.status != "na":
+        justif = (eval_inst.na_justification or
+                  eval_inst.exclusion_justification or "")[:100]
+        if eval_inst.status != "na":
             total_ml += ml
             count_with += 1
 
         rows_html += f"""
         <tr>
-          <td><strong>{inst.control.external_id}</strong></td>
+          <td><strong>{base_id}</strong></td>
           <td>{level_tag}</td>
-          <td>{inst.control.get_title("en")[:70]}</td>
+          <td>{title_ctrl.get_title("en")[:70]}</td>
           <td style="background:{ml_color};font-weight:bold">{ml}</td>
           <td style="background:{ml_color}">{ml_label}</td>
-          <td>{_status_badge(inst.status)}</td>
+          <td>{_status_badge(eval_inst.status)}</td>
           <td>{owner_name}</td>
           <td>{justif}</td>
         </tr>"""

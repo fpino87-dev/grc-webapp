@@ -2193,7 +2193,11 @@
     "renew_acceptance": "Renew expiry",
     "renew_confirm": "Confirm renewal",
     "reset_acceptance": "Re-evaluate (cancel acceptance)",
-    "reset_acceptance_confirm": "Cancel the formal acceptance and start re-evaluation? This action is tracked in the audit trail."
+    "reset_acceptance_confirm": "Cancel the formal acceptance and start re-evaluation? This action is tracked in the audit trail.",
+    "plan_due_date_label": "Treatment plan deadline",
+    "plan_due_date_help": "Date by which the selected treatment (mitigate/accept/transfer/avoid) must be applied",
+    "plan_due_date_overdue": "Overdue",
+    "plan_due_date_soon": "Due soon"
   },
   "pdca": {
     "source_incident": "Incident",
@@ -2335,7 +2339,11 @@
       "col_process": "Critical process",
       "col_criticality": "Crit.",
       "col_last_test": "Last BCP test",
-      "next_test": "Next test"
+      "next_test": "Next test",
+      "test_pass": "✓ Passed",
+      "test_partial": "⚠ Partial",
+      "test_fail": "✗ Failed",
+      "test_overdue": "⚠ Overdue"
     }
   },
   "manual": {

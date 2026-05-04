@@ -2272,7 +2272,11 @@
     "renew_acceptance": "Son tarihi yenile",
     "renew_confirm": "Yenilemeyi onayla",
     "reset_acceptance": "Yeniden değerlendir (kabulü iptal et)",
-    "reset_acceptance_confirm": "Resmi kabulü iptal edip yeniden değerlendirmeyi başlatmak istiyor musunuz? Bu işlem denetim kaydına eklenir."
+    "reset_acceptance_confirm": "Resmi kabulü iptal edip yeniden değerlendirmeyi başlatmak istiyor musunuz? Bu işlem denetim kaydına eklenir.",
+    "plan_due_date_label": "İşlem planı son tarihi",
+    "plan_due_date_help": "Seçilen işlemin (azaltma/kabul/aktarım/kaçınma) uygulanması gereken son tarih",
+    "plan_due_date_overdue": "Süresi geçmiş",
+    "plan_due_date_soon": "Yaklaşan"
   },
   "pdca": {
     "source_incident": "Olay",
@@ -2414,7 +2418,11 @@
       "col_process": "Kritik süreç",
       "col_criticality": "Krit.",
       "col_last_test": "Son BCP testi",
-      "next_test": "Sonraki test"
+      "next_test": "Sonraki test",
+      "test_pass": "✓ Başarılı",
+      "test_partial": "⚠ Kısmi",
+      "test_fail": "✗ Başarısız",
+      "test_overdue": "⚠ Süresi geçmiş"
     }
   },
   "manual": {
