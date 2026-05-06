@@ -273,11 +273,14 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
   const hasISO = frameworks.some(f => f.code === "ISO27001");
   const hasTISAX = frameworks.some(f => f.code === "TISAX_L2" || f.code === "TISAX_L3");
   const hasProto = frameworks.some(f => f.code === "TISAX_PROTO");
-  const hasNIS2 = frameworks.some(f => f.code === "NIS2");
+  // NIS2 matrix: scegli ACN_NIS2 se assegnato (delibera ACN, attuazione IT),
+  // altrimenti NIS2 puro (direttiva UE). L'export engine gestisce entrambi.
+  const nis2MatrixCode = frameworks.find(f => f.code === "ACN_NIS2")?.code
+    ?? frameworks.find(f => f.code === "NIS2")?.code;
   const tisaxCode = frameworks.find(f => f.code === "TISAX_L3")?.code
     ?? frameworks.find(f => f.code === "TISAX_L2")?.code;
 
-  if (!hasISO && !hasTISAX && !hasProto && !hasNIS2) return null;
+  if (!hasISO && !hasTISAX && !hasProto && !nis2MatrixCode) return null;
 
   return (
     <div>
@@ -309,11 +312,14 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
             {exporting === "vda_isa" ? t("common.downloading") : t("controls.export.proto_vda_isa")}
           </button>
         )}
-        {hasNIS2 && (
+        {nis2MatrixCode && (
           <button
-            onClick={() => handleExport("NIS2", "compliance_matrix")}
+            onClick={() => handleExport(nis2MatrixCode, "compliance_matrix")}
             disabled={exporting === "compliance_matrix"}
             className="px-3 py-1.5 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-60"
+            title={nis2MatrixCode === "ACN_NIS2"
+              ? "Matrice NIS2 — Delibera ACN 127434/2026 (attuazione italiana)"
+              : "Matrice NIS2 — Direttiva UE 2022/2555"}
           >
             {exporting === "compliance_matrix" ? t("common.downloading") : t("controls.export.nis2_matrix")}
           </button>

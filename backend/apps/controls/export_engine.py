@@ -568,12 +568,33 @@ def _generate_vda_isa(fw, plant, instances, user) -> str:
 
 
 def _generate_compliance_matrix(fw, plant, instances, user) -> str:
-    """Compliance Matrix NIS2"""
+    """
+    Compliance Matrix per framework derivati dalla NIS2 (UE 2022/2555).
+    Funziona sia con `NIS2` (direttiva UE pura) sia con `ACN_NIS2`
+    (delibera ACN 127434/2026, attuazione italiana riorganizzata
+    secondo NIST CSF 2.0). Titolo, sottotitolo e dichiarazione finale
+    si adattano al framework selezionato.
+    """
     from django.utils import translation
     lang = translation.get_language() or "it"
     plant_name = plant.name if plant else "Organizzazione"
     user_name = (f"{user.first_name} {user.last_name}".strip() or user.email)
     nis2_scope = getattr(plant, "nis2_scope", "—") if plant else "—"
+    is_acn = (fw.code == "ACN_NIS2")
+    matrix_title = "NIS2 — ACN Compliance Matrix" if is_acn else "NIS2 Compliance Matrix"
+    matrix_subtitle = (
+        "Delibera ACN 127434/2026 — Attuazione italiana NIS2 secondo NIST CSF 2.0"
+        if is_acn else
+        "Direttiva NIS2 (UE 2022/2555) — Misure di sicurezza adottate"
+    )
+    declaration_text = (
+        "La presente matrice attesta le misure di sicurezza adottate "
+        "ai sensi della Delibera ACN 127434/2026 (attuazione italiana "
+        "della Direttiva NIS2)."
+        if is_acn else
+        "La presente matrice attesta le misure di sicurezza adottate "
+        "ai sensi dell'Art. 21 della Direttiva NIS2."
+    )
 
     rows_html = ""
     for inst in instances:
@@ -619,9 +640,9 @@ def _generate_compliance_matrix(fw, plant, instances, user) -> str:
     pct = round(compliant / total * 100, 1) if total > 0 else 0
 
     content = f"""
-<h1>NIS2 Compliance Matrix</h1>
+<h1>{matrix_title}</h1>
 <p style="color:#6b7280;font-size:9px">
-  Direttiva NIS2 (UE 2022/2555) — Misure di sicurezza adottate
+  {matrix_subtitle}
 </p>
 
 <div class="meta">
@@ -682,8 +703,7 @@ def _generate_compliance_matrix(fw, plant, instances, user) -> str:
 
 <div class="signature">
   <strong>Dichiarazione NIS2</strong><br><br>
-  La presente matrice attesta le misure di sicurezza adottate
-  ai sensi dell'Art. 21 della Direttiva NIS2.<br><br>
+  {declaration_text}<br><br>
   Firma CISO: ________________________ &nbsp;&nbsp;
   Firma Legale Rappresentante: ________________________<br>
   Data: __________________
@@ -691,6 +711,6 @@ def _generate_compliance_matrix(fw, plant, instances, user) -> str:
 
     logo_src = _get_logo_src_for_plant(plant)
     return _base_html(
-        f"NIS2 Compliance Matrix — {plant_name}",
+        f"{matrix_title} — {plant_name}",
         content, plant_name, fw.name, user_name, logo_src
     )

@@ -602,7 +602,7 @@ class ComplianceExportView(APIView):
     FORMAT_FRAMEWORK = {
         "soa":               ["ISO27001"],
         "vda_isa":           ["TISAX_L2", "TISAX_L3", "TISAX_PROTO"],
-        "compliance_matrix": ["NIS2"],
+        "compliance_matrix": ["NIS2", "ACN_NIS2"],
     }
 
     def get(self, request):
