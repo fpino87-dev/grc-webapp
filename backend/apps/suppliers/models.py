@@ -40,6 +40,11 @@ class Supplier(BaseModel):
     framework_refs = models.JSONField(default=list)
     notes = models.TextField(blank=True)
     email = models.EmailField(blank=True)
+    additional_emails = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Email aggiuntive (CC) usate all'invio questionari/notifiche. La email primaria resta in `email` (TO).",
+    )
     website = models.URLField(
         max_length=500,
         blank=True,
@@ -371,6 +376,11 @@ class SupplierQuestionnaire(BaseModel):
     sent_at = models.DateTimeField()
     last_sent_at = models.DateTimeField()
     sent_to = models.EmailField()
+    sent_cc_snapshot = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Snapshot delle email in CC al momento dell'invio (audit trail).",
+    )
     sent_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,

@@ -41,9 +41,14 @@ def send_grc_email(
     body: str,
     recipients: list[str],
     html_body: str = "",
+    cc: list[str] | None = None,
 ) -> bool:
     """
     Invia email GRC usando config da DB.
+
+    `recipients` -> destinatari diretti (TO).
+    `cc` -> lista opzionale di indirizzi in copia conoscenza.
+
     Restituisce True se inviata, False se fallita.
     """
     if not recipients:
@@ -54,6 +59,8 @@ def send_grc_email(
     config = EmailConfiguration.get_active()
     from_email = config.from_email if config else "GRC Platform <noreply@grc.local>"
 
+    cc_list = [addr for addr in (cc or []) if addr]
+
     try:
         connection = _get_connection()
         msg = EmailMultiAlternatives(
@@ -61,15 +68,22 @@ def send_grc_email(
             body=body,
             from_email=from_email,
             to=recipients,
+            cc=cc_list or None,
             connection=connection,
         )
         if html_body:
             msg.attach_alternative(html_body, "text/html")
         msg.send()
-        logger.info("Email inviata a %d destinatari: %s", len(recipients), subject)
+        logger.info(
+            "Email inviata a %d destinatari (cc=%d): %s",
+            len(recipients), len(cc_list), subject,
+        )
         return True
     except Exception as exc:  # noqa: BLE001
-        logger.error("Errore invio email a %d destinatari [%s]: %s", len(recipients), subject, exc)
+        logger.error(
+            "Errore invio email a %d destinatari (cc=%d) [%s]: %s",
+            len(recipients), len(cc_list), subject, exc,
+        )
         return False
 
 

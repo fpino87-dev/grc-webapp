@@ -810,6 +810,59 @@ function NdaTab() {
   );
 }
 
+// ─── Editor email aggiuntive (CC) ────────────────────────────────────────────
+
+function isValidEmail(s: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim());
+}
+
+function EmailListEditor({
+  value,
+  onChange,
+}: {
+  value: string[];
+  onChange: (next: string[]) => void;
+}) {
+  const list = value ?? [];
+  return (
+    <div className="space-y-1.5">
+      {list.map((email, idx) => {
+        const valid = !email || isValidEmail(email);
+        return (
+          <div key={idx} className="flex items-center gap-2">
+            <input
+              type="email"
+              value={email}
+              onChange={e => {
+                const next = [...list];
+                next[idx] = e.target.value;
+                onChange(next);
+              }}
+              placeholder="email@dominio.it"
+              className={`flex-1 border rounded px-3 py-1.5 text-sm ${valid ? "" : "border-red-400 bg-red-50"}`}
+            />
+            <button
+              type="button"
+              onClick={() => onChange(list.filter((_, i) => i !== idx))}
+              className="text-red-500 hover:text-red-700 px-2"
+              title="Rimuovi"
+            >
+              ×
+            </button>
+          </div>
+        );
+      })}
+      <button
+        type="button"
+        onClick={() => onChange([...list, ""])}
+        className="text-xs text-indigo-600 hover:text-indigo-800 border border-indigo-200 rounded px-2 py-1 hover:bg-indigo-50"
+      >
+        + Aggiungi email in CC
+      </button>
+    </div>
+  );
+}
+
 // ─── Tab: Fornitori ───────────────────────────────────────────────────────────
 
 function NewSupplierModal({ onClose }: { onClose: () => void }) {
@@ -863,8 +916,20 @@ function NewSupplierModal({ onClose }: { onClose: () => void }) {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email fornitore *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email fornitore (TO) *</label>
             <input name="email" type="email" required onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="contatto@fornitore.it" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email aggiuntive in copia (CC)
+            </label>
+            <EmailListEditor
+              value={form.additional_emails ?? []}
+              onChange={emails => setForm(prev => ({ ...prev, additional_emails: emails }))}
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Inserite all'invio dei questionari come destinatari in CC. La email primaria resta il TO.
+            </p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Descrizione fornitura</label>
@@ -1005,8 +1070,20 @@ function EditSupplierModal({ supplier, onClose }: { supplier: Supplier; onClose:
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email fornitore *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email fornitore (TO) *</label>
             <input name="email" type="email" required value={form.email ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="contatto@fornitore.it" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email aggiuntive in copia (CC)
+            </label>
+            <EmailListEditor
+              value={form.additional_emails ?? []}
+              onChange={emails => setForm(prev => ({ ...prev, additional_emails: emails }))}
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Inserite all'invio dei questionari come destinatari in CC. La email primaria resta il TO.
+            </p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Descrizione fornitura</label>
@@ -1156,7 +1233,23 @@ function SendQuestionnaireModal({ supplier, onClose }: { supplier: Supplier; onC
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-5">
         <h3 className="text-base font-semibold mb-1">Invia questionario</h3>
-        <p className="text-sm text-gray-500 mb-3">Fornitore: <strong>{supplier.name}</strong> — {supplier.email || <span className="text-red-500">email non configurata</span>}</p>
+        <p className="text-sm text-gray-500 mb-1">
+          Fornitore: <strong>{supplier.name}</strong>
+        </p>
+        <div className="mb-3 text-sm space-y-0.5">
+          <p>
+            <span className="text-gray-500">A:</span>{" "}
+            {supplier.email || <span className="text-red-500">email non configurata</span>}
+          </p>
+          {(supplier.additional_emails?.length ?? 0) > 0 && (
+            <p>
+              <span className="text-gray-500">CC:</span>{" "}
+              <span className="text-gray-700">
+                {supplier.additional_emails.join(", ")}
+              </span>
+            </p>
+          )}
+        </div>
         {!supplier.email && (
           <p className="text-sm text-red-600 bg-red-50 rounded p-2 mb-3">Configura l'email del fornitore prima di inviare.</p>
         )}

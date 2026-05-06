@@ -41,6 +41,39 @@ class SupplierSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Il Codice Fiscale / P.IVA è obbligatorio.")
         return value.strip()
 
+    def validate_additional_emails(self, value):
+        """
+        Normalizza la lista CC: scarta valori falsy, trim, deduplica
+        (preserva l'ordine), valida il formato email per ogni voce.
+        """
+        from django.core.validators import EmailValidator
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        if not value:
+            return []
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Le email aggiuntive devono essere una lista di stringhe.")
+
+        validator = EmailValidator()
+        seen: set[str] = set()
+        out: list[str] = []
+        for raw in value:
+            if not isinstance(raw, str):
+                raise serializers.ValidationError("Ogni voce in additional_emails deve essere una stringa.")
+            email = raw.strip()
+            if not email:
+                continue
+            try:
+                validator(email)
+            except DjangoValidationError:
+                raise serializers.ValidationError(f"Indirizzo email non valido: {email}")
+            key = email.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append(email)
+        return out
+
     def validate(self, data):
         nis2_relevant = data.get("nis2_relevant", getattr(self.instance, "nis2_relevant", False))
         criterion = data.get("nis2_relevance_criterion", getattr(self.instance, "nis2_relevance_criterion", ""))

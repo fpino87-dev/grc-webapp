@@ -13,6 +13,7 @@ export interface Supplier {
   vat_number: string;
   country: string;
   email: string;
+  additional_emails: string[];
   description: string;
   risk_level: RiskClass;
   status: "attivo" | "sospeso" | "terminato";
@@ -83,6 +84,7 @@ export interface SupplierQuestionnaire {
   sent_at: string;
   last_sent_at: string;
   sent_to: string;
+  sent_cc_snapshot: string[];
   sent_by: string | null;
   sent_by_display: string | null;
   send_count: number;

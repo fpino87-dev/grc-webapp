@@ -267,6 +267,7 @@ def send_questionnaire(supplier, template, user) -> "SupplierQuestionnaire":
 
     now = timezone.now()
     subject, body = _build_email_body(template, supplier)
+    cc_emails = [e for e in (supplier.additional_emails or []) if e]
 
     questionnaire = SupplierQuestionnaire(
         supplier=supplier,
@@ -277,6 +278,7 @@ def send_questionnaire(supplier, template, user) -> "SupplierQuestionnaire":
         sent_at=now,
         last_sent_at=now,
         sent_to=supplier.email,
+        sent_cc_snapshot=cc_emails,
         sent_by=user,
         send_count=1,
         status="inviato",
@@ -288,6 +290,7 @@ def send_questionnaire(supplier, template, user) -> "SupplierQuestionnaire":
         subject=subject,
         body=body,
         recipients=[supplier.email],
+        cc=cc_emails,
     )
 
     log_action(
@@ -298,6 +301,7 @@ def send_questionnaire(supplier, template, user) -> "SupplierQuestionnaire":
         payload={
             "supplier": supplier.name,
             "sent_to": supplier.email,
+            "sent_cc_count": len(cc_emails),
             "template": template.name,
             "send_count": 1,
         },
@@ -322,12 +326,22 @@ def resend_questionnaire(questionnaire, user) -> "SupplierQuestionnaire":
     questionnaire.last_sent_at = now
     if questionnaire.send_count >= 3:
         questionnaire.status = "inviato"  # keep as inviato but send_count signals 3rd strike
-    questionnaire.save(update_fields=["send_count", "last_sent_at", "status", "updated_at"])
+    # Aggiorna lo snapshot CC con la lista corrente del fornitore (i contatti
+    # potrebbero essere cambiati tra il primo invio e il follow-up).
+    cc_emails = [e for e in (questionnaire.supplier.additional_emails or []) if e]
+    questionnaire.sent_cc_snapshot = cc_emails
+    questionnaire.save(
+        update_fields=[
+            "send_count", "last_sent_at", "status",
+            "sent_cc_snapshot", "updated_at",
+        ],
+    )
 
     send_grc_email(
         subject=questionnaire.subject_snapshot,
         body=questionnaire.body_snapshot,
         recipients=[questionnaire.sent_to],
+        cc=cc_emails,
     )
 
     log_action(
@@ -338,6 +352,7 @@ def resend_questionnaire(questionnaire, user) -> "SupplierQuestionnaire":
         payload={
             "supplier": questionnaire.supplier.name,
             "sent_to": questionnaire.sent_to,
+            "sent_cc_count": len(cc_emails),
             "send_count": questionnaire.send_count,
         },
     )
