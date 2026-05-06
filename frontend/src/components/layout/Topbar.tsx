@@ -6,6 +6,14 @@ import { plantsApi } from "../../api/endpoints/plants";
 import { notificationsApi } from "../../api/endpoints/notifications";
 import i18n from "../../i18n";
 import { useTranslation } from "react-i18next";
+import { GrcAssistantDrawer } from "../ui/GrcAssistantDrawer";
+
+const AI_ROLES = new Set([
+  "super_admin",
+  "compliance_officer",
+  "risk_manager",
+  "plant_manager",
+]);
 
 function NotificationBell() {
   const { t } = useTranslation();
@@ -78,6 +86,8 @@ export function Topbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [lang, setLang] = useState<string>(i18n.language || localStorage.getItem("grc_lang") || "it");
+  const [assistantOpen, setAssistantOpen] = useState(false);
+  const canUseAi = AI_ROLES.has(user?.role ?? "");
 
   const { data: plants } = useQuery({
     queryKey: ["plants"],
@@ -176,6 +186,16 @@ export function Topbar() {
           </div>
         </div>
 
+        {canUseAi && (
+          <button
+            onClick={() => setAssistantOpen(true)}
+            className="relative text-gray-500 hover:text-gray-700 p-1 rounded transition-colors"
+            title="GRC Assistant"
+          >
+            <span className="text-lg">🤖</span>
+          </button>
+        )}
+
         <NotificationBell />
         {user && (
           <span className="text-sm text-gray-700">
@@ -194,6 +214,7 @@ export function Topbar() {
       </div>
     </header>
 
+    <GrcAssistantDrawer open={assistantOpen} onClose={() => setAssistantOpen(false)} />
     </>
   );
 }

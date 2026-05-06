@@ -173,6 +173,11 @@ def test_get_compliance_summary_counts(plant, framework, user):
     )
 
     summary = get_compliance_summary(str(plant.pk), framework_code="ISO27K")
+    # Nuova semantica: N/A esclusi dal denominatore (vedono fuori contesto
+    # organizzativo), riportati separatamente in `na_excluded`.
     assert summary["gap"] == 2
-    assert summary["na"] == 1
-    assert summary["total"] >= 3
+    assert summary["na_excluded"] == 1
+    assert summary["total"] == 2  # solo i 2 gap, l'N/A non conta come applicabile
+    assert summary["compliant"] == 0
+    assert summary["covered_by_extender"] == 0
+    assert summary["pct_compliant"] == 0

@@ -75,29 +75,19 @@ def _detect_missing_extended_frameworks(prep: AuditPrep) -> dict | None:
 def _collect_validation_sources(ci):
     """
     Restituisce le `ControlInstance` da considerare come fonti valide per
-    questo controllo: l'istanza stessa + le istanze, sullo stesso plant, di
-    eventuali controlli che la estendono via `ControlMapping(relationship=
-    "extends")` (es. TISAX L3 estende L2 — un'evidenza L3 vale anche per L2).
+    questo controllo: l'istanza stessa + gli extender (controlli che la
+    estendono via `ControlMapping(relationship="extends")`, es. TISAX L3
+    estende L2 — un'evidenza L3 vale anche per L2).
 
     La direzione e' una sola: L3 -> L2 (chi estende copre l'esteso). L'inverso
     non vale: un'evidenza L2 non sostituisce un L3 piu' stringente.
-    """
-    from apps.controls.models import ControlInstance
 
-    sources = [ci]
-    extender_control_ids = list(
-        ci.control.mappings_to.filter(
-            relationship="extends",
-        ).values_list("source_control_id", flat=True)
-    )
-    if extender_control_ids:
-        extenders = ControlInstance.objects.filter(
-            plant=ci.plant,
-            control_id__in=extender_control_ids,
-            deleted_at__isnull=True,
-        ).select_related("control")
-        sources.extend(extenders)
-    return sources
+    La regola di estensione vive in `apps.controls.services.get_extender_instances`
+    (single source of truth condivisa con il GRC Assistant).
+    """
+    from apps.controls.services import get_extender_instances
+
+    return [ci, *get_extender_instances(ci)]
 
 
 def _evaluate_evidence_item(item: EvidenceItem) -> tuple[str, list[str]]:

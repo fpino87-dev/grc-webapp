@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "react-router-dom";
 import { apiClient } from "../../api/client";
+import { scrollAndHighlight } from "../../lib/scrollAndHighlight";
 import { riskApi, type RiskAssessment, type RiskMitigationPlan, type SuggestResidualResult, THREAT_CATEGORIES, PROB_LABELS, IMPACT_LABELS, NIS2_ART21_CHOICES, NIS2_RELEVANCE_CHOICES } from "../../api/endpoints/risk";
 import { plantsApi } from "../../api/endpoints/plants";
 import { biaApi, type CriticalProcess } from "../../api/endpoints/bia";
@@ -1189,6 +1191,7 @@ function RiskAppetiteCard({ plantId }: { plantId?: string }) {
 
 export function RiskPage() {
   const { t } = useTranslation();
+  const location = useLocation();
   const [typeFilter, setTypeFilter] = useState<"" | "IT" | "OT">("");
   const [statusFilter, setStatusFilter] = useState("");
   const [showNew, setShowNew] = useState(false);
@@ -1198,6 +1201,15 @@ export function RiskPage() {
   const [editAssessment, setEditAssessment] = useState<RiskAssessment | null>(null);
   const selectedPlant = useAuthStore(s => s.selectedPlant);
   const qc = useQueryClient();
+
+  // Deep-link dal GRC Assistant: scrolla ed evidenzia la riga del rischio.
+  useEffect(() => {
+    const state = location.state as { openRiskId?: string } | null;
+    if (state?.openRiskId) {
+      setExpandedId(state.openRiskId);
+      scrollAndHighlight(state.openRiskId);
+    }
+  }, [location.state]);
 
   const params: Record<string, string> = { page_size: "200" };
   if (typeFilter) params.assessment_type = typeFilter;
@@ -1347,6 +1359,7 @@ export function RiskPage() {
                 <>
                   <tr
                     key={a.id}
+                    data-row-id={a.id}
                     onClick={() => setExpandedId(prev => prev === a.id ? null : a.id)}
                     className="hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-100"
                   >

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "react-router-dom";
 import { documentsApi, type Document, type Evidence } from "../../api/endpoints/documents";
 import { controlsApi, type ControlInstance } from "../../api/endpoints/controls";
 import { plantsApi, type Plant } from "../../api/endpoints/plants";
@@ -7,6 +8,7 @@ import { StatusBadge } from "../../components/ui/StatusBadge";
 import { useAuthStore } from "../../store/auth";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
+import { scrollAndHighlight } from "../../lib/scrollAndHighlight";
 
 type MainTab = "documenti" | "evidenze";
 
@@ -847,7 +849,7 @@ function TabDocumenti() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {documents.map(doc => (
-                <tr key={doc.id} className="hover:bg-gray-50 transition-colors">
+                <tr key={doc.id} data-row-id={doc.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3 font-medium text-gray-800">{doc.title}</td>
                   <td className="px-4 py-3 text-xs">
                     {doc.latest_version ? (
@@ -1261,7 +1263,17 @@ function TabEvidenze() {
 
 export function DocumentsPage() {
   const { t } = useTranslation();
+  const location = useLocation();
   const [mainTab, setMainTab] = useState<MainTab>("documenti");
+
+  // Deep-link dal GRC Assistant: forziamo tab "documenti" e scrolliamo alla riga.
+  useEffect(() => {
+    const state = location.state as { openDocumentId?: string } | null;
+    if (state?.openDocumentId) {
+      setMainTab("documenti");
+      scrollAndHighlight(state.openDocumentId);
+    }
+  }, [location.state]);
 
   return (
     <div>

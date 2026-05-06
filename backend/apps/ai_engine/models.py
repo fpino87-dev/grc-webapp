@@ -81,6 +81,8 @@ TASK_TYPES = [
     ("osint_attack_surface", "OSINT: Analisi superficie di attacco"),
     ("osint_suppliers_nis2", "OSINT: Briefing fornitori NIS2"),
     ("osint_board_report", "OSINT: Report per Board/Audit"),
+    ("assistant_explain", "Assistant: Spiegazione gap"),
+    ("assistant_greeting", "Assistant: Saluto contestuale"),
 ]
 
 FALLBACK_MODES = [
@@ -152,6 +154,8 @@ class AiProviderConfig(BaseModel):
             "osint_attack_surface": "cloud",
             "osint_suppliers_nis2": "cloud",
             "osint_board_report": "cloud",
+            "assistant_explain": "cloud",
+            "assistant_greeting": "ollama",
         }
         routing = self.task_routing or {}
         return routing.get(task_type, defaults.get(task_type, "ollama"))

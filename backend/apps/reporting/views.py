@@ -9,31 +9,40 @@ from .permissions import ReportingPermission
 
 
 class ComplianceSummaryView(APIView):
+    """
+    GET /api/v1/reporting/compliance/?plant=<uuid>&framework=<code>
+
+    Riusa `apps.controls.services.get_compliance_summary` per garantire
+    coerenza con la dashboard e con il GRC Assistant: N/A esclusi dal
+    denominatore, controlli coperti da extender (TISAX L2 via L3) contati
+    come compliant nel numeratore.
+    """
+
     permission_classes = [ReportingPermission]
 
     def get(self, request):
-        from apps.controls.models import ControlInstance
+        from apps.controls.services import get_compliance_summary
+
         plant_id = request.query_params.get("plant")
         framework_code = request.query_params.get("framework")
-        qs = ControlInstance.objects.all()
-        if plant_id:
-            qs = qs.filter(plant_id=plant_id)
-            if not framework_code:
-                from apps.plants.services import get_active_frameworks
-                from apps.plants.models import Plant
-                plant = Plant.objects.filter(pk=plant_id).first()
-                if plant:
-                    qs = qs.filter(control__framework__in=get_active_frameworks(plant))
-        if framework_code:
-            qs = qs.filter(control__framework__code=framework_code)
-        totals = qs.values("status").annotate(n=Count("id"))
-        total = qs.count()
-        by_status = {r["status"]: r["n"] for r in totals}
-        compliant = by_status.get("compliant", 0)
+        if not plant_id:
+            return Response({
+                "total": 0,
+                "by_status": {},
+                "pct_compliant": 0,
+            })
+        summary = get_compliance_summary(plant_id, framework_code or None)
+        # Mantiene la chiave legacy `by_status` per i consumatori esistenti.
+        by_status = {
+            "compliant": summary["compliant_direct"],
+            "gap": summary["gap"],
+            "parziale": summary["parziale"],
+            "non_valutato": summary["non_valutato"],
+            "na": summary["na_excluded"],
+        }
         return Response({
-            "total": total,
+            **summary,
             "by_status": by_status,
-            "pct_compliant": round(compliant / total * 100, 1) if total else 0,
         })
 
 

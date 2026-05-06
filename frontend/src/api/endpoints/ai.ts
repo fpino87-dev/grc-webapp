@@ -9,6 +9,50 @@ export interface AiSuggestResponse {
   result: unknown;
 }
 
+export interface AssistantGap {
+  kind: string;
+  category: "documents" | "controls" | "risk" | "suppliers";
+  ref_id: string;
+  title: string;
+  subtitle: string;
+  details: Record<string, unknown>;
+  priority_score: number;
+  urgency: "red" | "yellow" | "green";
+  frontend_url: string;
+}
+
+export interface AssistantStartResponse {
+  plant: { id: string; code: string; name: string };
+  summary: {
+    plant_id: string;
+    plant_name: string;
+    frameworks: Array<{
+      code: string;
+      name: string;
+      total: number;
+      compliant: number;
+      compliant_direct: number;
+      covered_by_extender: number;
+      gap: number;
+      parziale: number;
+      non_valutato: number;
+      na_excluded: number;
+      pct_compliant: number;
+    }>;
+  };
+  gaps: AssistantGap[];
+  gaps_total: number;
+  gaps_truncated: boolean;
+}
+
+export interface AssistantExplainResponse {
+  explanation: string;
+  interaction_id: string | null;
+  provider: string;
+  model: string;
+  used_fallback: boolean;
+}
+
 export interface AiProviderConfig {
   id?: string;
   name?: string;
@@ -39,4 +83,14 @@ export const aiApi = {
   modelsCatalog: () => apiClient.get<Record<string, [string, string][]>>("/ai/config/models-catalog/").then((r) => r.data),
   testConnection: (id: string) => apiClient.post(`/ai/config/${id}/test-connection/`, {}).then((r) => r.data),
   resetBudget: (id: string) => apiClient.post(`/ai/config/${id}/reset-budget/`, {}).then((r) => r.data),
+  assistant: {
+    start: (plant_id: string) =>
+      apiClient
+        .post<AssistantStartResponse>("/ai/assistant/start/", { plant_id })
+        .then((r) => r.data),
+    explain: (plant_id: string, gap: AssistantGap) =>
+      apiClient
+        .post<AssistantExplainResponse>("/ai/assistant/explain/", { plant_id, gap })
+        .then((r) => r.data),
+  },
 };

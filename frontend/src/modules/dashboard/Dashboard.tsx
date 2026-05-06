@@ -334,8 +334,12 @@ export function Dashboard() {
   });
 
   const controls = controlsData?.results ?? [];
-  const compliant = controls.filter((c) => c.status === "compliant").length;
-  const gap = controls.filter((c) => c.status === "gap").length;
+  // Esclude i controlli N/A dal denominatore: sono fuori contesto organizzativo,
+  // non sono ne' compliant ne' gap. Il dedup L3->L2 e' gia' applicato a livello
+  // API (controls/views.py:272-285): qui ricevo gia' la lista dei controlli effettivi.
+  const applicableControls = controls.filter((c) => c.status !== "na");
+  const compliant = applicableControls.filter((c) => c.status === "compliant").length;
+  const gap = applicableControls.filter((c) => c.status === "gap").length;
   const openIncidents = incidentsData?.count ?? 0;
 
   return (
@@ -349,8 +353,8 @@ export function Dashboard() {
         <KpiCard label={t("dashboard.kpi.active_sites")} value={plants?.length ?? "—"} color="blue" />
         <KpiCard
           label={t("dashboard.kpi.compliant_controls")}
-          value={controls.length ? `${Math.round((compliant / controls.length) * 100)}%` : "—"}
-          sub={`${compliant} / ${controls.length}`}
+          value={applicableControls.length ? `${Math.round((compliant / applicableControls.length) * 100)}%` : "—"}
+          sub={`${compliant} / ${applicableControls.length}`}
           color="green"
         />
         <KpiCard

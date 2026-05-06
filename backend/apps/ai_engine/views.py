@@ -131,3 +131,120 @@ class AiConfirmView(APIView):
         else:
             return Response({"error": "action deve essere confirm o ignore"}, status=400)
         return Response({"ok": True})
+
+
+class AiAssistantStartView(APIView):
+    """
+    POST /api/v1/ai/assistant/start/
+    Body: { "plant_id": "<uuid>" }
+    Risponde con summary + lista prioritizzata di gap per il plant scelto.
+    Logga l'apertura sessione in audit_log (level L2).
+    """
+    permission_classes = [AiEnginePermission]
+
+    def post(self, request):
+        from apps.plants.models import Plant
+
+        from .agent_orchestrator import build_gaps, build_summary
+        from .agent_tools import _verify_plant_access
+
+        plant_id = request.data.get("plant_id")
+        if not plant_id:
+            return Response({"error": "plant_id obbligatorio"}, status=400)
+
+        if not _verify_plant_access(request.user, plant_id):
+            return Response({"error": "Plant non accessibile"}, status=403)
+
+        plant = Plant.objects.filter(pk=plant_id, deleted_at__isnull=True).first()
+        if not plant:
+            return Response({"error": "Plant non trovato"}, status=404)
+
+        gaps, total = build_gaps(request.user, plant_id)
+        summary = build_summary(request.user, plant_id)
+
+        log_action(
+            user=request.user,
+            action_code="ai.assistant.start",
+            level="L2",
+            entity=plant,
+            payload={
+                "plant_id": str(plant_id),
+                "gaps_returned": len(gaps),
+                "gaps_total": total,
+            },
+        )
+
+        return Response({
+            "plant": {"id": str(plant.id), "code": plant.code, "name": plant.name},
+            "summary": summary,
+            "gaps": gaps,
+            "gaps_total": total,
+            "gaps_truncated": total > len(gaps),
+        })
+
+
+class AiAssistantExplainView(APIView):
+    """
+    POST /api/v1/ai/assistant/explain/
+    Body: { "plant_id": "<uuid>", "gap": { ... gap object ... } }
+    Chiama l'LLM (via route()) per spiegare un singolo gap.
+    Crea AiInteractionLog HIL — l'utente puo' poi confermare/ignorare.
+    """
+    permission_classes = [AiEnginePermission]
+
+    def post(self, request):
+        from apps.plants.models import Plant
+
+        from .agent_orchestrator import build_explanation_prompt
+        from .agent_tools import _verify_plant_access
+        from .router import route
+
+        plant_id = request.data.get("plant_id")
+        gap = request.data.get("gap")
+        if not plant_id or not gap:
+            return Response({"error": "plant_id e gap obbligatori"}, status=400)
+        if not _verify_plant_access(request.user, plant_id):
+            return Response({"error": "Plant non accessibile"}, status=403)
+
+        plant = Plant.objects.filter(pk=plant_id, deleted_at__isnull=True).first()
+        if not plant:
+            return Response({"error": "Plant non trovato"}, status=404)
+
+        prompt, system = build_explanation_prompt(gap)
+        try:
+            result = route(
+                task_type="assistant_explain",
+                prompt=prompt,
+                system=system,
+                user=request.user,
+                entity_id=plant.pk,
+                module_source="M20",
+                sanitize=True,
+                plant_ids=[plant.pk],
+                max_tokens=600,
+            )
+        except Exception as exc:
+            return Response({"error": f"Errore LLM: {str(exc)[:200]}"}, status=500)
+
+        log_action(
+            user=request.user,
+            action_code="ai.assistant.explain",
+            level="L2",
+            entity=plant,
+            payload={
+                "plant_id": str(plant_id),
+                "gap_kind": gap.get("kind"),
+                "gap_ref_id": gap.get("ref_id"),
+                "interaction_id": result.get("interaction_id"),
+                "provider": result.get("provider"),
+                "used_fallback": result.get("used_fallback"),
+            },
+        )
+
+        return Response({
+            "explanation": result["text"],
+            "interaction_id": result.get("interaction_id"),
+            "provider": result.get("provider"),
+            "model": result.get("model"),
+            "used_fallback": result.get("used_fallback"),
+        })

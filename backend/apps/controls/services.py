@@ -149,6 +149,80 @@ def check_evidence_requirements(instance, lang: str | None = None) -> dict:
     return result
 
 
+def get_extender_instances(ci) -> list:
+    """
+    Restituisce le `ControlInstance` che estendono `ci.control` sullo stesso
+    plant via `ControlMapping(relationship="extends")`.
+
+    La direzione e' una sola: chi estende copre l'esteso (es. TISAX L3 estende
+    L2 -> evidenza/documento su L3 vale anche per L2). L'inverso non vale.
+
+    Single source of truth: usata sia da `audit_prep.validation` per la
+    validazione dell'AuditPrep, sia da `ai_engine.agent_tools` per evitare
+    falsi gap nel GRC Assistant quando l'evidenza e' caricata sul livello
+    estendente. Modificare la regola qui significa propagarla ovunque.
+    """
+    extender_control_ids = list(
+        ci.control.mappings_to.filter(
+            relationship="extends",
+        ).values_list("source_control_id", flat=True)
+    )
+    if not extender_control_ids:
+        return []
+    return list(
+        ControlInstance.objects.filter(
+            plant=ci.plant,
+            control_id__in=extender_control_ids,
+            deleted_at__isnull=True,
+        ).select_related("control")
+    )
+
+
+def is_covered_by_extender(ci, today=None) -> bool:
+    """
+    True se almeno un extender ControlInstance dello stesso plant ha:
+    - >= 1 evidenza valida (no expiry o valid_until >= oggi)
+    - AND >= 1 documento approvato valido (no expiry o expiry_date >= oggi)
+
+    Stessa semantica di `audit_prep.validation._evaluate_evidence_item` per la
+    parte "fonti aggregate": se gli extender sono coperti, copre anche il
+    controllo esteso.
+    """
+    from django.db.models import Q
+    from django.utils import timezone
+
+    from apps.documents.models import Document, Evidence
+
+    today = today or timezone.now().date()
+    extenders = get_extender_instances(ci)
+    if not extenders:
+        return False
+
+    extender_ci_ids = [e.pk for e in extenders]
+
+    has_valid_evidence = (
+        Evidence.objects.filter(
+            control_instances__in=extender_ci_ids,
+            deleted_at__isnull=True,
+        )
+        .filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today))
+        .exists()
+    )
+    if not has_valid_evidence:
+        return False
+
+    has_valid_doc = (
+        Document.objects.filter(
+            control_refs__in=extender_ci_ids,
+            deleted_at__isnull=True,
+            status="approvato",
+        )
+        .filter(Q(expiry_date__isnull=True) | Q(expiry_date__gte=today))
+        .exists()
+    )
+    return has_valid_doc
+
+
 def evaluate_control(instance, new_status, user, note=""):
     from django.core.exceptions import ValidationError
     from django.utils import timezone
@@ -611,32 +685,79 @@ def gap_analysis(source_framework_code: str, target_framework_code: str, plant_i
 
 
 def get_compliance_summary(plant_id, framework_code=None):
-    from apps.plants.services import get_active_frameworks
-    from apps.plants.models import Plant
+    """
+    % di compliance del plant (per framework specifico o globale sui framework
+    attivi).
 
-    qs = ControlInstance.objects.filter(plant_id=plant_id)
+    Regole:
+    - I controlli `na` (Non Applicabile) sono fuori contesto organizzativo e
+      vengono **esclusi dal denominatore** (non sono ne' gap ne' compliant —
+      non li valutiamo affatto).
+    - I controlli non-compliant ma coperti da un extender (es. TISAX L2 con
+      evidenza caricata sul corrispondente L3 via `ControlMapping(extends)`)
+      vengono conteggiati come compliant nel numeratore (la regola di
+      copertura e' la stessa di `audit_prep.validation` / `is_covered_by_extender`).
+
+    I campi `compliant_direct` e `covered_by_extender` sono esposti
+    separatamente per UI esplicative (es. "29 + 12 coperti da L3").
+    """
+    from django.db.models import Count
+    from django.utils import timezone
+
+    from apps.plants.models import Plant
+    from apps.plants.services import get_active_frameworks
+
+    qs = ControlInstance.objects.filter(
+        plant_id=plant_id,
+        deleted_at__isnull=True,
+    )
     if framework_code:
         qs = qs.filter(control__framework__code=framework_code)
     else:
         plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
         active_fws = get_active_frameworks(plant)
         qs = qs.filter(control__framework__in=active_fws)
+
+    na_count = qs.filter(status="na").count()
+    qs = qs.exclude(status="na")
     total = qs.count()
+
     if total == 0:
-        return {"total": 0, "compliant": 0, "gap": 0, "parziale": 0, "na": 0, "non_valutato": 0, "pct_compliant": 0}
-    from django.db.models import Count
+        return {
+            "total": 0,
+            "compliant": 0,
+            "compliant_direct": 0,
+            "covered_by_extender": 0,
+            "gap": 0,
+            "parziale": 0,
+            "non_valutato": 0,
+            "na_excluded": na_count,
+            "pct_compliant": 0,
+        }
 
     counts = qs.values("status").annotate(n=Count("id"))
     result = {r["status"]: r["n"] for r in counts}
-    compliant = result.get("compliant", 0)
+    compliant_direct = result.get("compliant", 0)
+
+    # Conta i non-compliant coperti da un extender (es. TISAX L2 coperto da L3).
+    today = timezone.now().date()
+    non_compliant_qs = qs.exclude(status="compliant").select_related("control")
+    covered_by_extender = 0
+    for ci in non_compliant_qs:
+        if is_covered_by_extender(ci, today):
+            covered_by_extender += 1
+
+    compliant_effective = compliant_direct + covered_by_extender
     return {
         "total": total,
-        "compliant": compliant,
+        "compliant": compliant_effective,
+        "compliant_direct": compliant_direct,
+        "covered_by_extender": covered_by_extender,
         "gap": result.get("gap", 0),
         "parziale": result.get("parziale", 0),
-        "na": result.get("na", 0),
         "non_valutato": result.get("non_valutato", 0),
-        "pct_compliant": round(compliant / total * 100, 1),
+        "na_excluded": na_count,
+        "pct_compliant": round(compliant_effective / total * 100, 1),
     }
 
 

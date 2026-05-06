@@ -1,5 +1,6 @@
-import { useState, Fragment } from "react";
+import { useEffect, useState, Fragment } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "react-router-dom";
 import {
   suppliersApi,
   type Supplier,
@@ -15,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
 import { InternalEvaluationSection } from "./InternalEvaluationSection";
 import { SupplierEvaluationSettingsPage } from "../settings/SupplierEvaluationSettingsPage";
+import { scrollAndHighlight } from "../../lib/scrollAndHighlight";
 
 // ─── Shared badge components ─────────────────────────────────────────────────
 
@@ -1292,7 +1294,7 @@ function ForniториTab() {
             <tbody className="divide-y divide-gray-100">
               {suppliers.map(s => (
                 <Fragment key={s.id}>
-                  <tr className="hover:bg-gray-50 transition-colors">
+                  <tr data-row-id={s.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3 font-medium text-gray-800">
                       <button onClick={() => setExpandedId(expandedId === s.id ? null : s.id)} className="hover:underline text-left">
                         {s.name}
@@ -1666,7 +1668,17 @@ function TemplateTab() {
 type Tab = "fornitori" | "questionari" | "template" | "nda" | "impostazioni";
 
 export function SuppliersPage() {
+  const location = useLocation();
   const [tab, setTab] = useState<Tab>("fornitori");
+
+  // Deep-link dal GRC Assistant: forziamo tab "fornitori" e scrolliamo alla riga.
+  useEffect(() => {
+    const state = location.state as { openSupplierId?: string } | null;
+    if (state?.openSupplierId) {
+      setTab("fornitori");
+      scrollAndHighlight(state.openSupplierId);
+    }
+  }, [location.state]);
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "fornitori",    label: "Fornitori" },
