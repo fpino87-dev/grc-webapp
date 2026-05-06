@@ -68,3 +68,7 @@ osint.md
 
 # Database backups (generati dal task Celery, non da versionare)
 backend/backups/
+
+# Snapshot/export GRC operativi (es. cleanup_orphan_*.csv) — contengono
+# dati di compliance per-plant, non vanno in repo
+backend/exports/
