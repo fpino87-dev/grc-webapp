@@ -1188,6 +1188,7 @@ function ForniториTab() {
   const [filterRisk, setFilterRisk] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filterNis2, setFilterNis2] = useState("");
+  const [search, setSearch] = useState("");
   const [exportLoading, setExportLoading] = useState(false);
 
   const deleteMutation = useMutation({
@@ -1205,7 +1206,23 @@ function ForniториTab() {
     queryKey: ["suppliers", filterRisk, filterStatus, filterNis2],
     queryFn: () => suppliersApi.list(Object.keys(params).length ? params : undefined),
   });
-  const suppliers = data?.results ?? [];
+  const allSuppliers = data?.results ?? [];
+
+  // Ordina alfabeticamente per nome (case-insensitive, locale-aware) e
+  // applica la ricerca client-side su denominazione + CF/P.IVA + email.
+  const suppliers = (() => {
+    const q = search.trim().toLowerCase();
+    const filtered = q
+      ? allSuppliers.filter(s =>
+          (s.name ?? "").toLowerCase().includes(q) ||
+          (s.vat_number ?? "").toLowerCase().includes(q) ||
+          (s.email ?? "").toLowerCase().includes(q),
+        )
+      : allSuppliers;
+    return [...filtered].sort((a, b) =>
+      (a.name ?? "").localeCompare(b.name ?? "", undefined, { sensitivity: "base" }),
+    );
+  })();
 
   async function handleExport(nis2Only: boolean) {
     setExportLoading(true);
@@ -1220,8 +1237,18 @@ function ForniториTab() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex gap-2 flex-wrap">
+      <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center">
+          <div className="relative">
+            <input
+              type="search"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Cerca denominazione, CF/P.IVA, email…"
+              className="border rounded pl-8 pr-3 py-1.5 text-sm w-72"
+            />
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none">🔍</span>
+          </div>
           <select value={filterRisk} onChange={e => setFilterRisk(e.target.value)} className="border rounded px-3 py-1.5 text-sm">
             <option value="">Tutti i rischi</option>
             {["basso","medio","alto","critico"].map(r => <option key={r} value={r}>{r}</option>)}
@@ -1235,6 +1262,11 @@ function ForniториTab() {
             <option value="true">Solo NIS2 rilevanti</option>
             <option value="false">Non NIS2</option>
           </select>
+          {search && (
+            <span className="text-xs text-gray-500">
+              {suppliers.length} di {allSuppliers.length}
+            </span>
+          )}
         </div>
         <div className="flex gap-2">
           {/* Export dropdown */}
@@ -1274,7 +1306,9 @@ function ForniториTab() {
         {isLoading ? (
           <div className="p-8 text-center text-gray-400">Caricamento...</div>
         ) : suppliers.length === 0 ? (
-          <div className="p-8 text-center text-gray-400">Nessun fornitore trovato.</div>
+          <div className="p-8 text-center text-gray-400">
+            {search ? `Nessun fornitore corrisponde a "${search}".` : "Nessun fornitore trovato."}
+          </div>
         ) : (
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
