@@ -1337,6 +1337,7 @@ interface RiskAppetitePolicy {
 }
 
 function RiskAppetiteCard({ plantId }: { plantId?: string }) {
+  const { t, i18n } = useTranslation();
   const { data: policy, isLoading, isError } = useQuery({
     queryKey: ["risk-appetite", plantId],
     queryFn: () => {
