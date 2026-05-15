@@ -2197,7 +2197,31 @@
     "plan_due_date_label": "Treatment plan deadline",
     "plan_due_date_help": "Date by which the selected treatment (mitigate/accept/transfer/avoid) must be applied",
     "plan_due_date_overdue": "Overdue",
-    "plan_due_date_soon": "Due soon"
+    "plan_due_date_soon": "Due soon",
+    "plan_col_header": "Treatment Deadline",
+    "mitigation_on_time": "Completed on time",
+    "mitigation_late": "Completed late",
+    "mitigation_progress": "{{completed}}/{{total}} actions completed",
+    "mitigation_no_plans": "No treatment actions",
+    "reopen_label": "Reopen as draft",
+    "reopen_confirm": "Reopen this scenario as draft? The 'completed' status will be reverted. This action is tracked in the audit trail.",
+    "plan_complete_btn": "Mark completed",
+    "plan_completed_label": "Completed",
+    "plan_uncomplete_label": "Undo completion",
+    "plan_uncomplete_confirm": "Undo the completion of this action? It will return to 'in progress'. This action is tracked in the audit trail.",
+    "plan_delete_confirm": "Delete this mitigation action? This cannot be undone.",
+    "eff_status": {
+      "in_valutazione": "Under assessment",
+      "valutato": "Assessed",
+      "da_pianificare": "To be planned",
+      "in_trattamento": "Being treated ({{done}}/{{total}})",
+      "in_accettazione": "Pending acceptance",
+      "accettato_azioni_in_corso": "Accepted — actions pending",
+      "completato": "Completed",
+      "archiviato": "Archived",
+      "rivalutare": "Re-assess",
+      "hint_accettazione": "Expand row to formally accept"
+    }
   },
   "pdca": {
     "source_incident": "Incident",

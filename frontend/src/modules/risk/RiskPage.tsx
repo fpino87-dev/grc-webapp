@@ -129,6 +129,162 @@ function RiskInherentResidualBadges({ assessment }: { assessment: RiskAssessment
   );
 }
 
+function TreatmentDeadlineBadge({ assessment }: { assessment: RiskAssessment }) {
+  const { t } = useTranslation();
+  const { plan_due_date, treatment, mitigation_plans_count, mitigation_plans_completed, last_plan_completed_at } = assessment;
+
+  const isActiveTreatment = treatment === "mitigare" || treatment === "trasferire";
+  if (!plan_due_date) return <span className="text-gray-300 text-xs">—</span>;
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const overdue = plan_due_date < todayStr;
+  const diffDays = Math.floor((new Date(plan_due_date).getTime() - new Date(todayStr).getTime()) / 86400000);
+  const allDone = mitigation_plans_count > 0 && mitigation_plans_completed === mitigation_plans_count;
+  const hasPlans = mitigation_plans_count > 0;
+
+  let completionStatus: "on_time" | "late" | null = null;
+  if (allDone && last_plan_completed_at) {
+    const completedDate = last_plan_completed_at.slice(0, 10);
+    completionStatus = completedDate <= plan_due_date ? "on_time" : "late";
+  }
+
+  const dateDisplay = new Date(plan_due_date + "T12:00:00").toLocaleDateString(i18n.language || "it");
+
+  let deadlineColor = "bg-green-50 text-green-700 border-green-200";
+  if (overdue && !allDone) deadlineColor = "bg-red-50 text-red-700 border-red-200";
+  else if (!overdue && diffDays <= 30 && !allDone) deadlineColor = "bg-amber-50 text-amber-700 border-amber-200";
+
+  return (
+    <div className="space-y-1.5">
+      <div className={`inline-flex items-center gap-1 px-2 py-1 rounded border text-xs font-medium ${deadlineColor}`}>
+        <span>📅</span>
+        <span>{dateDisplay}</span>
+        {overdue && !allDone && (
+          <span className="ml-1 px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-semibold">
+            {t("risk.plan_due_date_overdue")}
+          </span>
+        )}
+        {!overdue && diffDays <= 30 && !allDone && (
+          <span className="ml-1 px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-semibold">
+            {t("risk.plan_due_date_soon")}
+          </span>
+        )}
+      </div>
+
+      {isActiveTreatment && hasPlans && (
+        <div className="text-xs">
+          {completionStatus === "on_time" && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium">
+              ✓ {t("risk.mitigation_on_time")}
+            </span>
+          )}
+          {completionStatus === "late" && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 font-medium">
+              ⚠ {t("risk.mitigation_late")}
+            </span>
+          )}
+          {!completionStatus && (
+            <span className="text-gray-500">
+              {t("risk.mitigation_progress", { completed: mitigation_plans_completed, total: mitigation_plans_count })}
+            </span>
+          )}
+        </div>
+      )}
+
+      {isActiveTreatment && !hasPlans && (
+        <div className="text-[10px] text-gray-400">{t("risk.mitigation_no_plans")}</div>
+      )}
+    </div>
+  );
+}
+
+const TREATMENT_BADGE: Record<string, string> = {
+  mitigare:   "bg-blue-100 text-blue-800",
+  trasferire: "bg-purple-100 text-purple-800",
+  accettare:  "bg-yellow-100 text-yellow-800",
+  evitare:    "bg-gray-100 text-gray-700",
+};
+
+function EffectiveStatusBadge({ assessment: a }: { assessment: RiskAssessment }) {
+  const { t } = useTranslation();
+
+  const isActive = a.treatment === "mitigare" || a.treatment === "trasferire";
+  const allPlansDone = a.mitigation_plans_count > 0 && a.mitigation_plans_completed === a.mitigation_plans_count;
+  const hasPlans = a.mitigation_plans_count > 0;
+  const isVerde = a.risk_level === "verde" || (a.score !== null && a.score <= 7);
+
+  let label: string;
+  let cls: string;
+
+  if (a.status === "archiviato") {
+    label = t("risk.eff_status.archiviato");
+    cls = "bg-gray-100 text-gray-600";
+  } else if (a.risk_accepted_formally) {
+    if (isActive && !allPlansDone) {
+      label = t("risk.eff_status.accettato_azioni_in_corso");
+      cls = "bg-amber-100 text-amber-700";
+    } else {
+      label = t("risk.eff_status.completato");
+      cls = "bg-green-100 text-green-800";
+    }
+  } else if (a.status === "completato" && isActive) {
+    if (!hasPlans) {
+      label = t("risk.eff_status.da_pianificare");
+      cls = "bg-orange-100 text-orange-700";
+    } else if (allPlansDone) {
+      // Verde: si chiude senza accettazione formale
+      if (isVerde) {
+        label = t("risk.eff_status.completato");
+        cls = "bg-green-100 text-green-800";
+      } else {
+        label = t("risk.eff_status.in_accettazione");
+        cls = "bg-teal-100 text-teal-700";
+      }
+    } else {
+      label = t("risk.eff_status.in_trattamento", { done: a.mitigation_plans_completed, total: a.mitigation_plans_count });
+      cls = "bg-blue-100 text-blue-700";
+    }
+  } else if (a.status === "completato" && (a.treatment === "accettare" || a.treatment === "evitare")) {
+    // Verde: completato senza accettazione formale
+    if (isVerde) {
+      label = t("risk.eff_status.completato");
+      cls = "bg-green-100 text-green-800";
+    } else {
+      label = t("risk.eff_status.in_accettazione");
+      cls = "bg-amber-100 text-amber-700";
+    }
+  } else if (a.status === "completato") {
+    label = t("risk.eff_status.valutato");
+    cls = "bg-blue-100 text-blue-700";
+  } else {
+    label = t("risk.eff_status.in_valutazione");
+    cls = "bg-gray-100 text-gray-500";
+  }
+
+  return (
+    <div className="space-y-1.5">
+      {a.treatment && (
+        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${TREATMENT_BADGE[a.treatment] ?? "bg-gray-100 text-gray-600"}`}>
+          {t(`risk.treatment_${a.treatment}`)}
+        </span>
+      )}
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${cls}`}>
+          {label}
+        </span>
+        {a.needs_revaluation && (
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700">
+            ⚠ {t("risk.eff_status.rivalutare")}
+          </span>
+        )}
+      </div>
+      {(label === t("risk.eff_status.in_accettazione") || label === t("risk.eff_status.accettato_azioni_in_corso")) && !a.risk_accepted_formally && !isVerde && (
+        <p className="text-[10px] text-gray-400 mt-0.5">▼ {t("risk.eff_status.hint_accettazione")}</p>
+      )}
+    </div>
+  );
+}
+
 function SuggestResidualPanel({ assessment }: { assessment: RiskAssessment }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -369,6 +525,16 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["mitigation-plans", assessmentId] }),
   });
 
+  const uncompleteMutation = useMutation({
+    mutationFn: (id: string) => riskApi.uncompletePlan(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["mitigation-plans", assessmentId] }),
+  });
+
+  const deletePlanMutation = useMutation({
+    mutationFn: (id: string) => riskApi.deletePlan(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["mitigation-plans", assessmentId] }),
+  });
+
   const updateMutation = useMutation({
     mutationFn: () => {
       if (!editPlan) return Promise.reject(new Error("No plan selected"));
@@ -532,13 +698,34 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
                   }}
                   className="text-xs text-purple-700 border border-purple-300 rounded px-2 py-0.5 hover:bg-purple-50 whitespace-nowrap"
                 >
-                  Modifica
+                  {t("actions.edit")}
+                </button>
+                <button
+                  onClick={() => {
+                    if (window.confirm(t("risk.plan_delete_confirm"))) deletePlanMutation.mutate(plan.id);
+                  }}
+                  disabled={deletePlanMutation.isPending}
+                  title={t("actions.delete")}
+                  className="text-gray-400 hover:text-red-600 hover:bg-red-50 rounded p-0.5 transition-colors disabled:opacity-50"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
                 </button>
               </span>
               {!plan.completed_at ? (
-                <button onClick={() => completeMutation.mutate(plan.id)} className="text-xs text-green-700 hover:underline shrink-0">Completa</button>
+                <button onClick={() => completeMutation.mutate(plan.id)} disabled={completeMutation.isPending} className="text-xs text-green-700 border border-green-300 rounded px-2 py-0.5 hover:bg-green-50 disabled:opacity-50 shrink-0">
+                  {t("risk.plan_complete_btn")}
+                </button>
               ) : (
-                <span className="text-xs text-green-600 shrink-0">✓ Completato</span>
+                <button
+                  onClick={() => { if (window.confirm(t("risk.plan_uncomplete_confirm"))) uncompleteMutation.mutate(plan.id); }}
+                  disabled={uncompleteMutation.isPending}
+                  title={t("risk.plan_uncomplete_label")}
+                  className="text-xs text-green-600 border border-green-200 rounded px-2 py-0.5 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-300 transition-colors shrink-0"
+                >
+                  ✓ {t("risk.plan_completed_label")}
+                </button>
               )}
             </div>
               );
@@ -1239,6 +1426,11 @@ export function RiskPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["risk-assessments"] }),
   });
 
+  const reopenMutation = useMutation({
+    mutationFn: (id: string) => riskApi.reopen(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["risk-assessments"] }),
+  });
+
   const assessments: RiskAssessment[] = data?.results ?? [];
 
   return (
@@ -1350,6 +1542,7 @@ export function RiskPage() {
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Weighted (pesato)</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">ALE (da BIA)</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Stato</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("risk.plan_col_header")}</th>
                 <th className="text-left px-4 py-3 font-medium text-blue-700 bg-blue-50">NIS2</th>
                 <th className="px-4 py-3"></th>
               </tr>
@@ -1422,63 +1615,10 @@ export function RiskPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <StatusBadge status={a.status} />
-                          {a.needs_revaluation && (
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
-                              Rivalutare
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {a.status === "bozza" && "In bozza (completa per calcolare score/ALE)"}
-                          {a.status === "completato" && !a.risk_accepted_formally && "Apri ▼ per accettazione formale"}
-                          {a.status === "archiviato" && "Archiviato"}
-                        </div>
-                        {a.status === "completato" && a.risk_accepted_formally && (
-                          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium mt-0.5">
-                            ✓ Accettato formalmente
-                          </span>
-                        )}
-                        <div className="text-xs text-gray-500">
-                          Trattamento:{" "}
-                          {a.treatment
-                            ? a.treatment === "mitigare"
-                              ? t("risk.treatment_mitigare")
-                              : a.treatment === "accettare"
-                                ? t("risk.treatment_accettare")
-                                : a.treatment === "trasferire"
-                                  ? t("risk.treatment_trasferire")
-                                  : a.treatment === "evitare"
-                                    ? t("risk.treatment_evitare")
-                                    : a.treatment
-                            : "—"}
-                        </div>
-                        {a.plan_due_date && (() => {
-                          const due = new Date(a.plan_due_date);
-                          const today = new Date();
-                          today.setHours(0, 0, 0, 0);
-                          const diffDays = Math.floor((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                          const overdue = diffDays < 0 && a.status !== "archiviato";
-                          const soon = diffDays >= 0 && diffDays <= 14 && a.status !== "archiviato";
-                          return (
-                            <div className={`text-xs flex items-center gap-1 ${overdue ? "text-red-600 font-medium" : soon ? "text-amber-600" : "text-gray-500"}`}>
-                              <span>{t("risk.plan_due_date_label")}: {a.plan_due_date}</span>
-                              {overdue && (
-                                <span className="px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-semibold">
-                                  {t("risk.plan_due_date_overdue")}
-                                </span>
-                              )}
-                              {soon && (
-                                <span className="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-semibold">
-                                  {t("risk.plan_due_date_soon")}
-                                </span>
-                              )}
-                            </div>
-                          );
-                        })()}
-                      </div>
+                      <EffectiveStatusBadge assessment={a} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <TreatmentDeadlineBadge assessment={a} />
                     </td>
                     <td className="px-4 py-3 bg-blue-50/30" onClick={e => e.stopPropagation()}>
                       <div className="space-y-1">
@@ -1507,6 +1647,20 @@ export function RiskPage() {
                           <button onClick={() => completeMutation.mutate(a.id)} disabled={completeMutation.isPending}
                             className="text-xs text-blue-700 border border-blue-300 rounded px-2 py-1 hover:bg-blue-50 disabled:opacity-50 font-medium">
                             Completa
+                          </button>
+                        )}
+                        {a.status === "completato" && (
+                          <button
+                            onClick={() => {
+                              if (window.confirm(t("risk.reopen_confirm"))) reopenMutation.mutate(a.id);
+                            }}
+                            disabled={reopenMutation.isPending}
+                            title={t("risk.reopen_label")}
+                            className="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors disabled:opacity-50"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                            </svg>
                           </button>
                         )}
                         {a.status !== "archiviato" && (
@@ -1539,7 +1693,7 @@ export function RiskPage() {
                   </tr>
                   {expandedId === a.id && (
                     <tr key={`${a.id}-detail`}>
-                      <td colSpan={12} className="p-0">
+                      <td colSpan={13} className="p-0">
                         <RiskInherentResidualBadges assessment={a} />
                         <SuggestResidualPanel assessment={a} />
                         <FormalAcceptancePanel assessment={a} />

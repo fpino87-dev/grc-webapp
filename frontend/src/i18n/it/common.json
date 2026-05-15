@@ -2197,7 +2197,31 @@
     "plan_due_date_label": "Scadenza piano di trattamento",
     "plan_due_date_help": "Data entro cui il trattamento scelto (mitigare/accettare/trasferire/evitare) deve essere applicato",
     "plan_due_date_overdue": "Scaduto",
-    "plan_due_date_soon": "In scadenza"
+    "plan_due_date_soon": "In scadenza",
+    "plan_col_header": "Scadenza Piano",
+    "mitigation_on_time": "Completato in tempo",
+    "mitigation_late": "Completato in ritardo",
+    "mitigation_progress": "{{completed}}/{{total}} azioni completate",
+    "mitigation_no_plans": "Nessuna azione di trattamento",
+    "reopen_label": "Riapri in bozza",
+    "reopen_confirm": "Riportare questo scenario in bozza? Lo stato 'completato' verrà annullato. L'azione è tracciata in audit trail.",
+    "plan_complete_btn": "Segna completato",
+    "plan_completed_label": "Completato",
+    "plan_uncomplete_label": "Annulla completamento",
+    "plan_uncomplete_confirm": "Annullare il completamento di questa azione? Tornerà in stato 'in corso'. L'azione è tracciata in audit trail.",
+    "plan_delete_confirm": "Eliminare questa azione di mitigazione? L'operazione non è reversibile.",
+    "eff_status": {
+      "in_valutazione": "In valutazione",
+      "valutato": "Valutato",
+      "da_pianificare": "Da pianificare",
+      "in_trattamento": "In trattamento ({{done}}/{{total}})",
+      "in_accettazione": "In accettazione",
+      "accettato_azioni_in_corso": "Accettato — azioni in corso",
+      "completato": "Completato",
+      "archiviato": "Archiviato",
+      "rivalutare": "Rivalutare",
+      "hint_accettazione": "Espandi la riga per accettare formalmente"
+    }
   },
   "pdca": {
     "source_incident": "Incidente",

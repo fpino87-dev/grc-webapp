@@ -2276,7 +2276,31 @@
     "plan_due_date_label": "Échéance du plan de traitement",
     "plan_due_date_help": "Date à laquelle le traitement choisi (atténuer/accepter/transférer/éviter) doit être appliqué",
     "plan_due_date_overdue": "Échu",
-    "plan_due_date_soon": "Bientôt à échéance"
+    "plan_due_date_soon": "Bientôt à échéance",
+    "plan_col_header": "Échéance du plan",
+    "mitigation_on_time": "Complété à temps",
+    "mitigation_late": "Complété en retard",
+    "mitigation_progress": "{{completed}}/{{total}} actions terminées",
+    "mitigation_no_plans": "Aucune action de traitement",
+    "reopen_label": "Rouvrir en brouillon",
+    "reopen_confirm": "Rouvrir ce scénario en brouillon ? Le statut 'complété' sera annulé. Cette action est tracée dans l'audit trail.",
+    "plan_complete_btn": "Marquer terminé",
+    "plan_completed_label": "Terminé",
+    "plan_uncomplete_label": "Annuler la complétion",
+    "plan_uncomplete_confirm": "Annuler la complétion de cette action ? Elle reviendra à 'en cours'. Cette action est tracée dans l'audit trail.",
+    "plan_delete_confirm": "Supprimer cette action de mitigation ? Cette opération est irréversible.",
+    "eff_status": {
+      "in_valutazione": "En évaluation",
+      "valutato": "Évalué",
+      "da_pianificare": "À planifier",
+      "in_trattamento": "En traitement ({{done}}/{{total}})",
+      "in_accettazione": "En attente d'acceptation",
+      "accettato_azioni_in_corso": "Accepté — actions en cours",
+      "completato": "Complété",
+      "archiviato": "Archivé",
+      "rivalutare": "Réévaluer",
+      "hint_accettazione": "Développer la ligne pour accepter formellement"
+    }
   },
   "pdca": {
     "source_incident": "Incident",

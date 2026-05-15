@@ -2276,7 +2276,31 @@
     "plan_due_date_label": "İşlem planı son tarihi",
     "plan_due_date_help": "Seçilen işlemin (azaltma/kabul/aktarım/kaçınma) uygulanması gereken son tarih",
     "plan_due_date_overdue": "Süresi geçmiş",
-    "plan_due_date_soon": "Yaklaşan"
+    "plan_due_date_soon": "Yaklaşan",
+    "plan_col_header": "Plan Son Tarihi",
+    "mitigation_on_time": "Zamanında tamamlandı",
+    "mitigation_late": "Geç tamamlandı",
+    "mitigation_progress": "{{completed}}/{{total}} eylem tamamlandı",
+    "mitigation_no_plans": "Tedavi eylemi yok",
+    "reopen_label": "Taslağa geri al",
+    "reopen_confirm": "Bu senaryoyu taslağa geri almak istiyor musunuz? 'Tamamlandı' durumu geri alınacak. Bu işlem denetim günlüğünde takip edilir.",
+    "plan_complete_btn": "Tamamlandı olarak işaretle",
+    "plan_completed_label": "Tamamlandı",
+    "plan_uncomplete_label": "Tamamlamayı geri al",
+    "plan_uncomplete_confirm": "Bu eylemin tamamlanmasını geri almak istiyor musunuz? 'Devam ediyor' durumuna dönecek. Bu işlem denetim günlüğünde takip edilir.",
+    "plan_delete_confirm": "Bu azaltma eylemini silmek istiyor musunuz? Bu işlem geri alınamaz.",
+    "eff_status": {
+      "in_valutazione": "Değerlendiriliyor",
+      "valutato": "Değerlendirildi",
+      "da_pianificare": "Planlanacak",
+      "in_trattamento": "Tedavi ediliyor ({{done}}/{{total}})",
+      "in_accettazione": "Kabul bekliyor",
+      "accettato_azioni_in_corso": "Kabul edildi — eylemler devam ediyor",
+      "completato": "Tamamlandı",
+      "archiviato": "Arşivlendi",
+      "rivalutare": "Yeniden değerlendir",
+      "hint_accettazione": "Resmi kabul için satırı genişletin"
+    }
   },
   "pdca": {
     "source_incident": "Olay",

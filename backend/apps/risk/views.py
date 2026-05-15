@@ -15,7 +15,7 @@ from .services import delete_risk_assessment
 class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = RiskAssessment.objects.select_related(
         "plant", "asset", "assessed_by", "accepted_by", "owner", "critical_process"
-    )
+    ).prefetch_related("mitigation_plans")
     serializer_class = RiskAssessmentSerializer
     filterset_fields = ["plant", "status", "assessment_type"]
     plant_field = "plant"
@@ -119,6 +119,26 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 "score": score,
                 "ale_annuo": str(assessment.ale_annuo or 0),
             },
+        )
+        serializer = self.get_serializer(assessment)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["post"], url_path="reopen")
+    def reopen(self, request, pk=None):
+        """Riporta un assessment da 'completato' a 'bozza' in caso di errore."""
+        assessment = self.get_object()
+        if assessment.status != "completato":
+            return Response({"error": "Solo gli assessment in stato 'completato' possono essere riaperti."}, status=400)
+        assessment.status = "bozza"
+        assessment.assessed_by = None
+        assessment.assessed_at = None
+        assessment.save(update_fields=["status", "assessed_by", "assessed_at", "updated_at"])
+        log_action(
+            user=request.user,
+            action_code="risk.assessment.reopen",
+            level="L2",
+            entity=assessment,
+            payload={"id": str(assessment.id), "reopened_by": request.user.email},
         )
         serializer = self.get_serializer(assessment)
         return Response(serializer.data)
@@ -516,6 +536,36 @@ class RiskMitigationPlanViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet)
             entity=instance,
             payload={"id": str(instance.id), "completed_at": str(instance.completed_at)},
         )
+
+    def destroy(self, request, *args, **kwargs):
+        plan = self.get_object()
+        plan.soft_delete()
+        log_action(
+            user=request.user,
+            action_code="risk.mitigation_plan.deleted",
+            level="L2",
+            entity=plan,
+            payload={"id": str(plan.id), "action": plan.action[:100]},
+        )
+        return Response(status=204)
+
+    @action(detail=True, methods=["post"], url_path="uncomplete")
+    def uncomplete(self, request, pk=None):
+        """Annulla il completamento di un piano di mitigazione segnato per errore."""
+        plan = self.get_object()
+        if not plan.completed_at:
+            return Response({"error": "Il piano non è ancora completato."}, status=400)
+        plan.completed_at = None
+        plan.save(update_fields=["completed_at", "updated_at"])
+        log_action(
+            user=request.user,
+            action_code="risk.mitigation_plan.uncomplete",
+            level="L2",
+            entity=plan,
+            payload={"id": str(plan.id), "uncompleted_by": request.user.email},
+        )
+        serializer = self.get_serializer(plan)
+        return Response(serializer.data)
 
 
 class RiskAppetitePolicyViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):

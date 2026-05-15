@@ -69,6 +69,9 @@ export interface RiskAssessment {
   risk_acceptance_expiry: string | null;
   assessed_at: string | null;
   plan_due_date: string | null;
+  mitigation_plans_count: number;
+  mitigation_plans_completed: number;
+  last_plan_completed_at: string | null;
   needs_revaluation: boolean;
   needs_revaluation_since: string | null;
   cause: string;
@@ -128,6 +131,8 @@ export const riskApi = {
     apiClient.patch<RiskAssessment>(`/risk/assessments/${id}/`, data).then(r => r.data),
   complete: (id: string) =>
     apiClient.post(`/risk/assessments/${id}/complete/`).then(r => r.data),
+  reopen: (id: string) =>
+    apiClient.post<RiskAssessment>(`/risk/assessments/${id}/reopen/`).then(r => r.data),
   accept: (id: string) =>
     apiClient.post(`/risk/assessments/${id}/accept/`).then(r => r.data),
   mitigationPlans: (assessmentId: string) =>
@@ -138,6 +143,10 @@ export const riskApi = {
     apiClient.patch<RiskMitigationPlan>(`/risk/mitigation-plans/${id}/`, data).then(r => r.data),
   completePlan: (id: string) =>
     apiClient.patch<RiskMitigationPlan>(`/risk/mitigation-plans/${id}/`, { completed_at: new Date().toISOString() }).then(r => r.data),
+  uncompletePlan: (id: string) =>
+    apiClient.post<RiskMitigationPlan>(`/risk/mitigation-plans/${id}/uncomplete/`).then(r => r.data),
+  deletePlan: (id: string) =>
+    apiClient.delete(`/risk/mitigation-plans/${id}/`).then(() => undefined),
   suggestResidual: (id: string) =>
     apiClient.get<SuggestResidualResult>(`/risk/assessments/${id}/suggest-residual/`).then(r => r.data),
   acceptRisk: (id: string, note: string, expiryDate?: string) =>

@@ -17,6 +17,9 @@ class RiskAssessmentSerializer(serializers.ModelSerializer):
     inherent_risk_level = serializers.SerializerMethodField(read_only=True)
     risk_reduction_pct = serializers.SerializerMethodField(read_only=True)
     accepted_by_name = serializers.SerializerMethodField(read_only=True)
+    mitigation_plans_count = serializers.SerializerMethodField(read_only=True)
+    mitigation_plans_completed = serializers.SerializerMethodField(read_only=True)
+    last_plan_completed_at = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = RiskAssessment
@@ -47,6 +50,7 @@ class RiskAssessmentSerializer(serializers.ModelSerializer):
             "cause", "consequence",
             "nis2_art21_category", "nis2_relevance", "impacted_systems",
             "risk_level", "inherent_risk_level", "risk_reduction_pct",
+            "mitigation_plans_count", "mitigation_plans_completed", "last_plan_completed_at",
             "created_at", "updated_at",
         ]
         read_only_fields = [
@@ -57,6 +61,7 @@ class RiskAssessmentSerializer(serializers.ModelSerializer):
             "score", "inherent_score",
             "owner_name", "critical_process_name",
             "ale_calcolato", "weighted_score", "accepted_by_name",
+            "mitigation_plans_count", "mitigation_plans_completed", "last_plan_completed_at",
         ]
 
     def get_risk_level(self, obj):
@@ -86,6 +91,21 @@ class RiskAssessmentSerializer(serializers.ModelSerializer):
 
     def get_weighted_score(self, obj):
         return obj.weighted_score
+
+    def get_mitigation_plans_count(self, obj):
+        plans = obj.mitigation_plans.all()
+        return sum(1 for p in plans if p.deleted_at is None)
+
+    def get_mitigation_plans_completed(self, obj):
+        plans = obj.mitigation_plans.all()
+        return sum(1 for p in plans if p.deleted_at is None and p.completed_at is not None)
+
+    def get_last_plan_completed_at(self, obj):
+        completed = [
+            p.completed_at for p in obj.mitigation_plans.all()
+            if p.deleted_at is None and p.completed_at is not None
+        ]
+        return max(completed).isoformat() if completed else None
 
 
 class RiskDimensionSerializer(serializers.ModelSerializer):

@@ -2276,7 +2276,31 @@
     "plan_due_date_label": "Termin planu postępowania",
     "plan_due_date_help": "Data, do której wybrane postępowanie (ograniczanie/akceptacja/przenoszenie/unikanie) musi zostać zastosowane",
     "plan_due_date_overdue": "Zaległy",
-    "plan_due_date_soon": "Zbliża się termin"
+    "plan_due_date_soon": "Zbliża się termin",
+    "plan_col_header": "Termin planu",
+    "mitigation_on_time": "Ukończono na czas",
+    "mitigation_late": "Ukończono po terminie",
+    "mitigation_progress": "{{completed}}/{{total}} działań ukończonych",
+    "mitigation_no_plans": "Brak działań naprawczych",
+    "reopen_label": "Wróć do wersji roboczej",
+    "reopen_confirm": "Przywrócić ten scenariusz do wersji roboczej? Status 'ukończony' zostanie cofnięty. Akcja jest śledzona w dzienniku audytu.",
+    "plan_complete_btn": "Oznacz jako ukończone",
+    "plan_completed_label": "Ukończone",
+    "plan_uncomplete_label": "Cofnij ukończenie",
+    "plan_uncomplete_confirm": "Cofnąć ukończenie tej akcji? Wróci do stanu 'w toku'. Akcja jest śledzona w dzienniku audytu.",
+    "plan_delete_confirm": "Usunąć tę akcję naprawczą? Tej operacji nie można cofnąć.",
+    "eff_status": {
+      "in_valutazione": "W ocenie",
+      "valutato": "Oceniony",
+      "da_pianificare": "Do zaplanowania",
+      "in_trattamento": "W trakcie leczenia ({{done}}/{{total}})",
+      "in_accettazione": "Oczekuje na akceptację",
+      "accettato_azioni_in_corso": "Zaakceptowany — akcje w toku",
+      "completato": "Ukończony",
+      "archiviato": "Zarchiwizowany",
+      "rivalutare": "Ponowna ocena",
+      "hint_accettazione": "Rozwiń wiersz, aby formalnie zaakceptować"
+    }
   },
   "pdca": {
     "source_incident": "Incydent",
