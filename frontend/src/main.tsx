@@ -13,6 +13,12 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 2 * 60 * 1000, // 2 minuti — evita refetch massivi su focus/mount
       refetchOnWindowFocus: false,
+      // Non ritentare mai su 429 (rate limit): creerebbe un loop di retry
+      retry: (failureCount, error: unknown) => {
+        const status = (error as { response?: { status?: number } })?.response?.status;
+        if (status === 429) return false;
+        return failureCount < 3;
+      },
     },
   },
 });
