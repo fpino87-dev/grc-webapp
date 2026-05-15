@@ -43,7 +43,7 @@ export function OsintDashboard() {
   const { data: summary } = useQuery({
     queryKey: ["osint-summary"],
     queryFn: osintApi.dashboardSummary,
-    refetchInterval: 60_000,
+    refetchInterval: 5 * 60_000,
   });
 
   const { data: entities = [], isLoading } = useQuery({
@@ -59,7 +59,7 @@ export function OsintDashboard() {
   const { data: findingsSummary } = useQuery({
     queryKey: ["osint-findings-summary"],
     queryFn: osintApi.findingsSummary,
-    refetchInterval: 60_000,
+    refetchInterval: 5 * 60_000,
   });
 
   const totalOpenFindings = (findingsSummary?.open_critical ?? 0)

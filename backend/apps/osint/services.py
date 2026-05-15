@@ -188,6 +188,8 @@ def _sync_suppliers(settings: OsintSettings, result: AggregationResult) -> None:
 
 
 def _sync_assets_it(settings: OsintSettings, result: AggregationResult) -> None:
+    from .validators import is_public_internet_target
+
     kept: set = set()
     for a in AssetIT.objects.select_related("plant").all():
         candidates: list[str] = []
@@ -198,6 +200,9 @@ def _sync_assets_it(settings: OsintSettings, result: AggregationResult) -> None:
         for raw in candidates:
             domain = extract_domain(raw)
             if not domain:
+                continue
+            if not is_public_internet_target(domain):
+                logger.debug("OSINT: skipping non-public asset domain %s (%s)", domain, a.name)
                 continue
             _upsert_entity(
                 source_module=SourceModule.ASSETS_IT,
