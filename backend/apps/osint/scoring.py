@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def _score_ssl(scan: "OsintScan") -> int:
+def _score_ssl(scan: "OsintScan", warning_days: int = 60) -> int:
     if scan.ssl_valid is None:
         return 0  # nessun HTTPS rilevato: non applicabile, non penalizzare
     if scan.ssl_valid is False:
@@ -30,7 +30,7 @@ def _score_ssl(scan: "OsintScan") -> int:
         return 90
     if days <= 30:
         return 70
-    if days <= 60:
+    if days <= warning_days:
         return 40
     if days <= 90:
         return 20
@@ -127,9 +127,10 @@ def _score_grc(entity: "OsintEntity", scan: "OsintScan") -> int:
 
 def compute_scores(entity: "OsintEntity", scan: "OsintScan") -> None:
     """Calcola e scrive i 4 score + score_total nel scan (non salva — il chiamante salva)."""
-    from apps.osint.models import EntityType
+    from apps.osint.models import EntityType, OsintSettings
 
-    ssl = _score_ssl(scan)
+    settings = OsintSettings.load()
+    ssl = _score_ssl(scan, warning_days=settings.ssl_expiry_warning_days)
     dns = _score_dns(scan)
     rep = _score_reputation(scan)
     grc = _score_grc(entity, scan)

@@ -114,6 +114,7 @@ export interface OsintSettings {
   id: string;
   score_threshold_critical: number;
   score_threshold_warning: number;
+  ssl_expiry_warning_days: number;
   freq_my_domains: ScanFrequency;
   freq_suppliers_critical: ScanFrequency;
   freq_suppliers_other: ScanFrequency;

@@ -18,6 +18,7 @@ export function OsintSettingsPage() {
   const [form, setForm] = useState({
     score_threshold_critical: 70,
     score_threshold_warning: 50,
+    ssl_expiry_warning_days: 60,
     freq_my_domains: "weekly" as ScanFrequency,
     freq_suppliers_critical: "weekly" as ScanFrequency,
     freq_suppliers_other: "monthly" as ScanFrequency,
@@ -41,6 +42,7 @@ export function OsintSettingsPage() {
         ...prev,
         score_threshold_critical: settings.score_threshold_critical,
         score_threshold_warning: settings.score_threshold_warning,
+        ssl_expiry_warning_days: settings.ssl_expiry_warning_days,
         freq_my_domains: settings.freq_my_domains,
         freq_suppliers_critical: settings.freq_suppliers_critical,
         freq_suppliers_other: settings.freq_suppliers_other,
@@ -55,6 +57,7 @@ export function OsintSettingsPage() {
       const payload: Record<string, unknown> = {
         score_threshold_critical: form.score_threshold_critical,
         score_threshold_warning: form.score_threshold_warning,
+        ssl_expiry_warning_days: form.ssl_expiry_warning_days,
         freq_my_domains: form.freq_my_domains,
         freq_suppliers_critical: form.freq_suppliers_critical,
         freq_suppliers_other: form.freq_suppliers_other,
@@ -143,6 +146,23 @@ export function OsintSettingsPage() {
               onChange={e => set("score_threshold_warning", Number(e.target.value))}
               className="mt-1 block w-full border rounded px-3 py-2 text-sm"
             />
+          </label>
+        </div>
+        <div className="border-t pt-4">
+          <label className="block">
+            <span className="text-sm font-medium text-gray-700">{t("osint.settings.ssl_expiry_warning_days")}</span>
+            <p className="text-xs text-gray-400 mt-0.5">{t("osint.settings.ssl_expiry_warning_days_hint")}</p>
+            <div className="flex items-center gap-2 mt-1">
+              <input
+                type="number"
+                min={15}
+                max={365}
+                value={form.ssl_expiry_warning_days}
+                onChange={e => set("ssl_expiry_warning_days", Number(e.target.value))}
+                className="w-24 border rounded px-3 py-2 text-sm"
+              />
+              <span className="text-sm text-gray-500">{t("osint.settings.days")}</span>
+            </div>
           </label>
         </div>
       </section>

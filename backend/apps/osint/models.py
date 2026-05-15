@@ -314,6 +314,10 @@ class OsintSettings(BaseModel):
 
     score_threshold_critical = models.IntegerField(default=70)
     score_threshold_warning = models.IntegerField(default=50)
+    ssl_expiry_warning_days = models.PositiveIntegerField(
+        default=60,
+        help_text="Giorni rimanenti SSL sotto i quali lo score SSL sale a 40 (attenzione).",
+    )
     freq_my_domains = models.CharField(
         max_length=10, choices=ScanFrequency.choices, default=ScanFrequency.WEEKLY
     )
