@@ -24,8 +24,15 @@ class ControlDomain(BaseModel):
         unique_together = ["framework", "code"]
         ordering = ["order"]
 
+    def tr(self, field: str, lang: str = "it", default: str = "") -> str:
+        for cand in (lang, "it", "en"):
+            val = (self.translations.get(cand) or {}).get(field)
+            if val:
+                return val
+        return default
+
     def get_name(self, lang: str = "it") -> str:
-        return self.translations.get(lang, self.translations.get("en", {})).get("name", self.code)
+        return self.tr("name", lang, default=self.code)
 
 
 class Control(BaseModel):
@@ -63,9 +70,22 @@ class Control(BaseModel):
     class Meta:
         unique_together = ["framework", "external_id"]
 
+    def tr(self, field: str, lang: str = "it", default=None):
+        """Fallback per-campo: lang richiesta → it → en → default.
+
+        Risolve il caso in cui `translations[lang]` esiste ma contiene solo un
+        sottoinsieme di campi (es. `practical_summary` generato dall'AI senza
+        `title`/`description`): senza fallback per-campo, leggere `title` da
+        quella lingua restituirebbe il default invece di provare IT/EN.
+        """
+        for cand in (lang, "it", "en"):
+            val = (self.translations.get(cand) or {}).get(field)
+            if val:
+                return val
+        return default if default is not None else ""
+
     def get_title(self, lang: str = "it") -> str:
-        t = self.translations.get(lang) or self.translations.get("en", {})
-        return t.get("title", self.external_id)
+        return self.tr("title", lang, default=self.external_id)
 
 
 class ControlMapping(BaseModel):

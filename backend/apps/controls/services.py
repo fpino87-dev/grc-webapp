@@ -975,12 +975,8 @@ def generate_procedure_document(control, lang: str, user) -> bytes:
     }
     lang_name = _LANG_NAMES.get(lang, "italiano")
 
-    title_loc = control.get_title(lang) or control.get_title("en") or control.external_id
-    desc_loc = (
-        control.translations.get(lang, {}).get("description")
-        or control.translations.get("en", {}).get("description")
-        or ""
-    )
+    title_loc = control.get_title(lang) or control.external_id
+    desc_loc = control.tr("description", lang)
 
     prompt = (
         f"Sei un esperto GRC certificato ISO 27001 e NIS2. "

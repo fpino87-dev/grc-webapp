@@ -5,6 +5,27 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 
+def _merge_translations(existing: dict, incoming: dict) -> dict:
+    """Merge per-lingua: i campi del file JSON sovrascrivono, ma chiavi extra
+    presenti nel DB (es. `practical_summary` generato dall'AI) vengono preservate.
+    """
+    if not isinstance(existing, dict):
+        existing = {}
+    if not isinstance(incoming, dict):
+        return existing
+    out: dict = {}
+    langs = set(existing.keys()) | set(incoming.keys())
+    for lang in langs:
+        ex = existing.get(lang) or {}
+        inc = incoming.get(lang) or {}
+        if not isinstance(ex, dict):
+            ex = {}
+        if not isinstance(inc, dict):
+            inc = {}
+        out[lang] = {**ex, **inc}
+    return out
+
+
 class Command(BaseCommand):
     help = "Importa framework normativi da backend/frameworks/*.json"
 
@@ -41,23 +62,37 @@ class Command(BaseCommand):
                 )
                 dm: dict[str, ControlDomain] = {}
                 for d in data.get("domains", []):
+                    existing = ControlDomain.objects.filter(
+                        framework=fw, code=d["code"]
+                    ).first()
+                    merged_tr = _merge_translations(
+                        existing.translations if existing else {},
+                        d["translations"],
+                    )
                     obj, _ = ControlDomain.objects.update_or_create(
                         framework=fw,
                         code=d["code"],
                         defaults={
-                            "translations": d["translations"],
+                            "translations": merged_tr,
                             "order": d.get("order", 0),
                         },
                     )
                     dm[d["code"]] = obj
                 cm: dict[str, Control] = {}
                 for c in data.get("controls", []):
+                    existing = Control.objects.filter(
+                        framework=fw, external_id=c["external_id"]
+                    ).first()
+                    merged_tr = _merge_translations(
+                        existing.translations if existing else {},
+                        c["translations"],
+                    )
                     obj, _ = Control.objects.update_or_create(
                         framework=fw,
                         external_id=c["external_id"],
                         defaults={
                             "domain": dm.get(c.get("domain")),
-                            "translations": c["translations"],
+                            "translations": merged_tr,
                             "level": c.get("level", ""),
                             "evidence_requirement": c.get("evidence_requirement", {}),
                             "control_category": c.get("control_category", "procedurale"),

@@ -12,6 +12,9 @@
         },
         "it": {
           "name": "Politica e Organizzazione della Sicurezza delle Informazioni"
+        },
+        "fr": {
+          "name": "Politique et organisation de la sécurité de l'information"
         }
       },
       "order": 1
@@ -24,6 +27,9 @@
         },
         "it": {
           "name": "Risorse Umane"
+        },
+        "fr": {
+          "name": "Ressources humaines"
         }
       },
       "order": 2
@@ -36,6 +42,9 @@
         },
         "it": {
           "name": "Sicurezza Fisica"
+        },
+        "fr": {
+          "name": "Sécurité physique"
         }
       },
       "order": 3
@@ -48,6 +57,9 @@
         },
         "it": {
           "name": "Gestione Identità e Accessi"
+        },
+        "fr": {
+          "name": "Gestion des identités et des accès"
         }
       },
       "order": 4
@@ -60,6 +72,9 @@
         },
         "it": {
           "name": "Operazioni di Sicurezza IT"
+        },
+        "fr": {
+          "name": "Opérations de sécurité IT"
         }
       },
       "order": 5
@@ -72,6 +87,9 @@
         },
         "it": {
           "name": "Gestione Fornitori"
+        },
+        "fr": {
+          "name": "Relations avec les fournisseurs"
         }
       },
       "order": 6
@@ -84,6 +102,9 @@
         },
         "it": {
           "name": "Conformità"
+        },
+        "fr": {
+          "name": "Conformité"
         }
       },
       "order": 7
@@ -102,6 +123,10 @@
         "it": {
           "title": "In che misura sono disponibili politiche per la sicurezza delle informazioni?",
           "description": "Requisiti (must):\n+ The requirements for information security have been determined and documented:\n  - The requirements are adapted to the organization’s goals,\n  - A policy is prepared and is released by the organization.\n+ The policy includes objectives and the significance of information security within the organization.\n\nRequisiti (should):\n+ The information security requirements based on the strategy of the organization, legislation and contracts are considered in the policy.\n+ The policy indicates consequences in case of non-conformance. \n+ Other relevant security policies are established.\n+ Periodic review and, if required, revision of the policies are established.\n+ The policies are made available to employees in a suitable form (e.g. intranet).\n+ Employees and external business partners are informed of any changes relevant to them."
+        },
+        "fr": {
+          "title": "Dans quelle mesure des politiques de sécurité de l'information sont-elles disponibles ?",
+          "description": "Exigences (must):\n+ The requirements for information security have been determined and documented:\n  - The requirements are adapted to the organization’s goals,\n  - A policy is prepared and is released by the organization.\n+ The policy includes objectives and the significance of information security within the organization.\n\nExigences (should):\n+ The information security requirements based on the strategy of the organization, legislation and contracts are considered in the policy.\n+ The policy indicates consequences in case of non-conformance. \n+ Other relevant security policies are established.\n+ Periodic review and, if required, revision of the policies are established.\n+ The policies are made available to employees in a suitable form (e.g. intranet).\n+ Employees and external business partners are informed of any changes relevant to them."
         }
       },
       "control_category": "procedurale",
@@ -138,6 +163,10 @@
         "it": {
           "title": "In che misura la sicurezza delle informazioni è gestita all'interno dell'organizzazione?",
           "description": "Requisiti (must):\n+ The scope of the ISMS (the organization managed by the ISMS) is defined.\n+ The organization's requirements for the ISMS are determined.\n+ The organizational management has commissioned and approved the ISMS.\n+ The ISMS provides the organizational management with suitable monitoring and control means (e.g. management review).\n+ Applicable controls have been determined (e.g. ISO 27001 Statement of Applicability, completed ISA catalogue).\n+ The effectiveness of the ISMS is regularly reviewed by the management."
+        },
+        "fr": {
+          "title": "Dans quelle mesure la sécurité de l'information est-elle gérée au sein de l'organisation ?",
+          "description": "Exigences (must):\n+ The scope of the ISMS (the organization managed by the ISMS) is defined.\n+ The organization's requirements for the ISMS are determined.\n+ The organizational management has commissioned and approved the ISMS.\n+ The ISMS provides the organizational management with suitable monitoring and control means (e.g. management review).\n+ Applicable controls have been determined (e.g. ISO 27001 Statement of Applicability, completed ISA catalogue).\n+ The effectiveness of the ISMS is regularly reviewed by the management."
         }
       },
       "control_category": "procedurale",
@@ -174,6 +203,10 @@
         "it": {
           "title": "In che misura le responsabilità per la sicurezza delle informazioni sono organizzate?",
           "description": "Requisiti (must):\n+ Responsibilities for information security within the organization are defined, documented, and assigned.\n+ The responsible employees are defined and qualified for their task.\n+ The required resources are available.\n+ The contact persons are known within the organization and to relevant business partners.\n\nRequisiti (should):\n+ There is a definition and documentation of an adequate information security structure within the organization.\n  - Other relevant security roles are considered.\n\nRequisiti aggiuntivi per alta protezione:\n+ An appropriate organizational separation of responsibilities should be established in order to avoid conflict of interests (separation of duties). (C, I, A)"
+        },
+        "fr": {
+          "title": "Dans quelle mesure les responsabilités en matière de sécurité de l'information sont-elles organisées ?",
+          "description": "Exigences (must):\n+ Responsibilities for information security within the organization are defined, documented, and assigned.\n+ The responsible employees are defined and qualified for their task.\n+ The required resources are available.\n+ The contact persons are known within the organization and to relevant business partners.\n\nExigences (should):\n+ There is a definition and documentation of an adequate information security structure within the organization.\n  - Other relevant security roles are considered.\n\nExigences supplémentaires pour besoin de protection élevé:\n+ An appropriate organizational separation of responsibilities should be established in order to avoid conflict of interests (separation of duties). (C, I, A)"
         }
       },
       "control_category": "procedurale",
@@ -210,6 +243,10 @@
         "it": {
           "title": "In che misura i requisiti di sicurezza delle informazioni sono considerati nei progetti?",
           "description": "Requisiti (must):\n+ Projects are classified while taking into account the information security requirements.\n\nRequisiti (should):\n+ The procedure and criteria for the classification of projects are documented.\n+ During an early stage of the project, risk assessment is conducted based on the defined procedure and repeated in case of changes to the project.\n+ For identified information security risks, measures are derived and considered in the project.\n\nRequisiti aggiuntivi per alta protezione:\n+ The measures thus derived are reviewed regularly during the project and reassessed in case of changes to the assessment criteria. (C, I, A)"
+        },
+        "fr": {
+          "title": "Dans quelle mesure les exigences de sécurité de l'information sont-elles prises en compte dans les projets ?",
+          "description": "Exigences (must):\n+ Projects are classified while taking into account the information security requirements.\n\nExigences (should):\n+ The procedure and criteria for the classification of projects are documented.\n+ During an early stage of the project, risk assessment is conducted based on the defined procedure and repeated in case of changes to the project.\n+ For identified information security risks, measures are derived and considered in the project.\n\nExigences supplémentaires pour besoin de protection élevé:\n+ The measures thus derived are reviewed regularly during the project and reassessed in case of changes to the assessment criteria. (C, I, A)"
         }
       },
       "control_category": "procedurale",
@@ -246,6 +283,10 @@
         "it": {
           "title": "In che misura sono definite le responsabilità tra fornitori IT esterni e la propria organizzazione?",
           "description": "Requisiti (must):\n+ The concerned services and IT services used are identified.\n+ The security requirements relevant to the IT service are determined:\n+ The organization responsible for implementing the requirement is defined and aware of its responsibility.\n+ Mechanisms for shared responsibilities are specified and implemented.\n+ The responsible organization fulfils its respective responsibilities.\n\nRequisiti (should):\n+ In case of IT services, configuration has been conceived, implemented, and documented based on the necessary security requirements.\n+ The responsible staff is adequately trained.\n\nRequisiti aggiuntivi per alta protezione:\n+ A list exists indicating the concerned IT services and the respective responsible IT service providers. (C, I, A)\n+ The applicability of the ISA controls has been verified and documented. (C, I, A)\n+ The service configuration is included in the regular security assessments. (C, I, A)\n+ Proof is provided that the IT service providers fulfil their responsibility. (C, I, A)\n+ Integration into local protective measures (such as secure authentication mechanisms) is established and documented. (C, I, A)"
+        },
+        "fr": {
+          "title": "Dans quelle mesure les responsabilités entre les prestataires de services IT externes et l'organisation sont-elles définies ?",
+          "description": "Exigences (must):\n+ The concerned services and IT services used are identified.\n+ The security requirements relevant to the IT service are determined:\n+ The organization responsible for implementing the requirement is defined and aware of its responsibility.\n+ Mechanisms for shared responsibilities are specified and implemented.\n+ The responsible organization fulfils its respective responsibilities.\n\nExigences (should):\n+ In case of IT services, configuration has been conceived, implemented, and documented based on the necessary security requirements.\n+ The responsible staff is adequately trained.\n\nExigences supplémentaires pour besoin de protection élevé:\n+ A list exists indicating the concerned IT services and the respective responsible IT service providers. (C, I, A)\n+ The applicability of the ISA controls has been verified and documented. (C, I, A)\n+ The service configuration is included in the regular security assessments. (C, I, A)\n+ Proof is provided that the IT service providers fulfil their responsibility. (C, I, A)\n+ Integration into local protective measures (such as secure authentication mechanisms) is established and documented. (C, I, A)"
         }
       },
       "control_category": "tecnico",
@@ -282,6 +323,10 @@
         "it": {
           "title": "In che misura sono identificati e registrati gli asset informativi?",
           "description": "Requisiti (must):\n+ Information assets and other assets where security is relevant to the organization are identified and recorded.\n  - A person responsible for these information assets is assigned.\n+ The supporting assets processing the information assets are identified and recorded:\n  - A person responsible for these supporting assets is assigned.\n\nRequisiti (should):\n+ A catalogue of the relevant information assets exists:\n  - The corresponding supporting assets are assigned to each relevant information asset,\n  - The catalogue is subject to regular review."
+        },
+        "fr": {
+          "title": "Dans quelle mesure les actifs informationnels sont-ils identifiés et enregistrés ?",
+          "description": "Exigences (must):\n+ Information assets and other assets where security is relevant to the organization are identified and recorded.\n  - A person responsible for these information assets is assigned.\n+ The supporting assets processing the information assets are identified and recorded:\n  - A person responsible for these supporting assets is assigned.\n\nExigences (should):\n+ A catalogue of the relevant information assets exists:\n  - The corresponding supporting assets are assigned to each relevant information asset,\n  - The catalogue is subject to regular review."
         }
       },
       "control_category": "procedurale",
@@ -318,6 +363,10 @@
         "it": {
           "title": "In che misura gli asset informativi sono classificati e gestiti in base al loro livello di protezione?",
           "description": "Requisiti (must):\n+ A consistent scheme for the classification of information assets regarding the protection goal of confidentiality is available.\n+ Evaluation of the identified information assets is carried out according to the defined criteria and assigned to the existing classification scheme. \n+ Specifications for the handling of supporting assets (e.g. identification, correct handling, transport, storage, return, deletion/disposal) depending on the classification of information assets are in place and implemented.\n\nRequisiti (should):\n+ The protection goals of integrity and availability are taken into consideration."
+        },
+        "fr": {
+          "title": "Dans quelle mesure les actifs informationnels sont-ils classifiés et gérés en fonction de leurs besoins de protection ?",
+          "description": "Exigences (must):\n+ A consistent scheme for the classification of information assets regarding the protection goal of confidentiality is available.\n+ Evaluation of the identified information assets is carried out according to the defined criteria and assigned to the existing classification scheme. \n+ Specifications for the handling of supporting assets (e.g. identification, correct handling, transport, storage, return, deletion/disposal) depending on the classification of information assets are in place and implemented.\n\nExigences (should):\n+ The protection goals of integrity and availability are taken into consideration."
         }
       },
       "control_category": "procedurale",
@@ -354,6 +403,10 @@
         "it": {
           "title": "In che misura è garantito che vengano utilizzati solo servizi IT esterni valutati e approvati?",
           "description": "Requisiti (must):\n+ External IT services are not used without explicit assessment and implementation of the information security requirements:\n  - A risk assessment of the external IT services is available,\n  - Legal, regulatory, and contractual requirements are considered.\n+ The external IT services have been harmonized with the protection need of the processed information assets.\n\nRequisiti (should):\n+ Requirements regarding the procurement, commissioning and release associated with the use of external IT services are determined and fulfilled.\n+ A procedure for release in consideration of the protection need is established.\n+ External IT services and their approval are documented.\n+ It is verified at regular intervals that only approved external IT services are used."
+        },
+        "fr": {
+          "title": "Dans quelle mesure est-il garanti que seuls les services IT externes évalués et approuvés sont utilisés pour le traitement des actifs informationnels de l'organisation ?",
+          "description": "Exigences (must):\n+ External IT services are not used without explicit assessment and implementation of the information security requirements:\n  - A risk assessment of the external IT services is available,\n  - Legal, regulatory, and contractual requirements are considered.\n+ The external IT services have been harmonized with the protection need of the processed information assets.\n\nExigences (should):\n+ Requirements regarding the procurement, commissioning and release associated with the use of external IT services are determined and fulfilled.\n+ A procedure for release in consideration of the protection need is established.\n+ External IT services and their approval are documented.\n+ It is verified at regular intervals that only approved external IT services are used."
         }
       },
       "control_category": "tecnico",
@@ -390,6 +443,10 @@
         "it": {
           "title": "In che misura è garantito che venga utilizzato solo software valutato e approvato?",
           "description": "Requisiti (must):\n+ Software is approved before installation or use. The following aspects are considered:\n  - Limited approval for specific use-cases or roles\n  - Conformance to the information security requirements\n  - Software use rights and licensing \n  - Source / reputation of the software\n+ Software approval also applies to special purpose software such as maintenance tools\n\nRequisiti (should):\n+ The types of software such as firmware, operating systems, applications, libraries, device drivers to be managed are determined.\n+ Repositories of managed software exist\n+ The software repositories are protected against unauthorized manipulation\n+ Approval of software is regularly reviewed\n+ Software versions and patch levels are known"
+        },
+        "fr": {
+          "title": "Dans quelle mesure est-il garanti que seuls les logiciels évalués et approuvés sont utilisés pour le traitement des actifs informationnels de l'organisation ?",
+          "description": "Exigences (must):\n+ Software is approved before installation or use. The following aspects are considered:\n  - Limited approval for specific use-cases or roles\n  - Conformance to the information security requirements\n  - Software use rights and licensing \n  - Source / reputation of the software\n+ Software approval also applies to special purpose software such as maintenance tools\n\nExigences (should):\n+ The types of software such as firmware, operating systems, applications, libraries, device drivers to be managed are determined.\n+ Repositories of managed software exist\n+ The software repositories are protected against unauthorized manipulation\n+ Approval of software is regularly reviewed\n+ Software versions and patch levels are known"
         }
       },
       "control_category": "tecnico",
@@ -426,6 +483,10 @@
         "it": {
           "title": "In che misura i rischi per la sicurezza delle informazioni sono gestiti?",
           "description": "Requisiti (must):\n+ Risk assessments are carried out both at regular intervals and in response to events.\n+ Information security risks are appropriately assessed (e.g. for probability of occurrence and potential damage).\n+ Information security risks are documented.\n+ A responsible person (risk owner) is assigned to each information security risk. This person is responsible for the assessment and handling of the information security risks.\n\nRequisiti (should):\n+ A procedure is in place defining how to identify, assess and address security risks within the organization.\n+ Criteria for the assessment and handling of  security risks exist.\n+ Measures for handling security risks and the persons responsible for these are specified and documented:\n  - A plan of measures or an overview of their state of implementation is followed.\n+ In case of changes to the environment (e.g. organizational structure, location, changes to regulations), reassessment is carried out in a timely manner."
+        },
+        "fr": {
+          "title": "Dans quelle mesure les risques de sécurité de l'information sont-ils gérés ?",
+          "description": "Exigences (must):\n+ Risk assessments are carried out both at regular intervals and in response to events.\n+ Information security risks are appropriately assessed (e.g. for probability of occurrence and potential damage).\n+ Information security risks are documented.\n+ A responsible person (risk owner) is assigned to each information security risk. This person is responsible for the assessment and handling of the information security risks.\n\nExigences (should):\n+ A procedure is in place defining how to identify, assess and address security risks within the organization.\n+ Criteria for the assessment and handling of  security risks exist.\n+ Measures for handling security risks and the persons responsible for these are specified and documented:\n  - A plan of measures or an overview of their state of implementation is followed.\n+ In case of changes to the environment (e.g. organizational structure, location, changes to regulations), reassessment is carried out in a timely manner."
         }
       },
       "control_category": "organizzativo",
@@ -462,6 +523,10 @@
         "it": {
           "title": "In che misura è garantita la conformità alla sicurezza delle informazioni in procedure e processi?",
           "description": "Requisiti (must):\n+ Observation of policies is verified throughout the organization.\n+ Information security policies and procedures are reviewed at regular intervals.\n+ Measures for correcting potential non-conformities (deviations) are initiated and pursued.\n+ Compliance with information security requirements (e.g. technical specifications) is verified at regular intervals.\n+ The results of the conducted reviews are recorded and retained.\n\nRequisiti (should):\n+ A plan for content and framework conditions (time schedule, scope, controls) of the reviews to be conducted is provided."
+        },
+        "fr": {
+          "title": "Dans quelle mesure la conformité à la sécurité de l'information est-elle assurée dans les procédures et processus ?",
+          "description": "Exigences (must):\n+ Observation of policies is verified throughout the organization.\n+ Information security policies and procedures are reviewed at regular intervals.\n+ Measures for correcting potential non-conformities (deviations) are initiated and pursued.\n+ Compliance with information security requirements (e.g. technical specifications) is verified at regular intervals.\n+ The results of the conducted reviews are recorded and retained.\n\nExigences (should):\n+ A plan for content and framework conditions (time schedule, scope, controls) of the reviews to be conducted is provided."
         }
       },
       "control_category": "procedurale",
@@ -498,6 +563,10 @@
         "it": {
           "title": "In che misura il SGSI è riesaminato da un'autorità indipendente?",
           "description": "Requisiti (must):\n+ Information security reviews are carried out by an independent and competent body at regular intervals and in case of fundamental changes.\n+ Measures for correcting potential deviations are initiated and pursued.\n\nRequisiti (should):\n+ The results of conducted reviews are documented and reported to the management of the organization."
+        },
+        "fr": {
+          "title": "Dans quelle mesure le SMSI est-il révisé par une autorité indépendante ?",
+          "description": "Exigences (must):\n+ Information security reviews are carried out by an independent and competent body at regular intervals and in case of fundamental changes.\n+ Measures for correcting potential deviations are initiated and pursued.\n\nExigences (should):\n+ The results of conducted reviews are documented and reported to the management of the organization."
         }
       },
       "control_category": "organizzativo",
@@ -534,6 +603,10 @@
         "it": {
           "title": "In che misura sono segnalati gli eventi o le osservazioni rilevanti per la sicurezza?",
           "description": "Requisiti (must):\n+ A definition for a reportable security event or observation exists and is known by employees and relevant stakeholders. The following aspects are considered:\n  - Events and observations related to personnel (e.g., misconduct / misbehaviour)\n  - Events and observations related to physical security (e.g., intrusion, theft, unauthorized access to security zones, vulnerabilities in the security zones)\n  - Events and observations related to IT and cyber security (e.g., vulnerable IT-systems, detected successful or unsuccessful attacks)\n  - Events and observations related to suppliers and other business partners (e.g., any incidents that can have negative effect on the security of own organization)\n+ Adequate mechanisms based on perceived risks to report security events are defined, implemented, and known to all relevant potential reporters\n+ Adequate channels for communication with event reporters exist.\n\nRequisiti (should):\n+ A common point of contact for event reporting exists.\n+ Different reporting channels according to perceived severity exist (i.e., real time communication for significant events / emergencies in addition to asynchronous mechanisms such as tickets or email) are available.\n+ Employees are obliged and trained to report relevant events.\n+ Security event reports from external parties are considered.\n  - An externally accessible way to report security events exists and is communicated,\n  - Reaction to security event reports from external parties are defined\n+ Mechanism to - and information how to - report incidents is accessible by all relevant reporters.\n+ A feedback procedure to reporters is established."
+        },
+        "fr": {
+          "title": "Dans quelle mesure les événements ou observations pertinents pour la sécurité de l'information sont-ils signalés ?",
+          "description": "Exigences (must):\n+ A definition for a reportable security event or observation exists and is known by employees and relevant stakeholders. The following aspects are considered:\n  - Events and observations related to personnel (e.g., misconduct / misbehaviour)\n  - Events and observations related to physical security (e.g., intrusion, theft, unauthorized access to security zones, vulnerabilities in the security zones)\n  - Events and observations related to IT and cyber security (e.g., vulnerable IT-systems, detected successful or unsuccessful attacks)\n  - Events and observations related to suppliers and other business partners (e.g., any incidents that can have negative effect on the security of own organization)\n+ Adequate mechanisms based on perceived risks to report security events are defined, implemented, and known to all relevant potential reporters\n+ Adequate channels for communication with event reporters exist.\n\nExigences (should):\n+ A common point of contact for event reporting exists.\n+ Different reporting channels according to perceived severity exist (i.e., real time communication for significant events / emergencies in addition to asynchronous mechanisms such as tickets or email) are available.\n+ Employees are obliged and trained to report relevant events.\n+ Security event reports from external parties are considered.\n  - An externally accessible way to report security events exists and is communicated,\n  - Reaction to security event reports from external parties are defined\n+ Mechanism to - and information how to - report incidents is accessible by all relevant reporters.\n+ A feedback procedure to reporters is established."
         }
       },
       "control_category": "procedurale",
@@ -570,6 +643,10 @@
         "it": {
           "title": "In che misura sono gestiti gli eventi di sicurezza segnalati?",
           "description": "Requisiti (must):\n+ Reported events are processed without undue delay.\n+ An adequate reaction to reported security events is ensured.\n+ Lessons learned are incorporated into continuous improvement.\n\nRequisiti (should):\n+ During processing, reported events are categorized (e.g. by responsibility into personnel, physical and cyber), qualified (e.g. not security relevant, observation, suggested security improvement, security vulnerability, security incident) and prioritized (e.g. low, moderate, severe, critical).\n+ Responsibilities for handling of events based on their category are defined and assigned. The following aspects are considered:\n  - Coordination of incidents and vulnerabilities across multiple categories\n  - Qualification and resources\n  - Contact mechanisms based on type and priority (e.g., non-time-critical communication, time-critical communication, emergency communication)\n  - Absence-management\n+ A strategy for filing official reports and searching prosecution of potentially criminally relevant aspects of security incidents exists. (C, I, A)\n\nRequisiti aggiuntivi per alta protezione:\n+ Maximum response times based on class, category and severity are defined. (C, I, A)\n+ Event not processed appropriately according to their priority are escalated. (C, I, A)\n  - Conditions and thresholds such as maximum reaction times before escalation are defined\n  - Mechanisms, processes, and contacts for escalation are defined\n  - Escalation paths up to the organization’s top management is defined\n+ Lawful, regulatory, and contractual reporting obligations and respective contact information are known. (C, I, A)\n+ A communication strategy for security related events exist. The following aspects are considered: (C, I, A)\n  - To whom to communicate (e.g., shareholders, affected business partners and customers, other shareholders, general public)\n  - When to communicate\n  - Responsibilities for communication\n  - Authorization and approval of communication\n  - Legal and regulatory restrictions of communication\n  - What to communicate (e.g. prepared templates and building blocks for specific scenarios)\n  - How to communicate (e.g., communication channels)\n+ Procedures for response to supplier security incidents are established. The following aspects are considered: (C, I, A)\n  - Analysis of the impact on the own organization and invocation of appropriate internal mechanisms\n  - The need for reporting according to own reporting procedures"
+        },
+        "fr": {
+          "title": "Dans quelle mesure les événements de sécurité signalés sont-ils gérés ?",
+          "description": "Exigences (must):\n+ Reported events are processed without undue delay.\n+ An adequate reaction to reported security events is ensured.\n+ Lessons learned are incorporated into continuous improvement.\n\nExigences (should):\n+ During processing, reported events are categorized (e.g. by responsibility into personnel, physical and cyber), qualified (e.g. not security relevant, observation, suggested security improvement, security vulnerability, security incident) and prioritized (e.g. low, moderate, severe, critical).\n+ Responsibilities for handling of events based on their category are defined and assigned. The following aspects are considered:\n  - Coordination of incidents and vulnerabilities across multiple categories\n  - Qualification and resources\n  - Contact mechanisms based on type and priority (e.g., non-time-critical communication, time-critical communication, emergency communication)\n  - Absence-management\n+ A strategy for filing official reports and searching prosecution of potentially criminally relevant aspects of security incidents exists. (C, I, A)\n\nExigences supplémentaires pour besoin de protection élevé:\n+ Maximum response times based on class, category and severity are defined. (C, I, A)\n+ Event not processed appropriately according to their priority are escalated. (C, I, A)\n  - Conditions and thresholds such as maximum reaction times before escalation are defined\n  - Mechanisms, processes, and contacts for escalation are defined\n  - Escalation paths up to the organization’s top management is defined\n+ Lawful, regulatory, and contractual reporting obligations and respective contact information are known. (C, I, A)\n+ A communication strategy for security related events exist. The following aspects are considered: (C, I, A)\n  - To whom to communicate (e.g., shareholders, affected business partners and customers, other shareholders, general public)\n  - When to communicate\n  - Responsibilities for communication\n  - Authorization and approval of communication\n  - Legal and regulatory restrictions of communication\n  - What to communicate (e.g. prepared templates and building blocks for specific scenarios)\n  - How to communicate (e.g., communication channels)\n+ Procedures for response to supplier security incidents are established. The following aspects are considered: (C, I, A)\n  - Analysis of the impact on the own organization and invocation of appropriate internal mechanisms\n  - The need for reporting according to own reporting procedures"
         }
       },
       "control_category": "procedurale",
@@ -606,6 +683,10 @@
         "it": {
           "title": "In che misura l'organizzazione è preparata a gestire situazioni di crisi?",
           "description": "Requisiti (must):\n+ An appropriate planning to react to and recover from crisis situations exists.\n  - The required resources are available.\n+ Responsibilities and authority for crisis management within the organization are defined, documented, and assigned.\n+ The responsible employees are defined and qualified for their task.\n\nRequisiti (should):\n+ Methods to detect crisis situations are established.\n  - General indications for the existence or imminence of a crisis situation and specific predictable crisis are identified\n+ A procedure to invoke and/or escalate crisis management is in place.\n+ Strategic goals and their priority in crisis situations are defined and known to relevant personnel. The following aspects are considered:\n  - Ethical priorities (e.g., protection of life and health)\n  - Core business processes (e.g., processes that ensure the survival of the organization)\n  - Appropriate information security\n+ A crisis management team is defined and approved. The following aspects are considered:\n  - Management commitment\n  - Composition (e.g., participation of all major functions of the organization including organization leadership (management board), business operations (production), HR, information security, corporate security, corporate emergency services, IT/cyber security, communication, finance) \n  - Structure and roles\n  - Competences of members\n  - Expectation and authority\n  - Decision making procedures\n+ Crisis policies and procedures are defined and approved. The following aspects are considered:\n  - Exceptional authorities and decision-making processes beyond the crisis management team\n  - Primary and backup means of communication\n  - Emergency operating procedures\n  - Exceptional organizational structures (e.g., reporting, information gathering, decision making)\n  - Exceptional functions, responsibilities, and authority (including reporting)\n  - Exceptional tools \n+ Crisis planning is reviewed and updated regularly.\n\nRequisiti aggiuntivi per alta protezione:\n+ Relevant different potential crisis scenarios are identified. The following aspects are considered: (A)\n  - Crisis situations with unavailability of key personnel (e.g. Health crisis, Kidnapping / accidents affecting organization leadership):\n  - Crisis situations with unavailable of key physical resources (e.g. fire or natural disasters at specific sites)\n  - Crisis situations with outage of key infrastructure (e.g. outage of key communication channels, complete outage of IT infrastructure)\n+ Necessary resources and information to handle crisis (e.g. communication infrastructure, availability of necessary information such as contact information and relevant risks in different crisis situations) are identified. (A)\n  - Appropriate measures to ensure availability of infrastructure or fallback planning and information considering different crisis scenarios are in place\n+ A communication strategy for crisis situations exist. The following aspects are considered: (A)\n  - To whom to communicate (e.g., shareholders, affected business partners and customers, other shareholders, general public)\n  - When to communicate\n  - Responsibilities for communication\n  - Authorization and approval of communication\n  - Legal and regulatory restrictions of communication (e.g., stock corporation regulations)\n  - What to communicate (e.g. prepared templates for statements, contact information and building blocks for specific scenarios)\n  - Communication channels (e.g., Media channels, social media)\n  - Instruments to monitor communication\n  - Instruction and procedures for employees (in case of direct communication approaches such as direct contact of employees by business partners)\n+ The efficiency, feasibility, and appropriateness of the crisis planning is evaluated regularly. (A)\n+ Spot based testing of crisis planning is conducted ((e.g., simulation, table-top-exercises involving key personnel) (A)"
+        },
+        "fr": {
+          "title": "Dans quelle mesure l'organisation est-elle préparée à gérer des situations de crise ?",
+          "description": "Exigences (must):\n+ An appropriate planning to react to and recover from crisis situations exists.\n  - The required resources are available.\n+ Responsibilities and authority for crisis management within the organization are defined, documented, and assigned.\n+ The responsible employees are defined and qualified for their task.\n\nExigences (should):\n+ Methods to detect crisis situations are established.\n  - General indications for the existence or imminence of a crisis situation and specific predictable crisis are identified\n+ A procedure to invoke and/or escalate crisis management is in place.\n+ Strategic goals and their priority in crisis situations are defined and known to relevant personnel. The following aspects are considered:\n  - Ethical priorities (e.g., protection of life and health)\n  - Core business processes (e.g., processes that ensure the survival of the organization)\n  - Appropriate information security\n+ A crisis management team is defined and approved. The following aspects are considered:\n  - Management commitment\n  - Composition (e.g., participation of all major functions of the organization including organization leadership (management board), business operations (production), HR, information security, corporate security, corporate emergency services, IT/cyber security, communication, finance) \n  - Structure and roles\n  - Competences of members\n  - Expectation and authority\n  - Decision making procedures\n+ Crisis policies and procedures are defined and approved. The following aspects are considered:\n  - Exceptional authorities and decision-making processes beyond the crisis management team\n  - Primary and backup means of communication\n  - Emergency operating procedures\n  - Exceptional organizational structures (e.g., reporting, information gathering, decision making)\n  - Exceptional functions, responsibilities, and authority (including reporting)\n  - Exceptional tools \n+ Crisis planning is reviewed and updated regularly.\n\nExigences supplémentaires pour besoin de protection élevé:\n+ Relevant different potential crisis scenarios are identified. The following aspects are considered: (A)\n  - Crisis situations with unavailability of key personnel (e.g. Health crisis, Kidnapping / accidents affecting organization leadership):\n  - Crisis situations with unavailable of key physical resources (e.g. fire or natural disasters at specific sites)\n  - Crisis situations with outage of key infrastructure (e.g. outage of key communication channels, complete outage of IT infrastructure)\n+ Necessary resources and information to handle crisis (e.g. communication infrastructure, availability of necessary information such as contact information and relevant risks in different crisis situations) are identified. (A)\n  - Appropriate measures to ensure availability of infrastructure or fallback planning and information considering different crisis scenarios are in place\n+ A communication strategy for crisis situations exist. The following aspects are considered: (A)\n  - To whom to communicate (e.g., shareholders, affected business partners and customers, other shareholders, general public)\n  - When to communicate\n  - Responsibilities for communication\n  - Authorization and approval of communication\n  - Legal and regulatory restrictions of communication (e.g., stock corporation regulations)\n  - What to communicate (e.g. prepared templates for statements, contact information and building blocks for specific scenarios)\n  - Communication channels (e.g., Media channels, social media)\n  - Instruments to monitor communication\n  - Instruction and procedures for employees (in case of direct communication approaches such as direct contact of employees by business partners)\n+ The efficiency, feasibility, and appropriateness of the crisis planning is evaluated regularly. (A)\n+ Spot based testing of crisis planning is conducted ((e.g., simulation, table-top-exercises involving key personnel) (A)"
         }
       },
       "control_category": "procedurale",
@@ -642,6 +723,10 @@
         "it": {
           "title": "In che misura è garantita la qualificazione dei dipendenti per aree di lavoro sensibili?",
           "description": "Requisiti (must):\n+ Sensitive work fields and jobs are determined.\n+ The requirements for employees with respect to their job profiles are determined and fulfilled.\n+ The identity of potential employees is verified (e.g. checking identity documents).\n\nRequisiti (should):\n+ The personal suitability of potential employees is verified by means of simple methods (e.g. job interview).\n+ An extended suitability verification depending on the respective work field and job is conducted. (e.g. assessment centre, psychological analysis, checking of references, certificates and diploma, checking of certificates of conduct, checking of professional and private background)."
+        },
+        "fr": {
+          "title": "Dans quelle mesure la qualification des employés pour des postes sensibles est-elle assurée ?",
+          "description": "Exigences (must):\n+ Sensitive work fields and jobs are determined.\n+ The requirements for employees with respect to their job profiles are determined and fulfilled.\n+ The identity of potential employees is verified (e.g. checking identity documents).\n\nExigences (should):\n+ The personal suitability of potential employees is verified by means of simple methods (e.g. job interview).\n+ An extended suitability verification depending on the respective work field and job is conducted. (e.g. assessment centre, psychological analysis, checking of references, certificates and diploma, checking of certificates of conduct, checking of professional and private background)."
         }
       },
       "control_category": "procedurale",
@@ -678,6 +763,10 @@
         "it": {
           "title": "In che misura tutto il personale è contrattualmente vincolato a rispettare le politiche di sicurezza?",
           "description": "Requisiti (must):\n+ A non-disclosure obligation is in effect.\n+ An obligation to comply with the information security policies is in effect.\n\nRequisiti (should):\n+ A non-disclosure obligation beyond the employment contract or order is in effect.\n+ Information security aspects are considered in the employment contracts of the staff.\n+ A procedure for handling violations of said obligations is described."
+        },
+        "fr": {
+          "title": "Dans quelle mesure l'ensemble du personnel est-il contractuellement tenu de respecter les politiques de sécurité de l'information ?",
+          "description": "Exigences (must):\n+ A non-disclosure obligation is in effect.\n+ An obligation to comply with the information security policies is in effect.\n\nExigences (should):\n+ A non-disclosure obligation beyond the employment contract or order is in effect.\n+ Information security aspects are considered in the employment contracts of the staff.\n+ A procedure for handling violations of said obligations is described."
         }
       },
       "control_category": "procedurale",
@@ -714,6 +803,10 @@
         "it": {
           "title": "In che misura il personale è sensibilizzato e formato riguardo ai rischi legati al trattamento delle informazioni?",
           "description": "Requisiti (must):\n+ Employees are trained and made aware.\n\nRequisiti (should):\n+ A concept for awareness and training of employees is prepared. As a minimum, the following aspects are considered:\n  - Information security policy,\n  - Reports of information security events,\n  - Reaction to occurrence of malware,\n  - Policies regarding user accounts and login information (e.g. password policy),\n  - Compliance issues of information security,\n  - Requirements and procedures regarding the use of non-disclosure agreements when sharing information requiring protection,\n  - Use of external IT services.\n+ Target groups for training and awareness measures (i.e., people working in specific risk environments such as administrators, employees having access to customer networks, personnel in areas of manufacturing) are identified and considered in a training concept.\n+ The concept has been approved by the responsible management.\n+ Training and awareness measures are carried out both at regular intervals and in response to events.\n+ Participation in training and awareness measures is documented. \n+ Contact persons for information security are known to employees."
+        },
+        "fr": {
+          "title": "Dans quelle mesure le personnel est-il sensibilisé et formé aux risques liés au traitement de l'information ?",
+          "description": "Exigences (must):\n+ Employees are trained and made aware.\n\nExigences (should):\n+ A concept for awareness and training of employees is prepared. As a minimum, the following aspects are considered:\n  - Information security policy,\n  - Reports of information security events,\n  - Reaction to occurrence of malware,\n  - Policies regarding user accounts and login information (e.g. password policy),\n  - Compliance issues of information security,\n  - Requirements and procedures regarding the use of non-disclosure agreements when sharing information requiring protection,\n  - Use of external IT services.\n+ Target groups for training and awareness measures (i.e., people working in specific risk environments such as administrators, employees having access to customer networks, personnel in areas of manufacturing) are identified and considered in a training concept.\n+ The concept has been approved by the responsible management.\n+ Training and awareness measures are carried out both at regular intervals and in response to events.\n+ Participation in training and awareness measures is documented. \n+ Contact persons for information security are known to employees."
         }
       },
       "control_category": "organizzativo",
@@ -750,6 +843,10 @@
         "it": {
           "title": "In che misura il lavoro mobile è regolamentato?",
           "description": "Requisiti (must):\n+ The requirements for teleworking are determined and fulfilled. The following aspects are considered:\n  - Secure handling of and access to information (in both electronic and paper form) while considering the protection needs and the contractual requirements applying to private (e.g. home office) and public surroundings (e.g. during travels),\n  - Behavior in private surroundings,\n  - Behavior in public surroundings,\n  - Measures for protection from theft (e.g. in public surroundings),\n+ The organization’s network is accessed via a secured connection (e.g. VPN) and strong authentication.\n\nRequisiti (should):\n+ The following aspects are considered:\n  - Measures for travelling (e.g. viewing by authorities),\n  - Measures for travelling to security-critical countries.\n+ Employee awareness.\n\nRequisiti aggiuntivi per alta protezione:\n+ Protective measures against overhearing and viewing are implemented. (C)"
+        },
+        "fr": {
+          "title": "Dans quelle mesure le travail mobile est-il réglementé ?",
+          "description": "Exigences (must):\n+ The requirements for teleworking are determined and fulfilled. The following aspects are considered:\n  - Secure handling of and access to information (in both electronic and paper form) while considering the protection needs and the contractual requirements applying to private (e.g. home office) and public surroundings (e.g. during travels),\n  - Behavior in private surroundings,\n  - Behavior in public surroundings,\n  - Measures for protection from theft (e.g. in public surroundings),\n+ The organization’s network is accessed via a secured connection (e.g. VPN) and strong authentication.\n\nExigences (should):\n+ The following aspects are considered:\n  - Measures for travelling (e.g. viewing by authorities),\n  - Measures for travelling to security-critical countries.\n+ Employee awareness.\n\nExigences supplémentaires pour besoin de protection élevé:\n+ Protective measures against overhearing and viewing are implemented. (C)"
         }
       },
       "control_category": "procedurale",
@@ -786,6 +883,10 @@
         "it": {
           "title": "In che misura le zone di sicurezza sono gestite per proteggere gli asset informativi?",
           "description": "Requisiti (must):\n+ A security zone concept including the associated protective measures based on the requirements for the handling of information assets is in place:\n  - Physical conditions (e.g. premises / buildings / spaces) are considered in the definition of security zones,\n  - This also includes delivery and shipping areas.\n+ The defined protective measures are implemented.\n+ The code of conduct for security zones is known to all persons involved.\n\nRequisiti (should):\n+ Procedures for allocation and revocation of access rights are established.\n+ Visitor management policies (including registration and escorting of visitors) are defined.\n+ Policies for carrying along and using mobile IT devices and mobile data storage devices (e.g. registration before they are carried along, identification obligations) are defined and implemented.\n+ Network/infrastructure components (own or customer networks) are protected against unauthorized access.\n+ External properties used for storing and processing information assets are considered in the security zone concept (e.g. storage rooms, garages, workshops, test tracks, data processing centres).\n\nRequisiti aggiuntivi per alta protezione:\n+ Protective measures against simple overhearing and viewing are implemented. (C)"
+        },
+        "fr": {
+          "title": "Dans quelle mesure les zones de sécurité sont-elles gérées pour protéger les actifs informationnels ?",
+          "description": "Exigences (must):\n+ A security zone concept including the associated protective measures based on the requirements for the handling of information assets is in place:\n  - Physical conditions (e.g. premises / buildings / spaces) are considered in the definition of security zones,\n  - This also includes delivery and shipping areas.\n+ The defined protective measures are implemented.\n+ The code of conduct for security zones is known to all persons involved.\n\nExigences (should):\n+ Procedures for allocation and revocation of access rights are established.\n+ Visitor management policies (including registration and escorting of visitors) are defined.\n+ Policies for carrying along and using mobile IT devices and mobile data storage devices (e.g. registration before they are carried along, identification obligations) are defined and implemented.\n+ Network/infrastructure components (own or customer networks) are protected against unauthorized access.\n+ External properties used for storing and processing information assets are considered in the security zone concept (e.g. storage rooms, garages, workshops, test tracks, data processing centres).\n\nExigences supplémentaires pour besoin de protection élevé:\n+ Protective measures against simple overhearing and viewing are implemented. (C)"
         }
       },
       "control_category": "procedurale",
@@ -822,6 +923,10 @@
         "it": {
           "title": "In che misura è gestita la gestione dei supporting asset?",
           "description": "Requisiti (must):\n+ The requirements for the handling of supporting assets (e.g. transport, storage, repair, loss, return, disposal) are determined and fulfilled.\n\nRequisiti aggiuntivi per alta protezione:\n+ Supporting assets are protected. Disposal of supporting assets is conducted in accordance with one of the relevant standards (e.g. ISO 21964, at least Security Level 4). (C)"
+        },
+        "fr": {
+          "title": "Dans quelle mesure la gestion des actifs de support est-elle assurée ?",
+          "description": "Exigences (must):\n+ The requirements for the handling of supporting assets (e.g. transport, storage, repair, loss, return, disposal) are determined and fulfilled.\n\nExigences supplémentaires pour besoin de protection élevé:\n+ Supporting assets are protected. Disposal of supporting assets is conducted in accordance with one of the relevant standards (e.g. ISO 21964, at least Security Level 4). (C)"
         }
       },
       "control_category": "procedurale",
@@ -858,6 +963,10 @@
         "it": {
           "title": "In che misura è gestita la gestione dei dispositivi IT mobili e dei supporti mobili?",
           "description": "Requisiti (must):\n+ The requirements for mobile IT devices and mobile data storage devices are determined and fulfilled. The following aspects are considered: \n  - Encryption,\n  - Access protection (e.g. PIN, password),\n  - Marking (also considering requirements for use in the presence of customers).\n\nRequisiti (should):\n+ Registration of the IT devices.\n+ Users are informed of missing data protection on mobile devices.\n\nRequisiti aggiuntivi per alta protezione:\n+ General encryption of mobile data storage devices or the information assets stored thereon: (C, I)\n  - Where this is technically not feasible, information is protected by similarly effective measures."
+        },
+        "fr": {
+          "title": "Dans quelle mesure la gestion des appareils IT mobiles et des supports de stockage amovibles est-elle assurée ?",
+          "description": "Exigences (must):\n+ The requirements for mobile IT devices and mobile data storage devices are determined and fulfilled. The following aspects are considered: \n  - Encryption,\n  - Access protection (e.g. PIN, password),\n  - Marking (also considering requirements for use in the presence of customers).\n\nExigences (should):\n+ Registration of the IT devices.\n+ Users are informed of missing data protection on mobile devices.\n\nExigences supplémentaires pour besoin de protection élevé:\n+ General encryption of mobile data storage devices or the information assets stored thereon: (C, I)\n  - Where this is technically not feasible, information is protected by similarly effective measures."
         }
       },
       "control_category": "procedurale",
@@ -894,6 +1003,10 @@
         "it": {
           "title": "In che misura è gestito l'utilizzo dei mezzi di identificazione?",
           "description": "Requisiti (must):\n+ The requirements for the handling of identification means over the entire lifecycle are determined and fulfilled. The following aspects are considered:\n  - Creation, handover, return and destruction,\n  - Validity periods,\n  - Traceability,\n  - Handling of loss.\n\nRequisiti (should):\n+ Identification means can be produced under controlled conditions only.\n\nRequisiti aggiuntivi per alta protezione:\n+ The validity of identification means is limited to an appropriate period. (C, I, A)\n+ A strategy of blocking or invalidation of identification means in case of loss is prepared and implemented as far as possible. (C, I, A)"
+        },
+        "fr": {
+          "title": "Dans quelle mesure l'utilisation des moyens d'identification est-elle gérée ?",
+          "description": "Exigences (must):\n+ The requirements for the handling of identification means over the entire lifecycle are determined and fulfilled. The following aspects are considered:\n  - Creation, handover, return and destruction,\n  - Validity periods,\n  - Traceability,\n  - Handling of loss.\n\nExigences (should):\n+ Identification means can be produced under controlled conditions only.\n\nExigences supplémentaires pour besoin de protection élevé:\n+ The validity of identification means is limited to an appropriate period. (C, I, A)\n+ A strategy of blocking or invalidation of identification means in case of loss is prepared and implemented as far as possible. (C, I, A)"
         }
       },
       "control_category": "procedurale",
@@ -930,6 +1043,10 @@
         "it": {
           "title": "In che misura è garantito l'accesso degli utenti ai servizi e ai sistemi IT?",
           "description": "Requisiti (must):\n+ The procedures for user authentication have been selected based on a risk assessment. Possible attack scenarios have been considered (e.g. direct accessibility via the internet).\n+ State of the art procedures for user authentication are applied.\n\nRequisiti (should):\n+ The user authentication procedures are defined and implemented based on the business-related and security-relevant requirements:\n  - Users are authenticated at least by means of strong passwords according to the state of the art.\n+ Superior procedures are used for the authentication of privileged user accounts (e.g. Privileged Access Management, two-factor authentication).\n\nRequisiti aggiuntivi per alta protezione:\n+ Depending on the risk assessment, authentication procedure and access control have been enhanced by supplementary measures (e.g. continuous access monitoring with respect to irregularities or use of strong authentication, automatic logout, disabling in case of inactivity, or brute force prevention). (C, I, A)"
+        },
+        "fr": {
+          "title": "Dans quelle mesure l'accès des utilisateurs aux services et systèmes IT est-il sécurisé ?",
+          "description": "Exigences (must):\n+ The procedures for user authentication have been selected based on a risk assessment. Possible attack scenarios have been considered (e.g. direct accessibility via the internet).\n+ State of the art procedures for user authentication are applied.\n\nExigences (should):\n+ The user authentication procedures are defined and implemented based on the business-related and security-relevant requirements:\n  - Users are authenticated at least by means of strong passwords according to the state of the art.\n+ Superior procedures are used for the authentication of privileged user accounts (e.g. Privileged Access Management, two-factor authentication).\n\nExigences supplémentaires pour besoin de protection élevé:\n+ Depending on the risk assessment, authentication procedure and access control have been enhanced by supplementary measures (e.g. continuous access monitoring with respect to irregularities or use of strong authentication, automatic logout, disabling in case of inactivity, or brute force prevention). (C, I, A)"
         }
       },
       "control_category": "tecnico",
@@ -966,6 +1083,10 @@
         "it": {
           "title": "In che misura gli account utente e le credenziali sono gestiti e applicati in modo sicuro?",
           "description": "Requisiti (must):\n+ The creating, changing, and deleting of user accounts is conducted.\n+ Unique and personalized user accounts are used.\n+ The use of “collective accounts” is regulated (e.g. restricted to cases where traceability of actions is dispensable).\n+ User accounts are disabled immediately after the user has resigned from or left the organization (e.g. upon termination of the employment contract).\n+ User accounts are regularly reviewed.\n+ The login information is provided to the user in a secure manner.\n+ A policy for the handling of login information is defined and implemented. The following aspects are considered:\n  - No disclosure of login information to third parties\n  - not even to persons of authority\n  - under observation of legal parameters\n  - No writing down or unencrypted storing of login information\n  - Immediate changing of login information whenever potential compromising is suspected\n  - No use of identical login information for business and non-business purposes\n  - Changing of temporary or initial login information following the 1st login   - Requirements for the quality of authentication information (e.g. length of password, types of characters to be used).\n+ The login information (e.g. passwords) of a personalized user account must be known to the assigned user only.\n\nRequisiti (should):\n+ A basic user account with minimum access rights and functionalities is existent and used.\n+ Default accounts and passwords pre-configured by manufacturers are disabled (e.g. by blocking or changing of password).\n+ User accounts are created or authorized by the responsible body.\n+ Creating user accounts is subject to an approval process (four-eyes principle).\n+ User accounts of service providers are disabled upon completion of their task.\n+ Deadlines for disabling and deleting user accounts are defined.\n+ The use of default passwords is technically prevented.\n+ Where strong authentication is applied, the use of the medium (e.g. ownership factor) is secure.\n+ User accounts are reviewed at regular intervals. This also includes user accounts in customers' IT systems.\n+ Interactive login for service accounts (technical accounts) is technically prevented."
+        },
+        "fr": {
+          "title": "Dans quelle mesure les comptes utilisateur et les informations d'identification sont-ils gérés et utilisés de manière sécurisée ?",
+          "description": "Exigences (must):\n+ The creating, changing, and deleting of user accounts is conducted.\n+ Unique and personalized user accounts are used.\n+ The use of “collective accounts” is regulated (e.g. restricted to cases where traceability of actions is dispensable).\n+ User accounts are disabled immediately after the user has resigned from or left the organization (e.g. upon termination of the employment contract).\n+ User accounts are regularly reviewed.\n+ The login information is provided to the user in a secure manner.\n+ A policy for the handling of login information is defined and implemented. The following aspects are considered:\n  - No disclosure of login information to third parties\n  - not even to persons of authority\n  - under observation of legal parameters\n  - No writing down or unencrypted storing of login information\n  - Immediate changing of login information whenever potential compromising is suspected\n  - No use of identical login information for business and non-business purposes\n  - Changing of temporary or initial login information following the 1st login   - Requirements for the quality of authentication information (e.g. length of password, types of characters to be used).\n+ The login information (e.g. passwords) of a personalized user account must be known to the assigned user only.\n\nExigences (should):\n+ A basic user account with minimum access rights and functionalities is existent and used.\n+ Default accounts and passwords pre-configured by manufacturers are disabled (e.g. by blocking or changing of password).\n+ User accounts are created or authorized by the responsible body.\n+ Creating user accounts is subject to an approval process (four-eyes principle).\n+ User accounts of service providers are disabled upon completion of their task.\n+ Deadlines for disabling and deleting user accounts are defined.\n+ The use of default passwords is technically prevented.\n+ Where strong authentication is applied, the use of the medium (e.g. ownership factor) is secure.\n+ User accounts are reviewed at regular intervals. This also includes user accounts in customers' IT systems.\n+ Interactive login for service accounts (technical accounts) is technically prevented."
         }
       },
       "control_category": "tecnico",
@@ -1002,6 +1123,10 @@
         "it": {
           "title": "In che misura i diritti di accesso sono assegnati e gestiti?",
           "description": "Requisiti (must):\n+ The requirements for the management of access rights (authorization) are determined and fulfilled. The following aspects are considered:\n  - Procedure for application, verification, and approval,\n  - Applying the minimum (“need-to-know”/\"least privilege\") principle.\n  - Access rights are revoked when no longer needed\n+ The access rights granted for normal and privileged user accounts and technical accounts are reviewed at regular intervals also within IT systems of customers.\n\nRequisiti (should):\n+ Strategies for authorizing access to information are prepared.\n+ Authorization roles are used.\n+ Rights are allocated on a need-to-use basis and according to the role and/or area of responsibility. \n+ Normal user accounts are not granted privileged access rights.\n+ The access rights of a user account are adapted after the user has changed (e.g. to another field of responsibility).\n\nRequisiti aggiuntivi per alta protezione:\n+ The access rights are approved by the responsible internal Information Officer. (C, I, A)"
+        },
+        "fr": {
+          "title": "Dans quelle mesure les droits d'accès sont-ils attribués et gérés ?",
+          "description": "Exigences (must):\n+ The requirements for the management of access rights (authorization) are determined and fulfilled. The following aspects are considered:\n  - Procedure for application, verification, and approval,\n  - Applying the minimum (“need-to-know”/\"least privilege\") principle.\n  - Access rights are revoked when no longer needed\n+ The access rights granted for normal and privileged user accounts and technical accounts are reviewed at regular intervals also within IT systems of customers.\n\nExigences (should):\n+ Strategies for authorizing access to information are prepared.\n+ Authorization roles are used.\n+ Rights are allocated on a need-to-use basis and according to the role and/or area of responsibility. \n+ Normal user accounts are not granted privileged access rights.\n+ The access rights of a user account are adapted after the user has changed (e.g. to another field of responsibility).\n\nExigences supplémentaires pour besoin de protection élevé:\n+ The access rights are approved by the responsible internal Information Officer. (C, I, A)"
         }
       },
       "control_category": "procedurale",
@@ -1038,6 +1163,10 @@
         "it": {
           "title": "In che misura è gestito l'utilizzo delle procedure crittografiche?",
           "description": "Requisiti (must):\n+ All cryptographic procedures used (e.g. encryption, signature, and hash algorithms, protocols) provide the security required by the respective application field according to the recognized industry standard,\n  - to the extent legally feasible.\n\nRequisiti (should):\n+ Preparation of technical rules containing requirements for encryption in order to protect information according to its classification.\n+ A concept for the application of cryptography is defined and implemented. The following aspects are considered:\n  - Cryptographic procedures,\n  - Key strengths,\n  - Procedures for the complete lifecycle of cryptographic keys, including generation, storage, archiving, retrieval, distribution, deactivation, renewal, and deletion.\n+ An emergency process for restoring key material is established.\n\nRequisiti aggiuntivi per alta protezione:\n+ Key sovereignty requirements (particularly in case of external processing) are determined and fulfilled. (C, I)"
+        },
+        "fr": {
+          "title": "Dans quelle mesure l'utilisation des procédures cryptographiques est-elle gérée ?",
+          "description": "Exigences (must):\n+ All cryptographic procedures used (e.g. encryption, signature, and hash algorithms, protocols) provide the security required by the respective application field according to the recognized industry standard,\n  - to the extent legally feasible.\n\nExigences (should):\n+ Preparation of technical rules containing requirements for encryption in order to protect information according to its classification.\n+ A concept for the application of cryptography is defined and implemented. The following aspects are considered:\n  - Cryptographic procedures,\n  - Key strengths,\n  - Procedures for the complete lifecycle of cryptographic keys, including generation, storage, archiving, retrieval, distribution, deactivation, renewal, and deletion.\n+ An emergency process for restoring key material is established.\n\nExigences supplémentaires pour besoin de protection élevé:\n+ Key sovereignty requirements (particularly in case of external processing) are determined and fulfilled. (C, I)"
         }
       },
       "control_category": "tecnico",
@@ -1074,6 +1203,10 @@
         "it": {
           "title": "In che misura le informazioni sono protette durante il trasferimento?",
           "description": "Requisiti (must):\n+ The network services used to transfer information are identified and documented. \n+ Policies and procedures in accordance with the classification requirements for the use of network services are defined and implemented.\n+ Measures for the protection of transferred contents against unauthorized access are implemented.\n\nRequisiti (should):\n+ Measures for ensuring correct addressing and correct transfer of information are implemented.\n+ Electronic data exchange is conducted using content or transport encryption according to the respective classification. \n+ Remote access connections are verified to possess adequate security features (e.g., encryption, granting and termination of access) and capabilities.\n\nRequisiti aggiuntivi per alta protezione:\n+ Information is transported or transferred in encrypted form: (C)\n  - Where encryption is not feasible, information must be protected by similarly effective measures."
+        },
+        "fr": {
+          "title": "Dans quelle mesure l'information est-elle protégée pendant son transfert ?",
+          "description": "Exigences (must):\n+ The network services used to transfer information are identified and documented. \n+ Policies and procedures in accordance with the classification requirements for the use of network services are defined and implemented.\n+ Measures for the protection of transferred contents against unauthorized access are implemented.\n\nExigences (should):\n+ Measures for ensuring correct addressing and correct transfer of information are implemented.\n+ Electronic data exchange is conducted using content or transport encryption according to the respective classification. \n+ Remote access connections are verified to possess adequate security features (e.g., encryption, granting and termination of access) and capabilities.\n\nExigences supplémentaires pour besoin de protection élevé:\n+ Information is transported or transferred in encrypted form: (C)\n  - Where encryption is not feasible, information must be protected by similarly effective measures."
         }
       },
       "control_category": "procedurale",
@@ -1110,6 +1243,10 @@
         "it": {
           "title": "In che misura i cambiamenti sono gestiti?",
           "description": "Requisiti (must):\n+ Information security requirements for changes to the organization, business processes, IT systems are determined and applied.\n\nRequisiti (should):\n+ A formal approval procedure is established.\n+ Changes are verified and assessed for their potential impact on the information security.\n+ Changes affecting the information security are subjected to planning and testing.\n+ Procedures for fallback in fault cases are considered.\n\nRequisiti aggiuntivi per alta protezione:\n+ Compliance with the information security requirements is verified during and after the changes are applied. (C, I, A)"
+        },
+        "fr": {
+          "title": "Dans quelle mesure les changements sont-ils gérés ?",
+          "description": "Exigences (must):\n+ Information security requirements for changes to the organization, business processes, IT systems are determined and applied.\n\nExigences (should):\n+ A formal approval procedure is established.\n+ Changes are verified and assessed for their potential impact on the information security.\n+ Changes affecting the information security are subjected to planning and testing.\n+ Procedures for fallback in fault cases are considered.\n\nExigences supplémentaires pour besoin de protection élevé:\n+ Compliance with the information security requirements is verified during and after the changes are applied. (C, I, A)"
         }
       },
       "control_category": "procedurale",
@@ -1146,6 +1283,10 @@
         "it": {
           "title": "In che misura gli ambienti di sviluppo e test sono separati da quelli di produzione?",
           "description": "Requisiti (must):\n+ The IT systems have been subjected to risk assessment in order to determine the necessity of their separation into development, testing and operational systems.\n+ A segmentation is implemented based on the results of risk analysis.\n\nRequisiti (should):\n+ The requirements for development and testing environments are determined and implemented. The following aspects are considered:\n  - Separation of development, testing and operational systems,\n  - No development and system tools on operational systems (except those required for operation),\n  - Use of different user profiles for development, testing, and operational systems."
+        },
+        "fr": {
+          "title": "Dans quelle mesure les environnements de développement et de test sont-ils séparés des environnements opérationnels ?",
+          "description": "Exigences (must):\n+ The IT systems have been subjected to risk assessment in order to determine the necessity of their separation into development, testing and operational systems.\n+ A segmentation is implemented based on the results of risk analysis.\n\nExigences (should):\n+ The requirements for development and testing environments are determined and implemented. The following aspects are considered:\n  - Separation of development, testing and operational systems,\n  - No development and system tools on operational systems (except those required for operation),\n  - Use of different user profiles for development, testing, and operational systems."
         }
       },
       "control_category": "procedurale",
@@ -1182,6 +1323,10 @@
         "it": {
           "title": "In che misura i sistemi IT sono protetti contro il malware?",
           "description": "Requisiti (must):\n+ Requirements for protection against malware are determined.\n+ Technical and organizational measures for protection against malware are defined and implemented.\n\nRequisiti (should):\n+ Unnecessary network services are disabled.\n+ Access to network services is restricted to necessary access by means of suitable protective measures (see examples).\n+ Malware protection software is installed and updated automatically at regular intervals (e.g. virus scanner).\n+ Received files and software are automatically inspected for malware prior to their execution (on-access scan).\n+ The entire data contents of all systems is regularly inspected for malware.\n+ Data transferred by central gateways (e.g. e-mail, internet, third-party networks) is automatically inspected by means of protection software:\n  - Encrypted connections are considered.\n+ Measures to prevent protection software from being deactivated or altered by users are defined and implemented.\n+ Case-related staff awareness measures.\n+ For IT systems operated without the use of malware protection software, alternative measures (e.g. special resilience measures, few services, no active users, network isolation) are implemented."
+        },
+        "fr": {
+          "title": "Dans quelle mesure les systèmes IT sont-ils protégés contre les logiciels malveillants ?",
+          "description": "Exigences (must):\n+ Requirements for protection against malware are determined.\n+ Technical and organizational measures for protection against malware are defined and implemented.\n\nExigences (should):\n+ Unnecessary network services are disabled.\n+ Access to network services is restricted to necessary access by means of suitable protective measures (see examples).\n+ Malware protection software is installed and updated automatically at regular intervals (e.g. virus scanner).\n+ Received files and software are automatically inspected for malware prior to their execution (on-access scan).\n+ The entire data contents of all systems is regularly inspected for malware.\n+ Data transferred by central gateways (e.g. e-mail, internet, third-party networks) is automatically inspected by means of protection software:\n  - Encrypted connections are considered.\n+ Measures to prevent protection software from being deactivated or altered by users are defined and implemented.\n+ Case-related staff awareness measures.\n+ For IT systems operated without the use of malware protection software, alternative measures (e.g. special resilience measures, few services, no active users, network isolation) are implemented."
         }
       },
       "control_category": "tecnico",
@@ -1218,6 +1363,10 @@
         "it": {
           "title": "In che misura i log degli eventi sono registrati e analizzati?",
           "description": "Requisiti (must):\n+ Information security requirements regarding the handling of event logs are determined and fulfilled.\n+ Security-relevant requirements regarding the logging of activities of system administrators and users are determined and fulfilled.\n+ The IT systems used are assessed regarding the necessity of logging.\n+ When using external IT services, information on the monitoring options is obtained and considered in the assessment.\n+ Event logs are checked regularly for rule violations and noticeable problems in compliance with the permissible legal and organizational provisions.\n\nRequisiti (should):\n+ A procedure for the escalation of relevant events to the responsible body (e.g. security incident report, data protection, corporate security, IT security) is defined and established.\n+ Event logs (contents and meta data) are protected against alteration. (e.g. by a dedicated environment).\n+ Adequate monitoring and recording of any actions on the network that are relevant to information security are established.\n\nRequisiti aggiuntivi per alta protezione:\n+ Information security requirements relevant to the security during the handling of event logs, e.g. contractual requirements, are determined and implemented. (C, I, A)\n+ Cases of access during connection and disconnection of external networks (e.g. remote maintenance) are logged. (C, I, A)"
+        },
+        "fr": {
+          "title": "Dans quelle mesure les journaux d'événements sont-ils enregistrés et analysés ?",
+          "description": "Exigences (must):\n+ Information security requirements regarding the handling of event logs are determined and fulfilled.\n+ Security-relevant requirements regarding the logging of activities of system administrators and users are determined and fulfilled.\n+ The IT systems used are assessed regarding the necessity of logging.\n+ When using external IT services, information on the monitoring options is obtained and considered in the assessment.\n+ Event logs are checked regularly for rule violations and noticeable problems in compliance with the permissible legal and organizational provisions.\n\nExigences (should):\n+ A procedure for the escalation of relevant events to the responsible body (e.g. security incident report, data protection, corporate security, IT security) is defined and established.\n+ Event logs (contents and meta data) are protected against alteration. (e.g. by a dedicated environment).\n+ Adequate monitoring and recording of any actions on the network that are relevant to information security are established.\n\nExigences supplémentaires pour besoin de protection élevé:\n+ Information security requirements relevant to the security during the handling of event logs, e.g. contractual requirements, are determined and implemented. (C, I, A)\n+ Cases of access during connection and disconnection of external networks (e.g. remote maintenance) are logged. (C, I, A)"
         }
       },
       "control_category": "tecnico",
@@ -1254,6 +1403,10 @@
         "it": {
           "title": "In che misura le vulnerabilità sono identificate e affrontate?",
           "description": "Requisiti (must):\n+ Information on technical vulnerabilities for the IT systems in use is gathered (e.g. information from the manufacturer, system audits, CVS database) and evaluated (e.g. Common Vulnerability Scoring System CVSS)\n+ Potentially affected IT systems and software are identified, assessed and any vulnerabilities are addressed.\n\nRequisiti (should):\n+ An adequate patch management is defined and implemented (e.g. patch testing and installation).\n+ Risk minimizing measures are implemented, as necessary.\n+ Successful installation of patches is verified in an appropriate manner."
+        },
+        "fr": {
+          "title": "Dans quelle mesure les vulnérabilités sont-elles identifiées et traitées ?",
+          "description": "Exigences (must):\n+ Information on technical vulnerabilities for the IT systems in use is gathered (e.g. information from the manufacturer, system audits, CVS database) and evaluated (e.g. Common Vulnerability Scoring System CVSS)\n+ Potentially affected IT systems and software are identified, assessed and any vulnerabilities are addressed.\n\nExigences (should):\n+ An adequate patch management is defined and implemented (e.g. patch testing and installation).\n+ Risk minimizing measures are implemented, as necessary.\n+ Successful installation of patches is verified in an appropriate manner."
         }
       },
       "control_category": "procedurale",
@@ -1290,6 +1443,10 @@
         "it": {
           "title": "In che misura i sistemi e i servizi IT sono verificati tecnicamente?",
           "description": "Requisiti (must):\n+ Requirements for auditing IT systems or services are determined.\n+ The scope of the system audit is specified in a timely manner.\n+ System or service audits are coordinated with the operator and users of the IT systems or services.\n+ The results of system or service audits are stored in a traceable manner and reported to the relevant management.\n+ Measures are derived from the results.\n\nRequisiti (should):\n+ System and service audits are planned taking into account any security risks they might cause (e.g. disturbances).\n+ Regular system or service audits are performed\n  - carried out by qualified personnel\n  - suitable tools (e.g. vulnerability scanners) are used for system and service audits (if applicable)\n  - performed from the internet and the internal network\n+ Within a reasonable period following completion of the audit, a report is prepared.\n\nRequisiti aggiuntivi per alta protezione:\n+ For critical IT systems or services, additional system or service audit requirements have been identified and are fulfilled (e.g., service specific tests and tools and/or human penetration tests, risk-based time intervals) (A)"
+        },
+        "fr": {
+          "title": "Dans quelle mesure les systèmes et services IT sont-ils contrôlés techniquement (audit système et service) ?",
+          "description": "Exigences (must):\n+ Requirements for auditing IT systems or services are determined.\n+ The scope of the system audit is specified in a timely manner.\n+ System or service audits are coordinated with the operator and users of the IT systems or services.\n+ The results of system or service audits are stored in a traceable manner and reported to the relevant management.\n+ Measures are derived from the results.\n\nExigences (should):\n+ System and service audits are planned taking into account any security risks they might cause (e.g. disturbances).\n+ Regular system or service audits are performed\n  - carried out by qualified personnel\n  - suitable tools (e.g. vulnerability scanners) are used for system and service audits (if applicable)\n  - performed from the internet and the internal network\n+ Within a reasonable period following completion of the audit, a report is prepared.\n\nExigences supplémentaires pour besoin de protection élevé:\n+ For critical IT systems or services, additional system or service audit requirements have been identified and are fulfilled (e.g., service specific tests and tools and/or human penetration tests, risk-based time intervals) (A)"
         }
       },
       "control_category": "tecnico",
@@ -1326,6 +1483,10 @@
         "it": {
           "title": "In che misura la rete dell'organizzazione è gestita?",
           "description": "Requisiti (must):\n+ Requirements for the management and control of networks are determined and fulfilled.\n+ Requirements regarding network segmentation are determined and fulfilled.\n\nRequisiti (should):\n+ Procedures for the management and control of networks are defined.\n+ For a risk-based network segmentation, the following aspects are considered:\n  - Limitations for connecting IT systems to the network,\n  - Use of security technologies,\n  - Performance, trust, availability, security, and safety considerations\n  - Limitation of impact in case of compromised IT systems\n  - Detection of potential attacks and lateral movement of attackers\n  - Separation of networks with different operational purpose (e.g. test and development networks, office network, manufacturing networks)\n  - The increased risk due to network services accessible via the internet,\n  - Technology-specific separation options when using external IT services,\n  - Adequate separation between own networks and customer networks while considering customer requirements\n  - Detection and prevention of data loss/leakage\n\nRequisiti aggiuntivi per alta protezione:\n+ Extended requirements for the management and control of networks are determined and implemented. The following aspects are considered: (C, I, A)\n  - Authentication of IT systems on the network,\n  - Access to the management interfaces of IT systems is restricted.\n  - Specific risks (e.g. wireless and remote access)"
+        },
+        "fr": {
+          "title": "Dans quelle mesure le réseau de l'organisation est-il géré ?",
+          "description": "Exigences (must):\n+ Requirements for the management and control of networks are determined and fulfilled.\n+ Requirements regarding network segmentation are determined and fulfilled.\n\nExigences (should):\n+ Procedures for the management and control of networks are defined.\n+ For a risk-based network segmentation, the following aspects are considered:\n  - Limitations for connecting IT systems to the network,\n  - Use of security technologies,\n  - Performance, trust, availability, security, and safety considerations\n  - Limitation of impact in case of compromised IT systems\n  - Detection of potential attacks and lateral movement of attackers\n  - Separation of networks with different operational purpose (e.g. test and development networks, office network, manufacturing networks)\n  - The increased risk due to network services accessible via the internet,\n  - Technology-specific separation options when using external IT services,\n  - Adequate separation between own networks and customer networks while considering customer requirements\n  - Detection and prevention of data loss/leakage\n\nExigences supplémentaires pour besoin de protection élevé:\n+ Extended requirements for the management and control of networks are determined and implemented. The following aspects are considered: (C, I, A)\n  - Authentication of IT systems on the network,\n  - Access to the management interfaces of IT systems is restricted.\n  - Specific risks (e.g. wireless and remote access)"
         }
       },
       "control_category": "tecnico",
@@ -1362,6 +1523,10 @@
         "it": {
           "title": "In che misura è in atto una pianificazione della continuità per i servizi IT?",
           "description": "Requisiti (must):\n+ Critical IT services are identified, and business impact is considered.\n+ Requirements and responsibilities for continuity and recovery of those IT services are known to relevant stakeholders and fulfilled.\n\nRequisiti (should):\n+ Critical IT systems are identified\n - the relevant systems are classified to have the appropriate protection need\n - adequate and appropriate security measures are implemented\n+ Continuity planning includes at least the following scenarios affecting critical IT systems:\n  - (Distributed) Denial of Service attacks\n  - Successful ransomware attacks and other sabotage activities \n  - System failure \n  - Natural disaster \n+ Continuity planning considers the following cases \n   - Alternative communication strategies, in case primary communication means are not available \n  - Alternative storage strategies, in case primary storage means are not available\n  - Alternative power and network\n+ Continuity planning is regularly reviewed and updated\n\nRequisiti aggiuntivi per alta protezione:\n+ Continuity planning includes predefined time frames (Recovery Time Objective) for resumption of operation in line with requirements. (A)\n+ Appropriate SLAs with external service providers according to continuity planning are in place. (A)\n+ Continuity plans include coordination of contractually agreed communication with business partners (A)\n+ Continuity planning is regularly tested including a full recovery and reconstitution of the system to a known state and compliance with defined target times. (A)\n+ A backup and recovery strategy for critical IT services and information is defined and implemented. The following aspects are considered: \n  - Backups are protected against unauthorized modification or deletion by malicious software. (I, A)\n  - Backups are protected against unauthorized access by malicious software or operators (C, I)"
+        },
+        "fr": {
+          "title": "Dans quelle mesure la planification de la continuité des services IT est-elle en place ?",
+          "description": "Exigences (must):\n+ Critical IT services are identified, and business impact is considered.\n+ Requirements and responsibilities for continuity and recovery of those IT services are known to relevant stakeholders and fulfilled.\n\nExigences (should):\n+ Critical IT systems are identified\n - the relevant systems are classified to have the appropriate protection need\n - adequate and appropriate security measures are implemented\n+ Continuity planning includes at least the following scenarios affecting critical IT systems:\n  - (Distributed) Denial of Service attacks\n  - Successful ransomware attacks and other sabotage activities \n  - System failure \n  - Natural disaster \n+ Continuity planning considers the following cases \n   - Alternative communication strategies, in case primary communication means are not available \n  - Alternative storage strategies, in case primary storage means are not available\n  - Alternative power and network\n+ Continuity planning is regularly reviewed and updated\n\nExigences supplémentaires pour besoin de protection élevé:\n+ Continuity planning includes predefined time frames (Recovery Time Objective) for resumption of operation in line with requirements. (A)\n+ Appropriate SLAs with external service providers according to continuity planning are in place. (A)\n+ Continuity plans include coordination of contractually agreed communication with business partners (A)\n+ Continuity planning is regularly tested including a full recovery and reconstitution of the system to a known state and compliance with defined target times. (A)\n+ A backup and recovery strategy for critical IT services and information is defined and implemented. The following aspects are considered: \n  - Backups are protected against unauthorized modification or deletion by malicious software. (I, A)\n  - Backups are protected against unauthorized access by malicious software or operators (C, I)"
         }
       },
       "control_category": "tecnico",
@@ -1398,6 +1563,10 @@
         "it": {
           "title": "In che misura è garantito il backup e il ripristino di dati e servizi IT?",
           "description": "Requisiti (must):\n+ Backup concepts exist for relevant IT systems. The following aspects are considered:\n  - Appropriate protective measures to ensure confidentiality, integrity, and availability for data backups.\n+ Recovery concepts exist for relevant IT services.\n\nRequisiti (should):\n+ A backup and recovery concept exists for each relevant IT service.\n  - Dependencies between IT services and the sequence for recovery are considered.\n\nRequisiti aggiuntivi per alta protezione:\n+ Backup and recovery concepts are methodically reviewed at regular intervals. (A)\n+ General restore capability is considered and tested (e.g., sample testing, test systems) (I, A)\n+ Backup and recovery concepts consider the following aspects: (A)\n  - Recovery Point Objective (RPO).\n  - Recovery Time Objective (RTO).\n  - Required resources for recovery (considering capacity and performance incl. personnel and hardware).\n  - Avoidance of overload scenarios during recovery.\n  - Appropriate spatial redundancy (e.g., separate room, separate fire  section, separate datacentre, separate site)."
+        },
+        "fr": {
+          "title": "Dans quelle mesure la sauvegarde et la restauration des données et services IT sont-elles assurées ?",
+          "description": "Exigences (must):\n+ Backup concepts exist for relevant IT systems. The following aspects are considered:\n  - Appropriate protective measures to ensure confidentiality, integrity, and availability for data backups.\n+ Recovery concepts exist for relevant IT services.\n\nExigences (should):\n+ A backup and recovery concept exists for each relevant IT service.\n  - Dependencies between IT services and the sequence for recovery are considered.\n\nExigences supplémentaires pour besoin de protection élevé:\n+ Backup and recovery concepts are methodically reviewed at regular intervals. (A)\n+ General restore capability is considered and tested (e.g., sample testing, test systems) (I, A)\n+ Backup and recovery concepts consider the following aspects: (A)\n  - Recovery Point Objective (RPO).\n  - Recovery Time Objective (RTO).\n  - Required resources for recovery (considering capacity and performance incl. personnel and hardware).\n  - Avoidance of overload scenarios during recovery.\n  - Appropriate spatial redundancy (e.g., separate room, separate fire  section, separate datacentre, separate site)."
         }
       },
       "control_category": "tecnico",
@@ -1434,6 +1603,10 @@
         "it": {
           "title": "In che misura la sicurezza delle informazioni è considerata in sistemi IT nuovi o sviluppati ulteriormente?",
           "description": "Requisiti (must):\n+ The information security requirements associated with the design and development of IT systems are determined and considered.\n+ The information security requirements associated with the acquisition or extension of IT systems and IT components are determined and considered.\n+ Information security requirements associated with changes to developed IT systems are considered.\n+ System approval tests are carried out under consideration of the information security requirements.\n\nRequisiti (should):\n+ Requirement specifications are prepared. The following aspects are considered:\n  - The information security requirements. \n  - Vendor recommendations and best practices for secure configuration and implementation\n  - Best practices and security guidelines\n  - Fail safe (designed to return to a safe condition in the event of a failure or malfunction)\n+ Requirement specifications are reviewed against the information security requirements.\n+ The IT system is reviewed for compliance with specifications prior to productive use.\n+ The use of productive data for testing purposes is avoided as far as possible (if applicable, anonymization or pseudonymization):\n  - Where productive data are used for testing purposes, it shall be ensured that the test system is provided with protective measures comparable to those on the operational system,\n  - Requirements for the lifecycle of test data (e.g. deletion, maximum lifetime on the IT system),\n  - Case-related specifications for the generation of test data are defined."
+        },
+        "fr": {
+          "title": "Dans quelle mesure la sécurité de l'information est-elle prise en compte dans les systèmes IT nouveaux ou faisant l'objet de développements ultérieurs ?",
+          "description": "Exigences (must):\n+ The information security requirements associated with the design and development of IT systems are determined and considered.\n+ The information security requirements associated with the acquisition or extension of IT systems and IT components are determined and considered.\n+ Information security requirements associated with changes to developed IT systems are considered.\n+ System approval tests are carried out under consideration of the information security requirements.\n\nExigences (should):\n+ Requirement specifications are prepared. The following aspects are considered:\n  - The information security requirements. \n  - Vendor recommendations and best practices for secure configuration and implementation\n  - Best practices and security guidelines\n  - Fail safe (designed to return to a safe condition in the event of a failure or malfunction)\n+ Requirement specifications are reviewed against the information security requirements.\n+ The IT system is reviewed for compliance with specifications prior to productive use.\n+ The use of productive data for testing purposes is avoided as far as possible (if applicable, anonymization or pseudonymization):\n  - Where productive data are used for testing purposes, it shall be ensured that the test system is provided with protective measures comparable to those on the operational system,\n  - Requirements for the lifecycle of test data (e.g. deletion, maximum lifetime on the IT system),\n  - Case-related specifications for the generation of test data are defined."
         }
       },
       "control_category": "tecnico",
@@ -1470,6 +1643,10 @@
         "it": {
           "title": "In che misura sono definiti i requisiti per i servizi di rete?",
           "description": "Requisiti (must):\n+ Requirements regarding the information security of network services are determined and fulfilled.\n\nRequisiti (should):\n+ A procedure for securing and using network services is defined and implemented.\n+ The requirements are agreed in the form of SLAs.\n+ Adequate redundancy solutions are implemented.\n\nRequisiti aggiuntivi per alta protezione:\n+ Procedures for monitoring the quality of network traffic (e.g. traffic flow analyses, availability measurements) are defined and carried out. (A)"
+        },
+        "fr": {
+          "title": "Dans quelle mesure les exigences pour les services réseau sont-elles définies ?",
+          "description": "Exigences (must):\n+ Requirements regarding the information security of network services are determined and fulfilled.\n\nExigences (should):\n+ A procedure for securing and using network services is defined and implemented.\n+ The requirements are agreed in the form of SLAs.\n+ Adequate redundancy solutions are implemented.\n\nExigences supplémentaires pour besoin de protection élevé:\n+ Procedures for monitoring the quality of network traffic (e.g. traffic flow analyses, availability measurements) are defined and carried out. (A)"
         }
       },
       "control_category": "tecnico",
@@ -1506,6 +1683,10 @@
         "it": {
           "title": "In che misura è garantita la restituzione e la rimozione sicura degli asset informativi da servizi IT esterni?",
           "description": "Requisiti (must):\n+ A procedure for the return and secure removal of information assets from each external IT service is defined and implemented.\n\nRequisiti (should):\n+ A description of the termination process is given, adapted to any changes, and contractually regulated."
+        },
+        "fr": {
+          "title": "Dans quelle mesure le retour et la suppression sécurisée des actifs informationnels depuis les services IT externes sont-ils réglementés ?",
+          "description": "Exigences (must):\n+ A procedure for the return and secure removal of information assets from each external IT service is defined and implemented.\n\nExigences (should):\n+ A description of the termination process is given, adapted to any changes, and contractually regulated."
         }
       },
       "control_category": "tecnico",
@@ -1542,6 +1723,10 @@
         "it": {
           "title": "In che misura le informazioni sono protette in servizi IT esterni condivisi?",
           "description": "Requisiti (must):\n+ Effective segregation (e.g. segregation of clients) prevents access to own information by unauthorized users of other organizations.\n\nRequisiti (should):\n+ The provider’s segregation concept is documented and adapted to any changes. The following aspects are considered:\n  - Separation of data, functions, customer-specific software, operating system, storage system and network,\n  - Risk assessment for the operation of external software within the shared environment."
+        },
+        "fr": {
+          "title": "Dans quelle mesure l'information est-elle protégée dans les services IT externes partagés ?",
+          "description": "Exigences (must):\n+ Effective segregation (e.g. segregation of clients) prevents access to own information by unauthorized users of other organizations.\n\nExigences (should):\n+ The provider’s segregation concept is documented and adapted to any changes. The following aspects are considered:\n  - Separation of data, functions, customer-specific software, operating system, storage system and network,\n  - Risk assessment for the operation of external software within the shared environment."
         }
       },
       "control_category": "tecnico",
@@ -1578,6 +1763,10 @@
         "it": {
           "title": "In che misura è garantita la sicurezza delle informazioni tra appaltatori e partner di cooperazione?",
           "description": "Requisiti (must):\n+ Contractors and cooperation partners are subjected to a risk assessment with regard to information security.\n+ An appropriate level of information security is ensured by contractual agreements with contractors and cooperation partners.\n+ Where applicable, contractual agreements with clients are passed on to contractors and cooperation partners.\n+ Compliance with contractual agreements is verified.\n\nRequisiti (should):\n+ Contractors and cooperation partners are contractually obliged to pass on any requirements regarding an appropriate level of information security to their subcontractors.\n+ Service reports and documents by contractors and cooperation partners are reviewed.\n\nRequisiti aggiuntivi per alta protezione:\n+ Proof is provided that the information security level of the supplier is adequate for the protection needs of the information (e.g. certificate, attestation, internal audit). (C, I, A)"
+        },
+        "fr": {
+          "title": "Dans quelle mesure la sécurité de l'information est-elle assurée auprès des prestataires et partenaires de coopération ?",
+          "description": "Exigences (must):\n+ Contractors and cooperation partners are subjected to a risk assessment with regard to information security.\n+ An appropriate level of information security is ensured by contractual agreements with contractors and cooperation partners.\n+ Where applicable, contractual agreements with clients are passed on to contractors and cooperation partners.\n+ Compliance with contractual agreements is verified.\n\nExigences (should):\n+ Contractors and cooperation partners are contractually obliged to pass on any requirements regarding an appropriate level of information security to their subcontractors.\n+ Service reports and documents by contractors and cooperation partners are reviewed.\n\nExigences supplémentaires pour besoin de protection élevé:\n+ Proof is provided that the information security level of the supplier is adequate for the protection needs of the information (e.g. certificate, attestation, internal audit). (C, I, A)"
         }
       },
       "control_category": "procedurale",
@@ -1614,6 +1803,10 @@
         "it": {
           "title": "In che misura la riservatezza riguardante lo scambio di informazioni è regolamentata contrattualmente?",
           "description": "Requisiti (must):\n+ The non-disclosure requirements are determined and fulfilled.\n+ Requirements and procedures for applying non-disclosure agreements are known to all persons passing on information in need of protection.\n+ Valid non-disclosure agreements are concluded prior to  forwarding sensitive information.\n+ The requirements and procedures for the use of non-disclosure agreements and the handling of information requiring protection are reviewed at regular intervals.\n\nRequisiti (should):\n+ Non-disclosure agreement templates are available and checked for legal applicability.\n+ Non-disclosure agreements include the following information:\n  - the persons/organizations involved,\n  - the type of information covered by the agreement,\n  - the subject of the agreement,\n  - the validity period of the agreement,\n  - the responsibilities of the obliged party.\n+ Non-disclosure agreements include provisions for the handling of sensitive information beyond the contractual relationship.\n+ Options of demonstrating compliance with specifications (e.g. review by an independent third party or audit rights) are defined.\n+ A process for monitoring the validity period of temporary non-disclosure agreements and initiating their extension in due time is defined and implemented."
+        },
+        "fr": {
+          "title": "Dans quelle mesure la non-divulgation concernant l'échange d'information est-elle contractuellement convenue ?",
+          "description": "Exigences (must):\n+ The non-disclosure requirements are determined and fulfilled.\n+ Requirements and procedures for applying non-disclosure agreements are known to all persons passing on information in need of protection.\n+ Valid non-disclosure agreements are concluded prior to  forwarding sensitive information.\n+ The requirements and procedures for the use of non-disclosure agreements and the handling of information requiring protection are reviewed at regular intervals.\n\nExigences (should):\n+ Non-disclosure agreement templates are available and checked for legal applicability.\n+ Non-disclosure agreements include the following information:\n  - the persons/organizations involved,\n  - the type of information covered by the agreement,\n  - the subject of the agreement,\n  - the validity period of the agreement,\n  - the responsibilities of the obliged party.\n+ Non-disclosure agreements include provisions for the handling of sensitive information beyond the contractual relationship.\n+ Options of demonstrating compliance with specifications (e.g. review by an independent third party or audit rights) are defined.\n+ A process for monitoring the validity period of temporary non-disclosure agreements and initiating their extension in due time is defined and implemented."
         }
       },
       "control_category": "procedurale",
@@ -1650,6 +1843,10 @@
         "it": {
           "title": "In che misura è garantita la conformità alle disposizioni regolamentari e contrattuali?",
           "description": "Requisiti (must):\n+ Legal, regulatory, and contractual provisions of relevance to information security (see examples) are determined at regular intervals.\n+ Policies regarding compliance with the provisions are defined, implemented, and communicated to the responsible persons.\n\nRequisiti (should):\n+ The integrity of records in accordance with the legal, regulatory, or contractual provisions and business requirements is considered."
+        },
+        "fr": {
+          "title": "Dans quelle mesure la conformité aux dispositions réglementaires et contractuelles est-elle assurée ?",
+          "description": "Exigences (must):\n+ Legal, regulatory, and contractual provisions of relevance to information security (see examples) are determined at regular intervals.\n+ Policies regarding compliance with the provisions are defined, implemented, and communicated to the responsible persons.\n\nExigences (should):\n+ The integrity of records in accordance with the legal, regulatory, or contractual provisions and business requirements is considered."
         }
       },
       "control_category": "procedurale",
@@ -1686,6 +1883,10 @@
         "it": {
           "title": "In che misura è considerata la protezione dei dati personali identificabili nel trattamento delle informazioni?",
           "description": "Requisiti (must):\n+ Legal and contractual information security requirements regarding the procedures and processes in the processing of personally identifiable data are determined.\n+ Regulations regarding the compliance with legal and contractual requirements for the protection of personally identifiable data are defined and known to the entrusted persons.\n+ Processes and procedures for the protection of personally identifiable data are considered in the information security management system."
+        },
+        "fr": {
+          "title": "Dans quelle mesure la protection des données à caractère personnel est-elle prise en compte dans la mise en œuvre de la sécurité de l'information ?",
+          "description": "Exigences (must):\n+ Legal and contractual information security requirements regarding the procedures and processes in the processing of personally identifiable data are determined.\n+ Regulations regarding the compliance with legal and contractual requirements for the protection of personally identifiable data are defined and known to the entrusted persons.\n+ Processes and procedures for the protection of personally identifiable data are considered in the information security management system."
         }
       },
       "control_category": "procedurale",
