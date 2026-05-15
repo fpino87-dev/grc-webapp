@@ -2280,7 +2280,56 @@
     "appetite_max_score": "Max acceptable score:",
     "appetite_max_red": "Max red risks:",
     "appetite_valid_until": "Valid until:",
-    "appetite_approved_by": "Approved by:"
+    "appetite_approved_by": "Approved by:",
+    "guide_btn": "Assessment guide",
+    "bcp_link_label": "Link to a BCP (optional)",
+    "no_mitigation_plans": "No mitigation plans recorded",
+    "suggest_hint": "(The suggester recalculates from the inherent score using compliant controls and valid BCPs: if none exist or are expired, the suggested reduction may differ from the current value.)",
+    "threat_cat": {
+      "accesso_non_autorizzato": "Unauthorized access",
+      "malware_ransomware": "Malware / Ransomware",
+      "data_breach": "Data breach / Data leak",
+      "phishing_social": "Phishing / Social engineering",
+      "guasto_hw_sw": "Hardware / software failure",
+      "disastro_naturale": "Natural / environmental disaster",
+      "errore_umano": "Human error",
+      "attacco_supply_chain": "Supply chain attack",
+      "ddos": "DoS / DDoS",
+      "insider_threat": "Insider threat",
+      "furto_perdita": "Theft / loss of devices",
+      "altro": "Other"
+    },
+    "nis2_relevance": {
+      "non_significativo": "Non-significant",
+      "potenzialmente_significativo": "Potentially significant",
+      "significativo": "Significant"
+    },
+    "nis2_art21": {
+      "art21_a": "Art.21(2)(a) – Risk analysis and ISMS policy",
+      "art21_b": "Art.21(2)(b) – Incident management",
+      "art21_c": "Art.21(2)(c) – Business continuity and BCP/DR",
+      "art21_d": "Art.21(2)(d) – Supply chain",
+      "art21_e": "Art.21(2)(e) – Security in system acquisition and maintenance",
+      "art21_f": "Art.21(2)(f) – Assessment of security measures effectiveness",
+      "art21_g": "Art.21(2)(g) – Cyber hygiene and training",
+      "art21_h": "Art.21(2)(h) – Cryptography and data protection",
+      "art21_i": "Art.21(2)(i) – Access control, IAM and asset management",
+      "art21_j": "Art.21(2)(j) – MFA and secure communications"
+    },
+    "prob": {
+      "1": "1 – Very low",
+      "2": "2 – Low",
+      "3": "3 – Medium",
+      "4": "4 – High",
+      "5": "5 – Very high"
+    },
+    "impact": {
+      "1": "1 – Negligible",
+      "2": "2 – Minor",
+      "3": "3 – Moderate",
+      "4": "4 – Serious",
+      "5": "5 – Critical"
+    }
   },
   "pdca": {
     "source_incident": "Incident",

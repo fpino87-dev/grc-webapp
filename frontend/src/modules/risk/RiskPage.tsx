@@ -60,7 +60,7 @@ function ProbImpactSelector({
           {[1,2,3,4,5].map(v => (
             <label key={v} className={`flex items-center gap-2 px-3 py-1.5 rounded cursor-pointer border text-sm transition-colors ${probability === v ? "border-primary-500 bg-primary-50 font-medium" : "border-gray-200 hover:border-gray-300"}`}>
               <input type="radio" name="probability" value={v} checked={probability === v} onChange={() => onChange("probability", v)} className="accent-primary-600" />
-              {PROB_LABELS[v]}
+              {t(PROB_LABELS[v])}
             </label>
           ))}
         </div>
@@ -71,7 +71,7 @@ function ProbImpactSelector({
           {[1,2,3,4,5].map(v => (
             <label key={v} className={`flex items-center gap-2 px-3 py-1.5 rounded cursor-pointer border text-sm transition-colors ${impact === v ? "border-primary-500 bg-primary-50 font-medium" : "border-gray-200 hover:border-gray-300"}`}>
               <input type="radio" name="impact" value={v} checked={impact === v} onChange={() => onChange("impact", v)} className="accent-primary-600" />
-              {IMPACT_LABELS[v]}
+              {t(IMPACT_LABELS[v])}
             </label>
           ))}
         </div>
@@ -326,9 +326,7 @@ function SuggestResidualPanel({ assessment }: { assessment: RiskAssessment }) {
           <span className="text-xs text-gray-700 bg-gray-50 border border-gray-200 px-2 py-1 rounded">
             {t("risk.total_label")} {Math.min(70, (suggestion.reduction_pct ?? 0) + (suggestion.bcp_extra_pct ?? 0))}%
           </span>
-          <span className="text-xs text-gray-500">
-            (Il suggeritore ricalcola da `inerente` usando controlli `compliant` e BCP validi: se risultano 0 o scaduti, la riduzione suggerita può differire dal valore attuale.)
-          </span>
+          <span className="text-xs text-gray-500">{t("risk.suggest_hint")}</span>
         </div>
       )}
     </div>
@@ -565,7 +563,7 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
             className="w-full border rounded px-2 py-1.5 text-sm" rows={2}
           />
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Collega a un BCP (opzionale)</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t("risk.bcp_link_label")}</label>
             <select
               value={form.bcp_plan ?? ""}
               onChange={e => {
@@ -613,7 +611,7 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
             className="w-full border rounded px-2 py-1.5 text-sm" rows={2}
           />
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Collega a un BCP (opzionale)</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t("risk.bcp_link_label")}</label>
             <select
               value={editForm.bcp_plan ?? editPlan.bcp_plan ?? ""}
               onChange={e => {
@@ -659,7 +657,7 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
       )}
 
       {plans.length === 0 ? (
-        <p className="text-xs text-gray-400">Nessun piano di mitigazione registrato</p>
+        <p className="text-xs text-gray-400">{t("risk.no_mitigation_plans")}</p>
       ) : (
         <div className="space-y-2">
           {plans.map(plan => (
@@ -835,7 +833,7 @@ function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: s
               <label className="block text-sm font-medium text-gray-700 mb-1">{t("risk.threat_category_label")}</label>
               <select value={form.threat_category ?? ""} onChange={e => set("threat_category", e.target.value)} className="w-full border rounded px-3 py-2 text-sm">
                 <option value="">{t("risk.select_placeholder")}</option>
-                {THREAT_CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                {THREAT_CATEGORIES.map(c => <option key={c.value} value={c.value}>{t(c.label)}</option>)}
               </select>
             </div>
           </div>
@@ -926,7 +924,7 @@ function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: s
                   className="w-full border rounded px-2 py-1.5 text-sm"
                 >
                   <option value="">{t("risk.select_placeholder")}</option>
-                  {[1,2,3,4,5].map(v => <option key={v} value={v}>{PROB_LABELS[v]}</option>)}
+                  {[1,2,3,4,5].map(v => <option key={v} value={v}>{t(PROB_LABELS[v])}</option>)}
                 </select>
               </div>
               <div>
@@ -937,7 +935,7 @@ function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: s
                   className="w-full border rounded px-2 py-1.5 text-sm"
                 >
                   <option value="">{t("risk.select_placeholder")}</option>
-                  {[1,2,3,4,5].map(v => <option key={v} value={v}>{IMPACT_LABELS[v]}</option>)}
+                  {[1,2,3,4,5].map(v => <option key={v} value={v}>{t(IMPACT_LABELS[v])}</option>)}
                 </select>
               </div>
               {form.inherent_probability && form.inherent_impact && (
@@ -972,7 +970,7 @@ function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: s
                   <select value={form.nis2_art21_category ?? ""} onChange={e => set("nis2_art21_category", e.target.value)}
                     className="w-full border rounded px-3 py-2 text-xs">
                     <option value="">{t("risk.select_placeholder")}</option>
-                    {NIS2_ART21_CHOICES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                    {NIS2_ART21_CHOICES.map(c => <option key={c.value} value={c.value}>{t(c.label)}</option>)}
                   </select>
                 </div>
                 <div>
@@ -980,7 +978,7 @@ function NewAssessmentModal({ plants, onClose }: { plants: { id: string; code: s
                   <select value={form.nis2_relevance ?? ""} onChange={e => set("nis2_relevance", e.target.value)}
                     className="w-full border rounded px-3 py-2 text-xs">
                     <option value="">{t("risk.select_placeholder")}</option>
-                    {NIS2_RELEVANCE_CHOICES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                    {NIS2_RELEVANCE_CHOICES.map(c => <option key={c.value} value={c.value}>{t(c.label)}</option>)}
                   </select>
                 </div>
               </div>
@@ -1152,7 +1150,7 @@ function EditAssessmentModal({
               >
                 {THREAT_CATEGORIES.map(c => (
                   <option key={c.value} value={c.value}>
-                    {c.label}
+                    {t(c.label)}
                   </option>
                 ))}
               </select>
@@ -1283,7 +1281,7 @@ function EditAssessmentModal({
                   <select value={form.nis2_art21_category ?? ""} onChange={e => set("nis2_art21_category", e.target.value)}
                     className="w-full border rounded px-3 py-2 text-xs">
                     <option value="">{t("risk.select_placeholder")}</option>
-                    {NIS2_ART21_CHOICES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                    {NIS2_ART21_CHOICES.map(c => <option key={c.value} value={c.value}>{t(c.label)}</option>)}
                   </select>
                 </div>
                 <div>
@@ -1291,7 +1289,7 @@ function EditAssessmentModal({
                   <select value={form.nis2_relevance ?? ""} onChange={e => set("nis2_relevance", e.target.value)}
                     className="w-full border rounded px-3 py-2 text-xs">
                     <option value="">{t("risk.select_placeholder")}</option>
-                    {NIS2_RELEVANCE_CHOICES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                    {NIS2_RELEVANCE_CHOICES.map(c => <option key={c.value} value={c.value}>{t(c.label)}</option>)}
                   </select>
                 </div>
               </div>
@@ -1475,7 +1473,7 @@ export function RiskPage() {
             onClick={() => setDrawerOpen(true)}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
           >
-            <span>?</span> Guida alla valutazione
+            <span>?</span> {t("risk.guide_btn")}
           </button>
           <button
             onClick={async () => {

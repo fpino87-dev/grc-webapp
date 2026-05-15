@@ -2359,7 +2359,56 @@
     "appetite_max_score": "Maks. kabul edilebilir puan:",
     "appetite_max_red": "Maks. kırmızı risk:",
     "appetite_valid_until": "Geçerlilik tarihi:",
-    "appetite_approved_by": "Onaylayan:"
+    "appetite_approved_by": "Onaylayan:",
+    "guide_btn": "Değerlendirme kılavuzu",
+    "bcp_link_label": "BCP'ye bağla (isteğe bağlı)",
+    "no_mitigation_plans": "Kayıtlı azaltma planı yok",
+    "suggest_hint": "(Öneri aracı, uyumlu kontroller ve geçerli BCP'leri kullanarak doğasında gelen riskten yeniden hesaplar: sıfır veya süresi dolmuşsa, önerilen azalma mevcut değerden farklı olabilir.)",
+    "threat_cat": {
+      "accesso_non_autorizzato": "Yetkisiz erişim",
+      "malware_ransomware": "Malware / Ransomware",
+      "data_breach": "Veri ihlali / Veri sızıntısı",
+      "phishing_social": "Phishing / Sosyal mühendislik",
+      "guasto_hw_sw": "Donanım / yazılım arızası",
+      "disastro_naturale": "Doğal / çevresel felaket",
+      "errore_umano": "İnsan hatası",
+      "attacco_supply_chain": "Tedarik zinciri saldırısı",
+      "ddos": "DoS / DDoS",
+      "insider_threat": "İçeriden tehdit",
+      "furto_perdita": "Cihaz hırsızlığı / kaybı",
+      "altro": "Diğer"
+    },
+    "nis2_relevance": {
+      "non_significativo": "Önemsiz",
+      "potenzialmente_significativo": "Potansiyel olarak önemli",
+      "significativo": "Önemli"
+    },
+    "nis2_art21": {
+      "art21_a": "Art.21(2)(a) – Risk analizi ve BGYS politikası",
+      "art21_b": "Art.21(2)(b) – Olay yönetimi",
+      "art21_c": "Art.21(2)(c) – İş sürekliliği ve BCP/DR",
+      "art21_d": "Art.21(2)(d) – Tedarik zinciri",
+      "art21_e": "Art.21(2)(e) – Sistem edinimi ve bakımında güvenlik",
+      "art21_f": "Art.21(2)(f) – Güvenlik önlemlerinin etkinliğinin değerlendirilmesi",
+      "art21_g": "Art.21(2)(g) – Siber hijyen ve eğitim",
+      "art21_h": "Art.21(2)(h) – Kriptografi ve veri koruma",
+      "art21_i": "Art.21(2)(i) – Erişim kontrolü, IAM ve varlık yönetimi",
+      "art21_j": "Art.21(2)(j) – MFA ve güvenli iletişim"
+    },
+    "prob": {
+      "1": "1 – Çok düşük",
+      "2": "2 – Düşük",
+      "3": "3 – Orta",
+      "4": "4 – Yüksek",
+      "5": "5 – Çok yüksek"
+    },
+    "impact": {
+      "1": "1 – İhmal edilebilir",
+      "2": "2 – Küçük",
+      "3": "3 – Orta",
+      "4": "4 – Ciddi",
+      "5": "5 – Kritik"
+    }
   },
   "pdca": {
     "source_incident": "Olay",

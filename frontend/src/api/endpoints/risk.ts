@@ -15,23 +15,23 @@ export interface RiskMitigationPlan {
 }
 
 export const NIS2_ART21_CHOICES = [
-  { value: "art21_a", label: "Art.21(2)(a) – Analisi dei rischi e policy ISMS" },
-  { value: "art21_b", label: "Art.21(2)(b) – Gestione incidenti" },
-  { value: "art21_c", label: "Art.21(2)(c) – Continuità operativa e BCP/DR" },
-  { value: "art21_d", label: "Art.21(2)(d) – Supply chain" },
-  { value: "art21_e", label: "Art.21(2)(e) – Sicurezza acquisizione e manutenzione sistemi" },
-  { value: "art21_f", label: "Art.21(2)(f) – Verifica efficacia delle misure di sicurezza" },
-  { value: "art21_g", label: "Art.21(2)(g) – Igiene informatica e formazione" },
-  { value: "art21_h", label: "Art.21(2)(h) – Crittografia e protezione dati" },
-  { value: "art21_i", label: "Art.21(2)(i) – Controllo accessi, IAM e gestione asset" },
-  { value: "art21_j", label: "Art.21(2)(j) – MFA e comunicazioni sicure" },
-] as const;
+  { value: "art21_a", label: "risk.nis2_art21.art21_a" },
+  { value: "art21_b", label: "risk.nis2_art21.art21_b" },
+  { value: "art21_c", label: "risk.nis2_art21.art21_c" },
+  { value: "art21_d", label: "risk.nis2_art21.art21_d" },
+  { value: "art21_e", label: "risk.nis2_art21.art21_e" },
+  { value: "art21_f", label: "risk.nis2_art21.art21_f" },
+  { value: "art21_g", label: "risk.nis2_art21.art21_g" },
+  { value: "art21_h", label: "risk.nis2_art21.art21_h" },
+  { value: "art21_i", label: "risk.nis2_art21.art21_i" },
+  { value: "art21_j", label: "risk.nis2_art21.art21_j" },
+];
 
 export const NIS2_RELEVANCE_CHOICES = [
-  { value: "non_significativo", label: "Non significativo" },
-  { value: "potenzialmente_significativo", label: "Potenzialmente significativo" },
-  { value: "significativo", label: "Significativo" },
-] as const;
+  { value: "non_significativo",          label: "risk.nis2_relevance.non_significativo" },
+  { value: "potenzialmente_significativo", label: "risk.nis2_relevance.potenzialmente_significativo" },
+  { value: "significativo",              label: "risk.nis2_relevance.significativo" },
+];
 
 export interface RiskAssessment {
   id: string;
@@ -101,25 +101,25 @@ export interface RiskContext {
 }
 
 export const THREAT_CATEGORIES = [
-  { value: "accesso_non_autorizzato", label: "Accesso non autorizzato" },
-  { value: "malware_ransomware",      label: "Malware / Ransomware" },
-  { value: "data_breach",             label: "Data breach / Fuga di dati" },
-  { value: "phishing_social",         label: "Phishing / Social engineering" },
-  { value: "guasto_hw_sw",            label: "Guasto hardware / software" },
-  { value: "disastro_naturale",       label: "Disastro naturale / ambientale" },
-  { value: "errore_umano",            label: "Errore umano" },
-  { value: "attacco_supply_chain",    label: "Attacco supply chain" },
-  { value: "ddos",                    label: "DoS / DDoS" },
-  { value: "insider_threat",          label: "Insider threat" },
-  { value: "furto_perdita",           label: "Furto / perdita dispositivi" },
-  { value: "altro",                   label: "Altro" },
+  { value: "accesso_non_autorizzato", label: "risk.threat_cat.accesso_non_autorizzato" },
+  { value: "malware_ransomware",      label: "risk.threat_cat.malware_ransomware" },
+  { value: "data_breach",             label: "risk.threat_cat.data_breach" },
+  { value: "phishing_social",         label: "risk.threat_cat.phishing_social" },
+  { value: "guasto_hw_sw",            label: "risk.threat_cat.guasto_hw_sw" },
+  { value: "disastro_naturale",       label: "risk.threat_cat.disastro_naturale" },
+  { value: "errore_umano",            label: "risk.threat_cat.errore_umano" },
+  { value: "attacco_supply_chain",    label: "risk.threat_cat.attacco_supply_chain" },
+  { value: "ddos",                    label: "risk.threat_cat.ddos" },
+  { value: "insider_threat",          label: "risk.threat_cat.insider_threat" },
+  { value: "furto_perdita",           label: "risk.threat_cat.furto_perdita" },
+  { value: "altro",                   label: "risk.threat_cat.altro" },
 ];
 
 export const PROB_LABELS: Record<number, string> = {
-  1: "1 – Molto bassa", 2: "2 – Bassa", 3: "3 – Media", 4: "4 – Alta", 5: "5 – Molto alta",
+  1: "risk.prob.1", 2: "risk.prob.2", 3: "risk.prob.3", 4: "risk.prob.4", 5: "risk.prob.5",
 };
 export const IMPACT_LABELS: Record<number, string> = {
-  1: "1 – Trascurabile", 2: "2 – Minore", 3: "3 – Moderato", 4: "4 – Grave", 5: "5 – Critico",
+  1: "risk.impact.1", 2: "risk.impact.2", 3: "risk.impact.3", 4: "risk.impact.4", 5: "risk.impact.5",
 };
 
 export const riskApi = {

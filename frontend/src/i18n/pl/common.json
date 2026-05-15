@@ -2359,7 +2359,56 @@
     "appetite_max_score": "Maks. akceptowalny wynik:",
     "appetite_max_red": "Maks. czerwone ryzyka:",
     "appetite_valid_until": "Ważne do:",
-    "appetite_approved_by": "Zatwierdzone przez:"
+    "appetite_approved_by": "Zatwierdzone przez:",
+    "guide_btn": "Przewodnik oceny",
+    "bcp_link_label": "Połącz z BCP (opcjonalne)",
+    "no_mitigation_plans": "Brak zarejestrowanych planów mitygacji",
+    "suggest_hint": "(Narzędzie sugestii przelicza od ryzyka inerenta przy użyciu zgodnych kontrolek i ważnych BCP: jeśli wynoszą 0 lub wygasły, sugerowana redukcja może różnić się od wartości bieżącej.)",
+    "threat_cat": {
+      "accesso_non_autorizzato": "Nieautoryzowany dostęp",
+      "malware_ransomware": "Malware / Ransomware",
+      "data_breach": "Naruszenie danych / Wyciek danych",
+      "phishing_social": "Phishing / Inżynieria społeczna",
+      "guasto_hw_sw": "Awaria sprzętu / oprogramowania",
+      "disastro_naturale": "Klęska żywiołowa / środowiskowa",
+      "errore_umano": "Błąd ludzki",
+      "attacco_supply_chain": "Atak na łańcuch dostaw",
+      "ddos": "DoS / DDoS",
+      "insider_threat": "Zagrożenie wewnętrzne",
+      "furto_perdita": "Kradzież / utrata urządzeń",
+      "altro": "Inne"
+    },
+    "nis2_relevance": {
+      "non_significativo": "Nieistotny",
+      "potenzialmente_significativo": "Potencjalnie istotny",
+      "significativo": "Istotny"
+    },
+    "nis2_art21": {
+      "art21_a": "Art.21(2)(a) – Analiza ryzyka i polityka ISMS",
+      "art21_b": "Art.21(2)(b) – Zarządzanie incydentami",
+      "art21_c": "Art.21(2)(c) – Ciągłość działania i BCP/DR",
+      "art21_d": "Art.21(2)(d) – Łańcuch dostaw",
+      "art21_e": "Art.21(2)(e) – Bezpieczeństwo zakupu i utrzymania systemów",
+      "art21_f": "Art.21(2)(f) – Ocena skuteczności środków bezpieczeństwa",
+      "art21_g": "Art.21(2)(g) – Higiena informatyczna i szkolenia",
+      "art21_h": "Art.21(2)(h) – Kryptografia i ochrona danych",
+      "art21_i": "Art.21(2)(i) – Kontrola dostępu, IAM i zarządzanie aktywami",
+      "art21_j": "Art.21(2)(j) – MFA i bezpieczna komunikacja"
+    },
+    "prob": {
+      "1": "1 – Bardzo niska",
+      "2": "2 – Niska",
+      "3": "3 – Średnia",
+      "4": "4 – Wysoka",
+      "5": "5 – Bardzo wysoka"
+    },
+    "impact": {
+      "1": "1 – Zaniedbywalny",
+      "2": "2 – Mniejszy",
+      "3": "3 – Umiarkowany",
+      "4": "4 – Poważny",
+      "5": "5 – Krytyczny"
+    }
   },
   "pdca": {
     "source_incident": "Incydent",

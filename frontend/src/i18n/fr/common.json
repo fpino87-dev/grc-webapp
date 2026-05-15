@@ -2359,7 +2359,56 @@
     "appetite_max_score": "Score max acceptable :",
     "appetite_max_red": "Max risques rouges :",
     "appetite_valid_until": "Valide jusqu'au :",
-    "appetite_approved_by": "Approuvé par :"
+    "appetite_approved_by": "Approuvé par :",
+    "guide_btn": "Guide d'évaluation",
+    "bcp_link_label": "Lier à un BCP (optionnel)",
+    "no_mitigation_plans": "Aucun plan de mitigation enregistré",
+    "suggest_hint": "(Le suggesteur recalcule depuis le risque inhérent en utilisant les contrôles conformes et les BCP valides : s'ils sont nuls ou expirés, la réduction suggérée peut différer de la valeur actuelle.)",
+    "threat_cat": {
+      "accesso_non_autorizzato": "Accès non autorisé",
+      "malware_ransomware": "Malware / Ransomware",
+      "data_breach": "Violation de données / Fuite de données",
+      "phishing_social": "Phishing / Ingénierie sociale",
+      "guasto_hw_sw": "Panne matérielle / logicielle",
+      "disastro_naturale": "Catastrophe naturelle / environnementale",
+      "errore_umano": "Erreur humaine",
+      "attacco_supply_chain": "Attaque supply chain",
+      "ddos": "DoS / DDoS",
+      "insider_threat": "Menace interne",
+      "furto_perdita": "Vol / perte d'appareils",
+      "altro": "Autre"
+    },
+    "nis2_relevance": {
+      "non_significativo": "Non significatif",
+      "potenzialmente_significativo": "Potentiellement significatif",
+      "significativo": "Significatif"
+    },
+    "nis2_art21": {
+      "art21_a": "Art.21(2)(a) – Analyse des risques et politique SSI",
+      "art21_b": "Art.21(2)(b) – Gestion des incidents",
+      "art21_c": "Art.21(2)(c) – Continuité opérationnelle et PCA/DR",
+      "art21_d": "Art.21(2)(d) – Chaîne d'approvisionnement",
+      "art21_e": "Art.21(2)(e) – Sécurité acquisition et maintenance des systèmes",
+      "art21_f": "Art.21(2)(f) – Évaluation de l'efficacité des mesures de sécurité",
+      "art21_g": "Art.21(2)(g) – Hygiène informatique et formation",
+      "art21_h": "Art.21(2)(h) – Cryptographie et protection des données",
+      "art21_i": "Art.21(2)(i) – Contrôle d'accès, IAM et gestion des actifs",
+      "art21_j": "Art.21(2)(j) – MFA et communications sécurisées"
+    },
+    "prob": {
+      "1": "1 – Très faible",
+      "2": "2 – Faible",
+      "3": "3 – Moyenne",
+      "4": "4 – Élevée",
+      "5": "5 – Très élevée"
+    },
+    "impact": {
+      "1": "1 – Négligeable",
+      "2": "2 – Mineur",
+      "3": "3 – Modéré",
+      "4": "4 – Grave",
+      "5": "5 – Critique"
+    }
   },
   "pdca": {
     "source_incident": "Incident",

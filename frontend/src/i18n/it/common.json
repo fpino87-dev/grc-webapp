@@ -2280,7 +2280,56 @@
     "appetite_max_score": "Score max accettabile:",
     "appetite_max_red": "Max rischi rossi:",
     "appetite_valid_until": "Valida fino:",
-    "appetite_approved_by": "Approvata da:"
+    "appetite_approved_by": "Approvata da:",
+    "guide_btn": "Guida alla valutazione",
+    "bcp_link_label": "Collega a un BCP (opzionale)",
+    "no_mitigation_plans": "Nessun piano di mitigazione registrato",
+    "suggest_hint": "(Il suggeritore ricalcola dal rischio inerente usando controlli compliant e BCP validi: se risultano 0 o scaduti, la riduzione suggerita può differire dal valore attuale.)",
+    "threat_cat": {
+      "accesso_non_autorizzato": "Accesso non autorizzato",
+      "malware_ransomware": "Malware / Ransomware",
+      "data_breach": "Data breach / Fuga di dati",
+      "phishing_social": "Phishing / Social engineering",
+      "guasto_hw_sw": "Guasto hardware / software",
+      "disastro_naturale": "Disastro naturale / ambientale",
+      "errore_umano": "Errore umano",
+      "attacco_supply_chain": "Attacco supply chain",
+      "ddos": "DoS / DDoS",
+      "insider_threat": "Insider threat",
+      "furto_perdita": "Furto / perdita dispositivi",
+      "altro": "Altro"
+    },
+    "nis2_relevance": {
+      "non_significativo": "Non significativo",
+      "potenzialmente_significativo": "Potenzialmente significativo",
+      "significativo": "Significativo"
+    },
+    "nis2_art21": {
+      "art21_a": "Art.21(2)(a) – Analisi dei rischi e policy ISMS",
+      "art21_b": "Art.21(2)(b) – Gestione incidenti",
+      "art21_c": "Art.21(2)(c) – Continuità operativa e BCP/DR",
+      "art21_d": "Art.21(2)(d) – Supply chain",
+      "art21_e": "Art.21(2)(e) – Sicurezza acquisizione e manutenzione sistemi",
+      "art21_f": "Art.21(2)(f) – Verifica efficacia delle misure di sicurezza",
+      "art21_g": "Art.21(2)(g) – Igiene informatica e formazione",
+      "art21_h": "Art.21(2)(h) – Crittografia e protezione dati",
+      "art21_i": "Art.21(2)(i) – Controllo accessi, IAM e gestione asset",
+      "art21_j": "Art.21(2)(j) – MFA e comunicazioni sicure"
+    },
+    "prob": {
+      "1": "1 – Molto bassa",
+      "2": "2 – Bassa",
+      "3": "3 – Media",
+      "4": "4 – Alta",
+      "5": "5 – Molto alta"
+    },
+    "impact": {
+      "1": "1 – Trascurabile",
+      "2": "2 – Minore",
+      "3": "3 – Moderato",
+      "4": "4 – Grave",
+      "5": "5 – Critico"
+    }
   },
   "pdca": {
     "source_incident": "Incidente",
