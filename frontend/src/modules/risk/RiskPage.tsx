@@ -1381,6 +1381,7 @@ export function RiskPage() {
   const location = useLocation();
   const [typeFilter, setTypeFilter] = useState<"" | "IT" | "OT">("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [treatmentFilter, setTreatmentFilter] = useState("");
   const [showNew, setShowNew] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -1401,10 +1402,11 @@ export function RiskPage() {
   const params: Record<string, string> = { page_size: "200" };
   if (typeFilter) params.assessment_type = typeFilter;
   if (statusFilter) params.status = statusFilter;
+  if (treatmentFilter) params.treatment = treatmentFilter;
   if (selectedPlant?.id) params.plant = selectedPlant.id;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["risk-assessments", typeFilter, statusFilter, selectedPlant?.id],
+    queryKey: ["risk-assessments", typeFilter, statusFilter, treatmentFilter, selectedPlant?.id],
     queryFn: () => riskApi.list(params),
     retry: false,
   });
@@ -1516,6 +1518,17 @@ export function RiskPage() {
             <option value="bozza">{t("status.bozza")}</option>
             <option value="completato">{t("status.completato")}</option>
             <option value="archiviato">{t("risk.status_archiviato")}</option>
+          </select>
+        </div>
+        <div>
+          <label className="text-xs text-gray-500 mr-1">{t("risk.filter_treatment")}:</label>
+          <select value={treatmentFilter} onChange={e => setTreatmentFilter(e.target.value)}
+            className="border rounded px-2 py-1.5 text-sm">
+            <option value="">{t("risk.filter_all")}</option>
+            <option value="mitigare">{t("risk.treatment_mitigare")}</option>
+            <option value="trasferire">{t("risk.treatment_trasferire")}</option>
+            <option value="accettare">{t("risk.treatment_accettare")}</option>
+            <option value="evitare">{t("risk.treatment_evitare")}</option>
           </select>
         </div>
       </div>

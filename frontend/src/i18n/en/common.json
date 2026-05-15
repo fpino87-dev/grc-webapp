@@ -2160,6 +2160,7 @@
     "treatment_trasferire_ext": "Transfer (e.g. insurance)",
     "treatment_evitare": "Avoid",
     "filter_all": "All",
+    "filter_treatment": "Treatment",
     "status_archiviato": "Archived",
     "probability_label": "Probability *",
     "impact_label": "Impact *",

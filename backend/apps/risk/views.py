@@ -17,7 +17,7 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         "plant", "asset", "assessed_by", "accepted_by", "owner", "critical_process"
     ).prefetch_related("mitigation_plans")
     serializer_class = RiskAssessmentSerializer
-    filterset_fields = ["plant", "status", "assessment_type"]
+    filterset_fields = ["plant", "status", "assessment_type", "treatment"]
     plant_field = "plant"
 
     def destroy(self, request, *args, **kwargs):
