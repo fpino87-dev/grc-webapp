@@ -162,11 +162,11 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_THROTTLE_RATES": {
         "anon":  "20/hour",
-        # newfix S11 — abbassato da 2000 a 500/h come documentato in
-        # CLAUDE.md. Un account compromesso non puo' piu' scrapare l'intero
-        # database in mezza giornata. Per scenari batch / export pesanti
-        # esistono scope dedicati (es. "export" 10/h).
-        "user":  "500/hour",
+        # 2000/h: la dashboard GRC fa ~15 query per componente + refetchInterval
+        # su più moduli; 500/h era troppo basso per un uso normale single-user.
+        # La protezione da scraping avviene tramite autenticazione JWT + RBAC,
+        # non dal throttle (che è pensato per DoS / brute-force, non per lettura).
+        "user":  "2000/hour",
         "login": "5/minute",
         # Scope dedicato per endpoint di export bulk (CSV/Excel/PDF). I view
         # sensibili devono usare ScopedRateThrottle con throttle_scope="export".
