@@ -1134,60 +1134,22 @@ function TabDocumenti() {
                   <td className="px-4 py-3 text-gray-500 text-xs">{doc.review_due_date ? new Date(doc.review_due_date).toLocaleDateString(i18n.language || "it") : "—"}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{doc.approved_at ? new Date(doc.approved_at).toLocaleDateString(i18n.language || "it") : "—"}</td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <button
-                        onClick={() => setEditDoc(doc)}
-                        className="text-xs text-gray-500 hover:text-primary-700 border border-gray-300 rounded px-2 py-0.5 hover:border-primary-400"
-                        title={t("documents.actions.edit")}
-                      >
-                        ✎ {t("documents.actions.edit")}
-                      </button>
-                      {doc.status === "bozza" && <button onClick={() => submitMutation.mutate(doc.id)} className="text-xs text-gray-500 hover:text-blue-700 border border-gray-300 rounded px-2 py-0.5 hover:border-blue-400">{t("documents.actions.submit_for_review")}</button>}
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => setEditDoc(doc)} title={t("documents.actions.edit")} className="text-sm w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 text-gray-500 hover:text-gray-800">✎</button>
+                      {doc.status === "bozza" && <button onClick={() => submitMutation.mutate(doc.id)} title={t("documents.actions.submit_for_review")} className="text-sm w-7 h-7 flex items-center justify-center rounded hover:bg-blue-50 text-gray-500 hover:text-blue-700">▷</button>}
                       {(doc.status === "revisione" || doc.status === "approvazione") && (
                         <>
-                          <button onClick={() => approveMutation.mutate(doc.id)} className="text-xs text-gray-500 hover:text-green-700 border border-gray-300 rounded px-2 py-0.5 hover:border-green-400">{t("actions.approve")}</button>
-                          <button onClick={() => rejectMutation.mutate(doc.id)} className="text-xs text-gray-500 hover:text-red-700 border border-gray-300 rounded px-2 py-0.5 hover:border-red-400">{t("actions.reject")}</button>
+                          <button onClick={() => approveMutation.mutate(doc.id)} title={t("actions.approve")} className="text-sm w-7 h-7 flex items-center justify-center rounded hover:bg-green-50 text-gray-500 hover:text-green-700">✓</button>
+                          <button onClick={() => rejectMutation.mutate(doc.id)} title={t("actions.reject")} className="text-sm w-7 h-7 flex items-center justify-center rounded hover:bg-red-50 text-gray-500 hover:text-red-600">✗</button>
                         </>
                       )}
-                      <button
-                        onClick={() => setUploadDoc(doc)}
-                        className="text-xs text-gray-500 hover:text-indigo-700 border border-gray-300 rounded px-2 py-0.5 hover:border-indigo-400"
-                      >
-                        {t("documents.actions.new_version")}
-                      </button>
-                      <button
-                        onClick={() => setLinkControlsDoc(doc)}
-                        className="text-xs text-indigo-600 hover:text-indigo-800 border border-indigo-200 rounded px-2 py-0.5 hover:border-indigo-400"
-                      >
-                        {t("documents.actions.link_controls")}
-                      </button>
-                      <button
-                        onClick={() => setChangePlantDoc(doc)}
-                        className="text-xs text-gray-500 hover:text-amber-700 border border-gray-300 rounded px-2 py-0.5 hover:border-amber-400"
-                      >
-                        {t("documents.actions.change_plant")}
-                      </button>
+                      <button onClick={() => setUploadDoc(doc)} title={t("documents.actions.new_version")} className="text-sm w-7 h-7 flex items-center justify-center rounded hover:bg-indigo-50 text-gray-500 hover:text-indigo-700">⬆</button>
+                      <button onClick={() => setLinkControlsDoc(doc)} title={t("documents.actions.link_controls")} className="text-sm w-7 h-7 flex items-center justify-center rounded hover:bg-indigo-50 text-indigo-500 hover:text-indigo-800">⛓</button>
+                      <button onClick={() => setChangePlantDoc(doc)} title={t("documents.actions.change_plant")} className="text-sm w-7 h-7 flex items-center justify-center rounded hover:bg-amber-50 text-gray-500 hover:text-amber-700">🏭</button>
                       {!doc.is_shared_with_current && (
-                        <button
-                          onClick={() => setShareDoc(doc)}
-                          title={t("documents.actions.share_hint", { defaultValue: "Condividi con altri plant" })}
-                          className="text-xs text-indigo-500 hover:text-indigo-700 border border-indigo-200 rounded px-2 py-0.5 hover:border-indigo-400"
-                        >
-                          🔗 {t("documents.actions.share", { defaultValue: "Condividi" })}
-                        </button>
+                        <button onClick={() => setShareDoc(doc)} title={t("documents.actions.share_hint", { defaultValue: "Condividi con altri plant" })} className="text-sm w-7 h-7 flex items-center justify-center rounded hover:bg-indigo-50 text-indigo-400 hover:text-indigo-700">🔗</button>
                       )}
-                      <button
-                        type="button"
-                        title={t("documents.actions.delete_title")}
-                        onClick={() => {
-                          if (!window.confirm(t("documents.actions.delete_confirm", { title: doc.title }))) return;
-                          deleteMutation.mutate(doc.id);
-                        }}
-                        disabled={deleteMutation.isPending}
-                        className="text-xs text-red-600 hover:text-red-800 border border-red-200 rounded px-2 py-0.5 disabled:opacity-50"
-                      >
-                        🗑
-                      </button>
+                      <button type="button" title={t("documents.actions.delete_title")} onClick={() => { if (!window.confirm(t("documents.actions.delete_confirm", { title: doc.title }))) return; deleteMutation.mutate(doc.id); }} disabled={deleteMutation.isPending} className="text-sm w-7 h-7 flex items-center justify-center rounded hover:bg-red-50 text-red-500 hover:text-red-700 disabled:opacity-50">🗑</button>
                     </div>
                   </td>
                 </tr>
@@ -1364,32 +1326,13 @@ function TabNda() {
                       : <span className="text-gray-400">—</span>}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setEditDoc(doc)}
-                        className="text-xs text-gray-500 hover:text-primary-700 border border-gray-300 rounded px-2 py-0.5 hover:border-primary-400"
-                        title={t("documents.actions.edit")}
-                      >
-                        ✎ {t("documents.actions.edit")}
-                      </button>
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => setEditDoc(doc)} title={t("documents.actions.edit")} className="text-sm w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 text-gray-500 hover:text-gray-800">✎</button>
                       {(doc.status === "revisione" || doc.status === "approvazione") && (
-                        <button onClick={() => approveMutation.mutate(doc.id)}
-                          className="text-xs text-gray-500 hover:text-green-700 border border-gray-300 rounded px-2 py-0.5 hover:border-green-400">
-                          {t("actions.approve")}
-                        </button>
+                        <button onClick={() => approveMutation.mutate(doc.id)} title={t("actions.approve")} className="text-sm w-7 h-7 flex items-center justify-center rounded hover:bg-green-50 text-gray-500 hover:text-green-700">✓</button>
                       )}
-                      <button onClick={() => setUploadDoc(doc)}
-                        className="text-xs text-gray-500 hover:text-indigo-700 border border-gray-300 rounded px-2 py-0.5 hover:border-indigo-400">
-                        {t("documents.actions.new_version")}
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (!window.confirm(t("documents.actions.delete_confirm", { title: doc.title }))) return;
-                          deleteMutation.mutate(doc.id);
-                        }}
-                        className="text-xs text-red-600 hover:text-red-800 border border-red-200 rounded px-2 py-0.5">
-                        🗑
-                      </button>
+                      <button onClick={() => setUploadDoc(doc)} title={t("documents.actions.new_version")} className="text-sm w-7 h-7 flex items-center justify-center rounded hover:bg-indigo-50 text-gray-500 hover:text-indigo-700">⬆</button>
+                      <button onClick={() => { if (!window.confirm(t("documents.actions.delete_confirm", { title: doc.title }))) return; deleteMutation.mutate(doc.id); }} title={t("documents.actions.delete_title")} className="text-sm w-7 h-7 flex items-center justify-center rounded hover:bg-red-50 text-red-500 hover:text-red-700">🗑</button>
                     </div>
                   </td>
                 </tr>
