@@ -478,3 +478,146 @@ def delete_risk_assessment(assessment: RiskAssessment, user) -> None:
         payload={"id": str(assessment.id), "name": assessment.name},
     )
 
+
+def generate_risk_excel(plant_id=None, include_draft: bool = False) -> bytes:
+    """
+    Genera il Risk Register in formato Excel (.xlsx) e restituisce i bytes.
+    Riutilizzato sia dall'endpoint di export che dall'AuditPackageView.
+    """
+    import io
+    from django.db.models import Prefetch
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment
+    from .models import NIS2_ART21_CHOICES, NIS2_RELEVANCE_CHOICES, RiskMitigationPlan
+
+    plans_prefetch = Prefetch(
+        "mitigation_plans",
+        queryset=RiskMitigationPlan.objects.select_related("owner").order_by("due_date"),
+    )
+    qs = (
+        RiskAssessment.objects
+        .select_related("plant", "owner", "risk_accepted_by", "critical_process")
+        .prefetch_related(plans_prefetch)
+        .filter(deleted_at__isnull=True)
+    )
+    if plant_id:
+        qs = qs.filter(plant_id=plant_id)
+    if not include_draft:
+        qs = qs.filter(status="completato")
+
+    art21_map = dict(NIS2_ART21_CHOICES)
+    relevance_map = dict(NIS2_RELEVANCE_CHOICES)
+    prob_labels = {1: "Molto bassa", 2: "Bassa", 3: "Media", 4: "Alta", 5: "Molto alta"}
+    impact_labels = {1: "Trascurabile", 2: "Minore", 3: "Moderato", 4: "Grave", 5: "Critico"}
+    level_labels = {"verde": "Basso", "giallo": "Medio", "rosso": "Alto/Critico"}
+    treatment_labels = {
+        "mitigare": "Mitigare", "accettare": "Accettare",
+        "trasferire": "Trasferire", "evitare": "Evitare",
+    }
+
+    headers = [
+        "Nome / Scenario", "Causa", "Conseguenza",
+        "Tipo (IT/OT)", "Categoria minaccia", "Owner",
+        "Prob. inerente", "Impatto inerente", "Score inerente",
+        "Probabilità residua", "Impatto residuo", "Score residuo", "Livello rischio",
+        "ALE (€)",
+        "Trattamento", "Scadenza piano",
+        "Azioni di mitigazione",
+        "Rischio accettato (Art.20)", "Accettato da", "Data accettazione",
+        "Scadenza accettazione", "Nota accettazione",
+        "Sistemi impattati (NIS2)", "Art.21 NIS2", "Rilevanza NIS2",
+        "Processo BIA", "Plant", "Stato",
+    ]
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Risk Register"
+
+    header_fill = PatternFill("solid", fgColor="1E3A5F")
+    accept_fill = PatternFill("solid", fgColor="1A5276")
+    nis2_fill   = PatternFill("solid", fgColor="0F5E3A")
+    header_font = Font(color="FFFFFF", bold=True, size=10)
+    nis2_cols   = {headers.index(h) for h in ("Sistemi impattati (NIS2)", "Art.21 NIS2", "Rilevanza NIS2")}
+    accept_cols = {headers.index(h) for h in (
+        "Rischio accettato (Art.20)", "Accettato da", "Data accettazione",
+        "Scadenza accettazione", "Nota accettazione",
+    )}
+
+    for col_idx, header in enumerate(headers, 1):
+        i = col_idx - 1
+        cell = ws.cell(row=1, column=col_idx, value=header)
+        cell.font = header_font
+        cell.fill = nis2_fill if i in nis2_cols else (accept_fill if i in accept_cols else header_fill)
+        cell.alignment = Alignment(horizontal="center", wrap_text=True)
+
+    level_colors = {"verde": "C6EFCE", "giallo": "FFEB9C", "rosso": "FFC7CE"}
+
+    for row_idx, risk in enumerate(qs.order_by("created_at"), 2):
+        def _name(u):
+            if not u:
+                return ""
+            return f"{u.first_name} {u.last_name}".strip() or u.email
+
+        plans_text = "\n".join(
+            f"• {p.action}"
+            + (f" [{_name(p.owner)}]" if p.owner else "")
+            + f" — Scad: {p.due_date} — {'✓ Completato' if p.completed_at else 'In corso'}"
+            for p in risk.mitigation_plans.all()
+        )
+
+        ale_val = calc_ale(risk)
+        ale_str = str(ale_val) if ale_val else (str(risk.ale_annuo) if risk.ale_annuo else "")
+
+        row = [
+            risk.name, risk.cause, risk.consequence,
+            risk.assessment_type,
+            risk.get_threat_category_display() if risk.threat_category else "",
+            _name(risk.owner),
+            prob_labels.get(risk.inherent_probability, ""),
+            impact_labels.get(risk.inherent_impact, ""),
+            risk.inherent_score or "",
+            prob_labels.get(risk.probability, ""),
+            impact_labels.get(risk.impact, ""),
+            risk.score or "",
+            level_labels.get(risk.risk_level, ""),
+            ale_str,
+            treatment_labels.get(risk.treatment, risk.treatment),
+            str(risk.plan_due_date) if risk.plan_due_date else "",
+            plans_text,
+            "Sì" if risk.risk_accepted_formally else (
+                "In attesa" if risk.treatment == "accettare" else "No"
+            ),
+            _name(risk.risk_accepted_by),
+            str(risk.risk_accepted_at.date()) if risk.risk_accepted_at else "",
+            str(risk.risk_acceptance_expiry) if risk.risk_acceptance_expiry else "",
+            risk.risk_acceptance_note,
+            risk.impacted_systems,
+            art21_map.get(risk.nis2_art21_category, ""),
+            relevance_map.get(risk.nis2_relevance, ""),
+            risk.critical_process.name if risk.critical_process else "",
+            risk.plant.name if risk.plant else "",
+            risk.status,
+        ]
+
+        for col_idx, value in enumerate(row, 1):
+            ws.cell(row=row_idx, column=col_idx, value=value)\
+              .alignment = Alignment(wrap_text=True, vertical="top")
+
+        color = level_colors.get(risk.risk_level)
+        if color:
+            level_col = headers.index("Livello rischio") + 1
+            ws.cell(row=row_idx, column=level_col).fill = PatternFill("solid", fgColor=color)
+
+    col_widths = [
+        35, 40, 40, 10, 22, 20, 16, 16, 12, 16, 16, 12, 14, 14,
+        12, 14, 50, 18, 20, 18, 16, 40, 35, 35, 22, 22, 20, 12,
+    ]
+    for col_idx, width in enumerate(col_widths, 1):
+        ws.column_dimensions[ws.cell(row=1, column=col_idx).column_letter].width = width
+
+    ws.freeze_panes = "A2"
+    ws.auto_filter.ref = ws.dimensions
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()

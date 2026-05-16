@@ -851,6 +851,15 @@ def _add_management_reviews(zf, zip_name: str, plant_id, default_storage) -> Non
             pass
 
 
+def _add_risk_register(zf, zip_name: str, plant_id) -> None:
+    from apps.risk.services import generate_risk_excel
+    try:
+        excel_bytes = generate_risk_excel(plant_id=plant_id, include_draft=False)
+        zf.writestr(f"{zip_name}/RISK_REGISTER/risk_register.xlsx", excel_bytes)
+    except Exception:
+        pass
+
+
 class AuditPackageView(APIView):
     """
     GET /api/v1/controls/audit-package/?framework=TISAX&plant=<uuid>
@@ -1024,6 +1033,9 @@ class AuditPackageView(APIView):
 
             # ── Revisioni di direzione ─────────────────────────────────────────
             _add_management_reviews(zf, zip_name, plant_id, default_storage)
+
+            # ── Registro rischi ────────────────────────────────────────────────
+            _add_risk_register(zf, zip_name, plant_id)
 
             # ── Cartelle per controllo ─────────────────────────────────────────
             for ctrl in controls_list:
