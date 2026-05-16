@@ -225,7 +225,7 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
         <h3 className="text-lg font-semibold mb-4">{t("assets.new_asset_title", { type: assetType })}</h3>
         <div className="space-y-3">
           <div>
@@ -468,7 +468,7 @@ function EditAssetModalIT({ asset, onClose }: { asset: AssetIT; onClose: () => v
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
         <h3 className="text-lg font-semibold mb-4">{t("actions.edit")} asset IT</h3>
         <div className="space-y-3">
           <div>

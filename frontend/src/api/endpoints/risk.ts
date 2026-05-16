@@ -122,6 +122,26 @@ export const IMPACT_LABELS: Record<number, string> = {
   1: "risk.impact.1", 2: "risk.impact.2", 3: "risk.impact.3", 4: "risk.impact.4", 5: "risk.impact.5",
 };
 
+export interface AppetiteFormData {
+  max_acceptable_score: number;
+  max_red_risks_count: number;
+  valid_from: string;
+  valid_until: string | null;
+  approved_by: number | null;
+  approved_at: string | null;
+  notes: string;
+  plant?: string | null;
+  framework_code?: string;
+}
+
+export interface AppetitePolicyFull extends AppetiteFormData {
+  id: string;
+  approved_by_name: string | null;
+  is_active: boolean;
+  max_unacceptable_score: number;
+  review_frequency_months: number;
+}
+
 export const riskApi = {
   list: (params?: Record<string, string>) =>
     apiClient.get<{ results: RiskAssessment[] }>("/risk/assessments/", { params }).then(r => r.data),
@@ -165,4 +185,8 @@ export const riskApi = {
     if (params?.include_draft) query.set("include_draft", "1");
     return apiClient.get(`/risk/assessments/export/?${query.toString()}`, { responseType: "blob" });
   },
+  createAppetite: (data: AppetiteFormData) =>
+    apiClient.post<AppetitePolicyFull>("/risk/appetite-policies/", data).then(r => r.data),
+  updateAppetite: (id: string, data: Partial<AppetiteFormData>) =>
+    apiClient.patch<AppetitePolicyFull>(`/risk/appetite-policies/${id}/`, data).then(r => r.data),
 };
