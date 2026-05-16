@@ -10,7 +10,7 @@ export function BottomBar() {
       <div className="fixed bottom-0 left-0 right-0 h-10 bg-white border-t border-gray-200 flex items-center justify-end px-4 gap-4 z-30 shadow-sm">
 
         {/* Versione app */}
-        <span className="text-xs text-gray-300 mr-auto">GRC Platform v0.3.0</span>
+        <span className="text-xs text-gray-300 mr-auto">GRC Platform v0.4.0</span>
 
         {/* Manuale Utente */}
         <button
