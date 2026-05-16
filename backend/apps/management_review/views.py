@@ -1,3 +1,4 @@
+from django.db.models import Prefetch
 from rest_framework import viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -12,7 +13,11 @@ from . import services
 
 
 class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
-    queryset = ManagementReview.objects.all()
+    queryset = ManagementReview.objects.select_related(
+        "plant", "chair", "approved_by"
+    ).prefetch_related(
+        Prefetch("actions", queryset=ReviewAction.objects.select_related("owner").filter(deleted_at__isnull=True))
+    )
     serializer_class = ManagementReviewSerializer
     permission_classes = [ManagementReviewPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
