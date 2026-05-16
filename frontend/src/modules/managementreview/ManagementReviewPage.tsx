@@ -706,9 +706,7 @@ e produce la relazione formale del CISO scaricabile."
                       ) : (
                         <button
                           onClick={() => setConfirmDelete(r.id)}
-                          disabled={r.approval_status === "approvato"}
-                          title={r.approval_status === "approvato" ? "Una revisione approvata non può essere eliminata" : undefined}
-                          className="text-xs text-red-500 hover:text-red-700 hover:underline disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="text-xs text-red-500 hover:text-red-700 hover:underline"
                         >
                           Elimina
                         </button>
