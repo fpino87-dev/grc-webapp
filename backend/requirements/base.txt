@@ -13,7 +13,7 @@ psycopg2-binary==2.9.*
 boto3==1.35.*
 django-storages==1.14.*
 openpyxl==3.1.*
-djangorestframework-simplejwt==5.3.*
+djangorestframework-simplejwt==5.5.*
 drf-spectacular==0.27.*
 python-dateutil==2.9.*
 # cryptography: versione minima con fix CVE critici

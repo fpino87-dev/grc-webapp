@@ -37,13 +37,13 @@ jobs:
         run: |
           pip-audit --strict \
             --requirement backend/requirements/base.txt \
-            --disable-pip
+            --no-deps
       - name: Audit dev deps (warning-only)
         if: always()
         run: |
           pip-audit \
             --requirement backend/requirements/dev.txt \
-            --disable-pip || true
+            --no-deps || true
 
   npm-audit:
     name: npm audit (frontend)
