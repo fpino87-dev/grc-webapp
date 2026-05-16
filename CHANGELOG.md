@@ -8,6 +8,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ## [Unreleased]
 
+### Security
+- **CI security audit — fix flag `--disable-pip` e upgrade simplejwt**: il workflow `security-audit.yml` usava `--disable-pip` che richiede requirements hashati — il job falliva con errore prima di analizzare qualunque dipendenza. Sostituito con `--no-deps`. Contestualmente aggiornato `djangorestframework-simplejwt 5.3.* → 5.5.*` per correggere CVE-2024-22513 (bypass autenticazione, fix ufficiale in 5.5.1).
+
 ---
 
 ## [0.4.0] - 2026-05-16
