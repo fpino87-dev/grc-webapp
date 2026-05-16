@@ -705,6 +705,152 @@ def _sort_control_key(external_id: str):
     return result
 
 
+def _add_audit_programs(zf, zip_name: str, fw_codes: list[str], plant_id, today) -> None:
+    """
+    Aggiunge PROGRAMMA_AUDIT/ con un CSV per ogni programma approvato/in_corso
+    del plant che copre almeno uno dei framework del pacchetto.
+    """
+    import csv, io
+    from apps.audit_prep.models import AuditProgram
+
+    qs = AuditProgram.objects.filter(
+        deleted_at__isnull=True,
+        status__in=("approvato", "in_corso", "completato"),
+    ).select_related("plant", "approved_by").prefetch_related("frameworks")
+    if plant_id:
+        qs = qs.filter(plant_id=plant_id)
+
+    # Filtra per framework rilevanti
+    programs = [
+        p for p in qs
+        if any(f.code in fw_codes for f in p.frameworks.all())
+        or (p.framework and p.framework.code in fw_codes)
+    ]
+
+    if not programs:
+        return
+
+    for prog in programs:
+        buf = io.StringIO()
+        w = csv.writer(buf)
+
+        # Intestazione programma
+        w.writerow(["PROGRAMMA DI AUDIT INTERNO"])
+        w.writerow(["Titolo", prog.title])
+        w.writerow(["Anno", prog.year])
+        w.writerow(["Stato", prog.status])
+        w.writerow(["Copertura", prog.coverage_type])
+        w.writerow(["Approvato da", prog.approved_by.get_full_name() if prog.approved_by else "—"])
+        w.writerow(["Approvato il", prog.approved_at.strftime("%Y-%m-%d") if prog.approved_at else "—"])
+        w.writerow(["Generato il", today.isoformat()])
+        w.writerow([])
+
+        if prog.objectives:
+            w.writerow(["OBIETTIVI"])
+            w.writerow([prog.objectives])
+            w.writerow([])
+
+        if prog.scope:
+            w.writerow(["PERIMETRO / SCOPE"])
+            w.writerow([prog.scope])
+            w.writerow([])
+
+        if prog.methodology:
+            w.writerow(["METODOLOGIA"])
+            w.writerow([prog.methodology])
+            w.writerow([])
+
+        # Audit pianificati
+        audits = prog.planned_audits or []
+        if audits:
+            w.writerow(["AUDIT PIANIFICATI"])
+            w.writerow(["Data pianificata", "Titolo", "Auditor", "Perimetro", "Stato", "Note"])
+            for a in sorted(audits, key=lambda x: x.get("planned_date", "")):
+                w.writerow([
+                    a.get("planned_date", "—"),
+                    a.get("title", "—"),
+                    a.get("auditor", "—"),
+                    a.get("scope", "—"),
+                    a.get("status", "—"),
+                    a.get("notes", ""),
+                ])
+
+        safe_title = _sanitize_name(prog.title, 50)
+        fname = f"{prog.year}_{safe_title}.csv"
+        zf.writestr(
+            f"{zip_name}/PROGRAMMA_AUDIT/{fname}",
+            buf.getvalue().encode("utf-8-sig"),
+        )
+
+
+def _add_management_reviews(zf, zip_name: str, plant_id, default_storage) -> None:
+    """
+    Aggiunge REVISIONI_DIREZIONE/ con:
+    - RIEPILOGO.csv  — tutte le revisioni completate/approvate
+    - file documento (verbale) per ogni revisione che ha document_id impostato
+    """
+    import csv, io
+    from apps.management_review.models import ManagementReview
+    from apps.documents.models import Document
+
+    qs = ManagementReview.objects.filter(
+        deleted_at__isnull=True,
+        status="completato",
+    ).select_related("chair", "approved_by")
+    if plant_id:
+        qs = qs.filter(plant_id=plant_id)
+
+    reviews = list(qs.order_by("-review_date"))
+    if not reviews:
+        return
+
+    # Riepilogo CSV
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["Data", "Titolo", "Presidente", "Stato approvazione",
+                "Approvato da", "Approvato il", "Prossima revisione",
+                "N. delibere", "Verbale allegato"])
+    for r in reviews:
+        has_doc = bool(r.document_id)
+        w.writerow([
+            r.review_date.isoformat(),
+            r.title,
+            r.chair.get_full_name() if r.chair else "—",
+            r.approval_status,
+            r.approved_by.get_full_name() if r.approved_by else "—",
+            r.approved_at.strftime("%Y-%m-%d") if r.approved_at else "—",
+            r.next_review_date.isoformat() if r.next_review_date else "—",
+            len(r.delibere) if isinstance(r.delibere, list) else 0,
+            "Sì" if has_doc else "No",
+        ])
+    zf.writestr(
+        f"{zip_name}/REVISIONI_DIREZIONE/RIEPILOGO.csv",
+        buf.getvalue().encode("utf-8-sig"),
+    )
+
+    # Verbali (file documento allegato)
+    for r in reviews:
+        if not r.document_id:
+            continue
+        try:
+            doc = Document.objects.get(pk=r.document_id, deleted_at__isnull=True)
+            version = doc.versions.order_by("-version_number").first()
+            if not version or not version.storage_path:
+                continue
+            if not default_storage.exists(version.storage_path):
+                continue
+            content = default_storage.open(version.storage_path, "rb").read()
+            _, ext = _os.path.splitext(version.file_name or version.storage_path)
+            safe_title = _sanitize_name(r.title, 50)
+            fname = f"{r.review_date.isoformat()}_{safe_title}{ext}"
+            zf.writestr(
+                f"{zip_name}/REVISIONI_DIREZIONE/{fname}",
+                content,
+            )
+        except Exception:
+            pass
+
+
 class AuditPackageView(APIView):
     """
     GET /api/v1/controls/audit-package/?framework=TISAX&plant=<uuid>
@@ -872,6 +1018,12 @@ class AuditPackageView(APIView):
                     "# Tutti i controlli in trattamento hanno evidenze complete e valide.\n"
                 )
             zf.writestr(f"{zip_name}/MANCANZE.txt", mancanze_txt.encode("utf-8"))
+
+            # ── Programma audit annuale ────────────────────────────────────────
+            _add_audit_programs(zf, zip_name, fw_codes, plant_id, today)
+
+            # ── Revisioni di direzione ─────────────────────────────────────────
+            _add_management_reviews(zf, zip_name, plant_id, default_storage)
 
             # ── Cartelle per controllo ─────────────────────────────────────────
             for ctrl in controls_list:
