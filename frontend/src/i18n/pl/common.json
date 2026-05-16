@@ -353,7 +353,8 @@
       "soa": "Pobierz SOA",
       "vda_isa": "Pobierz VDA ISA",
       "proto_vda_isa": "Pobierz VDA ISA Prototypy",
-      "nis2_matrix": "Pobierz Macierz NIS2"
+      "nis2_matrix": "Pobierz Macierz NIS2",
+      "audit_package": "Pobierz paczkę audytu"
     },
     "drawer": {
       "title": "Zarządzanie kontrolą",

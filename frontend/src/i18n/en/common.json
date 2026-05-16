@@ -286,7 +286,8 @@
       "soa": "Download SOA",
       "vda_isa": "Download VDA ISA",
       "proto_vda_isa": "Download VDA ISA Prototype",
-      "nis2_matrix": "Download NIS2 Matrix"
+      "nis2_matrix": "Download NIS2 Matrix",
+      "audit_package": "Download Audit Package"
     },
     "drawer": {
       "title": "Control management",

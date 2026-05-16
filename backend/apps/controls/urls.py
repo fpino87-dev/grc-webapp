@@ -2,6 +2,7 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
+    AuditPackageView,
     ComplianceExportView,
     ControlDomainViewSet,
     ControlInstanceViewSet,
@@ -23,4 +24,5 @@ router.register("instances", ControlInstanceViewSet, basename="control-instance"
 urlpatterns = router.urls + [
     path("gap-analysis/", GapAnalysisView.as_view(), name="gap-analysis"),
     path("export/", ComplianceExportView.as_view(), name="compliance-export"),
+    path("audit-package/", AuditPackageView.as_view(), name="audit-package"),
 ]

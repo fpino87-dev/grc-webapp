@@ -353,7 +353,8 @@
       "soa": "SOA İndir",
       "vda_isa": "VDA ISA İndir",
       "proto_vda_isa": "VDA ISA Prototip İndir",
-      "nis2_matrix": "NIS2 Matrisi İndir"
+      "nis2_matrix": "NIS2 Matrisi İndir",
+      "audit_package": "Denetim paketini indir"
     },
     "drawer": {
       "title": "Kontrol yönetimi",

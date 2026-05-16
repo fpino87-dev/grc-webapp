@@ -270,6 +270,40 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
     }
   }
 
+  async function handleAuditPackage(frameworkParam: string) {
+    const key = `audit_${frameworkParam}`;
+    const params = new URLSearchParams({ framework: frameworkParam });
+    if (plantId) params.set("plant", plantId);
+    try {
+      setExporting(key);
+      setExportError("");
+      const response = await fetch(
+        `/api/v1/controls/audit-package/?${params.toString()}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!response.ok) {
+        let msg = t("controls.download_error");
+        try { const err = await response.json(); msg = err.error || msg; } catch {}
+        setExportError(msg);
+        return;
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const date = new Date().toISOString().slice(0, 10);
+      a.download = `audit_${frameworkParam}_${date}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      setExportError(t("controls.download_network_error"));
+    } finally {
+      setExporting(null);
+    }
+  }
+
   const hasISO = frameworks.some(f => f.code === "ISO27001");
   const hasTISAX = frameworks.some(f => f.code === "TISAX_L2" || f.code === "TISAX_L3");
   const hasProto = frameworks.some(f => f.code === "TISAX_PROTO");
@@ -283,7 +317,7 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
   if (!hasISO && !hasTISAX && !hasProto && !nis2MatrixCode) return null;
 
   return (
-    <div>
+    <div className="space-y-2">
       <div className="flex gap-2 flex-wrap">
         {hasISO && (
           <button
@@ -322,6 +356,39 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
               : "Matrice NIS2 — Direttiva UE 2022/2555"}
           >
             {exporting === "compliance_matrix" ? t("common.downloading") : t("controls.export.nis2_matrix")}
+          </button>
+        )}
+      </div>
+      {/* Audit Package — uno per framework attivo */}
+      <div className="flex gap-2 flex-wrap">
+        {hasTISAX && (
+          <button
+            onClick={() => handleAuditPackage("TISAX")}
+            disabled={!!exporting}
+            className="px-3 py-1.5 bg-gray-800 text-white text-sm rounded hover:bg-gray-900 disabled:opacity-60 flex items-center gap-1.5"
+            title="ZIP con documenti ed evidenze per ogni controllo TISAX (L2+L3). Include INDICE.csv e MANCANZE.txt."
+          >
+            {exporting === "audit_TISAX" ? t("common.downloading") : <>📦 {t("controls.export.audit_package")} — TISAX</>}
+          </button>
+        )}
+        {hasISO && (
+          <button
+            onClick={() => handleAuditPackage("ISO27001")}
+            disabled={!!exporting}
+            className="px-3 py-1.5 bg-gray-800 text-white text-sm rounded hover:bg-gray-900 disabled:opacity-60 flex items-center gap-1.5"
+            title="ZIP con documenti ed evidenze per ogni controllo ISO 27001. Include INDICE.csv e MANCANZE.txt."
+          >
+            {exporting === "audit_ISO27001" ? t("common.downloading") : <>📦 {t("controls.export.audit_package")} — ISO 27001</>}
+          </button>
+        )}
+        {nis2MatrixCode && (
+          <button
+            onClick={() => handleAuditPackage(nis2MatrixCode)}
+            disabled={!!exporting}
+            className="px-3 py-1.5 bg-gray-800 text-white text-sm rounded hover:bg-gray-900 disabled:opacity-60 flex items-center gap-1.5"
+            title="ZIP con documenti ed evidenze per ogni controllo NIS2. Include INDICE.csv e MANCANZE.txt."
+          >
+            {exporting === `audit_${nis2MatrixCode}` ? t("common.downloading") : <>📦 {t("controls.export.audit_package")} — NIS2</>}
           </button>
         )}
       </div>

@@ -353,7 +353,8 @@
       "soa": "Télécharger SOA",
       "vda_isa": "Télécharger VDA ISA",
       "proto_vda_isa": "Télécharger VDA ISA Prototype",
-      "nis2_matrix": "Télécharger Matrice NIS2"
+      "nis2_matrix": "Télécharger Matrice NIS2",
+      "audit_package": "Télécharger le package d'audit"
     },
     "drawer": {
       "title": "Gestion du contrôle",

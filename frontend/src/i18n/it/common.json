@@ -286,7 +286,8 @@
       "soa": "Scarica SOA",
       "vda_isa": "Scarica VDA ISA",
       "proto_vda_isa": "Scarica VDA ISA Prototipi",
-      "nis2_matrix": "Scarica NIS2 Matrix"
+      "nis2_matrix": "Scarica NIS2 Matrix",
+      "audit_package": "Scarica Audit Package"
     },
     "drawer": {
       "title": "Gestione controllo",
