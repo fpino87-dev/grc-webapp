@@ -157,9 +157,15 @@ function NewDocumentModal({ onClose }: { onClose: () => void }) {
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
         <h3 className="text-lg font-semibold mb-4">{t("documents.new.title")}</h3>
         <div className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.fields.title")} *</label>
-            <input name="title" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.fields.document_code")}</label>
+              <input name="document_code" onChange={handleChange} placeholder="D-ITA-INF-001" className="w-full border rounded px-3 py-2 text-sm font-mono" />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.fields.title")} *</label>
+              <input name="title" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -742,6 +748,8 @@ function TabDocumenti() {
   const qc = useQueryClient();
   const selectedPlant = useAuthStore(s => s.selectedPlant);
   const [statusFilter, setStatusFilter] = useState<DocStatusFilter>("tutti");
+  const [quickFilter, setQuickFilter] = useState<"" | "mandatory_gap" | "review_overdue" | "expired">("");
+  const [search, setSearch] = useState("");
   const [showNew, setShowNew] = useState(false);
   const [linkControlsDoc, setLinkControlsDoc] = useState<Document | null>(null);
   const [uploadDoc, setUploadDoc] = useState<Document | null>(null);
@@ -768,9 +776,30 @@ function TabDocumenti() {
     onError: (e: any) => window.alert(e?.response?.data?.detail || t("common.error")),
   });
 
-  const documents: Document[] = [...(data?.results ?? [])].sort((a, b) =>
-    (a.title ?? "").localeCompare(b.title ?? "", undefined, { sensitivity: "base" })
-  );
+  const today = new Date().toISOString().slice(0, 10);
+
+  const allDocuments: Document[] = [...(data?.results ?? [])].sort((a, b) => {
+    const ca = a.document_code || "￿";
+    const cb = b.document_code || "￿";
+    return ca.localeCompare(cb, undefined, { sensitivity: "base" }) ||
+      (a.title ?? "").localeCompare(b.title ?? "", undefined, { sensitivity: "base" });
+  });
+
+  // Contatori per il dashboard banner
+  const mandatoryGap  = allDocuments.filter(d => d.is_mandatory && d.status !== "approvato").length;
+  const reviewOverdue = allDocuments.filter(d => d.review_due_date && d.review_due_date < today).length;
+  const expired       = allDocuments.filter(d => d.expiry_date && d.expiry_date < today).length;
+
+  const documents = allDocuments.filter(d => {
+    if (search) {
+      const q = search.toLowerCase();
+      if (!d.title.toLowerCase().includes(q) && !d.document_code.toLowerCase().includes(q)) return false;
+    }
+    if (quickFilter === "mandatory_gap")  return d.is_mandatory && d.status !== "approvato";
+    if (quickFilter === "review_overdue") return !!d.review_due_date && d.review_due_date < today;
+    if (quickFilter === "expired")        return !!d.expiry_date && d.expiry_date < today;
+    return true;
+  });
 
   async function handleDownloadDocument(doc: Document) {
     try {
@@ -800,16 +829,64 @@ function TabDocumenti() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
+      {/* Dashboard banner — mandatory/scaduti */}
+      {!isLoading && (mandatoryGap > 0 || reviewOverdue > 0 || expired > 0) && (
+        <div className="mb-4 grid grid-cols-3 gap-3">
+          {mandatoryGap > 0 && (
+            <button
+              onClick={() => { setQuickFilter(quickFilter === "mandatory_gap" ? "" : "mandatory_gap"); setStatusFilter("tutti"); }}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-colors ${quickFilter === "mandatory_gap" ? "bg-red-100 border-red-400" : "bg-red-50 border-red-200 hover:bg-red-100"}`}
+            >
+              <span className="text-2xl">📋</span>
+              <div>
+                <div className="text-sm font-semibold text-red-800">{mandatoryGap} {t("documents.dashboard.mandatory_gap")}</div>
+                <div className="text-xs text-red-600">{t("documents.dashboard.mandatory_gap_sub")}</div>
+              </div>
+            </button>
+          )}
+          {reviewOverdue > 0 && (
+            <button
+              onClick={() => { setQuickFilter(quickFilter === "review_overdue" ? "" : "review_overdue"); setStatusFilter("tutti"); }}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-colors ${quickFilter === "review_overdue" ? "bg-amber-100 border-amber-400" : "bg-amber-50 border-amber-200 hover:bg-amber-100"}`}
+            >
+              <span className="text-2xl">🔄</span>
+              <div>
+                <div className="text-sm font-semibold text-amber-800">{reviewOverdue} {t("documents.dashboard.review_overdue")}</div>
+                <div className="text-xs text-amber-600">{t("documents.dashboard.review_overdue_sub")}</div>
+              </div>
+            </button>
+          )}
+          {expired > 0 && (
+            <button
+              onClick={() => { setQuickFilter(quickFilter === "expired" ? "" : "expired"); setStatusFilter("tutti"); }}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-colors ${quickFilter === "expired" ? "bg-orange-100 border-orange-400" : "bg-orange-50 border-orange-200 hover:bg-orange-100"}`}
+            >
+              <span className="text-2xl">⏰</span>
+              <div>
+                <div className="text-sm font-semibold text-orange-800">{expired} {t("documents.dashboard.expired")}</div>
+                <div className="text-xs text-orange-600">{t("documents.dashboard.expired_sub")}</div>
+              </div>
+            </button>
+          )}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
         <div className="flex items-center gap-1 flex-wrap">
           {STATUS_FILTERS.map(f => (
-            <button key={f.value} onClick={() => setStatusFilter(f.value)}
-              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${statusFilter === f.value ? "bg-primary-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+            <button key={f.value} onClick={() => { setStatusFilter(f.value); setQuickFilter(""); }}
+              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${statusFilter === f.value && !quickFilter ? "bg-primary-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
               {f.label}
             </button>
           ))}
         </div>
         <div className="flex items-center gap-3">
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder={t("documents.search_placeholder")}
+            className="border rounded px-3 py-1.5 text-sm w-52"
+          />
           {selectedPlant && (
             <label className="flex items-center gap-1 text-xs text-gray-600">
               <input
@@ -836,6 +913,7 @@ function TabDocumenti() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
+                <th className="text-left px-4 py-3 font-medium text-gray-600 w-32">{t("documents.table.code")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.table.title")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.table.file")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.table.plant")}</th>
@@ -850,6 +928,11 @@ function TabDocumenti() {
             <tbody className="divide-y divide-gray-100">
               {documents.map(doc => (
                 <tr key={doc.id} data-row-id={doc.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3">
+                    {doc.document_code
+                      ? <span className="font-mono text-xs font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">{doc.document_code}</span>
+                      : <span className="text-gray-300">—</span>}
+                  </td>
                   <td className="px-4 py-3 font-medium text-gray-800">{doc.title}</td>
                   <td className="px-4 py-3 text-xs">
                     {doc.latest_version ? (

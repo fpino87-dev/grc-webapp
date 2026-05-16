@@ -27,7 +27,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
     serializer_class = DocumentSerializer
     permission_classes = [DocumentPermission]
     filterset_fields = ["status", "category", "is_mandatory"]
-    search_fields = ["title"]
+    search_fields = ["title", "document_code"]
 
     def get_queryset(self):
         from django.db.models import Q

@@ -76,5 +76,9 @@ app.conf.beat_schedule = {
         "task": "apps.compliance_schedule.tasks.check_schedule_deadlines",
         "schedule": crontab(hour=2, minute=30),  # 02:30 ogni giorno
     },
+    "notify-expiring-documents": {
+        "task": "apps.documents.tasks.notify_expiring_documents",
+        "schedule": crontab(hour=7, minute=45),  # 07:45 ogni giorno
+    },
 }
 

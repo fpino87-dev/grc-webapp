@@ -10,6 +10,7 @@ export interface DocumentVersionSummary {
 
 export interface Document {
   id: string;
+  document_code: string;
   title: string;
   category: string;
   document_type: string;

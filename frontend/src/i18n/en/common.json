@@ -1199,6 +1199,7 @@
     },
     "fields": {
       "title": "Title",
+      "document_code": "Document code",
       "category": "Category",
       "document_type": "Document type",
       "review_due_date": "Review due date",
@@ -1206,6 +1207,15 @@
       "file": "File",
       "plant": "Site",
       "description": "Description"
+    },
+    "search_placeholder": "Search by code or title…",
+    "dashboard": {
+      "mandatory_gap": "mandatory not approved",
+      "mandatory_gap_sub": "Click to filter",
+      "review_overdue": "overdue reviews",
+      "review_overdue_sub": "Click to filter",
+      "expired": "expired documents",
+      "expired_sub": "Click to filter"
     },
     "new": {
       "title": "New document",
@@ -1241,6 +1251,7 @@
       "no": "Optional"
     },
     "table": {
+      "code": "Code",
       "title": "Title",
       "file": "File",
       "plant": "Site",

@@ -1278,6 +1278,7 @@
     },
     "fields": {
       "title": "Başlık",
+      "document_code": "Belge kodu",
       "category": "Kategori",
       "document_type": "Belge türü",
       "review_due_date": "İnceleme son tarihi",
@@ -1285,6 +1286,15 @@
       "file": "File",
       "plant": "Site",
       "description": "Açıklama"
+    },
+    "search_placeholder": "Kod veya başlığa göre ara…",
+    "dashboard": {
+      "mandatory_gap": "zorunlu onaylanmamış",
+      "mandatory_gap_sub": "Filtrelemek için tıklayın",
+      "review_overdue": "gecikmiş incelemeler",
+      "review_overdue_sub": "Filtrelemek için tıklayın",
+      "expired": "süresi dolmuş belgeler",
+      "expired_sub": "Filtrelemek için tıklayın"
     },
     "new": {
       "title": "Yeni belge",
@@ -1320,6 +1330,7 @@
       "no": "İsteğe bağlı"
     },
     "table": {
+      "code": "Kod",
       "title": "Başlık",
       "file": "File",
       "plant": "Site",

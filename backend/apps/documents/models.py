@@ -35,6 +35,12 @@ class Document(BaseModel):
     ]
 
     title = models.CharField(max_length=300)
+    document_code = models.CharField(
+        max_length=50,
+        blank=True,
+        db_index=True,
+        help_text="Codice identificativo del documento (es. D-ITA-INF-001). Libero, unico per convenzione aziendale.",
+    )
     category = models.CharField(max_length=30, choices=CATEGORY_CHOICES, db_index=True)
     document_type = models.CharField(
         max_length=20,

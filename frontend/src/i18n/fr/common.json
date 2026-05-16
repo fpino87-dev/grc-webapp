@@ -1278,6 +1278,7 @@
     },
     "fields": {
       "title": "Titre",
+      "document_code": "Code du document",
       "category": "Catégorie",
       "document_type": "Type de document",
       "review_due_date": "Date de révision",
@@ -1285,6 +1286,15 @@
       "file": "File",
       "plant": "Site",
       "description": "Description"
+    },
+    "search_placeholder": "Rechercher par code ou titre…",
+    "dashboard": {
+      "mandatory_gap": "obligatoires non approuvés",
+      "mandatory_gap_sub": "Cliquer pour filtrer",
+      "review_overdue": "révisions en retard",
+      "review_overdue_sub": "Cliquer pour filtrer",
+      "expired": "documents expirés",
+      "expired_sub": "Cliquer pour filtrer"
     },
     "new": {
       "title": "Nouveau document",
@@ -1320,6 +1330,7 @@
       "no": "Facultatif"
     },
     "table": {
+      "code": "Code",
       "title": "Titre",
       "file": "File",
       "plant": "Site",

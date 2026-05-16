@@ -1278,6 +1278,7 @@
     },
     "fields": {
       "title": "Tytuł",
+      "document_code": "Kod dokumentu",
       "category": "Kategoria",
       "document_type": "Typ dokumentu",
       "review_due_date": "Termin przeglądu",
@@ -1285,6 +1286,15 @@
       "file": "File",
       "plant": "Zakład",
       "description": "Opis"
+    },
+    "search_placeholder": "Szukaj po kodzie lub tytule…",
+    "dashboard": {
+      "mandatory_gap": "obowiązkowe niezatwierdzone",
+      "mandatory_gap_sub": "Kliknij, aby filtrować",
+      "review_overdue": "zaległe przeglądy",
+      "review_overdue_sub": "Kliknij, aby filtrować",
+      "expired": "wygasłe dokumenty",
+      "expired_sub": "Kliknij, aby filtrować"
     },
     "new": {
       "title": "Nowy dokument",
@@ -1320,6 +1330,7 @@
       "no": "Opcjonalny"
     },
     "table": {
+      "code": "Kod",
       "title": "Tytuł",
       "file": "File",
       "plant": "Zakład",
