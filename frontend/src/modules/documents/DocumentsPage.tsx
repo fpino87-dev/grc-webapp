@@ -576,7 +576,15 @@ function EditDocumentModal({ doc, onClose }: { doc: Document; onClose: () => voi
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("actions.cancel")}</button>
           <button
-            onClick={() => mutation.mutate(form)}
+            onClick={() => {
+              const payload: Partial<Document> = {
+                ...form,
+                review_due_date: form.review_due_date || null,
+                expiry_date: form.expiry_date || null,
+                supplier: form.supplier || null,
+              };
+              mutation.mutate(payload);
+            }}
             disabled={mutation.isPending || !form.title}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
