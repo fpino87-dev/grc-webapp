@@ -8,6 +8,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ## [Unreleased]
 
+### Added
+- **M07 Documenti — modal di modifica documento**: i documenti già caricati non erano modificabili dopo la creazione (assenza di form di editing). Aggiunto `EditDocumentModal` condiviso tra tab Documenti e NDA con campi: codice documento (`document_code`), titolo, tipo, categoria, data revisione, data scadenza, fornitore (visibile solo per `document_type=contratto`, carica la lista fornitori on-demand), obbligatorio. Pre-riempie tutti i valori esistenti del documento. Il salvataggio invalida sia la query `["documents"]` che `["documents-nda"]`. Bottone ✎ su ogni riga in entrambi i tab. Aggiunte chiavi i18n `documents.edit.title`, `documents.edit.submit`, `documents.actions.edit`, `documents.fields.expiry_date`, `documents.fields.supplier` in IT/EN/FR/PL/TR. Backend `controls/views.py`: aggiunto `document_code` alla risposta `linked_documents` del `detail_info`; `LinkedDocument` TypeScript aggiornato di conseguenza. Nel drawer Controlli il badge codice (es. `D-ITA-INF-001`) appare ora prima del titolo sia nella lista documenti collegati sia nel dropdown di ricerca per il collegamento.
+
+### Fixed
+- **M07 Documenti — PATCH documento falliva con 400**: il form di modifica inizializzava i campi data (`review_due_date`, `expiry_date`) e `supplier` a stringa vuota `""` quando il documento non aveva il valore. DRF rifiuta `""` su `DateField` e `PrimaryKeyRelatedField` — si aspetta `null`. Pulito il payload prima del `mutate`: i tre campi vengono convertiti a `null` se la stringa è vuota.
+
 ### Fixed
 - **M06 Risk — colonna Minaccia mostrava la chiave i18n invece del testo tradotto**: `THREAT_CATEGORIES.find(...)?.label` restituiva la chiave di traduzione (es. `"risk.threat_cat.malware_ransomware"`) direttamente nella cella della tabella invece di passarla a `t()`. Corretto con chiamata `t(cat.label)`.
 - **M06 Risk — filtro "Scenari incompleti" non mostrava risultati**: la logica precedente cercava campi vuoti (probability/impact/treatment/threat_category mancanti), ma la maggior parte degli scenari operativi ha questi campi compilati pur essendo ancora "in corso". Ridefinito il criterio GRC-corretto: uno scenario è incompleto se (a) in bozza, (b) trattamento attivo (mitigare/trasferire) con piani non tutti chiusi, (c) score > 7 senza accettazione formale, oppure (d) rivalutazione necessaria (`needs_revaluation=true`). Filtro client-side sul set già caricato.
