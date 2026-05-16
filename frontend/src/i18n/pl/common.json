@@ -1296,7 +1296,9 @@
       "mandatory": "Dokument obowiązkowy",
       "file": "File",
       "plant": "Zakład",
-      "description": "Opis"
+      "description": "Opis",
+      "expiry_date": "Data wygaśnięcia",
+      "supplier": "Dostawca"
     },
     "search_placeholder": "Szukaj po kodzie lub tytule…",
     "dashboard": {
@@ -1359,7 +1361,8 @@
       "change_type": "Zmień typ",
       "change_plant": "Zmień zakład",
       "delete_title": "Usuń dokument",
-      "delete_confirm": "Usunąć dokument „{{title}}”? Zabronione dla dokumentów w zatwierdzaniu lub zatwierdzonych (oprócz superużytkownika)."
+      "delete_confirm": "Usunąć dokument „{{title}}”? Zabronione dla dokumentów w zatwierdzaniu lub zatwierdzonych (oprócz superużytkownika).",
+      "edit": "Edytuj"
     },
     "errors": {
       "download_failed": "Nie można pobrać dokumentu. Sprawdź uprawnienia lub spróbuj ponownie później.",
@@ -1432,6 +1435,10 @@
       "toggle_flat": "Widok listy",
       "group_unassigned": "Nieprzypisane do żadnej kontroli",
       "group_count": "{{count}} dowodów"
+    },
+    "edit": {
+      "title": "Edytuj dokument",
+      "submit": "Zapisz zmiany"
     }
   },
   "schedule": {

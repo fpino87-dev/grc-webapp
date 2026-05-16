@@ -774,7 +774,12 @@ function DocsColumn({
             <div key={d.id} className="bg-white border border-gray-200 rounded px-2.5 py-2">
               <div className="flex items-start justify-between gap-1">
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-gray-800 truncate">{d.title}</p>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {d.document_code && (
+                      <span className="font-mono text-xs font-semibold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded shrink-0">{d.document_code}</span>
+                    )}
+                    <p className="text-xs font-medium text-gray-800 truncate">{d.title}</p>
+                  </div>
                   <div className="flex items-center gap-1 mt-0.5 flex-wrap">
                     <span className="text-xs bg-indigo-50 text-indigo-700 px-1 rounded">
                       {t(`documents.type.${d.document_type}`, { defaultValue: d.document_type })}
@@ -823,6 +828,9 @@ function DocsColumn({
                 className="w-full text-left px-2 py-1.5 text-xs hover:bg-blue-50 text-gray-700 flex items-center gap-1.5"
               >
                 <span className="text-gray-400">📄</span>
+                {d.document_code && (
+                  <span className="font-mono text-xs font-semibold text-indigo-700 shrink-0">{d.document_code}</span>
+                )}
                 <span className="truncate flex-1">{d.title}</span>
                 <span className={`shrink-0 px-1 rounded text-xs ${docStatusColor(d.status)}`}>
                   {t(`status.${d.status}`, { defaultValue: d.status })}

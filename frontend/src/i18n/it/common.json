@@ -1217,7 +1217,9 @@
       "mandatory": "Documento obbligatorio",
       "file": "File",
       "plant": "Sito",
-      "description": "Descrizione"
+      "description": "Descrizione",
+      "expiry_date": "Data scadenza",
+      "supplier": "Fornitore"
     },
     "search_placeholder": "Cerca per codice o titolo…",
     "dashboard": {
@@ -1280,7 +1282,8 @@
       "change_type": "Cambia tipo",
       "change_plant": "Cambia sito",
       "delete_title": "Elimina documento",
-      "delete_confirm": "Eliminare il documento «{{title}}»? Non consentito per documenti in approvazione o approvati (salvo superuser)."
+      "delete_confirm": "Eliminare il documento «{{title}}»? Non consentito per documenti in approvazione o approvati (salvo superuser).",
+      "edit": "Modifica"
     },
     "errors": {
       "download_failed": "Impossibile scaricare il documento. Verifica i permessi o riprova più tardi.",
@@ -1353,6 +1356,10 @@
       "toggle_flat": "Vista elenco",
       "group_unassigned": "Non assegnate a nessun controllo",
       "group_count": "{{count}} evidenze"
+    },
+    "edit": {
+      "title": "Modifica documento",
+      "submit": "Salva modifiche"
     }
   },
   "schedule": {

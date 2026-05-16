@@ -1217,7 +1217,9 @@
       "mandatory": "Mandatory document",
       "file": "File",
       "plant": "Site",
-      "description": "Description"
+      "description": "Description",
+      "expiry_date": "Expiry date",
+      "supplier": "Supplier"
     },
     "search_placeholder": "Search by code or title…",
     "dashboard": {
@@ -1280,7 +1282,8 @@
       "change_type": "Change type",
       "change_plant": "Change site",
       "delete_title": "Delete document",
-      "delete_confirm": "Delete document «{{title}}»? Not allowed for documents in approval or approved (except superuser)."
+      "delete_confirm": "Delete document «{{title}}»? Not allowed for documents in approval or approved (except superuser).",
+      "edit": "Edit"
     },
     "errors": {
       "download_failed": "Unable to download the document. Check permissions or try again later.",
@@ -1353,6 +1356,10 @@
       "toggle_flat": "List view",
       "group_unassigned": "Not assigned to any control",
       "group_count": "{{count}} evidences"
+    },
+    "edit": {
+      "title": "Edit document",
+      "submit": "Save changes"
     }
   },
   "schedule": {

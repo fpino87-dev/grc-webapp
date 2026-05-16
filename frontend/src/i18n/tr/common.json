@@ -1296,7 +1296,9 @@
       "mandatory": "Zorunlu belge",
       "file": "File",
       "plant": "Site",
-      "description": "Açıklama"
+      "description": "Açıklama",
+      "expiry_date": "Son kullanma tarihi",
+      "supplier": "Tedarikçi"
     },
     "search_placeholder": "Kod veya başlığa göre ara…",
     "dashboard": {
@@ -1359,7 +1361,8 @@
       "change_type": "Türü değiştir",
       "change_plant": "Site değiştir",
       "delete_title": "Belgeyi sil",
-      "delete_confirm": "«{{title}}» belgesi silinsin mi? Onay sürecinde veya onaylanmış belgeler için yasaktır (süper kullanıcı hariç)."
+      "delete_confirm": "«{{title}}» belgesi silinsin mi? Onay sürecinde veya onaylanmış belgeler için yasaktır (süper kullanıcı hariç).",
+      "edit": "Düzenle"
     },
     "errors": {
       "download_failed": "Belge indirilemedi. İzinleri kontrol edin veya daha sonra tekrar deneyin.",
@@ -1432,6 +1435,10 @@
       "toggle_flat": "Liste görünümü",
       "group_unassigned": "Hiçbir kontrole atanmamış",
       "group_count": "{{count}} kanıt"
+    },
+    "edit": {
+      "title": "Belgeyi düzenle",
+      "submit": "Değişiklikleri kaydet"
     }
   },
   "schedule": {

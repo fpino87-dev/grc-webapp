@@ -85,6 +85,7 @@ export interface RequirementsCheck {
 }
 export interface LinkedDocument {
   id: string;
+  document_code: string;
   title: string;
   document_type: string;
   status: string;

@@ -382,6 +382,7 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         linked_documents = [
             {
                 "id": str(d.id),
+                "document_code": d.document_code or "",
                 "title": d.title,
                 "document_type": d.document_type,
                 "status": d.status,
