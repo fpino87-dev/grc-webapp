@@ -33,6 +33,7 @@ class DocumentSerializer(serializers.ModelSerializer):
     plant_code = serializers.CharField(source="plant.code", read_only=True)
     shared_plant_names = serializers.SerializerMethodField(read_only=True)
     is_shared_with_current = serializers.SerializerMethodField(read_only=True)
+    supplier_name = serializers.CharField(source="supplier.name", read_only=True, default=None)
 
     class Meta:
         model = Document

@@ -1183,7 +1183,18 @@
     "title": "Documenti & Evidenze",
     "tabs": {
       "documents": "Documenti",
+      "nda": "NDA / Contratti",
       "evidences": "Evidenze"
+    },
+    "nda": {
+      "empty": "Nessun NDA o contratto registrato",
+      "new_btn": "Nuovo NDA / Contratto",
+      "new_title": "Nuovo NDA / Contratto",
+      "supplier_col": "Fornitore",
+      "expiry_col": "Scadenza contratto",
+      "search_placeholder": "Cerca per codice, titolo o fornitore…",
+      "expired": "contratti scaduti",
+      "expiring": "in scadenza (≤30 gg)"
     },
     "empty": "Nessun documento trovato",
     "file_help": "Max 50MB. Formati: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg.",

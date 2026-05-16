@@ -1262,7 +1262,18 @@
     "title": "Documents & Preuves",
     "tabs": {
       "documents": "Documents",
+      "nda": "NDA / Contrats",
       "evidences": "Preuves"
+    },
+    "nda": {
+      "empty": "Aucun NDA ou contrat enregistré",
+      "new_btn": "Nouveau NDA / Contrat",
+      "new_title": "Nouveau NDA / Contrat",
+      "supplier_col": "Fournisseur",
+      "expiry_col": "Expiration du contrat",
+      "search_placeholder": "Rechercher par code, titre ou fournisseur…",
+      "expired": "contrats expirés",
+      "expiring": "expirant bientôt (≤30 j)"
     },
     "empty": "Aucun document trouvé",
     "file_help": "Max 50 Mo. Formats : doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg.",

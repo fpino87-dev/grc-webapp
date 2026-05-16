@@ -1262,7 +1262,18 @@
     "title": "Belgeler & Kanıtlar",
     "tabs": {
       "documents": "Belgeler",
+      "nda": "NDA / Sözleşmeler",
       "evidences": "Kanıtlar"
+    },
+    "nda": {
+      "empty": "Kayıtlı NDA veya sözleşme yok",
+      "new_btn": "Yeni NDA / Sözleşme",
+      "new_title": "Yeni NDA / Sözleşme",
+      "supplier_col": "Tedarikçi",
+      "expiry_col": "Sözleşme son tarihi",
+      "search_placeholder": "Kod, başlık veya tedarikçiye göre ara…",
+      "expired": "süresi dolmuş sözleşmeler",
+      "expiring": "yakında süresi doluyor (≤30 gün)"
     },
     "empty": "Belge bulunamadı",
     "file_help": "Maks 50 MB. Formatlar: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg.",

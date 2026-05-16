@@ -1262,7 +1262,18 @@
     "title": "Dokumenty i Dowody",
     "tabs": {
       "documents": "Dokumenty",
+      "nda": "NDA / Umowy",
       "evidences": "Dowody"
+    },
+    "nda": {
+      "empty": "Brak NDA lub umów",
+      "new_btn": "Nowe NDA / Umowa",
+      "new_title": "Nowe NDA / Umowa",
+      "supplier_col": "Dostawca",
+      "expiry_col": "Wygaśnięcie umowy",
+      "search_placeholder": "Szukaj po kodzie, tytule lub dostawcy…",
+      "expired": "wygasłe umowy",
+      "expiring": "wygasające wkrótce (≤30 dni)"
     },
     "empty": "Brak dokumentów",
     "file_help": "Max 50 MB. Formaty: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg.",

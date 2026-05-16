@@ -22,11 +22,11 @@ from . import services
 
 class DocumentViewSet(viewsets.ModelViewSet):
     queryset = Document.objects.select_related(
-        "plant", "owner", "reviewer", "approver"
+        "plant", "owner", "reviewer", "approver", "supplier"
     ).prefetch_related("versions", "shared_plants")
     serializer_class = DocumentSerializer
     permission_classes = [DocumentPermission]
-    filterset_fields = ["status", "category", "is_mandatory"]
+    filterset_fields = ["status", "category", "document_type", "is_mandatory", "supplier"]
     search_fields = ["title", "document_code"]
 
     def get_queryset(self):

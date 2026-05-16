@@ -1183,7 +1183,18 @@
     "title": "Documents & Evidence",
     "tabs": {
       "documents": "Documents",
+      "nda": "NDA / Contracts",
       "evidences": "Evidence"
+    },
+    "nda": {
+      "empty": "No NDA or contract registered",
+      "new_btn": "New NDA / Contract",
+      "new_title": "New NDA / Contract",
+      "supplier_col": "Supplier",
+      "expiry_col": "Contract expiry",
+      "search_placeholder": "Search by code, title or supplier…",
+      "expired": "expired contracts",
+      "expiring": "expiring soon (≤30 days)"
     },
     "empty": "No documents found",
     "file_help": "Max 50MB. Formats: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg.",

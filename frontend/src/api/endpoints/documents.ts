@@ -22,6 +22,8 @@ export interface Document {
   shared_plant_names?: Array<{ id: string; name: string; code: string }>;
   is_shared_with_current?: boolean;
   owner: string | null;
+  supplier: string | null;
+  supplier_name?: string | null;
   review_due_date: string | null;
   expiry_date: string | null;
   is_mandatory: boolean;
