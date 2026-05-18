@@ -17,7 +17,7 @@ from .serializers import PdcaCycleSerializer, PdcaPhaseSerializer
 class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = PdcaCycle.objects.select_related("plant").prefetch_related("phases")
     serializer_class = PdcaCycleSerializer
-    filterset_fields = ["plant", "fase_corrente"]
+    filterset_fields = ["plant", "fase_corrente", "trigger_type"]
     search_fields = ["title"]
     plant_field = "plant"
 
@@ -72,6 +72,16 @@ class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         try:
             cycle = services.close_cycle(cycle, request.user, act_description)
             return Response({"ok": True, "fase_corrente": "chiuso"})
+        except ValidationError as exc:
+            return Response({"error": str(exc.message)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=["post"], url_path="archivia")
+    def archivia(self, request, pk=None):
+        cycle = self.get_object()
+        motivo = request.data.get("motivo", "")
+        try:
+            cycle = services.archivia_cycle(cycle, request.user, motivo)
+            return Response({"ok": True, "fase_corrente": "archiviato"})
         except ValidationError as exc:
             return Response({"error": str(exc.message)}, status=status.HTTP_400_BAD_REQUEST)
 

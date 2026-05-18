@@ -133,6 +133,39 @@ def advance_phase(cycle, user, phase_notes: str = "", evidence=None, outcome: st
     return cycle
 
 
+def archivia_cycle(cycle, user, motivo: str = "") -> PdcaCycle:
+    """
+    Archivia il ciclo senza implementazione — usato quando lo spunto non
+    porta beneficio sufficiente a giustificarne il costo.
+    Disponibile da qualsiasi fase aperta (non da chiuso/archiviato).
+    Non genera Lesson Learned: la decisione di non procedere viene
+    tracciata solo nell'audit trail.
+    """
+    if cycle.fase_corrente in ("chiuso", "archiviato"):
+        raise ValidationError(_("Il ciclo è già %(phase)s.") % {"phase": cycle.fase_corrente})
+    if not motivo or len(motivo.strip()) < 20:
+        raise ValidationError(
+            _("Per archiviare è obbligatorio specificare il motivo (minimo 20 caratteri).")
+        )
+    cycle.fase_corrente = "archiviato"
+    cycle.motivo_archiviazione = motivo.strip()
+    cycle.closed_at = timezone.now()
+    cycle.closed_by = user
+    cycle.save(update_fields=["fase_corrente", "motivo_archiviazione", "closed_at", "closed_by", "updated_at"])
+    log_action(
+        user=user,
+        action_code="pdca.cycle.archiviato",
+        level="L2",
+        entity=cycle,
+        payload={
+            "trigger_type": cycle.trigger_type,
+            "fase_at_archiviazione": cycle.fase_corrente,
+            "motivo": motivo.strip()[:200],
+        },
+    )
+    return cycle
+
+
 def close_cycle(cycle, user, act_description: str = "") -> PdcaCycle:
     """
     Chiude il ciclo dalla fase ACT.

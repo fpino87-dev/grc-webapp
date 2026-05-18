@@ -83,9 +83,90 @@ function DeleteCycleButton({ cycle }: { cycle: PdcaCycle }) {
   );
 }
 
+function ArchiviaCycleButton({ cycle }: { cycle: PdcaCycle }) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [motivo, setMotivo] = useState("");
+  const [error, setError] = useState("");
+
+  const mutation = useMutation({
+    mutationFn: () => pdcaApi.archivia(cycle.id, motivo.trim()),
+    onSuccess: () => {
+      setOpen(false);
+      setMotivo("");
+      setError("");
+      qc.invalidateQueries({ queryKey: ["pdca"] });
+    },
+    onError: (e: unknown) => {
+      const msg =
+        (e as { response?: { data?: { error?: string } } })?.response?.data?.error ||
+        "Errore durante l'archiviazione";
+      setError(String(msg));
+    },
+  });
+
+  if (cycle.fase_corrente === "chiuso" || cycle.fase_corrente === "archiviato") return null;
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => { setError(""); setOpen(true); }}
+        title="Archivia senza implementazione"
+        className="px-2 py-1 text-[11px] rounded-md text-amber-700 hover:bg-amber-50 border border-transparent hover:border-amber-200"
+      >
+        📦 Archivia
+      </button>
+      {open && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+            <h3 className="text-lg font-semibold mb-2">Archivia ciclo PDCA</h3>
+            <p className="text-sm text-gray-600 mb-1">
+              <strong>{cycle.title}</strong>
+            </p>
+            <p className="text-sm text-gray-500 mb-3">
+              Lo spunto viene chiuso senza implementazione. La decisione viene registrata nell'audit trail ma non genera una Lesson Learned.
+            </p>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Motivo *
+            </label>
+            <textarea
+              className="w-full border rounded px-3 py-2 text-sm min-h-[100px]"
+              value={motivo}
+              onChange={e => setMotivo(e.target.value)}
+              placeholder="Es: Il rapporto costo/beneficio non giustifica l'implementazione in questa fase. Il controllo compensativo già in essere copre il rischio residuo..."
+            />
+            <p className="text-xs text-gray-400 mt-0.5">Minimo 20 caratteri ({motivo.trim().length}/20)</p>
+            {error && (
+              <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-2">{error}</p>
+            )}
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                type="button"
+                onClick={() => { setOpen(false); setError(""); }}
+                className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50"
+              >
+                Annulla
+              </button>
+              <button
+                type="button"
+                onClick={() => mutation.mutate()}
+                disabled={motivo.trim().length < 20 || mutation.isPending}
+                className="px-4 py-2 bg-amber-600 text-white rounded text-sm hover:bg-amber-700 disabled:opacity-50"
+              >
+                {mutation.isPending ? "Archiviazione..." : "Archivia ciclo"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
   const qc = useQueryClient();
-  const [form, setForm] = useState<Partial<PdcaCycle>>({ trigger_type: "incident", scope_type: "plant" });
+  const [form, setForm] = useState<Partial<PdcaCycle>>({ trigger_type: "audit", scope_type: "plant" });
   const [error, setError] = useState("");
 
   const mutation = useMutation({
@@ -95,12 +176,22 @@ function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    setForm(prev => {
+      const next = { ...prev, [name]: value };
+      if (name === "trigger_type" && value !== "audit") {
+        delete next.audit_subtype;
+        delete next.riferimento_finding;
+      }
+      return next;
+    });
   }
+
+  const isAudit = form.trigger_type === "audit";
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
         <h3 className="text-lg font-semibold mb-4">Nuovo ciclo PDCA</h3>
         <div className="space-y-3">
           <div>
@@ -112,14 +203,14 @@ function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Titolo *</label>
-            <input name="title" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="es. Miglioramento gestione incidenti" />
+            <input name="title" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="es. Miglioramento gestione accessi privilegiati" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Tipo trigger</label>
-              <select name="trigger_type" defaultValue="incident" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-                <option value="incident">Incidente</option>
+              <select name="trigger_type" value={form.trigger_type} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
                 <option value="audit">Audit</option>
+                <option value="incident">Incidente</option>
                 <option value="management_review">Revisione direzione</option>
                 <option value="risk">Rischio</option>
                 <option value="manual">Manuale</option>
@@ -134,6 +225,31 @@ function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string
               </select>
             </div>
           </div>
+
+          {isAudit && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo audit</label>
+                <select name="audit_subtype" value={form.audit_subtype ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+                  <option value="">— seleziona —</option>
+                  <option value="interno">Audit interno</option>
+                  <option value="seconda_parte">Seconda parte</option>
+                  <option value="terza_parte">Terza parte</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Riferimento finding</label>
+                <input
+                  name="riferimento_finding"
+                  value={form.riferimento_finding ?? ""}
+                  onChange={handleChange}
+                  className="w-full border rounded px-3 py-2 text-sm"
+                  placeholder="es. NC-2026-04-01 o OPP-2026-03-05"
+                />
+                <p className="text-xs text-gray-400 mt-0.5">Numero/codice del rilievo o opportunità nell'audit report</p>
+              </div>
+            </>
+          )}
         </div>
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
@@ -163,7 +279,8 @@ function PhaseStepper({ cycle }: { cycle: PdcaCycle & { reopened_as?: string | n
   };
   const currentIndex = phases.indexOf((cycle.fase_corrente || "plan") as any);
 
-  if (cycle.fase_corrente === "chiuso") {
+  if (cycle.fase_corrente === "chiuso" || cycle.fase_corrente === "archiviato") {
+    const isArchiviato = cycle.fase_corrente === "archiviato";
     return (
       <div className="flex items-center gap-2 text-xs">
         {phases.map((p) => (
@@ -171,8 +288,8 @@ function PhaseStepper({ cycle }: { cycle: PdcaCycle & { reopened_as?: string | n
             {labels[p]}
           </span>
         ))}
-        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full bg-gray-800 text-white text-[10px] font-semibold">
-          CHIUSO
+        <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${isArchiviato ? "bg-amber-100 text-amber-800" : "bg-gray-800 text-white"}`}>
+          {isArchiviato ? "ARCHIVIATO" : "CHIUSO"}
         </span>
       </div>
     );
@@ -413,13 +530,20 @@ function AdvanceButtons({
     );
   }
 
-  if (fase === "chiuso") {
+  if (fase === "chiuso" || fase === "archiviato") {
+    const isArchiviato = fase === "archiviato";
     return (
       <>
         <p className="text-xs text-gray-500">
-          Chiuso il {new Date(cycle.closed_at || cycle.updated_at || cycle.created_at).toLocaleDateString(i18n.language || "it")}
+          {isArchiviato ? "Archiviato" : "Chiuso"} il{" "}
+          {new Date(cycle.closed_at || cycle.updated_at || cycle.created_at).toLocaleDateString(i18n.language || "it")}
         </p>
-        {cycle.act_description && (
+        {isArchiviato && (cycle as any).motivo_archiviazione && (
+          <p className="mt-1 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 whitespace-pre-wrap">
+            {(cycle as any).motivo_archiviazione}
+          </p>
+        )}
+        {!isArchiviato && cycle.act_description && (
           <p className="mt-1 text-xs text-gray-700 whitespace-pre-wrap">{cycle.act_description}</p>
         )}
       </>
@@ -457,12 +581,30 @@ function AdvanceButtons({
   );
 }
 
+const TRIGGER_LABELS: Record<string, string> = {
+  audit: "Audit",
+  incident: "Incidente",
+  management_review: "Revisione direzione",
+  risk: "Rischio",
+  manual: "Manuale",
+  pdca_ko: "Riciclo CHECK KO",
+  gap_controllo: "Gap controllo",
+  risk_rosso: "Rischio rosso",
+};
+
+const AUDIT_SUBTYPE_LABELS: Record<string, string> = {
+  interno: "Interno",
+  seconda_parte: "2ª parte",
+  terza_parte: "3ª parte",
+};
+
 export function PdcaPage() {
   const [showNew, setShowNew] = useState(false);
+  const [filterTrigger, setFilterTrigger] = useState("");
 
   const { data, isLoading } = useQuery({
-    queryKey: ["pdca"],
-    queryFn: () => pdcaApi.list(),
+    queryKey: ["pdca", filterTrigger],
+    queryFn: () => pdcaApi.list(filterTrigger ? { trigger_type: filterTrigger } : undefined),
     retry: false,
   });
 
@@ -483,6 +625,27 @@ export function PdcaPage() {
         </button>
       </div>
 
+      <div className="mb-3 flex items-center gap-3">
+        <label className="text-sm text-gray-600 font-medium">Filtra per trigger:</label>
+        <select
+          value={filterTrigger}
+          onChange={e => setFilterTrigger(e.target.value)}
+          className="border rounded px-3 py-1.5 text-sm text-gray-700 bg-white"
+        >
+          <option value="">Tutti</option>
+          <option value="audit">Audit</option>
+          <option value="incident">Incidente</option>
+          <option value="management_review">Revisione direzione</option>
+          <option value="risk">Rischio</option>
+          <option value="manual">Manuale</option>
+        </select>
+        {filterTrigger && (
+          <button onClick={() => setFilterTrigger("")} className="text-xs text-gray-500 hover:text-gray-700 underline">
+            Rimuovi filtro
+          </button>
+        )}
+      </div>
+
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center text-gray-400">Caricamento...</div>
@@ -495,7 +658,7 @@ export function PdcaPage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Titolo</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Titolo / Finding</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Trigger</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Ambito</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Fasi</th>
@@ -508,13 +671,25 @@ export function PdcaPage() {
                 <tr key={c.id} className="hover:bg-gray-50 transition-colors align-top">
                   <td className="px-4 py-3 font-medium text-gray-800">
                     {c.title}
+                    {c.riferimento_finding && (
+                      <div className="mt-0.5 text-[11px] text-indigo-700 font-mono bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5 inline-block">
+                        {c.riferimento_finding}
+                      </div>
+                    )}
                     {c.reopened_as && (
                       <div className="mt-1 text-[11px] text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-1 inline-block">
                         ⟳ Riciclo aperto per CHECK non efficace
                       </div>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-gray-600 text-xs uppercase">{c.trigger_type}</td>
+                  <td className="px-4 py-3 text-gray-600 text-xs">
+                    <span className="font-medium">{TRIGGER_LABELS[c.trigger_type] ?? c.trigger_type}</span>
+                    {c.audit_subtype && (
+                      <div className="mt-0.5 text-[11px] text-gray-400">
+                        {AUDIT_SUBTYPE_LABELS[c.audit_subtype] ?? c.audit_subtype}
+                      </div>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-gray-600 text-xs">{c.scope_type}</td>
                   <td className="px-4 py-3">
                     <PhaseStepper cycle={c as any} />
@@ -522,6 +697,7 @@ export function PdcaPage() {
                   <td className="px-4 py-3">
                     <div className="flex flex-col gap-2 items-start">
                       <AdvanceButtons cycle={c as any} onUpdated={() => {}} />
+                      <ArchiviaCycleButton cycle={c} />
                       <DeleteCycleButton cycle={c} />
                     </div>
                   </td>

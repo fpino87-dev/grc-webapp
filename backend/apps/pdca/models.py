@@ -17,9 +17,28 @@ class PdcaCycle(BaseModel):
         max_length=10,
         choices=[
             ("plan", "PLAN"), ("do", "DO"), ("check", "CHECK"),
-            ("act", "ACT"), ("chiuso", "Chiuso"),
+            ("act", "ACT"), ("chiuso", "Chiuso"), ("archiviato", "Archiviato"),
         ],
         default="plan",
+    )
+    riferimento_finding = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Numero/riferimento del finding di audit (es. NC-2026-04-01)",
+    )
+    audit_subtype = models.CharField(
+        max_length=20,
+        blank=True,
+        choices=[
+            ("interno", "Audit interno"),
+            ("seconda_parte", "Seconda parte"),
+            ("terza_parte", "Terza parte"),
+        ],
+        help_text="Tipo di audit sorgente (solo se trigger_type=audit)",
+    )
+    motivo_archiviazione = models.TextField(
+        blank=True,
+        help_text="Obbligatorio per archiviare: motivo per cui lo spunto non viene perseguito",
     )
     act_description = models.TextField(
         blank=True,

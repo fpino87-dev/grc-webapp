@@ -5,10 +5,13 @@ export interface PdcaCycle {
   plant: string;
   title: string;
   trigger_type: string;
+  audit_subtype?: string;
+  riferimento_finding?: string;
   scope_type: string;
   fase_corrente: string;
   act_description?: string;
   check_outcome?: string;
+  motivo_archiviazione?: string;
   reopened_as?: string | null;
   closed_at?: string | null;
   created_at: string;
@@ -22,4 +25,6 @@ export const pdcaApi = {
     apiClient.post<PdcaCycle>("/pdca/cycles/", data).then((r) => r.data),
   remove: (id: string, reason: string) =>
     apiClient.delete(`/pdca/cycles/${id}/`, { data: { reason } }),
+  archivia: (id: string, motivo: string) =>
+    apiClient.post(`/pdca/cycles/${id}/archivia/`, { motivo }),
 };

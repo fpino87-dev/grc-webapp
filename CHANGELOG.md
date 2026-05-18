@@ -8,6 +8,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ## [Unreleased]
 
+### Added
+- **M11 PDCA — Archivia senza implementazione**: nuovo stato `archiviato` che permette di chiudere uno spunto di miglioramento da qualsiasi fase aperta quando il rapporto costo/beneficio non giustifica l'implementazione. Richiede motivo obbligatorio (min 20 caratteri); la decisione viene tracciata nell'audit trail senza generare Lesson Learned. Badge ambra "ARCHIVIATO" nella lista; tasto 📦 Archivia nella colonna azioni.
+- **M11 PDCA — Riferimento finding e tipo audit**: il form "Nuovo ciclo" mostra (solo per trigger=Audit) due nuovi campi: *Tipo audit* (interno / seconda parte / terza parte) e *Riferimento finding* (codice del rilievo nell'audit report, es. `NC-2026-04-01`). Entrambi vengono visualizzati nella tabella come badge. Nuova migration `0004`.
+- **M11 PDCA — Filtro per trigger type**: dropdown di filtro sopra la lista cicli; attiva la query `?trigger_type=audit` (o altro valore) verso il backend. Il filtro lato backend era già disponibile su `fase_corrente`; aggiunto anche `trigger_type` ai `filterset_fields`.
+
 ### Security
 - **CI security audit — fix flag `--disable-pip` e upgrade simplejwt**: il workflow `security-audit.yml` usava `--disable-pip` che richiede requirements hashati — il job falliva con errore prima di analizzare qualunque dipendenza. Sostituito con `--no-deps`. Contestualmente aggiornato `djangorestframework-simplejwt 5.3.* → 5.5.*` per correggere CVE-2024-22513 (bypass autenticazione, fix ufficiale in 5.5.1).
 - **Frontend — npm audit fix completo, zero CVE**: risolte 3 vulnerabilità produzione (`lodash` Code Injection High + Prototype Pollution, `follow-redirects` auth header leak Moderate, `axios` transitivo). Upgrade Vite 5→8.0.13 per GHSA-67mh-4wv8-2f99 (esbuild dev server CORS). `@vitejs/plugin-react` aggiornato all'ultima versione con supporto Vite 8 nativo — eliminati tutti i warning di deprecazione. `vitest` 3→4.1.6 aggiornato di conseguenza. Migrazione DB `token_blacklist.0013` applicata (introdotta da simplejwt 5.5). `npm audit --omit=dev --audit-level=high → 0 vulnerabilities`.
