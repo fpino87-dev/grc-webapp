@@ -40,7 +40,7 @@ function DeleteCycleButton({ cycle }: { cycle: PdcaCycle }) {
         title={t("pdca.delete.tooltip")}
         className="px-2 py-1 text-[11px] rounded-md text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200"
       >
-        🗑 {t("pdca.delete.button")}
+        🗑
       </button>
       {open && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -223,7 +223,7 @@ function EditCycleButton({ cycle }: { cycle: PdcaCycle }) {
         title="Modifica"
         className="px-2 py-1 text-[11px] rounded-md text-gray-600 hover:bg-gray-100 border border-transparent hover:border-gray-200"
       >
-        ✏️ Modifica
+        ✏️
       </button>
       {open && <EditCycleModal cycle={cycle} onClose={() => setOpen(false)} />}
     </>
@@ -262,7 +262,7 @@ function ArchiviaCycleButton({ cycle }: { cycle: PdcaCycle }) {
         title="Archivia senza implementazione"
         className="px-2 py-1 text-[11px] rounded-md text-amber-700 hover:bg-amber-50 border border-transparent hover:border-amber-200"
       >
-        📦 Archivia
+        📦
       </button>
       {open && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -707,11 +707,13 @@ function AdvanceButtons({
     );
   }
 
-  let buttonLabel = "";
-  if (fase === "plan") buttonLabel = "Avanza a DO →";
-  else if (fase === "do") buttonLabel = "Avanza a CHECK →";
-  else if (fase === "check") buttonLabel = "Avanza ad ACT →";
-  else if (fase === "act") buttonLabel = "Chiudi ciclo ✓";
+  const advanceConfig: Record<string, { label: string; title: string }> = {
+    plan:  { label: "▶ DO",    title: "Avanza a DO" },
+    do:    { label: "▶ CHECK", title: "Avanza a CHECK" },
+    check: { label: "▶ ACT",   title: "Avanza ad ACT" },
+    act:   { label: "✓",       title: "Chiudi ciclo" },
+  };
+  const cfg = advanceConfig[fase as string];
 
   const onClick = () => {
     if (fase === "plan" || fase === "do" || fase === "check" || fase === "act") {
@@ -724,9 +726,10 @@ function AdvanceButtons({
       <button
         type="button"
         onClick={onClick}
-        className="px-3 py-1.5 text-xs rounded-md bg-primary-50 text-primary-700 hover:bg-primary-100"
+        title={cfg?.title}
+        className="px-2 py-1 text-[11px] font-semibold rounded-md bg-primary-50 text-primary-700 hover:bg-primary-100 border border-primary-200"
       >
-        {buttonLabel}
+        {cfg?.label}
       </button>
       {cycle.reopened_as && (
         <div className="mt-2 text-[11px] text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-1">
@@ -889,7 +892,7 @@ export function PdcaPage() {
                     <PhaseStepper cycle={c as any} />
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex flex-col gap-2 items-start">
+                    <div className="flex flex-row flex-wrap gap-1 items-center">
                       <AdvanceButtons cycle={c as any} onUpdated={() => {}} />
                       <EditCycleButton cycle={c} />
                       <ArchiviaCycleButton cycle={c} />
