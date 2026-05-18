@@ -9,6 +9,13 @@ on:
   schedule:
     # Ogni notte alle 03:30 UTC (04:30/05:30 ora italiana).
     - cron: "30 3 * * *"
+  push:
+    branches: [main]
+    paths:
+      - "backend/requirements/**"
+      - "frontend/package.json"
+      - "frontend/package-lock.json"
+      - ".github/workflows/security-audit.yml"
   pull_request:
     branches: [main]
     paths:
