@@ -85,8 +85,16 @@ def _detect_finding_codes(entity, scan) -> dict[str, dict]:
             # SPF "broken": +all = autorizza chiunque; permerror_* = MTA non valuta SPF
             detected[FindingCode.SPF_PLUS_ALL] = {"reason": scan.spf_policy}
 
-    # DNSSEC
-    if scan.dnssec_enabled is False:
+    # DNSSEC — segnalato solo se il dominio ha una presenza rilevabile (web o mail).
+    # Per domini NXDOMAIN o senza alcun record DNS, dnssec_enabled=False è un
+    # artefatto del resolver, non un vero gap di sicurezza.
+    _domain_has_presence = (
+        scan.ssl_valid is not None
+        or scan.mx_present is True
+        or scan.spf_present is True
+        or scan.dmarc_present is True
+    )
+    if scan.dnssec_enabled is False and _domain_has_presence:
         detected[FindingCode.DNSSEC_MISSING] = {}
 
     # Domain expiry

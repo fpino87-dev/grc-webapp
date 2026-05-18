@@ -28,17 +28,78 @@ TLS_TIMEOUT = 10
 # rallenta dashboard / aggregator.
 CRTSH_MAX_SUBDOMAINS = 1000
 
+# OID → nome compatibile con ssl.getpeercert() per la costruzione del dict issuer.
+_OID_NAMES: dict[str, str] = {
+    "2.5.4.3": "commonName",
+    "2.5.4.6": "countryName",
+    "2.5.4.10": "organizationName",
+    "2.5.4.11": "organizationalUnitName",
+}
+
+
+def _der_to_ssl_dict(der: bytes) -> dict | None:
+    """Converte DER grezzo in un dict compatibile con ssl.getpeercert().
+
+    Usato quando la connessione TLS riesce in modalità no-verify (cert scaduto
+    o self-signed) ma vogliamo comunque estrarre notAfter/issuer/SAN.
+    """
+    try:
+        from cryptography import x509 as cx509
+        cert = cx509.load_der_x509_certificate(der)
+
+        not_after = cert.not_valid_after_utc.strftime("%b %d %H:%M:%S %Y GMT")
+
+        issuer_rdns = tuple(
+            (((_OID_NAMES.get(a.oid.dotted_string, a.oid.dotted_string), a.value),),)
+            for a in cert.issuer
+        )
+
+        san: list[tuple[str, str]] = []
+        try:
+            ext = cert.extensions.get_extension_for_class(cx509.SubjectAlternativeName)
+            san = [("DNS", n.value) for n in ext.value if isinstance(n, cx509.DNSName)]
+        except Exception:
+            pass
+
+        return {"notAfter": not_after, "issuer": issuer_rdns, "subjectAltName": san}
+    except Exception as exc:
+        logger.debug("DER cert parse failed: %s", exc)
+        return None
+
 
 def _get_tls_cert(domain: str) -> dict | None:
-    """Connessione TLS diretta per leggere il certificato in uso."""
+    """Connessione TLS diretta per leggere il certificato in uso.
+
+    Prima tenta con verifica completa del certificato. Se la verifica fallisce per
+    un problema TLS (cert scaduto, self-signed, mismatch) riprova senza verifica
+    in modo da rilevare comunque i dati del certificato (scadenza, emittente).
+    Ritorna None solo se il server HTTPS non è raggiungibile.
+    """
+    # Tentativo 1: verifica completa
     try:
         ctx = ssl.create_default_context()
         with socket.create_connection((domain, 443), timeout=TLS_TIMEOUT) as sock:
             with ctx.wrap_socket(sock, server_hostname=domain) as ssock:
-                cert = ssock.getpeercert()
-                return cert
+                return ssock.getpeercert()
+    except ssl.SSLError:
+        pass  # problema certificato — riprova senza verifica
     except Exception as exc:
         logger.debug("TLS direct check failed for %s: %s", domain, exc)
+        return None  # server non raggiungibile
+
+    # Tentativo 2: no-verify per rilevare cert scaduti/non validi
+    try:
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        with socket.create_connection((domain, 443), timeout=TLS_TIMEOUT) as sock:
+            with ctx.wrap_socket(sock, server_hostname=domain) as ssock:
+                der = ssock.getpeercert(binary_form=True)
+        if not der:
+            return None
+        return _der_to_ssl_dict(der)
+    except Exception as exc:
+        logger.debug("TLS no-verify check failed for %s: %s", domain, exc)
         return None
 
 

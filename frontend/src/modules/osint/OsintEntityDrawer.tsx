@@ -78,10 +78,12 @@ function ScanFindings({ entity }: { entity: OsintEntityDetail }) {
     }
   }
 
-  // DNSSEC
+  // DNSSEC — solo se il dominio ha una presenza rilevabile (web o mail).
+  // Per domini NXDOMAIN/senza DNS, dnssec_enabled===false è un artefatto, non un gap.
+  const domainHasPresence = scan.ssl_valid !== null || scan.mx_present === true || scan.spf_present === true || scan.dmarc_present === true;
   if (scan.dnssec_enabled === true) {
     findings.push({ icon: "✅", text: t("osint.findings.dnssec_ok") });
-  } else if (scan.dnssec_enabled === false) {
+  } else if (scan.dnssec_enabled === false && domainHasPresence) {
     findings.push({ icon: "⚠️", text: t("osint.findings.dnssec_missing") });
   }
 
