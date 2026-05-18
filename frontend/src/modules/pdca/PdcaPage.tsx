@@ -738,6 +738,53 @@ function AdvanceButtons({
   );
 }
 
+function TitleCell({ cycle }: { cycle: PdcaCycle }) {
+  const [expanded, setExpanded] = useState(false);
+  const hasDesc = !!cycle.descrizione;
+
+  return (
+    <div>
+      <div className="flex items-start gap-1">
+        <span className="font-medium text-gray-800 leading-snug">{cycle.title}</span>
+        {hasDesc && (
+          <button
+            type="button"
+            onClick={() => setExpanded(v => !v)}
+            title={expanded ? "Nascondi descrizione" : "Mostra descrizione"}
+            className="mt-0.5 flex-shrink-0 text-gray-400 hover:text-primary-600 transition-colors"
+          >
+            <svg
+              className={`w-4 h-4 transition-transform duration-150 ${expanded ? "rotate-180" : ""}`}
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        )}
+      </div>
+
+      {hasDesc && expanded && (
+        <p className="mt-1.5 text-xs font-normal text-gray-600 bg-gray-50 border border-gray-200 rounded px-2.5 py-2 whitespace-pre-wrap leading-relaxed">
+          {cycle.descrizione}
+        </p>
+      )}
+
+      <div className="mt-1 flex flex-wrap gap-1">
+        {cycle.riferimento_finding && (
+          <span className="text-[11px] text-indigo-700 font-mono bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5">
+            {cycle.riferimento_finding}
+          </span>
+        )}
+        {cycle.reopened_as && (
+          <span className="text-[11px] text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-0.5">
+            ⟳ Riciclo CHECK KO
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 const TRIGGER_LABELS: Record<string, string> = {
   audit: "Audit",
   incident: "Incidente",
@@ -826,21 +873,8 @@ export function PdcaPage() {
             <tbody className="divide-y divide-gray-100">
               {cycles.map((c) => (
                 <tr key={c.id} className="hover:bg-gray-50 transition-colors align-top">
-                  <td className="px-4 py-3 font-medium text-gray-800">
-                    {c.title}
-                    {c.descrizione && (
-                      <p className="mt-0.5 text-xs font-normal text-gray-500 line-clamp-2">{c.descrizione}</p>
-                    )}
-                    {c.riferimento_finding && (
-                      <div className="mt-0.5 text-[11px] text-indigo-700 font-mono bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5 inline-block">
-                        {c.riferimento_finding}
-                      </div>
-                    )}
-                    {c.reopened_as && (
-                      <div className="mt-1 text-[11px] text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-1 inline-block">
-                        ⟳ Riciclo aperto per CHECK non efficace
-                      </div>
-                    )}
+                  <td className="px-4 py-3 font-medium text-gray-800 max-w-sm">
+                    <TitleCell cycle={c} />
                   </td>
                   <td className="px-4 py-3 text-gray-600 text-xs">
                     <span className="font-medium">{TRIGGER_LABELS[c.trigger_type] ?? c.trigger_type}</span>
