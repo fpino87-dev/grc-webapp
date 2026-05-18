@@ -19,6 +19,7 @@ class PdcaCycleSerializer(serializers.ModelSerializer):
             "id",
             "plant",
             "title",
+            "descrizione",
             "trigger_type",
             "trigger_source_id",
             "audit_subtype",

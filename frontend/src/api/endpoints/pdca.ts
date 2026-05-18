@@ -4,6 +4,7 @@ export interface PdcaCycle {
   id: string;
   plant: string;
   title: string;
+  descrizione?: string;
   trigger_type: string;
   audit_subtype?: string;
   riferimento_finding?: string;
@@ -23,6 +24,8 @@ export const pdcaApi = {
     apiClient.get<{ results: PdcaCycle[] }>("/pdca/cycles/", { params }).then((r) => r.data),
   create: (data: Partial<PdcaCycle>) =>
     apiClient.post<PdcaCycle>("/pdca/cycles/", data).then((r) => r.data),
+  update: (id: string, data: Partial<PdcaCycle>) =>
+    apiClient.patch<PdcaCycle>(`/pdca/cycles/${id}/`, data).then((r) => r.data),
   remove: (id: string, reason: string) =>
     apiClient.delete(`/pdca/cycles/${id}/`, { data: { reason } }),
   archivia: (id: string, motivo: string) =>

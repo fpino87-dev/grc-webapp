@@ -34,6 +34,19 @@ class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             payload={"cycle_id": str(cycle.pk), "title": cycle.title},
         )
 
+    def perform_update(self, serializer):
+        cycle = serializer.save()
+        log_action(
+            user=self.request.user,
+            action_code="pdca.cycle.updated",
+            level="L2",
+            entity=cycle,
+            payload={
+                "cycle_id": str(cycle.pk),
+                "updated_fields": list(serializer.validated_data.keys()),
+            },
+        )
+
     @action(detail=True, methods=["post"], url_path="advance")
     def advance(self, request, pk=None):
         from apps.documents.models import Evidence

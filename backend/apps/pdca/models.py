@@ -21,6 +21,10 @@ class PdcaCycle(BaseModel):
         ],
         default="plan",
     )
+    descrizione = models.TextField(
+        blank=True,
+        help_text="Descrizione estesa del finding o dello spunto di miglioramento",
+    )
     riferimento_finding = models.CharField(
         max_length=200,
         blank=True,

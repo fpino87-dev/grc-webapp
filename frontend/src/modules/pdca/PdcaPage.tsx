@@ -83,6 +83,153 @@ function DeleteCycleButton({ cycle }: { cycle: PdcaCycle }) {
   );
 }
 
+function EditCycleModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [form, setForm] = useState({
+    title: cycle.title,
+    descrizione: cycle.descrizione ?? "",
+    trigger_type: cycle.trigger_type,
+    audit_subtype: cycle.audit_subtype ?? "",
+    riferimento_finding: cycle.riferimento_finding ?? "",
+    scope_type: cycle.scope_type,
+  });
+  const [error, setError] = useState("");
+
+  const mutation = useMutation({
+    mutationFn: () => {
+      const payload: Partial<PdcaCycle> = {
+        title: form.title,
+        descrizione: form.descrizione,
+        trigger_type: form.trigger_type,
+        scope_type: form.scope_type,
+        audit_subtype: form.trigger_type === "audit" ? form.audit_subtype || undefined : undefined,
+        riferimento_finding: form.trigger_type === "audit" ? form.riferimento_finding : "",
+      };
+      return pdcaApi.update(cycle.id, payload);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["pdca"] });
+      onClose();
+    },
+    onError: (e: unknown) => {
+      const msg =
+        (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
+        "Errore durante il salvataggio";
+      setError(String(msg));
+    },
+  });
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  }
+
+  const isAudit = form.trigger_type === "audit";
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+        <h3 className="text-lg font-semibold mb-4">Modifica ciclo PDCA</h3>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Titolo *</label>
+            <input
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Descrizione</label>
+            <textarea
+              name="descrizione"
+              value={form.descrizione}
+              onChange={handleChange}
+              rows={4}
+              className="w-full border rounded px-3 py-2 text-sm"
+              placeholder="Descrizione estesa del finding o dello spunto..."
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo trigger</label>
+              <select name="trigger_type" value={form.trigger_type} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+                <option value="audit">Audit</option>
+                <option value="incident">Incidente</option>
+                <option value="management_review">Revisione direzione</option>
+                <option value="risk">Rischio</option>
+                <option value="manual">Manuale</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Ambito</label>
+              <select name="scope_type" value={form.scope_type} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+                <option value="plant">Sito</option>
+                <option value="org">Organizzazione</option>
+                <option value="process">Processo</option>
+              </select>
+            </div>
+          </div>
+          {isAudit && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo audit</label>
+                <select name="audit_subtype" value={form.audit_subtype} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+                  <option value="">— seleziona —</option>
+                  <option value="interno">Audit interno</option>
+                  <option value="seconda_parte">Seconda parte</option>
+                  <option value="terza_parte">Terza parte</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Riferimento finding</label>
+                <input
+                  name="riferimento_finding"
+                  value={form.riferimento_finding}
+                  onChange={handleChange}
+                  className="w-full border rounded px-3 py-2 text-sm"
+                  placeholder="es. NC-2026-04-01"
+                />
+              </div>
+            </>
+          )}
+        </div>
+        {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
+        <div className="flex justify-end gap-2 mt-4">
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">
+            Annulla
+          </button>
+          <button
+            onClick={() => mutation.mutate()}
+            disabled={mutation.isPending || !form.title.trim()}
+            className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
+          >
+            {mutation.isPending ? "Salvataggio..." : "Salva modifiche"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EditCycleButton({ cycle }: { cycle: PdcaCycle }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        title="Modifica"
+        className="px-2 py-1 text-[11px] rounded-md text-gray-600 hover:bg-gray-100 border border-transparent hover:border-gray-200"
+      >
+        ✏️ Modifica
+      </button>
+      {open && <EditCycleModal cycle={cycle} onClose={() => setOpen(false)} />}
+    </>
+  );
+}
+
 function ArchiviaCycleButton({ cycle }: { cycle: PdcaCycle }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -204,6 +351,16 @@ function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Titolo *</label>
             <input name="title" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="es. Miglioramento gestione accessi privilegiati" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Descrizione</label>
+            <textarea
+              name="descrizione"
+              onChange={e => setForm(prev => ({ ...prev, descrizione: e.target.value }))}
+              rows={3}
+              className="w-full border rounded px-3 py-2 text-sm"
+              placeholder="Descrizione del finding o dello spunto di miglioramento..."
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -671,6 +828,9 @@ export function PdcaPage() {
                 <tr key={c.id} className="hover:bg-gray-50 transition-colors align-top">
                   <td className="px-4 py-3 font-medium text-gray-800">
                     {c.title}
+                    {c.descrizione && (
+                      <p className="mt-0.5 text-xs font-normal text-gray-500 line-clamp-2">{c.descrizione}</p>
+                    )}
                     {c.riferimento_finding && (
                       <div className="mt-0.5 text-[11px] text-indigo-700 font-mono bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5 inline-block">
                         {c.riferimento_finding}
@@ -697,6 +857,7 @@ export function PdcaPage() {
                   <td className="px-4 py-3">
                     <div className="flex flex-col gap-2 items-start">
                       <AdvanceButtons cycle={c as any} onUpdated={() => {}} />
+                      <EditCycleButton cycle={c} />
                       <ArchiviaCycleButton cycle={c} />
                       <DeleteCycleButton cycle={c} />
                     </div>
