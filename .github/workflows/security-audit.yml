@@ -1,10 +1,9 @@
 name: security-audit
 
-# newfix S14 — esegue pip-audit e npm audit ogni notte e ad ogni PR.
-# Il job NON fallisce automaticamente sui findings di npm audit (alta rumorosita'
-# del registry), ma carica il report come artifact per revisione manuale.
-# pip-audit gira invece in modalita' --strict: una vulnerabilita' Python
-# blocca la build (i pacchetti backend sono pochi e curati).
+# Esegue pip-audit e npm audit ogni notte e ad ogni PR.
+# pip-audit: modalita' --strict (vulnerabilita' Python blocca la build).
+# npm audit: blocca solo su high/critical in dipendenze di produzione.
+# Node.js 24 runner richiesto per eliminare deprecation warning GitHub Actions.
 
 on:
   schedule:
@@ -18,6 +17,9 @@ on:
       - "frontend/package-lock.json"
       - ".github/workflows/security-audit.yml"
   workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   pip-audit:
@@ -53,7 +55,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - name: npm ci
@@ -62,9 +64,8 @@ jobs:
       - name: npm audit (production)
         working-directory: frontend
         run: |
-          # Fail solo su high/critical in dipendenze di produzione.
-          # Il registry npm e' rumoroso: low/moderate sono accettabili in
-          # attesa di patch upstream, ma vanno tracciate via report artifact.
+          # Blocca solo su high/critical in dipendenze di produzione.
+          # low/moderate sono accettabili in attesa di patch upstream.
           npm audit --omit=dev --audit-level=high
       - name: Save full audit report (always)
         if: always()
