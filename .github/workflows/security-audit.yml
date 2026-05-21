@@ -44,7 +44,10 @@ jobs:
         run: pip install --upgrade "pip-audit>=2.7.0"
       - name: Audit backend deps (strict)
         run: |
+          # PYSEC-2025-183 (pyjwt): no fix version available upstream as of 2026-05-21.
+          # Remove --ignore-vuln once pyjwt releases a patched version.
           pip-audit --strict \
+            --ignore-vuln PYSEC-2025-183 \
             --requirement backend/requirements/base.txt \
             --no-deps
       - name: Audit dev deps (warning-only)
