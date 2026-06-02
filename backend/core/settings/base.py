@@ -138,7 +138,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     "check-expiring-risk-acceptances-daily": {
         "task": "apps.risk.tasks.check_expiring_risk_acceptances",
-        "schedule": crontab(hour=7, minute=0),  # ogni mattina alle 07:00
+        "schedule": crontab(hour=7, minute=20),  # 07:20 — scaglionato da generate-scheduled-checklists (07:00)
     },
     "notify-expiring-documents": {
         "task": "apps.documents.tasks.notify_expiring_documents",
@@ -150,7 +150,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     "check-overdue-findings": {
         "task": "apps.audit_prep.tasks.check_overdue_findings",
-        "schedule": crontab(hour=8, minute=0),
+        "schedule": crontab(hour=8, minute=45),  # 08:45 — scaglionato da notify-expiring-roles (08:00)
     },
     "notify-pdca-blocked": {
         "task": "apps.pdca.tasks.notify_blocked_pdca_task",
