@@ -103,10 +103,10 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_TASK_SERIALIZER = "json"
 CELERY_TIMEZONE = "Europe/Rome"
 CELERY_BEAT_SCHEDULE = {
-    "auto-backup-daily": {
-        "task": "apps.backups.tasks.auto_backup_task",
-        "schedule": crontab(hour=2, minute=0),
-    },
+    # NB: il backup notturno è registrato come PeriodicTask "Backup automatico
+    # notturno" dal command `schedule_backup_task` (vedi runbook). NON ridichiararlo
+    # qui: in passato la voce "auto-backup-daily" creava una seconda PeriodicTask
+    # con nome diverso sullo stesso task → backup eseguito due volte ogni notte.
     "check-expiring-risk-acceptances-daily": {
         "task": "apps.risk.tasks.check_expiring_risk_acceptances",
         "schedule": crontab(hour=7, minute=0),  # ogni mattina alle 07:00
