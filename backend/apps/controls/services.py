@@ -286,6 +286,13 @@ def evaluate_control(instance, new_status, user, note=""):
     if new_status == "na":
         instance.na_justification = note
         update_fields.append("na_justification")
+    # Valutare il controllo È la rivalutazione: chiude il flag "da rivalutare".
+    # Prima non veniva azzerato da nessuna parte → un controllo flaggato da un
+    # change asset restava "da rivalutare" a vita anche dopo essere stato rivalutato.
+    if instance.needs_revaluation:
+        instance.needs_revaluation = False
+        instance.needs_revaluation_since = None
+        update_fields += ["needs_revaluation", "needs_revaluation_since"]
     instance.save(update_fields=update_fields)
 
     log_action(

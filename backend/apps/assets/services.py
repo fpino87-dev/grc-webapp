@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.utils import timezone
 
 from core.audit import log_action
@@ -17,6 +18,7 @@ def get_critical_assets(plant_id):
     return Asset.objects.filter(plant_id=plant_id, criticality__gte=4).select_related("plant", "owner")
 
 
+@transaction.atomic
 def register_change(asset, user, change_ref: str,
                     change_desc: str = "",
                     portal_url: str = "") -> dict:
@@ -24,8 +26,11 @@ def register_change(asset, user, change_ref: str,
     Registra un change esterno sull'asset.
     Non gestisce il workflow del change — solo lo referenzia.
     Propaga automaticamente flag "da rivalutare" a:
-      - ControlInstance collegati al processo BIA dell'asset
-      - RiskAssessment collegati all'asset
+      - ControlInstance del plant (compliant/parziale/na) — aggancio a livello
+        plant: ControlInstance non ha ancora un legame diretto con asset/processo
+        (vedi budnewsfix P1 per il narrowing);
+      - RiskAssessment collegati all'asset.
+    Atomico: o si aggiornano asset + cascate + audit insieme, o niente.
     """
     asset.last_change_ref = change_ref
     asset.last_change_date = timezone.now().date()
@@ -47,21 +52,25 @@ def register_change(asset, user, change_ref: str,
 
     today = timezone.now().date()
 
-    # Propaga a ControlInstance collegati tramite processi BIA
+    # Numero di processi BIA in cui l'asset è coinvolto (solo conteggio).
+    affected["processes"] = asset.processes.filter(deleted_at__isnull=True).count()
+
+    # Propaga ai ControlInstance del plant che dichiaravano conformità
+    # (compliant/parziale/na) → li rimette "da rivalutare". UNA sola volta:
+    # prima il flagging veniva ripetuto per OGNI processo (stesso filtro
+    # plant=asset.plant, ignorando il processo) → ri-scritture e conteggio ×N.
     from apps.controls.models import ControlInstance
-    for process in asset.processes.filter(deleted_at__isnull=True):
-        affected["processes"] += 1
-        cis = ControlInstance.objects.filter(
-            plant=asset.plant,
-            deleted_at__isnull=True,
-        ).exclude(status__in=["non_valutato", "gap"])
-        for ci in cis:
-            ci.needs_revaluation = True
-            ci.needs_revaluation_since = today
-            ci.save(update_fields=[
-                "needs_revaluation", "needs_revaluation_since", "updated_at",
-            ])
-            affected["controls"] += 1
+    cis = list(
+        ControlInstance.objects.filter(plant=asset.plant, deleted_at__isnull=True)
+        .exclude(status__in=["non_valutato", "gap"])
+    )
+    for ci in cis:
+        ci.needs_revaluation = True
+        ci.needs_revaluation_since = today
+        ci.save(update_fields=[
+            "needs_revaluation", "needs_revaluation_since", "updated_at",
+        ])
+    affected["controls"] = len(cis)
 
     # Propaga a RiskAssessment collegati all'asset
     from apps.risk.models import RiskAssessment
