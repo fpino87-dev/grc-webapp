@@ -49,8 +49,26 @@ def health_check(request):
         db_ok = True
     except Exception:
         db_ok = False
+
+    # Drift pianificazione Celery (settings vs PeriodicTask) — informativo, NON
+    # influenza lo status HTTP: un job non schedulato è un problema ops, non un
+    # outage. Best-effort: se django_celery_beat non è pronto, si omette.
+    schedule = None
+    try:
+        from apps.audit_trail.management.commands.verify_schedule import evaluate_all
+        results = evaluate_all()
+        problems = [
+            {"name": n, "status": s} for n, s, _ in results if s != "OK"
+        ]
+        schedule = {"expected": len(results), "problems": problems}
+    except Exception:
+        schedule = None
+
     status = 200 if db_ok else 503
-    return JsonResponse({"status": "ok" if db_ok else "error", "db": db_ok}, status=status)
+    payload = {"status": "ok" if db_ok else "error", "db": db_ok}
+    if schedule is not None:
+        payload["schedule"] = schedule
+    return JsonResponse(payload, status=status)
 
 
 # Whitelist completa tipo+lingua → nome file esatto.

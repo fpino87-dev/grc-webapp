@@ -25,10 +25,9 @@
 - **Fatto**: `evaluate_control` ora azzera il flag (rivalutare = chiudere); cascata controlli fatta **una sola volta** + `@transaction.atomic` su `register_change`; test di regressione (assets+controls 83 verdi). 0 flag stuck a DB → nessuna pulizia necessaria. (commit: vedi git)
 - **NB**: il narrowing reale (flaggare solo i controlli dell'asset, non tutto il plant) richiede un legame `ControlInstance↔asset/processo` che **non esiste nel modello** → spostato in P1-5.
 
-### P0-2 · Verifica schedulazione (no più "automazione fantasma")
-- **Problema**: nessuna garanzia che le `PeriodicTask` attese esistano (è così che OSINT weekly non girava). 
-- **Azione**: management command `verify_schedule` che confronta `settings.CELERY_BEAT_SCHEDULE` vs DB (manca/disabilitata/orario diverso) + test in CI + esposizione in health check.
-- **C/B**: S · Alto · Stato: ⬜
+### P0-2 · Verifica schedulazione (no più "automazione fantasma") — ✅ FATTO (2026-06-02)
+- **Fatto**: command `apps/audit_trail/.../verify_schedule.py` (confronta settings vs PeriodicTask: MISSING/DISABLED/MISMATCH; exit≠0 per CI; `--report-only`). Riepilogo esposto in `GET /api/health/` (`schedule.expected/problems`, non altera lo status). 6 test. Verificato live: 22/22 allineate.
+- **TODO opzionale**: aggiungere `verify_schedule` come step in CI (`security-audit.yml`/test workflow) per fallire la build sul drift.
 
 ### P0-3 · Bonifica `except: pass` nei calcoli di compliance
 - **Problema**: eccezioni inghiottite nascondono bug per settimane (provato col bug `plant`/`plants`). Occorrenze: controls 6, osint 6, suppliers 3, governance/incidents/audit_prep 2, ecc.
