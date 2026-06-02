@@ -31,6 +31,11 @@ const styles: Record<string, string> = {
   si: "bg-red-100 text-red-700",
   no: "bg-green-100 text-green-700",
   da_valutare: "bg-yellow-100 text-yellow-700",
+  // Checklist run statuses (M08)
+  pending: "bg-gray-100 text-gray-600",
+  in_progress: "bg-blue-100 text-blue-700",
+  completed: "bg-green-100 text-green-700",
+  overdue: "bg-red-200 text-red-800",
 };
 
 const labels: Record<string, string> = {

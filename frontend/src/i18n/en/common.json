@@ -37,7 +37,11 @@
     "si": "Yes",
     "no": "No",
     "da_valutare": "To be assessed",
-    "in_analisi": "In analysis"
+    "in_analisi": "In analysis",
+    "pending": "To do",
+    "in_progress": "In progress",
+    "completed": "Completed",
+    "overdue": "Overdue"
   },
   "actions": {
     "save": "Save",
@@ -997,7 +1001,9 @@
       "supplier_evaluation": "Supplier Evaluation",
       "mfa": "MFA Authentication",
       "backups": "Backup & Restore",
-      "osint": "OSINT Monitor"
+      "osint": "OSINT Monitor",
+      "checklist_runs": "Checklists",
+      "checklist_templates": "Checklist Templates"
     }
   },
   "topbar": {
@@ -2731,6 +2737,73 @@
       "reputation": "Reputation",
       "grc": "GRC",
       "legend": "Green 0–29 ok · Yellow 30–49 attention · Orange 50–69 warning · Red 70+ critical"
+    }
+  },
+  "checklists": {
+    "templates": {
+      "title": "Checklists — Templates",
+      "new": "New template",
+      "edit": "Edit template",
+      "name": "Name",
+      "description": "Description",
+      "frequency": "Frequency",
+      "plant": "Plant",
+      "active": "Active",
+      "active_yes": "Yes",
+      "active_no": "No",
+      "items": "Checklist items",
+      "add_item": "Add item",
+      "item_placeholder": "Item text...",
+      "mandatory": "Mandatory",
+      "all_plants": "All plants",
+      "all_plants_short": "All",
+      "all_frequencies": "All frequencies",
+      "back": "Back to templates",
+      "empty": "No templates found",
+      "table": {
+        "name": "Name",
+        "frequency": "Frequency",
+        "plant": "Plant",
+        "active": "Active"
+      }
+    },
+    "runs": {
+      "title": "Checklists — Runs",
+      "empty": "No checklists to run",
+      "all_plants": "All plants",
+      "filters": {
+        "all": "All"
+      },
+      "table": {
+        "template": "Template",
+        "plant": "Plant",
+        "due_date": "Due date",
+        "progress": "Progress",
+        "status": "Status"
+      }
+    },
+    "run": {
+      "back": "Back to runs",
+      "progress": "Progress",
+      "complete": "Complete checklist",
+      "complete_hint": "Check all mandatory items to complete.",
+      "ready_hint": "All mandatory items are checked.",
+      "note_placeholder": "Note (optional)",
+      "mandatory": "Req.",
+      "optional": "Opt.",
+      "completed_on": "Completed on"
+    },
+    "frequency": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "ad_hoc": "Ad hoc"
+    },
+    "status": {
+      "pending": "To do",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "overdue": "Overdue"
     }
   }
 }

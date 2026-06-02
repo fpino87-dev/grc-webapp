@@ -11,6 +11,10 @@ import { GovernancePage } from "./modules/governance/GovernancePage";
 import { AssetsPage } from "./modules/assets/AssetsPage";
 import { RiskPage } from "./modules/risk/RiskPage";
 import { TasksPage } from "./modules/tasks/TasksPage";
+import { ChecklistTemplateList } from "./modules/checklist/ChecklistTemplateList";
+import { ChecklistTemplateForm } from "./modules/checklist/ChecklistTemplateForm";
+import { ChecklistRunList } from "./modules/checklist/ChecklistRunList";
+import { ChecklistRunDetail } from "./modules/checklist/ChecklistRunDetail";
 import { DocumentsPage } from "./modules/documents/DocumentsPage";
 import { ReportingPage } from "./modules/reporting/ReportingPage";
 import { UsersPage } from "./modules/users/UsersPage";
@@ -66,6 +70,11 @@ export function App() {
           <Route path="assets" element={<AssetsPage />} />
           <Route path="risk" element={<RiskPage />} />
           <Route path="tasks" element={<TasksPage />} />
+          <Route path="checklists/templates" element={<ChecklistTemplateList />} />
+          <Route path="checklists/templates/new" element={<ChecklistTemplateForm />} />
+          <Route path="checklists/templates/:id/edit" element={<ChecklistTemplateForm />} />
+          <Route path="checklists/runs" element={<ChecklistRunList />} />
+          <Route path="checklists/runs/:id" element={<ChecklistRunDetail />} />
           <Route path="documents" element={<DocumentsPage />} />
           <Route path="reporting" element={<ReportingPage />} />
           <Route path="users" element={<UsersPage />} />

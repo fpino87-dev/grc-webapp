@@ -120,3 +120,145 @@ def get_overdue_tasks(plant_id=None):
     if plant_id:
         qs = qs.filter(plant_id=plant_id)
     return qs.select_related("plant", "assigned_to")
+
+
+# ── Quick Checklist (M08) ────────────────────────────────────────────────────
+
+# Soglia: N run consecutivi incompleti su uno stesso template apre un PDCA (M11).
+CHECKLIST_PDCA_THRESHOLD = 3
+
+
+def _run_has_unchecked_mandatory(run) -> bool:
+    """Vero se il run ha almeno un item obbligatorio non spuntato."""
+    return run.items.filter(
+        template_item__is_mandatory=True, checked=False
+    ).exists()
+
+
+def create_run_for_template(template, plant, due_date):
+    """
+    Crea un ChecklistRun per (template, plant, due_date) con un RunItem per
+    ciascun item attivo del template. Idempotente: non duplica un run esistente.
+    """
+    from .models import ChecklistRun, ChecklistRunItem
+
+    existing = ChecklistRun.objects.filter(
+        template=template, plant=plant, due_date=due_date
+    ).first()
+    if existing:
+        return existing
+
+    run = ChecklistRun.objects.create(
+        template=template,
+        plant=plant,
+        due_date=due_date,
+        status="pending",
+    )
+    items = [
+        ChecklistRunItem(run=run, template_item=ti)
+        for ti in template.items.all()
+    ]
+    if items:
+        ChecklistRunItem.objects.bulk_create(items)
+    return run
+
+
+def complete_run_item(run, item_id, checked, note="", user=None):
+    """Spunta/de-spunta un singolo item del run. Nessun workflow, immediato."""
+    run_item = run.items.filter(pk=item_id).first()
+    if run_item is None:
+        return None
+    run_item.checked = bool(checked)
+    run_item.note = note or ""
+    if run_item.checked:
+        run_item.checked_at = timezone.now()
+        run_item.checked_by = user
+    else:
+        run_item.checked_at = None
+        run_item.checked_by = None
+    run_item.save(
+        update_fields=["checked", "note", "checked_at", "checked_by", "updated_at"]
+    )
+
+    # Primo check → il run passa a in_progress
+    if run.status == "pending" and run.items.filter(checked=True).exists():
+        run.status = "in_progress"
+        run.save(update_fields=["status", "updated_at"])
+    return run_item
+
+
+def complete_run(run, user):
+    """
+    Marca il run come completato — solo se tutti gli item obbligatori sono
+    spuntati. Registra l'audit trail seguendo il pattern degli altri moduli.
+    """
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+
+    if _run_has_unchecked_mandatory(run):
+        raise ValidationError(
+            _("Tutti gli item obbligatori devono essere spuntati prima di completare.")
+        )
+
+    run.status = "completed"
+    run.completed_at = timezone.now()
+    run.completed_by = user
+    run.save(update_fields=["status", "completed_at", "completed_by", "updated_at"])
+
+    log_action(
+        user=user,
+        action_code="checklist_run.completed",
+        level="L1",
+        entity=run,
+        payload={
+            "id": str(run.pk),
+            "template": run.template.name,
+            "plant_id": str(run.plant_id),
+            "items_total": run.items.count(),
+            "items_checked": run.items.filter(checked=True).count(),
+        },
+    )
+    return run
+
+
+def evaluate_checklist_pdca_threshold(template, user=None):
+    """
+    Se gli ultimi CHECKLIST_PDCA_THRESHOLD run conclusi (completed/overdue) di
+    un template hanno tutti almeno un item obbligatorio non spuntato, apre
+    automaticamente un ciclo PDCA (M11) collegato al template.
+    Idempotente: non crea un nuovo ciclo se ne esiste già uno aperto.
+    """
+    from apps.pdca.models import PdcaCycle
+    from apps.pdca.services import create_cycle
+
+    from .models import ChecklistRun
+
+    recent = list(
+        ChecklistRun.objects.filter(
+            template=template, status__in=["completed", "overdue"]
+        )
+        .select_related("plant")
+        .prefetch_related("items")
+        .order_by("-due_date", "-created_at")[:CHECKLIST_PDCA_THRESHOLD]
+    )
+    if len(recent) < CHECKLIST_PDCA_THRESHOLD:
+        return None
+    if not all(_run_has_unchecked_mandatory(r) for r in recent):
+        return None
+
+    # Evita duplicati: un solo ciclo aperto per template alla volta.
+    already_open = PdcaCycle.objects.filter(
+        trigger_type="checklist_incompleta",
+        trigger_source_id=template.pk,
+        deleted_at__isnull=True,
+    ).exclude(fase_corrente__in=["chiuso", "archiviato"]).exists()
+    if already_open:
+        return None
+
+    plant = template.plant or recent[0].plant
+    return create_cycle(
+        plant=plant,
+        title=f"Checklist ricorrente incompleta: {template.name}",
+        trigger_type="checklist_incompleta",
+        trigger_source_id=template.pk,
+    )

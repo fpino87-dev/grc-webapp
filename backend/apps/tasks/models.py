@@ -137,3 +137,113 @@ class TaskComment(BaseModel):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="comments")
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     body = models.TextField()
+
+
+# ── Quick Checklist (M08) ────────────────────────────────────────────────────
+# Checklist operative ricorrenti: template riutilizzabili + run giornalieri
+# generati automaticamente via Celery. Pensate per essere completate in 30s,
+# senza workflow di approvazione.
+
+
+class ChecklistTemplate(BaseModel):
+    FREQUENCY_CHOICES = [
+        ("daily", "Giornaliera"),
+        ("weekly", "Settimanale"),
+        ("monthly", "Mensile"),
+        ("ad_hoc", "Ad hoc"),
+    ]
+
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    frequency = models.CharField(
+        max_length=10, choices=FREQUENCY_CHOICES, default="daily", db_index=True
+    )
+    # plant null = template valido per tutti i plant
+    plant = models.ForeignKey(
+        "plants.Plant",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="checklist_templates",
+        db_index=True,
+    )
+    is_active = models.BooleanField(default=True, db_index=True)
+
+    class Meta:
+        ordering = ["name"]
+
+
+class ChecklistTemplateItem(BaseModel):
+    template = models.ForeignKey(
+        ChecklistTemplate, on_delete=models.CASCADE, related_name="items"
+    )
+    order = models.IntegerField(default=0)
+    text = models.CharField(max_length=500)
+    is_mandatory = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order", "created_at"]
+
+
+class ChecklistRun(BaseModel):
+    STATUS_CHOICES = [
+        ("pending", "Da iniziare"),
+        ("in_progress", "In corso"),
+        ("completed", "Completata"),
+        ("overdue", "Scaduta"),
+    ]
+
+    template = models.ForeignKey(
+        ChecklistTemplate, on_delete=models.PROTECT, related_name="runs"
+    )
+    plant = models.ForeignKey(
+        "plants.Plant",
+        on_delete=models.PROTECT,
+        related_name="checklist_runs",
+        db_index=True,
+    )
+    # assegnazione diretta opzionale: i run auto-generati nascono senza assegnatario
+    assigned_to = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assigned_checklist_runs",
+    )
+    due_date = models.DateField(db_index=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="completed_checklist_runs",
+    )
+    status = models.CharField(
+        max_length=15, choices=STATUS_CHOICES, default="pending", db_index=True
+    )
+
+    class Meta:
+        ordering = ["-due_date", "template__name"]
+
+
+class ChecklistRunItem(BaseModel):
+    run = models.ForeignKey(
+        ChecklistRun, on_delete=models.CASCADE, related_name="items"
+    )
+    template_item = models.ForeignKey(
+        ChecklistTemplateItem, on_delete=models.PROTECT, related_name="run_items"
+    )
+    checked = models.BooleanField(default=False)
+    note = models.TextField(blank=True)
+    checked_at = models.DateTimeField(null=True, blank=True)
+    checked_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="checked_checklist_items",
+    )
+
+    class Meta:
+        ordering = ["template_item__order", "created_at"]

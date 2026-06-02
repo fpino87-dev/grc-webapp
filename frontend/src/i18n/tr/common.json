@@ -37,7 +37,11 @@
     "si": "Evet",
     "no": "No",
     "da_valutare": "Değerlendirilecek",
-    "in_analisi": "Analizde"
+    "in_analisi": "Analizde",
+    "pending": "Yapılacak",
+    "in_progress": "Devam ediyor",
+    "completed": "Tamamlandı",
+    "overdue": "Gecikmiş"
   },
   "actions": {
     "save": "Kaydet",
@@ -1079,7 +1083,9 @@
       "supplier_evaluation": "Tedarikçi Değerlendirmesi",
       "mfa": "MFA Kimlik Doğrulama",
       "backups": "Yedekleme & Geri Yükleme",
-      "osint": "OSINT Monitor"
+      "osint": "OSINT Monitor",
+      "checklist_runs": "Kontrol Listeleri",
+      "checklist_templates": "Liste Şablonları"
     }
   },
   "topbar": {
@@ -2810,6 +2816,73 @@
       "reputation": "İtibar",
       "grc": "GRC",
       "legend": "Yeşil 0–29 iyi · Sarı 30–49 dikkat · Turuncu 50–69 uyarı · Kırmızı 70+ kritik"
+    }
+  },
+  "checklists": {
+    "templates": {
+      "title": "Kontrol Listeleri — Şablonlar",
+      "new": "Yeni şablon",
+      "edit": "Şablonu düzenle",
+      "name": "Ad",
+      "description": "Açıklama",
+      "frequency": "Sıklık",
+      "plant": "Tesis",
+      "active": "Aktif",
+      "active_yes": "Evet",
+      "active_no": "Hayır",
+      "items": "Kontrol listesi maddeleri",
+      "add_item": "Madde ekle",
+      "item_placeholder": "Madde metni...",
+      "mandatory": "Zorunlu",
+      "all_plants": "Tüm tesisler",
+      "all_plants_short": "Tümü",
+      "all_frequencies": "Tüm sıklıklar",
+      "back": "Şablonlara dön",
+      "empty": "Şablon bulunamadı",
+      "table": {
+        "name": "Ad",
+        "frequency": "Sıklık",
+        "plant": "Tesis",
+        "active": "Aktif"
+      }
+    },
+    "runs": {
+      "title": "Kontrol Listeleri — Çalıştırmalar",
+      "empty": "Çalıştırılacak kontrol listesi yok",
+      "all_plants": "Tüm tesisler",
+      "filters": {
+        "all": "Tümü"
+      },
+      "table": {
+        "template": "Şablon",
+        "plant": "Tesis",
+        "due_date": "Son tarih",
+        "progress": "İlerleme",
+        "status": "Durum"
+      }
+    },
+    "run": {
+      "back": "Çalıştırmalara dön",
+      "progress": "İlerleme",
+      "complete": "Kontrol listesini tamamla",
+      "complete_hint": "Tamamlamak için tüm zorunlu maddeleri işaretleyin.",
+      "ready_hint": "Tüm zorunlu maddeler işaretlendi.",
+      "note_placeholder": "Not (isteğe bağlı)",
+      "mandatory": "Zor.",
+      "optional": "İst.",
+      "completed_on": "Tamamlanma"
+    },
+    "frequency": {
+      "daily": "Günlük",
+      "weekly": "Haftalık",
+      "monthly": "Aylık",
+      "ad_hoc": "Tek seferlik"
+    },
+    "status": {
+      "pending": "Yapılacak",
+      "in_progress": "Devam ediyor",
+      "completed": "Tamamlandı",
+      "overdue": "Gecikmiş"
     }
   }
 }

@@ -111,6 +111,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.risk.tasks.check_expiring_risk_acceptances",
         "schedule": crontab(hour=7, minute=0),  # ogni mattina alle 07:00
     },
+    "generate-scheduled-checklists": {
+        "task": "apps.tasks.tasks.generate_scheduled_checklists",
+        "schedule": crontab(hour=7, minute=0),  # ogni mattina alle 07:00
+    },
 }
 
 # Directory dove vengono salvati i file di backup (montata come volume Docker)

@@ -12,6 +12,7 @@ const navGroups: NavGroup[] = [
       { to: "/", labelKey: "sidebar.items.dashboard", icon: "⊞", roles: null },
       { to: "/reporting", labelKey: "sidebar.items.reporting", icon: "📊", roles: null },
       { to: "/tasks", labelKey: "sidebar.items.tasks", icon: "☑", roles: null },
+      { to: "/checklists/runs", labelKey: "sidebar.items.checklist_runs", icon: "✔", roles: null },
     ],
   },
   {
@@ -48,6 +49,7 @@ const navGroups: NavGroup[] = [
       { to: "/schedule/activity", labelKey: "sidebar.items.activity_schedule", icon: "📅", roles: null },
       { to: "/schedule/documents", labelKey: "sidebar.items.required_documents", icon: "📑", roles: null },
       { to: "/schedule/policy", labelKey: "sidebar.items.schedule_policy", icon: "⏱", roles: ["super_admin", "compliance_officer"] },
+      { to: "/checklists/templates", labelKey: "sidebar.items.checklist_templates", icon: "🗒", roles: ["super_admin", "compliance_officer", "ciso", "risk_manager"] },
     ],
   },
   {

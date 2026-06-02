@@ -37,7 +37,11 @@
     "si": "Tak",
     "no": "No",
     "da_valutare": "Do oceny",
-    "in_analisi": "W analizie"
+    "in_analisi": "W analizie",
+    "pending": "Do zrobienia",
+    "in_progress": "W toku",
+    "completed": "Zakończona",
+    "overdue": "Po terminie"
   },
   "actions": {
     "save": "Zapisz",
@@ -1079,7 +1083,9 @@
       "supplier_evaluation": "Ocena dostawców",
       "mfa": "Uwierzytelnianie MFA",
       "backups": "Kopia zapasowa & Przywracanie",
-      "osint": "OSINT Monitor"
+      "osint": "OSINT Monitor",
+      "checklist_runs": "Listy kontrolne",
+      "checklist_templates": "Szablony list"
     }
   },
   "topbar": {
@@ -2810,6 +2816,73 @@
       "reputation": "Reputacja",
       "grc": "GRC",
       "legend": "Zielony 0–29 ok · Żółty 30–49 uwaga · Pomarańczowy 50–69 ostrzeżenie · Czerwony 70+ krytyczny"
+    }
+  },
+  "checklists": {
+    "templates": {
+      "title": "Listy kontrolne — Szablony",
+      "new": "Nowy szablon",
+      "edit": "Edytuj szablon",
+      "name": "Nazwa",
+      "description": "Opis",
+      "frequency": "Częstotliwość",
+      "plant": "Zakład",
+      "active": "Aktywny",
+      "active_yes": "Tak",
+      "active_no": "Nie",
+      "items": "Pozycje listy kontrolnej",
+      "add_item": "Dodaj pozycję",
+      "item_placeholder": "Treść pozycji...",
+      "mandatory": "Obowiązkowa",
+      "all_plants": "Wszystkie zakłady",
+      "all_plants_short": "Wszystkie",
+      "all_frequencies": "Wszystkie częstotliwości",
+      "back": "Powrót do szablonów",
+      "empty": "Nie znaleziono szablonów",
+      "table": {
+        "name": "Nazwa",
+        "frequency": "Częstotliwość",
+        "plant": "Zakład",
+        "active": "Aktywny"
+      }
+    },
+    "runs": {
+      "title": "Listy kontrolne — Wykonania",
+      "empty": "Brak list kontrolnych do wykonania",
+      "all_plants": "Wszystkie zakłady",
+      "filters": {
+        "all": "Wszystkie"
+      },
+      "table": {
+        "template": "Szablon",
+        "plant": "Zakład",
+        "due_date": "Termin",
+        "progress": "Postęp",
+        "status": "Status"
+      }
+    },
+    "run": {
+      "back": "Powrót do wykonań",
+      "progress": "Postęp",
+      "complete": "Zakończ listę kontrolną",
+      "complete_hint": "Zaznacz wszystkie obowiązkowe pozycje, aby zakończyć.",
+      "ready_hint": "Wszystkie obowiązkowe pozycje są zaznaczone.",
+      "note_placeholder": "Notatka (opcjonalnie)",
+      "mandatory": "Wym.",
+      "optional": "Opc.",
+      "completed_on": "Zakończono"
+    },
+    "frequency": {
+      "daily": "Codziennie",
+      "weekly": "Co tydzień",
+      "monthly": "Co miesiąc",
+      "ad_hoc": "Doraźnie"
+    },
+    "status": {
+      "pending": "Do zrobienia",
+      "in_progress": "W toku",
+      "completed": "Zakończona",
+      "overdue": "Po terminie"
     }
   }
 }

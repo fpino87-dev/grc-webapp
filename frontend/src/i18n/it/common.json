@@ -37,7 +37,11 @@
     "si": "Sì",
     "no": "No",
     "da_valutare": "Da valutare",
-    "in_analisi": "In analisi"
+    "in_analisi": "In analisi",
+    "pending": "Da iniziare",
+    "in_progress": "In corso",
+    "completed": "Completata",
+    "overdue": "Scaduta"
   },
   "actions": {
     "save": "Salva",
@@ -997,7 +1001,9 @@
       "supplier_evaluation": "Valutazione Fornitori",
       "mfa": "Autenticazione MFA",
       "backups": "Backup & Restore",
-      "osint": "OSINT Monitor"
+      "osint": "OSINT Monitor",
+      "checklist_runs": "Checklist",
+      "checklist_templates": "Template Checklist"
     }
   },
   "topbar": {
@@ -2768,6 +2774,73 @@
       "reputation": "Reputazione",
       "grc": "GRC",
       "legend": "Verde 0–29 ok · Giallo 30–49 attenzione · Arancio 50–69 warning · Rosso 70+ critico"
+    }
+  },
+  "checklists": {
+    "templates": {
+      "title": "Checklist — Template",
+      "new": "Nuovo template",
+      "edit": "Modifica template",
+      "name": "Nome",
+      "description": "Descrizione",
+      "frequency": "Frequenza",
+      "plant": "Sito",
+      "active": "Attivo",
+      "active_yes": "Sì",
+      "active_no": "No",
+      "items": "Voci della checklist",
+      "add_item": "Aggiungi voce",
+      "item_placeholder": "Testo della voce...",
+      "mandatory": "Obbligatoria",
+      "all_plants": "Tutti i siti",
+      "all_plants_short": "Tutti",
+      "all_frequencies": "Tutte le frequenze",
+      "back": "Torna ai template",
+      "empty": "Nessun template trovato",
+      "table": {
+        "name": "Nome",
+        "frequency": "Frequenza",
+        "plant": "Sito",
+        "active": "Attivo"
+      }
+    },
+    "runs": {
+      "title": "Checklist — Esecuzioni",
+      "empty": "Nessuna checklist da eseguire",
+      "all_plants": "Tutti i siti",
+      "filters": {
+        "all": "Tutte"
+      },
+      "table": {
+        "template": "Template",
+        "plant": "Sito",
+        "due_date": "Scadenza",
+        "progress": "Avanzamento",
+        "status": "Stato"
+      }
+    },
+    "run": {
+      "back": "Torna alle esecuzioni",
+      "progress": "Avanzamento",
+      "complete": "Completa checklist",
+      "complete_hint": "Spunta tutte le voci obbligatorie per completare.",
+      "ready_hint": "Tutte le voci obbligatorie sono spuntate.",
+      "note_placeholder": "Nota (opzionale)",
+      "mandatory": "Obbl.",
+      "optional": "Opz.",
+      "completed_on": "Completata il"
+    },
+    "frequency": {
+      "daily": "Giornaliera",
+      "weekly": "Settimanale",
+      "monthly": "Mensile",
+      "ad_hoc": "Ad hoc"
+    },
+    "status": {
+      "pending": "Da iniziare",
+      "in_progress": "In corso",
+      "completed": "Completata",
+      "overdue": "Scaduta"
     }
   }
 }

@@ -1,9 +1,16 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import Task, TaskComment
-from .serializers import TaskCommentSerializer, TaskSerializer
+from django.core.exceptions import ValidationError
+
+from .models import ChecklistRun, ChecklistTemplate, Task, TaskComment
+from .serializers import (
+    ChecklistRunSerializer,
+    ChecklistTemplateSerializer,
+    TaskCommentSerializer,
+    TaskSerializer,
+)
 from . import services
 from django.db.models import Q
 from django.utils import timezone
@@ -107,3 +114,83 @@ class TaskCommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
+
+
+# ── Quick Checklist (M08) ────────────────────────────────────────────────────
+
+
+class ChecklistTemplateViewSet(viewsets.ModelViewSet):
+    queryset = (
+        ChecklistTemplate.objects.select_related("plant")
+        .prefetch_related("items")
+    )
+    serializer_class = ChecklistTemplateSerializer
+    filterset_fields = ["plant", "is_active", "frequency"]
+    search_fields = ["name", "description"]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    def perform_destroy(self, instance):
+        from core.audit import log_action
+        log_action(
+            user=self.request.user,
+            action_code="checklist_template.deleted",
+            level="L1",
+            entity=instance,
+            payload={"id": str(instance.pk), "name": instance.name},
+        )
+        instance.soft_delete()
+
+
+class ChecklistRunViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
+):
+    """I run sono generati automaticamente via Celery; qui solo lettura,
+    aggiornamento e completamento item — niente create/destroy manuali."""
+
+    queryset = (
+        ChecklistRun.objects.select_related("template", "plant", "assigned_to")
+        .prefetch_related("items", "items__template_item")
+    )
+    serializer_class = ChecklistRunSerializer
+    filterset_fields = ["plant", "status", "template", "assigned_to"]
+
+    @action(detail=True, methods=["post"], url_path="complete-item")
+    def complete_item(self, request, pk=None):
+        run = self.get_object()
+        item_id = request.data.get("item_id")
+        if not item_id:
+            return Response(
+                {"detail": "item_id obbligatorio."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        run_item = services.complete_run_item(
+            run,
+            item_id=item_id,
+            checked=request.data.get("checked", False),
+            note=request.data.get("note", ""),
+            user=request.user,
+        )
+        if run_item is None:
+            return Response(
+                {"detail": "Item non trovato in questo run."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        run.refresh_from_db()
+        return Response(ChecklistRunSerializer(run).data)
+
+    @action(detail=True, methods=["post"])
+    def complete(self, request, pk=None):
+        run = self.get_object()
+        try:
+            services.complete_run(run, request.user)
+        except ValidationError as exc:
+            return Response(
+                {"detail": exc.messages[0] if exc.messages else str(exc)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(ChecklistRunSerializer(run).data)

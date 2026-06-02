@@ -80,5 +80,9 @@ app.conf.beat_schedule = {
         "task": "apps.documents.tasks.notify_expiring_documents",
         "schedule": crontab(hour=7, minute=45),  # 07:45 ogni giorno
     },
+    "generate-scheduled-checklists": {
+        "task": "apps.tasks.tasks.generate_scheduled_checklists",
+        "schedule": crontab(hour=7, minute=0),  # 07:00 ogni giorno
+    },
 }
 
