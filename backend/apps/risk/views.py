@@ -63,15 +63,23 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         )
 
     def perform_update(self, serializer):
+        # Cattura i valori dei campi che guidano lo score PRIMA del salvataggio, per
+        # marcare needs_revaluation solo se cambiano DAVVERO. Prima si usavano le
+        # chiavi del payload (validated_data ∪ request.data): così un semplice
+        # risalvataggio del form — che reinvia comunque probabilità/impatto/... —
+        # rimetteva il rischio "da rivalutare" anche senza modifiche reali.
+        _plain = ("assessment_type", "treatment", "probability", "impact",
+                  "inherent_probability", "inherent_impact")
+        old_plain = {f: getattr(serializer.instance, f, None) for f in _plain}
+        old_critical = getattr(serializer.instance, "critical_process_id", None)
+
         instance = serializer.save()
-        # Se l'utente aggiorna campi che cambiano la valutazione,
-        # segnaliamo che serve rivalutazione (anche se lo stato non torna a "bozza").
         try:
             from .services import mark_needs_revaluation_if_risk_changed
 
-            changed_fields = set(getattr(serializer, "validated_data", {}) or {}).union(
-                set(getattr(self.request, "data", {}) or {})
-            )
+            changed_fields = {f for f in _plain if getattr(instance, f, None) != old_plain[f]}
+            if getattr(instance, "critical_process_id", None) != old_critical:
+                changed_fields.add("critical_process")
             mark_needs_revaluation_if_risk_changed(instance, changed_fields)
         except Exception:
             # Non bloccare l'update della UI.
@@ -105,9 +113,14 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         assessment.status = "completato"
         assessment.assessed_by = request.user
         assessment.assessed_at = timezone.now()
+        # Completare l'assessment È la rivalutazione: chiude il flag "da rivalutare"
+        # (così dopo una modifica basta ri-eseguire "Completa" per togliere il warning).
+        assessment.needs_revaluation = False
+        assessment.needs_revaluation_since = None
         assessment.save(update_fields=[
             "status", "assessed_by", "assessed_at",
-            "score", "ale_annuo", "updated_at",
+            "score", "ale_annuo",
+            "needs_revaluation", "needs_revaluation_since", "updated_at",
         ])
         log_action(
             user=request.user,
