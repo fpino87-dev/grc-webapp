@@ -10,6 +10,7 @@ Fallback: se Redis non risponde, si torna a `time.sleep` per non perdere il vinc
 """
 from __future__ import annotations
 
+import copy
 import logging
 import time
 from typing import TYPE_CHECKING
@@ -17,9 +18,24 @@ from typing import TYPE_CHECKING
 from django.utils import timezone
 
 if TYPE_CHECKING:
-    from apps.osint.models import OsintEntity, OsintSettings
+    from apps.osint.models import OsintEntity, OsintScan, OsintSettings
 
 logger = logging.getLogger(__name__)
+
+# Campi "domain-level" dello scan: dipendono solo dal dominio, quindi sono
+# copiabili tra entità che lo condividono senza ri-chiamare le API esterne
+# (de-dup scan per dominio). Lo score NON è qui: dipende dall'entità (GRC + pesi)
+# e va sempre ricalcolato. I sottodomini e i takeover_candidates sono per-entità
+# e vengono rigenerati in `_propagate_scan`.
+_DOMAIN_LEVEL_FIELDS: tuple[str, ...] = (
+    "ssl_valid", "ssl_expiry_date", "ssl_days_remaining", "ssl_issuer", "ssl_wildcard",
+    "spf_present", "spf_policy", "dmarc_present", "dmarc_policy", "mx_present", "dnssec_enabled",
+    "domain_expiry_date", "domain_registrar", "whois_privacy", "registrar_country",
+    "vt_malicious", "vt_suspicious", "abuseipdb_score", "abuseipdb_reports",
+    "otx_pulses", "gsb_status", "in_blacklist", "blacklist_sources",
+    "hibp_breaches", "hibp_latest_breach", "hibp_data_types",
+    "security_headers", "lookalike_domains", "enricher_errors",
+)
 
 # Pausa minima tra chiamate per uno stesso bucket (sec).
 DELAY_CRTSH_VT = 15      # crt.sh e VirusTotal: 4/min free
@@ -152,5 +168,71 @@ def run_enrichment(entity: "OsintEntity", settings: "OsintSettings") -> "OsintSc
         scan.status, entity.domain,
         " ".join(f"{k}={'ok' if v else 'ko'}" for k, v in results.items()),
         scan.score_total,
+    )
+    return scan
+
+
+def _propagate_scan(
+    entity: "OsintEntity",
+    source_scan: "OsintScan",
+    settings: "OsintSettings",
+) -> "OsintScan":
+    """Crea uno scan per `entity` riusando l'enrichment esterno già fatto su
+    `source_scan` (stessa `domain`), senza richiamare le API di terze parti.
+
+    Copia i soli campi domain-level; ricalcola tutto ciò che è per-entità:
+    sottodomini, takeover (DNS-only), score (GRC + pesi), status, alert, finding.
+    È il cuore del de-dup scan per dominio: una sola chiamata esterna per dominio.
+    """
+    from apps.osint.models import EntityType, OsintScan, ScanStatus
+    from apps.osint.scoring import compute_scores
+    from apps.osint.enrichers import takeover
+    from apps.osint.enrichers.ssl import _sync_subdomains
+
+    scan = OsintScan.objects.create(entity=entity, status=ScanStatus.RUNNING)
+
+    # Copia i campi domain-level (deepcopy sui JSON mutabili per non condividere
+    # liste/dict tra istanze di scan diverse).
+    for field in _DOMAIN_LEVEL_FIELDS:
+        setattr(scan, field, copy.deepcopy(getattr(source_scan, field)))
+
+    # dnstwist e HIBP girano solo su my_domain: per le entità fornitore/asset che
+    # condividono il dominio azzeriamo i relativi campi, così lo scan propagato è
+    # identico a uno stand-alone dello stesso tipo (niente finding lookalike/breach
+    # spuri su un fornitore).
+    if entity.entity_type != EntityType.MY_DOMAIN:
+        scan.lookalike_domains = []
+        scan.hibp_breaches = None
+        scan.hibp_latest_breach = None
+        scan.hibp_data_types = []
+
+    # Sottodomini: propaga il set del donor a questa entità (copia DB→DB, nessuna
+    # API). `_sync_subdomains` rispetta la auto-include policy e non altera le
+    # classificazioni per-entità già esistenti.
+    sub_names = set(
+        source_scan.entity.subdomains.filter(deleted_at__isnull=True)
+        .values_list("subdomain", flat=True)
+    )
+    if sub_names:
+        _sync_subdomains(entity, sub_names, settings)
+
+    # Takeover: per-entità (dipende dai sottodomini *inclusi* di questa entità).
+    # È solo lookup DNS, non un'API a quota → eseguirlo per entità è corretto.
+    takeover.run(entity, scan, settings)
+
+    # Score per-entità + status ereditato dal donor (stesso esito enrichment).
+    compute_scores(entity, scan, settings)
+    scan.status = source_scan.status
+    scan.save()
+
+    if scan.status == ScanStatus.COMPLETED:
+        from apps.osint.alerts import run_alerts
+        run_alerts(entity, scan, settings)
+        from apps.osint.findings import sync_findings
+        sync_findings(entity, scan)
+
+    logger.info(
+        "Propagated scan for %s from donor %s (entity %s) — status=%s score=%d",
+        entity.domain, source_scan.pk, source_scan.entity_id, scan.status, scan.score_total,
     )
     return scan

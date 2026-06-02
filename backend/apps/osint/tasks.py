@@ -43,21 +43,40 @@ def run_weekly_scan(self):
     now = timezone.now()
     entities = OsintEntity.objects.filter(is_active=True, deleted_at__isnull=True)
     total = entities.count()
-    dispatched = 0
-    skipped = 0
 
+    # De-dup per dominio: raggruppa le entità *da scansionare ora* per dominio.
+    # Le entità che condividono un dominio vengono affidate a un unico
+    # `run_domain_scan` che esegue l'enrichment esterno una sola volta e propaga
+    # i dati domain-level alle altre (ricalcolando score/alert/finding per entità).
+    from collections import defaultdict
+    due_by_domain: dict[str, list] = defaultdict(list)
+    skipped = 0
     for entity in entities:
         if _should_scan(entity, now):
-            run_entity_scan.delay(str(entity.pk))
-            dispatched += 1
+            due_by_domain[entity.domain].append(entity)
         else:
             skipped += 1
 
+    dispatched = 0
+    deduped_domains = 0
+    for domain, ents in due_by_domain.items():
+        if len(ents) == 1:
+            run_entity_scan.delay(str(ents[0].pk))
+        else:
+            run_domain_scan.delay(domain, [str(e.pk) for e in ents])
+            deduped_domains += 1
+        dispatched += len(ents)
+
     logger.info(
-        "OSINT weekly scan planned — total=%d dispatched=%d skipped=%d",
-        total, dispatched, skipped,
+        "OSINT weekly scan planned — total=%d dispatched=%d skipped=%d deduped_domains=%d",
+        total, dispatched, skipped, deduped_domains,
     )
-    return {"total": total, "dispatched": dispatched, "skipped": skipped}
+    return {
+        "total": total,
+        "dispatched": dispatched,
+        "skipped": skipped,
+        "deduped_domains": deduped_domains,
+    }
 
 
 def _should_scan(entity, now) -> bool:
@@ -98,3 +117,52 @@ def run_entity_scan(self, entity_id: str):
     from apps.osint.enrichers.run import run_enrichment
     scan = run_enrichment(entity, settings)
     return {"scan_id": str(scan.pk), "status": scan.status, "score": scan.score_total}
+
+
+@shared_task(
+    bind=True,
+    autoretry_for=(Exception,),
+    retry_backoff=30,
+    max_retries=1,
+    name="osint.scan_domain",
+)
+def run_domain_scan(self, domain: str, entity_ids: list[str]):
+    """Scansiona più entità che condividono lo stesso dominio con una sola
+    chiamata di enrichment esterno (de-dup quota API).
+
+    Esegue l'enrichment completo su un'entità "primaria" (preferendo una
+    `my_domain`, così dnstwist/HIBP girano), poi propaga i dati domain-level alle
+    altre entità ricalcolando per ciascuna score/alert/finding.
+    """
+    from apps.osint.models import EntityType, OsintEntity, OsintSettings
+    from apps.osint.enrichers.run import run_enrichment, _propagate_scan
+
+    entities = list(
+        OsintEntity.objects.filter(pk__in=entity_ids, is_active=True, deleted_at__isnull=True)
+    )
+    if not entities:
+        logger.warning("OSINT domain scan %s: nessuna entità attiva tra %s", domain, entity_ids)
+        return {"error": "no_entities", "domain": domain}
+
+    # Primaria: preferisci una my_domain (HIBP/dnstwist sono my_domain-only).
+    primary = next((e for e in entities if e.entity_type == EntityType.MY_DOMAIN), entities[0])
+    others = [e for e in entities if e.pk != primary.pk]
+
+    settings = OsintSettings.load()
+    primary_scan = run_enrichment(primary, settings)
+
+    propagated = 0
+    for ent in others:
+        _propagate_scan(ent, primary_scan, settings)
+        propagated += 1
+
+    logger.info(
+        "OSINT domain scan %s — primary=%s status=%s propagated=%d",
+        domain, primary.pk, primary_scan.status, propagated,
+    )
+    return {
+        "domain": domain,
+        "primary": str(primary.pk),
+        "status": primary_scan.status,
+        "propagated": propagated,
+    }
