@@ -1,3 +1,5 @@
+import logging
+
 from django.utils import timezone
 from rest_framework import filters, viewsets
 from rest_framework.decorators import action
@@ -7,6 +9,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from core.audit import log_action
 from core.scoping import PlantScopedQuerysetMixin
 from . import services
+
+logger = logging.getLogger(__name__)
 from .models import AuditFinding, AuditPrep, AuditProgram, EvidenceItem
 from .permissions import AuditPrepPermission
 from .serializers import (
@@ -67,8 +71,11 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             from .services import sync_program_completion
             try:
                 sync_program_completion(instance.audit_program)
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.warning(
+                    "audit_prep: sync_program_completion fallita per prep %s: %s",
+                    instance.pk, exc,
+                )
         log_action(
             user=self.request.user,
             action_code="audit_prep.updated",

@@ -32,12 +32,7 @@
 ### P0-3 · Bonifica `except: pass` (audit AST: 31 `pass` + 119 "soft") — TARGET PRECISI
 - **Trovato (AST)**: la stragrande maggioranza è LEGITTIMA (`except ValidationError→400`, `DoesNotExist→404`, `ValueError→fallback`, `ImportError→dep opzionale`). Da bonificare solo il sottoinsieme `except Exception: pass` che inghiotte logica o audit/notifiche.
 - ✅ Già fixato: `osint/views.py:339` (nome PeriodicTask vecchio → next_scan sempre null). (commit 1efdb79)
-- 🔴 **Logica reale inghiottita** (investigare, possibili bug nascosti):
-  - `incidents/nis2_services.py:652` — `advance_phase(pdca)` dopo report finale NIS2 (workflow legale!)
-  - `audit_prep/views.py:70` — `sync_program_completion`
-  - `controls/views.py:859` — `generate_risk_excel` (export)
-  - `bcp/services.py:142` — logica Evidence
-  - `documents/services.py:166` — `default_storage.delete` (file orfani)
+- ✅ 🔴 **Logica reale inghiottita** — investigati: tutti e 5 sono "best-effort" legittimi (nessun bug di comportamento), ma ora **loggano** (`logger.warning`) invece di `pass` silenzioso: `incidents/nis2_services.py:652` (PDCA NIS2), `audit_prep/views.py:70` (sync_program_completion), `controls/views.py:850+859` (verbali + risk register nello ZIP), `bcp/services.py:142` (evidenza test), `documents/services.py:166` (file orfano). (commit: vedi git)
 - 🟠 **Audit/notifiche best-effort** (aggiungere almeno `logger.warning`):
   - audit (`log_action`): `auth_grc/signals.py:50`, `osint/views.py:139`, `osint/views.py:731`
   - notifiche (`fire_notification`): `audit_prep/services.py:136`, `bcp/services.py:201`, `controls/tasks.py:114`, `incidents/services.py:101`, `suppliers/services.py:178`

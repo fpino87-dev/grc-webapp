@@ -1,4 +1,5 @@
 import html as html_module
+import logging
 from datetime import timedelta
 
 from django.utils import timezone
@@ -7,6 +8,8 @@ from apps.plants.models import CSIRT_BY_COUNTRY
 
 from .models import ENISA_INCIDENT_CATEGORIES, ENISA_SUBCATEGORIES, Incident, NIS2Configuration, NIS2Notification
 from .nis2_classification import run_full_classification
+
+logger = logging.getLogger(__name__)
 
 
 def _e(value) -> str:
@@ -649,5 +652,10 @@ def update_pdca_with_nis2_evidence(incident: Incident, notification: NIS2Notific
                     ),
                     evidence=ev,
                 )
-            except Exception:
-                pass
+            except Exception as exc:
+                # Best-effort: l'evidenza è già collegata; l'avanzamento PDCA
+                # non deve bloccare. Ma va reso visibile (workflow NIS2).
+                logger.warning(
+                    "NIS2: avanzamento PDCA non riuscito per incident %s: %s",
+                    incident.pk, exc,
+                )

@@ -1,6 +1,10 @@
+import logging
+
 from django.utils import timezone
 from core.audit import log_action
 from .models import BcpPlan, BcpTest
+
+logger = logging.getLogger(__name__)
 
 
 def approve_plan(plan: BcpPlan, user) -> BcpPlan:
@@ -139,9 +143,11 @@ def record_test(
 
             created_ev = create_evidence_with_file(payload, evidence_file, user)
             test.evidences.add(created_ev)
-    except Exception:
+    except Exception as exc:
         # le evidenze non devono bloccare la registrazione del test
-        pass
+        logger.warning(
+            "BCP: evidenza non creata per il test del piano %s: %s", plan.pk, exc,
+        )
     log_action(
         user=user,
         action_code="bcp.plan.test",

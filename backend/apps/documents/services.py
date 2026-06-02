@@ -1,5 +1,6 @@
 import datetime
 import hashlib
+import logging
 import os
 
 from django.conf import settings
@@ -163,9 +164,13 @@ def add_version_with_file(document, uploaded_file, user, change_summary=""):
     if last and last.storage_path:
         try:
             default_storage.delete(last.storage_path)
-        except Exception:
+        except Exception as exc:
             # In caso di errore nella cancellazione fisica non blocchiamo il flusso
-            pass
+            logging.getLogger(__name__).warning(
+                "Documento %s: rimozione file versione precedente fallita "
+                "(possibile file orfano in storage): %s",
+                document.pk, exc,
+            )
 
     version = DocumentVersion.objects.create(
         document=document,

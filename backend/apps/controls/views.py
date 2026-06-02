@@ -847,8 +847,11 @@ def _add_management_reviews(zf, zip_name: str, plant_id, default_storage) -> Non
                 f"{zip_name}/REVISIONI_DIREZIONE/{fname}",
                 content,
             )
-        except Exception:
-            pass
+        except Exception as exc:
+            import logging
+            logging.getLogger(__name__).warning(
+                "audit-package: verbale revisione %s saltato: %s", getattr(r, "pk", "?"), exc,
+            )
 
 
 def _add_risk_register(zf, zip_name: str, plant_id) -> None:
@@ -856,8 +859,11 @@ def _add_risk_register(zf, zip_name: str, plant_id) -> None:
     try:
         excel_bytes = generate_risk_excel(plant_id=plant_id, include_draft=False)
         zf.writestr(f"{zip_name}/RISK_REGISTER/risk_register.xlsx", excel_bytes)
-    except Exception:
-        pass
+    except Exception as exc:
+        import logging
+        logging.getLogger(__name__).warning(
+            "audit-package: risk register non incluso nello ZIP: %s", exc,
+        )
 
 
 class AuditPackageView(APIView):
