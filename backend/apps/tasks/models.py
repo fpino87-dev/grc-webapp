@@ -174,12 +174,38 @@ class ChecklistTemplate(BaseModel):
 
 
 class ChecklistTemplateItem(BaseModel):
+    ITEM_TYPE_CHOICES = [
+        ("checkbox", "Checkbox"),
+        ("numeric", "Numerico"),
+        ("text", "Testo libero"),
+    ]
+
     template = models.ForeignKey(
         ChecklistTemplate, on_delete=models.CASCADE, related_name="items"
     )
     order = models.IntegerField(default=0)
     text = models.CharField(max_length=500)
     is_mandatory = models.BooleanField(default=True)
+    # Tipologia di rilevazione: checkbox (default, retrocompatibile), valore
+    # numerico (per KPI) o testo libero.
+    item_type = models.CharField(
+        max_length=10, choices=ITEM_TYPE_CHOICES, default="checkbox"
+    )
+    unit = models.CharField(
+        max_length=20,
+        blank=True,
+        help_text="Es: %, ore, GB, n° — solo per item_type=numeric",
+    )
+    numeric_min = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Valore minimo accettabile per item numeric",
+    )
+    numeric_max = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
 
     class Meta:
         ordering = ["order", "created_at"]
@@ -244,6 +270,134 @@ class ChecklistRunItem(BaseModel):
         blank=True,
         related_name="checked_checklist_items",
     )
+    # Valorizzati in base a template_item.item_type (numeric / text).
+    value = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Valorizzato solo se template_item.item_type=numeric",
+    )
+    text_value = models.TextField(
+        blank=True,
+        help_text="Valorizzato solo se template_item.item_type=text",
+    )
 
     class Meta:
         ordering = ["template_item__order", "created_at"]
+
+
+# ── KPI Engine operativo (M08 ↔ M18) ─────────────────────────────────────────
+# Motore KPI con soglie e alerting. Le definizioni descrivono COSA misurare e
+# COME aggregare; gli snapshot sono i valori settimanali calcolati. Sorgenti:
+# checklist (aggregazione run), API esterna (ingest), inserimento manuale.
+
+
+class KPIDefinition(BaseModel):
+    AGGREGATION_CHOICES = [
+        ("success_rate", "Tasso di successo (% run completati)"),
+        ("avg_value", "Media valori numerici"),
+        ("last_value", "Ultimo valore registrato"),
+        ("count_ok", "Conteggio item OK"),
+        ("count_fail", "Conteggio item KO"),
+    ]
+    SOURCE_CHOICES = [
+        ("checklist", "Checklist"),
+        ("api", "API esterna"),
+        ("manual", "Inserimento manuale"),
+    ]
+    DIRECTION_CHOICES = [
+        ("above", "Sopra soglia=ok"),
+        ("below", "Sotto soglia=ok"),
+    ]
+
+    kpi_code = models.CharField(
+        max_length=50,
+        unique=True,
+        help_text="Es: backup_success_rate, vuln_critical_open",
+    )
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    unit = models.CharField(max_length=20, blank=True, help_text="%, ore, n°")
+    source = models.CharField(
+        max_length=15, choices=SOURCE_CHOICES, default="checklist", db_index=True
+    )
+    checklist_template = models.ForeignKey(
+        ChecklistTemplate,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="kpi_definitions",
+        help_text="Template sorgente se source=checklist",
+    )
+    checklist_item_filter = models.CharField(
+        max_length=500,
+        blank=True,
+        help_text="Testo parziale item da aggregare, blank=tutti",
+    )
+    aggregation = models.CharField(
+        max_length=20, choices=AGGREGATION_CHOICES, default="success_rate"
+    )
+    plant = models.ForeignKey(
+        "plants.Plant",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="kpi_definitions",
+        help_text="null=KPI globale multi-plant",
+        db_index=True,
+    )
+    threshold_warning = models.FloatField(null=True, blank=True)
+    threshold_critical = models.FloatField(null=True, blank=True)
+    threshold_direction = models.CharField(
+        max_length=5,
+        choices=DIRECTION_CHOICES,
+        default="above",
+        help_text=(
+            "above: valore alto è buono (es success_rate). "
+            "below: valore basso è buono (es vuln aperte)"
+        ),
+    )
+    is_active = models.BooleanField(default=True, db_index=True)
+    notify_on_warning = models.BooleanField(default=True)
+    notify_on_critical = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["kpi_code"]
+
+
+class OperationalKpiSnapshot(BaseModel):
+    STATUS_CHOICES = [
+        ("ok", "OK"),
+        ("warning", "Warning"),
+        ("critical", "Critico"),
+        ("no_data", "Nessun dato"),
+    ]
+
+    kpi_definition = models.ForeignKey(
+        KPIDefinition, on_delete=models.PROTECT, related_name="snapshots"
+    )
+    plant = models.ForeignKey(
+        "plants.Plant",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="operational_kpi_snapshots",
+    )
+    week_start = models.DateField(help_text="Lunedì della settimana", db_index=True)
+    value = models.FloatField(null=True, blank=True)
+    status = models.CharField(
+        max_length=10, choices=STATUS_CHOICES, default="no_data", db_index=True
+    )
+    source = models.CharField(
+        max_length=15, choices=KPIDefinition.SOURCE_CHOICES, default="checklist"
+    )
+    measured_at = models.DateTimeField(null=True, blank=True)
+    run_count = models.IntegerField(
+        default=0, help_text="N run analizzati per questo snapshot"
+    )
+    note = models.TextField(blank=True)
+
+    class Meta:
+        unique_together = [("kpi_definition", "plant", "week_start")]
+        ordering = ["-week_start"]

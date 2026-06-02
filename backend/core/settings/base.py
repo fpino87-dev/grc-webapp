@@ -115,7 +115,17 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.tasks.tasks.generate_scheduled_checklists",
         "schedule": crontab(hour=7, minute=0),  # ogni mattina alle 07:00
     },
+    "compute-operational-kpis": {
+        "task": "apps.tasks.tasks.compute_operational_kpis",
+        "schedule": crontab(hour=6, minute=30, day_of_week=1),  # lunedì 06:30
+    },
 }
+
+# API key per l'ingestione KPI da sorgenti esterne (machine-to-machine).
+# Se vuota, l'endpoint /api/v1/kpi-ingest/ accetta solo JWT di utenti is_staff.
+# In produzione valorizzare con una chiave robusta e consegnarla agli script
+# di integrazione (es. job Veeam/SIEM) via header X-API-Key.
+KPI_INGEST_API_KEY = env("KPI_INGEST_API_KEY", default="")
 
 # Directory dove vengono salvati i file di backup (montata come volume Docker)
 BACKUP_DIR = env("BACKUP_DIR", default="/app/backups")

@@ -1085,7 +1085,8 @@
       "backups": "Kopia zapasowa & Przywracanie",
       "osint": "OSINT Monitor",
       "checklist_runs": "Listy kontrolne",
-      "checklist_templates": "Szablony list"
+      "checklist_templates": "Szablony list",
+      "kpi_operational": "KPI operacyjne"
     }
   },
   "topbar": {
@@ -2883,6 +2884,128 @@
       "in_progress": "W toku",
       "completed": "Zakończona",
       "overdue": "Po terminie"
+    }
+  },
+  "kpi": {
+    "dashboard": {
+      "title": "KPI operacyjne",
+      "compute_now": "Oblicz teraz",
+      "computing": "Obliczanie…",
+      "manage": "Zarządzaj KPI",
+      "all_plants": "Wszystkie zakłady",
+      "empty": "Brak aktywnych KPI"
+    },
+    "definitions": {
+      "title": "Definicje KPI",
+      "new": "Nowy KPI",
+      "empty": "Brak skonfigurowanych KPI",
+      "back_dashboard": "Pulpit",
+      "table": {
+        "code": "Kod",
+        "name": "Nazwa",
+        "source": "Źródło",
+        "warning": "Próg ostrzegawczy",
+        "critical": "Próg krytyczny",
+        "active": "Aktywny"
+      }
+    },
+    "form": {
+      "new": "Nowy KPI",
+      "edit": "Edytuj KPI",
+      "kpi_code": "Kod KPI",
+      "kpi_code_hint": "Slug: małe litery, cyfry i podkreślenia (np. backup_success_rate)",
+      "name": "Nazwa",
+      "description": "Opis",
+      "unit": "Jednostka",
+      "source": "Źródło",
+      "plant": "Zakład",
+      "plant_global": "Globalny (wszystkie zakłady)",
+      "template": "Szablon listy kontrolnej",
+      "aggregation": "Agregacja",
+      "item_filter": "Filtr pozycji",
+      "item_filter_placeholder": "Częściowy tekst pozycji (puste = wszystkie)",
+      "template_placeholder": "szablon",
+      "threshold_warning": "Próg ostrzegawczy",
+      "threshold_critical": "Próg krytyczny",
+      "direction": "Kierunek",
+      "dir_above": "Powyżej progu = dobrze",
+      "dir_below": "Poniżej progu = dobrze",
+      "dir_above_short": "wysokie wartości są pozytywne",
+      "dir_below_short": "niskie wartości są pozytywne",
+      "is_active": "Aktywny",
+      "notify_warning": "Powiadom przy ostrzeżeniu",
+      "notify_critical": "Powiadom przy krytycznym",
+      "preview_title": "Formuła obliczeniowa",
+      "preview_checklist": "Oblicz „{{agg}}” na wykonaniach {{template}} ({{filter}}); {{dir}}.",
+      "preview_api": "Wartość „{{agg}}” otrzymana przez API zewnętrzne; {{dir}}.",
+      "preview_filter": "pozycje zawierające „{{filter}}”",
+      "preview_all_items": "wszystkie pozycje"
+    },
+    "aggregation": {
+      "success_rate": "Wskaźnik sukcesu (% ukończonych)",
+      "avg_value": "Średnia wartości liczbowych",
+      "last_value": "Ostatnia zarejestrowana wartość",
+      "count_ok": "Liczba pozycji OK",
+      "count_fail": "Liczba pozycji KO"
+    },
+    "source": {
+      "checklist": "Lista kontrolna",
+      "api": "API zewnętrzne",
+      "manual": "Ręczne"
+    },
+    "status": {
+      "ok": "OK",
+      "warning": "Ostrzeżenie",
+      "critical": "Krytyczny",
+      "no_data": "Brak danych"
+    },
+    "trend": {
+      "subtitle": "Trend ostatnich tygodni",
+      "empty": "Brak dostępnych migawek",
+      "warning": "Ostrzeżenie",
+      "critical": "Krytyczny"
+    },
+    "suggest": {
+      "button": "Zaproponuj KPI",
+      "title": "Zaproponuj KPI",
+      "back": "Wstecz",
+      "already_configured": "Już skonfigurowany",
+      "rationale": "Uzasadnienie normatywne",
+      "linkable_to": "Można połączyć z",
+      "import_success": "Pomyślnie skonfigurowano {{count}} KPI",
+      "categories": {
+        "operations": "Operacje",
+        "incident": "Incydenty",
+        "vulnerability": "Podatności",
+        "access": "Dostęp i tożsamość",
+        "compliance": "Zgodność i kontrole",
+        "training": "Szkolenia",
+        "supplier": "Dostawcy"
+      },
+      "step1": {
+        "tab": "Zakład",
+        "intro": "Wybierz zakład do analizy: KPI są sugerowane na podstawie aktywnych ram normatywnych.",
+        "plant": "Zakład",
+        "plant_global": "Globalny (wszystkie zakłady)",
+        "plant_hint": "Jeśli zakład nie ma aktywnych ram, wyświetlane są wszystkie KPI z katalogu.",
+        "analyze": "Analizuj",
+        "analyzing": "Analiza…"
+      },
+      "step2": {
+        "tab": "Sugestie",
+        "summary": "{{total}} sugerowanych KPI, {{configured}} już skonfigurowanych, {{selected}} wybranych",
+        "frameworks": "Aktywne ramy",
+        "next": "Dalej"
+      },
+      "step3": {
+        "tab": "Potwierdź",
+        "intro": "Zamierzasz zaimportować {{count}} KPI. Zostaną utworzone jako aktywne definicje.",
+        "import_btn": "Importuj {{count}} KPI",
+        "importing": "Importowanie…",
+        "skipped": "Pominięto {{count}} już istniejących",
+        "errors": "Błędy",
+        "skipped_label": "Pominięte"
+      }
     }
   }
 }

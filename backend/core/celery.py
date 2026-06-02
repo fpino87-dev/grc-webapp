@@ -84,5 +84,9 @@ app.conf.beat_schedule = {
         "task": "apps.tasks.tasks.generate_scheduled_checklists",
         "schedule": crontab(hour=7, minute=0),  # 07:00 ogni giorno
     },
+    "compute-operational-kpis": {
+        "task": "apps.tasks.tasks.compute_operational_kpis",
+        "schedule": crontab(hour=6, minute=30, day_of_week=1),  # lunedì 06:30
+    },
 }
 

@@ -1003,7 +1003,8 @@
       "backups": "Backup & Restore",
       "osint": "OSINT Monitor",
       "checklist_runs": "Checklist",
-      "checklist_templates": "Template Checklist"
+      "checklist_templates": "Template Checklist",
+      "kpi_operational": "KPI Operativi"
     }
   },
   "topbar": {
@@ -2841,6 +2842,128 @@
       "in_progress": "In corso",
       "completed": "Completata",
       "overdue": "Scaduta"
+    }
+  },
+  "kpi": {
+    "dashboard": {
+      "title": "KPI Operativi",
+      "compute_now": "Calcola ora",
+      "computing": "Calcolo…",
+      "manage": "Gestisci KPI",
+      "all_plants": "Tutti i siti",
+      "empty": "Nessun KPI attivo configurato"
+    },
+    "definitions": {
+      "title": "Definizioni KPI",
+      "new": "Nuovo KPI",
+      "empty": "Nessun KPI configurato",
+      "back_dashboard": "Dashboard",
+      "table": {
+        "code": "Codice",
+        "name": "Nome",
+        "source": "Sorgente",
+        "warning": "Soglia warning",
+        "critical": "Soglia critica",
+        "active": "Attivo"
+      }
+    },
+    "form": {
+      "new": "Nuovo KPI",
+      "edit": "Modifica KPI",
+      "kpi_code": "Codice KPI",
+      "kpi_code_hint": "Slug: minuscole, cifre e underscore (es: backup_success_rate)",
+      "name": "Nome",
+      "description": "Descrizione",
+      "unit": "Unità",
+      "source": "Sorgente",
+      "plant": "Sito",
+      "plant_global": "Globale (tutti i siti)",
+      "template": "Template checklist",
+      "aggregation": "Aggregazione",
+      "item_filter": "Filtro item",
+      "item_filter_placeholder": "Testo parziale item (vuoto = tutti)",
+      "template_placeholder": "il template",
+      "threshold_warning": "Soglia warning",
+      "threshold_critical": "Soglia critica",
+      "direction": "Direzione",
+      "dir_above": "Sopra soglia = buono",
+      "dir_below": "Sotto soglia = buono",
+      "dir_above_short": "valori alti sono positivi",
+      "dir_below_short": "valori bassi sono positivi",
+      "is_active": "Attivo",
+      "notify_warning": "Notifica su warning",
+      "notify_critical": "Notifica su critico",
+      "preview_title": "Formula di calcolo",
+      "preview_checklist": "Calcola «{{agg}}» sui run di {{template}} ({{filter}}); {{dir}}.",
+      "preview_api": "Valore «{{agg}}» ricevuto via API esterna; {{dir}}.",
+      "preview_filter": "item che contengono \"{{filter}}\"",
+      "preview_all_items": "tutti gli item"
+    },
+    "aggregation": {
+      "success_rate": "Tasso di successo (% run completati)",
+      "avg_value": "Media valori numerici",
+      "last_value": "Ultimo valore registrato",
+      "count_ok": "Conteggio item OK",
+      "count_fail": "Conteggio item KO"
+    },
+    "source": {
+      "checklist": "Checklist",
+      "api": "API esterna",
+      "manual": "Manuale"
+    },
+    "status": {
+      "ok": "OK",
+      "warning": "Warning",
+      "critical": "Critico",
+      "no_data": "Nessun dato"
+    },
+    "trend": {
+      "subtitle": "Trend ultime settimane",
+      "empty": "Nessuno snapshot disponibile",
+      "warning": "Warning",
+      "critical": "Critico"
+    },
+    "suggest": {
+      "button": "Consiglia KPI",
+      "title": "Consiglia KPI",
+      "back": "Indietro",
+      "already_configured": "Già configurato",
+      "rationale": "Razionale normativo",
+      "linkable_to": "Collegabile a",
+      "import_success": "{{count}} KPI configurati con successo",
+      "categories": {
+        "operations": "Operations",
+        "incident": "Incidenti",
+        "vulnerability": "Vulnerabilità",
+        "access": "Accessi & Identità",
+        "compliance": "Compliance & Controlli",
+        "training": "Formazione",
+        "supplier": "Fornitori"
+      },
+      "step1": {
+        "tab": "Plant",
+        "intro": "Seleziona il sito da analizzare: i KPI saranno suggeriti in base ai framework normativi attivi.",
+        "plant": "Sito",
+        "plant_global": "Globale (tutti i siti)",
+        "plant_hint": "Se il sito non ha framework attivi verranno mostrati tutti i KPI del catalogo.",
+        "analyze": "Analizza",
+        "analyzing": "Analisi in corso…"
+      },
+      "step2": {
+        "tab": "Suggerimenti",
+        "summary": "{{total}} KPI suggeriti, {{configured}} già configurati, {{selected}} selezionati",
+        "frameworks": "Framework attivi",
+        "next": "Avanti"
+      },
+      "step3": {
+        "tab": "Conferma",
+        "intro": "Stai per importare {{count}} KPI. Verranno creati come definizioni attive.",
+        "import_btn": "Importa {{count}} KPI",
+        "importing": "Importazione…",
+        "skipped": "{{count}} già esistenti saltati",
+        "errors": "Errori",
+        "skipped_label": "Saltati"
+      }
     }
   }
 }

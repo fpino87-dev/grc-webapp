@@ -2,10 +2,26 @@ from datetime import date
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
 from django.db.models import Count, Q, Avg, ExpressionWrapper, F, DurationField
 from django.utils import timezone
 
 from .permissions import ReportingPermission
+
+
+def _resolve_lang(request) -> str:
+    """Lingua dal query param ?lang o dall'header Accept-Language, default 'it'."""
+    from apps.tasks.kpi_catalog import LANGS
+
+    lang = (request.query_params.get("lang") or "").lower()
+    if lang in LANGS:
+        return lang
+    accept = request.headers.get("Accept-Language", "")
+    if accept:
+        first = accept.split(",")[0].strip().lower()[:2]
+        if first in LANGS:
+            return first
+    return "it"
 
 
 class ComplianceSummaryView(APIView):
@@ -880,3 +896,126 @@ class KpiOverviewView(APIView):
             "without_nda": without_nda,
             "suppliers": suppliers_detail,
         }
+
+
+# ── KPI suggestion engine (catalogo standard → import) ───────────────────────
+
+
+class KpiSuggestView(APIView):
+    """
+    GET /api/v1/kpi-suggest/?plant=<uuid>&lang=it
+
+    Suggerisce KPI standard dal catalogo in base ai framework attivi del plant.
+    Pura lettura: non crea nulla.
+    """
+
+    permission_classes = [ReportingPermission]
+
+    def get(self, request):
+        from apps.plants.models import Plant
+        from apps.plants.services import get_active_framework_codes
+        from apps.tasks.kpi_catalog import localized_catalog
+        from apps.tasks.models import ChecklistTemplate, KPIDefinition
+
+        lang = _resolve_lang(request)
+        plant_id = request.query_params.get("plant")
+        plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
+
+        # Framework attivi del plant (vuoto = nessun filtro, mostra tutto).
+        plant_frameworks = get_active_framework_codes(plant) if plant else []
+        fw_set = set(plant_frameworks)
+
+        # Template checklist candidati per il matching (scope plant + globali).
+        templates = list(
+            ChecklistTemplate.objects.filter(deleted_at__isnull=True)
+            .filter(Q(plant=plant) | Q(plant__isnull=True))
+            .values("id", "name")
+        )
+
+        # kpi_code già configurati (unique a livello sistema).
+        configured_codes = set(
+            KPIDefinition.objects.values_list("kpi_code", flat=True)
+        )
+
+        def _match_template(keywords):
+            for kw in keywords or []:
+                kw_l = kw.lower()
+                for tpl in templates:
+                    if kw_l in (tpl["name"] or "").lower():
+                        return {"id": str(tpl["id"]), "name": tpl["name"]}
+            return None
+
+        suggestions = []
+        for item in localized_catalog(lang):
+            # Filtro framework: se il plant ha framework attivi, tieni solo i KPI
+            # i cui frameworks[] intersecano quelli attivi.
+            if fw_set and not (set(item["frameworks"]) & fw_set):
+                continue
+            suggestions.append({
+                "kpi_code": item["kpi_code"],
+                "name": item["name"],
+                "description": item["description"],
+                "unit": item["unit"],
+                "aggregation": item["aggregation"],
+                "threshold_direction": item["threshold_direction"],
+                "threshold_warning": item["threshold_warning"],
+                "threshold_critical": item["threshold_critical"],
+                "notify_on_warning": item["notify_on_warning"],
+                "notify_on_critical": item["notify_on_critical"],
+                "source": item["source"],
+                "category": item["category"],
+                "frameworks": item["frameworks"],
+                "rationale": item["rationale"],
+                "checklist_hint": item["checklist_hint"],
+                "already_configured": item["kpi_code"] in configured_codes,
+                "suggested_checklist_template": (
+                    _match_template(item["match_keywords"])
+                    if item["source"] == "checklist" else None
+                ),
+            })
+
+        return Response({
+            "plant_frameworks": plant_frameworks,
+            "suggestions": suggestions,
+        })
+
+
+class KpiImportSuggestionsView(APIView):
+    """
+    POST /api/v1/kpi-suggest/import/
+
+    Importa i KPI suggeriti confermati dall'utente (idempotente).
+    """
+
+    permission_classes = [ReportingPermission]
+
+    def post(self, request):
+        from apps.plants.models import Plant
+        from apps.tasks import services
+
+        kpi_codes = request.data.get("kpi_codes") or []
+        if not isinstance(kpi_codes, list) or not kpi_codes:
+            return Response(
+                {"error": "kpi_codes deve essere una lista non vuota."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        plant_id = request.data.get("plant")
+        plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
+        if plant_id and plant is None:
+            return Response(
+                {"error": "Plant inesistente."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        overrides = request.data.get("overrides") or {}
+        if not isinstance(overrides, dict):
+            overrides = {}
+
+        result = services.import_kpi_suggestions(
+            plant=plant,
+            kpi_codes=kpi_codes,
+            overrides=overrides,
+            user=request.user,
+        )
+        return Response(result, status=status.HTTP_201_CREATED)

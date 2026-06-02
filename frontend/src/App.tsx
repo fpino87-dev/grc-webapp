@@ -15,6 +15,9 @@ import { ChecklistTemplateList } from "./modules/checklist/ChecklistTemplateList
 import { ChecklistTemplateForm } from "./modules/checklist/ChecklistTemplateForm";
 import { ChecklistRunList } from "./modules/checklist/ChecklistRunList";
 import { ChecklistRunDetail } from "./modules/checklist/ChecklistRunDetail";
+import { KpiDashboard } from "./modules/tasks/kpi/KpiDashboard";
+import { KpiDefinitionList } from "./modules/tasks/kpi/KpiDefinitionList";
+import { KpiDefinitionForm } from "./modules/tasks/kpi/KpiDefinitionForm";
 import { DocumentsPage } from "./modules/documents/DocumentsPage";
 import { ReportingPage } from "./modules/reporting/ReportingPage";
 import { UsersPage } from "./modules/users/UsersPage";
@@ -75,6 +78,10 @@ export function App() {
           <Route path="checklists/templates/:id/edit" element={<ChecklistTemplateForm />} />
           <Route path="checklists/runs" element={<ChecklistRunList />} />
           <Route path="checklists/runs/:id" element={<ChecklistRunDetail />} />
+          <Route path="kpi" element={<KpiDashboard />} />
+          <Route path="kpi/definitions" element={<KpiDefinitionList />} />
+          <Route path="kpi/definitions/new" element={<KpiDefinitionForm />} />
+          <Route path="kpi/definitions/:id/edit" element={<KpiDefinitionForm />} />
           <Route path="documents" element={<DocumentsPage />} />
           <Route path="reporting" element={<ReportingPage />} />
           <Route path="users" element={<UsersPage />} />

@@ -4,10 +4,20 @@ from rest_framework.response import Response
 
 from django.core.exceptions import ValidationError
 
-from .models import ChecklistRun, ChecklistTemplate, Task, TaskComment
+from .models import (
+    ChecklistRun,
+    ChecklistTemplate,
+    KPIDefinition,
+    OperationalKpiSnapshot,
+    Task,
+    TaskComment,
+)
 from .serializers import (
     ChecklistRunSerializer,
     ChecklistTemplateSerializer,
+    KPIDefinitionListSerializer,
+    KPIDefinitionSerializer,
+    OperationalKpiSnapshotSerializer,
     TaskCommentSerializer,
     TaskSerializer,
 )
@@ -174,6 +184,8 @@ class ChecklistRunViewSet(
             checked=request.data.get("checked", False),
             note=request.data.get("note", ""),
             user=request.user,
+            value=request.data.get("value"),
+            text_value=request.data.get("text_value"),
         )
         if run_item is None:
             return Response(
@@ -194,3 +206,98 @@ class ChecklistRunViewSet(
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return Response(ChecklistRunSerializer(run).data)
+
+
+# ── KPI Engine operativo (M08 ↔ M18) ─────────────────────────────────────────
+
+
+class KPIDefinitionViewSet(viewsets.ModelViewSet):
+    queryset = (
+        KPIDefinition.objects.select_related("plant", "checklist_template")
+        .prefetch_related("snapshots")
+    )
+    filterset_fields = ["plant", "is_active", "source", "aggregation"]
+    search_fields = ["kpi_code", "name", "description"]
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return KPIDefinitionListSerializer
+        return KPIDefinitionSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    def perform_destroy(self, instance):
+        from core.audit import log_action
+        log_action(
+            user=self.request.user,
+            action_code="kpi_definition.deleted",
+            level="L1",
+            entity=instance,
+            payload={"id": str(instance.pk), "kpi_code": instance.kpi_code},
+        )
+        instance.soft_delete()
+
+
+class OperationalKpiSnapshotViewSet(
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    queryset = OperationalKpiSnapshot.objects.select_related(
+        "kpi_definition", "plant"
+    )
+    serializer_class = OperationalKpiSnapshotSerializer
+    filterset_fields = ["kpi_definition", "plant", "week_start", "status"]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        params = self.request.query_params
+        week_from = params.get("week_start_after")
+        week_to = params.get("week_start_before")
+        if week_from:
+            qs = qs.filter(week_start__gte=week_from)
+        if week_to:
+            qs = qs.filter(week_start__lte=week_to)
+        return qs
+
+    @action(detail=False, methods=["get"])
+    def trend(self, request):
+        """GET /kpi-snapshots/trend/?kpi_code=X&plant=Y&weeks=12 — ultimi N
+        snapshot ordinati per week_start ASC (per il grafico trend)."""
+        kpi_code = request.query_params.get("kpi_code")
+        plant_id = request.query_params.get("plant")
+        try:
+            weeks = int(request.query_params.get("weeks", 12))
+        except (TypeError, ValueError):
+            weeks = 12
+        weeks = min(max(weeks, 1), 52)
+
+        if not kpi_code:
+            return Response(
+                {"detail": "kpi_code obbligatorio."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        qs = OperationalKpiSnapshot.objects.filter(
+            kpi_definition__kpi_code=kpi_code
+        ).select_related("kpi_definition", "plant")
+        if plant_id:
+            qs = qs.filter(plant_id=plant_id)
+        else:
+            qs = qs.filter(plant__isnull=True)
+
+        # Ultimi N per data desc, poi riordinati ASC per il grafico.
+        latest = list(qs.order_by("-week_start")[:weeks])
+        latest.reverse()
+
+        kpi_def = (
+            KPIDefinition.objects.filter(kpi_code=kpi_code).first()
+        )
+        return Response({
+            "kpi_code": kpi_code,
+            "name": kpi_def.name if kpi_def else kpi_code,
+            "unit": kpi_def.unit if kpi_def else "",
+            "threshold_warning": kpi_def.threshold_warning if kpi_def else None,
+            "threshold_critical": kpi_def.threshold_critical if kpi_def else None,
+            "threshold_direction": kpi_def.threshold_direction if kpi_def else "above",
+            "results": OperationalKpiSnapshotSerializer(latest, many=True).data,
+        })

@@ -13,6 +13,8 @@ from two_factor.urls import urlpatterns as tf_urls
 from django_otp import devices_for_user
 
 from core.jwt import GrcTokenObtainPairView, MfaVerifyView
+from apps.reporting.api_ingest import KpiComputeView, KpiIngestView
+from apps.reporting.views import KpiImportSuggestionsView, KpiSuggestView
 
 
 class AdminSiteOTPRequiredOrSetup(AdminSiteOTPRequired):
@@ -165,6 +167,12 @@ urlpatterns += [
     path("api/v1/bcp/", include("apps.bcp.urls")),
     path("api/v1/audit-prep/", include("apps.audit_prep.urls")),
     path("api/v1/reporting/", include("apps.reporting.urls")),
+    # KPI engine machine-to-machine (path top-level, fuori da /reporting/,
+    # per contratto API esterno stabile).
+    path("api/v1/kpi-ingest/", KpiIngestView.as_view(), name="kpi-ingest"),
+    path("api/v1/kpi-compute/", KpiComputeView.as_view(), name="kpi-compute"),
+    path("api/v1/kpi-suggest/", KpiSuggestView.as_view(), name="kpi-suggest"),
+    path("api/v1/kpi-suggest/import/", KpiImportSuggestionsView.as_view(), name="kpi-suggest-import"),
     path("api/v1/notifications/", include("apps.notifications.urls")),
     path("api/v1/ai/", include("apps.ai_engine.urls")),
     path("api/v1/schedule/", include("apps.compliance_schedule.urls")),

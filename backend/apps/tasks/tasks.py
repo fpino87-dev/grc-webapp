@@ -73,3 +73,44 @@ def generate_scheduled_checklists(self):
         f"generate_scheduled_checklists: {created_count} run creati, "
         f"{overdue_count} scaduti, {pdca_count} PDCA aperti"
     )
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), max_retries=3, retry_backoff=True)
+def compute_operational_kpis(self):
+    """
+    Ogni lunedì alle 06:30. Calcola gli snapshot settimanali dei KPI operativi
+    basati su checklist per la settimana corrente (lunedì→domenica):
+    per ogni KPIDefinition attiva con source=checklist, su tutti i plant
+    pertinenti (kpi.plant se valorizzato, altrimenti tutti i plant attivi).
+    Invia alert M19 quando uno status peggiora oltre soglia.
+    """
+    from apps.plants.models import Plant
+
+    from . import services
+    from .models import KPIDefinition
+
+    week_start = services._monday_of(timezone.now().date())
+    snapshot_count = 0
+    alert_count = 0
+
+    kpis = (
+        KPIDefinition.objects.filter(is_active=True, source="checklist")
+        .select_related("plant", "checklist_template")
+    )
+    for kpi_def in kpis:
+        if kpi_def.plant_id:
+            target_plants = [kpi_def.plant]
+        else:
+            target_plants = list(Plant.objects.filter(status="attivo"))
+        for plant in target_plants:
+            snapshot = services.compute_and_store_kpi_snapshot(
+                kpi_def, plant, week_start
+            )
+            snapshot_count += 1
+            if getattr(snapshot, "_alert_sent", False):
+                alert_count += 1
+
+    return (
+        f"compute_operational_kpis: {snapshot_count} snapshot, "
+        f"{alert_count} alert inviati (week_start={week_start})"
+    )

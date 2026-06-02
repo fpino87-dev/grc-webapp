@@ -11,6 +11,7 @@ const navGroups: NavGroup[] = [
     items: [
       { to: "/", labelKey: "sidebar.items.dashboard", icon: "⊞", roles: null },
       { to: "/reporting", labelKey: "sidebar.items.reporting", icon: "📊", roles: null },
+      { to: "/kpi", labelKey: "sidebar.items.kpi_operational", icon: "📈", roles: null },
       { to: "/tasks", labelKey: "sidebar.items.tasks", icon: "☑", roles: null },
       { to: "/checklists/runs", labelKey: "sidebar.items.checklist_runs", icon: "✔", roles: null },
     ],

@@ -1003,7 +1003,8 @@
       "backups": "Backup & Restore",
       "osint": "OSINT Monitor",
       "checklist_runs": "Checklists",
-      "checklist_templates": "Checklist Templates"
+      "checklist_templates": "Checklist Templates",
+      "kpi_operational": "Operational KPIs"
     }
   },
   "topbar": {
@@ -2804,6 +2805,128 @@
       "in_progress": "In progress",
       "completed": "Completed",
       "overdue": "Overdue"
+    }
+  },
+  "kpi": {
+    "dashboard": {
+      "title": "Operational KPIs",
+      "compute_now": "Compute now",
+      "computing": "Computing…",
+      "manage": "Manage KPIs",
+      "all_plants": "All plants",
+      "empty": "No active KPI configured"
+    },
+    "definitions": {
+      "title": "KPI Definitions",
+      "new": "New KPI",
+      "empty": "No KPI configured",
+      "back_dashboard": "Dashboard",
+      "table": {
+        "code": "Code",
+        "name": "Name",
+        "source": "Source",
+        "warning": "Warning threshold",
+        "critical": "Critical threshold",
+        "active": "Active"
+      }
+    },
+    "form": {
+      "new": "New KPI",
+      "edit": "Edit KPI",
+      "kpi_code": "KPI code",
+      "kpi_code_hint": "Slug: lowercase, digits and underscore (e.g. backup_success_rate)",
+      "name": "Name",
+      "description": "Description",
+      "unit": "Unit",
+      "source": "Source",
+      "plant": "Plant",
+      "plant_global": "Global (all plants)",
+      "template": "Checklist template",
+      "aggregation": "Aggregation",
+      "item_filter": "Item filter",
+      "item_filter_placeholder": "Partial item text (empty = all)",
+      "template_placeholder": "the template",
+      "threshold_warning": "Warning threshold",
+      "threshold_critical": "Critical threshold",
+      "direction": "Direction",
+      "dir_above": "Above threshold = good",
+      "dir_below": "Below threshold = good",
+      "dir_above_short": "higher values are better",
+      "dir_below_short": "lower values are better",
+      "is_active": "Active",
+      "notify_warning": "Notify on warning",
+      "notify_critical": "Notify on critical",
+      "preview_title": "Calculation formula",
+      "preview_checklist": "Compute \"{{agg}}\" over {{template}} runs ({{filter}}); {{dir}}.",
+      "preview_api": "Value \"{{agg}}\" received via external API; {{dir}}.",
+      "preview_filter": "items containing \"{{filter}}\"",
+      "preview_all_items": "all items"
+    },
+    "aggregation": {
+      "success_rate": "Success rate (% completed runs)",
+      "avg_value": "Average of numeric values",
+      "last_value": "Last recorded value",
+      "count_ok": "Count of OK items",
+      "count_fail": "Count of KO items"
+    },
+    "source": {
+      "checklist": "Checklist",
+      "api": "External API",
+      "manual": "Manual"
+    },
+    "status": {
+      "ok": "OK",
+      "warning": "Warning",
+      "critical": "Critical",
+      "no_data": "No data"
+    },
+    "trend": {
+      "subtitle": "Trend last weeks",
+      "empty": "No snapshot available",
+      "warning": "Warning",
+      "critical": "Critical"
+    },
+    "suggest": {
+      "button": "Suggest KPIs",
+      "title": "Suggest KPIs",
+      "back": "Back",
+      "already_configured": "Already configured",
+      "rationale": "Regulatory rationale",
+      "linkable_to": "Linkable to",
+      "import_success": "{{count}} KPIs configured successfully",
+      "categories": {
+        "operations": "Operations",
+        "incident": "Incidents",
+        "vulnerability": "Vulnerability",
+        "access": "Access & Identity",
+        "compliance": "Compliance & Controls",
+        "training": "Training",
+        "supplier": "Suppliers"
+      },
+      "step1": {
+        "tab": "Plant",
+        "intro": "Select the plant to analyze: KPIs are suggested based on the active regulatory frameworks.",
+        "plant": "Plant",
+        "plant_global": "Global (all plants)",
+        "plant_hint": "If the plant has no active frameworks, all catalog KPIs are shown.",
+        "analyze": "Analyze",
+        "analyzing": "Analyzing…"
+      },
+      "step2": {
+        "tab": "Suggestions",
+        "summary": "{{total}} suggested KPIs, {{configured}} already configured, {{selected}} selected",
+        "frameworks": "Active frameworks",
+        "next": "Next"
+      },
+      "step3": {
+        "tab": "Confirm",
+        "intro": "You are about to import {{count}} KPIs. They will be created as active definitions.",
+        "import_btn": "Import {{count}} KPIs",
+        "importing": "Importing…",
+        "skipped": "{{count}} already existing skipped",
+        "errors": "Errors",
+        "skipped_label": "Skipped"
+      }
     }
   }
 }

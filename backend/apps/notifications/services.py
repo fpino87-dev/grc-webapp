@@ -264,6 +264,36 @@ def notify_document_review_needed(document, recipients: list[str]):
     )
 
 
+def notify_kpi_alert(kpi_def, plant, snapshot, recipients: list[str]):
+    """
+    Alert per un KPI operativo che ha superato la soglia (warning/critical).
+    Segue il pattern degli altri notify_*: contenuto qui, destinatari risolti
+    dal chiamante (apps.tasks.services._send_kpi_alert).
+    """
+    status_label = {"warning": "⚠️ Warning", "critical": "🔴 Critico"}.get(
+        snapshot.status, snapshot.status
+    )
+    plant_label = plant.name if plant else "Tutti i plant (globale)"
+    value_label = (
+        f"{snapshot.value} {kpi_def.unit}".strip()
+        if snapshot.value is not None
+        else "n/d"
+    )
+    send_grc_email(
+        subject=f"[GRC] {status_label} KPI: {kpi_def.name}",
+        body=(
+            "Un KPI operativo ha superato la soglia configurata.\n\n"
+            f"KPI:        {kpi_def.name} ({kpi_def.kpi_code})\n"
+            f"Stato:      {status_label}\n"
+            f"Valore:     {value_label}\n"
+            f"Settimana:  {snapshot.week_start}\n"
+            f"Plant:      {plant_label}\n\n"
+            "Accedi alla dashboard KPI operativi per analizzare il trend."
+        ),
+        recipients=recipients,
+    )
+
+
 def notify_document_approved_broadcast(document, recipients: list[str]):
     """
     Notifica a tutti i membri del sito che un nuovo documento è stato approvato.

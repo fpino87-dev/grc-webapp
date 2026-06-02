@@ -1085,7 +1085,8 @@
       "backups": "Yedekleme & Geri Yükleme",
       "osint": "OSINT Monitor",
       "checklist_runs": "Kontrol Listeleri",
-      "checklist_templates": "Liste Şablonları"
+      "checklist_templates": "Liste Şablonları",
+      "kpi_operational": "Operasyonel KPI'lar"
     }
   },
   "topbar": {
@@ -2883,6 +2884,128 @@
       "in_progress": "Devam ediyor",
       "completed": "Tamamlandı",
       "overdue": "Gecikmiş"
+    }
+  },
+  "kpi": {
+    "dashboard": {
+      "title": "Operasyonel KPI'lar",
+      "compute_now": "Şimdi hesapla",
+      "computing": "Hesaplanıyor…",
+      "manage": "KPI'ları yönet",
+      "all_plants": "Tüm tesisler",
+      "empty": "Aktif KPI yapılandırılmamış"
+    },
+    "definitions": {
+      "title": "KPI Tanımları",
+      "new": "Yeni KPI",
+      "empty": "Yapılandırılmış KPI yok",
+      "back_dashboard": "Panel",
+      "table": {
+        "code": "Kod",
+        "name": "Ad",
+        "source": "Kaynak",
+        "warning": "Uyarı eşiği",
+        "critical": "Kritik eşik",
+        "active": "Aktif"
+      }
+    },
+    "form": {
+      "new": "Yeni KPI",
+      "edit": "KPI düzenle",
+      "kpi_code": "KPI kodu",
+      "kpi_code_hint": "Slug: küçük harf, rakam ve alt çizgi (örn. backup_success_rate)",
+      "name": "Ad",
+      "description": "Açıklama",
+      "unit": "Birim",
+      "source": "Kaynak",
+      "plant": "Tesis",
+      "plant_global": "Global (tüm tesisler)",
+      "template": "Kontrol listesi şablonu",
+      "aggregation": "Toplama",
+      "item_filter": "Madde filtresi",
+      "item_filter_placeholder": "Kısmi madde metni (boş = tümü)",
+      "template_placeholder": "şablon",
+      "threshold_warning": "Uyarı eşiği",
+      "threshold_critical": "Kritik eşik",
+      "direction": "Yön",
+      "dir_above": "Eşiğin üstü = iyi",
+      "dir_below": "Eşiğin altı = iyi",
+      "dir_above_short": "yüksek değerler olumlu",
+      "dir_below_short": "düşük değerler olumlu",
+      "is_active": "Aktif",
+      "notify_warning": "Uyarıda bildir",
+      "notify_critical": "Kritikte bildir",
+      "preview_title": "Hesaplama formülü",
+      "preview_checklist": "{{template}} çalıştırmaları üzerinde «{{agg}}» hesapla ({{filter}}); {{dir}}.",
+      "preview_api": "Harici API'den alınan «{{agg}}» değeri; {{dir}}.",
+      "preview_filter": "\"{{filter}}\" içeren maddeler",
+      "preview_all_items": "tüm maddeler"
+    },
+    "aggregation": {
+      "success_rate": "Başarı oranı (% tamamlanan)",
+      "avg_value": "Sayısal değerlerin ortalaması",
+      "last_value": "Son kaydedilen değer",
+      "count_ok": "OK madde sayısı",
+      "count_fail": "KO madde sayısı"
+    },
+    "source": {
+      "checklist": "Kontrol listesi",
+      "api": "Harici API",
+      "manual": "Manuel"
+    },
+    "status": {
+      "ok": "OK",
+      "warning": "Uyarı",
+      "critical": "Kritik",
+      "no_data": "Veri yok"
+    },
+    "trend": {
+      "subtitle": "Son haftaların trendi",
+      "empty": "Mevcut anlık görüntü yok",
+      "warning": "Uyarı",
+      "critical": "Kritik"
+    },
+    "suggest": {
+      "button": "KPI Öner",
+      "title": "KPI Öner",
+      "back": "Geri",
+      "already_configured": "Zaten yapılandırılmış",
+      "rationale": "Mevzuat gerekçesi",
+      "linkable_to": "Bağlanabilir",
+      "import_success": "{{count}} KPI başarıyla yapılandırıldı",
+      "categories": {
+        "operations": "Operasyonlar",
+        "incident": "Olaylar",
+        "vulnerability": "Açıklar",
+        "access": "Erişim ve Kimlik",
+        "compliance": "Uyum ve Kontroller",
+        "training": "Eğitim",
+        "supplier": "Tedarikçiler"
+      },
+      "step1": {
+        "tab": "Tesis",
+        "intro": "Analiz edilecek tesisi seçin: KPI'lar aktif mevzuat çerçevelerine göre önerilir.",
+        "plant": "Tesis",
+        "plant_global": "Global (tüm tesisler)",
+        "plant_hint": "Tesiste aktif çerçeve yoksa katalogdaki tüm KPI'lar gösterilir.",
+        "analyze": "Analiz et",
+        "analyzing": "Analiz ediliyor…"
+      },
+      "step2": {
+        "tab": "Öneriler",
+        "summary": "{{total}} önerilen KPI, {{configured}} zaten yapılandırılmış, {{selected}} seçili",
+        "frameworks": "Aktif çerçeveler",
+        "next": "İleri"
+      },
+      "step3": {
+        "tab": "Onayla",
+        "intro": "{{count}} KPI içe aktarmak üzeresiniz. Aktif tanımlar olarak oluşturulacak.",
+        "import_btn": "{{count}} KPI içe aktar",
+        "importing": "İçe aktarılıyor…",
+        "skipped": "{{count}} mevcut olan atlandı",
+        "errors": "Hatalar",
+        "skipped_label": "Atlananlar"
+      }
     }
   }
 }
