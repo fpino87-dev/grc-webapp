@@ -234,6 +234,30 @@ def _route_alert(alert: "OsintAlert", entity: "OsintEntity") -> None:
                 _create_task(alert, entity)
 
 
+def _system_user():
+    """Utente di sistema a cui attribuire l'audit delle azioni automatiche OSINT
+    (creazione incidenti/task da alert). Primo superuser attivo, o None."""
+    from django.contrib.auth import get_user_model
+    return (
+        get_user_model().objects.filter(is_superuser=True, is_active=True)
+        .order_by("date_joined").first()
+    )
+
+
+def _audit(action_code: str, entity, payload: dict) -> None:
+    """Scrive nell'audit trail (regola architetturale #3). Best-effort: se non
+    c'è un utente di sistema o log_action fallisce, non blocca lo scan."""
+    from core.audit import log_action
+    user = _system_user()
+    if user is None:
+        logger.warning("OSINT audit skipped (%s): nessun superuser di sistema", action_code)
+        return
+    try:
+        log_action(user=user, action_code=action_code, level="L2", entity=entity, payload=payload)
+    except Exception as exc:  # pragma: no cover
+        logger.debug("OSINT audit log failed (%s): %s", action_code, exc)
+
+
 def _severity_to_incident(severity: str) -> str:
     return {"critical": "critica", "warning": "alta", "info": "media"}.get(severity, "media")
 
@@ -265,19 +289,29 @@ def _create_incident(alert: "OsintAlert", entity: "OsintEntity") -> None:
         )
         alert.linked_incident_id = incident.pk
         alert.save(update_fields=["linked_incident_id", "updated_at"])
+        _audit("osint.incident_created", incident, {
+            "incident_id": str(incident.pk),
+            "alert_id": str(alert.pk),
+            "alert_type": alert.alert_type,
+            "domain": entity.domain,
+            "auto_generated": True,
+        })
         logger.info("OSINT → Incident created: %s for alert %s", incident.pk, alert.pk)
     except Exception as exc:
         logger.error("Failed to create incident for OSINT alert %s: %s", alert.pk, exc)
 
 
 def _create_task(alert: "OsintAlert", entity: "OsintEntity") -> None:
-    from apps.tasks.models import Task
+    # Business logic di creazione task centralizzata in M08 (regola #2): usiamo
+    # il service invece di scrivere direttamente sul modello Task.
+    from apps.tasks.services import create_task
     from apps.osint.models import AlertSeverity
 
     priority = "alta" if alert.severity == AlertSeverity.CRITICAL else "media"
 
     try:
-        task = Task.objects.create(
+        task = create_task(
+            plant=None,
             title=f"OSINT: {alert.get_alert_type_display()} — {entity.display_name}",
             description=(
                 f"[Generato automaticamente dal modulo OSINT]\n\n"
@@ -286,14 +320,19 @@ def _create_task(alert: "OsintAlert", entity: "OsintEntity") -> None:
                 f"{alert.description}"
             ),
             priority=priority,
-            due_date=(timezone.now() + timedelta(days=14)).date(),
-            source="manuale",
             source_module="osint",
             source_id=alert.pk,
-            status="aperto",
+            due_date=(timezone.now() + timedelta(days=14)).date(),
         )
         alert.linked_task_id = task.pk
         alert.save(update_fields=["linked_task_id", "updated_at"])
+        _audit("osint.task_created", task, {
+            "task_id": str(task.pk),
+            "alert_id": str(alert.pk),
+            "alert_type": alert.alert_type,
+            "domain": entity.domain,
+            "auto_generated": True,
+        })
         logger.info("OSINT → Task created: %s for alert %s", task.pk, alert.pk)
     except Exception as exc:
         logger.error("Failed to create task for OSINT alert %s: %s", alert.pk, exc)

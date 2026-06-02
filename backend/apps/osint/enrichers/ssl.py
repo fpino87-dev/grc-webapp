@@ -22,6 +22,10 @@ logger = logging.getLogger(__name__)
 CRTSH_URL = "https://crt.sh/?q=%.{domain}&output=json"
 CRTSH_TIMEOUT = 20
 TLS_TIMEOUT = 10
+# Cap sulla dimensione della risposta crt.sh letta in memoria. Domini globali
+# possono restituire risposte JSON da decine di MB: leggerle interamente prima
+# di troncare i sottodomini è uno spreco di memoria (review #9).
+CRTSH_MAX_BYTES = 8 * 1024 * 1024  # 8 MB
 # Cap difensivo sul numero di sottodomini importati da CT log per scan.
 # Domini molto popolari (es. cdn, ad-network, brand globali) possono restituire
 # decine di migliaia di entry; importarle tutte gonfia OsintSubdomain e
@@ -74,17 +78,29 @@ def _get_tls_cert(domain: str) -> dict | None:
     un problema TLS (cert scaduto, self-signed, mismatch) riprova senza verifica
     in modo da rilevare comunque i dati del certificato (scadenza, emittente).
     Ritorna None solo se il server HTTPS non è raggiungibile.
+
+    Anti-SSRF / anti DNS-rebinding (review #3): il dominio viene risolto a un IP
+    PUBBLICO validato e la connessione TCP avviene verso quell'IP (pinning),
+    mentre SNI e hostname-check restano sul dominio. Così tra validazione e
+    connessione non c'è una seconda risoluzione che un attaccante possa dirottare
+    verso un IP privato/metadata.
     """
-    # Tentativo 1: verifica completa
+    from apps.osint.validators import safe_resolve_public_ip
+
+    ip = safe_resolve_public_ip(domain)
+    if not ip:
+        return None  # non risolvibile a un IP pubblico → non connettere
+
+    # Tentativo 1: verifica completa (connessione all'IP pinnato, SNI=domain)
     try:
         ctx = ssl.create_default_context()
-        with socket.create_connection((domain, 443), timeout=TLS_TIMEOUT) as sock:
+        with socket.create_connection((ip, 443), timeout=TLS_TIMEOUT) as sock:
             with ctx.wrap_socket(sock, server_hostname=domain) as ssock:
                 return ssock.getpeercert()
     except ssl.SSLError:
         pass  # problema certificato — riprova senza verifica
     except Exception as exc:
-        logger.debug("TLS direct check failed for %s: %s", domain, exc)
+        logger.debug("TLS direct check failed for %s (%s): %s", domain, ip, exc)
         return None  # server non raggiungibile
 
     # Tentativo 2: no-verify per rilevare cert scaduti/non validi
@@ -92,14 +108,14 @@ def _get_tls_cert(domain: str) -> dict | None:
         ctx = ssl.create_default_context()
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
-        with socket.create_connection((domain, 443), timeout=TLS_TIMEOUT) as sock:
+        with socket.create_connection((ip, 443), timeout=TLS_TIMEOUT) as sock:
             with ctx.wrap_socket(sock, server_hostname=domain) as ssock:
                 der = ssock.getpeercert(binary_form=True)
         if not der:
             return None
         return _der_to_ssl_dict(der)
     except Exception as exc:
-        logger.debug("TLS no-verify check failed for %s: %s", domain, exc)
+        logger.debug("TLS no-verify check failed for %s (%s): %s", domain, ip, exc)
         return None
 
 
@@ -136,14 +152,25 @@ def _parse_cert(cert: dict) -> tuple[bool, date | None, int | None, str, bool]:
 def _get_crtsh_subdomains(domain: str) -> set[str]:
     """Recupera sottodomini unici dai log CT via crt.sh."""
     try:
+        import json as _json
+
         resp = requests.get(
             CRTSH_URL.format(domain=domain),
             timeout=CRTSH_TIMEOUT,
             headers={"Accept": "application/json"},
+            stream=True,
         )
         if resp.status_code != 200:
+            resp.close()
             return set()
-        entries = resp.json()
+        # Legge al massimo CRTSH_MAX_BYTES per evitare di caricare in RAM
+        # risposte enormi; se eccede, scarta (non affidabile/parziale).
+        raw = resp.raw.read(CRTSH_MAX_BYTES + 1, decode_content=True)
+        resp.close()
+        if len(raw) > CRTSH_MAX_BYTES:
+            logger.warning("crt.sh response for %s exceeds %d bytes, skipping", domain, CRTSH_MAX_BYTES)
+            return set()
+        entries = _json.loads(raw.decode("utf-8", errors="replace"))
     except Exception as exc:
         logger.debug("crt.sh request failed for %s: %s", domain, exc)
         return set()

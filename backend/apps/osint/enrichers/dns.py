@@ -101,34 +101,35 @@ def _check_mx(domain: str) -> bool:
         return False
 
 
-def _check_dnssec(domain: str) -> bool:
+def _check_dnssec(domain: str) -> bool | None:
     """DNSSEC enabled se il dominio espone DNSKEY *e* il parent ha un DS record.
 
-    Solo RRSIG sull'apex non è affidabile: alcuni resolver autoritativi non lo
-    ritornano in `dnspython` con `raise_on_no_answer=False`. La presenza di
-    DNSKEY (sul dominio) + DS (sul parent registry) è la firma canonica della
-    catena di fiducia DNSSEC attiva.
+    Ritorna:
+    - True  : DNSKEY presente E DS presente (catena di fiducia attiva)
+    - False : nessuna DNSKEY (DNSSEC sicuramente non attivo)
+    - None  : esito incerto (query DNSKEY/DS in errore) → NON assumere abilitato.
+
+    Nota (review #11): la versione precedente ritornava True quando la query DS
+    sollevava eccezione ("probabile"), causando falsi 'enabled'. Ora in caso di
+    incertezza ritorna None: il modello tiene dnssec_enabled=None e il finding
+    DNSSEC_MISSING (che scatta solo su False) non genera falsi positivi.
     """
     import dns.resolver
-    import dns.rdatatype
 
     # 1) DNSKEY sul dominio
     try:
         ans = dns.resolver.resolve(domain, "DNSKEY", raise_on_no_answer=False)
         if not list(ans):
-            return False
+            return False  # nessuna DNSKEY → DNSSEC non attivo (certo)
     except Exception:
-        return False
+        return None  # incerto
 
-    # 2) DS record nel parent zone (cioè interrogando il dominio stesso ritorna il DS proprio)
+    # 2) DS record (catena verso il parent). In caso di errore: incerto, non True.
     try:
         ans = dns.resolver.resolve(domain, "DS", raise_on_no_answer=False)
-        ds_rrs = list(ans)
-        return len(ds_rrs) > 0
+        return len(list(ans)) > 0
     except Exception:
-        # Per alcune TLD la query DS sul name può non risolvere via il resolver
-        # ricorsivo: se DNSKEY è presente accettiamo DNSSEC come probabile.
-        return True
+        return None
 
 
 def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> bool:

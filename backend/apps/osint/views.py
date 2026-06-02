@@ -22,7 +22,7 @@ from .models import (
     OsintSubdomain,
     SubdomainStatus,
 )
-from core.jwt import ExportRateThrottle
+from core.jwt import AiRateThrottle, ExportRateThrottle
 
 from .permissions import OsintReadPermission, OsintWritePermission
 from .serializers import (
@@ -416,7 +416,7 @@ class OsintSettingsViewSet(viewsets.GenericViewSet):
 class OsintAiView(viewsets.GenericViewSet):
     permission_classes = [OsintWritePermission]
 
-    @action(detail=False, methods=["post"])
+    @action(detail=False, methods=["post"], throttle_classes=[AiRateThrottle])
     def analyze(self, request):
         """Chiama AI Engine con dati OSINT anonimizzati."""
         analysis_type = request.data.get("type")

@@ -92,44 +92,52 @@ def _score_grc(entity: "OsintEntity", scan: "OsintScan") -> int:
     if entity.is_nis2_critical:
         base += 20
 
-    # Rischi aperti collegati al plant sorgente
+    # Rischi aperti (non archiviati e non accettati formalmente) sul plant
+    # sorgente. RiskAssessment ha una FK diretta a plant; gli stati validi sono
+    # bozza/completato/archiviato (vedi apps.risk.models.RiskAssessment).
     try:
         from apps.risk.models import RiskAssessment
         open_risks = RiskAssessment.objects.filter(
-            asset__plant_id=entity.source_id,
-            status__in=["in_lavorazione", "bozza"],
+            plant_id=entity.source_id,
+            status__in=["bozza", "completato"],
+            risk_accepted=False,
             deleted_at__isnull=True,
         ).count()
         if open_risks >= 3:
             base += 40
         elif open_risks >= 1:
             base += 20
-    except Exception:
-        pass
+    except Exception as exc:  # pragma: no cover - difensivo su schema drift
+        logger.debug("score_grc: open_risks query failed for %s: %s", entity.domain, exc)
 
-    # Gap controlli (non compliant) collegati al plant
+    # Gap controlli collegati al plant. Gli stati ControlInstance sono
+    # compliant/parziale/gap/na/non_valutato: il gap vero è "gap" (+ "parziale").
     try:
         from apps.controls.models import ControlInstance
         gap_controls = ControlInstance.objects.filter(
             plant_id=entity.source_id,
-            status__in=["non_conforme", "parziale"],
+            status__in=["gap", "parziale"],
             deleted_at__isnull=True,
         ).count()
         if gap_controls >= 5:
             base += 40
         elif gap_controls >= 1:
             base += 20
-    except Exception:
-        pass
+    except Exception as exc:  # pragma: no cover - difensivo su schema drift
+        logger.debug("score_grc: gap_controls query failed for %s: %s", entity.domain, exc)
 
     return min(base, 100)
 
 
-def compute_scores(entity: "OsintEntity", scan: "OsintScan") -> None:
-    """Calcola e scrive i 4 score + score_total nel scan (non salva — il chiamante salva)."""
+def compute_scores(entity: "OsintEntity", scan: "OsintScan", settings=None) -> None:
+    """Calcola e scrive i 4 score + score_total nel scan (non salva — il chiamante salva).
+
+    `settings` opzionale: se il chiamante lo possiede già evita una query in più.
+    """
     from apps.osint.models import EntityType, OsintSettings
 
-    settings = OsintSettings.load()
+    if settings is None:
+        settings = OsintSettings.load()
     ssl = _score_ssl(scan, warning_days=settings.ssl_expiry_warning_days)
     dns = _score_dns(scan)
     rep = _score_reputation(scan)

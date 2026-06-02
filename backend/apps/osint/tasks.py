@@ -22,40 +22,42 @@ logger = logging.getLogger(__name__)
     name="osint.weekly_scan",
 )
 def run_weekly_scan(self):
-    """Scansiona tutte le entità attive rispettando la frequenza configurata."""
-    from apps.osint.models import OsintEntity, OsintSettings
+    """Pianifica la scansione delle entità attive rispettando la frequenza.
+
+    Fa **fan-out**: invia un task `run_entity_scan` per ogni entità da scansionare
+    invece di scansionarle in serie in un unico task (review #6). Vantaggi:
+    - il fallimento/retry di una singola entità non ri-scansiona tutte le altre
+      (niente quota API sprecata su VirusTotal/AbuseIPDB al retry);
+    - le attese del throttle avvengono in worker paralleli, non bloccano un
+      singolo worker per tutta la durata;
+    - il throttle Redis (token bucket per bucket) continua a serializzare i call
+      rate verso ciascuna sorgente esterna anche tra worker diversi.
+    """
+    from apps.osint.models import OsintEntity
     from apps.osint.services import aggregate_entities
-    from apps.osint.enrichers.run import run_enrichment
 
     # Sincronizza prima le entità dai moduli sorgente
     agg = aggregate_entities()
     logger.info("OSINT pre-scan aggregation: %s", agg)
 
-    settings = OsintSettings.load()
     now = timezone.now()
-
     entities = OsintEntity.objects.filter(is_active=True, deleted_at__isnull=True)
     total = entities.count()
-    scanned = 0
+    dispatched = 0
     skipped = 0
-    errors = 0
 
     for entity in entities:
-        try:
-            if _should_scan(entity, now):
-                run_enrichment(entity, settings)
-                scanned += 1
-            else:
-                skipped += 1
-        except Exception as exc:
-            logger.error("OSINT scan failed for %s: %s", entity.domain, exc)
-            errors += 1
+        if _should_scan(entity, now):
+            run_entity_scan.delay(str(entity.pk))
+            dispatched += 1
+        else:
+            skipped += 1
 
     logger.info(
-        "OSINT weekly scan complete — total=%d scanned=%d skipped=%d errors=%d",
-        total, scanned, skipped, errors,
+        "OSINT weekly scan planned — total=%d dispatched=%d skipped=%d",
+        total, dispatched, skipped,
     )
-    return {"total": total, "scanned": scanned, "skipped": skipped, "errors": errors}
+    return {"total": total, "dispatched": dispatched, "skipped": skipped}
 
 
 def _should_scan(entity, now) -> bool:

@@ -106,11 +106,17 @@ class TestAggregator:
         assert e.is_nis2_critical is True
 
     def test_assets_it_fqdn_and_ip(self, plant_nis2):
+        from unittest.mock import patch
+
         AssetIT.objects.create(
             plant=plant_nis2, name="Web01", asset_type="IT",
             fqdn="web01.corp.example.com", ip_address="203.0.113.10",
         )
-        res = aggregate_entities()
+        # Questo test verifica la mappatura fqdn+ip → 2 entità, non il filtro
+        # anti-SSRF: forziamo is_public_internet_target=True per renderlo
+        # deterministico (gli IP RFC5737/host non risolvibili verrebbero scartati).
+        with patch("apps.osint.validators.is_public_internet_target", return_value=True):
+            aggregate_entities()
         # Plant ha niente domain → 0 da plants. AssetIT ha 2 entry (fqdn + ip).
         domains = set(
             OsintEntity.objects.filter(source_module=SourceModule.ASSETS_IT).values_list("domain", flat=True)

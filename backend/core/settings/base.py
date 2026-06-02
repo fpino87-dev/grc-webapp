@@ -185,6 +185,8 @@ REST_FRAMEWORK = {
         # Scope dedicato per endpoint di export bulk (CSV/Excel/PDF). I view
         # sensibili devono usare ScopedRateThrottle con throttle_scope="export".
         "export": "10/hour",
+        # Scope per endpoint che invocano l'AI Engine (costo per chiamata).
+        "ai": "20/hour",
     },
 }
 

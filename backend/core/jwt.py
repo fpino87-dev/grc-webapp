@@ -81,6 +81,14 @@ class ExportRateThrottle(UserRateThrottle):
     scope = "export"
 
 
+class AiRateThrottle(UserRateThrottle):
+    """Throttle per gli endpoint che invocano l'AI Engine (costo per chiamata).
+    Default 20/h per utente (vedi `DEFAULT_THROTTLE_RATES["ai"]`). Evita che un
+    account compromesso o uno script accidentale generino costi cloud elevati.
+    """
+    scope = "ai"
+
+
 def _fingerprint_source(request) -> str:
     """
     Costruisce la stringa input per `compute_device_fingerprint` (newfix S8).

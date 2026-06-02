@@ -63,63 +63,71 @@ def run_enrichment(entity: "OsintEntity", settings: "OsintSettings") -> "OsintSc
     from apps.osint.models import OsintScan, ScanStatus
     from apps.osint.enrichers import (
         ssl, dns, whois_enr, virustotal, abuseipdb, otx, gsb, hibp,
-        http_headers, dnstwist as dnstwist_enr,
+        http_headers, dnsbl, dnstwist as dnstwist_enr,
     )
     from apps.osint.scoring import compute_scores
 
     scan = OsintScan.objects.create(entity=entity, status=ScanStatus.RUNNING)
 
-    results: list[bool] = []
+    # Esiti per nome enricher: niente liste posizionali (riordinare gli enricher
+    # non deve più poter falsare status/logging — vedi review).
+    results: dict[str, bool] = {}
 
     # SSL (crt.sh): throttle PRIMA (non dopo) — così la prima chiamata può partire subito
     # ma ogni successivo scan dello stesso bucket attende.
     _acquire_token("crtsh", DELAY_CRTSH_VT)
-    results.append(ssl.run(entity, scan, settings))
+    results["ssl"] = ssl.run(entity, scan, settings)
 
     # DNS — lookup locale, nessun throttle
-    results.append(dns.run(entity, scan, settings))
+    results["dns"] = dns.run(entity, scan, settings)
 
     # WHOIS — locale
-    results.append(whois_enr.run(entity, scan, settings))
+    results["whois"] = whois_enr.run(entity, scan, settings)
 
     # VirusTotal
     if settings.virustotal_api_key:
         _acquire_token("virustotal", DELAY_CRTSH_VT)
-    results.append(virustotal.run(entity, scan, settings))
+    results["virustotal"] = virustotal.run(entity, scan, settings)
 
     # AbuseIPDB
     if settings.abuseipdb_api_key:
         _acquire_token("abuseipdb", DELAY_ABUSE_OTX)
-    results.append(abuseipdb.run(entity, scan, settings))
+    results["abuseipdb"] = abuseipdb.run(entity, scan, settings)
 
     # OTX
     _acquire_token("otx", DELAY_ABUSE_OTX)
-    results.append(otx.run(entity, scan, settings))
+    results["otx"] = otx.run(entity, scan, settings)
 
     # Google Safe Browsing
     if settings.gsb_api_key:
         _acquire_token("gsb", DELAY_GSB)
-    results.append(gsb.run(entity, scan, settings))
+    results["gsb"] = gsb.run(entity, scan, settings)
+
+    # DNSBL — reputazione via blocklist DNS (popola in_blacklist/blacklist_sources)
+    _acquire_token("dnsbl", DELAY_GSB)
+    results["dnsbl"] = dnsbl.run(entity, scan, settings)
 
     # HIBP (solo my_domain con api_key)
     if settings.hibp_api_key:
         _acquire_token("hibp", DELAY_HIBP)
-    results.append(hibp.run(entity, scan, settings))
+    results["hibp"] = hibp.run(entity, scan, settings)
 
     # HTTP security headers — locale (HEAD/GET su https://{domain})
-    results.append(http_headers.run(entity, scan, settings))
+    results["http_headers"] = http_headers.run(entity, scan, settings)
 
     # dnstwist — opzionale (skip se libreria non installata). Pesante: solo my_domain.
     if entity.entity_type == "my_domain":
-        results.append(dnstwist_enr.run(entity, scan, settings))
-    else:
-        results.append(True)  # skip silenzioso, mantieni indice positionale
+        results["dnstwist"] = dnstwist_enr.run(entity, scan, settings)
 
-    # Score
-    compute_scores(entity, scan)
+    # Score (passa settings per evitare un reload)
+    compute_scores(entity, scan, settings)
 
-    # Status: failed solo se TUTTI i risultati critici (ssl+dns) falliscono
-    scan.status = ScanStatus.FAILED if not any(results[:2]) else ScanStatus.COMPLETED
+    # Status: failed solo se ENTRAMBI gli enricher critici (ssl+dns) falliscono.
+    scan.status = (
+        ScanStatus.FAILED
+        if not (results.get("ssl") or results.get("dns"))
+        else ScanStatus.COMPLETED
+    )
     scan.save()
 
     # Alert engine + Finding engine (solo se scan completato)
@@ -136,9 +144,9 @@ def run_enrichment(entity: "OsintEntity", settings: "OsintSettings") -> "OsintSc
         )
 
     logger.info(
-        "Enrichment %s for %s — ssl=%s dns=%s vt=%s abu=%s otx=%s gsb=%s hibp=%s score=%d",
+        "Enrichment %s for %s — %s score=%d",
         scan.status, entity.domain,
-        results[0], results[1], results[3], results[4], results[5], results[6], results[7],
+        " ".join(f"{k}={'ok' if v else 'ko'}" for k, v in results.items()),
         scan.score_total,
     )
     return scan
