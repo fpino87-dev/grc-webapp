@@ -200,7 +200,8 @@ def get_activity_schedule(plant=None, months_ahead: int = 6) -> list[dict]:
 
         sa_qs = SupplierAssessment.objects.filter(next_assessment_date__isnull=False)
         if plant:
-            sa_qs = sa_qs.filter(supplier__plant=plant)
+            # Supplier ha una M2M `plants` (non un FK `plant`).
+            sa_qs = sa_qs.filter(supplier__plants=plant).distinct()
         for sa in sa_qs:
             _add(
                 "supplier_assessment",
@@ -218,7 +219,8 @@ def get_activity_schedule(plant=None, months_ahead: int = 6) -> list[dict]:
 
         sup_qs = Supplier.objects.filter(evaluation_date__isnull=False, deleted_at__isnull=True)
         if plant:
-            sup_qs = sup_qs.filter(**plant_filter)
+            # Supplier ha una M2M `plants` (non il FK `plant` di plant_filter).
+            sup_qs = sup_qs.filter(plants=plant).distinct()
         for sup in sup_qs:
             _add(
                 "supplier_contract_review",
