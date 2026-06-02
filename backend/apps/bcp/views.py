@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -74,9 +76,9 @@ class BcpPlanViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 unit = instance.test_frequency_unit or "years"
                 instance.next_test_date = _add_duration(instance.last_test_date, value, unit)
                 instance.save(update_fields=["next_test_date", "updated_at"])
-        except Exception:
+        except Exception as exc:
             # Non deve bloccare l'update del piano.
-            pass
+            logging.getLogger(__name__).warning("BCP: ricalcolo next_test_date saltato: %s", exc)
 
         log_action(
             user=self.request.user,

@@ -39,9 +39,9 @@ def submit_for_review(document, user):
         recipients = resolve_document_recipients(document, action="review")
         if recipients:
             notify_document_review_needed(document, recipients)
-    except Exception:
+    except Exception as exc:
         # Le notifiche non devono bloccare il flusso documentale
-        pass
+        logging.getLogger(__name__).warning("Documenti: notifica non inviata: %s", exc)
 
 
 def approve_document(document, user, notes=""):
@@ -54,8 +54,10 @@ def approve_document(document, user, notes=""):
         plant = getattr(document, "plant", None)
         rule_type = f"document_{document.document_type}"
         document.review_due_date = get_due_date(rule_type, plant=plant)
-    except Exception:
-        pass
+    except Exception as exc:
+        logging.getLogger(__name__).warning(
+            "Documento %s: scadenza revisione non calcolata: %s", document.pk, exc,
+        )
     document.save(update_fields=["status", "approved_at", "approver", "review_due_date", "updated_at"])
     DocumentApproval.objects.create(
         document=document, action="approve", actor=user, notes=notes
@@ -86,9 +88,9 @@ def approve_document(document, user, notes=""):
             members = resolve_plant_member_emails(document.plant)
             if members:
                 notify_document_approved_broadcast(document, members)
-    except Exception:
+    except Exception as exc:
         # Le notifiche non devono bloccare il flusso documentale
-        pass
+        logging.getLogger(__name__).warning("Documenti: notifica non inviata: %s", exc)
 
 
 def reject_document(document, user, notes=""):

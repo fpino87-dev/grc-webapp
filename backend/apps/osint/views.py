@@ -136,8 +136,8 @@ class OsintEntityViewSet(viewsets.ReadOnlyModelViewSet):
                     entity=qs[0],
                     payload={"rows": len(qs), "format": "csv"},
                 )
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.warning("OSINT: audit export entities non registrato: %s", exc)
         from django.http import HttpResponse
         resp = HttpResponse(buf.getvalue(), content_type="text/csv")
         resp["Content-Disposition"] = 'attachment; filename="osint_entities.csv"'
@@ -731,8 +731,8 @@ class OsintFindingViewSet(viewsets.GenericViewSet):
                     entity=qs[0],
                     payload={"rows": len(qs), "format": "csv"},
                 )
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.warning("OSINT: audit export findings non registrato: %s", exc)
         from django.http import HttpResponse
         resp = HttpResponse(buf.getvalue(), content_type="text/csv")
         resp["Content-Disposition"] = 'attachment; filename="osint_findings.csv"'

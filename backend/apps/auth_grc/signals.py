@@ -7,10 +7,13 @@ un attaccante che possedeva un device_token rubato perde immediatamente
 il bypass MFA. Conforme a ISO 27001 A.9.2.4 (gestione segreti) e
 A.9.4.3 (sistema di gestione password).
 """
+import logging
+
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
+logger = logging.getLogger(__name__)
 
 _PASSWORD_CHANGED_FLAG = "_grc_password_changed"
 
@@ -47,6 +50,6 @@ def _revoke_trusted_devices_on_password_change(sender, instance, created, **kwar
                 entity=instance,
                 payload={"trusted_devices_revoked": revoked, "user_id": instance.pk},
             )
-        except Exception:
+        except Exception as exc:
             # Audit best-effort: la revoca e' gia' avvenuta.
-            pass
+            logger.warning("Audit revoca device post-cambio-password non registrato: %s", exc)

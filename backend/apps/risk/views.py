@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -191,8 +193,8 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             try:
                 from dateutil import parser as dateparser
                 expiry_date = dateparser.parse(expiry_str).date()
-            except Exception:
-                pass
+            except (ValueError, TypeError, OverflowError) as exc:
+                logging.getLogger(__name__).warning("risk: expiry_date non valida ignorata: %s", exc)
         try:
             accept_risk(assessment, request.user, note, expiry_date)
             return Response({"ok": True})

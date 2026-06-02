@@ -1,4 +1,5 @@
 import datetime
+import logging
 from decimal import Decimal
 
 from django.db import transaction
@@ -175,8 +176,8 @@ def complete_assessment(
             plant=assessment.supplier.plants.first(),
             context={"assessment": assessment},
         )
-    except Exception:
-        pass
+    except Exception as exc:
+        logging.getLogger(__name__).warning("suppliers: notifica assessment non inviata: %s", exc)
     return assessment
 
 

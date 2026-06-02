@@ -204,8 +204,8 @@ def record_test(
                 plant=plan.plant,
                 context={"plan": plan},
             )
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.warning("BCP: notifica test fallito non inviata per piano %s: %s", plan.pk, exc)
 
     # Se RTO sforato crea anche PDCA autonomo
     if warnings and result == "superato":

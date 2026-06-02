@@ -1,3 +1,5 @@
+import logging
+
 from celery import shared_task
 from django.utils import timezone
 
@@ -111,7 +113,7 @@ def check_expired_evidences():
                 plant=instance.plant,
                 context={"instance": instance},
             )
-        except Exception:
-            pass
+        except Exception as exc:
+            logging.getLogger(__name__).warning("controls: notifica evidenza scaduta non inviata: %s", exc)
 
     return f"check_expired_evidences: {degraded} controlli degradati"

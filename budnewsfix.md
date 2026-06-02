@@ -33,12 +33,9 @@
 - **Trovato (AST)**: la stragrande maggioranza è LEGITTIMA (`except ValidationError→400`, `DoesNotExist→404`, `ValueError→fallback`, `ImportError→dep opzionale`). Da bonificare solo il sottoinsieme `except Exception: pass` che inghiotte logica o audit/notifiche.
 - ✅ Già fixato: `osint/views.py:339` (nome PeriodicTask vecchio → next_scan sempre null). (commit 1efdb79)
 - ✅ 🔴 **Logica reale inghiottita** — investigati: tutti e 5 sono "best-effort" legittimi (nessun bug di comportamento), ma ora **loggano** (`logger.warning`) invece di `pass` silenzioso: `incidents/nis2_services.py:652` (PDCA NIS2), `audit_prep/views.py:70` (sync_program_completion), `controls/views.py:850+859` (verbali + risk register nello ZIP), `bcp/services.py:142` (evidenza test), `documents/services.py:166` (file orfano). (commit: vedi git)
-- 🟠 **Audit/notifiche best-effort** (aggiungere almeno `logger.warning`):
-  - audit (`log_action`): `auth_grc/signals.py:50`, `osint/views.py:139`, `osint/views.py:731`
-  - notifiche (`fire_notification`): `audit_prep/services.py:136`, `bcp/services.py:201`, `controls/tasks.py:114`, `incidents/services.py:101`, `suppliers/services.py:178`
-  - `documents/services.py:41,56,88` — recipients/due_date best-effort
-- 🟡 **Rendere specifici** (broad→narrow): `governance/views.py:71,104` (date parse), `risk/views.py:194`, `bcp/views.py:77`
-- **C/B**: M · Alto · Stato: 🔄 (parz. — osint:339 fatto)
+- ✅ 🟠 **Audit/notifiche best-effort** — ora loggano (`logger.warning`): audit (`auth_grc/signals.py`, `osint/views.py` ×2), notifiche (`audit_prep/services`, `bcp/services`, `controls/tasks`, `incidents/services`, `suppliers/services`), documenti (`documents/services` ×3).
+- ✅ 🟡 **broad→narrow**: `governance/views.py` ×2 e `risk/views.py` ora `except (ValueError, TypeError, OverflowError)` + log; `bcp/views.py` logga.
+- **C/B**: M · Alto · **Stato: ✅ FATTO (2026-06-02)** — 448 test verdi sui moduli toccati, system check pulito.
 
 ---
 

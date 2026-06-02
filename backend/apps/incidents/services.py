@@ -1,3 +1,5 @@
+import logging
+
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework.exceptions import ValidationError
@@ -98,7 +100,7 @@ def close_incident(incident: Incident, user):
                 plant=incident.plant,
                 context={"incident": incident},
             )
-        except Exception:
-            pass
+        except Exception as exc:
+            logging.getLogger(__name__).warning("incidents: notifica NIS2 non inviata: %s", exc)
 
     return incident

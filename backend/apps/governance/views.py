@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -68,8 +70,8 @@ class RoleAssignmentViewSet(viewsets.ModelViewSet):
         if date_str:
             try:
                 termination_date = dateparser.parse(date_str).date()
-            except Exception:
-                pass
+            except (ValueError, TypeError, OverflowError) as exc:
+                logging.getLogger(__name__).warning("governance: termination_date non valida ignorata: %s", exc)
 
         assignment = terminate_role(assignment, request.user, termination_date, reason)
         return Response({
@@ -101,8 +103,8 @@ class RoleAssignmentViewSet(viewsets.ModelViewSet):
         if date_str:
             try:
                 handover_date = dateparser.parse(date_str).date()
-            except Exception:
-                pass
+            except (ValueError, TypeError, OverflowError) as exc:
+                logging.getLogger(__name__).warning("governance: handover_date non valida ignorata: %s", exc)
 
         old_a, new_a = replace_role(
             assignment, new_user, request.user,

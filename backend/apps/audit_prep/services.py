@@ -1,5 +1,6 @@
 import datetime
 import hashlib
+import logging
 import uuid
 
 from django.utils import timezone
@@ -133,8 +134,8 @@ def open_finding(audit_prep, finding_type: str, title: str,
             plant=audit_prep.plant,
             context={"finding": finding},
         )
-    except Exception:
-        pass
+    except Exception as exc:
+        logging.getLogger(__name__).warning("audit_prep: notifica finding non inviata: %s", exc)
 
     log_action(
         user=user,
