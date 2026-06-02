@@ -331,13 +331,16 @@ class OsintDashboardView(viewsets.GenericViewSet):
         )
         pending_subdomains = OsintSubdomain.objects.filter(status="pending", deleted_at__isnull=True).count()
 
+        # Filtro per `task` (non per nome): robusto a rinomine della PeriodicTask.
+        # Prima cercava name="OSINT Weekly Scanner" — rinominata in "osint-weekly-scan"
+        # → la get() falliva e l'except la nascondeva (next_scan sempre None).
         from django_celery_beat.models import PeriodicTask
-        next_scan = None
-        try:
-            pt = PeriodicTask.objects.get(name="OSINT Weekly Scanner", enabled=True)
-            next_scan = str(pt.last_run_at) if pt.last_run_at else None
-        except Exception:
-            pass
+        pt = (
+            PeriodicTask.objects.filter(task="osint.weekly_scan", enabled=True)
+            .order_by("-last_run_at")
+            .first()
+        )
+        next_scan = str(pt.last_run_at) if (pt and pt.last_run_at) else None
 
         return Response({
             "total_entities": total,
