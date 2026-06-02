@@ -102,22 +102,106 @@ CELERY_RESULT_BACKEND = "django-db"
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_TASK_SERIALIZER = "json"
 CELERY_TIMEZONE = "Europe/Rome"
+# Pianificazione periodica — UNICA fonte di verità (vedi nota in core/celery.py).
+# Il DatabaseScheduler sincronizza queste voci nella tabella PeriodicTask all'avvio
+# di celery-beat (update_or_create per nome → idempotente sulle righe esistenti).
+#
+# NB: il backup notturno è registrato come PeriodicTask "Backup automatico notturno"
+# dal command `schedule_backup_task` (vedi runbook). NON va ridichiarato qui: in
+# passato la voce "auto-backup-daily" creava una seconda PeriodicTask con nome
+# diverso sullo stesso task → backup eseguito due volte ogni notte.
 CELERY_BEAT_SCHEDULE = {
-    # NB: il backup notturno è registrato come PeriodicTask "Backup automatico
-    # notturno" dal command `schedule_backup_task` (vedi runbook). NON ridichiararlo
-    # qui: in passato la voce "auto-backup-daily" creava una seconda PeriodicTask
-    # con nome diverso sullo stesso task → backup eseguito due volte ogni notte.
-    "check-expiring-risk-acceptances-daily": {
-        "task": "apps.risk.tasks.check_expiring_risk_acceptances",
-        "schedule": crontab(hour=7, minute=0),  # ogni mattina alle 07:00
+    # Giornalieri
+    "check-expired-evidences": {
+        "task": "apps.controls.tasks.check_expired_evidences",
+        "schedule": crontab(hour=2, minute=0),
+    },
+    "check-expired-bcp-plans": {
+        "task": "apps.bcp.tasks.check_expired_bcp_plans",
+        "schedule": crontab(hour=2, minute=10),
+    },
+    "check-schedule-deadlines": {
+        "task": "apps.compliance_schedule.tasks.check_schedule_deadlines",
+        "schedule": crontab(hour=2, minute=30),
+    },
+    "recompute-supplier-risk-adj": {
+        "task": "apps.suppliers.tasks.recompute_expired_risk_adj_task",
+        "schedule": crontab(hour=2, minute=45),
+    },
+    "cleanup-celery-results": {
+        "task": "apps.audit_trail.tasks.cleanup_celery_results",
+        "schedule": crontab(hour=3, minute=30),
     },
     "generate-scheduled-checklists": {
         "task": "apps.tasks.tasks.generate_scheduled_checklists",
         "schedule": crontab(hour=7, minute=0),  # ogni mattina alle 07:00
     },
+    "check-expiring-risk-acceptances-daily": {
+        "task": "apps.risk.tasks.check_expiring_risk_acceptances",
+        "schedule": crontab(hour=7, minute=0),  # ogni mattina alle 07:00
+    },
+    "notify-expiring-documents": {
+        "task": "apps.documents.tasks.notify_expiring_documents",
+        "schedule": crontab(hour=7, minute=45),
+    },
+    "notify-expiring-roles": {
+        "task": "apps.governance.tasks.notify_expiring_roles_task",
+        "schedule": crontab(hour=8, minute=0),
+    },
+    "check-overdue-findings": {
+        "task": "apps.audit_prep.tasks.check_overdue_findings",
+        "schedule": crontab(hour=8, minute=0),
+    },
+    "notify-pdca-blocked": {
+        "task": "apps.pdca.tasks.notify_blocked_pdca_task",
+        "schedule": crontab(hour=8, minute=30),
+    },
+    "check-final-report-deadlines": {
+        "task": "apps.incidents.tasks.check_final_report_deadlines",
+        "schedule": crontab(hour=9, minute=0),
+    },
+    "check-questionnaire-followups": {
+        "task": "apps.suppliers.tasks.check_questionnaire_followups_task",
+        "schedule": crontab(hour=9, minute=0),
+    },
+    # Intra-giornalieri
+    "check-nis2-deadlines": {
+        "task": "apps.incidents.tasks.check_nis2_deadlines",
+        "schedule": crontab(minute="*/30"),
+    },
+    # Settimanali (lunedì)
+    "osint-weekly-scan": {
+        "task": "osint.weekly_scan",
+        "schedule": crontab(hour=2, minute=0, day_of_week=1),  # lunedì 02:00
+    },
+    "generate-weekly-kpi-snapshots": {
+        "task": "apps.reporting.tasks.generate_weekly_kpi_snapshots",
+        "schedule": crontab(hour=6, minute=0, day_of_week=1),  # lunedì 06:00
+    },
     "compute-operational-kpis": {
         "task": "apps.tasks.tasks.compute_operational_kpis",
         "schedule": crontab(hour=6, minute=30, day_of_week=1),  # lunedì 06:30
+    },
+    "check-unrevalued-changes": {
+        "task": "apps.assets.tasks.check_unrevalued_changes",
+        "schedule": crontab(hour=7, minute=0, day_of_week=1),  # lunedì 07:00
+    },
+    "check-software-eos": {
+        "task": "apps.assets.tasks.check_software_eos",
+        "schedule": crontab(hour=7, minute=15, day_of_week=1),  # lunedì 07:15
+    },
+    "check-upcoming-audits": {
+        "task": "apps.audit_prep.tasks.check_upcoming_audits",
+        "schedule": crontab(hour=7, minute=30, day_of_week=1),  # lunedì 07:30
+    },
+    "check-stale-audit-preps": {
+        "task": "apps.audit_prep.tasks.check_stale_audit_preps",
+        "schedule": crontab(hour=8, minute=15, day_of_week=1),  # lunedì 08:15
+    },
+    # Mensili
+    "cleanup-audit-logs": {
+        "task": "apps.audit_trail.tasks.cleanup_expired_audit_logs",
+        "schedule": crontab(hour=3, minute=0, day_of_month=1),  # giorno 1, 03:00
     },
 }
 
