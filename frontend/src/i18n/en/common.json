@@ -2926,7 +2926,9 @@
         "skipped": "{{count}} already existing skipped",
         "errors": "Errors",
         "skipped_label": "Skipped"
-      }
+      },
+      "create_template": "Create template",
+      "will_create_template": "creates template \"{{name}}\""
     }
   }
 }

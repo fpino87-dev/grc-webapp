@@ -69,6 +69,30 @@ KPI_CATALOG = {
             "pl": "Połącz z szablonem listy kontrolnej „Weryfikacja nocnej kopii zapasowej”, jeśli istnieje.",
             "tr": "Varsa 'Gecelik yedekleme doğrulaması' kontrol listesi şablonuna bağlayın.",
         },
+        "template_seed": {
+            "frequency": "daily",
+            "name": {
+                "it": "Verifica backup notturno",
+                "en": "Nightly backup verification",
+                "fr": "Vérification de la sauvegarde nocturne",
+                "pl": "Weryfikacja nocnej kopii zapasowej",
+                "tr": "Gecelik yedekleme doğrulaması",
+            },
+            "items": [
+                {
+                    "item_type": "checkbox",
+                    "is_mandatory": True,
+                    "unit": "",
+                    "text": {
+                        "it": "Backup notturno completato senza errori",
+                        "en": "Nightly backup completed without errors",
+                        "fr": "Sauvegarde nocturne terminée sans erreur",
+                        "pl": "Nocna kopia zapasowa ukończona bez błędów",
+                        "tr": "Gecelik yedekleme hatasız tamamlandı",
+                    },
+                },
+            ],
+        },
     },
     "backup_restore_test_age_days": {
         "name": {
@@ -109,6 +133,30 @@ KPI_CATALOG = {
             "fr": "Lier au modèle de checklist de test de restauration trimestriel si présent.",
             "pl": "Połącz z kwartalnym szablonem listy kontrolnej testu odtwarzania, jeśli istnieje.",
             "tr": "Varsa üç aylık geri yükleme testi kontrol listesi şablonuna bağlayın.",
+        },
+        "template_seed": {
+            "frequency": "monthly",
+            "name": {
+                "it": "Test ripristino backup",
+                "en": "Backup restore test",
+                "fr": "Test de restauration de sauvegarde",
+                "pl": "Test odtwarzania kopii zapasowej",
+                "tr": "Yedek geri yükleme testi",
+            },
+            "items": [
+                {
+                    "item_type": "numeric",
+                    "is_mandatory": True,
+                    "unit": "giorni",
+                    "text": {
+                        "it": "Giorni dall'ultimo test di ripristino completato",
+                        "en": "Days since the last completed restore test",
+                        "fr": "Jours depuis le dernier test de restauration réalisé",
+                        "pl": "Dni od ostatniego ukończonego testu odtwarzania",
+                        "tr": "Son tamamlanan geri yükleme testinden bu yana gün",
+                    },
+                },
+            ],
         },
     },
     "patch_critical_compliance_rate": {
@@ -564,6 +612,30 @@ KPI_CATALOG = {
             "pl": "Połącz z szablonem listy kontrolnej offboardingu HR/IT, jeśli istnieje.",
             "tr": "Varsa İK/BT işten ayrılış kontrol listesi şablonuna bağlayın.",
         },
+        "template_seed": {
+            "frequency": "weekly",
+            "name": {
+                "it": "Offboarding — revoca accessi",
+                "en": "Offboarding — access revocation",
+                "fr": "Offboarding — révocation des accès",
+                "pl": "Offboarding — odebranie dostępu",
+                "tr": "İşten ayrılış — erişim iptali",
+            },
+            "items": [
+                {
+                    "item_type": "checkbox",
+                    "is_mandatory": True,
+                    "unit": "",
+                    "text": {
+                        "it": "Accessi revocati entro 24h dalla cessazione",
+                        "en": "Access revoked within 24h of termination",
+                        "fr": "Accès révoqués sous 24h après la fin du contrat",
+                        "pl": "Dostęp odebrany w ciągu 24h od zakończenia",
+                        "tr": "İş bitiminden sonra 24 saat içinde erişim iptal edildi",
+                    },
+                },
+            ],
+        },
     },
     "privileged_accounts_count": {
         "name": {
@@ -962,6 +1034,7 @@ def localized_catalog(lang: str = "it") -> list:
 
     items = []
     for code, entry in KPI_CATALOG.items():
+        seed = entry.get("template_seed")
         items.append({
             "kpi_code": code,
             "name": _text(entry["name"], lang),
@@ -979,6 +1052,8 @@ def localized_catalog(lang: str = "it") -> list:
             "rationale": _text(entry["rationale"], lang),
             "checklist_hint": _text(entry["checklist_hint"], lang),
             "match_keywords": entry.get("match_keywords", []),
+            "has_template_seed": seed is not None,
+            "template_seed_name": _text(seed["name"], lang) if seed else "",
         })
 
     cat_order = {c: i for i, c in enumerate(CATEGORIES)}

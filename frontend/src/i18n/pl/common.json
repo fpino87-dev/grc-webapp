@@ -3005,7 +3005,9 @@
         "skipped": "Pominięto {{count}} już istniejących",
         "errors": "Błędy",
         "skipped_label": "Pominięte"
-      }
+      },
+      "create_template": "Utwórz szablon",
+      "will_create_template": "tworzy szablon „{{name}}”"
     }
   }
 }

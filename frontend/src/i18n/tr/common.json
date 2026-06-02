@@ -3005,7 +3005,9 @@
         "skipped": "{{count}} mevcut olan atlandı",
         "errors": "Hatalar",
         "skipped_label": "Atlananlar"
-      }
+      },
+      "create_template": "Şablon oluştur",
+      "will_create_template": "«{{name}}» şablonunu oluşturur"
     }
   }
 }

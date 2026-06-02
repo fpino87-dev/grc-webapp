@@ -58,6 +58,9 @@ export function KpiSuggestWizard({ initialPlantId, onClose, onImported }: Props)
           threshold_warning: s.threshold_warning,
           threshold_critical: s.threshold_critical,
           checklist_template: s.suggested_checklist_template?.id ?? null,
+          // Se il KPI checklist non ha un template collegabile ma ha uno seed,
+          // di default proponiamo di crearlo dal consiglio.
+          create_template: s.can_create_template,
         };
       }
       setSelected(sel);
@@ -243,38 +246,52 @@ export function KpiSuggestWizard({ initialPlantId, onClose, onImported }: Props)
 
                           {/* override inline (solo se selezionato e non già configurato) */}
                           {selected.has(s.kpi_code) && !s.already_configured && (
-                            <div className="mt-2 grid grid-cols-3 gap-2">
-                              <label className="text-[11px] text-gray-500">
-                                {t("kpi.form.threshold_warning")}
-                                <input
-                                  type="number" step="any"
-                                  value={ov.threshold_warning ?? ""}
-                                  onChange={(e) => setOverride(s.kpi_code, { threshold_warning: e.target.value === "" ? null : Number(e.target.value) })}
-                                  className="w-full border rounded px-2 py-1 text-xs mt-0.5 focus:outline-none focus:ring-1 focus:ring-primary-400"
-                                />
-                              </label>
-                              <label className="text-[11px] text-gray-500">
-                                {t("kpi.form.threshold_critical")}
-                                <input
-                                  type="number" step="any"
-                                  value={ov.threshold_critical ?? ""}
-                                  onChange={(e) => setOverride(s.kpi_code, { threshold_critical: e.target.value === "" ? null : Number(e.target.value) })}
-                                  className="w-full border rounded px-2 py-1 text-xs mt-0.5 focus:outline-none focus:ring-1 focus:ring-primary-400"
-                                />
-                              </label>
-                              {s.source === "checklist" && (
+                            <div className="mt-2 space-y-2">
+                              <div className="grid grid-cols-3 gap-2">
                                 <label className="text-[11px] text-gray-500">
-                                  {t("kpi.form.template")}
-                                  <select
-                                    value={ov.checklist_template ?? ""}
-                                    onChange={(e) => setOverride(s.kpi_code, { checklist_template: e.target.value || null })}
+                                  {t("kpi.form.threshold_warning")}
+                                  <input
+                                    type="number" step="any"
+                                    value={ov.threshold_warning ?? ""}
+                                    onChange={(e) => setOverride(s.kpi_code, { threshold_warning: e.target.value === "" ? null : Number(e.target.value) })}
                                     className="w-full border rounded px-2 py-1 text-xs mt-0.5 focus:outline-none focus:ring-1 focus:ring-primary-400"
-                                  >
-                                    <option value="">—</option>
-                                    {(templates?.results ?? []).map((tpl) => (
-                                      <option key={tpl.id} value={tpl.id}>{tpl.name}</option>
-                                    ))}
-                                  </select>
+                                  />
+                                </label>
+                                <label className="text-[11px] text-gray-500">
+                                  {t("kpi.form.threshold_critical")}
+                                  <input
+                                    type="number" step="any"
+                                    value={ov.threshold_critical ?? ""}
+                                    onChange={(e) => setOverride(s.kpi_code, { threshold_critical: e.target.value === "" ? null : Number(e.target.value) })}
+                                    className="w-full border rounded px-2 py-1 text-xs mt-0.5 focus:outline-none focus:ring-1 focus:ring-primary-400"
+                                  />
+                                </label>
+                                {s.source === "checklist" && !ov.create_template && (
+                                  <label className="text-[11px] text-gray-500">
+                                    {t("kpi.form.template")}
+                                    <select
+                                      value={ov.checklist_template ?? ""}
+                                      onChange={(e) => setOverride(s.kpi_code, { checklist_template: e.target.value || null })}
+                                      className="w-full border rounded px-2 py-1 text-xs mt-0.5 focus:outline-none focus:ring-1 focus:ring-primary-400"
+                                    >
+                                      <option value="">—</option>
+                                      {(templates?.results ?? []).map((tpl) => (
+                                        <option key={tpl.id} value={tpl.id}>{tpl.name}</option>
+                                      ))}
+                                    </select>
+                                  </label>
+                                )}
+                              </div>
+                              {/* crea template dallo seed (solo se non esiste già un collegamento) */}
+                              {s.source === "checklist" && s.can_create_template && (
+                                <label className="flex items-center gap-2 text-xs text-gray-600 bg-emerald-50 border border-emerald-100 rounded px-2 py-1">
+                                  <input
+                                    type="checkbox"
+                                    checked={!!ov.create_template}
+                                    onChange={(e) => setOverride(s.kpi_code, { create_template: e.target.checked, checklist_template: null })}
+                                    className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-400"
+                                  />
+                                  ➕ {t("kpi.suggest.create_template")}: <strong>{s.template_seed_name}</strong>
                                 </label>
                               )}
                             </div>
@@ -308,12 +325,22 @@ export function KpiSuggestWizard({ initialPlantId, onClose, onImported }: Props)
               <>
                 <p className="text-sm text-gray-600 mb-3">{t("kpi.suggest.step3.intro", { count: selectedList.length })}</p>
                 <ul className="border border-gray-200 rounded-lg divide-y divide-gray-100 mb-4">
-                  {selectedList.map((s) => (
-                    <li key={s.kpi_code} className="px-4 py-2 text-sm flex items-center justify-between">
-                      <span className="text-gray-800">{s.name}</span>
-                      <span className="text-xs text-gray-400 font-mono">{s.kpi_code}</span>
-                    </li>
-                  ))}
+                  {selectedList.map((s) => {
+                    const willCreate = !!overrides[s.kpi_code]?.create_template && s.can_create_template;
+                    return (
+                      <li key={s.kpi_code} className="px-4 py-2 text-sm flex items-center justify-between gap-2">
+                        <span className="text-gray-800">
+                          {s.name}
+                          {willCreate && (
+                            <span className="ml-2 text-xs text-emerald-700">
+                              ➕ {t("kpi.suggest.will_create_template", { name: s.template_seed_name })}
+                            </span>
+                          )}
+                        </span>
+                        <span className="text-xs text-gray-400 font-mono">{s.kpi_code}</span>
+                      </li>
+                    );
+                  })}
                 </ul>
                 {importMutation.isError && <p className="text-sm text-red-600 mb-2">{t("common.save_error")}</p>}
                 <div className="flex justify-between gap-2">

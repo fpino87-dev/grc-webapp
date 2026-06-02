@@ -177,3 +177,72 @@ def test_import_writes_audit_log(client, plant):
         "plant": str(plant.id), "kpi_codes": ["backup_success_rate"],
     }, format="json")
     assert AuditLog.objects.filter(action_code="kpi_definition.imported").exists()
+
+
+# ── Creazione template dallo seed ────────────────────────────────────────────
+
+@pytest.mark.django_db
+def test_suggest_marks_can_create_template(client, plant):
+    """Senza template corrispondente, un KPI checklist con seed → can_create_template."""
+    resp = client.get(SUGGEST_URL, {"plant": str(plant.id)})
+    by_code = {s["kpi_code"]: s for s in resp.data["suggestions"]}
+    bs = by_code["backup_success_rate"]
+    assert bs["suggested_checklist_template"] is None
+    assert bs["can_create_template"] is True
+    assert bs["template_seed_name"]  # nome localizzato presente
+    # un KPI api non può creare template
+    assert by_code["vuln_critical_open_count"]["can_create_template"] is False
+
+
+@pytest.mark.django_db
+def test_suggest_no_create_when_template_exists(client, plant):
+    """Se esiste un template collegabile, can_create_template è False."""
+    from apps.tasks.models import ChecklistTemplate
+    ChecklistTemplate.objects.create(name="Backup notturno sito", frequency="daily", plant=plant)
+    resp = client.get(SUGGEST_URL, {"plant": str(plant.id)})
+    bs = {s["kpi_code"]: s for s in resp.data["suggestions"]}["backup_success_rate"]
+    assert bs["suggested_checklist_template"] is not None
+    assert bs["can_create_template"] is False
+
+
+@pytest.mark.django_db
+def test_import_with_create_template(client, plant):
+    from apps.tasks.models import ChecklistTemplate, ChecklistTemplateItem, KPIDefinition
+    resp = client.post(IMPORT_URL, {
+        "plant": str(plant.id),
+        "kpi_codes": ["backup_success_rate"],
+        "overrides": {"backup_success_rate": {"create_template": True}},
+    }, format="json")
+    assert resp.status_code == 201
+    assert resp.data["created"] == ["backup_success_rate"]
+    # template creato dallo seed e collegato
+    tpl = ChecklistTemplate.objects.get(name="Verifica backup notturno", plant=plant)
+    assert tpl.frequency == "daily"
+    assert ChecklistTemplateItem.objects.filter(template=tpl).count() == 1
+    kpi = KPIDefinition.objects.get(kpi_code="backup_success_rate")
+    assert kpi.checklist_template_id == tpl.id
+
+
+@pytest.mark.django_db
+def test_create_template_from_seed_idempotent(db, plant):
+    from apps.tasks.models import ChecklistTemplate
+    from apps.tasks.services import create_template_from_seed
+    t1 = create_template_from_seed("backup_success_rate", plant)
+    t2 = create_template_from_seed("backup_success_rate", plant)
+    assert t1.id == t2.id
+    assert ChecklistTemplate.objects.filter(name="Verifica backup notturno", plant=plant).count() == 1
+
+
+@pytest.mark.django_db
+def test_create_template_from_seed_numeric_item(db, plant):
+    from apps.tasks.services import create_template_from_seed
+    tpl = create_template_from_seed("backup_restore_test_age_days", plant)
+    item = tpl.items.first()
+    assert item.item_type == "numeric"
+    assert item.unit == "giorni"
+
+
+@pytest.mark.django_db
+def test_create_template_from_seed_none_for_api_kpi(db, plant):
+    from apps.tasks.services import create_template_from_seed
+    assert create_template_from_seed("vuln_critical_open_count", plant) is None

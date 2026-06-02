@@ -951,6 +951,8 @@ class KpiSuggestView(APIView):
             # i cui frameworks[] intersecano quelli attivi.
             if fw_set and not (set(item["frameworks"]) & fw_set):
                 continue
+            is_checklist = item["source"] == "checklist"
+            matched_template = _match_template(item["match_keywords"]) if is_checklist else None
             suggestions.append({
                 "kpi_code": item["kpi_code"],
                 "name": item["name"],
@@ -968,10 +970,13 @@ class KpiSuggestView(APIView):
                 "rationale": item["rationale"],
                 "checklist_hint": item["checklist_hint"],
                 "already_configured": item["kpi_code"] in configured_codes,
-                "suggested_checklist_template": (
-                    _match_template(item["match_keywords"])
-                    if item["source"] == "checklist" else None
+                "suggested_checklist_template": matched_template,
+                # Può creare il template dallo seed se è un KPI checklist, ha un
+                # seed nel catalogo e non c'è già un template collegabile.
+                "can_create_template": (
+                    is_checklist and item["has_template_seed"] and matched_template is None
                 ),
+                "template_seed_name": item["template_seed_name"],
             })
 
         return Response({

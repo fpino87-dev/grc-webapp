@@ -594,11 +594,72 @@ def ingest_kpi_from_api(
     return snapshot
 
 
+def create_template_from_seed(code, plant, user=None, lang="it"):
+    """
+    Crea (o riusa) un ChecklistTemplate "scheletro" a partire dal template_seed
+    del catalogo per il kpi_code indicato. Idempotente: se esiste già un template
+    con lo stesso nome per quel plant lo riusa. Ritorna il template o None se il
+    KPI non ha un seed.
+    """
+    from .kpi_catalog import KPI_CATALOG, _text
+    from .models import ChecklistTemplate, ChecklistTemplateItem
+
+    entry = KPI_CATALOG.get(code)
+    seed = entry.get("template_seed") if entry else None
+    if not seed:
+        return None
+
+    name = _text(seed["name"], lang)
+    existing = ChecklistTemplate.objects.filter(
+        name=name, plant=plant, deleted_at__isnull=True
+    ).first()
+    if existing:
+        return existing
+
+    template = ChecklistTemplate.objects.create(
+        name=name,
+        description="",
+        frequency=seed.get("frequency", "daily"),
+        plant=plant,
+        is_active=True,
+        created_by=user,
+    )
+    ChecklistTemplateItem.objects.bulk_create([
+        ChecklistTemplateItem(
+            template=template,
+            order=idx,
+            text=_text(item["text"], lang),
+            is_mandatory=item.get("is_mandatory", True),
+            item_type=item.get("item_type", "checkbox"),
+            unit=item.get("unit", ""),
+        )
+        for idx, item in enumerate(seed.get("items", []))
+    ])
+    if user is not None:
+        log_action(
+            user=user,
+            action_code="checklist_template.created",
+            level="L1",
+            entity=template,
+            payload={
+                "id": str(template.pk),
+                "name": template.name,
+                "from_kpi_seed": code,
+            },
+        )
+    return template
+
+
 def import_kpi_suggestions(plant, kpi_codes, overrides=None, user=None) -> dict:
     """
     Importa una lista di KPI dal catalogo standard (kpi_catalog.KPI_CATALOG)
     applicando eventuali override per soglie/template. Idempotente: i KPI il
     cui kpi_code esiste già vengono saltati. Ritorna {created, skipped, errors}.
+
+    Override per kpi_code:
+      - threshold_warning / threshold_critical: soglie personalizzate
+      - checklist_template: UUID di un template esistente da collegare
+      - create_template: True → crea il template dallo seed del catalogo
     """
     from .kpi_catalog import KPI_CATALOG, _text
     from .models import ChecklistTemplate, KPIDefinition
@@ -621,6 +682,8 @@ def import_kpi_suggestions(plant, kpi_codes, overrides=None, user=None) -> dict:
         tpl_id = ov.get("checklist_template")
         if tpl_id:
             template = ChecklistTemplate.objects.filter(pk=tpl_id).first()
+        elif ov.get("create_template") and entry.get("template_seed"):
+            template = create_template_from_seed(code, plant, user=user)
 
         def _ov_threshold(key):
             return ov[key] if key in ov else entry[key]

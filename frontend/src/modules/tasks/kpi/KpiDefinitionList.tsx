@@ -135,7 +135,10 @@ export function KpiDefinitionList() {
         <KpiSuggestWizard
           initialPlantId={selectedPlant?.id}
           onClose={() => setShowWizard(false)}
-          onImported={() => qc.invalidateQueries({ queryKey: ["kpi-definitions"] })}
+          onImported={() => {
+            qc.invalidateQueries({ queryKey: ["kpi-definitions"] });
+            qc.invalidateQueries({ queryKey: ["checklist-templates"] });
+          }}
         />
       )}
     </div>

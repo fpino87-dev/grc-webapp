@@ -94,6 +94,8 @@ export interface KpiSuggestion {
   checklist_hint: string;
   already_configured: boolean;
   suggested_checklist_template: { id: string; name: string } | null;
+  can_create_template: boolean;
+  template_seed_name: string;
 }
 
 export interface KpiSuggestResponse {
@@ -105,6 +107,7 @@ export interface KpiImportOverride {
   threshold_warning?: number | null;
   threshold_critical?: number | null;
   checklist_template?: string | null;
+  create_template?: boolean;
 }
 
 export interface KpiImportResult {
