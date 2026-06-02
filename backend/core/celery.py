@@ -88,5 +88,9 @@ app.conf.beat_schedule = {
         "task": "apps.tasks.tasks.compute_operational_kpis",
         "schedule": crontab(hour=6, minute=30, day_of_week=1),  # lunedì 06:30
     },
+    "osint-weekly-scan": {
+        "task": "osint.weekly_scan",
+        "schedule": crontab(hour=2, minute=0, day_of_week=1),  # lunedì 02:00
+    },
 }
 
