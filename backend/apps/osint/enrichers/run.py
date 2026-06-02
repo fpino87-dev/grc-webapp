@@ -63,7 +63,7 @@ def run_enrichment(entity: "OsintEntity", settings: "OsintSettings") -> "OsintSc
     from apps.osint.models import OsintScan, ScanStatus
     from apps.osint.enrichers import (
         ssl, dns, whois_enr, virustotal, abuseipdb, otx, gsb, hibp,
-        http_headers, dnsbl, dnstwist as dnstwist_enr,
+        http_headers, dnsbl, dnstwist as dnstwist_enr, takeover,
     )
     from apps.osint.scoring import compute_scores
 
@@ -114,6 +114,10 @@ def run_enrichment(entity: "OsintEntity", settings: "OsintSettings") -> "OsintSc
 
     # HTTP security headers — locale (HEAD/GET su https://{domain})
     results["http_headers"] = http_headers.run(entity, scan, settings)
+
+    # Subdomain takeover — DNS-only sui sottodomini inclusi (popolati da ssl/crt.sh
+    # sopra). Nessun throttle: solo lookup CNAME/A locali.
+    results["takeover"] = takeover.run(entity, scan, settings)
 
     # dnstwist — opzionale (skip se libreria non installata). Pesante: solo my_domain.
     if entity.entity_type == "my_domain":

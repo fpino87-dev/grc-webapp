@@ -298,9 +298,10 @@
     ],
     "owner_role": "ciso",
     "fix_steps": [
-      "Verifica ogni dominio sosia (lista in 'params' del finding).",
+      "Verifica ogni dominio sosia (lista in 'params' del finding). Dai priorità a quelli marcati 'mx' (record MX attivo = pronti al phishing via email): il finding diventa CRITICAL se almeno un sosia ha MX.",
       "Per quelli usati per phishing: richiedi takedown al registrar/hosting (UDRP per .com, dispute per .it).",
       "Considera registrazione difensiva dei domini più rischiosi (typo principali).",
+      "Rafforza DMARC a p=reject sul tuo dominio per ridurre l'efficacia dello spoofing dei sosia.",
       "Educa dipendenti e clienti sui rischi di phishing brand-spoof."
     ],
     "verification": "Lookalike domains attivi in calo nelle scansioni successive.",
@@ -308,5 +309,29 @@
       {"label": "ICANN UDRP", "url": "https://www.icann.org/resources/pages/udrp-2012-02-25-en"}
     ],
     "estimated_effort_h": 4
+  },
+  "subdomain_takeover": {
+    "title": "Possibile subdomain takeover",
+    "what": "Uno o più sottodomini hanno un record CNAME che punta a una risorsa di un servizio cloud (S3, GitHub Pages, Heroku, Azure, ...) che non esiste più (il target del CNAME è NXDOMAIN). Un attaccante può registrare quella risorsa e prendere il controllo del sottodominio.",
+    "impact": "Hosting di contenuti malevoli su un sottodominio legittimo, phishing credibile verso clienti/dipendenti, furto di cookie/sessioni se il sottodominio condivide il dominio padre, bypass di policy CSP/CORS, danno reputazionale.",
+    "compliance": [
+      {"framework": "ISO27001", "control": "A.5.9 — Inventory of assets / A.8.20 — Network security"},
+      {"framework": "TISAX_L2", "control": "5.2.4 — Asset Management"},
+      {"framework": "NIS2", "control": "art.21 §2(a) — Risk management"}
+    ],
+    "owner_role": "it_infra",
+    "fix_steps": [
+      "Per ogni sottodominio segnalato (lista in 'params' del finding) verifica il record CNAME: `dig CNAME sottodominio`.",
+      "Se la risorsa cloud non serve più: RIMUOVI il record CNAME/DNS dal pannello del DNS provider.",
+      "Se la risorsa serve ancora: RIPRENDI possesso ricreando la risorsa sul provider (bucket S3, app, sito GitHub Pages) con lo stesso nome prima che lo faccia un attaccante.",
+      "Verifica che non esistano altri CNAME dangling: censisci tutti i sottodomini in Certificate Transparency e nel DNS interno.",
+      "Implementa un processo di de-provisioning che rimuova i record DNS quando una risorsa cloud viene dismessa."
+    ],
+    "verification": "La prossima scansione OSINT non deve più rilevare candidati takeover (takeover_candidates vuoto) e il finding deve auto-chiudersi.",
+    "external_refs": [
+      {"label": "OWASP — Test for Subdomain Takeover", "url": "https://owasp.org/www-project-web-security-testing-guide/"},
+      {"label": "can-i-take-over-xyz", "url": "https://github.com/EdOverflow/can-i-take-over-xyz"}
+    ],
+    "estimated_effort_h": 3
   }
 }

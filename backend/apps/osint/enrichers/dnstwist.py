@@ -25,6 +25,24 @@ logger = logging.getLogger(__name__)
 # Cap difensivi: dnstwist può generare 1000+ permutazioni.
 MAX_PERMUTATIONS = 250
 MAX_RESULTS_REPORTED = 50
+# Cap sui lookup MX di "weaponization": evita di moltiplicare le query DNS quando
+# i sosia con A attivo sono molti.
+MAX_MX_LOOKUPS = 30
+MX_TIMEOUT = 5
+
+
+def _has_mx(domain: str) -> bool:
+    """True se il dominio sosia ha record MX → può ricevere/inviare email (phishing
+    via spoofing del brand). Conservativo: in caso di errore ritorna False."""
+    import dns.resolver
+    try:
+        resolver = dns.resolver.Resolver()
+        resolver.lifetime = MX_TIMEOUT
+        resolver.timeout = MX_TIMEOUT
+        ans = resolver.resolve(domain, "MX", raise_on_no_answer=False)
+        return bool(list(ans))
+    except Exception:
+        return False
 
 
 def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> bool:
@@ -77,6 +95,24 @@ def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> 
             })
             if len(results) >= MAX_RESULTS_REPORTED:
                 break
+
+        # Weaponization: marca i sosia con MX configurato (pronti al phishing via
+        # email). dnstwist può già fornire `dns_mx`; se assente, lookup diretto
+        # (limitato a MAX_MX_LOOKUPS). Il flag alza la severity del finding.
+        mx_lookups = 0
+        for r in results:
+            mx_present = None
+            for entry in raw:
+                ed = entry.get("domain") or entry.get("domain-name")
+                if ed and ed.lower() == r["domain"].lower():
+                    raw_mx = entry.get("dns_mx") or entry.get("dns-mx")
+                    if raw_mx:
+                        mx_present = True
+                    break
+            if mx_present is None and mx_lookups < MAX_MX_LOOKUPS:
+                mx_present = _has_mx(r["domain"])
+                mx_lookups += 1
+            r["mx"] = bool(mx_present)
 
         scan.lookalike_domains = results
         return True

@@ -178,6 +178,26 @@ def _trigger_new_subdomain(entity, scan, settings, created_alerts):
     created_alerts.append(alert)
 
 
+def _trigger_takeover(entity, scan, settings, created_alerts):
+    """Alert CRITICAL su possibili subdomain takeover (CNAME dangling)."""
+    from apps.osint.models import AlertType, AlertSeverity
+    candidates = getattr(scan, "takeover_candidates", None) or []
+    if not candidates:
+        return
+    if _has_active_alert(entity, AlertType.SUBDOMAIN_TAKEOVER):
+        return
+    subs = ", ".join(c.get("subdomain", "?") for c in candidates[:5])
+    suffix = "…" if len(candidates) > 5 else ""
+    alert = _create_alert(
+        entity, scan,
+        AlertType.SUBDOMAIN_TAKEOVER, AlertSeverity.CRITICAL,
+        f"Possibile subdomain takeover su {len(candidates)} sottodominio/i ({subs}{suffix}): "
+        f"il record CNAME punta a un servizio cloud dismesso e rivendicabile da un attaccante. "
+        f"Rimuovere il record DNS o riprendere possesso della risorsa.",
+    )
+    created_alerts.append(alert)
+
+
 def _trigger_breach(entity, scan, prev, settings, created_alerts):
     from apps.osint.models import AlertType, AlertSeverity, EntityType
     if entity.entity_type != EntityType.MY_DOMAIN:
@@ -357,6 +377,7 @@ def run_alerts(
     _trigger_blacklist(entity, scan, prev, settings, created)
     _trigger_dmarc(entity, scan, settings, created)
     _trigger_new_subdomain(entity, scan, settings, created)
+    _trigger_takeover(entity, scan, settings, created)
     _trigger_breach(entity, scan, prev, settings, created)
 
     for alert in created:

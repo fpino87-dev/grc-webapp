@@ -7,7 +7,7 @@ export type AlertStatus = "new" | "acknowledged" | "resolved" | "pending_escalat
 export type AlertType =
   | "ssl_expiry" | "ssl_expired" | "blacklist_new"
   | "dmarc_missing" | "score_critical" | "score_degraded"
-  | "new_subdomain" | "breach_found";
+  | "new_subdomain" | "breach_found" | "subdomain_takeover";
 export type SubdomainStatus = "pending" | "included" | "ignored";
 export type ScoreClass = "critical" | "warning" | "attention" | "ok";
 
@@ -139,7 +139,8 @@ export type FindingCode =
   | "breach"
   | "headers_missing"
   | "new_subdomain"
-  | "lookalike_domains";
+  | "lookalike_domains"
+  | "subdomain_takeover";
 
 export interface FindingPlaybook {
   title: string;

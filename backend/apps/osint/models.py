@@ -174,6 +174,11 @@ class OsintScan(BaseModel):
     # {"domain": "...", "fuzzer": "...", "ips": [...]}. Vuoto se non eseguito.
     lookalike_domains = models.JSONField(default=list, blank=True)
 
+    # Candidati subdomain takeover rilevati dall'enricher takeover (DNS-only):
+    # sottodomini inclusi il cui CNAME punta a un servizio cloud dismesso e
+    # rivendicabile. Lista di dict {"subdomain": "...", "cname": "...", "service": "..."}.
+    takeover_candidates = models.JSONField(default=list, blank=True)
+
     # Score
     score_ssl = models.IntegerField(default=0)
     score_dns = models.IntegerField(default=0)
@@ -204,6 +209,7 @@ class AlertType(models.TextChoices):
     SCORE_DEGRADED = "score_degraded", "Score peggiorato"
     NEW_SUBDOMAIN = "new_subdomain", "Nuovo sottodominio"
     BREACH_FOUND = "breach_found", "Breach rilevata"
+    SUBDOMAIN_TAKEOVER = "subdomain_takeover", "Possibile subdomain takeover"
 
 
 class OsintAlert(BaseModel):
@@ -253,6 +259,7 @@ class FindingCode(models.TextChoices):
     HEADERS_MISSING = "headers_missing", "Header HTTP di sicurezza mancanti"
     NEW_SUBDOMAIN = "new_subdomain", "Nuovi sottodomini in attesa"
     LOOKALIKE = "lookalike_domains", "Domini sosia attivi"
+    SUBDOMAIN_TAKEOVER = "subdomain_takeover", "Possibile subdomain takeover"
 
 
 class FindingStatus(models.TextChoices):

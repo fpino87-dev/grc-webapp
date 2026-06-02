@@ -125,6 +125,11 @@ def _detect_finding_codes(entity, scan) -> dict[str, dict]:
     if lookalikes:
         detected[FindingCode.LOOKALIKE] = {"domains": lookalikes[:20]}
 
+    # Subdomain takeover (CRITICAL): CNAME dangling verso servizio cloud dismesso
+    takeover = getattr(scan, "takeover_candidates", None) or []
+    if takeover:
+        detected[FindingCode.SUBDOMAIN_TAKEOVER] = {"candidates": takeover[:20]}
+
     # Breach (solo my_domain)
     from apps.osint.models import EntityType
     if entity.entity_type == EntityType.MY_DOMAIN and scan.hibp_breaches and scan.hibp_breaches > 0:
@@ -143,17 +148,30 @@ def _detect_finding_codes(entity, scan) -> dict[str, dict]:
     return detected
 
 
-def _severity_for(code: str) -> str:
-    """Mappa code → severity di default. CRITICAL = action immediata."""
+def _severity_for(code: str, params: dict | None = None) -> str:
+    """Mappa code → severity. CRITICAL = action immediata.
+
+    Per alcuni codici la severity è dinamica e dipende dai `params` dello scan:
+    es. un dominio lookalike con MX configurato è "armato" per il phishing via
+    email e merita CRITICAL, mentre uno con solo un A record attivo resta WARNING.
+    """
     from apps.osint.models import AlertSeverity, FindingCode
+
+    # Lookalike "weaponization": severity in base allo stato del sosia.
+    if code == FindingCode.LOOKALIKE:
+        domains = (params or {}).get("domains", [])
+        if any(d.get("mx") for d in domains if isinstance(d, dict)):
+            return AlertSeverity.CRITICAL  # almeno un sosia ha MX → phishing email pronto
+        return AlertSeverity.WARNING
+
     high = {
         FindingCode.SSL_EXPIRED, FindingCode.BLACKLIST, FindingCode.GSB_UNSAFE,
-        FindingCode.BREACH, FindingCode.VT_MALICIOUS,
+        FindingCode.BREACH, FindingCode.VT_MALICIOUS, FindingCode.SUBDOMAIN_TAKEOVER,
     }
     medium = {
         FindingCode.SSL_EXPIRY, FindingCode.DMARC_MISSING, FindingCode.SPF_MISSING,
         FindingCode.SPF_PLUS_ALL, FindingCode.DOMAIN_EXPIRY_SOON,
-        FindingCode.HEADERS_MISSING, FindingCode.LOOKALIKE,
+        FindingCode.HEADERS_MISSING,
     }
     if code in high:
         return AlertSeverity.CRITICAL
@@ -191,14 +209,14 @@ def sync_findings(entity: "OsintEntity", scan: "OsintScan") -> tuple[int, int, i
                 entity=entity,
                 scan=scan,
                 code=code,
-                severity=_severity_for(code),
+                severity=_severity_for(code, params),
                 params=params,
             )
             created += 1
         else:
             existing.scan = scan
             existing.params = params
-            existing.severity = _severity_for(code)  # severity può cambiare nel tempo
+            existing.severity = _severity_for(code, params)  # severity può cambiare nel tempo
             existing.save(update_fields=["scan", "params", "severity", "last_seen", "updated_at"])
             updated += 1
 
