@@ -162,7 +162,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     "check-questionnaire-followups": {
         "task": "apps.suppliers.tasks.check_questionnaire_followups_task",
-        "schedule": crontab(hour=9, minute=0),
+        "schedule": crontab(hour=9, minute=30),  # 09:30 — scaglionato da check-final-report-deadlines (09:00)
     },
     # Intra-giornalieri
     "check-nis2-deadlines": {
