@@ -114,7 +114,7 @@ CELERY_BEAT_SCHEDULE = {
     # Giornalieri
     "check-expired-evidences": {
         "task": "apps.controls.tasks.check_expired_evidences",
-        "schedule": crontab(hour=2, minute=0),
+        "schedule": crontab(hour=2, minute=5),  # 02:05 — fuori dalla finestra del backup (02:00)
     },
     "check-expired-bcp-plans": {
         "task": "apps.bcp.tasks.check_expired_bcp_plans",
@@ -172,7 +172,7 @@ CELERY_BEAT_SCHEDULE = {
     # Settimanali (lunedì)
     "osint-weekly-scan": {
         "task": "osint.weekly_scan",
-        "schedule": crontab(hour=2, minute=0, day_of_week=1),  # lunedì 02:00
+        "schedule": crontab(hour=4, minute=0, day_of_week=1),  # lunedì 04:00 — fuori dalla finestra del backup (02:00)
     },
     "generate-weekly-kpi-snapshots": {
         "task": "apps.reporting.tasks.generate_weekly_kpi_snapshots",

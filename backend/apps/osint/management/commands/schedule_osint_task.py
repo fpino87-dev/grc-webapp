@@ -8,14 +8,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         from django_celery_beat.models import CrontabSchedule, PeriodicTask
 
-        # Ogni lunedì alle 02:00 (Europe/Rome). Il nome coincide con la chiave del
-        # beat_schedule in core/celery.py ("osint-weekly-scan"): così, se mai una
-        # sincronizzazione del DatabaseScheduler girasse, farebbe update_or_create
-        # sulla stessa riga invece di crearne una seconda (doppio scan settimanale,
-        # come accaduto per il backup "Backup automatico notturno"/"auto-backup-daily").
+        # Ogni lunedì alle 04:00 (Europe/Rome) — fuori dalla finestra del backup
+        # notturno (02:00). Il nome coincide con la chiave in
+        # settings.CELERY_BEAT_SCHEDULE ("osint-weekly-scan"), così beat e command
+        # fanno update_or_create sulla stessa riga (niente doppione). Tenere i due
+        # orari allineati se si modifica la pianificazione.
         schedule, _ = CrontabSchedule.objects.get_or_create(
             minute="0",
-            hour="2",
+            hour="4",
             day_of_week="1",  # lunedì
             day_of_month="*",
             month_of_year="*",
@@ -27,7 +27,7 @@ class Command(BaseCommand):
                 "task": "osint.weekly_scan",
                 "crontab": schedule,
                 "enabled": True,
-                "description": "Scan OSINT settimanale di tutte le entità attive (lunedì 02:00 Europe/Rome)",
+                "description": "Scan OSINT settimanale di tutte le entità attive (lunedì 04:00 Europe/Rome)",
             },
         )
         status = "creato" if created else "aggiornato"
