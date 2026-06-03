@@ -30,6 +30,69 @@ def get_high_risk_suppliers():
     return Supplier.objects.filter(risk_level__in=["alto", "critico"], status="attivo")
 
 
+# Soglia TPRM (Supplier.concentration_threshold) → livello di rischio del registro.
+_CONCENTRATION_SEVERITY = {"media": "medio", "critica": "alto"}
+_RISK_ORDER = ("basso", "medio", "alto", "critico")
+_RISK_RANK = {c: i for i, c in enumerate(_RISK_ORDER)}
+
+
+def get_concentration_risk_register(suppliers_qs=None) -> dict:
+    """Registro rischi di concentrazione della fornitura (P2-4 — catena fornitura→risk).
+
+    Trasforma il campo finora inerte `Supplier.supply_concentration_pct` in un
+    elenco di rischi consultabile dal risk manager. Ogni fornitore attivo con
+    concentrazione **media** o **critica** diventa una voce di rischio con
+    livello derivato dalla soglia TPRM (media→medio, critica→alto) e con un
+    **bump di un livello** se il fornitore è NIS2-relevant (dipendenza critica
+    su un'entità essenziale/importante). I fornitori con concentrazione bassa o
+    non valorizzata non sono rischi di concentrazione.
+
+    `suppliers_qs` permette al chiamante (es. viewset) di passare un queryset
+    già filtrato per scope-plant; il filtro `status="attivo"` e l'esclusione dei
+    soft-deleted sono applicati comunque.
+
+    Rationale: ACN Delibera 127434 (soglie concentrazione); NIS2 Art. 21.2(d)
+    supply chain risk management; ISO 27001 A.5.19-A.5.22.
+    """
+    if suppliers_qs is None:
+        suppliers_qs = Supplier.objects.all()
+    suppliers_qs = suppliers_qs.filter(
+        status="attivo",
+        deleted_at__isnull=True,
+        supply_concentration_pct__isnull=False,
+    ).prefetch_related("plants")
+
+    items: list[dict] = []
+    by_level = {"medio": 0, "alto": 0, "critico": 0}
+    for sup in suppliers_qs:
+        threshold = sup.concentration_threshold
+        base = _CONCENTRATION_SEVERITY.get(threshold)
+        if base is None:
+            continue  # bassa / nd → non è un rischio di concentrazione
+        rank = _RISK_RANK[base]
+        if sup.nis2_relevant:
+            rank = min(rank + 1, len(_RISK_ORDER) - 1)
+        risk_level = _RISK_ORDER[rank]
+        by_level[risk_level] = by_level.get(risk_level, 0) + 1
+        items.append({
+            "supplier_id": str(sup.id),
+            "supplier_name": sup.name,
+            "concentration_pct": float(sup.supply_concentration_pct),
+            "threshold": threshold,
+            "nis2_relevant": sup.nis2_relevant,
+            "risk_level": risk_level,
+            "plants": [p.name for p in sup.plants.all()],
+        })
+
+    items.sort(key=lambda x: (-_RISK_RANK[x["risk_level"]], -x["concentration_pct"]))
+    return {
+        "items": items,
+        "count": len(items),
+        "by_level": by_level,
+        "attention": by_level.get("alto", 0) + by_level.get("critico", 0),
+    }
+
+
 PARAMETER_KEYS = ("impatto", "accesso", "dati", "dipendenza", "integrazione", "compliance")
 
 

@@ -150,6 +150,20 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             "version_number": v.version_number,
         }
 
+    @action(detail=False, methods=["get"], url_path="concentration-risks")
+    def concentration_risks(self, request):
+        """
+        GET /suppliers/concentration-risks/
+
+        Registro rischi di concentrazione della fornitura (P2-4): i fornitori con
+        concentrazione media/critica diventano voci di rischio per il risk manager.
+        Rispetta lo scope-plant dell'utente (stessa queryset del listing).
+        """
+        from .services import get_concentration_risk_register
+
+        register = get_concentration_risk_register(self.get_queryset())
+        return Response(register)
+
     @action(detail=False, methods=["post"], url_path="suggest-cpv")
     def suggest_cpv(self, request):
         """
