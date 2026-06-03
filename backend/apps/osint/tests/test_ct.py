@@ -98,6 +98,18 @@ class TestAnalyzeCt:
         assert any("Rogue CA" in i for i in scan.ct_unexpected_issuers)
         assert not any("Let's Encrypt" in i for i in scan.ct_unexpected_issuers)
 
+    def test_unexpected_issuer_ignored_when_no_domain_names(self):
+        # Entry recente da CA fuori allowlist ma SENZA nomi pertinenti al dominio
+        # → non deve generare un issuer inatteso (niente alert CRITICAL spurio).
+        s = OsintSettings.load()
+        s.ct_lookback_days = 30
+        s.ct_expected_issuers = ["Let's Encrypt"]
+        scan = OsintScan()
+        entries = [_entry("C=CN, O=Rogue CA Ltd", ["unrelated.other.com"], days_ago=2)]
+        analyze_ct(_entity(), scan, entries, s)
+        assert scan.ct_recent_certs == []  # nessun nome del dominio → non recente-rilevante
+        assert scan.ct_unexpected_issuers == []
+
     def test_disabled_is_noop(self):
         s = OsintSettings.load()
         s.ct_monitoring_enabled = False

@@ -90,6 +90,12 @@ def analyze_ct(
             continue
         issuer = (entry.get("issuer_name") or "").strip()
         names = _names_from_entry(entry.get("name_value"), domain)
+        # Considera solo i certificati con almeno un nome pertinente al dominio:
+        # un'entry crt.sh i cui SAN non riguardano il dominio non è un certificato
+        # "del dominio" e non deve né comparire tra i recenti né — soprattutto —
+        # generare un issuer inatteso (alert CRITICAL spurio).
+        if not names:
+            continue
         recent.append({
             "id": entry.get("id"),
             "issuer": issuer[:255],

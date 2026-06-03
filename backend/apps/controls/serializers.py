@@ -35,6 +35,21 @@ class ControlInstanceSerializer(serializers.ModelSerializer):
         model = ControlInstance
         fields = "__all__"
 
+    def validate_assets(self, value):
+        """Gli asset collegati devono appartenere allo stesso plant del controllo
+        (P1-5): il legame restringe la cascata di rivalutazione per-plant, quindi
+        un asset di un altro plant non avrebbe senso e violerebbe lo scope."""
+        plant = self.instance.plant if self.instance else self.initial_data.get("plant")
+        plant_id = getattr(plant, "id", plant)
+        if plant_id and value:
+            foreign = [a for a in value if str(a.plant_id) != str(plant_id)]
+            if foreign:
+                from rest_framework import serializers as drf
+                raise drf.ValidationError(
+                    "Gli asset collegati devono appartenere allo stesso plant del controllo."
+                )
+        return value
+
     def get_control_title(self, obj):
         request = self.context.get("request")
         lang = getattr(request, "LANGUAGE_CODE", None) if request else None

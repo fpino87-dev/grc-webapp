@@ -267,7 +267,11 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.maintainer_supplier_label")}</label>
-            <select name="maintainer_supplier" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+            <select
+              name="maintainer_supplier"
+              onChange={(e) => setForm((prev) => ({ ...prev, maintainer_supplier: e.target.value || null }))}
+              className="w-full border rounded px-3 py-2 text-sm"
+            >
               <option value="">{t("common.select")}</option>
               {suppliers.map((s) => (
                 <option key={s.id} value={s.id}>{s.name}</option>

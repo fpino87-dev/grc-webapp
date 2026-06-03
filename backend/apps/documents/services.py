@@ -169,19 +169,13 @@ def add_version_with_file(document, uploaded_file, user, change_summary=""):
         uploaded_file.seek(0)
     storage_path = default_storage.save(relative_path, uploaded_file)
 
-    if last and last.storage_path:
-        try:
-            default_storage.delete(last.storage_path)
-        except Exception as exc:
-            # In caso di errore nella cancellazione fisica non blocchiamo il flusso
-            logging.getLogger(__name__).warning(
-                "Documento %s: rimozione file versione precedente fallita "
-                "(possibile file orfano in storage): %s",
-                document.pk, exc,
-            )
+    # La rimozione del file della versione precedente è schedulata DOPO il commit
+    # (transaction.on_commit): se la scrittura DB sotto fa rollback, il file vecchio
+    # resta integro (la riga superstite continuerebbe a puntarci). Best-effort.
+    old_path = last.storage_path if (last and last.storage_path) else None
 
     # Atomica (P1-2) solo sulle scritture DB (create versione + audit). Lo storage
-    # del file è già avvenuto sopra e resta fuori dalla transazione (I/O su FS).
+    # del nuovo file è già avvenuto sopra e resta fuori dalla transazione (I/O su FS).
     with transaction.atomic():
         version = DocumentVersion.objects.create(
             document=document,
@@ -204,6 +198,18 @@ def add_version_with_file(document, uploaded_file, user, change_summary=""):
                 "file_name": original_name,
             },
         )
+
+    if old_path:
+        def _delete_old():
+            try:
+                default_storage.delete(old_path)
+            except Exception as exc:
+                logging.getLogger(__name__).warning(
+                    "Documento %s: rimozione file versione precedente fallita "
+                    "(possibile file orfano in storage): %s",
+                    document.pk, exc,
+                )
+        transaction.on_commit(_delete_old)
     return version
 
 

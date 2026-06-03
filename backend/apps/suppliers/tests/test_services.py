@@ -2,8 +2,16 @@
 import pytest
 from datetime import date, timedelta
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 User = get_user_model()
+
+
+def _utc_today():
+    # get_expiring_contracts confronta con timezone.now().date() (UTC). I test
+    # usano la stessa reference per non flakare al confine mezzanotte locale↔UTC
+    # (TIME_ZONE=Europe/Rome: di sera UTC, date.today() locale è già il giorno dopo).
+    return timezone.now().date()
 
 
 @pytest.fixture
@@ -31,7 +39,7 @@ def supplier(db, plant, user):
 def test_expiring_contracts_found(plant, user):
     from apps.suppliers.models import Supplier
     from apps.suppliers.services import get_expiring_contracts
-    soon = date.today() + timedelta(days=30)
+    soon = _utc_today() + timedelta(days=30)
     s = Supplier.objects.create(name="Scade presto", risk_level="basso", status="attivo",
                                 evaluation_date=soon, created_by=user)
     s.plants.add(plant)
@@ -44,7 +52,7 @@ def test_expiring_contracts_found(plant, user):
 def test_expiring_contracts_not_returned_if_expired(plant, user):
     from apps.suppliers.models import Supplier
     from apps.suppliers.services import get_expiring_contracts
-    expired = date.today() - timedelta(days=1)
+    expired = _utc_today() - timedelta(days=1)
     s = Supplier.objects.create(name="Già scaduto", risk_level="basso", status="attivo",
                                 evaluation_date=expired, created_by=user)
     s.plants.add(plant)
@@ -57,7 +65,7 @@ def test_expiring_contracts_not_returned_if_expired(plant, user):
 def test_expiring_contracts_not_returned_if_terminated(plant, user):
     from apps.suppliers.models import Supplier
     from apps.suppliers.services import get_expiring_contracts
-    soon = date.today() + timedelta(days=10)
+    soon = _utc_today() + timedelta(days=10)
     s = Supplier.objects.create(name="Terminato", risk_level="basso", status="terminato",
                                 evaluation_date=soon, created_by=user)
     result = list(get_expiring_contracts(days=60))

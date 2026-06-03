@@ -312,3 +312,17 @@ def test_detail_info_exposes_assets_for_linking(client, plant, control, instance
     assert linked == {str(a1.id)}
     available = {a["id"] for a in resp.data["available_assets"]}
     assert str(a1.id) in available and len(available) == 2
+
+
+@pytest.mark.django_db
+def test_link_assets_rejects_foreign_plant(client, plant, control, instance):
+    """P1-5/review: il M2M assets non deve accettare asset di un altro plant."""
+    from apps.plants.models import Plant
+    from apps.assets.models import AssetIT
+    other = Plant.objects.create(code="CT-OTHER", name="Altro", country="IT",
+                                 nis2_scope="non_soggetto", status="attivo")
+    foreign = AssetIT.objects.create(plant=other, name="Foreign", asset_type="IT", criticality=3)
+    resp = client.patch(f"{URL_INSTANCES}{instance.id}/", {"assets": [str(foreign.id)]}, format="json")
+    assert resp.status_code == 400
+    instance.refresh_from_db()
+    assert instance.assets.count() == 0

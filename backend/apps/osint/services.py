@@ -374,6 +374,33 @@ def push_osint_kpis(user=None) -> dict:
     review (M13) tra gli `operational_kpis`. Ritorna un riepilogo.
     """
     from apps.tasks.services import ingest_kpi_from_api
+    from apps.tasks.models import KPIDefinition
+
+    # Assicura che la KPIDefinition abbia soglie: senza, evaluate_kpi_status
+    # ritorna sempre 'ok' (warn/crit None) e il KPI non segnalerebbe mai
+    # l'esposizione nella management review. Direzione 'below' (valori bassi =
+    # buoni): >0 → warning, >2 → critical (0 ok, 1-2 warning, ≥3 critical).
+    kpi_def, created = KPIDefinition.objects.get_or_create(
+        kpi_code=OSINT_CRITICAL_KPI_CODE,
+        defaults={
+            "name": "OSINT — finding critici aperti",
+            "description": "Numero di finding OSINT critici aperti sulle entità my_domain del plant.",
+            "unit": "n°",
+            "source": "api",
+            "threshold_warning": 0,
+            "threshold_critical": 2,
+            "threshold_direction": "below",
+        },
+    )
+    # Retrofit difensivo se la def esisteva già senza soglie (es. creata da un
+    # push precedente al fix), senza sovrascrivere eventuali tuning dell'admin.
+    if not created and kpi_def.threshold_warning is None and kpi_def.threshold_critical is None:
+        kpi_def.threshold_warning = 0
+        kpi_def.threshold_critical = 2
+        kpi_def.threshold_direction = "below"
+        kpi_def.save(update_fields=[
+            "threshold_warning", "threshold_critical", "threshold_direction", "updated_at",
+        ])
 
     counts = count_open_critical_findings_by_plant()
     pushed = 0

@@ -27,7 +27,13 @@ class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
         model = Supplier
         fields = "__all__"
-        read_only_fields = ["internal_risk_level", "risk_adj", "risk_adj_updated_at"]
+        # concentration_notified_threshold è un marcatore anti-spam gestito dal
+        # service (check_concentration_crossing): NON deve essere scrivibile via API,
+        # altrimenti un client potrebbe sopprimere o ri-scatenare l'alert M19.
+        read_only_fields = [
+            "internal_risk_level", "risk_adj", "risk_adj_updated_at",
+            "concentration_notified_threshold",
+        ]
 
     def get_latest_questionnaire_status(self, obj):
         q = obj.questionnaires.order_by("-sent_at").first()

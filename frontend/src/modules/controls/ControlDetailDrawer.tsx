@@ -1336,6 +1336,7 @@ export function ControlDetailDrawer({ instanceId, onClose }: Props) {
               {tab === "cosa"        && <TabCosa info={info} />}
               {tab === "valutazione" && (
                 <TabValutazione
+                  key={instanceId}
                   instanceId={instanceId!}
                   requirements={info.requirements}
                   currentStatus={info.current_status}

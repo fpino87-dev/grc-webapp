@@ -78,9 +78,26 @@ class TestPush:
         assert result["pushed"] == 1
 
         kpi = KPIDefinition.objects.get(kpi_code=OSINT_CRITICAL_KPI_CODE)
+        # La definizione ha soglie (altrimenti lo status sarebbe sempre 'ok').
+        assert kpi.threshold_direction == "below"
+        assert kpi.threshold_warning == 0 and kpi.threshold_critical == 2
         snap = OperationalKpiSnapshot.objects.get(kpi_definition=kpi, plant=p)
         assert snap.value == 1
         assert snap.source == "api"  # ingest_kpi_from_api normalizza la sorgente
+        assert snap.status == "warning"  # 1 finding critico aperto → warning (non 'ok')
+
+    def test_push_three_criticals_is_critical_status(self):
+        from apps.tasks.models import KPIDefinition, OperationalKpiSnapshot
+
+        p = _plant("P3")
+        e = _entity(p)
+        for code in ("ssl_expired", "blacklist", "breach"):
+            _finding(e, code=code, severity=AlertSeverity.CRITICAL)
+        push_osint_kpis()
+        kpi = KPIDefinition.objects.get(kpi_code=OSINT_CRITICAL_KPI_CODE)
+        snap = OperationalKpiSnapshot.objects.get(kpi_definition=kpi, plant=p)
+        assert snap.value == 3
+        assert snap.status == "critical"  # ≥3 → critical
 
     def test_push_reports_zero_when_no_exposure(self):
         from apps.tasks.models import KPIDefinition, OperationalKpiSnapshot
@@ -91,3 +108,4 @@ class TestPush:
         kpi = KPIDefinition.objects.get(kpi_code=OSINT_CRITICAL_KPI_CODE)
         snap = OperationalKpiSnapshot.objects.get(kpi_definition=kpi, plant=p)
         assert snap.value == 0
+        assert snap.status == "ok"  # 0 critici → ok
