@@ -107,6 +107,21 @@ def test_complete_run_succeeds_when_mandatory_checked(template, plant, user):
 
 
 @pytest.mark.django_db
+def test_complete_run_atomic_rollback_on_audit_failure(template, plant, user):
+    """P1-2: se l'audit fallisce, lo stato del run NON deve restare 'completed'."""
+    from unittest.mock import patch
+    from apps.tasks.services import complete_run, complete_run_item, create_run_for_template
+    run = create_run_for_template(template, plant, datetime.date.today())
+    for item in run.items.filter(template_item__is_mandatory=True):
+        complete_run_item(run, item_id=item.id, checked=True, user=user)
+    with patch("apps.tasks.services.log_action", side_effect=RuntimeError("boom")):
+        with pytest.raises(RuntimeError):
+            complete_run(run, user)
+    run.refresh_from_db()
+    assert run.status != "completed"  # rollback: nessuno stato parziale persistito
+
+
+@pytest.mark.django_db
 def test_complete_run_writes_audit_log(template, plant, user):
     from core.audit import AuditLog
     from apps.tasks.services import complete_run, complete_run_item, create_run_for_template

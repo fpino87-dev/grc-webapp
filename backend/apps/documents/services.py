@@ -6,6 +6,7 @@ import os
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
+from django.db import transaction
 from django.utils import timezone
 
 from django.utils.translation import gettext as _
@@ -58,17 +59,20 @@ def approve_document(document, user, notes=""):
         logging.getLogger(__name__).warning(
             "Documento %s: scadenza revisione non calcolata: %s", document.pk, exc,
         )
-    document.save(update_fields=["status", "approved_at", "approver", "review_due_date", "updated_at"])
-    DocumentApproval.objects.create(
-        document=document, action="approve", actor=user, notes=notes
-    )
-    log_action(
-        user=user,
-        action_code="document.approved",
-        level="L2",
-        entity=document,
-        payload={"id": str(document.pk), "title": document.title, "notes": notes},
-    )
+    # Atomica (P1-2): stato documento + record approvazione + audit append-only
+    # vanno insieme; le notifiche restano fuori dalla transazione (best-effort, I/O).
+    with transaction.atomic():
+        document.save(update_fields=["status", "approved_at", "approver", "review_due_date", "updated_at"])
+        DocumentApproval.objects.create(
+            document=document, action="approve", actor=user, notes=notes
+        )
+        log_action(
+            user=user,
+            action_code="document.approved",
+            level="L2",
+            entity=document,
+            payload={"id": str(document.pk), "title": document.title, "notes": notes},
+        )
     # notifica approvatori / stakeholder definiti in governance
     try:
         from apps.governance.services import resolve_document_recipients
@@ -94,18 +98,19 @@ def approve_document(document, user, notes=""):
 
 
 def reject_document(document, user, notes=""):
-    document.status = "bozza"
-    document.save(update_fields=["status", "updated_at"])
-    DocumentApproval.objects.create(
-        document=document, action="reject", actor=user, notes=notes
-    )
-    log_action(
-        user=user,
-        action_code="document.rejected",
-        level="L2",
-        entity=document,
-        payload={"id": str(document.pk), "title": document.title, "notes": notes},
-    )
+    with transaction.atomic():
+        document.status = "bozza"
+        document.save(update_fields=["status", "updated_at"])
+        DocumentApproval.objects.create(
+            document=document, action="reject", actor=user, notes=notes
+        )
+        log_action(
+            user=user,
+            action_code="document.rejected",
+            level="L2",
+            entity=document,
+            payload={"id": str(document.pk), "title": document.title, "notes": notes},
+        )
 
 
 def add_version(
@@ -117,27 +122,28 @@ def add_version(
     """
     last = document.versions.first()
     version_number = (last.version_number + 1) if last else 1
-    v = DocumentVersion.objects.create(
-        document=document,
-        version_number=version_number,
-        file_name=file_name,
-        sha256=sha256,
-        storage_path=storage_path,
-        change_summary=change_summary,
-        file_size=file_size,
-        uploaded_by=user,
-    )
-    log_action(
-        user=user,
-        action_code="document.version_added",
-        level="L1",
-        entity=document,
-        payload={
-            "id": str(document.pk),
-            "version_number": version_number,
-            "file_name": file_name,
-        },
-    )
+    with transaction.atomic():
+        v = DocumentVersion.objects.create(
+            document=document,
+            version_number=version_number,
+            file_name=file_name,
+            sha256=sha256,
+            storage_path=storage_path,
+            change_summary=change_summary,
+            file_size=file_size,
+            uploaded_by=user,
+        )
+        log_action(
+            user=user,
+            action_code="document.version_added",
+            level="L1",
+            entity=document,
+            payload={
+                "id": str(document.pk),
+                "version_number": version_number,
+                "file_name": file_name,
+            },
+        )
     return v
 
 
@@ -174,28 +180,30 @@ def add_version_with_file(document, uploaded_file, user, change_summary=""):
                 document.pk, exc,
             )
 
-    version = DocumentVersion.objects.create(
-        document=document,
-        version_number=version_number,
-        file_name=original_name,
-        file_size=file_size,
-        sha256=sha256_hash,
-        storage_path=storage_path,
-        change_summary=change_summary,
-        uploaded_by=user,
-    )
-
-    log_action(
-        user=user,
-        action_code="document.version_added",
-        level="L1",
-        entity=document,
-        payload={
-            "id": str(document.pk),
-            "version_number": version_number,
-            "file_name": original_name,
-        },
-    )
+    # Atomica (P1-2) solo sulle scritture DB (create versione + audit). Lo storage
+    # del file è già avvenuto sopra e resta fuori dalla transazione (I/O su FS).
+    with transaction.atomic():
+        version = DocumentVersion.objects.create(
+            document=document,
+            version_number=version_number,
+            file_name=original_name,
+            file_size=file_size,
+            sha256=sha256_hash,
+            storage_path=storage_path,
+            change_summary=change_summary,
+            uploaded_by=user,
+        )
+        log_action(
+            user=user,
+            action_code="document.version_added",
+            level="L1",
+            entity=document,
+            payload={
+                "id": str(document.pk),
+                "version_number": version_number,
+                "file_name": original_name,
+            },
+        )
     return version
 
 

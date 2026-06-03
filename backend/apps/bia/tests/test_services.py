@@ -50,3 +50,21 @@ def test_delete_process_without_dependencies(process, user):
     delete_process(process, user)
     process.refresh_from_db()
     assert process.deleted_at is not None
+
+
+@pytest.mark.django_db
+def test_delete_process_cascade_atomic_rollback(process, user):
+    """P1-2: se un audit fallisce a metà cascata, nulla deve restare soft-deleted."""
+    from unittest.mock import patch
+    from apps.bia.services import delete_process
+    from apps.risk.models import RiskAssessment
+
+    ra = RiskAssessment.objects.create(plant=process.plant, critical_process=process, created_by=user)
+    # delete_process importa log_action localmente → si patcha alla sorgente.
+    with patch("core.audit.log_action", side_effect=RuntimeError("boom")):
+        with pytest.raises(RuntimeError):
+            delete_process(process, user, cascade=True)
+    process.refresh_from_db()
+    ra.refresh_from_db()
+    assert process.deleted_at is None  # rollback
+    assert ra.deleted_at is None

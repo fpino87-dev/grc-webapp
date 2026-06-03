@@ -1,5 +1,6 @@
 import datetime
 
+from django.db import transaction
 from django.utils import timezone
 
 from core.audit import log_action
@@ -207,24 +208,25 @@ def complete_run(run, user):
             _("Tutti gli item obbligatori devono essere spuntati prima di completare.")
         )
 
-    run.status = "completed"
-    run.completed_at = timezone.now()
-    run.completed_by = user
-    run.save(update_fields=["status", "completed_at", "completed_by", "updated_at"])
+    with transaction.atomic():
+        run.status = "completed"
+        run.completed_at = timezone.now()
+        run.completed_by = user
+        run.save(update_fields=["status", "completed_at", "completed_by", "updated_at"])
 
-    log_action(
-        user=user,
-        action_code="checklist_run.completed",
-        level="L1",
-        entity=run,
-        payload={
-            "id": str(run.pk),
-            "template": run.template.name,
-            "plant_id": str(run.plant_id),
-            "items_total": run.items.count(),
-            "items_checked": run.items.filter(checked=True).count(),
-        },
-    )
+        log_action(
+            user=user,
+            action_code="checklist_run.completed",
+            level="L1",
+            entity=run,
+            payload={
+                "id": str(run.pk),
+                "template": run.template.name,
+                "plant_id": str(run.plant_id),
+                "items_total": run.items.count(),
+                "items_checked": run.items.filter(checked=True).count(),
+            },
+        )
     return run
 
 

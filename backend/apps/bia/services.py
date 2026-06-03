@@ -1,3 +1,5 @@
+from django.db import transaction
+
 from .models import CriticalProcess
 
 
@@ -199,12 +201,16 @@ def get_process_risk_bcp_snapshot(process: CriticalProcess) -> dict:
     }
 
 
+@transaction.atomic
 def delete_process(process: CriticalProcess, user, cascade: bool = False) -> None:
     """
     Elimina (soft delete) un processo BIA.
 
     - cascade=false: elimina solo se non ci sono dipendenze attive.
     - cascade=true: elimina anche dipendenze correlate (RiskAssessment, BCP, ecc.) per pulizia di prova.
+
+    Atomica (P1-2): in cascata fa molti soft_delete + audit append-only; un errore
+    a metà non deve lasciare dipendenze parzialmente eliminate con audit incoerente.
     """
     from django.core.exceptions import ValidationError
     from django.db.models import Q

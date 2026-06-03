@@ -48,6 +48,23 @@ def document(db, plant, user):
 
 
 @pytest.mark.django_db
+def test_approve_document_atomic_rollback(document, user):
+    """P1-2: se l'audit fallisce, stato documento e record approvazione non persistono."""
+    from unittest.mock import patch
+    from apps.documents.models import DocumentApproval
+    from apps.documents.services import approve_document
+
+    document.status = "revisione"
+    document.save(update_fields=["status"])
+    with patch("apps.documents.services.log_action", side_effect=RuntimeError("boom")):
+        with pytest.raises(RuntimeError):
+            approve_document(document, user, notes="ok")
+    document.refresh_from_db()
+    assert document.status == "revisione"  # rollback: non 'approvato'
+    assert not DocumentApproval.objects.filter(document=document).exists()
+
+
+@pytest.mark.django_db
 def test_list_document_versions(client):
     resp = client.get(URL_VERSIONS)
     assert resp.status_code == 200
