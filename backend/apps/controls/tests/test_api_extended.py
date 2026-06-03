@@ -295,3 +295,20 @@ def test_pm_does_not_see_control_instance_of_other_plant(db, framework, control)
     assert resp.status_code == 200
     plant_ids = {str(item["plant"]) for item in resp.data["results"]}
     assert plant_ids == {str(plant_a.id)}
+
+
+@pytest.mark.django_db
+def test_detail_info_exposes_assets_for_linking(client, plant, control, instance):
+    """P1-5: il payload detail-info espone plant_id, asset collegati e disponibili."""
+    from apps.assets.models import AssetIT
+    a1 = AssetIT.objects.create(plant=plant, name="Server A", asset_type="IT", criticality=3)
+    AssetIT.objects.create(plant=plant, name="Server B", asset_type="IT", criticality=2)
+    instance.assets.set([a1])
+
+    resp = client.get(f"{URL_INSTANCES}{instance.id}/detail-info/")
+    assert resp.status_code == 200
+    assert resp.data["plant_id"] == str(plant.id)
+    linked = {a["id"] for a in resp.data["linked_assets"]}
+    assert linked == {str(a1.id)}
+    available = {a["id"] for a in resp.data["available_assets"]}
+    assert str(a1.id) in available and len(available) == 2

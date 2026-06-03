@@ -498,6 +498,10 @@
     "notes_label": "Ek notlar",
     "notes_placeholder": "Bu kontrol hakkında serbest notlar (VDA/SOA'ya aktarılmaz)…",
     "notes_save": "Notları kaydet",
+    "linked_assets_label": "Bağlı varlıklar",
+    "linked_assets_hint": "Bu kontrolün kapsadığı varlıkları bağlayın: bağlı bir varlıktaki değişiklik tüm tesis duruşunu değil yalnızca etkilenen kontrolleri yeniden değerlendirir.",
+    "linked_assets_empty": "Bu tesis için varlık yok.",
+    "linked_assets_save": "Bağlı varlıkları kaydet",
     "status_filter": {
       "all": "Tümü"
     },
@@ -1996,6 +2000,8 @@
     "new_asset_title": "Yeni {{type}} varlık",
     "bia_processes_label": "Bağlı BIA süreçleri",
     "bia_processes_hint": "Bu varlığa (BT veya OT) bağımlı bir veya daha fazla BIA süreci seçin.",
+    "maintainer_supplier_label": "Bakım yapan tedarikçi",
+    "maintainer_supplier_hint": "Varlığı bakımını yapan veya ona uzaktan erişimi olan tedarikçi. OT varlıklarının bakımını yapan bir tedarikçiyle ilgili kritik OSINT uyarısı, otomatik görev oluşturmak yerine manuel olarak yükseltilir.",
     "criticality_guide_title": "ℹ️ Kritiklik nasıl seçilir",
     "criticality_table_value": "Değer",
     "criticality_table_label": "Etiket",

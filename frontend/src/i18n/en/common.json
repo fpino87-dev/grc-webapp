@@ -431,6 +431,10 @@
     "notes_label": "Additional notes",
     "notes_placeholder": "Free-form notes on this control (not exported to VDA/SOA)…",
     "notes_save": "Save notes",
+    "linked_assets_label": "Linked assets",
+    "linked_assets_hint": "Link the assets covered by this control: a change to a linked asset re-evaluates only the affected controls, not the whole site posture.",
+    "linked_assets_empty": "No assets available for this site.",
+    "linked_assets_save": "Save linked assets",
     "status_filter": {
       "all": "All"
     },
@@ -1917,6 +1921,8 @@
     "new_asset_title": "New {{type}} asset",
     "bia_processes_label": "Linked BIA processes",
     "bia_processes_hint": "Select one or more BIA processes that depend on this asset (IT or OT).",
+    "maintainer_supplier_label": "Maintainer supplier",
+    "maintainer_supplier_hint": "Supplier that maintains or has remote access to the asset. A critical OSINT alert on a supplier that maintains OT assets is escalated manually instead of generating an automatic task.",
     "criticality_guide_title": "ℹ️ How to choose criticality",
     "criticality_table_value": "Value",
     "criticality_table_label": "Label",

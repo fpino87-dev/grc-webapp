@@ -431,6 +431,10 @@
     "notes_label": "Note aggiuntive",
     "notes_placeholder": "Note libere sul controllo (non esportate in VDA/SOA)…",
     "notes_save": "Salva note",
+    "linked_assets_label": "Asset collegati",
+    "linked_assets_hint": "Collega gli asset coperti da questo controllo: una modifica a un asset collegato rivaluta solo i controlli interessati, non l'intera postura del sito.",
+    "linked_assets_empty": "Nessun asset disponibile per questo sito.",
+    "linked_assets_save": "Salva asset collegati",
     "status_filter": {
       "all": "Tutti"
     },
@@ -1917,6 +1921,8 @@
     "new_asset_title": "Nuovo asset {{type}}",
     "bia_processes_label": "Processi BIA collegati",
     "bia_processes_hint": "Seleziona uno o più processi BIA che dipendono da questo asset (IT o OT).",
+    "maintainer_supplier_label": "Fornitore manutentore",
+    "maintainer_supplier_hint": "Fornitore che manutiene o ha accesso remoto all'asset. Un alert OSINT critico su un fornitore che manutiene asset OT viene messo in escalation manuale invece di generare un task automatico.",
     "criticality_guide_title": "ℹ️ Come scegliere la criticità",
     "criticality_table_value": "Valore",
     "criticality_table_label": "Etichetta",

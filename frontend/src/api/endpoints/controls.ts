@@ -22,6 +22,13 @@ export interface ControlInstance {
   suggested_status?: string;
   suggestion_differs?: boolean;
   calc_maturity_level: number;
+  assets?: string[];
+}
+
+export interface AssetRef {
+  id: string;
+  name: string;
+  asset_type?: string;
 }
 
 export interface Framework {
@@ -124,6 +131,9 @@ export interface ControlDetailInfo {
   notes: string;
   needs_revaluation?: boolean;
   needs_revaluation_since?: string | null;
+  plant_id?: string;
+  linked_assets?: AssetRef[];
+  available_assets?: AssetRef[];
 }
 
 export interface GapEntry {

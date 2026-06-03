@@ -344,6 +344,12 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         from core.audit import AuditLog
 
         from django.utils import translation
+        from apps.assets.models import Asset
+
+        def _plant_assets(plant_id):
+            return Asset.objects.filter(
+                plant_id=plant_id, deleted_at__isnull=True
+            ).only("id", "name", "asset_type").order_by("name")
 
         instance = self.get_object()
         lang = request.query_params.get("lang") or getattr(request, "LANGUAGE_CODE", None) or "it"
@@ -414,6 +420,17 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 "needs_revaluation": instance.needs_revaluation,
                 "needs_revaluation_since": str(instance.needs_revaluation_since) if instance.needs_revaluation_since else None,
                 "notes": instance.notes,
+                # Legame controllo↔asset (P1-5): asset collegati + asset disponibili
+                # del plant, per popolare il M2M dalla UI e restringere la cascata change.
+                "plant_id": str(instance.plant_id),
+                "linked_assets": [
+                    {"id": str(a.id), "name": a.name}
+                    for a in instance.assets.filter(deleted_at__isnull=True)
+                ],
+                "available_assets": [
+                    {"id": str(a.id), "name": a.name, "asset_type": a.asset_type}
+                    for a in _plant_assets(instance.plant_id)
+                ],
                 "control_id": control.external_id,
                 "control_uuid": str(control.pk),
                 "title": control.get_title(lang),

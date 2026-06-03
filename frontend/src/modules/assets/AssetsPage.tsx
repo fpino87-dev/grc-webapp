@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { assetsApi, type AssetIT, type AssetOT, type AssetSW, type RegisterChangeResult } from "../../api/endpoints/assets";
 import { plantsApi } from "../../api/endpoints/plants";
 import { biaApi, type CriticalProcess } from "../../api/endpoints/bia";
+import { suppliersApi, type Supplier } from "../../api/endpoints/suppliers";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
 import { useTranslation } from "react-i18next";
@@ -201,6 +202,13 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
   });
   const processes: CriticalProcess[] = processesData?.results ?? [];
 
+  const { data: suppliersData } = useQuery({
+    queryKey: ["suppliers", "active"],
+    queryFn: () => suppliersApi.list({ status: "attivo" }),
+    retry: false,
+  });
+  const suppliers: Supplier[] = suppliersData?.results ?? [];
+
   const mutation = useMutation<AssetIT | AssetOT, any, Partial<AssetIT> & Partial<AssetOT>>({
     mutationFn: (data) =>
       assetType === "IT" ? assetsApi.createIT(data) : assetsApi.createOT(data),
@@ -256,6 +264,16 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
             <p className="mt-1 text-xs text-gray-500">
               {t("assets.bia_processes_hint")}
             </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.maintainer_supplier_label")}</label>
+            <select name="maintainer_supplier" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+              <option value="">{t("common.select")}</option>
+              {suppliers.map((s) => (
+                <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-gray-500">{t("assets.maintainer_supplier_hint")}</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t("eval_assistant.bia.columns.level")} (1-5)</label>

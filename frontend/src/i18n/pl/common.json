@@ -498,6 +498,10 @@
     "notes_label": "Dodatkowe uwagi",
     "notes_placeholder": "Dowolne uwagi dotyczące kontroli (nie eksportowane do VDA/SOA)…",
     "notes_save": "Zapisz uwagi",
+    "linked_assets_label": "Powiązane zasoby",
+    "linked_assets_hint": "Powiąż zasoby objęte tym kontrolą: zmiana powiązanego zasobu ponownie ocenia tylko dotknięte kontrole, a nie całą postawę zakładu.",
+    "linked_assets_empty": "Brak dostępnych zasobów dla tego zakładu.",
+    "linked_assets_save": "Zapisz powiązane zasoby",
     "status_filter": {
       "all": "Wszystkie"
     },
@@ -1996,6 +2000,8 @@
     "new_asset_title": "Nowy zasób {{type}}",
     "bia_processes_label": "Powiązane procesy BIA",
     "bia_processes_hint": "Wybierz jeden lub więcej procesów BIA zależnych od tego zasobu (IT lub OT).",
+    "maintainer_supplier_label": "Dostawca utrzymujący",
+    "maintainer_supplier_hint": "Dostawca, który utrzymuje zasób lub ma do niego zdalny dostęp. Krytyczny alert OSINT dotyczący dostawcy utrzymującego zasoby OT jest eskalowany ręcznie zamiast generowania automatycznego zadania.",
     "criticality_guide_title": "ℹ️ Jak wybrać krytyczność",
     "criticality_table_value": "Wartość",
     "criticality_table_label": "Etykieta",

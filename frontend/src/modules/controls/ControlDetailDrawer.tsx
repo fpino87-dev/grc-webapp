@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { controlsApi, type EvidenceRef, type LinkedDocument, type RequirementsCheck, type EvidenceRequirement } from "../../api/endpoints/controls";
+import { controlsApi, type EvidenceRef, type LinkedDocument, type RequirementsCheck, type EvidenceRequirement, type AssetRef } from "../../api/endpoints/controls";
 import { documentsApi } from "../../api/endpoints/documents";
 import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
@@ -315,6 +315,8 @@ function TabValutazione({
   needsRevaluation,
   needsRevaluationSince,
   initialNotes,
+  linkedAssets,
+  availableAssets,
 }: {
   instanceId: string;
   requirements: RequirementsCheck;
@@ -331,6 +333,8 @@ function TabValutazione({
   needsRevaluation?: boolean;
   needsRevaluationSince?: string | null;
   initialNotes?: string;
+  linkedAssets?: AssetRef[];
+  availableAssets?: AssetRef[];
 }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -347,6 +351,18 @@ function TabValutazione({
   const [gapActions, setGapActions] = useState<Array<{ title?: string; priority?: string; description?: string }>>([]);
   const [notesValue, setNotesValue] = useState(initialNotes ?? "");
   const [notesSaved, setNotesSaved] = useState(false);
+  const [assetIds, setAssetIds] = useState<string[]>((linkedAssets ?? []).map(a => a.id));
+  const [assetsSaved, setAssetsSaved] = useState(false);
+
+  const assetsMutation = useMutation({
+    mutationFn: () => controlsApi.updateInstance(instanceId, { assets: assetIds }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["controls"] });
+      qc.invalidateQueries({ queryKey: ["control-detail", instanceId] });
+      setAssetsSaved(true);
+      setTimeout(() => setAssetsSaved(false), 3000);
+    },
+  });
 
   const notesMutation = useMutation({
     mutationFn: () => controlsApi.updateInstance(instanceId, { notes: notesValue }),
@@ -690,6 +706,35 @@ function TabValutazione({
         >
           {notesMutation.isPending ? t("common.saving") : notesSaved ? "✓ " + t("common.saved", { defaultValue: "Salvato" }) : t("controls.notes_save")}
         </button>
+      </div>
+
+      {/* Asset collegati (P1-5): restringe la cascata di rivalutazione agli asset del controllo */}
+      <div className="border border-gray-200 rounded-lg p-3 space-y-2">
+        <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t("controls.linked_assets_label")}</p>
+        <p className="text-xs text-gray-500">{t("controls.linked_assets_hint")}</p>
+        {(availableAssets ?? []).length === 0 ? (
+          <p className="text-xs text-gray-400">{t("controls.linked_assets_empty")}</p>
+        ) : (
+          <>
+            <select
+              multiple
+              value={assetIds}
+              onChange={e => { setAssetIds(Array.from(e.target.selectedOptions).map(o => o.value)); setAssetsSaved(false); }}
+              className="w-full border rounded px-3 py-2 text-sm h-28"
+            >
+              {(availableAssets ?? []).map(a => (
+                <option key={a.id} value={a.id}>{a.name}{a.asset_type ? ` (${a.asset_type})` : ""}</option>
+              ))}
+            </select>
+            <button
+              onClick={() => assetsMutation.mutate()}
+              disabled={assetsMutation.isPending}
+              className="w-full py-1.5 bg-gray-600 text-white rounded text-xs hover:bg-gray-700 disabled:opacity-50"
+            >
+              {assetsMutation.isPending ? t("common.saving") : assetsSaved ? "✓ " + t("common.saved", { defaultValue: "Salvato" }) : t("controls.linked_assets_save")}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
@@ -1306,6 +1351,8 @@ export function ControlDetailDrawer({ instanceId, onClose }: Props) {
                   needsRevaluation={info.needs_revaluation}
                   needsRevaluationSince={info.needs_revaluation_since}
                   initialNotes={info.notes}
+                  linkedAssets={info.linked_assets ?? []}
+                  availableAssets={info.available_assets ?? []}
                 />
               )}
               {tab === "docevidence" && (

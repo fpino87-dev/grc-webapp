@@ -24,6 +24,7 @@ export interface AssetIT extends AssetChangeFields {
   internet_exposed: boolean;
   cve_score_max: number | null;
   owner: string | null;
+  maintainer_supplier: string | null;
   notes: string;
   processes: string[];
   deployment_type: "on_prem" | "iaas" | "paas" | "saas";
@@ -46,6 +47,7 @@ export interface AssetOT extends AssetChangeFields {
   ip_address: string | null;
   internet_exposed: boolean;
   owner: string | null;
+  maintainer_supplier: string | null;
   notes: string;
   processes: string[];
 }

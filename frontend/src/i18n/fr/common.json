@@ -498,6 +498,10 @@
     "notes_label": "Notes supplémentaires",
     "notes_placeholder": "Notes libres sur ce contrôle (non exportées VDA/SOA)…",
     "notes_save": "Enregistrer les notes",
+    "linked_assets_label": "Actifs liés",
+    "linked_assets_hint": "Liez les actifs couverts par ce contrôle : une modification d'un actif lié ne réévalue que les contrôles concernés, pas toute la posture du site.",
+    "linked_assets_empty": "Aucun actif disponible pour ce site.",
+    "linked_assets_save": "Enregistrer les actifs liés",
     "status_filter": {
       "all": "Tous"
     },
@@ -1996,6 +2000,8 @@
     "new_asset_title": "Nouvel actif {{type}}",
     "bia_processes_label": "Processus BIA liés",
     "bia_processes_hint": "Sélectionnez un ou plusieurs processus BIA qui dépendent de cet actif (IT ou OT).",
+    "maintainer_supplier_label": "Fournisseur mainteneur",
+    "maintainer_supplier_hint": "Fournisseur qui maintient ou a un accès distant à l'actif. Une alerte OSINT critique sur un fournisseur qui maintient des actifs OT est escaladée manuellement au lieu de générer une tâche automatique.",
     "criticality_guide_title": "ℹ️ Comment choisir la criticité",
     "criticality_table_value": "Valeur",
     "criticality_table_label": "Étiquette",
