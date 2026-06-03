@@ -148,6 +148,13 @@ function ScanFindings({ entity }: { entity: OsintEntityDetail }) {
     findings.push({ icon: "🔓", text: t("osint.findings.breach", { count: scan.hibp_breaches }) });
   }
 
+  // Certificate Transparency monitoring
+  if ((scan.ct_unexpected_issuers || []).length > 0) {
+    findings.push({ icon: "🛑", text: t("osint.findings.ct_unexpected_issuer", { issuers: (scan.ct_unexpected_issuers || []).join(", ") }) });
+  } else if ((scan.ct_recent_certs || []).length > 0) {
+    findings.push({ icon: "📜", text: t("osint.findings.ct_recent_certs", { count: (scan.ct_recent_certs || []).length }) });
+  }
+
   // Enricher errors
   const errorNames = Object.keys(scan.enricher_errors || {});
   if (errorNames.length > 0) {

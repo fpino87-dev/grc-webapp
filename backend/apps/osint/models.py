@@ -198,6 +198,15 @@ class OsintScan(BaseModel):
     # rivendicabile. Lista di dict {"subdomain": "...", "cname": "...", "service": "..."}.
     takeover_candidates = models.JSONField(default=list, blank=True)
 
+    # Certificate Transparency monitoring (crt.sh). Certificati emessi di recente
+    # (entro ct_lookback_days) per il dominio: lista di dict
+    # {"id": ..., "issuer": "...", "names": [...], "not_before": "...", "entry": "..."}.
+    ct_recent_certs = models.JSONField(default=list, blank=True)
+    # Issuer (CA) dei certificati recenti NON presenti nell'allowlist
+    # `OsintSettings.ct_expected_issuers` — possibile mis-issuance / cert rogue.
+    # Valorizzato solo quando l'allowlist è configurata (altrimenti vuoto).
+    ct_unexpected_issuers = models.JSONField(default=list, blank=True)
+
     # Score
     score_ssl = models.IntegerField(default=0)
     score_dns = models.IntegerField(default=0)
@@ -229,6 +238,7 @@ class AlertType(models.TextChoices):
     NEW_SUBDOMAIN = "new_subdomain", "Nuovo sottodominio"
     BREACH_FOUND = "breach_found", "Breach rilevata"
     SUBDOMAIN_TAKEOVER = "subdomain_takeover", "Possibile subdomain takeover"
+    CT_UNEXPECTED_ISSUER = "ct_unexpected_issuer", "Certificato da CA non attesa (CT)"
 
 
 class OsintAlert(BaseModel):
@@ -281,6 +291,7 @@ class FindingCode(models.TextChoices):
     NEW_SUBDOMAIN = "new_subdomain", "Nuovi sottodomini in attesa"
     LOOKALIKE = "lookalike_domains", "Domini sosia attivi"
     SUBDOMAIN_TAKEOVER = "subdomain_takeover", "Possibile subdomain takeover"
+    CT_UNEXPECTED_ISSUER = "ct_unexpected_issuer", "Certificato da CA non attesa (CT)"
 
 
 class FindingStatus(models.TextChoices):
@@ -375,6 +386,24 @@ class OsintSettings(BaseModel):
         default=SubdomainAutoInclude.ASK,
     )
     anonymization_enabled = models.BooleanField(default=True)
+
+    # Certificate Transparency monitoring (crt.sh, già interrogato per i
+    # sottodomini). Rileva certificati emessi di recente per il dominio.
+    ct_monitoring_enabled = models.BooleanField(default=True)
+    ct_lookback_days = models.PositiveIntegerField(
+        default=30,
+        help_text="Finestra (giorni) entro cui un certificato in CT è 'recente'.",
+    )
+    ct_expected_issuers = models.JSONField(
+        default=list,
+        blank=True,
+        help_text=(
+            "Allowlist di CA attese (match per sottostringa, case-insensitive sul "
+            "campo issuer del certificato CT, es. 'Let's Encrypt', 'DigiCert'). "
+            "Se vuota non viene segnalato nessun issuer come inatteso (solo "
+            "visibilità dei certificati recenti)."
+        ),
+    )
 
     # API keys opzionali — cifrate a riposo (AES-256 via FERNET_KEY)
     hibp_api_key = EncryptedCharField(max_length=512, blank=True, default="")

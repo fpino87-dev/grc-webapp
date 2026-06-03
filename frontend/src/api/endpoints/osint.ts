@@ -50,6 +50,8 @@ export interface OsintScanDetail extends OsintScanBrief {
   dmarc_policy: string;
   mx_present: boolean | null;
   dnssec_enabled: boolean | null;
+  ct_recent_certs: Array<{ id?: number; issuer: string; names: string[]; not_before?: string; entry?: string }>;
+  ct_unexpected_issuers: string[];
   dkim_present: boolean | null;
   dkim_selectors_found: string[];
   mta_sts_present: boolean | null;
@@ -129,6 +131,9 @@ export interface OsintSettings {
   freq_suppliers_other: ScanFrequency;
   subdomain_auto_include: "yes" | "no" | "ask";
   anonymization_enabled: boolean;
+  ct_monitoring_enabled: boolean;
+  ct_lookback_days: number;
+  ct_expected_issuers: string[];
   has_hibp_key: boolean;
   has_virustotal_key: boolean;
   has_abuseipdb_key: boolean;

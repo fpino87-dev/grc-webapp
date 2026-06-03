@@ -149,8 +149,11 @@ def _parse_cert(cert: dict) -> tuple[bool, date | None, int | None, str, bool]:
         return False, None, None, "", False
 
 
-def _get_crtsh_subdomains(domain: str) -> set[str]:
-    """Recupera sottodomini unici dai log CT via crt.sh."""
+def _fetch_crtsh_entries(domain: str) -> list[dict]:
+    """Scarica le entry JSON dei log CT via crt.sh (una sola chiamata di rete).
+
+    Usata sia per l'enumerazione sottodomini sia per il CT monitoring (enrichers/ct.py),
+    così non si interroga crt.sh due volte. Ritorna [] su errore o risposta troppo grande."""
     try:
         import json as _json
 
@@ -162,19 +165,22 @@ def _get_crtsh_subdomains(domain: str) -> set[str]:
         )
         if resp.status_code != 200:
             resp.close()
-            return set()
+            return []
         # Legge al massimo CRTSH_MAX_BYTES per evitare di caricare in RAM
         # risposte enormi; se eccede, scarta (non affidabile/parziale).
         raw = resp.raw.read(CRTSH_MAX_BYTES + 1, decode_content=True)
         resp.close()
         if len(raw) > CRTSH_MAX_BYTES:
             logger.warning("crt.sh response for %s exceeds %d bytes, skipping", domain, CRTSH_MAX_BYTES)
-            return set()
-        entries = _json.loads(raw.decode("utf-8", errors="replace"))
+            return []
+        return _json.loads(raw.decode("utf-8", errors="replace"))
     except Exception as exc:
         logger.debug("crt.sh request failed for %s: %s", domain, exc)
-        return set()
+        return []
 
+
+def _subdomains_from_entries(entries: list[dict], domain: str) -> set[str]:
+    """Estrae sottodomini unici dalle entry crt.sh (con cap difensivo)."""
     subdomains: set[str] = set()
     for entry in entries:
         name_value = entry.get("name_value", "")
@@ -214,10 +220,19 @@ def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> 
             scan.ssl_wildcard = wildcard
         # else: nessun HTTPS su domain né www.domain → ssl_valid rimane None (non applicabile)
 
-        subdomains = _get_crtsh_subdomains(domain)
+        entries = _fetch_crtsh_entries(domain)
+        subdomains = _subdomains_from_entries(entries, domain)
         # Aggiorna OsintSubdomain — aggiungi solo nuovi
         if subdomains:
             _sync_subdomains(entity, subdomains, settings)
+
+        # CT monitoring: analizza i certificati recenti dalle stesse entry crt.sh
+        # (nessuna seconda chiamata di rete). Best-effort: non deve far fallire SSL.
+        try:
+            from apps.osint.enrichers import ct
+            ct.analyze_ct(entity, scan, entries, settings)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("CT monitoring analysis failed for %s: %s", domain, exc)
 
         return True
     except Exception as exc:

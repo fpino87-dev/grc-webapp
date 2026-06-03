@@ -29,6 +29,9 @@ export function OsintSettingsPage() {
     freq_suppliers_other: "monthly" as ScanFrequency,
     subdomain_auto_include: "ask" as SubdomainPolicy,
     anonymization_enabled: true,
+    ct_monitoring_enabled: true,
+    ct_lookback_days: 30,
+    ct_expected_issuers_text: "",
     hibp_api_key: "",
     virustotal_api_key: "",
     abuseipdb_api_key: "",
@@ -58,6 +61,9 @@ export function OsintSettingsPage() {
         freq_suppliers_other: settings.freq_suppliers_other,
         subdomain_auto_include: settings.subdomain_auto_include,
         anonymization_enabled: settings.anonymization_enabled,
+        ct_monitoring_enabled: settings.ct_monitoring_enabled,
+        ct_lookback_days: settings.ct_lookback_days,
+        ct_expected_issuers_text: (settings.ct_expected_issuers || []).join(", "),
       }));
     }
   }, [settings]);
@@ -78,6 +84,12 @@ export function OsintSettingsPage() {
         freq_suppliers_other: form.freq_suppliers_other,
         subdomain_auto_include: form.subdomain_auto_include,
         anonymization_enabled: form.anonymization_enabled,
+        ct_monitoring_enabled: form.ct_monitoring_enabled,
+        ct_lookback_days: form.ct_lookback_days,
+        ct_expected_issuers: form.ct_expected_issuers_text
+          .split(/[,\n]/)
+          .map(s => s.trim())
+          .filter(Boolean),
       };
       if (form.hibp_api_key) payload.hibp_api_key = form.hibp_api_key;
       if (form.virustotal_api_key) payload.virustotal_api_key = form.virustotal_api_key;
@@ -243,6 +255,47 @@ export function OsintSettingsPage() {
             />
           </label>
         </div>
+      </section>
+
+      {/* Certificate Transparency monitoring */}
+      <section className="bg-white border rounded-xl p-5 space-y-4">
+        <h2 className="font-semibold text-gray-800">{t("osint.settings.ct_monitoring")}</h2>
+        <p className="text-xs text-gray-500">{t("osint.settings.ct_monitoring_hint")}</p>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={form.ct_monitoring_enabled}
+            onChange={e => set("ct_monitoring_enabled", e.target.checked)}
+          />
+          <span className="text-sm font-medium text-gray-700">{t("osint.settings.ct_enabled")}</span>
+        </label>
+        <label className="block">
+          <span className="text-sm font-medium text-gray-700">{t("osint.settings.ct_lookback_days")}</span>
+          <div className="flex items-center gap-2 mt-1">
+            <input
+              type="number"
+              min={1}
+              max={365}
+              value={form.ct_lookback_days}
+              onChange={e => set("ct_lookback_days", Number(e.target.value))}
+              className="w-24 border rounded px-3 py-2 text-sm"
+              disabled={!form.ct_monitoring_enabled}
+            />
+            <span className="text-sm text-gray-500">{t("osint.settings.days")}</span>
+          </div>
+        </label>
+        <label className="block">
+          <span className="text-sm font-medium text-gray-700">{t("osint.settings.ct_expected_issuers")}</span>
+          <p className="text-xs text-gray-400 mt-0.5">{t("osint.settings.ct_expected_issuers_hint")}</p>
+          <textarea
+            rows={2}
+            value={form.ct_expected_issuers_text}
+            onChange={e => set("ct_expected_issuers_text", e.target.value)}
+            className="mt-1 block w-full border rounded px-3 py-2 text-sm"
+            placeholder="Let's Encrypt, DigiCert, GlobalSign"
+            disabled={!form.ct_monitoring_enabled}
+          />
+        </label>
       </section>
 
       {/* Scan frequency */}

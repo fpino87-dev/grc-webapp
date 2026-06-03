@@ -36,6 +36,7 @@ _DOMAIN_LEVEL_FIELDS: tuple[str, ...] = (
     "otx_pulses", "gsb_status", "in_blacklist", "blacklist_sources",
     "hibp_breaches", "hibp_latest_breach", "hibp_data_types",
     "security_headers", "lookalike_domains", "enricher_errors",
+    "ct_recent_certs", "ct_unexpected_issuers",
 )
 
 # Pausa minima tra chiamate per uno stesso bucket (sec).

@@ -139,6 +139,15 @@ def _detect_finding_codes(entity, scan) -> dict[str, dict]:
     if takeover:
         detected[FindingCode.SUBDOMAIN_TAKEOVER] = {"candidates": takeover[:20]}
 
+    # CT monitoring (CRITICAL): certificati recenti emessi da CA fuori allowlist.
+    # Valorizzato solo quando l'allowlist `ct_expected_issuers` è configurata.
+    ct_unexpected = getattr(scan, "ct_unexpected_issuers", None) or []
+    if ct_unexpected:
+        detected[FindingCode.CT_UNEXPECTED_ISSUER] = {
+            "issuers": ct_unexpected[:10],
+            "recent_certs": (getattr(scan, "ct_recent_certs", None) or [])[:10],
+        }
+
     # Breach (solo my_domain)
     from apps.osint.models import EntityType
     if entity.entity_type == EntityType.MY_DOMAIN and scan.hibp_breaches and scan.hibp_breaches > 0:
@@ -176,6 +185,7 @@ def _severity_for(code: str, params: dict | None = None) -> str:
     high = {
         FindingCode.SSL_EXPIRED, FindingCode.BLACKLIST, FindingCode.GSB_UNSAFE,
         FindingCode.BREACH, FindingCode.VT_MALICIOUS, FindingCode.SUBDOMAIN_TAKEOVER,
+        FindingCode.CT_UNEXPECTED_ISSUER,
     }
     medium = {
         FindingCode.SSL_EXPIRY, FindingCode.DMARC_MISSING, FindingCode.SPF_MISSING,

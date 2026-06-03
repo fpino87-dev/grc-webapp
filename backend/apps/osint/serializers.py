@@ -147,6 +147,7 @@ class OsintSettingsSerializer(serializers.ModelSerializer):
             "ssl_expiry_warning_days",
             "freq_my_domains", "freq_suppliers_critical", "freq_suppliers_other",
             "subdomain_auto_include", "anonymization_enabled",
+            "ct_monitoring_enabled", "ct_lookback_days", "ct_expected_issuers",
             "hibp_api_key", "virustotal_api_key", "abuseipdb_api_key",
             "gsb_api_key", "otx_api_key",
             "has_hibp_key", "has_virustotal_key", "has_abuseipdb_key",

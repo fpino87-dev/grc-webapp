@@ -378,5 +378,29 @@
       {"label": "can-i-take-over-xyz", "url": "https://github.com/EdOverflow/can-i-take-over-xyz"}
     ],
     "estimated_effort_h": 3
+  },
+  "ct_unexpected_issuer": {
+    "title": "Certificato emesso da CA non attesa (Certificate Transparency)",
+    "what": "I log Certificate Transparency mostrano uno o più certificati emessi di recente per il dominio da una Certification Authority che non è nell'allowlist delle CA attese (issuer in 'params' del finding). Può indicare un certificato legittimo ma non censito (shadow IT), oppure un certificato ottenuto da un attaccante che controlla il dominio o un suo sottodominio.",
+    "impact": "Un certificato non autorizzato consente di servire HTTPS valido su un sottodominio del brand (phishing credibile, MITM), segnala una possibile compromissione del DNS o della validazione di dominio della CA, ed è un indicatore precoce di mis-issuance.",
+    "compliance": [
+      {"framework": "ISO27001", "control": "A.8.24 — Use of cryptography / A.5.9 — Inventory of assets"},
+      {"framework": "TISAX_L2", "control": "5.2.4 — Asset Management"},
+      {"framework": "NIS2", "control": "art.21 §2(a) — Risk management"}
+    ],
+    "owner_role": "it_infra",
+    "fix_steps": [
+      "Per ogni certificato segnalato verifica su crt.sh l'issuer, i nomi (SAN) e la data di emissione.",
+      "Confronta con l'inventario interno dei certificati: è stato richiesto dall'organizzazione (anche da un team/fornitore diverso)?",
+      "Se legittimo ma da una CA nuova: aggiungi quella CA all'allowlist `ct_expected_issuers` nelle impostazioni OSINT.",
+      "Se NON legittimo: contatta la CA emittente per la revoca, verifica integrità di DNS/registrar e dell'account di domain validation, ruota le credenziali esposte.",
+      "Abilita CAA records (`example.com. CAA 0 issue \"latua-ca.com\"`) per impedire l'emissione da CA non autorizzate."
+    ],
+    "verification": "Dopo la verifica/aggiornamento allowlist (o la revoca), la prossima scansione non deve più elencare issuer inattesi (ct_unexpected_issuers vuoto) e il finding si auto-chiude.",
+    "external_refs": [
+      {"label": "RFC 6962 (Certificate Transparency)", "url": "https://www.rfc-editor.org/rfc/rfc6962"},
+      {"label": "RFC 8659 (DNS CAA)", "url": "https://www.rfc-editor.org/rfc/rfc8659"}
+    ],
+    "estimated_effort_h": 2
   }
 }

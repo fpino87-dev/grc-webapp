@@ -198,6 +198,28 @@ def _trigger_takeover(entity, scan, settings, created_alerts):
     created_alerts.append(alert)
 
 
+def _trigger_ct_unexpected(entity, scan, settings, created_alerts):
+    """Alert CRITICAL: certificati recenti emessi da CA fuori allowlist (CT)."""
+    from apps.osint.models import AlertType, AlertSeverity
+    issuers = getattr(scan, "ct_unexpected_issuers", None) or []
+    if not issuers:
+        return
+    if _has_active_alert(entity, AlertType.CT_UNEXPECTED_ISSUER):
+        return
+    shown = ", ".join(issuers[:3])
+    suffix = "…" if len(issuers) > 3 else ""
+    alert = _create_alert(
+        entity, scan,
+        AlertType.CT_UNEXPECTED_ISSUER, AlertSeverity.CRITICAL,
+        f"Rilevato/i certificato/i recente/i nei log Certificate Transparency emesso/i "
+        f"da CA non presenti nell'allowlist attesa ({shown}{suffix}). Possibile "
+        f"mis-issuance, shadow IT o infrastruttura malevola che usa il dominio. "
+        f"Verificare la legittimità dei certificati e, se non autorizzati, avviare "
+        f"la revoca e l'analisi.",
+    )
+    created_alerts.append(alert)
+
+
 def _trigger_breach(entity, scan, prev, settings, created_alerts):
     from apps.osint.models import AlertType, AlertSeverity, EntityType
     if entity.entity_type != EntityType.MY_DOMAIN:
@@ -440,6 +462,7 @@ def run_alerts(
     _trigger_dmarc(entity, scan, settings, created)
     _trigger_new_subdomain(entity, scan, settings, created)
     _trigger_takeover(entity, scan, settings, created)
+    _trigger_ct_unexpected(entity, scan, settings, created)
     _trigger_breach(entity, scan, prev, settings, created)
 
     for alert in created:
