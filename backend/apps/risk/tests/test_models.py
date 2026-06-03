@@ -96,7 +96,7 @@ def test_inherent_score_auto_calculated(plant):
 def test_risk_appetite_policy_is_active(plant):
     from apps.risk.models import RiskAppetitePolicy
     from datetime import date, timedelta
-    today = date.today()
+    today = timezone.now().date()
     policy = RiskAppetitePolicy.objects.create(
         plant=plant,
         framework_code="ISO27K",
@@ -111,7 +111,7 @@ def test_risk_appetite_policy_is_active(plant):
 def test_risk_appetite_policy_expired(plant):
     from apps.risk.models import RiskAppetitePolicy
     from datetime import date, timedelta
-    today = date.today()
+    today = timezone.now().date()
     policy = RiskAppetitePolicy.objects.create(
         plant=plant,
         framework_code="ISO27K",
@@ -126,7 +126,7 @@ def test_risk_appetite_policy_expired(plant):
 def test_risk_appetite_policy_future(plant):
     from apps.risk.models import RiskAppetitePolicy
     from datetime import date, timedelta
-    today = date.today()
+    today = timezone.now().date()
     policy = RiskAppetitePolicy.objects.create(
         plant=plant,
         framework_code="ISO27K",

@@ -1,6 +1,7 @@
 """Test API task management."""
 import pytest
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from rest_framework.test import APIClient
 
 User = get_user_model()
@@ -121,7 +122,7 @@ def test_overdue_tasks_endpoint(client, plant, user):
         priority="alta",
         status="aperto",
         assigned_to=user,
-        due_date=date.today() - timedelta(days=1),
+        due_date=timezone.now().date() - timedelta(days=1),
         created_by=user,
     )
     resp = client.get(f"{URL}overdue/")
