@@ -156,7 +156,10 @@ class PlantViewSet(viewsets.ModelViewSet):
         import mimetypes
         file_handle = default_storage.open(storage_path, "rb")
         filename = os.path.basename(storage_path) or "logo"
-        content_type, _ = mimetypes.guess_type(filename)
+        # NB: non usare `_` come throwaway: collide con gettext `_` importato a
+        # livello di modulo e rende le raise Http404(_(...)) precedenti un
+        # UnboundLocalError (500 invece di 404).
+        content_type, _encoding = mimetypes.guess_type(filename)
         content_type = content_type or "application/octet-stream"
         return FileResponse(
             file_handle,
