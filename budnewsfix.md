@@ -65,9 +65,11 @@
 - **Azione**: aggiungere il legame (M2M `ControlInstance.assets`/`processes` o tramite SoA/BIA) e flaggare solo i controlli realmente impattati.
 - **C/B**: M · Medio · Stato: ⬜
 
-### P1-4 · `ai_engine`: test sanitizer "no-PII-leak" + circuit breaker LLM
-- **Problema**: 8 test su orchestratore che spende su LLM; manca test che garantisca nessun PII esca senza sanitize e fallback se LLM giù.
-- **C/B**: M · Medio · Stato: ⬜
+### P1-4 · `ai_engine`: test sanitizer "no-PII-leak" + circuit breaker LLM — ✅ FATTO (2026-06-03)
+- **Problema**: 8 test su orchestratore che spende su LLM; mancava test che garantisse nessun PII esca senza sanitize e un fallback robusto se LLM giù.
+- **Fatto**: (1) test no-PII-leak che mockano il provider e verificano che il prompt inviato non contenga PII in chiaro (email/IP/CF/telefono/P.IVA/plant) + desanitize della risposta + `sanitize=True` di default; (2) `circuit_breaker.py` (cache Redis): dopo 3 fallimenti consecutivi apre il circuito 120s → `route()` salta il provider giù (fail-fast); (3) eccezione `LlmUnavailable` quando anche il fallback locale è giù → endpoint AI rispondono **503** invece di 500. 8 test nuovi (16 totali ai_engine). Suite 789 verde, coverage 72.56%.
+- **Finding minore (rimandato)**: `Sanitizer` collide il token quando `name` e `code` dello stesso plant sono entrambi nel testo (desanitize ripristina solo l'ultimo). Non è un leak.
+- **C/B**: M · Medio · **Stato: ✅ FATTO (2026-06-03)**
 
 ---
 

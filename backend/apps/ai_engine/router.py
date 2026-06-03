@@ -7,7 +7,15 @@ import logging
 
 from django.utils import timezone
 
+from . import circuit_breaker
+
 logger = logging.getLogger(__name__)
+
+
+class LlmUnavailable(Exception):
+    """Sollevata quando nessun provider LLM è raggiungibile (cloud + fallback
+    locale entrambi giù). Permette ai chiamanti di degradare con grazia
+    (es. HTTP 503) invece di propagare un errore opaco."""
 
 
 def _call_ollama(prompt: str, model: str, endpoint: str, system: str = "", timeout: int = 60) -> str:
@@ -93,6 +101,9 @@ def route(
     provider_used = ""
     model_used = ""
 
+    cloud_key = f"cloud:{config.cloud_provider}"
+    ollama_key = "ollama"
+
     if task_provider == "cloud" and config.budget_remaining <= 0:
         task_provider = "ollama"
         used_fallback = True
@@ -101,6 +112,16 @@ def route(
             config.fallback_notified = True
             config.save(update_fields=["fallback_notified"])
 
+    # Circuit breaker: se il cloud è già marcato giù, salta direttamente al
+    # fallback locale (fail-fast) senza attendere il timeout HTTP a ogni richiesta.
+    if task_provider == "cloud" and circuit_breaker.is_open(cloud_key):
+        logger.info(
+            "Cloud provider '%s' circuito aperto — fallback Ollama (fail-fast)",
+            config.cloud_provider,
+        )
+        used_fallback = True
+        task_provider = "ollama"
+
     if task_provider == "cloud":
         try:
             text, tokens_used = _call_cloud(config, prompt_to_send, system, max_tokens)
@@ -108,13 +129,25 @@ def route(
             model_used = config.cloud_model
             config.tokens_used_month += tokens_used
             config.save(update_fields=["tokens_used_month", "updated_at"])
+            circuit_breaker.record_success(cloud_key)
         except Exception as exc:
             logger.warning("Cloud AI error (%s): %s — fallback Ollama", config.cloud_provider, exc)
+            circuit_breaker.record_failure(cloud_key)
             used_fallback = True
             task_provider = "ollama"
 
     if task_provider == "ollama":
-        text = _call_ollama(prompt_to_send, config.local_model, config.local_endpoint, system, timeout)
+        try:
+            text = _call_ollama(prompt_to_send, config.local_model, config.local_endpoint, system, timeout)
+            circuit_breaker.record_success(ollama_key)
+        except Exception as exc:
+            circuit_breaker.record_failure(ollama_key)
+            logger.error(
+                "LLM non disponibile (cloud_fallback=%s, ollama giù): %s", used_fallback, exc
+            )
+            raise LlmUnavailable(
+                "Nessun provider AI disponibile (cloud e fallback locale non raggiungibili)."
+            ) from exc
         provider_used = "ollama"
         model_used = config.local_model
         tokens_used = 0

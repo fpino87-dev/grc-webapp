@@ -68,6 +68,7 @@ class AiSuggestView(APIView):
     permission_classes = [AiEnginePermission]
 
     def post(self, request):
+        from .router import LlmUnavailable
         from .tasks_ai import classify_incident, draft_rca, suggest_gap_actions
 
         task_type = request.data.get("task_type")
@@ -97,6 +98,11 @@ class AiSuggestView(APIView):
                 return Response({"error": f"task_type '{task_type}' non supportato"}, status=400)
         except (Incident.DoesNotExist, ControlInstance.DoesNotExist):
             return Response({"error": "Entità non trovata o non accessibile."}, status=404)
+        except LlmUnavailable:
+            return Response(
+                {"error": "Servizio AI temporaneamente non disponibile. Riprova più tardi."},
+                status=503,
+            )
         except Exception as exc:
             return Response({"error": f"Errore AI: {str(exc)[:200]}"}, status=500)
 
@@ -197,7 +203,7 @@ class AiAssistantExplainView(APIView):
 
         from .agent_orchestrator import build_explanation_prompt
         from .agent_tools import _verify_plant_access
-        from .router import route
+        from .router import LlmUnavailable, route
 
         plant_id = request.data.get("plant_id")
         gap = request.data.get("gap")
@@ -222,6 +228,11 @@ class AiAssistantExplainView(APIView):
                 sanitize=True,
                 plant_ids=[plant.pk],
                 max_tokens=600,
+            )
+        except LlmUnavailable:
+            return Response(
+                {"error": "Assistente AI temporaneamente non disponibile. Riprova più tardi."},
+                status=503,
             )
         except Exception as exc:
             return Response({"error": f"Errore LLM: {str(exc)[:200]}"}, status=500)
