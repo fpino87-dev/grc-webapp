@@ -11,12 +11,14 @@ from core.scoping import PlantScopedQuerysetMixin
 
 from . import services
 from .models import PdcaCycle, PdcaPhase
+from .permissions import PdcaPermission
 from .serializers import PdcaCycleSerializer, PdcaPhaseSerializer
 
 
 class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = PdcaCycle.objects.select_related("plant").prefetch_related("phases")
     serializer_class = PdcaCycleSerializer
+    permission_classes = [PdcaPermission]
     filterset_fields = ["plant", "fase_corrente", "trigger_type"]
     search_fields = ["title"]
     plant_field = "plant"
@@ -184,5 +186,6 @@ class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 class PdcaPhaseViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = PdcaPhase.objects.select_related("cycle")
     serializer_class = PdcaPhaseSerializer
+    permission_classes = [PdcaPermission]
     filterset_fields = ["cycle", "phase"]
     plant_field = "cycle__plant"

@@ -11,6 +11,7 @@ from django.utils.translation import gettext as _
 from core.audit import log_action
 from core.uploads import validate_uploaded_file
 from .models import BusinessUnit, Plant, PlantFramework
+from .permissions import PlantConfigPermission, PlantPermission
 from .serializers import BusinessUnitSerializer, PlantFrameworkSerializer, PlantSerializer
 from .services import delete_plant
 
@@ -33,11 +34,13 @@ def _validate_logo_file(uploaded_file):
 class BusinessUnitViewSet(viewsets.ModelViewSet):
     queryset = BusinessUnit.objects.all()
     serializer_class = BusinessUnitSerializer
+    permission_classes = [PlantConfigPermission]
 
 
 class PlantViewSet(viewsets.ModelViewSet):
     queryset = Plant.objects.select_related("bu", "parent_plant")
     serializer_class = PlantSerializer
+    permission_classes = [PlantPermission]
 
     def update(self, request, *args, **kwargs):
         from rest_framework.response import Response
@@ -166,6 +169,7 @@ class PlantViewSet(viewsets.ModelViewSet):
 class PlantFrameworkViewSet(viewsets.ModelViewSet):
     queryset = PlantFramework.objects.select_related("plant", "framework")
     serializer_class = PlantFrameworkSerializer
+    permission_classes = [PlantConfigPermission]
 
     def get_queryset(self):
         qs = super().get_queryset()

@@ -7,6 +7,7 @@ from django.utils.translation import gettext as _
 from core.audit import log_action
 
 from .models import AssetDependency, AssetIT, AssetOT, AssetSW, NetworkZone
+from .permissions import AssetPermission
 from .serializers import (
     AssetDependencySerializer,
     AssetITSerializer,
@@ -20,6 +21,7 @@ from .services import clear_revaluation_flag, delete_asset, get_eol_assets, regi
 class NetworkZoneViewSet(viewsets.ModelViewSet):
     queryset = NetworkZone.objects.select_related("plant")
     serializer_class = NetworkZoneSerializer
+    permission_classes = [AssetPermission]
     filterset_fields = ["plant"]
 
     def perform_create(self, serializer):
@@ -46,6 +48,7 @@ class NetworkZoneViewSet(viewsets.ModelViewSet):
 class AssetITViewSet(viewsets.ModelViewSet):
     queryset = AssetIT.objects.select_related("plant", "owner")
     serializer_class = AssetITSerializer
+    permission_classes = [AssetPermission]
     filterset_fields = ["plant", "internet_exposed", "eol_date"]
 
     def perform_create(self, serializer):
@@ -118,6 +121,7 @@ class AssetITViewSet(viewsets.ModelViewSet):
 class AssetOTViewSet(viewsets.ModelViewSet):
     queryset = AssetOT.objects.select_related("plant", "owner", "network_zone")
     serializer_class = AssetOTSerializer
+    permission_classes = [AssetPermission]
     filterset_fields = ["plant"]
 
     def perform_create(self, serializer):
@@ -184,6 +188,7 @@ class AssetOTViewSet(viewsets.ModelViewSet):
 class AssetSWViewSet(viewsets.ModelViewSet):
     queryset = AssetSW.objects.select_related("plant", "owner")
     serializer_class = AssetSWSerializer
+    permission_classes = [AssetPermission]
     filterset_fields = ["plant", "approval_status"]
 
     def perform_create(self, serializer):
@@ -221,6 +226,7 @@ class AssetSWViewSet(viewsets.ModelViewSet):
 class AssetDependencyViewSet(viewsets.ModelViewSet):
     queryset = AssetDependency.objects.select_related("from_asset__plant", "to_asset__plant")
     serializer_class = AssetDependencySerializer
+    permission_classes = [AssetPermission]
 
     def get_queryset(self):
         qs = super().get_queryset()

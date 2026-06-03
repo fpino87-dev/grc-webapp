@@ -9,6 +9,7 @@ from django.utils.translation import gettext as _
 
 from core.audit import log_action
 from .models import CommitteeMeeting, DocumentWorkflowPolicy, RoleAssignment, SecurityCommittee
+from .permissions import GovernancePermission
 from .serializers import (
     CommitteeMeetingSerializer,
     DocumentWorkflowPolicySerializer,
@@ -20,6 +21,7 @@ from .serializers import (
 class RoleAssignmentViewSet(viewsets.ModelViewSet):
     queryset = RoleAssignment.objects.select_related("user").all()
     serializer_class = RoleAssignmentSerializer
+    permission_classes = [GovernancePermission]
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)
@@ -179,13 +181,16 @@ class DocumentWorkflowPolicyViewSet(viewsets.ModelViewSet):
 
     queryset = DocumentWorkflowPolicy.objects.all()
     serializer_class = DocumentWorkflowPolicySerializer
+    permission_classes = [GovernancePermission]
 
 
 class SecurityCommitteeViewSet(viewsets.ModelViewSet):
     queryset = SecurityCommittee.objects.all()
     serializer_class = SecurityCommitteeSerializer
+    permission_classes = [GovernancePermission]
 
 
 class CommitteeMeetingViewSet(viewsets.ModelViewSet):
     queryset = CommitteeMeeting.objects.all()
     serializer_class = CommitteeMeetingSerializer
+    permission_classes = [GovernancePermission]

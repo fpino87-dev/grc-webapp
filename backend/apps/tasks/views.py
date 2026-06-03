@@ -22,6 +22,7 @@ from .serializers import (
     TaskSerializer,
 )
 from . import services
+from .permissions import KpiConfigPermission, TaskPermission
 from django.db.models import Q
 from django.utils import timezone
 from apps.auth_grc.models import UserPlantAccess
@@ -33,6 +34,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         "plant", "assigned_to", "completed_by", "escalated_to"
     ).prefetch_related("comments")
     serializer_class = TaskSerializer
+    permission_classes = [TaskPermission]
     filterset_fields = ["plant", "status", "priority", "source", "assigned_to"]
     search_fields = ["title", "description"]
 
@@ -120,6 +122,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 class TaskCommentViewSet(viewsets.ModelViewSet):
     queryset = TaskComment.objects.select_related("task", "author")
     serializer_class = TaskCommentSerializer
+    permission_classes = [TaskPermission]
     filterset_fields = ["task"]
 
     def perform_create(self, serializer):
@@ -135,6 +138,7 @@ class ChecklistTemplateViewSet(viewsets.ModelViewSet):
         .prefetch_related("items")
     )
     serializer_class = ChecklistTemplateSerializer
+    permission_classes = [TaskPermission]
     filterset_fields = ["plant", "is_active", "frequency"]
     search_fields = ["name", "description"]
 
@@ -167,6 +171,7 @@ class ChecklistRunViewSet(
         .prefetch_related("items", "items__template_item")
     )
     serializer_class = ChecklistRunSerializer
+    permission_classes = [TaskPermission]
     filterset_fields = ["plant", "status", "template", "assigned_to"]
 
     @action(detail=True, methods=["post"], url_path="complete-item")
@@ -216,6 +221,7 @@ class KPIDefinitionViewSet(viewsets.ModelViewSet):
         KPIDefinition.objects.select_related("plant", "checklist_template")
         .prefetch_related("snapshots")
     )
+    permission_classes = [KpiConfigPermission]
     filterset_fields = ["plant", "is_active", "source", "aggregation"]
     search_fields = ["kpi_code", "name", "description"]
 
@@ -246,6 +252,7 @@ class OperationalKpiSnapshotViewSet(
         "kpi_definition", "plant"
     )
     serializer_class = OperationalKpiSnapshotSerializer
+    permission_classes = [TaskPermission]
     filterset_fields = ["kpi_definition", "plant", "week_start", "status"]
 
     def get_queryset(self):

@@ -10,6 +10,7 @@ from core.jwt import ExportRateThrottle
 from core.scoping import PlantScopedQuerysetMixin
 
 from .models import RiskAppetitePolicy, RiskAssessment, RiskDimension, RiskMitigationPlan
+from .permissions import RiskAppetitePermission, RiskPermission
 from .serializers import RiskAppetitePolicySerializer, RiskAssessmentSerializer, RiskDimensionSerializer, RiskMitigationPlanSerializer
 from .services import get_risk_bia_bcp_context
 from .services import delete_risk_assessment
@@ -20,6 +21,7 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         "plant", "asset", "assessed_by", "accepted_by", "owner", "critical_process"
     ).prefetch_related("mitigation_plans")
     serializer_class = RiskAssessmentSerializer
+    permission_classes = [RiskPermission]
     filterset_fields = ["plant", "status", "assessment_type", "treatment"]
     plant_field = "plant"
 
@@ -340,6 +342,7 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 class RiskDimensionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = RiskDimension.objects.select_related("assessment")
     serializer_class = RiskDimensionSerializer
+    permission_classes = [RiskPermission]
     filterset_fields = ["plant"]
     plant_field = "assessment__plant"
 
@@ -364,6 +367,7 @@ class RiskDimensionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 class RiskMitigationPlanViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = RiskMitigationPlan.objects.select_related("assessment", "owner", "control_instance")
     serializer_class = RiskMitigationPlanSerializer
+    permission_classes = [RiskPermission]
     filterset_fields = ["assessment"]
     plant_field = "assessment__plant"
 
@@ -431,6 +435,7 @@ class RiskMitigationPlanViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet)
 class RiskAppetitePolicyViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = RiskAppetitePolicy.objects.select_related("plant", "approved_by")
     serializer_class = RiskAppetitePolicySerializer
+    permission_classes = [RiskAppetitePermission]
     filterset_fields = ["plant", "framework_code"]
     plant_field = "plant"
     allow_null_plant = True  # plant=null = policy org-wide valida per tutti i plant

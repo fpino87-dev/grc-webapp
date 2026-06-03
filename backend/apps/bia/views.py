@@ -6,6 +6,7 @@ from core.audit import log_action
 from core.scoping import PlantScopedQuerysetMixin
 
 from .models import CriticalProcess, RiskDecision, TreatmentOption
+from .permissions import BiaPermission
 from .serializers import CriticalProcessSerializer, RiskDecisionSerializer, TreatmentOptionSerializer
 from .services import approve_process, get_process_risk_bcp_snapshot, validate_process, delete_process
 
@@ -13,6 +14,7 @@ from .services import approve_process, get_process_risk_bcp_snapshot, validate_p
 class CriticalProcessViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = CriticalProcess.objects.select_related("plant", "owner", "approved_by", "validated_by")
     serializer_class = CriticalProcessSerializer
+    permission_classes = [BiaPermission]
     filterset_fields = ["plant", "status"]
     plant_field = "plant"
 
@@ -98,6 +100,7 @@ class CriticalProcessViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 class TreatmentOptionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = TreatmentOption.objects.select_related("process")
     serializer_class = TreatmentOptionSerializer
+    permission_classes = [BiaPermission]
     filterset_fields = []
     plant_field = "process__plant"
 
@@ -122,6 +125,7 @@ class TreatmentOptionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 class RiskDecisionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = RiskDecision.objects.select_related("process", "decided_by", "treatment")
     serializer_class = RiskDecisionSerializer
+    permission_classes = [BiaPermission]
     filterset_fields = []
     plant_field = "process__plant"
 

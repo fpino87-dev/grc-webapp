@@ -12,7 +12,10 @@ URL_ZONES = "/api/v1/assets/network-zones/"
 
 @pytest.fixture
 def user(db):
-    return User.objects.create_user(username="asset_user", email="asset@test.com", password="test")
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    u = User.objects.create_user(username="asset_user", email="asset@test.com", password="test")
+    UserPlantAccess.objects.create(user=u, role=GrcRole.COMPLIANCE_OFFICER, scope_type="org")
+    return u
 
 
 @pytest.fixture

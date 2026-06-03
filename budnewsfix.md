@@ -54,10 +54,11 @@
 - **Resta fuori (follow-up)**: `bia.delete_process` (cascata ampia), `documents.approve/reject/add_version*`, `tasks.complete_run`/`compute_and_store_kpi_snapshot` — stesso pattern multi-write, non prioritari.
 - **C/B**: M · Alto · **Stato: ✅ FATTO (2026-06-03)**
 
-### P1-3 · Write-authorization granulare (SoD) dove `permission_classes=0`
+### P1-3 · Write-authorization granulare (SoD) dove `permission_classes=0` — ✅ FATTO (2026-06-03)
 - **Problema**: default globale `IsAuthenticated` + RBAC solo in `get_queryset` (visibilità). In `risk, assets, plants, bia, pdca, governance, tasks, training` chi vede può anche modificare/cancellare → SoD debole.
-- **Azione**: permission object-level riusabile per **write** con check di ruolo nello scope.
-- **C/B**: M · Alto · Stato: ⬜
+- **Fatto**: creata una `RoleScopedPermission` per ciascuno degli 8 moduli (`<modulo>/permissions.py`), collegata a tutti i viewset, completando il pattern dei ~11 moduli già coperti dal lavoro "newfix F1". Auditor sempre read-only; config org-level (BU/framework/role-assignment/comitato/KPIDefinition) write solo super_admin/compliance_officer; dato operativo write ai ruoli competenti (control_owner incluso su asset/pdca/task). Lo scoping per-plant resta su `PlantScopedQuerysetMixin` (vale anche per update/delete via get_object). 11 test di autorizzazione + fixture dei test assets/governance aggiornate (usavano un utente senza ruolo → ora serve un `UserPlantAccess`). Suite 781 verde, coverage 71.98%.
+- **NB**: object-level scope-aware non necessario: lo scope è già imposto dal queryset (un utente non può update/delete record fuori dal suo scope perché get_object non li trova). Il gap reale era solo il ruolo di scrittura.
+- **C/B**: M · Alto · **Stato: ✅ FATTO (2026-06-03)**
 
 ### P1-5 · Legame `ControlInstance ↔ asset/processo` per restringere la cascata change
 - **Problema**: oggi `register_change` flagga i controlli a livello di **plant** (manca un legame diretto controllo↔asset/processo). Troppo largo: un change su un asset rimette "da rivalutare" l'intera postura di conformità del plant.

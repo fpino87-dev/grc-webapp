@@ -6,6 +6,7 @@ from core.audit import log_action
 from core.scoping import PlantScopedQuerysetMixin
 
 from .models import PhishingSimulation, TrainingCourse, TrainingEnrollment
+from .permissions import TrainingPermission
 from .serializers import (
     PhishingSimulationSerializer,
     TrainingCourseSerializer,
@@ -17,6 +18,7 @@ from . import services
 class TrainingCourseViewSet(viewsets.ModelViewSet):
     queryset = TrainingCourse.objects.prefetch_related("plants")
     serializer_class = TrainingCourseSerializer
+    permission_classes = [TrainingPermission]
     filterset_fields = ["status", "mandatory", "source"]
     search_fields = ["title", "description"]
 
@@ -39,6 +41,7 @@ class TrainingCourseViewSet(viewsets.ModelViewSet):
 class TrainingEnrollmentViewSet(viewsets.ModelViewSet):
     queryset = TrainingEnrollment.objects.select_related("course", "user")
     serializer_class = TrainingEnrollmentSerializer
+    permission_classes = [TrainingPermission]
     filterset_fields = ["course", "user", "status", "passed"]
     search_fields = ["user__username", "course__title"]
 
@@ -56,6 +59,7 @@ class TrainingEnrollmentViewSet(viewsets.ModelViewSet):
 class PhishingSimulationViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = PhishingSimulation.objects.select_related("user", "plant")
     serializer_class = PhishingSimulationSerializer
+    permission_classes = [TrainingPermission]
     filterset_fields = ["plant", "result", "user"]
     search_fields = ["user__username", "kb4_simulation_id"]
     plant_field = "plant"
