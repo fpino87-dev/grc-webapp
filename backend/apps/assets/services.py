@@ -18,6 +18,23 @@ def get_critical_assets(plant_id):
     return Asset.objects.filter(plant_id=plant_id, criticality__gte=4).select_related("plant", "owner")
 
 
+def _impacted_control_instances(asset):
+    """ControlInstance impattati da un change sull'`asset`, con il loro scope.
+
+    Se l'asset ha controlli esplicitamente collegati (M2M `ControlInstance.assets`)
+    restringe a quelli (scope "asset"); altrimenti ricade su tutti i controlli del
+    plant (scope "plant", comportamento storico) finché i legami non sono popolati.
+    Ritorna `(queryset, narrowed: bool)` — `narrowed=True` se ha usato il legame
+    diretto. Filtra sempre i soft-deleted.
+    """
+    from apps.controls.models import ControlInstance
+
+    linked = ControlInstance.objects.filter(assets=asset, deleted_at__isnull=True)
+    if linked.exists():
+        return linked, True
+    return ControlInstance.objects.filter(plant=asset.plant, deleted_at__isnull=True), False
+
+
 @transaction.atomic
 def register_change(asset, user, change_ref: str,
                     change_desc: str = "",
@@ -55,15 +72,12 @@ def register_change(asset, user, change_ref: str,
     # Numero di processi BIA in cui l'asset è coinvolto (solo conteggio).
     affected["processes"] = asset.processes.filter(deleted_at__isnull=True).count()
 
-    # Propaga ai ControlInstance del plant che dichiaravano conformità
-    # (compliant/parziale/na) → li rimette "da rivalutare". UNA sola volta:
-    # prima il flagging veniva ripetuto per OGNI processo (stesso filtro
-    # plant=asset.plant, ignorando il processo) → ri-scritture e conteggio ×N.
-    from apps.controls.models import ControlInstance
-    cis = list(
-        ControlInstance.objects.filter(plant=asset.plant, deleted_at__isnull=True)
-        .exclude(status__in=["non_valutato", "gap"])
-    )
+    # Propaga ai ControlInstance che dichiaravano conformità (compliant/parziale/
+    # na) → li rimette "da rivalutare". Se l'asset ha controlli esplicitamente
+    # collegati (M2M ControlInstance.assets) restringe a quelli; altrimenti
+    # fallback plant-wide (comportamento storico). UNA sola volta.
+    impacted_qs, narrowed = _impacted_control_instances(asset)
+    cis = list(impacted_qs.exclude(status__in=["non_valutato", "gap"]))
     for ci in cis:
         ci.needs_revaluation = True
         ci.needs_revaluation_since = today
@@ -71,6 +85,7 @@ def register_change(asset, user, change_ref: str,
             "needs_revaluation", "needs_revaluation_since", "updated_at",
         ])
     affected["controls"] = len(cis)
+    affected["controls_scope"] = "asset" if narrowed else "plant"
 
     # Propaga a RiskAssessment collegati all'asset
     from apps.risk.models import RiskAssessment
@@ -97,6 +112,7 @@ def register_change(asset, user, change_ref: str,
             "change_desc": change_desc[:100],
             "affected_controls": affected["controls"],
             "affected_risks": affected["risks"],
+            "controls_scope": affected["controls_scope"],
         },
     )
     return {
@@ -119,14 +135,14 @@ def clear_revaluation_flag(asset, user, notes: str = "") -> None:
         "needs_revaluation", "needs_revaluation_since", "updated_at"
     ])
 
-    # Pulisce anche i flag sui controlli collegati
-    from apps.controls.models import ControlInstance
+    # Pulisce i flag sui controlli impattati dallo stesso change (stesso scope del
+    # flagging: solo i controlli collegati all'asset se il legame esiste, altrimenti
+    # plant-wide). Così "rivalutato" non azzera per sbaglio controlli di altri asset.
     threshold_date = asset.last_change_date if asset.last_change_date else today
-    ControlInstance.objects.filter(
-        plant=asset.plant,
+    impacted_qs, _narrowed = _impacted_control_instances(asset)
+    impacted_qs.filter(
         needs_revaluation=True,
         needs_revaluation_since__lte=threshold_date,
-        deleted_at__isnull=True,
     ).update(
         needs_revaluation=False,
         needs_revaluation_since=None,

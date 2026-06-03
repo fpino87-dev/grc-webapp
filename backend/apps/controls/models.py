@@ -200,6 +200,16 @@ class ControlInstance(BaseModel):
         related_name="control_instances",
     )
 
+    # Legame diretto controllo ↔ asset coperti. Se valorizzato, un change su un
+    # asset (assets.register_change) rivaluta SOLO i controlli collegati a
+    # quell'asset, invece dell'intera postura del plant. Se vuoto, la cascata
+    # ricade sul comportamento storico plant-wide (vedi assets.services).
+    assets = models.ManyToManyField(
+        "assets.Asset",
+        blank=True,
+        related_name="control_instances",
+    )
+
     class Meta:
         unique_together = ["plant", "control"]
 

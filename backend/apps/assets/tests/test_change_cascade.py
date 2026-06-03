@@ -47,4 +47,42 @@ def test_register_change_flags_controls_once(setup):
     setup["ci2"].refresh_from_db()
     assert setup["ci1"].needs_revaluation is True
     assert setup["ci2"].needs_revaluation is True
+    # Nessun legame asset↔controllo → fallback plant-wide.
+    assert aff["controls_scope"] == "plant"
     # I controlli in gap/non_valutato non vengono toccati (esclusi dal filtro).
+
+
+@pytest.mark.django_db
+def test_register_change_narrows_to_linked_controls(setup):
+    """P1-5: se l'asset ha controlli collegati (M2M), la cascata tocca SOLO quelli,
+    non l'intera postura del plant."""
+    from apps.assets.services import register_change
+
+    # Collega solo ci1 all'asset.
+    setup["ci1"].assets.add(setup["asset"])
+
+    res = register_change(setup["asset"], setup["user"], "REF-NARROW")
+    aff = res["affected"]
+    assert aff["controls"] == 1
+    assert aff["controls_scope"] == "asset"
+
+    setup["ci1"].refresh_from_db()
+    setup["ci2"].refresh_from_db()
+    assert setup["ci1"].needs_revaluation is True
+    assert setup["ci2"].needs_revaluation is False  # non collegato → non rivalutato
+
+
+@pytest.mark.django_db
+def test_clear_revaluation_narrowed_to_linked_controls(setup):
+    """clear_revaluation_flag usa lo stesso scope del flagging: con legame attivo
+    azzera solo i controlli dell'asset."""
+    from apps.assets.services import clear_revaluation_flag, register_change
+
+    setup["ci1"].assets.add(setup["asset"])
+    register_change(setup["asset"], setup["user"], "REF-CLR")
+    setup["ci1"].refresh_from_db()
+    assert setup["ci1"].needs_revaluation is True
+
+    clear_revaluation_flag(setup["asset"], setup["user"])
+    setup["ci1"].refresh_from_db()
+    assert setup["ci1"].needs_revaluation is False
