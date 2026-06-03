@@ -10,6 +10,81 @@ def get_unvalidated_processes(plant_id):
     return CriticalProcess.objects.filter(plant_id=plant_id, status="bozza")
 
 
+# Gravità del gap di resilienza → livello di rischio del registro.
+_GAP_SEVERITY = {
+    "no_bcp_plan": "alto",       # RTO target definito ma nessun piano BCP approvato
+    "bcp_insufficient": "alto",  # piano approvato ma RTO > 1.5× target
+    "bcp_marginal": "medio",     # piano approvato ma RTO oltre target (≤ 1.5×)
+}
+_RES_ORDER = ("basso", "medio", "alto", "critico")
+_RES_RANK = {c: i for i, c in enumerate(_RES_ORDER)}
+
+
+def get_resilience_gap_register(processes_qs=None) -> dict:
+    """Registro rischi di resilienza BIA→BCP→Risk (P2-4 — catena di valore GRC).
+
+    Un processo critico con un RTO target definito (BIA) ma **senza copertura BCP
+    adeguata** (nessun piano approvato, oppure piano che non rientra nel target)
+    è un rischio di continuità operativa che il risk manager deve vedere. Questa
+    funzione trasforma il confronto `CriticalProcess.rto_bcp_status` (già
+    esistente, ma finora solo informativo nella UI BIA) in un registro rischi
+    consultabile.
+
+    Livello derivato dalla gravità del gap (no-plan / insufficiente → alto;
+    marginale → medio) con **bump di un livello** per i processi ad alta
+    criticità (criticality ≥ 4). I processi con BCP adeguato (`ok`) o senza RTO
+    target (BIA incompleta) non sono voci di questo registro.
+
+    `processes_qs` permette al viewset di passare un queryset già scoped-plant.
+
+    Rationale: ISO 22301 (BCMS), TISAX 7.x (BCM), NIS2 Art. 21.2(c) business
+    continuity.
+    """
+    if processes_qs is None:
+        processes_qs = CriticalProcess.objects.all()
+    processes_qs = (
+        processes_qs.filter(deleted_at__isnull=True, rto_target_hours__isnull=False)
+        .select_related("plant")
+    )
+
+    items: list[dict] = []
+    by_level = {"medio": 0, "alto": 0, "critico": 0}
+    for proc in processes_qs:
+        status = proc.rto_bcp_status
+        if status == "ok":
+            continue
+        if status == "unknown":
+            gap = "no_bcp_plan"
+        elif status == "critical":
+            gap = "bcp_insufficient"
+        else:  # warning
+            gap = "bcp_marginal"
+
+        rank = _RES_RANK[_GAP_SEVERITY[gap]]
+        if (proc.criticality or 0) >= 4:
+            rank = min(rank + 1, len(_RES_ORDER) - 1)
+        risk_level = _RES_ORDER[rank]
+        by_level[risk_level] = by_level.get(risk_level, 0) + 1
+        items.append({
+            "process_id": str(proc.id),
+            "process_name": proc.name,
+            "plant": proc.plant.name if proc.plant_id else None,
+            "criticality": proc.criticality,
+            "rto_target_hours": proc.rto_target_hours,
+            "gap": gap,
+            "bcp_status": status,
+            "risk_level": risk_level,
+        })
+
+    items.sort(key=lambda x: (-_RES_RANK[x["risk_level"]], -(x["criticality"] or 0)))
+    return {
+        "items": items,
+        "count": len(items),
+        "by_level": by_level,
+        "attention": by_level.get("alto", 0) + by_level.get("critico", 0),
+    }
+
+
 def approve_process(process, user):
     from django.utils import timezone
 

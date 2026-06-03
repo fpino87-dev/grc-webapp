@@ -35,6 +35,20 @@ class CriticalProcessViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             return Response({"detail": str(e.message)}, status=400)
         return Response(status=204)
 
+    @action(detail=False, methods=["get"], url_path="resilience-gaps")
+    def resilience_gaps(self, request):
+        """
+        GET /bia/critical-processes/resilience-gaps/
+
+        Registro rischi di resilienza BIA→BCP→Risk (P2-4): i processi con RTO
+        target ma senza copertura BCP adeguata diventano voci di rischio per il
+        risk manager. Rispetta lo scope-plant dell'utente (stessa queryset del
+        listing).
+        """
+        from .services import get_resilience_gap_register
+
+        return Response(get_resilience_gap_register(self.get_queryset()))
+
     def perform_create(self, serializer):
         instance = serializer.save()
         log_action(
