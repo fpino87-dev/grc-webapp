@@ -162,7 +162,10 @@ CELERY_BEAT_SCHEDULE = {
     },
     "check-questionnaire-followups": {
         "task": "apps.suppliers.tasks.check_questionnaire_followups_task",
-        "schedule": crontab(hour=9, minute=30),  # 09:30 — scaglionato da check-final-report-deadlines (09:00)
+        # Settimanale: lunedì 09:30. Invia un unico riepilogo per operatore dei
+        # questionari fornitori senza risposta (prima era giornaliero, una mail
+        # per questionario → spam). Vedi check_questionnaire_followups().
+        "schedule": crontab(hour=9, minute=30, day_of_week=1),
     },
     # Intra-giornalieri
     "check-nis2-deadlines": {

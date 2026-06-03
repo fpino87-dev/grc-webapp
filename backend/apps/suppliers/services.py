@@ -411,8 +411,13 @@ def register_evaluation(questionnaire, evaluation_date, risk_result, user, notes
 def check_questionnaire_followups():
     """
     Check questionnaires awaiting response for > 7 days since last send.
-    Notifies the operator who sent (sent_by) via email.
+
+    Invia **una sola email di riepilogo per operatore** (`sent_by`) con tutti i
+    fornitori che non hanno risposto, invece di una mail per questionario (che,
+    girando settimanalmente, generava spam quando i pendenti erano molti).
     """
+    from collections import defaultdict
+
     from apps.notifications.services import send_grc_email
 
     today = timezone.now().date()
@@ -425,28 +430,49 @@ def check_questionnaire_followups():
         deleted_at__isnull=True,
     ).select_related("supplier", "sent_by")
 
+    # Raggruppa per operatore (chi ha inviato il questionario). Saltiamo i
+    # questionari senza operatore o senza email: non c'e' destinatario.
+    by_operator = defaultdict(list)
     for q in pending:
-        days_waiting = (today - q.last_sent_at.date()).days
         operator_email = q.sent_by.email if q.sent_by and q.sent_by.email else None
         if not operator_email:
             continue
+        by_operator[operator_email].append(q)
 
-        if q.send_count >= 3:
-            subject = f"[GRC] \U0001f534 Fornitore {q.supplier.name} — 3 tentativi senza risposta"
-            body = (
-                f"Il questionario inviato al fornitore {q.supplier.name} ({q.sent_to}) "
-                f"non ha ricevuto risposta dopo {q.send_count} invii ({days_waiting} giorni dall'ultimo).\n\n"
-                "\u26a0\ufe0f Azione richiesta: contattare il fornitore direttamente (telefono/presenza).\n\n"
-                "Accedi al modulo Fornitori per aggiornare lo stato."
-            )
-        else:
-            next_count = q.send_count + 1
-            subject = f"[GRC] Follow-up questionario — {q.supplier.name} ({days_waiting}gg senza risposta)"
-            body = (
-                f"Il questionario inviato al fornitore {q.supplier.name} ({q.sent_to}) "
-                f"non ha ricevuto risposta da {days_waiting} giorni.\n\n"
-                f"Invio numero: {q.send_count} — prossimo previsto: {next_count}\u00b0\n\n"
-                "Accedi al modulo Fornitori per inviare il promemoria."
-            )
+    def _days(q):
+        return (today - q.last_sent_at.date()).days
 
-        send_grc_email(subject=subject, body=body, recipients=[operator_email])
+    for operator_email, questionnaires in by_operator.items():
+        # 3+ tentativi prima (piu' urgenti), poi i follow-up; entro ogni gruppo
+        # i piu' vecchi (last_sent_at) in cima.
+        three_strike = sorted(
+            (q for q in questionnaires if q.send_count >= 3), key=lambda q: q.last_sent_at
+        )
+        followups = sorted(
+            (q for q in questionnaires if q.send_count < 3), key=lambda q: q.last_sent_at
+        )
+
+        lines = []
+        if three_strike:
+            lines.append("\U0001f534 3+ tentativi senza risposta - contatto diretto necessario:")
+            for q in three_strike:
+                lines.append(
+                    f"  - {q.supplier.name} ({q.sent_to}): "
+                    f"{q.send_count} invii, {_days(q)} giorni dall'ultimo"
+                )
+            lines.append("")
+        if followups:
+            lines.append("Follow-up - promemoria da inviare:")
+            for q in followups:
+                lines.append(
+                    f"  - {q.supplier.name} ({q.sent_to}): "
+                    f"{_days(q)} giorni senza risposta (invio {q.send_count}, prossimo {q.send_count + 1})"
+                )
+            lines.append("")
+
+        lines.append("Accedi al modulo Fornitori per inviare i promemoria o aggiornare lo stato.")
+
+        total = len(questionnaires)
+        plural = "e" if total == 1 else "i"
+        subject = f"[GRC] Riepilogo questionari fornitori senza risposta ({total} fornitor{plural})"
+        send_grc_email(subject=subject, body="\n".join(lines), recipients=[operator_email])
