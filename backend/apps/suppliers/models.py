@@ -75,6 +75,11 @@ class Supplier(BaseModel):
         blank=True,
         help_text="% di concentrazione della fornitura — soglia TPRM: <20% bassa, 20-50% media, >50% critica",
     )
+    # Ultima soglia di concentrazione per cui è stata inviata la notifica M19
+    # (anti-spam): la notifica di "crossing" parte solo quando la soglia entra in
+    # 'critica' e non era già stata notificata; se la concentrazione rientra, il
+    # campo viene azzerato così un futuro ri-attraversamento notifica di nuovo.
+    concentration_notified_threshold = models.CharField(max_length=10, blank=True, default="")
 
     # Campi calcolati (derivati dai service — non editabili direttamente)
     internal_risk_level = models.CharField(

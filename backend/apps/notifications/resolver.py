@@ -13,7 +13,7 @@ EXTERNAL_ROLES = {"external_auditor"}
 # Eventi le cui notifiche restano confinate al personale interno (i ruoli esterni
 # vengono filtrati a prescindere dal profilo). L'esposizione OSINT è informazione
 # di sicurezza sensibile → solo interni.
-INTERNAL_ONLY_EVENTS = {"osint_critical"}
+INTERNAL_ONLY_EVENTS = {"osint_critical", "supplier_concentration_critical"}
 
 
 def _user_has_access_to_plant(access: UserPlantAccess, plant) -> bool:
@@ -85,6 +85,7 @@ def fire_notification(event_type: str, plant=None, bu=None, context: dict | None
       notify_osint_alert,
       notify_risk_red,
       notify_role_expiring,
+      notify_supplier_concentration,
       send_grc_email,
   )
 
@@ -108,6 +109,9 @@ def fire_notification(event_type: str, plant=None, bu=None, context: dict | None
 
   elif event_type == "osint_critical" and "alert" in ctx and "entity" in ctx:
       notify_osint_alert(ctx["alert"], ctx["entity"], recipients)
+
+  elif event_type == "supplier_concentration_critical" and "supplier" in ctx:
+      notify_supplier_concentration(ctx["supplier"], recipients)
 
   elif event_type == "evidence_expired" and "instance" in ctx:
       notify_evidence_expired(ctx["instance"], recipients)

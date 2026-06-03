@@ -174,6 +174,7 @@ NOTIFICATION_PROFILES = {
             "evidence_expired",
             "bcp_test_failed",
             "document_approval",
+            "supplier_concentration_critical",
         ],
     },
     "completo": {
@@ -195,6 +196,7 @@ NOTIFICATION_PROFILES = {
             "document_approval",
             "pdca_blocked",
             "supplier_assessment",
+            "supplier_concentration_critical",
             "management_review",
             "risk_accepted",
         ],
@@ -230,6 +232,7 @@ EVENT_LABELS = {
     "document_approval":   "Documento in attesa approvazione",
     "pdca_blocked":        "PDCA bloccato oltre 30 giorni",
     "supplier_assessment": "Assessment fornitore completato",
+    "supplier_concentration_critical": "Concentrazione fornitura critica (crossing)",
     "management_review":   "Revisione direzione da approvare",
     "risk_accepted":       "Rischio formalmente accettato",
 }
@@ -323,6 +326,7 @@ EVENT_TYPES = [
     ("pdca_blocked", "PDCA bloccato > 30 giorni"),
     ("management_review", "Revisione direzione da approvare"),
     ("supplier_assessment", "Assessment fornitore completato"),
+    ("supplier_concentration_critical", "Concentrazione fornitura critica (crossing)"),
 ]
 
 SCOPE_TYPES = [

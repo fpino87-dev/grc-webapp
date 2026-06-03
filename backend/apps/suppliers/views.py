@@ -404,6 +404,15 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             entity=instance,
             payload={"id": str(instance.id), "name": instance.name},
         )
+        from .services import check_concentration_crossing
+        check_concentration_crossing(instance, user=self.request.user)
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        # Notifica M19 best-effort sull'attraversamento della soglia di
+        # concentrazione critica (anti-spam gestito nel service).
+        from .services import check_concentration_crossing
+        check_concentration_crossing(instance, user=self.request.user)
 
     def destroy(self, request, *args, **kwargs):
         from django.utils import timezone as tz

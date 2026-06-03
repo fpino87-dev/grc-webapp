@@ -2288,6 +2288,18 @@
     "scenario_placeholder": "örn. MES üretim sunucusunda Ransomware",
     "error_generic": "Hata",
     "wizard_title": "Sihirbaz BIA → Risk → BCP",
+    "registers": {
+      "title": "Entegre risk kayıtları",
+      "attention_count": "{{count}} yüksek dikkat",
+      "concentration_title": "Tedarik yoğunlaşması",
+      "concentration_hint": "Orta/kritik yoğunlaşmaya sahip tedarikçiler (M14 → M06 zinciri).",
+      "resilience_title": "BIA → BCP dayanıklılığı",
+      "resilience_hint": "Hedef RTO'su olan ancak yeterli BCP kapsamı olmayan kritik süreçler (M05 → M16 → M06).",
+      "empty": "Kayıt yok.",
+      "rto": "RTO {{hours}}s",
+      "level": { "medio": "Orta", "alto": "Yüksek", "critico": "Kritik" },
+      "gap": { "no_bcp_plan": "BCP yok", "bcp_insufficient": "BCP yetersiz", "bcp_marginal": "BCP marjinal" }
+    },
     "wizard_subtitle": "Sırayla oluşturun: kritik süreç, risk senaryosu ve tutarlı BCP planı.",
     "wizard_step_bia": "BIA Süreci",
     "wizard_step_risk": "Risk senaryosu",

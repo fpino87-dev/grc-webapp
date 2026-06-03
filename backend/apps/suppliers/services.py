@@ -93,6 +93,68 @@ def get_concentration_risk_register(suppliers_qs=None) -> dict:
     }
 
 
+def check_concentration_crossing(supplier: Supplier, user=None) -> bool:
+    """Notifica M19 quando un fornitore *attraversa* la soglia di concentrazione critica.
+
+    Anti-spam: la notifica parte solo alla **transizione** verso `critica` (la
+    soglia precedentemente notificata non era già `critica`). Se la concentrazione
+    rientra sotto `critica`, azzera il marcatore così un futuro ri-attraversamento
+    notifica di nuovo. Best-effort: un fallimento dell'invio non blocca il salvataggio
+    del fornitore. Ritorna True se una notifica è stata inviata.
+
+    Va chiamata dopo che `supply_concentration_pct` è stato salvato (es. dal
+    viewset su create/update).
+    """
+    threshold = supplier.concentration_threshold  # 'bassa'|'media'|'critica'|'nd'
+    last = supplier.concentration_notified_threshold or ""
+
+    if threshold != "critica":
+        # Rientrata o mai critica: resetta il marcatore se necessario (consente
+        # una nuova notifica al prossimo attraversamento).
+        if last:
+            supplier.concentration_notified_threshold = ""
+            supplier.save(update_fields=["concentration_notified_threshold", "updated_at"])
+        return False
+
+    if last == "critica":
+        return False  # già notificata, niente spam
+
+    # Transizione verso 'critica' → notifica + memorizza il marcatore.
+    supplier.concentration_notified_threshold = "critica"
+    supplier.save(update_fields=["concentration_notified_threshold", "updated_at"])
+
+    from core.audit import log_action
+    try:
+        log_action(
+            user=user,
+            action_code="suppliers.concentration.critical",
+            level="L2",
+            entity=supplier,
+            payload={
+                "supplier_id": str(supplier.id),
+                "concentration_pct": float(supplier.supply_concentration_pct or 0),
+                "nis2_relevant": supplier.nis2_relevant,
+            },
+        )
+    except Exception as exc:  # pragma: no cover - audit best-effort
+        logging.getLogger(__name__).warning("suppliers: audit concentration crossing non scritto: %s", exc)
+
+    sent = False
+    try:
+        from apps.notifications.resolver import fire_notification
+        fire_notification(
+            "supplier_concentration_critical",
+            plant=supplier.plants.first(),
+            context={"supplier": supplier},
+        )
+        sent = True
+    except Exception as exc:  # noqa: BLE001 - notifica best-effort
+        logging.getLogger(__name__).warning(
+            "suppliers: notifica concentration crossing non inviata (%s): %s", supplier.id, exc,
+        )
+    return sent
+
+
 PARAMETER_KEYS = ("impatto", "accesso", "dati", "dipendenza", "integrazione", "compliance")
 
 

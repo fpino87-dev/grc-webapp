@@ -2209,6 +2209,18 @@
     "scenario_placeholder": "e.g. Ransomware on MES production server",
     "error_generic": "Error",
     "wizard_title": "Wizard BIA → Risk → BCP",
+    "registers": {
+      "title": "Integrated risk registers",
+      "attention_count": "{{count}} high-attention",
+      "concentration_title": "Supply concentration",
+      "concentration_hint": "Suppliers with medium/critical concentration (M14 → M06 chain).",
+      "resilience_title": "BIA → BCP resilience",
+      "resilience_hint": "Critical processes with a target RTO but without adequate BCP coverage (M05 → M16 → M06).",
+      "empty": "No entries.",
+      "rto": "RTO {{hours}}h",
+      "level": { "medio": "Medium", "alto": "High", "critico": "Critical" },
+      "gap": { "no_bcp_plan": "No BCP", "bcp_insufficient": "BCP insufficient", "bcp_marginal": "BCP marginal" }
+    },
     "wizard_subtitle": "Create in sequence: critical process, risk scenario, and coherent BCP plan.",
     "wizard_step_bia": "BIA Process",
     "wizard_step_risk": "Risk scenario",

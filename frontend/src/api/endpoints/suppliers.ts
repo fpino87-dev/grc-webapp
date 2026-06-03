@@ -111,6 +111,23 @@ export interface NdaDocument {
   } | null;
 }
 
+export interface ConcentrationRiskItem {
+  supplier_id: string;
+  supplier_name: string;
+  concentration_pct: number;
+  threshold: "media" | "critica";
+  nis2_relevant: boolean;
+  risk_level: "medio" | "alto" | "critico";
+  plants: string[];
+}
+
+export interface ConcentrationRiskRegister {
+  items: ConcentrationRiskItem[];
+  count: number;
+  by_level: Record<string, number>;
+  attention: number;
+}
+
 export const suppliersApi = {
   list: (params?: Record<string, string>) =>
     apiClient.get<{ results: Supplier[] }>("/suppliers/suppliers/", { params }).then(r => r.data),
@@ -195,6 +212,11 @@ export const suppliersApi = {
     apiClient.get<EvaluationConfig>("/suppliers/evaluation-config/").then(r => r.data),
   updateEvaluationConfig: (data: Partial<EvaluationConfig>) =>
     apiClient.put<EvaluationConfig>("/suppliers/evaluation-config/", data).then(r => r.data),
+
+  concentrationRisks: (plantId?: string) =>
+    apiClient.get<ConcentrationRiskRegister>("/suppliers/suppliers/concentration-risks/", {
+      params: plantId ? { plant: plantId } : undefined,
+    }).then(r => r.data),
 
   exportCsv: (nis2Only: boolean) => {
     const url = `/suppliers/suppliers/export-csv/${nis2Only ? "?nis2_only=true" : ""}`;

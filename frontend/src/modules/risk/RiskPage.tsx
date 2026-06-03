@@ -13,6 +13,7 @@ import { StatusBadge } from "../../components/ui/StatusBadge";
 import { AssistenteValutazione } from "../../components/ui/AssistenteValutazione";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
 import { RiskContinuityWizard } from "./RiskContinuityWizard";
+import { RiskIntegratedRegisters } from "./RiskIntegratedRegisters";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
 
@@ -548,7 +549,7 @@ function MitigationPanel({ assessmentId }: { assessmentId: string }) {
   return (
     <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
       <div className="flex items-center justify-between mb-3">
-        <h4 className="text-sm font-semibold text-gray-700">{t("risk.mitigation_progress", { completed: plans.filter(p => p.status === "completed").length, total: plans.length })}</h4>
+        <h4 className="text-sm font-semibold text-gray-700">{t("risk.mitigation_progress", { completed: plans.filter(p => p.completed_at != null).length, total: plans.length })}</h4>
         <button onClick={() => setShowForm(s => !s)} className="text-xs px-2 py-1 bg-primary-600 text-white rounded hover:bg-primary-700">
           + {t("risk.add_plan")}
         </button>
@@ -1600,6 +1601,7 @@ export function RiskPage() {
   return (
     <div>
       <RiskAppetiteCard plantId={selectedPlant?.id} />
+      <RiskIntegratedRegisters plantId={selectedPlant?.id} />
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold text-gray-900 flex items-center">
           Risk Assessment

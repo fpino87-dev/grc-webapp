@@ -27,9 +27,31 @@ export interface CriticalProcessSnapshot {
   };
 }
 
+export interface ResilienceGapItem {
+  process_id: string;
+  process_name: string;
+  plant: string | null;
+  criticality: number | null;
+  rto_target_hours: number | null;
+  gap: "no_bcp_plan" | "bcp_insufficient" | "bcp_marginal";
+  bcp_status: string;
+  risk_level: "medio" | "alto" | "critico";
+}
+
+export interface ResilienceGapRegister {
+  items: ResilienceGapItem[];
+  count: number;
+  by_level: Record<string, number>;
+  attention: number;
+}
+
 export const biaApi = {
   list: (params?: Record<string, string>) =>
     apiClient.get<{ results: CriticalProcess[] }>("/bia/processes/", { params }).then(r => r.data),
+  resilienceGaps: (plantId?: string) =>
+    apiClient.get<ResilienceGapRegister>("/bia/processes/resilience-gaps/", {
+      params: plantId ? { plant: plantId } : undefined,
+    }).then(r => r.data),
   approve: (id: string) =>
     apiClient.post(`/bia/processes/${id}/approve/`).then(r => r.data),
   validate: (id: string) =>

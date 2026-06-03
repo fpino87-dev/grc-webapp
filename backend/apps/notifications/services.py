@@ -229,6 +229,29 @@ def notify_osint_alert(alert, entity, recipients: list[str]):
     )
 
 
+def notify_supplier_concentration(supplier, recipients: list[str]):
+    """
+    Alert: un fornitore ha attraversato la soglia di concentrazione *critica*
+    (>50% della fornitura, ACN Delibera 127434). Dipendenza single-supplier che
+    espone la continuità operativa. Destinatari risolti dal chiamante (interni).
+    """
+    pct = supplier.supply_concentration_pct
+    pct_label = f"{pct}%" if pct is not None else "n/d"
+    nis2 = " — fornitore NIS2-relevant" if getattr(supplier, "nis2_relevant", False) else ""
+    send_grc_email(
+        subject=f"[GRC] 🏭 Concentrazione fornitura critica: {supplier.name}",
+        body=(
+            "Un fornitore ha superato la soglia di concentrazione critica.\n\n"
+            f"Fornitore:       {supplier.name}\n"
+            f"Concentrazione:  {pct_label} (soglia critica > 50%){nis2}\n\n"
+            "La dipendenza da un singolo fornitore espone la continuità operativa. "
+            "Valutare diversificazione, clausole contrattuali di continuità e un "
+            "rischio di concentrazione nel registro rischi."
+        ),
+        recipients=recipients,
+    )
+
+
 def notify_role_expiring(assignment, days_left: int, recipients: list[str]):
     send_grc_email(
         subject=f"[GRC] Ruolo in scadenza: {assignment.role}",

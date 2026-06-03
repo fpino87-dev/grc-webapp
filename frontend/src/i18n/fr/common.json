@@ -2288,6 +2288,18 @@
     "scenario_placeholder": "ex. Ransomware sur le serveur de production MES",
     "error_generic": "Erreur",
     "wizard_title": "Assistant BIA → Risque → BCP",
+    "registers": {
+      "title": "Registres de risques intégrés",
+      "attention_count": "{{count}} à haute attention",
+      "concentration_title": "Concentration des fournisseurs",
+      "concentration_hint": "Fournisseurs à concentration moyenne/critique (chaîne M14 → M06).",
+      "resilience_title": "Résilience BIA → BCP",
+      "resilience_hint": "Processus critiques avec un RTO cible mais sans couverture BCP adéquate (M05 → M16 → M06).",
+      "empty": "Aucune entrée.",
+      "rto": "RTO {{hours}}h",
+      "level": { "medio": "Moyen", "alto": "Élevé", "critico": "Critique" },
+      "gap": { "no_bcp_plan": "Aucun BCP", "bcp_insufficient": "BCP insuffisant", "bcp_marginal": "BCP marginal" }
+    },
     "wizard_subtitle": "Créez en séquence : processus critique, scénario de risque et plan BCP cohérent.",
     "wizard_step_bia": "Processus BIA",
     "wizard_step_risk": "Scénario de risque",
