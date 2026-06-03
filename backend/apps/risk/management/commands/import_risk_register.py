@@ -647,7 +647,7 @@ class Command(BaseCommand):
                     assessment=assessment,
                     action=action_text,
                     owner=owner,
-                    due_date=date.today() + timedelta(days=180),
+                    due_date=timezone.localdate() + timedelta(days=180),
                     created_by=owner,
                 )
 

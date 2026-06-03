@@ -24,7 +24,7 @@ def role_assignment(db, user):
         user=user,
         role=NormativeRole.CISO,
         scope_type="org",
-        valid_from=timezone.now().date(),
+        valid_from=timezone.localdate(),
     )
 
 
@@ -34,8 +34,8 @@ def test_get_expiring_roles_with_expiry(user):
     from apps.governance.services import get_expiring_roles
     ra = RoleAssignment.objects.create(
         user=user, role=NormativeRole.DPO, scope_type="org",
-        valid_from=timezone.now().date(),
-        valid_until=timezone.now().date() + timedelta(days=15),
+        valid_from=timezone.localdate(),
+        valid_until=timezone.localdate() + timedelta(days=15),
     )
     result = get_expiring_roles(days=30)
     ids = [str(r.id) for r in result["expiring"]]
@@ -48,8 +48,8 @@ def test_get_expiring_roles_expired(user):
     from apps.governance.services import get_expiring_roles
     ra = RoleAssignment.objects.create(
         user=user, role=NormativeRole.RISK_MANAGER, scope_type="org",
-        valid_from=timezone.now().date() - timedelta(days=90),
-        valid_until=timezone.now().date() - timedelta(days=5),
+        valid_from=timezone.localdate() - timedelta(days=90),
+        valid_until=timezone.localdate() - timedelta(days=5),
     )
     result = get_expiring_roles(days=30)
     ids = [str(r.id) for r in result["expired"]]
@@ -69,8 +69,8 @@ def test_get_expiring_delegations(user):
     from apps.governance.services import get_expiring_delegations
     ra = RoleAssignment.objects.create(
         user=user, role=NormativeRole.COMPLIANCE_OFFICER, scope_type="org",
-        valid_from=timezone.now().date(),
-        valid_until=timezone.now().date() + timedelta(days=20),
+        valid_from=timezone.localdate(),
+        valid_until=timezone.localdate() + timedelta(days=20),
     )
     result = get_expiring_delegations(days=30)
     assert result is not None

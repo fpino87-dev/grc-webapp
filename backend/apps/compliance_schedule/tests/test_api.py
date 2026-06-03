@@ -1,5 +1,6 @@
 """Test API compliance schedule."""
 import pytest
+from django.utils import timezone
 from datetime import date, timedelta
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
@@ -41,7 +42,7 @@ def policy(db, plant, user):
         plant=plant,
         name="Policy ISO 27001",
         is_active=True,
-        valid_from=date.today(),
+        valid_from=timezone.localdate(),
         created_by=user,
     )
 
@@ -66,7 +67,7 @@ def test_create_policy(client, plant):
         "plant": str(plant.id),
         "name": "NIS2 Policy",
         "is_active": True,
-        "valid_from": str(date.today()),
+        "valid_from": str(timezone.localdate()),
     }
     resp = client.post(URL_POLICIES, payload, format="json")
     assert resp.status_code == 201

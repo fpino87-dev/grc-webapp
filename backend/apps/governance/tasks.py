@@ -10,7 +10,7 @@ def notify_expiring_roles_task(self):
 
     delegations = get_expiring_delegations(days=30)
     for assignment in delegations:
-        days_left = (assignment.valid_until - timezone.now().date()).days
+        days_left = (assignment.valid_until - timezone.localdate()).days
         fire_notification(
             "role_expiring",
             context={"assignment": assignment, "days_left": days_left},

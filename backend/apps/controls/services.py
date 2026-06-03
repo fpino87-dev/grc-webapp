@@ -34,7 +34,7 @@ def check_evidence_requirements(instance, lang: str | None = None) -> dict:
     if lang is None:
         lang = translation.get_language() or "it"
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     req = instance.control.evidence_requirement or {}
     result = {
         "satisfied": True,
@@ -193,7 +193,7 @@ def is_covered_by_extender(ci, today=None) -> bool:
 
     from apps.documents.models import Document, Evidence
 
-    today = today or timezone.now().date()
+    today = today or timezone.localdate()
     extenders = get_extender_instances(ci)
     if not extenders:
         return False
@@ -248,7 +248,7 @@ def evaluate_control(instance, new_status, user, note=""):
                 )
             # Fallback: if no evidence_requirement defined, require at least one valid evidence
             if not msgs:
-                today = timezone.now().date()
+                today = timezone.localdate()
                 if not instance.evidences.filter(valid_until__gte=today, deleted_at__isnull=True).exists():
                     raise ValidationError(
                         _("Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata.")
@@ -259,7 +259,7 @@ def evaluate_control(instance, new_status, user, note=""):
                 )
 
         if new_status == "parziale":
-            today = timezone.now().date()
+            today = timezone.localdate()
             has_any = (
                 instance.evidences.filter(
                     valid_until__gte=today, deleted_at__isnull=True
@@ -747,7 +747,7 @@ def get_compliance_summary(plant_id, framework_code=None):
     compliant_direct = result.get("compliant", 0)
 
     # Conta i non-compliant coperti da un extender (es. TISAX L2 coperto da L3).
-    today = timezone.now().date()
+    today = timezone.localdate()
     non_compliant_qs = qs.exclude(status="compliant").select_related("control")
     covered_by_extender = 0
     for ci in non_compliant_qs:
@@ -862,7 +862,7 @@ def archive_framework(framework, user) -> None:
             _("Impossibile archiviare: il framework è ancora assegnato a uno o più siti.")
         )
 
-    framework.archived_at = timezone.now().date()
+    framework.archived_at = timezone.localdate()
     framework.save(update_fields=["archived_at", "updated_at"])
 
     log_action(

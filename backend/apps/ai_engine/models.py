@@ -163,7 +163,7 @@ class AiProviderConfig(BaseModel):
     def reset_budget_if_needed(self):
         from django.utils import timezone
 
-        today = timezone.now().date()
+        today = timezone.localdate()
         if self.last_budget_reset is None or (
             today.day == self.budget_reset_day and today != self.last_budget_reset
         ):

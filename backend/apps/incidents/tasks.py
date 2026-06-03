@@ -98,7 +98,7 @@ def check_final_report_deadlines(self):
 
     from .models import Incident
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     count = 0
 
     for days_alert in (7, 1):

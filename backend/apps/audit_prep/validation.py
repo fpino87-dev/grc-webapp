@@ -99,7 +99,7 @@ def _evaluate_evidence_item(item: EvidenceItem) -> tuple[str, list[str]]:
     from apps.controls.models import ControlInstance
     from apps.documents.models import Document, Evidence
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     ci = item.control_instance
     reasons: list[str] = []
 
@@ -200,7 +200,7 @@ def auto_validate_prep(prep: AuditPrep, user) -> dict:
     Aggiorna gli stati e apre i finding per gli item `mancante`/`scaduto`.
     Restituisce un summary numerico per la UI.
     """
-    today = timezone.now().date()
+    today = timezone.localdate()
     audit_date = prep.audit_date or today
 
     counters = {

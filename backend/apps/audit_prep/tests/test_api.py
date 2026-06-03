@@ -1,5 +1,6 @@
 """Test API audit preparation."""
 import pytest
+from django.utils import timezone
 from datetime import date
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
@@ -43,7 +44,7 @@ def framework(db):
     from datetime import date
     return Framework.objects.create(
         code="ISO-AP", name="ISO 27001 AP", version="2022",
-        published_at=date.today(),
+        published_at=timezone.localdate(),
     )
 
 
@@ -54,7 +55,7 @@ def audit_prep(db, plant, framework, user):
         plant=plant,
         framework=framework,
         title="Audit ISO 27001 Q1",
-        audit_date=date.today(),
+        audit_date=timezone.localdate(),
         status="in_corso",
         created_by=user,
     )
@@ -93,7 +94,7 @@ def test_create_audit_prep(client, plant, framework):
         "plant": str(plant.id),
         "framework": str(framework.id),
         "title": "Nuovo Audit TISAX",
-        "audit_date": str(date.today()),
+        "audit_date": str(timezone.localdate()),
         "status": "in_corso",
     }
     resp = client.post(URL_PREPS, payload, format="json")
@@ -156,7 +157,7 @@ def test_create_finding(client, audit_prep):
         "finding_type": "major_nc",
         "title": "Mancata cifratura dati",
         "description": "Dati in chiaro su disco",
-        "audit_date": str(date.today()),
+        "audit_date": str(timezone.localdate()),
     }
     resp = client.post(URL_FINDINGS, payload, format="json")
     assert resp.status_code == 201

@@ -122,7 +122,7 @@ def test_overdue_tasks_endpoint(client, plant, user):
         priority="alta",
         status="aperto",
         assigned_to=user,
-        due_date=timezone.now().date() - timedelta(days=1),
+        due_date=timezone.localdate() - timedelta(days=1),
         created_by=user,
     )
     resp = client.get(f"{URL}overdue/")

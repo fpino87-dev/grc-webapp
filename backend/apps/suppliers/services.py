@@ -15,7 +15,7 @@ from .models import (
 
 def get_expiring_contracts(days: int = 60):
     """Return suppliers whose evaluation_date expires within the given number of days."""
-    today = timezone.now().date()
+    today = timezone.localdate()
     deadline = today + datetime.timedelta(days=days)
     return Supplier.objects.filter(
         status="attivo",
@@ -260,7 +260,7 @@ def complete_assessment(
 
     assessment.status = "completato"
     assessment.assessed_by = user
-    assessment.assessment_date = timezone.now().date()
+    assessment.assessment_date = timezone.localdate()
     assessment.score = score_overall
     assessment.score_overall = score_overall
     assessment.score_governance = score_governance
@@ -545,7 +545,7 @@ def check_questionnaire_followups():
 
     from apps.notifications.services import send_grc_email
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     threshold = timezone.now() - datetime.timedelta(days=7)
 
     pending = SupplierQuestionnaire.objects.filter(

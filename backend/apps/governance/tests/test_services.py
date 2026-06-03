@@ -30,7 +30,7 @@ def role_assignment(db, user):
         user=user,
         role=NormativeRole.CISO,
         scope_type="org",
-        valid_from=timezone.now().date(),
+        valid_from=timezone.localdate(),
     )
 
 
@@ -46,8 +46,8 @@ def test_role_assignment_is_active_with_future_end(user):
     from apps.governance.models import RoleAssignment, NormativeRole
     ra = RoleAssignment.objects.create(
         user=user, role=NormativeRole.DPO, scope_type="org",
-        valid_from=timezone.now().date(),
-        valid_until=timezone.now().date() + timedelta(days=30),
+        valid_from=timezone.localdate(),
+        valid_until=timezone.localdate() + timedelta(days=30),
     )
     assert ra.is_active is True
 
@@ -57,8 +57,8 @@ def test_role_assignment_is_inactive_when_expired(user):
     from apps.governance.models import RoleAssignment, NormativeRole
     ra = RoleAssignment.objects.create(
         user=user, role=NormativeRole.RISK_MANAGER, scope_type="org",
-        valid_from=timezone.now().date() - timedelta(days=60),
-        valid_until=timezone.now().date() - timedelta(days=1),
+        valid_from=timezone.localdate() - timedelta(days=60),
+        valid_until=timezone.localdate() - timedelta(days=1),
     )
     assert ra.is_active is False
 
@@ -68,7 +68,7 @@ def test_role_assignment_is_inactive_when_future(user):
     from apps.governance.models import RoleAssignment, NormativeRole
     ra = RoleAssignment.objects.create(
         user=user, role=NormativeRole.INTERNAL_AUDITOR, scope_type="org",
-        valid_from=timezone.now().date() + timedelta(days=10),
+        valid_from=timezone.localdate() + timedelta(days=10),
     )
     assert ra.is_active is False
 
@@ -78,7 +78,7 @@ def test_role_assignment_is_inactive_when_future(user):
 @pytest.mark.django_db
 def test_terminate_role_sets_valid_until(role_assignment, user):
     from apps.governance.services import terminate_role
-    yesterday = timezone.now().date() - timedelta(days=1)
+    yesterday = timezone.localdate() - timedelta(days=1)
     terminate_role(role_assignment, user, termination_date=yesterday, reason="Dimissioni")
     role_assignment.refresh_from_db()
     assert role_assignment.valid_until == yesterday
@@ -93,8 +93,8 @@ def test_get_expiring_roles_found(user):
     from apps.governance.services import get_expiring_roles
     ra = RoleAssignment.objects.create(
         user=user, role=NormativeRole.CISO, scope_type="org",
-        valid_from=timezone.now().date(),
-        valid_until=timezone.now().date() + timedelta(days=10),
+        valid_from=timezone.localdate(),
+        valid_until=timezone.localdate() + timedelta(days=10),
     )
     result = get_expiring_roles(days=30)
     expiring_ids = [str(r.id) for r in result["expiring"]]
@@ -107,8 +107,8 @@ def test_get_expiring_roles_excludes_far_future(user):
     from apps.governance.services import get_expiring_roles
     ra = RoleAssignment.objects.create(
         user=user, role=NormativeRole.COMPLIANCE_OFFICER, scope_type="org",
-        valid_from=timezone.now().date(),
-        valid_until=timezone.now().date() + timedelta(days=365),
+        valid_from=timezone.localdate(),
+        valid_until=timezone.localdate() + timedelta(days=365),
     )
     result = get_expiring_roles(days=30)
     # Returns dict with "expiring" and "expired" querysets

@@ -261,7 +261,7 @@ def _generate_soa(fw, plant, instances, user) -> str:
                     or inst.owner.email
                 )
             ev_count = inst.evidences.filter(
-                valid_until__gte=timezone.now().date()
+                valid_until__gte=timezone.localdate()
             ).count()
             last_eval = inst.last_evaluated_at.strftime("%d/%m/%Y") \
                 if inst.last_evaluated_at else "—"
@@ -367,7 +367,7 @@ def _generate_soa_change_section(plant) -> str:
     """Sezione clausola 8.1 — asset con change recenti (ultimi 90gg)."""
     from apps.assets.models import Asset
 
-    since = timezone.now().date() - datetime.timedelta(days=90)
+    since = timezone.localdate() - datetime.timedelta(days=90)
     qs_args = dict(last_change_date__gte=since, deleted_at__isnull=True)
     if plant is not None:
         qs_args["plant"] = plant

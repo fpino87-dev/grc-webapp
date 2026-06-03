@@ -45,7 +45,7 @@ def competency_gap_analysis(user) -> dict:
     from apps.governance.models import RoleAssignment
     from django.utils import timezone
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     roles = list(
         RoleAssignment.objects.filter(
             user=user,

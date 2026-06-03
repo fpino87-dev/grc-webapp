@@ -1,5 +1,6 @@
 """Test API documenti — versioni, evidenze e azioni avanzate."""
 import pytest
+from django.utils import timezone
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
@@ -87,8 +88,8 @@ def test_create_evidence(client, plant, document):
     from apps.controls.models import Framework, ControlDomain, Control, ControlInstance
     from apps.plants.models import PlantFramework
     from datetime import date
-    f = Framework.objects.create(code="DOC-FW", name="FW", version="1", published_at=date.today())
-    PlantFramework.objects.create(plant=plant, framework=f, active_from=date.today(), level="L2", active=True)
+    f = Framework.objects.create(code="DOC-FW", name="FW", version="1", published_at=timezone.localdate())
+    PlantFramework.objects.create(plant=plant, framework=f, active_from=timezone.localdate(), level="L2", active=True)
     dom = ControlDomain.objects.create(framework=f, code="A.1", translations={"it": {"name": "T"}}, order=1)
     ctrl = Control.objects.create(framework=f, domain=dom, external_id="A.1.1", translations={"it": {"name": "N", "description": "D"}, "en": {"name": "N", "description": "D"}}, level="L2", evidence_requirement={}, control_category="technical")
     inst = ControlInstance.objects.create(plant=plant, control=ctrl, status="non_valutato")

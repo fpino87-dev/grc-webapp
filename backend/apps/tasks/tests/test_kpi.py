@@ -2,6 +2,7 @@
 import datetime
 
 import pytest
+from django.utils import timezone
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
@@ -78,7 +79,7 @@ def kpi_def(db, plant, checklist_template):
 
 def _monday(offset_weeks=0):
     from apps.tasks.services import _monday_of
-    return _monday_of(datetime.date.today()) - datetime.timedelta(weeks=offset_weeks)
+    return _monday_of(timezone.localdate()) - datetime.timedelta(weeks=offset_weeks)
 
 
 # ── CRUD ─────────────────────────────────────────────────────────────────────

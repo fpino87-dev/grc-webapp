@@ -188,7 +188,7 @@ class PlantFrameworkViewSet(viewsets.ModelViewSet):
         # raise IntegrityError).
         plant = serializer.validated_data.get("plant")
         framework = serializer.validated_data.get("framework")
-        active_from = serializer.validated_data.get("active_from") or timezone.now().date()
+        active_from = serializer.validated_data.get("active_from") or timezone.localdate()
         existing = (
             PlantFramework.objects.all_with_deleted()
             .filter(plant=plant, framework=framework, deleted_at__isnull=False)

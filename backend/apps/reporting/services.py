@@ -120,7 +120,7 @@ def owner_report(plant_id) -> dict:
             aperti=Count("id", filter=Q(status__in=["aperto", "in_corso"])),
             scaduti=Count("id", filter=Q(
                 status__in=["aperto", "in_corso"],
-                due_date__lt=timezone.now().date(),
+                due_date__lt=timezone.localdate(),
             )),
             completati_30gg=Count("id", filter=Q(
                 status="completato",
@@ -174,7 +174,7 @@ def risk_bia_bcp(plant_id) -> dict:
         NIS2_ART21_CHOICES, NIS2_RELEVANCE_CHOICES, RiskAssessment, THREAT_CATEGORIES,
     )
 
-    today = timezone.now().date()
+    today = timezone.localdate()
 
     risk_qs = RiskAssessment.objects.filter(
         status="completato", deleted_at__isnull=True
@@ -398,7 +398,7 @@ def dashboard_summary(plant_id) -> dict:
     from apps.tasks.models import Task
 
     plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
-    today = timezone.now().date()
+    today = timezone.localdate()
     fw_codes = get_active_framework_codes(plant) if plant else []
 
     ci_qs = ControlInstance.objects.filter(deleted_at__isnull=True)
@@ -662,7 +662,7 @@ def _training(plant):
 def _supplier_nda(plant):
     from apps.suppliers.models import Supplier
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     threshold_90 = today + timezone.timedelta(days=90)
 
     supplier_qs = Supplier.objects.filter(status="attivo", deleted_at__isnull=True)

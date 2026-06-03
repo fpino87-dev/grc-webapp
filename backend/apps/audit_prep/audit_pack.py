@@ -432,7 +432,7 @@ def _collect_governance(out_dir: Path, plant) -> dict:
     gov_dir = out_dir / "08_governance"
     gov_dir.mkdir(parents=True, exist_ok=True)
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     role_rows = []
     for ra in RoleAssignment.objects.filter(deleted_at__isnull=True):
         valid = (ra.valid_from is None or ra.valid_from <= today) and (

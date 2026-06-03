@@ -26,7 +26,7 @@ def mark_needs_revaluation_if_risk_changed(assessment: RiskAssessment, changed_f
         return
 
     assessment.needs_revaluation = True
-    assessment.needs_revaluation_since = timezone.now().date()
+    assessment.needs_revaluation_since = timezone.localdate()
     assessment.save(update_fields=["needs_revaluation", "needs_revaluation_since", "updated_at"])
 
 
@@ -136,7 +136,7 @@ def suggest_residual_score(assessment) -> dict:
         from apps.bcp.models import BcpPlan
 
         process = assessment.critical_process
-        today = timezone.now().date()
+        today = timezone.localdate()
         rto_target = process.rto_target_hours
         rpo_target = process.rpo_target_hours
 
@@ -280,7 +280,7 @@ def get_active_appetite(plant=None, framework_code: str = ""):
     from django.db.models import Q
     from .models import RiskAppetitePolicy
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     base_qs = RiskAppetitePolicy.objects.filter(
         valid_from__lte=today,
         deleted_at__isnull=True,
@@ -320,7 +320,7 @@ def escalate_red_risk(assessment: RiskAssessment, user):
             priority="critica",
             source_module="M06",
             source_id=assessment.pk,
-            due_date=timezone.now().date() + timezone.timedelta(days=15),
+            due_date=timezone.localdate() + timezone.timedelta(days=15),
             assign_type="role",
             assign_value="risk_manager",
         )
@@ -339,7 +339,7 @@ def escalate_red_risk(assessment: RiskAssessment, user):
                     priority="critica",
                     source_module="M06",
                     source_id=assessment.pk,
-                    due_date=timezone.now().date() + timezone.timedelta(days=7),
+                    due_date=timezone.localdate() + timezone.timedelta(days=7),
                     assign_type="role",
                     assign_value="ciso",
                 )

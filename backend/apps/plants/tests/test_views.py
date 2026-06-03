@@ -9,6 +9,7 @@ import base64
 import datetime
 
 import pytest
+from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
@@ -227,7 +228,7 @@ def test_plant_framework_destroy_soft_deletes_control_instances(api_client, plan
     from apps.controls.models import ControlInstance
 
     pf = PlantFramework.objects.create(
-        plant=plant_nis2, framework=framework_iso, active_from=datetime.date.today(),
+        plant=plant_nis2, framework=framework_iso, active_from=timezone.localdate(),
     )
     ci = ControlInstance.objects.create(
         plant=plant_nis2, control=control_iso, status="non_valutato",
@@ -243,7 +244,7 @@ def test_plant_framework_destroy_soft_deletes_control_instances(api_client, plan
 def test_plant_framework_toggle_active(api_client, plant_nis2, framework_iso):
     pf = PlantFramework.objects.create(
         plant=plant_nis2, framework=framework_iso,
-        active_from=datetime.date.today(), active=True,
+        active_from=timezone.localdate(), active=True,
     )
     url = reverse("plant-framework-toggle-active", args=[pf.id])
     resp = api_client.post(url)
@@ -255,7 +256,7 @@ def test_plant_framework_toggle_active(api_client, plant_nis2, framework_iso):
 @pytest.mark.django_db
 def test_plant_framework_list_filtered_by_plant(api_client, plant_nis2, plant_tisax, framework_iso):
     PlantFramework.objects.create(
-        plant=plant_nis2, framework=framework_iso, active_from=datetime.date.today(),
+        plant=plant_nis2, framework=framework_iso, active_from=timezone.localdate(),
     )
     url = reverse("plant-framework-list") + f"?plant={plant_nis2.id}"
     resp = api_client.get(url)

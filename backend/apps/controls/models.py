@@ -219,7 +219,7 @@ class ControlInstance(BaseModel):
         if self.maturity_level_override and self.maturity_level is not None:
             return self.maturity_level
         from django.utils import timezone
-        today = timezone.now().date()
+        today = timezone.localdate()
         status_map = {"non_valutato": 0, "gap": 1, "na": 0}
         if self.status in status_map:
             return status_map[self.status]

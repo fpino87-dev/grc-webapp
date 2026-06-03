@@ -38,7 +38,7 @@ def get_expired_documents(user, plant_id, today=None) -> list[dict]:
     """
     from apps.documents.models import Document
 
-    today = today or timezone.now().date()
+    today = today or timezone.localdate()
     if not _verify_plant_access(user, plant_id):
         return []
 
@@ -94,7 +94,7 @@ def get_missing_evidences(user, plant_id) -> list[dict]:
     if not _verify_plant_access(user, plant_id):
         return []
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     qs = ControlInstance.objects.filter(
         plant_id=plant_id,
         deleted_at__isnull=True,
@@ -132,7 +132,7 @@ def get_expired_risk_assessments(user, plant_id, today=None) -> list[dict]:
     from apps.plants.models import Plant
     from apps.risk.models import RiskAssessment
 
-    today = today or timezone.now().date()
+    today = today or timezone.localdate()
     if not _verify_plant_access(user, plant_id):
         return []
 
@@ -187,7 +187,7 @@ def get_suppliers_without_assessment(user, plant_id, today=None) -> list[dict]:
     """
     from apps.suppliers.models import Supplier
 
-    today = today or timezone.now().date()
+    today = today or timezone.localdate()
     if not _verify_plant_access(user, plant_id):
         return []
 

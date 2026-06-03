@@ -14,7 +14,7 @@ def get_completion_rate(course_id) -> float:
 
 def get_overdue_enrollments():
     """Return enrollments where the course deadline has passed and status is not completed."""
-    today = timezone.now().date()
+    today = timezone.localdate()
     return TrainingEnrollment.objects.filter(
         course__deadline__lt=today,
     ).exclude(

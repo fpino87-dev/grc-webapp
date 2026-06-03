@@ -4,6 +4,7 @@ essere fuse in un'unica riga "L2 + L3 (VH)" che riflette il requisito
 completo, con valutazione presa dalla VH (vedi dedup lato API).
 """
 import pytest
+from django.utils import timezone
 from datetime import date
 from django.contrib.auth import get_user_model
 
@@ -33,10 +34,10 @@ def plant(db):
 def fw_pair(db):
     from apps.controls.models import Framework
     fw_l2 = Framework.objects.create(
-        code="TISAX_L2", name="TISAX L2", version="6.0", published_at=date.today(),
+        code="TISAX_L2", name="TISAX L2", version="6.0", published_at=timezone.localdate(),
     )
     fw_l3 = Framework.objects.create(
-        code="TISAX_L3", name="TISAX L3", version="6.0", published_at=date.today(),
+        code="TISAX_L3", name="TISAX L3", version="6.0", published_at=timezone.localdate(),
     )
     return fw_l2, fw_l3
 

@@ -138,7 +138,7 @@ class AuditFinding(BaseModel):
             return False
         return (
             self.status not in ("closed", "accepted_by_auditor")
-            and self.response_deadline < timezone.now().date()
+            and self.response_deadline < timezone.localdate()
         )
 
     @property
@@ -146,7 +146,7 @@ class AuditFinding(BaseModel):
         from django.utils import timezone
         if not self.response_deadline:
             return None
-        return (self.response_deadline - timezone.now().date()).days
+        return (self.response_deadline - timezone.localdate()).days
 
 
 class AuditProgram(BaseModel):
@@ -212,8 +212,8 @@ class AuditProgram(BaseModel):
 
     @property
     def next_planned_audit(self):
-        from datetime import date
-        today = str(date.today())
+        from django.utils import timezone
+        today = str(timezone.localdate())
         upcoming = [
             a for a in self.planned_audits
             if a.get("status") == "planned" and a.get("planned_date", "") >= today

@@ -50,7 +50,7 @@ def close_incident(incident: Incident, user):
                     due_date=(
                         incident.formal_notification_deadline.date()
                         if incident.formal_notification_deadline
-                        else timezone.now().date()
+                        else timezone.localdate()
                     ),
                     assign_type="role",
                     assign_value="compliance_officer",

@@ -1,5 +1,6 @@
 """Test API governance — azioni avanzate organigramma e ruoli."""
 import pytest
+from django.utils import timezone
 from datetime import date, timedelta
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
@@ -33,7 +34,7 @@ def role_assignment(db, user):
         user=user,
         role=NormativeRole.CISO,
         scope_type="org",
-        valid_from=date.today(),
+        valid_from=timezone.localdate(),
     )
 
 
@@ -50,7 +51,7 @@ def test_create_role_assignment(client, user):
         "user": str(user.id),
         "role": NormativeRole.DPO,
         "scope_type": "org",
-        "valid_from": str(date.today()),
+        "valid_from": str(timezone.localdate()),
     }
     resp = client.post(URL_ASSIGNMENTS, payload, format="json")
     assert resp.status_code == 201
@@ -66,7 +67,7 @@ def test_retrieve_role_assignment(client, role_assignment):
 def test_update_role_assignment(client, role_assignment):
     resp = client.patch(
         f"{URL_ASSIGNMENTS}{role_assignment.id}/",
-        {"valid_until": str(date.today() + timedelta(days=90))},
+        {"valid_until": str(timezone.localdate() + timedelta(days=90))},
         format="json",
     )
     assert resp.status_code == 200
@@ -80,7 +81,7 @@ def test_delete_role_assignment(client, role_assignment):
 
 @pytest.mark.django_db
 def test_termina_action(client, role_assignment):
-    payload = {"termination_date": str(date.today() - timedelta(days=1)), "reason": "Dimissioni"}
+    payload = {"termination_date": str(timezone.localdate() - timedelta(days=1)), "reason": "Dimissioni"}
     resp = client.post(f"{URL_ASSIGNMENTS}{role_assignment.id}/termina/", payload, format="json")
     assert resp.status_code == 200
 

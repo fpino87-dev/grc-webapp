@@ -116,7 +116,7 @@ def escalate_task(task, user):
 
 def get_overdue_tasks(plant_id=None):
     qs = Task.objects.filter(
-        status__in=["aperto", "in_corso"], due_date__lt=timezone.now().date()
+        status__in=["aperto", "in_corso"], due_date__lt=timezone.localdate()
     )
     if plant_id:
         qs = qs.filter(plant_id=plant_id)

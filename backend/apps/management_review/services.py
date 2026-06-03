@@ -123,7 +123,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     from apps.tasks.models import Task
 
     plant_id = review.plant_id
-    today = timezone.now().date()
+    today = timezone.localdate()
     since_12m = timezone.now() - timezone.timedelta(days=365)
 
     # ── 1. Compliance per framework con dettaglio ──

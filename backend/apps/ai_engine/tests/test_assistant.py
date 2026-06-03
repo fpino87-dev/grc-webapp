@@ -119,7 +119,7 @@ def test_expired_documents_are_detected(co_user_org, plant_a):
     """Documento con expiry_date scaduto deve apparire come gap document_expired."""
     from apps.documents.models import Document
 
-    yesterday = timezone.now().date() - datetime.timedelta(days=5)
+    yesterday = timezone.localdate() - datetime.timedelta(days=5)
     doc = Document.objects.create(
         title="Politica scaduta",
         category="politica",
@@ -216,7 +216,7 @@ def test_get_expired_documents_respects_plant_access(co_user_org, pm_user_plant_
     from apps.ai_engine.agent_tools import get_expired_documents
     from apps.documents.models import Document
 
-    yesterday = timezone.now().date() - datetime.timedelta(days=2)
+    yesterday = timezone.localdate() - datetime.timedelta(days=2)
     Document.objects.create(
         title="Doc B scaduto",
         category="politica",

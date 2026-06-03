@@ -81,7 +81,7 @@ def test_skips_recent_and_responded(operator):
     make_questionnaire("Recent", operator, send_count=1, days_ago=2, user=operator)
     # già valutato → escluso
     q = make_questionnaire("Done", operator, send_count=1, days_ago=30, user=operator)
-    q.evaluation_date = timezone.now().date()
+    q.evaluation_date = timezone.localdate()
     q.save(update_fields=["evaluation_date"])
 
     with mock.patch("apps.notifications.services.send_grc_email") as send:

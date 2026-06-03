@@ -214,7 +214,7 @@ def add_version_with_file(document, uploaded_file, user, change_summary=""):
 
 
 def get_expiring_documents(days=30):
-    cutoff = timezone.now().date() + datetime.timedelta(days=days)
+    cutoff = timezone.localdate() + datetime.timedelta(days=days)
     return (
         Document.objects.filter(status="approvato", expiry_date__lte=cutoff)
         .select_related("plant", "owner")

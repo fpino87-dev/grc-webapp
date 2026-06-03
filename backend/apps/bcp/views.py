@@ -111,7 +111,7 @@ class BcpPlanViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         user = request.user
 
         # CISO approval: privilegi su plant (preferenza UserPlantAccess) con fallback su RoleAssignment governance.
-        today = timezone.now().date()
+        today = timezone.localdate()
         has_access = False
         if user and user.is_authenticated:
             # 1) Preferenza via UserPlantAccess (ruolo operativo)

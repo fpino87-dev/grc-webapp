@@ -28,7 +28,7 @@ def _plant_nis2_contact_lines(plant):
 
     from apps.governance.models import RoleAssignment
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     ra = (
         RoleAssignment.objects.filter(
             role="nis2_contact",
@@ -641,7 +641,7 @@ def update_pdca_with_nis2_evidence(incident: Incident, notification: NIS2Notific
             title=f"Report Finale NIS2 — {incident.title}",
             evidence_type="report",
             plant=incident.plant,
-            valid_until=timezone.now().date() + timedelta(days=365),
+            valid_until=timezone.localdate() + timedelta(days=365),
             uploaded_by=notification.sent_by or incident.created_by,
             created_by=notification.sent_by or incident.created_by,
         )

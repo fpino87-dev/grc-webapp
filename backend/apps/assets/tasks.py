@@ -17,7 +17,7 @@ def check_unrevalued_changes():
     from .models import Asset
     from apps.tasks.services import create_task
 
-    threshold = timezone.now().date() - timezone.timedelta(days=14)
+    threshold = timezone.localdate() - timezone.timedelta(days=14)
     assets = Asset.objects.filter(
         needs_revaluation=True,
         needs_revaluation_since__lte=threshold,
@@ -41,7 +41,7 @@ def check_unrevalued_changes():
             priority="alta",
             source_module="M04",
             source_id=asset.pk,
-            due_date=timezone.now().date() + timezone.timedelta(days=7),
+            due_date=timezone.localdate() + timezone.timedelta(days=7),
             assign_type="role",
             assign_value="plant_manager",
         )
@@ -68,7 +68,7 @@ def check_software_eos():
     from apps.tasks.models import Task
     from apps.tasks.services import create_task
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     threshold_warn = today + timezone.timedelta(days=90)
     threshold_urgent = today + timezone.timedelta(days=30)
 

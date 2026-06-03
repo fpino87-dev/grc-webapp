@@ -2,6 +2,7 @@
 from datetime import date, timedelta
 
 import pytest
+from django.utils import timezone
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
@@ -44,7 +45,7 @@ def framework(db):
     from apps.controls.models import Framework
     return Framework.objects.create(
         code="ISO-AV", name="ISO 27001 AV", version="2022",
-        published_at=date.today(),
+        published_at=timezone.localdate(),
     )
 
 
@@ -70,7 +71,7 @@ def audit_prep(db, plant, framework, user):
     from apps.audit_prep.models import AuditPrep
     return AuditPrep.objects.create(
         plant=plant, framework=framework,
-        title="Audit AV Q1", audit_date=date.today(),
+        title="Audit AV Q1", audit_date=timezone.localdate(),
         status="in_corso", created_by=user,
     )
 
@@ -98,7 +99,7 @@ def test_auto_validate_marks_presente_when_evidence_and_doc_valid(
     ev = Evidence.objects.create(
         title="Screenshot config",
         evidence_type="screenshot",
-        valid_until=date.today() + timedelta(days=30),
+        valid_until=timezone.localdate() + timedelta(days=30),
         plant=plant,
     )
     control_instance.evidences.add(ev)
@@ -106,7 +107,7 @@ def test_auto_validate_marks_presente_when_evidence_and_doc_valid(
     doc = Document.objects.create(
         title="Policy AV", category="policy", document_type="policy",
         plant=plant, status="approvato",
-        expiry_date=date.today() + timedelta(days=180),
+        expiry_date=timezone.localdate() + timedelta(days=180),
     )
     doc.control_refs.add(control_instance)
 
@@ -133,7 +134,7 @@ def test_auto_validate_marks_scaduto_and_creates_finding(
     item = _make_evidence_item(audit_prep, control_instance, user)
     ev = Evidence.objects.create(
         title="Cert scaduto", evidence_type="certificato",
-        valid_until=date.today() - timedelta(days=10),
+        valid_until=timezone.localdate() - timedelta(days=10),
         plant=plant,
     )
     control_instance.evidences.add(ev)
@@ -221,7 +222,7 @@ def test_auto_validate_skips_finding_when_open_major_already_exists(
         finding_type="major_nc",
         title="Major manuale",
         description="rilevato dal lead auditor",
-        audit_date=date.today(),
+        audit_date=timezone.localdate(),
         status="open",
         auto_generated=False,
         created_by=user,

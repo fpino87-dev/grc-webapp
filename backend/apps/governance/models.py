@@ -52,7 +52,7 @@ class RoleAssignment(BaseModel):
     def is_active(self):
         from django.utils import timezone
 
-        today = timezone.now().date()
+        today = timezone.localdate()
         return self.valid_from <= today and (
             self.valid_until is None or self.valid_until >= today
         )

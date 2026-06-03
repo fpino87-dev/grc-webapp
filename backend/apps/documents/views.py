@@ -241,7 +241,7 @@ class EvidenceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             qs = qs.filter(Q(plant_id=plant_id) | Q(plant__isnull=True))
 
         expiry = self.request.query_params.get("expiry")
-        today = timezone.now().date()
+        today = timezone.localdate()
         if expiry == "valide":
             qs = qs.filter(valid_until__gt=today + timezone.timedelta(days=30))
         elif expiry == "in_scadenza":

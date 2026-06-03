@@ -73,7 +73,7 @@ def record_test(
 
     test = BcpTest.objects.create(
         plan=plan,
-        test_date=timezone.now().date(),
+        test_date=timezone.localdate(),
         result=result,
         conducted_by=user,
         notes=notes,

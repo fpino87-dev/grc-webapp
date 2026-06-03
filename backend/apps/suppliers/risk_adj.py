@@ -57,7 +57,7 @@ def _latest_valid_questionnaire_class(supplier: Supplier) -> Optional[str]:
     Ritorna la classe di rischio dall'ultimo questionario risposto e non scaduto.
     None se nessun questionario valido disponibile.
     """
-    today = timezone.now().date()
+    today = timezone.localdate()
     latest = (
         SupplierQuestionnaire.objects.filter(
             supplier=supplier,
@@ -93,7 +93,7 @@ def _latest_valid_audit_class(supplier: Supplier, validity_months: int) -> Optio
     entro la finestra di validità configurata.
     None se nessun audit valido disponibile.
     """
-    cutoff = timezone.now().date() - datetime.timedelta(days=validity_months * 30)
+    cutoff = timezone.localdate() - datetime.timedelta(days=validity_months * 30)
     latest = (
         SupplierAssessment.objects.filter(
             supplier=supplier,

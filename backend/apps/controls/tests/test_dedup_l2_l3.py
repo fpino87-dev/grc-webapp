@@ -3,6 +3,7 @@ Test deduplication L2/L3: quando un plant ha TISAX_L3, i controlli L2 che
 hanno un corrispondente VH (relazione 'extends') non devono apparire nella lista.
 """
 import pytest
+from django.utils import timezone
 from datetime import date
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
@@ -45,10 +46,10 @@ def l2l3_setup(db, plant):
     from apps.plants.models import PlantFramework
 
     fw_l2 = Framework.objects.create(
-        code="TISAX_L2_DD", name="TISAX L2 Dedup", version="6.0", published_at=date.today()
+        code="TISAX_L2_DD", name="TISAX L2 Dedup", version="6.0", published_at=timezone.localdate()
     )
     fw_l3 = Framework.objects.create(
-        code="TISAX_L3_DD", name="TISAX L3 Dedup", version="6.0", published_at=date.today()
+        code="TISAX_L3_DD", name="TISAX L3 Dedup", version="6.0", published_at=timezone.localdate()
     )
 
     # Controllo L2 base (sarà sostituito da VH)
@@ -72,10 +73,10 @@ def l2l3_setup(db, plant):
 
     # Assegna entrambi i framework al plant
     PlantFramework.objects.create(
-        plant=plant, framework=fw_l2, active_from=date.today(), level="AL2", active=True
+        plant=plant, framework=fw_l2, active_from=timezone.localdate(), level="AL2", active=True
     )
     PlantFramework.objects.create(
-        plant=plant, framework=fw_l3, active_from=date.today(), level="AL3", active=True
+        plant=plant, framework=fw_l3, active_from=timezone.localdate(), level="AL3", active=True
     )
 
     # Crea ControlInstance per tutti e tre i controlli
@@ -108,13 +109,13 @@ def test_l2_only_visible_without_l3(db, plant):
     from apps.plants.models import PlantFramework
 
     fw = Framework.objects.create(
-        code="TISAX_L2_NO3", name="TISAX L2 Solo", version="6.0", published_at=date.today()
+        code="TISAX_L2_NO3", name="TISAX L2 Solo", version="6.0", published_at=timezone.localdate()
     )
     ctrl = Control.objects.create(
         framework=fw, external_id="ISA-1.6.2-SOLO", translations={}, level="L2"
     )
     PlantFramework.objects.create(
-        plant=plant, framework=fw, active_from=date.today(), level="AL2", active=True
+        plant=plant, framework=fw, active_from=timezone.localdate(), level="AL2", active=True
     )
     ControlInstance.objects.create(plant=plant, control=ctrl)
 

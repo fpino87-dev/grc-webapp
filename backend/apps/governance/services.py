@@ -5,7 +5,7 @@ from django.utils import timezone
 def get_active_role(user, role: str, scope_id=None):
     from .models import RoleAssignment
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     qs = RoleAssignment.objects.filter(
         user=user,
         role=role,
@@ -20,7 +20,7 @@ def get_active_role(user, role: str, scope_id=None):
 def get_expiring_delegations(days: int = 90):
     from .models import RoleAssignment
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     threshold = today + timezone.timedelta(days=days)
     return (
         RoleAssignment.objects.filter(
@@ -37,7 +37,7 @@ def terminate_role(assignment, user, termination_date=None, reason=""):
     """Termina un ruolo impostando valid_until."""
     from core.audit import log_action
 
-    termination_date = termination_date or timezone.now().date()
+    termination_date = termination_date or timezone.localdate()
     assignment.valid_until = termination_date
     assignment.notes = (
         f"{assignment.notes}\n[Terminato il {termination_date}: {reason}]"
@@ -66,7 +66,7 @@ def replace_role(old_assignment, new_user, user,
     from core.audit import log_action
     from .models import RoleAssignment
 
-    handover_date = handover_date or timezone.now().date()
+    handover_date = handover_date or timezone.localdate()
 
     with transaction.atomic():
         terminate_role(
@@ -112,7 +112,7 @@ def get_expiring_roles(days=30):
     """Ruoli in scadenza nei prossimi N giorni o già scaduti."""
     from .models import RoleAssignment
 
-    today     = timezone.now().date()
+    today     = timezone.localdate()
     threshold = today + timezone.timedelta(days=days)
 
     expiring = RoleAssignment.objects.filter(
@@ -136,7 +136,7 @@ def get_vacant_mandatory_roles(plant=None):
     from .models import RoleAssignment
 
     MANDATORY_ROLES = ["nis2_contact", "ciso", "isms_manager", "dpo"]
-    today = timezone.now().date()
+    today = timezone.localdate()
     vacant = []
 
     for role in MANDATORY_ROLES:
@@ -159,7 +159,7 @@ def get_vacant_mandatory_roles(plant=None):
 def check_nis2_contact_active(plant) -> bool:
     from .models import NormativeRole, RoleAssignment
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     return RoleAssignment.objects.filter(
         role=NormativeRole.NIS2_CONTACT,
         scope_type="plant",
@@ -236,7 +236,7 @@ def user_has_document_permission(user, document, action: str) -> bool:
         # Policy definita ma lista ruoli vuota → nessun vincolo aggiuntivo
         return True
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     qs = RoleAssignment.objects.filter(
         user=user,
         role__in=target_roles,
@@ -283,7 +283,7 @@ def resolve_document_recipients(document, action: str) -> list[str]:
     if not target_roles:
         return []
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     qs = RoleAssignment.objects.filter(
         role__in=target_roles,
         valid_from__lte=today,

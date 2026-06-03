@@ -1,5 +1,6 @@
 """Test API fornitori."""
 import pytest
+from django.utils import timezone
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
@@ -51,7 +52,7 @@ def assessment(db, supplier, user):
     return SupplierAssessment.objects.create(
         supplier=supplier,
         assessed_by=user,
-        assessment_date=date.today(),
+        assessment_date=timezone.localdate(),
         status="pianificato",
         created_by=user,
     )
@@ -120,7 +121,7 @@ def test_create_assessment(client, supplier, user):
     payload = {
         "supplier": str(supplier.id),
         "assessed_by": str(user.id),
-        "assessment_date": str(date.today()),
+        "assessment_date": str(timezone.localdate()),
         "status": "pianificato",
     }
     resp = client.post(URL_ASSESSMENTS, payload, format="json")

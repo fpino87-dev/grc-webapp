@@ -8,6 +8,7 @@ Test dell'espansione gerarchica TISAX nell'AuditPrep:
 from datetime import date
 
 import pytest
+from django.utils import timezone
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
@@ -53,7 +54,7 @@ def tisax_l2(db):
     from apps.controls.models import Framework
     return Framework.objects.create(
         code="TISAX_L2", name="TISAX AL2", version="6.0",
-        published_at=date.today(),
+        published_at=timezone.localdate(),
     )
 
 
@@ -62,7 +63,7 @@ def tisax_l3(db):
     from apps.controls.models import Framework
     return Framework.objects.create(
         code="TISAX_L3", name="TISAX AL3", version="6.0",
-        published_at=date.today(),
+        published_at=timezone.localdate(),
     )
 
 
@@ -122,7 +123,7 @@ def test_create_prep_l3_auto_seeds_l2_and_l3_items(client, plant, tisax_l2, tisa
         "plant": str(plant.id),
         "framework": str(tisax_l3.id),
         "title": "Audit TISAX L3",
-        "audit_date": str(date.today()),
+        "audit_date": str(timezone.localdate()),
         "status": "in_corso",
         "coverage_type": "full",
     }
@@ -146,7 +147,7 @@ def test_create_prep_iso_does_not_auto_seed(client, plant, user):
     from apps.controls.models import Framework
     from apps.audit_prep.models import AuditPrep
     iso = Framework.objects.create(
-        code="ISO27001-X", name="ISO", version="2022", published_at=date.today(),
+        code="ISO27001-X", name="ISO", version="2022", published_at=timezone.localdate(),
     )
     _make_control(plant, iso, "A.5.1")
 
@@ -154,7 +155,7 @@ def test_create_prep_iso_does_not_auto_seed(client, plant, user):
         "plant": str(plant.id),
         "framework": str(iso.id),
         "title": "Audit ISO",
-        "audit_date": str(date.today()),
+        "audit_date": str(timezone.localdate()),
         "status": "in_corso",
     }
     resp = client.post(URL_PREPS, payload, format="json")
@@ -176,7 +177,7 @@ def test_sync_controls_adds_missing_l2_items(client, plant, tisax_l2, tisax_l3, 
     prep = AuditPrep.objects.create(
         plant=plant, framework=tisax_l3,
         title="Legacy L3 prep",
-        audit_date=date.today(), status="in_corso",
+        audit_date=timezone.localdate(), status="in_corso",
         coverage_type="full", created_by=user,
     )
     # Stato pre-fix: contiene solo i controlli L3
@@ -206,11 +207,11 @@ def test_sync_controls_noop_for_non_hierarchical_framework(client, plant, user):
     from apps.audit_prep.models import AuditPrep
     from apps.controls.models import Framework
     iso = Framework.objects.create(
-        code="ISO27001-Y", name="ISO Y", version="2022", published_at=date.today(),
+        code="ISO27001-Y", name="ISO Y", version="2022", published_at=timezone.localdate(),
     )
     prep = AuditPrep.objects.create(
         plant=plant, framework=iso, title="ISO prep",
-        audit_date=date.today(), status="in_corso", created_by=user,
+        audit_date=timezone.localdate(), status="in_corso", created_by=user,
     )
     resp = client.post(f"{URL_PREPS}{prep.id}/sync-controls/", {}, format="json")
     assert resp.status_code == 200
@@ -223,7 +224,7 @@ def test_sync_controls_blocked_on_archived_prep(client, plant, tisax_l3, user):
     from apps.audit_prep.models import AuditPrep
     prep = AuditPrep.objects.create(
         plant=plant, framework=tisax_l3, title="Archived",
-        audit_date=date.today(), status="archiviato", created_by=user,
+        audit_date=timezone.localdate(), status="archiviato", created_by=user,
     )
     resp = client.post(f"{URL_PREPS}{prep.id}/sync-controls/", {}, format="json")
     assert resp.status_code == 400
@@ -256,7 +257,7 @@ def test_launch_audit_from_program_l3_creates_l2_and_l3_items(
         "framework_codes": ["TISAX_L3"],
         "coverage_type": "full",
         "scope_domains": [],
-        "planned_date": str(date.today()),
+        "planned_date": str(timezone.localdate()),
         "auditor_name": "",
     }
     program.planned_audits = [audit_entry]
@@ -289,7 +290,7 @@ def test_auto_validate_warns_when_l3_prep_missing_l2_items(
 
     prep = AuditPrep.objects.create(
         plant=plant, framework=tisax_l3, title="L3 senza L2",
-        audit_date=date.today(), status="in_corso", created_by=user,
+        audit_date=timezone.localdate(), status="in_corso", created_by=user,
     )
     EvidenceItem.objects.create(
         audit_prep=prep, control_instance=l3_a,
@@ -326,21 +327,21 @@ def test_auto_validate_l2_satisfied_by_l3_extends_evidence(
     doc = Document.objects.create(
         plant=plant, title="Procedura X", status="approvato",
         category="procedura", document_type="procedura",
-        expiry_date=date.today() + timedelta(days=365),
+        expiry_date=timezone.localdate() + timedelta(days=365),
         created_by=user,
     )
     doc.control_refs.add(l3_a)
 
     ev = Evidence.objects.create(
         plant=plant, title="Screenshot config", evidence_type="screenshot",
-        valid_until=date.today() + timedelta(days=180),
+        valid_until=timezone.localdate() + timedelta(days=180),
         uploaded_by=user, created_by=user,
     )
     ev.control_instances.add(l3_a)
 
     prep = AuditPrep.objects.create(
         plant=plant, framework=tisax_l3, title="Prep L3 con L2 esteso",
-        audit_date=date.today(), status="in_corso", created_by=user,
+        audit_date=timezone.localdate(), status="in_corso", created_by=user,
     )
     EvidenceItem.objects.create(
         audit_prep=prep, control_instance=l2_a,
@@ -375,7 +376,7 @@ def test_auto_validate_no_warning_when_l3_prep_includes_l2(
 
     prep = AuditPrep.objects.create(
         plant=plant, framework=tisax_l3, title="L3 completo",
-        audit_date=date.today(), status="in_corso", created_by=user,
+        audit_date=timezone.localdate(), status="in_corso", created_by=user,
     )
     EvidenceItem.objects.create(
         audit_prep=prep, control_instance=l2_a,

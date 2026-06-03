@@ -75,7 +75,7 @@ class Asset(BaseModel):
         if not self.last_change_date:
             return False
         from django.utils import timezone
-        delta = timezone.now().date() - self.last_change_date
+        delta = timezone.localdate() - self.last_change_date
         return delta.days <= 30
 
     @property
@@ -84,7 +84,7 @@ class Asset(BaseModel):
         if not self.last_change_date:
             return None
         from django.utils import timezone
-        return (timezone.now().date() - self.last_change_date).days
+        return (timezone.localdate() - self.last_change_date).days
 
     @property
     def risk_score(self):
@@ -142,7 +142,7 @@ class AssetIT(Asset):
     @property
     def is_eol(self):
         from django.utils import timezone
-        return self.eol_date and self.eol_date < timezone.now().date()
+        return self.eol_date and self.eol_date < timezone.localdate()
 
     @property
     def exposure_score(self):
@@ -249,14 +249,14 @@ class AssetSW(Asset):
     @property
     def is_eos(self):
         from django.utils import timezone
-        return bool(self.end_of_support and self.end_of_support < timezone.now().date())
+        return bool(self.end_of_support and self.end_of_support < timezone.localdate())
 
     @property
     def days_to_eos(self):
         if not self.end_of_support:
             return None
         from django.utils import timezone
-        return (self.end_of_support - timezone.now().date()).days
+        return (self.end_of_support - timezone.localdate()).days
 
     class Meta:
         verbose_name = "Asset SW"

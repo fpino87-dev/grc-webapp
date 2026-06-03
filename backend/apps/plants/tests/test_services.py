@@ -6,6 +6,7 @@ delete_plant (blocco dipendenze, force non-superuser, cascata force).
 import datetime
 
 import pytest
+from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 
@@ -44,7 +45,7 @@ def superuser(db):
 def test_get_active_frameworks_returns_only_active_for_plant(plant_nis2, framework_iso):
     PlantFramework.objects.create(
         plant=plant_nis2, framework=framework_iso,
-        active_from=datetime.date.today(), active=True,
+        active_from=timezone.localdate(), active=True,
     )
     result = get_active_frameworks(plant_nis2)
     assert list(result) == [framework_iso]
@@ -54,18 +55,18 @@ def test_get_active_frameworks_returns_only_active_for_plant(plant_nis2, framewo
 def test_get_active_frameworks_excludes_inactive(plant_nis2, framework_iso):
     PlantFramework.objects.create(
         plant=plant_nis2, framework=framework_iso,
-        active_from=datetime.date.today(), active=False,
+        active_from=timezone.localdate(), active=False,
     )
     assert list(get_active_frameworks(plant_nis2)) == []
 
 
 @pytest.mark.django_db
 def test_get_active_frameworks_excludes_archived(plant_nis2, framework_iso):
-    framework_iso.archived_at = datetime.date.today()
+    framework_iso.archived_at = timezone.localdate()
     framework_iso.save(update_fields=["archived_at"])
     PlantFramework.objects.create(
         plant=plant_nis2, framework=framework_iso,
-        active_from=datetime.date.today(), active=True,
+        active_from=timezone.localdate(), active=True,
     )
     assert list(get_active_frameworks(plant_nis2)) == []
 
@@ -87,7 +88,7 @@ def test_get_active_frameworks_none_plant_returns_all_non_archived(framework_iso
 def test_get_active_framework_codes(plant_nis2, framework_iso):
     PlantFramework.objects.create(
         plant=plant_nis2, framework=framework_iso,
-        active_from=datetime.date.today(), active=True,
+        active_from=timezone.localdate(), active=True,
     )
     assert get_active_framework_codes(plant_nis2) == ["ISO27001"]
 

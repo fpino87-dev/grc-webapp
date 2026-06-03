@@ -1,5 +1,6 @@
 """Test API controlli — framework, domini, istanze."""
 import pytest
+from django.utils import timezone
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
@@ -42,7 +43,7 @@ def framework(db):
     from datetime import date
     return Framework.objects.create(
         code="ISO27001-TEST", name="ISO 27001 Test", version="2022",
-        published_at=date.today(),
+        published_at=timezone.localdate(),
     )
 
 
@@ -76,7 +77,7 @@ def plant_framework(db, plant, framework, user):
     from datetime import date
     return PlantFramework.objects.create(
         plant=plant, framework=framework,
-        active_from=date.today(), level="L2", active=True,
+        active_from=timezone.localdate(), level="L2", active=True,
     )
 
 
@@ -115,7 +116,7 @@ def test_retrieve_framework(client, framework):
 @pytest.mark.django_db
 def test_create_framework(client):
     from datetime import date
-    payload = {"code": "NIS2-TEST", "name": "NIS2 Test", "version": "2022", "published_at": str(date.today())}
+    payload = {"code": "NIS2-TEST", "name": "NIS2 Test", "version": "2022", "published_at": str(timezone.localdate())}
     resp = client.post(URL_FRAMEWORKS, payload, format="json")
     assert resp.status_code == 201
 
@@ -278,8 +279,8 @@ def test_pm_does_not_see_control_instance_of_other_plant(db, framework, control)
         code="CT-SC-B", name="B", country="IT",
         nis2_scope="non_soggetto", status="attivo",
     )
-    PlantFramework.objects.create(plant=plant_a, framework=framework, active_from=date.today(), active=True)
-    PlantFramework.objects.create(plant=plant_b, framework=framework, active_from=date.today(), active=True)
+    PlantFramework.objects.create(plant=plant_a, framework=framework, active_from=timezone.localdate(), active=True)
+    PlantFramework.objects.create(plant=plant_b, framework=framework, active_from=timezone.localdate(), active=True)
     ControlInstance.objects.create(plant=plant_a, control=control)
     ControlInstance.objects.create(plant=plant_b, control=control)
 

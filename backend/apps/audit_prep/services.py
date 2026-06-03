@@ -70,12 +70,12 @@ def open_finding(audit_prep, finding_type: str, title: str,
     if rule_type:
         try:
             from apps.compliance_schedule.services import get_due_date
-            base_date = audit_date if hasattr(audit_date, "year") else timezone.now().date()
+            base_date = audit_date if hasattr(audit_date, "year") else timezone.localdate()
             deadline = get_due_date(rule_type, plant=audit_prep.plant, from_date=base_date)
         except Exception:
             deadline_days = DEADLINE_DAYS.get(finding_type)
             if deadline_days:
-                base_date = audit_date if hasattr(audit_date, "year") else timezone.now().date()
+                base_date = audit_date if hasattr(audit_date, "year") else timezone.localdate()
                 deadline = base_date + datetime.timedelta(days=deadline_days)
 
     finding = AuditFinding.objects.create(

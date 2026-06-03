@@ -112,7 +112,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         plant_id = request.query_params.get("plant")
         qs = self.get_queryset().filter(
             status__in=["aperto", "in_corso"],
-            due_date__lt=timezone.now().date(),
+            due_date__lt=timezone.localdate(),
         )
         if plant_id:
             qs = qs.filter(plant_id=plant_id)

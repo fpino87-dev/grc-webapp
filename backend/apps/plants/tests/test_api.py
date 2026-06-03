@@ -1,6 +1,7 @@
 import datetime
 
 import pytest
+from django.utils import timezone
 from django.urls import reverse
 
 
@@ -53,7 +54,7 @@ def framework_iso(db):
 def test_plant_framework_delete_is_soft(api_client, plant_nis2, framework_iso):
     from apps.plants.models import PlantFramework
     pf = PlantFramework.objects.create(
-        plant=plant_nis2, framework=framework_iso, active_from=datetime.date.today(),
+        plant=plant_nis2, framework=framework_iso, active_from=timezone.localdate(),
     )
     url = reverse("plant-framework-detail", args=[pf.id])
     resp = api_client.delete(url)
@@ -70,7 +71,7 @@ def test_plant_framework_recreate_after_soft_delete_reactivates(api_client, plan
     """POST con stesso (plant, framework) di un PF soft-deleted -> riattivato."""
     from apps.plants.models import PlantFramework
     pf = PlantFramework.objects.create(
-        plant=plant_nis2, framework=framework_iso, active_from=datetime.date.today(),
+        plant=plant_nis2, framework=framework_iso, active_from=timezone.localdate(),
     )
     pf.soft_delete()
     assert PlantFramework.objects.filter(pk=pf.pk).count() == 0

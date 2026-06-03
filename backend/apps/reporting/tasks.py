@@ -14,7 +14,7 @@ def generate_weekly_kpi_snapshots():
     from apps.controls.models import ControlInstance
     from .models import IsmsKpiSnapshot
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     # Monday of current week
     week_start = today - timezone.timedelta(days=today.weekday())
 

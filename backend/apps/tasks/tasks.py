@@ -22,7 +22,7 @@ def generate_scheduled_checklists(self):
     from . import services
     from .models import ChecklistRun, ChecklistTemplate
 
-    today = timezone.now().date()
+    today = timezone.localdate()
 
     # 1) Scaduti: i run non conclusi con scadenza passata diventano overdue.
     overdue_qs = ChecklistRun.objects.filter(
@@ -89,7 +89,7 @@ def compute_operational_kpis(self):
     from . import services
     from .models import KPIDefinition
 
-    week_start = services._monday_of(timezone.now().date())
+    week_start = services._monday_of(timezone.localdate())
     snapshot_count = 0
     alert_count = 0
 

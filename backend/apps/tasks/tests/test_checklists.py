@@ -2,6 +2,7 @@
 import datetime
 
 import pytest
+from django.utils import timezone
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
@@ -55,7 +56,7 @@ def template(db, plant, user):
 @pytest.mark.django_db
 def test_create_run_for_template_builds_items(template, plant):
     from apps.tasks.services import create_run_for_template
-    today = datetime.date.today()
+    today = timezone.localdate()
     run = create_run_for_template(template, plant, today)
     assert run.status == "pending"
     assert run.items.count() == 3
@@ -65,7 +66,7 @@ def test_create_run_for_template_builds_items(template, plant):
 def test_create_run_for_template_is_idempotent(template, plant):
     from apps.tasks.models import ChecklistRun
     from apps.tasks.services import create_run_for_template
-    today = datetime.date.today()
+    today = timezone.localdate()
     create_run_for_template(template, plant, today)
     create_run_for_template(template, plant, today)
     assert ChecklistRun.objects.filter(template=template, plant=plant, due_date=today).count() == 1
@@ -74,7 +75,7 @@ def test_create_run_for_template_is_idempotent(template, plant):
 @pytest.mark.django_db
 def test_complete_run_item_sets_checked_and_progresses(template, plant, user):
     from apps.tasks.services import complete_run_item, create_run_for_template
-    run = create_run_for_template(template, plant, datetime.date.today())
+    run = create_run_for_template(template, plant, timezone.localdate())
     first = run.items.first()
     complete_run_item(run, item_id=first.id, checked=True, note="ok", user=user)
     first.refresh_from_db()
@@ -88,7 +89,7 @@ def test_complete_run_item_sets_checked_and_progresses(template, plant, user):
 def test_complete_run_requires_all_mandatory(template, plant, user):
     from django.core.exceptions import ValidationError
     from apps.tasks.services import complete_run, create_run_for_template
-    run = create_run_for_template(template, plant, datetime.date.today())
+    run = create_run_for_template(template, plant, timezone.localdate())
     with pytest.raises(ValidationError):
         complete_run(run, user)
 
@@ -96,7 +97,7 @@ def test_complete_run_requires_all_mandatory(template, plant, user):
 @pytest.mark.django_db
 def test_complete_run_succeeds_when_mandatory_checked(template, plant, user):
     from apps.tasks.services import complete_run, complete_run_item, create_run_for_template
-    run = create_run_for_template(template, plant, datetime.date.today())
+    run = create_run_for_template(template, plant, timezone.localdate())
     for item in run.items.filter(template_item__is_mandatory=True):
         complete_run_item(run, item_id=item.id, checked=True, user=user)
     complete_run(run, user)
@@ -111,7 +112,7 @@ def test_complete_run_atomic_rollback_on_audit_failure(template, plant, user):
     """P1-2: se l'audit fallisce, lo stato del run NON deve restare 'completed'."""
     from unittest.mock import patch
     from apps.tasks.services import complete_run, complete_run_item, create_run_for_template
-    run = create_run_for_template(template, plant, datetime.date.today())
+    run = create_run_for_template(template, plant, timezone.localdate())
     for item in run.items.filter(template_item__is_mandatory=True):
         complete_run_item(run, item_id=item.id, checked=True, user=user)
     with patch("apps.tasks.services.log_action", side_effect=RuntimeError("boom")):
@@ -125,7 +126,7 @@ def test_complete_run_atomic_rollback_on_audit_failure(template, plant, user):
 def test_complete_run_writes_audit_log(template, plant, user):
     from core.audit import AuditLog
     from apps.tasks.services import complete_run, complete_run_item, create_run_for_template
-    run = create_run_for_template(template, plant, datetime.date.today())
+    run = create_run_for_template(template, plant, timezone.localdate())
     for item in run.items.filter(template_item__is_mandatory=True):
         complete_run_item(run, item_id=item.id, checked=True, user=user)
     complete_run(run, user)
@@ -140,7 +141,7 @@ def test_pdca_threshold_opens_cycle_after_three_incomplete(template, plant, user
     from apps.tasks.models import ChecklistRun
     from apps.tasks.services import create_run_for_template, evaluate_checklist_pdca_threshold
 
-    today = datetime.date.today()
+    today = timezone.localdate()
     for i in range(3):
         run = create_run_for_template(template, plant, today - datetime.timedelta(days=i + 1))
         run.status = "overdue"  # concluso ma con obbligatori non spuntati
@@ -156,7 +157,7 @@ def test_pdca_threshold_opens_cycle_after_three_incomplete(template, plant, user
 @pytest.mark.django_db
 def test_pdca_threshold_not_triggered_with_fewer_runs(template, plant):
     from apps.tasks.services import create_run_for_template, evaluate_checklist_pdca_threshold
-    today = datetime.date.today()
+    today = timezone.localdate()
     for i in range(2):
         run = create_run_for_template(template, plant, today - datetime.timedelta(days=i + 1))
         run.status = "overdue"
@@ -168,7 +169,7 @@ def test_pdca_threshold_not_triggered_with_fewer_runs(template, plant):
 def test_pdca_threshold_idempotent(template, plant):
     from apps.pdca.models import PdcaCycle
     from apps.tasks.services import create_run_for_template, evaluate_checklist_pdca_threshold
-    today = datetime.date.today()
+    today = timezone.localdate()
     for i in range(3):
         run = create_run_for_template(template, plant, today - datetime.timedelta(days=i + 1))
         run.status = "overdue"
@@ -218,7 +219,7 @@ def test_list_templates_filter_by_active(client, template):
 @pytest.mark.django_db
 def test_run_complete_item_action(client, template, plant, user):
     from apps.tasks.services import create_run_for_template
-    run = create_run_for_template(template, plant, datetime.date.today())
+    run = create_run_for_template(template, plant, timezone.localdate())
     item = run.items.first()
     resp = client.post(
         f"{RUNS_URL}{run.id}/complete-item/",
@@ -232,7 +233,7 @@ def test_run_complete_item_action(client, template, plant, user):
 @pytest.mark.django_db
 def test_run_complete_action_blocked_when_mandatory_open(client, template, plant):
     from apps.tasks.services import create_run_for_template
-    run = create_run_for_template(template, plant, datetime.date.today())
+    run = create_run_for_template(template, plant, timezone.localdate())
     resp = client.post(f"{RUNS_URL}{run.id}/complete/", {}, format="json")
     assert resp.status_code == 400
 
@@ -240,7 +241,7 @@ def test_run_complete_action_blocked_when_mandatory_open(client, template, plant
 @pytest.mark.django_db
 def test_run_complete_action_ok(client, template, plant, user):
     from apps.tasks.services import complete_run_item, create_run_for_template
-    run = create_run_for_template(template, plant, datetime.date.today())
+    run = create_run_for_template(template, plant, timezone.localdate())
     for item in run.items.filter(template_item__is_mandatory=True):
         complete_run_item(run, item_id=item.id, checked=True, user=user)
     resp = client.post(f"{RUNS_URL}{run.id}/complete/", {}, format="json")

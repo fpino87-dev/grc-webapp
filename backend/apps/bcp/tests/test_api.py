@@ -1,5 +1,6 @@
 """Test API BCP — piani di continuità e test."""
 import pytest
+from django.utils import timezone
 from datetime import date
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
@@ -52,7 +53,7 @@ def bcp_test(db, bcp_plan, user):
     from apps.bcp.models import BcpTest
     return BcpTest.objects.create(
         plan=bcp_plan,
-        test_date=date.today(),
+        test_date=timezone.localdate(),
         result="superato",
         created_by=user,
     )
@@ -124,7 +125,7 @@ def test_list_bcp_tests(client):
 def test_create_bcp_test(client, bcp_plan):
     payload = {
         "plan": str(bcp_plan.id),
-        "test_date": str(date.today()),
+        "test_date": str(timezone.localdate()),
         "result": "parziale",
     }
     resp = client.post(URL_TESTS, payload, format="json")

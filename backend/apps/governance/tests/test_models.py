@@ -1,4 +1,5 @@
 import pytest
+from django.utils import timezone
 
 from apps.governance.models import NormativeRole, RoleAssignment
 
@@ -10,7 +11,7 @@ def test_role_assignment_is_active_property():
 
     User = get_user_model()
     user = User.objects.create(username="u1")
-    today = timezone.now().date()
+    today = timezone.localdate()
     ra = RoleAssignment.objects.create(
         user=user,
         role=NormativeRole.CISO,

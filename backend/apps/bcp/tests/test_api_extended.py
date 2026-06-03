@@ -1,5 +1,6 @@
 """Test API BCP — azioni avanzate piani e test."""
 import pytest
+from django.utils import timezone
 from datetime import date
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
@@ -56,7 +57,7 @@ def test_approve_plan_action(client, bcp_plan):
 @pytest.mark.django_db
 def test_record_test_action(client, bcp_plan, user):
     payload = {
-        "test_date": str(date.today()),
+        "test_date": str(timezone.localdate()),
         "result": "superato",
         "notes": "Test completato con successo",
         "conducted_by": str(user.id),

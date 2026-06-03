@@ -25,7 +25,7 @@ def check_expiring_risk_acceptances():
     """
     from .models import RiskAssessment
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     warning_threshold = today + timezone.timedelta(days=30)
 
     User = __import__("django.contrib.auth", fromlist=["get_user_model"]).get_user_model()

@@ -9,6 +9,7 @@ percorso e verifica che le voci compaiano senza errori.
 from datetime import date, timedelta
 
 import pytest
+from django.utils import timezone
 
 
 @pytest.fixture
@@ -25,13 +26,13 @@ def test_activity_schedule_includes_supplier_for_plant(plant):
     from apps.suppliers.models import Supplier, SupplierAssessment
     from apps.compliance_schedule.services import get_activity_schedule
 
-    due = date.today() + timedelta(days=10)
+    due = timezone.localdate() + timedelta(days=10)
 
     sup = Supplier.objects.create(name="ACME Fornitore", risk_level="medio", status="attivo", evaluation_date=due)
     sup.plants.add(plant)
     SupplierAssessment.objects.create(
         supplier=sup, status="attivo",
-        assessment_date=date.today(), next_assessment_date=due,
+        assessment_date=timezone.localdate(), next_assessment_date=due,
     )
 
     # Non deve sollevare e deve includere sia il contratto sia l'assessment.
@@ -50,7 +51,7 @@ def test_activity_schedule_excludes_supplier_of_other_plant(plant):
 
     other = Plant.objects.create(code="CS-PF2", name="Plant PF2", country="IT",
                                  nis2_scope="non_soggetto", status="attivo")
-    due = date.today() + timedelta(days=10)
+    due = timezone.localdate() + timedelta(days=10)
     sup = Supplier.objects.create(name="Altro Fornitore", risk_level="medio", status="attivo", evaluation_date=due)
     sup.plants.add(other)
 

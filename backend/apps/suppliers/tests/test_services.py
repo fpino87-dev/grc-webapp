@@ -8,10 +8,10 @@ User = get_user_model()
 
 
 def _utc_today():
-    # get_expiring_contracts confronta con timezone.now().date() (UTC). I test
+    # get_expiring_contracts confronta con timezone.localdate() (UTC). I test
     # usano la stessa reference per non flakare al confine mezzanotte locale↔UTC
-    # (TIME_ZONE=Europe/Rome: di sera UTC, date.today() locale è già il giorno dopo).
-    return timezone.now().date()
+    # (TIME_ZONE=Europe/Rome: di sera UTC, timezone.localdate() locale è già il giorno dopo).
+    return timezone.localdate()
 
 
 @pytest.fixture
@@ -95,7 +95,7 @@ def test_high_risk_suppliers(plant, user):
 def test_computed_risk_level_verde(supplier, user):
     from apps.suppliers.models import SupplierAssessment
     a = SupplierAssessment.objects.create(supplier=supplier, assessed_by=user, status="completato",
-                                          assessment_date=date.today(),
+                                          assessment_date=timezone.localdate(),
                                           score_overall=85, score=85, created_by=user)
     assert a.computed_risk_level == "verde"
 
@@ -104,7 +104,7 @@ def test_computed_risk_level_verde(supplier, user):
 def test_computed_risk_level_giallo(supplier, user):
     from apps.suppliers.models import SupplierAssessment
     a = SupplierAssessment.objects.create(supplier=supplier, assessed_by=user, status="completato",
-                                          assessment_date=date.today(),
+                                          assessment_date=timezone.localdate(),
                                           score_overall=65, score=65, created_by=user)
     assert a.computed_risk_level == "giallo"
 
@@ -113,7 +113,7 @@ def test_computed_risk_level_giallo(supplier, user):
 def test_computed_risk_level_rosso(supplier, user):
     from apps.suppliers.models import SupplierAssessment
     a = SupplierAssessment.objects.create(supplier=supplier, assessed_by=user, status="completato",
-                                          assessment_date=date.today(),
+                                          assessment_date=timezone.localdate(),
                                           score_overall=40, score=40, created_by=user)
     assert a.computed_risk_level == "rosso"
 
@@ -122,5 +122,5 @@ def test_computed_risk_level_rosso(supplier, user):
 def test_computed_risk_level_nd_when_no_score(supplier, user):
     from apps.suppliers.models import SupplierAssessment
     a = SupplierAssessment.objects.create(supplier=supplier, assessed_by=user, status="pianificato",
-                                          assessment_date=date.today(), created_by=user)
+                                          assessment_date=timezone.localdate(), created_by=user)
     assert a.computed_risk_level == "nd"

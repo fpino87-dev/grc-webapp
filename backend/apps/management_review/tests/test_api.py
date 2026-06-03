@@ -1,5 +1,6 @@
 """Test API revisione direzione."""
 import pytest
+from django.utils import timezone
 from datetime import date
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
@@ -40,7 +41,7 @@ def review(db, plant, user):
     return ManagementReview.objects.create(
         plant=plant,
         title="Revisione Q1 2026",
-        review_date=date.today(),
+        review_date=timezone.localdate(),
         status="pianificato",
         created_by=user,
     )
@@ -53,7 +54,7 @@ def action(db, review, user):
         review=review,
         description="Implementare controllo accessi",
         owner=user,
-        due_date=date.today(),
+        due_date=timezone.localdate(),
         status="aperto",
         created_by=user,
     )
@@ -78,7 +79,7 @@ def test_create_review(client, plant):
     payload = {
         "plant": str(plant.id),
         "title": "Revisione Annuale 2026",
-        "review_date": str(date.today()),
+        "review_date": str(timezone.localdate()),
         "status": "pianificato",
     }
     resp = client.post(URL_REVIEWS, payload, format="json")
@@ -126,7 +127,7 @@ def test_create_review_action(client, review, user):
         "review": str(review.id),
         "description": "Aggiornare documentazione sicurezza",
         "owner": str(user.id),
-        "due_date": str(date.today()),
+        "due_date": str(timezone.localdate()),
         "status": "aperto",
     }
     resp = client.post(URL_ACTIONS, payload, format="json")

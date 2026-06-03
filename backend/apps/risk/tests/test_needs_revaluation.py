@@ -8,6 +8,7 @@ Prima:
   per sempre (a meno di rinnovo accettazione, valido solo per gli accettati).
 """
 import pytest
+from django.utils import timezone
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
@@ -78,7 +79,7 @@ def test_complete_clears_revaluation_flag(sa_client, assessment):
     """Ri-eseguire 'Completa' chiude il flag da rivalutare."""
     from django.utils import timezone
     assessment.needs_revaluation = True
-    assessment.needs_revaluation_since = timezone.now().date()
+    assessment.needs_revaluation_since = timezone.localdate()
     assessment.save(update_fields=["needs_revaluation", "needs_revaluation_since"])
 
     res = sa_client.post(f"/api/v1/risk/assessments/{assessment.pk}/complete/")

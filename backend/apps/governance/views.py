@@ -57,7 +57,7 @@ class RoleAssignmentViewSet(viewsets.ModelViewSet):
 
         assignment = self.get_object()
 
-        if assignment.valid_until and assignment.valid_until < timezone.now().date():
+        if assignment.valid_until and assignment.valid_until < timezone.localdate():
             return Response({"error": _("Questo ruolo è già terminato.")}, status=400)
 
         reason = request.data.get("reason", "")
@@ -149,7 +149,7 @@ class RoleAssignmentViewSet(viewsets.ModelViewSet):
 
         days   = int(request.query_params.get("days", 30))
         result = get_expiring_roles(days)
-        today  = timezone.now().date()
+        today  = timezone.localdate()
 
         return Response({
             "expiring": [

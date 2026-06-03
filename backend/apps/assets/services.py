@@ -11,7 +11,7 @@ def get_assets_by_plant(plant_id):
 
 
 def get_eol_assets():
-    return AssetIT.objects.filter(eol_date__lte=timezone.now().date()).select_related("plant")
+    return AssetIT.objects.filter(eol_date__lte=timezone.localdate()).select_related("plant")
 
 
 def get_critical_assets(plant_id):
@@ -50,11 +50,11 @@ def register_change(asset, user, change_ref: str,
     Atomico: o si aggiornano asset + cascate + audit insieme, o niente.
     """
     asset.last_change_ref = change_ref
-    asset.last_change_date = timezone.now().date()
+    asset.last_change_date = timezone.localdate()
     asset.last_change_desc = change_desc
     asset.change_portal_url = portal_url
     asset.needs_revaluation = True
-    asset.needs_revaluation_since = timezone.now().date()
+    asset.needs_revaluation_since = timezone.localdate()
     asset.save(update_fields=[
         "last_change_ref", "last_change_date", "last_change_desc",
         "change_portal_url", "needs_revaluation",
@@ -67,7 +67,7 @@ def register_change(asset, user, change_ref: str,
         "processes": 0,
     }
 
-    today = timezone.now().date()
+    today = timezone.localdate()
 
     # Numero di processi BIA in cui l'asset è coinvolto (solo conteggio).
     affected["processes"] = asset.processes.filter(deleted_at__isnull=True).count()
@@ -128,7 +128,7 @@ def clear_revaluation_flag(asset, user, notes: str = "") -> None:
     Segna l'asset come rivalutato dopo un change.
     Chiama questo dopo aver verificato controlli e rischi.
     """
-    today = timezone.now().date()
+    today = timezone.localdate()
     asset.needs_revaluation = False
     asset.needs_revaluation_since = None
     asset.save(update_fields=[

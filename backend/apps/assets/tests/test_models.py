@@ -31,7 +31,7 @@ def test_asset_it_is_eol_when_past(plant, user):
     from apps.assets.models import AssetIT
     a = AssetIT.objects.create(
         plant=plant, name="EOL Asset", asset_type="IT", criticality=1,
-        eol_date=timezone.now().date() - timedelta(days=1), created_by=user,
+        eol_date=timezone.localdate() - timedelta(days=1), created_by=user,
     )
     assert a.is_eol is True
 
@@ -41,7 +41,7 @@ def test_asset_it_is_eol_false_when_future(plant, user):
     from apps.assets.models import AssetIT
     a = AssetIT.objects.create(
         plant=plant, name="Future Asset", asset_type="IT", criticality=1,
-        eol_date=timezone.now().date() + timedelta(days=365), created_by=user,
+        eol_date=timezone.localdate() + timedelta(days=365), created_by=user,
     )
     assert a.is_eol is False
 
@@ -78,7 +78,7 @@ def test_asset_it_exposure_score_eol_increases(plant, user):
     )
     a_eol = AssetIT.objects.create(
         plant=plant, name="EOL Exposed", asset_type="IT", criticality=3,
-        eol_date=timezone.now().date() - timedelta(days=1), created_by=user,
+        eol_date=timezone.localdate() - timedelta(days=1), created_by=user,
     )
     assert a_eol.exposure_score >= a_normal.exposure_score
 
@@ -120,7 +120,7 @@ def test_asset_has_recent_change_true(plant, user):
     from apps.assets.models import AssetIT
     a = AssetIT.objects.create(
         plant=plant, name="Changed", asset_type="IT", criticality=2,
-        last_change_date=timezone.now().date(), created_by=user,
+        last_change_date=timezone.localdate(), created_by=user,
     )
     assert a.has_recent_change is True
 
@@ -128,7 +128,7 @@ def test_asset_has_recent_change_true(plant, user):
 @pytest.mark.django_db
 def test_asset_has_recent_change_false_when_old(plant, user):
     from apps.assets.models import AssetIT
-    old = timezone.now().date() - timedelta(days=60)
+    old = timezone.localdate() - timedelta(days=60)
     a = AssetIT.objects.create(
         plant=plant, name="Old Change", asset_type="IT", criticality=2,
         last_change_date=old, created_by=user,

@@ -29,7 +29,7 @@ def check_expired_evidences():
     from django.contrib.auth import get_user_model
 
     User = get_user_model()
-    today = timezone.now().date()
+    today = timezone.localdate()
     system_user = User.objects.filter(is_superuser=True).first()
 
     from django.db.models import Exists, OuterRef

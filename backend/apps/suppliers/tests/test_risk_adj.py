@@ -64,7 +64,7 @@ def _eval(supplier, user, level):
 
 def _questionnaire(supplier, user, template, risk_result, evaluation_date=None, expired=False):
     """Helper: crea un questionario risposto con risk_result desiderato."""
-    evaluation_date = evaluation_date or timezone.now().date()
+    evaluation_date = evaluation_date or timezone.localdate()
     if expired:
         expires_at = evaluation_date - datetime.timedelta(days=1)
     else:
@@ -245,7 +245,7 @@ def test_register_evaluation_triggers_recompute(supplier, user, template):
         status="inviato",
         created_by=user,
     )
-    register_evaluation(q, timezone.now().date(), "critico", user)
+    register_evaluation(q, timezone.localdate(), "critico", user)
     supplier.refresh_from_db()
     assert supplier.risk_adj == "critico"
 
@@ -256,7 +256,7 @@ def _approved_assessment(supplier, user, score_overall, assessment_date=None):
     return SupplierAssessment.objects.create(
         supplier=supplier,
         assessed_by=user,
-        assessment_date=assessment_date or timezone.now().date(),
+        assessment_date=assessment_date or timezone.localdate(),
         status="approvato",
         score_overall=score_overall,
         score=score_overall,
@@ -277,7 +277,7 @@ def test_audit_only_within_validity(supplier, user):
 
 @pytest.mark.django_db
 def test_audit_expired_does_not_contribute(supplier, user, config):
-    old_date = timezone.now().date() - datetime.timedelta(days=config.assessment_validity_months * 30 + 10)
+    old_date = timezone.localdate() - datetime.timedelta(days=config.assessment_validity_months * 30 + 10)
     _approved_assessment(supplier, user, score_overall=10, assessment_date=old_date)
     recompute_risk_adj(supplier)
     supplier.refresh_from_db()
@@ -310,7 +310,7 @@ def test_approve_assessment_triggers_recompute(supplier, user):
     assessment = SupplierAssessment.objects.create(
         supplier=supplier,
         assessed_by=user,
-        assessment_date=timezone.now().date(),
+        assessment_date=timezone.localdate(),
         status="completato",
         score_overall=10,  # → critico
         score=10,

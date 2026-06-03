@@ -1,5 +1,6 @@
 """Test API cicli PDCA."""
 import pytest
+from django.utils import timezone
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
@@ -135,12 +136,12 @@ def test_delete_cycle_blocked_with_open_finding(client, cycle, plant, user):
 
     prep = AuditPrep.objects.create(
         plant=plant, title="Audit",
-        audit_date=date.today(), status="in_corso", created_by=user,
+        audit_date=timezone.localdate(), status="in_corso", created_by=user,
     )
     AuditFinding.objects.create(
         audit_prep=prep, pdca_cycle=cycle,
         finding_type="major_nc", title="open finding",
-        description="d", audit_date=date.today(),
+        description="d", audit_date=timezone.localdate(),
         status="open", created_by=user,
     )
     resp = client.delete(
@@ -161,12 +162,12 @@ def test_delete_cycle_cascades_auto_generated_open_finding(client, cycle, plant,
 
     prep = AuditPrep.objects.create(
         plant=plant, title="Audit",
-        audit_date=date.today(), status="in_corso", created_by=user,
+        audit_date=timezone.localdate(), status="in_corso", created_by=user,
     )
     auto_finding = AuditFinding.objects.create(
         audit_prep=prep, pdca_cycle=cycle,
         finding_type="minor_nc", title="auto-generated finding",
-        description="d", audit_date=date.today(),
+        description="d", audit_date=timezone.localdate(),
         status="open", auto_generated=True, created_by=user,
     )
     resp = client.delete(
@@ -191,18 +192,18 @@ def test_delete_cycle_blocked_with_manual_open_finding_even_with_auto(
 
     prep = AuditPrep.objects.create(
         plant=plant, title="Audit",
-        audit_date=date.today(), status="in_corso", created_by=user,
+        audit_date=timezone.localdate(), status="in_corso", created_by=user,
     )
     AuditFinding.objects.create(
         audit_prep=prep, pdca_cycle=cycle,
         finding_type="major_nc", title="manual finding",
-        description="d", audit_date=date.today(),
+        description="d", audit_date=timezone.localdate(),
         status="open", auto_generated=False, created_by=user,
     )
     AuditFinding.objects.create(
         audit_prep=prep, pdca_cycle=cycle,
         finding_type="minor_nc", title="auto finding",
-        description="d", audit_date=date.today(),
+        description="d", audit_date=timezone.localdate(),
         status="open", auto_generated=True, created_by=user,
     )
     resp = client.delete(
@@ -222,12 +223,12 @@ def test_delete_cycle_allowed_with_only_closed_findings(client, cycle, plant, us
 
     prep = AuditPrep.objects.create(
         plant=plant, title="Audit",
-        audit_date=date.today(), status="in_corso", created_by=user,
+        audit_date=timezone.localdate(), status="in_corso", created_by=user,
     )
     AuditFinding.objects.create(
         audit_prep=prep, pdca_cycle=cycle,
         finding_type="minor_nc", title="closed finding",
-        description="d", audit_date=date.today(),
+        description="d", audit_date=timezone.localdate(),
         status="closed", created_by=user,
     )
     resp = client.delete(

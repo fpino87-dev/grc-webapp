@@ -373,7 +373,7 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             .values("timestamp_utc", "user_email_at_time", "payload")
         )
 
-        today = timezone.now().date()
+        today = timezone.localdate()
         current_evidences = [
             {
                 "id": str(e.id),
@@ -983,7 +983,7 @@ class AuditPackageView(APIView):
 
         controls_list = sorted(merged.values(), key=lambda x: _sort_control_key(x["external_id"]))
 
-        today = timezone.now().date()
+        today = timezone.localdate()
         zip_name = f"audit_{zip_fw_label}_{plant_code}_{today.isoformat()}"
 
         buffer = io.BytesIO()

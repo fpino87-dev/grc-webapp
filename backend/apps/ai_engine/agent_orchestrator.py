@@ -50,7 +50,7 @@ def _urgency(days_overdue: int | None, base: int) -> str:
 
 def build_gaps(user, plant_id) -> tuple[list[dict], int]:
     """Costruisce la lista unificata e prioritizzata di gap. Tronca a 20."""
-    today = timezone.now().date()
+    today = timezone.localdate()
     gaps: list[dict] = []
 
     # 1. Documenti

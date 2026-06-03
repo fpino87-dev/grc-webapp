@@ -300,7 +300,7 @@ def _render_history_table(history) -> Table:
 
 
 def _render_assessments_table(assessments, config: SupplierEvaluationConfig) -> Table:
-    validity_cutoff = timezone.now().date() - datetime.timedelta(days=config.assessment_validity_months * 30)
+    validity_cutoff = timezone.localdate() - datetime.timedelta(days=config.assessment_validity_months * 30)
     rows = [["Data", "Score", "Classe derivata", "Validità", "Approvato da", "Note"]]
     for a in assessments:
         valid = a.assessment_date >= validity_cutoff

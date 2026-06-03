@@ -310,9 +310,9 @@ class AuditFindingViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             try:
                 audit_date = dateparser.parse(audit_date_raw).date()
             except Exception:
-                audit_date = date.today()
+                audit_date = timezone.localdate()
         else:
-            audit_date = audit_date_raw or date.today()
+            audit_date = audit_date_raw or timezone.localdate()
 
         finding = services.open_finding(
             audit_prep=serializer.validated_data["audit_prep"],

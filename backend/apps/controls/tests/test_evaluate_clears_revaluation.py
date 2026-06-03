@@ -6,6 +6,7 @@ Prima `evaluate_control` non azzerava mai il flag → un ControlInstance marcato
 import datetime
 
 import pytest
+from django.utils import timezone
 
 
 @pytest.mark.django_db
@@ -24,7 +25,7 @@ def test_evaluate_clears_needs_revaluation():
     ctrl = Control.objects.create(framework=fw, external_id="A.5.1", translations={"title": {"it": "x"}})
     ci = ControlInstance.objects.create(
         plant=plant, control=ctrl, status="compliant",
-        needs_revaluation=True, needs_revaluation_since=datetime.date.today(),
+        needs_revaluation=True, needs_revaluation_since=timezone.localdate(),
     )
 
     # "gap" non richiede evidenze: rivalutazione che chiude il flag.

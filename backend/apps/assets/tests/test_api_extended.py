@@ -1,5 +1,6 @@
 """Test API assets — azioni avanzate e filtri."""
 import pytest
+from django.utils import timezone
 from datetime import date, timedelta
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
@@ -43,7 +44,7 @@ def asset_it(db, plant, user):
         name="Server DB Extended",
         asset_type="IT",
         criticality=4,
-        last_change_date=date.today(),
+        last_change_date=timezone.localdate(),
         created_by=user,
     )
 
@@ -75,7 +76,7 @@ def test_asset_it_needs_revaluation(client):
 
 @pytest.mark.django_db
 def test_asset_it_register_change(client, asset_it):
-    payload = {"change_notes": "Aggiornato firmware", "change_date": str(date.today())}
+    payload = {"change_notes": "Aggiornato firmware", "change_date": str(timezone.localdate())}
     resp = client.post(f"{URL_IT}{asset_it.id}/register-change/", payload, format="json")
     assert resp.status_code in (200, 201, 400)
 

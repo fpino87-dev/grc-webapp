@@ -257,5 +257,5 @@ class UserCompetency(BaseModel):
         from django.utils import timezone
         if not self.valid_until:
             return True
-        return self.valid_until >= timezone.now().date()
+        return self.valid_until >= timezone.localdate()
 

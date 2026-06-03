@@ -1,5 +1,6 @@
 """Test API audit prep — azioni avanzate e EvidenceItem."""
 import pytest
+from django.utils import timezone
 from datetime import date
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
@@ -41,7 +42,7 @@ def framework(db):
     from apps.controls.models import Framework
     return Framework.objects.create(
         code="ISO-APX", name="ISO 27001 APX", version="2022",
-        published_at=date.today(),
+        published_at=timezone.localdate(),
     )
 
 
@@ -52,7 +53,7 @@ def audit_prep(db, plant, framework, user):
         plant=plant,
         framework=framework,
         title="Audit Extended",
-        audit_date=date.today(),
+        audit_date=timezone.localdate(),
         status="in_corso",
         created_by=user,
     )
@@ -66,7 +67,7 @@ def finding(db, audit_prep, user):
         finding_type="major_nc",
         title="Finding test",
         description="Test description",
-        audit_date=date.today(),
+        audit_date=timezone.localdate(),
         created_by=user,
     )
 
@@ -137,7 +138,7 @@ def test_create_evidence_item(client, audit_prep):
     framework = audit_prep.framework
     PlantFramework.objects.get_or_create(
         plant=plant, framework=framework,
-        defaults={"active_from": date.today(), "level": "L2", "active": True}
+        defaults={"active_from": timezone.localdate(), "level": "L2", "active": True}
     )
     dom = ControlDomain.objects.create(
         framework=framework, code="APX.1",

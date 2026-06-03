@@ -70,7 +70,7 @@ def _add_duration(base: datetime.date, value: int, unit: str) -> datetime.date:
 def get_due_date(rule_type: str, plant=None, from_date: Optional[datetime.date] = None) -> datetime.date:
     """Compute the next due date for rule_type starting from from_date (default: today)."""
     freq_val, freq_unit, _ = _get_rule(rule_type, plant)
-    base = from_date or timezone.now().date()
+    base = from_date or timezone.localdate()
     return _add_duration(base, freq_val, freq_unit)
 
 
@@ -112,7 +112,7 @@ def get_activity_schedule(plant=None, months_ahead: int = 6) -> list[dict]:
     Aggregate all upcoming expiring activities across GRC modules.
     Returns a list of dicts sorted by due_date ascending.
     """
-    today = timezone.now().date()
+    today = timezone.localdate()
     cutoff = _add_duration(today, months_ahead, "months")
     activities = []
 

@@ -23,7 +23,7 @@ def check_expired_bcp_plans():
     """
     User = get_user_model()
     system_user = User.objects.filter(is_superuser=True).first()
-    today = timezone.now().date()
+    today = timezone.localdate()
 
     plans = BcpPlan.objects.filter(
         deleted_at__isnull=True,

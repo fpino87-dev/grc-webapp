@@ -1,5 +1,6 @@
 """Test API governance — ruoli, comitati."""
 import pytest
+from django.utils import timezone
 from datetime import date
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
@@ -38,7 +39,7 @@ def role_assignment(db, user):
         user=user,
         role=NormativeRole.CISO,
         scope_type="org",
-        valid_from=date.today(),
+        valid_from=timezone.localdate(),
     )
 
 
@@ -62,7 +63,7 @@ def test_create_role_assignment(client, user):
         "user": str(user.id),
         "role": "compliance_officer",
         "scope_type": "org",
-        "valid_from": str(date.today()),
+        "valid_from": str(timezone.localdate()),
     }
     resp = client.post(URL_ROLES, payload, format="json")
     assert resp.status_code == 201
@@ -90,7 +91,7 @@ def test_in_scadenza_endpoint(client):
 
 @pytest.mark.django_db
 def test_termina_role_assignment(client, role_assignment):
-    payload = {"reason": "Cambio ruolo", "termination_date": str(date.today())}
+    payload = {"reason": "Cambio ruolo", "termination_date": str(timezone.localdate())}
     resp = client.post(f"{URL_ROLES}{role_assignment.id}/termina/", payload, format="json")
     assert resp.status_code in (200, 201)
     role_assignment.refresh_from_db()

@@ -168,7 +168,7 @@ def test_dashboard_summary_risk_and_incident_counts(plant, user):
 def test_dashboard_summary_overdue_tasks(plant, user):
     from apps.reporting.services import dashboard_summary
     from apps.tasks.models import Task
-    today = timezone.now().date()
+    today = timezone.localdate()
     Task.objects.create(plant=plant, title="late", status="aperto",
                         due_date=today - timedelta(days=2), created_by=user)
     Task.objects.create(plant=plant, title="future", status="aperto",
@@ -191,7 +191,7 @@ def make_snapshot(plant, week_start, framework="ISO27001", **extra):
 @pytest.mark.django_db
 def test_kpi_trend_orders_and_filters_framework(plant):
     from apps.reporting.services import kpi_trend
-    base = timezone.now().date()
+    base = timezone.localdate()
     make_snapshot(plant, base - timedelta(days=14), pct_compliant=50.0)
     make_snapshot(plant, base - timedelta(days=7), pct_compliant=60.0)
     make_snapshot(plant, base, framework="NIS2", pct_compliant=99.0)
@@ -207,7 +207,7 @@ def test_kpi_trend_orders_and_filters_framework(plant):
 @pytest.mark.django_db
 def test_kpi_trend_org_wide_only_when_no_plant(plant):
     from apps.reporting.services import kpi_trend
-    base = timezone.now().date()
+    base = timezone.localdate()
     make_snapshot(plant, base, pct_compliant=10.0)            # plant-specific
     make_snapshot(None, base, pct_compliant=20.0)             # org-wide
     out = kpi_trend(None, "ISO27001", 12)
@@ -245,7 +245,7 @@ def test_owner_report_risks_by_owner(plant, user):
 def test_owner_report_tasks_by_owner(plant, user):
     from apps.reporting.services import owner_report
     from apps.tasks.models import Task
-    today = timezone.now().date()
+    today = timezone.localdate()
     Task.objects.create(plant=plant, title="t1", status="aperto", assigned_to=user,
                         due_date=today - timedelta(days=1), created_by=user)
     Task.objects.create(plant=plant, title="t2", status="in_corso", assigned_to=user,
@@ -310,7 +310,7 @@ def test_risk_bia_bcp_critical_no_bcp_and_test_overdue(plant, user):
     from apps.bcp.models import BcpPlan
     from apps.bia.models import CriticalProcess
     from apps.reporting.services import risk_bia_bcp
-    today = timezone.now().date()
+    today = timezone.localdate()
 
     # Processo critico con BCP approvato ma test scaduto
     p1 = CriticalProcess.objects.create(plant=plant, name="P1", criticality=5)
@@ -330,7 +330,7 @@ def test_risk_bia_bcp_table_best_plan_and_last_test(plant, user):
     from apps.bcp.models import BcpPlan, BcpTest
     from apps.bia.models import CriticalProcess
     from apps.reporting.services import risk_bia_bcp
-    today = timezone.now().date()
+    today = timezone.localdate()
 
     proc = CriticalProcess.objects.create(plant=plant, name="ProcX", criticality=4)
     # piano approvato (preferito) con un test
@@ -384,7 +384,7 @@ def test_supplier_nda_statuses(plant, user):
     from apps.documents.models import Document
     from apps.reporting.services import _supplier_nda
     from apps.suppliers.models import Supplier
-    today = timezone.now().date()
+    today = timezone.localdate()
 
     def nda(supplier, expiry):
         Document.objects.create(

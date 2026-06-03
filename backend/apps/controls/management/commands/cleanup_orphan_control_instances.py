@@ -125,7 +125,7 @@ class Command(BaseCommand):
 
         # Snapshot CSV (sempre, dry-run o apply)
         os.makedirs(export_dir, exist_ok=True)
-        today = date.today().isoformat()
+        today = timezone.localdate().isoformat()
         fw_label = framework_code or "all"
         csv_path = os.path.join(
             export_dir,

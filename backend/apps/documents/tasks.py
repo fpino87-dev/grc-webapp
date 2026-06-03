@@ -29,7 +29,7 @@ def notify_expiring_documents():
 
     User = get_user_model()
     system_user = User.objects.filter(is_superuser=True).first()
-    today = timezone.now().date()
+    today = timezone.localdate()
 
     WINDOWS = [
         (0,  7,  "alta",  "SCADUTO"),

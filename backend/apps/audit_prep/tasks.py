@@ -33,7 +33,7 @@ def check_upcoming_audits(self):
     from apps.tasks.services import create_task
     from datetime import date
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     created = 0
 
     programs = AuditProgram.objects.filter(
@@ -146,7 +146,7 @@ def check_overdue_findings(self):
     from .models import AuditFinding
     from apps.tasks.services import create_task
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     created = 0
 
     overdue = AuditFinding.objects.filter(
@@ -214,7 +214,7 @@ def check_stale_audit_preps(self):
             priority="alta",
             source_module="M17",
             source_id=prep.pk,
-            due_date=timezone.now().date() + timezone.timedelta(days=7),
+            due_date=timezone.localdate() + timezone.timedelta(days=7),
             assign_type="role",
             assign_value="compliance_officer",
         )

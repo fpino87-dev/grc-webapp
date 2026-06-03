@@ -108,7 +108,7 @@ def _detect_finding_codes(entity, scan) -> dict[str, dict]:
 
     # Domain expiry
     if scan.domain_expiry_date:
-        days = (scan.domain_expiry_date - timezone.now().date()).days
+        days = (scan.domain_expiry_date - timezone.localdate()).days
         if days <= 30:
             detected[FindingCode.DOMAIN_EXPIRY_SOON] = {
                 "days": days,

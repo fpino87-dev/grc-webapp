@@ -231,9 +231,9 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             except Exception:
                 return Response({"error": "Data non valida."}, status=400)
         else:
-            expiry_date = timezone.now().date() + timezone.timedelta(days=365)
+            expiry_date = timezone.localdate() + timezone.timedelta(days=365)
 
-        today = timezone.now().date()
+        today = timezone.localdate()
         if expiry_date <= today:
             return Response({"error": "La nuova scadenza deve essere successiva a oggi."}, status=400)
 
@@ -267,7 +267,7 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         assessment.risk_acceptance_note = ""
         assessment.risk_acceptance_expiry = None
         assessment.needs_revaluation = True
-        assessment.needs_revaluation_since = timezone.now().date()
+        assessment.needs_revaluation_since = timezone.localdate()
         assessment.save(update_fields=[
             "risk_accepted_formally", "risk_accepted_by", "risk_accepted_at",
             "risk_acceptance_note", "risk_acceptance_expiry",
