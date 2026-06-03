@@ -6,6 +6,65 @@ from core.audit import log_action
 from .models import ManagementReview
 
 
+def get_operational_kpi_summary(plant_id) -> dict:
+    """Ultimo snapshot di ogni KPI operativo rilevante per il plant.
+
+    P2-4 (catena KPI engine → revisione direzione): la revisione di direzione
+    (ISO 27001 §9.3) deve considerare i "risultati di monitoraggio e misurazione".
+    Il KPI engine (M08) produce snapshot settimanali con soglie e stato, ma la
+    revisione finora li ignorava. Qui aggreghiamo, per ogni `KPIDefinition`
+    attiva, lo snapshot più recente rilevante per il plant — sia i KPI specifici
+    del plant sia i KPI globali (snapshot per-plant prodotti dal compute, oppure
+    snapshot globali `plant=None` da ingest API).
+    """
+    from django.db.models import Q
+    from apps.tasks.models import OperationalKpiSnapshot
+
+    snaps = (
+        OperationalKpiSnapshot.objects
+        .filter(Q(plant_id=plant_id) | Q(plant__isnull=True))
+        .filter(kpi_definition__is_active=True, kpi_definition__deleted_at__isnull=True)
+        .select_related("kpi_definition")
+        .order_by("kpi_definition_id", "-week_start", "-created_at")
+    )
+
+    latest: dict = {}
+    for s in snaps:
+        # Per ogni KPI tieni solo il primo (= più recente, per via dell'order_by);
+        # a parità di plant_id/None preferisci lo snapshot legato al plant.
+        prev = latest.get(s.kpi_definition_id)
+        if prev is None:
+            latest[s.kpi_definition_id] = s
+        elif prev.plant_id is None and s.plant_id is not None and s.week_start == prev.week_start:
+            latest[s.kpi_definition_id] = s
+
+    status_counts = {"ok": 0, "warning": 0, "critical": 0, "no_data": 0}
+    items = []
+    for s in latest.values():
+        kd = s.kpi_definition
+        status_counts[s.status] = status_counts.get(s.status, 0) + 1
+        items.append({
+            "kpi_code": kd.kpi_code,
+            "name": kd.name,
+            "unit": kd.unit,
+            "value": s.value,
+            "status": s.status,
+            "threshold_warning": kd.threshold_warning,
+            "threshold_critical": kd.threshold_critical,
+            "threshold_direction": kd.threshold_direction,
+            "week_start": s.week_start.isoformat(),
+            "scope": "plant" if s.plant_id else "global",
+        })
+
+    items.sort(key=lambda x: x["kpi_code"])
+    return {
+        "items": items,
+        "count": len(items),
+        "status_counts": status_counts,
+        "attention": status_counts["warning"] + status_counts["critical"],
+    }
+
+
 def get_kpi_snapshot(plant_id) -> dict:
     """Return a dict with key metrics for the given plant."""
     from django.db.models import Count, Q
@@ -30,6 +89,7 @@ def get_kpi_snapshot(plant_id) -> dict:
         "pct_compliant": round(compliant / total_controls * 100, 1) if total_controls else 0,
         "incidents_open": open_incidents,
         "risks_high": high_risks,
+        "operational_kpis": get_operational_kpi_summary(plant_id),
         "snapshot_at": timezone.now().isoformat(),
     }
 
