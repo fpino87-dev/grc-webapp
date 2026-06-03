@@ -142,6 +142,8 @@ class OsintSettingsSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "score_threshold_critical", "score_threshold_warning",
+            "score_threshold_attention",
+            "weight_ssl", "weight_dns", "weight_reputation", "weight_grc",
             "ssl_expiry_warning_days",
             "freq_my_domains", "freq_suppliers_critical", "freq_suppliers_other",
             "subdomain_auto_include", "anonymization_enabled",
@@ -152,6 +154,18 @@ class OsintSettingsSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id", "updated_at"]
+
+    def validate(self, attrs):
+        # I pesi SSL/DNS/Reputazione sono il denominatore per tutte le entità
+        # (il GRC vale solo per my_domain): non possono essere tutti e tre a zero,
+        # altrimenti lo score sarebbe sempre 0.
+        def _w(name):
+            return attrs.get(name, getattr(self.instance, name, 0) if self.instance else 0)
+        if _w("weight_ssl") + _w("weight_dns") + _w("weight_reputation") == 0:
+            raise serializers.ValidationError(
+                "Almeno uno tra i pesi SSL, DNS e Reputazione deve essere maggiore di zero."
+            )
+        return attrs
 
     def get_has_hibp_key(self, obj): return bool(obj.hibp_api_key)
     def get_has_virustotal_key(self, obj): return bool(obj.virustotal_api_key)

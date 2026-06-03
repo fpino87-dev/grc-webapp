@@ -18,6 +18,11 @@ export function OsintSettingsPage() {
   const [form, setForm] = useState({
     score_threshold_critical: 70,
     score_threshold_warning: 50,
+    score_threshold_attention: 30,
+    weight_ssl: 25,
+    weight_dns: 25,
+    weight_reputation: 30,
+    weight_grc: 20,
     ssl_expiry_warning_days: 60,
     freq_my_domains: "weekly" as ScanFrequency,
     freq_suppliers_critical: "weekly" as ScanFrequency,
@@ -42,6 +47,11 @@ export function OsintSettingsPage() {
         ...prev,
         score_threshold_critical: settings.score_threshold_critical,
         score_threshold_warning: settings.score_threshold_warning,
+        score_threshold_attention: settings.score_threshold_attention,
+        weight_ssl: settings.weight_ssl,
+        weight_dns: settings.weight_dns,
+        weight_reputation: settings.weight_reputation,
+        weight_grc: settings.weight_grc,
         ssl_expiry_warning_days: settings.ssl_expiry_warning_days,
         freq_my_domains: settings.freq_my_domains,
         freq_suppliers_critical: settings.freq_suppliers_critical,
@@ -57,6 +67,11 @@ export function OsintSettingsPage() {
       const payload: Record<string, unknown> = {
         score_threshold_critical: form.score_threshold_critical,
         score_threshold_warning: form.score_threshold_warning,
+        score_threshold_attention: form.score_threshold_attention,
+        weight_ssl: form.weight_ssl,
+        weight_dns: form.weight_dns,
+        weight_reputation: form.weight_reputation,
+        weight_grc: form.weight_grc,
         ssl_expiry_warning_days: form.ssl_expiry_warning_days,
         freq_my_domains: form.freq_my_domains,
         freq_suppliers_critical: form.freq_suppliers_critical,
@@ -124,7 +139,7 @@ export function OsintSettingsPage() {
       <section className="bg-white border rounded-xl p-5 space-y-4">
         <h2 className="font-semibold text-gray-800">{t("osint.settings.thresholds")}</h2>
         <p className="text-xs text-gray-500">{t("osint.settings.thresholds_hint")}</p>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <label className="block">
             <span className="text-sm font-medium text-gray-700">{t("osint.settings.threshold_critical")}</span>
             <input
@@ -147,6 +162,17 @@ export function OsintSettingsPage() {
               className="mt-1 block w-full border rounded px-3 py-2 text-sm"
             />
           </label>
+          <label className="block">
+            <span className="text-sm font-medium text-gray-700">{t("osint.settings.threshold_attention")}</span>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={form.score_threshold_attention}
+              onChange={e => set("score_threshold_attention", Number(e.target.value))}
+              className="mt-1 block w-full border rounded px-3 py-2 text-sm"
+            />
+          </label>
         </div>
         <div className="border-t pt-4">
           <label className="block">
@@ -163,6 +189,58 @@ export function OsintSettingsPage() {
               />
               <span className="text-sm text-gray-500">{t("osint.settings.days")}</span>
             </div>
+          </label>
+        </div>
+      </section>
+
+      {/* Score weights */}
+      <section className="bg-white border rounded-xl p-5 space-y-4">
+        <h2 className="font-semibold text-gray-800">{t("osint.settings.weights")}</h2>
+        <p className="text-xs text-gray-500">{t("osint.settings.weights_hint")}</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <label className="block">
+            <span className="text-sm font-medium text-gray-700">{t("osint.settings.weight_ssl")}</span>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={form.weight_ssl}
+              onChange={e => set("weight_ssl", Number(e.target.value))}
+              className="mt-1 block w-full border rounded px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-gray-700">{t("osint.settings.weight_dns")}</span>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={form.weight_dns}
+              onChange={e => set("weight_dns", Number(e.target.value))}
+              className="mt-1 block w-full border rounded px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-gray-700">{t("osint.settings.weight_reputation")}</span>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={form.weight_reputation}
+              onChange={e => set("weight_reputation", Number(e.target.value))}
+              className="mt-1 block w-full border rounded px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-gray-700">{t("osint.settings.weight_grc")}</span>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={form.weight_grc}
+              onChange={e => set("weight_grc", Number(e.target.value))}
+              className="mt-1 block w-full border rounded px-3 py-2 text-sm"
+            />
           </label>
         </div>
       </section>

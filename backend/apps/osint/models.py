@@ -342,6 +342,20 @@ class OsintSettings(BaseModel):
 
     score_threshold_critical = models.IntegerField(default=70)
     score_threshold_warning = models.IntegerField(default=50)
+    score_threshold_attention = models.IntegerField(
+        default=30,
+        help_text="Score ≥ questo valore (ma < warning) → 'attention'. Sotto → 'ok'.",
+    )
+
+    # Pesi delle 4 dimensioni dello score aggregato. Per le entità my_domain si
+    # usano tutti e 4; per fornitori/asset il GRC non è applicabile e i 3 pesi
+    # restanti vengono ri-normalizzati. I pesi non devono sommare a 100: lo score
+    # è una media pesata normalizzata sul totale dei pesi usati.
+    weight_ssl = models.PositiveIntegerField(default=25)
+    weight_dns = models.PositiveIntegerField(default=25)
+    weight_reputation = models.PositiveIntegerField(default=30)
+    weight_grc = models.PositiveIntegerField(default=20)
+
     ssl_expiry_warning_days = models.PositiveIntegerField(
         default=60,
         help_text="Giorni rimanenti SSL sotto i quali lo score SSL sale a 40 (attenzione).",

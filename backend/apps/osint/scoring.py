@@ -155,12 +155,20 @@ def compute_scores(entity: "OsintEntity", scan: "OsintScan", settings=None) -> N
     scan.score_reputation = rep
     scan.score_grc_context = grc
 
+    # Pesi configurabili (OsintSettings). Lo score è una media pesata normalizzata
+    # sul totale dei pesi usati: i pesi NON devono sommare a 100. Per le entità
+    # non-my_domain il GRC non si applica e i 3 pesi restanti si ri-normalizzano
+    # da soli (escludendo weight_grc dalla somma).
+    w_ssl = settings.weight_ssl
+    w_dns = settings.weight_dns
+    w_rep = settings.weight_reputation
     if entity.entity_type == EntityType.MY_DOMAIN:
-        total = (ssl * 0.25) + (dns * 0.25) + (rep * 0.30) + (grc * 0.20)
+        pairs = [(ssl, w_ssl), (dns, w_dns), (rep, w_rep), (grc, settings.weight_grc)]
     else:
-        # GRC non applicabile → pesi redistribuiti SSL 30% | DNS 30% | Rep 40%
-        total = (ssl * 0.30) + (dns * 0.30) + (rep * 0.40)
+        pairs = [(ssl, w_ssl), (dns, w_dns), (rep, w_rep)]
 
+    total_w = sum(w for _, w in pairs) or 1
+    total = sum(v * w for v, w in pairs) / total_w
     scan.score_total = round(total)
 
 
@@ -178,12 +186,21 @@ def score_delta(entity: "OsintEntity", current_scan: "OsintScan") -> int:
     return current_scan.score_total - prev.score_total
 
 
-def classify_score(score: int) -> str:
-    """Ritorna 'critical' | 'warning' | 'attention' | 'ok'."""
-    if score >= 70:
+def classify_score(score: int, settings=None) -> str:
+    """Ritorna 'critical' | 'warning' | 'attention' | 'ok'.
+
+    Le soglie sono configurabili via OsintSettings. Se `settings` non è passato si
+    usano i default storici (70/50/30) — così le chiamate pure e i test restano
+    invariati senza toccare il DB."""
+    crit, warn, att = 70, 50, 30
+    if settings is not None:
+        crit = settings.score_threshold_critical
+        warn = settings.score_threshold_warning
+        att = getattr(settings, "score_threshold_attention", 30)
+    if score >= crit:
         return "critical"
-    if score >= 50:
+    if score >= warn:
         return "warning"
-    if score >= 30:
+    if score >= att:
         return "attention"
     return "ok"

@@ -316,11 +316,12 @@ class OsintDashboardView(viewsets.GenericViewSet):
         entities = OsintEntity.objects.filter(is_active=True, deleted_at__isnull=True)
         total = entities.count()
 
-        # Score classification via campo denormalizzato.
+        # Score classification via campo denormalizzato (soglie configurabili).
+        settings = OsintSettings.load()
         critical_count = 0
         warning_count = 0
         for score in entities.exclude(last_score_total__isnull=True).values_list("last_score_total", flat=True):
-            cls = classify_score(score)
+            cls = classify_score(score, settings)
             if cls == "critical":
                 critical_count += 1
             elif cls == "warning":
@@ -465,7 +466,7 @@ class OsintAiView(viewsets.GenericViewSet):
             last = e.scans.filter(status="completed").order_by("-scan_date").first()
             if not last:
                 continue
-            cls = classify_score(last.score_total)
+            cls = classify_score(last.score_total, settings)
             if analysis_type != "board_report" and cls == "ok":
                 continue
             entity_data.append({

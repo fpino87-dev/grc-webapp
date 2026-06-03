@@ -190,4 +190,108 @@ class TestClassifyScore:
 
     def test_ok(self):
         assert classify_score(29) == "ok"
+
+    def test_custom_thresholds_from_settings(self):
+        from apps.osint.models import OsintSettings
+        s = OsintSettings.load()
+        s.score_threshold_critical = 90
+        s.score_threshold_warning = 60
+        s.score_threshold_attention = 20
+        # 75 era 'critical' coi default, ora 'warning' con la soglia critica a 90
+        assert classify_score(75, s) == "warning"
+        assert classify_score(95, s) == "critical"
+        assert classify_score(25, s) == "attention"
+        assert classify_score(19, s) == "ok"
+
+
+class TestConfigurableWeights:
+    """compute_scores usa i pesi configurabili e normalizza sul totale dei pesi."""
+
+    def _entity(self, entity_type=EntityType.MY_DOMAIN):
+        from apps.plants.models import Plant
+        p = Plant.objects.create(code="WSC1", name="W", country="IT",
+                                 nis2_scope="essenziale", status="attivo")
+        return OsintEntity.objects.create(
+            entity_type=entity_type, source_module=SourceModule.SITES,
+            source_id=p.id, domain="w.example.com", display_name="W",
+        )
+
+    def _scan_ssl100(self):
+        scan = OsintScan()
+        scan.ssl_valid = False  # SSL=100
+        scan.ssl_days_remaining = None
+        scan.spf_present = True
+        scan.spf_policy = "fail"
+        scan.dmarc_present = True
+        scan.dmarc_policy = "reject"
+        scan.mx_present = True
+        scan.gsb_status = "safe"
+        scan.in_blacklist = False
+        scan.vt_malicious = 0
+        scan.abuseipdb_score = 0
+        scan.otx_pulses = 0
+        scan.dkim_present = None
+        scan.mta_sts_present = None
+        return scan
+
+    def test_weight_shifts_total(self):
+        from apps.osint.models import OsintSettings
+        s = OsintSettings.load()
+        # Tutto il peso su SSL → total == SSL == 100 (DNS/Rep/GRC=0)
+        s.weight_ssl = 100
+        s.weight_dns = 0
+        s.weight_reputation = 0
+        s.weight_grc = 0
+        entity = self._entity()
+        scan = self._scan_ssl100()
+        compute_scores(entity, scan, s)
+        assert scan.score_ssl == 100
+        assert scan.score_total == 100
+
+    def test_normalized_not_required_to_sum_100(self):
+        from apps.osint.models import OsintSettings
+        s = OsintSettings.load()
+        # Pesi 10/10/10/10 → media semplice. SSL=100, resto 0 → 25.
+        s.weight_ssl = s.weight_dns = s.weight_reputation = s.weight_grc = 10
+        entity = self._entity()
+        scan = self._scan_ssl100()
+        compute_scores(entity, scan, s)
+        assert scan.score_total == 25
+
+    def test_supplier_excludes_grc_weight(self):
+        from apps.osint.models import OsintSettings
+        s = OsintSettings.load()
+        # Per un fornitore il GRC è escluso: pesi usati = SSL/DNS/Rep = 1/1/1.
+        s.weight_ssl = s.weight_dns = s.weight_reputation = 1
+        s.weight_grc = 1000  # ignorato per i non-my_domain
+        entity = self._entity(EntityType.SUPPLIER)
+        scan = self._scan_ssl100()
+        compute_scores(entity, scan, s)
+        # SSL=100, DNS=0, Rep=0 → 100/3 ≈ 33
+        assert scan.score_total == 33
+
+
+@pytest.mark.django_db
+class TestSettingsWeightValidation:
+    def test_rejects_all_zero_core_weights(self):
+        from apps.osint.serializers import OsintSettingsSerializer
+        from apps.osint.models import OsintSettings
+        s = OsintSettings.load()
+        ser = OsintSettingsSerializer(
+            instance=s,
+            data={"weight_ssl": 0, "weight_dns": 0, "weight_reputation": 0},
+            partial=True,
+        )
+        assert not ser.is_valid()
+
+    def test_accepts_one_positive_core_weight(self):
+        from apps.osint.serializers import OsintSettingsSerializer
+        from apps.osint.models import OsintSettings
+        s = OsintSettings.load()
+        ser = OsintSettingsSerializer(
+            instance=s,
+            data={"weight_ssl": 50, "weight_dns": 0, "weight_reputation": 0},
+            partial=True,
+        )
+        assert ser.is_valid(), ser.errors
         assert classify_score(0) == "ok"
