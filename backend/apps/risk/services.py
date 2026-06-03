@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.db import transaction
 from django.utils import timezone
 
 from .models import IMPACT_MAP, PROB_MAP, RiskAssessment
@@ -234,6 +235,7 @@ def accept_risk(assessment, user, note: str, expiry_date=None) -> None:
     from core.audit import log_action
 
     risk_lv = assessment.risk_level
+    # La validazione precede ogni scrittura: resta fuori dalla transazione.
     if risk_lv != "rosso" and not note:
         raise ValidationError(_("La nota è obbligatoria per l'accettazione formale del rischio."))
     if risk_lv == "rosso" and len(note.strip()) < 50:
@@ -241,30 +243,33 @@ def accept_risk(assessment, user, note: str, expiry_date=None) -> None:
             _("Per rischi critici (rosso) la nota di accettazione deve essere di almeno 50 caratteri.")
         )
 
-    assessment.risk_accepted_formally = True
-    assessment.risk_accepted = True  # allineato al flag semplice usato da PDCA/notifiche
-    assessment.risk_accepted_by = user
-    assessment.risk_accepted_at = timezone.now()
-    assessment.risk_acceptance_note = note
-    assessment.risk_acceptance_expiry = expiry_date
-    assessment.save(update_fields=[
-        "risk_accepted_formally", "risk_accepted",
-        "risk_accepted_by", "risk_accepted_at",
-        "risk_acceptance_note", "risk_acceptance_expiry", "updated_at",
-    ])
+    # Accettazione formale (L1) + audit: insieme, per non lasciare un'accettazione
+    # senza la sua traccia append-only (o viceversa).
+    with transaction.atomic():
+        assessment.risk_accepted_formally = True
+        assessment.risk_accepted = True  # allineato al flag semplice usato da PDCA/notifiche
+        assessment.risk_accepted_by = user
+        assessment.risk_accepted_at = timezone.now()
+        assessment.risk_acceptance_note = note
+        assessment.risk_acceptance_expiry = expiry_date
+        assessment.save(update_fields=[
+            "risk_accepted_formally", "risk_accepted",
+            "risk_accepted_by", "risk_accepted_at",
+            "risk_acceptance_note", "risk_acceptance_expiry", "updated_at",
+        ])
 
-    log_action(
-        user=user,
-        action_code="risk.accepted_formally",
-        level="L1",
-        entity=assessment,
-        payload={
-            "score": assessment.score,
-            "level": risk_lv,
-            "note": note[:100],
-            "expiry": str(expiry_date) if expiry_date else None,
-        },
-    )
+        log_action(
+            user=user,
+            action_code="risk.accepted_formally",
+            level="L1",
+            entity=assessment,
+            payload={
+                "score": assessment.score,
+                "level": risk_lv,
+                "note": note[:100],
+                "expiry": str(expiry_date) if expiry_date else None,
+            },
+        )
 
 
 def get_active_appetite(plant=None, framework_code: str = ""):
@@ -305,48 +310,56 @@ def escalate_red_risk(assessment: RiskAssessment, user):
     if not assessment.score or assessment.score <= threshold:
         return
 
-    create_task(
-        plant=assessment.plant,
-        title=f"Piano mitigazione rischio critico — {assessment.asset}",
-        priority="critica",
-        source_module="M06",
-        source_id=assessment.pk,
-        due_date=timezone.now().date() + timezone.timedelta(days=15),
-        assign_type="role",
-        assign_value="risk_manager",
-    )
-
-    # Notifica CISO se troppi rischi rossi
-    if appetite:
-        red_count = assessment.__class__.objects.filter(
+    # Creazione task di escalation atomica: i due task (mitigazione + soglia CISO)
+    # si committano insieme. Se chiamata dentro un'altra transazione (es. risk.complete)
+    # diventa un savepoint, restando coerente con la scrittura dell'assessment.
+    with transaction.atomic():
+        create_task(
             plant=assessment.plant,
-            score__gt=threshold,
-            deleted_at__isnull=True,
-        ).count()
-        if red_count > appetite.max_red_risks_count:
-            create_task(
-                plant=assessment.plant,
-                title=f"Soglia rischi critici superata ({red_count} rischi)",
-                priority="critica",
-                source_module="M06",
-                source_id=assessment.pk,
-                due_date=timezone.now().date() + timezone.timedelta(days=7),
-                assign_type="role",
-                assign_value="ciso",
-            )
-
-    # Notifica via email secondo le regole configurate
-    try:
-        from apps.notifications.resolver import fire_notification
-
-        fire_notification(
-            "risk_red",
-            plant=assessment.plant,
-            context={"assessment": assessment},
+            title=f"Piano mitigazione rischio critico — {assessment.asset}",
+            priority="critica",
+            source_module="M06",
+            source_id=assessment.pk,
+            due_date=timezone.now().date() + timezone.timedelta(days=15),
+            assign_type="role",
+            assign_value="risk_manager",
         )
-    except Exception:
-        # le notifiche non devono mai bloccare la logica principale
-        return
+
+        # Notifica CISO se troppi rischi rossi
+        if appetite:
+            red_count = assessment.__class__.objects.filter(
+                plant=assessment.plant,
+                score__gt=threshold,
+                deleted_at__isnull=True,
+            ).count()
+            if red_count > appetite.max_red_risks_count:
+                create_task(
+                    plant=assessment.plant,
+                    title=f"Soglia rischi critici superata ({red_count} rischi)",
+                    priority="critica",
+                    source_module="M06",
+                    source_id=assessment.pk,
+                    due_date=timezone.now().date() + timezone.timedelta(days=7),
+                    assign_type="role",
+                    assign_value="ciso",
+                )
+
+    # Notifica via email best-effort: schedulata su on_commit così parte solo dopo
+    # il commit della transazione (niente email per un'escalation poi annullata),
+    # e mai blocca la logica principale.
+    def _notify_risk_red():
+        try:
+            from apps.notifications.resolver import fire_notification
+
+            fire_notification(
+                "risk_red",
+                plant=assessment.plant,
+                context={"assessment": assessment},
+            )
+        except Exception:
+            pass
+
+    transaction.on_commit(_notify_risk_red)
 
 
 def get_risk_bia_bcp_context(assessment: RiskAssessment) -> dict:
@@ -442,9 +455,14 @@ def get_risk_bia_bcp_context(assessment: RiskAssessment) -> dict:
     }
 
 
+@transaction.atomic
 def delete_risk_assessment(assessment: RiskAssessment, user) -> None:
     """
     Soft delete del RiskAssessment e delle sue entità dipendenti (dimensions, mitigation_plans).
+
+    Atomica: il soft-delete a cascata (dimensions + mitigation_plans + assessment) e i
+    relativi audit log devono committarsi insieme, altrimenti restano entità orfane
+    parzialmente cancellate o audit trail incoerente.
     """
     from core.audit import log_action
 

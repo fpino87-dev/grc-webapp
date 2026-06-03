@@ -142,9 +142,14 @@ def clear_revaluation_flag(asset, user, notes: str = "") -> None:
     )
 
 
+@transaction.atomic
 def delete_asset(asset: Asset, user) -> None:
     """
     Soft delete di un asset IT/OT. Bloccato se esistono rischi o dipendenze attive.
+
+    Atomica: lo scollegamento dei processi (M2M), il soft-delete e l'audit log devono
+    committarsi insieme (i controlli di blocco a monte sollevano ValidationError prima
+    di qualsiasi scrittura, quindi non lasciano stato parziale).
     """
     from django.core.exceptions import ValidationError
     from django.db.models import Q

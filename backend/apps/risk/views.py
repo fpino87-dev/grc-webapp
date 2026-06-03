@@ -1,5 +1,6 @@
 import logging
 
+from django.db import transaction
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -100,41 +101,46 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         from .services import calc_ale, calc_score_from_dimensions, escalate_red_risk
         assessment = self.get_object()
 
-        # Calcola score dalle dimensioni IT/OT (con fallback a P×I)
-        score = calc_score_from_dimensions(assessment)
-        assessment.score = score
+        # Completamento = scrittura multi-entità: task di escalation + save assessment
+        # + audit devono committarsi insieme, altrimenti restano task orfani per un
+        # completamento mai persistito o audit incoerente. (escalate_red_risk schedula
+        # la sua notifica email via on_commit, quindi parte solo dopo questo commit.)
+        with transaction.atomic():
+            # Calcola score dalle dimensioni IT/OT (con fallback a P×I)
+            score = calc_score_from_dimensions(assessment)
+            assessment.score = score
 
-        # Calcola ALE automaticamente dalla BIA se collegato
-        if assessment.critical_process:
-            assessment.ale_annuo = calc_ale(assessment)
+            # Calcola ALE automaticamente dalla BIA se collegato
+            if assessment.critical_process:
+                assessment.ale_annuo = calc_ale(assessment)
 
-        # Genera task se rischio critico
-        if score > 14:
-            escalate_red_risk(assessment, request.user)
+            # Genera task se rischio critico
+            if score > 14:
+                escalate_red_risk(assessment, request.user)
 
-        assessment.status = "completato"
-        assessment.assessed_by = request.user
-        assessment.assessed_at = timezone.now()
-        # Completare l'assessment È la rivalutazione: chiude il flag "da rivalutare"
-        # (così dopo una modifica basta ri-eseguire "Completa" per togliere il warning).
-        assessment.needs_revaluation = False
-        assessment.needs_revaluation_since = None
-        assessment.save(update_fields=[
-            "status", "assessed_by", "assessed_at",
-            "score", "ale_annuo",
-            "needs_revaluation", "needs_revaluation_since", "updated_at",
-        ])
-        log_action(
-            user=request.user,
-            action_code="risk.assessment.complete",
-            level="L2",
-            entity=assessment,
-            payload={
-                "id": str(assessment.id),
-                "score": score,
-                "ale_annuo": str(assessment.ale_annuo or 0),
-            },
-        )
+            assessment.status = "completato"
+            assessment.assessed_by = request.user
+            assessment.assessed_at = timezone.now()
+            # Completare l'assessment È la rivalutazione: chiude il flag "da rivalutare"
+            # (così dopo una modifica basta ri-eseguire "Completa" per togliere il warning).
+            assessment.needs_revaluation = False
+            assessment.needs_revaluation_since = None
+            assessment.save(update_fields=[
+                "status", "assessed_by", "assessed_at",
+                "score", "ale_annuo",
+                "needs_revaluation", "needs_revaluation_since", "updated_at",
+            ])
+            log_action(
+                user=request.user,
+                action_code="risk.assessment.complete",
+                level="L2",
+                entity=assessment,
+                payload={
+                    "id": str(assessment.id),
+                    "score": score,
+                    "ale_annuo": str(assessment.ale_annuo or 0),
+                },
+            )
         serializer = self.get_serializer(assessment)
         return Response(serializer.data)
 

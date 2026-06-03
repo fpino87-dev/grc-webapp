@@ -2,6 +2,7 @@ import html as html_module
 import logging
 from datetime import timedelta
 
+from django.db import transaction
 from django.utils import timezone
 
 from apps.plants.models import CSIRT_BY_COUNTRY
@@ -586,31 +587,34 @@ def mark_notification_sent(
     from core.audit import log_action
 
     csirt = get_csirt_for_plant(incident.plant)
-    notif, _ = NIS2Notification.objects.update_or_create(
-        incident=incident,
-        notification_type=notification_type,
-        defaults={
-            "csirt_name": csirt.get("name", "—"),
-            "csirt_portal": csirt.get("portal", ""),
-            "csirt_country": incident.plant.country if incident.plant else "—",
-            "sent_at": timezone.now(),
-            "sent_by": user,
-            "protocol_ref": protocol_ref,
-            "authority_response": authority_response,
-        },
-    )
+    # Registrazione notifica + audit L1 atomici: una notifica NIS2 al CSIRT senza la
+    # sua traccia append-only (o viceversa) renderebbe incoerente il dossier ispettivo.
+    with transaction.atomic():
+        notif, _ = NIS2Notification.objects.update_or_create(
+            incident=incident,
+            notification_type=notification_type,
+            defaults={
+                "csirt_name": csirt.get("name", "—"),
+                "csirt_portal": csirt.get("portal", ""),
+                "csirt_country": incident.plant.country if incident.plant else "—",
+                "sent_at": timezone.now(),
+                "sent_by": user,
+                "protocol_ref": protocol_ref,
+                "authority_response": authority_response,
+            },
+        )
 
-    log_action(
-        user=user,
-        action_code=f"incident.nis2.{notification_type}.sent",
-        level="L1",
-        entity=incident,
-        payload={
-            "notification_type": notification_type,
-            "csirt": csirt.get("name", "—"),
-            "protocol_ref": protocol_ref,
-        },
-    )
+        log_action(
+            user=user,
+            action_code=f"incident.nis2.{notification_type}.sent",
+            level="L1",
+            entity=incident,
+            payload={
+                "notification_type": notification_type,
+                "csirt": csirt.get("name", "—"),
+                "protocol_ref": protocol_ref,
+            },
+        )
     return notif
 
 

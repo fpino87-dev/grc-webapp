@@ -1,7 +1,7 @@
 # BUD — Backlog Unico di Debito & Sviluppo (GRC webapp)
 
 > File di lavoro persistente. Si riprende **a ogni sessione**: si parte dai **P0 (critico, alto costo/beneficio)**, poi P1, poi P2.
-> Aggiornare lo **Stato** delle voci man mano. Ultimo aggiornamento: **2026-06-02**.
+> Aggiornare lo **Stato** delle voci man mano. Ultimo aggiornamento: **2026-06-03**.
 >
 > Legenda stato: ⬜ da fare · 🔄 in corso · ✅ fatto · 🧊 rimandato
 > Legenda C/B: costo (S/M/L) · beneficio (Basso/Medio/Alto)
@@ -46,10 +46,12 @@
 - **Azione**: `reporting/services.py` con funzioni pure; ≥20 test sui numeri della dashboard.
 - **C/B**: L · Alto · Stato: ⬜
 
-### P1-2 · `@transaction.atomic` sulle azioni multi-write + audit
+### P1-2 · `@transaction.atomic` sulle azioni multi-write + audit — ✅ FATTO (2026-06-03)
 - **Problema**: `risk, tasks, assets, bia, incidents, documents, notifications` con atomic=0. Es. `risk.complete` (score+ALE+escalate+save), `assets.register_change` (cascata). Stato parziale → audit append-only incoerente.
-- **Azione**: avvolgere le azioni che scrivono >1 entità (priorità risk/incidents/assets).
-- **C/B**: M · Alto · Stato: ⬜
+- **Fatto** (priorità risk/incidents/assets, come da backlog): atomiche `risk.complete` (view), `risk.accept_risk`, `risk.escalate_red_risk`, `risk.delete_risk_assessment`, `incidents.close_incident`, `incidents.mark_notification_sent`, `assets.delete_asset`. Le notifiche email best-effort (rischio rosso) spostate su `transaction.on_commit` (partono solo a commit avvenuto, mai bloccano). `update_pdca_with_nis2_evidence` lasciata **volutamente non atomica** (l'evidenza deve persistere anche se l'avanzamento PDCA fallisce — best-effort documentato). 10 test di regressione nuovi (rollback verificato per ogni azione). Suite intera verde, coverage 70.01% (vedi NB).
+- **NB coverage**: a HEAD pre-sessione la suite era a **69.49%**, già sotto il gate `--cov-fail-under=70` (debito preesistente = P2-1). Questo lavoro l'ha riportata a **70.01%**. Il grosso del gap resta da colmare in P2-1.
+- **Resta fuori (follow-up)**: `bia.delete_process` (cascata ampia), `documents.approve/reject/add_version*`, `tasks.complete_run`/`compute_and_store_kpi_snapshot` — stesso pattern multi-write, non prioritari.
+- **C/B**: M · Alto · **Stato: ✅ FATTO (2026-06-03)**
 
 ### P1-3 · Write-authorization granulare (SoD) dove `permission_classes=0`
 - **Problema**: default globale `IsAuthenticated` + RBAC solo in `get_queryset` (visibilità). In `risk, assets, plants, bia, pdca, governance, tasks, training` chi vede può anche modificare/cancellare → SoD debole.
