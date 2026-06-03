@@ -217,6 +217,26 @@ def close_cycle(cycle, user, act_description: str = "") -> PdcaCycle:
             ci.status = "parziale"
             ci.save(update_fields=["status", "updated_at"])
 
+    # Finding di audit (M17) — catena PDCA↔finding bidirezionale (P2-4).
+    # La chiusura del PDCA = azione correttiva completata: il finding ancora
+    # `open` avanza a `in_response`. NON viene chiuso: la chiusura formale del
+    # finding richiede evidenza e passa da `audit_prep.close_finding` (che a sua
+    # volta chiude il PDCA, ma a quel punto il finding è già `closed` e il filtro
+    # `status="open"` lo esclude, evitando interferenze e ricorsioni).
+    if cycle.trigger_type in (
+        "finding_major", "finding_minor", "finding_observation", "finding_opportunity",
+    ):
+        for finding in cycle.findings.filter(status="open"):
+            finding.status = "in_response"
+            finding.save(update_fields=["status", "updated_at"])
+            log_action(
+                user=user,
+                action_code="audit.finding.pdca_closed",
+                level="L2",
+                entity=finding,
+                payload={"pdca_cycle": str(cycle.pk), "new_status": "in_response"},
+            )
+
     # Crea Lesson Learned automatica
     from apps.lessons.models import LessonLearned
 
