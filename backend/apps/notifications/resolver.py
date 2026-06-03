@@ -5,6 +5,16 @@ trova i destinatari reali via UserPlantAccess.
 
 from apps.auth_grc.models import UserPlantAccess
 
+# Ruoli "esterni": persone non interne all'organizzazione (es. auditor di parte
+# terza). Non devono mai ricevere via email dati sull'esposizione esterna OSINT,
+# anche se un amministratore assegna loro un profilo che include l'evento.
+EXTERNAL_ROLES = {"external_auditor"}
+
+# Eventi le cui notifiche restano confinate al personale interno (i ruoli esterni
+# vengono filtrati a prescindere dal profilo). L'esposizione OSINT è informazione
+# di sicurezza sensibile → solo interni.
+INTERNAL_ONLY_EVENTS = {"osint_critical"}
+
 
 def _user_has_access_to_plant(access: UserPlantAccess, plant) -> bool:
   """Verifica scope accesso utente sul plant."""
@@ -34,6 +44,10 @@ def resolve_recipients(event_type: str, plant=None, bu=None) -> list:
     for profile in profiles:
         if event_type in profile.get_active_events():
             target_roles.append(profile.grc_role)
+
+    # Eventi interni-only: rimuovi i ruoli esterni a prescindere dal profilo.
+    if event_type in INTERNAL_ONLY_EVENTS:
+        target_roles = [r for r in target_roles if r not in EXTERNAL_ROLES]
 
     if not target_roles:
         return []
@@ -68,6 +82,7 @@ def fire_notification(event_type: str, plant=None, bu=None, context: dict | None
       notify_evidence_expired,
       notify_finding_major,
       notify_incident_nis2,
+      notify_osint_alert,
       notify_risk_red,
       notify_role_expiring,
       send_grc_email,
@@ -90,6 +105,9 @@ def fire_notification(event_type: str, plant=None, bu=None, context: dict | None
 
   elif event_type == "incident_nis2" and "incident" in ctx:
       notify_incident_nis2(ctx["incident"], recipients)
+
+  elif event_type == "osint_critical" and "alert" in ctx and "entity" in ctx:
+      notify_osint_alert(ctx["alert"], ctx["entity"], recipients)
 
   elif event_type == "evidence_expired" and "instance" in ctx:
       notify_evidence_expired(ctx["instance"], recipients)

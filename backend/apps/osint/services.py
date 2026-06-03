@@ -307,3 +307,88 @@ def find_duplicates() -> dict[str, list[OsintEntity]]:
     for e in OsintEntity.objects.filter(is_active=True):
         buckets[e.domain].append(e)
     return {d: items for d, items in buckets.items() if len(items) > 1}
+
+
+# ---------------------------------------------------------------------------
+# KPI bridge: OSINT → KPI engine M08 (→ management review M13)
+# ---------------------------------------------------------------------------
+
+OSINT_CRITICAL_KPI_CODE = "osint_critical_open_count"
+
+
+def count_open_critical_findings_by_plant() -> dict[str, int]:
+    """Conta i finding OSINT critici *aperti* per plant.
+
+    Solo le entità `my_domain` mappano a un plant (`source_id` = plant pk); i
+    finding di fornitori/asset non hanno un plant univoco e restano fuori da
+    questo KPI per-plant. "Aperto" = stato open/acknowledged/in_progress (gli
+    stati risolto/rischio-accettato non pesano sull'esposizione corrente).
+
+    Ritorna {plant_id (str): count}, con un'entrata per ogni plant che ha almeno
+    un'entità my_domain attiva — anche con count 0, così il KPI viene riportato a
+    0 quando l'esposizione rientra (altrimenti l'ultimo valore critico resterebbe
+    "appeso" all'infinito).
+    """
+    from .models import FindingStatus, OsintFinding
+
+    open_states = [
+        FindingStatus.OPEN, FindingStatus.ACKNOWLEDGED, FindingStatus.IN_PROGRESS,
+    ]
+
+    # Plant che hanno almeno un'entità my_domain attiva → universo dei plant da
+    # riportare (anche con 0 critici aperti).
+    plant_ids = set(
+        OsintEntity.objects.filter(
+            entity_type=EntityType.MY_DOMAIN, is_active=True, deleted_at__isnull=True,
+        ).values_list("source_id", flat=True)
+    )
+    counts: dict[str, int] = {str(pid): 0 for pid in plant_ids}
+
+    qs = (
+        OsintFinding.objects.filter(
+            entity__entity_type=EntityType.MY_DOMAIN,
+            entity__is_active=True,
+            severity="critical",
+            status__in=open_states,
+            deleted_at__isnull=True,
+        )
+        .values_list("entity__source_id")
+        .order_by()
+    )
+    from django.db.models import Count
+    for source_id, n in qs.annotate(n=Count("id")):
+        key = str(source_id)
+        if key in counts:
+            counts[key] += n
+        else:
+            counts[key] = n
+    return counts
+
+
+def push_osint_kpis(user=None) -> dict:
+    """Pubblica il KPI `osint_critical_open_count` per ogni plant nel KPI engine M08.
+
+    Usa `apps.tasks.services.ingest_kpi_from_api` (stessa pipeline degli ingest
+    esterni): trova/crea la KPIDefinition, salva lo snapshot settimanale, valuta
+    lo status e scrive l'audit. Da qui il valore confluisce nella management
+    review (M13) tra gli `operational_kpis`. Ritorna un riepilogo.
+    """
+    from apps.tasks.services import ingest_kpi_from_api
+
+    counts = count_open_critical_findings_by_plant()
+    pushed = 0
+    for plant_id, value in counts.items():
+        try:
+            ingest_kpi_from_api(
+                kpi_code=OSINT_CRITICAL_KPI_CODE,
+                plant_id=plant_id,
+                value=value,
+                source="osint",
+                note="Finding OSINT critici aperti (entità my_domain del plant).",
+                user=user,
+            )
+            pushed += 1
+        except Exception as exc:  # noqa: BLE001 - best-effort per plant
+            logger.warning("OSINT KPI push failed for plant %s: %s", plant_id, exc)
+    logger.info("OSINT KPI push: %d plant aggiornati (%s)", pushed, OSINT_CRITICAL_KPI_CODE)
+    return {"plants": len(counts), "pushed": pushed}

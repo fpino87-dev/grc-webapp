@@ -130,6 +130,51 @@
     "verification": "Lo scan deve mostrare spf_policy != '+all'.",
     "estimated_effort_h": 1
   },
+  "dkim_missing": {
+    "title": "DKIM non configurato",
+    "what": "Nessun selettore DKIM comune del dominio espone una chiave pubblica (record `v=DKIM1`). Senza DKIM le email non sono firmate crittograficamente: i destinatari non possono verificare che il contenuto non sia stato alterato in transito e DMARC non può raggiungere l'allineamento (alignment) necessario per `p=reject`.",
+    "impact": "DMARC resta inefficace anche se presente (manca l'allineamento DKIM), maggiore probabilità di finire in spam, spoofing del contenuto non rilevabile.",
+    "compliance": [
+      {"framework": "ISO27001", "control": "A.8.23 — Web filtering"},
+      {"framework": "TISAX_L2", "control": "5.2.7 — Phishing-Schutz"},
+      {"framework": "NIS2", "control": "art.21 §2(d) — Supply chain & cybersecurity hygiene"}
+    ],
+    "owner_role": "email_admin",
+    "fix_steps": [
+      "Abilita la firma DKIM sul provider email (Google Workspace, Microsoft 365, mailer transazionale).",
+      "Pubblica la chiave pubblica fornita dal provider come record TXT su `<selettore>._domainkey.{domain}`.",
+      "Verifica che SPF, DKIM e DMARC siano allineati (stesso dominio nel From) prima di alzare DMARC a `p=quarantine`/`p=reject`.",
+      "Ruota le chiavi DKIM periodicamente (almeno una volta l'anno)."
+    ],
+    "fix_template": "<selettore>._domainkey.{domain}  TXT  \"v=DKIM1; k=rsa; p=<chiave_pubblica>\"",
+    "verification": "Dopo la pubblicazione ri-esegui la scansione: il finding si auto-chiude quando un selettore noto espone un record DKIM. Selettori custom non sondati possono richiedere verifica manuale.",
+    "external_refs": [
+      {"label": "RFC 6376 (DKIM)", "url": "https://www.rfc-editor.org/rfc/rfc6376"}
+    ],
+    "estimated_effort_h": 2
+  },
+  "mta_sts_missing": {
+    "title": "MTA-STS non pubblicato",
+    "what": "Il dominio non pubblica una policy MTA-STS (record TXT `_mta-sts.{domain}`). MTA-STS impone ai server di posta mittenti l'uso di TLS verso i tuoi MX, prevenendo downgrade/stripping della cifratura e attacchi man-in-the-middle sul trasporto email.",
+    "impact": "Le email in ingresso possono essere consegnate in chiaro se un attaccante esegue un downgrade TLS sul percorso SMTP; nessuna garanzia di confidenzialità del trasporto.",
+    "compliance": [
+      {"framework": "ISO27001", "control": "A.8.24 — Use of cryptography"},
+      {"framework": "TISAX_L2", "control": "5.2.7 — Phishing-Schutz"}
+    ],
+    "owner_role": "email_admin",
+    "fix_steps": [
+      "Pubblica il record TXT `_mta-sts.{domain}` con `v=STSv1; id=<timestamp>`.",
+      "Esponi il policy file su `https://mta-sts.{domain}/.well-known/mta-sts.txt` (mode=testing per la prova, poi enforce).",
+      "Aggiungi TLS-RPT (`_smtp._tls.{domain}` TXT `v=TLSRPTv1; rua=mailto:tls-reports@{domain}`) per ricevere i report di consegna TLS.",
+      "Dopo aver verificato i report in modalità testing, passa la policy a `mode=enforce`."
+    ],
+    "fix_template": "_mta-sts.{domain}  TXT  \"v=STSv1; id=20260101000000\"",
+    "verification": "Lo scan rileva la pubblicazione del record TXT MTA-STS. La modalità (testing/enforce) e il policy file vanno verificati manualmente via HTTPS.",
+    "external_refs": [
+      {"label": "RFC 8461 (MTA-STS)", "url": "https://www.rfc-editor.org/rfc/rfc8461"}
+    ],
+    "estimated_effort_h": 2
+  },
   "dnssec_missing": {
     "title": "DNSSEC non abilitato",
     "what": "Il dominio non ha DNSSEC: le risposte DNS non sono firmate e possono essere alterate (cache poisoning, MITM su risoluzione).",

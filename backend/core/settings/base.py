@@ -177,6 +177,13 @@ CELERY_BEAT_SCHEDULE = {
         "task": "osint.weekly_scan",
         "schedule": crontab(hour=4, minute=0, day_of_week=1),  # lunedì 04:00 — fuori dalla finestra del backup (02:00)
     },
+    "osint-push-kpis": {
+        "task": "osint.push_kpis",
+        # lunedì 05:30 — dopo il weekly scan (04:00, ~90min per la riconciliazione
+        # finding) e prima degli snapshot KPI (06:00), così il KPI OSINT confluisce
+        # nello stesso ciclo settimanale di reporting/management review.
+        "schedule": crontab(hour=5, minute=30, day_of_week=1),
+    },
     "generate-weekly-kpi-snapshots": {
         "task": "apps.reporting.tasks.generate_weekly_kpi_snapshots",
         "schedule": crontab(hour=6, minute=0, day_of_week=1),  # lunedì 06:00

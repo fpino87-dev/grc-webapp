@@ -264,6 +264,58 @@ def _route_alert(alert: "OsintAlert", entity: "OsintEntity") -> None:
                 _create_task(alert, entity)
 
 
+def _entity_plant(entity: "OsintEntity"):
+    """Plant associato all'entità per lo scope delle notifiche M19.
+
+    Solo le entità `my_domain` mappano 1:1 a un Plant (`source_id` = plant pk).
+    Per fornitori/asset il legame con un singolo plant è ambiguo (M2M o nessuno):
+    in quel caso ritorna None e il resolver notifica i titolari di ruolo a livello
+    org. Best-effort: errori di lookup → None."""
+    from apps.osint.models import EntityType
+    if entity.entity_type != EntityType.MY_DOMAIN:
+        return None
+    try:
+        from apps.plants.models import Plant
+        return Plant.objects.filter(pk=entity.source_id, deleted_at__isnull=True).first()
+    except Exception as exc:  # pragma: no cover - difensivo
+        logger.debug("OSINT plant lookup failed for %s: %s", entity.domain, exc)
+        return None
+
+
+def _notify_critical_alerts(entity: "OsintEntity", created_alerts: list) -> None:
+    """Invia notifica M19 (`osint_critical`) per gli alert CRITICAL appena creati.
+
+    Best-effort: schedulata su `transaction.on_commit` così parte solo dopo il
+    commit (niente email per uno scan poi annullato) e non blocca mai lo scan.
+    Un fallimento del resolver/email viene loggato (regola P0-3: niente pass muto),
+    non propagato."""
+    from django.db import transaction
+    from apps.osint.models import AlertSeverity
+
+    critical = [a for a in created_alerts if a.severity == AlertSeverity.CRITICAL]
+    if not critical:
+        return
+
+    plant = _entity_plant(entity)
+
+    def _fire():
+        from apps.notifications.resolver import fire_notification
+        for alert in critical:
+            try:
+                fire_notification(
+                    "osint_critical",
+                    plant=plant,
+                    context={"alert": alert, "entity": entity},
+                )
+            except Exception as exc:  # noqa: BLE001
+                logger.warning(
+                    "OSINT M19 notify failed (alert=%s type=%s): %s",
+                    alert.pk, alert.alert_type, exc,
+                )
+
+    transaction.on_commit(_fire)
+
+
 def _system_user():
     """Utente di sistema a cui attribuire l'audit delle azioni automatiche OSINT
     (creazione incidenti/task da alert). Primo superuser attivo, o None."""
@@ -392,5 +444,9 @@ def run_alerts(
 
     for alert in created:
         _route_alert(alert, entity)
+
+    # Notifica M19 best-effort per gli alert critici (dopo il routing, così
+    # eventuali Incident/Task linkati esistono già al momento dell'invio).
+    _notify_critical_alerts(entity, created)
 
     return created

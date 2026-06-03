@@ -50,6 +50,10 @@ export interface OsintScanDetail extends OsintScanBrief {
   dmarc_policy: string;
   mx_present: boolean | null;
   dnssec_enabled: boolean | null;
+  dkim_present: boolean | null;
+  dkim_selectors_found: string[];
+  mta_sts_present: boolean | null;
+  tls_rpt_present: boolean | null;
   domain_expiry_date: string | null;
   domain_registrar: string;
   whois_privacy: boolean | null;

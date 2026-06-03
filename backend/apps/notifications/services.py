@@ -206,6 +206,29 @@ def notify_incident_nis2(incident, recipients: list[str]):
     )
 
 
+def notify_osint_alert(alert, entity, recipients: list[str]):
+    """
+    Alert OSINT critico su esposizione esterna (SSL scaduto, blacklist, breach,
+    subdomain takeover, score critico). Contenuto qui; destinatari risolti dal
+    chiamante via resolver. Non logga il dominio nei log di sistema (regola #11):
+    send_grc_email logga solo conteggi.
+    """
+    send_grc_email(
+        subject=f"[GRC] 🛰️ OSINT critico: {alert.get_alert_type_display()} — {entity.display_name}",
+        body=(
+            "Il monitoraggio OSINT ha rilevato un problema critico sull'esposizione "
+            "esterna di un'entità monitorata.\n\n"
+            f"Entità:    {entity.display_name}\n"
+            f"Dominio:   {entity.domain}\n"
+            f"Tipo:      {alert.get_alert_type_display()}\n"
+            f"Severità:  {alert.get_severity_display()}\n\n"
+            f"{alert.description}\n\n"
+            "Accedi al modulo OSINT → Risoluzione per la guida di remediation."
+        ),
+        recipients=recipients,
+    )
+
+
 def notify_role_expiring(assignment, days_left: int, recipients: list[str]):
     send_grc_email(
         subject=f"[GRC] Ruolo in scadenza: {assignment.role}",

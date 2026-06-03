@@ -32,3 +32,25 @@ class Command(BaseCommand):
         )
         status = "creato" if created else "aggiornato"
         self.stdout.write(self.style.SUCCESS(f"Job OSINT weekly scanner {status}: {task.name}"))
+
+        # KPI push: lunedì 05:30 (dopo il weekly scan). Nome allineato alla chiave
+        # in settings.CELERY_BEAT_SCHEDULE ("osint-push-kpis") per verify_schedule.
+        kpi_schedule, _ = CrontabSchedule.objects.get_or_create(
+            minute="30",
+            hour="5",
+            day_of_week="1",  # lunedì
+            day_of_month="*",
+            month_of_year="*",
+            timezone="Europe/Rome",
+        )
+        kpi_task, kpi_created = PeriodicTask.objects.update_or_create(
+            name="osint-push-kpis",
+            defaults={
+                "task": "osint.push_kpis",
+                "crontab": kpi_schedule,
+                "enabled": True,
+                "description": "Pubblica i KPI OSINT (critici aperti per plant) nel KPI engine (lunedì 05:30 Europe/Rome)",
+            },
+        )
+        kpi_status = "creato" if kpi_created else "aggiornato"
+        self.stdout.write(self.style.SUCCESS(f"Job OSINT KPI push {kpi_status}: {kpi_task.name}"))

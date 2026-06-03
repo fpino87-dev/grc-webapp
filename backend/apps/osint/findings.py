@@ -85,6 +85,15 @@ def _detect_finding_codes(entity, scan) -> dict[str, dict]:
             # SPF "broken": +all = autorizza chiunque; permerror_* = MTA non valuta SPF
             detected[FindingCode.SPF_PLUS_ALL] = {"reason": scan.spf_policy}
 
+        # DKIM/MTA-STS: rilevati solo su domini con mail server. `is False` esclude
+        # i domini non sondati (None) → nessun finding spurio.
+        if getattr(scan, "dkim_present", None) is False:
+            detected[FindingCode.DKIM_MISSING] = {}
+        if getattr(scan, "mta_sts_present", None) is False:
+            detected[FindingCode.MTA_STS_MISSING] = {
+                "tls_rpt": bool(getattr(scan, "tls_rpt_present", None)),
+            }
+
     # DNSSEC — segnalato solo se il dominio ha una presenza rilevabile (web o mail).
     # Per domini NXDOMAIN o senza alcun record DNS, dnssec_enabled=False è un
     # artefatto del resolver, non un vero gap di sicurezza.
@@ -171,8 +180,10 @@ def _severity_for(code: str, params: dict | None = None) -> str:
     medium = {
         FindingCode.SSL_EXPIRY, FindingCode.DMARC_MISSING, FindingCode.SPF_MISSING,
         FindingCode.SPF_PLUS_ALL, FindingCode.DOMAIN_EXPIRY_SOON,
-        FindingCode.HEADERS_MISSING,
+        FindingCode.HEADERS_MISSING, FindingCode.DKIM_MISSING,
     }
+    # MTA_STS_MISSING resta INFO (default sotto): è un irrobustimento, non un gap
+    # diretto come l'assenza di DKIM/DMARC.
     if code in high:
         return AlertSeverity.CRITICAL
     if code in medium:

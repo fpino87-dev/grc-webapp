@@ -144,6 +144,25 @@ class OsintScan(BaseModel):
     mx_present = models.BooleanField(null=True, blank=True)
     dnssec_enabled = models.BooleanField(null=True, blank=True)
 
+    # Email authentication posture (DNS-only, popolato da enrichers/dns.py).
+    # Applicabile solo a domini con mail server (mx_present); altrimenti None.
+    dkim_present = models.BooleanField(
+        null=True, blank=True,
+        help_text="True se almeno un selettore DKIM comune espone un record v=DKIM1.",
+    )
+    dkim_selectors_found = models.JSONField(
+        default=list, blank=True,
+        help_text="Selettori DKIM trovati tra quelli sondati (es. ['default', 'google']).",
+    )
+    mta_sts_present = models.BooleanField(
+        null=True, blank=True,
+        help_text="True se esiste il record TXT _mta-sts (v=STSv1).",
+    )
+    tls_rpt_present = models.BooleanField(
+        null=True, blank=True,
+        help_text="True se esiste il record TXT _smtp._tls (v=TLSRPTv1).",
+    )
+
     # WHOIS
     domain_expiry_date = models.DateField(null=True, blank=True)
     domain_registrar = models.CharField(max_length=255, blank=True)
@@ -250,6 +269,8 @@ class FindingCode(models.TextChoices):
     DMARC_NONE = "dmarc_none", "DMARC p=none"
     SPF_MISSING = "spf_missing", "SPF assente"
     SPF_PLUS_ALL = "spf_plus_all", "SPF +all (insicuro)"
+    DKIM_MISSING = "dkim_missing", "DKIM assente"
+    MTA_STS_MISSING = "mta_sts_missing", "MTA-STS assente"
     DNSSEC_MISSING = "dnssec_missing", "DNSSEC non abilitato"
     DOMAIN_EXPIRY_SOON = "domain_expiry_soon", "Dominio in scadenza"
     BLACKLIST = "blacklist", "Dominio in blacklist"

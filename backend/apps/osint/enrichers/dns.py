@@ -101,6 +101,83 @@ def _check_mx(domain: str) -> bool:
         return False
 
 
+# Selettori DKIM più diffusi tra i provider email mainstream. Il DNS non permette
+# di enumerare i selettori di un dominio: si possono solo sondare nomi noti. La
+# presenza di anche un solo record v=DKIM1 dimostra che DKIM è in uso (assenza su
+# tutti = "probabilmente non configurato", quindi finding solo WARNING, non CRITICAL).
+_DKIM_SELECTORS = (
+    "default", "google", "selector1", "selector2", "s1", "s2",
+    "k1", "k2", "mail", "dkim", "smtp", "mandrill", "mailjet",
+    "everlytickey1", "zoho", "fm1", "fm2", "protonmail", "amazonses",
+)
+
+
+def _check_dkim(domain: str) -> tuple[bool | None, list[str]]:
+    """Sonda i selettori DKIM comuni su `<selector>._domainkey.<domain>`.
+
+    Ritorna (present, selectors_found):
+    - (True, [...])  : almeno un selettore espone un record v=DKIM1
+    - (False, [])    : nessuno dei selettori noti risponde con un record DKIM
+    - (None, [])     : tutte le query in errore (resolver giù) → esito incerto
+
+    NB: False non prova l'assenza assoluta di DKIM (il dominio potrebbe usare un
+    selettore custom), ma è un segnale di posture utile. Per questo il finding
+    derivato resta WARNING, mai CRITICAL.
+    """
+    import dns.resolver
+
+    found: list[str] = []
+    any_query_ok = False
+    for selector in _DKIM_SELECTORS:
+        name = f"{selector}._domainkey.{domain}"
+        try:
+            answers = dns.resolver.resolve(name, "TXT", raise_on_no_answer=False)
+            any_query_ok = True
+            txts = [b"".join(r.strings).decode(errors="replace") for r in answers]
+            if any("v=dkim1" in t.lower() or "k=rsa" in t.lower() or "p=" in t.lower()
+                   for t in txts):
+                found.append(selector)
+        except dns.resolver.NXDOMAIN:
+            any_query_ok = True  # il resolver ha risposto: il selettore non esiste
+        except Exception:
+            continue
+    if found:
+        return True, found
+    if any_query_ok:
+        return False, []
+    return None, []
+
+
+def _check_mta_sts(domain: str) -> bool | None:
+    """MTA-STS: presenza del record TXT `_mta-sts.<domain>` con v=STSv1.
+
+    DNS-only: non scarichiamo il policy file su https://mta-sts.<domain>/, quindi
+    rileviamo la *pubblicazione* della policy, non la modalità (enforce/testing).
+    Ritorna None se la query è in errore (incerto)."""
+    import dns.resolver
+    try:
+        answers = dns.resolver.resolve(f"_mta-sts.{domain}", "TXT", raise_on_no_answer=False)
+        txts = [b"".join(r.strings).decode(errors="replace") for r in answers]
+        return any("v=stsv1" in t.lower() for t in txts)
+    except dns.resolver.NXDOMAIN:
+        return False
+    except Exception:
+        return None
+
+
+def _check_tls_rpt(domain: str) -> bool | None:
+    """SMTP TLS Reporting: record TXT `_smtp._tls.<domain>` con v=TLSRPTv1."""
+    import dns.resolver
+    try:
+        answers = dns.resolver.resolve(f"_smtp._tls.{domain}", "TXT", raise_on_no_answer=False)
+        txts = [b"".join(r.strings).decode(errors="replace") for r in answers]
+        return any("v=tlsrptv1" in t.lower() for t in txts)
+    except dns.resolver.NXDOMAIN:
+        return False
+    except Exception:
+        return None
+
+
 def _check_dnssec(domain: str) -> bool | None:
     """DNSSEC enabled se il dominio espone DNSKEY *e* il parent ha un DS record.
 
@@ -152,6 +229,16 @@ def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> 
         scan.dmarc_policy = dmarc_policy
         scan.mx_present = mx_present
         scan.dnssec_enabled = dnssec_enabled
+
+        # DKIM/MTA-STS/TLS-RPT sono rilevanti solo per domini che inviano email
+        # (mx presente). Per gli altri restano None (non applicabile), così non
+        # generano finding spuri su domini solo-web.
+        if mx_present:
+            dkim_present, dkim_selectors = _check_dkim(domain)
+            scan.dkim_present = dkim_present
+            scan.dkim_selectors_found = dkim_selectors
+            scan.mta_sts_present = _check_mta_sts(domain)
+            scan.tls_rpt_present = _check_tls_rpt(domain)
         return True
     except Exception as exc:
         logger.warning("DNS enricher failed for %s: %s", domain, exc)

@@ -122,6 +122,23 @@ def run_entity_scan(self, entity_id: str):
 @shared_task(
     bind=True,
     autoretry_for=(Exception,),
+    retry_backoff=120,
+    max_retries=2,
+    name="osint.push_kpis",
+)
+def push_osint_kpis(self):
+    """Pubblica i KPI OSINT (osint_critical_open_count per plant) nel KPI engine.
+
+    Schedulato il lunedì dopo il weekly scan (vedi CELERY_BEAT_SCHEDULE): a quel
+    punto i finding della settimana sono stati riconciliati e il conteggio dei
+    critici aperti è aggiornato. Da qui il valore alimenta la management review."""
+    from apps.osint.services import push_osint_kpis as _push
+    return _push()
+
+
+@shared_task(
+    bind=True,
+    autoretry_for=(Exception,),
     retry_backoff=30,
     max_retries=1,
     name="osint.scan_domain",

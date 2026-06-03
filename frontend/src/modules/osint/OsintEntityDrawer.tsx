@@ -76,6 +76,20 @@ function ScanFindings({ entity }: { entity: OsintEntityDetail }) {
     } else if (scan.spf_present === true) {
       findings.push({ icon: "✅", text: t("osint.findings.spf_ok") });
     }
+
+    // DKIM — sondaggio dei selettori comuni (assenza = WARNING, non prova assoluta)
+    if (scan.dkim_present === false) {
+      findings.push({ icon: "⚠️", text: t("osint.findings.dkim_missing") });
+    } else if (scan.dkim_present === true) {
+      findings.push({ icon: "✅", text: t("osint.findings.dkim_ok", { selectors: (scan.dkim_selectors_found || []).join(", ") || "?" }) });
+    }
+
+    // MTA-STS — irrobustimento del trasporto TLS (assenza = INFO)
+    if (scan.mta_sts_present === false) {
+      findings.push({ icon: "ℹ️", text: t("osint.findings.mta_sts_missing") });
+    } else if (scan.mta_sts_present === true) {
+      findings.push({ icon: "✅", text: t("osint.findings.mta_sts_ok") });
+    }
   }
 
   // DNSSEC — solo se il dominio ha una presenza rilevabile (web o mail).

@@ -49,6 +49,13 @@ def _score_dns(scan: "OsintScan") -> int:
             base += 30
         elif scan.dmarc_policy == "none":
             base += 15
+        # Posture DKIM/MTA-STS (penalità minori). Guardia `is False`: i campi
+        # restano None se non sondati (dominio senza mail o scan vecchio) → nessuna
+        # penalità, nessuna regressione sugli score esistenti.
+        if getattr(scan, "dkim_present", None) is False:
+            base += 15
+        if getattr(scan, "mta_sts_present", None) is False:
+            base += 10
     return min(base, 100)
 
 
