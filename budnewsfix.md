@@ -41,10 +41,11 @@
 
 ## 2. P1 — Importante (difendibilità del dato, integrità, sicurezza)
 
-### P1-1 · `reporting`: estrarre `services.py` + test (oggi 1026 righe in view, **0 test**)
-- **Problema**: la parte che vede direzione/auditor è la meno testata; logica cross-modulo dentro `APIView.get` (viola regola #2).
-- **Azione**: `reporting/services.py` con funzioni pure; ≥20 test sui numeri della dashboard.
-- **C/B**: L · Alto · Stato: ⬜
+### P1-1 · `reporting`: estrarre `services.py` + test (oggi 1026 righe in view, **0 test**) — ✅ FATTO (2026-06-03)
+- **Problema**: la parte che vede direzione/auditor era la meno testata; logica cross-modulo dentro `APIView.get` (viola regola #2).
+- **Fatto**: tutta la logica spostata in `reporting/services.py` (funzioni pure: `compliance_summary`, `risk_summary`, `incident_summary`, `owner_report`, `kpi_trend`, `risk_bia_bcp`, `dashboard_summary`, `kpi_overview`+`_mttr`/`_required_docs`/`_training`/`_supplier_nda`, `kpi_suggest`); view ridotte a wrapper sottili. **32 test** (22 sui numeri + 10 smoke API/permessi); reporting/services 90%, views 91%; coverage globale 71.59%.
+- **Bug trovato e corretto**: `_mttr` filtrava `finding_type` su `"major"`/`"minor"` ma i codici reali sono `major_nc`/`minor_nc` → MTTR Major/Minor degli audit finding **sempre a 0**. Corretto con mappa output→codici (contratto API invariato).
+- **C/B**: L · Alto · **Stato: ✅ FATTO (2026-06-03)**
 
 ### P1-2 · `@transaction.atomic` sulle azioni multi-write + audit — ✅ FATTO (2026-06-03)
 - **Problema**: `risk, tasks, assets, bia, incidents, documents, notifications` con atomic=0. Es. `risk.complete` (score+ALE+escalate+save), `assets.register_change` (cascata). Stato parziale → audit append-only incoerente.
