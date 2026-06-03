@@ -60,18 +60,11 @@ def _to_date(val) -> date | None:
     return None
 
 
-@lru_cache(maxsize=1)
-def _rdap_bootstrap() -> dict[str, str]:
-    """Mappa TLD → URL RDAP, da IANA bootstrap. Cached per processo."""
-    try:
-        resp = requests.get(RDAP_BOOTSTRAP_URL, timeout=RDAP_TIMEOUT)
-        if resp.status_code != 200:
-            return {}
-        data = resp.json()
-    except Exception as exc:
-        logger.debug("RDAP bootstrap fetch failed: %s", exc)
-        return {}
+RDAP_BOOTSTRAP_CACHE_KEY = "osint:rdap_bootstrap"
+RDAP_BOOTSTRAP_TTL = 86400  # 24h: la mappa TLD→RDAP cambia raramente
 
+
+def _parse_bootstrap(data: dict) -> dict[str, str]:
     mapping: dict[str, str] = {}
     for entry in data.get("services", []):
         if not isinstance(entry, list) or len(entry) < 2:
@@ -87,8 +80,56 @@ def _rdap_bootstrap() -> dict[str, str]:
     return mapping
 
 
+@lru_cache(maxsize=1)
+def _rdap_bootstrap() -> dict[str, str]:
+    """Mappa TLD → URL RDAP, da IANA bootstrap.
+
+    Cache a due livelli: `lru_cache` memoizza per processo; Redis (django cache)
+    condivide la mappa tra worker e tra riavvii con TTL 24h, così un worker appena
+    avviato non ri-scarica il bootstrap IANA. Se Redis non risponde si ricade sul
+    fetch diretto."""
+    try:
+        from django.core.cache import cache
+        cached = cache.get(RDAP_BOOTSTRAP_CACHE_KEY)
+        if cached:
+            return cached
+    except Exception as exc:  # pragma: no cover - solo se cache backend giù
+        logger.debug("RDAP bootstrap cache read failed: %s", exc)
+        cache = None
+
+    try:
+        resp = requests.get(RDAP_BOOTSTRAP_URL, timeout=RDAP_TIMEOUT)
+        if resp.status_code != 200:
+            return {}
+        mapping = _parse_bootstrap(resp.json())
+    except Exception as exc:
+        logger.debug("RDAP bootstrap fetch failed: %s", exc)
+        return {}
+
+    if mapping:
+        try:
+            from django.core.cache import cache as _c
+            _c.set(RDAP_BOOTSTRAP_CACHE_KEY, mapping, timeout=RDAP_BOOTSTRAP_TTL)
+        except Exception:  # pragma: no cover
+            pass
+    return mapping
+
+
+def _rdap_get(url: str) -> dict | None:
+    try:
+        resp = requests.get(
+            url, timeout=RDAP_TIMEOUT, headers={"Accept": "application/rdap+json"},
+        )
+        if resp.status_code != 200:
+            return None
+        return resp.json()
+    except Exception as exc:
+        logger.debug("RDAP GET failed for %s: %s", url, exc)
+        return None
+
+
 def _query_rdap(domain: str) -> dict | None:
-    """Lookup RDAP per il dominio. None se non disponibile/fallisce."""
+    """Lookup RDAP per il dominio presso il registry. None se non disponibile."""
     parts = domain.lower().rsplit(".", 1)
     if len(parts) != 2:
         return None
@@ -96,18 +137,27 @@ def _query_rdap(domain: str) -> dict | None:
     base = _rdap_bootstrap().get(tld)
     if not base:
         return None
-    try:
-        resp = requests.get(
-            f"{base}/domain/{domain}",
-            timeout=RDAP_TIMEOUT,
-            headers={"Accept": "application/rdap+json"},
-        )
-        if resp.status_code != 200:
-            return None
-        return resp.json()
-    except Exception as exc:
-        logger.debug("RDAP query failed for %s: %s", domain, exc)
-        return None
+    return _rdap_get(f"{base}/domain/{domain}")
+
+
+def _referral_url(data: dict) -> str | None:
+    """URL RDAP del registrar referenziato dalla risposta del registry.
+
+    Molti registry "thin" (es. .com/.net) restituiscono dati minimi e rimandano al
+    RDAP del registrar (link `rel=related`, type rdap+json) che ha expiry/registrar
+    completi — è il vero recupero di completezza che WHOIS legacy faceva via
+    referral testuale."""
+    for link in data.get("links", []) or []:
+        if not isinstance(link, dict):
+            continue
+        rel = (link.get("rel") or "").lower()
+        href = link.get("href") or ""
+        typ = (link.get("type") or "").lower()
+        if rel == "related" and href.startswith("https://") and (
+            "rdap" in typ or "/domain/" in href
+        ):
+            return href.rstrip("/")
+    return None
 
 
 def _rdap_extract(data: dict) -> dict:
@@ -145,9 +195,21 @@ def _rdap_extract(data: dict) -> dict:
                             out["country"] = val[-1][:10]
             break
 
-    # Privacy: cerca redaction nei testi (RDAP redaction extension RFC 9537).
-    raw = str(data)
-    if _is_privacy(raw) or _is_privacy(out["registrar"]):
+    # Privacy: (1) redaction strutturata RFC 9537 — un membro `redacted` con un
+    # target che riguarda il registrant indica privacy/proxy; (2) fallback sui
+    # keyword nei testi.
+    redacted = data.get("redacted")
+    if isinstance(redacted, list):
+        for r in redacted:
+            if not isinstance(r, dict):
+                continue
+            target = str(r.get("prePath", "")) + str(r.get("postPath", "")) + str(
+                (r.get("name") or {}).get("type", "") if isinstance(r.get("name"), dict) else r.get("name", "")
+            )
+            if "registrant" in target.lower():
+                out["privacy"] = True
+                break
+    if not out["privacy"] and (_is_privacy(str(data)) or _is_privacy(out["registrar"])):
         out["privacy"] = True
     return out
 
@@ -189,11 +251,33 @@ def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> 
     rdap = _query_rdap(domain)
     if rdap is not None:
         fields = _rdap_extract(rdap)
+        source = "rdap"
+
+        # Referral al RDAP del registrar per completare i campi mancanti (registry
+        # thin). Si segue una sola volta; i valori del referral riempiono solo i
+        # buchi (l'autorità sull'expiry resta del registry quando già presente).
+        ref_url = _referral_url(rdap)
+        if ref_url:
+            ref = _rdap_get(ref_url)
+            if ref:
+                ref_fields = _rdap_extract(ref)
+                if fields["expiry"] is None and ref_fields["expiry"]:
+                    fields["expiry"] = ref_fields["expiry"]
+                if not fields["registrar"] and ref_fields["registrar"]:
+                    fields["registrar"] = ref_fields["registrar"]
+                if not fields["country"] and ref_fields["country"]:
+                    fields["country"] = ref_fields["country"]
+                fields["privacy"] = fields["privacy"] or ref_fields["privacy"]
+                source = "rdap_referral"
+
         scan.domain_expiry_date = fields["expiry"]
         scan.domain_registrar = fields["registrar"]
         scan.registrar_country = fields["country"]
         scan.whois_privacy = fields["privacy"]
+        scan.whois_source = source
         return True
 
-    # Fallback
-    return _python_whois_fill(domain, scan)
+    # Fallback su WHOIS legacy
+    ok = _python_whois_fill(domain, scan)
+    scan.whois_source = "whois" if ok else ""
+    return ok

@@ -31,7 +31,7 @@ _DOMAIN_LEVEL_FIELDS: tuple[str, ...] = (
     "ssl_valid", "ssl_expiry_date", "ssl_days_remaining", "ssl_issuer", "ssl_wildcard",
     "spf_present", "spf_policy", "dmarc_present", "dmarc_policy", "mx_present", "dnssec_enabled",
     "dkim_present", "dkim_selectors_found", "mta_sts_present", "tls_rpt_present",
-    "domain_expiry_date", "domain_registrar", "whois_privacy", "registrar_country",
+    "domain_expiry_date", "domain_registrar", "whois_privacy", "registrar_country", "whois_source",
     "vt_malicious", "vt_suspicious", "abuseipdb_score", "abuseipdb_reports",
     "otx_pulses", "gsb_status", "in_blacklist", "blacklist_sources",
     "hibp_breaches", "hibp_latest_breach", "hibp_data_types",

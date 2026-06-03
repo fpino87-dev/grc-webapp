@@ -163,11 +163,14 @@ class OsintScan(BaseModel):
         help_text="True se esiste il record TXT _smtp._tls (v=TLSRPTv1).",
     )
 
-    # WHOIS
+    # WHOIS / RDAP
     domain_expiry_date = models.DateField(null=True, blank=True)
     domain_registrar = models.CharField(max_length=255, blank=True)
     whois_privacy = models.BooleanField(null=True, blank=True)
     registrar_country = models.CharField(max_length=10, blank=True)
+    # Sorgente del dato registrazione: "rdap" | "rdap_referral" | "whois" | "".
+    # Trasparenza per l'auditor: RDAP (strutturato, RFC 7483) vs WHOIS legacy.
+    whois_source = models.CharField(max_length=20, blank=True)
 
     # Reputazione
     vt_malicious = models.IntegerField(null=True, blank=True)
