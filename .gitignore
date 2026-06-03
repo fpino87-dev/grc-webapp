@@ -65,6 +65,7 @@ newmodelrisk.md
 osint.md
 newfix.md
 osint.md
+budnewsfix.md
 
 # Database backups (generati dal task Celery, non da versionare)
 backend/backups/
