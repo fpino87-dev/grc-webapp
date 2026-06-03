@@ -219,13 +219,41 @@ def _sync_assets_it(settings: OsintSettings, result: AggregationResult) -> None:
 
 
 def _sync_assets_ot(settings: OsintSettings, result: AggregationResult) -> None:
-    """AssetOT attualmente non ha campi di rete esposti pubblicamente.
-    Placeholder per estensioni future — deattiva tutto in assenza di sorgente.
+    """Sincronizza gli AssetOT *raggiungibili da Internet* come entità OSINT.
+
+    Un asset OT non è normalmente esposto (sta dietro le zone Purdue); quando
+    però ha un'interfaccia pubblica (fqdn/ip di management o teleassistenza) è
+    proprio il target che vogliamo monitorare. Sincronizziamo solo gli asset
+    con un target pubblico valido, con la stessa guardia
+    `is_public_internet_target` usata per gli asset IT.
     """
+    from .validators import is_public_internet_target
+
     kept: set = set()
-    # Nessun campo pubblico da cui estrarre dominio/IP nel modello corrente.
-    # Se/quando AssetOT acquisirà fqdn/ip_address, aggiungere logica qui.
-    _ = AssetOT.objects.all().exists()  # touch per coerenza
+    for a in AssetOT.objects.select_related("plant").all():
+        candidates: list[str] = []
+        if a.fqdn:
+            candidates.append(a.fqdn)
+        if a.ip_address:
+            candidates.append(str(a.ip_address))
+        for raw in candidates:
+            domain = extract_domain(raw)
+            if not domain:
+                continue
+            if not is_public_internet_target(domain):
+                logger.debug("OSINT: skipping non-public OT asset domain %s (%s)", domain, a.name)
+                continue
+            _upsert_entity(
+                source_module=SourceModule.ASSETS_OT,
+                source_id=a.id,
+                domain=domain,
+                entity_type=EntityType.ASSET,
+                display_name=a.name,
+                is_nis2_critical=False,
+                scan_frequency=settings.freq_my_domains,
+                result=result,
+                kept=kept,
+            )
     _deactivate_missing(SourceModule.ASSETS_OT, kept, result)
 
 

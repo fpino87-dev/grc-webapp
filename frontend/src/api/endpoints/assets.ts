@@ -42,6 +42,9 @@ export interface AssetOT extends AssetChangeFields {
   category: "PLC" | "SCADA" | "HMI" | "RTU" | "sensore" | "altro";
   patchable: boolean;
   vendor: string;
+  fqdn: string;
+  ip_address: string | null;
+  internet_exposed: boolean;
   owner: string | null;
   notes: string;
   processes: string[];

@@ -224,12 +224,22 @@ def _trigger_breach(entity, scan, prev, settings, created_alerts):
 # ---------------------------------------------------------------------------
 
 def _has_ot_asset_linked(entity: "OsintEntity") -> bool:
-    """True se il fornitore gestisce asset OT/IT nel nostro inventario."""
-    from apps.assets.models import AssetOT, AssetIT
-    sup_id = entity.source_id
-    # Cerca asset collegati al fornitore (non c'è FK diretta — cerca per nome vendor se supplier)
-    # Per ora logica semplificata: se source_module=suppliers cerca asset OT dello stesso plant
-    return False  # Placeholder — espandibile con relazione fornitore↔asset
+    """True se il fornitore manutiene almeno un asset OT nel nostro inventario.
+
+    Un alert CRITICAL su un fornitore che ha accesso remoto a impianti OT non va
+    auto-gestito con un Task: viene messo in `PENDING_ESCALATION` per revisione
+    umana (il foothold OT alza la posta). Il legame è il FK
+    `Asset.maintainer_supplier`. Significativo solo per entità di tipo fornitore.
+    """
+    from apps.osint.models import SourceModule
+    from apps.assets.models import AssetOT
+
+    if entity.source_module != SourceModule.SUPPLIERS:
+        return False
+    return AssetOT.objects.filter(
+        maintainer_supplier_id=entity.source_id,
+        deleted_at__isnull=True,
+    ).exists()
 
 
 def _route_alert(alert: "OsintAlert", entity: "OsintEntity") -> None:

@@ -24,6 +24,7 @@ class NetworkZoneSerializer(serializers.ModelSerializer):
 class AssetITSerializer(serializers.ModelSerializer):
     plant_name = serializers.CharField(source="plant.name", read_only=True)
     owner_username = serializers.CharField(source="owner.username", read_only=True)
+    maintainer_supplier_name = serializers.CharField(source="maintainer_supplier.name", read_only=True)
     processes = serializers.PrimaryKeyRelatedField(
         many=True,
         read_only=False,
@@ -42,6 +43,8 @@ class AssetITSerializer(serializers.ModelSerializer):
             "criticality",
             "owner",
             "owner_username",
+            "maintainer_supplier",
+            "maintainer_supplier_name",
             "notes",
             "processes",
             "fqdn",
@@ -64,6 +67,7 @@ class AssetOTSerializer(serializers.ModelSerializer):
     plant_name = serializers.CharField(source="plant.name", read_only=True)
     owner_username = serializers.CharField(source="owner.username", read_only=True)
     network_zone_name = serializers.CharField(source="network_zone.name", read_only=True)
+    maintainer_supplier_name = serializers.CharField(source="maintainer_supplier.name", read_only=True)
     processes = serializers.PrimaryKeyRelatedField(
         many=True,
         read_only=False,
@@ -82,8 +86,13 @@ class AssetOTSerializer(serializers.ModelSerializer):
             "criticality",
             "owner",
             "owner_username",
+            "maintainer_supplier",
+            "maintainer_supplier_name",
             "notes",
             "processes",
+            "fqdn",
+            "ip_address",
+            "internet_exposed",
             "purdue_level",
             "category",
             "patchable",

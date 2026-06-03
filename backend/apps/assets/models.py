@@ -32,6 +32,18 @@ class Asset(BaseModel):
         blank=True,
         on_delete=models.SET_NULL,
     )
+    maintainer_supplier = models.ForeignKey(
+        "suppliers.Supplier",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="maintained_assets",
+        help_text=(
+            "Fornitore che manutiene / ha accesso remoto a questo asset. Usato "
+            "dal modulo OSINT per escalare gli alert critici dei fornitori con "
+            "foothold su asset OT."
+        ),
+    )
     notes = models.TextField(blank=True)
 
     # Riferimento change esterno (ticket Jira, ServiceNow, ecc.)
@@ -145,6 +157,21 @@ class AssetIT(Asset):
 
 
 class AssetOT(Asset):
+    # Campi di rete: un asset OT raggiungibile da Internet (interfaccia di
+    # management, VPN di teleassistenza, ecc.) è un target che il modulo OSINT
+    # deve monitorare. Mirror dei campi AssetIT pertinenti.
+    fqdn = models.CharField(
+        max_length=255, blank=True,
+        help_text="Hostname pubblico dell'interfaccia di management/teleassistenza, se esposta.",
+    )
+    ip_address = models.GenericIPAddressField(
+        null=True, blank=True,
+        help_text="IP pubblico dell'interfaccia di management, se esposta.",
+    )
+    internet_exposed = models.BooleanField(
+        default=False,
+        help_text="L'asset OT è raggiungibile da Internet (condizione di rischio elevato).",
+    )
     purdue_level = models.IntegerField()
     category = models.CharField(
         max_length=20,

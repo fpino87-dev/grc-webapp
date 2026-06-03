@@ -391,6 +391,14 @@ function NewAssetModal({ assetType, plants, onClose }: { assetType: "IT" | "OT";
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.vendor_label")}</label>
                 <input name="vendor" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("assets.fqdn_label")}</label>
+                <input name="fqdn" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder={t("assets.fqdn_placeholder")} />
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="ot_internet_exposed" name="internet_exposed" onChange={handleChange} className="rounded" />
+                <label htmlFor="ot_internet_exposed" className="text-sm text-gray-700">{t("assets.internet_exposed_label")}</label>
+              </div>
             </>
           )}
         </div>
