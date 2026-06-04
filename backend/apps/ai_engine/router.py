@@ -4,6 +4,7 @@ AiRouter — routing local/cloud con fallback.
 
 import hashlib
 import logging
+import uuid
 
 from django.utils import timezone
 
@@ -158,7 +159,18 @@ def route(
         text = Sanitizer().desanitize(text, token_map)
 
     interaction_id = None
-    if user and entity_id:
+    # `entity_id` è una UUIDField: i chiamanti che lavorano su entità sintetiche
+    # (es. gli insight del Centro Operativo, identificati da un fingerprint hash,
+    # non da una pk) non hanno un UUID reale. In quel caso si salta la telemetria
+    # invece di far esplodere la richiesta con un 500 (la chiamata AI è andata a
+    # buon fine: l'output non deve andare perso per un dettaglio di logging).
+    def _as_uuid(value):
+        try:
+            return uuid.UUID(str(value))
+        except (ValueError, TypeError, AttributeError):
+            return None
+
+    if user and entity_id and _as_uuid(entity_id) is not None:
         log = AiInteractionLog.objects.create(
             user_id=user.pk,
             function=task_type,

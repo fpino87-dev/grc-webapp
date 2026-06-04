@@ -189,6 +189,42 @@ def co_user(db):
 
 
 @pytest.mark.django_db
+def test_non_uuid_entity_id_does_not_500_and_skips_log(co_user, ai_config):
+    """Regressione: i chiamanti su entità sintetiche (Centro Operativo: insight
+    identificati da un fingerprint hash, non da una pk UUID) passano un
+    `entity_id` non-UUID. La telemetria `AiInteractionLog` (UUIDField) deve essere
+    saltata senza far esplodere la chiamata con un 500 — l'output AI non va perso."""
+    from apps.ai_engine.models import AiInteractionLog
+
+    before = AiInteractionLog.objects.count()
+    with patch("apps.ai_engine.router._call_cloud", return_value=("spiegazione", 7)):
+        result = route(
+            task_type="unit_test", prompt="x", sanitize=False,
+            user=co_user, entity_id="13c6c7e4fd8e6568", module_source="M21",
+        )
+    assert result["text"] == "spiegazione"
+    assert result["interaction_id"] is None
+    # nessun log scritto per il fingerprint non-UUID
+    assert AiInteractionLog.objects.count() == before
+
+
+@pytest.mark.django_db
+def test_uuid_entity_id_still_logs_interaction(co_user, plant, ai_config):
+    """Controprova: con un `entity_id` UUID valido la telemetria viene scritta."""
+    import uuid as _uuid
+    from apps.ai_engine.models import AiInteractionLog
+
+    eid = _uuid.uuid4()
+    with patch("apps.ai_engine.router._call_cloud", return_value=("ok", 3)):
+        result = route(
+            task_type="unit_test", prompt="x", sanitize=False,
+            user=co_user, entity_id=eid, module_source="M09",
+        )
+    assert result["interaction_id"] is not None
+    assert AiInteractionLog.objects.filter(entity_id=eid).exists()
+
+
+@pytest.mark.django_db
 def test_explain_returns_503_when_llm_unavailable(co_user, plant, ai_config):
     client = APIClient()
     client.force_authenticate(user=co_user)
