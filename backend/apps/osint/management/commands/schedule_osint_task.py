@@ -54,3 +54,25 @@ class Command(BaseCommand):
         )
         kpi_status = "creato" if kpi_created else "aggiornato"
         self.stdout.write(self.style.SUCCESS(f"Job OSINT KPI push {kpi_status}: {kpi_task.name}"))
+
+        # Enricher health: giornaliero 03:30 (dopo il backup 02:00). Nome allineato
+        # alla chiave in settings.CELERY_BEAT_SCHEDULE ("osint-enricher-health").
+        health_schedule, _ = CrontabSchedule.objects.get_or_create(
+            minute="30",
+            hour="3",
+            day_of_week="*",
+            day_of_month="*",
+            month_of_year="*",
+            timezone="Europe/Rome",
+        )
+        health_task, health_created = PeriodicTask.objects.update_or_create(
+            name="osint-enricher-health",
+            defaults={
+                "task": "osint.check_enricher_health",
+                "crontab": health_schedule,
+                "enabled": True,
+                "description": "Probe giornaliera salute chiavi enricher OSINT (ogni giorno 03:30 Europe/Rome)",
+            },
+        )
+        health_status = "creato" if health_created else "aggiornato"
+        self.stdout.write(self.style.SUCCESS(f"Job OSINT enricher health {health_status}: {health_task.name}"))

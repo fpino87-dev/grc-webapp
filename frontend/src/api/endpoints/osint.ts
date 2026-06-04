@@ -7,7 +7,8 @@ export type AlertStatus = "new" | "acknowledged" | "resolved" | "pending_escalat
 export type AlertType =
   | "ssl_expiry" | "ssl_expired" | "blacklist_new"
   | "dmarc_missing" | "score_critical" | "score_degraded"
-  | "new_subdomain" | "breach_found" | "subdomain_takeover";
+  | "new_subdomain" | "breach_found" | "subdomain_takeover"
+  | "ct_unexpected_issuer" | "threatfox_listed" | "urlhaus_listed";
 export type SubdomainStatus = "pending" | "included" | "ignored";
 export type ScoreClass = "critical" | "warning" | "attention" | "ok";
 
@@ -68,6 +69,9 @@ export interface OsintScanDetail extends OsintScanBrief {
   gsb_status: string;
   in_blacklist: boolean;
   blacklist_sources: string[];
+  threatfox_iocs: number | null;
+  threatfox_malware: string[];
+  urlhaus_urls: number | null;
   hibp_breaches: number | null;
   hibp_latest_breach: string | null;
   hibp_data_types: string[];
@@ -139,8 +143,13 @@ export interface OsintSettings {
   has_abuseipdb_key: boolean;
   has_gsb_key: boolean;
   has_otx_key: boolean;
+  has_abusech_key: boolean;
+  enricher_health: EnricherHealth;
   updated_at: string;
 }
+
+export type EnricherHealthStatus = "ok" | "invalid" | "rate_limited" | "error" | "no_key";
+export type EnricherHealth = Record<string, { status: EnricherHealthStatus; detail: string; checked_at: string }>;
 
 export type FindingStatus = "open" | "acknowledged" | "in_progress" | "resolved" | "accepted_risk";
 export type FindingCode =
@@ -154,7 +163,10 @@ export type FindingCode =
   | "headers_missing"
   | "new_subdomain"
   | "lookalike_domains"
-  | "subdomain_takeover";
+  | "subdomain_takeover"
+  | "ct_unexpected_issuer"
+  | "threatfox_listed"
+  | "urlhaus_listed";
 
 export interface FindingPlaybook {
   title: string;
@@ -240,6 +252,8 @@ export const osintApi = {
     apiClient.get<OsintSettings>("/osint/settings/").then(r => r.data),
   updateSettings: (data: Partial<OsintSettings> & Record<string, unknown>) =>
     apiClient.patch<OsintSettings>("/osint/settings/", data).then(r => r.data),
+  testKeys: (provider?: string) =>
+    apiClient.post<{ enricher_health: EnricherHealth }>("/osint/settings/test-keys/", provider ? { provider } : {}).then(r => r.data.enricher_health),
 
   aiAnalyze: (type: "attack_surface" | "suppliers_nis2" | "board_report") =>
     apiClient.post<{ analysis: string }>("/osint/ai/analyze/", { type }).then(r => r.data),

@@ -9,6 +9,7 @@ import { assetsApi } from "../../api/endpoints/assets";
 import { scheduleApi } from "../../api/endpoints/schedule";
 import { governanceApi } from "../../api/endpoints/governance";
 import { useAuthStore } from "../../store/auth";
+import { CockpitWidget } from "../cockpit/CockpitWidget";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -346,6 +347,7 @@ export function Dashboard() {
     <div>
       <h2 className="text-xl font-semibold text-gray-900 mb-6">{t("dashboard.title")}</h2>
 
+      <CockpitWidget />
       <CriticalRolesWidget />
       <RevaluationAlert />
 

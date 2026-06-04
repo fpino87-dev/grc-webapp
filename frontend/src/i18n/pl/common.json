@@ -1090,7 +1090,8 @@
       "osint": "OSINT Monitor",
       "checklist_runs": "Listy kontrolne",
       "checklist_templates": "Szablony list",
-      "kpi_operational": "KPI operacyjne"
+      "kpi_operational": "KPI operacyjne",
+      "cockpit": "Centrum Operacyjne"
     }
   },
   "topbar": {
@@ -2303,8 +2304,16 @@
       "resilience_hint": "Procesy krytyczne z docelowym RTO, ale bez odpowiedniego pokrycia BCP (M05 → M16 → M06).",
       "empty": "Brak pozycji.",
       "rto": "RTO {{hours}}h",
-      "level": { "medio": "Średni", "alto": "Wysoki", "critico": "Krytyczny" },
-      "gap": { "no_bcp_plan": "Brak BCP", "bcp_insufficient": "BCP niewystarczający", "bcp_marginal": "BCP marginalny" }
+      "level": {
+        "medio": "Średni",
+        "alto": "Wysoki",
+        "critico": "Krytyczny"
+      },
+      "gap": {
+        "no_bcp_plan": "Brak BCP",
+        "bcp_insufficient": "BCP niewystarczający",
+        "bcp_marginal": "BCP marginalny"
+      }
     },
     "wizard_subtitle": "Utwórz kolejno: proces krytyczny, scenariusz ryzyka i spójny plan BCP.",
     "wizard_step_bia": "Proces BIA",
@@ -2689,6 +2698,8 @@
       "abuseipdb": "Wynik AbuseIPDB",
       "otx_pulses": "OTX Pulses",
       "gsb": "Google Safe Browsing",
+      "threatfox": "ThreatFox",
+      "urlhaus": "URLhaus",
       "hibp_last": "Ostatnie naruszenie",
       "hibp_types": "Ujawnione dane",
       "enricher_errors": "Błędy enricherów",
@@ -2727,6 +2738,8 @@
       "abuseipdb_flagged": "AbuseIPDB: wynik {{score}} ({{reports}} zgłoszeń)",
       "otx_pulses": "Obecny w {{count}} wskaźnikach zagrożeń (OTX)",
       "gsb_unsafe": "Google Safe Browsing: {{status}}",
+      "threatfox_listed": "Aktywny wskaźnik IoC malware (ThreatFox): {{count}} — {{malware}}",
+      "urlhaus_listed": "Znane adresy URL malware na hoście (URLhaus): {{count}}",
       "enricher_error": "Częściowe dane: enrichery {{names}} nie ukończone",
       "ssl_unreachable": "Port 443 niedostępny na {{domain}} — nie wykryto certyfikatu SSL",
       "ssl_no_https": "Nie wykryto HTTPS na {{domain}} — domena nie udostępnia usług web (normalne dla domen tylko e-mail lub wewnętrznych)"
@@ -2803,7 +2816,21 @@
       "api_keys": "Klucze API enrichera",
       "api_keys_hint": "Klucze są szyfrowane w spoczynku. Pozostaw puste, aby zachować bieżącą wartość.",
       "key_saved": "Klucz zapisany",
-      "key_placeholder": "Wprowadź klucz API…"
+      "key_placeholder": "Wprowadź klucz API…",
+      "health": {
+        "test": "Testuj",
+        "testing": "Testowanie…",
+        "test_all": "Testuj wszystkie",
+        "testing_all": "Testowanie…",
+        "checked_at": "sprawdzono {{date}}",
+        "status": {
+          "ok": "Klucz prawidłowy",
+          "invalid": "Nieprawidłowy klucz",
+          "rate_limited": "Limit zapytań (klucz OK)",
+          "error": "Błąd połączenia",
+          "no_key": "Brak klucza"
+        }
+      }
     },
     "remediation": {
       "title": "Naprawa",
@@ -3045,6 +3072,146 @@
       },
       "create_template": "Utwórz szablon",
       "will_create_template": "tworzy szablon „{{name}}”"
+    }
+  },
+  "cockpit": {
+    "title": "Centrum Operacyjne",
+    "subtitle": "Problemy, brakujące konfiguracje i zalecane działania w jednym, priorytetyzowanym widoku.",
+    "open": "Otwórz",
+    "go": "Przejdź",
+    "owner": "Właściciel",
+    "empty": "Nie wykryto problemów. Wszystko w porządku.",
+    "count_shown": "{{n}} elementów",
+    "load_error": "Nie udało się załadować Centrum Operacyjnego.",
+    "posture": {
+      "score": "Wskaźnik postawy",
+      "hint": "0 = doskonały, 100 = krytyczny. Liczony z otwartych insightów na obszar.",
+      "trend": "Trend"
+    },
+    "severity": {
+      "critical": "Krytyczny",
+      "warning": "Ostrzeżenie",
+      "info": "Info"
+    },
+    "areas": {
+      "governance": "Ład",
+      "controls": "Kontrole",
+      "risk": "Ryzyko",
+      "incidents": "Incydenty",
+      "supply_chain": "Łańcuch dostaw",
+      "technical": "Techniczne",
+      "continuity": "Ciągłość"
+    },
+    "filters": {
+      "all_areas": "Wszystkie obszary",
+      "all_severities": "Wszystkie poziomy",
+      "mine": "Moje",
+      "show_suppressed": "Pokaż odłożone"
+    },
+    "insights": {
+      "osint.key_invalid": {
+        "title": "Nieprawidłowy klucz enrichera: {{provider}}",
+        "what": "Wzbogacanie {{provider}} nie działa, dopóki klucz nie jest prawidłowy ({{detail}}).",
+        "action": "Popraw klucz w OSINT → Ustawienia i kliknij „Testuj”."
+      },
+      "osint.critical_findings": {
+        "title": "{{count}} otwartych krytycznych ustaleń OSINT",
+        "what": "Aktywne narażenie zewnętrzne w zakładzie {{plant_name}}.",
+        "action": "Otwórz moduł OSINT i obsłuż krytyczne ustalenia."
+      },
+      "schedule.drift": {
+        "title": "{{count}} niezsynchronizowanych automatyzacji",
+        "what": "Zadania zgodności mogą się nie uruchomić (brak/wyłączone/inny czas).",
+        "action": "Uruchom „schedule_osint_task” i sprawdź PeriodicTask."
+      },
+      "controls.gap": {
+        "title": "{{count}} kontroli z luką/częściowych",
+        "what": "Niekompletna postawa zgodności w zakładzie {{plant_name}}.",
+        "action": "Otwórz kontrole zakładu i zaplanuj naprawę."
+      },
+      "risk.needs_revaluation": {
+        "title": "{{count}} kontroli do ponownej oceny",
+        "what": "Ostatnie zmiany wymagają ponownej oceny ({{plant_name}}).",
+        "action": "Ponownie oceń wskazane kontrole."
+      },
+      "documents.expiring": {
+        "title": "{{count}} dokumentów wygasających",
+        "what": "Zatwierdzone dokumenty wygasające w ciągu 30 dni ({{plant_name}}).",
+        "action": "Odnów lub przejrzyj wygasające dokumenty."
+      },
+      "incidents.open": {
+        "title": "{{count}} otwartych incydentów",
+        "what": "Otwarte lub analizowane incydenty do zamknięcia ({{plant_name}}).",
+        "action": "Obsłuż otwarte incydenty."
+      },
+      "bia.resilience_gap": {
+        "title": "{{count}} procesów bez odpowiedniego pokrycia BCP",
+        "what": "Luka odporności BIA→BCP w procesach krytycznych.",
+        "action": "Przygotuj lub zatwierdź brakujące plany BCP."
+      },
+      "access.role_expiring": {
+        "title": "{{count}} wygasających przypisań ról",
+        "what": "Prawa dostępu wygasające w ciągu 30 dni.",
+        "action": "Odnów lub odwołaj odpowiednie przypisania."
+      },
+      "suppliers.assessment_gaps": {
+        "title": "{{count}} dostawców z niekompletną oceną",
+        "what": "Aktywni dostawcy, którym brakuje śledzonych elementów (obecne i ważne = pod kontrolą).",
+        "action": "Uzupełnij brakujący kwestionariusz, NDA i ocenę wewnętrzną."
+      },
+      "kpi.out_of_threshold": {
+        "title": "{{count}} wskaźników operacyjnych poza progiem",
+        "what": "Wskaźniki w stanie ostrzeżenia/krytycznym w zakładzie {{plant_name}} ({{critical}} krytycznych, {{warning}} ostrzeżeń).",
+        "action": "Otwórz KPI operacyjne i przeanalizuj odchylenia."
+      },
+      "mgmt_review.overdue": {
+        "title": "{{count}} zaległych przeglądów zarządzania",
+        "what": "Zaplanowane spotkania po terminie ({{plant_name}}).",
+        "action": "Przeprowadź przegląd lub zmień termin."
+      },
+      "links.ot_unmonitored": {
+        "title": "{{count}} ujawnionych zasobów OT bez monitoringu",
+        "what": "Wystawione do Internetu, ale bez FQDN/IP: OSINT nie może ich monitorować.",
+        "action": "Dodaj FQDN lub IP do ujawnionych zasobów OT."
+      },
+      "governance.vacant_roles": {
+        "title": "{{count}} obowiązkowych ról bez przypisania",
+        "what": "Wakujące obowiązkowe role NIS2/ISO: {{roles}}.",
+        "action": "Przypisz nieobsadzone obowiązkowe role."
+      },
+      "training.overdue": {
+        "title": "{{count}} zaległych obowiązkowych szkoleń",
+        "what": "Obowiązkowe kursy po terminie, nieukończone.",
+        "action": "Przypomnij lub przełóż zaległe szkolenia."
+      },
+      "audit_prep.open_findings": {
+        "title": "{{count}} otwartych ustaleń audytu",
+        "what": "Ustalenia audytu otwarte lub w trakcie odpowiedzi do zamknięcia.",
+        "action": "Obsłuż i zamknij ustalenia audytu."
+      }
+    },
+    "breakdown": {
+      "questionnaire": "brakujące kwestionariusze",
+      "nda": "brakujące NDA",
+      "evaluation": "brakujące oceny wewnętrzne"
+    },
+    "state": {
+      "snoozed": "Odłożone do {{date}}",
+      "accepted": "Ryzyko zaakceptowane do {{date}}"
+    },
+    "actions": {
+      "snooze": "Odłóż 7d",
+      "accept": "Akceptuj ryzyko",
+      "reopen": "Otwórz ponownie"
+    },
+    "ai": {
+      "explain": "Wyjaśnij (AI)",
+      "draft_label": "Szkic AI",
+      "thinking": "Myślę…",
+      "error": "Usługa AI niedostępna.",
+      "disclaimer": "Szkic wygenerowany przez AI — sprawdź przed działaniem.",
+      "ask": "Zapytaj",
+      "ask_placeholder": "Zapytaj Copilota: np. jakie są 3 najpilniejsze problemy?"
     }
   }
 }

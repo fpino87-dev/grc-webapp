@@ -30,6 +30,8 @@ def _scan(**kwargs):
     s.vt_malicious = kwargs.get("vt_malicious", 0)
     s.abuseipdb_score = kwargs.get("abuseipdb_score", 0)
     s.otx_pulses = kwargs.get("otx_pulses", 0)
+    s.threatfox_iocs = kwargs.get("threatfox_iocs", 0)
+    s.urlhaus_urls = kwargs.get("urlhaus_urls", 0)
     return s
 
 

@@ -136,6 +136,24 @@ def push_osint_kpis(self):
     return _push()
 
 
+@shared_task(name="osint.check_enricher_health")
+def check_enricher_health():
+    """Probe giornaliera della salute delle chiavi enricher (semaforo settings).
+
+    Non fa retry: è un health-check best-effort; un esito `error` transitorio
+    viene già rappresentato nello stato e verrà ricontrollato il giorno dopo (o
+    on-demand). Salta del tutto se non c'è nessuna chiave configurata."""
+    from apps.osint.health import check_enricher_health as _check, KEYED_PROVIDERS
+    from apps.osint.models import OsintSettings
+
+    settings = OsintSettings.load()
+    if not any(getattr(settings, f"{p}_api_key", "") for p in KEYED_PROVIDERS):
+        logger.info("OSINT enricher health: nessuna chiave configurata, skip")
+        return {"checked": 0}
+    health = _check(settings, save=True)
+    return {"checked": len(health)}
+
+
 @shared_task(
     bind=True,
     autoretry_for=(Exception,),

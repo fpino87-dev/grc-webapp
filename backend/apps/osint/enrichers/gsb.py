@@ -68,3 +68,31 @@ def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> 
         logger.warning("GSB enricher failed for %s: %s", domain, exc)
         scan.enricher_errors["gsb"] = str(exc)
         return False
+
+
+def probe(settings: "OsintSettings") -> tuple[str, str]:
+    """Health-check leggero della chiave Google Safe Browsing.
+
+    GSB con chiave non valida risponde **400** (API_KEY_INVALID) o **403**
+    (PERMISSION_DENIED): qui un 400 sulla nostra richiesta ben formata significa
+    chiave invalida, non richiesta malformata."""
+    from apps.osint.health import classify_http
+
+    if not settings.gsb_api_key:
+        return ("no_key", "")
+    try:
+        payload = {
+            "client": {"clientId": "grc-webapp-osint", "clientVersion": "1.0"},
+            "threatInfo": {
+                "threatTypes": THREAT_TYPES,
+                "platformTypes": ["ANY_PLATFORM"],
+                "threatEntryTypes": ["URL"],
+                "threatEntries": [{"url": "https://example.com"}],
+            },
+        }
+        resp = requests.post(
+            GSB_URL, params={"key": settings.gsb_api_key}, json=payload, timeout=TIMEOUT,
+        )
+        return (classify_http(resp.status_code, invalid_codes=(400, 401, 403)), f"HTTP {resp.status_code}")
+    except Exception as exc:  # noqa: BLE001
+        return ("error", str(exc)[:200])

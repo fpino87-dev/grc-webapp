@@ -130,12 +130,15 @@ class OsintSettingsSerializer(serializers.ModelSerializer):
     abuseipdb_api_key = serializers.CharField(write_only=True, allow_blank=True, required=False)
     gsb_api_key = serializers.CharField(write_only=True, allow_blank=True, required=False)
     otx_api_key = serializers.CharField(write_only=True, allow_blank=True, required=False)
+    abusech_api_key = serializers.CharField(write_only=True, allow_blank=True, required=False)
 
     has_hibp_key = serializers.SerializerMethodField()
     has_virustotal_key = serializers.SerializerMethodField()
     has_abuseipdb_key = serializers.SerializerMethodField()
     has_gsb_key = serializers.SerializerMethodField()
     has_otx_key = serializers.SerializerMethodField()
+    has_abusech_key = serializers.SerializerMethodField()
+    enricher_health = serializers.JSONField(read_only=True)
 
     class Meta:
         model = OsintSettings
@@ -149,9 +152,10 @@ class OsintSettingsSerializer(serializers.ModelSerializer):
             "subdomain_auto_include", "anonymization_enabled",
             "ct_monitoring_enabled", "ct_lookback_days", "ct_expected_issuers",
             "hibp_api_key", "virustotal_api_key", "abuseipdb_api_key",
-            "gsb_api_key", "otx_api_key",
+            "gsb_api_key", "otx_api_key", "abusech_api_key",
             "has_hibp_key", "has_virustotal_key", "has_abuseipdb_key",
-            "has_gsb_key", "has_otx_key",
+            "has_gsb_key", "has_otx_key", "has_abusech_key",
+            "enricher_health",
             "updated_at",
         ]
         read_only_fields = ["id", "updated_at"]
@@ -173,6 +177,7 @@ class OsintSettingsSerializer(serializers.ModelSerializer):
     def get_has_abuseipdb_key(self, obj): return bool(obj.abuseipdb_api_key)
     def get_has_gsb_key(self, obj): return bool(obj.gsb_api_key)
     def get_has_otx_key(self, obj): return bool(obj.otx_api_key)
+    def get_has_abusech_key(self, obj): return bool(obj.abusech_api_key)
 
 
 class OsintFindingSerializer(serializers.ModelSerializer):

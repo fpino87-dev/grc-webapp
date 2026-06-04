@@ -83,6 +83,8 @@ TASK_TYPES = [
     ("osint_board_report", "OSINT: Report per Board/Audit"),
     ("assistant_explain", "Assistant: Spiegazione gap"),
     ("assistant_greeting", "Assistant: Saluto contestuale"),
+    ("cockpit_explain", "Centro Operativo: Spiega insight + bozza remediation"),
+    ("cockpit_assistant", "Centro Operativo: Chiedi al Copilot"),
 ]
 
 FALLBACK_MODES = [
@@ -156,6 +158,8 @@ class AiProviderConfig(BaseModel):
             "osint_board_report": "cloud",
             "assistant_explain": "cloud",
             "assistant_greeting": "ollama",
+            "cockpit_explain": "cloud",
+            "cockpit_assistant": "cloud",
         }
         routing = self.task_routing or {}
         return routing.get(task_type, defaults.get(task_type, "ollama"))

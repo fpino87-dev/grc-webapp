@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "apps.compliance_schedule",
     "apps.backups",
     "apps.osint",
+    "apps.cockpit",
 ]
 
 MIDDLEWARE = [
@@ -172,6 +173,11 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.incidents.tasks.check_nis2_deadlines",
         "schedule": crontab(minute="*/30"),
     },
+    # Giornalieri
+    "osint-enricher-health": {
+        "task": "osint.check_enricher_health",
+        "schedule": crontab(hour=3, minute=30),  # ogni giorno 03:30 — dopo il backup (02:00)
+    },
     # Settimanali (lunedì)
     "osint-weekly-scan": {
         "task": "osint.weekly_scan",
@@ -195,6 +201,10 @@ CELERY_BEAT_SCHEDULE = {
     "check-unrevalued-changes": {
         "task": "apps.assets.tasks.check_unrevalued_changes",
         "schedule": crontab(hour=7, minute=0, day_of_week=1),  # lunedì 07:00
+    },
+    "cockpit-sync": {
+        "task": "cockpit.sync",
+        "schedule": crontab(hour=7, minute=15, day_of_week=1),  # lunedì 07:15 — dopo i ricalcoli
     },
     "check-software-eos": {
         "task": "apps.assets.tasks.check_software_eos",

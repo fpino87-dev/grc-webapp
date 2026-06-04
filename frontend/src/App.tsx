@@ -39,6 +39,7 @@ import { NotificationSettingsPage } from "./modules/settings/NotificationSetting
 import { AiSettingsPage } from "./modules/settings/AiSettingsPage";
 import { MfaSettingsPage } from "./modules/settings/MfaSettingsPage";
 import { BackupsPage } from "./modules/backups/BackupsPage";
+import { CockpitPage } from "./modules/cockpit/CockpitPage";
 import { OsintDashboard } from "./modules/osint/OsintDashboard";
 import { OsintSettingsPage } from "./modules/osint/OsintSettings";
 import { OsintSubdomainsPage } from "./modules/osint/OsintSubdomainsPage";
@@ -64,6 +65,7 @@ export function App() {
           }
         >
           <Route index element={<Dashboard />} />
+          <Route path="cockpit" element={<CockpitPage />} />
           <Route path="controls" element={<ControlsList />} />
           <Route path="gap-analysis" element={<GapAnalysisPage />} />
           <Route path="incidents" element={<IncidentsList />} />

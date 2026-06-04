@@ -1090,7 +1090,8 @@
       "osint": "OSINT Monitor",
       "checklist_runs": "Kontrol Listeleri",
       "checklist_templates": "Liste Şablonları",
-      "kpi_operational": "Operasyonel KPI'lar"
+      "kpi_operational": "Operasyonel KPI'lar",
+      "cockpit": "Operasyon Merkezi"
     }
   },
   "topbar": {
@@ -2303,8 +2304,16 @@
       "resilience_hint": "Hedef RTO'su olan ancak yeterli BCP kapsamı olmayan kritik süreçler (M05 → M16 → M06).",
       "empty": "Kayıt yok.",
       "rto": "RTO {{hours}}s",
-      "level": { "medio": "Orta", "alto": "Yüksek", "critico": "Kritik" },
-      "gap": { "no_bcp_plan": "BCP yok", "bcp_insufficient": "BCP yetersiz", "bcp_marginal": "BCP marjinal" }
+      "level": {
+        "medio": "Orta",
+        "alto": "Yüksek",
+        "critico": "Kritik"
+      },
+      "gap": {
+        "no_bcp_plan": "BCP yok",
+        "bcp_insufficient": "BCP yetersiz",
+        "bcp_marginal": "BCP marjinal"
+      }
     },
     "wizard_subtitle": "Sırayla oluşturun: kritik süreç, risk senaryosu ve tutarlı BCP planı.",
     "wizard_step_bia": "BIA Süreci",
@@ -2689,6 +2698,8 @@
       "abuseipdb": "AbuseIPDB skoru",
       "otx_pulses": "OTX Pulses",
       "gsb": "Google Safe Browsing",
+      "threatfox": "ThreatFox",
+      "urlhaus": "URLhaus",
       "hibp_last": "Son ihlal",
       "hibp_types": "Açığa çıkan veriler",
       "enricher_errors": "Zenginleştirici hataları",
@@ -2727,6 +2738,8 @@
       "abuseipdb_flagged": "AbuseIPDB: skor {{score}} ({{reports}} rapor)",
       "otx_pulses": "{{count}} tehdit istihbarat göstergesinde mevcut (OTX)",
       "gsb_unsafe": "Google Safe Browsing: {{status}}",
+      "threatfox_listed": "Etkin kötü amaçlı yazılım IoC (ThreatFox): {{count}} — {{malware}}",
+      "urlhaus_listed": "Ana bilgisayarda bilinen kötü amaçlı yazılım URL'leri (URLhaus): {{count}}",
       "enricher_error": "Kısmi veri: {{names}} zenginleştiricileri tamamlanmadı",
       "ssl_unreachable": "{{domain}} üzerinde port 443 erişilemiyor — SSL sertifikası algılanamadı",
       "ssl_no_https": "{{domain}} üzerinde HTTPS tespit edilmedi — domain web hizmeti sunmuyor (yalnızca e-posta veya dahili domainler için normal)"
@@ -2803,7 +2816,21 @@
       "api_keys": "Zenginleştirici API anahtarları",
       "api_keys_hint": "Anahtarlar beklerken şifrelenir. Mevcut değeri korumak için boş bırakın.",
       "key_saved": "Anahtar kaydedildi",
-      "key_placeholder": "API anahtarını girin…"
+      "key_placeholder": "API anahtarını girin…",
+      "health": {
+        "test": "Test et",
+        "testing": "Test ediliyor…",
+        "test_all": "Tümünü test et",
+        "testing_all": "Test ediliyor…",
+        "checked_at": "{{date}} kontrol edildi",
+        "status": {
+          "ok": "Anahtar geçerli",
+          "invalid": "Geçersiz anahtar",
+          "rate_limited": "İstek sınırı (anahtar OK)",
+          "error": "Bağlantı hatası",
+          "no_key": "Anahtar yok"
+        }
+      }
     },
     "remediation": {
       "title": "Düzeltme",
@@ -3045,6 +3072,146 @@
       },
       "create_template": "Şablon oluştur",
       "will_create_template": "«{{name}}» şablonunu oluşturur"
+    }
+  },
+  "cockpit": {
+    "title": "Operasyon Merkezi",
+    "subtitle": "Sorunlar, eksik yapılandırmalar ve önerilen aksiyonlar tek bir önceliklendirilmiş görünümde.",
+    "open": "Aç",
+    "go": "Git",
+    "owner": "Sorumlu",
+    "empty": "Sorun tespit edilmedi. Her şey yolunda.",
+    "count_shown": "{{n}} öğe",
+    "load_error": "Operasyon Merkezi yüklenemedi.",
+    "posture": {
+      "score": "Duruş Skoru",
+      "hint": "0 = mükemmel, 100 = kritik. Alana göre açık içgörülerden hesaplanır.",
+      "trend": "Eğilim"
+    },
+    "severity": {
+      "critical": "Kritik",
+      "warning": "Uyarı",
+      "info": "Bilgi"
+    },
+    "areas": {
+      "governance": "Yönetişim",
+      "controls": "Kontroller",
+      "risk": "Risk",
+      "incidents": "Olaylar",
+      "supply_chain": "Tedarik zinciri",
+      "technical": "Teknik",
+      "continuity": "Süreklilik"
+    },
+    "filters": {
+      "all_areas": "Tüm alanlar",
+      "all_severities": "Tüm seviyeler",
+      "mine": "Benimkiler",
+      "show_suppressed": "Ertelenenleri göster"
+    },
+    "insights": {
+      "osint.key_invalid": {
+        "title": "Geçersiz enricher anahtarı: {{provider}}",
+        "what": "Anahtar geçerli olana kadar {{provider}} zenginleştirmesi çalışmaz ({{detail}}).",
+        "action": "Anahtarı OSINT → Ayarlar'da düzeltin ve \"Test et\"e basın."
+      },
+      "osint.critical_findings": {
+        "title": "{{count}} açık kritik OSINT bulgusu",
+        "what": "{{plant_name}} tesisinde aktif dış maruziyet.",
+        "action": "OSINT modülünü açın ve kritik bulguları ele alın."
+      },
+      "schedule.drift": {
+        "title": "{{count}} zamanlanmış otomasyon senkronize değil",
+        "what": "Uyumluluk işleri çalışmayabilir (eksik/devre dışı/farklı saat).",
+        "action": "\"schedule_osint_task\"ı çalıştırın ve PeriodicTask'ları kontrol edin."
+      },
+      "controls.gap": {
+        "title": "{{count}} kontrol boşlukta/kısmi",
+        "what": "{{plant_name}} tesisinde eksik uyumluluk duruşu.",
+        "action": "Tesis kontrollerini açın ve iyileştirmeyi planlayın."
+      },
+      "risk.needs_revaluation": {
+        "title": "{{count}} kontrol yeniden değerlendirilmeli",
+        "what": "Son değişiklikler yeniden değerlendirme gerektiriyor ({{plant_name}}).",
+        "action": "İşaretli kontrolleri yeniden değerlendirin."
+      },
+      "documents.expiring": {
+        "title": "{{count}} belge süresi doluyor",
+        "what": "30 gün içinde süresi dolan onaylı belgeler ({{plant_name}}).",
+        "action": "Süresi dolan belgeleri yenileyin veya gözden geçirin."
+      },
+      "incidents.open": {
+        "title": "{{count}} açık olay",
+        "what": "Kapatılacak açık veya analizdeki olaylar ({{plant_name}}).",
+        "action": "Açık olayları ele alın."
+      },
+      "bia.resilience_gap": {
+        "title": "{{count}} süreç yeterli BCP kapsamından yoksun",
+        "what": "Kritik süreçlerde BIA→BCP dayanıklılık boşluğu.",
+        "action": "Eksik BCP planlarını hazırlayın veya onaylayın."
+      },
+      "access.role_expiring": {
+        "title": "{{count}} rol ataması sona eriyor",
+        "what": "30 gün içinde sona eren erişim hakları.",
+        "action": "İlgili atamaları yenileyin veya iptal edin."
+      },
+      "suppliers.assessment_gaps": {
+        "title": "{{count}} tedarikçide eksik durum tespiti",
+        "what": "Aktif tedarikçilerde izlenen eksik unsurlar (mevcut ve geçerli = kontrol altında).",
+        "action": "Eksik anketi, NDA'yı ve iç değerlendirmeyi tamamlayın."
+      },
+      "kpi.out_of_threshold": {
+        "title": "{{count}} operasyonel KPI eşik dışı",
+        "what": "{{plant_name}} tesisinde uyarı/kritik göstergeler ({{critical}} kritik, {{warning}} uyarı).",
+        "action": "Operasyonel KPI'ları açın ve sapmaları inceleyin."
+      },
+      "mgmt_review.overdue": {
+        "title": "{{count}} geciken yönetim gözden geçirmesi",
+        "what": "Tarihi geçmiş planlı toplantılar ({{plant_name}}).",
+        "action": "Gözden geçirmeyi yapın veya yeniden planlayın."
+      },
+      "links.ot_unmonitored": {
+        "title": "{{count}} izlenemeyen açık OT varlığı",
+        "what": "İnternete açık ama FQDN/IP yok: OSINT bunları izleyemez.",
+        "action": "Açık OT varlıklarına FQDN veya IP ekleyin."
+      },
+      "governance.vacant_roles": {
+        "title": "{{count}} zorunlu rol atanmamış",
+        "what": "Boş zorunlu NIS2/ISO rolleri: {{roles}}.",
+        "action": "Karşılanmayan zorunlu rolleri atayın."
+      },
+      "training.overdue": {
+        "title": "{{count}} geciken zorunlu eğitim",
+        "what": "Süresi geçmiş ve tamamlanmamış zorunlu kurslar.",
+        "action": "Geciken eğitimi takip edin veya yeniden planlayın."
+      },
+      "audit_prep.open_findings": {
+        "title": "{{count}} açık denetim bulgusu",
+        "what": "Kapatılacak açık veya yanıt aşamasındaki denetim bulguları.",
+        "action": "Denetim bulgularını ele alın ve kapatın."
+      }
+    },
+    "breakdown": {
+      "questionnaire": "eksik anketler",
+      "nda": "eksik NDA'lar",
+      "evaluation": "eksik iç değerlendirmeler"
+    },
+    "state": {
+      "snoozed": "{{date}} tarihine ertelendi",
+      "accepted": "{{date}} tarihine kadar risk kabul edildi"
+    },
+    "actions": {
+      "snooze": "7g ertele",
+      "accept": "Riski kabul et",
+      "reopen": "Yeniden aç"
+    },
+    "ai": {
+      "explain": "Açıkla (AI)",
+      "draft_label": "AI taslağı",
+      "thinking": "Düşünüyor…",
+      "error": "AI hizmeti kullanılamıyor.",
+      "disclaimer": "AI tarafından üretilen taslak — harekete geçmeden önce doğrulayın.",
+      "ask": "Sor",
+      "ask_placeholder": "Copilot'a sor: örn. en acil 3 sorun nedir?"
     }
   }
 }

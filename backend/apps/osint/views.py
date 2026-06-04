@@ -399,7 +399,7 @@ class OsintSettingsViewSet(viewsets.GenericViewSet):
         serializer.save()
 
         # Logga senza esporre le API key (anche tronche).
-        sensitive = {"hibp_api_key", "virustotal_api_key", "abuseipdb_api_key", "gsb_api_key", "otx_api_key"}
+        sensitive = {"hibp_api_key", "virustotal_api_key", "abuseipdb_api_key", "gsb_api_key", "otx_api_key", "abusech_api_key"}
         changed_keys = [k for k in request.data.keys() if k not in sensitive]
         api_key_touched = any(k in sensitive for k in request.data.keys())
 
@@ -415,6 +415,33 @@ class OsintSettingsViewSet(viewsets.GenericViewSet):
             },
         )
         return Response(serializer.data)
+
+    @action(detail=False, methods=["post"], url_path="test-keys")
+    def test_keys(self, request):
+        """Esegue al volo le probe degli enricher a chiave e salva l'esito.
+
+        Body opzionale `{"provider": "virustotal"}` per testarne uno solo; senza,
+        testa tutti i provider keyed. Ritorna il dict `enricher_health` aggiornato.
+        Sincrono: l'utente vuole feedback immediato dopo aver inserito una chiave."""
+        from apps.osint.health import check_enricher_health, KEYED_PROVIDERS
+
+        provider = request.data.get("provider")
+        providers = [provider] if provider in KEYED_PROVIDERS else None
+        if provider and providers is None:
+            return Response({"detail": "provider non valido."}, status=status.HTTP_400_BAD_REQUEST)
+
+        settings = self._get_settings()
+        health = check_enricher_health(settings, providers=providers, save=True)
+
+        from core.audit import log_action
+        log_action(
+            user=request.user,
+            action_code="osint.enricher_health_checked",
+            level="L1",
+            entity=settings,
+            payload={"providers": providers or list(KEYED_PROVIDERS)},
+        )
+        return Response({"enricher_health": health})
 
 
 class OsintAiView(viewsets.GenericViewSet):

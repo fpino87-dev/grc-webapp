@@ -123,6 +123,16 @@ def _detect_finding_codes(entity, scan) -> dict[str, dict]:
     if scan.gsb_status and scan.gsb_status not in ("safe", ""):
         detected[FindingCode.GSB_UNSAFE] = {"status": scan.gsb_status}
 
+    # abuse.ch CTI (CRITICAL). Valorizzati solo se l'enricher ha girato (chiave
+    # presente): None → nessun finding spurio.
+    if (getattr(scan, "threatfox_iocs", None) or 0) > 0:
+        detected[FindingCode.THREATFOX_LISTED] = {
+            "count": scan.threatfox_iocs,
+            "malware": (getattr(scan, "threatfox_malware", None) or [])[:10],
+        }
+    if (getattr(scan, "urlhaus_urls", None) or 0) > 0:
+        detected[FindingCode.URLHAUS_LISTED] = {"count": scan.urlhaus_urls}
+
     # Headers HTTP (popolato da enricher http_headers se attivo)
     headers = getattr(scan, "security_headers", None) or {}
     missing_headers = headers.get("missing", []) if isinstance(headers, dict) else []
@@ -186,6 +196,7 @@ def _severity_for(code: str, params: dict | None = None) -> str:
         FindingCode.SSL_EXPIRED, FindingCode.BLACKLIST, FindingCode.GSB_UNSAFE,
         FindingCode.BREACH, FindingCode.VT_MALICIOUS, FindingCode.SUBDOMAIN_TAKEOVER,
         FindingCode.CT_UNEXPECTED_ISSUER,
+        FindingCode.THREATFOX_LISTED, FindingCode.URLHAUS_LISTED,
     }
     medium = {
         FindingCode.SSL_EXPIRY, FindingCode.DMARC_MISSING, FindingCode.SPF_MISSING,

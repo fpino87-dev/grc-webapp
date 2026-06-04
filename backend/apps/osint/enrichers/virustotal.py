@@ -53,3 +53,20 @@ def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> 
         logger.warning("VirusTotal enricher failed for %s: %s", domain, exc)
         scan.enricher_errors["virustotal"] = str(exc)
         return False
+
+
+def probe(settings: "OsintSettings") -> tuple[str, str]:
+    """Health-check leggero della chiave VirusTotal (no scan, dominio neutro)."""
+    from apps.osint.health import classify_http
+
+    if not settings.virustotal_api_key:
+        return ("no_key", "")
+    try:
+        resp = requests.get(
+            VT_URL.format(domain="google.com"),
+            headers={"x-apikey": settings.virustotal_api_key},
+            timeout=VT_TIMEOUT,
+        )
+        return (classify_http(resp.status_code), f"HTTP {resp.status_code}")
+    except Exception as exc:  # noqa: BLE001
+        return ("error", str(exc)[:200])

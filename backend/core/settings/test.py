@@ -18,6 +18,7 @@ REST_FRAMEWORK = {
         "anon": "9999/min",
         "user": "9999/min",
         "login": "9999/min",
+        "ai": "9999/min",
     },
 }
 

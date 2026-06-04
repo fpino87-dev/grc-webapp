@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "version": "1.0.0",
-    "updated_at": "2026-04-25",
+    "version": "1.1.0",
+    "updated_at": "2026-06-04",
     "description": "Catalogo playbook di remediation per i finding OSINT. Ogni voce è una guida operativa di fix mappata ai controlli normativi (ISO 27001, NIS2, TISAX). I testi sono in italiano (chiave UI default)."
   },
   "ssl_expiry": {
@@ -402,5 +402,51 @@
       {"label": "RFC 8659 (DNS CAA)", "url": "https://www.rfc-editor.org/rfc/rfc8659"}
     ],
     "estimated_effort_h": 2
+  },
+  "threatfox_listed": {
+    "title": "Indicatore di compromissione attivo (abuse.ch ThreatFox)",
+    "what": "Il dominio o il suo indirizzo IP compare nel database ThreatFox di abuse.ch come Indicatore di Compromissione (IoC) associato a malware o botnet attivi (es. server di comando e controllo, distribuzione di payload). Le famiglie malware rilevate sono in 'params.malware' del finding.",
+    "impact": "Forte segnale di compromissione attiva: l'asset potrebbe essere sotto controllo di un attaccante, partecipare a una botnet o ospitare infrastruttura malevola. Rischio di blocco da parte di provider/security vendor, esfiltrazione dati, movimento laterale.",
+    "compliance": [
+      {"framework": "NIS2", "control": "art.21 §2(b) — Gestione degli incidenti / art.23 — Notifica"},
+      {"framework": "ISO27001", "control": "A.5.7 — Threat intelligence / A.8.7 — Protezione dal malware"},
+      {"framework": "TISAX_L2", "control": "1.6 — Gestione degli incidenti di sicurezza"}
+    ],
+    "owner_role": "ciso",
+    "fix_steps": [
+      "Verifica i dettagli dell'IoC su https://threatfox.abuse.ch/browse/ (cerca il dominio o l'IP).",
+      "Identifica l'asset corrispondente nell'inventario e isolalo dalla rete se confermato compromesso.",
+      "Avvia incident response: analisi forense, ricerca di persistenza/backdoor, rotazione delle credenziali esposte.",
+      "Se è un'entità essenziale/importante, apri un incidente NIS2 e valuta gli obblighi di notifica (24h/72h).",
+      "Dopo la bonifica, richiedi la rimozione dell'IoC se è un falso positivo o se l'infrastruttura è stata ripulita."
+    ],
+    "verification": "Re-scan dopo la bonifica: threatfox_iocs = 0 e nessun nuovo IoC associato al dominio/IP. Il finding si auto-chiude.",
+    "external_refs": [
+      {"label": "abuse.ch ThreatFox", "url": "https://threatfox.abuse.ch/"}
+    ],
+    "estimated_effort_h": 8
+  },
+  "urlhaus_listed": {
+    "title": "URL malware sull'host (abuse.ch URLhaus)",
+    "what": "abuse.ch URLhaus elenca uno o più URL ospitati su questo host che distribuiscono malware. Indica che il sito/server è stato compromesso e usato per servire payload malevoli, oppure ospita contenuti caricati da un attaccante.",
+    "impact": "Il dominio distribuisce malware ai visitatori: blocco da parte di browser/antivirus e blacklist email, danno reputazionale, possibile responsabilità legale. Segnala compromissione del CMS/hosting o di un'applicazione web.",
+    "compliance": [
+      {"framework": "NIS2", "control": "art.21 §2(b) — Gestione degli incidenti"},
+      {"framework": "ISO27001", "control": "A.8.7 — Protezione dal malware / A.8.26 — Requisiti di sicurezza applicativa"},
+      {"framework": "TISAX_L2", "control": "1.6 — Gestione degli incidenti di sicurezza"}
+    ],
+    "owner_role": "it_infra",
+    "fix_steps": [
+      "Consulta gli URL segnalati su https://urlhaus.abuse.ch/browse/ (cerca l'host) per individuare i percorsi malevoli.",
+      "Rimuovi i contenuti malevoli e ripristina i file da un backup pulito noto.",
+      "Aggiorna CMS/plugin/dipendenze e correggi la vulnerabilità di ingresso (upload non validato, RCE, credenziali deboli).",
+      "Ruota le credenziali del server, dell'hosting e del CMS; verifica la presenza di webshell o cron malevoli.",
+      "Richiedi il delisting su URLhaus e presso i security vendor dopo la bonifica."
+    ],
+    "verification": "Re-scan dopo la bonifica: urlhaus_urls = 0 (nessun URL malevolo noto per l'host). Il finding si auto-chiude.",
+    "external_refs": [
+      {"label": "abuse.ch URLhaus", "url": "https://urlhaus.abuse.ch/"}
+    ],
+    "estimated_effort_h": 6
   }
 }

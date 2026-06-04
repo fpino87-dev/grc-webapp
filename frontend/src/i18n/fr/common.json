@@ -1090,7 +1090,8 @@
       "osint": "OSINT Monitor",
       "checklist_runs": "Checklists",
       "checklist_templates": "Modèles checklist",
-      "kpi_operational": "KPI opérationnels"
+      "kpi_operational": "KPI opérationnels",
+      "cockpit": "Centre Opérationnel"
     }
   },
   "topbar": {
@@ -2303,8 +2304,16 @@
       "resilience_hint": "Processus critiques avec un RTO cible mais sans couverture BCP adéquate (M05 → M16 → M06).",
       "empty": "Aucune entrée.",
       "rto": "RTO {{hours}}h",
-      "level": { "medio": "Moyen", "alto": "Élevé", "critico": "Critique" },
-      "gap": { "no_bcp_plan": "Aucun BCP", "bcp_insufficient": "BCP insuffisant", "bcp_marginal": "BCP marginal" }
+      "level": {
+        "medio": "Moyen",
+        "alto": "Élevé",
+        "critico": "Critique"
+      },
+      "gap": {
+        "no_bcp_plan": "Aucun BCP",
+        "bcp_insufficient": "BCP insuffisant",
+        "bcp_marginal": "BCP marginal"
+      }
     },
     "wizard_subtitle": "Créez en séquence : processus critique, scénario de risque et plan BCP cohérent.",
     "wizard_step_bia": "Processus BIA",
@@ -2689,6 +2698,8 @@
       "abuseipdb": "Score AbuseIPDB",
       "otx_pulses": "OTX Pulses",
       "gsb": "Google Safe Browsing",
+      "threatfox": "ThreatFox",
+      "urlhaus": "URLhaus",
       "hibp_last": "Dernière violation",
       "hibp_types": "Données exposées",
       "enricher_errors": "Erreurs enrichisseurs",
@@ -2727,6 +2738,8 @@
       "abuseipdb_flagged": "AbuseIPDB : score {{score}} ({{reports}} signalements)",
       "otx_pulses": "Présent dans {{count}} indicateurs de menace (OTX)",
       "gsb_unsafe": "Google Safe Browsing : {{status}}",
+      "threatfox_listed": "IoC de logiciel malveillant actif (ThreatFox) : {{count}} indicateur(s) — {{malware}}",
+      "urlhaus_listed": "URL de logiciels malveillants connues sur l'hôte (URLhaus) : {{count}}",
       "enricher_error": "Données partielles : enrichisseurs {{names}} non terminés",
       "ssl_unreachable": "Port 443 injoignable sur {{domain}} — aucun certificat SSL détecté",
       "ssl_no_https": "Aucun HTTPS détecté sur {{domain}} — le domaine n'expose pas de services web (normal pour les domaines uniquement email ou internes)"
@@ -2803,7 +2816,21 @@
       "api_keys": "Clés API enrichisseur",
       "api_keys_hint": "Les clés sont chiffrées au repos. Laisser vide pour conserver la valeur actuelle.",
       "key_saved": "Clé sauvegardée",
-      "key_placeholder": "Entrer la clé API…"
+      "key_placeholder": "Entrer la clé API…",
+      "health": {
+        "test": "Tester",
+        "testing": "Test…",
+        "test_all": "Tout tester",
+        "testing_all": "Test en cours…",
+        "checked_at": "vérifié le {{date}}",
+        "status": {
+          "ok": "Clé valide",
+          "invalid": "Clé invalide",
+          "rate_limited": "Limite de requêtes atteinte (clé OK)",
+          "error": "Erreur de connexion",
+          "no_key": "Aucune clé"
+        }
+      }
     },
     "remediation": {
       "title": "Résolution",
@@ -3045,6 +3072,146 @@
       },
       "create_template": "Créer le modèle",
       "will_create_template": "crée le modèle « {{name}} »"
+    }
+  },
+  "cockpit": {
+    "title": "Centre Opérationnel",
+    "subtitle": "Problèmes, configurations manquantes et actions recommandées dans une vue unique priorisée.",
+    "open": "Ouvrir",
+    "go": "Aller",
+    "owner": "Responsable",
+    "empty": "Aucun problème détecté. Tout est en ordre.",
+    "count_shown": "{{n}} éléments",
+    "load_error": "Échec du chargement du Centre Opérationnel.",
+    "posture": {
+      "score": "Score de posture",
+      "hint": "0 = excellent, 100 = critique. Calculé sur les insights ouverts par domaine.",
+      "trend": "Tendance"
+    },
+    "severity": {
+      "critical": "Critique",
+      "warning": "Avertissement",
+      "info": "Info"
+    },
+    "areas": {
+      "governance": "Gouvernance",
+      "controls": "Contrôles",
+      "risk": "Risque",
+      "incidents": "Incidents",
+      "supply_chain": "Chaîne d'appro.",
+      "technical": "Technique",
+      "continuity": "Continuité"
+    },
+    "filters": {
+      "all_areas": "Tous les domaines",
+      "all_severities": "Toutes les gravités",
+      "mine": "Les miens",
+      "show_suppressed": "Afficher reportés"
+    },
+    "insights": {
+      "osint.key_invalid": {
+        "title": "Clé enricher invalide : {{provider}}",
+        "what": "L'enrichissement {{provider}} ne fonctionne pas tant que la clé n'est pas valide ({{detail}}).",
+        "action": "Corrigez la clé dans OSINT → Paramètres et cliquez « Tester »."
+      },
+      "osint.critical_findings": {
+        "title": "{{count}} constats OSINT critiques ouverts",
+        "what": "Exposition externe active sur le site {{plant_name}}.",
+        "action": "Ouvrez le module OSINT et traitez les constats critiques."
+      },
+      "schedule.drift": {
+        "title": "{{count}} automatisation(s) planifiée(s) désynchronisée(s)",
+        "what": "Des tâches de conformité peuvent ne pas démarrer (manquantes/désactivées/horaire différent).",
+        "action": "Exécutez « schedule_osint_task » et vérifiez les PeriodicTasks."
+      },
+      "controls.gap": {
+        "title": "{{count}} contrôles en écart/partiel",
+        "what": "Posture de conformité incomplète sur le site {{plant_name}}.",
+        "action": "Ouvrez les contrôles du site et planifiez la remédiation."
+      },
+      "risk.needs_revaluation": {
+        "title": "{{count}} contrôles à réévaluer",
+        "what": "Des changements récents nécessitent une réévaluation ({{plant_name}}).",
+        "action": "Réévaluez les contrôles signalés."
+      },
+      "documents.expiring": {
+        "title": "{{count}} documents arrivant à échéance",
+        "what": "Documents approuvés expirant sous 30 jours ({{plant_name}}).",
+        "action": "Renouvelez ou révisez les documents concernés."
+      },
+      "incidents.open": {
+        "title": "{{count}} incidents ouverts",
+        "what": "Incidents ouverts ou en analyse à clôturer ({{plant_name}}).",
+        "action": "Traitez les incidents ouverts."
+      },
+      "bia.resilience_gap": {
+        "title": "{{count}} processus sans couverture PCA adéquate",
+        "what": "Écart de résilience BIA→PCA sur des processus critiques.",
+        "action": "Préparez ou approuvez les plans PCA manquants."
+      },
+      "access.role_expiring": {
+        "title": "{{count}} attributions de rôle expirant",
+        "what": "Droits d'accès expirant sous 30 jours.",
+        "action": "Renouvelez ou révoquez les attributions concernées."
+      },
+      "suppliers.assessment_gaps": {
+        "title": "{{count}} fournisseurs avec due diligence incomplète",
+        "what": "Fournisseurs actifs auxquels manquent des éléments suivis (présents et valides = sous contrôle).",
+        "action": "Complétez le questionnaire, le NDA et l'évaluation interne manquants."
+      },
+      "kpi.out_of_threshold": {
+        "title": "{{count}} KPI opérationnels hors seuil",
+        "what": "Indicateurs en alerte/critique sur le site {{plant_name}} ({{critical}} critiques, {{warning}} alertes).",
+        "action": "Ouvrez les KPI opérationnels et analysez les écarts."
+      },
+      "mgmt_review.overdue": {
+        "title": "{{count}} revues de direction en retard",
+        "what": "Réunions planifiées dont la date est dépassée ({{plant_name}}).",
+        "action": "Tenez la revue ou reprogrammez la date."
+      },
+      "links.ot_unmonitored": {
+        "title": "{{count}} actifs OT exposés non surveillables",
+        "what": "Exposés sur Internet mais sans FQDN/IP : l'OSINT ne peut pas les surveiller.",
+        "action": "Ajoutez le FQDN ou l'IP aux actifs OT exposés."
+      },
+      "governance.vacant_roles": {
+        "title": "{{count}} rôles obligatoires non attribués",
+        "what": "Rôles obligatoires NIS2/ISO vacants : {{roles}}.",
+        "action": "Attribuez les rôles obligatoires non couverts."
+      },
+      "training.overdue": {
+        "title": "{{count}} formations obligatoires en retard",
+        "what": "Cours obligatoires en retard et non terminés.",
+        "action": "Relancez ou reprogrammez la formation en retard."
+      },
+      "audit_prep.open_findings": {
+        "title": "{{count}} constats d'audit ouverts",
+        "what": "Constats d'audit ouverts ou en réponse à clôturer.",
+        "action": "Traitez et clôturez les constats d'audit."
+      }
+    },
+    "breakdown": {
+      "questionnaire": "questionnaires manquants",
+      "nda": "NDA manquants",
+      "evaluation": "évaluations internes manquantes"
+    },
+    "state": {
+      "snoozed": "Reporté au {{date}}",
+      "accepted": "Risque accepté jusqu'au {{date}}"
+    },
+    "actions": {
+      "snooze": "Reporter 7j",
+      "accept": "Accepter le risque",
+      "reopen": "Rouvrir"
+    },
+    "ai": {
+      "explain": "Expliquer (IA)",
+      "draft_label": "Brouillon IA",
+      "thinking": "Réflexion…",
+      "error": "Service IA indisponible.",
+      "disclaimer": "Brouillon généré par l'IA — vérifiez avant d'agir.",
+      "ask": "Demander",
+      "ask_placeholder": "Demandez au Copilot : ex. quels sont les 3 problèmes les plus urgents ?"
     }
   }
 }

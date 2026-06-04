@@ -37,6 +37,7 @@ export function OsintSettingsPage() {
     abuseipdb_api_key: "",
     gsb_api_key: "",
     otx_api_key: "",
+    abusech_api_key: "",
   });
 
   const { data: settings, isLoading } = useQuery({
@@ -96,12 +97,22 @@ export function OsintSettingsPage() {
       if (form.abuseipdb_api_key) payload.abuseipdb_api_key = form.abuseipdb_api_key;
       if (form.gsb_api_key) payload.gsb_api_key = form.gsb_api_key;
       if (form.otx_api_key) payload.otx_api_key = form.otx_api_key;
+      if (form.abusech_api_key) payload.abusech_api_key = form.abusech_api_key;
       return osintApi.updateSettings(payload);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["osint-settings"] });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
+    },
+  });
+
+  const [testingProvider, setTestingProvider] = useState<string | null>(null);
+  const testMutation = useMutation({
+    mutationFn: (provider?: string) => osintApi.testKeys(provider),
+    onSettled: () => {
+      setTestingProvider(null);
+      qc.invalidateQueries({ queryKey: ["osint-settings"] });
     },
   });
 
@@ -129,6 +140,7 @@ export function OsintSettingsPage() {
             "AbuseIPDB — Blacklist IP: abuseipdb.com/register → piano Free (1000 req/giorno). API Key nel profilo.",
             "Google Safe Browsing — URL malevoli: console.cloud.google.com → Abilita 'Safe Browsing API' → Credenziali → Chiave API.",
             "AlienVault OTX — Threat intelligence: otx.alienvault.com → Registrati gratis → Profilo → OTX Key. Nessun costo.",
+            "abuse.ch (ThreatFox + URLhaus) — CTI malware/botnet: auth.abuse.ch → registrazione gratuita → Auth-Key (unica per entrambi i feed). Nessun costo.",
           ]}
           connections={[
             { module: "Plants", relation: "Dominio principale e domini aggiuntivi monitorati" },
@@ -141,6 +153,7 @@ export function OsintSettingsPage() {
             "VirusTotal Free: virustotal.com/gui/join-us",
             "AbuseIPDB Free: abuseipdb.com/register",
             "AlienVault OTX Free: otx.alienvault.com (registrazione gratuita)",
+            "abuse.ch Free: auth.abuse.ch (Auth-Key gratuita per ThreatFox + URLhaus)",
             "Google Safe Browsing: console.cloud.google.com (serve progetto GCP)",
             "HaveIBeenPwned: haveibeenpwned.com/API/Key (a pagamento, ~3,50$/mese)",
           ]}
@@ -374,19 +387,37 @@ export function OsintSettingsPage() {
         <p className="text-xs text-gray-500">{t("osint.settings.api_keys_hint")}</p>
         {(
           [
-            ["hibp_api_key", "HaveIBeenPwned", settings?.has_hibp_key],
-            ["virustotal_api_key", "VirusTotal", settings?.has_virustotal_key],
-            ["abuseipdb_api_key", "AbuseIPDB", settings?.has_abuseipdb_key],
-            ["gsb_api_key", "Google Safe Browsing", settings?.has_gsb_key],
-            ["otx_api_key", "AlienVault OTX", settings?.has_otx_key],
+            ["hibp_api_key", "HaveIBeenPwned", settings?.has_hibp_key, "hibp"],
+            ["virustotal_api_key", "VirusTotal", settings?.has_virustotal_key, "virustotal"],
+            ["abuseipdb_api_key", "AbuseIPDB", settings?.has_abuseipdb_key, "abuseipdb"],
+            ["gsb_api_key", "Google Safe Browsing", settings?.has_gsb_key, "gsb"],
+            ["otx_api_key", "AlienVault OTX", settings?.has_otx_key, null],
+            ["abusech_api_key", "abuse.ch (ThreatFox/URLhaus)", settings?.has_abusech_key, "abusech"],
           ] as const
-        ).map(([field, label, hasKey]) => (
+        ).map(([field, label, hasKey, provider]) => {
+          const health = provider ? settings?.enricher_health?.[provider] : undefined;
+          return (
           <div key={field}>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-sm font-medium text-gray-700">{label}</label>
-              {hasKey && (
-                <span className="text-xs text-green-600 font-medium">✓ {t("osint.settings.key_saved")}</span>
-              )}
+              <div className="flex items-center gap-2">
+                {provider && <HealthDot health={health} t={t} />}
+                <label className="text-sm font-medium text-gray-700">{label}</label>
+              </div>
+              <div className="flex items-center gap-2">
+                {hasKey && (
+                  <span className="text-xs text-green-600 font-medium">✓ {t("osint.settings.key_saved")}</span>
+                )}
+                {provider && hasKey && (
+                  <button
+                    type="button"
+                    onClick={() => { setTestingProvider(provider); testMutation.mutate(provider); }}
+                    disabled={testMutation.isPending}
+                    className="text-xs px-2 py-0.5 border rounded text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    {testingProvider === provider && testMutation.isPending ? t("osint.settings.health.testing") : t("osint.settings.health.test")}
+                  </button>
+                )}
+              </div>
             </div>
             <input
               type="password"
@@ -395,8 +426,25 @@ export function OsintSettingsPage() {
               placeholder={hasKey ? "••••••••••••" : t("osint.settings.key_placeholder")}
               className="w-full border rounded px-3 py-2 text-sm font-mono"
             />
+            {provider && health && health.status !== "no_key" && (
+              <p className="text-xs text-gray-400 mt-1">
+                {t(`osint.settings.health.status.${health.status}`)}
+                {health.checked_at && ` · ${t("osint.settings.health.checked_at", { date: new Date(health.checked_at).toLocaleString("it-IT") })}`}
+              </p>
+            )}
           </div>
-        ))}
+          );
+        })}
+        <div className="flex justify-end pt-1">
+          <button
+            type="button"
+            onClick={() => { setTestingProvider("__all__"); testMutation.mutate(undefined); }}
+            disabled={testMutation.isPending}
+            className="text-xs px-3 py-1 border rounded text-primary-700 border-primary-200 hover:bg-primary-50 disabled:opacity-50"
+          >
+            {testingProvider === "__all__" && testMutation.isPending ? t("osint.settings.health.testing_all") : t("osint.settings.health.test_all")}
+          </button>
+        </div>
       </section>
 
       {/* Save */}
@@ -417,4 +465,27 @@ export function OsintSettingsPage() {
       </div>
     </div>
   );
+}
+
+const HEALTH_DOT: Record<string, string> = {
+  ok: "bg-green-500",
+  invalid: "bg-red-500",
+  rate_limited: "bg-amber-400",
+  error: "bg-amber-400",
+  no_key: "bg-gray-300",
+};
+
+function HealthDot({
+  health,
+  t,
+}: {
+  health?: { status: string; detail: string; checked_at: string };
+  t: (k: string, o?: Record<string, unknown>) => string;
+}) {
+  const status = health?.status ?? "no_key";
+  const color = HEALTH_DOT[status] ?? "bg-gray-300";
+  const title = health
+    ? `${t(`osint.settings.health.status.${status}`)}${health.detail ? ` (${health.detail})` : ""}`
+    : t("osint.settings.health.status.no_key");
+  return <span className={`inline-block w-2.5 h-2.5 rounded-full ${color}`} title={title} aria-label={title} />;
 }

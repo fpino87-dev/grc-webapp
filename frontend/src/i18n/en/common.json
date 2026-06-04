@@ -1008,7 +1008,8 @@
       "osint": "OSINT Monitor",
       "checklist_runs": "Checklists",
       "checklist_templates": "Checklist Templates",
-      "kpi_operational": "Operational KPIs"
+      "kpi_operational": "Operational KPIs",
+      "cockpit": "Operations Center"
     }
   },
   "topbar": {
@@ -2224,8 +2225,16 @@
       "resilience_hint": "Critical processes with a target RTO but without adequate BCP coverage (M05 → M16 → M06).",
       "empty": "No entries.",
       "rto": "RTO {{hours}}h",
-      "level": { "medio": "Medium", "alto": "High", "critico": "Critical" },
-      "gap": { "no_bcp_plan": "No BCP", "bcp_insufficient": "BCP insufficient", "bcp_marginal": "BCP marginal" }
+      "level": {
+        "medio": "Medium",
+        "alto": "High",
+        "critico": "Critical"
+      },
+      "gap": {
+        "no_bcp_plan": "No BCP",
+        "bcp_insufficient": "BCP insufficient",
+        "bcp_marginal": "BCP marginal"
+      }
     },
     "wizard_subtitle": "Create in sequence: critical process, risk scenario, and coherent BCP plan.",
     "wizard_step_bia": "BIA Process",
@@ -2610,6 +2619,8 @@
       "abuseipdb": "AbuseIPDB score",
       "otx_pulses": "OTX Pulses",
       "gsb": "Google Safe Browsing",
+      "threatfox": "ThreatFox",
+      "urlhaus": "URLhaus",
       "hibp_last": "Last breach",
       "hibp_types": "Exposed data",
       "enricher_errors": "Enricher errors",
@@ -2648,6 +2659,8 @@
       "abuseipdb_flagged": "AbuseIPDB: score {{score}} ({{reports}} reports)",
       "otx_pulses": "Present in {{count}} threat intelligence indicators (OTX)",
       "gsb_unsafe": "Google Safe Browsing: {{status}}",
+      "threatfox_listed": "Active malware IoC (ThreatFox): {{count}} indicator(s) — {{malware}}",
+      "urlhaus_listed": "Known malware URLs on the host (URLhaus): {{count}}",
       "enricher_error": "Partial data: enrichers {{names}} did not complete",
       "ssl_unreachable": "Port 443 unreachable on {{domain}} — no SSL certificate detected",
       "ssl_no_https": "No HTTPS detected on {{domain}} — domain does not expose web services (normal for email-only or internal domains)"
@@ -2724,7 +2737,21 @@
       "api_keys": "Enricher API keys",
       "api_keys_hint": "Keys are encrypted at rest. Leave blank to keep the current value.",
       "key_saved": "Key saved",
-      "key_placeholder": "Enter API key…"
+      "key_placeholder": "Enter API key…",
+      "health": {
+        "test": "Test",
+        "testing": "Testing…",
+        "test_all": "Test all",
+        "testing_all": "Testing…",
+        "checked_at": "checked on {{date}}",
+        "status": {
+          "ok": "Key valid",
+          "invalid": "Invalid key",
+          "rate_limited": "Rate limited (key OK)",
+          "error": "Connection error",
+          "no_key": "No key"
+        }
+      }
     },
     "remediation": {
       "title": "Remediation",
@@ -2966,6 +2993,146 @@
       },
       "create_template": "Create template",
       "will_create_template": "creates template \"{{name}}\""
+    }
+  },
+  "cockpit": {
+    "title": "Operations Center",
+    "subtitle": "Problems, missing configurations and recommended actions in a single prioritized view.",
+    "open": "Open",
+    "go": "Go",
+    "owner": "Owner",
+    "empty": "No issues detected. All clear.",
+    "count_shown": "{{n}} items",
+    "load_error": "Failed to load the Operations Center.",
+    "posture": {
+      "score": "Posture Score",
+      "hint": "0 = excellent, 100 = critical. Computed from open insights per area.",
+      "trend": "Trend"
+    },
+    "severity": {
+      "critical": "Critical",
+      "warning": "Warning",
+      "info": "Info"
+    },
+    "areas": {
+      "governance": "Governance",
+      "controls": "Controls",
+      "risk": "Risk",
+      "incidents": "Incidents",
+      "supply_chain": "Supply chain",
+      "technical": "Technical",
+      "continuity": "Continuity"
+    },
+    "filters": {
+      "all_areas": "All areas",
+      "all_severities": "All severities",
+      "mine": "Mine",
+      "show_suppressed": "Show snoozed"
+    },
+    "insights": {
+      "osint.key_invalid": {
+        "title": "Invalid enricher key: {{provider}}",
+        "what": "{{provider}} enrichment will not work until the key is valid ({{detail}}).",
+        "action": "Fix the key in OSINT → Settings and press \"Test\"."
+      },
+      "osint.critical_findings": {
+        "title": "{{count}} open critical OSINT findings",
+        "what": "Active external exposure on plant {{plant_name}}.",
+        "action": "Open the OSINT module and handle the critical findings."
+      },
+      "schedule.drift": {
+        "title": "{{count}} scheduled automation(s) out of sync",
+        "what": "Compliance jobs may not run (missing/disabled/different time).",
+        "action": "Run \"schedule_osint_task\" and check the PeriodicTasks."
+      },
+      "controls.gap": {
+        "title": "{{count}} controls in gap/partial",
+        "what": "Incomplete compliance posture on plant {{plant_name}}.",
+        "action": "Open the plant controls and plan remediation."
+      },
+      "risk.needs_revaluation": {
+        "title": "{{count}} controls to re-evaluate",
+        "what": "Recent changes require a re-evaluation ({{plant_name}}).",
+        "action": "Re-evaluate the flagged controls."
+      },
+      "documents.expiring": {
+        "title": "{{count}} documents expiring",
+        "what": "Approved documents expiring within 30 days ({{plant_name}}).",
+        "action": "Renew or review the expiring documents."
+      },
+      "incidents.open": {
+        "title": "{{count}} open incidents",
+        "what": "Open or under-analysis incidents to close ({{plant_name}}).",
+        "action": "Handle the open incidents."
+      },
+      "bia.resilience_gap": {
+        "title": "{{count}} processes without adequate BCP coverage",
+        "what": "BIA→BCP resilience gap on critical processes.",
+        "action": "Prepare or approve the missing BCP plans."
+      },
+      "access.role_expiring": {
+        "title": "{{count}} role assignments expiring",
+        "what": "Access rights expiring within 30 days.",
+        "action": "Renew or revoke the affected assignments."
+      },
+      "suppliers.assessment_gaps": {
+        "title": "{{count}} suppliers with incomplete due diligence",
+        "what": "Active suppliers missing tracked items (present & valid = under control).",
+        "action": "Complete the missing questionnaire, NDA and internal evaluation."
+      },
+      "kpi.out_of_threshold": {
+        "title": "{{count}} operational KPIs out of threshold",
+        "what": "Indicators in warning/critical on plant {{plant_name}} ({{critical}} critical, {{warning}} warning).",
+        "action": "Open operational KPIs and analyze the deviations."
+      },
+      "mgmt_review.overdue": {
+        "title": "{{count}} management reviews overdue",
+        "what": "Planned meetings past their date ({{plant_name}}).",
+        "action": "Hold the review or reschedule."
+      },
+      "links.ot_unmonitored": {
+        "title": "{{count}} exposed OT assets not monitorable",
+        "what": "Internet-exposed but without FQDN/IP: OSINT cannot watch them.",
+        "action": "Add FQDN or IP to the exposed OT assets."
+      },
+      "governance.vacant_roles": {
+        "title": "{{count}} mandatory roles unassigned",
+        "what": "Vacant mandatory NIS2/ISO roles: {{roles}}.",
+        "action": "Assign the uncovered mandatory roles."
+      },
+      "training.overdue": {
+        "title": "{{count}} mandatory trainings overdue",
+        "what": "Mandatory courses past due and not completed.",
+        "action": "Chase up or reschedule the overdue training."
+      },
+      "audit_prep.open_findings": {
+        "title": "{{count}} open audit findings",
+        "what": "Audit findings open or in response to be closed.",
+        "action": "Handle and close the audit findings."
+      }
+    },
+    "breakdown": {
+      "questionnaire": "questionnaires missing",
+      "nda": "NDAs missing",
+      "evaluation": "internal evaluations missing"
+    },
+    "state": {
+      "snoozed": "Snoozed until {{date}}",
+      "accepted": "Risk accepted until {{date}}"
+    },
+    "actions": {
+      "snooze": "Snooze 7d",
+      "accept": "Accept risk",
+      "reopen": "Reopen"
+    },
+    "ai": {
+      "explain": "Explain (AI)",
+      "draft_label": "AI draft",
+      "thinking": "Thinking…",
+      "error": "AI service unavailable.",
+      "disclaimer": "AI-generated draft — review before acting.",
+      "ask": "Ask",
+      "ask_placeholder": "Ask the Copilot: e.g. what are the 3 most urgent problems?"
     }
   }
 }

@@ -10,6 +10,7 @@ const navGroups: NavGroup[] = [
     labelKey: "sidebar.groups.main",
     items: [
       { to: "/", labelKey: "sidebar.items.dashboard", icon: "⊞", roles: null },
+      { to: "/cockpit", labelKey: "sidebar.items.cockpit", icon: "🎛", roles: ["super_admin", "compliance_officer", "risk_manager", "internal_auditor", "plant_manager"] },
       { to: "/reporting", labelKey: "sidebar.items.reporting", icon: "📊", roles: null },
       { to: "/kpi", labelKey: "sidebar.items.kpi_operational", icon: "📈", roles: null },
       { to: "/tasks", labelKey: "sidebar.items.tasks", icon: "☑", roles: null },

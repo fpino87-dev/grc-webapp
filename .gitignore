@@ -66,6 +66,7 @@ osint.md
 newfix.md
 osint.md
 budnewsfix.md
+Insight.md
 
 # Database backups (generati dal task Celery, non da versionare)
 backend/backups/

@@ -1,6 +1,6 @@
 """Alert Engine OSINT — Step 5.
 
-Dopo ogni scan: valuta 7 trigger, genera OsintAlert senza duplicati,
+Dopo ogni scan: valuta i trigger, genera OsintAlert senza duplicati,
 crea automaticamente Incident (my_domain+critical) o Task (supplier+critical/warning).
 """
 from __future__ import annotations
@@ -218,6 +218,39 @@ def _trigger_ct_unexpected(entity, scan, settings, created_alerts):
         f"la revoca e l'analisi.",
     )
     created_alerts.append(alert)
+
+
+def _trigger_abusech(entity, scan, settings, created_alerts):
+    """Alert CRITICAL su match abuse.ch (ThreatFox IoC / URLhaus malware URL).
+
+    Emessi solo se l'enricher ha trovato qualcosa (count > 0). Un solo alert
+    attivo per tipo (de-dup via `_has_active_alert`)."""
+    from apps.osint.models import AlertType, AlertSeverity
+
+    iocs = getattr(scan, "threatfox_iocs", None) or 0
+    if iocs > 0 and not _has_active_alert(entity, AlertType.THREATFOX_LISTED):
+        malware = ", ".join((getattr(scan, "threatfox_malware", None) or [])[:5]) or "N/D"
+        alert = _create_alert(
+            entity, scan,
+            AlertType.THREATFOX_LISTED, AlertSeverity.CRITICAL,
+            f"Rilevato/i {iocs} indicatore/i di compromissione (IoC) su abuse.ch ThreatFox "
+            f"per il dominio o il suo IP. Famiglie malware associate: {malware}. "
+            f"Indica probabile coinvolgimento in infrastruttura malevola attiva "
+            f"(C2/botnet/malware): avviare incident response e verificare l'host.",
+        )
+        created_alerts.append(alert)
+
+    urls = getattr(scan, "urlhaus_urls", None) or 0
+    if urls > 0 and not _has_active_alert(entity, AlertType.URLHAUS_LISTED):
+        alert = _create_alert(
+            entity, scan,
+            AlertType.URLHAUS_LISTED, AlertSeverity.CRITICAL,
+            f"abuse.ch URLhaus segnala {urls} URL malevolo/i noto/i sull'host: il dominio "
+            f"distribuisce (o ha distribuito) payload malware. Possibile compromissione "
+            f"del sito/hosting: isolare i servizi, rimuovere i contenuti malevoli e "
+            f"verificare l'integrità del server.",
+        )
+        created_alerts.append(alert)
 
 
 def _trigger_breach(entity, scan, prev, settings, created_alerts):
@@ -463,6 +496,7 @@ def run_alerts(
     _trigger_new_subdomain(entity, scan, settings, created)
     _trigger_takeover(entity, scan, settings, created)
     _trigger_ct_unexpected(entity, scan, settings, created)
+    _trigger_abusech(entity, scan, settings, created)
     _trigger_breach(entity, scan, prev, settings, created)
 
     for alert in created:

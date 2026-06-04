@@ -13,6 +13,60 @@ from .models import (
 )
 
 
+def get_supplier_assessment_gaps() -> dict:
+    """Lacune di due diligence sui fornitori **attivi**, per le 3 cose che
+    effettivamente tracciamo: questionario, NDA, valutazione interna.
+
+    Filosofia: se il dato manca → è una lacuna; se c'è (ed è valido) → sotto
+    controllo (non segnalato). "Valido":
+    - **questionario**: esiste una risposta (`status='risposto'`) non scaduta
+      (`expires_at` nullo o futuro);
+    - **NDA**: esiste un Document `contratto` collegato e non eliminato;
+    - **valutazione interna**: esiste una `SupplierInternalEvaluation` corrente.
+
+    Ritorna `{questionnaire, nda, evaluation, suppliers_with_gap, active_total}`
+    (conteggi distinti di fornitori a cui manca ciascun elemento)."""
+    from django.db.models import Q
+    from apps.documents.models import Document
+
+    today = timezone.localdate()
+    active = set(
+        Supplier.objects.filter(status="attivo", deleted_at__isnull=True)
+        .values_list("id", flat=True)
+    )
+    if not active:
+        return {"questionnaire": 0, "nda": 0, "evaluation": 0, "suppliers_with_gap": 0, "active_total": 0}
+
+    with_questionnaire = set(
+        SupplierQuestionnaire.objects.filter(
+            supplier_id__in=active, status="risposto", deleted_at__isnull=True,
+        ).filter(
+            Q(expires_at__isnull=True) | Q(expires_at__gte=today)
+        ).values_list("supplier_id", flat=True)
+    )
+    with_nda = set(
+        Document.objects.filter(
+            supplier_id__in=active, document_type="contratto", deleted_at__isnull=True,
+        ).values_list("supplier_id", flat=True)
+    )
+    with_eval = set(
+        SupplierInternalEvaluation.objects.filter(
+            supplier_id__in=active, is_current=True, deleted_at__isnull=True,
+        ).values_list("supplier_id", flat=True)
+    )
+
+    miss_q = active - with_questionnaire
+    miss_n = active - with_nda
+    miss_e = active - with_eval
+    return {
+        "questionnaire": len(miss_q),
+        "nda": len(miss_n),
+        "evaluation": len(miss_e),
+        "suppliers_with_gap": len(miss_q | miss_n | miss_e),
+        "active_total": len(active),
+    }
+
+
 def get_expiring_contracts(days: int = 60):
     """Return suppliers whose evaluation_date expires within the given number of days."""
     today = timezone.localdate()

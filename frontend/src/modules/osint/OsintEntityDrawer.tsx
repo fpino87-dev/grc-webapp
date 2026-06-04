@@ -143,6 +143,14 @@ function ScanFindings({ entity }: { entity: OsintEntityDetail }) {
     findings.push({ icon: "❌", text: t("osint.findings.gsb_unsafe", { status: scan.gsb_status }) });
   }
 
+  // abuse.ch ThreatFox / URLhaus
+  if (scan.threatfox_iocs && scan.threatfox_iocs > 0) {
+    findings.push({ icon: "🛑", text: t("osint.findings.threatfox_listed", { count: scan.threatfox_iocs, malware: (scan.threatfox_malware || []).join(", ") || "N/D" }) });
+  }
+  if (scan.urlhaus_urls && scan.urlhaus_urls > 0) {
+    findings.push({ icon: "🛑", text: t("osint.findings.urlhaus_listed", { count: scan.urlhaus_urls }) });
+  }
+
   // HIBP
   if (scan.hibp_breaches && scan.hibp_breaches > 0) {
     findings.push({ icon: "🔓", text: t("osint.findings.breach", { count: scan.hibp_breaches }) });
@@ -253,6 +261,8 @@ function ScanTechData({ scan }: { scan: OsintScanDetail }) {
           <TechDataRow label={t("osint.detail.abuseipdb")} value={scan.abuseipdb_score !== null ? `${scan.abuseipdb_score} (${scan.abuseipdb_reports ?? 0} rep.)` : "—"} />
           <TechDataRow label={t("osint.detail.otx_pulses")} value={scan.otx_pulses ?? "—"} />
           <TechDataRow label={t("osint.detail.gsb")} value={scan.gsb_status || "—"} />
+          <TechDataRow label={t("osint.detail.threatfox")} value={scan.threatfox_iocs === null || scan.threatfox_iocs === undefined ? "—" : (scan.threatfox_iocs > 0 ? `${scan.threatfox_iocs} (${(scan.threatfox_malware || []).join(", ") || "?"})` : "0")} />
+          <TechDataRow label={t("osint.detail.urlhaus")} value={scan.urlhaus_urls ?? "—"} />
 
           {(scan.hibp_breaches ?? 0) > 0 && (
             <>

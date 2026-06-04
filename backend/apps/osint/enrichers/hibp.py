@@ -17,6 +17,9 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 HIBP_URL = "https://haveibeenpwned.com/api/v3/breacheddomain/{domain}"
+# Endpoint per la sola validazione chiave: non dipende dalla verifica del dominio
+# (breacheddomain dà 403 su domini non verificati anche con chiave valida).
+HIBP_PROBE_URL = "https://haveibeenpwned.com/api/v3/breachedaccount/probe@example.com"
 TIMEOUT = 15
 
 
@@ -76,3 +79,21 @@ def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> 
         logger.warning("HIBP enricher failed for %s: %s", domain, exc)
         scan.enricher_errors["hibp"] = str(exc)
         return False
+
+
+def probe(settings: "OsintSettings") -> tuple[str, str]:
+    """Health-check leggero della chiave HIBP (endpoint indipendente dal dominio)."""
+    from apps.osint.health import classify_http
+
+    if not settings.hibp_api_key:
+        return ("no_key", "")
+    try:
+        resp = requests.get(
+            HIBP_PROBE_URL,
+            headers={"hibp-api-key": settings.hibp_api_key, "User-Agent": "GRC-Webapp-OSINT/1.0"},
+            params={"truncateResponse": "true"},
+            timeout=TIMEOUT,
+        )
+        return (classify_http(resp.status_code), f"HTTP {resp.status_code}")
+    except Exception as exc:  # noqa: BLE001
+        return ("error", str(exc)[:200])

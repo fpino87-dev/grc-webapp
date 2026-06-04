@@ -12,6 +12,8 @@ const TASKS = [
   ["chatbot", "Chatbot"],
   ["cpv_suggestion", "Suggerimento codici CPV (M14 Fornitori)"],
   ["generate_procedure", "Genera documento procedura (M03 Controlli)"],
+  ["cockpit_explain", "Spiega insight (M21 Centro Operativo)"],
+  ["cockpit_assistant", "Chiedi al Copilot (M21 Centro Operativo)"],
 ] as const;
 
 export function AiSettingsPage() {

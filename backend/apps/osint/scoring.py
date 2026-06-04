@@ -86,6 +86,13 @@ def _score_reputation(scan: "OsintScan") -> int:
     elif pulses > 0:
         base += 10
 
+    # abuse.ch CTI: segnali forti di compromissione attiva. Guardia `or 0` così i
+    # campi None (enricher no-op senza chiave / scan vecchi) non penalizzano.
+    if (getattr(scan, "threatfox_iocs", None) or 0) > 0:
+        base += 50  # IoC malware/botnet attivo associato al dominio o al suo IP
+    if (getattr(scan, "urlhaus_urls", None) or 0) > 0:
+        base += 40  # l'host distribuisce/ha distribuito malware
+
     return min(base, 100)
 
 

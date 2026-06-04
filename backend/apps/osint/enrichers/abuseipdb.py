@@ -54,3 +54,21 @@ def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> 
         logger.warning("AbuseIPDB enricher failed for %s: %s", domain, exc)
         scan.enricher_errors["abuseipdb"] = str(exc)
         return False
+
+
+def probe(settings: "OsintSettings") -> tuple[str, str]:
+    """Health-check leggero della chiave AbuseIPDB (check su un IP neutro)."""
+    from apps.osint.health import classify_http
+
+    if not settings.abuseipdb_api_key:
+        return ("no_key", "")
+    try:
+        resp = requests.get(
+            ABUSEIPDB_URL,
+            params={"ipAddress": "8.8.8.8", "maxAgeInDays": 90},
+            headers={"Key": settings.abuseipdb_api_key, "Accept": "application/json"},
+            timeout=TIMEOUT,
+        )
+        return (classify_http(resp.status_code), f"HTTP {resp.status_code}")
+    except Exception as exc:  # noqa: BLE001
+        return ("error", str(exc)[:200])

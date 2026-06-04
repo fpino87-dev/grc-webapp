@@ -182,6 +182,23 @@ class OsintScan(BaseModel):
     in_blacklist = models.BooleanField(default=False)
     blacklist_sources = models.JSONField(default=list, blank=True)
 
+    # abuse.ch CTI (ThreatFox = IoC malware/botnet attivi; URLhaus = URL che
+    # distribuiscono malware sull'host). Popolati da enrichers/abusech.py solo se
+    # `OsintSettings.abusech_api_key` è valorizzata; altrimenti restano None
+    # (enricher no-op, nessuna penalità di score).
+    threatfox_iocs = models.IntegerField(
+        null=True, blank=True,
+        help_text="N. di IoC ThreatFox che matchano il dominio o il suo IP (0 = nessun match).",
+    )
+    threatfox_malware = models.JSONField(
+        default=list, blank=True,
+        help_text="Famiglie malware associate agli IoC ThreatFox trovati (es. ['Cobalt Strike']).",
+    )
+    urlhaus_urls = models.IntegerField(
+        null=True, blank=True,
+        help_text="N. di URL malevoli noti a URLhaus per l'host (0 = nessuno).",
+    )
+
     # Breach (opzionale HIBP, solo my_domain)
     hibp_breaches = models.IntegerField(null=True, blank=True)
     hibp_latest_breach = models.DateField(null=True, blank=True)
@@ -242,6 +259,8 @@ class AlertType(models.TextChoices):
     BREACH_FOUND = "breach_found", "Breach rilevata"
     SUBDOMAIN_TAKEOVER = "subdomain_takeover", "Possibile subdomain takeover"
     CT_UNEXPECTED_ISSUER = "ct_unexpected_issuer", "Certificato da CA non attesa (CT)"
+    THREATFOX_LISTED = "threatfox_listed", "IoC malware attivo (abuse.ch ThreatFox)"
+    URLHAUS_LISTED = "urlhaus_listed", "URL malware sull'host (abuse.ch URLhaus)"
 
 
 class OsintAlert(BaseModel):
@@ -295,6 +314,8 @@ class FindingCode(models.TextChoices):
     LOOKALIKE = "lookalike_domains", "Domini sosia attivi"
     SUBDOMAIN_TAKEOVER = "subdomain_takeover", "Possibile subdomain takeover"
     CT_UNEXPECTED_ISSUER = "ct_unexpected_issuer", "Certificato da CA non attesa (CT)"
+    THREATFOX_LISTED = "threatfox_listed", "IoC malware attivo (abuse.ch ThreatFox)"
+    URLHAUS_LISTED = "urlhaus_listed", "URL malware sull'host (abuse.ch URLhaus)"
 
 
 class FindingStatus(models.TextChoices):
@@ -414,6 +435,15 @@ class OsintSettings(BaseModel):
     abuseipdb_api_key = EncryptedCharField(max_length=512, blank=True, default="")
     gsb_api_key = EncryptedCharField(max_length=512, blank=True, default="")
     otx_api_key = EncryptedCharField(max_length=512, blank=True, default="")
+    # abuse.ch usa un'unica Auth-Key (gratuita) per ThreatFox e URLhaus.
+    abusech_api_key = EncryptedCharField(max_length=512, blank=True, default="")
+
+    # Salute degli enricher a chiave: esito dell'ultima probe (giornaliera o
+    # on-demand) per provider. Schema: {provider: {"status": "...", "detail":
+    # "...", "checked_at": "ISO8601"}}. status ∈ ok|invalid|rate_limited|error|
+    # no_key. NON contiene mai la chiave (solo esito + timestamp + dettaglio
+    # troncato). Alimenta il semaforo nella pagina impostazioni OSINT.
+    enricher_health = models.JSONField(default=dict, blank=True)
 
     class Meta:
         verbose_name = "OSINT Settings"

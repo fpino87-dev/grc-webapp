@@ -34,6 +34,7 @@ _DOMAIN_LEVEL_FIELDS: tuple[str, ...] = (
     "domain_expiry_date", "domain_registrar", "whois_privacy", "registrar_country", "whois_source",
     "vt_malicious", "vt_suspicious", "abuseipdb_score", "abuseipdb_reports",
     "otx_pulses", "gsb_status", "in_blacklist", "blacklist_sources",
+    "threatfox_iocs", "threatfox_malware", "urlhaus_urls",
     "hibp_breaches", "hibp_latest_breach", "hibp_data_types",
     "security_headers", "lookalike_domains", "enricher_errors",
     "ct_recent_certs", "ct_unexpected_issuers",
@@ -44,6 +45,7 @@ DELAY_CRTSH_VT = 15      # crt.sh e VirusTotal: 4/min free
 DELAY_ABUSE_OTX = 5      # AbuseIPDB e OTX: più generosi
 DELAY_GSB = 2
 DELAY_HIBP = 5
+DELAY_ABUSECH = 3      # abuse.ch (ThreatFox/URLhaus): generoso, key gratuita
 
 _THROTTLE_KEY_PREFIX = "osint:rate:"
 _THROTTLE_MAX_WAIT = 60  # secondi: cap difensivo
@@ -81,7 +83,7 @@ def run_enrichment(entity: "OsintEntity", settings: "OsintSettings") -> "OsintSc
     from apps.osint.models import OsintScan, ScanStatus
     from apps.osint.enrichers import (
         ssl, dns, whois_enr, virustotal, abuseipdb, otx, gsb, hibp,
-        http_headers, dnsbl, dnstwist as dnstwist_enr, takeover,
+        http_headers, dnsbl, dnstwist as dnstwist_enr, takeover, abusech,
     )
     from apps.osint.scoring import compute_scores
 
@@ -124,6 +126,11 @@ def run_enrichment(entity: "OsintEntity", settings: "OsintSettings") -> "OsintSc
     # DNSBL — reputazione via blocklist DNS (popola in_blacklist/blacklist_sources)
     _acquire_token("dnsbl", DELAY_GSB)
     results["dnsbl"] = dnsbl.run(entity, scan, settings)
+
+    # abuse.ch (ThreatFox + URLhaus) — CTI keyed: no-op senza Auth-Key
+    if settings.abusech_api_key:
+        _acquire_token("abusech", DELAY_ABUSECH)
+    results["abusech"] = abusech.run(entity, scan, settings)
 
     # HIBP (solo my_domain con api_key)
     if settings.hibp_api_key:

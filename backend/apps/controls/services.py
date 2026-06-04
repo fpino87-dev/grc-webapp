@@ -691,6 +691,55 @@ def gap_analysis(source_framework_code: str, target_framework_code: str, plant_i
     return result
 
 
+def _count_effective_by_plant(extra_q) -> dict:
+    """Conta per plant i ControlInstance che soddisfano `extra_q`, applicando la
+    STESSA deduplicazione della lista controlli (`ControlInstanceViewSet`): solo
+    framework attivi del plant + esclusione dei controlli L2 *superseded* da un L3
+    (`ControlMapping(extends)`). Così i numeri coincidono con quelli mostrati nel
+    modulo Controlli. Ritorna `{plant_id (str): count}` (solo count > 0)."""
+    from apps.plants.models import Plant
+    from apps.plants.services import get_active_frameworks
+    from .models import ControlMapping
+
+    out: dict[str, int] = {}
+    plant_ids = (
+        ControlInstance.objects.filter(deleted_at__isnull=True)
+        .values_list("plant_id", flat=True).distinct()
+    )
+    for plant in Plant.objects.filter(pk__in=list(plant_ids), deleted_at__isnull=True):
+        active = get_active_frameworks(plant)
+        qs = ControlInstance.objects.filter(
+            plant=plant, deleted_at__isnull=True, control__framework__in=active,
+        ).filter(extra_q)
+        if not qs.exists():
+            continue
+        fw_ids = (
+            ControlInstance.objects.filter(plant=plant, deleted_at__isnull=True)
+            .values_list("control__framework_id", flat=True).distinct()
+        )
+        superseded = ControlMapping.objects.filter(
+            relationship="extends",
+            source_control__framework_id__in=fw_ids,
+            target_control__framework_id__in=fw_ids,
+        ).values_list("target_control_id", flat=True)
+        count = qs.exclude(control_id__in=superseded).count()
+        if count > 0:
+            out[str(plant.pk)] = count
+    return out
+
+
+def count_open_gaps_by_plant() -> dict:
+    """Controlli "aperti" (gap/parziale) per plant — vedi `_count_effective_by_plant`."""
+    from django.db.models import Q
+    return _count_effective_by_plant(Q(status__in=["gap", "parziale"]))
+
+
+def count_revaluation_by_plant() -> dict:
+    """Controlli da rivalutare (`needs_revaluation=True`) per plant, deduplicati."""
+    from django.db.models import Q
+    return _count_effective_by_plant(Q(needs_revaluation=True))
+
+
 def get_compliance_summary(plant_id, framework_code=None):
     """
     % di compliance del plant (per framework specifico o globale sui framework

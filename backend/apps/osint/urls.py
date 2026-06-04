@@ -23,4 +23,6 @@ router.register("ai", OsintAiView, basename="osint-ai")
 urlpatterns = router.urls + [
     # Endpoint singleton per settings (GET/PATCH)
     path("settings/", OsintSettingsViewSet.as_view({"get": "retrieve_settings", "patch": "update_settings"})),
+    # Test on-demand della salute delle chiavi enricher
+    path("settings/test-keys/", OsintSettingsViewSet.as_view({"post": "test_keys"})),
 ]
