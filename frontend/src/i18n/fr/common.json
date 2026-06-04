@@ -3188,6 +3188,31 @@
         "title": "{{count}} constats d'audit ouverts",
         "what": "Constats d'audit ouverts ou en réponse à clôturer.",
         "action": "Traitez et clôturez les constats d'audit."
+      },
+      "documents.required_missing": {
+        "title": "{{count}} documents obligatoires manquants",
+        "what": "Documents requis par les référentiels actifs absents sur le site {{plant_name}}.",
+        "action": "Créez ou téléversez les documents obligatoires manquants."
+      },
+      "bcp.expired_untested": {
+        "title": "{{count}} plans PCA non testés/échus",
+        "what": "Plans de continuité jamais testés ou dont le test est en retard ({{plant_name}}).",
+        "action": "Planifiez les tests PCA pour rétablir les garanties de continuité."
+      },
+      "risk.open_high": {
+        "title": "{{count}} risques élevés non acceptés",
+        "what": "Risques résiduels rouges ouverts sans acceptation formelle ({{plant_name}}).",
+        "action": "Traitez ou acceptez formellement les risques élevés."
+      },
+      "risk.acceptance_expiring": {
+        "title": "{{count}} acceptations de risque arrivant à échéance",
+        "what": "Acceptations expirant sous 30 jours ou déjà expirées ({{plant_name}}).",
+        "action": "Renouvelez l'acceptation ou retraitez le risque."
+      },
+      "incidents.nis2_deadline": {
+        "title": "{{count}} échéances NIS2 à risque",
+        "what": "Notifications NIS2 imminentes ou déjà dépassées sur des incidents ouverts ({{plant_name}}).",
+        "action": "Envoyez la notification NIS2 avant l'échéance légale."
       }
     },
     "breakdown": {

@@ -3109,6 +3109,31 @@
         "title": "{{count}} open audit findings",
         "what": "Audit findings open or in response to be closed.",
         "action": "Handle and close the audit findings."
+      },
+      "documents.required_missing": {
+        "title": "{{count}} mandatory documents missing",
+        "what": "Documents required by active frameworks are absent at plant {{plant_name}}.",
+        "action": "Create or upload the missing mandatory documents."
+      },
+      "bcp.expired_untested": {
+        "title": "{{count}} untested/overdue BCP plans",
+        "what": "Continuity plans never tested or with overdue tests ({{plant_name}}).",
+        "action": "Schedule BCP tests to restore continuity assurance."
+      },
+      "risk.open_high": {
+        "title": "{{count}} high risks not accepted",
+        "what": "Open red residual risks without formal acceptance ({{plant_name}}).",
+        "action": "Treat or formally accept the high risks."
+      },
+      "risk.acceptance_expiring": {
+        "title": "{{count}} risk acceptances expiring",
+        "what": "Acceptances expiring within 30 days or already expired ({{plant_name}}).",
+        "action": "Renew the acceptance or re-treat the risk."
+      },
+      "incidents.nis2_deadline": {
+        "title": "{{count}} NIS2 deadlines at risk",
+        "what": "Imminent or already-breached NIS2 notifications on open incidents ({{plant_name}}).",
+        "action": "Send the NIS2 notification before the legal deadline."
       }
     },
     "breakdown": {

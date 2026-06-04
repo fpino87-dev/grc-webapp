@@ -315,6 +315,172 @@ def audit_findings_advisor(context=None):
 
 
 @register_advisor
+def documents_required_missing_advisor(context=None):
+    """Documenti obbligatori **mancanti** (non solo in scadenza) per plant.
+
+    Per ogni framework attivo del plant riusa il service canonico
+    `compliance_schedule.get_required_documents_status` (stesso semaforo della
+    pagina Documenti richiesti) e conta i documenti obbligatori in stato `red`
+    (assenti). Un documento richiesto e non presente è un gap di conformità
+    diverso dalla scadenza (`documents.expiring`): qui manca del tutto."""
+    from apps.plants.models import Plant
+    from apps.plants.services import get_active_framework_codes
+    from apps.compliance_schedule.services import get_required_documents_status
+
+    rows = []
+    for plant in Plant.objects.filter(deleted_at__isnull=True):
+        missing = 0
+        for fw in get_active_framework_codes(plant):
+            for item in get_required_documents_status(plant=plant, framework=fw):
+                if item.get("mandatory") and item.get("traffic_light") == "red":
+                    missing += 1
+        if missing > 0:
+            rows.append({"plant_id": str(plant.pk), "c": missing})
+    return _per_plant(
+        rows, "documents.required_missing", "documents", "governance", "warning",
+        owner_role="compliance_officer", effort_h=4.0,
+        compliance_refs=[
+            {"framework": "ISO27001", "control": "§7.5 — Informazioni documentate"},
+            {"framework": "NIS2", "control": "art.21 §2(a) — Politiche di sicurezza"},
+        ],
+        deep_link="/documents",
+    )
+
+
+@register_advisor
+def bcp_expired_untested_advisor(context=None):
+    """Piani BCP approvati **scaduti di test o mai testati** per plant.
+
+    Un BCP che non viene esercitato non dà garanzie di continuità: si segnala
+    chi ha `next_test_date` passata (test in ritardo) o `last_test_date` assente
+    (mai testato). Query aggregata, no N+1."""
+    from django.db.models import Count, Q
+    from django.utils import timezone
+    from apps.bcp.models import BcpPlan
+    today = timezone.localdate()
+    rows = (
+        BcpPlan.objects.filter(status="approvato", deleted_at__isnull=True)
+        .filter(Q(last_test_date__isnull=True) | Q(next_test_date__lt=today))
+        .values("plant_id").annotate(c=Count("id"))
+    )
+    return _per_plant(
+        rows, "bcp.expired_untested", "bcp", "continuity", "warning",
+        owner_role="risk_manager", effort_h=8.0,
+        compliance_refs=[
+            {"framework": "NIS2", "control": "art.21 §2(c) — Continuità operativa"},
+            {"framework": "ISO27001", "control": "A.5.30 — Continuità ICT"},
+        ],
+        deep_link="/bcp",
+    )
+
+
+@register_advisor
+def risk_open_high_advisor(context=None):
+    """Rischi residui **alti (rosso) non accettati formalmente**, per plant.
+
+    `risk_level` è una *property* (dipende da `weighted_score`/criticità BIA),
+    quindi si valuta in Python su un queryset ristretto (non archiviati, non
+    accettati formalmente) con `select_related` del processo critico (no N+1).
+    Un rischio rosso accettato formalmente è una decisione consapevole → escluso."""
+    from collections import Counter
+    from apps.risk.models import RiskAssessment
+    qs = (
+        RiskAssessment.objects.filter(deleted_at__isnull=True, risk_accepted_formally=False)
+        .exclude(status="archiviato")
+        .select_related("critical_process")
+    )
+    tally = Counter(
+        str(a.plant_id) for a in qs if a.plant_id and a.risk_level == "rosso"
+    )
+    rows = [{"plant_id": pid, "c": c} for pid, c in tally.items()]
+    return _per_plant(
+        rows, "risk.open_high", "risk", "risk", "warning",
+        owner_role="risk_manager", effort_h=8.0,
+        compliance_refs=[
+            {"framework": "NIS2", "control": "art.21 §2(a) — Gestione del rischio"},
+            {"framework": "ISO27001", "control": "§6.1 — Trattamento del rischio"},
+        ],
+        deep_link="/risk",
+    )
+
+
+@register_advisor
+def risk_acceptance_expiring_advisor(context=None):
+    """Accettazioni di rischio **in scadenza** (entro 30g) o già scadute, per plant.
+
+    Quando la `risk_acceptance_expiry` decade, il rischio torna *non gestito*:
+    va rinnovato o trattato. Query aggregata, no N+1."""
+    from datetime import timedelta
+    from django.db.models import Count
+    from django.utils import timezone
+    from apps.risk.models import RiskAssessment
+    cutoff = timezone.localdate() + timedelta(days=30)
+    rows = (
+        RiskAssessment.objects.filter(
+            deleted_at__isnull=True, risk_accepted_formally=True,
+            risk_acceptance_expiry__isnull=False, risk_acceptance_expiry__lte=cutoff,
+        ).exclude(status="archiviato")
+        .values("plant_id").annotate(c=Count("id"))
+    )
+    return _per_plant(
+        rows, "risk.acceptance_expiring", "risk", "risk", "warning",
+        owner_role="risk_manager", effort_h=2.0,
+        compliance_refs=[
+            {"framework": "ISO27001", "control": "§8.3 — Trattamento del rischio"},
+            {"framework": "NIS2", "control": "art.21 §2(a) — Gestione del rischio"},
+        ],
+        deep_link="/risk",
+    )
+
+
+@register_advisor
+def incidents_nis2_deadline_advisor(context=None):
+    """Scadenze di notifica NIS2 **imminenti o già violate** su incidenti
+    significativi aperti, per plant — **critico**.
+
+    Riproduce la stessa logica del task `check_nis2_deadlines` (M09) ma per la
+    vista del Centro: incidenti `nis2_notifiable="si"` ancora aperti/in analisi,
+    con `early_warning_deadline` (solo entità essenziali) o
+    `formal_notification_deadline` entro 24h **o già passata** e **non ancora
+    notificata**. Una notifica NIS2 mancata è una violazione di legge (art.23)."""
+    from datetime import timedelta
+    from collections import Counter
+    from django.utils import timezone
+    from apps.incidents.models import Incident
+    now = timezone.now()
+    horizon = now + timedelta(hours=24)
+    qs = (
+        Incident.objects.filter(
+            nis2_notifiable="si", status__in=["aperto", "in_analisi"],
+            deleted_at__isnull=True,
+        ).select_related("plant").prefetch_related("nis2_notifications")
+    )
+    tally = Counter()
+    for inc in qs:
+        if not inc.plant_id:
+            continue
+        notif_types = {n.notification_type for n in inc.nis2_notifications.all()}
+        breached = False
+        entity = inc.plant.nis2_scope if inc.plant else "importante"
+        if (entity == "essenziale" and inc.early_warning_deadline
+                and inc.early_warning_deadline <= horizon
+                and "early_warning" not in notif_types):
+            breached = True
+        if (inc.formal_notification_deadline and inc.formal_notification_deadline <= horizon
+                and "formal_notification" not in notif_types):
+            breached = True
+        if breached:
+            tally[str(inc.plant_id)] += 1
+    rows = [{"plant_id": pid, "c": c} for pid, c in tally.items()]
+    return _per_plant(
+        rows, "incidents.nis2_deadline", "incidents", "incidents", "critical",
+        owner_role="incident_manager", effort_h=1.0,
+        compliance_refs=[{"framework": "NIS2", "control": "art.23 — Obblighi di notifica (24h/72h)"}],
+        deep_link="/incidents",
+    )
+
+
+@register_advisor
 def role_expiring_advisor(context=None):
     """Assegnazioni di ruolo in scadenza entro 30 giorni (solo conteggio — regola #11)."""
     from datetime import timedelta

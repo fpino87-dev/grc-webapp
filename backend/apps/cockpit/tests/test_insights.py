@@ -261,6 +261,77 @@ class TestNewAdvisors:
         out = training_overdue_advisor(AdvisorContext())
         assert any(i.code == "training.overdue" and i.params["count"] >= 1 for i in out)
 
+    def test_documents_required_missing(self):
+        from django.utils import timezone
+        from apps.plants.models import Plant, PlantFramework
+        from apps.controls.models import Framework
+        from apps.compliance_schedule.models import RequiredDocument
+        from apps.cockpit.advisors_builtin import documents_required_missing_advisor
+        plant = Plant.objects.create(code="CKD1", name="DocPlant", country="IT", nis2_scope="essenziale", status="attivo")
+        fw = Framework.objects.create(code="ISO27001", name="ISO", version="1.0", published_at=timezone.localdate())
+        PlantFramework.objects.create(plant=plant, framework=fw, active_from=timezone.localdate(), level="AL2", active=True)
+        # Documento obbligatorio richiesto ma NESSUN Document corrispondente → traffic red → mancante.
+        RequiredDocument.objects.create(framework="ISO27001", document_type="policy", description="Security Policy", mandatory=True)
+        out = documents_required_missing_advisor(AdvisorContext())
+        match = [i for i in out if i.code == "documents.required_missing" and i.plant_id == str(plant.pk)]
+        assert len(match) == 1
+        assert match[0].params["count"] == 1
+
+    def test_bcp_expired_untested(self):
+        from apps.plants.models import Plant
+        from apps.bcp.models import BcpPlan
+        from apps.cockpit.advisors_builtin import bcp_expired_untested_advisor
+        plant = Plant.objects.create(code="CKB1", name="BcpPlant", country="IT", nis2_scope="essenziale", status="attivo")
+        # Piano approvato mai testato (last_test_date assente) → gap di continuità.
+        BcpPlan.objects.create(plant=plant, title="BCP IT", status="approvato")
+        out = bcp_expired_untested_advisor(AdvisorContext())
+        assert any(i.code == "bcp.expired_untested" and i.plant_id == str(plant.pk) and i.params["count"] == 1 for i in out)
+
+    def test_risk_open_high(self):
+        from apps.plants.models import Plant
+        from apps.risk.models import RiskAssessment
+        from apps.cockpit.advisors_builtin import risk_open_high_advisor
+        plant = Plant.objects.create(code="CKH1", name="RiskPlant", country="IT", nis2_scope="essenziale", status="attivo")
+        # score 20 → weighted_score rosso (>14), aperto, non accettato formalmente.
+        RiskAssessment.objects.create(plant=plant, status="completato", score=20, risk_accepted_formally=False)
+        # Un rischio rosso accettato formalmente NON deve comparire.
+        RiskAssessment.objects.create(plant=plant, status="completato", score=20, risk_accepted_formally=True)
+        out = risk_open_high_advisor(AdvisorContext())
+        match = [i for i in out if i.code == "risk.open_high" and i.plant_id == str(plant.pk)]
+        assert len(match) == 1
+        assert match[0].params["count"] == 1
+
+    def test_risk_acceptance_expiring(self):
+        from apps.plants.models import Plant
+        from apps.risk.models import RiskAssessment
+        from apps.cockpit.advisors_builtin import risk_acceptance_expiring_advisor
+        from django.utils import timezone
+        plant = Plant.objects.create(code="CKA1", name="AccPlant", country="IT", nis2_scope="essenziale", status="attivo")
+        RiskAssessment.objects.create(
+            plant=plant, status="completato", score=10,
+            risk_accepted_formally=True, risk_acceptance_expiry=timezone.localdate(),
+        )
+        out = risk_acceptance_expiring_advisor(AdvisorContext())
+        assert any(i.code == "risk.acceptance_expiring" and i.plant_id == str(plant.pk) and i.params["count"] == 1 for i in out)
+
+    def test_incidents_nis2_deadline(self):
+        from datetime import timedelta
+        from django.utils import timezone
+        from apps.plants.models import Plant
+        from apps.incidents.models import Incident
+        from apps.cockpit.advisors_builtin import incidents_nis2_deadline_advisor
+        plant = Plant.objects.create(code="CKN1", name="IncPlant", country="IT", nis2_scope="essenziale", status="attivo")
+        # Incidente significativo aperto, scadenza notifica formale già passata, mai notificato → critical.
+        Incident.objects.create(
+            plant=plant, title="Breach", description="x", detected_at=timezone.now(),
+            severity="alta", nis2_notifiable="si", status="aperto",
+            formal_notification_deadline=timezone.now() - timedelta(hours=1),
+        )
+        out = incidents_nis2_deadline_advisor(AdvisorContext())
+        match = [i for i in out if i.code == "incidents.nis2_deadline" and i.plant_id == str(plant.pk)]
+        assert len(match) == 1
+        assert match[0].severity == "critical"
+
 
 class TestSuppliersAssessmentAdvisor:
     def test_missing_items_one_row_with_categories(self):

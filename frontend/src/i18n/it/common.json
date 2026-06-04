@@ -3146,6 +3146,31 @@
         "title": "{{count}} rilievi d'audit aperti",
         "what": "Finding di audit aperti o in risposta da chiudere.",
         "action": "Gestisci e chiudi i rilievi d'audit."
+      },
+      "documents.required_missing": {
+        "title": "{{count}} documenti obbligatori mancanti",
+        "what": "Documenti richiesti dai framework attivi assenti sul plant {{plant_name}}.",
+        "action": "Crea o carica i documenti obbligatori mancanti."
+      },
+      "bcp.expired_untested": {
+        "title": "{{count}} piani BCP non testati/scaduti",
+        "what": "Piani di continuità mai testati o con test in ritardo ({{plant_name}}).",
+        "action": "Pianifica i test BCP per ripristinare le garanzie di continuità."
+      },
+      "risk.open_high": {
+        "title": "{{count}} rischi alti non accettati",
+        "what": "Rischi residui rossi aperti senza accettazione formale ({{plant_name}}).",
+        "action": "Tratta o accetta formalmente i rischi alti."
+      },
+      "risk.acceptance_expiring": {
+        "title": "{{count}} accettazioni di rischio in scadenza",
+        "what": "Accettazioni in scadenza entro 30 giorni o già scadute ({{plant_name}}).",
+        "action": "Rinnova l'accettazione o tratta nuovamente il rischio."
+      },
+      "incidents.nis2_deadline": {
+        "title": "{{count}} scadenze NIS2 a rischio",
+        "what": "Notifiche NIS2 imminenti o già violate su incidenti aperti ({{plant_name}}).",
+        "action": "Invia la notifica NIS2 prima della scadenza di legge."
       }
     },
     "breakdown": {

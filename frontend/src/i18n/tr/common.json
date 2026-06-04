@@ -3188,6 +3188,31 @@
         "title": "{{count}} açık denetim bulgusu",
         "what": "Kapatılacak açık veya yanıt aşamasındaki denetim bulguları.",
         "action": "Denetim bulgularını ele alın ve kapatın."
+      },
+      "documents.required_missing": {
+        "title": "{{count}} zorunlu belge eksik",
+        "what": "Aktif çerçevelerin gerektirdiği belgeler {{plant_name}} tesisinde yok.",
+        "action": "Eksik zorunlu belgeleri oluşturun veya yükleyin."
+      },
+      "bcp.expired_untested": {
+        "title": "{{count}} test edilmemiş/süresi geçmiş İSP planı",
+        "what": "Hiç test edilmemiş veya testi geciken süreklilik planları ({{plant_name}}).",
+        "action": "Süreklilik güvencesini geri kazanmak için İSP testlerini planlayın."
+      },
+      "risk.open_high": {
+        "title": "{{count}} kabul edilmemiş yüksek risk",
+        "what": "Resmî kabulü olmayan açık kırmızı artık riskler ({{plant_name}}).",
+        "action": "Yüksek riskleri işleyin veya resmî olarak kabul edin."
+      },
+      "risk.acceptance_expiring": {
+        "title": "{{count}} risk kabulü sona eriyor",
+        "what": "30 gün içinde sona eren veya süresi geçmiş kabuller ({{plant_name}}).",
+        "action": "Kabulü yenileyin veya riski yeniden işleyin."
+      },
+      "incidents.nis2_deadline": {
+        "title": "{{count}} NIS2 son tarihi riskte",
+        "what": "Açık olaylarda yaklaşan veya ihlal edilmiş NIS2 bildirimleri ({{plant_name}}).",
+        "action": "Yasal son tarihten önce NIS2 bildirimini gönderin."
       }
     },
     "breakdown": {

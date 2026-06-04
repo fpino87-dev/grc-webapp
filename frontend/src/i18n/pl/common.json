@@ -3188,6 +3188,31 @@
         "title": "{{count}} otwartych ustaleń audytu",
         "what": "Ustalenia audytu otwarte lub w trakcie odpowiedzi do zamknięcia.",
         "action": "Obsłuż i zamknij ustalenia audytu."
+      },
+      "documents.required_missing": {
+        "title": "Brak {{count}} obowiązkowych dokumentów",
+        "what": "Dokumenty wymagane przez aktywne ramy są nieobecne w zakładzie {{plant_name}}.",
+        "action": "Utwórz lub prześlij brakujące obowiązkowe dokumenty."
+      },
+      "bcp.expired_untested": {
+        "title": "{{count}} planów BCP nieprzetestowanych/zaległych",
+        "what": "Plany ciągłości nigdy nietestowane lub z zaległym testem ({{plant_name}}).",
+        "action": "Zaplanuj testy BCP, aby przywrócić gwarancje ciągłości."
+      },
+      "risk.open_high": {
+        "title": "{{count}} wysokich ryzyk nieakceptowanych",
+        "what": "Otwarte czerwone ryzyka rezydualne bez formalnej akceptacji ({{plant_name}}).",
+        "action": "Potraktuj lub formalnie zaakceptuj wysokie ryzyka."
+      },
+      "risk.acceptance_expiring": {
+        "title": "{{count}} akceptacji ryzyka wygasających",
+        "what": "Akceptacje wygasające w ciągu 30 dni lub już wygasłe ({{plant_name}}).",
+        "action": "Odnów akceptację lub ponownie potraktuj ryzyko."
+      },
+      "incidents.nis2_deadline": {
+        "title": "{{count}} terminów NIS2 zagrożonych",
+        "what": "Zbliżające się lub już naruszone powiadomienia NIS2 dla otwartych incydentów ({{plant_name}}).",
+        "action": "Wyślij powiadomienie NIS2 przed ustawowym terminem."
       }
     },
     "breakdown": {
