@@ -428,3 +428,21 @@ Convenzioni di codice, struttura modelli e API in [MANUAL_TECNICO_it.md](./manua
 Il modello decisionale NIS2 per la classificazione degli incidenti (M09 — motore PTA/PTNR e fattispecie ACN) è stato sviluppato con riferimento al progetto open source:
 
 > **NIS2 Incident Management and Reporting** — [CISOs4AI](https://github.com/CISOs4AI/NIS2-Incident-Management-and-Reporting)
+
+---
+
+## Licensing
+
+govrico is released under the [GNU Affero General Public License v3.0](./LICENSE) (AGPL-3.0).
+
+This means:
+- ✅ Free to use, modify and self-host
+- ✅ Contributions welcome under the same license
+- ⚠️ If you run a modified version as a network service, you must release your source code under AGPL-3.0
+- ❌ If you want to use govrico in a commercial product or service without open-sourcing your code, you need a commercial license
+
+### Commercial License
+
+For businesses that need to integrate govrico without the AGPL obligations — white-label deployments, commercial SaaS, or enterprise on-premise without source disclosure — a commercial license is available.
+
+Contact: [linkedin.com/in/fpino87](https://www.linkedin.com/in/fpino87/)
