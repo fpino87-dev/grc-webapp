@@ -1,4 +1,4 @@
-# govrico
+# <img src="./docs/govrico-logo.svg" width="34" align="middle" alt="govrico logo" /> govrico — Governance, Risk and Compliance Platform
 
 > govrico (Governance, Risk & Compliance) per aziende manifatturiere con certificazioni TISAX L2/L3, NIS2 e ISO 27001:2022.
 
