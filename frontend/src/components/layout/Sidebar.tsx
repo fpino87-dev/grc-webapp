@@ -94,9 +94,26 @@ export function Sidebar() {
 
   return (
     <aside className="w-56 min-h-screen bg-primary-900 text-white flex flex-col">
-      <div className="px-4 py-5 border-b border-primary-700">
-        <h1 className="text-lg font-bold tracking-tight">GRC Platform</h1>
-        <p className="text-xs text-primary-300 mt-0.5">Compliance & Risk</p>
+      <div
+        className="px-4 border-b border-primary-700 flex items-center"
+        style={{ gap: "10px", paddingTop: "20px", paddingBottom: "20px", imageRendering: "crisp-edges" }}
+      >
+        <svg width="36" height="36" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <rect x="0.75" y="0.75" width="38.5" height="38.5" rx="9" fill="#ffffff" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
+          <rect x="10" y="10" width="8" height="8" rx="1.5" fill="#185FA5" fillOpacity="0.95" />
+          <rect x="22" y="10" width="8" height="8" rx="1.5" fill="#185FA5" fillOpacity="0.45" />
+          <rect x="10" y="22" width="8" height="8" rx="1.5" fill="#185FA5" fillOpacity="0.45" />
+          <rect x="22" y="22" width="8" height="8" rx="1.5" fill="#185FA5" fillOpacity="0.95" />
+        </svg>
+        <div>
+          <div style={{ fontSize: "22px", letterSpacing: "-0.5px", lineHeight: 1.1, textTransform: "lowercase", WebkitFontSmoothing: "antialiased", textRendering: "optimizeLegibility" }}>
+            <span style={{ color: "#ffffff", fontWeight: 400 }}>gov</span>
+            <span style={{ color: "#85B7EB", fontWeight: 500 }}>rico</span>
+          </div>
+          <div style={{ color: "#85B7EB", opacity: 0.6, fontSize: "11px", marginTop: "2px" }}>
+            Compliance & Risk
+          </div>
+        </div>
       </div>
       <nav className="flex-1 px-2 py-4 space-y-4 overflow-y-auto pb-10">
         {navGroups.map(group => {

@@ -81,7 +81,19 @@ export function LoginPage() {
     <div className="min-h-screen bg-primary-900 flex items-center justify-center">
       <div className="bg-white rounded-xl shadow-lg w-full max-w-sm p-8">
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-gray-900">{t("app.name")}</h1>
+          <div className="flex items-center justify-center" style={{ gap: "16px" }}>
+            <svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+              <rect width="56" height="56" rx="12" fill="#ffffff" />
+              <rect x="14" y="14" width="11.2" height="11.2" rx="2.1" fill="#185FA5" fillOpacity="0.95" />
+              <rect x="30.8" y="14" width="11.2" height="11.2" rx="2.1" fill="#185FA5" fillOpacity="0.45" />
+              <rect x="14" y="30.8" width="11.2" height="11.2" rx="2.1" fill="#185FA5" fillOpacity="0.45" />
+              <rect x="30.8" y="30.8" width="11.2" height="11.2" rx="2.1" fill="#185FA5" fillOpacity="0.95" />
+            </svg>
+            <div style={{ fontSize: "36px", letterSpacing: "-0.5px", lineHeight: 1.1, textTransform: "lowercase", WebkitFontSmoothing: "antialiased", textRendering: "optimizeLegibility" }}>
+              <span style={{ color: "#1e3a5f", fontWeight: 400 }}>gov</span>
+              <span style={{ color: "#185FA5", fontWeight: 500 }}>rico</span>
+            </div>
+          </div>
           <p className="text-sm text-gray-500 mt-1">{t("auth.login.subtitle")}</p>
         </div>
 
