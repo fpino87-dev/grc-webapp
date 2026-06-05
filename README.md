@@ -445,4 +445,4 @@ This means:
 
 For businesses that need to integrate govrico without the AGPL obligations — white-label deployments, commercial SaaS, or enterprise on-premise without source disclosure — a commercial license is available.
 
-Contact: [linkedin.com/in/fpino87](https://www.linkedin.com/in/fpino87/)
+Contact: [linkedin.com/in/fpino87](https://www.linkedin.com/in/fpino87/) or write me: info@govrico.com
