@@ -117,7 +117,7 @@ export function CockpitPage() {
         </div>
       </section>
 
-      {/* Chiedi al Copilot */}
+      {/* Chiedi a govrico */}
       <CopilotBox plantId={plantId} t={t} />
 
       {/* Filtri */}

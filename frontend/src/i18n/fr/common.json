@@ -1083,7 +1083,7 @@
       "audit_trail": "Audit Trail",
       "email_settings": "Config. Email",
       "notification_rules": "Règles notifications",
-      "ai_engine": "AI Engine",
+      "ai_engine": "govrico AI",
       "supplier_evaluation": "Évaluation fournisseurs",
       "mfa": "Authentification MFA",
       "backups": "Sauvegarde & Restauration",
@@ -3241,7 +3241,7 @@
       "error": "Service IA indisponible.",
       "disclaimer": "Brouillon généré par l'IA — vérifiez avant d'agir.",
       "ask": "Demander",
-      "ask_placeholder": "Demandez au Copilot : ex. quels sont les 3 problèmes les plus urgents ?"
+      "ask_placeholder": "Demandez à govrico : ex. quels sont les 3 problèmes les plus urgents ?"
     }
   }
 }

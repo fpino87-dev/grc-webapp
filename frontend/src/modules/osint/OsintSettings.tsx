@@ -147,7 +147,7 @@ export function OsintSettingsPage() {
             { module: "M14 Fornitori", relation: "Sito web fornitore → entità OSINT tipo supplier" },
             { module: "M09 Incidenti", relation: "Alert critici su miei domini → incidente automatico" },
             { module: "M08 Task", relation: "Alert su fornitori → task di verifica" },
-            { module: "AI Engine M20", relation: "Analisi AI con dati anonimizzati" },
+            { module: "govrico AI M20", relation: "Analisi AI con dati anonimizzati" },
           ]}
           configNeeded={[
             "VirusTotal Free: virustotal.com/gui/join-us",

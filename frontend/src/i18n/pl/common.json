@@ -1083,7 +1083,7 @@
       "audit_trail": "Audit Trail",
       "email_settings": "Ustawienia e-mail",
       "notification_rules": "Reguły powiadomień",
-      "ai_engine": "AI Engine",
+      "ai_engine": "govrico AI",
       "supplier_evaluation": "Ocena dostawców",
       "mfa": "Uwierzytelnianie MFA",
       "backups": "Kopia zapasowa & Przywracanie",
@@ -3241,7 +3241,7 @@
       "error": "Usługa AI niedostępna.",
       "disclaimer": "Szkic wygenerowany przez AI — sprawdź przed działaniem.",
       "ask": "Zapytaj",
-      "ask_placeholder": "Zapytaj Copilota: np. jakie są 3 najpilniejsze problemy?"
+      "ask_placeholder": "Zapytaj govrico: np. jakie są 3 najpilniejsze problemy?"
     }
   }
 }

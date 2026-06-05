@@ -1001,7 +1001,7 @@
       "audit_trail": "Audit Trail",
       "email_settings": "Email settings",
       "notification_rules": "Notification rules",
-      "ai_engine": "AI Engine",
+      "ai_engine": "govrico AI",
       "supplier_evaluation": "Supplier Evaluation",
       "mfa": "MFA Authentication",
       "backups": "Backup & Restore",
@@ -3162,7 +3162,7 @@
       "error": "AI service unavailable.",
       "disclaimer": "AI-generated draft — review before acting.",
       "ask": "Ask",
-      "ask_placeholder": "Ask the Copilot: e.g. what are the 3 most urgent problems?"
+      "ask_placeholder": "Ask govrico: e.g. what are the 3 most urgent problems?"
     }
   }
 }

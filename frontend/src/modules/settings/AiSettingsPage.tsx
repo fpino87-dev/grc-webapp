@@ -13,7 +13,7 @@ const TASKS = [
   ["cpv_suggestion", "Suggerimento codici CPV (M14 Fornitori)"],
   ["generate_procedure", "Genera documento procedura (M03 Controlli)"],
   ["cockpit_explain", "Spiega insight (M21 Centro Operativo)"],
-  ["cockpit_assistant", "Chiedi al Copilot (M21 Centro Operativo)"],
+  ["cockpit_assistant", "Chiedi a govrico (M21 Centro Operativo)"],
 ] as const;
 
 export function AiSettingsPage() {
@@ -88,9 +88,9 @@ export function AiSettingsPage() {
   return (
     <div className="p-6 max-w-4xl space-y-4">
       <div className="flex items-center gap-2">
-        <h2 className="text-xl font-semibold">AI Engine</h2>
+        <h2 className="text-xl font-semibold">govrico AI</h2>
         <ModuleHelp
-          title="AI Engine — M20"
+          title="govrico AI — M20"
           description="Configura il provider AI usato da tutti i moduli della piattaforma (classificazione incidenti, gap analysis, RCA, chatbot, generazione documenti, analisi OSINT)."
           steps={[
             "Scegli provider Cloud (Anthropic/OpenAI) o locale (Ollama).",
