@@ -83,7 +83,7 @@ def _collect_validation_sources(ci):
     non vale: un'evidenza L2 non sostituisce un L3 piu' stringente.
 
     La regola di estensione vive in `apps.controls.services.get_extender_instances`
-    (single source of truth condivisa con il GRC Assistant).
+    (single source of truth condivisa con il govrico Assistant).
     """
     from apps.controls.services import get_extender_instances
 

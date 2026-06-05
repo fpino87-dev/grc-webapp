@@ -1,4 +1,4 @@
-"""Test del GRC Compliance Assistant (M20 — assistant/start, assistant/explain)."""
+"""Test del govrico Assistant (M20 — assistant/start, assistant/explain)."""
 from __future__ import annotations
 
 import datetime

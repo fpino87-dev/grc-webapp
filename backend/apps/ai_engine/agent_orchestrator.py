@@ -1,5 +1,5 @@
 """
-Orchestrator del GRC Compliance Assistant.
+Orchestrator del govrico Assistant.
 
 Aggrega i risultati dei tool deterministici in una lista unificata di "gap"
 prioritizzata, con CTA verso le pagine esistenti dell'app.

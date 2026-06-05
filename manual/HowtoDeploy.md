@@ -1,4 +1,4 @@
-# How to deploy GRC Webapp on Ubuntu (production-oriented)
+# How to deploy govrico on Ubuntu (production-oriented)
 
 This guide walks through installing the stack on a **fresh Ubuntu Server** (22.04 LTS or 24.04 LTS), securing the host, running the **Docker Compose production** stack, and putting the application **online** behind a reverse proxy with TLS.
 

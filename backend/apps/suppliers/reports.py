@@ -93,7 +93,7 @@ def build_supplier_risk_report(supplier: Supplier) -> bytes:
         topMargin=20 * mm,
         bottomMargin=18 * mm,
         title=f"Report rischio fornitore — {supplier.name}",
-        author="GRC Webapp",
+        author="govrico",
     )
     styles = getSampleStyleSheet()
     styles.add(ParagraphStyle(name="H1Small", parent=styles["Heading1"], fontSize=16, spaceAfter=6))
@@ -214,7 +214,7 @@ def build_supplier_risk_report(supplier: Supplier) -> bytes:
     # Footer
     story.append(Spacer(1, 6 * mm))
     story.append(Paragraph(
-        "Documento generato automaticamente dalla GRC Webapp. I dati riflettono lo stato "
+        "Documento generato automaticamente da govrico. I dati riflettono lo stato "
         f"al {_fmt_date(timezone.now())}. Utilizzare in abbinamento ad audit trail (M10) per la verifica cronologica.",
         styles["Footnote"],
     ))

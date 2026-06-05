@@ -1539,7 +1539,7 @@ export function RiskPage() {
   const selectedPlant = useAuthStore(s => s.selectedPlant);
   const qc = useQueryClient();
 
-  // Deep-link dal GRC Assistant: scrolla ed evidenzia la riga del rischio.
+  // Deep-link dal govrico Assistant: scrolla ed evidenzia la riga del rischio.
   useEffect(() => {
     const state = location.state as { openRiskId?: string } | null;
     if (state?.openRiskId) {

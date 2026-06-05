@@ -1721,7 +1721,7 @@ export function DocumentsPage() {
   const location = useLocation();
   const [mainTab, setMainTab] = useState<MainTab>("documenti");
 
-  // Deep-link dal GRC Assistant: forziamo tab "documenti" e scrolliamo alla riga.
+  // Deep-link dal govrico Assistant: forziamo tab "documenti" e scrolliamo alla riga.
   useEffect(() => {
     const state = location.state as { openDocumentId?: string } | null;
     if (state?.openDocumentId) {

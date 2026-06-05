@@ -1798,7 +1798,7 @@ export function SuppliersPage() {
   const location = useLocation();
   const [tab, setTab] = useState<Tab>("fornitori");
 
-  // Deep-link dal GRC Assistant: forziamo tab "fornitori" e scrolliamo alla riga.
+  // Deep-link dal govrico Assistant: forziamo tab "fornitori" e scrolliamo alla riga.
   useEffect(() => {
     const state = location.state as { openSupplierId?: string } | null;
     if (state?.openSupplierId) {

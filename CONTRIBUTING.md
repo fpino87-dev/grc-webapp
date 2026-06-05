@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for contributing to GRC Compliance Platform.
+Thank you for contributing to govrico.
 
 ---
 

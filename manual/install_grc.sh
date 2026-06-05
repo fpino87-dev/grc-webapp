@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  install_grc.sh — GRC Compliance Platform — Full Auto Install on Ubuntu 24
+#  install_grc.sh — govrico — Full Auto Install on Ubuntu 24
 #  Repo: https://github.com/fpino87-dev/grc-webapp
 #
 #  Uso:
@@ -52,7 +52,7 @@ state_check() { [[ -f "${STATE_DIR}/$1.done" ]]; }
 # ---------------------------------------------------------------------------
 echo -e "\n${BOLD}${CYAN}"
 echo "  ╔══════════════════════════════════════════════════════╗"
-echo "  ║   GRC Compliance Platform — Manager v2.3     ║"
+echo "  ║   govrico — Manager v2.3                             ║"
 echo "  ║   Ubuntu 24 LTS · Docker · Nginx SSL (self-signed)  ║"
 echo "  ╚══════════════════════════════════════════════════════╝"
 echo -e "${RESET}\n"
@@ -507,7 +507,7 @@ else
 
   cat > "${ENV_DST}" << ENV_CONTENT
 # =============================================================================
-# GRC Webapp — PRODUCTION — generato automaticamente da install_grc.sh
+# govrico — PRODUCTION — generato automaticamente da install_grc.sh
 # IP server: ${SERVER_IP}
 # =============================================================================
 
@@ -590,7 +590,7 @@ ENV_CONTENT
   CREDS_FILE="/root/grc_credentials.txt"
   cat > "${CREDS_FILE}" << CREDS
 ======================================================
-  GRC Compliance Platform — Credenziali di accesso
+  govrico — Credenziali di accesso
   Generato: $(date)
 ======================================================
 
@@ -918,7 +918,7 @@ if state_check "step9_systemd"; then
 else
   cat > /etc/systemd/system/grc-webapp.service << SVCEOF
 [Unit]
-Description=GRC Compliance Platform (Docker Compose)
+Description=govrico (Docker Compose)
 Requires=docker.service
 After=docker.service network-online.target
 
@@ -967,7 +967,7 @@ echo "  ╔═══════════════════════
 echo "  ║   ✅  Installazione completata con successo!             ║"
 echo "  ╚══════════════════════════════════════════════════════════╝"
 echo -e "${RESET}"
-echo -e "  🌐  Piattaforma GRC   →  ${BOLD}${CYAN}https://${SERVER_IP}${RESET}"
+echo -e "  🌐  govrico   →  ${BOLD}${CYAN}https://${SERVER_IP}${RESET}"
 echo -e "  🔧  Admin Django      →  ${BOLD}${CYAN}https://${SERVER_IP}/${ADMIN_URL_PATH}${RESET}"
 echo ""
 if [[ "${ENABLE_OLLAMA}" == "true" ]]; then

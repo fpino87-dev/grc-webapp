@@ -190,7 +190,7 @@ export function Topbar() {
           <button
             onClick={() => setAssistantOpen(true)}
             className="relative text-gray-500 hover:text-gray-700 p-1 rounded transition-colors"
-            title="GRC Assistant"
+            title="govrico Assistant"
           >
             <span className="text-lg">🤖</span>
           </button>

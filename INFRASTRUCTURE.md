@@ -1,4 +1,4 @@
-# INFRASTRUCTURE.md — GRC Compliance Platform
+# INFRASTRUCTURE.md — govrico
 
 > Architettura infrastrutturale, stack tecnologico, deployment, database, sicurezza, backup e monitoraggio.
 
@@ -196,7 +196,7 @@ EMAIL_PORT=587
 EMAIL_USE_TLS=true
 EMAIL_HOST_USER=grc-noreply@azienda.com
 EMAIL_HOST_PASSWORD=...
-DEFAULT_FROM_EMAIL=GRC Compliance <grc-noreply@azienda.com>
+DEFAULT_FROM_EMAIL=govrico <grc-noreply@azienda.com>
 
 # ── SSO ───────────────────────────────────────────────────────────────
 SSO_ENABLED=true

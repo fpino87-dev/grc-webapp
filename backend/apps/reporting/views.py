@@ -26,7 +26,7 @@ class ComplianceSummaryView(APIView):
     GET /api/v1/reporting/compliance/?plant=<uuid>&framework=<code>
 
     Riusa `apps.controls.services.get_compliance_summary` per garantire
-    coerenza con la dashboard e con il GRC Assistant.
+    coerenza con la dashboard e con il govrico Assistant.
     """
 
     permission_classes = [ReportingPermission]

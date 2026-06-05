@@ -159,7 +159,7 @@ def get_extender_instances(ci) -> list:
 
     Single source of truth: usata sia da `audit_prep.validation` per la
     validazione dell'AuditPrep, sia da `ai_engine.agent_tools` per evitare
-    falsi gap nel GRC Assistant quando l'evidenza e' caricata sul livello
+    falsi gap nel govrico Assistant quando l'evidenza e' caricata sul livello
     estendente. Modificare la regola qui significa propagarla ovunque.
     """
     extender_control_ids = list(

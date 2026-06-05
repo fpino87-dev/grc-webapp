@@ -1,6 +1,6 @@
 /**
  * Scrolla nella vista la riga con `data-row-id="${rowId}"` e la evidenzia per
- * ~2.5s. Usato dal GRC Assistant per atterrare sull'item specifico (documento,
+ * ~2.5s. Usato dal govrico Assistant per atterrare sull'item specifico (documento,
  * rischio, fornitore) cliccando "Vai a risolvere".
  *
  * Polling fino a 2s perche' i dati arrivano via TanStack Query e la riga

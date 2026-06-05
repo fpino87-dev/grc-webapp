@@ -1,5 +1,5 @@
 """
-Tool deterministici per il GRC Compliance Assistant.
+Tool deterministici per il govrico Assistant.
 
 Ogni funzione:
 - riceve `user` per RBAC + `plant_id` per scoping

@@ -110,7 +110,7 @@ export function GrcAssistantDrawer({ open, onClose }: Props) {
       <div className="fixed top-0 right-0 h-full w-[420px] max-w-full bg-white shadow-xl z-50 flex flex-col">
         <div className="px-4 py-3 border-b flex items-center justify-between bg-blue-50">
           <div>
-            <h2 className="font-semibold text-gray-800">🤖 GRC Assistant</h2>
+            <h2 className="font-semibold text-gray-800">🤖 govrico Assistant</h2>
             {hasSelected && !showPlantPicker && (
               <p className="text-xs text-gray-600 mt-0.5">
                 Sito: <strong>{selectedPlant!.name}</strong>{" "}

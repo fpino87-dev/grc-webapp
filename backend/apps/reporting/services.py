@@ -21,7 +21,7 @@ from django.utils import timezone
 def compliance_summary(plant_id, framework_code=None) -> dict:
     """
     Riusa `apps.controls.services.get_compliance_summary` per coerenza con la
-    dashboard e il GRC Assistant (N/A esclusi dal denominatore, extender contati
+    dashboard e il govrico Assistant (N/A esclusi dal denominatore, extender contati
     come compliant). Senza plant restituisce un sommario vuoto.
     """
     if not plant_id:
