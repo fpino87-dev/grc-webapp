@@ -1030,7 +1030,7 @@
     }
   },
   "app": {
-    "name": "GRC Platform"
+    "name": "govrico"
   },
   "auth": {
     "login": {

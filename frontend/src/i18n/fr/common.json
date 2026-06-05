@@ -90,7 +90,7 @@
     }
   },
   "app": {
-    "name": "Plateforme GRC"
+    "name": "govrico"
   },
   "countdown": {
     "expired": "EXPIRÉ"
