@@ -3110,6 +3110,11 @@
         "what": "Audit findings open or in response to be closed.",
         "action": "Handle and close the audit findings."
       },
+      "audit_prep.program_audit_overdue": {
+        "title": "{{count}} overdue annual programme audits",
+        "what": "Audits planned in the annual programme still open with a past due date ({{plant_name}}).",
+        "action": "Start or complete the overdue audits of the annual programme."
+      },
       "documents.required_missing": {
         "title": "{{count}} mandatory documents missing",
         "what": "Documents required by active frameworks are absent at plant {{plant_name}}.",

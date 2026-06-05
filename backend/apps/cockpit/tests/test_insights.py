@@ -332,6 +332,37 @@ class TestNewAdvisors:
         assert len(match) == 1
         assert match[0].severity == "critical"
 
+    def test_audit_program_overdue(self):
+        from datetime import timedelta
+        from django.utils import timezone
+        from apps.plants.models import Plant
+        from apps.audit_prep.models import AuditProgram
+        from apps.cockpit.advisors_builtin import audit_program_overdue_advisor
+        plant = Plant.objects.create(code="CKAP", name="AuditPlant", country="IT", nis2_scope="essenziale", status="attivo")
+        past = str(timezone.localdate() - timedelta(days=30))
+        future = str(timezone.localdate() + timedelta(days=30))
+        # Programma annuale attivo: 1 audit aperto in ritardo + 1 in ritardo ma già chiuso (ignorato) + 1 futuro (ignorato).
+        AuditProgram.objects.create(
+            plant=plant, year=timezone.localdate().year, title="Programma 2026",
+            status="approvato",
+            planned_audits=[
+                {"title": "Q1", "status": "in_progress", "planned_date": past},
+                {"title": "Q2", "status": "completed", "planned_date": past},
+                {"title": "Q3", "status": "planned", "planned_date": future},
+            ],
+        )
+        # Programma in bozza con audit in ritardo: NON deve generare rumore.
+        AuditProgram.objects.create(
+            plant=plant, year=timezone.localdate().year, title="Bozza",
+            status="bozza",
+            planned_audits=[{"title": "X", "status": "planned", "planned_date": past}],
+        )
+        out = audit_program_overdue_advisor(AdvisorContext())
+        match = [i for i in out if i.code == "audit_prep.program_audit_overdue" and i.plant_id == str(plant.pk)]
+        assert len(match) == 1
+        assert match[0].params["count"] == 1
+        assert match[0].severity == "warning"
+
 
 class TestSuppliersAssessmentAdvisor:
     def test_missing_items_one_row_with_categories(self):

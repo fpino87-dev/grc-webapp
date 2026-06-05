@@ -3189,6 +3189,11 @@
         "what": "Constats d'audit ouverts ou en réponse à clôturer.",
         "action": "Traitez et clôturez les constats d'audit."
       },
+      "audit_prep.program_audit_overdue": {
+        "title": "{{count}} audits du programme annuel en retard",
+        "what": "Audits planifiés dans le programme annuel encore ouverts avec une date dépassée ({{plant_name}}).",
+        "action": "Démarrez ou terminez les audits en retard du programme annuel."
+      },
       "documents.required_missing": {
         "title": "{{count}} documents obligatoires manquants",
         "what": "Documents requis par les référentiels actifs absents sur le site {{plant_name}}.",

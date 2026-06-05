@@ -315,6 +315,24 @@ def audit_findings_advisor(context=None):
 
 
 @register_advisor
+def audit_program_overdue_advisor(context=None):
+    """Audit del **programma annuale** in ritardo (M17, ISO 27001 §9.2).
+
+    Riusa il service canonico `count_overdue_program_audits_by_plant`: audit
+    pianificati nei programmi attivi (`approvato`/`in_corso`) con `planned_date`
+    già passata e non ancora chiusi. È l'esecuzione del programma di audit
+    interno (clausola 9.2), distinta dai rilievi (`audit_prep.open_findings`)."""
+    from apps.audit_prep.services import count_overdue_program_audits_by_plant
+    rows = count_overdue_program_audits_by_plant()
+    return _per_plant(
+        rows, "audit_prep.program_audit_overdue", "audit_prep", "governance", "warning",
+        owner_role="compliance_officer", effort_h=6.0,
+        compliance_refs=[{"framework": "ISO27001", "control": "§9.2 — Programma di audit interno"}],
+        deep_link="/audit-prep",
+    )
+
+
+@register_advisor
 def documents_required_missing_advisor(context=None):
     """Documenti obbligatori **mancanti** (non solo in scadenza) per plant.
 

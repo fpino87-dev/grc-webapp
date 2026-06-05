@@ -7,7 +7,7 @@ from django.utils import timezone
 from core.audit import log_action
 
 from .framework_hierarchy import expand_tisax
-from .models import AuditPrep, AuditFinding
+from .models import AuditPrep, AuditFinding, AuditProgram
 
 DEADLINE_DAYS = {
     "major_nc":    30,
@@ -660,3 +660,33 @@ def sync_program_completion(program) -> float:
         program.status = "in_corso"
     program.save(update_fields=["planned_audits", "status", "updated_at"])
     return pct
+
+
+def count_overdue_program_audits_by_plant():
+    """Conta gli audit pianificati **in ritardo** dei programmi annuali attivi, per plant.
+
+    Service canonico riusato dal Centro Operativo (M21). Un audit è in ritardo
+    quando la sua `planned_date` è già passata e non è ancora stato chiuso
+    (`status` non in `completed`/`cancelled`). Si considerano solo i programmi
+    attivi (`approvato`/`in_corso`): bozze e programmi completati non generano
+    rumore. ISO 27001 §9.2.
+
+    Ritorna una lista `[{"plant_id": <uuid str>, "c": <conteggio>}]` (solo > 0),
+    nello stesso formato atteso da `_per_plant` degli advisor.
+    """
+    today = str(timezone.localdate())
+    tally = {}
+    qs = AuditProgram.objects.filter(
+        status__in=["approvato", "in_corso"], deleted_at__isnull=True,
+    ).only("plant_id", "planned_audits")
+    for program in qs:
+        if not program.plant_id:
+            continue
+        overdue = sum(
+            1 for a in (program.planned_audits or [])
+            if a.get("status") not in ("completed", "cancelled")
+            and a.get("planned_date", "") and a.get("planned_date") < today
+        )
+        if overdue:
+            tally[str(program.plant_id)] = tally.get(str(program.plant_id), 0) + overdue
+    return [{"plant_id": pid, "c": c} for pid, c in tally.items()]

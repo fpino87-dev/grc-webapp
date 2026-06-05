@@ -3147,6 +3147,11 @@
         "what": "Finding di audit aperti o in risposta da chiudere.",
         "action": "Gestisci e chiudi i rilievi d'audit."
       },
+      "audit_prep.program_audit_overdue": {
+        "title": "{{count}} audit del programma annuale in ritardo",
+        "what": "Audit pianificati nel programma annuale ancora aperti con data già passata ({{plant_name}}).",
+        "action": "Avvia o completa gli audit in ritardo del programma annuale."
+      },
       "documents.required_missing": {
         "title": "{{count}} documenti obbligatori mancanti",
         "what": "Documenti richiesti dai framework attivi assenti sul plant {{plant_name}}.",

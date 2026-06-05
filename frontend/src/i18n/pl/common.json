@@ -3189,6 +3189,11 @@
         "what": "Ustalenia audytu otwarte lub w trakcie odpowiedzi do zamknięcia.",
         "action": "Obsłuż i zamknij ustalenia audytu."
       },
+      "audit_prep.program_audit_overdue": {
+        "title": "{{count}} zaległych audytów programu rocznego",
+        "what": "Audyty zaplanowane w programie rocznym wciąż otwarte z przekroczonym terminem ({{plant_name}}).",
+        "action": "Rozpocznij lub zakończ zaległe audyty programu rocznego."
+      },
       "documents.required_missing": {
         "title": "Brak {{count}} obowiązkowych dokumentów",
         "what": "Dokumenty wymagane przez aktywne ramy są nieobecne w zakładzie {{plant_name}}.",

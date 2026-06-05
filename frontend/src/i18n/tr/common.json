@@ -3189,6 +3189,11 @@
         "what": "Kapatılacak açık veya yanıt aşamasındaki denetim bulguları.",
         "action": "Denetim bulgularını ele alın ve kapatın."
       },
+      "audit_prep.program_audit_overdue": {
+        "title": "{{count}} geciken yıllık program denetimi",
+        "what": "Yıllık programda planlanan, tarihi geçmiş hâlâ açık denetimler ({{plant_name}}).",
+        "action": "Yıllık programın geciken denetimlerini başlatın veya tamamlayın."
+      },
       "documents.required_missing": {
         "title": "{{count}} zorunlu belge eksik",
         "what": "Aktif çerçevelerin gerektirdiği belgeler {{plant_name}} tesisinde yok.",
