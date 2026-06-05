@@ -1929,7 +1929,7 @@
     "password_label": "Mot de passe",
     "password_placeholder": "Laisser vide pour ne pas modifier",
     "from_email_label": "Adresse expéditeur",
-    "from_email_hint": "Ceci apparaîtra comme expéditeur dans les e-mails (ex. GRC Platform <noreply@entreprise.com>).",
+    "from_email_hint": "Ceci apparaîtra comme expéditeur dans les e-mails (ex. govrico <noreply@entreprise.com>).",
     "password_security_note": "Le mot de passe SMTP est chiffré avec AES-256 dans la base de données. Il n'est jamais affiché après l'enregistrement.",
     "test_recipient_label": "Destinataire e-mail de test",
     "test_recipient_placeholder": "votre@email.com",

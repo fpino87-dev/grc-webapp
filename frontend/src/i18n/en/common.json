@@ -1850,7 +1850,7 @@
     "password_label": "Password",
     "password_placeholder": "Leave blank to keep unchanged",
     "from_email_label": "Sender address",
-    "from_email_hint": "This will appear as the sender in emails (e.g. GRC Platform <noreply@company.com>).",
+    "from_email_hint": "This will appear as the sender in emails (e.g. govrico <noreply@company.com>).",
     "password_security_note": "The SMTP password is AES-256 encrypted in the database. It is never shown after saving.",
     "test_recipient_label": "Test email recipient",
     "test_recipient_placeholder": "your@email.com",

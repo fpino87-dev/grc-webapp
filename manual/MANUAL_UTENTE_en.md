@@ -1,4 +1,4 @@
-# User Manual — GRC Platform
+# User Manual — govrico
 
 > Guide for end users: Compliance Officer, Risk Manager, Plant Manager, Plant Security Officer, External Auditor.
 
@@ -910,7 +910,7 @@ The rejection generates a task for the internal contact to manage the transition
 ### Completion and deadlines
 
 - Click **Start course** on online courses to open the module directly on KnowBe4
-- Completions are synchronised automatically every night — if you have completed a course on KnowBe4 and it does not yet appear as completed in the GRC Platform, wait until the next day or contact the Compliance Officer
+- Completions are synchronised automatically every night — if you have completed a course on KnowBe4 and it does not yet appear as completed in the govrico, wait until the next day or contact the Compliance Officer
 - An expired course (completed but requiring periodic renewal) appears with a red badge and generates a renewal task
 
 ### Skills gap analysis

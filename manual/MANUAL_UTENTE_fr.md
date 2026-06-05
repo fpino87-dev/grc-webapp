@@ -1,4 +1,4 @@
-# Manuel Utilisateur — GRC Platform
+# Manuel Utilisateur — govrico
 
 > Guide pour les utilisateurs finaux : Compliance Officer, Risk Manager, Plant Manager, Plant Security Officer, Auditeur Externe.
 
@@ -910,7 +910,7 @@ Le refus génère une tâche au référent interne pour gérer la transition (re
 ### Completion et échéances
 
 - Cliquez sur **Démarrer le cours** pour les cours en ligne pour ouvrir directement le module sur KnowBe4
-- Les completions sont synchronisées automatiquement chaque nuit — si vous avez terminé un cours sur KnowBe4 et qu'il n'apparaît pas encore comme terminé dans la GRC Platform, attendez le lendemain ou contactez le Compliance Officer
+- Les completions sont synchronisées automatiquement chaque nuit — si vous avez terminé un cours sur KnowBe4 et qu'il n'apparaît pas encore comme terminé dans la govrico, attendez le lendemain ou contactez le Compliance Officer
 - Un cours expiré (terminé mais à refaire périodiquement) apparaît avec un badge rouge et génère une tâche de renouvellement
 
 ### Analyse des écarts de compétences

@@ -162,7 +162,7 @@ if [[ "${ACTION}" == "logs" ]]; then
 fi
 
 if [[ "${ACTION}" == "update" ]]; then
-  step "Aggiornamento GRC Platform"
+  step "Aggiornamento govrico"
   cd "${INSTALL_DIR}"
 
   info "Git pull..."
@@ -543,7 +543,7 @@ EMAIL_USE_TLS=true
 EMAIL_USE_SSL=false
 EMAIL_HOST_USER=
 EMAIL_HOST_PASSWORD=
-DEFAULT_FROM_EMAIL=GRC Platform <noreply@example.com>
+DEFAULT_FROM_EMAIL=govrico <noreply@example.com>
 
 # --- Celery ------------------------------------------------------------------
 CELERY_CONCURRENCY=4

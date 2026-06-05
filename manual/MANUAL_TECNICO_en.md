@@ -1,4 +1,4 @@
-# Technical Manual — GRC Platform
+# Technical Manual — govrico
 
 > Developer guide: architecture, data models, API, regulatory frameworks, AI Engine, tests and conventions.
 

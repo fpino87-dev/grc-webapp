@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                 ('use_ssl', models.BooleanField(default=False)),
                 ('username', models.CharField(max_length=255)),
                 ('password', apps.notifications.models.EncryptedCharField(max_length=1024)),
-                ('from_email', models.CharField(help_text='Es: GRC Platform <noreply@azienda.com>', max_length=255)),
+                ('from_email', models.CharField(help_text='Es: govrico <noreply@azienda.com>', max_length=255)),
                 ('active', models.BooleanField(default=True)),
                 ('last_test_at', models.DateTimeField(blank=True, null=True)),
                 ('last_test_ok', models.BooleanField(blank=True, null=True)),

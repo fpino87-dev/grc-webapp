@@ -59,7 +59,7 @@ export function EmailSettingsPage() {
     use_auth: true,
     username: "",
     password: "",
-    from_email: "GRC Platform <noreply@azienda.com>",
+    from_email: "govrico <noreply@azienda.com>",
     active: true,
   });
   const [showPassword, setShowPassword] = useState(false);

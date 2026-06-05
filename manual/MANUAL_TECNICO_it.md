@@ -1,4 +1,4 @@
-# Manuale Tecnico — GRC Platform
+# Manuale Tecnico — govrico
 
 > Guida per sviluppatori: architettura, modelli dati, API, framework normativi, AI Engine, test e convenzioni.
 

@@ -1,4 +1,4 @@
-# Teknik Kılavuz — GRC Platform
+# Teknik Kılavuz — govrico
 
 > Geliştiriciler için kılavuz: mimari, veri modelleri, API, normatif çerçeveler, AI Engine, testler ve kurallar.
 

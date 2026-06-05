@@ -1929,7 +1929,7 @@
     "password_label": "Hasło",
     "password_placeholder": "Pozostaw puste, aby nie zmieniać",
     "from_email_label": "Adres nadawcy",
-    "from_email_hint": "Będzie wyświetlany jako nadawca w e-mailach (np. GRC Platform <noreply@firma.com>).",
+    "from_email_hint": "Będzie wyświetlany jako nadawca w e-mailach (np. govrico <noreply@firma.com>).",
     "password_security_note": "Hasło SMTP jest zaszyfrowane AES-256 w bazie danych. Nigdy nie jest wyświetlane po zapisaniu.",
     "test_recipient_label": "Odbiorca testowego e-maila",
     "test_recipient_placeholder": "twoj@email.com",

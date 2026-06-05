@@ -1,4 +1,4 @@
-# Manuale Utente — GRC Platform
+# Manuale Utente — govrico
 
 > Guida per utenti finali: Compliance Officer, Risk Manager, Plant Manager, Plant Security Officer, Auditor Esterno.
 
@@ -910,7 +910,7 @@ Il rifiuto genera un task al referente interno per gestire la transizione (sosti
 ### Completion e scadenze
 
 - Clicca **Avvia corso** sui corsi online per aprire direttamente il modulo su KnowBe4
-- I completamenti vengono sincronizzati automaticamente ogni notte — se hai completato un corso su KnowBe4 e non appare ancora come completato nella GRC Platform, aspetta il giorno successivo o contatta il Compliance Officer
+- I completamenti vengono sincronizzati automaticamente ogni notte — se hai completato un corso su KnowBe4 e non appare ancora come completato nella govrico, aspetta il giorno successivo o contatta il Compliance Officer
 - Un corso scaduto (completato ma da rifare periodicamente) appare con badge rosso e genera un task di rinnovo
 
 ### Gap analysis competenze

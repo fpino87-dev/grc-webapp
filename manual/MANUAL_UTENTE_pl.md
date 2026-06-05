@@ -1,4 +1,4 @@
-# Podręcznik Użytkownika — GRC Platform
+# Podręcznik Użytkownika — govrico
 
 > Przewodnik dla użytkowników końcowych: Compliance Officer, Risk Manager, Plant Manager, Plant Security Officer, Audytor Zewnętrzny.
 
@@ -910,7 +910,7 @@ Odrzucenie generuje zadanie dla wewnętrznego opiekuna w celu zarządzania przej
 ### Ukończenie i terminy
 
 - Kliknij **Uruchom kurs** na kursach online, aby bezpośrednio otworzyć moduł na KnowBe4
-- Ukończenia są synchronizowane automatycznie każdej nocy — jeśli ukończyłeś kurs na KnowBe4, ale nie pojawia się jeszcze jako ukończony w GRC Platform, poczekaj do następnego dnia lub skontaktuj się z Compliance Officer
+- Ukończenia są synchronizowane automatycznie każdej nocy — jeśli ukończyłeś kurs na KnowBe4, ale nie pojawia się jeszcze jako ukończony w govrico, poczekaj do następnego dnia lub skontaktuj się z Compliance Officer
 - Kurs wygasły (ukończony, ale wymagający okresowego powtórzenia) pojawia się z czerwoną odznaką i generuje zadanie odświeżenia
 
 ### Analiza luk kompetencji

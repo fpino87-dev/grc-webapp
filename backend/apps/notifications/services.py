@@ -57,7 +57,7 @@ def send_grc_email(
     from .models import EmailConfiguration
 
     config = EmailConfiguration.get_active()
-    from_email = config.from_email if config else "GRC Platform <noreply@grc.local>"
+    from_email = config.from_email if config else "govrico <noreply@grc.local>"
 
     cc_list = [addr for addr in (cc or []) if addr]
 

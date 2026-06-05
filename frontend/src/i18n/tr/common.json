@@ -1929,7 +1929,7 @@
     "password_label": "Parola",
     "password_placeholder": "Değiştirmemek için boş bırakın",
     "from_email_label": "Gönderici adresi",
-    "from_email_hint": "Bu, e-postalarda gönderici olarak görünecek (örn. GRC Platform <noreply@sirket.com>).",
+    "from_email_hint": "Bu, e-postalarda gönderici olarak görünecek (örn. govrico <noreply@sirket.com>).",
     "password_security_note": "SMTP parolası veritabanında AES-256 ile şifrelenir. Kaydedildikten sonra hiçbir zaman gösterilmez.",
     "test_recipient_label": "Test e-posta alıcısı",
     "test_recipient_placeholder": "siz@email.com",

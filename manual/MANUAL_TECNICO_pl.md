@@ -1,4 +1,4 @@
-# Podręcznik Techniczny — GRC Platform
+# Podręcznik Techniczny — govrico
 
 > Przewodnik dla programistów: architektura, modele danych, API, frameworki normatywne, AI Engine, testy i konwencje.
 

@@ -1850,7 +1850,7 @@
     "password_label": "Password",
     "password_placeholder": "Lascia vuoto per non modificare",
     "from_email_label": "Indirizzo mittente",
-    "from_email_hint": "Questo apparirà come mittente nelle email (es. GRC Platform <noreply@azienda.com>).",
+    "from_email_hint": "Questo apparirà come mittente nelle email (es. govrico <noreply@azienda.com>).",
     "password_security_note": "La password SMTP è cifrata con AES-256 nel database. Non viene mai mostrata dopo il salvataggio.",
     "test_recipient_label": "Destinatario email di test",
     "test_recipient_placeholder": "tuo@email.com",

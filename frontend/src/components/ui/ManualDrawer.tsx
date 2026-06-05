@@ -98,7 +98,7 @@ export function ManualDrawer({ type, onClose }: ManualDrawerProps) {
 
         {/* Footer */}
         <div className="px-6 py-3 border-t border-gray-200 bg-gray-50 shrink-0 text-xs text-gray-400 text-center">
-          GRC Platform — {label}
+          govrico — {label}
         </div>
       </div>
     </>

@@ -1,5 +1,5 @@
 """
-Middleware di sicurezza aggiuntivo per GRC Platform.
+Middleware di sicurezza aggiuntivo per govrico.
 
 Aggiunge header HTTP di difesa non coperti da SecurityMiddleware di Django:
 - Permissions-Policy: disabilita feature browser non necessarie

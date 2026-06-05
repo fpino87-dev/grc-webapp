@@ -78,7 +78,7 @@ class MfaSetupView(APIView):
                 {"detail": "MFA già attivo. Disabilita prima di riconfigurare."},
                 status=status.HTTP_409_CONFLICT,
             )
-        issuer = get_current_site(request).name or "GRC Platform"
+        issuer = get_current_site(request).name or "govrico"
         otpauth_url = _otpauth_url(request.user, device, issuer)
         raw = binascii.unhexlify(device.key)
         b32 = base64.b32encode(raw).decode()

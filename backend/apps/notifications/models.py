@@ -99,7 +99,7 @@ class EmailConfiguration(BaseModel):
     password = EncryptedCharField(max_length=1024, blank=True, default="")
     from_email = models.CharField(
         max_length=255,
-        help_text="Es: GRC Platform <noreply@azienda.com>",
+        help_text="Es: govrico <noreply@azienda.com>",
     )
     active = models.BooleanField(default=True)
     last_test_at = models.DateTimeField(null=True, blank=True)
