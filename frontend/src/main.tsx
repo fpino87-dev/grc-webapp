@@ -1,5 +1,7 @@
-// govrico - Governance, Risk & Compliance Platform
-// Copyright (C) 2025 govrico
+// govrico - Governance, Risk and Compliance Platform
+// Copyright (C) 2026 Pino Federico. All rights reserved.
+// SPDX-License-Identifier: AGPL-3.0-or-later OR LicenseRef-govrico-commercial
+// For commercial licensing: https://www.linkedin.com/in/fpino87/
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published

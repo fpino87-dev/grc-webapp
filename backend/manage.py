@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+# govrico - Governance, Risk and Compliance Platform
+# Copyright (C) 2026 Pino Federico. All rights reserved.
+# SPDX-License-Identifier: AGPL-3.0-or-later OR LicenseRef-govrico-commercial
+# For commercial licensing: https://www.linkedin.com/in/fpino87/
 import os
 import sys
 
