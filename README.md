@@ -41,7 +41,7 @@ La piattaforma GRC consolida in un'unica soluzione la gestione di tutti i framew
 
 **Caratteristiche principali:**
 
-- 21 moduli funzionali dall'onboarding all'audit preparation (M00-M20), multilingua IT/EN/FR/PL/TR
+- 22 moduli funzionali dall'onboarding all'audit preparation (M00-M21) più il modulo trasversale OSINT Monitor, multilingua IT/EN/FR/PL/TR
 - Struttura multi-plant con Business Unit, sub-plant e profilo NIS2 per plant
 - Risk assessment IT/OT con heat map 5x5 e traduzione automatica in ALE (€)
 - Workflow documentale ISO 27001 cl.7.5 con approvazione a 3 livelli e versioning SHA-256
@@ -78,6 +78,8 @@ La piattaforma GRC consolida in un'unica soluzione la gestione di tutti i framew
 | M18 | Reporting & Dashboard | KPI snapshot settimanale, export report, dashboard cross-modulo | Implementato |
 | M19 | Notifiche & Integrazioni | Notifiche in-app, email digest, webhook SIEM, profili notifica per ruolo | Implementato |
 | M20 | AI Engine *(opzionale)* | Classificazione severità, analisi RCA, bozze documenti, anomaly detection — sanitization GDPR | Implementato |
+| M21 | Centro Operativo | Posture score, advisor automatici, problemi/configurazioni mancanti e azioni consigliate in vista prioritizzata, widget dashboard | Implementato |
+| — | OSINT Monitor *(trasversale)* | Monitoraggio superficie di attacco e reputazione domini, enricher CTI, scoring esposizione, alert e semaforo salute chiavi | Implementato |
 
 ---
 
@@ -198,23 +200,24 @@ grc-webapp/
 │   │   ├── audit_prep/         # M17
 │   │   ├── reporting/          # M18
 │   │   ├── notifications/      # M19
+│   │   ├── ai_engine/          # M20 — opzionale
+│   │   ├── cockpit/            # M21 — Centro Operativo
+│   │   ├── osint/              # OSINT Monitor — trasversale
 │   │   ├── backups/            # Backup DB (API + task)
-│   │   ├── compliance_schedule/  # M08 — scadenze cross-modulo
-│   │   └── ai_engine/          # M20 — opzionale
+│   │   └── compliance_schedule/  # M08 — scadenze cross-modulo
 │   ├── core/                   # Settings, middleware, modelli base, audit
 │   ├── frameworks/             # JSON framework normativi (ISO27001, NIS2, TISAX L2/L3)
 │   ├── tests/                  # pytest — integrazione audit trail, ecc.
 │   └── requirements/
 ├── frontend/                   # React SPA
 │   └── src/
-│       ├── modules/            # Pagine per modulo (M00–M20) e impostazioni
+│       ├── modules/            # Pagine per modulo (M00–M21, OSINT) e impostazioni
 │       ├── api/endpoints/      # Client API (~24 file TS)
 │       ├── i18n/               # Traduzioni IT / EN / FR / PL / TR
 │       └── components/         # Shell, Sidebar, UI condivise
 ├── manual/                     # Manuali utente e tecnici (multi-lingua)
 │   ├── MANUAL_UTENTE_{it,en,fr,pl,tr}.md
 │   └── MANUAL_TECNICO_{it,en,fr,pl,tr}.md
-├── CLAUDE.md                   # Istruzioni architetturali per agenti AI
 ├── INFRASTRUCTURE.md
 ├── .cursorrules
 ├── scripts/                    # Utility i18n (apply_translations, check hardcoded, ecc.)
@@ -398,7 +401,6 @@ Per la strategia completa di backup, crontab host, pulizia automatica, backup fi
 | [manual/MANUAL_UTENTE_it.md](./manual/MANUAL_UTENTE_it.md) | Manuale utente (IT; versioni EN/FR/PL/TR in `manual/`) |
 | [manual/MANUAL_TECNICO_it.md](./manual/MANUAL_TECNICO_it.md) | Manuale tecnico — API, modelli, framework, AI Engine, test (IT; altre lingue in `manual/`) |
 | [manual/HowtoDeploy.md](./manual/HowtoDeploy.md) | **Deploy (English)** — Ubuntu server, Docker, firewall, reverse proxy, TLS, environment variables |
-| [CLAUDE.md](./CLAUDE.md) | Istruzioni architetturali per agenti AI e sviluppatori |
 
 ### Stato implementazione ultime feature
 
@@ -417,7 +419,7 @@ Per la strategia completa di backup, crontab host, pulizia automatica, backup fi
 - Coverage minimo 80% per ogni nuovo modulo (target globale >= 70%)
 - Pull Request verso `develop` con 2 reviewer obbligatori
 - Merge su `main` solo via PR approvata + CI verde
-- Seguire le regole architetturali in [CLAUDE.md](./CLAUDE.md) — mai derogare
+- Seguire le regole architetturali e le convenzioni di codice documentate nel [manuale tecnico](./manual/MANUAL_TECNICO_it.md#convenzioni-di-sviluppo) — mai derogare
 
 Convenzioni di codice, struttura modelli e API in [MANUAL_TECNICO_it.md](./manual/MANUAL_TECNICO_it.md#convenzioni-di-sviluppo).
 
