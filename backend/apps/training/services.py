@@ -1,6 +1,6 @@
 from django.utils import timezone
 
-from .models import TrainingCourse, TrainingEnrollment
+from .models import TrainingEnrollment
 
 
 def get_completion_rate(course_id) -> float:

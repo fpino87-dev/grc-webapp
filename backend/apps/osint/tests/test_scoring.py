@@ -1,6 +1,6 @@
 """Test Step 4 — Score engine OSINT."""
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from apps.osint.scoring import (
     _score_ssl,
@@ -8,9 +8,8 @@ from apps.osint.scoring import (
     _score_reputation,
     compute_scores,
     classify_score,
-    score_delta,
 )
-from apps.osint.models import EntityType, OsintScan, OsintEntity, SourceModule, ScanStatus
+from apps.osint.models import EntityType, OsintScan, OsintEntity, SourceModule
 
 
 pytestmark = pytest.mark.django_db

@@ -40,7 +40,6 @@ def plant(db):
 @pytest.fixture
 def framework(db):
     from apps.controls.models import Framework
-    from datetime import date
     return Framework.objects.create(
         code="ISO27001-TEST", name="ISO 27001 Test", version="2022",
         published_at=timezone.localdate(),
@@ -74,7 +73,6 @@ def control(db, framework, domain):
 @pytest.fixture
 def plant_framework(db, plant, framework, user):
     from apps.plants.models import PlantFramework
-    from datetime import date
     return PlantFramework.objects.create(
         plant=plant, framework=framework,
         active_from=timezone.localdate(), level="L2", active=True,
@@ -115,7 +113,6 @@ def test_retrieve_framework(client, framework):
 
 @pytest.mark.django_db
 def test_create_framework(client):
-    from datetime import date
     payload = {"code": "NIS2-TEST", "name": "NIS2 Test", "version": "2022", "published_at": str(timezone.localdate())}
     resp = client.post(URL_FRAMEWORKS, payload, format="json")
     assert resp.status_code == 201
@@ -269,7 +266,6 @@ def test_pm_does_not_see_control_instance_of_other_plant(db, framework, control)
     from apps.auth_grc.models import GrcRole, UserPlantAccess
     from apps.controls.models import ControlInstance
     from apps.plants.models import Plant, PlantFramework
-    from datetime import date
 
     plant_a = Plant.objects.create(
         code="CT-SC-A", name="A", country="IT",

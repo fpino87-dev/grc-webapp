@@ -15,7 +15,6 @@ import logging
 import time
 from typing import TYPE_CHECKING
 
-from django.utils import timezone
 
 if TYPE_CHECKING:
     from apps.osint.models import OsintEntity, OsintScan, OsintSettings

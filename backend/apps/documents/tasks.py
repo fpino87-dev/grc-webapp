@@ -43,7 +43,6 @@ def notify_expiring_documents():
         ("expiry_date", "validità"),
     ]:
         for low, high, priority, urgency_label in WINDOWS:
-            date_low = today - timezone.timedelta(days=low) if low == 0 else today + timezone.timedelta(days=low)
             date_high = today + timezone.timedelta(days=high)
 
             if low == 0:

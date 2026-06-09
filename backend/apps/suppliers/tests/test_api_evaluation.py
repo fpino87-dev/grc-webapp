@@ -6,7 +6,6 @@ from rest_framework.test import APIClient
 from apps.suppliers.models import (
     Supplier,
     SupplierEvaluationConfig,
-    SupplierInternalEvaluation,
 )
 
 User = get_user_model()

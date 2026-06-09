@@ -115,7 +115,7 @@ def test_escalate_task_action(client, task):
 @pytest.mark.django_db
 def test_overdue_tasks_endpoint(client, plant, user):
     from apps.tasks.models import Task
-    from datetime import date, timedelta
+    from datetime import timedelta
     Task.objects.create(
         plant=plant,
         title="Scaduto",

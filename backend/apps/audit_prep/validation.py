@@ -96,7 +96,6 @@ def _evaluate_evidence_item(item: EvidenceItem) -> tuple[str, list[str]]:
     "presente" / "scaduto" / "mancante". `reasons` e' una lista di
     bullet che spiega perche' (utile per audit log e UI).
     """
-    from apps.controls.models import ControlInstance
     from apps.documents.models import Document, Evidence
 
     today = timezone.localdate()

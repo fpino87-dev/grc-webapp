@@ -1,5 +1,4 @@
 """Test cifratura at-rest dei backup (newfix R4)."""
-from pathlib import Path
 
 import pytest
 from django.test import override_settings

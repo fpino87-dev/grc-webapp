@@ -1,6 +1,6 @@
 """Test modelli Asset IT/OT — proprietà calcolate."""
 import pytest
-from datetime import date, timedelta
+from datetime import timedelta
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 

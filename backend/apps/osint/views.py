@@ -1,7 +1,6 @@
 """Views DRF modulo OSINT."""
 from __future__ import annotations
 
-import hashlib
 import json
 import logging
 
@@ -310,7 +309,6 @@ class OsintDashboardView(viewsets.GenericViewSet):
     @action(detail=False, methods=["get"])
     def summary(self, request):
         # Niente aggregator qui — viene chiamato da signal/POST sync esplicito.
-        from django.db.models import Count, Q
         from apps.osint.scoring import classify_score
 
         entities = OsintEntity.objects.filter(is_active=True, deleted_at__isnull=True)

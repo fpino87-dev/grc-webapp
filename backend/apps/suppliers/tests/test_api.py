@@ -48,7 +48,6 @@ def supplier(db, plant, user):
 @pytest.fixture
 def assessment(db, supplier, user):
     from apps.suppliers.models import SupplierAssessment
-    from datetime import date
     return SupplierAssessment.objects.create(
         supplier=supplier,
         assessed_by=user,
@@ -117,7 +116,6 @@ def test_list_assessments(client):
 
 @pytest.mark.django_db
 def test_create_assessment(client, supplier, user):
-    from datetime import date
     payload = {
         "supplier": str(supplier.id),
         "assessed_by": str(user.id),
@@ -182,7 +180,7 @@ def test_plant_manager_does_not_see_supplier_of_other_plant(db):
     sup_a.plants.add(plant_a)
     sup_b = Supplier.objects.create(name="OnlyB", risk_level="medio", status="attivo")
     sup_b.plants.add(plant_b)
-    sup_global = Supplier.objects.create(
+    Supplier.objects.create(
         name="Global", risk_level="basso", status="attivo",
     )  # nessun plant → cross-plant
 

@@ -220,7 +220,6 @@ def delete_process(process: CriticalProcess, user, cascade: bool = False) -> Non
     from apps.bcp.models import BcpPlan
     from apps.assets.models import Asset
 
-    from .models import RiskDecision, TreatmentOption
 
     if not cascade:
         has_risks = RiskAssessment.objects.filter(critical_process=process, deleted_at__isnull=True).exists()

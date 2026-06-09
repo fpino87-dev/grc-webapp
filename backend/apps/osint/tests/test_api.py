@@ -5,7 +5,7 @@ from rest_framework.test import APIClient
 
 from apps.osint.models import (
     AlertSeverity, AlertStatus, AlertType,
-    EntityType, OsintAlert, OsintEntity, OsintSettings, OsintSubdomain,
+    EntityType, OsintAlert, OsintEntity, OsintSubdomain,
     ScanStatus, SourceModule, SubdomainStatus,
 )
 from apps.plants.models import Plant
@@ -220,7 +220,7 @@ class TestAlertAPI:
 
 class TestSubdomainAPI:
     def test_pending_subdomains(self, auth_client, entity):
-        sub = OsintSubdomain.objects.create(
+        OsintSubdomain.objects.create(
             entity=entity, subdomain="sub.apitest.example.com",
             status=SubdomainStatus.PENDING,
         )
@@ -354,7 +354,7 @@ class TestSettingsAPI:
 
 class TestAggregatorEmailFallback:
     def test_supplier_domain_from_email(self, db):
-        from apps.osint.services import domain_from_email, aggregate_entities
+        from apps.osint.services import aggregate_entities
         from apps.suppliers.models import Supplier
 
         sup = Supplier.objects.create(
@@ -364,7 +364,7 @@ class TestAggregatorEmailFallback:
             risk_level="basso",
             status="attivo",
         )
-        result = aggregate_entities()
+        aggregate_entities()
         from apps.osint.models import OsintEntity
         entity = OsintEntity.objects.filter(source_id=sup.id).first()
         assert entity is not None

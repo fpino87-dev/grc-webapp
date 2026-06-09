@@ -77,7 +77,6 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         """
         from apps.documents.models import Document
         from apps.documents.services import add_version_with_file
-        from rest_framework.parsers import MultiPartParser, FormParser
         from core.audit import log_action
         import datetime
 
@@ -85,7 +84,6 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         uploaded_file = request.FILES.get("file")
         title = request.data.get("title", "").strip()
         expiry_date_str = request.data.get("expiry_date", "")
-        notes = request.data.get("notes", "")
 
         if not uploaded_file:
             return Response({"error": "Il file è obbligatorio."}, status=400)

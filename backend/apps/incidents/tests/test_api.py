@@ -119,7 +119,7 @@ def test_close_incident_without_rca_returns_400(client, incident):
 def test_close_incident_with_approved_rca(client, incident, user):
     from apps.incidents.models import RCA
     from django.utils import timezone
-    rca = RCA.objects.create(
+    RCA.objects.create(
         incident=incident,
         summary="Root cause identified",
         approved_at=timezone.now(),

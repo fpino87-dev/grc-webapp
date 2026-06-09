@@ -207,7 +207,7 @@ def user_has_document_permission(user, document, action: str) -> bool:
 
     action: "submit" | "review" | "approve"
     """
-    from .models import NormativeRole, RoleAssignment
+    from .models import RoleAssignment
 
     if not user.is_authenticated:
         return False

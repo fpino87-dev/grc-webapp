@@ -103,7 +103,7 @@ def escalate_task(task, user):
     task.save(update_fields=["escalation_level", "escalated_at", "updated_at"])
     log_action(
         user=user,
-        action_code=f"task.escalated",
+        action_code="task.escalated",
         level="L2",
         entity=task,
         payload={
@@ -687,7 +687,8 @@ def import_kpi_suggestions(plant, kpi_codes, overrides=None, user=None) -> dict:
         elif ov.get("create_template") and entry.get("template_seed"):
             template = create_template_from_seed(code, plant, user=user)
 
-        def _ov_threshold(key):
+        def _ov_threshold(key, ov=ov, entry=entry):
+            # default-bind: la closure non deve catturare le variabili di loop
             return ov[key] if key in ov else entry[key]
 
         try:

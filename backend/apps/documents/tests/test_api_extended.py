@@ -87,7 +87,6 @@ def test_filter_evidences_by_control(client):
 def test_create_evidence(client, plant, document):
     from apps.controls.models import Framework, ControlDomain, Control, ControlInstance
     from apps.plants.models import PlantFramework
-    from datetime import date
     f = Framework.objects.create(code="DOC-FW", name="FW", version="1", published_at=timezone.localdate())
     PlantFramework.objects.create(plant=plant, framework=f, active_from=timezone.localdate(), level="L2", active=True)
     dom = ControlDomain.objects.create(framework=f, code="A.1", translations={"it": {"name": "T"}}, order=1)

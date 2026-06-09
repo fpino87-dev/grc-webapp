@@ -318,7 +318,6 @@ def validate_exclusion(instance, applicability: str,
     Aggiorna status a 'na' se escluso.
     """
     from django.core.exceptions import ValidationError
-    from django.utils import timezone
     from django.utils.translation import gettext as _
     from core.audit import log_action
 
@@ -462,7 +461,7 @@ def import_framework_payload(data: dict, user, *, overwrite_json_file: bool = Tr
     from django.utils.translation import gettext as _
 
     from core.audit import log_action
-    from .models import Control, ControlDomain, ControlMapping, Framework
+    from .models import ControlDomain, ControlMapping, Framework
 
     _validate_framework_payload(data)
 
@@ -563,7 +562,7 @@ def list_framework_governance_metadata() -> list[dict]:
     """
     from django.db.models import Count
 
-    from .models import Framework, Control, ControlDomain
+    from .models import Framework, ControlDomain
 
     frameworks = list(
         Framework.objects.all()
@@ -606,23 +605,12 @@ def list_framework_governance_metadata() -> list[dict]:
 
     return frameworks
 
-    check = check_evidence_requirements(instance)
-    if check["satisfied"]:
-        return "compliant"
-
-    has_docs = instance.documents.filter(status="approvato", deleted_at__isnull=True).exists()
-    has_ev = instance.evidences.filter(deleted_at__isnull=True).exists()
-    if has_docs or has_ev:
-        return "parziale"
-
-    return "gap"
-
 
 def gap_analysis(source_framework_code: str, target_framework_code: str, plant_id, lang: str | None = None) -> dict:
     """
     Confronta due framework e mostra cosa manca per passare dall'uno all'altro.
     """
-    from .models import Control, ControlInstance, ControlMapping
+    from .models import ControlInstance
 
     target_controls = Control.objects.filter(
         framework__code=target_framework_code,

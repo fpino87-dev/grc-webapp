@@ -9,7 +9,7 @@ from apps.notifications.models import NotificationRoleProfile
 from apps.notifications.resolver import resolve_recipients
 from apps.osint.alerts import run_alerts, _entity_plant
 from apps.osint.models import (
-    AlertSeverity, AlertType, EntityType, OsintEntity, OsintScan,
+    AlertSeverity, EntityType, OsintEntity, OsintScan,
     ScanStatus, SourceModule,
 )
 from apps.plants.models import Plant

@@ -10,7 +10,6 @@ mantenere lo storico).
 
 Idempotente: se non c'è nulla da cancellare il comando esce a 0.
 """
-from collections import defaultdict
 from datetime import timedelta
 
 from django.core.management.base import BaseCommand

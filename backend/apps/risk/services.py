@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.db import transaction
 from django.utils import timezone
 
-from .models import IMPACT_MAP, PROB_MAP, RiskAssessment
+from .models import RiskAssessment
 
 
 def mark_needs_revaluation_if_risk_changed(assessment: RiskAssessment, changed_fields: set[str]) -> None:
@@ -135,8 +135,6 @@ def suggest_residual_score(assessment) -> dict:
     bcp_extra_pct = 0
     best_bcp_title = None
     best_bcp_strength = 0.0
-    best_rto_ok = None
-    best_rpo_ok = None
 
     try:
         import datetime
@@ -203,8 +201,6 @@ def suggest_residual_score(assessment) -> dict:
                 best_key = key
                 best_bcp_strength = strength
                 best_bcp_title = plan.title
-                best_rto_ok = rto_ok
-                best_rpo_ok = rpo_ok
 
         if best_bcp_title:
             if best_bcp_strength >= 1.0:

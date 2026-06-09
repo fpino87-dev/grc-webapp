@@ -38,7 +38,7 @@ def incident(db, plant, user):
 def test_close_incident_service(incident, user):
     from apps.incidents.services import close_incident
     from apps.incidents.models import RCA
-    rca = RCA.objects.create(
+    RCA.objects.create(
         incident=incident,
         summary="Root cause found",
         approved_at=timezone.now(),

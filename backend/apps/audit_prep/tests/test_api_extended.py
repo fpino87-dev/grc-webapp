@@ -1,7 +1,6 @@
 """Test API audit prep — azioni avanzate e EvidenceItem."""
 import pytest
 from django.utils import timezone
-from datetime import date
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
@@ -132,7 +131,7 @@ def test_filter_findings_by_status(client, finding):
 
 @pytest.mark.django_db
 def test_create_evidence_item(client, audit_prep):
-    from apps.controls.models import Framework, ControlDomain, Control, ControlInstance
+    from apps.controls.models import ControlDomain, Control, ControlInstance
     from apps.plants.models import PlantFramework
     plant = audit_prep.plant
     framework = audit_prep.framework

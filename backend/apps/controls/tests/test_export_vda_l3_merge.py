@@ -5,7 +5,6 @@ completo, con valutazione presa dalla VH (vedi dedup lato API).
 """
 import pytest
 from django.utils import timezone
-from datetime import date
 from django.contrib.auth import get_user_model
 
 from apps.controls.export_engine import generate_export

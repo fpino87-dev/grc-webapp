@@ -1,13 +1,12 @@
 """Test Step 5 — Alert engine OSINT."""
 import pytest
-from unittest.mock import patch, MagicMock
 
 from apps.osint.models import (
-    AlertStatus, AlertType, AlertSeverity,
-    EntityType, OsintAlert, OsintEntity, OsintScan, OsintSettings,
+    AlertType, AlertSeverity,
+    EntityType, OsintEntity, OsintScan, OsintSettings,
     ScanStatus, SourceModule,
 )
-from apps.osint.alerts import run_alerts, _has_active_alert
+from apps.osint.alerts import run_alerts
 from apps.plants.models import Plant
 
 
@@ -155,7 +154,7 @@ class TestTriggerBlacklist:
         s = OsintSettings.load()
         p = _make_plant()
         entity = _make_entity(p)
-        prev = _make_scan(entity, in_blacklist=True, score_total=20)
+        _make_scan(entity, in_blacklist=True, score_total=20)
         scan = _make_scan(entity, in_blacklist=True, score_total=20)
         alerts = run_alerts(entity, scan, s)
         bl = [a for a in alerts if a.alert_type == AlertType.BLACKLIST_NEW]

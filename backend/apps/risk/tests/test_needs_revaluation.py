@@ -77,7 +77,6 @@ def test_change_probability_flags_revaluation(sa_client, assessment):
 @pytest.mark.django_db
 def test_complete_clears_revaluation_flag(sa_client, assessment):
     """Ri-eseguire 'Completa' chiude il flag da rivalutare."""
-    from django.utils import timezone
     assessment.needs_revaluation = True
     assessment.needs_revaluation_since = timezone.localdate()
     assessment.save(update_fields=["needs_revaluation", "needs_revaluation_since"])

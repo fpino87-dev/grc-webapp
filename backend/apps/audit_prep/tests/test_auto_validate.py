@@ -1,5 +1,5 @@
 """Test della validazione automatica dell'AuditPrep."""
-from datetime import date, timedelta
+from datetime import timedelta
 
 import pytest
 from django.utils import timezone

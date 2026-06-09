@@ -1,5 +1,4 @@
 """P2-1 — copertura funzioni notify_* (formattazione email) di notifications.services."""
-import datetime
 from types import SimpleNamespace
 from unittest.mock import patch
 

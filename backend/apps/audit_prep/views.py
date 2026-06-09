@@ -260,7 +260,6 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             level="L2", entity=prep,
             payload={"filename": filename},
         )
-        from django.http import HttpResponse
         resp = HttpResponse(html, content_type="text/html; charset=utf-8")
         resp["Content-Disposition"] = f'attachment; filename="{filename}"'
         return resp
@@ -303,7 +302,6 @@ class AuditFindingViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     def perform_create(self, serializer):
         data = self.request.data
         # Resolve audit_date string to date object if needed
-        from datetime import date
         audit_date_raw = data.get("audit_date")
         if isinstance(audit_date_raw, str):
             from dateutil import parser as dateparser

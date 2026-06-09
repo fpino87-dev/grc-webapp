@@ -26,7 +26,7 @@ def auto_backup_task(self):
         )
     except Exception as exc:
         logger.exception("auto_backup_task fallito")
-        raise self.retry(exc=exc)
+        raise self.retry(exc=exc) from exc
 
 
 @shared_task

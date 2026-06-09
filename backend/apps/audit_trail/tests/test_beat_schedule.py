@@ -10,7 +10,6 @@ ogni entry di `CELERY_BEAT_SCHEDULE` referenzi un task Celery effettivamente
 registrato e abbia una `schedule` valida — fallisce alla build su un refuso o un
 task rinominato/rimosso.
 """
-import pytest
 from django.conf import settings
 
 

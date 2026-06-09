@@ -138,7 +138,6 @@ def test_complete_run_writes_audit_log(template, plant, user):
 @pytest.mark.django_db
 def test_pdca_threshold_opens_cycle_after_three_incomplete(template, plant, user):
     from apps.pdca.models import PdcaCycle
-    from apps.tasks.models import ChecklistRun
     from apps.tasks.services import create_run_for_template, evaluate_checklist_pdca_threshold
 
     today = timezone.localdate()

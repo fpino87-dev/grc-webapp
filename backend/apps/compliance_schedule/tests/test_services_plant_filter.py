@@ -6,7 +6,7 @@ FieldError/ValueError catturati e loggati, con le scadenze fornitori
 silenziosamente NON calcolate. Questo test esercita esattamente quel
 percorso e verifica che le voci compaiano senza errori.
 """
-from datetime import date, timedelta
+from datetime import timedelta
 
 import pytest
 from django.utils import timezone

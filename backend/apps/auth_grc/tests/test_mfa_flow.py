@@ -71,7 +71,7 @@ def test_mfa_verify_valid_otp_returns_jwt(user_with_mfa):
 
     # Mock verify_token su tutti i device
     with patch("core.jwt.devices_for_user") as mock_devices:
-        mock_device = mock_devices.return_value.__iter__.return_value = iter([type("D", (), {"verify_token": lambda self, c: True})() ])
+        mock_devices.return_value.__iter__.return_value = iter([type("D", (), {"verify_token": lambda self, c: True})() ])
         mock_devices.return_value = [type("D", (), {"verify_token": lambda self, c: True})()]
         res2 = client.post("/api/token/mfa/", {"mfa_token": mfa_token, "otp_code": "123456"})
 

@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -48,7 +48,7 @@ class ComplianceSchedulePolicyViewSet(viewsets.ModelViewSet):
         rule_type = request.data.get("rule_type")
         if not rule_type:
             return Response({"error": _("rule_type obbligatorio")}, status=400)
-        rule, _ = ScheduleRule.objects.get_or_create(
+        rule, _created = ScheduleRule.objects.get_or_create(
             policy=policy,
             rule_type=rule_type,
             defaults={

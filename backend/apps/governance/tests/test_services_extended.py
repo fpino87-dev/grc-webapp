@@ -1,6 +1,6 @@
 """Test services governance — funzioni aggiuntive."""
 import pytest
-from datetime import date, timedelta
+from datetime import timedelta
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
@@ -67,7 +67,7 @@ def test_get_vacant_mandatory_roles():
 def test_get_expiring_delegations(user):
     from apps.governance.models import RoleAssignment, NormativeRole
     from apps.governance.services import get_expiring_delegations
-    ra = RoleAssignment.objects.create(
+    RoleAssignment.objects.create(
         user=user, role=NormativeRole.COMPLIANCE_OFFICER, scope_type="org",
         valid_from=timezone.localdate(),
         valid_until=timezone.localdate() + timedelta(days=20),

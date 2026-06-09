@@ -191,7 +191,6 @@ def resolve_plant_member_emails(plant: Plant) -> list[str]:
     Restituisce tutte le email degli utenti che hanno accesso al plant
     tramite UserPlantAccess (qualsiasi ruolo).
     """
-    User = get_user_model()
     access_qs = (
         UserPlantAccess.objects.filter(
             deleted_at__isnull=True,

@@ -5,7 +5,6 @@ Test dell'espansione gerarchica TISAX nell'AuditPrep:
 - L'auto-validation segnala un warning se il prep e' L3/PROTO ma mancano
   EvidenceItem dei livelli inferiori.
 """
-from datetime import date
 
 import pytest
 from django.utils import timezone
@@ -170,7 +169,7 @@ def test_sync_controls_adds_missing_l2_items(client, plant, tisax_l2, tisax_l3, 
     EvidenceItem mancanti e l'azione e' idempotente."""
     from apps.audit_prep.models import AuditPrep, EvidenceItem
 
-    l2_a = _make_control(plant, tisax_l2, "ISA-2.1.1", "L2-A")
+    _make_control(plant, tisax_l2, "ISA-2.1.1", "L2-A")
     _make_control(plant, tisax_l2, "ISA-2.1.2", "L2-B")
     l3_a = _make_control(plant, tisax_l3, "ISA-2.1.1-VH", "L3-A")
 

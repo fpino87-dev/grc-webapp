@@ -1,6 +1,6 @@
 """Test services governance — ruoli, successione, scadenze."""
 import pytest
-from datetime import date, timedelta
+from datetime import timedelta
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 

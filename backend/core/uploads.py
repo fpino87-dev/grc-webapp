@@ -59,7 +59,9 @@ def validate_uploaded_file(
         mb = max_bytes // (1024 * 1024)
         raise ValidationError(_("File troppo grande. Dimensione massima: %(mb)sMB.") % {"mb": mb})
 
-    _, ext = os.path.splitext(getattr(uploaded_file, "name", "") or "")
+    # NB: non spacchettare in `_, ext`: `_` e' gettext a livello modulo e il
+    # local shadowing causava UnboundLocalError sul ramo "file troppo grande".
+    ext = os.path.splitext(getattr(uploaded_file, "name", "") or "")[1]
     ext = ext.lstrip(".").lower()
     if not ext or ext not in allowed_extensions:
         raise ValidationError(

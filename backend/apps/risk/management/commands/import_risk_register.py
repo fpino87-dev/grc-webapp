@@ -576,13 +576,13 @@ class Command(BaseCommand):
         try:
             plant = Plant.objects.get(name=plant_name, deleted_at__isnull=True)
         except Plant.DoesNotExist:
-            raise CommandError(f"Plant '{plant_name}' non trovato nel database.")
+            raise CommandError(f"Plant '{plant_name}' non trovato nel database.") from None
 
         # Resolve owner
         try:
             owner = User.objects.get(email=owner_email, is_active=True)
         except User.DoesNotExist:
-            raise CommandError(f"Utente '{owner_email}' non trovato nel database.")
+            raise CommandError(f"Utente '{owner_email}' non trovato nel database.") from None
 
         self.stdout.write(f"Plant: {plant.name} ({plant.id})")
         self.stdout.write(f"Owner: {owner.get_full_name()} <{owner.email}> (id={owner.id})")
@@ -642,7 +642,7 @@ class Command(BaseCommand):
             # Create mitigation plan if action text is present
             action_text = risk_data.get("action", "")
             if action_text:
-                from datetime import date, timedelta
+                from datetime import timedelta
                 RiskMitigationPlan.objects.create(
                     assessment=assessment,
                     action=action_text,

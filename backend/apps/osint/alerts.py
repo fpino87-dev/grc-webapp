@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 from django.utils import timezone
 
 if TYPE_CHECKING:
-    from apps.osint.models import OsintEntity, OsintScan, OsintSettings
+    from apps.osint.models import OsintAlert, OsintEntity, OsintScan, OsintSettings  # noqa: F401
 
 logger = logging.getLogger(__name__)
 

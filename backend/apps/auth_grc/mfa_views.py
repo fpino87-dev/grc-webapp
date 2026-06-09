@@ -12,7 +12,6 @@ import os
 
 import qrcode
 import qrcode.image.svg
-from django.apps import apps
 from django.contrib.sites.shortcuts import get_current_site
 from django_otp import devices_for_user
 from django_otp.plugins.otp_totp.models import TOTPDevice

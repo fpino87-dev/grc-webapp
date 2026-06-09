@@ -95,7 +95,7 @@ def test_inherent_score_auto_calculated(plant):
 @pytest.mark.django_db
 def test_risk_appetite_policy_is_active(plant):
     from apps.risk.models import RiskAppetitePolicy
-    from datetime import date, timedelta
+    from datetime import timedelta
     today = timezone.localdate()
     policy = RiskAppetitePolicy.objects.create(
         plant=plant,
@@ -110,7 +110,7 @@ def test_risk_appetite_policy_is_active(plant):
 @pytest.mark.django_db
 def test_risk_appetite_policy_expired(plant):
     from apps.risk.models import RiskAppetitePolicy
-    from datetime import date, timedelta
+    from datetime import timedelta
     today = timezone.localdate()
     policy = RiskAppetitePolicy.objects.create(
         plant=plant,
@@ -125,7 +125,7 @@ def test_risk_appetite_policy_expired(plant):
 @pytest.mark.django_db
 def test_risk_appetite_policy_future(plant):
     from apps.risk.models import RiskAppetitePolicy
-    from datetime import date, timedelta
+    from datetime import timedelta
     today = timezone.localdate()
     policy = RiskAppetitePolicy.objects.create(
         plant=plant,

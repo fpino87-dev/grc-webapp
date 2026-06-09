@@ -15,7 +15,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from apps.plants.models import Plant, PlantFramework
+from apps.plants.models import PlantFramework
 
 User = get_user_model()
 
@@ -169,7 +169,6 @@ def test_upload_logo_success_sets_logo_url(api_client, plant_nis2):
 
 @pytest.mark.django_db
 def test_upload_logo_rejects_non_image(api_client, plant_nis2):
-    from rest_framework.exceptions import ValidationError as DRFValidationError
 
     url = reverse("plant-upload-logo", args=[plant_nis2.id])
     upload = SimpleUploadedFile("evil.png", b"#!/bin/sh\necho hi", content_type="image/png")

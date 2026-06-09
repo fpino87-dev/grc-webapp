@@ -132,7 +132,6 @@ def test_delete_cycle_blocked_when_closed(client, cycle, user):
 def test_delete_cycle_blocked_with_open_finding(client, cycle, plant, user):
     """Finding aperto collegato -> 400."""
     from apps.audit_prep.models import AuditFinding, AuditPrep
-    from datetime import date
 
     prep = AuditPrep.objects.create(
         plant=plant, title="Audit",
@@ -158,7 +157,6 @@ def test_delete_cycle_cascades_auto_generated_open_finding(client, cycle, plant,
     """Finding aperti `auto_generated=True` non bloccano: vengono soft-deleted
     insieme al ciclo (sono parte della stessa catena di auto-validazione)."""
     from apps.audit_prep.models import AuditFinding, AuditPrep
-    from datetime import date
 
     prep = AuditPrep.objects.create(
         plant=plant, title="Audit",
@@ -188,7 +186,6 @@ def test_delete_cycle_blocked_with_manual_open_finding_even_with_auto(
     """Mix: 1 manuale + 1 auto-generato aperti -> blocco a causa del manuale.
     Il messaggio di errore deve specificare 'manuali'."""
     from apps.audit_prep.models import AuditFinding, AuditPrep
-    from datetime import date
 
     prep = AuditPrep.objects.create(
         plant=plant, title="Audit",
@@ -219,7 +216,6 @@ def test_delete_cycle_blocked_with_manual_open_finding_even_with_auto(
 def test_delete_cycle_allowed_with_only_closed_findings(client, cycle, plant, user):
     """Finding gia' chiusi non bloccano la cancellazione."""
     from apps.audit_prep.models import AuditFinding, AuditPrep
-    from datetime import date
 
     prep = AuditPrep.objects.create(
         plant=plant, title="Audit",

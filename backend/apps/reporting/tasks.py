@@ -1,6 +1,6 @@
 from celery import shared_task
 from django.utils import timezone
-from django.db.models import Avg, Count, Q
+from django.db.models import Avg
 
 
 @shared_task(name="apps.reporting.tasks.generate_weekly_kpi_snapshots")
@@ -12,7 +12,6 @@ def generate_weekly_kpi_snapshots():
     """
     from apps.plants.models import Plant
     from apps.controls.models import ControlInstance
-    from .models import IsmsKpiSnapshot
 
     today = timezone.localdate()
     # Monday of current week

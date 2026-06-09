@@ -7,7 +7,6 @@ from apps.governance.models import NormativeRole, RoleAssignment
 @pytest.mark.django_db
 def test_role_assignment_is_active_property():
     from django.contrib.auth import get_user_model
-    from django.utils import timezone
 
     User = get_user_model()
     user = User.objects.create(username="u1")

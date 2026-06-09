@@ -12,7 +12,6 @@ from __future__ import annotations
 import ipaddress
 import logging
 import socket
-from typing import Iterable
 
 logger = logging.getLogger(__name__)
 

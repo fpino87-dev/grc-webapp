@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Iterable
 from urllib.parse import urlparse
 
 from django.db import transaction
@@ -20,7 +19,6 @@ from .models import (
     EntityType,
     OsintEntity,
     OsintSettings,
-    ScanFrequency,
     SourceModule,
 )
 

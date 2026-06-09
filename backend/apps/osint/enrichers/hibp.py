@@ -6,7 +6,6 @@ Il dominio deve essere verificato su HIBP prima che l'API risponda.
 from __future__ import annotations
 
 import logging
-from datetime import date
 from typing import TYPE_CHECKING
 
 import requests

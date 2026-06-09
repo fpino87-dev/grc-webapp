@@ -3,7 +3,6 @@ import hashlib
 import logging
 import os
 
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.db import transaction
@@ -13,9 +12,6 @@ from django.utils.translation import gettext as _
 
 from core.audit import log_action
 from core.uploads import (
-    DEFAULT_MAX_FILE_SIZE_BYTES as MAX_FILE_SIZE_BYTES,
-    OFFICE_EXTENSIONS as ALLOWED_EXTENSIONS,
-    OFFICE_MIME_TYPES as ALLOWED_MIME_TYPES,
     validate_uploaded_file,
 )
 
@@ -279,8 +275,6 @@ def delete_document(document, user) -> None:
     Soft delete di un documento M07. Rimuove i collegamenti ai controlli.
     Documenti approvati: solo superuser.
     """
-    from django.core.exceptions import ValidationError
-    from django.utils.translation import gettext as _
 
     if document.status in ("approvazione", "approvato") and not user.is_superuser:
         raise ValidationError(
@@ -301,8 +295,6 @@ def delete_document(document, user) -> None:
 
 def delete_evidence(evidence, user) -> None:
     """Soft delete evidenza e rimozione collegamenti ai ControlInstance."""
-    from django.core.exceptions import ValidationError
-    from django.utils.translation import gettext as _
 
     from apps.controls.models import ControlInstance
 

@@ -169,7 +169,6 @@ def test_explain_blocks_other_plant(pm_user_plant_a, plant_b):
 @pytest.mark.django_db
 @patch("apps.ai_engine.router.route")
 def test_explain_creates_interaction_log(mock_route, co_user_org, plant_a):
-    from apps.ai_engine.models import AiInteractionLog
 
     mock_route.return_value = {
         "text": "spiegazione mock",

@@ -1,7 +1,6 @@
 """Test API compliance schedule."""
 import pytest
 from django.utils import timezone
-from datetime import date, timedelta
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 

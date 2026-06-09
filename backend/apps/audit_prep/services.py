@@ -237,7 +237,6 @@ def suggest_audit_plan(plant, frameworks, year: int,
     Distribuisce i domini nei 4 trimestri in modo bilanciato,
     prioritizzando i domini con più controlli in GAP o PARZIALE.
     """
-    from apps.controls.models import ControlInstance
     from apps.controls.models import ControlDomain
     from django.db.models import Count, Q
 

@@ -37,13 +37,12 @@ from __future__ import annotations
 
 import csv
 import hashlib
-import io
 import json
 import logging
 import shutil
 import tempfile
 import zipfile
-from datetime import date, datetime
+from datetime import date
 from pathlib import Path
 from typing import Optional
 

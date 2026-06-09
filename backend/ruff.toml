@@ -1,0 +1,20 @@
+# Lint backend (newfix 2026-06-09 #8). Baseline volutamente conservativa:
+# E9/F = errori reali (sintassi, nomi/import non definiti, variabili inutilizzate),
+# B = bug latenti (mutable default, except generici sospetti).
+# Stile (E5xx line-length, I isort) escluso per ora: attivarlo produce churn
+# massivo sul codice esistente — valutare in un passaggio dedicato.
+target-version = "py311"
+line-length = 120
+extend-exclude = ["**/migrations/**", "staticfiles"]
+
+[lint]
+select = ["E9", "F", "B"]
+
+[lint.per-file-ignores]
+# Pattern standard Django: i settings d'ambiente estendono base con `import *`.
+"core/settings/dev.py" = ["F403", "F405"]
+"core/settings/prod.py" = ["F403", "F405"]
+"core/settings/test.py" = ["F403", "F405"]
+# Nei test pytest.raises(Exception) è un pattern accettato (smoke su crash-safety).
+"**/tests/**" = ["B017"]
+"tests/**" = ["B017"]

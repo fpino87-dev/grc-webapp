@@ -1,7 +1,6 @@
 """Test API audit preparation."""
 import pytest
 from django.utils import timezone
-from datetime import date
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
@@ -41,7 +40,6 @@ def plant(db):
 @pytest.fixture
 def framework(db):
     from apps.controls.models import Framework
-    from datetime import date
     return Framework.objects.create(
         code="ISO-AP", name="ISO 27001 AP", version="2022",
         published_at=timezone.localdate(),

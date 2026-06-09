@@ -72,7 +72,7 @@ class SupplierSerializer(serializers.ModelSerializer):
             try:
                 validator(email)
             except DjangoValidationError:
-                raise serializers.ValidationError(f"Indirizzo email non valido: {email}")
+                raise serializers.ValidationError(f"Indirizzo email non valido: {email}") from None
             key = email.lower()
             if key in seen:
                 continue
@@ -155,7 +155,7 @@ class SupplierEvaluationConfigSerializer(serializers.ModelSerializer):
         try:
             nums = {k: float(v) for k, v in value.items()}
         except (TypeError, ValueError):
-            raise serializers.ValidationError("I pesi devono essere numerici.")
+            raise serializers.ValidationError("I pesi devono essere numerici.") from None
         if any(v < 0 for v in nums.values()):
             raise serializers.ValidationError("I pesi non possono essere negativi.")
         total = sum(nums.values())
@@ -198,7 +198,7 @@ class SupplierEvaluationConfigSerializer(serializers.ModelSerializer):
         try:
             nums = {k: float(v) for k, v in value.items()}
         except (TypeError, ValueError):
-            raise serializers.ValidationError("Le soglie devono essere numeriche.")
+            raise serializers.ValidationError("Le soglie devono essere numeriche.") from None
         if not (1.0 <= nums["medio"] < nums["alto"] < nums["critico"] <= 5.0):
             raise serializers.ValidationError(
                 "Le soglie devono essere crescenti e comprese tra 1.0 e 5.0 "

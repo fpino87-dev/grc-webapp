@@ -67,7 +67,6 @@ def get_operational_kpi_summary(plant_id) -> dict:
 
 def get_kpi_snapshot(plant_id) -> dict:
     """Return a dict with key metrics for the given plant."""
-    from django.db.models import Count, Q
     from apps.controls.models import ControlInstance
     from apps.incidents.models import Incident
     from apps.risk.models import RiskAssessment
@@ -115,7 +114,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     Congela i dati di compliance al momento della riunione.
     """
     from django.db.models import Count, Q
-    from apps.controls.models import Framework, ControlInstance
+    from apps.controls.models import ControlInstance
     from apps.documents.models import Document, Evidence
     from apps.risk.models import RiskAssessment
     from apps.incidents.models import Incident

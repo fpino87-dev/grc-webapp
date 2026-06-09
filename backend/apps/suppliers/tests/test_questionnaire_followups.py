@@ -75,7 +75,6 @@ def test_one_email_per_distinct_operator(operator, db):
 @pytest.mark.django_db
 def test_skips_recent_and_responded(operator):
     from apps.suppliers.services import check_questionnaire_followups
-    from apps.suppliers.models import SupplierQuestionnaire
 
     # entro i 7 giorni → escluso
     make_questionnaire("Recent", operator, send_count=1, days_ago=2, user=operator)

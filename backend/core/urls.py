@@ -140,7 +140,7 @@ def serve_manual(request, manual_type):
         with open(filepath, "r", encoding="utf-8") as f:
             return JsonResponse({"type": manual_type, "lang": lang, "content": f.read()})
     except FileNotFoundError:
-        raise Http404("File manuale non trovato")
+        raise Http404("File manuale non trovato") from None
 
 
 # Admin URL: in produzione viene letto da settings.ADMIN_URL (configurato via .env)

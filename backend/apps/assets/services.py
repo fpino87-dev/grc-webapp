@@ -3,7 +3,7 @@ from django.utils import timezone
 
 from core.audit import log_action
 
-from .models import Asset, AssetDependency, AssetIT, AssetOT
+from .models import Asset, AssetDependency, AssetIT
 
 
 def get_assets_by_plant(plant_id):

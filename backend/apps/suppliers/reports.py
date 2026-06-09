@@ -121,7 +121,7 @@ def build_supplier_risk_report(supplier: Supplier) -> bytes:
     story = []
 
     # Intestazione
-    story.append(Paragraph(f"Report di rischio — Fornitore", styles["H1Small"]))
+    story.append(Paragraph("Report di rischio — Fornitore", styles["H1Small"]))
     story.append(Paragraph(f"<b>{supplier.name}</b>", styles["Heading3"]))
     story.append(Paragraph(
         f"Data report: {_fmt_date(timezone.now())} · "
@@ -338,11 +338,6 @@ def _assessment_class_cell(assessment: Optional[SupplierAssessment], config: Sup
 
 
 def _bump_explanation(supplier: Supplier, config: SupplierEvaluationConfig) -> str:
-    active = (
-        config.nis2_concentration_bump
-        and supplier.nis2_relevant
-        and supplier.concentration_threshold == "critica"
-    )
     if not config.nis2_concentration_bump:
         return "No (policy di bump disattivata in configurazione)"
     if not supplier.nis2_relevant:

@@ -86,7 +86,6 @@ def delete_plant(plant: Plant, user, force: bool = False) -> None:
     con soft delete, poi elimina il plant.
     """
     from django.core.exceptions import ValidationError
-    from django.utils import timezone
 
     if force and not getattr(user, "is_superuser", False):
         raise ValidationError("Solo il superuser può forzare l'eliminazione del sito.")

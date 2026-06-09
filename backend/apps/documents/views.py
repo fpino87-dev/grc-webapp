@@ -12,7 +12,6 @@ from core.scoping import PlantScopedQuerysetMixin, get_user_plant_ids
 from .models import Document, DocumentVersion, Evidence
 from .permissions import DocumentPermission
 from .serializers import (
-    DocumentApprovalSerializer,
     DocumentSerializer,
     DocumentVersionSerializer,
     EvidenceSerializer,

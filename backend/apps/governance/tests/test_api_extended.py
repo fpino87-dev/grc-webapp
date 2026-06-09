@@ -1,7 +1,7 @@
 """Test API governance — azioni avanzate organigramma e ruoli."""
 import pytest
 from django.utils import timezone
-from datetime import date, timedelta
+from datetime import timedelta
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
