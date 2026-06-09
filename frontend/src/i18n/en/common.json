@@ -1087,7 +1087,8 @@
       "running": "Running",
       "completed": "Completed",
       "failed": "Failed",
-      "restored": "Restored"
+      "restored": "Restored",
+      "restoring": "Restore in progress"
     },
     "type": {
       "auto": "Automatic",
@@ -1112,8 +1113,10 @@
       "restored": "Database restored successfully.",
       "restore_error": "Error restoring the database.",
       "deleted": "Backup deleted.",
-      "delete_error": "Error deleting backup."
-    }
+      "delete_error": "Error deleting backup.",
+      "restore_started": "Restore started. The status updates automatically when finished."
+    },
+    "restoring": "Database restore in progress... this page refreshes automatically."
   },
   "dashboard": {
     "title": "Dashboard",

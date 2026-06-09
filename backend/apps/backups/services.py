@@ -178,13 +178,49 @@ def create_backup(user, backup_type: str = "manual"):
     return record
 
 
+def start_restore(backup_id, user):
+    """
+    Valida e accoda il restore su Celery (newfix 2026-06-09 #3).
+
+    Il restore era sincrono nella request HTTP: pg_restore ha timeout 600s ma
+    gunicorn killa il worker a 120s → su DB reali il processo moriva a metà
+    `--clean` lasciando il DB incoerente. Ora la view marca il record come
+    RESTORING e il lavoro vero avviene nel worker Celery (nessun timeout HTTP).
+
+    Solleva ValueError/FileNotFoundError per le stesse pre-condizioni che
+    prima bloccavano il restore sincrono.
+    """
+    from apps.backups.models import BackupRecord
+    from apps.backups.tasks import restore_backup_task
+
+    record = BackupRecord.objects.get(pk=backup_id)
+
+    if record.status != BackupRecord.Status.COMPLETED:
+        raise ValueError("Solo i backup completati possono essere ripristinati.")
+
+    filepath = BACKUP_DIR / record.filename
+    if not filepath.exists():
+        raise FileNotFoundError(f"File non trovato sul server: {record.filename}")
+
+    record.status = BackupRecord.Status.RESTORING
+    record.error_message = ""
+    record.save(update_fields=["status", "error_message", "updated_at"])
+
+    restore_backup_task.delay(str(record.pk), str(user.pk))
+    return record
+
+
 def restore_backup(backup_id, user):
     from apps.backups.models import BackupRecord
     from core.audit import log_action
 
     record = BackupRecord.objects.get(pk=backup_id)
 
-    if record.status != BackupRecord.Status.COMPLETED:
+    # RESTORING = accodato da start_restore(); COMPLETED resta accettato per
+    # invocazione diretta (shell/management) senza passare dalla coda.
+    if record.status not in (
+        BackupRecord.Status.COMPLETED, BackupRecord.Status.RESTORING,
+    ):
         raise ValueError("Solo i backup completati possono essere ripristinati.")
 
     filepath = BACKUP_DIR / record.filename

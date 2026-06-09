@@ -1087,7 +1087,8 @@
       "running": "In corso",
       "completed": "Completato",
       "failed": "Fallito",
-      "restored": "Ripristinato"
+      "restored": "Ripristinato",
+      "restoring": "Ripristino in corso"
     },
     "type": {
       "auto": "Automatico",
@@ -1112,8 +1113,10 @@
       "restored": "Database ripristinato con successo.",
       "restore_error": "Errore durante il ripristino del database.",
       "deleted": "Backup eliminato.",
-      "delete_error": "Errore durante l'eliminazione del backup."
-    }
+      "delete_error": "Errore durante l'eliminazione del backup.",
+      "restore_started": "Ripristino avviato. Lo stato si aggiorna automaticamente al termine."
+    },
+    "restoring": "Ripristino del database in corso... la pagina si aggiorna automaticamente."
   },
   "dashboard": {
     "title": "Dashboard",

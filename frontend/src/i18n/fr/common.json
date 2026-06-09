@@ -1166,7 +1166,8 @@
       "running": "En cours",
       "completed": "Terminé",
       "failed": "Échoué",
-      "restored": "Restauré"
+      "restored": "Restauré",
+      "restoring": "Restauration en cours"
     },
     "type": {
       "auto": "Automatique",
@@ -1191,8 +1192,10 @@
       "restored": "Base de données restaurée avec succès.",
       "restore_error": "Erreur lors de la restauration de la base de données.",
       "deleted": "Sauvegarde supprimée.",
-      "delete_error": "Erreur lors de la suppression de la sauvegarde."
-    }
+      "delete_error": "Erreur lors de la suppression de la sauvegarde.",
+      "restore_started": "Restauration lancée. Le statut se met à jour automatiquement à la fin."
+    },
+    "restoring": "Restauration de la base de données en cours... la page s'actualise automatiquement."
   },
   "dashboard": {
     "title": "Dashboard",

@@ -1166,7 +1166,8 @@
       "running": "W toku",
       "completed": "Ukończono",
       "failed": "Nieudane",
-      "restored": "Przywrócono"
+      "restored": "Przywrócono",
+      "restoring": "Przywracanie w toku"
     },
     "type": {
       "auto": "Automatyczny",
@@ -1191,8 +1192,10 @@
       "restored": "Baza danych została pomyślnie przywrócona.",
       "restore_error": "Błąd podczas przywracania bazy danych.",
       "deleted": "Kopia zapasowa usunięta.",
-      "delete_error": "Błąd podczas usuwania kopii zapasowej."
-    }
+      "delete_error": "Błąd podczas usuwania kopii zapasowej.",
+      "restore_started": "Rozpoczęto przywracanie. Status zaktualizuje się automatycznie po zakończeniu."
+    },
+    "restoring": "Trwa przywracanie bazy danych... strona odświeża się automatycznie."
   },
   "dashboard": {
     "title": "Dashboard",

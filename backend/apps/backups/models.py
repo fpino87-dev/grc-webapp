@@ -10,6 +10,7 @@ class BackupRecord(BaseModel):
         RUNNING   = "running",   _("In corso")
         COMPLETED = "completed", _("Completato")
         FAILED    = "failed",    _("Fallito")
+        RESTORING = "restoring", _("Ripristino in corso")
         RESTORED  = "restored",  _("Ripristinato")
 
     class BackupType(models.TextChoices):

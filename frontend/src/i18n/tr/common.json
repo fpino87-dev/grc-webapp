@@ -1166,7 +1166,8 @@
       "running": "Çalışıyor",
       "completed": "Tamamlandı",
       "failed": "Başarısız",
-      "restored": "Geri yüklendi"
+      "restored": "Geri yüklendi",
+      "restoring": "Geri yükleme sürüyor"
     },
     "type": {
       "auto": "Otomatik",
@@ -1191,8 +1192,10 @@
       "restored": "Veritabanı başarıyla geri yüklendi.",
       "restore_error": "Veritabanı geri yüklenirken hata oluştu.",
       "deleted": "Yedek silindi.",
-      "delete_error": "Yedek silinirken hata oluştu."
-    }
+      "delete_error": "Yedek silinirken hata oluştu.",
+      "restore_started": "Geri yükleme başlatıldı. Bitince durum otomatik olarak güncellenir."
+    },
+    "restoring": "Veritabanı geri yükleniyor... sayfa otomatik olarak yenilenir."
   },
   "dashboard": {
     "title": "Dashboard",

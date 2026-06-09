@@ -34,6 +34,7 @@ const STATUS_STYLES: Record<string, string> = {
   running:   "bg-blue-100  text-blue-800  border-blue-200",
   pending:   "bg-yellow-100 text-yellow-800 border-yellow-200",
   failed:    "bg-red-100   text-red-800   border-red-200",
+  restoring: "bg-amber-100 text-amber-800 border-amber-200",
   restored:  "bg-purple-100 text-purple-800 border-purple-200",
 };
 
@@ -42,6 +43,7 @@ const STATUS_DOT: Record<string, string> = {
   running:   "bg-blue-500 animate-pulse",
   pending:   "bg-yellow-500 animate-pulse",
   failed:    "bg-red-500",
+  restoring: "bg-amber-500 animate-pulse",
   restored:  "bg-purple-500",
 };
 
@@ -102,6 +104,7 @@ function BackupCard({
   const { t } = useTranslation();
   const isCompleted = backup.status === "completed";
   const isRunning   = backup.status === "running" || backup.status === "pending";
+  const isRestoring = backup.status === "restoring";
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-sm transition-shadow">
@@ -143,8 +146,8 @@ function BackupCard({
         )}
       </div>
 
-      {/* Errore (se failed) */}
-      {backup.status === "failed" && backup.error_message && (
+      {/* Errore: backup fallito, oppure restore fallito (record tornato completed) */}
+      {backup.error_message && (backup.status === "failed" || backup.status === "completed") && (
         <div className="mb-3 px-3 py-2 bg-red-50 border border-red-100 rounded text-xs text-red-700 break-all">
           {backup.error_message}
         </div>
@@ -173,10 +176,13 @@ function BackupCard({
         {isRunning && (
           <span className="text-xs text-blue-600 italic">{t("backups.creating")}</span>
         )}
+        {isRestoring && (
+          <span className="text-xs text-amber-700 italic">{t("backups.restoring")}</span>
+        )}
         <div className="ml-auto">
           <button
             onClick={onDelete}
-            disabled={isBusy || isRunning}
+            disabled={isBusy || isRunning || isRestoring}
             className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-md border border-red-300 hover:bg-red-50 text-red-600 font-medium disabled:opacity-50"
           >
             🗑 {t("backups.action.delete")}
@@ -203,7 +209,7 @@ export function BackupsPage() {
     queryFn: listBackupsApi,
     refetchInterval: (q) => {
       const data = q.state.data as BackupRecord[] | undefined;
-      return data?.some(b => b.status === "running" || b.status === "pending") ? 3000 : false;
+      return data?.some(b => ["running", "pending", "restoring"].includes(b.status)) ? 3000 : false;
     },
   });
 
@@ -220,7 +226,8 @@ export function BackupsPage() {
 
   const restoreMut = useMutation({
     mutationFn: (id: string) => restoreBackupApi(id),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["backups"] }); showFeedback("ok", t("backups.feedback.restored")); },
+    // 202: il restore prosegue su Celery — il polling aggiorna lo stato finale
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["backups"] }); showFeedback("ok", t("backups.feedback.restore_started")); },
     onError: (e: unknown) => {
       const msg = (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
       showFeedback("err", msg ?? t("backups.feedback.restore_error"));
@@ -250,9 +257,9 @@ export function BackupsPage() {
 
   const isBusy = createMut.isPending || restoreMut.isPending || deleteMut.isPending;
 
-  // Ordine: running/pending in cima, poi per data desc
+  // Ordine: running/pending/restoring in cima, poi per data desc
   const sorted = [...backups].sort((a, b) => {
-    const priority = (s: string) => (s === "running" || s === "pending") ? 0 : 1;
+    const priority = (s: string) => ["running", "pending", "restoring"].includes(s) ? 0 : 1;
     if (priority(a.status) !== priority(b.status)) return priority(a.status) - priority(b.status);
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });

@@ -11,7 +11,7 @@ from apps.auth_grc.permissions import IsGrcSuperAdmin
 
 from .models import BackupRecord
 from .serializers import BackupRecordSerializer
-from .services import create_backup, delete_backup, restore_backup
+from .services import create_backup, delete_backup, start_restore
 
 BACKUP_DIR = Path(getattr(settings, "BACKUP_DIR", "/app/backups"))
 
@@ -63,14 +63,18 @@ class BackupViewSet(ReadOnlyModelViewSet):
 
     @action(detail=True, methods=["post"])
     def restore(self, request, pk=None):
+        # Asincrono (newfix 2026-06-09 #3): pg_restore può superare il timeout
+        # gunicorn (120s) — il lavoro avviene su Celery, qui solo l'accodamento.
+        # Il client fa polling su GET /backups/{id}/ finché status != restoring.
         record = self.get_object()
         try:
-            restore_backup(record.pk, request.user)
+            record = start_restore(record.pk, request.user)
         except (FileNotFoundError, ValueError) as exc:
             return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        except RuntimeError as exc:
-            return Response({"detail": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response({"detail": "Ripristino completato con successo."})
+        return Response(
+            BackupRecordSerializer(record).data,
+            status=status.HTTP_202_ACCEPTED,
+        )
 
     @action(detail=True, methods=["delete"], url_path="remove")
     def remove(self, request, pk=None):

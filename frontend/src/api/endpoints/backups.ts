@@ -5,7 +5,7 @@ export interface BackupRecord {
   filename: string;
   size_bytes: number | null;
   size_mb: number | null;
-  status: "pending" | "running" | "completed" | "failed" | "restored";
+  status: "pending" | "running" | "completed" | "failed" | "restoring" | "restored";
   backup_type: "auto" | "manual";
   notes: string;
   error_message: string;
@@ -24,6 +24,8 @@ export async function createBackupApi(): Promise<BackupRecord> {
   return res.data;
 }
 
+// Risponde 202: il restore è asincrono (Celery). Lo stato passa a "restoring"
+// e va monitorato via polling su listBackupsApi finché non torna definitivo.
 export async function restoreBackupApi(id: string): Promise<void> {
   await apiClient.post(`/backups/${id}/restore/`);
 }
