@@ -10,6 +10,7 @@ Gli import dei modelli sono volutamente locali alle funzioni per evitare cicli d
 import tra app e mantenere leggero il caricamento del modulo.
 """
 from datetime import date
+from decimal import Decimal
 
 from django.db.models import Avg, Count, DurationField, ExpressionWrapper, F, Q
 from django.utils import timezone
@@ -169,16 +170,17 @@ def kpi_trend(plant_id, framework_code="ISO27001", weeks=12) -> dict:
 # ───────────────────────────────────────────────────────────────────────────
 def risk_bia_bcp(plant_id) -> dict:
     from apps.bcp.models import BcpPlan, BcpTest
-    from apps.bia.models import CriticalProcess
+    from apps.bia.models import CriticalProcess, TreatmentOption
     from apps.risk.models import (
         NIS2_ART21_CHOICES, NIS2_RELEVANCE_CHOICES, RiskAssessment, THREAT_CATEGORIES,
     )
+    from apps.risk.services import calc_ale
 
     today = timezone.localdate()
 
     risk_qs = RiskAssessment.objects.filter(
         status="completato", deleted_at__isnull=True
-    ).select_related("owner", "accepted_by")
+    ).select_related("owner", "accepted_by", "critical_process")
     bia_qs = CriticalProcess.objects.filter(deleted_at__isnull=True)
     bcp_qs = BcpPlan.objects.filter(deleted_at__isnull=True)
 
@@ -193,6 +195,36 @@ def risk_bia_bcp(plant_id) -> dict:
     risks_yellow = risk_qs.filter(score__gt=7, score__lte=14).count()
     risks_needs_revaluation = risk_qs.filter(needs_revaluation=True).count()
     risks_formally_accepted = risk_qs.filter(risk_accepted_formally=True).count()
+
+    # ALE (Annualized Loss Expectancy) — perdita attesa annua in €.
+    # Calcolata live da calc_ale() sui dati BIA collegati; vale 0 se il rischio
+    # non ha processo critico/costo di fermo. residua = post-controlli (campi
+    # correnti), inerente = pre-controlli (campi inherent_*). La differenza
+    # (inerente − residua) è il rischio già abbattuto dai controlli, in €.
+    # critical_process è in select_related → nessuna query N+1; risk_qs viene
+    # valutato una sola volta e riusato (cache queryset) per entrambe le ALE.
+    ale_by_risk = {}
+    ale_inherent_by_risk = {}
+    ale_by_proc = {}  # ALE residua aggregata per processo critico → base ROSI
+    for r in risk_qs:
+        residual = calc_ale(r)
+        ale_by_risk[r.id] = residual
+        ale_inherent_by_risk[r.id] = calc_ale(r, inherent=True)
+        if r.critical_process_id and residual:
+            ale_by_proc[r.critical_process_id] = (
+                ale_by_proc.get(r.critical_process_id, Decimal("0")) + residual
+            )
+    ale_total = sum((v for v in ale_by_risk.values() if v), Decimal("0"))
+    ale_total_inherent = sum((v for v in ale_inherent_by_risk.values() if v), Decimal("0"))
+    ale_saved = ale_total_inherent - ale_total
+    ale_valued_count = sum(1 for v in ale_by_risk.values() if v and v > 0)
+    ale_coverage_pct = (
+        round(ale_valued_count / risks_total * 100, 1) if risks_total else 0.0
+    )
+    ale_saved_pct = (
+        round(float(ale_saved) / float(ale_total_inherent) * 100, 1)
+        if ale_total_inherent else 0.0
+    )
 
     critical_proc_ids = set(bia_qs.filter(criticality__gte=4).values_list("id", flat=True))
     procs_with_bcp = set(
@@ -240,6 +272,8 @@ def risk_bia_bcp(plant_id) -> dict:
             ),
             "formally_accepted": r.risk_accepted_formally,
             "needs_revaluation": r.needs_revaluation,
+            "ale": float(ale_by_risk.get(r.id) or 0),
+            "ale_inherent": float(ale_inherent_by_risk.get(r.id) or 0),
         })
 
     # Breakdown per categoria minaccia
@@ -366,6 +400,78 @@ def risk_bia_bcp(plant_id) -> dict:
             ),
         })
 
+    # ROSI (Return on Security Investment) dei trattamenti pianificati (M05 BIA).
+    # Standard ENISA: ROSI = (ALE_evitata − costo_annualizzato) / costo_annualizzato.
+    # Il CapEx una tantum (cost_implementation) è ammortizzato su AMORT_YEARS anni
+    # (vita utile convenzionale del controllo); cost_annual è il ricorrente.
+    # ALE_evitata = ALE residua del processo × % di riduzione del trattamento.
+    # Ogni trattamento è valutato indipendentemente (non sommabile linearmente sullo
+    # stesso processo) come supporto alla decisione di investimento.
+    AMORT_YEARS = 3
+    opt_qs = TreatmentOption.objects.filter(deleted_at__isnull=True).select_related("process")
+    if plant_id:
+        opt_qs = opt_qs.filter(process__plant_id=plant_id)
+
+    treatments = []
+    tot_ale_avoided = Decimal("0")
+    tot_annual_cost = Decimal("0")
+    for opt in opt_qs:
+        proc_ale = ale_by_proc.get(opt.process_id, Decimal("0"))
+        reduction = Decimal(str(opt.ale_reduction_pct)) / Decimal("100")
+        ale_avoided = (proc_ale * reduction).quantize(Decimal("0.01"))
+        annual_cost = (
+            Decimal(str(opt.cost_annual))
+            + Decimal(str(opt.cost_implementation)) / Decimal(AMORT_YEARS)
+        ).quantize(Decimal("0.01"))
+        net_annual = ale_avoided - annual_cost
+        rosi_pct = (
+            round(float(net_annual / annual_cost * 100), 1) if annual_cost > 0 else None
+        )
+        # payback (mesi): solo CapEx contro il beneficio netto ricorrente positivo
+        net_recurring = ale_avoided - Decimal(str(opt.cost_annual))
+        payback_months = (
+            round(float(Decimal(str(opt.cost_implementation)) / net_recurring * 12), 1)
+            if net_recurring > 0 and opt.cost_implementation else None
+        )
+        worth_it = (rosi_pct is not None and rosi_pct > 0) or (
+            annual_cost == 0 and ale_avoided > 0
+        )
+        treatments.append({
+            "id": str(opt.id),
+            "title": opt.title,
+            "process_id": str(opt.process_id),
+            "process_name": opt.process.name,
+            "ale_reduction_pct": opt.ale_reduction_pct,
+            "process_ale": float(proc_ale),
+            "ale_avoided": float(ale_avoided),
+            "cost_implementation": float(opt.cost_implementation),
+            "cost_annual": float(opt.cost_annual),
+            "annual_cost": float(annual_cost),
+            "net_annual": float(net_annual),
+            "rosi_pct": rosi_pct,
+            "payback_months": payback_months,
+            "worth_it": worth_it,
+        })
+        tot_ale_avoided += ale_avoided
+        tot_annual_cost += annual_cost
+
+    # Ordina per ROSI decrescente (i None — costo annuo nullo — in coda)
+    treatments.sort(
+        key=lambda x: (x["rosi_pct"] is not None, x["rosi_pct"] if x["rosi_pct"] is not None else -1e9),
+        reverse=True,
+    )
+    treatments_totals = {
+        "count": len(treatments),
+        "ale_avoided": float(tot_ale_avoided),
+        "annual_cost": float(tot_annual_cost),
+        "net_annual": float(tot_ale_avoided - tot_annual_cost),
+        "rosi_pct": (
+            round(float((tot_ale_avoided - tot_annual_cost) / tot_annual_cost * 100), 1)
+            if tot_annual_cost > 0 else None
+        ),
+        "amort_years": AMORT_YEARS,
+    }
+
     return {
         "kpis": {
             "risks_total": risks_total,
@@ -375,12 +481,20 @@ def risk_bia_bcp(plant_id) -> dict:
             "risks_formally_accepted": risks_formally_accepted,
             "bia_critical_no_bcp": bia_critical_no_bcp,
             "bcp_test_overdue": bcp_test_overdue,
+            "ale_total": float(ale_total),
+            "ale_total_inherent": float(ale_total_inherent),
+            "ale_saved": float(ale_saved),
+            "ale_saved_pct": ale_saved_pct,
+            "ale_valued_count": ale_valued_count,
+            "ale_coverage_pct": ale_coverage_pct,
         },
         "heatmap": heatmap,
         "top_risks": top_risks,
         "by_threat": by_threat,
         "nis2_breakdown": nis2_breakdown,
         "bia_bcp_table": bia_bcp_table,
+        "treatments": treatments,
+        "treatments_totals": treatments_totals,
     }
 
 

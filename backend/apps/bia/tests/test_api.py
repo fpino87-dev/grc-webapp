@@ -121,6 +121,24 @@ def test_list_treatments(client):
 
 
 @pytest.mark.django_db
+def test_filter_treatments_by_process(client, plant, process, user, treatment):
+    """Il filtro ?process=<id> isola i trattamenti di un processo (usato dalla UI BIA)."""
+    from apps.bia.models import CriticalProcess, TreatmentOption
+    other = CriticalProcess.objects.create(
+        plant=plant, name="Altro processo", criticality=2, status="bozza", created_by=user,
+    )
+    TreatmentOption.objects.create(
+        process=other, title="Backup offsite", cost_implementation=1000,
+        ale_reduction_pct=20, created_by=user,
+    )
+    resp = client.get(f"{URL_TREATMENTS}?process={process.id}")
+    assert resp.status_code == 200
+    ids = [str(r["id"]) for r in resp.data["results"]]
+    assert str(treatment.id) in ids
+    assert all(str(r["process"]) == str(process.id) for r in resp.data["results"])
+
+
+@pytest.mark.django_db
 def test_create_treatment(client, process):
     payload = {
         "process": str(process.id),

@@ -123,7 +123,10 @@ class TreatmentOptionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         plant = self.request.query_params.get("plant")
         if plant:
             qs = qs.filter(process__plant_id=plant)
-        return qs
+        process = self.request.query_params.get("process")
+        if process:
+            qs = qs.filter(process_id=process)
+        return qs.order_by("-created_at")
 
     def perform_create(self, serializer):
         instance = serializer.save()

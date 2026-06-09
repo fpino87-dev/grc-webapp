@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { reportingApi, type BiaBcpRow, type TopRisk, type ThreatBreakdown, type Nis2CategoryBreakdown, type HeatmapCell, type RequiredDocsCoverage, type SupplierNdaEntry } from "../../api/endpoints/reporting";
+import { reportingApi, type BiaBcpRow, type TopRisk, type ThreatBreakdown, type Nis2CategoryBreakdown, type HeatmapCell, type RequiredDocsCoverage, type SupplierNdaEntry, type TreatmentRosi, type TreatmentRosiTotals } from "../../api/endpoints/reporting";
 import { plantsApi } from "../../api/endpoints/plants";
 import { useAuthStore } from "../../store/auth";
 import {
@@ -14,6 +14,17 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
+
+// Formattazione valuta (€) locale-aware. Compatta per le KPI tile (es. "1,2 Mln €"),
+// estesa per le righe di tabella. locale derivato dalla lingua i18n attiva.
+function formatEur(value: number, locale: string, compact = false): string {
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: "EUR",
+    notation: compact ? "compact" : "standard",
+    maximumFractionDigits: compact ? 1 : 0,
+  }).format(value || 0);
+}
 
 interface KpiCardProps {
   label: string;
@@ -357,7 +368,7 @@ function RiskHeatmap({ cells }: { cells: HeatmapCell[] }) {
 }
 
 function TopRisksTable({ risks }: { risks: TopRisk[] }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   if (risks.length === 0) return null;
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -371,6 +382,8 @@ function TopRisksTable({ risks }: { risks: TopRisk[] }) {
             <th className="text-left px-4 py-2 font-medium text-gray-600">{t("reporting.risk_bia_bcp.col_owner")}</th>
             <th className="text-center px-3 py-2 font-medium text-gray-600">{t("reporting.risk_bia_bcp.col_score_residual")}</th>
             <th className="text-center px-3 py-2 font-medium text-gray-600">{t("reporting.risk_bia_bcp.col_score_inherent")}</th>
+            <th className="text-right px-3 py-2 font-medium text-gray-600">{t("reporting.risk_bia_bcp.col_ale_inherent")}</th>
+            <th className="text-right px-3 py-2 font-medium text-gray-600">{t("reporting.risk_bia_bcp.col_ale_residual")}</th>
             <th className="text-left px-3 py-2 font-medium text-gray-600">NIS2</th>
             <th className="text-left px-3 py-2 font-medium text-gray-600">{t("reporting.risk_bia_bcp.col_treatment")}</th>
           </tr>
@@ -388,6 +401,14 @@ function TopRisksTable({ risks }: { risks: TopRisk[] }) {
               </td>
               <td className="px-3 py-2 text-center text-gray-400 text-sm">
                 {r.inherent_score ?? "—"}
+              </td>
+              <td className="px-3 py-2 text-right text-sm tabular-nums whitespace-nowrap text-gray-400">
+                {r.ale_inherent > 0 ? formatEur(r.ale_inherent, i18n.language) : <span className="text-gray-300">—</span>}
+              </td>
+              <td className="px-3 py-2 text-right text-sm tabular-nums whitespace-nowrap">
+                {r.ale > 0
+                  ? <span className="font-medium text-gray-700">{formatEur(r.ale, i18n.language)}</span>
+                  : <span className="text-gray-300">—</span>}
               </td>
               <td className="px-3 py-2">
                 {r.nis2_relevance ? (
@@ -566,7 +587,7 @@ function BiaBcpTable({ rows }: { rows: BiaBcpRow[] }) {
 }
 
 function TabRiskBiaBcp() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const selectedPlant = useAuthStore(s => s.selectedPlant);
   const { data, isLoading } = useQuery({
     queryKey: ["reporting-risk-bia-bcp", selectedPlant?.id],
@@ -577,7 +598,7 @@ function TabRiskBiaBcp() {
   if (isLoading) return <div className="p-8 text-center text-gray-400">{t("reporting.loading")}</div>;
   if (!data) return <div className="p-8 text-center text-gray-400">{t("reporting.no_data")}</div>;
 
-  const { kpis, heatmap, top_risks, by_threat, nis2_breakdown, bia_bcp_table } = data;
+  const { kpis, heatmap, top_risks, by_threat, nis2_breakdown, bia_bcp_table, treatments, treatments_totals } = data;
 
   return (
     <div className="space-y-6">
@@ -590,6 +611,33 @@ function TabRiskBiaBcp() {
         <KpiTile label={t("reporting.risk_bia_bcp.kpi_accepted")} value={kpis.risks_formally_accepted} variant="ok" sub={`/ ${kpis.risks_total}`} />
         <KpiTile label={t("reporting.risk_bia_bcp.kpi_bia_no_bcp")} value={kpis.bia_critical_no_bcp} variant={kpis.bia_critical_no_bcp > 0 ? "danger" : "ok"} sub={t("reporting.risk_bia_bcp.kpi_bia_no_bcp_sub")} />
         <KpiTile label={t("reporting.risk_bia_bcp.kpi_bcp_overdue")} value={kpis.bcp_test_overdue} variant={kpis.bcp_test_overdue > 0 ? "warning" : "ok"} sub={t("reporting.risk_bia_bcp.kpi_bcp_overdue_sub")} />
+      </div>
+
+      {/* Esposizione economica (ALE): inerente → residua + rischio abbattuto dai controlli */}
+      <div>
+        <h3 className="text-sm font-semibold text-gray-700 mb-2">{t("reporting.risk_bia_bcp.ale_section_title")}</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <KpiTile
+            label={t("reporting.risk_bia_bcp.kpi_ale_inherent")}
+            value={formatEur(kpis.ale_total_inherent, i18n.language, true)}
+          />
+          <KpiTile
+            label={t("reporting.risk_bia_bcp.kpi_ale_residual")}
+            value={formatEur(kpis.ale_total, i18n.language, true)}
+            variant={kpis.ale_total > 0 ? "warning" : "neutral"}
+            sub={t("reporting.risk_bia_bcp.kpi_ale_coverage", {
+              valued: kpis.ale_valued_count,
+              total: kpis.risks_total,
+              pct: kpis.ale_coverage_pct,
+            })}
+          />
+          <KpiTile
+            label={t("reporting.risk_bia_bcp.kpi_ale_saved")}
+            value={formatEur(kpis.ale_saved, i18n.language, true)}
+            variant={kpis.ale_saved > 0 ? "ok" : "neutral"}
+            sub={t("reporting.risk_bia_bcp.kpi_ale_saved_sub", { pct: kpis.ale_saved_pct })}
+          />
+        </div>
       </div>
 
       {/* Heatmap + NIS2 chart side by side */}
@@ -606,6 +654,74 @@ function TabRiskBiaBcp() {
 
       {/* BIA-BCP correlation table */}
       <BiaBcpTable rows={bia_bcp_table} />
+
+      {/* ROSI dei trattamenti pianificati */}
+      <TreatmentRosiTable treatments={treatments} totals={treatments_totals} />
+    </div>
+  );
+}
+
+function TreatmentRosiTable({ treatments, totals }: { treatments: TreatmentRosi[]; totals: TreatmentRosiTotals }) {
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
+  if (treatments.length === 0) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-5">
+        <h3 className="text-sm font-semibold text-gray-700 mb-1">{t("reporting.risk_bia_bcp.rosi_title")}</h3>
+        <p className="text-sm text-gray-400">{t("reporting.risk_bia_bcp.rosi_empty")}</p>
+      </div>
+    );
+  }
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="px-4 py-3 border-b border-gray-100">
+        <h3 className="text-sm font-semibold text-gray-700">{t("reporting.risk_bia_bcp.rosi_title")}</h3>
+        <p className="text-xs text-gray-400 mt-0.5">{t("reporting.risk_bia_bcp.rosi_subtitle", { years: totals.amort_years })}</p>
+      </div>
+      <table className="w-full text-sm">
+        <thead className="bg-gray-50 border-b border-gray-200">
+          <tr>
+            <th className="text-left px-4 py-2 font-medium text-gray-600">{t("reporting.risk_bia_bcp.rosi_col_treatment")}</th>
+            <th className="text-left px-3 py-2 font-medium text-gray-600">{t("reporting.risk_bia_bcp.rosi_col_process")}</th>
+            <th className="text-right px-3 py-2 font-medium text-gray-600">{t("reporting.risk_bia_bcp.rosi_col_reduction")}</th>
+            <th className="text-right px-3 py-2 font-medium text-gray-600">{t("reporting.risk_bia_bcp.rosi_col_avoided")}</th>
+            <th className="text-right px-3 py-2 font-medium text-gray-600">{t("reporting.risk_bia_bcp.rosi_col_cost")}</th>
+            <th className="text-right px-3 py-2 font-medium text-gray-600">{t("reporting.risk_bia_bcp.rosi_col_net")}</th>
+            <th className="text-right px-3 py-2 font-medium text-gray-600">{t("reporting.risk_bia_bcp.rosi_col_rosi")}</th>
+            <th className="text-right px-3 py-2 font-medium text-gray-600">{t("reporting.risk_bia_bcp.rosi_col_payback")}</th>
+            <th className="text-center px-3 py-2 font-medium text-gray-600">{t("reporting.risk_bia_bcp.rosi_col_verdict")}</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100">
+          {treatments.map(tr => (
+            <tr key={tr.id} className="hover:bg-gray-50">
+              <td className="px-4 py-2 font-medium text-gray-800 max-w-xs truncate">{tr.title}</td>
+              <td className="px-3 py-2 text-gray-500 text-xs">{tr.process_name}</td>
+              <td className="px-3 py-2 text-right tabular-nums text-gray-600">{tr.ale_reduction_pct}%</td>
+              <td className="px-3 py-2 text-right tabular-nums whitespace-nowrap text-gray-700">{tr.ale_avoided > 0 ? formatEur(tr.ale_avoided, lang) : "—"}</td>
+              <td className="px-3 py-2 text-right tabular-nums whitespace-nowrap text-gray-500">{formatEur(tr.annual_cost, lang)}</td>
+              <td className={`px-3 py-2 text-right tabular-nums whitespace-nowrap font-medium ${tr.net_annual >= 0 ? "text-green-700" : "text-red-600"}`}>{formatEur(tr.net_annual, lang)}</td>
+              <td className={`px-3 py-2 text-right tabular-nums font-bold ${tr.rosi_pct === null ? "text-gray-400" : tr.rosi_pct > 0 ? "text-green-700" : "text-red-600"}`}>{tr.rosi_pct === null ? "—" : `${tr.rosi_pct}%`}</td>
+              <td className="px-3 py-2 text-right tabular-nums whitespace-nowrap text-gray-500">{tr.payback_months === null ? "—" : t("reporting.risk_bia_bcp.rosi_months", { n: tr.payback_months })}</td>
+              <td className="px-3 py-2 text-center">
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${tr.worth_it ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}>
+                  {tr.worth_it ? t("reporting.risk_bia_bcp.rosi_worth") : t("reporting.risk_bia_bcp.rosi_not_worth")}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+        <tfoot className="bg-gray-50 border-t border-gray-200 font-medium text-gray-700">
+          <tr>
+            <td className="px-4 py-2" colSpan={3}>{t("reporting.risk_bia_bcp.rosi_total", { count: totals.count })}</td>
+            <td className="px-3 py-2 text-right tabular-nums whitespace-nowrap">{formatEur(totals.ale_avoided, lang)}</td>
+            <td className="px-3 py-2 text-right tabular-nums whitespace-nowrap">{formatEur(totals.annual_cost, lang)}</td>
+            <td className={`px-3 py-2 text-right tabular-nums whitespace-nowrap ${totals.net_annual >= 0 ? "text-green-700" : "text-red-600"}`}>{formatEur(totals.net_annual, lang)}</td>
+            <td className={`px-3 py-2 text-right tabular-nums font-bold ${totals.rosi_pct === null ? "text-gray-400" : totals.rosi_pct > 0 ? "text-green-700" : "text-red-600"}`}>{totals.rosi_pct === null ? "—" : `${totals.rosi_pct}%`}</td>
+            <td colSpan={2}></td>
+          </tr>
+        </tfoot>
+      </table>
     </div>
   );
 }

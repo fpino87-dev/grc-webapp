@@ -306,6 +306,80 @@ def test_risk_bia_bcp_top_risks_sorted(plant, user):
 
 
 @pytest.mark.django_db
+def test_risk_bia_bcp_ale_total_coverage_and_top_risks(plant, user):
+    """ALE: somma di portafoglio, copertura % e colonna sui top_risks.
+
+    Un rischio collegato a una BIA con downtime_cost_hour valorizzato ha ALE > 0;
+    uno senza processo critico vale 0 e abbassa la copertura."""
+    from apps.bia.models import CriticalProcess
+    from apps.reporting.services import risk_bia_bcp
+
+    proc = CriticalProcess.objects.create(
+        plant=plant, name="ProcALE", criticality=4, downtime_cost_hour=1000
+    )
+    # Residua: prob=3, impact=3 → ore_fermo=24, prob_annua=1.0 → 1000*24*1 = 24000.
+    # Inerente (pre-controlli): inherent prob=4, impact=4 → 72h × 3.0/anno → 1000*72*3 = 216000.
+    make_risk(
+        plant, user, 3, 3, name="with_bia", critical_process=proc,
+        inherent_probability=4, inherent_impact=4,
+    )
+    make_risk(plant, user, 5, 4, name="no_bia")  # nessuna BIA → ALE 0
+
+    out = risk_bia_bcp(str(plant.id))
+    k = out["kpis"]
+    assert k["ale_total"] == 24000.0
+    assert k["ale_total_inherent"] == 216000.0
+    assert k["ale_saved"] == 192000.0          # rischio abbattuto dai controlli
+    assert k["ale_saved_pct"] == 88.9
+    assert k["ale_valued_count"] == 1
+    assert k["ale_coverage_pct"] == 50.0
+
+    row = {r["name"]: r for r in out["top_risks"]}
+    assert row["with_bia"]["ale"] == 24000.0
+    assert row["with_bia"]["ale_inherent"] == 216000.0
+    assert row["no_bia"]["ale"] == 0
+    assert row["no_bia"]["ale_inherent"] == 0
+
+
+@pytest.mark.django_db
+def test_risk_bia_bcp_treatment_rosi(plant, user):
+    """ROSI: ALE evitata vs costo annualizzato (CapEx ammortizzato su 3 anni) + payback."""
+    from apps.bia.models import CriticalProcess, TreatmentOption
+    from apps.reporting.services import risk_bia_bcp
+
+    proc = CriticalProcess.objects.create(
+        plant=plant, name="ProcROSI", criticality=4, downtime_cost_hour=1000
+    )
+    # ALE residua processo: prob=3, impact=3 → 1000*24*1 = 24000.
+    make_risk(plant, user, 3, 3, name="r_rosi", critical_process=proc)
+    # Trattamento: abbatte il 50% → ALE evitata 12000/anno.
+    # annual_cost = cost_annual 2000 + cost_implementation 12000 / 3 = 6000.
+    # net = 12000-6000 = 6000 → ROSI 100%. payback = 12000 / (12000-2000) * 12 = 14.4 mesi.
+    TreatmentOption.objects.create(
+        process=proc, title="EDR", cost_implementation=12000,
+        cost_annual=2000, ale_reduction_pct=50,
+    )
+
+    out = risk_bia_bcp(str(plant.id))
+    tr = out["treatments"]
+    assert len(tr) == 1
+    row = tr[0]
+    assert row["ale_avoided"] == 12000.0
+    assert row["annual_cost"] == 6000.0
+    assert row["net_annual"] == 6000.0
+    assert row["rosi_pct"] == 100.0
+    assert row["payback_months"] == 14.4
+    assert row["worth_it"] is True
+
+    tot = out["treatments_totals"]
+    assert tot["count"] == 1
+    assert tot["ale_avoided"] == 12000.0
+    assert tot["annual_cost"] == 6000.0
+    assert tot["rosi_pct"] == 100.0
+    assert tot["amort_years"] == 3
+
+
+@pytest.mark.django_db
 def test_risk_bia_bcp_critical_no_bcp_and_test_overdue(plant, user):
     from apps.bcp.models import BcpPlan
     from apps.bia.models import CriticalProcess

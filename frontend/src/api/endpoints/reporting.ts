@@ -57,6 +57,8 @@ export interface TopRisk {
   owner_name: string;
   formally_accepted: boolean;
   needs_revaluation: boolean;
+  ale: number;
+  ale_inherent: number;
 }
 
 export interface ThreatBreakdown {
@@ -98,6 +100,32 @@ export interface BiaBcpRow {
   test_overdue: boolean;
 }
 
+export interface TreatmentRosi {
+  id: string;
+  title: string;
+  process_id: string;
+  process_name: string;
+  ale_reduction_pct: number;
+  process_ale: number;
+  ale_avoided: number;
+  cost_implementation: number;
+  cost_annual: number;
+  annual_cost: number;
+  net_annual: number;
+  rosi_pct: number | null;
+  payback_months: number | null;
+  worth_it: boolean;
+}
+
+export interface TreatmentRosiTotals {
+  count: number;
+  ale_avoided: number;
+  annual_cost: number;
+  net_annual: number;
+  rosi_pct: number | null;
+  amort_years: number;
+}
+
 export interface RiskBiaBcpData {
   kpis: {
     risks_total: number;
@@ -107,12 +135,20 @@ export interface RiskBiaBcpData {
     risks_formally_accepted: number;
     bia_critical_no_bcp: number;
     bcp_test_overdue: number;
+    ale_total: number;
+    ale_total_inherent: number;
+    ale_saved: number;
+    ale_saved_pct: number;
+    ale_valued_count: number;
+    ale_coverage_pct: number;
   };
   heatmap: HeatmapCell[];
   top_risks: TopRisk[];
   by_threat: ThreatBreakdown[];
   nis2_breakdown: Nis2CategoryBreakdown[];
   bia_bcp_table: BiaBcpRow[];
+  treatments: TreatmentRosi[];
+  treatments_totals: TreatmentRosiTotals;
 }
 
 // ── KPI Overview ──────────────────────────────────────────────────────────────

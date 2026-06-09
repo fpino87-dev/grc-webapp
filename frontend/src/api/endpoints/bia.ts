@@ -45,6 +45,31 @@ export interface ResilienceGapRegister {
   attention: number;
 }
 
+export interface TreatmentOption {
+  id: string;
+  process: string;
+  process_name: string;
+  title: string;
+  cost_implementation: string;
+  cost_annual: string;
+  ale_reduction_pct: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export const treatmentOptionsApi = {
+  listByProcess: (processId: string) =>
+    apiClient.get<{ results: TreatmentOption[] }>("/bia/treatment-options/", {
+      params: { process: processId },
+    }).then(r => r.data.results),
+  create: (data: Partial<TreatmentOption>) =>
+    apiClient.post<TreatmentOption>("/bia/treatment-options/", data).then(r => r.data),
+  update: (id: string, data: Partial<TreatmentOption>) =>
+    apiClient.patch<TreatmentOption>(`/bia/treatment-options/${id}/`, data).then(r => r.data),
+  delete: (id: string) =>
+    apiClient.delete(`/bia/treatment-options/${id}/`).then(() => undefined),
+};
+
 export const biaApi = {
   list: (params?: Record<string, string>) =>
     apiClient.get<{ results: CriticalProcess[] }>("/bia/processes/", { params }).then(r => r.data),

@@ -54,11 +54,17 @@ def calc_score(assessment: RiskAssessment) -> int:
     return min(25, prob * impact)
 
 
-def calc_ale(assessment: RiskAssessment) -> Decimal:
+def calc_ale(assessment: RiskAssessment, inherent: bool = False) -> Decimal:
     """
     Calcola ALE annuo partendo dai dati BIA del processo critico collegato.
     Formula: downtime_cost_hour × ore_fermo_stimato × probabilità_annua
     Se non c'è processo BIA collegato restituisce Decimal("0").
+
+    inherent=False (default) → ALE residua: usa probabilità/impatto post-controlli
+    (i campi correnti dell'assessment). inherent=True → ALE inerente: usa i campi
+    inherent_* (rischio prima dei controlli); se non valorizzati ricade sui residui,
+    così l'ALE inerente non risulta mai inferiore alla residua per dati mancanti.
+    La differenza inerente − residua quantifica in € il rischio abbattuto dai controlli.
     """
     if not assessment.critical_process:
         return Decimal("0")
@@ -67,8 +73,12 @@ def calc_ale(assessment: RiskAssessment) -> Decimal:
         return Decimal("0")
     ore_fermo_map = {1: 1, 2: 4, 3: 24, 4: 72, 5: 168}
     prob_annua_map = {1: 0.1, 2: 0.3, 3: 1.0, 4: 3.0, 5: 10.0}
-    impact = assessment.impact or 3
-    prob = assessment.probability or 3
+    if inherent:
+        impact = assessment.inherent_impact or assessment.impact or 3
+        prob = assessment.inherent_probability or assessment.probability or 3
+    else:
+        impact = assessment.impact or 3
+        prob = assessment.probability or 3
     ore = ore_fermo_map.get(impact, 24)
     prob_a = prob_annua_map.get(prob, 1.0)
     ale = Decimal(str(cp.downtime_cost_hour)) * Decimal(str(ore)) * Decimal(str(prob_a))
