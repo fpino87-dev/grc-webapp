@@ -1,5 +1,6 @@
 import axios from "axios";
 import { apiClient } from "../client";
+import { useAuthStore } from "../../store/auth";
 
 export type LoginResult =
   | { mfa_required: false; access: string; refresh: string }
@@ -18,6 +19,25 @@ export async function loginApi(email: string, password: string, deviceToken?: st
 export async function verifyMfaApi(mfa_token: string, otp_code: string, trust_device = false) {
   const res = await axios.post("/api/token/mfa/", { mfa_token, otp_code, trust_device });
   return res.data as { access: string; refresh: string; device_token?: string };
+}
+
+/**
+ * Blacklista il refresh token lato server (newfix 2026-06-09 #2).
+ * Best-effort: se rete/token falliscono il logout client procede comunque,
+ * quindi gli errori vengono inghiottiti. Da chiamare PRIMA di svuotare lo store.
+ */
+export async function logoutApi(): Promise<void> {
+  const { token, refresh } = useAuthStore.getState();
+  if (!token) return;
+  try {
+    await axios.post(
+      "/api/token/logout/",
+      { refresh },
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+  } catch {
+    // best-effort: il logout client non deve dipendere dal server
+  }
 }
 
 export async function refreshTokenApi(refresh: string) {

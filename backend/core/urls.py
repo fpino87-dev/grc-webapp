@@ -28,7 +28,7 @@ from two_factor.admin import AdminSiteOTPRequired
 from two_factor.urls import urlpatterns as tf_urls
 from django_otp import devices_for_user
 
-from core.jwt import GrcTokenObtainPairView, MfaVerifyView
+from core.jwt import GrcTokenObtainPairView, LogoutView, MfaVerifyView
 from apps.reporting.api_ingest import KpiComputeView, KpiIngestView
 from apps.reporting.views import KpiImportSuggestionsView, KpiSuggestView
 
@@ -156,6 +156,7 @@ urlpatterns = [
     path("api/token/",         GrcTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(),        name="token_refresh"),
     path("api/token/mfa/",     MfaVerifyView.as_view(),           name="token_mfa_verify"),
+    path("api/token/logout/",  LogoutView.as_view(),              name="token_logout"),
 ]
 
 # Swagger/OpenAPI: esposto solo se DEBUG=True o SHOW_API_DOCS=True.

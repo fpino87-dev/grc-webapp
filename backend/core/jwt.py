@@ -1,10 +1,13 @@
 from django.core import signing
 from django_otp import devices_for_user
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.views import APIView
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 _MFA_SALT = "grc-mfa-token"
@@ -233,6 +236,49 @@ class GrcTokenObtainPairView(TokenObtainPairView):
         # Nessun device — emetti JWT direttamente
         _audit_login(user, success=True, request=request, extra={"path": "no_mfa"})
         return Response(_issue_jwt(user), status=status.HTTP_200_OK)
+
+
+class LogoutView(APIView):
+    """
+    POST /api/token/logout/
+    Body: {"refresh": "..."}
+    Blacklista il refresh token alla disconnessione (newfix 2026-06-09 #2).
+    Senza questo endpoint il logout era solo client-side e il refresh token
+    restava spendibile per tutti i 7 giorni di REFRESH_TOKEN_LIFETIME.
+
+    Risponde sempre 204: un refresh assente/scaduto/già blacklistato non deve
+    impedire la disconnessione lato client.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        refresh = request.data.get("refresh", "")
+        blacklisted = False
+        if refresh:
+            try:
+                RefreshToken(refresh).blacklist()
+                blacklisted = True
+            except TokenError:
+                pass  # già scaduto/blacklistato/malformato: logout comunque OK
+
+        try:
+            from core.audit import log_action
+            log_action(
+                user=request.user,
+                action_code="auth.logout",
+                level="L1",
+                entity=request.user,
+                payload={
+                    "refresh_blacklisted": blacklisted,
+                    "ip": request.META.get("REMOTE_ADDR") or "",
+                    "user_agent": (request.META.get("HTTP_USER_AGENT") or "")[:200],
+                },
+            )
+        except Exception:
+            # Come per _audit_login: l'audit non deve bloccare la disconnessione.
+            pass
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class MfaVerifyView(APIView):

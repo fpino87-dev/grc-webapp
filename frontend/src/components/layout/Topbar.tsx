@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { plantsApi } from "../../api/endpoints/plants";
 import { notificationsApi } from "../../api/endpoints/notifications";
+import { logoutApi } from "../../api/endpoints/auth";
 import i18n from "../../i18n";
 import { useTranslation } from "react-i18next";
 import { GrcAssistantDrawer } from "../ui/GrcAssistantDrawer";
@@ -106,8 +107,12 @@ export function Topbar() {
   }, []);
 
   function handleLogout() {
-    logout();
-    navigate("/login");
+    // Blacklist server-side del refresh token, poi pulizia client.
+    // logoutApi legge i token dallo store: va atteso prima di logout().
+    void logoutApi().finally(() => {
+      logout();
+      navigate("/login");
+    });
   }
 
   function handleLanguageChange(next: string) {
