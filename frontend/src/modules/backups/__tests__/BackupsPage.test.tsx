@@ -93,7 +93,7 @@ describe("BackupsPage", () => {
     mockList.mockResolvedValue([]);
     renderPage();
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "backups.create" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /backups\.create/ })).toBeInTheDocument();
     });
   });
 
@@ -102,9 +102,9 @@ describe("BackupsPage", () => {
     mockCreate.mockResolvedValue(makeBackup({ status: "completed" }));
 
     renderPage();
-    await waitFor(() => screen.getByRole("button", { name: "backups.create" }));
+    await waitFor(() => screen.getByRole("button", { name: /backups\.create/ }));
 
-    fireEvent.click(screen.getByRole("button", { name: "backups.create" }));
+    fireEvent.click(screen.getByRole("button", { name: /backups\.create/ }));
     await waitFor(() => expect(mockCreate).toHaveBeenCalledOnce());
   });
 
@@ -125,7 +125,7 @@ describe("BackupsPage", () => {
     mockList.mockResolvedValue([makeBackup({ status: "running" })]);
     renderPage();
     await waitFor(() => {
-      const deleteBtn = screen.getByRole("button", { name: "backups.action.delete" });
+      const deleteBtn = screen.getByRole("button", { name: /backups\.action\.delete/ });
       expect(deleteBtn).toBeDisabled();
     });
   });
@@ -133,9 +133,9 @@ describe("BackupsPage", () => {
   it("click elimina mostra modal di conferma", async () => {
     mockList.mockResolvedValue([makeBackup()]);
     renderPage();
-    await waitFor(() => screen.getByRole("button", { name: "backups.action.delete" }));
+    await waitFor(() => screen.getByRole("button", { name: /backups\.action\.delete/ }));
 
-    fireEvent.click(screen.getByRole("button", { name: "backups.action.delete" }));
+    fireEvent.click(screen.getByRole("button", { name: /backups\.action\.delete/ }));
 
     await waitFor(() => {
       expect(screen.getByText("backups.confirm_delete.title")).toBeInTheDocument();
@@ -147,13 +147,13 @@ describe("BackupsPage", () => {
     mockDelete.mockResolvedValue(undefined);
 
     renderPage();
-    await waitFor(() => screen.getByRole("button", { name: "backups.action.delete" }));
-    fireEvent.click(screen.getByRole("button", { name: "backups.action.delete" }));
+    await waitFor(() => screen.getByRole("button", { name: /backups\.action\.delete/ }));
+    fireEvent.click(screen.getByRole("button", { name: /backups\.action\.delete/ }));
 
     await waitFor(() => screen.getByText("backups.confirm_delete.title"));
     // When modal is open there are two delete buttons: row + modal confirm.
     // Pick the modal confirm (last one).
-    const deleteBtns = screen.getAllByRole("button", { name: "backups.action.delete" });
+    const deleteBtns = screen.getAllByRole("button", { name: /backups\.action\.delete/ });
     fireEvent.click(deleteBtns[deleteBtns.length - 1]);
 
     await waitFor(() => expect(mockDelete).toHaveBeenCalledWith("uuid-1"));
