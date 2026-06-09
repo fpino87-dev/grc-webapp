@@ -123,29 +123,37 @@ export function Sidebar() {
           </div>
         )}
       </div>
-      {/* Toggle collassa/espandi — lo stato è ricordato per dispositivo */}
-      <div className={`flex border-b border-primary-800 ${collapsed ? "justify-center" : "justify-end pr-2"}`}>
-        <button
-          onClick={toggleSidebar}
-          title={t(collapsed ? "sidebar.expand" : "sidebar.collapse")}
-          aria-label={t(collapsed ? "sidebar.expand" : "sidebar.collapse")}
-          className="px-2 py-1 my-1 rounded text-primary-300 hover:bg-primary-800 hover:text-white text-sm font-mono"
-        >
-          {collapsed ? "»" : "«"}
-        </button>
-      </div>
       <nav className="flex-1 px-2 py-4 space-y-4 overflow-y-auto pb-10">
-        {navGroups.map(group => {
+        {navGroups.map((group, groupIndex) => {
           const visibleItems = group.items.filter(item => isVisible(item.roles));
           if (visibleItems.length === 0) return null;
+          // Toggle collassa/espandi sulla riga del primo gruppo ("Principale"),
+          // allineato a destra; in modalità rail resta centrato come prima voce.
+          const toggleButton = (
+            <button
+              onClick={toggleSidebar}
+              title={t(collapsed ? "sidebar.expand" : "sidebar.collapse")}
+              aria-label={t(collapsed ? "sidebar.expand" : "sidebar.collapse")}
+              className="px-1.5 rounded text-primary-300 hover:bg-primary-800 hover:text-white text-sm font-mono leading-none"
+            >
+              {collapsed ? "»" : "«"}
+            </button>
+          );
           return (
             <div key={group.labelKey}>
               {collapsed ? (
-                <div className="border-t border-primary-800 mx-1 mb-1" />
+                groupIndex === 0 ? (
+                  <div className="flex justify-center mb-1">{toggleButton}</div>
+                ) : (
+                  <div className="border-t border-primary-800 mx-1 mb-1" />
+                )
               ) : (
-                <p className="px-3 mb-1 text-xs font-semibold uppercase tracking-wider text-primary-400">
-                  {t(group.labelKey)}
-                </p>
+                <div className="px-3 mb-1 flex items-center justify-between">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-primary-400">
+                    {t(group.labelKey)}
+                  </p>
+                  {groupIndex === 0 && toggleButton}
+                </div>
               )}
               <div className="space-y-0.5">
                 {visibleItems.map(item => (
