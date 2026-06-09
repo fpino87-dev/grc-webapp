@@ -1092,7 +1092,9 @@
       "checklist_templates": "Szablony list",
       "kpi_operational": "KPI operacyjne",
       "cockpit": "Centrum Operacyjne"
-    }
+    },
+    "collapse": "Zwiń menu",
+    "expand": "Rozwiń menu"
   },
   "topbar": {
     "language": {
@@ -1109,6 +1111,11 @@
       "empty": "Brak skonfigurowanych subskrypcji",
       "enabled": "aktywny",
       "disabled": "nieaktywny"
+    },
+    "scale": {
+      "decrease": "Zmniejsz rozmiar interfejsu",
+      "increase": "Zwiększ rozmiar interfejsu",
+      "reset": "Skala interfejsu dla tego ekranu — kliknij, aby przywrócić 100%"
     }
   },
   "auth": {

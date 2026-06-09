@@ -1092,7 +1092,9 @@
       "checklist_templates": "Modèles checklist",
       "kpi_operational": "KPI opérationnels",
       "cockpit": "Centre Opérationnel"
-    }
+    },
+    "collapse": "Réduire le menu",
+    "expand": "Développer le menu"
   },
   "topbar": {
     "language": {
@@ -1109,6 +1111,11 @@
       "empty": "Aucun abonnement configuré",
       "enabled": "activé",
       "disabled": "désactivé"
+    },
+    "scale": {
+      "decrease": "Réduire la taille de l'interface",
+      "increase": "Augmenter la taille de l'interface",
+      "reset": "Échelle de l'interface pour cet écran — cliquer pour revenir à 100 %"
     }
   },
   "auth": {

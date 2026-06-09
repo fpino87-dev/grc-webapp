@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuthStore } from "../../store/auth";
+import { SCALE_MAX, SCALE_MIN, SCALE_STEP, useUiStore } from "../../store/ui";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { plantsApi } from "../../api/endpoints/plants";
@@ -76,6 +77,43 @@ function NotificationBell() {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function UiScaleControl() {
+  const { t } = useTranslation();
+  // Sottoscrive scala e firma: il valore mostrato si aggiorna sia quando
+  // l'utente clicca sia quando la finestra cambia monitor (UiScaleManager).
+  const scale = useUiStore((s) => s.scaleByScreen[s.signature] ?? 1);
+  const changeScale = useUiStore((s) => s.changeScale);
+  const resetScale = useUiStore((s) => s.resetScale);
+
+  return (
+    <div className="hidden md:flex items-center gap-0.5 text-gray-500">
+      <button
+        onClick={() => changeScale(-SCALE_STEP)}
+        disabled={scale <= SCALE_MIN}
+        title={t("topbar.scale.decrease")}
+        className="px-1.5 py-0.5 rounded hover:bg-gray-100 text-xs disabled:opacity-40"
+      >
+        A−
+      </button>
+      <button
+        onClick={resetScale}
+        title={t("topbar.scale.reset")}
+        className="px-1 py-0.5 rounded hover:bg-gray-100 text-xs tabular-nums min-w-[2.6rem] text-center"
+      >
+        {Math.round(scale * 100)}%
+      </button>
+      <button
+        onClick={() => changeScale(SCALE_STEP)}
+        disabled={scale >= SCALE_MAX}
+        title={t("topbar.scale.increase")}
+        className="px-1.5 py-0.5 rounded hover:bg-gray-100 text-sm disabled:opacity-40"
+      >
+        A+
+      </button>
     </div>
   );
 }
@@ -170,6 +208,9 @@ export function Topbar() {
 
       {/* Right side: language, manuals, notifications, user info, logout */}
       <div className="flex items-center gap-4">
+        {/* Scala UI — memorizzata per monitor (vedi store/ui.ts) */}
+        <UiScaleControl />
+
         {/* Language switcher */}
         <div className="flex items-center gap-1 text-xs text-gray-500">
           <span className="hidden sm:inline text-gray-400">{t("topbar.language.label")}</span>

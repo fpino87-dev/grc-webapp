@@ -1092,7 +1092,9 @@
       "checklist_templates": "Liste Şablonları",
       "kpi_operational": "Operasyonel KPI'lar",
       "cockpit": "Operasyon Merkezi"
-    }
+    },
+    "collapse": "Menüyü daralt",
+    "expand": "Menüyü genişlet"
   },
   "topbar": {
     "language": {
@@ -1109,6 +1111,11 @@
       "empty": "Yapılandırılmış abonelik yok",
       "enabled": "etkin",
       "disabled": "devre dışı"
+    },
+    "scale": {
+      "decrease": "Arayüz boyutunu küçült",
+      "increase": "Arayüz boyutunu büyüt",
+      "reset": "Bu ekran için arayüz ölçeği — %100'e döndürmek için tıklayın"
     }
   },
   "auth": {

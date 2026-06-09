@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useAuthStore } from "../../store/auth";
+import { useUiStore } from "../../store/ui";
 import { useTranslation } from "react-i18next";
 
 type NavItem = { to: string; labelKey: string; icon: string; roles: string[] | null };
@@ -92,28 +93,46 @@ export function Sidebar() {
     return roles.includes(userRole);
   }
 
+  const collapsed = useUiStore((s) => s.sidebarCollapsed);
+  const toggleSidebar = useUiStore((s) => s.toggleSidebar);
+
   return (
-    <aside className="w-56 min-h-screen bg-primary-900 text-white flex flex-col">
+    <aside
+      className={`${collapsed ? "w-14" : "w-56"} min-h-screen bg-primary-900 text-white flex flex-col transition-all duration-200`}
+    >
       <div
-        className="px-4 border-b border-primary-700 flex items-center"
+        className={`border-b border-primary-700 flex items-center ${collapsed ? "px-2 justify-center" : "px-4"}`}
         style={{ gap: "10px", paddingTop: "20px", paddingBottom: "20px", imageRendering: "crisp-edges" }}
       >
-        <svg width="36" height="36" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <svg width="36" height="36" viewBox="0 0 40 40" fill="none" aria-hidden="true" className="shrink-0">
           <rect x="0.75" y="0.75" width="38.5" height="38.5" rx="9" fill="#ffffff" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
           <rect x="10" y="10" width="8" height="8" rx="1.5" fill="#185FA5" fillOpacity="0.95" />
           <rect x="22" y="10" width="8" height="8" rx="1.5" fill="#185FA5" fillOpacity="0.45" />
           <rect x="10" y="22" width="8" height="8" rx="1.5" fill="#185FA5" fillOpacity="0.45" />
           <rect x="22" y="22" width="8" height="8" rx="1.5" fill="#185FA5" fillOpacity="0.95" />
         </svg>
-        <div>
-          <div style={{ fontSize: "22px", letterSpacing: "-0.5px", lineHeight: 1.1, textTransform: "lowercase", WebkitFontSmoothing: "antialiased", textRendering: "optimizeLegibility" }}>
-            <span style={{ color: "#ffffff", fontWeight: 400 }}>gov</span>
-            <span style={{ color: "#85B7EB", fontWeight: 500 }}>rico</span>
+        {!collapsed && (
+          <div>
+            <div style={{ fontSize: "22px", letterSpacing: "-0.5px", lineHeight: 1.1, textTransform: "lowercase", WebkitFontSmoothing: "antialiased", textRendering: "optimizeLegibility" }}>
+              <span style={{ color: "#ffffff", fontWeight: 400 }}>gov</span>
+              <span style={{ color: "#85B7EB", fontWeight: 500 }}>rico</span>
+            </div>
+            <div style={{ color: "#85B7EB", opacity: 0.6, fontSize: "11px", marginTop: "2px" }}>
+              Compliance & Risk
+            </div>
           </div>
-          <div style={{ color: "#85B7EB", opacity: 0.6, fontSize: "11px", marginTop: "2px" }}>
-            Compliance & Risk
-          </div>
-        </div>
+        )}
+      </div>
+      {/* Toggle collassa/espandi — lo stato è ricordato per dispositivo */}
+      <div className={`flex border-b border-primary-800 ${collapsed ? "justify-center" : "justify-end pr-2"}`}>
+        <button
+          onClick={toggleSidebar}
+          title={t(collapsed ? "sidebar.expand" : "sidebar.collapse")}
+          aria-label={t(collapsed ? "sidebar.expand" : "sidebar.collapse")}
+          className="px-2 py-1 my-1 rounded text-primary-300 hover:bg-primary-800 hover:text-white text-sm font-mono"
+        >
+          {collapsed ? "»" : "«"}
+        </button>
       </div>
       <nav className="flex-1 px-2 py-4 space-y-4 overflow-y-auto pb-10">
         {navGroups.map(group => {
@@ -121,25 +140,32 @@ export function Sidebar() {
           if (visibleItems.length === 0) return null;
           return (
             <div key={group.labelKey}>
-              <p className="px-3 mb-1 text-xs font-semibold uppercase tracking-wider text-primary-400">
-                {t(group.labelKey)}
-              </p>
+              {collapsed ? (
+                <div className="border-t border-primary-800 mx-1 mb-1" />
+              ) : (
+                <p className="px-3 mb-1 text-xs font-semibold uppercase tracking-wider text-primary-400">
+                  {t(group.labelKey)}
+                </p>
+              )}
               <div className="space-y-0.5">
                 {visibleItems.map(item => (
                   <NavLink
                     key={item.to}
                     to={item.to}
                     end={item.to === "/"}
+                    title={collapsed ? t(item.labelKey) : undefined}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      `flex items-center rounded-md text-sm font-medium transition-colors ${
+                        collapsed ? "justify-center px-0 py-2" : "gap-3 px-3 py-2"
+                      } ${
                         isActive
                           ? "bg-primary-700 text-white"
                           : "text-primary-200 hover:bg-primary-800 hover:text-white"
                       }`
                     }
                   >
-                    <span className="text-base w-5 text-center">{item.icon}</span>
-                    {t(item.labelKey)}
+                    <span className="text-base w-5 text-center shrink-0">{item.icon}</span>
+                    {!collapsed && t(item.labelKey)}
                   </NavLink>
                 ))}
               </div>

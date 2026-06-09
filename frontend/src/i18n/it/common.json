@@ -1010,7 +1010,9 @@
       "checklist_templates": "Template Checklist",
       "kpi_operational": "KPI Operativi",
       "cockpit": "Centro Operativo"
-    }
+    },
+    "collapse": "Comprimi menu",
+    "expand": "Espandi menu"
   },
   "topbar": {
     "language": {
@@ -1027,6 +1029,11 @@
       "empty": "Nessuna sottoscrizione configurata",
       "enabled": "attivo",
       "disabled": "disabilitato"
+    },
+    "scale": {
+      "decrease": "Riduci dimensione interfaccia",
+      "increase": "Aumenta dimensione interfaccia",
+      "reset": "Scala interfaccia per questo schermo — clic per riportare al 100%"
     }
   },
   "app": {

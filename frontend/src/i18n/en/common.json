@@ -1010,7 +1010,9 @@
       "checklist_templates": "Checklist Templates",
       "kpi_operational": "Operational KPIs",
       "cockpit": "Operations Center"
-    }
+    },
+    "collapse": "Collapse menu",
+    "expand": "Expand menu"
   },
   "topbar": {
     "language": {
@@ -1027,6 +1029,11 @@
       "empty": "No subscriptions configured",
       "enabled": "enabled",
       "disabled": "disabled"
+    },
+    "scale": {
+      "decrease": "Decrease interface size",
+      "increase": "Increase interface size",
+      "reset": "Interface scale for this screen — click to reset to 100%"
     }
   },
   "app": {

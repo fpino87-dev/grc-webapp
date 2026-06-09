@@ -17,6 +17,7 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "./store/auth";
+import { applyScale, useUiStore } from "./store/ui";
 import { refreshTokenApi } from "./api/endpoints/auth";
 import { Shell } from "./components/layout/Shell";
 import { LoginPage } from "./pages/LoginPage";
@@ -63,6 +64,21 @@ import { OsintSettingsPage } from "./modules/osint/OsintSettings";
 import { OsintSubdomainsPage } from "./modules/osint/OsintSubdomainsPage";
 import { OsintRemediationPage } from "./modules/osint/OsintRemediationPage";
 
+/**
+ * Applica la scala UI memorizzata per il monitor corrente e la riapplica
+ * quando la finestra cambia schermo (lo spostamento su un monitor con
+ * risoluzione/DPR diversi genera un resize e cambia la firma schermo).
+ */
+function UiScaleManager() {
+  useEffect(() => {
+    const sync = () => applyScale(useUiStore.getState().refreshSignature());
+    sync();
+    window.addEventListener("resize", sync);
+    return () => window.removeEventListener("resize", sync);
+  }, []);
+  return null;
+}
+
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
   const user = useAuthStore((s) => s.user);
@@ -96,6 +112,7 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 export function App() {
   return (
     <BrowserRouter>
+      <UiScaleManager />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route
