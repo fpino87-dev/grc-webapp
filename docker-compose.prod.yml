@@ -80,8 +80,8 @@ services:
 
   celery-beat:
     build:
-      context: ./backend
-      dockerfile: Dockerfile.prod
+      context: .
+      dockerfile: backend/Dockerfile.prod
     restart: unless-stopped
     command: >
       celery -A core beat -l warning
