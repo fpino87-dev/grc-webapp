@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import {
   osintApi, classifyScore, scoreBadgeColor, deltaArrow, deltaColor,
-  type OsintEntity, type AlertSeverity,
+  type OsintEntity,
 } from "../../api/endpoints/osint";
 import { OsintEntityDrawer } from "./OsintEntityDrawer";
 import { OsintAiPanel } from "./OsintAiPanel";
@@ -31,7 +31,6 @@ function SubScoreIcon({ value, threshold = 40 }: { value: number | undefined | n
 
 export function OsintDashboard() {
   const { t } = useTranslation();
-  const qc = useQueryClient();
   const [filterType, setFilterType] = useState<FilterType>("all");
   const [filterAlert, setFilterAlert] = useState<FilterAlert>("all");
   const [search, setSearch] = useState("");

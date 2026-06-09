@@ -310,9 +310,6 @@ export function IncidentsList() {
     selected?.is_recurrent,
   ]);
 
-  const thresholdUsers = Number(classificationMethod?.nis2_method.thresholds.affected_users_count ?? currentConfig?.threshold_users ?? 100);
-  const thresholdHours = Number(classificationMethod?.nis2_method.thresholds.service_disruption_hours ?? currentConfig?.threshold_hours ?? 4);
-  const thresholdFinancial = Number(classificationMethod?.nis2_method.thresholds.financial_impact_eur ?? currentConfig?.threshold_financial ?? 100000);
   const enisaCategories = (classificationMethod?.taxonomy.categories ?? []).map((c) => ({ value: c.code, label: c.label }));
   const enisaSubcategories: Record<string, { value: string; label: string }[]> = Object.fromEntries(
     Object.entries(classificationMethod?.taxonomy.subcategories ?? {}).map(([key, values]) => [

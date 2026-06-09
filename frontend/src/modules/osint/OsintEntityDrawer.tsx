@@ -1,9 +1,9 @@
 import { useState, useRef } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, ReferenceLine, ReferenceArea,
+  ResponsiveContainer, ReferenceArea,
 } from "recharts";
 import {
   osintApi, classifyScore, scoreBadgeColor, deltaArrow, deltaColor,
@@ -327,7 +327,6 @@ function HistoryChart({ data }: { data: HistoryPoint[] }) {
 
 export function OsintEntityDrawer({ entityId, onClose }: { entityId: string; onClose: () => void }) {
   const { t } = useTranslation();
-  const qc = useQueryClient();
   const [isScanning, setIsScanning] = useState(false);
   const pollingRef = useRef<{ initialScanDate: string | null; attempts: number } | null>(null);
 

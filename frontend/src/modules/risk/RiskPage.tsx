@@ -5,11 +5,10 @@ import { apiClient } from "../../api/client";
 import { scrollAndHighlight } from "../../lib/scrollAndHighlight";
 import { riskApi, type RiskAssessment, type RiskMitigationPlan, type SuggestResidualResult, type AppetitePolicyFull, THREAT_CATEGORIES, PROB_LABELS, IMPACT_LABELS, NIS2_ART21_CHOICES, NIS2_RELEVANCE_CHOICES } from "../../api/endpoints/risk";
 import { plantsApi } from "../../api/endpoints/plants";
-import { biaApi, type CriticalProcess } from "../../api/endpoints/bia";
-import { usersApi, type GrcUser } from "../../api/endpoints/users";
+import { biaApi } from "../../api/endpoints/bia";
+import { usersApi } from "../../api/endpoints/users";
 import { useAuthStore } from "../../store/auth";
 import { bcpApi, type BcpPlan } from "../../api/endpoints/bcp";
-import { StatusBadge } from "../../components/ui/StatusBadge";
 import { AssistenteValutazione } from "../../components/ui/AssistenteValutazione";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
 import { RiskContinuityWizard } from "./RiskContinuityWizard";
@@ -288,7 +287,6 @@ function EffectiveStatusBadge({ assessment: a }: { assessment: RiskAssessment })
 
 function SuggestResidualPanel({ assessment }: { assessment: RiskAssessment }) {
   const { t } = useTranslation();
-  const qc = useQueryClient();
   const [suggestion, setSuggestion] = useState<SuggestResidualResult | null>(null);
 
   const { refetch, isFetching } = useQuery({
@@ -1564,11 +1562,6 @@ export function RiskPage() {
 
   const completeMutation = useMutation({
     mutationFn: (id: string) => riskApi.complete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["risk-assessments"] }),
-  });
-
-  const acceptMutation = useMutation({
-    mutationFn: (id: string) => riskApi.accept(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["risk-assessments"] }),
   });
 

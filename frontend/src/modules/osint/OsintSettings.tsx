@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { osintApi, type OsintSettings, type ScanFrequency } from "../../api/endpoints/osint";
+import { osintApi, type ScanFrequency } from "../../api/endpoints/osint";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
 
 type SubdomainPolicy = "yes" | "no" | "ask";

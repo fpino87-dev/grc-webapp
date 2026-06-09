@@ -91,14 +91,16 @@ export function KpiSuggestWizard({ initialPlantId, onClose, onImported }: Props)
   function toggle(code: string) {
     setSelected((prev) => {
       const next = new Set(prev);
-      next.has(code) ? next.delete(code) : next.add(code);
+      if (next.has(code)) next.delete(code);
+      else next.add(code);
       return next;
     });
   }
   function toggleExpand(code: string) {
     setExpanded((prev) => {
       const next = new Set(prev);
-      next.has(code) ? next.delete(code) : next.add(code);
+      if (next.has(code)) next.delete(code);
+      else next.add(code);
       return next;
     });
   }

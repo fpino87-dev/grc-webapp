@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import {
   osintApi,
   type AlertSeverity,
-  type FindingCode,
   type FindingStatus,
   type OsintFinding,
 } from "../../api/endpoints/osint";

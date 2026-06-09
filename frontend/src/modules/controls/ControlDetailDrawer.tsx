@@ -1276,7 +1276,6 @@ export function ControlDetailDrawer({ instanceId, onClose }: Props) {
   const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("cosa");
   const { data: info, isLoading } = useDetailInfo(instanceId);
-  const qc = useQueryClient();
   const open = !!instanceId;
 
   const tabs: [Tab, string][] = [

@@ -12,7 +12,6 @@ import {
 import { reportingApi, type SupplierNdaEntry } from "../../api/endpoints/reporting";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { apiClient } from "../../api/client";
-import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
 import { InternalEvaluationSection } from "./InternalEvaluationSection";
 import { SupplierEvaluationSettingsPage } from "../settings/SupplierEvaluationSettingsPage";

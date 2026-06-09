@@ -284,12 +284,6 @@ function scoreColor(score: number): string {
   return "text-green-600";
 }
 
-function scoreBg(score: number): string {
-  if (score > 14) return "bg-red-100 text-red-700";
-  if (score > 7) return "bg-yellow-100 text-yellow-700";
-  return "bg-green-100 text-green-700";
-}
-
 function heatmapColor(score: number, count: number): string {
   if (count === 0) return "bg-gray-50 text-gray-300";
   if (score > 14) return "bg-red-500 text-white";

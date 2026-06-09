@@ -7,7 +7,6 @@ import { kpiApi, type KpiDefinitionListItem, type KpiStatus } from "../../../api
 import { plantsApi } from "../../../api/endpoints/plants";
 import { useAuthStore } from "../../../store/auth";
 import { KpiTrendModal } from "./KpiTrendModal";
-import i18n from "../../../i18n";
 
 const STATUS_STYLE: Record<KpiStatus, string> = {
   ok: "bg-green-100 text-green-700",

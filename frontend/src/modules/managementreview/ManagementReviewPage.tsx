@@ -10,12 +10,6 @@ import i18n from "../../i18n";
 
 // ── Labels ──────────────────────────────────────────────────────────────────
 
-const STATUS_LABELS: Record<string, string> = {
-  pianificato: "Pianificato",
-  in_corso: "In corso",
-  completato: "Completato",
-};
-
 const APPROVAL_LABELS: Record<string, string> = {
   bozza: "Bozza",
   in_review: "In revisione",

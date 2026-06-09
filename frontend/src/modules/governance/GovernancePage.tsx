@@ -35,9 +35,6 @@ const TODAY = new Date().toISOString().slice(0, 10);
 
 function scopeBadge(a: RoleAssignment) {
   if (a.scope_label) {
-    const colors: Record<string, string> = {
-      Globale: "bg-blue-50 text-blue-700 border-blue-200",
-    };
     const isGlobal = a.scope_type === "org";
     const isBu = a.scope_type === "bu";
     const cls = isGlobal

@@ -249,7 +249,7 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
       );
       if (!response.ok) {
         let msg = t("controls.download_error");
-        try { const err = await response.json(); msg = err.error || msg; } catch {}
+        try { const err = await response.json(); msg = err.error || msg; } catch { /* body non-JSON: tieni il messaggio di default */ }
         setExportError(msg);
         return;
       }
@@ -283,7 +283,7 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
       );
       if (!response.ok) {
         let msg = t("controls.download_error");
-        try { const err = await response.json(); msg = err.error || msg; } catch {}
+        try { const err = await response.json(); msg = err.error || msg; } catch { /* body non-JSON: tieni il messaggio di default */ }
         setExportError(msg);
         return;
       }

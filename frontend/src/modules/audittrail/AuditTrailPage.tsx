@@ -13,7 +13,7 @@ const LEVEL_COLORS: Record<string, string> = {
 // ─── Guida ai livelli drawer ────────────────────────────────────────────────
 
 function LevelCard({
-  level, title, badge, description, examples, border, bg,
+  title, badge, description, examples, border, bg,
 }: {
   level: string; title: string; badge: string; description: string;
   examples: { icon: string; text: string }[]; border: string; bg: string;

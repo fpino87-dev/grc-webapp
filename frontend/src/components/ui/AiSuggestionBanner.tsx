@@ -82,7 +82,7 @@ export function AiSuggestionBanner({
         `Categoria ENISA: ${String(data.category ?? "—")}`,
         `Sottocategoria: ${String(data.subcategory ?? "—")}`,
         `Severita suggerita: ${String(data.severity ?? "—")}`,
-        `Probabile NIS2: ${Boolean(data.nis2_likely) ? "Si" : "No"}`,
+        `Probabile NIS2: ${data.nis2_likely ? "Si" : "No"}`,
         `Motivazione: ${String(data.nis2_reason ?? "—")}`,
         `Confidenza: ${String(data.confidence ?? "—")}`,
       ].join("\n");

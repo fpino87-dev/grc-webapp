@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { pdcaApi, type PdcaCycle } from "../../api/endpoints/pdca";
 import { plantsApi } from "../../api/endpoints/plants";
-import { StatusBadge } from "../../components/ui/StatusBadge";
 import { apiClient } from "../../api/client";
 import i18n from "../../i18n";
 

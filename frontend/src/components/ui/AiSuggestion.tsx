@@ -8,7 +8,7 @@ interface Props {
   onIgnore: () => void;
 }
 
-export function AiSuggestion({ suggestionId, output, onAccept, onIgnore }: Props) {
+export function AiSuggestion({ output, onAccept, onIgnore }: Props) {
   const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [edited, setEdited] = useState(output);
