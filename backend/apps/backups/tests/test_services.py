@@ -152,10 +152,13 @@ def test_cleanup_keeps_recent_backups(admin_user, tmp_path):
 
 
 @pytest.mark.django_db
-def test_cleanup_ignores_failed_backups(admin_user):
+def test_cleanup_removes_old_failed_backups(admin_user, tmp_path):
+    """newfix #13 — i FAILED scaduti (file parziali) vengono ripuliti."""
     from apps.backups.models import BackupRecord
     from apps.backups.services import cleanup_old_backups
 
+    partial = tmp_path / "backup_failed.dump"
+    partial.write_bytes(b"partial")
     failed = BackupRecord.objects.create(
         filename="backup_failed.dump",
         status=BackupRecord.Status.FAILED,
@@ -166,4 +169,27 @@ def test_cleanup_ignores_failed_backups(admin_user):
     )
 
     count = cleanup_old_backups()
-    assert count == 0  # i backup falliti non vengono toccati
+    assert count == 1
+    assert not partial.exists()
+    assert BackupRecord.objects.filter(pk=failed.pk).count() == 0  # soft deleted
+
+
+@pytest.mark.django_db
+def test_cleanup_skips_transitional_states(admin_user):
+    """running/pending/restoring non vengono mai toccati dal cleanup."""
+    from apps.backups.models import BackupRecord
+    from apps.backups.services import cleanup_old_backups
+
+    for status in (
+        BackupRecord.Status.RUNNING,
+        BackupRecord.Status.PENDING,
+        BackupRecord.Status.RESTORING,
+    ):
+        rec = BackupRecord.objects.create(
+            filename=f"backup_{status}.dump", status=status, created_by=admin_user,
+        )
+        BackupRecord.objects.filter(pk=rec.pk).update(
+            created_at=timezone.now() - timezone.timedelta(days=40)
+        )
+
+    assert cleanup_old_backups() == 0

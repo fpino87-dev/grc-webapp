@@ -441,9 +441,16 @@ def cleanup_old_backups() -> int:
     from apps.backups.models import BackupRecord
 
     cutoff = timezone.now() - timezone.timedelta(days=BACKUP_RETENTION_DAYS)
+    # newfix #13 — anche FAILED (file parziali di pg_dump interrotti) e
+    # RESTORED rientrano nella retention: prima restavano su disco per sempre.
+    # Esclusi solo gli stati transitori (running/pending/restoring).
     old = BackupRecord.objects.filter(
         created_at__lt=cutoff,
-        status=BackupRecord.Status.COMPLETED,
+        status__in=[
+            BackupRecord.Status.COMPLETED,
+            BackupRecord.Status.FAILED,
+            BackupRecord.Status.RESTORED,
+        ],
     )
     count = 0
     for rec in old:
