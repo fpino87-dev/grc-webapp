@@ -1092,12 +1092,14 @@
     },
     "type": {
       "auto": "Automatic",
-      "manual": "Manual"
+      "manual": "Manual",
+      "imported": "Imported"
     },
     "action": {
       "download": "Download",
       "restore": "Restore",
-      "delete": "Delete"
+      "delete": "Delete",
+      "import": "Import backup"
     },
     "confirm_restore": {
       "title": "Confirm restore",
@@ -1114,9 +1116,18 @@
       "restore_error": "Error restoring the database.",
       "deleted": "Backup deleted.",
       "delete_error": "Error deleting backup.",
-      "restore_started": "Restore started. The status updates automatically when finished."
+      "restore_started": "Restore started. The status updates automatically when finished.",
+      "imported": "Backup imported successfully.",
+      "import_error": "Error importing the backup."
     },
-    "restoring": "Database restore in progress... this page refreshes automatically."
+    "restoring": "Database restore in progress... this page refreshes automatically.",
+    "import": {
+      "title": "Import backup",
+      "help": "Upload a previously downloaded backup file (.dump or .dump.enc). The content is verified before being accepted; encrypted files must be decryptable with the key configured on this server.",
+      "select_file": "Choose file (.dump / .dump.enc)",
+      "submit": "Import",
+      "uploading": "Uploading..."
+    }
   },
   "dashboard": {
     "title": "Dashboard",

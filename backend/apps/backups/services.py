@@ -178,6 +178,117 @@ def create_backup(user, backup_type: str = "manual"):
     return record
 
 
+# Magic bytes del formato custom di pg_dump (-Fc): primo controllo di
+# integrità sui file importati prima di accettarli come ripristinabili.
+_PGDMP_MAGIC = b"PGDMP"
+
+
+def import_backup(uploaded_file, user):
+    """
+    Importa un file di backup scaricato in precedenza (newfix F1).
+
+    Accetta `.dump` (pg_dump custom format, verificato via magic PGDMP) o
+    `.dump.enc` (cifrato GRC1/AES-GCM). I file cifrati vengono accettati solo
+    se la BACKUP_ENCRYPTION_KEY corrente li decifra davvero: la probe fa una
+    decifratura completa su file temporaneo e verifica il magic PGDMP del
+    plaintext — così un import "buono" è garantito ripristinabile, invece di
+    fallire al momento del restore (quando tipicamente c'è un'emergenza).
+
+    Il filename su disco è sempre rigenerato (mai quello caricato): niente
+    path traversal e niente collisioni. Il nome originale finisce in `notes`.
+
+    Solleva ValueError con messaggio user-facing per ogni rifiuto.
+    """
+    from apps.backups.models import BackupRecord
+    from core.audit import log_action
+
+    _ensure_backup_dir()
+
+    original_name = Path(getattr(uploaded_file, "name", "") or "").name
+    lower = original_name.lower()
+    if lower.endswith(".dump.enc"):
+        encrypted = True
+    elif lower.endswith(".dump"):
+        encrypted = False
+    else:
+        raise ValueError("Formato non supportato: sono ammessi solo file .dump o .dump.enc.")
+
+    max_bytes = getattr(settings, "BACKUP_IMPORT_MAX_BYTES", 2 * 1024**3)
+    if uploaded_file.size > max_bytes:
+        gb = max_bytes / 1024**3
+        raise ValueError(f"File troppo grande. Dimensione massima per l'import: {gb:.1f} GB.")
+
+    if encrypted and not encryption.is_encryption_enabled():
+        raise ValueError(
+            "Il file è cifrato ma BACKUP_ENCRYPTION_KEY non è configurata su "
+            "questo server: impossibile verificarlo e ripristinarlo."
+        )
+
+    ts = timezone.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"backup_{ts}_imported.dump" + (ENCRYPTED_SUFFIX if encrypted else "")
+    filepath = BACKUP_DIR / filename
+
+    with open(filepath, "wb") as dest:
+        for chunk in uploaded_file.chunks():
+            dest.write(chunk)
+
+    try:
+        if encrypted:
+            probe_path = filepath.with_name(filepath.name + ".probe")
+            try:
+                encryption.decrypt_file(filepath, probe_path)
+                with open(probe_path, "rb") as f:
+                    head = f.read(len(_PGDMP_MAGIC))
+            except Exception:
+                raise ValueError(
+                    "Il file cifrato non è decifrabile con la chiave configurata "
+                    "su questo server (chiave diversa o file corrotto)."
+                ) from None
+            finally:
+                if probe_path.exists():
+                    probe_path.unlink()
+        else:
+            with open(filepath, "rb") as f:
+                head = f.read(len(_PGDMP_MAGIC))
+
+        if head != _PGDMP_MAGIC:
+            raise ValueError(
+                "Il contenuto non è un backup PostgreSQL valido "
+                "(atteso formato custom pg_dump)."
+            )
+    except ValueError:
+        # File rifiutato: non lasciare l'upload nella directory dei backup.
+        if filepath.exists():
+            filepath.unlink()
+        raise
+
+    size = filepath.stat().st_size
+    record = BackupRecord.objects.create(
+        filename=filename,
+        status=BackupRecord.Status.COMPLETED,
+        size_bytes=size,
+        backup_type=BackupRecord.BackupType.IMPORTED,
+        encrypted=encrypted,
+        notes=f"Import manuale — file originale: {original_name[:200]}",
+        completed_at=timezone.now(),
+        created_by=user,
+    )
+    log_action(
+        user=user,
+        action_code="BACKUP_IMPORTED",
+        level="L2",
+        entity=record,
+        payload={
+            "filename": filename,
+            "original_name": original_name[:200],
+            "size_bytes": size,
+            "encrypted": encrypted,
+        },
+    )
+    logger.info("Backup importato: %s (%d bytes, encrypted=%s)", filename, size, encrypted)
+    return record
+
+
 def start_restore(backup_id, user):
     """
     Valida e accoda il restore su Celery (newfix 2026-06-09 #3).

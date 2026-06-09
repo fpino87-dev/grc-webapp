@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
   listBackupsApi,
   createBackupApi,
+  importBackupApi,
   restoreBackupApi,
   deleteBackupApi,
   backupDownloadUrl,
@@ -47,6 +48,12 @@ const STATUS_DOT: Record<string, string> = {
   restored:  "bg-purple-500",
 };
 
+const TYPE_STYLES: Record<string, string> = {
+  auto:     "bg-gray-100 text-gray-600",
+  manual:   "bg-indigo-100 text-indigo-700",
+  imported: "bg-teal-100 text-teal-700",
+};
+
 function StatusBadge({ status }: { status: BackupRecord["status"] }) {
   const { t } = useTranslation();
   return (
@@ -86,6 +93,58 @@ function ConfirmModal({
   );
 }
 
+// ── Import modal ──────────────────────────────────────────────────────────────
+
+function ImportModal({
+  onSubmit, onCancel, isUploading,
+}: {
+  onSubmit: (file: File) => void; onCancel: () => void; isUploading: boolean;
+}) {
+  const { t } = useTranslation();
+  const [file, setFile] = useState<File | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("backups.import.title")}</h3>
+        <p className="text-sm text-gray-600 mb-4 leading-relaxed">{t("backups.import.help")}</p>
+
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".dump,.enc"
+          className="hidden"
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+        />
+        <button
+          onClick={() => inputRef.current?.click()}
+          disabled={isUploading}
+          className="w-full mb-4 px-4 py-3 text-sm border-2 border-dashed border-gray-300 rounded-md hover:border-primary-400 hover:bg-gray-50 text-gray-600 disabled:opacity-50"
+        >
+          {file
+            ? <span className="font-mono text-xs break-all">{file.name}</span>
+            : `📁 ${t("backups.import.select_file")}`}
+        </button>
+
+        <div className="flex justify-end gap-3">
+          <button onClick={onCancel} disabled={isUploading}
+            className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 text-gray-700 disabled:opacity-50">
+            {t("actions.cancel")}
+          </button>
+          <button
+            onClick={() => file && onSubmit(file)}
+            disabled={!file || isUploading}
+            className="px-4 py-2 text-sm rounded-md text-white font-medium bg-primary-600 hover:bg-primary-700 disabled:opacity-50"
+          >
+            {isUploading ? t("backups.import.uploading") : t("backups.import.submit")}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Backup card ───────────────────────────────────────────────────────────────
 
 function BackupCard({
@@ -113,7 +172,7 @@ function BackupCard({
         <div className="flex items-center gap-2 flex-wrap">
           <StatusBadge status={backup.status} />
           <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-            backup.backup_type === "auto" ? "bg-gray-100 text-gray-600" : "bg-indigo-100 text-indigo-700"
+            TYPE_STYLES[backup.backup_type] ?? "bg-gray-100 text-gray-600"
           }`}>
             {t(`backups.type.${backup.backup_type}`)}
           </span>
@@ -202,6 +261,7 @@ export function BackupsPage() {
 
   const [confirmRestore, setConfirmRestore] = useState<BackupRecord | null>(null);
   const [confirmDelete,  setConfirmDelete]  = useState<BackupRecord | null>(null);
+  const [showImport, setShowImport] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "ok" | "err"; msg: string } | null>(null);
 
   const { data: backups = [], isLoading } = useQuery({
@@ -222,6 +282,21 @@ export function BackupsPage() {
     mutationFn: createBackupApi,
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["backups"] }); showFeedback("ok", t("backups.feedback.created")); },
     onError:   () => showFeedback("err", t("backups.feedback.create_error")),
+  });
+
+  const importMut = useMutation({
+    mutationFn: (file: File) => importBackupApi(file),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["backups"] });
+      setShowImport(false);
+      showFeedback("ok", t("backups.feedback.imported"));
+    },
+    onError: (e: unknown) => {
+      // Il backend risponde 400 con il motivo del rifiuto (magic/chiave/size)
+      const msg = (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+      showFeedback("err", msg ?? t("backups.feedback.import_error"));
+      setShowImport(false);
+    },
   });
 
   const restoreMut = useMutation({
@@ -255,7 +330,7 @@ export function BackupsPage() {
       });
   };
 
-  const isBusy = createMut.isPending || restoreMut.isPending || deleteMut.isPending;
+  const isBusy = createMut.isPending || importMut.isPending || restoreMut.isPending || deleteMut.isPending;
 
   // Ordine: running/pending/restoring in cima, poi per data desc
   const sorted = [...backups].sort((a, b) => {
@@ -272,13 +347,22 @@ export function BackupsPage() {
           <h1 className="text-2xl font-bold text-gray-900">{t("backups.title")}</h1>
           <p className="text-sm text-gray-500 mt-1">{t("backups.subtitle")}</p>
         </div>
-        <button
-          onClick={() => createMut.mutate()}
-          disabled={isBusy}
-          className="shrink-0 flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50"
-        >
-          {createMut.isPending ? t("backups.creating") : `💾 ${t("backups.create")}`}
-        </button>
+        <div className="shrink-0 flex items-center gap-2">
+          <button
+            onClick={() => setShowImport(true)}
+            disabled={isBusy}
+            className="flex items-center gap-2 border border-primary-600 text-primary-700 hover:bg-primary-50 px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50"
+          >
+            ⬆ {t("backups.action.import")}
+          </button>
+          <button
+            onClick={() => createMut.mutate()}
+            disabled={isBusy}
+            className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50"
+          >
+            {createMut.isPending ? t("backups.creating") : `💾 ${t("backups.create")}`}
+          </button>
+        </div>
       </div>
 
       {/* Feedback */}
@@ -323,6 +407,15 @@ export function BackupsPage() {
             />
           ))}
         </div>
+      )}
+
+      {/* Modale import */}
+      {showImport && (
+        <ImportModal
+          isUploading={importMut.isPending}
+          onSubmit={(file) => importMut.mutate(file)}
+          onCancel={() => setShowImport(false)}
+        />
       )}
 
       {/* Modale restore */}

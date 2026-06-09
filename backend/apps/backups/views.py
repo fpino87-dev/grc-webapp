@@ -11,7 +11,7 @@ from apps.auth_grc.permissions import IsGrcSuperAdmin
 
 from .models import BackupRecord
 from .serializers import BackupRecordSerializer
-from .services import create_backup, delete_backup, start_restore
+from .services import create_backup, delete_backup, import_backup, start_restore
 
 BACKUP_DIR = Path(getattr(settings, "BACKUP_DIR", "/app/backups"))
 
@@ -23,6 +23,7 @@ class BackupViewSet(ReadOnlyModelViewSet):
     GET    /api/v1/backups/               → lista backup
     GET    /api/v1/backups/{id}/          → dettaglio
     POST   /api/v1/backups/create/        → avvia backup manuale
+    POST   /api/v1/backups/import/        → importa file .dump/.dump.enc (multipart)
     GET    /api/v1/backups/{id}/download/ → scarica file
     POST   /api/v1/backups/{id}/restore/  → ripristina
     DELETE /api/v1/backups/{id}/remove/   → elimina
@@ -35,6 +36,23 @@ class BackupViewSet(ReadOnlyModelViewSet):
     @action(detail=False, methods=["post"], url_path="create")
     def create_backup(self, request):
         record = create_backup(request.user, backup_type="manual")
+        return Response(
+            BackupRecordSerializer(record).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=False, methods=["post"], url_path="import")
+    def import_backup(self, request):
+        uploaded = request.FILES.get("file")
+        if uploaded is None:
+            return Response(
+                {"detail": "Nessun file caricato: campo multipart 'file' obbligatorio."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            record = import_backup(uploaded, request.user)
+        except ValueError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(
             BackupRecordSerializer(record).data,
             status=status.HTTP_201_CREATED,

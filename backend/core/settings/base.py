@@ -255,6 +255,9 @@ BACKUP_DIR = env("BACKUP_DIR", default="/app/backups")
 # chiaro (dev/test); in produzione DEVE essere valorizzata con una passphrase
 # separata da FERNET_KEY (TISAX L3 / ISO 27001 A.8.24).
 BACKUP_ENCRYPTION_KEY = env("BACKUP_ENCRYPTION_KEY", default="")
+# Limite upload per l'import di backup (.dump/.dump.enc) — separato dai 50MB
+# degli allegati documentali: i dump pg_dump possono essere molto più grandi.
+BACKUP_IMPORT_MAX_BYTES = env.int("BACKUP_IMPORT_MAX_BYTES", default=2 * 1024**3)  # 2 GB
 
 # newfix S12 — limiti upload e body size. Django default e' 2.5 MB con JSON
 # body unbounded -> denial of memory possibile. Allinea il prodotto alle

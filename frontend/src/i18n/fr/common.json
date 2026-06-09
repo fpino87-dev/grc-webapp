@@ -1171,12 +1171,14 @@
     },
     "type": {
       "auto": "Automatique",
-      "manual": "Manuel"
+      "manual": "Manuel",
+      "imported": "Importé"
     },
     "action": {
       "download": "Télécharger",
       "restore": "Restaurer",
-      "delete": "Supprimer"
+      "delete": "Supprimer",
+      "import": "Importer une sauvegarde"
     },
     "confirm_restore": {
       "title": "Confirmer la restauration",
@@ -1193,9 +1195,18 @@
       "restore_error": "Erreur lors de la restauration de la base de données.",
       "deleted": "Sauvegarde supprimée.",
       "delete_error": "Erreur lors de la suppression de la sauvegarde.",
-      "restore_started": "Restauration lancée. Le statut se met à jour automatiquement à la fin."
+      "restore_started": "Restauration lancée. Le statut se met à jour automatiquement à la fin.",
+      "imported": "Sauvegarde importée avec succès.",
+      "import_error": "Erreur lors de l'importation de la sauvegarde."
     },
-    "restoring": "Restauration de la base de données en cours... la page s'actualise automatiquement."
+    "restoring": "Restauration de la base de données en cours... la page s'actualise automatiquement.",
+    "import": {
+      "title": "Importer une sauvegarde",
+      "help": "Chargez un fichier de sauvegarde téléchargé précédemment (.dump ou .dump.enc). Le contenu est vérifié avant acceptation ; les fichiers chiffrés doivent être déchiffrables avec la clé configurée sur ce serveur.",
+      "select_file": "Choisir un fichier (.dump / .dump.enc)",
+      "submit": "Importer",
+      "uploading": "Téléversement en cours..."
+    }
   },
   "dashboard": {
     "title": "Dashboard",

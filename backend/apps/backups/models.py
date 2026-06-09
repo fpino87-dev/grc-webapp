@@ -14,8 +14,9 @@ class BackupRecord(BaseModel):
         RESTORED  = "restored",  _("Ripristinato")
 
     class BackupType(models.TextChoices):
-        AUTO   = "auto",   _("Automatico")
-        MANUAL = "manual", _("Manuale")
+        AUTO     = "auto",     _("Automatico")
+        MANUAL   = "manual",   _("Manuale")
+        IMPORTED = "imported", _("Importato")
 
     filename      = models.CharField(max_length=255, blank=True)
     size_bytes    = models.BigIntegerField(null=True, blank=True)

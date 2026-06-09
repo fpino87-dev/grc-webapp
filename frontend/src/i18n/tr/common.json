@@ -1171,12 +1171,14 @@
     },
     "type": {
       "auto": "Otomatik",
-      "manual": "Manuel"
+      "manual": "Manuel",
+      "imported": "İçe aktarıldı"
     },
     "action": {
       "download": "İndir",
       "restore": "Geri yükle",
-      "delete": "Sil"
+      "delete": "Sil",
+      "import": "Yedek içe aktar"
     },
     "confirm_restore": {
       "title": "Geri yüklemeyi onayla",
@@ -1193,9 +1195,18 @@
       "restore_error": "Veritabanı geri yüklenirken hata oluştu.",
       "deleted": "Yedek silindi.",
       "delete_error": "Yedek silinirken hata oluştu.",
-      "restore_started": "Geri yükleme başlatıldı. Bitince durum otomatik olarak güncellenir."
+      "restore_started": "Geri yükleme başlatıldı. Bitince durum otomatik olarak güncellenir.",
+      "imported": "Yedek başarıyla içe aktarıldı.",
+      "import_error": "Yedek içe aktarılırken hata oluştu."
     },
-    "restoring": "Veritabanı geri yükleniyor... sayfa otomatik olarak yenilenir."
+    "restoring": "Veritabanı geri yükleniyor... sayfa otomatik olarak yenilenir.",
+    "import": {
+      "title": "Yedek içe aktar",
+      "help": "Daha önce indirilen bir yedek dosyasını yükleyin (.dump veya .dump.enc). İçerik kabul edilmeden önce doğrulanır; şifreli dosyaların bu sunucuda yapılandırılan anahtarla çözülebilmesi gerekir.",
+      "select_file": "Dosya seç (.dump / .dump.enc)",
+      "submit": "İçe aktar",
+      "uploading": "Yükleniyor..."
+    }
   },
   "dashboard": {
     "title": "Dashboard",

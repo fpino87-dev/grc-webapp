@@ -17,6 +17,7 @@ vi.mock("../../../store/auth", () => ({
 vi.mock("../../../api/endpoints/backups", () => ({
   listBackupsApi: vi.fn(),
   createBackupApi: vi.fn(),
+  importBackupApi: vi.fn(),
   restoreBackupApi: vi.fn(),
   deleteBackupApi: vi.fn(),
   backupDownloadUrl: (id: string) => `/api/v1/backups/${id}/download/`,
@@ -25,11 +26,13 @@ vi.mock("../../../api/endpoints/backups", () => ({
 import {
   listBackupsApi,
   createBackupApi,
+  importBackupApi,
   deleteBackupApi,
 } from "../../../api/endpoints/backups";
 
 const mockList = vi.mocked(listBackupsApi);
 const mockCreate = vi.mocked(createBackupApi);
+const mockImport = vi.mocked(importBackupApi);
 const mockDelete = vi.mocked(deleteBackupApi);
 
 // ── Helper ────────────────────────────────────────────────────────────────────
@@ -106,6 +109,38 @@ describe("BackupsPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /backups\.create/ }));
     await waitFor(() => expect(mockCreate).toHaveBeenCalledOnce());
+  });
+
+  it("bottone importa backup è visibile e apre il modal", async () => {
+    mockList.mockResolvedValue([]);
+    renderPage();
+    await waitFor(() => screen.getByRole("button", { name: /backups\.action\.import/ }));
+
+    fireEvent.click(screen.getByRole("button", { name: /backups\.action\.import/ }));
+    await waitFor(() => {
+      expect(screen.getByText("backups.import.help")).toBeInTheDocument();
+    });
+    // Senza file selezionato il submit è disabilitato
+    expect(screen.getByRole("button", { name: /backups\.import\.submit/ })).toBeDisabled();
+  });
+
+  it("selezione file e submit chiamano importBackupApi", async () => {
+    mockList.mockResolvedValue([]);
+    mockImport.mockResolvedValue(makeBackup({ backup_type: "imported" }));
+    renderPage();
+    await waitFor(() => screen.getByRole("button", { name: /backups\.action\.import/ }));
+    fireEvent.click(screen.getByRole("button", { name: /backups\.action\.import/ }));
+    await waitFor(() => screen.getByText("backups.import.help"));
+
+    const file = new File(["PGDMP"], "vecchio_backup.dump");
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    fireEvent.change(input, { target: { files: [file] } });
+
+    const submit = screen.getByRole("button", { name: /backups\.import\.submit/ });
+    await waitFor(() => expect(submit).toBeEnabled());
+    fireEvent.click(submit);
+
+    await waitFor(() => expect(mockImport).toHaveBeenCalledWith(file));
   });
 
   it("backup fallito mostra messaggio di errore troncato", async () => {

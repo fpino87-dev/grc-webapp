@@ -1171,12 +1171,14 @@
     },
     "type": {
       "auto": "Automatyczny",
-      "manual": "Ręczny"
+      "manual": "Ręczny",
+      "imported": "Zaimportowany"
     },
     "action": {
       "download": "Pobierz",
       "restore": "Przywróć",
-      "delete": "Usuń"
+      "delete": "Usuń",
+      "import": "Importuj kopię zapasową"
     },
     "confirm_restore": {
       "title": "Potwierdź przywrócenie",
@@ -1193,9 +1195,18 @@
       "restore_error": "Błąd podczas przywracania bazy danych.",
       "deleted": "Kopia zapasowa usunięta.",
       "delete_error": "Błąd podczas usuwania kopii zapasowej.",
-      "restore_started": "Rozpoczęto przywracanie. Status zaktualizuje się automatycznie po zakończeniu."
+      "restore_started": "Rozpoczęto przywracanie. Status zaktualizuje się automatycznie po zakończeniu.",
+      "imported": "Kopia zapasowa zaimportowana pomyślnie.",
+      "import_error": "Błąd podczas importowania kopii zapasowej."
     },
-    "restoring": "Trwa przywracanie bazy danych... strona odświeża się automatycznie."
+    "restoring": "Trwa przywracanie bazy danych... strona odświeża się automatycznie.",
+    "import": {
+      "title": "Importuj kopię zapasową",
+      "help": "Prześlij wcześniej pobrany plik kopii zapasowej (.dump lub .dump.enc). Zawartość jest weryfikowana przed przyjęciem; pliki zaszyfrowane muszą dać się odszyfrować kluczem skonfigurowanym na tym serwerze.",
+      "select_file": "Wybierz plik (.dump / .dump.enc)",
+      "submit": "Importuj",
+      "uploading": "Przesyłanie..."
+    }
   },
   "dashboard": {
     "title": "Dashboard",

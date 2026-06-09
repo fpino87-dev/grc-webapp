@@ -1092,12 +1092,14 @@
     },
     "type": {
       "auto": "Automatico",
-      "manual": "Manuale"
+      "manual": "Manuale",
+      "imported": "Importato"
     },
     "action": {
       "download": "Scarica",
       "restore": "Ripristina",
-      "delete": "Elimina"
+      "delete": "Elimina",
+      "import": "Importa backup"
     },
     "confirm_restore": {
       "title": "Conferma ripristino",
@@ -1114,9 +1116,18 @@
       "restore_error": "Errore durante il ripristino del database.",
       "deleted": "Backup eliminato.",
       "delete_error": "Errore durante l'eliminazione del backup.",
-      "restore_started": "Ripristino avviato. Lo stato si aggiorna automaticamente al termine."
+      "restore_started": "Ripristino avviato. Lo stato si aggiorna automaticamente al termine.",
+      "imported": "Backup importato con successo.",
+      "import_error": "Errore durante l'importazione del backup."
     },
-    "restoring": "Ripristino del database in corso... la pagina si aggiorna automaticamente."
+    "restoring": "Ripristino del database in corso... la pagina si aggiorna automaticamente.",
+    "import": {
+      "title": "Importa backup",
+      "help": "Carica un file di backup scaricato in precedenza (.dump o .dump.enc). Il contenuto viene verificato prima dell'accettazione; i file cifrati devono essere decifrabili con la chiave configurata su questo server.",
+      "select_file": "Seleziona file (.dump / .dump.enc)",
+      "submit": "Importa",
+      "uploading": "Caricamento in corso..."
+    }
   },
   "dashboard": {
     "title": "Dashboard",
