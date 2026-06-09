@@ -310,6 +310,14 @@ REST_FRAMEWORK = {
         # Scope per endpoint che invocano l'AI Engine (costo per chiamata).
         "ai": "20/hour",
     },
+    # newfix 2026-06-09 #5 — identificazione client dietro reverse proxy.
+    # Senza NUM_PROXIES, DRF usa l'header X-Forwarded-For così com'è quando
+    # presente: un client può spoofarlo e aggirare il throttle (login 5/min
+    # con XFF diverso a ogni richiesta = chiave di cache sempre nuova).
+    # Con NUM_PROXIES=1 DRF prende l'ultimo hop dell'XFF (l'IP del client
+    # visto dal proxy fidato NPM) e ignora i valori prepesi dal client.
+    # DRF_NUM_PROXIES=0 → ignora del tutto XFF (backend esposto direttamente).
+    "NUM_PROXIES": env.int("DRF_NUM_PROXIES", default=1),
 }
 
 SIMPLE_JWT = {

@@ -41,8 +41,10 @@ def _audit_login(user, *, success: bool, request=None, extra: dict | None = None
         return
     try:
         from core.audit import log_action
+        from core.network import get_client_ip
         payload = {
-            "ip": (request.META.get("REMOTE_ADDR") or "") if request is not None else "",
+            # newfix #5 — IP proxy-aware: dietro NPM REMOTE_ADDR è il proxy.
+            "ip": get_client_ip(request) if request is not None else "",
             "user_agent": (request.META.get("HTTP_USER_AGENT") or "")[:200] if request is not None else "",
         }
         if extra:
@@ -263,6 +265,7 @@ class LogoutView(APIView):
 
         try:
             from core.audit import log_action
+            from core.network import get_client_ip
             log_action(
                 user=request.user,
                 action_code="auth.logout",
@@ -270,7 +273,7 @@ class LogoutView(APIView):
                 entity=request.user,
                 payload={
                     "refresh_blacklisted": blacklisted,
-                    "ip": request.META.get("REMOTE_ADDR") or "",
+                    "ip": get_client_ip(request),
                     "user_agent": (request.META.get("HTTP_USER_AGENT") or "")[:200],
                 },
             )
