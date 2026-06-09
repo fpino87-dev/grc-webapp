@@ -1,0 +1,92 @@
+name: tests
+
+# Test + lint su ogni push/PR verso main (newfix 2026-06-09 #8).
+# Prima la suite (368→1083 test, coverage gate 70%) girava solo in locale:
+# una regressione poteva arrivare su main senza alcun controllo automatico.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  backend:
+    name: backend (pytest + ruff)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: grc_test
+          POSTGRES_USER: grc
+          POSTGRES_PASSWORD: grc
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U grc"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DJANGO_SETTINGS_MODULE: core.settings.test
+      DATABASE_URL: postgresql://grc:grc@localhost:5432/grc_test
+      REDIS_URL: redis://localhost:6379/0
+      SECRET_KEY: ci-only-secret-key-not-used-in-production
+      # Chiave Fernet valida solo per il run CI (base.py la richiede all'import)
+      FERNET_KEY: -RJI_2I6JFpmhfHjLjJNqzuKTYwLQkbxkRVZz2TlpWo=
+      ALLOWED_HOSTS: localhost
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements/dev.txt
+      - name: System deps (python-magic)
+        run: sudo apt-get update && sudo apt-get install -y libmagic1
+      - name: Install requirements
+        working-directory: backend
+        run: pip install -r requirements/dev.txt
+      - name: Ruff
+        working-directory: backend
+        run: ruff check .
+      - name: Pytest (coverage gate 70%)
+        working-directory: backend
+        run: pytest -q
+
+  frontend:
+    name: frontend (vitest + eslint + tsc)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: npm ci
+        working-directory: frontend
+        run: npm ci --no-audit --no-fund --legacy-peer-deps
+      - name: ESLint
+        working-directory: frontend
+        run: npm run lint
+      - name: TypeScript
+        working-directory: frontend
+        run: npm run typecheck
+      - name: Vitest
+        working-directory: frontend
+        run: npm run test
