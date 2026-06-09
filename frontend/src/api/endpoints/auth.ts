@@ -2,8 +2,10 @@ import axios from "axios";
 import { apiClient } from "../client";
 import { useAuthStore } from "../../store/auth";
 
+// newfix #6 — il refresh token non compare mai nelle risposte: il backend lo
+// imposta come cookie httpOnly (grc_refresh). Qui circola solo l'access.
 export type LoginResult =
-  | { mfa_required: false; access: string; refresh: string }
+  | { mfa_required: false; access: string }
   | { mfa_required: true; mfa_token: string };
 
 export async function loginApi(email: string, password: string, deviceToken?: string): Promise<LoginResult> {
@@ -13,12 +15,12 @@ export async function loginApi(email: string, password: string, deviceToken?: st
   if (res.status === 202) {
     return { mfa_required: true, mfa_token: res.data.mfa_token };
   }
-  return { mfa_required: false, access: res.data.access, refresh: res.data.refresh };
+  return { mfa_required: false, access: res.data.access };
 }
 
 export async function verifyMfaApi(mfa_token: string, otp_code: string, trust_device = false) {
   const res = await axios.post("/api/token/mfa/", { mfa_token, otp_code, trust_device });
-  return res.data as { access: string; refresh: string; device_token?: string };
+  return res.data as { access: string; device_token?: string };
 }
 
 /**
@@ -27,12 +29,14 @@ export async function verifyMfaApi(mfa_token: string, otp_code: string, trust_de
  * quindi gli errori vengono inghiottiti. Da chiamare PRIMA di svuotare lo store.
  */
 export async function logoutApi(): Promise<void> {
-  const { token, refresh } = useAuthStore.getState();
+  const { token } = useAuthStore.getState();
   if (!token) return;
   try {
+    // Il refresh da blacklistare viaggia nel cookie httpOnly; la risposta
+    // cancella il cookie stesso.
     await axios.post(
       "/api/token/logout/",
-      { refresh },
+      {},
       { headers: { Authorization: `Bearer ${token}` } },
     );
   } catch {
@@ -40,8 +44,9 @@ export async function logoutApi(): Promise<void> {
   }
 }
 
-export async function refreshTokenApi(refresh: string) {
-  const res = await axios.post("/api/token/refresh/", { refresh });
+// Il cookie grc_refresh parte automaticamente (stessa origin).
+export async function refreshTokenApi() {
+  const res = await axios.post("/api/token/refresh/", {});
   return res.data as { access: string };
 }
 

@@ -66,7 +66,6 @@ describe("LoginPage", () => {
     mockLoginApi.mockResolvedValue({
       mfa_required: false,
       access: MOCK_JWT,
-      refresh: "mock-refresh-token",
     });
 
     renderLogin();
@@ -111,7 +110,6 @@ describe("LoginPage", () => {
     mockLoginApi.mockResolvedValue({ mfa_required: true, mfa_token: "mock-mfa-token" });
     mockVerifyMfaApi.mockResolvedValue({
       access: MOCK_JWT,
-      refresh: "mock-refresh-token",
     });
 
     renderLogin();
@@ -130,7 +128,6 @@ describe("LoginPage", () => {
     mockLoginApi.mockResolvedValue({ mfa_required: true, mfa_token: "mock-mfa-token" });
     mockVerifyMfaApi.mockResolvedValue({
       access: MOCK_JWT,
-      refresh: "mock-refresh-token",
       device_token: "mock-device-token",
     });
 
@@ -184,7 +181,7 @@ describe("LoginPage", () => {
 
   it("invio device_token salvato nel login successivo", async () => {
     localStorage.setItem("grc_device_token", "mock-saved-device-token");
-    mockLoginApi.mockResolvedValue({ mfa_required: false, access: "mock-access-token", refresh: "mock-refresh-token" });
+    mockLoginApi.mockResolvedValue({ mfa_required: false, access: "mock-access-token" });
 
     renderLogin();
     fireEvent.click(screen.getByRole("button", { name: "auth.login.submit" }));

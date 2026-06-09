@@ -17,38 +17,35 @@ interface Plant {
 interface AuthStore {
   user: User | null;
   token: string | null;
-  refresh: string | null;
   selectedPlant: Plant | null;
-  setUser: (u: User, t: string, r?: string | null) => void;
+  setUser: (u: User, t: string) => void;
   setToken: (t: string) => void;
   setPlant: (p: Plant) => void;
   logout: () => void;
 }
 
-// Persistenza JWT (newfix R1): senza persist, ogni F5 fa logout.
-// REFRESH JWT vive 7 giorni (SIMPLE_JWT.REFRESH_TOKEN_LIFETIME) — usiamo
-// localStorage per allinearci a quella durata. Il sessionStorage e' stato
-// scartato perche' costringerebbe un re-login a ogni chiusura tab, che
-// contraddice la durata del refresh token gia' definita lato backend.
+// newfix 2026-06-09 #6 — il refresh token NON esiste più lato JS: vive in un
+// cookie httpOnly (grc_refresh) gestito dal backend, fuori dalla portata di
+// qualunque XSS. L'access token (30 min) resta SOLO in memoria: dopo un F5
+// viene riottenuto in silenzio da PrivateRoute via /api/token/refresh/
+// (il cookie parte da solo, stessa origin). In localStorage persistono solo
+// user e plant selezionato, che servono a ripartire senza flash di login.
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set) => ({
       user: null,
       token: null,
-      refresh: null,
       selectedPlant: null,
-      setUser: (user, token, refresh = null) => set({ user, token, refresh }),
+      setUser: (user, token) => set({ user, token }),
       setToken: (token) => set({ token }),
       setPlant: (plant) => set({ selectedPlant: plant }),
-      logout: () => set({ user: null, token: null, refresh: null, selectedPlant: null }),
+      logout: () => set({ user: null, token: null, selectedPlant: null }),
     }),
     {
       name: "grc-auth",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         user: state.user,
-        token: state.token,
-        refresh: state.refresh,
         selectedPlant: state.selectedPlant,
       }),
     },

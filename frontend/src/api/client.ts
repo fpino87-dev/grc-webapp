@@ -22,11 +22,11 @@ apiClient.interceptors.request.use((config) => {
 // si agganciano alla stessa Promise.
 let refreshInFlight: Promise<string | null> | null = null;
 
+// newfix #6 — il refresh token e' nel cookie httpOnly grc_refresh: parte da
+// solo (stessa origin), il JS non lo vede ne' lo invia esplicitamente.
 async function performRefresh(): Promise<string | null> {
-  const refreshToken = useAuthStore.getState().refresh;
-  if (!refreshToken) return null;
   try {
-    const res = await axios.post("/api/token/refresh/", { refresh: refreshToken });
+    const res = await axios.post("/api/token/refresh/", {});
     const newAccess: string = res.data.access;
     useAuthStore.getState().setToken(newAccess);
     return newAccess;
@@ -53,10 +53,6 @@ apiClient.interceptors.response.use(
     }
     // Evita loop su refresh stesso o richieste gia' ritentate.
     if (original._retry || (typeof original.url === "string" && original.url.includes("/token/refresh"))) {
-      logoutAndRedirect();
-      return Promise.reject(err);
-    }
-    if (!useAuthStore.getState().refresh) {
       logoutAndRedirect();
       return Promise.reject(err);
     }

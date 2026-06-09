@@ -1,9 +1,10 @@
 /**
- * Test del persist middleware sull'auth store (newfix R1).
+ * Test del persist middleware sull'auth store (newfix R1, aggiornato per #6).
  *
- * Verifica che user, token, refresh e selectedPlant sopravvivano a un reload
- * (simulato via localStorage). Senza questo, l'utente perde la sessione a
- * ogni F5.
+ * Dal newfix #6 il refresh token vive in un cookie httpOnly (mai nello store)
+ * e l'access token resta SOLO in memoria: in localStorage devono persistere
+ * esclusivamente user e selectedPlant. Se token o refresh finissero di nuovo
+ * nello storage, un XSS tornerebbe a poter rubare la sessione.
  */
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { useAuthStore } from "../auth";
@@ -13,7 +14,6 @@ beforeEach(() => {
   useAuthStore.setState({
     user: null,
     token: null,
-    refresh: null,
     selectedPlant: null,
   });
 });
@@ -22,52 +22,48 @@ afterEach(() => {
   localStorage.clear();
 });
 
-describe("useAuthStore persist", () => {
-  it("setUser scrive user, token e refresh in localStorage", () => {
+describe("useAuthStore persist (newfix #6)", () => {
+  it("setUser tiene il token in memoria e persiste solo lo user", () => {
     useAuthStore.getState().setUser(
       { id: "1", email: "x@x", role: "user", language: "it" },
       "access-token-1",
-      "refresh-token-1",
     );
+    expect(useAuthStore.getState().token).toBe("access-token-1");
+
     const persisted = JSON.parse(localStorage.getItem("grc-auth") ?? "{}");
-    expect(persisted.state.token).toBe("access-token-1");
-    expect(persisted.state.refresh).toBe("refresh-token-1");
     expect(persisted.state.user.email).toBe("x@x");
+    // Il token NON deve mai finire in localStorage (esposto a XSS)
+    expect(persisted.state.token).toBeUndefined();
+    expect(persisted.state.refresh).toBeUndefined();
   });
 
-  it("setToken aggiorna solo il token (refresh resta)", () => {
+  it("setToken aggiorna il token in memoria senza persisterlo", () => {
     useAuthStore.getState().setUser(
       { id: "1", email: "x@x", role: "user", language: "it" },
       "old-access",
-      "stable-refresh",
     );
     useAuthStore.getState().setToken("new-access");
+    expect(useAuthStore.getState().token).toBe("new-access");
+
     const persisted = JSON.parse(localStorage.getItem("grc-auth") ?? "{}");
-    expect(persisted.state.token).toBe("new-access");
-    expect(persisted.state.refresh).toBe("stable-refresh");
+    expect(persisted.state.token).toBeUndefined();
+  });
+
+  it("selectedPlant viene persistito", () => {
+    useAuthStore.getState().setPlant({ id: "p1", code: "PL1", name: "Plant 1" });
+    const persisted = JSON.parse(localStorage.getItem("grc-auth") ?? "{}");
+    expect(persisted.state.selectedPlant.code).toBe("PL1");
   });
 
   it("logout pulisce sia store che storage persistito", () => {
     useAuthStore.getState().setUser(
       { id: "1", email: "x@x", role: "user", language: "it" },
       "access",
-      "refresh",
     );
     useAuthStore.getState().logout();
     expect(useAuthStore.getState().token).toBeNull();
-    expect(useAuthStore.getState().refresh).toBeNull();
+    expect(useAuthStore.getState().user).toBeNull();
     const persisted = JSON.parse(localStorage.getItem("grc-auth") ?? "{}");
-    expect(persisted.state.token).toBeNull();
-    expect(persisted.state.refresh).toBeNull();
-  });
-
-  it("setUser senza refresh esplicito persiste refresh=null (non rompe il flusso)", () => {
-    useAuthStore.getState().setUser(
-      { id: "1", email: "x@x", role: "user", language: "it" },
-      "access-only",
-    );
-    const persisted = JSON.parse(localStorage.getItem("grc-auth") ?? "{}");
-    expect(persisted.state.token).toBe("access-only");
-    expect(persisted.state.refresh).toBeNull();
+    expect(persisted.state.user).toBeNull();
   });
 });

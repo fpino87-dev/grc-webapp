@@ -14,8 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "./store/auth";
+import { refreshTokenApi } from "./api/endpoints/auth";
 import { Shell } from "./components/layout/Shell";
 import { LoginPage } from "./pages/LoginPage";
 import { Dashboard } from "./modules/dashboard/Dashboard";
@@ -63,8 +65,32 @@ import { OsintRemediationPage } from "./modules/osint/OsintRemediationPage";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
-  if (!token) return <Navigate to="/login" replace />;
-  return <>{children}</>;
+  const user = useAuthStore((s) => s.user);
+  // newfix #6 — l'access token vive solo in memoria: dopo un F5 e' null anche
+  // se la sessione e' valida (cookie httpOnly grc_refresh, 7 giorni). Se c'e'
+  // un utente persistito, riotteniamo l'access in silenzio prima di decidere
+  // se mandare al login.
+  const [bootstrapping, setBootstrapping] = useState(!token && !!user);
+
+  useEffect(() => {
+    if (token || !user) return;
+    let cancelled = false;
+    refreshTokenApi()
+      .then((data) => { if (!cancelled) useAuthStore.getState().setToken(data.access); })
+      .catch(() => { if (!cancelled) useAuthStore.getState().logout(); })
+      .finally(() => { if (!cancelled) setBootstrapping(false); });
+    return () => { cancelled = true; };
+  }, [token, user]);
+
+  if (token) return <>{children}</>;
+  if (bootstrapping) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+  return <Navigate to="/login" replace />;
 }
 
 export function App() {
