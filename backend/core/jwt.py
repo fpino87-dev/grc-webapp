@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core import signing
 from django_otp import devices_for_user
 from rest_framework import status
@@ -8,10 +9,37 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 _MFA_SALT = "grc-mfa-token"
 _MFA_TTL = 300  # 5 minuti
+
+# newfix 2026-06-09 #6 — il refresh token vive in un cookie httpOnly invece
+# che nel body/localStorage: un XSS non può più esfiltrare la sessione a 7
+# giorni (resta esposto al massimo l'access token da 30 minuti, in memoria).
+# Path limitato a /api/token: il cookie viaggia solo verso login/refresh/
+# logout, mai verso il resto dell'API. SameSite=Strict elimina il CSRF
+# cross-site sul refresh; SPA e API sono same-origin (proxy Vite in dev,
+# nginx in prod), quindi Strict non rompe nessun flusso legittimo.
+REFRESH_COOKIE_NAME = "grc_refresh"
+REFRESH_COOKIE_PATH = "/api/token"
+
+
+def _set_refresh_cookie(response, refresh: str) -> None:
+    max_age = int(settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds())
+    response.set_cookie(
+        REFRESH_COOKIE_NAME,
+        refresh,
+        max_age=max_age,
+        path=REFRESH_COOKIE_PATH,
+        httponly=True,
+        secure=settings.SESSION_COOKIE_SECURE,
+        samesite="Strict",
+    )
+
+
+def _delete_refresh_cookie(response) -> None:
+    response.delete_cookie(REFRESH_COOKIE_NAME, path=REFRESH_COOKIE_PATH)
 
 # newfix S9 — lock per-utente su MfaVerifyView. Il throttle DRF e' per-IP:
 # una botnet distribuita aggira 5/min con N bot, e con OTP a 6 cifre lo spazio
@@ -25,6 +53,14 @@ _MFA_LOCK_DURATION = 60 * 60     # 1 ora di lock
 
 def _mfa_attempts_key(user_pk) -> str:
     return f"mfa:attempts:{user_pk}"
+
+
+# newfix 2026-06-09 #12 — one-time-use del mfa_token: dopo una verifica OTP
+# riuscita il token firmato (TTL 5 min) non deve poter essere rigiocato per
+# emettere un secondo JWT. Marker in cache con TTL pari alla vita del token.
+def _mfa_used_key(mfa_token: str) -> str:
+    import hashlib
+    return "mfa:used:" + hashlib.sha256(mfa_token.encode()).hexdigest()
 
 
 def _mfa_lock_key(user_pk) -> str:
@@ -180,6 +216,20 @@ def _issue_jwt(user):
     }
 
 
+def _jwt_response(user, extra: dict | None = None) -> Response:
+    """
+    Risposta di login riuscito (newfix #6): access nel body, refresh SOLO nel
+    cookie httpOnly — mai esposto al JavaScript.
+    """
+    pair = _issue_jwt(user)
+    data = {"access": pair["access"]}
+    if extra:
+        data.update(extra)
+    response = Response(data, status=status.HTTP_200_OK)
+    _set_refresh_cookie(response, pair["refresh"])
+    return response
+
+
 class GrcTokenObtainPairView(TokenObtainPairView):
     """
     POST /api/token/
@@ -223,7 +273,7 @@ class GrcTokenObtainPairView(TokenObtainPairView):
                         user, success=True, request=request,
                         extra={"path": "trusted_device"},
                     )
-                    return Response(_issue_jwt(user), status=status.HTTP_200_OK)
+                    return _jwt_response(user)
 
             # Utente ha MFA attivo: emetti un token temporaneo, NON il JWT
             mfa_token = signing.dumps(
@@ -237,7 +287,7 @@ class GrcTokenObtainPairView(TokenObtainPairView):
 
         # Nessun device — emetti JWT direttamente
         _audit_login(user, success=True, request=request, extra={"path": "no_mfa"})
-        return Response(_issue_jwt(user), status=status.HTTP_200_OK)
+        return _jwt_response(user)
 
 
 class LogoutView(APIView):
@@ -254,7 +304,9 @@ class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        refresh = request.data.get("refresh", "")
+        # newfix #6: il refresh ora vive nel cookie httpOnly; il body resta
+        # come fallback per client legacy/machine-to-machine.
+        refresh = request.COOKIES.get(REFRESH_COOKIE_NAME) or request.data.get("refresh", "")
         blacklisted = False
         if refresh:
             try:
@@ -281,7 +333,9 @@ class LogoutView(APIView):
             # Come per _audit_login: l'audit non deve bloccare la disconnessione.
             pass
 
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        response = Response(status=status.HTTP_204_NO_CONTENT)
+        _delete_refresh_cookie(response)
+        return response
 
 
 class MfaVerifyView(APIView):
@@ -324,8 +378,15 @@ class MfaVerifyView(APIView):
         except (User.DoesNotExist, KeyError):
             return Response({"detail": "Utente non trovato."}, status=status.HTTP_401_UNAUTHORIZED)
 
-        # newfix S9 — lock per-utente: se gia' bloccato, rifiuta subito.
+        # newfix #12 — token gia' speso con successo: rifiuta il replay.
         from django.core.cache import cache
+        if cache.get(_mfa_used_key(mfa_token)):
+            return Response(
+                {"detail": "Token non valido."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        # newfix S9 — lock per-utente: se gia' bloccato, rifiuta subito.
         lock_key = _mfa_lock_key(user.pk)
         if cache.get(lock_key):
             return Response(
@@ -389,13 +450,15 @@ class MfaVerifyView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        # OTP corretto: azzera il counter di tentativi falliti.
+        # OTP corretto: azzera il counter di tentativi falliti e marca il
+        # mfa_token come speso (one-time-use, newfix #12).
         cache.delete(_mfa_attempts_key(user.pk))
+        cache.set(_mfa_used_key(mfa_token), 1, timeout=_MFA_TTL)
 
         # newfix F2 — log MFA success (path distinto dal "no_mfa" per audit).
         _audit_login(user, success=True, request=request, extra={"path": "mfa_otp"})
 
-        response_data = _issue_jwt(user)
+        extra: dict = {}
 
         # Se il client chiede di fidarsi di questo dispositivo, emetti un token da 30 giorni
         if request.data.get("trust_device"):
@@ -407,6 +470,47 @@ class MfaVerifyView(APIView):
                 user, device_name,
                 fingerprint_source=_fingerprint_source(request),
             )
-            response_data["device_token"] = raw_token
+            extra["device_token"] = raw_token
 
-        return Response(response_data, status=status.HTTP_200_OK)
+        return _jwt_response(user, extra=extra)
+
+
+class GrcTokenRefreshView(TokenRefreshView):
+    """
+    POST /api/token/refresh/
+    newfix #6: il refresh token arriva dal cookie httpOnly `grc_refresh`
+    (fallback sul body per client machine-to-machine). La rotation emette il
+    nuovo refresh di nuovo SOLO nel cookie; il body contiene solo l'access.
+    """
+
+    def post(self, request, *args, **kwargs):
+        refresh = (
+            request.COOKIES.get(REFRESH_COOKIE_NAME)
+            or request.data.get("refresh")
+            or ""
+        )
+        if not refresh:
+            return Response(
+                {"detail": "Refresh token mancante."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        serializer = self.get_serializer(data={"refresh": refresh})
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception:
+            # Cookie scaduto/blacklistato: lo rimuoviamo così il client non
+            # continua a rigiocare un token morto.
+            response = Response(
+                {"detail": "Token non valido o scaduto."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+            _delete_refresh_cookie(response)
+            return response
+
+        data = serializer.validated_data
+        response = Response({"access": data["access"]}, status=status.HTTP_200_OK)
+        new_refresh = data.get("refresh")
+        if new_refresh:
+            _set_refresh_cookie(response, str(new_refresh))
+        return response

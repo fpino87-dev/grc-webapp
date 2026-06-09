@@ -39,7 +39,12 @@ def test_login_no_mfa_returns_jwt(user_no_mfa):
     res = client.post("/api/token/", {"username": "nomfa@test.com", "password": "StrongPass123!"})
     assert res.status_code == 200
     assert "access" in res.data
-    assert "refresh" in res.data
+    # newfix #6 — il refresh NON deve mai comparire nel body (esposto al JS):
+    # viaggia solo nel cookie httpOnly grc_refresh.
+    assert "refresh" not in res.data
+    cookie = res.cookies.get("grc_refresh")
+    assert cookie is not None and cookie.value
+    assert cookie["httponly"]
 
 
 @pytest.mark.django_db
@@ -269,3 +274,23 @@ def test_mfa_verify_with_trust_device_returns_device_token(user_with_mfa):
 
     assert res2.status_code == 200
     assert "device_token" in res2.data
+
+
+# ── One-time-use mfa_token (newfix 2026-06-09 #12) ───────────────────────────
+
+@pytest.mark.django_db
+def test_mfa_token_not_reusable_after_success(user_with_mfa):
+    """Il mfa_token speso con successo non deve emettere un secondo JWT."""
+    client = APIClient()
+    res = client.post("/api/token/", {"username": "mfa@test.com", "password": "StrongPass123!"})
+    mfa_token = res.data["mfa_token"]
+
+    fake_device = type("D", (), {"verify_token": lambda self, c: True})()
+    with patch("core.jwt.devices_for_user") as mock_devices:
+        mock_devices.return_value = [fake_device]
+        first = client.post("/api/token/mfa/", {"mfa_token": mfa_token, "otp_code": "123456"})
+        replay = client.post("/api/token/mfa/", {"mfa_token": mfa_token, "otp_code": "123456"})
+
+    assert first.status_code == 200
+    assert replay.status_code == 401
+    assert replay.data["detail"] == "Token non valido."
