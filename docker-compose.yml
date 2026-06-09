@@ -81,9 +81,15 @@ services:
     restart: unless-stopped
     volumes: [./frontend:/app, /app/node_modules]
     ports: ["3001:3000"]
-    env_file: .env
+    # newfix #14 — niente env_file: .env qui: il container frontend riceveva
+    # anche SECRET_KEY/FERNET_KEY/password DB senza motivo. Le sole VITE_*
+    # vengono interpolate da compose leggendo il .env di progetto.
     environment:
       - VITE_API_URL=http://localhost:8001
+      - VITE_SENTRY_DSN=${VITE_SENTRY_DSN:-}
+      - VITE_SENTRY_ENVIRONMENT=${VITE_SENTRY_ENVIRONMENT:-development}
+      - VITE_SENTRY_TRACES_RATE=${VITE_SENTRY_TRACES_RATE:-0.1}
+      - VITE_APP_VERSION=${VITE_APP_VERSION:-dev}
 
   mailhog:
     image: mailhog/mailhog
