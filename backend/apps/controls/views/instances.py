@@ -9,8 +9,9 @@ from ..permissions import ControlInstancePermission
 from ..serializers import ControlInstanceSerializer
 
 
-def _explain_suggestion(instance) -> str:
-    from ..services import calc_suggested_status, check_evidence_requirements
+def _explain_suggestion(instance, suggested: str, check: dict) -> str:
+    """`suggested` e `check` arrivano già calcolati dal chiamante (detail_info):
+    prima questa funzione li ricalcolava da zero — 2 passate in più (C2)."""
     from django.utils.translation import gettext as _
 
     req = instance.control.evidence_requirement or {}
@@ -21,11 +22,9 @@ def _explain_suggestion(instance) -> str:
     if not has_req:
         return _("Nessun requisito documentale definito per questo controllo.")
 
-    suggested = calc_suggested_status(instance)
     if suggested == "compliant":
         return _("Tutti i requisiti documentali sono soddisfatti.")
 
-    check = check_evidence_requirements(instance)
     msgs = []
     for md in check["missing_documents"]:
         msgs.append(_("Documento mancante: %(desc)s") % {"desc": md["description"] or md["type"]})
@@ -51,6 +50,7 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         "control__mappings_to__source_control__framework",
         "documents",
         "evidences",
+        "assets",  # serializzato come M2M da fields="__all__": senza prefetch è 1 query/riga
     ).order_by("control__framework__code", "control__external_id")
     serializer_class = ControlInstanceSerializer
     permission_classes = [ControlInstancePermission]
@@ -213,18 +213,17 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             for d in instance.documents.filter(deleted_at__isnull=True)
         ]
 
-        from ..services import check_evidence_requirements
+        from ..services import calc_suggested_status, check_evidence_requirements
         with translation.override(lang):
             requirements = check_evidence_requirements(instance, lang=lang)
-
-        from ..services import calc_suggested_status
-        suggested_status = calc_suggested_status(instance)
+        # riusa il check appena fatto: il flag `satisfied` non dipende dalla lingua
+        suggested_status = calc_suggested_status(instance, check=requirements)
 
         with translation.override(lang):
             return Response({
                 "current_status": instance.status,
                 "suggested_status": suggested_status,
-                "suggested_status_reason": _explain_suggestion(instance),
+                "suggested_status_reason": _explain_suggestion(instance, suggested_status, requirements),
                 "applicability": instance.applicability,
                 "exclusion_justification": instance.exclusion_justification,
                 "na_justification": instance.na_justification,

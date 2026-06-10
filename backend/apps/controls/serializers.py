@@ -88,13 +88,20 @@ class ControlInstanceSerializer(serializers.ModelSerializer):
         lang = getattr(request, "LANGUAGE_CODE", None) if request else None
         return obj.control.get_title(lang or "it")
 
+    def _suggested_status(self, obj):
+        # Memoizzato per istanza: suggested_status e suggestion_differs lo
+        # condividono, e calc_suggested_status percorre documenti/evidenze (C2)
+        cache = self.context.setdefault("_suggested_status_cache", {})
+        if obj.pk not in cache:
+            from .services import calc_suggested_status
+            cache[obj.pk] = calc_suggested_status(obj)
+        return cache[obj.pk]
+
     def get_suggested_status(self, obj):
-        from .services import calc_suggested_status
-        return calc_suggested_status(obj)
+        return self._suggested_status(obj)
 
     def get_suggestion_differs(self, obj):
-        from .services import calc_suggested_status
-        return calc_suggested_status(obj) != obj.status
+        return self._suggested_status(obj) != obj.status
 
     def get_calc_maturity_level(self, obj):
         return obj.calc_maturity_level

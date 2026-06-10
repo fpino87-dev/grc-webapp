@@ -215,7 +215,11 @@ class ControlInstance(BaseModel):
 
     @property
     def calc_maturity_level(self) -> int:
-        """Calcola maturity level 0-5 da status + evidenze per VDA ISA TISAX."""
+        """Calcola maturity level 0-5 da status + evidenze per VDA ISA TISAX.
+
+        Le evidenze sono lette via `.all()` + filtro in Python: con il
+        prefetch della lista controlli non costa query aggiuntive (C2).
+        """
         if self.maturity_level_override and self.maturity_level is not None:
             return self.maturity_level
         from django.utils import timezone
@@ -223,11 +227,14 @@ class ControlInstance(BaseModel):
         status_map = {"non_valutato": 0, "gap": 1, "na": 0}
         if self.status in status_map:
             return status_map[self.status]
-        if self.status == "parziale":
-            has_ev = self.evidences.filter(valid_until__gte=today, deleted_at__isnull=True).exists()
-            return 3 if has_ev else 2
-        if self.status == "compliant":
-            ev_count = self.evidences.filter(valid_until__gte=today, deleted_at__isnull=True).count()
-            return 5 if ev_count >= 2 else 4
+        if self.status in ("parziale", "compliant"):
+            # come il filtro originale valid_until__gte: senza scadenza non conta
+            valid_count = sum(
+                1 for ev in self.evidences.all()
+                if ev.deleted_at is None and ev.valid_until and ev.valid_until >= today
+            )
+            if self.status == "parziale":
+                return 3 if valid_count else 2
+            return 5 if valid_count >= 2 else 4
         return 0
 
