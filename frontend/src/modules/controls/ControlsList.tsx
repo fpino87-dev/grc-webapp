@@ -52,10 +52,16 @@ function InlineStatusSelect({ instance }: { instance: ControlInstance }) {
   const [crossPlant, setCrossPlant] = useState(false);
   const { t } = useTranslation();
 
+  // Sempre via POST /evaluate/ (mai PATCH diretta): il service valida evidenze
+  // e giustificazioni e scrive l'audit `control.evaluated` (C1)
   const updateMutation = useMutation({
-    mutationFn: (status: string) => controlsApi.updateInstance(instance.id, { status: status as ControlInstance["status"] }),
+    mutationFn: (status: string) => controlsApi.evaluate(instance.id, status, ""),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["controls"] });
+      setEditing(false);
+    },
+    onError: (e: any) => {
+      window.alert(e?.response?.data?.error || t("common.error"));
       setEditing(false);
     },
   });

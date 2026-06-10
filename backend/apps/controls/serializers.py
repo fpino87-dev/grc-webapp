@@ -34,6 +34,39 @@ class ControlInstanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = ControlInstance
         fields = "__all__"
+        # I campi governati dai service NON sono scrivibili via PATCH/PUT generica:
+        # passare dagli endpoint dedicati, che validano e scrivono l'audit trail
+        # (regola architetturale #2 — business logic solo nei services).
+        #   status / last_evaluated_*          → POST /evaluate/ (evaluate_control)
+        #   applicability / exclusion / na_*   → POST /set-applicability/
+        #   maturity_level{,_override}         → POST /set-maturity/
+        #   approved_in_soa / soa_*            → POST /bulk-approve-soa/
+        #   needs_revaluation{,_since}         → cascata change asset + evaluate
+        # Scrivibili via PATCH restano solo: owner, notes, assets (con
+        # validate_assets), documents/evidences (equivalenti a link/unlink).
+        read_only_fields = [
+            "status",
+            "last_evaluated_at",
+            "last_evaluated_note",
+            "applicability",
+            "exclusion_justification",
+            "na_justification",
+            "na_approved_by",
+            "na_second_approver",
+            "na_approved_at",
+            "na_review_by",
+            "maturity_level",
+            "maturity_level_override",
+            "approved_in_soa",
+            "soa_approved_at",
+            "soa_approved_by",
+            "needs_revaluation",
+            "needs_revaluation_since",
+            "created_at",
+            "updated_at",
+            "created_by",
+            "deleted_at",
+        ]
 
     def validate_assets(self, value):
         """Gli asset collegati devono appartenere allo stesso plant del controllo
