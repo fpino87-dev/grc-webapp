@@ -556,7 +556,8 @@
       "legal_entity_vat": "P.IVA / VAT",
       "nis2_activity_description": "Descrizione attività NIS2 (documenti formali)",
       "domain": "Dominio principale",
-      "additional_domains": "Domini aggiuntivi / Plant"
+      "additional_domains": "Domini aggiuntivi / Plant",
+      "timezone": "Fuso orario del sito"
     },
     "nis2_entity": {
       "section_title": "NIS2 e entità legale",
@@ -655,7 +656,8 @@
     },
     "hints": {
       "domain": "Dominio internet del sito, usato dal modulo OSINT per il monitoraggio passivo.",
-      "additional_domains": "Uno per riga. Letti dal modulo OSINT come il dominio principale."
+      "additional_domains": "Uno per riga. Letti dal modulo OSINT come il dominio principale.",
+      "timezone": "Fuso IANA usato per calcolare le date “oggi” e le scadenze del sito (scadenzario, advisor, badge)."
     }
   },
   "users": {

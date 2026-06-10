@@ -190,7 +190,7 @@ export function Topbar() {
             {(plants ?? []).map(p => (
               <button
                 key={p.id}
-                onClick={() => { setPlant({ id: p.id, code: p.code, name: p.name }); setDropdownOpen(false); }}
+                onClick={() => { setPlant({ id: p.id, code: p.code, name: p.name, timezone: p.timezone }); setDropdownOpen(false); }}
                 className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between ${
                   selectedPlant?.id === p.id ? "bg-blue-50 text-blue-800 font-medium" : "text-gray-700"
                 }`}

@@ -6,6 +6,7 @@ import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { AiSuggestionBanner } from "../../components/ui/AiSuggestionBanner";
 import { useTranslation } from "react-i18next";
+import { addYearsISO, usePlantToday } from "../../utils/dates";
 import i18n from "../../i18n";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -908,11 +909,7 @@ function DropzoneUpload({ instanceId, plant }: { instanceId: string; plant: stri
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
 
-  const oneYearOut = (() => {
-    const d = new Date();
-    d.setFullYear(d.getFullYear() + 1);
-    return d.toISOString().split("T")[0];
-  })();
+  const oneYearOut = addYearsISO(usePlantToday(), 1);
 
   function addFiles(files: FileList | File[]) {
     const items: UploadItem[] = Array.from(files).map(file => ({

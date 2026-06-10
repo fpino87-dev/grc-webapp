@@ -210,9 +210,21 @@ def add_version_with_file(document, uploaded_file, user, change_summary=""):
 
 
 def get_expiring_documents(days=30):
-    cutoff = timezone.localdate() + datetime.timedelta(days=days)
+    """Documenti approvati in scadenza entro `days` giorni dall'"oggi" del sito
+    (F3, timezone per Plant); per i documenti senza sito vale l'orologio server."""
+    from django.db.models import Q
+
+    from apps.plants.services import per_plant_today_q
+
+    server_cutoff = timezone.localdate() + datetime.timedelta(days=days)
+    cond = per_plant_today_q(
+        lambda today, ids: Q(
+            plant_id__in=ids, expiry_date__lte=today + datetime.timedelta(days=days)
+        )
+    ) | Q(plant__isnull=True, expiry_date__lte=server_cutoff)
     return (
-        Document.objects.filter(status="approvato", expiry_date__lte=cutoff)
+        Document.objects.filter(status="approvato")
+        .filter(cond)
         .select_related("plant", "owner")
     )
 

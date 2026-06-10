@@ -138,7 +138,7 @@ export function GrcAssistantDrawer({ open, onClose }: Props) {
               plants={plants}
               currentId={selectedPlant?.id}
               onSelect={(p) => {
-                setPlant({ id: p.id, code: p.code, name: p.name });
+                setPlant({ id: p.id, code: p.code, name: p.name, timezone: p.timezone });
                 setShowPlantPicker(false);
                 setExplanations({});
               }}

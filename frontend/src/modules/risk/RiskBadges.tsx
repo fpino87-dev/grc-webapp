@@ -2,6 +2,7 @@ import type { RiskAssessment } from "../../api/endpoints/risk";
 import { riskLevelFromScore, RISK_LEVEL_COLORS, RISK_LEVEL_ICONS, TREATMENT_BADGE, isActiveTreatment } from "./riskUtils";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
+import { usePlantToday } from "../../utils/dates";
 
 export function RiskLevelBadge({ score }: { score: number | null }) {
   const { t } = useTranslation();
@@ -43,10 +44,10 @@ export function TreatmentDeadlineBadge({ assessment }: { assessment: RiskAssessm
   const { t } = useTranslation();
   const { plan_due_date, treatment, mitigation_plans_count, mitigation_plans_completed, last_plan_completed_at } = assessment;
 
+  const todayStr = usePlantToday();
   const isActive = isActiveTreatment(treatment);
   if (!plan_due_date) return <span className="text-gray-300 text-xs">—</span>;
 
-  const todayStr = new Date().toISOString().slice(0, 10);
   const overdue = plan_due_date < todayStr;
   const diffDays = Math.floor((new Date(plan_due_date).getTime() - new Date(todayStr).getTime()) / 86400000);
   const allDone = mitigation_plans_count > 0 && mitigation_plans_completed === mitigation_plans_count;

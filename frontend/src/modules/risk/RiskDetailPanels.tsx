@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { riskApi, type RiskAssessment, type SuggestResidualResult } from "../../api/endpoints/risk";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
+import { addYearsISO, usePlantToday } from "../../utils/dates";
 
 export function SuggestResidualPanel({ assessment }: { assessment: RiskAssessment }) {
   const { t } = useTranslation();
@@ -57,8 +58,10 @@ export function FormalAcceptancePanel({ assessment }: { assessment: RiskAssessme
   const [open, setOpen] = useState(false);
   const [renewOpen, setRenewOpen] = useState(false);
   const [note, setNote] = useState("");
-  // Default: +1 anno da oggi (ISO 27001 — revisione annuale accettazione rischio)
-  const defaultExpiry = new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().slice(0, 10);
+  // "Oggi" nel fuso del sito selezionato (F3); default scadenza: +1 anno
+  // (ISO 27001 — revisione annuale accettazione rischio)
+  const todayStr = usePlantToday();
+  const defaultExpiry = addYearsISO(todayStr, 1);
   const [expiry, setExpiry] = useState(defaultExpiry);
   const [renewExpiry, setRenewExpiry] = useState(defaultExpiry);
   const [err, setErr] = useState("");
@@ -94,7 +97,6 @@ export function FormalAcceptancePanel({ assessment }: { assessment: RiskAssessme
 
   if (assessment.risk_accepted_formally) {
     const expiryStr = assessment.risk_acceptance_expiry ?? null;
-    const todayStr = new Date().toISOString().slice(0, 10);
     const expired = expiryStr ? expiryStr < todayStr : false;
     const expiryDisplay = expiryStr ? new Date(expiryStr + "T12:00:00").toLocaleDateString(i18n.language || "it") : null;
     return (

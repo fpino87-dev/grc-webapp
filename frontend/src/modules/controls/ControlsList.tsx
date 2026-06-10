@@ -9,6 +9,7 @@ import { ControlDetailDrawer } from "./ControlDetailDrawer";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
+import { todayISO } from "../../utils/dates";
 
 const STATUS_OPTIONS = ["compliant", "parziale", "gap", "na", "non_valutato"];
 
@@ -257,7 +258,7 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      const date = new Date().toISOString().slice(0, 10);
+      const date = todayISO();
       a.download = `${format}_${frameworkCode}_${date}.html`;
       document.body.appendChild(a);
       a.click();
@@ -291,7 +292,7 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      const date = new Date().toISOString().slice(0, 10);
+      const date = todayISO();
       a.download = `audit_${frameworkParam}_${date}.zip`;
       document.body.appendChild(a);
       a.click();

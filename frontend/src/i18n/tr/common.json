@@ -623,7 +623,8 @@
       "legal_entity_vat": "Vergi no / KDV",
       "nis2_activity_description": "NIS2 faaliyet açıklaması (resmi belgeler)",
       "domain": "Ana alan adı",
-      "additional_domains": "Ek alan adları / Tesis"
+      "additional_domains": "Ek alan adları / Tesis",
+      "timezone": "Tesisin saat dilimi"
     },
     "nis2_entity": {
       "section_title": "NIS2 ve tüzel kişilik",
@@ -722,7 +723,8 @@
     },
     "hints": {
       "domain": "Tesis internet alan adı, OSINT modülü tarafından pasif izleme için kullanılır.",
-      "additional_domains": "Satır başına bir adet. Ana alan adı gibi OSINT modülü tarafından okunur."
+      "additional_domains": "Satır başına bir adet. Ana alan adı gibi OSINT modülü tarafından okunur.",
+      "timezone": "Tesisin “bugün” tarihlerini ve son tarihlerini hesaplamak için kullanılan IANA saat dilimi (takvim, danışmanlar, rozetler)."
     }
   },
   "users": {

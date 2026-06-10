@@ -12,6 +12,7 @@ interface Plant {
   id: string;
   code: string;
   name: string;
+  timezone?: string; // IANA — usato per la data "oggi" del sito (F3)
 }
 
 interface AuthStore {

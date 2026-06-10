@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { osintApi } from "../../api/endpoints/osint";
+import { todayISO } from "../../utils/dates";
 
 type AiType = "attack_surface" | "suppliers_nis2" | "board_report";
 
@@ -35,7 +36,7 @@ export function OsintAiPanel({ type, onClose }: { type: AiType; onClose: () => v
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `osint_${type}_${new Date().toISOString().slice(0, 10)}.txt`;
+    a.download = `osint_${type}_${todayISO()}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   }

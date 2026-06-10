@@ -4,10 +4,10 @@ import { apiClient } from "../../api/client";
 import { riskApi, type AppetitePolicyFull } from "../../api/endpoints/risk";
 import { usersApi } from "../../api/endpoints/users";
 import { useTranslation } from "react-i18next";
+import { addYearsISO, usePlantToday } from "../../utils/dates";
 
-function expiryBadge(valid_until: string | null, t: (k: string) => string, lang: string) {
+function expiryBadge(valid_until: string | null, today: string, t: (k: string) => string, lang: string) {
   if (!valid_until) return null;
-  const today = new Date().toISOString().slice(0, 10);
   const diffDays = Math.floor((new Date(valid_until).getTime() - new Date(today).getTime()) / 86400000);
   if (diffDays < 0)
     return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">⚠ {t("risk.appetite_expired")}</span>;
@@ -20,8 +20,8 @@ export function RiskAppetiteCard({ plantId }: { plantId?: string }) {
   const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
-  const today = new Date().toISOString().slice(0, 10);
-  const defaultUntil = new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().slice(0, 10);
+  const today = usePlantToday();
+  const defaultUntil = addYearsISO(today, 1);
 
   const emptyForm = {
     max_acceptable_score: 14,
@@ -110,7 +110,7 @@ export function RiskAppetiteCard({ plantId }: { plantId?: string }) {
             </div>
             <div className="flex items-center gap-2 text-gray-700">
               <span>{t("risk.appetite_valid_until")}</span>
-              {expiryBadge(policy.valid_until, t, lang) ?? <span className="text-gray-400">—</span>}
+              {expiryBadge(policy.valid_until, today, t, lang) ?? <span className="text-gray-400">—</span>}
             </div>
             {policy.approved_by_name && (
               <div className="text-gray-500 text-xs">

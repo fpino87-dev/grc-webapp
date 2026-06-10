@@ -8,6 +8,7 @@ import { NewDocumentModal, EditDocumentModal, UploadVersionModal } from "./Docum
 import { ChangePlantModal, ShareDocumentModal, LinkControlsModal } from "./DocumentShareModals";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
+import { usePlantToday } from "../../utils/dates";
 
 type DocStatusFilter = "tutti" | "bozza" | "revisione" | "approvazione" | "approvato";
 
@@ -45,7 +46,7 @@ export function TabDocumenti() {
     onError: (e: any) => window.alert(e?.response?.data?.detail || t("common.error")),
   });
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = usePlantToday();
 
   // I contratti/NDA vivono nel tab dedicato: li escludiamo sia dalla lista
   // sia dai contatori del banner, che devono essere coerenti tra loro.

@@ -11,7 +11,14 @@ def get_assets_by_plant(plant_id):
 
 
 def get_eol_assets():
-    return AssetIT.objects.filter(eol_date__lte=timezone.localdate()).select_related("plant")
+    """Asset IT a fine vita rispetto all'"oggi" del sito (F3, timezone per Plant)."""
+    from django.db.models import Q
+
+    from apps.plants.services import per_plant_today_q
+
+    return AssetIT.objects.filter(
+        per_plant_today_q(lambda today, ids: Q(plant_id__in=ids, eol_date__lte=today))
+    ).select_related("plant")
 
 
 def get_critical_assets(plant_id):

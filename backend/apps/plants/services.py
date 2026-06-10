@@ -3,6 +3,87 @@ from django.db.models import QuerySet
 from .models import Plant
 
 
+def _zoneinfo_or_default(tz_name: str):
+    """
+    ZoneInfo dal nome IANA, con fallback al TIME_ZONE di progetto se il valore
+    è vuoto o non valido — un dato sporco non deve mai far esplodere un
+    calcolo di scadenza.
+    """
+    import zoneinfo
+
+    from django.conf import settings
+
+    tz_name = (tz_name or "").strip() or settings.TIME_ZONE
+    try:
+        return zoneinfo.ZoneInfo(tz_name)
+    except (zoneinfo.ZoneInfoNotFoundError, ValueError, KeyError):
+        return zoneinfo.ZoneInfo(settings.TIME_ZONE)
+
+
+def plant_timezone(plant):
+    """ZoneInfo del sito (`Plant.timezone`, nome IANA), con fallback robusto."""
+    return _zoneinfo_or_default(getattr(plant, "timezone", ""))
+
+
+def plant_today(plant=None):
+    """
+    Data "oggi" nel fuso orario del sito. Con `plant=None` equivale a
+    `timezone.localdate()` (orologio server / TIME_ZONE di progetto).
+
+    Da usare nei calcoli scaduto/in-scadenza per-plant (scadenzario, advisor
+    Cockpit, badge): la mezzanotte che conta è quella del sito, non quella
+    del server. I job Celery schedulati restano sull'orologio del server.
+    """
+    from django.utils import timezone as dj_timezone
+
+    if plant is None:
+        return dj_timezone.localdate()
+    return dj_timezone.localdate(timezone=plant_timezone(plant))
+
+
+def plant_ids_by_today() -> dict:
+    """
+    Raggruppa i plant attivi per data "oggi" nel rispettivo fuso orario:
+    `{date: [plant_id, ...]}` — un solo gruppo se tutti i siti condividono il
+    fuso (caso comune).
+
+    Pensata per gli advisor Cockpit: permette di mantenere una sola query
+    aggregata per advisor costruendo una `Q` per gruppo (vedi
+    `cockpit.advisors_builtin._per_plant_today_q`) invece di una query per plant.
+    """
+    from collections import defaultdict
+
+    from django.utils import timezone as dj_timezone
+
+    today_by_tz: dict[str, object] = {}
+    groups: dict = defaultdict(list)
+    for pid, tz_name in Plant.objects.filter(deleted_at__isnull=True).values_list("id", "timezone"):
+        key = tz_name or ""
+        if key not in today_by_tz:
+            today_by_tz[key] = dj_timezone.localdate(timezone=_zoneinfo_or_default(key))
+        groups[today_by_tz[key]].append(pid)
+    return dict(groups)
+
+
+def per_plant_today_q(build):
+    """
+    `Q` per confronti con l'"oggi" del sito (F3, timezone per Plant) senza
+    rompere le query aggregate: i plant attivi vengono raggruppati per data
+    odierna nel loro fuso (`plant_ids_by_today`, un solo gruppo se il fuso è
+    unico) e `build(today, plant_ids)` produce la Q del gruppo; il risultato è
+    l'OR dei gruppi — la query chiamante resta una sola.
+
+    NB: righe con `plant_id` NULL non matchano nessun gruppo — se vanno
+    incluse, aggiungere una clausola dedicata lato chiamante.
+    """
+    from django.db.models import Q
+
+    cond = Q(pk__in=[])  # base che non matcha nulla (nessun plant attivo)
+    for today, ids in plant_ids_by_today().items():
+        cond |= build(today, ids)
+    return cond
+
+
 def get_active_frameworks(plant):
     """
     Restituisce i Framework attivi per un plant.

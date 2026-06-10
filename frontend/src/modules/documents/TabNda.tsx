@@ -6,6 +6,7 @@ import { useAuthStore } from "../../store/auth";
 import { EditDocumentModal, UploadVersionModal } from "./DocumentFormModals";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
+import { addDaysISO, usePlantToday } from "../../utils/dates";
 
 export function TabNda() {
   const { t } = useTranslation();
@@ -36,7 +37,7 @@ export function TabNda() {
     onError: (e: any) => window.alert(e?.response?.data?.detail || t("common.error")),
   });
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = usePlantToday();
 
   const ndas: Document[] = [...(data?.results ?? [])]
     .sort((a, b) => {
@@ -55,7 +56,7 @@ export function TabNda() {
 
   const expired  = ndas.filter(d => d.expiry_date && d.expiry_date < today).length;
   const expiring = ndas.filter(d => d.expiry_date && d.expiry_date >= today &&
-    d.expiry_date <= new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10)).length;
+    d.expiry_date <= addDaysISO(today, 30)).length;
 
   async function handleDownload(doc: Document) {
     try {
@@ -76,8 +77,7 @@ export function TabNda() {
     const d = new Date(expiry_date + "T12:00:00").toLocaleDateString(i18n.language || "it");
     if (expiry_date < today)
       return <span className="text-xs font-semibold text-red-700 bg-red-50 px-2 py-0.5 rounded">⚠ {d}</span>;
-    const diffDays = Math.floor((new Date(expiry_date).getTime() - Date.now()) / 86400000);
-    if (diffDays <= 30)
+    if (expiry_date <= addDaysISO(today, 30))
       return <span className="text-xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">⏰ {d}</span>;
     return <span className="text-xs text-gray-600">{d}</span>;
   }

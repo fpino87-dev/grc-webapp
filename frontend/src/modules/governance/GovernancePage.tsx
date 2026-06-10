@@ -10,6 +10,7 @@ import { FrameworkGovernanceTab } from "./FrameworkGovernanceTab";
 import { RiskAppetiteGovernanceTab } from "./RiskAppetiteGovernanceTab";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { todayISO } from "../../utils/dates";
 
 const ROLE_KEYS: Record<string, string> = {
   ciso:                   "ciso",
@@ -29,7 +30,7 @@ const ROLE_KEYS: Record<string, string> = {
   raci_accountable:       "raci_accountable",
 };
 
-const TODAY = new Date().toISOString().slice(0, 10);
+const TODAY = todayISO();
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

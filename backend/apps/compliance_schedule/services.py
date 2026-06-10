@@ -11,8 +11,6 @@ import datetime
 import logging
 from typing import Optional
 
-from django.utils import timezone
-
 from .models import (
     ComplianceSchedulePolicy,
     DEFAULT_RULES,
@@ -68,9 +66,11 @@ def _add_duration(base: datetime.date, value: int, unit: str) -> datetime.date:
 # ─── Public API ───────────────────────────────────────────────────────────────
 
 def get_due_date(rule_type: str, plant=None, from_date: Optional[datetime.date] = None) -> datetime.date:
-    """Compute the next due date for rule_type starting from from_date (default: today)."""
+    """Compute the next due date for rule_type starting from from_date (default: today in the plant's timezone)."""
+    from apps.plants.services import plant_today
+
     freq_val, freq_unit, _ = _get_rule(rule_type, plant)
-    base = from_date or timezone.localdate()
+    base = from_date or plant_today(plant)
     return _add_duration(base, freq_val, freq_unit)
 
 
@@ -111,8 +111,14 @@ def get_activity_schedule(plant=None, months_ahead: int = 6) -> list[dict]:
     """
     Aggregate all upcoming expiring activities across GRC modules.
     Returns a list of dicts sorted by due_date ascending.
+
+    "Oggi" è la data nel fuso orario del sito (F3): per un plant a Istanbul
+    o New York la finestra scaduto/in-scadenza segue la mezzanotte locale,
+    non quella del server.
     """
-    today = timezone.localdate()
+    from apps.plants.services import plant_today
+
+    today = plant_today(plant)
     cutoff = _add_duration(today, months_ahead, "months")
     activities = []
 

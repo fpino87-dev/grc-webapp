@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { cockpitApi, type CockpitArea, type CockpitInsight, type InsightAction, type InsightSeverity } from "../../api/endpoints/cockpit";
 import { useAuthStore } from "../../store/auth";
+import { addDaysISO, todayISO } from "../../utils/dates";
 
 const AREAS: CockpitArea[] = [
   "governance", "controls", "risk", "incidents", "supply_chain", "technical", "continuity",
@@ -29,9 +30,7 @@ function barColor(score: number): string {
   return "bg-green-500";
 }
 function isoIn(days: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  return addDaysISO(todayISO(), days);
 }
 
 export function CockpitPage() {

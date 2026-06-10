@@ -623,7 +623,8 @@
       "legal_entity_vat": "N° TVA / VAT",
       "nis2_activity_description": "Description de l'activité NIS2 (documents officiels)",
       "domain": "Domaine principal",
-      "additional_domains": "Domaines supplémentaires / Site"
+      "additional_domains": "Domaines supplémentaires / Site",
+      "timezone": "Fuseau horaire du site"
     },
     "nis2_entity": {
       "section_title": "NIS2 et entité légale",
@@ -722,7 +723,8 @@
     },
     "hints": {
       "domain": "Domaine internet du site, utilisé par le module OSINT pour la surveillance passive.",
-      "additional_domains": "Un par ligne. Lu par le module OSINT comme le domaine principal."
+      "additional_domains": "Un par ligne. Lu par le module OSINT comme le domaine principal.",
+      "timezone": "Fuseau IANA utilisé pour calculer les dates « aujourd’hui » et les échéances du site (échéancier, conseillers, badges)."
     }
   },
   "users": {

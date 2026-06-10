@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { apiClient } from "../../api/client";
 import { plantsApi } from "../../api/endpoints/plants";
 import { controlsApi, type FrameworkGovernanceMeta } from "../../api/endpoints/controls";
+import { todayISO } from "../../utils/dates";
 
 interface RiskAppetitePolicy {
   id: string;
@@ -98,7 +99,7 @@ export function RiskAppetiteGovernanceTab() {
       max_acceptable_score: 14,
       max_red_risks_count: 3,
       max_unacceptable_score: 20,
-      valid_from: new Date().toISOString().slice(0, 10),
+      valid_from: todayISO(),
       valid_until: null,
       plant: null,
       notes: "",

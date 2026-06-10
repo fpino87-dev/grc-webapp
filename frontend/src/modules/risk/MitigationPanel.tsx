@@ -5,6 +5,7 @@ import { bcpApi, type BcpPlan } from "../../api/endpoints/bcp";
 import { useAuthStore } from "../../store/auth";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
+import { usePlantToday } from "../../utils/dates";
 
 export function MitigationPanel({ assessmentId }: { assessmentId: string }) {
   const { t } = useTranslation();
@@ -25,7 +26,7 @@ export function MitigationPanel({ assessmentId }: { assessmentId: string }) {
     queryFn: () => riskApi.mitigationPlans(assessmentId),
   });
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = usePlantToday();
 
   // Preferiamo i BCP "coerenti" trovati dal contesto (cioè legati al processo BIA del risk).
   // Se sono vuoti (es. risk senza critical_process collegato o BCP non legato al processo),

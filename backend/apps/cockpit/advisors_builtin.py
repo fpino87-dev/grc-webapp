@@ -51,6 +51,16 @@ def schedule_drift_advisor(context=None):
     ]
 
 
+def _per_plant_today_q(build):
+    """
+    `Q` per confronti con l'"oggi" del sito (F3, timezone per Plant) senza
+    rompere l'aggregazione — vedi `plants.services.per_plant_today_q`.
+    """
+    from apps.plants.services import per_plant_today_q
+
+    return per_plant_today_q(build)
+
+
 def _per_plant(qs_values, code, module, area, severity, owner_role, effort_h,
                compliance_refs, deep_link, extra_params=None):
     """Costruisce un Insight per ogni plant con `c > 0` da una values().annotate(c=...)."""
@@ -216,14 +226,16 @@ def kpi_threshold_advisor(context=None):
 
 @register_advisor
 def mgmt_review_overdue_advisor(context=None):
-    """Riesami di direzione pianificati ma non tenuti (review_date passata)."""
-    from django.db.models import Count
-    from django.utils import timezone
+    """Riesami di direzione pianificati ma non tenuti (review_date passata
+    rispetto all'"oggi" del sito)."""
+    from django.db.models import Count, Q
     from apps.management_review.models import ManagementReview
     rows = (
-        ManagementReview.objects.filter(
-            status="pianificato", review_date__lt=timezone.localdate(), deleted_at__isnull=True,
-        ).values("plant_id").annotate(c=Count("id"))
+        ManagementReview.objects.filter(status="pianificato", deleted_at__isnull=True)
+        .filter(_per_plant_today_q(
+            lambda today, ids: Q(plant_id__in=ids, review_date__lt=today)
+        ))
+        .values("plant_id").annotate(c=Count("id"))
     )
     return _per_plant(
         rows, "mgmt_review.overdue", "management_review", "governance", "info",
@@ -370,15 +382,16 @@ def bcp_expired_untested_advisor(context=None):
     """Piani BCP approvati **scaduti di test o mai testati** per plant.
 
     Un BCP che non viene esercitato non dà garanzie di continuità: si segnala
-    chi ha `next_test_date` passata (test in ritardo) o `last_test_date` assente
-    (mai testato). Query aggregata, no N+1."""
+    chi ha `next_test_date` passata (test in ritardo, "oggi" del sito) o
+    `last_test_date` assente (mai testato). Query aggregata, no N+1."""
     from django.db.models import Count, Q
-    from django.utils import timezone
     from apps.bcp.models import BcpPlan
-    today = timezone.localdate()
     rows = (
         BcpPlan.objects.filter(status="approvato", deleted_at__isnull=True)
-        .filter(Q(last_test_date__isnull=True) | Q(next_test_date__lt=today))
+        .filter(_per_plant_today_q(
+            lambda today, ids: Q(plant_id__in=ids)
+            & (Q(last_test_date__isnull=True) | Q(next_test_date__lt=today))
+        ))
         .values("plant_id").annotate(c=Count("id"))
     )
     return _per_plant(
@@ -427,17 +440,22 @@ def risk_acceptance_expiring_advisor(context=None):
     """Accettazioni di rischio **in scadenza** (entro 30g) o già scadute, per plant.
 
     Quando la `risk_acceptance_expiry` decade, il rischio torna *non gestito*:
-    va rinnovato o trattato. Query aggregata, no N+1."""
+    va rinnovato o trattato. Query aggregata, no N+1; la finestra di 30 giorni
+    parte dall'"oggi" del sito."""
     from datetime import timedelta
-    from django.db.models import Count
-    from django.utils import timezone
+    from django.db.models import Count, Q
     from apps.risk.models import RiskAssessment
-    cutoff = timezone.localdate() + timedelta(days=30)
     rows = (
         RiskAssessment.objects.filter(
             deleted_at__isnull=True, risk_accepted_formally=True,
-            risk_acceptance_expiry__isnull=False, risk_acceptance_expiry__lte=cutoff,
+            risk_acceptance_expiry__isnull=False,
         ).exclude(status="archiviato")
+        .filter(_per_plant_today_q(
+            lambda today, ids: Q(
+                plant_id__in=ids,
+                risk_acceptance_expiry__lte=today + timedelta(days=30),
+            )
+        ))
         .values("plant_id").annotate(c=Count("id"))
     )
     return _per_plant(

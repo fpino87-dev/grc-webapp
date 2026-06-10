@@ -22,6 +22,33 @@ const EU_COUNTRIES_EXTRA = [["GB","Regno Unito"],
   ["US","Stati Uniti"],["JP","Giappone"],["CN","Cina"],
   ["OTHER","Altro"]];
 
+// Lista IANA dal browser; fallback minimo se Intl.supportedValuesOf non esiste
+const TIMEZONES: string[] = (() => {
+  const intl = Intl as unknown as { supportedValuesOf?: (key: string) => string[] };
+  if (typeof intl.supportedValuesOf === "function") {
+    try { return intl.supportedValuesOf("timeZone"); } catch { /* fallback sotto */ }
+  }
+  return ["Europe/Rome", "Europe/Paris", "Europe/Warsaw", "Europe/Istanbul",
+    "Europe/London", "America/New_York", "America/Chicago", "Asia/Shanghai",
+    "Asia/Tokyo", "UTC"];
+})();
+
+function TimezoneSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { t } = useTranslation();
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">{t("plants.fields.timezone")}</label>
+      <select value={value} onChange={e => onChange(e.target.value)}
+        className="w-full border rounded px-3 py-2 text-sm">
+        {/* il valore corrente resta selezionabile anche se non è nella lista del browser */}
+        {!TIMEZONES.includes(value) && value && <option value={value}>{value}</option>}
+        {TIMEZONES.map(tz => <option key={tz} value={tz}>{tz}</option>)}
+      </select>
+      <p className="mt-1 text-xs text-gray-500">{t("plants.hints.timezone")}</p>
+    </div>
+  );
+}
+
 function resolvePlantLogoSrc(plantId: string, logoUrl?: string | null) {
   if (!logoUrl) return "";
   const value = logoUrl.trim();
@@ -39,6 +66,7 @@ function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void 
     nis2_scope: plant.nis2_scope,
     status: plant.status,
     has_ot: plant.has_ot,
+    timezone: plant.timezone || "Europe/Rome",
     logo_url: plant.logo_url ?? "",
     nis2_sector: plant.nis2_sector ?? "",
     nis2_subsector: plant.nis2_subsector ?? "",
@@ -139,6 +167,7 @@ function EditPlantModal({ plant, onClose }: { plant: Plant; onClose: () => void 
                   <option value="essenziale">{t("status.essenziale")}</option>
                 </select>
               </div>
+              <TimezoneSelect value={form.timezone ?? "Europe/Rome"} onChange={v => set("timezone", v)} />
               <div className="flex items-center gap-2">
                 <input type="checkbox" id="edit_has_ot" checked={!!form.has_ot}
                   onChange={e => set("has_ot", e.target.checked)} className="rounded" />
@@ -285,6 +314,7 @@ const EMPTY: Partial<Plant> = {
   nis2_scope: "non_soggetto",
   status: "attivo",
   has_ot: false,
+  timezone: "Europe/Rome",
   logo_url: "",
   nis2_sector: "",
   nis2_subsector: "",
@@ -377,6 +407,7 @@ function PlantModal({ onClose }: { onClose: () => void }) {
                   </select>
                 </div>
               </div>
+              <TimezoneSelect value={form.timezone ?? "Europe/Rome"} onChange={v => set("timezone", v)} />
               <div className="flex items-center gap-2">
                 <input type="checkbox" id="has_ot" checked={!!form.has_ot}
                   onChange={e => set("has_ot", e.target.checked)} className="rounded" />
@@ -882,7 +913,7 @@ export function PlantsList() {
                         className="text-xs text-indigo-600 hover:underline">
                         {t("plants.actions.frameworks")}
                       </button>
-                      <button onClick={() => setPlant({ id: p.id, code: p.code, name: p.name })}
+                      <button onClick={() => setPlant({ id: p.id, code: p.code, name: p.name, timezone: p.timezone })}
                         className="text-xs text-primary-600 hover:underline">
                         {t("plants.actions.select")}
                       </button>

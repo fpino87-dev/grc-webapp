@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { incidentsApi, type Incident } from "../../api/endpoints/incidents";
 import { useTranslation } from "react-i18next";
+import { nowLocalForInput } from "../../utils/dates";
 
 export function NewIncidentForm({
   plants,
@@ -15,7 +16,9 @@ export function NewIncidentForm({
   const [form, setForm] = useState<Partial<Incident>>({
     severity: "media",
     nis2_notifiable: "da_valutare",
-    detected_at: new Date().toISOString().slice(0, 16),
+    // datetime-local vuole l'ora locale del browser, non UTC (di sera l'UTC
+    // arretrava data/ora di rilevamento — dato critico per i termini NIS2)
+    detected_at: nowLocalForInput(),
   });
 
   const mutation = useMutation({

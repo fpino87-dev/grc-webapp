@@ -10,9 +10,23 @@ class BusinessUnitSerializer(serializers.ModelSerializer):
 
 
 class PlantSerializer(serializers.ModelSerializer):
+    # Esplicito per accettare campo assente/vuoto → default Europe/Rome
+    timezone = serializers.CharField(required=False, allow_blank=True)
+
     class Meta:
         model = Plant
         fields = "__all__"
+
+    def validate_timezone(self, value):
+        import zoneinfo
+
+        from django.utils.translation import gettext as _
+
+        if value and value not in zoneinfo.available_timezones():
+            raise serializers.ValidationError(
+                _("Timezone IANA non valido: %(tz)s") % {"tz": value}
+            )
+        return value or "Europe/Rome"
 
 
 class PlantFrameworkSerializer(serializers.ModelSerializer):

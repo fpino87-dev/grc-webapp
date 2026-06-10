@@ -623,7 +623,8 @@
       "legal_entity_vat": "NIP / VAT",
       "nis2_activity_description": "Opis działalności NIS2 (dokumenty formalne)",
       "domain": "Domena główna",
-      "additional_domains": "Dodatkowe domeny / Zakład"
+      "additional_domains": "Dodatkowe domeny / Zakład",
+      "timezone": "Strefa czasowa zakładu"
     },
     "nis2_entity": {
       "section_title": "NIS2 i podmiot prawny",
@@ -722,7 +723,8 @@
     },
     "hints": {
       "domain": "Domena internetowa zakładu, używana przez moduł OSINT do pasywnego monitorowania.",
-      "additional_domains": "Jedna na linię. Odczytywane przez moduł OSINT jak domena główna."
+      "additional_domains": "Jedna na linię. Odczytywane przez moduł OSINT jak domena główna.",
+      "timezone": "Strefa IANA używana do obliczania dat „dzisiaj” i terminów zakładu (harmonogram, doradcy, odznaki)."
     }
   },
   "users": {
