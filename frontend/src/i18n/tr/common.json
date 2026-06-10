@@ -2490,6 +2490,7 @@
     "col_inherent": "İçsel Risk (P×I)",
     "col_residual": "Artık Risk (P×I)",
     "col_weighted": "Ağırlıklı",
+    "weighted_on_bia": "BIA kritikliğine göre ağırlıklı",
     "col_ale": "ALE (BIA'dan)",
     "ale_calculated": "BIA'dan hesaplandı",
     "ale_estimate": "Tahmin (BIA verisi eksik)",

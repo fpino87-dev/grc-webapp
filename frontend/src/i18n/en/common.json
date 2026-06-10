@@ -2411,6 +2411,7 @@
     "col_inherent": "Inherent Risk (P×I)",
     "col_residual": "Residual Risk (P×I)",
     "col_weighted": "Weighted",
+    "weighted_on_bia": "Weighted on BIA criticality",
     "col_ale": "ALE (from BIA)",
     "ale_calculated": "Calculated from BIA",
     "ale_estimate": "Estimate (BIA data missing)",

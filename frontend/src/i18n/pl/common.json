@@ -2490,6 +2490,7 @@
     "col_inherent": "Ryzyko Inherentne (P×I)",
     "col_residual": "Ryzyko Rezydualne (P×I)",
     "col_weighted": "Ważone",
+    "weighted_on_bia": "Ważone wg krytyczności BIA",
     "col_ale": "ALE (z BIA)",
     "ale_calculated": "Obliczone z BIA",
     "ale_estimate": "Szacunek (brakuje danych BIA)",

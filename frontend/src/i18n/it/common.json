@@ -2411,6 +2411,7 @@
     "col_inherent": "Rischio Inerente (P×I)",
     "col_residual": "Rischio Residuo (P×I)",
     "col_weighted": "Weighted (pesato)",
+    "weighted_on_bia": "Pesato sulla criticità BIA",
     "col_ale": "ALE (da BIA)",
     "ale_calculated": "Calcolato da BIA",
     "ale_estimate": "Stima (dati BIA mancanti)",
