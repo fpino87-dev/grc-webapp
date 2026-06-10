@@ -2051,6 +2051,43 @@
     "maintainer_supplier_label": "Bakım yapan tedarikçi",
     "maintainer_supplier_hint": "Varlığı bakımını yapan veya ona uzaktan erişimi olan tedarikçi. OT varlıklarının bakımını yapan bir tedarikçiyle ilgili kritik OSINT uyarısı, otomatik görev oluşturmak yerine manuel olarak yükseltilir.",
     "criticality_guide_title": "ℹ️ Kritiklik nasıl seçilir",
+    "criticality_label": "Kritiklik",
+    "empty_it": "BT varlığı bulunamadı",
+    "empty_ot": "OT varlığı bulunamadı",
+    "search_placeholder": "Ada göre ara...",
+    "new_asset_btn": "Yeni {{type}} varlığı",
+    "change_btn": "Change",
+    "impacted_summary": "Etkilenenler: {{controls}} kontrol, {{risks}} risk değerlendirmesi, {{processes}} süreç",
+    "cols": {
+      "deployment": "Dağıtım",
+      "criticality": "Kritiklik",
+      "internet_exposed": "İnternete açık",
+      "bia_processes": "BIA süreçleri",
+      "category": "Kategori",
+      "purdue": "Purdue seviyesi",
+      "vendor": "Satıcı"
+    },
+    "help": {
+      "title": "BT ve OT varlıkları — M04",
+      "description": "Tüm BT varlıklarını (sunucular, bulut hizmetleri, veritabanları) ve OT varlıklarını (PLC, SCADA, HMI) kaydeder. Kritiklik, risk değerlendirmelerindeki önceliği ve BCP zorunluluğunu belirler.",
+      "steps": {
+        "1": "Varlığı BT (bulut hizmetleri dahil) veya OT olarak sınıflandırın",
+        "2": "BT varlıkları için dağıtım türünü (on-prem, IaaS, PaaS, SaaS) ve bulut ise sağlayıcı ile hizmet adını belirleyin",
+        "3": "1-5 kritiklik atayın (formdaki tabloya bakın) ve kritik BIA süreçlerini bağlayın",
+        "4": "Change yönetimi kayıtlarını bağlamak ve yeniden değerlendirilecek varlıkları işaretlemek için 'Change kaydet' özelliğini kullanın",
+        "5": "Yeni kritik bulut hizmetlerini veya mimari değişiklikleri eklemek için listeyi düzenli olarak gözden geçirin"
+      },
+      "connections": {
+        "bia": "Kritik sürece bağlı varlık",
+        "risk": "Risk değerlendirmesine ve ağırlıklı skora tabi varlık (on-prem veya bulut)",
+        "bcp": "Kritik varlık (≥4) BCP planı ve periyodik testler gerektirir"
+      },
+      "config_needed": {
+        "1": "Önce M01'de tesisleri oluşturun",
+        "2": "Varlıkları bağlamadan önce BIA süreçlerini (M05) oluşturun",
+        "3": "Kritik SaaS/PaaS/IaaS hizmetleri listesini BT kataloğuyla uyumlu tutun"
+      }
+    },
     "criticality_table_value": "Değer",
     "criticality_table_label": "Etiket",
     "criticality_table_downtime": "Tolere edilen kesinti",

@@ -2051,6 +2051,43 @@
     "maintainer_supplier_label": "Fournisseur mainteneur",
     "maintainer_supplier_hint": "Fournisseur qui maintient ou a un accès distant à l'actif. Une alerte OSINT critique sur un fournisseur qui maintient des actifs OT est escaladée manuellement au lieu de générer une tâche automatique.",
     "criticality_guide_title": "ℹ️ Comment choisir la criticité",
+    "criticality_label": "Criticité",
+    "empty_it": "Aucun actif IT trouvé",
+    "empty_ot": "Aucun actif OT trouvé",
+    "search_placeholder": "Rechercher par nom...",
+    "new_asset_btn": "Nouvel actif {{type}}",
+    "change_btn": "Change",
+    "impacted_summary": "Impactés : {{controls}} contrôles, {{risks}} évaluations de risque, {{processes}} processus",
+    "cols": {
+      "deployment": "Déploiement",
+      "criticality": "Criticité",
+      "internet_exposed": "Exposé Internet",
+      "bia_processes": "Processus BIA",
+      "category": "Catégorie",
+      "purdue": "Niveau Purdue",
+      "vendor": "Fournisseur"
+    },
+    "help": {
+      "title": "Actifs IT et OT — M04",
+      "description": "Recense tous les actifs informatiques (serveurs, services cloud, bases de données) et opérationnels (PLC, SCADA, HMI). La criticité détermine la priorité des évaluations de risque et l'obligation de PCA.",
+      "steps": {
+        "1": "Classez l'actif comme IT (y compris services cloud) ou OT",
+        "2": "Pour les actifs IT, définissez le type de déploiement (on-prem, IaaS, PaaS, SaaS) et, si cloud, le fournisseur et le nom du service",
+        "3": "Attribuez une criticité 1-5 (voir tableau dans le formulaire) et liez les processus critiques de la BIA",
+        "4": "Utilisez « Enregistrer un change » pour lier les tickets de change management et marquer les actifs à réévaluer",
+        "5": "Révisez périodiquement la liste pour ajouter de nouveaux services cloud critiques ou des changements d'architecture"
+      },
+      "connections": {
+        "bia": "Actif lié à un processus critique",
+        "risk": "Actif (on-prem ou cloud) objet d'évaluation de risque et de score pondéré",
+        "bcp": "Un actif critique (≥4) exige un plan PCA et des tests périodiques"
+      },
+      "config_needed": {
+        "1": "Créez d'abord les sites dans M01",
+        "2": "Créez les processus BIA (M05) avant de lier les actifs",
+        "3": "Maintenez la liste des services SaaS/PaaS/IaaS critiques alignée avec le catalogue IT"
+      }
+    },
     "criticality_table_value": "Valeur",
     "criticality_table_label": "Étiquette",
     "criticality_table_downtime": "Temps d'arrêt toléré",

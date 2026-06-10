@@ -2051,6 +2051,43 @@
     "maintainer_supplier_label": "Dostawca utrzymujący",
     "maintainer_supplier_hint": "Dostawca, który utrzymuje zasób lub ma do niego zdalny dostęp. Krytyczny alert OSINT dotyczący dostawcy utrzymującego zasoby OT jest eskalowany ręcznie zamiast generowania automatycznego zadania.",
     "criticality_guide_title": "ℹ️ Jak wybrać krytyczność",
+    "criticality_label": "Krytyczność",
+    "empty_it": "Nie znaleziono zasobów IT",
+    "empty_ot": "Nie znaleziono zasobów OT",
+    "search_placeholder": "Szukaj po nazwie...",
+    "new_asset_btn": "Nowy zasób {{type}}",
+    "change_btn": "Change",
+    "impacted_summary": "Objęte: {{controls}} kontroli, {{risks}} ocen ryzyka, {{processes}} procesów",
+    "cols": {
+      "deployment": "Wdrożenie",
+      "criticality": "Krytyczność",
+      "internet_exposed": "Ekspozycja w Internecie",
+      "bia_processes": "Procesy BIA",
+      "category": "Kategoria",
+      "purdue": "Poziom Purdue",
+      "vendor": "Dostawca"
+    },
+    "help": {
+      "title": "Zasoby IT i OT — M04",
+      "description": "Ewidencjonuje wszystkie zasoby IT (serwery, usługi chmurowe, bazy danych) i OT (PLC, SCADA, HMI). Krytyczność określa priorytet w ocenach ryzyka i obowiązek BCP.",
+      "steps": {
+        "1": "Sklasyfikuj zasób jako IT (w tym usługi chmurowe) lub OT",
+        "2": "Dla zasobów IT ustaw typ wdrożenia (on-prem, IaaS, PaaS, SaaS), a w przypadku chmury — dostawcę i nazwę usługi",
+        "3": "Przypisz krytyczność 1-5 (zob. tabela w formularzu) i powiąż krytyczne procesy BIA",
+        "4": "Użyj „Zarejestruj change”, aby powiązać zgłoszenia change management i oznaczyć zasoby do ponownej oceny",
+        "5": "Okresowo przeglądaj listę, aby dodać nowe krytyczne usługi chmurowe lub zmiany architektury"
+      },
+      "connections": {
+        "bia": "Zasób powiązany z procesem krytycznym",
+        "risk": "Zasób (on-prem lub chmura) objęty oceną ryzyka i ważonym wynikiem",
+        "bcp": "Zasób krytyczny (≥4) wymaga planu BCP i okresowych testów"
+      },
+      "config_needed": {
+        "1": "Najpierw utwórz zakłady w M01",
+        "2": "Utwórz procesy BIA (M05) przed powiązaniem zasobów",
+        "3": "Utrzymuj listę krytycznych usług SaaS/PaaS/IaaS zgodną z katalogiem IT"
+      }
+    },
     "criticality_table_value": "Wartość",
     "criticality_table_label": "Etykieta",
     "criticality_table_downtime": "Tolerowany przestój",

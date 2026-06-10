@@ -1972,6 +1972,43 @@
     "maintainer_supplier_label": "Maintainer supplier",
     "maintainer_supplier_hint": "Supplier that maintains or has remote access to the asset. A critical OSINT alert on a supplier that maintains OT assets is escalated manually instead of generating an automatic task.",
     "criticality_guide_title": "ℹ️ How to choose criticality",
+    "criticality_label": "Criticality",
+    "empty_it": "No IT assets found",
+    "empty_ot": "No OT assets found",
+    "search_placeholder": "Search by name...",
+    "new_asset_btn": "New {{type}} asset",
+    "change_btn": "Change",
+    "impacted_summary": "Impacted: {{controls}} controls, {{risks}} risk assessments, {{processes}} processes",
+    "cols": {
+      "deployment": "Deployment",
+      "criticality": "Criticality",
+      "internet_exposed": "Internet exposed",
+      "bia_processes": "BIA processes",
+      "category": "Category",
+      "purdue": "Purdue level",
+      "vendor": "Vendor"
+    },
+    "help": {
+      "title": "IT and OT assets — M04",
+      "description": "Catalogs all IT assets (servers, cloud services, databases) and OT assets (PLC, SCADA, HMI). Criticality drives the priority in risk assessments and the BCP obligation.",
+      "steps": {
+        "1": "Classify the asset as IT (including cloud services) or OT",
+        "2": "For IT assets set the deployment type (on-prem, IaaS, PaaS, SaaS) and, if cloud, provider and service name",
+        "3": "Assign criticality 1-5 (see table in the form) and link the critical BIA processes",
+        "4": "Use 'Register change' to link change management tickets and flag assets for reassessment",
+        "5": "Review the list periodically to add new critical cloud services or architectural changes"
+      },
+      "connections": {
+        "bia": "Asset linked to a critical process",
+        "risk": "Asset (on-prem or cloud) subject to risk assessment and weighted score",
+        "bcp": "Critical asset (≥4) requires a BCP plan and periodic tests"
+      },
+      "config_needed": {
+        "1": "Create the Plants in M01 first",
+        "2": "Create the BIA processes (M05) before linking assets",
+        "3": "Keep the list of critical SaaS/PaaS/IaaS services aligned with the IT catalog"
+      }
+    },
     "criticality_table_value": "Value",
     "criticality_table_label": "Label",
     "criticality_table_downtime": "Tolerated downtime",

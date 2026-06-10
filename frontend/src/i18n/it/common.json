@@ -1972,6 +1972,43 @@
     "maintainer_supplier_label": "Fornitore manutentore",
     "maintainer_supplier_hint": "Fornitore che manutiene o ha accesso remoto all'asset. Un alert OSINT critico su un fornitore che manutiene asset OT viene messo in escalation manuale invece di generare un task automatico.",
     "criticality_guide_title": "ℹ️ Come scegliere la criticità",
+    "criticality_label": "Criticità",
+    "empty_it": "Nessun asset IT trovato",
+    "empty_ot": "Nessun asset OT trovato",
+    "search_placeholder": "Cerca per nome...",
+    "new_asset_btn": "Nuovo asset {{type}}",
+    "change_btn": "Change",
+    "impacted_summary": "Impattati: {{controls}} controlli, {{risks}} risk assessment, {{processes}} processi",
+    "cols": {
+      "deployment": "Deployment",
+      "criticality": "Criticità",
+      "internet_exposed": "Esposto internet",
+      "bia_processes": "Processi BIA",
+      "category": "Categoria",
+      "purdue": "Livello Purdue",
+      "vendor": "Vendor"
+    },
+    "help": {
+      "title": "Asset IT e OT — M04",
+      "description": "Censisce tutti gli asset informatici (server, servizi cloud, database) e operativi (PLC, SCADA, HMI). La criticità determina la priorità nelle valutazioni di rischio e l'obbligo di BCP.",
+      "steps": {
+        "1": "Classifica l'asset come IT (inclusi servizi cloud) o OT",
+        "2": "Per gli asset IT imposta il tipo di deployment (on-prem, IaaS, PaaS, SaaS) e, se cloud, provider e nome servizio",
+        "3": "Assegna criticità 1-5 (vedi tabella nel form) e collega i processi critici della BIA",
+        "4": "Usa 'Registra change' per collegare i ticket di change management e marcare gli asset da rivalutare",
+        "5": "Rivedi periodicamente l'elenco per aggiungere nuovi servizi cloud critici o modifiche architetturali"
+      },
+      "connections": {
+        "bia": "Asset collegato a processo critico",
+        "risk": "Asset (on-prem o cloud) oggetto di risk assessment e weighted score",
+        "bcp": "Asset critico (≥4) richiede piano BCP e test periodici"
+      },
+      "config_needed": {
+        "1": "Creare prima i Plant in M01",
+        "2": "Creare i processi BIA (M05) prima di collegare gli asset",
+        "3": "Mantenere allineato l'elenco dei servizi SaaS/PaaS/IaaS critici con il catalogo IT"
+      }
+    },
     "criticality_table_value": "Valore",
     "criticality_table_label": "Etichetta",
     "criticality_table_downtime": "Downtime tollerato",
