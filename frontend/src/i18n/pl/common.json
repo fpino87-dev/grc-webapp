@@ -1403,6 +1403,7 @@
       "evidence_download_failed": "Nie można pobrać pliku dowodu. Sprawdź uprawnienia lub spróbuj ponownie później.",
       "no_file_selected": "Brak wybranego pliku",
       "upload_failed": "Błąd podczas przesyłania pliku",
+      "version_upload_after_create": "Dokument utworzono, ale przesyłanie pliku nie powiodło się. Otwórz dokument i prześlij nową wersję.",
       "update_plant_failed": "Błąd podczas aktualizacji zakładu"
     },
     "controls_link": {

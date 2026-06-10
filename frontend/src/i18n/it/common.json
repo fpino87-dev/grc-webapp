@@ -1324,6 +1324,7 @@
       "evidence_download_failed": "Impossibile scaricare il file evidenza. Verifica i permessi o riprova più tardi.",
       "no_file_selected": "Nessun file selezionato",
       "upload_failed": "Errore durante il caricamento del file",
+      "version_upload_after_create": "Documento creato, ma il caricamento del file è fallito. Apri il documento e carica una nuova versione.",
       "update_plant_failed": "Errore durante l'aggiornamento del sito"
     },
     "controls_link": {

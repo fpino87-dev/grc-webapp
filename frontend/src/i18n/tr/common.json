@@ -1403,6 +1403,7 @@
       "evidence_download_failed": "Kanıt dosyası indirilemedi. İzinleri kontrol edin veya daha sonra tekrar deneyin.",
       "no_file_selected": "Dosya seçilmedi",
       "upload_failed": "Dosya yüklenirken hata",
+      "version_upload_after_create": "Belge oluşturuldu ancak dosya yüklemesi başarısız oldu. Belgeyi açın ve yeni bir sürüm yükleyin.",
       "update_plant_failed": "Site güncellenirken hata"
     },
     "controls_link": {

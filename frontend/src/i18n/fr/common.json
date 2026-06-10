@@ -1403,6 +1403,7 @@
       "evidence_download_failed": "Impossible de télécharger le fichier de preuve. Vérifiez les permissions ou réessayez plus tard.",
       "no_file_selected": "Aucun fichier sélectionné",
       "upload_failed": "Erreur lors du téléversement du fichier",
+      "version_upload_after_create": "Document créé, mais le téléversement du fichier a échoué. Ouvrez le document et chargez une nouvelle version.",
       "update_plant_failed": "Erreur lors de la mise à jour du site"
     },
     "controls_link": {

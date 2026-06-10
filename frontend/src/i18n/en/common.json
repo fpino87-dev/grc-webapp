@@ -1324,6 +1324,7 @@
       "evidence_download_failed": "Unable to download the evidence file. Check permissions or try again later.",
       "no_file_selected": "No file selected",
       "upload_failed": "Error while uploading the file",
+      "version_upload_after_create": "Document created, but the file upload failed. Open the document and upload a new version.",
       "update_plant_failed": "Error while updating the site"
     },
     "controls_link": {
