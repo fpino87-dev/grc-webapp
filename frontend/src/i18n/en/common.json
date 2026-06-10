@@ -1571,6 +1571,70 @@
     }
   },
   "incidents": {
+    "delete_confirm": "Delete the incident “{{title}}”?",
+    "detail_tabs": {
+      "management": "Management",
+      "classification": "NIS2 classification",
+      "method": "Classification method",
+      "timeline": "NIS2 timeline & notifications"
+    },
+    "management": {
+      "enisa_label": "ENISA classification",
+      "enisa_detail_label": "Category detail",
+      "select_placeholder": "— select —",
+      "affected_users_ph": "Affected users or systems (no.)",
+      "disruption_hours_ph": "Service disruption duration (hours)",
+      "financial_impact_ph": "Estimated financial impact (EUR)",
+      "personal_data": "Personal data involved",
+      "cross_border": "Cross-border impact",
+      "critical_infra": "Critical infrastructure impact",
+      "save_btn": "Save management update",
+      "saving": "Updating...",
+      "saved": "✓ Update recorded",
+      "save_error": "Error during the update"
+    },
+    "timeline_tab": {
+      "reg_deadline": "Regulatory deadline",
+      "step_status": "Progress status",
+      "generate_doc": "Generate official document",
+      "prepare_send": "Prepare send registration",
+      "register_title": "Register submission to authority",
+      "type_early": "Early Warning",
+      "type_formal": "Formal notification",
+      "type_final": "Final report",
+      "type_update": "Update",
+      "protocol_ph": "Authority protocol / case reference",
+      "response_ph": "Outcome or notes from the competent authority",
+      "confirm_send": "Confirm send registration",
+      "registry_title": "Official notifications registry",
+      "col_type": "Type",
+      "col_csirt": "CSIRT",
+      "col_sent_at": "Sent at",
+      "col_protocol": "Protocol",
+      "rca_title": "AI-assisted RCA draft",
+      "rca_preview_title": "Executive RCA Preview",
+      "rca_summary": "Executive summary",
+      "rca_root_cause": "Root cause",
+      "rca_immediate": "Immediate actions",
+      "rca_preventive": "Preventive actions",
+      "rca_lessons": "Lessons learned",
+      "rca_placeholder": "Editable RCA draft in operational format."
+    },
+    "method_extra": {
+      "taxonomy_title": "Official ENISA taxonomy",
+      "subcategories_label": "Subcategories",
+      "none_defined": "not defined",
+      "acn_category": "ACN category",
+      "csirt_required": "CSIRT obligation",
+      "gdpr_required": "Privacy Authority assessment",
+      "criterion_value_line": "value",
+      "criterion_boolean_line": "boolean criterion"
+    },
+    "config_extra": {
+      "csirt_label": "Competent CSIRT",
+      "portal_label": "Portal",
+      "csirt_fallback": "National CSIRT"
+    },
     "title": "Operations — Incidents",
     "empty": "No incidents recorded",
     "table": {

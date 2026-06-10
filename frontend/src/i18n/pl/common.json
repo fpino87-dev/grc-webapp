@@ -1650,6 +1650,70 @@
     }
   },
   "incidents": {
+    "delete_confirm": "Usunąć incydent „{{title}}”?",
+    "detail_tabs": {
+      "management": "Zarządzanie",
+      "classification": "Klasyfikacja NIS2",
+      "method": "Metoda klasyfikacji",
+      "timeline": "Oś czasu NIS2 i powiadomienia"
+    },
+    "management": {
+      "enisa_label": "Klasyfikacja ENISA",
+      "enisa_detail_label": "Szczegół kategorii",
+      "select_placeholder": "— wybierz —",
+      "affected_users_ph": "Dotknięci użytkownicy lub systemy (liczba)",
+      "disruption_hours_ph": "Czas przerwy w usłudze (godziny)",
+      "financial_impact_ph": "Szacowany wpływ finansowy (EUR)",
+      "personal_data": "Dane osobowe objęte incydentem",
+      "cross_border": "Wpływ transgraniczny (cross-border)",
+      "critical_infra": "Wpływ na infrastrukturę krytyczną",
+      "save_btn": "Zapisz aktualizację",
+      "saving": "Aktualizowanie...",
+      "saved": "✓ Aktualizacja zapisana",
+      "save_error": "Błąd podczas aktualizacji"
+    },
+    "timeline_tab": {
+      "reg_deadline": "Termin regulacyjny",
+      "step_status": "Stan zaawansowania",
+      "generate_doc": "Wygeneruj oficjalny dokument",
+      "prepare_send": "Przygotuj rejestrację wysyłki",
+      "register_title": "Zarejestruj wysyłkę do organu",
+      "type_early": "Early Warning",
+      "type_formal": "Powiadomienie formalne",
+      "type_final": "Raport końcowy",
+      "type_update": "Aktualizacja",
+      "protocol_ph": "Protokół organu / sygnatura sprawy",
+      "response_ph": "Wynik lub uwagi właściwego organu",
+      "confirm_send": "Potwierdź rejestrację wysyłki",
+      "registry_title": "Rejestr oficjalnych powiadomień",
+      "col_type": "Typ",
+      "col_csirt": "CSIRT",
+      "col_sent_at": "Data wysyłki",
+      "col_protocol": "Protokół",
+      "rca_title": "Szkic RCA wspomagany przez AI",
+      "rca_preview_title": "Podgląd RCA (executive)",
+      "rca_summary": "Streszczenie",
+      "rca_root_cause": "Przyczyna źródłowa",
+      "rca_immediate": "Działania natychmiastowe",
+      "rca_preventive": "Działania zapobiegawcze",
+      "rca_lessons": "Wnioski",
+      "rca_placeholder": "Edytowalny szkic RCA w formacie operacyjnym."
+    },
+    "method_extra": {
+      "taxonomy_title": "Oficjalna taksonomia ENISA",
+      "subcategories_label": "Podkategorie",
+      "none_defined": "niezdefiniowane",
+      "acn_category": "Kategoria ACN",
+      "csirt_required": "Obowiązek CSIRT",
+      "gdpr_required": "Ocena organu ochrony danych",
+      "criterion_value_line": "wartość",
+      "criterion_boolean_line": "kryterium logiczne"
+    },
+    "config_extra": {
+      "csirt_label": "Właściwy CSIRT",
+      "portal_label": "Portal",
+      "csirt_fallback": "Krajowy CSIRT"
+    },
     "title": "Operacje — Incydenty",
     "empty": "Brak zarejestrowanych incydentów",
     "table": {

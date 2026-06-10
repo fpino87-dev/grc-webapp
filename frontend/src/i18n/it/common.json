@@ -1571,6 +1571,70 @@
     }
   },
   "incidents": {
+    "delete_confirm": "Eliminare l'incidente “{{title}}”?",
+    "detail_tabs": {
+      "management": "Gestione",
+      "classification": "Classificazione NIS2",
+      "method": "Metodo di classificazione",
+      "timeline": "Timeline NIS2 & Notifiche"
+    },
+    "management": {
+      "enisa_label": "Classificazione ENISA",
+      "enisa_detail_label": "Dettaglio categoria",
+      "select_placeholder": "— seleziona —",
+      "affected_users_ph": "Utenti o sistemi coinvolti (n.)",
+      "disruption_hours_ph": "Durata interruzione servizio (ore)",
+      "financial_impact_ph": "Impatto economico stimato (EUR)",
+      "personal_data": "Coinvolgimento dati personali",
+      "cross_border": "Impatto multi-paese (cross-border)",
+      "critical_infra": "Impatto su infrastrutture critiche",
+      "save_btn": "Salva aggiornamento gestione",
+      "saving": "Aggiornamento in corso...",
+      "saved": "✓ Aggiornamento registrato",
+      "save_error": "Errore durante l'aggiornamento"
+    },
+    "timeline_tab": {
+      "reg_deadline": "Scadenza regolatoria",
+      "step_status": "Stato avanzamento",
+      "generate_doc": "Genera documento ufficiale",
+      "prepare_send": "Prepara registrazione invio",
+      "register_title": "Registra invio verso autorità",
+      "type_early": "Early Warning",
+      "type_formal": "Notifica formale",
+      "type_final": "Report finale",
+      "type_update": "Aggiornamento",
+      "protocol_ph": "Protocollo autorità / riferimento pratica",
+      "response_ph": "Esito o note dell'autorità competente",
+      "confirm_send": "Conferma registrazione invio",
+      "registry_title": "Registro notifiche ufficiali",
+      "col_type": "Tipo",
+      "col_csirt": "CSIRT",
+      "col_sent_at": "Data invio",
+      "col_protocol": "Protocollo",
+      "rca_title": "Bozza RCA assistita da AI",
+      "rca_preview_title": "Executive RCA Preview",
+      "rca_summary": "Sommario esecutivo",
+      "rca_root_cause": "Causa radice",
+      "rca_immediate": "Azioni immediate",
+      "rca_preventive": "Azioni preventive",
+      "rca_lessons": "Lessons learned",
+      "rca_placeholder": "Bozza RCA editabile in formato operativo."
+    },
+    "method_extra": {
+      "taxonomy_title": "Tassonomia ENISA ufficiale",
+      "subcategories_label": "Sottocategorie",
+      "none_defined": "non definite",
+      "acn_category": "Categoria ACN",
+      "csirt_required": "Obbligo CSIRT",
+      "gdpr_required": "Valutazione Garante Privacy",
+      "criterion_value_line": "valore",
+      "criterion_boolean_line": "criterio booleano"
+    },
+    "config_extra": {
+      "csirt_label": "CSIRT competente",
+      "portal_label": "Portale",
+      "csirt_fallback": "CSIRT Nazionale"
+    },
     "title": "Operazioni — Incidenti",
     "empty": "Nessun incidente registrato",
     "table": {

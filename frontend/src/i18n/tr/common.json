@@ -1650,6 +1650,70 @@
     }
   },
   "incidents": {
+    "delete_confirm": "“{{title}}” olayı silinsin mi?",
+    "detail_tabs": {
+      "management": "Yönetim",
+      "classification": "NIS2 sınıflandırması",
+      "method": "Sınıflandırma yöntemi",
+      "timeline": "NIS2 zaman çizelgesi ve bildirimler"
+    },
+    "management": {
+      "enisa_label": "ENISA sınıflandırması",
+      "enisa_detail_label": "Kategori detayı",
+      "select_placeholder": "— seçin —",
+      "affected_users_ph": "Etkilenen kullanıcı veya sistemler (sayı)",
+      "disruption_hours_ph": "Hizmet kesintisi süresi (saat)",
+      "financial_impact_ph": "Tahmini mali etki (EUR)",
+      "personal_data": "Kişisel veri etkilenimi",
+      "cross_border": "Sınır ötesi etki (cross-border)",
+      "critical_infra": "Kritik altyapı etkisi",
+      "save_btn": "Yönetim güncellemesini kaydet",
+      "saving": "Güncelleniyor...",
+      "saved": "✓ Güncelleme kaydedildi",
+      "save_error": "Güncelleme sırasında hata"
+    },
+    "timeline_tab": {
+      "reg_deadline": "Düzenleyici son tarih",
+      "step_status": "İlerleme durumu",
+      "generate_doc": "Resmî belge oluştur",
+      "prepare_send": "Gönderim kaydını hazırla",
+      "register_title": "Otoriteye gönderimi kaydet",
+      "type_early": "Early Warning",
+      "type_formal": "Resmî bildirim",
+      "type_final": "Nihai rapor",
+      "type_update": "Güncelleme",
+      "protocol_ph": "Otorite protokolü / dosya referansı",
+      "response_ph": "Yetkili otoritenin sonucu veya notları",
+      "confirm_send": "Gönderim kaydını onayla",
+      "registry_title": "Resmî bildirim kütüğü",
+      "col_type": "Tür",
+      "col_csirt": "CSIRT",
+      "col_sent_at": "Gönderim tarihi",
+      "col_protocol": "Protokol",
+      "rca_title": "AI destekli RCA taslağı",
+      "rca_preview_title": "Yönetici RCA Önizlemesi",
+      "rca_summary": "Yönetici özeti",
+      "rca_root_cause": "Kök neden",
+      "rca_immediate": "Acil eylemler",
+      "rca_preventive": "Önleyici eylemler",
+      "rca_lessons": "Çıkarılan dersler",
+      "rca_placeholder": "Operasyonel formatta düzenlenebilir RCA taslağı."
+    },
+    "method_extra": {
+      "taxonomy_title": "Resmî ENISA taksonomisi",
+      "subcategories_label": "Alt kategoriler",
+      "none_defined": "tanımlanmamış",
+      "acn_category": "ACN kategorisi",
+      "csirt_required": "CSIRT yükümlülüğü",
+      "gdpr_required": "Veri koruma otoritesi değerlendirmesi",
+      "criterion_value_line": "değer",
+      "criterion_boolean_line": "mantıksal kriter"
+    },
+    "config_extra": {
+      "csirt_label": "Yetkili CSIRT",
+      "portal_label": "Portal",
+      "csirt_fallback": "Ulusal CSIRT"
+    },
     "title": "Operasyonlar — Olaylar",
     "empty": "Kayıtlı olay yok",
     "table": {
