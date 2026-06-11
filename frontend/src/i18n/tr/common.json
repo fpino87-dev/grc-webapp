@@ -358,7 +358,10 @@
       "vda_isa": "VDA ISA İndir",
       "proto_vda_isa": "VDA ISA Prototip İndir",
       "nis2_matrix": "NIS2 Matrisi İndir",
-      "audit_package": "Denetim paketini indir"
+      "audit_package": "Denetim paketini indir",
+      "audit_package_hint": "Her {{framework}} kontrolü için belge ve kanıt içeren ZIP. INDICE.csv ve MANCANZE.txt içerir.",
+      "nis2_matrix_hint_acn": "NIS2 matrisi — ACN Kararı 127434/2026 (İtalya uygulaması)",
+      "nis2_matrix_hint_eu": "NIS2 matrisi — AB Direktifi 2022/2555"
     },
     "drawer": {
       "title": "Kontrol yönetimi",
@@ -416,6 +419,8 @@
         "official_status": "Resmi durum",
         "system_suggestion": "Sistem önerisi",
         "apply_suggestion": "Öneriyi uygula ({{status}})",
+        "gap_actions_title": "Önerilen eylemler",
+        "gap_action_fallback": "Eylem",
         "apply_suggestion_title": "Öneriyi uygula",
         "note_optional": "Not (isteğe bağlı)",
         "applying": "Uygulanıyor...",
@@ -534,6 +539,7 @@
     "na_justification_too_short": "Gerekçe en az 20 karakter içermelidir.",
     "truncated_warning": "{{total}} kontrolden {{shown}} tanesi gösteriliyor: sayaçlar kısmidir. Tümünü görmek için filtrelerle daraltın.",
     "search_placeholder": "ID veya başlığa göre ara…",
+    "suggestion_system": "Sistem önerisi: {{status}}",
     "pagination": {
       "range": "{{total}} içinden {{from}}–{{to}}",
       "page": "Sayfa {{page}}/{{total}}",

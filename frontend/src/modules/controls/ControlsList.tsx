@@ -109,7 +109,7 @@ function InlineStatusSelect({ instance }: { instance: ControlInstance }) {
         onBlur={() => setEditing(false)}
         className="border rounded px-1 py-0.5 text-xs"
       >
-        {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+        {STATUS_OPTIONS.map(s => <option key={s} value={s}>{t(`status.${s}`)}</option>)}
       </select>
     );
   }
@@ -126,10 +126,10 @@ function InlineStatusSelect({ instance }: { instance: ControlInstance }) {
       </button>
       {instance.suggestion_differs && instance.suggested_status && (
         <span
-          title={`Suggerimento sistema: ${instance.suggested_status}`}
+          title={t("controls.suggestion_system", { status: t(`status.${instance.suggested_status}`) })}
           className="text-xs px-1.5 py-0.5 rounded border border-dashed border-indigo-300 text-indigo-500"
         >
-          → {instance.suggested_status}
+          → {t(`status.${instance.suggested_status}`)}
         </span>
       )}
       {canPropagate && (
@@ -364,8 +364,8 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
             disabled={exporting === "compliance_matrix"}
             className="px-3 py-1.5 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-60"
             title={nis2MatrixCode === "ACN_NIS2"
-              ? "Matrice NIS2 — Delibera ACN 127434/2026 (attuazione italiana)"
-              : "Matrice NIS2 — Direttiva UE 2022/2555"}
+              ? t("controls.export.nis2_matrix_hint_acn")
+              : t("controls.export.nis2_matrix_hint_eu")}
           >
             {exporting === "compliance_matrix" ? t("common.downloading") : t("controls.export.nis2_matrix")}
           </button>
@@ -378,7 +378,7 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
             onClick={() => handleAuditPackage("TISAX")}
             disabled={!!exporting}
             className="px-3 py-1.5 bg-gray-800 text-white text-sm rounded hover:bg-gray-900 disabled:opacity-60 flex items-center gap-1.5"
-            title="ZIP con documenti ed evidenze per ogni controllo TISAX (L2+L3). Include INDICE.csv e MANCANZE.txt."
+            title={t("controls.export.audit_package_hint", { framework: "TISAX (L2+L3)" })}
           >
             {exporting === "audit_TISAX" ? t("common.downloading") : <>📦 {t("controls.export.audit_package")} — TISAX</>}
           </button>
@@ -388,7 +388,7 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
             onClick={() => handleAuditPackage("ISO27001")}
             disabled={!!exporting}
             className="px-3 py-1.5 bg-gray-800 text-white text-sm rounded hover:bg-gray-900 disabled:opacity-60 flex items-center gap-1.5"
-            title="ZIP con documenti ed evidenze per ogni controllo ISO 27001. Include INDICE.csv e MANCANZE.txt."
+            title={t("controls.export.audit_package_hint", { framework: "ISO 27001" })}
           >
             {exporting === "audit_ISO27001" ? t("common.downloading") : <>📦 {t("controls.export.audit_package")} — ISO 27001</>}
           </button>
@@ -398,7 +398,7 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
             onClick={() => handleAuditPackage(nis2MatrixCode)}
             disabled={!!exporting}
             className="px-3 py-1.5 bg-gray-800 text-white text-sm rounded hover:bg-gray-900 disabled:opacity-60 flex items-center gap-1.5"
-            title="ZIP con documenti ed evidenze per ogni controllo NIS2. Include INDICE.csv e MANCANZE.txt."
+            title={t("controls.export.audit_package_hint", { framework: "NIS2" })}
           >
             {exporting === `audit_${nis2MatrixCode}` ? t("common.downloading") : <>📦 {t("controls.export.audit_package")} — NIS2</>}
           </button>

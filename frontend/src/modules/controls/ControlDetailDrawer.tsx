@@ -709,10 +709,10 @@ function TabValutazione({
           />
           {gapActions.length > 0 && (
             <div className="border rounded p-2 bg-slate-50">
-              <p className="text-xs font-semibold text-slate-700 mb-1">Azioni suggerite</p>
+              <p className="text-xs font-semibold text-slate-700 mb-1">{t("controls.drawer.evaluation.gap_actions_title")}</p>
               {gapActions.map((a, i) => (
                 <p key={i} className="text-xs text-slate-700">
-                  - [{a.priority ?? "n/a"}] {a.title ?? "Azione"}: {a.description ?? ""}
+                  - [{a.priority ?? "n/a"}] {a.title ?? t("controls.drawer.evaluation.gap_action_fallback")}: {a.description ?? ""}
                 </p>
               ))}
             </div>

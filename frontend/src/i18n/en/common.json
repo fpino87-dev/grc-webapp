@@ -291,7 +291,10 @@
       "vda_isa": "Download VDA ISA",
       "proto_vda_isa": "Download VDA ISA Prototype",
       "nis2_matrix": "Download NIS2 Matrix",
-      "audit_package": "Download Audit Package"
+      "audit_package": "Download Audit Package",
+      "audit_package_hint": "ZIP with documents and evidence for each {{framework}} control. Includes INDICE.csv and MANCANZE.txt.",
+      "nis2_matrix_hint_acn": "NIS2 matrix — ACN Resolution 127434/2026 (Italian implementation)",
+      "nis2_matrix_hint_eu": "NIS2 matrix — EU Directive 2022/2555"
     },
     "drawer": {
       "title": "Control management",
@@ -349,6 +352,8 @@
         "official_status": "Official status",
         "system_suggestion": "System suggestion",
         "apply_suggestion": "Apply suggestion ({{status}})",
+        "gap_actions_title": "Suggested actions",
+        "gap_action_fallback": "Action",
         "apply_suggestion_title": "Apply suggestion",
         "note_optional": "Note (optional)",
         "applying": "Applying...",
@@ -467,6 +472,7 @@
     "na_justification_too_short": "The justification must contain at least 20 characters.",
     "truncated_warning": "Showing {{shown}} of {{total}} controls: counters are partial. Narrow with filters to see them all.",
     "search_placeholder": "Search by ID or title…",
+    "suggestion_system": "System suggestion: {{status}}",
     "pagination": {
       "range": "{{from}}–{{to}} of {{total}}",
       "page": "Page {{page}}/{{total}}",

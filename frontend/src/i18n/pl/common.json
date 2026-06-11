@@ -358,7 +358,10 @@
       "vda_isa": "Pobierz VDA ISA",
       "proto_vda_isa": "Pobierz VDA ISA Prototypy",
       "nis2_matrix": "Pobierz Macierz NIS2",
-      "audit_package": "Pobierz paczkę audytu"
+      "audit_package": "Pobierz paczkę audytu",
+      "audit_package_hint": "ZIP z dokumentami i dowodami dla każdej kontroli {{framework}}. Zawiera INDICE.csv i MANCANZE.txt.",
+      "nis2_matrix_hint_acn": "Macierz NIS2 — Uchwała ACN 127434/2026 (implementacja włoska)",
+      "nis2_matrix_hint_eu": "Macierz NIS2 — Dyrektywa UE 2022/2555"
     },
     "drawer": {
       "title": "Zarządzanie kontrolą",
@@ -416,6 +419,8 @@
         "official_status": "Oficjalny status",
         "system_suggestion": "Sugestia systemu",
         "apply_suggestion": "Zastosuj sugestię ({{status}})",
+        "gap_actions_title": "Sugerowane działania",
+        "gap_action_fallback": "Działanie",
         "apply_suggestion_title": "Zastosuj sugestię",
         "note_optional": "Notatka (opcjonalna)",
         "applying": "Stosowanie...",
@@ -534,6 +539,7 @@
     "na_justification_too_short": "Uzasadnienie musi zawierać co najmniej 20 znaków.",
     "truncated_warning": "Wyświetlono {{shown}} z {{total}} kontroli: liczniki są częściowe. Zawęź filtrami, aby zobaczyć wszystkie.",
     "search_placeholder": "Szukaj po ID lub tytule…",
+    "suggestion_system": "Sugestia systemu: {{status}}",
     "pagination": {
       "range": "{{from}}–{{to}} z {{total}}",
       "page": "Strona {{page}}/{{total}}",

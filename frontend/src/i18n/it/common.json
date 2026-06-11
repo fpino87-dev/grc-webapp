@@ -291,7 +291,10 @@
       "vda_isa": "Scarica VDA ISA",
       "proto_vda_isa": "Scarica VDA ISA Prototipi",
       "nis2_matrix": "Scarica NIS2 Matrix",
-      "audit_package": "Scarica Audit Package"
+      "audit_package": "Scarica Audit Package",
+      "audit_package_hint": "ZIP con documenti ed evidenze per ogni controllo {{framework}}. Include INDICE.csv e MANCANZE.txt.",
+      "nis2_matrix_hint_acn": "Matrice NIS2 — Delibera ACN 127434/2026 (attuazione italiana)",
+      "nis2_matrix_hint_eu": "Matrice NIS2 — Direttiva UE 2022/2555"
     },
     "drawer": {
       "title": "Gestione controllo",
@@ -349,6 +352,8 @@
         "official_status": "Stato ufficiale",
         "system_suggestion": "Suggerimento sistema",
         "apply_suggestion": "Applica suggerimento ({{status}})",
+        "gap_actions_title": "Azioni suggerite",
+        "gap_action_fallback": "Azione",
         "apply_suggestion_title": "Applica suggerimento",
         "note_optional": "Nota (opzionale)",
         "applying": "Applicazione...",
@@ -467,6 +472,7 @@
     "na_justification_too_short": "La giustificazione deve contenere almeno 20 caratteri.",
     "truncated_warning": "Mostrati {{shown}} controlli su {{total}}: i contatori sono parziali. Restringi con i filtri per vederli tutti.",
     "search_placeholder": "Cerca per ID o titolo…",
+    "suggestion_system": "Suggerimento sistema: {{status}}",
     "pagination": {
       "range": "{{from}}–{{to}} di {{total}}",
       "page": "Pagina {{page}}/{{total}}",
