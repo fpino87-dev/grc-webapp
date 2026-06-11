@@ -49,7 +49,6 @@ function InlineStatusSelect({ instance }: { instance: ControlInstance }) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [propagated, setPropagated] = useState<number | null>(null);
-  const [crossPlant, setCrossPlant] = useState(false);
   const { t } = useTranslation();
 
   // Sempre via POST /evaluate/ (mai PATCH diretta): il service valida evidenze
@@ -86,8 +85,10 @@ function InlineStatusSelect({ instance }: { instance: ControlInstance }) {
     updateMutation.mutate({ status, note: "" });
   }
 
+  // Propaga solo entro lo stesso plant ai controlli equivalenti (la propagazione
+  // cross-plant è stata rimossa: ogni sito ha evidenze e controlli propri). (C4)
   const propagateMutation = useMutation({
-    mutationFn: () => controlsApi.propagate(instance.id, crossPlant),
+    mutationFn: () => controlsApi.propagate(instance.id),
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ["controls"] });
       setPropagated(data.propagated_to);
@@ -132,34 +133,18 @@ function InlineStatusSelect({ instance }: { instance: ControlInstance }) {
         </span>
       )}
       {canPropagate && (
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => propagateMutation.mutate()}
-            disabled={propagateMutation.isPending}
-            title={crossPlant
-              ? t("controls.actions.propagate_hint_cross_plant", { defaultValue: "Propaga a tutti i plant con questo controllo" })
-              : t("controls.actions.propagate_hint")}
-            className="text-xs text-indigo-500 hover:text-indigo-700 border border-indigo-200 rounded px-1.5 py-0.5 hover:bg-indigo-50 disabled:opacity-50"
-          >
-            {propagateMutation.isPending
-              ? "..."
-              : propagated !== null
-              ? `✓ ${propagated}`
-              : t("controls.actions.propagate")}
-          </button>
-          <label
-            title={t("controls.actions.cross_plant_label", { defaultValue: "Includi tutti i plant" })}
-            className="flex items-center gap-0.5 cursor-pointer text-xs text-gray-400 hover:text-gray-600"
-          >
-            <input
-              type="checkbox"
-              checked={crossPlant}
-              onChange={e => setCrossPlant(e.target.checked)}
-              className="w-3 h-3 accent-indigo-500"
-            />
-            <span>tutti plant</span>
-          </label>
-        </div>
+        <button
+          onClick={() => propagateMutation.mutate()}
+          disabled={propagateMutation.isPending}
+          title={t("controls.actions.propagate_hint")}
+          className="text-xs text-indigo-500 hover:text-indigo-700 border border-indigo-200 rounded px-1.5 py-0.5 hover:bg-indigo-50 disabled:opacity-50"
+        >
+          {propagateMutation.isPending
+            ? "..."
+            : propagated !== null
+            ? `✓ ${propagated}`
+            : t("controls.actions.propagate")}
+        </button>
       )}
     </div>
   );

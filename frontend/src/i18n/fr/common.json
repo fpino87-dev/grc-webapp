@@ -509,7 +509,7 @@
     "actions": {
       "open_drawer": "Ouvrir le contrôle",
       "click_to_edit": "Cliquer pour modifier",
-      "propagate_hint": "Propager ce statut aux contrôles liés",
+      "propagate_hint": "Propager ce statut aux contrôles équivalents du même site",
       "propagate": "⇒ propager",
       "delete_title": "Supprimer l'instance de contrôle",
       "delete_confirm": "Supprimer l'instance de contrôle {{id}} ? Autorisé uniquement si le statut est « non évalué » (sauf superuser)."

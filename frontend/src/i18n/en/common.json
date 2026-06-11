@@ -442,7 +442,7 @@
     "actions": {
       "open_drawer": "Open control",
       "click_to_edit": "Click to edit",
-      "propagate_hint": "Propagate this status to related controls",
+      "propagate_hint": "Propagate this status to equivalent controls in the same site",
       "propagate": "⇒ propagate",
       "delete_title": "Delete control instance",
       "delete_confirm": "Delete control instance {{id}}? Allowed only when status is «not evaluated» (except superuser)."

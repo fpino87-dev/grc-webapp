@@ -119,13 +119,13 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def propagate(self, request, pk=None):
         """
-        Propaga lo stato ai controlli mappati rispettando tipo di relazione e direzione.
-        Body opzionale: { "cross_plant": true }
+        Propaga lo stato ai controlli mappati dello stesso plant, rispettando
+        tipo di relazione e direzione. La propagazione cross-plant è stata
+        rimossa (ogni sito ha evidenze e controlli propri). (C4)
         """
         from ..services import propagate_control
         instance = self.get_object()
-        cross_plant = bool(request.data.get("cross_plant", False))
-        result = propagate_control(instance, request.user, cross_plant=cross_plant)
+        result = propagate_control(instance, request.user)
         return Response(result)
 
     @action(detail=True, methods=["post"], url_path="evaluate")

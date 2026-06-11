@@ -171,21 +171,22 @@ _PROPAGABLE_STATUSES = {"compliant", "na"}
 _PROPAGABLE_RELATIONSHIPS = {"equivalente", "covers"}
 
 
-def propagate_control(instance, user, cross_plant: bool = False) -> dict:
+def propagate_control(instance, user) -> dict:
     """
-    Propaga lo stato dell'istanza ai controlli mappati rispettando
-    tipo di relazione e direzione.
+    Propaga lo stato dell'istanza ai controlli mappati **dello stesso plant**,
+    rispettando tipo di relazione e direzione.
 
     Regole:
     - Solo stati 'compliant' e 'na' sono propagabili.
     - 'equivalente'  → bidirezionale (A≡B, quindi B≡A)
     - 'covers'       → solo source → target  (A copre B; B non copre A)
     - 'parziale', 'correlato', 'extends' → ignorati (valutazione separata)
-    - cross_plant=False → solo stesso plant
-    - cross_plant=True  → tutti i plant che hanno un'istanza del controllo target
+    - Sempre e solo entro lo stesso plant: la propagazione cross-plant è stata
+      rimossa per scelta — ogni sito deve avere evidenze e controlli propri,
+      altrimenti la conformità non è credibile in audit. (C4)
 
     Non esegue la validazione delle evidenze: la propagazione copia il dato
-    già validato sul controllo sorgente.
+    già validato sul controllo sorgente (stesso plant → stesse evidenze).
 
     Returns: {"propagated_to": int, "skipped_no_instance": int}
     """
@@ -208,16 +209,23 @@ def propagate_control(instance, user, cross_plant: bool = False) -> dict:
     if not target_control_ids:
         return {"propagated_to": 0, "skipped_no_instance": 0}
 
+    # Solo controlli dello stesso plant (mai cross-plant).
     qs = ControlInstance.objects.filter(
         control_id__in=target_control_ids,
+        plant=instance.plant,
         deleted_at__isnull=True,
     )
-    if not cross_plant:
-        qs = qs.filter(plant=instance.plant)
 
     note_origin = instance.na_justification or instance.last_evaluated_note or ""
     note_for_target = f"Propagato da {instance.control.external_id}" + (
         f": {note_origin}" if note_origin else ""
+    )
+
+    # Per i 'compliant' colleghiamo al target le evidenze del controllo sorgente,
+    # così il controllo equivalente non risulta conforme con evidenze vuote nel
+    # suo framework. Stesso plant → le evidenze appartengono allo stesso plant. (C4)
+    source_evidences = (
+        list(instance.evidences.all()) if instance.status == "compliant" else []
     )
 
     propagated = 0
@@ -235,6 +243,9 @@ def propagate_control(instance, user, cross_plant: bool = False) -> dict:
             update_fields.append("na_justification")
         target.save(update_fields=update_fields)
 
+        if source_evidences:
+            target.evidences.add(*source_evidences)
+
         log_action(
             user=user,
             action_code="control.propagated",
@@ -245,7 +256,6 @@ def propagate_control(instance, user, cross_plant: bool = False) -> dict:
                 "source_control": instance.control.external_id,
                 "source_plant": str(instance.plant_id),
                 "propagated_status": instance.status,
-                "cross_plant": cross_plant,
             },
         )
         propagated += 1

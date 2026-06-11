@@ -509,7 +509,7 @@
     "actions": {
       "open_drawer": "Kontrolü aç",
       "click_to_edit": "Düzenlemek için tıklayın",
-      "propagate_hint": "Bu durumu ilgili kontrollere yay",
+      "propagate_hint": "Bu durumu aynı tesisteki eşdeğer kontrollere yay",
       "propagate": "⇒ yay",
       "delete_title": "Kontrol örneğini sil",
       "delete_confirm": "{{id}} kontrol örneği silinsin mi? Yalnızca henüz değerlendirilmemişse izin verilir (süper kullanıcı hariç)."

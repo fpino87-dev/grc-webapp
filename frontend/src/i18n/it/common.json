@@ -442,7 +442,7 @@
     "actions": {
       "open_drawer": "Gestione controllo",
       "click_to_edit": "Clicca per modificare",
-      "propagate_hint": "Propaga questo stato ai controlli correlati",
+      "propagate_hint": "Propaga questo stato ai controlli equivalenti dello stesso sito",
       "propagate": "⇒ propaga",
       "delete_title": "Elimina istanza controllo",
       "delete_confirm": "Eliminare l'istanza controllo {{id}}? Consentito solo se non ancora valutata (salvo superuser)."

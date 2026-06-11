@@ -183,11 +183,10 @@ export const controlsApi = {
     ).then((r) => r.data),
   updateInstance: (id: string, data: Partial<ControlInstance>) =>
     apiClient.patch<ControlInstance>(`/controls/instances/${id}/`, data).then((r) => r.data),
-  propagate: (id: string, crossPlant = false) =>
+  propagate: (id: string) =>
     apiClient
       .post<{ propagated_to: number; skipped_no_instance: number; blocked?: string }>(
         `/controls/instances/${id}/propagate/`,
-        { cross_plant: crossPlant },
       )
       .then((r) => r.data),
   evaluate: (id: string, status: string, note: string) =>

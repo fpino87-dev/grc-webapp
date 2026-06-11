@@ -509,7 +509,7 @@
     "actions": {
       "open_drawer": "Otwórz kontrolę",
       "click_to_edit": "Kliknij aby edytować",
-      "propagate_hint": "Propaguj ten status do powiązanych kontroli",
+      "propagate_hint": "Propaguj ten status do równoważnych kontroli w tym samym zakładzie",
       "propagate": "⇒ propaguj",
       "delete_title": "Usuń instancję kontroli",
       "delete_confirm": "Usunąć instancję kontroli {{id}}? Dozwolone tylko, jeśli nie została jeszcze oceniona (oprócz superużytkownika)."
