@@ -619,7 +619,13 @@ export function ControlsList() {
                     <MappingBadges mappings={c.mapped_controls} />
                   </td>
                   <td className="px-4 py-3">
-                    <MaturityBadge level={c.calc_maturity_level} />
+                    {c.framework_code.includes("TISAX") ? (
+                      <MaturityBadge level={c.calc_maturity_level} />
+                    ) : (
+                      <span className="text-xs text-gray-300" title={t("controls.maturity_tisax_only")}>
+                        —
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <InlineStatusSelect instance={c} />

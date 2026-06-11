@@ -217,6 +217,11 @@ class ControlInstance(BaseModel):
     def calc_maturity_level(self) -> int:
         """Calcola maturity level 0-5 da status + evidenze per VDA ISA TISAX.
 
+        Significativa solo per i framework TISAX (VDA ISA): la UI mostra la
+        maturità unicamente sulle righe/controlli TISAX. Per gli altri
+        framework il valore resta calcolato ma non viene esposto perché
+        ridondante (mera funzione dello stato).
+
         Le evidenze sono lette via `.all()` + filtro in Python: con il
         prefetch della lista controlli non costa query aggiuntive (C2).
         """
@@ -234,7 +239,13 @@ class ControlInstance(BaseModel):
                 if ev.deleted_at is None and ev.valid_until and ev.valid_until >= today
             )
             if self.status == "parziale":
-                return 3 if valid_count else 2
-            return 5 if valid_count >= 2 else 4
+                return 2  # pianificato / implementazione parziale
+            # compliant: 3 (definito e documentato) di base, 4 (gestito e misurato)
+            # con ≥2 evidenze valide. Il livello 5 VDA ISA (ottimizzato, con
+            # miglioramento continuo) NON è derivabile automaticamente da uno status
+            # self-assessment: richiede l'override manuale documentato (gestito in
+            # cima a questa funzione). Cap a 4 per non gonfiare la maturità rispetto
+            # a un assessment ENX reale (C3).
+            return 4 if valid_count >= 2 else 3
         return 0
 

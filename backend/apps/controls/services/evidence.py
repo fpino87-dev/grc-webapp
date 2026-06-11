@@ -238,6 +238,13 @@ def calc_suggested_status(instance, check: dict | None = None) -> str:
     `check`: risultato di `check_evidence_requirements` già calcolato dal
     chiamante (es. detail-info del drawer), per non rieseguirlo (C2).
     """
+    # N/A è una decisione di governance deliberata (na_justification + workflow di
+    # approvazione na_*): il suggeritore evidence-based non la mette in discussione,
+    # altrimenti proporrebbe "gap" (nessuna documentazione) su un controllo che è
+    # stato consapevolmente escluso. Nessun suggerimento di cambio stato. (C14)
+    if instance.status == "na":
+        return "na"
+
     req = instance.control.evidence_requirement or {}
     has_req = bool(
         req.get("documents") or req.get("evidences")

@@ -519,6 +519,7 @@
     "maturity_3": "3 — Défini et documenté",
     "maturity_4": "4 — Géré et mesuré",
     "maturity_5": "5 — Optimisé",
+    "maturity_tisax_only": "La maturité VDA ISA n'a de sens que pour les référentiels TISAX",
     "applicability_applicable": "Applicable",
     "applicability_excluded": "Exclu",
     "applicability_not_relevant": "Non pertinent",

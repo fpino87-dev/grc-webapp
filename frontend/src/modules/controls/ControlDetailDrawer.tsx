@@ -543,7 +543,10 @@ function TabValutazione({
         </div>
       )}
 
-      {/* Applicabilità SOA */}
+      {/* Applicabilità SOA — solo per ISO 27001 (lo Statement of Applicability è
+          un artefatto dell'Annex A ISO 27001; per TISAX/NIS2 la non-applicabilità
+          si esprime con lo status N/A). C13 */}
+      {framework.includes("ISO") && (
       <div className="border border-gray-200 rounded-lg p-3 space-y-2">
         <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t("controls.drawer.evaluation.applicability.title")}</p>
         <select
@@ -575,6 +578,7 @@ function TabValutazione({
           {applicabilityMutation.isPending ? t("common.saving") : t("controls.drawer.evaluation.applicability.save")}
         </button>
       </div>
+      )}
 
       {/* Maturity Level — solo per TISAX */}
       {(framework.includes("TISAX") || framework.includes("VDA")) && (

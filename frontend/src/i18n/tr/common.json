@@ -519,6 +519,7 @@
     "maturity_3": "3 — Tanımlandı ve belgelendi",
     "maturity_4": "4 — Yönetilen ve ölçülen",
     "maturity_5": "5 — Optimize edildi",
+    "maturity_tisax_only": "VDA ISA olgunluğu yalnızca TISAX çerçeveleri için anlamlıdır",
     "applicability_applicable": "Uygulanabilir",
     "applicability_excluded": "Dışlandı",
     "applicability_not_relevant": "İlgili değil",
