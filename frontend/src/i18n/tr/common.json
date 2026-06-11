@@ -530,6 +530,7 @@
     "maturity_tisax_only": "VDA ISA olgunluğu yalnızca TISAX çerçeveleri için anlamlıdır",
     "na_justification_prompt": "N/A (uygulanamaz) durumu için gerekçe — en az 20 karakter:",
     "na_justification_too_short": "Gerekçe en az 20 karakter içermelidir.",
+    "truncated_warning": "{{total}} kontrolden {{shown}} tanesi gösteriliyor: sayaçlar kısmidir. Tümünü görmek için filtrelerle daraltın.",
     "soa": {
       "title": "Uygulanabilirlik Bildirimi (SoA)",
       "approved_count": "{{approved}}/{{total}} kontrol onaylandı",

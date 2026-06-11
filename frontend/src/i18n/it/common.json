@@ -463,6 +463,7 @@
     "maturity_tisax_only": "Maturità VDA ISA significativa solo per i framework TISAX",
     "na_justification_prompt": "Giustificazione per lo stato N/A (non applicabile) — minimo 20 caratteri:",
     "na_justification_too_short": "La giustificazione deve contenere almeno 20 caratteri.",
+    "truncated_warning": "Mostrati {{shown}} controlli su {{total}}: i contatori sono parziali. Restringi con i filtri per vederli tutti.",
     "soa": {
       "title": "Statement of Applicability (SoA)",
       "approved_count": "{{approved}}/{{total}} controlli approvati",

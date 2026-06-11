@@ -463,6 +463,7 @@
     "maturity_tisax_only": "VDA ISA maturity is meaningful only for TISAX frameworks",
     "na_justification_prompt": "Justification for N/A (not applicable) status — minimum 20 characters:",
     "na_justification_too_short": "The justification must contain at least 20 characters.",
+    "truncated_warning": "Showing {{shown}} of {{total}} controls: counters are partial. Narrow with filters to see them all.",
     "soa": {
       "title": "Statement of Applicability (SoA)",
       "approved_count": "{{approved}}/{{total}} controls approved",

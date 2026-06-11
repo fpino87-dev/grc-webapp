@@ -456,12 +456,14 @@ export function ControlsList() {
     },
   });
 
+  // Stato e framework si filtrano entrambi client-side sullo stesso dataset
+  // (un'unica fetch per sito): così le pill dei contatori restano una
+  // distribuzione reale invece di andare a 0 quando si seleziona uno stato. (C6)
   const params: Record<string, string> = {};
-  if (statusFilter) params.status = statusFilter;
   if (selectedPlant?.id) params.plant = selectedPlant.id;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["controls", statusFilter, selectedPlant?.id],
+    queryKey: ["controls", selectedPlant?.id],
     queryFn: () => controlsApi.instances(Object.keys(params).length ? params : undefined),
     retry: false,
   });
@@ -506,8 +508,18 @@ export function ControlsList() {
     {} as Record<string, number>
   );
 
+  // Righe effettivamente mostrate: applica il filtro stato (client-side). Le pill
+  // (stats/frameworkStats) restano calcolate sul dataset NON filtrato per stato,
+  // così restano una distribuzione reale. (C6)
+  const visibleRows = statusFilter
+    ? filteredByFramework.filter((c) => c.status === statusFilter)
+    : filteredByFramework;
+
+  // Dati troncati dalla paginazione: i contatori sarebbero parziali → avviso. (C6)
+  const truncated = (data?.count ?? 0) > instances.length;
+
   const soaApprovedCount = soaMode
-    ? filteredByFramework.filter((c) => c.approved_in_soa).length
+    ? visibleRows.filter((c) => c.approved_in_soa).length
     : 0;
   function toggleSoa(id: string) {
     setSoaSelected((prev) => {
@@ -518,9 +530,9 @@ export function ControlsList() {
   }
   function toggleSoaAll() {
     setSoaSelected((prev) =>
-      prev.size === filteredByFramework.length && filteredByFramework.length > 0
+      prev.size === visibleRows.length && visibleRows.length > 0
         ? new Set()
-        : new Set(filteredByFramework.map((c) => c.id)),
+        : new Set(visibleRows.map((c) => c.id)),
     );
   }
 
@@ -612,13 +624,20 @@ export function ControlsList() {
         ))}
       </div>
 
+      {/* Avviso: dataset troncato dalla paginazione → contatori parziali. C6 */}
+      {truncated && (
+        <div className="mb-4 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+          ⚠️ {t("controls.truncated_warning", { shown: instances.length, total: data?.count ?? 0 })}
+        </div>
+      )}
+
       {/* Barra SoA — approvazione formale (solo filtrando su ISO 27001). C5 */}
-      {soaMode && filteredByFramework.length > 0 && (
+      {soaMode && visibleRows.length > 0 && (
         <div className="flex items-center justify-between gap-3 mb-4 px-3 py-2 bg-green-50 border border-green-200 rounded-lg flex-wrap">
           <p className="text-sm text-green-900">
             <span className="font-semibold">{t("controls.soa.title")}</span>
             {" — "}
-            {t("controls.soa.approved_count", { approved: soaApprovedCount, total: filteredByFramework.length })}
+            {t("controls.soa.approved_count", { approved: soaApprovedCount, total: visibleRows.length })}
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -642,7 +661,7 @@ export function ControlsList() {
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center text-gray-400">{t("common.loading")}</div>
-        ) : filteredByFramework.length === 0 ? (
+        ) : visibleRows.length === 0 ? (
           <div className="p-8 text-center text-gray-400">{t("controls.empty")}</div>
         ) : (
           <table className="w-full text-sm">
@@ -652,7 +671,7 @@ export function ControlsList() {
                   <th className="px-4 py-3 w-10">
                     <input
                       type="checkbox"
-                      checked={soaSelected.size === filteredByFramework.length && filteredByFramework.length > 0}
+                      checked={soaSelected.size === visibleRows.length && visibleRows.length > 0}
                       onChange={toggleSoaAll}
                       className="w-3.5 h-3.5 accent-green-600"
                       title={t("controls.soa.select_all")}
@@ -670,7 +689,7 @@ export function ControlsList() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredByFramework.map((c) => (
+              {visibleRows.map((c) => (
                 <tr key={c.id} className="hover:bg-gray-50 transition-colors">
                   {soaMode && (
                     <td className="px-4 py-3 align-top">

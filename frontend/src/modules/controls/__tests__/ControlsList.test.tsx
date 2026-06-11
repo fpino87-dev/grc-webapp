@@ -22,6 +22,7 @@ vi.mock("../../../api/endpoints/controls", () => ({
     updateInstance: vi.fn(),
     deleteInstance: vi.fn(),
     propagate: vi.fn(),
+    bulkApproveSoa: vi.fn(),
   },
 }));
 
@@ -105,11 +106,10 @@ describe("ControlsList — M03", () => {
     expect(mockUpdate).not.toHaveBeenCalled();
   });
 
-  it("mostra l'errore di validazione del service (es. N/A senza giustificazione)", async () => {
-    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
-    mockEvaluate.mockRejectedValue({
-      response: { data: { error: "Lo stato N/A richiede una giustificazione." } },
-    });
+  it("N/A dalla lista richiede la giustificazione e la invia a /evaluate/", async () => {
+    const justification = "Controllo non applicabile a questo perimetro produttivo.";
+    const promptSpy = vi.spyOn(window, "prompt").mockReturnValue(justification);
+    mockEvaluate.mockResolvedValue(makeInstance({ status: "na" }) as never);
     renderPage();
     await screen.findByText("A.5.1");
 
@@ -118,9 +118,18 @@ describe("ControlsList — M03", () => {
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "na" } });
 
     await waitFor(() =>
-      expect(alertSpy).toHaveBeenCalledWith("Lo stato N/A richiede una giustificazione."),
+      expect(mockEvaluate).toHaveBeenCalledWith("ci-1", "na", justification),
     );
     expect(mockUpdate).not.toHaveBeenCalled();
-    alertSpy.mockRestore();
+    promptSpy.mockRestore();
+  });
+
+  it("non filtra lo stato lato server: i contatori restano una distribuzione (C6)", async () => {
+    renderPage();
+    await screen.findByText("A.5.1");
+    // la fetch dei controlli NON include il parametro status: il filtro stato è
+    // client-side, quindi le pill mostrano la distribuzione reale e non vanno a 0.
+    const callArg = mockInstances.mock.calls[0]?.[0] as Record<string, string> | undefined;
+    expect(callArg?.status).toBeUndefined();
   });
 });

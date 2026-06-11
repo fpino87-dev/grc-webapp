@@ -530,6 +530,7 @@
     "maturity_tisax_only": "Dojrzałość VDA ISA ma znaczenie tylko dla frameworków TISAX",
     "na_justification_prompt": "Uzasadnienie statusu N/D (nie dotyczy) — minimum 20 znaków:",
     "na_justification_too_short": "Uzasadnienie musi zawierać co najmniej 20 znaków.",
+    "truncated_warning": "Wyświetlono {{shown}} z {{total}} kontroli: liczniki są częściowe. Zawęź filtrami, aby zobaczyć wszystkie.",
     "soa": {
       "title": "Deklaracja Stosowania (SoA)",
       "approved_count": "{{approved}}/{{total}} kontroli zatwierdzonych",
