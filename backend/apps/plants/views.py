@@ -182,6 +182,8 @@ class PlantFrameworkViewSet(viewsets.ModelViewSet):
         return qs
 
     def perform_create(self, serializer):
+        from django.db import transaction
+
         # newfix S10 — se esiste un PlantFramework soft-deleted con stesso
         # (plant, framework) lo "ri-attiviamo" invece di tentare l'INSERT
         # (il vincolo unique_together sul DB ignora il soft-delete e farebbe
@@ -189,25 +191,29 @@ class PlantFrameworkViewSet(viewsets.ModelViewSet):
         plant = serializer.validated_data.get("plant")
         framework = serializer.validated_data.get("framework")
         active_from = serializer.validated_data.get("active_from") or timezone.localdate()
-        existing = (
-            PlantFramework.objects.all_with_deleted()
-            .filter(plant=plant, framework=framework, deleted_at__isnull=False)
-            .first()
-        )
-        if existing is not None:
-            existing.deleted_at = None
-            existing.active = True
-            existing.active_from = active_from
-            existing.level = serializer.validated_data.get("level", "")
-            existing.save(update_fields=["deleted_at", "active", "active_from", "level", "updated_at"])
-            self._create_control_instances(existing)
-            serializer.instance = existing
-            return
-        pf = serializer.save(
-            created_by=self.request.user,
-            active_from=active_from,
-        )
-        self._create_control_instances(pf)
+        # Atomico: se la creazione delle istanze fallisce, anche la
+        # creazione/riattivazione del PlantFramework viene annullata (niente
+        # stato parziale "framework assegnato ma 0 controlli").
+        with transaction.atomic():
+            existing = (
+                PlantFramework.objects.all_with_deleted()
+                .filter(plant=plant, framework=framework, deleted_at__isnull=False)
+                .first()
+            )
+            if existing is not None:
+                existing.deleted_at = None
+                existing.active = True
+                existing.active_from = active_from
+                existing.level = serializer.validated_data.get("level", "")
+                existing.save(update_fields=["deleted_at", "active", "active_from", "level", "updated_at"])
+                self._create_control_instances(existing)
+                serializer.instance = existing
+                return
+            pf = serializer.save(
+                created_by=self.request.user,
+                active_from=active_from,
+            )
+            self._create_control_instances(pf)
 
     def _create_control_instances(self, plant_framework):
         from apps.controls.models import Control, ControlInstance
@@ -218,20 +224,36 @@ class PlantFrameworkViewSet(viewsets.ModelViewSet):
         )
         if plant_framework.framework.code == "ACN_NIS2" and plant.nis2_scope == "importante":
             controls = controls.filter(level="")
-        instances = [
+        control_ids = list(controls.values_list("id", flat=True))
+
+        # Le istanze già esistenti vanno cercate INCLUDENDO le soft-deleted: il
+        # vincolo unique_together(plant, control) sul DB conta anche quelle
+        # cancellate logicamente. Quelle soft-deleted (da una precedente rimozione
+        # del framework) vengono RIATTIVATE — non reinserite, altrimenti
+        # IntegrityError. Solo i controlli senza alcuna istanza vengono creati.
+        existing = ControlInstance.objects.all_with_deleted().filter(
+            plant=plant, control_id__in=control_ids,
+        )
+        existing_ctrl_ids = {ci.control_id for ci in existing}
+        restore_ids = [ci.pk for ci in existing if ci.deleted_at is not None]
+
+        if restore_ids:
+            ControlInstance.objects.all_with_deleted().filter(pk__in=restore_ids).update(
+                deleted_at=None, updated_at=timezone.now(),
+            )
+
+        new_instances = [
             ControlInstance(
                 plant=plant,
-                control=control,
+                control_id=cid,
                 status="non_valutato",
                 created_by=self.request.user,
             )
-            for control in controls
-            if not ControlInstance.objects.filter(
-                plant=plant, control=control
-            ).exists()
+            for cid in control_ids
+            if cid not in existing_ctrl_ids
         ]
-        if instances:
-            ControlInstance.objects.bulk_create(instances)
+        if new_instances:
+            ControlInstance.objects.bulk_create(new_instances)
 
     def perform_destroy(self, instance):
         from apps.controls.models import ControlInstance
