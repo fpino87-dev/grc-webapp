@@ -373,6 +373,13 @@
             "5": "Optimized"
           }
         },
+        "soa": {
+          "title": "SoA approval",
+          "approved": "Approved in SoA",
+          "not_approved": "Not yet approved in SoA",
+          "approve": "Approve in SoA",
+          "revoke": "Revoke SoA approval"
+        },
         "status_guide": {
           "compliant": "Valid non-expired evidence + last verification date",
           "parziale": "Some evidence + remediation plan (task M08)",
@@ -456,6 +463,13 @@
     "maturity_tisax_only": "VDA ISA maturity is meaningful only for TISAX frameworks",
     "na_justification_prompt": "Justification for N/A (not applicable) status — minimum 20 characters:",
     "na_justification_too_short": "The justification must contain at least 20 characters.",
+    "soa": {
+      "title": "Statement of Applicability (SoA)",
+      "approved_count": "{{approved}}/{{total}} controls approved",
+      "approve_selected": "Approve selected ({{count}})",
+      "revoke_selected": "Revoke selected ({{count}})",
+      "select_all": "Select all"
+    },
     "applicability_applicable": "Applicable",
     "applicability_excluded": "Excluded",
     "applicability_not_relevant": "Not relevant",

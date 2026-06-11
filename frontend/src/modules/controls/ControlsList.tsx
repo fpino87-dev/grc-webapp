@@ -421,7 +421,23 @@ export function ControlsList() {
   const [statusFilter, setStatusFilter] = useState("");
   const [frameworkFilter, setFrameworkFilter] = useState<string>("");
   const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
+  const [soaSelected, setSoaSelected] = useState<Set<string>>(new Set());
   const selectedPlant = useAuthStore(s => s.selectedPlant);
+
+  // Lo Statement of Applicability è un artefatto ISO 27001: la gestione SoA
+  // (selezione + approvazione) compare solo filtrando su ISO 27001. (C5)
+  const soaMode = frameworkFilter.includes("ISO");
+  // Cambiando filtro framework azzero la selezione SoA (evita selezioni stale).
+  useEffect(() => { setSoaSelected(new Set()); }, [frameworkFilter]);
+
+  const soaApproveMutation = useMutation({
+    mutationFn: ({ ids, approved }: { ids: string[]; approved: boolean }) =>
+      controlsApi.bulkApproveSoa(ids, approved),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["controls"] });
+      setSoaSelected(new Set());
+    },
+  });
 
   // Apri automaticamente il drawer se si arriva dalla task page
   useEffect(() => {
@@ -489,6 +505,24 @@ export function ControlsList() {
     }),
     {} as Record<string, number>
   );
+
+  const soaApprovedCount = soaMode
+    ? filteredByFramework.filter((c) => c.approved_in_soa).length
+    : 0;
+  function toggleSoa(id: string) {
+    setSoaSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+  function toggleSoaAll() {
+    setSoaSelected((prev) =>
+      prev.size === filteredByFramework.length && filteredByFramework.length > 0
+        ? new Set()
+        : new Set(filteredByFramework.map((c) => c.id)),
+    );
+  }
 
   return (
     <div>
@@ -578,6 +612,33 @@ export function ControlsList() {
         ))}
       </div>
 
+      {/* Barra SoA — approvazione formale (solo filtrando su ISO 27001). C5 */}
+      {soaMode && filteredByFramework.length > 0 && (
+        <div className="flex items-center justify-between gap-3 mb-4 px-3 py-2 bg-green-50 border border-green-200 rounded-lg flex-wrap">
+          <p className="text-sm text-green-900">
+            <span className="font-semibold">{t("controls.soa.title")}</span>
+            {" — "}
+            {t("controls.soa.approved_count", { approved: soaApprovedCount, total: filteredByFramework.length })}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => soaApproveMutation.mutate({ ids: [...soaSelected], approved: true })}
+              disabled={soaSelected.size === 0 || soaApproveMutation.isPending}
+              className="text-xs px-2.5 py-1 rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
+            >
+              {t("controls.soa.approve_selected", { count: soaSelected.size })}
+            </button>
+            <button
+              onClick={() => soaApproveMutation.mutate({ ids: [...soaSelected], approved: false })}
+              disabled={soaSelected.size === 0 || soaApproveMutation.isPending}
+              className="text-xs px-2.5 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+            >
+              {t("controls.soa.revoke_selected", { count: soaSelected.size })}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center text-gray-400">{t("common.loading")}</div>
@@ -587,6 +648,17 @@ export function ControlsList() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
+                {soaMode && (
+                  <th className="px-4 py-3 w-10">
+                    <input
+                      type="checkbox"
+                      checked={soaSelected.size === filteredByFramework.length && filteredByFramework.length > 0}
+                      onChange={toggleSoaAll}
+                      className="w-3.5 h-3.5 accent-green-600"
+                      title={t("controls.soa.select_all")}
+                    />
+                  </th>
+                )}
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("controls.table.control_id")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("controls.table.framework")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("controls.table.title")}</th>
@@ -600,6 +672,26 @@ export function ControlsList() {
             <tbody className="divide-y divide-gray-100">
               {filteredByFramework.map((c) => (
                 <tr key={c.id} className="hover:bg-gray-50 transition-colors">
+                  {soaMode && (
+                    <td className="px-4 py-3 align-top">
+                      <div className="flex flex-col items-center gap-1">
+                        <input
+                          type="checkbox"
+                          checked={soaSelected.has(c.id)}
+                          onChange={() => toggleSoa(c.id)}
+                          className="w-3.5 h-3.5 accent-green-600"
+                        />
+                        {c.approved_in_soa && (
+                          <span
+                            className="text-[10px] text-green-700"
+                            title={`${c.soa_approved_by_name ?? ""}${c.soa_approved_at ? " · " + new Date(c.soa_approved_at).toLocaleDateString(i18n.language || "it") : ""}`}
+                          >
+                            ✓ SoA
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                  )}
                   <td className="px-4 py-3 font-mono text-xs text-gray-500">
                     <div className="flex items-center gap-1">
                       <span>{c.control_external_id || c.control}</span>

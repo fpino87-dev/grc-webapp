@@ -23,6 +23,9 @@ export interface ControlInstance {
   suggestion_differs?: boolean;
   calc_maturity_level: number;
   assets?: string[];
+  approved_in_soa: boolean;
+  soa_approved_at: string | null;
+  soa_approved_by_name: string | null;
 }
 
 export interface AssetRef {
@@ -129,6 +132,7 @@ export interface ControlDetailInfo {
   calc_maturity_level: number;
   approved_in_soa: boolean;
   soa_approved_at: string | null;
+  soa_approved_by_name: string | null;
   notes: string;
   needs_revaluation?: boolean;
   needs_revaluation_since?: string | null;
@@ -187,6 +191,13 @@ export const controlsApi = {
     apiClient
       .post<{ propagated_to: number; skipped_no_instance: number; blocked?: string }>(
         `/controls/instances/${id}/propagate/`,
+      )
+      .then((r) => r.data),
+  bulkApproveSoa: (instanceIds: string[], approved = true) =>
+    apiClient
+      .post<{ ok: boolean; approved_count: number; approved: boolean }>(
+        "/controls/instances/bulk-approve-soa/",
+        { instance_ids: instanceIds, approved },
       )
       .then((r) => r.data),
   evaluate: (id: string, status: string, note: string) =>

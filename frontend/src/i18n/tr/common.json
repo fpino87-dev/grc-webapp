@@ -440,6 +440,13 @@
             "5": "Optimize edildi"
           }
         },
+        "soa": {
+          "title": "SoA onayı",
+          "approved": "SoA'da onaylandı",
+          "not_approved": "SoA'da henüz onaylanmadı",
+          "approve": "SoA'da onayla",
+          "revoke": "SoA onayını geri al"
+        },
         "status_guide": {
           "compliant": "Geçerli kanıt + son doğrulama tarihi",
           "parziale": "Kısmi kanıt + iyileştirme planı (görev M08)",
@@ -523,6 +530,13 @@
     "maturity_tisax_only": "VDA ISA olgunluğu yalnızca TISAX çerçeveleri için anlamlıdır",
     "na_justification_prompt": "N/A (uygulanamaz) durumu için gerekçe — en az 20 karakter:",
     "na_justification_too_short": "Gerekçe en az 20 karakter içermelidir.",
+    "soa": {
+      "title": "Uygulanabilirlik Bildirimi (SoA)",
+      "approved_count": "{{approved}}/{{total}} kontrol onaylandı",
+      "approve_selected": "Seçilenleri onayla ({{count}})",
+      "revoke_selected": "Seçilenleri geri al ({{count}})",
+      "select_all": "Tümünü seç"
+    },
     "applicability_applicable": "Uygulanabilir",
     "applicability_excluded": "Dışlandı",
     "applicability_not_relevant": "İlgili değil",

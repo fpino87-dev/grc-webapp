@@ -373,6 +373,13 @@
             "5": "Ottimizzato"
           }
         },
+        "soa": {
+          "title": "Approvazione SoA",
+          "approved": "Approvato nel SoA",
+          "not_approved": "Non ancora approvato nel SoA",
+          "approve": "Approva nel SoA",
+          "revoke": "Revoca approvazione SoA"
+        },
         "status_guide": {
           "compliant": "Evidenza valida non scaduta + data ultima verifica",
           "parziale": "Evidenza anche parziale + piano di remediation (task M08)",
@@ -456,6 +463,13 @@
     "maturity_tisax_only": "Maturità VDA ISA significativa solo per i framework TISAX",
     "na_justification_prompt": "Giustificazione per lo stato N/A (non applicabile) — minimo 20 caratteri:",
     "na_justification_too_short": "La giustificazione deve contenere almeno 20 caratteri.",
+    "soa": {
+      "title": "Statement of Applicability (SoA)",
+      "approved_count": "{{approved}}/{{total}} controlli approvati",
+      "approve_selected": "Approva selezionati ({{count}})",
+      "revoke_selected": "Revoca selezionati ({{count}})",
+      "select_all": "Seleziona tutti"
+    },
     "applicability_applicable": "Applicabile",
     "applicability_excluded": "Escluso",
     "applicability_not_relevant": "Non pertinente",

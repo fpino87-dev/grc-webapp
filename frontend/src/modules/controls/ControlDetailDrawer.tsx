@@ -313,6 +313,9 @@ function TabValutazione({
   calcMaturityLevel,
   maturityLevelOverride,
   framework,
+  approvedInSoa,
+  soaApprovedAt,
+  soaApprovedByName,
   needsRevaluation,
   needsRevaluationSince,
   initialNotes,
@@ -331,6 +334,9 @@ function TabValutazione({
   calcMaturityLevel: number;
   maturityLevelOverride: boolean;
   framework: string;
+  approvedInSoa: boolean;
+  soaApprovedAt: string | null;
+  soaApprovedByName: string | null;
   needsRevaluation?: boolean;
   needsRevaluationSince?: string | null;
   initialNotes?: string;
@@ -399,6 +405,14 @@ function TabValutazione({
   const maturityMutation = useMutation({
     mutationFn: () => controlsApi.setMaturity(instanceId, maturityOverrideVal),
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["control-detail", instanceId] });
+    },
+  });
+
+  const soaMutation = useMutation({
+    mutationFn: (approved: boolean) => controlsApi.bulkApproveSoa([instanceId], approved),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["controls"] });
       qc.invalidateQueries({ queryKey: ["control-detail", instanceId] });
     },
   });
@@ -612,6 +626,36 @@ function TabValutazione({
             className="w-full py-1.5 bg-purple-600 text-white rounded text-xs hover:bg-purple-700 disabled:opacity-50"
           >
             {maturityMutation.isPending ? t("common.saving") : t("controls.drawer.evaluation.maturity.override")}
+          </button>
+        </div>
+      )}
+
+      {/* Approvazione SoA — solo per ISO 27001 (lo Statement of Applicability è
+          l'approvazione formale della direzione, artefatto Annex A ISO 27001). C5 */}
+      {framework.includes("ISO") && (
+        <div className={`border rounded-lg p-3 space-y-2 ${approvedInSoa ? "border-green-300 bg-green-50/40" : "border-gray-200"}`}>
+          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t("controls.drawer.evaluation.soa.title")}</p>
+          {approvedInSoa ? (
+            <div className="text-xs text-green-800">
+              <p className="font-medium">✓ {t("controls.drawer.evaluation.soa.approved")}</p>
+              <p className="text-green-700 mt-0.5">
+                {soaApprovedByName ? `${soaApprovedByName} · ` : ""}
+                {soaApprovedAt ? new Date(soaApprovedAt).toLocaleDateString(i18n.language || "it") : ""}
+              </p>
+            </div>
+          ) : (
+            <p className="text-xs text-gray-500">{t("controls.drawer.evaluation.soa.not_approved")}</p>
+          )}
+          <button
+            onClick={() => soaMutation.mutate(!approvedInSoa)}
+            disabled={soaMutation.isPending}
+            className={`w-full py-1.5 rounded text-xs text-white disabled:opacity-50 ${approvedInSoa ? "bg-gray-500 hover:bg-gray-600" : "bg-green-600 hover:bg-green-700"}`}
+          >
+            {soaMutation.isPending
+              ? t("common.saving")
+              : approvedInSoa
+              ? t("controls.drawer.evaluation.soa.revoke")
+              : t("controls.drawer.evaluation.soa.approve")}
           </button>
         </div>
       )}
@@ -1357,6 +1401,9 @@ export function ControlDetailDrawer({ instanceId, onClose }: Props) {
                   calcMaturityLevel={info.calc_maturity_level}
                   maturityLevelOverride={info.maturity_level_override}
                   framework={info.framework}
+                  approvedInSoa={info.approved_in_soa}
+                  soaApprovedAt={info.soa_approved_at}
+                  soaApprovedByName={info.soa_approved_by_name}
                   needsRevaluation={info.needs_revaluation}
                   needsRevaluationSince={info.needs_revaluation_since}
                   initialNotes={info.notes}

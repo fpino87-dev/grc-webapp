@@ -44,7 +44,7 @@ def _explain_suggestion(instance, suggested: str, check: dict) -> str:
 
 class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = ControlInstance.objects.select_related(
-        "plant", "control__framework", "control__domain", "owner"
+        "plant", "control__framework", "control__domain", "owner", "soa_approved_by"
     ).prefetch_related(
         "control__mappings_from__target_control__framework",
         "control__mappings_to__source_control__framework",
@@ -232,6 +232,11 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 "calc_maturity_level": instance.calc_maturity_level,
                 "approved_in_soa": instance.approved_in_soa,
                 "soa_approved_at": instance.soa_approved_at.isoformat() if instance.soa_approved_at else None,
+                "soa_approved_by_name": (
+                    (f"{instance.soa_approved_by.first_name} {instance.soa_approved_by.last_name}".strip()
+                     or instance.soa_approved_by.email or instance.soa_approved_by.username)
+                    if instance.soa_approved_by else None
+                ),
                 "needs_revaluation": instance.needs_revaluation,
                 "needs_revaluation_since": str(instance.needs_revaluation_since) if instance.needs_revaluation_since else None,
                 "notes": instance.notes,
@@ -342,26 +347,35 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 
     @action(detail=False, methods=["post"], url_path="bulk-approve-soa")
     def bulk_approve_soa(self, request):
-        """Approva formalmente un gruppo di ControlInstance per il SOA."""
+        """Approva (o revoca) formalmente un gruppo di ControlInstance per il SoA.
+
+        Body: { "instance_ids": [...], "approved": true|false }
+        Lo Statement of Applicability è un artefatto ISO 27001: l'approvazione è
+        ammessa solo sui controlli di framework ISO (gli altri vengono ignorati).
+        Con approved=false l'approvazione viene revocata (azzera chi/quando). (C5)
+        """
         from django.utils import timezone
         from core.audit import log_action
         ids = request.data.get("instance_ids", [])
-        qs = self.get_queryset().filter(pk__in=ids)
-        now = timezone.now()
-        qs.update(
-            approved_in_soa=True,
-            soa_approved_at=now,
-            soa_approved_by=request.user,
+        approved = bool(request.data.get("approved", True))
+        qs = self.get_queryset().filter(
+            pk__in=ids, control__framework__code__icontains="ISO"
         )
-        for instance in qs:
+        instances = list(qs)  # materializza prima dell'update (poi i filtri non matchano più)
+        now = timezone.now()
+        if approved:
+            qs.update(approved_in_soa=True, soa_approved_at=now, soa_approved_by=request.user)
+        else:
+            qs.update(approved_in_soa=False, soa_approved_at=None, soa_approved_by=None)
+        for instance in instances:
             log_action(
                 user=request.user,
-                action_code="control.soa_approved",
+                action_code="control.soa_approved" if approved else "control.soa_revoked",
                 level="L1",
                 entity=instance,
-                payload={"framework": instance.control.framework.code},
+                payload={"framework": instance.control.framework.code, "approved": approved},
             )
-        return Response({"ok": True, "approved_count": qs.count()})
+        return Response({"ok": True, "approved_count": len(instances), "approved": approved})
 
     @action(detail=True, methods=["post"], url_path="apply-suggestion")
     def apply_suggestion(self, request, pk=None):

@@ -30,6 +30,7 @@ class ControlInstanceSerializer(serializers.ModelSerializer):
     suggestion_differs = serializers.SerializerMethodField(read_only=True)
     calc_maturity_level = serializers.SerializerMethodField(read_only=True)
     owner_display = serializers.SerializerMethodField(read_only=True)
+    soa_approved_by_name = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = ControlInstance
@@ -113,6 +114,12 @@ class ControlInstanceSerializer(serializers.ModelSerializer):
             f"{obj.owner.first_name} {obj.owner.last_name}".strip()
             or obj.owner.email
         )
+
+    def get_soa_approved_by_name(self, obj):
+        if not obj.soa_approved_by:
+            return None
+        u = obj.soa_approved_by
+        return f"{u.first_name} {u.last_name}".strip() or u.email or u.username
 
     def get_mapped_controls(self, obj):
         result = []
