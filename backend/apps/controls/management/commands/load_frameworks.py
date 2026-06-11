@@ -96,6 +96,7 @@ class Command(BaseCommand):
                             "level": c.get("level", ""),
                             "evidence_requirement": c.get("evidence_requirement", {}),
                             "control_category": c.get("control_category", "procedurale"),
+                            "requirements": c.get("requirements", []),
                         },
                     )
                     cm[c["external_id"]] = obj

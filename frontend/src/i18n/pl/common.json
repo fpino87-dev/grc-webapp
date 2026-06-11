@@ -370,6 +370,8 @@
       },
       "about": {
         "no_description": "Brak opisu dla tego języka.",
+        "normative_requirements": "Wymagania normatywne",
+        "applies_to": { "essential": "Kluczowy", "important": "Ważny" },
         "guidance": "Wskazówki implementacji",
         "evidence_examples": "Przykłady akceptowalnych dowodów",
         "mappings": "Mapowania między ramami",
@@ -531,6 +533,13 @@
     "na_justification_prompt": "Uzasadnienie statusu N/D (nie dotyczy) — minimum 20 znaków:",
     "na_justification_too_short": "Uzasadnienie musi zawierać co najmniej 20 znaków.",
     "truncated_warning": "Wyświetlono {{shown}} z {{total}} kontroli: liczniki są częściowe. Zawęź filtrami, aby zobaczyć wszystkie.",
+    "search_placeholder": "Szukaj po ID lub tytule…",
+    "pagination": {
+      "range": "{{from}}–{{to}} z {{total}}",
+      "page": "Strona {{page}}/{{total}}",
+      "prev": "‹ Poprzednia",
+      "next": "Następna ›"
+    },
     "soa": {
       "title": "Deklaracja Stosowania (SoA)",
       "approved_count": "{{approved}}/{{total}} kontroli zatwierdzonych",
@@ -703,11 +712,6 @@
       "nis2": {
         "essential_hint": "Nadzór proaktywny · kary do 10 mln €",
         "important_hint": "Nadzór reaktywny · kary do 7 mln €"
-      },
-      "generic": {
-        "base": "Podstawowy — minimalne wymagania obowiązkowe",
-        "advanced": "Zaawansowany — z opcjonalnymi środkami",
-        "complete": "Kompletny — pełna implementacja"
       }
     },
     "delete_blocked": {

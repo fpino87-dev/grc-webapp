@@ -370,6 +370,8 @@
       },
       "about": {
         "no_description": "Aucune description disponible pour cette langue.",
+        "normative_requirements": "Exigences réglementaires",
+        "applies_to": { "essential": "Essentiel", "important": "Important" },
         "guidance": "Guide d'implémentation",
         "evidence_examples": "Exemples de preuves acceptables",
         "mappings": "Correspondances inter-cadres",
@@ -531,6 +533,13 @@
     "na_justification_prompt": "Justification du statut N/A (non applicable) — minimum 20 caractères :",
     "na_justification_too_short": "La justification doit contenir au moins 20 caractères.",
     "truncated_warning": "{{shown}} contrôles affichés sur {{total}} : les compteurs sont partiels. Affinez avec les filtres pour tous les voir.",
+    "search_placeholder": "Rechercher par ID ou titre…",
+    "pagination": {
+      "range": "{{from}}–{{to}} sur {{total}}",
+      "page": "Page {{page}}/{{total}}",
+      "prev": "‹ Précédent",
+      "next": "Suivant ›"
+    },
     "soa": {
       "title": "Déclaration d'applicabilité (SoA)",
       "approved_count": "{{approved}}/{{total}} contrôles approuvés",
@@ -703,11 +712,6 @@
       "nis2": {
         "essential_hint": "Supervision proactive · amendes jusqu'à 10M€",
         "important_hint": "Supervision réactive · amendes jusqu'à 7M€"
-      },
-      "generic": {
-        "base": "Base — exigences minimales obligatoires",
-        "advanced": "Avancé — avec mesures optionnelles",
-        "complete": "Complet — implémentation totale"
       }
     },
     "delete_blocked": {

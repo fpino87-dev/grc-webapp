@@ -132,4 +132,26 @@ describe("ControlsList — M03", () => {
     const callArg = mockInstances.mock.calls[0]?.[0] as Record<string, string> | undefined;
     expect(callArg?.status).toBeUndefined();
   });
+
+  it("la ricerca filtra la lista per ID/titolo, client-side (C7)", async () => {
+    mockInstances.mockResolvedValue({
+      results: [
+        makeInstance({ id: "ci-1", control_external_id: "A.5.1", control_title: "Policy" }),
+        makeInstance({ id: "ci-2", control_external_id: "A.8.9", control_title: "Inventario asset" }),
+      ],
+      count: 2,
+    } as never);
+    renderPage();
+    await screen.findByText("A.5.1");
+    expect(screen.getByText("A.8.9")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByPlaceholderText("controls.search_placeholder"), {
+      target: { value: "inventario" },
+    });
+
+    await waitFor(() => expect(screen.queryByText("A.5.1")).not.toBeInTheDocument());
+    expect(screen.getByText("A.8.9")).toBeInTheDocument();
+    // nessuna nuova fetch: la ricerca è client-side
+    expect(mockInstances).toHaveBeenCalledTimes(1);
+  });
 });

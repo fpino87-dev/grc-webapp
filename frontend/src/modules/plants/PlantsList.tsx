@@ -547,7 +547,6 @@ function FrameworkPanel({ plant, onClose }: { plant: Plant; onClose: () => void 
   const [selectedKey, setSelectedKey] = useState("");
   const [tisaxLevel, setTisaxLevel] = useState<"L2" | "L3" | "L3+PROTO">("L2");
   const [nisLevel, setNisLevel] = useState<string>(plant.nis2_scope !== "non_soggetto" ? plant.nis2_scope : "importante");
-  const [genericLevel, setGenericLevel] = useState("base");
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
   const [error, setError] = useState("");
 
@@ -589,7 +588,10 @@ function FrameworkPanel({ plant, onClose }: { plant: Plant; onClose: () => void 
       } else {
         const fwCode = frameworks.find(f => f.id === selectedKey)?.code ?? "";
         const isNis = fwCode === "NIS2" || fwCode === "ACN_NIS2";
-        const level = isNis ? nisLevel : genericLevel;
+        // Solo TISAX (L2/L3/PROTO) e NIS2 (essenziale/importante) hanno un livello
+        // reale. Gli altri (es. ISO 27001) non hanno una nozione di livello: nessun
+        // selettore e nessun valore inviato. (C15)
+        const level = isNis ? nisLevel : "";
         await plantsApi.assignFramework({ plant: plant.id, framework: selectedKey, level });
       }
     },
@@ -668,7 +670,9 @@ function FrameworkPanel({ plant, onClose }: { plant: Plant; onClose: () => void 
                       <span className={`text-xs px-2 py-0.5 rounded ${pf.active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
                         {pf.active ? t("common.enabled") : t("common.disabled")}
                       </span>
-                      <span className="text-xs text-gray-400">{t("plants.frameworks.level", { level: pf.level })}</span>
+                      {pf.level && (
+                        <span className="text-xs text-gray-400">{t("plants.frameworks.level", { level: pf.level })}</span>
+                      )}
                     </div>
                     <p className="text-sm text-gray-600 mt-1 leading-snug">{pf.framework_name}</p>
                     <p className="text-xs text-gray-400 mt-0.5">{t("plants.frameworks.active_from", { date: pf.active_from })}</p>
@@ -762,16 +766,6 @@ function FrameworkPanel({ plant, onClose }: { plant: Plant; onClose: () => void 
                   ))}
                 </div>
               </div>
-            )}
-
-            {/* Generic level (ISO etc.) */}
-            {selectedKey && selectedKey !== "TISAX" && !selectedIsNis && (
-              <select value={genericLevel} onChange={e => setGenericLevel(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
-                <option value="base">{t("plants.frameworks.generic.base")}</option>
-                <option value="avanzato">{t("plants.frameworks.generic.advanced")}</option>
-                <option value="completo">{t("plants.frameworks.generic.complete")}</option>
-              </select>
             )}
 
             {error && <p className="text-sm text-red-600">{error}</p>}

@@ -303,6 +303,8 @@
       },
       "about": {
         "no_description": "No description available for this language.",
+        "normative_requirements": "Regulatory requirements",
+        "applies_to": { "essential": "Essential", "important": "Important" },
         "guidance": "Implementation guidance",
         "evidence_examples": "Examples of acceptable evidence",
         "mappings": "Cross-framework mappings",
@@ -464,6 +466,13 @@
     "na_justification_prompt": "Justification for N/A (not applicable) status — minimum 20 characters:",
     "na_justification_too_short": "The justification must contain at least 20 characters.",
     "truncated_warning": "Showing {{shown}} of {{total}} controls: counters are partial. Narrow with filters to see them all.",
+    "search_placeholder": "Search by ID or title…",
+    "pagination": {
+      "range": "{{from}}–{{to}} of {{total}}",
+      "page": "Page {{page}}/{{total}}",
+      "prev": "‹ Previous",
+      "next": "Next ›"
+    },
     "soa": {
       "title": "Statement of Applicability (SoA)",
       "approved_count": "{{approved}}/{{total}} controls approved",
@@ -636,11 +645,6 @@
       "nis2": {
         "essential_hint": "Proactive supervision · penalties up to €10M",
         "important_hint": "Reactive supervision · penalties up to €7M"
-      },
-      "generic": {
-        "base": "Base — mandatory minimum requirements",
-        "advanced": "Advanced — with optional measures",
-        "complete": "Complete — full implementation"
       }
     },
     "delete_blocked": {

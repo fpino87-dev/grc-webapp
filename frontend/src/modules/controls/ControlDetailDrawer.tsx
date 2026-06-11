@@ -115,6 +115,40 @@ function TabCosa({ info }: { info: NonNullable<ReturnType<typeof useDetailInfo>[
         <p className="text-sm text-gray-400 italic">{t("controls.drawer.about.no_description")}</p>
       )}
 
+      {/* Requisiti normativi granulari (es. misure ACN NIS2), raggruppati per ambito */}
+      {info.normative_requirements?.length > 0 && (
+        <div className="border border-indigo-200 rounded-lg p-3 space-y-2">
+          <p className="text-xs font-semibold text-indigo-700 uppercase tracking-wide">
+            {t("controls.drawer.about.normative_requirements")}
+          </p>
+          {Object.entries(
+            info.normative_requirements.reduce<Record<string, typeof info.normative_requirements>>((acc, r) => {
+              (acc[r.ambito] ??= []).push(r);
+              return acc;
+            }, {}),
+          ).map(([ambito, items]) => (
+            <div key={ambito} className="space-y-1">
+              {ambito && <p className="text-xs font-medium text-gray-500 mt-1">{ambito}</p>}
+              <ul className="space-y-1">
+                {items.map((r, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                    {r.punto && <span className="text-indigo-400 font-mono text-xs shrink-0 mt-0.5">{r.punto}</span>}
+                    <span>
+                      {r.text}
+                      {r.applies_to?.map((a) => (
+                        <span key={a} className="ml-1.5 text-[10px] px-1 py-0.5 rounded bg-gray-100 text-gray-500 align-middle">
+                          {t(`controls.drawer.about.applies_to.${a}`, { defaultValue: a })}
+                        </span>
+                      ))}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Spiegazione AI plain-language */}
       <div className="border border-purple-200 rounded-lg overflow-hidden">
         <div className="flex items-center justify-between px-3 py-2 bg-purple-50">

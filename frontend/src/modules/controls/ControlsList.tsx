@@ -420,9 +420,16 @@ export function ControlsList() {
   const location = useLocation();
   const [statusFilter, setStatusFilter] = useState("");
   const [frameworkFilter, setFrameworkFilter] = useState<string>("");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
   const [soaSelected, setSoaSelected] = useState<Set<string>>(new Set());
   const selectedPlant = useAuthStore(s => s.selectedPlant);
+
+  const PAGE_SIZE = 100;
+  // Torna a pagina 1 a ogni cambio di filtro/ricerca (evita di restare su una
+  // pagina che non esiste più). (C7)
+  useEffect(() => { setPage(1); }, [statusFilter, frameworkFilter, search, selectedPlant?.id]);
 
   // Lo Statement of Applicability è un artefatto ISO 27001: la gestione SoA
   // (selezione + approvazione) compare solo filtrando su ISO 27001. (C5)
@@ -515,11 +522,27 @@ export function ControlsList() {
     ? filteredByFramework.filter((c) => c.status === statusFilter)
     : filteredByFramework;
 
-  // Dati troncati dalla paginazione: i contatori sarebbero parziali → avviso. (C6)
+  // Ricerca testuale client-side su external_id e titolo. (C7)
+  const searchedRows = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return visibleRows;
+    return visibleRows.filter(
+      (c) =>
+        (c.control_external_id ?? "").toLowerCase().includes(q) ||
+        (c.control_title ?? "").toLowerCase().includes(q),
+    );
+  }, [visibleRows, search]);
+
+  // Paginazione client-side della lista filtrata. (C7)
+  const totalPages = Math.max(1, Math.ceil(searchedRows.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pagedRows = searchedRows.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  // Dati troncati dalla paginazione server: i contatori sarebbero parziali → avviso. (C6)
   const truncated = (data?.count ?? 0) > instances.length;
 
   const soaApprovedCount = soaMode
-    ? visibleRows.filter((c) => c.approved_in_soa).length
+    ? searchedRows.filter((c) => c.approved_in_soa).length
     : 0;
   function toggleSoa(id: string) {
     setSoaSelected((prev) => {
@@ -528,11 +551,13 @@ export function ControlsList() {
       return next;
     });
   }
+  // Select-all opera sull'intero set filtrato (anche oltre la pagina corrente):
+  // utile per approvare un intero SoA in un colpo. (C5/C7)
   function toggleSoaAll() {
     setSoaSelected((prev) =>
-      prev.size === visibleRows.length && visibleRows.length > 0
+      prev.size === searchedRows.length && searchedRows.length > 0
         ? new Set()
-        : new Set(visibleRows.map((c) => c.id)),
+        : new Set(searchedRows.map((c) => c.id)),
     );
   }
 
@@ -564,6 +589,17 @@ export function ControlsList() {
           />
         </h2>
         <ExportToolbar frameworks={frameworks ?? []} plantId={selectedPlant?.id} />
+      </div>
+
+      {/* Ricerca testuale (external_id / titolo). C7 */}
+      <div className="mb-4">
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t("controls.search_placeholder")}
+          className="w-full md:w-96 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400"
+        />
       </div>
 
       {/* Filtro per framework (singola barra) */}
@@ -632,12 +668,12 @@ export function ControlsList() {
       )}
 
       {/* Barra SoA — approvazione formale (solo filtrando su ISO 27001). C5 */}
-      {soaMode && visibleRows.length > 0 && (
+      {soaMode && searchedRows.length > 0 && (
         <div className="flex items-center justify-between gap-3 mb-4 px-3 py-2 bg-green-50 border border-green-200 rounded-lg flex-wrap">
           <p className="text-sm text-green-900">
             <span className="font-semibold">{t("controls.soa.title")}</span>
             {" — "}
-            {t("controls.soa.approved_count", { approved: soaApprovedCount, total: visibleRows.length })}
+            {t("controls.soa.approved_count", { approved: soaApprovedCount, total: searchedRows.length })}
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -661,7 +697,7 @@ export function ControlsList() {
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center text-gray-400">{t("common.loading")}</div>
-        ) : visibleRows.length === 0 ? (
+        ) : searchedRows.length === 0 ? (
           <div className="p-8 text-center text-gray-400">{t("controls.empty")}</div>
         ) : (
           <table className="w-full text-sm">
@@ -671,7 +707,7 @@ export function ControlsList() {
                   <th className="px-4 py-3 w-10">
                     <input
                       type="checkbox"
-                      checked={soaSelected.size === visibleRows.length && visibleRows.length > 0}
+                      checked={soaSelected.size === searchedRows.length && searchedRows.length > 0}
                       onChange={toggleSoaAll}
                       className="w-3.5 h-3.5 accent-green-600"
                       title={t("controls.soa.select_all")}
@@ -689,7 +725,7 @@ export function ControlsList() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {visibleRows.map((c) => (
+              {pagedRows.map((c) => (
                 <tr key={c.id} className="hover:bg-gray-50 transition-colors">
                   {soaMode && (
                     <td className="px-4 py-3 align-top">
@@ -774,6 +810,37 @@ export function ControlsList() {
           </table>
         )}
       </div>
+
+      {/* Paginazione client-side (mostrata solo se la lista filtrata supera una
+          pagina). C7 */}
+      {searchedRows.length > PAGE_SIZE && (
+        <div className="flex items-center justify-between mt-3 text-sm text-gray-600">
+          <span>
+            {t("controls.pagination.range", {
+              from: (safePage - 1) * PAGE_SIZE + 1,
+              to: Math.min(safePage * PAGE_SIZE, searchedRows.length),
+              total: searchedRows.length,
+            })}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={safePage <= 1}
+              className="px-2.5 py-1 border border-gray-300 rounded disabled:opacity-40 hover:bg-gray-50"
+            >
+              {t("controls.pagination.prev")}
+            </button>
+            <span>{t("controls.pagination.page", { page: safePage, total: totalPages })}</span>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={safePage >= totalPages}
+              className="px-2.5 py-1 border border-gray-300 rounded disabled:opacity-40 hover:bg-gray-50"
+            >
+              {t("controls.pagination.next")}
+            </button>
+          </div>
+        </div>
+      )}
 
       <ControlDetailDrawer
         instanceId={selectedInstance}

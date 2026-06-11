@@ -370,6 +370,8 @@
       },
       "about": {
         "no_description": "Bu dil için açıklama yok.",
+        "normative_requirements": "Mevzuat gereksinimleri",
+        "applies_to": { "essential": "Temel", "important": "Önemli" },
         "guidance": "Uygulama kılavuzu",
         "evidence_examples": "Kabul edilebilir kanıt örnekleri",
         "mappings": "Çerçeveler arası eşleştirmeler",
@@ -531,6 +533,13 @@
     "na_justification_prompt": "N/A (uygulanamaz) durumu için gerekçe — en az 20 karakter:",
     "na_justification_too_short": "Gerekçe en az 20 karakter içermelidir.",
     "truncated_warning": "{{total}} kontrolden {{shown}} tanesi gösteriliyor: sayaçlar kısmidir. Tümünü görmek için filtrelerle daraltın.",
+    "search_placeholder": "ID veya başlığa göre ara…",
+    "pagination": {
+      "range": "{{total}} içinden {{from}}–{{to}}",
+      "page": "Sayfa {{page}}/{{total}}",
+      "prev": "‹ Önceki",
+      "next": "Sonraki ›"
+    },
     "soa": {
       "title": "Uygulanabilirlik Bildirimi (SoA)",
       "approved_count": "{{approved}}/{{total}} kontrol onaylandı",
@@ -703,11 +712,6 @@
       "nis2": {
         "essential_hint": "Proaktif denetim · 10 milyon €'ya kadar ceza",
         "important_hint": "Reaktif denetim · 7 milyon €'ya kadar ceza"
-      },
-      "generic": {
-        "base": "Temel — zorunlu minimum gereksinimler",
-        "advanced": "Gelişmiş — isteğe bağlı önlemlerle",
-        "complete": "Tam — eksiksiz uygulama"
       }
     },
     "delete_blocked": {

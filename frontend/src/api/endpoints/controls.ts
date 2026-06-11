@@ -121,6 +121,7 @@ export interface ControlDetailInfo {
   current_evidences: EvidenceRef[];
   linked_documents: LinkedDocument[];
   requirements: RequirementsCheck;
+  normative_requirements: { punto: string; applies_to: string[]; ambito: string; text: string }[];
   current_status: string;
   suggested_status: string;
   suggested_status_reason: string;
@@ -168,7 +169,7 @@ export interface GapAnalysisResult {
 
 export const controlsApi = {
   instances: (params?: Record<string, string>) =>
-    apiClient.get<{ results: ControlInstance[]; count: number }>("/controls/instances/", { params: { page_size: "500", ...params } }).then((r) => r.data),
+    apiClient.get<{ results: ControlInstance[]; count: number }>("/controls/instances/", { params: { page_size: "1000", ...params } }).then((r) => r.data),
   frameworks: (plantId?: string) =>
     apiClient.get<{ results: Framework[] }>(
       "/controls/frameworks/",

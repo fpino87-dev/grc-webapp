@@ -99,6 +99,27 @@
         "en": {
           "title": "Information security roles and responsibilities"
         }
+      },
+      "control_category": "organizzativo",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Matrice ruoli e responsabilità di sicurezza (RACI)"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Organigramma sicurezza aggiornato"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Ruoli formalmente assegnati e comunicati"
       }
     },
     {
@@ -112,6 +133,27 @@
         "en": {
           "title": "Segregation of duties"
         }
+      },
+      "control_category": "organizzativo",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Matrice di separazione dei compiti (SoD)"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Analisi conflitti SoD"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Compiti in conflitto identificati e separati"
       }
     },
     {
@@ -125,6 +167,27 @@
         "en": {
           "title": "Management responsibilities"
         }
+      },
+      "control_category": "organizzativo",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "policy",
+            "mandatory": true,
+            "description": "Impegno della direzione alla sicurezza delle informazioni"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "verbale",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Verbale riesame della direzione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "La direzione promuove e supporta la sicurezza"
       }
     },
     {
@@ -138,6 +201,61 @@
         "en": {
           "title": "Contact with authorities"
         }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "registro",
+            "mandatory": true,
+            "description": "Registro dei contatti con le autorità competenti"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 180,
+            "description": "Evidenza contatti/segnalazioni"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Contatti con autorità mantenuti e aggiornati"
+      }
+    },
+    {
+      "external_id": "A.5.6",
+      "domain": "A5",
+      "translations": {
+        "it": {
+          "title": "Contatti con gruppi di interesse specialistici",
+          "description": "Stabilire e mantenere contatti con gruppi di interesse specialistici, forum specializzati e associazioni professionali in materia di sicurezza."
+        },
+        "en": {
+          "title": "Contact with special interest groups"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "registro",
+            "mandatory": true,
+            "description": "Registro adesioni a gruppi/forum specialistici"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 180,
+            "description": "Evidenza partecipazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Contatti con gruppi specialistici mantenuti"
       }
     },
     {
@@ -151,6 +269,61 @@
         "en": {
           "title": "Threat intelligence"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": false,
+            "description": "Procedura di threat intelligence"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Report di threat intelligence / feed sulle minacce"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Intelligence sulle minacce raccolta e analizzata"
+      }
+    },
+    {
+      "external_id": "A.5.8",
+      "domain": "A5",
+      "translations": {
+        "it": {
+          "title": "Sicurezza delle informazioni nella gestione dei progetti",
+          "description": "Integrare la sicurezza delle informazioni nella gestione dei progetti, indipendentemente dalla tipologia di progetto."
+        },
+        "en": {
+          "title": "Information security in project management"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di sicurezza nella gestione dei progetti"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 180,
+            "description": "Risk assessment di progetto"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Sicurezza integrata nel ciclo di progetto"
       }
     },
     {
@@ -164,6 +337,27 @@
         "en": {
           "title": "Inventory of information and other associated assets"
         }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "registro",
+            "mandatory": true,
+            "description": "Inventario degli asset informativi"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 90,
+            "description": "Export inventario asset"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Inventario completo e aggiornato"
       }
     },
     {
@@ -177,6 +371,61 @@
         "en": {
           "title": "Acceptable use of information and other associated assets"
         }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "policy",
+            "mandatory": true,
+            "description": "Policy di uso accettabile degli asset"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "verbale",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza presa visione personale"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Regole d'uso accettabile comunicate e accettate"
+      }
+    },
+    {
+      "external_id": "A.5.11",
+      "domain": "A5",
+      "translations": {
+        "it": {
+          "title": "Restituzione degli asset",
+          "description": "Il personale e le altre parti interessate devono restituire tutti gli asset dell'organizzazione in loro possesso al termine del rapporto, contratto o accordo."
+        },
+        "en": {
+          "title": "Return of assets"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di restituzione asset (offboarding)"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Checklist riconsegna asset firmata"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Asset restituiti a fine rapporto"
       }
     },
     {
@@ -190,6 +439,61 @@
         "en": {
           "title": "Classification of information"
         }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "policy",
+            "mandatory": true,
+            "description": "Policy di classificazione delle informazioni"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "verbale",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza applicazione schema di classificazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Schema di classificazione definito e applicato"
+      }
+    },
+    {
+      "external_id": "A.5.13",
+      "domain": "A5",
+      "translations": {
+        "it": {
+          "title": "Etichettatura delle informazioni",
+          "description": "Sviluppare e applicare un insieme appropriato di procedure per l'etichettatura delle informazioni in coerenza con lo schema di classificazione adottato."
+        },
+        "en": {
+          "title": "Labelling of information"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di etichettatura delle informazioni"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 180,
+            "description": "Esempi di etichettatura applicata"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Etichettatura coerente con la classificazione"
       }
     },
     {
@@ -203,6 +507,27 @@
         "en": {
           "title": "Information transfer"
         }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di trasferimento sicuro delle informazioni"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 180,
+            "description": "Configurazione canale di trasferimento sicuro"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Trasferimenti protetti per tutte le tipologie"
       }
     },
     {
@@ -216,6 +541,27 @@
         "en": {
           "title": "Access control"
         }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "policy",
+            "mandatory": true,
+            "description": "Policy di controllo degli accessi"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "verbale",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Matrice/riesame degli accessi"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Regole di accesso definite per asset e ruoli"
       }
     },
     {
@@ -229,6 +575,27 @@
         "en": {
           "title": "Identity management"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": false,
+            "description": "Procedura di gestione del ciclo di vita delle identità"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Elenco utenze dal sistema di gestione identità"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Ciclo di vita delle identità gestito"
       }
     },
     {
@@ -242,6 +609,27 @@
         "en": {
           "title": "Authentication information"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": false,
+            "description": "Policy di gestione delle credenziali"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Configurazione policy credenziali/password attiva"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Informazioni di autenticazione gestite in modo sicuro"
       }
     },
     {
@@ -255,6 +643,27 @@
         "en": {
           "title": "Access rights"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": false,
+            "description": "Procedura di provisioning/deprovisioning"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "max_age_days": 180,
+            "description": "Report di riesame periodico dei diritti di accesso"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Diritti di accesso assegnati, riesaminati e revocati"
       }
     },
     {
@@ -268,6 +677,129 @@
         "en": {
           "title": "Information security in supplier relationships"
         }
+      },
+      "control_category": "organizzativo",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Policy di sicurezza nelle relazioni con i fornitori"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Elenco fornitori valutati"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Rischi dei fornitori identificati e gestiti"
+      }
+    },
+    {
+      "external_id": "A.5.20",
+      "domain": "A5",
+      "translations": {
+        "it": {
+          "title": "Sicurezza delle informazioni negli accordi con i fornitori",
+          "description": "Stabilire e concordare con ciascun fornitore i requisiti di sicurezza delle informazioni pertinenti, in funzione della tipologia di rapporto."
+        },
+        "en": {
+          "title": "Addressing information security within supplier agreements"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Clausole contrattuali di sicurezza per i fornitori"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Contratti con clausole di sicurezza"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Requisiti di sicurezza inclusi negli accordi"
+      }
+    },
+    {
+      "external_id": "A.5.21",
+      "domain": "A5",
+      "translations": {
+        "it": {
+          "title": "Gestione della sicurezza nella catena di fornitura ICT",
+          "description": "Definire e attuare processi e procedure per gestire i rischi di sicurezza associati alla catena di fornitura di prodotti e servizi ICT."
+        },
+        "en": {
+          "title": "Managing information security in the ICT supply chain"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di gestione del rischio nella supply chain ICT"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Valutazione fornitori ICT"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Rischi della catena di fornitura ICT gestiti"
+      }
+    },
+    {
+      "external_id": "A.5.22",
+      "domain": "A5",
+      "translations": {
+        "it": {
+          "title": "Monitoraggio, riesame e gestione dei cambiamenti dei servizi dei fornitori",
+          "description": "Monitorare, riesaminare, valutare e gestire periodicamente i cambiamenti nelle pratiche di sicurezza delle informazioni e nell'erogazione dei servizi dei fornitori."
+        },
+        "en": {
+          "title": "Monitoring, review and change management of supplier services"
+        }
+      },
+      "control_category": "organizzativo",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di monitoraggio e riesame dei servizi dei fornitori"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "verbale",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Verbale di riesame periodico del fornitore"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Servizi dei fornitori monitorati e riesaminati"
       }
     },
     {
@@ -281,6 +813,27 @@
         "en": {
           "title": "Information security for use of cloud services"
         }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "policy",
+            "mandatory": true,
+            "description": "Policy per l'uso sicuro dei servizi cloud"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "verbale",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Configurazione sicurezza tenant cloud"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Sicurezza dei servizi cloud governata"
       }
     },
     {
@@ -294,6 +847,27 @@
         "en": {
           "title": "Information security incident management planning and preparation"
         }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di pianificazione e gestione degli incidenti"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "verbale",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Verbale di test/tabletop del piano di risposta"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Processi, ruoli e responsabilità per la gestione degli incidenti definiti"
       }
     },
     {
@@ -307,6 +881,129 @@
         "en": {
           "title": "Assessment and decision on information security events"
         }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di valutazione e classificazione degli eventi"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 180,
+            "description": "Registro eventi classificati"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Eventi valutati e classificati come incidenti o meno"
+      }
+    },
+    {
+      "external_id": "A.5.26",
+      "domain": "A5",
+      "translations": {
+        "it": {
+          "title": "Risposta agli incidenti relativi alla sicurezza delle informazioni",
+          "description": "Rispondere agli incidenti di sicurezza delle informazioni secondo le procedure documentate."
+        },
+        "en": {
+          "title": "Response to information security incidents"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di risposta agli incidenti"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Report degli incidenti gestiti"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Risposta agli incidenti conforme alle procedure"
+      }
+    },
+    {
+      "external_id": "A.5.27",
+      "domain": "A5",
+      "translations": {
+        "it": {
+          "title": "Apprendimento dagli incidenti relativi alla sicurezza delle informazioni",
+          "description": "Utilizzare le conoscenze acquisite dagli incidenti di sicurezza per rafforzare e migliorare i controlli."
+        },
+        "en": {
+          "title": "Learning from information security incidents"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di lessons learned post-incidente"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "verbale",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Verbale di post-incident review"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Le conoscenze dagli incidenti riducono probabilità/impatto futuri"
+      }
+    },
+    {
+      "external_id": "A.5.28",
+      "domain": "A5",
+      "translations": {
+        "it": {
+          "title": "Raccolta delle evidenze",
+          "description": "Definire e applicare procedure per l'identificazione, la raccolta, l'acquisizione e la conservazione delle evidenze relative agli eventi di sicurezza."
+        },
+        "en": {
+          "title": "Collection of evidence"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di raccolta e conservazione delle evidenze (chain of custody)"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Report di gestione delle evidenze"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Evidenze identificate, raccolte e preservate"
       }
     },
     {
@@ -320,6 +1017,27 @@
         "en": {
           "title": "Information security during disruption"
         }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Piano di continuità operativa (BCP) della sicurezza"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Verbale di test di continuità"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Sicurezza mantenuta durante le interruzioni"
       }
     },
     {
@@ -333,6 +1051,27 @@
         "en": {
           "title": "ICT readiness for business continuity"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Piano di disaster recovery / ICT readiness"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "max_age_days": 365,
+            "description": "Report dei test di disaster recovery"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 1,
+        "notes": "Capacità ICT di ripristino verificata con test"
       }
     },
     {
@@ -375,6 +1114,40 @@
       }
     },
     {
+      "external_id": "A.5.32",
+      "domain": "A5",
+      "translations": {
+        "it": {
+          "title": "Diritti di proprietà intellettuale",
+          "description": "Attuare procedure appropriate per proteggere i diritti di proprietà intellettuale."
+        },
+        "en": {
+          "title": "Intellectual property rights"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "policy",
+            "mandatory": true,
+            "description": "Policy su proprietà intellettuale e licenze software"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Estratto del registro licenze software"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Diritti di proprietà intellettuale tutelati"
+      }
+    },
+    {
       "external_id": "A.5.33",
       "domain": "A5",
       "translations": {
@@ -385,6 +1158,100 @@
         "en": {
           "title": "Protection of records"
         }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di conservazione e protezione dei registri (retention)"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 180,
+            "description": "Configurazione retention/protezione registri"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Registri protetti da perdita, falsificazione e accesso non autorizzato"
+      }
+    },
+    {
+      "external_id": "A.5.34",
+      "domain": "A5",
+      "translations": {
+        "it": {
+          "title": "Privacy e protezione dei dati personali (PII)",
+          "description": "Identificare e soddisfare i requisiti relativi alla preservazione della privacy e alla protezione dei dati personali secondo le leggi e i regolamenti applicabili."
+        },
+        "en": {
+          "title": "Privacy and protection of PII"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "registro",
+            "mandatory": true,
+            "description": "Registro dei trattamenti GDPR (art. 30)"
+          },
+          {
+            "type": "policy",
+            "mandatory": false,
+            "description": "Privacy policy interna approvata"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "verbale",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Verbale DPO o responsabile privacy"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Requisito normativo GDPR su privacy e protezione PII"
+      }
+    },
+    {
+      "external_id": "A.5.35",
+      "domain": "A5",
+      "translations": {
+        "it": {
+          "title": "Riesame indipendente della sicurezza delle informazioni",
+          "description": "Riesaminare in modo indipendente, a intervalli pianificati o a fronte di cambiamenti significativi, l'approccio dell'organizzazione alla gestione della sicurezza delle informazioni."
+        },
+        "en": {
+          "title": "Independent review of information security"
+        }
+      },
+      "control_category": "organizzativo",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di audit interno della sicurezza"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "max_age_days": 365,
+            "description": "Report di riesame indipendente"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 1,
+        "notes": "Riesame indipendente a intervalli pianificati"
       }
     },
     {
@@ -398,6 +1265,27 @@
         "en": {
           "title": "Compliance with policies, rules and standards for information security"
         }
+      },
+      "control_category": "organizzativo",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di verifica della conformità a policy e norme"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Report di verifica di conformità"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Conformità alle politiche verificata periodicamente"
       }
     },
     {
@@ -411,6 +1299,27 @@
         "en": {
           "title": "Documented operating procedures"
         }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedure operative documentate (SOP)"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Elenco delle SOP pubblicate"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Attività operative documentate e disponibili"
       }
     },
     {
@@ -424,6 +1333,27 @@
         "en": {
           "title": "Screening"
         }
+      },
+      "control_category": "organizzativo",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di screening del personale"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Esito verifiche di background"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Verifiche proporzionate a rischio e classificazione"
       }
     },
     {
@@ -437,6 +1367,27 @@
         "en": {
           "title": "Terms and conditions of employment"
         }
+      },
+      "control_category": "organizzativo",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Clausole di sicurezza nei termini e condizioni di impiego"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Contratti firmati con clausole di sicurezza"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Responsabilità di sicurezza incluse nei contratti"
       }
     },
     {
@@ -480,6 +1431,40 @@
       }
     },
     {
+      "external_id": "A.6.4",
+      "domain": "A6",
+      "translations": {
+        "it": {
+          "title": "Processo disciplinare",
+          "description": "Formalizzare e comunicare un processo disciplinare per intraprendere azioni verso il personale che commette violazioni della sicurezza delle informazioni."
+        },
+        "en": {
+          "title": "Disciplinary process"
+        }
+      },
+      "control_category": "organizzativo",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura del processo disciplinare"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "verbale",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di applicazione del processo"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Processo disciplinare formalizzato e comunicato"
+      }
+    },
+    {
       "external_id": "A.6.5",
       "domain": "A6",
       "translations": {
@@ -490,6 +1475,95 @@
         "en": {
           "title": "Responsibilities after termination or change of employment"
         }
+      },
+      "control_category": "organizzativo",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di gestione cessazione/cambio di impiego"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Checklist offboarding completata"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Responsabilità post-rapporto definite e applicate"
+      }
+    },
+    {
+      "external_id": "A.6.6",
+      "domain": "A6",
+      "translations": {
+        "it": {
+          "title": "Accordi di riservatezza o non divulgazione",
+          "description": "Identificare, documentare, riesaminare periodicamente e far sottoscrivere accordi di riservatezza o non divulgazione che riflettano le esigenze di protezione delle informazioni."
+        },
+        "en": {
+          "title": "Confidentiality or non-disclosure agreements"
+        }
+      },
+      "control_category": "organizzativo",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Modello di accordo di riservatezza/NDA"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Registro NDA sottoscritti"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "NDA identificati, riesaminati e sottoscritti"
+      }
+    },
+    {
+      "external_id": "A.6.7",
+      "domain": "A6",
+      "translations": {
+        "it": {
+          "title": "Lavoro a distanza",
+          "description": "Attuare misure di sicurezza quando il personale lavora da remoto, per proteggere le informazioni accedute, trattate o memorizzate al di fuori delle sedi dell'organizzazione."
+        },
+        "en": {
+          "title": "Remote working"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "policy",
+            "mandatory": true,
+            "description": "Policy per il lavoro a distanza"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": false,
+            "max_age_days": 180,
+            "description": "Configurazione VPN/MDM per accesso remoto"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Misure di protezione per accesso e trattamento da remoto"
       }
     },
     {
@@ -503,6 +1577,27 @@
         "en": {
           "title": "Information security event reporting"
         }
+      },
+      "control_category": "organizzativo",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di segnalazione degli eventi di sicurezza"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 180,
+            "description": "Evidenza canale e segnalazioni ricevute"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Canale di segnalazione disponibile e noto"
       }
     },
     {
@@ -516,6 +1611,21 @@
         "en": {
           "title": "Physical security perimeters"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "max_age_days": 365,
+            "description": "Documentazione/foto dei perimetri di sicurezza fisica"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Perimetri di sicurezza fisica definiti e protetti"
       }
     },
     {
@@ -529,6 +1639,55 @@
         "en": {
           "title": "Physical entry"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": false,
+            "description": "Procedura di controllo degli accessi fisici"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "log",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Registro/log degli accessi fisici"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Accessi fisici controllati e tracciati"
+      }
+    },
+    {
+      "external_id": "A.7.3",
+      "domain": "A7",
+      "translations": {
+        "it": {
+          "title": "Messa in sicurezza di uffici, locali e strutture",
+          "description": "Progettare e applicare misure di sicurezza fisica per uffici, locali e strutture."
+        },
+        "en": {
+          "title": "Securing offices, rooms and facilities"
+        }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "max_age_days": 365,
+            "description": "Report di sopralluogo su uffici, locali e strutture"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Aree fisiche messe in sicurezza"
       }
     },
     {
@@ -542,6 +1701,49 @@
         "en": {
           "title": "Physical security monitoring"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Schermata del sistema di videosorveglianza/allarmi"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Sicurezza fisica monitorata in continuo"
+      }
+    },
+    {
+      "external_id": "A.7.5",
+      "domain": "A7",
+      "translations": {
+        "it": {
+          "title": "Protezione da minacce fisiche e ambientali",
+          "description": "Progettare e attuare misure di protezione contro minacce fisiche e ambientali, sia di origine naturale sia dolosa o accidentale."
+        },
+        "en": {
+          "title": "Protecting against physical and environmental threats"
+        }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "max_age_days": 365,
+            "description": "Report misure antincendio/ambientali (UPS, rilevazione)"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Protezione da minacce fisiche e ambientali in essere"
       }
     },
     {
@@ -555,6 +1757,27 @@
         "en": {
           "title": "Working in secure areas"
         }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura per il lavoro nelle aree sicure"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza misure nelle aree sicure"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Regole per operare nelle aree sicure definite"
       }
     },
     {
@@ -568,6 +1791,27 @@
         "en": {
           "title": "Clear desk and clear screen"
         }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "policy",
+            "mandatory": true,
+            "description": "Policy clear desk e clear screen"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 180,
+            "description": "Esito verifiche clear desk/clear screen"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Scrivanie e schermi protetti quando non presidiati"
       }
     },
     {
@@ -581,6 +1825,55 @@
         "en": {
           "title": "Equipment siting and protection"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "max_age_days": 365,
+            "description": "Documentazione/foto del posizionamento delle apparecchiature"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Apparecchiature posizionate e protette"
+      }
+    },
+    {
+      "external_id": "A.7.9",
+      "domain": "A7",
+      "translations": {
+        "it": {
+          "title": "Sicurezza degli asset fuori sede",
+          "description": "Proteggere gli asset utilizzati al di fuori delle sedi dell'organizzazione, tenendo conto dei diversi rischi connessi all'operatività esterna."
+        },
+        "en": {
+          "title": "Security of assets off-premises"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "policy",
+            "mandatory": true,
+            "description": "Policy per l'uso degli asset fuori sede"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 180,
+            "description": "Estratto del registro asset fuori sede"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Asset esterni protetti in funzione dei rischi"
       }
     },
     {
@@ -594,6 +1887,27 @@
         "en": {
           "title": "Storage media"
         }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di gestione dei supporti di archiviazione"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 180,
+            "description": "Registro dei supporti di archiviazione"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Ciclo di vita dei supporti gestito in sicurezza"
       }
     },
     {
@@ -607,6 +1921,21 @@
         "en": {
           "title": "Supporting utilities"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "max_age_days": 365,
+            "description": "Report manutenzione utenze di supporto (UPS, alimentazione, clima)"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Servizi di supporto protetti e ridondati"
       }
     },
     {
@@ -620,6 +1949,21 @@
         "en": {
           "title": "Cabling security"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "max_age_days": 365,
+            "description": "Documentazione/foto del cablaggio protetto"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Cablaggio di rete e alimentazione protetto"
       }
     },
     {
@@ -633,6 +1977,61 @@
         "en": {
           "title": "Equipment maintenance"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": false,
+            "description": "Procedura di manutenzione delle apparecchiature"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "max_age_days": 365,
+            "description": "Report degli interventi di manutenzione"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Apparecchiature mantenute correttamente"
+      }
+    },
+    {
+      "external_id": "A.7.14",
+      "domain": "A7",
+      "translations": {
+        "it": {
+          "title": "Smaltimento sicuro o riutilizzo delle apparecchiature",
+          "description": "Verificare le apparecchiature contenenti supporti di memorizzazione prima dello smaltimento o riutilizzo, per assicurare la rimozione o sovrascrittura sicura dei dati sensibili."
+        },
+        "en": {
+          "title": "Secure disposal or re-use of equipment"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di smaltimento sicuro/sanitizzazione"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "certificato",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Certificato di distruzione o wiping dei supporti"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Dati rimossi o sovrascritti prima di smaltimento/riutilizzo"
       }
     },
     {
@@ -646,6 +2045,27 @@
         "en": {
           "title": "User endpoint devices"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": false,
+            "description": "Procedura di hardening degli endpoint"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Configurazione MDM/sicurezza endpoint"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Dispositivi endpoint protetti e conformi"
       }
     },
     {
@@ -693,6 +2113,21 @@
         "en": {
           "title": "Information access restriction"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Configurazione permessi/ACL sulle informazioni"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Accesso alle informazioni ristretto secondo policy"
       }
     },
     {
@@ -706,6 +2141,21 @@
         "en": {
           "title": "Access to source code"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Configurazione permessi sui repository di codice"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Accesso al codice sorgente ristretto"
       }
     },
     {
@@ -753,6 +2203,21 @@
         "en": {
           "title": "Capacity management"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Report di monitoraggio della capacità"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Capacità monitorata e proiettata"
       }
     },
     {
@@ -766,6 +2231,33 @@
         "en": {
           "title": "Protection against malware"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": false,
+            "description": "Procedura di protezione dai malware"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 30,
+            "description": "Console antimalware con definizioni aggiornate"
+          },
+          {
+            "type": "log",
+            "mandatory": false,
+            "max_age_days": 30,
+            "description": "Log rilevazioni malware ultimo mese"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Protezione anti-malware attiva e aggiornata"
       }
     },
     {
@@ -779,6 +2271,27 @@
         "en": {
           "title": "Management of technical vulnerabilities"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": false,
+            "description": "Procedura di gestione delle vulnerabilità"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Report di scansione delle vulnerabilità"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Vulnerabilità tecniche identificate e gestite"
       }
     },
     {
@@ -792,6 +2305,27 @@
         "en": {
           "title": "Configuration management"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": false,
+            "description": "Procedura di gestione della configurazione"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Baseline di configurazione / estratto CMDB"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Configurazioni gestite secondo baseline approvate"
       }
     },
     {
@@ -805,6 +2339,21 @@
         "en": {
           "title": "Information deletion"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "max_age_days": 180,
+            "description": "Report/log delle cancellazioni effettuate"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Informazioni cancellate quando non più necessarie"
       }
     },
     {
@@ -818,6 +2367,21 @@
         "en": {
           "title": "Data masking"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 180,
+            "description": "Configurazione di mascheramento dati attiva"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Dati mascherati dove richiesto"
       }
     },
     {
@@ -831,6 +2395,27 @@
         "en": {
           "title": "Data leakage prevention"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Console DLP con policy attive"
+          },
+          {
+            "type": "log",
+            "mandatory": false,
+            "max_age_days": 30,
+            "description": "Log eventi DLP ultimo mese"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Misure anti-fuga di dati attive sui canali rilevanti"
       }
     },
     {
@@ -844,6 +2429,33 @@
         "en": {
           "title": "Information backup"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": false,
+            "description": "Procedura di backup"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 30,
+            "description": "Job di backup eseguiti con esito positivo"
+          },
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 180,
+            "description": "Report test di ripristino (restore)"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Backup eseguiti e testati secondo policy"
       }
     },
     {
@@ -857,6 +2469,21 @@
         "en": {
           "title": "Redundancy of information processing facilities"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "max_age_days": 365,
+            "description": "Report architettura ridondante / test di failover"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Strutture di elaborazione ridondate per la disponibilità"
       }
     },
     {
@@ -910,6 +2537,123 @@
         "en": {
           "title": "Monitoring activities"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": false,
+            "description": "Procedura di monitoraggio delle attività"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 30,
+            "description": "Sistema di monitoraggio/alerting attivo"
+          },
+          {
+            "type": "log",
+            "mandatory": false,
+            "max_age_days": 7,
+            "description": "Sample log eventi recenti"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Reti, sistemi e applicazioni monitorati per anomalie"
+      }
+    },
+    {
+      "external_id": "A.8.17",
+      "domain": "A8",
+      "translations": {
+        "it": {
+          "title": "Sincronizzazione degli orologi",
+          "description": "Sincronizzare gli orologi dei sistemi di elaborazione con fonti temporali approvate."
+        },
+        "en": {
+          "title": "Clock synchronization"
+        }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 180,
+            "description": "Configurazione sincronizzazione NTP"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Orologi sincronizzati con fonte temporale approvata"
+      }
+    },
+    {
+      "external_id": "A.8.18",
+      "domain": "A8",
+      "translations": {
+        "it": {
+          "title": "Uso di programmi di utilità privilegiati",
+          "description": "Limitare e controllare rigorosamente l'uso dei programmi di utilità in grado di superare i controlli di sistema e applicativi."
+        },
+        "en": {
+          "title": "Use of privileged utility programs"
+        }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Configurazione restrizioni sui programmi di utilità privilegiati"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Uso dei tool privilegiati limitato e controllato"
+      }
+    },
+    {
+      "external_id": "A.8.19",
+      "domain": "A8",
+      "translations": {
+        "it": {
+          "title": "Installazione di software sui sistemi operativi",
+          "description": "Attuare procedure e misure per gestire in modo sicuro l'installazione di software sui sistemi operativi."
+        },
+        "en": {
+          "title": "Installation of software on operational systems"
+        }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": false,
+            "description": "Procedura di gestione del software"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Configurazione controllo installazione software (whitelisting)"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Installazione software sui sistemi gestita"
       }
     },
     {
@@ -923,6 +2667,27 @@
         "en": {
           "title": "Networks security"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": false,
+            "description": "Procedura di sicurezza delle reti"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Configurazione di sicurezza della rete (firewall)"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Reti protette e segmentate"
       }
     },
     {
@@ -936,6 +2701,21 @@
         "en": {
           "title": "Security of network services"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Configurazione di sicurezza dei servizi di rete"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Meccanismi di sicurezza dei servizi di rete definiti"
       }
     },
     {
@@ -949,6 +2729,21 @@
         "en": {
           "title": "Segregation of networks"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Configurazione segmentazione/VLAN di rete"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Reti segregate per gruppi di servizi e utenti"
       }
     },
     {
@@ -962,6 +2757,21 @@
         "en": {
           "title": "Web filtering"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Configurazione proxy/filtraggio web"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Accesso a siti esterni filtrato"
       }
     },
     {
@@ -975,6 +2785,27 @@
         "en": {
           "title": "Use of cryptography"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "policy",
+            "mandatory": true,
+            "description": "Policy sull'uso della crittografia e gestione delle chiavi"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Configurazione cifratura attiva (dati a riposo e in transito)"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 1,
+        "notes": "Crittografia usata secondo una policy che copre il ciclo di vita delle chiavi"
       }
     },
     {
@@ -988,6 +2819,95 @@
         "en": {
           "title": "Secure development life cycle"
         }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di ciclo di sviluppo sicuro (SDLC)"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza dei gate di sicurezza nello sviluppo"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Regole di sviluppo sicuro stabilite e applicate"
+      }
+    },
+    {
+      "external_id": "A.8.26",
+      "domain": "A8",
+      "translations": {
+        "it": {
+          "title": "Requisiti di sicurezza delle applicazioni",
+          "description": "Identificare, specificare e approvare i requisiti di sicurezza delle informazioni nello sviluppo o nell'acquisizione delle applicazioni."
+        },
+        "en": {
+          "title": "Application security requirements"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di definizione dei requisiti di sicurezza applicativi"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Specifiche di sicurezza delle applicazioni"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Requisiti di sicurezza identificati e approvati"
+      }
+    },
+    {
+      "external_id": "A.8.27",
+      "domain": "A8",
+      "translations": {
+        "it": {
+          "title": "Principi di architettura e ingegneria sicura dei sistemi",
+          "description": "Stabilire, documentare, mantenere e applicare principi di ingegneria dei sistemi sicuri a tutte le attività di sviluppo."
+        },
+        "en": {
+          "title": "Secure system architecture and engineering principles"
+        }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Principi di architettura e ingegneria sicura dei sistemi"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza di design/architecture review"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Principi di sicurezza applicati allo sviluppo"
       }
     },
     {
@@ -1001,6 +2921,27 @@
         "en": {
           "title": "Secure coding"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": false,
+            "description": "Linee guida di programmazione sicura"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Report di code review/SAST"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Codice sviluppato secondo principi di programmazione sicura"
       }
     },
     {
@@ -1014,6 +2955,83 @@
         "en": {
           "title": "Security testing in development and acceptance"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "max_age_days": 180,
+            "description": "Report dei test di sicurezza (DAST/penetration test)"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Test di sicurezza eseguiti in sviluppo e accettazione"
+      }
+    },
+    {
+      "external_id": "A.8.30",
+      "domain": "A8",
+      "translations": {
+        "it": {
+          "title": "Sviluppo affidato all'esterno",
+          "description": "Dirigere, monitorare e riesaminare le attività di sviluppo dei sistemi affidate in outsourcing."
+        },
+        "en": {
+          "title": "Outsourced development"
+        }
+      },
+      "control_category": "organizzativo",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di gestione dello sviluppo affidato all'esterno"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Evidenza dei controlli sul fornitore di sviluppo"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Sviluppo in outsourcing monitorato e controllato"
+      }
+    },
+    {
+      "external_id": "A.8.31",
+      "domain": "A8",
+      "translations": {
+        "it": {
+          "title": "Separazione degli ambienti di sviluppo, test e produzione",
+          "description": "Separare e proteggere gli ambienti di sviluppo, test e produzione."
+        },
+        "en": {
+          "title": "Separation of development, test and production environments"
+        }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "screenshot",
+            "mandatory": true,
+            "max_age_days": 90,
+            "description": "Configurazione separazione ambienti dev/test/prod"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Ambienti di sviluppo, test e produzione separati"
       }
     },
     {
@@ -1027,6 +3045,27 @@
         "en": {
           "title": "Change management"
         }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di gestione dei cambiamenti (change management)"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": false,
+            "max_age_days": 180,
+            "description": "Registro dei change / verbali CAB"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Cambiamenti valutati e autorizzati"
       }
     },
     {
@@ -1040,6 +3079,21 @@
         "en": {
           "title": "Test information"
         }
+      },
+      "control_category": "tecnico",
+      "evidence_requirement": {
+        "documents": [],
+        "evidences": [
+          {
+            "type": "report",
+            "mandatory": true,
+            "max_age_days": 180,
+            "description": "Evidenza di protezione/anonimizzazione dei dati di test"
+          }
+        ],
+        "min_documents": 0,
+        "min_evidences": 1,
+        "notes": "Informazioni di test selezionate e protette"
       }
     },
     {
@@ -1053,6 +3107,27 @@
         "en": {
           "title": "Protection of information systems during audit testing"
         }
+      },
+      "control_category": "procedurale",
+      "evidence_requirement": {
+        "documents": [
+          {
+            "type": "procedura",
+            "mandatory": true,
+            "description": "Procedura di gestione dei test di audit sui sistemi"
+          }
+        ],
+        "evidences": [
+          {
+            "type": "verbale",
+            "mandatory": false,
+            "max_age_days": 365,
+            "description": "Pianificazione concordata dei test di audit"
+          }
+        ],
+        "min_documents": 1,
+        "min_evidences": 0,
+        "notes": "Test di audit pianificati per minimizzare l'impatto sui sistemi"
       }
     }
   ],

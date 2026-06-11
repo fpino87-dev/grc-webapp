@@ -9,6 +9,23 @@ from ..permissions import ControlInstancePermission
 from ..serializers import ControlInstanceSerializer
 
 
+def _localize_requirements(requirements, lang: str) -> list:
+    """Appiattisce i sotto-requisiti normativi (Control.requirements) localizzando
+    il testo nella lingua richiesta (fallback su 'it'). Restituisce una lista di
+    {punto, applies_to, ambito, text} pronta per la UI."""
+    out = []
+    for r in requirements or []:
+        tr = r.get("translations") or {}
+        loc = tr.get(lang) or tr.get("it") or {}
+        out.append({
+            "punto": r.get("punto", ""),
+            "applies_to": r.get("applies_to", []),
+            "ambito": r.get("ambiti_politiche", ""),
+            "text": (loc.get("text") if isinstance(loc, dict) else "") or "",
+        })
+    return out
+
+
 def _explain_suggestion(instance, suggested: str, check: dict) -> str:
     """`suggested` e `check` arrivano già calcolati dal chiamante (detail_info):
     prima questa funzione li ricalcolava da zero — 2 passate in più (C2)."""
@@ -268,6 +285,7 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 "current_evidences": current_evidences,
                 "linked_documents": linked_documents,
                 "requirements": requirements,
+                "normative_requirements": _localize_requirements(control.requirements, lang),
             })
 
     @action(detail=True, methods=["post"], url_path="link-document")

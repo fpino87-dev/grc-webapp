@@ -303,6 +303,8 @@
       },
       "about": {
         "no_description": "Nessuna descrizione disponibile per questa lingua.",
+        "normative_requirements": "Requisiti normativi",
+        "applies_to": { "essential": "Essenziale", "important": "Importante" },
         "guidance": "Linee guida implementazione",
         "evidence_examples": "Esempi di evidenza accettabile",
         "mappings": "Mappature cross-framework",
@@ -464,6 +466,13 @@
     "na_justification_prompt": "Giustificazione per lo stato N/A (non applicabile) — minimo 20 caratteri:",
     "na_justification_too_short": "La giustificazione deve contenere almeno 20 caratteri.",
     "truncated_warning": "Mostrati {{shown}} controlli su {{total}}: i contatori sono parziali. Restringi con i filtri per vederli tutti.",
+    "search_placeholder": "Cerca per ID o titolo…",
+    "pagination": {
+      "range": "{{from}}–{{to}} di {{total}}",
+      "page": "Pagina {{page}}/{{total}}",
+      "prev": "‹ Precedente",
+      "next": "Successiva ›"
+    },
     "soa": {
       "title": "Statement of Applicability (SoA)",
       "approved_count": "{{approved}}/{{total}} controlli approvati",
@@ -636,11 +645,6 @@
       "nis2": {
         "essential_hint": "Supervisione proattiva · sanzioni fino a €10M",
         "important_hint": "Supervisione reattiva · sanzioni fino a €7M"
-      },
-      "generic": {
-        "base": "Base — requisiti minimi obbligatori",
-        "advanced": "Avanzato — con misure opzionali",
-        "complete": "Completo — implementazione piena"
       }
     },
     "delete_blocked": {

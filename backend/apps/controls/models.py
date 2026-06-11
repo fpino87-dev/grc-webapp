@@ -66,6 +66,15 @@ class Control(BaseModel):
         default="procedurale",
         blank=True,
     )
+    requirements = models.JSONField(
+        default=list,
+        blank=True,
+        help_text=(
+            "Sotto-requisiti normativi granulari (es. misure ACN NIS2). Struttura: "
+            "[{punto, applies_to:[essential|important], ambiti_politiche, "
+            "translations:{<lang>:{text}}}]"
+        ),
+    )
 
     class Meta:
         unique_together = ["framework", "external_id"]
