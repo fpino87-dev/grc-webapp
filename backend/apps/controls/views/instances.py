@@ -9,18 +9,28 @@ from ..permissions import ControlInstancePermission
 from ..serializers import ControlInstanceSerializer
 
 
-def _localize_requirements(requirements, lang: str) -> list:
+def _localize_requirements(requirements, lang: str, scope: str | None = None) -> list:
     """Appiattisce i sotto-requisiti normativi (Control.requirements) localizzando
     il testo nella lingua richiesta (fallback su 'it'). Restituisce una lista di
-    {punto, applies_to, ambito, text} pronta per la UI."""
+    {punto, applies_to, ambito, text} pronta per la UI.
+
+    `scope` (es. 'important'/'essential'): se valorizzato, mantiene solo i
+    requisiti applicabili a quel tipo di soggetto NIS2 (un requisito senza
+    `applies_to` vale per tutti). Per un soggetto "importante" i requisiti
+    riservati ai soli "essenziali" non si applicano e vanno nascosti.
+    """
     out = []
     for r in requirements or []:
+        applies_to = r.get("applies_to") or []
+        if scope and applies_to and scope not in applies_to:
+            continue
         tr = r.get("translations") or {}
         loc = tr.get(lang) or tr.get("it") or {}
         out.append({
             "punto": r.get("punto", ""),
-            "applies_to": r.get("applies_to", []),
-            "ambito": r.get("ambiti_politiche", ""),
+            "applies_to": applies_to,
+            # null/mancante → "" (altrimenti il raggruppamento lato UI mostra "null")
+            "ambito": r.get("ambiti_politiche") or "",
             "text": (loc.get("text") if isinstance(loc, dict) else "") or "",
         })
     return out
@@ -285,7 +295,10 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 "current_evidences": current_evidences,
                 "linked_documents": linked_documents,
                 "requirements": requirements,
-                "normative_requirements": _localize_requirements(control.requirements, lang),
+                "normative_requirements": _localize_requirements(
+                    control.requirements, lang,
+                    scope={"importante": "important", "essenziale": "essential"}.get(instance.plant.nis2_scope),
+                ),
             })
 
     @action(detail=True, methods=["post"], url_path="link-document")

@@ -54,3 +54,41 @@ def test_localize_requirements_picks_lang_with_fallback():
 
     assert _localize_requirements([], "it") == []
     assert _localize_requirements(None, "it") == []
+
+
+def test_localize_requirements_coerces_null_ambito():
+    """ambiti_politiche null/mancante → "" (niente 'null' nel raggruppamento UI)."""
+    from apps.controls.views.instances import _localize_requirements
+
+    reqs = [
+        {"punto": "3", "applies_to": ["important"], "ambiti_politiche": None,
+         "translations": {"it": {"text": "x"}}},
+        {"punto": "4", "applies_to": ["important"],  # chiave ambiti_politiche assente
+         "translations": {"it": {"text": "y"}}},
+    ]
+    out = _localize_requirements(reqs, "it")
+    assert out[0]["ambito"] == ""
+    assert out[1]["ambito"] == ""
+
+
+def test_localize_requirements_filters_by_scope():
+    """Un soggetto 'importante' non vede i requisiti riservati ai soli 'essenziali'."""
+    from apps.controls.views.instances import _localize_requirements
+
+    reqs = [
+        {"punto": "1", "applies_to": ["essential", "important"], "ambiti_politiche": "a",
+         "translations": {"it": {"text": "entrambi"}}},
+        {"punto": "2", "applies_to": ["essential"], "ambiti_politiche": "a",
+         "translations": {"it": {"text": "solo essenziale"}}},
+        {"punto": "3", "applies_to": [], "ambiti_politiche": "a",
+         "translations": {"it": {"text": "tutti"}}},
+    ]
+    imp = _localize_requirements(reqs, "it", scope="important")
+    punti = {r["punto"] for r in imp}
+    assert punti == {"1", "3"}  # il 2 (solo essential) è escluso
+
+    ess = _localize_requirements(reqs, "it", scope="essential")
+    assert {r["punto"] for r in ess} == {"1", "2", "3"}
+
+    # senza scope: tutti
+    assert len(_localize_requirements(reqs, "it")) == 3
