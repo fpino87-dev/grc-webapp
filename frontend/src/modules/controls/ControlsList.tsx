@@ -55,7 +55,8 @@ function InlineStatusSelect({ instance }: { instance: ControlInstance }) {
   // Sempre via POST /evaluate/ (mai PATCH diretta): il service valida evidenze
   // e giustificazioni e scrive l'audit `control.evaluated` (C1)
   const updateMutation = useMutation({
-    mutationFn: (status: string) => controlsApi.evaluate(instance.id, status, ""),
+    mutationFn: ({ status, note }: { status: string; note: string }) =>
+      controlsApi.evaluate(instance.id, status, note),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["controls"] });
       setEditing(false);
@@ -65,6 +66,25 @@ function InlineStatusSelect({ instance }: { instance: ControlInstance }) {
       setEditing(false);
     },
   });
+
+  // Lo status N/A richiede una giustificazione scritta (≥20 char): senza, il
+  // backend rifiuta e lo stato "tornava indietro" silenziosamente dalla select
+  // inline (che mandava nota vuota). La raccogliamo qui prima di inviare.
+  function handleStatusChange(status: string) {
+    if (status === instance.status) { setEditing(false); return; }
+    if (status === "na") {
+      const note = window.prompt(t("controls.na_justification_prompt"));
+      if (note === null) { setEditing(false); return; }  // annullato
+      if (note.trim().length < 20) {
+        window.alert(t("controls.na_justification_too_short"));
+        setEditing(false);
+        return;
+      }
+      updateMutation.mutate({ status, note: note.trim() });
+      return;
+    }
+    updateMutation.mutate({ status, note: "" });
+  }
 
   const propagateMutation = useMutation({
     mutationFn: () => controlsApi.propagate(instance.id, crossPlant),
@@ -84,7 +104,7 @@ function InlineStatusSelect({ instance }: { instance: ControlInstance }) {
       <select
         autoFocus
         defaultValue={instance.status}
-        onChange={e => updateMutation.mutate(e.target.value)}
+        onChange={e => handleStatusChange(e.target.value)}
         onBlur={() => setEditing(false)}
         className="border rounded px-1 py-0.5 text-xs"
       >

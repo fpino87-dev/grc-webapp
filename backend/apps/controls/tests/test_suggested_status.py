@@ -69,3 +69,29 @@ def test_non_na_control_still_suggested_from_evidence(make_instance):
 
     inst = make_instance("non_valutato")
     assert calc_suggested_status(inst) == "gap"
+
+
+@pytest.mark.django_db
+def test_na_control_has_no_requirement_gaps(make_instance):
+    """Un controllo N/A è fuori ambito: niente documenti/evidenze mancanti."""
+    from apps.controls.services import check_evidence_requirements
+
+    inst = make_instance("na")  # ha un requisito (min_evidences) ma nessuna evidenza
+    res = check_evidence_requirements(inst)
+    assert res["not_applicable"] is True
+    assert res["satisfied"] is True
+    assert res["missing_documents"] == []
+    assert res["missing_evidences"] == []
+    assert res["expired_evidences"] == []
+
+
+@pytest.mark.django_db
+def test_non_na_control_still_flags_gaps(make_instance):
+    """Per gli stati non-N/A le mancanze continuano a essere segnalate."""
+    from apps.controls.services import check_evidence_requirements
+
+    inst = make_instance("non_valutato")
+    res = check_evidence_requirements(inst)
+    assert res["not_applicable"] is False
+    assert res["satisfied"] is False
+    assert res["missing_evidences"]  # requisito non soddisfatto

@@ -58,7 +58,17 @@ def check_evidence_requirements(instance, lang: str | None = None) -> dict:
         "missing_evidences": [],
         "expired_evidences": [],
         "warnings": [],
+        "not_applicable": False,
     }
+
+    # Un controllo valutato N/A è fuori ambito: i requisiti documentali non si
+    # applicano e non deve generare "mancanze" (documenti/evidenze mancanti o
+    # scaduti). La non-applicabilità è una decisione di governance documentata
+    # (na_justification). Coerente con l'audit package, che già esclude gli N/A
+    # dal MANCANZE.txt. (C14)
+    if instance.status == "na":
+        result["not_applicable"] = True
+        return result
 
     approved_docs = [d for d in _linked_documents(instance) if d.status == "approvato"]
     evidences = _linked_evidences(instance)

@@ -341,7 +341,8 @@
           "missing_evidence": "Missing evidence",
           "expired_evidence": "Expired evidence",
           "warning": "Warning",
-          "satisfied": "All requirements satisfied"
+          "satisfied": "All requirements satisfied",
+          "not_applicable": "N/A control: documentary requirements not applicable"
         },
         "official_status": "Official status",
         "system_suggestion": "System suggestion",
@@ -453,6 +454,8 @@
     "maturity_4": "4 — Managed and measured",
     "maturity_5": "5 — Optimized",
     "maturity_tisax_only": "VDA ISA maturity is meaningful only for TISAX frameworks",
+    "na_justification_prompt": "Justification for N/A (not applicable) status — minimum 20 characters:",
+    "na_justification_too_short": "The justification must contain at least 20 characters.",
     "applicability_applicable": "Applicable",
     "applicability_excluded": "Excluded",
     "applicability_not_relevant": "Not relevant",

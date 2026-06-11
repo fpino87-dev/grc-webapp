@@ -89,6 +89,7 @@ export interface RequirementsCheck {
   missing_evidences: { type: string; description: string }[];
   expired_evidences: { id: string; title: string; expired_on: string }[];
   warnings: string[];
+  not_applicable?: boolean;
 }
 export interface LinkedDocument {
   id: string;

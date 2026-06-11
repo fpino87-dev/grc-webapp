@@ -451,7 +451,11 @@ function TabValutazione({
       )}
 
       {/* Banner requisiti */}
-      {noRequirements ? (
+      {requirements.not_applicable ? (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500">
+          ℹ️ {t("controls.drawer.evaluation.requirements.not_applicable")}
+        </div>
+      ) : noRequirements ? (
         <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500">
           ℹ️ {t("controls.drawer.evaluation.requirements.none")}
         </div>
@@ -1184,7 +1188,11 @@ function TabDocEvidence({
   return (
     <div className="space-y-3">
       {/* Banner requisiti */}
-      {noRequirements ? (
+      {requirements.not_applicable ? (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500">
+          ℹ️ {t("controls.drawer.evaluation.requirements.not_applicable")}
+        </div>
+      ) : noRequirements ? (
         <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500">
           ℹ️ {t("controls.drawer.evaluation.requirements.none")}
         </div>

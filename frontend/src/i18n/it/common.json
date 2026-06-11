@@ -341,7 +341,8 @@
           "missing_evidence": "Evidenza mancante",
           "expired_evidence": "Evidenza scaduta",
           "warning": "Attenzione",
-          "satisfied": "Tutti i requisiti soddisfatti"
+          "satisfied": "Tutti i requisiti soddisfatti",
+          "not_applicable": "Controllo N/A: requisiti documentali non applicabili"
         },
         "official_status": "Stato ufficiale",
         "system_suggestion": "Suggerimento sistema",
@@ -453,6 +454,8 @@
     "maturity_4": "4 — Gestito e misurato",
     "maturity_5": "5 — Ottimizzato",
     "maturity_tisax_only": "Maturità VDA ISA significativa solo per i framework TISAX",
+    "na_justification_prompt": "Giustificazione per lo stato N/A (non applicabile) — minimo 20 caratteri:",
+    "na_justification_too_short": "La giustificazione deve contenere almeno 20 caratteri.",
     "applicability_applicable": "Applicabile",
     "applicability_excluded": "Escluso",
     "applicability_not_relevant": "Non pertinente",

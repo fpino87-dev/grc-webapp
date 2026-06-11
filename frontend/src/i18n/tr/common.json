@@ -408,7 +408,8 @@
           "missing_evidence": "Eksik kanıt",
           "expired_evidence": "Süresi dolmuş kanıt",
           "warning": "Uyarı",
-          "satisfied": "Tüm gereksinimler karşılandı"
+          "satisfied": "Tüm gereksinimler karşılandı",
+          "not_applicable": "N/A kontrolü: belge gereksinimleri uygulanamaz"
         },
         "official_status": "Resmi durum",
         "system_suggestion": "Sistem önerisi",
@@ -520,6 +521,8 @@
     "maturity_4": "4 — Yönetilen ve ölçülen",
     "maturity_5": "5 — Optimize edildi",
     "maturity_tisax_only": "VDA ISA olgunluğu yalnızca TISAX çerçeveleri için anlamlıdır",
+    "na_justification_prompt": "N/A (uygulanamaz) durumu için gerekçe — en az 20 karakter:",
+    "na_justification_too_short": "Gerekçe en az 20 karakter içermelidir.",
     "applicability_applicable": "Uygulanabilir",
     "applicability_excluded": "Dışlandı",
     "applicability_not_relevant": "İlgili değil",

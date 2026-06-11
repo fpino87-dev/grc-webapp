@@ -408,7 +408,8 @@
           "missing_evidence": "Brakujący dowód",
           "expired_evidence": "Wygasły dowód",
           "warning": "Ostrzeżenie",
-          "satisfied": "Wszystkie wymagania spełnione"
+          "satisfied": "Wszystkie wymagania spełnione",
+          "not_applicable": "Kontrola N/D: wymagania dokumentacyjne nie mają zastosowania"
         },
         "official_status": "Oficjalny status",
         "system_suggestion": "Sugestia systemu",
@@ -520,6 +521,8 @@
     "maturity_4": "4 — Zarządzane i mierzone",
     "maturity_5": "5 — Zoptymalizowane",
     "maturity_tisax_only": "Dojrzałość VDA ISA ma znaczenie tylko dla frameworków TISAX",
+    "na_justification_prompt": "Uzasadnienie statusu N/D (nie dotyczy) — minimum 20 znaków:",
+    "na_justification_too_short": "Uzasadnienie musi zawierać co najmniej 20 znaków.",
     "applicability_applicable": "Ma zastosowanie",
     "applicability_excluded": "Wyłączone",
     "applicability_not_relevant": "Nieistotne",
