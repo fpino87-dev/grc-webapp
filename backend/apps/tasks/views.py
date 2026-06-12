@@ -23,14 +23,21 @@ from .serializers import (
 )
 from . import services
 from .permissions import KpiConfigPermission, TaskPermission
-from core.scoping import PlantScopedQuerysetMixin, require_plant_access
+from core.scoping import (
+    PlantPayloadWriteGuardMixin,
+    PlantScopedQuerysetMixin,
+    require_plant_access,
+)
 from django.db.models import Q
 from django.utils import timezone
 from apps.auth_grc.models import UserPlantAccess
 from apps.plants.models import Plant
 
 
-class TaskViewSet(viewsets.ModelViewSet):
+class TaskViewSet(PlantPayloadWriteGuardMixin, viewsets.ModelViewSet):
+    # Scoping di lettura custom in get_queryset (ruoli + assegnatario); il
+    # guard sulle scritture impedisce di creare/spostare task su un plant
+    # fuori perimetro (sweep 2026-06-12 fase 2).
     queryset = Task.objects.select_related(
         "plant", "assigned_to", "completed_by", "escalated_to"
     ).prefetch_related("comments")

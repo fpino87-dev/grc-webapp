@@ -7,7 +7,11 @@ from django.core.files.storage import default_storage
 from django.utils.translation import gettext as _
 import os
 
-from core.scoping import PlantScopedQuerysetMixin, get_user_plant_ids
+from core.scoping import (
+    PlantPayloadWriteGuardMixin,
+    PlantScopedQuerysetMixin,
+    get_user_plant_ids,
+)
 
 from .models import Document, DocumentVersion, Evidence
 from .permissions import DocumentPermission
@@ -19,7 +23,10 @@ from .serializers import (
 from . import services
 
 
-class DocumentViewSet(viewsets.ModelViewSet):
+class DocumentViewSet(PlantPayloadWriteGuardMixin, viewsets.ModelViewSet):
+    # Scoping di lettura custom in get_queryset (plant + condivisi + org-wide);
+    # il guard sulle scritture impedisce di creare/spostare un documento su un
+    # plant fuori perimetro (sweep 2026-06-12 fase 2).
     queryset = Document.objects.select_related(
         "plant", "owner", "reviewer", "approver", "supplier"
     ).prefetch_related("versions", "shared_plants")

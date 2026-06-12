@@ -116,8 +116,110 @@ def require_plant_access(user, plant=None, *, aggregate_requires_org=True) -> No
         ))
 
 
-class PlantScopedQuerysetMixin:
-    """Mixin DRF che restringe `get_queryset()` agli oggetti del plant accessibile.
+def require_payload_plant_access(user, data, model, plant_field: str = "plant") -> None:
+    """Guard sulle SCRITTURE: blocca create/update il cui body indica un plant
+    (o un oggetto correlato appartenente a un plant) fuori dal perimetro
+    dell'utente (sweep security 2026-06-12 fase 2 — lo scoping dei queryset
+    protegge le letture, non il plant arbitrario nel body).
+
+    Interpretazione di `plant_field` (lo stesso del mixin di scoping):
+      * "plant" / "plants"     — il body contiene id di Plant: serve accesso a
+                                 TUTTI gli id indicati (si sta scrivendo su quei siti)
+      * "process__plant", ...  — il body contiene l'id dell'oggetto correlato
+                                 (es. `process`): se ne risolve il plant e basta
+                                 che UNO sia accessibile (semantica di accesso
+                                 all'oggetto, come per le letture M2M)
+    Plant assente/null nel body → nessun vincolo (gli oggetti org-wide restano
+    creabili, stessa scelta del guard sulle evidenze). Id malformati o
+    inesistenti → nessun blocco qui, ci pensa la validazione del serializer.
+    """
+    from django.utils.translation import gettext as _
+    from rest_framework.exceptions import PermissionDenied
+
+    if get_user_plant_ids(user) is None:
+        return  # superuser / scope org: nessun vincolo
+    if not hasattr(data, "get"):
+        return
+
+    head, _sep, rest = plant_field.partition("__")
+    if head in ("pk", "id") or head not in data:
+        return
+
+    raw = data.get(head)
+    if hasattr(data, "getlist"):
+        values = data.getlist(head)
+    else:
+        values = raw if isinstance(raw, (list, tuple)) else [raw]
+    values = [v for v in values if v]
+    if not values:
+        return
+
+    try:
+        related = model._meta.get_field(head).related_model
+    except Exception:
+        return
+    if related is None:
+        return
+
+    from apps.plants.models import Plant
+
+    if related is Plant:
+        for v in values:
+            if not user_can_access_plant(user, v):
+                raise PermissionDenied(_("Accesso negato per questo sito."))
+        return
+
+    for v in values:
+        try:
+            obj = related.objects.filter(pk=v).first()
+        except Exception:
+            return  # id malformato → 400 dal serializer
+        if obj is None:
+            continue  # inesistente → 400 dal serializer
+        plant_ids = _plants_reachable_from(obj, rest)
+        if plant_ids and not any(user_can_access_plant(user, p) for p in plant_ids):
+            raise PermissionDenied(_("Accesso negato per questo sito."))
+
+
+def _plants_reachable_from(obj, path: str) -> list:
+    """Risolve un percorso ORM residuo (es. "plant", "plants", "audit_prep__plant")
+    a partire da un'istanza, ritornando la lista di Plant.id raggiunti."""
+    cur = obj
+    for seg in [s for s in path.split("__") if s]:
+        if cur is None:
+            return []
+        cur = getattr(cur, seg, None)
+    if cur is None:
+        return []
+    if hasattr(cur, "values_list"):  # manager M2M / reverse
+        return list(cur.values_list("pk", flat=True))
+    return [getattr(cur, "pk", cur)]
+
+
+class PlantPayloadWriteGuardMixin:
+    """Applica `require_payload_plant_access` a create/update/partial_update.
+
+    Hook in `initial()` (non in create/update) per non aggiungere action al
+    router sui ViewSet read-only/parziali. Usabile da solo sui ViewSet che
+    hanno uno scoping di lettura proprio (es. DocumentViewSet, TaskViewSet).
+    """
+
+    plant_field: str = "plant"
+
+    def initial(self, request, *args, **kwargs):
+        super().initial(request, *args, **kwargs)
+        if getattr(self, "action", None) in ("create", "update", "partial_update"):
+            base_qs = getattr(self, "queryset", None)
+            model = base_qs.model if base_qs is not None else self.get_queryset().model
+            require_payload_plant_access(
+                request.user, request.data, model, plant_field=self.plant_field,
+            )
+
+
+class PlantScopedQuerysetMixin(PlantPayloadWriteGuardMixin):
+    """Mixin DRF che restringe `get_queryset()` agli oggetti del plant accessibile
+    e (via `PlantPayloadWriteGuardMixin`) blocca le scritture su plant fuori
+    perimetro.
 
     Configurabile per-ViewSet:
         plant_field      — nome del FK Plant sul modello (default 'plant')

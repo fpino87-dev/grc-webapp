@@ -15,12 +15,14 @@ from .serializers import (
 from . import services
 
 
-class TrainingCourseViewSet(viewsets.ModelViewSet):
+class TrainingCourseViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = TrainingCourse.objects.prefetch_related("plants")
     serializer_class = TrainingCourseSerializer
     permission_classes = [TrainingPermission]
     filterset_fields = ["status", "mandatory", "source"]
     search_fields = ["title", "description"]
+    plant_field = "plants"
+    allow_null_plant = True  # corso senza plants = catalogo globale
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)
@@ -34,15 +36,20 @@ class TrainingCourseViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def completion_rate(self, request, pk=None):
-        rate = services.get_completion_rate(pk)
-        return Response({"course_id": pk, "completion_rate": rate})
+        # get_object() passa dal queryset scoped: niente tassi di completamento
+        # di corsi di altri siti via pk diretto (sweep 2026-06-12).
+        course = self.get_object()
+        rate = services.get_completion_rate(course.pk)
+        return Response({"course_id": str(course.pk), "completion_rate": rate})
 
 
-class TrainingEnrollmentViewSet(viewsets.ModelViewSet):
+class TrainingEnrollmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = TrainingEnrollment.objects.select_related("course", "user")
     serializer_class = TrainingEnrollmentSerializer
     permission_classes = [TrainingPermission]
     filterset_fields = ["course", "user", "status", "passed"]
+    plant_field = "course__plants"
+    allow_null_plant = True  # iscrizioni a corsi globali (senza plants)
     search_fields = ["user__username", "course__title"]
 
     def perform_create(self, serializer):

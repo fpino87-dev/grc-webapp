@@ -32,16 +32,23 @@ def _validate_logo_file(uploaded_file):
     )
 
 
-class BusinessUnitViewSet(viewsets.ModelViewSet):
+class BusinessUnitViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = BusinessUnit.objects.all()
     serializer_class = BusinessUnitSerializer
     permission_classes = [PlantConfigPermission]
+    # Un utente plant-scoped vede solo le BU dei propri siti (la scrittura
+    # resta org-only via PlantConfigPermission). Sweep 2026-06-12.
+    plant_field = "plants"
 
 
-class PlantViewSet(viewsets.ModelViewSet):
+class PlantViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = Plant.objects.select_related("bu", "parent_plant")
     serializer_class = PlantSerializer
     permission_classes = [PlantPermission]
+    # La directory siti è essa stessa per-sito: un utente plant-scoped vede e
+    # modifica (PlantPermission permettendo) solo i propri siti — prima un
+    # plant_manager poteva fare PATCH su QUALSIASI sito. Sweep 2026-06-12.
+    plant_field = "pk"
 
     def update(self, request, *args, **kwargs):
         from rest_framework.response import Response
