@@ -78,6 +78,21 @@ def get_user_plant_ids(user) -> set | None:
     return allowed
 
 
+def user_can_access_plant(user, plant) -> bool:
+    """True se l'utente può operare sul plant indicato (istanza o id).
+
+    Stesse regole di `get_user_plant_ids`: superuser e scope org passano
+    sempre. Da usare nelle view che accettano un `?plant=` esplicito — il
+    `PlantScopedQuerysetMixin` protegge i queryset, NON i parametri liberi
+    (security review 2026-06-12: gap-analysis/export/eligible-owners
+    accettavano qualsiasi plant uuid)."""
+    allowed = get_user_plant_ids(user)
+    if allowed is None:
+        return True
+    plant_id = getattr(plant, "pk", plant)
+    return str(plant_id) in {str(i) for i in allowed}
+
+
 class PlantScopedQuerysetMixin:
     """Mixin DRF che restringe `get_queryset()` agli oggetti del plant accessibile.
 

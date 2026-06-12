@@ -29,6 +29,11 @@ class GapAnalysisView(APIView):
         plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
         if not plant:
             return Response({"error": _("Parametro 'plant' obbligatorio.")}, status=400)
+        # La postura di compliance di un sito è visibile solo a chi vi ha
+        # accesso (security review 2026-06-12).
+        from core.scoping import user_can_access_plant
+        if not user_can_access_plant(request.user, plant):
+            return Response({"error": _("Accesso negato per questo sito.")}, status=403)
 
         lang = request.query_params.get("lang") or getattr(request, "LANGUAGE_CODE", None) or "it"
         result = run_gap_analysis(
@@ -76,6 +81,16 @@ class ComplianceExportView(APIView):
 
         if not framework_code:
             return Response({"error": _("Parametro 'framework' obbligatorio.")}, status=400)
+
+        # Export = postura di compliance del sito: richiede accesso al plant;
+        # senza plant l'export è aggregato su TUTTI i siti → solo scope org
+        # (security review 2026-06-12).
+        from core.scoping import get_user_plant_ids, user_can_access_plant
+        if plant_id:
+            if not user_can_access_plant(request.user, plant_id):
+                return Response({"error": _("Accesso negato per questo sito.")}, status=403)
+        elif get_user_plant_ids(request.user) is not None:
+            return Response({"error": _("Accesso negato: export aggregato riservato allo scope organizzazione.")}, status=403)
 
         allowed = self.FORMAT_FRAMEWORK.get(export_format, [])
         if allowed and framework_code not in allowed:

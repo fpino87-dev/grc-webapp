@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
 import { controlsApi, type ControlInstance, type Framework } from "../../api/endpoints/controls";
 import { useAuthStore } from "../../store/auth";
+import { OWNER_ASSIGN_ROLES, SOA_APPROVAL_ROLES } from "./roles";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { ControlDetailDrawer } from "./ControlDetailDrawer";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
@@ -178,6 +179,11 @@ function InlineOwnerSelect({ instance }: { instance: ControlInstance }) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
   const { t } = useTranslation();
+  // L'assegnazione owner è una scrittura: i ruoli read-only (auditor interni/
+  // esterni, risk manager) vedono solo il nome — il backend rifiuterebbe
+  // comunque PATCH ed eligible-owners (security review 2026-06-12).
+  const userRole = useAuthStore(s => s.user?.role ?? "");
+  const canAssign = OWNER_ASSIGN_ROLES.includes(userRole);
 
   // C9: solo gli utenti con accesso al plant dell'istanza (non più i role
   // assignment org-wide), così un controllo non viene assegnato a chi non ha
@@ -222,6 +228,14 @@ function InlineOwnerSelect({ instance }: { instance: ControlInstance }) {
           </option>
         ))}
       </select>
+    );
+  }
+
+  if (!canAssign) {
+    return (
+      <span className="text-xs text-gray-600">
+        {instance.owner_display ?? <span className="text-gray-300">—</span>}
+      </span>
     );
   }
 
@@ -431,6 +445,11 @@ export function ControlsList() {
   // Lo Statement of Applicability è un artefatto ISO 27001: la gestione SoA
   // (selezione + approvazione) compare solo filtrando su ISO 27001. (C5)
   const soaMode = frameworkFilter.includes("ISO");
+  // L'approvazione formale è un atto di governance: il backend la riserva a
+  // SoAApprovalPermission — la UI nasconde le azioni agli altri ruoli (il
+  // badge "✓ SoA" resta visibile a tutti). Security review 2026-06-12.
+  const userRole = useAuthStore(s => s.user?.role ?? "");
+  const canApproveSoa = SOA_APPROVAL_ROLES.includes(userRole);
   // Cambiando filtro framework azzero la selezione SoA (evita selezioni stale).
   useEffect(() => { setSoaSelected(new Set()); }, [frameworkFilter]);
 
@@ -660,7 +679,7 @@ export function ControlsList() {
       )}
 
       {/* Barra SoA — approvazione formale (solo filtrando su ISO 27001). C5 */}
-      {soaMode && searchedRows.length > 0 && (
+      {soaMode && canApproveSoa && searchedRows.length > 0 && (
         <div className="flex items-center justify-between gap-3 mb-4 px-3 py-2 bg-green-50 border border-green-200 rounded-lg flex-wrap">
           <p className="text-sm text-green-900">
             <span className="font-semibold">{t("controls.soa.title")}</span>
@@ -697,13 +716,15 @@ export function ControlsList() {
               <tr>
                 {soaMode && (
                   <th className="px-4 py-3 w-10">
-                    <input
-                      type="checkbox"
-                      checked={soaSelected.size === searchedRows.length && searchedRows.length > 0}
-                      onChange={toggleSoaAll}
-                      className="w-3.5 h-3.5 accent-green-600"
-                      title={t("controls.soa.select_all")}
-                    />
+                    {canApproveSoa && (
+                      <input
+                        type="checkbox"
+                        checked={soaSelected.size === searchedRows.length && searchedRows.length > 0}
+                        onChange={toggleSoaAll}
+                        className="w-3.5 h-3.5 accent-green-600"
+                        title={t("controls.soa.select_all")}
+                      />
+                    )}
                   </th>
                 )}
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("controls.table.control_id")}</th>
@@ -721,12 +742,14 @@ export function ControlsList() {
                   {soaMode && (
                     <td className="px-4 py-3 align-top">
                       <div className="flex flex-col items-center gap-1">
-                        <input
-                          type="checkbox"
-                          checked={soaSelected.has(c.id)}
-                          onChange={() => toggleSoa(c.id)}
-                          className="w-3.5 h-3.5 accent-green-600"
-                        />
+                        {canApproveSoa && (
+                          <input
+                            type="checkbox"
+                            checked={soaSelected.has(c.id)}
+                            onChange={() => toggleSoa(c.id)}
+                            className="w-3.5 h-3.5 accent-green-600"
+                          />
+                        )}
                         {c.approved_in_soa && (
                           <span
                             className="text-[10px] text-green-700"

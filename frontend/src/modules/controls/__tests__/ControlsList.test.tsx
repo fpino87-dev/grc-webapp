@@ -31,8 +31,8 @@ vi.mock("../../../api/endpoints/governance", () => ({
 }));
 
 vi.mock("../../../store/auth", () => ({
-  useAuthStore: (sel: (s: { selectedPlant: null; token: string }) => unknown) =>
-    sel({ selectedPlant: null, token: "tok" }),
+  useAuthStore: (sel: (s: { selectedPlant: null; token: string; user: { role: string } }) => unknown) =>
+    sel({ selectedPlant: null, token: "tok", user: { role: "compliance_officer" } }),
 }));
 
 vi.mock("../ControlDetailDrawer", () => ({

@@ -4,8 +4,10 @@ import { useTranslation } from "react-i18next";
 import { controlsApi, type RequirementsCheck, type EvidenceRequirement, type AssetRef } from "../../../api/endpoints/controls";
 import { StatusBadge } from "../../../components/ui/StatusBadge";
 import { AiSuggestionBanner } from "../../../components/ui/AiSuggestionBanner";
+import { useAuthStore } from "../../../store/auth";
 import i18n from "../../../i18n";
 import { STATUS_GUIDE } from "./shared";
+import { SOA_APPROVAL_ROLES } from "../roles";
 
 const MATURITY_KEYS: Record<number, string> = {
   0: "controls.maturity_0",
@@ -67,6 +69,8 @@ export function TabValutazione({
 }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
+  const userRole = useAuthStore(s => s.user?.role ?? "");
+  const canApproveSoa = SOA_APPROVAL_ROLES.includes(userRole);
   const [selectedStatus, setSelectedStatus] = useState("");
   const [note, setNote] = useState(currentStatus === "na" ? (naJustification || "") : "");
   const [blockError, setBlockError] = useState("");
@@ -368,17 +372,21 @@ export function TabValutazione({
           ) : (
             <p className="text-xs text-gray-500">{t("controls.drawer.evaluation.soa.not_approved")}</p>
           )}
-          <button
-            onClick={() => soaMutation.mutate(!approvedInSoa)}
-            disabled={soaMutation.isPending}
-            className={`w-full py-1.5 rounded text-xs text-white disabled:opacity-50 ${approvedInSoa ? "bg-gray-500 hover:bg-gray-600" : "bg-green-600 hover:bg-green-700"}`}
-          >
-            {soaMutation.isPending
-              ? t("common.saving")
-              : approvedInSoa
-              ? t("controls.drawer.evaluation.soa.revoke")
-              : t("controls.drawer.evaluation.soa.approve")}
-          </button>
+          {/* L'approvazione formale è riservata alla governance (backend:
+              SoAApprovalPermission) — gli altri ruoli vedono solo lo stato. */}
+          {canApproveSoa && (
+            <button
+              onClick={() => soaMutation.mutate(!approvedInSoa)}
+              disabled={soaMutation.isPending}
+              className={`w-full py-1.5 rounded text-xs text-white disabled:opacity-50 ${approvedInSoa ? "bg-gray-500 hover:bg-gray-600" : "bg-green-600 hover:bg-green-700"}`}
+            >
+              {soaMutation.isPending
+                ? t("common.saving")
+                : approvedInSoa
+                ? t("controls.drawer.evaluation.soa.revoke")
+                : t("controls.drawer.evaluation.soa.approve")}
+            </button>
+          )}
         </div>
       )}
 

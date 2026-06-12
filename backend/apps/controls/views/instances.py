@@ -5,7 +5,11 @@ from rest_framework.response import Response
 from core.scoping import PlantScopedQuerysetMixin
 
 from ..models import ControlInstance
-from ..permissions import ControlInstancePermission
+from ..permissions import (
+    ControlInstanceAssignPermission,
+    ControlInstancePermission,
+    SoAApprovalPermission,
+)
 from ..serializers import ControlInstanceSerializer
 
 
@@ -82,6 +86,15 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     serializer_class = ControlInstanceSerializer
     permission_classes = [ControlInstancePermission]
     plant_field = "plant"
+
+    def get_permissions(self):
+        # Azioni con requisiti di ruolo più stretti della permission di default
+        # (security review 2026-06-12).
+        if self.action == "eligible_owners":
+            return [ControlInstanceAssignPermission()]
+        if self.action == "bulk_approve_soa":
+            return [SoAApprovalPermission()]
+        return super().get_permissions()
 
     def destroy(self, request, *args, **kwargs):
         from django.core.exceptions import ValidationError
@@ -303,17 +316,32 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="link-document")
     def link_document(self, request, pk=None):
-        """Collega un Document a questo ControlInstance."""
+        """Collega un Document a questo ControlInstance.
+
+        Il documento deve appartenere al plant dell'istanza, essere org-wide
+        (plant null) o essere condiviso col plant: senza questo vincolo si
+        poteva marcare compliant un controllo con l'evidenza documentale di un
+        ALTRO sito (security review 2026-06-12). 404 anche per i documenti
+        esistenti ma fuori perimetro (non rivela l'esistenza)."""
+        from django.db.models import Q
         from apps.documents.models import Document
         from django.utils.translation import gettext as _
         instance = self.get_object()
         doc_id = request.data.get("document_id")
-        try:
-            doc = Document.objects.get(pk=doc_id, deleted_at__isnull=True)
-            instance.documents.add(doc)
-            return Response({"ok": True, "document_id": str(doc.id)})
-        except Document.DoesNotExist:
+        doc = (
+            Document.objects.filter(pk=doc_id, deleted_at__isnull=True)
+            .filter(
+                Q(plant=instance.plant)
+                | Q(plant__isnull=True)
+                | Q(shared_plants=instance.plant)
+            )
+            .distinct()
+            .first()
+        )
+        if not doc:
             return Response({"error": _("Documento non trovato")}, status=404)
+        instance.documents.add(doc)
+        return Response({"ok": True, "document_id": str(doc.id)})
 
     @action(detail=True, methods=["post"], url_path="unlink-document")
     def unlink_document(self, request, pk=None):
@@ -331,13 +359,19 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="link_evidence")
     def link_evidence(self, request, pk=None):
+        """L'evidenza deve appartenere al plant dell'istanza o essere org-wide
+        (plant null) — mai di un altro sito (security review 2026-06-12)."""
+        from django.db.models import Q
         from apps.documents.models import Evidence
         from django.utils.translation import gettext as _
         instance = self.get_object()
         evidence_id = request.data.get("evidence_id")
-        try:
-            evidence = Evidence.objects.get(pk=evidence_id)
-        except Evidence.DoesNotExist:
+        evidence = (
+            Evidence.objects.filter(pk=evidence_id, deleted_at__isnull=True)
+            .filter(Q(plant=instance.plant) | Q(plant__isnull=True))
+            .first()
+        )
+        if not evidence:
             return Response({"error": _("Evidenza non trovata.")}, status=404)
         instance.evidences.add(evidence)
         return Response({"ok": True})
@@ -455,6 +489,11 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         plant = Plant.objects.filter(pk=plant_id).first()
         if not plant:
             return Response({"error": _("Plant non trovato.")}, status=404)
+        # Il richiedente deve avere accesso al plant richiesto: il mixin scopa i
+        # queryset, non i parametri liberi (security review 2026-06-12).
+        from core.scoping import user_can_access_plant
+        if not user_can_access_plant(request.user, plant):
+            return Response({"error": _("Accesso negato per questo sito.")}, status=403)
         return Response(eligible_owners_for_plant(plant))
 
     @action(detail=False, methods=["get"], url_path="needs-revaluation")

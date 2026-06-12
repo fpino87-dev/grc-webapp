@@ -70,6 +70,26 @@ class ControlInstanceSerializer(serializers.ModelSerializer):
             "deleted_at",
         ]
 
+    def _plant_id(self):
+        plant = self.instance.plant_id if self.instance else self.initial_data.get("plant")
+        return getattr(plant, "id", plant)
+
+    # NB: "documents" è un M2M REVERSE (Document.control_refs) → non è un campo
+    # del serializer e la PATCH lo ignora: l'unica via di scrittura è l'azione
+    # link-document, che applica il perimetro plant/org-wide/shared.
+    def validate_evidences(self, value):
+        """Le evidenze collegate devono appartenere al plant del controllo o
+        essere org-wide (security review 2026-06-12)."""
+        plant_id = self._plant_id()
+        if not (plant_id and value):
+            return value
+        foreign = [e for e in value if e.plant_id and str(e.plant_id) != str(plant_id)]
+        if foreign:
+            raise serializers.ValidationError(
+                "Le evidenze collegate devono appartenere al plant del controllo."
+            )
+        return value
+
     def validate_assets(self, value):
         """Gli asset collegati devono appartenere allo stesso plant del controllo
         (P1-5): il legame restringe la cascata di rivalutazione per-plant, quindi

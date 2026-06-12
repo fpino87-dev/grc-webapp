@@ -231,6 +231,16 @@ class AuditPackageView(APIView):
             fw_codes = [framework_param]
             zip_fw_label = framework_param
 
+        # Il pacchetto audit contiene documenti ed evidenze del sito: richiede
+        # accesso al plant; senza plant copre TUTTI i siti → solo scope org
+        # (security review 2026-06-12).
+        from core.scoping import get_user_plant_ids, user_can_access_plant
+        if plant_id:
+            if not user_can_access_plant(request.user, plant_id):
+                return Response({"error": "Accesso negato per questo sito."}, status=403)
+        elif get_user_plant_ids(request.user) is not None:
+            return Response({"error": "Accesso negato: pacchetto aggregato riservato allo scope organizzazione."}, status=403)
+
         plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
         plant_code = plant.code if plant else "all"
 

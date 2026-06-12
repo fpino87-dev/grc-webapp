@@ -33,6 +33,23 @@ class ControlInstancePermission(RoleScopedPermission):
     }
 
 
+class ControlInstanceAssignPermission(RoleScopedPermission):
+    """eligible-owners: è una GET, ma serve solo a chi può assegnare un owner
+    (PATCH = write). Espone nomi/ruoli del personale del sito: non deve essere
+    leggibile dai ruoli read-only — in particolare mai da external_auditor
+    (security review 2026-06-12)."""
+    read_roles = ControlInstancePermission.write_roles
+    write_roles = ControlInstancePermission.write_roles
+
+
+class SoAApprovalPermission(RoleScopedPermission):
+    """Approvazione formale dello Statement of Applicability (ISO 27001
+    §6.1.3.d): atto di governance, non operativo — il control_owner valuta i
+    controlli ma non firma il SoA (security review 2026-06-12)."""
+    read_roles = {GrcRole.SUPER_ADMIN, GrcRole.COMPLIANCE_OFFICER, GrcRole.PLANT_MANAGER}
+    write_roles = read_roles
+
+
 class ControlsReportPermission(RoleScopedPermission):
     """Gap analysis / export compliance: read-only ad audit + governance."""
     read_roles = {
