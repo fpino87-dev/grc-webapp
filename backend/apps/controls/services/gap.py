@@ -36,8 +36,6 @@ _REL_STRENGTH = {"correlato": 0, "parziale": 1, "equivalente": 2}
 WEIGHT_EQUIVALENTE = 1.0
 WEIGHT_PARZIALE = 0.5
 
-_STATUS_ORDER = {"compliant": 3, "parziale": 2, "gap": 1, "non_valutato": 0}
-
 STATE_COPERTO = "coperto"
 STATE_COPERTO_RIUSO = "coperto_riuso"
 STATE_PARZIALE = "parziale"
@@ -151,8 +149,10 @@ def run_gap_analysis(
     base_of_extender = {m.source_control_id: m.target_control_id for m in extends}
 
     def best_instance(control_id):
-        """Istanza del controllo; per i base L2 estesi da un VH valutato,
-        prevale lo stato migliore tra base e VH (dedup M03: si valuta il VH)."""
+        """Istanza del controllo; per i base L2 estesi da un VH, quando il VH è
+        stato valutato è LUI l'istanza autoritativa (dedup M03: si valuta il
+        VH, il base è superseded) — anche per 'na', che nell'ordine di stato
+        vale 0 e altrimenti perderebbe contro gap/non_valutato del base."""
         own = instances.get(control_id)
         ext_id = extender_of_base.get(control_id)
         ext = instances.get(ext_id) if ext_id else None
@@ -160,7 +160,7 @@ def run_gap_analysis(
             return ext
         if ext is None:
             return own
-        return own if _STATUS_ORDER.get(own.status, 0) >= _STATUS_ORDER.get(ext.status, 0) else ext
+        return ext if ext.status != "non_valutato" else own
 
     def counterpart_status(control_id):
         ci = best_instance(control_id)

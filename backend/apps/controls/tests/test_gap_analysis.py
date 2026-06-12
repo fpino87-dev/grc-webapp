@@ -208,6 +208,18 @@ def test_tisax_al3_includes_l3_and_base_inherits_vh_status(plant, world):
 
 
 @pytest.mark.django_db
+def test_tisax_vh_na_is_authoritative_over_base(plant, world):
+    """Il VH valutato è l'istanza autoritativa (in M03 il base è superseded):
+    un VH 'na' deve dare 'escluso' anche se il base è non_valutato o gap —
+    nell'ordine di stato 'na' valeva 0 e perdeva il confronto (code review)."""
+    _instance(plant, world["l3_c"], "na")
+    _instance(plant, world["l2_c"], "non_valutato")
+    report = run_gap_analysis("TISAX", plant, profile="AL3")
+    assert _item(report, "ISA-1.1.1")["state"] == "escluso"
+    assert _item(report, "ISA-1.1.1-VH")["state"] == "escluso"
+
+
+@pytest.mark.django_db
 def test_tisax_vh_inherits_cross_links_of_base(plant, world):
     """Il crosswalk punta agli ID L2: il VH eredita i cross-link del base."""
     _instance(plant, world["iso_a"], "compliant")
