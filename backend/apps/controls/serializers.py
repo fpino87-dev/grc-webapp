@@ -84,6 +84,25 @@ class ControlInstanceSerializer(serializers.ModelSerializer):
                 )
         return value
 
+    def validate_owner(self, value):
+        """L'owner deve avere accesso al plant del controllo (C9): senza questo
+        controllo lato server il filtro della tendina UI sarebbe aggirabile via
+        PATCH diretta, assegnando un controllo a chi non ha accesso al sito."""
+        if value is None:
+            return value
+        plant = self.instance.plant if self.instance else self.initial_data.get("plant")
+        if plant is not None and not hasattr(plant, "bu_id"):
+            from apps.plants.models import Plant
+            plant = Plant.objects.filter(pk=plant).first()
+        if plant is not None:
+            from apps.auth_grc.services import user_has_plant_access
+            if not user_has_plant_access(value, plant):
+                from rest_framework import serializers as drf
+                raise drf.ValidationError(
+                    "L'owner deve avere accesso al plant del controllo."
+                )
+        return value
+
     def get_control_title(self, obj):
         request = self.context.get("request")
         lang = getattr(request, "LANGUAGE_CODE", None) if request else None

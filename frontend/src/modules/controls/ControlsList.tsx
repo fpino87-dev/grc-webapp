@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
 import { controlsApi, type ControlInstance, type Framework } from "../../api/endpoints/controls";
-import { governanceApi } from "../../api/endpoints/governance";
 import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { ControlDetailDrawer } from "./ControlDetailDrawer";
@@ -178,27 +177,20 @@ function InlineOwnerSelect({ instance }: { instance: ControlInstance }) {
   const [editing, setEditing] = useState(false);
   const { t } = useTranslation();
 
-  const { data: assignments } = useQuery({
-    queryKey: ["governance-role-assignments"],
-    queryFn: () => governanceApi.roleAssignments(),
+  // C9: solo gli utenti con accesso al plant dell'istanza (non più i role
+  // assignment org-wide), così un controllo non viene assegnato a chi non ha
+  // accesso al sito. Il backend convalida comunque l'owner sulla PATCH.
+  const { data: owners } = useQuery({
+    queryKey: ["controls-eligible-owners", instance.plant],
+    queryFn: () => controlsApi.eligibleOwners(instance.plant),
     enabled: editing,
     staleTime: 60_000,
   });
 
-  // Dedupe by user, keep only active assignments
-  const userOptions = useMemo(() => {
-    if (!assignments) return [];
-    const seen = new Set<number>();
-    const result: { id: number; label: string; role: string }[] = [];
-    for (const a of assignments) {
-      if (!a.is_active) continue;
-      if (seen.has(a.user as number)) continue;
-      seen.add(a.user as number);
-      const name = a.user_name || a.user_email || String(a.user);
-      result.push({ id: a.user as number, label: name, role: a.role });
-    }
-    return result.sort((a, b) => a.label.localeCompare(b.label));
-  }, [assignments]);
+  const userOptions = useMemo(
+    () => (owners ?? []).map(o => ({ id: o.id, label: o.name, role: o.role })),
+    [owners],
+  );
 
   const updateMutation = useMutation({
     mutationFn: (ownerId: number | null) =>

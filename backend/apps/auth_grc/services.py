@@ -214,3 +214,56 @@ def resolve_plant_member_emails(plant: Plant) -> list[str]:
 
     return list(emails)
 
+
+def _plant_access_filter(plant: Plant) -> models.Q:
+    """Condizione UserPlantAccess che copre il plant dato, su tutti gli scope:
+    org (tutti i plant), bu (stessa BU del plant), single_plant/plant_list
+    (plant esplicitamente nello scope)."""
+    cond = models.Q(scope_type="org")
+    if plant.bu_id:
+        cond |= models.Q(scope_type="bu", scope_bu_id=plant.bu_id)
+    cond |= models.Q(scope_type__in=("single_plant", "plant_list"), scope_plants=plant)
+    return cond
+
+
+def user_has_plant_access(user, plant: Plant) -> bool:
+    """True se l'utente ha accesso al plant via UserPlantAccess (qualsiasi ruolo)."""
+    if user is None:
+        return False
+    return (
+        UserPlantAccess.objects.filter(deleted_at__isnull=True, user=user)
+        .filter(_plant_access_filter(plant))
+        .exists()
+    )
+
+
+def eligible_owners_for_plant(plant: Plant) -> list[dict]:
+    """Utenti assegnabili come owner di un controllo del plant: hanno accesso al
+    plant via UserPlantAccess (qualsiasi ruolo). Restituisce [{id, name, role}],
+    deduplicato per utente (un utente con più assegnazioni mantiene il primo
+    ruolo per scope più specifico) e ordinato per nome."""
+    access_qs = (
+        UserPlantAccess.objects.filter(deleted_at__isnull=True, user__is_active=True)
+        .filter(_plant_access_filter(plant))
+        .select_related("user")
+    )
+    # scope più specifico prima (single/list > bu > org), così il ruolo mostrato
+    # è quello che concede l'accesso più mirato al plant.
+    scope_rank = {"single_plant": 0, "plant_list": 0, "bu": 1, "org": 2}
+    by_user: dict[int, dict] = {}
+    for access in access_qs:
+        user = access.user
+        if user.pk in by_user:
+            if scope_rank.get(access.scope_type, 9) >= by_user[user.pk]["_rank"]:
+                continue
+        name = f"{user.first_name} {user.last_name}".strip() or user.email or user.username
+        by_user[user.pk] = {
+            "id": user.pk,
+            "name": name,
+            "role": access.role,
+            "_rank": scope_rank.get(access.scope_type, 9),
+        }
+    result = [{"id": v["id"], "name": v["name"], "role": v["role"]} for v in by_user.values()]
+    result.sort(key=lambda u: u["name"].lower())
+    return result
+

@@ -188,6 +188,12 @@ export const controlsApi = {
     ).then((r) => r.data),
   updateInstance: (id: string, data: Partial<ControlInstance>) =>
     apiClient.patch<ControlInstance>(`/controls/instances/${id}/`, data).then((r) => r.data),
+  eligibleOwners: (plantId: string) =>
+    apiClient
+      .get<{ id: number; name: string; role: string }[]>("/controls/instances/eligible-owners/", {
+        params: { plant: plantId },
+      })
+      .then((r) => r.data),
   propagate: (id: string) =>
     apiClient
       .post<{ propagated_to: number; skipped_no_instance: number; blocked?: string }>(

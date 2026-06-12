@@ -437,6 +437,26 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         instance.evidences.remove(evidence)
         return Response({"ok": True})
 
+    @action(detail=False, methods=["get"], url_path="eligible-owners")
+    def eligible_owners(self, request):
+        """Utenti assegnabili come owner per i controlli di un plant.
+
+        Query: ?plant=<uuid> — restituisce solo chi ha accesso al plant via
+        UserPlantAccess (C9: l'owner non deve essere scelto org-wide ma scoped
+        al plant dell'istanza).
+        """
+        from django.utils.translation import gettext as _
+        from apps.plants.models import Plant
+        from apps.auth_grc.services import eligible_owners_for_plant
+
+        plant_id = request.query_params.get("plant")
+        if not plant_id:
+            return Response({"error": _("Parametro 'plant' obbligatorio.")}, status=400)
+        plant = Plant.objects.filter(pk=plant_id).first()
+        if not plant:
+            return Response({"error": _("Plant non trovato.")}, status=404)
+        return Response(eligible_owners_for_plant(plant))
+
     @action(detail=False, methods=["get"], url_path="needs-revaluation")
     def needs_revaluation_list(self, request):
         """Controlli che richiedono rivalutazione dopo un change."""
