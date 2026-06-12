@@ -21,6 +21,7 @@ export interface ControlInstance {
   mapped_controls: MappedControl[];
   suggested_status?: string;
   suggestion_differs?: boolean;
+  can_propagate?: boolean;
   calc_maturity_level: number;
   assets?: string[];
   approved_in_soa: boolean;

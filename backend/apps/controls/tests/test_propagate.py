@@ -103,3 +103,61 @@ def test_na_propagates_same_plant_only(env):
     assert tgt_p.status == "na"
     assert tgt_p.na_justification
     assert tgt_q.status == "non_valutato"  # altro plant: invariato
+
+
+# ── can_propagate (serializer) — il pulsante "⇒ propaga" appare solo se utile ──
+
+def _can_propagate(instance):
+    """Serializza l'istanza come fa la lista e legge il flag."""
+    from apps.controls.serializers import ControlInstanceSerializer
+    from apps.controls.views.instances import ControlInstanceViewSet
+
+    obj = ControlInstanceViewSet.queryset.get(pk=instance.pk)
+    return ControlInstanceSerializer(obj, context={}).data["can_propagate"]
+
+
+@pytest.mark.django_db
+def test_can_propagate_true_with_equivalent_target_in_plant(env):
+    src = env["make"](env["plant_p"], env["ctrl_a"], "compliant")
+    env["make"](env["plant_p"], env["ctrl_b"], "non_valutato")
+    assert _can_propagate(src) is True
+
+
+@pytest.mark.django_db
+def test_can_propagate_false_without_target_instance_in_plant(env):
+    """Il mapping esiste, ma il controllo equivalente non è istanziato in
+    questo sito (es. framework non assegnato): il pulsante non deve apparire."""
+    src = env["make"](env["plant_p"], env["ctrl_a"], "compliant")
+    env["make"](env["plant_q"], env["ctrl_b"], "non_valutato")  # solo sull'altro sito
+    assert _can_propagate(src) is False
+
+
+@pytest.mark.django_db
+def test_can_propagate_false_for_non_propagable_status(env):
+    src = env["make"](env["plant_p"], env["ctrl_a"], "gap")
+    env["make"](env["plant_p"], env["ctrl_b"], "non_valutato")
+    assert _can_propagate(src) is False
+
+
+@pytest.mark.django_db
+def test_can_propagate_respects_covers_direction(env):
+    """'covers' propaga solo source→target: il covered (B) non deve mostrare
+    il pulsante verso chi lo copre (A)."""
+    from apps.controls.models import ControlMapping
+
+    ControlMapping.objects.filter(source_control=env["ctrl_a"]).update(relationship="covers")
+    inst_b = env["make"](env["plant_p"], env["ctrl_b"], "compliant")
+    inst_a = env["make"](env["plant_p"], env["ctrl_a"], "compliant")
+    assert _can_propagate(inst_b) is False  # B è il covered: direzione sbagliata
+    assert _can_propagate(inst_a) is True   # A copre B: direzione giusta
+
+
+@pytest.mark.django_db
+def test_can_propagate_ignores_non_propagable_relationships(env):
+    """parziale/correlato (la massa del crosswalk C12) non rendono il pulsante visibile."""
+    from apps.controls.models import ControlMapping
+
+    ControlMapping.objects.filter(source_control=env["ctrl_a"]).update(relationship="parziale")
+    src = env["make"](env["plant_p"], env["ctrl_a"], "compliant")
+    env["make"](env["plant_p"], env["ctrl_b"], "non_valutato")
+    assert _can_propagate(src) is False

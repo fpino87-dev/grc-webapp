@@ -133,6 +133,20 @@ describe("ControlsList — M03", () => {
     expect(callArg?.status).toBeUndefined();
   });
 
+  it("mostra '⇒ propaga' solo quando il backend dice che c'è un target reale (can_propagate)", async () => {
+    mockInstances.mockResolvedValue({
+      results: [
+        makeInstance({ id: "ci-1", control_external_id: "A.5.1", status: "compliant", can_propagate: true }),
+        // compliant e mappato, ma nessun controllo equivalente istanziato nel sito
+        makeInstance({ id: "ci-2", control_external_id: "A.8.9", status: "compliant", can_propagate: false }),
+      ],
+      count: 2,
+    } as never);
+    renderPage();
+    await screen.findByText("A.5.1");
+    expect(screen.getAllByTitle("controls.actions.propagate_hint")).toHaveLength(1);
+  });
+
   it("la ricerca filtra la lista per ID/titolo, client-side (C7)", async () => {
     mockInstances.mockResolvedValue({
       results: [

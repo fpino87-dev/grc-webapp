@@ -31,6 +31,7 @@ class ControlInstanceSerializer(serializers.ModelSerializer):
     calc_maturity_level = serializers.SerializerMethodField(read_only=True)
     owner_display = serializers.SerializerMethodField(read_only=True)
     soa_approved_by_name = serializers.SerializerMethodField(read_only=True)
+    can_propagate = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = ControlInstance
@@ -139,6 +140,40 @@ class ControlInstanceSerializer(serializers.ModelSerializer):
             return None
         u = obj.soa_approved_by
         return f"{u.first_name} {u.last_name}".strip() or u.email or u.username
+
+    def get_can_propagate(self, obj):
+        """True solo se "⇒ propaga" farebbe davvero qualcosa: stato propagabile
+        E almeno un controllo mappato con la relazione/direzione giusta che ha
+        un'istanza in questo plant. Col crosswalk C12 quasi ogni controllo ha
+        mapping, ma senza un target istanziato il pulsante produceva solo
+        "✓ 0" — la UI lo mostra solo quando questo flag è True.
+
+        Stesse regole di propagate_control: niente query per riga — i mapping
+        sono prefetchati, le istanze del plant sono una query cached (C2)."""
+        from .services.instances import _PROPAGABLE_RELATIONSHIPS, _PROPAGABLE_STATUSES
+
+        if obj.status not in _PROPAGABLE_STATUSES:
+            return False
+        candidate_ids = {
+            m.target_control_id
+            for m in obj.control.mappings_from.all()
+            if m.relationship in _PROPAGABLE_RELATIONSHIPS
+        } | {
+            m.source_control_id
+            for m in obj.control.mappings_to.all()
+            if m.relationship == "equivalente"  # simmetrica; covers no
+        }
+        candidate_ids.discard(obj.control_id)
+        if not candidate_ids:
+            return False
+        cache = self.context.setdefault("_plant_control_ids_cache", {})
+        if obj.plant_id not in cache:
+            cache[obj.plant_id] = set(
+                ControlInstance.objects.filter(
+                    plant_id=obj.plant_id, deleted_at__isnull=True,
+                ).values_list("control_id", flat=True)
+            )
+        return bool(candidate_ids & cache[obj.plant_id])
 
     def get_mapped_controls(self, obj):
         result = []

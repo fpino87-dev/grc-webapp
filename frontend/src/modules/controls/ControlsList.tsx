@@ -95,9 +95,11 @@ function InlineStatusSelect({ instance }: { instance: ControlInstance }) {
     },
   });
 
-  const hasMappings = instance.mapped_controls?.length > 0;
-  // Solo compliant e na sono propagabili
-  const canPropagate = hasMappings && (instance.status === "compliant" || instance.status === "na");
+  // Il backend espone can_propagate solo quando la propagazione farebbe
+  // davvero qualcosa: stato compliant/na E un controllo mappato (relazione
+  // e direzione propagabili) istanziato in questo sito. Prima il pulsante
+  // compariva su qualsiasi mapping e spesso dava "✓ 0".
+  const canPropagate = instance.can_propagate === true;
 
   if (editing) {
     return (
