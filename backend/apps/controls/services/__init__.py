@@ -5,7 +5,8 @@ Servizi del modulo controls, organizzati per area:
 - instances.py  — ciclo di vita ControlInstance: valutazione, applicabilità,
                   soft delete, propagazione cross-framework
 - frameworks.py — governance framework: import/preview JSON, archive/delete
-- reporting.py  — gap analysis, compliance summary, conteggi per plant
+- gap.py        — gap analysis cross-framework via hub ISO (crosswalk C12)
+- reporting.py  — compliance summary, conteggi per plant
 - documents.py  — generazione documenti di procedura via AI
 
 L'API pubblica resta `apps.controls.services.<funzione>` (re-export qui sotto).
@@ -31,10 +32,10 @@ from .instances import (
     propagate_control,
     validate_exclusion,
 )
+from .gap import run_gap_analysis
 from .reporting import (
     count_open_gaps_by_plant,
     count_revaluation_by_plant,
-    gap_analysis,
     get_compliance_summary,
 )
 
@@ -47,7 +48,6 @@ __all__ = [
     "delete_control_instance",
     "delete_framework",
     "evaluate_control",
-    "gap_analysis",
     "generate_procedure_document",
     "get_compliance_summary",
     "get_extender_instances",
@@ -56,5 +56,6 @@ __all__ = [
     "list_framework_governance_metadata",
     "preview_framework_import",
     "propagate_control",
+    "run_gap_analysis",
     "validate_exclusion",
 ]

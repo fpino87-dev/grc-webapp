@@ -600,40 +600,68 @@
     }
   },
   "gap_analysis": {
-    "title": "Analiza luk frameworku",
-    "source_framework": "Framework źródłowy",
+    "title": "Analiza luk między frameworkami",
+    "subtitle": "Twój poziom gotowości wobec frameworka, z ponownym wykorzystaniem tego, co już wdrożono w innych (mapowanie przez ISO 27001).",
     "target_framework": "Framework docelowy",
-    "loading": "Analizowanie...",
-    "empty_category": "Brak kontroli w tej kategorii",
-    "sections": {
-      "covered": "Pokryte",
-      "partial": "Częściowe",
-      "gap": "Gap",
-      "not_mapped": "Niezamapowane"
-    },
+    "profile": "Profil",
+    "profile_auto": "Automatycznie (z lokalizacji)",
+    "profile_importante": "Podmiot ważny",
+    "profile_essenziale": "Podmiot kluczowy",
+    "include_proto": "Uwzględnij moduł prototypów (PROTO)",
+    "loading": "Trwa analiza...",
+    "reuse_disclaimer": "Kredyt za ponowne użycie to sugestia do weryfikacji: dowód trzeba sprawdzić i powiązać z kontrolą docelową — to nie jest certyfikowana zgodność.",
     "actions": {
-      "analyze": "Analizuj lukę",
-      "download_report": "↓ Pobierz raport analizy luk"
+      "analyze": "Analizuj luki",
+      "download_report": "↓ Pobierz raport CSV"
     },
     "errors": {
-      "same_framework": "Wybierz dwa różne frameworki",
-      "load_failed": "Błąd podczas ładowania danych"
+      "load_failed": "Błąd ładowania danych",
+      "select_plant": "Wybierz lokalizację, aby uruchomić analizę luk."
+    },
+    "states": {
+      "coperto": "Pokryta",
+      "coperto_riuso": "Pokryta przez ponowne użycie",
+      "parziale": "Częściowa",
+      "parziale_riuso": "Częściowa przez ponowne użycie",
+      "scoperto": "Niepokryta",
+      "escluso": "Wykluczona"
+    },
+    "relationships": {
+      "equivalente": "Równoważna",
+      "parziale": "Pokrycie częściowe",
+      "correlato": "Powiązana"
     },
     "summary": {
-      "controls_from_to": "Kontrole {{source}} → {{target}}",
-      "pct_covered": "{{pct}}% pokrytych",
-      "covered_count": "Pokryte: {{count}}",
-      "partial_count": "Częściowe: {{count}}",
-      "gap_count": "Gap: {{count}}",
-      "not_mapped_count": "Niezamapowane: {{count}}"
+      "scope": "{{plant}} → {{target}}",
+      "profile_badge": "profil: {{profile}}",
+      "direct": "Pokrycie bezpośrednie",
+      "assisted": "Pokrycie wspomagane",
+      "assisted_hint": "Bezpośrednie + równoważne ponowne użycie (100%) + częściowe (50%)",
+      "applicable_controls": "{{count}} kontroli mających zastosowanie",
+      "applicable_requirements": "{{count}} wymagań mających zastosowanie"
+    },
+    "domains": {
+      "title": "Pokrycie według domeny"
+    },
+    "items": {
+      "title": "Elementy ({{count}})",
+      "only_gaps": "Tylko luki i ponowne użycia do weryfikacji",
+      "empty": "Brak elementów — wszystko pokryte ✅",
+      "state": "Stan",
+      "control": "Kontrola / wymaganie",
+      "cross": "Powiązania między frameworkami",
+      "requirements": "{{count}} wymagań mających zastosowanie",
+      "via": "przez ISO {{id}}",
+      "reuse_hint": "już zgodne: użyj ponownie dowodu"
     },
     "export": {
       "columns": {
-        "category": "Kategoria",
+        "state": "Stan",
         "id": "ID",
         "title": "Tytuł",
         "domain": "Domena",
-        "source_status": "Status źródłowy"
+        "direct_status": "Stan bezpośredni",
+        "cross": "Powiązania"
       }
     }
   },

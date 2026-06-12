@@ -533,40 +533,68 @@
     }
   },
   "gap_analysis": {
-    "title": "Gap Analysis framework",
-    "source_framework": "Framework di partenza",
+    "title": "Gap Analysis cross-framework",
+    "subtitle": "Quanto sei pronto per un framework, riusando ciò che hai già implementato negli altri (crosswalk via ISO 27001).",
     "target_framework": "Framework di destinazione",
+    "profile": "Profilo",
+    "profile_auto": "Automatico (dal sito)",
+    "profile_importante": "Soggetto importante",
+    "profile_essenziale": "Soggetto essenziale",
+    "include_proto": "Includi modulo Prototipi (PROTO)",
     "loading": "Analisi in corso...",
-    "empty_category": "Nessun controllo in questa categoria",
-    "sections": {
-      "covered": "Coperti",
-      "partial": "Parziali",
-      "gap": "Gap",
-      "not_mapped": "Non mappati"
-    },
+    "reuse_disclaimer": "Il credito di riuso è un suggerimento da validare: l'evidenza va verificata e collegata al controllo di destinazione, non è conformità certificata.",
     "actions": {
       "analyze": "Analizza gap",
-      "download_report": "↓ Scarica report gap analysis"
+      "download_report": "↓ Scarica report CSV"
     },
     "errors": {
-      "same_framework": "Seleziona due framework diversi",
-      "load_failed": "Errore nel caricamento dei dati"
+      "load_failed": "Errore nel caricamento dei dati",
+      "select_plant": "Seleziona un sito per eseguire la gap analysis."
+    },
+    "states": {
+      "coperto": "Coperto",
+      "coperto_riuso": "Coperto per riuso",
+      "parziale": "Parziale",
+      "parziale_riuso": "Parziale per riuso",
+      "scoperto": "Scoperto",
+      "escluso": "Escluso"
+    },
+    "relationships": {
+      "equivalente": "Equivalente",
+      "parziale": "Copertura parziale",
+      "correlato": "Correlato"
     },
     "summary": {
-      "controls_from_to": "Controlli {{source}} → {{target}}",
-      "pct_covered": "{{pct}}% coperti",
-      "covered_count": "Coperti: {{count}}",
-      "partial_count": "Parziali: {{count}}",
-      "gap_count": "Gap: {{count}}",
-      "not_mapped_count": "Non mappati: {{count}}"
+      "scope": "{{plant}} → {{target}}",
+      "profile_badge": "profilo: {{profile}}",
+      "direct": "Copertura diretta",
+      "assisted": "Copertura assistita",
+      "assisted_hint": "Diretta + riuso equivalente (100%) + parziali (50%)",
+      "applicable_controls": "{{count}} controlli applicabili",
+      "applicable_requirements": "{{count}} requisiti applicabili"
+    },
+    "domains": {
+      "title": "Copertura per dominio"
+    },
+    "items": {
+      "title": "Elementi ({{count}})",
+      "only_gaps": "Solo gap e riuso da validare",
+      "empty": "Nessun elemento da mostrare — tutto coperto ✅",
+      "state": "Stato",
+      "control": "Controllo / requisito",
+      "cross": "Collegamenti cross-framework",
+      "requirements": "{{count}} requisiti applicabili",
+      "via": "via ISO {{id}}",
+      "reuse_hint": "già compliant: riusa l'evidenza"
     },
     "export": {
       "columns": {
-        "category": "Categoria",
+        "state": "Stato",
         "id": "ID",
         "title": "Titolo",
         "domain": "Dominio",
-        "source_status": "Stato sorgente"
+        "direct_status": "Stato diretto",
+        "cross": "Collegamenti"
       }
     }
   },

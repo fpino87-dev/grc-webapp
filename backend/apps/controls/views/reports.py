@@ -8,15 +8,36 @@ class GapAnalysisView(APIView):
     permission_classes = [ControlsReportPermission]
 
     def get(self, request):
-        from ..services import gap_analysis
+        """Gap analysis cross-framework via hub ISO (C12).
+
+        Query: target=ISO27001|NIS2|ACN_NIS2|TISAX & plant=<uuid>
+               [&profile=importante|essenziale (ACN, default dal sito)
+                | AL2|AL3 (TISAX)] [&proto=true] [&lang=]
+        """
         from django.utils.translation import gettext as _
-        source = request.query_params.get("source")
+        from apps.plants.models import Plant
+        from ..services.gap import VALID_TARGETS, run_gap_analysis
+
         target = request.query_params.get("target")
         plant_id = request.query_params.get("plant")
-        if not source or not target:
-            return Response({"error": _("Parametri 'source' e 'target' obbligatori.")}, status=400)
+        if not target or target not in VALID_TARGETS:
+            return Response(
+                {"error": _("Parametro 'target' obbligatorio (uno tra: %(targets)s).")
+                 % {"targets": ", ".join(sorted(VALID_TARGETS))}},
+                status=400,
+            )
+        plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
+        if not plant:
+            return Response({"error": _("Parametro 'plant' obbligatorio.")}, status=400)
+
         lang = request.query_params.get("lang") or getattr(request, "LANGUAGE_CODE", None) or "it"
-        result = gap_analysis(source, target, plant_id, lang=lang)
+        result = run_gap_analysis(
+            target=target,
+            plant=plant,
+            profile=request.query_params.get("profile", ""),
+            include_proto=request.query_params.get("proto") in ("true", "1"),
+            lang=lang,
+        )
         return Response(result)
 
 

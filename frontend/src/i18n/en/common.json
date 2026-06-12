@@ -533,40 +533,68 @@
     }
   },
   "gap_analysis": {
-    "title": "Framework gap analysis",
-    "source_framework": "Source framework",
+    "title": "Cross-framework Gap Analysis",
+    "subtitle": "How ready you are for a framework, reusing what you already implemented in the others (crosswalk via ISO 27001).",
     "target_framework": "Target framework",
+    "profile": "Profile",
+    "profile_auto": "Automatic (from site)",
+    "profile_importante": "Important entity",
+    "profile_essenziale": "Essential entity",
+    "include_proto": "Include Prototypes module (PROTO)",
     "loading": "Analyzing...",
-    "empty_category": "No controls in this category",
-    "sections": {
-      "covered": "Covered",
-      "partial": "Partial",
-      "gap": "Gap",
-      "not_mapped": "Not mapped"
-    },
+    "reuse_disclaimer": "Reuse credit is a suggestion to validate: the evidence must be checked and linked to the target control — it is not certified compliance.",
     "actions": {
       "analyze": "Analyze gap",
-      "download_report": "↓ Download gap analysis report"
+      "download_report": "↓ Download CSV report"
     },
     "errors": {
-      "same_framework": "Select two different frameworks",
-      "load_failed": "Error while loading data"
+      "load_failed": "Error loading data",
+      "select_plant": "Select a site to run the gap analysis."
+    },
+    "states": {
+      "coperto": "Covered",
+      "coperto_riuso": "Covered via reuse",
+      "parziale": "Partial",
+      "parziale_riuso": "Partial via reuse",
+      "scoperto": "Not covered",
+      "escluso": "Excluded"
+    },
+    "relationships": {
+      "equivalente": "Equivalent",
+      "parziale": "Partial coverage",
+      "correlato": "Related"
     },
     "summary": {
-      "controls_from_to": "Controls {{source}} → {{target}}",
-      "pct_covered": "{{pct}}% covered",
-      "covered_count": "Covered: {{count}}",
-      "partial_count": "Partial: {{count}}",
-      "gap_count": "Gap: {{count}}",
-      "not_mapped_count": "Not mapped: {{count}}"
+      "scope": "{{plant}} → {{target}}",
+      "profile_badge": "profile: {{profile}}",
+      "direct": "Direct coverage",
+      "assisted": "Assisted coverage",
+      "assisted_hint": "Direct + equivalent reuse (100%) + partials (50%)",
+      "applicable_controls": "{{count}} applicable controls",
+      "applicable_requirements": "{{count}} applicable requirements"
+    },
+    "domains": {
+      "title": "Coverage by domain"
+    },
+    "items": {
+      "title": "Items ({{count}})",
+      "only_gaps": "Only gaps and reuse to validate",
+      "empty": "Nothing to show — all covered ✅",
+      "state": "State",
+      "control": "Control / requirement",
+      "cross": "Cross-framework links",
+      "requirements": "{{count}} applicable requirements",
+      "via": "via ISO {{id}}",
+      "reuse_hint": "already compliant: reuse the evidence"
     },
     "export": {
       "columns": {
-        "category": "Category",
+        "state": "State",
         "id": "ID",
         "title": "Title",
         "domain": "Domain",
-        "source_status": "Source status"
+        "direct_status": "Direct state",
+        "cross": "Links"
       }
     }
   },

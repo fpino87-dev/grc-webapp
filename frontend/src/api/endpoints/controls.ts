@@ -142,29 +142,46 @@ export interface ControlDetailInfo {
   available_assets?: AssetRef[];
 }
 
-export interface GapEntry {
-  id: string;
+export type GapState = "coperto" | "coperto_riuso" | "parziale" | "parziale_riuso" | "scoperto" | "escluso";
+
+export interface GapCrossLink {
+  framework: string;
   external_id: string;
   title: string;
+  relationship: "equivalente" | "parziale" | "correlato";
+  status: string | null; // status ufficiale della controparte sul plant (null = nessuna istanza)
+  via: string | null;    // ID del controllo ISO hub per i collegamenti transitivi
+}
+
+export interface GapItem {
+  id: string;
+  external_id: string;
+  framework: string;
+  title: string;
   domain: string;
-  source_status?: string;
+  domain_name: string;
+  direct_status: string | null;
+  state: GapState;
+  cross: GapCrossLink[];
+  weight: number; // per ACN = numero di requirement applicabili (denominatore spec §3.1)
+  requirements?: { punto: string; applies_to: string[]; text: string }[];
+}
+
+export interface GapCoverage {
+  applicable: number;
+  direct_pct: number;
+  assisted_pct: number;
 }
 
 export interface GapAnalysisResult {
-  source_framework: string;
-  target_framework: string;
-  covered: GapEntry[];
-  partial: GapEntry[];
-  gap: GapEntry[];
-  not_mapped: GapEntry[];
-  summary: {
-    total: number;
-    covered: number;
-    partial: number;
-    gap: number;
-    not_mapped: number;
-    pct_ready: number;
-  };
+  target: string;
+  profile: string;
+  include_proto: boolean | null;
+  frameworks: string[];
+  counts: Record<GapState, number>;
+  coverage: GapCoverage;
+  coverage_by_domain: ({ code: string; name: string } & Record<GapState, number> & GapCoverage)[];
+  items: GapItem[];
 }
 
 export const controlsApi = {
@@ -215,8 +232,15 @@ export const controlsApi = {
     apiClient.post(`/controls/instances/${instanceId}/link_evidence/`, { evidence_id: evidenceId }).then((r) => r.data),
   unlinkEvidence: (instanceId: string, evidenceId: string) =>
     apiClient.post(`/controls/instances/${instanceId}/unlink_evidence/`, { evidence_id: evidenceId }).then((r) => r.data),
-  gapAnalysis: (source: string, target: string, plant?: string) =>
-    apiClient.get<GapAnalysisResult>("/controls/gap-analysis/", { params: { source, target, ...(plant ? { plant } : {}) } }).then((r) => r.data),
+  gapAnalysis: (target: string, plant: string, opts?: { profile?: string; proto?: boolean; lang?: string }) =>
+    apiClient.get<GapAnalysisResult>("/controls/gap-analysis/", {
+      params: {
+        target, plant,
+        ...(opts?.profile ? { profile: opts.profile } : {}),
+        ...(opts?.proto ? { proto: "true" } : {}),
+        ...(opts?.lang ? { lang: opts.lang } : {}),
+      },
+    }).then((r) => r.data),
   linkDocument: (instanceId: string, documentId: string) =>
     apiClient.post(`/controls/instances/${instanceId}/link-document/`, { document_id: documentId }).then((r) => r.data),
   unlinkDocument: (instanceId: string, documentId: string) =>

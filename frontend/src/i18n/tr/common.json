@@ -600,40 +600,68 @@
     }
   },
   "gap_analysis": {
-    "title": "Çerçeve boşluk analizi",
-    "source_framework": "Kaynak çerçeve",
+    "title": "Çerçeveler arası boşluk analizi",
+    "subtitle": "Bir çerçeveye ne kadar hazır olduğunuz — diğerlerinde zaten uyguladıklarınızı yeniden kullanarak (ISO 27001 üzerinden eşleştirme).",
     "target_framework": "Hedef çerçeve",
+    "profile": "Profil",
+    "profile_auto": "Otomatik (tesisten)",
+    "profile_importante": "Önemli kuruluş",
+    "profile_essenziale": "Temel kuruluş",
+    "include_proto": "Prototip modülünü dahil et (PROTO)",
     "loading": "Analiz ediliyor...",
-    "empty_category": "Bu kategoride kontrol yok",
-    "sections": {
-      "covered": "Kapsananlar",
-      "partial": "Kısmi",
-      "gap": "Gap",
-      "not_mapped": "Eşleştirilmemiş"
-    },
+    "reuse_disclaimer": "Yeniden kullanım kredisi doğrulanması gereken bir öneridir: kanıt kontrol edilmeli ve hedef kontrole bağlanmalıdır — sertifikalı uyumluluk değildir.",
     "actions": {
-      "analyze": "Boşluk analizi yap",
-      "download_report": "↓ Boşluk analizi raporunu indir"
+      "analyze": "Boşlukları analiz et",
+      "download_report": "↓ CSV raporunu indir"
     },
     "errors": {
-      "same_framework": "İki farklı çerçeve seçin",
-      "load_failed": "Veri yüklenirken hata"
+      "load_failed": "Veriler yüklenirken hata oluştu",
+      "select_plant": "Boşluk analizini çalıştırmak için bir tesis seçin."
+    },
+    "states": {
+      "coperto": "Karşılanmış",
+      "coperto_riuso": "Yeniden kullanımla karşılanmış",
+      "parziale": "Kısmi",
+      "parziale_riuso": "Yeniden kullanımla kısmi",
+      "scoperto": "Karşılanmamış",
+      "escluso": "Hariç"
+    },
+    "relationships": {
+      "equivalente": "Eşdeğer",
+      "parziale": "Kısmi kapsam",
+      "correlato": "İlişkili"
     },
     "summary": {
-      "controls_from_to": "Kontroller {{source}} → {{target}}",
-      "pct_covered": "{{pct}}% kapsandı",
-      "covered_count": "Kapsanan: {{count}}",
-      "partial_count": "Kısmi: {{count}}",
-      "gap_count": "Gap: {{count}}",
-      "not_mapped_count": "Eşleştirilmemiş: {{count}}"
+      "scope": "{{plant}} → {{target}}",
+      "profile_badge": "profil: {{profile}}",
+      "direct": "Doğrudan kapsam",
+      "assisted": "Destekli kapsam",
+      "assisted_hint": "Doğrudan + eşdeğer yeniden kullanım (%100) + kısmiler (%50)",
+      "applicable_controls": "{{count}} geçerli kontrol",
+      "applicable_requirements": "{{count}} geçerli gereksinim"
+    },
+    "domains": {
+      "title": "Alan bazında kapsam"
+    },
+    "items": {
+      "title": "Öğeler ({{count}})",
+      "only_gaps": "Yalnızca boşluklar ve doğrulanacak yeniden kullanımlar",
+      "empty": "Gösterilecek öğe yok — hepsi karşılanmış ✅",
+      "state": "Durum",
+      "control": "Kontrol / gereksinim",
+      "cross": "Çerçeveler arası bağlantılar",
+      "requirements": "{{count}} geçerli gereksinim",
+      "via": "ISO {{id}} üzerinden",
+      "reuse_hint": "zaten uyumlu: kanıtı yeniden kullanın"
     },
     "export": {
       "columns": {
-        "category": "Kategori",
+        "state": "Durum",
         "id": "ID",
         "title": "Başlık",
         "domain": "Alan",
-        "source_status": "Kaynak durumu"
+        "direct_status": "Doğrudan durum",
+        "cross": "Bağlantılar"
       }
     }
   },
