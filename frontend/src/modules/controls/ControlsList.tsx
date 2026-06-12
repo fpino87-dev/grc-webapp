@@ -241,11 +241,14 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
   const [exportError, setExportError] = useState("");
   const { t } = useTranslation();
 
-  async function handleExport(frameworkCode: string, format: string) {
+  // `spinnerKey` distingue lo spinner dal formato API (`fmt`): TISAX e PROTO
+  // esportano entrambi in formato `vda_isa` ma sono bottoni diversi, quindi lo
+  // stato di caricamento non deve accendersi su entrambi.
+  async function handleExport(frameworkCode: string, format: string, spinnerKey: string = format) {
     const params = new URLSearchParams({ framework: frameworkCode, fmt: format });
     if (plantId) params.set("plant", plantId);
     try {
-      setExporting(format);
+      setExporting(spinnerKey);
       setExportError("");
       const response = await fetch(
         `/api/v1/controls/export/?${params.toString()}`,
@@ -343,11 +346,11 @@ function ExportToolbar({ frameworks, plantId }: { frameworks: Framework[]; plant
         )}
         {hasProto && (
           <button
-            onClick={() => handleExport("TISAX_PROTO", "vda_isa")}
-            disabled={exporting === "vda_isa"}
+            onClick={() => handleExport("TISAX_PROTO", "vda_isa", "proto_vda_isa")}
+            disabled={exporting === "proto_vda_isa"}
             className="px-3 py-1.5 bg-violet-600 text-white text-sm rounded hover:bg-violet-700 disabled:opacity-60"
           >
-            {exporting === "vda_isa" ? t("common.downloading") : t("controls.export.proto_vda_isa")}
+            {exporting === "proto_vda_isa" ? t("common.downloading") : t("controls.export.proto_vda_isa")}
           </button>
         )}
         {nis2MatrixCode && (
