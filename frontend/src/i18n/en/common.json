@@ -297,6 +297,11 @@
       "nis2_matrix_hint_eu": "NIS2 matrix — EU Directive 2022/2555"
     },
     "drawer": {
+      "delete": {
+        "button": "Delete control",
+        "hint": "Soft-deletes this control instance for the site (administrative action). Recorded in the audit trail.",
+        "restricted": "Deletion is allowed only for controls not yet assessed (super admins excepted)."
+      },
       "title": "Control management",
       "tabs": {
         "about": "About",

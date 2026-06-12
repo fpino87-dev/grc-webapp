@@ -364,6 +364,11 @@
       "nis2_matrix_hint_eu": "Matrice NIS2 — Directive UE 2022/2555"
     },
     "drawer": {
+      "delete": {
+        "button": "Supprimer le contrôle",
+        "hint": "Suppression logique de l'instance pour ce site (action administrative). Tracée dans la piste d'audit.",
+        "restricted": "Suppression autorisée uniquement pour les contrôles non encore évalués (sauf super administrateurs)."
+      },
       "title": "Gestion du contrôle",
       "tabs": {
         "about": "À propos",

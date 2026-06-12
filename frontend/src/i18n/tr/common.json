@@ -364,6 +364,11 @@
       "nis2_matrix_hint_eu": "NIS2 matrisi — AB Direktifi 2022/2555"
     },
     "drawer": {
+      "delete": {
+        "button": "Kontrolü sil",
+        "hint": "Bu tesis için kontrol örneğini mantıksal olarak siler (yönetimsel işlem). Denetim izine kaydedilir.",
+        "restricted": "Silme yalnızca henüz değerlendirilmemiş kontroller için izinlidir (süper yöneticiler hariç)."
+      },
       "title": "Kontrol yönetimi",
       "tabs": {
         "about": "Hakkında",

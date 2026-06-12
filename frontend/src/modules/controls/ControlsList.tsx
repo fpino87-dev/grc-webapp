@@ -446,14 +446,9 @@ export function ControlsList() {
     }
   }, [location.state]);
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => controlsApi.deleteInstance(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["controls"] }),
-    onError: (e: any) => {
-      const msg = e?.response?.data?.detail || t("common.error");
-      window.alert(msg);
-    },
-  });
+  // L'eliminazione dell'istanza (azione amministrativa rara, consentita solo sui
+  // controlli non valutati salvo superuser) è stata spostata nel drawer di
+  // dettaglio: non ingombra più ogni riga della tabella operativa. (C10)
 
   // Stato e framework si filtrano entrambi client-side sullo stesso dataset
   // (un'unica fetch per sito): così le pill dei contatori restano una
@@ -713,7 +708,6 @@ export function ControlsList() {
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("controls.table.status")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("controls.table.owner")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("controls.table.last_evaluated")}</th>
-                <th className="px-4 py-3 w-10"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -781,20 +775,6 @@ export function ControlsList() {
                     {c.last_evaluated_at
                       ? new Date(c.last_evaluated_at).toLocaleDateString(i18n.language || "it")
                       : "—"}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      type="button"
-                      title={t("controls.actions.delete_title")}
-                      onClick={() => {
-                        if (!window.confirm(t("controls.actions.delete_confirm", { id: c.control_external_id || c.id }))) return;
-                        deleteMutation.mutate(c.id);
-                      }}
-                      disabled={deleteMutation.isPending}
-                      className="text-xs text-red-600 hover:text-red-800 border border-red-200 rounded px-1.5 py-0.5 disabled:opacity-50"
-                    >
-                      🗑
-                    </button>
                   </td>
                 </tr>
               ))}

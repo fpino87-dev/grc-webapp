@@ -364,6 +364,11 @@
       "nis2_matrix_hint_eu": "Macierz NIS2 — Dyrektywa UE 2022/2555"
     },
     "drawer": {
+      "delete": {
+        "button": "Usuń kontrolę",
+        "hint": "Logiczne usunięcie instancji dla tej lokalizacji (czynność administracyjna). Zapisywane w dzienniku audytu.",
+        "restricted": "Usuwanie dozwolone tylko dla kontroli jeszcze nieocenionych (z wyjątkiem superadministratorów)."
+      },
       "title": "Zarządzanie kontrolą",
       "tabs": {
         "about": "O kontroli",

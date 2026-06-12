@@ -1361,9 +1361,28 @@ interface Props {
 
 export function ControlDetailDrawer({ instanceId, onClose }: Props) {
   const { t } = useTranslation();
+  const qc = useQueryClient();
+  const user = useAuthStore(s => s.user);
   const [tab, setTab] = useState<Tab>("cosa");
   const { data: info, isLoading } = useDetailInfo(instanceId);
   const open = !!instanceId;
+
+  // C10: l'eliminazione (soft delete) dell'istanza vive qui, non più su ogni
+  // riga della lista. Il backend la consente solo sui controlli non valutati,
+  // salvo super admin — rispecchiamo la stessa regola nella UI.
+  const isSuperAdmin = user?.role === "super_admin";
+  const canDelete = !!info && (info.current_status === "non_valutato" || isSuperAdmin);
+
+  const deleteMutation = useMutation({
+    mutationFn: () => controlsApi.deleteInstance(instanceId!),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["controls"] });
+      onClose();
+    },
+    onError: (e: any) => {
+      window.alert(e?.response?.data?.detail || t("common.error"));
+    },
+  });
 
   const tabs: [Tab, string][] = [
     ["cosa",        t("controls.drawer.tabs.about")],
@@ -1458,6 +1477,29 @@ export function ControlDetailDrawer({ instanceId, onClose }: Props) {
             </>
           )}
         </div>
+
+        {/* Footer — danger zone (C10) */}
+        {info && (
+          <div className="shrink-0 border-t border-gray-100 px-5 py-3 bg-gray-50 flex items-center justify-between gap-3">
+            <p className="text-[11px] text-gray-500 leading-tight">
+              {canDelete
+                ? t("controls.drawer.delete.hint")
+                : t("controls.drawer.delete.restricted")}
+            </p>
+            <button
+              type="button"
+              title={t("controls.actions.delete_title")}
+              disabled={!canDelete || deleteMutation.isPending}
+              onClick={() => {
+                if (!window.confirm(t("controls.actions.delete_confirm", { id: info.control_id }))) return;
+                deleteMutation.mutate();
+              }}
+              className="shrink-0 text-xs font-medium text-red-600 hover:text-red-800 border border-red-200 hover:border-red-300 rounded px-3 py-1.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-red-600"
+            >
+              🗑 {t("controls.drawer.delete.button")}
+            </button>
+          </div>
+        )}
       </div>
     </>
   );
