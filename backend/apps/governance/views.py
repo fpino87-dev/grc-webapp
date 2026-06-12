@@ -134,6 +134,11 @@ class RoleAssignmentViewSet(viewsets.ModelViewSet):
         from apps.plants.models import Plant
 
         plant_id = request.query_params.get("plant")
+        # Vacanze calcolate direttamente dal plant richiesto: serve accesso al
+        # sito; senza plant la vista è org-wide (soli nomi ruolo, nessun dato
+        # di sito) → nessun vincolo aggiuntivo (sweep 2026-06-12).
+        from core.scoping import require_plant_access
+        require_plant_access(request.user, plant_id or None, aggregate_requires_org=False)
         plant    = Plant.objects.filter(pk=plant_id).first() if plant_id else None
         vacant   = get_vacant_mandatory_roles(plant)
         return Response({

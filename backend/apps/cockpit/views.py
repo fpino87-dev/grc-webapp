@@ -13,7 +13,13 @@ from .permissions import CockpitPermission
 
 
 def _resolve_plant(request):
+    """Risolve `?plant=` verificando l'accesso dell'utente al sito; senza plant
+    la vista è aggregata sulla postura di TUTTI i siti → solo scope org
+    (sweep security 2026-06-12, pattern gap-analysis)."""
+    from core.scoping import require_plant_access
+
     plant_id = request.query_params.get("plant")
+    require_plant_access(request.user, plant_id or None)
     if not plant_id:
         return None, None
     from apps.plants.models import Plant
@@ -124,6 +130,8 @@ class CockpitAssistantView(APIView):
 
         plant = None
         plant_id = request.data.get("plant") or request.query_params.get("plant")
+        from core.scoping import require_plant_access
+        require_plant_access(request.user, plant_id or None)
         if plant_id:
             from apps.plants.models import Plant
             plant = Plant.objects.filter(pk=plant_id, deleted_at__isnull=True).first()

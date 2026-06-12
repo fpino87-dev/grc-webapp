@@ -199,6 +199,12 @@ def apply_insight_action(fingerprint: str, action: str, until=None, note: str = 
     if live is None and existing is None:
         return None
 
+    # Snooze/accept/reopen incidono sulla postura del sito dell'insight: serve
+    # accesso al plant; insight org-wide (plant_id null) solo a scope org
+    # (sweep security 2026-06-12).
+    from core.scoping import require_plant_access
+    require_plant_access(user, live.plant_id if live is not None else existing.plant_id)
+
     defaults = {}
     if live is not None:
         defaults = {
@@ -252,6 +258,10 @@ def ai_explain_insight(fingerprint: str, user=None):
     ins = _insight_by_fingerprint(fingerprint)
     if ins is None:
         return None
+    # La spiegazione contiene i dati dell'insight: stesso perimetro plant delle
+    # azioni (sweep security 2026-06-12).
+    from core.scoping import require_plant_access
+    require_plant_access(user, ins.plant_id or None)
     refs = "; ".join(f"{c.get('framework', '')} {c.get('control', '')}".strip() for c in ins.compliance_refs)
     prompt = (
         f"Problema rilevato — codice: {ins.code}; area: {ins.area}; gravità: {ins.severity}.\n"

@@ -264,7 +264,16 @@ class EvidenceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         from django.core.exceptions import ValidationError
+        from core.scoping import require_plant_access
         from .services import create_evidence_with_file
+
+        # L'evidenza viene creata sul plant indicato nel body (non passa dal
+        # queryset scoped): serve accesso al sito; plant assente = evidenza
+        # org-wide, comportamento esistente non ristretto (sweep 2026-06-12).
+        require_plant_access(
+            request.user, request.data.get("plant") or None,
+            aggregate_requires_org=False,
+        )
 
         uploaded_file = request.FILES.get("file")
         if uploaded_file:

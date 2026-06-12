@@ -316,6 +316,12 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         plant_id = request.query_params.get("plant")
         include_draft = request.query_params.get("include_draft") == "1"
 
+        # L'export è generato direttamente dal plant_id richiesto (non dal
+        # queryset scoped): serve accesso al sito; senza plant l'export è il
+        # registro rischi di TUTTI i siti → solo scope org (sweep 2026-06-12).
+        from core.scoping import require_plant_access
+        require_plant_access(request.user, plant_id or None)
+
         from apps.plants.models import Plant
         excel_bytes = generate_risk_excel(plant_id=plant_id, include_draft=include_draft)
 
@@ -459,6 +465,11 @@ class RiskAppetitePolicyViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet)
         from .services import get_active_appetite
         plant_id = request.query_params.get("plant")
         framework_code = request.query_params.get("framework", "")
+        # Policy risolta direttamente dal plant_id richiesto; senza plant si
+        # legge la policy globale (legittima per tutti i ruoli risk) →
+        # aggregate_requires_org=False (sweep 2026-06-12).
+        from core.scoping import require_plant_access
+        require_plant_access(request.user, plant_id or None, aggregate_requires_org=False)
         from apps.plants.models import Plant
         plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
         policy = get_active_appetite(plant=plant, framework_code=framework_code)

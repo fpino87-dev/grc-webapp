@@ -93,6 +93,29 @@ def user_can_access_plant(user, plant) -> bool:
     return str(plant_id) in {str(i) for i in allowed}
 
 
+def require_plant_access(user, plant=None, *, aggregate_requires_org=True) -> None:
+    """Guard per view che costruiscono la risposta da un `?plant=` esplicito
+    (sweep security 2026-06-12 sul pattern gap-analysis, esteso ai moduli
+    reporting/cockpit/risk/schedule/bcp/governance).
+
+    Con `plant` valorizzato richiede `user_can_access_plant`; senza plant la
+    risposta è tipicamente aggregata su TUTTI i siti → riservata a scope
+    org/superuser. Per gli endpoint dove "nessun plant" significa risorsa
+    globale legittima (es. policy di default) usare
+    `aggregate_requires_org=False`. Solleva `PermissionDenied` (HTTP 403).
+    """
+    from django.utils.translation import gettext as _
+    from rest_framework.exceptions import PermissionDenied
+
+    if plant:
+        if not user_can_access_plant(user, plant):
+            raise PermissionDenied(_("Accesso negato per questo sito."))
+    elif aggregate_requires_org and get_user_plant_ids(user) is not None:
+        raise PermissionDenied(_(
+            "Accesso negato: vista aggregata su tutti i siti riservata allo scope organizzazione."
+        ))
+
+
 class PlantScopedQuerysetMixin:
     """Mixin DRF che restringe `get_queryset()` agli oggetti del plant accessibile.
 

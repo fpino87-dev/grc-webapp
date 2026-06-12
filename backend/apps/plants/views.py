@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from django.utils.translation import gettext as _
 
 from core.audit import log_action
+from core.scoping import PlantScopedQuerysetMixin
 from core.uploads import validate_uploaded_file
 from .models import BusinessUnit, Plant, PlantFramework
 from .permissions import PlantConfigPermission, PlantPermission
@@ -169,7 +170,7 @@ class PlantViewSet(viewsets.ModelViewSet):
         )
 
 
-class PlantFrameworkViewSet(viewsets.ModelViewSet):
+class PlantFrameworkViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = PlantFramework.objects.select_related("plant", "framework")
     serializer_class = PlantFrameworkSerializer
     permission_classes = [PlantConfigPermission]

@@ -408,6 +408,12 @@ class TestPersistence:
         from apps.cockpit import services
         monkeypatch.setattr(services, "collect_insights", lambda ctx=None: list(insights))
 
+    @pytest.fixture
+    def su(self):
+        # apply_insight_action/ai_explain_insight richiedono un utente con
+        # accesso al plant dell'insight (sweep security 2026-06-12).
+        return User.objects.create_superuser(username="pers", password="p", email="pers@t.com")
+
     def test_sync_create_resolve_reopen(self, monkeypatch):
         from apps.cockpit.services import sync_insights
         from apps.cockpit.models import InsightState, InsightStatus
@@ -426,26 +432,26 @@ class TestPersistence:
         b.refresh_from_db()
         assert b.status == InsightStatus.OPEN
 
-    def test_snooze_hides_then_expires(self, monkeypatch):
+    def test_snooze_hides_then_expires(self, monkeypatch, su):
         from datetime import date, timedelta
         from apps.cockpit.services import build_cockpit, apply_insight_action
         A = Insight(code="a", module="m", severity="warning", area="governance")
         self._patch(monkeypatch, [A])
         assert build_cockpit()["counts"]["total"] == 1
-        apply_insight_action(A.fingerprint, "snooze", until=date.today() + timedelta(days=5))
+        apply_insight_action(A.fingerprint, "snooze", until=date.today() + timedelta(days=5), user=su)
         out = build_cockpit()
         assert out["counts"]["total"] == 0 and out["suppressed_count"] == 1
         # snooze scaduto → riappare
-        apply_insight_action(A.fingerprint, "snooze", until=date.today() - timedelta(days=1))
+        apply_insight_action(A.fingerprint, "snooze", until=date.today() - timedelta(days=1), user=su)
         assert build_cockpit()["counts"]["total"] == 1
 
-    def test_accept_risk_hides_and_excluded_from_posture(self, monkeypatch):
+    def test_accept_risk_hides_and_excluded_from_posture(self, monkeypatch, su):
         from datetime import date, timedelta
         from apps.cockpit.services import build_cockpit, apply_insight_action
         A = Insight(code="a", module="m", severity="critical", area="risk")
         self._patch(monkeypatch, [A])
         assert build_cockpit()["posture"]["areas"]["risk"]["score"] > 0
-        apply_insight_action(A.fingerprint, "accept", until=date.today() + timedelta(days=30), note="ok")
+        apply_insight_action(A.fingerprint, "accept", until=date.today() + timedelta(days=30), note="ok", user=su)
         out = build_cockpit()
         assert out["counts"]["total"] == 0
         assert out["posture"]["areas"]["risk"]["score"] == 0  # accettato → non pesa
@@ -507,7 +513,8 @@ class TestAI:
         A = Insight(code="a", module="m", severity="warning", area="governance", plant_id="p1",
                     compliance_refs=[{"framework": "NIS2", "control": "art.21"}])
         self._patch_insights(monkeypatch, [A])
-        out = ai_explain_insight(A.fingerprint)
+        su = User.objects.create_superuser(username="aiexp", password="p", email="aiexp@t.com")
+        out = ai_explain_insight(A.fingerprint, user=su)
         assert out["text"] == "spiegazione"
         assert calls["sanitize"] is True            # regola #9: mai PII al cloud in chiaro
         assert calls["plant_ids"] == ["p1"]

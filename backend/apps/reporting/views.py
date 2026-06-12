@@ -2,8 +2,23 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.scoping import require_plant_access
+
 from . import services
 from .permissions import ReportingPermission
+
+
+class PlantParamGuardedView(APIView):
+    """I report costruiscono la risposta direttamente dal `?plant=` richiesto,
+    senza passare da un queryset scoped: il check di accesso al sito va fatto
+    qui (sweep security 2026-06-12). Senza plant il report è aggregato su
+    tutti i siti → solo scope org."""
+
+    permission_classes = [ReportingPermission]
+
+    def initial(self, request, *args, **kwargs):
+        super().initial(request, *args, **kwargs)
+        require_plant_access(request.user, request.query_params.get("plant"))
 
 
 def _resolve_lang(request) -> str:
@@ -21,15 +36,13 @@ def _resolve_lang(request) -> str:
     return "it"
 
 
-class ComplianceSummaryView(APIView):
+class ComplianceSummaryView(PlantParamGuardedView):
     """
     GET /api/v1/reporting/compliance/?plant=<uuid>&framework=<code>
 
     Riusa `apps.controls.services.get_compliance_summary` per garantire
     coerenza con la dashboard e con il govrico Assistant.
     """
-
-    permission_classes = [ReportingPermission]
 
     def get(self, request):
         return Response(services.compliance_summary(
@@ -38,30 +51,22 @@ class ComplianceSummaryView(APIView):
         ))
 
 
-class RiskSummaryView(APIView):
-    permission_classes = [ReportingPermission]
-
+class RiskSummaryView(PlantParamGuardedView):
     def get(self, request):
         return Response(services.risk_summary(request.query_params.get("plant")))
 
 
-class IncidentSummaryView(APIView):
-    permission_classes = [ReportingPermission]
-
+class IncidentSummaryView(PlantParamGuardedView):
     def get(self, request):
         return Response(services.incident_summary(request.query_params.get("plant")))
 
 
-class OwnerReportView(APIView):
-    permission_classes = [ReportingPermission]
-
+class OwnerReportView(PlantParamGuardedView):
     def get(self, request):
         return Response(services.owner_report(request.query_params.get("plant")))
 
 
-class KpiTrendView(APIView):
-    permission_classes = [ReportingPermission]
-
+class KpiTrendView(PlantParamGuardedView):
     def get(self, request):
         return Response(services.kpi_trend(
             request.query_params.get("plant"),
@@ -70,32 +75,28 @@ class KpiTrendView(APIView):
         ))
 
 
-class RiskBiaBcpView(APIView):
+class RiskBiaBcpView(PlantParamGuardedView):
     """
     Endpoint unificato Risk + BIA + BCP per il tab dedicato nel Reporting.
     GET /reporting/risk-bia-bcp/?plant=<uuid>
     """
-    permission_classes = [ReportingPermission]
 
     def get(self, request):
         return Response(services.risk_bia_bcp(request.query_params.get("plant")))
 
 
-class DashboardSummaryView(APIView):
-    permission_classes = [ReportingPermission]
-
+class DashboardSummaryView(PlantParamGuardedView):
     def get(self, request):
         return Response(services.dashboard_summary(request.query_params.get("plant")))
 
 
-class KpiOverviewView(APIView):
+class KpiOverviewView(PlantParamGuardedView):
     """
     GET /reporting/kpi-overview/?plant=<uuid>
 
     KPI di governance GRC: copertura documenti obbligatori, MTTR, completamento
     formazione obbligatoria, copertura NDA fornitori.
     """
-    permission_classes = [ReportingPermission]
 
     def get(self, request):
         return Response(services.kpi_overview(request.query_params.get("plant")))
@@ -104,15 +105,13 @@ class KpiOverviewView(APIView):
 # ── KPI suggestion engine (catalogo standard → import) ───────────────────────
 
 
-class KpiSuggestView(APIView):
+class KpiSuggestView(PlantParamGuardedView):
     """
     GET /api/v1/kpi-suggest/?plant=<uuid>&lang=it
 
     Suggerisce KPI standard dal catalogo in base ai framework attivi del plant.
     Pura lettura: non crea nulla.
     """
-
-    permission_classes = [ReportingPermission]
 
     def get(self, request):
         return Response(services.kpi_suggest(
@@ -148,6 +147,9 @@ class KpiImportSuggestionsView(APIView):
                 {"error": "Plant inesistente."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        # Crea KPI sul plant richiesto (o globali se assente): serve accesso al
+        # sito; i KPI globali restano riservati allo scope org (sweep 2026-06-12).
+        require_plant_access(request.user, plant)
 
         overrides = request.data.get("overrides") or {}
         if not isinstance(overrides, dict):

@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from django.utils.translation import gettext as _
 
 from core.audit import log_action
+from core.scoping import PlantScopedQuerysetMixin
 
 from .models import AssetDependency, AssetIT, AssetOT, AssetSW, NetworkZone
 from .permissions import AssetPermission
@@ -18,7 +19,7 @@ from .serializers import (
 from .services import clear_revaluation_flag, delete_asset, get_eol_assets, register_change
 
 
-class NetworkZoneViewSet(viewsets.ModelViewSet):
+class NetworkZoneViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = NetworkZone.objects.select_related("plant")
     serializer_class = NetworkZoneSerializer
     permission_classes = [AssetPermission]
@@ -45,7 +46,7 @@ class NetworkZoneViewSet(viewsets.ModelViewSet):
         )
 
 
-class AssetITViewSet(viewsets.ModelViewSet):
+class AssetITViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = AssetIT.objects.select_related("plant", "owner")
     serializer_class = AssetITSerializer
     permission_classes = [AssetPermission]
@@ -118,7 +119,7 @@ class AssetITViewSet(viewsets.ModelViewSet):
         return Response(self.get_serializer(qs, many=True).data)
 
 
-class AssetOTViewSet(viewsets.ModelViewSet):
+class AssetOTViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = AssetOT.objects.select_related("plant", "owner", "network_zone")
     serializer_class = AssetOTSerializer
     permission_classes = [AssetPermission]
@@ -185,7 +186,7 @@ class AssetOTViewSet(viewsets.ModelViewSet):
         return Response(self.get_serializer(qs, many=True).data)
 
 
-class AssetSWViewSet(viewsets.ModelViewSet):
+class AssetSWViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = AssetSW.objects.select_related("plant", "owner")
     serializer_class = AssetSWSerializer
     permission_classes = [AssetPermission]
@@ -223,10 +224,11 @@ class AssetSWViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class AssetDependencyViewSet(viewsets.ModelViewSet):
+class AssetDependencyViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = AssetDependency.objects.select_related("from_asset__plant", "to_asset__plant")
     serializer_class = AssetDependencySerializer
     permission_classes = [AssetPermission]
+    plant_field = "from_asset__plant"
 
     def get_queryset(self):
         qs = super().get_queryset()

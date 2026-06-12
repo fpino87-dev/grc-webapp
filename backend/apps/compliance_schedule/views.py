@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.utils.translation import gettext as _
 
+from core.scoping import PlantScopedQuerysetMixin, require_plant_access
+
 from .models import ComplianceSchedulePolicy, ScheduleRule, RequiredDocument, DEFAULT_RULES, RULE_TYPE_LABELS, RULE_CATEGORIES
 from .permissions import CompliancePolicyPermission
 from .serializers import (
@@ -13,10 +15,11 @@ from .serializers import (
 )
 
 
-class ComplianceSchedulePolicyViewSet(viewsets.ModelViewSet):
+class ComplianceSchedulePolicyViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = ComplianceSchedulePolicy.objects.prefetch_related("rules")
     serializer_class = ComplianceSchedulePolicySerializer
     permission_classes = [CompliancePolicyPermission]
+    allow_null_plant = True  # policy globali (plant=null) visibili a tutti
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -31,6 +34,9 @@ class ComplianceSchedulePolicyViewSet(viewsets.ModelViewSet):
         from .services import create_default_policy
         plant_id = request.data.get("plant_id")
         name = request.data.get("name", _("Policy predefinita"))
+        # Crea la policy direttamente sul plant richiesto (o globale se assente):
+        # serve accesso al sito; policy globale solo a scope org (sweep 2026-06-12).
+        require_plant_access(request.user, plant_id or None)
         plant = None
         if plant_id:
             from apps.plants.models import Plant
@@ -82,6 +88,9 @@ class ActivityScheduleView(APIView):
     def get(self, request):
         from .services import get_activity_schedule
         plant_id = request.query_params.get("plant")
+        # Lo scadenzario è costruito direttamente dal plant richiesto; senza
+        # plant aggrega tutti i siti → solo scope org (sweep 2026-06-12).
+        require_plant_access(request.user, plant_id or None)
         months_ahead = int(request.query_params.get("months", 6))
         plant = None
         if plant_id:
@@ -97,6 +106,7 @@ class RequiredDocumentsStatusView(APIView):
     def get(self, request):
         from .services import get_required_documents_status
         plant_id = request.query_params.get("plant")
+        require_plant_access(request.user, plant_id or None)
         framework = request.query_params.get("framework", "ISO27001")
         plant = None
         if plant_id:

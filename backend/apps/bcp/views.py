@@ -101,6 +101,10 @@ class BcpPlanViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             plant = Plant.objects.get(pk=plant_id)
         except Plant.DoesNotExist:
             return Response({"detail": "Plant non trovato."}, status=404)
+        # Risposta costruita direttamente dal plant richiesto (non dal queryset
+        # scoped del viewset): serve accesso al sito (sweep 2026-06-12).
+        from core.scoping import require_plant_access
+        require_plant_access(request.user, plant)
         missing = services.check_missing_bcp_plans(plant)
         serializer = CriticalProcessSerializer(missing, many=True)
         return Response(serializer.data)

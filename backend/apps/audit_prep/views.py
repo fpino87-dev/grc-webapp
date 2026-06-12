@@ -419,6 +419,10 @@ class AuditProgramViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         frameworks = Framework.objects.filter(code__in=framework_codes)
         if not plant or not frameworks.exists():
             return Response({"error": "plant e framework_codes obbligatori"}, status=400)
+        # Il piano è generato direttamente dal plant nel body (non dal queryset
+        # scoped del viewset): serve accesso al sito (sweep 2026-06-12).
+        from core.scoping import require_plant_access
+        require_plant_access(request.user, plant)
         plan = suggest_audit_plan(plant, frameworks, year, coverage_type)
         return Response({"suggested_plan": plan})
 

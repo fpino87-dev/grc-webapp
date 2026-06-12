@@ -23,6 +23,7 @@ from .serializers import (
 )
 from . import services
 from .permissions import KpiConfigPermission, TaskPermission
+from core.scoping import PlantScopedQuerysetMixin, require_plant_access
 from django.db.models import Q
 from django.utils import timezone
 from apps.auth_grc.models import UserPlantAccess
@@ -119,11 +120,13 @@ class TaskViewSet(viewsets.ModelViewSet):
         return Response(TaskSerializer(qs, many=True).data)
 
 
-class TaskCommentViewSet(viewsets.ModelViewSet):
+class TaskCommentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = TaskComment.objects.select_related("task", "author")
     serializer_class = TaskCommentSerializer
     permission_classes = [TaskPermission]
     filterset_fields = ["task"]
+    plant_field = "task__plant"
+    allow_null_plant = True  # commenti su task org-wide (plant=null)
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
@@ -132,7 +135,7 @@ class TaskCommentViewSet(viewsets.ModelViewSet):
 # ── Quick Checklist (M08) ────────────────────────────────────────────────────
 
 
-class ChecklistTemplateViewSet(viewsets.ModelViewSet):
+class ChecklistTemplateViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = (
         ChecklistTemplate.objects.select_related("plant")
         .prefetch_related("items")
@@ -140,6 +143,7 @@ class ChecklistTemplateViewSet(viewsets.ModelViewSet):
     serializer_class = ChecklistTemplateSerializer
     permission_classes = [TaskPermission]
     filterset_fields = ["plant", "is_active", "frequency"]
+    allow_null_plant = True  # template globali (plant=null) validi per tutti i plant
     search_fields = ["name", "description"]
 
     def perform_create(self, serializer):
@@ -158,6 +162,7 @@ class ChecklistTemplateViewSet(viewsets.ModelViewSet):
 
 
 class ChecklistRunViewSet(
+    PlantScopedQuerysetMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
@@ -216,13 +221,14 @@ class ChecklistRunViewSet(
 # ── KPI Engine operativo (M08 ↔ M18) ─────────────────────────────────────────
 
 
-class KPIDefinitionViewSet(viewsets.ModelViewSet):
+class KPIDefinitionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = (
         KPIDefinition.objects.select_related("plant", "checklist_template")
         .prefetch_related("snapshots")
     )
     permission_classes = [KpiConfigPermission]
     filterset_fields = ["plant", "is_active", "source", "aggregation"]
+    allow_null_plant = True  # KPI globali multi-plant (plant=null)
     search_fields = ["kpi_code", "name", "description"]
 
     def get_serializer_class(self):
@@ -246,6 +252,7 @@ class KPIDefinitionViewSet(viewsets.ModelViewSet):
 
 
 class OperationalKpiSnapshotViewSet(
+    PlantScopedQuerysetMixin,
     mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
     queryset = OperationalKpiSnapshot.objects.select_related(
@@ -254,6 +261,7 @@ class OperationalKpiSnapshotViewSet(
     serializer_class = OperationalKpiSnapshotSerializer
     permission_classes = [TaskPermission]
     filterset_fields = ["kpi_definition", "plant", "week_start", "status"]
+    allow_null_plant = True  # snapshot di KPI globali (plant=null)
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -283,6 +291,11 @@ class OperationalKpiSnapshotViewSet(
                 {"detail": "kpi_code obbligatorio."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        # Il trend è costruito dal manager raw (non da get_queryset scoped):
+        # serve accesso al plant richiesto; senza plant si leggono solo gli
+        # snapshot globali (plant=null), legittimi per tutti (sweep 2026-06-12).
+        require_plant_access(request.user, plant_id or None, aggregate_requires_org=False)
 
         qs = OperationalKpiSnapshot.objects.filter(
             kpi_definition__kpi_code=kpi_code
