@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -63,6 +63,7 @@ export function KpiDefinitionForm() {
   const isEdit = Boolean(id);
   const [form, setForm] = useState<FormState>(EMPTY);
   const [codeError, setCodeError] = useState<string | null>(null);
+  const [loadedId, setLoadedId] = useState<string | null>(null);
 
   const { data: plants } = useQuery({
     queryKey: ["plants"],
@@ -81,27 +82,29 @@ export function KpiDefinitionForm() {
     retry: false,
   });
 
-  useEffect(() => {
-    if (existing) {
-      setForm({
-        kpi_code: existing.kpi_code,
-        name: existing.name,
-        description: existing.description ?? "",
-        unit: existing.unit ?? "",
-        source: existing.source,
-        checklist_template: existing.checklist_template ?? "",
-        checklist_item_filter: existing.checklist_item_filter ?? "",
-        aggregation: existing.aggregation,
-        plant: existing.plant ?? "",
-        threshold_warning: existing.threshold_warning?.toString() ?? "",
-        threshold_critical: existing.threshold_critical?.toString() ?? "",
-        threshold_direction: existing.threshold_direction,
-        is_active: existing.is_active,
-        notify_on_warning: existing.notify_on_warning,
-        notify_on_critical: existing.notify_on_critical,
-      });
-    }
-  }, [existing]);
+  // Popola il form dai dati caricati in modifica, una sola volta per id (pattern
+  // React di adeguamento dello stato durante il render, senza effect): quando
+  // `existing` arriva per l'id corrente lo sincronizziamo e marchiamo l'id.
+  if (existing && loadedId !== id) {
+    setLoadedId(id ?? null);
+    setForm({
+      kpi_code: existing.kpi_code,
+      name: existing.name,
+      description: existing.description ?? "",
+      unit: existing.unit ?? "",
+      source: existing.source,
+      checklist_template: existing.checklist_template ?? "",
+      checklist_item_filter: existing.checklist_item_filter ?? "",
+      aggregation: existing.aggregation,
+      plant: existing.plant ?? "",
+      threshold_warning: existing.threshold_warning?.toString() ?? "",
+      threshold_critical: existing.threshold_critical?.toString() ?? "",
+      threshold_direction: existing.threshold_direction,
+      is_active: existing.is_active,
+      notify_on_warning: existing.notify_on_warning,
+      notify_on_critical: existing.notify_on_critical,
+    });
+  }
 
   const mutation = useMutation({
     mutationFn: () => {
