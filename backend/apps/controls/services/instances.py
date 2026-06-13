@@ -128,6 +128,37 @@ def validate_exclusion(instance, applicability: str,
     )
 
 
+def delete_control(control, user) -> None:
+    """Eliminazione di un controllo del CATALOGO. Bloccata se il controllo ha
+    valutazioni (ControlInstance attive) su uno o più siti: cancellarlo
+    porterebbe via storico e prove (FK on_delete=CASCADE). Il catalogo si
+    gestisce ricaricando i framework, non cancellando a mano un controllo con
+    istanze. Senza istanze → soft delete + audit.
+    """
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    from ..models import ControlInstance
+
+    n = ControlInstance.objects.filter(control=control, deleted_at__isnull=True).count()
+    if n:
+        raise ValidationError(
+            _("Impossibile eliminare il controllo: ha %(n)d valutazioni su uno o più siti. "
+              "Il catalogo si gestisce ricaricando i framework.") % {"n": n}
+        )
+    control.soft_delete()
+    log_action(
+        user=user,
+        action_code="controls.control.delete",
+        level="L2",
+        entity=control,
+        payload={"id": str(control.id), "external_id": control.external_id,
+                 "framework": control.framework.code},
+    )
+
+
 def can_delete_instance(instance, user) -> bool:
     """Regola unica di eliminabilità di un'istanza controllo: consentita solo
     se lo stato è ancora «non_valutato», salvo superuser. Sorgente di verità

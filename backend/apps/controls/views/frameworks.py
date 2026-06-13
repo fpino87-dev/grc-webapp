@@ -121,15 +121,28 @@ class ControlDomainViewSet(SoftDeleteAuditMixin, viewsets.ModelViewSet):
     audit_action = "controls.control_domain"
 
 
-class ControlViewSet(SoftDeleteAuditMixin, viewsets.ModelViewSet):
+class ControlViewSet(viewsets.ModelViewSet):
     queryset = Control.objects.select_related("framework", "domain")
     serializer_class = ControlSerializer
     permission_classes = [FrameworkPermission]
-    # Il default destroy faceva hard delete del Control → CASCADE su TUTTE le
-    # ControlInstance valutate (FK on_delete=CASCADE), perdita dati su tutti i
-    # siti. Ora soft delete + audit; le istanze restano (filtrate dal proprio
-    # deleted_at). Il catalogo si gestisce via load_frameworks.
-    audit_action = "controls.control"
+
+    def destroy(self, request, *args, **kwargs):
+        # Il default destroy faceva HARD delete del Control → CASCADE su TUTTE le
+        # ControlInstance valutate, perdita dati su tutti i siti. Ora: BLOCCO se
+        # il controllo ha valutazioni (delete_control), altrimenti soft delete +
+        # audit. Il catalogo si gestisce via load_frameworks.
+        from django.core.exceptions import ValidationError
+
+        from ..services import delete_control
+        control = self.get_object()
+        try:
+            delete_control(control, request.user)
+        except ValidationError as e:
+            return Response(
+                {"detail": e.messages[0] if getattr(e, "messages", None) else str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["post"], url_path="explain")
     def explain(self, request, pk=None):

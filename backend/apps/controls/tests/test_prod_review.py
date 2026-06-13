@@ -25,10 +25,11 @@ def admin_client(db):
 
 
 @pytest.mark.django_db
-def test_control_delete_is_soft_and_does_not_cascade_instances(admin_client):
+def test_control_with_evaluations_is_blocked_not_deleted(admin_client):
+    """Guard: un controllo con valutazioni NON si elimina (niente catena rotta
+    né perdita dati). Si gestisce via load_frameworks."""
     from apps.controls.models import Control, ControlInstance, Framework
     from apps.plants.models import Plant
-    from core.audit import AuditLog
 
     fw = Framework.objects.create(code="M3FW", name="M3 FW", version="1", published_at=datetime.date.today())
     ctrl = Control.objects.create(framework=fw, external_id="M3.1", translations={"it": {"title": "T"}})
@@ -36,10 +37,21 @@ def test_control_delete_is_soft_and_does_not_cascade_instances(admin_client):
     inst = ControlInstance.objects.create(plant=plant, control=ctrl, status="compliant")
 
     resp = admin_client.delete(f"/api/v1/controls/controls/{ctrl.id}/")
-    assert resp.status_code == 204
+    assert resp.status_code == 400
+    # Controllo e istanza intatti (niente hard cascade, niente soft delete)
+    assert Control.objects.filter(pk=ctrl.id, deleted_at__isnull=True).exists()
+    assert ControlInstance.objects.filter(pk=inst.id, deleted_at__isnull=True).exists()
 
-    # Control soft-deleted, NON sparito dal DB
+
+@pytest.mark.django_db
+def test_control_without_evaluations_is_soft_deleted(admin_client):
+    from apps.controls.models import Control, Framework
+    from core.audit import AuditLog
+
+    fw = Framework.objects.create(code="M3FW2", name="M3 FW2", version="1", published_at=datetime.date.today())
+    ctrl = Control.objects.create(framework=fw, external_id="M3.2", translations={"it": {"title": "T"}})
+
+    resp = admin_client.delete(f"/api/v1/controls/controls/{ctrl.id}/")
+    assert resp.status_code == 204
     assert Control.objects.all_with_deleted().filter(pk=ctrl.id, deleted_at__isnull=False).exists()
-    # L'istanza valutata sopravvive (niente cascade hard delete)
-    assert ControlInstance.objects.all_with_deleted().filter(pk=inst.id).exists()
     assert AuditLog.objects.filter(action_code="controls.control.delete").exists()

@@ -28,6 +28,7 @@ from .frameworks import (
 )
 from .instances import (
     can_delete_instance,
+    delete_control,
     delete_control_instance,
     evaluate_control,
     propagate_control,
@@ -47,6 +48,7 @@ __all__ = [
     "count_open_gaps_by_plant",
     "count_revaluation_by_plant",
     "can_delete_instance",
+    "delete_control",
     "delete_control_instance",
     "delete_framework",
     "evaluate_control",
