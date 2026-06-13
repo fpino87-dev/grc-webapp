@@ -8,7 +8,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ## [Unreleased]
 
-_Nessuna voce._
+### Security
+
+- **CSV export — protezione contro la formula injection (OWASP)**: tutti gli export CSV della piattaforma (gap analysis cross-framework, fornitori, finding OSINT, audit package controlli, audit pack M17) neutralizzano le celle che iniziano con `=`, `+`, `-`, `@`, tab o CR, prefissandole con un apostrofo, così non vengono interpretate come formule all'apertura in Excel/LibreOffice/Sheets. I valori numerici (anche negativi) non vengono alterati. Helper centrali `core.csv_safe` (backend) e `utils/csv` (frontend).
+
+### Fixed
+
+- **Controlli — eliminabilità decisa dal backend**: il flag `can_delete` (regola «solo controlli non valutati, salvo super admin») è ora calcolato dal server ed esposto in detail-info; la UI non lo ricalcola più, eliminando il rischio di divergenza tra interfaccia e backend.
 
 ## [0.6.0] - 2026-06-12
 

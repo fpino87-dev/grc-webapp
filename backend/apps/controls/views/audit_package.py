@@ -33,7 +33,9 @@ def _add_audit_programs(zf, zip_name: str, fw_codes: list[str], plant_id, today)
     Aggiunge PROGRAMMA_AUDIT/ con un CSV per ogni programma approvato/in_corso
     del plant che copre almeno uno dei framework del pacchetto.
     """
-    import csv, io
+    import io
+
+    from core.csv_safe import safe_writer
     from apps.audit_prep.models import AuditProgram
 
     qs = AuditProgram.objects.filter(
@@ -55,7 +57,7 @@ def _add_audit_programs(zf, zip_name: str, fw_codes: list[str], plant_id, today)
 
     for prog in programs:
         buf = io.StringIO()
-        w = csv.writer(buf)
+        w = safe_writer(buf)
 
         # Intestazione programma
         w.writerow(["PROGRAMMA DI AUDIT INTERNO"])
@@ -112,7 +114,9 @@ def _add_management_reviews(zf, zip_name: str, plant_id, default_storage) -> Non
     - RIEPILOGO.csv  — tutte le revisioni completate/approvate
     - file documento (verbale) per ogni revisione che ha document_id impostato
     """
-    import csv, io
+    import io
+
+    from core.csv_safe import safe_writer
     from apps.management_review.models import ManagementReview
     from apps.documents.models import Document
 
@@ -129,7 +133,7 @@ def _add_management_reviews(zf, zip_name: str, plant_id, default_storage) -> Non
 
     # Riepilogo CSV
     buf = io.StringIO()
-    w = csv.writer(buf)
+    w = safe_writer(buf)
     w.writerow(["Data", "Titolo", "Presidente", "Stato approvazione",
                 "Approvato da", "Approvato il", "Prossima revisione",
                 "N. delibere", "Verbale allegato"])
@@ -209,7 +213,7 @@ class AuditPackageView(APIView):
     def get(self, request):
         import io
         import zipfile
-        import csv
+        from core.csv_safe import safe_writer
         from django.core.files.storage import default_storage
         from django.http import HttpResponse
         from django.utils import timezone
@@ -307,7 +311,7 @@ class AuditPackageView(APIView):
 
             # ── INDICE.csv ────────────────────────────────────────────────────
             indice_buf = io.StringIO()
-            w = csv.writer(indice_buf)
+            w = safe_writer(indice_buf)
             w.writerow(["ID Controllo", "Titolo", "Framework", "Stato",
                         "N. Documenti", "N. Evidenze", "Ultima Valutazione"])
             for ctrl in controls_list:

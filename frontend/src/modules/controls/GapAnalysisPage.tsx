@@ -4,6 +4,7 @@ import { controlsApi, type GapAnalysisResult, type GapCrossLink, type GapItem, t
 import { useAuthStore } from "../../store/auth";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
+import { toCsv } from "../../utils/csv";
 
 const TARGETS = [
   { code: "ISO27001", label: "ISO 27001:2022" },
@@ -120,8 +121,7 @@ function exportCsv(result: GapAnalysisResult, t: (key: string, opts?: Record<str
       ).join("; "),
     ]);
   }
-  const csv = rows.map(r => r.map(c => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
-  const blob = new Blob([csv], { type: "text/csv" });
+  const blob = new Blob([toCsv(rows)], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

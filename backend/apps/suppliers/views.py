@@ -1,6 +1,7 @@
-import csv
 import json
 import re
+
+from core.csv_safe import safe_writer
 
 from django.http import HttpResponse
 from rest_framework import filters, viewsets
@@ -293,7 +294,7 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             "nd": "N/D",
         }
 
-        writer = csv.writer(response)
+        writer = safe_writer(response)
         writer.writerow([
             "Denominazione",
             "Codice Fiscale / P.IVA",

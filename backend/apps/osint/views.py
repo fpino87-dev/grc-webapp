@@ -105,10 +105,10 @@ class OsintEntityViewSet(viewsets.ReadOnlyModelViewSet):
     )
     def export_csv(self, request):
         """Export CSV evidence audit (entità + ultimo scan)."""
-        import csv
         from io import StringIO
+        from core.csv_safe import safe_writer
         buf = StringIO()
-        w = csv.writer(buf)
+        w = safe_writer(buf)
         w.writerow([
             "domain", "display_name", "entity_type", "is_nis2_critical",
             "scan_frequency", "last_scan_at", "last_score_total",
@@ -727,10 +727,10 @@ class OsintFindingViewSet(viewsets.GenericViewSet):
     )
     def export_csv(self, request):
         """Export CSV per audit GRC."""
-        import csv
         from io import StringIO
+        from core.csv_safe import safe_writer
         buf = StringIO()
-        w = csv.writer(buf)
+        w = safe_writer(buf)
         w.writerow([
             "code", "severity", "status", "entity_domain", "entity_display_name",
             "is_nis2_critical", "first_seen", "last_seen", "resolved_at",

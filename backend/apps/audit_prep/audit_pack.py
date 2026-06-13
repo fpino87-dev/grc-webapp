@@ -35,7 +35,6 @@ Celery, mai da view sincrona.
 """
 from __future__ import annotations
 
-import csv
 import hashlib
 import json
 import logging
@@ -48,6 +47,8 @@ from typing import Optional
 
 from django.conf import settings
 from django.utils import timezone
+
+from core.csv_safe import safe_dict_writer
 
 from .framework_hierarchy import expand_tisax
 
@@ -132,7 +133,7 @@ def _collect_controls(out_dir: Path, plant, frameworks: list[str]) -> dict:
     csv_path = controls_dir / "controls_status.csv"
     with csv_path.open("w", newline="", encoding="utf-8") as fp:
         if rows:
-            writer = csv.DictWriter(fp, fieldnames=list(rows[0].keys()))
+            writer = safe_dict_writer(fp, fieldnames=list(rows[0].keys()))
             writer.writeheader()
             writer.writerows(rows)
         else:
@@ -214,7 +215,7 @@ def _collect_documents(out_dir: Path, plant, frameworks: list[str]) -> dict:
     csv_path = docs_dir / "_index.csv"
     with csv_path.open("w", newline="", encoding="utf-8") as fp:
         if index_rows:
-            writer = csv.DictWriter(fp, fieldnames=list(index_rows[0].keys()))
+            writer = safe_dict_writer(fp, fieldnames=list(index_rows[0].keys()))
             writer.writeheader()
             writer.writerows(index_rows)
         else:
@@ -264,7 +265,7 @@ def _collect_evidences(out_dir: Path, plant, frameworks: list[str]) -> dict:
     csv_path = ev_dir / "_index.csv"
     with csv_path.open("w", newline="", encoding="utf-8") as fp:
         if rows:
-            writer = csv.DictWriter(fp, fieldnames=list(rows[0].keys()))
+            writer = safe_dict_writer(fp, fieldnames=list(rows[0].keys()))
             writer.writeheader()
             writer.writerows(rows)
         else:
@@ -309,7 +310,7 @@ def _collect_risk(out_dir: Path, plant) -> dict:
     csv_path = risk_dir / "risk_register.csv"
     with csv_path.open("w", newline="", encoding="utf-8") as fp:
         if rows:
-            writer = csv.DictWriter(fp, fieldnames=list(rows[0].keys()))
+            writer = safe_dict_writer(fp, fieldnames=list(rows[0].keys()))
             writer.writeheader()
             writer.writerows(rows)
         else:
@@ -337,7 +338,7 @@ def _collect_bia_bcp(out_dir: Path, plant) -> dict:
     } for p in procs]
     with (bia_dir / "critical_processes.csv").open("w", newline="", encoding="utf-8") as fp:
         if bia_rows:
-            w = csv.DictWriter(fp, fieldnames=list(bia_rows[0].keys()))
+            w = safe_dict_writer(fp, fieldnames=list(bia_rows[0].keys()))
             w.writeheader(); w.writerows(bia_rows)
         else:
             fp.write("# Nessun processo critico per il plant.\n")
@@ -362,7 +363,7 @@ def _collect_bia_bcp(out_dir: Path, plant) -> dict:
         })
     with (bia_dir / "bcp_plans.csv").open("w", newline="", encoding="utf-8") as fp:
         if bcp_rows:
-            w = csv.DictWriter(fp, fieldnames=list(bcp_rows[0].keys()))
+            w = safe_dict_writer(fp, fieldnames=list(bcp_rows[0].keys()))
             w.writeheader(); w.writerows(bcp_rows)
         else:
             fp.write("# Nessun piano BCP per il plant.\n")
@@ -391,7 +392,7 @@ def _collect_incidents(out_dir: Path, plant, since: Optional[date]) -> dict:
     } for i in qs]
     with (inc_dir / "incidents.csv").open("w", newline="", encoding="utf-8") as fp:
         if rows:
-            w = csv.DictWriter(fp, fieldnames=list(rows[0].keys()))
+            w = safe_dict_writer(fp, fieldnames=list(rows[0].keys()))
             w.writeheader(); w.writerows(rows)
         else:
             fp.write("# Nessun incidente per il plant nel periodo richiesto.\n")
@@ -418,7 +419,7 @@ def _collect_training(out_dir: Path, plant) -> dict:
     } for e in qs]
     with (tr_dir / "training_enrollments.csv").open("w", newline="", encoding="utf-8") as fp:
         if rows:
-            w = csv.DictWriter(fp, fieldnames=list(rows[0].keys()))
+            w = safe_dict_writer(fp, fieldnames=list(rows[0].keys()))
             w.writeheader(); w.writerows(rows)
         else:
             fp.write("# Nessuna iscrizione training trovata.\n")
@@ -446,7 +447,7 @@ def _collect_governance(out_dir: Path, plant) -> dict:
         })
     with (gov_dir / "role_assignments.csv").open("w", newline="", encoding="utf-8") as fp:
         if role_rows:
-            w = csv.DictWriter(fp, fieldnames=list(role_rows[0].keys()))
+            w = safe_dict_writer(fp, fieldnames=list(role_rows[0].keys()))
             w.writeheader(); w.writerows(role_rows)
         else:
             fp.write("# Nessuna assegnazione ruolo.\n")
@@ -459,7 +460,7 @@ def _collect_governance(out_dir: Path, plant) -> dict:
     } for c in committees]
     with (gov_dir / "security_committees.csv").open("w", newline="", encoding="utf-8") as fp:
         if com_rows:
-            w = csv.DictWriter(fp, fieldnames=list(com_rows[0].keys()))
+            w = safe_dict_writer(fp, fieldnames=list(com_rows[0].keys()))
             w.writeheader(); w.writerows(com_rows)
         else:
             fp.write("# Nessun comitato di sicurezza definito.\n")
@@ -533,11 +534,11 @@ def _collect_management_review(out_dir: Path, plant) -> dict:
             })
 
     with (mr_dir / "_index.csv").open("w", newline="", encoding="utf-8") as fp:
-        w = csv.DictWriter(fp, fieldnames=list(review_rows[0].keys()))
+        w = safe_dict_writer(fp, fieldnames=list(review_rows[0].keys()))
         w.writeheader(); w.writerows(review_rows)
     with (mr_dir / "actions.csv").open("w", newline="", encoding="utf-8") as fp:
         if action_rows:
-            w = csv.DictWriter(fp, fieldnames=list(action_rows[0].keys()))
+            w = safe_dict_writer(fp, fieldnames=list(action_rows[0].keys()))
             w.writeheader(); w.writerows(action_rows)
         else:
             fp.write("# Nessuna action item nelle review approvate.\n")
@@ -584,7 +585,7 @@ def _collect_audit_trail(out_dir: Path, plant, since: Optional[date]) -> dict:
     } for l in qs]
     with (at_dir / "audit_trail.csv").open("w", newline="", encoding="utf-8") as fp:
         if rows:
-            w = csv.DictWriter(fp, fieldnames=list(rows[0].keys()))
+            w = safe_dict_writer(fp, fieldnames=list(rows[0].keys()))
             w.writeheader(); w.writerows(rows)
         else:
             fp.write("# Nessun evento audit trail correlato al plant nel periodo.\n")
