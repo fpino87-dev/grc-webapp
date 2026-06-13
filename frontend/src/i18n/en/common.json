@@ -3079,7 +3079,8 @@
         "users": "Users",
         "access": "Access grants",
         "responsibilities": "Responsibilities",
-        "issues": "Inconsistencies"
+        "issues": "Inconsistencies",
+        "committees": "Committees"
       },
       "filter": {
         "all": "All",
@@ -3101,7 +3102,13 @@
         "inactive_user": "Inactive user",
         "responsibility_without_access": "Responsibility without access",
         "expiring": "Expiring"
-      }
+      },
+      "section_access": "Access (what they can do)",
+      "section_resp": "Responsibilities (what they're accountable for)",
+      "committees_title": "Security committees",
+      "committees_empty": "No security committee configured. Create one in Governance → Committees.",
+      "committees_next": "next",
+      "committees_no_members": "No members recorded (no meetings yet)"
     }
   },
   "manual": {

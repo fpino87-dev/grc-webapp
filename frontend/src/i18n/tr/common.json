@@ -3158,7 +3158,8 @@
         "users": "Kullanıcılar",
         "access": "Erişimler",
         "responsibilities": "Sorumluluklar",
-        "issues": "Tutarsızlıklar"
+        "issues": "Tutarsızlıklar",
+        "committees": "Komiteler"
       },
       "filter": {
         "all": "Tümü",
@@ -3180,7 +3181,13 @@
         "inactive_user": "Pasif kullanıcı",
         "responsibility_without_access": "Erişimsiz sorumluluk",
         "expiring": "Süresi doluyor"
-      }
+      },
+      "section_access": "Erişimler (ne yapabilir)",
+      "section_resp": "Sorumluluklar (neyden sorumlu)",
+      "committees_title": "Güvenlik komiteleri",
+      "committees_empty": "Yapılandırılmış güvenlik komitesi yok. Yönetişim → Komiteler'den oluşturun.",
+      "committees_next": "sonraki",
+      "committees_no_members": "Kayıtlı üye yok (henüz toplantı yok)"
     }
   },
   "manual": {

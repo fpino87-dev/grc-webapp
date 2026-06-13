@@ -238,13 +238,25 @@ export interface AccessMatrixRow {
   flags: string[];
 }
 
+export interface SecurityCommitteeRow {
+  id: string;
+  name: string;
+  committee_type: string;
+  frequency: string;
+  plant_code: string | null;
+  next_meeting_at: string | null;
+  last_meeting_at: string | null;
+  members: { name: string; email: string }[];
+}
+
 export interface AccessMatrixData {
   generated_at: string;
   plant_id: string | null;
   plant_code: string | null;
   rows: AccessMatrixRow[];
   vacant_mandatory_roles: string[];
-  summary: { users: number; access: number; responsibilities: number; issues: number };
+  committees: SecurityCommitteeRow[];
+  summary: { users: number; access: number; responsibilities: number; issues: number; committees: number };
 }
 
 export const reportingApi = {

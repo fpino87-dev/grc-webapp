@@ -3158,7 +3158,8 @@
         "users": "Utilisateurs",
         "access": "Accès",
         "responsibilities": "Responsabilités",
-        "issues": "Incohérences"
+        "issues": "Incohérences",
+        "committees": "Comités"
       },
       "filter": {
         "all": "Tous",
@@ -3180,7 +3181,13 @@
         "inactive_user": "Utilisateur inactif",
         "responsibility_without_access": "Responsabilité sans accès",
         "expiring": "Bientôt expiré"
-      }
+      },
+      "section_access": "Accès (ce qu'il peut faire)",
+      "section_resp": "Responsabilités (de quoi il répond)",
+      "committees_title": "Comités de sécurité",
+      "committees_empty": "Aucun comité de sécurité configuré. Créez-en un dans Gouvernance → Comités.",
+      "committees_next": "prochaine",
+      "committees_no_members": "Aucun participant enregistré (aucune réunion)"
     }
   },
   "manual": {

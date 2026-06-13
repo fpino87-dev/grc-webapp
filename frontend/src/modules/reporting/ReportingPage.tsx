@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { reportingApi, type BiaBcpRow, type TopRisk, type ThreatBreakdown, type Nis2CategoryBreakdown, type HeatmapCell, type RequiredDocsCoverage, type SupplierNdaEntry, type TreatmentRosi, type TreatmentRosiTotals } from "../../api/endpoints/reporting";
+import { reportingApi, type BiaBcpRow, type TopRisk, type ThreatBreakdown, type Nis2CategoryBreakdown, type HeatmapCell, type RequiredDocsCoverage, type SupplierNdaEntry, type TreatmentRosi, type TreatmentRosiTotals, type AccessMatrixRow } from "../../api/endpoints/reporting";
 import { plantsApi } from "../../api/endpoints/plants";
 import { useAuthStore } from "../../store/auth";
 import {
@@ -1062,10 +1062,32 @@ function TabKpi() {
 
 const ACCESS_REVIEW_ROLES = ["super_admin", "compliance_officer", "internal_auditor", "external_auditor"];
 
+function AccessRow({ r, t }: { r: AccessMatrixRow; t: (k: string) => string }) {
+  return (
+    <tr className={`border-t border-gray-100 ${!r.is_active ? "bg-gray-50/60" : ""}`}>
+      <td className="px-3 py-2">
+        <div className="font-medium text-gray-800">{r.user_name}</div>
+        <div className="text-xs text-gray-400">{r.user_email}</div>
+      </td>
+      <td className="px-3 py-2 text-gray-700">{r.role_label}</td>
+      <td className="px-3 py-2 text-gray-600 text-xs">
+        {r.covers_all ? t("reporting.access_matrix.all_sites") : (r.plant_codes.join(", ") || r.scope_label)}
+        {r.valid_until && <span className="text-gray-400"> · {t("reporting.access_matrix.until")} {r.valid_until}</span>}
+      </td>
+      <td className="px-3 py-2">
+        {r.flags.map(f => (
+          <span key={f} className="inline-block text-xs px-1.5 py-0.5 rounded bg-red-100 text-red-700 mr-1 mb-0.5">
+            {t(`reporting.access_matrix.flag.${f}`)}
+          </span>
+        ))}
+      </td>
+    </tr>
+  );
+}
+
 function TabAccessMatrix() {
   const { t } = useTranslation();
   const selectedPlant = useAuthStore(s => s.selectedPlant);
-  const [kind, setKind] = useState<"all" | "access" | "responsibility">("all");
   const [onlyIssues, setOnlyIssues] = useState(false);
 
   const { data, isLoading } = useQuery({
@@ -1076,30 +1098,63 @@ function TabAccessMatrix() {
   if (isLoading) return <div className="text-gray-400 py-8 text-center">{t("common.loading")}</div>;
   if (!data) return null;
 
-  const rows = data.rows.filter(r =>
-    (kind === "all" || r.kind === kind) && (!onlyIssues || r.flags.length > 0)
-  );
+  const byKind = (k: "access" | "responsibility") =>
+    data.rows.filter(r => r.kind === k && (!onlyIssues || r.flags.length > 0));
 
   const tiles: [string, number, string][] = [
     ["users", data.summary.users, "text-gray-900"],
     ["access", data.summary.access, "text-blue-700"],
     ["responsibilities", data.summary.responsibilities, "text-indigo-700"],
+    ["committees", data.summary.committees, "text-emerald-700"],
     ["issues", data.summary.issues, data.summary.issues > 0 ? "text-red-600" : "text-green-600"],
   ];
 
+  const renderTable = (k: "access" | "responsibility", titleKey: string, accent: string) => {
+    const rows = byKind(k);
+    return (
+      <div>
+        <p className={`text-sm font-semibold ${accent} mb-1.5`}>{t(titleKey)} <span className="text-gray-400 font-normal">({rows.length})</span></p>
+        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+              <tr>
+                <th className="px-3 py-2 text-left">{t("reporting.access_matrix.col.user")}</th>
+                <th className="px-3 py-2 text-left">{t("reporting.access_matrix.col.role")}</th>
+                <th className="px-3 py-2 text-left">{t("reporting.access_matrix.col.scope")}</th>
+                <th className="px-3 py-2 text-left">{t("reporting.access_matrix.col.flags")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r, i) => <AccessRow key={i} r={r} t={t} />)}
+              {rows.length === 0 && (
+                <tr><td colSpan={4} className="px-3 py-6 text-center text-gray-400">{t("reporting.access_matrix.empty")}</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <p className="text-sm text-gray-500">{t("reporting.access_matrix.subtitle")}</p>
-        <button
-          onClick={() => reportingApi.exportAccessMatrixCsv(selectedPlant?.id)}
-          className="text-xs font-medium text-gray-600 border border-gray-300 rounded px-3 py-1.5 hover:bg-gray-50"
-        >
-          ⬇ {t("reporting.access_matrix.export_csv")}
-        </button>
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-1.5 text-xs text-gray-600">
+            <input type="checkbox" checked={onlyIssues} onChange={e => setOnlyIssues(e.target.checked)} />
+            {t("reporting.access_matrix.only_issues")}
+          </label>
+          <button
+            onClick={() => reportingApi.exportAccessMatrixCsv(selectedPlant?.id)}
+            className="text-xs font-medium text-gray-600 border border-gray-300 rounded px-3 py-1.5 hover:bg-gray-50"
+          >
+            ⬇ {t("reporting.access_matrix.export_csv")}
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {tiles.map(([key, val, cls]) => (
           <div key={key} className="border border-gray-200 rounded-lg p-3 bg-white">
             <p className="text-xs text-gray-500 uppercase tracking-wide">{t(`reporting.access_matrix.summary.${key}`)}</p>
@@ -1114,68 +1169,37 @@ function TabAccessMatrix() {
         </div>
       )}
 
-      <div className="flex items-center gap-3 text-sm flex-wrap">
-        {(["all", "access", "responsibility"] as const).map(k => (
-          <button
-            key={k}
-            onClick={() => setKind(k)}
-            className={`px-3 py-1 rounded-full text-xs font-medium border ${
-              kind === k ? "bg-slate-700 text-white border-slate-700" : "bg-white text-gray-600 border-gray-300"
-            }`}
-          >
-            {t(`reporting.access_matrix.filter.${k}`)}
-          </button>
-        ))}
-        <label className="flex items-center gap-1.5 text-xs text-gray-600 ml-2">
-          <input type="checkbox" checked={onlyIssues} onChange={e => setOnlyIssues(e.target.checked)} />
-          {t("reporting.access_matrix.only_issues")}
-        </label>
-      </div>
+      {/* Due tabelle separate: gli utenti non si ripetono mischiati */}
+      {renderTable("access", "reporting.access_matrix.section_access", "text-blue-700")}
+      {renderTable("responsibility", "reporting.access_matrix.section_resp", "text-indigo-700")}
 
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
-            <tr>
-              <th className="px-3 py-2 text-left">{t("reporting.access_matrix.col.user")}</th>
-              <th className="px-3 py-2 text-left">{t("reporting.access_matrix.col.kind")}</th>
-              <th className="px-3 py-2 text-left">{t("reporting.access_matrix.col.role")}</th>
-              <th className="px-3 py-2 text-left">{t("reporting.access_matrix.col.scope")}</th>
-              <th className="px-3 py-2 text-left">{t("reporting.access_matrix.col.flags")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r, i) => (
-              <tr key={i} className={`border-t border-gray-100 ${!r.is_active ? "bg-gray-50/60" : ""}`}>
-                <td className="px-3 py-2">
-                  <div className="font-medium text-gray-800">{r.user_name}</div>
-                  <div className="text-xs text-gray-400">{r.user_email}</div>
-                </td>
-                <td className="px-3 py-2">
-                  <span className={`text-xs px-1.5 py-0.5 rounded ${
-                    r.kind === "access" ? "bg-blue-50 text-blue-700" : "bg-indigo-50 text-indigo-700"
-                  }`}>
-                    {t(`reporting.access_matrix.kind.${r.kind}`)}
+      {/* Comitati di Sicurezza (il "direttivo") */}
+      <div>
+        <p className="text-sm font-semibold text-emerald-700 mb-1.5">{t("reporting.access_matrix.committees_title")} <span className="text-gray-400 font-normal">({data.committees.length})</span></p>
+        {data.committees.length === 0 ? (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-3 text-xs text-gray-500">
+            ℹ️ {t("reporting.access_matrix.committees_empty")}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {data.committees.map(c => (
+              <div key={c.id} className="bg-white border border-gray-200 rounded-lg px-3 py-2">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <span className="font-medium text-gray-800">{c.name}</span>
+                  <span className="text-xs text-gray-500">
+                    {c.committee_type}{c.plant_code ? ` · ${c.plant_code}` : ""} · {c.frequency}
+                    {c.next_meeting_at && ` · ${t("reporting.access_matrix.committees_next")} ${c.next_meeting_at.slice(0, 10)}`}
                   </span>
-                </td>
-                <td className="px-3 py-2 text-gray-700">{r.role_label}</td>
-                <td className="px-3 py-2 text-gray-600 text-xs">
-                  {r.covers_all ? t("reporting.access_matrix.all_sites") : (r.plant_codes.join(", ") || r.scope_label)}
-                  {r.valid_until && <span className="text-gray-400"> · {t("reporting.access_matrix.until")} {r.valid_until}</span>}
-                </td>
-                <td className="px-3 py-2">
-                  {r.flags.map(f => (
-                    <span key={f} className="inline-block text-xs px-1.5 py-0.5 rounded bg-red-100 text-red-700 mr-1 mb-0.5">
-                      {t(`reporting.access_matrix.flag.${f}`)}
-                    </span>
-                  ))}
-                </td>
-              </tr>
+                </div>
+                <div className="text-xs text-gray-600 mt-1">
+                  {c.members.length > 0
+                    ? c.members.map(m => m.name).join(", ")
+                    : <span className="text-gray-400">{t("reporting.access_matrix.committees_no_members")}</span>}
+                </div>
+              </div>
             ))}
-            {rows.length === 0 && (
-              <tr><td colSpan={5} className="px-3 py-6 text-center text-gray-400">{t("reporting.access_matrix.empty")}</td></tr>
-            )}
-          </tbody>
-        </table>
+          </div>
+        )}
       </div>
     </div>
   );

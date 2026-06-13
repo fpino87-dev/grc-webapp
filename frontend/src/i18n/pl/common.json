@@ -3158,7 +3158,8 @@
         "users": "Użytkownicy",
         "access": "Dostępy",
         "responsibilities": "Odpowiedzialności",
-        "issues": "Niespójności"
+        "issues": "Niespójności",
+        "committees": "Komitety"
       },
       "filter": {
         "all": "Wszystkie",
@@ -3180,7 +3181,13 @@
         "inactive_user": "Użytkownik nieaktywny",
         "responsibility_without_access": "Odpowiedzialność bez dostępu",
         "expiring": "Wygasa"
-      }
+      },
+      "section_access": "Dostępy (co może robić)",
+      "section_resp": "Odpowiedzialności (za co odpowiada)",
+      "committees_title": "Komitety bezpieczeństwa",
+      "committees_empty": "Brak skonfigurowanego komitetu bezpieczeństwa. Utwórz w Zarządzanie → Komitety.",
+      "committees_next": "następne",
+      "committees_no_members": "Brak zarejestrowanych uczestników (brak spotkań)"
     }
   },
   "manual": {

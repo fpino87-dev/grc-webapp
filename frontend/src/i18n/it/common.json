@@ -3116,7 +3116,8 @@
         "users": "Utenti",
         "access": "Accessi",
         "responsibilities": "Responsabilità",
-        "issues": "Incoerenze"
+        "issues": "Incoerenze",
+        "committees": "Comitati"
       },
       "filter": {
         "all": "Tutti",
@@ -3138,7 +3139,13 @@
         "inactive_user": "Utente non attivo",
         "responsibility_without_access": "Responsabilità senza accesso",
         "expiring": "In scadenza"
-      }
+      },
+      "section_access": "Accessi (cosa può fare)",
+      "section_resp": "Responsabilità (di cosa risponde)",
+      "committees_title": "Comitati di Sicurezza",
+      "committees_empty": "Nessun Comitato di Sicurezza configurato. Creane uno in Governance → Comitati.",
+      "committees_next": "prossima",
+      "committees_no_members": "Nessun partecipante registrato (nessuna riunione)"
     }
   },
   "manual": {

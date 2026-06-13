@@ -91,6 +91,34 @@ def test_permission_restricted_to_governance_and_audit():
 
 
 @pytest.mark.django_db
+def test_security_committees_in_report(topo):
+    from apps.governance.models import CommitteeMeeting, SecurityCommittee
+    from apps.reporting.services import access_matrix
+    from django.utils import timezone
+    bu, pa, pb = topo
+
+    member = User.objects.create_user(username="commemb", email="cm@am.test",
+                                       first_name="Comm", last_name="Member", password="x")
+    c = SecurityCommittee.objects.create(name="Direttivo Centrale", committee_type="centrale", frequency="trimestrale")
+    m = CommitteeMeeting.objects.create(committee=c, held_at=timezone.now())
+    m.attendees.add(member)
+
+    data = access_matrix(None, "it")
+    assert data["summary"]["committees"] == 1
+    row = data["committees"][0]
+    assert row["name"] == "Direttivo Centrale"
+    assert any("Comm Member" == mm["name"] for mm in row["members"])
+
+
+@pytest.mark.django_db
+def test_committee_empty_state_when_none():
+    from apps.reporting.services import access_matrix
+    data = access_matrix(None, "it")
+    assert data["committees"] == []
+    assert data["summary"]["committees"] == 0
+
+
+@pytest.mark.django_db
 def test_csv_export():
     client, _ = _client(GrcRole.COMPLIANCE_OFFICER)
     resp = client.get(f"{URL}?export=csv")

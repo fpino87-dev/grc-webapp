@@ -1076,6 +1076,7 @@ def access_matrix(plant_id=None, lang: str = "it") -> dict:
     rows.sort(key=lambda x: (x["user_name"].lower(), x["kind"], x["role"]))
     vacant = get_vacant_mandatory_roles(target)
     issues = sum(1 for x in rows if x["flags"])
+    committees = _security_committees(target, plants)
 
     return {
         "generated_at": timezone.now().isoformat(),
@@ -1083,13 +1084,51 @@ def access_matrix(plant_id=None, lang: str = "it") -> dict:
         "plant_code": target.code if target else None,
         "rows": rows,
         "vacant_mandatory_roles": vacant,
+        "committees": committees,
         "summary": {
             "users": len(user_ids_seen),
             "access": sum(1 for x in rows if x["kind"] == "access"),
             "responsibilities": sum(1 for x in rows if x["kind"] == "responsibility"),
             "issues": issues,
+            "committees": len(committees),
         },
     }
+
+
+def _security_committees(target, plants) -> list:
+    """Comitati di Sicurezza ('direttivo') per il report. Membri = partecipanti
+    dell'ultima riunione registrata. Filtra per sito: i comitati centrali
+    (plant nullo) valgono org-wide; quelli per-sito solo per il proprio sito."""
+    from apps.governance.models import CommitteeMeeting, SecurityCommittee
+
+    qs = SecurityCommittee.objects.filter(deleted_at__isnull=True).select_related("plant")
+    if target is not None:
+        qs = qs.filter(Q(plant__isnull=True) | Q(plant=target))
+
+    out = []
+    for c in qs:
+        last = (
+            CommitteeMeeting.objects.filter(committee=c, deleted_at__isnull=True)
+            .order_by("-held_at").prefetch_related("attendees").first()
+        )
+        members = []
+        if last:
+            for u in last.attendees.all():
+                members.append({
+                    "name": f"{u.first_name} {u.last_name}".strip() or u.email or u.username,
+                    "email": u.email,
+                })
+        out.append({
+            "id": str(c.id),
+            "name": c.name,
+            "committee_type": c.committee_type,
+            "frequency": c.frequency,
+            "plant_code": plants[c.plant_id].code if c.plant_id and c.plant_id in plants else None,
+            "next_meeting_at": c.next_meeting_at.isoformat() if c.next_meeting_at else None,
+            "last_meeting_at": last.held_at.isoformat() if last else None,
+            "members": members,
+        })
+    return out
 
 
 def _to_uuid(value):
