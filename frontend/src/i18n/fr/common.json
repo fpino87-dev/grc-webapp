@@ -847,6 +847,22 @@
       "confirm": "Confirmer la réinitialisation",
       "reset_success": "Réinitialisation terminée. Redirection vers la connexion...",
       "reset_error": "Erreur lors de la réinitialisation"
+    },
+    "access": {
+      "menu": "Gérer les accès",
+      "title": "Gérer les accès",
+      "subtitle": "Attribuez des rôles d'accès au niveau organisation, BU ou sites spécifiques.",
+      "no_grants": "Aucun accès configuré.",
+      "add": "Ajouter un accès",
+      "role": "Rôle",
+      "scope": "Périmètre",
+      "scope_org": "Toute l'organisation",
+      "scope_bu": "Business unit",
+      "scope_single_plant": "Site unique",
+      "scope_plant_list": "Plusieurs sites",
+      "select_sites": "Sélectionner les sites",
+      "select_bu": "Sélectionner la business unit",
+      "no_sites": "(aucun site)"
     }
   },
   "governance": {

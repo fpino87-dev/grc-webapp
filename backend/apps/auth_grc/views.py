@@ -81,8 +81,9 @@ class UserPlantAccessViewSet(viewsets.ModelViewSet):
     # con role=super_admin/scope=org e auto-promuoversi. Questa è la tabella RBAC
     # reale letta dal JWT: la gestione accessi è operazione da super admin.
     permission_classes = [IsGrcSuperAdmin]
-    queryset = UserPlantAccess.objects.select_related("scope_bu")
+    queryset = UserPlantAccess.objects.select_related("scope_bu", "user").prefetch_related("scope_plants")
     serializer_class = UserPlantAccessSerializer
+    filterset_fields = ["user", "role", "scope_type"]
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)

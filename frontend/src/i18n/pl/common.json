@@ -847,6 +847,22 @@
       "confirm": "Potwierdź reset",
       "reset_success": "Reset zakończony. Przekierowanie do logowania...",
       "reset_error": "Błąd podczas resetowania"
+    },
+    "access": {
+      "menu": "Zarządzaj dostępem",
+      "title": "Zarządzaj dostępem",
+      "subtitle": "Przypisz role dostępu na poziomie organizacji, BU lub konkretnych zakładów.",
+      "no_grants": "Brak skonfigurowanego dostępu.",
+      "add": "Dodaj dostęp",
+      "role": "Rola",
+      "scope": "Zakres",
+      "scope_org": "Cała organizacja",
+      "scope_bu": "Jednostka biznesowa",
+      "scope_single_plant": "Pojedynczy zakład",
+      "scope_plant_list": "Wiele zakładów",
+      "select_sites": "Wybierz zakłady",
+      "select_bu": "Wybierz jednostkę biznesową",
+      "no_sites": "(brak zakładu)"
     }
   },
   "governance": {

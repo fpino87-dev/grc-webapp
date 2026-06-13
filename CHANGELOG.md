@@ -10,6 +10,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ### Added
 
+- **Utenti — assegnazione accesso per sito (perimetro)**: la gestione utenti permette ora di assegnare un ruolo di accesso non solo a tutta l'organizzazione, ma anche a **una o più sedi specifiche** o a una Business Unit (es. un Plant Manager limitato a 2 siti su 3, prima impossibile dall'interfaccia). Nuovo pannello "Gestione accessi" per ogni utente (super admin) per aggiungere/rimuovere accessi con selettore sedi. Risolto anche un difetto per cui un perimetro per-sito impostato senza sedi creava un accesso vuoto e silenzioso: ora è validato. i18n IT/EN/FR/PL/TR.
 - **Reporting — Matrice Accessi & Responsabilità (user access review)**: nuovo tab nel Reporting che mostra, in un'unica vista verificabile in qualunque momento, **chi ha accesso** (ruolo tecnico + perimetro: organizzazione / BU / siti specifici) e **chi è responsabile di cosa** (ruoli di governance: CISO, DPO, contatto NIS2, ecc.). Evidenzia automaticamente le incoerenze — responsabilità assegnata su un sito senza il relativo accesso, account non più attivo con accessi residui, ruoli in scadenza — e i ruoli obbligatori vacanti. Filtri per tipo e per sole incoerenze, ed export CSV per l'evidenza d'audit (ISO 27001 A.9.2.5). Accesso ristretto a governance e audit (super admin / compliance officer / auditor interni ed esterni). i18n IT/EN/FR/PL/TR.
 
 ### Security

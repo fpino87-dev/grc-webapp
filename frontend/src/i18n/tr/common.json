@@ -847,6 +847,22 @@
       "confirm": "Sıfırlamayı onayla",
       "reset_success": "Sıfırlama tamamlandı. Girişe yönlendiriliyor...",
       "reset_error": "Sıfırlama sırasında hata"
+    },
+    "access": {
+      "menu": "Erişimi yönet",
+      "title": "Erişimi yönet",
+      "subtitle": "Erişim rollerini organizasyon, BU veya belirli tesis düzeyinde atayın.",
+      "no_grants": "Yapılandırılmış erişim yok.",
+      "add": "Erişim ekle",
+      "role": "Rol",
+      "scope": "Kapsam",
+      "scope_org": "Tüm organizasyon",
+      "scope_bu": "İş birimi",
+      "scope_single_plant": "Tek tesis",
+      "scope_plant_list": "Birden çok tesis",
+      "select_sites": "Tesisleri seçin",
+      "select_bu": "İş birimini seçin",
+      "no_sites": "(tesis yok)"
     }
   },
   "governance": {

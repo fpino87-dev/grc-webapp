@@ -780,6 +780,22 @@
       "confirm": "Conferma reset",
       "reset_success": "Reset completato. Reindirizzamento al login...",
       "reset_error": "Errore durante il reset"
+    },
+    "access": {
+      "menu": "Gestione accessi",
+      "title": "Gestione accessi",
+      "subtitle": "Assegna ruoli di accesso a livello organizzazione, BU o siti specifici.",
+      "no_grants": "Nessun accesso configurato.",
+      "add": "Aggiungi accesso",
+      "role": "Ruolo",
+      "scope": "Perimetro",
+      "scope_org": "Tutta l'organizzazione",
+      "scope_bu": "Business Unit",
+      "scope_single_plant": "Sito singolo",
+      "scope_plant_list": "Più siti",
+      "select_sites": "Seleziona i siti",
+      "select_bu": "Seleziona la Business Unit",
+      "no_sites": "(nessun sito)"
     }
   },
   "governance": {

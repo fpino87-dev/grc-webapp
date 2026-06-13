@@ -77,10 +77,11 @@ class AssignRoleSerializer(serializers.Serializer):
     # stessi ruoli esposti in creazione
     EXPOSED_ROLES = UserCreateSerializer.EXPOSED_ROLES
     role = serializers.ChoiceField(choices=[r[0] for r in EXPOSED_ROLES])
-    scope_type = serializers.ChoiceField(
-        choices=["org", "bu", "plant_list", "single_plant"],
-        default="org"
-    )
+    # Solo 'org': questo endpoint imposta il ruolo "primario" org-wide e non
+    # accetta i siti, quindi un perimetro per-sito qui creerebbe un accesso
+    # VUOTO. Gli accessi per-sito si gestiscono via UserPlantAccessViewSet
+    # (/auth/plant-access/) col selettore siti.
+    scope_type = serializers.ChoiceField(choices=["org"], default="org")
 
 
 class UserViewSet(viewsets.ModelViewSet):

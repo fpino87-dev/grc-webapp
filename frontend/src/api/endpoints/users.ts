@@ -19,6 +19,38 @@ export interface GrcRole {
   label: string;
 }
 
+// Tutti i ruoli di accesso (GrcRole) assegnabili a un perimetro.
+export const GRC_ACCESS_ROLES = [
+  "super_admin",
+  "compliance_officer",
+  "risk_manager",
+  "plant_manager",
+  "control_owner",
+  "internal_auditor",
+  "external_auditor",
+] as const;
+
+export interface PlantAccessGrant {
+  id: string;
+  user: number;
+  role: string;
+  role_label: string;
+  scope_type: "org" | "bu" | "plant_list" | "single_plant";
+  scope_bu: string | null;
+  scope_bu_code: string | null;
+  scope_plants: string[];
+  scope_plant_codes: string[];
+}
+
+export const plantAccessApi = {
+  listForUser: (userId: number) =>
+    apiClient.get<{ results: PlantAccessGrant[] }>("/auth/plant-access/", { params: { user: userId } })
+      .then(r => r.data.results ?? r.data),
+  create: (data: { user: number; role: string; scope_type: string; scope_plants?: string[]; scope_bu?: string | null }) =>
+    apiClient.post<PlantAccessGrant>("/auth/plant-access/", data).then(r => r.data),
+  remove: (id: string) => apiClient.delete(`/auth/plant-access/${id}/`),
+};
+
 export const usersApi = {
   list: () => apiClient.get<{ results: GrcUser[] }>("/auth/users/").then(r => r.data.results),
   create: (data: { username: string; email: string; first_name?: string; last_name?: string; password: string; grc_role?: string }) =>

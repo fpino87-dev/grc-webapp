@@ -780,6 +780,22 @@
       "confirm": "Confirm reset",
       "reset_success": "Reset completed. Redirecting to login...",
       "reset_error": "Error while resetting"
+    },
+    "access": {
+      "menu": "Manage access",
+      "title": "Manage access",
+      "subtitle": "Assign access roles at organization, BU or specific-site level.",
+      "no_grants": "No access configured.",
+      "add": "Add access",
+      "role": "Role",
+      "scope": "Scope",
+      "scope_org": "Whole organization",
+      "scope_bu": "Business unit",
+      "scope_single_plant": "Single site",
+      "scope_plant_list": "Multiple sites",
+      "select_sites": "Select sites",
+      "select_bu": "Select business unit",
+      "no_sites": "(no site)"
     }
   },
   "governance": {

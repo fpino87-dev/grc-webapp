@@ -1,9 +1,132 @@
 import { Fragment, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../../api/client";
-import { usersApi, type GrcUser, type GrcRole } from "../../api/endpoints/users";
+import { usersApi, plantAccessApi, GRC_ACCESS_ROLES, type GrcUser, type GrcRole, type PlantAccessGrant } from "../../api/endpoints/users";
+import { plantsApi } from "../../api/endpoints/plants";
 import { useAuthStore } from "../../store/auth";
 import { useTranslation } from "react-i18next";
+
+function AccessManagementModal({ user, onClose }: { user: GrcUser; onClose: () => void }) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [role, setRole] = useState<string>("control_owner");
+  const [scopeType, setScopeType] = useState<"org" | "bu" | "plant_list" | "single_plant">("single_plant");
+  const [plantIds, setPlantIds] = useState<string[]>([]);
+  const [buId, setBuId] = useState<string>("");
+  const [error, setError] = useState("");
+
+  const { data: grants } = useQuery({ queryKey: ["plant-access", user.id], queryFn: () => plantAccessApi.listForUser(user.id) });
+  const { data: plants } = useQuery({ queryKey: ["plants"], queryFn: () => plantsApi.list(), retry: false });
+  const { data: bus } = useQuery({ queryKey: ["business-units"], queryFn: () => plantsApi.businessUnits(), retry: false });
+
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["plant-access", user.id] });
+
+  const createMut = useMutation({
+    mutationFn: () => plantAccessApi.create({
+      user: user.id, role, scope_type: scopeType,
+      scope_plants: (scopeType === "plant_list" || scopeType === "single_plant") ? plantIds : undefined,
+      scope_bu: scopeType === "bu" ? (buId || null) : undefined,
+    }),
+    onSuccess: () => { setError(""); setPlantIds([]); setBuId(""); invalidate(); },
+    onError: (e: unknown) => {
+      const data = (e as { response?: { data?: Record<string, unknown> } })?.response?.data;
+      setError(data ? Object.values(data).flat().join(" ") : t("common.error"));
+    },
+  });
+  const deleteMut = useMutation({ mutationFn: (id: string) => plantAccessApi.remove(id), onSuccess: invalidate });
+
+  const togglePlant = (id: string) =>
+    setPlantIds(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]);
+
+  const scopeLabel = (g: PlantAccessGrant) => {
+    if (g.scope_type === "org") return t("users.access.scope_org");
+    if (g.scope_type === "bu") return `${t("users.access.scope_bu")}: ${g.scope_bu_code ?? "—"}`;
+    return g.scope_plant_codes.join(", ") || t("users.access.no_sites");
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="px-5 py-4 border-b flex items-center justify-between">
+          <h3 className="font-semibold text-gray-900">{t("users.access.title")} — {user.first_name} {user.last_name || user.username}</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 text-xl">×</button>
+        </div>
+
+        <div className="px-5 py-4 space-y-4">
+          <p className="text-xs text-gray-500">{t("users.access.subtitle")}</p>
+
+          {/* Grants esistenti */}
+          <div className="border border-gray-200 rounded-lg divide-y">
+            {(grants ?? []).length === 0 && <p className="px-3 py-3 text-sm text-gray-400">{t("users.access.no_grants")}</p>}
+            {(grants ?? []).map(g => (
+              <div key={g.id} className="flex items-center justify-between px-3 py-2 text-sm">
+                <div>
+                  <span className="font-medium text-gray-800">{g.role_label}</span>
+                  <span className="text-gray-500 text-xs ml-2">{scopeLabel(g)}</span>
+                </div>
+                <button onClick={() => deleteMut.mutate(g.id)} className="text-red-600 hover:text-red-800 text-xs border border-red-200 rounded px-2 py-0.5">
+                  {t("actions.delete")}
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Nuovo grant */}
+          <div className="border border-gray-200 rounded-lg p-3 space-y-3 bg-gray-50/50">
+            <p className="text-xs font-semibold text-gray-600 uppercase">{t("users.access.add")}</p>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="text-sm">
+                <span className="block text-xs text-gray-500 mb-1">{t("users.access.role")}</span>
+                <select value={role} onChange={e => setRole(e.target.value)} className="w-full border rounded px-2 py-1.5 text-sm">
+                  {GRC_ACCESS_ROLES.map(r => <option key={r} value={r}>{r.replace(/_/g, " ")}</option>)}
+                </select>
+              </label>
+              <label className="text-sm">
+                <span className="block text-xs text-gray-500 mb-1">{t("users.access.scope")}</span>
+                <select value={scopeType} onChange={e => setScopeType(e.target.value as typeof scopeType)} className="w-full border rounded px-2 py-1.5 text-sm">
+                  <option value="single_plant">{t("users.access.scope_single_plant")}</option>
+                  <option value="plant_list">{t("users.access.scope_plant_list")}</option>
+                  <option value="bu">{t("users.access.scope_bu")}</option>
+                  <option value="org">{t("users.access.scope_org")}</option>
+                </select>
+              </label>
+            </div>
+
+            {(scopeType === "single_plant" || scopeType === "plant_list") && (
+              <div>
+                <span className="block text-xs text-gray-500 mb-1">{t("users.access.select_sites")}</span>
+                <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+                  {(plants ?? []).map(p => (
+                    <button key={p.id} type="button" onClick={() => togglePlant(p.id)}
+                      className={`text-xs px-2 py-1 rounded border ${plantIds.includes(p.id) ? "bg-slate-700 text-white border-slate-700" : "bg-white text-gray-600 border-gray-300"}`}>
+                      {p.code}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {scopeType === "bu" && (
+              <label className="text-sm block">
+                <span className="block text-xs text-gray-500 mb-1">{t("users.access.select_bu")}</span>
+                <select value={buId} onChange={e => setBuId(e.target.value)} className="w-full border rounded px-2 py-1.5 text-sm">
+                  <option value="">—</option>
+                  {(bus ?? []).map(b => <option key={b.id} value={b.id}>{b.code} — {b.name}</option>)}
+                </select>
+              </label>
+            )}
+
+            {error && <p className="text-xs text-red-600">{error}</p>}
+            <button onClick={() => createMut.mutate()} disabled={createMut.isPending}
+              className="text-sm bg-slate-700 text-white rounded px-3 py-1.5 hover:bg-slate-800 disabled:opacity-50">
+              {t("users.access.add")}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface CompetencyGap {
   competency: string; role: string; required_level: number;
@@ -457,6 +580,7 @@ export function UsersPage() {
   const [expandedCompetency, setExpandedCompetency] = useState<number | null>(null);
   const [editUser, setEditUser] = useState<GrcUser | null>(null);
   const [resetUser, setResetUser] = useState<GrcUser | null>(null);
+  const [accessUser, setAccessUser] = useState<GrcUser | null>(null);
   const [menuUserId, setMenuUserId] = useState<number | null>(null);
   const qc = useQueryClient();
 
@@ -580,6 +704,18 @@ export function UsersPage() {
                                   {t("actions.edit")}
                                 </button>
                               )}
+                              {me?.grc_role === "super_admin" && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setAccessUser(user);
+                                    setMenuUserId(null);
+                                  }}
+                                  className="w-full text-left px-3 py-1.5 hover:bg-gray-50"
+                                >
+                                  {t("users.access.menu")}
+                                </button>
+                              )}
                               {me?.grc_role === "super_admin" && !user.is_superuser && (
                                 <button
                                   type="button"
@@ -629,6 +765,7 @@ export function UsersPage() {
       {showNew && <NewUserModal roles={roles} onClose={() => setShowNew(false)} />}
       {editUser && <EditUserModal user={editUser} onClose={() => setEditUser(null)} />}
       {resetUser && <ResetPasswordModal user={resetUser} onClose={() => setResetUser(null)} />}
+      {accessUser && <AccessManagementModal user={accessUser} onClose={() => setAccessUser(null)} />}
 
       {me?.is_superuser && <DangerZone />}
     </div>
