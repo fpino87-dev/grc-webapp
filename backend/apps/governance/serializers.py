@@ -7,7 +7,12 @@ class RoleAssignmentSerializer(serializers.ModelSerializer):
     user_email  = serializers.SerializerMethodField(read_only=True)
     user_name   = serializers.SerializerMethodField(read_only=True)
     is_active   = serializers.SerializerMethodField(read_only=True)
-    scope_label = serializers.SerializerMethodField(read_only=True)
+    # Dati strutturati dello scope: la label localizzata la compone il frontend
+    # (prima il serializer restituiva una stringa hardcoded in italiano → utenti
+    # EN/FR/PL/TR vedevano testo IT). code/name sono None per scope org o se la
+    # BU/Plant referenziata non esiste più.
+    scope_code  = serializers.SerializerMethodField(read_only=True)
+    scope_name  = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model  = RoleAssignment
@@ -28,18 +33,28 @@ class RoleAssignmentSerializer(serializers.ModelSerializer):
     def get_is_active(self, obj):
         return obj.is_active
 
-    def get_scope_label(self, obj):
-        if obj.scope_type == "org":
-            return "Globale"
-        if obj.scope_type == "bu" and obj.scope_id:
-            from apps.plants.models import BusinessUnit
-            bu = BusinessUnit.objects.filter(pk=obj.scope_id).first()
-            return f"BU: {bu.code} — {bu.name}" if bu else f"BU: {obj.scope_id}"
-        if obj.scope_type == "plant" and obj.scope_id:
-            from apps.plants.models import Plant
-            plant = Plant.objects.filter(pk=obj.scope_id).first()
-            return f"Sito: {plant.code} — {plant.name}" if plant else f"Sito: {obj.scope_id}"
-        return obj.scope_type or "—"
+    def _scope_maps(self):
+        """Mappe BU/Plant per id caricate UNA volta per richiesta (no N+1: le
+        tabelle sono piccole). Cache condivisa tra le righe via self.context."""
+        cache = self.context.setdefault("_scope_maps", {})
+        if not cache:
+            from apps.plants.models import BusinessUnit, Plant
+            cache["bu"] = {str(b.id): b for b in BusinessUnit.objects.all()}
+            cache["plant"] = {str(p.id): p for p in Plant.objects.all()}
+        return cache
+
+    def _scope_obj(self, obj):
+        if not obj.scope_id or obj.scope_type not in ("bu", "plant"):
+            return None
+        return self._scope_maps()[obj.scope_type].get(str(obj.scope_id))
+
+    def get_scope_code(self, obj):
+        o = self._scope_obj(obj)
+        return o.code if o else None
+
+    def get_scope_name(self, obj):
+        o = self._scope_obj(obj)
+        return o.name if o else None
 
 
 class DocumentWorkflowPolicySerializer(serializers.ModelSerializer):

@@ -869,6 +869,11 @@
       "bu": "Business Unit specifica",
       "plant": "Sito specifico"
     },
+    "scope_badge": {
+      "global": "Globale",
+      "bu": "BU",
+      "plant": "Sito"
+    },
     "roles_assign": {
       "open": "+ Assegna",
       "modal_title": "Nuova assegnazione ruolo",

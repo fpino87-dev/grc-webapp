@@ -2,6 +2,32 @@ from django.db.models import Q
 from django.utils import timezone
 
 
+def visible_role_assignments(qs, user):
+    """Filtra le assegnazioni di ruolo visibili all'utente per perimetro plant.
+
+    org-scope / superuser → tutto. Gli altri vedono le assegnazioni org-level
+    (ruoli aziendali obbligatori, evidenza d'audit legittima) più quelle dei
+    siti/BU a cui hanno accesso. Evita che un utente scoped a un sito (es.
+    external_auditor) legga i titolari — con email/nome — di tutti gli altri
+    siti.
+    """
+    from core.scoping import get_user_plant_ids
+    from apps.plants.models import Plant
+
+    allowed = get_user_plant_ids(user)
+    if allowed is None:
+        return qs  # org scope / superuser → nessun filtro
+    allowed_bu_ids = set(
+        Plant.objects.filter(id__in=allowed).values_list("bu_id", flat=True)
+    )
+    allowed_bu_ids.discard(None)
+    return qs.filter(
+        Q(scope_type="org")
+        | Q(scope_type="plant", scope_id__in=allowed)
+        | Q(scope_type="bu", scope_id__in=allowed_bu_ids)
+    )
+
+
 def get_active_role(user, role: str, scope_id=None):
     from .models import RoleAssignment
 

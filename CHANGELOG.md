@@ -17,6 +17,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 - **Controlli — eliminabilità decisa dal backend**: il flag `can_delete` (regola «solo controlli non valutati, salvo super admin») è ora calcolato dal server ed esposto in detail-info; la UI non lo ricalcola più, eliminando il rischio di divergenza tra interfaccia e backend.
 - **M00 Governance — robustezza e igiene API**: l'endpoint "ruoli in scadenza" non va più in errore con un parametro `days` non numerico (viene normalizzato); le liste di assegnazioni ruolo e comitati hanno un ordinamento stabile (paginazione coerente); i campi gestiti dal sistema (`created_by`, date di sistema, eliminazione) non sono più impostabili dal client sulle assegnazioni di ruolo.
+- **M00 Governance — etichetta perimetro localizzata**: il badge di perimetro di un'assegnazione di ruolo (Globale / BU / Sito) era generato dal server in italiano fisso e restava in italiano anche per gli utenti EN/FR/PL/TR. Ora l'API restituisce dati strutturati (codice e nome di BU/Sito) e l'interfaccia compone l'etichetta nella lingua attiva.
+
+### Changed
+
+- **M00 Governance — visibilità delle assegnazioni di ruolo per perimetro**: l'elenco delle assegnazioni di ruolo (e dei ruoli in scadenza) è ora filtrato in base ai siti a cui l'utente ha accesso. Gli utenti con visibilità sull'intera organizzazione continuano a vedere tutto; gli altri (es. un auditor esterno assegnato a un singolo sito) vedono i ruoli a livello aziendale e quelli dei propri siti/BU, non più i titolari — con i relativi dati personali — di tutti gli altri siti.
 
 ## [0.6.0] - 2026-06-12
 

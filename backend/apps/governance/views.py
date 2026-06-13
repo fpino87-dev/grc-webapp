@@ -44,6 +44,12 @@ class RoleAssignmentViewSet(viewsets.ModelViewSet):
     serializer_class = RoleAssignmentSerializer
     permission_classes = [GovernancePermission]
 
+    def get_queryset(self):
+        # Scoping per accesso plant (D1): un utente non org-scope non deve
+        # leggere i titolari (con PII) dei siti a cui non ha accesso.
+        from .services import visible_role_assignments
+        return visible_role_assignments(super().get_queryset(), self.request.user)
+
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)
         log_action(
@@ -171,7 +177,7 @@ class RoleAssignmentViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"], url_path="in-scadenza")
     def in_scadenza(self, request):
         """Ruoli in scadenza nei prossimi N giorni o già scaduti."""
-        from .services import get_expiring_roles
+        from .services import get_expiring_roles, visible_role_assignments
 
         try:
             days = int(request.query_params.get("days", 30))
@@ -179,6 +185,11 @@ class RoleAssignmentViewSet(viewsets.ModelViewSet):
             days = 30
         days = max(0, min(days, 365))
         result = get_expiring_roles(days)
+        # Stesso scoping plant della lista (D1).
+        result = {
+            "expiring": visible_role_assignments(result["expiring"], request.user),
+            "expired":  visible_role_assignments(result["expired"], request.user),
+        }
         today  = timezone.localdate()
 
         return Response({

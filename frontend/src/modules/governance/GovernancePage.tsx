@@ -34,22 +34,29 @@ const TODAY = todayISO();
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function scopeBadge(a: RoleAssignment) {
-  if (a.scope_label) {
-    const isGlobal = a.scope_type === "org";
-    const isBu = a.scope_type === "bu";
-    const cls = isGlobal
-      ? "bg-blue-50 text-blue-700 border-blue-200"
-      : isBu
-      ? "bg-indigo-50 text-indigo-700 border-indigo-200"
-      : "bg-green-50 text-green-700 border-green-200";
-    return (
-      <span className={`text-xs px-1.5 py-0.5 rounded border ${cls}`}>
-        {a.scope_label}
-      </span>
-    );
+function scopeBadge(a: RoleAssignment, t: (k: string) => string) {
+  const isGlobal = a.scope_type === "org";
+  const isBu = a.scope_type === "bu";
+  const cls = isGlobal
+    ? "bg-blue-50 text-blue-700 border-blue-200"
+    : isBu
+    ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+    : "bg-green-50 text-green-700 border-green-200";
+
+  let label: string;
+  if (isGlobal) {
+    label = t("governance.scope_badge.global");
+  } else {
+    const prefix = t(isBu ? "governance.scope_badge.bu" : "governance.scope_badge.plant");
+    const detail = [a.scope_code, a.scope_name].filter(Boolean).join(" — ") || a.scope_id || "";
+    label = detail ? `${prefix}: ${detail}` : prefix;
   }
-  return null;
+
+  return (
+    <span className={`text-xs px-1.5 py-0.5 rounded border ${cls}`}>
+      {label}
+    </span>
+  );
 }
 
 function roleBadge(a: RoleAssignment, t: (k: string, opts?: any) => string) {
@@ -746,7 +753,7 @@ export function GovernancePage() {
                         {roleLabel(a.role)}
                       </span>
                       {roleBadge(a, t)}
-                      {scopeBadge(a)}
+                      {scopeBadge(a, t)}
                     </div>
                     <div className="text-xs text-gray-500 mt-0.5">
                       {a.user_name ?? a.user_email ?? String(a.user)}

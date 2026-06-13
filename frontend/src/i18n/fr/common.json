@@ -936,6 +936,11 @@
       "bu": "Unité commerciale spécifique",
       "plant": "Site spécifique"
     },
+    "scope_badge": {
+      "global": "Global",
+      "bu": "BU",
+      "plant": "Site"
+    },
     "roles_assign": {
       "open": "+ Assigner",
       "modal_title": "Nouvelle assignation de rôle",

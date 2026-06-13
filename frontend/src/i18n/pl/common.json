@@ -936,6 +936,11 @@
       "bu": "Konkretna jednostka biznesowa",
       "plant": "Konkretny zakład"
     },
+    "scope_badge": {
+      "global": "Globalny",
+      "bu": "BU",
+      "plant": "Zakład"
+    },
     "roles_assign": {
       "open": "+ Przypisz",
       "modal_title": "Nowe przypisanie roli",

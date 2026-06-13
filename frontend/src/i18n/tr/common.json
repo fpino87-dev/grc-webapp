@@ -936,6 +936,11 @@
       "bu": "Belirli iş birimi",
       "plant": "Belirli site"
     },
+    "scope_badge": {
+      "global": "Küresel",
+      "bu": "BU",
+      "plant": "Tesis"
+    },
     "roles_assign": {
       "open": "+ Ata",
       "modal_title": "Yeni rol ataması",
