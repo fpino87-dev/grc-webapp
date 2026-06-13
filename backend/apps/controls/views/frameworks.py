@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from core.viewsets import SoftDeleteAuditMixin
 from ..models import Control, ControlDomain, Framework
 from ..permissions import FrameworkPermission
 from ..serializers import (
@@ -113,16 +114,22 @@ class FrameworkViewSet(viewsets.ModelViewSet):
             return Response({"error": str(e.message)}, status=400)
 
 
-class ControlDomainViewSet(viewsets.ModelViewSet):
+class ControlDomainViewSet(SoftDeleteAuditMixin, viewsets.ModelViewSet):
     queryset = ControlDomain.objects.select_related("framework")
     serializer_class = ControlDomainSerializer
     permission_classes = [FrameworkPermission]
+    audit_action = "controls.control_domain"
 
 
-class ControlViewSet(viewsets.ModelViewSet):
+class ControlViewSet(SoftDeleteAuditMixin, viewsets.ModelViewSet):
     queryset = Control.objects.select_related("framework", "domain")
     serializer_class = ControlSerializer
     permission_classes = [FrameworkPermission]
+    # Il default destroy faceva hard delete del Control → CASCADE su TUTTE le
+    # ControlInstance valutate (FK on_delete=CASCADE), perdita dati su tutti i
+    # siti. Ora soft delete + audit; le istanze restano (filtrate dal proprio
+    # deleted_at). Il catalogo si gestisce via load_frameworks.
+    audit_action = "controls.control"
 
     @action(detail=True, methods=["post"], url_path="explain")
     def explain(self, request, pk=None):

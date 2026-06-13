@@ -78,6 +78,7 @@ class Control(BaseModel):
 
     class Meta:
         unique_together = ["framework", "external_id"]
+        ordering = ["framework_id", "external_id"]
 
     def tr(self, field: str, lang: str = "it", default=None):
         """Fallback per-campo: lang richiesta → it → en → default.
@@ -221,6 +222,7 @@ class ControlInstance(BaseModel):
 
     class Meta:
         unique_together = ["plant", "control"]
+        ordering = ["plant_id", "control_id"]
 
     @property
     def calc_maturity_level(self) -> int:
