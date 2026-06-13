@@ -124,6 +124,7 @@ export interface ControlDetailInfo {
   requirements: RequirementsCheck;
   normative_requirements: { punto: string; applies_to: string[]; ambito: string; text: string }[];
   current_status: string;
+  can_delete: boolean;
   suggested_status: string;
   suggested_status_reason: string;
   applicability: string;

@@ -128,6 +128,14 @@ def validate_exclusion(instance, applicability: str,
     )
 
 
+def can_delete_instance(instance, user) -> bool:
+    """Regola unica di eliminabilità di un'istanza controllo: consentita solo
+    se lo stato è ancora «non_valutato», salvo superuser. Sorgente di verità
+    condivisa tra il guard di `delete_control_instance` e il flag `can_delete`
+    esposto da detail-info (la UI non deve ricalcolarla)."""
+    return instance.status == "non_valutato" or bool(getattr(user, "is_superuser", False))
+
+
 def delete_control_instance(instance, user) -> None:
     """
     Soft delete di un'istanza controllo per plant.
@@ -138,7 +146,7 @@ def delete_control_instance(instance, user) -> None:
 
     from core.audit import log_action
 
-    if instance.status != "non_valutato" and not getattr(user, "is_superuser", False):
+    if not can_delete_instance(instance, user):
         raise ValidationError(
             _("Eliminazione consentita solo per controlli non ancora valutati.")
         )

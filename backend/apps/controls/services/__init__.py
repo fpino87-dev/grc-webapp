@@ -27,6 +27,7 @@ from .frameworks import (
     preview_framework_import,
 )
 from .instances import (
+    can_delete_instance,
     delete_control_instance,
     evaluate_control,
     propagate_control,
@@ -45,6 +46,7 @@ __all__ = [
     "check_evidence_requirements",
     "count_open_gaps_by_plant",
     "count_revaluation_by_plant",
+    "can_delete_instance",
     "delete_control_instance",
     "delete_framework",
     "evaluate_control",

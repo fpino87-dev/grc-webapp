@@ -6,7 +6,7 @@ import { documentsApi } from "../../../api/endpoints/documents";
 import { useAuthStore } from "../../../store/auth";
 import { addYearsISO, usePlantToday } from "../../../utils/dates";
 import i18n from "../../../i18n";
-import { evidenceIcon, docStatusColor, ExpiryBadge, useDebounce } from "./shared";
+import { evidenceIcon, docStatusColor, ExpiryBadge, useDebounce, useRequirementLabel, RequirementsBanner } from "./shared";
 
 function DocsColumn({
   instanceId,
@@ -24,10 +24,7 @@ function DocsColumn({
   const [searchQ, setSearchQ] = useState("");
   const debounced = useDebounce(searchQ);
 
-  function requirementLabel(type: string, description?: string) {
-    if (type === "any") return description || "";
-    return t(`documents.type.${type}`, { defaultValue: description || type });
-  }
+  const requirementLabel = useRequirementLabel();
 
   const { data: searchResults } = useQuery({
     queryKey: ["doc-search", debounced, plant],
@@ -60,7 +57,7 @@ function DocsColumn({
           {requirements.missing_documents.map((m, i) => (
             <div key={i} className="flex items-center gap-1.5 text-xs bg-red-50 border border-red-200 rounded px-2 py-1">
               <span className="text-red-500 font-bold shrink-0">!</span>
-              <span className="text-red-700">{requirementLabel(m.type, m.description)}</span>
+              <span className="text-red-700">{requirementLabel("document", m.type, m.description)}</span>
               <span className="ml-auto text-xs text-red-500 font-medium shrink-0">{t("controls.drawer.docs.missing")}</span>
             </div>
           ))}
@@ -298,10 +295,7 @@ function EvidencesColumn({
   const [searchQ, setSearchQ] = useState("");
   const debounced = useDebounce(searchQ);
 
-  function requirementLabel(type: string, description?: string) {
-    if (type === "any") return description || "";
-    return t(`documents.evidence.types.${type}`, { defaultValue: description || type });
-  }
+  const requirementLabel = useRequirementLabel();
 
   const { data: searchResults } = useQuery({
     queryKey: ["ev-search", debounced],
@@ -334,7 +328,7 @@ function EvidencesColumn({
           {requirements.missing_evidences.map((m, i) => (
             <div key={i} className="flex items-center gap-1.5 text-xs bg-red-50 border border-red-200 rounded px-2 py-1">
               <span className="text-red-500 font-bold shrink-0">!</span>
-              <span className="text-red-700">{requirementLabel(m.type, m.description)}</span>
+              <span className="text-red-700">{requirementLabel("evidence", m.type, m.description)}</span>
               <span className="ml-auto text-xs text-red-500 font-medium shrink-0">{t("controls.drawer.docs.missing")}</span>
             </div>
           ))}
@@ -421,46 +415,19 @@ export function TabDocEvidence({
   requirements: RequirementsCheck;
   evidenceRequirement: EvidenceRequirement;
 }) {
-  const { t } = useTranslation();
   const plant = useAuthStore(s => s.selectedPlant?.id ?? null);
   const noRequirements = !evidenceRequirement ||
     (!evidenceRequirement.documents?.length && !evidenceRequirement.evidences?.length &&
      !evidenceRequirement.min_documents && !evidenceRequirement.min_evidences);
 
-  function requirementLabel(kind: "document" | "evidence", type: string, description?: string) {
-    if (type === "any") return description || "";
-    if (kind === "document") return t(`documents.type.${type}`, { defaultValue: description || type });
-    return t(`documents.evidence.types.${type}`, { defaultValue: description || type });
-  }
-
   return (
     <div className="space-y-3">
       {/* Banner requisiti */}
-      {requirements.not_applicable ? (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500">
-          ℹ️ {t("controls.drawer.evaluation.requirements.not_applicable")}
-        </div>
-      ) : noRequirements ? (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500">
-          ℹ️ {t("controls.drawer.evaluation.requirements.none")}
-        </div>
-      ) : !requirements.satisfied ? (
-        <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-800">
-          <p className="font-semibold mb-1">⛔ {t("controls.drawer.docs.requirements.not_satisfied_for_compliant")}</p>
-          {requirements.missing_documents.map((m, i) => <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_document")}: {requirementLabel("document", m.type, m.description)}</p>)}
-          {requirements.missing_evidences.map((m, i) => <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_evidence")}: {requirementLabel("evidence", m.type, m.description)}</p>)}
-          {requirements.expired_evidences.map((e, i) => <p key={i}>• {t("controls.drawer.evaluation.requirements.expired_evidence")}: {e.title} ({e.expired_on})</p>)}
-        </div>
-      ) : requirements.warnings.length > 0 ? (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 text-xs text-yellow-800">
-          <p className="font-semibold mb-1">⚠️ {t("controls.drawer.evaluation.requirements.warning")}</p>
-          {requirements.warnings.map((w, i) => <p key={i}>• {w}</p>)}
-        </div>
-      ) : (
-        <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-xs text-green-800">
-          ✅ {t("controls.drawer.evaluation.requirements.satisfied")}
-        </div>
-      )}
+      <RequirementsBanner
+        requirements={requirements}
+        noRequirements={noRequirements}
+        notSatisfiedKey="controls.drawer.docs.requirements.not_satisfied_for_compliant"
+      />
 
       {/* Due colonne */}
       <div className="grid grid-cols-2 gap-3">

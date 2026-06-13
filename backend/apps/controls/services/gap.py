@@ -18,6 +18,7 @@ Il riuso (`*_riuso`) è un credito DA VALIDARE, non conformità certificata: in
 UI va presentato come suggerimento di lavoro.
 """
 from ..models import Control, ControlInstance, ControlMapping
+from .evidence import extends_maps
 
 HUB_CODE = "ISO27001"
 
@@ -137,16 +138,9 @@ def run_gap_analysis(
 
     # extends: L3-VH (source) -> L2 base (target). Serve in due direzioni:
     # lo stato del base eredita dal VH (superseded in M03) e il VH eredita i
-    # cross-link del base (il crosswalk punta sempre agli ID L2).
-    extends = list(
-        ControlMapping.objects.filter(
-            relationship="extends", deleted_at__isnull=True,
-            source_control__deleted_at__isnull=True,
-            target_control__deleted_at__isnull=True,
-        ).only("source_control_id", "target_control_id")
-    )
-    extender_of_base = {m.target_control_id: m.source_control_id for m in extends}
-    base_of_extender = {m.source_control_id: m.target_control_id for m in extends}
+    # cross-link del base (il crosswalk punta sempre agli ID L2). Mappe
+    # bidirezionali dall'helper condiviso (single source of truth con reporting).
+    extender_of_base, base_of_extender = extends_maps()
 
     def best_instance(control_id):
         """Istanza del controllo; per i base L2 estesi da un VH, quando il VH è

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { controlsApi } from "../../api/endpoints/controls";
-import { useAuthStore } from "../../store/auth";
 import type { Tab } from "./drawer/shared";
 import { useDetailInfo } from "./drawer/useDetailInfo";
 import { TabCosa } from "./drawer/TabCosa";
@@ -18,16 +17,15 @@ interface Props {
 export function ControlDetailDrawer({ instanceId, onClose }: Props) {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const user = useAuthStore(s => s.user);
   const [tab, setTab] = useState<Tab>("cosa");
   const { data: info, isLoading } = useDetailInfo(instanceId);
   const open = !!instanceId;
 
   // C10: l'eliminazione (soft delete) dell'istanza vive qui, non più su ogni
-  // riga della lista. Il backend la consente solo sui controlli non valutati,
-  // salvo super admin — rispecchiamo la stessa regola nella UI.
-  const isSuperAdmin = user?.role === "super_admin";
-  const canDelete = !!info && (info.current_status === "non_valutato" || isSuperAdmin);
+  // riga della lista. L'eleggibilità è decisa dal backend (`can_delete`,
+  // stessa regola del guard di delete_control_instance): la UI non la
+  // ricalcola, così non può divergere dal server.
+  const canDelete = !!info && info.can_delete;
 
   const deleteMutation = useMutation({
     mutationFn: () => controlsApi.deleteInstance(instanceId!),

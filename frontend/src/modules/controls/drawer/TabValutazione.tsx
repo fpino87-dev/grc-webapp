@@ -6,7 +6,7 @@ import { StatusBadge } from "../../../components/ui/StatusBadge";
 import { AiSuggestionBanner } from "../../../components/ui/AiSuggestionBanner";
 import { useAuthStore } from "../../../store/auth";
 import i18n from "../../../i18n";
-import { STATUS_GUIDE } from "./shared";
+import { STATUS_GUIDE, useRequirementLabel, RequirementsBanner } from "./shared";
 import { SOA_APPROVAL_ROLES } from "../roles";
 
 const MATURITY_KEYS: Record<number, string> = {
@@ -107,11 +107,7 @@ export function TabValutazione({
     },
   });
 
-  function requirementLabel(kind: "document" | "evidence", type: string, description?: string) {
-    if (type === "any") return description || "";
-    if (kind === "document") return t(`documents.type.${type}`, { defaultValue: description || type });
-    return t(`documents.evidence.types.${type}`, { defaultValue: description || type });
-  }
+  const requirementLabel = useRequirementLabel();
 
   const suggestionDiffers = suggestedStatus !== currentStatus;
 
@@ -191,37 +187,7 @@ export function TabValutazione({
       )}
 
       {/* Banner requisiti */}
-      {requirements.not_applicable ? (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500">
-          ℹ️ {t("controls.drawer.evaluation.requirements.not_applicable")}
-        </div>
-      ) : noRequirements ? (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500">
-          ℹ️ {t("controls.drawer.evaluation.requirements.none")}
-        </div>
-      ) : !requirements.satisfied ? (
-        <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-800">
-          <p className="font-semibold mb-1">⛔ {t("controls.drawer.evaluation.requirements.not_satisfied")}</p>
-          {requirements.missing_documents.map((m, i) => (
-            <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_document")}: {requirementLabel("document", m.type, m.description)}</p>
-          ))}
-          {requirements.missing_evidences.map((m, i) => (
-            <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_evidence")}: {requirementLabel("evidence", m.type, m.description)}</p>
-          ))}
-          {requirements.expired_evidences.map((e, i) => (
-            <p key={i}>• {t("controls.drawer.evaluation.requirements.expired_evidence")}: {e.title} ({e.expired_on})</p>
-          ))}
-        </div>
-      ) : requirements.warnings.length > 0 ? (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 text-xs text-yellow-800">
-          <p className="font-semibold mb-1">⚠️ {t("controls.drawer.evaluation.requirements.warning")}</p>
-          {requirements.warnings.map((w, i) => <p key={i}>• {w}</p>)}
-        </div>
-      ) : (
-        <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-xs text-green-800">
-          ✅ {t("controls.drawer.evaluation.requirements.satisfied")}
-        </div>
-      )}
+      <RequirementsBanner requirements={requirements} noRequirements={noRequirements} />
 
       {/* Due box: Stato ufficiale / Suggerimento sistema */}
       <div className="grid grid-cols-2 gap-3">

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import i18n from "../../../i18n";
+import type { RequirementsCheck } from "../../../api/endpoints/controls";
 
 // ─── Tipi condivisi ───────────────────────────────────────────────────────────
 
@@ -57,6 +58,78 @@ export const STATUS_GUIDE = [
   { status: "na",           icon: "⚪", label: "N/A",          reqKey: "controls.drawer.evaluation.status_guide.na", badge: "bg-gray-100 text-gray-600" },
   { status: "non_valutato", icon: "⬜", label: "Not assessed", reqKey: "controls.drawer.evaluation.status_guide.non_valutato", badge: "bg-gray-50 text-gray-500" },
 ];
+
+// Etichetta localizzata di un requisito documentale/evidenza. Helper unico per
+// tutti i tab del drawer (prima duplicato ×4): `any` → descrizione libera,
+// altrimenti la chiave i18n del tipo, con fallback su descrizione/tipo.
+export function useRequirementLabel() {
+  const { t } = useTranslation();
+  return (kind: "document" | "evidence", type: string, description?: string): string => {
+    if (type === "any") return description || "";
+    const key = kind === "document" ? `documents.type.${type}` : `documents.evidence.types.${type}`;
+    return t(key, { defaultValue: description || type });
+  };
+}
+
+// Banner di stato dei requisiti documentali, condiviso tra TabValutazione e
+// TabDocEvidence (prima duplicato identico in entrambi). L'unica differenza è
+// l'intestazione del caso "non soddisfatto", parametrizzata da `notSatisfiedKey`.
+export function RequirementsBanner({
+  requirements,
+  noRequirements,
+  notSatisfiedKey = "controls.drawer.evaluation.requirements.not_satisfied",
+}: {
+  requirements: RequirementsCheck;
+  noRequirements: boolean;
+  notSatisfiedKey?: string;
+}) {
+  const { t } = useTranslation();
+  const requirementLabel = useRequirementLabel();
+
+  if (requirements.not_applicable) {
+    return (
+      <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500">
+        ℹ️ {t("controls.drawer.evaluation.requirements.not_applicable")}
+      </div>
+    );
+  }
+  if (noRequirements) {
+    return (
+      <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500">
+        ℹ️ {t("controls.drawer.evaluation.requirements.none")}
+      </div>
+    );
+  }
+  if (!requirements.satisfied) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-800">
+        <p className="font-semibold mb-1">⛔ {t(notSatisfiedKey)}</p>
+        {requirements.missing_documents.map((m, i) => (
+          <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_document")}: {requirementLabel("document", m.type, m.description)}</p>
+        ))}
+        {requirements.missing_evidences.map((m, i) => (
+          <p key={i}>• {t("controls.drawer.evaluation.requirements.missing_evidence")}: {requirementLabel("evidence", m.type, m.description)}</p>
+        ))}
+        {requirements.expired_evidences.map((e, i) => (
+          <p key={i}>• {t("controls.drawer.evaluation.requirements.expired_evidence")}: {e.title} ({e.expired_on})</p>
+        ))}
+      </div>
+    );
+  }
+  if (requirements.warnings.length > 0) {
+    return (
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 text-xs text-yellow-800">
+        <p className="font-semibold mb-1">⚠️ {t("controls.drawer.evaluation.requirements.warning")}</p>
+        {requirements.warnings.map((w, i) => <p key={i}>• {w}</p>)}
+      </div>
+    );
+  }
+  return (
+    <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-xs text-green-800">
+      ✅ {t("controls.drawer.evaluation.requirements.satisfied")}
+    </div>
+  );
+}
 
 export function useDebounce(value: string, delay = 300) {
   const [debounced, setDebounced] = useState(value);

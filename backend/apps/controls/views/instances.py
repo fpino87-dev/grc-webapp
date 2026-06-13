@@ -253,7 +253,7 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             for d in instance.documents.filter(deleted_at__isnull=True)
         ]
 
-        from ..services import calc_suggested_status, check_evidence_requirements
+        from ..services import calc_suggested_status, can_delete_instance, check_evidence_requirements
         with translation.override(lang):
             requirements = check_evidence_requirements(instance, lang=lang)
         # riusa il check appena fatto: il flag `satisfied` non dipende dalla lingua
@@ -262,6 +262,7 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         with translation.override(lang):
             return Response({
                 "current_status": instance.status,
+                "can_delete": can_delete_instance(instance, request.user),
                 "suggested_status": suggested_status,
                 "suggested_status_reason": _explain_suggestion(instance, suggested_status, requirements),
                 "applicability": instance.applicability,

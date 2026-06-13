@@ -1,4 +1,45 @@
-from ..models import ControlInstance
+from ..models import ControlInstance, ControlMapping
+
+
+# ---------------------------------------------------------------------------
+# Relazione `extends` (VH/extender L3 → base L2) — helper bulk condivisi
+# Single source of truth per i calcoli su INSIEMI di controlli (gap analysis,
+# conteggi report). La variante per-istanza è `get_extender_instances`.
+# ---------------------------------------------------------------------------
+
+def _extends_pairs_qs(framework_ids=None):
+    """QuerySet delle relazioni `extends` non soft-deleted (mapping e controlli).
+    Se `framework_ids` è dato, limita ai mapping con entrambi i controlli in
+    quei framework."""
+    qs = ControlMapping.objects.filter(
+        relationship="extends",
+        deleted_at__isnull=True,
+        source_control__deleted_at__isnull=True,
+        target_control__deleted_at__isnull=True,
+    )
+    if framework_ids is not None:
+        qs = qs.filter(
+            source_control__framework_id__in=framework_ids,
+            target_control__framework_id__in=framework_ids,
+        )
+    return qs
+
+
+def extends_maps(framework_ids=None):
+    """`(extender_of_base, base_of_extender)`: dict bidirezionali della relazione
+    `extends`. `extender_of_base[base_id] = vh_id`,
+    `base_of_extender[vh_id] = base_id`."""
+    pairs = list(_extends_pairs_qs(framework_ids).only("source_control_id", "target_control_id"))
+    return (
+        {m.target_control_id: m.source_control_id for m in pairs},
+        {m.source_control_id: m.target_control_id for m in pairs},
+    )
+
+
+def superseded_base_ids(framework_ids) -> set:
+    """ID dei controlli base superseded da un extender attivo negli stessi
+    framework (da escludere dai conteggi per non contarli due volte)."""
+    return set(_extends_pairs_qs(framework_ids).values_list("target_control_id", flat=True))
 
 
 def _pick_translation(value, lang: str | None) -> str:

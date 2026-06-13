@@ -10,7 +10,7 @@ def _count_effective_by_plant(extra_q) -> dict:
     modulo Controlli. Ritorna `{plant_id (str): count}` (solo count > 0)."""
     from apps.plants.models import Plant
     from apps.plants.services import get_active_frameworks
-    from ..models import ControlMapping
+    from .evidence import superseded_base_ids
 
     out: dict[str, int] = {}
     plant_ids = (
@@ -28,11 +28,7 @@ def _count_effective_by_plant(extra_q) -> dict:
             ControlInstance.objects.filter(plant=plant, deleted_at__isnull=True)
             .values_list("control__framework_id", flat=True).distinct()
         )
-        superseded = ControlMapping.objects.filter(
-            relationship="extends",
-            source_control__framework_id__in=fw_ids,
-            target_control__framework_id__in=fw_ids,
-        ).values_list("target_control_id", flat=True)
+        superseded = superseded_base_ids(fw_ids)
         count = qs.exclude(control_id__in=superseded).count()
         if count > 0:
             out[str(plant.pk)] = count
