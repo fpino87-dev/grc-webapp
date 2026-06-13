@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     postgresql-client \
     curl \
+    gettext \
     && rm -rf /var/lib/apt/lists/*
 
 # Dipendenze Python (context = project root)
@@ -30,6 +31,9 @@ ENV DJANGO_SETTINGS_MODULE=core.settings.prod \
     REDIS_URL=redis://x:6379/0 \
     # Placeholder only for collectstatic/build; real FERNET_KEY must be provided at runtime.
     FERNET_KEY=
+# Compila i cataloghi i18n (.po → .mo): senza questo passo Django cade sempre
+# sul testo italiano (msgid) per ogni lingua, perché usa i .mo a runtime.
+RUN python manage.py compilemessages
 RUN python manage.py collectstatic --noinput
 
 # Utente non-root
