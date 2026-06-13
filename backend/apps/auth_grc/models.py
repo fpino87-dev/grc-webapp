@@ -43,6 +43,9 @@ class UserPlantAccess(BaseModel):
     scope_plants = models.ManyToManyField("plants.Plant", blank=True)
     framework_filter = ArrayField(models.CharField(max_length=50), default=list, blank=True)
 
+    class Meta:
+        ordering = ["user_id", "role"]
+
 
 class ExternalAuditorToken(BaseModel):
     user = models.ForeignKey(
@@ -63,6 +66,9 @@ class ExternalAuditorToken(BaseModel):
         on_delete=models.SET_NULL,
         related_name="issued_tokens",
     )
+
+    class Meta:
+        ordering = ["-valid_from"]
 
     @classmethod
     def create_token(cls, user, plant, framework_filter, valid_days, issued_by):

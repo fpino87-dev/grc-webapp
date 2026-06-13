@@ -1,6 +1,16 @@
 from rest_framework.permissions import BasePermission
 
+from core.permissions import RoleScopedPermission
+
 from .models import GrcRole, UserPlantAccess
+
+
+class CompetencyPermission(RoleScopedPermission):
+    """Catalogo competenze (ISO 27001 7.2) e competenze utente: lettura per tutti
+    i ruoli GRC (servono al gap analysis), scrittura ai soli super_admin /
+    compliance_officer (definizione requisiti e verifica formale)."""
+    read_roles = set(GrcRole.values)
+    write_roles = {GrcRole.SUPER_ADMIN, GrcRole.COMPLIANCE_OFFICER}
 
 
 class IsGrcSuperAdmin(BasePermission):

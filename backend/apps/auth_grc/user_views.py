@@ -1,13 +1,23 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password as django_validate_password
 from django.core.exceptions import ValidationError
 from rest_framework import viewsets, status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
+from core.audit import log_action
 from .models import UserPlantAccess, GrcRole
 from .permissions import IsGrcSuperAdmin
 from .services import deactivate_grc_user
+
+
+def _validate_password_policy(value):
+    """Applica i validator password di progetto (12+ char, CommonPassword,
+    NumericPassword, ...) ai flussi admin di creazione/reset, che prima si
+    fermavano a min_length=8 bypassando la policy."""
+    django_validate_password(value)
+    return value
 
 User = get_user_model()
 
@@ -35,7 +45,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8)
+    password = serializers.CharField(write_only=True, validators=[_validate_password_policy])
     # esponiamo solo un sottoinsieme dei ruoli GRC per la UI
     EXPOSED_ROLES = [
         (GrcRole.SUPER_ADMIN, "Super Admin"),
@@ -60,7 +70,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
 
 class SetPasswordSerializer(serializers.Serializer):
-    password = serializers.CharField(min_length=8)
+    password = serializers.CharField(validators=[_validate_password_policy])
 
 
 class AssignRoleSerializer(serializers.Serializer):
@@ -111,18 +121,40 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         user.set_password(serializer.validated_data["password"])
         user.save()
+        # Reset password da parte di un admin: azione privilegiata → audit
+        # (ISO 27001 A.9.4.3). Il signal revoca anche i TrustedDevice.
+        log_action(
+            user=request.user,
+            action_code="auth.user.password_reset",
+            level="L2",
+            entity=user,
+            payload={"user_id": user.pk},
+        )
         return Response({"ok": True})
 
     @action(detail=True, methods=["post"])
     def assign_role(self, request, pk=None):
+        from django.utils import timezone
         user = self.get_object()
         serializer = AssignRoleSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         role = serializer.validated_data["role"]
         scope_type = serializer.validated_data["scope_type"]
-        # Replace existing org-level access
-        UserPlantAccess.objects.filter(user=user, scope_type="org").delete()
-        UserPlantAccess.objects.create(user=user, role=role, scope_type=scope_type)
+        # Sostituisce l'accesso org esistente: soft delete (regola #5), non hard
+        # delete come prima.
+        UserPlantAccess.objects.filter(
+            user=user, scope_type="org", deleted_at__isnull=True,
+        ).update(deleted_at=timezone.now())
+        access = UserPlantAccess.objects.create(
+            user=user, role=role, scope_type=scope_type, created_by=request.user,
+        )
+        log_action(
+            user=request.user,
+            action_code="auth.access.granted",
+            level="L2",
+            entity=access,
+            payload={"user_id": user.pk, "role": role, "scope_type": scope_type},
+        )
         return Response({"ok": True, "role": role})
 
     @action(detail=True, methods=["post"])
@@ -130,6 +162,13 @@ class UserViewSet(viewsets.ModelViewSet):
         user = self.get_object()
         user.is_active = not user.is_active
         user.save(update_fields=["is_active"])
+        log_action(
+            user=request.user,
+            action_code="auth.user.activated" if user.is_active else "auth.user.deactivated",
+            level="L2",
+            entity=user,
+            payload={"user_id": user.pk, "is_active": user.is_active},
+        )
         return Response({"is_active": user.is_active})
 
     @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])

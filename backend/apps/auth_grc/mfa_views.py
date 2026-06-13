@@ -140,4 +140,17 @@ class MfaDisableView(APIView):
         for td in TrustedDevice.objects.filter(user=request.user):
             td.revoke()
 
+        # Disabilitare l'MFA è un abbassamento di postura → audit (ISO 27001 A.9.4.2)
+        try:
+            from core.audit import log_action
+            log_action(
+                user=request.user,
+                action_code="auth.mfa.disabled",
+                level="L2",
+                entity=request.user,
+                payload={"user_id": request.user.pk},
+            )
+        except Exception:
+            pass
+
         return Response({"detail": "MFA disabilitato."}, status=status.HTTP_200_OK)

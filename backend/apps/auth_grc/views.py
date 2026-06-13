@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from core.audit import log_action
 
 from .models import ExternalAuditorToken, RoleCompetencyRequirement, UserCompetency, UserPlantAccess
+from .permissions import CompetencyPermission, IsGrcSuperAdmin
 from .serializers import (
     ExternalAuditorTokenSerializer,
     RoleCompetencyRequirementSerializer,
@@ -75,6 +76,11 @@ class ResetTestDbView(APIView):
 
 
 class UserPlantAccessViewSet(viewsets.ModelViewSet):
+    # CRITICAL (review M02): senza permission esplicita ricadeva sul default
+    # IsAuthenticated → QUALSIASI utente loggato poteva creare una UserPlantAccess
+    # con role=super_admin/scope=org e auto-promuoversi. Questa è la tabella RBAC
+    # reale letta dal JWT: la gestione accessi è operazione da super admin.
+    permission_classes = [IsGrcSuperAdmin]
     queryset = UserPlantAccess.objects.select_related("scope_bu")
     serializer_class = UserPlantAccessSerializer
 
@@ -137,17 +143,22 @@ class UserPlantAccessViewSet(viewsets.ModelViewSet):
 
 
 class ExternalAuditorTokenViewSet(viewsets.ModelViewSet):
+    # CRITICAL (review M02): emette token di accesso ai dati di un sito per gli
+    # auditor esterni → ristretto a super admin (prima default IsAuthenticated).
+    permission_classes = [IsGrcSuperAdmin]
     queryset = ExternalAuditorToken.objects.select_related("plant", "user")
     serializer_class = ExternalAuditorTokenSerializer
 
 
 class RoleCompetencyRequirementViewSet(viewsets.ModelViewSet):
+    permission_classes = [CompetencyPermission]
     queryset = RoleCompetencyRequirement.objects.all()
     serializer_class = RoleCompetencyRequirementSerializer
     filterset_fields = ["grc_role", "mandatory"]
 
 
 class UserCompetencyViewSet(viewsets.ModelViewSet):
+    permission_classes = [CompetencyPermission]
     queryset = UserCompetency.objects.select_related("user", "verified_by", "evidence")
     serializer_class = UserCompetencySerializer
     filterset_fields = ["user"]
