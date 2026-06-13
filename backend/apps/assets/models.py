@@ -12,6 +12,9 @@ class NetworkZone(BaseModel):
     )
     purdue_level = models.IntegerField(null=True, blank=True)
 
+    class Meta:
+        ordering = ["plant_id", "name"]
+
 
 class Asset(BaseModel):
     plant = models.ForeignKey(
@@ -280,4 +283,7 @@ class AssetDependency(BaseModel):
             ("connesso_a", "Connesso a"),
         ],
     )
+
+    class Meta:
+        ordering = ["from_asset_id", "to_asset_id"]
 

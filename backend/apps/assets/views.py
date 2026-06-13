@@ -6,6 +6,7 @@ from django.utils.translation import gettext as _
 
 from core.audit import log_action
 from core.scoping import PlantScopedQuerysetMixin
+from core.viewsets import SoftDeleteAuditMixin
 
 from .models import AssetDependency, AssetIT, AssetOT, AssetSW, NetworkZone
 from .permissions import AssetPermission
@@ -19,14 +20,15 @@ from .serializers import (
 from .services import clear_revaluation_flag, delete_asset, get_eol_assets, register_change
 
 
-class NetworkZoneViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+class NetworkZoneViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = NetworkZone.objects.select_related("plant")
     serializer_class = NetworkZoneSerializer
     permission_classes = [AssetPermission]
     filterset_fields = ["plant"]
+    audit_action = "assets.network_zone"
 
     def perform_create(self, serializer):
-        instance = serializer.save()
+        instance = serializer.save(created_by=self.request.user)
         log_action(
             user=self.request.user,
             action_code="assets.network_zone.create",
@@ -53,7 +55,7 @@ class AssetITViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     filterset_fields = ["plant", "internet_exposed", "eol_date"]
 
     def perform_create(self, serializer):
-        instance = serializer.save(asset_type="IT")
+        instance = serializer.save(asset_type="IT", created_by=self.request.user)
         log_action(
             user=self.request.user,
             action_code="assets.asset_it.create",
@@ -126,7 +128,7 @@ class AssetOTViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     filterset_fields = ["plant"]
 
     def perform_create(self, serializer):
-        instance = serializer.save(asset_type="OT")
+        instance = serializer.save(asset_type="OT", created_by=self.request.user)
         log_action(
             user=self.request.user,
             action_code="assets.asset_ot.create",
@@ -193,7 +195,7 @@ class AssetSWViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     filterset_fields = ["plant", "approval_status"]
 
     def perform_create(self, serializer):
-        instance = serializer.save(asset_type="SW")
+        instance = serializer.save(asset_type="SW", created_by=self.request.user)
         log_action(
             user=self.request.user,
             action_code="assets.asset_sw.create",
@@ -224,11 +226,12 @@ class AssetSWViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class AssetDependencyViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+class AssetDependencyViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = AssetDependency.objects.select_related("from_asset__plant", "to_asset__plant")
     serializer_class = AssetDependencySerializer
     permission_classes = [AssetPermission]
     plant_field = "from_asset__plant"
+    audit_action = "assets.asset_dependency"
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -238,7 +241,7 @@ class AssetDependencyViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         return qs
 
     def perform_create(self, serializer):
-        instance = serializer.save()
+        instance = serializer.save(created_by=self.request.user)
         log_action(
             user=self.request.user,
             action_code="assets.asset_dependency.create",
