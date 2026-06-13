@@ -18,6 +18,27 @@ from .serializers import (
 )
 
 
+class SoftDeleteAuditMixin:
+    """Soft delete + audit per i viewset di governance: il `destroy` di default
+    di DRF chiama `instance.delete()` → hard delete sul DB (BaseModel non lo
+    override) e nessun audit, violando le regole #5 (soft delete sempre) e #3
+    (audit sulle azioni rilevanti). I sottoclassi impostano `audit_entity`."""
+
+    audit_entity = "entity"
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.soft_delete()
+        log_action(
+            user=request.user,
+            action_code=f"governance.{self.audit_entity}.delete",
+            level="L2",
+            entity=instance,
+            payload={"id": str(instance.id)},
+        )
+        return Response(status=204)
+
+
 class RoleAssignmentViewSet(viewsets.ModelViewSet):
     queryset = RoleAssignment.objects.select_related("user").all()
     serializer_class = RoleAssignmentSerializer
@@ -152,7 +173,11 @@ class RoleAssignmentViewSet(viewsets.ModelViewSet):
         """Ruoli in scadenza nei prossimi N giorni o già scaduti."""
         from .services import get_expiring_roles
 
-        days   = int(request.query_params.get("days", 30))
+        try:
+            days = int(request.query_params.get("days", 30))
+        except (TypeError, ValueError):
+            days = 30
+        days = max(0, min(days, 365))
         result = get_expiring_roles(days)
         today  = timezone.localdate()
 
@@ -179,23 +204,49 @@ class RoleAssignmentViewSet(viewsets.ModelViewSet):
         })
 
 
-class DocumentWorkflowPolicyViewSet(viewsets.ModelViewSet):
+class DocumentWorkflowPolicyViewSet(SoftDeleteAuditMixin, viewsets.ModelViewSet):
     """
     ViewSet per configurare da Governance il workflow documentale M07.
+
+    La policy governa CHI può inviare/revisionare/approvare i documenti: ogni
+    modifica (create/update/delete) è materia di controllo → audit completo.
     """
 
     queryset = DocumentWorkflowPolicy.objects.all()
     serializer_class = DocumentWorkflowPolicySerializer
     permission_classes = [GovernancePermission]
+    audit_entity = "document_workflow_policy"
+
+    def perform_create(self, serializer):
+        instance = serializer.save(created_by=self.request.user)
+        log_action(
+            user=self.request.user,
+            action_code="governance.document_workflow_policy.create",
+            level="L2",
+            entity=instance,
+            payload={"id": str(instance.id), "document_type": instance.document_type},
+        )
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        log_action(
+            user=self.request.user,
+            action_code="governance.document_workflow_policy.update",
+            level="L2",
+            entity=instance,
+            payload={"id": str(instance.id), "document_type": instance.document_type},
+        )
 
 
-class SecurityCommitteeViewSet(viewsets.ModelViewSet):
+class SecurityCommitteeViewSet(SoftDeleteAuditMixin, viewsets.ModelViewSet):
     queryset = SecurityCommittee.objects.all()
     serializer_class = SecurityCommitteeSerializer
     permission_classes = [GovernancePermission]
+    audit_entity = "security_committee"
 
 
-class CommitteeMeetingViewSet(viewsets.ModelViewSet):
+class CommitteeMeetingViewSet(SoftDeleteAuditMixin, viewsets.ModelViewSet):
     queryset = CommitteeMeeting.objects.all()
     serializer_class = CommitteeMeetingSerializer
     permission_classes = [GovernancePermission]
+    audit_entity = "committee_meeting"

@@ -48,6 +48,9 @@ class RoleAssignment(BaseModel):
     framework_refs = ArrayField(models.CharField(max_length=50), default=list, blank=True)
     notes = models.TextField(blank=True)
 
+    class Meta:
+        ordering = ["-valid_from", "role"]
+
     @property
     def is_active(self):
         from django.utils import timezone
@@ -131,6 +134,9 @@ class SecurityCommittee(BaseModel):
         ],
     )
     next_meeting_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["name"]
 
 
 class CommitteeMeeting(BaseModel):

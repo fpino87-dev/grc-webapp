@@ -11,10 +11,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 ### Security
 
 - **CSV export — protezione contro la formula injection (OWASP)**: tutti gli export CSV della piattaforma (gap analysis cross-framework, fornitori, finding OSINT, audit package controlli, audit pack M17) neutralizzano le celle che iniziano con `=`, `+`, `-`, `@`, tab o CR, prefissandole con un apostrofo, così non vengono interpretate come formule all'apertura in Excel/LibreOffice/Sheets. I valori numerici (anche negativi) non vengono alterati. Helper centrali `core.csv_safe` (backend) e `utils/csv` (frontend).
+- **M00 Governance — soft delete e audit su comitati, riunioni e policy di workflow documentale**: l'eliminazione di un Comitato di Sicurezza, di una Riunione o di una Policy di Workflow Documentale eseguiva una cancellazione **fisica** del record senza traccia di audit (il `destroy` di default cancellava davvero la riga). Ora l'eliminazione è sempre **logica** (soft delete) e registra un evento di audit. La Policy di Workflow Documentale governa chi può inviare/revisionare/approvare i documenti M07: anche creazione e modifica sono ora tracciate nell'audit trail.
 
 ### Fixed
 
 - **Controlli — eliminabilità decisa dal backend**: il flag `can_delete` (regola «solo controlli non valutati, salvo super admin») è ora calcolato dal server ed esposto in detail-info; la UI non lo ricalcola più, eliminando il rischio di divergenza tra interfaccia e backend.
+- **M00 Governance — robustezza e igiene API**: l'endpoint "ruoli in scadenza" non va più in errore con un parametro `days` non numerico (viene normalizzato); le liste di assegnazioni ruolo e comitati hanno un ordinamento stabile (paginazione coerente); i campi gestiti dal sistema (`created_by`, date di sistema, eliminazione) non sono più impostabili dal client sulle assegnazioni di ruolo.
 
 ## [0.6.0] - 2026-06-12
 

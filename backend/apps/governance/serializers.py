@@ -12,6 +12,10 @@ class RoleAssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model  = RoleAssignment
         fields = "__all__"
+        # Campi gestiti dal server / ciclo di vita: mai scrivibili dal client
+        # (created_by lo imposta perform_create; deleted_at solo via soft_delete
+        # con audit; terminate/replace gestiscono valid_until con audit).
+        read_only_fields = ["created_by", "created_at", "updated_at", "deleted_at"]
 
     def get_user_email(self, obj):
         return obj.user.email if obj.user_id else None
