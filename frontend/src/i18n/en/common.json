@@ -312,7 +312,10 @@
       "about": {
         "no_description": "No description available for this language.",
         "normative_requirements": "Regulatory requirements",
-        "applies_to": { "essential": "Essential", "important": "Important" },
+        "applies_to": {
+          "essential": "Essential",
+          "important": "Important"
+        },
         "guidance": "Implementation guidance",
         "evidence_examples": "Examples of acceptable evidence",
         "mappings": "Cross-framework mappings",
@@ -2933,7 +2936,8 @@
       "compliance": "Compliance",
       "owner": "By Owner",
       "risk_bia_bcp": "Risk / BIA / BCP",
-      "kpi": "KPI"
+      "kpi": "KPI",
+      "access_matrix": "Access & responsibilities"
     },
     "kpi": {
       "active_sites": "Active sites",
@@ -3039,6 +3043,42 @@
       "test_partial": "⚠ Partial",
       "test_fail": "✗ Failed",
       "test_overdue": "⚠ Overdue"
+    },
+    "access_matrix": {
+      "subtitle": "Who has access and who is responsible for what — review accesses at any time.",
+      "export_csv": "Export CSV",
+      "vacant_roles": "Vacant mandatory roles",
+      "only_issues": "Inconsistencies only",
+      "all_sites": "All sites",
+      "until": "until",
+      "empty": "No rows",
+      "summary": {
+        "users": "Users",
+        "access": "Access grants",
+        "responsibilities": "Responsibilities",
+        "issues": "Inconsistencies"
+      },
+      "filter": {
+        "all": "All",
+        "access": "Access",
+        "responsibility": "Responsibilities"
+      },
+      "kind": {
+        "access": "Access",
+        "responsibility": "Responsibility"
+      },
+      "col": {
+        "user": "User",
+        "kind": "Type",
+        "role": "Role",
+        "scope": "Scope",
+        "flags": "Flags"
+      },
+      "flag": {
+        "inactive_user": "Inactive user",
+        "responsibility_without_access": "Responsibility without access",
+        "expiring": "Expiring"
+      }
     }
   },
   "manual": {

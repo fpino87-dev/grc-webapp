@@ -16,3 +16,16 @@ class ReportingPermission(RoleScopedPermission):
         GrcRole.EXTERNAL_AUDITOR,
     }
     write_roles = read_roles
+
+
+class AccessReviewPermission(RoleScopedPermission):
+    """Matrice Accessi & Responsabilita': espone CHI ha accesso/responsabilita'
+    su cosa (dati di tutti gli utenti) → ristretta a chi conduce la user-access
+    review (ISO 27001 A.9.2.5): governance + audit. NON i ruoli operativi."""
+    read_roles = {
+        GrcRole.SUPER_ADMIN,
+        GrcRole.COMPLIANCE_OFFICER,
+        GrcRole.INTERNAL_AUDITOR,
+        GrcRole.EXTERNAL_AUDITOR,
+    }
+    write_roles = read_roles

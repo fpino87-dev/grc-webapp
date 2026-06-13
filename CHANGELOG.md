@@ -8,6 +8,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ## [Unreleased]
 
+### Added
+
+- **Reporting — Matrice Accessi & Responsabilità (user access review)**: nuovo tab nel Reporting che mostra, in un'unica vista verificabile in qualunque momento, **chi ha accesso** (ruolo tecnico + perimetro: organizzazione / BU / siti specifici) e **chi è responsabile di cosa** (ruoli di governance: CISO, DPO, contatto NIS2, ecc.). Evidenzia automaticamente le incoerenze — responsabilità assegnata su un sito senza il relativo accesso, account non più attivo con accessi residui, ruoli in scadenza — e i ruoli obbligatori vacanti. Filtri per tipo e per sole incoerenze, ed export CSV per l'evidenza d'audit (ISO 27001 A.9.2.5). Accesso ristretto a governance e audit (super admin / compliance officer / auditor interni ed esterni). i18n IT/EN/FR/PL/TR.
+
 ### Security
 
 - **M02 RBAC — corretta una escalation di privilegi critica nella gestione accessi**: gli endpoint di gestione delle assegnazioni di accesso per sito (`UserPlantAccess`) e di emissione dei token per auditor esterni non avevano un controllo di autorizzazione esplicito e ricadevano sul default "utente autenticato": qualsiasi utente con un account valido poteva quindi assegnarsi il ruolo di super amministratore o emettere token di accesso ai dati di un sito. Entrambi gli endpoint sono ora riservati ai super amministratori; gli endpoint di gestione delle competenze sono in lettura per i ruoli GRC e in scrittura per i soli super admin / compliance officer. Aggiunti test di regressione mirati.

@@ -379,7 +379,10 @@
       "about": {
         "no_description": "Aucune description disponible pour cette langue.",
         "normative_requirements": "Exigences réglementaires",
-        "applies_to": { "essential": "Essentiel", "important": "Important" },
+        "applies_to": {
+          "essential": "Essentiel",
+          "important": "Important"
+        },
         "guidance": "Guide d'implémentation",
         "evidence_examples": "Exemples de preuves acceptables",
         "mappings": "Correspondances inter-cadres",
@@ -3012,7 +3015,8 @@
       "compliance": "Conformité",
       "owner": "Par responsable",
       "risk_bia_bcp": "Risque / BIA / BCP",
-      "kpi": "KPI"
+      "kpi": "KPI",
+      "access_matrix": "Accès & responsabilités"
     },
     "kpi": {
       "active_sites": "Sites actifs",
@@ -3118,6 +3122,42 @@
       "test_partial": "⚠ Partiel",
       "test_fail": "✗ Échoué",
       "test_overdue": "⚠ En retard"
+    },
+    "access_matrix": {
+      "subtitle": "Qui a accès et qui est responsable de quoi — validez les accès à tout moment.",
+      "export_csv": "Exporter CSV",
+      "vacant_roles": "Rôles obligatoires vacants",
+      "only_issues": "Incohérences uniquement",
+      "all_sites": "Tous les sites",
+      "until": "jusqu'au",
+      "empty": "Aucune ligne",
+      "summary": {
+        "users": "Utilisateurs",
+        "access": "Accès",
+        "responsibilities": "Responsabilités",
+        "issues": "Incohérences"
+      },
+      "filter": {
+        "all": "Tous",
+        "access": "Accès",
+        "responsibility": "Responsabilités"
+      },
+      "kind": {
+        "access": "Accès",
+        "responsibility": "Responsabilité"
+      },
+      "col": {
+        "user": "Utilisateur",
+        "kind": "Type",
+        "role": "Rôle",
+        "scope": "Périmètre",
+        "flags": "Signalements"
+      },
+      "flag": {
+        "inactive_user": "Utilisateur inactif",
+        "responsibility_without_access": "Responsabilité sans accès",
+        "expiring": "Bientôt expiré"
+      }
     }
   },
   "manual": {

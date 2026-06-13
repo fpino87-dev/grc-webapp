@@ -918,3 +918,188 @@ def kpi_suggest(plant_id, lang) -> dict:
         })
 
     return {"plant_frameworks": plant_frameworks, "suggestions": suggestions}
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# Matrice Accessi & Responsabilità (M18 / access review ISO 27001 A.9.2.5)
+# ───────────────────────────────────────────────────────────────────────────
+def access_matrix(plant_id=None, lang: str = "it") -> dict:
+    """Matrice di chi-fa-cosa per validare gli accessi in qualunque momento.
+
+    Aggrega per utente attivo due categorie:
+      - ACCESSO tecnico (UserPlantAccess / GrcRole) → guida i permessi
+      - RESPONSABILITÀ normativa (RoleAssignment governance / NormativeRole)
+
+    Con `plant_id` mostra solo righe il cui scope copre quel sito; senza, è
+    org-wide. Calcola flag di coerenza (responsabilità senza accesso, utente
+    non attivo, in scadenza) e i ruoli obbligatori vacanti.
+    """
+    from django.utils import timezone
+    from django.utils.translation import gettext, override
+
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    from apps.governance.models import NormativeRole, RoleAssignment
+    from apps.governance.services import get_vacant_mandatory_roles
+    from apps.plants.models import Plant
+
+    today = timezone.localdate()
+    EXPIRY_DAYS = 30
+
+    # ── Lookup siti/BU (una query ciascuno; tabelle piccole) ────────────────
+    plants = {
+        p.id: p for p in Plant.objects.filter(deleted_at__isnull=True).select_related("bu")
+    }
+    target = plants.get(_to_uuid(plant_id)) if plant_id else None
+    all_plant_ids = set(plants.keys())
+    bu_to_plant_ids: dict = {}
+    for p in plants.values():
+        if p.bu_id:
+            bu_to_plant_ids.setdefault(p.bu_id, set()).add(p.id)
+
+    def _codes(ids) -> list:
+        return sorted(plants[i].code for i in ids if i in plants)
+
+    # Risolve uno scope (di accesso o responsabilità) in (covers_all, plant_ids, label)
+    def _resolve_access_scope(a) -> tuple:
+        if a.scope_type == "org":
+            return True, all_plant_ids, gettext("Tutti i siti")
+        if a.scope_type == "bu" and a.scope_bu_id:
+            ids = bu_to_plant_ids.get(a.scope_bu_id, set())
+            label = f"{gettext('BU')}: {a.scope_bu.code}" if a.scope_bu else gettext("BU")
+            return False, ids, label
+        # plant_list / single_plant
+        ids = {p.id for p in a.scope_plants.all()}
+        return False, ids, ", ".join(_codes(ids)) or gettext("(nessun sito)")
+
+    def _resolve_resp_scope(r) -> tuple:
+        if r.scope_type == "org":
+            return True, all_plant_ids, gettext("Tutti i siti")
+        if r.scope_type == "bu" and r.scope_id:
+            ids = bu_to_plant_ids.get(r.scope_id, set())
+            return False, ids, gettext("BU")
+        if r.scope_type == "plant" and r.scope_id:
+            pid = r.scope_id
+            return False, ({pid} if pid in plants else set()), ", ".join(_codes({pid}))
+        return False, set(), gettext("(nessun sito)")
+
+    def _covers_target(covers_all, ids) -> bool:
+        # Senza filtro plant: includi tutto. Con filtro: org copre sempre.
+        if target is None:
+            return True
+        return covers_all or target.id in ids
+
+    # ── Accessi per utente (per il check responsabilità-senza-accesso) ──────
+    access_qs = (
+        UserPlantAccess.objects.filter(deleted_at__isnull=True)
+        .select_related("user", "scope_bu")
+        .prefetch_related("scope_plants")
+    )
+    access_by_user: dict = {}      # user_id -> {"all": bool, "ids": set}
+    access_rows_raw: list = []
+    for a in access_qs:
+        covers_all, ids, label = _resolve_access_scope(a)
+        cov = access_by_user.setdefault(a.user_id, {"all": False, "ids": set()})
+        cov["all"] = cov["all"] or covers_all
+        cov["ids"] |= ids
+        access_rows_raw.append((a, covers_all, ids, label))
+
+    # ── Responsabilità governance attive ────────────────────────────────────
+    resp_qs = (
+        RoleAssignment.objects.filter(deleted_at__isnull=True, valid_from__lte=today)
+        .filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today))
+        .select_related("user")
+    )
+
+    rows: list = []
+    user_ids_seen: set = set()
+
+    with override(lang):
+        grc_labels = {c.value: c.label for c in GrcRole}
+        norm_labels = {c.value: c.label for c in NormativeRole}
+
+        for a, covers_all, ids, label in access_rows_raw:
+            if not _covers_target(covers_all, ids):
+                continue
+            u = a.user
+            user_ids_seen.add(u.id)
+            flags = []
+            if not u.is_active:
+                flags.append("inactive_user")
+            rows.append({
+                "user_id": str(u.id),
+                "user_name": (f"{u.first_name} {u.last_name}".strip() or u.email or u.username),
+                "user_email": u.email,
+                "is_active": u.is_active,
+                "kind": "access",
+                "role": a.role,
+                "role_label": str(grc_labels.get(a.role, a.role)),
+                "scope_type": a.scope_type,
+                "scope_label": label,
+                "plant_codes": [] if covers_all else _codes(ids),
+                "covers_all": covers_all,
+                "valid_until": None,
+                "flags": flags,
+            })
+
+        for r in resp_qs:
+            covers_all, ids, label = _resolve_resp_scope(r)
+            if not _covers_target(covers_all, ids):
+                continue
+            u = r.user
+            user_ids_seen.add(u.id)
+            flags = []
+            if not u.is_active:
+                flags.append("inactive_user")
+            # Responsabilità senza un accesso che copra lo stesso perimetro
+            cov = access_by_user.get(u.id)
+            has_access = bool(cov and (cov["all"] or covers_all or (cov["ids"] & ids)))
+            if not has_access:
+                flags.append("responsibility_without_access")
+            if r.valid_until and today <= r.valid_until <= today + timezone.timedelta(days=EXPIRY_DAYS):
+                flags.append("expiring")
+            rows.append({
+                "user_id": str(u.id),
+                "user_name": (f"{u.first_name} {u.last_name}".strip() or u.email or u.username),
+                "user_email": u.email,
+                "is_active": u.is_active,
+                "kind": "responsibility",
+                "role": r.role,
+                "role_label": str(norm_labels.get(r.role, r.role)),
+                "scope_type": r.scope_type,
+                "scope_label": label,
+                "plant_codes": [] if covers_all else _codes(ids),
+                "covers_all": covers_all,
+                "valid_until": str(r.valid_until) if r.valid_until else None,
+                "flags": flags,
+            })
+
+    rows.sort(key=lambda x: (x["user_name"].lower(), x["kind"], x["role"]))
+    vacant = get_vacant_mandatory_roles(target)
+    issues = sum(1 for x in rows if x["flags"])
+
+    return {
+        "generated_at": timezone.now().isoformat(),
+        "plant_id": str(target.id) if target else None,
+        "plant_code": target.code if target else None,
+        "rows": rows,
+        "vacant_mandatory_roles": vacant,
+        "summary": {
+            "users": len(user_ids_seen),
+            "access": sum(1 for x in rows if x["kind"] == "access"),
+            "responsibilities": sum(1 for x in rows if x["kind"] == "responsibility"),
+            "issues": issues,
+        },
+    }
+
+
+def _to_uuid(value):
+    """Converte una stringa in UUID per il lookup nel dict plants (None-safe)."""
+    import uuid
+    if value is None:
+        return None
+    if isinstance(value, uuid.UUID):
+        return value
+    try:
+        return uuid.UUID(str(value))
+    except (ValueError, AttributeError, TypeError):
+        return None

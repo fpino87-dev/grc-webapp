@@ -379,7 +379,10 @@
       "about": {
         "no_description": "Bu dil için açıklama yok.",
         "normative_requirements": "Mevzuat gereksinimleri",
-        "applies_to": { "essential": "Temel", "important": "Önemli" },
+        "applies_to": {
+          "essential": "Temel",
+          "important": "Önemli"
+        },
         "guidance": "Uygulama kılavuzu",
         "evidence_examples": "Kabul edilebilir kanıt örnekleri",
         "mappings": "Çerçeveler arası eşleştirmeler",
@@ -3012,7 +3015,8 @@
       "compliance": "Uyum",
       "owner": "Sahibe göre",
       "risk_bia_bcp": "Risk / BIA / BCP",
-      "kpi": "KPI"
+      "kpi": "KPI",
+      "access_matrix": "Erişim ve sorumluluklar"
     },
     "kpi": {
       "active_sites": "Aktif siteler",
@@ -3118,6 +3122,42 @@
       "test_partial": "⚠ Kısmi",
       "test_fail": "✗ Başarısız",
       "test_overdue": "⚠ Süresi geçmiş"
+    },
+    "access_matrix": {
+      "subtitle": "Kimin erişimi var ve kim neyden sorumlu — erişimleri istediğiniz zaman doğrulayın.",
+      "export_csv": "CSV dışa aktar",
+      "vacant_roles": "Boş zorunlu roller",
+      "only_issues": "Yalnızca tutarsızlıklar",
+      "all_sites": "Tüm tesisler",
+      "until": "bitiş",
+      "empty": "Satır yok",
+      "summary": {
+        "users": "Kullanıcılar",
+        "access": "Erişimler",
+        "responsibilities": "Sorumluluklar",
+        "issues": "Tutarsızlıklar"
+      },
+      "filter": {
+        "all": "Tümü",
+        "access": "Erişimler",
+        "responsibility": "Sorumluluklar"
+      },
+      "kind": {
+        "access": "Erişim",
+        "responsibility": "Sorumluluk"
+      },
+      "col": {
+        "user": "Kullanıcı",
+        "kind": "Tür",
+        "role": "Rol",
+        "scope": "Kapsam",
+        "flags": "İşaretler"
+      },
+      "flag": {
+        "inactive_user": "Pasif kullanıcı",
+        "responsibility_without_access": "Erişimsiz sorumluluk",
+        "expiring": "Süresi doluyor"
+      }
     }
   },
   "manual": {

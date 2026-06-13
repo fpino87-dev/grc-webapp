@@ -222,7 +222,51 @@ export interface KpiOverviewData {
   };
 }
 
+export interface AccessMatrixRow {
+  user_id: string;
+  user_name: string;
+  user_email: string;
+  is_active: boolean;
+  kind: "access" | "responsibility";
+  role: string;
+  role_label: string;
+  scope_type: string;
+  scope_label: string;
+  plant_codes: string[];
+  covers_all: boolean;
+  valid_until: string | null;
+  flags: string[];
+}
+
+export interface AccessMatrixData {
+  generated_at: string;
+  plant_id: string | null;
+  plant_code: string | null;
+  rows: AccessMatrixRow[];
+  vacant_mandatory_roles: string[];
+  summary: { users: number; access: number; responsibilities: number; issues: number };
+}
+
 export const reportingApi = {
+  accessMatrix: (plant?: string) =>
+    apiClient.get<AccessMatrixData>(
+      "/reporting/access-matrix/",
+      { params: plant ? { plant } : {} }
+    ).then(r => r.data),
+
+  exportAccessMatrixCsv: (plant?: string) =>
+    apiClient.get("/reporting/access-matrix/", {
+      params: { export: "csv", ...(plant ? { plant } : {}) },
+      responseType: "blob",
+    }).then(r => {
+      const blob = new Blob([r.data], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "access-matrix.csv";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }),
+
   dashboard: (plant?: string) =>
     apiClient.get<{
       plants_active: number;

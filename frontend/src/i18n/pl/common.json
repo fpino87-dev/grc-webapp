@@ -379,7 +379,10 @@
       "about": {
         "no_description": "Brak opisu dla tego języka.",
         "normative_requirements": "Wymagania normatywne",
-        "applies_to": { "essential": "Kluczowy", "important": "Ważny" },
+        "applies_to": {
+          "essential": "Kluczowy",
+          "important": "Ważny"
+        },
         "guidance": "Wskazówki implementacji",
         "evidence_examples": "Przykłady akceptowalnych dowodów",
         "mappings": "Mapowania między ramami",
@@ -3012,7 +3015,8 @@
       "compliance": "Zgodność",
       "owner": "Wg właściciela",
       "risk_bia_bcp": "Ryzyko / BIA / BCP",
-      "kpi": "KPI"
+      "kpi": "KPI",
+      "access_matrix": "Dostępy i odpowiedzialności"
     },
     "kpi": {
       "active_sites": "Aktywne zakłady",
@@ -3118,6 +3122,42 @@
       "test_partial": "⚠ Częściowy",
       "test_fail": "✗ Niezaliczony",
       "test_overdue": "⚠ Zaległy"
+    },
+    "access_matrix": {
+      "subtitle": "Kto ma dostęp i kto za co odpowiada — weryfikuj dostępy w dowolnym momencie.",
+      "export_csv": "Eksport CSV",
+      "vacant_roles": "Nieobsadzone role obowiązkowe",
+      "only_issues": "Tylko niespójności",
+      "all_sites": "Wszystkie zakłady",
+      "until": "do",
+      "empty": "Brak wierszy",
+      "summary": {
+        "users": "Użytkownicy",
+        "access": "Dostępy",
+        "responsibilities": "Odpowiedzialności",
+        "issues": "Niespójności"
+      },
+      "filter": {
+        "all": "Wszystkie",
+        "access": "Dostępy",
+        "responsibility": "Odpowiedzialności"
+      },
+      "kind": {
+        "access": "Dostęp",
+        "responsibility": "Odpowiedzialność"
+      },
+      "col": {
+        "user": "Użytkownik",
+        "kind": "Typ",
+        "role": "Rola",
+        "scope": "Zakres",
+        "flags": "Sygnały"
+      },
+      "flag": {
+        "inactive_user": "Użytkownik nieaktywny",
+        "responsibility_without_access": "Odpowiedzialność bez dostępu",
+        "expiring": "Wygasa"
+      }
     }
   },
   "manual": {

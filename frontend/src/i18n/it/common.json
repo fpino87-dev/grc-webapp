@@ -312,7 +312,10 @@
       "about": {
         "no_description": "Nessuna descrizione disponibile per questa lingua.",
         "normative_requirements": "Requisiti normativi",
-        "applies_to": { "essential": "Essenziale", "important": "Importante" },
+        "applies_to": {
+          "essential": "Essenziale",
+          "important": "Importante"
+        },
         "guidance": "Linee guida implementazione",
         "evidence_examples": "Esempi di evidenza accettabile",
         "mappings": "Mappature cross-framework",
@@ -3009,7 +3012,8 @@
       "compliance": "Compliance",
       "owner": "Per Owner",
       "risk_bia_bcp": "Risk / BIA / BCP",
-      "kpi": "KPI"
+      "kpi": "KPI",
+      "access_matrix": "Accessi & responsabilità"
     },
     "risk_bia_bcp": {
       "kpi_total": "Rischi totali",
@@ -3076,6 +3080,42 @@
       "test_partial": "⚠ Parziale",
       "test_fail": "✗ Fallito",
       "test_overdue": "⚠ Scaduto"
+    },
+    "access_matrix": {
+      "subtitle": "Chi ha accesso e chi è responsabile di cosa — valida gli accessi in qualunque momento.",
+      "export_csv": "Esporta CSV",
+      "vacant_roles": "Ruoli obbligatori vacanti",
+      "only_issues": "Solo incoerenze",
+      "all_sites": "Tutti i siti",
+      "until": "fino al",
+      "empty": "Nessuna riga",
+      "summary": {
+        "users": "Utenti",
+        "access": "Accessi",
+        "responsibilities": "Responsabilità",
+        "issues": "Incoerenze"
+      },
+      "filter": {
+        "all": "Tutti",
+        "access": "Accessi",
+        "responsibility": "Responsabilità"
+      },
+      "kind": {
+        "access": "Accesso",
+        "responsibility": "Responsabilità"
+      },
+      "col": {
+        "user": "Utente",
+        "kind": "Tipo",
+        "role": "Ruolo",
+        "scope": "Perimetro",
+        "flags": "Segnalazioni"
+      },
+      "flag": {
+        "inactive_user": "Utente non attivo",
+        "responsibility_without_access": "Responsabilità senza accesso",
+        "expiring": "In scadenza"
+      }
     }
   },
   "manual": {

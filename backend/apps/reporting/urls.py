@@ -1,11 +1,13 @@
 from django.urls import path
 from .views import (
+    AccessMatrixView,
     ComplianceSummaryView, RiskSummaryView, IncidentSummaryView,
     DashboardSummaryView, OwnerReportView, KpiTrendView, RiskBiaBcpView,
     KpiOverviewView,
 )
 
 urlpatterns = [
+    path("access-matrix/", AccessMatrixView.as_view(), name="reporting-access-matrix"),
     path("compliance/", ComplianceSummaryView.as_view(), name="reporting-compliance"),
     path("risk/", RiskSummaryView.as_view(), name="reporting-risk"),
     path("incidents/", IncidentSummaryView.as_view(), name="reporting-incidents"),

@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from core.scoping import require_plant_access
 
 from . import services
-from .permissions import ReportingPermission
+from .permissions import AccessReviewPermission, ReportingPermission
 
 
 class PlantParamGuardedView(APIView):
@@ -83,6 +83,55 @@ class RiskBiaBcpView(PlantParamGuardedView):
 
     def get(self, request):
         return Response(services.risk_bia_bcp(request.query_params.get("plant")))
+
+
+class AccessMatrixView(PlantParamGuardedView):
+    """GET /api/v1/reporting/access-matrix/?plant=&lang=  (+ &format=csv)
+
+    Matrice Accessi & Responsabilità per la user-access review (ISO 27001
+    A.9.2.5): chi ha accesso e chi è responsabile di cosa, con flag di
+    incoerenza. Ristretta a governance/audit."""
+
+    permission_classes = [AccessReviewPermission]
+
+    def get(self, request):
+        lang = _resolve_lang(request)
+        data = services.access_matrix(request.query_params.get("plant"), lang=lang)
+        # NB: `export` e non `format` (quest'ultimo collide con la content
+        # negotiation di DRF e darebbe 404).
+        if request.query_params.get("export") == "csv":
+            return self._csv(data, lang)
+        return Response(data)
+
+    def _csv(self, data, lang):
+        import io
+
+        from django.http import HttpResponse
+        from django.utils.translation import gettext, override
+
+        from core.csv_safe import safe_writer
+
+        buf = io.StringIO()
+        w = safe_writer(buf)
+        with override(lang):
+            w.writerow([
+                gettext("Utente"), gettext("Email"), gettext("Attivo"),
+                gettext("Tipo"), gettext("Ruolo"), gettext("Perimetro"),
+                gettext("Siti"), gettext("Scadenza"), gettext("Segnalazioni"),
+            ])
+            for r in data["rows"]:
+                w.writerow([
+                    r["user_name"], r["user_email"],
+                    gettext("Sì") if r["is_active"] else gettext("No"),
+                    gettext("Accesso") if r["kind"] == "access" else gettext("Responsabilità"),
+                    r["role_label"], r["scope_label"],
+                    gettext("Tutti i siti") if r["covers_all"] else ", ".join(r["plant_codes"]),
+                    r["valid_until"] or "",
+                    ", ".join(r["flags"]),
+                ])
+        resp = HttpResponse(buf.getvalue(), content_type="text/csv")
+        resp["Content-Disposition"] = 'attachment; filename="access-matrix.csv"'
+        return resp
 
 
 class DashboardSummaryView(PlantParamGuardedView):
