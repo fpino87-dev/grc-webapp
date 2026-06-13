@@ -138,6 +138,9 @@ class TaskComment(BaseModel):
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     body = models.TextField()
 
+    class Meta:
+        ordering = ["task_id", "created_at"]
+
 
 # ── Quick Checklist (M08) ────────────────────────────────────────────────────
 # Checklist operative ricorrenti: template riutilizzabili + run giornalieri

@@ -28,6 +28,7 @@ from core.scoping import (
     PlantScopedQuerysetMixin,
     require_plant_access,
 )
+from core.viewsets import SoftDeleteAuditMixin
 from django.db.models import Q
 from django.utils import timezone
 from apps.auth_grc.models import UserPlantAccess
@@ -127,13 +128,14 @@ class TaskViewSet(PlantPayloadWriteGuardMixin, viewsets.ModelViewSet):
         return Response(TaskSerializer(qs, many=True).data)
 
 
-class TaskCommentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+class TaskCommentViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = TaskComment.objects.select_related("task", "author")
     serializer_class = TaskCommentSerializer
     permission_classes = [TaskPermission]
     filterset_fields = ["task"]
     plant_field = "task__plant"
     allow_null_plant = True  # commenti su task org-wide (plant=null)
+    audit_action = "tasks.task_comment"
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)

@@ -15,6 +15,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ### Security
 
+- **M08 Task — soft delete e audit sui commenti dei task**: l'eliminazione di un commento (thread di discussione di un task) eseguiva una cancellazione fisica senza traccia. Ora è logica (soft delete) e registrata.
 - **M07 Documenti — soft delete e audit sulle versioni dei documenti**: l'eliminazione di una versione di un documento eseguiva una cancellazione fisica senza traccia, perdendo lo storico documentale. Ora è logica (soft delete) e registrata; anche il caricamento di una nuova versione viene tracciato nell'audit trail.
 - **M06 Rischi — soft delete e audit su dimensioni di rischio e policy di appetito; modifica della soglia tracciata**: l'eliminazione di una dimensione di rischio o di una policy di appetito al rischio (che definisce la soglia di accettazione) eseguiva una cancellazione fisica senza traccia. Ora è logica e registrata; inoltre **ogni modifica della soglia di accettazione del rischio è registrata nell'audit trail** (chi l'ha alzata/abbassata e quando).
 - **M05 BIA — soft delete e audit sulle decisioni di rischio e opzioni di trattamento**: l'eliminazione di una decisione di rischio (accettare/mitigare/trasferire/evitare — un record di accountability che l'auditor deve poter ricostruire) o di un'opzione di trattamento eseguiva una cancellazione fisica senza traccia. Ora è sempre logica (soft delete) e registrata nell'audit trail.
