@@ -121,6 +121,9 @@ class CriticalProcess(BaseModel):
             return "warning"
         return "critical"
 
+    class Meta:
+        ordering = ["plant_id", "name"]
+
 
 class TreatmentOption(BaseModel):
     process = models.ForeignKey(
@@ -132,6 +135,9 @@ class TreatmentOption(BaseModel):
     cost_implementation = models.DecimalField(max_digits=14, decimal_places=2)
     cost_annual = models.DecimalField(max_digits=14, decimal_places=2, default=0)
     ale_reduction_pct = models.FloatField()
+
+    class Meta:
+        ordering = ["-created_at"]
 
 
 class RiskDecision(BaseModel):
@@ -159,4 +165,7 @@ class RiskDecision(BaseModel):
         blank=True,
         on_delete=models.SET_NULL,
     )
+
+    class Meta:
+        ordering = ["-decided_at"]
 

@@ -4,6 +4,7 @@ from rest_framework.response import Response
 
 from core.audit import log_action
 from core.scoping import PlantScopedQuerysetMixin
+from core.viewsets import SoftDeleteAuditMixin
 
 from .models import CriticalProcess, RiskDecision, TreatmentOption
 from .permissions import BiaPermission
@@ -111,12 +112,13 @@ class CriticalProcessViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         return Response(data)
 
 
-class TreatmentOptionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+class TreatmentOptionViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = TreatmentOption.objects.select_related("process")
     serializer_class = TreatmentOptionSerializer
     permission_classes = [BiaPermission]
     filterset_fields = []
     plant_field = "process__plant"
+    audit_action = "bia.treatment_option"
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -139,12 +141,15 @@ class TreatmentOptionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         )
 
 
-class RiskDecisionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+class RiskDecisionViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = RiskDecision.objects.select_related("process", "decided_by", "treatment")
     serializer_class = RiskDecisionSerializer
     permission_classes = [BiaPermission]
     filterset_fields = []
     plant_field = "process__plant"
+    # Decisione di rischio = record governance L3: soft delete + audit, mai
+    # hard delete (l'auditor deve poter ricostruire chi ha deciso cosa).
+    audit_action = "bia.risk_decision"
 
     def get_queryset(self):
         qs = super().get_queryset()
