@@ -167,9 +167,10 @@ def delete_plant(plant: Plant, user, force: bool = False) -> None:
     con soft delete, poi elimina il plant.
     """
     from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
 
     if force and not getattr(user, "is_superuser", False):
-        raise ValidationError("Solo il superuser può forzare l'eliminazione del sito.")
+        raise ValidationError(_("Solo il superuser può forzare l'eliminazione del sito."))
 
     if force:
         _cascade_delete_plant(plant, user)
@@ -244,8 +245,9 @@ def delete_plant(plant: Plant, user, force: bool = False) -> None:
 
     blocking = {k: v for k, v in dependency_counts.items() if v}
     if blocking:
+        from django.utils.translation import gettext as _
         err = ValidationError(
-            "Impossibile eliminare il sito: sono presenti dipendenze collegate.",
+            _("Impossibile eliminare il sito: sono presenti dipendenze collegate."),
             code="blocking_dependencies",
             params={"blocking": blocking},
         )

@@ -10,6 +10,7 @@ from django.utils.translation import gettext as _
 
 from core.audit import log_action
 from core.scoping import PlantScopedQuerysetMixin
+from core.viewsets import SoftDeleteAuditMixin
 from core.uploads import validate_uploaded_file
 from .models import BusinessUnit, Plant, PlantFramework
 from .permissions import PlantConfigPermission, PlantPermission
@@ -32,13 +33,15 @@ def _validate_logo_file(uploaded_file):
     )
 
 
-class BusinessUnitViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+class BusinessUnitViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = BusinessUnit.objects.all()
     serializer_class = BusinessUnitSerializer
     permission_classes = [PlantConfigPermission]
     # Un utente plant-scoped vede solo le BU dei propri siti (la scrittura
     # resta org-only via PlantConfigPermission). Sweep 2026-06-12.
     plant_field = "plants"
+    # Eliminazione = soft delete + audit (prima hard delete senza traccia).
+    audit_action = "plants.business_unit"
 
 
 class PlantViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
@@ -60,7 +63,7 @@ class PlantViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         if new_code and new_code != instance.code:
             if ControlInstance.objects.filter(plant=instance).exists():
                 return Response(
-                    {"error": "Impossibile cambiare il codice: il sito ha controlli collegati."},
+                    {"error": _("Impossibile cambiare il codice: il sito ha controlli collegati.")},
                     status=400,
                 )
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
@@ -68,11 +71,16 @@ class PlantViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         self.perform_update(serializer)
         # Warning if open incidents
         from apps.incidents.models import Incident
+        from django.utils.translation import ngettext
         open_incidents = Incident.objects.filter(plant=instance, status__in=["aperto", "in_analisi"]).count()
         data = serializer.data
         if open_incidents:
             data = dict(data)
-            data["_warning"] = f"Questo sito ha {open_incidents} incidente/i aperti."
+            data["_warning"] = ngettext(
+                "Questo sito ha %(n)d incidente aperto.",
+                "Questo sito ha %(n)d incidenti aperti.",
+                open_incidents,
+            ) % {"n": open_incidents}
         return Response(data)
 
     def destroy(self, request, *args, **kwargs):
@@ -288,5 +296,12 @@ class PlantFrameworkViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         pf = self.get_object()
         pf.active = not pf.active
         pf.save(update_fields=["active", "updated_at"])
+        log_action(
+            user=request.user,
+            action_code="plants.framework.toggle_active",
+            level="L2",
+            entity=pf.plant,
+            payload={"framework": pf.framework.code, "active": pf.active},
+        )
         return Response(PlantFrameworkSerializer(pf).data)
 

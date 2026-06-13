@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from core.audit import log_action
+from core.viewsets import SoftDeleteAuditMixin
 from .models import CommitteeMeeting, DocumentWorkflowPolicy, RoleAssignment, SecurityCommittee
 from .permissions import GovernancePermission
 from .serializers import (
@@ -16,27 +17,6 @@ from .serializers import (
     RoleAssignmentSerializer,
     SecurityCommitteeSerializer,
 )
-
-
-class SoftDeleteAuditMixin:
-    """Soft delete + audit per i viewset di governance: il `destroy` di default
-    di DRF chiama `instance.delete()` → hard delete sul DB (BaseModel non lo
-    override) e nessun audit, violando le regole #5 (soft delete sempre) e #3
-    (audit sulle azioni rilevanti). I sottoclassi impostano `audit_entity`."""
-
-    audit_entity = "entity"
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.soft_delete()
-        log_action(
-            user=request.user,
-            action_code=f"governance.{self.audit_entity}.delete",
-            level="L2",
-            entity=instance,
-            payload={"id": str(instance.id)},
-        )
-        return Response(status=204)
 
 
 class RoleAssignmentViewSet(viewsets.ModelViewSet):
@@ -226,7 +206,7 @@ class DocumentWorkflowPolicyViewSet(SoftDeleteAuditMixin, viewsets.ModelViewSet)
     queryset = DocumentWorkflowPolicy.objects.all()
     serializer_class = DocumentWorkflowPolicySerializer
     permission_classes = [GovernancePermission]
-    audit_entity = "document_workflow_policy"
+    audit_action = "governance.document_workflow_policy"
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)
@@ -253,11 +233,11 @@ class SecurityCommitteeViewSet(SoftDeleteAuditMixin, viewsets.ModelViewSet):
     queryset = SecurityCommittee.objects.all()
     serializer_class = SecurityCommitteeSerializer
     permission_classes = [GovernancePermission]
-    audit_entity = "security_committee"
+    audit_action = "governance.security_committee"
 
 
 class CommitteeMeetingViewSet(SoftDeleteAuditMixin, viewsets.ModelViewSet):
     queryset = CommitteeMeeting.objects.all()
     serializer_class = CommitteeMeetingSerializer
     permission_classes = [GovernancePermission]
-    audit_entity = "committee_meeting"
+    audit_action = "governance.committee_meeting"

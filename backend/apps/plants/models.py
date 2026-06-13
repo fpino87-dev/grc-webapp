@@ -117,6 +117,9 @@ class BusinessUnit(BaseModel):
         on_delete=models.SET_NULL,
     )
 
+    class Meta:
+        ordering = ["code"]
+
 
 class Plant(BaseModel):
     code = models.CharField(max_length=20, unique=True)
@@ -223,4 +226,5 @@ class PlantFramework(BaseModel):
 
     class Meta:
         unique_together = ["plant", "framework"]
+        ordering = ["plant_id", "framework_id"]
 
