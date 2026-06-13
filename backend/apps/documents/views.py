@@ -12,6 +12,7 @@ from core.scoping import (
     PlantScopedQuerysetMixin,
     get_user_plant_ids,
 )
+from core.viewsets import SoftDeleteAuditMixin
 
 from .models import Document, DocumentVersion, Evidence
 from .permissions import DocumentPermission
@@ -211,16 +212,27 @@ class DocumentViewSet(PlantPayloadWriteGuardMixin, viewsets.ModelViewSet):
             return Response({"error": str(e.message)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class DocumentVersionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+class DocumentVersionViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = DocumentVersion.objects.select_related("document", "uploaded_by")
     serializer_class = DocumentVersionSerializer
     permission_classes = [DocumentPermission]
     filterset_fields = ["document"]
     plant_field = "document__plant"
     allow_null_plant = True  # versioni di documenti org-wide visibili a tutti
+    # Lo storico versioni di un documento è materia d'audit: eliminazione =
+    # soft delete + audit (prima hard delete, perdita di storico).
+    audit_action = "documents.document_version"
 
     def perform_create(self, serializer):
-        serializer.save(uploaded_by=self.request.user)
+        from core.audit import log_action
+        instance = serializer.save(uploaded_by=self.request.user, created_by=self.request.user)
+        log_action(
+            user=self.request.user,
+            action_code="documents.document_version.create",
+            level="L2",
+            entity=instance,
+            payload={"id": str(instance.id), "document_id": str(instance.document_id)},
+        )
 
 
 class EvidenceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
