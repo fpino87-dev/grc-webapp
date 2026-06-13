@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from core.audit import log_action
 from core.jwt import ExportRateThrottle
 from core.scoping import PlantScopedQuerysetMixin
+from core.viewsets import SoftDeleteAuditMixin
 
 from .models import RiskAppetitePolicy, RiskAssessment, RiskDimension, RiskMitigationPlan
 from .permissions import RiskAppetitePermission, RiskPermission
@@ -345,12 +346,15 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         return response
 
 
-class RiskDimensionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+class RiskDimensionViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = RiskDimension.objects.select_related("assessment")
     serializer_class = RiskDimensionSerializer
     permission_classes = [RiskPermission]
-    filterset_fields = ["plant"]
+    # NB: NIENTE filterset_fields=["plant"] — RiskDimension non ha campo `plant`
+    # (lo derivava da assessment): DjangoFilterBackend andava in TypeError → 500
+    # su list/detail/delete. Il filtro per plant è gestito in get_queryset.
     plant_field = "assessment__plant"
+    audit_action = "risk.dimension"
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -438,19 +442,35 @@ class RiskMitigationPlanViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet)
         return Response(serializer.data)
 
 
-class RiskAppetitePolicyViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+class RiskAppetitePolicyViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = RiskAppetitePolicy.objects.select_related("plant", "approved_by")
     serializer_class = RiskAppetitePolicySerializer
     permission_classes = [RiskAppetitePermission]
     filterset_fields = ["plant", "framework_code"]
     plant_field = "plant"
     allow_null_plant = True  # plant=null = policy org-wide valida per tutti i plant
+    audit_action = "risk.appetite_policy"
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)
         log_action(
             user=self.request.user,
             action_code="risk.appetite_policy.create",
+            level="L1",
+            entity=instance,
+            payload={
+                "max_acceptable_score": instance.max_acceptable_score,
+                "framework_code": instance.framework_code,
+            },
+        )
+
+    def perform_update(self, serializer):
+        # La soglia di accettazione del rischio è governance: ogni modifica va
+        # tracciata (chi ha alzato/abbassato l'appetito e quando).
+        instance = serializer.save()
+        log_action(
+            user=self.request.user,
+            action_code="risk.appetite_policy.update",
             level="L1",
             entity=instance,
             payload={

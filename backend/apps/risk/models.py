@@ -268,6 +268,9 @@ class RiskAssessment(BaseModel):
         crit = getattr(self.critical_process, "criticality", 3)
         return min(25, round(self.score * multipliers.get(crit, 1.0)))
 
+    class Meta:
+        ordering = ["-created_at"]
+
 
 class RiskDimension(BaseModel):
     assessment = models.ForeignKey(
@@ -278,6 +281,9 @@ class RiskDimension(BaseModel):
     dimension_code = models.CharField(max_length=50)
     value = models.IntegerField()
     notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["assessment_id", "dimension_code"]
 
 
 class RiskMitigationPlan(BaseModel):
@@ -311,6 +317,9 @@ class RiskMitigationPlan(BaseModel):
         blank=True,
         on_delete=models.SET_NULL,
     )
+
+    class Meta:
+        ordering = ["-created_at"]
 
 
 class RiskAppetitePolicy(BaseModel):
