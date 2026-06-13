@@ -862,7 +862,14 @@
       "scope_plant_list": "Plusieurs sites",
       "select_sites": "Sélectionner les sites",
       "select_bu": "Sélectionner la business unit",
-      "no_sites": "(aucun site)"
+      "no_sites": "(aucun site)",
+      "title_full": "Accès & responsabilités",
+      "section_access": "Accès (ce qu'il peut faire)",
+      "section_resp": "Responsabilités (de quoi il répond)",
+      "no_resp": "Aucune responsabilité attribuée.",
+      "add_resp": "Ajouter une responsabilité",
+      "select_site": "Sélectionner le site",
+      "couple_suggest": "Accorder aussi l'accès « {{role}} » sur le même périmètre ?"
     }
   },
   "governance": {

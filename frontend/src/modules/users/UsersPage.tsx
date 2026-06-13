@@ -3,8 +3,19 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../../api/client";
 import { usersApi, plantAccessApi, GRC_ACCESS_ROLES, type GrcUser, type GrcRole, type PlantAccessGrant } from "../../api/endpoints/users";
 import { plantsApi } from "../../api/endpoints/plants";
+import { governanceApi, type RoleAssignment } from "../../api/endpoints/governance";
+import { todayISO } from "../../utils/dates";
 import { useAuthStore } from "../../store/auth";
 import { useTranslation } from "react-i18next";
+
+// Ruoli normativi (NormativeRole) — responsabilità di governance (0..N per persona).
+const GOVERNANCE_ROLES = [
+  "ciso", "compliance_officer", "risk_manager", "internal_auditor", "external_auditor",
+  "plant_manager", "control_owner", "plant_security_officer", "nis2_contact", "dpo",
+  "isms_manager", "comitato_membro", "bu_referente", "raci_responsible", "raci_accountable",
+] as const;
+// Ruoli che esistono sia come accesso (GrcRole) sia come responsabilità → coupling leggero.
+const OVERLAPPING_ROLES = new Set<string>(GRC_ACCESS_ROLES.filter(r => (GOVERNANCE_ROLES as readonly string[]).includes(r)));
 
 function AccessManagementModal({ user, onClose }: { user: GrcUser; onClose: () => void }) {
   const { t } = useTranslation();
@@ -15,11 +26,53 @@ function AccessManagementModal({ user, onClose }: { user: GrcUser; onClose: () =
   const [buId, setBuId] = useState<string>("");
   const [error, setError] = useState("");
 
+  // Responsabilità (governance RoleAssignment)
+  const [respRole, setRespRole] = useState<string>("ciso");
+  const [respScope, setRespScope] = useState<"org" | "bu" | "plant">("plant");
+  const [respScopeId, setRespScopeId] = useState<string>("");
+  const [respError, setRespError] = useState("");
+
   const { data: grants } = useQuery({ queryKey: ["plant-access", user.id], queryFn: () => plantAccessApi.listForUser(user.id) });
   const { data: plants } = useQuery({ queryKey: ["plants"], queryFn: () => plantsApi.list(), retry: false });
   const { data: bus } = useQuery({ queryKey: ["business-units"], queryFn: () => plantsApi.businessUnits(), retry: false });
+  const { data: resps } = useQuery({ queryKey: ["resp-assignments", user.id], queryFn: () => governanceApi.roleAssignments({ user: String(user.id) }) as Promise<RoleAssignment[]> });
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["plant-access", user.id] });
+  const invalidateResp = () => qc.invalidateQueries({ queryKey: ["resp-assignments", user.id] });
+
+  // Coupling leggero: se la responsabilità ha un nome di ruolo che è anche un
+  // accesso, propone (conferma esplicita) di creare il grant di accesso sullo
+  // stesso perimetro. Nessuna sincronizzazione automatica nascosta.
+  function maybeSuggestAccess(role: string, scope: string, scopeId: string) {
+    if (!OVERLAPPING_ROLES.has(role)) return;
+    if (!window.confirm(t("users.access.couple_suggest", { role: role.replace(/_/g, " ") }))) return;
+    plantAccessApi.create({
+      user: user.id, role,
+      scope_type: scope === "plant" ? "single_plant" : scope,
+      scope_plants: scope === "plant" && scopeId ? [scopeId] : undefined,
+      scope_bu: scope === "bu" ? (scopeId || null) : undefined,
+    }).then(invalidate).catch(() => { /* errore mostrato altrove */ });
+  }
+
+  const createResp = useMutation({
+    mutationFn: () => governanceApi.createRoleAssignment({
+      user: user.id, role: respRole,
+      scope_type: respScope,
+      scope_id: respScope === "org" ? null : (respScopeId || null),
+      valid_from: todayISO(),
+    } as Partial<RoleAssignment>),
+    onSuccess: () => {
+      setRespError("");
+      invalidateResp();
+      maybeSuggestAccess(respRole, respScope, respScopeId);
+      setRespScopeId("");
+    },
+    onError: (e: unknown) => {
+      const data = (e as { response?: { data?: Record<string, unknown> } })?.response?.data;
+      setRespError(data ? Object.values(data).flat().join(" ") : t("common.error"));
+    },
+  });
+  const deleteResp = useMutation({ mutationFn: (id: string) => governanceApi.deleteRoleAssignment(id), onSuccess: invalidateResp });
 
   const createMut = useMutation({
     mutationFn: () => plantAccessApi.create({
@@ -48,13 +101,14 @@ function AccessManagementModal({ user, onClose }: { user: GrcUser; onClose: () =
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="px-5 py-4 border-b flex items-center justify-between">
-          <h3 className="font-semibold text-gray-900">{t("users.access.title")} — {user.first_name} {user.last_name || user.username}</h3>
+          <h3 className="font-semibold text-gray-900">{t("users.access.title_full")} — {user.first_name} {user.last_name || user.username}</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-700 text-xl">×</button>
         </div>
 
         <div className="px-5 py-4 space-y-4">
           <p className="text-xs text-gray-500">{t("users.access.subtitle")}</p>
 
+          <p className="text-sm font-semibold text-blue-700">🔑 {t("users.access.section_access")}</p>
           {/* Grants esistenti */}
           <div className="border border-gray-200 rounded-lg divide-y">
             {(grants ?? []).length === 0 && <p className="px-3 py-3 text-sm text-gray-400">{t("users.access.no_grants")}</p>}
@@ -120,6 +174,69 @@ function AccessManagementModal({ user, onClose }: { user: GrcUser; onClose: () =
             <button onClick={() => createMut.mutate()} disabled={createMut.isPending}
               className="text-sm bg-slate-700 text-white rounded px-3 py-1.5 hover:bg-slate-800 disabled:opacity-50">
               {t("users.access.add")}
+            </button>
+          </div>
+
+          {/* ── Responsabilità governance ───────────────────────────────── */}
+          <p className="text-sm font-semibold text-indigo-700 pt-2">📋 {t("users.access.section_resp")}</p>
+          <div className="border border-gray-200 rounded-lg divide-y">
+            {(resps ?? []).length === 0 && <p className="px-3 py-3 text-sm text-gray-400">{t("users.access.no_resp")}</p>}
+            {(resps ?? []).map(r => (
+              <div key={r.id} className="flex items-center justify-between px-3 py-2 text-sm">
+                <div>
+                  <span className="font-medium text-gray-800">{r.role.replace(/_/g, " ")}</span>
+                  <span className="text-gray-500 text-xs ml-2">
+                    {r.scope_type === "org"
+                      ? t("users.access.scope_org")
+                      : `${r.scope_type === "bu" ? t("users.access.scope_bu") + ": " : ""}${r.scope_code ?? r.scope_type}`}
+                  </span>
+                </div>
+                <button onClick={() => deleteResp.mutate(r.id)} className="text-red-600 hover:text-red-800 text-xs border border-red-200 rounded px-2 py-0.5">
+                  {t("actions.delete")}
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="border border-gray-200 rounded-lg p-3 space-y-3 bg-gray-50/50">
+            <p className="text-xs font-semibold text-gray-600 uppercase">{t("users.access.add_resp")}</p>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="text-sm">
+                <span className="block text-xs text-gray-500 mb-1">{t("users.access.role")}</span>
+                <select value={respRole} onChange={e => setRespRole(e.target.value)} className="w-full border rounded px-2 py-1.5 text-sm">
+                  {GOVERNANCE_ROLES.map(r => <option key={r} value={r}>{r.replace(/_/g, " ")}</option>)}
+                </select>
+              </label>
+              <label className="text-sm">
+                <span className="block text-xs text-gray-500 mb-1">{t("users.access.scope")}</span>
+                <select value={respScope} onChange={e => { setRespScope(e.target.value as typeof respScope); setRespScopeId(""); }} className="w-full border rounded px-2 py-1.5 text-sm">
+                  <option value="plant">{t("users.access.scope_single_plant")}</option>
+                  <option value="bu">{t("users.access.scope_bu")}</option>
+                  <option value="org">{t("users.access.scope_org")}</option>
+                </select>
+              </label>
+            </div>
+            {respScope === "plant" && (
+              <label className="text-sm block">
+                <span className="block text-xs text-gray-500 mb-1">{t("users.access.select_site")}</span>
+                <select value={respScopeId} onChange={e => setRespScopeId(e.target.value)} className="w-full border rounded px-2 py-1.5 text-sm">
+                  <option value="">—</option>
+                  {(plants ?? []).map(p => <option key={p.id} value={p.id}>{p.code} — {p.name}</option>)}
+                </select>
+              </label>
+            )}
+            {respScope === "bu" && (
+              <label className="text-sm block">
+                <span className="block text-xs text-gray-500 mb-1">{t("users.access.select_bu")}</span>
+                <select value={respScopeId} onChange={e => setRespScopeId(e.target.value)} className="w-full border rounded px-2 py-1.5 text-sm">
+                  <option value="">—</option>
+                  {(bus ?? []).map(b => <option key={b.id} value={b.id}>{b.code} — {b.name}</option>)}
+                </select>
+              </label>
+            )}
+            {respError && <p className="text-xs text-red-600">{respError}</p>}
+            <button onClick={() => createResp.mutate()} disabled={createResp.isPending}
+              className="text-sm bg-indigo-700 text-white rounded px-3 py-1.5 hover:bg-indigo-800 disabled:opacity-50">
+              {t("users.access.add_resp")}
             </button>
           </div>
         </div>

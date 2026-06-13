@@ -23,6 +23,7 @@ class RoleAssignmentViewSet(viewsets.ModelViewSet):
     queryset = RoleAssignment.objects.select_related("user").all()
     serializer_class = RoleAssignmentSerializer
     permission_classes = [GovernancePermission]
+    filterset_fields = ["user", "role", "scope_type"]
 
     def get_queryset(self):
         # Scoping per accesso plant (D1): un utente non org-scope non deve

@@ -862,7 +862,14 @@
       "scope_plant_list": "Wiele zakładów",
       "select_sites": "Wybierz zakłady",
       "select_bu": "Wybierz jednostkę biznesową",
-      "no_sites": "(brak zakładu)"
+      "no_sites": "(brak zakładu)",
+      "title_full": "Dostępy i odpowiedzialności",
+      "section_access": "Dostęp (co może robić)",
+      "section_resp": "Odpowiedzialności (za co odpowiada)",
+      "no_resp": "Brak przypisanych odpowiedzialności.",
+      "add_resp": "Dodaj odpowiedzialność",
+      "select_site": "Wybierz zakład",
+      "couple_suggest": "Czy nadać też odpowiadający dostęp «{{role}}» na tym samym zakresie?"
     }
   },
   "governance": {

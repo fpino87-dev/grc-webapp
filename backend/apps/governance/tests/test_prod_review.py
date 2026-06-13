@@ -155,6 +155,22 @@ def test_scope_code_name_structured(client, user):
 
 
 @pytest.mark.django_db
+def test_role_assignments_filterable_by_user(client, user):
+    """Fase 3: il pannello per-utente filtra le responsabilità per ?user=."""
+    from apps.governance.models import NormativeRole, RoleAssignment
+
+    other = User.objects.create_user(username="resp_other", email="ro@test.com", password="test")
+    RoleAssignment.objects.create(user=user, role=NormativeRole.CISO, scope_type="org",
+                                  valid_from=timezone.localdate())
+    RoleAssignment.objects.create(user=other, role=NormativeRole.DPO, scope_type="org",
+                                  valid_from=timezone.localdate())
+    resp = client.get(f"{URL_ASSIGNMENTS}?user={user.id}")
+    assert resp.status_code == 200
+    rows = resp.data["results"] if isinstance(resp.data, dict) else resp.data
+    assert rows and all(r["user"] == user.id for r in rows)
+
+
+@pytest.mark.django_db
 def test_role_assignment_created_by_is_read_only(client, user):
     """Un client non può impostare created_by: lo fissa perform_create."""
     from apps.governance.models import NormativeRole, RoleAssignment

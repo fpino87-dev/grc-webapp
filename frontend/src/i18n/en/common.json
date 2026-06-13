@@ -795,7 +795,14 @@
       "scope_plant_list": "Multiple sites",
       "select_sites": "Select sites",
       "select_bu": "Select business unit",
-      "no_sites": "(no site)"
+      "no_sites": "(no site)",
+      "title_full": "Access & responsibilities",
+      "section_access": "Access (what they can do)",
+      "section_resp": "Responsibilities (what they're accountable for)",
+      "no_resp": "No responsibilities assigned.",
+      "add_resp": "Add responsibility",
+      "select_site": "Select site",
+      "couple_suggest": "Also grant the matching «{{role}}» access on the same scope?"
     }
   },
   "governance": {

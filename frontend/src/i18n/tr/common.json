@@ -862,7 +862,14 @@
       "scope_plant_list": "Birden çok tesis",
       "select_sites": "Tesisleri seçin",
       "select_bu": "İş birimini seçin",
-      "no_sites": "(tesis yok)"
+      "no_sites": "(tesis yok)",
+      "title_full": "Erişim ve sorumluluklar",
+      "section_access": "Erişim (ne yapabilir)",
+      "section_resp": "Sorumluluklar (neyden sorumlu)",
+      "no_resp": "Atanmış sorumluluk yok.",
+      "add_resp": "Sorumluluk ekle",
+      "select_site": "Tesisi seçin",
+      "couple_suggest": "Aynı kapsamda eşleşen «{{role}}» erişimi de verilsin mi?"
     }
   },
   "governance": {
