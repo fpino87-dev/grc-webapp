@@ -66,7 +66,7 @@ After the fix is released, a CVE will be requested if the severity warrants it (
 - The audit trail (M10) is append-only and cryptographically chained — tampering is detectable
 - No PII reaches external AI services without passing through `Sanitizer.sanitize()` (M20); a local-LLM (Ollama) option avoids external transfer entirely
 - Production deployment uses non-root Docker containers; secrets are never committed to the repository
-- A **Software Bill of Materials (SBOM)** can be produced from `backend/requirements/*.txt` and `frontend/package-lock.json` (CRA Annex I.2). *Roadmap: publish SBOM artifacts per release.*
+- A **Software Bill of Materials (SBOM)** in CycloneDX format is generated automatically for backend and frontend on every published release (`.github/workflows/sbom.yml`) and attached to the release assets (CRA Annex I.2).
 
 ---
 

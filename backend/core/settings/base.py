@@ -254,6 +254,10 @@ KPI_INGEST_API_KEY = env("KPI_INGEST_API_KEY", default="")
 # contenere PII incidentale → minimizzazione GDPR Art. 5.1.e. Default 12 mesi.
 AI_LOG_RETENTION_DAYS = env.int("AI_LOG_RETENTION_DAYS", default=365)
 
+# Età minima (giorni) oltre la quale i record soft-deleted possono essere purgati
+# definitivamente dal comando `purge_soft_deleted` (irreversibile, operator-driven).
+SOFT_DELETE_PURGE_DAYS = env.int("SOFT_DELETE_PURGE_DAYS", default=365)
+
 # Directory dove vengono salvati i file di backup (montata come volume Docker)
 BACKUP_DIR = env("BACKUP_DIR", default="/app/backups")
 # Cifratura at-rest dei backup pg_dump (newfix R4). Se vuota, i backup sono in

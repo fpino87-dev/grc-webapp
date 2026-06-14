@@ -1,0 +1,41 @@
+name: sbom
+
+# Genera la Software Bill of Materials (SBOM, formato CycloneDX) per backend e
+# frontend a ogni release pubblicata e su richiesta. Requisito CRA Annex I.2.
+# Gli SBOM sono caricati come artifact del workflow e, su release, allegati alla
+# release stessa.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: write   # necessario per allegare gli SBOM agli asset di release
+
+jobs:
+  sbom:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: SBOM backend (Python / requirements)
+        uses: anchore/sbom-action@v0
+        with:
+          path: backend
+          format: cyclonedx-json
+          output-file: sbom-backend.cyclonedx.json
+          artifact-name: sbom-backend.cyclonedx.json
+          upload-release-assets: true
+
+      - name: SBOM frontend (npm / package-lock)
+        uses: anchore/sbom-action@v0
+        with:
+          path: frontend
+          format: cyclonedx-json
+          output-file: sbom-frontend.cyclonedx.json
+          artifact-name: sbom-frontend.cyclonedx.json
+          upload-release-assets: true

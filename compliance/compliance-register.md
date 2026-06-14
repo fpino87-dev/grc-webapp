@@ -38,7 +38,7 @@
 | Rif. | Obbligo | Owner | Stato | Evidenza / azione |
 |------|---------|-------|-------|-------------------|
 | Cap. III/IV | Condivisione dati / clausole eque (B2B) | O | ⬜📄 | Rilevante in SaaS; clausole contrattuali |
-| Cap. VI | Switching / portabilità servizi cloud, no lock-in | P/O | 🟡 | Export CSV + backup esistono; verificare **export completo** del dato cliente |
+| Cap. VI | Switching / portabilità servizi cloud, no lock-in | P/O | ✅ | Export CSV + backup + comando **`export_portable_data`** (dump JSON aperto e re-importabile, anti lock-in) |
 | — | (Self-hosted: esposizione bassa) | D | ✅ | Il dato è già presso il cliente |
 
 ## Cyber Resilience Act (Reg. 2024/2847)
@@ -47,7 +47,7 @@
 |------|---------|-------|-------|-------------------|
 | — | Applicabilità | P | 🟡 | OSS **non commerciale esente**; con offerta commerciale/SaaS rientra |
 | Annex I | Requisiti di sicurezza essenziali | P | ✅ | Vedi GDPR Art.32 (stesse misure) |
-| Annex I.2 | **Gestione vulnerabilità** + SBOM | P | 🟡 | `pip-audit`/`npm audit` in CI; manca SBOM formale + processo patch documentato |
+| Annex I.2 | **Gestione vulnerabilità** + SBOM | P | ✅ | `pip-audit`/`npm audit` in CI + **SBOM CycloneDX per release** (`.github/workflows/sbom.yml`, allegato alla release) |
 | Art. 13 | Vulnerability disclosure coordinata | P | ✅ | [`SECURITY.md`](../SECURITY.md) a root: reporting privato, SLA, safe harbor, SBOM, allineato CRA/ISO 29147 |
 | — | Notifica incidenti/vuln sfruttate attivamente (~set 2026) | O | ⬜📄 | Processo se prodotto commerciale |
 

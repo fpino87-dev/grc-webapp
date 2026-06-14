@@ -51,6 +51,7 @@ runtime non persistono; i FK usano UUID → ok).
 1. **`[DA COMPILARE]`**: periodi di conservazione per categoria (titolare + vincoli settoriali).
 2. ✅ ~~Retention `AiInteractionLog`~~ — implementata: `cleanup_ai_interaction_logs` mensile,
    `AI_LOG_RETENTION_DAYS` (default 365gg, override env).
-3. Definire **purge definitivo** dei record soft-deleted dopo il periodo di retention.
+3. ✅ ~~Purge definitivo dei soft-deleted~~ — comando `purge_soft_deleted` (dry-run salvo
+   `--apply`, `--days` / `SOFT_DELETE_PURGE_DAYS`); operator-driven perché irreversibile.
 4. Per phishing/training: valutare **aggregazione/anonimizzazione** dopo il periodo utile (DPIA §6).
 5. Formalizzare il tutto in informativa (Art. 13-14) e ROPA (Art. 30).

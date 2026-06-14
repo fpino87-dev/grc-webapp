@@ -67,10 +67,10 @@ Misure tecniche già implementate che fanno da evidenza di privacy/security-by-d
 audit-PII assessment completi. Restano i campi `[DA COMPILARE]` di competenza del **titolare**
 (intestazione, basi giuridiche di dettaglio, periodi di conservazione, verifica certificazioni provider).
 
-**Tecnici** ancora aperti:
-1. Export/portabilità completi del dato cliente (Data Act).
-2. Purge definitivo dei record soft-deleted dopo il periodo di retention.
-3. Pubblicazione **SBOM** per release (CRA Annex I.2).
+**Tecnici** — tutti chiusi:
+1. ✅ Export/portabilità (Data Act): comando `export_portable_data` (dump JSON aperto).
+2. ✅ Purge soft-deleted dopo retention: comando `purge_soft_deleted` (dry-run/`--apply`).
+3. ✅ SBOM per release (CRA Annex I.2): `.github/workflows/sbom.yml` (CycloneDX, allegato alla release).
 
-*(Chiusi nel corso del lavoro: verifica PII payload audit, label "AI-generated", avviso cloud-PII,
-retention `AiInteractionLog`, esclusione external_auditor da OSINT.)*
+*(Chiusi nel corso del lavoro anche: verifica/minimizzazione PII payload audit, label "AI-generated",
+avviso cloud-PII, retention `AiInteractionLog`, esclusione external_auditor da OSINT.)*
