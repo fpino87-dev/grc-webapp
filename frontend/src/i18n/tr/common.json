@@ -340,6 +340,7 @@
     }
   },
   "ai": {
+    "generated_label": "Yapay zekâ tarafından üretilen içerik — kullanmadan önce doğrulayın.",
     "cloud_pii_notice": "Gizlilik notu: öneri bir bulut modeliyle üretiliyorsa, elle yazdığınız serbest metin alanlarında (ör. açıklama, notlar) kişiler için hayali isimler kullanın — yalnızca bu serbest alanlar sağlayıcıya gönderilebilir. Geri kalanı (IP'ler, e-postalar, vergi/kimlik numaraları, telefonlar, VKN'ler, tesis adları) otomatik olarak anonimleştirilir.",
     "suggestion_label": "AI Önerisi",
     "accept": "Bunu kullan",

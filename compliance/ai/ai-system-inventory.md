@@ -48,7 +48,7 @@ persone (es. scoring fornitori/dipendenti via AI): in quel caso rivalutare verso
 |--------|-------|------|
 | L'utente sa che interagisce con AI | ✅ | Banner "Raccomandazione AI" + badge provider/modello |
 | Avviso sui dati liberi verso cloud | ✅ | `ai.cloud_pii_notice` (banner + Copilot cockpit), i18n ×5 |
-| **Output marcato come "generato da AI"** | 🟡 **gap** | Aggiungere label/disclaimer esplicito sull'output AI (oltre al badge) |
+| **Output marcato come "generato da AI"** | ✅ | Label `ai.generated_label` su banner raccomandazioni + OSINT AI (anche nel testo esportato/copiato); cockpit già con `cockpit.ai.disclaimer` |
 | Tracciabilità interazioni | ✅ | `AiInteractionLog`: input_hash SHA-256 (mai il testo), output, confermatore |
 
 ## 5. Misure di minimizzazione (privacy + transfer)

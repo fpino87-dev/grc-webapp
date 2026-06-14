@@ -158,8 +158,13 @@ export function AiSuggestionBanner({
           {providerBadge} - {model || provider}
         </div>
       </div>
+      {!!result && (
+        <div className="mt-2 text-[11px] text-gray-500 flex items-center gap-1">
+          🤖 <span>{t("ai.generated_label")}</span>
+        </div>
+      )}
       {!isEditing && (
-        <div className="mt-2 whitespace-pre-wrap rounded border bg-gray-50 p-3 text-xs text-gray-800 min-h-28">
+        <div className="mt-1 whitespace-pre-wrap rounded border bg-gray-50 p-3 text-xs text-gray-800 min-h-28">
           {prettyText || "Nessun suggerimento disponibile."}
         </div>
       )}

@@ -340,6 +340,7 @@
     }
   },
   "ai": {
+    "generated_label": "Contenu généré par IA — à vérifier avant utilisation.",
     "cloud_pii_notice": "Note de confidentialité : si la recommandation est générée avec un modèle cloud, utilisez des noms fictifs pour les personnes dans les champs de texte saisis à la main (ex. description, notes) — seuls ces champs libres peuvent être envoyés au fournisseur. Tout le reste (IP, e-mails, codes fiscaux, téléphones, numéros de TVA, noms des sites) est anonymisé automatiquement.",
     "suggestion_label": "Suggestion IA",
     "accept": "Utiliser ceci",

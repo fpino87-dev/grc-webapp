@@ -26,7 +26,7 @@
 | Rif. | Obbligo | Owner | Stato | Evidenza / azione |
 |------|---------|-------|-------|-------------------|
 | Art. 6 / Annex III | Classificazione rischio (verificare Annex III.4 "gestione lavoratori") | P | 🟡📄 | Probabile **rischio limitato** (supporto + HIL, non valuta lavoratori); formalizzare in `ai/ai-system-inventory.md` |
-| Art. 50 | **Trasparenza**: dichiarare interazione AI + marcare output generato | P | 🟡 | Badge provider presente; **manca label esplicito "AI-generated"** sugli output |
+| Art. 50 | **Trasparenza**: dichiarare interazione AI + marcare output generato | P | ✅ | Badge provider + **label "Contenuto generato da AI"** su banner/OSINT (anche nell'export) + disclaimer cockpit |
 | Art. 14 | Supervisione umana | P | ✅ | Human-in-the-loop: output solo proposto, confirm/ignore (`AiInteractionLog`) |
 | Art. 12 | Record-keeping | P | ✅ | `AiInteractionLog` (input_hash SHA-256, mai il testo; output, confirmer) |
 | (GPAI) | Ruolo: **deployer** di GPAI di terzi | P | ✅ | Provider obligations su Anthropic/OpenAI; tu integratore/deployer |

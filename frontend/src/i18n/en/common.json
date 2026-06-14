@@ -58,6 +58,7 @@
     "close": "Close"
   },
   "ai": {
+    "generated_label": "AI-generated content — verify before use.",
     "cloud_pii_notice": "Privacy note: if the recommendation is generated with a cloud model, use fictitious names for people in the free-text fields you type by hand (e.g. description, notes) — only these free fields may be sent to the provider. Everything else (IPs, emails, tax codes, phone numbers, VAT numbers, site names) is anonymized automatically.",
     "suggestion_label": "AI Suggestion",
     "accept": "Use this",

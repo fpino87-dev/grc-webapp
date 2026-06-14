@@ -22,9 +22,12 @@ export function OsintAiPanel({ type, onClose }: { type: AiType; onClose: () => v
     board_report: t("osint.ai.board_report"),
   };
 
+  // Il marking "generato da AI" (AI Act Art. 50) viaggia con l'artefatto esportato.
+  const exportText = result ? `${t("ai.generated_label")}\n\n${result}` : "";
+
   function handleCopy() {
     if (result) {
-      navigator.clipboard.writeText(result);
+      navigator.clipboard.writeText(exportText);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -32,7 +35,7 @@ export function OsintAiPanel({ type, onClose }: { type: AiType; onClose: () => v
 
   function handleDownload() {
     if (!result) return;
-    const blob = new Blob([result], { type: "text/plain;charset=utf-8" });
+    const blob = new Blob([exportText], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -84,9 +87,14 @@ export function OsintAiPanel({ type, onClose }: { type: AiType; onClose: () => v
           )}
 
           {result && (
-            <pre className="whitespace-pre-wrap text-sm text-gray-800 font-sans leading-relaxed">
-              {result}
-            </pre>
+            <>
+              <div className="mb-2 text-[11px] text-gray-500 flex items-center gap-1">
+                🤖 <span>{t("ai.generated_label")}</span>
+              </div>
+              <pre className="whitespace-pre-wrap text-sm text-gray-800 font-sans leading-relaxed">
+                {result}
+              </pre>
+            </>
           )}
         </div>
 
