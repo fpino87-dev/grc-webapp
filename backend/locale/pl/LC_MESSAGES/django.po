@@ -1,7 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: grc-webapp\n"
-"POT-Creation-Date: 2026-03-18 00:00+0000\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-14 13:38+0200\n"
 "PO-Revision-Date: 2026-03-18 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -11,207 +12,746 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2));\n"
 
-msgid "Evidenza '%(title)s' ha %(age)s giorni (max consigliato: %(max_age)s gg)"
-msgstr "Dowód „%(title)s” ma %(age)s dni (zalecane maksimum: %(max_age)s dni)"
+#: apps/assets/services.py:187
+msgid "Impossibile eliminare: esistono valutazioni rischio attive collegate all'asset."
+msgstr "Nie można usunąć: istnieją aktywne oceny ryzyka powiązane z zasobem."
 
-msgid "Richiesti almeno %(count)s documenti approvati"
-msgstr "Wymagane jest co najmniej %(count)s zatwierdzonych dokumentów"
+#: apps/assets/services.py:192
+msgid "Impossibile eliminare: esistono scenari di rischio collegati all'asset."
+msgstr "Nie można usunąć: istnieją scenariusze ryzyka powiązane z zasobem."
 
-msgid "Richieste almeno %(count)s evidenze valide"
-msgstr "Wymagane jest co najmniej %(count)s ważnych dowodów"
+#: apps/assets/services.py:200
+msgid "Impossibile eliminare: rimuovere prima le dipendenze tra asset."
+msgstr "Nie można usunąć: najpierw usuń zależności między zasobami."
 
-msgid "• Documento mancante: %(desc)s"
-msgstr "• Brakujący dokument: %(desc)s"
-
-msgid "• Evidenza mancante: %(desc)s"
-msgstr "• Brakujący dowód: %(desc)s"
-
-msgid "• Evidenza scaduta: %(title)s (scaduta il %(date)s)"
-msgstr "• Przedawniony dowód: %(title)s (wygasł %(date)s)"
-
-msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata."
-msgstr "Nie można ustawić stanu na „zgodny” bez co najmniej jednego powiązanego ważnego dowodu."
-
-msgid "Requisiti non soddisfatti per stato Compliant:\\n"
-msgstr "Wymagania niespełnione dla stanu Zgodny:\\n"
-
-msgid "Almeno un documento approvato o un'evidenza valida richiesti per stato Parziale."
-msgstr "Co najmniej jeden zatwierdzony dokument lub ważny dowód jest wymagany dla stanu Częściowy."
-
-msgid "Lo stato N/A richiede una giustificazione scritta di almeno 20 caratteri."
-msgstr "Stan N/A wymaga pisemnego uzasadnienia o długości co najmniej 20 znaków."
-
-msgid "La giustificazione di esclusione per SOA richiede almeno 50 caratteri. Specificare il motivo formale per cui il controllo non è applicabile."
-msgstr "Uzasadnienie wyłączenia w SOA musi mieć co najmniej 50 znaków. Podaj formalny powód, dla którego kontrola nie ma zastosowania."
-
-msgid "Solo assessment completati possono essere approvati."
-msgstr "Tylko zakończone oceny mogą zostać zatwierdzone."
-
-msgid "Motivazione rifiuto obbligatoria (min 10 caratteri)."
-msgstr "Uzasadnienie odrzucenia jest obowiązkowe (minimum 10 znaków)."
-
-msgid "La nota è obbligatoria per l'accettazione formale del rischio."
-msgstr "Notatka jest obowiązkowa przy formalnej akceptacji ryzyka."
-
-msgid "Per rischi critici (rosso) la nota di accettazione deve essere di almeno 50 caratteri."
-msgstr "Dla ryzyk krytycznych (czerwonych) notatka akceptacyjna musi mieć co najmniej 50 znaków."
-
-msgid "Il ciclo è già chiuso."
-msgstr "Cykl jest już zamknięty."
-
-msgid "Per avanzare da PLAN a DO è obbligatorio descrivere l'azione pianificata (minimo 20 caratteri)."
-msgstr "Aby przejść z PLAN do DO, należy opisać zaplanowane działanie (minimum 20 znaków)."
-
-msgid "Per avanzare da DO a CHECK è obbligatorio allegare un'evidenza dell'implementazione."
-msgstr "Aby przejść z DO do CHECK, należy dołączyć dowód wdrożenia."
-
-msgid "Per avanzare da CHECK ad ACT è obbligatorio descrivere il risultato della verifica."
-msgstr "Aby przejść z CHECK do ACT, należy opisać wynik weryfikacji."
-
-msgid "Per avanzare da CHECK ad ACT è obbligatorio indicare l'esito: ok / partial / ko."
-msgstr "Aby przejść z CHECK do ACT, należy wskazać wynik: ok / partial / ko."
-
-msgid "Usa close_cycle() per chiudere dalla fase ACT."
-msgstr "Użyj close_cycle(), aby zamknąć cykl z fazy ACT."
-
-msgid "Il ciclo è in fase %(phase)s. Avanza fino ad ACT prima di chiudere."
-msgstr "Cykl znajduje się w fazie %(phase)s. Przejdź do ACT przed zamknięciem."
-
-msgid "Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata (minimo 20 caratteri)."
-msgstr "Aby zamknąć cykl, należy opisać znormalizowane działanie (minimum 20 znaków)."
-
-msgid "File troppo grande. Dimensione massima: 50MB."
-msgstr "Plik jest zbyt duży. Maksymalny rozmiar: 50 MB."
-
-msgid "Estensione file non consentita. Formati ammessi: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
-msgstr "Niedozwolone rozszerzenie pliku. Dozwolone formaty: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
-
-msgid "Generare lo snapshot dei dati prima di approvare il riesame."
-msgstr "Wygeneruj snapshot danych przed zatwierdzeniem przeglądu."
-
-msgid "Il riesame è già approvato."
-msgstr "Przegląd jest już zatwierdzony."
-
-msgid "RCA approvato obbligatorio per chiudere l'incidente."
-msgstr "Zatwierdzony RCA jest wymagany do zamknięcia incydentu."
-
-msgid "Policy predefinita"
-msgstr "Domyślna polityka"
-
-msgid "Plant non trovato"
-msgstr "Zakład nie został znaleziony"
-
-msgid "rule_type obbligatorio"
-msgstr "rule_type jest wymagany"
-
-msgid "Endpoint disponibile solo in ambiente di test (DEBUG=True)."
-msgstr "Endpoint dostępny tylko w środowisku testowym (DEBUG=True)."
-
-msgid "Solo il superuser può eseguire questa operazione"
-msgstr "Tylko superużytkownik może wykonać tę operację"
-
-msgid "Header X-Confirm-Reset: RESET-CONFIRMED richiesto"
-msgstr "Nagłówek X-Confirm-Reset: RESET-CONFIRMED jest wymagany"
-
-msgid "Utente non trovato"
-msgstr "Użytkownik nie został znaleziony"
-
-msgid "Evidenza non trovata"
-msgstr "Dowód nie został znaleziony"
-
-msgid "Non hai i permessi per inviare in revisione questo documento."
-msgstr "Nie masz uprawnień, aby wysłać ten dokument do przeglądu."
-
-msgid "Non hai i permessi per approvare questo documento."
-msgstr "Nie masz uprawnień, aby zatwierdzić ten dokument."
-
-msgid "Nessun file fornito."
-msgstr "Nie dostarczono żadnego pliku."
-
-msgid "Nessun file associato a questa evidenza."
-msgstr "Brak pliku powiązanego z tym dowodem."
-
-msgid "File non trovato nello storage."
-msgstr "Plik nie został znaleziony w magazynie."
-
+#: apps/assets/views.py:99 apps/assets/views.py:166
 msgid "change_ref obbligatorio"
 msgstr "change_ref jest wymagany"
 
-msgid "Questo ruolo è già terminato."
-msgstr "Ta rola jest już zakończona."
+#: apps/auth_grc/models.py:12
+msgid "Super Admin"
+msgstr "Super administrator"
 
-msgid "Motivo terminazione obbligatorio (min 5 caratteri)."
-msgstr "Powód zakończenia jest obowiązkowy (minimum 5 znaków)."
+#: apps/auth_grc/models.py:13 apps/governance/models.py:10
+msgid "Compliance Officer"
+msgstr "Specjalista ds. zgodności"
 
-msgid "new_user_id obbligatorio."
-msgstr "new_user_id jest wymagany."
+#: apps/auth_grc/models.py:14 apps/governance/models.py:11
+msgid "Risk Manager"
+msgstr "Menedżer ryzyka"
 
+#: apps/auth_grc/models.py:15 apps/governance/models.py:14
+msgid "Plant Manager"
+msgstr "Kierownik zakładu"
+
+#: apps/auth_grc/models.py:16 apps/governance/models.py:15
+msgid "Control Owner"
+msgstr "Właściciel kontroli"
+
+#: apps/auth_grc/models.py:17 apps/governance/models.py:12
+msgid "Auditor Interno"
+msgstr "Audytor wewnętrzny"
+
+#: apps/auth_grc/models.py:18 apps/governance/models.py:13
+msgid "Auditor Esterno"
+msgstr "Audytor zewnętrzny"
+
+#: apps/auth_grc/serializers.py:49
+msgid "Seleziona almeno un sito per questo perimetro."
+msgstr "Wybierz co najmniej jedną lokalizację dla tego zakresu."
+
+#: apps/auth_grc/serializers.py:55
+msgid "Seleziona una Business Unit per questo perimetro."
+msgstr "Wybierz jednostkę biznesową dla tego zakresu."
+
+#: apps/auth_grc/services.py:124
+msgid "Non puoi disattivare il tuo account da qui."
+msgstr "Nie możesz dezaktywować własnego konta w tym miejscu."
+
+#: apps/auth_grc/services.py:126
+msgid "Operazione non consentita su un account superuser."
+msgstr "Operacja niedozwolona na koncie superużytkownika."
+
+#: apps/auth_grc/views.py:49
+msgid "Endpoint disponibile solo in ambiente di test (DEBUG=True)."
+msgstr "Endpoint dostępny tylko w środowisku testowym (DEBUG=True)."
+
+#: apps/auth_grc/views.py:54
+msgid "Solo il superuser può eseguire questa operazione"
+msgstr "Tylko superużytkownik może wykonać tę operację"
+
+#: apps/auth_grc/views.py:60
+msgid "Header X-Confirm-Reset: RESET-CONFIRMED richiesto"
+msgstr "Nagłówek X-Confirm-Reset: RESET-CONFIRMED jest wymagany"
+
+#: apps/auth_grc/views.py:136 apps/auth_grc/views.py:190
+msgid "Utente non trovato"
+msgstr "Użytkownik nie został znaleziony"
+
+#: apps/auth_grc/views.py:140
+#, fuzzy
+#| msgid "Motivazione rifiuto obbligatoria (min 10 caratteri)."
+msgid "Motivazione obbligatoria (min 10 caratteri) per richiesta GDPR Art. 17"
+msgstr "Uzasadnienie odrzucenia jest obowiązkowe (minimum 10 znaków)."
+
+#: apps/auth_grc/views.py:143
+msgid "Utente anonimizzato (GDPR Art. 17)"
+msgstr "Użytkownik zanonimizowany (RODO art. 17)"
+
+#: apps/auth_grc/views.py:184
+msgid "Non sei autorizzato a visualizzare il gap analysis di altri utenti."
+msgstr "Nie masz uprawnień do przeglądania analizy luk innych użytkowników."
+
+#: apps/backups/models.py:9
+msgid "In attesa"
+msgstr "Oczekujące"
+
+#: apps/backups/models.py:10
+msgid "In corso"
+msgstr "W toku"
+
+#: apps/backups/models.py:11
+msgid "Completato"
+msgstr "Zakończone"
+
+#: apps/backups/models.py:12
+msgid "Fallito"
+msgstr "Nieudane"
+
+#: apps/backups/models.py:13
+msgid "Ripristino in corso"
+msgstr "Przywracanie w toku"
+
+#: apps/backups/models.py:14
+msgid "Ripristinato"
+msgstr "Przywrócone"
+
+#: apps/backups/models.py:17
+msgid "Automatico"
+msgstr "Automatyczne"
+
+#: apps/backups/models.py:18
+msgid "Manuale"
+msgstr "Ręczne"
+
+#: apps/backups/models.py:19
+msgid "Importato"
+msgstr "Zaimportowane"
+
+#: apps/compliance_schedule/views.py:36
+msgid "Policy predefinita"
+msgstr "Domyślna polityka"
+
+#: apps/compliance_schedule/views.py:46
+msgid "Plant non trovato"
+msgstr "Zakład nie został znaleziony"
+
+#: apps/compliance_schedule/views.py:56
+msgid "rule_type obbligatorio"
+msgstr "rule_type jest wymagany"
+
+#: apps/controls/export_engine.py:207
+msgid "Compliant"
+msgstr "Zgodny"
+
+#: apps/controls/export_engine.py:208
+msgid "Parziale"
+msgstr "Częściowy"
+
+#: apps/controls/export_engine.py:209
+msgid "Gap"
+msgstr "Luka"
+
+#: apps/controls/export_engine.py:210
+msgid "N/A"
+msgstr "N/D"
+
+#: apps/controls/export_engine.py:211
+msgid "Non valutato"
+msgstr "Nieoceniony"
+
+#: apps/controls/export_engine.py:219
+msgid "Applicabile"
+msgstr "Dotyczy"
+
+#: apps/controls/export_engine.py:220
+msgid "Escluso"
+msgstr "Wykluczony"
+
+#: apps/controls/export_engine.py:221
+msgid "Non pertinente"
+msgstr "Nieistotny"
+
+#: apps/controls/services/evidence.py:129
+#, python-format
+msgid "Documento collegato ma non classificato come '%(type)s' — verificare la classificazione"
+msgstr "Dokument powiązany, ale niesklasyfikowany jako '%(type)s' — sprawdź klasyfikację"
+
+#: apps/controls/services/evidence.py:167
+#, python-format
+msgid "Evidenza '%(title)s' ha %(age)s giorni (max consigliato: %(max_age)s gg)"
+msgstr "Dowód „%(title)s” ma %(age)s dni (zalecane maksimum: %(max_age)s dni)"
+
+#: apps/controls/services/evidence.py:190
+#, python-format
+msgid "Richiesti almeno %(count)s documenti approvati"
+msgstr "Wymagane jest co najmniej %(count)s zatwierdzonych dokumentów"
+
+#: apps/controls/services/evidence.py:200
+#, python-format
+msgid "Richieste almeno %(count)s evidenze valide"
+msgstr "Wymagane jest co najmniej %(count)s ważnych dowodów"
+
+#: apps/controls/services/frameworks.py:16
+#, python-format
 msgid "Framework JSON non valido: campi mancanti: %(fields)s"
 msgstr "Nieprawidłowy JSON frameworka: brakujące pola: %(fields)s"
 
+#: apps/controls/services/frameworks.py:20
 msgid "Framework JSON non valido: 'controls' deve essere una lista."
 msgstr "Nieprawidłowy JSON frameworka: „controls” musi być listą."
 
+#: apps/controls/services/frameworks.py:24
 msgid "Framework JSON non valido: ogni control deve essere un oggetto."
 msgstr "Nieprawidłowy JSON frameworka: każdy control musi być obiektem."
 
+#: apps/controls/services/frameworks.py:28
+#, python-format
 msgid "Framework JSON non valido: control senza campo '%(field)s'."
 msgstr "Nieprawidłowy JSON frameworka: control bez pola „%(field)s”."
 
+#: apps/controls/services/frameworks.py:181
+#, python-format
 msgid "Framework '%(code)s' importato (v%(version)s)."
 msgstr "Framework „%(code)s” został zaimportowany (v%(version)s)."
 
+#: apps/controls/services/frameworks.py:249
+#, fuzzy
+#| msgid "Solo il superuser può importare framework."
+msgid "Solo il superuser può eliminare un framework."
+msgstr "Tylko superużytkownik może importować frameworki."
+
+#: apps/controls/services/frameworks.py:258
+msgid "Impossibile eliminare: il framework è ancora assegnato a uno o più siti."
+msgstr "Nie można usunąć: framework jest nadal przypisany do co najmniej jednej lokalizacji."
+
+#: apps/controls/services/frameworks.py:284
+#, fuzzy
+#| msgid "Solo il superuser può importare framework."
+msgid "Solo il superuser può archiviare un framework."
+msgstr "Tylko superużytkownik może importować frameworki."
+
+#: apps/controls/services/frameworks.py:293
+msgid "Impossibile archiviare: il framework è ancora assegnato a uno o più siti."
+msgstr "Nie można zarchiwizować: framework jest nadal przypisany do co najmniej jednej lokalizacji."
+
+#: apps/controls/services/instances.py:18
+#, python-format
+msgid "• Documento mancante: %(desc)s"
+msgstr "• Brakujący dokument: %(desc)s"
+
+#: apps/controls/services/instances.py:20
+#, python-format
+msgid "• Evidenza mancante: %(desc)s"
+msgstr "• Brakujący dowód: %(desc)s"
+
+#: apps/controls/services/instances.py:23
+#, python-format
+msgid "• Evidenza scaduta: %(title)s (scaduta il %(date)s)"
+msgstr "• Przedawniony dowód: %(title)s (wygasł %(date)s)"
+
+#: apps/controls/services/instances.py:33
+msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata."
+msgstr "Nie można ustawić stanu na „zgodny” bez co najmniej jednego powiązanego ważnego dowodu."
+
+#: apps/controls/services/instances.py:37
+#, fuzzy
+#| msgid "Requisiti non soddisfatti per stato Compliant:\\n"
+msgid "Requisiti non soddisfatti per stato Compliant:\n"
+msgstr "Wymagania niespełnione dla stanu Zgodny:\\n"
+
+#: apps/controls/services/instances.py:52
+msgid "Almeno un documento approvato o un'evidenza valida richiesti per stato Parziale."
+msgstr "Co najmniej jeden zatwierdzony dokument lub ważny dowód jest wymagany dla stanu Częściowy."
+
+#: apps/controls/services/instances.py:58
+msgid "Lo stato N/A richiede una giustificazione scritta di almeno 20 caratteri."
+msgstr "Stan N/A wymaga pisemnego uzasadnienia o długości co najmniej 20 znaków."
+
+#: apps/controls/services/instances.py:106
+msgid "La giustificazione di esclusione per SOA richiede almeno 50 caratteri. Specificare il motivo formale per cui il controllo non è applicabile."
+msgstr "Uzasadnienie wyłączenia w SOA musi mieć co najmniej 50 znaków. Podaj formalny powód, dla którego kontrola nie ma zastosowania."
+
+#: apps/controls/services/instances.py:148
+#, python-format
+msgid "Impossibile eliminare il controllo: ha %(n)d valutazioni su uno o più siti. Il catalogo si gestisce ricaricando i framework."
+msgstr "Nie można usunąć kontroli: ma %(n)d ocen w co najmniej jednej lokalizacji. Katalog zarządzany jest przez ponowne wczytanie frameworków."
+
+#: apps/controls/services/instances.py:182
+msgid "Eliminazione consentita solo per controlli non ancora valutati."
+msgstr "Usuwanie dozwolone tylko dla kontroli jeszcze nieocenionych."
+
+#: apps/controls/views/frameworks.py:82 apps/controls/views/frameworks.py:102
 msgid "Solo il superuser può importare framework."
 msgstr "Tylko superużytkownik może importować frameworki."
 
+#: apps/controls/views/frameworks.py:111
 msgid "Conferma import non valida (sha256 mismatch)."
 msgstr "Nieprawidłowe potwierdzenie importu (sha256 mismatch)."
 
+#: apps/controls/views/frameworks.py:164
+#, python-format
+msgid "Generazione spiegazione non riuscita: %(err)s"
+msgstr "Generowanie wyjaśnienia nie powiodło się: %(err)s"
+
+#: apps/controls/views/frameworks.py:187
+#, fuzzy, python-format
+#| msgid "Errore generazione documento: %(err)s"
+msgid "Generazione documento non riuscita: %(err)s"
+msgstr "Błąd podczas generowania dokumentu: %(err)s"
+
+#: apps/controls/views/instances.py:54
 msgid "Nessun requisito documentale definito per questo controllo."
 msgstr "Brak wymogów dokumentacyjnych zdefiniowanych dla tej kontroli."
 
+#: apps/controls/views/instances.py:57
 msgid "Tutti i requisiti documentali sono soddisfatti."
 msgstr "Wszystkie wymogi dokumentacyjne są spełnione."
 
+#: apps/controls/views/instances.py:61
+#, python-format
 msgid "Documento mancante: %(desc)s"
 msgstr "Brakujący dokument: %(desc)s"
 
+#: apps/controls/views/instances.py:63
+#, python-format
 msgid "Evidenza mancante: %(desc)s"
 msgstr "Brakujący dowód: %(desc)s"
 
+#: apps/controls/views/instances.py:66
+#, python-format
 msgid "Evidenza scaduta: %(title)s (scaduta il %(date)s)"
 msgstr "Przedawniony dowód: %(title)s (wygasł %(date)s)"
 
+#: apps/controls/views/instances.py:72
 msgid "Requisiti parzialmente soddisfatti."
 msgstr "Wymagania częściowo spełnione."
 
+#: apps/controls/views/instances.py:72
 msgid "Nessuna documentazione presente."
 msgstr "Brak dokumentacji."
 
+#: apps/controls/views/instances.py:185
 msgid "Campo 'status' obbligatorio."
 msgstr "Pole „status” jest obowiązkowe."
 
+#: apps/controls/views/instances.py:343 apps/controls/views/instances.py:359
 msgid "Documento non trovato"
 msgstr "Dokument nie został znaleziony"
 
+#: apps/controls/views/instances.py:376 apps/controls/views/instances.py:471
 msgid "Evidenza non trovata."
 msgstr "Dowód nie został znaleziony."
 
+#: apps/controls/views/instances.py:401
 msgid "maturity_level deve essere tra 0 e 5"
 msgstr "maturity_level musi być pomiędzy 0 a 5"
 
-msgid "Parametri 'source' e 'target' obbligatori."
+#: apps/controls/views/instances.py:489 apps/controls/views/reports.py:31
+#, fuzzy
+#| msgid "Parametro 'framework' obbligatorio."
+msgid "Parametro 'plant' obbligatorio."
+msgstr "Parametr „framework” jest obowiązkowy."
+
+#: apps/controls/views/instances.py:492
+#, fuzzy
+#| msgid "Plant non trovato"
+msgid "Plant non trovato."
+msgstr "Zakład nie został znaleziony"
+
+#: apps/controls/views/instances.py:497 apps/controls/views/reports.py:36
+#: apps/controls/views/reports.py:91 core/scoping.py:112 core/scoping.py:169
+#: core/scoping.py:181
+msgid "Accesso negato per questo sito."
+msgstr "Odmowa dostępu do tej lokalizacji."
+
+#: apps/controls/views/reports.py:25
+#, fuzzy, python-format
+#| msgid "Parametri 'source' e 'target' obbligatori."
+msgid "Parametro 'target' obbligatorio (uno tra: %(targets)s)."
 msgstr "Parametry „source” i „target” są obowiązkowe."
 
+#: apps/controls/views/reports.py:83
 msgid "Parametro 'framework' obbligatorio."
 msgstr "Parametr „framework” jest obowiązkowy."
 
+#: apps/controls/views/reports.py:93
+msgid "Accesso negato: export aggregato riservato allo scope organizzazione."
+msgstr "Odmowa dostępu: eksport zbiorczy zarezerwowany dla zakresu organizacji."
+
+#: apps/controls/views/reports.py:99
+#, python-format
 msgid "Formato %(fmt)s non compatibile con framework %(fw)s. Usa uno di: %(allowed)s"
 msgstr "Format %(fmt)s nie jest kompatybilny z frameworkiem %(fw)s. Użyj jednego z: %(allowed)s"
 
+#: apps/controls/views/reports.py:117
+#, python-format
 msgid "Framework '%(fw)s' non attivo per questo sito. Framework attivi: %(active)s"
 msgstr "Framework „%(fw)s” nie jest aktywny dla tego zakładu. Aktywne frameworki: %(active)s"
 
+#: apps/controls/views/reports.py:132
+#, python-format
 msgid "Errore generazione documento: %(err)s"
 msgstr "Błąd podczas generowania dokumentu: %(err)s"
 
+#: apps/documents/services.py:293
+msgid "Eliminazione non consentita per documenti in approvazione o già approvati."
+msgstr "Usuwanie niedozwolone dla dokumentów w trakcie zatwierdzania lub już zatwierdzonych."
+
+#: apps/documents/services.py:318
+msgid "Eliminazione non consentita: l'evidenza è collegata a controlli già valutati."
+msgstr "Usuwanie niedozwolone: dowód jest powiązany z już ocenionymi kontrolami."
+
+#: apps/documents/views.py:141
+msgid "Non hai i permessi per inviare in revisione questo documento."
+msgstr "Nie masz uprawnień, aby wysłać ten dokument do przeglądu."
+
+#: apps/documents/views.py:154
+msgid "Non hai i permessi per approvare questo documento."
+msgstr "Nie masz uprawnień, aby zatwierdzić ten dokument."
+
+#: apps/documents/views.py:204 apps/plants/views.py:118
+msgid "Nessun file fornito."
+msgstr "Nie dostarczono żadnego pliku."
+
+#: apps/documents/views.py:315
+msgid "Nessun file associato a questa evidenza."
+msgstr "Brak pliku powiązanego z tym dowodem."
+
+#: apps/documents/views.py:319
+msgid "Percorso file non valido."
+msgstr "Nieprawidłowa ścieżka pliku."
+
+#: apps/documents/views.py:322
+msgid "File non trovato nello storage."
+msgstr "Plik nie został znaleziony w magazynie."
+
+#: apps/governance/models.py:9
+msgid "CISO"
+msgstr "CISO"
+
+#: apps/governance/models.py:16
+msgid "Plant Security Officer"
+msgstr "Specjalista ds. bezpieczeństwa zakładu"
+
+#: apps/governance/models.py:17
+msgid "Contatto NIS2"
+msgstr "Kontakt NIS2"
+
+#: apps/governance/models.py:18
+msgid "DPO"
+msgstr "DPO"
+
+#: apps/governance/models.py:19
+msgid "ISMS Manager"
+msgstr "Menedżer SZBI"
+
+#: apps/governance/models.py:20
+msgid "Membro Comitato"
+msgstr "Członek komitetu"
+
+#: apps/governance/models.py:21
+msgid "Referente BU"
+msgstr "Osoba kontaktowa BU"
+
+#: apps/governance/models.py:22
+msgid "RACI Responsible"
+msgstr "RACI Responsible"
+
+#: apps/governance/models.py:23
+msgid "RACI Accountable"
+msgstr "RACI Accountable"
+
+#: apps/governance/views.py:69
+msgid "Questo ruolo è già terminato."
+msgstr "Ta rola jest już zakończona."
+
+#: apps/governance/views.py:74
+msgid "Motivo terminazione obbligatorio (min 5 caratteri)."
+msgstr "Powód zakończenia jest obowiązkowy (minimum 5 znaków)."
+
+#: apps/governance/views.py:106
+msgid "new_user_id obbligatorio."
+msgstr "new_user_id jest wymagany."
+
+#: apps/governance/views.py:109
+#, fuzzy
+#| msgid "Utente non trovato"
+msgid "Utente non trovato."
+msgstr "Użytkownik nie został znaleziony"
+
+#: apps/incidents/serializers.py:55
+msgid "La chiusura dell'incidente avviene solo tramite l'azione dedicata, previo RCA approvato."
+msgstr "Zamknięcie incydentu odbywa się wyłącznie przez dedykowaną akcję, po zatwierdzonej analizie RCA."
+
+#: apps/incidents/services.py:18
+msgid "RCA approvato obbligatorio per chiudere l'incidente."
+msgstr "Zatwierdzony RCA jest wymagany do zamknięcia incydentu."
+
+#: apps/lessons/services.py:16
+#, python-format
+msgid "Solo una lezione in bozza può essere validata (stato attuale: %(s)s)."
+msgstr "Tylko lekcję w wersji roboczej można zatwierdzić (bieżący status: %(s)s)."
+
+#: apps/lessons/services.py:46
+msgid "La lezione deve essere validata prima di poter essere propagata."
+msgstr "Lekcja musi zostać zatwierdzona, zanim będzie można ją rozpropagować."
+
+#: apps/lessons/services.py:56
+msgid "Accesso negato per uno dei siti di destinazione."
+msgstr "Odmowa dostępu do jednej z lokalizacji docelowych."
+
+#: apps/management_review/services.py:305
+msgid "Generare lo snapshot dei dati prima di approvare il riesame."
+msgstr "Wygeneruj snapshot danych przed zatwierdzeniem przeglądu."
+
+#: apps/management_review/services.py:308
+msgid "Il riesame è già approvato."
+msgstr "Przegląd jest już zatwierdzony."
+
+#: apps/pdca/services.py:41
+msgid "Il ciclo è già chiuso."
+msgstr "Cykl jest już zamknięty."
+
+#: apps/pdca/services.py:50
+msgid "Per avanzare da PLAN a DO è obbligatorio descrivere l'azione pianificata (minimo 20 caratteri)."
+msgstr "Aby przejść z PLAN do DO, należy opisać zaplanowane działanie (minimum 20 znaków)."
+
+#: apps/pdca/services.py:58
+msgid "Per avanzare da DO a CHECK è obbligatorio allegare un'evidenza dell'implementazione."
+msgstr "Aby przejść z DO do CHECK, należy dołączyć dowód wdrożenia."
+
+#: apps/pdca/services.py:66
+msgid "Per avanzare da CHECK ad ACT è obbligatorio descrivere il risultato della verifica."
+msgstr "Aby przejść z CHECK do ACT, należy opisać wynik weryfikacji."
+
+#: apps/pdca/services.py:73
+msgid "Per avanzare da CHECK ad ACT è obbligatorio indicare l'esito: ok / partial / ko."
+msgstr "Aby przejść z CHECK do ACT, należy wskazać wynik: ok / partial / ko."
+
+#: apps/pdca/services.py:99
+msgid "Usa close_cycle() per chiudere dalla fase ACT."
+msgstr "Użyj close_cycle(), aby zamknąć cykl z fazy ACT."
+
+#: apps/pdca/services.py:153
+#, fuzzy, python-format
+#| msgid "Il ciclo è già chiuso."
+msgid "Il ciclo è già %(phase)s."
+msgstr "Cykl jest już zamknięty."
+
+#: apps/pdca/services.py:156
+#, fuzzy
+#| msgid "Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata (minimo 20 caratteri)."
+msgid "Per archiviare è obbligatorio specificare il motivo (minimo 20 caratteri)."
+msgstr "Aby zamknąć cykl, należy opisać znormalizowane działanie (minimum 20 znaków)."
+
+#: apps/pdca/services.py:190
+#, python-format
+msgid "Il ciclo è in fase %(phase)s. Avanza fino ad ACT prima di chiudere."
+msgstr "Cykl znajduje się w fazie %(phase)s. Przejdź do ACT przed zamknięciem."
+
+#: apps/pdca/services.py:197
+msgid "Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata (minimo 20 caratteri)."
+msgstr "Aby zamknąć cykl, należy opisać znormalizowane działanie (minimum 20 znaków)."
+
+#: apps/pdca/views.py:64
+msgid "Evidenza non trovata"
+msgstr "Dowód nie został znaleziony"
+
+#: apps/pdca/views.py:130
+#, fuzzy
+#| msgid "Motivo terminazione obbligatorio (min 5 caratteri)."
+msgid "Motivo cancellazione obbligatorio (min 10 caratteri)."
+msgstr "Powód zakończenia jest obowiązkowy (minimum 5 znaków)."
+
+#: apps/pdca/views.py:137
+msgid "Ciclo gia' chiuso: ha generato una Lesson Learned e fa parte dell'audit trail. Non e' cancellabile."
+msgstr "Cykl już zamknięty: wygenerował wnioski (Lesson Learned) i jest częścią ścieżki audytu. Nie można go usunąć."
+
+#: apps/pdca/views.py:152
+#, python-format
+msgid "Impossibile cancellare: %(count)d finding manuali aperti referenziano questo ciclo. Chiudi o annulla prima i finding."
+msgstr "Nie można usunąć: %(count)d otwartych ręcznych ustaleń odwołuje się do tego cyklu. Najpierw zamknij lub anuluj ustalenia."
+
+#: apps/plants/models.py:213
+msgid "Max 1 livello di nesting per i sub-plant."
+msgstr "Maksymalnie 1 poziom zagnieżdżenia dla podlokalizacji."
+
+#: apps/plants/serializers.py:32
+#, python-format
+msgid "Timezone IANA non valido: %(tz)s"
+msgstr "Nieprawidłowa strefa czasowa IANA: %(tz)s"
+
+#: apps/plants/serializers.py:43
+msgid "Max 1 livello di nesting per i sub-plant: il sito scelto è già un sotto-sito."
+msgstr "Maksymalnie 1 poziom zagnieżdżenia dla podlokalizacji: wybrana lokalizacja jest już podlokalizacją."
+
+#: apps/plants/services.py:173
+#, fuzzy
+#| msgid "Solo il superuser può importare framework."
+msgid "Solo il superuser può forzare l'eliminazione del sito."
+msgstr "Tylko superużytkownik może importować frameworki."
+
+#: apps/plants/services.py:250
+#, fuzzy
+#| msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata."
+msgid "Impossibile eliminare il sito: sono presenti dipendenze collegate."
+msgstr "Nie można ustawić stanu na „zgodny” bez co najmniej jednego powiązanego ważnego dowodu."
+
+#: apps/plants/views.py:66
+msgid "Impossibile cambiare il codice: il sito ha controlli collegati."
+msgstr "Nie można zmienić kodu: lokalizacja ma powiązane kontrole."
+
+#: apps/plants/views.py:80
+#, python-format
+msgid "Questo sito ha %(n)d incidente aperto."
+msgid_plural "Questo sito ha %(n)d incidenti aperti."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: apps/plants/views.py:153
+#, fuzzy
+#| msgid "Nessun requisito documentale definito per questo controllo."
+msgid "Nessun logo configurato per questo sito."
+msgstr "Brak wymogów dokumentacyjnych zdefiniowanych dla tej kontroli."
+
+#: apps/plants/views.py:157
+msgid "Logo non disponibile: usa l'upload file per i loghi del sito."
+msgstr "Logo niedostępne: użyj przesyłania pliku dla logo lokalizacji."
+
+#: apps/plants/views.py:167 apps/plants/views.py:170
+#, fuzzy
+#| msgid "File non trovato nello storage."
+msgid "Logo non trovato nello storage."
+msgstr "Plik nie został znaleziony w magazynie."
+
+#: apps/reporting/services.py:965 apps/reporting/services.py:976
+#: apps/reporting/views.py:128
+msgid "Tutti i siti"
+msgstr "Wszystkie lokalizacje"
+
+#: apps/reporting/services.py:968 apps/reporting/services.py:979
+msgid "BU"
+msgstr "BU"
+
+#: apps/reporting/services.py:972 apps/reporting/services.py:983
+msgid "(nessun sito)"
+msgstr "(brak lokalizacji)"
+
+#: apps/reporting/views.py:118
+msgid "Utente"
+msgstr "Użytkownik"
+
+#: apps/reporting/views.py:118
+msgid "Email"
+msgstr "E-mail"
+
+#: apps/reporting/views.py:118
+msgid "Attivo"
+msgstr "Aktywny"
+
+#: apps/reporting/views.py:119
+msgid "Tipo"
+msgstr "Typ"
+
+#: apps/reporting/views.py:119
+msgid "Ruolo"
+msgstr "Rola"
+
+#: apps/reporting/views.py:119
+msgid "Perimetro"
+msgstr "Zakres"
+
+#: apps/reporting/views.py:120
+msgid "Siti"
+msgstr "Lokalizacje"
+
+#: apps/reporting/views.py:120
+msgid "Scadenza"
+msgstr "Termin"
+
+#: apps/reporting/views.py:120
+msgid "Segnalazioni"
+msgstr "Oznaczenia"
+
+#: apps/reporting/views.py:125
+msgid "Sì"
+msgstr "Tak"
+
+#: apps/reporting/views.py:125
+msgid "No"
+msgstr "Nie"
+
+#: apps/reporting/views.py:126
+msgid "Accesso"
+msgstr "Dostęp"
+
+#: apps/reporting/views.py:126
+msgid "Responsabilità"
+msgstr "Odpowiedzialność"
+
+#: apps/risk/services.py:246
+msgid "La nota è obbligatoria per l'accettazione formale del rischio."
+msgstr "Notatka jest obowiązkowa przy formalnej akceptacji ryzyka."
+
+#: apps/risk/services.py:249
+msgid "Per rischi critici (rosso) la nota di accettazione deve essere di almeno 50 caratteri."
+msgstr "Dla ryzyk krytycznych (czerwonych) notatka akceptacyjna musi mieć co najmniej 50 znaków."
+
+#: apps/suppliers/services.py:369
+msgid "Solo assessment completati possono essere approvati."
+msgstr "Tylko zakończone oceny mogą zostać zatwierdzone."
+
+#: apps/suppliers/services.py:401
+msgid "Motivazione rifiuto obbligatoria (min 10 caratteri)."
+msgstr "Uzasadnienie odrzucenia jest obowiązkowe (minimum 10 znaków)."
+
+#: apps/suppliers/services.py:446
+#, fuzzy
+#| msgid "Nessun requisito documentale definito per questo controllo."
+msgid "Nessun indirizzo email configurato per questo fornitore."
+msgstr "Brak wymogów dokumentacyjnych zdefiniowanych dla tej kontroli."
+
+#: apps/suppliers/services.py:502
+msgid "Il questionario ha già ricevuto risposta."
+msgstr "Kwestionariusz już otrzymał odpowiedź."
+
+#: apps/tasks/services.py:208
+msgid "Tutti gli item obbligatori devono essere spuntati prima di completare."
+msgstr "Wszystkie obowiązkowe pozycje muszą być zaznaczone przed zakończeniem."
+
+#: core/scoping.py:115
+msgid "Accesso negato: vista aggregata su tutti i siti riservata allo scope organizzazione."
+msgstr "Odmowa dostępu: widok zbiorczy wszystkich lokalizacji zarezerwowany dla zakresu organizacji."
+
+#: core/uploads.py:86
+#, fuzzy, python-format
+#| msgid "File troppo grande. Dimensione massima: 50MB."
+msgid "File troppo grande. Dimensione massima: %(mb)sMB."
+msgstr "Plik jest zbyt duży. Maksymalny rozmiar: 50 MB."
+
+#: core/uploads.py:94
+#, fuzzy, python-format
+#| msgid "Estensione file non consentita. Formati ammessi: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
+msgid "Estensione file non consentita. Formati ammessi: %(formats)s."
+msgstr "Niedozwolone rozszerzenie pliku. Dozwolone formaty: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
+
+#: core/uploads.py:104
+msgid "Tipo di file non consentito. Il contenuto del file non corrisponde all'estensione."
+msgstr "Niedozwolony typ pliku. Zawartość pliku nie odpowiada rozszerzeniu."
+
+#: core/uploads.py:113
+#, python-format
+msgid "Il contenuto del file non corrisponde all'estensione .%(ext)s."
+msgstr "Zawartość pliku nie odpowiada rozszerzeniu .%(ext)s."

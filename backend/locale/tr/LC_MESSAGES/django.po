@@ -1,7 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: grc-webapp\n"
-"POT-Creation-Date: 2026-03-18 00:00+0000\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-14 13:38+0200\n"
 "PO-Revision-Date: 2026-03-18 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -11,207 +12,745 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-msgid "Evidenza '%(title)s' ha %(age)s giorni (max consigliato: %(max_age)s gg)"
-msgstr "'%(title)s' kanıtı %(age)s günlük (önerilen en fazla: %(max_age)s gün)"
+#: apps/assets/services.py:187
+msgid "Impossibile eliminare: esistono valutazioni rischio attive collegate all'asset."
+msgstr "Silinemiyor: varlığa bağlı aktif risk değerlendirmeleri var."
 
-msgid "Richiesti almeno %(count)s documenti approvati"
-msgstr "En az %(count)s onaylı doküman gereklidir"
+#: apps/assets/services.py:192
+msgid "Impossibile eliminare: esistono scenari di rischio collegati all'asset."
+msgstr "Silinemiyor: varlığa bağlı risk senaryoları var."
 
-msgid "Richieste almeno %(count)s evidenze valide"
-msgstr "En az %(count)s geçerli kanıt gereklidir"
+#: apps/assets/services.py:200
+msgid "Impossibile eliminare: rimuovere prima le dipendenze tra asset."
+msgstr "Silinemiyor: önce varlık bağımlılıklarını kaldırın."
 
-msgid "• Documento mancante: %(desc)s"
-msgstr "• Eksik doküman: %(desc)s"
-
-msgid "• Evidenza mancante: %(desc)s"
-msgstr "• Eksik kanıt: %(desc)s"
-
-msgid "• Evidenza scaduta: %(title)s (scaduta il %(date)s)"
-msgstr "• Süresi dolmuş kanıt: %(title)s (%(date)s tarihinde süresi doldu)"
-
-msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata."
-msgstr "En az bir geçerli kanıt iliştirilmeden durum 'uyumlu' olarak ayarlanamaz."
-
-msgid "Requisiti non soddisfatti per stato Compliant:\\n"
-msgstr "Uyumlu durumu için karşılanmayan gereksinimler:\\n"
-
-msgid "Almeno un documento approvato o un'evidenza valida richiesti per stato Parziale."
-msgstr "Kısmi durumu için en az bir onaylı doküman veya geçerli kanıt gereklidir."
-
-msgid "Lo stato N/A richiede una giustificazione scritta di almeno 20 caratteri."
-msgstr "N/A durumu için en az 20 karakterlik yazılı bir gerekçe gereklidir."
-
-msgid "La giustificazione di esclusione per SOA richiede almeno 50 caratteri. Specificare il motivo formale per cui il controllo non è applicabile."
-msgstr "SOA dışlama gerekçesi en az 50 karakter olmalıdır. Kontrolün neden uygulanabilir olmadığını resmi olarak belirtin."
-
-msgid "Solo assessment completati possono essere approvati."
-msgstr "Yalnızca tamamlanmış değerlendirmeler onaylanabilir."
-
-msgid "Motivazione rifiuto obbligatoria (min 10 caratteri)."
-msgstr "Reddetme gerekçesi zorunludur (en az 10 karakter)."
-
-msgid "La nota è obbligatoria per l'accettazione formale del rischio."
-msgstr "Riskin resmi olarak kabulü için not zorunludur."
-
-msgid "Per rischi critici (rosso) la nota di accettazione deve essere di almeno 50 caratteri."
-msgstr "Kritik (kırmızı) riskler için kabul notu en az 50 karakter olmalıdır."
-
-msgid "Il ciclo è già chiuso."
-msgstr "Döngü zaten kapatılmış."
-
-msgid "Per avanzare da PLAN a DO è obbligatorio descrivere l'azione pianificata (minimo 20 caratteri)."
-msgstr "PLAN'dan DO'ya geçmek için planlanan eylemin tanımlanması zorunludur (en az 20 karakter)."
-
-msgid "Per avanzare da DO a CHECK è obbligatorio allegare un'evidenza dell'implementazione."
-msgstr "DO'dan CHECK'e geçmek için uygulamaya dair bir kanıt iliştirilmesi zorunludur."
-
-msgid "Per avanzare da CHECK ad ACT è obbligatorio descrivere il risultato della verifica."
-msgstr "CHECK'ten ACT'e geçmek için doğrulama sonucunun tanımlanması zorunludur."
-
-msgid "Per avanzare da CHECK ad ACT è obbligatorio indicare l'esito: ok / partial / ko."
-msgstr "CHECK'ten ACT'e geçmek için sonucu belirtmek zorunludur: ok / partial / ko."
-
-msgid "Usa close_cycle() per chiudere dalla fase ACT."
-msgstr "Döngüyü ACT aşamasından kapatmak için close_cycle() kullanın."
-
-msgid "Il ciclo è in fase %(phase)s. Avanza fino ad ACT prima di chiudere."
-msgstr "Döngü şu aşamada: %(phase)s. Kapatmadan önce ACT aşamasına ilerleyin."
-
-msgid "Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata (minimo 20 caratteri)."
-msgstr "Döngüyü kapatmak için standartlaştırılmış eylemi tanımlamak zorunludur (en az 20 karakter)."
-
-msgid "File troppo grande. Dimensione massima: 50MB."
-msgstr "Dosya çok büyük. Maksimum boyut: 50 MB."
-
-msgid "Estensione file non consentita. Formati ammessi: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
-msgstr "Dosya uzantısına izin verilmiyor. İzin verilen formatlar: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
-
-msgid "Generare lo snapshot dei dati prima di approvare il riesame."
-msgstr "Gözden geçirmeyi onaylamadan önce veri snapshot'ını oluşturun."
-
-msgid "Il riesame è già approvato."
-msgstr "Gözden geçirme zaten onaylanmış."
-
-msgid "RCA approvato obbligatorio per chiudere l'incidente."
-msgstr "Olayı kapatmak için onaylanmış bir RCA zorunludur."
-
-msgid "Policy predefinita"
-msgstr "Varsayılan politika"
-
-msgid "Plant non trovato"
-msgstr "Tesis bulunamadı"
-
-msgid "rule_type obbligatorio"
-msgstr "rule_type zorunludur"
-
-msgid "Endpoint disponibile solo in ambiente di test (DEBUG=True)."
-msgstr "Endpoint yalnızca test ortamında kullanılabilir (DEBUG=True)."
-
-msgid "Solo il superuser può eseguire questa operazione"
-msgstr "Bu işlemi yalnızca süper kullanıcı gerçekleştirebilir"
-
-msgid "Header X-Confirm-Reset: RESET-CONFIRMED richiesto"
-msgstr "X-Confirm-Reset başlığı: RESET-CONFIRMED zorunludur"
-
-msgid "Utente non trovato"
-msgstr "Kullanıcı bulunamadı"
-
-msgid "Evidenza non trovata"
-msgstr "Kanıt bulunamadı"
-
-msgid "Non hai i permessi per inviare in revisione questo documento."
-msgstr "Bu dokümanı incelemeye göndermek için izniniz yok."
-
-msgid "Non hai i permessi per approvare questo documento."
-msgstr "Bu dokümanı onaylamak için izniniz yok."
-
-msgid "Nessun file fornito."
-msgstr "Herhangi bir dosya sağlanmadı."
-
-msgid "Nessun file associato a questa evidenza."
-msgstr "Bu kanıtla iliştirilmiş bir dosya yok."
-
-msgid "File non trovato nello storage."
-msgstr "Dosya depolamada bulunamadı."
-
+#: apps/assets/views.py:99 apps/assets/views.py:166
 msgid "change_ref obbligatorio"
 msgstr "change_ref zorunludur"
 
-msgid "Questo ruolo è già terminato."
-msgstr "Bu rol zaten sonlandırılmış."
+#: apps/auth_grc/models.py:12
+msgid "Super Admin"
+msgstr "Süper Yönetici"
 
-msgid "Motivo terminazione obbligatorio (min 5 caratteri)."
-msgstr "Sonlandırma gerekçesi zorunludur (en az 5 karakter)."
+#: apps/auth_grc/models.py:13 apps/governance/models.py:10
+msgid "Compliance Officer"
+msgstr "Uyum Sorumlusu"
 
-msgid "new_user_id obbligatorio."
-msgstr "new_user_id zorunludur."
+#: apps/auth_grc/models.py:14 apps/governance/models.py:11
+msgid "Risk Manager"
+msgstr "Risk Yöneticisi"
 
+#: apps/auth_grc/models.py:15 apps/governance/models.py:14
+msgid "Plant Manager"
+msgstr "Tesis Yöneticisi"
+
+#: apps/auth_grc/models.py:16 apps/governance/models.py:15
+msgid "Control Owner"
+msgstr "Kontrol Sahibi"
+
+#: apps/auth_grc/models.py:17 apps/governance/models.py:12
+msgid "Auditor Interno"
+msgstr "İç Denetçi"
+
+#: apps/auth_grc/models.py:18 apps/governance/models.py:13
+msgid "Auditor Esterno"
+msgstr "Dış Denetçi"
+
+#: apps/auth_grc/serializers.py:49
+msgid "Seleziona almeno un sito per questo perimetro."
+msgstr "Bu kapsam için en az bir tesis seçin."
+
+#: apps/auth_grc/serializers.py:55
+msgid "Seleziona una Business Unit per questo perimetro."
+msgstr "Bu kapsam için bir İş Birimi seçin."
+
+#: apps/auth_grc/services.py:124
+msgid "Non puoi disattivare il tuo account da qui."
+msgstr "Kendi hesabınızı buradan devre dışı bırakamazsınız."
+
+#: apps/auth_grc/services.py:126
+msgid "Operazione non consentita su un account superuser."
+msgstr "Süper kullanıcı hesabında bu işleme izin verilmiyor."
+
+#: apps/auth_grc/views.py:49
+msgid "Endpoint disponibile solo in ambiente di test (DEBUG=True)."
+msgstr "Endpoint yalnızca test ortamında kullanılabilir (DEBUG=True)."
+
+#: apps/auth_grc/views.py:54
+msgid "Solo il superuser può eseguire questa operazione"
+msgstr "Bu işlemi yalnızca süper kullanıcı gerçekleştirebilir"
+
+#: apps/auth_grc/views.py:60
+msgid "Header X-Confirm-Reset: RESET-CONFIRMED richiesto"
+msgstr "X-Confirm-Reset başlığı: RESET-CONFIRMED zorunludur"
+
+#: apps/auth_grc/views.py:136 apps/auth_grc/views.py:190
+msgid "Utente non trovato"
+msgstr "Kullanıcı bulunamadı"
+
+#: apps/auth_grc/views.py:140
+#, fuzzy
+#| msgid "Motivazione rifiuto obbligatoria (min 10 caratteri)."
+msgid "Motivazione obbligatoria (min 10 caratteri) per richiesta GDPR Art. 17"
+msgstr "Reddetme gerekçesi zorunludur (en az 10 karakter)."
+
+#: apps/auth_grc/views.py:143
+msgid "Utente anonimizzato (GDPR Art. 17)"
+msgstr "Kullanıcı anonimleştirildi (GDPR Madde 17)"
+
+#: apps/auth_grc/views.py:184
+msgid "Non sei autorizzato a visualizzare il gap analysis di altri utenti."
+msgstr "Diğer kullanıcıların boşluk analizini görüntüleme yetkiniz yok."
+
+#: apps/backups/models.py:9
+msgid "In attesa"
+msgstr "Beklemede"
+
+#: apps/backups/models.py:10
+msgid "In corso"
+msgstr "Devam ediyor"
+
+#: apps/backups/models.py:11
+msgid "Completato"
+msgstr "Tamamlandı"
+
+#: apps/backups/models.py:12
+msgid "Fallito"
+msgstr "Başarısız"
+
+#: apps/backups/models.py:13
+msgid "Ripristino in corso"
+msgstr "Geri yükleme devam ediyor"
+
+#: apps/backups/models.py:14
+msgid "Ripristinato"
+msgstr "Geri yüklendi"
+
+#: apps/backups/models.py:17
+msgid "Automatico"
+msgstr "Otomatik"
+
+#: apps/backups/models.py:18
+msgid "Manuale"
+msgstr "Manuel"
+
+#: apps/backups/models.py:19
+msgid "Importato"
+msgstr "İçe aktarıldı"
+
+#: apps/compliance_schedule/views.py:36
+msgid "Policy predefinita"
+msgstr "Varsayılan politika"
+
+#: apps/compliance_schedule/views.py:46
+msgid "Plant non trovato"
+msgstr "Tesis bulunamadı"
+
+#: apps/compliance_schedule/views.py:56
+msgid "rule_type obbligatorio"
+msgstr "rule_type zorunludur"
+
+#: apps/controls/export_engine.py:207
+msgid "Compliant"
+msgstr "Uyumlu"
+
+#: apps/controls/export_engine.py:208
+msgid "Parziale"
+msgstr "Kısmi"
+
+#: apps/controls/export_engine.py:209
+msgid "Gap"
+msgstr "Boşluk"
+
+#: apps/controls/export_engine.py:210
+msgid "N/A"
+msgstr "N/A"
+
+#: apps/controls/export_engine.py:211
+msgid "Non valutato"
+msgstr "Değerlendirilmedi"
+
+#: apps/controls/export_engine.py:219
+msgid "Applicabile"
+msgstr "Uygulanabilir"
+
+#: apps/controls/export_engine.py:220
+msgid "Escluso"
+msgstr "Hariç tutuldu"
+
+#: apps/controls/export_engine.py:221
+msgid "Non pertinente"
+msgstr "İlgili değil"
+
+#: apps/controls/services/evidence.py:129
+#, python-format
+msgid "Documento collegato ma non classificato come '%(type)s' — verificare la classificazione"
+msgstr "Belge bağlı ancak '%(type)s' olarak sınıflandırılmamış — sınıflandırmayı kontrol edin"
+
+#: apps/controls/services/evidence.py:167
+#, python-format
+msgid "Evidenza '%(title)s' ha %(age)s giorni (max consigliato: %(max_age)s gg)"
+msgstr "'%(title)s' kanıtı %(age)s günlük (önerilen en fazla: %(max_age)s gün)"
+
+#: apps/controls/services/evidence.py:190
+#, python-format
+msgid "Richiesti almeno %(count)s documenti approvati"
+msgstr "En az %(count)s onaylı doküman gereklidir"
+
+#: apps/controls/services/evidence.py:200
+#, python-format
+msgid "Richieste almeno %(count)s evidenze valide"
+msgstr "En az %(count)s geçerli kanıt gereklidir"
+
+#: apps/controls/services/frameworks.py:16
+#, python-format
 msgid "Framework JSON non valido: campi mancanti: %(fields)s"
 msgstr "Geçersiz framework JSON: eksik alanlar: %(fields)s"
 
+#: apps/controls/services/frameworks.py:20
 msgid "Framework JSON non valido: 'controls' deve essere una lista."
 msgstr "Geçersiz framework JSON: 'controls' bir liste olmalıdır."
 
+#: apps/controls/services/frameworks.py:24
 msgid "Framework JSON non valido: ogni control deve essere un oggetto."
 msgstr "Geçersiz framework JSON: her control bir nesne olmalıdır."
 
+#: apps/controls/services/frameworks.py:28
+#, python-format
 msgid "Framework JSON non valido: control senza campo '%(field)s'."
 msgstr "Geçersiz framework JSON: control '%(field)s' alanına sahip değil."
 
+#: apps/controls/services/frameworks.py:181
+#, python-format
 msgid "Framework '%(code)s' importato (v%(version)s)."
 msgstr "'%(code)s' framework'ü içe aktarıldı (v%(version)s)."
 
+#: apps/controls/services/frameworks.py:249
+#, fuzzy
+#| msgid "Solo il superuser può importare framework."
+msgid "Solo il superuser può eliminare un framework."
+msgstr "Framework içe aktarmayı yalnızca süper kullanıcı yapabilir."
+
+#: apps/controls/services/frameworks.py:258
+msgid "Impossibile eliminare: il framework è ancora assegnato a uno o più siti."
+msgstr "Silinemiyor: çerçeve hâlâ bir veya daha fazla tesise atanmış."
+
+#: apps/controls/services/frameworks.py:284
+#, fuzzy
+#| msgid "Solo il superuser può importare framework."
+msgid "Solo il superuser può archiviare un framework."
+msgstr "Framework içe aktarmayı yalnızca süper kullanıcı yapabilir."
+
+#: apps/controls/services/frameworks.py:293
+msgid "Impossibile archiviare: il framework è ancora assegnato a uno o più siti."
+msgstr "Arşivlenemiyor: çerçeve hâlâ bir veya daha fazla tesise atanmış."
+
+#: apps/controls/services/instances.py:18
+#, python-format
+msgid "• Documento mancante: %(desc)s"
+msgstr "• Eksik doküman: %(desc)s"
+
+#: apps/controls/services/instances.py:20
+#, python-format
+msgid "• Evidenza mancante: %(desc)s"
+msgstr "• Eksik kanıt: %(desc)s"
+
+#: apps/controls/services/instances.py:23
+#, python-format
+msgid "• Evidenza scaduta: %(title)s (scaduta il %(date)s)"
+msgstr "• Süresi dolmuş kanıt: %(title)s (%(date)s tarihinde süresi doldu)"
+
+#: apps/controls/services/instances.py:33
+msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata."
+msgstr "En az bir geçerli kanıt iliştirilmeden durum 'uyumlu' olarak ayarlanamaz."
+
+#: apps/controls/services/instances.py:37
+#, fuzzy
+#| msgid "Requisiti non soddisfatti per stato Compliant:\\n"
+msgid "Requisiti non soddisfatti per stato Compliant:\n"
+msgstr "Uyumlu durumu için karşılanmayan gereksinimler:\\n"
+
+#: apps/controls/services/instances.py:52
+msgid "Almeno un documento approvato o un'evidenza valida richiesti per stato Parziale."
+msgstr "Kısmi durumu için en az bir onaylı doküman veya geçerli kanıt gereklidir."
+
+#: apps/controls/services/instances.py:58
+msgid "Lo stato N/A richiede una giustificazione scritta di almeno 20 caratteri."
+msgstr "N/A durumu için en az 20 karakterlik yazılı bir gerekçe gereklidir."
+
+#: apps/controls/services/instances.py:106
+msgid "La giustificazione di esclusione per SOA richiede almeno 50 caratteri. Specificare il motivo formale per cui il controllo non è applicabile."
+msgstr "SOA dışlama gerekçesi en az 50 karakter olmalıdır. Kontrolün neden uygulanabilir olmadığını resmi olarak belirtin."
+
+#: apps/controls/services/instances.py:148
+#, python-format
+msgid "Impossibile eliminare il controllo: ha %(n)d valutazioni su uno o più siti. Il catalogo si gestisce ricaricando i framework."
+msgstr "Kontrol silinemiyor: bir veya daha fazla tesiste %(n)d değerlendirmesi var. Katalog, çerçeveler yeniden yüklenerek yönetilir."
+
+#: apps/controls/services/instances.py:182
+msgid "Eliminazione consentita solo per controlli non ancora valutati."
+msgstr "Silme yalnızca henüz değerlendirilmemiş kontroller için izinlidir."
+
+#: apps/controls/views/frameworks.py:82 apps/controls/views/frameworks.py:102
 msgid "Solo il superuser può importare framework."
 msgstr "Framework içe aktarmayı yalnızca süper kullanıcı yapabilir."
 
+#: apps/controls/views/frameworks.py:111
 msgid "Conferma import non valida (sha256 mismatch)."
 msgstr "Geçersiz içe aktarma onayı (sha256 uyuşmazlığı)."
 
+#: apps/controls/views/frameworks.py:164
+#, python-format
+msgid "Generazione spiegazione non riuscita: %(err)s"
+msgstr "Açıklama oluşturma başarısız: %(err)s"
+
+#: apps/controls/views/frameworks.py:187
+#, fuzzy, python-format
+#| msgid "Errore generazione documento: %(err)s"
+msgid "Generazione documento non riuscita: %(err)s"
+msgstr "Doküman oluşturma hatası: %(err)s"
+
+#: apps/controls/views/instances.py:54
 msgid "Nessun requisito documentale definito per questo controllo."
 msgstr "Bu kontrol için tanımlanmış dokümantasyon gereksinimi yok."
 
+#: apps/controls/views/instances.py:57
 msgid "Tutti i requisiti documentali sono soddisfatti."
 msgstr "Tüm dokümantasyon gereksinimleri karşılanmıştır."
 
+#: apps/controls/views/instances.py:61
+#, python-format
 msgid "Documento mancante: %(desc)s"
 msgstr "Eksik doküman: %(desc)s"
 
+#: apps/controls/views/instances.py:63
+#, python-format
 msgid "Evidenza mancante: %(desc)s"
 msgstr "Eksik kanıt: %(desc)s"
 
+#: apps/controls/views/instances.py:66
+#, python-format
 msgid "Evidenza scaduta: %(title)s (scaduta il %(date)s)"
 msgstr "Süresi dolmuş kanıt: %(title)s (%(date)s tarihinde süresi doldu)"
 
+#: apps/controls/views/instances.py:72
 msgid "Requisiti parzialmente soddisfatti."
 msgstr "Gereksinimler kısmen karşılandı."
 
+#: apps/controls/views/instances.py:72
 msgid "Nessuna documentazione presente."
 msgstr "Herhangi bir dokümantasyon mevcut değil."
 
+#: apps/controls/views/instances.py:185
 msgid "Campo 'status' obbligatorio."
 msgstr "'status' alanı zorunludur."
 
+#: apps/controls/views/instances.py:343 apps/controls/views/instances.py:359
 msgid "Documento non trovato"
 msgstr "Doküman bulunamadı"
 
+#: apps/controls/views/instances.py:376 apps/controls/views/instances.py:471
 msgid "Evidenza non trovata."
 msgstr "Kanıt bulunamadı."
 
+#: apps/controls/views/instances.py:401
 msgid "maturity_level deve essere tra 0 e 5"
 msgstr "maturity_level 0 ile 5 arasında olmalıdır"
 
-msgid "Parametri 'source' e 'target' obbligatori."
+#: apps/controls/views/instances.py:489 apps/controls/views/reports.py:31
+#, fuzzy
+#| msgid "Parametro 'framework' obbligatorio."
+msgid "Parametro 'plant' obbligatorio."
+msgstr "'framework' parametresi zorunludur."
+
+#: apps/controls/views/instances.py:492
+#, fuzzy
+#| msgid "Plant non trovato"
+msgid "Plant non trovato."
+msgstr "Tesis bulunamadı"
+
+#: apps/controls/views/instances.py:497 apps/controls/views/reports.py:36
+#: apps/controls/views/reports.py:91 core/scoping.py:112 core/scoping.py:169
+#: core/scoping.py:181
+msgid "Accesso negato per questo sito."
+msgstr "Bu tesis için erişim reddedildi."
+
+#: apps/controls/views/reports.py:25
+#, fuzzy, python-format
+#| msgid "Parametri 'source' e 'target' obbligatori."
+msgid "Parametro 'target' obbligatorio (uno tra: %(targets)s)."
 msgstr "'source' ve 'target' parametreleri zorunludur."
 
+#: apps/controls/views/reports.py:83
 msgid "Parametro 'framework' obbligatorio."
 msgstr "'framework' parametresi zorunludur."
 
+#: apps/controls/views/reports.py:93
+msgid "Accesso negato: export aggregato riservato allo scope organizzazione."
+msgstr "Erişim reddedildi: toplu dışa aktarma yalnızca kuruluş kapsamına özeldir."
+
+#: apps/controls/views/reports.py:99
+#, python-format
 msgid "Formato %(fmt)s non compatibile con framework %(fw)s. Usa uno di: %(allowed)s"
 msgstr "%(fmt)s formatı %(fw)s framework'ü ile uyumlu değil. Şunlardan birini kullanın: %(allowed)s"
 
+#: apps/controls/views/reports.py:117
+#, python-format
 msgid "Framework '%(fw)s' non attivo per questo sito. Framework attivi: %(active)s"
 msgstr "'%(fw)s' framework'ü bu tesis için aktif değil. Aktif framework'ler: %(active)s"
 
+#: apps/controls/views/reports.py:132
+#, python-format
 msgid "Errore generazione documento: %(err)s"
 msgstr "Doküman oluşturma hatası: %(err)s"
 
+#: apps/documents/services.py:293
+msgid "Eliminazione non consentita per documenti in approvazione o già approvati."
+msgstr "Onay sürecindeki veya zaten onaylanmış belgeler için silmeye izin verilmiyor."
+
+#: apps/documents/services.py:318
+msgid "Eliminazione non consentita: l'evidenza è collegata a controlli già valutati."
+msgstr "Silmeye izin verilmiyor: kanıt zaten değerlendirilmiş kontrollere bağlı."
+
+#: apps/documents/views.py:141
+msgid "Non hai i permessi per inviare in revisione questo documento."
+msgstr "Bu dokümanı incelemeye göndermek için izniniz yok."
+
+#: apps/documents/views.py:154
+msgid "Non hai i permessi per approvare questo documento."
+msgstr "Bu dokümanı onaylamak için izniniz yok."
+
+#: apps/documents/views.py:204 apps/plants/views.py:118
+msgid "Nessun file fornito."
+msgstr "Herhangi bir dosya sağlanmadı."
+
+#: apps/documents/views.py:315
+msgid "Nessun file associato a questa evidenza."
+msgstr "Bu kanıtla iliştirilmiş bir dosya yok."
+
+#: apps/documents/views.py:319
+msgid "Percorso file non valido."
+msgstr "Geçersiz dosya yolu."
+
+#: apps/documents/views.py:322
+msgid "File non trovato nello storage."
+msgstr "Dosya depolamada bulunamadı."
+
+#: apps/governance/models.py:9
+msgid "CISO"
+msgstr "CISO"
+
+#: apps/governance/models.py:16
+msgid "Plant Security Officer"
+msgstr "Tesis Güvenlik Sorumlusu"
+
+#: apps/governance/models.py:17
+msgid "Contatto NIS2"
+msgstr "NIS2 İrtibat Kişisi"
+
+#: apps/governance/models.py:18
+msgid "DPO"
+msgstr "DPO"
+
+#: apps/governance/models.py:19
+msgid "ISMS Manager"
+msgstr "BGYS Yöneticisi"
+
+#: apps/governance/models.py:20
+msgid "Membro Comitato"
+msgstr "Komite Üyesi"
+
+#: apps/governance/models.py:21
+msgid "Referente BU"
+msgstr "BU Sorumlusu"
+
+#: apps/governance/models.py:22
+msgid "RACI Responsible"
+msgstr "RACI Sorumlu"
+
+#: apps/governance/models.py:23
+msgid "RACI Accountable"
+msgstr "RACI Hesap Veren"
+
+#: apps/governance/views.py:69
+msgid "Questo ruolo è già terminato."
+msgstr "Bu rol zaten sonlandırılmış."
+
+#: apps/governance/views.py:74
+msgid "Motivo terminazione obbligatorio (min 5 caratteri)."
+msgstr "Sonlandırma gerekçesi zorunludur (en az 5 karakter)."
+
+#: apps/governance/views.py:106
+msgid "new_user_id obbligatorio."
+msgstr "new_user_id zorunludur."
+
+#: apps/governance/views.py:109
+#, fuzzy
+#| msgid "Utente non trovato"
+msgid "Utente non trovato."
+msgstr "Kullanıcı bulunamadı"
+
+#: apps/incidents/serializers.py:55
+msgid "La chiusura dell'incidente avviene solo tramite l'azione dedicata, previo RCA approvato."
+msgstr "Olayın kapatılması yalnızca onaylanmış bir RCA sonrası özel eylemle yapılır."
+
+#: apps/incidents/services.py:18
+msgid "RCA approvato obbligatorio per chiudere l'incidente."
+msgstr "Olayı kapatmak için onaylanmış bir RCA zorunludur."
+
+#: apps/lessons/services.py:16
+#, python-format
+msgid "Solo una lezione in bozza può essere validata (stato attuale: %(s)s)."
+msgstr "Yalnızca taslak durumundaki bir ders doğrulanabilir (mevcut durum: %(s)s)."
+
+#: apps/lessons/services.py:46
+msgid "La lezione deve essere validata prima di poter essere propagata."
+msgstr "Ders, yayılabilmesi için önce doğrulanmalıdır."
+
+#: apps/lessons/services.py:56
+msgid "Accesso negato per uno dei siti di destinazione."
+msgstr "Hedef tesislerden biri için erişim reddedildi."
+
+#: apps/management_review/services.py:305
+msgid "Generare lo snapshot dei dati prima di approvare il riesame."
+msgstr "Gözden geçirmeyi onaylamadan önce veri snapshot'ını oluşturun."
+
+#: apps/management_review/services.py:308
+msgid "Il riesame è già approvato."
+msgstr "Gözden geçirme zaten onaylanmış."
+
+#: apps/pdca/services.py:41
+msgid "Il ciclo è già chiuso."
+msgstr "Döngü zaten kapatılmış."
+
+#: apps/pdca/services.py:50
+msgid "Per avanzare da PLAN a DO è obbligatorio descrivere l'azione pianificata (minimo 20 caratteri)."
+msgstr "PLAN'dan DO'ya geçmek için planlanan eylemin tanımlanması zorunludur (en az 20 karakter)."
+
+#: apps/pdca/services.py:58
+msgid "Per avanzare da DO a CHECK è obbligatorio allegare un'evidenza dell'implementazione."
+msgstr "DO'dan CHECK'e geçmek için uygulamaya dair bir kanıt iliştirilmesi zorunludur."
+
+#: apps/pdca/services.py:66
+msgid "Per avanzare da CHECK ad ACT è obbligatorio descrivere il risultato della verifica."
+msgstr "CHECK'ten ACT'e geçmek için doğrulama sonucunun tanımlanması zorunludur."
+
+#: apps/pdca/services.py:73
+msgid "Per avanzare da CHECK ad ACT è obbligatorio indicare l'esito: ok / partial / ko."
+msgstr "CHECK'ten ACT'e geçmek için sonucu belirtmek zorunludur: ok / partial / ko."
+
+#: apps/pdca/services.py:99
+msgid "Usa close_cycle() per chiudere dalla fase ACT."
+msgstr "Döngüyü ACT aşamasından kapatmak için close_cycle() kullanın."
+
+#: apps/pdca/services.py:153
+#, fuzzy, python-format
+#| msgid "Il ciclo è già chiuso."
+msgid "Il ciclo è già %(phase)s."
+msgstr "Döngü zaten kapatılmış."
+
+#: apps/pdca/services.py:156
+#, fuzzy
+#| msgid "Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata (minimo 20 caratteri)."
+msgid "Per archiviare è obbligatorio specificare il motivo (minimo 20 caratteri)."
+msgstr "Döngüyü kapatmak için standartlaştırılmış eylemi tanımlamak zorunludur (en az 20 karakter)."
+
+#: apps/pdca/services.py:190
+#, python-format
+msgid "Il ciclo è in fase %(phase)s. Avanza fino ad ACT prima di chiudere."
+msgstr "Döngü şu aşamada: %(phase)s. Kapatmadan önce ACT aşamasına ilerleyin."
+
+#: apps/pdca/services.py:197
+msgid "Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata (minimo 20 caratteri)."
+msgstr "Döngüyü kapatmak için standartlaştırılmış eylemi tanımlamak zorunludur (en az 20 karakter)."
+
+#: apps/pdca/views.py:64
+msgid "Evidenza non trovata"
+msgstr "Kanıt bulunamadı"
+
+#: apps/pdca/views.py:130
+#, fuzzy
+#| msgid "Motivo terminazione obbligatorio (min 5 caratteri)."
+msgid "Motivo cancellazione obbligatorio (min 10 caratteri)."
+msgstr "Sonlandırma gerekçesi zorunludur (en az 5 karakter)."
+
+#: apps/pdca/views.py:137
+msgid "Ciclo gia' chiuso: ha generato una Lesson Learned e fa parte dell'audit trail. Non e' cancellabile."
+msgstr "Döngü zaten kapatılmış: bir Lesson Learned oluşturdu ve denetim izinin parçası. Silinemez."
+
+#: apps/pdca/views.py:152
+#, python-format
+msgid "Impossibile cancellare: %(count)d finding manuali aperti referenziano questo ciclo. Chiudi o annulla prima i finding."
+msgstr "Silinemiyor: %(count)d açık manuel bulgu bu döngüye başvuruyor. Önce bulguları kapatın veya iptal edin."
+
+#: apps/plants/models.py:213
+msgid "Max 1 livello di nesting per i sub-plant."
+msgstr "Alt tesisler için en fazla 1 iç içe geçme düzeyi."
+
+#: apps/plants/serializers.py:32
+#, python-format
+msgid "Timezone IANA non valido: %(tz)s"
+msgstr "Geçersiz IANA saat dilimi: %(tz)s"
+
+#: apps/plants/serializers.py:43
+msgid "Max 1 livello di nesting per i sub-plant: il sito scelto è già un sotto-sito."
+msgstr "Alt tesisler için en fazla 1 iç içe geçme düzeyi: seçilen tesis zaten bir alt tesis."
+
+#: apps/plants/services.py:173
+#, fuzzy
+#| msgid "Solo il superuser può importare framework."
+msgid "Solo il superuser può forzare l'eliminazione del sito."
+msgstr "Framework içe aktarmayı yalnızca süper kullanıcı yapabilir."
+
+#: apps/plants/services.py:250
+#, fuzzy
+#| msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata."
+msgid "Impossibile eliminare il sito: sono presenti dipendenze collegate."
+msgstr "En az bir geçerli kanıt iliştirilmeden durum 'uyumlu' olarak ayarlanamaz."
+
+#: apps/plants/views.py:66
+msgid "Impossibile cambiare il codice: il sito ha controlli collegati."
+msgstr "Kod değiştirilemiyor: tesisin bağlı kontrolleri var."
+
+#: apps/plants/views.py:80
+#, python-format
+msgid "Questo sito ha %(n)d incidente aperto."
+msgid_plural "Questo sito ha %(n)d incidenti aperti."
+msgstr[0] ""
+msgstr[1] ""
+
+#: apps/plants/views.py:153
+#, fuzzy
+#| msgid "Nessun requisito documentale definito per questo controllo."
+msgid "Nessun logo configurato per questo sito."
+msgstr "Bu kontrol için tanımlanmış dokümantasyon gereksinimi yok."
+
+#: apps/plants/views.py:157
+msgid "Logo non disponibile: usa l'upload file per i loghi del sito."
+msgstr "Logo mevcut değil: tesis logoları için dosya yüklemeyi kullanın."
+
+#: apps/plants/views.py:167 apps/plants/views.py:170
+#, fuzzy
+#| msgid "File non trovato nello storage."
+msgid "Logo non trovato nello storage."
+msgstr "Dosya depolamada bulunamadı."
+
+#: apps/reporting/services.py:965 apps/reporting/services.py:976
+#: apps/reporting/views.py:128
+msgid "Tutti i siti"
+msgstr "Tüm tesisler"
+
+#: apps/reporting/services.py:968 apps/reporting/services.py:979
+msgid "BU"
+msgstr "BU"
+
+#: apps/reporting/services.py:972 apps/reporting/services.py:983
+msgid "(nessun sito)"
+msgstr "(tesis yok)"
+
+#: apps/reporting/views.py:118
+msgid "Utente"
+msgstr "Kullanıcı"
+
+#: apps/reporting/views.py:118
+msgid "Email"
+msgstr "E-posta"
+
+#: apps/reporting/views.py:118
+msgid "Attivo"
+msgstr "Aktif"
+
+#: apps/reporting/views.py:119
+msgid "Tipo"
+msgstr "Tür"
+
+#: apps/reporting/views.py:119
+msgid "Ruolo"
+msgstr "Rol"
+
+#: apps/reporting/views.py:119
+msgid "Perimetro"
+msgstr "Kapsam"
+
+#: apps/reporting/views.py:120
+msgid "Siti"
+msgstr "Tesisler"
+
+#: apps/reporting/views.py:120
+msgid "Scadenza"
+msgstr "Son Tarih"
+
+#: apps/reporting/views.py:120
+msgid "Segnalazioni"
+msgstr "İşaretler"
+
+#: apps/reporting/views.py:125
+msgid "Sì"
+msgstr "Evet"
+
+#: apps/reporting/views.py:125
+msgid "No"
+msgstr "Hayır"
+
+#: apps/reporting/views.py:126
+msgid "Accesso"
+msgstr "Erişim"
+
+#: apps/reporting/views.py:126
+msgid "Responsabilità"
+msgstr "Sorumluluk"
+
+#: apps/risk/services.py:246
+msgid "La nota è obbligatoria per l'accettazione formale del rischio."
+msgstr "Riskin resmi olarak kabulü için not zorunludur."
+
+#: apps/risk/services.py:249
+msgid "Per rischi critici (rosso) la nota di accettazione deve essere di almeno 50 caratteri."
+msgstr "Kritik (kırmızı) riskler için kabul notu en az 50 karakter olmalıdır."
+
+#: apps/suppliers/services.py:369
+msgid "Solo assessment completati possono essere approvati."
+msgstr "Yalnızca tamamlanmış değerlendirmeler onaylanabilir."
+
+#: apps/suppliers/services.py:401
+msgid "Motivazione rifiuto obbligatoria (min 10 caratteri)."
+msgstr "Reddetme gerekçesi zorunludur (en az 10 karakter)."
+
+#: apps/suppliers/services.py:446
+#, fuzzy
+#| msgid "Nessun requisito documentale definito per questo controllo."
+msgid "Nessun indirizzo email configurato per questo fornitore."
+msgstr "Bu kontrol için tanımlanmış dokümantasyon gereksinimi yok."
+
+#: apps/suppliers/services.py:502
+msgid "Il questionario ha già ricevuto risposta."
+msgstr "Anket zaten yanıtlandı."
+
+#: apps/tasks/services.py:208
+msgid "Tutti gli item obbligatori devono essere spuntati prima di completare."
+msgstr "Tamamlamadan önce tüm zorunlu öğeler işaretlenmelidir."
+
+#: core/scoping.py:115
+msgid "Accesso negato: vista aggregata su tutti i siti riservata allo scope organizzazione."
+msgstr "Erişim reddedildi: tüm tesislerin toplu görünümü yalnızca kuruluş kapsamına özeldir."
+
+#: core/uploads.py:86
+#, fuzzy, python-format
+#| msgid "File troppo grande. Dimensione massima: 50MB."
+msgid "File troppo grande. Dimensione massima: %(mb)sMB."
+msgstr "Dosya çok büyük. Maksimum boyut: 50 MB."
+
+#: core/uploads.py:94
+#, fuzzy, python-format
+#| msgid "Estensione file non consentita. Formati ammessi: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
+msgid "Estensione file non consentita. Formati ammessi: %(formats)s."
+msgstr "Dosya uzantısına izin verilmiyor. İzin verilen formatlar: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
+
+#: core/uploads.py:104
+msgid "Tipo di file non consentito. Il contenuto del file non corrisponde all'estensione."
+msgstr "Dosya türüne izin verilmiyor. Dosya içeriği uzantıyla eşleşmiyor."
+
+#: core/uploads.py:113
+#, python-format
+msgid "Il contenuto del file non corrisponde all'estensione .%(ext)s."
+msgstr "Dosya içeriği .%(ext)s uzantısıyla eşleşmiyor."

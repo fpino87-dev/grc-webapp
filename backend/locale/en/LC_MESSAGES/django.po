@@ -1,7 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: grc-webapp\n"
-"POT-Creation-Date: 2026-03-18 00:00+0000\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-14 13:38+0200\n"
 "PO-Revision-Date: 2026-03-18 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -11,207 +12,745 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-msgid "Evidenza '%(title)s' ha %(age)s giorni (max consigliato: %(max_age)s gg)"
-msgstr "Evidence '%(title)s' is %(age)s days old (recommended max: %(max_age)s days)"
+#: apps/assets/services.py:187
+msgid "Impossibile eliminare: esistono valutazioni rischio attive collegate all'asset."
+msgstr "Cannot delete: there are active risk assessments linked to the asset."
 
-msgid "Richiesti almeno %(count)s documenti approvati"
-msgstr "At least %(count)s approved documents required"
+#: apps/assets/services.py:192
+msgid "Impossibile eliminare: esistono scenari di rischio collegati all'asset."
+msgstr "Cannot delete: there are risk scenarios linked to the asset."
 
-msgid "Richieste almeno %(count)s evidenze valide"
-msgstr "At least %(count)s valid evidences required"
+#: apps/assets/services.py:200
+msgid "Impossibile eliminare: rimuovere prima le dipendenze tra asset."
+msgstr "Cannot delete: remove the asset dependencies first."
 
-msgid "• Documento mancante: %(desc)s"
-msgstr "• Missing document: %(desc)s"
-
-msgid "• Evidenza mancante: %(desc)s"
-msgstr "• Missing evidence: %(desc)s"
-
-msgid "• Evidenza scaduta: %(title)s (scaduta il %(date)s)"
-msgstr "• Expired evidence: %(title)s (expired on %(date)s)"
-
-msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata."
-msgstr "Cannot set status to 'compliant' without at least one linked valid evidence."
-
-msgid "Requisiti non soddisfatti per stato Compliant:\\n"
-msgstr "Requirements not satisfied for Compliant status:\\n"
-
-msgid "Almeno un documento approvato o un'evidenza valida richiesti per stato Parziale."
-msgstr "At least one approved document or one valid evidence is required for Partial status."
-
-msgid "Lo stato N/A richiede una giustificazione scritta di almeno 20 caratteri."
-msgstr "N/A status requires a written justification of at least 20 characters."
-
-msgid "La giustificazione di esclusione per SOA richiede almeno 50 caratteri. Specificare il motivo formale per cui il controllo non è applicabile."
-msgstr "SOA exclusion justification requires at least 50 characters. Provide the formal reason why the control is not applicable."
-
-msgid "Solo assessment completati possono essere approvati."
-msgstr "Only completed assessments can be approved."
-
-msgid "Motivazione rifiuto obbligatoria (min 10 caratteri)."
-msgstr "Rejection reason is mandatory (min 10 characters)."
-
-msgid "La nota è obbligatoria per l'accettazione formale del rischio."
-msgstr "A note is required for formal risk acceptance."
-
-msgid "Per rischi critici (rosso) la nota di accettazione deve essere di almeno 50 caratteri."
-msgstr "For critical (red) risks, the acceptance note must be at least 50 characters long."
-
-msgid "Il ciclo è già chiuso."
-msgstr "The cycle is already closed."
-
-msgid "Per avanzare da PLAN a DO è obbligatorio descrivere l'azione pianificata (minimo 20 caratteri)."
-msgstr "To move from PLAN to DO you must describe the planned action (minimum 20 characters)."
-
-msgid "Per avanzare da DO a CHECK è obbligatorio allegare un'evidenza dell'implementazione."
-msgstr "To move from DO to CHECK you must attach evidence of the implementation."
-
-msgid "Per avanzare da CHECK ad ACT è obbligatorio descrivere il risultato della verifica."
-msgstr "To move from CHECK to ACT you must describe the verification result."
-
-msgid "Per avanzare da CHECK ad ACT è obbligatorio indicare l'esito: ok / partial / ko."
-msgstr "To move from CHECK to ACT you must indicate the outcome: ok / partial / ko."
-
-msgid "Usa close_cycle() per chiudere dalla fase ACT."
-msgstr "Use close_cycle() to close from the ACT phase."
-
-msgid "Il ciclo è in fase %(phase)s. Avanza fino ad ACT prima di chiudere."
-msgstr "The cycle is in phase %(phase)s. Move to ACT before closing."
-
-msgid "Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata (minimo 20 caratteri)."
-msgstr "To close the cycle you must describe the standardized action (minimum 20 characters)."
-
-msgid "File troppo grande. Dimensione massima: 50MB."
-msgstr "File too large. Maximum size: 50MB."
-
-msgid "Estensione file non consentita. Formati ammessi: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
-msgstr "File extension not allowed. Allowed formats: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
-
-msgid "Generare lo snapshot dei dati prima di approvare il riesame."
-msgstr "Generate the data snapshot before approving the review."
-
-msgid "Il riesame è già approvato."
-msgstr "The review has already been approved."
-
-msgid "RCA approvato obbligatorio per chiudere l'incidente."
-msgstr "An approved RCA is required to close the incident."
-
-msgid "Policy predefinita"
-msgstr "Default policy"
-
-msgid "Plant non trovato"
-msgstr "Plant not found"
-
-msgid "rule_type obbligatorio"
-msgstr "rule_type is required"
-
-msgid "Endpoint disponibile solo in ambiente di test (DEBUG=True)."
-msgstr "Endpoint available only in test environment (DEBUG=True)."
-
-msgid "Solo il superuser può eseguire questa operazione"
-msgstr "Only the superuser can perform this operation"
-
-msgid "Header X-Confirm-Reset: RESET-CONFIRMED richiesto"
-msgstr "Header X-Confirm-Reset: RESET-CONFIRMED required"
-
-msgid "Utente non trovato"
-msgstr "User not found"
-
-msgid "Evidenza non trovata"
-msgstr "Evidence not found"
-
-msgid "Non hai i permessi per inviare in revisione questo documento."
-msgstr "You do not have permission to submit this document for review."
-
-msgid "Non hai i permessi per approvare questo documento."
-msgstr "You do not have permission to approve this document."
-
-msgid "Nessun file fornito."
-msgstr "No file provided."
-
-msgid "Nessun file associato a questa evidenza."
-msgstr "No file associated with this evidence."
-
-msgid "File non trovato nello storage."
-msgstr "File not found in storage."
-
+#: apps/assets/views.py:99 apps/assets/views.py:166
 msgid "change_ref obbligatorio"
 msgstr "change_ref is required"
 
-msgid "Questo ruolo è già terminato."
-msgstr "This role has already ended."
+#: apps/auth_grc/models.py:12
+msgid "Super Admin"
+msgstr "Super Admin"
 
-msgid "Motivo terminazione obbligatorio (min 5 caratteri)."
-msgstr "Termination reason is required (min 5 characters)."
+#: apps/auth_grc/models.py:13 apps/governance/models.py:10
+msgid "Compliance Officer"
+msgstr "Compliance Officer"
 
-msgid "new_user_id obbligatorio."
-msgstr "new_user_id is required."
+#: apps/auth_grc/models.py:14 apps/governance/models.py:11
+msgid "Risk Manager"
+msgstr "Risk Manager"
 
+#: apps/auth_grc/models.py:15 apps/governance/models.py:14
+msgid "Plant Manager"
+msgstr "Plant Manager"
+
+#: apps/auth_grc/models.py:16 apps/governance/models.py:15
+msgid "Control Owner"
+msgstr "Control Owner"
+
+#: apps/auth_grc/models.py:17 apps/governance/models.py:12
+msgid "Auditor Interno"
+msgstr "Internal Auditor"
+
+#: apps/auth_grc/models.py:18 apps/governance/models.py:13
+msgid "Auditor Esterno"
+msgstr "External Auditor"
+
+#: apps/auth_grc/serializers.py:49
+msgid "Seleziona almeno un sito per questo perimetro."
+msgstr "Select at least one site for this scope."
+
+#: apps/auth_grc/serializers.py:55
+msgid "Seleziona una Business Unit per questo perimetro."
+msgstr "Select a Business Unit for this scope."
+
+#: apps/auth_grc/services.py:124
+msgid "Non puoi disattivare il tuo account da qui."
+msgstr "You cannot deactivate your own account here."
+
+#: apps/auth_grc/services.py:126
+msgid "Operazione non consentita su un account superuser."
+msgstr "Operation not allowed on a superuser account."
+
+#: apps/auth_grc/views.py:49
+msgid "Endpoint disponibile solo in ambiente di test (DEBUG=True)."
+msgstr "Endpoint available only in test environment (DEBUG=True)."
+
+#: apps/auth_grc/views.py:54
+msgid "Solo il superuser può eseguire questa operazione"
+msgstr "Only the superuser can perform this operation"
+
+#: apps/auth_grc/views.py:60
+msgid "Header X-Confirm-Reset: RESET-CONFIRMED richiesto"
+msgstr "Header X-Confirm-Reset: RESET-CONFIRMED required"
+
+#: apps/auth_grc/views.py:136 apps/auth_grc/views.py:190
+msgid "Utente non trovato"
+msgstr "User not found"
+
+#: apps/auth_grc/views.py:140
+#, fuzzy
+#| msgid "Motivazione rifiuto obbligatoria (min 10 caratteri)."
+msgid "Motivazione obbligatoria (min 10 caratteri) per richiesta GDPR Art. 17"
+msgstr "Rejection reason is mandatory (min 10 characters)."
+
+#: apps/auth_grc/views.py:143
+msgid "Utente anonimizzato (GDPR Art. 17)"
+msgstr "User anonymized (GDPR Art. 17)"
+
+#: apps/auth_grc/views.py:184
+msgid "Non sei autorizzato a visualizzare il gap analysis di altri utenti."
+msgstr "You are not authorized to view other users' gap analysis."
+
+#: apps/backups/models.py:9
+msgid "In attesa"
+msgstr "Pending"
+
+#: apps/backups/models.py:10
+msgid "In corso"
+msgstr "In progress"
+
+#: apps/backups/models.py:11
+msgid "Completato"
+msgstr "Completed"
+
+#: apps/backups/models.py:12
+msgid "Fallito"
+msgstr "Failed"
+
+#: apps/backups/models.py:13
+msgid "Ripristino in corso"
+msgstr "Restore in progress"
+
+#: apps/backups/models.py:14
+msgid "Ripristinato"
+msgstr "Restored"
+
+#: apps/backups/models.py:17
+msgid "Automatico"
+msgstr "Automatic"
+
+#: apps/backups/models.py:18
+msgid "Manuale"
+msgstr "Manual"
+
+#: apps/backups/models.py:19
+msgid "Importato"
+msgstr "Imported"
+
+#: apps/compliance_schedule/views.py:36
+msgid "Policy predefinita"
+msgstr "Default policy"
+
+#: apps/compliance_schedule/views.py:46
+msgid "Plant non trovato"
+msgstr "Plant not found"
+
+#: apps/compliance_schedule/views.py:56
+msgid "rule_type obbligatorio"
+msgstr "rule_type is required"
+
+#: apps/controls/export_engine.py:207
+msgid "Compliant"
+msgstr "Compliant"
+
+#: apps/controls/export_engine.py:208
+msgid "Parziale"
+msgstr "Partial"
+
+#: apps/controls/export_engine.py:209
+msgid "Gap"
+msgstr "Gap"
+
+#: apps/controls/export_engine.py:210
+msgid "N/A"
+msgstr "N/A"
+
+#: apps/controls/export_engine.py:211
+msgid "Non valutato"
+msgstr "Not assessed"
+
+#: apps/controls/export_engine.py:219
+msgid "Applicabile"
+msgstr "Applicable"
+
+#: apps/controls/export_engine.py:220
+msgid "Escluso"
+msgstr "Excluded"
+
+#: apps/controls/export_engine.py:221
+msgid "Non pertinente"
+msgstr "Not relevant"
+
+#: apps/controls/services/evidence.py:129
+#, python-format
+msgid "Documento collegato ma non classificato come '%(type)s' — verificare la classificazione"
+msgstr "Document linked but not classified as '%(type)s' — check the classification"
+
+#: apps/controls/services/evidence.py:167
+#, python-format
+msgid "Evidenza '%(title)s' ha %(age)s giorni (max consigliato: %(max_age)s gg)"
+msgstr "Evidence '%(title)s' is %(age)s days old (recommended max: %(max_age)s days)"
+
+#: apps/controls/services/evidence.py:190
+#, python-format
+msgid "Richiesti almeno %(count)s documenti approvati"
+msgstr "At least %(count)s approved documents required"
+
+#: apps/controls/services/evidence.py:200
+#, python-format
+msgid "Richieste almeno %(count)s evidenze valide"
+msgstr "At least %(count)s valid evidences required"
+
+#: apps/controls/services/frameworks.py:16
+#, python-format
 msgid "Framework JSON non valido: campi mancanti: %(fields)s"
 msgstr "Invalid framework JSON: missing fields: %(fields)s"
 
+#: apps/controls/services/frameworks.py:20
 msgid "Framework JSON non valido: 'controls' deve essere una lista."
 msgstr "Invalid framework JSON: 'controls' must be a list."
 
+#: apps/controls/services/frameworks.py:24
 msgid "Framework JSON non valido: ogni control deve essere un oggetto."
 msgstr "Invalid framework JSON: each control must be an object."
 
+#: apps/controls/services/frameworks.py:28
+#, python-format
 msgid "Framework JSON non valido: control senza campo '%(field)s'."
 msgstr "Invalid framework JSON: control missing '%(field)s'."
 
+#: apps/controls/services/frameworks.py:181
+#, python-format
 msgid "Framework '%(code)s' importato (v%(version)s)."
 msgstr "Framework '%(code)s' imported (v%(version)s)."
 
+#: apps/controls/services/frameworks.py:249
+#, fuzzy
+#| msgid "Solo il superuser può importare framework."
+msgid "Solo il superuser può eliminare un framework."
+msgstr "Only the superuser can import frameworks."
+
+#: apps/controls/services/frameworks.py:258
+msgid "Impossibile eliminare: il framework è ancora assegnato a uno o più siti."
+msgstr "Cannot delete: the framework is still assigned to one or more sites."
+
+#: apps/controls/services/frameworks.py:284
+#, fuzzy
+#| msgid "Solo il superuser può importare framework."
+msgid "Solo il superuser può archiviare un framework."
+msgstr "Only the superuser can import frameworks."
+
+#: apps/controls/services/frameworks.py:293
+msgid "Impossibile archiviare: il framework è ancora assegnato a uno o più siti."
+msgstr "Cannot archive: the framework is still assigned to one or more sites."
+
+#: apps/controls/services/instances.py:18
+#, python-format
+msgid "• Documento mancante: %(desc)s"
+msgstr "• Missing document: %(desc)s"
+
+#: apps/controls/services/instances.py:20
+#, python-format
+msgid "• Evidenza mancante: %(desc)s"
+msgstr "• Missing evidence: %(desc)s"
+
+#: apps/controls/services/instances.py:23
+#, python-format
+msgid "• Evidenza scaduta: %(title)s (scaduta il %(date)s)"
+msgstr "• Expired evidence: %(title)s (expired on %(date)s)"
+
+#: apps/controls/services/instances.py:33
+msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata."
+msgstr "Cannot set status to 'compliant' without at least one linked valid evidence."
+
+#: apps/controls/services/instances.py:37
+#, fuzzy
+#| msgid "Requisiti non soddisfatti per stato Compliant:\\n"
+msgid "Requisiti non soddisfatti per stato Compliant:\n"
+msgstr "Requirements not satisfied for Compliant status:\\n"
+
+#: apps/controls/services/instances.py:52
+msgid "Almeno un documento approvato o un'evidenza valida richiesti per stato Parziale."
+msgstr "At least one approved document or one valid evidence is required for Partial status."
+
+#: apps/controls/services/instances.py:58
+msgid "Lo stato N/A richiede una giustificazione scritta di almeno 20 caratteri."
+msgstr "N/A status requires a written justification of at least 20 characters."
+
+#: apps/controls/services/instances.py:106
+msgid "La giustificazione di esclusione per SOA richiede almeno 50 caratteri. Specificare il motivo formale per cui il controllo non è applicabile."
+msgstr "SOA exclusion justification requires at least 50 characters. Provide the formal reason why the control is not applicable."
+
+#: apps/controls/services/instances.py:148
+#, python-format
+msgid "Impossibile eliminare il controllo: ha %(n)d valutazioni su uno o più siti. Il catalogo si gestisce ricaricando i framework."
+msgstr "Cannot delete the control: it has %(n)d assessments across one or more sites. The catalog is managed by reloading the frameworks."
+
+#: apps/controls/services/instances.py:182
+msgid "Eliminazione consentita solo per controlli non ancora valutati."
+msgstr "Deletion allowed only for controls not yet assessed."
+
+#: apps/controls/views/frameworks.py:82 apps/controls/views/frameworks.py:102
 msgid "Solo il superuser può importare framework."
 msgstr "Only the superuser can import frameworks."
 
+#: apps/controls/views/frameworks.py:111
 msgid "Conferma import non valida (sha256 mismatch)."
 msgstr "Import confirmation invalid (sha256 mismatch)."
 
+#: apps/controls/views/frameworks.py:164
+#, python-format
+msgid "Generazione spiegazione non riuscita: %(err)s"
+msgstr "Explanation generation failed: %(err)s"
+
+#: apps/controls/views/frameworks.py:187
+#, fuzzy, python-format
+#| msgid "Errore generazione documento: %(err)s"
+msgid "Generazione documento non riuscita: %(err)s"
+msgstr "Document generation error: %(err)s"
+
+#: apps/controls/views/instances.py:54
 msgid "Nessun requisito documentale definito per questo controllo."
 msgstr "No documentary requirements defined for this control."
 
+#: apps/controls/views/instances.py:57
 msgid "Tutti i requisiti documentali sono soddisfatti."
 msgstr "All documentary requirements are satisfied."
 
+#: apps/controls/views/instances.py:61
+#, python-format
 msgid "Documento mancante: %(desc)s"
 msgstr "Missing document: %(desc)s"
 
+#: apps/controls/views/instances.py:63
+#, python-format
 msgid "Evidenza mancante: %(desc)s"
 msgstr "Missing evidence: %(desc)s"
 
+#: apps/controls/views/instances.py:66
+#, python-format
 msgid "Evidenza scaduta: %(title)s (scaduta il %(date)s)"
 msgstr "Expired evidence: %(title)s (expired on %(date)s)"
 
+#: apps/controls/views/instances.py:72
 msgid "Requisiti parzialmente soddisfatti."
 msgstr "Partially satisfied requirements."
 
+#: apps/controls/views/instances.py:72
 msgid "Nessuna documentazione presente."
 msgstr "No documentation present."
 
+#: apps/controls/views/instances.py:185
 msgid "Campo 'status' obbligatorio."
 msgstr "Field 'status' is required."
 
+#: apps/controls/views/instances.py:343 apps/controls/views/instances.py:359
 msgid "Documento non trovato"
 msgstr "Document not found"
 
+#: apps/controls/views/instances.py:376 apps/controls/views/instances.py:471
 msgid "Evidenza non trovata."
 msgstr "Evidence not found."
 
+#: apps/controls/views/instances.py:401
 msgid "maturity_level deve essere tra 0 e 5"
 msgstr "maturity_level must be between 0 and 5"
 
-msgid "Parametri 'source' e 'target' obbligatori."
+#: apps/controls/views/instances.py:489 apps/controls/views/reports.py:31
+#, fuzzy
+#| msgid "Parametro 'framework' obbligatorio."
+msgid "Parametro 'plant' obbligatorio."
+msgstr "Parameter 'framework' is required."
+
+#: apps/controls/views/instances.py:492
+#, fuzzy
+#| msgid "Plant non trovato"
+msgid "Plant non trovato."
+msgstr "Plant not found"
+
+#: apps/controls/views/instances.py:497 apps/controls/views/reports.py:36
+#: apps/controls/views/reports.py:91 core/scoping.py:112 core/scoping.py:169
+#: core/scoping.py:181
+msgid "Accesso negato per questo sito."
+msgstr "Access denied for this site."
+
+#: apps/controls/views/reports.py:25
+#, fuzzy, python-format
+#| msgid "Parametri 'source' e 'target' obbligatori."
+msgid "Parametro 'target' obbligatorio (uno tra: %(targets)s)."
 msgstr "Parameters 'source' and 'target' are required."
 
+#: apps/controls/views/reports.py:83
 msgid "Parametro 'framework' obbligatorio."
 msgstr "Parameter 'framework' is required."
 
+#: apps/controls/views/reports.py:93
+msgid "Accesso negato: export aggregato riservato allo scope organizzazione."
+msgstr "Access denied: aggregate export restricted to the organization scope."
+
+#: apps/controls/views/reports.py:99
+#, python-format
 msgid "Formato %(fmt)s non compatibile con framework %(fw)s. Usa uno di: %(allowed)s"
 msgstr "Format %(fmt)s is not compatible with framework %(fw)s. Use one of: %(allowed)s"
 
+#: apps/controls/views/reports.py:117
+#, python-format
 msgid "Framework '%(fw)s' non attivo per questo sito. Framework attivi: %(active)s"
 msgstr "Framework '%(fw)s' is not active for this site. Active frameworks: %(active)s"
 
+#: apps/controls/views/reports.py:132
+#, python-format
 msgid "Errore generazione documento: %(err)s"
 msgstr "Document generation error: %(err)s"
 
+#: apps/documents/services.py:293
+msgid "Eliminazione non consentita per documenti in approvazione o già approvati."
+msgstr "Deletion not allowed for documents under approval or already approved."
+
+#: apps/documents/services.py:318
+msgid "Eliminazione non consentita: l'evidenza è collegata a controlli già valutati."
+msgstr "Deletion not allowed: the evidence is linked to controls already assessed."
+
+#: apps/documents/views.py:141
+msgid "Non hai i permessi per inviare in revisione questo documento."
+msgstr "You do not have permission to submit this document for review."
+
+#: apps/documents/views.py:154
+msgid "Non hai i permessi per approvare questo documento."
+msgstr "You do not have permission to approve this document."
+
+#: apps/documents/views.py:204 apps/plants/views.py:118
+msgid "Nessun file fornito."
+msgstr "No file provided."
+
+#: apps/documents/views.py:315
+msgid "Nessun file associato a questa evidenza."
+msgstr "No file associated with this evidence."
+
+#: apps/documents/views.py:319
+msgid "Percorso file non valido."
+msgstr "Invalid file path."
+
+#: apps/documents/views.py:322
+msgid "File non trovato nello storage."
+msgstr "File not found in storage."
+
+#: apps/governance/models.py:9
+msgid "CISO"
+msgstr "CISO"
+
+#: apps/governance/models.py:16
+msgid "Plant Security Officer"
+msgstr "Plant Security Officer"
+
+#: apps/governance/models.py:17
+msgid "Contatto NIS2"
+msgstr "NIS2 Contact"
+
+#: apps/governance/models.py:18
+msgid "DPO"
+msgstr "DPO"
+
+#: apps/governance/models.py:19
+msgid "ISMS Manager"
+msgstr "ISMS Manager"
+
+#: apps/governance/models.py:20
+msgid "Membro Comitato"
+msgstr "Committee Member"
+
+#: apps/governance/models.py:21
+msgid "Referente BU"
+msgstr "BU Contact"
+
+#: apps/governance/models.py:22
+msgid "RACI Responsible"
+msgstr "RACI Responsible"
+
+#: apps/governance/models.py:23
+msgid "RACI Accountable"
+msgstr "RACI Accountable"
+
+#: apps/governance/views.py:69
+msgid "Questo ruolo è già terminato."
+msgstr "This role has already ended."
+
+#: apps/governance/views.py:74
+msgid "Motivo terminazione obbligatorio (min 5 caratteri)."
+msgstr "Termination reason is required (min 5 characters)."
+
+#: apps/governance/views.py:106
+msgid "new_user_id obbligatorio."
+msgstr "new_user_id is required."
+
+#: apps/governance/views.py:109
+#, fuzzy
+#| msgid "Utente non trovato"
+msgid "Utente non trovato."
+msgstr "User not found"
+
+#: apps/incidents/serializers.py:55
+msgid "La chiusura dell'incidente avviene solo tramite l'azione dedicata, previo RCA approvato."
+msgstr "Closing the incident is done only through the dedicated action, after an approved RCA."
+
+#: apps/incidents/services.py:18
+msgid "RCA approvato obbligatorio per chiudere l'incidente."
+msgstr "An approved RCA is required to close the incident."
+
+#: apps/lessons/services.py:16
+#, python-format
+msgid "Solo una lezione in bozza può essere validata (stato attuale: %(s)s)."
+msgstr "Only a draft lesson can be validated (current status: %(s)s)."
+
+#: apps/lessons/services.py:46
+msgid "La lezione deve essere validata prima di poter essere propagata."
+msgstr "The lesson must be validated before it can be propagated."
+
+#: apps/lessons/services.py:56
+msgid "Accesso negato per uno dei siti di destinazione."
+msgstr "Access denied for one of the target sites."
+
+#: apps/management_review/services.py:305
+msgid "Generare lo snapshot dei dati prima di approvare il riesame."
+msgstr "Generate the data snapshot before approving the review."
+
+#: apps/management_review/services.py:308
+msgid "Il riesame è già approvato."
+msgstr "The review has already been approved."
+
+#: apps/pdca/services.py:41
+msgid "Il ciclo è già chiuso."
+msgstr "The cycle is already closed."
+
+#: apps/pdca/services.py:50
+msgid "Per avanzare da PLAN a DO è obbligatorio descrivere l'azione pianificata (minimo 20 caratteri)."
+msgstr "To move from PLAN to DO you must describe the planned action (minimum 20 characters)."
+
+#: apps/pdca/services.py:58
+msgid "Per avanzare da DO a CHECK è obbligatorio allegare un'evidenza dell'implementazione."
+msgstr "To move from DO to CHECK you must attach evidence of the implementation."
+
+#: apps/pdca/services.py:66
+msgid "Per avanzare da CHECK ad ACT è obbligatorio descrivere il risultato della verifica."
+msgstr "To move from CHECK to ACT you must describe the verification result."
+
+#: apps/pdca/services.py:73
+msgid "Per avanzare da CHECK ad ACT è obbligatorio indicare l'esito: ok / partial / ko."
+msgstr "To move from CHECK to ACT you must indicate the outcome: ok / partial / ko."
+
+#: apps/pdca/services.py:99
+msgid "Usa close_cycle() per chiudere dalla fase ACT."
+msgstr "Use close_cycle() to close from the ACT phase."
+
+#: apps/pdca/services.py:153
+#, fuzzy, python-format
+#| msgid "Il ciclo è già chiuso."
+msgid "Il ciclo è già %(phase)s."
+msgstr "The cycle is already closed."
+
+#: apps/pdca/services.py:156
+#, fuzzy
+#| msgid "Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata (minimo 20 caratteri)."
+msgid "Per archiviare è obbligatorio specificare il motivo (minimo 20 caratteri)."
+msgstr "To close the cycle you must describe the standardized action (minimum 20 characters)."
+
+#: apps/pdca/services.py:190
+#, python-format
+msgid "Il ciclo è in fase %(phase)s. Avanza fino ad ACT prima di chiudere."
+msgstr "The cycle is in phase %(phase)s. Move to ACT before closing."
+
+#: apps/pdca/services.py:197
+msgid "Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata (minimo 20 caratteri)."
+msgstr "To close the cycle you must describe the standardized action (minimum 20 characters)."
+
+#: apps/pdca/views.py:64
+msgid "Evidenza non trovata"
+msgstr "Evidence not found"
+
+#: apps/pdca/views.py:130
+#, fuzzy
+#| msgid "Motivo terminazione obbligatorio (min 5 caratteri)."
+msgid "Motivo cancellazione obbligatorio (min 10 caratteri)."
+msgstr "Termination reason is required (min 5 characters)."
+
+#: apps/pdca/views.py:137
+msgid "Ciclo gia' chiuso: ha generato una Lesson Learned e fa parte dell'audit trail. Non e' cancellabile."
+msgstr "Cycle already closed: it generated a Lesson Learned and is part of the audit trail. It cannot be deleted."
+
+#: apps/pdca/views.py:152
+#, python-format
+msgid "Impossibile cancellare: %(count)d finding manuali aperti referenziano questo ciclo. Chiudi o annulla prima i finding."
+msgstr "Cannot delete: %(count)d open manual findings reference this cycle. Close or cancel the findings first."
+
+#: apps/plants/models.py:213
+msgid "Max 1 livello di nesting per i sub-plant."
+msgstr "Max 1 level of nesting for sub-sites."
+
+#: apps/plants/serializers.py:32
+#, python-format
+msgid "Timezone IANA non valido: %(tz)s"
+msgstr "Invalid IANA timezone: %(tz)s"
+
+#: apps/plants/serializers.py:43
+msgid "Max 1 livello di nesting per i sub-plant: il sito scelto è già un sotto-sito."
+msgstr "Max 1 level of nesting for sub-sites: the selected site is already a sub-site."
+
+#: apps/plants/services.py:173
+#, fuzzy
+#| msgid "Solo il superuser può importare framework."
+msgid "Solo il superuser può forzare l'eliminazione del sito."
+msgstr "Only the superuser can import frameworks."
+
+#: apps/plants/services.py:250
+#, fuzzy
+#| msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata."
+msgid "Impossibile eliminare il sito: sono presenti dipendenze collegate."
+msgstr "Cannot set status to 'compliant' without at least one linked valid evidence."
+
+#: apps/plants/views.py:66
+msgid "Impossibile cambiare il codice: il sito ha controlli collegati."
+msgstr "Cannot change the code: the site has linked controls."
+
+#: apps/plants/views.py:80
+#, python-format
+msgid "Questo sito ha %(n)d incidente aperto."
+msgid_plural "Questo sito ha %(n)d incidenti aperti."
+msgstr[0] ""
+msgstr[1] ""
+
+#: apps/plants/views.py:153
+#, fuzzy
+#| msgid "Nessun requisito documentale definito per questo controllo."
+msgid "Nessun logo configurato per questo sito."
+msgstr "No documentary requirements defined for this control."
+
+#: apps/plants/views.py:157
+msgid "Logo non disponibile: usa l'upload file per i loghi del sito."
+msgstr "Logo not available: use file upload for site logos."
+
+#: apps/plants/views.py:167 apps/plants/views.py:170
+#, fuzzy
+#| msgid "File non trovato nello storage."
+msgid "Logo non trovato nello storage."
+msgstr "File not found in storage."
+
+#: apps/reporting/services.py:965 apps/reporting/services.py:976
+#: apps/reporting/views.py:128
+msgid "Tutti i siti"
+msgstr "All sites"
+
+#: apps/reporting/services.py:968 apps/reporting/services.py:979
+msgid "BU"
+msgstr "BU"
+
+#: apps/reporting/services.py:972 apps/reporting/services.py:983
+msgid "(nessun sito)"
+msgstr "(no site)"
+
+#: apps/reporting/views.py:118
+msgid "Utente"
+msgstr "User"
+
+#: apps/reporting/views.py:118
+msgid "Email"
+msgstr "Email"
+
+#: apps/reporting/views.py:118
+msgid "Attivo"
+msgstr "Active"
+
+#: apps/reporting/views.py:119
+msgid "Tipo"
+msgstr "Type"
+
+#: apps/reporting/views.py:119
+msgid "Ruolo"
+msgstr "Role"
+
+#: apps/reporting/views.py:119
+msgid "Perimetro"
+msgstr "Scope"
+
+#: apps/reporting/views.py:120
+msgid "Siti"
+msgstr "Sites"
+
+#: apps/reporting/views.py:120
+msgid "Scadenza"
+msgstr "Expiry"
+
+#: apps/reporting/views.py:120
+msgid "Segnalazioni"
+msgstr "Flags"
+
+#: apps/reporting/views.py:125
+msgid "Sì"
+msgstr "Yes"
+
+#: apps/reporting/views.py:125
+msgid "No"
+msgstr "No"
+
+#: apps/reporting/views.py:126
+msgid "Accesso"
+msgstr "Access"
+
+#: apps/reporting/views.py:126
+msgid "Responsabilità"
+msgstr "Responsibility"
+
+#: apps/risk/services.py:246
+msgid "La nota è obbligatoria per l'accettazione formale del rischio."
+msgstr "A note is required for formal risk acceptance."
+
+#: apps/risk/services.py:249
+msgid "Per rischi critici (rosso) la nota di accettazione deve essere di almeno 50 caratteri."
+msgstr "For critical (red) risks, the acceptance note must be at least 50 characters long."
+
+#: apps/suppliers/services.py:369
+msgid "Solo assessment completati possono essere approvati."
+msgstr "Only completed assessments can be approved."
+
+#: apps/suppliers/services.py:401
+msgid "Motivazione rifiuto obbligatoria (min 10 caratteri)."
+msgstr "Rejection reason is mandatory (min 10 characters)."
+
+#: apps/suppliers/services.py:446
+#, fuzzy
+#| msgid "Nessun requisito documentale definito per questo controllo."
+msgid "Nessun indirizzo email configurato per questo fornitore."
+msgstr "No documentary requirements defined for this control."
+
+#: apps/suppliers/services.py:502
+msgid "Il questionario ha già ricevuto risposta."
+msgstr "The questionnaire has already been answered."
+
+#: apps/tasks/services.py:208
+msgid "Tutti gli item obbligatori devono essere spuntati prima di completare."
+msgstr "All mandatory items must be checked before completing."
+
+#: core/scoping.py:115
+msgid "Accesso negato: vista aggregata su tutti i siti riservata allo scope organizzazione."
+msgstr "Access denied: aggregate view across all sites restricted to the organization scope."
+
+#: core/uploads.py:86
+#, fuzzy, python-format
+#| msgid "File troppo grande. Dimensione massima: 50MB."
+msgid "File troppo grande. Dimensione massima: %(mb)sMB."
+msgstr "File too large. Maximum size: 50MB."
+
+#: core/uploads.py:94
+#, fuzzy, python-format
+#| msgid "Estensione file non consentita. Formati ammessi: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
+msgid "Estensione file non consentita. Formati ammessi: %(formats)s."
+msgstr "File extension not allowed. Allowed formats: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
+
+#: core/uploads.py:104
+msgid "Tipo di file non consentito. Il contenuto del file non corrisponde all'estensione."
+msgstr "File type not allowed. The file content does not match the extension."
+
+#: core/uploads.py:113
+#, python-format
+msgid "Il contenuto del file non corrisponde all'estensione .%(ext)s."
+msgstr "The file content does not match the .%(ext)s extension."

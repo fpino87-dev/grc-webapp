@@ -1,7 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: grc-webapp\n"
-"POT-Creation-Date: 2026-03-18 00:00+0000\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-14 13:38+0200\n"
 "PO-Revision-Date: 2026-03-18 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -11,207 +12,745 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-msgid "Evidenza '%(title)s' ha %(age)s giorni (max consigliato: %(max_age)s gg)"
-msgstr "L'évidence '%(title)s' a %(age)s jours (maximum recommandé : %(max_age)s jours)"
+#: apps/assets/services.py:187
+msgid "Impossibile eliminare: esistono valutazioni rischio attive collegate all'asset."
+msgstr "Suppression impossible : des évaluations de risque actives sont liées à l'actif."
 
-msgid "Richiesti almeno %(count)s documenti approvati"
-msgstr "Au moins %(count)s documents approuvés sont requis"
+#: apps/assets/services.py:192
+msgid "Impossibile eliminare: esistono scenari di rischio collegati all'asset."
+msgstr "Suppression impossible : des scénarios de risque sont liés à l'actif."
 
-msgid "Richieste almeno %(count)s evidenze valide"
-msgstr "Au moins %(count)s évidences valides sont requises"
+#: apps/assets/services.py:200
+msgid "Impossibile eliminare: rimuovere prima le dipendenze tra asset."
+msgstr "Suppression impossible : supprimez d'abord les dépendances entre actifs."
 
-msgid "• Documento mancante: %(desc)s"
-msgstr "• Document manquant : %(desc)s"
-
-msgid "• Evidenza mancante: %(desc)s"
-msgstr "• Évidence manquante : %(desc)s"
-
-msgid "• Evidenza scaduta: %(title)s (scaduta il %(date)s)"
-msgstr "• Évidence expirée : %(title)s (expirée le %(date)s)"
-
-msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata."
-msgstr "Impossible de définir l'état sur 'conforme' sans au moins une évidence valide liée."
-
-msgid "Requisiti non soddisfatti per stato Compliant:\\n"
-msgstr "Exigences non satisfaites pour l'état Conforme :\\n"
-
-msgid "Almeno un documento approvato o un'evidenza valida richiesti per stato Parziale."
-msgstr "Au moins un document approuvé ou une évidence valide est requis pour l'état Partiel."
-
-msgid "Lo stato N/A richiede una giustificazione scritta di almeno 20 caratteri."
-msgstr "L'état N/A nécessite une justification écrite d'au moins 20 caractères."
-
-msgid "La giustificazione di esclusione per SOA richiede almeno 50 caratteri. Specificare il motivo formale per cui il controllo non è applicabile."
-msgstr "La justification d'exclusion pour la SOA doit comporter au moins 50 caractères. Indiquez la raison formelle pour laquelle le contrôle n'est pas applicable."
-
-msgid "Solo assessment completati possono essere approvati."
-msgstr "Seules les évaluations terminées peuvent être approuvées."
-
-msgid "Motivazione rifiuto obbligatoria (min 10 caratteri)."
-msgstr "Le motif de refus est obligatoire (minimum 10 caractères)."
-
-msgid "La nota è obbligatoria per l'accettazione formale del rischio."
-msgstr "Une note est obligatoire pour l'acceptation formelle du risque."
-
-msgid "Per rischi critici (rosso) la nota di accettazione deve essere di almeno 50 caratteri."
-msgstr "Pour les risques critiques (rouge), la note d'acceptation doit comporter au moins 50 caractères."
-
-msgid "Il ciclo è già chiuso."
-msgstr "Le cycle est déjà clôturé."
-
-msgid "Per avanzare da PLAN a DO è obbligatorio descrivere l'azione pianificata (minimo 20 caratteri)."
-msgstr "Pour passer de PLAN à DO, il est obligatoire de décrire l'action planifiée (minimum 20 caractères)."
-
-msgid "Per avanzare da DO a CHECK è obbligatorio allegare un'evidenza dell'implementazione."
-msgstr "Pour passer de DO à CHECK, il est obligatoire de joindre une évidence de la mise en œuvre."
-
-msgid "Per avanzare da CHECK ad ACT è obbligatorio descrivere il risultato della verifica."
-msgstr "Pour passer de CHECK à ACT, il est obligatoire de décrire le résultat de la vérification."
-
-msgid "Per avanzare da CHECK ad ACT è obbligatorio indicare l'esito: ok / partial / ko."
-msgstr "Pour passer de CHECK à ACT, il est obligatoire d'indiquer le résultat : ok / partial / ko."
-
-msgid "Usa close_cycle() per chiudere dalla fase ACT."
-msgstr "Utilisez close_cycle() pour clôturer depuis la phase ACT."
-
-msgid "Il ciclo è in fase %(phase)s. Avanza fino ad ACT prima di chiudere."
-msgstr "Le cycle est en phase %(phase)s. Passez à ACT avant de clôturer."
-
-msgid "Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata (minimo 20 caratteri)."
-msgstr "Pour clôturer le cycle, il est obligatoire de décrire l'action standardisée (minimum 20 caractères)."
-
-msgid "File troppo grande. Dimensione massima: 50MB."
-msgstr "Fichier trop volumineux. Taille maximale : 50 Mo."
-
-msgid "Estensione file non consentita. Formati ammessi: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
-msgstr "Extension de fichier non autorisée. Formats autorisés : doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
-
-msgid "Generare lo snapshot dei dati prima di approvare il riesame."
-msgstr "Générez le snapshot des données avant d'approuver la revue."
-
-msgid "Il riesame è già approvato."
-msgstr "La revue est déjà approuvée."
-
-msgid "RCA approvato obbligatorio per chiudere l'incidente."
-msgstr "Un RCA approuvé est obligatoire pour clôturer l'incident."
-
-msgid "Policy predefinita"
-msgstr "Politique par défaut"
-
-msgid "Plant non trovato"
-msgstr "Site non trouvé"
-
-msgid "rule_type obbligatorio"
-msgstr "rule_type obligatoire"
-
-msgid "Endpoint disponibile solo in ambiente di test (DEBUG=True)."
-msgstr "Endpoint disponible uniquement en environnement de test (DEBUG=True)."
-
-msgid "Solo il superuser può eseguire questa operazione"
-msgstr "Seul le superutilisateur peut effectuer cette opération"
-
-msgid "Header X-Confirm-Reset: RESET-CONFIRMED richiesto"
-msgstr "Header X-Confirm-Reset : RESET-CONFIRMED requis"
-
-msgid "Utente non trovato"
-msgstr "Utilisateur non trouvé"
-
-msgid "Evidenza non trovata"
-msgstr "Évidence non trouvée"
-
-msgid "Non hai i permessi per inviare in revisione questo documento."
-msgstr "Vous n'avez pas les droits pour envoyer ce document en revue."
-
-msgid "Non hai i permessi per approvare questo documento."
-msgstr "Vous n'avez pas les droits pour approuver ce document."
-
-msgid "Nessun file fornito."
-msgstr "Aucun fichier fourni."
-
-msgid "Nessun file associato a questa evidenza."
-msgstr "Aucun fichier associé à cette évidence."
-
-msgid "File non trovato nello storage."
-msgstr "Fichier introuvable dans le stockage."
-
+#: apps/assets/views.py:99 apps/assets/views.py:166
 msgid "change_ref obbligatorio"
 msgstr "change_ref obligatoire"
 
-msgid "Questo ruolo è già terminato."
-msgstr "Ce rôle est déjà terminé."
+#: apps/auth_grc/models.py:12
+msgid "Super Admin"
+msgstr "Super administrateur"
 
-msgid "Motivo terminazione obbligatorio (min 5 caratteri)."
-msgstr "Le motif de terminaison est obligatoire (minimum 5 caractères)."
+#: apps/auth_grc/models.py:13 apps/governance/models.py:10
+msgid "Compliance Officer"
+msgstr "Responsable conformité"
 
-msgid "new_user_id obbligatorio."
-msgstr "new_user_id obligatoire."
+#: apps/auth_grc/models.py:14 apps/governance/models.py:11
+msgid "Risk Manager"
+msgstr "Gestionnaire des risques"
 
+#: apps/auth_grc/models.py:15 apps/governance/models.py:14
+msgid "Plant Manager"
+msgstr "Responsable de site"
+
+#: apps/auth_grc/models.py:16 apps/governance/models.py:15
+msgid "Control Owner"
+msgstr "Propriétaire du contrôle"
+
+#: apps/auth_grc/models.py:17 apps/governance/models.py:12
+msgid "Auditor Interno"
+msgstr "Auditeur interne"
+
+#: apps/auth_grc/models.py:18 apps/governance/models.py:13
+msgid "Auditor Esterno"
+msgstr "Auditeur externe"
+
+#: apps/auth_grc/serializers.py:49
+msgid "Seleziona almeno un sito per questo perimetro."
+msgstr "Sélectionnez au moins un site pour ce périmètre."
+
+#: apps/auth_grc/serializers.py:55
+msgid "Seleziona una Business Unit per questo perimetro."
+msgstr "Sélectionnez une Business Unit pour ce périmètre."
+
+#: apps/auth_grc/services.py:124
+msgid "Non puoi disattivare il tuo account da qui."
+msgstr "Vous ne pouvez pas désactiver votre propre compte ici."
+
+#: apps/auth_grc/services.py:126
+msgid "Operazione non consentita su un account superuser."
+msgstr "Opération non autorisée sur un compte superutilisateur."
+
+#: apps/auth_grc/views.py:49
+msgid "Endpoint disponibile solo in ambiente di test (DEBUG=True)."
+msgstr "Endpoint disponible uniquement en environnement de test (DEBUG=True)."
+
+#: apps/auth_grc/views.py:54
+msgid "Solo il superuser può eseguire questa operazione"
+msgstr "Seul le superutilisateur peut effectuer cette opération"
+
+#: apps/auth_grc/views.py:60
+msgid "Header X-Confirm-Reset: RESET-CONFIRMED richiesto"
+msgstr "Header X-Confirm-Reset : RESET-CONFIRMED requis"
+
+#: apps/auth_grc/views.py:136 apps/auth_grc/views.py:190
+msgid "Utente non trovato"
+msgstr "Utilisateur non trouvé"
+
+#: apps/auth_grc/views.py:140
+#, fuzzy
+#| msgid "Motivazione rifiuto obbligatoria (min 10 caratteri)."
+msgid "Motivazione obbligatoria (min 10 caratteri) per richiesta GDPR Art. 17"
+msgstr "Le motif de refus est obligatoire (minimum 10 caractères)."
+
+#: apps/auth_grc/views.py:143
+msgid "Utente anonimizzato (GDPR Art. 17)"
+msgstr "Utilisateur anonymisé (RGPD art. 17)"
+
+#: apps/auth_grc/views.py:184
+msgid "Non sei autorizzato a visualizzare il gap analysis di altri utenti."
+msgstr "Vous n'êtes pas autorisé à consulter l'analyse des écarts d'autres utilisateurs."
+
+#: apps/backups/models.py:9
+msgid "In attesa"
+msgstr "En attente"
+
+#: apps/backups/models.py:10
+msgid "In corso"
+msgstr "En cours"
+
+#: apps/backups/models.py:11
+msgid "Completato"
+msgstr "Terminé"
+
+#: apps/backups/models.py:12
+msgid "Fallito"
+msgstr "Échoué"
+
+#: apps/backups/models.py:13
+msgid "Ripristino in corso"
+msgstr "Restauration en cours"
+
+#: apps/backups/models.py:14
+msgid "Ripristinato"
+msgstr "Restauré"
+
+#: apps/backups/models.py:17
+msgid "Automatico"
+msgstr "Automatique"
+
+#: apps/backups/models.py:18
+msgid "Manuale"
+msgstr "Manuel"
+
+#: apps/backups/models.py:19
+msgid "Importato"
+msgstr "Importé"
+
+#: apps/compliance_schedule/views.py:36
+msgid "Policy predefinita"
+msgstr "Politique par défaut"
+
+#: apps/compliance_schedule/views.py:46
+msgid "Plant non trovato"
+msgstr "Site non trouvé"
+
+#: apps/compliance_schedule/views.py:56
+msgid "rule_type obbligatorio"
+msgstr "rule_type obligatoire"
+
+#: apps/controls/export_engine.py:207
+msgid "Compliant"
+msgstr "Conforme"
+
+#: apps/controls/export_engine.py:208
+msgid "Parziale"
+msgstr "Partiel"
+
+#: apps/controls/export_engine.py:209
+msgid "Gap"
+msgstr "Écart"
+
+#: apps/controls/export_engine.py:210
+msgid "N/A"
+msgstr "N/A"
+
+#: apps/controls/export_engine.py:211
+msgid "Non valutato"
+msgstr "Non évalué"
+
+#: apps/controls/export_engine.py:219
+msgid "Applicabile"
+msgstr "Applicable"
+
+#: apps/controls/export_engine.py:220
+msgid "Escluso"
+msgstr "Exclu"
+
+#: apps/controls/export_engine.py:221
+msgid "Non pertinente"
+msgstr "Non pertinent"
+
+#: apps/controls/services/evidence.py:129
+#, python-format
+msgid "Documento collegato ma non classificato come '%(type)s' — verificare la classificazione"
+msgstr "Document lié mais non classé comme '%(type)s' — vérifiez la classification"
+
+#: apps/controls/services/evidence.py:167
+#, python-format
+msgid "Evidenza '%(title)s' ha %(age)s giorni (max consigliato: %(max_age)s gg)"
+msgstr "L'évidence '%(title)s' a %(age)s jours (maximum recommandé : %(max_age)s jours)"
+
+#: apps/controls/services/evidence.py:190
+#, python-format
+msgid "Richiesti almeno %(count)s documenti approvati"
+msgstr "Au moins %(count)s documents approuvés sont requis"
+
+#: apps/controls/services/evidence.py:200
+#, python-format
+msgid "Richieste almeno %(count)s evidenze valide"
+msgstr "Au moins %(count)s évidences valides sont requises"
+
+#: apps/controls/services/frameworks.py:16
+#, python-format
 msgid "Framework JSON non valido: campi mancanti: %(fields)s"
 msgstr "JSON de framework invalide : champs manquants : %(fields)s"
 
+#: apps/controls/services/frameworks.py:20
 msgid "Framework JSON non valido: 'controls' deve essere una lista."
 msgstr "JSON de framework invalide : 'controls' doit être une liste."
 
+#: apps/controls/services/frameworks.py:24
 msgid "Framework JSON non valido: ogni control deve essere un oggetto."
 msgstr "JSON de framework invalide : chaque control doit être un objet."
 
+#: apps/controls/services/frameworks.py:28
+#, python-format
 msgid "Framework JSON non valido: control senza campo '%(field)s'."
 msgstr "JSON de framework invalide : control sans champ '%(field)s'."
 
+#: apps/controls/services/frameworks.py:181
+#, python-format
 msgid "Framework '%(code)s' importato (v%(version)s)."
 msgstr "Framework '%(code)s' importé (v%(version)s)."
 
+#: apps/controls/services/frameworks.py:249
+#, fuzzy
+#| msgid "Solo il superuser può importare framework."
+msgid "Solo il superuser può eliminare un framework."
+msgstr "Seul le superutilisateur peut importer des frameworks."
+
+#: apps/controls/services/frameworks.py:258
+msgid "Impossibile eliminare: il framework è ancora assegnato a uno o più siti."
+msgstr "Suppression impossible : le référentiel est encore attribué à un ou plusieurs sites."
+
+#: apps/controls/services/frameworks.py:284
+#, fuzzy
+#| msgid "Solo il superuser può importare framework."
+msgid "Solo il superuser può archiviare un framework."
+msgstr "Seul le superutilisateur peut importer des frameworks."
+
+#: apps/controls/services/frameworks.py:293
+msgid "Impossibile archiviare: il framework è ancora assegnato a uno o più siti."
+msgstr "Archivage impossible : le référentiel est encore attribué à un ou plusieurs sites."
+
+#: apps/controls/services/instances.py:18
+#, python-format
+msgid "• Documento mancante: %(desc)s"
+msgstr "• Document manquant : %(desc)s"
+
+#: apps/controls/services/instances.py:20
+#, python-format
+msgid "• Evidenza mancante: %(desc)s"
+msgstr "• Évidence manquante : %(desc)s"
+
+#: apps/controls/services/instances.py:23
+#, python-format
+msgid "• Evidenza scaduta: %(title)s (scaduta il %(date)s)"
+msgstr "• Évidence expirée : %(title)s (expirée le %(date)s)"
+
+#: apps/controls/services/instances.py:33
+msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata."
+msgstr "Impossible de définir l'état sur 'conforme' sans au moins une évidence valide liée."
+
+#: apps/controls/services/instances.py:37
+#, fuzzy
+#| msgid "Requisiti non soddisfatti per stato Compliant:\\n"
+msgid "Requisiti non soddisfatti per stato Compliant:\n"
+msgstr "Exigences non satisfaites pour l'état Conforme :\\n"
+
+#: apps/controls/services/instances.py:52
+msgid "Almeno un documento approvato o un'evidenza valida richiesti per stato Parziale."
+msgstr "Au moins un document approuvé ou une évidence valide est requis pour l'état Partiel."
+
+#: apps/controls/services/instances.py:58
+msgid "Lo stato N/A richiede una giustificazione scritta di almeno 20 caratteri."
+msgstr "L'état N/A nécessite une justification écrite d'au moins 20 caractères."
+
+#: apps/controls/services/instances.py:106
+msgid "La giustificazione di esclusione per SOA richiede almeno 50 caratteri. Specificare il motivo formale per cui il controllo non è applicabile."
+msgstr "La justification d'exclusion pour la SOA doit comporter au moins 50 caractères. Indiquez la raison formelle pour laquelle le contrôle n'est pas applicable."
+
+#: apps/controls/services/instances.py:148
+#, python-format
+msgid "Impossibile eliminare il controllo: ha %(n)d valutazioni su uno o più siti. Il catalogo si gestisce ricaricando i framework."
+msgstr "Suppression impossible du contrôle : il comporte %(n)d évaluations sur un ou plusieurs sites. Le catalogue se gère en rechargeant les référentiels."
+
+#: apps/controls/services/instances.py:182
+msgid "Eliminazione consentita solo per controlli non ancora valutati."
+msgstr "Suppression autorisée uniquement pour les contrôles non encore évalués."
+
+#: apps/controls/views/frameworks.py:82 apps/controls/views/frameworks.py:102
 msgid "Solo il superuser può importare framework."
 msgstr "Seul le superutilisateur peut importer des frameworks."
 
+#: apps/controls/views/frameworks.py:111
 msgid "Conferma import non valida (sha256 mismatch)."
 msgstr "Confirmation d'import invalide (sha256 mismatch)."
 
+#: apps/controls/views/frameworks.py:164
+#, python-format
+msgid "Generazione spiegazione non riuscita: %(err)s"
+msgstr "Échec de la génération de l'explication : %(err)s"
+
+#: apps/controls/views/frameworks.py:187
+#, fuzzy, python-format
+#| msgid "Errore generazione documento: %(err)s"
+msgid "Generazione documento non riuscita: %(err)s"
+msgstr "Erreur lors de la génération du document : %(err)s"
+
+#: apps/controls/views/instances.py:54
 msgid "Nessun requisito documentale definito per questo controllo."
 msgstr "Aucune exigence documentaire définie pour ce contrôle."
 
+#: apps/controls/views/instances.py:57
 msgid "Tutti i requisiti documentali sono soddisfatti."
 msgstr "Toutes les exigences documentaires sont satisfaites."
 
+#: apps/controls/views/instances.py:61
+#, python-format
 msgid "Documento mancante: %(desc)s"
 msgstr "Document manquant : %(desc)s"
 
+#: apps/controls/views/instances.py:63
+#, python-format
 msgid "Evidenza mancante: %(desc)s"
 msgstr "Évidence manquante : %(desc)s"
 
+#: apps/controls/views/instances.py:66
+#, python-format
 msgid "Evidenza scaduta: %(title)s (scaduta il %(date)s)"
 msgstr "Évidence expirée : %(title)s (expirée le %(date)s)"
 
+#: apps/controls/views/instances.py:72
 msgid "Requisiti parzialmente soddisfatti."
 msgstr "Exigences partiellement satisfaites."
 
+#: apps/controls/views/instances.py:72
 msgid "Nessuna documentazione presente."
 msgstr "Aucune documentation présente."
 
+#: apps/controls/views/instances.py:185
 msgid "Campo 'status' obbligatorio."
 msgstr "Le champ 'status' est obligatoire."
 
+#: apps/controls/views/instances.py:343 apps/controls/views/instances.py:359
 msgid "Documento non trovato"
 msgstr "Document non trouvé"
 
+#: apps/controls/views/instances.py:376 apps/controls/views/instances.py:471
 msgid "Evidenza non trovata."
 msgstr "Évidence non trouvée."
 
+#: apps/controls/views/instances.py:401
 msgid "maturity_level deve essere tra 0 e 5"
 msgstr "maturity_level doit être compris entre 0 et 5"
 
-msgid "Parametri 'source' e 'target' obbligatori."
+#: apps/controls/views/instances.py:489 apps/controls/views/reports.py:31
+#, fuzzy
+#| msgid "Parametro 'framework' obbligatorio."
+msgid "Parametro 'plant' obbligatorio."
+msgstr "Le paramètre 'framework' est obligatoire."
+
+#: apps/controls/views/instances.py:492
+#, fuzzy
+#| msgid "Plant non trovato"
+msgid "Plant non trovato."
+msgstr "Site non trouvé"
+
+#: apps/controls/views/instances.py:497 apps/controls/views/reports.py:36
+#: apps/controls/views/reports.py:91 core/scoping.py:112 core/scoping.py:169
+#: core/scoping.py:181
+msgid "Accesso negato per questo sito."
+msgstr "Accès refusé pour ce site."
+
+#: apps/controls/views/reports.py:25
+#, fuzzy, python-format
+#| msgid "Parametri 'source' e 'target' obbligatori."
+msgid "Parametro 'target' obbligatorio (uno tra: %(targets)s)."
 msgstr "Les paramètres 'source' et 'target' sont obligatoires."
 
+#: apps/controls/views/reports.py:83
 msgid "Parametro 'framework' obbligatorio."
 msgstr "Le paramètre 'framework' est obligatoire."
 
+#: apps/controls/views/reports.py:93
+msgid "Accesso negato: export aggregato riservato allo scope organizzazione."
+msgstr "Accès refusé : l'export agrégé est réservé au périmètre organisation."
+
+#: apps/controls/views/reports.py:99
+#, python-format
 msgid "Formato %(fmt)s non compatibile con framework %(fw)s. Usa uno di: %(allowed)s"
 msgstr "Le format %(fmt)s n'est pas compatible avec le framework %(fw)s. Utilisez un des formats : %(allowed)s"
 
+#: apps/controls/views/reports.py:117
+#, python-format
 msgid "Framework '%(fw)s' non attivo per questo sito. Framework attivi: %(active)s"
 msgstr "Le framework '%(fw)s' n'est pas actif pour ce site. Frameworks actifs : %(active)s"
 
+#: apps/controls/views/reports.py:132
+#, python-format
 msgid "Errore generazione documento: %(err)s"
 msgstr "Erreur lors de la génération du document : %(err)s"
 
+#: apps/documents/services.py:293
+msgid "Eliminazione non consentita per documenti in approvazione o già approvati."
+msgstr "Suppression non autorisée pour les documents en cours d'approbation ou déjà approuvés."
+
+#: apps/documents/services.py:318
+msgid "Eliminazione non consentita: l'evidenza è collegata a controlli già valutati."
+msgstr "Suppression non autorisée : la preuve est liée à des contrôles déjà évalués."
+
+#: apps/documents/views.py:141
+msgid "Non hai i permessi per inviare in revisione questo documento."
+msgstr "Vous n'avez pas les droits pour envoyer ce document en revue."
+
+#: apps/documents/views.py:154
+msgid "Non hai i permessi per approvare questo documento."
+msgstr "Vous n'avez pas les droits pour approuver ce document."
+
+#: apps/documents/views.py:204 apps/plants/views.py:118
+msgid "Nessun file fornito."
+msgstr "Aucun fichier fourni."
+
+#: apps/documents/views.py:315
+msgid "Nessun file associato a questa evidenza."
+msgstr "Aucun fichier associé à cette évidence."
+
+#: apps/documents/views.py:319
+msgid "Percorso file non valido."
+msgstr "Chemin de fichier non valide."
+
+#: apps/documents/views.py:322
+msgid "File non trovato nello storage."
+msgstr "Fichier introuvable dans le stockage."
+
+#: apps/governance/models.py:9
+msgid "CISO"
+msgstr "CISO"
+
+#: apps/governance/models.py:16
+msgid "Plant Security Officer"
+msgstr "Responsable sécurité du site"
+
+#: apps/governance/models.py:17
+msgid "Contatto NIS2"
+msgstr "Contact NIS2"
+
+#: apps/governance/models.py:18
+msgid "DPO"
+msgstr "DPO"
+
+#: apps/governance/models.py:19
+msgid "ISMS Manager"
+msgstr "Responsable SMSI"
+
+#: apps/governance/models.py:20
+msgid "Membro Comitato"
+msgstr "Membre du comité"
+
+#: apps/governance/models.py:21
+msgid "Referente BU"
+msgstr "Référent BU"
+
+#: apps/governance/models.py:22
+msgid "RACI Responsible"
+msgstr "RACI Responsable"
+
+#: apps/governance/models.py:23
+msgid "RACI Accountable"
+msgstr "RACI Redevable"
+
+#: apps/governance/views.py:69
+msgid "Questo ruolo è già terminato."
+msgstr "Ce rôle est déjà terminé."
+
+#: apps/governance/views.py:74
+msgid "Motivo terminazione obbligatorio (min 5 caratteri)."
+msgstr "Le motif de terminaison est obligatoire (minimum 5 caractères)."
+
+#: apps/governance/views.py:106
+msgid "new_user_id obbligatorio."
+msgstr "new_user_id obligatoire."
+
+#: apps/governance/views.py:109
+#, fuzzy
+#| msgid "Utente non trovato"
+msgid "Utente non trovato."
+msgstr "Utilisateur non trouvé"
+
+#: apps/incidents/serializers.py:55
+msgid "La chiusura dell'incidente avviene solo tramite l'azione dedicata, previo RCA approvato."
+msgstr "La clôture de l'incident s'effectue uniquement via l'action dédiée, après une RCA approuvée."
+
+#: apps/incidents/services.py:18
+msgid "RCA approvato obbligatorio per chiudere l'incidente."
+msgstr "Un RCA approuvé est obligatoire pour clôturer l'incident."
+
+#: apps/lessons/services.py:16
+#, python-format
+msgid "Solo una lezione in bozza può essere validata (stato attuale: %(s)s)."
+msgstr "Seule une leçon à l'état brouillon peut être validée (statut actuel : %(s)s)."
+
+#: apps/lessons/services.py:46
+msgid "La lezione deve essere validata prima di poter essere propagata."
+msgstr "La leçon doit être validée avant de pouvoir être propagée."
+
+#: apps/lessons/services.py:56
+msgid "Accesso negato per uno dei siti di destinazione."
+msgstr "Accès refusé pour l'un des sites de destination."
+
+#: apps/management_review/services.py:305
+msgid "Generare lo snapshot dei dati prima di approvare il riesame."
+msgstr "Générez le snapshot des données avant d'approuver la revue."
+
+#: apps/management_review/services.py:308
+msgid "Il riesame è già approvato."
+msgstr "La revue est déjà approuvée."
+
+#: apps/pdca/services.py:41
+msgid "Il ciclo è già chiuso."
+msgstr "Le cycle est déjà clôturé."
+
+#: apps/pdca/services.py:50
+msgid "Per avanzare da PLAN a DO è obbligatorio descrivere l'azione pianificata (minimo 20 caratteri)."
+msgstr "Pour passer de PLAN à DO, il est obligatoire de décrire l'action planifiée (minimum 20 caractères)."
+
+#: apps/pdca/services.py:58
+msgid "Per avanzare da DO a CHECK è obbligatorio allegare un'evidenza dell'implementazione."
+msgstr "Pour passer de DO à CHECK, il est obligatoire de joindre une évidence de la mise en œuvre."
+
+#: apps/pdca/services.py:66
+msgid "Per avanzare da CHECK ad ACT è obbligatorio descrivere il risultato della verifica."
+msgstr "Pour passer de CHECK à ACT, il est obligatoire de décrire le résultat de la vérification."
+
+#: apps/pdca/services.py:73
+msgid "Per avanzare da CHECK ad ACT è obbligatorio indicare l'esito: ok / partial / ko."
+msgstr "Pour passer de CHECK à ACT, il est obligatoire d'indiquer le résultat : ok / partial / ko."
+
+#: apps/pdca/services.py:99
+msgid "Usa close_cycle() per chiudere dalla fase ACT."
+msgstr "Utilisez close_cycle() pour clôturer depuis la phase ACT."
+
+#: apps/pdca/services.py:153
+#, fuzzy, python-format
+#| msgid "Il ciclo è già chiuso."
+msgid "Il ciclo è già %(phase)s."
+msgstr "Le cycle est déjà clôturé."
+
+#: apps/pdca/services.py:156
+#, fuzzy
+#| msgid "Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata (minimo 20 caratteri)."
+msgid "Per archiviare è obbligatorio specificare il motivo (minimo 20 caratteri)."
+msgstr "Pour clôturer le cycle, il est obligatoire de décrire l'action standardisée (minimum 20 caractères)."
+
+#: apps/pdca/services.py:190
+#, python-format
+msgid "Il ciclo è in fase %(phase)s. Avanza fino ad ACT prima di chiudere."
+msgstr "Le cycle est en phase %(phase)s. Passez à ACT avant de clôturer."
+
+#: apps/pdca/services.py:197
+msgid "Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata (minimo 20 caratteri)."
+msgstr "Pour clôturer le cycle, il est obligatoire de décrire l'action standardisée (minimum 20 caractères)."
+
+#: apps/pdca/views.py:64
+msgid "Evidenza non trovata"
+msgstr "Évidence non trouvée"
+
+#: apps/pdca/views.py:130
+#, fuzzy
+#| msgid "Motivo terminazione obbligatorio (min 5 caratteri)."
+msgid "Motivo cancellazione obbligatorio (min 10 caratteri)."
+msgstr "Le motif de terminaison est obligatoire (minimum 5 caractères)."
+
+#: apps/pdca/views.py:137
+msgid "Ciclo gia' chiuso: ha generato una Lesson Learned e fa parte dell'audit trail. Non e' cancellabile."
+msgstr "Cycle déjà clôturé : il a généré une leçon apprise et fait partie de la piste d'audit. Il ne peut pas être supprimé."
+
+#: apps/pdca/views.py:152
+#, python-format
+msgid "Impossibile cancellare: %(count)d finding manuali aperti referenziano questo ciclo. Chiudi o annulla prima i finding."
+msgstr "Suppression impossible : %(count)d constats manuels ouverts référencent ce cycle. Clôturez ou annulez d'abord les constats."
+
+#: apps/plants/models.py:213
+msgid "Max 1 livello di nesting per i sub-plant."
+msgstr "1 niveau d'imbrication maximum pour les sous-sites."
+
+#: apps/plants/serializers.py:32
+#, python-format
+msgid "Timezone IANA non valido: %(tz)s"
+msgstr "Fuseau horaire IANA non valide : %(tz)s"
+
+#: apps/plants/serializers.py:43
+msgid "Max 1 livello di nesting per i sub-plant: il sito scelto è già un sotto-sito."
+msgstr "1 niveau d'imbrication maximum pour les sous-sites : le site choisi est déjà un sous-site."
+
+#: apps/plants/services.py:173
+#, fuzzy
+#| msgid "Solo il superuser può importare framework."
+msgid "Solo il superuser può forzare l'eliminazione del sito."
+msgstr "Seul le superutilisateur peut importer des frameworks."
+
+#: apps/plants/services.py:250
+#, fuzzy
+#| msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata."
+msgid "Impossibile eliminare il sito: sono presenti dipendenze collegate."
+msgstr "Impossible de définir l'état sur 'conforme' sans au moins une évidence valide liée."
+
+#: apps/plants/views.py:66
+msgid "Impossibile cambiare il codice: il sito ha controlli collegati."
+msgstr "Impossible de changer le code : le site a des contrôles liés."
+
+#: apps/plants/views.py:80
+#, python-format
+msgid "Questo sito ha %(n)d incidente aperto."
+msgid_plural "Questo sito ha %(n)d incidenti aperti."
+msgstr[0] ""
+msgstr[1] ""
+
+#: apps/plants/views.py:153
+#, fuzzy
+#| msgid "Nessun requisito documentale definito per questo controllo."
+msgid "Nessun logo configurato per questo sito."
+msgstr "Aucune exigence documentaire définie pour ce contrôle."
+
+#: apps/plants/views.py:157
+msgid "Logo non disponibile: usa l'upload file per i loghi del sito."
+msgstr "Logo non disponible : utilisez le téléversement de fichier pour les logos du site."
+
+#: apps/plants/views.py:167 apps/plants/views.py:170
+#, fuzzy
+#| msgid "File non trovato nello storage."
+msgid "Logo non trovato nello storage."
+msgstr "Fichier introuvable dans le stockage."
+
+#: apps/reporting/services.py:965 apps/reporting/services.py:976
+#: apps/reporting/views.py:128
+msgid "Tutti i siti"
+msgstr "Tous les sites"
+
+#: apps/reporting/services.py:968 apps/reporting/services.py:979
+msgid "BU"
+msgstr "BU"
+
+#: apps/reporting/services.py:972 apps/reporting/services.py:983
+msgid "(nessun sito)"
+msgstr "(aucun site)"
+
+#: apps/reporting/views.py:118
+msgid "Utente"
+msgstr "Utilisateur"
+
+#: apps/reporting/views.py:118
+msgid "Email"
+msgstr "E-mail"
+
+#: apps/reporting/views.py:118
+msgid "Attivo"
+msgstr "Actif"
+
+#: apps/reporting/views.py:119
+msgid "Tipo"
+msgstr "Type"
+
+#: apps/reporting/views.py:119
+msgid "Ruolo"
+msgstr "Rôle"
+
+#: apps/reporting/views.py:119
+msgid "Perimetro"
+msgstr "Périmètre"
+
+#: apps/reporting/views.py:120
+msgid "Siti"
+msgstr "Sites"
+
+#: apps/reporting/views.py:120
+msgid "Scadenza"
+msgstr "Échéance"
+
+#: apps/reporting/views.py:120
+msgid "Segnalazioni"
+msgstr "Signalements"
+
+#: apps/reporting/views.py:125
+msgid "Sì"
+msgstr "Oui"
+
+#: apps/reporting/views.py:125
+msgid "No"
+msgstr "Non"
+
+#: apps/reporting/views.py:126
+msgid "Accesso"
+msgstr "Accès"
+
+#: apps/reporting/views.py:126
+msgid "Responsabilità"
+msgstr "Responsabilité"
+
+#: apps/risk/services.py:246
+msgid "La nota è obbligatoria per l'accettazione formale del rischio."
+msgstr "Une note est obligatoire pour l'acceptation formelle du risque."
+
+#: apps/risk/services.py:249
+msgid "Per rischi critici (rosso) la nota di accettazione deve essere di almeno 50 caratteri."
+msgstr "Pour les risques critiques (rouge), la note d'acceptation doit comporter au moins 50 caractères."
+
+#: apps/suppliers/services.py:369
+msgid "Solo assessment completati possono essere approvati."
+msgstr "Seules les évaluations terminées peuvent être approuvées."
+
+#: apps/suppliers/services.py:401
+msgid "Motivazione rifiuto obbligatoria (min 10 caratteri)."
+msgstr "Le motif de refus est obligatoire (minimum 10 caractères)."
+
+#: apps/suppliers/services.py:446
+#, fuzzy
+#| msgid "Nessun requisito documentale definito per questo controllo."
+msgid "Nessun indirizzo email configurato per questo fornitore."
+msgstr "Aucune exigence documentaire définie pour ce contrôle."
+
+#: apps/suppliers/services.py:502
+msgid "Il questionario ha già ricevuto risposta."
+msgstr "Le questionnaire a déjà reçu une réponse."
+
+#: apps/tasks/services.py:208
+msgid "Tutti gli item obbligatori devono essere spuntati prima di completare."
+msgstr "Tous les éléments obligatoires doivent être cochés avant de terminer."
+
+#: core/scoping.py:115
+msgid "Accesso negato: vista aggregata su tutti i siti riservata allo scope organizzazione."
+msgstr "Accès refusé : la vue agrégée sur tous les sites est réservée au périmètre organisation."
+
+#: core/uploads.py:86
+#, fuzzy, python-format
+#| msgid "File troppo grande. Dimensione massima: 50MB."
+msgid "File troppo grande. Dimensione massima: %(mb)sMB."
+msgstr "Fichier trop volumineux. Taille maximale : 50 Mo."
+
+#: core/uploads.py:94
+#, fuzzy, python-format
+#| msgid "Estensione file non consentita. Formati ammessi: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
+msgid "Estensione file non consentita. Formati ammessi: %(formats)s."
+msgstr "Extension de fichier non autorisée. Formats autorisés : doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
+
+#: core/uploads.py:104
+msgid "Tipo di file non consentito. Il contenuto del file non corrisponde all'estensione."
+msgstr "Type de fichier non autorisé. Le contenu du fichier ne correspond pas à l'extension."
+
+#: core/uploads.py:113
+#, python-format
+msgid "Il contenuto del file non corrisponde all'estensione .%(ext)s."
+msgstr "Le contenu du fichier ne correspond pas à l'extension .%(ext)s."
