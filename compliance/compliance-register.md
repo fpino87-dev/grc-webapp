@@ -16,7 +16,7 @@
 | 15-22 | Diritti interessati (accesso, rettifica, **cancellazione**, portabilità) | P+D/O | 🟡 | `anonymize_user()` (Art.17); export CSV/backup (Art.20); doc bilanciamento vs audit immutabile |
 | 17 vs 5.1.e | Cancellazione vs **audit append-only** | P | 🟡📄 | Audit immutabile per obbligo legale/legittimo interesse; email già pseudonimizzata → documentare in retention policy. **Payload verificati**: nessun identificatore diretto, prosa libera troncata → [`gdpr/audit-log-pii-assessment.md`](gdpr/audit-log-pii-assessment.md) |
 | 28 | Contratto responsabile (DPA) | O | ⬜📄 | Necessario in SaaS/managed; e verso i **sub-processor AI** (Anthropic/OpenAI) |
-| 30 | Registro dei trattamenti (ROPA) | D/O | ⬜📄 | `gdpr/ropa.md` |
+| 30 | Registro dei trattamenti (ROPA) | D/O | 🟡📄 | 9 trattamenti mappati in [`gdpr/ropa.md`](gdpr/ropa.md); intestazione/retention titolare `[DA COMPILARE]` |
 | 32 | Sicurezza del trattamento | P | ✅ | FERNET AES-256, RBAC, MFA, password policy, MIME-check, JWT blacklist, rate-limit, audit hash-chain |
 | 33-34 | Notifica data breach | D/O | 🟡 | Modulo incidenti M09 (NIS2) riusabile; definire processo/tempistiche GDPR |
 | 35 | **DPIA** | D/O | 🟡📄 | Obbligatoria; **bozza pre-compilata** in [`gdpr/dpia.md`](gdpr/dpia.md) — restano i campi `[DA COMPILARE]` del titolare |

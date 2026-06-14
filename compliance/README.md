@@ -40,13 +40,13 @@ Legenda owner usata nel register: **P** = Prodotto (dentro il software, sempre t
 |-----|-----------|-------|
 | [`compliance-register.md`](compliance-register.md) | Mappa master: regolamento → obbligo → scenario → owner → stato → evidenza | 🟡 bozza |
 | [`ai/ai-system-inventory.md`](ai/ai-system-inventory.md) | Inventario sistemi AI + classificazione AI Act + trasparenza | 🟡 bozza |
-| `gdpr/dpia.md` | DPIA (phishing/training, OSINT, AI cloud) | 🟡 bozza pre-compilata |
+| [`gdpr/dpia.md`](gdpr/dpia.md) | DPIA (phishing/training, OSINT, AI cloud) | 🟡 bozza pre-compilata |
 | [`gdpr/audit-log-pii-assessment.md`](gdpr/audit-log-pii-assessment.md) | Verifica PII nei payload audit | ✅ fatto |
 | [`gdpr/retention-and-erasure.md`](gdpr/retention-and-erasure.md) | Retention + Art. 17 vs audit immutabile | 🟡 bozza |
-| `gdpr/ropa.md` | Registro dei trattamenti (Art. 30) | ⬜ da fare |
+| [`gdpr/ropa.md`](gdpr/ropa.md) | Registro dei trattamenti (Art. 30) | 🟡 bozza |
 | [`gdpr/international-transfers.md`](gdpr/international-transfers.md) | TIA provider AI + leve (Ollama/EU region) | 🟡 bozza |
 | [`../SECURITY.md`](../SECURITY.md) | Vulnerability disclosure coordinata (CRA Art. 13) — a root del repo | ✅ fatto |
-| `data-flows.md` | Diagramma flussi dati + sub-processor | ⬜ da fare |
+| [`data-flows.md`](data-flows.md) | Diagramma flussi dati + sub-processor | 🟡 bozza |
 
 ## Punti di forza già nel prodotto (evidenze "Common")
 
@@ -61,7 +61,16 @@ Misure tecniche già implementate che fanno da evidenza di privacy/security-by-d
 - **FERNET (AES-256)** per i segreti (chiavi AI/SMTP/enricher), MIME-check upload, password policy.
 - **CI**: `pip-audit` + `npm audit` (base SBOM/vulnerability management — CRA).
 
-## Gap principali (sintesi)
+## Gap residui (sintesi)
 
-1. **Documentali**: DPIA, ROPA, retention policy, TIA, SECURITY.md, data-flow.
-2. **Tecnici** (pochi): label "AI-generated" sugli output; verifica che i payload audit non contengano PII libere (regola #11); scelta esplicita region/provider AI; export/portabilità completi.
+**Documentali** — bozze redatte (DPIA, ROPA, retention, TIA, data-flows) + SECURITY.md e
+audit-PII assessment completi. Restano i campi `[DA COMPILARE]` di competenza del **titolare**
+(intestazione, basi giuridiche di dettaglio, periodi di conservazione, verifica certificazioni provider).
+
+**Tecnici** ancora aperti:
+1. Export/portabilità completi del dato cliente (Data Act).
+2. Purge definitivo dei record soft-deleted dopo il periodo di retention.
+3. Pubblicazione **SBOM** per release (CRA Annex I.2).
+
+*(Chiusi nel corso del lavoro: verifica PII payload audit, label "AI-generated", avviso cloud-PII,
+retention `AiInteractionLog`, esclusione external_auditor da OSINT.)*
