@@ -10,7 +10,7 @@
 | Titolare del trattamento | `[DA COMPILARE]` |
 | DPO / referente | `[DA COMPILARE]` |
 | Data / versione | 2026-06-14 — v0 draft |
-| Sistema | GRC Webapp (TISAX/NIS2/ISO 27001) |
+| Sistema | govrico (TISAX/NIS2/ISO 27001) |
 | Esito sintetico | Rischio **medio**, **mitigabile** con le misure elencate; consultazione preventiva Garante non necessaria se le misure sono implementate |
 
 ## 1. È necessaria la DPIA? (Art. 35.3 + linee guida WP248)

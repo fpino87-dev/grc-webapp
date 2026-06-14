@@ -1,4 +1,4 @@
-# Compliance Pack — GRC Webapp
+# Compliance Pack — govrico
 
 > ⚠️ **DRAFT / work-in-progress.** Questi documenti sono un *fascicolo di conformità*
 > tecnico-organizzativo, **non un parere legale**. I testi destinati a clienti,
