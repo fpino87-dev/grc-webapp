@@ -36,12 +36,15 @@ class UserSerializer(serializers.ModelSerializer):
     def get_grc_role(self, obj):
         if obj.is_superuser:
             return "super_admin"
-        access = UserPlantAccess.objects.filter(user=obj).first()
-        return access.role if access else None
+        # Usa il related manager (prefetchato dal ViewSet sul listing → niente N+1).
+        accesses = list(obj.plant_access.all())
+        return accesses[0].role if accesses else None
 
     def get_plant_access(self, obj):
-        accesses = UserPlantAccess.objects.filter(user=obj).select_related("scope_bu").prefetch_related("scope_plants")
-        return [{"id": str(a.id), "role": a.role, "scope_type": a.scope_type} for a in accesses]
+        return [
+            {"id": str(a.id), "role": a.role, "scope_type": a.scope_type}
+            for a in obj.plant_access.all()
+        ]
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -85,7 +88,11 @@ class AssignRoleSerializer(serializers.Serializer):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.filter(is_active=True).order_by("username")
+    # prefetch_related("plant_access"): il UserSerializer legge ruolo + accessi
+    # per ogni utente → senza prefetch sarebbe 2N+ query sul listing.
+    queryset = (
+        User.objects.filter(is_active=True).order_by("username").prefetch_related("plant_access")
+    )
     filterset_fields = ["is_active", "is_staff"]
     search_fields = ["username", "email", "first_name", "last_name"]
 
