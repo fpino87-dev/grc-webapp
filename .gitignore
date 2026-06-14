@@ -74,3 +74,6 @@ backend/backups/
 # Snapshot/export GRC operativi (es. cleanup_orphan_*.csv) — contengono
 # dati di compliance per-plant, non vanno in repo
 backend/exports/
+
+# Fascicolo di conformità: deliverable privato, non nel repo pubblico
+compliance/
