@@ -18,7 +18,7 @@
 | 30 | Registro dei trattamenti (ROPA) | D/O | ⬜📄 | `gdpr/ropa.md` |
 | 32 | Sicurezza del trattamento | P | ✅ | FERNET AES-256, RBAC, MFA, password policy, MIME-check, JWT blacklist, rate-limit, audit hash-chain |
 | 33-34 | Notifica data breach | D/O | 🟡 | Modulo incidenti M09 (NIS2) riusabile; definire processo/tempistiche GDPR |
-| 35 | **DPIA** | D/O | ⬜📄 | Obbligatoria: monitoraggio lavoratori + larga scala + transfer. `gdpr/dpia.md` |
+| 35 | **DPIA** | D/O | 🟡📄 | Obbligatoria; **bozza pre-compilata** in [`gdpr/dpia.md`](gdpr/dpia.md) — restano i campi `[DA COMPILARE]` del titolare |
 | 44-49 | **Trasferimenti extra-UE** (provider AI USA) | P+D/O | 🟡📄 | Leva tecnica: Ollama locale / endpoint EU; serve SCC/DPF + TIA |
 
 ## AI Act (Reg. 2024/1689)
