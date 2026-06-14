@@ -476,11 +476,19 @@ class AuditProgramViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     @action(detail=True, methods=["get"], url_path="report")
     def report(self, request, pk=None):
         """Relazione HTML del programma annuale."""
+        import html as _html
+
         from django.http import HttpResponse
         program = self.get_object()
         preps = AuditPrep.objects.filter(
             audit_program=program
         ).prefetch_related("evidence_items", "findings")
+
+        def _e(value) -> str:
+            # Gli audit pianificati (titolo, auditor, framework) sono input utente
+            # liberi salvati nel JSON `planned_audits`: vanno escapati prima di
+            # finire nell'HTML del report scaricabile (no XSS-on-open).
+            return _html.escape(str(value)) if value is not None else "—"
 
         rows = ""
         for audit in program.planned_audits:
@@ -494,19 +502,19 @@ class AuditProgramViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             }
             color = status_colors.get(status, "#6b7280")
             rows += (
-                f"<tr><td>Q{audit['quarter']}</td>"
-                f"<td>{audit.get('title', '—')}</td>"
-                f"<td>{', '.join(audit.get('framework_codes', []))}</td>"
-                f"<td>{audit.get('planned_date', '—')}</td>"
-                f"<td>{audit.get('auditor_name', '—')}</td>"
-                f"<td style='color:{color};font-weight:bold'>{status.replace('_', ' ').title()}</td>"
+                f"<tr><td>Q{_e(audit.get('quarter', '—'))}</td>"
+                f"<td>{_e(audit.get('title', '—'))}</td>"
+                f"<td>{_e(', '.join(audit.get('framework_codes', [])))}</td>"
+                f"<td>{_e(audit.get('planned_date', '—'))}</td>"
+                f"<td>{_e(audit.get('auditor_name', '—'))}</td>"
+                f"<td style='color:{color};font-weight:bold'>{_e(status.replace('_', ' ').title())}</td>"
                 f"<td style='font-weight:bold'>{f'{score}/100' if score is not None else '—'}</td></tr>"
             )
 
         from django.utils import timezone as tz
         html = f"""<!DOCTYPE html>
 <html lang="it"><head><meta charset="UTF-8">
-<title>Programma Audit {program.year}</title>
+<title>Programma Audit {_e(program.year)}</title>
 <style>
 body{{font-family:Arial,sans-serif;font-size:10px;margin:24px}}
 h1{{font-size:16px;color:#1e40af;border-bottom:2px solid #1e40af;padding-bottom:6px}}
@@ -515,9 +523,9 @@ th{{background:#1e40af;color:white;padding:5px 6px;text-align:left}}
 td{{padding:4px 6px;border-bottom:1px solid #e5e7eb}}
 tr:nth-child(even){{background:#f9fafb}}
 </style></head><body>
-<h1>Programma Audit Annuale {program.year}</h1>
-<p><strong>Sito:</strong> {program.plant.name} &nbsp;
-   <strong>Stato:</strong> {program.status} &nbsp;
+<h1>Programma Audit Annuale {_e(program.year)}</h1>
+<p><strong>Sito:</strong> {_e(program.plant.name)} &nbsp;
+   <strong>Stato:</strong> {_e(program.status)} &nbsp;
    <strong>Completamento:</strong> {program.completion_pct}%</p>
 <table>
 <tr><th>Q</th><th>Titolo</th><th>Framework</th><th>Data</th><th>Auditor</th><th>Stato</th><th>Score</th></tr>
