@@ -64,6 +64,9 @@ class EvidenceItem(BaseModel):
     notes = models.TextField(blank=True)
     due_date = models.DateField(null=True, blank=True)
 
+    class Meta:
+        ordering = ["created_at"]
+
 
 class AuditFinding(BaseModel):
     FINDING_TYPE_CHOICES = [

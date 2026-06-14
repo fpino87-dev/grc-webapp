@@ -167,6 +167,21 @@ def test_filter_findings_by_audit_prep(client, audit_prep):
     assert resp.status_code == 200
 
 
+@pytest.mark.django_db
+def test_cannot_close_finding_via_direct_patch(client, audit_prep):
+    """status/closed_by del finding sono governati dall'azione close."""
+    from apps.audit_prep.models import AuditFinding
+    f = AuditFinding.objects.create(
+        audit_prep=audit_prep, finding_type="minor_nc",
+        title="X", description="Y", audit_date=timezone.localdate(),
+    )
+    resp = client.patch(f"{URL_FINDINGS}{f.id}/", {"status": "closed"}, format="json")
+    assert resp.status_code == 200
+    f.refresh_from_db()
+    assert f.status == "open"
+    assert f.closed_at is None
+
+
 # ── Programs ──────────────────────────────────────────────────────────────────
 
 @pytest.mark.django_db
@@ -197,9 +212,20 @@ def test_retrieve_program(client, audit_program):
 
 
 @pytest.mark.django_db
-def test_update_program(client, audit_program):
+def test_program_approval_governed_via_action(client, audit_program):
+    """status/approved_by sono governati dall'azione approve: una PATCH diretta
+    non approva il programma né falsifica l'approvatore."""
     resp = client.patch(f"{URL_PROGRAMS}{audit_program.id}/", {"status": "approvato"}, format="json")
     assert resp.status_code == 200
+    audit_program.refresh_from_db()
+    assert audit_program.status == "bozza"
+    assert audit_program.approved_at is None
+    # l'azione dedicata invece approva
+    resp2 = client.post(f"{URL_PROGRAMS}{audit_program.id}/approve/")
+    assert resp2.status_code == 200
+    audit_program.refresh_from_db()
+    assert audit_program.status == "approvato"
+    assert audit_program.approved_by is not None
 
 
 @pytest.mark.django_db
