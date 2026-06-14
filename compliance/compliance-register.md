@@ -13,7 +13,7 @@
 | 6/9 | Base giuridica (incl. monitoraggio lavoratori phishing/training) | D/O | ⬜📄 | Da definire per trattamento; possibile consultazione RSU/comitato (DE/IT) |
 | 13-14 | Informativa agli interessati | D/O | ⬜📄 | Template informativa per utenti/dipendenti |
 | 15-22 | Diritti interessati (accesso, rettifica, **cancellazione**, portabilità) | P+D/O | 🟡 | `anonymize_user()` (Art.17); export CSV/backup (Art.20); doc bilanciamento vs audit immutabile |
-| 17 vs 5.1.e | Cancellazione vs **audit append-only** | P | 🟡📄 | Audit immutabile per obbligo legale/legittimo interesse; email già pseudonimizzata → documentare in retention policy; **verificare payload senza PII** |
+| 17 vs 5.1.e | Cancellazione vs **audit append-only** | P | 🟡📄 | Audit immutabile per obbligo legale/legittimo interesse; email già pseudonimizzata → documentare in retention policy. **Payload verificati**: nessun identificatore diretto, prosa libera troncata → [`gdpr/audit-log-pii-assessment.md`](gdpr/audit-log-pii-assessment.md) |
 | 28 | Contratto responsabile (DPA) | O | ⬜📄 | Necessario in SaaS/managed; e verso i **sub-processor AI** (Anthropic/OpenAI) |
 | 30 | Registro dei trattamenti (ROPA) | D/O | ⬜📄 | `gdpr/ropa.md` |
 | 32 | Sicurezza del trattamento | P | ✅ | FERNET AES-256, RBAC, MFA, password policy, MIME-check, JWT blacklist, rate-limit, audit hash-chain |

@@ -79,7 +79,7 @@ def terminate_role(assignment, user, termination_date=None, reason=""):
             "role":             assignment.role,
             "terminated_user":  str(assignment.user_id),
             "termination_date": str(termination_date),
-            "reason":           reason,
+            "reason":           (reason or "")[:200],
         },
     )
     return assignment
@@ -127,7 +127,7 @@ def replace_role(old_assignment, new_user, user,
                 "old_user":      str(old_assignment.user_id),
                 "new_user":      str(new_user.pk),
                 "handover_date": str(handover_date),
-                "reason":        reason,
+                "reason":        (reason or "")[:200],
             },
         )
 

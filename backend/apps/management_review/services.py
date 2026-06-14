@@ -321,6 +321,6 @@ def approve_review(review: ManagementReview, user, note="") -> ManagementReview:
         action_code="management_review.approved",
         level="L1",
         entity=review,
-        payload={"review_id": str(review.pk), "note": note},
+        payload={"review_id": str(review.pk), "note": (note or "")[:200]},
     )
     return review

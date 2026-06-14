@@ -81,7 +81,7 @@ def evaluate_control(instance, new_status, user, note=""):
         entity=instance,
         payload={
             "new_status": new_status,
-            "note": note,
+            "note": (note or "")[:200],
             "evidences_count": instance.evidences.count(),
             "documents_count": instance.documents.count(),
         },

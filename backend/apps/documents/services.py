@@ -67,7 +67,7 @@ def approve_document(document, user, notes=""):
             action_code="document.approved",
             level="L2",
             entity=document,
-            payload={"id": str(document.pk), "title": document.title, "notes": notes},
+            payload={"id": str(document.pk), "title": document.title, "notes": (notes or "")[:200]},
         )
     # notifica approvatori / stakeholder definiti in governance
     try:
@@ -105,7 +105,7 @@ def reject_document(document, user, notes=""):
             action_code="document.rejected",
             level="L2",
             entity=document,
-            payload={"id": str(document.pk), "title": document.title, "notes": notes},
+            payload={"id": str(document.pk), "title": document.title, "notes": (notes or "")[:200]},
         )
 
 

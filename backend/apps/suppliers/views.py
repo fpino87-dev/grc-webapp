@@ -125,7 +125,7 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 "supplier_id": str(supplier.id),
                 "supplier_name": supplier.name,
                 "document_id": str(doc.id),
-                "title": title,
+                "title": title[:200],
                 "expiry_date": expiry_date_str or None,
             },
         )
