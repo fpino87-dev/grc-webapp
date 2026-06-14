@@ -185,6 +185,9 @@ function CopilotBox({ plantId, t }: { plantId?: string; t: (k: string, o?: Recor
           {ask.isPending ? t("cockpit.ai.thinking") : t("cockpit.ai.ask")}
         </button>
       </div>
+      <p className="mt-2 rounded border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-800">
+        🔒 {t("ai.cloud_pii_notice")}
+      </p>
       {ask.isError && <p className="text-xs text-red-600 mt-2">{t("cockpit.ai.error")}</p>}
       {answer && (
         <div className="mt-3 bg-gray-50 border rounded-lg p-3">
