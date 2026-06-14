@@ -20,7 +20,7 @@
 | Risultati task Celery | `django_celery_results` | **7 giorni** | `cleanup_celery_results` | Tecnico, no PII rilevante |
 | Scan OSINT | `osint` | **Tiered** (recenti + mensili) | `cleanup_old_scans` | Bilanciato audit/DB |
 | Token auditor esterni | `auth_grc` | Scadenza per `valid_days` | expiry su token | Accesso temporaneo |
-| **Log interazioni AI** | `ai_interaction_log` | **⚠️ indefinita (nessun cleanup)** | — | **Gap**: output AI (possibile PII incidentale) senza retention → vedi §5 |
+| **Log interazioni AI** | `ai_interaction_log` | **365 giorni** (`AI_LOG_RETENTION_DAYS`, override env) | `cleanup_ai_interaction_logs` (mensile) | Output AI con possibile PII incidentale → minimizzato |
 | Record soft-deleted | tabelle BaseModel | Conservati (`deleted_at`) | non purgati | Recuperabili; definire purge dopo X `[DA COMPILARE]` |
 | **Phishing/training per dipendente** | `training` | `[DA COMPILARE]` | — | DPIA: minimizzare; valutare aggregazione dopo X |
 | Incidenti / documenti / evidenze | vari | `[DA COMPILARE]` (spesso pluriennale per compliance) | soft delete | Vincoli ISO/NIS2/contrattuali |
@@ -49,8 +49,8 @@ runtime non persistono; i FK usano UUID → ok).
 
 ## 5. Azioni residue
 1. **`[DA COMPILARE]`**: periodi di conservazione per categoria (titolare + vincoli settoriali).
-2. **Gap tecnico**: aggiungere una **retention per `AiInteractionLog`** (es. cleanup oltre N
-   mesi) — oggi cresce indefinitamente e può contenere PII incidentale negli output.
+2. ✅ ~~Retention `AiInteractionLog`~~ — implementata: `cleanup_ai_interaction_logs` mensile,
+   `AI_LOG_RETENTION_DAYS` (default 365gg, override env).
 3. Definire **purge definitivo** dei record soft-deleted dopo il periodo di retention.
 4. Per phishing/training: valutare **aggregazione/anonimizzazione** dopo il periodo utile (DPIA §6).
 5. Formalizzare il tutto in informativa (Art. 13-14) e ROPA (Art. 30).

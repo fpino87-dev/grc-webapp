@@ -10,7 +10,7 @@
 | Art. | Obbligo | Owner | Stato | Evidenza / azione |
 |------|---------|-------|-------|-------------------|
 | 5, 25 | Minimizzazione, privacy-by-design/default | P | ✅ | Email pseudonimizzata audit; no PII nei log (regola #11); Sanitizer; RBAC scoping |
-| 5.1.e | Limitazione conservazione (retention) | P+D/O | 🟡📄 | Backup 30gg, Celery 7gg, OSINT tiered, audit permanente; **gap**: AiInteractionLog senza retention → [`gdpr/retention-and-erasure.md`](gdpr/retention-and-erasure.md) |
+| 5.1.e | Limitazione conservazione (retention) | P+D/O | 🟡📄 | Backup 30gg, Celery 7gg, OSINT tiered, **AI log 365gg**, audit permanente (giustificato) → [`gdpr/retention-and-erasure.md`](gdpr/retention-and-erasure.md); restano periodi `[DA COMPILARE]` del titolare |
 | 6/9 | Base giuridica (incl. monitoraggio lavoratori phishing/training) | D/O | ⬜📄 | Da definire per trattamento; possibile consultazione RSU/comitato (DE/IT) |
 | 13-14 | Informativa agli interessati | D/O | ⬜📄 | Template informativa per utenti/dipendenti |
 | 15-22 | Diritti interessati (accesso, rettifica, **cancellazione**, portabilità) | P+D/O | 🟡 | `anonymize_user()` (Art.17); export CSV/backup (Art.20); doc bilanciamento vs audit immutabile |

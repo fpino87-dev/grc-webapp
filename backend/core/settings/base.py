@@ -151,6 +151,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.audit_trail.tasks.cleanup_celery_results",
         "schedule": crontab(hour=3, minute=30),
     },
+    "cleanup-ai-interaction-logs": {
+        "task": "apps.ai_engine.tasks.cleanup_ai_interaction_logs",
+        "schedule": crontab(hour=3, minute=45, day_of_month=1),  # mensile
+    },
     "generate-scheduled-checklists": {
         "task": "apps.tasks.tasks.generate_scheduled_checklists",
         "schedule": crontab(hour=7, minute=0),  # ogni mattina alle 07:00
@@ -245,6 +249,10 @@ CELERY_BEAT_SCHEDULE = {
 # In produzione valorizzare con una chiave robusta e consegnarla agli script
 # di integrazione (es. job Veeam/SIEM) via header X-API-Key.
 KPI_INGEST_API_KEY = env("KPI_INGEST_API_KEY", default="")
+
+# Retention (giorni) del log interazioni AI (human-in-the-loop): l'output può
+# contenere PII incidentale → minimizzazione GDPR Art. 5.1.e. Default 12 mesi.
+AI_LOG_RETENTION_DAYS = env.int("AI_LOG_RETENTION_DAYS", default=365)
 
 # Directory dove vengono salvati i file di backup (montata come volume Docker)
 BACKUP_DIR = env("BACKUP_DIR", default="/app/backups")
