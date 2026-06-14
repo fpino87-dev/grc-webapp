@@ -6,6 +6,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from core.audit import log_action
 from core.scoping import PlantScopedQuerysetMixin
+from core.viewsets import SoftDeleteAuditMixin
 from .models import ManagementReview, ReviewAction
 from .permissions import ManagementReviewPermission
 from .serializers import ManagementReviewSerializer, ReviewActionSerializer
@@ -95,13 +96,14 @@ class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         return response
 
 
-class ReviewActionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
-    queryset = ReviewAction.objects.all()
+class ReviewActionViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+    queryset = ReviewAction.objects.select_related("review", "owner")
     serializer_class = ReviewActionSerializer
     permission_classes = [ManagementReviewPermission]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["review"]
     plant_field = "review__plant"
+    audit_action = "management_review.action"
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)

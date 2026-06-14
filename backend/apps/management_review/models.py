@@ -74,3 +74,6 @@ class ReviewAction(BaseModel):
     due_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="aperto")
     closed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["due_date", "created_at"]

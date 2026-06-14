@@ -101,6 +101,34 @@ def test_update_review(client, review):
 
 
 @pytest.mark.django_db
+def test_cannot_self_approve_via_patch(client, review):
+    """L'approvazione formale (ISO 9.3) non è impostabile con una PATCH diretta:
+    né lo stato di approvazione né uno snapshot fittizio per sbloccarla."""
+    resp = client.patch(
+        f"{URL_REVIEWS}{review.id}/",
+        {
+            "approval_status": "approvato",
+            "snapshot_generated_at": timezone.now().isoformat(),
+        },
+        format="json",
+    )
+    assert resp.status_code == 200
+    review.refresh_from_db()
+    assert review.approval_status == "bozza"
+    assert review.approved_by is None
+    assert review.snapshot_generated_at is None
+
+
+@pytest.mark.django_db
+def test_approve_requires_snapshot(client, review):
+    """L'azione approve è bloccata finché non si genera lo snapshot dati."""
+    resp = client.post(f"{URL_REVIEWS}{review.id}/approve/", {"note": "ok"}, format="json")
+    assert resp.status_code == 400
+    review.refresh_from_db()
+    assert review.approval_status == "bozza"
+
+
+@pytest.mark.django_db
 def test_delete_review(client, review):
     resp = client.delete(f"{URL_REVIEWS}{review.id}/")
     assert resp.status_code == 204
@@ -147,6 +175,11 @@ def test_update_review_action(client, action):
 
 
 @pytest.mark.django_db
-def test_delete_review_action(client, action):
+def test_delete_review_action_soft(client, action):
     resp = client.delete(f"{URL_ACTIONS}{action.id}/")
     assert resp.status_code == 204
+    from apps.management_review.models import ReviewAction
+    action.refresh_from_db()
+    assert action.deleted_at is not None
+    assert ReviewAction.objects.filter(pk=action.pk).count() == 0
+    assert ReviewAction.objects.all_with_deleted().filter(pk=action.pk).count() == 1
