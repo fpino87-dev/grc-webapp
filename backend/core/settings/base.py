@@ -236,11 +236,8 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.audit_prep.tasks.check_stale_audit_preps",
         "schedule": crontab(hour=8, minute=15, day_of_week=1),  # lunedì 08:15
     },
-    # Mensili
-    "cleanup-audit-logs": {
-        "task": "apps.audit_trail.tasks.cleanup_expired_audit_logs",
-        "schedule": crontab(hour=3, minute=0, day_of_month=1),  # giorno 1, 03:00
-    },
+    # NB: nessun task mensile di retention sull'AuditLog: è append-only/immutabile
+    # (trigger anti-tamper) e la conservazione è permanente — vedi apps/audit_trail/tasks.py.
 }
 
 # API key per l'ingestione KPI da sorgenti esterne (machine-to-machine).

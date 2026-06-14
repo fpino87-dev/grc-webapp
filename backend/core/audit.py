@@ -105,6 +105,90 @@ def compute_record_hash(log: "AuditLog") -> str:
     return _compute_hash_v1(log.payload, log.prev_hash)
 
 
+GENESIS_HASH = "0" * 64
+
+
+def audit_trigger_installed() -> bool:
+    """True se il trigger anti-tamper `audit_no_mutation` è installato sul DB."""
+    from django.db import connection
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT 1 FROM pg_trigger WHERE tgname = 'audit_no_mutation' LIMIT 1;")
+        return cursor.fetchone() is not None
+
+
+def verify_audit_integrity(queryset=None) -> dict:
+    """Verifica integrità dell'audit trail su due livelli:
+
+    1. **per-record**: ricalcola `record_hash` da campi immutabili + `prev_hash`
+       e lo confronta con quello memorizzato (rileva la modifica di un campo);
+    2. **linkage di catena**: per ogni `entity_type` verifica che il `prev_hash`
+       di ogni record punti al `record_hash` di un record realmente presente
+       (rileva la **cancellazione/troncamento** di record, non coperta dal solo
+       check per-record). Una sola testa di catena (`prev_hash` genesi) ammessa.
+
+    Ritorna un dict serializzabile con `ok`, `checked`, eventuale `error`/`message`.
+    """
+    from collections import defaultdict
+
+    qs = AuditLog.objects.all() if queryset is None else queryset
+    qs = qs.order_by("entity_type", "timestamp_utc")
+
+    groups: dict[str, list] = defaultdict(list)
+    v1 = v2 = checked = 0
+    for log in qs:
+        expected = compute_record_hash(log)
+        if expected != log.record_hash:
+            return {
+                "ok": False,
+                "checked": checked,
+                "error": "hash_mismatch",
+                "record_id": str(log.id),
+                "action_code": log.action_code,
+                "hash_version": log.hash_version,
+                "message": f"Hash non corrispondente sul record {log.action_code}",
+            }
+        v2 += 1 if log.hash_version == "v2" else 0
+        v1 += 0 if log.hash_version == "v2" else 1
+        groups[log.entity_type].append(log)
+        checked += 1
+
+    for entity_type, records in groups.items():
+        present = {r.record_hash for r in records}
+        heads = [r for r in records if r.prev_hash == GENESIS_HASH]
+        if len(heads) > 1:
+            return {
+                "ok": False,
+                "checked": checked,
+                "error": "multiple_chain_heads",
+                "entity_type": entity_type,
+                "message": f"Più teste di catena per entity_type={entity_type}",
+            }
+        for r in records:
+            if r.prev_hash != GENESIS_HASH and r.prev_hash not in present:
+                return {
+                    "ok": False,
+                    "checked": checked,
+                    "error": "broken_link",
+                    "entity_type": entity_type,
+                    "record_id": str(r.id),
+                    "action_code": r.action_code,
+                    "message": (
+                        f"Catena interrotta su entity_type={entity_type}: "
+                        f"predecessore mancante (possibile cancellazione) — {r.action_code}"
+                    ),
+                }
+
+    return {
+        "ok": True,
+        "checked": checked,
+        "v1": v1,
+        "v2": v2,
+        "error": None,
+        "message": f"Integrità verificata — {checked} record ({v1} v1 legacy, {v2} v2 tamper-evident)",
+    }
+
+
 def _get_prev_hash(entity_type: str) -> str:
     # Usa SELECT ... FOR UPDATE per serializzare la catena hash per entity_type
     last = (

@@ -5,37 +5,11 @@ from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
-
-@shared_task(bind=True, autoretry_for=(Exception,), max_retries=3, default_retry_delay=300)
-def cleanup_expired_audit_logs(self):
-    """
-    Elimina i log AuditTrail scaduti secondo la retention policy.
-    L1: 5 anni, L2: 3 anni, L3: 1 anno.
-    Eseguito il primo giorno di ogni mese.
-    """
-    from core.models import AuditLog
-
-    now = timezone.now()
-    retention = {
-        "L1": now - timezone.timedelta(days=365 * 5),
-        "L2": now - timezone.timedelta(days=365 * 3),
-        "L3": now - timezone.timedelta(days=365 * 1),
-    }
-
-    total_deleted = 0
-    for level, cutoff in retention.items():
-        deleted, _ = AuditLog.objects.filter(
-            level=level,
-            timestamp_utc__lt=cutoff,
-        ).delete()
-        total_deleted += deleted
-        if deleted:
-            logger.info(
-                "Audit log cleanup: eliminati %d record %s precedenti a %s",
-                deleted, level, cutoff.date(),
-            )
-
-    return f"Cleanup completato: {total_deleted} record eliminati"
+# NB: nessuna retention-by-deletion sull'AuditLog. È append-only e immutabile
+# (trigger PostgreSQL `audit_no_mutation` blocca UPDATE/DELETE — regola #4):
+# qualunque task di cancellazione fallirebbe e indebolirebbe la tamper-evidence
+# e la linkage di catena. La conservazione è permanente; l'email è già
+# pseudonimizzata in `log_action` (GDPR by design).
 
 
 @shared_task

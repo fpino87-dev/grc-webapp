@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core.audit import AuditLog, compute_record_hash
+from core.audit import AuditLog, audit_trigger_installed, verify_audit_integrity
 
 from .permissions import AuditLogIntegrityPermission, AuditLogReadPermission
 from .serializers import AuditLogSerializer
@@ -45,24 +45,35 @@ class AuditLogViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets
 
 
 class AuditIntegrityView(APIView):
+    """Verifica integrità completa: trigger anti-tamper + hash per-record +
+    linkage di catena (rileva anche cancellazioni). Stesso motore del comando
+    `verify_audit_trail_integrity`."""
+
     permission_classes = [AuditLogIntegrityPermission]
 
     def get(self, request):
-        logs = AuditLog.objects.order_by("timestamp_utc")[:1000]
-        checked = 0
-        for log in logs:
-            expected = compute_record_hash(log)
-            if log.record_hash and expected != log.record_hash:
-                return Response({
-                    "status": "error",
-                    "corrupted_id": str(log.id),
-                    "action_code": log.action_code,
-                    "hash_version": log.hash_version,
-                    "message": f"Hash non corrispondente sul record {log.action_code}",
-                })
-            checked += 1
+        if not audit_trigger_installed():
+            return Response({
+                "status": "error",
+                "error": "trigger_missing",
+                "message": (
+                    "Trigger anti-tamper 'audit_no_mutation' assente: l'audit log "
+                    "non è protetto da UPDATE/DELETE."
+                ),
+            })
+
+        result = verify_audit_integrity()
+        if not result["ok"]:
+            return Response({
+                "status": "error",
+                "error": result["error"],
+                "corrupted_id": result.get("record_id"),
+                "action_code": result.get("action_code"),
+                "entity_type": result.get("entity_type"),
+                "message": result.get("message"),
+            })
         return Response({
             "status": "ok",
-            "checked": checked,
-            "message": f"Integrità verificata — {checked} record controllati",
+            "checked": result["checked"],
+            "message": result["message"],
         })
