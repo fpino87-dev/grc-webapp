@@ -24,6 +24,40 @@ class AiProviderConfigViewSet(viewsets.ModelViewSet):
             return AiProviderConfigReadSerializer
         return AiProviderConfigSerializer
 
+    def _audit(self, instance, event: str):
+        # La config AI governa chiave cloud, budget e routing cloud/locale (cioè
+        # se i dati escono verso il cloud): ogni modifica è rilevante per
+        # l'auditor. La chiave API NON viene mai loggata (regola #11).
+        log_action(
+            user=self.request.user,
+            action_code="ai.config.changed",
+            level="L2",
+            entity=instance,
+            payload={
+                "event": event,
+                "config_id": str(instance.pk),
+                "active": instance.active,
+                "cloud_provider": instance.cloud_provider,
+                "cloud_model": instance.cloud_model,
+                "monthly_token_budget": instance.monthly_token_budget,
+                "fallback_mode": instance.fallback_mode,
+                "api_key_present": bool(instance.api_key),
+            },
+        )
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        self._audit(instance, "created")
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        self._audit(instance, "updated")
+
+    def perform_destroy(self, instance):
+        # BaseModel + get_active() filtra deleted_at → soft delete (regola #5/#10).
+        self._audit(instance, "deleted")
+        instance.soft_delete()
+
     @action(detail=False, methods=["get"], url_path="models-catalog")
     def models_catalog(self, request):
         return Response(MODELS_BY_PROVIDER)

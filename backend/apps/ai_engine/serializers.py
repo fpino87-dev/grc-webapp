@@ -13,6 +13,9 @@ class AiProviderConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = AiProviderConfig
         fields = "__all__"
+        # La chiave API non deve mai essere restituita in chiaro nella risposta
+        # di create/update (è cifrata a riposo, ma write_only evita l'echo).
+        extra_kwargs = {"api_key": {"write_only": True, "required": False, "allow_blank": True}}
 
     def update(self, instance, validated_data):
         # Non sovrascrivere la api_key se arriva stringa vuota
