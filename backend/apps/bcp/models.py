@@ -107,6 +107,9 @@ class BcpTest(BaseModel):
         related_name="bcp_tests",
     )
 
+    class Meta:
+        ordering = ["-test_date"]
+
     @property
     def objectives_met_pct(self) -> float | None:
         """Percentage of objectives marked as met. None if no objectives defined."""

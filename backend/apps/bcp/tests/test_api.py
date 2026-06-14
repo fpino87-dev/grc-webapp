@@ -94,10 +94,18 @@ def test_retrieve_plan(client, bcp_plan):
 
 
 @pytest.mark.django_db
-def test_update_plan_status(client, bcp_plan):
-    resp = client.patch(f"{URL_PLANS}{bcp_plan.id}/", {"status": "approvato"}, format="json")
+def test_cannot_approve_plan_via_direct_patch(client, bcp_plan):
+    """status/approved_by sono governati dall'azione approve (check CISO):
+    una PATCH diretta non approva il piano né falsifica l'approvatore."""
+    resp = client.patch(
+        f"{URL_PLANS}{bcp_plan.id}/",
+        {"status": "approvato", "approved_by": None},
+        format="json",
+    )
     assert resp.status_code == 200
-    assert resp.data["status"] == "approvato"
+    bcp_plan.refresh_from_db()
+    assert bcp_plan.status == "bozza"
+    assert bcp_plan.approved_at is None
 
 
 @pytest.mark.django_db
