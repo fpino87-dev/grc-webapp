@@ -1,12 +1,18 @@
 # Security Policy
 
+This document describes our **coordinated vulnerability disclosure** process, aligned with
+the EU **Cyber Resilience Act** (Reg. 2024/2847, Art. 13) and **ISO/IEC 29147**.
+For the broader compliance dossier (GDPR / AI Act / transfers) see [`compliance/`](compliance/README.md).
+Security requests may be sent in English or Italian.
+
 ## Supported Versions
 
 | Version | Supported |
 |---------|-----------|
-| 0.1.x   | Yes       |
+| Latest `0.x` release on `main` | Yes |
+| Older releases | Best-effort |
 
-Only the latest release receives security fixes. Older versions are not backported.
+Only the latest release line receives security fixes. Older versions are not backported.
 
 ---
 
@@ -55,11 +61,12 @@ After the fix is released, a CVE will be requested if the severity warrants it (
 
 ## Security Practices
 
-- Dependencies are reviewed manually on each release using `pip-audit` (backend) and `npm audit` (frontend)
+- Dependencies are continuously scanned in CI (`.github/workflows/security-audit.yml`): `pip-audit` (backend, strict) and `npm audit` (frontend, high/critical gate)
 - Security-relevant changes are tagged `security` in CHANGELOG.md
 - The audit trail (M10) is append-only and cryptographically chained — tampering is detectable
-- No PII reaches external AI services without passing through `Sanitizer.sanitize()` (M20)
+- No PII reaches external AI services without passing through `Sanitizer.sanitize()` (M20); a local-LLM (Ollama) option avoids external transfer entirely
 - Production deployment uses non-root Docker containers; secrets are never committed to the repository
+- A **Software Bill of Materials (SBOM)** can be produced from `backend/requirements/*.txt` and `frontend/package-lock.json` (CRA Annex I.2). *Roadmap: publish SBOM artifacts per release.*
 
 ---
 
@@ -76,3 +83,21 @@ After the fix is released, a CVE will be requested if the severity warrants it (
 ## Disclosure Policy
 
 This project follows **coordinated disclosure**. Vulnerabilities are disclosed publicly only after a fix is available, or after the 90-day window expires — whichever comes first.
+
+---
+
+## Safe Harbor
+
+We will not pursue or support legal action against security researchers who, in good faith:
+
+- make a genuine effort to avoid privacy violations, data destruction, and service disruption;
+- only access or interact with accounts and data they own or have explicit permission to test;
+- do not exploit a finding beyond what is necessary to demonstrate it;
+- give us reasonable time to remediate before any public disclosure.
+
+Research conducted consistently with this policy is considered **authorized**, and we will
+work with you to understand and resolve the issue quickly. Reporters are credited in the
+advisory/release notes unless they prefer to remain anonymous.
+
+> Note for testers: report only against deployments you own. Do not test third-party
+> installations of this software you do not control — contact that operator instead.

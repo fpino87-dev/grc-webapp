@@ -48,7 +48,7 @@
 | — | Applicabilità | P | 🟡 | OSS **non commerciale esente**; con offerta commerciale/SaaS rientra |
 | Annex I | Requisiti di sicurezza essenziali | P | ✅ | Vedi GDPR Art.32 (stesse misure) |
 | Annex I.2 | **Gestione vulnerabilità** + SBOM | P | 🟡 | `pip-audit`/`npm audit` in CI; manca SBOM formale + processo patch documentato |
-| Art. 13 | Vulnerability disclosure coordinata | P | ⬜📄 | `security/SECURITY.md` |
+| Art. 13 | Vulnerability disclosure coordinata | P | ✅ | [`SECURITY.md`](../SECURITY.md) a root: reporting privato, SLA, safe harbor, SBOM, allineato CRA/ISO 29147 |
 | — | Notifica incidenti/vuln sfruttate attivamente (~set 2026) | O | ⬜📄 | Processo se prodotto commerciale |
 
 ## NIS2 (Reg. 2022/2555)
