@@ -58,6 +58,7 @@
     "close": "Chiudi"
   },
   "ai": {
+    "cloud_pii_notice": "Nota privacy: se la raccomandazione è generata con un modello cloud, nei campi di testo scritti a mano (es. descrizione, note) usa nomi di fantasia per le persone — solo questi campi liberi possono essere inviati al provider. Tutto il resto (IP, email, codici fiscali, telefoni, P.IVA, nomi dei siti) è anonimizzato automaticamente.",
     "suggestion_label": "Suggerimento IA",
     "accept": "Usa questo",
     "edit_and_use": "Modifica e usa",

@@ -340,6 +340,7 @@
     }
   },
   "ai": {
+    "cloud_pii_notice": "Uwaga dotycząca prywatności: jeśli rekomendacja jest generowana modelem w chmurze, w ręcznie wpisywanych polach tekstowych (np. opis, notatki) używaj fikcyjnych danych osób — tylko te swobodne pola mogą zostać wysłane do dostawcy. Cała reszta (adresy IP, e-maile, numery podatkowe, telefony, numery VAT, nazwy lokalizacji) jest anonimizowana automatycznie.",
     "suggestion_label": "Sugestia AI",
     "accept": "Użyj tego",
     "edit_and_use": "Edytuj i użyj",

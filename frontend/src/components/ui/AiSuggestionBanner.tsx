@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { aiApi } from "../../api/endpoints/ai";
 
 interface AiSuggestionBannerProps {
@@ -17,6 +18,7 @@ export function AiSuggestionBanner({
   onIgnore,
   autoTrigger = false,
 }: AiSuggestionBannerProps) {
+  const { t } = useTranslation();
   const [interactionId, setInteractionId] = useState<string | null>(null);
   const [result, setResult] = useState<unknown>(null);
   const [provider, setProvider] = useState("");
@@ -136,6 +138,9 @@ export function AiSuggestionBanner({
 
   return (
     <div className="border rounded-lg p-3 bg-white">
+      <div className="mb-2 rounded border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-800">
+        🔒 {t("ai.cloud_pii_notice")}
+      </div>
       {suggestMutation.isError && (
         <div className="mb-2 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 flex items-center justify-between">
           <span>Servizio AI non disponibile. Riprovare oppure verificare la configurazione provider.</span>
