@@ -1,8 +1,12 @@
 """Permessi RBAC per il modulo OSINT.
 
 Lettura: SUPER_ADMIN, COMPLIANCE_OFFICER, RISK_MANAGER, INTERNAL_AUDITOR,
-         EXTERNAL_AUDITOR. Plant Manager riceve l'accesso in lettura solo se
-         ha membership attiva (qualsiasi plant — il modulo è cross-plant).
+         PLANT_MANAGER. L'EXTERNAL_AUDITOR è ESCLUSO: i dati OSINT sono
+         esposizione esterna sensibile (attack surface, breach, takeover) e il
+         vincolo di progetto è "esposizione/notifiche solo a personale interno"
+         — coerente con il Centro Operativo (M21) e con le notifiche M19
+         (INTERNAL_ONLY_EVENTS). Plant Manager legge solo se ha membership
+         attiva (qualsiasi plant — il modulo è cross-plant).
 Scrittura (settings, escalate, classifica sottodomini, force-scan):
          SUPER_ADMIN, COMPLIANCE_OFFICER, RISK_MANAGER.
 """
@@ -17,7 +21,6 @@ _READ_ROLES = frozenset({
     GrcRole.COMPLIANCE_OFFICER,
     GrcRole.RISK_MANAGER,
     GrcRole.INTERNAL_AUDITOR,
-    GrcRole.EXTERNAL_AUDITOR,
     GrcRole.PLANT_MANAGER,
 })
 

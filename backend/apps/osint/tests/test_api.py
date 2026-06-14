@@ -105,6 +105,24 @@ class TestEntityAPI:
         resp = client.get("/api/v1/osint/entities/")
         assert resp.status_code == 401
 
+    def test_external_auditor_cannot_read_osint(self, entity):
+        """L'esposizione esterna OSINT è solo per personale interno: external_auditor 403
+        (coerente con cockpit M21 e notifiche M19)."""
+        from apps.auth_grc.models import GrcRole, UserPlantAccess
+        ext = User.objects.create_user(username="osint_ext", email="ext@third.com", password="x")
+        UserPlantAccess.objects.create(user=ext, role=GrcRole.EXTERNAL_AUDITOR, scope_type="org")
+        c = APIClient()
+        c.force_authenticate(user=ext)
+        assert c.get("/api/v1/osint/entities/").status_code == 403
+
+    def test_internal_auditor_can_read_osint(self, entity):
+        from apps.auth_grc.models import GrcRole, UserPlantAccess
+        ia = User.objects.create_user(username="osint_ia", email="ia@in.com", password="x")
+        UserPlantAccess.objects.create(user=ia, role=GrcRole.INTERNAL_AUDITOR, scope_type="org")
+        c = APIClient()
+        c.force_authenticate(user=ia)
+        assert c.get("/api/v1/osint/entities/").status_code == 200
+
 
 class TestEntityAPI2:
     def test_search_by_domain(self, auth_client, entity):
