@@ -5,23 +5,28 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from core.audit import log_action
 from core.scoping import PlantScopedQuerysetMixin
+from core.viewsets import SoftDeleteAuditMixin
 from .models import LessonLearned
 from .permissions import LessonLearnedPermission
 from .serializers import LessonLearnedSerializer
 from . import services
 
 
-class LessonLearnedViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
-    queryset = LessonLearned.objects.all()
+class LessonLearnedViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+    queryset = LessonLearned.objects.select_related("plant").all()
     serializer_class = LessonLearnedSerializer
     permission_classes = [LessonLearnedPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["plant", "status", "category"]
     search_fields = ["title", "description"]
     plant_field = "plant"
+    audit_action = "lessons.lesson_learned"
 
     def perform_create(self, serializer):
-        instance = serializer.save(created_by=self.request.user)
+        instance = serializer.save(
+            created_by=self.request.user,
+            identified_by=serializer.validated_data.get("identified_by") or self.request.user,
+        )
         log_action(
             user=self.request.user,
             action_code="lessons.lesson_learned.create",

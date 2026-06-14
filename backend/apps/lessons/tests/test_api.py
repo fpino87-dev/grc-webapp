@@ -80,16 +80,35 @@ def test_retrieve_lesson(client, lesson):
 
 
 @pytest.mark.django_db
-def test_update_lesson(client, lesson):
+def test_update_lesson_status_is_governed(client, lesson):
+    """status è read-only: una PATCH diretta non valida la lezione
+    (la validazione passa solo dall'azione dedicata)."""
     resp = client.patch(f"{URL}{lesson.id}/", {"status": "validato"}, format="json")
     assert resp.status_code == 200
-    assert resp.data["status"] == "validato"
+    lesson.refresh_from_db()
+    assert lesson.status == "bozza"
+    assert lesson.validated_by is None
 
 
 @pytest.mark.django_db
-def test_delete_lesson(client, lesson):
+def test_validate_action(client, lesson):
+    resp = client.post(f"{URL}{lesson.id}/validate/")
+    assert resp.status_code == 200
+    lesson.refresh_from_db()
+    assert lesson.status == "validato"
+    assert lesson.validated_by is not None
+    assert lesson.validated_at is not None
+
+
+@pytest.mark.django_db
+def test_delete_lesson_soft(client, lesson):
     resp = client.delete(f"{URL}{lesson.id}/")
     assert resp.status_code == 204
+    from apps.lessons.models import LessonLearned
+    lesson.refresh_from_db()
+    assert lesson.deleted_at is not None
+    assert LessonLearned.objects.filter(pk=lesson.pk).count() == 0
+    assert LessonLearned.objects.all_with_deleted().filter(pk=lesson.pk).count() == 1
 
 
 @pytest.mark.django_db
