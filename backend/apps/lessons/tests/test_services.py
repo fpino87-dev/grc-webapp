@@ -64,7 +64,7 @@ def test_propagate_requires_validated(lesson, user):
 def test_propagate_blocked_for_inaccessible_plant(lesson, plant):
     """Un utente fuori perimetro non può propagare verso un sito non suo."""
     from apps.auth_grc.models import GrcRole, UserPlantAccess
-    from apps.lessons.services import propagate_to_plants, validate_lesson
+    from apps.lessons.services import propagate_to_plants
     from apps.plants.models import Plant
     from rest_framework.exceptions import PermissionDenied
 
