@@ -91,6 +91,31 @@ def test_update_incident_severity(client, incident):
 
 
 @pytest.mark.django_db
+def test_update_cannot_set_governed_classification_fields(client, incident):
+    """I campi NIS2 governati sono read-only: una PATCH diretta non li altera."""
+    resp = client.patch(
+        f"{URL}{incident.id}/",
+        {"is_significant": True, "pta_nis2": 5, "nis2_notifiable": "si",
+         "significance_override": True, "significance_override_reason": "x"},
+        format="json",
+    )
+    assert resp.status_code == 200
+    incident.refresh_from_db()
+    assert incident.is_significant is None
+    assert incident.pta_nis2 is None
+    assert incident.significance_override is None
+
+
+@pytest.mark.django_db
+def test_update_cannot_close_via_serializer(client, incident):
+    """La chiusura passa solo dall'azione dedicata (gate RCA), non da una PATCH."""
+    resp = client.patch(f"{URL}{incident.id}/", {"status": "chiuso"}, format="json")
+    assert resp.status_code == 400
+    incident.refresh_from_db()
+    assert incident.status == "aperto"
+
+
+@pytest.mark.django_db
 def test_delete_incident_soft(client, incident):
     resp = client.delete(f"{URL}{incident.id}/")
     assert resp.status_code == 204

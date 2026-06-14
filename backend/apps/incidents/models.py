@@ -150,6 +150,9 @@ class Incident(BaseModel):
     final_report_deadline = models.DateField(null=True, blank=True, help_text="Scadenza Report Finale T+1 mese")
     nis2_incident_ref = models.CharField(max_length=100, blank=True, help_text="Riferimento univoco assegnato dal CSIRT")
 
+    class Meta:
+        ordering = ["-detected_at"]
+
     @property
     def nis2_timeline_status(self) -> dict:
         now = timezone.now()

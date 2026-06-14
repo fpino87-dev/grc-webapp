@@ -4,7 +4,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import decorators, response, viewsets
 
 from core.audit import log_action
-from core.scoping import PlantScopedQuerysetMixin
+from core.scoping import PlantScopedQuerysetMixin, require_plant_access
+from core.viewsets import SoftDeleteAuditMixin
 from .models import Incident, NIS2Configuration
 from .permissions import IncidentPermission, NIS2ConfigurationPermission
 from apps.plants.models import Plant
@@ -25,6 +26,26 @@ class IncidentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = Incident.objects.select_related("plant", "closed_by").prefetch_related("assets", "nis2_notifications")
     serializer_class = IncidentSerializer
     permission_classes = [IncidentPermission]
+
+    def perform_create(self, serializer):
+        instance = serializer.save(created_by=self.request.user)
+        log_action(
+            user=self.request.user,
+            action_code="incident.created",
+            level="L2",
+            entity=instance,
+            payload={"title": instance.title, "severity": instance.severity},
+        )
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        log_action(
+            user=self.request.user,
+            action_code="incident.updated",
+            level="L2",
+            entity=instance,
+            payload={"title": instance.title, "severity": instance.severity},
+        )
 
     def perform_destroy(self, instance):
         log_action(
@@ -198,6 +219,11 @@ class IncidentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         if not plant:
             return response.Response({"error": "Plant non trovato"}, status=404)
 
+        # Lo scoping dei queryset non copre i plant passati nel body: senza questa
+        # guardia un utente potrebbe leggere soglie/scope NIS2 di un sito fuori
+        # perimetro tramite la preview.
+        require_plant_access(request.user, plant)
+
         nis2_scope = plant.nis2_scope
 
         if nis2_scope == "non_soggetto":
@@ -257,12 +283,13 @@ class IncidentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         return response.Response(breakdown)
 
 
-class NIS2ConfigurationViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+class NIS2ConfigurationViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = NIS2Configuration.objects.select_related("plant")
     serializer_class = NIS2ConfigurationSerializer
     permission_classes = [NIS2ConfigurationPermission]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["plant"]
+    audit_action = "incident.nis2config"
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)
@@ -272,5 +299,23 @@ class NIS2ConfigurationViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             level="L2",
             entity=instance,
             payload={"plant": str(instance.plant_id)},
+        )
+
+    def perform_update(self, serializer):
+        # Le soglie di significatività governano la classificazione NIS2: ogni
+        # modifica è rilevante per l'auditor → audit L2 con i parametri salvati.
+        instance = serializer.save()
+        log_action(
+            user=self.request.user,
+            action_code="incident.nis2config.updated",
+            level="L2",
+            entity=instance,
+            payload={
+                "plant": str(instance.plant_id),
+                "threshold_users": instance.threshold_users,
+                "threshold_hours": str(instance.threshold_hours),
+                "threshold_financial": str(instance.threshold_financial),
+                "ptnr_threshold": instance.ptnr_threshold,
+            },
         )
 
