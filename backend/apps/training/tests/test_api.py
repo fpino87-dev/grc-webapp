@@ -7,6 +7,16 @@ User = get_user_model()
 
 URL_COURSES = "/api/v1/training/courses/"
 URL_ENROLLMENTS = "/api/v1/training/enrollments/"
+URL_PHISHING = "/api/v1/training/phishing/"
+
+
+def _client_with_role(role):
+    from apps.auth_grc.models import UserPlantAccess
+    u = User.objects.create_user(username=f"u_{role}", email=f"{role}@t.it", password="x")
+    UserPlantAccess.objects.create(user=u, role=role, scope_type="org")
+    c = APIClient()
+    c.force_authenticate(user=u)
+    return c
 
 
 @pytest.fixture
@@ -136,6 +146,46 @@ def test_retrieve_enrollment(client, enrollment):
     resp = client.get(f"{URL_ENROLLMENTS}{enrollment.id}/")
     assert resp.status_code == 200
     assert resp.data["status"] == "assegnato"
+
+
+# ── PII read-scope (M15 review) ───────────────────────────────────────────
+
+@pytest.mark.django_db
+def test_results_pii_restricted_for_non_governance(enrollment):
+    """Un ruolo operativo legge il catalogo corsi ma NON i dati per-dipendente
+    (iscrizioni / risultati phishing)."""
+    from apps.auth_grc.models import GrcRole
+    c = _client_with_role(GrcRole.RISK_MANAGER)
+    assert c.get(URL_COURSES).status_code == 200
+    assert c.get(URL_ENROLLMENTS).status_code == 403
+    assert c.get(URL_PHISHING).status_code == 403
+
+
+@pytest.mark.django_db
+def test_external_auditor_cannot_read_results(enrollment):
+    from apps.auth_grc.models import GrcRole
+    c = _client_with_role(GrcRole.EXTERNAL_AUDITOR)
+    assert c.get(URL_ENROLLMENTS).status_code == 403
+    assert c.get(URL_PHISHING).status_code == 403
+
+
+@pytest.mark.django_db
+def test_internal_auditor_can_read_results(enrollment):
+    from apps.auth_grc.models import GrcRole
+    c = _client_with_role(GrcRole.INTERNAL_AUDITOR)
+    assert c.get(URL_ENROLLMENTS).status_code == 200
+    assert c.get(URL_PHISHING).status_code == 200
+
+
+@pytest.mark.django_db
+def test_delete_course_is_soft(client, course):
+    from apps.training.models import TrainingCourse
+    resp = client.delete(f"{URL_COURSES}{course.id}/")
+    assert resp.status_code == 204
+    course.refresh_from_db()
+    assert course.deleted_at is not None
+    assert TrainingCourse.objects.filter(pk=course.pk).count() == 0
+    assert TrainingCourse.objects.all_with_deleted().filter(pk=course.pk).count() == 1
 
 
 # ── TrainingCourse model properties ──────────────────────────────────────

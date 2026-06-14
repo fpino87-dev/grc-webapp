@@ -58,3 +58,6 @@ class PhishingSimulation(BaseModel):
     result = models.CharField(max_length=15, choices=RESULT_CHOICES)
     sent_at = models.DateTimeField()
     responded_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-sent_at"]

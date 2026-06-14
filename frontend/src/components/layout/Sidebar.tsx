@@ -42,7 +42,7 @@ const navGroups: NavGroup[] = [
       { to: "/incidents", labelKey: "sidebar.items.incidents", icon: "⚠", roles: null },
       { to: "/lessons", labelKey: "sidebar.items.lessons", icon: "💡", roles: null },
       { to: "/suppliers", labelKey: "sidebar.items.suppliers", icon: "🏢", roles: null },
-      { to: "/training", labelKey: "sidebar.items.training", icon: "🎓", roles: null },
+      { to: "/training", labelKey: "sidebar.items.training", icon: "🎓", roles: ["super_admin", "compliance_officer", "plant_manager", "internal_auditor"] },
       { to: "/pdca", labelKey: "sidebar.items.pdca", icon: "↻", roles: null },
     ],
   },
