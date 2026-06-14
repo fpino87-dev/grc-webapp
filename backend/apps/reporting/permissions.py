@@ -4,9 +4,11 @@ from core.permissions import RoleScopedPermission
 
 
 class ReportingPermission(RoleScopedPermission):
-    """Tutte le viste reporting sono read-only di fatto. Limitato a chi ha
-    responsabilita' GRC: dashboard di compliance/rischio non e' destinata a
-    control_owner / utenti operativi puri."""
+    """Dashboard di compliance/rischio in lettura per governance + audit.
+    Le **scritture** sotto questo permesso non sono report ma configurazione
+    ISMS (import di definizioni KPI, ricalcolo snapshot): riservate ai ruoli di
+    governance — gli auditor (interni/esterni) sono osservatori e non
+    configurano l'ISMS."""
     read_roles = {
         GrcRole.SUPER_ADMIN,
         GrcRole.COMPLIANCE_OFFICER,
@@ -15,7 +17,12 @@ class ReportingPermission(RoleScopedPermission):
         GrcRole.INTERNAL_AUDITOR,
         GrcRole.EXTERNAL_AUDITOR,
     }
-    write_roles = read_roles
+    write_roles = {
+        GrcRole.SUPER_ADMIN,
+        GrcRole.COMPLIANCE_OFFICER,
+        GrcRole.RISK_MANAGER,
+        GrcRole.PLANT_MANAGER,
+    }
 
 
 class AccessReviewPermission(RoleScopedPermission):
