@@ -89,10 +89,9 @@ msgid "Utente non trovato"
 msgstr "Utilisateur non trouvé"
 
 #: apps/auth_grc/views.py:140
-#, fuzzy
 #| msgid "Motivazione rifiuto obbligatoria (min 10 caratteri)."
 msgid "Motivazione obbligatoria (min 10 caratteri) per richiesta GDPR Art. 17"
-msgstr "Le motif de refus est obligatoire (minimum 10 caractères)."
+msgstr "Justification obligatoire (min 10 caractères) pour la demande RGPD Art. 17"
 
 #: apps/auth_grc/views.py:143
 msgid "Utente anonimizzato (GDPR Art. 17)"
@@ -226,20 +225,18 @@ msgid "Framework '%(code)s' importato (v%(version)s)."
 msgstr "Framework '%(code)s' importé (v%(version)s)."
 
 #: apps/controls/services/frameworks.py:249
-#, fuzzy
 #| msgid "Solo il superuser può importare framework."
 msgid "Solo il superuser può eliminare un framework."
-msgstr "Seul le superutilisateur peut importer des frameworks."
+msgstr "Seul le superutilisateur peut supprimer un framework."
 
 #: apps/controls/services/frameworks.py:258
 msgid "Impossibile eliminare: il framework è ancora assegnato a uno o più siti."
 msgstr "Suppression impossible : le référentiel est encore attribué à un ou plusieurs sites."
 
 #: apps/controls/services/frameworks.py:284
-#, fuzzy
 #| msgid "Solo il superuser può importare framework."
 msgid "Solo il superuser può archiviare un framework."
-msgstr "Seul le superutilisateur peut importer des frameworks."
+msgstr "Seul le superutilisateur peut archiver un framework."
 
 #: apps/controls/services/frameworks.py:293
 msgid "Impossibile archiviare: il framework è ancora assegnato a uno o più siti."
@@ -265,10 +262,9 @@ msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza val
 msgstr "Impossible de définir l'état sur 'conforme' sans au moins une évidence valide liée."
 
 #: apps/controls/services/instances.py:37
-#, fuzzy
 #| msgid "Requisiti non soddisfatti per stato Compliant:\\n"
 msgid "Requisiti non soddisfatti per stato Compliant:\n"
-msgstr "Exigences non satisfaites pour l'état Conforme :\\n"
+msgstr "Exigences non satisfaites pour le statut Conforme :\n"
 
 #: apps/controls/services/instances.py:52
 msgid "Almeno un documento approvato o un'evidenza valida richiesti per stato Parziale."
@@ -305,10 +301,10 @@ msgid "Generazione spiegazione non riuscita: %(err)s"
 msgstr "Échec de la génération de l'explication : %(err)s"
 
 #: apps/controls/views/frameworks.py:187
-#, fuzzy, python-format
+#, python-format
 #| msgid "Errore generazione documento: %(err)s"
 msgid "Generazione documento non riuscita: %(err)s"
-msgstr "Erreur lors de la génération du document : %(err)s"
+msgstr "Échec de la génération du document : %(err)s"
 
 #: apps/controls/views/instances.py:54
 msgid "Nessun requisito documentale definito per questo controllo."
@@ -358,16 +354,14 @@ msgid "maturity_level deve essere tra 0 e 5"
 msgstr "maturity_level doit être compris entre 0 et 5"
 
 #: apps/controls/views/instances.py:489 apps/controls/views/reports.py:31
-#, fuzzy
 #| msgid "Parametro 'framework' obbligatorio."
 msgid "Parametro 'plant' obbligatorio."
-msgstr "Le paramètre 'framework' est obligatoire."
+msgstr "Le paramètre « plant » est obligatoire."
 
 #: apps/controls/views/instances.py:492
-#, fuzzy
 #| msgid "Plant non trovato"
 msgid "Plant non trovato."
-msgstr "Site non trouvé"
+msgstr "Site non trouvé."
 
 #: apps/controls/views/instances.py:497 apps/controls/views/reports.py:36
 #: apps/controls/views/reports.py:91 core/scoping.py:112 core/scoping.py:169
@@ -376,10 +370,10 @@ msgid "Accesso negato per questo sito."
 msgstr "Accès refusé pour ce site."
 
 #: apps/controls/views/reports.py:25
-#, fuzzy, python-format
+#, python-format
 #| msgid "Parametri 'source' e 'target' obbligatori."
 msgid "Parametro 'target' obbligatorio (uno tra: %(targets)s)."
-msgstr "Les paramètres 'source' et 'target' sont obligatoires."
+msgstr "Le paramètre « target » est obligatoire (l'un de : %(targets)s)."
 
 #: apps/controls/views/reports.py:83
 msgid "Parametro 'framework' obbligatorio."
@@ -485,10 +479,9 @@ msgid "new_user_id obbligatorio."
 msgstr "new_user_id obligatoire."
 
 #: apps/governance/views.py:109
-#, fuzzy
 #| msgid "Utente non trovato"
 msgid "Utente non trovato."
-msgstr "Utilisateur non trouvé"
+msgstr "Utilisateur non trouvé."
 
 #: apps/incidents/serializers.py:55
 msgid "La chiusura dell'incidente avviene solo tramite l'azione dedicata, previo RCA approvato."
@@ -544,16 +537,15 @@ msgid "Usa close_cycle() per chiudere dalla fase ACT."
 msgstr "Utilisez close_cycle() pour clôturer depuis la phase ACT."
 
 #: apps/pdca/services.py:153
-#, fuzzy, python-format
+#, python-format
 #| msgid "Il ciclo è già chiuso."
 msgid "Il ciclo è già %(phase)s."
-msgstr "Le cycle est déjà clôturé."
+msgstr "Le cycle est déjà %(phase)s."
 
 #: apps/pdca/services.py:156
-#, fuzzy
 #| msgid "Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata (minimo 20 caratteri)."
 msgid "Per archiviare è obbligatorio specificare il motivo (minimo 20 caratteri)."
-msgstr "Pour clôturer le cycle, il est obligatoire de décrire l'action standardisée (minimum 20 caractères)."
+msgstr "Pour archiver, il est obligatoire d'indiquer le motif (minimum 20 caractères)."
 
 #: apps/pdca/services.py:190
 #, python-format
@@ -569,10 +561,9 @@ msgid "Evidenza non trovata"
 msgstr "Évidence non trouvée"
 
 #: apps/pdca/views.py:130
-#, fuzzy
 #| msgid "Motivo terminazione obbligatorio (min 5 caratteri)."
 msgid "Motivo cancellazione obbligatorio (min 10 caratteri)."
-msgstr "Le motif de terminaison est obligatoire (minimum 5 caractères)."
+msgstr "Le motif d'annulation est obligatoire (min 10 caractères)."
 
 #: apps/pdca/views.py:137
 msgid "Ciclo gia' chiuso: ha generato una Lesson Learned e fa parte dell'audit trail. Non e' cancellabile."
@@ -597,16 +588,14 @@ msgid "Max 1 livello di nesting per i sub-plant: il sito scelto è già un sotto
 msgstr "1 niveau d'imbrication maximum pour les sous-sites : le site choisi est déjà un sous-site."
 
 #: apps/plants/services.py:173
-#, fuzzy
 #| msgid "Solo il superuser può importare framework."
 msgid "Solo il superuser può forzare l'eliminazione del sito."
-msgstr "Seul le superutilisateur peut importer des frameworks."
+msgstr "Seul le superutilisateur peut forcer la suppression du site."
 
 #: apps/plants/services.py:250
-#, fuzzy
 #| msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata."
 msgid "Impossibile eliminare il sito: sono presenti dipendenze collegate."
-msgstr "Impossible de définir l'état sur 'conforme' sans au moins une évidence valide liée."
+msgstr "Impossible de supprimer le site : des dépendances liées sont présentes."
 
 #: apps/plants/views.py:66
 msgid "Impossibile cambiare il codice: il sito ha controlli collegati."
@@ -620,20 +609,18 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: apps/plants/views.py:153
-#, fuzzy
 #| msgid "Nessun requisito documentale definito per questo controllo."
 msgid "Nessun logo configurato per questo sito."
-msgstr "Aucune exigence documentaire définie pour ce contrôle."
+msgstr "Aucun logo configuré pour ce site."
 
 #: apps/plants/views.py:157
 msgid "Logo non disponibile: usa l'upload file per i loghi del sito."
 msgstr "Logo non disponible : utilisez le téléversement de fichier pour les logos du site."
 
 #: apps/plants/views.py:167 apps/plants/views.py:170
-#, fuzzy
 #| msgid "File non trovato nello storage."
 msgid "Logo non trovato nello storage."
-msgstr "Fichier introuvable dans le stockage."
+msgstr "Logo introuvable dans le stockage."
 
 #: apps/reporting/services.py:965 apps/reporting/services.py:976
 #: apps/reporting/views.py:128
@@ -717,10 +704,9 @@ msgid "Motivazione rifiuto obbligatoria (min 10 caratteri)."
 msgstr "Le motif de refus est obligatoire (minimum 10 caractères)."
 
 #: apps/suppliers/services.py:446
-#, fuzzy
 #| msgid "Nessun requisito documentale definito per questo controllo."
 msgid "Nessun indirizzo email configurato per questo fornitore."
-msgstr "Aucune exigence documentaire définie pour ce contrôle."
+msgstr "Aucune adresse e-mail configurée pour ce fournisseur."
 
 #: apps/suppliers/services.py:502
 msgid "Il questionario ha già ricevuto risposta."
@@ -735,16 +721,16 @@ msgid "Accesso negato: vista aggregata su tutti i siti riservata allo scope orga
 msgstr "Accès refusé : la vue agrégée sur tous les sites est réservée au périmètre organisation."
 
 #: core/uploads.py:86
-#, fuzzy, python-format
+#, python-format
 #| msgid "File troppo grande. Dimensione massima: 50MB."
 msgid "File troppo grande. Dimensione massima: %(mb)sMB."
-msgstr "Fichier trop volumineux. Taille maximale : 50 Mo."
+msgstr "Fichier trop volumineux. Taille maximale : %(mb)s Mo."
 
 #: core/uploads.py:94
-#, fuzzy, python-format
+#, python-format
 #| msgid "Estensione file non consentita. Formati ammessi: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
 msgid "Estensione file non consentita. Formati ammessi: %(formats)s."
-msgstr "Extension de fichier non autorisée. Formats autorisés : doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
+msgstr "Extension de fichier non autorisée. Formats admis : %(formats)s."
 
 #: core/uploads.py:104
 msgid "Tipo di file non consentito. Il contenuto del file non corrisponde all'estensione."
