@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
@@ -25,10 +26,16 @@ def create_cycle(plant, title, trigger_type, trigger_source_id=None, scope_type=
     return cycle
 
 
+@transaction.atomic
 def advance_phase(cycle, user, phase_notes: str = "", evidence=None, outcome: str = "") -> PdcaCycle:
     """
     Avanza la fase del ciclo PDCA validando i prerequisiti.
     Ogni transizione ha requisiti obbligatori.
+
+    Scrittura multi-entità (fase + ciclo + audit + eventuale riciclo PLAN su
+    CHECK=ko): atomica, così un avanzamento mai resta a metà (fase completata
+    senza ciclo aggiornato, o riciclo senza traccia). Le validazioni precedono
+    qualsiasi scrittura e sollevano `ValidationError` → rollback pulito.
     """
     if cycle.fase_corrente == "chiuso":
         raise ValidationError(_("Il ciclo è già chiuso."))
@@ -133,6 +140,7 @@ def advance_phase(cycle, user, phase_notes: str = "", evidence=None, outcome: st
     return cycle
 
 
+@transaction.atomic
 def archivia_cycle(cycle, user, motivo: str = "") -> PdcaCycle:
     """
     Archivia il ciclo senza implementazione — usato quando lo spunto non
@@ -166,10 +174,15 @@ def archivia_cycle(cycle, user, motivo: str = "") -> PdcaCycle:
     return cycle
 
 
+@transaction.atomic
 def close_cycle(cycle, user, act_description: str = "") -> PdcaCycle:
     """
     Chiude il ciclo dalla fase ACT.
     Richiede descrizione standardizzazione.
+
+    Scrittura multi-entità (ciclo + modulo sorgente + finding M17 + Lesson
+    Learned + audit): atomica, così una chiusura non lascia un ciclo `chiuso`
+    senza Lesson Learned o con il modulo sorgente non aggiornato.
     """
     if cycle.fase_corrente != "act":
         raise ValidationError(

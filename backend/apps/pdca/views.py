@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from rest_framework import status, viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -183,7 +183,17 @@ class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class PdcaPhaseViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+class PdcaPhaseViewSet(
+    PlantScopedQuerysetMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Sola lettura — le fasi sono interamente gestite dal workflow
+    (`create_cycle` / `advance_phase`). Esporre create/update/destroy darebbe
+    accesso a hard-delete senza audit e a duplicazione/manomissione dei record
+    di fase, scavalcando il ciclo PDCA. Nessun client le scrive direttamente."""
+
     queryset = PdcaPhase.objects.select_related("cycle")
     serializer_class = PdcaPhaseSerializer
     permission_classes = [PdcaPermission]

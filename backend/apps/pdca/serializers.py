@@ -40,4 +40,8 @@ class PdcaCycleSerializer(serializers.ModelSerializer):
         read_only_fields = [
             "id", "fase_corrente", "reopened_as", "closed_at",
             "created_at", "updated_at", "created_by",
+            # Campi governati dalle azioni di workflow (advance/close/archivia):
+            # non impostabili con una PATCH diretta. Le azioni li scrivono sul
+            # modello leggendo il valore dal body della richiesta, non da qui.
+            "act_description", "check_outcome", "motivo_archiviazione",
         ]

@@ -7,6 +7,7 @@ from rest_framework.test import APIClient
 User = get_user_model()
 
 URL_CYCLES = "/api/v1/pdca/cycles/"
+URL_PHASES = "/api/v1/pdca/phases/"
 
 
 @pytest.fixture
@@ -69,6 +70,37 @@ def test_retrieve_cycle(client, cycle):
     resp = client.get(f"{URL_CYCLES}{cycle.id}/")
     assert resp.status_code == 200
     assert resp.data["title"] == "Ciclo Test"
+
+
+@pytest.mark.django_db
+def test_phases_endpoint_is_read_only(client, cycle):
+    """Le fasi sono gestite dal workflow: niente create/update/destroy via API."""
+    from apps.pdca.models import PdcaPhase
+    # lettura ok
+    resp = client.get(f"{URL_PHASES}?cycle={cycle.id}")
+    assert resp.status_code == 200
+    phase = PdcaPhase.objects.filter(cycle=cycle).first()
+    # delete bloccato (no hard-delete senza audit)
+    assert client.delete(f"{URL_PHASES}{phase.id}/").status_code == 405
+    # create bloccato (no duplicazione fasi)
+    assert client.post(
+        URL_PHASES, {"cycle": str(cycle.id), "phase": "plan"}, format="json"
+    ).status_code == 405
+    # update bloccato
+    assert client.patch(
+        f"{URL_PHASES}{phase.id}/", {"notes": "tamper"}, format="json"
+    ).status_code == 405
+
+
+@pytest.mark.django_db
+def test_cannot_close_cycle_via_direct_patch(client, cycle):
+    """fase_corrente è read-only: la chiusura passa solo dall'azione dedicata."""
+    resp = client.patch(
+        f"{URL_CYCLES}{cycle.id}/", {"fase_corrente": "chiuso"}, format="json"
+    )
+    assert resp.status_code == 200
+    cycle.refresh_from_db()
+    assert cycle.fase_corrente == "plan"
 
 
 @pytest.mark.django_db

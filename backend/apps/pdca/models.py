@@ -70,6 +70,9 @@ class PdcaCycle(BaseModel):
         related_name="closed_pdca_cycles",
     )
 
+    class Meta:
+        ordering = ["-created_at"]
+
 
 class PdcaPhase(BaseModel):
     cycle = models.ForeignKey(PdcaCycle, on_delete=models.CASCADE, related_name="phases")
@@ -105,4 +108,8 @@ class PdcaPhase(BaseModel):
         on_delete=models.SET_NULL,
         related_name="completed_pdca_phases",
     )
+
+    class Meta:
+        # plan → do → check → act (ordine di creazione in create_cycle)
+        ordering = ["created_at"]
 
