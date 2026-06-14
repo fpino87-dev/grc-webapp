@@ -19,6 +19,9 @@ REST_FRAMEWORK = {
         "user": "9999/min",
         "login": "9999/min",
         "ai": "9999/min",
+        # Endpoint di export bulk (ExportRateThrottle, scope "export"): senza
+        # questa voce qualsiasi test che colpisce un export va in KeyError.
+        "export": "9999/min",
     },
 }
 

@@ -15,6 +15,29 @@ class SupplierAssessmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = SupplierAssessment
         fields = "__all__"
+        # Stato e punteggi sono governati dalle azioni complete/approve/reject:
+        # uno `status=approvato` impostato con una PATCH diretta scavalcherebbe la
+        # validazione e farebbe rientrare l'assessment nel calcolo del `risk_adj`
+        # del fornitore senza punteggi né revisione. assessed_by/reviewed_by
+        # tracciano chi ha eseguito/approvato (SoD) → non impostabili dal client.
+        read_only_fields = [
+            "id",
+            "status",
+            "score_overall",
+            "score_governance",
+            "score_security",
+            "score_bcp",
+            "score",
+            "findings",
+            "assessed_by",
+            "reviewed_by",
+            "reviewed_at",
+            "review_notes",
+            "created_by",
+            "created_at",
+            "updated_at",
+            "deleted_at",
+        ]
 
     def get_computed_risk_level(self, obj):
         return obj.computed_risk_level
@@ -230,6 +253,33 @@ class SupplierQuestionnaireSerializer(serializers.ModelSerializer):
     class Meta:
         model = SupplierQuestionnaire
         fields = "__all__"
+        # Il questionario è interamente gestito dalle azioni send/resend/evaluate
+        # (snapshot del template, invio email, registrazione esito con calcolo del
+        # risk_adj). Esito/stato/data non devono essere impostabili con una PATCH
+        # diretta, che falsificherebbe una valutazione del fornitore saltando
+        # `register_evaluation` e l'audit. Modificabili solo le `notes`.
+        read_only_fields = [
+            "id",
+            "supplier",
+            "template",
+            "subject_snapshot",
+            "body_snapshot",
+            "form_url_snapshot",
+            "sent_at",
+            "last_sent_at",
+            "sent_to",
+            "sent_cc_snapshot",
+            "sent_by",
+            "send_count",
+            "evaluation_date",
+            "risk_result",
+            "status",
+            "expires_at",
+            "created_by",
+            "created_at",
+            "updated_at",
+            "deleted_at",
+        ]
 
     def get_sent_by_display(self, obj):
         if not obj.sent_by:

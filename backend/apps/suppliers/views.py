@@ -272,7 +272,9 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         Esporta i fornitori in CSV con tutti i campi richiesti da ACN Delibera 127434.
         """
         nis2_only = request.query_params.get("nis2_only", "false").lower() == "true"
-        qs = Supplier.objects.filter(deleted_at__isnull=True).order_by("name")
+        # Rispetta il perimetro plant dell'utente: l'export non deve esporre
+        # fornitori di siti fuori scope (sweep security per-sito sugli export).
+        qs = self.get_queryset().order_by("name")
         if nis2_only:
             qs = qs.filter(nis2_relevant=True)
 
@@ -583,8 +585,20 @@ class SupplierQuestionnaireViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewS
         if not supplier_id or not template_id:
             return Response({"error": "supplier_id e template_id obbligatori."}, status=400)
 
+        from rest_framework.exceptions import PermissionDenied
+        from core.scoping import get_user_plant_ids
+
         try:
             supplier = Supplier.objects.get(pk=supplier_id)
+            # Lo scoping dei queryset non copre il supplier_id passato nel body:
+            # un fornitore legato a uno o più siti è raggiungibile solo se l'utente
+            # ha accesso ad almeno uno di essi (i fornitori org-wide, senza siti,
+            # restano accessibili — coerente con allow_null_plant del listing).
+            allowed = get_user_plant_ids(request.user)
+            if allowed is not None:
+                supplier_plant_ids = set(supplier.plants.values_list("id", flat=True))
+                if supplier_plant_ids and not (supplier_plant_ids & allowed):
+                    raise PermissionDenied("Accesso negato per questo fornitore.")
             template = QuestionnaireTemplate.objects.get(pk=template_id, deleted_at__isnull=True)
             q = send_questionnaire(supplier, template, request.user)
             return Response(SupplierQuestionnaireSerializer(q).data, status=201)

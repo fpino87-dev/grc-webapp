@@ -57,6 +57,61 @@ def assessment(db, supplier, user):
     )
 
 
+# ── Governance / scoping (M14 review) ─────────────────────────────────────
+
+@pytest.mark.django_db
+def test_cannot_fake_assessment_approval_via_patch(client, assessment):
+    """status/score sono governati da complete/approve: non via PATCH diretta."""
+    resp = client.patch(
+        f"{URL_ASSESSMENTS}{assessment.id}/",
+        {"status": "approvato", "score_overall": 90},
+        format="json",
+    )
+    assert resp.status_code == 200
+    assessment.refresh_from_db()
+    assert assessment.status == "pianificato"
+    assert assessment.score_overall is None
+
+
+@pytest.mark.django_db
+def test_export_csv_respects_plant_scope(db, plant, supplier):
+    """Un utente di un altro sito non vede il fornitore nell'export CSV."""
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    from apps.plants.models import Plant
+    other = Plant.objects.create(code="SUP-OTH", name="Other", country="IT",
+                                 nis2_scope="non_soggetto", status="attivo")
+    pm = User.objects.create_user(username="pm_sup", email="pm_sup@test.com", password="x")
+    acc = UserPlantAccess.objects.create(user=pm, role=GrcRole.PLANT_MANAGER, scope_type="single_plant")
+    acc.scope_plants.set([other])
+    c = APIClient()
+    c.force_authenticate(user=pm)
+    resp = c.get(f"{URL_SUPPLIERS}export-csv/")
+    assert resp.status_code == 200
+    assert "Fornitore Test" not in resp.content.decode("utf-8")
+
+
+@pytest.mark.django_db
+def test_send_questionnaire_blocked_cross_plant(db, plant, supplier):
+    """Inviare un questionario a un fornitore fuori perimetro è negato."""
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    from apps.plants.models import Plant
+    from apps.suppliers.models import QuestionnaireTemplate
+    other = Plant.objects.create(code="SUP-O2", name="Other2", country="IT",
+                                 nis2_scope="non_soggetto", status="attivo")
+    pm = User.objects.create_user(username="pm_sup2", email="pm_sup2@test.com", password="x")
+    acc = UserPlantAccess.objects.create(user=pm, role=GrcRole.PLANT_MANAGER, scope_type="single_plant")
+    acc.scope_plants.set([other])
+    tpl = QuestionnaireTemplate.objects.create(name="T", subject="S", body="B", form_url="https://x.it")
+    c = APIClient()
+    c.force_authenticate(user=pm)
+    resp = c.post(
+        "/api/v1/suppliers/questionnaires/send/",
+        {"supplier_id": str(supplier.id), "template_id": str(tpl.id)},
+        format="json",
+    )
+    assert resp.status_code == 403
+
+
 # ── Suppliers CRUD ────────────────────────────────────────────────────────
 
 @pytest.mark.django_db

@@ -268,6 +268,9 @@ class SupplierAssessment(BaseModel):
     findings = models.TextField(blank=True)
     next_assessment_date = models.DateField(null=True, blank=True)
 
+    class Meta:
+        ordering = ["-assessment_date"]
+
     @property
     def computed_risk_level(self) -> str:
         if self.score_overall is None:
