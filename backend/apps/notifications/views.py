@@ -144,6 +144,23 @@ class NotificationRuleViewSet(viewsets.ModelViewSet):
                      "scope_type": instance.scope_type},
         )
 
+    def perform_destroy(self, instance):
+        # La regola instrada chi riceve gli alert (anche di sicurezza): la sua
+        # rimozione va tracciata come create/update. Hard delete mantenuto perché
+        # `unique_together` impedirebbe di ricreare una regola identica se la
+        # vecchia restasse soft-deleted a occupare il vincolo.
+        log_action(
+            user=self.request.user,
+            action_code="notif.smtp.config.changed",
+            level="L2",
+            entity=instance,
+            payload={"event": "rule_deleted", "rule_id": str(instance.pk),
+                     "event_type": instance.event_type,
+                     "recipient_roles": instance.recipient_roles,
+                     "scope_type": instance.scope_type},
+        )
+        instance.delete()
+
 
 class NotificationRoleProfileViewSet(viewsets.ModelViewSet):
     queryset = NotificationRoleProfile.objects.all()
@@ -151,6 +168,37 @@ class NotificationRoleProfileViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsGrcSuperAdmin]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["grc_role", "profile", "enabled"]
+
+    def _audit(self, instance, event: str):
+        # I profili instradano le notifiche (anche di sicurezza) per ruolo GRC:
+        # ogni modifica del routing deve essere ricostruibile dall'auditor.
+        log_action(
+            user=self.request.user,
+            action_code="notif.profile.changed",
+            level="L2",
+            entity=instance,
+            payload={
+                "event": event,
+                "profile_id": str(instance.pk),
+                "grc_role": instance.grc_role,
+                "profile": instance.profile,
+                "enabled": instance.enabled,
+            },
+        )
+
+    def perform_create(self, serializer):
+        instance = serializer.save(created_by=self.request.user)
+        self._audit(instance, "profile_created")
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        self._audit(instance, "profile_updated")
+
+    def perform_destroy(self, instance):
+        # Hard delete: `grc_role` è unique, un soft-delete bloccherebbe la
+        # ricreazione del profilo per lo stesso ruolo.
+        self._audit(instance, "profile_deleted")
+        instance.delete()
 
     @action(detail=False, methods=["get"], url_path="profiles-catalog")
     def profiles_catalog(self, request):
@@ -167,6 +215,13 @@ class NotificationRoleProfileViewSet(viewsets.ModelViewSet):
                 profile=profile, enabled=True, custom_events=[]
             )
             updated += n
+        log_action(
+            user=request.user,
+            action_code="notif.profile.changed",
+            level="L2",
+            entity=request.user,
+            payload={"event": "profiles_reset_defaults", "updated": updated},
+        )
         return Response({"ok": True, "updated": updated, "message": f"{updated} profili reimpostati ai valori default"})
 
     @action(detail=True, methods=["post"], url_path="set-custom")
@@ -183,4 +238,5 @@ class NotificationRoleProfileViewSet(viewsets.ModelViewSet):
         profile_obj.profile = "custom"
         profile_obj.custom_events = events
         profile_obj.save(update_fields=["profile", "custom_events", "updated_at"])
+        self._audit(profile_obj, "profile_set_custom")
         return Response({"ok": True, "profile": "custom", "active_events": profile_obj.get_active_events()})
