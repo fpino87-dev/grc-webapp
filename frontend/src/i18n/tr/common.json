@@ -1792,7 +1792,15 @@
       "rca_immediate": "Acil eylemler",
       "rca_preventive": "Önleyici eylemler",
       "rca_lessons": "Çıkarılan dersler",
-      "rca_placeholder": "Operasyonel formatta düzenlenebilir RCA taslağı."
+      "rca_placeholder": "Operasyonel formatta düzenlenebilir RCA taslağı.",
+      "rca_save": "RCA'yı kaydet",
+      "rca_saving": "Kaydediliyor…",
+      "rca_save_error": "RCA kaydedilemedi",
+      "rca_approve": "RCA'yı onayla",
+      "rca_approving": "Onaylanıyor…",
+      "rca_approved_on": "RCA {{date}} tarihinde onaylandı",
+      "rca_save_first": "Önce RCA taslağını kaydedin",
+      "rca_gate_hint": "Olayın kapatılabilmesi için RCA onaylanmalıdır."
     },
     "method_extra": {
       "taxonomy_title": "Resmî ENISA taksonomisi",

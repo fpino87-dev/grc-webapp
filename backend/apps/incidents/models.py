@@ -240,6 +240,9 @@ class RCA(BaseModel):
         related_name="approved_rca",
     )
 
+    class Meta:
+        ordering = ["-created_at"]
+
 
 class NIS2Notification(BaseModel):
     NOTIFICATION_TYPES = [

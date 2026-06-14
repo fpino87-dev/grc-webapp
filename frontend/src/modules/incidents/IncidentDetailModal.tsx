@@ -79,6 +79,22 @@ export function IncidentDetailModal({
     },
   });
 
+  const { data: rca } = useQuery({
+    queryKey: ["rca", selected.id],
+    queryFn: () => incidentsApi.getRca(selected.id),
+  });
+  const saveRcaMutation = useMutation({
+    mutationFn: () =>
+      rca
+        ? incidentsApi.updateRca(rca.id, { summary: rcaDraftText })
+        : incidentsApi.createRca({ incident: selected.id, summary: rcaDraftText }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["rca", selected.id] }),
+  });
+  const approveRcaMutation = useMutation({
+    mutationFn: () => incidentsApi.approveRca(rca!.id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["rca", selected.id] }),
+  });
+
   const { data: timeline } = useQuery({
     queryKey: ["nis2-timeline", selected.id],
     queryFn: () => incidentsApi.timeline(selected.id),
@@ -103,6 +119,11 @@ export function IncidentDetailModal({
   useEffect(() => {
     setPreviewBreakdown(null);
   }, [selected.id]);
+
+  // Precarica il testo RCA salvato (se l'utente non sta già scrivendo).
+  useEffect(() => {
+    if (rca?.summary) setRcaDraftText((prev) => prev || rca.summary);
+  }, [rca?.summary]);
 
   useEffect(() => {
     if (!selected.plant || activeTab !== "classificazione") return;
@@ -1011,7 +1032,43 @@ export function IncidentDetailModal({
                 value={rcaDraftText}
                 onChange={(e) => setRcaDraftText(e.target.value)}
                 placeholder={t("incidents.timeline_tab.rca_placeholder")}
+                disabled={!!rca?.approved_at}
               />
+              <div className="mt-2 flex items-center gap-2 flex-wrap">
+                {rca?.approved_at ? (
+                  <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-800">
+                    {t("incidents.timeline_tab.rca_approved_on", {
+                      date: new Date(rca.approved_at).toLocaleString(dateLocale),
+                    })}
+                  </span>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => saveRcaMutation.mutate()}
+                      disabled={!rcaDraftText.trim() || saveRcaMutation.isPending}
+                      className="px-3 py-2 text-xs bg-primary-600 text-white rounded disabled:opacity-50"
+                    >
+                      {saveRcaMutation.isPending
+                        ? t("incidents.timeline_tab.rca_saving")
+                        : t("incidents.timeline_tab.rca_save")}
+                    </button>
+                    <button
+                      onClick={() => approveRcaMutation.mutate()}
+                      disabled={!rca || approveRcaMutation.isPending}
+                      title={!rca ? t("incidents.timeline_tab.rca_save_first") : undefined}
+                      className="px-3 py-2 text-xs bg-green-600 text-white rounded disabled:opacity-50"
+                    >
+                      {approveRcaMutation.isPending
+                        ? t("incidents.timeline_tab.rca_approving")
+                        : t("incidents.timeline_tab.rca_approve")}
+                    </button>
+                    <span className="text-xs text-gray-500">{t("incidents.timeline_tab.rca_gate_hint")}</span>
+                  </>
+                )}
+                {saveRcaMutation.isError && (
+                  <span className="text-xs text-red-600">{t("incidents.timeline_tab.rca_save_error")}</span>
+                )}
+              </div>
             </div>
           </div>
         )}

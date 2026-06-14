@@ -6,7 +6,7 @@ from rest_framework import decorators, response, viewsets
 from core.audit import log_action
 from core.scoping import PlantScopedQuerysetMixin, require_plant_access
 from core.viewsets import SoftDeleteAuditMixin
-from .models import Incident, NIS2Configuration
+from .models import Incident, NIS2Configuration, RCA
 from .permissions import IncidentPermission, NIS2ConfigurationPermission
 from apps.plants.models import Plant
 
@@ -18,7 +18,12 @@ from .nis2_services import (
     mark_notification_sent,
     update_pdca_with_nis2_evidence,
 )
-from .serializers import IncidentSerializer, NIS2ConfigurationSerializer, NIS2NotificationSerializer
+from .serializers import (
+    IncidentSerializer,
+    NIS2ConfigurationSerializer,
+    NIS2NotificationSerializer,
+    RCASerializer,
+)
 from .services import close_incident
 
 
@@ -318,4 +323,55 @@ class NIS2ConfigurationViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, v
                 "ptnr_threshold": instance.ptnr_threshold,
             },
         )
+
+
+class RCAViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+    """Root Cause Analysis dell'incidente: redazione + approvazione.
+
+    L'approvazione (azione `approve`, audit L1) è il gate richiesto da
+    `close_incident` per chiudere l'incidente. Scoping per plant via incidente.
+    """
+
+    queryset = RCA.objects.select_related("incident", "incident__plant", "approved_by")
+    serializer_class = RCASerializer
+    permission_classes = [IncidentPermission]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["incident"]
+    plant_field = "incident__plant"
+    audit_action = "incident.rca"
+
+    def perform_create(self, serializer):
+        instance = serializer.save(created_by=self.request.user)
+        log_action(
+            user=self.request.user,
+            action_code="incident.rca.created",
+            level="L2",
+            entity=instance.incident,
+            payload={"rca_id": str(instance.pk)},
+        )
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        log_action(
+            user=self.request.user,
+            action_code="incident.rca.updated",
+            level="L2",
+            entity=instance.incident,
+            payload={"rca_id": str(instance.pk)},
+        )
+
+    @decorators.action(detail=True, methods=["post"])
+    def approve(self, request, pk=None):
+        rca = self.get_object()
+        rca.approved_at = timezone.now()
+        rca.approved_by = request.user
+        rca.save(update_fields=["approved_at", "approved_by", "updated_at"])
+        log_action(
+            user=request.user,
+            action_code="incident.rca.approved",
+            level="L1",
+            entity=rca.incident,
+            payload={"rca_id": str(rca.pk)},
+        )
+        return response.Response(self.get_serializer(rca).data)
 

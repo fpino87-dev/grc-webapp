@@ -158,6 +158,67 @@ def test_close_incident_with_approved_rca(client, incident, user):
 
 
 @pytest.mark.django_db
+def test_rca_create_approve_then_close(client, incident):
+    """Flusso completo via API: redazione RCA → approvazione → chiusura."""
+    rca_url = "/api/v1/incidents/rca/"
+    # 1) redazione
+    resp = client.post(rca_url, {"incident": str(incident.id), "summary": "Causa radice"}, format="json")
+    assert resp.status_code == 201
+    rca_id = resp.data["id"]
+    # approved_at è read-only: non valorizzato dalla create anche se forzato
+    assert resp.data["approved_at"] is None
+    # 2) approvazione tramite azione dedicata
+    resp = client.post(f"{rca_url}{rca_id}/approve/", {}, format="json")
+    assert resp.status_code == 200
+    assert resp.data["approved_at"] is not None
+    # 3) ora la chiusura passa
+    resp = client.post(f"{URL}{incident.id}/close/", {}, format="json")
+    assert resp.status_code == 200
+    incident.refresh_from_db()
+    assert incident.status == "chiuso"
+
+
+@pytest.mark.django_db
+def test_rca_approved_at_not_settable_on_create(client, incident):
+    """Una create che prova a impostare approved_at non bypassa il gate."""
+    from django.utils import timezone
+    rca_url = "/api/v1/incidents/rca/"
+    resp = client.post(
+        rca_url,
+        {"incident": str(incident.id), "summary": "x", "approved_at": timezone.now().isoformat()},
+        format="json",
+    )
+    assert resp.status_code == 201
+    assert resp.data["approved_at"] is None
+
+
+@pytest.mark.django_db
+def test_rca_scoped_by_plant(db):
+    """RCA di un incidente di Plant B non è visibile a un PM di Plant A."""
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    from apps.incidents.models import Incident, RCA
+    from apps.plants.models import Plant
+
+    plant_a = Plant.objects.create(code="RCA-A", name="A", country="IT", nis2_scope="non_soggetto", status="attivo")
+    plant_b = Plant.objects.create(code="RCA-B", name="B", country="IT", nis2_scope="non_soggetto", status="attivo")
+    inc_b = Incident.objects.create(
+        plant=plant_b, title="Inc B", detected_at="2026-03-20T10:00:00Z",
+        severity="media", nis2_notifiable="da_valutare",
+    )
+    RCA.objects.create(incident=inc_b, summary="rb")
+
+    pm_a = User.objects.create_user(username="pm_rca_a", email="pm_rca_a@t.test", password="x")
+    acc = UserPlantAccess.objects.create(user=pm_a, role=GrcRole.PLANT_MANAGER, scope_type="single_plant")
+    acc.scope_plants.set([plant_a])
+
+    c = APIClient()
+    c.force_authenticate(user=pm_a)
+    resp = c.get("/api/v1/incidents/rca/")
+    assert resp.status_code == 200
+    assert resp.data["results"] == []
+
+
+@pytest.mark.django_db
 def test_classify_significance_action(client, plant):
     from apps.incidents.models import Incident, NIS2Configuration
     NIS2Configuration.objects.create(

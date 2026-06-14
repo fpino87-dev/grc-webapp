@@ -1713,7 +1713,15 @@
       "rca_immediate": "Azioni immediate",
       "rca_preventive": "Azioni preventive",
       "rca_lessons": "Lessons learned",
-      "rca_placeholder": "Bozza RCA editabile in formato operativo."
+      "rca_placeholder": "Bozza RCA editabile in formato operativo.",
+      "rca_save": "Salva RCA",
+      "rca_saving": "Salvataggio…",
+      "rca_save_error": "Errore nel salvataggio dell'RCA",
+      "rca_approve": "Approva RCA",
+      "rca_approving": "Approvazione…",
+      "rca_approved_on": "RCA approvato il {{date}}",
+      "rca_save_first": "Salva prima la bozza RCA",
+      "rca_gate_hint": "L'RCA deve essere approvato per poter chiudere l'incidente."
     },
     "method_extra": {
       "taxonomy_title": "Tassonomia ENISA ufficiale",

@@ -1792,7 +1792,15 @@
       "rca_immediate": "Działania natychmiastowe",
       "rca_preventive": "Działania zapobiegawcze",
       "rca_lessons": "Wnioski",
-      "rca_placeholder": "Edytowalny szkic RCA w formacie operacyjnym."
+      "rca_placeholder": "Edytowalny szkic RCA w formacie operacyjnym.",
+      "rca_save": "Zapisz RCA",
+      "rca_saving": "Zapisywanie…",
+      "rca_save_error": "Nie udało się zapisać RCA",
+      "rca_approve": "Zatwierdź RCA",
+      "rca_approving": "Zatwierdzanie…",
+      "rca_approved_on": "RCA zatwierdzone dnia {{date}}",
+      "rca_save_first": "Najpierw zapisz szkic RCA",
+      "rca_gate_hint": "RCA musi zostać zatwierdzone przed zamknięciem incydentu."
     },
     "method_extra": {
       "taxonomy_title": "Oficjalna taksonomia ENISA",

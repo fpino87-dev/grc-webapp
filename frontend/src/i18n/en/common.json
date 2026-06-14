@@ -1713,7 +1713,15 @@
       "rca_immediate": "Immediate actions",
       "rca_preventive": "Preventive actions",
       "rca_lessons": "Lessons learned",
-      "rca_placeholder": "Editable RCA draft in operational format."
+      "rca_placeholder": "Editable RCA draft in operational format.",
+      "rca_save": "Save RCA",
+      "rca_saving": "Saving…",
+      "rca_save_error": "Failed to save the RCA",
+      "rca_approve": "Approve RCA",
+      "rca_approving": "Approving…",
+      "rca_approved_on": "RCA approved on {{date}}",
+      "rca_save_first": "Save the RCA draft first",
+      "rca_gate_hint": "The RCA must be approved before the incident can be closed."
     },
     "method_extra": {
       "taxonomy_title": "Official ENISA taxonomy",

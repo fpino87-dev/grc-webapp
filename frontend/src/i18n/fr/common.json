@@ -1792,7 +1792,15 @@
       "rca_immediate": "Actions immédiates",
       "rca_preventive": "Actions préventives",
       "rca_lessons": "Enseignements tirés",
-      "rca_placeholder": "Brouillon RCA modifiable au format opérationnel."
+      "rca_placeholder": "Brouillon RCA modifiable au format opérationnel.",
+      "rca_save": "Enregistrer la RCA",
+      "rca_saving": "Enregistrement…",
+      "rca_save_error": "Échec de l'enregistrement de la RCA",
+      "rca_approve": "Approuver la RCA",
+      "rca_approving": "Approbation…",
+      "rca_approved_on": "RCA approuvée le {{date}}",
+      "rca_save_first": "Enregistrez d'abord le brouillon RCA",
+      "rca_gate_hint": "La RCA doit être approuvée avant de pouvoir clôturer l'incident."
     },
     "method_extra": {
       "taxonomy_title": "Taxonomie ENISA officielle",

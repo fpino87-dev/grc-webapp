@@ -161,6 +161,17 @@ export interface ClassificationMethod {
   };
 }
 
+export interface RCA {
+  id: string;
+  incident: string;
+  incident_title?: string;
+  summary: string;
+  approved_at: string | null;
+  approved_by: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export const incidentsApi = {
   list: (params?: Record<string, string>) =>
     apiClient.get<{ results: Incident[]; count: number }>("/incidents/incidents/", { params }).then((r) => r.data),
@@ -208,4 +219,14 @@ export const incidentsApi = {
     apiClient.post<NIS2Configuration>("/incidents/nis2-configurations/", data).then((r) => r.data),
   updateConfig: (id: string, data: Partial<NIS2Configuration>) =>
     apiClient.patch<NIS2Configuration>(`/incidents/nis2-configurations/${id}/`, data).then((r) => r.data),
+  getRca: (incidentId: string) =>
+    apiClient
+      .get<{ results: RCA[] }>("/incidents/rca/", { params: { incident: incidentId } })
+      .then((r) => r.data.results[0] ?? null),
+  createRca: (data: { incident: string; summary: string }) =>
+    apiClient.post<RCA>("/incidents/rca/", data).then((r) => r.data),
+  updateRca: (id: string, data: { summary: string }) =>
+    apiClient.patch<RCA>(`/incidents/rca/${id}/`, data).then((r) => r.data),
+  approveRca: (id: string) =>
+    apiClient.post<RCA>(`/incidents/rca/${id}/approve/`, {}).then((r) => r.data),
 };

@@ -67,9 +67,22 @@ class IncidentNotificationSerializer(serializers.ModelSerializer):
 
 
 class RCASerializer(serializers.ModelSerializer):
+    incident_title = serializers.CharField(source="incident.title", read_only=True)
+
     class Meta:
         model = RCA
         fields = "__all__"
+        # L'approvazione passa SOLO dall'azione dedicata `approve` (audit L1):
+        # è il gate che abilita la chiusura dell'incidente. Non deve essere
+        # impostabile con una PATCH diretta sul record.
+        read_only_fields = [
+            "created_by",
+            "created_at",
+            "updated_at",
+            "deleted_at",
+            "approved_at",
+            "approved_by",
+        ]
 
 
 class NIS2NotificationSerializer(serializers.ModelSerializer):
