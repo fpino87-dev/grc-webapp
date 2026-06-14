@@ -44,7 +44,7 @@ Legenda owner usata nel register: **P** = Prodotto (dentro il software, sempre t
 | [`gdpr/audit-log-pii-assessment.md`](gdpr/audit-log-pii-assessment.md) | Verifica PII nei payload audit | ✅ fatto |
 | [`gdpr/retention-and-erasure.md`](gdpr/retention-and-erasure.md) | Retention + Art. 17 vs audit immutabile | 🟡 bozza |
 | `gdpr/ropa.md` | Registro dei trattamenti (Art. 30) | ⬜ da fare |
-| `gdpr/international-transfers.md` | TIA provider AI + leve (Ollama/EU region) | ⬜ da fare |
+| [`gdpr/international-transfers.md`](gdpr/international-transfers.md) | TIA provider AI + leve (Ollama/EU region) | 🟡 bozza |
 | `security/SECURITY.md` | Vulnerability disclosure (CRA) | ⬜ da fare |
 | `data-flows.md` | Diagramma flussi dati + sub-processor | ⬜ da fare |
 
