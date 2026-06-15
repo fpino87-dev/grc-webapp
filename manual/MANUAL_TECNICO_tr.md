@@ -63,7 +63,7 @@ frontend (React SPA)
     ▼
 backend (Django + DRF)
     │
-    ├── apps/          her modül için bir Django uygulaması (M00–M20)
+    ├── apps/          her modül için bir Django uygulaması (M00–M21 + OSINT)
     ├── core/          ayarlar, middleware, temel modeller, auth
     └── frameworks/    normatif çerçeve JSON dosyaları (VDA ISA, NIS2, ISO 27001)
     │
@@ -315,7 +315,10 @@ backend/
 │   ├── audit_prep/          # M17 — Denetim Hazırlığı
 │   ├── reporting/           # M18 — Raporlama (model yok, yalnızca toplama view'ları)
 │   ├── notifications/       # M19 — Bildirimler
-│   └── ai_engine/           # M20 — AI Engine + Sanitizer
+│   ├── ai_engine/           # M20 — AI Engine + Sanitizer
+│   ├── cockpit/             # M21 — Operasyon Merkezi (insight + advisor)
+│   ├── osint/               # OSINT Monitor (yatay, org-wide)
+│   └── compliance_schedule/ # Yapılandırılabilir son tarihler (M08 kuralları)
 └── frameworks/
     ├── iso27001.json
     ├── nis2.json
@@ -358,7 +361,7 @@ frontend/src/
 ├── components/
 │   ├── layout/
 │   │   ├── Shell.tsx          # Kenar çubuğu ile ana düzen
-│   │   ├── Sidebar.tsx        # M00–M20 için öğelerle yan gezinme
+│   │   ├── Sidebar.tsx        # M00–M21 + OSINT için öğelerle yan gezinme
 │   │   ├── Topbar.tsx         # Tesis seçimi ve dil ile üst çubuk
 │   │   └── BottomBar.tsx      # Mobil alt çubuk
 │   └── ui/
@@ -366,7 +369,7 @@ frontend/src/
 │       ├── CountdownTimer.tsx # Gerçek zamanlı NIS2 geri sayımı
 │       ├── StatusBadge.tsx    # Uyumluluk durumları için renkli rozet
 │       └── ManualDrawer.tsx   # Bağlamsal kılavuz çekmecesi (? düğmesi)
-├── modules/                   # Her modül için bir klasör (M00–M20)
+├── modules/                   # Her modül için bir klasör (M00–M21 + OSINT)
 │   ├── dashboard/Dashboard.tsx
 │   ├── controls/ControlsList.tsx
 │   ├── incidents/IncidentsList.tsx
@@ -676,6 +679,11 @@ Temel URL: `/api/v1/`
 | `reporting/dashboard-summary/` | GET | M18 toplama panosu |
 | `reporting/kpi-trend/` | GET | M18 KPI trendi |
 | `notifications/` | GET | M19 bildirimler |
+| `cockpit/insights/` | GET | Toplu insight + posture M21 |
+| `cockpit/insights/{fingerprint}/{action}/` | POST | Insight eylemi (snooze\|accept\|reopen) |
+| `osint/entities/` | GET, POST | OSINT izlenen varlıklar |
+| `osint/alerts/` | GET | OSINT maruziyet uyarıları |
+| `osint/dashboard/` | GET | OSINT maruziyet panosu |
 | `manual/<type>/` | GET | Kılavuzlar (kullanıcı/teknik) |
 
 ### Filtreler ve sayfalandırma

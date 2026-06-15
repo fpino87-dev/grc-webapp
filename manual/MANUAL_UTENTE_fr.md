@@ -29,6 +29,8 @@
 - [Rôles et ce que vous pouvez faire](#rôles-et-ce-que-vous-pouvez-faire)
 - [AI Engine — suggestions IA (M20)](#ai-engine--suggestions-ia-m20)
 - [Reporting et export (M18)](#reporting-et-export-m18)
+- [Centre opérationnel (M21)](#centre-opérationnel-m21)
+- [OSINT Monitor](#osint-monitor)
 - [Annexe : Questions fréquentes](#annexe--questions-fréquentes)
 
 ---
@@ -1315,6 +1317,76 @@ Allez sur **Audit → Reporting**. Vous trouverez trois niveaux de tableau de bo
 5. Le rapport est disponible pour le téléchargement dans la section **Rapports générés**
 
 Tous les rapports générés sont enregistrés dans l'audit trail.
+
+---
+
+## Centre opérationnel (M21)
+
+[Capture : cockpit avec insights priorisés et posture]
+
+Le Centre opérationnel est le tableau de bord qui agrège les signaux de tous les modules en **insights** priorisés et vous montre la **posture de sécurité** globale avec sa tendance. Il est conçu pour le travail quotidien : il vous indique *quoi regarder en premier* sans avoir à ouvrir module par module.
+
+### Que sont les insights
+
+Chaque insight est un signal généré par les **advisors** (règles qui surveillent contrôles, risques, incidents, échéances, audits, etc.) avec une priorité. Pour chaque insight vous voyez un résumé, le module d'origine et l'action recommandée.
+
+### Gérer un insight (anti alert-fatigue)
+
+Depuis la fiche de l'insight vous pouvez :
+
+- **Accepter** : prendre en charge l'insight jusqu'à une date — il ne réapparaît pas avant
+- **Reporter (snooze)** : le mettre en pause jusqu'à une date, avec une note facultative
+- **Rouvrir** : réactiver un insight précédemment accepté ou reporté
+
+Ces actions évitent que les mêmes alertes se répètent indéfiniment et sont enregistrées dans l'audit trail.
+
+### Explication IA et assistant
+
+Si le module IA (M20) est activé, vous pouvez demander une **explication IA** de l'insight (les données sont anonymisées avant l'envoi) et utiliser l'**assistant opérationnel** pour des questions de contexte. L'IA n'applique jamais de modifications seule : le principe human-in-the-loop s'applique toujours.
+
+### Posture et tendance
+
+La page affiche un indicateur de posture globale et son évolution dans le temps (posture trend), utile pour comprendre si la situation s'améliore ou se dégrade.
+
+### Qui peut accéder
+
+Le Centre opérationnel est réservé aux rôles de gouvernance et de supervision : Super Admin, Compliance Officer, Risk Manager, Internal Auditor et Plant Manager. Il n'est pas accessible à l'Auditeur Externe.
+
+---
+
+## OSINT Monitor
+
+[Capture : tableau de bord d'exposition OSINT]
+
+OSINT Monitor est le module transversal qui surveille l'**exposition externe** de votre organisation — vos domaines et les sites web de vos fournisseurs — à partir de sources publiques (Open Source Intelligence). Contrairement aux autres modules, il n'est pas lié à un seul site : il travaille au niveau de l'**organisation**.
+
+### Ce qu'il surveille
+
+- Le **domaine principal** et les éventuels **domaines supplémentaires** configurés
+- Les **sites web des fournisseurs** (M14), comme entités OSINT de type *supplier*
+- Pour chaque entité : sous-domaines, certificats SSL, enregistrements DNS/WHOIS et — si les clés sont configurées — réputation, fuites, listes noires et threat intelligence
+
+### Scans et enrichisseurs
+
+Les scans de base (SSL, DNS, WHOIS) sont **gratuits et toujours actifs**. Les enrichissements supplémentaires (HaveIBeenPwned, VirusTotal, AbuseIPDB, Google Safe Browsing, AlienVault OTX, abuse.ch) s'activent en saisissant les **clés API** correspondantes dans **OSINT → Paramètres** (toutes optionnelles ; utilisez le bouton `?` de la page des paramètres pour les liens d'inscription). Les clés sont chiffrées et jamais affichées en clair.
+
+### Alertes et actions automatiques
+
+Lorsqu'un scan détecte un problème pertinent :
+
+- Une **alerte critique sur l'un de vos domaines** peut générer automatiquement un **incident** (M09)
+- Une **alerte sur un fournisseur** peut générer une **tâche de vérification** (M08) pour le référent interne
+- Les findings peuvent être acheminés vers la remédiation et, si nécessaire, **escaladés**
+
+Les notifications d'exposition externe sont destinées **uniquement au personnel interne** (jamais à l'Auditeur Externe).
+
+### Analyse IA
+
+Si le module IA (M20) est activé, vous pouvez demander une analyse de la surface d'attaque, des briefings NIS2 et des rapports pour la direction : les données sont **anonymisées** avant l'envoi au fournisseur IA.
+
+### Qui peut accéder
+
+OSINT Monitor est réservé au Super Admin, au CISO et au Compliance Officer.
 
 ---
 

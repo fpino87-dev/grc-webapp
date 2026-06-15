@@ -63,7 +63,7 @@ frontend (React SPA)
     ▼
 backend (Django + DRF)
     │
-    ├── apps/          un'app Django per modulo (M00–M20)
+    ├── apps/          un'app Django per modulo (M00–M21 + OSINT)
     ├── core/          settings, middleware, base models, auth
     └── frameworks/    JSON framework normativi (VDA ISA, NIS2, ISO 27001)
     │
@@ -315,7 +315,10 @@ backend/
 │   ├── audit_prep/          # M17 — Audit Readiness
 │   ├── reporting/           # M18 — Reporting (no model, solo views aggregate)
 │   ├── notifications/       # M19 — Notifiche
-│   └── ai_engine/           # M20 — AI Engine + Sanitizer
+│   ├── ai_engine/           # M20 — AI Engine + Sanitizer
+│   ├── cockpit/             # M21 — Centro Operativo (insight + advisor)
+│   ├── osint/               # OSINT Monitor (trasversale, org-wide)
+│   └── compliance_schedule/ # Scadenze configurabili (regole M08)
 └── frameworks/
     ├── iso27001.json
     ├── nis2.json
@@ -358,7 +361,7 @@ frontend/src/
 ├── components/
 │   ├── layout/
 │   │   ├── Shell.tsx          # Layout principale con sidebar
-│   │   ├── Sidebar.tsx        # Navigazione laterale con voci per M00–M20
+│   │   ├── Sidebar.tsx        # Navigazione laterale con voci per M00–M21 + OSINT
 │   │   ├── Topbar.tsx         # Barra superiore con selezione plant e lingua
 │   │   └── BottomBar.tsx      # Barra inferiore mobile
 │   └── ui/
@@ -366,7 +369,7 @@ frontend/src/
 │       ├── CountdownTimer.tsx # Countdown NIS2 real-time
 │       ├── StatusBadge.tsx    # Badge colorato per stati compliance
 │       └── ManualDrawer.tsx   # Drawer contestuale manuali (? button)
-├── modules/                   # Una cartella per modulo (M00–M20)
+├── modules/                   # Una cartella per modulo (M00–M21 + OSINT)
 │   ├── dashboard/Dashboard.tsx
 │   ├── controls/ControlsList.tsx
 │   ├── incidents/IncidentsList.tsx
@@ -677,6 +680,11 @@ Base URL: `/api/v1/`
 | `reporting/dashboard-summary/` | GET | Dashboard aggregato M18 |
 | `reporting/kpi-trend/` | GET | KPI trend M18 |
 | `notifications/` | GET | Notifiche M19 |
+| `cockpit/insights/` | GET | Insight aggregati + posture M21 |
+| `cockpit/insights/{fingerprint}/{action}/` | POST | Azione insight (snooze\|accept\|reopen) |
+| `osint/entities/` | GET, POST | Entità monitorate OSINT |
+| `osint/alerts/` | GET | Alert esposizione OSINT |
+| `osint/dashboard/` | GET | Dashboard esposizione OSINT |
 | `manual/<type>/` | GET | Manuali (utente/tecnico) |
 
 ### Filtri e paginazione

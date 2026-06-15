@@ -63,7 +63,7 @@ frontend (React SPA)
     ▼
 backend (Django + DRF)
     │
-    ├── apps/          une application Django par module (M00–M20)
+    ├── apps/          une application Django par module (M00–M21 + OSINT)
     ├── core/          settings, middleware, modèles de base, auth
     └── frameworks/    référentiels normatifs JSON (VDA ISA, NIS2, ISO 27001)
     │
@@ -315,7 +315,10 @@ backend/
 │   ├── audit_prep/          # M17 — Préparation d'audit
 │   ├── reporting/           # M18 — Reporting (pas de modèle, seulement vues agrégées)
 │   ├── notifications/       # M19 — Notifications
-│   └── ai_engine/           # M20 — Moteur IA + Sanitizer
+│   ├── ai_engine/           # M20 — Moteur IA + Sanitizer
+│   ├── cockpit/             # M21 — Centre opérationnel (insights + advisors)
+│   ├── osint/               # OSINT Monitor (transversal, org-wide)
+│   └── compliance_schedule/ # Échéances configurables (règles M08)
 └── frameworks/
     ├── iso27001.json
     ├── nis2.json
@@ -358,7 +361,7 @@ frontend/src/
 ├── components/
 │   ├── layout/
 │   │   ├── Shell.tsx          # Layout principal avec sidebar
-│   │   ├── Sidebar.tsx        # Navigation latérale avec entrées pour M00–M20
+│   │   ├── Sidebar.tsx        # Navigation latérale avec entrées pour M00–M21 + OSINT
 │   │   ├── Topbar.tsx         # Barre supérieure avec sélection plant et langue
 │   │   └── BottomBar.tsx      # Barre inférieure mobile
 │   └── ui/
@@ -366,7 +369,7 @@ frontend/src/
 │       ├── CountdownTimer.tsx # Compte à rebours NIS2 en temps réel
 │       ├── StatusBadge.tsx    # Badge coloré pour les états de conformité
 │       └── ManualDrawer.tsx   # Tiroir contextuel des manuels (bouton ?)
-├── modules/                   # Un dossier par module (M00–M20)
+├── modules/                   # Un dossier par module (M00–M21 + OSINT)
 │   ├── dashboard/Dashboard.tsx
 │   ├── controls/ControlsList.tsx
 │   ├── incidents/IncidentsList.tsx
@@ -676,6 +679,11 @@ URL de base : `/api/v1/`
 | `reporting/dashboard-summary/` | GET | Tableau de bord agrégé M18 |
 | `reporting/kpi-trend/` | GET | Tendance KPI M18 |
 | `notifications/` | GET | Notifications M19 |
+| `cockpit/insights/` | GET | Insights agrégés + posture M21 |
+| `cockpit/insights/{fingerprint}/{action}/` | POST | Action insight (snooze\|accept\|reopen) |
+| `osint/entities/` | GET, POST | Entités surveillées OSINT |
+| `osint/alerts/` | GET | Alertes d'exposition OSINT |
+| `osint/dashboard/` | GET | Tableau de bord d'exposition OSINT |
 | `manual/<type>/` | GET | Manuels (utilisateur/technique) |
 
 ### Filtres et pagination

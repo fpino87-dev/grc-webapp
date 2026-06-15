@@ -29,6 +29,8 @@
 - [Roller ve yapabilecekleriniz](#roller-ve-yapabilecekleriniz)
 - [AI Engine — Yapay Zeka Önerileri (M20)](#ai-engine--yapay-zeka-önerileri-m20)
 - [Raporlama ve dışa aktarma (M18)](#raporlama-ve-dışa-aktarma-m18)
+- [Operasyon Merkezi (M21)](#operasyon-merkezi-m21)
+- [OSINT Monitor](#osint-monitor)
 - [Ek: Sık sorulan sorular](#ek-sık-sorulan-sorular)
 
 ---
@@ -1315,6 +1317,76 @@ Yapay zeka önerisi, **açıkça onaylayana** kadar hiçbir etki yaratmaz. Yapab
 5. Rapor, **Oluşturulan Raporlar** bölümünde indirme için kullanılabilir
 
 Oluşturulan tüm raporlar denetim izine kaydedilir.
+
+---
+
+## Operasyon Merkezi (M21)
+
+[Ekran: önceliklendirilmiş insight'lar ve postür içeren cockpit]
+
+Operasyon Merkezi, tüm modüllerden gelen sinyalleri önceliklendirilmiş **insight**'lara toplayan ve genel **güvenlik postürünü** trendiyle birlikte gösteren panodur. Günlük çalışma için tasarlanmıştır: modül modül açmadan *önce neye bakmanız gerektiğini* söyler.
+
+### Insight nedir
+
+Her insight, **advisor**'lar (kontrolleri, riskleri, olayları, son tarihleri, denetimleri vb. izleyen kurallar) tarafından bir öncelikle üretilen bir sinyaldir. Her insight için bir özet, kaynak modül ve önerilen eylem görürsünüz.
+
+### Bir insight'ı yönetmek (alarm yorgunluğuna karşı)
+
+Insight kartından şunları yapabilirsiniz:
+
+- **Kabul et**: insight'ı bir tarihe kadar üstlenirsiniz — o zamana kadar yeniden görünmez
+- **Ertele (snooze)**: isteğe bağlı notla birlikte bir tarihe kadar duraklatırsınız
+- **Yeniden aç**: daha önce kabul edilen veya ertelenen bir insight'ı geri getirirsiniz
+
+Bu eylemler aynı uyarıların sonsuza dek tekrarlanmasını önler ve audit trail'e kaydedilir.
+
+### AI açıklaması ve asistan
+
+AI modülü (M20) etkinse, insight'ın **AI açıklamasını** isteyebilir (veriler gönderilmeden önce anonimleştirilir) ve bağlam soruları için **operasyon asistanını** kullanabilirsiniz. AI asla tek başına değişiklik uygulamaz: her zaman human-in-the-loop ilkesi geçerlidir.
+
+### Postür ve trend
+
+Sayfa, genel bir postür göstergesini ve zaman içindeki değişimini (posture trend) gösterir; durumun iyileşip iyileşmediğini anlamak için kullanışlıdır.
+
+### Kimler erişebilir
+
+Operasyon Merkezi, yönetişim ve denetim rolleriyle sınırlıdır: Super Admin, Compliance Officer, Risk Manager, Internal Auditor ve Tesis Yöneticisi. Dış Denetçi erişemez.
+
+---
+
+## OSINT Monitor
+
+[Ekran: OSINT maruziyet panosu]
+
+OSINT Monitor, kuruluşunuzun **dış maruziyetini** — alan adlarınızı ve tedarikçilerinizin web sitelerini — kamuya açık kaynaklar (Open Source Intelligence) kullanarak izleyen yatay modüldür. Diğer modüllerin aksine tek bir tesise bağlı değildir: **kuruluş** düzeyinde çalışır.
+
+### Neyi izler
+
+- **Ana alan adı** ve yapılandırılmış olası **ek alan adları**
+- **Tedarikçi web siteleri** (M14), *supplier* tipi OSINT varlıkları olarak
+- Her varlık için: alt alan adları, SSL sertifikaları, DNS/WHOIS kayıtları ve — anahtarlar yapılandırılmışsa — itibar, ihlaller, kara listeler ve threat intelligence
+
+### Taramalar ve zenginleştiriciler
+
+Temel taramalar (SSL, DNS, WHOIS) **ücretsiz ve her zaman aktiftir**. Ek zenginleştirmeler (HaveIBeenPwned, VirusTotal, AbuseIPDB, Google Safe Browsing, AlienVault OTX, abuse.ch), ilgili **API anahtarlarını** **OSINT → Ayarlar**'a girerek etkinleştirilir (tümü isteğe bağlı; kayıt bağlantıları için ayarlar sayfasındaki `?` düğmesini kullanın). Anahtarlar şifrelenir ve asla açık metin olarak gösterilmez.
+
+### Uyarılar ve otomatik eylemler
+
+Bir tarama önemli bir sorun tespit ettiğinde:
+
+- **Alan adlarınızdan birindeki kritik bir uyarı** otomatik olarak bir **olay** (M09) oluşturabilir
+- **Bir tedarikçiye ilişkin uyarı**, iç referans için bir **doğrulama görevi** (M08) oluşturabilir
+- Bulgular remediasyona yönlendirilebilir ve gerekirse **yükseltilebilir**
+
+Dış maruziyet bildirimleri **yalnızca iç personele** yöneliktir (asla Dış Denetçiye).
+
+### AI analizi
+
+AI modülü (M20) etkinse, saldırı yüzeyi analizi, NIS2 brifingleri ve yönetim kurulu raporları isteyebilirsiniz: veriler AI sağlayıcısına gönderilmeden önce **anonimleştirilir**.
+
+### Kimler erişebilir
+
+OSINT Monitor, Super Admin, CISO ve Compliance Officer ile sınırlıdır.
 
 ---
 

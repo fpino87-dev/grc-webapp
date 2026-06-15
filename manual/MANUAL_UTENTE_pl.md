@@ -29,6 +29,8 @@
 - [Role i uprawnienia](#role-i-uprawnienia)
 - [AI Engine — sugestie SI (M20)](#ai-engine--sugestie-si-m20)
 - [Raportowanie i eksport (M18)](#raportowanie-i-eksport-m18)
+- [Centrum operacyjne (M21)](#centrum-operacyjne-m21)
+- [OSINT Monitor](#osint-monitor)
 - [Załącznik: Często zadawane pytania](#załącznik-często-zadawane-pytania)
 
 ---
@@ -1315,6 +1317,76 @@ Przejdź do **Audyt → Raportowanie**. Znajdziesz trzy poziomy pulpitów:
 5. Raport jest dostępny do pobrania w sekcji **Wygenerowane raporty**
 
 Wszystkie wygenerowane raporty są rejestrowane w śladzie audytu.
+
+---
+
+## Centrum operacyjne (M21)
+
+[Zrzut ekranu: cockpit z priorytetyzowanymi insightami i posturą]
+
+Centrum operacyjne to pulpit, który agreguje sygnały ze wszystkich modułów w priorytetyzowane **insighty** i pokazuje całościową **postawę bezpieczeństwa** wraz z jej trendem. Jest zaprojektowane do codziennej pracy: mówi, *na co spojrzeć najpierw*, bez otwierania modułu po module.
+
+### Czym są insighty
+
+Każdy insight to sygnał generowany przez **doradców (advisors)** — reguły obserwujące kontrole, ryzyka, incydenty, terminy, audyty itd. — z priorytetem. Dla każdego insightu widzisz podsumowanie, moduł źródłowy i zalecane działanie.
+
+### Zarządzanie insightem (anti alert-fatigue)
+
+Z karty insightu możesz:
+
+- **Zaakceptuj**: bierzesz insight na siebie do określonej daty — nie pojawi się ponownie do tego czasu
+- **Odłóż (snooze)**: wstrzymujesz go do daty, z opcjonalną notatką
+- **Otwórz ponownie**: przywracasz insight wcześniej zaakceptowany lub odłożony
+
+Te działania zapobiegają nieskończonemu powtarzaniu tych samych alertów i są rejestrowane w audit trail.
+
+### Wyjaśnienie AI i asystent
+
+Jeśli moduł AI (M20) jest aktywny, możesz poprosić o **wyjaśnienie AI** insightu (dane są anonimizowane przed wysłaniem) i użyć **asystenta operacyjnego** do pytań o kontekst. AI nigdy nie wprowadza zmian samodzielnie: zawsze obowiązuje zasada human-in-the-loop.
+
+### Postawa i trend
+
+Strona pokazuje wskaźnik całościowej postawy i jego zmianę w czasie (posture trend), przydatny do oceny, czy sytuacja się poprawia, czy pogarsza.
+
+### Kto ma dostęp
+
+Centrum operacyjne jest zarezerwowane dla ról governance i nadzoru: Super Admin, Compliance Officer, Risk Manager, Internal Auditor i Plant Manager. Nie jest dostępne dla Audytora Zewnętrznego.
+
+---
+
+## OSINT Monitor
+
+[Zrzut ekranu: pulpit ekspozycji OSINT]
+
+OSINT Monitor to przekrojowy moduł monitorujący **zewnętrzną ekspozycję** Twojej organizacji — Twoje domeny i strony internetowe dostawców — z wykorzystaniem źródeł publicznych (Open Source Intelligence). W przeciwieństwie do innych modułów nie jest powiązany z pojedynczym zakładem: działa na poziomie **organizacji**.
+
+### Co monitoruje
+
+- **Domenę główną** i ewentualne skonfigurowane **domeny dodatkowe**
+- **Strony internetowe dostawców** (M14), jako encje OSINT typu *supplier*
+- Dla każdej encji: subdomeny, certyfikaty SSL, rekordy DNS/WHOIS oraz — jeśli skonfigurowano klucze — reputację, wycieki, czarne listy i threat intelligence
+
+### Skany i enrichery
+
+Skany podstawowe (SSL, DNS, WHOIS) są **darmowe i zawsze aktywne**. Dodatkowe wzbogacenia (HaveIBeenPwned, VirusTotal, AbuseIPDB, Google Safe Browsing, AlienVault OTX, abuse.ch) włącza się, wprowadzając odpowiednie **klucze API** w **OSINT → Ustawienia** (wszystkie opcjonalne; użyj przycisku `?` na stronie ustawień, aby uzyskać linki rejestracyjne). Klucze są szyfrowane i nigdy nie pokazywane jawnie.
+
+### Alerty i działania automatyczne
+
+Gdy skan wykryje istotny problem:
+
+- **Krytyczny alert na jednej z Twoich domen** może automatycznie wygenerować **incydent** (M09)
+- **Alert dotyczący dostawcy** może wygenerować **zadanie weryfikacji** (M08) dla referenta wewnętrznego
+- Wyniki mogą być kierowane do remediacji i, w razie potrzeby, **eskalowane**
+
+Powiadomienia o ekspozycji zewnętrznej są przeznaczone **wyłącznie dla personelu wewnętrznego** (nigdy dla Audytora Zewnętrznego).
+
+### Analiza AI
+
+Jeśli moduł AI (M20) jest aktywny, możesz zażądać analizy powierzchni ataku, briefingów NIS2 i raportów dla zarządu: dane są **anonimizowane** przed wysłaniem do dostawcy AI.
+
+### Kto ma dostęp
+
+OSINT Monitor jest zarezerwowany dla Super Admin, CISO i Compliance Officer.
 
 ---
 
