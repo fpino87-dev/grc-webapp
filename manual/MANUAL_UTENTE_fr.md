@@ -73,7 +73,7 @@ Toutes les opérations (création d'asset, ouverture d'incidents, évaluation de
 2. Sélectionnez la langue souhaitée : **Italiano**, **English**, **Français**, **Polski**, **Türkçe**
 3. L'interface se met à jour immédiatement sans recharger la page
 
-La langue sélectionnée s'applique à toute l'interface. Les rapports PDF générés utilisent la langue active au moment de la génération.
+La langue sélectionnée s'applique à toute l'interface. Les rapports et exports générés utilisent la langue active au moment de la génération.
 
 ### Menu latéral : sections principales et leur contenu
 
@@ -685,12 +685,16 @@ Pour chaque point à l'ordre du jour :
 
 Les décisions avec responsable et échéance sont automatiquement transformées en tâches dans M08 et, si structurelles, en cycles PDCA dans M11.
 
-### Clôture et approbation
+### Instantané des données, clôture et approbation
 
-1. Après avoir complété tous les points obligatoires, cliquez sur **Envoyer pour approbation**
-2. Le Plant Manager reçoit une tâche d'approbation
-3. Une fois approuvée, la revue devient immuable
-4. Le procès-verbal en PDF signé avec hash et horodatage est automatiquement généré, disponible dans la section **Documents générés** de la revue
+La revue s'articule autour d'un **instantané figé** des données GRC au moment de la réunion :
+
+1. Démarrez la réunion : le statut passe à **En cours**
+2. Cliquez sur **Générer l'instantané des données** : les KPI (risques par niveau et par responsable, incidents des 12 derniers mois, PDCA ouverts et bloqués) sont figés à cet instant et ne changeront plus. L'instantané est un **prérequis obligatoire** pour l'approbation
+3. Présentez les données en réunion et enregistrez les décisions comme actions (responsable + échéance)
+4. Marquez la réunion comme **Terminée**
+5. Cliquez sur **Approuver** et saisissez la note formelle d'approbation (l'instantané doit être généré). Une fois approuvée, la revue devient immuable
+6. Téléchargez le **rapport CISO au format HTML** (imprimable/archivable) depuis le bouton rapport — le téléchargement est enregistré dans l'audit trail
 
 ---
 
@@ -806,10 +810,10 @@ Les délais de réponse sont calculés automatiquement à partir de la date d'ou
 #### Comment télécharger le rapport d'audit
 
 Depuis l'audit en cours ou clôturé :
-1. Cliquez sur le bouton **Rapport** (icône PDF) en haut à droite de la page d'audit
+1. Cliquez sur le bouton **Rapport** en haut à droite de la page d'audit
 2. Choisissez la langue du rapport
-3. Le système génère un PDF avec : récapitulatif de la couverture, liste des findings par type, état de clôture, tendance par rapport à l'audit précédent
-4. Le PDF est disponible immédiatement pour le téléchargement
+3. Le système génère un rapport **HTML** avec : récapitulatif de la couverture, liste des findings par type, état de clôture, tendance par rapport à l'audit précédent
+4. Le rapport est disponible immédiatement pour le téléchargement (imprimable/archivable)
 
 ---
 
@@ -1302,12 +1306,12 @@ Allez sur **Audit → Reporting**. Vous trouverez trois niveaux de tableau de bo
 - **Risk** : carte de chaleur agrégée, top 10 des risques ouverts
 - **Executive** : conformité %, tendance de maturité PDCA, préparation à l'audit
 
-### Générer un rapport PDF
+### Générer un rapport
 
 1. Sélectionnez le type de rapport (écart TISAX, conformité NIS2, SOA ISO 27001, BIA executive)
 2. Choisissez le plant et la période
 3. Sélectionnez la langue du rapport
-4. Cliquez sur **Générer** — le PDF est signé avec horodatage et hash
+4. Cliquez sur **Générer** — le rapport est produit au format approprié : **HTML** pour les rapports de synthèse, **CSV/Excel** pour les exports tabulaires (SOA, VDA ISA, matrice NIS2)
 5. Le rapport est disponible pour le téléchargement dans la section **Rapports générés**
 
 Tous les rapports générés sont enregistrés dans l'audit trail.

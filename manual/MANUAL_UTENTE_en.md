@@ -73,7 +73,7 @@ All operations (asset creation, incident opening, control assessments) are assoc
 2. Select the desired language: **Italiano**, **English**, **Français**, **Polski**, **Türkçe**
 3. The interface updates immediately without reloading the page
 
-The selected language applies to the entire interface. PDF reports generated use the language active at the time of generation.
+The selected language applies to the entire interface. The reports and exports generated use the language active at the time of generation.
 
 ### Side menu: main sections and what they contain
 
@@ -685,12 +685,16 @@ For each agenda item:
 
 Decisions with a responsible and deadline are automatically converted into tasks in M08 and, if structural, into PDCA cycles in M11.
 
-### Closure and approval
+### Data snapshot, closure and approval
 
-1. After completing all mandatory items click **Submit for approval**
-2. The Plant Manager receives an approval task
-3. Once approved, the review becomes immutable
-4. The meeting minutes are automatically generated as a hash- and timestamp-signed PDF, available in the **Generated documents** section of the review
+The review revolves around a **frozen snapshot** of GRC data at the time of the meeting:
+
+1. Start the meeting: the status moves to **In progress**
+2. Click **Generate data snapshot**: the KPIs (risks by level and by owner, incidents from the last 12 months, open and blocked PDCA) are captured at that moment and will no longer change. The snapshot is a **mandatory prerequisite** for approval
+3. Present the data in the meeting and record decisions as actions (owner + due date)
+4. Mark the meeting as **Completed**
+5. Click **Approve** and enter the formal approval note (requires the snapshot to be generated). Once approved, the review becomes immutable
+6. Download the **CISO report in HTML format** (printable/archivable) from the report button — the download is recorded in the audit trail
 
 ---
 
@@ -806,10 +810,10 @@ Response deadlines are automatically calculated from the finding opening date ba
 #### How to download the audit report
 
 From the in-progress or closed audit:
-1. Click the **Report** button (PDF icon) in the top right of the audit page
+1. Click the **Report** button in the top right of the audit page
 2. Choose the report language
-3. The system generates a PDF with: coverage summary, list of findings by type, closure status, trend compared to the previous audit
-4. The PDF is available immediately for download
+3. The system generates an **HTML** report with: coverage summary, list of findings by type, closure status, trend compared to the previous audit
+4. The report is available immediately for download (printable/archivable)
 
 ---
 
@@ -1302,12 +1306,12 @@ Go to **Audit → Reporting**. You will find three levels of dashboard:
 - **Risk**: aggregated heat map, top 10 open risks
 - **Executive**: compliance %, PDCA maturity trend, audit readiness
 
-### Generating a PDF report
+### Generating a report
 
 1. Select the report type (TISAX gap, NIS2 compliance, SOA ISO 27001, BIA executive)
 2. Choose the plant and period
 3. Select the report language
-4. Click **Generate** — the PDF is signed with a timestamp and hash
+4. Click **Generate** — the report is produced in the appropriate format: **HTML** for summary reports, **CSV/Excel** for tabular exports (SOA, VDA ISA, NIS2 matrix)
 5. The report is available for download in the **Generated reports** section
 
 All generated reports are recorded in the audit trail.

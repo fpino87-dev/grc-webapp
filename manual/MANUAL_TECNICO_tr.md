@@ -445,7 +445,7 @@ AuditLog'un temel özellikleri:
 - SHA-256 hash zinciri: her kayıt `prev_hash` + `record_hash` içerir
 - PostgreSQL tetikleyicisi UPDATE/DELETE'i engeller
 - Race condition'ı önlemek için `_get_prev_hash()` içinde `select_for_update()`
-- L1/L2/L3 seviyeleri 5/3/1 yıl saklama ile
+- L1/L2/L3 sınıflandırma seviyeleri (5/3/1 yıl referans); kalıcı/değişmez günlük, otomatik silme yok
 - Doğrulama: `python manage.py verify_audit_trail_integrity`
 
 ### ControlInstance
@@ -820,12 +820,10 @@ safe_text = Sanitizer.sanitize(raw_text)
 # Bulut LLM'ye göndermeden önce DAIMA kullanın
 ```
 
-### Denetim günlüğü otomatik saklama
+### Denetim günlüğü saklama ve değişmezlik
 
-- L1 (güvenlik): 5 yıl
-- L2 (uyumluluk): 3 yıl
-- L3 (operasyonel): 1 yıl
-- Zamanlama: her ayın 1'inde saat 03:00 (`cleanup_expired_audit_logs` görevi)
+- L1 (güvenlik), L2 (uyumluluk), L3 (operasyonel): olay **sınıflandırma** seviyeleri (saklama referansı: 5/3/1 yıl)
+- **Silme görevi yok**: denetim günlüğü yalnızca-ekleme/değişmezdir. PostgreSQL tetikleyicisi UPDATE ve DELETE'i reddeder, dolayısıyla silme yoluyla saklama yoktur (kural #4). Saklama fiilen kalıcıdır; `AUDIT_RETENTION` değerleri (settings) yalnızca sınıflandırma meta verileridir.
 
 ---
 
@@ -870,8 +868,8 @@ python manage.py verify_audit_trail_integrity
 # İlk bozuk kaydı bulur
 python manage.py verify_audit_trail_integrity --verbose
 
-# Gece görevi (Celery Beat — zaten yapılandırıldı)
-# Zincir kırıksa uyarı gönderir
+# İsteğe bağlı veya cron ile çalıştırın (varsayılan olarak zamanlanmış beat görevi yok)
+# Zincir kırıksa sıfırdan farklı bir kodla çıkar
 ```
 
 ---

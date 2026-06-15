@@ -73,7 +73,7 @@ Tutte le operazioni (creazione asset, apertura incidenti, valutazione controlli)
 2. Seleziona la lingua desiderata: **Italiano**, **English**, **Français**, **Polski**, **Türkçe**
 3. L'interfaccia si aggiorna immediatamente senza ricaricare la pagina
 
-La lingua selezionata si applica a tutta l'interfaccia. I report PDF generati utilizzano la lingua attiva al momento della generazione.
+La lingua selezionata si applica a tutta l'interfaccia. I report e gli export generati utilizzano la lingua attiva al momento della generazione.
 
 ### Menu laterale: sezioni principali e cosa contengono
 
@@ -685,12 +685,16 @@ Per ogni punto all'ordine del giorno:
 
 Le decisioni con responsabile e scadenza vengono automaticamente trasformate in task in M08 e, se strutturali, in cicli PDCA in M11.
 
-### Chiusura e approvazione
+### Snapshot dei dati, chiusura e approvazione
 
-1. Dopo aver completato tutti i punti obbligatori clicca **Invia per approvazione**
-2. Il Plant Manager riceve un task di approvazione
-3. Una volta approvata, la revisione diventa immutabile
-4. Viene generato automaticamente il verbale in PDF firmato con hash e timestamp, disponibile nella sezione **Documenti generati** della revisione
+Il riesame ruota attorno a uno **snapshot congelato** dei dati GRC al momento della riunione:
+
+1. Avvia la riunione: lo stato passa a **In corso**
+2. Clicca **Genera snapshot dati**: i KPI (rischi per livello e per owner, incidenti degli ultimi 12 mesi, PDCA aperti e bloccati) vengono fotografati in quel momento e non cambieranno più. Lo snapshot è **prerequisito obbligatorio** per l'approvazione
+3. Presenta i dati in riunione e registra le decisioni come azioni (owner + scadenza)
+4. Segna la riunione come **Completata**
+5. Clicca **Approva** e inserisci la nota formale di approvazione (richiede lo snapshot già generato). Una volta approvata, la revisione diventa immutabile
+6. Scarica la **relazione CISO in formato HTML** (stampabile/archiviabile) dal pulsante report — il download viene registrato nell'audit trail
 
 ---
 
@@ -806,10 +810,10 @@ Le scadenze di risposta sono calcolate automaticamente dalla data di apertura de
 #### Come scaricare la relazione audit
 
 Dall'audit in corso o chiuso:
-1. Clicca il pulsante **Report** (icona PDF) in alto a destra nella pagina dell'audit
+1. Clicca il pulsante **Report** in alto a destra nella pagina dell'audit
 2. Scegli la lingua del report
-3. Il sistema genera un PDF con: riepilogo copertura, lista finding per tipo, stato di chiusura, trend rispetto all'audit precedente
-4. Il PDF e' disponibile immediatamente per il download
+3. Il sistema genera un report **HTML** con: riepilogo copertura, lista finding per tipo, stato di chiusura, trend rispetto all'audit precedente
+4. Il report e' disponibile immediatamente per il download (stampabile/archiviabile)
 
 ---
 
@@ -1302,12 +1306,12 @@ Vai su **Audit → Reporting**. Trovi tre livelli di dashboard:
 - **Risk**: heat map aggregata, top 10 rischi aperti
 - **Executive**: compliance %, trend maturita' PDCA, readiness audit
 
-### Generare un report PDF
+### Generare un report
 
 1. Seleziona il tipo di report (gap TISAX, compliance NIS2, SOA ISO 27001, BIA executive)
 2. Scegli il plant e il periodo
 3. Seleziona la lingua del report
-4. Clicca **Genera** — il PDF viene firmato con timestamp e hash
+4. Clicca **Genera** — il report viene prodotto nel formato previsto: **HTML** per i report di sintesi, **CSV/Excel** per gli export tabellari (SOA, VDA ISA, NIS2 matrix)
 5. Il report e' disponibile per il download nella sezione **Report generati**
 
 Tutti i report generati sono registrati nell'audit trail.

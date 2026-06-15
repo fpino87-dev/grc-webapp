@@ -73,7 +73,7 @@ Wszystkie operacje (tworzenie aktywów, otwieranie incydentów, ocena kontroli) 
 2. Wybierz żądany język: **Italiano**, **English**, **Français**, **Polski**, **Türkçe**
 3. Interfejs aktualizuje się natychmiast bez przeładowania strony
 
-Wybrany język obowiązuje w całym interfejsie. Raporty PDF generowane są w języku aktywnym w momencie generowania.
+Wybrany język obowiązuje w całym interfejsie. Raporty i eksporty generowane są w języku aktywnym w momencie generowania.
 
 ### Menu boczne: główne sekcje i ich zawartość
 
@@ -685,12 +685,16 @@ Dla każdego punktu porządku obrad:
 
 Decyzje z odpowiedzialnym i terminem są automatycznie przekształcane w zadania w M08 i, jeśli strukturalne, w cykle PDCA w M11.
 
-### Zamknięcie i zatwierdzenie
+### Snapshot danych, zamknięcie i zatwierdzenie
 
-1. Po uzupełnieniu wszystkich obowiązkowych punktów kliknij **Wyślij do zatwierdzenia**
-2. Plant Manager otrzymuje zadanie zatwierdzenia
-3. Po zatwierdzeniu przegląd staje się niezmienny
-4. Automatycznie generowany jest protokół PDF podpisany hashem i znacznikiem czasu, dostępny w sekcji **Wygenerowane dokumenty** przeglądu
+Przegląd opiera się na **zamrożonym snapshocie** danych GRC w chwili spotkania:
+
+1. Rozpocznij spotkanie: status zmienia się na **W toku**
+2. Kliknij **Generuj snapshot danych**: KPI (ryzyka wg poziomu i właściciela, incydenty z ostatnich 12 miesięcy, otwarte i zablokowane PDCA) zostają uchwycone w tym momencie i już się nie zmienią. Snapshot jest **obowiązkowym warunkiem** zatwierdzenia
+3. Zaprezentuj dane na spotkaniu i zapisz decyzje jako działania (właściciel + termin)
+4. Oznacz spotkanie jako **Zakończone**
+5. Kliknij **Zatwierdź** i wprowadź formalną notatkę zatwierdzenia (wymaga wygenerowanego snapshotu). Po zatwierdzeniu przegląd staje się niezmienny
+6. Pobierz **raport CISO w formacie HTML** (do druku/archiwizacji) z przycisku raportu — pobranie jest rejestrowane w audit trail
 
 ---
 
@@ -806,10 +810,10 @@ Terminy odpowiedzi są obliczane automatycznie od daty otwarcia wyniku na podsta
 #### Jak pobrać raport audytu
 
 Z audytu w toku lub zamkniętego:
-1. Kliknij przycisk **Raport** (ikona PDF) w prawym górnym rogu strony audytu
+1. Kliknij przycisk **Raport** w prawym górnym rogu strony audytu
 2. Wybierz język raportu
-3. System generuje PDF z: podsumowaniem pokrycia, listą wyników według typu, statusem zamknięcia, trendem w porównaniu z poprzednim audytem
-4. PDF jest natychmiast dostępny do pobrania
+3. System generuje raport **HTML** z: podsumowaniem pokrycia, listą wyników według typu, statusem zamknięcia, trendem w porównaniu z poprzednim audytem
+4. Raport jest natychmiast dostępny do pobrania (do druku/archiwizacji)
 
 ---
 
@@ -1302,12 +1306,12 @@ Przejdź do **Audyt → Raportowanie**. Znajdziesz trzy poziomy pulpitów:
 - **Ryzyko**: zagregowana mapa ciepła, 10 największych otwartych ryzyk
 - **Wykonawczy**: compliance %, trend dojrzałości PDCA, gotowość do audytu
 
-### Generowanie raportu PDF
+### Generowanie raportu
 
 1. Wybierz typ raportu (luka TISAX, compliance NIS2, SOA ISO 27001, BIA wykonawczy)
 2. Wybierz plant i okres
 3. Wybierz język raportu
-4. Kliknij **Generuj** — PDF jest podpisywany znacznikiem czasu i hashem
+4. Kliknij **Generuj** — raport jest tworzony w odpowiednim formacie: **HTML** dla raportów zbiorczych, **CSV/Excel** dla eksportów tabelarycznych (SOA, VDA ISA, macierz NIS2)
 5. Raport jest dostępny do pobrania w sekcji **Wygenerowane raporty**
 
 Wszystkie wygenerowane raporty są rejestrowane w śladzie audytu.

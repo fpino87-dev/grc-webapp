@@ -445,7 +445,7 @@ Proprietà chiave dell'AuditLog:
 - Hash chain SHA-256: ogni record ha `prev_hash` + `record_hash`
 - Trigger PostgreSQL impedisce UPDATE/DELETE
 - `select_for_update()` in `_get_prev_hash()` per prevenire race condition
-- Livelli L1/L2/L3 con retention 5/3/1 anni
+- Livelli L1/L2/L3 di classificazione (riferimento 5/3/1 anni); log permanente/immutabile, nessuna cancellazione automatica
 - Verifica: `python manage.py verify_audit_trail_integrity`
 
 ### ControlInstance
@@ -821,12 +821,10 @@ safe_text = Sanitizer.sanitize(raw_text)
 # SEMPRE usare prima di inviare a cloud LLM
 ```
 
-### Retention automatica audit log
+### Retention e immutabilità dell'audit log
 
-- L1 (sicurezza): 5 anni
-- L2 (compliance): 3 anni
-- L3 (operativo): 1 anno
-- Schedulato: 1° del mese alle 03:00 (task `cleanup_expired_audit_logs`)
+- L1 (sicurezza), L2 (compliance), L3 (operativo): livelli di **classificazione** degli eventi (riferimento di conservazione: 5/3/1 anni)
+- **Nessun task di cancellazione**: l'audit log è append-only/immutabile. Il trigger PostgreSQL rifiuta UPDATE e DELETE, quindi non esiste retention-by-deletion (regola #4). La conservazione è di fatto permanente; i valori in `AUDIT_RETENTION` (settings) sono solo metadati di classificazione.
 
 ---
 
@@ -871,8 +869,8 @@ python manage.py verify_audit_trail_integrity
 # Trova il primo record corrotto
 python manage.py verify_audit_trail_integrity --verbose
 
-# Job notturno (Celery Beat — già configurato)
-# Invia alert se catena rotta
+# Eseguire su richiesta o via cron (nessun task beat schedulato di default)
+# Esce con codice diverso da zero se la catena è rotta
 ```
 
 ---
