@@ -771,7 +771,7 @@ SIMPLE_JWT = {
 Il throttling di base usa `AnonRateThrottle` e `UserRateThrottle`:
 
 - `AnonRateThrottle`: 20/h
-- `UserRateThrottle`: 500/h
+- `UserRateThrottle`: 2000/h
 - `LoginRateThrottle`: 5/min (su `GrcTokenObtainPairView`)
 
 Personalizzabile per endpoint sensibili sovrascrivendo `throttle_classes` nel ViewSet.
@@ -824,8 +824,10 @@ anonymize_user(user_id)
 ```python
 from apps.ai_engine.sanitizer import Sanitizer
 
-safe_text = Sanitizer.sanitize(raw_text)
-# Rimuove: email, IP, P.IVA, CF, telefono, nomi plant
+sanitizer = Sanitizer()
+sanitized_context, token_map = sanitizer.sanitize({"text": raw_text}, plant_ids=[plant.id])
+# Anonimizza: email, IP, P.IVA, CF, telefono, nomi/codici plant
+# Restituisce (contesto_sanitizzato, token_map) per la de-anonimizzazione del risultato
 # SEMPRE usare prima di inviare a cloud LLM
 ```
 
@@ -1460,7 +1462,7 @@ La suite pytest (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=7
 - Branch: `feature/M{nn}-descrizione`, `fix/M{nn}-bug-description`, `chore/descrizione`
 - Commit: `feat(M09): aggiungi timer NIS2 con countdown visibile`
 - Un branch = un modulo o una funzionalità coerente
-- Nessun commit diretto su `main` o `develop`
+- Branch dedicati per feature ampie; per fix mirati e documentazione sono ammessi commit diretti su `main` (convenzione del repo)
 
 ### Python / Django
 

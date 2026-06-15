@@ -532,7 +532,7 @@ Jeśli plant jest sklasyfikowany jako podmiot NIS2 (istotny lub ważny), na karc
 - **T+72h — Pełne zgłoszenie**: szczegółowe zgłoszenie z wpływem i podjętymi środkami
 - **T+30 dni — Raport końcowy**: raport końcowy z RCA
 
-CISO ma 30 minut od utworzenia incydentu, aby potwierdzić lub wykluczyć obowiązek zgłoszenia za pomocą przycisku **Wyklucz obowiązek NIS2**. Jeśli nie odpowie w ciągu 30 minut, system zakłada, że zgłoszenie jest wymagane i timery pozostają aktywne.
+Jeśli zakład jest objęty NIS2, incydent startuje jako **do oceny**: CISO musi **potwierdzić** obowiązek zgłoszenia — wówczas ustawiane są terminy T+24h i T+72h — albo go **wykluczyć** z uzasadnieniem. Jeśli incydent pozostaje niesklasyfikowany przez ponad **30 minut**, system wysyła do CISO **alert przypominający** o konieczności klasyfikacji (nie decyduje za niego). Każda decyzja jest rejestrowana w audit trail.
 
 Timery wyświetlane są z czerwonym tłem, gdy pozostały czas jest krótszy niż 2 godziny.
 
@@ -928,6 +928,10 @@ Przejdź do **Ład organizacyjny → Szkolenia → Analiza luk**. Strona pokazuj
 - Podświetlone luki: wymagane kompetencje, ale niezabezpieczone żadnym ukończonym kursem
 
 Compliance Officer może używać tego widoku do planowania sesji szkoleniowych i uzupełniania priorytetowych luk.
+
+### Widoczność wyników (prywatność)
+
+Wyniki indywidualne — ukończenia kursów, wyniki punktowe, a zwłaszcza **rezultaty symulacji phishingu** (kto kliknął) — są danymi osobowymi pracowników. Z tego powodu są dostępne **tylko dla ról governance** (Super Admin, Compliance Officer, Plant Manager) oraz dla **Internal Auditora**; nie są widoczne dla pozostałych ról operacyjnych ani dla Audytora Zewnętrznego. Katalog kursów pozostaje natomiast widoczny dla wszystkich.
 
 ### Synchronizacja KnowBe4 (tylko admin)
 
@@ -1399,7 +1403,7 @@ Sprawdź, czy wybrałeś właściwy plant w selektorze na górze. Jeśli framewo
 Sprawdź, czy dowód jest powiązany z właściwą kontrolą (karta dowodu → sekcja „Objęte kontrole") i czy data wygaśnięcia jeszcze nie minęła.
 
 **Timer NIS2 uruchomił się, ale incydent nie jest naprawdę incydentem NIS2.**
-CISO ma 30 minut na wykluczenie obowiązku zgłoszenia. Jeśli jesteś CISO, otwórz kartę incydentu i kliknij **Wyklucz obowiązek NIS2**, podając uzasadnienie. Timery zatrzymują się, a decyzja jest rejestrowana w śladzie audytu.
+Jeśli jesteś CISO, otwórz kartę incydentu i **wyklucz obowiązek NIS2**, podając uzasadnienie: terminy wygasają, a decyzja jest rejestrowana w audit trail. Dopóki incydent pozostaje „do oceny”, po 30 minutach otrzymasz alert przypominający o jego klasyfikacji.
 
 **Ukończyłem zadanie, ale nadal pojawia się jako otwarte.**
 Niektóre zadania zamykają się automatycznie po zakończeniu akcji w module źródłowym. Jeśli zadanie jest ręczne, musisz je jawnie zamknąć z karty zadania → **Oznacz jako ukończone**.

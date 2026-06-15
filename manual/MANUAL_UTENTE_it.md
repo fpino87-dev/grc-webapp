@@ -532,7 +532,7 @@ Se il plant e' classificato come soggetto NIS2 (essenziale o importante), nella 
 - **T+72h — Notifica completa**: notifica dettagliata con impatto e misure adottate
 - **T+30gg — Report finale**: rapporto conclusivo con RCA
 
-Il CISO ha 30 minuti dalla creazione dell'incidente per confermare o escludere l'obbligo di notifica tramite il pulsante **Escludi obbligo NIS2**. Se non risponde entro 30 minuti il sistema assume che la notifica sia dovuta e i timer rimangono attivi.
+Se il plant è soggetto NIS2 l'incidente parte come **da valutare**: il CISO deve **confermare** l'obbligo di notifica — vengono allora impostate le scadenze T+24h e T+72h — oppure **escluderlo** con motivazione. Se l'incidente resta non classificato per più di **30 minuti**, il sistema invia un **alert di sollecito** al CISO per richiederne la classificazione (non decide al posto suo). Ogni decisione viene registrata nell'audit trail.
 
 I timer vengono visualizzati con sfondo rosso quando il tempo residuo e' inferiore a 2 ore.
 
@@ -928,6 +928,10 @@ Vai su **Governance → Formazione → Gap analysis**. La pagina mostra:
 - I gap evidenziati: competenze richieste ma non ancora coperte da alcun corso completato
 
 Il Compliance Officer puo' usare questa vista per pianificare le sessioni formative e colmare i gap prioritari.
+
+### Visibilità dei risultati (privacy)
+
+I risultati individuali — completamenti, punteggi dei corsi e in particolare gli **esiti delle simulazioni di phishing** (chi ha cliccato) — sono dati personali dei dipendenti. Per questo sono consultabili **solo dai ruoli di governance** (Super Admin, Compliance Officer, Plant Manager) e dall'**Internal Auditor**; non sono visibili agli altri ruoli operativi né all'Auditor Esterno. Il catalogo dei corsi resta invece visibile a tutti.
 
 ### Sincronizzazione KnowBe4 (solo admin)
 
@@ -1399,7 +1403,7 @@ Verifica di aver selezionato il plant corretto nel selettore in alto. Se il fram
 Verifica che l'evidenza sia collegata al controllo corretto (scheda evidenza → sezione "Controlli coperti") e che la data di scadenza non sia gia' passata.
 
 **Il timer NIS2 e' partito ma l'incidente non e' davvero un incidente NIS2.**
-Il CISO ha 30 minuti per escludere l'obbligo di notifica. Se sei il CISO, apri la scheda incidente e clicca **Escludi obbligo NIS2** inserendo la motivazione. I timer si fermano e la decisione viene registrata nell'audit trail.
+Se sei il CISO, apri la scheda incidente ed **escludi l'obbligo NIS2** inserendo la motivazione: le scadenze decadono e la decisione viene registrata nell'audit trail. Finché l'incidente resta "da valutare", dopo 30 minuti ricevi un alert di sollecito alla classificazione.
 
 **Ho completato un task ma continua ad apparire come aperto.**
 Alcuni task si chiudono automaticamente quando l'azione nel modulo origine e' completata. Se il task e' manuale, devi chiuderlo esplicitamente dalla scheda del task → **Segna come completato**.

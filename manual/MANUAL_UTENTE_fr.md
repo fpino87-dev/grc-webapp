@@ -532,7 +532,7 @@ Si le plant est classifié comme sujet NIS2 (essentiel ou important), trois comp
 - **T+72h — Notification complète** : notification détaillée avec impact et mesures adoptées
 - **T+30j — Rapport final** : rapport conclusif avec analyse de cause racine
 
-Le RSSI dispose de 30 minutes à compter de la création de l'incident pour confirmer ou exclure l'obligation de notification via le bouton **Exclure l'obligation NIS2**. S'il ne répond pas dans les 30 minutes, le système suppose que la notification est due et les minuteries restent actives.
+Si le site est dans le périmètre NIS2, l'incident démarre comme **à évaluer** : le RSSI doit soit **confirmer** l'obligation de notification — les échéances T+24h et T+72h sont alors fixées — soit l'**exclure** avec une justification. Si l'incident reste non classé pendant plus de **30 minutes**, le système envoie une **alerte de relance** au RSSI pour en demander la classification (il ne décide pas à sa place). Chaque décision est enregistrée dans l'audit trail.
 
 Les minuteries s'affichent avec un fond rouge lorsque le temps restant est inférieur à 2 heures.
 
@@ -928,6 +928,10 @@ Allez sur **Gouvernance → Formation → Analyse des écarts**. La page affiche
 - Les écarts mis en évidence : compétences requises mais pas encore couvertes par un cours terminé
 
 Le Compliance Officer peut utiliser cette vue pour planifier les sessions de formation et combler les écarts prioritaires.
+
+### Visibilité des résultats (confidentialité)
+
+Les résultats individuels — achèvements de cours, scores et surtout **résultats des simulations de phishing** (qui a cliqué) — sont des données personnelles des employés. Pour cette raison, ils ne sont consultables **que par les rôles de gouvernance** (Super Admin, Compliance Officer, Plant Manager) et par l'**Internal Auditor** ; ils ne sont pas visibles par les autres rôles opérationnels ni par l'Auditeur Externe. Le catalogue des cours, en revanche, reste visible par tous.
 
 ### Synchronisation KnowBe4 (admin uniquement)
 
@@ -1399,7 +1403,7 @@ Vérifiez que vous avez sélectionné le plant correct dans le sélecteur en hau
 Vérifiez que la preuve est liée au bon contrôle (fiche de la preuve → section "Contrôles couverts") et que la date d'expiration n'est pas déjà passée.
 
 **La minuterie NIS2 a démarré mais l'incident n'est pas vraiment un incident NIS2.**
-Le RSSI dispose de 30 minutes pour exclure l'obligation de notification. Si vous êtes le RSSI, ouvrez la fiche de l'incident et cliquez sur **Exclure l'obligation NIS2** en saisissant la justification. Les minuteries s'arrêtent et la décision est enregistrée dans l'audit trail.
+Si vous êtes le RSSI, ouvrez la fiche de l'incident et **excluez l'obligation NIS2** en saisissant la justification : les échéances expirent et la décision est enregistrée dans l'audit trail. Tant que l'incident reste « à évaluer », après 30 minutes vous recevez une alerte de relance pour le classer.
 
 **J'ai complété une tâche mais elle continue d'apparaître comme ouverte.**
 Certaines tâches se ferment automatiquement lorsque l'action dans le module d'origine est complétée. Si la tâche est manuelle, vous devez la fermer explicitement depuis la fiche de la tâche → **Marquer comme terminée**.

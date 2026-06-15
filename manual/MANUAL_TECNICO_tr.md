@@ -770,7 +770,7 @@ SIMPLE_JWT = {
 Temel hız sınırlama `AnonRateThrottle` ve `UserRateThrottle` kullanır:
 
 - `AnonRateThrottle`: 20/sa
-- `UserRateThrottle`: 500/sa
+- `UserRateThrottle`: 2000/sa
 - `LoginRateThrottle`: 5/dk (`GrcTokenObtainPairView` üzerinde)
 
 ViewSet'te `throttle_classes` geçersiz kılınarak hassas endpoint'ler için özelleştirilebilir.
@@ -823,8 +823,10 @@ anonymize_user(user_id)
 ```python
 from apps.ai_engine.sanitizer import Sanitizer
 
-safe_text = Sanitizer.sanitize(raw_text)
-# Kaldırır: e-posta, IP, VAT no, vergi no, telefon, tesis adları
+sanitizer = Sanitizer()
+sanitized_context, token_map = sanitizer.sanitize({"text": raw_text}, plant_ids=[plant.id])
+# Anonimleştirir: e-posta, IP, VAT no, vergi no, telefon, tesis adları/kodları
+# Sonucun geri-anonimleştirilmesi için (sanitized_context, token_map) döndürür
 # Bulut LLM'ye göndermeden önce DAIMA kullanın
 ```
 
@@ -1459,7 +1461,7 @@ pytest paketi (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=70`
 - Branch: `feature/M{nn}-açıklama`, `fix/M{nn}-hata-açıklaması`, `chore/açıklama`
 - Commit: `feat(M09): NIS2 zamanlayıcısını görünür geri sayımla ekle`
 - Bir branch = bir modül veya tutarlı bir özellik
-- `main` veya `develop`'a doğrudan commit yok
+- Büyük özellikler için ayrı branch'ler; hedefli düzeltmeler ve dokümantasyon için `main`'e doğrudan commit'e izin verilir (repo kuralı)
 
 ### Python / Django
 

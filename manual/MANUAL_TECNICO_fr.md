@@ -770,7 +770,7 @@ SIMPLE_JWT = {
 La limitation de débit de base utilise `AnonRateThrottle` et `UserRateThrottle` :
 
 - `AnonRateThrottle` : 20/h
-- `UserRateThrottle` : 500/h
+- `UserRateThrottle` : 2000/h
 - `LoginRateThrottle` : 5/min (sur `GrcTokenObtainPairView`)
 
 Personnalisable pour les endpoints sensibles en surchargeant `throttle_classes` dans le ViewSet.
@@ -823,8 +823,10 @@ anonymize_user(user_id)
 ```python
 from apps.ai_engine.sanitizer import Sanitizer
 
-safe_text = Sanitizer.sanitize(raw_text)
-# Supprime : email, IP, numéro de TVA, code fiscal, téléphone, noms de plants
+sanitizer = Sanitizer()
+sanitized_context, token_map = sanitizer.sanitize({"text": raw_text}, plant_ids=[plant.id])
+# Anonymise : email, IP, numéro de TVA, code fiscal, téléphone, noms/codes de plants
+# Retourne (sanitized_context, token_map) pour la désanonymisation du résultat
 # TOUJOURS utiliser avant d'envoyer au LLM cloud
 ```
 
@@ -1459,7 +1461,7 @@ La suite pytest (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=7
 - Branches : `feature/M{nn}-description`, `fix/M{nn}-bug-description`, `chore/description`
 - Commits : `feat(M09): ajoute le timer NIS2 avec compte à rebours visible`
 - Une branche = un module ou une fonctionnalité cohérente
-- Aucun commit direct sur `main` ou `develop`
+- Branches dédiées pour les grandes fonctionnalités ; pour les corrections ciblées et la documentation, les commits directs sur `main` sont autorisés (convention du repo)
 
 ### Python / Django
 

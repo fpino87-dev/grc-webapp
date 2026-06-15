@@ -532,7 +532,7 @@ If the plant is classified as a NIS2 subject (essential or important), three cou
 - **T+72h — Full notification**: detailed notification with impact and measures adopted
 - **T+30d — Final report**: conclusive report with RCA
 
-The CISO has 30 minutes from incident creation to confirm or exclude the notification obligation via the **Exclude NIS2 obligation** button. If there is no response within 30 minutes, the system assumes the notification is required and the timers remain active.
+If the plant is in NIS2 scope, the incident starts as **to be assessed**: the CISO must either **confirm** the notification obligation — the T+24h and T+72h deadlines are then set — or **exclude** it with a reason. If the incident remains unclassified for more than **30 minutes**, the system sends a **reminder alert** to the CISO asking for classification (it does not decide on their behalf). Every decision is recorded in the audit trail.
 
 The timers are displayed with a red background when the remaining time is less than 2 hours.
 
@@ -928,6 +928,10 @@ Go to **Governance → Training → Gap analysis**. The page shows:
 - Highlighted gaps: required competencies not yet covered by any completed course
 
 The Compliance Officer can use this view to plan training sessions and address priority gaps.
+
+### Results visibility (privacy)
+
+Individual results — course completions, scores and especially **phishing simulation outcomes** (who clicked) — are employees' personal data. For this reason they can be viewed **only by governance roles** (Super Admin, Compliance Officer, Plant Manager) and by the **Internal Auditor**; they are not visible to other operational roles or to the External Auditor. The course catalogue, on the other hand, remains visible to everyone.
 
 ### KnowBe4 synchronisation (admin only)
 
@@ -1399,7 +1403,7 @@ Check that you have selected the correct plant in the selector at the top. If th
 Check that the evidence is linked to the correct control (evidence record → "Controls covered" section) and that the expiry date has not already passed.
 
 **The NIS2 timer has started but the incident is not really a NIS2 incident.**
-The CISO has 30 minutes to exclude the notification obligation. If you are the CISO, open the incident record and click **Exclude NIS2 obligation** entering the reason. The timers stop and the decision is recorded in the audit trail.
+If you are the CISO, open the incident record and **exclude the NIS2 obligation** entering the reason: the deadlines lapse and the decision is recorded in the audit trail. While the incident remains 'to be assessed', after 30 minutes you receive a reminder alert to classify it.
 
 **I completed a task but it keeps appearing as open.**
 Some tasks close automatically when the action in the originating module is completed. If the task is manual, you must close it explicitly from the task record → **Mark as completed**.
