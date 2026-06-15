@@ -6,6 +6,7 @@ import { usersApi, type GrcUser } from "../../api/endpoints/users";
 import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
+import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
 
 // ── Labels ──────────────────────────────────────────────────────────────────
@@ -560,6 +561,7 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
 // ── ManagementReviewPage ──────────────────────────────────────────────────────
 
 export function ManagementReviewPage() {
+  const { t } = useTranslation();
   const [showNew, setShowNew] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -605,26 +607,24 @@ export function ManagementReviewPage() {
         <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-1">
           Governance — Revisione Direzione
           <ModuleHelp
-            title="Revisione di Direzione — M13"
-            description="Gestisce il riesame periodico del management ISMS.
-Genera uno snapshot congelato dei dati GRC al momento della riunione
-e produce la relazione formale del CISO scaricabile."
+            title={t("management_review.help.title")}
+            description={t("management_review.help.description")}
             steps={[
-              "Crea la revisione con titolo, plant e data riunione",
-              "Avvia la riunione per passare lo stato in 'In corso'",
-              "Premi 'Genera snapshot dati': i KPI vengono congelati in quel momento",
-              "Presenta i dati in riunione — lo snapshot non cambierà più",
-              "Le delibere vengono registrate come azioni con owner e scadenza",
-              "Segna la riunione come completata",
-              "Approva il riesame con nota formale",
-              "Scarica la relazione CISO in HTML (stampabile/archiviabile)",
+              t("management_review.help.steps.1"),
+              t("management_review.help.steps.2"),
+              t("management_review.help.steps.3"),
+              t("management_review.help.steps.4"),
+              t("management_review.help.steps.5"),
+              t("management_review.help.steps.6"),
+              t("management_review.help.steps.7"),
+              t("management_review.help.steps.8"),
             ]}
             connections={[
-              { module: "M06 Risk", relation: "Rischi per livello e per owner nello snapshot" },
-              { module: "M09 Incidenti", relation: "Incidenti ultimi 12 mesi nello snapshot" },
-              { module: "M11 PDCA", relation: "PDCA aperti e bloccati nello snapshot" },
+              { module: "M06 Risk", relation: t("management_review.help.connections.risk") },
+              { module: "M09 Incidenti", relation: t("management_review.help.connections.incidents") },
+              { module: "M11 PDCA", relation: t("management_review.help.connections.pdca") },
             ]}
-            configNeeded={["Nominare il CISO come chair in M00 Governance"]}
+            configNeeded={[t("management_review.help.config_needed.1")]}
           />
         </h2>
         <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700">

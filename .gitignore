@@ -77,3 +77,6 @@ backend/exports/
 
 # Fascicolo di conformità: deliverable privato, non nel repo pubblico
 compliance/
+
+# Report di lavoro review documentazione: nota interna, non versionare
+DOC_GAP_REPORT.md

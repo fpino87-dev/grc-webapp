@@ -347,7 +347,32 @@
     "edit_and_use": "Edytuj i użyj",
     "save_edits": "Zapisz zmiany",
     "ignore": "Ignoruj",
-    "ai_badge": "AI"
+    "ai_badge": "AI",
+    "help": {
+      "title": "govrico AI — M20",
+      "description": "Konfiguruje dostawcę AI używanego przez wszystkie moduły platformy (klasyfikacja incydentów, gap analysis, RCA, chatbot, generowanie dokumentów, analiza OSINT).",
+      "steps": {
+        "1": "Wybierz dostawcę Cloud (Anthropic/OpenAI) lub lokalnego (Ollama).",
+        "2": "Dla Anthropic: wejdź na console.anthropic.com → API Keys → Create Key. Zalecane modele: claude-haiku-4-5-20251001 (ekonomiczny) lub claude-sonnet-4-6 (wyższa jakość).",
+        "3": "Dla OpenAI: wejdź na platform.openai.com → API Keys → Create new secret key.",
+        "4": "Dla Ollama (lokalnie): zainstaluj Ollama na serwerze, pobierz model poleceniem „ollama pull <model>”, ustaw endpoint.",
+        "5": "Ustaw miesięczny budżet tokenów, aby kontrolować koszty.",
+        "6": "Użyj routingu per-zadanie, aby przypisać różne modele do różnych zadań.",
+        "7": "Kliknij „Testuj”, aby sprawdzić połączenie przed zapisaniem."
+      },
+      "connections": {
+        "controls": "Generuje dokumenty procedur (.docx)",
+        "risk": "Sugestie RCA i działań korygujących",
+        "incidents": "Automatyczna klasyfikacja incydentu",
+        "suppliers": "Sugestia kodów CPV",
+        "osint": "Analiza powierzchni ataku, briefing NIS2, raport zarządu"
+      },
+      "config_needed": {
+        "1": "Klucz API Anthropic: console.anthropic.com → API Keys",
+        "2": "Klucz API OpenAI: platform.openai.com → API Keys",
+        "3": "Ollama (lokalnie): zainstaluj binarkę z ollama.com, klucz API nie jest wymagany"
+      }
+    }
   },
   "controls": {
     "title": "Zgodność — Kontrole",
@@ -2188,7 +2213,29 @@
     "mtpd_placeholder": "np. 48",
     "mbco_placeholder": "np. 70",
     "rto_placeholder": "np. 24",
-    "rpo_placeholder": "np. 4"
+    "rpo_placeholder": "np. 4",
+    "help": {
+      "title": "Business Impact Analysis — M05",
+      "description": "Ocenia ekonomiczny i operacyjny wpływ przestoju każdego procesu krytycznego. Definiuje cele RTO/RPO/MTPD, które sterują BCP i ważą wyliczenie ALE w Risk Assessment.",
+      "steps": {
+        "1": "Utwórz proces krytyczny z odpowiedzialnym właścicielem",
+        "2": "Wprowadź godzinowy koszt przestoju (€) i roczny przychód narażony na ryzyko",
+        "3": "Zdefiniuj MTPD (maks. tolerowane godziny), docelowe RTO i RPO",
+        "4": "Zwaliduj proces (compliance officer)",
+        "5": "Zatwierdź (zarząd) — od tej chwili steruje Risk Assessment",
+        "6": "Risk Assessment użyje downtime_cost do automatycznego wyliczenia ALE",
+        "7": "Zdefiniuj sposoby postępowania (przycisk «Postępowanie») z kosztem i % redukcji ALE → zasilają ROSI w Reporting"
+      },
+      "connections": {
+        "asset": "Zasób powiązany z procesem",
+        "risk": "ALE = downtime_cost × godziny × prawdopodobieństwo",
+        "bcp": "RTO/RPO z BIA walidują i ograniczają plan BCP",
+        "reporting": "ROSI = uniknięte ALE − zannualizowany koszt postępowania"
+      },
+      "config_needed": {
+        "1": "Najpierw utwórz Zakłady (M01) i Zasoby (M04)"
+      }
+    }
   },
   "assets": {
     "criticality_1_label": "Znikomy",
@@ -3451,6 +3498,33 @@
       "reputation": "Reputacja",
       "grc": "GRC",
       "legend": "Zielony 0–29 ok · Żółty 30–49 uwaga · Pomarańczowy 50–69 ostrzeżenie · Czerwony 70+ krytyczny"
+    },
+    "help": {
+      "title": "OSINT Monitor — Klucze API enricherów",
+      "description": "Klucze API włączają dodatkowe wzbogacenia podczas skanów. Wszystkie są opcjonalne: moduł działa również bez nich, używając tylko SSL/DNS/WHOIS (darmowe i bez rejestracji).",
+      "steps": {
+        "1": "HaveIBeenPwned (HIBP) — Wycieki e-mail: haveibeenpwned.com/API/Key → plan płatny (~3,50$/mies.). Tylko dla „Moich domen”.",
+        "2": "VirusTotal — Reputacja domeny/IP: virustotal.com/gui/join-us → plan Free (1000 zap./dzień). Klucz API w „My API Key”.",
+        "3": "AbuseIPDB — Czarna lista IP: abuseipdb.com/register → plan Free (1000 zap./dzień). Klucz API w profilu.",
+        "4": "Google Safe Browsing — Złośliwe adresy URL: console.cloud.google.com → włącz „Safe Browsing API” → Poświadczenia → Klucz API.",
+        "5": "AlienVault OTX — Threat intelligence: otx.alienvault.com → darmowa rejestracja → Profil → OTX Key. Bez kosztów.",
+        "6": "abuse.ch (ThreatFox + URLhaus) — CTI malware/botnet: auth.abuse.ch → darmowa rejestracja → Auth-Key (jeden klucz dla obu kanałów). Bez kosztów."
+      },
+      "connections": {
+        "plants": "Domena główna i dodatkowe monitorowane domeny",
+        "suppliers": "Strona dostawcy → encja OSINT typu supplier",
+        "incidents": "Krytyczne alerty na moich domenach → automatyczny incydent",
+        "tasks": "Alerty o dostawcach → zadanie weryfikacji",
+        "ai": "Analiza AI na zanonimizowanych danych"
+      },
+      "config_needed": {
+        "1": "VirusTotal Free: virustotal.com/gui/join-us",
+        "2": "AbuseIPDB Free: abuseipdb.com/register",
+        "3": "AlienVault OTX Free: otx.alienvault.com (darmowa rejestracja)",
+        "4": "abuse.ch Free: auth.abuse.ch (darmowy Auth-Key dla ThreatFox + URLhaus)",
+        "5": "Google Safe Browsing: console.cloud.google.com (wymagany projekt GCP)",
+        "6": "HaveIBeenPwned: haveibeenpwned.com/API/Key (płatne, ~3,50$/mies.)"
+      }
     }
   },
   "checklists": {
@@ -3812,6 +3886,30 @@
       "disclaimer": "Szkic wygenerowany przez AI — sprawdź przed działaniem.",
       "ask": "Zapytaj",
       "ask_placeholder": "Zapytaj govrico: np. jakie są 3 najpilniejsze problemy?"
+    }
+  },
+  "management_review": {
+    "help": {
+      "title": "Przegląd Zarządzania — M13",
+      "description": "Zarządza okresowym przeglądem zarządzania ISMS. Generuje zamrożony snapshot danych GRC w chwili spotkania i tworzy formalny, pobieralny raport CISO.",
+      "steps": {
+        "1": "Utwórz przegląd z tytułem, zakładem i datą spotkania",
+        "2": "Rozpocznij spotkanie, aby zmienić status na „W toku”",
+        "3": "Kliknij „Generuj snapshot danych”: KPI zostają zamrożone w tym momencie",
+        "4": "Zaprezentuj dane na spotkaniu — snapshot już się nie zmieni",
+        "5": "Uchwały są zapisywane jako działania z właścicielem i terminem",
+        "6": "Oznacz spotkanie jako zakończone",
+        "7": "Zatwierdź przegląd formalną notatką (wymaga wygenerowanego snapshotu)",
+        "8": "Pobierz raport CISO w formacie HTML (do druku/archiwizacji)"
+      },
+      "connections": {
+        "risk": "Ryzyka wg poziomu i właściciela w snapshocie",
+        "incidents": "Incydenty z ostatnich 12 miesięcy w snapshocie",
+        "pdca": "Otwarte i zablokowane PDCA w snapshocie"
+      },
+      "config_needed": {
+        "1": "Wyznacz CISO jako przewodniczącego w M00 Governance"
+      }
     }
   }
 }

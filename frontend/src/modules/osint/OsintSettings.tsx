@@ -132,30 +132,30 @@ export function OsintSettingsPage() {
         <span className="text-gray-300">/</span>
         <h1 className="text-xl font-bold text-gray-900">{t("osint.settings.title")}</h1>
         <ModuleHelp
-          title="OSINT Monitor — Chiavi API enricher"
-          description="Le chiavi API abilitano arricchimenti aggiuntivi durante le scansioni. Tutte sono opzionali: il modulo funziona anche senza, usando solo SSL/DNS/WHOIS (gratuiti e senza registrazione)."
+          title={t("osint.help.title")}
+          description={t("osint.help.description")}
           steps={[
-            "HaveIBeenPwned (HIBP) — Breach email: haveibeenpwned.com/API/Key → piano a pagamento (~3,50$/mese). Solo per 'Miei domini'.",
-            "VirusTotal — Reputazione dominio/IP: virustotal.com/gui/join-us → piano Free (1000 req/giorno). API Key in 'My API Key'.",
-            "AbuseIPDB — Blacklist IP: abuseipdb.com/register → piano Free (1000 req/giorno). API Key nel profilo.",
-            "Google Safe Browsing — URL malevoli: console.cloud.google.com → Abilita 'Safe Browsing API' → Credenziali → Chiave API.",
-            "AlienVault OTX — Threat intelligence: otx.alienvault.com → Registrati gratis → Profilo → OTX Key. Nessun costo.",
-            "abuse.ch (ThreatFox + URLhaus) — CTI malware/botnet: auth.abuse.ch → registrazione gratuita → Auth-Key (unica per entrambi i feed). Nessun costo.",
+            t("osint.help.steps.1"),
+            t("osint.help.steps.2"),
+            t("osint.help.steps.3"),
+            t("osint.help.steps.4"),
+            t("osint.help.steps.5"),
+            t("osint.help.steps.6"),
           ]}
           connections={[
-            { module: "Plants", relation: "Dominio principale e domini aggiuntivi monitorati" },
-            { module: "M14 Fornitori", relation: "Sito web fornitore → entità OSINT tipo supplier" },
-            { module: "M09 Incidenti", relation: "Alert critici su miei domini → incidente automatico" },
-            { module: "M08 Task", relation: "Alert su fornitori → task di verifica" },
-            { module: "govrico AI M20", relation: "Analisi AI con dati anonimizzati" },
+            { module: "Plants", relation: t("osint.help.connections.plants") },
+            { module: "M14 Fornitori", relation: t("osint.help.connections.suppliers") },
+            { module: "M09 Incidenti", relation: t("osint.help.connections.incidents") },
+            { module: "M08 Task", relation: t("osint.help.connections.tasks") },
+            { module: "govrico AI M20", relation: t("osint.help.connections.ai") },
           ]}
           configNeeded={[
-            "VirusTotal Free: virustotal.com/gui/join-us",
-            "AbuseIPDB Free: abuseipdb.com/register",
-            "AlienVault OTX Free: otx.alienvault.com (registrazione gratuita)",
-            "abuse.ch Free: auth.abuse.ch (Auth-Key gratuita per ThreatFox + URLhaus)",
-            "Google Safe Browsing: console.cloud.google.com (serve progetto GCP)",
-            "HaveIBeenPwned: haveibeenpwned.com/API/Key (a pagamento, ~3,50$/mese)",
+            t("osint.help.config_needed.1"),
+            t("osint.help.config_needed.2"),
+            t("osint.help.config_needed.3"),
+            t("osint.help.config_needed.4"),
+            t("osint.help.config_needed.5"),
+            t("osint.help.config_needed.6"),
           ]}
         />
       </div>

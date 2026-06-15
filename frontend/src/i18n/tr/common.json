@@ -347,7 +347,32 @@
     "edit_and_use": "Düzenle ve kullan",
     "save_edits": "Değişiklikleri kaydet",
     "ignore": "Yoksay",
-    "ai_badge": "AI"
+    "ai_badge": "AI",
+    "help": {
+      "title": "govrico AI — M20",
+      "description": "Tüm platform modüllerinin kullandığı AI sağlayıcısını yapılandırır (olay sınıflandırma, gap analysis, RCA, sohbet botu, belge oluşturma, OSINT analizi).",
+      "steps": {
+        "1": "Cloud sağlayıcı (Anthropic/OpenAI) veya yerel (Ollama) seçin.",
+        "2": "Anthropic için: console.anthropic.com → API Keys → Create Key. Önerilen modeller: claude-haiku-4-5-20251001 (ekonomik) veya claude-sonnet-4-6 (daha yüksek kalite).",
+        "3": "OpenAI için: platform.openai.com → API Keys → Create new secret key.",
+        "4": "Ollama (yerel) için: Ollama'yı sunucuya kurun, istediğiniz modeli 'ollama pull <model>' ile indirin, endpoint'i ayarlayın.",
+        "5": "Maliyetleri kontrol etmek için aylık token bütçesini ayarlayın.",
+        "6": "Farklı görevlere farklı modeller atamak için görev bazlı yönlendirmeyi kullanın.",
+        "7": "Kaydetmeden önce bağlantıyı doğrulamak için 'Test et'e tıklayın."
+      },
+      "connections": {
+        "controls": "Prosedür belgeleri (.docx) oluşturur",
+        "risk": "RCA ve düzeltici eylem önerileri",
+        "incidents": "Otomatik olay sınıflandırması",
+        "suppliers": "CPV kodu önerisi",
+        "osint": "Saldırı yüzeyi analizi, NIS2 brifingi, yönetim kurulu raporu"
+      },
+      "config_needed": {
+        "1": "Anthropic API Anahtarı: console.anthropic.com → API Keys",
+        "2": "OpenAI API Anahtarı: platform.openai.com → API Keys",
+        "3": "Ollama (yerel): ikiliyi ollama.com'dan kurun, API anahtarı gerekmez"
+      }
+    }
   },
   "controls": {
     "title": "Uyum — Kontroller",
@@ -2188,7 +2213,29 @@
     "mtpd_placeholder": "örn. 48",
     "mbco_placeholder": "örn. 70",
     "rto_placeholder": "örn. 24",
-    "rpo_placeholder": "örn. 4"
+    "rpo_placeholder": "örn. 4",
+    "help": {
+      "title": "Business Impact Analysis — M05",
+      "description": "Her kritik sürecin durmasının ekonomik ve operasyonel etkisini değerlendirir. BCP'yi yönlendiren ve Risk Assessment'taki ALE hesabını ağırlıklandıran RTO/RPO/MTPD hedeflerini tanımlar.",
+      "steps": {
+        "1": "Sorumlu sahibiyle kritik süreci oluşturun",
+        "2": "Saatlik kesinti maliyetini (€) ve yıllık riske maruz geliri girin",
+        "3": "MTPD (azami tolere edilebilir saat), hedef RTO ve RPO tanımlayın",
+        "4": "Süreci doğrulayın (uyum sorumlusu)",
+        "5": "Onaylayın (yönetim) — bu andan itibaren Risk Assessment'ı yönlendirir",
+        "6": "Risk Assessment, ALE'yi otomatik hesaplamak için downtime_cost değerini kullanır",
+        "7": "Maliyet ve % ALE azaltımı ile işlemleri tanımlayın («İşlemler» düğmesi) → Reporting'deki ROSI'yi besler"
+      },
+      "connections": {
+        "asset": "Sürece bağlı varlık",
+        "risk": "ALE = downtime_cost × saat × olasılık",
+        "bcp": "BIA'nın RTO/RPO değerleri BCP planını doğrular ve sınırlandırır",
+        "reporting": "ROSI = önlenen ALE − yıllıklandırılmış işlem maliyeti"
+      },
+      "config_needed": {
+        "1": "Önce Tesisleri (M01) ve Varlıkları (M04) oluşturun"
+      }
+    }
   },
   "assets": {
     "criticality_1_label": "İhmal edilebilir",
@@ -3451,6 +3498,33 @@
       "reputation": "İtibar",
       "grc": "GRC",
       "legend": "Yeşil 0–29 iyi · Sarı 30–49 dikkat · Turuncu 50–69 uyarı · Kırmızı 70+ kritik"
+    },
+    "help": {
+      "title": "OSINT Monitor — Zenginleştirici API anahtarları",
+      "description": "API anahtarları tarama sırasında ek zenginleştirmeleri etkinleştirir. Hepsi isteğe bağlıdır: modül bunlar olmadan da yalnızca SSL/DNS/WHOIS (ücretsiz ve kayıt gerektirmez) kullanarak çalışır.",
+      "steps": {
+        "1": "HaveIBeenPwned (HIBP) — E-posta ihlali: haveibeenpwned.com/API/Key → ücretli plan (~3,50$/ay). Yalnızca 'Kendi alan adlarım' için.",
+        "2": "VirusTotal — Alan adı/IP itibarı: virustotal.com/gui/join-us → Ücretsiz plan (1000 istek/gün). API Anahtarı 'My API Key' altında.",
+        "3": "AbuseIPDB — IP kara listesi: abuseipdb.com/register → Ücretsiz plan (1000 istek/gün). API Anahtarı profilde.",
+        "4": "Google Safe Browsing — Kötü amaçlı URL'ler: console.cloud.google.com → 'Safe Browsing API'yi etkinleştir → Kimlik bilgileri → API Anahtarı.",
+        "5": "AlienVault OTX — Tehdit istihbaratı: otx.alienvault.com → ücretsiz kayıt → Profil → OTX Key. Ücretsiz.",
+        "6": "abuse.ch (ThreatFox + URLhaus) — Kötü amaçlı yazılım/botnet CTI: auth.abuse.ch → ücretsiz kayıt → Auth-Key (her iki akış için tek anahtar). Ücretsiz."
+      },
+      "connections": {
+        "plants": "Ana alan adı ve izlenen ek alan adları",
+        "suppliers": "Tedarikçi web sitesi → supplier tipi OSINT varlığı",
+        "incidents": "Kendi alan adlarımdaki kritik uyarılar → otomatik olay",
+        "tasks": "Tedarikçilere ilişkin uyarılar → doğrulama görevi",
+        "ai": "Anonimleştirilmiş verilerle AI analizi"
+      },
+      "config_needed": {
+        "1": "VirusTotal Free: virustotal.com/gui/join-us",
+        "2": "AbuseIPDB Free: abuseipdb.com/register",
+        "3": "AlienVault OTX Free: otx.alienvault.com (ücretsiz kayıt)",
+        "4": "abuse.ch Free: auth.abuse.ch (ThreatFox + URLhaus için ücretsiz Auth-Key)",
+        "5": "Google Safe Browsing: console.cloud.google.com (bir GCP projesi gerekir)",
+        "6": "HaveIBeenPwned: haveibeenpwned.com/API/Key (ücretli, ~3,50$/ay)"
+      }
     }
   },
   "checklists": {
@@ -3812,6 +3886,30 @@
       "disclaimer": "AI tarafından üretilen taslak — harekete geçmeden önce doğrulayın.",
       "ask": "Sor",
       "ask_placeholder": "govrico'ya sor: örn. en acil 3 sorun nedir?"
+    }
+  },
+  "management_review": {
+    "help": {
+      "title": "Yönetimin Gözden Geçirmesi — M13",
+      "description": "Periyodik ISMS yönetim gözden geçirmesini yönetir. Toplantı anındaki GRC verilerinin dondurulmuş bir anlık görüntüsünü oluşturur ve indirilebilir resmi CISO raporunu üretir.",
+      "steps": {
+        "1": "Başlık, tesis ve toplantı tarihiyle gözden geçirmeyi oluşturun",
+        "2": "Durumu 'Devam ediyor'a almak için toplantıyı başlatın",
+        "3": "'Veri anlık görüntüsü oluştur'a tıklayın: KPI'lar o anda dondurulur",
+        "4": "Verileri toplantıda sunun — anlık görüntü artık değişmez",
+        "5": "Kararlar, sahip ve son tarihle eylem olarak kaydedilir",
+        "6": "Toplantıyı tamamlandı olarak işaretleyin",
+        "7": "Gözden geçirmeyi resmi notla onaylayın (anlık görüntü oluşturulmuş olmalı)",
+        "8": "CISO raporunu HTML olarak indirin (yazdırılabilir/arşivlenebilir)"
+      },
+      "connections": {
+        "risk": "Anlık görüntüde seviyeye ve sahibe göre riskler",
+        "incidents": "Anlık görüntüde son 12 ayın olayları",
+        "pdca": "Anlık görüntüde açık ve bloke PDCA"
+      },
+      "config_needed": {
+        "1": "M00 Governance'ta CISO'yu başkan olarak atayın"
+      }
     }
   }
 }

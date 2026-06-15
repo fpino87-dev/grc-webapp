@@ -65,7 +65,32 @@
     "edit_and_use": "Edit and use",
     "save_edits": "Save edits",
     "ignore": "Ignore",
-    "ai_badge": "AI"
+    "ai_badge": "AI",
+    "help": {
+      "title": "govrico AI — M20",
+      "description": "Configures the AI provider used by all platform modules (incident classification, gap analysis, RCA, chatbot, document generation, OSINT analysis).",
+      "steps": {
+        "1": "Choose a Cloud provider (Anthropic/OpenAI) or local (Ollama).",
+        "2": "For Anthropic: go to console.anthropic.com → API Keys → Create Key. Recommended models: claude-haiku-4-5-20251001 (cheap) or claude-sonnet-4-6 (higher quality).",
+        "3": "For OpenAI: go to platform.openai.com → API Keys → Create new secret key.",
+        "4": "For Ollama (local): install Ollama on the server, pull the desired model with 'ollama pull <model>', set the endpoint.",
+        "5": "Set the monthly token budget to control costs.",
+        "6": "Use per-task routing to assign different models to different tasks.",
+        "7": "Click 'Test' to verify the connection before saving."
+      },
+      "connections": {
+        "controls": "Generates procedure documents (.docx)",
+        "risk": "RCA and corrective-action suggestions",
+        "incidents": "Automatic incident classification",
+        "suppliers": "CPV code suggestion",
+        "osint": "Attack-surface analysis, NIS2 briefing, board report"
+      },
+      "config_needed": {
+        "1": "Anthropic API Key: console.anthropic.com → API Keys",
+        "2": "OpenAI API Key: platform.openai.com → API Keys",
+        "3": "Ollama (local): install the binary from ollama.com, no API key required"
+      }
+    }
   },
   "countdown": {
     "expired": "EXPIRED"
@@ -2109,7 +2134,29 @@
     "mtpd_placeholder": "e.g. 48",
     "mbco_placeholder": "e.g. 70",
     "rto_placeholder": "e.g. 24",
-    "rpo_placeholder": "e.g. 4"
+    "rpo_placeholder": "e.g. 4",
+    "help": {
+      "title": "Business Impact Analysis — M05",
+      "description": "Assesses the economic and operational impact of each critical process being down. Defines the RTO/RPO/MTPD targets that drive the BCP and weight the ALE calculation in the Risk Assessment.",
+      "steps": {
+        "1": "Create the critical process with a responsible owner",
+        "2": "Enter the hourly downtime cost (€) and the annual revenue at risk",
+        "3": "Define MTPD (maximum tolerable hours), RTO and RPO targets",
+        "4": "Validate the process (compliance officer)",
+        "5": "Approve (management) — from now on it drives the Risk Assessment",
+        "6": "The Risk Assessment will use downtime_cost to compute the ALE automatically",
+        "7": "Define treatments («Treatments» button) with cost and % ALE reduction → they feed the ROSI in Reporting"
+      },
+      "connections": {
+        "asset": "Asset linked to the process",
+        "risk": "ALE = downtime_cost × hours × probability",
+        "bcp": "BIA RTO/RPO validate and constrain the BCP plan",
+        "reporting": "ROSI = avoided ALE − annualised treatment cost"
+      },
+      "config_needed": {
+        "1": "Create the Plants (M01) and Assets (M04) first"
+      }
+    }
   },
   "assets": {
     "criticality_1_label": "Negligible",
@@ -3372,6 +3419,33 @@
       "reputation": "Reputation",
       "grc": "GRC",
       "legend": "Green 0–29 ok · Yellow 30–49 attention · Orange 50–69 warning · Red 70+ critical"
+    },
+    "help": {
+      "title": "OSINT Monitor — Enricher API keys",
+      "description": "API keys enable extra enrichments during scans. All are optional: the module also works without them, using only SSL/DNS/WHOIS (free and no registration).",
+      "steps": {
+        "1": "HaveIBeenPwned (HIBP) — Email breach: haveibeenpwned.com/API/Key → paid plan (~$3.50/month). Only for 'My domains'.",
+        "2": "VirusTotal — Domain/IP reputation: virustotal.com/gui/join-us → Free plan (1000 req/day). API Key under 'My API Key'.",
+        "3": "AbuseIPDB — IP blacklist: abuseipdb.com/register → Free plan (1000 req/day). API Key in your profile.",
+        "4": "Google Safe Browsing — Malicious URLs: console.cloud.google.com → enable 'Safe Browsing API' → Credentials → API Key.",
+        "5": "AlienVault OTX — Threat intelligence: otx.alienvault.com → register for free → Profile → OTX Key. No cost.",
+        "6": "abuse.ch (ThreatFox + URLhaus) — Malware/botnet CTI: auth.abuse.ch → free registration → Auth-Key (single key for both feeds). No cost."
+      },
+      "connections": {
+        "plants": "Primary domain and additional monitored domains",
+        "suppliers": "Supplier website → OSINT entity of type supplier",
+        "incidents": "Critical alerts on my domains → automatic incident",
+        "tasks": "Alerts on suppliers → verification task",
+        "ai": "AI analysis on anonymised data"
+      },
+      "config_needed": {
+        "1": "VirusTotal Free: virustotal.com/gui/join-us",
+        "2": "AbuseIPDB Free: abuseipdb.com/register",
+        "3": "AlienVault OTX Free: otx.alienvault.com (free registration)",
+        "4": "abuse.ch Free: auth.abuse.ch (free Auth-Key for ThreatFox + URLhaus)",
+        "5": "Google Safe Browsing: console.cloud.google.com (a GCP project is required)",
+        "6": "HaveIBeenPwned: haveibeenpwned.com/API/Key (paid, ~$3.50/month)"
+      }
     }
   },
   "checklists": {
@@ -3733,6 +3807,30 @@
       "disclaimer": "AI-generated draft — review before acting.",
       "ask": "Ask",
       "ask_placeholder": "Ask govrico: e.g. what are the 3 most urgent problems?"
+    }
+  },
+  "management_review": {
+    "help": {
+      "title": "Management Review — M13",
+      "description": "Manages the periodic ISMS management review. Generates a frozen snapshot of GRC data at the time of the meeting and produces the formal, downloadable CISO report.",
+      "steps": {
+        "1": "Create the review with title, plant and meeting date",
+        "2": "Start the meeting to move the status to 'In progress'",
+        "3": "Click 'Generate data snapshot': the KPIs are frozen at that moment",
+        "4": "Present the data in the meeting — the snapshot will no longer change",
+        "5": "Resolutions are recorded as actions with owner and due date",
+        "6": "Mark the meeting as completed",
+        "7": "Approve the review with a formal note (requires the snapshot to be generated)",
+        "8": "Download the CISO report as HTML (printable/archivable)"
+      },
+      "connections": {
+        "risk": "Risks by level and by owner in the snapshot",
+        "incidents": "Incidents from the last 12 months in the snapshot",
+        "pdca": "Open and blocked PDCA in the snapshot"
+      },
+      "config_needed": {
+        "1": "Appoint the CISO as chair in M00 Governance"
+      }
     }
   }
 }

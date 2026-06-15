@@ -347,7 +347,32 @@
     "edit_and_use": "Modifier et utiliser",
     "save_edits": "Enregistrer les modifications",
     "ignore": "Ignorer",
-    "ai_badge": "IA"
+    "ai_badge": "IA",
+    "help": {
+      "title": "govrico AI — M20",
+      "description": "Configure le fournisseur IA utilisé par tous les modules de la plateforme (classification des incidents, gap analysis, RCA, chatbot, génération de documents, analyse OSINT).",
+      "steps": {
+        "1": "Choisissez un fournisseur Cloud (Anthropic/OpenAI) ou local (Ollama).",
+        "2": "Pour Anthropic : allez sur console.anthropic.com → API Keys → Create Key. Modèles recommandés : claude-haiku-4-5-20251001 (économique) ou claude-sonnet-4-6 (qualité supérieure).",
+        "3": "Pour OpenAI : allez sur platform.openai.com → API Keys → Create new secret key.",
+        "4": "Pour Ollama (local) : installez Ollama sur le serveur, téléchargez le modèle voulu avec « ollama pull <modèle> », définissez l'endpoint.",
+        "5": "Définissez le budget mensuel de tokens pour maîtriser les coûts.",
+        "6": "Utilisez le routage par tâche pour affecter des modèles différents à des tâches différentes.",
+        "7": "Cliquez sur « Tester » pour vérifier la connexion avant d'enregistrer."
+      },
+      "connections": {
+        "controls": "Génère des documents de procédure (.docx)",
+        "risk": "Suggestions de RCA et d'actions correctives",
+        "incidents": "Classification automatique des incidents",
+        "suppliers": "Suggestion de codes CPV",
+        "osint": "Analyse de la surface d'attaque, briefing NIS2, rapport board"
+      },
+      "config_needed": {
+        "1": "Clé API Anthropic : console.anthropic.com → API Keys",
+        "2": "Clé API OpenAI : platform.openai.com → API Keys",
+        "3": "Ollama (local) : installer le binaire depuis ollama.com, aucune clé API requise"
+      }
+    }
   },
   "controls": {
     "title": "Conformité — Contrôles",
@@ -2188,7 +2213,29 @@
     "mtpd_placeholder": "ex. 48",
     "mbco_placeholder": "ex. 70",
     "rto_placeholder": "ex. 24",
-    "rpo_placeholder": "ex. 4"
+    "rpo_placeholder": "ex. 4",
+    "help": {
+      "title": "Business Impact Analysis — M05",
+      "description": "Évalue l'impact économique et opérationnel de l'arrêt de chaque processus critique. Définit les cibles RTO/RPO/MTPD qui guident le PCA et pondèrent le calcul de l'ALE dans le Risk Assessment.",
+      "steps": {
+        "1": "Créez le processus critique avec un responsable",
+        "2": "Saisissez le coût horaire d'arrêt (€) et le chiffre d'affaires annuel exposé",
+        "3": "Définissez le MTPD (heures maximales tolérables), le RTO et le RPO cibles",
+        "4": "Validez le processus (responsable conformité)",
+        "5": "Approuvez (direction) — dès lors il guide le Risk Assessment",
+        "6": "Le Risk Assessment utilisera downtime_cost pour calculer l'ALE automatiquement",
+        "7": "Définissez les traitements (bouton « Traitements ») avec coût et % de réduction de l'ALE → ils alimentent le ROSI dans le Reporting"
+      },
+      "connections": {
+        "asset": "Actif lié au processus",
+        "risk": "ALE = downtime_cost × heures × probabilité",
+        "bcp": "Les RTO/RPO de la BIA valident et contraignent le plan PCA",
+        "reporting": "ROSI = ALE évitée − coût annualisé du traitement"
+      },
+      "config_needed": {
+        "1": "Créer d'abord les Sites (M01) et les Actifs (M04)"
+      }
+    }
   },
   "assets": {
     "criticality_1_label": "Négligeable",
@@ -3451,6 +3498,33 @@
       "reputation": "Réputation",
       "grc": "GRC",
       "legend": "Vert 0–29 ok · Jaune 30–49 attention · Orange 50–69 avertissement · Rouge 70+ critique"
+    },
+    "help": {
+      "title": "OSINT Monitor — Clés API des enrichisseurs",
+      "description": "Les clés API activent des enrichissements supplémentaires lors des scans. Toutes sont optionnelles : le module fonctionne aussi sans, en utilisant uniquement SSL/DNS/WHOIS (gratuits et sans inscription).",
+      "steps": {
+        "1": "HaveIBeenPwned (HIBP) — Fuite d'e-mails : haveibeenpwned.com/API/Key → offre payante (~3,50$/mois). Uniquement pour « Mes domaines ».",
+        "2": "VirusTotal — Réputation domaine/IP : virustotal.com/gui/join-us → offre Free (1000 req/jour). Clé API dans « My API Key ».",
+        "3": "AbuseIPDB — Liste noire d'IP : abuseipdb.com/register → offre Free (1000 req/jour). Clé API dans le profil.",
+        "4": "Google Safe Browsing — URL malveillantes : console.cloud.google.com → activez « Safe Browsing API » → Identifiants → Clé API.",
+        "5": "AlienVault OTX — Threat intelligence : otx.alienvault.com → inscription gratuite → Profil → OTX Key. Sans coût.",
+        "6": "abuse.ch (ThreatFox + URLhaus) — CTI malware/botnet : auth.abuse.ch → inscription gratuite → Auth-Key (unique pour les deux flux). Sans coût."
+      },
+      "connections": {
+        "plants": "Domaine principal et domaines supplémentaires surveillés",
+        "suppliers": "Site web du fournisseur → entité OSINT de type supplier",
+        "incidents": "Alertes critiques sur mes domaines → incident automatique",
+        "tasks": "Alertes sur les fournisseurs → tâche de vérification",
+        "ai": "Analyse IA sur données anonymisées"
+      },
+      "config_needed": {
+        "1": "VirusTotal Free : virustotal.com/gui/join-us",
+        "2": "AbuseIPDB Free : abuseipdb.com/register",
+        "3": "AlienVault OTX Free : otx.alienvault.com (inscription gratuite)",
+        "4": "abuse.ch Free : auth.abuse.ch (Auth-Key gratuite pour ThreatFox + URLhaus)",
+        "5": "Google Safe Browsing : console.cloud.google.com (un projet GCP est requis)",
+        "6": "HaveIBeenPwned : haveibeenpwned.com/API/Key (payant, ~3,50$/mois)"
+      }
     }
   },
   "checklists": {
@@ -3812,6 +3886,30 @@
       "disclaimer": "Brouillon généré par l'IA — vérifiez avant d'agir.",
       "ask": "Demander",
       "ask_placeholder": "Demandez à govrico : ex. quels sont les 3 problèmes les plus urgents ?"
+    }
+  },
+  "management_review": {
+    "help": {
+      "title": "Revue de Direction — M13",
+      "description": "Gère la revue de direction périodique du SMSI. Génère un instantané figé des données GRC au moment de la réunion et produit le rapport formel du CISO téléchargeable.",
+      "steps": {
+        "1": "Créez la revue avec titre, site et date de réunion",
+        "2": "Démarrez la réunion pour passer le statut à « En cours »",
+        "3": "Cliquez sur « Générer l'instantané des données » : les KPI sont figés à cet instant",
+        "4": "Présentez les données en réunion — l'instantané ne changera plus",
+        "5": "Les délibérations sont enregistrées comme actions avec responsable et échéance",
+        "6": "Marquez la réunion comme terminée",
+        "7": "Approuvez la revue avec une note formelle (l'instantané doit être généré)",
+        "8": "Téléchargez le rapport CISO en HTML (imprimable/archivable)"
+      },
+      "connections": {
+        "risk": "Risques par niveau et par responsable dans l'instantané",
+        "incidents": "Incidents des 12 derniers mois dans l'instantané",
+        "pdca": "PDCA ouverts et bloqués dans l'instantané"
+      },
+      "config_needed": {
+        "1": "Nommer le CISO comme président dans M00 Governance"
+      }
     }
   }
 }

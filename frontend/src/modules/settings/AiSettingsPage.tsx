@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { aiApi, type AiProviderConfig } from "../../api/endpoints/ai";
 import { useAuthStore } from "../../store/auth";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
+import { useTranslation } from "react-i18next";
 
 const TASKS = [
   ["incident_classify", "Classificazione incidente"],
@@ -17,6 +18,7 @@ const TASKS = [
 ] as const;
 
 export function AiSettingsPage() {
+  const { t } = useTranslation();
   const role = useAuthStore((s) => s.user?.role);
   const qc = useQueryClient();
   const [form, setForm] = useState<AiProviderConfig>({
@@ -90,28 +92,28 @@ export function AiSettingsPage() {
       <div className="flex items-center gap-2">
         <h2 className="text-xl font-semibold">govrico AI</h2>
         <ModuleHelp
-          title="govrico AI — M20"
-          description="Configura il provider AI usato da tutti i moduli della piattaforma (classificazione incidenti, gap analysis, RCA, chatbot, generazione documenti, analisi OSINT)."
+          title={t("ai.help.title")}
+          description={t("ai.help.description")}
           steps={[
-            "Scegli provider Cloud (Anthropic/OpenAI) o locale (Ollama).",
-            "Per Anthropic: vai su console.anthropic.com → API Keys → Create Key. Modelli consigliati: claude-haiku-4-5-20251001 (economico) o claude-sonnet-4-6 (qualità superiore).",
-            "Per OpenAI: vai su platform.openai.com → API Keys → Create new secret key.",
-            "Per Ollama (locale): installa Ollama sul server, scarica il modello desiderato con 'ollama pull <modello>', imposta l'endpoint.",
-            "Imposta il budget mensile token per controllare i costi.",
-            "Usa il routing per-task per assegnare modelli diversi a task diversi.",
-            "Clicca 'Testa' per verificare la connessione prima di salvare.",
+            t("ai.help.steps.1"),
+            t("ai.help.steps.2"),
+            t("ai.help.steps.3"),
+            t("ai.help.steps.4"),
+            t("ai.help.steps.5"),
+            t("ai.help.steps.6"),
+            t("ai.help.steps.7"),
           ]}
           connections={[
-            { module: "M03 Controlli", relation: "Genera documenti procedura (.docx)" },
-            { module: "M06 Risk", relation: "Suggerimenti RCA e azioni correttive" },
-            { module: "M09 Incidenti", relation: "Classificazione automatica incidente" },
-            { module: "M14 Fornitori", relation: "Suggerimento codici CPV" },
-            { module: "OSINT Monitor", relation: "Analisi superficie attacco, briefing NIS2, report board" },
+            { module: "M03 Controlli", relation: t("ai.help.connections.controls") },
+            { module: "M06 Risk", relation: t("ai.help.connections.risk") },
+            { module: "M09 Incidenti", relation: t("ai.help.connections.incidents") },
+            { module: "M14 Fornitori", relation: t("ai.help.connections.suppliers") },
+            { module: "OSINT Monitor", relation: t("ai.help.connections.osint") },
           ]}
           configNeeded={[
-            "API Key Anthropic: console.anthropic.com → API Keys",
-            "API Key OpenAI: platform.openai.com → API Keys",
-            "Ollama (locale): installare il binario da ollama.com, nessuna API key richiesta",
+            t("ai.help.config_needed.1"),
+            t("ai.help.config_needed.2"),
+            t("ai.help.config_needed.3"),
           ]}
         />
       </div>

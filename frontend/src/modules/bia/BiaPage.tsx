@@ -409,27 +409,25 @@ export function BiaPage() {
         <h2 className="text-xl font-semibold text-gray-900 flex items-center">
           Rischio — Business Impact Analysis
           <ModuleHelp
-            title="Business Impact Analysis — M05"
-            description="Valuta l'impatto economico e operativo del fermo di ogni
-    processo critico. Definisce i target RTO/RPO/MTPD che guidano
-    il BCP e pesano il calcolo dell'ALE nel Risk Assessment."
+            title={t("bia.help.title")}
+            description={t("bia.help.description")}
             steps={[
-              "Crea il processo critico con owner responsabile",
-              "Inserisci costo orario fermo (€) e fatturato esposto annuo",
-              "Definisci MTPD (ore massime tollerabili), RTO e RPO target",
-              "Valida il processo (compliance officer)",
-              "Approva (management) — da questo momento guida il Risk Assessment",
-              "Il Risk Assessment userà downtime_cost per calcolare l'ALE automaticamente",
-              "Definisci i trattamenti (pulsante «Trattamenti») con costo e % di riduzione ALE → alimentano il ROSI nel Reporting",
+              t("bia.help.steps.1"),
+              t("bia.help.steps.2"),
+              t("bia.help.steps.3"),
+              t("bia.help.steps.4"),
+              t("bia.help.steps.5"),
+              t("bia.help.steps.6"),
+              t("bia.help.steps.7"),
             ]}
             connections={[
-              { module: "M04 Asset", relation: "Asset collegato al processo" },
-              { module: "M06 Risk", relation: "ALE = downtime_cost × ore × probabilità" },
-              { module: "M16 BCP", relation: "RTO/RPO BIA validano e vincolano il piano BCP" },
-              { module: "M18 Reporting", relation: "ROSI = ALE evitata − costo annualizzato del trattamento" },
+              { module: "M04 Asset", relation: t("bia.help.connections.asset") },
+              { module: "M06 Risk", relation: t("bia.help.connections.risk") },
+              { module: "M16 BCP", relation: t("bia.help.connections.bcp") },
+              { module: "M18 Reporting", relation: t("bia.help.connections.reporting") },
             ]}
             configNeeded={[
-              "Creare prima i Plant (M01) e gli Asset (M04)",
+              t("bia.help.config_needed.1"),
             ]}
           />
         </h2>
