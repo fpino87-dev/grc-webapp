@@ -224,12 +224,18 @@ export function TabDocumenti() {
                     <div className="flex flex-col gap-0.5">
                       <span>{doc.plant_code || doc.plant_name || t("documents.org_wide", { defaultValue: "Org-wide" })}</span>
                       {doc.is_shared_with_current && (
-                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 text-xs font-medium w-fit">
+                        <span
+                          className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 text-xs font-medium w-fit cursor-help"
+                          title={(doc.shared_plant_names ?? []).map(p => p.code ? `${p.code} — ${p.name}` : p.name).join(", ") || undefined}
+                        >
                           🔗 {t("documents.shared_badge", { defaultValue: "condiviso" })}
                         </span>
                       )}
                       {!doc.is_shared_with_current && (doc.shared_plant_names?.length ?? 0) > 0 && (
-                        <span className="text-gray-400 text-xs">
+                        <span
+                          className="text-gray-400 text-xs cursor-help"
+                          title={doc.shared_plant_names!.map(p => p.code ? `${p.code} — ${p.name}` : p.name).join(", ")}
+                        >
                           🔗 {doc.shared_plant_names!.length} {t("documents.shared_with_n_plants", { defaultValue: "plant" })}
                         </span>
                       )}
