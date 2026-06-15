@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 from celery import shared_task
@@ -79,9 +80,11 @@ def generate_scheduled_checklists(self):
 def compute_operational_kpis(self):
     """
     Ogni lunedì alle 06:30. Calcola gli snapshot settimanali dei KPI operativi
-    basati su checklist per la settimana corrente (lunedì→domenica):
-    per ogni KPIDefinition attiva con source=checklist, su tutti i plant
-    pertinenti (kpi.plant se valorizzato, altrimenti tutti i plant attivi).
+    basati su checklist per la settimana APPENA CONCLUSA (lunedì→domenica
+    precedenti): quando il task gira il lunedì mattina la settimana corrente
+    non contiene ancora run, quindi misurarla darebbe sempre no_data. Per ogni
+    KPIDefinition attiva con source=checklist, su tutti i plant pertinenti
+    (kpi.plant se valorizzato, altrimenti tutti i plant attivi).
     Invia alert M19 quando uno status peggiora oltre soglia.
     """
     from apps.plants.models import Plant
@@ -89,7 +92,10 @@ def compute_operational_kpis(self):
     from . import services
     from .models import KPIDefinition
 
-    week_start = services._monday_of(timezone.localdate())
+    # Settimana conclusa: il lunedì di 7 giorni fa.
+    week_start = services._monday_of(
+        timezone.localdate() - datetime.timedelta(days=7)
+    )
     snapshot_count = 0
     alert_count = 0
 

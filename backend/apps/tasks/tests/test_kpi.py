@@ -309,3 +309,47 @@ def test_kpi_trend_endpoint(client, kpi_def, plant):
     # ordinati ASC per week_start
     weeks = [r["week_start"] for r in resp.data["results"]]
     assert weeks == sorted(weeks)
+
+
+# ── settimana misurata dal task periodico (regressione off-by-one) ───────────
+
+@pytest.mark.django_db
+def test_compute_operational_kpis_measures_completed_previous_week(
+    kpi_def, plant, checklist_template
+):
+    """Regressione off-by-one di `compute_operational_kpis`.
+
+    Scenario reale: è lunedì, il task gira alle 06:30. I run della settimana
+    appena conclusa sono compilati (4 completed + 1 overdue → 80%); quelli
+    della settimana corrente non esistono ancora (verranno generati alle 07:00).
+
+    Il task deve produrre uno snapshot della settimana CONCLUSA con il valore
+    reale (80% → warning), non un no_data sulla settimana corrente vuota.
+    """
+    from apps.tasks.models import ChecklistRun, OperationalKpiSnapshot
+    from apps.tasks.tasks import compute_operational_kpis
+
+    prev_week = _monday(offset_weeks=1)
+    for _ in range(4):
+        ChecklistRun.objects.create(
+            template=checklist_template, plant=plant,
+            due_date=prev_week, status="completed",
+        )
+    ChecklistRun.objects.create(
+        template=checklist_template, plant=plant,
+        due_date=prev_week, status="overdue",
+    )
+
+    # Esecuzione sincrona del task Celery (bind=True → self iniettato).
+    compute_operational_kpis()
+
+    prev_snap = OperationalKpiSnapshot.objects.filter(
+        kpi_definition=kpi_def, plant=plant, week_start=prev_week
+    ).first()
+    assert prev_snap is not None, (
+        "nessuno snapshot per la settimana conclusa: il task ha misurato "
+        "un'altra settimana (off-by-one)"
+    )
+    assert prev_snap.run_count == 5
+    assert prev_snap.value == 80.0  # 4/5 completati
+    assert prev_snap.status == "warning"  # 80 < warning(90), 80 >= critical(75)
