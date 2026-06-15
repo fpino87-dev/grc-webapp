@@ -186,14 +186,14 @@ export function TabDocumenti() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600 w-32">{t("documents.table.code")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600 w-44">{t("documents.table.code")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.table.title")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.table.file")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.table.plant")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.table.type")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.table.status")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.table.mandatory")}</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.table.review_due_date")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600 w-24">{t("documents.table.review_due_date")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("documents.table.approved_at")}</th>
                 <th className="px-4 py-3"></th>
               </tr>
@@ -201,7 +201,7 @@ export function TabDocumenti() {
             <tbody className="divide-y divide-gray-100">
               {documents.map(doc => (
                 <tr key={doc.id} data-row-id={doc.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     {doc.document_code
                       ? <span className="font-mono text-xs font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">{doc.document_code}</span>
                       : <span className="text-gray-300">—</span>}
@@ -244,7 +244,7 @@ export function TabDocumenti() {
                       ? <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">{t("documents.mandatory.yes")}</span>
                       : <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">{t("documents.mandatory.no")}</span>}
                   </td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{doc.review_due_date ? new Date(doc.review_due_date).toLocaleDateString(i18n.language || "it") : "—"}</td>
+                  <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{doc.review_due_date ? new Date(doc.review_due_date).toLocaleDateString(i18n.language || "it") : "—"}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{doc.approved_at ? new Date(doc.approved_at).toLocaleDateString(i18n.language || "it") : "—"}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
