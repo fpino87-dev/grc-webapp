@@ -3530,6 +3530,8 @@
       "name": "Nome",
       "description": "Descrizione",
       "frequency": "Frequenza",
+      "days_of_week": "Giorni di generazione",
+      "days_of_week_hint": "Solo per frequenza giornaliera. Nessun giorno selezionato = tutti i giorni (sab/dom inclusi).",
       "plant": "Sito",
       "active": "Attivo",
       "active_yes": "Sì",
@@ -3581,6 +3583,15 @@
       "weekly": "Settimanale",
       "monthly": "Mensile",
       "ad_hoc": "Ad hoc"
+    },
+    "weekdays": {
+      "mon": "Lun",
+      "tue": "Mar",
+      "wed": "Mer",
+      "thu": "Gio",
+      "fri": "Ven",
+      "sat": "Sab",
+      "sun": "Dom"
     },
     "status": {
       "pending": "Da iniziare",

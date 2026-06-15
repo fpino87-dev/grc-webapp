@@ -3582,6 +3582,8 @@
       "mandatory": "Obligatoire",
       "all_plants": "Tous les sites",
       "all_plants_short": "Tous",
+      "days_of_week": "Jours de génération",
+      "days_of_week_hint": "Uniquement pour la fréquence quotidienne. Aucun jour sélectionné = tous les jours (sam./dim. inclus).",
       "all_frequencies": "Toutes les fréquences",
       "back": "Retour aux modèles",
       "empty": "Aucun modèle trouvé",
@@ -3623,6 +3625,15 @@
       "weekly": "Hebdomadaire",
       "monthly": "Mensuelle",
       "ad_hoc": "Ponctuelle"
+    },
+    "weekdays": {
+      "mon": "Lun",
+      "tue": "Mar",
+      "wed": "Mer",
+      "thu": "Jeu",
+      "fri": "Ven",
+      "sat": "Sam",
+      "sun": "Dim"
     },
     "status": {
       "pending": "À faire",

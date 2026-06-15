@@ -13,6 +13,7 @@ interface FormState {
   name: string;
   description: string;
   frequency: ChecklistFrequency;
+  days_of_week: number[];
   plant: string;
   is_active: boolean;
   items: ChecklistTemplateItem[];
@@ -22,10 +23,14 @@ const EMPTY: FormState = {
   name: "",
   description: "",
   frequency: "daily",
+  days_of_week: [],
   plant: "",
   is_active: true,
   items: [{ order: 0, text: "", is_mandatory: true }],
 };
+
+// 0=lunedì … 6=domenica (allineato a date.weekday() del backend).
+const WEEKDAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 
 export function ChecklistTemplateForm() {
   const { t } = useTranslation();
@@ -54,6 +59,7 @@ export function ChecklistTemplateForm() {
         name: existing.name,
         description: existing.description ?? "",
         frequency: existing.frequency,
+        days_of_week: existing.days_of_week ?? [],
         plant: existing.plant ?? "",
         is_active: existing.is_active,
         items:
@@ -70,6 +76,8 @@ export function ChecklistTemplateForm() {
         name: form.name,
         description: form.description,
         frequency: form.frequency,
+        // days_of_week ha senso solo per la frequenza giornaliera.
+        days_of_week: form.frequency === "daily" ? form.days_of_week : [],
         plant: form.plant || null,
         is_active: form.is_active,
         items: form.items
@@ -112,6 +120,15 @@ export function ChecklistTemplateForm() {
       [next[idx], next[target]] = [next[target], next[idx]];
       return { ...prev, items: next };
     });
+  }
+
+  function toggleDay(day: number) {
+    setForm((prev) => ({
+      ...prev,
+      days_of_week: prev.days_of_week.includes(day)
+        ? prev.days_of_week.filter((d) => d !== day)
+        : [...prev.days_of_week, day].sort((a, b) => a - b),
+    }));
   }
 
   const canSave = form.name.trim() && form.items.some((it) => it.text.trim());
@@ -175,6 +192,38 @@ export function ChecklistTemplateForm() {
             </select>
           </div>
         </div>
+
+        {form.frequency === "daily" && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t("checklists.templates.days_of_week")}
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              {WEEKDAY_KEYS.map((key, day) => {
+                const selected = form.days_of_week.includes(day);
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => toggleDay(day)}
+                    aria-pressed={selected}
+                    className={
+                      "px-2.5 py-1 text-sm rounded border " +
+                      (selected
+                        ? "bg-primary-600 text-white border-primary-600"
+                        : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50")
+                    }
+                  >
+                    {t(`checklists.weekdays.${key}`)}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              {t("checklists.templates.days_of_week_hint")}
+            </p>
+          </div>
+        )}
 
         <label className="flex items-center gap-2 text-sm text-gray-700">
           <input

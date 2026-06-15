@@ -3582,6 +3582,8 @@
       "mandatory": "Zorunlu",
       "all_plants": "Tüm tesisler",
       "all_plants_short": "Tümü",
+      "days_of_week": "Oluşturma günleri",
+      "days_of_week_hint": "Yalnızca günlük sıklık için. Hiçbir gün seçilmezse = her gün (Cmt/Paz dahil).",
       "all_frequencies": "Tüm sıklıklar",
       "back": "Şablonlara dön",
       "empty": "Şablon bulunamadı",
@@ -3623,6 +3625,15 @@
       "weekly": "Haftalık",
       "monthly": "Aylık",
       "ad_hoc": "Tek seferlik"
+    },
+    "weekdays": {
+      "mon": "Pzt",
+      "tue": "Sal",
+      "wed": "Çar",
+      "thu": "Per",
+      "fri": "Cum",
+      "sat": "Cmt",
+      "sun": "Paz"
     },
     "status": {
       "pending": "Yapılacak",

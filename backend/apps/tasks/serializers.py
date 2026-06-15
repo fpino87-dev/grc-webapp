@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from .models import (
@@ -49,12 +50,28 @@ class ChecklistTemplateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChecklistTemplate
         fields = [
-            "id", "name", "description", "frequency", "plant", "plant_name",
-            "is_active", "items", "runs_count", "created_at", "updated_at",
+            "id", "name", "description", "frequency", "days_of_week", "plant",
+            "plant_name", "is_active", "items", "runs_count", "created_at",
+            "updated_at",
         ]
 
     def get_runs_count(self, obj):
         return obj.runs.count()
+
+    def validate_days_of_week(self, value):
+        if value in (None, ""):
+            return []
+        if not isinstance(value, list):
+            raise serializers.ValidationError(_("Deve essere una lista di giorni."))
+        cleaned = []
+        for day in value:
+            if not isinstance(day, int) or isinstance(day, bool) or not 0 <= day <= 6:
+                raise serializers.ValidationError(
+                    _("I giorni devono essere interi da 0 (lun) a 6 (dom).")
+                )
+            if day not in cleaned:
+                cleaned.append(day)
+        return sorted(cleaned)
 
     def _sync_items(self, template, items_data):
         template.items.all().delete()

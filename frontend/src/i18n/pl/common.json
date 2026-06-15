@@ -3582,6 +3582,8 @@
       "mandatory": "Obowiązkowa",
       "all_plants": "Wszystkie zakłady",
       "all_plants_short": "Wszystkie",
+      "days_of_week": "Dni generowania",
+      "days_of_week_hint": "Tylko dla częstotliwości dziennej. Brak wybranego dnia = każdy dzień (w tym sob./niedz.).",
       "all_frequencies": "Wszystkie częstotliwości",
       "back": "Powrót do szablonów",
       "empty": "Nie znaleziono szablonów",
@@ -3623,6 +3625,15 @@
       "weekly": "Co tydzień",
       "monthly": "Co miesiąc",
       "ad_hoc": "Doraźnie"
+    },
+    "weekdays": {
+      "mon": "Pon",
+      "tue": "Wt",
+      "wed": "Śr",
+      "thu": "Czw",
+      "fri": "Pt",
+      "sat": "Sob",
+      "sun": "Nd"
     },
     "status": {
       "pending": "Do zrobienia",

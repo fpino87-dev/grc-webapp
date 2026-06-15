@@ -15,6 +15,8 @@ export interface ChecklistTemplate {
   name: string;
   description: string;
   frequency: ChecklistFrequency;
+  /** Giorni 0=lun … 6=dom in cui generare il run (solo frequency="daily"; vuoto=tutti). */
+  days_of_week?: number[];
   plant: string | null;
   plant_name?: string | null;
   is_active: boolean;

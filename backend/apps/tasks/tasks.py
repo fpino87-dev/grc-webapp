@@ -32,12 +32,16 @@ def generate_scheduled_checklists(self):
     overdue_count = overdue_qs.update(status="overdue", updated_at=timezone.now())
 
     # 2) Generazione run odierni in base alla frequenza.
-    def _is_due_today(frequency) -> bool:
-        if frequency == "daily":
-            return True
-        if frequency == "weekly":
+    def _is_due_today(template) -> bool:
+        freq = template.frequency
+        if freq == "daily":
+            # days_of_week vuoto → tutti i giorni (storico); altrimenti solo i
+            # giorni indicati (es. [0..4] = solo feriali).
+            days = template.days_of_week or []
+            return today.weekday() in days if days else True
+        if freq == "weekly":
             return today.weekday() == 0  # lunedì
-        if frequency == "monthly":
+        if freq == "monthly":
             return today.day == 1
         return False  # ad_hoc: solo manuale
 
@@ -48,7 +52,7 @@ def generate_scheduled_checklists(self):
         .prefetch_related("items")
     )
     for template in templates:
-        if not _is_due_today(template.frequency):
+        if not _is_due_today(template):
             continue
         if template.plant_id:
             target_plants = [template.plant]

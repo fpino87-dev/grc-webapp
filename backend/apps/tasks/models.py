@@ -161,6 +161,16 @@ class ChecklistTemplate(BaseModel):
     frequency = models.CharField(
         max_length=10, choices=FREQUENCY_CHOICES, default="daily", db_index=True
     )
+    # Giorni della settimana (0=lunedì … 6=domenica, come date.weekday()) in cui
+    # generare il run. Si applica SOLO a frequency="daily": lista vuota = tutti i
+    # 7 giorni (comportamento storico). Permette es. [0,1,2,3,4] per attività
+    # solo feriali, evitando run di sabato/domenica che resterebbero "overdue" e
+    # falserebbero i KPI basati su checklist.
+    days_of_week = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Solo per frequenza giornaliera: giorni 0-6 (lun-dom). Vuoto=tutti.",
+    )
     # plant null = template valido per tutti i plant
     plant = models.ForeignKey(
         "plants.Plant",

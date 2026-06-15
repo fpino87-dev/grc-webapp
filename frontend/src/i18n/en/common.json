@@ -3503,6 +3503,8 @@
       "mandatory": "Mandatory",
       "all_plants": "All plants",
       "all_plants_short": "All",
+      "days_of_week": "Generation days",
+      "days_of_week_hint": "Daily frequency only. No day selected = every day (incl. Sat/Sun).",
       "all_frequencies": "All frequencies",
       "back": "Back to templates",
       "empty": "No templates found",
@@ -3544,6 +3546,15 @@
       "weekly": "Weekly",
       "monthly": "Monthly",
       "ad_hoc": "Ad hoc"
+    },
+    "weekdays": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
     },
     "status": {
       "pending": "To do",
