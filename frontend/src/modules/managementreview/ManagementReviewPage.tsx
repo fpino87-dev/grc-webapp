@@ -11,13 +11,6 @@ import i18n from "../../i18n";
 
 // ── Labels ──────────────────────────────────────────────────────────────────
 
-const APPROVAL_LABELS: Record<string, string> = {
-  bozza: "Bozza",
-  in_review: "In revisione",
-  approvato: "Approvato",
-  rifiutato: "Rifiutato",
-};
-
 const APPROVAL_COLORS: Record<string, string> = {
   bozza:     "bg-gray-100 text-gray-600",
   in_review: "bg-blue-100 text-blue-700",
@@ -62,6 +55,7 @@ function SnapSection({ title, children, defaultOpen = true }: { title: string; c
 // ── NewReviewModal ────────────────────────────────────────────────────────────
 
 function NewReviewModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [form, setForm] = useState<Partial<ManagementReview>>({});
   const [error, setError] = useState("");
@@ -69,7 +63,7 @@ function NewReviewModal({ plants, onClose }: { plants: { id: string; code: strin
   const mutation = useMutation({
     mutationFn: managementReviewApi.create,
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["management-review"] }); onClose(); },
-    onError: (e: any) => setError(e?.response?.data?.detail || "Errore durante il salvataggio"),
+    onError: (e: any) => setError(e?.response?.data?.detail || t("management_review.new.save_error")),
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
@@ -79,33 +73,33 @@ function NewReviewModal({ plants, onClose }: { plants: { id: string; code: strin
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-        <h3 className="text-lg font-semibold mb-4">Nuova revisione direzione</h3>
+        <h3 className="text-lg font-semibold mb-4">{t("management_review.new.title")}</h3>
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Titolo *</label>
-            <input name="title" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="es. Revisione direzione Q1 2026" />
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("management_review.new.title_label")}</label>
+            <input name="title" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder={t("management_review.new.title_ph")} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Sito (opzionale)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("management_review.new.plant_label")}</label>
             <select name="plant" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-              <option value="">— org-wide —</option>
+              <option value="">{t("management_review.new.org_wide_opt")}</option>
               {plants.map(p => <option key={p.id} value={p.id}>{p.code} — {p.name}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Data riunione</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("management_review.new.date_label")}</label>
             <input type="date" name="review_date" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
           </div>
         </div>
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
-          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("management_review.new.cancel")}</button>
           <button
             onClick={() => mutation.mutate(form)}
             disabled={mutation.isPending || !form.title}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
-            {mutation.isPending ? "Salvataggio..." : "Crea revisione"}
+            {mutation.isPending ? t("management_review.new.saving") : t("management_review.new.create")}
           </button>
         </div>
       </div>
@@ -116,6 +110,7 @@ function NewReviewModal({ plants, onClose }: { plants: { id: string; code: strin
 // ── ActionsSection ────────────────────────────────────────────────────────────
 
 function ActionsSection({ review, users }: { review: ManagementReview; users: GrcUser[] }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState({ description: "", owner: "", due_date: "" });
@@ -154,13 +149,13 @@ function ActionsSection({ review, users }: { review: ManagementReview; users: Gr
   return (
     <section>
       <div className="flex items-center justify-between mb-2">
-        <h4 className="text-sm font-semibold text-gray-700">Delibere e azioni ({actions.length})</h4>
+        <h4 className="text-sm font-semibold text-gray-700">{t("management_review.actions.heading")} ({actions.length})</h4>
         {!adding && (
           <button
             onClick={() => setAdding(true)}
             className="text-xs px-2 py-1 border border-gray-300 rounded hover:bg-gray-50 text-gray-600"
           >
-            + Aggiungi azione
+            + {t("management_review.actions.add")}
           </button>
         )}
       </div>
@@ -171,7 +166,7 @@ function ActionsSection({ review, users }: { review: ManagementReview; users: Gr
             rows={2}
             value={form.description}
             onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
-            placeholder="Descrizione dell'azione deliberata..."
+            placeholder={t("management_review.actions.desc_ph")}
             className="w-full border rounded px-3 py-2 text-sm"
           />
           <div className="flex gap-2">
@@ -180,7 +175,7 @@ function ActionsSection({ review, users }: { review: ManagementReview; users: Gr
               onChange={e => setForm(p => ({ ...p, owner: e.target.value }))}
               className="flex-1 border rounded px-2 py-1.5 text-sm"
             >
-              <option value="">— Responsabile —</option>
+              <option value="">{t("management_review.actions.owner_ph")}</option>
               {users.map(u => (
                 <option key={u.id} value={u.id}>
                   {`${u.first_name} ${u.last_name}`.trim() || u.email}
@@ -200,17 +195,17 @@ function ActionsSection({ review, users }: { review: ManagementReview; users: Gr
               disabled={createMutation.isPending || !form.description.trim()}
               className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50"
             >
-              {createMutation.isPending ? "Salvataggio..." : "Aggiungi"}
+              {createMutation.isPending ? t("management_review.actions.saving") : t("management_review.actions.add_btn")}
             </button>
             <button onClick={() => { setAdding(false); setForm({ description: "", owner: "", due_date: "" }); }} className="px-3 py-1 border rounded text-xs text-gray-600 hover:bg-gray-50">
-              Annulla
+              {t("management_review.actions.cancel")}
             </button>
           </div>
         </div>
       )}
 
       {actions.length === 0 && !adding ? (
-        <p className="text-xs text-gray-400 italic">Nessuna azione deliberata.</p>
+        <p className="text-xs text-gray-400 italic">{t("management_review.actions.none")}</p>
       ) : (
         <div className="space-y-2">
           {actions.map(a => (
@@ -223,17 +218,17 @@ function ActionsSection({ review, users }: { review: ManagementReview; users: Gr
                   )}
                   {a.due_date && (
                     <span className={`text-xs font-medium ${isOverdue(a.due_date) && a.status === "aperto" ? "text-red-600" : "text-gray-500"}`}>
-                      📅 {a.due_date}{isOverdue(a.due_date) && a.status === "aperto" ? " — scaduta" : ""}
+                      📅 {a.due_date}{isOverdue(a.due_date) && a.status === "aperto" ? ` — ${t("management_review.actions.overdue")}` : ""}
                     </span>
                   )}
                 </div>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
                 <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${a.status === "aperto" ? "bg-orange-100 text-orange-700" : "bg-green-100 text-green-700"}`}>
-                  {a.status === "aperto" ? "Aperta" : "Chiusa"}
+                  {a.status === "aperto" ? t("management_review.actions.open") : t("management_review.actions.closed")}
                 </span>
                 <button
-                  title={a.status === "aperto" ? "Segna come chiusa" : "Riapri"}
+                  title={a.status === "aperto" ? t("management_review.actions.mark_closed") : t("management_review.actions.reopen")}
                   onClick={() => toggleMutation.mutate(a)}
                   disabled={toggleMutation.isPending}
                   className="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-500 hover:text-gray-700 disabled:opacity-40"
@@ -247,13 +242,13 @@ function ActionsSection({ review, users }: { review: ManagementReview; users: Gr
                       disabled={deleteMutation.isPending}
                       className="text-xs text-white bg-red-600 hover:bg-red-700 px-1.5 py-0.5 rounded disabled:opacity-50"
                     >
-                      Sì
+                      {t("management_review.actions.yes")}
                     </button>
-                    <button onClick={() => setConfirmDeleteId(null)} className="text-xs text-gray-500 hover:underline">No</button>
+                    <button onClick={() => setConfirmDeleteId(null)} className="text-xs text-gray-500 hover:underline">{t("management_review.actions.no")}</button>
                   </span>
                 ) : (
                   <button
-                    title="Elimina azione"
+                    title={t("management_review.actions.delete")}
                     onClick={() => setConfirmDeleteId(a.id)}
                     className="w-6 h-6 flex items-center justify-center rounded hover:bg-red-50 text-gray-400 hover:text-red-600"
                   >
@@ -275,6 +270,7 @@ type SnapFramework = { framework_name: string; total: number; pct_compliant: num
 type SnapOwner = { owner__first_name: string; owner__last_name: string; owner__email: string; totale: number; rossi: number };
 
 function ReviewDetail({ review, users, onClose }: { review: ManagementReview; users: GrcUser[]; onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [note, setNote] = useState("");
   const [snapshotError, setSnapshotError] = useState("");
@@ -284,7 +280,7 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
   const snapshotMutation = useMutation({
     mutationFn: () => managementReviewApi.generateSnapshot(review.id),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["management-review"] }); setSnapshotError(""); },
-    onError: (e: any) => setSnapshotError(e?.response?.data?.error || "Errore nella generazione snapshot"),
+    onError: (e: any) => setSnapshotError(e?.response?.data?.error || t("management_review.detail.snapshot_error")),
   });
 
   const statusMutation = useMutation({
@@ -295,7 +291,7 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
   const approveMutation = useMutation({
     mutationFn: () => managementReviewApi.approve(review.id, note),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["management-review"] }); setApproveError(""); },
-    onError: (e: any) => setApproveError(e?.response?.data?.error || "Errore nell'approvazione"),
+    onError: (e: any) => setApproveError(e?.response?.data?.error || t("management_review.detail.approve_error")),
   });
 
   async function handleDownload() {
@@ -329,7 +325,7 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
           <div>
             <h3 className="text-lg font-semibold text-gray-900">{review.title}</h3>
             <p className="text-xs text-gray-400 mt-0.5">
-              Data riunione: {review.review_date}
+              {t("management_review.detail.meeting_date")} {review.review_date}
               {review.plant_name && <span className="ml-2 text-gray-400">· {review.plant_name}</span>}
             </p>
           </div>
@@ -340,7 +336,7 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
                 disabled={downloading}
                 className="px-3 py-1.5 bg-indigo-600 text-white rounded text-xs hover:bg-indigo-700 disabled:opacity-50"
               >
-                {downloading ? "Download..." : "Scarica relazione CISO"}
+                {downloading ? t("management_review.detail.downloading") : t("management_review.detail.download_report")}
               </button>
             )}
             <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100">×</button>
@@ -351,7 +347,7 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
 
           {/* ── Stato riunione ── */}
           <section>
-            <h4 className="text-sm font-semibold text-gray-700 mb-2">Stato riunione</h4>
+            <h4 className="text-sm font-semibold text-gray-700 mb-2">{t("management_review.detail.meeting_status")}</h4>
             <div className="flex items-center gap-3">
               <StatusBadge status={review.status} />
               {review.status === "pianificato" && (
@@ -360,7 +356,7 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
                   disabled={statusMutation.isPending}
                   className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50"
                 >
-                  ▶ Avvia riunione
+                  ▶ {t("management_review.detail.start_meeting")}
                 </button>
               )}
               {review.status === "in_corso" && (
@@ -369,7 +365,7 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
                   disabled={statusMutation.isPending}
                   className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 disabled:opacity-50"
                 >
-                  ✓ Segna come completata
+                  ✓ {t("management_review.detail.mark_completed")}
                 </button>
               )}
             </div>
@@ -377,37 +373,37 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
 
           {/* ── Dati riesame (snapshot) ── */}
           <section>
-            <h4 className="text-sm font-semibold text-gray-700 mb-3">Dati riesame</h4>
+            <h4 className="text-sm font-semibold text-gray-700 mb-3">{t("management_review.detail.review_data")}</h4>
             {!hasSnapshot ? (
               <div className="border border-dashed border-gray-300 rounded p-4 text-center">
-                <p className="text-sm text-gray-500 mb-3">Nessuno snapshot disponibile. Genera i dati da congelare per questa revisione.</p>
+                <p className="text-sm text-gray-500 mb-3">{t("management_review.detail.no_snapshot")}</p>
                 {snapshotError && <p className="text-xs text-red-600 mb-2">{snapshotError}</p>}
                 <button
                   onClick={() => snapshotMutation.mutate()}
                   disabled={snapshotMutation.isPending}
                   className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {snapshotMutation.isPending ? "Generazione in corso..." : "Genera snapshot dati"}
+                  {snapshotMutation.isPending ? t("management_review.detail.generating") : t("management_review.detail.generate_snapshot")}
                 </button>
               </div>
             ) : (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-blue-600 bg-blue-50 rounded px-3 py-2 flex-1">
-                    Snapshot generato il {new Date(review.snapshot_generated_at!).toLocaleString(i18n.language || "it")} — dati congelati
+                    {t("management_review.detail.snapshot_generated", { date: new Date(review.snapshot_generated_at!).toLocaleString(i18n.language || "it") })}
                   </p>
                   <button
                     onClick={() => snapshotMutation.mutate()}
                     disabled={snapshotMutation.isPending || isApproved}
-                    title={isApproved ? "Non modificabile dopo l'approvazione" : "Rigenera snapshot con i dati aggiornati"}
+                    title={isApproved ? t("management_review.detail.regen_locked") : t("management_review.detail.regen_tip")}
                     className="ml-2 text-xs px-2 py-1 border border-gray-300 rounded hover:bg-gray-50 text-gray-500 disabled:opacity-40"
                   >
-                    {snapshotMutation.isPending ? "..." : "Rigenera"}
+                    {snapshotMutation.isPending ? "..." : t("management_review.detail.regen")}
                   </button>
                 </div>
 
                 {frameworks && Object.keys(frameworks).length > 0 && (
-                  <SnapSection title="Compliance per framework">
+                  <SnapSection title={t("management_review.snap.compliance_fw")}>
                     <div className="space-y-2">
                       {Object.entries(frameworks).map(([code, fw]) => {
                         const color = fw.pct_compliant >= 80 ? "bg-green-500" : fw.pct_compliant >= 60 ? "bg-yellow-400" : "bg-red-500";
@@ -421,7 +417,7 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
                               <div className={`h-full ${color}`} style={{ width: `${fw.pct_compliant}%` }} />
                             </div>
                             {fw.expired_evidence_count > 0 && (
-                              <p className="text-xs text-amber-600 mt-0.5">{fw.expired_evidence_count} evidenze scadute</p>
+                              <p className="text-xs text-amber-600 mt-0.5">{t("management_review.snap.expired_evidence", { count: fw.expired_evidence_count })}</p>
                             )}
                           </div>
                         );
@@ -431,26 +427,26 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
                 )}
 
                 {rischi && (
-                  <SnapSection title="Profilo di rischio">
+                  <SnapSection title={t("management_review.snap.risk_profile")}>
                     <div className="grid grid-cols-4 gap-2">
-                      <KpiBox label="Critici" value={rischi.rosso ?? 0} color="text-red-600" />
-                      <KpiBox label="Medi" value={rischi.giallo ?? 0} color="text-yellow-600" />
-                      <KpiBox label="Bassi" value={rischi.verde ?? 0} color="text-green-600" />
-                      <KpiBox label="Critici senza piano" value={rischi.senza_piano ?? 0} color="text-red-600" />
+                      <KpiBox label={t("management_review.snap.critical")} value={rischi.rosso ?? 0} color="text-red-600" />
+                      <KpiBox label={t("management_review.snap.medium")} value={rischi.giallo ?? 0} color="text-yellow-600" />
+                      <KpiBox label={t("management_review.snap.low")} value={rischi.verde ?? 0} color="text-green-600" />
+                      <KpiBox label={t("management_review.snap.critical_no_plan")} value={rischi.senza_piano ?? 0} color="text-red-600" />
                     </div>
                     {(rischi.senza_owner ?? 0) > 0 && (
-                      <p className="text-xs text-amber-600 mt-2">{rischi.senza_owner} rischi senza owner assegnato</p>
+                      <p className="text-xs text-amber-600 mt-2">{t("management_review.snap.risks_no_owner", { count: rischi.senza_owner })}</p>
                     )}
                   </SnapSection>
                 )}
 
                 {ownerList && ownerList.length > 0 && (
-                  <SnapSection title="Rischi per owner" defaultOpen={false}>
+                  <SnapSection title={t("management_review.snap.risks_by_owner")} defaultOpen={false}>
                     <table className="w-full text-xs">
                       <thead><tr className="border-b border-gray-200">
-                        <th className="text-left py-1 font-medium text-gray-600">Owner</th>
-                        <th className="text-right py-1 font-medium text-gray-600">Tot</th>
-                        <th className="text-right py-1 font-medium text-gray-600">Critici</th>
+                        <th className="text-left py-1 font-medium text-gray-600">{t("management_review.snap.owner")}</th>
+                        <th className="text-right py-1 font-medium text-gray-600">{t("management_review.snap.tot")}</th>
+                        <th className="text-right py-1 font-medium text-gray-600">{t("management_review.snap.crit")}</th>
                       </tr></thead>
                       <tbody>
                         {ownerList.map((o, i) => {
@@ -469,41 +465,41 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
                 )}
 
                 {documenti && (
-                  <SnapSection title="Documenti e evidenze" defaultOpen={false}>
+                  <SnapSection title={t("management_review.snap.docs_evidence")} defaultOpen={false}>
                     <div className="grid grid-cols-4 gap-2">
-                      <KpiBox label="Approvati" value={documenti.approvati ?? 0} />
-                      <KpiBox label="In scadenza (90gg)" value={documenti.in_scadenza ?? 0} color="text-yellow-600" />
-                      <KpiBox label="Scaduti" value={documenti.scaduti ?? 0} color="text-red-600" />
-                      <KpiBox label="Evidenze scadute" value={documenti.evidenze_scadute ?? 0} color="text-red-600" />
+                      <KpiBox label={t("management_review.snap.approved")} value={documenti.approvati ?? 0} />
+                      <KpiBox label={t("management_review.snap.expiring_90")} value={documenti.in_scadenza ?? 0} color="text-yellow-600" />
+                      <KpiBox label={t("management_review.snap.expired")} value={documenti.scaduti ?? 0} color="text-red-600" />
+                      <KpiBox label={t("management_review.snap.expired_evidence_kpi")} value={documenti.evidenze_scadute ?? 0} color="text-red-600" />
                     </div>
                   </SnapSection>
                 )}
 
                 {incidenti && (
-                  <SnapSection title="Incidenti (ultimi 12 mesi)" defaultOpen={false}>
+                  <SnapSection title={t("management_review.snap.incidents_12m")} defaultOpen={false}>
                     <div className="grid grid-cols-4 gap-2">
-                      <KpiBox label="Totale" value={incidenti.totale_12m ?? 0} />
-                      <KpiBox label="NIS2" value={incidenti.nis2_notificati ?? 0} color="text-red-600" />
-                      <KpiBox label="Aperti" value={incidenti.aperti ?? 0} color="text-orange-600" />
-                      <KpiBox label="Chiusi senza RCA" value={incidenti.senza_rca ?? 0} color="text-amber-600" />
+                      <KpiBox label={t("management_review.snap.total")} value={incidenti.totale_12m ?? 0} />
+                      <KpiBox label={t("management_review.snap.nis2")} value={incidenti.nis2_notificati ?? 0} color="text-red-600" />
+                      <KpiBox label={t("management_review.snap.open")} value={incidenti.aperti ?? 0} color="text-orange-600" />
+                      <KpiBox label={t("management_review.snap.closed_no_rca")} value={incidenti.senza_rca ?? 0} color="text-amber-600" />
                     </div>
                   </SnapSection>
                 )}
 
                 {pdca && (
-                  <SnapSection title="PDCA e task" defaultOpen={false}>
+                  <SnapSection title={t("management_review.snap.pdca_task")} defaultOpen={false}>
                     <div className="grid grid-cols-4 gap-2">
-                      <KpiBox label="PDCA aperti" value={pdca.aperti ?? 0} />
-                      <KpiBox label="Bloccati >90gg" value={pdca.bloccati_plan_90gg ?? 0} color="text-red-600" />
-                      <KpiBox label="Chiusi 12m" value={pdca.chiusi_12m ?? 0} color="text-green-600" />
-                      <KpiBox label="Task scaduti" value={task?.scaduti ?? 0} color="text-red-600" />
+                      <KpiBox label={t("management_review.snap.pdca_open")} value={pdca.aperti ?? 0} />
+                      <KpiBox label={t("management_review.snap.blocked_90")} value={pdca.bloccati_plan_90gg ?? 0} color="text-red-600" />
+                      <KpiBox label={t("management_review.snap.closed_12m")} value={pdca.chiusi_12m ?? 0} color="text-green-600" />
+                      <KpiBox label={t("management_review.snap.tasks_overdue")} value={task?.scaduti ?? 0} color="text-red-600" />
                     </div>
                   </SnapSection>
                 )}
 
                 {bcp && bcp.processi_critici_senza_bcp > 0 && (
-                  <SnapSection title="BCP" defaultOpen={false}>
-                    <p className="text-xs text-red-600 font-medium">{bcp.processi_critici_senza_bcp} processi critici senza piano BCP</p>
+                  <SnapSection title={t("management_review.snap.bcp")} defaultOpen={false}>
+                    <p className="text-xs text-red-600 font-medium">{t("management_review.snap.critical_no_bcp", { count: bcp.processi_critici_senza_bcp })}</p>
                     {bcp.nomi.length > 0 && <p className="text-xs text-gray-600 mt-1">{bcp.nomi.join(", ")}</p>}
                   </SnapSection>
                 )}
@@ -516,14 +512,14 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
 
           {/* ── Approvazione ── */}
           <section>
-            <h4 className="text-sm font-semibold text-gray-700 mb-3">Approvazione</h4>
+            <h4 className="text-sm font-semibold text-gray-700 mb-3">{t("management_review.detail.approval")}</h4>
             <div className="flex items-center gap-3 mb-3">
               <span className={`text-xs px-2 py-1 rounded font-medium ${APPROVAL_COLORS[review.approval_status] ?? "bg-gray-100 text-gray-600"}`}>
-                {APPROVAL_LABELS[review.approval_status] ?? review.approval_status}
+                {t(`management_review.approval.${review.approval_status}`, review.approval_status)}
               </span>
               {isApproved && review.approved_at && (
                 <span className="text-xs text-gray-500">
-                  Approvato il {new Date(review.approved_at).toLocaleString(i18n.language || "it")}
+                  {t("management_review.detail.approved_on", { date: new Date(review.approved_at).toLocaleString(i18n.language || "it") })}
                   {review.approval_note && ` — ${review.approval_note}`}
                 </span>
               )}
@@ -533,7 +529,7 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
                 <textarea
                   value={note}
                   onChange={e => setNote(e.target.value)}
-                  placeholder="Nota di approvazione (opzionale)..."
+                  placeholder={t("management_review.detail.note_ph")}
                   rows={2}
                   className="w-full border rounded px-3 py-2 text-sm"
                 />
@@ -541,13 +537,13 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
                 <button
                   onClick={() => approveMutation.mutate()}
                   disabled={approveMutation.isPending || !hasSnapshot}
-                  title={!hasSnapshot ? "Genera prima lo snapshot dei dati" : undefined}
+                  title={!hasSnapshot ? t("management_review.detail.need_snapshot_tip") : undefined}
                   className="px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-50"
                 >
-                  {approveMutation.isPending ? "Approvazione..." : "Approva riesame"}
+                  {approveMutation.isPending ? t("management_review.detail.approving") : t("management_review.detail.approve")}
                 </button>
                 {!hasSnapshot && (
-                  <p className="text-xs text-amber-600">Genera prima lo snapshot dei dati per poter approvare</p>
+                  <p className="text-xs text-amber-600">{t("management_review.detail.need_snapshot")}</p>
                 )}
               </div>
             )}
@@ -605,7 +601,7 @@ export function ManagementReviewPage() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-1">
-          Governance — Revisione Direzione
+          {t("management_review.list.h2")}
           <ModuleHelp
             title={t("management_review.help.title")}
             description={t("management_review.help.description")}
@@ -628,36 +624,36 @@ export function ManagementReviewPage() {
           />
         </h2>
         <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700">
-          + Nuova revisione
+          + {t("management_review.list.new")}
         </button>
       </div>
 
       {/* Plant filter info */}
       {selectedPlant && (
         <p className="text-xs text-gray-500 mb-3">
-          Filtro attivo: <span className="font-medium text-gray-700">{selectedPlant.name}</span>
+          {t("management_review.list.filter_active")} <span className="font-medium text-gray-700">{selectedPlant.name}</span>
         </p>
       )}
 
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {isLoading ? (
-          <div className="p-8 text-center text-gray-400">Caricamento...</div>
+          <div className="p-8 text-center text-gray-400">{t("management_review.list.loading")}</div>
         ) : reviews.length === 0 ? (
           <div className="p-8 text-center">
-            <p className="text-gray-400 mb-2">Nessuna revisione registrata</p>
-            <button onClick={() => setShowNew(true)} className="text-sm text-primary-600 hover:underline">Crea la prima revisione →</button>
+            <p className="text-gray-400 mb-2">{t("management_review.list.none")}</p>
+            <button onClick={() => setShowNew(true)} className="text-sm text-primary-600 hover:underline">{t("management_review.list.create_first")}</button>
           </div>
         ) : (
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Titolo</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Sito</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Stato</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Approvazione</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Snapshot</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Azioni</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Data riunione</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("management_review.list.col_title")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("management_review.list.col_plant")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("management_review.list.col_status")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("management_review.list.col_approval")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("management_review.list.col_snapshot")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("management_review.list.col_actions")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("management_review.list.col_date")}</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
@@ -665,11 +661,11 @@ export function ManagementReviewPage() {
               {reviews.map(r => (
                 <tr key={r.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3 font-medium text-gray-800">{r.title}</td>
-                  <td className="px-4 py-3 text-xs text-gray-500">{r.plant_name ?? <span className="text-gray-300">org-wide</span>}</td>
+                  <td className="px-4 py-3 text-xs text-gray-500">{r.plant_name ?? <span className="text-gray-300">{t("management_review.list.org_wide")}</span>}</td>
                   <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
                   <td className="px-4 py-3">
                     <span className={`text-xs px-2 py-0.5 rounded font-medium ${APPROVAL_COLORS[r.approval_status] ?? "bg-gray-100 text-gray-600"}`}>
-                      {APPROVAL_LABELS[r.approval_status] ?? r.approval_status}
+                      {t(`management_review.approval.${r.approval_status}`, r.approval_status)}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-xs text-gray-500">
@@ -679,13 +675,13 @@ export function ManagementReviewPage() {
                   </td>
                   <td className="px-4 py-3 text-xs text-gray-500">
                     {r.actions.length > 0
-                      ? <span>{r.actions.filter(a => a.status === "aperto").length}/{r.actions.length} aperte</span>
+                      ? <span>{t("management_review.list.actions_open", { open: r.actions.filter(a => a.status === "aperto").length, total: r.actions.length })}</span>
                       : <span className="text-gray-300">—</span>}
                   </td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{r.review_date}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <button onClick={() => setSelectedId(r.id)} className="text-xs text-primary-600 hover:underline">Dettaglio</button>
+                      <button onClick={() => setSelectedId(r.id)} className="text-xs text-primary-600 hover:underline">{t("management_review.list.detail")}</button>
                       {confirmDelete === r.id ? (
                         <span className="flex items-center gap-1">
                           <button
@@ -693,16 +689,16 @@ export function ManagementReviewPage() {
                             disabled={deleteMutation.isPending}
                             className="text-xs text-white bg-red-600 hover:bg-red-700 px-2 py-0.5 rounded disabled:opacity-50"
                           >
-                            Conferma
+                            {t("management_review.list.confirm")}
                           </button>
-                          <button onClick={() => setConfirmDelete(null)} className="text-xs text-gray-500 hover:underline">Annulla</button>
+                          <button onClick={() => setConfirmDelete(null)} className="text-xs text-gray-500 hover:underline">{t("management_review.list.cancel")}</button>
                         </span>
                       ) : (
                         <button
                           onClick={() => setConfirmDelete(r.id)}
                           className="text-xs text-red-500 hover:text-red-700 hover:underline"
                         >
-                          Elimina
+                          {t("management_review.list.delete")}
                         </button>
                       )}
                     </div>

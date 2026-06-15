@@ -6,15 +6,15 @@ import { ModuleHelp } from "../../components/ui/ModuleHelp";
 import { useTranslation } from "react-i18next";
 
 const TASKS = [
-  ["incident_classify", "Classificazione incidente"],
-  ["gap_actions", "Azioni correttive gap"],
-  ["rca_draft", "Bozza RCA"],
-  ["review_summary", "Sintesi Management Review"],
-  ["chatbot", "Chatbot"],
-  ["cpv_suggestion", "Suggerimento codici CPV (M14 Fornitori)"],
-  ["generate_procedure", "Genera documento procedura (M03 Controlli)"],
-  ["cockpit_explain", "Spiega insight (M21 Centro Operativo)"],
-  ["cockpit_assistant", "Chiedi a govrico (M21 Centro Operativo)"],
+  "incident_classify",
+  "gap_actions",
+  "rca_draft",
+  "review_summary",
+  "chatbot",
+  "cpv_suggestion",
+  "generate_procedure",
+  "cockpit_explain",
+  "cockpit_assistant",
 ] as const;
 
 export function AiSettingsPage() {
@@ -79,7 +79,7 @@ export function AiSettingsPage() {
   });
 
   if (role !== "super_admin" && role !== "compliance_officer") {
-    return <div className="p-6 text-sm text-gray-600">Permessi insufficienti.</div>;
+    return <div className="p-6 text-sm text-gray-600">{t("ai.settings.insufficient_permissions")}</div>;
   }
 
   const cloudModels = catalog?.[form.cloud_provider] ?? [];
@@ -120,7 +120,7 @@ export function AiSettingsPage() {
 
       {/* Provider Cloud */}
       <div className="bg-white border rounded p-4 space-y-3">
-        <h3 className="font-medium">Provider Cloud</h3>
+        <h3 className="font-medium">{t("ai.settings.provider_cloud")}</h3>
         <div className="grid grid-cols-2 gap-3">
           <select
             className="border rounded px-2 py-2 text-sm"
@@ -150,7 +150,7 @@ export function AiSettingsPage() {
             <input
               type="password"
               className="w-full border rounded px-2 py-2 text-sm pr-24"
-              placeholder={apiKeyMasked ? "••••••••  (key salvata — digita per modificare)" : "Inserisci API key"}
+              placeholder={apiKeyMasked ? t("ai.settings.api_key_ph_saved") : t("ai.settings.api_key_ph_new")}
               value={form.api_key ?? ""}
               onChange={(e) => {
                 setApiKeyMasked(false);
@@ -159,12 +159,12 @@ export function AiSettingsPage() {
             />
             {apiKeyMasked && (
               <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
-                ✓ salvata
+                ✓ {t("ai.settings.saved_badge")}
               </span>
             )}
           </div>
           {apiKeyMasked && (
-            <p className="text-xs text-gray-400">La key è cifrata nel DB. Lascia vuoto per non modificarla.</p>
+            <p className="text-xs text-gray-400">{t("ai.settings.key_encrypted_hint")}</p>
           )}
         </div>
 
@@ -174,7 +174,7 @@ export function AiSettingsPage() {
           disabled={testMutation.isPending || !activeConfig?.id}
           className="px-3 py-1.5 border border-indigo-300 text-indigo-700 rounded text-sm hover:bg-indigo-50 disabled:opacity-40"
         >
-          {testMutation.isPending ? "Test in corso..." : "🔌 Testa API Cloud & Ollama"}
+          {testMutation.isPending ? t("ai.settings.testing") : `🔌 ${t("ai.settings.test_button")}`}
         </button>
 
         {/* Risultati test */}
@@ -187,7 +187,7 @@ export function AiSettingsPage() {
                 </span>
                 <span className="font-medium w-12">{target}</span>
                 {res.ok
-                  ? <span className="text-gray-600">{res.response}{res.tokens ? ` — ${res.tokens} token` : ""}</span>
+                  ? <span className="text-gray-600">{res.response}{res.tokens ? ` — ${res.tokens} ${t("ai.settings.token_unit")}` : ""}</span>
                   : <span className="text-red-500">{res.error}</span>
                 }
               </div>
@@ -198,7 +198,7 @@ export function AiSettingsPage() {
 
       {/* Provider Locale */}
       <div className="bg-white border rounded p-4 space-y-3">
-        <h3 className="font-medium">Provider Locale (Ollama)</h3>
+        <h3 className="font-medium">{t("ai.settings.provider_local")}</h3>
         <input
           className="w-full border rounded px-2 py-2 text-sm"
           value={form.local_endpoint}
@@ -215,7 +215,7 @@ export function AiSettingsPage() {
 
       {/* Budget Token */}
       <div className="bg-white border rounded p-4 space-y-3">
-        <h3 className="font-medium">Budget Token</h3>
+        <h3 className="font-medium">{t("ai.settings.budget_token")}</h3>
         <input
           type="number"
           className="border rounded px-2 py-2 text-sm"
@@ -230,26 +230,26 @@ export function AiSettingsPage() {
           onClick={() => resetMutation.mutate()}
           className="px-3 py-1.5 border rounded text-sm"
         >
-          Reset manuale budget
+          {t("ai.settings.reset_budget")}
         </button>
       </div>
 
       {/* Routing per Task */}
       <div className="bg-white border rounded p-4 space-y-3">
-        <h3 className="font-medium">Routing per Task</h3>
+        <h3 className="font-medium">{t("ai.settings.routing_per_task")}</h3>
         <div className="space-y-2">
-          {TASKS.map(([task, label]) => (
+          {TASKS.map((task) => (
             <div key={task} className="grid grid-cols-3 gap-2 items-center text-sm">
-              <div>{label}</div>
+              <div>{t(`ai.settings.tasks.${task}`)}</div>
               <select
                 className="border rounded px-2 py-1.5"
                 value={form.task_routing?.[task] ?? (task === "incident_classify" ? "ollama" : "cloud")}
                 onChange={(e) => setForm((f) => ({ ...f, task_routing: { ...(f.task_routing ?? {}), [task]: e.target.value as "cloud" | "ollama" } }))}
               >
-                <option value="ollama">Locale</option>
-                <option value="cloud">Cloud</option>
+                <option value="ollama">{t("ai.settings.local")}</option>
+                <option value="cloud">{t("ai.settings.cloud")}</option>
               </select>
-              <div className="text-xs text-gray-500">Fallback: Ollama</div>
+              <div className="text-xs text-gray-500">{t("ai.settings.fallback_ollama")}</div>
             </div>
           ))}
         </div>
@@ -257,15 +257,15 @@ export function AiSettingsPage() {
 
       {/* Fallback */}
       <div className="bg-white border rounded p-4 space-y-3">
-        <h3 className="font-medium">Fallback</h3>
+        <h3 className="font-medium">{t("ai.settings.fallback")}</h3>
         <select
           className="border rounded px-2 py-2 text-sm"
           value={form.fallback_mode}
           onChange={(e) => setForm((f) => ({ ...f, fallback_mode: e.target.value as AiProviderConfig["fallback_mode"] }))}
         >
-          <option value="auto">Automatico</option>
-          <option value="notify">Notifica</option>
-          <option value="disabled">Disabilitato</option>
+          <option value="auto">{t("ai.settings.fallback_auto")}</option>
+          <option value="notify">{t("ai.settings.fallback_notify")}</option>
+          <option value="disabled">{t("ai.settings.fallback_disabled")}</option>
         </select>
       </div>
 
@@ -275,13 +275,13 @@ export function AiSettingsPage() {
           disabled={saveMutation.isPending}
           className="px-4 py-2 bg-indigo-600 text-white rounded text-sm disabled:opacity-50"
         >
-          {saveMutation.isPending ? "Salvataggio..." : "Salva configurazione"}
+          {saveMutation.isPending ? t("ai.settings.saving") : t("ai.settings.save_config")}
         </button>
         {saveMutation.isSuccess && (
-          <span className="text-sm text-green-600">✓ Salvato</span>
+          <span className="text-sm text-green-600">✓ {t("ai.settings.saved")}</span>
         )}
         {saveMutation.isError && (
-          <span className="text-sm text-red-500">Errore nel salvataggio</span>
+          <span className="text-sm text-red-500">{t("ai.settings.save_error")}</span>
         )}
       </div>
     </div>
