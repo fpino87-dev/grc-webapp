@@ -22,6 +22,11 @@ REST_FRAMEWORK = {
         # Endpoint di export bulk (ExportRateThrottle, scope "export"): senza
         # questa voce qualsiasi test che colpisce un export va in KeyError.
         "export": "9999/min",
+        # /api/token/refresh/ (RefreshRateThrottle, scope "refresh"): è un
+        # throttle a livello di view, quindi resta attivo nonostante
+        # DEFAULT_THROTTLE_CLASSES vuoto; senza questa voce i test che chiamano
+        # il refresh vanno in KeyError.
+        "refresh": "9999/min",
     },
 }
 
