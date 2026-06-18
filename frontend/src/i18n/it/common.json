@@ -3652,6 +3652,7 @@
       "preview_title": "Formula di calcolo",
       "preview_checklist": "Calcola «{{agg}}» sui run di {{template}} ({{filter}}); {{dir}}.",
       "preview_api": "Valore «{{agg}}» ricevuto via API esterna; {{dir}}.",
+      "preview_internal": "Calcolato automaticamente dai dati del modulo interno; {{dir}}.",
       "preview_filter": "item che contengono \"{{filter}}\"",
       "preview_all_items": "tutti gli item"
     },
@@ -3664,6 +3665,7 @@
     },
     "source": {
       "checklist": "Checklist",
+      "internal": "Modulo interno",
       "api": "API esterna",
       "manual": "Manuale"
     },

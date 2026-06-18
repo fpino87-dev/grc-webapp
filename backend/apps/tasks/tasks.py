@@ -84,11 +84,12 @@ def generate_scheduled_checklists(self):
 def compute_operational_kpis(self):
     """
     Ogni lunedì alle 06:30. Calcola gli snapshot settimanali dei KPI operativi
-    basati su checklist per la settimana APPENA CONCLUSA (lunedì→domenica
-    precedenti): quando il task gira il lunedì mattina la settimana corrente
-    non contiene ancora run, quindi misurarla darebbe sempre no_data. Per ogni
-    KPIDefinition attiva con source=checklist, su tutti i plant pertinenti
-    (kpi.plant se valorizzato, altrimenti tutti i plant attivi).
+    per la settimana APPENA CONCLUSA (lunedì→domenica precedenti): quando il
+    task gira il lunedì mattina la settimana corrente non contiene ancora run,
+    quindi misurarla darebbe sempre no_data. Per ogni KPIDefinition attiva con
+    source=checklist (aggregazione run) o source=internal (connettore che legge
+    direttamente i dati dei moduli M03/M04/M07/M09/M11/M14/M15/M17), su tutti i
+    plant pertinenti (kpi.plant se valorizzato, altrimenti tutti i plant attivi).
     Invia alert M19 quando uno status peggiora oltre soglia.
     """
     from apps.plants.models import Plant
@@ -104,7 +105,9 @@ def compute_operational_kpis(self):
     alert_count = 0
 
     kpis = (
-        KPIDefinition.objects.filter(is_active=True, source="checklist")
+        KPIDefinition.objects.filter(
+            is_active=True, source__in=["checklist", "internal"]
+        )
         .select_related("plant", "checklist_template")
     )
     for kpi_def in kpis:

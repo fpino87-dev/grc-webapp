@@ -442,7 +442,11 @@ def compute_and_store_kpi_snapshot(kpi_def, plant, week_start):
     """
     from .models import OperationalKpiSnapshot
 
-    result = calculate_kpi_value(kpi_def, plant, week_start)
+    if kpi_def.source == "internal":
+        from .kpi_connectors import compute_internal_kpi
+        result = compute_internal_kpi(kpi_def, plant, week_start)
+    else:
+        result = calculate_kpi_value(kpi_def, plant, week_start)
     value = result["value"]
     status = evaluate_kpi_status(kpi_def, value)
 

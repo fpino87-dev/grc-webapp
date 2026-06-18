@@ -155,6 +155,9 @@ export function KpiDefinitionForm() {
         : t("kpi.form.preview_all_items");
       return t("kpi.form.preview_checklist", { agg: aggLabel, template: tplName, filter, dir });
     }
+    if (form.source === "internal") {
+      return t("kpi.form.preview_internal", { dir });
+    }
     return t("kpi.form.preview_api", { agg: aggLabel, dir });
   }
 
@@ -224,7 +227,7 @@ export function KpiDefinitionForm() {
               onChange={(e) => set("source", e.target.value as KpiSource)}
               className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
             >
-              {(["checklist", "api", "manual"] as KpiSource[]).map((s) => (
+              {(["checklist", "internal", "api", "manual"] as KpiSource[]).map((s) => (
                 <option key={s} value={s}>{t(`kpi.source.${s}`)}</option>
               ))}
             </select>

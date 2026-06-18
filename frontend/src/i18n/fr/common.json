@@ -3694,6 +3694,7 @@
       "preview_title": "Formule de calcul",
       "preview_checklist": "Calcule « {{agg}} » sur les exécutions de {{template}} ({{filter}}) ; {{dir}}.",
       "preview_api": "Valeur « {{agg}} » reçue via API externe ; {{dir}}.",
+      "preview_internal": "Calculé automatiquement à partir des données du module interne ; {{dir}}.",
       "preview_filter": "éléments contenant « {{filter}} »",
       "preview_all_items": "tous les éléments"
     },
@@ -3706,6 +3707,7 @@
     },
     "source": {
       "checklist": "Checklist",
+      "internal": "Module interne",
       "api": "API externe",
       "manual": "Manuel"
     },

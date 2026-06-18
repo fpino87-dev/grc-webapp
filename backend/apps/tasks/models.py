@@ -316,6 +316,7 @@ class KPIDefinition(BaseModel):
     ]
     SOURCE_CHOICES = [
         ("checklist", "Checklist"),
+        ("internal", "Modulo interno (auto-calcolo)"),
         ("api", "API esterna"),
         ("manual", "Inserimento manuale"),
     ]

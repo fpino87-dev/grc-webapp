@@ -3694,6 +3694,7 @@
       "preview_title": "Hesaplama formülü",
       "preview_checklist": "{{template}} çalıştırmaları üzerinde «{{agg}}» hesapla ({{filter}}); {{dir}}.",
       "preview_api": "Harici API'den alınan «{{agg}}» değeri; {{dir}}.",
+      "preview_internal": "Dahili modül verilerinden otomatik hesaplanır; {{dir}}.",
       "preview_filter": "\"{{filter}}\" içeren maddeler",
       "preview_all_items": "tüm maddeler"
     },
@@ -3706,6 +3707,7 @@
     },
     "source": {
       "checklist": "Kontrol listesi",
+      "internal": "Dahili modül",
       "api": "Harici API",
       "manual": "Manuel"
     },

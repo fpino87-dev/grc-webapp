@@ -1,6 +1,6 @@
 import { apiClient } from "../client";
 
-export type KpiSource = "checklist" | "api" | "manual";
+export type KpiSource = "checklist" | "internal" | "api" | "manual";
 export type KpiAggregation =
   | "success_rate"
   | "avg_value"

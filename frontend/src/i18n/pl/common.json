@@ -3694,6 +3694,7 @@
       "preview_title": "Formuła obliczeniowa",
       "preview_checklist": "Oblicz „{{agg}}” na wykonaniach {{template}} ({{filter}}); {{dir}}.",
       "preview_api": "Wartość „{{agg}}” otrzymana przez API zewnętrzne; {{dir}}.",
+      "preview_internal": "Obliczane automatycznie na podstawie danych modułu wewnętrznego; {{dir}}.",
       "preview_filter": "pozycje zawierające „{{filter}}”",
       "preview_all_items": "wszystkie pozycje"
     },
@@ -3706,6 +3707,7 @@
     },
     "source": {
       "checklist": "Lista kontrolna",
+      "internal": "Moduł wewnętrzny",
       "api": "API zewnętrzne",
       "manual": "Ręczne"
     },

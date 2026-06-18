@@ -1012,6 +1012,33 @@ KPI_CATALOG = {
 }
 
 
+# I KPI dotati di connettore interno (kpi_connectors.INTERNAL_CONNECTORS) si
+# popolano da soli leggendo i dati dei moduli GRC: il loro source è "internal"
+# (auto-calcolo), non "api" (push esterno). Allineiamo qui source e checklist_hint
+# usando il registry come unica fonte di verità, così catalogo, wizard di import
+# e task settimanale restano coerenti senza duplicare l'elenco dei codici.
+_INTERNAL_HINT = {
+    "it": "Calcolato automaticamente dal modulo interno: nessun inserimento manuale o ingest API necessario.",
+    "en": "Computed automatically from the internal module: no manual entry or API ingest required.",
+    "fr": "Calculé automatiquement depuis le module interne : aucune saisie manuelle ni ingestion API requise.",
+    "pl": "Obliczane automatycznie z modułu wewnętrznego: bez ręcznego wprowadzania ani ingestu API.",
+    "tr": "Dahili modülden otomatik hesaplanır: manuel giriş veya API beslemesi gerekmez.",
+}
+
+
+def _apply_internal_sources():
+    from .kpi_connectors import INTERNAL_CONNECTORS
+
+    for code in INTERNAL_CONNECTORS:
+        entry = KPI_CATALOG.get(code)
+        if entry is not None:
+            entry["source"] = "internal"
+            entry["checklist_hint"] = dict(_INTERNAL_HINT)
+
+
+_apply_internal_sources()
+
+
 def _text(entry_field: dict, lang: str) -> str:
     """Estrae un campo localizzato con fallback IT → EN → primo disponibile."""
     if not isinstance(entry_field, dict):

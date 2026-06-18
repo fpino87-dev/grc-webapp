@@ -3615,6 +3615,7 @@
       "preview_title": "Calculation formula",
       "preview_checklist": "Compute \"{{agg}}\" over {{template}} runs ({{filter}}); {{dir}}.",
       "preview_api": "Value \"{{agg}}\" received via external API; {{dir}}.",
+      "preview_internal": "Computed automatically from internal module data; {{dir}}.",
       "preview_filter": "items containing \"{{filter}}\"",
       "preview_all_items": "all items"
     },
@@ -3627,6 +3628,7 @@
     },
     "source": {
       "checklist": "Checklist",
+      "internal": "Internal module",
       "api": "External API",
       "manual": "Manual"
     },
