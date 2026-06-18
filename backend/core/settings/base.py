@@ -316,6 +316,11 @@ REST_FRAMEWORK = {
         # non dal throttle (che è pensato per DoS / brute-force, non per lettura).
         "user":  "2000/hour",
         "login": "5/minute",
+        # Refresh sessione: chiamata anonima (access scaduto) ma legittima e
+        # frequente (multi-tab, reload). Scope dedicato ampio per non bruciare
+        # il bucket `anon` 20/h e disconnettere l'utente. Il refresh richiede un
+        # token firmato nel cookie httpOnly: limite solo anti-DoS.
+        "refresh": "60/minute",
         # Scope dedicato per endpoint di export bulk (CSV/Excel/PDF). I view
         # sensibili devono usare ScopedRateThrottle con throttle_scope="export".
         "export": "10/hour",

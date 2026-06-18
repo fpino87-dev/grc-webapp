@@ -112,6 +112,22 @@ class LoginRateThrottle(AnonRateThrottle):
     scope = "login"
 
 
+class RefreshRateThrottle(AnonRateThrottle):
+    """Throttle dedicato per /api/token/refresh/.
+
+    Il refresh è una chiamata anonima (l'access token è scaduto, quindi la
+    richiesta non porta header Authorization): senza scope dedicato ricadeva
+    nel throttle `anon` (20/h) condiviso con tutto il traffico anonimo dell'IP.
+    Risultato: ad access token scaduto, dopo poche richieste il refresh tornava
+    429 e l'interceptor frontend disconnetteva l'utente — la pagina sembrava
+    "bloccarsi" a ogni reload. Il refresh richiede comunque un refresh token
+    firmato nel cookie httpOnly, quindi il brute-force è inattuabile: qui il
+    limite serve solo da guardia anti-DoS, con una soglia ampia (vedi
+    `DEFAULT_THROTTLE_RATES["refresh"]`).
+    """
+    scope = "refresh"
+
+
 class ExportRateThrottle(UserRateThrottle):
     """
     newfix S11 — throttle dedicato per export bulk (CSV/Excel/PDF).
@@ -482,6 +498,8 @@ class GrcTokenRefreshView(TokenRefreshView):
     (fallback sul body per client machine-to-machine). La rotation emette il
     nuovo refresh di nuovo SOLO nel cookie; il body contiene solo l'access.
     """
+
+    throttle_classes = [RefreshRateThrottle]
 
     def post(self, request, *args, **kwargs):
         refresh = (
