@@ -34,63 +34,6 @@ const ROLE_KEYS: Record<string, string> = {
 
 const TODAY = todayISO();
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function scopeBadge(a: RoleAssignment, t: (k: string) => string) {
-  const isGlobal = a.scope_type === "org";
-  const isBu = a.scope_type === "bu";
-  const cls = isGlobal
-    ? "bg-blue-50 text-blue-700 border-blue-200"
-    : isBu
-    ? "bg-indigo-50 text-indigo-700 border-indigo-200"
-    : "bg-green-50 text-green-700 border-green-200";
-
-  let label: string;
-  if (isGlobal) {
-    label = t("governance.scope_badge.global");
-  } else {
-    const prefix = t(isBu ? "governance.scope_badge.bu" : "governance.scope_badge.plant");
-    const detail = [a.scope_code, a.scope_name].filter(Boolean).join(" — ") || a.scope_id || "";
-    label = detail ? `${prefix}: ${detail}` : prefix;
-  }
-
-  return (
-    <span className={`text-xs px-1.5 py-0.5 rounded border ${cls}`}>
-      {label}
-    </span>
-  );
-}
-
-function roleBadge(a: RoleAssignment, t: (k: string, opts?: any) => string) {
-  if (!a.valid_until) {
-    return (
-      <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-        {t("status.attivo")}
-      </span>
-    );
-  }
-  const days = Math.ceil((new Date(a.valid_until).getTime() - Date.now()) / 86400000);
-  if (days < 0) {
-    return (
-      <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
-        {t("status.scaduto")}
-      </span>
-    );
-  }
-  if (days <= 30) {
-    return (
-      <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
-        {t("governance.badges.expires_in_days", { days })}
-      </span>
-    );
-  }
-  return (
-    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-      {t("status.attivo")}
-    </span>
-  );
-}
-
 // ── Toast ─────────────────────────────────────────────────────────────────────
 
 function Toast({ msg, onClose }: { msg: string; onClose: () => void }) {
@@ -505,12 +448,6 @@ export function GovernancePage() {
   const [sostituisciTarget, setSostituisciTarget] = useState<RoleAssignment | null>(null);
   const [toast, setToast]                         = useState<string | null>(null);
 
-  const { data: assignments, isLoading: loadingAssign } = useQuery({
-    queryKey: ["role-assignments"],
-    queryFn: () => governanceApi.roleAssignments(),
-    retry: false,
-  });
-
   const { data: committees, isLoading: loadingComm } = useQuery({
     queryKey: ["committees"],
     queryFn: () => governanceApi.committees(),
@@ -528,15 +465,6 @@ export function GovernancePage() {
     email: u.email,
     name:  `${u.first_name} ${u.last_name}`.trim() || u.username || u.email,
   }));
-
-  function roleLabel(role: string) {
-    const key = ROLE_KEYS[role] ?? role;
-    return t(`governance.roles.${key}`, { defaultValue: role });
-  }
-
-  function formatDate(dateStr: string) {
-    return new Date(dateStr).toLocaleDateString(i18n.language);
-  }
 
   function showToast(msg: string) {
     setToast(msg);
@@ -556,15 +484,6 @@ export function GovernancePage() {
   // matrice costruiamo un assignment parziale a partire dal titolare della cella.
   const holderAsAssignment = (h: { id: string; role: string; user_name?: string | null }) =>
     ({ id: h.id, role: h.role, user_name: h.user_name ?? null } as unknown as RoleAssignment);
-
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => governanceApi.deleteRoleAssignment(id),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["role-assignments"] });
-      qc.invalidateQueries({ queryKey: ["governance-vacanti"] });
-      qc.invalidateQueries({ queryKey: ["governance-in-scadenza"] });
-    },
-  });
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
@@ -731,114 +650,45 @@ export function GovernancePage() {
             />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Ruoli normativi */}
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-gray-700">{t("governance.sections.roles")}</h3>
-            <button
-              onClick={() => openAssign()}
-              className="text-xs px-2 py-1 bg-primary-600 text-white rounded hover:bg-primary-700"
-            >
-              {t("governance.roles_assign.open")}
-            </button>
-          </div>
-
-          {loadingAssign ? (
-            <p className="text-sm text-gray-400">{t("common.loading")}</p>
-          ) : !assignments?.length ? (
-            <p className="text-sm text-gray-400 italic">{t("governance.empty.roles")}</p>
-          ) : (
-            <div className="space-y-1">
-              {assignments.map((a) => (
-                <div key={a.id} className="flex items-start justify-between py-2 border-b border-gray-50 last:border-0 gap-2">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-gray-800 text-sm">
-                        {roleLabel(a.role)}
+          {/* Comitati di sicurezza */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-gray-700">{t("governance.sections.committees")}</h3>
+              <button
+                onClick={() => setShowCommitteeModal(true)}
+                className="text-xs px-2 py-1 bg-primary-600 text-white rounded hover:bg-primary-700"
+              >
+                {t("governance.committees.new.open")}
+              </button>
+            </div>
+            {loadingComm ? (
+              <p className="text-sm text-gray-400">{t("common.loading")}</p>
+            ) : !committees?.length ? (
+              <p className="text-sm text-gray-400 italic">{t("governance.empty.committees")}</p>
+            ) : (
+              <div className="space-y-3">
+                {committees.map((c) => (
+                  <div key={c.id} className="border border-gray-100 rounded p-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-gray-800 text-sm">{c.name}</span>
+                      <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
+                        {c.committee_type}
                       </span>
-                      {roleBadge(a, t)}
-                      {scopeBadge(a, t)}
                     </div>
-                    <div className="text-xs text-gray-500 mt-0.5">
-                      {a.user_name ?? a.user_email ?? String(a.user)}
-                      {a.valid_until && (
-                        <span className="ml-2 text-gray-400">
-                          {t("governance.valid_until", { date: formatDate(a.valid_until) })}
-                        </span>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {t("governance.committees.frequency", { value: c.frequency })}
+                      {c.next_meeting_at && (
+                        <> — {t("governance.committees.next_meeting")}{" "}
+                          <span className="font-medium">
+                            {new Date(c.next_meeting_at).toLocaleDateString(i18n.language)}
+                          </span>
+                        </>
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-1 flex-shrink-0 mt-0.5">
-                    <button
-                      onClick={() => setSostituisciTarget(a)}
-                      className="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 border border-blue-200"
-                    >
-                      {t("governance.actions.replace")}
-                    </button>
-                    <button
-                      onClick={() => setTerminaTarget(a)}
-                      className="text-xs px-2 py-1 bg-orange-50 text-orange-700 rounded hover:bg-orange-100 border border-orange-200"
-                    >
-                      {t("governance.actions.terminate")}
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (window.confirm(t("governance.actions.delete_confirm"))) {
-                          deleteMutation.mutate(a.id);
-                        }
-                      }}
-                      className="text-xs px-2 py-1 bg-red-50 text-red-700 rounded hover:bg-red-100 border border-red-200"
-                    >
-                      {t("actions.delete")}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Comitati */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-gray-700">{t("governance.sections.committees")}</h3>
-            <button
-              onClick={() => setShowCommitteeModal(true)}
-              className="text-xs px-2 py-1 bg-primary-600 text-white rounded hover:bg-primary-700"
-            >
-              {t("governance.committees.new.open")}
-            </button>
-          </div>
-          {loadingComm ? (
-            <p className="text-sm text-gray-400">{t("common.loading")}</p>
-          ) : !committees?.length ? (
-            <p className="text-sm text-gray-400 italic">{t("governance.empty.committees")}</p>
-          ) : (
-            <div className="space-y-3">
-              {committees.map((c) => (
-                <div key={c.id} className="border border-gray-100 rounded p-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-gray-800 text-sm">{c.name}</span>
-                    <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
-                      {c.committee_type}
-                    </span>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    {t("governance.committees.frequency", { value: c.frequency })}
-                    {c.next_meeting_at && (
-                      <> — {t("governance.committees.next_meeting")}{" "}
-                        <span className="font-medium">
-                          {new Date(c.next_meeting_at).toLocaleDateString(i18n.language)}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Modali */}

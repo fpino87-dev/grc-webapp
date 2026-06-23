@@ -18,6 +18,8 @@ export function RoleRequirementsPanel() {
     scope_level: "org",
     applies_to: "all",
     org_covers_sites: false,
+    mandatory: true,
+    single_holder: true,
     enabled: true,
     framework_refs: [],
   });
@@ -113,6 +115,22 @@ export function RoleRequirementsPanel() {
               </label>
             </>
           )}
+          <label className="flex items-center gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={form.mandatory !== false}
+              onChange={(e) => setForm({ ...form, mandatory: e.target.checked })}
+            />
+            {t("governance.requirements.mandatory")}
+          </label>
+          <label className="flex items-center gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={form.single_holder !== false}
+              onChange={(e) => setForm({ ...form, single_holder: e.target.checked })}
+            />
+            {t("governance.requirements.single_holder")}
+          </label>
           <div className="sm:col-span-2 flex justify-end gap-2">
             {error && <p className="text-xs text-red-600 self-center">{error}</p>}
             <button onClick={() => setShowForm(false)} className="px-3 py-1.5 border rounded text-sm text-gray-600 hover:bg-gray-50">
@@ -145,6 +163,10 @@ export function RoleRequirementsPanel() {
                   {r.scope_level === "org"
                     ? t("governance.requirements.scope_level_org")
                     : `${t("governance.requirements.scope_level_plant")} · ${r.applies_to === "nis2_only" ? t("governance.requirements.applies_nis2") : t("governance.requirements.applies_all")}${r.org_covers_sites ? " · " + t("governance.requirements.org_covers_sites") : ""}`}
+                  {" · "}
+                  {r.mandatory ? t("governance.requirements.mandatory") : t("governance.requirements.optional")}
+                  {" · "}
+                  {r.single_holder ? t("governance.requirements.single_holder") : t("governance.requirements.multi_holder")}
                 </span>
               </div>
               <div className="flex gap-1 shrink-0">

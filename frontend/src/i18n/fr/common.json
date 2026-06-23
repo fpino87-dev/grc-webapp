@@ -1221,14 +1221,17 @@
         "covered_via_org": "Hérité de l'org",
         "expiring": "Bientôt expiré",
         "vacant": "Vacant",
-        "na": "N/D"
+        "na": "N/D",
+        "unset": "Non attribué"
       },
       "filters": {
         "all_bu": "Toutes les BU",
         "only_gaps": "Lacunes uniquement",
         "search_plant": "Rechercher un site…"
       },
-      "site_column": "Site"
+      "site_column": "Site",
+      "add_holder": "Ajouter",
+      "multi_holder": "plusieurs titulaires"
     },
     "requirements": {
       "title": "Rôles obligatoires",
@@ -1249,7 +1252,11 @@
       "notes": "Notes",
       "save": "Enregistrer",
       "delete_confirm": "Supprimer cette exigence de rôle ?",
-      "empty": "Aucune exigence définie"
+      "empty": "Aucune exigence définie",
+      "mandatory": "Obligatoire",
+      "optional": "Facultatif",
+      "single_holder": "Titulaire unique",
+      "multi_holder": "Plusieurs titulaires"
     }
   },
   "sidebar": {

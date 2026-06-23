@@ -169,6 +169,36 @@ def _active_role_qs(role):
     ).filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today))
 
 
+# Ruoli che per natura ammettono più titolari attivi sullo stesso perimetro,
+# quando non esiste un RoleRequirement esplicito che ne fissi la policy.
+DEFAULT_MULTI_HOLDER_ROLES = {
+    "control_owner",
+    "comitato_membro",
+    "raci_responsible",
+    "raci_accountable",
+    "external_auditor",
+}
+
+
+def is_single_holder(role: str) -> bool:
+    """True se il ruolo ammette un solo titolare attivo per perimetro.
+
+    Configurabile per ruolo via ``RoleRequirement.single_holder``; in assenza di
+    un requisito esplicito vale un default sensato (la maggior parte dei ruoli
+    normativi è a titolare unico, tranne i ruoli distribuiti).
+    """
+    from .models import RoleRequirement
+
+    req = (
+        RoleRequirement.objects.filter(role=role, enabled=True, deleted_at__isnull=True)
+        .order_by("scope_level")  # "org" prima di "plant": deterministico
+        .first()
+    )
+    if req is not None:
+        return req.single_holder
+    return role not in DEFAULT_MULTI_HOLDER_ROLES
+
+
 def get_vacant_mandatory_roles(plant=None):
     """Ruoli obbligatori (``RoleRequirement``) senza titolare attivo.
 
@@ -184,7 +214,9 @@ def get_vacant_mandatory_roles(plant=None):
     from .models import RoleRequirement
 
     vacant = []
-    requirements = RoleRequirement.objects.filter(enabled=True, deleted_at__isnull=True)
+    requirements = RoleRequirement.objects.filter(
+        enabled=True, mandatory=True, deleted_at__isnull=True,
+    )
 
     for req in requirements:
         if req.scope_level == "org":
@@ -209,18 +241,22 @@ def get_vacant_mandatory_roles(plant=None):
 
 
 def get_role_coverage_matrix(user, expiring_days: int = 30):
-    """Matrice di copertura dei ruoli obbligatori per scope.
+    """Matrice di copertura dei ruoli per scope.
 
     Restituisce tre blocchi:
-    - ``org_roles``: ruoli org-level con stato unico (covered/expiring/vacant);
-    - ``plant_roles``: ruoli per-sito con una cella per ogni plant visibile;
+    - ``org_roles``: ruoli org-level **obbligatori** con stato unico;
+    - ``plant_roles``: matrice completa — TUTTI i ruoli normativi tranne quelli
+      definiti come org-level obbligatori — con una cella per ogni plant
+      visibile. I ruoli obbligatori per-sito segnalano le lacune (``vacant``);
+      gli altri sono assegnabili ma neutri (``unset``);
     - ``plants``: anagrafica dei plant visibili (raggruppabili per BU lato UI).
 
     Stati cella: ``covered`` (titolare di sito), ``covered_via_org`` (ereditato
-    dal titolare org quando ``org_covers_sites=True``), ``expiring``, ``vacant``,
+    dal titolare org quando ``org_covers_sites=True``), ``expiring``, ``vacant``
+    (obbligatorio e scoperto), ``unset`` (non obbligatorio e senza titolare),
     ``na`` (requisito non applicabile al sito).
     """
-    from .models import RoleAssignment, RoleRequirement
+    from .models import NormativeRole, RoleAssignment, RoleRequirement
     from apps.plants.models import Plant
     from core.scoping import get_user_plant_ids
 
@@ -230,7 +266,16 @@ def get_role_coverage_matrix(user, expiring_days: int = 30):
     requirements = list(
         RoleRequirement.objects.filter(enabled=True, deleted_at__isnull=True)
     )
-    req_roles = {r.role for r in requirements}
+    org_mandatory = {r.role for r in requirements if r.scope_level == "org" and r.mandatory}
+    # Requisito per-sito (obbligatorio) per ruolo: definisce applies_to/fallback
+    site_req = {
+        r.role: r for r in requirements
+        if r.scope_level == "plant" and r.mandatory
+    }
+    single_by_role = {r.role: r.single_holder for r in requirements}
+
+    all_roles = [code for code, _ in NormativeRole.choices]
+    site_row_roles = [r for r in all_roles if r not in org_mandatory]
 
     # Plant visibili all'utente (scoping plant — niente PII di siti non accessibili)
     allowed = get_user_plant_ids(user)
@@ -239,10 +284,10 @@ def get_role_coverage_matrix(user, expiring_days: int = 30):
         plants_qs = plants_qs.filter(id__in=allowed)
     plants = list(plants_qs.order_by("bu__code", "code"))
 
-    # Tutte le assegnazioni attive dei ruoli richiesti: una sola query (no N+1)
+    # Tutte le assegnazioni attive: una sola query (no N+1)
     active = (
         RoleAssignment.objects.filter(
-            role__in=req_roles,
+            role__in=all_roles,
             valid_from__lte=today,
             deleted_at__isnull=True,
         )
@@ -266,10 +311,10 @@ def get_role_coverage_matrix(user, expiring_days: int = 30):
             "days_left": (a.valid_until - today).days if a.valid_until else None,
         }
 
-    def evaluate(assignments):
-        """(status, holders) per un insieme di assegnazioni dirette."""
+    def evaluate(assignments, empty_status):
+        """(status, holders): empty_status distingue obbligatorio (vacant) da non (unset)."""
         if not assignments:
-            return "vacant", []
+            return empty_status, []
         holders = [holder(a) for a in assignments]
         all_expiring = all(
             a.valid_until is not None and a.valid_until <= threshold
@@ -277,41 +322,53 @@ def get_role_coverage_matrix(user, expiring_days: int = 30):
         )
         return ("expiring" if all_expiring else "covered"), holders
 
-    org_roles, plant_roles = [], []
-    for r in sorted(requirements, key=lambda x: (x.scope_level, x.role)):
-        if r.scope_level == "org":
-            status, holders = evaluate(org_by_role.get(r.role, []))
-            org_roles.append({
-                "role": r.role,
-                "framework_refs": r.framework_refs,
-                "status": status,
-                "holders": holders,
-            })
-            continue
+    # ── Ruoli org-level obbligatori ──
+    org_roles = []
+    for r in sorted((x for x in requirements if x.scope_level == "org" and x.mandatory),
+                    key=lambda x: x.role):
+        status, holders = evaluate(org_by_role.get(r.role, []), "vacant")
+        org_roles.append({
+            "role": r.role,
+            "framework_refs": r.framework_refs,
+            "status": status,
+            "holders": holders,
+        })
+
+    # ── Matrice completa per-sito ──
+    plant_roles = []
+    for role in sorted(site_row_roles):
+        req = site_req.get(role)
+        required = req is not None
+        applies_to = req.applies_to if req else "all"
+        org_covers = req.org_covers_sites if req else False
+        empty_status = "vacant" if required else "unset"
 
         cells = {}
         for p in plants:
-            if r.applies_to == "nis2_only" and not p.is_nis2_subject:
+            if required and applies_to == "nis2_only" and not p.is_nis2_subject:
                 cells[str(p.id)] = {"status": "na", "holders": []}
                 continue
-            site_assigns = plant_by_role_site.get((r.role, str(p.id)), [])
+            site_assigns = plant_by_role_site.get((role, str(p.id)), [])
             if site_assigns:
-                status, holders = evaluate(site_assigns)
+                status, holders = evaluate(site_assigns, empty_status)
                 cells[str(p.id)] = {"status": status, "holders": holders}
-            elif r.org_covers_sites and org_by_role.get(r.role):
-                status, holders = evaluate(org_by_role[r.role])
+            elif org_covers and org_by_role.get(role):
+                status, holders = evaluate(org_by_role[role], empty_status)
                 cells[str(p.id)] = {
                     "status": "expiring" if status == "expiring" else "covered_via_org",
                     "holders": holders,
                     "via_org": True,
                 }
             else:
-                cells[str(p.id)] = {"status": "vacant", "holders": []}
+                cells[str(p.id)] = {"status": empty_status, "holders": []}
+
         plant_roles.append({
-            "role": r.role,
-            "framework_refs": r.framework_refs,
-            "applies_to": r.applies_to,
-            "org_covers_sites": r.org_covers_sites,
+            "role": role,
+            "required": required,
+            "single_holder": single_by_role.get(role, role not in DEFAULT_MULTI_HOLDER_ROLES),
+            "framework_refs": req.framework_refs if req else [],
+            "applies_to": applies_to,
+            "org_covers_sites": org_covers,
             "cells": cells,
         })
 

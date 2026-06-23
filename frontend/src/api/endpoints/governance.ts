@@ -48,6 +48,7 @@ export type CoverageStatus =
   | "covered_via_org"
   | "expiring"
   | "vacant"
+  | "unset"
   | "na";
 
 export interface CoverageHolder {
@@ -72,6 +73,8 @@ export interface CoverageCell {
 
 export interface PlantRoleCoverage {
   role: string;
+  required: boolean;
+  single_holder: boolean;
   framework_refs: string[];
   applies_to: "all" | "nis2_only";
   org_covers_sites: boolean;
@@ -101,6 +104,8 @@ export interface RoleRequirement {
   scope_level: "org" | "plant";
   applies_to: "all" | "nis2_only";
   org_covers_sites: boolean;
+  mandatory: boolean;
+  single_holder: boolean;
   enabled: boolean;
   framework_refs: string[];
   notes: string;

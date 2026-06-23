@@ -1221,14 +1221,17 @@
         "covered_via_org": "Kuruluştan devralındı",
         "expiring": "Süresi doluyor",
         "vacant": "Boş",
-        "na": "Yok"
+        "na": "Yok",
+        "unset": "Atanmamış"
       },
       "filters": {
         "all_bu": "Tüm İB",
         "only_gaps": "Yalnızca boşluklar",
         "search_plant": "Tesis ara…"
       },
-      "site_column": "Tesis"
+      "site_column": "Tesis",
+      "add_holder": "Ekle",
+      "multi_holder": "birden çok görevli"
     },
     "requirements": {
       "title": "Zorunlu roller",
@@ -1249,7 +1252,11 @@
       "notes": "Notlar",
       "save": "Kaydet",
       "delete_confirm": "Bu rol gereksinimi silinsin mi?",
-      "empty": "Tanımlı gereksinim yok"
+      "empty": "Tanımlı gereksinim yok",
+      "mandatory": "Zorunlu",
+      "optional": "İsteğe bağlı",
+      "single_holder": "Tek görevli",
+      "multi_holder": "Birden çok görevli"
     }
   },
   "sidebar": {

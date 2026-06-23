@@ -1221,14 +1221,17 @@
         "covered_via_org": "Dziedziczone z org",
         "expiring": "Wygasające",
         "vacant": "Wakat",
-        "na": "N/D"
+        "na": "N/D",
+        "unset": "Nieprzypisane"
       },
       "filters": {
         "all_bu": "Wszystkie JB",
         "only_gaps": "Tylko braki",
         "search_plant": "Szukaj zakładu…"
       },
-      "site_column": "Zakład"
+      "site_column": "Zakład",
+      "add_holder": "Dodaj",
+      "multi_holder": "wielu posiadaczy"
     },
     "requirements": {
       "title": "Role obowiązkowe",
@@ -1249,7 +1252,11 @@
       "notes": "Notatki",
       "save": "Zapisz",
       "delete_confirm": "Usunąć to wymaganie roli?",
-      "empty": "Nie zdefiniowano wymagań"
+      "empty": "Nie zdefiniowano wymagań",
+      "mandatory": "Obowiązkowy",
+      "optional": "Opcjonalny",
+      "single_holder": "Jeden posiadacz",
+      "multi_holder": "Wielu posiadaczy"
     }
   },
   "sidebar": {

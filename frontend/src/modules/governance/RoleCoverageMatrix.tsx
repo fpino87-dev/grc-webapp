@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import {
   governanceApi,
   type CoverageCell,
+  type CoverageHolder,
   type CoverageStatus,
   type CoveragePlant,
 } from "../../api/endpoints/governance";
@@ -25,7 +26,8 @@ const STATUS_DOT: Record<CoverageStatus, string> = {
   covered_via_org: "bg-emerald-400",
   expiring: "bg-amber-400",
   vacant: "bg-red-500",
-  na: "bg-gray-200",
+  unset: "bg-gray-300",
+  na: "bg-gray-100",
 };
 
 const STATUS_CELL: Record<CoverageStatus, string> = {
@@ -33,7 +35,17 @@ const STATUS_CELL: Record<CoverageStatus, string> = {
   covered_via_org: "bg-emerald-50 border-emerald-200 text-emerald-800",
   expiring: "bg-amber-50 border-amber-200 text-amber-800",
   vacant: "bg-red-50 border-red-200 text-red-700",
+  unset: "bg-white border-gray-200 text-gray-300 hover:bg-gray-50",
   na: "bg-gray-50 border-gray-100 text-gray-300",
+};
+
+const SYMBOL: Record<CoverageStatus, string> = {
+  covered: "✓",
+  covered_via_org: "↑",
+  expiring: "!",
+  vacant: "—",
+  unset: "+",
+  na: "",
 };
 
 export function RoleCoverageMatrix({ onAssign, onReplace, onTerminate }: Props) {
@@ -82,6 +94,87 @@ export function RoleCoverageMatrix({ onAssign, onReplace, onTerminate }: Props) 
 
   const isGap = (s: CoverageStatus) => s === "vacant" || s === "expiring";
 
+  // Popover azioni riutilizzato da celle e card org.
+  function ActionPopover({
+    role, scopeType, scopeId, siteLabel, cell, singleHolder, align = "center",
+  }: {
+    role: string;
+    scopeType: "org" | "plant";
+    scopeId?: string | null;
+    siteLabel: string;
+    cell: { status: CoverageStatus; holders: CoverageHolder[]; via_org?: boolean };
+    singleHolder: boolean;
+    align?: "center" | "left";
+  }) {
+    const { status, holders, via_org } = cell;
+    // Aggiungere un titolare è possibile se: vuoto, ruolo multi-titolare, o cella
+    // ereditata da org (override per sito). Non se single-titolare già coperto.
+    const canAssign =
+      status !== "na" &&
+      (status === "unset" || status === "vacant" || status === "covered_via_org" || !singleHolder);
+    const assignLabel = !singleHolder && holders.length
+      ? t("governance.coverage.add_holder")
+      : t("governance.coverage.assign");
+    return (
+      <div
+        className={`absolute z-20 mt-1 ${align === "center" ? "left-1/2 -translate-x-1/2" : "left-0"} bg-white border border-gray-200 rounded shadow-lg p-2 w-56 text-left`}
+      >
+        <div className="text-xs font-semibold text-gray-700 mb-1">
+          {roleLabel(role)} — {siteLabel}
+        </div>
+        {via_org && (
+          <div className="text-[11px] text-emerald-600 mb-1">
+            {t("governance.coverage.via_org_hint")}
+          </div>
+        )}
+        {holders.length ? (
+          <ul className="text-xs text-gray-600 space-y-0.5 mb-2">
+            {holders.map((h) => (
+              <li key={h.id}>
+                {h.user}
+                {h.valid_until && <span className="text-gray-400"> · {h.valid_until}</span>}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="text-xs text-gray-400 italic mb-2">
+            {t("governance.coverage.holder_none")}
+          </div>
+        )}
+        <div className="flex flex-wrap gap-1">
+          {canAssign && (
+            <button
+              onClick={() => {
+                setOpenCell(null);
+                onAssign({ role, scope_type: scopeType, scope_id: scopeId });
+              }}
+              className="text-xs px-2 py-1 bg-primary-600 text-white rounded hover:bg-primary-700"
+            >
+              {assignLabel}
+            </button>
+          )}
+          {/* Sostituisci/Termina solo su titolari diretti (non sul fallback org) */}
+          {!via_org && holders.map((h) => (
+            <span key={h.id} className="flex gap-1">
+              <button
+                onClick={() => { setOpenCell(null); onReplace({ id: h.id, role, user_name: h.user }); }}
+                className="text-xs px-2 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100"
+              >
+                {t("governance.coverage.replace")}
+              </button>
+              <button
+                onClick={() => { setOpenCell(null); onTerminate({ id: h.id, role, user_name: h.user }); }}
+                className="text-xs px-2 py-1 bg-orange-50 text-orange-700 border border-orange-200 rounded hover:bg-orange-100"
+              >
+                {t("governance.coverage.terminate")}
+              </button>
+            </span>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -89,9 +182,8 @@ export function RoleCoverageMatrix({ onAssign, onReplace, onTerminate }: Props) 
           <h3 className="text-sm font-semibold text-gray-700">{t("governance.coverage.title")}</h3>
           <p className="text-xs text-gray-500 mt-0.5">{t("governance.coverage.subtitle")}</p>
         </div>
-        {/* Legenda */}
         <div className="flex items-center gap-3 text-xs text-gray-600 flex-wrap">
-          {(["covered", "covered_via_org", "expiring", "vacant", "na"] as CoverageStatus[]).map((s) => (
+          {(["covered", "covered_via_org", "expiring", "vacant", "unset", "na"] as CoverageStatus[]).map((s) => (
             <span key={s} className="inline-flex items-center gap-1">
               <span className={`inline-block w-2.5 h-2.5 rounded-full ${STATUS_DOT[s]}`} />
               {statusLabel(s)}
@@ -100,41 +192,46 @@ export function RoleCoverageMatrix({ onAssign, onReplace, onTerminate }: Props) 
         </div>
       </div>
 
-      {/* Ruoli org-level */}
+      {/* Ruoli org-level obbligatori */}
       <div>
         <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
           {t("governance.coverage.org_section")}
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-          {data.org_roles.map((r) => (
-            <div
-              key={r.role}
-              className={`flex items-center justify-between border rounded px-3 py-2 ${STATUS_CELL[r.status]}`}
-            >
-              <div className="min-w-0">
-                <div className="text-sm font-medium truncate">{roleLabel(r.role)}</div>
-                <div className="text-xs truncate">
-                  {r.holders.length
-                    ? r.holders.map((h) => h.user).join(", ")
-                    : t("governance.coverage.holder_none")}
-                </div>
-              </div>
-              {r.status === "vacant" ? (
+          {data.org_roles.map((r) => {
+            const key = `org:${r.role}`;
+            const isOpen = openCell === key;
+            return (
+              <div key={r.role} className="relative">
                 <button
-                  onClick={() => onAssign({ role: r.role, scope_type: "org" })}
-                  className="text-xs px-2 py-1 bg-white/70 border rounded hover:bg-white shrink-0"
+                  onClick={() => setOpenCell(isOpen ? null : key)}
+                  className={`w-full flex items-center justify-between border rounded px-3 py-2 text-left ${STATUS_CELL[r.status]}`}
                 >
-                  {t("governance.coverage.assign")}
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium truncate">{roleLabel(r.role)}</span>
+                    <span className="block text-xs truncate">
+                      {r.holders.length ? r.holders.map((h) => h.user).join(", ") : t("governance.coverage.holder_none")}
+                    </span>
+                  </span>
+                  <span className="text-xs font-medium shrink-0 ml-2">{statusLabel(r.status)}</span>
                 </button>
-              ) : (
-                <span className="text-xs font-medium shrink-0">{statusLabel(r.status)}</span>
-              )}
-            </div>
-          ))}
+                {isOpen && (
+                  <ActionPopover
+                    role={r.role}
+                    scopeType="org"
+                    siteLabel={t("governance.coverage.org_section")}
+                    cell={{ status: r.status, holders: r.holders }}
+                    singleHolder
+                    align="left"
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Ruoli per-sito */}
+      {/* Matrice completa: ruoli in riga, siti in colonna */}
       <div>
         <div className="flex items-center justify-between gap-3 flex-wrap mb-2">
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -167,120 +264,70 @@ export function RoleCoverageMatrix({ onAssign, onReplace, onTerminate }: Props) 
         {plants.length === 0 ? (
           <p className="text-sm text-gray-400 italic">{t("governance.coverage.no_plants")}</p>
         ) : (
-          // Trasposta: siti in riga (tutti visibili, niente scroll orizzontale),
-          // ruoli per-sito in colonna (pochi → ci stanno sempre in larghezza).
-          <div className="border border-gray-200 rounded">
-            <table className="w-full text-sm border-collapse table-fixed">
+          <div className="overflow-x-auto border border-gray-200 rounded">
+            <table className="text-sm border-collapse">
               <thead>
                 <tr className="bg-gray-50">
-                  <th className="text-left px-3 py-2 font-medium text-gray-600 border-b border-r border-gray-200">
-                    {t("governance.coverage.site_column")}
+                  <th className="sticky left-0 z-10 bg-gray-50 text-left px-3 py-2 font-medium text-gray-600 border-b border-r border-gray-200 min-w-[180px]">
+                    {t("governance.coverage.role_column")}
                   </th>
-                  {data.plant_roles.map((r) => (
-                    <th key={r.role} className="px-2 py-2 font-medium text-gray-600 border-b border-gray-200 text-center">
-                      <div>{roleLabel(r.role)}</div>
-                      {r.applies_to === "nis2_only" && (
-                        <div className="text-[10px] text-gray-400 font-normal">
-                          {t("governance.coverage.applies_nis2_only")}
-                        </div>
-                      )}
+                  {plants.map((p) => (
+                    <th
+                      key={p.id}
+                      className="px-2 py-2 font-medium text-gray-600 border-b border-gray-200 whitespace-nowrap text-center"
+                      title={`${p.bu_code ?? ""} ${p.name}`.trim()}
+                    >
+                      <div>{p.code}</div>
+                      {p.is_nis2 && <div className="text-[10px] text-blue-600 font-normal">NIS2</div>}
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {plants.map((p) => {
-                  const rowCells = data.plant_roles.map((r) => ({ r, cell: r.cells[p.id] as CoverageCell | undefined }));
+                {data.plant_roles.map((r) => {
+                  const rowCells = plants.map((p) => ({ p, cell: r.cells[p.id] as CoverageCell | undefined }));
                   if (onlyGaps && !rowCells.some(({ cell }) => cell && isGap(cell.status))) {
                     return null;
                   }
                   return (
-                    <tr key={p.id} className="border-b border-gray-100 last:border-0">
-                      <td className="px-3 py-2 text-gray-800 border-r border-gray-200">
-                        <span className="font-medium">{p.code}</span>
-                        <span className="text-gray-500"> — {p.name}</span>
-                        {p.is_nis2 && (
-                          <span className="ml-1 text-[10px] text-blue-600">NIS2</span>
+                    <tr key={r.role} className="border-b border-gray-100 last:border-0">
+                      <td className="sticky left-0 z-10 bg-white px-3 py-2 font-medium text-gray-800 border-r border-gray-200 whitespace-nowrap">
+                        {roleLabel(r.role)}
+                        {r.required && r.applies_to === "nis2_only" && (
+                          <span className="ml-1 text-[10px] text-gray-400">
+                            ({t("governance.coverage.applies_nis2_only")})
+                          </span>
+                        )}
+                        {!r.single_holder && (
+                          <span className="ml-1 text-[10px] text-gray-400">
+                            ({t("governance.coverage.multi_holder")})
+                          </span>
                         )}
                       </td>
-                      {rowCells.map(({ r, cell }) => {
+                      {rowCells.map(({ p, cell }) => {
                         const status = cell?.status ?? "na";
-                        const key = `${p.id}:${r.role}`;
+                        const key = `${r.role}:${p.id}`;
                         const isOpen = openCell === key;
+                        const count = cell?.holders?.length ?? 0;
                         return (
-                          <td key={r.role} className="px-1 py-1 text-center align-middle relative">
+                          <td key={p.id} className="px-1 py-1 text-center align-middle relative">
                             <button
                               onClick={() => setOpenCell(isOpen ? null : key)}
                               disabled={status === "na"}
                               className={`w-full h-8 rounded border text-xs ${STATUS_CELL[status]} ${status === "na" ? "cursor-default" : "hover:brightness-95"}`}
                               title={statusLabel(status)}
                             >
-                              {status === "covered" && "✓"}
-                              {status === "covered_via_org" && "↑"}
-                              {status === "expiring" && "!"}
-                              {status === "vacant" && "—"}
+                              {!r.single_holder && count > 1 ? count : SYMBOL[status]}
                             </button>
                             {isOpen && status !== "na" && (
-                              <div className="absolute z-20 mt-1 left-1/2 -translate-x-1/2 bg-white border border-gray-200 rounded shadow-lg p-2 w-56 text-left">
-                                <div className="text-xs font-semibold text-gray-700 mb-1">
-                                  {roleLabel(r.role)} — {p.code}
-                                </div>
-                                {cell?.via_org && (
-                                  <div className="text-[11px] text-emerald-600 mb-1">
-                                    {t("governance.coverage.via_org_hint")}
-                                  </div>
-                                )}
-                                {cell?.holders?.length ? (
-                                  <ul className="text-xs text-gray-600 space-y-0.5 mb-2">
-                                    {cell.holders.map((h) => (
-                                      <li key={h.id}>
-                                        {h.user}
-                                        {h.valid_until && (
-                                          <span className="text-gray-400"> · {h.valid_until}</span>
-                                        )}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                ) : (
-                                  <div className="text-xs text-gray-400 italic mb-2">
-                                    {t("governance.coverage.holder_none")}
-                                  </div>
-                                )}
-                                <div className="flex flex-wrap gap-1">
-                                  <button
-                                    onClick={() => {
-                                      setOpenCell(null);
-                                      onAssign({ role: r.role, scope_type: "plant", scope_id: p.id });
-                                    }}
-                                    className="text-xs px-2 py-1 bg-primary-600 text-white rounded hover:bg-primary-700"
-                                  >
-                                    {t("governance.coverage.assign")}
-                                  </button>
-                                  {/* sostituisci/termina solo su titolari specifici del sito (non sul fallback org) */}
-                                  {!cell?.via_org && cell?.holders?.map((h) => (
-                                    <span key={h.id} className="flex gap-1">
-                                      <button
-                                        onClick={() => {
-                                          setOpenCell(null);
-                                          onReplace({ id: h.id, role: r.role, user_name: h.user });
-                                        }}
-                                        className="text-xs px-2 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100"
-                                      >
-                                        {t("governance.coverage.replace")}
-                                      </button>
-                                      <button
-                                        onClick={() => {
-                                          setOpenCell(null);
-                                          onTerminate({ id: h.id, role: r.role, user_name: h.user });
-                                        }}
-                                        className="text-xs px-2 py-1 bg-orange-50 text-orange-700 border border-orange-200 rounded hover:bg-orange-100"
-                                      >
-                                        {t("governance.coverage.terminate")}
-                                      </button>
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
+                              <ActionPopover
+                                role={r.role}
+                                scopeType="plant"
+                                scopeId={p.id}
+                                siteLabel={p.code}
+                                cell={cell ?? { status, holders: [] }}
+                                singleHolder={r.single_holder}
+                              />
                             )}
                           </td>
                         );

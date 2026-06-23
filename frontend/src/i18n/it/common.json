@@ -1139,14 +1139,17 @@
         "covered_via_org": "Ereditato da org",
         "expiring": "In scadenza",
         "vacant": "Vacante",
-        "na": "N/D"
+        "na": "N/D",
+        "unset": "Non assegnato"
       },
       "filters": {
         "all_bu": "Tutte le BU",
         "only_gaps": "Solo lacune",
         "search_plant": "Cerca sito…"
       },
-      "site_column": "Sito"
+      "site_column": "Sito",
+      "add_holder": "Aggiungi",
+      "multi_holder": "più titolari"
     },
     "requirements": {
       "title": "Ruoli obbligatori",
@@ -1167,7 +1170,11 @@
       "notes": "Note",
       "save": "Salva",
       "delete_confirm": "Eliminare questo requisito di ruolo?",
-      "empty": "Nessun requisito definito"
+      "empty": "Nessun requisito definito",
+      "mandatory": "Obbligatorio",
+      "optional": "Facoltativo",
+      "single_holder": "Titolare unico",
+      "multi_holder": "Più titolari"
     }
   },
   "sidebar": {

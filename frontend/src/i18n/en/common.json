@@ -1139,14 +1139,17 @@
         "covered_via_org": "Inherited from org",
         "expiring": "Expiring",
         "vacant": "Vacant",
-        "na": "N/A"
+        "na": "N/A",
+        "unset": "Unassigned"
       },
       "filters": {
         "all_bu": "All BUs",
         "only_gaps": "Only gaps",
         "search_plant": "Search site…"
       },
-      "site_column": "Site"
+      "site_column": "Site",
+      "add_holder": "Add",
+      "multi_holder": "multiple holders"
     },
     "requirements": {
       "title": "Mandatory roles",
@@ -1167,7 +1170,11 @@
       "notes": "Notes",
       "save": "Save",
       "delete_confirm": "Delete this role requirement?",
-      "empty": "No requirement defined"
+      "empty": "No requirement defined",
+      "mandatory": "Mandatory",
+      "optional": "Optional",
+      "single_holder": "Single holder",
+      "multi_holder": "Multiple holders"
     }
   },
   "sidebar": {

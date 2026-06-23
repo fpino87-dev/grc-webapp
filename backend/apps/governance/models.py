@@ -196,6 +196,22 @@ class RoleRequirement(BaseModel):
             "nominato (caso NIS2 Contact)."
         ),
     )
+    mandatory = models.BooleanField(
+        default=True,
+        help_text=(
+            "Se True il ruolo è obbligatorio: la matrice segnala come lacuna i "
+            "perimetri scoperti. Se False la riga serve solo a definire la "
+            "policy del ruolo (es. titolare unico) senza imporne la copertura."
+        ),
+    )
+    single_holder = models.BooleanField(
+        default=True,
+        help_text=(
+            "Se True il ruolo ammette un solo titolare attivo per perimetro "
+            "(la seconda assegnazione è bloccata: usare Sostituisci). Se False "
+            "sono ammessi più titolari (es. Control Owner, membri comitato)."
+        ),
+    )
     enabled = models.BooleanField(
         default=True,
         help_text="Disattiva il requisito senza eliminarlo (escluso dalla matrice).",

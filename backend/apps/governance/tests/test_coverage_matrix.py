@@ -182,6 +182,64 @@ def test_coverage_matrix_endpoint(client, nis2_plant):
 
 
 @pytest.mark.django_db
+def test_single_holder_role_blocks_duplicate(client, org_user, nis2_plant):
+    """Bug: il Contatto NIS2 (titolare unico) non deve essere assegnabile due volte."""
+    payload = {
+        "user": org_user.id,
+        "role": "nis2_contact",
+        "scope_type": "plant",
+        "scope_id": str(nis2_plant.id),
+        "valid_from": str(timezone.localdate()),
+    }
+    r1 = client.post("/api/v1/governance/role-assignments/", payload, format="json")
+    assert r1.status_code == 201
+    r2 = client.post("/api/v1/governance/role-assignments/", payload, format="json")
+    assert r2.status_code == 400
+    assert "role" in r2.json()
+
+
+@pytest.mark.django_db
+def test_multi_holder_role_allows_duplicates(client, org_user, plain_plant):
+    """Control Owner ammette più titolari sullo stesso sito."""
+    u2 = User.objects.create_user(username="co2", email="co2@test.com", password="t")
+    base = {
+        "role": "control_owner", "scope_type": "plant", "scope_id": str(plain_plant.id),
+        "valid_from": str(timezone.localdate()),
+    }
+    r1 = client.post("/api/v1/governance/role-assignments/", {**base, "user": org_user.id}, format="json")
+    r2 = client.post("/api/v1/governance/role-assignments/", {**base, "user": u2.id}, format="json")
+    assert r1.status_code == 201 and r2.status_code == 201
+
+
+@pytest.mark.django_db
+def test_is_single_holder_respects_requirement_override(db):
+    from apps.governance.models import RoleRequirement
+    from apps.governance.services import is_single_holder
+
+    # control_owner di default è multi
+    assert is_single_holder("control_owner") is False
+    # ma un requisito può forzarlo a titolare unico
+    RoleRequirement.objects.create(
+        role="control_owner", scope_level="plant", mandatory=False, single_holder=True,
+    )
+    assert is_single_holder("control_owner") is True
+
+
+@pytest.mark.django_db
+def test_matrix_includes_all_non_org_roles_with_unset(org_user, plain_plant):
+    """La matrice completa include i ruoli non obbligatori con stato 'unset'."""
+    from apps.governance.services import get_role_coverage_matrix
+
+    m = get_role_coverage_matrix(org_user)
+    roles = {r["role"] for r in m["plant_roles"]}
+    assert "control_owner" in roles and "plant_manager" in roles
+    # ruolo non obbligatorio e senza titolare → unset (non 'vacant')
+    co = _plant_row(m, "control_owner")
+    assert co["required"] is False
+    assert co["cells"][str(plain_plant.id)]["status"] == "unset"
+
+
+@pytest.mark.django_db
 def test_requirement_crud_and_audit(client):
     from core.audit import AuditLog
 
