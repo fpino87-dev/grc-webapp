@@ -876,7 +876,8 @@
       "roles": "Roles & committees",
       "workflow": "Document workflow (M07)",
       "frameworks": "Normative frameworks",
-      "risk_appetite": "Risk Appetite"
+      "risk_appetite": "Risk Appetite",
+      "requirements": "Mandatory roles"
     },
     "workflow": {
       "title": "Document workflow",
@@ -1119,7 +1120,55 @@
         "actions": "Actions"
       }
     },
-    "appetite_notes_placeholder": "Approval notes, management resolution references, etc."
+    "appetite_notes_placeholder": "Approval notes, management resolution references, etc.",
+    "coverage": {
+      "title": "Role coverage matrix",
+      "subtitle": "Coverage of mandatory roles by organization and by site",
+      "org_section": "Organization-level roles",
+      "sites_section": "Per-site roles",
+      "role_column": "Role",
+      "assign": "Assign",
+      "replace": "Replace",
+      "terminate": "Terminate",
+      "via_org_hint": "Covered by the organization-level holder",
+      "no_plants": "No visible site",
+      "holder_none": "No holder",
+      "applies_nis2_only": "NIS2 sites only",
+      "status": {
+        "covered": "Covered",
+        "covered_via_org": "Inherited from org",
+        "expiring": "Expiring",
+        "vacant": "Vacant",
+        "na": "N/A"
+      },
+      "filters": {
+        "all_bu": "All BUs",
+        "only_gaps": "Only gaps",
+        "search_plant": "Search site…"
+      },
+      "site_column": "Site"
+    },
+    "requirements": {
+      "title": "Mandatory roles",
+      "subtitle": "Define which roles are mandatory and at which level (org / site)",
+      "add": "Add requirement",
+      "role": "Role",
+      "scope_level": "Level",
+      "scope_level_org": "Organization",
+      "scope_level_plant": "Site",
+      "applies_to": "Applies to",
+      "applies_all": "All sites",
+      "applies_nis2": "NIS2 sites only",
+      "org_covers_sites": "Org holder covers sites",
+      "enabled": "Enabled",
+      "disable": "Disable",
+      "enable": "Enable",
+      "framework_refs": "Framework references",
+      "notes": "Notes",
+      "save": "Save",
+      "delete_confirm": "Delete this role requirement?",
+      "empty": "No requirement defined"
+    }
   },
   "sidebar": {
     "groups": {

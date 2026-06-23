@@ -943,7 +943,8 @@
       "roles": "Roller ve komiteler",
       "workflow": "Belge iş akışı (M07)",
       "frameworks": "Normatif çerçeveler",
-      "risk_appetite": "Risk Appetite"
+      "risk_appetite": "Risk Appetite",
+      "requirements": "Zorunlu roller"
     },
     "workflow": {
       "title": "Belge iş akışı",
@@ -1201,7 +1202,55 @@
       "save": "Kaydet",
       "saved": "Risk iştahı kaydedildi"
     },
-    "appetite_notes_placeholder": "Onay notları, yönetim kararı referansları, vb."
+    "appetite_notes_placeholder": "Onay notları, yönetim kararı referansları, vb.",
+    "coverage": {
+      "title": "Rol kapsama matrisi",
+      "subtitle": "Zorunlu rollerin kuruluş ve tesis bazında kapsanması",
+      "org_section": "Kuruluş düzeyi roller",
+      "sites_section": "Tesis bazlı roller",
+      "role_column": "Rol",
+      "assign": "Ata",
+      "replace": "Değiştir",
+      "terminate": "Sonlandır",
+      "via_org_hint": "Kuruluş düzeyindeki görevli tarafından kapsanıyor",
+      "no_plants": "Görünür tesis yok",
+      "holder_none": "Görevli yok",
+      "applies_nis2_only": "yalnızca NIS2 tesisleri",
+      "status": {
+        "covered": "Kapsandı",
+        "covered_via_org": "Kuruluştan devralındı",
+        "expiring": "Süresi doluyor",
+        "vacant": "Boş",
+        "na": "Yok"
+      },
+      "filters": {
+        "all_bu": "Tüm İB",
+        "only_gaps": "Yalnızca boşluklar",
+        "search_plant": "Tesis ara…"
+      },
+      "site_column": "Tesis"
+    },
+    "requirements": {
+      "title": "Zorunlu roller",
+      "subtitle": "Hangi rollerin zorunlu olduğunu ve hangi düzeyde (kuruluş / tesis) olduğunu tanımlayın",
+      "add": "Gereksinim ekle",
+      "role": "Rol",
+      "scope_level": "Düzey",
+      "scope_level_org": "Kuruluş",
+      "scope_level_plant": "Tesis",
+      "applies_to": "Uygulanır",
+      "applies_all": "Tüm tesisler",
+      "applies_nis2": "Yalnızca NIS2 tesisleri",
+      "org_covers_sites": "Kuruluş görevlisi tesisleri kapsar",
+      "enabled": "Etkin",
+      "disable": "Devre dışı bırak",
+      "enable": "Etkinleştir",
+      "framework_refs": "Çerçeve referansları",
+      "notes": "Notlar",
+      "save": "Kaydet",
+      "delete_confirm": "Bu rol gereksinimi silinsin mi?",
+      "empty": "Tanımlı gereksinim yok"
+    }
   },
   "sidebar": {
     "groups": {

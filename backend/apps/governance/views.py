@@ -9,12 +9,19 @@ from django.utils.translation import gettext as _
 
 from core.audit import log_action
 from core.viewsets import SoftDeleteAuditMixin
-from .models import CommitteeMeeting, DocumentWorkflowPolicy, RoleAssignment, SecurityCommittee
+from .models import (
+    CommitteeMeeting,
+    DocumentWorkflowPolicy,
+    RoleAssignment,
+    RoleRequirement,
+    SecurityCommittee,
+)
 from .permissions import GovernancePermission
 from .serializers import (
     CommitteeMeetingSerializer,
     DocumentWorkflowPolicySerializer,
     RoleAssignmentSerializer,
+    RoleRequirementSerializer,
     SecurityCommitteeSerializer,
 )
 
@@ -155,6 +162,22 @@ class RoleAssignmentViewSet(viewsets.ModelViewSet):
             "critical":     len(vacant) > 0,
         })
 
+    @action(detail=False, methods=["get"], url_path="coverage-matrix")
+    def coverage_matrix(self, request):
+        """Matrice di copertura dei ruoli obbligatori per scope (org + per-sito).
+
+        Lo scoping plant è gestito da ``get_role_coverage_matrix`` (mostra solo i
+        siti accessibili all'utente).
+        """
+        from .services import get_role_coverage_matrix
+
+        try:
+            days = int(request.query_params.get("expiring_days", 30))
+        except (TypeError, ValueError):
+            days = 30
+        days = max(0, min(days, 365))
+        return Response(get_role_coverage_matrix(request.user, expiring_days=days))
+
     @action(detail=False, methods=["get"], url_path="in-scadenza")
     def in_scadenza(self, request):
         """Ruoli in scadenza nei prossimi N giorni o già scaduti."""
@@ -242,3 +265,35 @@ class CommitteeMeetingViewSet(SoftDeleteAuditMixin, viewsets.ModelViewSet):
     serializer_class = CommitteeMeetingSerializer
     permission_classes = [GovernancePermission]
     audit_action = "governance.committee_meeting"
+
+
+class RoleRequirementViewSet(SoftDeleteAuditMixin, viewsets.ModelViewSet):
+    """Configura QUALI ruoli sono obbligatori e a quale scope (alimenta la
+    matrice di copertura). Materia di governance → scrittura solo
+    super_admin/compliance_officer, ogni modifica è auditata."""
+
+    queryset = RoleRequirement.objects.all()
+    serializer_class = RoleRequirementSerializer
+    permission_classes = [GovernancePermission]
+    filterset_fields = ["role", "scope_level", "enabled"]
+    audit_action = "governance.role_requirement"
+
+    def perform_create(self, serializer):
+        instance = serializer.save(created_by=self.request.user)
+        log_action(
+            user=self.request.user,
+            action_code="governance.role_requirement.create",
+            level="L2",
+            entity=instance,
+            payload={"id": str(instance.id), "role": instance.role, "scope_level": instance.scope_level},
+        )
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        log_action(
+            user=self.request.user,
+            action_code="governance.role_requirement.update",
+            level="L2",
+            entity=instance,
+            payload={"id": str(instance.id), "role": instance.role, "enabled": instance.enabled},
+        )

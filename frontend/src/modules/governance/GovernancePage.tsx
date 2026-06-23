@@ -8,6 +8,8 @@ import { ModuleHelp } from "../../components/ui/ModuleHelp";
 import { DocumentWorkflowSection } from "./DocumentWorkflowPage";
 import { FrameworkGovernanceTab } from "./FrameworkGovernanceTab";
 import { RiskAppetiteGovernanceTab } from "./RiskAppetiteGovernanceTab";
+import { RoleCoverageMatrix, type AssignPrefill } from "./RoleCoverageMatrix";
+import { RoleRequirementsPanel } from "./RoleRequirementsPanel";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { todayISO } from "../../utils/dates";
@@ -105,12 +107,18 @@ function Toast({ msg, onClose }: { msg: string; onClose: () => void }) {
 function RoleAssignmentModal({
   users,
   onClose,
-}: { users: { id: number; email: string; name: string }[]; onClose: () => void }) {
+  initial,
+}: {
+  users: { id: number; email: string; name: string }[];
+  onClose: () => void;
+  initial?: Partial<Record<string, any>>;
+}) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [form, setForm] = useState<Record<string, any>>({
     scope_type: "org",
     valid_from: TODAY,
+    ...initial,
   });
   const [error, setError] = useState("");
 
@@ -158,7 +166,7 @@ function RoleAssignmentModal({
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.roles_assign.role")} *</label>
-            <select name="role" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+            <select name="role" value={form.role ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
               <option value="">{t("common.select")}</option>
               {Object.keys(ROLE_KEYS).map((k) => (
                 <option key={k} value={k}>{t(`governance.roles.${ROLE_KEYS[k]}`)}</option>
@@ -167,7 +175,7 @@ function RoleAssignmentModal({
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.roles_assign.scope")}</label>
-            <select name="scope_type" defaultValue="org" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+            <select name="scope_type" value={form.scope_type ?? "org"} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
               <option value="org">{t("governance.scopes.org")}</option>
               <option value="bu">{t("governance.scopes.bu")}</option>
               <option value="plant">{t("governance.scopes.plant")}</option>
@@ -187,7 +195,7 @@ function RoleAssignmentModal({
           {form.scope_type === "plant" && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.roles_assign.plant")} *</label>
-              <select name="scope_id" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+              <select name="scope_id" value={form.scope_id ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
                 <option value="">{t("governance.roles_assign.select_plant")}</option>
                 {(plants ?? []).map((p) => (
                   <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>
@@ -471,31 +479,27 @@ export function GovernancePage() {
   const qc = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
-  const initialTab =
-    tabParam === "workflow"
+  const resolveTab = (p: string | null) =>
+    p === "workflow"
       ? "workflow"
-      : tabParam === "frameworks"
+      : p === "frameworks"
       ? "frameworks"
-      : tabParam === "risk-appetite"
+      : p === "risk-appetite"
       ? "risk-appetite"
+      : p === "requirements"
+      ? "requirements"
       : "roles";
-  const [tab, setTab] = useState<"roles" | "workflow" | "frameworks" | "risk-appetite">(initialTab);
+  const [tab, setTab] = useState<
+    "roles" | "workflow" | "frameworks" | "risk-appetite" | "requirements"
+  >(resolveTab(tabParam));
 
   useEffect(() => {
-    const tabParam = searchParams.get("tab");
-    const next =
-      tabParam === "workflow"
-        ? "workflow"
-        : tabParam === "frameworks"
-        ? "frameworks"
-        : tabParam === "risk-appetite"
-        ? "risk-appetite"
-        : "roles";
-    setTab(next);
+    setTab(resolveTab(searchParams.get("tab")));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const [showRoleModal, setShowRoleModal]         = useState(false);
+  const [assignInitial, setAssignInitial]         = useState<Partial<Record<string, any>> | undefined>(undefined);
   const [showCommitteeModal, setShowCommitteeModal] = useState(false);
   const [terminaTarget, setTerminaTarget]         = useState<RoleAssignment | null>(null);
   const [sostituisciTarget, setSostituisciTarget] = useState<RoleAssignment | null>(null);
@@ -519,18 +523,6 @@ export function GovernancePage() {
     retry: false,
   });
 
-  const { data: vacanti } = useQuery({
-    queryKey: ["governance-vacanti"],
-    queryFn: () => governanceApi.vacanti(),
-    retry: false,
-  });
-
-  const { data: inScadenza } = useQuery({
-    queryKey: ["governance-in-scadenza"],
-    queryFn: () => governanceApi.inScadenza(30),
-    retry: false,
-  });
-
   const userList = (users ?? []).map(u => ({
     id:    u.id,
     email: u.email,
@@ -550,6 +542,20 @@ export function GovernancePage() {
     setToast(msg);
     setTimeout(() => setToast(null), 4000);
   }
+
+  function openAssign(prefill?: AssignPrefill) {
+    setAssignInitial(
+      prefill
+        ? { role: prefill.role, scope_type: prefill.scope_type, scope_id: prefill.scope_id ?? null }
+        : undefined,
+    );
+    setShowRoleModal(true);
+  }
+
+  // I modali Termina/Sostituisci usano solo id, role e nome titolare: dalla
+  // matrice costruiamo un assignment parziale a partire dal titolare della cella.
+  const holderAsAssignment = (h: { id: string; role: string; user_name?: string | null }) =>
+    ({ id: h.id, role: h.role, user_name: h.user_name ?? null } as unknown as RoleAssignment);
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => governanceApi.deleteRoleAssignment(id),
@@ -661,6 +667,24 @@ export function GovernancePage() {
           >
             {t("governance.tabs.risk_appetite", { defaultValue: "Risk Appetite" })}
           </button>
+          <button
+            type="button"
+            onClick={() => {
+              setTab("requirements");
+              setSearchParams((prev) => {
+                const next = new URLSearchParams(prev);
+                next.set("tab", "requirements");
+                return next;
+              });
+            }}
+            className={
+              tab === "requirements"
+                ? "border-primary-600 text-primary-700 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+            }
+          >
+            {t("governance.tabs.requirements", { defaultValue: "Ruoli obbligatori" })}
+          </button>
         </nav>
       </div>
 
@@ -694,37 +718,18 @@ export function GovernancePage() {
         </div>
       ) : tab === "risk-appetite" ? (
         <RiskAppetiteGovernanceTab />
+      ) : tab === "requirements" ? (
+        <RoleRequirementsPanel />
       ) : (
         <>
-          {/* Alert: ruoli vacanti */}
-          {(vacanti?.count ?? 0) > 0 && (
-            <div className="border border-red-300 bg-red-50 rounded-lg p-4">
-              <p className="font-semibold text-red-700">
-                {t("governance.alerts.vacant_roles", { count: vacanti!.count })}
-              </p>
-              <ul className="mt-2 text-sm text-red-600 space-y-0.5">
-                {vacanti!.vacant_roles.map((r) => (
-                  <li key={r}>• {roleLabel(r)}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Alert: ruoli in scadenza */}
-          {(inScadenza?.expiring?.length ?? 0) > 0 && (
-            <div className="border border-amber-300 bg-amber-50 rounded-lg p-4">
-              <p className="font-semibold text-amber-700">
-                {t("governance.alerts.expiring_roles", { count: inScadenza!.expiring.length })}
-              </p>
-              <ul className="mt-2 text-sm text-amber-600 space-y-0.5">
-                {inScadenza!.expiring.map((r) => (
-                  <li key={r.id}>
-                    • {roleLabel(r.role)} — {r.user} ({t("governance.expires_on", { date: formatDate(r.valid_until) })})
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {/* Matrice di copertura ruoli (ingloba gli alert vacanti / in scadenza) */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <RoleCoverageMatrix
+              onAssign={(prefill) => openAssign(prefill)}
+              onReplace={(h) => setSostituisciTarget(holderAsAssignment(h))}
+              onTerminate={(h) => setTerminaTarget(holderAsAssignment(h))}
+            />
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Ruoli normativi */}
@@ -732,7 +737,7 @@ export function GovernancePage() {
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-gray-700">{t("governance.sections.roles")}</h3>
             <button
-              onClick={() => setShowRoleModal(true)}
+              onClick={() => openAssign()}
               className="text-xs px-2 py-1 bg-primary-600 text-white rounded hover:bg-primary-700"
             >
               {t("governance.roles_assign.open")}
@@ -838,7 +843,11 @@ export function GovernancePage() {
 
           {/* Modali */}
           {showRoleModal && (
-            <RoleAssignmentModal users={userList} onClose={() => setShowRoleModal(false)} />
+            <RoleAssignmentModal
+              users={userList}
+              initial={assignInitial}
+              onClose={() => { setShowRoleModal(false); setAssignInitial(undefined); }}
+            />
           )}
           {showCommitteeModal && (
             <CommitteeModal onClose={() => setShowCommitteeModal(false)} />

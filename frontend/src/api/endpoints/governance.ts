@@ -43,6 +43,69 @@ export interface InScadenzaResult {
   expired: ExpiringRole[];
 }
 
+export type CoverageStatus =
+  | "covered"
+  | "covered_via_org"
+  | "expiring"
+  | "vacant"
+  | "na";
+
+export interface CoverageHolder {
+  id: string;
+  user: string | null;
+  valid_until: string | null;
+  days_left: number | null;
+}
+
+export interface OrgRoleCoverage {
+  role: string;
+  framework_refs: string[];
+  status: CoverageStatus;
+  holders: CoverageHolder[];
+}
+
+export interface CoverageCell {
+  status: CoverageStatus;
+  holders: CoverageHolder[];
+  via_org?: boolean;
+}
+
+export interface PlantRoleCoverage {
+  role: string;
+  framework_refs: string[];
+  applies_to: "all" | "nis2_only";
+  org_covers_sites: boolean;
+  cells: Record<string, CoverageCell>;
+}
+
+export interface CoveragePlant {
+  id: string;
+  code: string;
+  name: string;
+  bu_id: string | null;
+  bu_code: string | null;
+  bu_name: string | null;
+  nis2_scope: string;
+  is_nis2: boolean;
+}
+
+export interface RoleCoverageMatrix {
+  org_roles: OrgRoleCoverage[];
+  plant_roles: PlantRoleCoverage[];
+  plants: CoveragePlant[];
+}
+
+export interface RoleRequirement {
+  id: string;
+  role: string;
+  scope_level: "org" | "plant";
+  applies_to: "all" | "nis2_only";
+  org_covers_sites: boolean;
+  enabled: boolean;
+  framework_refs: string[];
+  notes: string;
+}
+
 export interface DocumentWorkflowPolicy {
   id: string;
   document_type: string;
@@ -76,6 +139,22 @@ export const governanceApi = {
     apiClient.get<InScadenzaResult>(
       `/governance/role-assignments/in-scadenza/?days=${days}`
     ).then((r) => r.data),
+  coverageMatrix: () =>
+    apiClient.get<RoleCoverageMatrix>(
+      "/governance/role-assignments/coverage-matrix/"
+    ).then((r) => r.data),
+
+  // Role requirements (config matrice copertura)
+  listRoleRequirements: () =>
+    apiClient
+      .get<{ results?: RoleRequirement[] } | RoleRequirement[]>("/governance/role-requirements/")
+      .then((r) => (Array.isArray(r.data) ? r.data : r.data.results ?? [])),
+  createRoleRequirement: (data: Partial<RoleRequirement>) =>
+    apiClient.post<RoleRequirement>("/governance/role-requirements/", data).then((r) => r.data),
+  updateRoleRequirement: (id: string, data: Partial<RoleRequirement>) =>
+    apiClient.patch<RoleRequirement>(`/governance/role-requirements/${id}/`, data).then((r) => r.data),
+  deleteRoleRequirement: (id: string) =>
+    apiClient.delete(`/governance/role-requirements/${id}/`).then((r) => r.data),
   committees: () =>
     apiClient.get<{ results: SecurityCommittee[] }>("/governance/committees/").then((r) => r.data.results ?? r.data),
   createCommittee: (data: Partial<SecurityCommittee>) =>

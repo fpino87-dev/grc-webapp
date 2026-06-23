@@ -153,3 +153,71 @@ class CommitteeMeeting(BaseModel):
     class Meta:
         ordering = ["-held_at"]
 
+
+class RoleRequirement(BaseModel):
+    """
+    Definisce QUALI ruoli normativi sono obbligatori e a QUALE scope, alimentando
+    la matrice di copertura (M00) e ``get_vacant_mandatory_roles``.
+
+    Tre profili di copertura:
+    - ``scope_level="org"``: un solo titolare org copre l'azienda (es. CISO).
+    - ``scope_level="plant"`` + ``org_covers_sites=False``: va nominato per ogni
+      sito in perimetro, un'assegnazione org NON copre (es. NIS2 Contact).
+    - ``scope_level="plant"`` + ``org_covers_sites=True``: un titolare org copre
+      i siti privi di nomina specifica, ma il sito può nominare il proprio
+      titolare che ha la precedenza (es. DPO — può variare per entità giuridica).
+
+    L'elenco è configurabile dagli admin (CRUD da UI); i default sono caricati da
+    ``load_role_requirements``.
+    """
+
+    SCOPE_LEVEL_CHOICES = [
+        ("org", "Org"),
+        ("plant", "Plant"),
+    ]
+    APPLIES_TO_CHOICES = [
+        ("all", "Tutti i siti"),
+        ("nis2_only", "Solo siti NIS2"),
+    ]
+
+    role = models.CharField(max_length=50, choices=NormativeRole.choices)
+    scope_level = models.CharField(max_length=10, choices=SCOPE_LEVEL_CHOICES, default="org")
+    applies_to = models.CharField(
+        max_length=20,
+        choices=APPLIES_TO_CHOICES,
+        default="all",
+        help_text="Usato solo per scope_level=plant: a quali siti si applica il requisito.",
+    )
+    org_covers_sites = models.BooleanField(
+        default=False,
+        help_text=(
+            "Solo per scope_level=plant: se True un'assegnazione org attiva copre "
+            "i siti privi di nomina specifica (caso DPO); se False ogni sito va "
+            "nominato (caso NIS2 Contact)."
+        ),
+    )
+    enabled = models.BooleanField(
+        default=True,
+        help_text="Disattiva il requisito senza eliminarlo (escluso dalla matrice).",
+    )
+    framework_refs = ArrayField(
+        models.CharField(max_length=50),
+        default=list,
+        blank=True,
+        help_text="Riferimenti normativi per evidenza audit (es. ISO27001:A.5.2).",
+    )
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["scope_level", "role"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["role", "scope_level"],
+                condition=models.Q(deleted_at__isnull=True),
+                name="uniq_active_role_requirement",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.role} @ {self.scope_level}"
+

@@ -943,7 +943,8 @@
       "roles": "Rôles & comités",
       "workflow": "Workflow documentaire (M07)",
       "frameworks": "Cadres normatifs",
-      "risk_appetite": "Risk Appetite"
+      "risk_appetite": "Risk Appetite",
+      "requirements": "Rôles obligatoires"
     },
     "workflow": {
       "title": "Workflow documentaire",
@@ -1201,7 +1202,55 @@
       "save": "Enregistrer",
       "saved": "Appétit au risque enregistré"
     },
-    "appetite_notes_placeholder": "Notes d'approbation, références aux délibérations de direction, etc."
+    "appetite_notes_placeholder": "Notes d'approbation, références aux délibérations de direction, etc.",
+    "coverage": {
+      "title": "Matrice de couverture des rôles",
+      "subtitle": "Couverture des rôles obligatoires par organisation et par site",
+      "org_section": "Rôles au niveau organisation",
+      "sites_section": "Rôles par site",
+      "role_column": "Rôle",
+      "assign": "Attribuer",
+      "replace": "Remplacer",
+      "terminate": "Clôturer",
+      "via_org_hint": "Couvert par le titulaire au niveau organisation",
+      "no_plants": "Aucun site visible",
+      "holder_none": "Aucun titulaire",
+      "applies_nis2_only": "sites NIS2 uniquement",
+      "status": {
+        "covered": "Couvert",
+        "covered_via_org": "Hérité de l'org",
+        "expiring": "Bientôt expiré",
+        "vacant": "Vacant",
+        "na": "N/D"
+      },
+      "filters": {
+        "all_bu": "Toutes les BU",
+        "only_gaps": "Lacunes uniquement",
+        "search_plant": "Rechercher un site…"
+      },
+      "site_column": "Site"
+    },
+    "requirements": {
+      "title": "Rôles obligatoires",
+      "subtitle": "Définir quels rôles sont obligatoires et à quel niveau (org / site)",
+      "add": "Ajouter une exigence",
+      "role": "Rôle",
+      "scope_level": "Niveau",
+      "scope_level_org": "Organisation",
+      "scope_level_plant": "Site",
+      "applies_to": "S'applique à",
+      "applies_all": "Tous les sites",
+      "applies_nis2": "Sites NIS2 uniquement",
+      "org_covers_sites": "Le titulaire org couvre les sites",
+      "enabled": "Activé",
+      "disable": "Désactiver",
+      "enable": "Activer",
+      "framework_refs": "Références normatives",
+      "notes": "Notes",
+      "save": "Enregistrer",
+      "delete_confirm": "Supprimer cette exigence de rôle ?",
+      "empty": "Aucune exigence définie"
+    }
   },
   "sidebar": {
     "groups": {

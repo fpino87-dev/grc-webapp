@@ -157,29 +157,179 @@ def get_expiring_roles(days=30):
     return {"expiring": expiring, "expired": expired}
 
 
-def get_vacant_mandatory_roles(plant=None):
-    """Ruoli NIS2/ISO obbligatori senza titolare attivo."""
+def _active_role_qs(role):
+    """Assegnazioni attive (valide oggi, non eliminate) di un dato ruolo."""
     from .models import RoleAssignment
 
-    MANDATORY_ROLES = ["nis2_contact", "ciso", "isms_manager", "dpo"]
     today = timezone.localdate()
-    vacant = []
+    return RoleAssignment.objects.filter(
+        role=role,
+        valid_from__lte=today,
+        deleted_at__isnull=True,
+    ).filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today))
 
-    for role in MANDATORY_ROLES:
-        qs = RoleAssignment.objects.filter(
-            role=role,
-            valid_from__lte=today,
-            deleted_at__isnull=True,
-        ).filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today))
-        if plant:
-            qs = qs.filter(
-                Q(scope_type="org") |
-                Q(scope_type="plant", scope_id=plant.pk)
-            )
-        if not qs.exists():
-            vacant.append(role)
+
+def get_vacant_mandatory_roles(plant=None):
+    """Ruoli obbligatori (``RoleRequirement``) senza titolare attivo.
+
+    Senza ``plant`` la vista è org-wide: un ruolo è vacante se non ha alcuna
+    nomina attiva nel suo scope (org per i ruoli org-level; nessuna nomina di
+    sito — né fallback org dove previsto — per i ruoli per-sito). Con ``plant``
+    valuta la copertura del singolo sito (rispettando ``applies_to`` e il
+    fallback org ``org_covers_sites``).
+
+    Ritorna una lista di codici ruolo (compatibile con il cockpit advisor e
+    l'endpoint ``/vacanti``).
+    """
+    from .models import RoleRequirement
+
+    vacant = []
+    requirements = RoleRequirement.objects.filter(enabled=True, deleted_at__isnull=True)
+
+    for req in requirements:
+        if req.scope_level == "org":
+            covered = _active_role_qs(req.role).filter(scope_type="org").exists()
+        else:  # per-sito
+            if plant is not None and req.applies_to == "nis2_only" and not plant.is_nis2_subject:
+                continue  # requisito non applicabile a questo sito
+            if plant is not None:
+                site = _active_role_qs(req.role).filter(
+                    scope_type="plant", scope_id=plant.pk,
+                ).exists()
+            else:
+                site = _active_role_qs(req.role).filter(scope_type="plant").exists()
+            org = req.org_covers_sites and _active_role_qs(req.role).filter(
+                scope_type="org",
+            ).exists()
+            covered = site or org
+        if not covered and req.role not in vacant:
+            vacant.append(req.role)
 
     return vacant
+
+
+def get_role_coverage_matrix(user, expiring_days: int = 30):
+    """Matrice di copertura dei ruoli obbligatori per scope.
+
+    Restituisce tre blocchi:
+    - ``org_roles``: ruoli org-level con stato unico (covered/expiring/vacant);
+    - ``plant_roles``: ruoli per-sito con una cella per ogni plant visibile;
+    - ``plants``: anagrafica dei plant visibili (raggruppabili per BU lato UI).
+
+    Stati cella: ``covered`` (titolare di sito), ``covered_via_org`` (ereditato
+    dal titolare org quando ``org_covers_sites=True``), ``expiring``, ``vacant``,
+    ``na`` (requisito non applicabile al sito).
+    """
+    from .models import RoleAssignment, RoleRequirement
+    from apps.plants.models import Plant
+    from core.scoping import get_user_plant_ids
+
+    today = timezone.localdate()
+    threshold = today + timezone.timedelta(days=expiring_days)
+
+    requirements = list(
+        RoleRequirement.objects.filter(enabled=True, deleted_at__isnull=True)
+    )
+    req_roles = {r.role for r in requirements}
+
+    # Plant visibili all'utente (scoping plant — niente PII di siti non accessibili)
+    allowed = get_user_plant_ids(user)
+    plants_qs = Plant.objects.select_related("bu").filter(deleted_at__isnull=True)
+    if allowed is not None:
+        plants_qs = plants_qs.filter(id__in=allowed)
+    plants = list(plants_qs.order_by("bu__code", "code"))
+
+    # Tutte le assegnazioni attive dei ruoli richiesti: una sola query (no N+1)
+    active = (
+        RoleAssignment.objects.filter(
+            role__in=req_roles,
+            valid_from__lte=today,
+            deleted_at__isnull=True,
+        )
+        .filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today))
+        .select_related("user")
+    )
+
+    org_by_role: dict = {}          # role -> [assignment]
+    plant_by_role_site: dict = {}   # (role, str(scope_id)) -> [assignment]
+    for a in active:
+        if a.scope_type == "org":
+            org_by_role.setdefault(a.role, []).append(a)
+        elif a.scope_type == "plant" and a.scope_id:
+            plant_by_role_site.setdefault((a.role, str(a.scope_id)), []).append(a)
+
+    def holder(a):
+        return {
+            "id": str(a.id),
+            "user": (a.user.get_full_name() or a.user.email) if a.user_id else None,
+            "valid_until": str(a.valid_until) if a.valid_until else None,
+            "days_left": (a.valid_until - today).days if a.valid_until else None,
+        }
+
+    def evaluate(assignments):
+        """(status, holders) per un insieme di assegnazioni dirette."""
+        if not assignments:
+            return "vacant", []
+        holders = [holder(a) for a in assignments]
+        all_expiring = all(
+            a.valid_until is not None and a.valid_until <= threshold
+            for a in assignments
+        )
+        return ("expiring" if all_expiring else "covered"), holders
+
+    org_roles, plant_roles = [], []
+    for r in sorted(requirements, key=lambda x: (x.scope_level, x.role)):
+        if r.scope_level == "org":
+            status, holders = evaluate(org_by_role.get(r.role, []))
+            org_roles.append({
+                "role": r.role,
+                "framework_refs": r.framework_refs,
+                "status": status,
+                "holders": holders,
+            })
+            continue
+
+        cells = {}
+        for p in plants:
+            if r.applies_to == "nis2_only" and not p.is_nis2_subject:
+                cells[str(p.id)] = {"status": "na", "holders": []}
+                continue
+            site_assigns = plant_by_role_site.get((r.role, str(p.id)), [])
+            if site_assigns:
+                status, holders = evaluate(site_assigns)
+                cells[str(p.id)] = {"status": status, "holders": holders}
+            elif r.org_covers_sites and org_by_role.get(r.role):
+                status, holders = evaluate(org_by_role[r.role])
+                cells[str(p.id)] = {
+                    "status": "expiring" if status == "expiring" else "covered_via_org",
+                    "holders": holders,
+                    "via_org": True,
+                }
+            else:
+                cells[str(p.id)] = {"status": "vacant", "holders": []}
+        plant_roles.append({
+            "role": r.role,
+            "framework_refs": r.framework_refs,
+            "applies_to": r.applies_to,
+            "org_covers_sites": r.org_covers_sites,
+            "cells": cells,
+        })
+
+    plants_out = [
+        {
+            "id": str(p.id),
+            "code": p.code,
+            "name": p.name,
+            "bu_id": str(p.bu_id) if p.bu_id else None,
+            "bu_code": p.bu.code if p.bu_id else None,
+            "bu_name": p.bu.name if p.bu_id else None,
+            "nis2_scope": p.nis2_scope,
+            "is_nis2": p.is_nis2_subject,
+        }
+        for p in plants
+    ]
+
+    return {"org_roles": org_roles, "plant_roles": plant_roles, "plants": plants_out}
 
 
 def check_nis2_contact_active(plant) -> bool:

@@ -943,7 +943,8 @@
       "roles": "Role i komitety",
       "workflow": "Obieg dokumentów (M07)",
       "frameworks": "Ramy normatywne",
-      "risk_appetite": "Risk Appetite"
+      "risk_appetite": "Risk Appetite",
+      "requirements": "Role obowiązkowe"
     },
     "workflow": {
       "title": "Obieg dokumentów",
@@ -1201,7 +1202,55 @@
       "save": "Zapisz",
       "saved": "Apetyt na ryzyko zapisany"
     },
-    "appetite_notes_placeholder": "Uwagi dotyczące zatwierdzenia, odniesienia do uchwał zarządu, itp."
+    "appetite_notes_placeholder": "Uwagi dotyczące zatwierdzenia, odniesienia do uchwał zarządu, itp.",
+    "coverage": {
+      "title": "Macierz pokrycia ról",
+      "subtitle": "Pokrycie ról obowiązkowych na poziomie organizacji i zakładu",
+      "org_section": "Role na poziomie organizacji",
+      "sites_section": "Role na poziomie zakładu",
+      "role_column": "Rola",
+      "assign": "Przypisz",
+      "replace": "Zastąp",
+      "terminate": "Zakończ",
+      "via_org_hint": "Pokryte przez osobę na poziomie organizacji",
+      "no_plants": "Brak widocznych zakładów",
+      "holder_none": "Brak osoby",
+      "applies_nis2_only": "tylko zakłady NIS2",
+      "status": {
+        "covered": "Pokryte",
+        "covered_via_org": "Dziedziczone z org",
+        "expiring": "Wygasające",
+        "vacant": "Wakat",
+        "na": "N/D"
+      },
+      "filters": {
+        "all_bu": "Wszystkie JB",
+        "only_gaps": "Tylko braki",
+        "search_plant": "Szukaj zakładu…"
+      },
+      "site_column": "Zakład"
+    },
+    "requirements": {
+      "title": "Role obowiązkowe",
+      "subtitle": "Określ, które role są obowiązkowe i na jakim poziomie (org / zakład)",
+      "add": "Dodaj wymaganie",
+      "role": "Rola",
+      "scope_level": "Poziom",
+      "scope_level_org": "Organizacja",
+      "scope_level_plant": "Zakład",
+      "applies_to": "Dotyczy",
+      "applies_all": "Wszystkie zakłady",
+      "applies_nis2": "Tylko zakłady NIS2",
+      "org_covers_sites": "Osoba org pokrywa zakłady",
+      "enabled": "Aktywne",
+      "disable": "Wyłącz",
+      "enable": "Włącz",
+      "framework_refs": "Odniesienia normatywne",
+      "notes": "Notatki",
+      "save": "Zapisz",
+      "delete_confirm": "Usunąć to wymaganie roli?",
+      "empty": "Nie zdefiniowano wymagań"
+    }
   },
   "sidebar": {
     "groups": {

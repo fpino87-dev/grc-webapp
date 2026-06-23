@@ -876,7 +876,8 @@
       "roles": "Ruoli & comitati",
       "workflow": "Workflow documentale (M07)",
       "frameworks": "Framework normativi",
-      "risk_appetite": "Risk Appetite"
+      "risk_appetite": "Risk Appetite",
+      "requirements": "Ruoli obbligatori"
     },
     "workflow": {
       "title": "Workflow documentale",
@@ -1119,7 +1120,55 @@
         "actions": "Azioni"
       }
     },
-    "appetite_notes_placeholder": "Note approvazione, riferimenti a delibere management, ecc."
+    "appetite_notes_placeholder": "Note approvazione, riferimenti a delibere management, ecc.",
+    "coverage": {
+      "title": "Matrice di copertura ruoli",
+      "subtitle": "Copertura dei ruoli obbligatori per organizzazione e per sito",
+      "org_section": "Ruoli a livello organizzazione",
+      "sites_section": "Ruoli per sito",
+      "role_column": "Ruolo",
+      "assign": "Assegna",
+      "replace": "Sostituisci",
+      "terminate": "Termina",
+      "via_org_hint": "Coperto dal titolare a livello organizzazione",
+      "no_plants": "Nessun sito visibile",
+      "holder_none": "Nessun titolare",
+      "applies_nis2_only": "solo siti NIS2",
+      "status": {
+        "covered": "Coperto",
+        "covered_via_org": "Ereditato da org",
+        "expiring": "In scadenza",
+        "vacant": "Vacante",
+        "na": "N/D"
+      },
+      "filters": {
+        "all_bu": "Tutte le BU",
+        "only_gaps": "Solo lacune",
+        "search_plant": "Cerca sito…"
+      },
+      "site_column": "Sito"
+    },
+    "requirements": {
+      "title": "Ruoli obbligatori",
+      "subtitle": "Definisci quali ruoli sono obbligatori e a quale livello (org / sito)",
+      "add": "Aggiungi requisito",
+      "role": "Ruolo",
+      "scope_level": "Livello",
+      "scope_level_org": "Organizzazione",
+      "scope_level_plant": "Sito",
+      "applies_to": "Si applica a",
+      "applies_all": "Tutti i siti",
+      "applies_nis2": "Solo siti NIS2",
+      "org_covers_sites": "Il titolare org copre i siti",
+      "enabled": "Attivo",
+      "disable": "Disattiva",
+      "enable": "Attiva",
+      "framework_refs": "Riferimenti normativi",
+      "notes": "Note",
+      "save": "Salva",
+      "delete_confirm": "Eliminare questo requisito di ruolo?",
+      "empty": "Nessun requisito definito"
+    }
   },
   "sidebar": {
     "groups": {

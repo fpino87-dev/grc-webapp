@@ -1,6 +1,12 @@
 from rest_framework import serializers
 
-from .models import CommitteeMeeting, DocumentWorkflowPolicy, RoleAssignment, SecurityCommittee
+from .models import (
+    CommitteeMeeting,
+    DocumentWorkflowPolicy,
+    RoleAssignment,
+    RoleRequirement,
+    SecurityCommittee,
+)
 
 
 class RoleAssignmentSerializer(serializers.ModelSerializer):
@@ -55,6 +61,13 @@ class RoleAssignmentSerializer(serializers.ModelSerializer):
     def get_scope_name(self, obj):
         o = self._scope_obj(obj)
         return o.name if o else None
+
+
+class RoleRequirementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RoleRequirement
+        fields = "__all__"
+        read_only_fields = ["created_by", "created_at", "updated_at", "deleted_at"]
 
 
 class DocumentWorkflowPolicySerializer(serializers.ModelSerializer):
