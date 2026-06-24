@@ -7,7 +7,9 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 3000,
-    allowedHosts: ["grc.sumiriko.it"],
+    // Dominio/i pubblici da cui il dev server accetta richieste: valore
+    // specifico del deployment, letto da VITE_ALLOWED_HOSTS (.env, gitignored).
+    allowedHosts: process.env.VITE_ALLOWED_HOSTS?.split(",").map((h) => h.trim()).filter(Boolean) ?? [],
     proxy: {
       "/api": {
         target: "http://grc-webapp-backend-1:8000",
