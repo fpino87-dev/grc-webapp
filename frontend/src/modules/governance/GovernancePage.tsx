@@ -82,7 +82,13 @@ function RoleAssignmentModal({
 
   const mutation = useMutation({
     mutationFn: () => governanceApi.createRoleAssignment(form as any),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["role-assignments"] }); onClose(); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["role-assignments"] });
+      qc.invalidateQueries({ queryKey: ["governance-coverage-matrix"] });
+      qc.invalidateQueries({ queryKey: ["governance-vacanti"] });
+      qc.invalidateQueries({ queryKey: ["governance-in-scadenza"] });
+      onClose();
+    },
     onError: (e: any) => setError(e?.response?.data?.detail || JSON.stringify(e?.response?.data) || t("common.error")),
   });
 
@@ -200,6 +206,7 @@ function TerminaModal({
     mutationFn: () => governanceApi.terminaRole(assignment.id, { reason, termination_date: date }),
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ["role-assignments"] });
+      qc.invalidateQueries({ queryKey: ["governance-coverage-matrix"] });
       qc.invalidateQueries({ queryKey: ["governance-vacanti"] });
       qc.invalidateQueries({ queryKey: ["governance-in-scadenza"] });
       onSuccess(data.message);
@@ -283,6 +290,7 @@ function SostituisciModal({
       }),
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ["role-assignments"] });
+      qc.invalidateQueries({ queryKey: ["governance-coverage-matrix"] });
       qc.invalidateQueries({ queryKey: ["governance-vacanti"] });
       qc.invalidateQueries({ queryKey: ["governance-in-scadenza"] });
       onSuccess(data.message);

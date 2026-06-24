@@ -359,10 +359,15 @@ function NewUserModal({ roles, onClose }: { roles: GrcRole[]; onClose: () => voi
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [form, setForm] = useState({ username: "", email: "", first_name: "", last_name: "", password: "", grc_role: "" });
+  const [error, setError] = useState("");
 
   const mutation = useMutation({
     mutationFn: usersApi.create,
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["users"] }); onClose(); },
+    onError: (e: unknown) => {
+      const data = (e as { response?: { data?: Record<string, unknown> } })?.response?.data;
+      setError(data ? Object.values(data).flat().join(" ") : t("common.save_error"));
+    },
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
@@ -395,7 +400,7 @@ function NewUserModal({ roles, onClose }: { roles: GrcRole[]; onClose: () => voi
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t("users.fields.password")} *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("users.fields.password")} * <span className="text-xs font-normal text-gray-400">({t("users.fields.password_hint")})</span></label>
             <input name="password" type="password" value={form.password} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
           </div>
           <div>
@@ -406,7 +411,7 @@ function NewUserModal({ roles, onClose }: { roles: GrcRole[]; onClose: () => voi
             </select>
           </div>
         </div>
-        {mutation.isError && <p className="text-sm text-red-600 mt-2">{t("common.save_error")}</p>}
+        {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("actions.cancel")}</button>
           <button
@@ -471,12 +476,13 @@ function ResetPasswordModal({ user, onClose }: { user: GrcUser; onClose: () => v
       qc.invalidateQueries({ queryKey: ["users"] });
       onClose();
     },
-    onError: () => {
-      setError(t("common.save_error"));
+    onError: (e: unknown) => {
+      const data = (e as { response?: { data?: Record<string, unknown> } })?.response?.data;
+      setError(data ? Object.values(data).flat().join(" ") : t("common.save_error"));
     },
   });
 
-  const disabled = password.length < 8 || mutation.isPending;
+  const disabled = password.length < 12 || mutation.isPending;
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -485,7 +491,7 @@ function ResetPasswordModal({ user, onClose }: { user: GrcUser; onClose: () => v
           {t("users.actions.reset_password")} — {user.username}
         </h3>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          {t("users.fields.password")} (min 8)
+          {t("users.fields.password")} ({t("users.fields.password_hint")})
         </label>
         <input
           type="password"

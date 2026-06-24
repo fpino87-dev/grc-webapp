@@ -874,7 +874,8 @@
       "last_name": "Soyad",
       "password": "Parola",
       "grc_role": "GRC rolü",
-      "grc_role_none": "— yok —"
+      "grc_role_none": "— yok —",
+      "password_hint": "en az 12 karakter"
     },
     "actions": {
       "assign_role": "Rol ata",

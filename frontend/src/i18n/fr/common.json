@@ -874,7 +874,8 @@
       "last_name": "Nom",
       "password": "Mot de passe",
       "grc_role": "Rôle GRC",
-      "grc_role_none": "— aucun —"
+      "grc_role_none": "— aucun —",
+      "password_hint": "min 12 caractères"
     },
     "actions": {
       "assign_role": "Attribuer un rôle",

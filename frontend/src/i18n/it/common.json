@@ -807,7 +807,8 @@
       "last_name": "Cognome",
       "password": "Password",
       "grc_role": "Ruolo GRC",
-      "grc_role_none": "— nessuno —"
+      "grc_role_none": "— nessuno —",
+      "password_hint": "min 12 caratteri"
     },
     "actions": {
       "assign_role": "Assegna ruolo",
