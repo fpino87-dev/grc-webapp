@@ -287,6 +287,57 @@ choose_ollama_model() {
 }
 
 # ---------------------------------------------------------------------------
+# Domanda interattiva: dominio pubblico (opzionale, default = IP del server)
+# ---------------------------------------------------------------------------
+PUBLIC_DOMAIN=""
+
+if ! state_check "step_domain_choice"; then
+  echo ""
+  echo -e "${BOLD}${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+  echo -e "${BOLD} Dominio pubblico${RESET}"
+  echo -e "${BOLD}${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+  echo ""
+  echo -e "  Se la webapp sarà raggiunta tramite un nome DNS (es. ${BOLD}grc.azienda.com${RESET}),"
+  echo -e "  inseriscilo qui: verrà usato in ALLOWED_HOSTS, CSRF e nel certificato."
+  echo -e "  Lascia ${BOLD}vuoto${RESET} per usare l'IP del server (${BOLD}${SERVER_IP}${RESET})."
+  echo ""
+  echo -ne "  Dominio [invio = IP ${SERVER_IP}]: "
+  read -r DOMAIN_ANSWER </dev/tty
+  # Normalizza: rimuovi spazi, eventuale schema e path se incollati per intero
+  PUBLIC_DOMAIN="$(echo "${DOMAIN_ANSWER}" | tr -d '[:space:]')"
+  PUBLIC_DOMAIN="${PUBLIC_DOMAIN#http://}"
+  PUBLIC_DOMAIN="${PUBLIC_DOMAIN#https://}"
+  PUBLIC_DOMAIN="${PUBLIC_DOMAIN%%/*}"
+  echo "PUBLIC_DOMAIN=${PUBLIC_DOMAIN}" > "${STATE_DIR}/domain_choice.conf"
+  if [[ -n "${PUBLIC_DOMAIN}" ]]; then
+    success "Dominio configurato: ${PUBLIC_DOMAIN} (IP ${SERVER_IP} resta come fallback)"
+  else
+    info "Nessun dominio — accesso via IP ${SERVER_IP}"
+  fi
+  state_done "step_domain_choice"
+else
+  source "${STATE_DIR}/domain_choice.conf"
+  skip "Scelta dominio già effettuata (${PUBLIC_DOMAIN:-IP ${SERVER_IP}})"
+fi
+
+# Derivati host/origin/cert — calcolati a ogni run da PUBLIC_DOMAIN
+if [[ -n "${PUBLIC_DOMAIN}" ]]; then
+  ALLOWED_HOSTS_VALUE="${PUBLIC_DOMAIN},${SERVER_IP},localhost,127.0.0.1"
+  PUBLIC_ORIGIN="https://${PUBLIC_DOMAIN}"
+  CSRF_VALUE="https://${PUBLIC_DOMAIN},https://${SERVER_IP}"
+  CERT_CN="${PUBLIC_DOMAIN}"
+  CERT_SAN="subjectAltName=DNS:${PUBLIC_DOMAIN},IP:${SERVER_IP},IP:127.0.0.1"
+  CERT_LABEL="${PUBLIC_DOMAIN} (+ IP ${SERVER_IP})"
+else
+  ALLOWED_HOSTS_VALUE="${SERVER_IP},localhost,127.0.0.1"
+  PUBLIC_ORIGIN="https://${SERVER_IP}"
+  CSRF_VALUE="https://${SERVER_IP}"
+  CERT_CN="${SERVER_IP}"
+  CERT_SAN="subjectAltName=IP:${SERVER_IP},IP:127.0.0.1"
+  CERT_LABEL="IP ${SERVER_IP}"
+fi
+
+# ---------------------------------------------------------------------------
 # Domanda interattiva: abilitare AI locale?
 # ---------------------------------------------------------------------------
 ENABLE_OLLAMA=false
@@ -514,10 +565,10 @@ else
 # --- Django ------------------------------------------------------------------
 SECRET_KEY=${SECRET_KEY}
 DEBUG=false
-ALLOWED_HOSTS=${SERVER_IP},localhost,127.0.0.1
-FRONTEND_URL=https://${SERVER_IP}
+ALLOWED_HOSTS=${ALLOWED_HOSTS_VALUE}
+FRONTEND_URL=${PUBLIC_ORIGIN}
 DJANGO_SETTINGS_MODULE=core.settings.prod
-CSRF_TRUSTED_ORIGINS=https://${SERVER_IP}
+CSRF_TRUSTED_ORIGINS=${CSRF_VALUE}
 ADMIN_URL=${ADMIN_URL}
 SHOW_API_DOCS=false
 SESSION_COOKIE_SECURE=true
@@ -630,12 +681,12 @@ else
   openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
     -keyout "${SSL_DIR}/grc.key" \
     -out    "${SSL_DIR}/grc.crt" \
-    -subj   "/C=IT/ST=Italy/L=Local/O=GRC/OU=IT/CN=${SERVER_IP}" \
-    -addext "subjectAltName=IP:${SERVER_IP},IP:127.0.0.1" \
+    -subj   "/C=IT/ST=Italy/L=Local/O=GRC/OU=IT/CN=${CERT_CN}" \
+    -addext "${CERT_SAN}" \
     2>/dev/null
   chmod 600 "${SSL_DIR}/grc.key"
   chmod 644 "${SSL_DIR}/grc.crt"
-  success "Certificato self-signed per IP ${SERVER_IP} (valido 10 anni)"
+  success "Certificato self-signed per ${CERT_LABEL} (valido 10 anni)"
 fi
 
 if [[ ! -f /etc/nginx/ssl/dhparam.pem ]]; then
