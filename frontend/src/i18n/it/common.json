@@ -1290,11 +1290,11 @@
   },
   "backups": {
     "title": "Backup & Restore",
-    "subtitle": "Gestisci i backup del database. Il backup automatico viene eseguito ogni giorno alle 02:00.",
+    "subtitle": "Gestisci i backup completi (database + file: documenti, evidenze, loghi). Il backup automatico viene eseguito ogni giorno alle 02:00.",
     "create": "Crea backup",
     "creating": "Creazione in corso...",
     "empty": "Nessun backup disponibile. Crea il primo backup manuale.",
-    "retention_info": "I backup vengono conservati per 30 giorni. Il backup automatico viene eseguito ogni notte alle 02:00.",
+    "retention_info": "I backup includono database e file (documenti, evidenze, loghi) e vengono conservati per 30 giorni. Il backup automatico viene eseguito ogni notte alle 02:00.",
     "col": {
       "date": "Data",
       "filename": "File",
@@ -1326,7 +1326,7 @@
     },
     "confirm_restore": {
       "title": "Conferma ripristino",
-      "message": "Stai per ripristinare il database dal backup \"{{filename}}\". Tutti i dati attuali verranno sovrascritti. Questa operazione non è reversibile. Continuare?"
+      "message": "Stai per ripristinare l'intero sistema dal backup \"{{filename}}\": database e file (documenti, evidenze, loghi). Tutti i dati e i file attuali verranno sovrascritti. Questa operazione non è reversibile. Continuare?"
     },
     "confirm_delete": {
       "title": "Elimina backup",
@@ -1346,8 +1346,8 @@
     "restoring": "Ripristino del database in corso... la pagina si aggiorna automaticamente.",
     "import": {
       "title": "Importa backup",
-      "help": "Carica un file di backup scaricato in precedenza (.dump o .dump.enc). Il contenuto viene verificato prima dell'accettazione; i file cifrati devono essere decifrabili con la chiave configurata su questo server.",
-      "select_file": "Seleziona file (.dump / .dump.enc)",
+      "help": "Carica un file di backup scaricato in precedenza (.tar o .tar.enc, oppure i vecchi .dump). Il contenuto viene verificato prima dell'accettazione; i file cifrati devono essere decifrabili con la chiave configurata su questo server.",
+      "select_file": "Seleziona file (.tar / .tar.enc)",
       "submit": "Importa",
       "uploading": "Caricamento in corso..."
     }

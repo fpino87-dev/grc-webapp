@@ -52,6 +52,10 @@ services:
     volumes:
       - ./manual:/app/manual:ro
       - backupdata:/app/backups
+      # Media persistenti (documenti, evidenze, loghi). DEVE essere lo stesso
+      # volume montato su `celery`: gli upload passano dal backend, ma il
+      # restore dei media è eseguito dal worker Celery.
+      - mediadata:/app/media
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/api/health/ || exit 1"]
       interval: 30s
@@ -74,6 +78,9 @@ services:
       DJANGO_SETTINGS_MODULE: core.settings.prod
     volumes:
       - backupdata:/app/backups
+      # Stesso volume media del backend: necessario per il restore (lo swap
+      # dell'albero media avviene in questo worker) e per i task che leggono i file.
+      - mediadata:/app/media
     depends_on:
       - backend
       - redis
@@ -116,3 +123,4 @@ volumes:
   pgdata:
   redisdata:
   backupdata:
+  mediadata:

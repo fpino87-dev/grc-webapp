@@ -1369,11 +1369,11 @@
   },
   "backups": {
     "title": "Sauvegarde & Restauration",
-    "subtitle": "Gérez les sauvegardes de la base de données. La sauvegarde automatique s'exécute chaque jour à 02h00.",
+    "subtitle": "Gérez les sauvegardes complètes (base de données + fichiers : documents, preuves, logos). La sauvegarde automatique s'exécute chaque jour à 02:00.",
     "create": "Créer une sauvegarde",
     "creating": "Création en cours...",
     "empty": "Aucune sauvegarde disponible. Créez la première sauvegarde manuelle.",
-    "retention_info": "Les sauvegardes sont conservées pendant 30 jours. La sauvegarde automatique s'exécute chaque nuit à 02h00.",
+    "retention_info": "Les sauvegardes incluent la base de données et les fichiers (documents, preuves, logos) et sont conservées 30 jours. La sauvegarde automatique s'exécute chaque nuit à 02:00.",
     "col": {
       "date": "Date",
       "filename": "Fichier",
@@ -1405,7 +1405,7 @@
     },
     "confirm_restore": {
       "title": "Confirmer la restauration",
-      "message": "Vous êtes sur le point de restaurer la base de données depuis la sauvegarde \"{{filename}}\". Toutes les données actuelles seront écrasées. Cette opération est irréversible. Continuer ?"
+      "message": "Vous êtes sur le point de restaurer l'ensemble du système à partir de la sauvegarde « {{filename}} » : base de données et fichiers (documents, preuves, logos). Toutes les données et tous les fichiers actuels seront écrasés. Cette opération est irréversible. Continuer ?"
     },
     "confirm_delete": {
       "title": "Supprimer la sauvegarde",
@@ -1425,8 +1425,8 @@
     "restoring": "Restauration de la base de données en cours... la page s'actualise automatiquement.",
     "import": {
       "title": "Importer une sauvegarde",
-      "help": "Chargez un fichier de sauvegarde téléchargé précédemment (.dump ou .dump.enc). Le contenu est vérifié avant acceptation ; les fichiers chiffrés doivent être déchiffrables avec la clé configurée sur ce serveur.",
-      "select_file": "Choisir un fichier (.dump / .dump.enc)",
+      "help": "Importez un fichier de sauvegarde téléchargé précédemment (.tar ou .tar.enc, ou les anciens .dump). Le contenu est vérifié avant acceptation ; les fichiers chiffrés doivent être déchiffrables avec la clé configurée sur ce serveur.",
+      "select_file": "Sélectionner un fichier (.tar / .tar.enc)",
       "submit": "Importer",
       "uploading": "Téléversement en cours..."
     }

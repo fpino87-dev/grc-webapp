@@ -1369,11 +1369,11 @@
   },
   "backups": {
     "title": "Kopia zapasowa & Przywracanie",
-    "subtitle": "Zarządzaj kopiami zapasowymi bazy danych. Automatyczna kopia uruchamia się codziennie o 02:00.",
+    "subtitle": "Zarządzaj pełnymi kopiami zapasowymi (baza danych + pliki: dokumenty, dowody, logo). Automatyczna kopia jest wykonywana codziennie o 02:00.",
     "create": "Utwórz kopię zapasową",
     "creating": "Tworzenie...",
     "empty": "Brak dostępnych kopii zapasowych. Utwórz pierwszą ręczną kopię.",
-    "retention_info": "Kopie zapasowe są przechowywane przez 30 dni. Automatyczna kopia uruchamia się każdej nocy o 02:00.",
+    "retention_info": "Kopie zapasowe obejmują bazę danych i pliki (dokumenty, dowody, logo) i są przechowywane przez 30 dni. Automatyczna kopia jest wykonywana co noc o 02:00.",
     "col": {
       "date": "Data",
       "filename": "Plik",
@@ -1405,7 +1405,7 @@
     },
     "confirm_restore": {
       "title": "Potwierdź przywrócenie",
-      "message": "Zamierzasz przywrócić bazę danych z kopii zapasowej \"{{filename}}\". Wszystkie bieżące dane zostaną nadpisane. Tej operacji nie można cofnąć. Kontynuować?"
+      "message": "Zamierzasz przywrócić cały system z kopii zapasowej „{{filename}}”: bazę danych i pliki (dokumenty, dowody, logo). Wszystkie bieżące dane i pliki zostaną nadpisane. Tej operacji nie można cofnąć. Kontynuować?"
     },
     "confirm_delete": {
       "title": "Usuń kopię zapasową",
@@ -1425,8 +1425,8 @@
     "restoring": "Trwa przywracanie bazy danych... strona odświeża się automatycznie.",
     "import": {
       "title": "Importuj kopię zapasową",
-      "help": "Prześlij wcześniej pobrany plik kopii zapasowej (.dump lub .dump.enc). Zawartość jest weryfikowana przed przyjęciem; pliki zaszyfrowane muszą dać się odszyfrować kluczem skonfigurowanym na tym serwerze.",
-      "select_file": "Wybierz plik (.dump / .dump.enc)",
+      "help": "Prześlij wcześniej pobrany plik kopii zapasowej (.tar lub .tar.enc albo starsze .dump). Zawartość jest weryfikowana przed zaakceptowaniem; pliki zaszyfrowane muszą być możliwe do odszyfrowania kluczem skonfigurowanym na tym serwerze.",
+      "select_file": "Wybierz plik (.tar / .tar.enc)",
       "submit": "Importuj",
       "uploading": "Przesyłanie..."
     }

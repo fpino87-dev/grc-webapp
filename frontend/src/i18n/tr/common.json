@@ -1369,11 +1369,11 @@
   },
   "backups": {
     "title": "Yedekleme & Geri Yükleme",
-    "subtitle": "Veritabanı yedeklerini yönetin. Otomatik yedekleme her gün saat 02:00'de çalışır.",
+    "subtitle": "Tam yedekleri yönetin (veritabanı + dosyalar: belgeler, kanıtlar, logolar). Otomatik yedekleme her gün saat 02:00'de çalışır.",
     "create": "Yedek oluştur",
     "creating": "Oluşturuluyor...",
     "empty": "Kullanılabilir yedek yok. İlk manuel yedeği oluşturun.",
-    "retention_info": "Yedekler 30 gün boyunca saklanır. Otomatik yedekleme her gece saat 02:00'de çalışır.",
+    "retention_info": "Yedekler veritabanını ve dosyaları (belgeler, kanıtlar, logolar) içerir ve 30 gün saklanır. Otomatik yedekleme her gece saat 02:00'de çalışır.",
     "col": {
       "date": "Tarih",
       "filename": "Dosya",
@@ -1405,7 +1405,7 @@
     },
     "confirm_restore": {
       "title": "Geri yüklemeyi onayla",
-      "message": "\"{{filename}}\" yedeğinden veritabanını geri yüklemek üzeresiniz. Tüm mevcut veriler üzerine yazılacak. Bu işlem geri alınamaz. Devam edilsin mi?"
+      "message": "\"{{filename}}\" yedeğinden tüm sistemi geri yüklemek üzeresiniz: veritabanı ve dosyalar (belgeler, kanıtlar, logolar). Mevcut tüm veriler ve dosyalar üzerine yazılacak. Bu işlem geri alınamaz. Devam edilsin mi?"
     },
     "confirm_delete": {
       "title": "Yedeği sil",
@@ -1425,8 +1425,8 @@
     "restoring": "Veritabanı geri yükleniyor... sayfa otomatik olarak yenilenir.",
     "import": {
       "title": "Yedek içe aktar",
-      "help": "Daha önce indirilen bir yedek dosyasını yükleyin (.dump veya .dump.enc). İçerik kabul edilmeden önce doğrulanır; şifreli dosyaların bu sunucuda yapılandırılan anahtarla çözülebilmesi gerekir.",
-      "select_file": "Dosya seç (.dump / .dump.enc)",
+      "help": "Daha önce indirdiğiniz bir yedek dosyasını yükleyin (.tar veya .tar.enc ya da eski .dump). İçerik kabul edilmeden önce doğrulanır; şifreli dosyaların bu sunucuda yapılandırılmış anahtarla çözülebilmesi gerekir.",
+      "select_file": "Dosya seç (.tar / .tar.enc)",
       "submit": "İçe aktar",
       "uploading": "Yükleniyor..."
     }

@@ -6,7 +6,7 @@ from pathlib import Path
 from django.conf import settings
 from django.utils import timezone
 
-from . import encryption
+from . import archive, encryption
 
 logger = logging.getLogger("apps.backups")
 
@@ -38,8 +38,12 @@ def create_backup(user, backup_type: str = "manual"):
     _ensure_backup_dir()
 
     ts = timezone.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"backup_{ts}_{backup_type}.dump"
+    # Backup completo: archivio tar con il dump DB + l'albero MEDIA_ROOT.
+    filename = f"backup_{ts}_{backup_type}.tar"
     filepath = BACKUP_DIR / filename
+    # Il pg_dump viene scritto su un file temporaneo e poi impacchettato nel tar
+    # insieme ai media; il temporaneo è rimosso a fine impacchettamento.
+    dump_tmp = BACKUP_DIR / f"backup_{ts}_{backup_type}.dbtmp"
 
     record = BackupRecord.objects.create(
         filename=filename,
@@ -59,7 +63,7 @@ def create_backup(user, backup_type: str = "manual"):
         "-p", db["port"],
         "-U", db["user"],
         "-d", db["name"],
-        "-f", str(filepath),
+        "-f", str(dump_tmp),
     ]
 
     try:
@@ -67,6 +71,7 @@ def create_backup(user, backup_type: str = "manual"):
             cmd, env=env, capture_output=True, text=True, timeout=300
         )
         if result.returncode != 0:
+            dump_tmp.unlink(missing_ok=True)
             record.status        = BackupRecord.Status.FAILED
             record.error_message = result.stderr[:2000]
             record.completed_at  = timezone.now()
@@ -88,6 +93,34 @@ def create_backup(user, backup_type: str = "manual"):
                 },
             )
         else:
+            # Impacchetta dump DB + albero media in un unico tar, poi rimuove
+            # il dump temporaneo. Da qui in avanti `filepath` è l'archivio.
+            try:
+                archive.build_archive(dump_tmp, filepath)
+            except Exception as exc:
+                dump_tmp.unlink(missing_ok=True)
+                filepath.unlink(missing_ok=True)
+                record.status        = BackupRecord.Status.FAILED
+                record.error_message = f"Creazione archivio fallita: {exc}"[:2000]
+                record.completed_at  = timezone.now()
+                record.save(update_fields=["status", "error_message", "completed_at", "updated_at"])
+                logger.exception("Creazione archivio backup fallita")
+                log_action(
+                    user=user,
+                    action_code="BACKUP_FAILED",
+                    level="L2",
+                    entity=record,
+                    payload={
+                        "filename": record.filename,
+                        "type": backup_type,
+                        "error": str(exc)[:500],
+                        "stage": "archive",
+                    },
+                )
+                return record
+            finally:
+                dump_tmp.unlink(missing_ok=True)
+
             # newfix R4: cifratura at-rest se BACKUP_ENCRYPTION_KEY e' settata.
             encrypted = False
             if encryption.is_encryption_enabled():
@@ -206,12 +239,20 @@ def import_backup(uploaded_file, user):
 
     original_name = Path(getattr(uploaded_file, "name", "") or "").name
     lower = original_name.lower()
-    if lower.endswith(".dump.enc"):
+    if lower.endswith(".enc"):
         encrypted = True
-    elif lower.endswith(".dump"):
-        encrypted = False
+        base = lower[: -len(".enc")]
     else:
-        raise ValueError("Formato non supportato: sono ammessi solo file .dump o .dump.enc.")
+        encrypted = False
+        base = lower
+    if base.endswith(".tar"):
+        suffix = ".tar"
+    elif base.endswith(".dump"):
+        suffix = ".dump"
+    else:
+        raise ValueError(
+            "Formato non supportato: sono ammessi solo file .tar, .tar.enc, .dump o .dump.enc."
+        )
 
     max_bytes = getattr(settings, "BACKUP_IMPORT_MAX_BYTES", 2 * 1024**3)
     if uploaded_file.size > max_bytes:
@@ -225,37 +266,46 @@ def import_backup(uploaded_file, user):
         )
 
     ts = timezone.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"backup_{ts}_imported.dump" + (ENCRYPTED_SUFFIX if encrypted else "")
+    filename = f"backup_{ts}_imported{suffix}" + (ENCRYPTED_SUFFIX if encrypted else "")
     filepath = BACKUP_DIR / filename
 
     with open(filepath, "wb") as dest:
         for chunk in uploaded_file.chunks():
             dest.write(chunk)
 
+    # Verifica del contenuto sul plaintext: archivio completo (tar con
+    # database.dump) oppure dump pg_dump grezzo (legacy). In entrambi i casi
+    # il dump deve iniziare col magic PGDMP, così un import accettato è
+    # garantito ripristinabile.
     try:
+        probe_path = None
         if encrypted:
             probe_path = filepath.with_name(filepath.name + ".probe")
             try:
                 encryption.decrypt_file(filepath, probe_path)
-                with open(probe_path, "rb") as f:
-                    head = f.read(len(_PGDMP_MAGIC))
             except Exception:
                 raise ValueError(
                     "Il file cifrato non è decifrabile con la chiave configurata "
                     "su questo server (chiave diversa o file corrotto)."
                 ) from None
-            finally:
-                if probe_path.exists():
-                    probe_path.unlink()
+            plain_for_check = probe_path
         else:
-            with open(filepath, "rb") as f:
-                head = f.read(len(_PGDMP_MAGIC))
+            plain_for_check = filepath
 
-        if head != _PGDMP_MAGIC:
-            raise ValueError(
-                "Il contenuto non è un backup PostgreSQL valido "
-                "(atteso formato custom pg_dump)."
-            )
+        try:
+            if archive.is_full_archive(plain_for_check):
+                head = archive.read_db_dump_head(plain_for_check)
+            else:
+                with open(plain_for_check, "rb") as f:
+                    head = f.read(len(archive.PGDMP_MAGIC))
+            if head != archive.PGDMP_MAGIC:
+                raise ValueError(
+                    "Il contenuto non è un backup valido (atteso archivio GRC "
+                    "o dump pg_dump in formato custom)."
+                )
+        finally:
+            if probe_path is not None and probe_path.exists():
+                probe_path.unlink()
     except ValueError:
         # File rifiutato: non lasciare l'upload nella directory dei backup.
         if filepath.exists():
@@ -361,47 +411,97 @@ def restore_backup(backup_id, user):
             raise RuntimeError(f"Decifratura backup fallita: {exc}") from exc
         plain_filepath = decrypted_temp
 
-    db = _db_params()
-    env = os.environ.copy()
-    env["PGPASSWORD"] = db["password"]
-
-    cmd = [
-        "pg_restore",
-        "-h", db["host"],
-        "-p", db["port"],
-        "-U", db["user"],
-        "-d", db["name"],
-        "--clean",
-        "--if-exists",
-        "--no-owner",
-        "--no-privileges",
-        str(plain_filepath),
-    ]
-
+    # Backup completo (tar) → estrai il dump DB e ripristina anche i media;
+    # backup legacy (dump pg_dump grezzo) → ripristina il solo database.
+    is_full = archive.is_full_archive(plain_filepath)
+    db_dump_path = plain_filepath
+    db_dump_temp: Path | None = None
     try:
+        if is_full:
+            db_dump_temp = plain_filepath.with_suffix(plain_filepath.suffix + ".dbrestore")
+            try:
+                archive.extract_db_dump(plain_filepath, db_dump_temp)
+            except Exception as exc:
+                log_action(
+                    user=user,
+                    action_code="BACKUP_RESTORE_FAILED",
+                    level="L3",
+                    entity=record,
+                    payload={
+                        "filename": record.filename,
+                        "error": str(exc)[:500],
+                        "stage": "archive_extract",
+                    },
+                )
+                raise RuntimeError(f"Estrazione archivio fallita: {exc}") from exc
+            db_dump_path = db_dump_temp
+
+        db = _db_params()
+        env = os.environ.copy()
+        env["PGPASSWORD"] = db["password"]
+
+        cmd = [
+            "pg_restore",
+            "-h", db["host"],
+            "-p", db["port"],
+            "-U", db["user"],
+            "-d", db["name"],
+            "--clean",
+            "--if-exists",
+            "--no-owner",
+            "--no-privileges",
+            str(db_dump_path),
+        ]
+
         result = subprocess.run(
             cmd, env=env, capture_output=True, text=True, timeout=600
         )
+
+        # pg_restore restituisce returncode=1 anche per warning non fatali
+        # Consideriamo fallimento solo se non c'è output o stderr contiene ERROR
+        if result.returncode > 1 or "ERROR" in result.stderr:
+            # newfix F2 — fallimento restore (pg_restore) e' privileged.
+            log_action(
+                user=user,
+                action_code="BACKUP_RESTORE_FAILED",
+                level="L3",
+                entity=record,
+                payload={
+                    "filename": record.filename,
+                    "error": (result.stderr or "")[:500],
+                    "stage": "pg_restore",
+                },
+            )
+            raise RuntimeError(result.stderr[:2000] or "Errore sconosciuto durante il restore.")
+
+        # DB ripristinato: ora rimpiazza l'albero media (swap atomico). Un
+        # fallimento qui lascia il DB già ripristinato ma i media non allineati:
+        # è un evento privileged e va segnalato senza fingere successo.
+        if is_full:
+            try:
+                archive.restore_media(plain_filepath)
+            except Exception as exc:
+                log_action(
+                    user=user,
+                    action_code="BACKUP_RESTORE_FAILED",
+                    level="L3",
+                    entity=record,
+                    payload={
+                        "filename": record.filename,
+                        "error": str(exc)[:500],
+                        "stage": "media",
+                    },
+                )
+                raise RuntimeError(
+                    "Database ripristinato ma il ripristino dei file media è "
+                    f"fallito: {exc}"
+                ) from exc
     finally:
-        # Pulisci sempre il plain temporaneo, anche se pg_restore fallisce.
+        # Pulisci sempre i temporanei, anche se il restore fallisce.
+        if db_dump_temp is not None and db_dump_temp.exists():
+            db_dump_temp.unlink()
         if decrypted_temp is not None and decrypted_temp.exists():
             decrypted_temp.unlink()
-    # pg_restore restituisce returncode=1 anche per warning non fatali
-    # Consideriamo fallimento solo se non c'è output o stderr contiene ERROR
-    if result.returncode > 1 or "ERROR" in result.stderr:
-        # newfix F2 — fallimento restore (pg_restore) e' privileged.
-        log_action(
-            user=user,
-            action_code="BACKUP_RESTORE_FAILED",
-            level="L3",
-            entity=record,
-            payload={
-                "filename": record.filename,
-                "error": (result.stderr or "")[:500],
-                "stage": "pg_restore",
-            },
-        )
-        raise RuntimeError(result.stderr[:2000] or "Errore sconosciuto durante il restore.")
 
     record.status = BackupRecord.Status.RESTORED
     record.save(update_fields=["status", "updated_at"])
@@ -411,9 +511,9 @@ def restore_backup(backup_id, user):
         action_code="BACKUP_RESTORED",
         level="L3",
         entity=record,
-        payload={"filename": record.filename},
+        payload={"filename": record.filename, "media_restored": is_full},
     )
-    logger.info("Restore completato da: %s", record.filename)
+    logger.info("Restore completato da: %s (media=%s)", record.filename, is_full)
 
 
 def delete_backup(backup_id, user):

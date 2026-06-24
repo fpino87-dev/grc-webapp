@@ -18,9 +18,13 @@ def admin_user(db):
 
 
 @pytest.fixture(autouse=True)
-def patch_backup_dir(tmp_path, monkeypatch):
-    """Usa una directory temporanea per i backup durante i test."""
+def patch_backup_dir(tmp_path, monkeypatch, settings):
+    """Usa directory temporanee per backup e media durante i test, così
+    l'impacchettamento dell'archivio non tocca il MEDIA_ROOT reale."""
     monkeypatch.setattr("apps.backups.services.BACKUP_DIR", tmp_path)
+    media_dir = tmp_path / "media"
+    media_dir.mkdir()
+    settings.MEDIA_ROOT = str(media_dir)
     return tmp_path
 
 
@@ -42,9 +46,10 @@ def test_create_backup_success(admin_user, tmp_path):
         record = create_backup(admin_user, backup_type="manual")
 
     assert record.status == "completed"
-    assert record.size_bytes == len(b"FAKE_DUMP_DATA")
+    # size = dimensione dell'archivio tar (dump + media), non del solo dump.
+    assert record.size_bytes > 0
     assert record.filename.startswith("backup_")
-    assert record.filename.endswith("_manual.dump")
+    assert record.filename.endswith("_manual.tar")
     assert record.completed_at is not None
 
 
@@ -101,7 +106,7 @@ def test_create_backup_type_auto(admin_user, tmp_path):
         record = create_backup(admin_user, backup_type="auto")
 
     assert record.backup_type == "auto"
-    assert "_auto.dump" in record.filename
+    assert "_auto.tar" in record.filename
 
 
 # ── cleanup_old_backups ───────────────────────────────────────────────────────

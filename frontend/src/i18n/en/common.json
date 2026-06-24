@@ -1290,11 +1290,11 @@
   },
   "backups": {
     "title": "Backup & Restore",
-    "subtitle": "Manage database backups. Automatic backup runs every day at 02:00.",
+    "subtitle": "Manage complete backups (database + files: documents, evidence, logos). The automatic backup runs every day at 02:00.",
     "create": "Create backup",
     "creating": "Creating...",
     "empty": "No backups available. Create the first manual backup.",
-    "retention_info": "Backups are retained for 30 days. Automatic backup runs every night at 02:00.",
+    "retention_info": "Backups include the database and files (documents, evidence, logos) and are kept for 30 days. The automatic backup runs every night at 02:00.",
     "col": {
       "date": "Date",
       "filename": "File",
@@ -1326,7 +1326,7 @@
     },
     "confirm_restore": {
       "title": "Confirm restore",
-      "message": "You are about to restore the database from backup \"{{filename}}\". All current data will be overwritten. This operation cannot be undone. Continue?"
+      "message": "You are about to restore the entire system from backup \"{{filename}}\": database and files (documents, evidence, logos). All current data and files will be overwritten. This operation cannot be undone. Continue?"
     },
     "confirm_delete": {
       "title": "Delete backup",
@@ -1346,8 +1346,8 @@
     "restoring": "Database restore in progress... this page refreshes automatically.",
     "import": {
       "title": "Import backup",
-      "help": "Upload a previously downloaded backup file (.dump or .dump.enc). The content is verified before being accepted; encrypted files must be decryptable with the key configured on this server.",
-      "select_file": "Choose file (.dump / .dump.enc)",
+      "help": "Upload a backup file you downloaded earlier (.tar or .tar.enc, or the older .dump). The content is verified before acceptance; encrypted files must be decryptable with the key configured on this server.",
+      "select_file": "Select file (.tar / .tar.enc)",
       "submit": "Import",
       "uploading": "Uploading..."
     }

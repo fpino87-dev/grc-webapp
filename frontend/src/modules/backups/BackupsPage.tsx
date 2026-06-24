@@ -113,7 +113,7 @@ function ImportModal({
         <input
           ref={inputRef}
           type="file"
-          accept=".dump,.enc"
+          accept=".tar,.dump,.enc"
           className="hidden"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
         />
