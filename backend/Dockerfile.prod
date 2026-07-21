@@ -29,6 +29,7 @@ ENV DJANGO_SETTINGS_MODULE=core.settings.prod \
     SECRET_KEY=collectstatic-build-placeholder \
     DATABASE_URL=postgresql://x:x@x:5432/x \
     REDIS_URL=redis://x:6379/0 \
+    FRONTEND_URL=https://build-placeholder.example.com \
     # Placeholder only for collectstatic/build; real FERNET_KEY must be provided at runtime.
     FERNET_KEY=
 # Compila i cataloghi i18n (.po → .mo): senza questo passo Django cade sempre

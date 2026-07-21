@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password as django_validate_password
-from django.core.exceptions import ValidationError
 from rest_framework import viewsets, status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from core.audit import log_action
 from .models import UserPlantAccess, GrcRole
 from .permissions import IsGrcSuperAdmin
-from .services import deactivate_grc_user
+from .services import anonymize_user
 
 
 def _validate_password_policy(value):
@@ -107,14 +106,25 @@ class UserViewSet(viewsets.ModelViewSet):
         return [IsAuthenticated(), IsGrcSuperAdmin()]
 
     def destroy(self, request, *args, **kwargs):
+        # "Cancella utente": anonimizza (GDPR Art. 17) invece di soft-delete.
+        # Rispetto a deactivate_grc_user questo libera username/email (li
+        # riassegna a deleted_<id>@anonymized.invalid), così l'utente può
+        # essere ricreato con lo stesso username. I record collegati restano
+        # ma perdono il riferimento all'identità reale.
         user = self.get_object()
-        try:
-            deactivate_grc_user(user, request.user)
-        except ValidationError as e:
+        # Stesse guardie di deactivate_grc_user: no auto-cancellazione, un
+        # non-superuser non può rimuovere un superuser.
+        if user.pk == request.user.pk:
             return Response(
-                {"detail": e.messages[0] if getattr(e, "messages", None) else str(e)},
+                {"detail": "Non puoi cancellare il tuo account da qui."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        if user.is_superuser and not request.user.is_superuser:
+            return Response(
+                {"detail": "Operazione non consentita su un account superuser."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        anonymize_user(user, request.user, reason="Cancellazione da gestione utenti")
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
