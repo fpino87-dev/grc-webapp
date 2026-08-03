@@ -1,9 +1,12 @@
 """Test limiti upload e body size (newfix S12) + cross-check ext/MIME (#11)."""
+from unittest.mock import patch
+
 import pytest
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 
+import core.uploads as uploads
 from core.uploads import EVIDENCE_EXTENSIONS, EVIDENCE_MIME_TYPES, validate_uploaded_file
 
 import base64
@@ -11,6 +14,27 @@ import io
 import zipfile
 
 PDF_BYTES = b"%PDF-1.4\n%fake pdf body\n1 0 obj\n<<>>\nendobj\n"
+
+
+def _ooxml_bytes(*, first_entry, part, extra=()):
+    """Costruisce un pacchetto OPC (OOXML) minimale, controllando quale entry
+    viene scritto per primo. Word/Excel scrivono `[Content_Types].xml` per
+    primo, ma altri strumenti mettono `_rels/.rels` o la parte principale: in
+    quel caso libmagic non riconosce lo specifico MIME Office."""
+    buf = io.BytesIO()
+    z = zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED)
+    entries = {
+        "_rels/.rels": "<Relationships/>",
+        "[Content_Types].xml": '<?xml version="1.0"?><Types/>',
+        part: "<x/>",
+    }
+    entries.update(extra)
+    # scrivi prima `first_entry`, poi il resto nell'ordine di inserimento
+    z.writestr(first_entry, entries.pop(first_entry))
+    for name, data in entries.items():
+        z.writestr(name, data)
+    z.close()
+    return buf.getvalue()
 
 
 def _docx_bytes_marker_past_header():
@@ -79,6 +103,66 @@ def test_docx_with_markers_past_2048_bytes_ok():
     non deve essere rifiutato. Prima del fix libmagic vedeva solo la testa e
     restituiva application/octet-stream → 400 sull'upload di nuova versione."""
     validate_uploaded_file(_file("verbale.docx", _docx_bytes_marker_past_header()))
+
+
+def test_docx_with_rels_as_first_entry_ok():
+    """Regressione (file reale utente): un .docx valido in cui il PRIMO entry
+    dello ZIP è `_rels/.rels` (non `[Content_Types].xml`). A seconda della
+    versione della magic DB, libmagic può non riconoscere lo specifico MIME
+    Office e restituire application/octet-stream → 400. Il fallback OPC via
+    zipfile lo accetta comunque (contiene [Content_Types].xml + word/)."""
+    validate_uploaded_file(
+        _file("manuale.docx", _ooxml_bytes(first_entry="_rels/.rels", part="word/document.xml"))
+    )
+
+
+# I test seguenti forzano libmagic a restituire application/octet-stream (la
+# condizione osservata sul file reale dell'utente), così il ramo di fallback
+# OPC è esercitato in modo deterministico, indipendente dalla magic DB locale.
+
+def test_ooxml_fallback_accepts_valid_docx_when_libmagic_says_octet_stream():
+    data = _ooxml_bytes(first_entry="_rels/.rels", part="word/document.xml")
+    with patch.object(uploads.magic, "from_buffer", return_value="application/octet-stream"):
+        validate_uploaded_file(_file("manuale.docx", data))
+
+
+def test_ooxml_fallback_rejects_xlsx_renamed_to_docx():
+    """Un vero .xlsx rinominato .docx: ha la cartella `xl/`, non `word/` → il
+    fallback OPC non lo accetta (cross-check estensione preservato)."""
+    data = _ooxml_bytes(first_entry="_rels/.rels", part="xl/workbook.xml")
+    with patch.object(uploads.magic, "from_buffer", return_value="application/octet-stream"):
+        with pytest.raises(ValidationError):
+            validate_uploaded_file(_file("finto.docx", data))
+
+
+def test_ooxml_fallback_rejects_plain_zip_renamed_to_docx():
+    """Uno ZIP generico (senza [Content_Types].xml) rinominato .docx non deve
+    passare il fallback OPC."""
+    buf = io.BytesIO()
+    z = zipfile.ZipFile(buf, "w")
+    z.writestr("foo/bar.txt", "hi")
+    z.close()
+    with patch.object(uploads.magic, "from_buffer", return_value="application/octet-stream"):
+        with pytest.raises(ValidationError):
+            validate_uploaded_file(_file("finto.docx", buf.getvalue()))
+
+
+def test_ooxml_fallback_rejects_non_zip_renamed_to_docx():
+    """Un PDF rinominato .docx: non è uno ZIP → BadZipFile → rifiutato anche
+    se libmagic dà octet-stream."""
+    with patch.object(uploads.magic, "from_buffer", return_value="application/octet-stream"):
+        with pytest.raises(ValidationError):
+            validate_uploaded_file(_file("finto.docx", PDF_BYTES))
+
+
+def test_ooxml_fallback_accepts_valid_xlsx_when_libmagic_says_zip():
+    data = _ooxml_bytes(first_entry="_rels/.rels", part="xl/workbook.xml")
+    with patch.object(uploads.magic, "from_buffer", return_value="application/zip"):
+        validate_uploaded_file(
+            _file("dati.xlsx", data),
+            allowed_extensions=EVIDENCE_EXTENSIONS,
+            allowed_mimes=EVIDENCE_MIME_TYPES,
+        )
 
 
 def test_csv_detected_as_text_plain_ok():

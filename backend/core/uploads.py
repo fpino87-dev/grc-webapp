@@ -10,7 +10,9 @@ I preset coprono i casi tipici: documenti d'ufficio, evidenze (PDF + immagini),
 allegati incidente. Per casi nuovi, comporre `validate_uploaded_file(file, allowed_extensions=..., allowed_mimes=..., max_bytes=...)`.
 """
 
+import io
 import os
+import zipfile
 
 import magic
 from django.core.exceptions import ValidationError
@@ -65,6 +67,38 @@ EXT_TO_MIME: dict[str, set[str]] = {
     "csv":  {"text/csv", "application/csv", "text/plain"},
 }
 
+# Gli OOXML sono contenitori ZIP (OPC). libmagic li classifica con lo specifico
+# MIME Office SOLO se `[Content_Types].xml` è il PRIMO entry dell'archivio
+# (convenzione, non requisito, di MS Word/Excel). File prodotti o ri-zippati da
+# altri strumenti mettono `_rels/.rels` o `word/document.xml` per primo: allora
+# libmagic ripiega su application/zip o application/octet-stream e un file
+# perfettamente valido verrebbe rifiutato. Per questi casi validiamo la
+# struttura OPC direttamente via zipfile (entry `[Content_Types].xml` + cartella
+# di parte attesa), che è indipendente dall'ordine degli entry.
+_OOXML_EXT_MARKERS = {
+    "docx": "word/",
+    "xlsx": "xl/",
+    "pptx": "ppt/",
+}
+_ZIP_LIKE_MIMES = {"application/zip", "application/octet-stream"}
+
+
+def _looks_like_ooxml(content: bytes, part_prefix: str) -> bool:
+    """True se ``content`` è un pacchetto OPC (OOXML) con la parte attesa.
+
+    Ispeziona solo la central directory (namelist), non estrae nulla: sicuro
+    anche su archivi ostili. Un non-ZIP (es. PDF rinominato .docx) solleva
+    BadZipFile → False; un altro OOXML rinominato (xlsx→.docx) non ha la
+    cartella attesa → False (cross-check estensione preservato)."""
+    try:
+        with zipfile.ZipFile(io.BytesIO(content)) as zf:
+            names = zf.namelist()
+    except zipfile.BadZipFile:
+        return False
+    if "[Content_Types].xml" not in names:
+        return False
+    return any(name.startswith(part_prefix) for name in names)
+
 
 def validate_uploaded_file(
     uploaded_file,
@@ -95,17 +129,26 @@ def validate_uploaded_file(
             % {"formats": ", ".join(sorted(allowed_extensions))}
         )
 
-    # NB: leggere l'intero contenuto, non solo i primi 2048 byte. Gli OOXML
-    # (docx/xlsx/pptx) sono archivi ZIP e libmagic li distingue dallo ZIP
-    # generico solo trovando i marker `word/`/`xl/`/`ppt/`, che nei file reali
-    # di Word/Excel stanno spesso oltre i 2048 byte (o nella central directory
-    # in coda). Con la sola testa libmagic ripiegava su application/octet-stream
-    # o application/zip → falso rifiuto "il contenuto non corrisponde
-    # all'estensione". Il size cap sopra garantisce che qui il file sia ≤ max_bytes.
+    # NB: leggere l'intero contenuto, non solo i primi 2048 byte. Il size cap
+    # sopra garantisce che qui il file sia ≤ max_bytes, e il contenuto serve
+    # comunque interamente per l'eventuale ispezione OPC (vedi sotto).
     uploaded_file.seek(0)
     content = uploaded_file.read()
     uploaded_file.seek(0)
     mime_type = magic.from_buffer(content, mime=True)
+
+    # Fallback OOXML: se l'estensione è docx/xlsx/pptx ma libmagic ha restituito
+    # un MIME ZIP-generico (perché `[Content_Types].xml` non è il primo entry),
+    # verifichiamo la struttura OPC via zipfile e, se valida, normalizziamo il
+    # MIME a quello atteso per l'estensione. Vedi _looks_like_ooxml.
+    part_prefix = _OOXML_EXT_MARKERS.get(ext)
+    if (
+        part_prefix is not None
+        and mime_type in _ZIP_LIKE_MIMES
+        and _looks_like_ooxml(content, part_prefix)
+    ):
+        mime_type = next(iter(EXT_TO_MIME[ext]))
+
     if mime_type not in allowed_mimes:
         raise ValidationError(
             _("Tipo di file non consentito. Il contenuto del file non corrisponde all'estensione.")
