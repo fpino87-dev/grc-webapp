@@ -73,9 +73,11 @@ jobs:
       - name: npm audit (production)
         working-directory: frontend
         run: |
-          # Blocca solo su high/critical in dipendenze di produzione.
-          # low/moderate sono accettabili in attesa di patch upstream.
-          npm audit --omit=dev --audit-level=high
+          # Blocca su high/critical in dipendenze di produzione, con eccezioni
+          # documentate (advisory non applicabili a questa app). low/moderate
+          # sono accettabili in attesa di patch upstream. Vedi lo script per la
+          # lista delle eccezioni e la relativa giustificazione.
+          node ../.github/scripts/npm-audit-gate.mjs
       - name: Save full audit report (always)
         if: always()
         working-directory: frontend
