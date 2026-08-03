@@ -60,6 +60,26 @@ def is_full_archive(path: Path) -> bool:
         return False
 
 
+def _chown_tree(root: Path, uid: int, gid: int) -> None:
+    """Chown ricorsivo di ``root`` (inclusa la radice) a ``uid:gid``.
+
+    No-op sulle piattaforme prive di ``os.chown`` (Windows). I singoli errori
+    (es. file già di proprietà nostra, EPERM da non-root) sono best-effort e non
+    devono far fallire il restore."""
+    if not hasattr(os, "chown"):
+        return
+    try:
+        os.chown(root, uid, gid)
+    except OSError:
+        pass
+    for dirpath, dirnames, filenames in os.walk(root):
+        for name in dirnames + filenames:
+            try:
+                os.chown(os.path.join(dirpath, name), uid, gid, follow_symlinks=False)
+            except OSError:
+                pass
+
+
 def _iter_safe_members(tar: tarfile.TarFile):
     """Restituisce i soli membri attesi (``database.dump`` o ``media/...``),
     sollevando ValueError su path assoluti o traversal. Membri inattesi
@@ -135,6 +155,14 @@ def restore_media(path: Path) -> bool:
         if not extracted_media.exists():
             # Solo il dir entry "media" senza contenuto: tratta come media vuoto.
             extracted_media.mkdir(parents=True, exist_ok=True)
+
+        # Riallinea l'ownership all'utente runtime del processo. Il tar preserva
+        # uid/gid di chi ha creato il backup (potenzialmente un altro deploy): se
+        # il restore gira da root quell'owner estraneo sopravvive e il container
+        # applicativo — che gira come utente non privilegiato — non può più
+        # scrivere in MEDIA_ROOT (upload → PermissionError → 500). Chown all'uid
+        # corrente è idempotente: da non-root i file sono già di proprietà nostra.
+        _chown_tree(extracted_media, os.getuid(), os.getgid())
 
         # Swap atomico. Se qualcosa fallisce dopo aver spostato via il vecchio
         # media, si tenta il rollback per non lasciare MEDIA_ROOT mancante.

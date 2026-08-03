@@ -87,6 +87,27 @@ def test_restore_media_swaps_tree_atomically(tmp_path, settings):
     assert not any(p.name.startswith(".media_") for p in tmp_path.iterdir())
 
 
+def test_restore_media_chowns_extracted_tree_to_runtime_user(tmp_path, settings):
+    """Il restore deve riallineare l'ownership dell'albero estratto all'utente
+    runtime, altrimenti (restore da root con tar creato da un altro deploy) il
+    container applicativo non-root non può scrivere in MEDIA_ROOT → upload 500."""
+    arc = _make_archive(tmp_path, {"plant-logos/p/logo.png": b"L"})
+    live = tmp_path / "media_live"
+    live.mkdir()
+    settings.MEDIA_ROOT = str(live)
+
+    import os as _os
+    with patch.object(archive, "_chown_tree") as chown, \
+            patch.object(archive.os, "getuid", return_value=4242, create=True), \
+            patch.object(archive.os, "getgid", return_value=4343, create=True):
+        assert archive.restore_media(arc) is True
+
+    assert chown.call_count == 1
+    called_path, uid, gid = chown.call_args.args
+    assert Path(called_path).name == archive.MEDIA_PREFIX
+    assert (uid, gid) == (4242, 4343)
+
+
 def test_restore_media_noop_when_archive_has_no_media(tmp_path, settings):
     dump = tmp_path / "db.dump"
     dump.write_bytes(PGDMP)
