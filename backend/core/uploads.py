@@ -95,10 +95,17 @@ def validate_uploaded_file(
             % {"formats": ", ".join(sorted(allowed_extensions))}
         )
 
+    # NB: leggere l'intero contenuto, non solo i primi 2048 byte. Gli OOXML
+    # (docx/xlsx/pptx) sono archivi ZIP e libmagic li distingue dallo ZIP
+    # generico solo trovando i marker `word/`/`xl/`/`ppt/`, che nei file reali
+    # di Word/Excel stanno spesso oltre i 2048 byte (o nella central directory
+    # in coda). Con la sola testa libmagic ripiegava su application/octet-stream
+    # o application/zip → falso rifiuto "il contenuto non corrisponde
+    # all'estensione". Il size cap sopra garantisce che qui il file sia ≤ max_bytes.
     uploaded_file.seek(0)
-    header = uploaded_file.read(2048)
+    content = uploaded_file.read()
     uploaded_file.seek(0)
-    mime_type = magic.from_buffer(header, mime=True)
+    mime_type = magic.from_buffer(content, mime=True)
     if mime_type not in allowed_mimes:
         raise ValidationError(
             _("Tipo di file non consentito. Il contenuto del file non corrisponde all'estensione.")

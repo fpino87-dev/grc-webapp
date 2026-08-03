@@ -7,8 +7,26 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from core.uploads import EVIDENCE_EXTENSIONS, EVIDENCE_MIME_TYPES, validate_uploaded_file
 
 import base64
+import io
+import zipfile
 
 PDF_BYTES = b"%PDF-1.4\n%fake pdf body\n1 0 obj\n<<>>\nendobj\n"
+
+
+def _docx_bytes_marker_past_header():
+    """Costruisce un .docx valido in cui il marker `word/` finisce oltre i
+    primi 2048 byte (entry [Content_Types].xml grande e non compressa), come
+    accade nei documenti reali di Word. Con la sola lettura di 2048 byte
+    libmagic ripiegava su application/octet-stream → falso rifiuto."""
+    buf = io.BytesIO()
+    z = zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED)
+    z.writestr(
+        "[Content_Types].xml",
+        '<?xml version="1.0"?><Types>' + ("A" * 6000) + "</Types>",
+    )
+    z.writestr("word/document.xml", "<x/>")
+    z.close()
+    return buf.getvalue()
 # PNG 1x1 reale: un header sintetico con IHDR azzerato non viene riconosciuto
 # da libmagic (application/octet-stream).
 PNG_BYTES = base64.b64decode(
@@ -54,6 +72,13 @@ def test_png_content_with_jpg_extension_rejected():
 
 def test_png_content_with_png_extension_ok():
     validate_uploaded_file(_file("foto.png", PNG_BYTES))
+
+
+def test_docx_with_markers_past_2048_bytes_ok():
+    """Regressione: un .docx reale con i marker OOXML oltre i primi 2048 byte
+    non deve essere rifiutato. Prima del fix libmagic vedeva solo la testa e
+    restituiva application/octet-stream → 400 sull'upload di nuova versione."""
+    validate_uploaded_file(_file("verbale.docx", _docx_bytes_marker_past_header()))
 
 
 def test_csv_detected_as_text_plain_ok():
