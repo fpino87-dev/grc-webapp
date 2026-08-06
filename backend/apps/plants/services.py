@@ -92,9 +92,14 @@ def get_active_frameworks(plant):
     from apps.controls.models import Framework
     if plant is None:
         return Framework.objects.filter(archived_at__isnull=True)
+    # NB: il join inverso `plantframework__` scavalca il SoftDeleteManager, quindi
+    # va escluso esplicitamente il soft-delete: un framework rimosso dal plant
+    # (PlantFramework.deleted_at valorizzato) resta con active=True e altrimenti
+    # riapparirebbe come attivo.
     return Framework.objects.filter(
         plantframework__plant=plant,
         plantframework__active=True,
+        plantframework__deleted_at__isnull=True,
         archived_at__isnull=True,
     ).distinct()
 
