@@ -541,6 +541,16 @@ def get_required_documents_status(plant=None, framework: str = "ISO27001") -> li
                 traffic = "yellow"
                 doc_info = {"id": str(doc.id), "title": doc.title, "status": doc.status, "review_due_date": str(doc.review_due_date) if doc.review_due_date else None}
 
+        # Stato del controllo per il frontend (messaggistica del picker):
+        #   resolved     → controllo attivo sul sito, collegabile
+        #   no_instance  → controllo esiste ma non attivo su questo sito
+        #   system       → documento di sistema non legato ad alcun controllo
+        control_status = {
+            "resolvable": "resolved",
+            "control_no_instance": "no_instance",
+            "no_control": "system",
+        }.get(applicability, "system")
+
         result.append({
             "id": str(req.id),
             "document_type": req.document_type,
@@ -551,6 +561,7 @@ def get_required_documents_status(plant=None, framework: str = "ISO27001") -> li
             "traffic_light": traffic,
             "document": doc_info,
             "control": control_info,
+            "control_status": control_status,
             "linkable_count": linkable_count,
             "fulfillment": fulfillment_info,
         })

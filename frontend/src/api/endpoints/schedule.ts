@@ -64,6 +64,7 @@ export interface RequiredDocItem {
     review_due_date: string | null;
   } | null;
   control: RequiredDocControl | null;
+  control_status: "resolved" | "no_instance" | "system";
   linkable_count: number;
   fulfillment: RequiredDocFulfillment | null;
 }

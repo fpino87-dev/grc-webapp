@@ -99,10 +99,22 @@ function LinkPickerModal({ item, plantId, onClose }: { item: RequiredDocItem; pl
           {isLoading ? (
             <p className="text-sm text-gray-400">Caricamento…</p>
           ) : !hasControl ? (
-            <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2">
-              Nessun controllo risolvibile per questo requisito su questo sito: non è possibile
-              collegare elementi verificati. Verifica che il framework/controllo sia presente.
-            </p>
+            item.control_status === "system" ? (
+              <div className="text-sm text-blue-800 bg-blue-50 border border-blue-200 rounded px-3 py-2.5">
+                <div className="font-medium mb-0.5">Documento di sistema</div>
+                Questo requisito non è legato a un controllo specifico (è una clausola gestionale,
+                es. Dichiarazione di Applicabilità, riesame della direzione, rapporti di audit interno):
+                non va collegato a un controllo. Risulta soddisfatto quando nel sito esiste un
+                documento <em>approvato</em> del tipo richiesto (<span className="font-mono">{item.document_type}</span>).
+              </div>
+            ) : (
+              <div className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded px-3 py-2.5">
+                <div className="font-medium mb-0.5">Controllo non attivo su questo sito</div>
+                Il controllo {item.iso_clause && <span className="font-mono">{item.iso_clause}</span>} collegato a questo
+                requisito non è istanziato su questo sito (per classificazione o perimetro): qui non ci sono
+                elementi collegabili. Attiva/istanzia il controllo nel modulo Controlli per poterlo soddisfare.
+              </div>
+            )
           ) : empty ? (
             <p className="text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded px-3 py-2">
               Nessun documento o evidenza è collegato al controllo <span className="font-mono">{linkables?.control?.external_id}</span>.
@@ -222,10 +234,12 @@ function DocRow({ item, plantId }: { item: RequiredDocItem; plantId: string }) {
           <button
             type="button"
             onClick={() => setPickerOpen(true)}
-            title="Collega documento/evidenza al controllo per soddisfare il requisito"
+            title={item.control_status === "system"
+              ? "Documento di sistema (non legato a un controllo) — dettagli"
+              : "Collega documento/evidenza al controllo per soddisfare il requisito"}
             className="text-gray-400 hover:text-blue-600 text-base leading-none"
           >
-            🔗
+            {item.control_status === "system" ? "ℹ️" : "🔗"}
           </button>
         </div>
       </td>
