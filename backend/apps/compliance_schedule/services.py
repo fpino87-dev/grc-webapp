@@ -339,16 +339,22 @@ def _control_applicability(req, plant):
     """Applicabilità del requisito al plant, derivata dal controllo mappato.
 
     Ritorna:
-      - ("resolvable", ci)  se esiste una ControlInstance sul plant;
-      - ("excluded", None)  se il controllo ESISTE nel framework ma NON ha
-        istanza sul plant → fuori scope per la classificazione del sito
-        (es. controllo 'essential' su entità NIS2 'importante'): il documento
-        NON è richiesto e va nascosto;
-      - ("no_control", None) se non esiste alcun controllo corrispondente
-        (documento di sistema non legato a un controllo, es. clausole gestionali
-        ISO): resta mostrato.
-    Così la checklist si adatta automaticamente al livello del plant, usando le
-    ControlInstance come unica fonte di verità (già filtrate per classificazione).
+      - ("resolvable", ci)          esiste una ControlInstance sul plant → il
+        documento è control-backed e collegabile;
+      - ("excluded", None)          il controllo esiste ma è "level-gated" (es.
+        level='essential') e NON ha istanza sul plant → fuori scope per la
+        classificazione NIS2 del sito (essenziale/importante) → il documento
+        NON è richiesto e va NASCOSTO;
+      - ("control_no_instance", None) il controllo esiste, NON è level-gated, ma
+        non ha istanza sul plant (buco di istanziazione, es. framework attivo
+        senza controlli generati) → il documento è comunque control-backed e va
+        MOSTRATO (rosso), non nascosto;
+      - ("no_control", None)        nessun controllo corrispondente (documento di
+        sistema, es. clausole gestionali ISO) → mostrato, con euristica per tipo.
+
+    Solo i controlli level-gated senza istanza vengono nascosti: così la checklist
+    si adatta alla classificazione del plant senza sopprimere documenti per un
+    semplice buco di istanziazione.
     """
     ci = resolve_control_instance(req, plant)
     if ci is not None:
@@ -360,13 +366,21 @@ def _control_applicability(req, plant):
 
     candidates = {raw, raw.replace(" ", "-"), raw.replace("ISA ", "ISA-")}
     fw = Framework.objects.filter(code=req.framework).first()
-    control_exists = bool(
-        fw
-        and Control.objects.filter(
+    ctrl = (
+        Control.objects.filter(
             framework=fw, external_id__in=list(candidates), deleted_at__isnull=True
-        ).exists()
+        ).first()
+        if fw
+        else None
     )
-    return ("excluded", None) if control_exists else ("no_control", None)
+    if ctrl is None:
+        return "no_control", None
+    if (ctrl.level or "") != "":
+        # Controllo applicabile solo a certe classificazioni (es. 'essential'):
+        # se non ha istanza sul plant è fuori scope → nascondi.
+        return "excluded", None
+    # Controllo standard senza istanza: buco dati, ma resta control-backed.
+    return "control_no_instance", None
 
 
 def _linkables_for_control(ci):
@@ -432,12 +446,16 @@ def get_required_documents_status(plant=None, framework: str = "ISO27001") -> li
     Espone anche il controllo risolto e il numero di elementi agganciabili, così
     il frontend può offrire il picker "solo elementi collegati al controllo".
     """
+    # I documenti obbligatori sono per-sito: senza un plant non c'è scoping
+    # affidabile (né classificazione né framework attivo) → nessun risultato.
+    if plant is None:
+        return []
+
     # Verifica che il framework sia attivo per questo plant
-    if plant:
-        from apps.plants.services import get_active_framework_codes
-        active_codes = get_active_framework_codes(plant)
-        if framework not in active_codes:
-            return []
+    from apps.plants.services import get_active_framework_codes
+    active_codes = get_active_framework_codes(plant)
+    if framework not in active_codes:
+        return []
 
     from django.db.models import Q
     from .models import RequiredDocument, RequiredDocumentFulfillment
@@ -458,14 +476,14 @@ def get_required_documents_status(plant=None, framework: str = "ISO27001") -> li
             fulfillments[str(f.required_document_id)] = f
 
     for req in required:
-        ci = None
-        if plant:
-            applicability, ci = _control_applicability(req, plant)
-            if applicability == "excluded":
-                # Controllo mappato non applicabile alla classificazione del plant
-                # (es. controllo 'essential' su entità 'importante'): il documento
-                # non è richiesto qui → escluso dalla checklist.
-                continue
+        # plant è garantito non-None qui (ritorno anticipato sopra).
+        applicability, ci = _control_applicability(req, plant)
+        if applicability == "excluded":
+            # Controllo level-gated fuori scope per la classificazione del plant
+            # (es. controllo 'essential' su entità 'importante'): il documento
+            # non è richiesto qui → escluso dalla checklist.
+            continue
+        control_backed = applicability in ("resolvable", "control_no_instance")
         control_info = None
         linkable_count = 0
         if ci is not None:
@@ -489,7 +507,17 @@ def get_required_documents_status(plant=None, framework: str = "ISO27001") -> li
                 traffic = f_traffic
                 fulfillment_info = f_info
 
-        # 2) Fallback euristico se non c'è un aggancio valido
+        # 2) Requisito ANCORATO a un controllo: nessuna euristica per tipo.
+        #    Verde solo via aggancio esplicito al controllo (già gestito sopra):
+        #    se manca, resta rosso. Evita falsi verdi con documenti generici non
+        #    collegati al controllo (es. un manuale ISMS che colora tutte le
+        #    procedure). Vale anche per controllo senza istanza (control-backed).
+        if traffic is None and control_backed:
+            traffic = "red"
+
+        # 3) Requisito NON ancorato a un controllo (es. clausole gestionali ISO
+        #    come SoA, riesame, audit): fallback euristico per tipo di documento
+        #    come unico segnale disponibile.
         if traffic is None:
             try:
                 from apps.documents.models import Document

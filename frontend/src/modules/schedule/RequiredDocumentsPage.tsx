@@ -270,7 +270,10 @@ export function RequiredDocumentsPage() {
       plant: plantId || undefined,
       framework,
     }),
-    enabled: !!plantId && !!framework,
+    // Interroga solo se il framework selezionato è davvero attivo sul plant:
+    // durante il cambio sito il framework può restare stantìo un attimo, e non
+    // va richiesto un framework non pertinente al plant.
+    enabled: !!plantId && !!framework && !!activeFrameworks?.some(f => f.code === framework),
     retry: false,
   });
 
