@@ -289,7 +289,12 @@ class PlantFrameworkViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         # newfix S10 — soft-delete invece di hard-delete (CLAUDE.md regola #5).
         # Un PlantFramework rimosso resta tracciabile per audit; la riassegna-
         # zione successiva lo "riattiva" via perform_create.
-        instance.soft_delete()
+        # Azzera anche `active`: un record rimosso NON deve restare active=True
+        # (get_active_frameworks lo escluderebbe comunque via deleted_at, ma la
+        # coerenza del flag evita ambiguità). perform_create lo rimette a True.
+        instance.active = False
+        instance.deleted_at = timezone.now()
+        instance.save(update_fields=["active", "deleted_at", "updated_at"])
 
     @action(detail=True, methods=["post"])
     def toggle_active(self, request, pk=None):
