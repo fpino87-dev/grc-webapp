@@ -69,13 +69,17 @@ class ComplianceSchedulePolicyViewSet(PlantScopedQuerysetMixin, viewsets.ModelVi
         return Response(serializer.data)
 
 
-class RequiredDocumentViewSet(viewsets.ReadOnlyModelViewSet):
+class RequiredDocumentViewSet(viewsets.ModelViewSet):
+    """Catalogo documenti obbligatori, editabile da super_admin/compliance_officer
+    (scrittura gestita da CompliancePolicyPermission.write_roles). La lettura è
+    allargata (dashboard scadenzario)."""
+
     queryset = RequiredDocument.objects.all()
     serializer_class = RequiredDocumentSerializer
     permission_classes = [CompliancePolicyPermission]
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        qs = super().get_queryset().order_by("framework", "document_type", "description")
         framework = self.request.query_params.get("framework")
         if framework:
             qs = qs.filter(framework=framework)
@@ -202,6 +206,33 @@ class RequiredDocumentFulfillmentView(APIView):
             return Response({"error": _("Requisito o sito non trovato")}, status=404)
         unlink_required_document(req, plant)
         return Response(status=204)
+
+
+class FrameworkControlsView(APIView):
+    """Controlli di un framework (external_id + titolo + level) per il picker
+    del catalogo documenti obbligatori — così le voci mappano a controlli reali."""
+
+    permission_classes = [CompliancePolicyPermission]
+
+    def get(self, request):
+        framework = request.query_params.get("framework")
+        if not framework:
+            return Response({"results": []})
+        from apps.controls.models import Control, Framework
+
+        fw = Framework.objects.filter(code=framework).first()
+        if fw is None:
+            return Response({"results": []})
+        controls = (
+            Control.objects.filter(framework=fw, deleted_at__isnull=True)
+            .order_by("external_id")
+        )
+        return Response({
+            "results": [
+                {"external_id": c.external_id, "title": c.get_title(), "level": c.level or ""}
+                for c in controls
+            ]
+        })
 
 
 class RuleTypeCatalogueView(APIView):

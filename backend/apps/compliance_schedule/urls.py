@@ -7,6 +7,7 @@ from .views import (
     RequiredDocumentsStatusView,
     RequiredDocumentLinkablesView,
     RequiredDocumentFulfillmentView,
+    FrameworkControlsView,
     RuleTypeCatalogueView,
 )
 
@@ -20,5 +21,6 @@ urlpatterns = [
     path("required-documents-status/", RequiredDocumentsStatusView.as_view(), name="required-documents-status"),
     path("required-documents-linkables/", RequiredDocumentLinkablesView.as_view(), name="required-documents-linkables"),
     path("required-documents-fulfillment/", RequiredDocumentFulfillmentView.as_view(), name="required-documents-fulfillment"),
+    path("framework-controls/", FrameworkControlsView.as_view(), name="framework-controls"),
     path("rule-types/", RuleTypeCatalogueView.as_view(), name="rule-type-catalogue"),
 ]

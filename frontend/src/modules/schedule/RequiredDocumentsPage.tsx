@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { scheduleApi, RequiredDocItem } from "../../api/endpoints/schedule";
+import { scheduleApi, RequiredDocItem, RequiredDocumentCatalog } from "../../api/endpoints/schedule";
 import { plantsApi } from "../../api/endpoints/plants";
 import { controlsApi } from "../../api/endpoints/controls";
+import { useAuthStore } from "../../store/auth";
 
 const FRAMEWORK_LABELS: Record<string, string> = {
   ISO27001: "ISO 27001",
@@ -233,11 +234,205 @@ function DocRow({ item, plantId }: { item: RequiredDocItem; plantId: string }) {
   );
 }
 
+const DOC_TYPES = [
+  { value: "policy", label: "Policy" },
+  { value: "procedure", label: "Procedura" },
+  { value: "record", label: "Registro/Record" },
+];
+
+type CatalogForm = {
+  document_type: string;
+  description: string;
+  iso_clause: string;
+  mandatory: boolean;
+  notes: string;
+};
+
+const EMPTY_FORM: CatalogForm = { document_type: "procedure", description: "", iso_clause: "", mandatory: true, notes: "" };
+
+function CatalogManagerModal({ framework, onClose }: { framework: string; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState<CatalogForm>(EMPTY_FORM);
+  const [error, setError] = useState("");
+
+  const { data: rows, isLoading } = useQuery({
+    queryKey: ["required-docs-catalog", framework],
+    queryFn: () => scheduleApi.listRequiredDocuments(framework),
+    retry: false,
+  });
+  const { data: controls } = useQuery({
+    queryKey: ["framework-controls", framework],
+    queryFn: () => scheduleApi.getFrameworkControls(framework),
+    retry: false,
+  });
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["required-docs-catalog", framework] });
+    qc.invalidateQueries({ queryKey: ["required-docs-status"] });
+  };
+
+  const resetForm = () => { setEditingId(null); setForm(EMPTY_FORM); setError(""); };
+
+  const saveMutation = useMutation({
+    mutationFn: () => {
+      const payload = { ...form, framework };
+      return editingId
+        ? scheduleApi.updateRequiredDocument(editingId, payload)
+        : scheduleApi.createRequiredDocument(payload);
+    },
+    onSuccess: () => { invalidate(); resetForm(); },
+    onError: (e: unknown) => {
+      const d = (e as { response?: { status?: number; data?: Record<string, unknown> } })?.response;
+      setError(d?.status === 403 ? "Permesso negato: serve il ruolo Compliance Officer o Super Admin." : "Errore durante il salvataggio.");
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => scheduleApi.deleteRequiredDocument(id),
+    onSuccess: invalidate,
+    onError: () => setError("Errore durante l'eliminazione."),
+  });
+
+  const startEdit = (r: RequiredDocumentCatalog) => {
+    setEditingId(r.id);
+    setForm({ document_type: r.document_type, description: r.description, iso_clause: r.iso_clause, mandatory: r.mandatory, notes: r.notes || "" });
+    setError("");
+  };
+
+  const canSave = form.description.trim().length >= 3 && !!form.document_type;
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-start justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl my-6">
+        <div className="px-5 py-3 border-b border-gray-200 flex items-center justify-between">
+          <h3 className="text-base font-semibold text-gray-900">
+            Gestione catalogo — {FRAMEWORK_LABELS[framework] ?? framework}
+          </h3>
+          <button type="button" onClick={onClose} className="px-3 py-1.5 text-sm border border-gray-300 rounded text-gray-600 hover:bg-gray-50">Chiudi</button>
+        </div>
+
+        <div className="px-5 py-4 max-h-[70vh] overflow-y-auto">
+          {/* Form aggiungi/modifica */}
+          <div className="border border-gray-200 rounded-lg p-3 mb-4 bg-gray-50">
+            <div className="text-xs font-semibold text-gray-600 uppercase mb-2">
+              {editingId ? "Modifica documento" : "Aggiungi documento"}
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="text-xs text-gray-600 col-span-2">
+                Descrizione *
+                <input
+                  className="mt-0.5 w-full border border-gray-300 rounded px-2 py-1.5 text-sm"
+                  value={form.description}
+                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                  placeholder="Es. Policy di gestione del rischio di cybersecurity"
+                />
+              </label>
+              <label className="text-xs text-gray-600">
+                Tipo *
+                <select
+                  className="mt-0.5 w-full border border-gray-300 rounded px-2 py-1.5 text-sm bg-white"
+                  value={form.document_type}
+                  onChange={e => setForm(f => ({ ...f, document_type: e.target.value }))}
+                >
+                  {DOC_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                </select>
+              </label>
+              <label className="text-xs text-gray-600">
+                Controllo collegato
+                <select
+                  className="mt-0.5 w-full border border-gray-300 rounded px-2 py-1.5 text-sm bg-white"
+                  value={form.iso_clause}
+                  onChange={e => setForm(f => ({ ...f, iso_clause: e.target.value }))}
+                >
+                  <option value="">— nessuno (documento di sistema) —</option>
+                  {(controls ?? []).map(c => (
+                    <option key={c.external_id} value={c.external_id}>
+                      {c.external_id}{c.level ? ` [${c.level}]` : ""} — {c.title.slice(0, 60)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-xs text-gray-600 flex items-center gap-2 mt-2">
+                <input type="checkbox" checked={form.mandatory} onChange={e => setForm(f => ({ ...f, mandatory: e.target.checked }))} />
+                Obbligatorio
+              </label>
+              <label className="text-xs text-gray-600 col-span-2">
+                Note
+                <input
+                  className="mt-0.5 w-full border border-gray-300 rounded px-2 py-1.5 text-sm"
+                  value={form.notes}
+                  onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+                />
+              </label>
+            </div>
+            {error && <p className="text-xs text-red-600 bg-red-50 px-2 py-1.5 rounded mt-2">{error}</p>}
+            <div className="flex justify-end gap-2 mt-3">
+              {editingId && (
+                <button type="button" onClick={resetForm} className="px-3 py-1.5 text-xs border border-gray-300 rounded text-gray-600 hover:bg-gray-50">Annulla</button>
+              )}
+              <button
+                type="button"
+                onClick={() => { setError(""); saveMutation.mutate(); }}
+                disabled={!canSave || saveMutation.isPending}
+                className="px-3 py-1.5 text-xs rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                {saveMutation.isPending ? "Salvataggio…" : editingId ? "Salva modifiche" : "Aggiungi"}
+              </button>
+            </div>
+          </div>
+
+          {/* Lista catalogo */}
+          {isLoading ? (
+            <p className="text-sm text-gray-400">Caricamento…</p>
+          ) : (rows ?? []).length === 0 ? (
+            <p className="text-sm text-gray-400 italic">Nessun documento nel catalogo per questo framework.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 text-left text-xs text-gray-500 uppercase">
+                  <th className="py-2">Documento</th>
+                  <th className="py-2">Tipo</th>
+                  <th className="py-2">Controllo</th>
+                  <th className="py-2">Obbl.</th>
+                  <th className="py-2"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {(rows ?? []).map(r => (
+                  <tr key={r.id} className="hover:bg-gray-50">
+                    <td className="py-2 pr-2 text-gray-800">{r.description}</td>
+                    <td className="py-2 pr-2 text-gray-600">{r.document_type}</td>
+                    <td className="py-2 pr-2 text-gray-500 font-mono text-xs">{r.iso_clause || "—"}</td>
+                    <td className="py-2 pr-2">{r.mandatory ? "Sì" : "No"}</td>
+                    <td className="py-2 text-right whitespace-nowrap">
+                      <button type="button" onClick={() => startEdit(r)} title="Modifica" className="px-1.5 text-gray-500 hover:text-blue-600">✏️</button>
+                      <button
+                        type="button"
+                        onClick={() => { if (confirm(`Eliminare "${r.description}" dal catalogo?`)) deleteMutation.mutate(r.id); }}
+                        title="Elimina"
+                        className="px-1.5 text-gray-500 hover:text-red-600"
+                      >🗑️</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function RequiredDocumentsPage() {
   const { t } = useTranslation();
   const [plantId, setPlantId] = useState<string>("");
   const [framework, setFramework] = useState("");
   const [filter, setFilter] = useState<"all" | "red" | "yellow" | "green">("all");
+  const [manageOpen, setManageOpen] = useState(false);
+  const role = useAuthStore(s => s.user?.role);
+  const canManageCatalog = role === "super_admin" || role === "compliance_officer";
 
   const { data: plants } = useQuery({
     queryKey: ["plants"],
@@ -289,7 +484,23 @@ export function RequiredDocumentsPage() {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">{t("schedule.required_docs.title")}</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold text-gray-900">{t("schedule.required_docs.title")}</h2>
+        {canManageCatalog && (
+          <button
+            type="button"
+            onClick={() => setManageOpen(true)}
+            disabled={!framework}
+            title={framework ? "Gestisci il catalogo dei documenti obbligatori del framework selezionato" : "Seleziona prima un framework"}
+            className="px-3 py-1.5 text-sm rounded border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          >
+            ⚙️ Gestisci catalogo
+          </button>
+        )}
+      </div>
+      {manageOpen && framework && (
+        <CatalogManagerModal framework={framework} onClose={() => setManageOpen(false)} />
+      )}
 
       {/* Filters */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">

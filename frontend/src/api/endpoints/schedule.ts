@@ -98,6 +98,22 @@ export interface RequiredDocumentsStatus {
   results: RequiredDocItem[];
 }
 
+export interface RequiredDocumentCatalog {
+  id: string;
+  framework: string;
+  document_type: string;
+  description: string;
+  iso_clause: string;
+  mandatory: boolean;
+  notes: string;
+}
+
+export interface FrameworkControl {
+  external_id: string;
+  title: string;
+  level: string;
+}
+
 export const scheduleApi = {
   listPolicies: (plant?: string) =>
     apiClient.get<{ results: SchedulePolicy[] }>("/schedule/policies/", {
@@ -130,4 +146,24 @@ export const scheduleApi = {
 
   getRuleTypes: () =>
     apiClient.get("/schedule/rule-types/").then(r => r.data),
+
+  // ── Catalogo documenti obbligatori (CRUD, solo ruoli abilitati) ──────────
+  listRequiredDocuments: (framework: string) =>
+    apiClient.get<{ results: RequiredDocumentCatalog[] }>("/schedule/required-documents/", {
+      params: { framework, page_size: 1000 },
+    }).then(r => r.data.results ?? []),
+
+  createRequiredDocument: (data: Omit<RequiredDocumentCatalog, "id">) =>
+    apiClient.post<RequiredDocumentCatalog>("/schedule/required-documents/", data).then(r => r.data),
+
+  updateRequiredDocument: (id: string, data: Partial<Omit<RequiredDocumentCatalog, "id">>) =>
+    apiClient.patch<RequiredDocumentCatalog>(`/schedule/required-documents/${id}/`, data).then(r => r.data),
+
+  deleteRequiredDocument: (id: string) =>
+    apiClient.delete(`/schedule/required-documents/${id}/`),
+
+  getFrameworkControls: (framework: string) =>
+    apiClient.get<{ results: FrameworkControl[] }>("/schedule/framework-controls/", {
+      params: { framework },
+    }).then(r => r.data.results ?? []),
 };
