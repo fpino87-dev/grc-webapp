@@ -56,16 +56,16 @@ REQUIRED_DOCS = [
     ("TISAX_L2", "record",           "Accordi NDA con fornitori",                           "ISA 6.1.1",  True),
 
     # ── TISAX L3 (VDA ISA 6.0 — requisiti Very High Protection) ────────────────
-    ("TISAX_L3", "policy",           "Information Security Policy (ISP) — Livello VH",     "ISA 1.1.1-VH", True),
-    ("TISAX_L3", "record",           "Analisi rischi approfondita Very High",               "ISA 1.2.2-VH", True),
-    ("TISAX_L3", "procedure",        "Procedura autenticazione rinforzata (MFA)",           "ISA 3.1.4-VH", True),
+    # "Very High" aggiunge requisiti solo a un sottoinsieme di 12 controlli VH.
+    # I documenti senza controllo VH dedicato (ISP, analisi rischi, distruzione
+    # sicura, terze parti, NDA) sono coperti a livello L2 e NON sono elencati qui:
+    # rimossi 2026-08-06 per allineamento al catalogo controlli reale. Le clausole
+    # dei 5 documenti rimasti puntano a controlli VH esistenti.
+    ("TISAX_L3", "procedure",        "Procedura autenticazione rinforzata (MFA)",           "ISA 4.1.2-VH", True),
     ("TISAX_L3", "record",           "Registro accessi aree Very High Protection",          "ISA 4.1.2-VH", True),
-    ("TISAX_L3", "procedure",        "Procedura distruzione sicura informazioni classificate", "ISA 1.2.6-VH", True),
     ("TISAX_L3", "record",           "Risultati assessment TISAX AL3 (terza parte)",        "ISA 1.3.4-VH", True),
-    ("TISAX_L3", "record",           "Evidenze controlli crittografici rinforzati",         "ISA 3.1.5-VH", True),
-    ("TISAX_L3", "procedure",        "Procedura risposta incidenti Very High",              "ISA 5.2.6-VH", True),
-    ("TISAX_L3", "record",           "Accordi NDA estesi con partner OEM",                  "ISA 6.1.1",    True),
-    ("TISAX_L3", "procedure",        "Procedura gestione rischi terze parti Very High",     "ISA 6.1.2-VH", True),
+    ("TISAX_L3", "procedure",        "Procedura risposta incidenti Very High",              "ISA 1.6.2-VH", True),
+    ("TISAX_L3", "record",           "Evidenze controlli crittografici rinforzati",         "ISA 5.1.2-VH", True),
 
     # ── TISAX Prototype Protection (VDA ISA 6.0 — Capitolo 8) ──────────────────
     ("TISAX_PROTO", "policy",        "Concetto di sicurezza prototipi (HSS/PPE)",           "ISA 8.1.1",  True),
