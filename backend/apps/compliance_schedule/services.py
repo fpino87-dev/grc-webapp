@@ -335,6 +335,40 @@ def resolve_control_instance(req, plant):
     )
 
 
+def _control_applicability(req, plant):
+    """Applicabilità del requisito al plant, derivata dal controllo mappato.
+
+    Ritorna:
+      - ("resolvable", ci)  se esiste una ControlInstance sul plant;
+      - ("excluded", None)  se il controllo ESISTE nel framework ma NON ha
+        istanza sul plant → fuori scope per la classificazione del sito
+        (es. controllo 'essential' su entità NIS2 'importante'): il documento
+        NON è richiesto e va nascosto;
+      - ("no_control", None) se non esiste alcun controllo corrispondente
+        (documento di sistema non legato a un controllo, es. clausole gestionali
+        ISO): resta mostrato.
+    Così la checklist si adatta automaticamente al livello del plant, usando le
+    ControlInstance come unica fonte di verità (già filtrate per classificazione).
+    """
+    ci = resolve_control_instance(req, plant)
+    if ci is not None:
+        return "resolvable", ci
+    raw = (req.iso_clause or "").strip()
+    if not raw:
+        return "no_control", None
+    from apps.controls.models import Control, Framework
+
+    candidates = {raw, raw.replace(" ", "-"), raw.replace("ISA ", "ISA-")}
+    fw = Framework.objects.filter(code=req.framework).first()
+    control_exists = bool(
+        fw
+        and Control.objects.filter(
+            framework=fw, external_id__in=list(candidates), deleted_at__isnull=True
+        ).exists()
+    )
+    return ("excluded", None) if control_exists else ("no_control", None)
+
+
 def _linkables_for_control(ci):
     """Document ed Evidence collegati al controllo (non cancellati)."""
     if ci is None:
@@ -424,7 +458,14 @@ def get_required_documents_status(plant=None, framework: str = "ISO27001") -> li
             fulfillments[str(f.required_document_id)] = f
 
     for req in required:
-        ci = resolve_control_instance(req, plant) if plant else None
+        ci = None
+        if plant:
+            applicability, ci = _control_applicability(req, plant)
+            if applicability == "excluded":
+                # Controllo mappato non applicabile alla classificazione del plant
+                # (es. controllo 'essential' su entità 'importante'): il documento
+                # non è richiesto qui → escluso dalla checklist.
+                continue
         control_info = None
         linkable_count = 0
         if ci is not None:

@@ -8,8 +8,10 @@ import { controlsApi } from "../../api/endpoints/controls";
 const FRAMEWORK_LABELS: Record<string, string> = {
   ISO27001: "ISO 27001",
   NIS2:     "NIS2",
+  ACN_NIS2: "ACN NIS2",
   TISAX_L2: "TISAX L2",
   TISAX_L3: "TISAX L3",
+  TISAX_PROTO: "TISAX Prototype",
 };
 
 const TRAFFIC_LIGHT_COLORS: Record<string, { bg: string; text: string }> = {

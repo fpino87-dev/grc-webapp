@@ -152,6 +152,7 @@ class RequiredDocument(BaseModel):
     FRAMEWORK_CHOICES = [
         ("ISO27001",    "ISO 27001"),
         ("NIS2",        "NIS2"),
+        ("ACN_NIS2",    "ACN NIS2 (Italia)"),
         ("TISAX_L2",    "TISAX L2"),
         ("TISAX_L3",    "TISAX L3"),
         ("TISAX_PROTO", "TISAX Prototype Protection"),

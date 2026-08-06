@@ -39,6 +39,40 @@ REQUIRED_DOCS = [
     # sito; la compliance concreta gira sui controlli "ACN_NIS2" (trasposizione
     # italiana). Nessun documento obbligatorio è definito qui per NIS2.
 
+    # ── ACN_NIS2 (trasposizione italiana — controlli NIST CSF adattati ACN) ────
+    # iso_clause = external_id COMPLETO del controllo ACN (necessario al resolver).
+    # Le voci marcate [essential] mappano controlli con level="essential": la
+    # logica di stato le mostra SOLO sui plant con nis2_scope="essenziale" (per gli
+    # "importanti" il controllo non è istanziato → il documento è escluso).
+    ("ACN_NIS2", "policy",    "Policy di gestione del rischio di cybersecurity",         "ACN-NIS2-GV.PO-01", True),
+    ("ACN_NIS2", "record",    "Documento ruoli e responsabilità cybersecurity",          "ACN-NIS2-GV.RR-02", True),
+    ("ACN_NIS2", "procedure", "Programma di gestione del rischio supply chain",           "ACN-NIS2-GV.SC-01", True),
+    ("ACN_NIS2", "record",    "Registro fornitori con prioritizzazione",                 "ACN-NIS2-GV.SC-04", True),
+    ("ACN_NIS2", "record",    "Clausole di sicurezza nei contratti con fornitori",       "ACN-NIS2-GV.SC-05", True),
+    ("ACN_NIS2", "record",    "Inventario asset hardware",                               "ACN-NIS2-ID.AM-01", True),
+    ("ACN_NIS2", "record",    "Inventario software, servizi e sistemi",                  "ACN-NIS2-ID.AM-02", True),
+    ("ACN_NIS2", "record",    "Valutazione del rischio cyber (probabilità/impatto)",     "ACN-NIS2-ID.RA-05", True),
+    ("ACN_NIS2", "record",    "Piano di trattamento del rischio",                        "ACN-NIS2-ID.RA-06", True),
+    ("ACN_NIS2", "record",    "Registro delle vulnerabilità",                            "ACN-NIS2-ID.RA-01", True),
+    ("ACN_NIS2", "procedure", "Piano di risposta agli incidenti",                        "ACN-NIS2-ID.IM-04", True),
+    ("ACN_NIS2", "record",    "Mappa dei flussi di rete e dati",                         "ACN-NIS2-ID.AM-03", True),   # [essential]
+    ("ACN_NIS2", "procedure", "Procedura gestione identità e accessi (IAM)",             "ACN-NIS2-PR.AA-01", True),
+    ("ACN_NIS2", "procedure", "Procedura controllo accessi fisici",                      "ACN-NIS2-PR.AA-06", False),
+    ("ACN_NIS2", "record",    "Piano di formazione e awareness cybersecurity",           "ACN-NIS2-PR.AT-01", True),
+    ("ACN_NIS2", "procedure", "Procedura crittografia e protezione dati",                "ACN-NIS2-PR.DS-02", True),
+    ("ACN_NIS2", "procedure", "Procedura backup e ripristino dati",                      "ACN-NIS2-PR.DS-11", True),
+    ("ACN_NIS2", "procedure", "Procedura patch e aggiornamento software",                "ACN-NIS2-PR.PS-02", True),
+    ("ACN_NIS2", "procedure", "Procedura gestione log e monitoraggio",                   "ACN-NIS2-PR.PS-04", True),
+    ("ACN_NIS2", "procedure", "Procedura sviluppo software sicuro (SDLC)",               "ACN-NIS2-PR.PS-06", False),
+    ("ACN_NIS2", "record",    "Piano formazione specialistica per ruoli critici",        "ACN-NIS2-PR.AT-02", True),   # [essential]
+    ("ACN_NIS2", "record",    "Documentazione resilienza/ridondanza infrastruttura IT",  "ACN-NIS2-PR.IR-03", True),   # [essential]
+    ("ACN_NIS2", "procedure", "Procedura gestione configurazioni sicure (hardening)",    "ACN-NIS2-PR.PS-01", True),   # [essential]
+    ("ACN_NIS2", "procedure", "Procedura manutenzione hardware",                         "ACN-NIS2-PR.PS-03", False),  # [essential]
+    ("ACN_NIS2", "procedure", "Procedura notifica incidenti significativi (ACN/CSIRT)",  "ACN-NIS2-RS.CO-02", True),
+    ("ACN_NIS2", "record",    "Registro incidenti significativi",                        "ACN-NIS2-RS.MA-01", True),
+    ("ACN_NIS2", "procedure", "Piano di continuità operativa e ripristino (BCP/DR)",     "ACN-NIS2-RC.RP-01", True),
+    ("ACN_NIS2", "record",    "Piano di comunicazione durante il ripristino",            "ACN-NIS2-RC.CO-03", False),  # [essential]
+
     # ── TISAX L2 (VDA ISA 6.0 — numerazione ISA) ───────────────────────────────
     ("TISAX_L2", "policy",           "Information Security Policy (ISP)",                  "ISA 1.1.1",  True),
     ("TISAX_L2", "record",           "Registro asset informativi classificati",             "ISA 1.2.1",  True),
