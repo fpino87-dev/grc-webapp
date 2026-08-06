@@ -33,7 +33,24 @@ export interface ActivityItem {
   url: string;
 }
 
+export interface RequiredDocControl {
+  instance_id: string;
+  external_id: string;
+  title: string;
+}
+
+export interface RequiredDocFulfillment {
+  kind: "document" | "evidence";
+  id: string;
+  title: string;
+  status: string;
+  valid_until: string | null;
+  linked_by: string | null;
+  linked_at: string | null;
+}
+
 export interface RequiredDocItem {
+  id: string;
   document_type: string;
   description: string;
   iso_clause: string;
@@ -46,6 +63,30 @@ export interface RequiredDocItem {
     status: string;
     review_due_date: string | null;
   } | null;
+  control: RequiredDocControl | null;
+  linkable_count: number;
+  fulfillment: RequiredDocFulfillment | null;
+}
+
+export interface LinkableDocument {
+  id: string;
+  title: string;
+  document_type: string;
+  status: string;
+}
+
+export interface LinkableEvidence {
+  id: string;
+  title: string;
+  evidence_type: string;
+  valid_until: string | null;
+  valid: boolean;
+}
+
+export interface RequiredDocLinkables {
+  control: RequiredDocControl | null;
+  documents: LinkableDocument[];
+  evidences: LinkableEvidence[];
 }
 
 export interface RequiredDocumentsStatus {
@@ -77,6 +118,15 @@ export const scheduleApi = {
 
   getRequiredDocumentsStatus: (params?: { plant?: string; framework?: string }) =>
     apiClient.get<RequiredDocumentsStatus>("/schedule/required-documents-status/", { params }).then(r => r.data),
+
+  getRequiredDocLinkables: (params: { plant: string; required_document: string }) =>
+    apiClient.get<RequiredDocLinkables>("/schedule/required-documents-linkables/", { params }).then(r => r.data),
+
+  linkRequiredDoc: (data: { plant: string; required_document: string; document?: string; evidence?: string }) =>
+    apiClient.post("/schedule/required-documents-fulfillment/", data).then(r => r.data),
+
+  unlinkRequiredDoc: (params: { plant: string; required_document: string }) =>
+    apiClient.delete("/schedule/required-documents-fulfillment/", { params }),
 
   getRuleTypes: () =>
     apiClient.get("/schedule/rule-types/").then(r => r.data),

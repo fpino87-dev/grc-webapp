@@ -5,6 +5,8 @@ from .views import (
     RequiredDocumentViewSet,
     ActivityScheduleView,
     RequiredDocumentsStatusView,
+    RequiredDocumentLinkablesView,
+    RequiredDocumentFulfillmentView,
     RuleTypeCatalogueView,
 )
 
@@ -16,5 +18,7 @@ urlpatterns = [
     path("", include(router.urls)),
     path("activity/", ActivityScheduleView.as_view(), name="activity-schedule"),
     path("required-documents-status/", RequiredDocumentsStatusView.as_view(), name="required-documents-status"),
+    path("required-documents-linkables/", RequiredDocumentLinkablesView.as_view(), name="required-documents-linkables"),
+    path("required-documents-fulfillment/", RequiredDocumentFulfillmentView.as_view(), name="required-documents-fulfillment"),
     path("rule-types/", RuleTypeCatalogueView.as_view(), name="rule-type-catalogue"),
 ]

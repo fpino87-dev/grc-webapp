@@ -169,3 +169,57 @@ class RequiredDocument(BaseModel):
 
     def __str__(self):
         return f"[{self.framework}] {self.document_type}"
+
+
+class RequiredDocumentFulfillment(BaseModel):
+    """Aggancio esplicito di una voce di checklist (RequiredDocument, globale per
+    framework) a un Document o Evidence reale, per un dato sito.
+
+    Rende il semaforo dei documenti obbligatori esplicito e verificabile in audit
+    ("questo requisito è soddisfatto da QUESTA evidenza"), al posto del match
+    euristico per solo tipo di documento. Vincolo: un aggancio per (plant,
+    required_document), esattamente uno tra document/evidence valorizzato.
+    """
+
+    plant = models.ForeignKey(
+        "plants.Plant", on_delete=models.CASCADE, related_name="required_doc_fulfillments"
+    )
+    required_document = models.ForeignKey(
+        RequiredDocument, on_delete=models.CASCADE, related_name="fulfillments"
+    )
+    document = models.ForeignKey(
+        "documents.Document",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="required_fulfillments",
+    )
+    evidence = models.ForeignKey(
+        "documents.Evidence",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="required_fulfillments",
+    )
+    linked_by = models.ForeignKey(
+        "auth.User", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    linked_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["plant", "required_document"],
+                name="uniq_fulfillment_per_plant_req",
+            ),
+            models.CheckConstraint(
+                check=(
+                    models.Q(document__isnull=False, evidence__isnull=True)
+                    | models.Q(document__isnull=True, evidence__isnull=False)
+                ),
+                name="fulfillment_exactly_one_target",
+            ),
+        ]
+
+    def __str__(self):
+        return f"Fulfillment {self.required_document_id} @ {self.plant_id}"

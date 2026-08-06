@@ -126,6 +126,84 @@ class RequiredDocumentsStatusView(APIView):
         })
 
 
+class RequiredDocumentLinkablesView(APIView):
+    """GET: elementi (Document/Evidence) collegati al controllo del requisito,
+    selezionabili per soddisfarlo. Solo ciò che è già linkato al controllo."""
+
+    permission_classes = [CompliancePolicyPermission]
+
+    def get(self, request):
+        from .services import get_required_document_linkables
+
+        plant_id = request.query_params.get("plant")
+        req_id = request.query_params.get("required_document")
+        require_plant_access(request.user, plant_id or None)
+        if not plant_id or not req_id:
+            return Response({"error": _("plant e required_document obbligatori")}, status=400)
+        from apps.plants.models import Plant
+        plant = Plant.objects.filter(pk=plant_id).first()
+        req = RequiredDocument.objects.filter(pk=req_id).first()
+        if plant is None or req is None:
+            return Response({"error": _("Requisito o sito non trovato")}, status=404)
+        return Response(get_required_document_linkables(req, plant))
+
+
+class RequiredDocumentFulfillmentView(APIView):
+    """POST: collega un Document o una Evidence al requisito per il sito.
+    DELETE: rimuove l'aggancio."""
+
+    permission_classes = [CompliancePolicyPermission]
+
+    def post(self, request):
+        from django.core.exceptions import ValidationError
+        from .services import link_required_document
+
+        plant_id = request.data.get("plant")
+        req_id = request.data.get("required_document")
+        document_id = request.data.get("document")
+        evidence_id = request.data.get("evidence")
+        require_plant_access(request.user, plant_id or None)
+        if not plant_id or not req_id:
+            return Response({"error": _("plant e required_document obbligatori")}, status=400)
+
+        from apps.plants.models import Plant
+        from apps.documents.models import Document, Evidence
+
+        plant = Plant.objects.filter(pk=plant_id).first()
+        req = RequiredDocument.objects.filter(pk=req_id).first()
+        if plant is None or req is None:
+            return Response({"error": _("Requisito o sito non trovato")}, status=404)
+
+        document = Document.objects.filter(pk=document_id).first() if document_id else None
+        evidence = Evidence.objects.filter(pk=evidence_id).first() if evidence_id else None
+        if document_id and document is None:
+            return Response({"error": _("Documento non trovato")}, status=404)
+        if evidence_id and evidence is None:
+            return Response({"error": _("Evidenza non trovata")}, status=404)
+
+        try:
+            link_required_document(req, plant, request.user, document=document, evidence=evidence)
+        except ValidationError as exc:
+            return Response({"error": exc.messages[0] if exc.messages else str(exc)}, status=400)
+        return Response({"ok": True}, status=201)
+
+    def delete(self, request):
+        from .services import unlink_required_document
+
+        plant_id = request.query_params.get("plant") or request.data.get("plant")
+        req_id = request.query_params.get("required_document") or request.data.get("required_document")
+        require_plant_access(request.user, plant_id or None)
+        if not plant_id or not req_id:
+            return Response({"error": _("plant e required_document obbligatori")}, status=400)
+        from apps.plants.models import Plant
+        plant = Plant.objects.filter(pk=plant_id).first()
+        req = RequiredDocument.objects.filter(pk=req_id).first()
+        if plant is None or req is None:
+            return Response({"error": _("Requisito o sito non trovato")}, status=404)
+        unlink_required_document(req, plant)
+        return Response(status=204)
+
+
 class RuleTypeCatalogueView(APIView):
     permission_classes = [CompliancePolicyPermission]
 

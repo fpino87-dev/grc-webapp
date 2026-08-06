@@ -308,10 +308,95 @@ def get_activity_schedule(plant=None, months_ahead: int = 6) -> list[dict]:
 
 # ─── Required documents status ────────────────────────────────────────────────
 
+def resolve_control_instance(req, plant):
+    """Risolve la voce di checklist (RequiredDocument.iso_clause) al ControlInstance
+    reale del sito, se esiste.
+
+    L'iso_clause è testo libero e non allineato al formato ``external_id``:
+      - TISAX: "ISA 6.1.1" ↔ external_id "ISA-6.1.1" (spazio→trattino);
+      - ISO Annex A: "A.5.1" ↔ "A.5.1" (match esatto).
+    Le clausole gestionali ISO (es. "9.3") non hanno un controllo Annex A: in tal
+    caso non si risolve nulla e la voce resta puramente documentale.
+    """
+    if not plant or not req.iso_clause:
+        return None
+    from apps.controls.models import ControlInstance
+
+    raw = req.iso_clause.strip()
+    candidates = {raw, raw.replace(" ", "-"), raw.replace("ISA ", "ISA-")}
+    return (
+        ControlInstance.objects.filter(
+            plant=plant,
+            control__external_id__in=list(candidates),
+            deleted_at__isnull=True,
+        )
+        .select_related("control")
+        .first()
+    )
+
+
+def _linkables_for_control(ci):
+    """Document ed Evidence collegati al controllo (non cancellati)."""
+    if ci is None:
+        return [], []
+    docs = list(ci.documents.filter(deleted_at__isnull=True))
+    evs = list(ci.evidences.filter(deleted_at__isnull=True))
+    return docs, evs
+
+
+def _evidence_is_valid(ev):
+    import datetime
+    if ev.valid_until is None:
+        return True
+    return ev.valid_until >= datetime.date.today()
+
+
+def _fulfillment_status(fulfillment):
+    """(traffic_light, info dict) per un aggancio esplicito.
+
+    Verde solo se l'elemento agganciato è "valido": Document approvato oppure
+    Evidence non scaduta. Altrimenti giallo (agganciato ma non valido).
+    """
+    doc = fulfillment.document
+    ev = fulfillment.evidence
+    if doc is not None and doc.deleted_at is None:
+        valid = doc.status == "approvato"
+        info = {
+            "kind": "document",
+            "id": str(doc.id),
+            "title": doc.title,
+            "status": doc.status,
+            "valid_until": None,
+            "linked_by": fulfillment.linked_by.username if fulfillment.linked_by else None,
+            "linked_at": fulfillment.linked_at.isoformat() if fulfillment.linked_at else None,
+        }
+        return ("green" if valid else "yellow"), info
+    if ev is not None and ev.deleted_at is None:
+        valid = _evidence_is_valid(ev)
+        info = {
+            "kind": "evidence",
+            "id": str(ev.id),
+            "title": ev.title,
+            "status": "valida" if valid else "scaduta",
+            "valid_until": str(ev.valid_until) if ev.valid_until else None,
+            "linked_by": fulfillment.linked_by.username if fulfillment.linked_by else None,
+            "linked_at": fulfillment.linked_at.isoformat() if fulfillment.linked_at else None,
+        }
+        return ("green" if valid else "yellow"), info
+    # target cancellato/mancante → aggancio non più valido
+    return None, None
+
+
 def get_required_documents_status(plant=None, framework: str = "ISO27001") -> list[dict]:
     """
-    For each RequiredDocument of the given framework, check whether a matching
-    Document exists in the plant. Returns traffic-light status.
+    Per ogni RequiredDocument del framework calcola il semaforo.
+
+    Priorità:
+      1. Se esiste un aggancio esplicito (RequiredDocumentFulfillment) valido →
+         usa quello (verde se valido, giallo se agganciato ma non valido).
+      2. Altrimenti fallback all'euristica storica per tipo di documento.
+    Espone anche il controllo risolto e il numero di elementi agganciabili, così
+    il frontend può offrire il picker "solo elementi collegati al controllo".
     """
     # Verifica che il framework sia attivo per questo plant
     if plant:
@@ -320,7 +405,9 @@ def get_required_documents_status(plant=None, framework: str = "ISO27001") -> li
         if framework not in active_codes:
             return []
 
-    from .models import RequiredDocument
+    from django.db.models import Q
+    from .models import RequiredDocument, RequiredDocumentFulfillment
+
     required = RequiredDocument.objects.filter(framework=framework)
     result = []
 
@@ -328,32 +415,65 @@ def get_required_documents_status(plant=None, framework: str = "ISO27001") -> li
     # Document.document_type usa chiavi italiane (policy/procedura/registro).
     _TYPE_MAP = {"procedure": "procedura", "record": "registro"}
 
-    for req in required:
-        try:
-            from apps.documents.models import Document
-            from django.db.models import Q
-            doc_type = _TYPE_MAP.get(req.document_type, req.document_type)
-            doc_qs = Document.objects.filter(
-                document_type=doc_type,
-                deleted_at__isnull=True,
-            )
-            if plant:
-                doc_qs = doc_qs.filter(Q(plant=plant) | Q(shared_plants=plant))
-            doc = doc_qs.order_by("-updated_at").first()
-        except Exception:
-            doc = None
+    # Precarica gli agganci del sito per questo set di requisiti.
+    fulfillments = {}
+    if plant:
+        for f in RequiredDocumentFulfillment.objects.filter(
+            plant=plant, required_document__framework=framework, deleted_at__isnull=True
+        ).select_related("document", "evidence", "linked_by"):
+            fulfillments[str(f.required_document_id)] = f
 
-        if doc is None:
-            traffic = "red"
-            doc_info = None
-        elif doc.status == "approvato":
-            traffic = "green"
-            doc_info = {"id": str(doc.id), "title": doc.title, "status": doc.status, "review_due_date": str(doc.review_due_date) if doc.review_due_date else None}
-        else:
-            traffic = "yellow"
-            doc_info = {"id": str(doc.id), "title": doc.title, "status": doc.status, "review_due_date": str(doc.review_due_date) if doc.review_due_date else None}
+    for req in required:
+        ci = resolve_control_instance(req, plant) if plant else None
+        control_info = None
+        linkable_count = 0
+        if ci is not None:
+            docs, evs = _linkables_for_control(ci)
+            linkable_count = len(docs) + len(evs)
+            control_info = {
+                "instance_id": str(ci.id),
+                "external_id": ci.control.external_id,
+                "title": ci.control.get_title(),
+            }
+
+        traffic = None
+        doc_info = None
+        fulfillment_info = None
+
+        # 1) Aggancio esplicito
+        f = fulfillments.get(str(req.id))
+        if f is not None:
+            f_traffic, f_info = _fulfillment_status(f)
+            if f_traffic is not None:
+                traffic = f_traffic
+                fulfillment_info = f_info
+
+        # 2) Fallback euristico se non c'è un aggancio valido
+        if traffic is None:
+            try:
+                from apps.documents.models import Document
+                doc_type = _TYPE_MAP.get(req.document_type, req.document_type)
+                doc_qs = Document.objects.filter(
+                    document_type=doc_type,
+                    deleted_at__isnull=True,
+                )
+                if plant:
+                    doc_qs = doc_qs.filter(Q(plant=plant) | Q(shared_plants=plant))
+                doc = doc_qs.order_by("-updated_at").first()
+            except Exception:
+                doc = None
+
+            if doc is None:
+                traffic = "red"
+            elif doc.status == "approvato":
+                traffic = "green"
+                doc_info = {"id": str(doc.id), "title": doc.title, "status": doc.status, "review_due_date": str(doc.review_due_date) if doc.review_due_date else None}
+            else:
+                traffic = "yellow"
+                doc_info = {"id": str(doc.id), "title": doc.title, "status": doc.status, "review_due_date": str(doc.review_due_date) if doc.review_due_date else None}
 
         result.append({
+            "id": str(req.id),
             "document_type": req.document_type,
             "description": req.description,
             "iso_clause": req.iso_clause,
@@ -361,6 +481,82 @@ def get_required_documents_status(plant=None, framework: str = "ISO27001") -> li
             "notes": req.notes,
             "traffic_light": traffic,
             "document": doc_info,
+            "control": control_info,
+            "linkable_count": linkable_count,
+            "fulfillment": fulfillment_info,
         })
 
     return result
+
+
+def get_required_document_linkables(req, plant) -> dict:
+    """Elementi selezionabili per soddisfare un requisito: SOLO Document ed
+    Evidence già collegati al controllo risolto per quel sito."""
+    ci = resolve_control_instance(req, plant)
+    if ci is None:
+        return {"control": None, "documents": [], "evidences": []}
+    docs, evs = _linkables_for_control(ci)
+    return {
+        "control": {
+            "instance_id": str(ci.id),
+            "external_id": ci.control.external_id,
+            "title": ci.control.get_title(),
+        },
+        "documents": [
+            {"id": str(d.id), "title": d.title, "document_type": d.document_type, "status": d.status}
+            for d in docs
+        ],
+        "evidences": [
+            {
+                "id": str(e.id),
+                "title": e.title,
+                "evidence_type": e.evidence_type,
+                "valid_until": str(e.valid_until) if e.valid_until else None,
+                "valid": _evidence_is_valid(e),
+            }
+            for e in evs
+        ],
+    }
+
+
+def link_required_document(req, plant, user, document=None, evidence=None):
+    """Crea/sostituisce l'aggancio del requisito per il sito. Valida che il
+    target sia effettivamente collegato al controllo risolto (scope "solo
+    collegati al controllo")."""
+    from django.core.exceptions import ValidationError
+    from .models import RequiredDocumentFulfillment
+
+    if (document is None) == (evidence is None):
+        raise ValidationError("Specificare esattamente un document oppure una evidence.")
+
+    ci = resolve_control_instance(req, plant)
+    if ci is None:
+        raise ValidationError(
+            "Nessun controllo risolvibile per questo requisito/sito: impossibile "
+            "verificare il collegamento."
+        )
+    docs, evs = _linkables_for_control(ci)
+    if document is not None and document.id not in {d.id for d in docs}:
+        raise ValidationError("Il documento selezionato non è collegato al controllo.")
+    if evidence is not None and evidence.id not in {e.id for e in evs}:
+        raise ValidationError("L'evidenza selezionata non è collegata al controllo.")
+
+    fulfillment, _created = RequiredDocumentFulfillment.objects.update_or_create(
+        plant=plant,
+        required_document=req,
+        defaults={
+            "document": document,
+            "evidence": evidence,
+            "linked_by": user,
+            "deleted_at": None,
+        },
+    )
+    return fulfillment
+
+
+def unlink_required_document(req, plant):
+    from .models import RequiredDocumentFulfillment
+
+    RequiredDocumentFulfillment.objects.filter(
+        plant=plant, required_document=req
+    ).delete()

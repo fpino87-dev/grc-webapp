@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { scheduleApi, RequiredDocItem } from "../../api/endpoints/schedule";
 import { plantsApi } from "../../api/endpoints/plants";
 import { controlsApi } from "../../api/endpoints/controls";
@@ -18,8 +18,152 @@ const TRAFFIC_LIGHT_COLORS: Record<string, { bg: string; text: string }> = {
   red:    { bg: "bg-red-500",    text: "text-white" },
 };
 
-function DocRow({ item }: { item: RequiredDocItem }) {
+function LinkPickerModal({ item, plantId, onClose }: { item: RequiredDocItem; plantId: string; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [selected, setSelected] = useState<{ kind: "document" | "evidence"; id: string } | null>(null);
+  const [error, setError] = useState("");
+
+  const { data: linkables, isLoading } = useQuery({
+    queryKey: ["required-doc-linkables", plantId, item.id],
+    queryFn: () => scheduleApi.getRequiredDocLinkables({ plant: plantId, required_document: item.id }),
+    retry: false,
+  });
+
+  const linkMutation = useMutation({
+    mutationFn: () =>
+      scheduleApi.linkRequiredDoc({
+        plant: plantId,
+        required_document: item.id,
+        document: selected?.kind === "document" ? selected.id : undefined,
+        evidence: selected?.kind === "evidence" ? selected.id : undefined,
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["required-docs-status"] });
+      onClose();
+    },
+    onError: (e: unknown) => {
+      const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error || "Errore durante il collegamento";
+      setError(String(msg));
+    },
+  });
+
+  const unlinkMutation = useMutation({
+    mutationFn: () => scheduleApi.unlinkRequiredDoc({ plant: plantId, required_document: item.id }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["required-docs-status"] });
+      onClose();
+    },
+  });
+
+  const hasControl = !!linkables?.control;
+  const docs = linkables?.documents ?? [];
+  const evs = linkables?.evidences ?? [];
+  const empty = hasControl && docs.length === 0 && evs.length === 0;
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-start justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg my-8">
+        <div className="px-5 py-3 border-b border-gray-200">
+          <h3 className="text-base font-semibold text-gray-900">Collega documento / evidenza</h3>
+          <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
+          {item.control && (
+            <p className="text-[11px] text-gray-500 mt-1">
+              Controllo: <span className="font-mono text-indigo-700">{item.control.external_id}</span> — {item.control.title}
+            </p>
+          )}
+        </div>
+
+        <div className="px-5 py-4 max-h-[55vh] overflow-y-auto">
+          {item.fulfillment && (
+            <div className="mb-4 rounded border border-green-200 bg-green-50 p-3 text-xs">
+              <div className="font-medium text-green-800">Attualmente collegato</div>
+              <div className="text-green-900 mt-0.5">
+                {item.fulfillment.kind === "document" ? "📄" : "📎"} {item.fulfillment.title}
+                {" · "}<span className="text-green-700">{item.fulfillment.status}</span>
+                {item.fulfillment.linked_by && <span className="text-green-600"> · {item.fulfillment.linked_by}</span>}
+              </div>
+              <button
+                type="button"
+                onClick={() => unlinkMutation.mutate()}
+                disabled={unlinkMutation.isPending}
+                className="mt-2 text-[11px] text-red-600 hover:underline"
+              >
+                Scollega
+              </button>
+            </div>
+          )}
+
+          {isLoading ? (
+            <p className="text-sm text-gray-400">Caricamento…</p>
+          ) : !hasControl ? (
+            <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2">
+              Nessun controllo risolvibile per questo requisito su questo sito: non è possibile
+              collegare elementi verificati. Verifica che il framework/controllo sia presente.
+            </p>
+          ) : empty ? (
+            <p className="text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded px-3 py-2">
+              Nessun documento o evidenza è collegato al controllo <span className="font-mono">{linkables?.control?.external_id}</span>.
+              Collega prima l'elemento al controllo nel modulo Controlli, poi torna qui.
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {docs.length > 0 && (
+                <div>
+                  <div className="text-xs font-semibold text-gray-500 uppercase mb-1">Documenti</div>
+                  <div className="space-y-1">
+                    {docs.map(d => (
+                      <label key={d.id} className="flex items-center gap-2 p-2 rounded border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                        <input type="radio" name="linktarget" checked={selected?.kind === "document" && selected.id === d.id} onChange={() => setSelected({ kind: "document", id: d.id })} />
+                        <span className="text-sm text-gray-800">📄 {d.title}</span>
+                        <span className={`ml-auto text-[11px] px-1.5 py-0.5 rounded ${d.status === "approvato" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>{d.status}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {evs.length > 0 && (
+                <div>
+                  <div className="text-xs font-semibold text-gray-500 uppercase mb-1">Evidenze</div>
+                  <div className="space-y-1">
+                    {evs.map(e => (
+                      <label key={e.id} className="flex items-center gap-2 p-2 rounded border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                        <input type="radio" name="linktarget" checked={selected?.kind === "evidence" && selected.id === e.id} onChange={() => setSelected({ kind: "evidence", id: e.id })} />
+                        <span className="text-sm text-gray-800">📎 {e.title}</span>
+                        <span className={`ml-auto text-[11px] px-1.5 py-0.5 rounded ${e.valid ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                          {e.valid ? "valida" : "scaduta"}{e.valid_until ? ` · ${e.valid_until}` : ""}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
+        </div>
+
+        <div className="px-5 py-3 border-t border-gray-200 flex justify-end gap-2">
+          <button type="button" onClick={onClose} className="px-3 py-1.5 text-sm border border-gray-300 rounded text-gray-600 hover:bg-gray-50">
+            Chiudi
+          </button>
+          <button
+            type="button"
+            onClick={() => { setError(""); linkMutation.mutate(); }}
+            disabled={!selected || linkMutation.isPending}
+            className="px-3 py-1.5 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            {linkMutation.isPending ? "Collegamento…" : "Collega e soddisfa"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DocRow({ item, plantId }: { item: RequiredDocItem; plantId: string }) {
   const { t } = useTranslation();
+  const [pickerOpen, setPickerOpen] = useState(false);
   const tl = TRAFFIC_LIGHT_COLORS[item.traffic_light] ?? TRAFFIC_LIGHT_COLORS.red;
   const tlLabelKey = item.traffic_light === "green"
     ? "schedule.required_docs.traffic_present_approved"
@@ -44,7 +188,17 @@ function DocRow({ item }: { item: RequiredDocItem }) {
       <td className="px-4 py-3 text-sm text-gray-600">{item.document_type}</td>
       <td className="px-4 py-3 text-sm text-gray-500 font-mono">{item.iso_clause}</td>
       <td className="px-4 py-3 text-sm">
-        {item.document ? (
+        {item.fulfillment ? (
+          <div>
+            <span className="text-gray-800">
+              {item.fulfillment.kind === "document" ? "📄" : "📎"} {item.fulfillment.title}
+            </span>
+            <span className="block text-[11px] text-gray-500 mt-0.5">
+              Collegato{item.fulfillment.linked_by ? ` da ${item.fulfillment.linked_by}` : ""}
+              {" · "}{item.fulfillment.status}
+            </span>
+          </div>
+        ) : item.document ? (
           <div>
             <span className="text-gray-800">{item.document.title}</span>
             {item.document.review_due_date && (
@@ -58,10 +212,21 @@ function DocRow({ item }: { item: RequiredDocItem }) {
         )}
       </td>
       <td className="px-4 py-3">
-        <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${tl.bg} ${tl.text}`}>
-          {tlLabel}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${tl.bg} ${tl.text}`}>
+            {tlLabel}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPickerOpen(true)}
+            title="Collega documento/evidenza al controllo per soddisfare il requisito"
+            className="text-gray-400 hover:text-blue-600 text-base leading-none"
+          >
+            🔗
+          </button>
+        </div>
       </td>
+      {pickerOpen && <LinkPickerModal item={item} plantId={plantId} onClose={() => setPickerOpen(false)} />}
     </tr>
   );
 }
@@ -228,7 +393,7 @@ export function RequiredDocumentsPage() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {filtered.map((item, idx) => (
-                <DocRow key={`${item.document_type}-${idx}`} item={item} />
+                <DocRow key={item.id || `${item.document_type}-${idx}`} item={item} plantId={plantId} />
               ))}
             </tbody>
           </table>
