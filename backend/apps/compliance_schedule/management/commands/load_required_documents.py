@@ -32,16 +32,12 @@ REQUIRED_DOCS = [
     ("ISO27001", "record",           "Analisi BIA",                                        "A.5.30",  False),
 
     # ── NIS2 ───────────────────────────────────────────────────────────────────
-    ("NIS2",     "policy",           "Politica sicurezza reti e sistemi informativi",       "Art.21", True),
-    ("NIS2",     "record",           "Valutazione rischi cyber aggiornata",                "Art.21", True),
-    ("NIS2",     "procedure",        "Procedura notifica incidenti NIS2 (24h/72h)",        "Art.23", True),
-    ("NIS2",     "record",           "Registro incidenti significativi",                   "Art.23", True),
-    ("NIS2",     "procedure",        "Procedura business continuity e disaster recovery",  "Art.21", True),
-    ("NIS2",     "record",           "Valutazione sicurezza supply chain",                 "Art.21", True),
-    ("NIS2",     "procedure",        "Procedura crittografia e MFA",                       "Art.21", True),
-    ("NIS2",     "record",           "Piano formazione sicurezza informatica",              "Art.21", True),
-    ("NIS2",     "record",           "Evidenze test BCP annuali",                          "Art.21", False),
-    ("NIS2",     "record",           "Contratti fornitori con clausole NIS2",              "Art.21", False),
+    # Catalogo documenti NIS2 generico rimosso 2026-08-06: NIS2 è una direttiva,
+    # la documentazione dipende dalla trasposizione nazionale (in Italia
+    # D.Lgs. 138/2024), dal settore e dalla classificazione dell'entità. Una lista
+    # fissa sarebbe fuorviante. Il framework generico "NIS2" non è attivo su alcun
+    # sito; la compliance concreta gira sui controlli "ACN_NIS2" (trasposizione
+    # italiana). Nessun documento obbligatorio è definito qui per NIS2.
 
     # ── TISAX L2 (VDA ISA 6.0 — numerazione ISA) ───────────────────────────────
     ("TISAX_L2", "policy",           "Information Security Policy (ISP)",                  "ISA 1.1.1",  True),
