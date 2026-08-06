@@ -1,7 +1,7 @@
 import { useState, Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { pdcaApi, type PdcaCycle } from "../../api/endpoints/pdca";
+import { pdcaApi, type PdcaCycle, type PdcaPhase } from "../../api/endpoints/pdca";
 import { plantsApi } from "../../api/endpoints/plants";
 import { apiClient } from "../../api/client";
 import i18n from "../../i18n";
@@ -478,6 +478,204 @@ function PhaseStepper({ cycle }: { cycle: PdcaCycle & { reopened_as?: string | n
   );
 }
 
+const OUTCOME_BADGE: Record<string, { label: string; cls: string }> = {
+  ok: { label: "Efficace", cls: "bg-green-100 text-green-800 border-green-200" },
+  partial: { label: "Parzialmente efficace", cls: "bg-amber-100 text-amber-800 border-amber-200" },
+  ko: { label: "Non efficace", cls: "bg-red-100 text-red-800 border-red-200" },
+};
+
+const DOSSIER_PHASES: { key: PdcaPhase["phase"]; label: string; contentLabel: string }[] = [
+  { key: "plan", label: "PLAN — Pianificazione", contentLabel: "Azione pianificata" },
+  { key: "do", label: "DO — Attuazione", contentLabel: "Attuazione" },
+  { key: "check", label: "CHECK — Verifica", contentLabel: "Risultato della verifica" },
+  { key: "act", label: "ACT — Standardizzazione", contentLabel: "Standardizzazione" },
+];
+
+function fmtDateTime(d?: string | null): string {
+  if (!d) return "—";
+  return new Date(d).toLocaleString(i18n.language || "it");
+}
+
+function CycleDossierModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () => void }) {
+  const phases = cycle.phases ?? [];
+  const byPhase = (p: string) => phases.find((ph) => ph.phase === p);
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-start justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl my-6">
+        {/* Toolbar (non stampata) */}
+        <div className="no-print flex items-center justify-between px-6 py-3 border-b border-gray-200 sticky top-0 bg-white rounded-t-lg">
+          <h3 className="text-base font-semibold text-gray-900">Dossier ciclo PDCA</h3>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="px-3 py-1.5 text-sm rounded bg-primary-600 text-white hover:bg-primary-700"
+            >
+              🖨️ Stampa / PDF
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-3 py-1.5 text-sm rounded border border-gray-300 text-gray-600 hover:bg-gray-50"
+            >
+              Chiudi
+            </button>
+          </div>
+        </div>
+
+        {/* Contenuto stampabile */}
+        <div id="pdca-dossier-print" className="px-6 py-5">
+          <header className="border-b border-gray-200 pb-4 mb-4">
+            <h1 className="text-lg font-bold text-gray-900">{cycle.title}</h1>
+            {cycle.descrizione && (
+              <p className="mt-1 text-sm text-gray-600 whitespace-pre-wrap">{cycle.descrizione}</p>
+            )}
+            <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
+              <div className="flex gap-2">
+                <dt className="text-gray-500">Trigger:</dt>
+                <dd className="text-gray-800 font-medium">{TRIGGER_LABELS[cycle.trigger_type] ?? cycle.trigger_type}</dd>
+              </div>
+              {cycle.riferimento_finding && (
+                <div className="flex gap-2">
+                  <dt className="text-gray-500">Rif. finding:</dt>
+                  <dd className="text-gray-800 font-mono">{cycle.riferimento_finding}</dd>
+                </div>
+              )}
+              <div className="flex gap-2">
+                <dt className="text-gray-500">Ambito:</dt>
+                <dd className="text-gray-800">{cycle.scope_type}</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="text-gray-500">Stato:</dt>
+                <dd className="text-gray-800 font-medium uppercase">{cycle.fase_corrente}</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="text-gray-500">Creato il:</dt>
+                <dd className="text-gray-800">{fmtDateTime(cycle.created_at)}</dd>
+              </div>
+              {cycle.closed_at && (
+                <div className="flex gap-2">
+                  <dt className="text-gray-500">Chiuso il:</dt>
+                  <dd className="text-gray-800">{fmtDateTime(cycle.closed_at)}</dd>
+                </div>
+              )}
+            </dl>
+          </header>
+
+          <ol className="space-y-3">
+            {DOSSIER_PHASES.map(({ key, label, contentLabel }) => {
+              const ph = byPhase(key);
+              const done = !!ph?.completed_at;
+              // ACT: la standardizzazione è registrata sul ciclo alla chiusura.
+              const notes = key === "act" ? (cycle.act_description || ph?.notes || "") : (ph?.notes || "");
+              return (
+                <li
+                  key={key}
+                  className={`rounded-lg border p-4 ${done ? "border-gray-200 bg-white" : "border-dashed border-gray-200 bg-gray-50"}`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-semibold text-gray-900">
+                      {done ? "✓ " : ""}{label}
+                    </span>
+                    {ph?.completed_at && (
+                      <span className="text-[11px] text-gray-500">
+                        {ph.completed_by_username ? `${ph.completed_by_username} · ` : ""}{fmtDateTime(ph.completed_at)}
+                      </span>
+                    )}
+                  </div>
+
+                  {notes ? (
+                    <div className="text-xs">
+                      <div className="text-gray-500 mb-0.5">{contentLabel}</div>
+                      <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{notes}</p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-400 italic">Fase non ancora completata</p>
+                  )}
+
+                  {key === "check" && ph?.outcome && OUTCOME_BADGE[ph.outcome] && (
+                    <div className="mt-2">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[11px] font-semibold ${OUTCOME_BADGE[ph.outcome].cls}`}>
+                        Esito: {OUTCOME_BADGE[ph.outcome].label}
+                      </span>
+                    </div>
+                  )}
+
+                  {ph?.evidence && (
+                    <div className="mt-2 text-xs">
+                      <div className="text-gray-500 mb-0.5">Evidenza allegata</div>
+                      {ph.evidence.file_url ? (
+                        <a
+                          href={ph.evidence.file_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="print-url inline-flex items-center gap-1 text-primary-700 hover:underline break-all"
+                        >
+                          📎 {ph.evidence.title}
+                        </a>
+                      ) : (
+                        <span className="text-gray-800">📎 {ph.evidence.title} <span className="text-gray-400">(nessun file)</span></span>
+                      )}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+
+          {cycle.motivo_archiviazione && (
+            <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-xs">
+              <div className="font-semibold text-amber-800 mb-0.5">Archiviato — motivo</div>
+              <p className="text-amber-900 whitespace-pre-wrap">{cycle.motivo_archiviazione}</p>
+            </div>
+          )}
+          {cycle.reopened_as && (
+            <p className="mt-3 text-[11px] text-blue-700">⟳ CHECK non efficace: ha generato un nuovo ciclo PLAN di riciclo.</p>
+          )}
+
+          <p className="no-print mt-4 text-[10px] text-gray-400">
+            Documento generato dalla piattaforma GRC — usare "Stampa / PDF" e scegliere "Salva come PDF" per l'archiviazione audit.
+          </p>
+        </div>
+      </div>
+
+      <style>{`
+        @media print {
+          body * { visibility: hidden !important; }
+          #pdca-dossier-print, #pdca-dossier-print * { visibility: visible !important; }
+          #pdca-dossier-print {
+            position: absolute !important;
+            left: 0; top: 0; width: 100%;
+            padding: 0 !important;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+          }
+          .no-print { display: none !important; }
+          .print-url::after { content: " — " attr(href); font-size: 9px; color: #555; word-break: break-all; }
+          @page { margin: 1.5cm; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function CycleDossierButton({ cycle }: { cycle: PdcaCycle }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        title="Dossier audit (dettaglio fasi + stampa/PDF)"
+        className="px-2 py-1 text-[11px] rounded-md text-gray-600 hover:bg-gray-100 border border-transparent hover:border-gray-200"
+      >
+        📄
+      </button>
+      {open && <CycleDossierModal cycle={cycle} onClose={() => setOpen(false)} />}
+    </>
+  );
+}
+
 function AdvanceButtons({
   cycle,
   onUpdated,
@@ -496,7 +694,7 @@ function AdvanceButtons({
     enabled: open === "do",
     queryFn: async () => {
       const res = await apiClient.get("/documents/evidences/", {
-        params: { plant: cycle.plant },
+        params: { plant: cycle.plant, page_size: 1000 },
       });
       return res.data.results || res.data;
     },
@@ -507,7 +705,7 @@ function AdvanceButtons({
       const payload: any = { notes };
       if (open === "do") payload.evidence_id = evidenceId || undefined;
       if (open === "check") payload.outcome = outcome;
-      const res = await apiClient.post(`/pdca/${cycle.id}/advance/`, payload);
+      const res = await apiClient.post(`/pdca/cycles/${cycle.id}/advance/`, payload);
       return res.data;
     },
     onSuccess: () => {
@@ -527,7 +725,7 @@ function AdvanceButtons({
 
   const closeMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiClient.post(`/pdca/${cycle.id}/close/`, {
+      const res = await apiClient.post(`/pdca/cycles/${cycle.id}/close/`, {
         act_description: notes,
       });
       return res.data;
@@ -893,6 +1091,7 @@ export function PdcaPage() {
                   <td className="px-4 py-3">
                     <div className="flex flex-row flex-wrap gap-1 items-center">
                       <AdvanceButtons cycle={c as any} onUpdated={() => {}} />
+                      <CycleDossierButton cycle={c} />
                       <EditCycleButton cycle={c} />
                       <ArchiviaCycleButton cycle={c} />
                       <DeleteCycleButton cycle={c} />

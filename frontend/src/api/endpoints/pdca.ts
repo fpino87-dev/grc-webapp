@@ -1,5 +1,25 @@
 import { apiClient } from "../client";
 
+export interface PdcaPhaseEvidence {
+  id: string;
+  title: string;
+  evidence_type?: string;
+  file_url?: string | null;
+}
+
+export interface PdcaPhase {
+  id: string;
+  phase: "plan" | "do" | "check" | "act";
+  notes?: string;
+  evidence?: PdcaPhaseEvidence | null;
+  outcome?: string;
+  outcome_display?: string;
+  completed_at?: string | null;
+  completed_by_username?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface PdcaCycle {
   id: string;
   plant: string;
@@ -15,6 +35,7 @@ export interface PdcaCycle {
   motivo_archiviazione?: string;
   reopened_as?: string | null;
   closed_at?: string | null;
+  phases?: PdcaPhase[];
   created_at: string;
   updated_at?: string;
 }
