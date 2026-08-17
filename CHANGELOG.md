@@ -8,6 +8,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-08-17
+
 ### Added
 
 - **Backup & Restore completo (database + file)**: il backup non salva più il solo database ma un **archivio unico** (`.tar`, opzionalmente cifrato `.tar.enc`) che include sia il dump PostgreSQL sia l'intero albero dei file caricati — documenti, evidenze e loghi dei siti (`MEDIA_ROOT`). Prima il backup automatico notturno conteneva solo il database: in caso di disastro i file allegati (le evidenze d'audit) sarebbero andati persi. Il restore ripristina il database e poi **sostituisce i file media** con quelli dell'archivio (swap atomico). L'import accetta i nuovi `.tar`/`.tar.enc` e resta retro-compatibile con i vecchi backup di solo database (`.dump`/`.dump.enc`). In produzione i file media sono ora su un **volume Docker persistente** condiviso tra backend e worker (prima vivevano nel layer effimero del container e andavano persi a ogni ricreazione). i18n IT/EN/FR/PL/TR.
