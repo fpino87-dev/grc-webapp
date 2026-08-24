@@ -523,6 +523,25 @@ def _resolve_audit_user(user):
     ).order_by("date_joined").first()
 
 
+def resolve_kpi_definition(kpi_code, plant):
+    """Definizione da applicare a (kpi_code, plant).
+
+    Dal momento che lo stesso kpi_code puo' esistere sia per il singolo sito
+    sia come definizione globale, la precedenza e' del sito: le sue soglie
+    sovrascrivono quelle globali. La globale (plant=NULL) resta il default per
+    i siti che non hanno configurato quel KPI. `None` se non esiste nessuna
+    delle due.
+    """
+    from .models import KPIDefinition
+
+    qs = KPIDefinition.objects.filter(kpi_code=kpi_code)
+    if plant is not None:
+        specific = qs.filter(plant=plant).first()
+        if specific is not None:
+            return specific
+    return qs.filter(plant__isnull=True).first()
+
+
 def ingest_kpi_from_api(
     kpi_code, plant_id, value, source, measured_at=None, note="", user=None
 ):
@@ -539,14 +558,17 @@ def ingest_kpi_from_api(
     measured_at = measured_at or timezone.now()
     plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
 
-    kpi_def, _created = KPIDefinition.objects.get_or_create(
-        kpi_code=kpi_code,
-        defaults={
-            "name": kpi_code.replace("_", " ").title(),
-            "source": "api",
-            "plant": plant,
-        },
-    )
+    # Sito prima, globale come fallback: un push per il sito A non deve creare
+    # una definizione doppia se esiste gia' quella globale con le sue soglie
+    # (e' il caso del KPI OSINT, definito una volta e alimentato per sito).
+    kpi_def = resolve_kpi_definition(kpi_code, plant)
+    if kpi_def is None:
+        kpi_def = KPIDefinition.objects.create(
+            kpi_code=kpi_code,
+            name=kpi_code.replace("_", " ").title(),
+            source="api",
+            plant=plant,
+        )
 
     measured_date = measured_at.date() if hasattr(measured_at, "date") else measured_at
     week_start = _monday_of(measured_date)
@@ -679,17 +701,19 @@ def import_kpi_suggestions(plant, kpi_codes, overrides=None, user=None) -> dict:
         if entry is None:
             errors.append({"kpi_code": code, "error": "not_in_catalog"})
             continue
-        # Idempotenza: kpi_code è unique a livello di sistema, e il vincolo
-        # UNIQUE del DB copre anche le righe soft-deleted (il manager di
-        # default le nasconde, Postgres no). Interrogare `objects` faceva
-        # passare il controllo per una definizione cancellata e schiantare
-        # la INSERT con "duplicate key ... already exists".
-        existing = (
-            KPIDefinition.objects.all_with_deleted().filter(kpi_code=code).first()
+        # Idempotenza per (kpi_code, plant): lo stesso codice puo' essere
+        # configurato da piu' siti, quindi il confronto e' sempre nello scope
+        # richiesto (plant=None → definizione globale).
+        scoped = KPIDefinition.objects.all_with_deleted().filter(
+            kpi_code=code, plant=plant
         )
-        if existing is not None and existing.deleted_at is None:
+        if scoped.filter(deleted_at__isnull=True).exists():
             skipped.append(code)
             continue
+        # Se il sito aveva gia' avuto questo KPI e l'ha cancellato, si
+        # ripristina la definizione piu' recente invece di crearne una nuova:
+        # gli snapshot storici restano agganciati.
+        existing = scoped.order_by("-deleted_at").first()
 
         ov = overrides.get(code, {}) or {}
         template = None

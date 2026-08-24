@@ -877,7 +877,17 @@ def kpi_suggest(plant_id, lang) -> dict:
         .values("id", "name")
     )
 
-    configured_codes = set(KPIDefinition.objects.values_list("kpi_code", flat=True))
+    # "Gia' configurato" e' relativo allo scope scelto: un KPI del sito A non
+    # rende configurato il sito B. La definizione globale non blocca il sito:
+    # viene solo segnalata, cosi' l'utente sa che il KPI e' gia' coperto e
+    # sceglie se dargli comunque soglie proprie.
+    configured_codes = set(
+        KPIDefinition.objects.filter(plant=plant).values_list("kpi_code", flat=True)
+    )
+    global_codes = set(
+        KPIDefinition.objects.filter(plant__isnull=True)
+        .values_list("kpi_code", flat=True)
+    ) if plant is not None else set()
 
     def _match_template(keywords):
         for kw in keywords or []:
@@ -910,6 +920,7 @@ def kpi_suggest(plant_id, lang) -> dict:
             "rationale": item["rationale"],
             "checklist_hint": item["checklist_hint"],
             "already_configured": item["kpi_code"] in configured_codes,
+            "covered_by_global": item["kpi_code"] in global_codes,
             "suggested_checklist_template": matched_template,
             "can_create_template": (
                 is_checklist and item["has_template_seed"] and matched_template is None

@@ -3934,6 +3934,8 @@
       "title": "KPI Öner",
       "back": "Geri",
       "already_configured": "Zaten yapılandırılmış",
+      "covered_by_global": "Genel KPI kapsamında",
+      "covered_by_global_hint": "Tüm siteler için geçerli bir tanım zaten var. Bu siteye özel bir tanım yapılandırabilirsiniz: genel tanıma göre önceliklidir.",
       "rationale": "Mevzuat gerekçesi",
       "linkable_to": "Bağlanabilir",
       "import_success": "{{count}} KPI başarıyla yapılandırıldı",

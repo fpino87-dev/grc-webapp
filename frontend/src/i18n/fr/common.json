@@ -3934,6 +3934,8 @@
       "title": "Suggérer des KPI",
       "back": "Retour",
       "already_configured": "Déjà configuré",
+      "covered_by_global": "Couvert par un KPI global",
+      "covered_by_global_hint": "Une définition valable pour tous les sites existe déjà. Vous pouvez en configurer une propre à ce site : elle prévaut sur la définition globale.",
       "rationale": "Justification réglementaire",
       "linkable_to": "Liable à",
       "import_success": "{{count}} KPI configurés avec succès",

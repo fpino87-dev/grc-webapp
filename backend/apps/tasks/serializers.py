@@ -169,6 +169,11 @@ def _validate_kpi_code(value: str) -> str:
 
 
 class KPIDefinitionSerializer(serializers.ModelSerializer):
+    # Dichiarato a mano per non ereditare l'UniqueValidator che DRF genera
+    # dalla UniqueConstraint su kpi_code: quel validator ignora il plant e
+    # bloccherebbe un sito solo perché il codice esiste altrove. L'unicità
+    # corretta — per (kpi_code, plant) — è verificata in validate().
+    kpi_code = serializers.CharField(max_length=50)
     plant_name = serializers.CharField(source="plant.name", read_only=True)
     checklist_template_name = serializers.CharField(
         source="checklist_template.name", read_only=True
@@ -186,24 +191,39 @@ class KPIDefinitionSerializer(serializers.ModelSerializer):
             "created_at", "updated_at",
         ]
         read_only_fields = ["created_at", "updated_at"]
+        # DRF deriva da solo dei validator di unicità dalle UniqueConstraint
+        # del modello, ma il messaggio finisce in `non_field_errors` ("I campi
+        # kpi_code, plant devono costituire un insieme unico") — illeggibile
+        # per chi compila il form. Li disattiviamo e facciamo il controllo in
+        # `validate()`, che riporta l'errore sul campo kpi_code spiegando se il
+        # conflitto è sul sito o sulla definizione globale.
+        validators = []
 
     def validate_kpi_code(self, value):
-        value = _validate_kpi_code(value)
-        # Il vincolo UNIQUE del DB su kpi_code copre anche le definizioni
-        # soft-deleted, che il manager di default nasconde: senza questo
-        # controllo il UniqueValidator di DRF (che interroga `objects`) lascia
-        # passare e la INSERT esplode con un IntegrityError → 500.
-        qs = KPIDefinition.objects.all_with_deleted().filter(kpi_code=value)
-        if self.instance is not None:
-            qs = qs.exclude(pk=self.instance.pk)
-        clash = qs.first()
-        if clash is not None and clash.deleted_at is not None:
-            raise serializers.ValidationError(
-                "Questo codice KPI appartiene a una definizione eliminata ma "
-                "ancora presente a storico. Ripristinala dal wizard "
-                "«Consiglia KPI», oppure usa un codice diverso."
-            )
-        return value
+        return _validate_kpi_code(value)
+
+    def validate(self, attrs):
+        # L'unicita' di kpi_code e' per sito, non globale: due stabilimenti
+        # possono tracciare lo stesso KPI con soglie proprie. Il controllo sta
+        # qui e non in validate_kpi_code perche' serve anche il plant, che su
+        # una PATCH parziale puo' arrivare solo dall'istanza.
+        attrs = super().validate(attrs)
+        code = attrs.get("kpi_code") or getattr(self.instance, "kpi_code", None)
+        plant = (
+            attrs["plant"] if "plant" in attrs
+            else getattr(self.instance, "plant", None)
+        )
+        if code:
+            qs = KPIDefinition.objects.filter(kpi_code=code, plant=plant)
+            if self.instance is not None:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise serializers.ValidationError({"kpi_code": (
+                    "Esiste già un KPI globale con questo codice."
+                    if plant is None else
+                    "Esiste già un KPI con questo codice per questo sito."
+                )})
+        return attrs
 
 
 class OperationalKpiSnapshotSerializer(serializers.ModelSerializer):

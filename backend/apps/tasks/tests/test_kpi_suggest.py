@@ -182,16 +182,28 @@ def test_import_restore_writes_dedicated_audit_log(client, plant):
     assert AuditLog.objects.filter(action_code="kpi_definition.restored").exists()
 
 
+DEF_URL = "/api/v1/tasks/kpi-definitions/"
+
+
+@pytest.fixture
+def plant2(db):
+    from apps.plants.models import Plant
+    return Plant.objects.create(
+        code="SUG-P2", name="Plant Suggest 2", country="IT",
+        nis2_scope="non_soggetto", status="attivo",
+    )
+
+
 @pytest.mark.django_db
-def test_create_definition_with_soft_deleted_code_is_400(client, plant):
-    """La POST manuale su un kpi_code gia' occupato da una definizione
-    cancellata deve dare un 400 leggibile, non un 500 da IntegrityError."""
+def test_create_definition_reuses_soft_deleted_code(client, plant):
+    """Il vincolo di unicita' ignora le righe cancellate: un codice liberato
+    dalla UI deve tornare disponibile."""
     from apps.tasks.models import KPIDefinition
     KPIDefinition.objects.create(
         kpi_code="backup_success_rate", name="Backup", plant=plant,
     ).soft_delete()
 
-    resp = client.post("/api/v1/tasks/kpi-definitions/", {
+    resp = client.post(DEF_URL, {
         "kpi_code": "backup_success_rate",
         "name": "Backup bis",
         "plant": str(plant.id),
@@ -199,9 +211,128 @@ def test_create_definition_with_soft_deleted_code_is_400(client, plant):
         "aggregation": "success_rate",
     }, format="json")
 
+    assert resp.status_code == 201, resp.data
+    assert KPIDefinition.objects.filter(kpi_code="backup_success_rate").count() == 1
+
+
+@pytest.mark.django_db
+def test_same_kpi_code_on_two_plants(client, plant, plant2):
+    """Ogni sito ha i propri KPI: lo stesso codice deve poter convivere su
+    stabilimenti diversi, con soglie indipendenti."""
+    from apps.tasks.models import KPIDefinition
+    for p, warn in ((plant, 99.0), (plant2, 95.0)):
+        resp = client.post(IMPORT_URL, {
+            "plant": str(p.id),
+            "kpi_codes": ["backup_success_rate"],
+            "overrides": {"backup_success_rate": {"threshold_warning": warn}},
+        }, format="json")
+        assert resp.status_code == 201, resp.data
+        assert resp.data["created"] == ["backup_success_rate"], resp.data
+
+    defs = KPIDefinition.objects.filter(kpi_code="backup_success_rate")
+    assert defs.count() == 2
+    assert defs.get(plant=plant).threshold_warning == 99.0
+    assert defs.get(plant=plant2).threshold_warning == 95.0
+
+
+@pytest.mark.django_db
+def test_duplicate_kpi_code_same_plant_is_400(client, plant):
+    payload = {
+        "kpi_code": "backup_success_rate", "name": "Backup",
+        "plant": str(plant.id), "source": "manual", "aggregation": "success_rate",
+    }
+    assert client.post(DEF_URL, payload, format="json").status_code == 201
+    resp = client.post(DEF_URL, payload, format="json")
     assert resp.status_code == 400, resp.data
     assert "kpi_code" in resp.data
-    assert "eliminata" in str(resp.data["kpi_code"][0])
+
+
+@pytest.mark.django_db
+def test_duplicate_global_kpi_code_is_400(client):
+    payload = {
+        "kpi_code": "backup_success_rate", "name": "Backup",
+        "plant": None, "source": "manual", "aggregation": "success_rate",
+    }
+    assert client.post(DEF_URL, payload, format="json").status_code == 201
+    resp = client.post(DEF_URL, payload, format="json")
+    assert resp.status_code == 400, resp.data
+    assert "globale" in str(resp.data["kpi_code"][0])
+
+
+@pytest.mark.django_db
+def test_suggest_already_configured_is_per_plant(client, plant, plant2):
+    """Configurare un KPI sul sito A non deve marcarlo configurato sul B."""
+    client.post(IMPORT_URL, {
+        "plant": str(plant.id), "kpi_codes": ["backup_success_rate"],
+    }, format="json")
+
+    def _flag(plant_obj, key):
+        data = client.get(SUGGEST_URL, {"plant": str(plant_obj.id)}).data
+        item = next(
+            s for s in data["suggestions"] if s["kpi_code"] == "backup_success_rate"
+        )
+        return item[key]
+
+    assert _flag(plant, "already_configured") is True
+    assert _flag(plant2, "already_configured") is False
+
+
+@pytest.mark.django_db
+def test_suggest_flags_coverage_by_global_definition(client, plant):
+    """Un KPI globale non blocca il sito, ma viene segnalato come gia' coperto."""
+    client.post(IMPORT_URL, {
+        "plant": None, "kpi_codes": ["backup_success_rate"],
+    }, format="json")
+    data = client.get(SUGGEST_URL, {"plant": str(plant.id)}).data
+    item = next(
+        s for s in data["suggestions"] if s["kpi_code"] == "backup_success_rate"
+    )
+    assert item["already_configured"] is False
+    assert item["covered_by_global"] is True
+
+
+@pytest.mark.django_db
+def test_global_kpi_skips_plants_with_own_definition(client, plant, plant2):
+    """La definizione globale copre solo i siti senza una propria: altrimenti
+    lo stesso KPI verrebbe misurato due volte sullo stesso sito."""
+    from apps.tasks.models import KPIDefinition, OperationalKpiSnapshot
+    from apps.tasks.tasks import compute_operational_kpis
+
+    KPIDefinition.objects.create(
+        kpi_code="ctrl_compliance_rate", name="Globale", plant=None,
+        source="internal", is_active=True,
+    )
+    own = KPIDefinition.objects.create(
+        kpi_code="ctrl_compliance_rate", name="Solo sito 2", plant=plant2,
+        source="internal", is_active=True,
+    )
+
+    compute_operational_kpis()
+
+    snaps = OperationalKpiSnapshot.objects.filter(plant=plant2)
+    assert snaps.count() == 1
+    assert snaps.first().kpi_definition_id == own.id
+
+
+@pytest.mark.django_db
+def test_ingest_prefers_plant_definition_over_global(db, plant):
+    """L'ingest per sito riusa la definizione del sito se c'e', altrimenti la
+    globale: non deve creare una terza definizione a ogni push."""
+    from apps.tasks.models import KPIDefinition
+    from apps.tasks.services import ingest_kpi_from_api
+
+    glob = KPIDefinition.objects.create(
+        kpi_code="osint_critical_open", name="Globale", plant=None, source="api",
+    )
+    snap = ingest_kpi_from_api("osint_critical_open", str(plant.id), 3, "osint")
+    assert snap.kpi_definition_id == glob.id
+    assert KPIDefinition.objects.filter(kpi_code="osint_critical_open").count() == 1
+
+    own = KPIDefinition.objects.create(
+        kpi_code="osint_critical_open", name="Sito", plant=plant, source="api",
+    )
+    snap2 = ingest_kpi_from_api("osint_critical_open", str(plant.id), 4, "osint")
+    assert snap2.kpi_definition_id == own.id
 
 
 @pytest.mark.django_db

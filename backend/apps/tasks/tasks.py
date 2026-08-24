@@ -89,7 +89,9 @@ def compute_operational_kpis(self):
     quindi misurarla darebbe sempre no_data. Per ogni KPIDefinition attiva con
     source=checklist (aggregazione run) o source=internal (connettore che legge
     direttamente i dati dei moduli M03/M04/M07/M09/M11/M14/M15/M17), su tutti i
-    plant pertinenti (kpi.plant se valorizzato, altrimenti tutti i plant attivi).
+    plant pertinenti: il sito della definizione se valorizzato, altrimenti
+    tutti i plant attivi tranne quelli che hanno una propria definizione dello
+    stesso kpi_code (che ha la precedenza sulla globale).
     Invia alert M19 quando uno status peggiora oltre soglia.
     """
     from apps.plants.models import Plant
@@ -110,11 +112,22 @@ def compute_operational_kpis(self):
         )
         .select_related("plant", "checklist_template")
     )
+    active_plants = list(Plant.objects.filter(status="attivo"))
     for kpi_def in kpis:
         if kpi_def.plant_id:
             target_plants = [kpi_def.plant]
         else:
-            target_plants = list(Plant.objects.filter(status="attivo"))
+            # Definizione globale: vale solo per i siti che non hanno una
+            # propria definizione dello stesso kpi_code. Chi ne ha una decide
+            # soglie e attivazione per conto suo (anche disattivandola), e
+            # misurare due volte lo stesso KPI sullo stesso sito produrrebbe
+            # snapshot doppi in dashboard.
+            overridden = set(
+                KPIDefinition.objects.filter(
+                    kpi_code=kpi_def.kpi_code, plant__isnull=False
+                ).values_list("plant_id", flat=True)
+            )
+            target_plants = [p for p in active_plants if p.id not in overridden]
         for plant in target_plants:
             snapshot = services.compute_and_store_kpi_snapshot(
                 kpi_def, plant, week_start

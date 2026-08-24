@@ -217,6 +217,14 @@ export function KpiSuggestWizard({ initialPlantId, onClose, onImported }: Props)
                                 {t("kpi.suggest.already_configured")}
                               </span>
                             )}
+                            {!s.already_configured && s.covered_by_global && (
+                              <span
+                                title={t("kpi.suggest.covered_by_global_hint")}
+                                className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200"
+                              >
+                                {t("kpi.suggest.covered_by_global")}
+                              </span>
+                            )}
                             {s.frameworks.map((fw) => (
                               <span key={fw} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700">
                                 {fwLabel(fw)}

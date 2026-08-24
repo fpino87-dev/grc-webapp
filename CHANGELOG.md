@@ -8,6 +8,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ## [Unreleased]
 
+### Added
+
+- **KPI operativi — ogni sito ha i propri KPI, anche con lo stesso codice**: lo stesso indicatore (es. `backup_success_rate`) può ora essere configurato da più stabilimenti contemporaneamente, ciascuno con le proprie soglie di warning e critico e la propria attivazione. Prima il codice KPI era **unico per l'intera installazione**: una volta configurato su un sito, gli altri lo vedevano come "già configurato" e non potevano tracciarlo — un limite serio per un'azienda multi-sito, dove stabilimenti diversi hanno obiettivi diversi sullo stesso indicatore. Il vincolo di unicità è ora per coppia **(codice KPI, sito)**.
+  - La definizione **globale** (valida per tutti i siti) resta disponibile e funziona da **default**: i siti che non hanno una definizione propria per quel codice continuano a essere misurati con le sue soglie, mentre un sito che se ne dà una propria ha la precedenza e non viene più misurato due volte. Il wizard «Consiglia KPI» segnala con un'etichetta i KPI già coperti da una definizione globale, così si sceglie consapevolmente se dare al sito soglie proprie.
+  - Il calcolo settimanale, l'ingestione da API esterne e il grafico di trend usano ora la definizione del sito richiesto, con ricaduta su quella globale quando il sito non ne ha una.
+  - Il vincolo di unicità non considera più le definizioni **eliminate**: un codice KPI liberato dalla UI torna immediatamente riutilizzabile, invece di restare occupato per sempre.
+  - i18n IT/EN/FR/PL/TR.
+
 ### Fixed
 
 - **KPI operativi — «Consiglia KPI» falliva con "duplicate key" sui KPI eliminati in passato**: selezionando nel wizard un KPI la cui definizione era stata cancellata in precedenza, l'importazione andava in errore con un messaggio di database (`duplicate key value violates unique constraint "tasks_kpidefinition_kpi_code_key"`) e il KPI non veniva configurato. La cancellazione di un KPI è **logica** (la riga resta a storico per non perdere gli snapshot già misurati) ma il codice KPI resta occupato nel database, mentre il controllo di esistenza del wizard guardava solo le definizioni non cancellate: il wizard proponeva quindi come "non configurato" un KPI che il database considerava ancora esistente. Ora il re-import **ripristina** la definizione eliminata al posto di tentare di ricrearla, conservando l'intero storico degli snapshot e del trend, e il riepilogo finale distingue i KPI ripristinati da quelli creati ex novo. La stessa protezione è stata estesa alla creazione manuale di un KPI: un codice occupato da una definizione eliminata restituisce ora un messaggio esplicito invece di un errore generico del server. i18n IT/EN/FR/PL/TR.

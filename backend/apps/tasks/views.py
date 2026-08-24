@@ -318,9 +318,14 @@ class OperationalKpiSnapshotViewSet(
         latest = list(qs.order_by("-week_start")[:weeks])
         latest.reverse()
 
-        kpi_def = (
-            KPIDefinition.objects.filter(kpi_code=kpi_code).first()
-        )
+        # Soglie e nome vengono dalla definizione del sito richiesto; se il
+        # sito non ne ha una propria si ricade su quella globale.
+        from apps.plants.models import Plant
+
+        from . import services as tasks_services
+
+        trend_plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
+        kpi_def = tasks_services.resolve_kpi_definition(kpi_code, trend_plant)
         return Response({
             "kpi_code": kpi_code,
             "name": kpi_def.name if kpi_def else kpi_code,

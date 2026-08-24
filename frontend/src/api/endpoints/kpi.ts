@@ -93,6 +93,9 @@ export interface KpiSuggestion {
   rationale: string;
   checklist_hint: string;
   already_configured: boolean;
+  /** Esiste una definizione globale (tutti i siti) per questo codice: il sito
+   *  e' gia' coperto, ma puo' comunque darsi soglie proprie. */
+  covered_by_global: boolean;
   suggested_checklist_template: { id: string; name: string } | null;
   can_create_template: boolean;
   template_seed_name: string;

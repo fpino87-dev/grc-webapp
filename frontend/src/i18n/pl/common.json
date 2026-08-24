@@ -3934,6 +3934,8 @@
       "title": "Zaproponuj KPI",
       "back": "Wstecz",
       "already_configured": "Już skonfigurowany",
+      "covered_by_global": "Objęte globalnym KPI",
+      "covered_by_global_hint": "Istnieje już definicja obowiązująca dla wszystkich zakładów. Możesz skonfigurować własną dla tego zakładu: będzie miała pierwszeństwo przed globalną.",
       "rationale": "Uzasadnienie normatywne",
       "linkable_to": "Można połączyć z",
       "import_success": "Pomyślnie skonfigurowano {{count}} KPI",

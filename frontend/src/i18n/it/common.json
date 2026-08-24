@@ -3892,6 +3892,8 @@
       "title": "Consiglia KPI",
       "back": "Indietro",
       "already_configured": "Già configurato",
+      "covered_by_global": "Coperto da KPI globale",
+      "covered_by_global_hint": "Esiste già una definizione valida per tutti i siti. Puoi configurarne una specifica per questo sito: avrà la precedenza su quella globale.",
       "rationale": "Razionale normativo",
       "linkable_to": "Collegabile a",
       "import_success": "{{count}} KPI configurati con successo",

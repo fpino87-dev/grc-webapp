@@ -3855,6 +3855,8 @@
       "title": "Suggest KPIs",
       "back": "Back",
       "already_configured": "Already configured",
+      "covered_by_global": "Covered by global KPI",
+      "covered_by_global_hint": "A definition valid for all sites already exists. You can configure a site-specific one: it takes precedence over the global definition.",
       "rationale": "Regulatory rationale",
       "linkable_to": "Linkable to",
       "import_success": "{{count}} KPIs configured successfully",

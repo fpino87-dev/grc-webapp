@@ -327,7 +327,7 @@ class KPIDefinition(BaseModel):
 
     kpi_code = models.CharField(
         max_length=50,
-        unique=True,
+        db_index=True,
         help_text="Es: backup_success_rate, vuln_critical_open",
     )
     name = models.CharField(max_length=200)
@@ -358,7 +358,11 @@ class KPIDefinition(BaseModel):
         null=True,
         blank=True,
         related_name="kpi_definitions",
-        help_text="null=KPI globale multi-plant",
+        help_text=(
+            "Sito che traccia questo KPI con le proprie soglie. "
+            "null = definizione globale, usata come default dai siti che non "
+            "hanno una definizione propria per lo stesso kpi_code."
+        ),
         db_index=True,
     )
     threshold_warning = models.FloatField(null=True, blank=True)
@@ -378,6 +382,30 @@ class KPIDefinition(BaseModel):
 
     class Meta:
         ordering = ["kpi_code"]
+        constraints = [
+            # Lo stesso kpi_code puo' esistere una volta per sito (soglie e
+            # attivazione sono decise dal singolo stabilimento) e una volta
+            # come definizione globale (plant=NULL), che vale da default per i
+            # siti che non ne hanno una propria.
+            #
+            # Servono due vincoli distinti perche' in Postgres NULL != NULL:
+            # un indice unico su (kpi_code, plant) non impedirebbe due
+            # definizioni globali con lo stesso codice.
+            #
+            # La condizione su deleted_at tiene fuori le righe cancellate
+            # logicamente: prima il vincolo le includeva e un codice
+            # "liberato" dalla UI restava occupato per sempre nel DB.
+            models.UniqueConstraint(
+                fields=["kpi_code", "plant"],
+                condition=models.Q(deleted_at__isnull=True, plant__isnull=False),
+                name="uniq_active_kpi_code_per_plant",
+            ),
+            models.UniqueConstraint(
+                fields=["kpi_code"],
+                condition=models.Q(deleted_at__isnull=True, plant__isnull=True),
+                name="uniq_active_kpi_code_global",
+            ),
+        ]
 
 
 class OperationalKpiSnapshot(BaseModel):
