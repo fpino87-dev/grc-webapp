@@ -3966,6 +3966,7 @@
         "intro": "Vous allez importer {{count}} KPI. Ils seront créés comme définitions actives.",
         "import_btn": "Importer {{count}} KPI",
         "importing": "Importation…",
+        "restored": "{{count}} KPI restaurés (ils avaient été supprimés : l'historique des instantanés a été conservé)",
         "skipped": "{{count}} déjà existants ignorés",
         "errors": "Erreurs",
         "skipped_label": "Ignorés"

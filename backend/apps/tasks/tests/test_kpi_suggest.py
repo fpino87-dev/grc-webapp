@@ -144,6 +144,67 @@ def test_import_is_idempotent(client, plant):
 
 
 @pytest.mark.django_db
+def test_import_restores_soft_deleted_definition(client, plant):
+    """Una definizione cancellata logicamente occupa ancora il kpi_code (il
+    vincolo UNIQUE del DB ignora deleted_at): il re-import deve ripristinarla,
+    non tentare una INSERT che finirebbe in 'duplicate key'."""
+    from apps.tasks.models import KPIDefinition
+    payload = {"plant": str(plant.id), "kpi_codes": ["backup_success_rate"]}
+    client.post(IMPORT_URL, payload, format="json")
+    kpi = KPIDefinition.objects.get(kpi_code="backup_success_rate")
+    original_pk = kpi.pk
+    kpi.soft_delete()
+    assert not KPIDefinition.objects.filter(kpi_code="backup_success_rate").exists()
+
+    resp = client.post(IMPORT_URL, payload, format="json")
+
+    assert resp.status_code == 201, resp.data
+    assert resp.data["errors"] == []
+    assert resp.data["created"] == []
+    assert resp.data["restored"] == ["backup_success_rate"]
+    revived = KPIDefinition.objects.get(kpi_code="backup_success_rate")
+    assert revived.pk == original_pk  # stessa riga → snapshot storici salvi
+    assert revived.deleted_at is None
+    assert revived.is_active is True
+    assert KPIDefinition.objects.all_with_deleted().filter(
+        kpi_code="backup_success_rate"
+    ).count() == 1
+
+
+@pytest.mark.django_db
+def test_import_restore_writes_dedicated_audit_log(client, plant):
+    from apps.tasks.models import KPIDefinition
+    from core.audit import AuditLog
+    payload = {"plant": str(plant.id), "kpi_codes": ["backup_success_rate"]}
+    client.post(IMPORT_URL, payload, format="json")
+    KPIDefinition.objects.get(kpi_code="backup_success_rate").soft_delete()
+    client.post(IMPORT_URL, payload, format="json")
+    assert AuditLog.objects.filter(action_code="kpi_definition.restored").exists()
+
+
+@pytest.mark.django_db
+def test_create_definition_with_soft_deleted_code_is_400(client, plant):
+    """La POST manuale su un kpi_code gia' occupato da una definizione
+    cancellata deve dare un 400 leggibile, non un 500 da IntegrityError."""
+    from apps.tasks.models import KPIDefinition
+    KPIDefinition.objects.create(
+        kpi_code="backup_success_rate", name="Backup", plant=plant,
+    ).soft_delete()
+
+    resp = client.post("/api/v1/tasks/kpi-definitions/", {
+        "kpi_code": "backup_success_rate",
+        "name": "Backup bis",
+        "plant": str(plant.id),
+        "source": "manual",
+        "aggregation": "success_rate",
+    }, format="json")
+
+    assert resp.status_code == 400, resp.data
+    assert "kpi_code" in resp.data
+    assert "eliminata" in str(resp.data["kpi_code"][0])
+
+
+@pytest.mark.django_db
 def test_import_applies_overrides(client, plant):
     from apps.tasks.models import ChecklistTemplate, KPIDefinition
     tpl = ChecklistTemplate.objects.create(name="Backup check", frequency="daily", plant=plant)

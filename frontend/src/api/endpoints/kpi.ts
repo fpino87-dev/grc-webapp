@@ -112,6 +112,9 @@ export interface KpiImportOverride {
 
 export interface KpiImportResult {
   created: string[];
+  /** KPI la cui definizione era stata eliminata e viene riportata in vita
+   *  (conserva gli snapshot storici gia' collegati). */
+  restored: string[];
   skipped: string[];
   errors: { kpi_code: string; error: string }[];
 }

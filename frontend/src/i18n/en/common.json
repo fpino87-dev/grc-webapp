@@ -3887,6 +3887,7 @@
         "intro": "You are about to import {{count}} KPIs. They will be created as active definitions.",
         "import_btn": "Import {{count}} KPIs",
         "importing": "Importing…",
+        "restored": "{{count}} KPI restored (they had been deleted: the snapshot history was preserved)",
         "skipped": "{{count}} already existing skipped",
         "errors": "Errors",
         "skipped_label": "Skipped"

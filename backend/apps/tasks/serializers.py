@@ -188,7 +188,22 @@ class KPIDefinitionSerializer(serializers.ModelSerializer):
         read_only_fields = ["created_at", "updated_at"]
 
     def validate_kpi_code(self, value):
-        return _validate_kpi_code(value)
+        value = _validate_kpi_code(value)
+        # Il vincolo UNIQUE del DB su kpi_code copre anche le definizioni
+        # soft-deleted, che il manager di default nasconde: senza questo
+        # controllo il UniqueValidator di DRF (che interroga `objects`) lascia
+        # passare e la INSERT esplode con un IntegrityError → 500.
+        qs = KPIDefinition.objects.all_with_deleted().filter(kpi_code=value)
+        if self.instance is not None:
+            qs = qs.exclude(pk=self.instance.pk)
+        clash = qs.first()
+        if clash is not None and clash.deleted_at is not None:
+            raise serializers.ValidationError(
+                "Questo codice KPI appartiene a una definizione eliminata ma "
+                "ancora presente a storico. Ripristinala dal wizard "
+                "«Consiglia KPI», oppure usa un codice diverso."
+            )
+        return value
 
 
 class OperationalKpiSnapshotSerializer(serializers.ModelSerializer):

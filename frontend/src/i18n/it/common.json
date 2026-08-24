@@ -3924,6 +3924,7 @@
         "intro": "Stai per importare {{count}} KPI. Verranno creati come definizioni attive.",
         "import_btn": "Importa {{count}} KPI",
         "importing": "Importazione…",
+        "restored": "{{count}} KPI ripristinati (erano stati eliminati: lo storico degli snapshot è stato conservato)",
         "skipped": "{{count}} già esistenti saltati",
         "errors": "Errori",
         "skipped_label": "Saltati"

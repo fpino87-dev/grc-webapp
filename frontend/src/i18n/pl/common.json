@@ -3966,6 +3966,7 @@
         "intro": "Zamierzasz zaimportować {{count}} KPI. Zostaną utworzone jako aktywne definicje.",
         "import_btn": "Importuj {{count}} KPI",
         "importing": "Importowanie…",
+        "restored": "Przywrócono {{count}} KPI (były usunięte: historia migawek została zachowana)",
         "skipped": "Pominięto {{count}} już istniejących",
         "errors": "Błędy",
         "skipped_label": "Pominięte"

@@ -364,6 +364,11 @@ export function KpiSuggestWizard({ initialPlantId, onClose, onImported }: Props)
                 <p className="text-lg font-medium text-gray-900">
                   {t("kpi.suggest.import_success", { count: importMutation.data?.created.length ?? 0 })}
                 </p>
+                {(importMutation.data?.restored.length ?? 0) > 0 && (
+                  <p className="text-sm text-gray-600 mt-1">
+                    {t("kpi.suggest.step3.restored", { count: importMutation.data?.restored.length })}
+                  </p>
+                )}
                 {(importMutation.data?.skipped.length ?? 0) > 0 && (
                   <p className="text-sm text-gray-500 mt-1">
                     {t("kpi.suggest.step3.skipped", { count: importMutation.data?.skipped.length })}

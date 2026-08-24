@@ -659,8 +659,9 @@ def create_template_from_seed(code, plant, user=None, lang="it"):
 def import_kpi_suggestions(plant, kpi_codes, overrides=None, user=None) -> dict:
     """
     Importa una lista di KPI dal catalogo standard (kpi_catalog.KPI_CATALOG)
-    applicando eventuali override per soglie/template. Idempotente: i KPI il
-    cui kpi_code esiste già vengono saltati. Ritorna {created, skipped, errors}.
+    applicando eventuali override per soglie/template. Idempotente: i KPI già
+    attivi vengono saltati, quelli cancellati logicamente vengono ripristinati.
+    Ritorna {created, restored, skipped, errors}.
 
     Override per kpi_code:
       - threshold_warning / threshold_critical: soglie personalizzate
@@ -671,15 +672,22 @@ def import_kpi_suggestions(plant, kpi_codes, overrides=None, user=None) -> dict:
     from .models import ChecklistTemplate, KPIDefinition
 
     overrides = overrides or {}
-    created, skipped, errors = [], [], []
+    created, restored, skipped, errors = [], [], [], []
 
     for code in kpi_codes:
         entry = KPI_CATALOG.get(code)
         if entry is None:
             errors.append({"kpi_code": code, "error": "not_in_catalog"})
             continue
-        # Idempotenza: kpi_code è unique a livello di sistema.
-        if KPIDefinition.objects.filter(kpi_code=code).exists():
+        # Idempotenza: kpi_code è unique a livello di sistema, e il vincolo
+        # UNIQUE del DB copre anche le righe soft-deleted (il manager di
+        # default le nasconde, Postgres no). Interrogare `objects` faceva
+        # passare il controllo per una definizione cancellata e schiantare
+        # la INSERT con "duplicate key ... already exists".
+        existing = (
+            KPIDefinition.objects.all_with_deleted().filter(kpi_code=code).first()
+        )
+        if existing is not None and existing.deleted_at is None:
             skipped.append(code)
             continue
 
@@ -695,25 +703,38 @@ def import_kpi_suggestions(plant, kpi_codes, overrides=None, user=None) -> dict:
             # default-bind: la closure non deve catturare le variabili di loop
             return ov[key] if key in ov else entry[key]
 
+        fields = {
+            "name": _text(entry["name"], "it"),
+            "description": _text(entry["description"], "it"),
+            "unit": entry["unit"],
+            "source": entry["source"],
+            "checklist_template": template,
+            "checklist_item_filter": "",
+            "aggregation": entry["aggregation"],
+            "plant": plant,
+            "threshold_warning": _ov_threshold("threshold_warning"),
+            "threshold_critical": _ov_threshold("threshold_critical"),
+            "threshold_direction": entry["threshold_direction"],
+            "is_active": True,
+            "notify_on_warning": entry["notify_on_warning"],
+            "notify_on_critical": entry["notify_on_critical"],
+        }
+        is_restore = existing is not None
+
         try:
-            kpi = KPIDefinition.objects.create(
-                kpi_code=code,
-                name=_text(entry["name"], "it"),
-                description=_text(entry["description"], "it"),
-                unit=entry["unit"],
-                source=entry["source"],
-                checklist_template=template,
-                checklist_item_filter="",
-                aggregation=entry["aggregation"],
-                plant=plant,
-                threshold_warning=_ov_threshold("threshold_warning"),
-                threshold_critical=_ov_threshold("threshold_critical"),
-                threshold_direction=entry["threshold_direction"],
-                is_active=True,
-                notify_on_warning=entry["notify_on_warning"],
-                notify_on_critical=entry["notify_on_critical"],
-                created_by=user,
-            )
+            if is_restore:
+                # Ripristino invece di ricreazione: gli OperationalKpiSnapshot
+                # storici puntano ancora a questa definizione (FK PROTECT), e
+                # riesumarla conserva il trend invece di ripartire da zero.
+                for field, value in fields.items():
+                    setattr(existing, field, value)
+                existing.deleted_at = None
+                existing.save()
+                kpi = existing
+            else:
+                kpi = KPIDefinition.objects.create(
+                    kpi_code=code, created_by=user, **fields
+                )
         except Exception as exc:  # noqa: BLE001
             errors.append({"kpi_code": code, "error": str(exc)[:200]})
             continue
@@ -721,7 +742,10 @@ def import_kpi_suggestions(plant, kpi_codes, overrides=None, user=None) -> dict:
         if user is not None:
             log_action(
                 user=user,
-                action_code="kpi_definition.imported",
+                action_code=(
+                    "kpi_definition.restored" if is_restore
+                    else "kpi_definition.imported"
+                ),
                 level="L1",
                 entity=kpi,
                 payload={
@@ -729,8 +753,14 @@ def import_kpi_suggestions(plant, kpi_codes, overrides=None, user=None) -> dict:
                     "plant_id": str(plant.id) if plant else None,
                     "source": entry["source"],
                     "from_catalog": True,
+                    "restored": is_restore,
                 },
             )
-        created.append(code)
+        (restored if is_restore else created).append(code)
 
-    return {"created": created, "skipped": skipped, "errors": errors}
+    return {
+        "created": created,
+        "restored": restored,
+        "skipped": skipped,
+        "errors": errors,
+    }

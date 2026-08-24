@@ -3966,6 +3966,7 @@
         "intro": "{{count}} KPI içe aktarmak üzeresiniz. Aktif tanımlar olarak oluşturulacak.",
         "import_btn": "{{count}} KPI içe aktar",
         "importing": "İçe aktarılıyor…",
+        "restored": "{{count}} KPI geri yüklendi (silinmişlerdi: anlık görüntü geçmişi korundu)",
         "skipped": "{{count}} mevcut olan atlandı",
         "errors": "Hatalar",
         "skipped_label": "Atlananlar"
