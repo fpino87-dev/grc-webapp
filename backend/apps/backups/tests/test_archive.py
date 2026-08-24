@@ -96,7 +96,6 @@ def test_restore_media_chowns_extracted_tree_to_runtime_user(tmp_path, settings)
     live.mkdir()
     settings.MEDIA_ROOT = str(live)
 
-    import os as _os
     with patch.object(archive, "_chown_tree") as chown, \
             patch.object(archive.os, "getuid", return_value=4242, create=True), \
             patch.object(archive.os, "getgid", return_value=4343, create=True):

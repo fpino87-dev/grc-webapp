@@ -63,6 +63,12 @@ jobs:
       - name: Ruff
         working-directory: backend
         run: ruff check .
+      # I modelli devono essere allineati alle migrazioni: senza questo check
+      # una modifica a un field (es. nuove choices) resta senza migrazione e
+      # se ne accorge solo chi lancia makemigrations mesi dopo.
+      - name: Migrazioni allineate ai modelli
+        working-directory: backend
+        run: python manage.py makemigrations --check --dry-run
       - name: Pytest (coverage gate 70%)
         working-directory: backend
         run: pytest -q

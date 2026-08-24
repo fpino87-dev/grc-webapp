@@ -41,7 +41,8 @@
     "pending": "Yapılacak",
     "in_progress": "Devam ediyor",
     "completed": "Tamamlandı",
-    "overdue": "Gecikmiş"
+    "overdue": "Gecikmiş",
+    "archived": "Etkin değil"
   },
   "actions": {
     "save": "Kaydet",
@@ -77,7 +78,16 @@
     "freq_quarterly": "Üç aylık",
     "freq_biannual": "Yarıyıllık",
     "freq_annual": "Yıllık",
-    "finish": "Bitir"
+    "finish": "Bitir",
+    "actions": "İşlemler",
+    "uploading": "Yükleniyor…",
+    "cancel": "İptal",
+    "current": "Geçerli",
+    "date": "Tarih",
+    "deleting": "Siliniyor...",
+    "notes": "Notlar",
+    "save": "Kaydet",
+    "user": "Kullanıcı"
   },
   "help": {
     "open_title": "Bu modül için yardım",
@@ -249,41 +259,6 @@
           "label": "Tespit edilebilirlik",
           "desc": "Gerçek zamanlı tehlikeyi tespit etme kapasitesi"
         }
-      },
-      "scale_title": "Risk değerlendirme matrisi (5×5)",
-      "columns": {
-        "likelihood": "Olasılık",
-        "impact": "Etki",
-        "score": "Puan",
-        "level": "Seviye",
-        "examples": "Örnekler"
-      },
-      "levels": {
-        "1": {
-          "label": "Çok düşük",
-          "likelihood": "Neredeyse imkânsız",
-          "impact": "Küçük kesinti, < 1 saat"
-        },
-        "2": {
-          "label": "Düşük",
-          "likelihood": "Düşük ihtimal, yılda 1–2 kez",
-          "impact": "Sınırlı etki, < 1 gün"
-        },
-        "3": {
-          "label": "Orta",
-          "likelihood": "Mümkün, aylık",
-          "impact": "Önemli kesinti, < 1 hafta"
-        },
-        "4": {
-          "label": "Yüksek",
-          "likelihood": "Muhtemel, haftalık",
-          "impact": "Büyük etki, < 1 ay"
-        },
-        "5": {
-          "label": "Kritik",
-          "likelihood": "Çok muhtemel, günlük",
-          "impact": "Felaket etkisi, > 1 ay"
-        }
       }
     },
     "risk_module": {
@@ -307,35 +282,6 @@
       "config_needed": {
         "1": "Yönetişim → Risk İştahı'nda eşikleri yapılandırın",
         "2": "Otomatik ALE ve ağırlıklı puan hesaplaması için BIA süreçlerini bağlayın"
-      }
-    },
-    "controls": {
-      "scale_title": "Kontrol değerlendirme kılavuzu",
-      "columns": {
-        "status": "Durum",
-        "meaning": "Anlam",
-        "requirements": "Minimum gereksinimler"
-      },
-      "statuses": {
-        "compliant": "Uyumlu",
-        "parziale": "Kısmi",
-        "gap": "Boşluk",
-        "na": "N/A",
-        "non_valutato": "Değerlendirilmemiş"
-      },
-      "meanings": {
-        "compliant": "Kanıtlarla tam uygulanan kontrol",
-        "parziale": "Kısmi uygulama veya yetersiz kanıt",
-        "gap": "Eksik veya etkisiz kontrol",
-        "na": "Resmi gerekçeyle geçerli değil",
-        "non_valutato": "Henüz değerlendirilmemiş"
-      },
-      "requirements": {
-        "compliant": "Geçerli kanıt + son doğrulama tarihi",
-        "parziale": "Kısmi kanıt + iyileştirme planı (görev M08)",
-        "gap": "Gereksinim yok — iyileştirme görevi otomatik oluşturulur",
-        "na": "Yazılı gerekçe min 20 karakter. TISAX L3: çift onay",
-        "non_valutato": "Sitenin uyum puanını düşürür"
       }
     }
   },
@@ -935,6 +881,9 @@
       "add_resp": "Sorumluluk ekle",
       "select_site": "Tesisi seçin",
       "couple_suggest": "Aynı kapsamda eşleşen «{{role}}» erişimi de verilsin mi?"
+    },
+    "edit": {
+      "title": "Kullanıcıyı düzenle"
     }
   },
   "governance": {
@@ -982,6 +931,20 @@
         "contratto": "Sözleşme/NDA",
         "registro": "Kayıt",
         "altro": "Diğer"
+      },
+      "help": {
+        "title": "Doküman iş akışı",
+        "description": "Her doküman türü için kimin oluşturduğunu, kimin gözden geçirdiğini ve kimin onayladığını tanımlar. Politika olmadan doküman durum değiştiremez: denetimde beklenen görevler ayrılığıdır.",
+        "steps": {
+          "choose_type_and_scope": "Doküman türünü ve politika kapsamını seçin: organizasyon veya tek bir site.",
+          "assign_creators": "Dokümanı oluşturup incelemeye gönderebilecek rolleri belirtin.",
+          "assign_reviewers": "İçeriği onaydan önce gözden geçirecek rolleri belirtin.",
+          "assign_approvers": "Onaylayan rolleri belirtin: dokümanın resmi sorumluluğunu bunlar üstlenir."
+        },
+        "connections": {
+          "documents": "İş akışı doküman durumlarını yönetir: taslak, incelemede, onaylandı.",
+          "governance": "Politikada kullanılan roller, rol kapsama matrisinde atanan rollerdir."
+        }
       }
     },
     "sections": {
@@ -1092,11 +1055,7 @@
       "reason": "Sebep / notlar",
       "pending": "Değiştiriliyor...",
       "confirm": "Devri onayla",
-      "error": "Değiştirme sırasında hata.",
-      "new_user": "Yeni kullanıcı",
-      "new_valid_from": "Yeni geçerlilik başlangıcı",
-      "new_valid_until": "Yeni geçerlilik sonu",
-      "submit": "Değiştirmeyi onayla"
+      "error": "Değiştirme sırasında hata."
     },
     "help": {
       "title": "Governance — M00",
@@ -1160,18 +1119,12 @@
         "counts": "Sayımlar",
         "languages": "Diller"
       },
-      "framework": "Çerçeve",
-      "compliant": "Uyumlu",
-      "partial": "Kısmi",
-      "gap": "Boşluk",
-      "not_evaluated": "Değerlendirilmemiş",
-      "risk_appetite": "Risk iştahı",
       "archive_title": "Çerçeveyi arşivle",
       "archive_confirm": "{{code}} çerçevesi arşivlensin mi? Listeden gizlenir ve yeni eşleştirmeleri engeller; geçmiş verileri silmez.",
-      "archived_badge": "Arşivlendi",
       "delete_title": "Çerçeveyi sil",
       "delete_action": "Sil",
-      "delete_confirm": "\"{{code}}\" çerçevesini kalıcı olarak silmek istiyor musunuz? İlişkili tüm kontroller ve alanlar kaldırılacak. Bu işlem geri alınamaz."
+      "delete_confirm": "\"{{code}}\" çerçevesini kalıcı olarak silmek istiyor musunuz? İlişkili tüm kontroller ve alanlar kaldırılacak. Bu işlem geri alınamaz.",
+      "archive_action": "Arşivle"
     },
     "risk_appetite": {
       "title": "Risk iştahı",
@@ -1196,12 +1149,7 @@
         "valid_until": "Geçerlilik sonu",
         "status": "Durum",
         "actions": "İşlemler"
-      },
-      "domain": "Alan",
-      "threshold": "Kabul eşiği",
-      "current": "Mevcut",
-      "save": "Kaydet",
-      "saved": "Risk iştahı kaydedildi"
+      }
     },
     "appetite_notes_placeholder": "Onay notları, yönetim kararı referansları, vb.",
     "coverage": {
@@ -1612,7 +1560,8 @@
       "change_plant": "Site değiştir",
       "delete_title": "Belgeyi sil",
       "delete_confirm": "«{{title}}» belgesi silinsin mi? Onay sürecinde veya onaylanmış belgeler için yasaktır (süper kullanıcı hariç).",
-      "edit": "Düzenle"
+      "edit": "Düzenle",
+      "share_hint": "Diğer sitelerle paylaş"
     },
     "errors": {
       "download_failed": "Belge indirilemedi. İzinleri kontrol edin veya daha sonra tekrar deneyin.",
@@ -1690,7 +1639,17 @@
     "edit": {
       "title": "Belgeyi düzenle",
       "submit": "Değişiklikleri kaydet"
-    }
+    },
+    "share": {
+      "selected_count": "{{count}} site seçildi",
+      "hint": "Doküman, kaynak sitenin mülkiyetinde kalır. Seçilen siteler dosyayı yeniden yüklemeden görüntüleyip indirebilir.",
+      "no_plants": "Başka site yok",
+      "none_selected": "Site seçilmedi — doküman yalnızca sahibi olan siteye görünür olacak",
+      "title": "Diğer sitelerle paylaş"
+    },
+    "org_wide": "Tüm organizasyon",
+    "shared_badge": "paylaşıldı",
+    "shared_with_n_plants": "site"
   },
   "schedule": {
     "activity": {
@@ -2877,7 +2836,12 @@
       "3": "3 – Orta",
       "4": "4 – Ciddi",
       "5": "5 – Kritik"
-    }
+    },
+    "appetite_notes_placeholder": "Eşik notları: gerekçe, onay kararı, planlanan gözden geçirme…",
+    "appetite": {
+      "all_frameworks": "Tüm çerçeveler"
+    },
+    "col_score": "Puan"
   },
   "pdca": {
     "title": "PDCA — Sürekli iyileştirme",
@@ -3330,6 +3294,35 @@
       "kpi_expired": "NDA süresi dolmuş",
       "kpi_missing": "NDA yok",
       "no_suppliers": "Aktif tedarikçi yok."
+    },
+    "evaluation": {
+      "class": "Sınıf",
+      "current": "Geçerli değerlendirme",
+      "form_help": "Her parametreyi 1–5 ölçeğinde puanlayın (1 = en düşük risk, 5 = en yüksek risk). Ağırlık Ayarlar'dan yapılandırılır.",
+      "history": "Değerlendirme geçmişi",
+      "level": "Seviye",
+      "new": "Yeni değerlendirme",
+      "no_current": "Kayıtlı iç değerlendirme yok.",
+      "param": "Parametre",
+      "preview": "Önizleme",
+      "score": "Puan",
+      "start": "Değerlendirmeyi başlat",
+      "title": "İç risk değerlendirmesi",
+      "weight": "Ağırlık",
+      "weighted": "Ağırlıklı puan"
+    },
+    "settings": {
+      "bump_nis2": "NIS2 artışı + kritik yoğunlaşma",
+      "labels": "Parametre başına seviye etiketleri",
+      "operational": "Operasyonel parametreler",
+      "readonly": "Salt okunur — yalnızca bir süper yönetici değiştirebilir.",
+      "subtitle": "Ağırlıklar, parametre etiketleri, sınıflandırma eşikleri ve değerlendirme geçerliliği. Hiçbir değer koda gömülü değildir.",
+      "thresholds": "Sınıflandırma eşikleri",
+      "thresholds_help": "Düşük sınıf < orta eşik ≤ orta sınıf < yüksek eşik ≤ yüksek sınıf < kritik eşik ≤ kritik sınıf.",
+      "title": "Tedarikçi değerlendirmesi — Yapılandırma",
+      "validity": "Üçüncü taraf denetim geçerliliği (ay)",
+      "weights": "Parametre ağırlıkları",
+      "weights_must_sum": "Ağırlıkların toplamı 1,00 olmalıdır"
     }
   },
   "reporting": {
@@ -3347,7 +3340,50 @@
       "total_controls": "Toplam kontroller",
       "pct_compliant": "% Uyumlu",
       "gap_controls": "Eksik kontroller",
-      "no_required_docs_configured": "Bu çerçeve için yapılandırılmış zorunlu belge yok"
+      "no_required_docs_configured": "Bu çerçeve için yapılandırılmış zorunlu belge yok",
+      "plant_label": "Site",
+      "all_plants": "Tüm siteler",
+      "no_frameworks": "Seçili site için etkin çerçeve yok.",
+      "no_mandatory_courses": "Etkin zorunlu eğitim yok.",
+      "section_docs": "Zorunlu doküman kapsamı",
+      "section_mttr": "Ortalama çözüm süresi (MTTR)",
+      "section_training": "Zorunlu eğitim tamamlanması",
+      "mttr_hint": "kapatılan öğeler üzerinden hesaplandı",
+      "col_framework": "Çerçeve",
+      "col_total": "Toplam",
+      "col_approved": "Onaylanan",
+      "col_draft": "Taslak/İnceleme",
+      "col_missing": "Eksik",
+      "col_coverage": "Toplam kapsam",
+      "col_mandatory": "Yalnızca zorunlu",
+      "mttr_findings": "Denetim bulguları",
+      "mttr_incidents": "Olaylar",
+      "mttr_tasks": "Görevler",
+      "mttr_tasks_note": "Oluşturmadan tamamlamaya, tüm görevler.",
+      "finding_major": "Major",
+      "finding_minor": "Minör",
+      "finding_observation": "Gözlem",
+      "severity_critica": "Kritik",
+      "severity_alta": "Yüksek",
+      "severity_media": "Orta",
+      "severity_bassa": "Düşük",
+      "closed": "kapatıldı",
+      "total": "Toplam",
+      "training_users": "GRC kullanıcıları",
+      "training_grc_perimeter": "platforma erişimi olan kullanıcılar",
+      "training_mandatory_courses": "Zorunlu eğitimler",
+      "training_all_done": "Tüm eğitimleri tamamlamış",
+      "training_users_suffix": "kullanıcı",
+      "col_course": "Eğitim",
+      "col_source": "Kaynak",
+      "col_enrolled": "Kayıtlı",
+      "col_completed": "Tamamlanan",
+      "col_not_enrolled": "Kayıtsız",
+      "col_completion": "Tamamlanma",
+      "col_deadline": "Son tarih",
+      "section_nda": "Tedarikçi NDA'ları",
+      "nda_hint": "etkin tedarikçilerdeki NDA durumu",
+      "tasks_completed": "Tamamlanan görevler"
     },
     "loading_kpi": "KPI'ler yükleniyor...",
     "loading_compliance": "Uyum yükleniyor...",

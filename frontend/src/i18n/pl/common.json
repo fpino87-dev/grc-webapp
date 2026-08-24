@@ -41,7 +41,8 @@
     "pending": "Do zrobienia",
     "in_progress": "W toku",
     "completed": "Zakończona",
-    "overdue": "Po terminie"
+    "overdue": "Po terminie",
+    "archived": "Nieaktywna"
   },
   "actions": {
     "save": "Zapisz",
@@ -77,7 +78,16 @@
     "freq_quarterly": "Kwartalny",
     "freq_biannual": "Półroczny",
     "freq_annual": "Roczny",
-    "finish": "Zakończ"
+    "finish": "Zakończ",
+    "actions": "Akcje",
+    "uploading": "Przesyłanie…",
+    "cancel": "Anuluj",
+    "current": "Bieżąca",
+    "date": "Data",
+    "deleting": "Usuwanie...",
+    "notes": "Uwagi",
+    "save": "Zapisz",
+    "user": "Użytkownik"
   },
   "help": {
     "open_title": "Pomoc dla tego modułu",
@@ -249,41 +259,6 @@
           "label": "Wykrywalność",
           "desc": "Zdolność do wykrycia kompromitacji w czasie rzeczywistym"
         }
-      },
-      "scale_title": "Matryca ryzyka (5×5)",
-      "columns": {
-        "likelihood": "Prawdopodobieństwo",
-        "impact": "Wpływ",
-        "score": "Wynik",
-        "level": "Poziom",
-        "examples": "Przykłady"
-      },
-      "levels": {
-        "1": {
-          "label": "Bardzo niski",
-          "likelihood": "Praktycznie niemożliwe",
-          "impact": "Minimalne zakłócenie, < 1 godz."
-        },
-        "2": {
-          "label": "Niski",
-          "likelihood": "Mało prawdopodobne, 1–2 razy w roku",
-          "impact": "Ograniczony wpływ, < 1 dzień"
-        },
-        "3": {
-          "label": "Średni",
-          "likelihood": "Możliwe, co miesiąc",
-          "impact": "Znaczące zakłócenie, < 1 tydzień"
-        },
-        "4": {
-          "label": "Wysoki",
-          "likelihood": "Prawdopodobne, co tydzień",
-          "impact": "Poważny wpływ, < 1 miesiąc"
-        },
-        "5": {
-          "label": "Krytyczny",
-          "likelihood": "Bardzo prawdopodobne, codziennie",
-          "impact": "Katastrofalny wpływ, > 1 miesiąc"
-        }
       }
     },
     "risk_module": {
@@ -307,35 +282,6 @@
       "config_needed": {
         "1": "Skonfiguruj progi w Governance → Apetyt na ryzyko",
         "2": "Połącz procesy BIA dla automatycznego obliczania ALE i wyniku ważonego"
-      }
-    },
-    "controls": {
-      "scale_title": "Przewodnik oceny kontroli",
-      "columns": {
-        "status": "Status",
-        "meaning": "Znaczenie",
-        "requirements": "Minimalne wymagania"
-      },
-      "statuses": {
-        "compliant": "Zgodny",
-        "parziale": "Częściowy",
-        "gap": "Luka",
-        "na": "N/D",
-        "non_valutato": "Nie ocenione"
-      },
-      "meanings": {
-        "compliant": "Kontrola w pełni wdrożona z dowodami",
-        "parziale": "Częściowa implementacja lub niewystarczające dowody",
-        "gap": "Brak kontroli lub nieskuteczna",
-        "na": "Nie dotyczy z formalnym uzasadnieniem",
-        "non_valutato": "Jeszcze nie ocenione"
-      },
-      "requirements": {
-        "compliant": "Ważny dowód + data ostatniej weryfikacji",
-        "parziale": "Częściowy dowód + plan naprawczy (zadanie M08)",
-        "gap": "Brak wymagań — zadanie naprawcze generowane automatycznie",
-        "na": "Uzasadnienie min 20 znaków. TISAX L3: podwójne zatwierdzenie",
-        "non_valutato": "Obniża wynik zgodności zakładu"
       }
     }
   },
@@ -935,6 +881,9 @@
       "add_resp": "Dodaj odpowiedzialność",
       "select_site": "Wybierz zakład",
       "couple_suggest": "Czy nadać też odpowiadający dostęp «{{role}}» na tym samym zakresie?"
+    },
+    "edit": {
+      "title": "Edytuj użytkownika"
     }
   },
   "governance": {
@@ -982,6 +931,20 @@
         "contratto": "Umowa/NDA",
         "registro": "Rejestr",
         "altro": "Inne"
+      },
+      "help": {
+        "title": "Workflow dokumentów",
+        "description": "Określa dla każdego typu dokumentu, kto go tworzy, kto weryfikuje i kto zatwierdza. Bez polityki dokument nie zmieni statusu: to rozdzielenie obowiązków wymagane podczas audytu.",
+        "steps": {
+          "choose_type_and_scope": "Wybierz typ dokumentu i zakres polityki: organizacja lub pojedynczy zakład.",
+          "assign_creators": "Wskaż role, które mogą tworzyć dokument i przekazywać go do przeglądu.",
+          "assign_reviewers": "Wskaż role, które weryfikują treść przed zatwierdzeniem.",
+          "assign_approvers": "Wskaż role zatwierdzające: to one biorą formalną odpowiedzialność za dokument."
+        },
+        "connections": {
+          "documents": "Workflow steruje statusami dokumentów: wersja robocza, w przeglądzie, zatwierdzony.",
+          "governance": "Role użyte w polityce to te wyznaczone w macierzy pokrycia ról."
+        }
       }
     },
     "sections": {
@@ -1092,11 +1055,7 @@
       "reason": "Powód / notatki",
       "pending": "Zastępowanie...",
       "confirm": "Potwierdź sukcesję",
-      "error": "Błąd podczas zastępowania.",
-      "new_user": "Nowy użytkownik",
-      "new_valid_from": "Nowe obowiązuje od",
-      "new_valid_until": "Nowe obowiązuje do",
-      "submit": "Potwierdź zastąpienie"
+      "error": "Błąd podczas zastępowania."
     },
     "help": {
       "title": "Governance — M00",
@@ -1160,18 +1119,12 @@
         "counts": "Liczniki",
         "languages": "Języki"
       },
-      "framework": "Ramy",
-      "compliant": "Zgodne",
-      "partial": "Częściowe",
-      "gap": "Luka",
-      "not_evaluated": "Nie ocenione",
-      "risk_appetite": "Apetyt na ryzyko",
       "archive_title": "Archiwizuj framework",
       "archive_confirm": "Archiwizować framework {{code}}? Ukryje go z listy i zablokuje nowe mapowania; nie usuwa danych historycznych.",
-      "archived_badge": "Zarchiwizowany",
       "delete_title": "Usuń framework",
       "delete_action": "Usuń",
-      "delete_confirm": "Trwale usunąć framework \"{{code}}\"? Wszystkie powiązane kontrole i domeny zostaną usunięte. Tej operacji nie można cofnąć."
+      "delete_confirm": "Trwale usunąć framework \"{{code}}\"? Wszystkie powiązane kontrole i domeny zostaną usunięte. Tej operacji nie można cofnąć.",
+      "archive_action": "Archiwizuj"
     },
     "risk_appetite": {
       "title": "Apetyt na ryzyko",
@@ -1196,12 +1149,7 @@
         "valid_until": "Ważne do",
         "status": "Status",
         "actions": "Akcje"
-      },
-      "domain": "Obszar",
-      "threshold": "Próg akceptowalności",
-      "current": "Aktualny",
-      "save": "Zapisz",
-      "saved": "Apetyt na ryzyko zapisany"
+      }
     },
     "appetite_notes_placeholder": "Uwagi dotyczące zatwierdzenia, odniesienia do uchwał zarządu, itp.",
     "coverage": {
@@ -1612,7 +1560,8 @@
       "change_plant": "Zmień zakład",
       "delete_title": "Usuń dokument",
       "delete_confirm": "Usunąć dokument „{{title}}”? Zabronione dla dokumentów w zatwierdzaniu lub zatwierdzonych (oprócz superużytkownika).",
-      "edit": "Edytuj"
+      "edit": "Edytuj",
+      "share_hint": "Udostępnij innym zakładom"
     },
     "errors": {
       "download_failed": "Nie można pobrać dokumentu. Sprawdź uprawnienia lub spróbuj ponownie później.",
@@ -1690,7 +1639,17 @@
     "edit": {
       "title": "Edytuj dokument",
       "submit": "Zapisz zmiany"
-    }
+    },
+    "share": {
+      "selected_count": "Wybrano {{count}} zakładów",
+      "hint": "Dokument pozostaje własnością zakładu źródłowego. Wybrane zakłady będą mogły go przeglądać i pobierać bez ponownego przesyłania pliku.",
+      "no_plants": "Brak innych dostępnych zakładów",
+      "none_selected": "Nie wybrano zakładu — dokument będzie widoczny tylko dla zakładu właściciela",
+      "title": "Udostępnij innym zakładom"
+    },
+    "org_wide": "Cała organizacja",
+    "shared_badge": "udostępniony",
+    "shared_with_n_plants": "zakłady"
   },
   "schedule": {
     "activity": {
@@ -2877,7 +2836,12 @@
       "3": "3 – Umiarkowany",
       "4": "4 – Poważny",
       "5": "5 – Krytyczny"
-    }
+    },
+    "appetite_notes_placeholder": "Uwagi do progu: uzasadnienie, uchwała zatwierdzająca, planowany przegląd…",
+    "appetite": {
+      "all_frameworks": "Wszystkie frameworki"
+    },
+    "col_score": "Wynik"
   },
   "pdca": {
     "title": "PDCA — Ciągłe doskonalenie",
@@ -3330,6 +3294,35 @@
       "kpi_expired": "NDA wygasłe",
       "kpi_missing": "Bez NDA",
       "no_suppliers": "Brak aktywnych dostawców."
+    },
+    "evaluation": {
+      "class": "Klasa",
+      "current": "Bieżąca ocena",
+      "form_help": "Oceń każdy parametr w skali 1–5 (1 = najniższe ryzyko, 5 = najwyższe ryzyko). Wagę konfiguruje się w Ustawieniach.",
+      "history": "Historia ocen",
+      "level": "Poziom",
+      "new": "Nowa ocena",
+      "no_current": "Brak zarejestrowanej oceny wewnętrznej.",
+      "param": "Parametr",
+      "preview": "Podgląd",
+      "score": "Wynik",
+      "start": "Rozpocznij ocenę",
+      "title": "Wewnętrzna ocena ryzyka",
+      "weight": "Waga",
+      "weighted": "Wynik ważony"
+    },
+    "settings": {
+      "bump_nis2": "Podbicie NIS2 + krytyczna koncentracja",
+      "labels": "Etykiety poziomów dla parametru",
+      "operational": "Parametry operacyjne",
+      "readonly": "Tylko do odczytu — zmiany może wprowadzać wyłącznie super admin.",
+      "subtitle": "Wagi, etykiety parametrów, progi klasyfikacji i ważność oceny. Żadna wartość nie jest zaszyta w kodzie.",
+      "thresholds": "Progi klasyfikacji",
+      "thresholds_help": "Klasa niska < próg średni ≤ klasa średnia < próg wysoki ≤ klasa wysoka < próg krytyczny ≤ klasa krytyczna.",
+      "title": "Ocena dostawców — Konfiguracja",
+      "validity": "Ważność audytu strony trzeciej (miesiące)",
+      "weights": "Wagi parametrów",
+      "weights_must_sum": "Suma wag musi wynosić 1,00"
     }
   },
   "reporting": {
@@ -3347,7 +3340,50 @@
       "total_controls": "Wszystkie kontrole",
       "pct_compliant": "% Zgodnych",
       "gap_controls": "Kontrole z luką",
-      "no_required_docs_configured": "Brak wymaganych dokumentów skonfigurowanych dla tego frameworku"
+      "no_required_docs_configured": "Brak wymaganych dokumentów skonfigurowanych dla tego frameworku",
+      "plant_label": "Zakład",
+      "all_plants": "Wszystkie zakłady",
+      "no_frameworks": "Brak aktywnego frameworku dla wybranego zakładu.",
+      "no_mandatory_courses": "Brak aktywnych szkoleń obowiązkowych.",
+      "section_docs": "Pokrycie dokumentów obowiązkowych",
+      "section_mttr": "Średni czas rozwiązania (MTTR)",
+      "section_training": "Ukończenie szkoleń obowiązkowych",
+      "mttr_hint": "obliczone na zamkniętych elementach",
+      "col_framework": "Framework",
+      "col_total": "Łącznie",
+      "col_approved": "Zatwierdzone",
+      "col_draft": "Wersja robocza/Przegląd",
+      "col_missing": "Brakujące",
+      "col_coverage": "Pokrycie całkowite",
+      "col_mandatory": "Tylko obowiązkowe",
+      "mttr_findings": "Ustalenia z audytu",
+      "mttr_incidents": "Incydenty",
+      "mttr_tasks": "Zadania",
+      "mttr_tasks_note": "Od utworzenia do ukończenia, wszystkie zadania.",
+      "finding_major": "Major",
+      "finding_minor": "Minor",
+      "finding_observation": "Obserwacja",
+      "severity_critica": "Krytyczna",
+      "severity_alta": "Wysoka",
+      "severity_media": "Średnia",
+      "severity_bassa": "Niska",
+      "closed": "zamknięte",
+      "total": "Łącznie",
+      "training_users": "Użytkownicy GRC",
+      "training_grc_perimeter": "użytkownicy z dostępem do platformy",
+      "training_mandatory_courses": "Szkolenia obowiązkowe",
+      "training_all_done": "Z ukończonymi wszystkimi szkoleniami",
+      "training_users_suffix": "użytkowników",
+      "col_course": "Szkolenie",
+      "col_source": "Źródło",
+      "col_enrolled": "Zapisani",
+      "col_completed": "Ukończone",
+      "col_not_enrolled": "Niezapisani",
+      "col_completion": "Ukończenie",
+      "col_deadline": "Termin",
+      "section_nda": "NDA dostawców",
+      "nda_hint": "status NDA aktywnych dostawców",
+      "tasks_completed": "Ukończone zadania"
     },
     "loading_kpi": "Ładowanie KPI...",
     "loading_compliance": "Ładowanie zgodności...",

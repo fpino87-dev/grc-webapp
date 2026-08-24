@@ -59,7 +59,7 @@ export function MfaSettingsPage() {
     else if (step === "disable") disableMutation.mutate();
   }
 
-  if (isLoading) return <div className="p-6 text-gray-400">{t("actions.loading")}</div>;
+  if (isLoading) return <div className="p-6 text-gray-400">{t("common.loading")}</div>;
 
   const enabled = status?.enabled ?? false;
 
@@ -105,7 +105,7 @@ export function MfaSettingsPage() {
         <div className="space-y-4">
           <p className="text-sm text-gray-600">{t("auth.mfa.setup_instructions")}</p>
           {loadingQr ? (
-            <div className="h-48 flex items-center justify-center text-gray-400">{t("actions.loading")}</div>
+            <div className="h-48 flex items-center justify-center text-gray-400">{t("common.loading")}</div>
           ) : setupData ? (
             <>
               <div className="flex justify-center">

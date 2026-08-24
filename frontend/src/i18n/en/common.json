@@ -41,7 +41,8 @@
     "pending": "To do",
     "in_progress": "In progress",
     "completed": "Completed",
-    "overdue": "Overdue"
+    "overdue": "Overdue",
+    "archived": "Inactive"
   },
   "actions": {
     "save": "Save",
@@ -152,7 +153,16 @@
     "freq_quarterly": "Quarterly",
     "freq_biannual": "Semi-annual",
     "freq_annual": "Annual",
-    "finish": "Finish"
+    "finish": "Finish",
+    "actions": "Actions",
+    "uploading": "Uploading…",
+    "cancel": "Cancel",
+    "current": "Current",
+    "date": "Date",
+    "deleting": "Deleting...",
+    "notes": "Notes",
+    "save": "Save",
+    "user": "User"
   },
   "help": {
     "open_title": "Help for this module",
@@ -868,6 +878,9 @@
       "add_resp": "Add responsibility",
       "select_site": "Select site",
       "couple_suggest": "Also grant the matching «{{role}}» access on the same scope?"
+    },
+    "edit": {
+      "title": "Edit user"
     }
   },
   "governance": {
@@ -915,6 +928,20 @@
         "contratto": "Contract/NDA",
         "registro": "Register",
         "altro": "Other"
+      },
+      "help": {
+        "title": "Document workflow",
+        "description": "Defines, for each document type, who creates it, who reviews it and who approves it. Without a policy a document cannot change state: this is the segregation of duties auditors expect.",
+        "steps": {
+          "choose_type_and_scope": "Choose the document type and the policy scope: organization or a single site.",
+          "assign_creators": "Set the roles allowed to create the document and submit it for review.",
+          "assign_reviewers": "Set the roles that review the content before approval.",
+          "assign_approvers": "Set the approving roles: they take formal responsibility for the document."
+        },
+        "connections": {
+          "documents": "The workflow drives document states: draft, in review, approved.",
+          "governance": "The roles used in the policy are the ones appointed in the role coverage matrix."
+        }
       }
     },
     "sections": {
@@ -1533,7 +1560,8 @@
       "change_plant": "Change site",
       "delete_title": "Delete document",
       "delete_confirm": "Delete document «{{title}}»? Not allowed for documents in approval or approved (except superuser).",
-      "edit": "Edit"
+      "edit": "Edit",
+      "share_hint": "Share with other sites"
     },
     "errors": {
       "download_failed": "Unable to download the document. Check permissions or try again later.",
@@ -1611,7 +1639,17 @@
     "edit": {
       "title": "Edit document",
       "submit": "Save changes"
-    }
+    },
+    "share": {
+      "selected_count": "{{count}} sites selected",
+      "hint": "The document remains owned by the originating site. The selected sites can view and download it without re-uploading the file.",
+      "no_plants": "No other site available",
+      "none_selected": "No site selected — the document will be visible only to the owning site",
+      "title": "Share with other sites"
+    },
+    "org_wide": "Org-wide",
+    "shared_badge": "shared",
+    "shared_with_n_plants": "sites"
   },
   "schedule": {
     "activity": {
@@ -2798,7 +2836,12 @@
       "3": "3 – Moderate",
       "4": "4 – Serious",
       "5": "5 – Critical"
-    }
+    },
+    "appetite_notes_placeholder": "Threshold notes: rationale, approval resolution, planned review…",
+    "appetite": {
+      "all_frameworks": "All frameworks"
+    },
+    "col_score": "Score"
   },
   "pdca": {
     "title": "PDCA — Continuous improvement",
@@ -3251,6 +3294,35 @@
       "kpi_expired": "NDA expired",
       "kpi_missing": "Without NDA",
       "no_suppliers": "No active suppliers."
+    },
+    "evaluation": {
+      "class": "Class",
+      "current": "Current assessment",
+      "form_help": "Rate each parameter on a 1–5 scale (1 = lowest risk, 5 = highest risk). Weights are configurable in Settings.",
+      "history": "Assessment history",
+      "level": "Level",
+      "new": "New assessment",
+      "no_current": "No internal assessment recorded.",
+      "param": "Parameter",
+      "preview": "Preview",
+      "score": "Score",
+      "start": "Start assessment",
+      "title": "Internal risk assessment",
+      "weight": "Weight",
+      "weighted": "Weighted score"
+    },
+    "settings": {
+      "bump_nis2": "NIS2 bump + critical concentration",
+      "labels": "Level labels per parameter",
+      "operational": "Operational parameters",
+      "readonly": "Read-only — only a super admin can change these.",
+      "subtitle": "Weights, parameter labels, classification thresholds and assessment validity. No value is hardcoded.",
+      "thresholds": "Classification thresholds",
+      "thresholds_help": "Low class < medium threshold ≤ medium class < high threshold ≤ high class < critical threshold ≤ critical class.",
+      "title": "Supplier assessment — Configuration",
+      "validity": "Third-party audit validity (months)",
+      "weights": "Parameter weights",
+      "weights_must_sum": "Weights must sum to 1.00"
     }
   },
   "reporting": {
@@ -3268,7 +3340,50 @@
       "total_controls": "Total controls",
       "pct_compliant": "% Compliant",
       "gap_controls": "Controls in gap",
-      "no_required_docs_configured": "No required documents configured for this framework"
+      "no_required_docs_configured": "No required documents configured for this framework",
+      "plant_label": "Site",
+      "all_plants": "All sites",
+      "no_frameworks": "No active framework for the selected site.",
+      "no_mandatory_courses": "No active mandatory course.",
+      "section_docs": "Mandatory document coverage",
+      "section_mttr": "Mean time to resolution (MTTR)",
+      "section_training": "Mandatory training completion",
+      "mttr_hint": "computed on closed items",
+      "col_framework": "Framework",
+      "col_total": "Total",
+      "col_approved": "Approved",
+      "col_draft": "Draft/Review",
+      "col_missing": "Missing",
+      "col_coverage": "Total coverage",
+      "col_mandatory": "Mandatory only",
+      "mttr_findings": "Audit findings",
+      "mttr_incidents": "Incidents",
+      "mttr_tasks": "Tasks",
+      "mttr_tasks_note": "From creation to completion, all tasks.",
+      "finding_major": "Major",
+      "finding_minor": "Minor",
+      "finding_observation": "Observation",
+      "severity_critica": "Critical",
+      "severity_alta": "High",
+      "severity_media": "Medium",
+      "severity_bassa": "Low",
+      "closed": "closed",
+      "total": "Total",
+      "training_users": "GRC users",
+      "training_grc_perimeter": "users with access to the platform",
+      "training_mandatory_courses": "Mandatory courses",
+      "training_all_done": "With all courses completed",
+      "training_users_suffix": "users",
+      "col_course": "Course",
+      "col_source": "Source",
+      "col_enrolled": "Enrolled",
+      "col_completed": "Completed",
+      "col_not_enrolled": "Not enrolled",
+      "col_completion": "Completion",
+      "col_deadline": "Deadline",
+      "section_nda": "Supplier NDAs",
+      "nda_hint": "NDA status on active suppliers",
+      "tasks_completed": "Completed tasks"
     },
     "loading_kpi": "Loading KPIs...",
     "loading_compliance": "Loading compliance...",

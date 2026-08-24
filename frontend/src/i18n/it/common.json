@@ -41,7 +41,8 @@
     "pending": "Da iniziare",
     "in_progress": "In corso",
     "completed": "Completata",
-    "overdue": "Scaduta"
+    "overdue": "Scaduta",
+    "archived": "Non attiva"
   },
   "actions": {
     "save": "Salva",
@@ -152,7 +153,16 @@
     "freq_quarterly": "Trimestrale",
     "freq_biannual": "Semestrale",
     "freq_annual": "Annuale",
-    "finish": "Fine"
+    "finish": "Fine",
+    "actions": "Azioni",
+    "uploading": "Caricamento…",
+    "cancel": "Annulla",
+    "current": "Corrente",
+    "date": "Data",
+    "deleting": "Eliminazione...",
+    "notes": "Note",
+    "save": "Salva",
+    "user": "Utente"
   },
   "help": {
     "open_title": "Aiuto su questo modulo",
@@ -868,6 +878,9 @@
       "add_resp": "Aggiungi responsabilità",
       "select_site": "Seleziona il sito",
       "couple_suggest": "Vuoi concedere anche l'accesso «{{role}}» sullo stesso perimetro?"
+    },
+    "edit": {
+      "title": "Modifica utente"
     }
   },
   "governance": {
@@ -915,6 +928,20 @@
         "contratto": "Contratto/NDA",
         "registro": "Registro",
         "altro": "Altro"
+      },
+      "help": {
+        "title": "Workflow documentale",
+        "description": "Definisce, per ogni tipo di documento, chi lo crea, chi lo revisiona e chi lo approva. Senza una policy il documento non può avanzare di stato: è la separazione dei compiti richiesta in sede di audit.",
+        "steps": {
+          "choose_type_and_scope": "Scegli il tipo di documento e l'ambito della policy: organizzazione o singolo sito.",
+          "assign_creators": "Indica i ruoli che possono creare il documento e inviarlo in revisione.",
+          "assign_reviewers": "Indica i ruoli che revisionano il contenuto prima dell'approvazione.",
+          "assign_approvers": "Indica i ruoli che approvano: sono quelli che si assumono la responsabilità formale del documento."
+        },
+        "connections": {
+          "documents": "Il workflow governa gli stati dei documenti: bozza, in revisione, approvato.",
+          "governance": "I ruoli citati nella policy sono quelli nominati nella matrice di copertura ruoli."
+        }
       }
     },
     "sections": {
@@ -1533,7 +1560,8 @@
       "change_plant": "Cambia sito",
       "delete_title": "Elimina documento",
       "delete_confirm": "Eliminare il documento «{{title}}»? Non consentito per documenti in approvazione o approvati (salvo superuser).",
-      "edit": "Modifica"
+      "edit": "Modifica",
+      "share_hint": "Condividi con altri siti"
     },
     "errors": {
       "download_failed": "Impossibile scaricare il documento. Verifica i permessi o riprova più tardi.",
@@ -1611,7 +1639,17 @@
     "edit": {
       "title": "Modifica documento",
       "submit": "Salva modifiche"
-    }
+    },
+    "share": {
+      "selected_count": "{{count}} siti selezionati",
+      "hint": "Il documento resterà di proprietà del sito originale. I siti selezionati potranno vederlo e scaricarlo senza dover ricaricare il file.",
+      "no_plants": "Nessun altro sito disponibile",
+      "none_selected": "Nessun sito selezionato — il documento sarà visibile solo al sito proprietario",
+      "title": "Condividi con altri siti"
+    },
+    "org_wide": "Tutta l'organizzazione",
+    "shared_badge": "condiviso",
+    "shared_with_n_plants": "siti"
   },
   "schedule": {
     "activity": {
@@ -2798,7 +2836,12 @@
       "3": "3 – Moderato",
       "4": "4 – Grave",
       "5": "5 – Critico"
-    }
+    },
+    "appetite_notes_placeholder": "Note sulla soglia: motivazione, delibera di approvazione, riesame previsto…",
+    "appetite": {
+      "all_frameworks": "Tutti i framework"
+    },
+    "col_score": "Score"
   },
   "pdca": {
     "title": "PDCA — Miglioramento continuo",
@@ -3251,6 +3294,35 @@
       "kpi_expired": "NDA scaduto",
       "kpi_missing": "Senza NDA",
       "no_suppliers": "Nessun fornitore attivo."
+    },
+    "evaluation": {
+      "class": "Classe",
+      "current": "Valutazione corrente",
+      "form_help": "Valuta ciascun parametro su scala 1–5 (1 = rischio minimo, 5 = rischio massimo). Il peso è configurabile in Impostazioni.",
+      "history": "Storico valutazioni",
+      "level": "Livello",
+      "new": "Nuova valutazione",
+      "no_current": "Nessuna valutazione interna registrata.",
+      "param": "Parametro",
+      "preview": "Anteprima",
+      "score": "Score",
+      "start": "Avvia valutazione",
+      "title": "Valutazione interna del rischio",
+      "weight": "Peso",
+      "weighted": "Score ponderato"
+    },
+    "settings": {
+      "bump_nis2": "Bump NIS2 + concentrazione critica",
+      "labels": "Label livelli per parametro",
+      "operational": "Parametri operativi",
+      "readonly": "Sola lettura — solo un super admin può modificare.",
+      "subtitle": "Pesi, label dei parametri, soglie di classificazione e validità assessment. Nessun valore è hardcoded.",
+      "thresholds": "Soglie di classificazione",
+      "thresholds_help": "Classe basso < soglia medio ≤ classe medio < soglia alto ≤ classe alto < soglia critico ≤ classe critico.",
+      "title": "Valutazione fornitori — Configurazione",
+      "validity": "Validità audit terze parti (mesi)",
+      "weights": "Pesi parametri",
+      "weights_must_sum": "La somma dei pesi deve essere 1.00"
     }
   },
   "reporting": {
@@ -3303,7 +3375,13 @@
       "col_deadline": "Scadenza",
       "section_nda": "NDA Fornitori",
       "nda_hint": "stato NDA sui fornitori attivi",
-      "no_required_docs_configured": "Nessun documento obbligatorio configurato per questo framework"
+      "no_required_docs_configured": "Nessun documento obbligatorio configurato per questo framework",
+      "active_sites": "Siti attivi",
+      "open_incidents": "Incidenti aperti",
+      "total_controls": "Controlli totali",
+      "pct_compliant": "% Conformi",
+      "gap_controls": "Controlli in gap",
+      "tasks_completed": "Task completati"
     },
     "compliance": {
       "distribution_title": "Distribuzione compliance ({{total}} controlli)",

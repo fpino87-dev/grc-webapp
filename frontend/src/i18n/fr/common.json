@@ -41,7 +41,8 @@
     "pending": "À faire",
     "in_progress": "En cours",
     "completed": "Terminée",
-    "overdue": "En retard"
+    "overdue": "En retard",
+    "archived": "Inactive"
   },
   "actions": {
     "save": "Enregistrer",
@@ -77,7 +78,16 @@
     "freq_quarterly": "Trimestriel",
     "freq_biannual": "Semestriel",
     "freq_annual": "Annuel",
-    "finish": "Terminer"
+    "finish": "Terminer",
+    "actions": "Actions",
+    "uploading": "Téléversement…",
+    "cancel": "Annuler",
+    "current": "Actuelle",
+    "date": "Date",
+    "deleting": "Suppression...",
+    "notes": "Notes",
+    "save": "Enregistrer",
+    "user": "Utilisateur"
   },
   "help": {
     "open_title": "Aide pour ce module",
@@ -249,41 +259,6 @@
           "label": "Détectabilité",
           "desc": "Capacité à détecter une compromission en temps réel"
         }
-      },
-      "scale_title": "Grille d'évaluation du risque (5×5)",
-      "columns": {
-        "likelihood": "Probabilité",
-        "impact": "Impact",
-        "score": "Score",
-        "level": "Niveau",
-        "examples": "Exemples"
-      },
-      "levels": {
-        "1": {
-          "label": "Très faible",
-          "likelihood": "Pratiquement impossible",
-          "impact": "Perturbation mineure, < 1 heure"
-        },
-        "2": {
-          "label": "Faible",
-          "likelihood": "Peu probable, 1–2 fois par an",
-          "impact": "Impact limité, < 1 jour"
-        },
-        "3": {
-          "label": "Moyen",
-          "likelihood": "Possible, mensuellement",
-          "impact": "Perturbation significative, < 1 semaine"
-        },
-        "4": {
-          "label": "Élevé",
-          "likelihood": "Probable, hebdomadairement",
-          "impact": "Impact majeur, < 1 mois"
-        },
-        "5": {
-          "label": "Critique",
-          "likelihood": "Très probable, quotidiennement",
-          "impact": "Impact catastrophique, > 1 mois"
-        }
       }
     },
     "risk_module": {
@@ -307,35 +282,6 @@
       "config_needed": {
         "1": "Configurer les seuils dans Gouvernance → Appétit au risque",
         "2": "Lier les processus BIA pour le calcul automatique de l'ALE et du score pondéré"
-      }
-    },
-    "controls": {
-      "scale_title": "Guide d'évaluation des contrôles",
-      "columns": {
-        "status": "Statut",
-        "meaning": "Signification",
-        "requirements": "Prérequis minimaux"
-      },
-      "statuses": {
-        "compliant": "Conforme",
-        "parziale": "Partiel",
-        "gap": "Écart",
-        "na": "N/A",
-        "non_valutato": "Non évalué"
-      },
-      "meanings": {
-        "compliant": "Contrôle pleinement implémenté avec preuves",
-        "parziale": "Implémentation partielle ou preuves insuffisantes",
-        "gap": "Contrôle absent ou inefficace",
-        "na": "Non applicable avec justification formelle",
-        "non_valutato": "Pas encore évalué"
-      },
-      "requirements": {
-        "compliant": "Preuve valide non expirée + date de dernière vérification",
-        "parziale": "Preuve partielle + plan de remédiation (tâche M08)",
-        "gap": "Aucun prérequis — tâche de remédiation auto-générée",
-        "na": "Justification écrite min 20 caractères. TISAX L3 : double approbation",
-        "non_valutato": "Réduit le score de conformité du site"
       }
     }
   },
@@ -935,6 +881,9 @@
       "add_resp": "Ajouter une responsabilité",
       "select_site": "Sélectionner le site",
       "couple_suggest": "Accorder aussi l'accès « {{role}} » sur le même périmètre ?"
+    },
+    "edit": {
+      "title": "Modifier l'utilisateur"
     }
   },
   "governance": {
@@ -982,6 +931,20 @@
         "contratto": "Contrat/NDA",
         "registro": "Registre",
         "altro": "Autre"
+      },
+      "help": {
+        "title": "Workflow documentaire",
+        "description": "Définit, pour chaque type de document, qui le crée, qui le révise et qui l'approuve. Sans politique, un document ne peut pas changer d'état : c'est la séparation des tâches attendue en audit.",
+        "steps": {
+          "choose_type_and_scope": "Choisissez le type de document et le périmètre de la politique : organisation ou site unique.",
+          "assign_creators": "Indiquez les rôles autorisés à créer le document et à le soumettre en révision.",
+          "assign_reviewers": "Indiquez les rôles qui révisent le contenu avant l'approbation.",
+          "assign_approvers": "Indiquez les rôles approbateurs : ce sont eux qui assument la responsabilité formelle du document."
+        },
+        "connections": {
+          "documents": "Le workflow régit les états des documents : brouillon, en révision, approuvé.",
+          "governance": "Les rôles utilisés dans la politique sont ceux nommés dans la matrice de couverture des rôles."
+        }
       }
     },
     "sections": {
@@ -1092,11 +1055,7 @@
       "reason": "Motif / notes",
       "pending": "Remplacement...",
       "confirm": "Confirmer la succession",
-      "error": "Erreur lors du remplacement.",
-      "new_user": "Nouvel utilisateur",
-      "new_valid_from": "Nouveau valide à partir du",
-      "new_valid_until": "Nouveau valide jusqu'au",
-      "submit": "Confirmer le remplacement"
+      "error": "Erreur lors du remplacement."
     },
     "help": {
       "title": "Governance — M00",
@@ -1163,12 +1122,6 @@
       "archive_title": "Archiver le cadre",
       "archive_action": "Archiver",
       "archive_confirm": "Archiver le cadre {{code}} ? Nécessite un superuser et aucun site ne doit encore l'avoir assigné.",
-      "framework": "Cadre",
-      "compliant": "Conforme",
-      "partial": "Partiel",
-      "gap": "Écart",
-      "not_evaluated": "Non évalué",
-      "risk_appetite": "Appétit au risque",
       "delete_title": "Supprimer le référentiel",
       "delete_action": "Supprimer",
       "delete_confirm": "Supprimer définitivement le référentiel \"{{code}}\" ? Tous les contrôles et domaines associés seront supprimés. Cette action est irréversible."
@@ -1196,12 +1149,7 @@
         "valid_until": "Valide jusqu'au",
         "status": "Statut",
         "actions": "Actions"
-      },
-      "domain": "Domaine",
-      "threshold": "Seuil d'acceptabilité",
-      "current": "Actuel",
-      "save": "Enregistrer",
-      "saved": "Appétit au risque enregistré"
+      }
     },
     "appetite_notes_placeholder": "Notes d'approbation, références aux délibérations de direction, etc.",
     "coverage": {
@@ -1612,7 +1560,8 @@
       "change_plant": "Changer de site",
       "delete_title": "Supprimer le document",
       "delete_confirm": "Supprimer le document « {{title}} » ? Interdit pour les documents en approbation ou approuvés (sauf superuser).",
-      "edit": "Modifier"
+      "edit": "Modifier",
+      "share_hint": "Partager avec d'autres sites"
     },
     "errors": {
       "download_failed": "Impossible de télécharger le document. Vérifiez les permissions ou réessayez plus tard.",
@@ -1690,7 +1639,17 @@
     "edit": {
       "title": "Modifier le document",
       "submit": "Enregistrer"
-    }
+    },
+    "share": {
+      "selected_count": "{{count}} sites sélectionnés",
+      "hint": "Le document reste la propriété du site d'origine. Les sites sélectionnés pourront le consulter et le télécharger sans re-téléverser le fichier.",
+      "no_plants": "Aucun autre site disponible",
+      "none_selected": "Aucun site sélectionné — le document ne sera visible que par le site propriétaire",
+      "title": "Partager avec d'autres sites"
+    },
+    "org_wide": "Toute l'organisation",
+    "shared_badge": "partagé",
+    "shared_with_n_plants": "sites"
   },
   "schedule": {
     "activity": {
@@ -2877,7 +2836,12 @@
       "3": "3 – Modéré",
       "4": "4 – Grave",
       "5": "5 – Critique"
-    }
+    },
+    "appetite_notes_placeholder": "Notes sur le seuil : justification, décision d'approbation, revue prévue…",
+    "appetite": {
+      "all_frameworks": "Tous les référentiels"
+    },
+    "col_score": "Score"
   },
   "pdca": {
     "title": "PDCA — Amélioration continue",
@@ -3330,6 +3294,35 @@
       "kpi_expired": "NDA expiré",
       "kpi_missing": "Sans NDA",
       "no_suppliers": "Aucun fournisseur actif."
+    },
+    "evaluation": {
+      "class": "Classe",
+      "current": "Évaluation actuelle",
+      "form_help": "Évaluez chaque paramètre sur une échelle de 1 à 5 (1 = risque minimal, 5 = risque maximal). Le poids est configurable dans Paramètres.",
+      "history": "Historique des évaluations",
+      "level": "Niveau",
+      "new": "Nouvelle évaluation",
+      "no_current": "Aucune évaluation interne enregistrée.",
+      "param": "Paramètre",
+      "preview": "Aperçu",
+      "score": "Score",
+      "start": "Lancer l'évaluation",
+      "title": "Évaluation interne du risque",
+      "weight": "Poids",
+      "weighted": "Score pondéré"
+    },
+    "settings": {
+      "bump_nis2": "Bump NIS2 + concentration critique",
+      "labels": "Libellés des niveaux par paramètre",
+      "operational": "Paramètres opérationnels",
+      "readonly": "Lecture seule — seul un super admin peut modifier.",
+      "subtitle": "Poids, libellés des paramètres, seuils de classification et validité des évaluations. Aucune valeur n'est codée en dur.",
+      "thresholds": "Seuils de classification",
+      "thresholds_help": "Classe faible < seuil moyen ≤ classe moyenne < seuil élevé ≤ classe élevée < seuil critique ≤ classe critique.",
+      "title": "Évaluation des fournisseurs — Configuration",
+      "validity": "Validité des audits tierce partie (mois)",
+      "weights": "Poids des paramètres",
+      "weights_must_sum": "La somme des poids doit être égale à 1,00"
     }
   },
   "reporting": {
@@ -3347,7 +3340,50 @@
       "total_controls": "Contrôles totaux",
       "pct_compliant": "% Conforme",
       "gap_controls": "Contrôles en écart",
-      "no_required_docs_configured": "Aucun document obligatoire configuré pour ce référentiel"
+      "no_required_docs_configured": "Aucun document obligatoire configuré pour ce référentiel",
+      "plant_label": "Site",
+      "all_plants": "Tous les sites",
+      "no_frameworks": "Aucun référentiel actif pour le site sélectionné.",
+      "no_mandatory_courses": "Aucune formation obligatoire active.",
+      "section_docs": "Couverture des documents obligatoires",
+      "section_mttr": "Temps moyen de résolution (MTTR)",
+      "section_training": "Achèvement de la formation obligatoire",
+      "mttr_hint": "calculé sur les éléments clôturés",
+      "col_framework": "Référentiel",
+      "col_total": "Total",
+      "col_approved": "Approuvés",
+      "col_draft": "Brouillon/Révision",
+      "col_missing": "Manquants",
+      "col_coverage": "Couverture totale",
+      "col_mandatory": "Obligatoires uniquement",
+      "mttr_findings": "Constats d'audit",
+      "mttr_incidents": "Incidents",
+      "mttr_tasks": "Tâches",
+      "mttr_tasks_note": "De la création à l'achèvement, toutes les tâches.",
+      "finding_major": "Majeur",
+      "finding_minor": "Mineur",
+      "finding_observation": "Observation",
+      "severity_critica": "Critique",
+      "severity_alta": "Élevée",
+      "severity_media": "Moyenne",
+      "severity_bassa": "Faible",
+      "closed": "clôturés",
+      "total": "Total",
+      "training_users": "Utilisateurs GRC",
+      "training_grc_perimeter": "utilisateurs ayant accès à la plateforme",
+      "training_mandatory_courses": "Formations obligatoires",
+      "training_all_done": "Ayant terminé toutes les formations",
+      "training_users_suffix": "utilisateurs",
+      "col_course": "Formation",
+      "col_source": "Source",
+      "col_enrolled": "Inscrits",
+      "col_completed": "Terminés",
+      "col_not_enrolled": "Non inscrits",
+      "col_completion": "Achèvement",
+      "col_deadline": "Échéance",
+      "section_nda": "NDA fournisseurs",
+      "nda_hint": "statut NDA sur les fournisseurs actifs",
+      "tasks_completed": "Tâches terminées"
     },
     "loading_kpi": "Chargement des KPI...",
     "loading_compliance": "Chargement de la conformité...",
