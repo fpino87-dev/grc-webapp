@@ -15,6 +15,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
   - Il calcolo settimanale, l'ingestione da API esterne e il grafico di trend usano ora la definizione del sito richiesto, con ricaduta su quella globale quando il sito non ne ha una.
   - Il vincolo di unicità non considera più le definizioni **eliminate**: un codice KPI liberato dalla UI torna immediatamente riutilizzabile, invece di restare occupato per sempre.
   - i18n IT/EN/FR/PL/TR.
+  - **Ingestione da API su un sito nuovo**: quando un sistema esterno invia un KPI per un sito che non lo ha ancora configurato, la definizione creata automaticamente eredita nome, unità e soglie da dove quel KPI è già configurato. Senza, sarebbe nata priva di soglie e quel sito non avrebbe mai ricevuto un alert, senza alcun segnale.
+  - **Pre-flight per l'aggiornamento**: nuovo comando `check_kpi_migration_readiness`, da eseguire prima di applicare la migrazione, che verifica in sola lettura che i dati esistenti siano compatibili con i nuovi vincoli ed elenca le definizioni cancellate che tornano disponibili.
 
 ### Fixed
 

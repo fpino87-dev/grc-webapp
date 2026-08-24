@@ -563,11 +563,29 @@ def ingest_kpi_from_api(
     # (e' il caso del KPI OSINT, definito una volta e alimentato per sito).
     kpi_def = resolve_kpi_definition(kpi_code, plant)
     if kpi_def is None:
+        # Nessuna definizione per questo sito ne' globale: se lo stesso KPI e'
+        # gia' configurato altrove ne ereditiamo nome, unita' e soglie. Senza
+        # questo, un push per un sito nuovo creerebbe una definizione senza
+        # soglie: evaluate_kpi_status ritornerebbe sempre "ok" e quel sito non
+        # riceverebbe mai un alert, in silenzio. Le soglie restano poi
+        # modificabili per sito.
+        template = (
+            KPIDefinition.objects.filter(kpi_code=kpi_code)
+            .order_by("plant__code")
+            .first()
+        )
         kpi_def = KPIDefinition.objects.create(
             kpi_code=kpi_code,
-            name=kpi_code.replace("_", " ").title(),
+            name=template.name if template else kpi_code.replace("_", " ").title(),
+            description=template.description if template else "",
+            unit=template.unit if template else "",
             source="api",
             plant=plant,
+            threshold_warning=template.threshold_warning if template else None,
+            threshold_critical=template.threshold_critical if template else None,
+            threshold_direction=template.threshold_direction if template else "above",
+            notify_on_warning=template.notify_on_warning if template else True,
+            notify_on_critical=template.notify_on_critical if template else True,
         )
 
     measured_date = measured_at.date() if hasattr(measured_at, "date") else measured_at

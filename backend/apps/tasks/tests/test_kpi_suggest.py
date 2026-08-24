@@ -336,6 +336,53 @@ def test_ingest_prefers_plant_definition_over_global(db, plant):
 
 
 @pytest.mark.django_db
+def test_ingest_new_plant_inherits_thresholds(db, plant, plant2):
+    """Un push per un sito che non ha ancora quel KPI eredita le soglie da
+    dove il KPI e' gia' configurato: senza, la nuova definizione nascerebbe
+    senza soglie e quel sito non riceverebbe mai un alert."""
+    from apps.tasks.models import KPIDefinition
+    from apps.tasks.services import ingest_kpi_from_api
+
+    KPIDefinition.objects.create(
+        kpi_code="phishing_click_rate", name="Click rate phishing", unit="%",
+        plant=plant, source="api", threshold_warning=5.0, threshold_critical=15.0,
+        threshold_direction="below",
+    )
+
+    snap = ingest_kpi_from_api("phishing_click_rate", str(plant2.id), 20, "knowbe4")
+
+    created = KPIDefinition.objects.get(kpi_code="phishing_click_rate", plant=plant2)
+    assert snap.kpi_definition_id == created.id
+    assert created.threshold_warning == 5.0
+    assert created.threshold_critical == 15.0
+    assert created.threshold_direction == "below"
+    assert created.unit == "%"
+    # soglie ereditate → lo status viene valutato davvero, non resta "ok"
+    assert snap.status == "critical"
+
+
+@pytest.mark.django_db
+def test_migration_readiness_command_reports_deleted_and_passes(plant, capsys):
+    """Il pre-flight non deve fallire su dati legittimi e deve elencare le
+    definizioni cancellate che la migrazione libera."""
+    from django.core.management import call_command
+    from apps.tasks.models import KPIDefinition
+
+    KPIDefinition.objects.create(
+        kpi_code="backup_success_rate", name="Backup", plant=plant,
+    ).soft_delete()
+    KPIDefinition.objects.create(
+        kpi_code="vapt_age_days", name="VAPT", plant=plant,
+    )
+
+    call_command("check_kpi_migration_readiness")
+
+    out = capsys.readouterr().out
+    assert "backup_success_rate" in out
+    assert "OK" in out
+
+
+@pytest.mark.django_db
 def test_import_applies_overrides(client, plant):
     from apps.tasks.models import ChecklistTemplate, KPIDefinition
     tpl = ChecklistTemplate.objects.create(name="Backup check", frequency="daily", plant=plant)
