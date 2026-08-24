@@ -16,7 +16,32 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
   - Il vincolo di unicità non considera più le definizioni **eliminate**: un codice KPI liberato dalla UI torna immediatamente riutilizzabile, invece di restare occupato per sempre.
   - i18n IT/EN/FR/PL/TR.
   - **Ingestione da API su un sito nuovo**: quando un sistema esterno invia un KPI per un sito che non lo ha ancora configurato, la definizione creata automaticamente eredita nome, unità e soglie da dove quel KPI è già configurato. Senza, sarebbe nata priva di soglie e quel sito non avrebbe mai ricevuto un alert, senza alcun segnale.
-  - **Pre-flight per l'aggiornamento**: nuovo comando `check_kpi_migration_readiness`, da eseguire prima di applicare la migrazione, che verifica in sola lettura che i dati esistenti siano compatibili con i nuovi vincoli ed elenca le definizioni cancellate che tornano disponibili.
+  - **NB deploy — la migrazione `tasks.0009` sostituisce l'indice unico su `kpi_code`.** Non può fallire per duplicati (il vincolo precedente ne impediva l'esistenza), ma modifica lo schema: eseguire nell'ordine, con backup esplicito prima.
+
+    **Passo 1 — backup completo (DB + media) immediato**, senza attendere quello notturno: pulsante **«Crea backup»** nel modulo Backup della UI, e attendere che lo stato diventi *completato*. Da riga di comando, per un deploy headless:
+
+    ```bash
+    docker compose -f docker-compose.prod.yml exec backend python manage.py shell -c "from django.contrib.auth import get_user_model; from apps.backups.services import create_backup; u=get_user_model().objects.filter(is_superuser=True, is_active=True).order_by('date_joined').first(); r=create_backup(u, backup_type='manual'); print(r.filename, r.status)"
+    ```
+
+    Non usare `auto_backup_task` per questo scopo: oltre al backup esegue il cleanup per retention, e cancellerebbe i backup più vecchi proprio nel momento in cui servono.
+
+    ```bash
+    # 2. Pre-flight in sola lettura: verifica che i dati siano compatibili con i
+    #    nuovi vincoli ed elenca le definizioni cancellate che tornano disponibili.
+    #    Esce con 1 se trova duplicati da sanare a mano.
+    docker compose -f docker-compose.prod.yml exec backend \
+      python manage.py check_kpi_migration_readiness
+
+    # 3. Deploy e migrazioni.
+    docker compose -f docker-compose.prod.yml up -d --build
+    docker compose -f docker-compose.prod.yml exec backend python manage.py migrate
+
+    # 4. Riavvio Celery: è cambiato il codice del task settimanale dei KPI.
+    docker compose -f docker-compose.prod.yml restart celery celery-beat
+    ```
+
+    A deploy concluso, dal wizard «Consiglia KPI» si ripristinano i KPI eliminati in passato, che tornano con il loro storico di snapshot.
 
 ### Fixed
 
