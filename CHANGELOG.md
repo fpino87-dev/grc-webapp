@@ -12,6 +12,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 - **M11 PDCA — la lista ignorava il sito selezionato e non era filtrabile per sito**: la pagina PDCA elencava i cicli di *tutti* i siti a cui l'utente ha accesso, senza tenere conto del sito scelto nella barra in alto e senza alcun filtro per sito accanto a quello per trigger; su un'organizzazione multi-sito i cicli di stabilimenti diversi risultavano mescolati e indistinguibili, perché la tabella non mostrava nemmeno il sito di appartenenza. Ora la lista applica il sito attivo della barra in alto come filtro predefinito, espone un selettore "Filtra per sito" accanto al filtro trigger (che può sovrascrivere il sito attivo, o mostrare tutti i siti in perimetro) e aggiunge la colonna **Sito** in tabella. Il form "Nuovo ciclo" precompila il sito attivo, per non creare cicli sullo stabilimento sbagliato. i18n IT/EN/FR/PL/TR.
 
+### Changed
+
+- **M11 PDCA — interfaccia tradotta in tutte e 5 le lingue**: la pagina PDCA era scritta quasi interamente in italiano nel codice (titoli, filtri, intestazioni di tabella, form di creazione e modifica, modali di avanzamento fase, archiviazione e dossier d'audit stampabile): per un utente con interfaccia EN/FR/PL/TR il modulo restava in italiano, dossier di stampa incluso. Tutte le stringhe sono ora tradotte in IT/EN/FR/PL/TR, comprese le etichette di trigger, ambito, fase ed esito della verifica, e i messaggi di errore delle azioni.
+
 ## [0.7.0] - 2026-08-17
 
 ### Added

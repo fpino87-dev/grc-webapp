@@ -7,6 +7,24 @@ import { useAuthStore } from "../../store/auth";
 import { apiClient } from "../../api/client";
 import i18n from "../../i18n";
 
+type TFn = (key: string, opts?: Record<string, unknown>) => string;
+
+// I codici sono enum del backend: se ne arriva uno non mappato (nuovo trigger
+// non ancora tradotto) si mostra il codice grezzo invece della chiave i18n.
+const TRIGGER_CODES = [
+  "audit", "incident", "management_review", "risk", "manual",
+  "pdca_ko", "gap_controllo", "risk_rosso",
+];
+const SCOPE_CODES = ["plant", "org", "process"];
+const AUDIT_SUBTYPE_CODES = ["interno", "seconda_parte", "terza_parte"];
+
+const triggerLabel = (t: TFn, code: string) =>
+  TRIGGER_CODES.includes(code) ? t(`pdca.trigger.${code}`) : code;
+const scopeLabel = (t: TFn, code: string) =>
+  SCOPE_CODES.includes(code) ? t(`pdca.scope.${code}`) : code;
+const auditSubtypeLabel = (t: TFn, code: string) =>
+  AUDIT_SUBTYPE_CODES.includes(code) ? t(`pdca.audit_subtype.${code}`) : code;
+
 function DeleteCycleButton({ cycle }: { cycle: PdcaCycle }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -84,6 +102,7 @@ function DeleteCycleButton({ cycle }: { cycle: PdcaCycle }) {
 }
 
 function EditCycleModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [form, setForm] = useState({
     title: cycle.title,
@@ -114,7 +133,7 @@ function EditCycleModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () => v
     onError: (e: unknown) => {
       const msg =
         (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
-        "Errore durante il salvataggio";
+        t("common.save_error");
       setError(String(msg));
     },
   });
@@ -129,10 +148,10 @@ function EditCycleModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () => v
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
-        <h3 className="text-lg font-semibold mb-4">Modifica ciclo PDCA</h3>
+        <h3 className="text-lg font-semibold mb-4">{t("pdca.form.edit_title")}</h3>
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Titolo *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.title_label")}</label>
             <input
               name="title"
               value={form.title}
@@ -141,55 +160,55 @@ function EditCycleModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () => v
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Descrizione</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.desc_label")}</label>
             <textarea
               name="descrizione"
               value={form.descrizione}
               onChange={handleChange}
               rows={4}
               className="w-full border rounded px-3 py-2 text-sm"
-              placeholder="Descrizione estesa del finding o dello spunto..."
+              placeholder={t("pdca.form.desc_placeholder_edit")}
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo trigger</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.trigger_label")}</label>
               <select name="trigger_type" value={form.trigger_type} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-                <option value="audit">Audit</option>
-                <option value="incident">Incidente</option>
-                <option value="management_review">Revisione direzione</option>
-                <option value="risk">Rischio</option>
-                <option value="manual">Manuale</option>
+                <option value="audit">{t("pdca.trigger.audit")}</option>
+                <option value="incident">{t("pdca.trigger.incident")}</option>
+                <option value="management_review">{t("pdca.trigger.management_review")}</option>
+                <option value="risk">{t("pdca.trigger.risk")}</option>
+                <option value="manual">{t("pdca.trigger.manual")}</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Ambito</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.scope_label")}</label>
               <select name="scope_type" value={form.scope_type} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-                <option value="plant">Sito</option>
-                <option value="org">Organizzazione</option>
-                <option value="process">Processo</option>
+                <option value="plant">{t("pdca.scope.plant")}</option>
+                <option value="org">{t("pdca.scope.org")}</option>
+                <option value="process">{t("pdca.scope.process")}</option>
               </select>
             </div>
           </div>
           {isAudit && (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo audit</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.audit_subtype_label")}</label>
                 <select name="audit_subtype" value={form.audit_subtype} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-                  <option value="">— seleziona —</option>
-                  <option value="interno">Audit interno</option>
-                  <option value="seconda_parte">Seconda parte</option>
-                  <option value="terza_parte">Terza parte</option>
+                  <option value="">{t("common.select")}</option>
+                  <option value="interno">{t("pdca.audit_subtype.interno_full")}</option>
+                  <option value="seconda_parte">{t("pdca.audit_subtype.seconda_parte_full")}</option>
+                  <option value="terza_parte">{t("pdca.audit_subtype.terza_parte_full")}</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Riferimento finding</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.finding_label")}</label>
                 <input
                   name="riferimento_finding"
                   value={form.riferimento_finding}
                   onChange={handleChange}
                   className="w-full border rounded px-3 py-2 text-sm"
-                  placeholder="es. NC-2026-04-01"
+                  placeholder={t("pdca.form.finding_placeholder_edit")}
                 />
               </div>
             </>
@@ -198,14 +217,14 @@ function EditCycleModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () => v
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">
-            Annulla
+            {t("pdca.form.cancel")}
           </button>
           <button
             onClick={() => mutation.mutate()}
             disabled={mutation.isPending || !form.title.trim()}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
-            {mutation.isPending ? "Salvataggio..." : "Salva modifiche"}
+            {mutation.isPending ? t("common.saving") : t("pdca.form.save_btn")}
           </button>
         </div>
       </div>
@@ -214,13 +233,14 @@ function EditCycleModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () => v
 }
 
 function EditCycleButton({ cycle }: { cycle: PdcaCycle }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   return (
     <>
       <button
         type="button"
         onClick={() => setOpen(true)}
-        title="Modifica"
+        title={t("pdca.form.edit_tooltip")}
         className="px-2 py-1 text-[11px] rounded-md text-gray-600 hover:bg-gray-100 border border-transparent hover:border-gray-200"
       >
         ✏️
@@ -231,6 +251,7 @@ function EditCycleButton({ cycle }: { cycle: PdcaCycle }) {
 }
 
 function ArchiviaCycleButton({ cycle }: { cycle: PdcaCycle }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [motivo, setMotivo] = useState("");
@@ -247,7 +268,7 @@ function ArchiviaCycleButton({ cycle }: { cycle: PdcaCycle }) {
     onError: (e: unknown) => {
       const msg =
         (e as { response?: { data?: { error?: string } } })?.response?.data?.error ||
-        "Errore durante l'archiviazione";
+        t("pdca.archive.error_generic");
       setError(String(msg));
     },
   });
@@ -259,7 +280,7 @@ function ArchiviaCycleButton({ cycle }: { cycle: PdcaCycle }) {
       <button
         type="button"
         onClick={() => { setError(""); setOpen(true); }}
-        title="Archivia senza implementazione"
+        title={t("pdca.archive.tooltip")}
         className="px-2 py-1 text-[11px] rounded-md text-amber-700 hover:bg-amber-50 border border-transparent hover:border-amber-200"
       >
         📦
@@ -267,23 +288,23 @@ function ArchiviaCycleButton({ cycle }: { cycle: PdcaCycle }) {
       {open && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-            <h3 className="text-lg font-semibold mb-2">Archivia ciclo PDCA</h3>
+            <h3 className="text-lg font-semibold mb-2">{t("pdca.archive.modal_title")}</h3>
             <p className="text-sm text-gray-600 mb-1">
               <strong>{cycle.title}</strong>
             </p>
-            <p className="text-sm text-gray-500 mb-3">
-              Lo spunto viene chiuso senza implementazione. La decisione viene registrata nell'audit trail ma non genera una Lesson Learned.
-            </p>
+            <p className="text-sm text-gray-500 mb-3">{t("pdca.archive.intro")}</p>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Motivo *
+              {t("pdca.archive.reason_label")}
             </label>
             <textarea
               className="w-full border rounded px-3 py-2 text-sm min-h-[100px]"
               value={motivo}
               onChange={e => setMotivo(e.target.value)}
-              placeholder="Es: Il rapporto costo/beneficio non giustifica l'implementazione in questa fase. Il controllo compensativo già in essere copre il rischio residuo..."
+              placeholder={t("pdca.archive.reason_placeholder")}
             />
-            <p className="text-xs text-gray-400 mt-0.5">Minimo 20 caratteri ({motivo.trim().length}/20)</p>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {t("pdca.archive.min_chars", { n: motivo.trim().length })}
+            </p>
             {error && (
               <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-2">{error}</p>
             )}
@@ -293,7 +314,7 @@ function ArchiviaCycleButton({ cycle }: { cycle: PdcaCycle }) {
                 onClick={() => { setOpen(false); setError(""); }}
                 className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50"
               >
-                Annulla
+                {t("pdca.form.cancel")}
               </button>
               <button
                 type="button"
@@ -301,7 +322,7 @@ function ArchiviaCycleButton({ cycle }: { cycle: PdcaCycle }) {
                 disabled={motivo.trim().length < 20 || mutation.isPending}
                 className="px-4 py-2 bg-amber-600 text-white rounded text-sm hover:bg-amber-700 disabled:opacity-50"
               >
-                {mutation.isPending ? "Archiviazione..." : "Archivia ciclo"}
+                {mutation.isPending ? t("pdca.archive.in_progress") : t("pdca.archive.confirm_btn")}
               </button>
             </div>
           </div>
@@ -312,6 +333,7 @@ function ArchiviaCycleButton({ cycle }: { cycle: PdcaCycle }) {
 }
 
 function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const selectedPlant = useAuthStore(s => s.selectedPlant);
   const [form, setForm] = useState<Partial<PdcaCycle>>({
@@ -326,7 +348,7 @@ function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string
   const mutation = useMutation({
     mutationFn: pdcaApi.create,
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["pdca"] }); onClose(); },
-    onError: (e: any) => setError(e?.response?.data?.detail || "Errore durante il salvataggio"),
+    onError: (e: any) => setError(e?.response?.data?.detail || t("common.save_error")),
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
@@ -346,46 +368,46 @@ function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
-        <h3 className="text-lg font-semibold mb-4">Nuovo ciclo PDCA</h3>
+        <h3 className="text-lg font-semibold mb-4">{t("pdca.form.new_title")}</h3>
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Sito *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.plant_label")}</label>
             <select name="plant" value={form.plant ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-              <option value="">— seleziona —</option>
+              <option value="">{t("common.select")}</option>
               {plants.map(p => <option key={p.id} value={p.id}>{p.code} — {p.name}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Titolo *</label>
-            <input name="title" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder="es. Miglioramento gestione accessi privilegiati" />
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.title_label")}</label>
+            <input name="title" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder={t("pdca.form.title_placeholder")} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Descrizione</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.desc_label")}</label>
             <textarea
               name="descrizione"
               onChange={e => setForm(prev => ({ ...prev, descrizione: e.target.value }))}
               rows={3}
               className="w-full border rounded px-3 py-2 text-sm"
-              placeholder="Descrizione del finding o dello spunto di miglioramento..."
+              placeholder={t("pdca.form.desc_placeholder")}
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo trigger</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.trigger_label")}</label>
               <select name="trigger_type" value={form.trigger_type} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-                <option value="audit">Audit</option>
-                <option value="incident">Incidente</option>
-                <option value="management_review">Revisione direzione</option>
-                <option value="risk">Rischio</option>
-                <option value="manual">Manuale</option>
+                <option value="audit">{t("pdca.trigger.audit")}</option>
+                <option value="incident">{t("pdca.trigger.incident")}</option>
+                <option value="management_review">{t("pdca.trigger.management_review")}</option>
+                <option value="risk">{t("pdca.trigger.risk")}</option>
+                <option value="manual">{t("pdca.trigger.manual")}</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Ambito</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.scope_label")}</label>
               <select name="scope_type" defaultValue="plant" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-                <option value="plant">Sito</option>
-                <option value="org">Organizzazione</option>
-                <option value="process">Processo</option>
+                <option value="plant">{t("pdca.scope.plant")}</option>
+                <option value="org">{t("pdca.scope.org")}</option>
+                <option value="process">{t("pdca.scope.process")}</option>
               </select>
             </div>
           </div>
@@ -393,37 +415,37 @@ function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string
           {isAudit && (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo audit</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.audit_subtype_label")}</label>
                 <select name="audit_subtype" value={form.audit_subtype ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-                  <option value="">— seleziona —</option>
-                  <option value="interno">Audit interno</option>
-                  <option value="seconda_parte">Seconda parte</option>
-                  <option value="terza_parte">Terza parte</option>
+                  <option value="">{t("common.select")}</option>
+                  <option value="interno">{t("pdca.audit_subtype.interno_full")}</option>
+                  <option value="seconda_parte">{t("pdca.audit_subtype.seconda_parte_full")}</option>
+                  <option value="terza_parte">{t("pdca.audit_subtype.terza_parte_full")}</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Riferimento finding</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.finding_label")}</label>
                 <input
                   name="riferimento_finding"
                   value={form.riferimento_finding ?? ""}
                   onChange={handleChange}
                   className="w-full border rounded px-3 py-2 text-sm"
-                  placeholder="es. NC-2026-04-01 o OPP-2026-03-05"
+                  placeholder={t("pdca.form.finding_placeholder")}
                 />
-                <p className="text-xs text-gray-400 mt-0.5">Numero/codice del rilievo o opportunità nell'audit report</p>
+                <p className="text-xs text-gray-400 mt-0.5">{t("pdca.form.finding_hint")}</p>
               </div>
             </>
           )}
         </div>
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
-          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">Annulla</button>
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("pdca.form.cancel")}</button>
           <button
             onClick={() => mutation.mutate(form)}
             disabled={mutation.isPending || !form.plant || !form.title}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
-            {mutation.isPending ? "Salvataggio..." : "Crea ciclo"}
+            {mutation.isPending ? t("common.saving") : t("pdca.form.create_btn")}
           </button>
         </div>
       </div>
@@ -434,12 +456,13 @@ function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string
 type Evidence = { id: string; title: string };
 
 function PhaseStepper({ cycle }: { cycle: PdcaCycle & { reopened_as?: string | null } }) {
+  const { t } = useTranslation();
   const phases = ["plan", "do", "check", "act"] as const;
   const labels: Record<(typeof phases)[number], string> = {
-    plan: "PLAN",
-    do: "DO",
-    check: "CHECK",
-    act: "ACT",
+    plan: t("pdca.phase.plan"),
+    do: t("pdca.phase.do"),
+    check: t("pdca.phase.check"),
+    act: t("pdca.phase.act"),
   };
   const currentIndex = phases.indexOf((cycle.fase_corrente || "plan") as any);
 
@@ -453,7 +476,7 @@ function PhaseStepper({ cycle }: { cycle: PdcaCycle & { reopened_as?: string | n
           </span>
         ))}
         <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${isArchiviato ? "bg-amber-100 text-amber-800" : "bg-gray-800 text-white"}`}>
-          {isArchiviato ? "ARCHIVIATO" : "CHIUSO"}
+          {isArchiviato ? t("pdca.status.archiviato") : t("pdca.status.chiuso")}
         </span>
       </div>
     );
@@ -486,17 +509,17 @@ function PhaseStepper({ cycle }: { cycle: PdcaCycle & { reopened_as?: string | n
   );
 }
 
-const OUTCOME_BADGE: Record<string, { label: string; cls: string }> = {
-  ok: { label: "Efficace", cls: "bg-green-100 text-green-800 border-green-200" },
-  partial: { label: "Parzialmente efficace", cls: "bg-amber-100 text-amber-800 border-amber-200" },
-  ko: { label: "Non efficace", cls: "bg-red-100 text-red-800 border-red-200" },
+const OUTCOME_BADGE: Record<string, { labelKey: string; cls: string }> = {
+  ok: { labelKey: "pdca.outcome.ok", cls: "bg-green-100 text-green-800 border-green-200" },
+  partial: { labelKey: "pdca.outcome.partial", cls: "bg-amber-100 text-amber-800 border-amber-200" },
+  ko: { labelKey: "pdca.outcome.ko", cls: "bg-red-100 text-red-800 border-red-200" },
 };
 
-const DOSSIER_PHASES: { key: PdcaPhase["phase"]; label: string; contentLabel: string }[] = [
-  { key: "plan", label: "PLAN — Pianificazione", contentLabel: "Azione pianificata" },
-  { key: "do", label: "DO — Attuazione", contentLabel: "Attuazione" },
-  { key: "check", label: "CHECK — Verifica", contentLabel: "Risultato della verifica" },
-  { key: "act", label: "ACT — Standardizzazione", contentLabel: "Standardizzazione" },
+const DOSSIER_PHASES: { key: PdcaPhase["phase"]; labelKey: string; contentKey: string }[] = [
+  { key: "plan", labelKey: "pdca.dossier.plan_label", contentKey: "pdca.dossier.plan_content" },
+  { key: "do", labelKey: "pdca.dossier.do_label", contentKey: "pdca.dossier.do_content" },
+  { key: "check", labelKey: "pdca.dossier.check_label", contentKey: "pdca.dossier.check_content" },
+  { key: "act", labelKey: "pdca.dossier.act_label", contentKey: "pdca.dossier.act_content" },
 ];
 
 function fmtDateTime(d?: string | null): string {
@@ -505,6 +528,7 @@ function fmtDateTime(d?: string | null): string {
 }
 
 function CycleDossierModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () => void }) {
+  const { t } = useTranslation();
   const phases = cycle.phases ?? [];
   const byPhase = (p: string) => phases.find((ph) => ph.phase === p);
 
@@ -513,21 +537,21 @@ function CycleDossierModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () =
       <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl my-6">
         {/* Toolbar (non stampata) */}
         <div className="no-print flex items-center justify-between px-6 py-3 border-b border-gray-200 sticky top-0 bg-white rounded-t-lg">
-          <h3 className="text-base font-semibold text-gray-900">Dossier ciclo PDCA</h3>
+          <h3 className="text-base font-semibold text-gray-900">{t("pdca.dossier.modal_title")}</h3>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => window.print()}
               className="px-3 py-1.5 text-sm rounded bg-primary-600 text-white hover:bg-primary-700"
             >
-              🖨️ Stampa / PDF
+              {t("pdca.dossier.print_btn")}
             </button>
             <button
               type="button"
               onClick={onClose}
               className="px-3 py-1.5 text-sm rounded border border-gray-300 text-gray-600 hover:bg-gray-50"
             >
-              Chiudi
+              {t("common.close")}
             </button>
           </div>
         </div>
@@ -541,30 +565,32 @@ function CycleDossierModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () =
             )}
             <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
               <div className="flex gap-2">
-                <dt className="text-gray-500">Trigger:</dt>
-                <dd className="text-gray-800 font-medium">{TRIGGER_LABELS[cycle.trigger_type] ?? cycle.trigger_type}</dd>
+                <dt className="text-gray-500">{t("pdca.dossier.meta_trigger")}</dt>
+                <dd className="text-gray-800 font-medium">{triggerLabel(t, cycle.trigger_type)}</dd>
               </div>
               {cycle.riferimento_finding && (
                 <div className="flex gap-2">
-                  <dt className="text-gray-500">Rif. finding:</dt>
+                  <dt className="text-gray-500">{t("pdca.dossier.meta_finding")}</dt>
                   <dd className="text-gray-800 font-mono">{cycle.riferimento_finding}</dd>
                 </div>
               )}
               <div className="flex gap-2">
-                <dt className="text-gray-500">Ambito:</dt>
-                <dd className="text-gray-800">{cycle.scope_type}</dd>
+                <dt className="text-gray-500">{t("pdca.dossier.meta_scope")}</dt>
+                <dd className="text-gray-800">{scopeLabel(t, cycle.scope_type)}</dd>
               </div>
               <div className="flex gap-2">
-                <dt className="text-gray-500">Stato:</dt>
-                <dd className="text-gray-800 font-medium uppercase">{cycle.fase_corrente}</dd>
+                <dt className="text-gray-500">{t("pdca.dossier.meta_status")}</dt>
+                <dd className="text-gray-800 font-medium uppercase">
+                  {t(`pdca.phase.${cycle.fase_corrente}`, { defaultValue: cycle.fase_corrente })}
+                </dd>
               </div>
               <div className="flex gap-2">
-                <dt className="text-gray-500">Creato il:</dt>
+                <dt className="text-gray-500">{t("pdca.dossier.meta_created")}</dt>
                 <dd className="text-gray-800">{fmtDateTime(cycle.created_at)}</dd>
               </div>
               {cycle.closed_at && (
                 <div className="flex gap-2">
-                  <dt className="text-gray-500">Chiuso il:</dt>
+                  <dt className="text-gray-500">{t("pdca.dossier.meta_closed")}</dt>
                   <dd className="text-gray-800">{fmtDateTime(cycle.closed_at)}</dd>
                 </div>
               )}
@@ -572,7 +598,7 @@ function CycleDossierModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () =
           </header>
 
           <ol className="space-y-3">
-            {DOSSIER_PHASES.map(({ key, label, contentLabel }) => {
+            {DOSSIER_PHASES.map(({ key, labelKey, contentKey }) => {
               const ph = byPhase(key);
               const done = !!ph?.completed_at;
               // ACT: la standardizzazione è registrata sul ciclo alla chiusura.
@@ -584,7 +610,7 @@ function CycleDossierModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () =
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-semibold text-gray-900">
-                      {done ? "✓ " : ""}{label}
+                      {done ? "✓ " : ""}{t(labelKey)}
                     </span>
                     {ph?.completed_at && (
                       <span className="text-[11px] text-gray-500">
@@ -595,24 +621,24 @@ function CycleDossierModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () =
 
                   {notes ? (
                     <div className="text-xs">
-                      <div className="text-gray-500 mb-0.5">{contentLabel}</div>
+                      <div className="text-gray-500 mb-0.5">{t(contentKey)}</div>
                       <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{notes}</p>
                     </div>
                   ) : (
-                    <p className="text-xs text-gray-400 italic">Fase non ancora completata</p>
+                    <p className="text-xs text-gray-400 italic">{t("pdca.dossier.phase_incomplete")}</p>
                   )}
 
                   {key === "check" && ph?.outcome && OUTCOME_BADGE[ph.outcome] && (
                     <div className="mt-2">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[11px] font-semibold ${OUTCOME_BADGE[ph.outcome].cls}`}>
-                        Esito: {OUTCOME_BADGE[ph.outcome].label}
+                        {t("pdca.dossier.outcome_prefix", { outcome: t(OUTCOME_BADGE[ph.outcome].labelKey) })}
                       </span>
                     </div>
                   )}
 
                   {ph?.evidence && (
                     <div className="mt-2 text-xs">
-                      <div className="text-gray-500 mb-0.5">Evidenza allegata</div>
+                      <div className="text-gray-500 mb-0.5">{t("pdca.dossier.evidence_label")}</div>
                       {ph.evidence.file_url ? (
                         <a
                           href={ph.evidence.file_url}
@@ -623,7 +649,7 @@ function CycleDossierModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () =
                           📎 {ph.evidence.title}
                         </a>
                       ) : (
-                        <span className="text-gray-800">📎 {ph.evidence.title} <span className="text-gray-400">(nessun file)</span></span>
+                        <span className="text-gray-800">📎 {ph.evidence.title} <span className="text-gray-400">{t("pdca.dossier.no_file")}</span></span>
                       )}
                     </div>
                   )}
@@ -634,17 +660,15 @@ function CycleDossierModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () =
 
           {cycle.motivo_archiviazione && (
             <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-xs">
-              <div className="font-semibold text-amber-800 mb-0.5">Archiviato — motivo</div>
+              <div className="font-semibold text-amber-800 mb-0.5">{t("pdca.dossier.archived_reason")}</div>
               <p className="text-amber-900 whitespace-pre-wrap">{cycle.motivo_archiviazione}</p>
             </div>
           )}
           {cycle.reopened_as && (
-            <p className="mt-3 text-[11px] text-blue-700">⟳ CHECK non efficace: ha generato un nuovo ciclo PLAN di riciclo.</p>
+            <p className="mt-3 text-[11px] text-blue-700">{t("pdca.dossier.reopened")}</p>
           )}
 
-          <p className="no-print mt-4 text-[10px] text-gray-400">
-            Documento generato dalla piattaforma GRC — usare "Stampa / PDF" e scegliere "Salva come PDF" per l'archiviazione audit.
-          </p>
+          <p className="no-print mt-4 text-[10px] text-gray-400">{t("pdca.dossier.footer_note")}</p>
         </div>
       </div>
 
@@ -668,13 +692,14 @@ function CycleDossierModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () =
 }
 
 function CycleDossierButton({ cycle }: { cycle: PdcaCycle }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   return (
     <>
       <button
         type="button"
         onClick={() => setOpen(true)}
-        title="Dossier audit (dettaglio fasi + stampa/PDF)"
+        title={t("pdca.dossier.tooltip")}
         className="px-2 py-1 text-[11px] rounded-md text-gray-600 hover:bg-gray-100 border border-transparent hover:border-gray-200"
       >
         📄
@@ -691,6 +716,7 @@ function AdvanceButtons({
   cycle: PdcaCycle & { reopened_as?: string | null };
   onUpdated: () => void;
 }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [open, setOpen] = useState<"plan" | "do" | "check" | "act" | null>(null);
   const [notes, setNotes] = useState("");
@@ -726,7 +752,7 @@ function AdvanceButtons({
       onUpdated();
     },
     onError: (e: any) => {
-      const msg = e?.response?.data?.error || "Errore durante l'avanzamento di fase.";
+      const msg = e?.response?.data?.error || t("pdca.advance.error_advance");
       setError(String(msg));
     },
   });
@@ -746,7 +772,7 @@ function AdvanceButtons({
       onUpdated();
     },
     onError: (e: any) => {
-      const msg = e?.response?.data?.error || "Errore durante la chiusura del ciclo.";
+      const msg = e?.response?.data?.error || t("pdca.advance.error_close");
       setError(String(msg));
     },
   });
@@ -756,10 +782,10 @@ function AdvanceButtons({
   function renderModal() {
     if (!open) return null;
     const titleMap: Record<string, string> = {
-      plan: "Avanza a DO",
-      do: "Avanza a CHECK",
-      check: "Avanza ad ACT",
-      act: "Chiudi ciclo",
+      plan: t("pdca.advance.to_do"),
+      do: t("pdca.advance.to_check"),
+      check: t("pdca.advance.to_act"),
+      act: t("pdca.advance.close"),
     };
     return (
       <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -769,20 +795,20 @@ function AdvanceButtons({
             {open === "plan" && (
               <>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Descrivi l&apos;azione pianificata *
+                  {t("pdca.advance.plan_label")}
                 </label>
                 <textarea
                   className="w-full border rounded px-3 py-2 text-sm min-h-[100px]"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Minimo 20 caratteri..."
+                  placeholder={t("pdca.advance.min_20")}
                 />
               </>
             )}
             {open === "do" && (
               <>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Note implementazione (opzionale)
+                  {t("pdca.advance.do_notes_label")}
                 </label>
                 <textarea
                   className="w-full border rounded px-3 py-2 text-sm min-h-[80px]"
@@ -791,14 +817,14 @@ function AdvanceButtons({
                 />
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Allega evidenza implementazione *
+                    {t("pdca.advance.do_evidence_label")}
                   </label>
                   <select
                     className="w-full border rounded px-3 py-2 text-sm"
                     value={evidenceId}
                     onChange={(e) => setEvidenceId(e.target.value)}
                   >
-                    <option value="">— seleziona evidenza —</option>
+                    <option value="">{t("pdca.advance.evidence_placeholder")}</option>
                     {(evidences || []).map((ev) => (
                       <option key={ev.id} value={ev.id}>
                         {ev.title}
@@ -811,32 +837,32 @@ function AdvanceButtons({
             {open === "check" && (
               <>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Descrivi il risultato della verifica *
+                  {t("pdca.advance.check_label")}
                 </label>
                 <textarea
                   className="w-full border rounded px-3 py-2 text-sm min-h-[80px]"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Minimo 10 caratteri..."
+                  placeholder={t("pdca.advance.min_10")}
                 />
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Esito verifica *
+                    {t("pdca.advance.outcome_label")}
                   </label>
                   <select
                     className="w-full border rounded px-3 py-2 text-sm"
                     value={outcome}
                     onChange={(e) => setOutcome(e.target.value as any)}
                   >
-                    <option value="">— seleziona esito —</option>
-                    <option value="ok">✅ Efficace</option>
-                    <option value="partial">🟡 Parzialmente efficace</option>
-                    <option value="ko">❌ Non efficace — aprirà nuovo ciclo</option>
+                    <option value="">{t("pdca.advance.outcome_placeholder")}</option>
+                    <option value="ok">{t("pdca.advance.outcome_ok")}</option>
+                    <option value="partial">{t("pdca.advance.outcome_partial")}</option>
+                    <option value="ko">{t("pdca.advance.outcome_ko")}</option>
                   </select>
                 </div>
                 {outcome === "ko" && (
                   <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2">
-                    ⚠️ Selezionando &quot;Non efficace&quot; verrà aperto automaticamente un nuovo ciclo PLAN.
+                    {t("pdca.advance.ko_warning")}
                   </p>
                 )}
               </>
@@ -844,13 +870,13 @@ function AdvanceButtons({
             {open === "act" && (
               <>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Descrivi l&apos;azione standardizzata *
+                  {t("pdca.advance.act_label")}
                 </label>
                 <textarea
                   className="w-full border rounded px-3 py-2 text-sm min-h-[100px]"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Es: La procedura X è stata aggiornata e comunicata a tutti i responsabili..."
+                  placeholder={t("pdca.advance.act_placeholder")}
                 />
               </>
             )}
@@ -865,7 +891,7 @@ function AdvanceButtons({
               }}
               className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50"
             >
-              Annulla
+              {t("pdca.form.cancel")}
             </button>
             {open === "act" ? (
               <button
@@ -874,7 +900,7 @@ function AdvanceButtons({
                 disabled={closeMutation.isPending}
                 className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
               >
-                {closeMutation.isPending ? "Chiusura..." : "Chiudi ciclo"}
+                {closeMutation.isPending ? t("pdca.advance.closing") : t("pdca.advance.close")}
               </button>
             ) : (
               <button
@@ -883,7 +909,7 @@ function AdvanceButtons({
                 disabled={advanceMutation.isPending}
                 className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
               >
-                {advanceMutation.isPending ? "Avanzamento..." : "Conferma"}
+                {advanceMutation.isPending ? t("pdca.advance.in_progress") : t("pdca.advance.confirm")}
               </button>
             )}
           </div>
@@ -897,8 +923,11 @@ function AdvanceButtons({
     return (
       <>
         <p className="text-xs text-gray-500">
-          {isArchiviato ? "Archiviato" : "Chiuso"} il{" "}
-          {new Date(cycle.closed_at || cycle.updated_at || cycle.created_at).toLocaleDateString(i18n.language || "it")}
+          {t(isArchiviato ? "pdca.status.archived_on" : "pdca.status.closed_on", {
+            date: new Date(
+              cycle.closed_at || cycle.updated_at || cycle.created_at,
+            ).toLocaleDateString(i18n.language || "it"),
+          })}
         </p>
         {isArchiviato && (cycle as any).motivo_archiviazione && (
           <p className="mt-1 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 whitespace-pre-wrap">
@@ -913,10 +942,10 @@ function AdvanceButtons({
   }
 
   const advanceConfig: Record<string, { label: string; title: string }> = {
-    plan:  { label: "▶ DO",    title: "Avanza a DO" },
-    do:    { label: "▶ CHECK", title: "Avanza a CHECK" },
-    check: { label: "▶ ACT",   title: "Avanza ad ACT" },
-    act:   { label: "✓",       title: "Chiudi ciclo" },
+    plan:  { label: t("pdca.advance.btn_do"),    title: t("pdca.advance.to_do") },
+    do:    { label: t("pdca.advance.btn_check"), title: t("pdca.advance.to_check") },
+    check: { label: t("pdca.advance.btn_act"),   title: t("pdca.advance.to_act") },
+    act:   { label: t("pdca.advance.btn_close"), title: t("pdca.advance.close") },
   };
   const cfg = advanceConfig[fase as string];
 
@@ -938,7 +967,7 @@ function AdvanceButtons({
       </button>
       {cycle.reopened_as && (
         <div className="mt-2 text-[11px] text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-1">
-          ⟳ Questo ciclo ha generato un nuovo ciclo PLAN per esito CHECK non efficace.
+          {t("pdca.advance.reopened_note")}
         </div>
       )}
       {renderModal()}
@@ -947,6 +976,7 @@ function AdvanceButtons({
 }
 
 function TitleCell({ cycle }: { cycle: PdcaCycle }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const hasDesc = !!cycle.descrizione;
 
@@ -958,7 +988,7 @@ function TitleCell({ cycle }: { cycle: PdcaCycle }) {
           <button
             type="button"
             onClick={() => setExpanded(v => !v)}
-            title={expanded ? "Nascondi descrizione" : "Mostra descrizione"}
+            title={expanded ? t("pdca.title_cell.hide_desc") : t("pdca.title_cell.show_desc")}
             className="mt-0.5 flex-shrink-0 text-gray-400 hover:text-primary-600 transition-colors"
           >
             <svg
@@ -985,30 +1015,13 @@ function TitleCell({ cycle }: { cycle: PdcaCycle }) {
         )}
         {cycle.reopened_as && (
           <span className="text-[11px] text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-0.5">
-            ⟳ Riciclo CHECK KO
+            {t("pdca.title_cell.recycle_badge")}
           </span>
         )}
       </div>
     </div>
   );
 }
-
-const TRIGGER_LABELS: Record<string, string> = {
-  audit: "Audit",
-  incident: "Incidente",
-  management_review: "Revisione direzione",
-  risk: "Rischio",
-  manual: "Manuale",
-  pdca_ko: "Riciclo CHECK KO",
-  gap_controllo: "Gap controllo",
-  risk_rosso: "Rischio rosso",
-};
-
-const AUDIT_SUBTYPE_LABELS: Record<string, string> = {
-  interno: "Interno",
-  seconda_parte: "2ª parte",
-  terza_parte: "3ª parte",
-};
 
 export function PdcaPage() {
   const { t } = useTranslation();
@@ -1042,25 +1055,25 @@ export function PdcaPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">PDCA — Miglioramento continuo</h2>
+        <h2 className="text-xl font-semibold text-gray-900">{t("pdca.title")}</h2>
         <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700">
-          + Nuovo ciclo
+          {t("pdca.new_btn")}
         </button>
       </div>
 
       <div className="mb-3 flex items-center gap-3">
-        <label className="text-sm text-gray-600 font-medium">Filtra per trigger:</label>
+        <label className="text-sm text-gray-600 font-medium">{t("pdca.filters.trigger_label")}</label>
         <select
           value={filterTrigger}
           onChange={e => setFilterTrigger(e.target.value)}
           className="border rounded px-3 py-1.5 text-sm text-gray-700 bg-white"
         >
-          <option value="">Tutti</option>
-          <option value="audit">Audit</option>
-          <option value="incident">Incidente</option>
-          <option value="management_review">Revisione direzione</option>
-          <option value="risk">Rischio</option>
-          <option value="manual">Manuale</option>
+          <option value="">{t("pdca.filters.all_triggers")}</option>
+          <option value="audit">{t("pdca.trigger.audit")}</option>
+          <option value="incident">{t("pdca.trigger.incident")}</option>
+          <option value="management_review">{t("pdca.trigger.management_review")}</option>
+          <option value="risk">{t("pdca.trigger.risk")}</option>
+          <option value="manual">{t("pdca.trigger.manual")}</option>
         </select>
         <label className="text-sm text-gray-600 font-medium ml-2">{t("pdca.filters.plant_label")}</label>
         <select
@@ -1082,30 +1095,30 @@ export function PdcaPage() {
             onClick={() => { setFilterTrigger(""); setFilterPlant(""); }}
             className="text-xs text-gray-500 hover:text-gray-700 underline"
           >
-            Rimuovi filtro
+            {t("pdca.filters.clear")}
           </button>
         )}
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {isLoading ? (
-          <div className="p-8 text-center text-gray-400">Caricamento...</div>
+          <div className="p-8 text-center text-gray-400">{t("common.loading")}</div>
         ) : cycles.length === 0 ? (
           <div className="p-8 text-center">
-            <p className="text-gray-400 mb-2">Nessun ciclo PDCA registrato</p>
-            <button onClick={() => setShowNew(true)} className="text-sm text-primary-600 hover:underline">Crea il primo ciclo →</button>
+            <p className="text-gray-400 mb-2">{t("pdca.empty")}</p>
+            <button onClick={() => setShowNew(true)} className="text-sm text-primary-600 hover:underline">{t("pdca.empty_cta")}</button>
           </div>
         ) : (
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Titolo / Finding</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Trigger</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("pdca.filters.table_plant")}</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Ambito</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Fasi</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Azione</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Creato il</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("pdca.table.title")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("pdca.table.trigger")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("pdca.table.plant")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("pdca.table.scope")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("pdca.table.phases")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("pdca.table.action")}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("pdca.table.created_at")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -1115,10 +1128,10 @@ export function PdcaPage() {
                     <TitleCell cycle={c} />
                   </td>
                   <td className="px-4 py-3 text-gray-600 text-xs">
-                    <span className="font-medium">{TRIGGER_LABELS[c.trigger_type] ?? c.trigger_type}</span>
+                    <span className="font-medium">{triggerLabel(t, c.trigger_type)}</span>
                     {c.audit_subtype && (
                       <div className="mt-0.5 text-[11px] text-gray-400">
-                        {AUDIT_SUBTYPE_LABELS[c.audit_subtype] ?? c.audit_subtype}
+                        {auditSubtypeLabel(t, c.audit_subtype)}
                       </div>
                     )}
                   </td>
@@ -1127,7 +1140,7 @@ export function PdcaPage() {
                     {c.plant_name ? <div className="text-[11px] text-gray-400">{c.plant_name}</div> : null}
                     {!c.plant_code && !c.plant_name ? "—" : null}
                   </td>
-                  <td className="px-4 py-3 text-gray-600 text-xs">{c.scope_type}</td>
+                  <td className="px-4 py-3 text-gray-600 text-xs">{scopeLabel(t, c.scope_type)}</td>
                   <td className="px-4 py-3">
                     <PhaseStepper cycle={c as any} />
                   </td>
