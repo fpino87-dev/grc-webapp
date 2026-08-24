@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { pdcaApi, type PdcaCycle, type PdcaPhase } from "../../api/endpoints/pdca";
 import { plantsApi } from "../../api/endpoints/plants";
+import { useAuthStore } from "../../store/auth";
 import { apiClient } from "../../api/client";
 import i18n from "../../i18n";
 
@@ -312,7 +313,14 @@ function ArchiviaCycleButton({ cycle }: { cycle: PdcaCycle }) {
 
 function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
   const qc = useQueryClient();
-  const [form, setForm] = useState<Partial<PdcaCycle>>({ trigger_type: "audit", scope_type: "plant" });
+  const selectedPlant = useAuthStore(s => s.selectedPlant);
+  const [form, setForm] = useState<Partial<PdcaCycle>>({
+    trigger_type: "audit",
+    scope_type: "plant",
+    // Precompila con il sito attivo in barra: evita di creare cicli sul sito
+    // sbagliato quando si sta lavorando su uno stabilimento specifico.
+    ...(selectedPlant?.id ? { plant: selectedPlant.id } : {}),
+  });
   const [error, setError] = useState("");
 
   const mutation = useMutation({
@@ -342,7 +350,7 @@ function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string
         <div className="space-y-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Sito *</label>
-            <select name="plant" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+            <select name="plant" value={form.plant ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
               <option value="">— seleziona —</option>
               {plants.map(p => <option key={p.id} value={p.id}>{p.code} — {p.name}</option>)}
             </select>
@@ -1003,12 +1011,23 @@ const AUDIT_SUBTYPE_LABELS: Record<string, string> = {
 };
 
 export function PdcaPage() {
+  const { t } = useTranslation();
+  const selectedPlant = useAuthStore(s => s.selectedPlant);
   const [showNew, setShowNew] = useState(false);
   const [filterTrigger, setFilterTrigger] = useState("");
+  const [filterPlant, setFilterPlant] = useState("");
+
+  // Il sito scelto nella barra in alto vale come filtro di default; il select
+  // locale lo sovrascrive solo se valorizzato esplicitamente.
+  const effectivePlant = filterPlant || selectedPlant?.id || "";
+
+  const params: Record<string, string> = {};
+  if (filterTrigger) params.trigger_type = filterTrigger;
+  if (effectivePlant) params.plant = effectivePlant;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["pdca", filterTrigger],
-    queryFn: () => pdcaApi.list(filterTrigger ? { trigger_type: filterTrigger } : undefined),
+    queryKey: ["pdca", filterTrigger, effectivePlant],
+    queryFn: () => pdcaApi.list(params),
     retry: false,
   });
 
@@ -1043,8 +1062,26 @@ export function PdcaPage() {
           <option value="risk">Rischio</option>
           <option value="manual">Manuale</option>
         </select>
-        {filterTrigger && (
-          <button onClick={() => setFilterTrigger("")} className="text-xs text-gray-500 hover:text-gray-700 underline">
+        <label className="text-sm text-gray-600 font-medium ml-2">{t("pdca.filters.plant_label")}</label>
+        <select
+          value={filterPlant}
+          onChange={e => setFilterPlant(e.target.value)}
+          className="border rounded px-3 py-1.5 text-sm text-gray-700 bg-white"
+        >
+          <option value="">
+            {selectedPlant?.id
+              ? t("pdca.filters.from_topbar", { plant: selectedPlant.code || selectedPlant.name })
+              : t("pdca.filters.all_plants")}
+          </option>
+          {(plants ?? []).map(p => (
+            <option key={p.id} value={p.id}>{p.code} — {p.name}</option>
+          ))}
+        </select>
+        {(filterTrigger || filterPlant) && (
+          <button
+            onClick={() => { setFilterTrigger(""); setFilterPlant(""); }}
+            className="text-xs text-gray-500 hover:text-gray-700 underline"
+          >
             Rimuovi filtro
           </button>
         )}
@@ -1064,6 +1101,7 @@ export function PdcaPage() {
               <tr>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Titolo / Finding</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Trigger</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("pdca.filters.table_plant")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Ambito</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Fasi</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Azione</th>
@@ -1083,6 +1121,11 @@ export function PdcaPage() {
                         {AUDIT_SUBTYPE_LABELS[c.audit_subtype] ?? c.audit_subtype}
                       </div>
                     )}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600 text-xs">
+                    {c.plant_code ? <span className="font-mono">{c.plant_code}</span> : null}
+                    {c.plant_name ? <div className="text-[11px] text-gray-400">{c.plant_name}</div> : null}
+                    {!c.plant_code && !c.plant_name ? "—" : null}
                   </td>
                   <td className="px-4 py-3 text-gray-600 text-xs">{c.scope_type}</td>
                   <td className="px-4 py-3">

@@ -2880,6 +2880,12 @@
     }
   },
   "pdca": {
+    "filters": {
+      "plant_label": "Filtrer par site :",
+      "all_plants": "Tous les sites",
+      "from_topbar": "Site actif : {{plant}}",
+      "table_plant": "Site"
+    },
     "source_incident": "Incident",
     "source_audit": "Audit",
     "source_management_review": "Revue de direction",

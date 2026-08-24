@@ -51,12 +51,18 @@ class PdcaPhaseSerializer(serializers.ModelSerializer):
 
 class PdcaCycleSerializer(serializers.ModelSerializer):
     phases = PdcaPhaseSerializer(many=True, read_only=True)
+    # Denormalizzati per la lista: evitano una query per riga lato client
+    # (il ViewSet fa gia' select_related("plant")).
+    plant_name = serializers.CharField(source="plant.name", read_only=True, default=None)
+    plant_code = serializers.CharField(source="plant.code", read_only=True, default=None)
 
     class Meta:
         model = PdcaCycle
         fields = [
             "id",
             "plant",
+            "plant_name",
+            "plant_code",
             "title",
             "descrizione",
             "trigger_type",
@@ -77,7 +83,8 @@ class PdcaCycleSerializer(serializers.ModelSerializer):
             "created_by",
         ]
         read_only_fields = [
-            "id", "fase_corrente", "reopened_as", "closed_at",
+            "id", "plant_name", "plant_code",
+            "fase_corrente", "reopened_as", "closed_at",
             "created_at", "updated_at", "created_by",
             # Campi governati dalle azioni di workflow (advance/close/archivia):
             # non impostabili con una PATCH diretta. Le azioni li scrivono sul

@@ -2880,6 +2880,12 @@
     }
   },
   "pdca": {
+    "filters": {
+      "plant_label": "Filtruj wg zakładu:",
+      "all_plants": "Wszystkie zakłady",
+      "from_topbar": "Aktywny zakład: {{plant}}",
+      "table_plant": "Zakład"
+    },
     "source_incident": "Incydent",
     "source_audit": "Audyt",
     "source_management_review": "Przegląd zarządzania",

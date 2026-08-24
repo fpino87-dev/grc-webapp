@@ -2880,6 +2880,12 @@
     }
   },
   "pdca": {
+    "filters": {
+      "plant_label": "Siteye göre filtrele:",
+      "all_plants": "Tüm siteler",
+      "from_topbar": "Etkin site: {{plant}}",
+      "table_plant": "Site"
+    },
     "source_incident": "Olay",
     "source_audit": "Denetim",
     "source_management_review": "Yönetim gözden geçirmesi",

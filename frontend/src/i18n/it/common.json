@@ -2801,6 +2801,12 @@
     }
   },
   "pdca": {
+    "filters": {
+      "plant_label": "Filtra per sito:",
+      "all_plants": "Tutti i siti",
+      "from_topbar": "Sito attivo: {{plant}}",
+      "table_plant": "Sito"
+    },
     "source_incident": "Incidente",
     "source_audit": "Audit",
     "source_management_review": "Revisione direzione",

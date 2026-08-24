@@ -23,6 +23,8 @@ export interface PdcaPhase {
 export interface PdcaCycle {
   id: string;
   plant: string;
+  plant_name?: string | null;
+  plant_code?: string | null;
   title: string;
   descrizione?: string;
   trigger_type: string;

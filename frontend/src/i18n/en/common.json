@@ -2801,6 +2801,12 @@
     }
   },
   "pdca": {
+    "filters": {
+      "plant_label": "Filter by site:",
+      "all_plants": "All sites",
+      "from_topbar": "Active site: {{plant}}",
+      "table_plant": "Site"
+    },
     "source_incident": "Incident",
     "source_audit": "Audit",
     "source_management_review": "Management review",
