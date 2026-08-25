@@ -187,3 +187,66 @@ def test_a_completed_prep_gets_no_new_reminder(plant, prep, user):
     check_stale_audit_preps()
 
     assert not Task.objects.filter(source_id=prep.pk).exists()
+
+
+# ── Promemoria agganciati al programma ───────────────────────────────────────
+
+def _program_reminder(plant, program, user, quarter=2):
+    """I promemoria del programma annuale nascono prima del prep, quindi sono
+    agganciati al programma: `source_id` è il programma, non il prep."""
+    from apps.tasks.services import create_task
+    return create_task(
+        plant=plant,
+        title=f"Preparazione audit Q{quarter}: Audit Q{quarter} 2026",
+        description="Promemoria di preparazione",
+        priority="media", source_module="M17", source_id=program.pk,
+        due_date=timezone.localdate(),
+        assign_type="role", assign_value="compliance_officer",
+    )
+
+
+@pytest.mark.django_db
+def test_completing_closes_the_programme_reminder_too(client, plant, prep, program, user):
+    """«Preparazione audit Q2» è agganciato al programma: senza questo passo
+    sopravviveva alla chiusura dell'audit che lo aveva motivato."""
+    reminder = _program_reminder(plant, program, user, quarter=2)
+
+    resp = client.post(f"{URL}{prep.id}/complete/")
+    assert resp.status_code == 200, resp.data
+
+    reminder.refresh_from_db()
+    assert reminder.status == "completato"
+
+
+@pytest.mark.django_db
+def test_reminders_of_other_quarters_survive(client, plant, prep, program, user):
+    """Chiudere l'audit del secondo trimestre non deve toccare il terzo."""
+    q2 = _program_reminder(plant, program, user, quarter=2)
+    q3 = _program_reminder(plant, program, user, quarter=3)
+
+    client.post(f"{URL}{prep.id}/complete/")
+
+    q2.refresh_from_db()
+    q3.refresh_from_db()
+    assert q2.status == "completato"
+    assert q3.status == "aperto", "il Q3 non è stato ancora fatto"
+
+
+@pytest.mark.django_db
+def test_a_prep_outside_any_programme_closes_only_its_own(client, plant, user):
+    from apps.audit_prep.models import AuditPrep
+    from apps.tasks.models import Task
+
+    standalone = AuditPrep.objects.create(
+        plant=plant, title="Audit spot", audit_date=timezone.localdate(),
+        status="in_corso", created_by=user,
+    )
+    own = _reminder(plant, standalone, user, title="Audit prep bloccato: Audit spot")
+
+    resp = client.post(f"{URL}{standalone.id}/complete/")
+    assert resp.status_code == 200, resp.data
+    assert resp.data["reminders_closed"] == 1
+
+    own.refresh_from_db()
+    assert own.status == "completato"
+    assert not Task.objects.filter(status="aperto", source_module="M17").exists()

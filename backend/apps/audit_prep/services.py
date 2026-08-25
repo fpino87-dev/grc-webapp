@@ -673,7 +673,31 @@ def close_prep_reminders(prep, user, reason: str = "") -> int:
     for task in open_tasks:
         complete_task(task, user, notes=reason or f"Audit prep «{prep.title}» concluso.")
         closed += 1
+
+    # I promemoria nati dal programma annuale («Preparazione audit Q3»,
+    # «Avvia AuditPrep Q3») sono agganciati al PROGRAMMA, non al prep: quando
+    # nascono il prep ancora non esiste. Vanno chiusi anche da qui, altrimenti
+    # sopravvivono alla chiusura dell'audit che li aveva motivati.
+    closed += _close_reminders_of_program_entry(prep, user, reason)
     return closed
+
+
+def _close_reminders_of_program_entry(prep, user, reason: str = "") -> int:
+    """Chiude i promemoria di programma dell'audit a cui questo prep si
+    riferisce. Nessuno se il prep non nasce da un programma annuale."""
+    if not prep.audit_program_id:
+        return 0
+    program = prep.audit_program
+    entry = next(
+        (
+            a for a in (program.planned_audits or [])
+            if a.get("audit_prep_id") == str(prep.pk)
+        ),
+        None,
+    )
+    if entry is None:
+        return 0
+    return close_program_audit_reminders(program, entry, user, reason=reason)
 
 
 def close_program_audit_reminders(program, audit_entry: dict, user, reason: str = "") -> int:
