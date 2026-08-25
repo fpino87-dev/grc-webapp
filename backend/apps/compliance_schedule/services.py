@@ -7,6 +7,7 @@ get_required_documents_status(plant, framework) — traffic-light for required d
 """
 from __future__ import annotations
 
+import calendar
 import datetime
 import logging
 from typing import Optional
@@ -53,12 +54,16 @@ def _add_duration(base: datetime.date, value: int, unit: str) -> datetime.date:
         month = base.month - 1 + value
         year = base.year + month // 12
         month = month % 12 + 1
-        day = min(base.day, [31,28,29,31,30,31,30,31,31,30,31,30,31][month])
+        # Il giorno arretra all'ultimo del mese di arrivo: `monthrange` tiene
+        # conto degli anni bisestili (il 31 agosto + 6 mesi è il 28 o 29
+        # febbraio, non un 29 febbraio inesistente).
+        day = min(base.day, calendar.monthrange(year, month)[1])
         return datetime.date(year, month, day)
     elif unit == "years":
         try:
             return base.replace(year=base.year + value)
         except ValueError:
+            # 29 febbraio verso un anno non bisestile.
             return base.replace(year=base.year + value, day=28)
     return base + datetime.timedelta(days=value * 30)
 
