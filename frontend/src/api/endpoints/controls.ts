@@ -18,6 +18,8 @@ export interface ControlInstance {
   owner_display: string | null;
   notes: string;
   last_evaluated_at: string | null;
+  review_frequency_months?: number | null;
+  next_review_date?: string | null;
   mapped_controls: MappedControl[];
   suggested_status?: string;
   suggestion_differs?: boolean;
@@ -139,6 +141,11 @@ export interface ControlDetailInfo {
   notes: string;
   needs_revaluation?: boolean;
   needs_revaluation_since?: string | null;
+  /** Cadenza di riverifica in mesi impostata sul controllo; null = quella della policy del sito. */
+  review_frequency_months?: number | null;
+  next_review_date?: string | null;
+  /** Cadenza della policy del sito, in mesi — mostrata come valore predefinito. */
+  policy_review_months?: number;
   plant_id?: string;
   linked_assets?: AssetRef[];
   available_assets?: AssetRef[];

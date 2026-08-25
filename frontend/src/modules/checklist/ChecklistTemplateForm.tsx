@@ -4,6 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   checklistsApi,
+  CHECKLIST_FREQUENCIES,
+  MONTH_BASED_FREQUENCIES,
   type ChecklistFrequency,
   type ChecklistTemplateItem,
 } from "../../api/endpoints/checklists";
@@ -14,6 +16,8 @@ interface FormState {
   description: string;
   frequency: ChecklistFrequency;
   days_of_week: number[];
+  day_of_month: number;
+  start_month: number;
   plant: string;
   is_active: boolean;
   items: ChecklistTemplateItem[];
@@ -24,6 +28,8 @@ const EMPTY: FormState = {
   description: "",
   frequency: "daily",
   days_of_week: [],
+  day_of_month: 1,
+  start_month: 1,
   plant: "",
   is_active: true,
   items: [{ order: 0, text: "", is_mandatory: true }],
@@ -33,7 +39,7 @@ const EMPTY: FormState = {
 const WEEKDAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 
 export function ChecklistTemplateForm() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { id } = useParams();
@@ -60,6 +66,8 @@ export function ChecklistTemplateForm() {
         description: existing.description ?? "",
         frequency: existing.frequency,
         days_of_week: existing.days_of_week ?? [],
+        day_of_month: existing.day_of_month ?? 1,
+        start_month: existing.start_month ?? 1,
         plant: existing.plant ?? "",
         is_active: existing.is_active,
         items:
@@ -76,13 +84,24 @@ export function ChecklistTemplateForm() {
         name: form.name,
         description: form.description,
         frequency: form.frequency,
-        // days_of_week ha senso solo per la frequenza giornaliera.
-        days_of_week: form.frequency === "daily" ? form.days_of_week : [],
+        // I giorni valgono per giornaliera (più giorni) e settimanale (uno
+        // solo); il giorno del mese solo per la mensile.
+        days_of_week:
+          form.frequency === "daily"
+            ? form.days_of_week
+            : form.frequency === "weekly"
+              ? form.days_of_week.slice(0, 1)
+              : [],
+        day_of_month: isMonthBased ? form.day_of_month : 1,
+        start_month: isMonthBased ? form.start_month : 1,
         plant: form.plant || null,
         is_active: form.is_active,
+        // Si rimanda l'item completo (id compreso, quando esiste): il backend
+        // aggiorna in place gli item già usati dai run e conserva tipo, unità
+        // e soglie numeriche non modificabili da questo form.
         items: form.items
           .filter((it) => it.text.trim())
-          .map((it, i) => ({ order: i, text: it.text.trim(), is_mandatory: it.is_mandatory })),
+          .map((it, i) => ({ ...it, order: i, text: it.text.trim() })),
       };
       return isEdit
         ? checklistsApi.updateTemplate(id!, payload)
@@ -123,13 +142,22 @@ export function ChecklistTemplateForm() {
   }
 
   function toggleDay(day: number) {
-    setForm((prev) => ({
-      ...prev,
-      days_of_week: prev.days_of_week.includes(day)
-        ? prev.days_of_week.filter((d) => d !== day)
-        : [...prev.days_of_week, day].sort((a, b) => a - b),
-    }));
+    setForm((prev) => {
+      // Settimanale: un solo giorno di generazione, il click sostituisce.
+      if (prev.frequency === "weekly") return { ...prev, days_of_week: [day] };
+      return {
+        ...prev,
+        days_of_week: prev.days_of_week.includes(day)
+          ? prev.days_of_week.filter((d) => d !== day)
+          : [...prev.days_of_week, day].sort((a, b) => a - b),
+      };
+    });
   }
+
+  const isMonthBased = MONTH_BASED_FREQUENCIES.includes(form.frequency);
+  // Nomi dei mesi nella lingua attiva: evita 12 stringhe tradotte a mano.
+  const monthName = (m: number) =>
+    new Date(2026, m - 1, 1).toLocaleDateString(i18n.language, { month: "long" });
 
   const canSave = form.name.trim() && form.items.some((it) => it.text.trim());
 
@@ -173,7 +201,7 @@ export function ChecklistTemplateForm() {
               onChange={(e) => setForm({ ...form, frequency: e.target.value as ChecklistFrequency })}
               className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
             >
-              {["daily", "weekly", "monthly", "ad_hoc"].map((f) => (
+              {CHECKLIST_FREQUENCIES.map((f) => (
                 <option key={f} value={f}>{t(`checklists.frequency.${f}`)}</option>
               ))}
             </select>
@@ -193,14 +221,19 @@ export function ChecklistTemplateForm() {
           </div>
         </div>
 
-        {form.frequency === "daily" && (
+        {(form.frequency === "daily" || form.frequency === "weekly") && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("checklists.templates.days_of_week")}
+              {form.frequency === "weekly"
+                ? t("checklists.templates.day_of_week")
+                : t("checklists.templates.days_of_week")}
             </label>
             <div className="flex flex-wrap gap-1.5">
               {WEEKDAY_KEYS.map((key, day) => {
-                const selected = form.days_of_week.includes(day);
+                const selected =
+                  form.frequency === "weekly"
+                    ? (form.days_of_week[0] ?? 0) === day
+                    : form.days_of_week.includes(day);
                 return (
                   <button
                     key={key}
@@ -220,9 +253,65 @@ export function ChecklistTemplateForm() {
               })}
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              {t("checklists.templates.days_of_week_hint")}
+              {form.frequency === "weekly"
+                ? t("checklists.templates.day_of_week_hint")
+                : t("checklists.templates.days_of_week_hint")}
             </p>
           </div>
+        )}
+
+        {isMonthBased && (
+          <div className="grid grid-cols-2 gap-3">
+            {form.frequency !== "monthly" && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t("checklists.templates.start_month")}
+                </label>
+                <select
+                  value={form.start_month}
+                  onChange={(e) => setForm({ ...form, start_month: Number(e.target.value) })}
+                  className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                >
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                    <option key={m} value={m} className="capitalize">{monthName(m)}</option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  {t("checklists.templates.start_month_hint")}
+                </p>
+              </div>
+            )}
+            <div className={form.frequency === "monthly" ? "col-span-2" : ""}>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {form.frequency === "monthly"
+                ? t("checklists.templates.day_of_month")
+                : t("checklists.templates.day_of_period")}
+            </label>
+            <select
+              value={form.day_of_month}
+              onChange={(e) => setForm({ ...form, day_of_month: Number(e.target.value) })}
+              className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+            >
+              {Array.from({ length: 28 }, (_, i) => i + 1).map((d) => (
+                <option key={d} value={d}>
+                  {t("checklists.templates.day_of_month_option", { day: d })}
+                </option>
+              ))}
+              <option value={0}>{t("checklists.templates.day_of_month_last")}</option>
+            </select>
+            <p className="text-xs text-gray-500 mt-1">
+              {form.frequency === "monthly"
+                ? t("checklists.templates.day_of_month_hint")
+                : t("checklists.templates.day_of_period_hint")}
+            </p>
+            </div>
+          </div>
+        )}
+
+        {form.frequency === "ad_hoc" && (
+          <p className="text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded px-3 py-2">
+            {t("checklists.templates.ad_hoc_hint")}
+          </p>
         )}
 
         <label className="flex items-center gap-2 text-sm text-gray-700">

@@ -27,11 +27,14 @@ from .frameworks import (
     preview_framework_import,
 )
 from .instances import (
+    EVALUATED_STATUSES,
+    apply_review_schedule,
     can_delete_instance,
     delete_control,
     delete_control_instance,
     evaluate_control,
     propagate_control,
+    resolve_review_due_date,
     validate_exclusion,
 )
 from .gap import run_gap_analysis
@@ -42,6 +45,8 @@ from .reporting import (
 )
 
 __all__ = [
+    "EVALUATED_STATUSES",
+    "apply_review_schedule",
     "archive_framework",
     "calc_suggested_status",
     "check_evidence_requirements",
@@ -57,6 +62,7 @@ __all__ = [
     "get_extender_instances",
     "import_framework_payload",
     "is_covered_by_extender",
+    "resolve_review_due_date",
     "list_framework_governance_metadata",
     "preview_framework_import",
     "propagate_control",

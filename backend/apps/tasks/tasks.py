@@ -12,11 +12,13 @@ def generate_scheduled_checklists(self):
     """
     Ogni giorno alle 07:00:
     1) marca come 'overdue' i run pending/in_progress con due_date passata;
-    2) genera i ChecklistRun di oggi per ogni template attivo, in base alla
-       frequenza, evitando duplicati su (template, plant, data odierna);
+    2) genera i ChecklistRun di competenza per ogni template attivo, in base
+       alla frequenza e al giorno configurato, evitando duplicati su
+       (template, plant, scadenza);
     3) valuta la soglia PDCA: 3 run consecutivi incompleti aprono un ciclo M11.
 
-    I template ad_hoc non vengono mai generati automaticamente.
+    I template ad_hoc non vengono mai generati automaticamente: si avviano a
+    mano dalla UI (services.start_manual_run).
     """
     from apps.plants.models import Plant
 
@@ -31,20 +33,9 @@ def generate_scheduled_checklists(self):
     )
     overdue_count = overdue_qs.update(status="overdue", updated_at=timezone.now())
 
-    # 2) Generazione run odierni in base alla frequenza.
-    def _is_due_today(template) -> bool:
-        freq = template.frequency
-        if freq == "daily":
-            # days_of_week vuoto → tutti i giorni (storico); altrimenti solo i
-            # giorni indicati (es. [0..4] = solo feriali).
-            days = template.days_of_week or []
-            return today.weekday() in days if days else True
-        if freq == "weekly":
-            return today.weekday() == 0  # lunedì
-        if freq == "monthly":
-            return today.day == 1
-        return False  # ad_hoc: solo manuale
-
+    # 2) Generazione dei run di competenza (vedi services.checklist_due_date_for:
+    #    giorno scelto per giornaliera/settimanale/mensile, scadenza a fine
+    #    periodo, recupero del periodo ancora scoperto).
     created_count = 0
     templates = (
         ChecklistTemplate.objects.filter(is_active=True)
@@ -52,7 +43,8 @@ def generate_scheduled_checklists(self):
         .prefetch_related("items")
     )
     for template in templates:
-        if not _is_due_today(template):
+        due_date = services.checklist_due_date_for(template, today)
+        if due_date is None:
             continue
         if template.plant_id:
             target_plants = [template.plant]
@@ -61,9 +53,9 @@ def generate_scheduled_checklists(self):
             target_plants = list(Plant.objects.filter(status="attivo"))
         for plant in target_plants:
             already = ChecklistRun.objects.filter(
-                template=template, plant=plant, due_date=today
+                template=template, plant=plant, due_date=due_date
             ).exists()
-            services.create_run_for_template(template, plant, today)
+            services.create_run_for_template(template, plant, due_date)
             if not already:
                 created_count += 1
 
@@ -140,3 +132,48 @@ def compute_operational_kpis(self):
         f"compute_operational_kpis: {snapshot_count} snapshot, "
         f"{alert_count} alert inviati (week_start={week_start})"
     )
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), max_retries=3, retry_backoff=True)
+def roll_recurring_tasks(self):
+    """
+    Ogni notte: i task ricorrenti la cui scadenza è passata senza che siano
+    stati chiusi generano comunque l'occorrenza successiva.
+
+    Prima la ricorrenza si propagava SOLO alla chiusura (`complete_task`): un
+    task ricorrente scaduto e mai completato interrompeva la serie in
+    silenzio, senza alcun segnale. Su una verifica annuale ci si sarebbe
+    accorti del buco l'anno dopo, in audit.
+
+    Il task mancato NON viene chiuso né modificato: resta aperto come traccia
+    del periodo saltato, e accanto compare l'occorrenza del periodo nuovo.
+    """
+    from django.db.models import Exists, OuterRef
+
+    from . import services
+    from .models import Task
+
+    today = timezone.localdate()
+    # Un task che ha già un figlio ha già propagato la ricorrenza.
+    has_child = Task.objects.filter(parent_task=OuterRef("pk"))
+    pending = (
+        Task.objects.filter(
+            recurrence__in=Task.RECURRENCE_STEPS.keys(),
+            due_date__lt=today,
+            status__in=["aperto", "in_corso", "scaduto"],
+        )
+        .annotate(already_rolled=Exists(has_child))
+        .filter(already_rolled=False)
+        .select_related("plant")
+    )
+
+    created = 0
+    for task in pending:
+        note = (
+            f"Occorrenza generata automaticamente: la precedente, in scadenza "
+            f"il {task.due_date}, non è stata completata."
+        )
+        if services._spawn_next_recurrence(task, note=note) is not None:
+            created += 1
+
+    return f"roll_recurring_tasks: {created} occorrenze ricorrenti generate"

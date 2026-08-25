@@ -169,6 +169,18 @@ class ControlInstance(BaseModel):
     )
     needs_revaluation_since = models.DateField(null=True, blank=True)
 
+    # Riverifica periodica del controllo (semestrale, annuale, …). La cadenza
+    # è quella della policy del sito (regola `control_review`, default 1 anno)
+    # se qui non è indicato nulla: un valore esplicito è un'eccezione motivata
+    # sul singolo controllo (es. controlli critici da rivedere ogni 6 mesi).
+    review_frequency_months = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        help_text="Cadenza di riverifica in mesi; vuoto = cadenza della policy del sito.",
+    )
+    # Data della prossima riverifica, ricalcolata a ogni valutazione.
+    next_review_date = models.DateField(null=True, blank=True, db_index=True)
+
     # Applicabilità per SOA ISO 27001
     applicability = models.CharField(
         max_length=20,

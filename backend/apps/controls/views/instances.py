@@ -207,6 +207,16 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 plant_id=plant_id, deleted_at__isnull=True
             ).only("id", "name", "asset_type").order_by("name")
 
+        def _policy_review_months(ci):
+            """Cadenza di riverifica della policy del sito, in mesi — serve alla
+            UI per dire "predefinita (12 mesi)" invece di un generico "policy"."""
+            from apps.compliance_schedule.services import get_due_date
+            import datetime
+
+            base = datetime.date(2000, 1, 1)
+            due = get_due_date("control_review", plant=ci.plant, from_date=base)
+            return (due.year - base.year) * 12 + (due.month - base.month)
+
         instance = self.get_object()
         lang = request.query_params.get("lang") or getattr(request, "LANGUAGE_CODE", None) or "it"
         control = instance.control
@@ -280,6 +290,11 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 ),
                 "needs_revaluation": instance.needs_revaluation,
                 "needs_revaluation_since": str(instance.needs_revaluation_since) if instance.needs_revaluation_since else None,
+                # Riverifica periodica: cadenza configurata sul controllo (o
+                # None = quella della policy del sito) e prossima scadenza.
+                "review_frequency_months": instance.review_frequency_months,
+                "next_review_date": str(instance.next_review_date) if instance.next_review_date else None,
+                "policy_review_months": _policy_review_months(instance),
                 "notes": instance.notes,
                 # Legame controllo↔asset (P1-5): asset collegati + asset disponibili
                 # del plant, per popolare il M2M dalla UI e restringere la cascata change.

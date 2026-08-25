@@ -31,6 +31,8 @@ from core.scoping import (
 from core.viewsets import SoftDeleteAuditMixin
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.dateparse import parse_date
+from django.utils.translation import gettext as _
 from apps.auth_grc.models import UserPlantAccess
 from apps.plants.models import Plant
 
@@ -168,6 +170,47 @@ class ChecklistTemplateViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             payload={"id": str(instance.pk), "name": instance.name},
         )
         instance.soft_delete()
+
+    @action(detail=True, methods=["post"], url_path="start-run")
+    def start_run(self, request, pk=None):
+        """Avvia subito una checklist da questo template: unica via per i
+        template ad hoc, che non sono schedulati, e riesecuzione fuori ciclo
+        per gli altri. Scadenza di default: fine del periodo corrente."""
+        template = self.get_object()
+
+        if template.plant_id:
+            plant = template.plant
+        else:
+            # Template globale: il sito va indicato esplicitamente.
+            plant_id = request.data.get("plant")
+            if not plant_id:
+                return Response(
+                    {"plant": _("Indicare il sito per cui avviare la checklist.")},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            plant = Plant.objects.filter(pk=plant_id, status="attivo").first()
+            if plant is None:
+                return Response(
+                    {"plant": _("Sito non trovato o non attivo.")},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        require_plant_access(request.user, plant)
+
+        due_date = request.data.get("due_date") or None
+        if due_date is not None:
+            due_date = parse_date(str(due_date))
+            if due_date is None:
+                return Response(
+                    {"due_date": _("Data non valida (formato atteso AAAA-MM-GG).")},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        run = services.start_manual_run(
+            template, plant, due_date=due_date, user=request.user
+        )
+        return Response(
+            ChecklistRunSerializer(run).data, status=status.HTTP_201_CREATED
+        )
 
 
 class ChecklistRunViewSet(

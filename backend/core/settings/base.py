@@ -135,6 +135,14 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.controls.tasks.check_expired_evidences",
         "schedule": crontab(hour=2, minute=5),  # 02:05 — fuori dalla finestra del backup (02:00)
     },
+    "check-control-reviews-due": {
+        "task": "apps.controls.tasks.check_control_reviews_due",
+        "schedule": crontab(hour=2, minute=15),  # 02:15 — dopo check-expired-evidences
+    },
+    "roll-recurring-tasks": {
+        "task": "apps.tasks.tasks.roll_recurring_tasks",
+        "schedule": crontab(hour=2, minute=20),  # 02:20 — dopo check-control-reviews-due
+    },
     "check-expired-bcp-plans": {
         "task": "apps.bcp.tasks.check_expired_bcp_plans",
         "schedule": crontab(hour=2, minute=10),

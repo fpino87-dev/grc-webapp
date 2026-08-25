@@ -424,6 +424,14 @@
           "title": "Wymagana ponowna ocena",
           "body": "Zarejestrowana zmiana{{hasSince, select, true { od {{since}}} other {}}} mogła wpłynąć na tę kontrolę. Sprawdź i zaktualizuj ocenę."
         },
+        "review": {
+          "title": "Weryfikacja okresowa",
+          "next": "Następna: {{date}}",
+          "not_scheduled": "Niezaplanowana",
+          "use_policy": "Domyślna dla zakładu ({{months}} mies.)",
+          "every_months": "Co {{count}} mies.",
+          "hint": "Każda ocena zeruje licznik. Kontrola pojawia się w terminarzu, a w odpowiednim momencie zostaje oznaczona „do ponownej oceny” wraz z zadaniem dla właściciela."
+        },
         "requirements": {
           "none": "Brak wymagań dokumentacyjnych dla tej kontroli.",
           "not_satisfied": "Wymagania niespełnione",
@@ -1435,13 +1443,24 @@
       "title": "Tytuł",
       "priority": "Priorytet",
       "due_date": "Termin",
-      "plant": "Zakład"
+      "plant": "Zakład",
+      "recurrence": "Cykliczność",
+      "recurrence_hint": "Po zamknięciu — lub po upływie terminu, jeśli pozostanie otwarte — zadanie powstaje ponownie na kolejny okres."
     },
     "priority": {
       "bassa": "niska",
       "media": "średnia",
       "alta": "wysoka",
       "critica": "krytyczna"
+    },
+    "recurrence": {
+      "none": "Brak",
+      "daily": "Codzienna",
+      "weekly": "Tygodniowa",
+      "monthly": "Miesięczna",
+      "quarterly": "Kwartalna",
+      "semiannual": "Półroczna",
+      "yearly": "Roczna"
     },
     "table": {
       "title": "Tytuł",
@@ -3826,6 +3845,23 @@
       "all_plants_short": "Wszystkie",
       "days_of_week": "Dni generowania",
       "days_of_week_hint": "Tylko dla częstotliwości dziennej. Brak wybranego dnia = każdy dzień (w tym sob./niedz.).",
+      "day_of_week": "Dzień generowania",
+      "day_of_week_hint": "Lista kontrolna jest tworzona w tym dniu i pozostaje do wypełnienia do niedzieli.",
+      "day_of_month": "Dzień miesiąca",
+      "day_of_month_option": "Dzień {{day}}",
+      "day_of_month_last": "Ostatni dzień miesiąca",
+      "day_of_month_hint": "Lista kontrolna jest tworzona w tym dniu i pozostaje do wypełnienia do końca miesiąca. W krótszych miesiącach dzień jest cofany do ostatniego dostępnego.",
+      "start_month": "Miesiąc rozpoczęcia cyklu",
+      "start_month_hint": "Zakotwicza okresy: cykl półroczny rozpoczynający się w marcu obejmuje marzec-sierpień i wrzesień-luty.",
+      "day_of_period": "Dzień otwarcia okresu",
+      "day_of_period_hint": "Dzień pierwszego miesiąca okresu, w którym tworzona jest lista kontrolna; pozostaje do wypełnienia do końca okresu.",
+      "ad_hoc_hint": "Listy doraźne nie są generowane automatycznie: uruchom je w razie potrzeby przyciskiem „Uruchom teraz” na liście szablonów.",
+      "start_now": "Uruchom teraz",
+      "start_now_hint": "Natychmiast utwórz listę kontrolną do wypełnienia na podstawie tego szablonu.",
+      "start_pick_plant": "Wybierz zakład…",
+      "start_due_date": "Termin",
+      "start_due_date_hint": "Puste = koniec bieżącego okresu (dzisiaj dla list doraźnych).",
+      "start_confirm": "Uruchom",
       "all_frequencies": "Wszystkie częstotliwości",
       "back": "Powrót do szablonów",
       "empty": "Nie znaleziono szablonów",
@@ -3866,6 +3902,9 @@
       "daily": "Codziennie",
       "weekly": "Co tydzień",
       "monthly": "Co miesiąc",
+      "quarterly": "Kwartalna",
+      "semiannual": "Półroczna",
+      "annual": "Roczna",
       "ad_hoc": "Doraźnie"
     },
     "weekdays": {

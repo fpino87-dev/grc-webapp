@@ -1,3 +1,4 @@
+import calendar
 import datetime
 
 from django.db import transaction
@@ -19,8 +20,13 @@ def create_task(
     assign_type=None,
     assign_value=None,
     control_instance=None,
+    recurrence="none",
 ):
-    """Crea un Task collegato a un modulo sorgente."""
+    """Crea un Task collegato a un modulo sorgente.
+
+    Con `recurrence` diversa da "none" il task è ricorrente: alla chiusura —
+    o alla scadenza, se resta aperto — nasce l'occorrenza successiva.
+    """
     from django.contrib.auth import get_user_model
 
     User = get_user_model()
@@ -47,6 +53,7 @@ def create_task(
         assigned_role=assign_value if assign_type == "role" else "",
         due_date=due_date,
         control_instance=control_instance,
+        recurrence=recurrence,
     )
 
 
@@ -70,30 +77,65 @@ def complete_task(task, user, notes=""):
         _spawn_next_recurrence(task)
 
 
-def _spawn_next_recurrence(task):
-    deltas = {
-        "daily": datetime.timedelta(days=1),
-        "weekly": datetime.timedelta(weeks=1),
-        "monthly": datetime.timedelta(days=30),
-        "quarterly": datetime.timedelta(days=90),
-        "yearly": datetime.timedelta(days=365),
-    }
-    delta = deltas.get(task.recurrence)
-    if not delta or not task.due_date:
-        return
-    Task.objects.create(
+def next_recurrence_due_date(task, today=None):
+    """
+    Scadenza della prossima occorrenza di un task ricorrente, o `None` se il
+    task non è ricorrente o non ha una scadenza da cui contare.
+
+    Si parte dalla scadenza corrente e si avanza di un passo di calendario per
+    volta finché non si supera oggi: un task ricorrente chiuso (o mancato) con
+    molto ritardo genera così **una** occorrenza futura invece di una fila di
+    arretrati già scaduti. Il task mancato resta comunque a sistema come
+    traccia del periodo saltato.
+    """
+    from apps.compliance_schedule.services import _add_duration
+    from apps.plants.services import plant_today
+
+    step = Task.RECURRENCE_STEPS.get(task.recurrence)
+    if not step or not task.due_date:
+        return None
+
+    value, unit = step
+    today = today or plant_today(task.plant)
+    due = _add_duration(task.due_date, value, unit)
+    # Il limite è una rete di sicurezza contro dati incoerenti (es. scadenza
+    # nel 1900 con ricorrenza giornaliera), non un caso funzionale.
+    for _ in range(1000):
+        if due > today:
+            break
+        due = _add_duration(due, value, unit)
+    return due
+
+
+def _spawn_next_recurrence(task, note=""):
+    """Crea l'occorrenza successiva. Idempotente: un task genera al massimo un
+    figlio, così chiusura e scadenza non possono duplicare la ricorrenza."""
+    if task.recurrence_children.exists():
+        return None
+
+    due_date = next_recurrence_due_date(task)
+    if due_date is None:
+        return None
+
+    return Task.objects.create(
         title=task.title,
         description=task.description,
         plant=task.plant,
         priority=task.priority,
         source=task.source,
+        # Il legame con il modulo di origine va portato avanti, altrimenti
+        # l'occorrenza successiva perde la tracciabilità della sorgente.
+        source_module=task.source_module,
+        source_id=task.source_id,
         assigned_role=task.assigned_role,
         assigned_to=task.assigned_to,
-        due_date=task.due_date + delta,
+        due_date=due_date,
         recurrence=task.recurrence,
         parent_task=task,
         control_instance=task.control_instance,
+        risk_assessment=task.risk_assessment,
         incident=task.incident,
+        notes=note,
     )
 
 
@@ -134,6 +176,159 @@ def _run_has_unchecked_mandatory(run) -> bool:
     return run.items.filter(
         template_item__is_mandatory=True, checked=False
     ).exists()
+
+
+def checklist_period_bounds(template, today):
+    """
+    Periodo di competenza che contiene `today`, come
+    `(inizio, fine, data_di_generazione)`.
+
+      * weekly  → la settimana lun-dom di `today`; genera nel giorno indicato
+        da `days_of_week[0]` (vuoto = lunedì, comportamento storico).
+      * monthly / quarterly / semiannual / annual → il periodo di 1, 3, 6 o 12
+        mesi che contiene `today`, ancorato a `start_month` (un semestrale
+        ancorato a marzo copre mar-ago e set-feb). Genera il giorno
+        `day_of_month` del mese di apertura (0 = ultimo giorno del mese); un
+        giorno oltre la fine di un mese corto arretra all'ultimo disponibile,
+        così il 31 non salta febbraio.
+      * daily / ad_hoc → il periodo è il giorno stesso.
+    """
+    from .models import ChecklistTemplate
+
+    freq = template.frequency
+    if freq == "weekly":
+        start = today - datetime.timedelta(days=today.weekday())
+        days = template.days_of_week or []
+        offset = days[0] if days else 0
+        return start, start + datetime.timedelta(days=6), start + datetime.timedelta(days=offset)
+    step = ChecklistTemplate.PERIOD_MONTHS.get(freq)
+    if step:
+        # Periodi ancorati a start_month e lunghi `step` mesi: si lavora in
+        # mesi assoluti (anno*12+mese) per non incappare nei cambi d'anno.
+        anchor = min(max(int(template.start_month or 1), 1), 12)
+        current = today.year * 12 + (today.month - 1)
+        offset = (current - (anchor - 1)) % step
+        start_abs = current - offset
+        end_abs = start_abs + step - 1
+        start = datetime.date(start_abs // 12, start_abs % 12 + 1, 1)
+        end_year, end_month = end_abs // 12, end_abs % 12 + 1
+        end = datetime.date(end_year, end_month, calendar.monthrange(end_year, end_month)[1])
+
+        start_last_day = calendar.monthrange(start.year, start.month)[1]
+        wanted = template.day_of_month
+        if not wanted or wanted == ChecklistTemplate.LAST_DAY_OF_MONTH:
+            gen_day = start_last_day
+        else:
+            gen_day = min(max(int(wanted), 1), start_last_day)
+        return start, end, start.replace(day=gen_day)
+    return today, today, today
+
+
+def checklist_due_date_for(template, today):
+    """
+    Scadenza del run di competenza per `today`, o `None` se il template oggi
+    non deve generare nulla.
+
+    Per settimanale e mensile la scadenza è la FINE del periodo (domenica /
+    ultimo giorno del mese): la checklist resta compilabile per tutto il
+    proprio periodo invece di risultare scaduta il giorno dopo la generazione.
+    La generazione avviene da `data_di_generazione` in poi, non solo in quel
+    giorno esatto: un periodo ancora scoperto viene così recuperato anche se
+    lo scheduler era fermo o se il template è stato attivato a metà periodo
+    (l'unicità su `(template, plant, due_date)` evita i doppioni).
+    """
+    freq = template.frequency
+    if freq == "ad_hoc":
+        return None  # solo avvio manuale
+    if freq == "daily":
+        days = template.days_of_week or []
+        if days and today.weekday() not in days:
+            return None
+        return today
+    _start, end, gen_date = checklist_period_bounds(template, today)
+    return end if today >= gen_date else None
+
+
+def start_manual_run(template, plant, due_date=None, user=None):
+    """
+    Avvia manualmente una checklist: unica via per i template `ad_hoc`, che
+    per definizione non sono schedulati, e scorciatoia per rieseguire un
+    template ricorrente fuori ciclo (es. dopo un incidente).
+    Idempotente su `(template, plant, due_date)` come la generazione automatica.
+    """
+    if due_date is None:
+        _start, due_date, _gen = checklist_period_bounds(template, timezone.localdate())
+
+    with transaction.atomic():
+        run = create_run_for_template(template, plant, due_date)
+        log_action(
+            user=user,
+            action_code="checklist_run.started_manually",
+            level="L1",
+            entity=run,
+            payload={
+                "id": str(run.pk),
+                "template": template.name,
+                "plant_id": str(plant.pk),
+                "due_date": str(due_date),
+            },
+        )
+    return run
+
+
+def sync_template_items(template, items_data):
+    """
+    Allinea gli item di un template alla lista inviata dal client.
+
+    Gli item già esistenti vengono aggiornati **in place**, mantenendo il loro
+    id: i ChecklistRunItem dei run già generati vi puntano con una FK PROTECT,
+    quindi cancellarli e ricrearli renderebbe il template non più salvabile e
+    farebbe perdere la storicità delle rilevazioni.
+    Gli item tolti dalla lista sono soft-deletati: restano leggibili nei run
+    passati ma non entrano nei run futuri.
+    """
+    from .models import ChecklistTemplateItem
+
+    OPTIONAL_FIELDS = (
+        "is_mandatory", "item_type", "unit", "numeric_min", "numeric_max",
+    )
+
+    existing = {str(item.pk): item for item in template.items.all()}
+    seen = set()
+    to_create = []
+
+    for idx, data in enumerate(items_data):
+        item = existing.get(str(data.get("id") or ""))
+        if item is not None:
+            seen.add(str(item.pk))
+            item.order = data.get("order", idx)
+            item.text = data["text"]
+            # I campi assenti dal payload conservano il valore corrente: un
+            # client "semplice" non deve azzerare tipo/unità/soglie numeriche.
+            for field in OPTIONAL_FIELDS:
+                if field in data:
+                    setattr(item, field, data[field])
+            item.save()
+        else:
+            to_create.append(
+                ChecklistTemplateItem(
+                    template=template,
+                    order=data.get("order", idx),
+                    text=data["text"],
+                    is_mandatory=data.get("is_mandatory", True),
+                    item_type=data.get("item_type", "checkbox"),
+                    unit=data.get("unit", ""),
+                    numeric_min=data.get("numeric_min"),
+                    numeric_max=data.get("numeric_max"),
+                )
+            )
+
+    if to_create:
+        ChecklistTemplateItem.objects.bulk_create(to_create)
+
+    for item_id, item in existing.items():
+        if item_id not in seen:
+            item.soft_delete()
 
 
 def create_run_for_template(template, plant, due_date):

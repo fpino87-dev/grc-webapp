@@ -2,10 +2,15 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { checklistsApi, type ChecklistTemplate } from "../../api/endpoints/checklists";
+import {
+  checklistsApi,
+  CHECKLIST_FREQUENCIES,
+  type ChecklistFrequency,
+  type ChecklistTemplate,
+} from "../../api/endpoints/checklists";
 import { plantsApi } from "../../api/endpoints/plants";
 
-type FrequencyFilter = "" | "daily" | "weekly" | "monthly" | "ad_hoc";
+type FrequencyFilter = "" | ChecklistFrequency;
 
 export function ChecklistTemplateList() {
   const { t } = useTranslation();
@@ -14,6 +19,10 @@ export function ChecklistTemplateList() {
   const [plantFilter, setPlantFilter] = useState("");
   const [freqFilter, setFreqFilter] = useState<FrequencyFilter>("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  // Template per cui è aperto il pannello di avvio manuale.
+  const [startTpl, setStartTpl] = useState<ChecklistTemplate | null>(null);
+  const [startPlant, setStartPlant] = useState("");
+  const [startDue, setStartDue] = useState("");
 
   const { data: plants } = useQuery({
     queryKey: ["plants"],
@@ -38,6 +47,32 @@ export function ChecklistTemplateList() {
       setConfirmDeleteId(null);
     },
   });
+
+  const startMutation = useMutation({
+    mutationFn: () =>
+      checklistsApi.startRun(startTpl!.id, {
+        ...(startPlant ? { plant: startPlant } : {}),
+        ...(startDue ? { due_date: startDue } : {}),
+      }),
+    onSuccess: (run) => {
+      qc.invalidateQueries({ queryKey: ["checklist-runs"] });
+      closeStart();
+      navigate(`/checklists/runs/${run.id}`);
+    },
+  });
+
+  function openStart(tpl: ChecklistTemplate) {
+    setStartTpl(tpl);
+    setStartPlant("");
+    setStartDue("");
+    startMutation.reset();
+  }
+
+  function closeStart() {
+    setStartTpl(null);
+    setStartPlant("");
+    setStartDue("");
+  }
 
   const templates: ChecklistTemplate[] = data?.results ?? [];
 
@@ -70,7 +105,7 @@ export function ChecklistTemplateList() {
           className="border rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
         >
           <option value="">{t("checklists.templates.all_frequencies")}</option>
-          {["daily", "weekly", "monthly", "ad_hoc"].map((f) => (
+          {CHECKLIST_FREQUENCIES.map((f) => (
             <option key={f} value={f}>{t(`checklists.frequency.${f}`)}</option>
           ))}
         </select>
@@ -135,13 +170,23 @@ export function ChecklistTemplateList() {
                           </button>
                         </>
                       ) : (
-                        <button
-                          onClick={() => setConfirmDeleteId(tpl.id)}
-                          className="text-xs text-gray-400 hover:text-red-600"
-                          title={t("actions.delete")}
-                        >
-                          ✕
-                        </button>
+                        <>
+                          <button
+                            onClick={() => openStart(tpl)}
+                            disabled={!tpl.is_active}
+                            className="text-xs text-primary-700 hover:text-primary-900 border border-primary-300 rounded px-2 py-0.5 hover:bg-primary-50 disabled:opacity-40 disabled:hover:bg-transparent"
+                            title={t("checklists.templates.start_now_hint")}
+                          >
+                            ▶ {t("checklists.templates.start_now")}
+                          </button>
+                          <button
+                            onClick={() => setConfirmDeleteId(tpl.id)}
+                            className="text-xs text-gray-400 hover:text-red-600"
+                            title={t("actions.delete")}
+                          >
+                            ✕
+                          </button>
+                        </>
                       )}
                     </div>
                   </td>
@@ -151,6 +196,74 @@ export function ChecklistTemplateList() {
           </table>
         )}
       </div>
+
+      {startTpl && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 p-4">
+          <div className="bg-white rounded-lg shadow-lg border border-gray-200 w-full max-w-md p-5">
+            <h3 className="text-base font-semibold text-gray-900 mb-1">
+              {t("checklists.templates.start_now")}
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">{startTpl.name}</p>
+
+            {!startTpl.plant && (
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t("checklists.templates.plant")}
+                </label>
+                <select
+                  value={startPlant}
+                  onChange={(e) => setStartPlant(e.target.value)}
+                  className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                >
+                  <option value="">{t("checklists.templates.start_pick_plant")}</option>
+                  {(plants ?? []).map((p) => (
+                    <option key={p.id} value={p.id}>{p.code} — {p.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("checklists.templates.start_due_date")}
+              </label>
+              <input
+                type="date"
+                value={startDue}
+                onChange={(e) => setStartDue(e.target.value)}
+                className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                {t("checklists.templates.start_due_date_hint")}
+              </p>
+            </div>
+
+            {startMutation.isError && (
+              <p className="text-sm text-red-600 mt-2">{t("common.save_error")}</p>
+            )}
+
+            <div className="flex justify-end gap-2 pt-4">
+              <button
+                onClick={closeStart}
+                className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50"
+              >
+                {t("actions.cancel")}
+              </button>
+              <button
+                onClick={() => startMutation.mutate()}
+                disabled={
+                  startMutation.isPending || (!startTpl.plant && !startPlant)
+                }
+                className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
+              >
+                {startMutation.isPending
+                  ? t("common.saving")
+                  : t("checklists.templates.start_confirm")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

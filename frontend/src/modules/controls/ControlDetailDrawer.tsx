@@ -113,6 +113,9 @@ export function ControlDetailDrawer({ instanceId, onClose }: Props) {
                   soaApprovedByName={info.soa_approved_by_name}
                   needsRevaluation={info.needs_revaluation}
                   needsRevaluationSince={info.needs_revaluation_since}
+                  reviewFrequencyMonths={info.review_frequency_months}
+                  nextReviewDate={info.next_review_date}
+                  policyReviewMonths={info.policy_review_months}
                   initialNotes={info.notes}
                   linkedAssets={info.linked_assets ?? []}
                   availableAssets={info.available_assets ?? []}

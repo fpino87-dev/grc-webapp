@@ -1,13 +1,48 @@
 import { apiClient } from "../client";
 
-export type ChecklistFrequency = "daily" | "weekly" | "monthly" | "ad_hoc";
+export type ChecklistFrequency =
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "quarterly"
+  | "semiannual"
+  | "annual"
+  | "ad_hoc";
+
+/** Tutte le frequenze, nell'ordine in cui vanno mostrate nella UI. */
+export const CHECKLIST_FREQUENCIES: ChecklistFrequency[] = [
+  "daily",
+  "weekly",
+  "monthly",
+  "quarterly",
+  "semiannual",
+  "annual",
+  "ad_hoc",
+];
+
+/** Frequenze il cui periodo si misura in mesi: usano day_of_month (+ start_month
+ *  per quelle più lunghe di un mese). */
+export const MONTH_BASED_FREQUENCIES: ChecklistFrequency[] = [
+  "monthly",
+  "quarterly",
+  "semiannual",
+  "annual",
+];
 export type ChecklistRunStatus = "pending" | "in_progress" | "completed" | "overdue";
 
+export type ChecklistItemType = "checkbox" | "numeric" | "text";
+
 export interface ChecklistTemplateItem {
+  /** Presente sugli item già salvati: il backend lo usa per aggiornarli in
+   *  place invece di ricrearli (i run storici vi puntano). */
   id?: string;
   order: number;
   text: string;
   is_mandatory: boolean;
+  item_type?: ChecklistItemType;
+  unit?: string;
+  numeric_min?: string | null;
+  numeric_max?: string | null;
 }
 
 export interface ChecklistTemplate {
@@ -15,8 +50,14 @@ export interface ChecklistTemplate {
   name: string;
   description: string;
   frequency: ChecklistFrequency;
-  /** Giorni 0=lun … 6=dom in cui generare il run (solo frequency="daily"; vuoto=tutti). */
+  /** Giorni 0=lun … 6=dom in cui generare il run.
+   *  daily: tutti i giorni indicati (vuoto = tutti e 7).
+   *  weekly: il primo giorno indicato (vuoto = lunedì). */
   days_of_week?: number[];
+  /** Frequenze a mesi: giorno del mese 1-28, 0 = ultimo giorno del mese. */
+  day_of_month?: number;
+  /** Trimestrale/semestrale/annuale: mese di partenza del ciclo (1-12). */
+  start_month?: number;
   plant: string | null;
   plant_name?: string | null;
   is_active: boolean;
@@ -72,6 +113,11 @@ export const checklistsApi = {
     apiClient.patch<ChecklistTemplate>(`${TPL}${id}/`, data).then((r) => r.data),
   deleteTemplate: (id: string) =>
     apiClient.delete(`${TPL}${id}/`).then((r) => r.data),
+  /** Avvia subito una checklist da un template: unica via per gli "ad hoc",
+   *  riesecuzione fuori ciclo per gli altri. `due_date` omessa = fine del
+   *  periodo corrente (oggi per gli ad hoc). */
+  startRun: (id: string, data?: { plant?: string; due_date?: string }) =>
+    apiClient.post<ChecklistRun>(`${TPL}${id}/start-run/`, data ?? {}).then((r) => r.data),
 
   // Run
   listRuns: (params?: Record<string, string>) =>

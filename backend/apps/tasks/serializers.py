@@ -1,6 +1,8 @@
+from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
+from . import services
 from .models import (
     ChecklistRun,
     ChecklistRunItem,
@@ -32,6 +34,10 @@ class TaskSerializer(serializers.ModelSerializer):
 
 
 class ChecklistTemplateItemSerializer(serializers.ModelSerializer):
+    # `id` scrivibile: identifica l'item esistente da aggiornare in place
+    # invece di ricrearlo (vedi services.sync_template_items).
+    id = serializers.UUIDField(required=False)
+
     class Meta:
         model = ChecklistTemplateItem
         fields = [
@@ -50,9 +56,9 @@ class ChecklistTemplateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChecklistTemplate
         fields = [
-            "id", "name", "description", "frequency", "days_of_week", "plant",
-            "plant_name", "is_active", "items", "runs_count", "created_at",
-            "updated_at",
+            "id", "name", "description", "frequency", "days_of_week",
+            "day_of_month", "start_month", "plant", "plant_name", "is_active",
+            "items", "runs_count", "created_at", "updated_at",
         ]
 
     def get_runs_count(self, obj):
@@ -73,35 +79,51 @@ class ChecklistTemplateSerializer(serializers.ModelSerializer):
                 cleaned.append(day)
         return sorted(cleaned)
 
-    def _sync_items(self, template, items_data):
-        template.items.all().delete()
-        ChecklistTemplateItem.objects.bulk_create([
-            ChecklistTemplateItem(
-                template=template,
-                order=item.get("order", idx),
-                text=item["text"],
-                is_mandatory=item.get("is_mandatory", True),
-                item_type=item.get("item_type", "checkbox"),
-                unit=item.get("unit", ""),
-                numeric_min=item.get("numeric_min"),
-                numeric_max=item.get("numeric_max"),
+    def validate_day_of_month(self, value):
+        # 0 = ultimo giorno del mese. Il massimo è 28 e non 31: un giorno più
+        # avanti non esiste in ogni mese e chi vuole "fine mese" ha l'opzione
+        # dedicata, che è sempre l'ultimo giorno reale.
+        if value is None:
+            return 1
+        if not 0 <= value <= 28:
+            raise serializers.ValidationError(
+                _("Indicare un giorno da 1 a 28, oppure 0 per l'ultimo giorno del mese.")
             )
-            for idx, item in enumerate(items_data)
-        ])
+        return value
 
+    def validate_start_month(self, value):
+        if value is None:
+            return 1
+        if not 1 <= value <= 12:
+            raise serializers.ValidationError(
+                _("Il mese di partenza deve essere compreso fra 1 (gennaio) e 12 (dicembre).")
+            )
+        return value
+
+    def validate(self, attrs):
+        frequency = attrs.get("frequency") or getattr(self.instance, "frequency", "daily")
+        days = attrs.get("days_of_week")
+        if frequency == "weekly" and days and len(days) > 1:
+            raise serializers.ValidationError({
+                "days_of_week": _("Per la frequenza settimanale indicare un solo giorno.")
+            })
+        return attrs
+
+    @transaction.atomic
     def create(self, validated_data):
         items_data = validated_data.pop("items", [])
         template = ChecklistTemplate.objects.create(**validated_data)
-        self._sync_items(template, items_data)
+        services.sync_template_items(template, items_data)
         return template
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         items_data = validated_data.pop("items", None)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
         if items_data is not None:
-            self._sync_items(instance, items_data)
+            services.sync_template_items(instance, items_data)
         return instance
 
 

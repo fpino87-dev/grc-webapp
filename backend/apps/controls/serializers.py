@@ -64,6 +64,9 @@ class ControlInstanceSerializer(serializers.ModelSerializer):
             "soa_approved_by",
             "needs_revaluation",
             "needs_revaluation_since",
+            #   next_review_date → ricalcolata dal service a ogni valutazione
+            #   (review_frequency_months resta scrivibile: è configurazione)
+            "next_review_date",
             "created_at",
             "updated_at",
             "created_by",

@@ -1,11 +1,30 @@
 import { apiClient } from "../client";
 
+export type TaskRecurrence =
+  | "none"
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "quarterly"
+  | "semiannual"
+  | "yearly";
+
+export const TASK_RECURRENCES: TaskRecurrence[] = [
+  "none",
+  "daily",
+  "weekly",
+  "monthly",
+  "quarterly",
+  "semiannual",
+  "yearly",
+];
+
 export interface Task {
   id: string; title: string; description: string;
   plant: string | null; priority: "bassa"|"media"|"alta"|"critica";
   status: "aperto"|"in_corso"|"completato"|"annullato"|"scaduto";
   source: string; due_date: string | null;
-  assigned_to: string | null; recurrence: string; escalation_level: number;
+  assigned_to: string | null; recurrence: TaskRecurrence; escalation_level: number;
   source_module: string; source_id: string | null;
   control_instance: string | null;
 }

@@ -1,6 +1,40 @@
 from ..models import ControlInstance
 from .evidence import check_evidence_requirements
 
+# Stati che valgono come "controllo valutato": solo da questi parte il conteggio
+# della prossima riverifica periodica.
+EVALUATED_STATUSES = ("compliant", "parziale", "gap", "na")
+
+
+def resolve_review_due_date(instance, base=None):
+    """
+    Data della prossima riverifica del controllo a partire da `base`
+    (default: oggi nel fuso del sito).
+
+    La cadenza è quella indicata sul singolo controllo, se presente; altrimenti
+    quella della policy del sito per la regola `control_review` (1 anno di
+    default). Un unico posto dove si decide "ogni quanto va riguardato".
+    """
+    from apps.compliance_schedule.services import _add_duration, get_due_date
+    from apps.plants.services import plant_today
+
+    base = base or plant_today(instance.plant)
+    months = instance.review_frequency_months
+    if months:
+        return _add_duration(base, int(months), "months")
+    return get_due_date("control_review", plant=instance.plant, from_date=base)
+
+
+def apply_review_schedule(instance, base=None, save=True):
+    """Ricalcola `next_review_date`. Restituisce la data impostata (o None se
+    il controllo non è ancora stato valutato: non c'è nulla da riverificare)."""
+    if instance.status not in EVALUATED_STATUSES:
+        return None
+    instance.next_review_date = resolve_review_due_date(instance, base=base)
+    if save:
+        instance.save(update_fields=["next_review_date", "updated_at"])
+    return instance.next_review_date
+
 
 def evaluate_control(instance, new_status, user, note=""):
     from django.core.exceptions import ValidationError
@@ -72,6 +106,9 @@ def evaluate_control(instance, new_status, user, note=""):
         instance.needs_revaluation = False
         instance.needs_revaluation_since = None
         update_fields += ["needs_revaluation", "needs_revaluation_since"]
+    # La valutazione fa ripartire il conteggio della riverifica periodica.
+    if apply_review_schedule(instance, save=False) is not None:
+        update_fields.append("next_review_date")
     instance.save(update_fields=update_fields)
 
     log_action(

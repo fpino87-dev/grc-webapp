@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { tasksApi, type Task } from "../../api/endpoints/tasks";
+import { tasksApi, TASK_RECURRENCES, type Task } from "../../api/endpoints/tasks";
 import { plantsApi } from "../../api/endpoints/plants";
 import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
@@ -71,6 +71,20 @@ function NewTaskModal({ onClose }: { onClose: () => void }) {
                 className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
               />
             </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("tasks.fields.recurrence")}</label>
+            <select
+              name="recurrence"
+              defaultValue="none"
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+            >
+              {TASK_RECURRENCES.map((r) => (
+                <option key={r} value={r}>{t(`tasks.recurrence.${r}`)}</option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 mt-1">{t("tasks.fields.recurrence_hint")}</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t("tasks.fields.plant")}</label>

@@ -42,6 +42,9 @@ export function TabValutazione({
   soaApprovedByName,
   needsRevaluation,
   needsRevaluationSince,
+  reviewFrequencyMonths,
+  nextReviewDate,
+  policyReviewMonths,
   initialNotes,
   linkedAssets,
   availableAssets,
@@ -63,6 +66,9 @@ export function TabValutazione({
   soaApprovedByName: string | null;
   needsRevaluation?: boolean;
   needsRevaluationSince?: string | null;
+  reviewFrequencyMonths?: number | null;
+  nextReviewDate?: string | null;
+  policyReviewMonths?: number;
   initialNotes?: string;
   linkedAssets?: AssetRef[];
   availableAssets?: AssetRef[];
@@ -86,6 +92,11 @@ export function TabValutazione({
   const [notesSaved, setNotesSaved] = useState(false);
   const [assetIds, setAssetIds] = useState<string[]>((linkedAssets ?? []).map(a => a.id));
   const [assetsSaved, setAssetsSaved] = useState(false);
+  // "" = usa la cadenza della policy del sito
+  const [reviewMonths, setReviewMonths] = useState<string>(
+    reviewFrequencyMonths != null ? String(reviewFrequencyMonths) : ""
+  );
+  const [reviewSaved, setReviewSaved] = useState(false);
 
   const assetsMutation = useMutation({
     mutationFn: () => controlsApi.updateInstance(instanceId, { assets: assetIds }),
@@ -104,6 +115,19 @@ export function TabValutazione({
       qc.invalidateQueries({ queryKey: ["control-detail", instanceId] });
       setNotesSaved(true);
       setTimeout(() => setNotesSaved(false), 2000);
+    },
+  });
+
+  const reviewMutation = useMutation({
+    mutationFn: () =>
+      controlsApi.updateInstance(instanceId, {
+        review_frequency_months: reviewMonths === "" ? null : Number(reviewMonths),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["controls"] });
+      qc.invalidateQueries({ queryKey: ["control-detail", instanceId] });
+      setReviewSaved(true);
+      setTimeout(() => setReviewSaved(false), 2000);
     },
   });
 
@@ -185,6 +209,64 @@ export function TabValutazione({
           </p>
         </div>
       )}
+
+      {/* Riverifica periodica */}
+      <div className="border border-gray-200 rounded-lg p-3">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            {t("controls.drawer.evaluation.review.title")}
+          </p>
+          {nextReviewDate ? (
+            <span
+              className={
+                "text-xs px-2 py-0.5 rounded font-medium " +
+                (new Date(nextReviewDate) < new Date()
+                  ? "bg-red-100 text-red-700"
+                  : "bg-gray-100 text-gray-600")
+              }
+            >
+              {t("controls.drawer.evaluation.review.next", {
+                date: new Date(nextReviewDate).toLocaleDateString(i18n.language || "it"),
+              })}
+            </span>
+          ) : (
+            <span className="text-xs text-gray-400">
+              {t("controls.drawer.evaluation.review.not_scheduled")}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <select
+            value={reviewMonths}
+            onChange={e => setReviewMonths(e.target.value)}
+            className="flex-1 border rounded px-2 py-1.5 text-sm"
+          >
+            <option value="">
+              {t("controls.drawer.evaluation.review.use_policy", {
+                months: policyReviewMonths ?? 12,
+              })}
+            </option>
+            {[3, 6, 12, 24].map(m => (
+              <option key={m} value={m}>
+                {t("controls.drawer.evaluation.review.every_months", { count: m })}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => reviewMutation.mutate()}
+            disabled={
+              reviewMutation.isPending ||
+              reviewMonths === (reviewFrequencyMonths != null ? String(reviewFrequencyMonths) : "")
+            }
+            className="px-3 py-1.5 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+          >
+            {reviewSaved ? t("common.saved") : t("actions.save")}
+          </button>
+        </div>
+        <p className="text-xs text-gray-500 mt-1.5 leading-snug">
+          {t("controls.drawer.evaluation.review.hint")}
+        </p>
+      </div>
 
       {/* Banner requisiti */}
       <RequirementsBanner requirements={requirements} noRequirements={noRequirements} />

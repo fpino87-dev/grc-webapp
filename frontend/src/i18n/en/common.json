@@ -421,6 +421,14 @@
           "title": "Re-evaluation required",
           "body": "A recorded change{{hasSince, select, true { since {{since}}} other {}}} may have impacted this control. Please review and update the evaluation."
         },
+        "review": {
+          "title": "Periodic review",
+          "next": "Next: {{date}}",
+          "not_scheduled": "Not scheduled",
+          "use_policy": "Site default ({{months}} months)",
+          "every_months": "Every {{count}} months",
+          "hint": "Each evaluation restarts the countdown. The control appears in the schedule and, when due, is flagged “to re-assess” with a task for its owner."
+        },
         "requirements": {
           "none": "No documentary requirements defined for this control.",
           "not_satisfied": "Requirements not satisfied",
@@ -1435,13 +1443,24 @@
       "title": "Title",
       "priority": "Priority",
       "due_date": "Due date",
-      "plant": "Site"
+      "plant": "Site",
+      "recurrence": "Recurrence",
+      "recurrence_hint": "When closed — or when it expires, if left open — the task is recreated for the next period."
     },
     "priority": {
       "bassa": "low",
       "media": "medium",
       "alta": "high",
       "critica": "critical"
+    },
+    "recurrence": {
+      "none": "None",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "semiannual": "Half-yearly",
+      "yearly": "Annual"
     },
     "table": {
       "title": "Title",
@@ -3826,6 +3845,23 @@
       "all_plants_short": "All",
       "days_of_week": "Generation days",
       "days_of_week_hint": "Daily frequency only. No day selected = every day (incl. Sat/Sun).",
+      "day_of_week": "Generation day",
+      "day_of_week_hint": "The checklist is created on this day and stays open until Sunday.",
+      "day_of_month": "Day of the month",
+      "day_of_month_option": "Day {{day}}",
+      "day_of_month_last": "Last day of the month",
+      "day_of_month_hint": "The checklist is created on this day and stays open until the end of the month. In shorter months the day falls back to the last available one.",
+      "start_month": "Cycle start month",
+      "start_month_hint": "Anchors the periods: a half-yearly cycle starting in March covers March-August and September-February.",
+      "day_of_period": "Period opening day",
+      "day_of_period_hint": "Day of the period's first month when the checklist is created; it stays open until the end of the period.",
+      "ad_hoc_hint": "Ad hoc checklists are never generated automatically: start them when needed with “Start now” from the template list.",
+      "start_now": "Start now",
+      "start_now_hint": "Immediately create a checklist to fill in from this template.",
+      "start_pick_plant": "Select a site…",
+      "start_due_date": "Due date",
+      "start_due_date_hint": "Empty = end of the current period (today for ad hoc checklists).",
+      "start_confirm": "Start",
       "all_frequencies": "All frequencies",
       "back": "Back to templates",
       "empty": "No templates found",
@@ -3866,6 +3902,9 @@
       "daily": "Daily",
       "weekly": "Weekly",
       "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "semiannual": "Half-yearly",
+      "annual": "Annual",
       "ad_hoc": "Ad hoc"
     },
     "weekdays": {

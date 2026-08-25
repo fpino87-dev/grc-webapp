@@ -424,6 +424,14 @@
           "title": "Yeniden değerlendirme gerekli",
           "body": "Kayıtlı bir değişiklik{{hasSince, select, true { {{since}} tarihinden beri} other {}}} bu kontrolü etkilemiş olabilir. Lütfen değerlendirmeyi gözden geçirin."
         },
+        "review": {
+          "title": "Periyodik yeniden doğrulama",
+          "next": "Sonraki: {{date}}",
+          "not_scheduled": "Planlanmadı",
+          "use_policy": "Tesis varsayılanı ({{months}} ay)",
+          "every_months": "Her {{count}} ayda bir",
+          "hint": "Her değerlendirme sayacı sıfırlar. Kontrol takvimde görünür ve zamanı geldiğinde sahibine bir görevle birlikte «yeniden değerlendirilecek» olarak işaretlenir."
+        },
         "requirements": {
           "none": "Bu kontrol için belgesel gereksinim tanımlanmamış.",
           "not_satisfied": "Gereksinimler karşılanmadı",
@@ -1435,13 +1443,24 @@
       "title": "Başlık",
       "priority": "Öncelik",
       "due_date": "Son tarih",
-      "plant": "Site"
+      "plant": "Site",
+      "recurrence": "Yinelenme",
+      "recurrence_hint": "Kapatıldığında — ya da açık kalırsa süresi dolduğunda — görev sonraki dönem için yeniden oluşturulur."
     },
     "priority": {
       "bassa": "düşük",
       "media": "orta",
       "alta": "yüksek",
       "critica": "kritik"
+    },
+    "recurrence": {
+      "none": "Yok",
+      "daily": "Günlük",
+      "weekly": "Haftalık",
+      "monthly": "Aylık",
+      "quarterly": "Üç aylık",
+      "semiannual": "Altı aylık",
+      "yearly": "Yıllık"
     },
     "table": {
       "title": "Başlık",
@@ -3826,6 +3845,23 @@
       "all_plants_short": "Tümü",
       "days_of_week": "Oluşturma günleri",
       "days_of_week_hint": "Yalnızca günlük sıklık için. Hiçbir gün seçilmezse = her gün (Cmt/Paz dahil).",
+      "day_of_week": "Oluşturma günü",
+      "day_of_week_hint": "Kontrol listesi bu gün oluşturulur ve pazar gününe kadar doldurulabilir.",
+      "day_of_month": "Ayın günü",
+      "day_of_month_option": "{{day}}. gün",
+      "day_of_month_last": "Ayın son günü",
+      "day_of_month_hint": "Kontrol listesi bu gün oluşturulur ve ay sonuna kadar doldurulabilir. Daha kısa aylarda gün, mevcut son güne çekilir.",
+      "start_month": "Döngü başlangıç ayı",
+      "start_month_hint": "Dönemleri sabitler: mart ayında başlayan altı aylık bir döngü mart-ağustos ve eylül-şubat dönemlerini kapsar.",
+      "day_of_period": "Dönem açılış günü",
+      "day_of_period_hint": "Kontrol listesinin oluşturulduğu, dönemin ilk ayındaki gün; dönem sonuna kadar doldurulabilir kalır.",
+      "ad_hoc_hint": "Ad hoc kontrol listeleri otomatik oluşturulmaz: gerektiğinde şablon listesindeki «Şimdi başlat» ile başlatılır.",
+      "start_now": "Şimdi başlat",
+      "start_now_hint": "Bu şablondan doldurulacak bir kontrol listesini hemen oluşturur.",
+      "start_pick_plant": "Bir tesis seçin…",
+      "start_due_date": "Son tarih",
+      "start_due_date_hint": "Boş = mevcut dönemin sonu (ad hoc listelerde bugün).",
+      "start_confirm": "Başlat",
       "all_frequencies": "Tüm sıklıklar",
       "back": "Şablonlara dön",
       "empty": "Şablon bulunamadı",
@@ -3866,6 +3902,9 @@
       "daily": "Günlük",
       "weekly": "Haftalık",
       "monthly": "Aylık",
+      "quarterly": "Üç aylık",
+      "semiannual": "Altı aylık",
+      "annual": "Yıllık",
       "ad_hoc": "Tek seferlik"
     },
     "weekdays": {

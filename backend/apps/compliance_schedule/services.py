@@ -179,6 +179,28 @@ def get_activity_schedule(plant=None, months_ahead: int = 6) -> list[dict]:
     except Exception:
         logger.exception("Errore nel calcolo delle scadenze evidenze", exc_info=True)
 
+    # Control instances — periodic re-verification due
+    try:
+        from apps.controls.models import ControlInstance
+
+        ci_qs = ControlInstance.objects.filter(
+            deleted_at__isnull=True,
+            applicability="applicabile",
+            next_review_date__isnull=False,
+        ).select_related("control")
+        if plant:
+            ci_qs = ci_qs.filter(**plant_filter)
+        for ci in ci_qs:
+            _add(
+                "control_review",
+                f"Controllo: {ci.control.external_id}",
+                ci.next_review_date,
+                ci.status,
+                str(ci.id),
+            )
+    except Exception:
+        logger.exception("Errore nel calcolo delle riverifiche controlli", exc_info=True)
+
     # Risk assessments — next review due
     try:
         from apps.risk.models import RiskAssessment

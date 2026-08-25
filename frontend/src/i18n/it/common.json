@@ -421,6 +421,14 @@
           "title": "Rivalutazione richiesta",
           "body": "Un change registrato{{hasSince, select, true { dal {{since}}} other {}}} potrebbe aver impattato questo controllo. Verificare e aggiornare la valutazione."
         },
+        "review": {
+          "title": "Riverifica periodica",
+          "next": "Prossima: {{date}}",
+          "not_scheduled": "Non pianificata",
+          "use_policy": "Predefinita del sito ({{months}} mesi)",
+          "every_months": "Ogni {{count}} mesi",
+          "hint": "Ogni valutazione fa ripartire il conteggio. Il controllo compare nello scadenzario e, al momento giusto, viene marcato «da rivalutare» con un task all'owner."
+        },
         "requirements": {
           "none": "Nessun requisito documentale definito per questo controllo.",
           "not_satisfied": "Requisiti non soddisfatti",
@@ -1435,13 +1443,24 @@
       "title": "Titolo",
       "priority": "Priorità",
       "due_date": "Scadenza",
-      "plant": "Sito"
+      "plant": "Sito",
+      "recurrence": "Ricorrenza",
+      "recurrence_hint": "Alla chiusura — o alla scadenza, se resta aperto — il task rinasce per il periodo successivo."
     },
     "priority": {
       "bassa": "bassa",
       "media": "media",
       "alta": "alta",
       "critica": "critica"
+    },
+    "recurrence": {
+      "none": "Nessuna",
+      "daily": "Giornaliera",
+      "weekly": "Settimanale",
+      "monthly": "Mensile",
+      "quarterly": "Trimestrale",
+      "semiannual": "Semestrale",
+      "yearly": "Annuale"
     },
     "table": {
       "title": "Titolo",
@@ -3816,6 +3835,23 @@
       "frequency": "Frequenza",
       "days_of_week": "Giorni di generazione",
       "days_of_week_hint": "Solo per frequenza giornaliera. Nessun giorno selezionato = tutti i giorni (sab/dom inclusi).",
+      "day_of_week": "Giorno di generazione",
+      "day_of_week_hint": "La checklist viene creata in questo giorno e resta compilabile fino a domenica.",
+      "day_of_month": "Giorno del mese",
+      "day_of_month_option": "Giorno {{day}}",
+      "day_of_month_last": "Ultimo giorno del mese",
+      "day_of_month_hint": "La checklist viene creata in questo giorno e resta compilabile fino a fine mese. Nei mesi più corti il giorno arretra all'ultimo disponibile.",
+      "start_month": "Mese di partenza del ciclo",
+      "start_month_hint": "Ancora i periodi: un semestrale che parte da marzo copre marzo-agosto e settembre-febbraio.",
+      "day_of_period": "Giorno di apertura del periodo",
+      "day_of_period_hint": "Giorno del primo mese del periodo in cui la checklist viene creata; resta compilabile fino alla fine del periodo.",
+      "ad_hoc_hint": "Le checklist ad hoc non vengono generate automaticamente: si avviano quando servono con «Avvia adesso» dall'elenco dei template.",
+      "start_now": "Avvia adesso",
+      "start_now_hint": "Crea subito una checklist da compilare a partire da questo template.",
+      "start_pick_plant": "Seleziona un sito…",
+      "start_due_date": "Scadenza",
+      "start_due_date_hint": "Vuoto = fine del periodo corrente (oggi per le checklist ad hoc).",
+      "start_confirm": "Avvia",
       "plant": "Sito",
       "active": "Attivo",
       "active_yes": "Sì",
@@ -3866,6 +3902,9 @@
       "daily": "Giornaliera",
       "weekly": "Settimanale",
       "monthly": "Mensile",
+      "quarterly": "Trimestrale",
+      "semiannual": "Semestrale",
+      "annual": "Annuale",
       "ad_hoc": "Ad hoc"
     },
     "weekdays": {

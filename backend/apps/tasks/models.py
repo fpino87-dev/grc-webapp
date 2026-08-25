@@ -33,8 +33,20 @@ class Task(BaseModel):
         ("weekly", "Settimanale"),
         ("monthly", "Mensile"),
         ("quarterly", "Trimestrale"),
+        ("semiannual", "Semestrale"),
         ("yearly", "Annuale"),
     ]
+    # Passo di ogni ricorrenza come (valore, unità di calendario): i mesi e gli
+    # anni sono quelli veri, non approssimati in giorni — un task mensile in
+    # scadenza il 31 gennaio ricade il 28/29 febbraio, non il 2 marzo.
+    RECURRENCE_STEPS = {
+        "daily": (1, "days"),
+        "weekly": (1, "weeks"),
+        "monthly": (1, "months"),
+        "quarterly": (3, "months"),
+        "semiannual": (6, "months"),
+        "yearly": (1, "years"),
+    }
 
     source_module = models.CharField(max_length=10, blank=True, default="")
     source_id     = models.UUIDField(null=True, blank=True)
@@ -153,8 +165,14 @@ class ChecklistTemplate(BaseModel):
         ("daily", "Giornaliera"),
         ("weekly", "Settimanale"),
         ("monthly", "Mensile"),
+        ("quarterly", "Trimestrale"),
+        ("semiannual", "Semestrale"),
+        ("annual", "Annuale"),
         ("ad_hoc", "Ad hoc"),
     ]
+    # Ampiezza in mesi del periodo di competenza, per le frequenze che si
+    # misurano in mesi. Il periodo parte da `start_month` e si ripete.
+    PERIOD_MONTHS = {"monthly": 1, "quarterly": 3, "semiannual": 6, "annual": 12}
 
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
@@ -162,14 +180,38 @@ class ChecklistTemplate(BaseModel):
         max_length=10, choices=FREQUENCY_CHOICES, default="daily", db_index=True
     )
     # Giorni della settimana (0=lunedì … 6=domenica, come date.weekday()) in cui
-    # generare il run. Si applica SOLO a frequency="daily": lista vuota = tutti i
-    # 7 giorni (comportamento storico). Permette es. [0,1,2,3,4] per attività
-    # solo feriali, evitando run di sabato/domenica che resterebbero "overdue" e
-    # falserebbero i KPI basati su checklist.
+    # generare il run.
+    #  * frequency="daily"  → tutti i giorni indicati; lista vuota = tutti i 7
+    #    giorni (comportamento storico). Es. [0,1,2,3,4] per attività solo
+    #    feriali, evitando run di sabato/domenica che resterebbero "overdue" e
+    #    falserebbero i KPI basati su checklist.
+    #  * frequency="weekly" → si usa il PRIMO giorno della lista come giorno di
+    #    generazione settimanale; lista vuota = lunedì (comportamento storico).
     days_of_week = models.JSONField(
         default=list,
         blank=True,
-        help_text="Solo per frequenza giornaliera: giorni 0-6 (lun-dom). Vuoto=tutti.",
+        help_text=(
+            "Giornaliera: giorni 0-6 (lun-dom), vuoto=tutti. "
+            "Settimanale: il primo giorno indicato, vuoto=lunedì."
+        ),
+    )
+    # Solo per frequency="monthly": giorno del mese in cui generare il run.
+    # 0 = ultimo giorno del mese. Valori oltre la fine di un mese corto vengono
+    # riportati all'ultimo giorno disponibile (31 non salta febbraio).
+    LAST_DAY_OF_MONTH = 0
+    day_of_month = models.IntegerField(
+        default=1,
+        help_text=(
+            "Frequenze mensile/trimestrale/semestrale/annuale: giorno 1-28 del "
+            "mese di apertura del periodo, oppure 0 = ultimo giorno del mese."
+        ),
+    )
+    # Mese di ancoraggio dei periodi lunghi (1=gennaio … 12=dicembre): un
+    # semestrale ancorato a gennaio copre gen-giu e lug-dic, ancorato a marzo
+    # copre mar-ago e set-feb. Irrilevante per la frequenza mensile.
+    start_month = models.PositiveSmallIntegerField(
+        default=1,
+        help_text="Trimestrale/semestrale/annuale: mese di partenza del ciclo (1-12).",
     )
     # plant null = template valido per tutti i plant
     plant = models.ForeignKey(
