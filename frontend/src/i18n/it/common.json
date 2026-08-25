@@ -2548,7 +2548,8 @@
       "finding_auto_badge": "Auto",
       "finding_auto_tooltip": "Finding generato automaticamente dalla validazione del prep — rivedi e motiva se ancora aperto",
       "warning_missing_extended_title": "Controlli del framework esteso mancanti",
-      "warning_missing_extended_body": "Il prep è su {{requested}} ma non contiene EvidenceItem per i framework {{missing}}. La validazione potrebbe quindi non riflettere i controlli già completi al livello inferiore. Usa \"Allinea controlli framework esteso\" e rilancia."
+      "warning_missing_extended_body": "Il prep è su {{requested}} ma non contiene EvidenceItem per i framework {{missing}}. La validazione potrebbe quindi non riflettere i controlli già completi al livello inferiore. Usa \"Allinea controlli framework esteso\" e rilancia.",
+      "findings_obsolete": "{{count}} rilievo/i aperto/i riguarda/no controlli ora non applicabili: verificali e chiudili tu, non vengono annullati d'ufficio."
     },
     "sync_controls": {
       "button": "Allinea controlli framework esteso",
@@ -2676,7 +2677,8 @@
     "help_step4": "Durante l'audit: compila le evidenze e aggiungi i finding",
     "help_step5": "Major NC → PDCA automatico aperto",
     "help_step6": "Completa l'audit → relazione scaricabile",
-    "help_step7": "Il programma aggiorna automaticamente il % completamento"
+    "help_step7": "Il programma aggiorna automaticamente il % completamento",
+    "ev_na_opt": "Non applicabile"
   },
   "risk": {
     "no_process_selected": "Nessun processo selezionato",

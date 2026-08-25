@@ -2548,7 +2548,8 @@
       "finding_auto_badge": "Auto",
       "finding_auto_tooltip": "Finding generated automatically by prep validation — review and justify if still open",
       "warning_missing_extended_title": "Extended framework controls missing",
-      "warning_missing_extended_body": "The prep targets {{requested}} but contains no EvidenceItem for frameworks {{missing}}. Validation may therefore overlook controls already fulfilled at the lower level. Use \"Sync extended framework controls\" and re-run."
+      "warning_missing_extended_body": "The prep targets {{requested}} but contains no EvidenceItem for frameworks {{missing}}. Validation may therefore overlook controls already fulfilled at the lower level. Use \"Sync extended framework controls\" and re-run.",
+      "findings_obsolete": "{{count}} open finding(s) concern controls that are now not applicable: review and close them yourself — they are not cancelled automatically."
     },
     "sync_controls": {
       "button": "Sync extended framework controls",
@@ -2676,7 +2677,8 @@
     "help_step4": "During the audit: fill in evidence and add findings",
     "help_step5": "Major NC → automatic PDCA opened",
     "help_step6": "Complete the audit → downloadable report",
-    "help_step7": "The program automatically updates the % completion"
+    "help_step7": "The program automatically updates the % completion",
+    "ev_na_opt": "Not applicable"
   },
   "risk": {
     "no_process_selected": "No process selected",

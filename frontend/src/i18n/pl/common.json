@@ -2548,7 +2548,8 @@
       "finding_auto_badge": "Auto",
       "finding_auto_tooltip": "Ustalenie wygenerowane automatycznie przez walidację — sprawdź i uzasadnij, jeśli wciąż otwarte",
       "warning_missing_extended_title": "Brak kontroli rozszerzonego frameworka",
-      "warning_missing_extended_body": "Prep dotyczy {{requested}}, ale nie zawiera EvidenceItem dla frameworków {{missing}}. Walidacja może pominąć kontrole już spełnione na niższym poziomie. Użyj „Wyrównaj kontrole rozszerzonego frameworka” i uruchom ponownie."
+      "warning_missing_extended_body": "Prep dotyczy {{requested}}, ale nie zawiera EvidenceItem dla frameworków {{missing}}. Walidacja może pominąć kontrole już spełnione na niższym poziomie. Użyj „Wyrównaj kontrole rozszerzonego frameworka” i uruchom ponownie.",
+      "findings_obsolete": "{{count}} otwarte ustalenia dotyczą kontroli, które nie mają już zastosowania: zweryfikuj i zamknij je samodzielnie — nie są anulowane automatycznie."
     },
     "sync_controls": {
       "button": "Wyrównaj kontrole rozszerzonego frameworka",
@@ -2676,7 +2677,8 @@
     "help_step4": "Podczas audytu: wypełnij dowody i dodaj wyniki",
     "help_step5": "Major NC → automatyczne PDCA otwarte",
     "help_step6": "Zakończ audyt → raport do pobrania",
-    "help_step7": "Program automatycznie aktualizuje % ukończenia"
+    "help_step7": "Program automatycznie aktualizuje % ukończenia",
+    "ev_na_opt": "Nie dotyczy"
   },
   "risk": {
     "no_process_selected": "Nie wybrano procesu",

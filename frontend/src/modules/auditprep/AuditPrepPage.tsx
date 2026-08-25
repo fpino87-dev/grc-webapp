@@ -218,15 +218,21 @@ function PrepDrawer({ prep, onClose }: { prep: AuditPrep; onClose: () => void })
                     </div>
                     <button onClick={() => setAutoValidateResult(null)} className="text-indigo-400 hover:text-indigo-600">✕</button>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 mt-2">
+                  <div className="grid grid-cols-4 gap-2 mt-2">
                     <span>✅ {t("audit_prep.ev_present_opt")}: <b>{autoValidateResult.presente}</b></span>
                     <span>⚠️ {t("audit_prep.ev_expired_opt")}: <b>{autoValidateResult.scaduto}</b></span>
                     <span>❌ {t("audit_prep.ev_missing_opt")}: <b>{autoValidateResult.mancante}</b></span>
+                    <span>➖ {t("audit_prep.ev_na_opt")}: <b>{autoValidateResult.na ?? 0}</b></span>
                   </div>
                   <div className="mt-2 text-indigo-700">
                     {t("audit_prep.auto_validate.findings_created", { count: autoValidateResult.findings_created })}
                     {autoValidateResult.findings_skipped_existing > 0 && (
                       <> · {t("audit_prep.auto_validate.findings_skipped", { count: autoValidateResult.findings_skipped_existing })}</>
+                    )}
+                    {(autoValidateResult.findings_obsolete ?? 0) > 0 && (
+                      <div className="mt-1 text-amber-700">
+                        {t("audit_prep.auto_validate.findings_obsolete", { count: autoValidateResult.findings_obsolete })}
+                      </div>
                     )}
                     {" · "}
                     Readiness: <b>{autoValidateResult.readiness_score}/100</b>
@@ -254,11 +260,12 @@ function PrepDrawer({ prep, onClose }: { prep: AuditPrep; onClose: () => void })
                     <select
                       value={ev.status}
                       onChange={e => updateEvMutation.mutate({ id: ev.id, status: e.target.value })}
-                      className={`text-xs border rounded px-2 py-1 ${ev.status === "presente" ? "border-green-300 bg-green-50" : ev.status === "scaduto" ? "border-yellow-300 bg-yellow-50" : "border-red-200 bg-red-50"}`}
+                      className={`text-xs border rounded px-2 py-1 ${ev.status === "presente" ? "border-green-300 bg-green-50" : ev.status === "scaduto" ? "border-yellow-300 bg-yellow-50" : ev.status === "na" ? "border-gray-300 bg-gray-100 text-gray-600" : "border-red-200 bg-red-50"}`}
                     >
                       <option value="mancante">{t("audit_prep.ev_missing_opt")}</option>
                       <option value="presente">{t("audit_prep.ev_present_opt")}</option>
                       <option value="scaduto">{t("audit_prep.ev_expired_opt")}</option>
+                      <option value="na">{t("audit_prep.ev_na_opt")}</option>
                     </select>
                     <span className="text-sm text-gray-700 flex-1">{ev.description}</span>
                     {ev.notes && <span className="text-xs text-gray-400 truncate max-w-[120px]">{ev.notes}</span>}

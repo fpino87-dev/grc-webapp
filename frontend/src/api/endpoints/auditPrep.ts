@@ -21,7 +21,9 @@ export interface EvidenceItem {
   audit_prep: string;
   control_instance: string | null;
   description: string;
-  status: "mancante" | "presente" | "scaduto";
+  /** `na` = controllo non applicabile o escluso dalla SoA: resta in elenco con
+   *  la giustificazione, senza rilievi e fuori dal punteggio di prontezza. */
+  status: "mancante" | "presente" | "scaduto" | "na";
   notes: string;
   due_date: string | null;
 }
@@ -62,8 +64,12 @@ export interface AutoValidateResult {
   presente: number;
   scaduto: number;
   mancante: number;
+  na: number;
   findings_created: number;
   findings_skipped_existing: number;
+  /** Rilievi automatici aperti su controlli oggi non applicabili: segnalati,
+   *  non chiusi d'ufficio. */
+  findings_obsolete: number;
   readiness_score: number;
   warning?: AutoValidateWarning;
 }

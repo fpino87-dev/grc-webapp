@@ -31,8 +31,15 @@ PDCA_TRIGGER_MAP = {
 
 
 def calc_readiness_score(audit_prep: AuditPrep) -> int:
-    """Calculate readiness score 0-100 based on evidence_items status."""
-    items = list(audit_prep.evidence_items.all())
+    """
+    Prontezza 0-100 sulle voci di evidenza.
+
+    Le voci `na` (controllo non applicabile o escluso dalla SoA) restano fuori
+    dal calcolo, numeratore e denominatore: contarle come presenti gonfierebbe
+    il punteggio, contarle come mancanti lo affosserebbe. Non sono materia di
+    prontezza — non c'è niente da preparare.
+    """
+    items = [i for i in audit_prep.evidence_items.all() if i.status != "na"]
     if not items:
         return 0
     total = len(items)
@@ -399,6 +406,16 @@ def seed_evidence_items_for_prep(
 
         instance_list = list(instances)
 
+        # I controlli non applicabili non sono materia di verifica: restano in
+        # elenco (in audit le esclusioni si verificano) ma non entrano nel
+        # campione, altrimenti consumerebbero slot sottraendoli ai controlli
+        # che vanno davvero testati.
+        not_applicable = [
+            i for i in instance_list
+            if i.status == "na" or i.applicability != "applicabile"
+        ]
+        instance_list = [i for i in instance_list if i not in not_applicable]
+
         if coverage_type == "campione" and len(instance_list) > 10:
             gaps = [i for i in instance_list if i.status in ("gap", "parziale")]
             others = [i for i in instance_list if i.status not in ("gap", "parziale")]
@@ -412,7 +429,7 @@ def seed_evidence_items_for_prep(
             target = max(5, len(instance_list) // 2)
             instance_list = gaps[:target] + others[:max(0, target - len(gaps))]
 
-        for inst in instance_list:
+        for inst in instance_list + not_applicable:
             if only_missing and inst.pk in existing_ci_ids:
                 continue
             items_to_create.append(EvidenceItem(
@@ -422,7 +439,7 @@ def seed_evidence_items_for_prep(
                     f"{inst.control.external_id} — "
                     f"{inst.control.get_title('it')}"
                 ),
-                status="mancante",
+                status="na" if inst in not_applicable else "mancante",
                 created_by=user,
             ))
 

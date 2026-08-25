@@ -2548,7 +2548,8 @@
       "finding_auto_badge": "Auto",
       "finding_auto_tooltip": "Bulgu, hazırlık doğrulaması tarafından otomatik olarak oluşturuldu — hâlâ açıksa gözden geçir ve gerekçelendir",
       "warning_missing_extended_title": "Genişletilmiş çerçeve kontrolleri eksik",
-      "warning_missing_extended_body": "Hazırlık {{requested}} hedefinde ama {{missing}} çerçeveleri için EvidenceItem yok. Bu nedenle doğrulama, alt seviyede zaten karşılanmış kontrolleri gözden kaçırabilir. \"Genişletilmiş çerçeve kontrollerini hizala\" butonunu kullan ve yeniden çalıştır."
+      "warning_missing_extended_body": "Hazırlık {{requested}} hedefinde ama {{missing}} çerçeveleri için EvidenceItem yok. Bu nedenle doğrulama, alt seviyede zaten karşılanmış kontrolleri gözden kaçırabilir. \"Genişletilmiş çerçeve kontrollerini hizala\" butonunu kullan ve yeniden çalıştır.",
+      "findings_obsolete": "{{count}} açık bulgu artık uygulanmayan kontrollerle ilgili: kendiniz inceleyip kapatın — otomatik olarak iptal edilmez."
     },
     "sync_controls": {
       "button": "Genişletilmiş çerçeve kontrollerini hizala",
@@ -2676,7 +2677,8 @@
     "help_step4": "Denetim sırasında: kanıtları doldurun ve bulgular ekleyin",
     "help_step5": "Major NC → otomatik PDCA açıldı",
     "help_step6": "Denetimi tamamlayın → indirilebilir rapor",
-    "help_step7": "Program tamamlanma %'sini otomatik günceller"
+    "help_step7": "Program tamamlanma %'sini otomatik günceller",
+    "ev_na_opt": "Uygulanamaz"
   },
   "risk": {
     "no_process_selected": "Hiçbir süreç seçilmedi",

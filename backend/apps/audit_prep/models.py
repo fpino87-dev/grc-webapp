@@ -51,6 +51,11 @@ class EvidenceItem(BaseModel):
         ("mancante", "Mancante"),
         ("presente", "Presente"),
         ("scaduto", "Scaduto"),
+        # Controllo dichiarato non applicabile (N/A) o escluso dalla SoA: non
+        # richiede evidenza, quindi non è una mancanza. Resta in elenco perché
+        # in audit le esclusioni si verificano — con la loro giustificazione —
+        # ma non produce rilievi e non entra nel punteggio di prontezza.
+        ("na", "Non applicabile"),
     ]
     audit_prep = models.ForeignKey(
         AuditPrep, on_delete=models.CASCADE, related_name="evidence_items"

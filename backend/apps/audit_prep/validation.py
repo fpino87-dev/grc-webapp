@@ -105,6 +105,23 @@ def _evaluate_evidence_item(item: EvidenceItem) -> tuple[str, list[str]]:
     if ci is None:
         return "mancante", ["Evidence item non collegato a nessun control_instance"]
 
+    # Un controllo dichiarato non applicabile non richiede evidenza: pretenderla
+    # e aprire una non conformità significa trasformare una decisione motivata e
+    # approvata (l'N/A richiede giustificazione scritta e doppio approvatore) nel
+    # suo contrario. Vale sia per lo stato N/A sia per l'esclusione dalla SoA.
+    if ci.status == "na" or ci.applicability != "applicabile":
+        motivo = (
+            "dichiarato N/A" if ci.status == "na"
+            else f"escluso dalla SoA ({ci.get_applicability_display()})"
+        )
+        reasons = [f"Controllo {motivo}: nessuna evidenza richiesta"]
+        justification = (ci.na_justification or ci.exclusion_justification or "").strip()
+        if justification:
+            reasons.append(f"Giustificazione: {justification[:200]}")
+        if ci.na_review_by:
+            reasons.append(f"Da riesaminare entro il {ci.na_review_by}")
+        return "na", reasons
+
     sources = _collect_validation_sources(ci)
     source_ci_ids = [s.pk for s in sources]
     extender_codes = [
@@ -207,8 +224,14 @@ def auto_validate_prep(prep: AuditPrep, user) -> dict:
         "presente": 0,
         "scaduto": 0,
         "mancante": 0,
+        "na": 0,
         "findings_created": 0,
         "findings_skipped_existing": 0,
+        # Rilievi aperti in passato su controlli oggi non applicabili: vengono
+        # segnalati, non chiusi d'ufficio. Chiudere un minor NC richiede
+        # evidenza e genera una lesson learned, e comunque un rilievo che un
+        # auditor potrebbe aver già visto non si cancella da solo.
+        "findings_obsolete": 0,
     }
 
     items = list(
@@ -240,6 +263,20 @@ def auto_validate_prep(prep: AuditPrep, user) -> dict:
             updates.append("notes")
             updates.append("updated_at")
             item.save(update_fields=updates)
+
+            if new_status == "na":
+                # Se un rilievo automatico era stato aperto quando il controllo
+                # era ancora applicabile, ora non ha più oggetto: lo si conta e
+                # lo si lascia all'auditor.
+                if item.control_instance_id and AuditFinding.objects.filter(
+                    audit_prep=prep,
+                    control_instance=item.control_instance,
+                    auto_generated=True,
+                    status__in=["open", "in_response"],
+                    deleted_at__isnull=True,
+                ).exists():
+                    counters["findings_obsolete"] += 1
+                continue
 
             if new_status in ("mancante", "scaduto"):
                 if _has_open_finding(item.control_instance, prep):
