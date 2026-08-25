@@ -40,7 +40,16 @@ def _has_mx(domain: str) -> bool:
         resolver.lifetime = MX_TIMEOUT
         resolver.timeout = MX_TIMEOUT
         ans = resolver.resolve(domain, "MX", raise_on_no_answer=False)
-        return bool(list(ans))
+        records = list(ans)
+        if not records:
+            return False
+        # Null MX (RFC 7505): il dominio dichiara di non accettare posta, quindi
+        # non è utilizzabile per ricevere risposte a un phishing.
+        if len(records) == 1:
+            rr = records[0]
+            if getattr(rr, "preference", None) == 0 and str(rr.exchange) == ".":
+                return False
+        return True
     except Exception:
         return False
 

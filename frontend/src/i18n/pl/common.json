@@ -3868,6 +3868,20 @@
         "5": "Google Safe Browsing: console.cloud.google.com (wymagany projekt GCP)",
         "6": "HaveIBeenPwned: haveibeenpwned.com/API/Key (płatne, ~3,50$/mies.)"
       }
+    },
+    "posture": {
+      "title": "Oczekiwana postawa",
+      "hint": "Zadeklarowanie, czego oczekuje się od tej domeny, usuwa niejednoznaczność: bez poczty brak DMARC jest poprawną konfiguracją, a nie luką.",
+      "expected_mail": "Obsługuje pocztę?",
+      "expected_web": "Serwuje witrynę?",
+      "values": {
+        "unknown": "Niezadeklarowane — używa się wykrycia",
+        "yes": "Tak",
+        "no": "Nie"
+      },
+      "duplicate_candidate": "Możliwy duplikat odpowiednika www/apex: do weryfikacji.",
+      "duplicate_confirmed": "Zweryfikowano: te same adresy co odpowiednik www/apex. Rozważ pozostawienie jednej.",
+      "duplicate_distinct": "Zweryfikowano: inne adresy niż odpowiednik www/apex — to odrębne zasoby."
     }
   },
   "checklists": {

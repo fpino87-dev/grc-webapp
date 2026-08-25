@@ -189,6 +189,10 @@ def test_propagate_grc_differs_between_plants():
         ssl_valid=True, ssl_days_remaining=300, mx_present=False, in_blacklist=False,
     )
     scan = _propagate_scan(gappy, source, OsintSettings.load())
-    # GRC pesato 20% su my_domain: >=1 gap → grc 20 → total >= 20*0.20 = 4
+    # Il contesto GRC dipende dal plant e resta consultabile...
     assert scan.score_grc_context >= 20
-    assert scan.score_total >= 4
+    # ...ma non entra nel totale: l'esposizione di un dominio è la stessa
+    # qualunque sia il sito che lo riferisce. Prima due plant vedevano un
+    # punteggio di esposizione diverso per lo stesso dominio, per via dei loro
+    # gap di compliance.
+    assert scan.score_total == source.score_total

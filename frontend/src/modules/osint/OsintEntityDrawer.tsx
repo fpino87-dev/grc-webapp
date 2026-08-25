@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -7,7 +7,9 @@ import {
 } from "recharts";
 import {
   osintApi, classifyScore, scoreBadgeColor, deltaArrow, deltaColor,
-  type OsintEntityDetail, type HistoryPoint, type OsintScanDetail,
+  EXPECTED_POSTURES,
+  type ExpectedPosture, type OsintEntityDetail, type HistoryPoint,
+  type OsintScanDetail,
 } from "../../api/endpoints/osint";
 
 function ScorePill({ label, score }: { label: string; score: number }) {
@@ -353,6 +355,19 @@ export function OsintEntityDrawer({ entityId, onClose }: { entityId: string; onC
     queryFn: () => osintApi.entityHistory(entityId),
   });
 
+  const qc = useQueryClient();
+
+  // Postura attesa: senza dichiararla, ogni assenza (DMARC, HTTPS) resta
+  // ambigua e il modulo la segnala per prudenza.
+  const postureMutation = useMutation({
+    mutationFn: (data: { expected_mail?: ExpectedPosture; expected_web?: ExpectedPosture }) =>
+      osintApi.setPosture(entityId, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["osint-entity", entityId] });
+      qc.invalidateQueries({ queryKey: ["osint-entities"] });
+    },
+  });
+
   const scanMutation = useMutation({
     mutationFn: () => osintApi.forceScan(entityId),
     onSuccess: () => {
@@ -431,6 +446,42 @@ export function OsintEntityDrawer({ entityId, onClose }: { entityId: string; onC
               <ScorePill label="GRC" score={scan.score_grc_context} />
             </div>
           )}
+
+          {/* Postura attesa */}
+          <div className="border border-gray-200 rounded-lg p-3">
+            <h3 className="text-sm font-semibold text-gray-700 mb-1">
+              {t("osint.posture.title")}
+            </h3>
+            <p className="text-xs text-gray-500 mb-2">{t("osint.posture.hint")}</p>
+            <div className="grid grid-cols-2 gap-3">
+              {(["expected_mail", "expected_web"] as const).map((field) => (
+                <label key={field} className="text-xs text-gray-600">
+                  {t(`osint.posture.${field}`)}
+                  <select
+                    value={entity[field] ?? "unknown"}
+                    onChange={(e) =>
+                      postureMutation.mutate({ [field]: e.target.value as ExpectedPosture })
+                    }
+                    disabled={postureMutation.isPending}
+                    className="block w-full border rounded px-2 py-1 text-sm mt-0.5"
+                  >
+                    {EXPECTED_POSTURES.map((v) => (
+                      <option key={v} value={v}>{t(`osint.posture.values.${v}`)}</option>
+                    ))}
+                  </select>
+                </label>
+              ))}
+            </div>
+            {entity.duplicate_candidate_of && (
+              <p className="text-xs text-amber-700 mt-2">
+                {entity.duplicate_verified === true
+                  ? t("osint.posture.duplicate_confirmed")
+                  : entity.duplicate_verified === false
+                    ? t("osint.posture.duplicate_distinct")
+                    : t("osint.posture.duplicate_candidate")}
+              </p>
+            )}
+          </div>
 
           {/* Finding */}
           <div>

@@ -92,13 +92,42 @@ def _check_dmarc(domain: str) -> tuple[bool, str]:
     return False, ""
 
 
-def _check_mx(domain: str) -> bool:
+def _check_mx(domain: str) -> bool | None:
+    """
+    Il dominio accetta posta?  True / False / None (non determinabile).
+
+    Tre stati e non due, perché «non lo so» e «no» portano a conclusioni
+    opposte su SPF e DMARC: senza posta la loro assenza è corretta, con la
+    posta è un buco, e con un DNS in errore non si può dire nulla.
+
+    Attenzione a `raise_on_no_answer=False`: la risoluzione NON solleva
+    eccezione quando il dominio non ha record MX, restituisce una risposta
+    vuota. Trattare qualunque non-eccezione come "ha la posta" faceva
+    risultare dotato di mail server ogni dominio che risolve — inclusi i
+    domini solo-web — e generava un finding DMARC su ognuno di essi.
+    """
     import dns.resolver
+
     try:
-        dns.resolver.resolve(domain, "MX", raise_on_no_answer=False)
-        return True
+        answer = dns.resolver.resolve(domain, "MX", raise_on_no_answer=False)
+    except dns.resolver.NXDOMAIN:
+        return False  # il dominio non esiste: nessuna posta possibile
     except Exception:
-        return False
+        return None  # timeout, SERVFAIL, resolver irraggiungibile
+
+    rrset = answer.rrset
+    if rrset is None or len(rrset) == 0:
+        return False  # nessun record MX pubblicato
+
+    # Null MX (RFC 7505): un solo record con preferenza 0 e target "." è il modo
+    # standard con cui un dominio dichiara di NON accettare posta.
+    records = list(rrset)
+    if len(records) == 1:
+        rr = records[0]
+        if getattr(rr, "preference", None) == 0 and str(rr.exchange) == ".":
+            return False
+
+    return True
 
 
 # Selettori DKIM più diffusi tra i provider email mainstream. Il DNS non permette
@@ -233,7 +262,7 @@ def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> 
         # DKIM/MTA-STS/TLS-RPT sono rilevanti solo per domini che inviano email
         # (mx presente). Per gli altri restano None (non applicabile), così non
         # generano finding spuri su domini solo-web.
-        if mx_present:
+        if mx_present is True:
             dkim_present, dkim_selectors = _check_dkim(domain)
             scan.dkim_present = dkim_present
             scan.dkim_selectors_found = dkim_selectors

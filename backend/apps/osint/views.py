@@ -29,6 +29,7 @@ from .serializers import (
     OsintEntityDetailSerializer,
     OsintEntityListSerializer,
     OsintFindingSerializer,
+    OsintPostureSerializer,
     OsintScanDetailSerializer,
     OsintSettingsSerializer,
     OsintSubdomainSerializer,
@@ -45,6 +46,36 @@ class OsintEntityViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ["domain", "display_name"]
     ordering_fields = ["display_name", "domain", "updated_at"]
     ordering = ["display_name"]
+
+    @action(detail=True, methods=["patch"], url_path="posture",
+            permission_classes=[OsintWritePermission])
+    def set_posture(self, request, pk=None):
+        """
+        Dichiara se questo dominio è atteso gestire posta e servire un sito.
+
+        È l'unico campo scrivibile su un'entità — tutto il resto specchia il
+        modulo di origine — ed è ciò che distingue «manca DMARC» da «non serve
+        DMARC»: senza, ogni assenza resta ambigua e il modulo la segnala per
+        prudenza, generando allarmi che non sono problemi.
+        """
+        from core.audit import log_action
+
+        entity = self.get_object()
+        serializer = OsintPostureSerializer(entity, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        log_action(
+            user=request.user,
+            action_code="osint.posture_declared",
+            level="L1",
+            entity=entity,
+            payload={
+                "domain": entity.domain,
+                "expected_mail": entity.expected_mail,
+                "expected_web": entity.expected_web,
+            },
+        )
+        return Response(OsintPostureSerializer(entity).data)
 
     def get_queryset(self):
         from django.db.models import Prefetch

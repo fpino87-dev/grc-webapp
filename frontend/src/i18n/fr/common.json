@@ -3868,6 +3868,20 @@
         "5": "Google Safe Browsing : console.cloud.google.com (un projet GCP est requis)",
         "6": "HaveIBeenPwned : haveibeenpwned.com/API/Key (payant, ~3,50$/mois)"
       }
+    },
+    "posture": {
+      "title": "Posture attendue",
+      "hint": "Déclarer ce que l'on attend de ce domaine lève l'ambiguïté : sans messagerie, l'absence de DMARC est la configuration correcte, pas une faille.",
+      "expected_mail": "Gère la messagerie ?",
+      "expected_web": "Héberge un site ?",
+      "values": {
+        "unknown": "Non déclaré — on utilise la détection",
+        "yes": "Oui",
+        "no": "Non"
+      },
+      "duplicate_candidate": "Doublon possible avec sa contrepartie www/apex : à vérifier.",
+      "duplicate_confirmed": "Vérifié : mêmes adresses que la contrepartie www/apex. Envisager de n'en garder qu'une.",
+      "duplicate_distinct": "Vérifié : adresses différentes de la contrepartie www/apex, ce sont des propriétés distinctes."
     }
   },
   "checklists": {

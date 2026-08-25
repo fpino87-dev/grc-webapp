@@ -252,12 +252,14 @@ class TestConfigurableWeights:
     def test_normalized_not_required_to_sum_100(self):
         from apps.osint.models import OsintSettings
         s = OsintSettings.load()
-        # Pesi 10/10/10/10 → media semplice. SSL=100, resto 0 → 25.
+        # Pesi 10/10/10 → media semplice sulle tre dimensioni di esposizione.
+        # SSL=100, DNS=0, Rep=0 → 33. (Il GRC non entra più nel totale: misura
+        # la compliance del sito, non l'esposizione del dominio.)
         s.weight_ssl = s.weight_dns = s.weight_reputation = s.weight_grc = 10
         entity = self._entity()
         scan = self._scan_ssl100()
         compute_scores(entity, scan, s)
-        assert scan.score_total == 25
+        assert scan.score_total == 33
 
     def test_supplier_excludes_grc_weight(self):
         from apps.osint.models import OsintSettings
@@ -296,3 +298,92 @@ class TestSettingsWeightValidation:
         )
         assert ser.is_valid(), ser.errors
         assert classify_score(0) == "ok"
+
+
+class TestCompromiseFloor:
+    """La media pesata diluisce: un segnale di compromissione in atto non va
+    mediato con la scadenza di un certificato, deve dominare il giudizio.
+
+    I casi qui sotto sono quelli che prima davano un esito palesemente sbagliato:
+    un dominio che distribuisce malware finiva a 27/100, cioè «ok»."""
+
+    def _entity(self):
+        import uuid
+
+        from apps.osint.models import EntityType, OsintEntity, SourceModule
+
+        return OsintEntity.objects.create(
+            entity_type=EntityType.MY_DOMAIN,
+            source_module=SourceModule.SITES,
+            source_id=uuid.uuid4(),
+            domain="floor.example.com",
+            display_name="Floor",
+        )
+
+    def _clean_scan(self, **kw):
+        """Dominio impeccabile su tutto il resto: certificato valido a lungo,
+        DNS in ordine, nessuna posta."""
+        s = MagicMock(spec=OsintScan)
+        s.ssl_valid = True
+        s.ssl_days_remaining = 300
+        s.https_available = True
+        s.http_only = False
+        s.mx_present = False
+        s.spf_present = True
+        s.spf_policy = "fail"
+        s.dmarc_present = True
+        s.dmarc_policy = "reject"
+        s.dkim_present = None
+        s.mta_sts_present = None
+        s.gsb_status = kw.get("gsb_status", "safe")
+        s.in_blacklist = kw.get("in_blacklist", False)
+        s.vt_malicious = 0
+        s.abuseipdb_score = 0
+        s.otx_pulses = 0
+        s.threatfox_iocs = kw.get("threatfox_iocs", 0)
+        s.urlhaus_urls = kw.get("urlhaus_urls", 0)
+        return s
+
+    def _classify(self, settings, **kw):
+        from apps.osint.scoring import classify_score, compute_scores
+
+        scan = self._clean_scan(**kw)
+        compute_scores(self._entity(), scan, settings)
+        return scan.score_total, classify_score(scan.score_total, settings)
+
+    def test_domain_serving_malware_is_critical(self):
+        from apps.osint.models import OsintSettings
+
+        s = OsintSettings.load()
+        total, verdict = self._classify(s, threatfox_iocs=2, urlhaus_urls=3)
+        assert verdict == "critical", f"score {total}"
+
+    def test_active_malware_ioc_is_critical(self):
+        from apps.osint.models import OsintSettings
+
+        s = OsintSettings.load()
+        _total, verdict = self._classify(s, threatfox_iocs=1)
+        assert verdict == "critical"
+
+    def test_google_safe_browsing_unsafe_is_critical(self):
+        from apps.osint.models import OsintSettings
+
+        s = OsintSettings.load()
+        _total, verdict = self._classify(s, gsb_status="malware")
+        assert verdict == "critical"
+
+    def test_blacklisted_domain_is_critical(self):
+        from apps.osint.models import OsintSettings
+
+        s = OsintSettings.load()
+        _total, verdict = self._classify(s, in_blacklist=True)
+        assert verdict == "critical"
+
+    def test_a_clean_domain_stays_ok(self):
+        """Il pavimento non deve alzare il punteggio di chi è a posto."""
+        from apps.osint.models import OsintSettings
+
+        s = OsintSettings.load()
+        total, verdict = self._classify(s)
+        assert verdict == "ok"
+        assert total == 0

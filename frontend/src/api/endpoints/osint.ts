@@ -23,6 +23,10 @@ export interface OsintScanBrief {
   score_total: number;
 }
 
+export type ExpectedPosture = "unknown" | "yes" | "no";
+
+export const EXPECTED_POSTURES: ExpectedPosture[] = ["unknown", "yes", "no"];
+
 export interface OsintEntity {
   id: string;
   entity_type: EntityType;
@@ -30,6 +34,11 @@ export interface OsintEntity {
   domain: string;
   display_name: string;
   is_nis2_critical: boolean;
+  /** Postura dichiarata: distingue «manca DMARC» da «non serve DMARC». */
+  expected_mail?: ExpectedPosture;
+  expected_web?: ExpectedPosture;
+  duplicate_candidate_of?: string | null;
+  duplicate_verified?: boolean | null;
   is_active: boolean;
   scan_frequency: ScanFrequency;
   last_scan: OsintScanBrief | null;
@@ -233,6 +242,12 @@ export const osintApi = {
 
   alerts: (params?: Record<string, string>) =>
     apiClient.get<OsintAlert[]>("/osint/alerts/", { params }).then(r => r.data),
+  /** Dichiara la postura attesa: unico campo scrivibile su un'entità, perché
+   *  è l'unico che non deriva dal modulo di origine. */
+  setPosture: (
+    id: string,
+    data: { expected_mail?: ExpectedPosture; expected_web?: ExpectedPosture },
+  ) => apiClient.patch(`/osint/entities/${id}/posture/`, data).then(r => r.data),
   updateAlert: (id: string, data: { status: AlertStatus }) =>
     apiClient.patch<OsintAlert>(`/osint/alerts/${id}/`, data).then(r => r.data),
   escalateAlert: (id: string, action: "incident" | "task" | "ignore") =>

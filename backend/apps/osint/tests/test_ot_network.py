@@ -176,13 +176,25 @@ def test_critical_supplier_with_ot_escalates_not_task(plant):
     assert crit.status == AlertStatus.PENDING_ESCALATION
 
 
-def test_critical_supplier_without_ot_creates_task(plant):
+def test_hygiene_alert_on_a_supplier_without_ot_opens_no_task(plant):
+    """Un certificato scaduto sul dominio di un fornitore non è un compito che
+    la tua squadra possa chiudere: non hai accesso al suo DNS. Resta un segnale
+    di filiera a severità WARNING, visibile ma senza task.
+
+    (Comportamento cambiato: prima generava un task automatico. Vedi
+    `_adjusted_severity`.)"""
+    from apps.osint.models import AlertSeverity, OsintAlert
+    from apps.tasks.models import Task
+
     s = OsintSettings.load()
     sup = Supplier.objects.create(name="Fornitore senza OT")
     entity = _supplier_entity(sup)
     scan = _critical_scan(entity)
 
-    from apps.tasks.models import Task
     task_before = Task.objects.count()
     run_alerts(entity, scan, s)
-    assert Task.objects.count() > task_before
+
+    assert Task.objects.count() == task_before
+    alert = OsintAlert.objects.filter(entity=entity).first()
+    assert alert is not None, "il segnale resta comunque registrato"
+    assert alert.severity == AlertSeverity.WARNING

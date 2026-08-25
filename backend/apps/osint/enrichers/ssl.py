@@ -22,6 +22,8 @@ logger = logging.getLogger(__name__)
 CRTSH_URL = "https://crt.sh/?q=%.{domain}&output=json"
 CRTSH_TIMEOUT = 20
 TLS_TIMEOUT = 10
+HTTP_PROBE_TIMEOUT = 8
+USER_AGENT = "grc-osint/1.0"
 # Cap sulla dimensione della risposta crt.sh letta in memoria. Domini globali
 # possono restituire risposte JSON da decine di MB: leggerle interamente prima
 # di troncare i sottodomini è uno spreco di memoria (review #9).
@@ -199,6 +201,43 @@ def _subdomains_from_entries(entries: list[dict], domain: str) -> set[str]:
     return subdomains
 
 
+def _serves_over_http(domain: str) -> bool | None:
+    """
+    Il dominio serve contenuti in HTTP puro?  True / False / None (irraggiungibile).
+
+    Serve a distinguere due situazioni che il modulo confondeva: un dominio
+    senza HTTPS che però risponde in chiaro è un problema (credenziali e dati
+    in transito leggibili), un dominio che non risponde a nulla non lo è.
+    Prima entrambi finivano in «non applicabile, nessuna penalità».
+
+    Nessun redirect seguito: se il sito risponde 301 verso https:// significa
+    che l'HTTPS c'è e il caso non è questo. Vale solo la risposta diretta.
+    """
+    import requests
+
+    from apps.osint.validators import is_public_internet_target
+
+    if not is_public_internet_target(domain):
+        return None
+    for host in (domain, f"www.{domain}") if not domain.startswith("www.") else (domain,):
+        try:
+            resp = requests.get(
+                f"http://{host}/",
+                timeout=HTTP_PROBE_TIMEOUT,
+                allow_redirects=False,
+                headers={"User-Agent": USER_AGENT},
+                stream=True,
+            )
+        except Exception:
+            continue
+        location = resp.headers.get("Location", "") or ""
+        if 300 <= resp.status_code < 400 and location.lower().startswith("https://"):
+            return False  # redirige a HTTPS: contenuto non servito in chiaro
+        if resp.status_code < 500:
+            return True
+    return None
+
+
 def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> bool:
     from apps.osint.validators import assert_public_or_log
 
@@ -214,11 +253,19 @@ def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> 
         if cert:
             ssl_valid, expiry, days, issuer, wildcard = _parse_cert(cert)
             scan.ssl_valid = ssl_valid
+            scan.https_available = True
+            scan.http_only = False
             scan.ssl_expiry_date = expiry
             scan.ssl_days_remaining = days
             scan.ssl_issuer = issuer[:255]
             scan.ssl_wildcard = wildcard
-        # else: nessun HTTPS su domain né www.domain → ssl_valid rimane None (non applicabile)
+        else:
+            # Nessun HTTPS su domain né www.domain. Non è automaticamente «non
+            # applicabile»: se il sito risponde in HTTP puro è un finding, se
+            # non risponde nulla non lo è. Senza questa distinzione un portale
+            # in chiaro otteneva lo stesso punteggio di un dominio parcheggiato.
+            scan.https_available = False
+            scan.http_only = _serves_over_http(domain)
 
         entries = _fetch_crtsh_entries(domain)
         subdomains = _subdomains_from_entries(entries, domain)

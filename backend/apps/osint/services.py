@@ -22,6 +22,8 @@ from .models import (
     SourceModule,
 )
 
+from .validators import hostname_is_scannable, is_public_mail_domain
+
 logger = logging.getLogger(__name__)
 
 
@@ -61,12 +63,14 @@ class AggregationResult:
     updated: int = 0
     reactivated: int = 0
     deactivated: int = 0
+    skipped: int = 0
 
     def add(self, other: "AggregationResult") -> "AggregationResult":
         self.created += other.created
         self.updated += other.updated
         self.reactivated += other.reactivated
         self.deactivated += other.deactivated
+        self.skipped += other.skipped
         return self
 
 
@@ -85,6 +89,19 @@ def _upsert_entity(
     domain = domain.strip().lower()
     if not domain:
         return
+
+    # Hostname interni e TLD riservati non potranno mai essere scansionati:
+    # censirli crea entità che restano per sempre senza dati, e senza che
+    # nulla lo segnali.
+    scannable, reason = hostname_is_scannable(domain)
+    if not scannable:
+        logger.info(
+            "OSINT: dominio '%s' ignorato in ingestione (%s) — sorgente %s",
+            domain, reason, source_module,
+        )
+        result.skipped += 1
+        return
+
     entity, created = OsintEntity.objects.get_or_create(
         source_module=source_module,
         source_id=source_id,
@@ -120,7 +137,66 @@ def _upsert_entity(
         if changed:
             entity.save()
             result.updated += 1
+    if created:
+        _mark_duplicate_candidate(entity)
     kept.add(entity.pk)
+
+
+def _counterpart_domain(domain: str) -> str:
+    """`www.X` ↔ `X`. Stringa vuota se non c'è una controparte sensata."""
+    if domain.startswith("www."):
+        return domain[4:]
+    # Solo per i domini apex: aggiungere "www." a un sottodominio qualsiasi
+    # (es. api.example.com) non produce una controparte plausibile.
+    return f"www.{domain}" if domain.count(".") == 1 else ""
+
+
+def _mark_duplicate_candidate(entity) -> None:
+    """
+    Registra il sospetto che `www.X` e `X` siano la stessa proprietà web.
+
+    Sospetto, non certezza: possono risolvere altrove, servire contenuti
+    diversi o esistere solo uno dei due. Qui si annota soltanto; la verifica
+    (`verify_duplicate_candidate`) conferma o smentisce, e l'eventuale unione
+    resta una decisione umana.
+    """
+    counterpart_domain = _counterpart_domain(entity.domain)
+    if not counterpart_domain:
+        return
+    counterpart = (
+        OsintEntity.objects.filter(domain=counterpart_domain, is_active=True)
+        .exclude(pk=entity.pk)
+        .first()
+    )
+    if counterpart is None:
+        return
+    entity.duplicate_candidate_of = counterpart
+    entity.duplicate_verified = None
+    entity.save(update_fields=["duplicate_candidate_of", "duplicate_verified", "updated_at"])
+
+
+def verify_duplicate_candidate(entity) -> bool | None:
+    """
+    Confronta gli indirizzi di `www.X` e `X`: stessi IP = alias, IP diversi =
+    proprietà distinte, irrisolvibile = si resta nel dubbio (None).
+
+    Non modifica nulla oltre all'esito: nessuna entità viene unita o
+    disattivata: quella scelta è di chi conosce l'infrastruttura.
+    """
+    from apps.osint.validators import _resolve_all
+
+    other = entity.duplicate_candidate_of
+    if other is None:
+        return None
+    mine = set(_resolve_all(entity.domain) or [])
+    theirs = set(_resolve_all(other.domain) or [])
+    if not mine or not theirs:
+        verdict = None
+    else:
+        verdict = bool(mine & theirs)
+    entity.duplicate_verified = verdict
+    entity.save(update_fields=["duplicate_verified", "updated_at"])
+    return verdict
 
 
 def _deactivate_missing(source_module: str, kept: set, result: AggregationResult) -> None:
@@ -166,7 +242,12 @@ def _sync_plants(settings: OsintSettings, result: AggregationResult) -> None:
 def _sync_suppliers(settings: OsintSettings, result: AggregationResult) -> None:
     kept: set = set()
     for sup in Supplier.objects.all():
-        domain = extract_domain(sup.website) or domain_from_email(sup.email)
+        # Il ripiego sull'email vale solo se il dominio è del fornitore: con un
+        # contatto su Gmail o su una PEC si finirebbe a monitorare il provider.
+        domain = extract_domain(sup.website)
+        if not domain:
+            candidate = domain_from_email(sup.email)
+            domain = "" if is_public_mail_domain(candidate) else candidate
         if not domain:
             continue
         is_nis2 = bool(getattr(sup, "nis2_relevant", False))

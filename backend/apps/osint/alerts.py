@@ -40,8 +40,52 @@ def _has_active_alert(entity: "OsintEntity", alert_type: str) -> bool:
     ).exists()
 
 
+# Segnali di compromissione in atto: valgono al massimo della severità su
+# qualunque dominio, perché un fornitore compromesso è una minaccia diretta per
+# chi scambia dati con lui, esattamente come un proprio dominio compromesso.
+COMPROMISE_ALERTS = frozenset({
+    "gsb_unsafe", "blacklist_new", "threatfox_listed", "urlhaus_listed",
+    "breach_found", "subdomain_takeover", "ct_unexpected_issuer",
+})
+
+
+def _adjusted_severity(entity, alert_type, severity):
+    """
+    La severità dipende anche da chi può agire.
+
+    Su un dominio di un fornitore non hai accesso al DNS: «certificato scaduto
+    su fornitore.it» non è un compito di remediation ma un elemento di
+    valutazione della filiera. Con severità critica genera però un task alla
+    tua squadra, che nessuno può chiudere — e una coda che non si può chiudere
+    insegna a ignorare la coda.
+
+    Due eccezioni, entrambe deliberate:
+      * i segnali di compromissione in atto restano critici ovunque, perché il
+        rischio ricade su di te comunque;
+      * i fornitori con un piede sugli asset OT restano critici anche
+        sull'igiene, perché lì la loro postura è la tua superficie di attacco:
+        è l'escalation che il modulo già prevede e che non va spenta.
+
+    Negli altri casi si scende a WARNING: resta visibile in dashboard come
+    segnale di filiera, senza aprire un compito che non ti compete.
+    """
+    from apps.osint.models import AlertSeverity, EntityType
+
+    if entity.entity_type == EntityType.MY_DOMAIN:
+        return severity
+    if alert_type in COMPROMISE_ALERTS:
+        return severity
+    if severity != AlertSeverity.CRITICAL:
+        return severity
+    if _has_ot_asset_linked(entity):
+        return severity
+    return AlertSeverity.WARNING
+
+
 def _create_alert(entity, scan, alert_type, severity, description) -> "OsintAlert":
     from apps.osint.models import OsintAlert
+
+    severity = _adjusted_severity(entity, alert_type, severity)
     alert = OsintAlert.objects.create(
         entity=entity,
         scan=scan,
@@ -142,12 +186,37 @@ def _trigger_blacklist(entity, scan, prev, settings, created_alerts):
     created_alerts.append(alert)
 
 
+def _trigger_no_https(entity, scan, settings, created_alerts):
+    """Il dominio serve contenuti in HTTP puro: credenziali e dati in transito
+    sono leggibili. Prima non esisteva alcun alert per questo caso — l'assenza
+    di HTTPS veniva trattata come non applicabilità."""
+    from apps.osint.models import AlertType, AlertSeverity
+
+    from apps.osint.posture import expects_web
+
+    if getattr(scan, "http_only", None) is not True or not expects_web(entity, scan):
+        return
+    if _has_active_alert(entity, AlertType.NO_HTTPS):
+        return
+    alert = _create_alert(
+        entity, scan,
+        AlertType.NO_HTTPS, AlertSeverity.WARNING,
+        "Il sito risponde in HTTP senza HTTPS: il traffico, comprese eventuali "
+        "credenziali, viaggia in chiaro.",
+    )
+    created_alerts.append(alert)
+
+
 def _trigger_dmarc(entity, scan, settings, created_alerts):
     from apps.osint.models import AlertType, AlertSeverity
     if scan.dmarc_present is not False:
         return
-    if scan.mx_present is False:
-        return  # nessun mail server: DMARC non applicabile
+    from apps.osint.posture import expects_mail
+
+    if not expects_mail(entity, scan):
+        # Nessuna posta attesa — dichiarata o rilevata — quindi l'assenza di
+        # DMARC non è un buco ma la configurazione corretta.
+        return
     if _has_active_alert(entity, AlertType.DMARC_MISSING):
         return
     alert = _create_alert(
@@ -492,6 +561,7 @@ def run_alerts(
     _trigger_score_degraded(entity, scan, prev, settings, created)
     _trigger_ssl(entity, scan, settings, created)
     _trigger_blacklist(entity, scan, prev, settings, created)
+    _trigger_no_https(entity, scan, settings, created)
     _trigger_dmarc(entity, scan, settings, created)
     _trigger_new_subdomain(entity, scan, settings, created)
     _trigger_takeover(entity, scan, settings, created)

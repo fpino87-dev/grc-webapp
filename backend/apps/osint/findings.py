@@ -56,6 +56,7 @@ def _detect_finding_codes(entity, scan) -> dict[str, dict]:
     I 'params' vengono salvati nel finding e usati per rendering UI.
     """
     from apps.osint.models import FindingCode, OsintSubdomain, SubdomainStatus
+    from apps.osint.posture import expects_mail, expects_web
 
     detected: dict[str, dict] = {}
 
@@ -72,8 +73,15 @@ def _detect_finding_codes(entity, scan) -> dict[str, dict]:
     elif scan.ssl_valid is False:
         detected[FindingCode.SSL_EXPIRED] = {"expiry_date": str(scan.ssl_expiry_date or "")}
 
-    # DMARC/SPF — solo se il dominio ha mail server
-    if scan.mx_present is not False:
+    # Nessun HTTPS ma il sito risponde in chiaro: è un finding, non una non
+    # applicabilità. Un dominio che non risponde a nulla non compare qui.
+    if getattr(scan, "http_only", None) is True and expects_web(entity, scan):
+        detected[FindingCode.NO_HTTPS] = {}
+
+    # DMARC/SPF — solo con posta accertata (`is True`): su un dominio senza MX
+    # l'assenza di SPF/DMARC è la configurazione corretta, non un buco, e su un
+    # dominio non sondabile non è dimostrabile nulla.
+    if expects_mail(entity, scan):
         if scan.dmarc_present is False:
             detected[FindingCode.DMARC_MISSING] = {}
         elif scan.dmarc_present is True and scan.dmarc_policy == "none":

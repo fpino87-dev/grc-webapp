@@ -128,3 +128,58 @@ def assert_public_or_log(domain: str, enricher_name: str) -> bool:
         return True
     logger.debug("OSINT enricher %s skipped: %s is not a public internet target", enricher_name, domain)
     return False
+
+# Provider di posta pubblici e domini PEC: se il contatto di un fornitore è su
+# uno di questi, il dominio dell'email NON è il dominio del fornitore, e
+# monitorarlo significherebbe monitorare il provider.
+PUBLIC_MAIL_DOMAINS = frozenset({
+    "gmail.com", "googlemail.com", "outlook.com", "hotmail.com", "hotmail.it",
+    "live.com", "live.it", "msn.com", "yahoo.com", "yahoo.it", "icloud.com",
+    "me.com", "aol.com", "gmx.com", "gmx.net", "protonmail.com", "proton.me",
+    "libero.it", "virgilio.it", "alice.it", "tin.it", "tiscali.it", "fastwebnet.it",
+    "email.it", "inwind.it", "iol.it", "vodafone.it", "wind.it",
+    # PEC: caselle di posta certificata ospitate dal provider, non dal fornitore
+    "pec.it", "legalmail.it", "arubapec.it", "postecert.it", "pec.aruba.it",
+    "registerpec.it", "sicurezzapostale.it", "cert.legalmail.it",
+})
+
+
+def hostname_is_scannable(domain: str) -> tuple[bool, str]:
+    """
+    `(scansionabile, motivo)` — controllo puramente sintattico, senza DNS.
+
+    Serve in ingestione, dove risolvere sarebbe lento e dove un dominio
+    temporaneamente irraggiungibile non va scartato. Qui si escludono solo le
+    forme che non potranno mai essere pubbliche: hostname interni, TLD
+    riservati, nomi a etichetta singola e indirizzi IP.
+    """
+    value = (domain or "").strip().lower().rstrip(".")
+    if not value:
+        return False, "vuoto"
+    # Stessa lista usata da `is_public_internet_target`: una sola fonte di
+    # verità, altrimenti i due elenchi divergono e un TLD escluso in scansione
+    # continua a essere censito in ingestione.
+    if value in _RESERVED_HOSTS:
+        return False, "hostname riservato"
+    if any(value == s.lstrip(".") or value.endswith(s) for s in _PRIVATE_SUFFIXES):
+        return False, "hostname interno o TLD riservato"
+    # Un indirizzo IP è un target legittimo: blacklist e reputazione si
+    # valutano proprio sull'IP. Va escluso solo se non è pubblico.
+    try:
+        ipaddress.ip_address(value)
+    except ValueError:
+        pass
+    else:
+        # Delegato a `is_public_internet_target`, che è già il guardiano usato
+        # dagli enricher: un solo punto in cui si decide cosa è raggiungibile.
+        ok = is_public_internet_target(value)
+        return (True, "") if ok else (False, "indirizzo IP non pubblico")
+
+    if "." not in value:
+        return False, "nome a etichetta singola"
+    return True, ""
+
+
+def is_public_mail_domain(domain: str) -> bool:
+    """Il dominio è di un provider di posta pubblico (o di PEC)?"""
+    return (domain or "").strip().lower().rstrip(".") in PUBLIC_MAIL_DOMAINS

@@ -33,6 +33,8 @@ class OsintEntityListSerializer(serializers.ModelSerializer):
         fields = [
             "id", "entity_type", "source_module", "domain", "display_name",
             "is_nis2_critical", "is_active", "scan_frequency",
+            "expected_mail", "expected_web",
+            "duplicate_candidate_of", "duplicate_verified",
             "last_scan", "delta", "active_alerts_count",
             "created_at", "updated_at",
         ]
@@ -73,6 +75,8 @@ class OsintEntityDetailSerializer(serializers.ModelSerializer):
         fields = [
             "id", "entity_type", "source_module", "source_id",
             "domain", "display_name", "is_nis2_critical", "is_active", "scan_frequency",
+            "expected_mail", "expected_web",
+            "duplicate_candidate_of", "duplicate_verified",
             "last_scan", "delta", "active_alerts", "pending_subdomains_count",
             "created_at", "updated_at",
         ]
@@ -206,3 +210,15 @@ class OsintFindingSerializer(serializers.ModelSerializer):
     def get_playbook(self, obj):
         from apps.osint.findings import get_playbook
         return get_playbook(obj.code)
+
+
+class OsintPostureSerializer(serializers.ModelSerializer):
+    """
+    Postura attesa: l'unica cosa dell'entità che NON deriva dal modulo di
+    origine, e quindi l'unica scrivibile qui. Tutto il resto (dominio, nome,
+    criticità NIS2) è specchio della sorgente e si modifica là.
+    """
+
+    class Meta:
+        model = OsintEntity
+        fields = ["expected_mail", "expected_web"]

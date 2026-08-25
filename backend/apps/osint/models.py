@@ -59,6 +59,16 @@ class SubdomainAutoInclude(models.TextChoices):
     ASK = "ask", "Chiedi conferma"
 
 
+class ExpectedPosture(models.TextChoices):
+    """Cosa ci si aspetta da questo dominio. `UNKNOWN` non è un ripiego: è lo
+    stato onesto finché nessuno l'ha dichiarato, e fa ricadere la valutazione
+    su ciò che la scansione rileva."""
+
+    UNKNOWN = "unknown", "Non dichiarato"
+    YES = "yes", "Atteso"
+    NO = "no", "Non atteso"
+
+
 class OsintEntity(BaseModel):
     """Entità monitorata dal modulo OSINT — aggregata dagli altri moduli."""
 
@@ -68,6 +78,20 @@ class OsintEntity(BaseModel):
     domain = models.CharField(max_length=255, db_index=True)
     display_name = models.CharField(max_length=255)
     is_nis2_critical = models.BooleanField(default=False)
+    # Postura attesa dichiarata: rende inequivocabile ciò che altrimenti è
+    # ambiguo (l'assenza di DMARC su un dominio senza posta è corretta).
+    expected_mail = models.CharField(
+        max_length=10,
+        choices=ExpectedPosture.choices,
+        default=ExpectedPosture.UNKNOWN,
+        help_text="Il dominio è atteso gestire posta? Non dichiarato = si usa ciò che si rileva.",
+    )
+    expected_web = models.CharField(
+        max_length=10,
+        choices=ExpectedPosture.choices,
+        default=ExpectedPosture.UNKNOWN,
+        help_text="Il dominio è atteso servire un sito? Non dichiarato = si usa ciò che si rileva.",
+    )
     is_active = models.BooleanField(
         default=True,
         help_text="False se la sorgente è stata eliminata — preserva lo storico",
@@ -83,6 +107,24 @@ class OsintEntity(BaseModel):
     last_score_total = models.IntegerField(null=True, blank=True, db_index=True)
     prev_score_total = models.IntegerField(null=True, blank=True)
     active_alerts_count_cached = models.IntegerField(default=0)
+    # `www.dominio` e `dominio` sono CANDIDATI a essere la stessa proprietà, non
+    # la stessa proprietà: possono risolvere altrove, servire contenuti diversi
+    # o esistere solo uno dei due. Qui si registra il sospetto, la verifica lo
+    # conferma o lo smentisce, e l'unione resta comunque una decisione umana:
+    # unire d'ufficio farebbe sparire un host che potrebbe essere distinto.
+    duplicate_candidate_of = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="duplicate_candidates",
+        help_text="Entità di cui questa potrebbe essere un alias (www/apex).",
+    )
+    duplicate_verified = models.BooleanField(
+        null=True,
+        blank=True,
+        help_text="True = confermato alias, False = verificato distinto, None = da verificare.",
+    )
 
     class Meta:
         unique_together = [("source_module", "source_id", "domain")]
@@ -131,6 +173,13 @@ class OsintScan(BaseModel):
 
     # SSL
     ssl_valid = models.BooleanField(null=True, blank=True)
+    # Postura HTTPS, tenuta separata dalla validità del certificato:
+    #   https_available False + http_only True  → il sito risponde in chiaro
+    #   https_available False + http_only False → non risponde nulla (o redirige a HTTPS)
+    # Prima i due casi erano indistinguibili (ssl_valid=None) e nessuno dei due
+    # veniva segnalato.
+    https_available = models.BooleanField(null=True, blank=True)
+    http_only = models.BooleanField(null=True, blank=True)
     ssl_expiry_date = models.DateField(null=True, blank=True)
     ssl_days_remaining = models.IntegerField(null=True, blank=True)
     ssl_issuer = models.CharField(max_length=255, blank=True)
@@ -251,6 +300,7 @@ class OsintScan(BaseModel):
 class AlertType(models.TextChoices):
     SSL_EXPIRY = "ssl_expiry", "SSL in scadenza"
     SSL_EXPIRED = "ssl_expired", "SSL scaduto"
+    NO_HTTPS = "no_https", "Sito senza HTTPS"
     BLACKLIST_NEW = "blacklist_new", "Nuovo ingresso in blacklist"
     DMARC_MISSING = "dmarc_missing", "DMARC assente"
     SCORE_CRITICAL = "score_critical", "Score critico"
@@ -297,6 +347,7 @@ class OsintAlert(BaseModel):
 class FindingCode(models.TextChoices):
     SSL_EXPIRY = "ssl_expiry", "SSL in scadenza"
     SSL_EXPIRED = "ssl_expired", "SSL scaduto/non raggiungibile"
+    NO_HTTPS = "no_https", "Sito servito in HTTP puro (nessun HTTPS)"
     DMARC_MISSING = "dmarc_missing", "DMARC assente"
     DMARC_NONE = "dmarc_none", "DMARC p=none"
     SPF_MISSING = "spf_missing", "SPF assente"

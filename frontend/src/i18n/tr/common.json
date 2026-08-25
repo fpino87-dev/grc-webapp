@@ -3868,6 +3868,20 @@
         "5": "Google Safe Browsing: console.cloud.google.com (bir GCP projesi gerekir)",
         "6": "HaveIBeenPwned: haveibeenpwned.com/API/Key (ücretli, ~3,50$/ay)"
       }
+    },
+    "posture": {
+      "title": "Beklenen duruş",
+      "hint": "Bu alan adından ne beklendiğini bildirmek belirsizliği ortadan kaldırır: posta yoksa DMARC'ın olmaması doğru yapılandırmadır, bir açık değil.",
+      "expected_mail": "Posta yönetiyor mu?",
+      "expected_web": "Site sunuyor mu?",
+      "values": {
+        "unknown": "Bildirilmedi — tespit kullanılır",
+        "yes": "Evet",
+        "no": "Hayır"
+      },
+      "duplicate_candidate": "www/apex karşılığıyla olası kopya: doğrulanmalı.",
+      "duplicate_confirmed": "Doğrulandı: www/apex karşılığıyla aynı adresler. Yalnızca birini tutmayı değerlendirin.",
+      "duplicate_distinct": "Doğrulandı: www/apex karşılığından farklı adresler — ayrı varlıklar."
     }
   },
   "checklists": {

@@ -172,14 +172,40 @@ class TestRoutingIncidentTask:
         run_alerts(entity, scan, s)
         assert Incident.objects.count() > before
 
-    def test_critical_supplier_creates_task(self):
+    def test_hygiene_alert_on_a_supplier_opens_no_task(self):
+        """Igiene sul dominio altrui: segnale di filiera, non remediation.
+        (Prima apriva un task; vedi `_adjusted_severity`.)"""
+        from apps.osint.models import AlertSeverity, OsintAlert
+        from apps.tasks.models import Task
+
         s = OsintSettings.load()
         p = _make_plant()
         entity = _make_entity(p, EntityType.SUPPLIER, SourceModule.SUPPLIERS)
         scan = _make_scan(entity, ssl_valid=False, ssl_days_remaining=None, score_total=10)
-        from apps.tasks.models import Task
         before = Task.objects.count()
         run_alerts(entity, scan, s)
+
+        assert Task.objects.count() == before
+        assert OsintAlert.objects.filter(
+            entity=entity, severity=AlertSeverity.WARNING
+        ).exists()
+
+    def test_compromise_alert_on_a_supplier_still_acts(self):
+        """L'eccezione: un fornitore compromesso è una minaccia diretta per chi
+        scambia dati con lui, quindi resta critico e genera l'azione."""
+        from apps.osint.models import AlertSeverity, OsintAlert
+        from apps.tasks.models import Task
+
+        s = OsintSettings.load()
+        p = _make_plant()
+        entity = _make_entity(p, EntityType.SUPPLIER, SourceModule.SUPPLIERS)
+        scan = _make_scan(entity, in_blacklist=True, score_total=10)
+        before = Task.objects.count()
+        run_alerts(entity, scan, s)
+
+        assert OsintAlert.objects.filter(
+            entity=entity, severity=AlertSeverity.CRITICAL
+        ).exists()
         assert Task.objects.count() > before
 
     def test_new_subdomain_no_incident_or_task(self):

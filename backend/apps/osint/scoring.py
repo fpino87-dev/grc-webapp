@@ -18,9 +18,21 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def _score_ssl(scan: "OsintScan", warning_days: int = 60) -> int:
+def _score_ssl(scan: "OsintScan", warning_days: int = 60, entity=None) -> int:
+    from apps.osint.posture import expects_web
+
+    if entity is not None and not expects_web(entity, scan):
+        return 0  # dominio non atteso servire web: nulla da valutare
     if scan.ssl_valid is None:
-        return 0  # nessun HTTPS rilevato: non applicabile, non penalizzare
+        # Nessun HTTPS. Due casi opposti, che prima collassavano entrambi in
+        # "non applicabile": se il sito risponde in chiaro il traffico è
+        # leggibile da chiunque ed è più grave di un certificato in scadenza;
+        # se non risponde nulla non c'è niente da proteggere.
+        if getattr(scan, "http_only", None) is True:
+            # Massimo della dimensione: un certificato scaduto cifra ancora,
+            # per quanto non autenticato; nessun HTTPS non cifra affatto.
+            return 100
+        return 0
     if scan.ssl_valid is False:
         return 100
     days = scan.ssl_days_remaining
@@ -37,10 +49,17 @@ def _score_ssl(scan: "OsintScan", warning_days: int = 60) -> int:
     return 0
 
 
-def _score_dns(scan: "OsintScan") -> int:
+def _score_dns(scan: "OsintScan", entity=None) -> int:
+    from apps.osint.posture import expects_mail
+
     base = 0
-    # SPF e DMARC rilevanti solo se il dominio ha un mail server
-    if scan.mx_present is not False:
+    # SPF e DMARC si valutano solo con posta accertata: `is True` e non
+    # `is not False`, altrimenti un mx_present a None (dominio non sondabile,
+    # DNS in errore) verrebbe trattato come "ha la posta" e penalizzato.
+    mail_expected = (
+        expects_mail(entity, scan) if entity is not None else scan.mx_present is True
+    )
+    if mail_expected:
         if scan.spf_present is False:
             base += 40
         elif scan.spf_policy == "+all":
@@ -96,6 +115,24 @@ def _score_reputation(scan: "OsintScan") -> int:
     return min(base, 100)
 
 
+def _has_active_compromise(scan: "OsintScan") -> bool:
+    """
+    Il dominio mostra segni di compromissione ATTIVA?
+
+    Non «è configurato male», ma «qualcuno lo sta usando per fare del male
+    adesso»: segnalato da Google Safe Browsing, in blacklist, associato a IoC
+    malware o a URL che distribuiscono malware. Sono condizioni che cambiano la
+    natura del giudizio, non il suo grado.
+    """
+    gsb = (getattr(scan, "gsb_status", "") or "").strip()
+    return bool(
+        (gsb and gsb != "safe")
+        or getattr(scan, "in_blacklist", False)
+        or (getattr(scan, "threatfox_iocs", None) or 0) > 0
+        or (getattr(scan, "urlhaus_urls", None) or 0) > 0
+    )
+
+
 def _score_grc(entity: "OsintEntity", scan: "OsintScan") -> int:
     """Applicabile solo a entity_type='my_domain'."""
     from apps.osint.models import EntityType
@@ -103,8 +140,10 @@ def _score_grc(entity: "OsintEntity", scan: "OsintScan") -> int:
         return 0
 
     base = 0
-    if entity.is_nis2_critical:
-        base += 20
+    # `is_nis2_critical` NON entra più nel punteggio: essere critici NIS2 è un
+    # attributo di perimetro — quanto conta questo sito — non una debolezza.
+    # Sommarlo significava penalizzare un dominio perché è importante, cioè
+    # confondere l'impatto con la vulnerabilità.
 
     # Rischi aperti (non archiviati e non accettati formalmente) sul plant
     # sorgente. RiskAssessment ha una FK diretta a plant; gli stati validi sono
@@ -152,8 +191,8 @@ def compute_scores(entity: "OsintEntity", scan: "OsintScan", settings=None) -> N
 
     if settings is None:
         settings = OsintSettings.load()
-    ssl = _score_ssl(scan, warning_days=settings.ssl_expiry_warning_days)
-    dns = _score_dns(scan)
+    ssl = _score_ssl(scan, warning_days=settings.ssl_expiry_warning_days, entity=entity)
+    dns = _score_dns(scan, entity=entity)
     rep = _score_reputation(scan)
     grc = _score_grc(entity, scan)
 
@@ -162,20 +201,30 @@ def compute_scores(entity: "OsintEntity", scan: "OsintScan", settings=None) -> N
     scan.score_reputation = rep
     scan.score_grc_context = grc
 
-    # Pesi configurabili (OsintSettings). Lo score è una media pesata normalizzata
-    # sul totale dei pesi usati: i pesi NON devono sommare a 100. Per le entità
-    # non-my_domain il GRC non si applica e i 3 pesi restanti si ri-normalizzano
-    # da soli (escludendo weight_grc dalla somma).
-    w_ssl = settings.weight_ssl
-    w_dns = settings.weight_dns
-    w_rep = settings.weight_reputation
-    if entity.entity_type == EntityType.MY_DOMAIN:
-        pairs = [(ssl, w_ssl), (dns, w_dns), (rep, w_rep), (grc, settings.weight_grc)]
-    else:
-        pairs = [(ssl, w_ssl), (dns, w_dns), (rep, w_rep)]
-
+    # Lo score misura l'ESPOSIZIONE: SSL, DNS, reputazione. La dimensione GRC
+    # (rischi aperti e controlli in gap del sito dietro il dominio) resta
+    # calcolata e consultabile in `score_grc_context`, ma non entra più nel
+    # totale: quanto sei attaccabile dall'esterno e quanto sei messo male in
+    # compliance sono due assi diversi, e sommarli produce un numero che non
+    # risponde a nessuna delle due domande. `weight_grc` resta nelle
+    # impostazioni per non rompere configurazioni esistenti, ma non è più usato
+    # nel calcolo del totale.
+    pairs = [
+        (ssl, settings.weight_ssl),
+        (dns, settings.weight_dns),
+        (rep, settings.weight_reputation),
+    ]
     total_w = sum(w for _, w in pairs) or 1
     total = sum(v * w for v, w in pairs) / total_w
+
+    # Pavimento sulla compromissione in atto. Una media pesata, per costruzione,
+    # diluisce: con i pesi di default un dominio che distribuisce malware ma ha
+    # certificato e DNS in ordine finiva a 27 su 100, cioè "ok". Un segnale di
+    # compromissione non va mediato con la scadenza di un certificato: deve
+    # dominare, e porta il totale almeno alla soglia critica.
+    if _has_active_compromise(scan):
+        total = max(total, settings.score_threshold_critical)
+
     scan.score_total = round(total)
 
 
