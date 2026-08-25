@@ -202,6 +202,12 @@ def check_stale_audit_preps(self):
     ).select_related("plant")
 
     for prep in stale:
+        # Deduplica come negli altri giri di questo modulo: senza, ogni lunedì
+        # nasceva un promemoria in più sullo stesso prep — creare il task non
+        # tocca il prep, quindi resta "fermo" e la settimana dopo se ne
+        # aggiunge un altro. Undici settimane = undici task identici.
+        if _task_exists(prep.plant, "M17", prep.pk, "Audit prep bloccato"):
+            continue
         days_stale = (timezone.now() - prep.updated_at).days
         create_task(
             plant=prep.plant,

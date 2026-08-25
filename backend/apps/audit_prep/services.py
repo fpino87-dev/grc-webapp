@@ -501,6 +501,10 @@ def launch_audit_from_program(program, audit_entry: dict, user) -> "AuditPrep":
         program.planned_audits = audits
         program.save(update_fields=["planned_audits", "updated_at"])
 
+        # Il promemoria «avvia il prep» ha esaurito il suo scopo nel momento in
+        # cui il prep esiste.
+        close_program_audit_reminders(program, audit_entry, user)
+
         log_action(
             user=user,
             action_code="audit_prep.launched_from_program",
@@ -645,6 +649,61 @@ tr:nth-child(even){{background:#f9fafb}}
   Firma: _________________________
 </div>
 </body></html>"""
+
+
+def close_prep_reminders(prep, user, reason: str = "") -> int:
+    """
+    Chiude i promemoria aperti su questo prep. Restituisce quanti ne ha chiusi.
+
+    I reminder li genera il giro settimanale (`check_stale_audit_preps`,
+    `check_upcoming_audits`) e nessuno li chiudeva: completare o annullare un
+    prep lasciava i suoi promemoria aperti a vita, e ogni lunedì se ne
+    aggiungeva un altro. Qui si chiudono quando il loro motivo viene meno.
+    """
+    from apps.tasks.models import Task
+    from apps.tasks.services import complete_task
+
+    open_tasks = Task.objects.filter(
+        source_module="M17",
+        source_id=prep.pk,
+        status__in=["aperto", "in_corso"],
+        deleted_at__isnull=True,
+    )
+    closed = 0
+    for task in open_tasks:
+        complete_task(task, user, notes=reason or f"Audit prep «{prep.title}» concluso.")
+        closed += 1
+    return closed
+
+
+def close_program_audit_reminders(program, audit_entry: dict, user, reason: str = "") -> int:
+    """
+    Chiude i promemoria «avvia il prep» di un audit pianificato, quando il prep
+    è stato effettivamente avviato.
+
+    I reminder di programma sono agganciati al programma, non al singolo audit
+    (il prep ancora non esiste quando nascono), quindi il trimestre nel titolo
+    è l'unico discriminante — stessa convenzione già usata da `_task_exists`.
+    """
+    from apps.tasks.models import Task
+    from apps.tasks.services import complete_task
+
+    quarter = audit_entry.get("quarter")
+    if not quarter:
+        return 0
+
+    open_tasks = Task.objects.filter(
+        source_module="M17",
+        source_id=program.pk,
+        status__in=["aperto", "in_corso"],
+        deleted_at__isnull=True,
+        title__contains=f"Q{quarter}",
+    )
+    closed = 0
+    for task in open_tasks:
+        complete_task(task, user, notes=reason or "Audit prep avviato.")
+        closed += 1
+    return closed
 
 
 def sync_program_completion(program) -> float:

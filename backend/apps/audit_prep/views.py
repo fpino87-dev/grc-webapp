@@ -65,17 +65,29 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             payload={"id": str(instance.id), "title": instance.title},
         )
 
+    @staticmethod
+    def _sync_program(prep):
+        """Riallinea il programma annuale allo stato reale del prep.
+
+        Serve a ogni via che cambia lo stato — PATCH generica, completamento,
+        annullamento — altrimenti l'audit resta «in corso» nel programma anche
+        dopo essere stato chiuso: era il caso delle azioni dedicate, che non
+        passano da `perform_update`.
+        """
+        if not prep.audit_program_id:
+            return
+        from .services import sync_program_completion
+        try:
+            sync_program_completion(prep.audit_program)
+        except Exception as exc:
+            logger.warning(
+                "audit_prep: sync_program_completion fallita per prep %s: %s",
+                prep.pk, exc,
+            )
+
     def perform_update(self, serializer):
         instance = serializer.save()
-        if instance.audit_program_id:
-            from .services import sync_program_completion
-            try:
-                sync_program_completion(instance.audit_program)
-            except Exception as exc:
-                logger.warning(
-                    "audit_prep: sync_program_completion fallita per prep %s: %s",
-                    instance.pk, exc,
-                )
+        self._sync_program(instance)
         log_action(
             user=self.request.user,
             action_code="audit_prep.updated",
@@ -129,14 +141,27 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         ).update(status="closed")
         instance.status = "archiviato"
         instance.save(update_fields=["status", "updated_at"])
+        closed_reminders = services.close_prep_reminders(
+            instance, request.user,
+            reason=f"Audit prep «{instance.title}» annullato: {reason.strip()}",
+        )
+        self._sync_program(instance)
         log_action(
             user=request.user,
             action_code="audit_prep.auditprep.cancelled",
             level="L2",
             entity=instance,
-            payload={"title": instance.title, "reason": reason},
+            payload={
+                "title": instance.title,
+                "reason": reason,
+                "reminders_closed": closed_reminders,
+            },
         )
-        return Response({"ok": True, "status": "archiviato"})
+        return Response({
+            "ok": True,
+            "status": "archiviato",
+            "reminders_closed": closed_reminders,
+        })
 
     @action(detail=True, methods=["get"])
     def readiness(self, request, pk=None):
@@ -158,13 +183,24 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             )
         prep.status = "completato"
         prep.save(update_fields=["status", "updated_at"])
+        # Il prep è concluso: i suoi promemoria non hanno più motivo di esistere
+        # e il programma annuale va riallineato, altrimenti l'audit resta «in
+        # corso» pur essendo chiuso.
+        closed_reminders = services.close_prep_reminders(
+            prep, request.user, reason=f"Audit prep «{prep.title}» completato."
+        )
+        self._sync_program(prep)
         log_action(
             user=request.user,
             action_code="audit_prep.auditprep.completed",
             level="L1", entity=prep,
-            payload={"title": prep.title},
+            payload={"title": prep.title, "reminders_closed": closed_reminders},
         )
-        return Response({"ok": True, "status": "completato"})
+        return Response({
+            "ok": True,
+            "status": "completato",
+            "reminders_closed": closed_reminders,
+        })
 
     @action(detail=True, methods=["post"], url_path="sync-controls")
     def sync_controls(self, request, pk=None):
