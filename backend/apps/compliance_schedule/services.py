@@ -201,6 +201,26 @@ def get_activity_schedule(plant=None, months_ahead: int = 6) -> list[dict]:
     except Exception:
         logger.exception("Errore nel calcolo delle riverifiche controlli", exc_info=True)
 
+    # Assets — manutenzione periodica di apparati e impianti
+    try:
+        from apps.assets.models import Asset
+
+        asset_qs = Asset.objects.filter(
+            deleted_at__isnull=True, next_maintenance_date__isnull=False
+        )
+        if plant:
+            asset_qs = asset_qs.filter(**plant_filter)
+        for asset in asset_qs:
+            _add(
+                "asset_maintenance",
+                f"Manutenzione: {asset.name}",
+                asset.next_maintenance_date,
+                asset.last_maintenance_result or "mai_eseguita",
+                str(asset.id),
+            )
+    except Exception:
+        logger.exception("Errore nel calcolo delle manutenzioni asset", exc_info=True)
+
     # Risk assessments — next review due
     try:
         from apps.risk.models import RiskAssessment

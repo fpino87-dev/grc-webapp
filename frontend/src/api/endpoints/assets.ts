@@ -11,7 +11,7 @@ export interface AssetChangeFields {
   change_age_days: number | null;
 }
 
-export interface AssetIT extends AssetChangeFields {
+export interface AssetIT extends AssetChangeFields, Partial<MaintenanceFields> {
   id: string;
   plant: string;
   name: string;
@@ -33,7 +33,66 @@ export interface AssetIT extends AssetChangeFields {
   data_classification: string | null;
 }
 
-export interface AssetOT extends AssetChangeFields {
+/** Manutenzione periodica: campi comuni a ogni tipo di asset.
+ *  La cadenza è configurazione e si scrive; data ed esito dell'ultima
+ *  manutenzione li governa l'azione record-maintenance. */
+export interface MaintenanceFields {
+  maintenance_frequency_months: number | null;
+  last_maintenance_date: string | null;
+  next_maintenance_date: string | null;
+  last_maintenance_result: "superata" | "con_riserve" | "fallita" | "";
+  maintenance_notes: string;
+  maintenance_is_overdue: boolean;
+}
+
+export type FacilityCategory =
+  | "ups"
+  | "gruppo_elettrogeno"
+  | "antincendio"
+  | "climatizzazione"
+  | "controllo_accessi"
+  | "videosorveglianza"
+  | "altro";
+
+export const FACILITY_CATEGORIES: FacilityCategory[] = [
+  "ups",
+  "gruppo_elettrogeno",
+  "antincendio",
+  "climatizzazione",
+  "controllo_accessi",
+  "videosorveglianza",
+  "altro",
+];
+
+/** Impianti di supporto: continuità elettrica, antincendio, climatizzazione,
+ *  sicurezza fisica. Le misure (autonomia rilevata, temperature) non stanno
+ *  qui: sono rilevazioni e vivono nelle checklist. */
+export interface AssetFacility extends MaintenanceFields {
+  id: string;
+  plant: string;
+  plant_name?: string;
+  name: string;
+  asset_type: "FAC";
+  category: FacilityCategory;
+  category_display?: string;
+  criticality: number;
+  owner: string | null;
+  owner_username?: string | null;
+  maintainer_supplier: string | null;
+  maintainer_supplier_name?: string | null;
+  location: string;
+  vendor: string;
+  model: string;
+  serial_number: string;
+  installation_date: string | null;
+  rated_autonomy_minutes: number | null;
+  serves_assets: string[];
+  notes: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface AssetOT extends AssetChangeFields, Partial<MaintenanceFields> {
   id: string;
   plant: string;
   name: string;
@@ -52,7 +111,7 @@ export interface AssetOT extends AssetChangeFields {
   processes: string[];
 }
 
-export interface AssetSW {
+export interface AssetSW extends Partial<MaintenanceFields> {
   id: string;
   plant: string;
   plant_name: string;
@@ -99,6 +158,22 @@ export const assetsApi = {
     apiClient.post<{ ok: boolean }>(`/assets/${type === "IT" ? "it" : "ot"}/${id}/clear-revaluation/`, { notes: notes ?? "" }).then(r => r.data),
   needsRevaluationIT: (plant?: string) =>
     apiClient.get<AssetIT[]>("/assets/it/needs-revaluation/", { params: plant ? { plant } : {} }).then(r => r.data),
+  listFacility: (params?: Record<string, string>) =>
+    apiClient.get<{ results: AssetFacility[] }>("/assets/facility/", { params }).then(r => r.data),
+  createFacility: (data: Partial<AssetFacility>) =>
+    apiClient.post<AssetFacility>("/assets/facility/", data).then(r => r.data),
+  updateFacility: (id: string, data: Partial<AssetFacility>) =>
+    apiClient.patch<AssetFacility>(`/assets/facility/${id}/`, data).then(r => r.data),
+  deleteFacility: (id: string) =>
+    apiClient.delete(`/assets/facility/${id}/`).then(r => r.data),
+  /** Registra l'esecuzione di una manutenzione: sposta avanti la scadenza
+   *  successiva e scrive l'audit trail. `type` è il segmento di rotta. */
+  recordMaintenance: (
+    type: "it" | "ot" | "sw" | "facility",
+    id: string,
+    data: { date?: string; result?: string; notes?: string },
+  ) =>
+    apiClient.post(`/assets/${type}/${id}/record-maintenance/`, data).then(r => r.data),
   listSW: (params?: Record<string, string>) =>
     apiClient.get<{ results: AssetSW[] }>("/assets/sw/", { params }).then(r => r.data),
   createSW: (data: Partial<AssetSW>) =>

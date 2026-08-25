@@ -2437,6 +2437,51 @@
     "actions": {
       "delete_title": "Supprimer l'actif",
       "delete_confirm": "Supprimer l'actif « {{name}} » ? Interdit s'il existe des risques actifs ou des dépendances entre actifs."
+    },
+    "facility": {
+      "tab": "Installations",
+      "empty": "Aucune installation enregistrée",
+      "new_title": "Nouvelle installation",
+      "new_hint": "Installations de support : continuité électrique, incendie, climatisation, sécurité physique.",
+      "location": "Emplacement",
+      "model": "Modèle",
+      "serial_number": "Numéro de série",
+      "installation_date": "Date d'installation",
+      "maintainer": "Mainteneur",
+      "rated_autonomy": "Autonomie nominale (minutes)",
+      "rated_autonomy_hint": "Donnée constructeur. L'autonomie réellement mesurée relève d'une checklist périodique, où elle devient une série historique.",
+      "rated_autonomy_short": "{{minutes}} min nominales",
+      "categories": {
+        "ups": "Onduleur",
+        "gruppo_elettrogeno": "Groupe électrogène",
+        "antincendio": "Incendie",
+        "climatizzazione": "Climatisation",
+        "controllo_accessi": "Contrôle d'accès",
+        "videosorveglianza": "Vidéosurveillance",
+        "altro": "Autre installation"
+      }
+    },
+    "maintenance": {
+      "cadence": "Fréquence de maintenance",
+      "cadence_hint": "L'actif entre dans l'échéancier et, le moment venu, ouvre un rappel pour son responsable. Sans fréquence, il n'est jamais rappelé.",
+      "no_cadence": "Aucune maintenance programmée",
+      "every_months": "Tous les {{count}} mois",
+      "last": "Dernière maintenance",
+      "next": "Prochaine",
+      "overdue": "échue",
+      "not_planned": "Non programmée",
+      "record": "Enregistrer la maintenance",
+      "record_title": "Enregistrer la maintenance — {{name}}",
+      "record_hint": "La date du jour devient la dernière maintenance et la prochaine est décalée de {{months}} mois.",
+      "no_cadence_hint": "Définissez d'abord une fréquence de maintenance.",
+      "result": "Résultat",
+      "notes": "Notes",
+      "notes_placeholder": "ex. autonomie mesurée 28 min",
+      "results": {
+        "superata": "Réussie",
+        "con_riserve": "Avec réserves",
+        "fallita": "Échouée"
+      }
     }
   },
   "audit_prep": {
@@ -4021,7 +4066,9 @@
         "access": "Accès & Identité",
         "compliance": "Conformité & Contrôles",
         "training": "Formation",
-        "supplier": "Fournisseurs"
+        "supplier": "Fournisseurs",
+        "continuity": "Continuité d'activité",
+        "facility": "Installations & Maintenance"
       },
       "step1": {
         "tab": "Site",

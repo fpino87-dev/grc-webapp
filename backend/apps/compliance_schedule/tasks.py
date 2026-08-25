@@ -16,6 +16,7 @@ _CATEGORY_ROLE = {
     "incident_review":          "compliance_officer",
     "supplier_assessment":      "compliance_officer",
     "supplier_contract_review": "compliance_officer",
+    "asset_maintenance":        "plant_manager",
     "training_mandatory":       "compliance_officer",
     "training_refresh":         "compliance_officer",
     "management_review":        "plant_manager",

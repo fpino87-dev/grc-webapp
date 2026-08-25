@@ -165,6 +165,83 @@ def clear_revaluation_flag(asset, user, notes: str = "") -> None:
     )
 
 
+# ── Manutenzione periodica ───────────────────────────────────────────────────
+# Cadenza dell'asset se indicata, altrimenti quella della policy del sito
+# (regola `asset_maintenance` dello scadenzario, M18).
+
+
+def resolve_maintenance_due_date(asset, base=None):
+    """Data della prossima manutenzione a partire da `base` (default: oggi)."""
+    from apps.plants.services import plant_today
+    from core.periodic import resolve_next_date
+
+    return resolve_next_date(
+        asset.plant,
+        "asset_maintenance",
+        base or plant_today(asset.plant),
+        months_override=asset.maintenance_frequency_months,
+    )
+
+
+def apply_maintenance_schedule(asset, base=None, save=True):
+    """
+    Ricalcola `next_maintenance_date`. Restituisce la data impostata, o None se
+    l'asset non ha una manutenzione programmata — in quel caso la scadenza
+    viene azzerata, così togliere la cadenza lo fa uscire dallo scadenzario
+    invece di lasciarlo appeso a una data vecchia.
+    """
+    if not asset.maintenance_frequency_months:
+        if asset.next_maintenance_date is not None and save:
+            asset.next_maintenance_date = None
+            asset.save(update_fields=["next_maintenance_date", "updated_at"])
+        else:
+            asset.next_maintenance_date = None
+        return None
+
+    asset.next_maintenance_date = resolve_maintenance_due_date(asset, base=base)
+    if save:
+        asset.save(update_fields=["next_maintenance_date", "updated_at"])
+    return asset.next_maintenance_date
+
+
+def record_maintenance(asset, user, date=None, result="superata", notes=""):
+    """
+    Registra l'esecuzione di una manutenzione: aggiorna ultima data ed esito e
+    fa ripartire il conteggio della prossima.
+
+    Non tiene lo storico degli interventi — quello vive nelle checklist, che
+    sono già datate e firmate. Qui resta lo stato corrente, che è ciò che
+    serve allo scadenzario e ai KPI.
+    """
+    from apps.plants.services import plant_today
+
+    date = date or plant_today(asset.plant)
+    asset.last_maintenance_date = date
+    asset.last_maintenance_result = result
+    if notes:
+        asset.maintenance_notes = notes
+    apply_maintenance_schedule(asset, base=date, save=False)
+    asset.save(update_fields=[
+        "last_maintenance_date", "last_maintenance_result", "maintenance_notes",
+        "next_maintenance_date", "updated_at",
+    ])
+
+    log_action(
+        user=user,
+        action_code="asset.maintenance_recorded",
+        level="L1",
+        entity=asset,
+        payload={
+            "id": str(asset.pk),
+            "name": asset.name,
+            "date": str(date),
+            "result": result,
+            "next_maintenance_date": str(asset.next_maintenance_date or ""),
+        },
+    )
+    return asset
+
+
 @transaction.atomic
 def delete_asset(asset: Asset, user) -> None:
     """

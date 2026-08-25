@@ -2437,6 +2437,51 @@
     "actions": {
       "delete_title": "Delete asset",
       "delete_confirm": "Delete asset «{{name}}»? Not allowed if active risks or asset dependencies exist."
+    },
+    "facility": {
+      "tab": "Facilities",
+      "empty": "No facilities registered",
+      "new_title": "New facility",
+      "new_hint": "Supporting facilities: power continuity, fire protection, cooling, physical security.",
+      "location": "Location",
+      "model": "Model",
+      "serial_number": "Serial number",
+      "installation_date": "Installation date",
+      "maintainer": "Maintainer",
+      "rated_autonomy": "Rated autonomy (minutes)",
+      "rated_autonomy_hint": "Manufacturer's rating. The autonomy actually measured belongs in a periodic checklist, where it becomes a time series.",
+      "rated_autonomy_short": "{{minutes}} min rated",
+      "categories": {
+        "ups": "UPS",
+        "gruppo_elettrogeno": "Generator",
+        "antincendio": "Fire protection",
+        "climatizzazione": "Cooling",
+        "controllo_accessi": "Access control",
+        "videosorveglianza": "CCTV",
+        "altro": "Other facility"
+      }
+    },
+    "maintenance": {
+      "cadence": "Maintenance frequency",
+      "cadence_hint": "The asset enters the schedule and, when due, opens a reminder for its owner. Without a frequency it is never called back.",
+      "no_cadence": "No scheduled maintenance",
+      "every_months": "Every {{count}} months",
+      "last": "Last maintenance",
+      "next": "Next",
+      "overdue": "overdue",
+      "not_planned": "Not scheduled",
+      "record": "Record maintenance",
+      "record_title": "Record maintenance — {{name}}",
+      "record_hint": "Today becomes the last maintenance date and the next one moves {{months}} months ahead.",
+      "no_cadence_hint": "Set a maintenance frequency first.",
+      "result": "Outcome",
+      "notes": "Notes",
+      "notes_placeholder": "e.g. measured autonomy 28 min",
+      "results": {
+        "superata": "Passed",
+        "con_riserve": "Passed with reservations",
+        "fallita": "Failed"
+      }
     }
   },
   "audit_prep": {
@@ -4021,7 +4066,9 @@
         "access": "Access & Identity",
         "compliance": "Compliance & Controls",
         "training": "Training",
-        "supplier": "Suppliers"
+        "supplier": "Suppliers",
+        "continuity": "Business Continuity",
+        "facility": "Facilities & Maintenance"
       },
       "step1": {
         "tab": "Plant",

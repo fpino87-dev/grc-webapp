@@ -142,8 +142,8 @@ def check_control_reviews_due():
     ricalcola anche la scadenza successiva: nessun task duplicato finché il
     controllo resta da rivalutare.
     """
-    from apps.compliance_schedule.services import get_alert_threshold
     from apps.plants.services import plant_today
+    from core.periodic import due_status
     from apps.tasks.services import create_task
     from core.audit import log_action
     from django.contrib.auth import get_user_model
@@ -181,12 +181,11 @@ def check_control_reviews_due():
         next_review_date__isnull=False, needs_revaluation=False
     ):
         today = plant_today(instance.plant)
-        alert_days = get_alert_threshold("control_review", instance.plant)
-        if instance.next_review_date > today + timezone.timedelta(days=alert_days):
+        to_flag, days_left, already_due = due_status(
+            instance.plant, "control_review", instance.next_review_date, today
+        )
+        if not to_flag:
             continue
-
-        days_left = (instance.next_review_date - today).days
-        already_due = days_left < 0
 
         instance.needs_revaluation = True
         instance.needs_revaluation_since = today

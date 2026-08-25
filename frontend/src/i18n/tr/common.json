@@ -2437,6 +2437,51 @@
     "actions": {
       "delete_title": "Varlığı sil",
       "delete_confirm": "«{{name}}» varlığı silinsin mi? Aktif riskler veya varlıklar arası bağımlılıklar varsa engellenir."
+    },
+    "facility": {
+      "tab": "Tesisler",
+      "empty": "Kayıtlı tesis yok",
+      "new_title": "Yeni tesis",
+      "new_hint": "Destek tesisleri: güç sürekliliği, yangın, iklimlendirme, fiziksel güvenlik.",
+      "location": "Konum",
+      "model": "Model",
+      "serial_number": "Seri numarası",
+      "installation_date": "Kurulum tarihi",
+      "maintainer": "Bakım sağlayıcı",
+      "rated_autonomy": "Nominal özerklik (dakika)",
+      "rated_autonomy_hint": "Üretici verisi. Gerçekte ölçülen özerklik periyodik kontrol listesine aittir; orada zaman serisi olur.",
+      "rated_autonomy_short": "{{minutes}} dk nominal",
+      "categories": {
+        "ups": "UPS",
+        "gruppo_elettrogeno": "Jeneratör",
+        "antincendio": "Yangın",
+        "climatizzazione": "İklimlendirme",
+        "controllo_accessi": "Geçiş kontrolü",
+        "videosorveglianza": "Kamera sistemi",
+        "altro": "Diğer tesis"
+      }
+    },
+    "maintenance": {
+      "cadence": "Bakım sıklığı",
+      "cadence_hint": "Varlık takvime girer ve zamanı geldiğinde sahibine hatırlatma açar. Sıklık olmadan hiç çağrılmaz.",
+      "no_cadence": "Planlanmış bakım yok",
+      "every_months": "Her {{count}} ayda bir",
+      "last": "Son bakım",
+      "next": "Sonraki",
+      "overdue": "gecikmiş",
+      "not_planned": "Planlanmadı",
+      "record": "Bakımı kaydet",
+      "record_title": "Bakımı kaydet — {{name}}",
+      "record_hint": "Bugünün tarihi son bakım olur ve sonraki {{months}} ay ileri kayar.",
+      "no_cadence_hint": "Önce bir bakım sıklığı belirleyin.",
+      "result": "Sonuç",
+      "notes": "Notlar",
+      "notes_placeholder": "ör. ölçülen özerklik 28 dk",
+      "results": {
+        "superata": "Başarılı",
+        "con_riserve": "Şartlı başarılı",
+        "fallita": "Başarısız"
+      }
     }
   },
   "audit_prep": {
@@ -4021,7 +4066,9 @@
         "access": "Erişim ve Kimlik",
         "compliance": "Uyum ve Kontroller",
         "training": "Eğitim",
-        "supplier": "Tedarikçiler"
+        "supplier": "Tedarikçiler",
+        "continuity": "İş Sürekliliği",
+        "facility": "Tesisler ve Bakım"
       },
       "step1": {
         "tab": "Tesis",

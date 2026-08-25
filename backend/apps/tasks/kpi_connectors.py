@@ -230,6 +230,241 @@ def suppliers_critical_unassessed(plant, week_start) -> dict:
     return _result(float(unassessed), total, f"{unassessed}/{total} fornitori critici non valutati")
 
 
+# ── M16 BCP / Disaster Recovery ─────────────────────────────────────────────
+# I test di continuità sono eventi rari (tipicamente annuali): misurarne la
+# "quantità nella settimana" darebbe 51 settimane vuote e una piena. Si misura
+# quindi lo STATO — anzianità dell'ultimo test, esito, scostamento dagli
+# obiettivi — che è leggibile ogni settimana e disegna un trend sensato.
+
+DR_WINDOW_DAYS = 365  # finestra mobile per gli indicatori "negli ultimi 12 mesi"
+
+
+def _active_bcp_plans(plant):
+    """Piani BCP approvati: le bozze non sono impegni e gli archiviati non valgono più."""
+    from apps.bcp.models import BcpPlan
+
+    qs = BcpPlan.objects.filter(status="approvato")
+    if plant is not None:
+        qs = qs.filter(plant=plant)
+    return qs
+
+
+def _recent_bcp_tests(plant, today):
+    """Test eseguiti nella finestra mobile, sui soli piani attivi."""
+    from apps.bcp.models import BcpTest
+
+    return BcpTest.objects.filter(
+        plan__in=_active_bcp_plans(plant),
+        test_date__gte=today - datetime.timedelta(days=DR_WINDOW_DAYS),
+        test_date__lte=today,
+    )
+
+
+def dr_test_age_days(plant, week_start) -> dict:
+    """Giorni dall'ultimo test DR del piano messo peggio (stato puntuale).
+
+    Si prende il piano con l'attesa più lunga, non la media: un solo piano
+    critico mai provato non deve essere mascherato dagli altri in regola. Un
+    piano mai testato conta dalla propria creazione, così non sparisce dal
+    conteggio proprio perché non è mai stato provato.
+    """
+    today = timezone.localdate()
+    plans = list(_active_bcp_plans(plant).values("id", "title", "last_test_date", "created_at"))
+    if not plans:
+        return _no_data("Nessun piano BCP approvato.")
+
+    worst_age, worst_title, never_tested = -1, "", 0
+    for plan in plans:
+        base = plan["last_test_date"] or timezone.localtime(plan["created_at"]).date()
+        if plan["last_test_date"] is None:
+            never_tested += 1
+        age = (today - base).days
+        if age > worst_age:
+            worst_age, worst_title = age, plan["title"]
+
+    note = f"{worst_age} giorni dall'ultimo test di «{worst_title}»"
+    if never_tested:
+        note += f" — {never_tested}/{len(plans)} piani mai testati"
+    return _result(float(worst_age), len(plans), note)
+
+
+def dr_test_pass_rate(plant, week_start) -> dict:
+    """% di test DR con esito superato negli ultimi 12 mesi.
+
+    Un test "parziale" non conta come superato: la continuità o è dimostrata
+    o non lo è.
+    """
+    today = timezone.localdate()
+    tests = _recent_bcp_tests(plant, today)
+    total = tests.count()
+    if total == 0:
+        return _no_data("Nessun test DR negli ultimi 12 mesi.")
+    passed = tests.filter(result="superato").count()
+    return _result(_rate(passed, total), total, f"{passed}/{total} test superati")
+
+
+def dr_rto_gap_hours(plant, week_start) -> dict:
+    """Scostamento medio fra RTO ottenuto nei test e RTO obiettivo del piano.
+
+    Positivo = il ripristino ha richiesto più tempo di quanto il piano prometta.
+    È la misura che un auditor chiede per prima: un piano con RTO dichiarato di
+    4 ore, provato in 30, non è un piano.
+    """
+    today = timezone.localdate()
+    tests = _recent_bcp_tests(plant, today).filter(
+        rto_achieved_hours__isnull=False, plan__rto_hours__isnull=False
+    ).select_related("plan")
+    gaps = [t.rto_achieved_hours - t.plan.rto_hours for t in tests]
+    if not gaps:
+        return _no_data("Nessun test DR con RTO misurato negli ultimi 12 mesi.")
+    avg_gap = round(sum(gaps) / len(gaps), 2)
+    worst = max(gaps)
+    return _result(
+        float(avg_gap),
+        len(gaps),
+        f"Scostamento medio {avg_gap}h su {len(gaps)} test (peggiore {worst}h)",
+    )
+
+
+def dr_plans_overdue_count(plant, week_start) -> dict:
+    """N. di piani BCP con test scaduto o mai eseguito (stato puntuale)."""
+    today = timezone.localdate()
+    plans = _active_bcp_plans(plant)
+    total = plans.count()
+    if total == 0:
+        return _no_data("Nessun piano BCP approvato.")
+    overdue = plans.filter(
+        Q(next_test_date__lt=today) | Q(last_test_date__isnull=True)
+    ).count()
+    return _result(float(overdue), total, f"{overdue}/{total} piani con test scaduto o mai eseguito")
+
+
+def bcp_critical_process_coverage(plant, week_start) -> dict:
+    """% di processi critici della BIA coperti da almeno un piano BCP approvato.
+
+    Scopre i processi scoperti: è il buco che in audit costa di più, perché
+    non si vede da nessuna parte finché non serve il piano.
+    """
+    from apps.bia.models import CriticalProcess
+
+    processes = CriticalProcess.objects.filter(status__in=["validato", "approvato"])
+    if plant is not None:
+        processes = processes.filter(plant=plant)
+    total = processes.count()
+    if total == 0:
+        return _no_data("Nessun processo critico validato in BIA.")
+
+    plans = _active_bcp_plans(plant)
+    covered = processes.filter(
+        Q(id__in=plans.values("critical_processes"))
+        | Q(id__in=plans.exclude(critical_process__isnull=True).values("critical_process"))
+    ).distinct().count()
+    return _result(_rate(covered, total), total, f"{covered}/{total} processi critici coperti")
+
+
+def bcp_rto_meets_bia_target_rate(plant, week_start) -> dict:
+    """% di piani BCP il cui RTO dichiarato rispetta il target della BIA.
+
+    Un piano può essere approvato e testato e promettere comunque MENO di
+    quanto il processo richiede: qui il confronto è con il target più
+    stringente fra i processi che il piano copre.
+    """
+    plans = _active_bcp_plans(plant).filter(rto_hours__isnull=False).prefetch_related(
+        "critical_processes"
+    ).select_related("critical_process")
+
+    checked, compliant = 0, 0
+    for plan in plans:
+        targets = [
+            p.rto_target_hours
+            for p in list(plan.critical_processes.all()) + ([plan.critical_process] if plan.critical_process else [])
+            if p is not None and p.rto_target_hours is not None
+        ]
+        if not targets:
+            continue
+        checked += 1
+        if plan.rto_hours <= min(targets):
+            compliant += 1
+
+    if checked == 0:
+        return _no_data("Nessun piano BCP collegato a un processo con RTO target.")
+    return _result(_rate(compliant, checked), checked, f"{compliant}/{checked} piani entro il target BIA")
+
+
+# ── M04 Manutenzione impianti e apparati ─────────────────────────────────────
+
+
+def _maintained_assets(plant):
+    """Asset con una manutenzione programmata: gli altri non sono in ritardo,
+    semplicemente non hanno un piano e non vanno conteggiati."""
+    from apps.assets.models import Asset
+
+    qs = Asset.objects.filter(maintenance_frequency_months__isnull=False)
+    if plant is not None:
+        qs = qs.filter(plant=plant)
+    return qs
+
+
+def maintenance_plan_compliance_rate(plant, week_start) -> dict:
+    """% di asset con manutenzione programmata entro la scadenza (stato puntuale)."""
+    today = timezone.localdate()
+    qs = _maintained_assets(plant)
+    total = qs.count()
+    if total == 0:
+        return _no_data("Nessun asset con manutenzione programmata.")
+    in_time = qs.filter(next_maintenance_date__gte=today).count()
+    return _result(_rate(in_time, total), total, f"{in_time}/{total} asset entro la scadenza")
+
+
+def maintenance_overdue_count(plant, week_start) -> dict:
+    """N. di asset con manutenzione scaduta (stato puntuale)."""
+    today = timezone.localdate()
+    qs = _maintained_assets(plant)
+    total = qs.count()
+    if total == 0:
+        return _no_data("Nessun asset con manutenzione programmata.")
+    overdue = qs.filter(next_maintenance_date__lt=today).count()
+    return _result(float(overdue), total, f"{overdue}/{total} manutenzioni scadute")
+
+
+def facility_check_age_days(plant, week_start) -> dict:
+    """Giorni dall'ultima verifica dell'impianto messo peggio.
+
+    Vale per gli impianti di supporto (UPS, gruppi elettrogeni, antincendio,
+    climatizzazione, sicurezza fisica): come per i test DR si prende il caso
+    peggiore, perché è quello che si rompe quando serve. Un impianto mai
+    verificato conta dalla data di installazione, o dalla registrazione se
+    l'installazione non è nota.
+    """
+    from apps.assets.models import AssetFacility
+
+    today = timezone.localdate()
+    qs = AssetFacility.objects.all()
+    if plant is not None:
+        qs = qs.filter(plant=plant)
+    facilities = list(qs.values("name", "last_maintenance_date", "installation_date", "created_at"))
+    if not facilities:
+        return _no_data("Nessun impianto censito.")
+
+    worst_age, worst_name, never = -1, "", 0
+    for f in facilities:
+        base = (
+            f["last_maintenance_date"]
+            or f["installation_date"]
+            or timezone.localtime(f["created_at"]).date()
+        )
+        if f["last_maintenance_date"] is None:
+            never += 1
+        age = (today - base).days
+        if age > worst_age:
+            worst_age, worst_name = age, f["name"]
+
+    note = f"{worst_age} giorni dall'ultima verifica di «{worst_name}»"
+    if never:
+        note += f" — {never}/{len(facilities)} impianti mai verificati"
+    return _result(float(worst_age), len(facilities), note)
+
+
 # Registry kpi_code → connettore. I codici qui presenti DEVONO avere
 # source="internal" nel catalogo (kpi_catalog) e nelle KPIDefinition salvate.
 INTERNAL_CONNECTORS = {
@@ -244,6 +479,15 @@ INTERNAL_CONNECTORS = {
     "incident_rca_completion_rate": incident_rca_completion_rate,
     "suppliers_assessed_rate": suppliers_assessed_rate,
     "suppliers_critical_unassessed": suppliers_critical_unassessed,
+    "dr_test_age_days": dr_test_age_days,
+    "dr_test_pass_rate": dr_test_pass_rate,
+    "dr_rto_gap_hours": dr_rto_gap_hours,
+    "dr_plans_overdue_count": dr_plans_overdue_count,
+    "bcp_critical_process_coverage": bcp_critical_process_coverage,
+    "bcp_rto_meets_bia_target_rate": bcp_rto_meets_bia_target_rate,
+    "maintenance_plan_compliance_rate": maintenance_plan_compliance_rate,
+    "maintenance_overdue_count": maintenance_overdue_count,
+    "facility_check_age_days": facility_check_age_days,
 }
 
 

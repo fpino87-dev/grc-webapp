@@ -143,6 +143,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.tasks.tasks.roll_recurring_tasks",
         "schedule": crontab(hour=2, minute=20),  # 02:20 — dopo check-control-reviews-due
     },
+    "check-maintenance-due": {
+        "task": "apps.assets.tasks.check_maintenance_due",
+        "schedule": crontab(hour=2, minute=25),  # 02:25 — dopo roll-recurring-tasks
+    },
     "check-expired-bcp-plans": {
         "task": "apps.bcp.tasks.check_expired_bcp_plans",
         "schedule": crontab(hour=2, minute=10),

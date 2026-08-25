@@ -25,7 +25,7 @@ class Asset(BaseModel):
     name = models.CharField(max_length=200)
     asset_type = models.CharField(
         max_length=5,
-        choices=[("IT", "IT"), ("OT", "OT"), ("SW", "SW")],
+        choices=[("IT", "IT"), ("OT", "OT"), ("SW", "SW"), ("FAC", "Impianto")],
     )
     criticality = models.IntegerField(default=1)
     processes = models.ManyToManyField("bia.CriticalProcess", blank=True)
@@ -71,6 +71,44 @@ class Asset(BaseModel):
         help_text="True se il change richiede rivalutazione dei controlli e del risk assessment collegati",
     )
     needs_revaluation_since = models.DateField(null=True, blank=True)
+
+    # ── Manutenzione periodica ───────────────────────────────────────────────
+    # L'asset tiene lo STATO della manutenzione (cadenza, ultima, prossima,
+    # esito); l'esecuzione — chi, quando, cosa ha misurato — vive nelle
+    # checklist, che sono già datate, firmate e tracciate. Qui non si accumula
+    # uno storico: il registro resta un registro.
+    MAINTENANCE_RESULT_CHOICES = [
+        ("superata", "Superata"),
+        ("con_riserve", "Superata con riserve"),
+        ("fallita", "Fallita"),
+    ]
+    maintenance_frequency_months = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        help_text=(
+            "Cadenza di manutenzione in mesi; vuoto = nessuna manutenzione "
+            "programmata (l'asset non entra nello scadenzario)."
+        ),
+    )
+    last_maintenance_date = models.DateField(null=True, blank=True)
+    next_maintenance_date = models.DateField(null=True, blank=True, db_index=True)
+    last_maintenance_result = models.CharField(
+        max_length=15, choices=MAINTENANCE_RESULT_CHOICES, blank=True
+    )
+    maintenance_notes = models.TextField(blank=True)
+    # Scadenza per cui il promemoria è già stato aperto. Confrontarla con
+    # next_maintenance_date rende il giro notturno idempotente senza un flag
+    # da azzerare a mano: registrata la manutenzione la prossima scadenza
+    # cambia, e l'asset torna da segnalare al momento giusto.
+    maintenance_alert_for = models.DateField(null=True, blank=True)
+
+    @property
+    def maintenance_is_overdue(self) -> bool:
+        from django.utils import timezone
+        return bool(
+            self.next_maintenance_date
+            and self.next_maintenance_date < timezone.localdate()
+        )
 
     @property
     def has_recent_change(self) -> bool:
@@ -263,6 +301,57 @@ class AssetSW(Asset):
 
     class Meta:
         verbose_name = "Asset SW"
+
+
+class AssetFacility(Asset):
+    """
+    Impianti di supporto: continuità elettrica, antincendio, climatizzazione,
+    sicurezza fisica. ISO 27001 li mette esplicitamente in perimetro (A.7 —
+    sicurezza fisica e ambientale), ma finora non avevano dove stare: il
+    registro conosceva solo IT, OT e software.
+
+    Le misure (autonomia rilevata in una prova, temperatura di sala) NON stanno
+    qui: sono rilevazioni e vanno nelle checklist, dove diventano una serie
+    storica invece di un campo che qualcuno sovrascrive.
+    """
+
+    CATEGORY_CHOICES = [
+        ("ups", "UPS / gruppo di continuità"),
+        ("gruppo_elettrogeno", "Gruppo elettrogeno"),
+        ("antincendio", "Rilevazione / spegnimento incendi"),
+        ("climatizzazione", "Climatizzazione sala tecnica"),
+        ("controllo_accessi", "Controllo accessi fisici"),
+        ("videosorveglianza", "Videosorveglianza"),
+        ("altro", "Altro impianto"),
+    ]
+
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, db_index=True)
+    location = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Ubicazione fisica: sala server, cabina elettrica, reparto…",
+    )
+    vendor = models.CharField(max_length=100, blank=True)
+    model = models.CharField(max_length=100, blank=True)
+    serial_number = models.CharField(max_length=100, blank=True)
+    installation_date = models.DateField(null=True, blank=True)
+    # Solo per UPS e gruppi elettrogeni: il dato di targa, contro cui
+    # confrontare l'autonomia realmente misurata nelle prove periodiche.
+    rated_autonomy_minutes = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text="Autonomia nominale dichiarata dal costruttore (UPS/gruppi elettrogeni).",
+    )
+    serves_assets = models.ManyToManyField(
+        Asset,
+        blank=True,
+        related_name="supporting_facilities",
+        help_text="Asset IT/OT alimentati o protetti da questo impianto.",
+    )
+
+    class Meta:
+        verbose_name = "Asset Facility"
+        verbose_name_plural = "Asset Facility"
 
 
 class AssetDependency(BaseModel):

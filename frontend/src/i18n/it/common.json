@@ -2437,6 +2437,51 @@
     "actions": {
       "delete_title": "Elimina asset",
       "delete_confirm": "Eliminare l'asset «{{name}}»? Non consentito se esistono rischi attivi o dipendenze tra asset."
+    },
+    "facility": {
+      "tab": "Impianti",
+      "empty": "Nessun impianto censito",
+      "new_title": "Nuovo impianto",
+      "new_hint": "Impianti di supporto: continuità elettrica, antincendio, climatizzazione, sicurezza fisica.",
+      "location": "Ubicazione",
+      "model": "Modello",
+      "serial_number": "Matricola",
+      "installation_date": "Data installazione",
+      "maintainer": "Manutentore",
+      "rated_autonomy": "Autonomia nominale (minuti)",
+      "rated_autonomy_hint": "Dato di targa del costruttore. L'autonomia realmente misurata va rilevata con una checklist periodica, così diventa una serie storica.",
+      "rated_autonomy_short": "{{minutes}} min nominali",
+      "categories": {
+        "ups": "UPS / gruppo di continuità",
+        "gruppo_elettrogeno": "Gruppo elettrogeno",
+        "antincendio": "Antincendio",
+        "climatizzazione": "Climatizzazione",
+        "controllo_accessi": "Controllo accessi",
+        "videosorveglianza": "Videosorveglianza",
+        "altro": "Altro impianto"
+      }
+    },
+    "maintenance": {
+      "cadence": "Cadenza manutenzione",
+      "cadence_hint": "L'asset entra nello scadenzario e, al momento giusto, apre un promemoria al suo owner. Senza cadenza non viene mai richiamato.",
+      "no_cadence": "Nessuna manutenzione programmata",
+      "every_months": "Ogni {{count}} mesi",
+      "last": "Ultima manutenzione",
+      "next": "Prossima",
+      "overdue": "scaduta",
+      "not_planned": "Non programmata",
+      "record": "Registra manutenzione",
+      "record_title": "Registra manutenzione — {{name}}",
+      "record_hint": "La data di oggi diventa l'ultima manutenzione e la prossima slitta di {{months}} mesi.",
+      "no_cadence_hint": "Imposta prima una cadenza di manutenzione.",
+      "result": "Esito",
+      "notes": "Note",
+      "notes_placeholder": "Es. autonomia misurata 28 min",
+      "results": {
+        "superata": "Superata",
+        "con_riserve": "Con riserve",
+        "fallita": "Fallita"
+      }
     }
   },
   "audit_prep": {
@@ -4021,7 +4066,9 @@
         "access": "Accessi & Identità",
         "compliance": "Compliance & Controlli",
         "training": "Formazione",
-        "supplier": "Fornitori"
+        "supplier": "Fornitori",
+        "continuity": "Continuità operativa",
+        "facility": "Impianti & Manutenzione"
       },
       "step1": {
         "tab": "Plant",

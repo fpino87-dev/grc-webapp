@@ -15,14 +15,15 @@ def resolve_review_due_date(instance, base=None):
     quella della policy del sito per la regola `control_review` (1 anno di
     default). Un unico posto dove si decide "ogni quanto va riguardato".
     """
-    from apps.compliance_schedule.services import _add_duration, get_due_date
     from apps.plants.services import plant_today
+    from core.periodic import resolve_next_date
 
-    base = base or plant_today(instance.plant)
-    months = instance.review_frequency_months
-    if months:
-        return _add_duration(base, int(months), "months")
-    return get_due_date("control_review", plant=instance.plant, from_date=base)
+    return resolve_next_date(
+        instance.plant,
+        "control_review",
+        base or plant_today(instance.plant),
+        months_override=instance.review_frequency_months,
+    )
 
 
 def apply_review_schedule(instance, base=None, save=True):

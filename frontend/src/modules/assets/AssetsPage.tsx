@@ -5,13 +5,15 @@ import { ModuleHelp } from "../../components/ui/ModuleHelp";
 import { ITTab } from "./ITTab";
 import { OTTab } from "./OTTab";
 import { SWTab } from "./SWTab";
+import { FacilityTab } from "./FacilityTab";
+import { NewFacilityModal } from "./NewFacilityModal";
 import { NewAssetModal } from "./NewAssetModal";
 import { NewAssetModalSW } from "./AssetSwModals";
 import { useTranslation } from "react-i18next";
 
 export function AssetsPage() {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<"IT" | "OT" | "SW">("IT");
+  const [activeTab, setActiveTab] = useState<"IT" | "OT" | "SW" | "FAC">("IT");
   const [search, setSearch] = useState("");
   const [showNew, setShowNew] = useState(false);
 
@@ -56,7 +58,7 @@ export function AssetsPage() {
 
       <div className="mb-4 flex items-center gap-4">
         <div className="flex border-b border-gray-200">
-          {(["IT", "OT", "SW"] as const).map((tab) => (
+          {(["IT", "OT", "SW", "FAC"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => { setActiveTab(tab); setSearch(""); }}
@@ -66,7 +68,7 @@ export function AssetsPage() {
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
-              {tab === "SW" ? "Software (ASL)" : `Asset ${tab}`}
+              {tab === "SW" ? "Software (ASL)" : tab === "FAC" ? t("assets.facility.tab") : `Asset ${tab}`}
             </button>
           ))}
         </div>
@@ -83,9 +85,13 @@ export function AssetsPage() {
         {activeTab === "IT" && <ITTab search={search} />}
         {activeTab === "OT" && <OTTab search={search} />}
         {activeTab === "SW" && <SWTab search={search} />}
+        {activeTab === "FAC" && <FacilityTab search={search} />}
       </div>
 
-      {showNew && plants && activeTab !== "SW" && (
+      {showNew && plants && activeTab === "FAC" && (
+        <NewFacilityModal plants={plants} onClose={() => setShowNew(false)} />
+      )}
+      {showNew && plants && activeTab !== "SW" && activeTab !== "FAC" && (
         <NewAssetModal assetType={activeTab} plants={plants} onClose={() => setShowNew(false)} />
       )}
       {showNew && plants && activeTab === "SW" && (

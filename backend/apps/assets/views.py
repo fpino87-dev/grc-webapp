@@ -8,10 +8,11 @@ from core.audit import log_action
 from core.scoping import PlantScopedQuerysetMixin
 from core.viewsets import SoftDeleteAuditMixin
 
-from .models import AssetDependency, AssetIT, AssetOT, AssetSW, NetworkZone
+from .models import AssetDependency, AssetFacility, AssetIT, AssetOT, AssetSW, NetworkZone
 from .permissions import AssetPermission
 from .serializers import (
     AssetDependencySerializer,
+    AssetFacilitySerializer,
     AssetITSerializer,
     AssetOTSerializer,
     AssetSWSerializer,
@@ -48,7 +49,61 @@ class NetworkZoneViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewset
         )
 
 
-class AssetITViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+class MaintenanceActionsMixin:
+    """Registrazione della manutenzione, uguale per ogni tipo di asset."""
+
+    @action(detail=True, methods=["post"], url_path="record-maintenance")
+    def record_maintenance_action(self, request, pk=None):
+        from django.utils.dateparse import parse_date
+
+        from .models import Asset
+        from .services import record_maintenance
+
+        asset = self.get_object()
+        if not asset.maintenance_frequency_months:
+            return Response(
+                {"error": _("Nessuna cadenza di manutenzione configurata per questo asset.")},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        result = request.data.get("result", "superata")
+        if result not in dict(Asset.MAINTENANCE_RESULT_CHOICES):
+            return Response({"error": _("Esito non valido.")}, status=status.HTTP_400_BAD_REQUEST)
+
+        date = request.data.get("date")
+        if date:
+            date = parse_date(str(date))
+            if date is None:
+                return Response(
+                    {"error": _("Data non valida (formato atteso AAAA-MM-GG).")},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        record_maintenance(
+            asset,
+            request.user,
+            date=date,
+            result=result,
+            notes=request.data.get("notes", ""),
+        )
+        return Response(self.get_serializer(asset).data)
+
+    @action(detail=False, methods=["get"], url_path="maintenance-due")
+    def maintenance_due(self, request):
+        """Asset con manutenzione scaduta o senza data: la lista da lavorare."""
+        from django.utils import timezone
+
+        qs = self.get_queryset().filter(
+            next_maintenance_date__isnull=False,
+            next_maintenance_date__lt=timezone.localdate(),
+        )
+        plant_id = request.query_params.get("plant")
+        if plant_id:
+            qs = qs.filter(plant_id=plant_id)
+        return Response(self.get_serializer(qs, many=True).data)
+
+
+class AssetITViewSet(MaintenanceActionsMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = AssetIT.objects.select_related("plant", "owner")
     serializer_class = AssetITSerializer
     permission_classes = [AssetPermission]
@@ -121,7 +176,7 @@ class AssetITViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         return Response(self.get_serializer(qs, many=True).data)
 
 
-class AssetOTViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+class AssetOTViewSet(MaintenanceActionsMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = AssetOT.objects.select_related("plant", "owner", "network_zone")
     serializer_class = AssetOTSerializer
     permission_classes = [AssetPermission]
@@ -188,7 +243,7 @@ class AssetOTViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         return Response(self.get_serializer(qs, many=True).data)
 
 
-class AssetSWViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+class AssetSWViewSet(MaintenanceActionsMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = AssetSW.objects.select_related("plant", "owner")
     serializer_class = AssetSWSerializer
     permission_classes = [AssetPermission]
@@ -209,6 +264,51 @@ class AssetSWViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         log_action(
             user=self.request.user,
             action_code="assets.asset_sw.update",
+            level="L2",
+            entity=instance,
+            payload={"id": str(instance.id), "name": instance.name},
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        asset = self.get_object()
+        try:
+            delete_asset(asset, request.user)
+        except ValidationError as e:
+            return Response(
+                {"detail": e.messages[0] if getattr(e, "messages", None) else str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class AssetFacilityViewSet(MaintenanceActionsMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+    """Impianti di supporto: continuità elettrica, antincendio, climatizzazione,
+    sicurezza fisica. Nessuna gestione di change: un impianto non si "patcha",
+    si manutiene — il ciclo di vita è quello della manutenzione periodica."""
+
+    queryset = AssetFacility.objects.select_related(
+        "plant", "owner", "maintainer_supplier"
+    ).prefetch_related("serves_assets")
+    serializer_class = AssetFacilitySerializer
+    permission_classes = [AssetPermission]
+    filterset_fields = ["plant", "category", "criticality"]
+    search_fields = ["name", "location", "vendor", "model", "serial_number"]
+
+    def perform_create(self, serializer):
+        instance = serializer.save(asset_type="FAC", created_by=self.request.user)
+        log_action(
+            user=self.request.user,
+            action_code="assets.asset_facility.create",
+            level="L2",
+            entity=instance,
+            payload={"id": str(instance.id), "name": instance.name, "category": instance.category},
+        )
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        log_action(
+            user=self.request.user,
+            action_code="assets.asset_facility.update",
             level="L2",
             entity=instance,
             payload={"id": str(instance.id), "name": instance.name},

@@ -2437,6 +2437,51 @@
     "actions": {
       "delete_title": "Usuń aktywo",
       "delete_confirm": "Usunąć aktywo „{{name}}”? Zabronione przy aktywnych ryzykach lub zależnościach między aktywami."
+    },
+    "facility": {
+      "tab": "Instalacje",
+      "empty": "Brak zarejestrowanych instalacji",
+      "new_title": "Nowa instalacja",
+      "new_hint": "Instalacje wspierające: ciągłość zasilania, ppoż., klimatyzacja, ochrona fizyczna.",
+      "location": "Lokalizacja",
+      "model": "Model",
+      "serial_number": "Numer seryjny",
+      "installation_date": "Data instalacji",
+      "maintainer": "Serwisant",
+      "rated_autonomy": "Autonomia znamionowa (minuty)",
+      "rated_autonomy_hint": "Dane producenta. Autonomia faktycznie zmierzona należy do listy kontrolnej, gdzie staje się szeregiem czasowym.",
+      "rated_autonomy_short": "{{minutes}} min znamionowo",
+      "categories": {
+        "ups": "UPS",
+        "gruppo_elettrogeno": "Agregat",
+        "antincendio": "Ppoż.",
+        "climatizzazione": "Klimatyzacja",
+        "controllo_accessi": "Kontrola dostępu",
+        "videosorveglianza": "Monitoring",
+        "altro": "Inna instalacja"
+      }
+    },
+    "maintenance": {
+      "cadence": "Częstotliwość konserwacji",
+      "cadence_hint": "Zasób trafia do terminarza i w odpowiednim momencie otwiera przypomnienie dla właściciela. Bez częstotliwości nigdy nie zostanie przywołany.",
+      "no_cadence": "Brak zaplanowanej konserwacji",
+      "every_months": "Co {{count}} mies.",
+      "last": "Ostatnia konserwacja",
+      "next": "Następna",
+      "overdue": "zaległa",
+      "not_planned": "Niezaplanowana",
+      "record": "Zarejestruj konserwację",
+      "record_title": "Zarejestruj konserwację — {{name}}",
+      "record_hint": "Dzisiejsza data staje się ostatnią konserwacją, a następna przesuwa się o {{months}} mies.",
+      "no_cadence_hint": "Najpierw ustaw częstotliwość konserwacji.",
+      "result": "Wynik",
+      "notes": "Uwagi",
+      "notes_placeholder": "np. zmierzona autonomia 28 min",
+      "results": {
+        "superata": "Zdana",
+        "con_riserve": "Z zastrzeżeniami",
+        "fallita": "Niezdana"
+      }
     }
   },
   "audit_prep": {
@@ -4021,7 +4066,9 @@
         "access": "Dostęp i tożsamość",
         "compliance": "Zgodność i kontrole",
         "training": "Szkolenia",
-        "supplier": "Dostawcy"
+        "supplier": "Dostawcy",
+        "continuity": "Ciągłość działania",
+        "facility": "Instalacje i konserwacja"
       },
       "step1": {
         "tab": "Zakład",
