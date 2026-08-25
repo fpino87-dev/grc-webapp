@@ -222,6 +222,25 @@ class ChecklistTemplate(BaseModel):
         related_name="checklist_templates",
         db_index=True,
     )
+    # Espansione sugli impianti: come `plant=null` si espande su tutti i siti,
+    # una categoria qui indicata genera una checklist PER OGNI impianto di
+    # quella categoria nel sito. Una sola «Prova UPS trimestrale» copre così
+    # dieci UPS, e ogni misura resta agganciata al proprio impianto.
+    facility_category = models.CharField(
+        max_length=20,
+        blank=True,
+        help_text=(
+            "Categoria di impianti su cui espandere la checklist (vuoto = "
+            "una sola checklist per sito, non legata a un impianto)."
+        ),
+    )
+    # Completare la checklist registra la manutenzione dell'impianto: è
+    # opt-in, perché non ogni verifica periodica è una manutenzione e
+    # aggiornare il registro di nascosto sarebbe una sorpresa.
+    records_maintenance = models.BooleanField(
+        default=False,
+        help_text="Al completamento aggiorna ultima manutenzione ed esito sull'impianto.",
+    )
     is_active = models.BooleanField(default=True, db_index=True)
 
     class Meta:
@@ -276,6 +295,17 @@ class ChecklistRun(BaseModel):
 
     template = models.ForeignKey(
         ChecklistTemplate, on_delete=models.PROTECT, related_name="runs"
+    )
+    # Impianto a cui si riferisce questa esecuzione, quando il template è
+    # espanso per categoria: è ciò che rende la misura una serie storica per
+    # apparato invece di un numero per sito.
+    asset = models.ForeignKey(
+        "assets.Asset",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="checklist_runs",
+        db_index=True,
     )
     plant = models.ForeignKey(
         "plants.Plant",
@@ -386,10 +416,25 @@ class KPIDefinition(BaseModel):
         related_name="kpi_definitions",
         help_text="Template sorgente se source=checklist",
     )
+    # Voce specifica da aggregare. È una FK e non più solo un testo: il filtro
+    # testuale (mantenuto sotto per retrocompatibilità) si rompeva in silenzio
+    # appena qualcuno rinominava la voce, e il KPI smetteva di misurare senza
+    # alcun segnale. Vuoto = tutte le voci del template.
+    checklist_item = models.ForeignKey(
+        "tasks.ChecklistTemplateItem",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="kpi_definitions",
+        help_text="Voce del template da aggregare; vuoto = tutte.",
+    )
     checklist_item_filter = models.CharField(
         max_length=500,
         blank=True,
-        help_text="Testo parziale item da aggregare, blank=tutti",
+        help_text=(
+            "Storico: testo parziale della voce da aggregare. Usato solo se "
+            "`checklist_item` non è valorizzata."
+        ),
     )
     aggregation = models.CharField(
         max_length=20, choices=AGGREGATION_CHOICES, default="success_rate"

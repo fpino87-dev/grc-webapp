@@ -18,6 +18,7 @@ interface FormState {
   unit: string;
   source: KpiSource;
   checklist_template: string;
+  checklist_item: string;
   checklist_item_filter: string;
   aggregation: KpiAggregation;
   plant: string;
@@ -36,6 +37,7 @@ const EMPTY: FormState = {
   unit: "",
   source: "checklist",
   checklist_template: "",
+  checklist_item: "",
   checklist_item_filter: "",
   aggregation: "success_rate",
   plant: "",
@@ -75,6 +77,10 @@ export function KpiDefinitionForm() {
     queryFn: () => checklistsApi.listTemplates(),
     retry: false,
   });
+  // Voci del template scelto: il KPI si aggancia alla voce, non al suo testo.
+  const templateItems =
+    (templates?.results ?? []).find((tpl) => tpl.id === form.checklist_template)?.items ?? [];
+
   const { data: existing } = useQuery({
     queryKey: ["kpi-definition", id],
     queryFn: () => kpiApi.getKpiDefinition(id!),
@@ -94,6 +100,7 @@ export function KpiDefinitionForm() {
       unit: existing.unit ?? "",
       source: existing.source,
       checklist_template: existing.checklist_template ?? "",
+      checklist_item: existing.checklist_item ?? "",
       checklist_item_filter: existing.checklist_item_filter ?? "",
       aggregation: existing.aggregation,
       plant: existing.plant ?? "",
@@ -115,7 +122,12 @@ export function KpiDefinitionForm() {
         unit: form.unit,
         source: form.source,
         checklist_template: form.source === "checklist" && form.checklist_template ? form.checklist_template : null,
-        checklist_item_filter: form.source === "checklist" ? form.checklist_item_filter : "",
+        checklist_item:
+          form.source === "checklist" && form.checklist_item ? form.checklist_item : null,
+        // Il filtro testuale resta solo per le definizioni storiche: scegliendo
+        // una voce si azzera, così non restano due criteri in conflitto.
+        checklist_item_filter:
+          form.source === "checklist" && !form.checklist_item ? form.checklist_item_filter : "",
         aggregation: form.aggregation,
         plant: form.plant || null,
         threshold_warning: form.threshold_warning === "" ? null : Number(form.threshold_warning),
@@ -278,13 +290,27 @@ export function KpiDefinitionForm() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("kpi.form.item_filter")}</label>
-              <input
-                value={form.checklist_item_filter}
-                onChange={(e) => set("checklist_item_filter", e.target.value)}
-                placeholder={t("kpi.form.item_filter_placeholder")}
-                className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("kpi.form.item")}</label>
+              <select
+                value={form.checklist_item}
+                onChange={(e) => set("checklist_item", e.target.value)}
+                disabled={!form.checklist_template}
+                className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 disabled:bg-gray-50"
+              >
+                <option value="">{t("kpi.form.item_all")}</option>
+                {templateItems.map((it) => (
+                  <option key={it.id} value={it.id}>
+                    {it.text}
+                    {it.unit ? ` (${it.unit})` : ""}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-1">{t("kpi.form.item_hint")}</p>
+              {!form.checklist_item && form.checklist_item_filter && (
+                <p className="text-xs text-amber-700 mt-1">
+                  {t("kpi.form.item_legacy_filter", { filter: form.checklist_item_filter })}
+                </p>
+              )}
             </div>
           </>
         )}

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { FACILITY_CATEGORIES } from "../../api/endpoints/assets";
 import {
   checklistsApi,
   CHECKLIST_FREQUENCIES,
@@ -19,6 +20,8 @@ interface FormState {
   day_of_month: number;
   start_month: number;
   plant: string;
+  facility_category: string;
+  records_maintenance: boolean;
   is_active: boolean;
   items: ChecklistTemplateItem[];
 }
@@ -31,6 +34,8 @@ const EMPTY: FormState = {
   day_of_month: 1,
   start_month: 1,
   plant: "",
+  facility_category: "",
+  records_maintenance: false,
   is_active: true,
   items: [{ order: 0, text: "", is_mandatory: true }],
 };
@@ -68,6 +73,8 @@ export function ChecklistTemplateForm() {
         days_of_week: existing.days_of_week ?? [],
         day_of_month: existing.day_of_month ?? 1,
         start_month: existing.start_month ?? 1,
+        facility_category: existing.facility_category ?? "",
+        records_maintenance: existing.records_maintenance ?? false,
         plant: existing.plant ?? "",
         is_active: existing.is_active,
         items:
@@ -95,6 +102,10 @@ export function ChecklistTemplateForm() {
         day_of_month: isMonthBased ? form.day_of_month : 1,
         start_month: isMonthBased ? form.start_month : 1,
         plant: form.plant || null,
+        facility_category: form.facility_category,
+        // Registrare la manutenzione ha senso solo su una checklist legata a
+        // un impianto: senza categoria non c'è nulla da aggiornare.
+        records_maintenance: Boolean(form.facility_category) && form.records_maintenance,
         is_active: form.is_active,
         // Si rimanda l'item completo (id compreso, quando esiste): il backend
         // aggiorna in place gli item già usati dai run e conserva tipo, unità
@@ -312,6 +323,42 @@ export function ChecklistTemplateForm() {
           <p className="text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded px-3 py-2">
             {t("checklists.templates.ad_hoc_hint")}
           </p>
+        )}
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t("checklists.templates.facility_category")}
+          </label>
+          <select
+            value={form.facility_category}
+            onChange={(e) => setForm({ ...form, facility_category: e.target.value })}
+            className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+          >
+            <option value="">{t("checklists.templates.facility_category_none")}</option>
+            {FACILITY_CATEGORIES.map((c) => (
+              <option key={c} value={c}>{t(`assets.facility.categories.${c}`)}</option>
+            ))}
+          </select>
+          <p className="text-xs text-gray-500 mt-1">
+            {t("checklists.templates.facility_category_hint")}
+          </p>
+        </div>
+
+        {form.facility_category && (
+          <label className="flex items-start gap-2 text-sm text-gray-700 bg-emerald-50 border border-emerald-100 rounded px-3 py-2">
+            <input
+              type="checkbox"
+              checked={form.records_maintenance}
+              onChange={(e) => setForm({ ...form, records_maintenance: e.target.checked })}
+              className="mt-0.5 rounded border-gray-300 text-primary-600 focus:ring-primary-400"
+            />
+            <span>
+              {t("checklists.templates.records_maintenance")}
+              <span className="block text-xs text-gray-500">
+                {t("checklists.templates.records_maintenance_hint")}
+              </span>
+            </span>
+          </label>
         )}
 
         <label className="flex items-center gap-2 text-sm text-gray-700">

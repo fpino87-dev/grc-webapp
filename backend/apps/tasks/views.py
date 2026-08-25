@@ -302,6 +302,60 @@ class KPIDefinitionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         )
         instance.soft_delete()
 
+    @action(detail=True, methods=["post"], url_path="record-value")
+    def record_value(self, request, pk=None):
+        """Inserimento manuale del valore, per i KPI che dipendono da una
+        fonte esterna non ancora integrata."""
+        from django.utils.dateparse import parse_date
+
+        kpi = self.get_object()
+        if kpi.source in ("checklist", "internal"):
+            return Response(
+                {"error": _("Questo KPI si calcola da solo: il valore non va inserito a mano.")},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        raw = request.data.get("value")
+        try:
+            value = float(raw)
+        except (TypeError, ValueError):
+            return Response(
+                {"error": _("Valore numerico obbligatorio.")},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        plant = kpi.plant
+        plant_id = request.data.get("plant")
+        if plant is None and plant_id:
+            plant = Plant.objects.filter(pk=plant_id).first()
+            if plant is None:
+                return Response(
+                    {"error": _("Sito non trovato.")},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        require_plant_access(request.user, plant, aggregate_requires_org=False)
+
+        week_start = request.data.get("week_start")
+        if week_start:
+            week_start = parse_date(str(week_start))
+            if week_start is None:
+                return Response(
+                    {"error": _("Settimana non valida (formato atteso AAAA-MM-GG).")},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            week_start = services._monday_of(week_start)
+
+        snapshot = services.record_manual_kpi_value(
+            kpi, plant, value,
+            week_start=week_start,
+            note=request.data.get("note", ""),
+            user=request.user,
+        )
+        return Response(
+            OperationalKpiSnapshotSerializer(snapshot).data,
+            status=status.HTTP_201_CREATED,
+        )
+
 
 class OperationalKpiSnapshotViewSet(
     PlantScopedQuerysetMixin,

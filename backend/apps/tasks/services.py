@@ -331,15 +331,16 @@ def sync_template_items(template, items_data):
             item.soft_delete()
 
 
-def create_run_for_template(template, plant, due_date):
+def create_run_for_template(template, plant, due_date, asset=None):
     """
-    Crea un ChecklistRun per (template, plant, due_date) con un RunItem per
-    ciascun item attivo del template. Idempotente: non duplica un run esistente.
+    Crea un ChecklistRun per (template, plant, due_date, asset) con un RunItem
+    per ciascun item attivo del template. Idempotente: non duplica un run
+    esistente. `asset` è valorizzato per i template espansi sugli impianti.
     """
     from .models import ChecklistRun, ChecklistRunItem
 
     existing = ChecklistRun.objects.filter(
-        template=template, plant=plant, due_date=due_date
+        template=template, plant=plant, due_date=due_date, asset=asset
     ).first()
     if existing:
         return existing
@@ -348,6 +349,7 @@ def create_run_for_template(template, plant, due_date):
         template=template,
         plant=plant,
         due_date=due_date,
+        asset=asset,
         status="pending",
     )
     items = [
@@ -357,6 +359,27 @@ def create_run_for_template(template, plant, due_date):
     if items:
         ChecklistRunItem.objects.bulk_create(items)
     return run
+
+
+def checklist_targets(template, plant):
+    """
+    Impianti su cui espandere la checklist in questo sito.
+
+    `None` = nessuna espansione: il template genera una sola checklist per
+    sito, come sempre. Una lista **vuota** è invece un caso diverso e va tenuto
+    distinto: il template dichiara una categoria ma il sito non ha impianti di
+    quel tipo, quindi non si genera nulla — una prova UPS in un sito senza UPS
+    non è una checklist, è rumore.
+    """
+    from apps.assets.models import AssetFacility
+
+    if not template.facility_category:
+        return None
+    return list(
+        AssetFacility.objects.filter(
+            plant=plant, category=template.facility_category
+        ).order_by("name")
+    )
 
 
 def complete_run_item(
@@ -418,10 +441,26 @@ def complete_run(run, user):
                 "id": str(run.pk),
                 "template": run.template.name,
                 "plant_id": str(run.plant_id),
+                "asset_id": str(run.asset_id) if run.asset_id else None,
                 "items_total": run.items.count(),
                 "items_checked": run.items.filter(checked=True).count(),
             },
         )
+
+        # Il template può dichiarare che questa verifica È la manutenzione
+        # dell'impianto: in quel caso il registro asset si aggiorna da solo e
+        # la scadenza successiva riparte. Resta opt-in, così una checklist di
+        # controllo non tocca il registro di nascosto.
+        if run.template.records_maintenance and run.asset_id:
+            from apps.assets.services import record_maintenance
+
+            record_maintenance(
+                run.asset,
+                user,
+                date=run.due_date,
+                result="superata",
+                notes=f"Registrata dalla checklist «{run.template.name}».",
+            )
     return run
 
 
@@ -536,8 +575,12 @@ def calculate_kpi_value(kpi_def, plant, week_start) -> dict:
         }
 
     # Aggregazioni a livello item: filtra gli item dei run nel periodo.
+    # La voce collegata (FK) ha la precedenza sul filtro testuale storico:
+    # rinominare la voce non deve far smettere di misurare il KPI.
     items = ChecklistRunItem.objects.filter(run__in=runs)
-    if kpi_def.checklist_item_filter:
+    if kpi_def.checklist_item_id:
+        items = items.filter(template_item_id=kpi_def.checklist_item_id)
+    elif kpi_def.checklist_item_filter:
         items = items.filter(
             template_item__text__icontains=kpi_def.checklist_item_filter
         )
@@ -627,6 +670,66 @@ def _maybe_alert(kpi_def, plant, snapshot, prev_status) -> bool:
         _send_kpi_alert(kpi_def, plant, snapshot)
         return True
     return False
+
+
+def record_manual_kpi_value(kpi_def, plant, value, week_start=None, note="", user=None):
+    """
+    Registra a mano il valore di un KPI per una settimana.
+
+    Serve ai KPI che dipendono da una fonte esterna (`source="api"`): finché
+    l'integrazione non esiste — e in molte aziende non esisterà mai, viste
+    quante marche diverse di scanner e sistemi ci sono — il numero lo si legge
+    dalla console del prodotto e lo si scrive qui. Meglio una misura mensile
+    battuta a mano che un indicatore vuoto per sempre.
+
+    Passa dallo stesso calcolo di stato e dallo stesso alerting degli altri
+    KPI: una soglia superata a mano notifica come una superata da un
+    connettore.
+    """
+    from .models import OperationalKpiSnapshot
+
+    week_start = week_start or _monday_of(timezone.localdate())
+    status = evaluate_kpi_status(kpi_def, value)
+
+    prev = (
+        OperationalKpiSnapshot.objects.filter(
+            kpi_definition=kpi_def, plant=plant, week_start__lt=week_start
+        )
+        .order_by("-week_start")
+        .first()
+    )
+    prev_status = prev.status if prev else None
+
+    with transaction.atomic():
+        snapshot, _created = OperationalKpiSnapshot.objects.update_or_create(
+            kpi_definition=kpi_def,
+            plant=plant,
+            week_start=week_start,
+            defaults={
+                "value": value,
+                "status": status,
+                "source": "manual",
+                "measured_at": timezone.now(),
+                "run_count": 0,
+                "note": note or "Inserimento manuale",
+            },
+        )
+        log_action(
+            user=user,
+            action_code="kpi_snapshot.recorded_manually",
+            level="L1",
+            entity=snapshot,
+            payload={
+                "kpi_code": kpi_def.kpi_code,
+                "plant_id": str(plant.pk) if plant else None,
+                "week_start": str(week_start),
+                "value": value,
+                "status": status,
+            },
+        )
+
+    snapshot._alert_sent = _maybe_alert(kpi_def, plant, snapshot, prev_status)
+    return snapshot
 
 
 def compute_and_store_kpi_snapshot(kpi_def, plant, week_start):

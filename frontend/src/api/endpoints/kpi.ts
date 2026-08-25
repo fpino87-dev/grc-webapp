@@ -19,6 +19,10 @@ export interface KpiDefinition {
   source: KpiSource;
   checklist_template: string | null;
   checklist_template_name?: string | null;
+  /** Voce del template da aggregare. Sostituisce il filtro testuale: rinominare
+   *  la voce non fa più smettere di misurare il KPI. */
+  checklist_item?: string | null;
+  checklist_item_text?: string | null;
   checklist_item_filter: string;
   aggregation: KpiAggregation;
   plant: string | null;
@@ -110,6 +114,7 @@ export interface KpiImportOverride {
   threshold_warning?: number | null;
   threshold_critical?: number | null;
   checklist_template?: string | null;
+  checklist_item?: string | null;
   create_template?: boolean;
 }
 
@@ -139,6 +144,13 @@ export const kpiApi = {
     apiClient.patch<KpiDefinition>(`${DEF}${id}/`, data).then((r) => r.data),
   deleteKpiDefinition: (id: string) =>
     apiClient.delete(`${DEF}${id}/`).then((r) => r.data),
+  /** Inserimento manuale del valore, per i KPI che dipendono da una fonte
+   *  esterna non ancora integrata. Passa dallo stesso calcolo di stato e
+   *  dallo stesso alerting degli altri. */
+  recordKpiValue: (
+    id: string,
+    data: { value: number; week_start?: string; note?: string; plant?: string },
+  ) => apiClient.post<KpiSnapshot>(`${DEF}${id}/record-value/`, data).then((r) => r.data),
 
   // Snapshot / trend
   getKpiSnapshots: (params?: Record<string, string>) =>

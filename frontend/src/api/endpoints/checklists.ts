@@ -60,6 +60,11 @@ export interface ChecklistTemplate {
   start_month?: number;
   plant: string | null;
   plant_name?: string | null;
+  /** Categoria di impianti su cui espandere: genera una checklist per ogni
+   *  impianto di quel tipo nel sito (vuoto = una sola per sito). */
+  facility_category?: string;
+  /** Al completamento aggiorna ultima manutenzione ed esito sull'impianto. */
+  records_maintenance?: boolean;
   is_active: boolean;
   items: ChecklistTemplateItem[];
   runs_count?: number;
@@ -83,6 +88,9 @@ export interface ChecklistRun {
   id: string;
   template: string;
   template_name: string;
+  /** Impianto a cui si riferisce, per le checklist espanse per categoria. */
+  asset?: string | null;
+  asset_name?: string | null;
   plant: string;
   plant_name?: string;
   assigned_to: string | null;

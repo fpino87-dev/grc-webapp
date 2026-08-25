@@ -13,11 +13,31 @@ export function KpiDefinitionList() {
   const selectedPlant = useAuthStore((s) => s.selectedPlant);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [showWizard, setShowWizard] = useState(false);
+  // KPI per cui è aperto l'inserimento manuale del valore.
+  const [recordingId, setRecordingId] = useState<string | null>(null);
+  const [value, setValue] = useState("");
+  const [note, setNote] = useState("");
 
   const { data, isLoading } = useQuery({
     queryKey: ["kpi-definitions"],
     queryFn: () => kpiApi.getKpiDefinitions(),
     retry: false,
+  });
+
+  const recordMutation = useMutation({
+    mutationFn: () =>
+      kpiApi.recordKpiValue(recordingId!, {
+        value: Number(value),
+        note,
+        ...(selectedPlant ? { plant: selectedPlant.id } : {}),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["kpi-definitions"] });
+      qc.invalidateQueries({ queryKey: ["kpi-snapshots"] });
+      setRecordingId(null);
+      setValue("");
+      setNote("");
+    },
   });
 
   const deleteMutation = useMutation({
@@ -86,7 +106,17 @@ export function KpiDefinitionList() {
                     </button>
                   </td>
                   <td className="px-4 py-3 text-gray-800">{kpi.name}</td>
-                  <td className="px-4 py-3 text-gray-500">{t(`kpi.source.${kpi.source}`)}</td>
+                  <td className="px-4 py-3 text-gray-500">
+                    {t(`kpi.source.${kpi.source}`)}
+                    {kpi.source === "api" && (
+                      <span
+                        title={t("kpi.definitions.needs_feed_hint")}
+                        className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-amber-100 text-amber-700"
+                      >
+                        {t("kpi.definitions.needs_feed")}
+                      </span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-gray-600">{kpi.threshold_warning ?? "—"}</td>
                   <td className="px-4 py-3 text-gray-600">{kpi.threshold_critical ?? "—"}</td>
                   <td className="px-4 py-3">
@@ -115,17 +145,72 @@ export function KpiDefinitionList() {
                         </button>
                       </span>
                     ) : (
-                      <button
-                        onClick={() => setConfirmDeleteId(kpi.id)}
-                        className="text-xs text-gray-400 hover:text-red-600"
-                        title={t("actions.delete")}
-                      >
-                        ✕
-                      </button>
+                      <span className="flex items-center justify-end gap-2">
+                        {(kpi.source === "api" || kpi.source === "manual") && (
+                          <button
+                            onClick={() => {
+                              setRecordingId(recordingId === kpi.id ? null : kpi.id);
+                              setValue("");
+                              setNote("");
+                              recordMutation.reset();
+                            }}
+                            className="text-xs text-primary-700 hover:text-primary-900 border border-primary-300 rounded px-2 py-0.5 hover:bg-primary-50"
+                          >
+                            {recordingId === kpi.id ? t("common.close") : t("kpi.definitions.record_value")}
+                          </button>
+                        )}
+                        <button
+                          onClick={() => setConfirmDeleteId(kpi.id)}
+                          className="text-xs text-gray-400 hover:text-red-600"
+                          title={t("actions.delete")}
+                        >
+                          ✕
+                        </button>
+                      </span>
                     )}
                   </td>
                 </tr>
               ))}
+              {recordingId && (
+                <tr>
+                  <td colSpan={7} className="px-4 pb-4 bg-primary-50/30">
+                    <div className="flex flex-wrap items-end gap-2 pt-3">
+                      <label className="text-xs text-gray-600">
+                        {t("kpi.definitions.value")}
+                        <input
+                          type="number"
+                          step="any"
+                          value={value}
+                          onChange={(e) => setValue(e.target.value)}
+                          className="block w-32 border rounded px-2 py-1 text-sm mt-0.5"
+                        />
+                      </label>
+                      <label className="flex-1 min-w-[16rem] text-xs text-gray-600">
+                        {t("kpi.definitions.value_note")}
+                        <input
+                          value={note}
+                          onChange={(e) => setNote(e.target.value)}
+                          placeholder={t("kpi.definitions.value_note_placeholder")}
+                          className="block w-full border rounded px-2 py-1 text-sm mt-0.5"
+                        />
+                      </label>
+                      <button
+                        onClick={() => recordMutation.mutate()}
+                        disabled={value === "" || recordMutation.isPending}
+                        className="px-3 py-1.5 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
+                      >
+                        {recordMutation.isPending ? t("common.saving") : t("actions.save")}
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1.5">
+                      {t("kpi.definitions.value_hint")}
+                    </p>
+                    {recordMutation.isError && (
+                      <p className="text-sm text-red-600 mt-1">{t("common.save_error")}</p>
+                    )}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         )}

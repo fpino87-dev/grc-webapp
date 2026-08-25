@@ -3915,7 +3915,12 @@
         "frequency": "Sıklık",
         "plant": "Tesis",
         "active": "Aktif"
-      }
+      },
+      "facility_category": "Uygulandığı tesisler",
+      "facility_category_none": "Yok — tesis başına tek kontrol listesi",
+      "facility_category_hint": "Sahadaki bu kategorideki her tesis için bir kontrol listesi üretir: tek bir «UPS testi» tüm UPS'leri kapsar ve her ölçüm kendi cihazına bağlı kalır.",
+      "records_maintenance": "Tesisin bakımını kaydet",
+      "records_maintenance_hint": "Tamamlandığında tesiste son bakımı ve sonucunu günceller, sonraki vadeyi yeniden başlatır."
     },
     "runs": {
       "title": "Kontrol Listeleri — Çalıştırmalar",
@@ -3989,7 +3994,14 @@
         "warning": "Uyarı eşiği",
         "critical": "Kritik eşik",
         "active": "Aktif"
-      }
+      },
+      "needs_feed": "kaynak gerekli",
+      "needs_feed_hint": "Bu KPI dış bir sistemden veri bekler: gelene kadar boş kalır. Değeri elle girebilirsiniz.",
+      "record_value": "Değer gir",
+      "value": "Değer",
+      "value_note": "Not",
+      "value_note_placeholder": "ör. tarayıcı konsolundan okundu",
+      "value_hint": "Değer içinde bulunulan haftaya işlenir ve diğer KPI'larla aynı eşik ve uyarılardan geçer."
     },
     "form": {
       "new": "Yeni KPI",
@@ -4022,7 +4034,11 @@
       "preview_api": "Harici API'den alınan «{{agg}}» değeri; {{dir}}.",
       "preview_internal": "Dahili modül verilerinden otomatik hesaplanır; {{dir}}.",
       "preview_filter": "\"{{filter}}\" içeren maddeler",
-      "preview_all_items": "tüm maddeler"
+      "preview_all_items": "tüm maddeler",
+      "item": "Ölçülecek madde",
+      "item_all": "Şablondaki tüm maddeler",
+      "item_hint": "KPI metne değil maddenin kendisine bağlanır: yeniden adlandırmak ölçümü artık durdurmaz.",
+      "item_legacy_filter": "Eski tanım: hâlâ «{{filter}}» metnine göre filtreliyor. Kararlı hale getirmek için bir madde seçin."
     },
     "aggregation": {
       "success_rate": "Başarı oranı (% tamamlanan)",

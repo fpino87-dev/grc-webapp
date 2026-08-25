@@ -52,12 +52,16 @@ def generate_scheduled_checklists(self):
             # plant null → template valido per tutti i plant attivi
             target_plants = list(Plant.objects.filter(status="attivo"))
         for plant in target_plants:
-            already = ChecklistRun.objects.filter(
-                template=template, plant=plant, due_date=due_date
-            ).exists()
-            services.create_run_for_template(template, plant, due_date)
-            if not already:
-                created_count += 1
+            # Template espanso per categoria di impianto: una checklist per
+            # ciascun impianto del sito. Senza categoria, una sola per sito.
+            targets = services.checklist_targets(template, plant)
+            for asset in ([None] if targets is None else targets):
+                already = ChecklistRun.objects.filter(
+                    template=template, plant=plant, due_date=due_date, asset=asset
+                ).exists()
+                services.create_run_for_template(template, plant, due_date, asset=asset)
+                if not already:
+                    created_count += 1
 
     # 3) Soglia PDCA su run consecutivi incompleti.
     pdca_count = 0

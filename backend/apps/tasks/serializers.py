@@ -57,8 +57,9 @@ class ChecklistTemplateSerializer(serializers.ModelSerializer):
         model = ChecklistTemplate
         fields = [
             "id", "name", "description", "frequency", "days_of_week",
-            "day_of_month", "start_month", "plant", "plant_name", "is_active",
-            "items", "runs_count", "created_at", "updated_at",
+            "day_of_month", "start_month", "plant", "plant_name",
+            "facility_category", "records_maintenance",
+            "is_active", "items", "runs_count", "created_at", "updated_at",
         ]
 
     def get_runs_count(self, obj):
@@ -152,13 +153,15 @@ class ChecklistRunSerializer(serializers.ModelSerializer):
     items = ChecklistRunItemSerializer(many=True, read_only=True)
     template_name = serializers.CharField(source="template.name", read_only=True)
     plant_name = serializers.CharField(source="plant.name", read_only=True)
+    asset_name = serializers.CharField(source="asset.name", read_only=True)
     progress_total = serializers.SerializerMethodField(read_only=True)
     progress_done = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = ChecklistRun
         fields = [
-            "id", "template", "template_name", "plant", "plant_name",
+            "id", "template", "template_name", "asset", "asset_name",
+            "plant", "plant_name",
             "assigned_to", "due_date", "completed_at", "completed_by",
             "status", "items", "progress_total", "progress_done", "created_at",
         ]
@@ -200,13 +203,17 @@ class KPIDefinitionSerializer(serializers.ModelSerializer):
     checklist_template_name = serializers.CharField(
         source="checklist_template.name", read_only=True
     )
+    checklist_item_text = serializers.CharField(
+        source="checklist_item.text", read_only=True
+    )
 
     class Meta:
         model = KPIDefinition
         fields = [
             "id", "kpi_code", "name", "description", "unit", "source",
             "checklist_template", "checklist_template_name",
-            "checklist_item_filter", "aggregation",
+            "checklist_item", "checklist_item_text", "checklist_item_filter",
+            "aggregation",
             "plant", "plant_name",
             "threshold_warning", "threshold_critical", "threshold_direction",
             "is_active", "notify_on_warning", "notify_on_critical",
@@ -235,6 +242,20 @@ class KPIDefinitionSerializer(serializers.ModelSerializer):
             attrs["plant"] if "plant" in attrs
             else getattr(self.instance, "plant", None)
         )
+        # La voce collegata deve appartenere al template del KPI: puntare alla
+        # voce di un altro template darebbe un KPI che non misura mai nulla.
+        item = attrs["checklist_item"] if "checklist_item" in attrs else getattr(
+            self.instance, "checklist_item", None
+        )
+        template = (
+            attrs["checklist_template"] if "checklist_template" in attrs
+            else getattr(self.instance, "checklist_template", None)
+        )
+        if item is not None and (template is None or item.template_id != template.pk):
+            raise serializers.ValidationError({"checklist_item": (
+                "La voce indicata non appartiene al template selezionato."
+            )})
+
         if code:
             qs = KPIDefinition.objects.filter(kpi_code=code, plant=plant)
             if self.instance is not None:
