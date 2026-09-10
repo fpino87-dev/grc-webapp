@@ -3251,6 +3251,7 @@
       "exporting": "Esportazione...",
       "export_all": "Tutti i fornitori",
       "export_nis2": "Solo NIS2 rilevanti",
+      "export_tisax": "Solo TISAX rilevanti",
       "export_error": "Errore durante l'esportazione.",
       "new_btn": "+ Nuovo fornitore",
       "empty": "Nessun fornitore trovato.",

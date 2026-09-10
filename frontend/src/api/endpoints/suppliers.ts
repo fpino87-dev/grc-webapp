@@ -220,13 +220,14 @@ export const suppliersApi = {
       params: plantId ? { plant: plantId } : undefined,
     }).then(r => r.data),
 
-  exportCsv: (nis2Only: boolean) => {
-    const url = `/suppliers/suppliers/export-csv/${nis2Only ? "?nis2_only=true" : ""}`;
+  exportCsv: (scope: "all" | "nis2" | "tisax") => {
+    const query = scope === "all" ? "" : `?${scope}_only=true`;
+    const url = `/suppliers/suppliers/export-csv/${query}`;
     return apiClient.get(url, { responseType: "blob" }).then(r => {
       const blob = new Blob([r.data], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = nis2Only ? "fornitori_nis2.csv" : "fornitori.csv";
+      link.download = scope === "all" ? "fornitori.csv" : `fornitori_${scope}.csv`;
       link.click();
       URL.revokeObjectURL(link.href);
     });

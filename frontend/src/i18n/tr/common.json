@@ -3251,6 +3251,7 @@
       "exporting": "Dışa aktarılıyor...",
       "export_all": "Tüm tedarikçiler",
       "export_nis2": "Yalnızca NIS2 önemli",
+      "export_tisax": "Yalnızca TISAX önemli",
       "export_error": "Dışa aktarma sırasında hata.",
       "new_btn": "+ Yeni tedarikçi",
       "empty": "Tedarikçi bulunamadı.",

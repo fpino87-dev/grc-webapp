@@ -56,10 +56,10 @@ export function FornitoriTab() {
     );
   })();
 
-  async function handleExport(nis2Only: boolean) {
+  async function handleExport(scope: "all" | "nis2" | "tisax") {
     setExportLoading(true);
     try {
-      await suppliersApi.exportCsv(nis2Only);
+      await suppliersApi.exportCsv(scope);
     } catch {
       window.alert(t("suppliers.list.export_error"));
     } finally {
@@ -116,16 +116,22 @@ export function FornitoriTab() {
             </button>
             <div className="absolute right-0 top-full mt-1 w-52 bg-white border border-gray-200 rounded-lg shadow-lg z-10 hidden group-hover:block">
               <button
-                onClick={() => handleExport(false)}
+                onClick={() => handleExport("all")}
                 className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
               >
                 {t("suppliers.list.export_all")}
               </button>
               <button
-                onClick={() => handleExport(true)}
+                onClick={() => handleExport("nis2")}
                 className="w-full text-left px-4 py-2 text-sm text-purple-700 hover:bg-purple-50 font-medium"
               >
                 {t("suppliers.list.export_nis2")}
+              </button>
+              <button
+                onClick={() => handleExport("tisax")}
+                className="w-full text-left px-4 py-2 text-sm text-sky-700 hover:bg-sky-50 font-medium"
+              >
+                {t("suppliers.list.export_tisax")}
               </button>
             </div>
           </div>

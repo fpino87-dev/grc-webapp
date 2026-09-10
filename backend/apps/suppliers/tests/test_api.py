@@ -117,6 +117,22 @@ def test_export_csv_includes_tisax_column(client, supplier):
 
 
 @pytest.mark.django_db
+def test_export_csv_tisax_only(client, supplier, plant, user):
+    from apps.suppliers.models import Supplier
+    supplier.tisax_relevant = True
+    supplier.save(update_fields=["tisax_relevant"])
+    other = Supplier.objects.create(name="Fornitore Non TISAX", vat_number="IT999", created_by=user)
+    other.plants.add(plant)
+
+    resp = client.get(f"{URL_SUPPLIERS}export-csv/", {"tisax_only": "true"})
+    assert resp.status_code == 200
+    assert 'filename="fornitori_tisax.csv"' in resp["Content-Disposition"]
+    body = resp.content.decode("utf-8")
+    assert "Fornitore Test" in body
+    assert "Fornitore Non TISAX" not in body
+
+
+@pytest.mark.django_db
 def test_send_questionnaire_blocked_cross_plant(db, plant, supplier):
     """Inviare un questionario a un fornitore fuori perimetro è negato."""
     from apps.auth_grc.models import GrcRole, UserPlantAccess

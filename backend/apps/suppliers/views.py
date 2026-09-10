@@ -268,18 +268,23 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     )
     def export_csv(self, request):
         """
-        GET /suppliers/export-csv/?nis2_only=true
+        GET /suppliers/export-csv/?nis2_only=true | ?tisax_only=true
         Esporta i fornitori in CSV con tutti i campi richiesti da ACN Delibera 127434.
         """
         nis2_only = request.query_params.get("nis2_only", "false").lower() == "true"
+        tisax_only = request.query_params.get("tisax_only", "false").lower() == "true"
         # Rispetta il perimetro plant dell'utente: l'export non deve esporre
         # fornitori di siti fuori scope (sweep security per-sito sugli export).
         qs = self.get_queryset().order_by("name")
         if nis2_only:
             qs = qs.filter(nis2_relevant=True)
+        if tisax_only:
+            qs = qs.filter(tisax_relevant=True)
 
         response = HttpResponse(content_type="text/csv; charset=utf-8")
-        filename = "fornitori_nis2.csv" if nis2_only else "fornitori.csv"
+        filename = "fornitori{}{}.csv".format(
+            "_nis2" if nis2_only else "", "_tisax" if tisax_only else "",
+        )
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
         response.write("\ufeff")  # BOM per Excel
 
@@ -345,7 +350,7 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             action_code="suppliers.export.csv",
             level="L2",
             entity=request.user,
-            payload={"nis2_only": nis2_only, "count": qs.count()},
+            payload={"nis2_only": nis2_only, "tisax_only": tisax_only, "count": qs.count()},
         )
         return response
 
