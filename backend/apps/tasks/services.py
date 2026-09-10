@@ -413,6 +413,62 @@ def complete_run_item(
     return run_item
 
 
+RUN_DELETE_REASON_MIN_LENGTH = 10
+
+
+def delete_run(run, user, reason):
+    """
+    Cancella (soft delete) una checklist non conclusa: generata per errore,
+    duplicata, o riferita a un periodo in cui non era dovuta.
+
+    - Motivo obbligatorio: un run scaduto pesa sul KPI di successo e sulla
+      soglia PDCA, quindi toglierlo cambia la fotografia della conformità e
+      l'auditor deve poter leggere perché.
+    - Un run completato non è cancellabile: è l'evidenza del controllo
+      eseguito (misure, manutenzione registrata, serie KPI).
+    - Anche le voci del run sono soft-deletate, così nessuna query sulle
+      rilevazioni (KPI) le conta più.
+    Il generatore giornaliero non ricrea un run cancellato per lo stesso
+    periodo (vedi tasks.generate_scheduled_checklists).
+    """
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+
+    reason = (reason or "").strip()
+    if len(reason) < RUN_DELETE_REASON_MIN_LENGTH:
+        raise ValidationError(
+            _("Motivo cancellazione obbligatorio (min 10 caratteri).")
+        )
+    if run.status == "completed":
+        raise ValidationError(
+            _(
+                "Una checklist completata è l'evidenza del controllo eseguito: "
+                "non è cancellabile."
+            )
+        )
+
+    with transaction.atomic():
+        now = timezone.now()
+        items_count = run.items.update(deleted_at=now, updated_at=now)
+        run.soft_delete()
+        log_action(
+            user=user,
+            action_code="checklist_run.deleted",
+            level="L2",
+            entity=run,
+            payload={
+                "id": str(run.pk),
+                "template": run.template.name,
+                "plant_id": str(run.plant_id),
+                "asset_id": str(run.asset_id) if run.asset_id else None,
+                "due_date": str(run.due_date),
+                "status": run.status,
+                "items_count": items_count,
+                "reason": reason[:200],
+            },
+        )
+
+
 def complete_run(run, user):
     """
     Marca il run come completato — solo se tutti gli item obbligatori sono

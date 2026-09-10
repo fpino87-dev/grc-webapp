@@ -3951,6 +3951,16 @@
         "due_date": "Échéance",
         "progress": "Progression",
         "status": "Statut"
+      },
+      "delete": {
+        "tooltip": "Supprimer la checklist (uniquement si non terminée)",
+        "modal_title": "Supprimer la checklist",
+        "modal_intro": "Vous êtes sur le point de supprimer la checklist « {{name}} » à échéance du {{date}}. Elle ne comptera plus dans le KPI ni dans le seuil PDCA, et ne sera pas régénérée pour la même période. La suppression reste dans la piste d'audit avec son motif.",
+        "reason_label": "Motif de la suppression (min. 10 caractères) *",
+        "reason_placeholder": "Ex. : générée par erreur, site non concerné, équipement mis hors service…",
+        "confirm": "Confirmer la suppression",
+        "in_progress": "Suppression…",
+        "error_generic": "Erreur lors de la suppression de la checklist."
       }
     },
     "run": {

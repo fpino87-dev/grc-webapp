@@ -736,3 +736,127 @@ def test_serializer_rejects_invalid_start_month(plant):
     })
     assert not s.is_valid()
     assert "start_month" in s.errors
+
+
+# ── Cancellazione dei run ────────────────────────────────────────────────────
+
+DELETE_REASON = "Generata per errore sul sito sbagliato"
+
+
+@pytest.mark.django_db
+def test_delete_run_soft_deletes_run_and_items(client, template, plant):
+    from apps.tasks.models import ChecklistRun, ChecklistRunItem
+    from apps.tasks.services import create_run_for_template
+
+    run = create_run_for_template(template, plant, timezone.localdate())
+    resp = client.delete(f"{RUNS_URL}{run.id}/", {"reason": DELETE_REASON}, format="json")
+    assert resp.status_code == 204, getattr(resp, "data", None)
+    assert not ChecklistRun.objects.filter(pk=run.pk).exists()
+    assert ChecklistRun.objects.all_with_deleted().filter(pk=run.pk).exists()
+    # Le voci escono dalle rilevazioni (KPI) insieme al run.
+    assert not ChecklistRunItem.objects.filter(run_id=run.pk).exists()
+    assert client.get(f"{RUNS_URL}{run.id}/").status_code == 404
+
+
+@pytest.mark.django_db
+def test_delete_overdue_run_is_allowed(client, template, plant):
+    from apps.tasks.services import create_run_for_template
+
+    run = create_run_for_template(
+        template, plant, timezone.localdate() - datetime.timedelta(days=5)
+    )
+    run.status = "overdue"
+    run.save(update_fields=["status"])
+    resp = client.delete(f"{RUNS_URL}{run.id}/", {"reason": DELETE_REASON}, format="json")
+    assert resp.status_code == 204
+
+
+@pytest.mark.django_db
+def test_delete_run_requires_reason(client, template, plant):
+    from apps.tasks.models import ChecklistRun
+    from apps.tasks.services import create_run_for_template
+
+    run = create_run_for_template(template, plant, timezone.localdate())
+    for payload in ({}, {"reason": "   breve  "}):
+        resp = client.delete(f"{RUNS_URL}{run.id}/", payload, format="json")
+        assert resp.status_code == 400
+    assert ChecklistRun.objects.filter(pk=run.pk).exists()
+
+
+@pytest.mark.django_db
+def test_delete_completed_run_is_refused(client, template, plant, user):
+    from apps.tasks.models import ChecklistRun
+    from apps.tasks.services import complete_run, complete_run_item, create_run_for_template
+
+    run = create_run_for_template(template, plant, timezone.localdate())
+    for item in run.items.filter(template_item__is_mandatory=True):
+        complete_run_item(run, item_id=item.id, checked=True, user=user)
+    complete_run(run, user)
+    resp = client.delete(f"{RUNS_URL}{run.id}/", {"reason": DELETE_REASON}, format="json")
+    assert resp.status_code == 400
+    assert ChecklistRun.objects.filter(pk=run.pk).exists()
+
+
+@pytest.mark.django_db
+def test_delete_run_writes_audit_log_with_reason(client, template, plant):
+    from core.audit import AuditLog
+    from apps.tasks.services import create_run_for_template
+
+    run = create_run_for_template(template, plant, timezone.localdate())
+    client.delete(f"{RUNS_URL}{run.id}/", {"reason": DELETE_REASON}, format="json")
+    log = AuditLog.objects.get(action_code="checklist_run.deleted", entity_id=run.id)
+    assert log.level == "L2"
+    assert log.payload["reason"] == DELETE_REASON
+    assert log.payload["status"] == "pending"
+
+
+@pytest.mark.django_db
+def test_delete_run_is_reserved_to_checklist_managers(template, plant):
+    """Chi esegue le checklist non ne cancella l'evidenza: il plant manager
+    compila, ma non può togliere un controllo dovuto."""
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    from apps.tasks.models import ChecklistRun
+    from apps.tasks.services import create_run_for_template
+
+    operator = User.objects.create_user(username="chk_pm", email="pm@test.com", password="test")
+    UserPlantAccess.objects.create(user=operator, role=GrcRole.PLANT_MANAGER, scope_type="org")
+    c = APIClient()
+    c.force_authenticate(user=operator)
+
+    run = create_run_for_template(template, plant, timezone.localdate())
+    resp = c.delete(f"{RUNS_URL}{run.id}/", {"reason": DELETE_REASON}, format="json")
+    assert resp.status_code == 403
+    assert ChecklistRun.objects.filter(pk=run.pk).exists()
+
+
+@pytest.mark.django_db
+def test_scheduler_does_not_recreate_a_deleted_run(template, plant, user):
+    from apps.tasks.models import ChecklistRun
+    from apps.tasks.services import delete_run
+    from apps.tasks.tasks import generate_scheduled_checklists
+
+    generate_scheduled_checklists()
+    run = ChecklistRun.objects.get(template=template)
+    delete_run(run, user, DELETE_REASON)
+
+    generate_scheduled_checklists()
+    assert not ChecklistRun.objects.filter(template=template).exists()
+
+
+@pytest.mark.django_db
+def test_manual_start_after_delete_creates_a_fresh_run(client, template, plant, user):
+    """Il ripensamento resta possibile: «Avvia adesso» crea un run nuovo per
+    lo stesso periodo invece di restituire quello cancellato."""
+    from apps.tasks.models import ChecklistRun
+    from apps.tasks.services import create_run_for_template, delete_run
+
+    due = timezone.localdate()
+    run = create_run_for_template(template, plant, due)
+    delete_run(run, user, DELETE_REASON)
+
+    resp = client.post(
+        f"{TEMPLATES_URL}{template.id}/start-run/", {"due_date": str(due)}, format="json"
+    )
+    assert resp.status_code == 201, resp.data
+    assert resp.data["id"] != str(run.pk)
+    assert ChecklistRun.objects.get(template=template).items.count() == 3

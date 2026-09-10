@@ -3951,6 +3951,16 @@
         "due_date": "Scadenza",
         "progress": "Avanzamento",
         "status": "Stato"
+      },
+      "delete": {
+        "tooltip": "Cancella checklist (solo se non completata)",
+        "modal_title": "Cancella checklist",
+        "modal_intro": "Stai per cancellare la checklist «{{name}}» con scadenza {{date}}. Non conterà più nel KPI né nella soglia PDCA, e non verrà rigenerata per lo stesso periodo. La cancellazione resta nell'audit trail con il motivo.",
+        "reason_label": "Motivo cancellazione (min 10 caratteri) *",
+        "reason_placeholder": "Es: generata per errore, sito non pertinente, impianto dismesso…",
+        "confirm": "Conferma cancellazione",
+        "in_progress": "Cancellazione…",
+        "error_generic": "Errore durante la cancellazione della checklist."
       }
     },
     "run": {

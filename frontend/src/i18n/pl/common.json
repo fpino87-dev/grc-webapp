@@ -3951,6 +3951,16 @@
         "due_date": "Termin",
         "progress": "Postęp",
         "status": "Status"
+      },
+      "delete": {
+        "tooltip": "Usuń listę kontrolną (tylko jeśli nie jest ukończona)",
+        "modal_title": "Usuń listę kontrolną",
+        "modal_intro": "Zamierzasz usunąć listę kontrolną „{{name}}” z terminem {{date}}. Nie będzie już liczona do KPI ani do progu PDCA i nie zostanie ponownie wygenerowana dla tego samego okresu. Usunięcie pozostaje w ścieżce audytu wraz z powodem.",
+        "reason_label": "Powód usunięcia (min. 10 znaków) *",
+        "reason_placeholder": "Np.: wygenerowana przez pomyłkę, zakład nie dotyczy, urządzenie wycofane z eksploatacji…",
+        "confirm": "Potwierdź usunięcie",
+        "in_progress": "Usuwanie…",
+        "error_generic": "Błąd podczas usuwania listy kontrolnej."
       }
     },
     "run": {

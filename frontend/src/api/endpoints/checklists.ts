@@ -134,6 +134,10 @@ export const checklistsApi = {
       .then((r) => r.data),
   getRun: (id: string) =>
     apiClient.get<ChecklistRun>(`${RUN}${id}/`).then((r) => r.data),
+  /** Cancellazione logica di un run non completato; motivo obbligatorio
+   *  (min 10 caratteri), riservata a chi configura le checklist. */
+  deleteRun: (id: string, reason: string) =>
+    apiClient.delete(`${RUN}${id}/`, { data: { reason } }).then((r) => r.data),
   completeItem: (
     runId: string,
     payload: { item_id: string; checked: boolean; note?: string }

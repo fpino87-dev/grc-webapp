@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { checklistsApi, type ChecklistRun } from "../../api/endpoints/checklists";
@@ -10,10 +10,83 @@ import i18n from "../../i18n";
 
 type StatusFilter = "" | "pending" | "in_progress" | "completed" | "overdue";
 
+// Allineato a ChecklistRunDeletePermission (backend): chi configura le
+// checklist può cancellarne un run, chi le esegue no.
+const RUN_DELETE_ROLES = ["super_admin", "compliance_officer", "risk_manager"];
+const REASON_MIN_LENGTH = 10;
+
+function DeleteRunModal({ run, onClose }: { run: ChecklistRun; onClose: () => void }) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [reason, setReason] = useState("");
+  const [error, setError] = useState("");
+
+  const deleteMutation = useMutation({
+    mutationFn: () => checklistsApi.deleteRun(run.id, reason.trim()),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["checklist-runs"] });
+      onClose();
+    },
+    onError: (e: unknown) => {
+      const msg =
+        (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+        || t("checklists.runs.delete.error_generic");
+      setError(String(msg));
+    },
+  });
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+        <h3 className="text-lg font-semibold mb-2">{t("checklists.runs.delete.modal_title")}</h3>
+        <p className="text-sm text-gray-600 mb-3">
+          {t("checklists.runs.delete.modal_intro", {
+            name: run.template_name,
+            date: new Date(run.due_date).toLocaleDateString(i18n.language || "it"),
+          })}
+        </p>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          {t("checklists.runs.delete.reason_label")}
+        </label>
+        <textarea
+          className="w-full border rounded px-3 py-2 text-sm min-h-[80px] focus:outline-none focus:ring-2 focus:ring-primary-400"
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder={t("checklists.runs.delete.reason_placeholder")}
+        />
+        {error && (
+          <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-2">{error}</p>
+        )}
+        <div className="flex justify-end gap-2 mt-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50"
+          >
+            {t("actions.cancel")}
+          </button>
+          <button
+            type="button"
+            onClick={() => deleteMutation.mutate()}
+            disabled={reason.trim().length < REASON_MIN_LENGTH || deleteMutation.isPending}
+            className="px-4 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 disabled:opacity-50"
+          >
+            {deleteMutation.isPending
+              ? t("checklists.runs.delete.in_progress")
+              : t("checklists.runs.delete.confirm")}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ChecklistRunList() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const selectedPlant = useAuthStore((s) => s.selectedPlant);
+  const canDelete = RUN_DELETE_ROLES.includes(useAuthStore((s) => s.user?.role ?? ""));
+  const [deleteRun, setDeleteRun] = useState<ChecklistRun | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("");
   const [plantFilter, setPlantFilter] = useState("");
 
@@ -92,6 +165,7 @@ export function ChecklistRunList() {
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("checklists.runs.table.due_date")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("checklists.runs.table.progress")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("checklists.runs.table.status")}</th>
+                {canDelete && <th className="px-4 py-3"></th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -114,12 +188,32 @@ export function ChecklistRunList() {
                   <td className="px-4 py-3">
                     <StatusBadge status={run.status} />
                   </td>
+                  {canDelete && (
+                    <td className="px-4 py-3 text-right">
+                      {/* Un run completato è l'evidenza del controllo eseguito: non si cancella. */}
+                      {run.status !== "completed" && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteRun(run);
+                          }}
+                          title={t("checklists.runs.delete.tooltip")}
+                          className="text-xs text-gray-400 hover:text-red-600"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
           </table>
         )}
       </div>
+
+      {deleteRun && <DeleteRunModal run={deleteRun} onClose={() => setDeleteRun(null)} />}
     </div>
   );
 }

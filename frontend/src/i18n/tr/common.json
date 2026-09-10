@@ -3951,6 +3951,16 @@
         "due_date": "Son tarih",
         "progress": "İlerleme",
         "status": "Durum"
+      },
+      "delete": {
+        "tooltip": "Kontrol listesini sil (yalnızca tamamlanmamışsa)",
+        "modal_title": "Kontrol listesini sil",
+        "modal_intro": "Son tarihi {{date}} olan «{{name}}» kontrol listesini silmek üzeresiniz. Artık KPI'ya ve PDCA eşiğine dahil edilmeyecek ve aynı dönem için yeniden oluşturulmayacak. Silme işlemi, gerekçesiyle birlikte denetim izinde kalır.",
+        "reason_label": "Silme gerekçesi (en az 10 karakter) *",
+        "reason_placeholder": "Örn.: yanlışlıkla oluşturuldu, tesis ilgili değil, ekipman devre dışı bırakıldı…",
+        "confirm": "Silmeyi onayla",
+        "in_progress": "Siliniyor…",
+        "error_generic": "Kontrol listesi silinirken hata oluştu."
       }
     },
     "run": {

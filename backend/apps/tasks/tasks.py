@@ -56,12 +56,16 @@ def generate_scheduled_checklists(self):
             # ciascun impianto del sito. Senza categoria, una sola per sito.
             targets = services.checklist_targets(template, plant)
             for asset in ([None] if targets is None else targets):
-                already = ChecklistRun.objects.filter(
+                # Anche i run cancellati contano: cancellarne uno è una
+                # decisione motivata (services.delete_run) e il giro del
+                # giorno dopo non deve annullarla ricreandolo.
+                already = ChecklistRun.objects.all_with_deleted().filter(
                     template=template, plant=plant, due_date=due_date, asset=asset
                 ).exists()
+                if already:
+                    continue
                 services.create_run_for_template(template, plant, due_date, asset=asset)
-                if not already:
-                    created_count += 1
+                created_count += 1
 
     # 3) Soglia PDCA su run consecutivi incompleti.
     pdca_count = 0

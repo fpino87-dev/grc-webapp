@@ -22,7 +22,11 @@ from .serializers import (
     TaskSerializer,
 )
 from . import services
-from .permissions import KpiConfigPermission, TaskPermission
+from .permissions import (
+    ChecklistRunDeletePermission,
+    KpiConfigPermission,
+    TaskPermission,
+)
 from core.scoping import (
     PlantPayloadWriteGuardMixin,
     PlantScopedQuerysetMixin,
@@ -220,8 +224,9 @@ class ChecklistRunViewSet(
     mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
 ):
-    """I run sono generati automaticamente via Celery; qui solo lettura,
-    aggiornamento e completamento item — niente create/destroy manuali."""
+    """I run sono generati automaticamente via Celery (o avviati da un
+    template con start-run); qui lettura, aggiornamento, completamento item e
+    cancellazione motivata dei run non conclusi."""
 
     queryset = (
         ChecklistRun.objects.select_related("template", "plant", "assigned_to")
@@ -230,6 +235,22 @@ class ChecklistRunViewSet(
     serializer_class = ChecklistRunSerializer
     permission_classes = [TaskPermission]
     filterset_fields = ["plant", "status", "template", "assigned_to"]
+
+    def get_permissions(self):
+        if self.action == "destroy":
+            return [ChecklistRunDeletePermission()]
+        return super().get_permissions()
+
+    def destroy(self, request, pk=None):
+        run = self.get_object()
+        try:
+            services.delete_run(run, request.user, request.data.get("reason"))
+        except ValidationError as exc:
+            return Response(
+                {"detail": exc.messages[0] if exc.messages else str(exc)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["post"], url_path="complete-item")
     def complete_item(self, request, pk=None):
