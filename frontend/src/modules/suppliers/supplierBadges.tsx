@@ -77,6 +77,10 @@ export function Nis2Badge({ relevant }: { relevant: boolean }) {
   return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">NIS2</span>;
 }
 
+export function TisaxBadge() {
+  return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800">TISAX</span>;
+}
+
 const CONCENTRATION_CLASSES: Record<string, string> = {
   bassa:   "bg-green-100 text-green-700",
   media:   "bg-amber-100 text-amber-800",

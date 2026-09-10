@@ -81,6 +81,12 @@ class Supplier(BaseModel):
     # campo viene azzerato così un futuro ri-attraversamento notifica di nuovo.
     concentration_notified_threshold = models.CharField(max_length=10, blank=True, default="")
 
+    # TISAX (VDA ISA 6.1.1 — contractors and cooperation partners)
+    tisax_relevant = models.BooleanField(
+        default=False,
+        help_text="Fornitore rilevante ai fini TISAX: tratta informazioni del perimetro TISAX (es. dati/prototipi dei clienti OEM) o accede ai sistemi in scope (VDA ISA 6.1.1)",
+    )
+
     # Campi calcolati (derivati dai service — non editabili direttamente)
     internal_risk_level = models.CharField(
         max_length=10,

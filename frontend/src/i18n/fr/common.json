@@ -3230,6 +3230,8 @@
       "criterion_nf": "Non-fongibilité (b)",
       "criterion_both": "Les deux (a + b)",
       "concentration_label": "% Concentration de la fourniture",
+      "tisax_relevant_label": "Fournisseur pertinent TISAX",
+      "tisax_relevant_hint": "Traite des informations du périmètre TISAX (ex. données ou prototypes des clients OEM) ou accède aux systèmes dans le périmètre — VDA ISA 6.1.1.",
       "save_error": "Erreur lors de l'enregistrement.",
       "create_btn": "Créer le fournisseur",
       "update_btn": "Mettre à jour le fournisseur"
@@ -3241,6 +3243,9 @@
       "all_nis2": "Tous (NIS2)",
       "only_nis2": "NIS2 pertinents uniquement",
       "not_nis2": "Non NIS2",
+      "all_tisax": "Tous (TISAX)",
+      "only_tisax": "TISAX pertinents uniquement",
+      "not_tisax": "Non TISAX",
       "count_of": "{{shown}} sur {{total}}",
       "export_btn": "↓ Exporter CSV",
       "exporting": "Exportation...",

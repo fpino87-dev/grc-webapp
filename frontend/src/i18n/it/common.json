@@ -3230,6 +3230,8 @@
       "criterion_nf": "Non fungibilità (b)",
       "criterion_both": "Entrambi (a + b)",
       "concentration_label": "% Concentrazione fornitura",
+      "tisax_relevant_label": "Fornitore rilevante TISAX",
+      "tisax_relevant_hint": "Tratta informazioni del perimetro TISAX (es. dati o prototipi dei clienti OEM) o accede ai sistemi in scope — VDA ISA 6.1.1.",
       "save_error": "Errore durante il salvataggio.",
       "create_btn": "Crea fornitore",
       "update_btn": "Aggiorna fornitore"
@@ -3241,6 +3243,9 @@
       "all_nis2": "Tutti (NIS2)",
       "only_nis2": "Solo NIS2 rilevanti",
       "not_nis2": "Non NIS2",
+      "all_tisax": "Tutti (TISAX)",
+      "only_tisax": "Solo TISAX rilevanti",
+      "not_tisax": "Non TISAX",
       "count_of": "{{shown}} di {{total}}",
       "export_btn": "↓ Esporta CSV",
       "exporting": "Esportazione...",

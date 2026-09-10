@@ -26,6 +26,8 @@ export interface Supplier {
   nis2_relevance_criterion: "ict" | "non_fungibile" | "entrambi" | "";
   supply_concentration_pct: string | null;
   concentration_threshold: "bassa" | "media" | "critica" | "nd";
+  // TISAX (VDA ISA 6.1.1)
+  tisax_relevant: boolean;
   // Campi calcolati (read-only)
   internal_risk_level: RiskClass | "";
   risk_adj: RiskClass | "";

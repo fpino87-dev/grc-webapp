@@ -3230,6 +3230,8 @@
       "criterion_nf": "Niezastępowalność (b)",
       "criterion_both": "Oba (a + b)",
       "concentration_label": "% koncentracji dostaw",
+      "tisax_relevant_label": "Dostawca istotny dla TISAX",
+      "tisax_relevant_hint": "Przetwarza informacje objęte zakresem TISAX (np. dane lub prototypy klientów OEM) lub ma dostęp do systemów w zakresie — VDA ISA 6.1.1.",
       "save_error": "Błąd podczas zapisywania.",
       "create_btn": "Utwórz dostawcę",
       "update_btn": "Aktualizuj dostawcę"
@@ -3241,6 +3243,9 @@
       "all_nis2": "Wszystkie (NIS2)",
       "only_nis2": "Tylko istotne NIS2",
       "not_nis2": "Nie NIS2",
+      "all_tisax": "Wszystkie (TISAX)",
+      "only_tisax": "Tylko istotne TISAX",
+      "not_tisax": "Nie TISAX",
       "count_of": "{{shown}} z {{total}}",
       "export_btn": "↓ Eksport CSV",
       "exporting": "Eksportowanie...",

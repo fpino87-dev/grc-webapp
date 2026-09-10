@@ -2,7 +2,7 @@ import { Fragment, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { suppliersApi, type Supplier } from "../../api/endpoints/suppliers";
 import { StatusBadge } from "../../components/ui/StatusBadge";
-import { RiskBadge, Nis2Badge, ConcentrationBadge, EvalDateCell, ExpiryDateCell } from "./supplierBadges";
+import { RiskBadge, Nis2Badge, TisaxBadge, ConcentrationBadge, EvalDateCell, ExpiryDateCell } from "./supplierBadges";
 import { NewSupplierModal, EditSupplierModal } from "./SupplierModals";
 import { SendQuestionnaireModal } from "./QuestionnaireModals";
 import { ExpandedSupplierRow } from "./ExpandedSupplierRow";
@@ -18,6 +18,7 @@ export function FornitoriTab() {
   const [filterRisk, setFilterRisk] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filterNis2, setFilterNis2] = useState("");
+  const [filterTisax, setFilterTisax] = useState("");
   const [search, setSearch] = useState("");
   const [exportLoading, setExportLoading] = useState(false);
 
@@ -31,9 +32,10 @@ export function FornitoriTab() {
   if (filterRisk) params.risk_level = filterRisk;
   if (filterStatus) params.status = filterStatus;
   if (filterNis2) params.nis2_relevant = filterNis2;
+  if (filterTisax) params.tisax_relevant = filterTisax;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["suppliers", filterRisk, filterStatus, filterNis2],
+    queryKey: ["suppliers", filterRisk, filterStatus, filterNis2, filterTisax],
     queryFn: () => suppliersApi.list(Object.keys(params).length ? params : undefined),
   });
   const allSuppliers = data?.results ?? [];
@@ -92,6 +94,11 @@ export function FornitoriTab() {
             <option value="true">{t("suppliers.list.only_nis2")}</option>
             <option value="false">{t("suppliers.list.not_nis2")}</option>
           </select>
+          <select value={filterTisax} onChange={e => setFilterTisax(e.target.value)} className="border rounded px-3 py-1.5 text-sm">
+            <option value="">{t("suppliers.list.all_tisax")}</option>
+            <option value="true">{t("suppliers.list.only_tisax")}</option>
+            <option value="false">{t("suppliers.list.not_tisax")}</option>
+          </select>
           {search && (
             <span className="text-xs text-gray-500">
               {t("suppliers.list.count_of", { shown: suppliers.length, total: allSuppliers.length })}
@@ -146,7 +153,7 @@ export function FornitoriTab() {
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("suppliers.list.col_name")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("suppliers.list.col_vat")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("suppliers.list.col_country")}</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">NIS2</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">NIS2 / TISAX</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("suppliers.list.col_concentration")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600" title={t("suppliers.list.risk_adj_title")}>{t("suppliers.list.col_risk_adj")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("suppliers.list.col_status")}</th>
@@ -167,13 +174,14 @@ export function FornitoriTab() {
                     <td className="px-4 py-3 text-gray-500 font-mono text-xs">{s.vat_number || <span className="text-red-400 font-sans">{t("suppliers.list.vat_missing")}</span>}</td>
                     <td className="px-4 py-3 text-gray-500">{s.country}</td>
                     <td className="px-4 py-3">
-                      <div className="flex flex-col gap-0.5">
-                        <Nis2Badge relevant={s.nis2_relevant} />
+                      <div className="flex flex-col gap-0.5 items-start">
+                        {(s.nis2_relevant || !s.tisax_relevant) && <Nis2Badge relevant={s.nis2_relevant} />}
                         {s.nis2_relevant && s.nis2_relevance_criterion && (
                           <span className="text-xs text-purple-600">
                             {s.nis2_relevance_criterion === "ict" ? "ICT (a)" : s.nis2_relevance_criterion === "non_fungibile" ? "Non fung. (b)" : "a+b"}
                           </span>
                         )}
+                        {s.tisax_relevant && <TisaxBadge />}
                       </div>
                     </td>
                     <td className="px-4 py-3">

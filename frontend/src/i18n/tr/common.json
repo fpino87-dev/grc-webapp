@@ -3230,6 +3230,8 @@
       "criterion_nf": "İkame edilemezlik (b)",
       "criterion_both": "Her ikisi (a + b)",
       "concentration_label": "% Tedarik yoğunluğu",
+      "tisax_relevant_label": "TISAX kapsamında önemli tedarikçi",
+      "tisax_relevant_hint": "TISAX kapsamındaki bilgileri işler (ör. OEM müşteri verileri veya prototipleri) ya da kapsamdaki sistemlere erişir — VDA ISA 6.1.1.",
       "save_error": "Kaydetme sırasında hata.",
       "create_btn": "Tedarikçi oluştur",
       "update_btn": "Tedarikçiyi güncelle"
@@ -3241,6 +3243,9 @@
       "all_nis2": "Tümü (NIS2)",
       "only_nis2": "Yalnızca NIS2 önemli",
       "not_nis2": "NIS2 değil",
+      "all_tisax": "Tümü (TISAX)",
+      "only_tisax": "Yalnızca TISAX önemli",
+      "not_tisax": "TISAX değil",
       "count_of": "{{shown}} / {{total}}",
       "export_btn": "↓ CSV dışa aktar",
       "exporting": "Dışa aktarılıyor...",

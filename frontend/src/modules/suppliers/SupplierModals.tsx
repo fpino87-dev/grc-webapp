@@ -67,6 +67,7 @@ export function NewSupplierModal({ onClose }: { onClose: () => void }) {
     risk_level: "basso",
     status: "attivo",
     nis2_relevant: false,
+    tisax_relevant: false,
     cpv_codes: [],
   });
   const [error, setError] = useState("");
@@ -202,6 +203,25 @@ export function NewSupplierModal({ onClose }: { onClose: () => void }) {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Sezione TISAX */}
+          <div className="border-t border-gray-200 pt-3">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">TISAX</p>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="tisax_relevant"
+                id="new_tisax_relevant"
+                checked={!!form.tisax_relevant}
+                onChange={handleChange}
+                className="h-4 w-4 text-sky-600 border-gray-300 rounded"
+              />
+              <label htmlFor="new_tisax_relevant" className="text-sm font-medium text-gray-700">
+                {t("suppliers.form.tisax_relevant_label")}
+              </label>
+            </div>
+            <p className="mt-1 text-xs text-gray-500">{t("suppliers.form.tisax_relevant_hint")}</p>
           </div>
         </div>
         {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
@@ -366,6 +386,25 @@ export function EditSupplierModal({ supplier, onClose }: { supplier: Supplier; o
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Sezione TISAX */}
+          <div className="border-t border-gray-200 pt-3">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">TISAX</p>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="tisax_relevant"
+                id="edit_tisax_relevant"
+                checked={!!form.tisax_relevant}
+                onChange={handleChange}
+                className="h-4 w-4 text-sky-600 border-gray-300 rounded"
+              />
+              <label htmlFor="edit_tisax_relevant" className="text-sm font-medium text-gray-700">
+                {t("suppliers.form.tisax_relevant_label")}
+              </label>
+            </div>
+            <p className="mt-1 text-xs text-gray-500">{t("suppliers.form.tisax_relevant_hint")}</p>
           </div>
         </div>
         {error && <p className="text-sm text-red-600 mt-2">{error}</p>}

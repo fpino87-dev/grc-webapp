@@ -91,6 +91,32 @@ def test_export_csv_respects_plant_scope(db, plant, supplier):
 
 
 @pytest.mark.django_db
+def test_tisax_relevant_flag_and_filter(client, supplier, plant, user):
+    """Il flag TISAX si imposta via PATCH e filtra la lista (?tisax_relevant=)."""
+    from apps.suppliers.models import Supplier
+    other = Supplier.objects.create(name="Fornitore Non TISAX", vat_number="IT999", created_by=user)
+    other.plants.add(plant)
+
+    resp = client.patch(f"{URL_SUPPLIERS}{supplier.id}/", {"tisax_relevant": True}, format="json")
+    assert resp.status_code == 200
+    assert resp.json()["tisax_relevant"] is True
+
+    only = client.get(URL_SUPPLIERS, {"tisax_relevant": "true"}).json()["results"]
+    assert [s["name"] for s in only] == ["Fornitore Test"]
+    excluded = client.get(URL_SUPPLIERS, {"tisax_relevant": "false"}).json()["results"]
+    assert [s["name"] for s in excluded] == ["Fornitore Non TISAX"]
+
+
+@pytest.mark.django_db
+def test_export_csv_includes_tisax_column(client, supplier):
+    supplier.tisax_relevant = True
+    supplier.save(update_fields=["tisax_relevant"])
+    lines = client.get(f"{URL_SUPPLIERS}export-csv/").content.decode("utf-8").splitlines()
+    assert lines[0].rstrip().endswith("Rilevante TISAX")
+    assert lines[1].rstrip().endswith("Sì")
+
+
+@pytest.mark.django_db
 def test_send_questionnaire_blocked_cross_plant(db, plant, supplier):
     """Inviare un questionario a un fornitore fuori perimetro è negato."""
     from apps.auth_grc.models import GrcRole, UserPlantAccess

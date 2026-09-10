@@ -37,7 +37,7 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     serializer_class = SupplierSerializer
     permission_classes = [SupplierPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ["risk_level", "risk_adj", "status", "nis2_relevant"]
+    filterset_fields = ["risk_level", "risk_adj", "status", "nis2_relevant", "tisax_relevant"]
     search_fields = ["name", "vat_number"]
     # Supplier ha M2M `plants`; supplier senza alcun plant assegnato = cross-plant
     # (fornitore organizzativo) → visibile a tutti gli utenti con almeno un accesso.
@@ -311,6 +311,7 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             "Stato",
             "Data ultima valutazione",
             "Email",
+            "Rilevante TISAX",
         ])
 
         for s in qs:
@@ -336,6 +337,7 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 s.status,
                 str(s.evaluation_date) if s.evaluation_date else "",
                 s.email,
+                "Sì" if s.tisax_relevant else "No",
             ])
 
         log_action(
