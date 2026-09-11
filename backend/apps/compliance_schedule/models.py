@@ -21,7 +21,7 @@ RULE_TYPE_LABELS = {
     "incident_review":          "Revisione incidenti chiusi",
     # Suppliers
     "supplier_assessment":      "Assessment fornitori",
-    "supplier_contract_review": "Revisione contratti fornitori",
+    "supplier_reevaluation":    "Rivalutazione fornitori",
     # Asset / impianti
     "asset_maintenance":        "Manutenzione impianti e apparati",
     # Training
@@ -47,7 +47,7 @@ RULE_CATEGORIES = {
     "Rischi": ["risk_assessment", "risk_treatment"],
     "BCP": ["bcp_test", "bcp_review"],
     "Incidenti": ["incident_review"],
-    "Fornitori": ["supplier_assessment", "supplier_contract_review"],
+    "Fornitori": ["supplier_assessment", "supplier_reevaluation"],
     "Asset": ["asset_maintenance"],
     "Formazione": ["training_mandatory", "training_refresh"],
     "Governance": ["management_review", "security_committee"],
@@ -76,7 +76,7 @@ DEFAULT_RULES = {
     "bcp_review":               (1,  "years",  30),
     "incident_review":          (3,  "months", 14),
     "supplier_assessment":      (1,  "years",  45),
-    "supplier_contract_review": (1,  "years",  60),
+    "supplier_reevaluation":    (1,  "years",  60),
     "asset_maintenance":        (1,  "years",  30),
     "training_mandatory":       (1,  "years",  30),
     "training_refresh":         (2,  "years",  60),

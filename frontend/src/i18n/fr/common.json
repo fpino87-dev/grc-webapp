@@ -3219,7 +3219,6 @@
       "description_label": "Description de la fourniture",
       "description_placeholder": "Décrivez les services/produits fournis (utilisé pour la suggestion CPV IA)",
       "risk_label": "Niveau de risque",
-      "eval_date_label": "Date d'évaluation",
       "status_label": "Statut",
       "acn_section": "ACN — Délibération 127434 du 13/04/2026",
       "cpv_label": "Codes CPV de la fourniture",
@@ -3234,7 +3233,14 @@
       "tisax_relevant_hint": "Traite des informations du périmètre TISAX (ex. données ou prototypes des clients OEM) ou accède aux systèmes dans le périmètre — VDA ISA 6.1.1.",
       "save_error": "Erreur lors de l'enregistrement.",
       "create_btn": "Créer le fournisseur",
-      "update_btn": "Mettre à jour le fournisseur"
+      "update_btn": "Mettre à jour le fournisseur",
+      "eval_new_hint": "La date d'évaluation ne se saisit pas ici : elle provient du résultat du questionnaire (onglet Questionnaires) ou de « Enregistrer une évaluation existante ».",
+      "eval_summary_label": "Évaluation en cours",
+      "eval_summary_none": "Aucune évaluation enregistrée.",
+      "eval_summary_hint": "La date et l'échéance se mettent à jour automatiquement lorsque vous enregistrez le résultat d'un questionnaire ou une évaluation existante, ou approuvez un audit tiers.",
+      "eval_summary_date": "Évalué le {{date}}",
+      "eval_summary_expires": "expire le {{date}}",
+      "eval_summary_expired": "expirée le {{date}}"
     },
     "list": {
       "search_placeholder": "Rechercher dénomination, n° TVA, email…",
@@ -3278,7 +3284,10 @@
       "delete_error": "Erreur lors de la suppression",
       "status_sospeso": "suspendu",
       "status_terminato": "terminé",
-      "status_attivo": "actif"
+      "status_attivo": "actif",
+      "not_evaluated_filter": "Non évalués",
+      "expired_short": "expirée",
+      "days_short": "{{days}} j"
     },
     "send": {
       "title": "Envoyer le questionnaire",
@@ -3323,7 +3332,9 @@
       "resend_title": "Renvoyer ({{n}}e envoi)",
       "resend_max_title": "3e envoi (dernier)",
       "evaluate": "Évaluer",
-      "error_resend": "Erreur de renvoi"
+      "error_resend": "Erreur de renvoi",
+      "origin_existing": "Enregistrée",
+      "origin_existing_title": "Évaluation existante enregistrée — aucun envoi depuis la plateforme"
     },
     "templates": {
       "hint": "Modèles pour l'envoi du questionnaire aux fournisseurs. Le lien du formulaire est inclus automatiquement dans le corps de l'email.",
@@ -3395,6 +3406,25 @@
       "validity": "Validité des audits tierce partie (mois)",
       "weights": "Poids des paramètres",
       "weights_must_sum": "La somme des poids doit être égale à 1,00"
+    },
+    "eval_source": {
+      "questionario": "Questionnaire",
+      "esistente": "Évaluation existante",
+      "audit": "Audit tiers"
+    },
+    "register_existing": {
+      "btn": "Enregistrer une évaluation existante",
+      "title": "Enregistrer une évaluation existante",
+      "intro": "Pour les évaluations réalisées en dehors de la plateforme (ex. fournisseurs déjà évalués avant l'adoption). Aucun e-mail n'est envoyé au fournisseur.",
+      "supplier_label": "Fournisseur *",
+      "supplier_select": "— sélectionner un fournisseur —",
+      "date_label": "Date de l'évaluation *",
+      "result_label": "Résultat (niveau de risque) *",
+      "notes_label": "Référence / notes *",
+      "notes_placeholder": "Ex. questionnaire du 12/03/2026 rempli par le fournisseur, archivé dans…",
+      "submit": "Enregistrer",
+      "saving": "Enregistrement...",
+      "error": "Erreur lors de l'enregistrement."
     }
   },
   "reporting": {

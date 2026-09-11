@@ -862,6 +862,25 @@ L'audit annullato non viene mai eliminato fisicamente — rimane nell'archivio c
    - **Trattamento dati**: flag se il fornitore tratta dati personali (comporta obblighi GDPR aggiuntivi)
 3. Clicca **Salva**
 
+### Data di valutazione e scadenza
+
+La data di valutazione **non si inserisce nell'anagrafica**: il sistema la ricava dall'ultima valutazione registrata, che può essere:
+
+- l'esito di un **questionario** inviato dalla piattaforma (tab **Questionari → Valuta**);
+- una **valutazione esistente**, cioè svolta fuori dalla piattaforma (vedi sotto);
+- un **audit terze parti** approvato.
+
+La **scadenza** si calcola con la validità configurata in **Fornitori → Impostazioni valutazione** (12 mesi di default). L'elenco fornitori mostra data, origine e scadenza; lo scadenzario propone la voce **Rivalutazione fornitori** in prossimità della scadenza e apre un promemoria al Compliance Officer.
+
+**Registrare una valutazione esistente** — per i fornitori già valutati prima di usare la piattaforma, o con un questionario raccolto su carta:
+
+1. Dal tab **Questionari** (oppure dalla scheda del fornitore) clicca **Registra valutazione esistente**
+2. Indica fornitore, **data** della valutazione (non futura) ed **esito** (livello di rischio)
+3. Nel campo **Riferimento / note** (obbligatorio) scrivi dove si trova la valutazione e chi l'ha compilata: è ciò che mostrerai all'auditor
+4. Clicca **Registra**. Nessuna email viene inviata al fornitore; nel tab Questionari la voce compare con l'etichetta **Registrata**
+
+Il filtro **Rischio** dell'elenco lavora sul **rischio aggiustato** mostrato in colonna; l'opzione **Non valutati** elenca i fornitori senza alcuna valutazione.
+
 ### Assessment: pianificato → in corso → completato → approvato/rifiutato
 
 Ogni fornitore critico deve essere periodicamente valutato tramite assessment. Il flusso e':

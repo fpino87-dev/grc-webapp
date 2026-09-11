@@ -92,7 +92,7 @@ export function EvaluateModal({ questionnaire, onClose }: { questionnaire: Suppl
         <div className="space-y-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t("suppliers.evaluate.date_label")}</label>
-            <input type="date" value={evalDate} onChange={e => setEvalDate(e.target.value)} className="w-full border rounded px-3 py-2 text-sm" />
+            <input type="date" max={localIsoToday()} value={evalDate} onChange={e => setEvalDate(e.target.value)} className="w-full border rounded px-3 py-2 text-sm" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t("suppliers.evaluate.result_label")}</label>
@@ -110,6 +110,102 @@ export function EvaluateModal({ questionnaire, onClose }: { questionnaire: Suppl
           <button onClick={onClose} className="px-3 py-1.5 border rounded text-sm text-gray-600">{t("actions.cancel")}</button>
           <button onClick={() => mutation.mutate()} disabled={mutation.isPending || !evalDate} className="px-3 py-1.5 bg-green-600 text-white rounded text-sm disabled:opacity-50">
             {mutation.isPending ? t("suppliers.evaluate.saving") : t("suppliers.evaluate.submit")}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function localIsoToday(): string {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/**
+ * Registra una valutazione svolta fuori dalla piattaforma (es. storico dei
+ * fornitori già valutati prima dell'adozione). Nessuna email al fornitore.
+ * Senza `supplier` mostra la scelta del fornitore.
+ */
+export function RegisterExistingEvaluationModal({
+  supplier,
+  onClose,
+  onSaved,
+}: {
+  supplier?: Pick<Supplier, "id" | "name">;
+  onClose: () => void;
+  onSaved?: () => void;
+}) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [supplierId, setSupplierId] = useState(supplier?.id ?? "");
+  const [evalDate, setEvalDate] = useState("");
+  const [riskResult, setRiskResult] = useState<string>("medio");
+  const [notes, setNotes] = useState("");
+  const [error, setError] = useState("");
+  const today = localIsoToday();
+
+  const { data: suppliersData } = useQuery({
+    queryKey: ["suppliers", "register-existing-select"],
+    queryFn: () => suppliersApi.list(),
+    enabled: !supplier,
+  });
+  const supplierOptions = [...(suppliersData?.results ?? [])].sort((a, b) =>
+    (a.name ?? "").localeCompare(b.name ?? "", undefined, { sensitivity: "base" }),
+  );
+
+  const mutation = useMutation({
+    mutationFn: () => suppliersApi.registerExistingEvaluation(supplierId, evalDate, riskResult, notes.trim()),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["supplier-questionnaires"] });
+      qc.invalidateQueries({ queryKey: ["suppliers"] });
+      qc.invalidateQueries({ queryKey: ["supplier", supplierId] });
+      onSaved?.();
+      onClose();
+    },
+    onError: (e: any) => setError(e?.response?.data?.error || t("suppliers.register_existing.error")),
+  });
+
+  const canSubmit = !!supplierId && !!evalDate && evalDate <= today && !!notes.trim();
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60]">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-5 mx-4">
+        <h3 className="text-base font-semibold mb-1">{t("suppliers.register_existing.title")}</h3>
+        <p className="text-xs text-gray-500 mb-3">{t("suppliers.register_existing.intro")}</p>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("suppliers.register_existing.supplier_label")}</label>
+            {supplier ? (
+              <p className="text-sm font-medium text-gray-800">{supplier.name}</p>
+            ) : (
+              <select value={supplierId} onChange={e => setSupplierId(e.target.value)} className="w-full border rounded px-3 py-2 text-sm">
+                <option value="">{t("suppliers.register_existing.supplier_select")}</option>
+                {supplierOptions.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("suppliers.register_existing.date_label")}</label>
+            <input type="date" max={today} value={evalDate} onChange={e => setEvalDate(e.target.value)} className="w-full border rounded px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("suppliers.register_existing.result_label")}</label>
+            <select value={riskResult} onChange={e => setRiskResult(e.target.value)} className="w-full border rounded px-3 py-2 text-sm">
+              {["basso","medio","alto","critico"].map(r => <option key={r} value={r}>{t(`suppliers.risk.${r}`)}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("suppliers.register_existing.notes_label")}</label>
+            <textarea value={notes} onChange={e => setNotes(e.target.value)} className="w-full border rounded px-3 py-2 text-sm" rows={3} placeholder={t("suppliers.register_existing.notes_placeholder")} />
+          </div>
+        </div>
+        {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
+        <div className="flex justify-end gap-2 mt-4">
+          <button onClick={onClose} className="px-3 py-1.5 border rounded text-sm text-gray-600">{t("actions.cancel")}</button>
+          <button onClick={() => { setError(""); mutation.mutate(); }} disabled={mutation.isPending || !canSubmit} className="px-3 py-1.5 bg-green-600 text-white rounded text-sm disabled:opacity-50">
+            {mutation.isPending ? t("suppliers.register_existing.saving") : t("suppliers.register_existing.submit")}
           </button>
         </div>
       </div>

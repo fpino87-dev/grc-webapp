@@ -10,7 +10,7 @@ const CATEGORIES: Record<string, string[]> = {
   "Rischi":     ["risk_assessment", "risk_treatment"],
   "BCP":        ["bcp_test", "bcp_review"],
   "Incidenti":  ["incident_review"],
-  "Fornitori":  ["supplier_assessment", "supplier_contract_review"],
+  "Fornitori":  ["supplier_assessment", "supplier_reevaluation"],
   "Formazione": ["training_mandatory", "training_refresh"],
   "Governance": ["management_review", "security_committee"],
   "Audit":      ["finding_minor", "finding_major", "finding_observation"],

@@ -53,13 +53,20 @@ class SupplierSerializer(serializers.ModelSerializer):
         # concentration_notified_threshold è un marcatore anti-spam gestito dal
         # service (check_concentration_crossing): NON deve essere scrivibile via API,
         # altrimenti un client potrebbe sopprimere o ri-scatenare l'alert M19.
+        # La valutazione corrente (data/scadenza/origine) è derivata da
+        # `recompute_risk_adj` a partire da questionari valutati e audit
+        # approvati: non si imposta a mano dall'anagrafica.
         read_only_fields = [
             "internal_risk_level", "risk_adj", "risk_adj_updated_at",
             "concentration_notified_threshold",
+            "evaluation_date", "evaluation_expires_at", "evaluation_source",
         ]
 
     def get_latest_questionnaire_status(self, obj):
-        q = obj.questionnaires.order_by("-sent_at").first()
+        # Solo i questionari inviati dalla piattaforma: una valutazione
+        # esistente registrata non è un invio e non deve sbloccare/bloccare
+        # il pulsante "Invia questionario".
+        q = obj.questionnaires.filter(origin="piattaforma").order_by("-sent_at").first()
         return q.status if q else None
 
     def get_concentration_threshold(self, obj):
@@ -271,6 +278,7 @@ class SupplierQuestionnaireSerializer(serializers.ModelSerializer):
             "sent_cc_snapshot",
             "sent_by",
             "send_count",
+            "origin",
             "evaluation_date",
             "risk_result",
             "status",

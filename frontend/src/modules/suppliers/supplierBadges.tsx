@@ -135,19 +135,26 @@ export function NdaStatusBadge({ status }: { status: SupplierNdaEntry["nda_statu
 
 // ─── Celle data valutazione / scadenza ───────────────────────────────────────
 
-export function EvalDateCell({ date }: { date: string | null }) {
+export function EvalDateCell({ date, source }: { date: string | null; source?: string }) {
+  const { t } = useTranslation();
   if (!date) return <span className="text-gray-400">—</span>;
   return (
-    <span className="text-gray-600">
-      {new Date(date).toLocaleDateString(i18n.language || "it")}
-    </span>
+    <div className="flex flex-col">
+      <span className="text-gray-600">
+        {new Date(date).toLocaleDateString(i18n.language || "it")}
+      </span>
+      {source && (
+        <span className="text-[10px] text-gray-400">{t(`suppliers.eval_source.${source}`)}</span>
+      )}
+    </div>
   );
 }
 
-export function ExpiryDateCell({ evaluationDate }: { evaluationDate: string | null }) {
-  if (!evaluationDate) return <span className="text-gray-400">—</span>;
-  const expiry = new Date(evaluationDate);
-  expiry.setFullYear(expiry.getFullYear() + 1);
+/** Scadenza della valutazione corrente (calcolata dal backend con la validità configurata). */
+export function ExpiryDateCell({ expiresAt }: { expiresAt: string | null }) {
+  const { t } = useTranslation();
+  if (!expiresAt) return <span className="text-gray-400">—</span>;
+  const expiry = new Date(expiresAt);
   const daysLeft = Math.ceil((expiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
   let colorClass = "text-green-600";
   if (daysLeft <= 30) colorClass = "text-red-600 font-medium";
@@ -155,7 +162,11 @@ export function ExpiryDateCell({ evaluationDate }: { evaluationDate: string | nu
   return (
     <span className={colorClass}>
       {expiry.toLocaleDateString(i18n.language || "it")}
-      {daysLeft <= 90 && <span className="ml-1 text-xs">({daysLeft}gg)</span>}
+      {daysLeft < 0 ? (
+        <span className="ml-1 text-xs">({t("suppliers.list.expired_short")})</span>
+      ) : daysLeft <= 90 ? (
+        <span className="ml-1 text-xs">({t("suppliers.list.days_short", { days: daysLeft })})</span>
+      ) : null}
     </span>
   );
 }

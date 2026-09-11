@@ -862,6 +862,25 @@ L'audit annulé n'est jamais supprimé physiquement — il reste dans l'archive 
    - **Traitement des données** : indicateur si le fournisseur traite des données personnelles (implique des obligations RGPD supplémentaires)
 3. Cliquez sur **Enregistrer**
 
+### Date d'évaluation et échéance
+
+La date d'évaluation **ne se saisit pas dans la fiche fournisseur** : le système la déduit de la dernière évaluation enregistrée, qui peut être :
+
+- le résultat d'un **questionnaire** envoyé depuis la plateforme (onglet **Questionnaires → Évaluer**) ;
+- une **évaluation existante**, c'est-à-dire réalisée en dehors de la plateforme (voir ci-dessous) ;
+- un **audit tiers** approuvé.
+
+L'**échéance** est calculée avec la validité configurée dans **Fournisseurs → Paramètres d'évaluation** (12 mois par défaut). La liste des fournisseurs affiche la date, l'origine et l'échéance ; l'échéancier propose l'élément **Réévaluation des fournisseurs** à l'approche de l'échéance et ouvre un rappel au Compliance Officer.
+
+**Enregistrer une évaluation existante** — pour les fournisseurs déjà évalués avant l'utilisation de la plateforme, ou avec un questionnaire recueilli sur papier :
+
+1. Depuis l'onglet **Questionnaires** (ou depuis la fiche du fournisseur), cliquez sur **Enregistrer une évaluation existante**
+2. Indiquez le fournisseur, la **date** de l'évaluation (non future) et le **résultat** (niveau de risque)
+3. Dans le champ **Référence / notes** (obligatoire), indiquez où se trouve l'évaluation et qui l'a remplie : c'est ce que vous montrerez à l'auditeur
+4. Cliquez sur **Enregistrer**. Aucun e-mail n'est envoyé au fournisseur ; dans l'onglet Questionnaires, l'élément apparaît avec l'étiquette **Enregistrée**
+
+Le filtre **Risque** de la liste porte sur le **risque ajusté** affiché dans la colonne ; l'option **Non évalués** liste les fournisseurs sans aucune évaluation.
+
 ### Évaluation : planifiée → en cours → complétée → approuvée/refusée
 
 Chaque fournisseur critique doit être périodiquement évalué via une évaluation. Le flux est :

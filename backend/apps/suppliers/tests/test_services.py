@@ -8,7 +8,7 @@ User = get_user_model()
 
 
 def _utc_today():
-    # get_expiring_contracts confronta con timezone.localdate() (UTC). I test
+    # get_expiring_evaluations confronta con timezone.localdate() (UTC). I test
     # usano la stessa reference per non flakare al confine mezzanotte locale↔UTC
     # (TIME_ZONE=Europe/Rome: di sera UTC, timezone.localdate() locale è già il giorno dopo).
     return timezone.localdate()
@@ -33,42 +33,42 @@ def supplier(db, plant, user):
     return s
 
 
-# ── get_expiring_contracts ────────────────────────────────────────────────
+# ── get_expiring_evaluations ──────────────────────────────────────────────
 
 @pytest.mark.django_db
-def test_expiring_contracts_found(plant, user):
+def test_expiring_evaluations_found(plant, user):
     from apps.suppliers.models import Supplier
-    from apps.suppliers.services import get_expiring_contracts
+    from apps.suppliers.services import get_expiring_evaluations
     soon = _utc_today() + timedelta(days=30)
     s = Supplier.objects.create(name="Scade presto", risk_level="basso", status="attivo",
-                                evaluation_date=soon, created_by=user)
+                                evaluation_expires_at=soon, created_by=user)
     s.plants.add(plant)
-    result = list(get_expiring_contracts(days=60))
+    result = list(get_expiring_evaluations(days=60))
     ids = [str(r.id) for r in result]
     assert str(s.id) in ids
 
 
 @pytest.mark.django_db
-def test_expiring_contracts_not_returned_if_expired(plant, user):
+def test_expiring_evaluations_not_returned_if_expired(plant, user):
     from apps.suppliers.models import Supplier
-    from apps.suppliers.services import get_expiring_contracts
+    from apps.suppliers.services import get_expiring_evaluations
     expired = _utc_today() - timedelta(days=1)
     s = Supplier.objects.create(name="Già scaduto", risk_level="basso", status="attivo",
-                                evaluation_date=expired, created_by=user)
+                                evaluation_expires_at=expired, created_by=user)
     s.plants.add(plant)
-    result = list(get_expiring_contracts(days=60))
+    result = list(get_expiring_evaluations(days=60))
     ids = [str(r.id) for r in result]
     assert str(s.id) not in ids
 
 
 @pytest.mark.django_db
-def test_expiring_contracts_not_returned_if_terminated(plant, user):
+def test_expiring_evaluations_not_returned_if_terminated(plant, user):
     from apps.suppliers.models import Supplier
-    from apps.suppliers.services import get_expiring_contracts
+    from apps.suppliers.services import get_expiring_evaluations
     soon = _utc_today() + timedelta(days=10)
     s = Supplier.objects.create(name="Terminato", risk_level="basso", status="terminato",
-                                evaluation_date=soon, created_by=user)
-    result = list(get_expiring_contracts(days=60))
+                                evaluation_expires_at=soon, created_by=user)
+    result = list(get_expiring_evaluations(days=60))
     ids = [str(r.id) for r in result]
     assert str(s.id) not in ids
 

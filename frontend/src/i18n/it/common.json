@@ -3219,7 +3219,6 @@
       "description_label": "Descrizione fornitura",
       "description_placeholder": "Descrivere i servizi/prodotti forniti (usato per suggerimento CPV AI)",
       "risk_label": "Livello rischio",
-      "eval_date_label": "Data di Valutazione",
       "status_label": "Stato",
       "acn_section": "ACN — Delibera 127434 del 13/04/2026",
       "cpv_label": "Codici CPV della fornitura",
@@ -3234,7 +3233,14 @@
       "tisax_relevant_hint": "Tratta informazioni del perimetro TISAX (es. dati o prototipi dei clienti OEM) o accede ai sistemi in scope — VDA ISA 6.1.1.",
       "save_error": "Errore durante il salvataggio.",
       "create_btn": "Crea fornitore",
-      "update_btn": "Aggiorna fornitore"
+      "update_btn": "Aggiorna fornitore",
+      "eval_new_hint": "La data di valutazione non si inserisce qui: arriva dall'esito del questionario (tab Questionari) o da «Registra valutazione esistente».",
+      "eval_summary_label": "Valutazione corrente",
+      "eval_summary_none": "Nessuna valutazione registrata.",
+      "eval_summary_hint": "Data e scadenza si aggiornano da sole quando registri l'esito di un questionario, una valutazione esistente o approvi un audit terze parti.",
+      "eval_summary_date": "Valutato il {{date}}",
+      "eval_summary_expires": "scade il {{date}}",
+      "eval_summary_expired": "scaduta il {{date}}"
     },
     "list": {
       "search_placeholder": "Cerca denominazione, CF/P.IVA, email…",
@@ -3278,7 +3284,10 @@
       "delete_error": "Errore durante l'eliminazione",
       "status_sospeso": "sospeso",
       "status_terminato": "terminato",
-      "status_attivo": "attivo"
+      "status_attivo": "attivo",
+      "not_evaluated_filter": "Non valutati",
+      "expired_short": "scaduta",
+      "days_short": "{{days}}gg"
     },
     "send": {
       "title": "Invia questionario",
@@ -3323,7 +3332,9 @@
       "resend_title": "Reinvia ({{n}}° invio)",
       "resend_max_title": "3° invio (ultimo)",
       "evaluate": "Valuta",
-      "error_resend": "Errore reinvio"
+      "error_resend": "Errore reinvio",
+      "origin_existing": "Registrata",
+      "origin_existing_title": "Valutazione esistente registrata — nessun invio dalla piattaforma"
     },
     "templates": {
       "hint": "Template per l'invio del questionario ai fornitori. Il link al form viene incluso automaticamente nel corpo dell'email.",
@@ -3395,6 +3406,25 @@
       "validity": "Validità audit terze parti (mesi)",
       "weights": "Pesi parametri",
       "weights_must_sum": "La somma dei pesi deve essere 1.00"
+    },
+    "eval_source": {
+      "questionario": "Questionario",
+      "esistente": "Valutazione esistente",
+      "audit": "Audit terze parti"
+    },
+    "register_existing": {
+      "btn": "Registra valutazione esistente",
+      "title": "Registra valutazione esistente",
+      "intro": "Per valutazioni svolte fuori dalla piattaforma (es. fornitori già valutati prima dell'adozione). Nessuna email viene inviata al fornitore.",
+      "supplier_label": "Fornitore *",
+      "supplier_select": "— seleziona fornitore —",
+      "date_label": "Data della valutazione *",
+      "result_label": "Esito (livello di rischio) *",
+      "notes_label": "Riferimento / note *",
+      "notes_placeholder": "Es. questionario del 12/03/2026 compilato dal fornitore, archiviato in…",
+      "submit": "Registra",
+      "saving": "Salvataggio...",
+      "error": "Errore durante la registrazione."
     }
   },
   "reporting": {

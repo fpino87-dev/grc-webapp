@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { suppliersApi, type SupplierQuestionnaire } from "../../api/endpoints/suppliers";
 import { QStatus, RiskBadge } from "./supplierBadges";
-import { EvaluateModal } from "./QuestionnaireModals";
+import { EvaluateModal, RegisterExistingEvaluationModal } from "./QuestionnaireModals";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
 
@@ -10,6 +10,7 @@ export function QuestionariTab() {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [evaluateTarget, setEvaluateTarget] = useState<SupplierQuestionnaire | null>(null);
+  const [registerOpen, setRegisterOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState("");
 
   const params: Record<string, string> = {};
@@ -30,6 +31,7 @@ export function QuestionariTab() {
   return (
     <div>
       {evaluateTarget && <EvaluateModal questionnaire={evaluateTarget} onClose={() => setEvaluateTarget(null)} />}
+      {registerOpen && <RegisterExistingEvaluationModal onClose={() => setRegisterOpen(false)} />}
 
       <div className="flex items-center gap-3 mb-4">
         <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="border rounded px-3 py-1.5 text-sm">
@@ -39,6 +41,13 @@ export function QuestionariTab() {
           <option value="scaduto">{t("suppliers.quests.expired")}</option>
         </select>
         <span className="text-sm text-gray-500">{t("suppliers.quests.count", { count: questionnaires.length })}</span>
+        <button
+          onClick={() => setRegisterOpen(true)}
+          title={t("suppliers.register_existing.intro")}
+          className="ml-auto text-sm text-green-700 border border-green-200 rounded px-3 py-1.5 hover:bg-green-50"
+        >
+          {t("suppliers.register_existing.btn")}
+        </button>
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -65,10 +74,23 @@ export function QuestionariTab() {
               {questionnaires.map(q => (
                 <tr key={q.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 font-medium text-gray-800">{q.supplier_name}</td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{q.sent_to}</td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{new Date(q.sent_at).toLocaleDateString(i18n.language || "it")}</td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{new Date(q.last_sent_at).toLocaleDateString(i18n.language || "it")}</td>
-                  <td className="px-4 py-3"><QStatus status={q.status} sendCount={q.send_count} /></td>
+                  {q.origin === "esistente" ? (
+                    <>
+                      <td colSpan={3} className="px-4 py-3 text-xs text-gray-400 italic">{t("suppliers.quests.origin_existing_title")}</td>
+                      <td className="px-4 py-3">
+                        <span title={q.notes || undefined} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700 cursor-help">
+                          {t("suppliers.quests.origin_existing")}
+                        </span>
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="px-4 py-3 text-gray-500 text-xs">{q.sent_to}</td>
+                      <td className="px-4 py-3 text-gray-500 text-xs">{new Date(q.sent_at).toLocaleDateString(i18n.language || "it")}</td>
+                      <td className="px-4 py-3 text-gray-500 text-xs">{new Date(q.last_sent_at).toLocaleDateString(i18n.language || "it")}</td>
+                      <td className="px-4 py-3"><QStatus status={q.status} sendCount={q.send_count} /></td>
+                    </>
+                  )}
                   <td className="px-4 py-3 text-gray-600">{q.evaluation_date ? new Date(q.evaluation_date).toLocaleDateString(i18n.language || "it") : "—"}</td>
                   <td className="px-4 py-3">{q.risk_result ? <RiskBadge level={q.risk_result} /> : <span className="text-gray-400">—</span>}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{q.expires_at ? new Date(q.expires_at).toLocaleDateString(i18n.language || "it") : "—"}</td>

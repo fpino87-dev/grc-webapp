@@ -862,6 +862,25 @@ Anulowany audyt nigdy nie jest fizycznie usuwany — pozostaje w archiwum ze sta
    - **Przetwarzanie danych**: flaga, jeśli dostawca przetwarza dane osobowe (wiąże się z dodatkowymi obowiązkami RODO)
 3. Kliknij **Zapisz**
 
+### Data oceny i termin ważności
+
+Daty oceny **nie wprowadza się w karcie dostawcy**: system wyznacza ją na podstawie ostatniej zarejestrowanej oceny, którą może być:
+
+- wynik **kwestionariusza** wysłanego z platformy (zakładka **Kwestionariusze → Oceń**);
+- **istniejąca ocena**, czyli przeprowadzona poza platformą (patrz niżej);
+- zatwierdzony **audyt strony trzeciej**.
+
+**Termin ważności** jest obliczany na podstawie ważności skonfigurowanej w **Dostawcy → Ustawienia oceny** (domyślnie 12 miesięcy). Lista dostawców pokazuje datę, źródło i termin ważności; harmonogram wyświetla pozycję **Ponowna ocena dostawców** w miarę zbliżania się terminu i otwiera przypomnienie dla Compliance Officera.
+
+**Rejestracja istniejącej oceny** — dla dostawców ocenionych przed rozpoczęciem korzystania z platformy lub na podstawie kwestionariusza papierowego:
+
+1. W zakładce **Kwestionariusze** (lub w karcie dostawcy) kliknij **Zarejestruj istniejącą ocenę**
+2. Wskaż dostawcę, **datę** oceny (nie przyszłą) i **wynik** (poziom ryzyka)
+3. W polu **Odniesienie / uwagi** (obowiązkowe) wpisz, gdzie znajduje się ocena i kto ją wypełnił: to pokażesz audytorowi
+4. Kliknij **Zarejestruj**. Do dostawcy nie jest wysyłany żaden e-mail; w zakładce Kwestionariusze pozycja ma etykietę **Zarejestrowana**
+
+Filtr **Ryzyko** na liście działa na **ryzyku skorygowanym** widocznym w kolumnie; opcja **Nieocenieni** pokazuje dostawców bez żadnej oceny.
+
 ### Ocena: zaplanowana → w toku → zakończona → zatwierdzona/odrzucona
 
 Każdy krytyczny dostawca musi być okresowo oceniany. Przepływ to:

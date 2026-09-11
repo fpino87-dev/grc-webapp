@@ -862,6 +862,25 @@ The cancelled audit is never physically deleted — it remains in the archive wi
    - **Data processing**: flag if the supplier processes personal data (entails additional GDPR obligations)
 3. Click **Save**
 
+### Evaluation date and expiry
+
+The evaluation date is **not entered in the supplier record**: the system derives it from the latest recorded evaluation, which can be:
+
+- the result of a **questionnaire** sent from the platform (**Questionnaires → Evaluate** tab);
+- an **existing evaluation**, i.e. carried out outside the platform (see below);
+- an approved **third-party audit**.
+
+The **expiry** is calculated with the validity configured in **Suppliers → Evaluation settings** (12 months by default). The supplier list shows date, source and expiry; the compliance schedule shows a **Supplier re-evaluation** item as the expiry approaches and opens a reminder for the Compliance Officer.
+
+**Recording an existing evaluation** — for suppliers already evaluated before using the platform, or with a questionnaire collected on paper:
+
+1. From the **Questionnaires** tab (or from the supplier form) click **Record existing evaluation**
+2. Enter the supplier, the evaluation **date** (not in the future) and the **result** (risk level)
+3. In the **Reference / notes** field (mandatory) write where the evaluation is stored and who completed it: this is what you will show the auditor
+4. Click **Record**. No email is sent to the supplier; in the Questionnaires tab the entry is labelled **Recorded**
+
+The list **Risk** filter works on the **adjusted risk** shown in the column; the **Not evaluated** option lists suppliers with no evaluation at all.
+
 ### Assessment: planned → in progress → completed → approved/rejected
 
 Each critical supplier must be periodically evaluated through an assessment. The flow is:

@@ -109,6 +109,53 @@ def _latest_valid_audit_class(supplier: Supplier, validity_months: int) -> Optio
     return _assessment_to_class(latest.score_overall)
 
 
+def _latest_evaluation(supplier: Supplier, config: SupplierEvaluationConfig):
+    """
+    Ultima valutazione registrata del fornitore, scaduta o no: questionario
+    valutato (inviato o esistente registrato) oppure audit terze parti approvato.
+
+    Ritorna (data, scadenza, origine) — tutti None/"" se non ce n'è nessuna.
+    La scadenza del questionario è il suo `expires_at`; quella dell'audit è la
+    finestra `assessment_validity_months` (la stessa usata per il risk_adj).
+    A parità di data vince la valutazione con la scadenza più lontana.
+    """
+    candidates = []
+    q = (
+        SupplierQuestionnaire.objects.filter(
+            supplier=supplier,
+            status="risposto",
+            evaluation_date__isnull=False,
+            deleted_at__isnull=True,
+        )
+        .order_by("-evaluation_date", "-expires_at")
+        .first()
+    )
+    if q is not None:
+        expires = q.expires_at or (
+            q.evaluation_date
+            + datetime.timedelta(days=config.questionnaire_validity_months * 30)
+        )
+        source = "esistente" if q.origin == "esistente" else "questionario"
+        candidates.append((q.evaluation_date, expires, source))
+
+    a = (
+        SupplierAssessment.objects.filter(
+            supplier=supplier, status="approvato", deleted_at__isnull=True,
+        )
+        .order_by("-assessment_date")
+        .first()
+    )
+    if a is not None:
+        expires = a.assessment_date + datetime.timedelta(
+            days=config.assessment_validity_months * 30
+        )
+        candidates.append((a.assessment_date, expires, "audit"))
+
+    if not candidates:
+        return None, None, ""
+    return max(candidates, key=lambda c: (c[0], c[1]))
+
+
 def _current_internal_class(supplier: Supplier) -> Optional[str]:
     ev = (
         SupplierInternalEvaluation.objects.filter(
@@ -128,6 +175,9 @@ def recompute_risk_adj(supplier: Supplier) -> Supplier:
     - internal_risk_level = classe della valutazione interna corrente (o "" se assente)
     - risk_adj = max(interno, questionario_valido, audit_terze_parti_valido) + bump NIS2
       Ogni sorgente è opzionale. Se nessuna disponibile, risk_adj resta vuoto.
+    - evaluation_date / evaluation_expires_at / evaluation_source = ultima
+      valutazione registrata (vedi `_latest_evaluation`): gira qui perché ogni
+      evento che cambia le sorgenti del risk_adj cambia anche la valutazione.
     """
     config = SupplierEvaluationConfig.get_solo()
 
@@ -136,14 +186,22 @@ def recompute_risk_adj(supplier: Supplier) -> Supplier:
     audit_class = _latest_valid_audit_class(supplier, config.assessment_validity_months)
 
     supplier.internal_risk_level = internal_class or ""
+    (
+        supplier.evaluation_date,
+        supplier.evaluation_expires_at,
+        supplier.evaluation_source,
+    ) = _latest_evaluation(supplier, config)
+    update_fields = [
+        "internal_risk_level", "risk_adj", "risk_adj_updated_at",
+        "evaluation_date", "evaluation_expires_at", "evaluation_source",
+        "updated_at",
+    ]
 
     candidates = [c for c in (internal_class, questionnaire_class, audit_class) if c]
     if not candidates:
         supplier.risk_adj = ""
         supplier.risk_adj_updated_at = timezone.now()
-        supplier.save(update_fields=[
-            "internal_risk_level", "risk_adj", "risk_adj_updated_at", "updated_at"
-        ])
+        supplier.save(update_fields=update_fields)
         return supplier
 
     base_rank = max(_rank(c) for c in candidates)
@@ -157,9 +215,7 @@ def recompute_risk_adj(supplier: Supplier) -> Supplier:
 
     supplier.risk_adj = _class_from_rank(final_rank)
     supplier.risk_adj_updated_at = timezone.now()
-    supplier.save(update_fields=[
-        "internal_risk_level", "risk_adj", "risk_adj_updated_at", "updated_at"
-    ])
+    supplier.save(update_fields=update_fields)
     return supplier
 
 

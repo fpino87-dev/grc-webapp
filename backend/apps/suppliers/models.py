@@ -50,7 +50,32 @@ class Supplier(BaseModel):
         blank=True,
         help_text="Sito web / dominio principale del fornitore — usato dal modulo OSINT per monitoraggio passivo.",
     )
-    evaluation_date = models.DateField(null=True, blank=True)
+    # Valutazione corrente — campi derivati (calcolati da `recompute_risk_adj`,
+    # read-only via API): data, scadenza e origine dell'ultima valutazione
+    # registrata (questionario valutato, valutazione esistente registrata o
+    # audit terze parti approvato). Non si inseriscono a mano.
+    EVALUATION_SOURCE_CHOICES = [
+        ("questionario", "Questionario"),
+        ("esistente", "Valutazione esistente registrata"),
+        ("audit", "Audit terze parti"),
+    ]
+    evaluation_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Data dell'ultima valutazione registrata (calcolato, read-only)",
+    )
+    evaluation_expires_at = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Scadenza dell'ultima valutazione: oltre questa data il fornitore va rivalutato (calcolato, read-only)",
+    )
+    evaluation_source = models.CharField(
+        max_length=15,
+        choices=EVALUATION_SOURCE_CHOICES,
+        blank=True,
+        default="",
+        help_text="Origine dell'ultima valutazione (calcolato, read-only)",
+    )
 
     # Campi ACN Delibera 127434 del 13/04/2026
     cpv_codes = models.JSONField(
@@ -372,8 +397,18 @@ class SupplierQuestionnaire(BaseModel):
         ("risposto", "Risposto"),
         ("scaduto", "Scaduto"),
     ]
+    ORIGIN_CHOICES = [
+        ("piattaforma", "Inviato dalla piattaforma"),
+        ("esistente", "Valutazione esistente registrata"),
+    ]
     supplier = models.ForeignKey(
         Supplier, on_delete=models.CASCADE, related_name="questionnaires"
+    )
+    # "esistente" = valutazione svolta fuori dalla piattaforma (es. storico prima
+    # dell'adozione) e registrata a posteriori: nessun invio email, nessun
+    # template, gli snapshot restano vuoti.
+    origin = models.CharField(
+        max_length=15, choices=ORIGIN_CHOICES, default="piattaforma"
     )
     template = models.ForeignKey(
         QuestionnaireTemplate,

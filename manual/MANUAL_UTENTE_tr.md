@@ -862,6 +862,25 @@ Zaten açık bulguları olan bir denetimi iptal ettiğinizde:
    - **Veri işleme**: tedarikçi kişisel veri işliyorsa işaretleyin (ek GDPR yükümlülükleri doğurur)
 3. **Kaydet**'e tıklayın
 
+### Değerlendirme tarihi ve geçerlilik sonu
+
+Değerlendirme tarihi **tedarikçi kaydına girilmez**: sistem bunu kaydedilen son değerlendirmeden türetir. Bu değerlendirme şunlardan biri olabilir:
+
+- platformdan gönderilen bir **anketin** sonucu (**Anketler → Değerlendir** sekmesi);
+- **mevcut bir değerlendirme**, yani platform dışında yapılmış bir değerlendirme (aşağıya bakın);
+- onaylanmış bir **üçüncü taraf denetimi**.
+
+**Geçerlilik sonu**, **Tedarikçiler → Değerlendirme ayarları** bölümünde yapılandırılan geçerlilik süresiyle hesaplanır (varsayılan 12 ay). Tedarikçi listesi tarihi, kaynağı ve geçerlilik sonunu gösterir; takvim, süre yaklaştığında **Tedarikçi yeniden değerlendirmesi** kalemini gösterir ve Compliance Officer için bir hatırlatma açar.
+
+**Mevcut bir değerlendirmeyi kaydetme** — platformu kullanmaya başlamadan önce değerlendirilmiş tedarikçiler veya kağıt üzerinde toplanan bir anket için:
+
+1. **Anketler** sekmesinden (veya tedarikçi kartından) **Mevcut değerlendirmeyi kaydet**'e tıklayın
+2. Tedarikçiyi, değerlendirmenin **tarihini** (gelecek tarih olamaz) ve **sonucu** (risk seviyesi) girin
+3. **Referans / notlar** alanına (zorunlu) değerlendirmenin nerede saklandığını ve kimin doldurduğunu yazın: denetçiye göstereceğiniz bilgi budur
+4. **Kaydet**'e tıklayın. Tedarikçiye e-posta gönderilmez; Anketler sekmesinde kayıt **Kaydedildi** etiketiyle görünür
+
+Listedeki **Risk** filtresi sütunda gösterilen **düzeltilmiş risk** üzerinde çalışır; **Değerlendirilmemiş** seçeneği hiçbir değerlendirmesi olmayan tedarikçileri listeler.
+
 ### Değerlendirme: planlandı → devam ediyor → tamamlandı → onaylandı/reddedildi
 
 Her kritik tedarikçi periyodik değerlendirmelerle değerlendirilmelidir. Akış şöyledir:

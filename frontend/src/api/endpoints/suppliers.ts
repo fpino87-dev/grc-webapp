@@ -17,7 +17,6 @@ export interface Supplier {
   description: string;
   risk_level: RiskClass;
   status: "attivo" | "sospeso" | "terminato";
-  evaluation_date: string | null;
   notes: string;
   latest_questionnaire_status: "inviato" | "risposto" | "scaduto" | null;
   // Campi ACN Delibera 127434
@@ -32,7 +31,14 @@ export interface Supplier {
   internal_risk_level: RiskClass | "";
   risk_adj: RiskClass | "";
   risk_adj_updated_at: string | null;
+  // Valutazione corrente — derivata da questionari valutati, valutazioni
+  // esistenti registrate e audit approvati (read-only, non si inserisce a mano)
+  evaluation_date: string | null;
+  evaluation_expires_at: string | null;
+  evaluation_source: EvaluationSource | "";
 }
+
+export type EvaluationSource = "questionario" | "esistente" | "audit";
 
 export interface InternalEvaluation {
   id: string;
@@ -90,6 +96,7 @@ export interface SupplierQuestionnaire {
   sent_by: string | null;
   sent_by_display: string | null;
   send_count: number;
+  origin: "piattaforma" | "esistente";
   evaluation_date: string | null;
   risk_result: "basso" | "medio" | "alto" | "critico" | null;
   status: "inviato" | "risposto" | "scaduto";
@@ -133,6 +140,8 @@ export interface ConcentrationRiskRegister {
 export const suppliersApi = {
   list: (params?: Record<string, string>) =>
     apiClient.get<{ results: Supplier[] }>("/suppliers/suppliers/", { params }).then(r => r.data),
+  get: (id: string) =>
+    apiClient.get<Supplier>(`/suppliers/suppliers/${id}/`).then(r => r.data),
   create: (data: Partial<Supplier>) =>
     apiClient.post<Supplier>("/suppliers/suppliers/", data).then(r => r.data),
   update: (id: string, data: Partial<Supplier>) =>
@@ -163,6 +172,10 @@ export const suppliersApi = {
   evaluateQuestionnaire: (id: string, evaluation_date: string, risk_result: string, notes?: string) =>
     apiClient.post<SupplierQuestionnaire>(`/suppliers/questionnaires/${id}/evaluate/`, {
       evaluation_date, risk_result, notes: notes ?? "",
+    }).then(r => r.data),
+  registerExistingEvaluation: (supplierId: string, evaluation_date: string, risk_result: string, notes: string) =>
+    apiClient.post<SupplierQuestionnaire>("/suppliers/questionnaires/register-existing/", {
+      supplier_id: supplierId, evaluation_date, risk_result, notes,
     }).then(r => r.data),
 
   // NDA / Contracts

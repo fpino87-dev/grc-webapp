@@ -25,6 +25,8 @@ vi.mock("../../../api/client", () => ({
 vi.mock("../../../api/endpoints/suppliers", () => ({
   suppliersApi: {
     list: vi.fn(),
+    get: vi.fn(),
+    registerExistingEvaluation: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
@@ -66,6 +68,8 @@ function makeSupplier(overrides = {}) {
     risk_level: "basso",
     status: "attivo",
     evaluation_date: null,
+    evaluation_expires_at: null,
+    evaluation_source: "",
     nis2_relevant: false,
     nis2_relevance_criterion: "",
     supply_concentration_pct: null,
@@ -131,6 +135,7 @@ describe("SuppliersPage", () => {
         last_sent_at: "2026-06-01T10:00:00Z",
         status: "inviato",
         send_count: 1,
+        origin: "piattaforma",
         evaluation_date: null,
         risk_result: null,
         expires_at: null,
@@ -140,5 +145,60 @@ describe("SuppliersPage", () => {
     fireEvent.click(screen.getByText("suppliers.tabs.questionnaires"));
     expect(await screen.findByText("Acme S.p.A.")).toBeInTheDocument();
     expect(screen.getByText("suppliers.qstatus.waiting")).toBeInTheDocument();
+  });
+
+  it("il filtro rischio segue il Rischio Adj e offre i non valutati", async () => {
+    renderPage();
+    await screen.findByText("suppliers.list.empty");
+    const riskSelect = screen.getByDisplayValue("suppliers.list.all_risks");
+    fireEvent.change(riskSelect, { target: { value: "alto" } });
+    await vi.waitFor(() => expect(mockList).toHaveBeenLastCalledWith({ risk_adj: "alto" }));
+    fireEvent.change(riskSelect, { target: { value: "none" } });
+    await vi.waitFor(() => expect(mockList).toHaveBeenLastCalledWith({ risk_adj_missing: "true" }));
+  });
+
+  it("la scadenza in elenco è quella calcolata dal backend", async () => {
+    mockList.mockResolvedValue({
+      results: [makeSupplier({
+        evaluation_date: "2026-01-10",
+        evaluation_expires_at: "2099-01-05",
+        evaluation_source: "esistente",
+      })],
+    } as never);
+    renderPage();
+    expect(await screen.findByText(new Date("2099-01-05").toLocaleDateString("it"))).toBeInTheDocument();
+    expect(screen.getByText("suppliers.eval_source.esistente")).toBeInTheDocument();
+  });
+
+  it("il nuovo fornitore non chiede la data di valutazione", async () => {
+    renderPage();
+    fireEvent.click(await screen.findByText("suppliers.list.new_btn"));
+    expect(screen.getByText("suppliers.form.eval_new_hint")).toBeInTheDocument();
+    expect(document.querySelector('input[name="evaluation_date"]')).toBeNull();
+  });
+
+  it("il tab Questionari distingue le valutazioni esistenti registrate", async () => {
+    mockQuests.mockResolvedValue([
+      {
+        id: "q-2",
+        supplier_name: "Storico Srl",
+        sent_to: "",
+        sent_at: "2025-03-01T00:00:00Z",
+        last_sent_at: "2025-03-01T00:00:00Z",
+        status: "risposto",
+        send_count: 0,
+        origin: "esistente",
+        evaluation_date: "2025-03-01",
+        risk_result: "medio",
+        expires_at: "2026-02-24",
+        notes: "Questionario cartaceo",
+      },
+    ] as never);
+    renderPage();
+    fireEvent.click(screen.getByText("suppliers.tabs.questionnaires"));
+    expect(await screen.findByText("Storico Srl")).toBeInTheDocument();
+    expect(screen.getByText("suppliers.quests.origin_existing")).toHaveAttribute("title", "Questionario cartaceo");
+    expect(screen.queryByText("suppliers.quests.resend")).not.toBeInTheDocument();
+    expect(screen.getByText("suppliers.register_existing.btn")).toBeInTheDocument();
   });
 });

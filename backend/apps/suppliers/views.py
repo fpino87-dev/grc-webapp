@@ -44,6 +44,14 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     plant_field = "plants"
     allow_null_plant = True
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        # ?risk_adj_missing=true → fornitori senza alcuna sorgente di rischio
+        # (la colonna "Rischio" dell'elenco li mostra come "Non valutato").
+        if self.request.query_params.get("risk_adj_missing", "").lower() == "true":
+            qs = qs.filter(risk_adj="")
+        return qs
+
     @action(detail=True, methods=["get"], url_path="nda")
     def nda_list(self, request, pk=None):
         """GET /suppliers/<id>/nda/ — lista documenti NDA/contratto collegati al fornitore."""
@@ -315,6 +323,7 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             "Livello rischio TPRM",
             "Stato",
             "Data ultima valutazione",
+            "Scadenza valutazione",
             "Email",
             "Rilevante TISAX",
         ])
@@ -341,6 +350,7 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 s.risk_level,
                 s.status,
                 str(s.evaluation_date) if s.evaluation_date else "",
+                str(s.evaluation_expires_at) if s.evaluation_expires_at else "",
                 s.email,
                 "Sì" if s.tisax_relevant else "No",
             ])
@@ -581,6 +591,25 @@ class SupplierQuestionnaireViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewS
     plant_field = "supplier__plants"
     allow_null_plant = True
 
+    def _supplier_in_scope(self, supplier_id) -> Supplier:
+        """
+        Lo scoping dei queryset non copre il supplier_id passato nel body:
+        un fornitore legato a uno o più siti è raggiungibile solo se l'utente
+        ha accesso ad almeno uno di essi (i fornitori org-wide, senza siti,
+        restano accessibili — coerente con allow_null_plant del listing).
+        Solleva Supplier.DoesNotExist / PermissionDenied.
+        """
+        from rest_framework.exceptions import PermissionDenied
+        from core.scoping import get_user_plant_ids
+
+        supplier = Supplier.objects.get(pk=supplier_id)
+        allowed = get_user_plant_ids(self.request.user)
+        if allowed is not None:
+            supplier_plant_ids = set(supplier.plants.values_list("id", flat=True))
+            if supplier_plant_ids and not (supplier_plant_ids & allowed):
+                raise PermissionDenied("Accesso negato per questo fornitore.")
+        return supplier
+
     @action(detail=False, methods=["post"], url_path="send")
     def send_questionnaire(self, request):
         from django.core.exceptions import ValidationError
@@ -592,20 +621,8 @@ class SupplierQuestionnaireViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewS
         if not supplier_id or not template_id:
             return Response({"error": "supplier_id e template_id obbligatori."}, status=400)
 
-        from rest_framework.exceptions import PermissionDenied
-        from core.scoping import get_user_plant_ids
-
         try:
-            supplier = Supplier.objects.get(pk=supplier_id)
-            # Lo scoping dei queryset non copre il supplier_id passato nel body:
-            # un fornitore legato a uno o più siti è raggiungibile solo se l'utente
-            # ha accesso ad almeno uno di essi (i fornitori org-wide, senza siti,
-            # restano accessibili — coerente con allow_null_plant del listing).
-            allowed = get_user_plant_ids(request.user)
-            if allowed is not None:
-                supplier_plant_ids = set(supplier.plants.values_list("id", flat=True))
-                if supplier_plant_ids and not (supplier_plant_ids & allowed):
-                    raise PermissionDenied("Accesso negato per questo fornitore.")
+            supplier = self._supplier_in_scope(supplier_id)
             template = QuestionnaireTemplate.objects.get(pk=template_id, deleted_at__isnull=True)
             q = send_questionnaire(supplier, template, request.user)
             return Response(SupplierQuestionnaireSerializer(q).data, status=201)
@@ -613,6 +630,64 @@ class SupplierQuestionnaireViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewS
             return Response({"error": "Fornitore o template non trovato."}, status=404)
         except ValidationError as exc:
             return Response({"error": str(exc.message)}, status=400)
+
+    @action(detail=False, methods=["post"], url_path="register-existing")
+    def register_existing(self, request):
+        """
+        POST /suppliers/questionnaires/register-existing/
+        {supplier_id, evaluation_date, risk_result, notes}
+        Registra una valutazione svolta fuori dalla piattaforma (storico).
+        """
+        from datetime import date
+        from django.core.exceptions import ValidationError
+        from .services import register_existing_evaluation
+
+        supplier_id = request.data.get("supplier_id")
+        evaluation_date_str = request.data.get("evaluation_date")
+        risk_result = request.data.get("risk_result")
+        notes = request.data.get("notes", "")
+
+        if not supplier_id or not evaluation_date_str or not risk_result:
+            return Response(
+                {"error": "supplier_id, evaluation_date e risk_result obbligatori."}, status=400,
+            )
+        try:
+            evaluation_date = date.fromisoformat(evaluation_date_str)
+        except (TypeError, ValueError):
+            return Response({"error": "Formato data non valido (YYYY-MM-DD)."}, status=400)
+
+        try:
+            supplier = self._supplier_in_scope(supplier_id)
+        except (Supplier.DoesNotExist, ValidationError):
+            return Response({"error": "Fornitore non trovato."}, status=404)
+        try:
+            q = register_existing_evaluation(
+                supplier, evaluation_date, risk_result, request.user, notes,
+            )
+        except ValidationError as exc:
+            return Response({"error": " ".join(exc.messages)}, status=400)
+        return Response(SupplierQuestionnaireSerializer(q).data, status=201)
+
+    def destroy(self, request, *args, **kwargs):
+        # Soft delete + ricalcolo: il questionario può essere la sorgente della
+        # valutazione corrente / del risk_adj del fornitore.
+        from .risk_adj import recompute_risk_adj
+
+        instance = self.get_object()
+        instance.soft_delete()
+        recompute_risk_adj(instance.supplier)
+        log_action(
+            user=request.user,
+            action_code="supplier.questionnaire.delete",
+            level="L2",
+            entity=instance,
+            payload={
+                "supplier_id": str(instance.supplier_id),
+                "origin": instance.origin,
+                "status": instance.status,
+            },
+        )
+        return Response(status=204)
 
     @action(detail=True, methods=["post"], url_path="resend")
     def resend(self, request, pk=None):

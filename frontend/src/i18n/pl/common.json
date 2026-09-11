@@ -3219,7 +3219,6 @@
       "description_label": "Opis dostawy",
       "description_placeholder": "Opisz dostarczane usługi/produkty (używane do sugestii CPV AI)",
       "risk_label": "Poziom ryzyka",
-      "eval_date_label": "Data oceny",
       "status_label": "Status",
       "acn_section": "ACN — Uchwała 127434 z 13/04/2026",
       "cpv_label": "Kody CPV dostawy",
@@ -3234,7 +3233,14 @@
       "tisax_relevant_hint": "Przetwarza informacje objęte zakresem TISAX (np. dane lub prototypy klientów OEM) lub ma dostęp do systemów w zakresie — VDA ISA 6.1.1.",
       "save_error": "Błąd podczas zapisywania.",
       "create_btn": "Utwórz dostawcę",
-      "update_btn": "Aktualizuj dostawcę"
+      "update_btn": "Aktualizuj dostawcę",
+      "eval_new_hint": "Daty oceny nie wprowadza się tutaj: pochodzi z wyniku kwestionariusza (zakładka Kwestionariusze) lub z opcji „Zarejestruj istniejącą ocenę”.",
+      "eval_summary_label": "Bieżąca ocena",
+      "eval_summary_none": "Brak zarejestrowanej oceny.",
+      "eval_summary_hint": "Data i termin ważności aktualizują się automatycznie po zarejestrowaniu wyniku kwestionariusza lub istniejącej oceny albo po zatwierdzeniu audytu strony trzeciej.",
+      "eval_summary_date": "Oceniono {{date}}",
+      "eval_summary_expires": "wygasa {{date}}",
+      "eval_summary_expired": "wygasła {{date}}"
     },
     "list": {
       "search_placeholder": "Szukaj: nazwa, NIP, email…",
@@ -3278,7 +3284,10 @@
       "delete_error": "Błąd podczas usuwania",
       "status_sospeso": "zawieszony",
       "status_terminato": "zakończony",
-      "status_attivo": "aktywny"
+      "status_attivo": "aktywny",
+      "not_evaluated_filter": "Nieocenieni",
+      "expired_short": "wygasła",
+      "days_short": "{{days}} dni"
     },
     "send": {
       "title": "Wyślij kwestionariusz",
@@ -3323,7 +3332,9 @@
       "resend_title": "Wyślij ponownie ({{n}}. wysyłka)",
       "resend_max_title": "3. wysyłka (ostatnia)",
       "evaluate": "Oceń",
-      "error_resend": "Błąd ponownej wysyłki"
+      "error_resend": "Błąd ponownej wysyłki",
+      "origin_existing": "Zarejestrowana",
+      "origin_existing_title": "Zarejestrowana istniejąca ocena — bez wysyłki z platformy"
     },
     "templates": {
       "hint": "Szablony do wysyłania kwestionariusza dostawcom. Link do formularza jest automatycznie dołączany do treści emaila.",
@@ -3395,6 +3406,25 @@
       "validity": "Ważność audytu strony trzeciej (miesiące)",
       "weights": "Wagi parametrów",
       "weights_must_sum": "Suma wag musi wynosić 1,00"
+    },
+    "eval_source": {
+      "questionario": "Kwestionariusz",
+      "esistente": "Istniejąca ocena",
+      "audit": "Audyt strony trzeciej"
+    },
+    "register_existing": {
+      "btn": "Zarejestruj istniejącą ocenę",
+      "title": "Zarejestruj istniejącą ocenę",
+      "intro": "Dla ocen przeprowadzonych poza platformą (np. dostawcy ocenieni przed wdrożeniem). Do dostawcy nie jest wysyłany żaden e-mail.",
+      "supplier_label": "Dostawca *",
+      "supplier_select": "— wybierz dostawcę —",
+      "date_label": "Data oceny *",
+      "result_label": "Wynik (poziom ryzyka) *",
+      "notes_label": "Odniesienie / uwagi *",
+      "notes_placeholder": "Np. kwestionariusz z 12/03/2026 wypełniony przez dostawcę, zarchiwizowany w…",
+      "submit": "Zarejestruj",
+      "saving": "Zapisywanie...",
+      "error": "Błąd podczas rejestracji oceny."
     }
   },
   "reporting": {

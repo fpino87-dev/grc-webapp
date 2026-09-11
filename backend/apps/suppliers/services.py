@@ -67,15 +67,15 @@ def get_supplier_assessment_gaps() -> dict:
     }
 
 
-def get_expiring_contracts(days: int = 60):
-    """Return suppliers whose evaluation_date expires within the given number of days."""
+def get_expiring_evaluations(days: int = 60):
+    """Fornitori attivi la cui valutazione corrente scade entro `days` giorni."""
     today = timezone.localdate()
     deadline = today + datetime.timedelta(days=days)
     return Supplier.objects.filter(
         status="attivo",
-        evaluation_date__isnull=False,
-        evaluation_date__lte=deadline,
-        evaluation_date__gte=today,
+        evaluation_expires_at__isnull=False,
+        evaluation_expires_at__lte=deadline,
+        evaluation_expires_at__gte=today,
     )
 
 
@@ -539,13 +539,28 @@ def resend_questionnaire(questionnaire, user) -> "SupplierQuestionnaire":
     return questionnaire
 
 
-def register_evaluation(questionnaire, evaluation_date, risk_result, user, notes: str = "") -> "SupplierQuestionnaire":
+def _validate_evaluation_input(evaluation_date, risk_result) -> None:
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+
+    if risk_result not in dict(SupplierQuestionnaire.RISK_CHOICES):
+        raise ValidationError(_("Esito di rischio non valido."))
+    if evaluation_date > timezone.localdate():
+        raise ValidationError(_("La data di valutazione non può essere nel futuro."))
+
+
+def _apply_evaluation(questionnaire, evaluation_date, risk_result, notes: str = "") -> datetime.date:
     """
-    Record the received evaluation: sets evaluation_date, risk_result, expires_at.
-    expires_at = evaluation_date + questionnaire_validity_months (da SupplierEvaluationConfig).
-    Updates supplier.risk_level and supplier.evaluation_date.
+    Registra l'esito sul questionario (data, rischio, scadenza) e aggiorna il
+    fornitore. Ritorna la scadenza calcolata.
+
+    expires_at = evaluation_date + questionnaire_validity_months (SupplierEvaluationConfig).
+    Il `risk_level` del fornitore segue l'esito solo se questa è la valutazione
+    più recente: registrare uno storico più vecchio non deve sovrascrivere il
+    rischio di una valutazione successiva. Data/scadenza/origine della
+    valutazione corrente del fornitore sono derivate da `recompute_risk_adj`.
     """
-    from core.audit import log_action
+    from .risk_adj import recompute_risk_adj
 
     config = SupplierEvaluationConfig.get_solo()
     expires_at = evaluation_date + datetime.timedelta(days=config.questionnaire_validity_months * 30)
@@ -562,19 +577,85 @@ def register_evaluation(questionnaire, evaluation_date, risk_result, user, notes
         ]
     )
 
-    # Update supplier
     supplier = questionnaire.supplier
-    supplier.risk_level = risk_result
-    supplier.evaluation_date = evaluation_date
-    supplier.save(update_fields=["risk_level", "evaluation_date", "updated_at"])
+    newer_exists = SupplierQuestionnaire.objects.filter(
+        supplier=supplier,
+        status="risposto",
+        evaluation_date__gt=evaluation_date,
+        deleted_at__isnull=True,
+    ).exclude(pk=questionnaire.pk).exists()
+    if not newer_exists:
+        supplier.risk_level = risk_result
+        supplier.save(update_fields=["risk_level", "updated_at"])
 
-    # Ricalcolo risk_adj — il questionario valutato contribuisce al worst-case
-    from .risk_adj import recompute_risk_adj
+    # Ricalcolo risk_adj + valutazione corrente — il questionario valutato
+    # contribuisce al worst-case e può diventare l'ultima valutazione.
     recompute_risk_adj(supplier)
+    return expires_at
+
+
+def register_evaluation(questionnaire, evaluation_date, risk_result, user, notes: str = "") -> "SupplierQuestionnaire":
+    """Registra l'esito di un questionario inviato dalla piattaforma e ricevuto."""
+    from core.audit import log_action
+
+    _validate_evaluation_input(evaluation_date, risk_result)
+    expires_at = _apply_evaluation(questionnaire, evaluation_date, risk_result, notes)
+    supplier = questionnaire.supplier
 
     log_action(
         user=user,
         action_code="supplier.questionnaire.evaluated",
+        level="L2",
+        entity=questionnaire,
+        payload={
+            "supplier": supplier.name,
+            "evaluation_date": str(evaluation_date),
+            "risk_result": risk_result,
+            "expires_at": str(expires_at),
+        },
+    )
+    return questionnaire
+
+
+@transaction.atomic
+def register_existing_evaluation(supplier, evaluation_date, risk_result, user, notes: str = "") -> "SupplierQuestionnaire":
+    """
+    Registra una valutazione svolta fuori dalla piattaforma (es. storico dei
+    fornitori già valutati prima dell'adozione): crea un questionario con
+    origine "esistente", già valutato, senza invio email. Da lì in poi segue lo
+    stesso percorso di un questionario ricevuto (scadenza, risk_adj,
+    valutazione corrente, scadenzario).
+    """
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+    from core.audit import log_action
+
+    _validate_evaluation_input(evaluation_date, risk_result)
+    if not (notes or "").strip():
+        raise ValidationError(
+            _("Indica nelle note il riferimento della valutazione (es. questionario, audit, data e autore).")
+        )
+
+    # sent_at/last_sent_at sono obbligatori sul modello: li ancoriamo alla data
+    # di valutazione (nessun invio reale — l'origine "esistente" lo dichiara).
+    anchor = timezone.make_aware(
+        datetime.datetime.combine(evaluation_date, datetime.time.min)
+    )
+    questionnaire = SupplierQuestionnaire.objects.create(
+        supplier=supplier,
+        origin="esistente",
+        sent_at=anchor,
+        last_sent_at=anchor,
+        sent_to="",
+        send_count=0,
+        status="risposto",
+        created_by=user,
+    )
+    expires_at = _apply_evaluation(questionnaire, evaluation_date, risk_result, notes)
+
+    log_action(
+        user=user,
+        action_code="supplier.questionnaire.existing_registered",
         level="L2",
         entity=questionnaire,
         payload={

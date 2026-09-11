@@ -3219,7 +3219,6 @@
       "description_label": "Tedarik açıklaması",
       "description_placeholder": "Sağlanan hizmetleri/ürünleri açıklayın (AI CPV önerisi için kullanılır)",
       "risk_label": "Risk seviyesi",
-      "eval_date_label": "Değerlendirme tarihi",
       "status_label": "Durum",
       "acn_section": "ACN — 13/04/2026 tarihli 127434 sayılı Karar",
       "cpv_label": "Tedarik CPV kodları",
@@ -3234,7 +3233,14 @@
       "tisax_relevant_hint": "TISAX kapsamındaki bilgileri işler (ör. OEM müşteri verileri veya prototipleri) ya da kapsamdaki sistemlere erişir — VDA ISA 6.1.1.",
       "save_error": "Kaydetme sırasında hata.",
       "create_btn": "Tedarikçi oluştur",
-      "update_btn": "Tedarikçiyi güncelle"
+      "update_btn": "Tedarikçiyi güncelle",
+      "eval_new_hint": "Değerlendirme tarihi buraya girilmez: anket sonucundan (Anketler sekmesi) veya «Mevcut değerlendirmeyi kaydet» ile gelir.",
+      "eval_summary_label": "Güncel değerlendirme",
+      "eval_summary_none": "Kayıtlı değerlendirme yok.",
+      "eval_summary_hint": "Tarih ve geçerlilik sonu, bir anket sonucu veya mevcut bir değerlendirme kaydettiğinizde ya da üçüncü taraf denetimini onayladığınızda otomatik güncellenir.",
+      "eval_summary_date": "Değerlendirme tarihi: {{date}}",
+      "eval_summary_expires": "geçerlilik sonu {{date}}",
+      "eval_summary_expired": "{{date}} tarihinde süresi doldu"
     },
     "list": {
       "search_placeholder": "Unvan, vergi no, e-posta ara…",
@@ -3278,7 +3284,10 @@
       "delete_error": "Silme sırasında hata",
       "status_sospeso": "askıda",
       "status_terminato": "sonlandırıldı",
-      "status_attivo": "aktif"
+      "status_attivo": "aktif",
+      "not_evaluated_filter": "Değerlendirilmemiş",
+      "expired_short": "süresi doldu",
+      "days_short": "{{days}} gün"
     },
     "send": {
       "title": "Anket gönder",
@@ -3323,7 +3332,9 @@
       "resend_title": "Yeniden gönder ({{n}}. gönderim)",
       "resend_max_title": "3. gönderim (son)",
       "evaluate": "Değerlendir",
-      "error_resend": "Yeniden gönderim hatası"
+      "error_resend": "Yeniden gönderim hatası",
+      "origin_existing": "Kaydedildi",
+      "origin_existing_title": "Mevcut değerlendirme kaydedildi — platformdan gönderim yok"
     },
     "templates": {
       "hint": "Tedarikçilere anket göndermek için şablonlar. Form bağlantısı e-posta gövdesine otomatik eklenir.",
@@ -3395,6 +3406,25 @@
       "validity": "Üçüncü taraf denetim geçerliliği (ay)",
       "weights": "Parametre ağırlıkları",
       "weights_must_sum": "Ağırlıkların toplamı 1,00 olmalıdır"
+    },
+    "eval_source": {
+      "questionario": "Anket",
+      "esistente": "Mevcut değerlendirme",
+      "audit": "Üçüncü taraf denetimi"
+    },
+    "register_existing": {
+      "btn": "Mevcut değerlendirmeyi kaydet",
+      "title": "Mevcut değerlendirmeyi kaydet",
+      "intro": "Platform dışında yapılan değerlendirmeler için (ör. kullanıma başlamadan önce değerlendirilmiş tedarikçiler). Tedarikçiye e-posta gönderilmez.",
+      "supplier_label": "Tedarikçi *",
+      "supplier_select": "— tedarikçi seçin —",
+      "date_label": "Değerlendirme tarihi *",
+      "result_label": "Sonuç (risk seviyesi) *",
+      "notes_label": "Referans / notlar *",
+      "notes_placeholder": "Ör. tedarikçinin doldurduğu 12/03/2026 tarihli anket, arşiv yeri…",
+      "submit": "Kaydet",
+      "saving": "Kaydediliyor...",
+      "error": "Değerlendirme kaydedilirken hata oluştu."
     }
   },
   "reporting": {

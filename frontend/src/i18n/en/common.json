@@ -3219,7 +3219,6 @@
       "description_label": "Supply description",
       "description_placeholder": "Describe the services/products supplied (used for AI CPV suggestion)",
       "risk_label": "Risk level",
-      "eval_date_label": "Evaluation date",
       "status_label": "Status",
       "acn_section": "ACN — Resolution 127434 of 13/04/2026",
       "cpv_label": "Supply CPV codes",
@@ -3234,7 +3233,14 @@
       "tisax_relevant_hint": "Handles information within the TISAX scope (e.g. OEM customer data or prototypes) or accesses in-scope systems — VDA ISA 6.1.1.",
       "save_error": "Error while saving.",
       "create_btn": "Create supplier",
-      "update_btn": "Update supplier"
+      "update_btn": "Update supplier",
+      "eval_new_hint": "The evaluation date is not entered here: it comes from the questionnaire result (Questionnaires tab) or from «Record existing evaluation».",
+      "eval_summary_label": "Current evaluation",
+      "eval_summary_none": "No evaluation recorded.",
+      "eval_summary_hint": "Date and expiry update automatically when you record a questionnaire result or an existing evaluation, or approve a third-party audit.",
+      "eval_summary_date": "Evaluated on {{date}}",
+      "eval_summary_expires": "expires on {{date}}",
+      "eval_summary_expired": "expired on {{date}}"
     },
     "list": {
       "search_placeholder": "Search name, VAT, email…",
@@ -3278,7 +3284,10 @@
       "delete_error": "Error while deleting",
       "status_sospeso": "suspended",
       "status_terminato": "terminated",
-      "status_attivo": "active"
+      "status_attivo": "active",
+      "not_evaluated_filter": "Not evaluated",
+      "expired_short": "expired",
+      "days_short": "{{days}}d"
     },
     "send": {
       "title": "Send questionnaire",
@@ -3323,7 +3332,9 @@
       "resend_title": "Resend (send {{n}})",
       "resend_max_title": "3rd send (last)",
       "evaluate": "Evaluate",
-      "error_resend": "Resend error"
+      "error_resend": "Resend error",
+      "origin_existing": "Recorded",
+      "origin_existing_title": "Existing evaluation recorded — not sent from the platform"
     },
     "templates": {
       "hint": "Templates for sending the questionnaire to suppliers. The form link is automatically included in the email body.",
@@ -3395,6 +3406,25 @@
       "validity": "Third-party audit validity (months)",
       "weights": "Parameter weights",
       "weights_must_sum": "Weights must sum to 1.00"
+    },
+    "eval_source": {
+      "questionario": "Questionnaire",
+      "esistente": "Existing evaluation",
+      "audit": "Third-party audit"
+    },
+    "register_existing": {
+      "btn": "Record existing evaluation",
+      "title": "Record existing evaluation",
+      "intro": "For evaluations carried out outside the platform (e.g. suppliers already evaluated before adoption). No email is sent to the supplier.",
+      "supplier_label": "Supplier *",
+      "supplier_select": "— select supplier —",
+      "date_label": "Evaluation date *",
+      "result_label": "Result (risk level) *",
+      "notes_label": "Reference / notes *",
+      "notes_placeholder": "E.g. questionnaire of 12/03/2026 completed by the supplier, filed in…",
+      "submit": "Record",
+      "saving": "Saving...",
+      "error": "Error while recording the evaluation."
     }
   },
   "reporting": {

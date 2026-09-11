@@ -29,7 +29,9 @@ export function FornitoriTab() {
   });
 
   const params: Record<string, string> = {};
-  if (filterRisk) params.risk_level = filterRisk;
+  // Il filtro segue la colonna "Rischio Adj" (non il livello manuale dell'anagrafica).
+  if (filterRisk === "none") params.risk_adj_missing = "true";
+  else if (filterRisk) params.risk_adj = filterRisk;
   if (filterStatus) params.status = filterStatus;
   if (filterNis2) params.nis2_relevant = filterNis2;
   if (filterTisax) params.tisax_relevant = filterTisax;
@@ -84,6 +86,7 @@ export function FornitoriTab() {
           <select value={filterRisk} onChange={e => setFilterRisk(e.target.value)} className="border rounded px-3 py-1.5 text-sm">
             <option value="">{t("suppliers.list.all_risks")}</option>
             {["basso","medio","alto","critico"].map(r => <option key={r} value={r}>{t(`suppliers.risk.${r}`)}</option>)}
+            <option value="none">{t("suppliers.list.not_evaluated_filter")}</option>
           </select>
           <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="border rounded px-3 py-1.5 text-sm">
             <option value="">{t("suppliers.list.all_statuses")}</option>
@@ -214,8 +217,8 @@ export function FornitoriTab() {
                       )}
                     </td>
                     <td className="px-4 py-3"><StatusBadge status={s.status} /></td>
-                    <td className="px-4 py-3"><EvalDateCell date={s.evaluation_date} /></td>
-                    <td className="px-4 py-3"><ExpiryDateCell evaluationDate={s.evaluation_date} /></td>
+                    <td className="px-4 py-3"><EvalDateCell date={s.evaluation_date} source={s.evaluation_source} /></td>
+                    <td className="px-4 py-3"><ExpiryDateCell expiresAt={s.evaluation_expires_at} /></td>
                     <td className="px-4 py-3 text-right space-x-1">
                       <button
                         onClick={() => s.latest_questionnaire_status !== "inviato" && setSendModal(s)}

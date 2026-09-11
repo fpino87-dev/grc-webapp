@@ -266,24 +266,29 @@ def get_activity_schedule(plant=None, months_ahead: int = 6) -> list[dict]:
     except Exception:
         logger.exception("Errore nel calcolo delle scadenze assessment fornitori", exc_info=True)
 
-    # Supplier contracts expiring
+    # Supplier re-evaluation — scadenza della valutazione corrente (questionario
+    # valutato, valutazione esistente registrata o audit approvato).
     try:
         from apps.suppliers.models import Supplier
 
-        sup_qs = Supplier.objects.filter(evaluation_date__isnull=False, deleted_at__isnull=True)
+        sup_qs = Supplier.objects.filter(
+            status="attivo",
+            evaluation_expires_at__isnull=False,
+            deleted_at__isnull=True,
+        )
         if plant:
             # Supplier ha una M2M `plants` (non il FK `plant` di plant_filter).
             sup_qs = sup_qs.filter(plants=plant).distinct()
         for sup in sup_qs:
             _add(
-                "supplier_contract_review",
-                f"Contratto: {sup.name}",
-                sup.evaluation_date,
+                "supplier_reevaluation",
+                f"Rivalutazione: {sup.name}",
+                sup.evaluation_expires_at,
                 sup.status,
                 str(sup.id),
             )
     except Exception:
-        logger.exception("Errore nel calcolo delle scadenze contratti fornitori", exc_info=True)
+        logger.exception("Errore nel calcolo delle scadenze rivalutazione fornitori", exc_info=True)
 
     # Training courses deadline
     try:

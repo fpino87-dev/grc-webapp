@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { suppliersApi, type Supplier } from "../../api/endpoints/suppliers";
 import { CpvInput } from "./CpvInput";
+import { RegisterExistingEvaluationModal } from "./QuestionnaireModals";
 import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
 
 // ─── Editor email aggiuntive (CC) ────────────────────────────────────────────
 
@@ -132,17 +134,12 @@ export function NewSupplierModal({ onClose }: { onClose: () => void }) {
             <label className="block text-sm font-medium text-gray-700 mb-1">{t("suppliers.form.description_label")}</label>
             <textarea name="description" rows={2} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder={t("suppliers.form.description_placeholder")} />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("suppliers.form.risk_label")}</label>
-              <select name="risk_level" defaultValue="basso" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-                {["basso","medio","alto","critico"].map(r => <option key={r} value={r}>{t(`suppliers.risk.${r}`)}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("suppliers.form.eval_date_label")}</label>
-              <input name="evaluation_date" type="date" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("suppliers.form.risk_label")}</label>
+            <select name="risk_level" defaultValue="basso" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+              {["basso","medio","alto","critico"].map(r => <option key={r} value={r}>{t(`suppliers.risk.${r}`)}</option>)}
+            </select>
+            <p className="mt-1 text-xs text-gray-500">{t("suppliers.form.eval_new_hint")}</p>
           </div>
 
           {/* Sezione ACN / NIS2 */}
@@ -240,6 +237,85 @@ export function NewSupplierModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+// ─── Valutazione corrente (read-only) ────────────────────────────────────────
+
+/**
+ * Data/scadenza/origine dell'ultima valutazione: derivate dal backend
+ * (questionario valutato, valutazione esistente registrata, audit approvato),
+ * non modificabili a mano. Rilegge il fornitore dopo una registrazione.
+ */
+function EvaluationSummary({
+  supplierId,
+  initial,
+  onRefreshed,
+}: {
+  supplierId: string;
+  initial: Supplier;
+  onRefreshed?: (fresh: Supplier) => void;
+}) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [registerOpen, setRegisterOpen] = useState(false);
+  const { data } = useQuery({
+    queryKey: ["supplier", supplierId],
+    queryFn: () => suppliersApi.get(supplierId),
+    initialData: initial,
+    staleTime: 0,
+  });
+  const s = data ?? initial;
+  const fmt = (d: string) => new Date(d).toLocaleDateString(i18n.language || "it");
+  const expired = !!s.evaluation_expires_at && new Date(s.evaluation_expires_at).getTime() < Date.now();
+
+  return (
+    <div className="rounded border border-gray-200 bg-gray-50 px-3 py-2">
+      <div className="flex items-start justify-between gap-3">
+        <div className="text-sm">
+          <p className="font-medium text-gray-700">{t("suppliers.form.eval_summary_label")}</p>
+          {s.evaluation_date ? (
+            <p className="text-gray-700">
+              {t("suppliers.form.eval_summary_date", { date: fmt(s.evaluation_date) })}
+              {s.evaluation_source && (
+                <span className="text-gray-500"> · {t(`suppliers.eval_source.${s.evaluation_source}`)}</span>
+              )}
+              {s.evaluation_expires_at && (
+                <span className={expired ? "text-red-600 font-medium" : "text-gray-500"}>
+                  {" · "}
+                  {expired
+                    ? t("suppliers.form.eval_summary_expired", { date: fmt(s.evaluation_expires_at) })
+                    : t("suppliers.form.eval_summary_expires", { date: fmt(s.evaluation_expires_at) })}
+                </span>
+              )}
+            </p>
+          ) : (
+            <p className="text-gray-500">{t("suppliers.form.eval_summary_none")}</p>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => setRegisterOpen(true)}
+          className="shrink-0 text-xs text-green-700 border border-green-200 rounded px-2 py-1 hover:bg-green-50"
+        >
+          {t("suppliers.register_existing.btn")}
+        </button>
+      </div>
+      <p className="mt-1 text-xs text-gray-500">{t("suppliers.form.eval_summary_hint")}</p>
+      {registerOpen && (
+        <RegisterExistingEvaluationModal
+          supplier={s}
+          onClose={() => setRegisterOpen(false)}
+          onSaved={async () => {
+            // La registrazione può aggiornare anche il livello di rischio:
+            // riallinea il form, altrimenti il salvataggio lo sovrascriverebbe.
+            const fresh = await suppliersApi.get(supplierId);
+            qc.setQueryData(["supplier", supplierId], fresh);
+            onRefreshed?.(fresh);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
 // ─── Modal modifica fornitore ────────────────────────────────────────────────
 
 export function EditSupplierModal({ supplier, onClose }: { supplier: Supplier; onClose: () => void }) {
@@ -322,10 +398,11 @@ export function EditSupplierModal({ supplier, onClose }: { supplier: Supplier; o
               </select>
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t("suppliers.form.eval_date_label")}</label>
-            <input name="evaluation_date" type="date" value={form.evaluation_date ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
-          </div>
+          <EvaluationSummary
+            supplierId={supplier.id}
+            initial={supplier}
+            onRefreshed={fresh => setForm(prev => ({ ...prev, risk_level: fresh.risk_level }))}
+          />
 
           {/* Sezione ACN / NIS2 */}
           <div className="border-t border-gray-200 pt-3">
