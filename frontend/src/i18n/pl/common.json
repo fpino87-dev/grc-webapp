@@ -3408,7 +3408,69 @@
       "start": "Rozpocznij ocenę",
       "title": "Wewnętrzna ocena ryzyka",
       "weight": "Waga",
-      "weighted": "Wynik ważony"
+      "weighted": "Wynik ważony",
+      "params": {
+        "impatto": {
+          "name": "Wpływ na biznes",
+          "levels": {
+            "1": "Brak",
+            "2": "Minimalny",
+            "3": "Degradacja",
+            "4": "Przerwa",
+            "5": "Zatrzymanie"
+          }
+        },
+        "accesso": {
+          "name": "Dostęp do systemów",
+          "levels": {
+            "1": "Brak",
+            "2": "Ograniczony",
+            "3": "Użytkownik",
+            "4": "Krytyczny",
+            "5": "Admin"
+          }
+        },
+        "dati": {
+          "name": "Przetwarzane dane",
+          "levels": {
+            "1": "Publiczne",
+            "2": "Wewnętrzne",
+            "3": "Wrażliwe",
+            "4": "Klientów",
+            "5": "Krytyczne"
+          }
+        },
+        "dipendenza": {
+          "name": "Zależność od dostawcy",
+          "levels": {
+            "1": "Łatwa",
+            "2": "Szybka",
+            "3": "Średnia",
+            "4": "Trudna",
+            "5": "Lock-in"
+          }
+        },
+        "integrazione": {
+          "name": "Integracja IT",
+          "levels": {
+            "1": "Brak",
+            "2": "Podstawowa",
+            "3": "API",
+            "4": "Aplikacja",
+            "5": "Rdzeń"
+          }
+        },
+        "compliance": {
+          "name": "Zgodność z certyfikacjami cyber",
+          "levels": {
+            "1": "TISAX L3 / ISO27001 + TISAX L2",
+            "2": "TISAX L2 / ISO27001",
+            "3": "ISO27001 w toku / SOC 2 / równoważne",
+            "4": "Samoocena / polityki wewnętrzne",
+            "5": "Brak dowodów"
+          }
+        }
+      }
     },
     "settings": {
       "bump_nis2": "Podbicie NIS2 + krytyczna koncentracja",
@@ -3421,7 +3483,9 @@
       "title": "Ocena dostawców — Konfiguracja",
       "validity": "Ważność audytu strony trzeciej (miesiące)",
       "weights": "Wagi parametrów",
-      "weights_must_sum": "Suma wag musi wynosić 1,00"
+      "weights_must_sum": "Suma wag musi wynosić 1,00",
+      "level_placeholder": "Poziom {{n}}",
+      "labels_i18n_hint": "Etykiety domyślne są wyświetlane w języku użytkownika; etykiety zmienione tutaj pozostają w wpisanej formie."
     },
     "eval_source": {
       "questionario": "Kwestionariusz",

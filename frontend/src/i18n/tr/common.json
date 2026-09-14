@@ -3408,7 +3408,69 @@
       "start": "Değerlendirmeyi başlat",
       "title": "İç risk değerlendirmesi",
       "weight": "Ağırlık",
-      "weighted": "Ağırlıklı puan"
+      "weighted": "Ağırlıklı puan",
+      "params": {
+        "impatto": {
+          "name": "İş etkisi",
+          "levels": {
+            "1": "Yok",
+            "2": "Minimum",
+            "3": "Bozulma",
+            "4": "Kesinti",
+            "5": "Durma"
+          }
+        },
+        "accesso": {
+          "name": "Sistem erişimi",
+          "levels": {
+            "1": "Yok",
+            "2": "Sınırlı",
+            "3": "Kullanıcı",
+            "4": "Kritik",
+            "5": "Yönetici"
+          }
+        },
+        "dati": {
+          "name": "İşlenen veriler",
+          "levels": {
+            "1": "Herkese açık",
+            "2": "Dahili",
+            "3": "Hassas",
+            "4": "Müşteri",
+            "5": "Kritik"
+          }
+        },
+        "dipendenza": {
+          "name": "Tedarikçi bağımlılığı",
+          "levels": {
+            "1": "Kolay",
+            "2": "Hızlı",
+            "3": "Orta",
+            "4": "Zor",
+            "5": "Lock-in"
+          }
+        },
+        "integrazione": {
+          "name": "BT entegrasyonu",
+          "levels": {
+            "1": "Yok",
+            "2": "Temel",
+            "3": "API",
+            "4": "Uygulama",
+            "5": "Çekirdek"
+          }
+        },
+        "compliance": {
+          "name": "Siber sertifika uyumluluğu",
+          "levels": {
+            "1": "TISAX L3 / ISO27001 + TISAX L2",
+            "2": "TISAX L2 / ISO27001",
+            "3": "ISO27001 süreçte / SOC 2 / eşdeğerleri",
+            "4": "Öz beyan / iç politikalar",
+            "5": "Kanıt yok"
+          }
+        }
+      }
     },
     "settings": {
       "bump_nis2": "NIS2 artışı + kritik yoğunlaşma",
@@ -3421,7 +3483,9 @@
       "title": "Tedarikçi değerlendirmesi — Yapılandırma",
       "validity": "Üçüncü taraf denetim geçerliliği (ay)",
       "weights": "Parametre ağırlıkları",
-      "weights_must_sum": "Ağırlıkların toplamı 1,00 olmalıdır"
+      "weights_must_sum": "Ağırlıkların toplamı 1,00 olmalıdır",
+      "level_placeholder": "Seviye {{n}}",
+      "labels_i18n_hint": "Varsayılan etiketler her kullanıcının dilinde gösterilir; burada değiştirilen etiketler yazıldığı gibi kalır."
     },
     "eval_source": {
       "questionario": "Anket",

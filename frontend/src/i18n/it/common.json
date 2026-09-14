@@ -3408,7 +3408,69 @@
       "start": "Avvia valutazione",
       "title": "Valutazione interna del rischio",
       "weight": "Peso",
-      "weighted": "Score ponderato"
+      "weighted": "Score ponderato",
+      "params": {
+        "impatto": {
+          "name": "Impatto business",
+          "levels": {
+            "1": "Nessuno",
+            "2": "Minimo",
+            "3": "Degrado",
+            "4": "Interruzione",
+            "5": "Blocco"
+          }
+        },
+        "accesso": {
+          "name": "Accesso sistemi",
+          "levels": {
+            "1": "Nessuno",
+            "2": "Limitato",
+            "3": "User",
+            "4": "Critico",
+            "5": "Admin"
+          }
+        },
+        "dati": {
+          "name": "Dati trattati",
+          "levels": {
+            "1": "Pubblici",
+            "2": "Interni",
+            "3": "Sensibili",
+            "4": "Clienti",
+            "5": "Critici"
+          }
+        },
+        "dipendenza": {
+          "name": "Dipendenza fornitore",
+          "levels": {
+            "1": "Facile",
+            "2": "Rapida",
+            "3": "Media",
+            "4": "Difficile",
+            "5": "Lock-in"
+          }
+        },
+        "integrazione": {
+          "name": "Integrazione IT",
+          "levels": {
+            "1": "Nessuna",
+            "2": "Base",
+            "3": "API",
+            "4": "App",
+            "5": "Core"
+          }
+        },
+        "compliance": {
+          "name": "Compliance certificazioni cyber",
+          "levels": {
+            "1": "TISAX L3 / ISO27001 + TISAX L2",
+            "2": "TISAX L2 / ISO27001",
+            "3": "ISO27001 in iter / SOC 2 / equivalenti",
+            "4": "Autocertificazione / policy interne",
+            "5": "Nessuna evidenza"
+          }
+        }
+      }
     },
     "settings": {
       "bump_nis2": "Bump NIS2 + concentrazione critica",
@@ -3421,7 +3483,9 @@
       "title": "Valutazione fornitori — Configurazione",
       "validity": "Validità audit terze parti (mesi)",
       "weights": "Pesi parametri",
-      "weights_must_sum": "La somma dei pesi deve essere 1.00"
+      "weights_must_sum": "La somma dei pesi deve essere 1.00",
+      "level_placeholder": "Livello {{n}}",
+      "labels_i18n_hint": "Le etichette predefinite vengono mostrate nella lingua di chi usa l'applicazione; quelle modificate qui restano come sono state scritte."
     },
     "eval_source": {
       "questionario": "Questionario",

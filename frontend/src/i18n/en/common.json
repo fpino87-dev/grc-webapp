@@ -3408,7 +3408,69 @@
       "start": "Start assessment",
       "title": "Internal risk assessment",
       "weight": "Weight",
-      "weighted": "Weighted score"
+      "weighted": "Weighted score",
+      "params": {
+        "impatto": {
+          "name": "Business impact",
+          "levels": {
+            "1": "None",
+            "2": "Minimal",
+            "3": "Degradation",
+            "4": "Disruption",
+            "5": "Shutdown"
+          }
+        },
+        "accesso": {
+          "name": "System access",
+          "levels": {
+            "1": "None",
+            "2": "Limited",
+            "3": "User",
+            "4": "Critical",
+            "5": "Admin"
+          }
+        },
+        "dati": {
+          "name": "Data processed",
+          "levels": {
+            "1": "Public",
+            "2": "Internal",
+            "3": "Sensitive",
+            "4": "Customer",
+            "5": "Critical"
+          }
+        },
+        "dipendenza": {
+          "name": "Supplier dependency",
+          "levels": {
+            "1": "Easy",
+            "2": "Quick",
+            "3": "Moderate",
+            "4": "Hard",
+            "5": "Lock-in"
+          }
+        },
+        "integrazione": {
+          "name": "IT integration",
+          "levels": {
+            "1": "None",
+            "2": "Basic",
+            "3": "API",
+            "4": "App",
+            "5": "Core"
+          }
+        },
+        "compliance": {
+          "name": "Cyber certification compliance",
+          "levels": {
+            "1": "TISAX L3 / ISO27001 + TISAX L2",
+            "2": "TISAX L2 / ISO27001",
+            "3": "ISO27001 in progress / SOC 2 / equivalent",
+            "4": "Self-assessment / internal policies",
+            "5": "No evidence"
+          }
+        }
+      }
     },
     "settings": {
       "bump_nis2": "NIS2 bump + critical concentration",
@@ -3421,7 +3483,9 @@
       "title": "Supplier assessment — Configuration",
       "validity": "Third-party audit validity (months)",
       "weights": "Parameter weights",
-      "weights_must_sum": "Weights must sum to 1.00"
+      "weights_must_sum": "Weights must sum to 1.00",
+      "level_placeholder": "Level {{n}}",
+      "labels_i18n_hint": "Default labels are shown in each user's language; labels changed here are shown exactly as written."
     },
     "eval_source": {
       "questionario": "Questionnaire",

@@ -6,6 +6,7 @@ import {
   type InternalEvaluation,
   type EvaluationConfig,
 } from "../../api/endpoints/suppliers";
+import { useEvaluationLabels } from "./evaluationLabels";
 
 type ParamKey = "impatto" | "accesso" | "dati" | "dipendenza" | "integrazione" | "compliance";
 const PARAM_KEYS: ParamKey[] = ["impatto", "accesso", "dati", "dipendenza", "integrazione", "compliance"];
@@ -103,6 +104,7 @@ function CurrentEvaluationCard({
   config: EvaluationConfig;
 }) {
   const { t } = useTranslation();
+  const { paramName, levelLabel } = useEvaluationLabels();
   const scores: Record<ParamKey, number> = {
     impatto: evaluation.score_impatto,
     accesso: evaluation.score_accesso,
@@ -149,10 +151,10 @@ function CurrentEvaluationCard({
             const labels = config.parameter_labels[key];
             return (
               <tr key={key} className="border-t border-gray-100">
-                <td className="py-1 text-gray-700">{labels?.name ?? key}</td>
+                <td className="py-1 text-gray-700">{paramName(key, labels)}</td>
                 <td className="py-1 text-center font-mono">{score}</td>
                 <td className="py-1 text-center text-gray-500">{(weight * 100).toFixed(0)}%</td>
-                <td className="py-1 text-gray-600">{labels?.levels?.[score - 1] ?? "—"}</td>
+                <td className="py-1 text-gray-600">{levelLabel(key, labels, score) ?? "—"}</td>
               </tr>
             );
           })}
@@ -185,6 +187,7 @@ function EvaluationForm({
   ) => void | Promise<void>;
 }) {
   const { t } = useTranslation();
+  const { paramName, levelLabel } = useEvaluationLabels();
   const [scores, setScores] = useState<Record<ParamKey, number>>({
     impatto: 3, accesso: 3, dati: 3, dipendenza: 3, integrazione: 3, compliance: 3,
   });
@@ -246,8 +249,8 @@ function EvaluationForm({
         const labels = config.parameter_labels[key];
         return (
           <div key={key} className="grid grid-cols-12 gap-2 items-center">
-            <label className="col-span-3 text-sm text-gray-700" title={labels?.name}>
-              {labels?.name ?? key}
+            <label className="col-span-3 text-sm text-gray-700" title={paramName(key, labels)}>
+              {paramName(key, labels)}
               <span className="ml-1 text-xs text-gray-400">({(config.weights[key] * 100).toFixed(0)}%)</span>
             </label>
             <div className="col-span-5 flex gap-1">
@@ -266,8 +269,8 @@ function EvaluationForm({
                 </button>
               ))}
             </div>
-            <div className="col-span-4 text-xs text-gray-600 truncate" title={labels?.levels?.[scores[key] - 1]}>
-              {labels?.levels?.[scores[key] - 1] ?? "—"}
+            <div className="col-span-4 text-xs text-gray-600 truncate" title={levelLabel(key, labels, scores[key])}>
+              {levelLabel(key, labels, scores[key]) ?? "—"}
             </div>
           </div>
         );

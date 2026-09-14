@@ -3,12 +3,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { suppliersApi, type EvaluationConfig } from "../../api/endpoints/suppliers";
 import { useAuthStore } from "../../store/auth";
+import { useEvaluationLabels } from "../suppliers/evaluationLabels";
 
 type ParamKey = "impatto" | "accesso" | "dati" | "dipendenza" | "integrazione" | "compliance";
 const PARAM_KEYS: ParamKey[] = ["impatto", "accesso", "dati", "dipendenza", "integrazione", "compliance"];
 
 export function SupplierEvaluationSettingsPage() {
   const { t } = useTranslation();
+  const { paramName } = useEvaluationLabels();
   const role = useAuthStore(s => s.user?.role);
   const canEdit = role === "super_admin";
   const qc = useQueryClient();
@@ -100,7 +102,7 @@ export function SupplierEvaluationSettingsPage() {
             {PARAM_KEYS.map(k => (
               <label key={k} className="text-sm">
                 <span className="block text-gray-700 mb-1">
-                  {form.parameter_labels[k]?.name ?? k}
+                  {paramName(k, form.parameter_labels[k])}
                 </span>
                 <input
                   type="number"
@@ -235,11 +237,12 @@ export function SupplierEvaluationSettingsPage() {
           <h2 className="text-base font-semibold mb-2">
             {t("suppliers.settings.labels", "Label livelli per parametro")}
           </h2>
+          <p className="text-xs text-gray-500 mb-3">{t("suppliers.settings.labels_i18n_hint")}</p>
           <div className="space-y-3">
             {PARAM_KEYS.map(k => (
               <div key={k}>
                 <div className="text-sm font-medium text-gray-700 mb-1">
-                  {form.parameter_labels[k]?.name ?? k}
+                  {paramName(k, form.parameter_labels[k])}
                 </div>
                 <div className="grid grid-cols-5 gap-2">
                   {[0, 1, 2, 3, 4].map(idx => (
@@ -262,7 +265,7 @@ export function SupplierEvaluationSettingsPage() {
                           };
                         })
                       }
-                      placeholder={`Livello ${idx + 1}`}
+                      placeholder={t("suppliers.settings.level_placeholder", { n: idx + 1 })}
                       className="w-full border border-gray-300 rounded px-2 py-1 text-xs"
                     />
                   ))}
