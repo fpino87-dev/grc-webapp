@@ -3337,7 +3337,17 @@
       "evaluate": "Évaluer",
       "error_resend": "Erreur de renvoi",
       "origin_existing": "Enregistrée",
-      "origin_existing_title": "Évaluation existante enregistrée — aucun envoi depuis la plateforme"
+      "origin_existing_title": "Évaluation existante enregistrée — aucun envoi depuis la plateforme",
+      "search_placeholder": "Rechercher un fournisseur ou un e-mail…",
+      "filter_valid": "Évaluation valide",
+      "filter_expiring": "Expire bientôt (90 j)",
+      "kpi_valid": "Évaluations valides",
+      "kpi_expiring": "Expirent bientôt (90 j)",
+      "kpi_waiting": "En attente de réponse",
+      "kpi_waiting_third": "dont {{n}} au 3e envoi",
+      "kpi_expired": "Expirés",
+      "card_filter_title": "Cliquez pour filtrer la liste",
+      "no_match": "Aucun questionnaire ne correspond aux filtres."
     },
     "templates": {
       "hint": "Modèles pour l'envoi du questionnaire aux fournisseurs. Le lien du formulaire est inclus automatiquement dans le corps de l'email.",
@@ -3379,7 +3389,10 @@
       "kpi_expiring": "Expire bientôt (90j)",
       "kpi_expired": "NDA expiré",
       "kpi_missing": "Sans NDA",
-      "no_suppliers": "Aucun fournisseur actif."
+      "no_suppliers": "Aucun fournisseur actif.",
+      "search_placeholder": "Rechercher un fournisseur…",
+      "all_statuses": "Tous les statuts NDA",
+      "no_match": "Aucun fournisseur ne correspond aux filtres."
     },
     "evaluation": {
       "class": "Classe",

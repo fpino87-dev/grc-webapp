@@ -3337,7 +3337,17 @@
       "evaluate": "Değerlendir",
       "error_resend": "Yeniden gönderim hatası",
       "origin_existing": "Kaydedildi",
-      "origin_existing_title": "Mevcut değerlendirme kaydedildi — platformdan gönderim yok"
+      "origin_existing_title": "Mevcut değerlendirme kaydedildi — platformdan gönderim yok",
+      "search_placeholder": "Tedarikçi veya e-posta ara…",
+      "filter_valid": "Geçerli değerlendirme",
+      "filter_expiring": "Süresi doluyor (90 gün)",
+      "kpi_valid": "Geçerli değerlendirmeler",
+      "kpi_expiring": "Süresi dolacak (90 gün)",
+      "kpi_waiting": "Yanıt bekleniyor",
+      "kpi_waiting_third": "{{n}} tanesi 3. gönderimde",
+      "kpi_expired": "Süresi dolmuş",
+      "card_filter_title": "Listeyi filtrelemek için tıklayın",
+      "no_match": "Filtrelerle eşleşen anket yok."
     },
     "templates": {
       "hint": "Tedarikçilere anket göndermek için şablonlar. Form bağlantısı e-posta gövdesine otomatik eklenir.",
@@ -3379,7 +3389,10 @@
       "kpi_expiring": "Sona eriyor (90 gün)",
       "kpi_expired": "NDA süresi dolmuş",
       "kpi_missing": "NDA yok",
-      "no_suppliers": "Aktif tedarikçi yok."
+      "no_suppliers": "Aktif tedarikçi yok.",
+      "search_placeholder": "Tedarikçi ara…",
+      "all_statuses": "Tüm NDA durumları",
+      "no_match": "Filtrelerle eşleşen tedarikçi yok."
     },
     "evaluation": {
       "class": "Sınıf",

@@ -3337,7 +3337,17 @@
       "evaluate": "Oceń",
       "error_resend": "Błąd ponownej wysyłki",
       "origin_existing": "Zarejestrowana",
-      "origin_existing_title": "Zarejestrowana istniejąca ocena — bez wysyłki z platformy"
+      "origin_existing_title": "Zarejestrowana istniejąca ocena — bez wysyłki z platformy",
+      "search_placeholder": "Szukaj dostawcy lub e-maila…",
+      "filter_valid": "Ocena ważna",
+      "filter_expiring": "Wygasa (90 dni)",
+      "kpi_valid": "Ważne oceny",
+      "kpi_expiring": "Wygasające (90 dni)",
+      "kpi_waiting": "Oczekujące na odpowiedź",
+      "kpi_waiting_third": "w tym {{n}} po 3. wysyłce",
+      "kpi_expired": "Wygasłe",
+      "card_filter_title": "Kliknij, aby przefiltrować listę",
+      "no_match": "Żaden kwestionariusz nie pasuje do filtrów."
     },
     "templates": {
       "hint": "Szablony do wysyłania kwestionariusza dostawcom. Link do formularza jest automatycznie dołączany do treści emaila.",
@@ -3379,7 +3389,10 @@
       "kpi_expiring": "Wygasa (90 dni)",
       "kpi_expired": "NDA wygasłe",
       "kpi_missing": "Bez NDA",
-      "no_suppliers": "Brak aktywnych dostawców."
+      "no_suppliers": "Brak aktywnych dostawców.",
+      "search_placeholder": "Szukaj dostawcy…",
+      "all_statuses": "Wszystkie statusy NDA",
+      "no_match": "Żaden dostawca nie pasuje do filtrów."
     },
     "evaluation": {
       "class": "Klasa",

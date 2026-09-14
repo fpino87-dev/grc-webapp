@@ -160,8 +160,21 @@ export const suppliersApi = {
     apiClient.delete(`/suppliers/questionnaire-templates/${id}/`).then(r => r.data),
 
   // Questionnaires
-  listQuestionnaires: (params?: Record<string, string>) =>
-    apiClient.get<{ results: SupplierQuestionnaire[] }>("/suppliers/questionnaires/", { params }).then(r => r.data.results ?? r.data),
+  // Il listing è paginato lato server (25 per pagina di default): prendere solo
+  // `results` mostrava al massimo i primi 25 questionari. Si seguono le pagine
+  // fino all'ultima, così elenco e riepilogo contano tutti i questionari.
+  listQuestionnaires: async (params?: Record<string, string>) => {
+    const all: SupplierQuestionnaire[] = [];
+    for (let page = 1; ; page++) {
+      const { data } = await apiClient.get<{ results: SupplierQuestionnaire[]; next: string | null } | SupplierQuestionnaire[]>(
+        "/suppliers/questionnaires/",
+        { params: { ...params, page_size: "500", page: String(page) } },
+      );
+      if (Array.isArray(data)) return data;
+      all.push(...data.results);
+      if (!data.next) return all;
+    }
+  },
   sendQuestionnaire: (supplierId: string, templateId: string) =>
     apiClient.post<SupplierQuestionnaire>("/suppliers/questionnaires/send/", {
       supplier_id: supplierId,

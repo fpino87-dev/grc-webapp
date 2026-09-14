@@ -50,6 +50,7 @@ vi.mock("../../../api/endpoints/reporting", () => ({
 }));
 
 import { suppliersApi } from "../../../api/endpoints/suppliers";
+import { reportingApi } from "../../../api/endpoints/reporting";
 
 const mockList = vi.mocked(suppliersApi.list);
 const mockQuests = vi.mocked(suppliersApi.listQuestionnaires);
@@ -200,5 +201,50 @@ describe("SuppliersPage", () => {
     expect(screen.getByText("suppliers.quests.origin_existing")).toHaveAttribute("title", "Questionario cartaceo");
     expect(screen.queryByText("suppliers.quests.resend")).not.toBeInTheDocument();
     expect(screen.getByText("suppliers.register_existing.btn")).toBeInTheDocument();
+  });
+  it("il tab Questionari riepiloga tutti i questionari e il contatore filtra l'elenco", async () => {
+    const base = { sent_to: "x@example.com", sent_at: "2026-01-01T00:00:00Z", last_sent_at: "2026-01-01T00:00:00Z", origin: "piattaforma", notes: "" };
+    mockQuests.mockResolvedValue([
+      { ...base, id: "q-a", supplier_name: "Attesa Srl", status: "inviato", send_count: 3, evaluation_date: null, risk_result: null, expires_at: null },
+      { ...base, id: "q-v", supplier_name: "Valido Spa", status: "risposto", send_count: 1, evaluation_date: "2026-01-10", risk_result: "basso", expires_at: "2099-01-01" },
+      { ...base, id: "q-s", supplier_name: "Vecchio Snc", status: "risposto", send_count: 1, evaluation_date: "2019-01-10", risk_result: "medio", expires_at: "2020-01-01" },
+    ] as never);
+    renderPage();
+    fireEvent.click(screen.getByText("suppliers.tabs.questionnaires"));
+    expect(await screen.findByText("Valido Spa")).toBeInTheDocument();
+    expect(screen.getByText("suppliers.quests.kpi_waiting_third")).toBeInTheDocument();
+
+    // Una valutazione oltre expires_at conta come scaduta anche se "risposto"
+    fireEvent.click(screen.getByRole("button", { name: /suppliers\.quests\.kpi_expired/ }));
+    expect(screen.getByText("Vecchio Snc")).toBeInTheDocument();
+    expect(screen.queryByText("Valido Spa")).not.toBeInTheDocument();
+    expect(screen.queryByText("Attesa Srl")).not.toBeInTheDocument();
+  });
+
+  it("lo stato NDA si filtra per stato, rischio e nome", async () => {
+    vi.mocked(reportingApi.kpiOverview).mockResolvedValue({
+      supplier_nda: {
+        total: 2, covered: 1, expiring_soon: 0, expired: 0, without_nda: 1,
+        suppliers: [
+          { id: "s-1", name: "Coperto Spa", risk_level: "basso", nda_status: "ok", expiry_date: "2099-01-01", days_to_expiry: 9999 },
+          { id: "s-2", name: "Senza Srl", risk_level: "alto", nda_status: "missing", expiry_date: null, days_to_expiry: null },
+        ],
+      },
+    } as never);
+    renderPage();
+    fireEvent.click(screen.getByText("suppliers.tabs.nda_status"));
+    expect(await screen.findByText("Coperto Spa")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("suppliers.nda.col_status"), { target: { value: "missing" } });
+    expect(screen.getByText("Senza Srl")).toBeInTheDocument();
+    expect(screen.queryByText("Coperto Spa")).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("suppliers.nda.col_status"), { target: { value: "" } });
+    fireEvent.change(screen.getByLabelText("suppliers.nda.col_risk"), { target: { value: "basso" } });
+    expect(screen.getByText("Coperto Spa")).toBeInTheDocument();
+    expect(screen.queryByText("Senza Srl")).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByPlaceholderText("suppliers.nda.search_placeholder"), { target: { value: "zzz" } });
+    expect(screen.getByText("suppliers.nda.no_match")).toBeInTheDocument();
   });
 });

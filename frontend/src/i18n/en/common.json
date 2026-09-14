@@ -3337,7 +3337,17 @@
       "evaluate": "Evaluate",
       "error_resend": "Resend error",
       "origin_existing": "Recorded",
-      "origin_existing_title": "Existing evaluation recorded — not sent from the platform"
+      "origin_existing_title": "Existing evaluation recorded — not sent from the platform",
+      "search_placeholder": "Search supplier or email…",
+      "filter_valid": "Valid assessment",
+      "filter_expiring": "Expiring (90 days)",
+      "kpi_valid": "Valid assessments",
+      "kpi_expiring": "Expiring (90 days)",
+      "kpi_waiting": "Awaiting response",
+      "kpi_waiting_third": "{{n}} of which at 3rd send",
+      "kpi_expired": "Expired",
+      "card_filter_title": "Click to filter the list",
+      "no_match": "No questionnaire matches the filters."
     },
     "templates": {
       "hint": "Templates for sending the questionnaire to suppliers. The form link is automatically included in the email body.",
@@ -3379,7 +3389,10 @@
       "kpi_expiring": "Expiring (90d)",
       "kpi_expired": "NDA expired",
       "kpi_missing": "Without NDA",
-      "no_suppliers": "No active suppliers."
+      "no_suppliers": "No active suppliers.",
+      "search_placeholder": "Search supplier…",
+      "all_statuses": "All NDA statuses",
+      "no_match": "No supplier matches the filters."
     },
     "evaluation": {
       "class": "Class",
