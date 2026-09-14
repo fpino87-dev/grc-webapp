@@ -5,7 +5,8 @@ from rest_framework.test import APIClient
 
 from apps.osint.models import (
     AlertSeverity, AlertStatus, AlertType,
-    EntityType, OsintAlert, OsintEntity, OsintSubdomain,
+    EntityType, FindingCode, FindingStatus, OsintAlert, OsintEntity,
+    OsintFinding, OsintSubdomain,
     ScanStatus, SourceModule, SubdomainStatus,
 )
 from apps.plants.models import Plant
@@ -234,6 +235,39 @@ class TestAlertAPI:
             format="json",
         )
         assert resp.status_code == 404
+
+
+class TestFindingAPI:
+    """PATCH del ciclo di vita dei finding.
+
+    Il modello ha una UniqueConstraint condizionale su `status`: da DRF 3.16 i
+    ModelSerializer ne derivano un validator di unicità che sui partial update
+    può rompersi. Il test fissa che la transizione di stato resti funzionante.
+    """
+
+    def test_acknowledge_then_resolve_finding(self, auth_client, entity, scan):
+        finding = OsintFinding.objects.create(
+            entity=entity, scan=scan, code=FindingCode.DMARC_MISSING,
+            severity=AlertSeverity.WARNING,
+        )
+        resp = auth_client.patch(
+            f"/api/v1/osint/findings/{finding.id}/",
+            {"status": FindingStatus.ACKNOWLEDGED},
+            format="json",
+        )
+        assert resp.status_code == 200
+        assert resp.json()["status"] == FindingStatus.ACKNOWLEDGED
+
+        resp = auth_client.patch(
+            f"/api/v1/osint/findings/{finding.id}/",
+            {"status": FindingStatus.RESOLVED, "resolution_note": "DMARC pubblicato"},
+            format="json",
+        )
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["status"] == FindingStatus.RESOLVED
+        assert body["resolved_at"] is not None
+        assert body["resolution_note"] == "DMARC pubblicato"
 
 
 class TestSubdomainAPI:

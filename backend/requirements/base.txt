@@ -6,7 +6,7 @@
 # UniqueConstraint condizionali (pattern soft-delete deleted_at) che va in
 # KeyError sui partial update. 3.15 non ha upper-bound su Django e gira su 5.2.
 Django==5.2.*
-djangorestframework==3.15.*
+djangorestframework==3.17.*
 django-environ==0.11.*
 django-cors-headers==4.4.*
 django-filter==24.*

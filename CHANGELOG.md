@@ -83,6 +83,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
     A deploy concluso, dal wizard «Consiglia KPI» si ripristinano i KPI eliminati in passato, che tornano con il loro storico di snapshot.
 
+### Security
+
+- **Dipendenze backend — aggiornato Django REST Framework alla 3.17.2: risolte 2 CVE (`pip-audit` pulito)**: la versione in uso (3.15.2) risultava affetta da due vulnerabilità pubblicate il 10/09/2026, corrette solo a partire dalla 3.17.2. Il controllo notturno `security-audit` falliva da quella data.
+  - **CVE-2026-73228** (GHSA-2m8g-3cmr-wg3w) — la lettura del corpo delle richieste JSON e form da parte di DRF **ignorava il limite di dimensione** configurato in Django (5 MB). Un client, anche non autenticato (per esempio sulla pagina di login), poteva inviare corpi molto più grandi e consumare memoria sul server; in produzione restava comunque il tetto di 50 MB del reverse proxy. Ora il limite di 5 MB è applicato anche alle API.
+  - **CVE-2026-73229** (GHSA-g47c-3xmw-q6m2) — l'`AdminRenderer` di DRF poteva mostrare dati protetti in lettura in risposta a una scrittura non valida. **Non sfruttabile in questa applicazione**, che risponde solo in JSON e non usa quel renderer: l'aggiornamento chiude comunque la segnalazione.
+  - Nessuna modifica funzionale attesa. La 3.16 era stata evitata perché rompeva la modifica dei **requisiti di ruolo** (M00); sulla 3.17 il problema è corretto, verificato dalla test suite, e un nuovo test copre anche l'aggiornamento di stato dei finding OSINT.
+
 ### Fixed
 
 - **Fornitori: la data di valutazione si inseriva a mano e ogni schermata la interpretava a modo suo**: nella scheda fornitore la «Data di valutazione» era un campo libero, sovrascritto alla prima valutazione di un questionario, e poi letto in tre modi incompatibili. L'elenco ne ricavava la scadenza aggiungendo **un anno fisso**, ignorando la validità configurata nelle impostazioni. Lo scadenzario la presentava come **«Contratto: fornitore»**, con scadenza pari alla data stessa della valutazione, cioè già passata. Una funzione interna la trattava invece come scadenza contrattuale futura. Ora data, scadenza e origine della valutazione sono **ricavate dal sistema** dall'ultima valutazione registrata: un questionario valutato, una valutazione esistente registrata o un audit terze parti approvato.

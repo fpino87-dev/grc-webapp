@@ -172,3 +172,31 @@ def test_csv_detected_as_text_plain_ok():
         allowed_extensions=EVIDENCE_EXTENSIONS,
         allowed_mimes=EVIDENCE_MIME_TYPES,
     )
+
+
+# ── Limite body applicato anche alle API DRF (CVE-2026-73228) ────────────────
+
+@pytest.mark.django_db
+def test_oversized_json_body_rejected_by_api():
+    """Fino a DRF 3.17.1 `request.data` leggeva lo stream grezzo e aggirava
+    DATA_UPLOAD_MAX_MEMORY_SIZE: un JSON da 6 MB veniva parsato per intero.
+    Il login è l'endpoint più esposto (raggiungibile senza autenticazione)."""
+    from rest_framework.test import APIClient
+
+    client = APIClient()
+    # Controllo: con un corpo piccolo le credenziali errate danno 401, quindi
+    # il 400 sotto dipende solo dalla dimensione e non dal payload.
+    resp = client.post(
+        "/api/token/",
+        {"email": "nobody@example.com", "password": "wrong-password"},
+        format="json",
+    )
+    assert resp.status_code == 401
+
+    oversized = "x" * (settings.DATA_UPLOAD_MAX_MEMORY_SIZE + 1024)
+    resp = client.post(
+        "/api/token/",
+        {"email": "nobody@example.com", "password": oversized},
+        format="json",
+    )
+    assert resp.status_code == 400
