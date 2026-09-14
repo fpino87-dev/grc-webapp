@@ -94,6 +94,26 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ### Fixed
 
+- **Governance — nomine di ruolo duplicate rimosse e non più possibili**: prima del fix del 23/06/2026 si poteva nominare più volte la stessa persona sullo stesso ruolo e sito. Il fix aveva bloccato le nuove nomine doppie ma non aveva ripulito quelle già presenti, che continuavano a comparire più volte in Governance → Ruoli e nella Matrice Accessi & Responsabilità del Reporting (es. lo stesso «Contatto NIS2» ripetuto tre volte sul sito IT-ITA).
+  - **Pulizia automatica durante l'aggiornamento**: per ogni nomina ripetuta si tiene la più vecchia, che conserva la data di inizio reale, e le copie vengono eliminate logicamente. Ogni eliminazione è registrata nell'audit trail (`governance.role_assignment.duplicate_removed`, con il riferimento alla nomina conservata) e attribuita al primo superuser attivo. Nomine terminate o già eliminate non vengono toccate.
+  - **Doppioni impossibili anche con salvataggi simultanei**: la base dati rifiuta ora una seconda nomina aperta della stessa persona sullo stesso ruolo e perimetro, e le nomine sullo stesso ruolo e perimetro vengono verificate una alla volta, così un doppio clic non può creare due titolari di un ruolo a titolare unico. Chi prova a nominare di nuovo la stessa persona riceve un messaggio chiaro; «Sostituisci» verso una persona che ha già il ruolo restituisce un errore esplicito invece di un errore del server.
+  - **Casi da decidere a mano**: se un ruolo a titolare unico ha più titolari *diversi* attivi sullo stesso sito, la pulizia non sceglie al posto del responsabile. Il comando `dedupe_role_assignments` li elenca; si risolvono da Governance con Sostituisci o Termina.
+  - **NB deploy — le migrazioni `governance.0008` e `0009` modificano dati e schema.** Eseguire nell'ordine:
+
+    **Passo 1 — backup completo (DB + media)** dal modulo Backup («Crea backup»), attendendo lo stato *completato*.
+
+    **Passo 2 — anteprima (facoltativa, nessuna modifica)**, dopo aver aggiornato il codice e prima di `migrate`:
+
+    ```bash
+    docker compose -f docker-compose.prod.yml exec backend python manage.py dedupe_role_assignments
+    ```
+
+    Mostra per ogni ruolo e sito quale nomina viene tenuta e quali rimosse (utenti indicati solo per id), più gli eventuali conflitti fra persone diverse.
+
+    **Passo 3 — `migrate`**: la migrazione 0008 esegue la pulizia e la 0009 aggiunge il vincolo. Se esistono doppioni ma nessun superuser attivo, la migrazione si ferma con le istruzioni: in quel caso eseguire prima `python manage.py dedupe_role_assignments --apply --user <email>` e poi di nuovo `migrate`.
+
+    **Passo 4 — conflitti fra persone diverse**, se il comando ne ha elencati: risolverli da Governance → Ruoli con Sostituisci o Termina.
+
 - **Fornitori — valutazione interna del rischio tradotta**: avviando la valutazione interna di un fornitore, i sei parametri (impatto business, accesso ai sistemi, dati trattati, dipendenza, integrazione IT, certificazioni cyber) e le descrizioni dei loro cinque livelli comparivano sempre in italiano, qualunque fosse la lingua dell'utente, perché arrivano dalla configurazione salvata e non dai file di traduzione. Ora le etichette predefinite sono mostrate in italiano, inglese, francese, polacco e turco, sia nel form di valutazione sia nella scheda della valutazione corrente e nella pagina di configurazione. Le etichette che l'amministratore ha modificato dalle Impostazioni continuano a essere mostrate esattamente come sono state scritte. Il report PDF del fornitore resta in italiano.
 
 - **Fornitori: il tab Questionari mostrava al massimo 25 questionari**: l'elenco leggeva solo la prima pagina della risposta del server, che restituisce i questionari 25 alla volta. Con più di 25 questionari i successivi — anche con il filtro «Tutti gli stati» — non comparivano, e il conteggio in testata si fermava a 25. Ora l'elenco carica tutte le pagine e mostra tutti i questionari.

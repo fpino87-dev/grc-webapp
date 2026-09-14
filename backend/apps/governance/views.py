@@ -39,14 +39,14 @@ class RoleAssignmentViewSet(viewsets.ModelViewSet):
         return visible_role_assignments(super().get_queryset(), self.request.user)
 
     def perform_create(self, serializer):
-        instance = serializer.save(created_by=self.request.user)
-        log_action(
-            user=self.request.user,
-            action_code="governance.role_assignment.create",
-            level="L2",
-            entity=instance,
-            payload={"id": str(instance.id)},
-        )
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        from rest_framework.exceptions import ValidationError as DRFValidationError
+        from .services import create_role_assignment
+
+        try:
+            serializer.instance = create_role_assignment(serializer.validated_data, self.request.user)
+        except DjangoValidationError as exc:
+            raise DRFValidationError(exc.message_dict) from None
 
     def destroy(self, request, *args, **kwargs):
         """
@@ -123,12 +123,16 @@ class RoleAssignmentViewSet(viewsets.ModelViewSet):
             except (ValueError, TypeError, OverflowError) as exc:
                 logging.getLogger(__name__).warning("governance: handover_date non valida ignorata: %s", exc)
 
-        old_a, new_a = replace_role(
-            assignment, new_user, request.user,
-            handover_date=handover_date,
-            reason=reason,
-            document_id=request.data.get("document_id"),
-        )
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        try:
+            old_a, new_a = replace_role(
+                assignment, new_user, request.user,
+                handover_date=handover_date,
+                reason=reason,
+                document_id=request.data.get("document_id"),
+            )
+        except DjangoValidationError as exc:
+            return Response({"error": " ".join(exc.messages)}, status=400)
         return Response({
             "ok":             True,
             "old_assignment": str(old_a.pk),

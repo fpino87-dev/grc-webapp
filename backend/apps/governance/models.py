@@ -50,6 +50,20 @@ class RoleAssignment(BaseModel):
 
     class Meta:
         ordering = ["-valid_from", "role"]
+        constraints = [
+            # Stesso utente, stesso ruolo, stesso perimetro, due nomine aperte:
+            # non esiste un caso legittimo (una rinomina passa da Termina o
+            # Sostituisci, che chiudono la precedente). nulls_distinct=False
+            # copre anche le nomine org, dove scope_id è NULL. Il titolare
+            # unico fra utenti diversi dipende da RoleRequirement e resta
+            # controllato in services.create_role_assignment.
+            models.UniqueConstraint(
+                fields=["user", "role", "scope_type", "scope_id"],
+                condition=models.Q(deleted_at__isnull=True, valid_until__isnull=True),
+                nulls_distinct=False,
+                name="uniq_open_role_assignment",
+            ),
+        ]
 
     @property
     def is_active(self):

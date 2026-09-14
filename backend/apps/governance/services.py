@@ -94,6 +94,19 @@ def replace_role(old_assignment, new_user, user,
 
     handover_date = handover_date or timezone.localdate()
 
+    already_holder = RoleAssignment.objects.filter(
+        user=new_user,
+        role=old_assignment.role,
+        scope_type=old_assignment.scope_type,
+        scope_id=old_assignment.scope_id,
+        valid_until__isnull=True,
+    ).exclude(pk=old_assignment.pk).exists()
+    if already_holder:
+        from django.core.exceptions import ValidationError
+        from django.utils.translation import gettext_lazy as _
+
+        raise ValidationError(_("Il nuovo titolare ha già questo ruolo attivo per questo perimetro."))
+
     with transaction.atomic():
         terminate_role(
             old_assignment, user,
@@ -536,3 +549,147 @@ def resolve_document_recipients(document, action: str) -> list[str]:
     ).exclude(email__isnull=True).exclude(email__exact="")
     return list(users.values_list("email", flat=True))
 
+
+# ── Assegnazioni di ruolo duplicate ─────────────────────────────────────────
+
+def system_actor():
+    """Utente a cui attribuire l'audit delle azioni automatiche (migrazioni,
+    manutenzioni senza operatore): il primo superuser attivo, o None."""
+    from django.contrib.auth import get_user_model
+
+    return (
+        get_user_model().objects.filter(is_superuser=True, is_active=True)
+        .order_by("date_joined").first()
+    )
+
+
+def create_role_assignment(data: dict, user):
+    """Crea una nomina dopo aver escluso i doppioni.
+
+    Controllo e creazione sono serializzati per (ruolo, perimetro) con un
+    advisory lock di transazione: due salvataggi simultanei (doppio clic,
+    doppio invio) non possono superare entrambi il controllo. Il vincolo DB
+    `uniq_open_role_assignment` resta l'ultima difesa per lo stesso utente.
+    Solleva ValidationError con messaggio sul campo `role`.
+    """
+    from django.core.exceptions import ValidationError
+    from django.db import IntegrityError, connection, transaction
+    from django.utils.translation import gettext_lazy as _
+    from core.audit import log_action
+    from .models import RoleAssignment
+
+    role = data.get("role")
+    scope_type = data.get("scope_type")
+    scope_id = data.get("scope_id")
+    same_user_msg = _("Questo utente ha già questo ruolo attivo per questo perimetro.")
+    today = timezone.localdate()
+
+    with transaction.atomic():
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT pg_advisory_xact_lock(hashtext(%s))",
+                [f"governance.role_assignment:{role}:{scope_type}:{scope_id or ''}"],
+            )
+        active = RoleAssignment.objects.filter(
+            role=role, scope_type=scope_type, scope_id=scope_id,
+        ).filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today))
+        if is_single_holder(role) and active.exists():
+            raise ValidationError({"role": _(
+                "Questo ruolo ha già un titolare attivo per questo "
+                "perimetro. Usa Sostituisci per cambiare il titolare."
+            )})
+        if active.filter(user=data.get("user")).exists():
+            raise ValidationError({"role": same_user_msg})
+        try:
+            with transaction.atomic():
+                instance = RoleAssignment.objects.create(created_by=user, **data)
+        except IntegrityError:
+            raise ValidationError({"role": same_user_msg}) from None
+
+        log_action(
+            user=user,
+            action_code="governance.role_assignment.create",
+            level="L2",
+            entity=instance,
+            payload={"id": str(instance.id)},
+        )
+    return instance
+
+
+def find_duplicate_role_assignments() -> list[dict]:
+    """Nomine "aperte" (non eliminate, senza data di fine) dello stesso utente
+    sullo stesso ruolo e perimetro: le righe che `uniq_open_role_assignment`
+    non ammette. Per ogni gruppo si tiene la nomina più vecchia (`keep`, la
+    data di inizio reale) e si elencano le altre (`remove`)."""
+    from .models import RoleAssignment
+
+    groups: dict[tuple, list] = {}
+    rows = RoleAssignment.objects.filter(valid_until__isnull=True).order_by("valid_from", "created_at")
+    for ra in rows:
+        groups.setdefault((ra.user_id, ra.role, ra.scope_type, ra.scope_id), []).append(ra)
+    return [
+        {
+            "user_id": key[0], "role": key[1], "scope_type": key[2], "scope_id": key[3],
+            "keep": items[0], "remove": items[1:],
+        }
+        for key, items in groups.items()
+        if len(items) > 1
+    ]
+
+
+def cleanup_duplicate_role_assignments(actor) -> int:
+    """Soft delete dei doppioni trovati da `find_duplicate_role_assignments`,
+    con audit trail per ciascuna nomina rimossa. Idempotente. Ritorna il numero
+    di nomine rimosse."""
+    from django.db import transaction
+    from core.audit import log_action
+
+    removed = 0
+    with transaction.atomic():
+        for group in find_duplicate_role_assignments():
+            keep = group["keep"]
+            for dup in group["remove"]:
+                dup.soft_delete()
+                log_action(
+                    user=actor,
+                    action_code="governance.role_assignment.duplicate_removed",
+                    level="L2",
+                    entity=dup,
+                    payload={
+                        "role": dup.role,
+                        "scope_type": dup.scope_type,
+                        "scope_id": str(dup.scope_id) if dup.scope_id else None,
+                        "kept_assignment": str(keep.pk),
+                    },
+                )
+                removed += 1
+    return removed
+
+
+def find_single_holder_conflicts() -> list[dict]:
+    """Ruoli a titolare unico con più titolari attivi *diversi* sullo stesso
+    perimetro. Non si risolvono in automatico: chi resta lo decide il
+    responsabile, da Governance con Sostituisci o Termina."""
+    from .models import RoleAssignment
+
+    today = timezone.localdate()
+    holders: dict[tuple, set] = {}
+    active = RoleAssignment.objects.filter(valid_from__lte=today).filter(
+        Q(valid_until__isnull=True) | Q(valid_until__gte=today)
+    )
+    for ra in active:
+        holders.setdefault((ra.role, ra.scope_type, ra.scope_id), set()).add(ra.user_id)
+
+    single_cache: dict[str, bool] = {}
+    conflicts = []
+    for (role, scope_type, scope_id), user_ids in holders.items():
+        if len(user_ids) < 2:
+            continue
+        if role not in single_cache:
+            single_cache[role] = is_single_holder(role)
+        if single_cache[role]:
+            conflicts.append({
+                "role": role, "scope_type": scope_type, "scope_id": scope_id,
+                "user_ids": sorted(user_ids),
+            })
+    return conflicts

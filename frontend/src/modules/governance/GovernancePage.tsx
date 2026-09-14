@@ -89,7 +89,15 @@ function RoleAssignmentModal({
       qc.invalidateQueries({ queryKey: ["governance-in-scadenza"] });
       onClose();
     },
-    onError: (e: any) => setError(e?.response?.data?.detail || JSON.stringify(e?.response?.data) || t("common.error")),
+    onError: (e: any) => {
+      // Errori di validazione per campo ({"role": ["..."]}): mostra il messaggio,
+      // non il JSON grezzo (es. ruolo già assegnato a un titolare attivo).
+      const data = e?.response?.data;
+      const fieldMessage = data && typeof data === "object"
+        ? Object.values(data).flat().find((v): v is string => typeof v === "string")
+        : undefined;
+      setError(data?.detail || fieldMessage || t("common.error"));
+    },
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
