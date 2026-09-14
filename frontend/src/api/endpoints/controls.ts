@@ -69,6 +69,8 @@ export interface EvidenceRef {
   valid_until: string | null;
   expired: boolean;
   evidence_type: string;
+  /** Nome del file allegato (vuoto se l'evidenza non ha file). */
+  file_name?: string;
 }
 
 export interface DocRequirement {

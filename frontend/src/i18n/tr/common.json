@@ -1639,6 +1639,9 @@
       },
       "actions": {
         "download_file": "Dosyayı indir",
+        "preview_file": "Önizleme",
+        "preview_unsupported": "Bu dosya biçimi için önizleme kullanılamıyor. Açmak için dosyayı indirin.",
+        "no_file": "Bu kanıta ekli dosya yok",
         "link_controls": "Kontrole bağla",
         "delete_title": "Kanıtı sil",
         "delete_confirm": "«{{title}}» kanıtı silinsin mi? Değerlendirilmiş kontrollerle bağlıysa yasaktır (süper kullanıcı hariç)."

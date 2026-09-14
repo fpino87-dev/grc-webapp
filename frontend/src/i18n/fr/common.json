@@ -1639,6 +1639,9 @@
       },
       "actions": {
         "download_file": "Télécharger le fichier",
+        "preview_file": "Aperçu",
+        "preview_unsupported": "Aperçu non disponible pour ce format de fichier. Téléchargez le fichier pour l'ouvrir.",
+        "no_file": "Aucun fichier joint à cette preuve",
         "link_controls": "Lier au contrôle",
         "delete_title": "Supprimer la preuve",
         "delete_confirm": "Supprimer la preuve « {{title}} » ? Interdit si liée à des contrôles déjà évalués (sauf superuser)."

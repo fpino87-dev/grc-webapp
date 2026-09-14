@@ -1,3 +1,5 @@
+import os
+
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -247,6 +249,8 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 "valid_until": str(e.valid_until) if e.valid_until else None,
                 "expired": bool(e.valid_until and e.valid_until < today),
                 "evidence_type": e.evidence_type,
+                # nome file per anteprima/download lato drawer (mai il path completo)
+                "file_name": os.path.basename(e.file_path) if e.file_path else "",
             }
             for e in instance.evidences.all()
         ]

@@ -1639,6 +1639,9 @@
       },
       "actions": {
         "download_file": "Scarica file",
+        "preview_file": "Anteprima",
+        "preview_unsupported": "Anteprima non disponibile per questo formato. Scarica il file per aprirlo.",
+        "no_file": "Nessun file allegato a questa evidenza",
         "link_controls": "Collega a controllo",
         "delete_title": "Elimina evidenza",
         "delete_confirm": "Eliminare l'evidenza «{{title}}»? Non consentita se collegata a controlli già valutati (salvo superuser)."

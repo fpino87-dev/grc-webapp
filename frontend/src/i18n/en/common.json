@@ -1639,6 +1639,9 @@
       },
       "actions": {
         "download_file": "Download file",
+        "preview_file": "Preview",
+        "preview_unsupported": "Preview not available for this file format. Download the file to open it.",
+        "no_file": "No file attached to this evidence",
         "link_controls": "Link to control",
         "delete_title": "Delete evidence",
         "delete_confirm": "Delete evidence «{{title}}»? Not allowed if linked to evaluated controls (except superuser)."

@@ -1639,6 +1639,9 @@
       },
       "actions": {
         "download_file": "Pobierz plik",
+        "preview_file": "Podgląd",
+        "preview_unsupported": "Podgląd nie jest dostępny dla tego formatu pliku. Pobierz plik, aby go otworzyć.",
+        "no_file": "Brak pliku dołączonego do tego dowodu",
         "link_controls": "Powiąż z kontrolą",
         "delete_title": "Usuń dowód",
         "delete_confirm": "Usunąć dowód „{{title}}”? Zabronione, jeśli powiązany z ocenionymi kontrolami (oprócz superużytkownika)."

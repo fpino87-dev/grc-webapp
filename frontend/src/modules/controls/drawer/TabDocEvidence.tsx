@@ -7,6 +7,7 @@ import { useAuthStore } from "../../../store/auth";
 import { addYearsISO, usePlantToday } from "../../../utils/dates";
 import i18n from "../../../i18n";
 import { evidenceIcon, docStatusColor, ExpiryBadge, useDebounce, useRequirementLabel, RequirementsBanner } from "./shared";
+import { EvidencePreviewModal, canPreviewEvidence, downloadEvidenceFile } from "../../../components/ui/EvidencePreviewModal";
 
 function DocsColumn({
   instanceId,
@@ -294,8 +295,17 @@ function EvidencesColumn({
   const qc = useQueryClient();
   const [searchQ, setSearchQ] = useState("");
   const debounced = useDebounce(searchQ);
+  const [previewEv, setPreviewEv] = useState<EvidenceRef | null>(null);
 
   const requirementLabel = useRequirementLabel();
+
+  async function handleDownload(e: EvidenceRef) {
+    try {
+      await downloadEvidenceFile(e);
+    } catch {
+      alert(t("documents.errors.evidence_download_failed"));
+    }
+  }
 
   const { data: searchResults } = useQuery({
     queryKey: ["ev-search", debounced],
@@ -351,14 +361,38 @@ function EvidencesColumn({
                     <ExpiryBadge validUntil={e.valid_until} />
                   </div>
                 </div>
-                <button
-                  onClick={() => unlinkMut.mutate(e.id)}
-                  disabled={unlinkMut.isPending}
-                  className="text-red-400 hover:text-red-600 text-xs shrink-0 ml-1"
-                  title={t("controls.drawer.docs.unlink")}
-                >
-                  ✕
-                </button>
+                <div className="flex flex-col items-center gap-1 shrink-0 ml-1">
+                  <button
+                    onClick={() => unlinkMut.mutate(e.id)}
+                    disabled={unlinkMut.isPending}
+                    className="text-red-400 hover:text-red-600 text-xs leading-none"
+                    title={t("controls.drawer.docs.unlink")}
+                  >
+                    ✕
+                  </button>
+                  <button
+                    onClick={() => setPreviewEv(e)}
+                    disabled={!e.file_name || !canPreviewEvidence(e)}
+                    className="text-gray-400 hover:text-indigo-600 text-xs leading-none disabled:opacity-30 disabled:hover:text-gray-400"
+                    title={
+                      !e.file_name
+                        ? t("documents.evidence.actions.no_file")
+                        : canPreviewEvidence(e)
+                          ? t("documents.evidence.actions.preview_file")
+                          : t("documents.evidence.actions.preview_unsupported")
+                    }
+                  >
+                    👁
+                  </button>
+                  <button
+                    onClick={() => handleDownload(e)}
+                    disabled={!e.file_name}
+                    className="text-gray-400 hover:text-indigo-600 text-xs leading-none disabled:opacity-30 disabled:hover:text-gray-400"
+                    title={e.file_name ? t("documents.evidence.actions.download_file") : t("documents.evidence.actions.no_file")}
+                  >
+                    ⬇
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -398,6 +432,10 @@ function EvidencesColumn({
         <p className="text-xs font-medium text-green-700 mb-1.5">{t("controls.drawer.docs.upload_new_evidence")}</p>
         <DropzoneUpload instanceId={instanceId} plant={plant} />
       </div>
+
+      {previewEv && (
+        <EvidencePreviewModal evidence={previewEv} onClose={() => setPreviewEv(null)} />
+      )}
     </div>
   );
 }

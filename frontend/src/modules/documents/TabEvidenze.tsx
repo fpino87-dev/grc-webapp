@@ -4,6 +4,7 @@ import { documentsApi, type Evidence } from "../../api/endpoints/documents";
 import { useAuthStore } from "../../store/auth";
 import { evidenceIcon, ExpiryBadge, EVIDENCE_TYPES, expirySort, buildEvidenceGroups } from "./documentUtils";
 import { NewEvidenceModal, LinkEvidenceToControlModal } from "./EvidenceModals";
+import { EvidencePreviewModal, canPreviewEvidence, downloadEvidenceFile } from "../../components/ui/EvidencePreviewModal";
 import { useTranslation } from "react-i18next";
 
 type ExpiryFilter = "tutti" | "valide" | "in_scadenza" | "scadute";
@@ -19,19 +20,11 @@ export function TabEvidenze() {
   const [linkControlsEv, setLinkControlsEv] = useState<Evidence | null>(null);
   const [groupedView, setGroupedView] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const [previewEv, setPreviewEv] = useState<Evidence | null>(null);
 
   async function handleDownloadEvidence(ev: Evidence) {
     try {
-      const blob = await documentsApi.downloadEvidence(ev.id);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      const filename = ev.file_path ? ev.file_path.split("/").pop() || ev.title || "evidenza" : ev.title || "evidenza";
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
+      await downloadEvidenceFile(ev);
     } catch {
       alert(t("documents.errors.evidence_download_failed"));
     }
@@ -155,9 +148,16 @@ export function TabEvidenze() {
                             <div className="truncate">{ev.title}</div>
                             {ev.description && <div className="text-xs text-gray-400 truncate">{ev.description}</div>}
                             {(ev.file_url || ev.file_path) && (
-                              <button type="button" onClick={() => handleDownloadEvidence(ev)} className="mt-1 inline-flex text-xs text-indigo-600 hover:underline">
-                                {t("documents.evidence.actions.download_file")}
-                              </button>
+                              <div className="mt-1 flex items-center gap-2">
+                                <button type="button" onClick={() => handleDownloadEvidence(ev)} className="inline-flex text-xs text-indigo-600 hover:underline">
+                                  {t("documents.evidence.actions.download_file")}
+                                </button>
+                                {canPreviewEvidence(ev) && (
+                                  <button type="button" onClick={() => setPreviewEv(ev)} className="inline-flex text-xs text-indigo-600 hover:underline">
+                                    {t("documents.evidence.actions.preview_file")}
+                                  </button>
+                                )}
+                              </div>
                             )}
                           </td>
                           <td className="px-4 py-3 text-center"><ExpiryBadge validUntil={ev.valid_until} /></td>
@@ -214,9 +214,16 @@ export function TabEvidenze() {
                     <div className="truncate">{ev.title}</div>
                     {ev.description && <div className="text-xs text-gray-400 truncate">{ev.description}</div>}
                     {(ev.file_url || ev.file_path) && (
-                      <button type="button" onClick={() => handleDownloadEvidence(ev)} className="mt-1 inline-flex text-xs text-indigo-600 hover:underline">
-                        {t("documents.evidence.actions.download_file")}
-                      </button>
+                      <div className="mt-1 flex items-center gap-2">
+                        <button type="button" onClick={() => handleDownloadEvidence(ev)} className="inline-flex text-xs text-indigo-600 hover:underline">
+                          {t("documents.evidence.actions.download_file")}
+                        </button>
+                        {canPreviewEvidence(ev) && (
+                          <button type="button" onClick={() => setPreviewEv(ev)} className="inline-flex text-xs text-indigo-600 hover:underline">
+                            {t("documents.evidence.actions.preview_file")}
+                          </button>
+                        )}
+                      </div>
                     )}
                   </td>
                   <td className="px-4 py-3 text-center"><ExpiryBadge validUntil={ev.valid_until} /></td>
@@ -250,6 +257,7 @@ export function TabEvidenze() {
 
       {showNew && <NewEvidenceModal onClose={() => setShowNew(false)} />}
       {linkControlsEv && <LinkEvidenceToControlModal ev={linkControlsEv} onClose={() => setLinkControlsEv(null)} />}
+      {previewEv && <EvidencePreviewModal evidence={previewEv} onClose={() => setPreviewEv(null)} />}
     </div>
   );
 }
