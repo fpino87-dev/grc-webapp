@@ -187,7 +187,7 @@ def compute_scores(entity: "OsintEntity", scan: "OsintScan", settings=None) -> N
 
     `settings` opzionale: se il chiamante lo possiede già evita una query in più.
     """
-    from apps.osint.models import EntityType, OsintSettings
+    from apps.osint.models import OsintSettings
 
     if settings is None:
         settings = OsintSettings.load()

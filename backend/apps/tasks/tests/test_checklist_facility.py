@@ -2,11 +2,9 @@
 Checklist legate agli impianti: espansione per categoria, misura per apparato,
 registrazione della manutenzione, e KPI agganciato alla voce invece che al testo.
 """
-import datetime
 
 import pytest
 from django.contrib.auth import get_user_model
-from django.utils import timezone
 from rest_framework.test import APIClient
 
 User = get_user_model()
