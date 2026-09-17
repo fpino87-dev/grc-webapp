@@ -82,6 +82,8 @@ def fire_notification(event_type: str, plant=None, bu=None, context: dict | None
       notify_evidence_expired,
       notify_finding_major,
       notify_incident_nis2,
+      notify_objective_deadline,
+      notify_objective_off_track,
       notify_osint_alert,
       notify_risk_red,
       notify_role_expiring,
@@ -125,6 +127,12 @@ def fire_notification(event_type: str, plant=None, bu=None, context: dict | None
           ctx.get("days_left", 0),
           recipients,
       )
+
+  elif event_type == "objective_off_track" and "objective" in ctx:
+      notify_objective_off_track(ctx["objective"], ctx.get("evaluation", {}), recipients)
+
+  elif event_type == "objective_deadline" and "objective" in ctx:
+      notify_objective_deadline(ctx["objective"], ctx.get("evaluation", {}), recipients)
 
   elif event_type == "bcp_test_failed":
       plan = ctx.get("plan")

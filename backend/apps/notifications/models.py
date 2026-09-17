@@ -174,6 +174,7 @@ NOTIFICATION_PROFILES = {
             "bcp_test_failed",
             "document_approval",
             "supplier_concentration_critical",
+            "objective_off_track",
         ],
     },
     "completo": {
@@ -198,6 +199,8 @@ NOTIFICATION_PROFILES = {
             "supplier_concentration_critical",
             "management_review",
             "risk_accepted",
+            "objective_off_track",
+            "objective_deadline",
         ],
     },
 }
@@ -324,6 +327,8 @@ EVENT_TYPES = [
     ("bcp_test_failed", "Test BCP fallito"),
     ("pdca_blocked", "PDCA bloccato > 30 giorni"),
     ("management_review", "Revisione direzione da approvare"),
+    ("objective_off_track", "Obiettivo di sicurezza fuori traiettoria"),
+    ("objective_deadline", "Obiettivo di sicurezza in scadenza"),
     ("supplier_assessment", "Assessment fornitore completato"),
     ("supplier_concentration_critical", "Concentrazione fornitura critica (crossing)"),
 ]

@@ -265,6 +265,49 @@ def notify_role_expiring(assignment, days_left: int, recipients: list[str]):
     )
 
 
+def notify_objective_off_track(objective, evaluation: dict, recipients: list[str]):
+    """Obiettivo di sicurezza (§6.2) che non arriverà al target al ritmo attuale.
+
+    Non è un allarme operativo — quello lo dà la soglia del KPI — ma il segnale
+    che un impegno preso sta per essere mancato, mentre c'è ancora tempo per
+    fare qualcosa.
+    """
+    unit = evaluation.get("unit") or ""
+    progress = evaluation.get("progress_pct")
+    send_grc_email(
+        subject=f"[GRC] Obiettivo di sicurezza fuori traiettoria: {objective.code}",
+        body=(
+            f"{objective.title}\n\n"
+            f"Perimetro:  {objective.plant.name if objective.plant_id else 'Intera organizzazione'}\n"
+            f"Partenza:   {objective.baseline_value if objective.baseline_value is not None else '—'} {unit}\n"
+            f"Attuale:    {evaluation.get('current_value') if evaluation.get('current_value') is not None else '—'} {unit}\n"
+            f"Target:     {objective.target_value} {unit} entro il {objective.target_date}\n"
+            f"Progresso:  {progress if progress is not None else '—'}% "
+            f"(tempo trascorso {evaluation.get('elapsed_pct')}%)\n"
+            f"Responsabile: ruolo {objective.owner_role or '—'}\n\n"
+            "Accedi a Obiettivi di sicurezza per aggiornare il piano o rivedere il traguardo."
+        ),
+        recipients=recipients,
+    )
+
+
+def notify_objective_deadline(objective, evaluation: dict, recipients: list[str]):
+    """Promemoria a ridosso della scadenza di un obiettivo non ancora raggiunto."""
+    unit = evaluation.get("unit") or ""
+    send_grc_email(
+        subject=f"[GRC] Obiettivo di sicurezza in scadenza: {objective.code}",
+        body=(
+            f"{objective.title}\n\n"
+            f"Scadenza fra {evaluation.get('days_to_target')} giorni ({objective.target_date}).\n"
+            f"Attuale: {evaluation.get('current_value') if evaluation.get('current_value') is not None else '—'} {unit} "
+            f"su un target di {objective.target_value} {unit}.\n\n"
+            "Se il traguardo non è raggiungibile, la chiusura come non raggiunto va portata "
+            "al prossimo riesame di direzione."
+        ),
+        recipients=recipients,
+    )
+
+
 def notify_evidence_expired(instance, recipients: list[str]):
     send_grc_email(
         subject=f"[GRC] Evidenza scaduta: {instance.control.external_id}",

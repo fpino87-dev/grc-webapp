@@ -329,6 +329,23 @@ def get_activity_schedule(plant=None, months_ahead: int = 6) -> list[dict]:
     except Exception:
         logger.exception("Errore nel calcolo delle scadenze riesame di direzione", exc_info=True)
 
+    # Obiettivi di sicurezza (ISO 27001 §6.2): la scadenza di un impegno
+    # aperto è una data come le altre e va vista insieme alle altre. Gli
+    # obiettivi di organizzazione valgono per ogni sito.
+    try:
+        from django.db.models import Q as _Q
+        from apps.governance.models import SecurityObjective
+        from apps.governance.services import OBJECTIVE_OPEN_STATUSES
+
+        obj_qs = SecurityObjective.objects.filter(status__in=OBJECTIVE_OPEN_STATUSES)
+        if plant:
+            obj_qs = obj_qs.filter(_Q(plant=plant) | _Q(plant__isnull=True))
+        for objective in obj_qs.select_related("plant"):
+            _add("security_objective", f"Obiettivo: {objective.title} ({objective.code})",
+                 objective.target_date, objective.status, str(objective.id), "/objectives")
+    except Exception:
+        logger.exception("Errore nel calcolo delle scadenze degli obiettivi di sicurezza", exc_info=True)
+
     # Security committee next meeting
     try:
         from apps.governance.models import SecurityCommittee

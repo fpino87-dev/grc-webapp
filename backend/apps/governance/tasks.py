@@ -1,5 +1,9 @@
 from celery import shared_task
 
+# Sorveglianza degli obiettivi di sicurezza (§6.2) — modulo separato per non
+# mescolarla con le notifiche sulle nomine di ruolo.
+from .tasks_objectives import evaluate_objectives_task  # noqa: F401
+
 
 @shared_task(bind=True, autoretry_for=(Exception,), max_retries=3, default_retry_delay=60)
 def notify_expiring_roles_task(self):

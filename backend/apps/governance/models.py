@@ -393,6 +393,16 @@ class SecurityObjective(BaseModel):
     )
     closure_note = models.TextField(blank=True)
 
+    # ── Memoria della sorveglianza automatica ─────────────────────────────
+    # Si notifica quando la traiettoria PEGGIORA, non a ogni giro: senza
+    # ricordare l'ultima lettura, l'obiettivo in ritardo manderebbe la stessa
+    # email ogni settimana fino alla scadenza, e la si imparerebbe a ignorare
+    # (stesso criterio degli alert KPI, `_kpi_status_worsened`).
+    last_track = models.CharField(max_length=20, blank=True)
+    last_evaluated_at = models.DateTimeField(null=True, blank=True)
+    # Promemoria di avvicinamento alla scadenza: una volta sola.
+    deadline_notice_at = models.DateTimeField(null=True, blank=True)
+
     class Meta:
         ordering = ["target_date", "code"]
         indexes = [

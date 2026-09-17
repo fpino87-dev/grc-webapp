@@ -30,6 +30,7 @@ RULE_TYPE_LABELS = {
     # Governance / Management Review
     "management_review":        "Revisione della direzione",
     "security_committee":       "Riunione comitato sicurezza",
+    "security_objective":       "Obiettivo di sicurezza",
     # Audit Prep
     "finding_minor":            "Risoluzione non conformità minore",
     "finding_major":            "Risoluzione non conformità maggiore",
@@ -50,7 +51,7 @@ RULE_CATEGORIES = {
     "Fornitori": ["supplier_assessment", "supplier_reevaluation"],
     "Asset": ["asset_maintenance"],
     "Formazione": ["training_mandatory", "training_refresh"],
-    "Governance": ["management_review", "security_committee"],
+    "Governance": ["management_review", "security_committee", "security_objective"],
     "Audit": ["finding_minor", "finding_major", "finding_observation"],
     "PDCA": ["pdca_cycle"],
     "Reporting": ["kpi_review", "isms_review"],
@@ -65,6 +66,9 @@ FREQUENCY_UNIT_CHOICES = [
 
 # Default rules (frequency_value, frequency_unit, alert_days_before)
 DEFAULT_RULES = {
+    # L'obiettivo non ha una frequenza propria (la scadenza è quella dichiarata
+    # sull'obiettivo): la regola serve solo a dire con quanto anticipo avvisare.
+    "security_objective":       (1,  "years",  30),
     "control_review":           (1,  "years",  30),
     "control_audit":            (1,  "years",  60),
     "document_policy":          (1,  "years",  30),

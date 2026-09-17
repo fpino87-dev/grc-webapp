@@ -244,6 +244,13 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.assets.tasks.check_software_eos",
         "schedule": crontab(hour=7, minute=15, day_of_week=1),  # lunedì 07:15
     },
+    "evaluate-security-objectives": {
+        "task": "apps.governance.tasks_objectives.evaluate_objectives_task",
+        # lunedì 07:45 — dopo compute-operational-kpis (06:30): la traiettoria
+        # si rivaluta sugli snapshot KPI appena calcolati, non su quelli della
+        # settimana prima.
+        "schedule": crontab(hour=7, minute=45, day_of_week=1),
+    },
     "check-upcoming-audits": {
         "task": "apps.audit_prep.tasks.check_upcoming_audits",
         "schedule": crontab(hour=7, minute=30, day_of_week=1),  # lunedì 07:30
