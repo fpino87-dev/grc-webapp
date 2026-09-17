@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grc-webapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-17 20:24+0000\n"
+"POT-Creation-Date: 2026-09-17 21:56+0000\n"
 "PO-Revision-Date: 2026-03-18 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -29,16 +29,12 @@ msgid "Impossibile eliminare: rimuovere prima le dipendenze tra asset."
 msgstr "Silinemiyor: önce varlık bağımlılıklarını kaldırın."
 
 #: apps/assets/views.py:65
-#, fuzzy
-#| msgid "Nessun logo configurato per questo sito."
 msgid "Nessuna cadenza di manutenzione configurata per questo asset."
-msgstr "Bu tesis için yapılandırılmış logo yok."
+msgstr "Bu varlık için bakım sıklığı tanımlanmamış."
 
 #: apps/assets/views.py:71 apps/governance/services.py:1064
-#, fuzzy
-#| msgid "Percorso file non valido."
 msgid "Esito non valido."
-msgstr "Geçersiz dosya yolu."
+msgstr "Geçersiz sonuç."
 
 #: apps/assets/views.py:78 apps/tasks/views.py:208
 msgid "Data non valida (formato atteso AAAA-MM-GG)."
@@ -181,10 +177,8 @@ msgstr "plant ve required_document zorunludur"
 
 #: apps/compliance_schedule/views.py:151 apps/compliance_schedule/views.py:179
 #: apps/compliance_schedule/views.py:206
-#, fuzzy
-#| msgid "Documento non trovato"
 msgid "Requisito o sito non trovato"
-msgstr "Doküman bulunamadı"
+msgstr "Gereklilik veya tesis bulunamadı"
 
 #: apps/compliance_schedule/views.py:184 apps/controls/views/instances.py:362
 #: apps/controls/views/instances.py:378
@@ -507,16 +501,12 @@ msgid "Esiste già un obiettivo con questo codice in questo perimetro."
 msgstr "Bu kapsamda bu koda sahip bir hedef zaten var."
 
 #: apps/governance/services.py:108
-#, fuzzy
-#| msgid "Seleziona almeno un sito per questo perimetro."
 msgid "Il nuovo titolare ha già questo ruolo attivo per questo perimetro."
-msgstr "Bu kapsam için en az bir tesis seçin."
+msgstr "Yeni sahip bu kapsamda bu role zaten sahip."
 
 #: apps/governance/services.py:584
-#, fuzzy
-#| msgid "Seleziona almeno un sito per questo perimetro."
 msgid "Questo utente ha già questo ruolo attivo per questo perimetro."
-msgstr "Bu kapsam için en az bir tesis seçin."
+msgstr "Bu kullanıcı bu kapsamda bu role zaten sahip."
 
 #: apps/governance/services.py:598
 msgid "Questo ruolo ha già un titolare attivo per questo perimetro. Usa Sostituisci per cambiare il titolare."
@@ -555,10 +545,8 @@ msgid "L'obiettivo è chiuso: non è più modificabile."
 msgstr "Hedef kapatıldı: artık değiştirilemez."
 
 #: apps/governance/services.py:1023
-#, fuzzy
-#| msgid "Solo una lezione in bozza può essere validata (stato attuale: %(s)s)."
 msgid "Solo un obiettivo in bozza o sospeso può essere attivato."
-msgstr "Yalnızca taslak durumundaki bir ders doğrulanabilir (mevcut durum: %(s)s)."
+msgstr "Yalnızca taslak veya askıya alınmış bir hedef etkinleştirilebilir."
 
 #: apps/governance/services.py:1026
 msgid "il ruolo responsabile"
@@ -578,10 +566,8 @@ msgid "Solo un obiettivo attivo può essere sospeso."
 msgstr "Yalnızca aktif bir hedef askıya alınabilir."
 
 #: apps/governance/services.py:1066
-#, fuzzy
-#| msgid "Il ciclo è già chiuso."
 msgid "L'obiettivo è già chiuso."
-msgstr "Döngü zaten kapatılmış."
+msgstr "Hedef zaten kapatıldı."
 
 #: apps/governance/services.py:1068
 msgid "Indicare il motivo dell'annullamento."
@@ -738,10 +724,8 @@ msgid "OK"
 msgstr "OK"
 
 #: apps/management_review/report/builder.py:33
-#, fuzzy
-#| msgid "N/A"
 msgid "N/D"
-msgstr "N/A"
+msgstr "Yok"
 
 #: apps/management_review/report/builder.py:34
 msgid "Bassa"
@@ -808,7 +792,7 @@ msgid "—"
 msgstr "—"
 
 #: apps/management_review/report/builder.py:54
-#: apps/management_review/report/builder.py:424
+#: apps/management_review/report/builder.py:452
 msgid "Bozza"
 msgstr "Taslak"
 
@@ -821,10 +805,8 @@ msgid "Raggiunto"
 msgstr "Ulaşıldı"
 
 #: apps/management_review/report/builder.py:55
-#, fuzzy
-#| msgid "Non valutato"
 msgid "Non raggiunto"
-msgstr "Değerlendirilmedi"
+msgstr "Ulaşılmadı"
 
 #: apps/management_review/report/builder.py:55
 msgid "Sospeso"
@@ -841,10 +823,8 @@ msgid "Chiusa"
 msgstr "Kapalı"
 
 #: apps/management_review/report/builder.py:106
-#, fuzzy
-#| msgid "Scadenza"
 msgid "Scaduta"
-msgstr "Son Tarih"
+msgstr "Süresi geçmiş"
 
 #: apps/management_review/report/builder.py:106
 #: apps/management_review/report/builder.py:309
@@ -853,10 +833,9 @@ msgid "Aperta"
 msgstr "Açık"
 
 #: apps/management_review/report/builder.py:114
-#, fuzzy, python-format
-#| msgid "Evidenza scaduta: %(title)s (scaduta il %(date)s)"
+#, python-format
 msgid "Riesame precedente: %(title)s del %(date)s."
-msgstr "Süresi dolmuş kanıt: %(title)s (%(date)s tarihinde süresi doldu)"
+msgstr "Önceki gözden geçirme: %(date)s tarihli %(title)s."
 
 #: apps/management_review/report/builder.py:116
 msgid "Azioni considerate"
@@ -871,10 +850,8 @@ msgid "Aperte"
 msgstr "Açık"
 
 #: apps/management_review/report/builder.py:119
-#, fuzzy
-#| msgid "Scadenza"
 msgid "Scadute"
-msgstr "Son Tarih"
+msgstr "Süresi geçmiş"
 
 #: apps/management_review/report/builder.py:120
 msgid "Azione"
@@ -908,16 +885,12 @@ msgid "Riesame"
 msgstr "Gözden geçirme"
 
 #: apps/management_review/report/builder.py:121
-#, fuzzy
-#| msgid "Nessuna documentazione presente."
 msgid "Nessuna azione dai riesami precedenti"
-msgstr "Herhangi bir dokümantasyon mevcut değil."
+msgstr "Önceki gözden geçirmelerden eylem yok"
 
 #: apps/management_review/report/builder.py:145
-#, fuzzy
-#| msgid "Compliance Officer"
 msgid "Compliance per framework"
-msgstr "Uyum Sorumlusu"
+msgstr "Çerçeveye göre uygunluk"
 
 #: apps/management_review/report/builder.py:146
 #: apps/management_review/report/builder.py:150
@@ -926,27 +899,20 @@ msgid "Framework"
 msgstr "Çerçeve"
 
 #: apps/management_review/report/builder.py:146
-#, fuzzy
-#| msgid "Control Owner"
 msgid "Controlli"
-msgstr "Kontrol Sahibi"
+msgstr "Kontroller"
 
 #: apps/management_review/report/builder.py:146
-#: apps/management_review/report/builder.py:447
-#, fuzzy, python-format
-#| msgid "Compliant"
+#: apps/management_review/report/builder.py:479
+#, python-format
 msgid "% compliant"
-msgstr "Uyumlu"
+msgstr "% uyumlu"
 
 #: apps/management_review/report/builder.py:146
-#, fuzzy
-#| msgid "Parziale"
 msgid "Gap/parziali"
-msgstr "Kısmi"
+msgstr "Boşluk/kısmi"
 
 #: apps/management_review/report/builder.py:147
-#, fuzzy
-#| msgid "Non valutato"
 msgid "Non valutati"
 msgstr "Değerlendirilmedi"
 
@@ -964,13 +930,11 @@ msgid "Controlli in gap (primi 5 per framework)"
 msgstr "Boşluklu kontroller (çerçeve başına ilk 5)"
 
 #: apps/management_review/report/builder.py:150
-#, fuzzy
-#| msgid "Control Owner"
 msgid "Controllo"
-msgstr "Kontrol Sahibi"
+msgstr "Kontrol"
 
 #: apps/management_review/report/builder.py:150
-#: apps/management_review/report/builder.py:418
+#: apps/management_review/report/builder.py:446
 msgid "Titolo"
 msgstr "Başlık"
 
@@ -983,10 +947,8 @@ msgid "Critici"
 msgstr "Kritik"
 
 #: apps/management_review/report/builder.py:172
-#, fuzzy
-#| msgid "In attesa"
 msgid "In attenzione"
-msgstr "Beklemede"
+msgstr "Uyarıda"
 
 #: apps/management_review/report/builder.py:173
 msgid "Senza dati"
@@ -1083,10 +1045,8 @@ msgid "Incidenti (12 mesi)"
 msgstr "Olaylar (12 ay)"
 
 #: apps/management_review/report/builder.py:218
-#, fuzzy
-#| msgid "Contatto NIS2"
 msgid "Notificati NIS2"
-msgstr "NIS2 İrtibat Kişisi"
+msgstr "NIS2 kapsamında bildirilen"
 
 #: apps/management_review/report/builder.py:219
 msgid "Ancora aperti"
@@ -1097,7 +1057,7 @@ msgid "Chiusi senza RCA"
 msgstr "Kök neden analizi olmadan kapatıldı"
 
 #: apps/management_review/report/builder.py:221
-#: apps/management_review/report/builder.py:447
+#: apps/management_review/report/builder.py:479
 msgid "Incidenti aperti"
 msgstr "Açık olaylar"
 
@@ -1118,7 +1078,7 @@ msgid "PDCA chiusi (12 mesi)"
 msgstr "Kapatılan PUKÖ (12 ay)"
 
 #: apps/management_review/report/builder.py:233
-#: apps/management_review/report/builder.py:447
+#: apps/management_review/report/builder.py:479
 msgid "Task scaduti"
 msgstr "Süresi geçmiş görevler"
 
@@ -1151,10 +1111,8 @@ msgid "Ruolo"
 msgstr "Rol"
 
 #: apps/management_review/report/builder.py:251
-#, fuzzy
-#| msgid "Documento non trovato"
 msgid "Documenti approvati"
-msgstr "Doküman bulunamadı"
+msgstr "Onaylanmış belgeler"
 
 #: apps/management_review/report/builder.py:252
 msgid "In scadenza (90gg)"
@@ -1167,10 +1125,8 @@ msgstr "Süresi geçmiş belgeler"
 
 #: apps/management_review/report/builder.py:256
 #: apps/management_review/report/builder.py:263
-#, fuzzy
-#| msgid "Documento non trovato"
 msgid "Documento"
-msgstr "Doküman bulunamadı"
+msgstr "Belge"
 
 #: apps/management_review/report/builder.py:256
 msgid "Revisione prevista"
@@ -1181,17 +1137,16 @@ msgid "Documenti in scadenza entro 90 giorni"
 msgstr "90 gün içinde süresi dolacak belgeler"
 
 #: apps/management_review/report/builder.py:262
-#, fuzzy, python-format
-#| msgid "Documento mancante: %(desc)s"
+#, python-format
 msgid "Documenti approvati dal %(date)s"
-msgstr "Eksik doküman: %(desc)s"
+msgstr "%(date)s tarihinden beri onaylanan belgeler"
 
 #: apps/management_review/report/builder.py:263
 msgid "Approvato il"
 msgstr "Onay tarihi"
 
 #: apps/management_review/report/builder.py:271
-#: apps/management_review/report/builder.py:447
+#: apps/management_review/report/builder.py:479
 msgid "Rischi critici"
 msgstr "Kritik riskler"
 
@@ -1286,10 +1241,8 @@ msgid "Obiettivi di sicurezza (§6.2)"
 msgstr "Bilgi güvenliği hedefleri (§6.2)"
 
 #: apps/management_review/report/builder.py:345
-#, fuzzy
-#| msgid "Attivo"
 msgid "Obiettivo"
-msgstr "Aktif"
+msgstr "Hedef"
 
 #: apps/management_review/report/builder.py:345
 msgid "Partenza → target"
@@ -1308,16 +1261,12 @@ msgid "Traiettoria"
 msgstr "Gidişat"
 
 #: apps/management_review/report/builder.py:346
-#, fuzzy
-#| msgid "Responsabilità"
 msgid "Responsabile"
-msgstr "Sorumluluk"
+msgstr "Sorumlu"
 
 #: apps/management_review/report/builder.py:347
-#, fuzzy
-#| msgid "Nessun requisito documentale definito per questo controllo."
 msgid "Nessun obiettivo di sicurezza definito per questo perimetro."
-msgstr "Bu kontrol için tanımlanmış dokümantasyon gereksinimi yok."
+msgstr "Bu kapsam için tanımlanmış güvenlik hedefi yok."
 
 #: apps/management_review/report/builder.py:366
 #, python-format
@@ -1372,110 +1321,110 @@ msgstr "Önceki gözden geçirmelerden %(n)s eylem süresi geçmiş ve hâlâ a�
 msgid "%(n)s non conformità maggiori aperte"
 msgstr "%(n)s açık büyük uygunsuzluk"
 
-#: apps/management_review/report/builder.py:407
+#: apps/management_review/report/builder.py:410
 #, python-format
 msgid "%(n)s obiettivi di sicurezza mancati o fuori traiettoria"
 msgstr "%(n)s güvenlik hedefi kaçırıldı veya hedef dışında"
 
-#: apps/management_review/report/builder.py:419 apps/reporting/views.py:119
+#: apps/management_review/report/builder.py:433
+msgid "Riesame periodico dei sistemi di gestione"
+msgstr "Yönetim sistemlerinin periyodik gözden geçirmesi"
+
+#: apps/management_review/report/builder.py:447 apps/reporting/views.py:119
 msgid "Perimetro"
 msgstr "Kapsam"
 
-#: apps/management_review/report/builder.py:419
+#: apps/management_review/report/builder.py:447
 msgid "Intera organizzazione"
 msgstr "Tüm kuruluş"
 
-#: apps/management_review/report/builder.py:420
+#: apps/management_review/report/builder.py:448
 msgid "Data riunione"
 msgstr "Toplantı tarihi"
 
-#: apps/management_review/report/builder.py:421
+#: apps/management_review/report/builder.py:449
 msgid "Presieduto da"
 msgstr "Başkan"
 
-#: apps/management_review/report/builder.py:422
+#: apps/management_review/report/builder.py:450
 msgid "Partecipanti"
 msgstr "Katılımcılar"
 
-#: apps/management_review/report/builder.py:423
+#: apps/management_review/report/builder.py:451
 msgid "Dati congelati il"
 msgstr "Veriler donduruldu"
 
-#: apps/management_review/report/builder.py:424
+#: apps/management_review/report/builder.py:452
 msgid "Stato approvazione"
 msgstr "Onay durumu"
 
-#: apps/management_review/report/builder.py:424
+#: apps/management_review/report/builder.py:452
 msgid "Approvato"
 msgstr "Onaylandı"
 
-#: apps/management_review/report/builder.py:426
+#: apps/management_review/report/builder.py:454
 msgid "Prossimo riesame"
 msgstr "Sonraki gözden geçirme"
 
-#: apps/management_review/report/builder.py:433
+#: apps/management_review/report/builder.py:466
 #, python-format
-msgid "Testo redatto con il supporto dell'intelligenza artificiale (%(provider)s/%(model)s)%(edited)s, verificato e accettato da %(who)s il %(when)s."
-msgstr "Yapay zekâ desteğiyle hazırlanan metin (%(provider)s/%(model)s)%(edited)s, %(who)s tarafından %(when)s tarihinde doğrulanıp kabul edildi."
+msgid "Testo redatto con il supporto dell'intelligenza artificiale%(edited)s, verificato e accettato da %(who)s il %(when)s."
+msgstr "Yapay zekâ desteğiyle hazırlanan metin%(edited)s, %(who)s tarafından %(when)s tarihinde doğrulanıp kabul edildi."
 
-#: apps/management_review/report/builder.py:436
+#: apps/management_review/report/builder.py:468
 msgid " e modificato"
 msgstr " ve düzenlendi"
 
-#: apps/management_review/report/builder.py:439
+#: apps/management_review/report/builder.py:471
 #, python-format
 msgid "Redatto da %(who)s il %(when)s."
 msgstr "%(who)s tarafından %(when)s tarihinde hazırlandı."
 
-#: apps/management_review/report/builder.py:446
+#: apps/management_review/report/builder.py:478
 msgid "Quadro per sito"
 msgstr "Tesise göre genel görünüm"
 
-#: apps/management_review/report/builder.py:447
+#: apps/management_review/report/builder.py:479
 msgid "Sito"
 msgstr "Tesis"
 
-#: apps/management_review/report/builder.py:460
+#: apps/management_review/report/builder.py:492
 msgid "Discussione"
 msgstr "Görüşme"
 
-#: apps/management_review/report/builder.py:461
-#, fuzzy
-#| msgid "Nessuna documentazione presente."
+#: apps/management_review/report/builder.py:493
 msgid "Nessuna annotazione."
-msgstr "Herhangi bir dokümantasyon mevcut değil."
+msgstr "Not yok."
 
-#: apps/management_review/report/builder.py:464
+#: apps/management_review/report/builder.py:496
 msgid "Decisioni"
 msgstr "Kararlar"
 
-#: apps/management_review/report/builder.py:468
+#: apps/management_review/report/builder.py:500
 msgid "Altre decisioni"
 msgstr "Diğer kararlar"
 
-#: apps/management_review/report/builder.py:475
+#: apps/management_review/report/builder.py:507
 msgid "Dati del riesame"
 msgstr "Gözden geçirme verileri"
 
-#: apps/management_review/report/builder.py:476
+#: apps/management_review/report/builder.py:508
 msgid "Decisioni e azioni"
 msgstr "Kararlar ve eylemler"
 
-#: apps/management_review/report/builder.py:477
-#, fuzzy
-#| msgid "Nessuna documentazione presente."
+#: apps/management_review/report/builder.py:509
 msgid "Nessuna azione registrata"
-msgstr "Herhangi bir dokümantasyon mevcut değil."
+msgstr "Kayıtlı eylem yok"
 
-#: apps/management_review/report/builder.py:482
-msgid "Riepilogo delle decisioni (output §9.3.3)"
-msgstr "Kararların özeti (çıktılar §9.3.3)"
+#: apps/management_review/report/builder.py:514
+msgid "Riepilogo delle decisioni"
+msgstr "Kararların özeti"
 
-#: apps/management_review/report/builder.py:494
+#: apps/management_review/report/builder.py:526
 msgid "Riesame di Direzione SGSI"
 msgstr "BGYS Yönetimin Gözden Geçirmesi"
 
-#: apps/management_review/report/builder.py:501
+#: apps/management_review/report/builder.py:533
 #, python-format
 msgid "Documento generato dal sistema GRC il %(when)s — RISERVATO — Solo per uso interno"
 msgstr "%(when)s tarihinde GRC sistemi tarafından oluşturulan belge — GİZLİ — Yalnızca kurum içi kullanım"
@@ -1553,59 +1502,67 @@ msgstr "Görevi oluşturmak için kararın son tarihini belirtin."
 msgid "Riesame di direzione: %(title)s"
 msgstr "Yönetimin gözden geçirmesi: %(title)s"
 
-#: apps/management_review/services/review.py:176
+#: apps/management_review/services/review.py:180
 msgid "Per un riesame di organizzazione indicare il sito del ciclo PDCA."
 msgstr "Kurum genelindeki gözden geçirmede PUKÖ döngüsünün tesisini belirtin."
 
-#: apps/management_review/services/review.py:204
+#: apps/management_review/services/review.py:234
+msgid "Indicare il codice dell'obiettivo di sicurezza."
+msgstr "Güvenlik hedefinin kodunu girin."
+
+#: apps/management_review/services/review.py:236
+msgid "Indicare il valore target dell'obiettivo."
+msgstr "Hedefin hedef değerini girin."
+
+#: apps/management_review/services/review.py:238
+msgid "Indicare la scadenza dell'obiettivo (o quella della decisione)."
+msgstr "Hedefin son tarihini (ya da kararınkini) girin."
+
+#: apps/management_review/services/review.py:253
 msgid "Il riesame è approvato: della decisione si può aggiornare solo lo stato."
 msgstr "Gözden geçirme onaylandı: kararın yalnızca durumu güncellenebilir."
 
-#: apps/management_review/services/review.py:212
+#: apps/management_review/services/review.py:261
 msgid "Il riesame è approvato: le decisioni non si possono eliminare."
 msgstr "Gözden geçirme onaylandı: kararlar silinemez."
 
-#: apps/management_review/services/review.py:224
+#: apps/management_review/services/review.py:273
 msgid "La riunione è già stata avviata."
 msgstr "Toplantı zaten başladı."
 
-#: apps/management_review/services/review.py:251
+#: apps/management_review/services/review.py:300
 msgid "La riunione è già completata."
 msgstr "Toplantı zaten tamamlandı."
 
-#: apps/management_review/services/review.py:255
+#: apps/management_review/services/review.py:304
 msgid "Prima di chiudere la riunione completare i punti obbligatori dell'ordine del giorno."
 msgstr "Toplantıyı kapatmadan önce zorunlu gündem maddelerini tamamlayın."
 
-#: apps/management_review/services/review.py:282
+#: apps/management_review/services/review.py:331
 msgid "Il riesame è già approvato."
 msgstr "Gözden geçirme zaten onaylanmış."
 
-#: apps/management_review/services/review.py:285
+#: apps/management_review/services/review.py:334
 msgid "Generare lo snapshot dei dati prima di approvare il riesame."
 msgstr "Gözden geçirmeyi onaylamadan önce veri snapshot'ını oluşturun."
 
-#: apps/management_review/services/review.py:288
-#, fuzzy
-#| msgid "Generare lo snapshot dei dati prima di approvare il riesame."
+#: apps/management_review/services/review.py:337
 msgid "Chiudere la riunione prima di approvare il riesame."
-msgstr "Gözden geçirmeyi onaylamadan önce veri snapshot'ını oluşturun."
+msgstr "Gözden geçirmeyi onaylamadan önce toplantıyı kapatın."
 
 #: apps/management_review/services/snapshot.py:376
 msgid "Il riesame è approvato: lo snapshot non può essere rigenerato."
 msgstr "Gözden geçirme onaylandı: anlık görüntü yeniden oluşturulamaz."
 
-#: apps/management_review/services/summary.py:44
+#: apps/management_review/services/summary.py:48
 msgid "Il riesame è approvato: la sintesi non è più modificabile."
 msgstr "Gözden geçirme onaylandı: özet artık değiştirilemez."
 
-#: apps/management_review/services/summary.py:204
-#, fuzzy
-#| msgid "Generare lo snapshot dei dati prima di approvare il riesame."
+#: apps/management_review/services/summary.py:210
 msgid "Generare lo snapshot dei dati prima di chiedere la sintesi all'IA."
-msgstr "Gözden geçirmeyi onaylamadan önce veri snapshot'ını oluşturun."
+msgstr "Yapay zekâdan özet istemeden önce veri anlık görüntüsünü oluşturun."
 
-#: apps/management_review/services/summary.py:224
+#: apps/management_review/services/summary.py:230
 msgid "L'IA non ha restituito alcun testo. Riprovare."
 msgstr "Yapay zekâ metin döndürmedi. Lütfen tekrar deneyin."
 
@@ -1770,10 +1727,8 @@ msgid "Il questionario ha già ricevuto risposta."
 msgstr "Anket zaten yanıtlandı."
 
 #: apps/suppliers/services.py:547
-#, fuzzy
-#| msgid "Percorso file non valido."
 msgid "Esito di rischio non valido."
-msgstr "Geçersiz dosya yolu."
+msgstr "Geçersiz risk sonucu."
 
 #: apps/suppliers/services.py:549
 msgid "La data di valutazione non può essere nel futuro."
@@ -1816,24 +1771,18 @@ msgid "Indicare il sito per cui avviare la checklist."
 msgstr "Kontrol listesinin başlatılacağı tesisi belirtin."
 
 #: apps/tasks/views.py:198
-#, fuzzy
-#| msgid "Logo non trovato nello storage."
 msgid "Sito non trovato o non attivo."
-msgstr "Logo depolamada bulunamadı."
+msgstr "Tesis bulunamadı veya aktif değil."
 
 #: apps/tasks/views.py:335
 msgid "Questo KPI si calcola da solo: il valore non va inserito a mano."
 msgstr "Bu KPI otomatik hesaplanır: değer elle girilmemelidir."
 
 #: apps/tasks/views.py:344
-#, fuzzy
-#| msgid "new_user_id obbligatorio."
 msgid "Valore numerico obbligatorio."
-msgstr "new_user_id zorunludur."
+msgstr "Sayısal bir değer zorunludur."
 
 #: apps/tasks/views.py:354
-#, fuzzy
-#| msgid "Plant non trovato."
 msgid "Sito non trovato."
 msgstr "Tesis bulunamadı."
 

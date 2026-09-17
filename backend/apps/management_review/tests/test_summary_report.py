@@ -116,7 +116,11 @@ def test_report_html_and_pdf(client, review, user):
     html = client.get(f"{URL}{review.id}/report/").content.decode()
     assert "b) Cambiamenti nei fattori esterni e interni" in html
     assert "Aggiornare l&#x27;analisi del contesto" in html
-    assert "supporto dell&#x27;intelligenza artificiale (anthropic/claude-x)" in html
+    # Il verbale dichiara che il testo è assistito dall'IA e chi l'ha validato;
+    # fornitore e modello restano nei metadati e nell'audit trail, non nel
+    # documento che va in direzione.
+    assert "supporto dell&#x27;intelligenza artificiale" in html
+    assert "anthropic" not in html and "claude-x" not in html
     assert "Presieduto da" in html and "Giulia Bianchi" in html
 
     resp = client.get(f"{URL}{review.id}/report/", {"fmt": "pdf"})

@@ -8,6 +8,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ## [Unreleased]
 
+### Changed
+
+- **Il verbale non è più intestato alla sola ISO 27001**: il riesame di direzione è uno solo e vale per tutti i sistemi di gestione adottati, ma il verbale portava in testa «ISO/IEC 27001:2022 §9.3», dando un'informazione incompleta a un auditor TISAX o a un'autorità NIS2. Ora il sottotitolo elenca i **framework realmente in perimetro** per quel sito (o per l'organizzazione), e dove non ce ne sono riporta una dicitura neutra. La struttura dell'ordine del giorno resta quella di §9.3.2 e continua a essere indicata dalle **lettere di clausola sui singoli punti**, dove serve all'auditor, senza intestare l'intero documento. Anche la bozza IA non apre più citando la norma.
+- **Nota sull'uso dell'IA più sobria nel verbale**: la dicitura riportava fornitore e modello («…con il supporto dell'intelligenza artificiale (groq/openai/gpt-oss-120b)»). Ciò che serve a chi legge il verbale è **che** il testo è assistito dall'IA e **chi** l'ha verificato e fatto proprio; fornitore e modello restano nei metadati della sintesi e nell'audit trail, dove un auditor può risalirci.
+
+### Fixed
+
+- **Sintesi IA: niente più etichette tecniche nel testo**: il modello ricopiava nella prosa le annotazioni di servizio del prompt, producendo frasi come «È stato approvato [modifica al SGSI, entro 2026-11-16]». Le decisioni arrivano ora al modello in forma discorsiva.
+- **Traduzioni del verbale realmente applicate**: 41 messaggi (intestazioni di tabella, esiti, messaggi del riesame e degli obiettivi) erano rimasti marcati «fuzzy» nei cataloghi, condizione che Django ignora a runtime: agli utenti EN/FR/PL/TR comparivano ancora in italiano. Tradotti e riattivati in tutte e quattro le lingue.
+
 ### Fixed
 
 - **I modelli IA si scelgono da quelli che il provider offre davvero**: l'elenco dei modelli era **scritto nel codice** e proponeva modelli che i provider hanno nel frattempo dismesso — su Groq, `llama-3.1-8b-instant`, `llama-3.3-70b-versatile` e `mixtral-8x7b-32768` non esistono più. Chi ne sceglieva uno vedeva ogni funzione IA fallire con un messaggio che non nominava la causa. Ora Impostazioni → govrico AI interroga il provider e mostra i modelli **disponibili in questo momento**, con un pulsante per rileggerli; lo stesso vale per i modelli scaricati sull'istanza Ollama. Se il modello configurato non è più offerto, la pagina lo dice esplicitamente e lo lascia comunque selezionato, senza cambiarlo di nascosto. Quando il provider non è interrogabile (nessuna chiave, rete assente) si ricade sull'elenco statico.

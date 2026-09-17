@@ -411,6 +411,31 @@ def _alerts(snap) -> list[str]:
     return out
 
 
+def _scope_subtitle(review) -> str:
+    """Framework realmente in perimetro, al posto della sola ISO 27001.
+
+    Il riesame di direzione è uno solo e vale per tutti i sistemi di gestione
+    adottati: intestarlo alla sola ISO 27001 dava un'informazione incompleta a
+    un auditor TISAX o a un'autorità NIS2. La struttura dell'ordine del giorno
+    resta quella di ISO 27001 §9.3.2 — è indicata dalle lettere di clausola sui
+    singoli punti, dove serve all'auditor, senza intestare l'intero documento.
+    """
+    try:
+        from apps.plants.services import get_active_frameworks
+
+        # I codici e non i nomi completi: "TISAX — VDA ISA 6.0 Assessment Level 2
+        # (High Protection Need)" ripetuto tre volte non sta in una riga di
+        # intestazione e non aggiunge nulla a chi legge il verbale.
+        codes = list(dict.fromkeys(fw.code for fw in get_active_frameworks(review.plant)))
+    except Exception:  # nessun framework caricato: il verbale resta valido
+        codes = []
+    if not codes:
+        return str(_("Riesame periodico dei sistemi di gestione"))
+    shown, rest = codes[:5], len(codes) - 5
+    line = " · ".join(shown)
+    return f"{line} · +{rest}" if rest > 0 else line
+
+
 def build_report(review) -> dict:
     snap = review.snapshot_data
     if not snap:
@@ -433,9 +458,13 @@ def build_report(review) -> dict:
     if review.executive_summary.strip():
         m = review.executive_summary_meta or {}
         if m.get("ai_assisted"):
-            note = (_("Testo redatto con il supporto dell'intelligenza artificiale (%(provider)s/%(model)s)"
-                      "%(edited)s, verificato e accettato da %(who)s il %(when)s.") % {
-                "provider": m.get("provider"), "model": m.get("model"),
+            # La trasparenza che serve al lettore è *che* il testo è assistito
+            # dall'IA e *chi* l'ha verificato e fatto proprio. Fornitore e
+            # modello sono dettaglio tecnico: restano nei metadati della sintesi
+            # e nell'audit trail, dove un auditor può risalirci, senza occupare
+            # il verbale che va in direzione.
+            note = (_("Testo redatto con il supporto dell'intelligenza artificiale%(edited)s, "
+                      "verificato e accettato da %(who)s il %(when)s.") % {
                 "edited": _(" e modificato") if m.get("edited") else "",
                 "who": m.get("accepted_by_name") or "—", "when": fmt_date(m.get("accepted_at"))})
         else:
@@ -482,7 +511,7 @@ def build_report(review) -> dict:
     # Riepilogo unico degli output §9.3.3, utile quando le decisioni sono
     # distribuite su più punti (altrimenti ripeterebbe la stessa tabella).
     if agenda and len({a.agenda_item_id for a in actions}) > 1:
-        sections.append({"heading": _("Riepilogo delle decisioni (output §9.3.3)"),
+        sections.append({"heading": _("Riepilogo delle decisioni"),
                          "blocks": [_table(None, DECISION_HEADERS, _decision_rows(actions))]})
 
     approval = None
@@ -495,7 +524,7 @@ def build_report(review) -> dict:
 
     return {
         "title": _("Riesame di Direzione SGSI"),
-        "subtitle": "ISO/IEC 27001:2022 §9.3",
+        "subtitle": _scope_subtitle(review),
         "meta": meta,
         "summary": summary,
         "alerts": _alerts(snap),

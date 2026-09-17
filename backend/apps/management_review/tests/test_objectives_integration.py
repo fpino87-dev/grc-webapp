@@ -198,3 +198,32 @@ def test_decision_objective_rejects_a_target_that_does_not_improve(client, revie
                       "baseline_value": 90.0, "target_value": 60.0},
     }, format="json")
     assert resp.status_code == 400
+
+
+# ── Intestazione del verbale e nota IA ────────────────────────────────────
+
+@pytest.mark.django_db
+def test_report_subtitle_lists_the_frameworks_in_scope(review, plant, user):
+    """Il riesame vale per tutti i sistemi di gestione adottati: intestarlo
+    alla sola ISO 27001 dava un'informazione incompleta a un auditor TISAX."""
+    from apps.management_review.report.builder import build_report
+    from apps.management_review.services import generate_snapshot
+    generate_snapshot(review, user)
+    review.refresh_from_db()
+    subtitle = str(build_report(review)["subtitle"])
+    assert "§9.3" not in subtitle
+    # Con i framework caricati il sottotitolo li elenca; senza, resta una
+    # dicitura neutra — in nessun caso intesta il documento a una sola norma.
+    assert subtitle
+
+
+@pytest.mark.django_db
+def test_agenda_items_keep_the_clause_letters(review, plant, user):
+    """La struttura resta quella di §9.3.2 e va mostrata dove serve
+    all'auditor: sulle singole voci, non come intestazione del documento."""
+    from apps.management_review.report.builder import build_report
+    from apps.management_review.services import generate_snapshot
+    generate_snapshot(review, user)
+    review.refresh_from_db()
+    headings = [str(s["heading"]) for s in build_report(review)["sections"]]
+    assert any(h.startswith("d)") for h in headings)

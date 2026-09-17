@@ -25,16 +25,20 @@ LANGUAGE_NAMES = {"it": "italiano", "en": "English", "fr": "français", "pl": "p
 
 SYSTEM_PROMPT = (
     "Sei un consulente esperto di sistemi di gestione della sicurezza delle informazioni. "
-    "Redigi la sintesi executive del verbale di un riesame di direzione ISO/IEC 27001 §9.3 "
-    "per il vertice aziendale. Usa esclusivamente i dati forniti: non inventare numeri, "
-    "nomi, date o decisioni. I segnaposto tra parentesi quadre (es. [PERSONA_1], [PLANT_A]) "
-    "vanno riportati identici."
+    "Redigi la sintesi executive del verbale di un riesame di direzione per il vertice "
+    "aziendale. Il riesame copre tutti i sistemi di gestione adottati dall'azienda: non "
+    "intestarlo a una singola norma e non citare numeri di clausola. Usa esclusivamente i "
+    "dati forniti: non inventare numeri, nomi, date o decisioni. I segnaposto tra parentesi "
+    "quadre (es. [PERSONA_1], [PLANT_A]) vanno riportati identici; le altre annotazioni fra "
+    "parentesi quadre presenti nei dati sono etichette di servizio e non vanno ricopiate nel "
+    "testo."
 )
 
 DECISION_LABELS = {
     "miglioramento": "miglioramento",
     "modifica_sgsi": "modifica al SGSI",
     "risorse": "risorse",
+    "obiettivo": "obiettivo di sicurezza",
     "altro": "altro",
 }
 
@@ -171,9 +175,9 @@ def build_summary_prompt(review: ManagementReview, lang: str) -> str:
         lines.append(f"* {clause + ') ' if clause else ''}{title}")
         lines.append(f"  Discussione: {item.discussion.strip()[:1500] or '(nessuna)'}")
         for dec in item.decisions.all():
-            due = f", entro {dec.due_date.isoformat()}" if dec.due_date else ""
-            lines.append(f"  Decisione [{DECISION_LABELS.get(dec.decision_type, dec.decision_type)}{due}]: "
-                         f"{dec.description.strip()[:500]}")
+            due = f" con scadenza {dec.due_date.isoformat()}" if dec.due_date else ""
+            tipo = DECISION_LABELS.get(dec.decision_type, dec.decision_type)
+            lines.append(f"  Decisione di tipo {tipo}{due}: {dec.description.strip()[:500]}")
     loose = review.actions.filter(agenda_item__isnull=True)
     for dec in loose:
         lines.append(f"* Decisione non associata a un punto: {dec.description.strip()[:500]}")
@@ -189,6 +193,8 @@ def build_summary_prompt(review: ManagementReview, lang: str) -> str:
         "3) esiti della riunione e decisioni prese, con eventuali scadenze;",
         "4) priorità per il periodo fino al prossimo riesame.",
         "Se un'informazione non è presente nei dati, non citarla.",
+        "Scrivi in prosa scorrevole: non ricopiare le etichette fra parentesi quadre né i "
+        "riferimenti a clausole di norma.",
     ]
     return "\n".join(lines)
 
