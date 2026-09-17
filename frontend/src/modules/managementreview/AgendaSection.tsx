@@ -10,7 +10,7 @@ import { StatusBadge } from "../../components/ui/StatusBadge";
 import { AGENDA_CODES_WITH_DATA, AgendaData } from "./SnapshotBlocks";
 import { ISO_CLAUSE, fmtDate, isOverdue, userLabel, type Snap } from "./shared";
 
-const DECISION_TYPES: DecisionType[] = ["miglioramento", "modifica_sgsi", "risorse", "altro"];
+const DECISION_TYPES: DecisionType[] = ["miglioramento", "modifica_sgsi", "risorse", "obiettivo", "altro"];
 const TASK_ROLES = GRC_ACCESS_ROLES.filter(r => r !== "super_admin");
 
 type Plant = { id: string; code: string; name: string };
@@ -61,6 +61,15 @@ function DecisionRow({ action, locked }: { action: ReviewAction; locked: boolean
               {t("management_review.actions.linked_pdca")} <span className="font-medium">{(action.pdca_phase ?? "").toUpperCase()}</span>
             </span>
           )}
+          {action.security_objective && (
+            <span className="text-xs text-gray-500">
+              {t("management_review.actions.linked_objective")}{" "}
+              <span className="font-medium">{action.objective_code}</span>
+              {action.objective_status && (
+                <span className="text-gray-400"> · {t(`objectives.status.${action.objective_status}`)}</span>
+              )}
+            </span>
+          )}
         </div>
         {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
       </div>
@@ -103,6 +112,8 @@ function DecisionForm({
   const empty = {
     description: "", decision_type: "miglioramento" as DecisionType, owner: "", due_date: "",
     create_task: false, task_role: "compliance_officer", create_pdca: false, pdca_plant: "",
+    obj_code: "", obj_unit: "", obj_baseline: "", obj_target: "", obj_direction: "above",
+    obj_owner_role: "compliance_officer",
   };
   const [form, setForm] = useState(empty);
   const [error, setError] = useState("");
@@ -120,13 +131,26 @@ function DecisionForm({
       task_role: form.create_task ? form.task_role : "",
       create_pdca: form.create_pdca,
       pdca_plant: form.create_pdca && !review.plant ? form.pdca_plant || null : null,
+      // L'obiettivo nasce a misura manuale: agganciarlo a un KPI è una scelta
+      // che si fa con calma nel modulo Obiettivi, non in riunione.
+      objective: form.decision_type === "obiettivo" ? {
+        code: form.obj_code.trim(),
+        measure_source: "manual" as const,
+        unit: form.obj_unit,
+        baseline_value: form.obj_baseline === "" ? null : Number(form.obj_baseline),
+        target_value: Number(form.obj_target),
+        target_direction: form.obj_direction as "above" | "below",
+        owner_role: form.obj_owner_role,
+      } : null,
     }),
     onSuccess: () => { invalidate(qc); setForm(empty); onDone(); },
     onError: e => setError(reviewErrorMessage(e, t("management_review.actions.save_error"))),
   });
 
-  const needsDue = form.create_task && !form.due_date;
+  const needsDue = (form.create_task || form.decision_type === "obiettivo") && !form.due_date;
+  const isObjective = form.decision_type === "obiettivo";
   const needsSite = form.create_pdca && !review.plant && !form.pdca_plant;
+  const needsObjective = isObjective && (!form.obj_code.trim() || form.obj_target === "");
 
   return (
     <div className="border border-blue-200 rounded p-3 space-y-2 bg-blue-50">
@@ -168,13 +192,37 @@ function DecisionForm({
           </select>
         )}
       </div>
+      {isObjective && (
+        <div className="border border-indigo-200 bg-white rounded p-2.5 space-y-2">
+          <p className="text-xs text-gray-600">{t("management_review.actions.objective_hint")}</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <input value={form.obj_code} onChange={e => set("obj_code", e.target.value)}
+                   placeholder={t("objectives.fields.code")} className="border rounded px-2 py-1 text-sm" />
+            <input value={form.obj_unit} onChange={e => set("obj_unit", e.target.value)}
+                   placeholder={t("objectives.fields.unit")} className="border rounded px-2 py-1 text-sm" />
+            <select value={form.obj_owner_role} onChange={e => set("obj_owner_role", e.target.value)}
+                    className="border rounded px-2 py-1 text-sm">
+              {TASK_ROLES.map(r => <option key={r} value={r}>{t(`governance.roles.${r}`, r)}</option>)}
+            </select>
+            <input type="number" step="any" value={form.obj_baseline} onChange={e => set("obj_baseline", e.target.value)}
+                   placeholder={t("objectives.fields.baseline_value")} className="border rounded px-2 py-1 text-sm" />
+            <input type="number" step="any" value={form.obj_target} onChange={e => set("obj_target", e.target.value)}
+                   placeholder={t("objectives.fields.target_value")} className="border rounded px-2 py-1 text-sm" />
+            <select value={form.obj_direction} onChange={e => set("obj_direction", e.target.value)}
+                    className="border rounded px-2 py-1 text-sm">
+              <option value="above">{t("objectives.direction.above")}</option>
+              <option value="below">{t("objectives.direction.below")}</option>
+            </select>
+          </div>
+        </div>
+      )}
       {form.create_task && <p className="text-xs text-gray-500">{t("management_review.actions.task_role_hint")}</p>}
       {needsDue && <p className="text-xs text-amber-600">{t("management_review.actions.task_needs_due")}</p>}
       {error && <p className="text-xs text-red-600">{error}</p>}
       <div className="flex gap-2">
         <button
           onClick={() => create.mutate()}
-          disabled={create.isPending || !form.description.trim() || needsDue || needsSite}
+          disabled={create.isPending || !form.description.trim() || needsDue || needsSite || needsObjective}
           className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50"
         >
           {create.isPending ? t("management_review.actions.saving") : t("management_review.actions.add_btn")}

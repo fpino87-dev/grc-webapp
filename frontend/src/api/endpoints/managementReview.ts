@@ -1,6 +1,22 @@
 import { apiClient } from "../client";
 
-export type DecisionType = "miglioramento" | "modifica_sgsi" | "risorse" | "altro";
+export type DecisionType = "miglioramento" | "modifica_sgsi" | "risorse" | "obiettivo" | "altro";
+
+/** Obiettivo di sicurezza (§6.2) deliberato dal riesame. Nasce in bozza:
+ *  il riesame decide *che* ci sarà un obiettivo, il piano richiesto dalla
+ *  norma si completa dopo la riunione. */
+export interface DecisionObjective {
+  code: string;
+  title?: string;
+  measure_source: "kpi" | "manual";
+  kpi_definition?: string | null;
+  unit?: string;
+  baseline_value?: number | null;
+  target_value: number;
+  target_direction?: "above" | "below";
+  target_date?: string | null;
+  owner_role?: string;
+}
 
 export interface ReviewAction {
   id: string;
@@ -19,6 +35,9 @@ export interface ReviewAction {
   pdca_cycle: string | null;
   pdca_phase: string | null;
   pdca_title: string | null;
+  security_objective: string | null;
+  objective_code: string | null;
+  objective_status: string | null;
   created_at: string;
 }
 
@@ -84,6 +103,7 @@ export interface CreateActionPayload {
   task_role?: string;
   create_pdca?: boolean;
   pdca_plant?: string | null;
+  objective?: DecisionObjective | null;
 }
 
 const base = "/management-review/reviews";

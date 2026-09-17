@@ -4,7 +4,7 @@ import i18n from "../../i18n";
 import {
   DetailTable, KpiBox, KpiGrid, SnapSection, fmtDate, isOverdue,
   type Snap, type SnapAudit, type SnapDoc, type SnapFinding, type SnapFramework, type SnapIncident,
-  type SnapKpi, type SnapPdca, type SnapPrevAction, type SnapRisk, type SnapSite, type SnapTask,
+  type SnapKpi, type SnapObjective, type SnapPdca, type SnapPrevAction, type SnapRisk, type SnapSite, type SnapTask,
 } from "./shared";
 
 // Ogni blocco mostra i dati congelati di un'area; se lo snapshot non contiene
@@ -120,6 +120,45 @@ export function KpiBlock({ snap }: { snap: Snap }) {
           `${i.threshold_warning ?? "—"} / ${i.threshold_critical ?? "—"}`,
         ])}
         total={k.attenzione}
+      />
+    </div>
+  );
+}
+
+export function ObjectivesBlock({ snap }: { snap: Snap }) {
+  const { t } = useTranslation();
+  const o = snap.obiettivi;
+  if (!o) return null;
+  const tone: Record<string, string> = {
+    mancato: "text-red-600 font-medium",
+    a_rischio: "text-orange-600 font-medium",
+    in_linea: "text-green-600",
+    senza_misure: "text-gray-400",
+  };
+  return (
+    <div>
+      <KpiGrid>
+        <KpiBox label={t("objectives.counters.active")} value={o.attivi ?? 0} />
+        <KpiBox label={t("objectives.counters.missed")} value={o.mancati ?? 0} color="text-red-600" />
+        <KpiBox label={t("objectives.counters.at_risk")} value={o.a_rischio ?? 0} color="text-orange-600" />
+        <KpiBox label={t("objectives.counters.achieved")} value={o.raggiunti ?? 0} color="text-green-600" />
+      </KpiGrid>
+      <DetailTable
+        title={t("management_review.snap.objectives_list")}
+        headers={[
+          t("objectives.fields.objective"), t("objectives.baseline_to_target"),
+          t("objectives.current_value"), t("objectives.progress"),
+          t("objectives.fields.target_date"), t("objectives.fields.track"),
+        ]}
+        rows={((o.elenco ?? []) as SnapObjective[]).map(i => [
+          <span>{i.title}<span className="text-gray-400"> · {i.code}{i.plant_code ? ` · ${i.plant_code}` : ""}</span></span>,
+          `${i.baseline_value ?? "—"} → ${i.target_value} ${i.unit ?? ""}`.trim(),
+          `${i.current_value ?? "—"} ${i.unit ?? ""}`.trim(),
+          i.progress_pct === null ? "—" : `${i.progress_pct}%`,
+          fmtDate(i.target_date),
+          <span className={tone[i.track] ?? ""}>{t(`objectives.track.${i.track}`)}</span>,
+        ])}
+        total={o.totale}
       />
     </div>
   );
@@ -380,6 +419,7 @@ export function AgendaData({ code, snap }: { code: string; snap: Snap }) {
         <div className="space-y-2">
           <SnapSection title={t("management_review.snap.compliance_fw")} defaultOpen={false}><ComplianceBlock snap={snap} /></SnapSection>
           {snap.kpi && <SnapSection title={t("management_review.snap.kpi_section")} defaultOpen={false}><KpiBlock snap={snap} /></SnapSection>}
+          {snap.obiettivi && <SnapSection title={t("management_review.snap.objectives_section")} defaultOpen={false}><ObjectivesBlock snap={snap} /></SnapSection>}
           {snap.audit && <SnapSection title={t("management_review.snap.audit_section")} defaultOpen={false}><AuditBlock snap={snap} /></SnapSection>}
           <SnapSection title={t("management_review.snap.incidents_12m")} defaultOpen={false}><IncidentsBlock snap={snap} /></SnapSection>
           <SnapSection title={t("management_review.snap.pdca_task")} defaultOpen={false}><PdcaTasksBlock snap={snap} /></SnapSection>

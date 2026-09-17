@@ -1260,7 +1260,8 @@
       "checklist_runs": "Checklists",
       "checklist_templates": "Checklist Templates",
       "kpi_operational": "Operational KPIs",
-      "cockpit": "Operations Center"
+      "cockpit": "Operations Center",
+      "objectives": "Security objectives"
     },
     "collapse": "Collapse menu",
     "expand": "Expand menu"
@@ -4516,7 +4517,9 @@
       "pdca_site_ph": "— PDCA site —",
       "linked_task": "Task:",
       "linked_pdca": "PDCA:",
-      "save_error": "Error while saving"
+      "save_error": "Error while saving",
+      "linked_objective": "Objective:",
+      "objective_hint": "The objective starts as a manually measured draft: after the meeting you complete the plan (resources, evaluation method) and activate it, linking it to a KPI if appropriate."
     },
     "detail": {
       "meeting_date": "Meeting date:",
@@ -4653,7 +4656,9 @@
       "sites_overview": "Overview by site",
       "col_site": "Site",
       "col_compliance": "% compliant",
-      "open_incidents": "Open incidents"
+      "open_incidents": "Open incidents",
+      "objectives_section": "Security objectives (§6.2)",
+      "objectives_list": "Objective status"
     },
     "participants": {
       "heading": "Chair and attendees",
@@ -4712,7 +4717,8 @@
       "miglioramento": "Improvement",
       "modifica_sgsi": "Change to the ISMS",
       "risorse": "Resources",
-      "altro": "Other"
+      "altro": "Other",
+      "obiettivo": "Security objective"
     },
     "summary": {
       "heading": "Executive summary",
@@ -4738,6 +4744,115 @@
       "ai_not_configured": "The AI engine is not configured (Settings → AI Engine).",
       "ai_error": "Generation failed",
       "save_error": "Error while saving"
+    }
+  },
+  "objectives": {
+    "page_title": "Security objectives",
+    "page_subtitle": "The ISMS's measurable commitments (ISO 27001 §6.2): where we intend to get, by when, and who is answerable.",
+    "empty": "No security objectives defined.",
+    "empty_hint": "Four to six objectives a year are enough, on the indicators where there is a gap to close.",
+    "show_closed": "Show closed objectives too",
+    "baseline_to_target": "Baseline → target",
+    "current_value": "Current value",
+    "progress": "Progress",
+    "trend": "Measurement trend",
+    "no_baseline": "no baseline value",
+    "elapsed_marker": "Time elapsed: {{pct}}%",
+    "days_left": "{{n}} days",
+    "record_measure": "Record a measurement",
+    "kpi_measured_hint": "Measurements come from the linked KPI's weekly snapshots: they are not entered here.",
+    "weak_target_warning": "The target does not go beyond the KPI's warning threshold: it adds nothing to what the KPI already reports every week.",
+    "counters": {
+      "active": "Active",
+      "at_risk": "At risk",
+      "missed": "Missed",
+      "achieved": "Achieved"
+    },
+    "track": {
+      "in_linea": "On track",
+      "a_rischio": "At risk",
+      "mancato": "Missed",
+      "senza_misure": "No measurements",
+      "non_applicabile": "—"
+    },
+    "status": {
+      "bozza": "Draft",
+      "attivo": "Active",
+      "raggiunto": "Achieved",
+      "non_raggiunto": "Not achieved",
+      "sospeso": "Suspended",
+      "annullato": "Cancelled"
+    },
+    "origin": {
+      "politica": "Security policy",
+      "risk_assessment": "Risk assessment",
+      "audit": "Audit outcome",
+      "requisito": "Legal or contractual requirement",
+      "incidente": "Incident",
+      "riesame": "Management review",
+      "altro": "Other"
+    },
+    "measure_source": {
+      "kpi": "Operational KPI",
+      "manual": "Manual measurement"
+    },
+    "direction": {
+      "above": "Higher is better",
+      "below": "Lower is better"
+    },
+    "fields": {
+      "code": "Code",
+      "title": "Title",
+      "description": "Description",
+      "origin": "Origin",
+      "plant": "Scope",
+      "plant_org": "Whole organisation",
+      "measure_source": "How it is measured",
+      "kpi": "Linked KPI",
+      "unit": "Unit",
+      "start_date": "Period start",
+      "baseline_value": "Baseline value",
+      "target_value": "Target",
+      "target_direction": "Direction",
+      "target_date": "Deadline",
+      "owner_role": "Responsible role",
+      "resources": "Resources required",
+      "evaluation_method": "How the result is evaluated",
+      "status": "Status",
+      "track": "Trajectory",
+      "objective": "Objective",
+      "value": "Value",
+      "note": "Note"
+    },
+    "actions": {
+      "new": "New objective",
+      "activate": "Activate",
+      "suspend": "Suspend",
+      "close_reached": "Close as achieved",
+      "close_missed": "Close as not achieved"
+    },
+    "form": {
+      "new_title": "New security objective",
+      "edit_title": "Edit objective",
+      "intro": "An objective is a commitment with a number, a date and an owner — not an indicator to watch.",
+      "measure_hint": "Linking it to a KPI makes values flow in from the weekly snapshots, with no double entry. Manual measurement is only for what the platform does not measure.",
+      "evaluation_hint": "Required by the standard (§6.2 f): how you determine whether the result has been achieved."
+    },
+    "help": {
+      "title": "Security objectives",
+      "description": "Security objectives are the measurable commitments management makes on the ISMS (ISO 27001 §6.2). They are not KPIs: a KPI says where we stand right now and its threshold is a floor set by risk; an objective says whether we will reach the target by the deadline. The same number can be green on the threshold and red on the objective.",
+      "steps": {
+        "1": "Pick a few indicators where there is a gap to close: four to six a year is enough. Where the process already works, the KPI threshold alone is sufficient.",
+        "2": "Set the baseline, target, deadline and responsible role, plus the resources and evaluation method the standard requires.",
+        "3": "Link the objective to a KPI whenever the platform already measures that number: values come from the weekly snapshots, with no double entry.",
+        "4": "Activate the objective: from then on the trajectory compares progress against elapsed time and flags when you fall behind.",
+        "5": "Once the target is reached, raise the KPI thresholds to lock in the result and set the next objective."
+      },
+      "connections": {
+        "kpi": "supplies weekly measurements to objectives linked to an indicator",
+        "management_review": "presents objective status under agenda item d) and can resolve on new ones",
+        "pdca": "takes on the analysis of a missed objective, when management so decides"
+      }
     }
   }
 }

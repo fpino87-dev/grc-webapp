@@ -1263,7 +1263,8 @@
       "checklist_runs": "Listy kontrolne",
       "checklist_templates": "Szablony list",
       "kpi_operational": "KPI operacyjne",
-      "cockpit": "Centrum Operacyjne"
+      "cockpit": "Centrum Operacyjne",
+      "objectives": "Cele bezpieczeństwa"
     },
     "collapse": "Zwiń menu",
     "expand": "Rozwiń menu"
@@ -4516,7 +4517,9 @@
       "pdca_site_ph": "— Zakład cyklu PDCA —",
       "linked_task": "Zadanie:",
       "linked_pdca": "PDCA:",
-      "save_error": "Błąd podczas zapisywania"
+      "save_error": "Błąd podczas zapisywania",
+      "linked_objective": "Cel:",
+      "objective_hint": "Cel powstaje jako wersja robocza z pomiarem ręcznym: po spotkaniu uzupełnia się plan (zasoby, metoda oceny) i aktywuje, ewentualnie wiążąc go z KPI."
     },
     "detail": {
       "meeting_date": "Data spotkania:",
@@ -4653,7 +4656,9 @@
       "sites_overview": "Przegląd według zakładów",
       "col_site": "Zakład",
       "col_compliance": "% zgodności",
-      "open_incidents": "Otwarte incydenty"
+      "open_incidents": "Otwarte incydenty",
+      "objectives_section": "Cele bezpieczeństwa (§6.2)",
+      "objectives_list": "Status celów"
     },
     "participants": {
       "heading": "Przewodniczący i uczestnicy",
@@ -4712,7 +4717,8 @@
       "miglioramento": "Doskonalenie",
       "modifica_sgsi": "Zmiana w ISMS",
       "risorse": "Zasoby",
-      "altro": "Inne"
+      "altro": "Inne",
+      "obiettivo": "Cel bezpieczeństwa"
     },
     "summary": {
       "heading": "Podsumowanie dla kierownictwa",
@@ -4738,6 +4744,115 @@
       "ai_not_configured": "Silnik AI nie jest skonfigurowany (Ustawienia → AI Engine).",
       "ai_error": "Generowanie nie powiodło się",
       "save_error": "Błąd podczas zapisywania"
+    }
+  },
+  "objectives": {
+    "page_title": "Cele bezpieczeństwa",
+    "page_subtitle": "Mierzalne zobowiązania SZBI (ISO 27001 §6.2): dokąd chcemy dojść, do kiedy i kto za to odpowiada.",
+    "empty": "Nie zdefiniowano żadnych celów bezpieczeństwa.",
+    "empty_hint": "Wystarczy 4–6 celów rocznie, dla wskaźników, w których jest luka do zamknięcia.",
+    "show_closed": "Pokaż także cele zamknięte",
+    "baseline_to_target": "Punkt wyjścia → cel",
+    "current_value": "Bieżąca wartość",
+    "progress": "Postęp",
+    "trend": "Przebieg pomiarów",
+    "no_baseline": "brak wartości początkowej",
+    "elapsed_marker": "Upłynęło: {{pct}}%",
+    "days_left": "{{n}} dni",
+    "record_measure": "Zarejestruj pomiar",
+    "kpi_measured_hint": "Pomiary pochodzą z tygodniowych migawek powiązanego KPI: nie wprowadza się ich tutaj.",
+    "weak_target_warning": "Cel nie przekracza progu ostrzegawczego KPI: nie wnosi nic ponad to, co KPI sygnalizuje co tydzień.",
+    "counters": {
+      "active": "Aktywne",
+      "at_risk": "Zagrożone",
+      "missed": "Niezrealizowane",
+      "achieved": "Osiągnięte"
+    },
+    "track": {
+      "in_linea": "Zgodnie z planem",
+      "a_rischio": "Zagrożony",
+      "mancato": "Niezrealizowany",
+      "senza_misure": "Brak pomiarów",
+      "non_applicabile": "—"
+    },
+    "status": {
+      "bozza": "Wersja robocza",
+      "attivo": "Aktywny",
+      "raggiunto": "Osiągnięty",
+      "non_raggiunto": "Nieosiągnięty",
+      "sospeso": "Zawieszony",
+      "annullato": "Anulowany"
+    },
+    "origin": {
+      "politica": "Polityka bezpieczeństwa",
+      "risk_assessment": "Ocena ryzyka",
+      "audit": "Wynik audytu",
+      "requisito": "Wymóg prawny lub umowny",
+      "incidente": "Incydent",
+      "riesame": "Przegląd zarządzania",
+      "altro": "Inne"
+    },
+    "measure_source": {
+      "kpi": "KPI operacyjny",
+      "manual": "Pomiar ręczny"
+    },
+    "direction": {
+      "above": "Im wyżej, tym lepiej",
+      "below": "Im niżej, tym lepiej"
+    },
+    "fields": {
+      "code": "Kod",
+      "title": "Tytuł",
+      "description": "Opis",
+      "origin": "Pochodzenie",
+      "plant": "Zakres",
+      "plant_org": "Cała organizacja",
+      "measure_source": "Sposób pomiaru",
+      "kpi": "Powiązany KPI",
+      "unit": "Jednostka",
+      "start_date": "Początek okresu",
+      "baseline_value": "Wartość początkowa",
+      "target_value": "Cel",
+      "target_direction": "Kierunek",
+      "target_date": "Termin",
+      "owner_role": "Rola odpowiedzialna",
+      "resources": "Potrzebne zasoby",
+      "evaluation_method": "Sposób oceny wyniku",
+      "status": "Status",
+      "track": "Trajektoria",
+      "objective": "Cel",
+      "value": "Wartość",
+      "note": "Uwaga"
+    },
+    "actions": {
+      "new": "Nowy cel",
+      "activate": "Aktywuj",
+      "suspend": "Zawieś",
+      "close_reached": "Zamknij jako osiągnięty",
+      "close_missed": "Zamknij jako nieosiągnięty"
+    },
+    "form": {
+      "new_title": "Nowy cel bezpieczeństwa",
+      "edit_title": "Edytuj cel",
+      "intro": "Cel to zobowiązanie z liczbą, datą i osobą odpowiedzialną — nie wskaźnik do obserwowania.",
+      "measure_hint": "Powiązanie z KPI sprawia, że wartości pochodzą z tygodniowych migawek, bez podwójnego wprowadzania. Pomiar ręczny służy tylko temu, czego platforma nie mierzy.",
+      "evaluation_hint": "Wymagane przez normę (§6.2 f): jak ustala się, czy wynik został osiągnięty."
+    },
+    "help": {
+      "title": "Cele bezpieczeństwa",
+      "description": "Cele bezpieczeństwa to mierzalne zobowiązania kierownictwa wobec SZBI (ISO 27001 §6.2). To nie są KPI: KPI mówi, gdzie jesteśmy teraz, a jego próg to podłoga wyznaczona przez ryzyko; cel mówi, czy dojdziemy do wartości docelowej przed terminem. Ta sama liczba może być zielona na progu i czerwona na celu.",
+      "steps": {
+        "1": "Wybierz kilka wskaźników, w których jest luka do zamknięcia: 4–6 rocznie wystarczy. Tam, gdzie proces już działa, sam próg KPI jest wystarczający.",
+        "2": "Określ wartość początkową, cel, termin i rolę odpowiedzialną oraz zasoby i metodę oceny wymagane przez normę.",
+        "3": "Powiąż cel z KPI, jeśli platforma już mierzy tę liczbę: wartości pochodzą z tygodniowych migawek, bez podwójnego wprowadzania.",
+        "4": "Aktywuj cel: od tej chwili trajektoria porównuje postęp z upływem czasu i sygnalizuje opóźnienia.",
+        "5": "Po osiągnięciu celu podnieś progi KPI, aby utrwalić wynik, i wyznacz kolejny cel."
+      },
+      "connections": {
+        "kpi": "dostarcza tygodniowe pomiary celom powiązanym ze wskaźnikiem",
+        "management_review": "przedstawia status celów w punkcie d) i może ustanawiać nowe",
+        "pdca": "przejmuje analizę niezrealizowanego celu, na podstawie decyzji kierownictwa"
+      }
     }
   }
 }

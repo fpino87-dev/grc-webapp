@@ -1263,7 +1263,8 @@
       "checklist_runs": "Kontrol Listeleri",
       "checklist_templates": "Liste Şablonları",
       "kpi_operational": "Operasyonel KPI'lar",
-      "cockpit": "Operasyon Merkezi"
+      "cockpit": "Operasyon Merkezi",
+      "objectives": "Güvenlik hedefleri"
     },
     "collapse": "Menüyü daralt",
     "expand": "Menüyü genişlet"
@@ -4516,7 +4517,9 @@
       "pdca_site_ph": "— PDCA tesisi —",
       "linked_task": "Görev:",
       "linked_pdca": "PDCA:",
-      "save_error": "Kaydetme sırasında hata"
+      "save_error": "Kaydetme sırasında hata",
+      "linked_objective": "Hedef:",
+      "objective_hint": "Hedef, elle ölçülen bir taslak olarak doğar: toplantıdan sonra planı (kaynaklar, değerlendirme yöntemi) tamamlayıp etkinleştirirsiniz, uygunsa bir KPI'a bağlayarak."
     },
     "detail": {
       "meeting_date": "Toplantı tarihi:",
@@ -4653,7 +4656,9 @@
       "sites_overview": "Tesis bazında görünüm",
       "col_site": "Tesis",
       "col_compliance": "% uyumlu",
-      "open_incidents": "Açık olaylar"
+      "open_incidents": "Açık olaylar",
+      "objectives_section": "Güvenlik hedefleri (§6.2)",
+      "objectives_list": "Hedeflerin durumu"
     },
     "participants": {
       "heading": "Başkan ve katılımcılar",
@@ -4712,7 +4717,8 @@
       "miglioramento": "İyileştirme",
       "modifica_sgsi": "BGYS değişikliği",
       "risorse": "Kaynaklar",
-      "altro": "Diğer"
+      "altro": "Diğer",
+      "obiettivo": "Güvenlik hedefi"
     },
     "summary": {
       "heading": "Yönetici özeti",
@@ -4738,6 +4744,115 @@
       "ai_not_configured": "Yapay zekâ motoru yapılandırılmamış (Ayarlar → AI Engine).",
       "ai_error": "Oluşturma başarısız oldu",
       "save_error": "Kaydetme sırasında hata"
+    }
+  },
+  "objectives": {
+    "page_title": "Güvenlik hedefleri",
+    "page_subtitle": "BGYS'nin ölçülebilir taahhütleri (ISO 27001 §6.2): nereye, ne zamana kadar varmak istediğimiz ve bunun sorumlusu.",
+    "empty": "Tanımlanmış güvenlik hedefi yok.",
+    "empty_hint": "Yılda dört ila altı hedef yeterlidir; kapatılacak bir açığın bulunduğu göstergeler için.",
+    "show_closed": "Kapatılan hedefleri de göster",
+    "baseline_to_target": "Başlangıç → hedef",
+    "current_value": "Güncel değer",
+    "progress": "İlerleme",
+    "trend": "Ölçüm seyri",
+    "no_baseline": "başlangıç değeri yok",
+    "elapsed_marker": "Geçen süre: %{{pct}}",
+    "days_left": "{{n}} gün",
+    "record_measure": "Ölçüm kaydet",
+    "kpi_measured_hint": "Ölçümler bağlı KPI'ın haftalık anlık görüntülerinden gelir: buraya girilmez.",
+    "weak_target_warning": "Hedef, KPI'ın uyarı eşiğini aşmıyor: KPI'ın zaten her hafta bildirdiğine bir şey katmıyor.",
+    "counters": {
+      "active": "Aktif",
+      "at_risk": "Risk altında",
+      "missed": "Kaçırılan",
+      "achieved": "Ulaşılan"
+    },
+    "track": {
+      "in_linea": "Hedefte",
+      "a_rischio": "Risk altında",
+      "mancato": "Kaçırıldı",
+      "senza_misure": "Ölçüm yok",
+      "non_applicabile": "—"
+    },
+    "status": {
+      "bozza": "Taslak",
+      "attivo": "Aktif",
+      "raggiunto": "Ulaşıldı",
+      "non_raggiunto": "Ulaşılmadı",
+      "sospeso": "Askıya alındı",
+      "annullato": "İptal edildi"
+    },
+    "origin": {
+      "politica": "Güvenlik politikası",
+      "risk_assessment": "Risk değerlendirmesi",
+      "audit": "Denetim sonucu",
+      "requisito": "Yasal veya sözleşmesel gereklilik",
+      "incidente": "Olay",
+      "riesame": "Yönetimin gözden geçirmesi",
+      "altro": "Diğer"
+    },
+    "measure_source": {
+      "kpi": "Operasyonel KPI",
+      "manual": "Elle ölçüm"
+    },
+    "direction": {
+      "above": "Yüksek olması iyi",
+      "below": "Düşük olması iyi"
+    },
+    "fields": {
+      "code": "Kod",
+      "title": "Başlık",
+      "description": "Açıklama",
+      "origin": "Kaynak",
+      "plant": "Kapsam",
+      "plant_org": "Tüm kuruluş",
+      "measure_source": "Nasıl ölçülür",
+      "kpi": "Bağlı KPI",
+      "unit": "Birim",
+      "start_date": "Dönem başlangıcı",
+      "baseline_value": "Başlangıç değeri",
+      "target_value": "Hedef",
+      "target_direction": "Yön",
+      "target_date": "Son tarih",
+      "owner_role": "Sorumlu rol",
+      "resources": "Gerekli kaynaklar",
+      "evaluation_method": "Sonuç nasıl değerlendirilir",
+      "status": "Durum",
+      "track": "Gidişat",
+      "objective": "Hedef",
+      "value": "Değer",
+      "note": "Not"
+    },
+    "actions": {
+      "new": "Yeni hedef",
+      "activate": "Etkinleştir",
+      "suspend": "Askıya al",
+      "close_reached": "Ulaşıldı olarak kapat",
+      "close_missed": "Ulaşılmadı olarak kapat"
+    },
+    "form": {
+      "new_title": "Yeni güvenlik hedefi",
+      "edit_title": "Hedefi düzenle",
+      "intro": "Hedef; bir sayısı, bir tarihi ve bir sorumlusu olan taahhüttür — izlenecek bir gösterge değil.",
+      "measure_hint": "Bir KPI'a bağlandığında değerler haftalık anlık görüntülerden gelir, çift giriş olmaz. Elle ölçüm yalnızca platformun ölçmediği şeyler içindir.",
+      "evaluation_hint": "Standardın gerektirdiği (§6.2 f): sonuca ulaşılıp ulaşılmadığı nasıl belirlenir."
+    },
+    "help": {
+      "title": "Güvenlik hedefleri",
+      "description": "Güvenlik hedefleri, yönetimin BGYS üzerine aldığı ölçülebilir taahhütlerdir (ISO 27001 §6.2). Bunlar KPI değildir: KPI şu anda nerede olduğumuzu söyler ve eşiği riske göre belirlenmiş bir tabandır; hedef ise son tarihe kadar hedefe ulaşıp ulaşmayacağımızı söyler. Aynı sayı eşikte yeşil, hedefte kırmızı olabilir.",
+      "steps": {
+        "1": "Kapatılacak bir açığın bulunduğu birkaç göstergeyi seçin: yılda dört ila altı yeterlidir. Süreç zaten işliyorsa yalnızca KPI eşiği yeterlidir.",
+        "2": "Başlangıç değerini, hedefi, son tarihi ve sorumlu rolü belirleyin; standardın istediği kaynakları ve değerlendirme yöntemini de ekleyin.",
+        "3": "Platform o sayıyı zaten ölçüyorsa hedefi bir KPI'a bağlayın: değerler haftalık anlık görüntülerden gelir, çift giriş olmaz.",
+        "4": "Hedefi etkinleştirin: o andan itibaren gidişat, ilerlemeyi geçen süreyle karşılaştırır ve geri kalındığında uyarır.",
+        "5": "Hedefe ulaşıldığında sonucu kalıcı kılmak için KPI eşiklerini yükseltin ve yeni hedefi belirleyin."
+      },
+      "connections": {
+        "kpi": "bir göstergeye bağlı hedeflere haftalık ölçümleri sağlar",
+        "management_review": "hedeflerin durumunu d) maddesinde sunar ve yenilerini karara bağlayabilir",
+        "pdca": "yönetimin kararıyla kaçırılan bir hedefin analizini üstlenir"
+      }
     }
   }
 }

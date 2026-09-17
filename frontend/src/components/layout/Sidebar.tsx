@@ -59,6 +59,7 @@ const navGroups: NavGroup[] = [
     labelKey: "sidebar.groups.organisation",
     items: [
       { to: "/governance", labelKey: "sidebar.items.governance", icon: "◈", roles: null },
+      { to: "/objectives", labelKey: "sidebar.items.objectives", icon: "🎯", roles: null },
       { to: "/management-review", labelKey: "sidebar.items.management_review", icon: "📝", roles: ["super_admin", "compliance_officer", "risk_manager"] },
       { to: "/plants", labelKey: "sidebar.items.plants", icon: "🏭", roles: ["super_admin", "compliance_officer"] },
       { to: "/users", labelKey: "sidebar.items.users", icon: "👥", roles: ["super_admin"] },

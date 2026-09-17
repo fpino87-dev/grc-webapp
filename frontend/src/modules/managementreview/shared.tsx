@@ -58,6 +58,11 @@ export type SnapFinding = {
   id: string; title: string; finding_type: string; status: string; response_deadline: string | null;
   overdue: boolean; audit: string; plant_code: string | null;
 };
+export type SnapObjective = {
+  id: string; code: string; title: string; plant_code: string | null; owner_role: string;
+  status: string; baseline_value: number | null; target_value: number; target_date: string | null;
+  current_value: number | null; unit: string; progress_pct: number | null; track: string;
+};
 export type SnapSite = {
   plant_id: string; code: string; name: string; pct_compliant: number | null;
   rischi_critici: number; incidenti_aperti: number; task_scaduti: number;

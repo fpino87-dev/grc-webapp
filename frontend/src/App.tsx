@@ -27,6 +27,7 @@ import { GapAnalysisPage } from "./modules/controls/GapAnalysisPage";
 import { IncidentsList } from "./modules/incidents/IncidentsList";
 import { PlantsList } from "./modules/plants/PlantsList";
 import { GovernancePage } from "./modules/governance/GovernancePage";
+import { ObjectivesPage } from "./modules/objectives/ObjectivesPage";
 import { AssetsPage } from "./modules/assets/AssetsPage";
 import { RiskPage } from "./modules/risk/RiskPage";
 import { TasksPage } from "./modules/tasks/TasksPage";
@@ -130,6 +131,7 @@ export function App() {
           <Route path="incidents" element={<IncidentsList />} />
           <Route path="plants" element={<PlantsList />} />
           <Route path="governance" element={<GovernancePage />} />
+          <Route path="objectives" element={<ObjectivesPage />} />
           <Route path="governance/workflow-documenti" element={<Navigate to="/governance?tab=workflow" replace />} />
           <Route path="assets" element={<AssetsPage />} />
           <Route path="risk" element={<RiskPage />} />

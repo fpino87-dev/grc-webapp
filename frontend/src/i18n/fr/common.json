@@ -1263,7 +1263,8 @@
       "checklist_runs": "Checklists",
       "checklist_templates": "Modèles checklist",
       "kpi_operational": "KPI opérationnels",
-      "cockpit": "Centre Opérationnel"
+      "cockpit": "Centre Opérationnel",
+      "objectives": "Objectifs de sécurité"
     },
     "collapse": "Réduire le menu",
     "expand": "Développer le menu"
@@ -4516,7 +4517,9 @@
       "pdca_site_ph": "— Site du PDCA —",
       "linked_task": "Tâche :",
       "linked_pdca": "PDCA :",
-      "save_error": "Erreur lors de l'enregistrement"
+      "save_error": "Erreur lors de l'enregistrement",
+      "linked_objective": "Objectif :",
+      "objective_hint": "L'objectif naît en brouillon, à mesure manuelle : après la réunion, on complète le plan (ressources, méthode d'évaluation) et on l'active, en le liant éventuellement à un KPI."
     },
     "detail": {
       "meeting_date": "Date de réunion :",
@@ -4653,7 +4656,9 @@
       "sites_overview": "Vue par site",
       "col_site": "Site",
       "col_compliance": "% conforme",
-      "open_incidents": "Incidents ouverts"
+      "open_incidents": "Incidents ouverts",
+      "objectives_section": "Objectifs de sécurité (§6.2)",
+      "objectives_list": "État des objectifs"
     },
     "participants": {
       "heading": "Président et participants",
@@ -4712,7 +4717,8 @@
       "miglioramento": "Amélioration",
       "modifica_sgsi": "Modification du SMSI",
       "risorse": "Ressources",
-      "altro": "Autre"
+      "altro": "Autre",
+      "obiettivo": "Objectif de sécurité"
     },
     "summary": {
       "heading": "Synthèse exécutive",
@@ -4738,6 +4744,115 @@
       "ai_not_configured": "Le moteur IA n'est pas configuré (Paramètres → AI Engine).",
       "ai_error": "La génération a échoué",
       "save_error": "Erreur lors de l'enregistrement"
+    }
+  },
+  "objectives": {
+    "page_title": "Objectifs de sécurité",
+    "page_subtitle": "Les engagements mesurables du SMSI (ISO 27001 §6.2) : où nous voulons arriver, pour quand, et qui en répond.",
+    "empty": "Aucun objectif de sécurité défini.",
+    "empty_hint": "Quatre à six objectifs par an suffisent, sur les indicateurs où un écart reste à combler.",
+    "show_closed": "Afficher aussi les objectifs clôturés",
+    "baseline_to_target": "Départ → cible",
+    "current_value": "Valeur actuelle",
+    "progress": "Progression",
+    "trend": "Évolution des mesures",
+    "no_baseline": "sans valeur de départ",
+    "elapsed_marker": "Temps écoulé : {{pct}} %",
+    "days_left": "{{n}} jours",
+    "record_measure": "Enregistrer une mesure",
+    "kpi_measured_hint": "Les mesures proviennent des instantanés hebdomadaires du KPI lié : elles ne se saisissent pas ici.",
+    "weak_target_warning": "La cible ne dépasse pas le seuil d'attention du KPI : elle n'ajoute rien à ce que le KPI signale déjà chaque semaine.",
+    "counters": {
+      "active": "Actifs",
+      "at_risk": "À risque",
+      "missed": "Manqués",
+      "achieved": "Atteints"
+    },
+    "track": {
+      "in_linea": "Sur la bonne voie",
+      "a_rischio": "À risque",
+      "mancato": "Manqué",
+      "senza_misure": "Sans mesures",
+      "non_applicabile": "—"
+    },
+    "status": {
+      "bozza": "Brouillon",
+      "attivo": "Actif",
+      "raggiunto": "Atteint",
+      "non_raggiunto": "Non atteint",
+      "sospeso": "Suspendu",
+      "annullato": "Annulé"
+    },
+    "origin": {
+      "politica": "Politique de sécurité",
+      "risk_assessment": "Appréciation des risques",
+      "audit": "Résultat d'audit",
+      "requisito": "Exigence légale ou contractuelle",
+      "incidente": "Incident",
+      "riesame": "Revue de direction",
+      "altro": "Autre"
+    },
+    "measure_source": {
+      "kpi": "KPI opérationnel",
+      "manual": "Mesure manuelle"
+    },
+    "direction": {
+      "above": "Plus c'est haut, mieux c'est",
+      "below": "Plus c'est bas, mieux c'est"
+    },
+    "fields": {
+      "code": "Code",
+      "title": "Titre",
+      "description": "Description",
+      "origin": "Origine",
+      "plant": "Périmètre",
+      "plant_org": "Ensemble de l'organisation",
+      "measure_source": "Mode de mesure",
+      "kpi": "KPI lié",
+      "unit": "Unité",
+      "start_date": "Début de période",
+      "baseline_value": "Valeur de départ",
+      "target_value": "Cible",
+      "target_direction": "Sens",
+      "target_date": "Échéance",
+      "owner_role": "Rôle responsable",
+      "resources": "Ressources nécessaires",
+      "evaluation_method": "Évaluation du résultat",
+      "status": "État",
+      "track": "Trajectoire",
+      "objective": "Objectif",
+      "value": "Valeur",
+      "note": "Note"
+    },
+    "actions": {
+      "new": "Nouvel objectif",
+      "activate": "Activer",
+      "suspend": "Suspendre",
+      "close_reached": "Clôturer comme atteint",
+      "close_missed": "Clôturer comme non atteint"
+    },
+    "form": {
+      "new_title": "Nouvel objectif de sécurité",
+      "edit_title": "Modifier l'objectif",
+      "intro": "Un objectif est un engagement avec un chiffre, une date et un responsable — pas un indicateur à surveiller.",
+      "measure_hint": "En le liant à un KPI, les valeurs arrivent des instantanés hebdomadaires, sans double saisie. La mesure manuelle ne sert qu'à ce que la plateforme ne mesure pas.",
+      "evaluation_hint": "Exigé par la norme (§6.2 f) : comment établir si le résultat est atteint."
+    },
+    "help": {
+      "title": "Objectifs de sécurité",
+      "description": "Les objectifs de sécurité sont les engagements mesurables que la direction prend sur le SMSI (ISO 27001 §6.2). Ce ne sont pas des KPI : le KPI dit où nous en sommes maintenant et son seuil est un plancher calé sur le risque ; l'objectif dit si nous atteindrons la cible avant l'échéance. Un même chiffre peut être vert sur le seuil et rouge sur l'objectif.",
+      "steps": {
+        "1": "Choisissez quelques indicateurs où un écart reste à combler : quatre à six par an suffisent. Là où le processus fonctionne déjà, le seuil du KPI suffit.",
+        "2": "Définissez la valeur de départ, la cible, l'échéance et le rôle responsable, ainsi que les ressources et la méthode d'évaluation exigées par la norme.",
+        "3": "Liez l'objectif à un KPI lorsque la plateforme mesure déjà ce chiffre : les valeurs viennent des instantanés hebdomadaires, sans double saisie.",
+        "4": "Activez l'objectif : dès lors, la trajectoire compare la progression au temps écoulé et signale tout retard.",
+        "5": "Une fois la cible atteinte, relevez les seuils du KPI pour consolider le résultat et fixez l'objectif suivant."
+      },
+      "connections": {
+        "kpi": "fournit les mesures hebdomadaires aux objectifs liés à un indicateur",
+        "management_review": "présente l'état des objectifs au point d) et peut en décider de nouveaux",
+        "pdca": "reprend l'analyse d'un objectif manqué, sur décision de la direction"
+      }
     }
   }
 }
