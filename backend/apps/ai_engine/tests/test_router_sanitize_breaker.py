@@ -71,7 +71,7 @@ def test_no_pii_reaches_cloud_provider(ai_config, plant):
 
     captured = {}
 
-    def fake_cloud(config, prompt, system, max_tokens):
+    def fake_cloud(config, prompt, system, max_tokens, model=""):
         captured["prompt"] = prompt
         return "[PLANT_A] presenta un gap di conformità.", 42
 
@@ -97,7 +97,7 @@ def test_sanitize_is_on_by_default(ai_config, plant):
     """route() sanitizza di default (sanitize=True) anche senza passare il flag."""
     captured = {}
 
-    def fake_cloud(config, prompt, system, max_tokens):
+    def fake_cloud(config, prompt, system, max_tokens, model=""):
         captured["prompt"] = prompt
         return "ok", 1
 

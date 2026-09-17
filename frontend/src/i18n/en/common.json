@@ -127,7 +127,17 @@
       "saving": "Saving...",
       "save_config": "Save configuration",
       "saved": "Saved",
-      "save_error": "Save error"
+      "save_error": "Save error",
+      "models_refresh": "Refresh model list",
+      "models_loading": "Reading models…",
+      "models_live": "{{count}} models offered right now by {{provider}}",
+      "models_static_fallback": "Provider not reachable: fallback list",
+      "models_local_live": "{{count}} models downloaded on this Ollama instance",
+      "models_local_unreachable": "Ollama instance unreachable: fallback list",
+      "model_gone": "Model \\u201c{{model}}\\u201d is no longer offered by {{provider}}. Until you pick another one, the engine will automatically use the best available.",
+      "model_local_gone": "Model \\u201c{{model}}\\u201d does not appear to be downloaded on this Ollama instance.",
+      "model_substituted": "instead of {{from}}",
+      "local_slow_hint": "The local model runs on the server's CPU: a long summary can take minutes. For long texts prefer a 7B model or larger."
     }
   },
   "countdown": {

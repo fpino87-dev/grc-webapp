@@ -354,7 +354,17 @@
       "saving": "Zapisywanie...",
       "save_config": "Zapisz konfigurację",
       "saved": "Zapisano",
-      "save_error": "Błąd zapisu"
+      "save_error": "Błąd zapisu",
+      "models_refresh": "Odśwież listę modeli",
+      "models_loading": "Odczyt modeli…",
+      "models_live": "{{count}} modeli oferowanych teraz przez {{provider}}",
+      "models_static_fallback": "Dostawca nieosiągalny: lista zapasowa",
+      "models_local_live": "{{count}} modeli pobranych na tej instancji Ollama",
+      "models_local_unreachable": "Instancja Ollama nieosiągalna: lista zapasowa",
+      "model_gone": "Model „{{model}}” nie jest już oferowany przez {{provider}}. Dopóki nie wybierzesz innego, silnik automatycznie użyje najlepszego dostępnego.",
+      "model_local_gone": "Model „{{model}}” nie wygląda na pobrany na tej instancji Ollama.",
+      "model_substituted": "zamiast {{from}}",
+      "local_slow_hint": "Model lokalny działa na CPU serwera: długie podsumowanie może zająć minuty. Do długich tekstów lepszy jest model 7B lub większy."
     }
   },
   "controls": {

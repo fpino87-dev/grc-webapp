@@ -60,22 +60,46 @@ class AiProviderConfigViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="models-catalog")
     def models_catalog(self, request):
+        """Catalogo statico: resta come ripiego per la pagina quando il
+        provider non è interrogabile (nessuna chiave, rete assente)."""
         return Response(MODELS_BY_PROVIDER)
+
+    @action(detail=True, methods=["get"], url_path="available-models")
+    def available_models(self, request, pk=None):
+        """Modelli realmente offerti dal provider e da Ollama, adesso.
+
+        Il catalogo statico invecchia — i provider dismettono modelli ogni
+        pochi mesi — e un menù che offre un modello inesistente produce un
+        errore che sembra un guasto della piattaforma. `?refresh=1` ignora la
+        cache di 15 minuti.
+        """
+        from .catalog import available_models
+
+        config = self.get_object()
+        refresh = request.query_params.get("refresh") in ("1", "true", "yes")
+        return Response(available_models(config, refresh=refresh))
 
     @action(detail=True, methods=["post"], url_path="test-connection")
     def test_connection(self, request, pk=None):
         from .router import _call_cloud, _call_ollama
 
+        from .catalog import resolve_cloud_model
+
         config = self.get_object()
         results = {}
         try:
-            text, tokens = _call_cloud(config, "Rispondi solo: ok", "")
-            results["cloud"] = {"ok": True, "response": (text or "").strip()[:50], "tokens": tokens}
+            model, substituted = resolve_cloud_model(config)
+            text, tokens = _call_cloud(config, "Rispondi solo: ok", "", model=model)
+            results["cloud"] = {
+                "ok": True, "response": (text or "").strip()[:50], "tokens": tokens,
+                "model": model, "substituted_from": substituted,
+            }
         except Exception as exc:
             results["cloud"] = {"ok": False, "error": str(exc)[:200]}
         try:
             text = _call_ollama("Rispondi solo: ok", config.local_model, config.local_endpoint)
-            results["local"] = {"ok": True, "response": (text or "").strip()[:50]}
+            results["local"] = {"ok": True, "response": (text or "").strip()[:50],
+                                "model": config.local_model}
         except Exception as exc:
             results["local"] = {"ok": False, "error": str(exc)[:200]}
 

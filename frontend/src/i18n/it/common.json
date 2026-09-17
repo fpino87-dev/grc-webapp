@@ -127,7 +127,17 @@
       "saving": "Salvataggio...",
       "save_config": "Salva configurazione",
       "saved": "Salvato",
-      "save_error": "Errore nel salvataggio"
+      "save_error": "Errore nel salvataggio",
+      "models_refresh": "Aggiorna elenco modelli",
+      "models_loading": "Lettura modelli…",
+      "models_live": "{{count}} modelli offerti ora da {{provider}}",
+      "models_static_fallback": "Provider non interrogabile: elenco di riserva",
+      "models_local_live": "{{count}} modelli scaricati su questa istanza Ollama",
+      "models_local_unreachable": "Istanza Ollama non raggiungibile: elenco di riserva",
+      "model_gone": "Il modello «{{model}}» non è più offerto da {{provider}}. Finché non ne scegli un altro, il motore userà automaticamente il migliore disponibile.",
+      "model_local_gone": "Il modello «{{model}}» non risulta scaricato su questa istanza Ollama.",
+      "model_substituted": "al posto di {{from}}",
+      "local_slow_hint": "Il modello locale gira sulla CPU del server: una sintesi lunga può richiedere minuti. Per i testi lunghi conviene un modello da 7B in su."
     }
   },
   "countdown": {

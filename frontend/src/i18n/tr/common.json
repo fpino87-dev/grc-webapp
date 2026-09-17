@@ -354,7 +354,17 @@
       "saving": "Kaydediliyor...",
       "save_config": "Yapılandırmayı kaydet",
       "saved": "Kaydedildi",
-      "save_error": "Kaydetme hatası"
+      "save_error": "Kaydetme hatası",
+      "models_refresh": "Model listesini yenile",
+      "models_loading": "Modeller okunuyor…",
+      "models_live": "{{provider}} tarafından şu anda sunulan {{count}} model",
+      "models_static_fallback": "Sağlayıcıya ulaşılamıyor: yedek liste",
+      "models_local_live": "Bu Ollama örneğine indirilmiş {{count}} model",
+      "models_local_unreachable": "Ollama örneğine ulaşılamıyor: yedek liste",
+      "model_gone": "«{{model}}» modeli artık {{provider}} tarafından sunulmuyor. Başka bir model seçene kadar motor otomatik olarak mevcut en iyisini kullanacak.",
+      "model_local_gone": "«{{model}}» modeli bu Ollama örneğinde indirilmiş görünmüyor.",
+      "model_substituted": "{{from}} yerine",
+      "local_slow_hint": "Yerel model sunucunun CPU'sunda çalışır: uzun bir özet dakikalar sürebilir. Uzun metinler için 7B ve üzeri bir model tercih edin."
     }
   },
   "controls": {

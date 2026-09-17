@@ -9,8 +9,16 @@ import uuid
 from django.utils import timezone
 
 from . import circuit_breaker
+from .catalog import resolve_cloud_model
 
 logger = logging.getLogger(__name__)
+
+
+# L'inferenza locale su CPU si misura in minuti, non in secondi: il timeout
+# pensato per una API cloud (60-120s) la interrompe a metà generazione e la fa
+# sembrare "giù" quando sta solo lavorando. Il fallback locale usa quindi un
+# limite proprio, non quello del chiamante.
+LOCAL_MIN_TIMEOUT = 300
 
 
 class LlmUnavailable(Exception):
@@ -19,12 +27,19 @@ class LlmUnavailable(Exception):
     (es. HTTP 503) invece di propagare un errore opaco."""
 
 
-def _call_ollama(prompt: str, model: str, endpoint: str, system: str = "", timeout: int = 60) -> str:
+def _call_ollama(prompt: str, model: str, endpoint: str, system: str = "", timeout: int = 60,
+                 max_tokens: int = 0) -> str:
     import httpx
 
     payload = {"model": model, "prompt": prompt, "stream": False}
     if system:
         payload["system"] = system
+    if max_tokens:
+        # Il limite di lunghezza chiesto dal chiamante veniva applicato solo al
+        # cloud: in locale Ollama generava senza freno finché il modello non si
+        # fermava da sé, e la richiesta scadeva per timeout dando l'impressione
+        # che il modello fosse irraggiungibile.
+        payload["options"] = {"num_predict": max_tokens}
     resp = httpx.post(f"{endpoint}/api/generate", json=payload, timeout=timeout)
     resp.raise_for_status()
     return resp.json().get("response", "")
@@ -123,15 +138,26 @@ def route(
         used_fallback = True
         task_provider = "ollama"
 
+    cloud_error = ""
+    model_substituted = None
     if task_provider == "cloud":
         try:
-            text, tokens_used = _call_cloud(config, prompt_to_send, system, max_tokens)
+            # Il modello configurato può essere stato dismesso dal provider:
+            # si usa quello se c'è ancora, altrimenti il migliore disponibile.
+            model, model_substituted = resolve_cloud_model(config)
+            text, tokens_used = _call_cloud(config, prompt_to_send, system, max_tokens, model=model)
             provider_used = config.cloud_provider
-            model_used = config.cloud_model
+            model_used = model
+            if model_substituted:
+                logger.warning(
+                    "Modello '%s' non più offerto da %s: usato '%s'. Aggiornare la configurazione.",
+                    model_substituted, config.cloud_provider, model,
+                )
             config.tokens_used_month += tokens_used
             config.save(update_fields=["tokens_used_month", "updated_at"])
             circuit_breaker.record_success(cloud_key)
         except Exception as exc:
+            cloud_error = str(exc)[:200]
             logger.warning("Cloud AI error (%s): %s — fallback Ollama", config.cloud_provider, exc)
             circuit_breaker.record_failure(cloud_key)
             used_fallback = True
@@ -139,16 +165,23 @@ def route(
 
     if task_provider == "ollama":
         try:
-            text = _call_ollama(prompt_to_send, config.local_model, config.local_endpoint, system, timeout)
+            text = _call_ollama(
+                prompt_to_send, config.local_model, config.local_endpoint, system,
+                max(timeout, LOCAL_MIN_TIMEOUT), max_tokens=max_tokens,
+            )
             circuit_breaker.record_success(ollama_key)
         except Exception as exc:
             circuit_breaker.record_failure(ollama_key)
             logger.error(
                 "LLM non disponibile (cloud_fallback=%s, ollama giù): %s", used_fallback, exc
             )
-            raise LlmUnavailable(
-                "Nessun provider AI disponibile (cloud e fallback locale non raggiungibili)."
-            ) from exc
+            # Il messaggio dice QUALE dei due percorsi ha ceduto e perché: con
+            # il testo generico di prima, un modello dismesso dal provider e un
+            # Ollama spento erano indistinguibili.
+            detail = f"Modello locale '{config.local_model}': {str(exc)[:120]}"
+            if cloud_error:
+                detail = f"Cloud {config.cloud_provider} ({cloud_error}); {detail}"
+            raise LlmUnavailable(f"Nessun provider AI disponibile. {detail}") from exc
         provider_used = "ollama"
         model_used = config.local_model
         tokens_used = 0
@@ -187,14 +220,17 @@ def route(
         "provider": provider_used,
         "model": model_used,
         "used_fallback": used_fallback,
+        "model_substituted": model_substituted,
         "tokens_used": tokens_used,
         "interaction_id": interaction_id,
     }
 
 
-def _call_cloud(config, prompt: str, system: str, max_tokens: int = 2048) -> tuple[str, int]:
+def _call_cloud(config, prompt: str, system: str, max_tokens: int = 2048, model: str = "") -> tuple[str, int]:
+    """`model` esplicito quando il chiamante ha già risolto il catalogo vivo
+    (vedi `resolve_cloud_model`); altrimenti quello in configurazione."""
     provider = config.cloud_provider
-    model = config.cloud_model
+    model = model or config.cloud_model
     api_key = config.api_key
 
     if provider == "anthropic":

@@ -69,6 +69,20 @@ export interface AiProviderConfig {
   task_routing: Record<string, "cloud" | "ollama">;
 }
 
+export interface ModelSource {
+  models: string[];
+  /** null = non verificabile (nessuna chiave, provider irraggiungibile);
+   *  false = verificato e non più offerto dal provider. */
+  configured_available: boolean | null;
+  configured: string;
+  error: string | null;
+}
+
+export interface AvailableModels {
+  cloud: ModelSource & { provider: string };
+  local: ModelSource & { endpoint: string };
+}
+
 export const aiApi = {
   suggest: (task_type: string, entity_id: string) =>
     apiClient.post<AiSuggestResponse>("/ai/suggest/", { task_type, entity_id }).then((r) => r.data),
@@ -80,7 +94,13 @@ export const aiApi = {
   createConfig: (payload: AiProviderConfig) => apiClient.post<AiProviderConfig>("/ai/config/", payload).then((r) => r.data),
   updateConfig: (id: string, payload: Partial<AiProviderConfig>) =>
     apiClient.patch<AiProviderConfig>(`/ai/config/${id}/`, payload).then((r) => r.data),
+  /** Catalogo statico: ripiego quando il provider non è interrogabile. */
   modelsCatalog: () => apiClient.get<Record<string, [string, string][]>>("/ai/config/models-catalog/").then((r) => r.data),
+  /** Modelli realmente offerti dal provider e da Ollama in questo momento. */
+  availableModels: (id: string, refresh = false) =>
+    apiClient
+      .get<AvailableModels>(`/ai/config/${id}/available-models/`, refresh ? { params: { refresh: 1 } } : undefined)
+      .then((r) => r.data),
   testConnection: (id: string) => apiClient.post(`/ai/config/${id}/test-connection/`, {}).then((r) => r.data),
   resetBudget: (id: string) => apiClient.post(`/ai/config/${id}/reset-budget/`, {}).then((r) => r.data),
   assistant: {

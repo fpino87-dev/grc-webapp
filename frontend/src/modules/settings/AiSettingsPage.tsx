@@ -34,7 +34,10 @@ export function AiSettingsPage() {
   });
   // "********" = key già salvata, non modificata dall'utente
   const [apiKeyMasked, setApiKeyMasked] = useState(false);
-  const [testResult, setTestResult] = useState<Record<string, { ok: boolean; response?: string; error?: string; tokens?: number }> | null>(null);
+  const [testResult, setTestResult] = useState<Record<string, {
+    ok: boolean; response?: string; error?: string; tokens?: number;
+    model?: string; substituted_from?: string | null;
+  }> | null>(null);
 
   const { data: catalog } = useQuery({
     queryKey: ["ai-models-catalog"],
@@ -45,6 +48,17 @@ export function AiSettingsPage() {
     queryFn: aiApi.listConfig,
   });
   const activeConfig = useMemo(() => configs?.find((c) => c.active) ?? configs?.[0], [configs]);
+
+  // Modelli realmente offerti dal provider adesso. Il catalogo statico
+  // elencava modelli dismessi: la scelta cadeva su un modello inesistente e
+  // ogni chiamata falliva. Serve solo da ripiego se il provider non risponde.
+  const { data: live, isFetching: liveLoading, refetch: refetchLive } = useQuery({
+    queryKey: ["ai-available-models", activeConfig?.id],
+    queryFn: () => aiApi.availableModels(activeConfig!.id!),
+    enabled: !!activeConfig?.id,
+    staleTime: 5 * 60 * 1000,
+  });
+
 
   useEffect(() => {
     if (activeConfig) {
@@ -82,7 +96,22 @@ export function AiSettingsPage() {
     return <div className="p-6 text-sm text-gray-600">{t("ai.settings.insufficient_permissions")}</div>;
   }
 
-  const cloudModels = catalog?.[form.cloud_provider] ?? [];
+  const staticCloudModels = catalog?.[form.cloud_provider] ?? [];
+  const liveIsForCurrentProvider = live?.cloud.provider === form.cloud_provider;
+  const cloudModels: [string, string][] = liveIsForCurrentProvider && live!.cloud.models.length
+    ? live!.cloud.models.map((m) => [m, m] as [string, string])
+    : staticCloudModels;
+  const localModels: [string, string][] = live?.local.models.length
+    ? live.local.models.map((m) => [m, m] as [string, string])
+    : (catalog?.ollama ?? []);
+  // Il modello salvato resta selezionabile anche se il provider non lo offre
+  // più, altrimenti il menù mostrerebbe in silenzio un altro valore e la
+  // pagina mentirebbe su cosa è configurato.
+  const withConfigured = (list: [string, string][], current: string): [string, string][] =>
+    current && !list.some(([v]) => v === current) ? [[current, current], ...list] : list;
+  const cloudGone = liveIsForCurrentProvider && live?.cloud.configured_available === false
+    && live?.cloud.configured === form.cloud_model;
+  const localGone = live?.local.configured_available === false && live?.local.configured === form.local_model;
   const used = activeConfig?.tokens_used_month ?? 0;
   const budget = activeConfig?.monthly_token_budget ?? form.monthly_token_budget;
   const pct = budget > 0 ? Math.min(100, Math.round((used / budget) * 100)) : 100;
@@ -136,13 +165,40 @@ export function AiSettingsPage() {
             ))}
           </select>
           <select
-            className="border rounded px-2 py-2 text-sm"
+            className={`border rounded px-2 py-2 text-sm ${cloudGone ? "border-amber-400 bg-amber-50" : ""}`}
             value={form.cloud_model}
             onChange={(e) => setForm((f) => ({ ...f, cloud_model: e.target.value }))}
           >
-            {cloudModels.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            {withConfigured(cloudModels, form.cloud_model).map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
           </select>
         </div>
+
+        <div className="flex items-center gap-3 text-xs">
+          <button
+            type="button"
+            onClick={() => refetchLive()}
+            disabled={!activeConfig?.id || liveLoading}
+            className="px-2 py-1 border rounded text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+          >
+            {liveLoading ? t("ai.settings.models_loading") : `↻ ${t("ai.settings.models_refresh")}`}
+          </button>
+          {liveIsForCurrentProvider && live!.cloud.models.length > 0 && (
+            <span className="text-gray-500">
+              {t("ai.settings.models_live", { count: live!.cloud.models.length, provider: live!.cloud.provider })}
+            </span>
+          )}
+          {live?.cloud.error && (
+            <span className="text-gray-400">{t("ai.settings.models_static_fallback")}</span>
+          )}
+        </div>
+
+        {cloudGone && (
+          <div className="bg-amber-50 border border-amber-300 rounded p-2.5 text-xs text-amber-800">
+            {t("ai.settings.model_gone", { model: form.cloud_model, provider: form.cloud_provider })}
+          </div>
+        )}
 
         {/* API Key con indicatore stato */}
         <div className="space-y-1">
@@ -187,7 +243,15 @@ export function AiSettingsPage() {
                 </span>
                 <span className="font-medium w-12">{target}</span>
                 {res.ok
-                  ? <span className="text-gray-600">{res.response}{res.tokens ? ` — ${res.tokens} ${t("ai.settings.token_unit")}` : ""}</span>
+                  ? (
+                    <span className="text-gray-600">
+                      {res.response}{res.tokens ? ` — ${res.tokens} ${t("ai.settings.token_unit")}` : ""}
+                      {res.model ? ` · ${res.model}` : ""}
+                      {res.substituted_from && (
+                        <span className="text-amber-700"> · {t("ai.settings.model_substituted", { from: res.substituted_from })}</span>
+                      )}
+                    </span>
+                  )
                   : <span className="text-red-500">{res.error}</span>
                 }
               </div>
@@ -205,12 +269,27 @@ export function AiSettingsPage() {
           onChange={(e) => setForm((f) => ({ ...f, local_endpoint: e.target.value }))}
         />
         <select
-          className="border rounded px-2 py-2 text-sm"
+          className={`border rounded px-2 py-2 text-sm ${localGone ? "border-amber-400 bg-amber-50" : ""}`}
           value={form.local_model}
           onChange={(e) => setForm((f) => ({ ...f, local_model: e.target.value }))}
         >
-          {(catalog?.ollama ?? []).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          {withConfigured(localModels, form.local_model).map(([value, label]) => (
+            <option key={value} value={value}>{label}</option>
+          ))}
         </select>
+        {live?.local.models.length ? (
+          <p className="text-xs text-gray-500">
+            {t("ai.settings.models_local_live", { count: live.local.models.length })}
+          </p>
+        ) : live?.local.error ? (
+          <p className="text-xs text-amber-700">{t("ai.settings.models_local_unreachable")}</p>
+        ) : null}
+        {localGone && (
+          <div className="bg-amber-50 border border-amber-300 rounded p-2.5 text-xs text-amber-800">
+            {t("ai.settings.model_local_gone", { model: form.local_model })}
+          </div>
+        )}
+        <p className="text-xs text-gray-400">{t("ai.settings.local_slow_hint")}</p>
       </div>
 
       {/* Budget Token */}

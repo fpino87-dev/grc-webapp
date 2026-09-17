@@ -354,7 +354,17 @@
       "saving": "Enregistrement...",
       "save_config": "Enregistrer la configuration",
       "saved": "Enregistré",
-      "save_error": "Erreur d'enregistrement"
+      "save_error": "Erreur d'enregistrement",
+      "models_refresh": "Actualiser la liste des modèles",
+      "models_loading": "Lecture des modèles…",
+      "models_live": "{{count}} modèles proposés actuellement par {{provider}}",
+      "models_static_fallback": "Fournisseur injoignable : liste de secours",
+      "models_local_live": "{{count}} modèles téléchargés sur cette instance Ollama",
+      "models_local_unreachable": "Instance Ollama injoignable : liste de secours",
+      "model_gone": "Le modèle « {{model}} » n'est plus proposé par {{provider}}. Tant que vous n'en choisissez pas un autre, le moteur utilisera automatiquement le meilleur disponible.",
+      "model_local_gone": "Le modèle « {{model}} » ne semble pas téléchargé sur cette instance Ollama.",
+      "model_substituted": "à la place de {{from}}",
+      "local_slow_hint": "Le modèle local tourne sur le CPU du serveur : une synthèse longue peut prendre plusieurs minutes. Pour les textes longs, préférez un modèle de 7B ou plus."
     }
   },
   "controls": {
