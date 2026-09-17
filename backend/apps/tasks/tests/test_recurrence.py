@@ -211,3 +211,44 @@ def test_create_task_can_open_a_recurring_series(plant):
         recurrence="semiannual",
     )
     assert task.recurrence == "semiannual"
+
+
+@pytest.mark.django_db
+def test_deleting_the_generated_occurrence_does_not_make_it_come_back(plant):
+    """Il task che tornava ogni notte.
+
+    Chi elimina l'occorrenza generata sta dicendo che quel periodo è chiuso,
+    non che ne vuole un'altra. Il controllo di idempotenza passava però dal
+    manager con soft delete: l'occorrenza eliminata spariva dal controllo e il
+    giro notturno ne creava una nuova, all'infinito. Per fermare la serie si
+    agisce sul task ricorrente padre, non sull'occorrenza.
+    """
+    from apps.tasks.models import Task
+    from apps.tasks.tasks import roll_recurring_tasks
+
+    task = _task(plant, "monthly", timezone.localdate() - datetime.timedelta(days=3))
+    roll_recurring_tasks()
+    Task.objects.get(parent_task=task).soft_delete()
+
+    roll_recurring_tasks()
+    roll_recurring_tasks()
+
+    assert Task.objects.all_with_deleted().filter(parent_task=task).count() == 1
+    assert not Task.objects.filter(parent_task=task).exists()
+
+
+@pytest.mark.django_db
+def test_deleting_the_occurrence_after_completion_does_not_respawn_it(plant, user):
+    """Stessa garanzia sul percorso della chiusura, non solo del giro notturno."""
+    from apps.tasks.models import Task
+    from apps.tasks.services import complete_task
+    from apps.tasks.tasks import roll_recurring_tasks
+
+    task = _task(plant, "monthly", timezone.localdate() - datetime.timedelta(days=3))
+    complete_task(task, user)
+    Task.objects.get(parent_task=task).soft_delete()
+
+    complete_task(task, user)
+    roll_recurring_tasks()
+
+    assert Task.objects.all_with_deleted().filter(parent_task=task).count() == 1

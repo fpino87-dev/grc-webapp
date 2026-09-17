@@ -15,6 +15,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ### Fixed
 
+- **Il task ricorrente che tornava ogni notte**: eliminando l'occorrenza generata da un task ricorrente, il giro notturno ne creava un'altra la notte successiva — e così a ogni eliminazione, dando l'impressione di un task impossibile da togliere. Il controllo che impedisce di duplicare la ricorrenza non vedeva le occorrenze **eliminate**, quindi il task padre risultava non aver ancora propagato la serie. Ora chi elimina un'occorrenza chiude quel periodo: per fermare la serie si agisce sul task ricorrente padre (chiudendolo o togliendogli la ricorrenza).
+
 - **Sintesi IA: niente più etichette tecniche nel testo**: il modello ricopiava nella prosa le annotazioni di servizio del prompt, producendo frasi come «È stato approvato [modifica al SGSI, entro 2026-11-16]». Le decisioni arrivano ora al modello in forma discorsiva.
 - **Traduzioni del verbale realmente applicate**: 41 messaggi (intestazioni di tabella, esiti, messaggi del riesame e degli obiettivi) erano rimasti marcati «fuzzy» nei cataloghi, condizione che Django ignora a runtime: agli utenti EN/FR/PL/TR comparivano ancora in italiano. Tradotti e riattivati in tutte e quattro le lingue.
 

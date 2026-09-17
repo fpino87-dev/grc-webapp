@@ -109,8 +109,16 @@ def next_recurrence_due_date(task, today=None):
 
 def _spawn_next_recurrence(task, note=""):
     """Crea l'occorrenza successiva. Idempotente: un task genera al massimo un
-    figlio, così chiusura e scadenza non possono duplicare la ricorrenza."""
-    if task.recurrence_children.exists():
+    figlio, così chiusura e scadenza non possono duplicare la ricorrenza.
+
+    Il controllo guarda anche le occorrenze **eliminate**: `recurrence_children`
+    passa dal manager con soft delete, quindi cancellare l'occorrenza generata
+    la rendeva invisibile al controllo e il giro notturno ne creava un'altra —
+    il task tornava ogni notte e sembrava impossibile da togliere. Chi elimina
+    un'occorrenza sta dicendo che quel periodo è chiuso, non che ne vuole
+    un'altra: per fermare la serie si agisce sul task ricorrente padre.
+    """
+    if Task.objects.all_with_deleted().filter(parent_task=task).exists():
         return None
 
     due_date = next_recurrence_due_date(task)

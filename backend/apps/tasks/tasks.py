@@ -162,8 +162,11 @@ def roll_recurring_tasks(self):
     from .models import Task
 
     today = timezone.localdate()
-    # Un task che ha già un figlio ha già propagato la ricorrenza.
-    has_child = Task.objects.filter(parent_task=OuterRef("pk"))
+    # Un task che ha già un figlio ha già propagato la ricorrenza — anche se
+    # quel figlio è stato poi eliminato (`all_with_deleted`): col manager
+    # normale la cancellazione dell'occorrenza faceva ripartire la generazione
+    # la notte successiva, all'infinito.
+    has_child = Task.objects.all_with_deleted().filter(parent_task=OuterRef("pk"))
     pending = (
         Task.objects.filter(
             recurrence__in=Task.RECURRENCE_STEPS.keys(),
