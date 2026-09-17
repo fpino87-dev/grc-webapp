@@ -4432,7 +4432,7 @@
       "title": "Revue de Direction — M13",
       "description": "Gère la revue de direction périodique du SMSI. Génère un instantané figé des données GRC au moment de la réunion et produit le rapport formel du CISO téléchargeable.",
       "steps": {
-        "1": "Créez la revue avec titre, site et date de réunion",
+        "1": "Créez la revue avec titre, site, date, président et participants",
         "2": "Démarrez la réunion pour passer le statut à « En cours »",
         "3": "Cliquez sur « Générer l'instantané des données » : les KPI sont figés à cet instant",
         "4": "Présentez les données en réunion — l'instantané ne changera plus",
@@ -4442,12 +4442,12 @@
         "8": "Téléchargez le rapport CISO en HTML (imprimable/archivable)"
       },
       "connections": {
-        "risk": "Risques par niveau et par responsable dans l'instantané",
+        "risk": "Risques critiques et risques formellement acceptés dans l'instantané",
         "incidents": "Incidents des 12 derniers mois dans l'instantané",
         "pdca": "PDCA ouverts et bloqués dans l'instantané"
       },
       "config_needed": {
-        "1": "Nommer le CISO comme président dans M00 Governance"
+        "1": "Nommer le RSSI dans M00 Governance : il est proposé comme président de la revue"
       }
     },
     "list": {
@@ -4530,12 +4530,12 @@
       "need_snapshot_tip": "Générez d'abord l'instantané des données",
       "need_snapshot": "Générez d'abord l'instantané des données pour pouvoir approuver",
       "snapshot_error": "Erreur lors de la génération de l'instantané",
-      "approve_error": "Erreur lors de l'approbation"
+      "approve_error": "Erreur lors de l'approbation",
+      "regen_for_details": "Instantané généré avant l'ajout des détails : régénérez-le pour voir les listes de documents, risques, incidents et tâches."
     },
     "snap": {
       "compliance_fw": "Conformité par framework",
       "risk_profile": "Profil de risque",
-      "risks_by_owner": "Risques par responsable",
       "docs_evidence": "Documents et preuves",
       "incidents_12m": "Incidents (12 derniers mois)",
       "pdca_task": "PDCA et tâches",
@@ -4546,9 +4546,6 @@
       "low": "Faibles",
       "critical_no_plan": "Critiques sans plan",
       "risks_no_owner": "{{count}} risques sans responsable assigné",
-      "owner": "Responsable",
-      "tot": "Tot",
-      "crit": "Critiques",
       "approved": "Approuvés",
       "expiring_90": "Expirant (90j)",
       "expired": "Expirés",
@@ -4561,7 +4558,57 @@
       "blocked_90": "Bloqués >90j",
       "closed_12m": "Fermés 12m",
       "tasks_overdue": "Tâches en retard",
-      "critical_no_bcp": "{{count}} processus critiques sans plan PCA"
+      "critical_no_bcp": "{{count}} processus critiques sans plan PCA",
+      "more": "… et {{count}} autres",
+      "gap_controls": "Contrôles en écart",
+      "docs_expired": "Documents expirés",
+      "docs_expiring": "À réviser sous 90 jours",
+      "docs_approved_since": "Approuvés depuis le {{date}}",
+      "col_document": "Document",
+      "col_owner": "Responsable",
+      "col_review_due": "Révision prévue",
+      "col_approved_at": "Approuvé le",
+      "top_critical": "Risques critiques (résiduel le plus élevé)",
+      "col_risk": "Risque",
+      "col_asset_process": "Actif / processus",
+      "col_score": "Inhérent → résiduel",
+      "col_treatment": "Traitement",
+      "col_plan": "Plan",
+      "accepted_risks": "Risques formellement acceptés",
+      "col_accepted_by": "Accepté par",
+      "col_acceptance_expiry": "Échéance de l'acceptation",
+      "incidents_open_list": "Incidents ouverts",
+      "incidents_nis2_list": "Notifiés NIS2 (12 mois)",
+      "col_incident": "Incident",
+      "col_detected": "Détecté le",
+      "col_severity": "Gravité",
+      "col_status": "Statut",
+      "pdca_blocked_list": "Cycles PDCA bloqués en PLAN depuis plus de 90 jours",
+      "col_cycle": "Cycle",
+      "col_opened": "Ouvert le",
+      "tasks_overdue_list": "Tâches en retard (par priorité)",
+      "col_task": "Tâche",
+      "col_priority": "Priorité",
+      "col_due": "Échéance",
+      "col_role": "Rôle",
+      "yes": "Oui",
+      "no": "Non"
+    },
+    "participants": {
+      "heading": "Président et participants",
+      "chair": "Présidée par",
+      "attendees": "Participants",
+      "none": "— Aucun —",
+      "chair_missing": "Non indiqué",
+      "edit": "Modifier",
+      "save": "Enregistrer",
+      "saving": "Enregistrement...",
+      "cancel": "Annuler",
+      "search_ph": "Rechercher une personne...",
+      "selected": "{{count}} sélectionnés",
+      "suggested": "Proposé selon le rôle en Governance : {{name}}",
+      "save_error": "Erreur lors de l'enregistrement",
+      "locked": "Non modifiables après l'approbation"
     }
   }
 }

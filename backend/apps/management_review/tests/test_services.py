@@ -66,3 +66,90 @@ def test_approve_review_ok_then_idempotent(review, user):
     # seconda approvazione → errore
     with pytest.raises(ValidationError):
         approve_review(out, user)
+
+
+# ── Dettagli executive nello snapshot ──────────────────────────────────────────
+
+def test_snapshot_lists_documents_risks_incidents_details(review, plant, user):
+    from datetime import timedelta
+    from apps.documents.models import Document
+    from apps.incidents.models import Incident
+    from apps.risk.models import RiskAssessment, RiskMitigationPlan
+    from apps.management_review.services import generate_snapshot
+
+    today = timezone.localdate()
+    Document.objects.create(
+        plant=plant, title="Policy scaduta", category="policy", document_type="policy",
+        status="approvato", review_due_date=today - timedelta(days=5), owner=user,
+    )
+    Document.objects.create(
+        plant=plant, title="Procedura in scadenza", category="procedura", document_type="procedura",
+        status="approvato", review_due_date=today + timedelta(days=30),
+        approved_at=timezone.now(),
+    )
+    RiskAssessment.objects.create(
+        plant=plant, name="Ransomware MES", assessment_type="OT", status="completato",
+        probability=5, impact=4, inherent_probability=5, inherent_impact=5, owner=user,
+    )
+    covered = RiskAssessment.objects.create(
+        plant=plant, name="Phishing", assessment_type="IT", status="completato",
+        probability=4, impact=4,
+    )
+    RiskMitigationPlan.objects.create(assessment=covered, action="MFA", due_date=today)
+    RiskAssessment.objects.create(
+        plant=plant, name="Accettato", assessment_type="IT", status="completato",
+        probability=2, impact=2, risk_accepted_formally=True, risk_accepted_by=user,
+    )
+    Incident.objects.create(
+        plant=plant, title="Malware linea 3", description="x", detected_at=timezone.now(),
+        severity="alta", status="aperto",
+    )
+
+    snap = generate_snapshot(review, user)
+
+    docs = snap["documenti"]
+    assert [d["title"] for d in docs["elenco_scaduti"]] == ["Policy scaduta"]
+    assert docs["elenco_scaduti"][0]["owner"] == "mrs@x.it"
+    assert [d["title"] for d in docs["elenco_in_scadenza"]] == ["Procedura in scadenza"]
+    assert docs["approvati_periodo"] == 1
+
+    rischi = snap["rischi"]
+    assert rischi["rosso"] == 2
+    assert rischi["senza_piano"] == 1
+    top = rischi["top_critici"]
+    assert top[0]["name"] == "Ransomware MES"  # score più alto prima
+    assert top[0]["inherent_score"] == 25 and top[0]["score"] == 20
+    assert top[0]["has_plan"] is False
+    assert next(r for r in top if r["name"] == "Phishing")["has_plan"] is True
+    assert [r["name"] for r in rischi["elenco_accettati"]] == ["Accettato"]
+
+    assert [i["title"] for i in snap["incidenti"]["elenco_aperti"]] == ["Malware linea 3"]
+    assert "risks_by_owner" not in snap
+
+
+def test_suggest_chair_prefers_plant_ciso_then_org(plant, user):
+    from apps.governance.models import RoleAssignment
+    from apps.management_review.services import suggest_chair
+
+    assert suggest_chair(plant.id) is None
+    org_ciso = User.objects.create_user(username="orgciso", email="o@x.it", password="x")
+    RoleAssignment.objects.create(
+        user=org_ciso, role="ciso", scope_type="org", valid_from=timezone.localdate(),
+    )
+    assert suggest_chair(plant.id) == org_ciso
+    RoleAssignment.objects.create(
+        user=user, role="ciso", scope_type="plant", scope_id=plant.id,
+        valid_from=timezone.localdate(),
+    )
+    assert suggest_chair(plant.id) == user
+    assert suggest_chair(None) == org_ciso
+
+
+def test_chair_locked_after_approval(review, user):
+    from apps.management_review.services import check_review_editable
+
+    check_review_editable(review, ["chair", "attendees"])  # bozza: ok
+    review.approval_status = "approvato"
+    with pytest.raises(ValidationError):
+        check_review_editable(review, ["chair"])
+    check_review_editable(review, ["status"])  # altri campi non bloccati qui

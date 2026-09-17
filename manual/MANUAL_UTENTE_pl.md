@@ -689,10 +689,12 @@ Decyzje z odpowiedzialnym i terminem są automatycznie przekształcane w zadania
 
 ### Snapshot danych, zamknięcie i zatwierdzenie
 
+**Przewodniczącego i uczestników** wskazuje się przy tworzeniu przeglądu lub w dedykowanej sekcji szczegółów. Jako przewodniczący proponowany jest CISO wyznaczony w M00 Governance (dla zakładu, a w przeciwnym razie dla organizacji; w ostateczności ISMS Manager), z możliwością ręcznej zmiany. Oba pola pojawiają się w raporcie i nie można ich zmienić po zatwierdzeniu.
+
 Przegląd opiera się na **zamrożonym snapshocie** danych GRC w chwili spotkania:
 
 1. Rozpocznij spotkanie: status zmienia się na **W toku**
-2. Kliknij **Generuj snapshot danych**: KPI (ryzyka wg poziomu i właściciela, incydenty z ostatnich 12 miesięcy, otwarte i zablokowane PDCA) zostają uchwycone w tym momencie i już się nie zmienią. Snapshot jest **obowiązkowym warunkiem** zatwierdzenia
+2. Kliknij **Generuj snapshot danych**: dane zostają uchwycone w tym momencie i już się nie zmienią. Oprócz liczników snapshot zawiera krótkie listy dla kierownictwa (maksymalnie 10 pozycji każda, z „… i N więcej”): kontrole z lukami dla każdego frameworku, dokumenty po terminie, do przeglądu w ciągu 90 dni i zatwierdzone od ostatniego przeglądu, ryzyka krytyczne (inherentne → rezydualne, postępowanie, właściciel, czy istnieje plan) i ryzyka formalnie zaakceptowane, otwarte incydenty i zgłoszone NIS2, zablokowane cykle PDCA i zadania po terminie. Snapshot jest **obowiązkowym warunkiem** zatwierdzenia
 3. Zaprezentuj dane na spotkaniu i zapisz decyzje jako działania (właściciel + termin)
 4. Oznacz spotkanie jako **Zakończone**
 5. Kliknij **Zatwierdź** i wprowadź formalną notatkę zatwierdzenia (wymaga wygenerowanego snapshotu). Po zatwierdzeniu przegląd staje się niezmienny

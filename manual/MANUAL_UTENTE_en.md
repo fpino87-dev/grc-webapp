@@ -689,10 +689,12 @@ Decisions with a responsible and deadline are automatically converted into tasks
 
 ### Data snapshot, closure and approval
 
+**Chair and attendees** are set when creating the review or from the dedicated section in the detail view. The CISO appointed in M00 Governance is proposed as chair (the site CISO, otherwise the organisation one; failing that the ISMS Manager) and can be changed manually. Both appear in the report and can no longer be changed after approval.
+
 The review revolves around a **frozen snapshot** of GRC data at the time of the meeting:
 
 1. Start the meeting: the status moves to **In progress**
-2. Click **Generate data snapshot**: the KPIs (risks by level and by owner, incidents from the last 12 months, open and blocked PDCA) are captured at that moment and will no longer change. The snapshot is a **mandatory prerequisite** for approval
+2. Click **Generate data snapshot**: the data is captured at that moment and will no longer change. Besides the counters, the snapshot contains the short lists to bring to management (at most 10 items each, with "… and N more"): controls with gaps per framework, expired documents, documents due for review within 90 days and those approved since the last review, critical risks (inherent → residual, treatment, owner, whether a plan exists) and formally accepted risks, open and NIS2-notified incidents, stuck PDCA cycles and overdue tasks. The snapshot is a **mandatory prerequisite** for approval
 3. Present the data in the meeting and record decisions as actions (owner + due date)
 4. Mark the meeting as **Completed**
 5. Click **Approve** and enter the formal approval note (requires the snapshot to be generated). Once approved, the review becomes immutable

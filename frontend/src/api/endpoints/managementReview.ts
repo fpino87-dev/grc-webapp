@@ -19,6 +19,10 @@ export interface ManagementReview {
   title: string;
   review_date: string;
   next_review_date: string | null;
+  chair: number | null;
+  chair_name: string | null;
+  attendees: number[];
+  attendees_detail: { id: number; name: string }[];
   status: "pianificato" | "in_corso" | "completato";
   approval_status: "bozza" | "in_review" | "approvato" | "rifiutato";
   approved_by: string | null;
@@ -39,6 +43,13 @@ export const managementReviewApi = {
 
   update: (id: string, data: Partial<ManagementReview>) =>
     apiClient.patch<ManagementReview>(`/management-review/reviews/${id}/`, data).then((r) => r.data),
+
+  suggestedChair: (plant: string | null) =>
+    apiClient
+      .get<{ id: number | null; name: string | null }>("/management-review/reviews/suggested-chair/", {
+        params: plant ? { plant } : {},
+      })
+      .then((r) => r.data),
 
   generateSnapshot: (id: string) =>
     apiClient.post<Record<string, unknown>>(`/management-review/reviews/${id}/generate-snapshot/`).then((r) => r.data),

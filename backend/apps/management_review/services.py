@@ -5,6 +5,53 @@ from django.utils.translation import gettext as _
 from core.audit import log_action
 from .models import ManagementReview
 
+# Gli elenchi di dettaglio nello snapshot sono pensati per la direzione:
+# pochi elementi, i più rilevanti; il totale resta nei contatori.
+SNAPSHOT_LIST_LIMIT = 10
+
+# Soglia di rischio "critico" (rosso), coerente con il resto del modulo.
+CRITICAL_RISK_SCORE = 14
+
+
+def _display_name(first_name, last_name, email) -> str:
+    name = f"{first_name or ''} {last_name or ''}".strip()
+    return name or email or ""
+
+
+def _iso(value):
+    return value.isoformat() if value else None
+
+
+def suggest_chair(plant_id=None):
+    """Titolare suggerito per presiedere il riesame.
+
+    CISO nominato sul sito, altrimenti CISO a livello organizzazione, altrimenti
+    ISMS Manager (stesso ordine). Solo un suggerimento: l'utente può cambiarlo.
+    """
+    from apps.governance.services import _active_role_qs
+
+    for role in ("ciso", "isms_manager"):
+        qs = _active_role_qs(role).select_related("user").order_by("valid_from")
+        if plant_id:
+            hit = qs.filter(scope_type="plant", scope_id=plant_id).first()
+            if hit:
+                return hit.user
+        hit = qs.filter(scope_type="org").first()
+        if hit:
+            return hit.user
+    return None
+
+
+def check_review_editable(review: ManagementReview, changed_fields) -> None:
+    """Chair e partecipanti fanno parte del verbale: bloccati dopo l'approvazione."""
+    from django.core.exceptions import ValidationError
+
+    locked = {"chair", "attendees"} & set(changed_fields)
+    if locked and review.approval_status == "approvato":
+        raise ValidationError(
+            _("Presidente e partecipanti non sono modificabili dopo l'approvazione del riesame.")
+        )
+
 
 def get_operational_kpi_summary(plant_id) -> dict:
     """Ultimo snapshot di ogni KPI operativo rilevante per il plant.
@@ -113,7 +160,13 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     """
     Congela i dati di compliance al momento della riunione.
     """
-    from django.db.models import Count, Q
+    from django.core.exceptions import ValidationError
+
+    if review.approval_status == "approvato":
+        # Lo snapshot è il contenuto del verbale approvato: non si riscrive.
+        raise ValidationError(_("Il riesame è approvato: lo snapshot non può essere rigenerato."))
+
+    from django.db.models import Case, Count, IntegerField, Q, Value, When
     from apps.controls.models import ControlInstance
     from apps.documents.models import Document, Evidence
     from apps.risk.models import RiskAssessment
@@ -142,10 +195,20 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
         compliant = by_status.get("compliant", 0)
 
         gap_controls = [
-            {**item, "id": str(item["id"])}
-            for item in qs.filter(status="gap").values(
+            {
+                "id": str(item["id"]),
+                "control__external_id": item["control__external_id"],
+                # Solo il titolo per lingua: il JSON completo delle traduzioni
+                # (guida, evidenze attese…) non serve al verbale.
+                "titles": {
+                    lang: (tr or {}).get("title", "")
+                    for lang, tr in (item["control__translations"] or {}).items()
+                    if (tr or {}).get("title")
+                },
+            }
+            for item in qs.filter(status="gap").order_by("control__external_id").values(
                 "id", "control__external_id", "control__translations",
-            )[:20]
+            )[:SNAPSHOT_LIST_LIMIT]
         ]
 
         expired_evidence_controls = [
@@ -167,17 +230,51 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
 
     # ── 2. Documenti ──
     docs_qs = Document.objects.filter(plant_id=plant_id, deleted_at__isnull=True)
+    expiring_q = Q(
+        status="approvato",
+        review_due_date__lte=today + timezone.timedelta(days=90),
+        review_due_date__gte=today,
+    )
+    expired_q = Q(status="approvato", review_due_date__lt=today)
+
+    # "Novità" da portare in direzione: approvati dall'ultimo riesame del
+    # perimetro (o negli ultimi 12 mesi se è il primo).
+    previous = (
+        ManagementReview.objects.filter(plant_id=plant_id, review_date__lt=review.review_date)
+        .exclude(pk=review.pk)
+        .order_by("-review_date")
+        .first()
+    )
+    approved_since = previous.review_date if previous else (today - timezone.timedelta(days=365))
+    approved_recent_q = Q(status="approvato", approved_at__date__gte=approved_since)
+
+    def _doc_items(q, order):
+        return [
+            {
+                "id": str(d["id"]),
+                "title": d["title"],
+                "owner": _display_name(d["owner__first_name"], d["owner__last_name"], d["owner__email"]),
+                "review_due_date": _iso(d["review_due_date"]),
+                "approved_at": _iso(d["approved_at"]),
+            }
+            for d in docs_qs.filter(q).order_by(order).values(
+                "id", "title", "review_due_date", "approved_at",
+                "owner__first_name", "owner__last_name", "owner__email",
+            )[:SNAPSHOT_LIST_LIMIT]
+        ]
+
     docs_summary = {
         "totale": docs_qs.count(),
         "approvati": docs_qs.filter(status="approvato").count(),
         "in_revisione": docs_qs.filter(status__in=["revisione", "approvazione"]).count(),
         "bozza": docs_qs.filter(status="bozza").count(),
-        "in_scadenza": docs_qs.filter(
-            status="approvato",
-            review_due_date__lte=today + timezone.timedelta(days=90),
-            review_due_date__gte=today,
-        ).count(),
-        "scaduti": docs_qs.filter(status="approvato", review_due_date__lt=today).count(),
+        "in_scadenza": docs_qs.filter(expiring_q).count(),
+        "scaduti": docs_qs.filter(expired_q).count(),
+        "approvati_periodo": docs_qs.filter(approved_recent_q).count(),
+        "approvati_dal": approved_since.isoformat(),
+        "elenco_scaduti": _doc_items(expired_q, "review_due_date"),
+        "elenco_in_scadenza": _doc_items(expiring_q, "review_due_date"),
+        "elenco_approvati_periodo": _doc_items(approved_recent_q, "-approved_at"),
     }
     ev_scadute = Evidence.objects.filter(
         plant_id=plant_id, valid_until__lt=today, deleted_at__isnull=True
@@ -193,42 +290,90 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     risks_qs = RiskAssessment.objects.filter(
         plant_id=plant_id, status="completato", deleted_at__isnull=True
     )
+    critical_qs = risks_qs.filter(score__gt=CRITICAL_RISK_SCORE)
+    accepted_qs = risks_qs.filter(risk_accepted_formally=True)
     risk_summary = {
-        "rosso":  risks_qs.filter(score__gt=14).count(),
-        "giallo": risks_qs.filter(score__gt=7, score__lte=14).count(),
+        "rosso":  critical_qs.count(),
+        "giallo": risks_qs.filter(score__gt=7, score__lte=CRITICAL_RISK_SCORE).count(),
         "verde":  risks_qs.filter(score__lte=7).count(),
-        "senza_piano": risks_qs.filter(score__gt=14, mitigation_plans__isnull=True).count(),
+        "senza_piano": critical_qs.annotate(
+            n_plans=Count("mitigation_plans", filter=Q(mitigation_plans__deleted_at__isnull=True))
+        ).filter(n_plans=0).count(),
         "senza_owner": risks_qs.filter(owner__isnull=True).count(),
+        "accettati_formalmente": accepted_qs.count(),
     }
-    risks_by_owner = list(
-        risks_qs.values("owner__first_name", "owner__last_name", "owner__email").annotate(
-            totale=Count("id"),
-            rossi=Count("id", filter=Q(score__gt=14)),
-        ).order_by("-rossi")[:10]
-    )
+
+    def _risk_items(qs, order):
+        rows = (
+            qs.select_related("asset", "critical_process", "owner", "risk_accepted_by")
+            .annotate(n_plans=Count("mitigation_plans", filter=Q(mitigation_plans__deleted_at__isnull=True)))
+            .order_by(*order)[:SNAPSHOT_LIST_LIMIT]
+        )
+        return [
+            {
+                "id": str(r.pk),
+                "name": r.name or (r.asset.name if r.asset else "") or "—",
+                "asset": r.asset.name if r.asset else None,
+                "process": r.critical_process.name if r.critical_process else None,
+                "inherent_score": r.inherent_score,
+                "score": r.score,
+                "treatment": r.treatment or None,
+                "owner": _display_name(r.owner.first_name, r.owner.last_name, r.owner.email) if r.owner else None,
+                "has_plan": r.n_plans > 0,
+                "accepted_formally": r.risk_accepted_formally,
+                "accepted_by": (
+                    _display_name(r.risk_accepted_by.first_name, r.risk_accepted_by.last_name, r.risk_accepted_by.email)
+                    if r.risk_accepted_by else None
+                ),
+                "acceptance_expiry": _iso(r.risk_acceptance_expiry),
+            }
+            for r in rows
+        ]
+
+    risk_summary["top_critici"] = _risk_items(critical_qs, ["-score", "-inherent_score"])
+    risk_summary["elenco_accettati"] = _risk_items(accepted_qs, ["risk_acceptance_expiry", "-score"])
 
     # ── 4. Incidenti ──
+    incidents_qs = Incident.objects.filter(plant_id=plant_id)
+    open_inc_q = Q(status__in=["aperto", "in_analisi"])
+    nis2_inc_q = Q(nis2_notifiable="si", created_at__gte=since_12m)
+
+    def _incident_items(q):
+        return [
+            {
+                "id": str(i["id"]),
+                "title": i["title"],
+                "detected_at": _iso(i["detected_at"]),
+                "severity": i["severity"],
+                "status": i["status"],
+            }
+            for i in incidents_qs.filter(q).order_by("-detected_at").values(
+                "id", "title", "detected_at", "severity", "status",
+            )[:SNAPSHOT_LIST_LIMIT]
+        ]
+
     incidents_summary = {
-        "totale_12m": Incident.objects.filter(plant_id=plant_id, created_at__gte=since_12m).count(),
-        "nis2_notificati": Incident.objects.filter(
-            plant_id=plant_id, nis2_notifiable="si", created_at__gte=since_12m
-        ).count(),
-        "aperti": Incident.objects.filter(plant_id=plant_id, status__in=["aperto", "in_analisi"]).count(),
-        "senza_rca": Incident.objects.filter(
-            plant_id=plant_id, status="chiuso", rca__isnull=True
-        ).count(),
+        "totale_12m": incidents_qs.filter(created_at__gte=since_12m).count(),
+        "nis2_notificati": incidents_qs.filter(nis2_inc_q).count(),
+        "aperti": incidents_qs.filter(open_inc_q).count(),
+        "senza_rca": incidents_qs.filter(status="chiuso", rca__isnull=True).count(),
+        "elenco_aperti": _incident_items(open_inc_q),
+        "elenco_nis2": _incident_items(nis2_inc_q),
     }
 
     # ── 5. PDCA ──
+    blocked_q = Q(fase_corrente="plan", created_at__lt=timezone.now() - timezone.timedelta(days=90))
+    pdca_qs = PdcaCycle.objects.filter(plant_id=plant_id)
     pdca_summary = {
-        "aperti": PdcaCycle.objects.filter(plant_id=plant_id).exclude(fase_corrente="chiuso").count(),
-        "bloccati_plan_90gg": PdcaCycle.objects.filter(
-            plant_id=plant_id, fase_corrente="plan",
-            created_at__lt=timezone.now() - timezone.timedelta(days=90),
-        ).count(),
-        "chiusi_12m": PdcaCycle.objects.filter(
-            plant_id=plant_id, fase_corrente="chiuso", closed_at__gte=since_12m,
-        ).count(),
+        "aperti": pdca_qs.exclude(fase_corrente__in=["chiuso", "archiviato"]).count(),
+        "bloccati_plan_90gg": pdca_qs.filter(blocked_q).count(),
+        "chiusi_12m": pdca_qs.filter(fase_corrente="chiuso", closed_at__gte=since_12m).count(),
+        "elenco_bloccati": [
+            {"id": str(c["id"]), "title": c["title"], "created_at": _iso(c["created_at"])}
+            for c in pdca_qs.filter(blocked_q).order_by("created_at").values(
+                "id", "title", "created_at",
+            )[:SNAPSHOT_LIST_LIMIT]
+        ],
     }
 
     # ── 6. BCP ──
@@ -256,17 +401,31 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     }
 
     # ── 7. Task scaduti ──
+    open_tasks_qs = Task.objects.filter(plant_id=plant_id, status__in=["aperto", "in_corso"])
+    overdue_qs = open_tasks_qs.filter(due_date__lt=today)
+    priority_rank = Case(
+        When(priority="critica", then=Value(0)),
+        When(priority="alta", then=Value(1)),
+        When(priority="media", then=Value(2)),
+        default=Value(3),
+        output_field=IntegerField(),
+    )
     tasks_summary = {
-        "scaduti": Task.objects.filter(
-            plant_id=plant_id,
-            status__in=["aperto", "in_corso"],
-            due_date__lt=today,
-        ).count(),
-        "critici_aperti": Task.objects.filter(
-            plant_id=plant_id,
-            priority="critica",
-            status__in=["aperto", "in_corso"],
-        ).count(),
+        "scaduti": overdue_qs.count(),
+        "critici_aperti": open_tasks_qs.filter(priority="critica").count(),
+        # Prima i più gravi, poi i più in ritardo.
+        "elenco_scaduti": [
+            {
+                "id": str(t["id"]),
+                "title": t["title"],
+                "priority": t["priority"],
+                "due_date": _iso(t["due_date"]),
+                "assigned_role": t["assigned_role"],
+            }
+            for t in overdue_qs.annotate(rank=priority_rank).order_by("rank", "due_date").values(
+                "id", "title", "priority", "due_date", "assigned_role",
+            )[:SNAPSHOT_LIST_LIMIT]
+        ],
     }
 
     snapshot = {
@@ -275,7 +434,6 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
         "frameworks":     frameworks_detail,
         "documenti":      {**docs_summary, "evidenze_scadute": ev_scadute, "evidenze_in_scadenza": ev_in_scadenza},
         "rischi":         risk_summary,
-        "risks_by_owner": risks_by_owner,
         "incidenti":      incidents_summary,
         "pdca":           pdca_summary,
         "bcp":            bcp_summary,

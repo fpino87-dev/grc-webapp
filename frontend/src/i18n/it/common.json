@@ -4432,7 +4432,7 @@
       "title": "Revisione di Direzione — M13",
       "description": "Gestisce il riesame periodico del management ISMS. Genera uno snapshot congelato dei dati GRC al momento della riunione e produce la relazione formale del CISO scaricabile.",
       "steps": {
-        "1": "Crea la revisione con titolo, plant e data riunione",
+        "1": "Crea la revisione con titolo, sito, data, presidente e partecipanti",
         "2": "Avvia la riunione per passare lo stato in 'In corso'",
         "3": "Premi 'Genera snapshot dati': i KPI vengono congelati in quel momento",
         "4": "Presenta i dati in riunione — lo snapshot non cambierà più",
@@ -4442,12 +4442,12 @@
         "8": "Scarica la relazione CISO in HTML (stampabile/archiviabile)"
       },
       "connections": {
-        "risk": "Rischi per livello e per owner nello snapshot",
+        "risk": "Rischi critici e rischi accettati formalmente nello snapshot",
         "incidents": "Incidenti degli ultimi 12 mesi nello snapshot",
         "pdca": "PDCA aperti e bloccati nello snapshot"
       },
       "config_needed": {
-        "1": "Nominare il CISO come chair in M00 Governance"
+        "1": "Nominare il CISO in M00 Governance: viene proposto come presidente del riesame"
       }
     },
     "list": {
@@ -4530,12 +4530,12 @@
       "need_snapshot_tip": "Genera prima lo snapshot dei dati",
       "need_snapshot": "Genera prima lo snapshot dei dati per poter approvare",
       "snapshot_error": "Errore nella generazione snapshot",
-      "approve_error": "Errore nell'approvazione"
+      "approve_error": "Errore nell'approvazione",
+      "regen_for_details": "Snapshot generato prima dei dettagli: rigeneralo per vedere gli elenchi di documenti, rischi, incidenti e task."
     },
     "snap": {
       "compliance_fw": "Compliance per framework",
       "risk_profile": "Profilo di rischio",
-      "risks_by_owner": "Rischi per owner",
       "docs_evidence": "Documenti e evidenze",
       "incidents_12m": "Incidenti (ultimi 12 mesi)",
       "pdca_task": "PDCA e task",
@@ -4546,9 +4546,6 @@
       "low": "Bassi",
       "critical_no_plan": "Critici senza piano",
       "risks_no_owner": "{{count}} rischi senza owner assegnato",
-      "owner": "Owner",
-      "tot": "Tot",
-      "crit": "Critici",
       "approved": "Approvati",
       "expiring_90": "In scadenza (90gg)",
       "expired": "Scaduti",
@@ -4561,7 +4558,57 @@
       "blocked_90": "Bloccati >90gg",
       "closed_12m": "Chiusi 12m",
       "tasks_overdue": "Task scaduti",
-      "critical_no_bcp": "{{count}} processi critici senza piano BCP"
+      "critical_no_bcp": "{{count}} processi critici senza piano BCP",
+      "more": "… e altri {{count}}",
+      "gap_controls": "Controlli in gap",
+      "docs_expired": "Documenti scaduti",
+      "docs_expiring": "In scadenza entro 90 giorni",
+      "docs_approved_since": "Approvati dal {{date}}",
+      "col_document": "Documento",
+      "col_owner": "Owner",
+      "col_review_due": "Revisione prevista",
+      "col_approved_at": "Approvato il",
+      "top_critical": "Rischi critici (residuo più alto)",
+      "col_risk": "Rischio",
+      "col_asset_process": "Asset / processo",
+      "col_score": "Inerente → residuo",
+      "col_treatment": "Trattamento",
+      "col_plan": "Piano",
+      "accepted_risks": "Rischi accettati formalmente",
+      "col_accepted_by": "Accettato da",
+      "col_acceptance_expiry": "Scadenza accettazione",
+      "incidents_open_list": "Incidenti aperti",
+      "incidents_nis2_list": "Notificati NIS2 (12 mesi)",
+      "col_incident": "Incidente",
+      "col_detected": "Rilevato il",
+      "col_severity": "Gravità",
+      "col_status": "Stato",
+      "pdca_blocked_list": "Cicli PDCA fermi in PLAN da oltre 90 giorni",
+      "col_cycle": "Ciclo",
+      "col_opened": "Aperto il",
+      "tasks_overdue_list": "Task scaduti (per priorità)",
+      "col_task": "Task",
+      "col_priority": "Priorità",
+      "col_due": "Scadenza",
+      "col_role": "Ruolo",
+      "yes": "Sì",
+      "no": "No"
+    },
+    "participants": {
+      "heading": "Presidente e partecipanti",
+      "chair": "Presieduto da",
+      "attendees": "Partecipanti",
+      "none": "— Nessuno —",
+      "chair_missing": "Non indicato",
+      "edit": "Modifica",
+      "save": "Salva",
+      "saving": "Salvataggio...",
+      "cancel": "Annulla",
+      "search_ph": "Cerca persona...",
+      "selected": "{{count}} selezionati",
+      "suggested": "Proposto in base al ruolo in Governance: {{name}}",
+      "save_error": "Errore durante il salvataggio",
+      "locked": "Non modificabili dopo l'approvazione"
     }
   }
 }

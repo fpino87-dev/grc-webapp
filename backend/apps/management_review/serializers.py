@@ -17,9 +17,22 @@ class ReviewActionSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_by", "created_at", "updated_at", "deleted_at"]
 
 
+def _user_label(user):
+    name = f"{user.first_name} {user.last_name}".strip()
+    return name or user.email
+
+
 class ManagementReviewSerializer(serializers.ModelSerializer):
     actions = ReviewActionSerializer(many=True, read_only=True)
     plant_name = serializers.CharField(source="plant.name", read_only=True, allow_null=True)
+    chair_name = serializers.SerializerMethodField()
+    attendees_detail = serializers.SerializerMethodField()
+
+    def get_chair_name(self, obj):
+        return _user_label(obj.chair) if obj.chair else None
+
+    def get_attendees_detail(self, obj):
+        return [{"id": u.pk, "name": _user_label(u)} for u in obj.attendees.all()]
 
     class Meta:
         model = ManagementReview

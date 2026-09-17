@@ -689,10 +689,12 @@ Les décisions avec responsable et échéance sont automatiquement transformées
 
 ### Instantané des données, clôture et approbation
 
+Le **président et les participants** se renseignent à la création de la revue ou depuis la section dédiée du détail. Le RSSI nommé dans M00 Governance est proposé comme président (celui du site, sinon celui de l'organisation ; à défaut l'ISMS Manager), modifiable manuellement. Les deux figurent dans le rapport et ne sont plus modifiables après l'approbation.
+
 La revue s'articule autour d'un **instantané figé** des données GRC au moment de la réunion :
 
 1. Démarrez la réunion : le statut passe à **En cours**
-2. Cliquez sur **Générer l'instantané des données** : les KPI (risques par niveau et par responsable, incidents des 12 derniers mois, PDCA ouverts et bloqués) sont figés à cet instant et ne changeront plus. L'instantané est un **prérequis obligatoire** pour l'approbation
+2. Cliquez sur **Générer l'instantané des données** : les données sont figées à cet instant et ne changeront plus. En plus des compteurs, l'instantané contient les listes synthétiques à présenter à la direction (10 éléments au maximum chacune, avec « … et N autres ») : contrôles en écart par référentiel, documents expirés, à réviser sous 90 jours et approuvés depuis la dernière revue, risques critiques (inhérent → résiduel, traitement, responsable, présence d'un plan) et risques formellement acceptés, incidents ouverts et notifiés NIS2, cycles PDCA bloqués et tâches en retard. L'instantané est un **prérequis obligatoire** pour l'approbation
 3. Présentez les données en réunion et enregistrez les décisions comme actions (responsable + échéance)
 4. Marquez la réunion comme **Terminée**
 5. Cliquez sur **Approuver** et saisissez la note formelle d'approbation (l'instantané doit être généré). Une fois approuvée, la revue devient immuable

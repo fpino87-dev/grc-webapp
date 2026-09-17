@@ -4432,7 +4432,7 @@
       "title": "Management Review — M13",
       "description": "Manages the periodic ISMS management review. Generates a frozen snapshot of GRC data at the time of the meeting and produces the formal, downloadable CISO report.",
       "steps": {
-        "1": "Create the review with title, plant and meeting date",
+        "1": "Create the review with title, site, date, chair and attendees",
         "2": "Start the meeting to move the status to 'In progress'",
         "3": "Click 'Generate data snapshot': the KPIs are frozen at that moment",
         "4": "Present the data in the meeting — the snapshot will no longer change",
@@ -4442,12 +4442,12 @@
         "8": "Download the CISO report as HTML (printable/archivable)"
       },
       "connections": {
-        "risk": "Risks by level and by owner in the snapshot",
+        "risk": "Critical risks and formally accepted risks in the snapshot",
         "incidents": "Incidents from the last 12 months in the snapshot",
         "pdca": "Open and blocked PDCA in the snapshot"
       },
       "config_needed": {
-        "1": "Appoint the CISO as chair in M00 Governance"
+        "1": "Appoint the CISO in M00 Governance: they are proposed as chair of the review"
       }
     },
     "list": {
@@ -4530,12 +4530,12 @@
       "need_snapshot_tip": "Generate the data snapshot first",
       "need_snapshot": "Generate the data snapshot first to be able to approve",
       "snapshot_error": "Error generating snapshot",
-      "approve_error": "Error during approval"
+      "approve_error": "Error during approval",
+      "regen_for_details": "Snapshot generated before the detail lists were available: regenerate it to see documents, risks, incidents and tasks."
     },
     "snap": {
       "compliance_fw": "Compliance per framework",
       "risk_profile": "Risk profile",
-      "risks_by_owner": "Risks by owner",
       "docs_evidence": "Documents and evidence",
       "incidents_12m": "Incidents (last 12 months)",
       "pdca_task": "PDCA and tasks",
@@ -4546,9 +4546,6 @@
       "low": "Low",
       "critical_no_plan": "Critical without plan",
       "risks_no_owner": "{{count}} risks without assigned owner",
-      "owner": "Owner",
-      "tot": "Tot",
-      "crit": "Critical",
       "approved": "Approved",
       "expiring_90": "Expiring (90d)",
       "expired": "Expired",
@@ -4561,7 +4558,57 @@
       "blocked_90": "Blocked >90d",
       "closed_12m": "Closed 12m",
       "tasks_overdue": "Overdue tasks",
-      "critical_no_bcp": "{{count}} critical processes without a BCP plan"
+      "critical_no_bcp": "{{count}} critical processes without a BCP plan",
+      "more": "… and {{count}} more",
+      "gap_controls": "Controls with gaps",
+      "docs_expired": "Expired documents",
+      "docs_expiring": "Due for review within 90 days",
+      "docs_approved_since": "Approved since {{date}}",
+      "col_document": "Document",
+      "col_owner": "Owner",
+      "col_review_due": "Review due",
+      "col_approved_at": "Approved on",
+      "top_critical": "Critical risks (highest residual)",
+      "col_risk": "Risk",
+      "col_asset_process": "Asset / process",
+      "col_score": "Inherent → residual",
+      "col_treatment": "Treatment",
+      "col_plan": "Plan",
+      "accepted_risks": "Formally accepted risks",
+      "col_accepted_by": "Accepted by",
+      "col_acceptance_expiry": "Acceptance expiry",
+      "incidents_open_list": "Open incidents",
+      "incidents_nis2_list": "NIS2 notified (12 months)",
+      "col_incident": "Incident",
+      "col_detected": "Detected on",
+      "col_severity": "Severity",
+      "col_status": "Status",
+      "pdca_blocked_list": "PDCA cycles stuck in PLAN for over 90 days",
+      "col_cycle": "Cycle",
+      "col_opened": "Opened on",
+      "tasks_overdue_list": "Overdue tasks (by priority)",
+      "col_task": "Task",
+      "col_priority": "Priority",
+      "col_due": "Due date",
+      "col_role": "Role",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "participants": {
+      "heading": "Chair and attendees",
+      "chair": "Chaired by",
+      "attendees": "Attendees",
+      "none": "— None —",
+      "chair_missing": "Not set",
+      "edit": "Edit",
+      "save": "Save",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "search_ph": "Search person...",
+      "selected": "{{count}} selected",
+      "suggested": "Proposed from the Governance role: {{name}}",
+      "save_error": "Error while saving",
+      "locked": "Cannot be changed after approval"
     }
   }
 }

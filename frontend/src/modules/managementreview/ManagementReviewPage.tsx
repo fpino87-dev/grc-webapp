@@ -52,13 +52,121 @@ function SnapSection({ title, children, defaultOpen = true }: { title: string; c
   );
 }
 
+function fmtDate(iso: string | null | undefined) {
+  if (!iso) return "—";
+  return new Date(iso.length === 10 ? `${iso}T00:00:00` : iso).toLocaleDateString(i18n.language || "it");
+}
+
+function userLabel(u: GrcUser) {
+  return `${u.first_name} ${u.last_name}`.trim() || u.email;
+}
+
+/** Elenco sintetico per la direzione: nascosto se vuoto, "altri N" se troncato. */
+function DetailTable({ title, headers, rows, total }: { title: string; headers: string[]; rows: React.ReactNode[][]; total?: number }) {
+  const { t } = useTranslation();
+  if (rows.length === 0) return null;
+  const rest = (total ?? rows.length) - rows.length;
+  return (
+    <div className="mt-3">
+      <p className="text-xs font-semibold text-gray-600 mb-1">{title}</p>
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="border-b border-gray-200">
+              {headers.map(h => <th key={h} className="text-left py-1 pr-2 font-medium text-gray-500">{h}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r, i) => (
+              <tr key={i} className="border-b border-gray-100">
+                {r.map((c, j) => <td key={j} className="py-1 pr-2 text-gray-700 align-top">{c}</td>)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {rest > 0 && <p className="text-xs text-gray-400 mt-1">{t("management_review.snap.more", { count: rest })}</p>}
+    </div>
+  );
+}
+
+function ParticipantsFields({
+  users, chair, attendees, onChange,
+}: {
+  users: GrcUser[];
+  chair: number | null;
+  attendees: number[];
+  onChange: (next: { chair: number | null; attendees: number[] }) => void;
+}) {
+  const { t } = useTranslation();
+  const [query, setQuery] = useState("");
+  const q = query.trim().toLowerCase();
+  const visible = users.filter(u => u.is_active !== false && (!q || userLabel(u).toLowerCase().includes(q) || u.email.toLowerCase().includes(q)));
+
+  function toggle(id: number) {
+    onChange({ chair, attendees: attendees.includes(id) ? attendees.filter(a => a !== id) : [...attendees, id] });
+  }
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t("management_review.participants.chair")}</label>
+        <select
+          value={chair ?? ""}
+          onChange={e => onChange({ chair: e.target.value ? Number(e.target.value) : null, attendees })}
+          className="w-full border rounded px-3 py-2 text-sm"
+        >
+          <option value="">{t("management_review.participants.none")}</option>
+          {users.map(u => <option key={u.id} value={u.id}>{userLabel(u)}</option>)}
+        </select>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          {t("management_review.participants.attendees")}
+          {attendees.length > 0 && <span className="ml-1 text-xs font-normal text-gray-400">({t("management_review.participants.selected", { count: attendees.length })})</span>}
+        </label>
+        <input
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder={t("management_review.participants.search_ph")}
+          className="w-full border rounded px-3 py-1.5 text-sm mb-1"
+        />
+        <div className="border rounded max-h-36 overflow-y-auto divide-y divide-gray-100">
+          {visible.map(u => (
+            <label key={u.id} className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-gray-50 cursor-pointer">
+              <input type="checkbox" checked={attendees.includes(u.id)} onChange={() => toggle(u.id)} />
+              <span className="text-gray-700">{userLabel(u)}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── NewReviewModal ────────────────────────────────────────────────────────────
 
-function NewReviewModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
+function NewReviewModal({ plants, users, onClose }: { plants: { id: string; code: string; name: string }[]; users: GrcUser[]; onClose: () => void }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const [form, setForm] = useState<Partial<ManagementReview>>({});
+  const [form, setForm] = useState<Partial<ManagementReview>>({ chair: null, attendees: [] });
   const [error, setError] = useState("");
+  const [chairTouched, setChairTouched] = useState(false);
+  const [suggested, setSuggested] = useState<string | null>(null);
+
+  // Propone il CISO (del sito, altrimenti di organizzazione) finché l'utente
+  // non sceglie a mano chi presiede.
+  const plantId = (form.plant as string | null | undefined) ?? null;
+  useEffect(() => {
+    if (chairTouched) return;
+    let cancelled = false;
+    managementReviewApi.suggestedChair(plantId).then(res => {
+      if (cancelled) return;
+      setSuggested(res.name);
+      setForm(prev => ({ ...prev, chair: res.id }));
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [plantId, chairTouched]);
 
   const mutation = useMutation({
     mutationFn: managementReviewApi.create,
@@ -72,7 +180,7 @@ function NewReviewModal({ plants, onClose }: { plants: { id: string; code: strin
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
         <h3 className="text-lg font-semibold mb-4">{t("management_review.new.title")}</h3>
         <div className="space-y-3">
           <div>
@@ -90,6 +198,18 @@ function NewReviewModal({ plants, onClose }: { plants: { id: string; code: strin
             <label className="block text-sm font-medium text-gray-700 mb-1">{t("management_review.new.date_label")}</label>
             <input type="date" name="review_date" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
           </div>
+          <ParticipantsFields
+            users={users}
+            chair={form.chair ?? null}
+            attendees={form.attendees ?? []}
+            onChange={next => {
+              if (next.chair !== (form.chair ?? null)) setChairTouched(true);
+              setForm(prev => ({ ...prev, ...next }));
+            }}
+          />
+          {!chairTouched && suggested && (
+            <p className="text-xs text-gray-400 -mt-2">{t("management_review.participants.suggested", { name: suggested })}</p>
+          )}
         </div>
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
@@ -264,10 +384,91 @@ function ActionsSection({ review, users }: { review: ManagementReview; users: Gr
   );
 }
 
+// ── ParticipantsSection ───────────────────────────────────────────────────────
+
+function ParticipantsSection({ review, users, locked }: { review: ManagementReview; users: GrcUser[]; locked: boolean }) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<{ chair: number | null; attendees: number[] }>({ chair: null, attendees: [] });
+  const [error, setError] = useState("");
+
+  const saveMutation = useMutation({
+    mutationFn: () => managementReviewApi.update(review.id, draft),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["management-review"] }); setEditing(false); setError(""); },
+    onError: (e: any) => setError(e?.response?.data?.error || t("management_review.participants.save_error")),
+  });
+
+  async function startEdit() {
+    let chair = review.chair ?? null;
+    if (chair === null) {
+      chair = (await managementReviewApi.suggestedChair(review.plant).catch(() => ({ id: null }))).id;
+    }
+    setDraft({ chair, attendees: review.attendees ?? [] });
+    setEditing(true);
+  }
+
+  return (
+    <section>
+      <div className="flex items-center justify-between mb-2">
+        <h4 className="text-sm font-semibold text-gray-700">{t("management_review.participants.heading")}</h4>
+        {!editing && !locked && (
+          <button onClick={startEdit} className="text-xs px-2 py-1 border border-gray-300 rounded hover:bg-gray-50 text-gray-600">
+            {t("management_review.participants.edit")}
+          </button>
+        )}
+      </div>
+      {editing ? (
+        <div className="border border-blue-200 rounded p-3 bg-blue-50 space-y-2">
+          <ParticipantsFields users={users} chair={draft.chair} attendees={draft.attendees} onChange={setDraft} />
+          {error && <p className="text-xs text-red-600">{error}</p>}
+          <div className="flex gap-2">
+            <button
+              onClick={() => saveMutation.mutate()}
+              disabled={saveMutation.isPending}
+              className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50"
+            >
+              {saveMutation.isPending ? t("management_review.participants.saving") : t("management_review.participants.save")}
+            </button>
+            <button onClick={() => { setEditing(false); setError(""); }} className="px-3 py-1 border rounded text-xs text-gray-600 hover:bg-white">
+              {t("management_review.participants.cancel")}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <dl className="text-sm space-y-1">
+          <div className="flex gap-2">
+            <dt className="text-gray-500 shrink-0">{t("management_review.participants.chair")}:</dt>
+            <dd className={review.chair_name ? "text-gray-800 font-medium" : "text-amber-600"}>
+              {review.chair_name ?? t("management_review.participants.chair_missing")}
+            </dd>
+          </div>
+          <div className="flex gap-2">
+            <dt className="text-gray-500 shrink-0">{t("management_review.participants.attendees")}:</dt>
+            <dd className="text-gray-800">
+              {review.attendees_detail?.length ? review.attendees_detail.map(a => a.name).join(", ") : <span className="text-gray-400">—</span>}
+            </dd>
+          </div>
+        </dl>
+      )}
+      {locked && <p className="text-xs text-gray-400 mt-1">{t("management_review.participants.locked")}</p>}
+    </section>
+  );
+}
+
 // ── ReviewDetail ──────────────────────────────────────────────────────────────
 
-type SnapFramework = { framework_name: string; total: number; pct_compliant: number; by_status: Record<string, number>; expired_evidence_count: number };
-type SnapOwner = { owner__first_name: string; owner__last_name: string; owner__email: string; totale: number; rossi: number };
+type SnapGapControl = { id: string; control__external_id: string; titles?: Record<string, string> };
+type SnapFramework = { framework_name: string; total: number; pct_compliant: number; by_status: Record<string, number>; expired_evidence_count: number; gap_controls?: SnapGapControl[] };
+type SnapDoc = { id: string; title: string; owner: string; review_due_date: string | null; approved_at: string | null };
+type SnapRisk = {
+  id: string; name: string; asset: string | null; process: string | null;
+  inherent_score: number | null; score: number | null; treatment: string | null; owner: string | null;
+  has_plan: boolean; accepted_by: string | null; acceptance_expiry: string | null;
+};
+type SnapIncident = { id: string; title: string; detected_at: string | null; severity: string; status: string };
+type SnapTask = { id: string; title: string; priority: string; due_date: string | null; assigned_role: string };
+type SnapPdca = { id: string; title: string; created_at: string | null };
 
 function ReviewDetail({ review, users, onClose }: { review: ManagementReview; users: GrcUser[]; onClose: () => void }) {
   const { t } = useTranslation();
@@ -306,13 +507,18 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
 
   const snap = review.snapshot_data as Record<string, any>;
   const frameworks = snap?.frameworks as Record<string, SnapFramework> | undefined;
-  const documenti = snap?.documenti as Record<string, number> | undefined;
-  const rischi = snap?.rischi as Record<string, number> | undefined;
-  const ownerList = snap?.risks_by_owner as SnapOwner[] | undefined;
-  const incidenti = snap?.incidenti as Record<string, number> | undefined;
-  const pdca = snap?.pdca as Record<string, number> | undefined;
+  const documenti = snap?.documenti as Record<string, any> | undefined;
+  const rischi = snap?.rischi as Record<string, any> | undefined;
+  const incidenti = snap?.incidenti as Record<string, any> | undefined;
+  const pdca = snap?.pdca as Record<string, any> | undefined;
   const bcp = snap?.bcp as { processi_critici_senza_bcp: number; nomi: string[] } | undefined;
-  const task = snap?.task as Record<string, number> | undefined;
+  const task = snap?.task as Record<string, any> | undefined;
+  // Snapshot generati prima dei dettagli executive: solo contatori.
+  const legacySnapshot = !!rischi && !("top_critici" in rischi);
+  const lang = i18n.language || "it";
+  const yesNo = (v: boolean) => v
+    ? <span className="text-green-700">{t("management_review.snap.yes")}</span>
+    : <span className="text-red-600 font-medium">{t("management_review.snap.no")}</span>;
 
   const isApproved = review.approval_status === "approvato";
   const hasSnapshot = !!review.snapshot_generated_at;
@@ -371,6 +577,9 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
             </div>
           </section>
 
+          {/* ── Presidente e partecipanti ── */}
+          <ParticipantsSection review={review} users={users} locked={isApproved} />
+
           {/* ── Dati riesame (snapshot) ── */}
           <section>
             <h4 className="text-sm font-semibold text-gray-700 mb-3">{t("management_review.detail.review_data")}</h4>
@@ -401,6 +610,9 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
                     {snapshotMutation.isPending ? "..." : t("management_review.detail.regen")}
                   </button>
                 </div>
+                {legacySnapshot && !isApproved && (
+                  <p className="text-xs text-amber-600">{t("management_review.detail.regen_for_details")}</p>
+                )}
 
                 {frameworks && Object.keys(frameworks).length > 0 && (
                   <SnapSection title={t("management_review.snap.compliance_fw")}>
@@ -418,6 +630,20 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
                             </div>
                             {fw.expired_evidence_count > 0 && (
                               <p className="text-xs text-amber-600 mt-0.5">{t("management_review.snap.expired_evidence", { count: fw.expired_evidence_count })}</p>
+                            )}
+                            {fw.gap_controls && fw.gap_controls.length > 0 && (
+                              <div className="mt-1 pl-2 border-l-2 border-red-200">
+                                <p className="text-xs text-gray-500">{t("management_review.snap.gap_controls")}</p>
+                                {fw.gap_controls.slice(0, 5).map(g => (
+                                  <p key={g.id} className="text-xs text-gray-700 truncate">
+                                    <span className="font-medium">{g.control__external_id}</span>{" "}
+                                    {g.titles?.[lang] || g.titles?.it || g.titles?.en || ""}
+                                  </p>
+                                ))}
+                                {(fw.by_status?.gap ?? 0) > 5 && (
+                                  <p className="text-xs text-gray-400">{t("management_review.snap.more", { count: (fw.by_status?.gap ?? 0) - 5 })}</p>
+                                )}
+                              </div>
                             )}
                           </div>
                         );
@@ -437,30 +663,35 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
                     {(rischi.senza_owner ?? 0) > 0 && (
                       <p className="text-xs text-amber-600 mt-2">{t("management_review.snap.risks_no_owner", { count: rischi.senza_owner })}</p>
                     )}
-                  </SnapSection>
-                )}
-
-                {ownerList && ownerList.length > 0 && (
-                  <SnapSection title={t("management_review.snap.risks_by_owner")} defaultOpen={false}>
-                    <table className="w-full text-xs">
-                      <thead><tr className="border-b border-gray-200">
-                        <th className="text-left py-1 font-medium text-gray-600">{t("management_review.snap.owner")}</th>
-                        <th className="text-right py-1 font-medium text-gray-600">{t("management_review.snap.tot")}</th>
-                        <th className="text-right py-1 font-medium text-gray-600">{t("management_review.snap.crit")}</th>
-                      </tr></thead>
-                      <tbody>
-                        {ownerList.map((o, i) => {
-                          const name = `${o.owner__first_name} ${o.owner__last_name}`.trim() || o.owner__email || "—";
-                          return (
-                            <tr key={i} className="border-b border-gray-100">
-                              <td className="py-1 text-gray-700">{name}</td>
-                              <td className="py-1 text-right">{o.totale}</td>
-                              <td className="py-1 text-right text-red-600 font-medium">{o.rossi}</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                    <DetailTable
+                      title={t("management_review.snap.top_critical")}
+                      headers={[
+                        t("management_review.snap.col_risk"), t("management_review.snap.col_asset_process"),
+                        t("management_review.snap.col_score"), t("management_review.snap.col_treatment"),
+                        t("management_review.snap.col_owner"), t("management_review.snap.col_plan"),
+                      ]}
+                      rows={((rischi.top_critici ?? []) as SnapRisk[]).map(r => [
+                        <span className="font-medium">{r.name}</span>,
+                        r.asset || r.process || "—",
+                        <span>{r.inherent_score ?? "—"} → <span className="text-red-600 font-semibold">{r.score ?? "—"}</span></span>,
+                        r.treatment ? t(`risk.treatment_${r.treatment}`, r.treatment) : "—",
+                        r.owner || <span className="text-amber-600">—</span>,
+                        yesNo(r.has_plan),
+                      ])}
+                      total={rischi.rosso}
+                    />
+                    <DetailTable
+                      title={t("management_review.snap.accepted_risks")}
+                      headers={[
+                        t("management_review.snap.col_risk"), t("management_review.snap.col_score"),
+                        t("management_review.snap.col_accepted_by"), t("management_review.snap.col_acceptance_expiry"),
+                      ]}
+                      rows={((rischi.elenco_accettati ?? []) as SnapRisk[]).map(r => [
+                        r.name, r.score ?? "—", r.accepted_by || "—",
+                        <span className={isOverdue(r.acceptance_expiry) ? "text-red-600 font-medium" : ""}>{fmtDate(r.acceptance_expiry)}</span>,
+                      ])}
+                      total={rischi.accettati_formalmente}
+                    />
                   </SnapSection>
                 )}
 
@@ -472,6 +703,31 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
                       <KpiBox label={t("management_review.snap.expired")} value={documenti.scaduti ?? 0} color="text-red-600" />
                       <KpiBox label={t("management_review.snap.expired_evidence_kpi")} value={documenti.evidenze_scadute ?? 0} color="text-red-600" />
                     </div>
+                    <DetailTable
+                      title={t("management_review.snap.docs_expired")}
+                      headers={[t("management_review.snap.col_document"), t("management_review.snap.col_owner"), t("management_review.snap.col_review_due")]}
+                      rows={((documenti.elenco_scaduti ?? []) as SnapDoc[]).map(d => [
+                        <span className="font-medium">{d.title}</span>, d.owner || "—",
+                        <span className="text-red-600">{fmtDate(d.review_due_date)}</span>,
+                      ])}
+                      total={documenti.scaduti}
+                    />
+                    <DetailTable
+                      title={t("management_review.snap.docs_expiring")}
+                      headers={[t("management_review.snap.col_document"), t("management_review.snap.col_owner"), t("management_review.snap.col_review_due")]}
+                      rows={((documenti.elenco_in_scadenza ?? []) as SnapDoc[]).map(d => [
+                        d.title, d.owner || "—", fmtDate(d.review_due_date),
+                      ])}
+                      total={documenti.in_scadenza}
+                    />
+                    <DetailTable
+                      title={t("management_review.snap.docs_approved_since", { date: fmtDate(documenti.approvati_dal) })}
+                      headers={[t("management_review.snap.col_document"), t("management_review.snap.col_owner"), t("management_review.snap.col_approved_at")]}
+                      rows={((documenti.elenco_approvati_periodo ?? []) as SnapDoc[]).map(d => [
+                        d.title, d.owner || "—", fmtDate(d.approved_at),
+                      ])}
+                      total={documenti.approvati_periodo}
+                    />
                   </SnapSection>
                 )}
 
@@ -483,6 +739,21 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
                       <KpiBox label={t("management_review.snap.open")} value={incidenti.aperti ?? 0} color="text-orange-600" />
                       <KpiBox label={t("management_review.snap.closed_no_rca")} value={incidenti.senza_rca ?? 0} color="text-amber-600" />
                     </div>
+                    {(["elenco_aperti", "elenco_nis2"] as const).map(key => (
+                      <DetailTable
+                        key={key}
+                        title={t(key === "elenco_aperti" ? "management_review.snap.incidents_open_list" : "management_review.snap.incidents_nis2_list")}
+                        headers={[
+                          t("management_review.snap.col_incident"), t("management_review.snap.col_detected"),
+                          t("management_review.snap.col_severity"), t("management_review.snap.col_status"),
+                        ]}
+                        rows={((incidenti[key] ?? []) as SnapIncident[]).map(i => [
+                          <span className="font-medium">{i.title}</span>, fmtDate(i.detected_at),
+                          <StatusBadge status={i.severity} />, <StatusBadge status={i.status} />,
+                        ])}
+                        total={key === "elenco_aperti" ? incidenti.aperti : incidenti.nis2_notificati}
+                      />
+                    ))}
                   </SnapSection>
                 )}
 
@@ -494,6 +765,25 @@ function ReviewDetail({ review, users, onClose }: { review: ManagementReview; us
                       <KpiBox label={t("management_review.snap.closed_12m")} value={pdca.chiusi_12m ?? 0} color="text-green-600" />
                       <KpiBox label={t("management_review.snap.tasks_overdue")} value={task?.scaduti ?? 0} color="text-red-600" />
                     </div>
+                    <DetailTable
+                      title={t("management_review.snap.pdca_blocked_list")}
+                      headers={[t("management_review.snap.col_cycle"), t("management_review.snap.col_opened")]}
+                      rows={((pdca.elenco_bloccati ?? []) as SnapPdca[]).map(c => [c.title, fmtDate(c.created_at)])}
+                      total={pdca.bloccati_plan_90gg}
+                    />
+                    <DetailTable
+                      title={t("management_review.snap.tasks_overdue_list")}
+                      headers={[
+                        t("management_review.snap.col_task"), t("management_review.snap.col_priority"),
+                        t("management_review.snap.col_due"), t("management_review.snap.col_role"),
+                      ]}
+                      rows={((task?.elenco_scaduti ?? []) as SnapTask[]).map(tk => [
+                        tk.title, <StatusBadge status={tk.priority} />,
+                        <span className="text-red-600">{fmtDate(tk.due_date)}</span>,
+                        tk.assigned_role ? t(`governance.roles.${tk.assigned_role}`, tk.assigned_role) : "—",
+                      ])}
+                      total={task?.scaduti}
+                    />
                   </SnapSection>
                 )}
 
@@ -710,7 +1000,7 @@ export function ManagementReviewPage() {
         )}
       </div>
 
-      {showNew && plants && <NewReviewModal plants={plants} onClose={() => setShowNew(false)} />}
+      {showNew && plants && <NewReviewModal plants={plants} users={users} onClose={() => setShowNew(false)} />}
       {selected && <ReviewDetail review={selected} users={users} onClose={() => setSelectedId(null)} />}
     </div>
   );

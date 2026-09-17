@@ -4432,7 +4432,7 @@
       "title": "Yönetimin Gözden Geçirmesi — M13",
       "description": "Periyodik ISMS yönetim gözden geçirmesini yönetir. Toplantı anındaki GRC verilerinin dondurulmuş bir anlık görüntüsünü oluşturur ve indirilebilir resmi CISO raporunu üretir.",
       "steps": {
-        "1": "Başlık, tesis ve toplantı tarihiyle gözden geçirmeyi oluşturun",
+        "1": "Gözden geçirmeyi başlık, tesis, tarih, başkan ve katılımcılarla oluşturun",
         "2": "Durumu 'Devam ediyor'a almak için toplantıyı başlatın",
         "3": "'Veri anlık görüntüsü oluştur'a tıklayın: KPI'lar o anda dondurulur",
         "4": "Verileri toplantıda sunun — anlık görüntü artık değişmez",
@@ -4442,12 +4442,12 @@
         "8": "CISO raporunu HTML olarak indirin (yazdırılabilir/arşivlenebilir)"
       },
       "connections": {
-        "risk": "Anlık görüntüde seviyeye ve sahibe göre riskler",
+        "risk": "Anlık görüntüde kritik riskler ve resmi olarak kabul edilen riskler",
         "incidents": "Anlık görüntüde son 12 ayın olayları",
         "pdca": "Anlık görüntüde açık ve bloke PDCA"
       },
       "config_needed": {
-        "1": "M00 Governance'ta CISO'yu başkan olarak atayın"
+        "1": "M00 Governance'ta CISO'yu atayın: gözden geçirmenin başkanı olarak önerilir"
       }
     },
     "list": {
@@ -4530,12 +4530,12 @@
       "need_snapshot_tip": "Önce veri anlık görüntüsünü oluşturun",
       "need_snapshot": "Onaylayabilmek için önce veri anlık görüntüsünü oluşturun",
       "snapshot_error": "Anlık görüntü oluşturma hatası",
-      "approve_error": "Onaylama sırasında hata"
+      "approve_error": "Onaylama sırasında hata",
+      "regen_for_details": "Anlık görüntü ayrıntılar eklenmeden önce oluşturuldu: belge, risk, olay ve görev listelerini görmek için yeniden oluşturun."
     },
     "snap": {
       "compliance_fw": "Framework başına uyum",
       "risk_profile": "Risk profili",
-      "risks_by_owner": "Sahibe göre riskler",
       "docs_evidence": "Belgeler ve kanıtlar",
       "incidents_12m": "Olaylar (son 12 ay)",
       "pdca_task": "PDCA ve görevler",
@@ -4546,9 +4546,6 @@
       "low": "Düşük",
       "critical_no_plan": "Plansız kritik",
       "risks_no_owner": "{{count}} sahibi atanmamış risk",
-      "owner": "Sahip",
-      "tot": "Top",
-      "crit": "Kritik",
       "approved": "Onaylanmış",
       "expiring_90": "Süresi dolan (90g)",
       "expired": "Süresi dolmuş",
@@ -4561,7 +4558,57 @@
       "blocked_90": "Bloke >90g",
       "closed_12m": "Kapatılmış 12a",
       "tasks_overdue": "Gecikmiş görevler",
-      "critical_no_bcp": "{{count}} BCP planı olmayan kritik süreç"
+      "critical_no_bcp": "{{count}} BCP planı olmayan kritik süreç",
+      "more": "… ve {{count}} tane daha",
+      "gap_controls": "Açığı olan kontroller",
+      "docs_expired": "Süresi dolmuş belgeler",
+      "docs_expiring": "90 gün içinde gözden geçirilecek",
+      "docs_approved_since": "{{date}} tarihinden beri onaylananlar",
+      "col_document": "Belge",
+      "col_owner": "Sahip",
+      "col_review_due": "Planlanan gözden geçirme",
+      "col_approved_at": "Onay tarihi",
+      "top_critical": "Kritik riskler (en yüksek artık)",
+      "col_risk": "Risk",
+      "col_asset_process": "Varlık / süreç",
+      "col_score": "Doğal → artık",
+      "col_treatment": "İşlem",
+      "col_plan": "Plan",
+      "accepted_risks": "Resmi olarak kabul edilen riskler",
+      "col_accepted_by": "Kabul eden",
+      "col_acceptance_expiry": "Kabul geçerlilik sonu",
+      "incidents_open_list": "Açık olaylar",
+      "incidents_nis2_list": "NIS2 bildirilenler (12 ay)",
+      "col_incident": "Olay",
+      "col_detected": "Tespit tarihi",
+      "col_severity": "Önem",
+      "col_status": "Durum",
+      "pdca_blocked_list": "90 günden uzun süredir PLAN aşamasında kalan PDCA döngüleri",
+      "col_cycle": "Döngü",
+      "col_opened": "Açılış tarihi",
+      "tasks_overdue_list": "Gecikmiş görevler (önceliğe göre)",
+      "col_task": "Görev",
+      "col_priority": "Öncelik",
+      "col_due": "Son tarih",
+      "col_role": "Rol",
+      "yes": "Evet",
+      "no": "Hayır"
+    },
+    "participants": {
+      "heading": "Başkan ve katılımcılar",
+      "chair": "Başkan",
+      "attendees": "Katılımcılar",
+      "none": "— Yok —",
+      "chair_missing": "Belirtilmedi",
+      "edit": "Düzenle",
+      "save": "Kaydet",
+      "saving": "Kaydediliyor...",
+      "cancel": "İptal",
+      "search_ph": "Kişi ara...",
+      "selected": "{{count}} seçildi",
+      "suggested": "Governance rolüne göre önerildi: {{name}}",
+      "save_error": "Kaydetme sırasında hata",
+      "locked": "Onaydan sonra değiştirilemez"
     }
   }
 }

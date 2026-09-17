@@ -689,10 +689,12 @@ Le decisioni con responsabile e scadenza vengono automaticamente trasformate in 
 
 ### Snapshot dei dati, chiusura e approvazione
 
+**Presidente e partecipanti** si indicano alla creazione del riesame o dalla sezione dedicata nel dettaglio. Come presidente viene proposto il CISO nominato in M00 Governance (quello del sito, altrimenti quello di organizzazione; in mancanza l'ISMS Manager), modificabile a mano. Entrambi compaiono nella relazione e non sono più modificabili dopo l'approvazione.
+
 Il riesame ruota attorno a uno **snapshot congelato** dei dati GRC al momento della riunione:
 
 1. Avvia la riunione: lo stato passa a **In corso**
-2. Clicca **Genera snapshot dati**: i KPI (rischi per livello e per owner, incidenti degli ultimi 12 mesi, PDCA aperti e bloccati) vengono fotografati in quel momento e non cambieranno più. Lo snapshot è **prerequisito obbligatorio** per l'approvazione
+2. Clicca **Genera snapshot dati**: i dati vengono fotografati in quel momento e non cambieranno più. Oltre ai contatori, lo snapshot contiene gli elenchi sintetici da portare in direzione (massimo 10 voci ciascuno, con «… e altri N»): controlli in gap per framework, documenti scaduti, in scadenza entro 90 giorni e approvati dall'ultimo riesame, rischi critici (inerente → residuo, trattamento, owner, presenza del piano) e rischi accettati formalmente, incidenti aperti e notificati NIS2, cicli PDCA fermi e task scaduti. Lo snapshot è **prerequisito obbligatorio** per l'approvazione
 3. Presenta i dati in riunione e registra le decisioni come azioni (owner + scadenza)
 4. Segna la riunione come **Completata**
 5. Clicca **Approva** e inserisci la nota formale di approvazione (richiede lo snapshot già generato). Una volta approvata, la revisione diventa immutabile

@@ -689,10 +689,12 @@ Sorumlusu ve son tarihi olan kararlar otomatik olarak M08'de görevlere ve yapı
 
 ### Veri anlık görüntüsü, kapanış ve onay
 
+**Başkan ve katılımcılar** gözden geçirme oluşturulurken veya ayrıntı görünümündeki ilgili bölümden belirtilir. Başkan olarak M00 Governance'ta atanan CISO önerilir (tesisin CISO'su, yoksa kuruluşunki; o da yoksa ISMS Manager) ve elle değiştirilebilir. Her ikisi de raporda yer alır ve onaydan sonra değiştirilemez.
+
 Gözden geçirme, toplantı anındaki GRC verilerinin **dondurulmuş bir anlık görüntüsü** etrafında döner:
 
 1. Toplantıyı başlatın: durum **Devam ediyor**'a geçer
-2. **Veri anlık görüntüsü oluştur**'a tıklayın: KPI'lar (seviyeye ve sahibe göre riskler, son 12 ayın olayları, açık ve bloke PDCA) o anda dondurulur ve artık değişmez. Anlık görüntü, onay için **zorunlu bir ön koşuldur**
+2. **Veri anlık görüntüsü oluştur**'a tıklayın: veriler o anda dondurulur ve artık değişmez. Sayaçların yanı sıra anlık görüntü, yönetime sunulacak kısa listeleri içerir (her biri en fazla 10 öğe, "… ve N tane daha" ile): çerçeve başına açığı olan kontroller, süresi dolmuş belgeler, 90 gün içinde gözden geçirilecek ve son gözden geçirmeden beri onaylanan belgeler, kritik riskler (doğal → artık, işlem, sahip, plan olup olmadığı) ve resmi olarak kabul edilen riskler, açık ve NIS2 bildirilen olaylar, takılı kalmış PDCA döngüleri ve gecikmiş görevler. Anlık görüntü, onay için **zorunlu bir ön koşuldur**
 3. Verileri toplantıda sunun ve kararları eylem olarak kaydedin (sahip + son tarih)
 4. Toplantıyı **Tamamlandı** olarak işaretleyin
 5. **Onayla**'ya tıklayın ve resmi onay notunu girin (anlık görüntü oluşturulmuş olmalıdır). Onaylandıktan sonra gözden geçirme değiştirilemez hale gelir

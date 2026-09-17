@@ -4432,7 +4432,7 @@
       "title": "Przegląd Zarządzania — M13",
       "description": "Zarządza okresowym przeglądem zarządzania ISMS. Generuje zamrożony snapshot danych GRC w chwili spotkania i tworzy formalny, pobieralny raport CISO.",
       "steps": {
-        "1": "Utwórz przegląd z tytułem, zakładem i datą spotkania",
+        "1": "Utwórz przegląd z tytułem, zakładem, datą, przewodniczącym i uczestnikami",
         "2": "Rozpocznij spotkanie, aby zmienić status na „W toku”",
         "3": "Kliknij „Generuj snapshot danych”: KPI zostają zamrożone w tym momencie",
         "4": "Zaprezentuj dane na spotkaniu — snapshot już się nie zmieni",
@@ -4442,12 +4442,12 @@
         "8": "Pobierz raport CISO w formacie HTML (do druku/archiwizacji)"
       },
       "connections": {
-        "risk": "Ryzyka wg poziomu i właściciela w snapshocie",
+        "risk": "Ryzyka krytyczne i formalnie zaakceptowane w snapshocie",
         "incidents": "Incydenty z ostatnich 12 miesięcy w snapshocie",
         "pdca": "Otwarte i zablokowane PDCA w snapshocie"
       },
       "config_needed": {
-        "1": "Wyznacz CISO jako przewodniczącego w M00 Governance"
+        "1": "Wyznacz CISO w M00 Governance: zostanie zaproponowany jako przewodniczący przeglądu"
       }
     },
     "list": {
@@ -4530,12 +4530,12 @@
       "need_snapshot_tip": "Najpierw wygeneruj snapshot danych",
       "need_snapshot": "Najpierw wygeneruj snapshot danych, aby móc zatwierdzić",
       "snapshot_error": "Błąd generowania snapshotu",
-      "approve_error": "Błąd podczas zatwierdzania"
+      "approve_error": "Błąd podczas zatwierdzania",
+      "regen_for_details": "Snapshot wygenerowany przed dodaniem szczegółów: wygeneruj go ponownie, aby zobaczyć listy dokumentów, ryzyk, incydentów i zadań."
     },
     "snap": {
       "compliance_fw": "Zgodność wg frameworka",
       "risk_profile": "Profil ryzyka",
-      "risks_by_owner": "Ryzyka wg właściciela",
       "docs_evidence": "Dokumenty i dowody",
       "incidents_12m": "Incydenty (ostatnie 12 miesięcy)",
       "pdca_task": "PDCA i zadania",
@@ -4546,9 +4546,6 @@
       "low": "Niskie",
       "critical_no_plan": "Krytyczne bez planu",
       "risks_no_owner": "{{count}} ryzyk bez przypisanego właściciela",
-      "owner": "Właściciel",
-      "tot": "Suma",
-      "crit": "Krytyczne",
       "approved": "Zatwierdzone",
       "expiring_90": "Wygasające (90 dni)",
       "expired": "Wygasłe",
@@ -4561,7 +4558,57 @@
       "blocked_90": "Zablokowane >90 dni",
       "closed_12m": "Zamknięte 12m",
       "tasks_overdue": "Zadania po terminie",
-      "critical_no_bcp": "{{count}} procesów krytycznych bez planu BCP"
+      "critical_no_bcp": "{{count}} procesów krytycznych bez planu BCP",
+      "more": "… i {{count}} więcej",
+      "gap_controls": "Kontrole z lukami",
+      "docs_expired": "Dokumenty po terminie",
+      "docs_expiring": "Do przeglądu w ciągu 90 dni",
+      "docs_approved_since": "Zatwierdzone od {{date}}",
+      "col_document": "Dokument",
+      "col_owner": "Właściciel",
+      "col_review_due": "Planowany przegląd",
+      "col_approved_at": "Zatwierdzono",
+      "top_critical": "Ryzyka krytyczne (najwyższe rezydualne)",
+      "col_risk": "Ryzyko",
+      "col_asset_process": "Zasób / proces",
+      "col_score": "Inherentne → rezydualne",
+      "col_treatment": "Postępowanie",
+      "col_plan": "Plan",
+      "accepted_risks": "Ryzyka formalnie zaakceptowane",
+      "col_accepted_by": "Zaakceptował",
+      "col_acceptance_expiry": "Ważność akceptacji",
+      "incidents_open_list": "Otwarte incydenty",
+      "incidents_nis2_list": "Zgłoszone NIS2 (12 miesięcy)",
+      "col_incident": "Incydent",
+      "col_detected": "Wykryto",
+      "col_severity": "Waga",
+      "col_status": "Status",
+      "pdca_blocked_list": "Cykle PDCA w fazie PLAN ponad 90 dni",
+      "col_cycle": "Cykl",
+      "col_opened": "Otwarto",
+      "tasks_overdue_list": "Zadania po terminie (wg priorytetu)",
+      "col_task": "Zadanie",
+      "col_priority": "Priorytet",
+      "col_due": "Termin",
+      "col_role": "Rola",
+      "yes": "Tak",
+      "no": "Nie"
+    },
+    "participants": {
+      "heading": "Przewodniczący i uczestnicy",
+      "chair": "Przewodniczący",
+      "attendees": "Uczestnicy",
+      "none": "— Brak —",
+      "chair_missing": "Nie wskazano",
+      "edit": "Edytuj",
+      "save": "Zapisz",
+      "saving": "Zapisywanie...",
+      "cancel": "Anuluj",
+      "search_ph": "Szukaj osoby...",
+      "selected": "Wybrano: {{count}}",
+      "suggested": "Zaproponowano na podstawie roli w Governance: {{name}}",
+      "save_error": "Błąd podczas zapisywania",
+      "locked": "Nie można zmienić po zatwierdzeniu"
     }
   }
 }

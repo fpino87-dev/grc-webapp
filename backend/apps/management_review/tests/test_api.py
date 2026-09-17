@@ -183,3 +183,55 @@ def test_delete_review_action_soft(client, action):
     assert action.deleted_at is not None
     assert ReviewAction.objects.filter(pk=action.pk).count() == 0
     assert ReviewAction.objects.all_with_deleted().filter(pk=action.pk).count() == 1
+
+
+@pytest.mark.django_db
+def test_set_chair_and_attendees(client, review, user):
+    other = User.objects.create_user(username="att", email="att@test.com", password="x",
+                                     first_name="Anna", last_name="Rossi")
+    resp = client.patch(f"{URL_REVIEWS}{review.id}/", {"chair": user.id, "attendees": [user.id, other.id]}, format="json")
+    assert resp.status_code == 200, resp.data
+    assert resp.data["chair_name"] == "mr@test.com"
+    assert {a["name"] for a in resp.data["attendees_detail"]} == {"mr@test.com", "Anna Rossi"}
+
+
+@pytest.mark.django_db
+def test_chair_not_editable_after_approval(client, review, user):
+    review.approval_status = "approvato"
+    review.save(update_fields=["approval_status"])
+    resp = client.patch(f"{URL_REVIEWS}{review.id}/", {"chair": user.id}, format="json")
+    assert resp.status_code == 400
+
+
+@pytest.mark.django_db
+def test_suggested_chair_endpoint(client, plant):
+    resp = client.get(f"{URL_REVIEWS}suggested-chair/", {"plant": str(plant.id)})
+    assert resp.status_code == 200
+    assert resp.data == {"id": None, "name": None}
+    assert client.get(f"{URL_REVIEWS}suggested-chair/", {"plant": "nope"}).status_code == 400
+
+
+@pytest.mark.django_db
+def test_report_escapes_user_content(client, review):
+    review.title = "<script>alert(1)</script>"
+    review.snapshot_data = {"generated_at": timezone.now().isoformat(), "documenti": {
+        "elenco_scaduti": [{"title": "<img src=x onerror=alert(1)>", "owner": None, "review_due_date": "2026-01-01"}],
+    }}
+    review.snapshot_generated_at = timezone.now()
+    review.save()
+    resp = client.get(f"{URL_REVIEWS}{review.id}/report/")
+    assert resp.status_code == 200
+    body = resp.content.decode()
+    assert "<script>alert(1)" not in body and "<img src=x" not in body
+    assert "&lt;img src=x" in body
+
+
+@pytest.mark.django_db
+def test_snapshot_not_regenerated_after_approval(client, review):
+    review.approval_status = "approvato"
+    review.snapshot_data = {"generated_at": "2026-01-01T00:00:00"}
+    review.save(update_fields=["approval_status", "snapshot_data"])
+    resp = client.post(f"{URL_REVIEWS}{review.id}/generate-snapshot/")
+    assert resp.status_code == 400
+    review.refresh_from_db()
+    assert review.snapshot_data == {"generated_at": "2026-01-01T00:00:00"}

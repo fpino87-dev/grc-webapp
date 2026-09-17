@@ -17,6 +17,7 @@ class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = ManagementReview.objects.select_related(
         "plant", "chair", "approved_by"
     ).prefetch_related(
+        "attendees",
         Prefetch("actions", queryset=ReviewAction.objects.select_related("owner").filter(deleted_at__isnull=True))
     )
     serializer_class = ManagementReviewSerializer
@@ -35,6 +36,30 @@ class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             entity=instance,
             payload={"id": str(instance.id), "title": instance.title},
         )
+
+    def perform_update(self, serializer):
+        from django.core.exceptions import ValidationError
+        from rest_framework.exceptions import ValidationError as DRFValidationError
+        try:
+            services.check_review_editable(serializer.instance, serializer.validated_data.keys())
+        except ValidationError as e:
+            raise DRFValidationError({"error": e.message}) from e
+        serializer.save()
+
+    @action(detail=False, methods=["get"], url_path="suggested-chair")
+    def suggested_chair(self, request):
+        import uuid
+        plant_id = request.query_params.get("plant") or None
+        if plant_id:
+            try:
+                plant_id = uuid.UUID(plant_id)
+            except ValueError:
+                return Response({"error": "plant non valido"}, status=400)
+        user = services.suggest_chair(plant_id)
+        if not user:
+            return Response({"id": None, "name": None})
+        name = f"{user.first_name} {user.last_name}".strip() or user.email
+        return Response({"id": user.pk, "name": name})
 
     def perform_destroy(self, instance):
         log_action(
@@ -55,8 +80,12 @@ class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="generate-snapshot")
     def generate_snapshot(self, request, pk=None):
+        from django.core.exceptions import ValidationError
         review = self.get_object()
-        snapshot = services.generate_snapshot(review, request.user)
+        try:
+            snapshot = services.generate_snapshot(review, request.user)
+        except ValidationError as e:
+            return Response({"error": e.message}, status=400)
         return Response(snapshot)
 
     @action(detail=True, methods=["post"])
