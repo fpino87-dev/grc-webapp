@@ -84,6 +84,9 @@ def test_create_review(client, plant):
     resp = client.post(URL_REVIEWS, payload, format="json")
     assert resp.status_code == 201
     assert resp.data["title"] == "Revisione Annuale 2026"
+    codes = [i["code"] for i in resp.data["agenda_items"]]
+    assert codes == ["azioni_precedenti", "contesto", "parti_interessate", "prestazioni",
+                     "feedback_parti", "rischi", "miglioramento"]
 
 
 @pytest.mark.django_db
@@ -95,9 +98,11 @@ def test_retrieve_review(client, review):
 
 @pytest.mark.django_db
 def test_update_review(client, review):
-    resp = client.patch(f"{URL_REVIEWS}{review.id}/", {"status": "completato"}, format="json")
+    resp = client.patch(f"{URL_REVIEWS}{review.id}/", {"title": "Nuovo titolo", "status": "completato"}, format="json")
     assert resp.status_code == 200
-    assert resp.data["status"] == "completato"
+    assert resp.data["title"] == "Nuovo titolo"
+    # lo stato passa solo dalle azioni start/complete (la chiusura verifica l'OdG)
+    assert resp.data["status"] == "pianificato"
 
 
 @pytest.mark.django_db

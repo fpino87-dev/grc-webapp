@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from core.audit import log_action
-from .models import ManagementReview
+from ..models import ManagementReview, ReviewAction
 
 # Gli elenchi di dettaglio nello snapshot sono pensati per la direzione:
 # pochi elementi, i più rilevanti; il totale resta nei contatori.
@@ -22,38 +22,7 @@ def _iso(value):
     return value.isoformat() if value else None
 
 
-def suggest_chair(plant_id=None):
-    """Titolare suggerito per presiedere il riesame.
-
-    CISO nominato sul sito, altrimenti CISO a livello organizzazione, altrimenti
-    ISMS Manager (stesso ordine). Solo un suggerimento: l'utente può cambiarlo.
-    """
-    from apps.governance.services import _active_role_qs
-
-    for role in ("ciso", "isms_manager"):
-        qs = _active_role_qs(role).select_related("user").order_by("valid_from")
-        if plant_id:
-            hit = qs.filter(scope_type="plant", scope_id=plant_id).first()
-            if hit:
-                return hit.user
-        hit = qs.filter(scope_type="org").first()
-        if hit:
-            return hit.user
-    return None
-
-
-def check_review_editable(review: ManagementReview, changed_fields) -> None:
-    """Chair e partecipanti fanno parte del verbale: bloccati dopo l'approvazione."""
-    from django.core.exceptions import ValidationError
-
-    locked = {"chair", "attendees"} & set(changed_fields)
-    if locked and review.approval_status == "approvato":
-        raise ValidationError(
-            _("Presidente e partecipanti non sono modificabili dopo l'approvazione del riesame.")
-        )
-
-
-def get_operational_kpi_summary(plant_id) -> dict:
+def get_operational_kpi_summary(plant_id, all_plants: bool = False) -> dict:
     """Ultimo snapshot di ogni KPI operativo rilevante per il plant.
 
     P2-4 (catena KPI engine → revisione direzione): la revisione di direzione
@@ -69,9 +38,9 @@ def get_operational_kpi_summary(plant_id) -> dict:
 
     snaps = (
         OperationalKpiSnapshot.objects
-        .filter(Q(plant_id=plant_id) | Q(plant__isnull=True))
+        .filter(Q(plant_id=plant_id) | Q(plant__isnull=True) if plant_id or not all_plants else Q())
         .filter(kpi_definition__is_active=True, kpi_definition__deleted_at__isnull=True)
-        .select_related("kpi_definition")
+        .select_related("kpi_definition", "plant")
         .order_by("kpi_definition_id", "-week_start", "-created_at")
     )
 
@@ -79,11 +48,13 @@ def get_operational_kpi_summary(plant_id) -> dict:
     for s in snaps:
         # Per ogni KPI tieni solo il primo (= più recente, per via dell'order_by);
         # a parità di plant_id/None preferisci lo snapshot legato al plant.
-        prev = latest.get(s.kpi_definition_id)
+        # Con `all_plants` (riesame di organizzazione) un valore per ogni sito.
+        key = (s.kpi_definition_id, s.plant_id) if all_plants and not plant_id else s.kpi_definition_id
+        prev = latest.get(key)
         if prev is None:
-            latest[s.kpi_definition_id] = s
+            latest[key] = s
         elif prev.plant_id is None and s.plant_id is not None and s.week_start == prev.week_start:
-            latest[s.kpi_definition_id] = s
+            latest[key] = s
 
     status_counts = {"ok": 0, "warning": 0, "critical": 0, "no_data": 0}
     items = []
@@ -101,6 +72,7 @@ def get_operational_kpi_summary(plant_id) -> dict:
             "threshold_direction": kd.threshold_direction,
             "week_start": s.week_start.isoformat(),
             "scope": "plant" if s.plant_id else "global",
+            "plant_code": s.plant.code if s.plant_id else None,
         })
 
     items.sort(key=lambda x: x["kpi_code"])
@@ -140,20 +112,197 @@ def get_kpi_snapshot(plant_id) -> dict:
     }
 
 
-def complete_review(review: ManagementReview, user) -> ManagementReview:
-    """Transition a review to completato and snapshot KPIs."""
-    if review.plant_id:
-        review.kpi_snapshot = get_kpi_snapshot(review.plant_id)
-    review.status = "completato"
-    review.save(update_fields=["status", "kpi_snapshot", "updated_at"])
-    log_action(
-        user=user,
-        action_code="management_review.review.complete",
-        level="L2",
-        entity=review,
-        payload={"id": str(review.id), "title": review.title},
+def _previous_reviews(review: ManagementReview):
+    """Riesami precedenti dello stesso perimetro (stesso sito, o di organizzazione)."""
+    return (
+        ManagementReview.objects.filter(plant_id=review.plant_id, review_date__lt=review.review_date)
+        .exclude(pk=review.pk)
+        .order_by("-review_date")
     )
-    return review
+
+
+def _previous_actions_block(review: ManagementReview, today) -> dict:
+    """§9.3.2 a) — stato delle azioni dei riesami precedenti: tutte quelle del
+    riesame immediatamente precedente, più quelle più vecchie ancora aperte o
+    chiuse nel periodo."""
+    from django.db.models import Case, IntegerField, Q, Value, When
+
+    previous = _previous_reviews(review).first()
+    empty = {"riesame_precedente": None, "totale": 0, "aperte": 0, "scadute": 0, "chiuse": 0, "elenco": []}
+    if previous is None:
+        return empty
+
+    qs = ReviewAction.objects.filter(
+        review__plant_id=review.plant_id,
+        review__review_date__lt=review.review_date,
+        review__deleted_at__isnull=True,
+    ).exclude(review=review).filter(
+        Q(review=previous) | Q(status="aperto") | Q(closed_at__date__gte=previous.review_date)
+    )
+    overdue_q = Q(status="aperto", due_date__lt=today)
+    rank = Case(
+        When(overdue_q, then=Value(0)),
+        When(status="aperto", then=Value(1)),
+        default=Value(2),
+        output_field=IntegerField(),
+    )
+    rows = (
+        qs.select_related("owner", "review", "task", "pdca_cycle")
+        .annotate(rank=rank)
+        .order_by("rank", "due_date")[:SNAPSHOT_LIST_LIMIT]
+    )
+    return {
+        "riesame_precedente": {
+            "id": str(previous.pk), "title": previous.title, "review_date": _iso(previous.review_date),
+        },
+        "totale": qs.count(),
+        "aperte": qs.filter(status="aperto").count(),
+        "scadute": qs.filter(overdue_q).count(),
+        "chiuse": qs.filter(status="chiuso").count(),
+        "elenco": [
+            {
+                "id": str(a.pk),
+                "description": a.description[:300],
+                "owner": _display_name(a.owner.first_name, a.owner.last_name, a.owner.email) if a.owner else None,
+                "due_date": _iso(a.due_date),
+                "status": a.status,
+                "overdue": a.status == "aperto" and bool(a.due_date) and a.due_date < today,
+                "closed_at": _iso(a.closed_at),
+                "review_title": a.review.title,
+                "review_date": _iso(a.review.review_date),
+                "task_status": a.task.status if a.task_id else None,
+                "pdca_phase": a.pdca_cycle.fase_corrente if a.pdca_cycle_id else None,
+            }
+            for a in rows
+        ],
+    }
+
+
+def _kpi_block(plant_id) -> dict:
+    """§9.3.2 d) — risultati di monitoraggio e misurazione (KPI operativi)."""
+    summary = get_operational_kpi_summary(plant_id, all_plants=not plant_id)
+    rank = {"critical": 0, "warning": 1}
+    attention = sorted(
+        (i for i in summary["items"] if i["status"] in rank),
+        key=lambda i: (rank[i["status"]], i["kpi_code"], i.get("plant_code") or ""),
+    )
+    keys = ("kpi_code", "name", "unit", "value", "status", "threshold_warning",
+            "threshold_critical", "threshold_direction", "week_start", "plant_code")
+    return {
+        "totale": summary["count"],
+        "status_counts": summary["status_counts"],
+        "attenzione": len(attention),
+        "elenco_attenzione": [{k: i.get(k) for k in keys} for i in attention[:SNAPSHOT_LIST_LIMIT]],
+    }
+
+
+def _audit_block(scope: dict, today, since_12m) -> dict:
+    """§9.3.2 d) — risultati degli audit e non conformità (M17)."""
+    from django.db.models import Case, Count, IntegerField, Q, Value, When
+    from apps.audit_prep.models import AuditFinding, AuditPrep
+
+    prep_scope = {"plant_id": scope["plant_id"]} if scope else {}
+    finding_scope = {"audit_prep__plant_id": scope["plant_id"]} if scope else {}
+
+    audits = (
+        AuditPrep.objects.filter(**prep_scope, audit_date__gte=since_12m.date())
+        .select_related("framework", "plant")
+        .annotate(n_findings=Count("findings", filter=Q(findings__deleted_at__isnull=True)))
+        .order_by("-audit_date")
+    )
+    findings = AuditFinding.objects.filter(**finding_scope, audit_prep__deleted_at__isnull=True)
+    open_qs = findings.filter(status__in=["open", "in_response"])
+    by_type = dict(open_qs.values("finding_type").annotate(n=Count("id")).values_list("finding_type", "n"))
+    nc_rank = Case(When(finding_type="major_nc", then=Value(0)), default=Value(1), output_field=IntegerField())
+
+    def _finding(f):
+        return {
+            "id": str(f.pk),
+            "title": f.title,
+            "finding_type": f.finding_type,
+            "status": f.status,
+            "response_deadline": _iso(f.response_deadline),
+            "overdue": bool(f.response_deadline) and f.response_deadline < today,
+            "audit": f.audit_prep.title,
+            "plant_code": f.audit_prep.plant.code if f.audit_prep.plant_id else None,
+        }
+
+    open_nc = (
+        open_qs.filter(finding_type__in=["major_nc", "minor_nc"])
+        .select_related("audit_prep__plant")
+        .annotate(rank=nc_rank)
+        .order_by("rank", "response_deadline")
+    )
+    opportunities = (
+        findings.filter(finding_type="opportunity").exclude(status="closed")
+        .select_related("audit_prep__plant")
+        .order_by("-audit_date")
+    )
+    return {
+        "audit_12m": audits.count(),
+        "nc_aperte_maggiori": by_type.get("major_nc", 0),
+        "nc_aperte_minori": by_type.get("minor_nc", 0),
+        "osservazioni_aperte": by_type.get("observation", 0),
+        "opportunita_aperte": opportunities.count(),
+        "finding_scaduti": open_qs.filter(response_deadline__lt=today).count(),
+        "finding_chiusi_12m": findings.filter(
+            status__in=["closed", "accepted_by_auditor"], closed_at__gte=since_12m
+        ).count(),
+        "elenco_audit": [
+            {
+                "id": str(a.pk),
+                "title": a.title,
+                "audit_date": _iso(a.audit_date),
+                "framework": a.framework.code if a.framework_id else None,
+                "status": a.status,
+                "readiness_score": a.readiness_score,
+                "findings": a.n_findings,
+                "plant_code": a.plant.code if a.plant_id else None,
+            }
+            for a in audits[:SNAPSHOT_LIST_LIMIT]
+        ],
+        "elenco_nc_aperte": [_finding(f) for f in open_nc[:SNAPSHOT_LIST_LIMIT]],
+        "elenco_opportunita": [_finding(f) for f in opportunities[:SNAPSHOT_LIST_LIMIT]],
+    }
+
+
+def _sites_block(today) -> list[dict]:
+    """Riesame di organizzazione: una riga di sintesi per sito (query aggregate)."""
+    from django.db.models import Count, Q
+    from apps.controls.models import ControlInstance
+    from apps.incidents.models import Incident
+    from apps.plants.models import Plant
+    from apps.risk.models import RiskAssessment
+    from apps.tasks.models import Task
+
+    def _by_plant(qs, **annotations):
+        return {row.pop("plant_id"): row for row in qs.values("plant_id").annotate(**annotations)}
+
+    controls = _by_plant(
+        ControlInstance.objects.all(),
+        total=Count("id"), compliant=Count("id", filter=Q(status="compliant")),
+    )
+    risks = _by_plant(
+        RiskAssessment.objects.filter(status="completato", score__gt=CRITICAL_RISK_SCORE), n=Count("id"),
+    )
+    incidents = _by_plant(Incident.objects.filter(status__in=["aperto", "in_analisi"]), n=Count("id"))
+    tasks = _by_plant(
+        Task.objects.filter(status__in=["aperto", "in_corso"], due_date__lt=today), n=Count("id"),
+    )
+    rows = []
+    for plant in Plant.objects.order_by("code"):
+        c = controls.get(plant.pk, {})
+        total = c.get("total", 0)
+        rows.append({
+            "plant_id": str(plant.pk),
+            "code": plant.code,
+            "name": plant.name,
+            "pct_compliant": round(c.get("compliant", 0) / total * 100, 1) if total else None,
+            "rischi_critici": risks.get(plant.pk, {}).get("n", 0),
+            "incidenti_aperti": incidents.get(plant.pk, {}).get("n", 0),
+            "task_scaduti": tasks.get(plant.pk, {}).get("n", 0),
+        })
+    return rows
 
 
 def generate_snapshot(review: ManagementReview, user) -> dict:
@@ -174,8 +323,12 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     from apps.pdca.models import PdcaCycle
     from apps.tasks.models import Task
 
+    from apps.plants.services import plant_today
+
     plant_id = review.plant_id
-    today = timezone.localdate()
+    # Riesame di organizzazione (senza sito): i dati aggregano tutti i siti.
+    scope = {"plant_id": plant_id} if plant_id else {}
+    today = plant_today(review.plant)
     since_12m = timezone.now() - timezone.timedelta(days=365)
 
     # ── 1. Compliance per framework con dettaglio ──
@@ -186,7 +339,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     frameworks_detail = {}
     for fw in get_active_frameworks(_plant):
         qs = ControlInstance.objects.filter(
-            plant_id=plant_id, control__framework=fw
+            **scope, control__framework=fw
         ).select_related("control__domain")
         total = qs.count()
         if total == 0:
@@ -229,7 +382,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
         }
 
     # ── 2. Documenti ──
-    docs_qs = Document.objects.filter(plant_id=plant_id, deleted_at__isnull=True)
+    docs_qs = Document.objects.filter(**scope, deleted_at__isnull=True)
     expiring_q = Q(
         status="approvato",
         review_due_date__lte=today + timezone.timedelta(days=90),
@@ -240,10 +393,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     # "Novità" da portare in direzione: approvati dall'ultimo riesame del
     # perimetro (o negli ultimi 12 mesi se è il primo).
     previous = (
-        ManagementReview.objects.filter(plant_id=plant_id, review_date__lt=review.review_date)
-        .exclude(pk=review.pk)
-        .order_by("-review_date")
-        .first()
+        _previous_reviews(review).first()
     )
     approved_since = previous.review_date if previous else (today - timezone.timedelta(days=365))
     approved_recent_q = Q(status="approvato", approved_at__date__gte=approved_since)
@@ -277,10 +427,10 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
         "elenco_approvati_periodo": _doc_items(approved_recent_q, "-approved_at"),
     }
     ev_scadute = Evidence.objects.filter(
-        plant_id=plant_id, valid_until__lt=today, deleted_at__isnull=True
+        **scope, valid_until__lt=today, deleted_at__isnull=True
     ).count()
     ev_in_scadenza = Evidence.objects.filter(
-        plant_id=plant_id,
+        **scope,
         valid_until__gte=today,
         valid_until__lte=today + timezone.timedelta(days=30),
         deleted_at__isnull=True,
@@ -288,7 +438,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
 
     # ── 3. Rischi ──
     risks_qs = RiskAssessment.objects.filter(
-        plant_id=plant_id, status="completato", deleted_at__isnull=True
+        **scope, status="completato", deleted_at__isnull=True
     )
     critical_qs = risks_qs.filter(score__gt=CRITICAL_RISK_SCORE)
     accepted_qs = risks_qs.filter(risk_accepted_formally=True)
@@ -334,7 +484,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     risk_summary["elenco_accettati"] = _risk_items(accepted_qs, ["risk_acceptance_expiry", "-score"])
 
     # ── 4. Incidenti ──
-    incidents_qs = Incident.objects.filter(plant_id=plant_id)
+    incidents_qs = Incident.objects.filter(**scope)
     open_inc_q = Q(status__in=["aperto", "in_analisi"])
     nis2_inc_q = Q(nis2_notifiable="si", created_at__gte=since_12m)
 
@@ -363,7 +513,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
 
     # ── 5. PDCA ──
     blocked_q = Q(fase_corrente="plan", created_at__lt=timezone.now() - timezone.timedelta(days=90))
-    pdca_qs = PdcaCycle.objects.filter(plant_id=plant_id)
+    pdca_qs = PdcaCycle.objects.filter(**scope)
     pdca_summary = {
         "aperti": pdca_qs.exclude(fase_corrente__in=["chiuso", "archiviato"]).count(),
         "bloccati_plan_90gg": pdca_qs.filter(blocked_q).count(),
@@ -380,28 +530,25 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     from apps.bia.models import CriticalProcess
     from apps.bcp.models import BcpPlan
 
-    if plant_id:
-        critical_procs = CriticalProcess.objects.filter(
-            plant_id=plant_id,
-            criticality__gte=4,
-            status="approvato",
-            deleted_at__isnull=True,
-        ).prefetch_related(
-            Prefetch(
-                "bcp_plans",
-                queryset=BcpPlan.objects.filter(deleted_at__isnull=True),
-            )
+    critical_procs = CriticalProcess.objects.filter(
+        **scope,
+        criticality__gte=4,
+        status="approvato",
+        deleted_at__isnull=True,
+    ).prefetch_related(
+        Prefetch(
+            "bcp_plans",
+            queryset=BcpPlan.objects.filter(deleted_at__isnull=True),
         )
-        missing_bcp = [p for p in critical_procs if not p.bcp_plans.all()]
-    else:
-        missing_bcp = []
+    )
+    missing_bcp = [p for p in critical_procs if not p.bcp_plans.all()]
     bcp_summary = {
         "processi_critici_senza_bcp": len(missing_bcp),
         "nomi": [p.name for p in missing_bcp[:5]],
     }
 
     # ── 7. Task scaduti ──
-    open_tasks_qs = Task.objects.filter(plant_id=plant_id, status__in=["aperto", "in_corso"])
+    open_tasks_qs = Task.objects.filter(**scope, status__in=["aperto", "in_corso"])
     overdue_qs = open_tasks_qs.filter(due_date__lt=today)
     priority_rank = Case(
         When(priority="critica", then=Value(0)),
@@ -438,6 +585,10 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
         "pdca":           pdca_summary,
         "bcp":            bcp_summary,
         "task":           tasks_summary,
+        "azioni_precedenti": _previous_actions_block(review, today),
+        "kpi":            _kpi_block(plant_id),
+        "audit":          _audit_block(scope, today, since_12m),
+        "siti":           [] if plant_id else _sites_block(today),
     }
 
     review.snapshot_data = snapshot
@@ -454,31 +605,3 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     return snapshot
 
 
-def approve_review(review: ManagementReview, user, note="") -> ManagementReview:
-    """Approva formalmente il riesame di direzione."""
-    from django.core.exceptions import ValidationError
-
-    if not review.snapshot_generated_at:
-        raise ValidationError(
-            _("Generare lo snapshot dei dati prima di approvare il riesame.")
-        )
-    if review.approval_status == "approvato":
-        raise ValidationError(_("Il riesame è già approvato."))
-
-    review.approval_status = "approvato"
-    review.approved_by = user
-    review.approved_at = timezone.now()
-    review.approval_note = note
-    review.save(update_fields=[
-        "approval_status", "approved_by", "approved_at",
-        "approval_note", "updated_at",
-    ])
-
-    log_action(
-        user=user,
-        action_code="management_review.approved",
-        level="L1",
-        entity=review,
-        payload={"review_id": str(review.pk), "note": (note or "")[:200]},
-    )
-    return review

@@ -308,6 +308,27 @@ def get_activity_schedule(plant=None, months_ahead: int = 6) -> list[dict]:
     except Exception:
         logger.exception("Errore nel calcolo delle scadenze formazione", exc_info=True)
 
+    # Riesame di direzione (ISO 27001 §9.3): riunioni pianificate e, per il
+    # perimetro, il prossimo riesame deciso nell'ultimo chiuso. Un riesame di
+    # organizzazione (senza sito) vale per ogni sito.
+    try:
+        from django.db.models import Q as _Q
+        from apps.management_review.models import ManagementReview
+
+        mr_qs = ManagementReview.objects.all()
+        if plant:
+            mr_qs = mr_qs.filter(_Q(plant=plant) | _Q(plant__isnull=True))
+        planned = list(mr_qs.filter(status__in=["pianificato", "in_corso"]))
+        for mr in planned:
+            _add("management_review", f"Riesame di direzione: {mr.title}", mr.review_date, mr.status, str(mr.id),
+                 "/management-review")
+        latest_done = mr_qs.filter(status="completato", next_review_date__isnull=False).order_by("-review_date").first()
+        if latest_done and not any(p.review_date >= latest_done.review_date for p in planned):
+            _add("management_review", f"Prossimo riesame di direzione (da {latest_done.title})",
+                 latest_done.next_review_date, "da_pianificare", str(latest_done.id), "/management-review")
+    except Exception:
+        logger.exception("Errore nel calcolo delle scadenze riesame di direzione", exc_info=True)
+
     # Security committee next meeting
     try:
         from apps.governance.models import SecurityCommittee

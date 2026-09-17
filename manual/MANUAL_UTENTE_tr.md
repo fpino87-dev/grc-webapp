@@ -652,53 +652,71 @@ Yalnızca onaylanmış alınan dersler gösterilir. Taslaklar yalnızca sahip ve
 
 [Ekran görüntüsü: yönetim gözden geçirmesi]
 
+Modül, ISO/IEC 27001:2022 §9.3'ün gerektirdiği yönetimin gözden geçirmesi sürecine rehberlik eder ve arşivlenecek, denetçiye sunulacak tutanağı üretir.
+
 ### Gözden geçirme nasıl oluşturulur
 
-1. **Yönetişim → Yönetim Gözden Geçirmesi → Yeni** bölümüne gidin
+1. **Yönetişim → Yönetim Gözden Geçirmesi → Yeni gözden geçirme** bölümüne gidin
 2. Doldurun:
-   - **Yıl ve numara**: ör. "2026 — Rev. 1/2026"
-   - **Planlanan tarih**
-   - **Katılımcılar**: dahil edilen rolleri seçin (Tesis Yöneticisi, BGYS Yöneticisi, Risk Yöneticisi, UY)
-3. Sistem, zorunlu gündem maddelerini otomatik olarak ekler (aşağıya bakın)
-4. **Gündem Maddesi Ekle** aracılığıyla ek maddeler ekleyebilirsiniz
-5. **Taslak Kaydet**'e tıklayın
+   - **Başlık**: ör. "Yönetimin gözden geçirmesi 2026"
+   - **Tesis**: bir tesis veya tüm kuruluşun gözden geçirmesi için **org-wide** (veriler tüm tesisleri kapsar ve tutanak tesis bazında bir görünüm içerir)
+   - **Toplantı tarihi**
+   - **Başkan**: M00 Governance'ta atanan CISO önerilir (tesisin CISO'su, yoksa kuruluşunki; o da yoksa ISMS Manager) ve elle değiştirilebilir
+   - **Katılımcılar**
+3. **Gözden geçirme oluştur**'a tıklayın: sistem zorunlu maddeleri içeren gündemi otomatik oluşturur
 
-### Zorunlu gündem maddeleri (ISO 27001 Madde 9.3)
+Başkan, katılımcılar ve sonraki gözden geçirme tarihi onaya kadar ayrıntı görünümünden değiştirilebilir.
 
-ISO 27001 Madde 9.3 standardı, yönetim gözden geçirmesinin zorunlu olarak bir dizi madde içermesini şart koşar. Sistem bunları taslağa otomatik olarak ekler:
+### Zorunlu gündem (ISO 27001 §9.3.2)
 
-- Önceki gözden geçirmelerdeki eylemlerin durumu
-- BGYS için geçerli iç ve dış bağlamdaki değişiklikler
-- BGYS performansına ilişkin geri bildirim (NC'ler, denetimler, izleme, ölçümler)
-- İlgili tarafların geri bildirimi
-- Risk değerlendirmesinin sonuçları ve işlem planının durumu
-- Sürekli iyileştirme fırsatları
+Her gözden geçirme, silinemeyen şu maddeleri içerir:
 
-Bu maddelerden herhangi biri en az bir yorum veya kaydedilmiş karar içermiyorsa gözden geçirme kapatılamaz.
+- a) Önceki yönetim gözden geçirmelerindeki eylemlerin durumu
+- b) BGYS ile ilgili dış ve iç hususlardaki değişiklikler
+- c) İlgili tarafların ihtiyaç ve beklentilerindeki değişiklikler
+- d) Bilgi güvenliği performansı (uygunsuzluklar ve düzeltici faaliyetler, izleme ve ölçme, denetimler, hedefler)
+- e) İlgili taraflardan geri bildirimler
+- f) Risk değerlendirmesinin sonuçları ve risk işleme planının durumu
+- g) Sürekli iyileştirme fırsatları
 
-### Kararlar nasıl kaydedilir
+**Madde ekle** ile ek maddeler eklenebilir. Zorunlu bir maddenin ne tartışması ne de kararı varsa **toplantı kapatılamaz**: eksik maddeler vurgulanır.
 
-Gündemdeki her madde için:
+### Veri anlık görüntüsü
 
-1. Maddeyi genişletmek için tıklayın
-2. **Tartışma özetini** girin
-3. Yönetim tarafından onaylanan eylemleri kaydetmek için **Karar Ekle**'ye tıklayın
-4. Her karar için: sorumlu, yapılacak eylem, son tarih
+Toplantı anındaki GRC verilerini dondurmak için **Veri anlık görüntüsü oluştur**'a tıklayın. Veriler, ilgili oldukları gündem maddelerinin içinde kısa listelerle gösterilir (en fazla 10 öğe, "… ve N tane daha" ile):
 
-Sorumlusu ve son tarihi olan kararlar otomatik olarak M08'de görevlere ve yapısal nitelikteyse M11'de PDCA döngülerine dönüştürülür.
+- **a)** önceki gözden geçirmelerin eylemleri: bir önceki gözden geçirmenin tüm eylemleri ile dönem içinde hâlâ açık olan veya kapatılan daha eski eylemler; gecikmiş olanlar vurgulanır
+- **d)** çerçeve başına uyum ve açığı olan kontroller; eşik dışı operasyonel KPI'lar; son 12 ayın denetimleri, hazırlık düzeyi ve açık uygunsuzluklar (önce büyükler); açık ve NIS2 bildirilen olaylar; takılı kalmış PDCA döngüleri ve gecikmiş görevler; süresi dolmuş, gözden geçirilecek ve son gözden geçirmeden beri onaylanan belgeler
+- **f)** kritik riskler (doğal → artık, işlem, sahip, plan olup olmadığı), resmi olarak kabul edilen riskler, BCP planı olmayan kritik süreçler
+- **g)** denetimlerden çıkan iyileştirme fırsatları
 
-### Veri anlık görüntüsü, kapanış ve onay
+Anlık görüntü onaya kadar yeniden oluşturulabilir; sonrasında tutanağın içeriği olduğu için sabit kalır.
 
-**Başkan ve katılımcılar** gözden geçirme oluşturulurken veya ayrıntı görünümündeki ilgili bölümden belirtilir. Başkan olarak M00 Governance'ta atanan CISO önerilir (tesisin CISO'su, yoksa kuruluşunki; o da yoksa ISMS Manager) ve elle değiştirilebilir. Her ikisi de raporda yer alır ve onaydan sonra değiştirilemez.
+### Toplantı nasıl yürütülür ve kararlar nasıl kaydedilir
 
-Gözden geçirme, toplantı anındaki GRC verilerinin **dondurulmuş bir anlık görüntüsü** etrafında döner:
+1. **Toplantıyı başlat**'a tıklayın
+2. Her madde için: maddeyi açın, verileri inceleyin, **tartışmayı** yazın ve kaydedin
+3. **Karar ekle** ile gözden geçirmenin çıktılarını (§9.3.3) kaydedin: açıklama, **tür** (iyileştirme, BGYS değişikliği, kaynaklar, diğer), sorumlu ve son tarih
+4. Kararın uygulanması gerekiyorsa şunları işaretleyin:
+   - **Görev oluştur**: M08'de, kararın son tarihiyle **seçilen role atanmış** bir görev açar (BGYS değişiklikleri için yüksek öncelik)
+   - **PDCA döngüsü aç**: M11'de bir PDCA döngüsü açar (tüm kuruluşun gözden geçirmesi için tesisi belirtin)
+   Bağlı görevin durumu ve PDCA'nın aşaması karar üzerinde görünür
+5. **Tamamlandı olarak işaretle**'ye tıklayın: sistem zorunlu maddeleri kontrol eder ve takvim politikasına göre **sonraki gözden geçirme tarihini** önerir. Planlanan toplantılar ve sonraki gözden geçirme **Takvim**'de görünür
 
-1. Toplantıyı başlatın: durum **Devam ediyor**'a geçer
-2. **Veri anlık görüntüsü oluştur**'a tıklayın: veriler o anda dondurulur ve artık değişmez. Sayaçların yanı sıra anlık görüntü, yönetime sunulacak kısa listeleri içerir (her biri en fazla 10 öğe, "… ve N tane daha" ile): çerçeve başına açığı olan kontroller, süresi dolmuş belgeler, 90 gün içinde gözden geçirilecek ve son gözden geçirmeden beri onaylanan belgeler, kritik riskler (doğal → artık, işlem, sahip, plan olup olmadığı) ve resmi olarak kabul edilen riskler, açık ve NIS2 bildirilen olaylar, takılı kalmış PDCA döngüleri ve gecikmiş görevler. Anlık görüntü, onay için **zorunlu bir ön koşuldur**
-3. Verileri toplantıda sunun ve kararları eylem olarak kaydedin (sahip + son tarih)
-4. Toplantıyı **Tamamlandı** olarak işaretleyin
-5. **Onayla**'ya tıklayın ve resmi onay notunu girin (anlık görüntü oluşturulmuş olmalıdır). Onaylandıktan sonra gözden geçirme değiştirilemez hale gelir
-6. Rapor düğmesinden **CISO raporunu HTML formatında** (yazdırılabilir/arşivlenebilir) indirin — indirme audit trail'e kaydedilir
+### Yapay zekâ ile yönetici özeti
+
+Yönetici özeti tutanağı açar: BGYS'nin genel değerlendirmesi, kritik konular, kararlar ve öncelikler.
+
+- **Elle yaz** veya
+- **Yapay zekâ ile taslak oluştur** (anlık görüntü gerekir; en iyisi gündemi doldurduktan sonra yapmaktır). Yapay zekâ motoruna toplu veriler ve tutanak metinleri gönderilir: kişi adları yer tutucularla değiştirilir ve metin standart anonimleştirmeden geçer (e-postalar, telefonlar, tesis adları). Taslak **yapay zekâ tarafından üretilmiş içerik** olarak işaretlenir ve gerekirse düzenledikten sonra **Tutanağa kabul et**'e tıklayana kadar **tutanağa girmez**; **Taslağı at** taslağı siler
+
+Tutanakta özet, yapay zekâ desteğiyle (ve hangi modelle) hazırlanıp hazırlanmadığını, düzenlenip düzenlenmediğini ve kimin kabul ettiğini belirtir.
+
+### Onay ve tutanak
+
+1. **Gözden geçirmeyi onayla**'ya tıklayın ve resmi notu girin (anlık görüntü ve tamamlanmış toplantı gerekir). Onaydan sonra toplantı verileri, gündem, kararlar ve özet değiştirilemez; yalnızca kararların ilerleme durumu güncellenebilir
+2. Tutanağı **PDF** veya **HTML** olarak indirin: gözden geçirme bilgileri, katılımcılar, yönetici özeti, dikkat edilecek noktalar, veriler/tartışma/kararlarla gündem, karar özeti, onay. İndirme denetim izine kaydedilir
+3. **Denetim paketi** (M03), gözden geçirmelerin özetini ve onaylanmış gözden geçirmelerin PDF tutanaklarını içerir
 
 ---
 

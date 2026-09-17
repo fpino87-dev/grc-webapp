@@ -652,53 +652,71 @@ Wyświetlane są tylko zatwierdzone lekcje. Szkice są widoczne tylko dla właś
 
 [Zrzut ekranu: przegląd zarządu]
 
+Moduł prowadzi przez przegląd zarządzania wymagany przez ISO/IEC 27001:2022 §9.3 i tworzy protokół do archiwizacji i przedstawienia audytorowi.
+
 ### Jak utworzyć przegląd
 
-1. Przejdź do **Ład organizacyjny → Przegląd Zarządu → Nowy**
+1. Przejdź do **Ład organizacyjny → Przegląd Zarządu → Nowy przegląd**
 2. Wypełnij:
-   - **Rok i numer**: np. „2026 — Prz. 1/2026"
-   - **Planowana data**
-   - **Uczestnicy**: wybierz zaangażowane role (Plant Manager, CISO, Risk Manager, CO)
-3. System automatycznie dodaje obowiązkowe punkty do porządku obrad (patrz poniżej)
-4. Możesz dodawać dodatkowe punkty za pomocą **Dodaj punkt PO**
-5. Kliknij **Zapisz szkic**
+   - **Tytuł**: np. „Przegląd zarządzania 2026"
+   - **Zakład**: jeden zakład lub **org-wide** dla przeglądu całej organizacji (dane obejmują wszystkie zakłady, a protokół zawiera przegląd według zakładów)
+   - **Data spotkania**
+   - **Przewodniczący**: proponowany jest CISO wyznaczony w M00 Governance (dla zakładu, a w przeciwnym razie dla organizacji; w ostateczności ISMS Manager), z możliwością ręcznej zmiany
+   - **Uczestnicy**
+3. Kliknij **Utwórz przegląd**: system automatycznie tworzy porządek obrad z punktami obowiązkowymi
 
-### Obowiązkowe punkty porządku obrad (ISO 27001 kl.9.3)
+Przewodniczącego, uczestników i datę kolejnego przeglądu można zmieniać w szczegółach do momentu zatwierdzenia.
 
-Norma ISO 27001 klauzula 9.3 wymaga, aby przegląd zarządu obowiązkowo obejmował szereg punktów. System automatycznie wstawia je do szkicu:
+### Obowiązkowy porządek obrad (ISO 27001 §9.3.2)
 
-- Status działań z poprzednich przeglądów
-- Zmiany w wewnętrznym i zewnętrznym kontekście istotne dla SZBI
-- Informacje zwrotne o wynikach SZBI (NC, audyty, monitorowanie, pomiary)
-- Informacje zwrotne od zainteresowanych stron
-- Wyniki oceny ryzyka i status planu postępowania
-- Możliwości ciągłego doskonalenia
+Każdy przegląd zawiera poniższe punkty, których nie można usunąć:
 
-Nie można zamknąć przeglądu, jeśli którykolwiek z tych punktów nie ma przynajmniej jednego zarejestrowanego komentarza lub decyzji.
+- a) Status działań z poprzednich przeglądów zarządzania
+- b) Zmiany w kwestiach zewnętrznych i wewnętrznych istotnych dla ISMS
+- c) Zmiany potrzeb i oczekiwań zainteresowanych stron
+- d) Skuteczność bezpieczeństwa informacji (niezgodności i działania korygujące, monitorowanie i pomiary, audyty, cele)
+- e) Informacje zwrotne od zainteresowanych stron
+- f) Wyniki szacowania ryzyka i status planu postępowania z ryzykiem
+- g) Możliwości ciągłego doskonalenia
 
-### Jak rejestrować decyzje
+Dodatkowe punkty można dodać przyciskiem **Dodaj punkt**. **Nie można zamknąć spotkania**, jeśli punkt obowiązkowy nie ma ani dyskusji, ani decyzji: brakujące punkty są wyróżniane.
 
-Dla każdego punktu porządku obrad:
+### Snapshot danych
 
-1. Kliknij punkt, aby go rozwinąć
-2. Wpisz **streszczenie dyskusji**
-3. Kliknij **Dodaj decyzję**, aby zarejestrować działania zatwierdzone przez kierownictwo
-4. Dla każdej decyzji podaj: odpowiedzialnego, działanie do podjęcia, termin
+Kliknij **Generuj snapshot danych**, aby zamrozić dane GRC w chwili spotkania. Dane pojawiają się w punktach porządku obrad, których dotyczą, w postaci krótkich list (maksymalnie 10 pozycji, z „… i N więcej"):
 
-Decyzje z odpowiedzialnym i terminem są automatycznie przekształcane w zadania w M08 i, jeśli strukturalne, w cykle PDCA w M11.
+- **a)** działania z poprzednich przeglądów: wszystkie z poprzedniego przeglądu oraz starsze, nadal otwarte lub zamknięte w danym okresie, z wyróżnieniem działań po terminie
+- **d)** zgodność dla każdego frameworku z kontrolami z lukami; operacyjne KPI poza progami; audyty z ostatnich 12 miesięcy z gotowością i otwartymi niezgodnościami (najpierw poważne); incydenty otwarte i zgłoszone NIS2; zablokowane cykle PDCA i zadania po terminie; dokumenty po terminie, do przeglądu i zatwierdzone od ostatniego przeglądu
+- **f)** ryzyka krytyczne (inherentne → rezydualne, postępowanie, właściciel, czy istnieje plan), ryzyka formalnie zaakceptowane, krytyczne procesy bez planu BCP
+- **g)** możliwości doskonalenia wskazane w audytach
 
-### Snapshot danych, zamknięcie i zatwierdzenie
+Snapshot można generować ponownie do momentu zatwierdzenia; potem pozostaje niezmienny, ponieważ stanowi treść protokołu.
 
-**Przewodniczącego i uczestników** wskazuje się przy tworzeniu przeglądu lub w dedykowanej sekcji szczegółów. Jako przewodniczący proponowany jest CISO wyznaczony w M00 Governance (dla zakładu, a w przeciwnym razie dla organizacji; w ostateczności ISMS Manager), z możliwością ręcznej zmiany. Oba pola pojawiają się w raporcie i nie można ich zmienić po zatwierdzeniu.
+### Jak prowadzić spotkanie i rejestrować decyzje
 
-Przegląd opiera się na **zamrożonym snapshocie** danych GRC w chwili spotkania:
+1. Kliknij **Rozpocznij spotkanie**
+2. Dla każdego punktu: otwórz go, przejrzyj dane, wpisz **dyskusję** i zapisz
+3. Przyciskiem **Dodaj decyzję** zarejestruj wyniki przeglądu (§9.3.3): opis, **rodzaj** (doskonalenie, zmiana w ISMS, zasoby, inne), właściciela i termin
+4. Jeśli decyzję trzeba zrealizować, zaznacz:
+   - **Utwórz zadanie**: otwiera zadanie w M08 **przypisane do wybranej roli**, z terminem decyzji (wysoki priorytet dla zmian w ISMS)
+   - **Otwórz cykl PDCA**: otwiera cykl PDCA w M11 (dla przeglądu całej organizacji wskaż zakład)
+   Status powiązanego zadania i faza cyklu PDCA są widoczne przy decyzji
+5. Kliknij **Oznacz jako zakończone**: system sprawdza punkty obowiązkowe i proponuje **datę kolejnego przeglądu** zgodnie z polityką harmonogramu. Zaplanowane spotkania i kolejny przegląd pojawiają się w **Harmonogramie**
 
-1. Rozpocznij spotkanie: status zmienia się na **W toku**
-2. Kliknij **Generuj snapshot danych**: dane zostają uchwycone w tym momencie i już się nie zmienią. Oprócz liczników snapshot zawiera krótkie listy dla kierownictwa (maksymalnie 10 pozycji każda, z „… i N więcej”): kontrole z lukami dla każdego frameworku, dokumenty po terminie, do przeglądu w ciągu 90 dni i zatwierdzone od ostatniego przeglądu, ryzyka krytyczne (inherentne → rezydualne, postępowanie, właściciel, czy istnieje plan) i ryzyka formalnie zaakceptowane, otwarte incydenty i zgłoszone NIS2, zablokowane cykle PDCA i zadania po terminie. Snapshot jest **obowiązkowym warunkiem** zatwierdzenia
-3. Zaprezentuj dane na spotkaniu i zapisz decyzje jako działania (właściciel + termin)
-4. Oznacz spotkanie jako **Zakończone**
-5. Kliknij **Zatwierdź** i wprowadź formalną notatkę zatwierdzenia (wymaga wygenerowanego snapshotu). Po zatwierdzeniu przegląd staje się niezmienny
-6. Pobierz **raport CISO w formacie HTML** (do druku/archiwizacji) z przycisku raportu — pobranie jest rejestrowane w audit trail
+### Podsumowanie dla kierownictwa z AI
+
+Podsumowanie dla kierownictwa otwiera protokół: ogólna ocena ISMS, problemy krytyczne, decyzje i priorytety.
+
+- **Napisz ręcznie** lub
+- **Wygeneruj wersję roboczą z AI** (wymaga snapshotu; najlepiej po uzupełnieniu porządku obrad). Silnik AI otrzymuje dane zbiorcze i teksty protokołu: nazwiska osób są zastępowane symbolami zastępczymi, a tekst przechodzi standardową anonimizację (e-maile, telefony, nazwy zakładów). Wersja robocza jest oznaczona jako **treść wygenerowana przez AI** i **nie trafia do protokołu**, dopóki nie klikniesz **Zaakceptuj do protokołu**, ewentualnie po jej poprawieniu; **Odrzuć wersję roboczą** ją usuwa
+
+W protokole podsumowanie informuje, czy powstało z pomocą AI (i jakiego modelu), czy było modyfikowane i kto je zaakceptował.
+
+### Zatwierdzenie i protokół
+
+1. Kliknij **Zatwierdź przegląd** i wprowadź formalną notatkę (wymaga snapshotu i zakończonego spotkania). Po zatwierdzeniu nie można zmieniać danych spotkania, porządku obrad, decyzji ani podsumowania; można jedynie aktualizować status realizacji decyzji
+2. Pobierz protokół w formacie **PDF** lub **HTML**: dane przeglądu, uczestnicy, podsumowanie dla kierownictwa, punkty uwagi, porządek obrad z danymi, dyskusja i decyzje, zestawienie decyzji, zatwierdzenie. Pobranie jest rejestrowane w ścieżce audytu
+3. **Pakiet audytowy** (M03) zawiera zestawienie przeglądów i protokoły PDF przeglądów zatwierdzonych
 
 ---
 

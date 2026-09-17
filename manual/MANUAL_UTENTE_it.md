@@ -652,53 +652,71 @@ Vengono mostrate solo le lesson learned approvate. Le bozze sono visibili solo a
 
 [Schermata: revisione direzione]
 
-### Come creare una revisione
+Il modulo guida il riesame di direzione richiesto da ISO/IEC 27001:2022 §9.3 e produce il verbale da archiviare e presentare all'auditor.
 
-1. Vai su **Governance → Revisione Direzione → Nuova**
+### Come creare un riesame
+
+1. Vai su **Governance → Revisione Direzione → Nuova revisione**
 2. Compila:
-   - **Anno e numero**: es. "2026 — Rev. 1/2026"
-   - **Data pianificata**
-   - **Partecipanti**: seleziona i ruoli coinvolti (Plant Manager, CISO, Risk Manager, CO)
-3. Il sistema aggiunge automaticamente i punti obbligatori all'ordine del giorno (vedi sotto)
-4. Puoi aggiungere punti extra tramite **Aggiungi punto OdG**
-5. Clicca **Salva bozza**
+   - **Titolo**: es. "Riesame di direzione 2026"
+   - **Sito**: un sito, oppure **org-wide** per un riesame dell'intera organizzazione (i dati aggregano tutti i siti e il verbale include un quadro per sito)
+   - **Data riunione**
+   - **Presieduto da**: viene proposto il CISO nominato in M00 Governance (quello del sito, altrimenti quello di organizzazione; in mancanza l'ISMS Manager), modificabile a mano
+   - **Partecipanti**
+3. Clicca **Crea revisione**: il sistema crea automaticamente l'ordine del giorno con i punti obbligatori
 
-### Punti all'ordine del giorno obbligatori (ISO 27001 cl.9.3)
+Presidente, partecipanti e data del prossimo riesame si possono modificare dal dettaglio fino all'approvazione.
 
-La norma ISO 27001 clausola 9.3 impone che la revisione di direzione includa obbligatoriamente una serie di punti. Il sistema li inserisce automaticamente nella bozza:
+### Ordine del giorno obbligatorio (ISO 27001 §9.3.2)
 
-- Stato delle azioni delle revisioni precedenti
-- Cambiamenti nel contesto interno ed esterno rilevanti per il SGSI
-- Feedback sulle prestazioni del SGSI (NC, audit, monitoraggio, misurazioni)
-- Feedback delle parti interessate
-- Risultati della valutazione dei rischi e stato del piano di trattamento
-- Opportunita' di miglioramento continuo
+Ogni riesame contiene questi punti, che non si possono eliminare:
 
-Non e' possibile chiudere una revisione se uno di questi punti non ha almeno un commento o una decisione registrata.
+- a) Stato delle azioni dei riesami precedenti
+- b) Cambiamenti nei fattori esterni e interni rilevanti per il SGSI
+- c) Cambiamenti nelle esigenze e aspettative delle parti interessate
+- d) Prestazioni della sicurezza delle informazioni (non conformità e azioni correttive, monitoraggio e misurazioni, audit, obiettivi)
+- e) Feedback delle parti interessate
+- f) Risultati della valutazione del rischio e stato del piano di trattamento
+- g) Opportunità di miglioramento continuo
 
-### Come registrare le decisioni
+Si possono aggiungere punti extra con **Aggiungi punto**. **Non è possibile chiudere la riunione** se un punto obbligatorio non ha almeno una discussione o una decisione: i punti mancanti vengono evidenziati.
 
-Per ogni punto all'ordine del giorno:
+### Snapshot dei dati
 
-1. Clicca sul punto per espanderlo
-2. Inserisci il **riepilogo della discussione**
-3. Clicca **Aggiungi decisione** per registrare le azioni approvate dalla direzione
-4. Per ogni decisione specifica: responsabile, azione da intraprendere, scadenza
+Clicca **Genera snapshot dati** per congelare i dati GRC al momento della riunione. I dati compaiono dentro i punti dell'ordine del giorno a cui si riferiscono, con elenchi sintetici (massimo 10 voci, con «… e altri N»):
 
-Le decisioni con responsabile e scadenza vengono automaticamente trasformate in task in M08 e, se strutturali, in cicli PDCA in M11.
+- **a)** azioni dei riesami precedenti: tutte quelle del riesame precedente, più quelle più vecchie ancora aperte o chiuse nel periodo, con quelle scadute in evidenza
+- **d)** compliance per framework con i controlli in gap; KPI operativi fuori soglia; audit degli ultimi 12 mesi con readiness e non conformità aperte (maggiori prima); incidenti aperti e notificati NIS2; cicli PDCA fermi e task scaduti; documenti scaduti, in scadenza e approvati dall'ultimo riesame
+- **f)** rischi critici (inerente → residuo, trattamento, owner, presenza del piano), rischi accettati formalmente, processi critici senza piano BCP
+- **g)** opportunità di miglioramento emerse dagli audit
 
-### Snapshot dei dati, chiusura e approvazione
+Lo snapshot si può rigenerare fino all'approvazione; dopo resta fisso perché è il contenuto del verbale.
 
-**Presidente e partecipanti** si indicano alla creazione del riesame o dalla sezione dedicata nel dettaglio. Come presidente viene proposto il CISO nominato in M00 Governance (quello del sito, altrimenti quello di organizzazione; in mancanza l'ISMS Manager), modificabile a mano. Entrambi compaiono nella relazione e non sono più modificabili dopo l'approvazione.
+### Come condurre la riunione e registrare le decisioni
 
-Il riesame ruota attorno a uno **snapshot congelato** dei dati GRC al momento della riunione:
+1. Clicca **Avvia riunione**
+2. Per ogni punto: aprilo, consulta i dati, scrivi la **discussione** e salva
+3. Con **Aggiungi decisione** registra gli output del riesame (§9.3.3): descrizione, **tipo** (miglioramento, modifica al SGSI, risorse, altro), owner e scadenza
+4. Se la decisione va eseguita, spunta:
+   - **Crea task**: apre un task in M08 **assegnato al ruolo** scelto, con la scadenza della decisione (priorità alta per le modifiche al SGSI)
+   - **Apri ciclo PDCA**: apre un ciclo PDCA in M11 (per un riesame di organizzazione indica il sito)
+   Lo stato del task e la fase del PDCA collegati si vedono sulla decisione
+5. Clicca **Segna come completata**: il sistema verifica i punti obbligatori e propone la **data del prossimo riesame** secondo la policy dello scadenzario. Riunioni pianificate e prossimo riesame compaiono nello **Scadenzario**
 
-1. Avvia la riunione: lo stato passa a **In corso**
-2. Clicca **Genera snapshot dati**: i dati vengono fotografati in quel momento e non cambieranno più. Oltre ai contatori, lo snapshot contiene gli elenchi sintetici da portare in direzione (massimo 10 voci ciascuno, con «… e altri N»): controlli in gap per framework, documenti scaduti, in scadenza entro 90 giorni e approvati dall'ultimo riesame, rischi critici (inerente → residuo, trattamento, owner, presenza del piano) e rischi accettati formalmente, incidenti aperti e notificati NIS2, cicli PDCA fermi e task scaduti. Lo snapshot è **prerequisito obbligatorio** per l'approvazione
-3. Presenta i dati in riunione e registra le decisioni come azioni (owner + scadenza)
-4. Segna la riunione come **Completata**
-5. Clicca **Approva** e inserisci la nota formale di approvazione (richiede lo snapshot già generato). Una volta approvata, la revisione diventa immutabile
-6. Scarica la **relazione CISO in formato HTML** (stampabile/archiviabile) dal pulsante report — il download viene registrato nell'audit trail
+### Sintesi executive con l'IA
+
+La sintesi executive apre il verbale: giudizio complessivo sul SGSI, criticità, decisioni e priorità.
+
+- **Scrivi a mano**, oppure
+- **Genera bozza con IA** (richiede lo snapshot; conviene farlo dopo aver compilato l'ordine del giorno). Al motore IA arrivano dati aggregati e i testi del verbale: i nomi delle persone vengono sostituiti da segnaposto e il testo passa dall'anonimizzazione standard (email, telefoni, nomi dei siti). La bozza è marcata come **contenuto generato da IA** e **non entra nel verbale** finché non clicchi **Accetta nel verbale**, eventualmente dopo averla modificata; **Scarta bozza** la elimina
+
+Nel verbale la sintesi riporta se è stata redatta con il supporto dell'IA (e con quale modello), se è stata modificata e chi l'ha accettata.
+
+### Approvazione e verbale
+
+1. Clicca **Approva riesame** e inserisci la nota formale (richiede snapshot generato e riunione completata). Dopo l'approvazione dati della riunione, ordine del giorno, decisioni e sintesi non sono più modificabili; resta aggiornabile solo lo stato di avanzamento delle decisioni
+2. Scarica il verbale in **PDF** o **HTML**: dati del riesame, partecipanti, sintesi executive, punti di attenzione, ordine del giorno con dati, discussione e decisioni, riepilogo delle decisioni, approvazione. Il download è registrato nell'audit trail
+3. Il **pacchetto audit** (M03) include il riepilogo dei riesami e il verbale PDF di quelli approvati
 
 ---
 

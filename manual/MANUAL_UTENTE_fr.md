@@ -652,53 +652,71 @@ Seules les lessons apprises approuvées sont affichées. Les brouillons sont vis
 
 [Écran : revue de direction]
 
+Le module guide la revue de direction exigée par ISO/IEC 27001:2022 §9.3 et produit le procès-verbal à archiver et à présenter à l'auditeur.
+
 ### Comment créer une revue
 
-1. Allez sur **Gouvernance → Revue de Direction → Nouvelle**
+1. Allez dans **Gouvernance → Revue de Direction → Nouvelle revue**
 2. Renseignez :
-   - **Année et numéro** : ex. "2026 — Rev. 1/2026"
-   - **Date planifiée**
-   - **Participants** : sélectionnez les rôles impliqués (Plant Manager, RSSI, Risk Manager, CO)
-3. Le système ajoute automatiquement les points obligatoires à l'ordre du jour (voir ci-dessous)
-4. Vous pouvez ajouter des points supplémentaires via **Ajouter un point à l'OdJ**
-5. Cliquez sur **Enregistrer le brouillon**
+   - **Titre** : ex. « Revue de direction 2026 »
+   - **Site** : un site, ou **org-wide** pour une revue de toute l'organisation (les données agrègent tous les sites et le procès-verbal inclut une vue par site)
+   - **Date de la réunion**
+   - **Présidée par** : le RSSI nommé dans M00 Gouvernance est proposé (celui du site, sinon celui de l'organisation ; à défaut l'ISMS Manager), modifiable manuellement
+   - **Participants**
+3. Cliquez sur **Créer la revue** : le système crée automatiquement l'ordre du jour avec les points obligatoires
 
-### Points à l'ordre du jour obligatoires (ISO 27001 cl.9.3)
+Président, participants et date de la prochaine revue sont modifiables depuis le détail jusqu'à l'approbation.
 
-La norme ISO 27001 clause 9.3 impose que la revue de direction inclue obligatoirement un ensemble de points. Le système les insère automatiquement dans le brouillon :
+### Ordre du jour obligatoire (ISO 27001 §9.3.2)
 
-- État des actions des revues précédentes
-- Changements dans le contexte interne et externe pertinents pour le SGSI
-- Retours sur les performances du SGSI (NC, audits, surveillance, mesures)
-- Retours des parties intéressées
-- Résultats de l'évaluation des risques et état du plan de traitement
-- Opportunités d'amélioration continue
+Chaque revue contient ces points, qui ne peuvent pas être supprimés :
 
-Il n'est pas possible de clôturer une revue si l'un de ces points n'a pas au moins un commentaire ou une décision enregistrée.
+- a) État des actions des revues de direction précédentes
+- b) Modifications des enjeux externes et internes pertinents pour le SMSI
+- c) Modifications des besoins et attentes des parties intéressées
+- d) Performance de la sécurité de l'information (non-conformités et actions correctives, surveillance et mesures, audits, objectifs)
+- e) Retours des parties intéressées
+- f) Résultats de l'appréciation des risques et état du plan de traitement
+- g) Opportunités d'amélioration continue
 
-### Comment enregistrer les décisions
+Des points supplémentaires peuvent être ajoutés avec **Ajouter un point**. **La réunion ne peut pas être clôturée** si un point obligatoire n'a ni discussion ni décision : les points manquants sont mis en évidence.
 
-Pour chaque point à l'ordre du jour :
+### Instantané des données
 
-1. Cliquez sur le point pour le développer
-2. Saisissez le **résumé de la discussion**
-3. Cliquez sur **Ajouter une décision** pour enregistrer les actions approuvées par la direction
-4. Pour chaque décision, précisez : responsable, action à entreprendre, échéance
+Cliquez sur **Générer l'instantané des données** pour figer les données GRC au moment de la réunion. Les données apparaissent dans les points de l'ordre du jour concernés, avec des listes synthétiques (10 éléments au maximum, avec « … et N autres ») :
 
-Les décisions avec responsable et échéance sont automatiquement transformées en tâches dans M08 et, si structurelles, en cycles PDCA dans M11.
+- **a)** actions des revues précédentes : toutes celles de la revue précédente, plus les plus anciennes encore ouvertes ou clôturées sur la période, les actions en retard étant mises en évidence
+- **d)** conformité par référentiel avec les contrôles en écart ; KPI opérationnels hors seuil ; audits des 12 derniers mois avec préparation et non-conformités ouvertes (majeures d'abord) ; incidents ouverts et notifiés NIS2 ; cycles PDCA bloqués et tâches en retard ; documents expirés, à réviser et approuvés depuis la dernière revue
+- **f)** risques critiques (inhérent → résiduel, traitement, responsable, présence d'un plan), risques formellement acceptés, processus critiques sans plan BCP
+- **g)** opportunités d'amélioration issues des audits
 
-### Instantané des données, clôture et approbation
+L'instantané peut être régénéré jusqu'à l'approbation ; ensuite il reste figé car il constitue le contenu du procès-verbal.
 
-Le **président et les participants** se renseignent à la création de la revue ou depuis la section dédiée du détail. Le RSSI nommé dans M00 Governance est proposé comme président (celui du site, sinon celui de l'organisation ; à défaut l'ISMS Manager), modifiable manuellement. Les deux figurent dans le rapport et ne sont plus modifiables après l'approbation.
+### Comment conduire la réunion et enregistrer les décisions
 
-La revue s'articule autour d'un **instantané figé** des données GRC au moment de la réunion :
+1. Cliquez sur **Démarrer la réunion**
+2. Pour chaque point : ouvrez-le, consultez les données, rédigez la **discussion** et enregistrez
+3. Avec **Ajouter une décision**, enregistrez les éléments de sortie de la revue (§9.3.3) : description, **type** (amélioration, modification du SMSI, ressources, autre), responsable et échéance
+4. Si la décision doit être mise en œuvre, cochez :
+   - **Créer une tâche** : ouvre une tâche dans M08 **assignée au rôle** choisi, avec l'échéance de la décision (priorité haute pour les modifications du SMSI)
+   - **Ouvrir un cycle PDCA** : ouvre un cycle PDCA dans M11 (pour une revue de toute l'organisation, indiquez le site)
+   L'état de la tâche et la phase du PDCA liés sont visibles sur la décision
+5. Cliquez sur **Marquer comme terminée** : le système vérifie les points obligatoires et propose la **date de la prochaine revue** selon la politique de l'échéancier. Les réunions planifiées et la prochaine revue apparaissent dans l'**Échéancier**
 
-1. Démarrez la réunion : le statut passe à **En cours**
-2. Cliquez sur **Générer l'instantané des données** : les données sont figées à cet instant et ne changeront plus. En plus des compteurs, l'instantané contient les listes synthétiques à présenter à la direction (10 éléments au maximum chacune, avec « … et N autres ») : contrôles en écart par référentiel, documents expirés, à réviser sous 90 jours et approuvés depuis la dernière revue, risques critiques (inhérent → résiduel, traitement, responsable, présence d'un plan) et risques formellement acceptés, incidents ouverts et notifiés NIS2, cycles PDCA bloqués et tâches en retard. L'instantané est un **prérequis obligatoire** pour l'approbation
-3. Présentez les données en réunion et enregistrez les décisions comme actions (responsable + échéance)
-4. Marquez la réunion comme **Terminée**
-5. Cliquez sur **Approuver** et saisissez la note formelle d'approbation (l'instantané doit être généré). Une fois approuvée, la revue devient immuable
-6. Téléchargez le **rapport CISO au format HTML** (imprimable/archivable) depuis le bouton rapport — le téléchargement est enregistré dans l'audit trail
+### Synthèse exécutive avec l'IA
+
+La synthèse exécutive ouvre le procès-verbal : appréciation globale du SMSI, points critiques, décisions et priorités.
+
+- **Rédiger manuellement**, ou
+- **Générer un brouillon avec l'IA** (nécessite l'instantané ; de préférence après avoir complété l'ordre du jour). Le moteur IA reçoit des données agrégées et les textes du procès-verbal : les noms des personnes sont remplacés par des marqueurs et le texte passe par l'anonymisation standard (e-mails, téléphones, noms de sites). Le brouillon est marqué comme **contenu généré par l'IA** et **n'entre pas dans le procès-verbal** tant que vous ne cliquez pas sur **Accepter dans le procès-verbal**, éventuellement après l'avoir modifié ; **Écarter le brouillon** le supprime
+
+Dans le procès-verbal, la synthèse indique si elle a été rédigée avec l'aide de l'IA (et avec quel modèle), si elle a été modifiée et qui l'a acceptée.
+
+### Approbation et procès-verbal
+
+1. Cliquez sur **Approuver la revue** et saisissez la note formelle (nécessite l'instantané et la réunion terminée). Après l'approbation, les données de la réunion, l'ordre du jour, les décisions et la synthèse ne sont plus modifiables ; seul l'état d'avancement des décisions peut encore être mis à jour
+2. Téléchargez le procès-verbal en **PDF** ou **HTML** : données de la revue, participants, synthèse exécutive, points d'attention, ordre du jour avec données, discussion et décisions, récapitulatif des décisions, approbation. Le téléchargement est enregistré dans la piste d'audit
+3. Le **dossier d'audit** (M03) inclut le récapitulatif des revues et le procès-verbal PDF des revues approuvées
 
 ---
 

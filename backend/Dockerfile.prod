@@ -8,6 +8,7 @@ WORKDIR /app
 # Dipendenze sistema per python-magic e Pillow
 RUN apt-get update && apt-get install -y \
     libmagic1 \
+    fonts-dejavu-core \
     libjpeg-dev \
     libpng-dev \
     libpq-dev \

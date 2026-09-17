@@ -59,6 +59,10 @@ def test_approve_review_ok_then_idempotent(review, user):
     from apps.management_review.services import approve_review
     review.snapshot_generated_at = timezone.now()
     review.save(update_fields=["snapshot_generated_at"])
+    with pytest.raises(ValidationError):  # riunione non ancora chiusa
+        approve_review(review, user, note="ok")
+    review.status = "completato"
+    review.save(update_fields=["status"])
     out = approve_review(review, user, note="ok")
     out.refresh_from_db()
     assert out.approval_status == "approvato"
@@ -143,13 +147,3 @@ def test_suggest_chair_prefers_plant_ciso_then_org(plant, user):
     )
     assert suggest_chair(plant.id) == user
     assert suggest_chair(None) == org_ciso
-
-
-def test_chair_locked_after_approval(review, user):
-    from apps.management_review.services import check_review_editable
-
-    check_review_editable(review, ["chair", "attendees"])  # bozza: ok
-    review.approval_status = "approvato"
-    with pytest.raises(ValidationError):
-        check_review_editable(review, ["chair"])
-    check_review_editable(review, ["status"])  # altri campi non bloccati qui

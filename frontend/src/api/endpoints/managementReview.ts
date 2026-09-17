@@ -1,15 +1,48 @@
 import { apiClient } from "../client";
 
+export type DecisionType = "miglioramento" | "modifica_sgsi" | "risorse" | "altro";
+
 export interface ReviewAction {
   id: string;
   review: string;
+  agenda_item: string | null;
+  decision_type: DecisionType;
   description: string;
   owner: number | null;
   owner_name: string | null;
   due_date: string | null;
   status: "aperto" | "chiuso";
   closed_at: string | null;
+  task: string | null;
+  task_status: string | null;
+  task_title: string | null;
+  pdca_cycle: string | null;
+  pdca_phase: string | null;
+  pdca_title: string | null;
   created_at: string;
+}
+
+export interface ReviewAgendaItem {
+  id: string;
+  review: string;
+  code: string;
+  title: string;
+  order: number;
+  mandatory: boolean;
+  discussion: string;
+  updated_at: string;
+}
+
+export interface ExecutiveSummaryMeta {
+  ai_assisted?: boolean;
+  provider?: string;
+  model?: string;
+  edited?: boolean;
+  accepted_by_name?: string;
+  accepted_at?: string;
+  generated_at?: string;
+  snapshot_generated_at?: string;
+  used_fallback?: boolean;
 }
 
 export interface ManagementReview {
@@ -25,44 +58,78 @@ export interface ManagementReview {
   attendees_detail: { id: number; name: string }[];
   status: "pianificato" | "in_corso" | "completato";
   approval_status: "bozza" | "in_review" | "approvato" | "rifiutato";
-  approved_by: string | null;
+  approved_by: number | null;
+  approved_by_name: string | null;
   approved_at: string | null;
   approval_note: string;
   snapshot_generated_at: string | null;
   snapshot_data: Record<string, unknown>;
+  executive_summary: string;
+  executive_summary_meta: ExecutiveSummaryMeta;
+  executive_summary_draft: string;
+  executive_summary_draft_meta: ExecutiveSummaryMeta;
   actions: ReviewAction[];
+  agenda_items: ReviewAgendaItem[];
   created_at: string;
 }
 
+export interface CreateActionPayload {
+  review: string;
+  agenda_item?: string | null;
+  decision_type: DecisionType;
+  description: string;
+  owner?: number | null;
+  due_date?: string | null;
+  create_task?: boolean;
+  task_role?: string;
+  create_pdca?: boolean;
+  pdca_plant?: string | null;
+}
+
+const base = "/management-review/reviews";
+
 export const managementReviewApi = {
   list: (params?: Record<string, string>) =>
-    apiClient.get<{ results: ManagementReview[] }>("/management-review/reviews/", { params }).then((r) => r.data),
+    apiClient.get<{ results: ManagementReview[] }>(`${base}/`, { params }).then((r) => r.data),
 
   create: (data: Partial<ManagementReview>) =>
-    apiClient.post<ManagementReview>("/management-review/reviews/", data).then((r) => r.data),
+    apiClient.post<ManagementReview>(`${base}/`, data).then((r) => r.data),
 
   update: (id: string, data: Partial<ManagementReview>) =>
-    apiClient.patch<ManagementReview>(`/management-review/reviews/${id}/`, data).then((r) => r.data),
+    apiClient.patch<ManagementReview>(`${base}/${id}/`, data).then((r) => r.data),
 
   suggestedChair: (plant: string | null) =>
     apiClient
-      .get<{ id: number | null; name: string | null }>("/management-review/reviews/suggested-chair/", {
+      .get<{ id: number | null; name: string | null }>(`${base}/suggested-chair/`, {
         params: plant ? { plant } : {},
       })
       .then((r) => r.data),
 
+  start: (id: string) => apiClient.post<ManagementReview>(`${base}/${id}/start/`).then((r) => r.data),
+
+  complete: (id: string) => apiClient.post<ManagementReview>(`${base}/${id}/complete/`).then((r) => r.data),
+
   generateSnapshot: (id: string) =>
-    apiClient.post<Record<string, unknown>>(`/management-review/reviews/${id}/generate-snapshot/`).then((r) => r.data),
+    apiClient.post<Record<string, unknown>>(`${base}/${id}/generate-snapshot/`).then((r) => r.data),
 
   approve: (id: string, note: string) =>
-    apiClient.post<ManagementReview>(`/management-review/reviews/${id}/approve/`, { note }).then((r) => r.data),
+    apiClient.post<ManagementReview>(`${base}/${id}/approve/`, { note }).then((r) => r.data),
 
-  delete: (id: string) =>
-    apiClient.delete(`/management-review/reviews/${id}/`).then((r) => r.data),
+  delete: (id: string) => apiClient.delete(`${base}/${id}/`).then((r) => r.data),
 
-  downloadReport: async (id: string, filename: string) => {
-    const resp = await apiClient.get(`/management-review/reviews/${id}/report/`, { responseType: "blob" });
-    const url = URL.createObjectURL(new Blob([resp.data as BlobPart], { type: "text/html" }));
+  draftSummary: (id: string, lang: string) =>
+    apiClient.post<ManagementReview>(`${base}/${id}/summary-draft/`, { lang }).then((r) => r.data),
+
+  discardSummaryDraft: (id: string) =>
+    apiClient.delete<ManagementReview>(`${base}/${id}/summary-draft/`).then((r) => r.data),
+
+  saveSummary: (id: string, text: string) =>
+    apiClient.post<ManagementReview>(`${base}/${id}/summary/`, { text }).then((r) => r.data),
+
+  downloadReport: async (id: string, filename: string, fmt: "html" | "pdf" = "html") => {
+    const resp = await apiClient.get(`${base}/${id}/report/`, { params: { fmt }, responseType: "blob" });
+    const type = fmt === "pdf" ? "application/pdf" : "text/html";
+    const url = URL.createObjectURL(new Blob([resp.data as BlobPart], { type }));
     const a = document.createElement("a");
     a.href = url;
     a.download = filename;
@@ -70,7 +137,16 @@ export const managementReviewApi = {
     URL.revokeObjectURL(url);
   },
 
-  createAction: (data: { review: string; description: string; owner?: number | null; due_date?: string | null }) =>
+  addAgendaItem: (review: string, title: string) =>
+    apiClient.post<ReviewAgendaItem>("/management-review/agenda-items/", { review, title }).then((r) => r.data),
+
+  updateAgendaItem: (id: string, data: Partial<Pick<ReviewAgendaItem, "discussion" | "title">>) =>
+    apiClient.patch<ReviewAgendaItem>(`/management-review/agenda-items/${id}/`, data).then((r) => r.data),
+
+  deleteAgendaItem: (id: string) =>
+    apiClient.delete(`/management-review/agenda-items/${id}/`).then((r) => r.data),
+
+  createAction: (data: CreateActionPayload) =>
     apiClient.post<ReviewAction>("/management-review/review-actions/", data).then((r) => r.data),
 
   updateAction: (id: string, data: Partial<ReviewAction>) =>
@@ -79,3 +155,9 @@ export const managementReviewApi = {
   deleteAction: (id: string) =>
     apiClient.delete(`/management-review/review-actions/${id}/`).then((r) => r.data),
 };
+
+/** Messaggio d'errore delle azioni di dominio (`{"error": ...}`) con fallback. */
+export function reviewErrorMessage(e: unknown, fallback: string): string {
+  const data = (e as { response?: { data?: { error?: string; detail?: string } } })?.response?.data;
+  return data?.error || data?.detail || fallback;
+}

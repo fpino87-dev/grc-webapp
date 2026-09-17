@@ -120,10 +120,14 @@ def _add_management_reviews(zf, zip_name: str, plant_id, default_storage) -> Non
     from apps.management_review.models import ManagementReview
     from apps.documents.models import Document
 
+    from django.db.models import Count, Q
+
     qs = ManagementReview.objects.filter(
         deleted_at__isnull=True,
         status="completato",
-    ).select_related("chair", "approved_by")
+    ).select_related("chair", "approved_by").annotate(
+        n_actions=Count("actions", filter=Q(actions__deleted_at__isnull=True))
+    )
     if plant_id:
         qs = qs.filter(plant_id=plant_id)
 
@@ -136,7 +140,7 @@ def _add_management_reviews(zf, zip_name: str, plant_id, default_storage) -> Non
     w = safe_writer(buf)
     w.writerow(["Data", "Titolo", "Presidente", "Stato approvazione",
                 "Approvato da", "Approvato il", "Prossima revisione",
-                "N. delibere", "Verbale allegato"])
+                "N. decisioni", "Verbale allegato"])
     for r in reviews:
         has_doc = bool(r.document_id)
         w.writerow([
@@ -147,7 +151,7 @@ def _add_management_reviews(zf, zip_name: str, plant_id, default_storage) -> Non
             r.approved_by.get_full_name() if r.approved_by else "—",
             r.approved_at.strftime("%Y-%m-%d") if r.approved_at else "—",
             r.next_review_date.isoformat() if r.next_review_date else "—",
-            len(r.delibere) if isinstance(r.delibere, list) else 0,
+            r.n_actions,
             "Sì" if has_doc else "No",
         ])
     zf.writestr(
@@ -178,6 +182,30 @@ def _add_management_reviews(zf, zip_name: str, plant_id, default_storage) -> Non
             import logging
             logging.getLogger(__name__).warning(
                 "audit-package: verbale revisione %s saltato: %s", getattr(r, "pk", "?"), exc,
+            )
+
+
+def _add_management_review_reports(zf, zip_name: str, plant_id) -> None:
+    """Verbali PDF generati dal sistema per i riesami approvati."""
+    import logging
+
+    from apps.management_review.models import ManagementReview
+    from apps.management_review.report import render_pdf
+
+    qs = (
+        ManagementReview.objects.filter(approval_status="approvato", snapshot_generated_at__isnull=False)
+        .select_related("plant", "chair", "approved_by")
+        .prefetch_related("attendees", "agenda_items", "actions__owner", "actions__task", "actions__pdca_cycle")
+    )
+    if plant_id:
+        qs = qs.filter(plant_id=plant_id)
+    for r in qs:
+        try:
+            fname = f"{r.review_date.isoformat()}_{_sanitize_name(r.title, 50)}_verbale.pdf"
+            zf.writestr(f"{zip_name}/REVISIONI_DIREZIONE/{fname}", render_pdf(r))
+        except Exception as exc:
+            logging.getLogger(__name__).warning(
+                "audit-package: verbale PDF del riesame %s non generato: %s", r.pk, exc,
             )
 
 
@@ -376,6 +404,7 @@ class AuditPackageView(APIView):
 
             # ── Revisioni di direzione ─────────────────────────────────────────
             _add_management_reviews(zf, zip_name, plant_id, default_storage)
+            _add_management_review_reports(zf, zip_name, plant_id)
 
             # ── Registro rischi ────────────────────────────────────────────────
             _add_risk_register(zf, zip_name, plant_id)

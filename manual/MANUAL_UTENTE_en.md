@@ -652,53 +652,71 @@ Only approved lesson learned are shown. Drafts are visible only to the owner and
 
 [Screenshot: management review]
 
+The module guides the management review required by ISO/IEC 27001:2022 §9.3 and produces the minutes to archive and present to the auditor.
+
 ### How to create a review
 
-1. Go to **Governance → Management Review → New**
+1. Go to **Governance → Management Review → New review**
 2. Fill in:
-   - **Year and number**: e.g. "2026 — Rev. 1/2026"
-   - **Planned date**
-   - **Participants**: select the roles involved (Plant Manager, CISO, Risk Manager, CO)
-3. The system automatically adds the mandatory agenda items (see below)
-4. You can add extra items via **Add agenda item**
-5. Click **Save draft**
+   - **Title**: e.g. "Management review 2026"
+   - **Site**: a site, or **org-wide** for a review of the whole organisation (data aggregates all sites and the minutes include an overview by site)
+   - **Meeting date**
+   - **Chaired by**: the CISO appointed in M00 Governance is proposed (the site CISO, otherwise the organisation one; failing that the ISMS Manager) and can be changed manually
+   - **Attendees**
+3. Click **Create review**: the system automatically creates the agenda with the mandatory items
 
-### Mandatory agenda items (ISO 27001 cl.9.3)
+Chair, attendees and next review date can be changed from the detail view until approval.
 
-ISO 27001 clause 9.3 requires that the management review mandatorily includes a number of items. The system inserts them automatically into the draft:
+### Mandatory agenda (ISO 27001 §9.3.2)
 
-- Status of actions from previous reviews
-- Changes in the internal and external context relevant to the ISMS
-- Feedback on ISMS performance (NCs, audits, monitoring, measurements)
-- Feedback from interested parties
-- Results of risk assessment and status of the treatment plan
-- Opportunities for continual improvement
+Every review contains these items, which cannot be deleted:
 
-It is not possible to close a review if any of these items does not have at least one comment or recorded decision.
+- a) Status of actions from previous management reviews
+- b) Changes in external and internal issues relevant to the ISMS
+- c) Changes in needs and expectations of interested parties
+- d) Information security performance (nonconformities and corrective actions, monitoring and measurement, audits, objectives)
+- e) Feedback from interested parties
+- f) Results of risk assessment and status of the risk treatment plan
+- g) Opportunities for continual improvement
 
-### How to record decisions
+Extra items can be added with **Add item**. **The meeting cannot be closed** if a mandatory item has neither a discussion nor a decision: missing items are highlighted.
 
-For each agenda item:
+### Data snapshot
 
-1. Click on the item to expand it
-2. Enter the **discussion summary**
-3. Click **Add decision** to record the actions approved by management
-4. For each decision specify: responsible, action to be taken, deadline
+Click **Generate data snapshot** to freeze GRC data at the time of the meeting. The data appears inside the agenda items it relates to, with short lists (at most 10 entries, with "… and N more"):
 
-Decisions with a responsible and deadline are automatically converted into tasks in M08 and, if structural, into PDCA cycles in M11.
+- **a)** actions from previous reviews: all those of the previous review, plus older ones still open or closed in the period, with overdue ones highlighted
+- **d)** compliance per framework with controls with gaps; operational KPIs outside thresholds; audits of the last 12 months with readiness and open nonconformities (major first); open and NIS2-notified incidents; stuck PDCA cycles and overdue tasks; expired, expiring and recently approved documents
+- **f)** critical risks (inherent → residual, treatment, owner, whether a plan exists), formally accepted risks, critical processes without a BCP plan
+- **g)** improvement opportunities from audits
 
-### Data snapshot, closure and approval
+The snapshot can be regenerated until approval; afterwards it is fixed because it is the content of the minutes.
 
-**Chair and attendees** are set when creating the review or from the dedicated section in the detail view. The CISO appointed in M00 Governance is proposed as chair (the site CISO, otherwise the organisation one; failing that the ISMS Manager) and can be changed manually. Both appear in the report and can no longer be changed after approval.
+### How to run the meeting and record decisions
 
-The review revolves around a **frozen snapshot** of GRC data at the time of the meeting:
+1. Click **Start meeting**
+2. For each item: open it, review the data, write the **discussion** and save
+3. With **Add decision** record the review outputs (§9.3.3): description, **type** (improvement, change to the ISMS, resources, other), owner and due date
+4. If the decision needs to be carried out, tick:
+   - **Create task**: opens a task in M08 **assigned to the selected role**, with the decision's due date (high priority for changes to the ISMS)
+   - **Open PDCA cycle**: opens a PDCA cycle in M11 (for an organisation-wide review select the site)
+   The status of the linked task and the phase of the linked PDCA are shown on the decision
+5. Click **Mark as completed**: the system checks the mandatory items and proposes the **next review date** according to the schedule policy. Planned meetings and the next review appear in the **Schedule**
 
-1. Start the meeting: the status moves to **In progress**
-2. Click **Generate data snapshot**: the data is captured at that moment and will no longer change. Besides the counters, the snapshot contains the short lists to bring to management (at most 10 items each, with "… and N more"): controls with gaps per framework, expired documents, documents due for review within 90 days and those approved since the last review, critical risks (inherent → residual, treatment, owner, whether a plan exists) and formally accepted risks, open and NIS2-notified incidents, stuck PDCA cycles and overdue tasks. The snapshot is a **mandatory prerequisite** for approval
-3. Present the data in the meeting and record decisions as actions (owner + due date)
-4. Mark the meeting as **Completed**
-5. Click **Approve** and enter the formal approval note (requires the snapshot to be generated). Once approved, the review becomes immutable
-6. Download the **CISO report in HTML format** (printable/archivable) from the report button — the download is recorded in the audit trail
+### Executive summary with AI
+
+The executive summary opens the minutes: overall assessment of the ISMS, critical issues, decisions and priorities.
+
+- **Write manually**, or
+- **Generate AI draft** (requires the snapshot; best done after filling in the agenda). The AI engine receives aggregated data and the minutes' texts: people's names are replaced with placeholders and the text goes through the standard anonymisation (emails, phone numbers, site names). The draft is marked as **AI-generated content** and **does not enter the minutes** until you click **Accept into minutes**, possibly after editing it; **Discard draft** deletes it
+
+In the minutes the summary states whether it was drafted with AI support (and with which model), whether it was edited and who accepted it.
+
+### Approval and minutes
+
+1. Click **Approve review** and enter the formal note (requires the snapshot and a completed meeting). After approval meeting data, agenda, decisions and summary can no longer be changed; only the progress status of decisions can still be updated
+2. Download the minutes as **PDF** or **HTML**: review data, attendees, executive summary, points of attention, agenda with data, discussion and decisions, decisions summary, approval. The download is recorded in the audit trail
+3. The **audit package** (M03) includes the review summary and the PDF minutes of approved reviews
 
 ---
 
