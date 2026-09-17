@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grc-webapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-14 13:38+0200\n"
+"POT-Creation-Date: 2026-09-17 20:24+0000\n"
 "PO-Revision-Date: 2026-03-18 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -12,19 +12,39 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2));\n"
 
-#: apps/assets/services.py:187
+#: apps/assets/serializers.py:266
+msgid "L'autonomia nominale si applica solo a UPS e gruppi elettrogeni."
+msgstr "Znamionowy czas podtrzymania dotyczy wyłącznie UPS-ów i agregatów prądotwórczych."
+
+#: apps/assets/services.py:264
 msgid "Impossibile eliminare: esistono valutazioni rischio attive collegate all'asset."
 msgstr "Nie można usunąć: istnieją aktywne oceny ryzyka powiązane z zasobem."
 
-#: apps/assets/services.py:192
+#: apps/assets/services.py:269
 msgid "Impossibile eliminare: esistono scenari di rischio collegati all'asset."
 msgstr "Nie można usunąć: istnieją scenariusze ryzyka powiązane z zasobem."
 
-#: apps/assets/services.py:200
+#: apps/assets/services.py:277
 msgid "Impossibile eliminare: rimuovere prima le dipendenze tra asset."
 msgstr "Nie można usunąć: najpierw usuń zależności między zasobami."
 
-#: apps/assets/views.py:99 apps/assets/views.py:166
+#: apps/assets/views.py:65
+#, fuzzy
+#| msgid "Nessun logo configurato per questo sito."
+msgid "Nessuna cadenza di manutenzione configurata per questo asset."
+msgstr "Brak skonfigurowanego logo dla tego zakładu."
+
+#: apps/assets/views.py:71 apps/governance/services.py:1064
+#, fuzzy
+#| msgid "Percorso file non valido."
+msgid "Esito non valido."
+msgstr "Nieprawidłowa ścieżka pliku."
+
+#: apps/assets/views.py:78 apps/tasks/views.py:208
+msgid "Data non valida (formato atteso AAAA-MM-GG)."
+msgstr "Nieprawidłowa data (oczekiwany format RRRR-MM-DD)."
+
+#: apps/assets/views.py:154 apps/assets/views.py:221
 msgid "change_ref obbligatorio"
 msgstr "change_ref jest wymagany"
 
@@ -33,26 +53,32 @@ msgid "Super Admin"
 msgstr "Super administrator"
 
 #: apps/auth_grc/models.py:13 apps/governance/models.py:10
+#: apps/management_review/report/builder.py:43
 msgid "Compliance Officer"
 msgstr "Specjalista ds. zgodności"
 
 #: apps/auth_grc/models.py:14 apps/governance/models.py:11
+#: apps/management_review/report/builder.py:43
 msgid "Risk Manager"
 msgstr "Menedżer ryzyka"
 
 #: apps/auth_grc/models.py:15 apps/governance/models.py:14
+#: apps/management_review/report/builder.py:44
 msgid "Plant Manager"
 msgstr "Kierownik zakładu"
 
 #: apps/auth_grc/models.py:16 apps/governance/models.py:15
+#: apps/management_review/report/builder.py:44
 msgid "Control Owner"
 msgstr "Właściciel kontroli"
 
 #: apps/auth_grc/models.py:17 apps/governance/models.py:12
+#: apps/management_review/report/builder.py:45
 msgid "Auditor Interno"
 msgstr "Audytor wewnętrzny"
 
 #: apps/auth_grc/models.py:18 apps/governance/models.py:13
+#: apps/management_review/report/builder.py:45
 msgid "Auditor Esterno"
 msgstr "Audytor zewnętrzny"
 
@@ -89,7 +115,6 @@ msgid "Utente non trovato"
 msgstr "Użytkownik nie został znaleziony"
 
 #: apps/auth_grc/views.py:140
-#| msgid "Motivazione rifiuto obbligatoria (min 10 caratteri)."
 msgid "Motivazione obbligatoria (min 10 caratteri) per richiesta GDPR Art. 17"
 msgstr "Uzasadnienie wymagane (min 10 znaków) dla żądania RODO art. 17"
 
@@ -105,11 +130,11 @@ msgstr "Nie masz uprawnień do przeglądania analizy luk innych użytkowników."
 msgid "In attesa"
 msgstr "Oczekujące"
 
-#: apps/backups/models.py:10
+#: apps/backups/models.py:10 apps/management_review/report/builder.py:37
 msgid "In corso"
 msgstr "W toku"
 
-#: apps/backups/models.py:11
+#: apps/backups/models.py:11 apps/management_review/report/builder.py:37
 msgid "Completato"
 msgstr "Zakończone"
 
@@ -149,7 +174,29 @@ msgstr "Zakład nie został znaleziony"
 msgid "rule_type obbligatorio"
 msgstr "rule_type jest wymagany"
 
+#: apps/compliance_schedule/views.py:146 apps/compliance_schedule/views.py:171
+#: apps/compliance_schedule/views.py:201
+msgid "plant e required_document obbligatori"
+msgstr "plant i required_document są wymagane"
+
+#: apps/compliance_schedule/views.py:151 apps/compliance_schedule/views.py:179
+#: apps/compliance_schedule/views.py:206
+#, fuzzy
+#| msgid "Documento non trovato"
+msgid "Requisito o sito non trovato"
+msgstr "Dokument nie został znaleziony"
+
+#: apps/compliance_schedule/views.py:184 apps/controls/views/instances.py:362
+#: apps/controls/views/instances.py:378
+msgid "Documento non trovato"
+msgstr "Dokument nie został znaleziony"
+
+#: apps/compliance_schedule/views.py:186 apps/pdca/views.py:64
+msgid "Evidenza non trovata"
+msgstr "Dowód nie został znaleziony"
+
 #: apps/controls/export_engine.py:207
+#: apps/management_review/report/builder.py:146
 msgid "Compliant"
 msgstr "Zgodny"
 
@@ -225,7 +272,6 @@ msgid "Framework '%(code)s' importato (v%(version)s)."
 msgstr "Framework „%(code)s” został zaimportowany (v%(version)s)."
 
 #: apps/controls/services/frameworks.py:249
-#| msgid "Solo il superuser può importare framework."
 msgid "Solo il superuser può eliminare un framework."
 msgstr "Tylko superużytkownik może usunąć framework."
 
@@ -234,7 +280,6 @@ msgid "Impossibile eliminare: il framework è ancora assegnato a uno o più siti
 msgstr "Nie można usunąć: framework jest nadal przypisany do co najmniej jednej lokalizacji."
 
 #: apps/controls/services/frameworks.py:284
-#| msgid "Solo il superuser può importare framework."
 msgid "Solo il superuser può archiviare un framework."
 msgstr "Tylko superużytkownik może zarchiwizować framework."
 
@@ -242,48 +287,47 @@ msgstr "Tylko superużytkownik może zarchiwizować framework."
 msgid "Impossibile archiviare: il framework è ancora assegnato a uno o più siti."
 msgstr "Nie można zarchiwizować: framework jest nadal przypisany do co najmniej jednej lokalizacji."
 
-#: apps/controls/services/instances.py:18
+#: apps/controls/services/instances.py:53
 #, python-format
 msgid "• Documento mancante: %(desc)s"
 msgstr "• Brakujący dokument: %(desc)s"
 
-#: apps/controls/services/instances.py:20
+#: apps/controls/services/instances.py:55
 #, python-format
 msgid "• Evidenza mancante: %(desc)s"
 msgstr "• Brakujący dowód: %(desc)s"
 
-#: apps/controls/services/instances.py:23
+#: apps/controls/services/instances.py:58
 #, python-format
 msgid "• Evidenza scaduta: %(title)s (scaduta il %(date)s)"
 msgstr "• Przedawniony dowód: %(title)s (wygasł %(date)s)"
 
-#: apps/controls/services/instances.py:33
+#: apps/controls/services/instances.py:68
 msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata."
 msgstr "Nie można ustawić stanu na „zgodny” bez co najmniej jednego powiązanego ważnego dowodu."
 
-#: apps/controls/services/instances.py:37
-#| msgid "Requisiti non soddisfatti per stato Compliant:\\n"
+#: apps/controls/services/instances.py:72
 msgid "Requisiti non soddisfatti per stato Compliant:\n"
 msgstr "Wymagania niespełnione dla statusu Zgodny:\n"
 
-#: apps/controls/services/instances.py:52
+#: apps/controls/services/instances.py:87
 msgid "Almeno un documento approvato o un'evidenza valida richiesti per stato Parziale."
 msgstr "Co najmniej jeden zatwierdzony dokument lub ważny dowód jest wymagany dla stanu Częściowy."
 
-#: apps/controls/services/instances.py:58
+#: apps/controls/services/instances.py:93
 msgid "Lo stato N/A richiede una giustificazione scritta di almeno 20 caratteri."
 msgstr "Stan N/A wymaga pisemnego uzasadnienia o długości co najmniej 20 znaków."
 
-#: apps/controls/services/instances.py:106
+#: apps/controls/services/instances.py:144
 msgid "La giustificazione di esclusione per SOA richiede almeno 50 caratteri. Specificare il motivo formale per cui il controllo non è applicabile."
 msgstr "Uzasadnienie wyłączenia w SOA musi mieć co najmniej 50 znaków. Podaj formalny powód, dla którego kontrola nie ma zastosowania."
 
-#: apps/controls/services/instances.py:148
+#: apps/controls/services/instances.py:186
 #, python-format
 msgid "Impossibile eliminare il controllo: ha %(n)d valutazioni su uno o più siti. Il catalogo si gestisce ricaricando i framework."
 msgstr "Nie można usunąć kontroli: ma %(n)d ocen w co najmniej jednej lokalizacji. Katalog zarządzany jest przez ponowne wczytanie frameworków."
 
-#: apps/controls/services/instances.py:182
+#: apps/controls/services/instances.py:220
 msgid "Eliminazione consentita solo per controlli non ancora valutati."
 msgstr "Usuwanie dozwolone tylko dla kontroli jeszcze nieocenionych."
 
@@ -302,68 +346,61 @@ msgstr "Generowanie wyjaśnienia nie powiodło się: %(err)s"
 
 #: apps/controls/views/frameworks.py:187
 #, python-format
-#| msgid "Errore generazione documento: %(err)s"
 msgid "Generazione documento non riuscita: %(err)s"
 msgstr "Nie udało się wygenerować dokumentu: %(err)s"
 
-#: apps/controls/views/instances.py:54
+#: apps/controls/views/instances.py:56
 msgid "Nessun requisito documentale definito per questo controllo."
 msgstr "Brak wymogów dokumentacyjnych zdefiniowanych dla tej kontroli."
 
-#: apps/controls/views/instances.py:57
+#: apps/controls/views/instances.py:59
 msgid "Tutti i requisiti documentali sono soddisfatti."
 msgstr "Wszystkie wymogi dokumentacyjne są spełnione."
 
-#: apps/controls/views/instances.py:61
+#: apps/controls/views/instances.py:63
 #, python-format
 msgid "Documento mancante: %(desc)s"
 msgstr "Brakujący dokument: %(desc)s"
 
-#: apps/controls/views/instances.py:63
+#: apps/controls/views/instances.py:65
 #, python-format
 msgid "Evidenza mancante: %(desc)s"
 msgstr "Brakujący dowód: %(desc)s"
 
-#: apps/controls/views/instances.py:66
+#: apps/controls/views/instances.py:68
 #, python-format
 msgid "Evidenza scaduta: %(title)s (scaduta il %(date)s)"
 msgstr "Przedawniony dowód: %(title)s (wygasł %(date)s)"
 
-#: apps/controls/views/instances.py:72
+#: apps/controls/views/instances.py:74
 msgid "Requisiti parzialmente soddisfatti."
 msgstr "Wymagania częściowo spełnione."
 
-#: apps/controls/views/instances.py:72
+#: apps/controls/views/instances.py:74
 msgid "Nessuna documentazione presente."
 msgstr "Brak dokumentacji."
 
-#: apps/controls/views/instances.py:185
+#: apps/controls/views/instances.py:187
 msgid "Campo 'status' obbligatorio."
 msgstr "Pole „status” jest obowiązkowe."
 
-#: apps/controls/views/instances.py:343 apps/controls/views/instances.py:359
-msgid "Documento non trovato"
-msgstr "Dokument nie został znaleziony"
-
-#: apps/controls/views/instances.py:376 apps/controls/views/instances.py:471
+#: apps/controls/views/instances.py:395 apps/controls/views/instances.py:490
 msgid "Evidenza non trovata."
 msgstr "Dowód nie został znaleziony."
 
-#: apps/controls/views/instances.py:401
+#: apps/controls/views/instances.py:420
 msgid "maturity_level deve essere tra 0 e 5"
 msgstr "maturity_level musi być pomiędzy 0 a 5"
 
-#: apps/controls/views/instances.py:489 apps/controls/views/reports.py:31
-#| msgid "Parametro 'framework' obbligatorio."
+#: apps/controls/views/instances.py:508 apps/controls/views/reports.py:31
 msgid "Parametro 'plant' obbligatorio."
 msgstr "Parametr „plant” jest obowiązkowy."
 
-#: apps/controls/views/instances.py:492
-#| msgid "Plant non trovato"
+#: apps/controls/views/instances.py:511
 msgid "Plant non trovato."
 msgstr "Zakład nie został znaleziony."
 
-#: apps/controls/views/instances.py:497 apps/controls/views/reports.py:36
+#: apps/controls/views/instances.py:516 apps/controls/views/reports.py:36
 #: apps/controls/views/reports.py:91 core/scoping.py:112 core/scoping.py:169
 #: core/scoping.py:181
 msgid "Accesso negato per questo sito."
@@ -371,7 +408,6 @@ msgstr "Odmowa dostępu do tej lokalizacji."
 
 #: apps/controls/views/reports.py:25
 #, python-format
-#| msgid "Parametri 'source' e 'target' obbligatori."
 msgid "Parametro 'target' obbligatorio (uno tra: %(targets)s)."
 msgstr "Parametr „target” jest obowiązkowy (jeden z: %(targets)s)."
 
@@ -466,20 +502,124 @@ msgstr "RACI Responsible"
 msgid "RACI Accountable"
 msgstr "RACI Accountable"
 
-#: apps/governance/views.py:69
+#: apps/governance/serializers.py:159
+msgid "Esiste già un obiettivo con questo codice in questo perimetro."
+msgstr "Cel o tym kodzie już istnieje w tym zakresie."
+
+#: apps/governance/services.py:108
+#, fuzzy
+#| msgid "Seleziona almeno un sito per questo perimetro."
+msgid "Il nuovo titolare ha già questo ruolo attivo per questo perimetro."
+msgstr "Wybierz co najmniej jedną lokalizację dla tego zakresu."
+
+#: apps/governance/services.py:584
+#, fuzzy
+#| msgid "Seleziona almeno un sito per questo perimetro."
+msgid "Questo utente ha già questo ruolo attivo per questo perimetro."
+msgstr "Wybierz co najmniej jedną lokalizację dla tego zakresu."
+
+#: apps/governance/services.py:598
+msgid "Questo ruolo ha già un titolare attivo per questo perimetro. Usa Sostituisci per cambiare il titolare."
+msgstr "Ta rola ma już aktywnego posiadacza w tym zakresie. Użyj opcji Zastąp, aby go zmienić."
+
+#: apps/governance/services.py:941
+msgid "Indicare il KPI da cui leggere le misure."
+msgstr "Wskaż KPI, z którego będą odczytywane pomiary."
+
+#: apps/governance/services.py:944
+msgid "Un obiettivo a misura manuale non può essere agganciato a un KPI."
+msgstr "Cel mierzony ręcznie nie może być powiązany z KPI."
+
+#: apps/governance/services.py:949
+msgid "Il KPI appartiene a un altro sito."
+msgstr "KPI należy do innego zakładu."
+
+#: apps/governance/services.py:952
+msgid "Un obiettivo di organizzazione non può usare un KPI di un singolo sito."
+msgstr "Cel ogólnoorganizacyjny nie może korzystać z KPI pojedynczego zakładu."
+
+#: apps/governance/services.py:957
+msgid "La scadenza deve essere successiva all'inizio del periodo."
+msgstr "Termin musi być późniejszy niż początek okresu."
+
+#: apps/governance/services.py:962
+msgid "Il target coincide con il valore di partenza: non c'è alcun miglioramento da misurare."
+msgstr "Cel jest równy wartości początkowej: nie ma poprawy do zmierzenia."
+
+#: apps/governance/services.py:969
+msgid "Il target peggiora il valore di partenza nella direzione indicata."
+msgstr "Cel pogarsza wartość początkową we wskazanym kierunku."
+
+#: apps/governance/services.py:998
+msgid "L'obiettivo è chiuso: non è più modificabile."
+msgstr "Cel jest zamknięty: nie można go już modyfikować."
+
+#: apps/governance/services.py:1023
+#, fuzzy
+#| msgid "Solo una lezione in bozza può essere validata (stato attuale: %(s)s)."
+msgid "Solo un obiettivo in bozza o sospeso può essere attivato."
+msgstr "Tylko lekcję w wersji roboczej można zatwierdzić (bieżący status: %(s)s)."
+
+#: apps/governance/services.py:1026
+msgid "il ruolo responsabile"
+msgstr "rolę odpowiedzialną"
+
+#: apps/governance/services.py:1028
+msgid "il metodo di valutazione del risultato"
+msgstr "metodę oceny wyniku"
+
+#: apps/governance/services.py:1031
+#, python-format
+msgid "Per attivare l'obiettivo indicare: %(fields)s."
+msgstr "Aby aktywować cel, podaj: %(fields)s."
+
+#: apps/governance/services.py:1044
+msgid "Solo un obiettivo attivo può essere sospeso."
+msgstr "Tylko aktywny cel może zostać zawieszony."
+
+#: apps/governance/services.py:1066
+#, fuzzy
+#| msgid "Il ciclo è già chiuso."
+msgid "L'obiettivo è già chiuso."
+msgstr "Cykl jest już zamknięty."
+
+#: apps/governance/services.py:1068
+msgid "Indicare il motivo dell'annullamento."
+msgstr "Podaj powód anulowania."
+
+#: apps/governance/services.py:1099
+msgid "L'obiettivo è agganciato a un KPI: il valore si registra sul KPI."
+msgstr "Cel jest powiązany z KPI: wartość zapisuje się na KPI."
+
+#: apps/governance/services.py:1102
+msgid "Si possono registrare misure solo su un obiettivo aperto."
+msgstr "Pomiary można rejestrować tylko dla otwartego celu."
+
+#: apps/governance/services.py:1104
+msgid "Indicare il valore misurato."
+msgstr "Podaj zmierzoną wartość."
+
+#: apps/governance/services.py:1115
+msgid "Data non valida (formato atteso: AAAA-MM-GG)."
+msgstr "Nieprawidłowa data (oczekiwany format: RRRR-MM-DD)."
+
+#: apps/governance/services.py:1118
+msgid "La data della misura precede l'inizio del periodo."
+msgstr "Data pomiaru jest wcześniejsza niż początek okresu."
+
+#: apps/governance/views.py:80
 msgid "Questo ruolo è già terminato."
 msgstr "Ta rola jest już zakończona."
 
-#: apps/governance/views.py:74
+#: apps/governance/views.py:85
 msgid "Motivo terminazione obbligatorio (min 5 caratteri)."
 msgstr "Powód zakończenia jest obowiązkowy (minimum 5 znaków)."
 
-#: apps/governance/views.py:106
+#: apps/governance/views.py:117
 msgid "new_user_id obbligatorio."
 msgstr "new_user_id jest wymagany."
 
-#: apps/governance/views.py:109
-#| msgid "Utente non trovato"
+#: apps/governance/views.py:120
 msgid "Utente non trovato."
 msgstr "Użytkownik nie został znaleziony."
 
@@ -504,13 +644,970 @@ msgstr "Lekcja musi zostać zatwierdzona, zanim będzie można ją rozpropagowa�
 msgid "Accesso negato per uno dei siti di destinazione."
 msgstr "Odmowa dostępu do jednej z lokalizacji docelowych."
 
-#: apps/management_review/services.py:305
+#: apps/management_review/agenda.py:11
+msgid "Stato delle azioni dei riesami precedenti"
+msgstr "Status działań z poprzednich przeglądów"
+
+#: apps/management_review/agenda.py:12
+msgid "Cambiamenti nei fattori esterni e interni rilevanti per il SGSI"
+msgstr "Zmiany czynników zewnętrznych i wewnętrznych istotnych dla SZBI"
+
+#: apps/management_review/agenda.py:13
+msgid "Cambiamenti nelle esigenze e aspettative delle parti interessate"
+msgstr "Zmiany potrzeb i oczekiwań stron zainteresowanych"
+
+#: apps/management_review/agenda.py:14
+msgid "Prestazioni della sicurezza delle informazioni: non conformità e azioni correttive, monitoraggio e misurazioni, audit, obiettivi"
+msgstr "Wyniki bezpieczeństwa informacji: niezgodności i działania korygujące, monitorowanie i pomiary, audyty, cele"
+
+#: apps/management_review/agenda.py:16
+msgid "Feedback delle parti interessate"
+msgstr "Informacje zwrotne od stron zainteresowanych"
+
+#: apps/management_review/agenda.py:17
+msgid "Risultati della valutazione del rischio e stato del piano di trattamento"
+msgstr "Wyniki oceny ryzyka i status planu postępowania"
+
+#: apps/management_review/agenda.py:18
+msgid "Opportunità di miglioramento continuo"
+msgstr "Możliwości ciągłego doskonalenia"
+
+#: apps/management_review/report/builder.py:23
+msgid "Mitigare"
+msgstr "Ograniczanie"
+
+#: apps/management_review/report/builder.py:23
+msgid "Accettare"
+msgstr "Akceptacja"
+
+#: apps/management_review/report/builder.py:23
+msgid "Trasferire"
+msgstr "Przeniesienie"
+
+#: apps/management_review/report/builder.py:24
+msgid "Evitare"
+msgstr "Unikanie"
+
+#: apps/management_review/report/builder.py:26
+msgid "Miglioramento"
+msgstr "Doskonalenie"
+
+#: apps/management_review/report/builder.py:26
+msgid "Modifica al SGSI"
+msgstr "Zmiana w SZBI"
+
+#: apps/management_review/report/builder.py:26
+msgid "Risorse"
+msgstr "Zasoby"
+
+#: apps/management_review/report/builder.py:27
+msgid "Obiettivo di sicurezza"
+msgstr "Cel bezpieczeństwa"
+
+#: apps/management_review/report/builder.py:27
+msgid "Altro"
+msgstr "Inne"
+
+#: apps/management_review/report/builder.py:30
+msgid "NC maggiore"
+msgstr "Niezgodność duża"
+
+#: apps/management_review/report/builder.py:30
+msgid "NC minore"
+msgstr "Niezgodność mała"
+
+#: apps/management_review/report/builder.py:30
+msgid "Osservazione"
+msgstr "Obserwacja"
+
+#: apps/management_review/report/builder.py:31
+#: apps/management_review/report/builder.py:307
+msgid "Opportunità"
+msgstr "Możliwość"
+
+#: apps/management_review/report/builder.py:33
+msgid "Critico"
+msgstr "Krytyczny"
+
+#: apps/management_review/report/builder.py:33
+msgid "Attenzione"
+msgstr "Ostrzeżenie"
+
+#: apps/management_review/report/builder.py:33
+msgid "OK"
+msgstr "OK"
+
+#: apps/management_review/report/builder.py:33
+#, fuzzy
+#| msgid "N/A"
+msgid "N/D"
+msgstr "N/D"
+
+#: apps/management_review/report/builder.py:34
+msgid "Bassa"
+msgstr "Niski"
+
+#: apps/management_review/report/builder.py:34
+msgid "Media"
+msgstr "Średni"
+
+#: apps/management_review/report/builder.py:34
+msgid "Alta"
+msgstr "Wysoki"
+
+#: apps/management_review/report/builder.py:34
+msgid "Critica"
+msgstr "Krytyczny"
+
+#: apps/management_review/report/builder.py:35
+#: apps/management_review/report/builder.py:37
+msgid "Aperto"
+msgstr "Otwarty"
+
+#: apps/management_review/report/builder.py:35
+msgid "In analisi"
+msgstr "W analizie"
+
+#: apps/management_review/report/builder.py:35
+#: apps/management_review/report/builder.py:40
+msgid "Chiuso"
+msgstr "Zamknięty"
+
+#: apps/management_review/report/builder.py:38
+#: apps/management_review/report/builder.py:55
+msgid "Annullato"
+msgstr "Anulowany"
+
+#: apps/management_review/report/builder.py:38
+msgid "Scaduto"
+msgstr "Przeterminowany"
+
+#: apps/management_review/report/builder.py:41
+msgid "Archiviato"
+msgstr "Zarchiwizowany"
+
+#: apps/management_review/report/builder.py:50
+msgid "In linea"
+msgstr "Zgodnie z planem"
+
+#: apps/management_review/report/builder.py:50
+#: apps/management_review/report/builder.py:342
+msgid "A rischio"
+msgstr "Zagrożony"
+
+#: apps/management_review/report/builder.py:50
+msgid "Mancato"
+msgstr "Niezrealizowany"
+
+#: apps/management_review/report/builder.py:51
+msgid "Senza misure"
+msgstr "Brak pomiarów"
+
+#: apps/management_review/report/builder.py:51
+msgid "—"
+msgstr "—"
+
+#: apps/management_review/report/builder.py:54
+#: apps/management_review/report/builder.py:424
+msgid "Bozza"
+msgstr "Wersja robocza"
+
+#: apps/management_review/report/builder.py:54 apps/reporting/views.py:118
+msgid "Attivo"
+msgstr "Aktywny"
+
+#: apps/management_review/report/builder.py:54
+msgid "Raggiunto"
+msgstr "Osiągnięty"
+
+#: apps/management_review/report/builder.py:55
+#, fuzzy
+#| msgid "Non valutato"
+msgid "Non raggiunto"
+msgstr "Nieoceniony"
+
+#: apps/management_review/report/builder.py:55
+msgid "Sospeso"
+msgstr "Zawieszony"
+
+#: apps/management_review/report/builder.py:98
+msgid "Primo riesame del perimetro: nessuna azione precedente."
+msgstr "Pierwszy przegląd dla tego zakresu: brak wcześniejszych działań."
+
+#: apps/management_review/report/builder.py:105
+#: apps/management_review/report/builder.py:309
+#: apps/management_review/report/builder.py:375
+msgid "Chiusa"
+msgstr "Zamknięte"
+
+#: apps/management_review/report/builder.py:106
+#, fuzzy
+#| msgid "Scadenza"
+msgid "Scaduta"
+msgstr "Termin"
+
+#: apps/management_review/report/builder.py:106
+#: apps/management_review/report/builder.py:309
+#: apps/management_review/report/builder.py:375
+msgid "Aperta"
+msgstr "Otwarte"
+
+#: apps/management_review/report/builder.py:114
+#, fuzzy, python-format
+#| msgid "Evidenza scaduta: %(title)s (scaduta il %(date)s)"
+msgid "Riesame precedente: %(title)s del %(date)s."
+msgstr "Przedawniony dowód: %(title)s (wygasł %(date)s)"
+
+#: apps/management_review/report/builder.py:116
+msgid "Azioni considerate"
+msgstr "Rozpatrzone działania"
+
+#: apps/management_review/report/builder.py:117
+msgid "Chiuse"
+msgstr "Zamknięte"
+
+#: apps/management_review/report/builder.py:118
+msgid "Aperte"
+msgstr "Otwarte"
+
+#: apps/management_review/report/builder.py:119
+#, fuzzy
+#| msgid "Scadenza"
+msgid "Scadute"
+msgstr "Termin"
+
+#: apps/management_review/report/builder.py:120
+msgid "Azione"
+msgstr "Działanie"
+
+#: apps/management_review/report/builder.py:120
+#: apps/management_review/report/builder.py:256
+#: apps/management_review/report/builder.py:263
+#: apps/management_review/report/builder.py:278
+#: apps/management_review/report/builder.py:383
+msgid "Owner"
+msgstr "Właściciel"
+
+#: apps/management_review/report/builder.py:120
+#: apps/management_review/report/builder.py:237
+#: apps/management_review/report/builder.py:345
+#: apps/management_review/report/builder.py:383 apps/reporting/views.py:120
+msgid "Scadenza"
+msgstr "Termin"
+
+#: apps/management_review/report/builder.py:120
+#: apps/management_review/report/builder.py:175
+#: apps/management_review/report/builder.py:215
+#: apps/management_review/report/builder.py:307
+#: apps/management_review/report/builder.py:383
+msgid "Stato"
+msgstr "Status"
+
+#: apps/management_review/report/builder.py:120
+msgid "Riesame"
+msgstr "Przegląd"
+
+#: apps/management_review/report/builder.py:121
+#, fuzzy
+#| msgid "Nessuna documentazione presente."
+msgid "Nessuna azione dai riesami precedenti"
+msgstr "Brak dokumentacji."
+
+#: apps/management_review/report/builder.py:145
+#, fuzzy
+#| msgid "Compliance Officer"
+msgid "Compliance per framework"
+msgstr "Specjalista ds. zgodności"
+
+#: apps/management_review/report/builder.py:146
+#: apps/management_review/report/builder.py:150
+#: apps/management_review/report/builder.py:201
+msgid "Framework"
+msgstr "Standard"
+
+#: apps/management_review/report/builder.py:146
+#, fuzzy
+#| msgid "Control Owner"
+msgid "Controlli"
+msgstr "Właściciel kontroli"
+
+#: apps/management_review/report/builder.py:146
+#: apps/management_review/report/builder.py:447
+#, fuzzy, python-format
+#| msgid "Compliant"
+msgid "% compliant"
+msgstr "Zgodny"
+
+#: apps/management_review/report/builder.py:146
+#, fuzzy
+#| msgid "Parziale"
+msgid "Gap/parziali"
+msgstr "Częściowy"
+
+#: apps/management_review/report/builder.py:147
+#, fuzzy
+#| msgid "Non valutato"
+msgid "Non valutati"
+msgstr "Nieoceniony"
+
+#: apps/management_review/report/builder.py:147
+#: apps/management_review/report/builder.py:254
+msgid "Evidenze scadute"
+msgstr "Przeterminowane dowody"
+
+#: apps/management_review/report/builder.py:147
+msgid "Nessun dato disponibile"
+msgstr "Brak dostępnych danych"
+
+#: apps/management_review/report/builder.py:149
+msgid "Controlli in gap (primi 5 per framework)"
+msgstr "Zabezpieczenia z lukami (5 pierwszych na standard)"
+
+#: apps/management_review/report/builder.py:150
+#, fuzzy
+#| msgid "Control Owner"
+msgid "Controllo"
+msgstr "Właściciel kontroli"
+
+#: apps/management_review/report/builder.py:150
+#: apps/management_review/report/builder.py:418
+msgid "Titolo"
+msgstr "Tytuł"
+
+#: apps/management_review/report/builder.py:171
+msgid "KPI monitorati"
+msgstr "Monitorowane KPI"
+
+#: apps/management_review/report/builder.py:171
+msgid "Critici"
+msgstr "Krytyczne"
+
+#: apps/management_review/report/builder.py:172
+#, fuzzy
+#| msgid "In attesa"
+msgid "In attenzione"
+msgstr "Oczekujące"
+
+#: apps/management_review/report/builder.py:173
+msgid "Senza dati"
+msgstr "Brak danych"
+
+#: apps/management_review/report/builder.py:174
+msgid "KPI fuori soglia"
+msgstr "KPI poza progiem"
+
+#: apps/management_review/report/builder.py:175
+msgid "KPI"
+msgstr "KPI"
+
+#: apps/management_review/report/builder.py:175
+msgid "Valore"
+msgstr "Wartość"
+
+#: apps/management_review/report/builder.py:175
+msgid "Soglie att./crit."
+msgstr "Progi ostrz./kryt."
+
+#: apps/management_review/report/builder.py:175
+msgid "Settimana"
+msgstr "Tydzień"
+
+#: apps/management_review/report/builder.py:196
+msgid "Audit (12 mesi)"
+msgstr "Audyty (12 miesięcy)"
+
+#: apps/management_review/report/builder.py:197
+msgid "NC maggiori aperte"
+msgstr "Otwarte niezgodności duże"
+
+#: apps/management_review/report/builder.py:198
+msgid "NC minori aperte"
+msgstr "Otwarte niezgodności małe"
+
+#: apps/management_review/report/builder.py:199
+msgid "Finding scaduti"
+msgstr "Przeterminowane ustalenia"
+
+#: apps/management_review/report/builder.py:200
+msgid "Audit degli ultimi 12 mesi"
+msgstr "Audyty z ostatnich 12 miesięcy"
+
+#: apps/management_review/report/builder.py:201
+#: apps/management_review/report/builder.py:203
+#: apps/management_review/report/builder.py:307
+msgid "Audit"
+msgstr "Audyt"
+
+#: apps/management_review/report/builder.py:201
+#: apps/management_review/report/html.py:98
+#: apps/management_review/report/pdf.py:208
+msgid "Data"
+msgstr "Data"
+
+#: apps/management_review/report/builder.py:201
+msgid "Readiness"
+msgstr "Gotowość"
+
+#: apps/management_review/report/builder.py:201
+#: apps/management_review/report/builder.py:203
+msgid "Finding"
+msgstr "Ustalenie"
+
+#: apps/management_review/report/builder.py:203
+msgid "Non conformità aperte"
+msgstr "Otwarte niezgodności"
+
+#: apps/management_review/report/builder.py:203
+#: apps/management_review/report/builder.py:383 apps/reporting/views.py:119
+msgid "Tipo"
+msgstr "Typ"
+
+#: apps/management_review/report/builder.py:203
+msgid "Risposta entro"
+msgstr "Odpowiedź do"
+
+#: apps/management_review/report/builder.py:215
+msgid "Incidente"
+msgstr "Incydent"
+
+#: apps/management_review/report/builder.py:215
+msgid "Rilevato il"
+msgstr "Wykryto"
+
+#: apps/management_review/report/builder.py:215
+msgid "Gravità"
+msgstr "Istotność"
+
+#: apps/management_review/report/builder.py:217
+msgid "Incidenti (12 mesi)"
+msgstr "Incydenty (12 miesięcy)"
+
+#: apps/management_review/report/builder.py:218
+#, fuzzy
+#| msgid "Contatto NIS2"
+msgid "Notificati NIS2"
+msgstr "Kontakt NIS2"
+
+#: apps/management_review/report/builder.py:219
+msgid "Ancora aperti"
+msgstr "Nadal otwarte"
+
+#: apps/management_review/report/builder.py:220
+msgid "Chiusi senza RCA"
+msgstr "Zamknięte bez analizy przyczyn"
+
+#: apps/management_review/report/builder.py:221
+#: apps/management_review/report/builder.py:447
+msgid "Incidenti aperti"
+msgstr "Otwarte incydenty"
+
+#: apps/management_review/report/builder.py:222
+msgid "Incidenti notificati NIS2 (12 mesi)"
+msgstr "Incydenty zgłoszone w ramach NIS2 (12 miesięcy)"
+
+#: apps/management_review/report/builder.py:230
+msgid "Cicli PDCA aperti"
+msgstr "Otwarte cykle PDCA"
+
+#: apps/management_review/report/builder.py:231
+msgid "Fermi in PLAN >90gg"
+msgstr "Utknęły w fazie PLAN >90 dni"
+
+#: apps/management_review/report/builder.py:232
+msgid "PDCA chiusi (12 mesi)"
+msgstr "Zamknięte PDCA (12 miesięcy)"
+
+#: apps/management_review/report/builder.py:233
+#: apps/management_review/report/builder.py:447
+msgid "Task scaduti"
+msgstr "Przeterminowane zadania"
+
+#: apps/management_review/report/builder.py:234
+msgid "Cicli PDCA fermi in PLAN da oltre 90 giorni"
+msgstr "Cykle PDCA utknęły w fazie PLAN ponad 90 dni"
+
+#: apps/management_review/report/builder.py:234
+msgid "Ciclo"
+msgstr "Cykl"
+
+#: apps/management_review/report/builder.py:234
+msgid "Aperto il"
+msgstr "Otwarto"
+
+#: apps/management_review/report/builder.py:237
+msgid "Task scaduti (per priorità)"
+msgstr "Przeterminowane zadania (wg priorytetu)"
+
+#: apps/management_review/report/builder.py:237
+msgid "Task"
+msgstr "Zadanie"
+
+#: apps/management_review/report/builder.py:237
+msgid "Priorità"
+msgstr "Priorytet"
+
+#: apps/management_review/report/builder.py:237 apps/reporting/views.py:119
+msgid "Ruolo"
+msgstr "Rola"
+
+#: apps/management_review/report/builder.py:251
+#, fuzzy
+#| msgid "Documento non trovato"
+msgid "Documenti approvati"
+msgstr "Dokument nie został znaleziony"
+
+#: apps/management_review/report/builder.py:252
+msgid "In scadenza (90gg)"
+msgstr "Wygasające (90 dni)"
+
+#: apps/management_review/report/builder.py:253
+#: apps/management_review/report/builder.py:258
+msgid "Documenti scaduti"
+msgstr "Przeterminowane dokumenty"
+
+#: apps/management_review/report/builder.py:256
+#: apps/management_review/report/builder.py:263
+#, fuzzy
+#| msgid "Documento non trovato"
+msgid "Documento"
+msgstr "Dokument nie został znaleziony"
+
+#: apps/management_review/report/builder.py:256
+msgid "Revisione prevista"
+msgstr "Planowany przegląd"
+
+#: apps/management_review/report/builder.py:260
+msgid "Documenti in scadenza entro 90 giorni"
+msgstr "Dokumenty wygasające w ciągu 90 dni"
+
+#: apps/management_review/report/builder.py:262
+#, fuzzy, python-format
+#| msgid "Documento mancante: %(desc)s"
+msgid "Documenti approvati dal %(date)s"
+msgstr "Brakujący dokument: %(desc)s"
+
+#: apps/management_review/report/builder.py:263
+msgid "Approvato il"
+msgstr "Zatwierdzono"
+
+#: apps/management_review/report/builder.py:271
+#: apps/management_review/report/builder.py:447
+msgid "Rischi critici"
+msgstr "Ryzyka krytyczne"
+
+#: apps/management_review/report/builder.py:272
+msgid "Rischi medi"
+msgstr "Ryzyka średnie"
+
+#: apps/management_review/report/builder.py:273
+msgid "Rischi bassi"
+msgstr "Ryzyka niskie"
+
+#: apps/management_review/report/builder.py:274
+msgid "Critici senza piano"
+msgstr "Krytyczne bez planu"
+
+#: apps/management_review/report/builder.py:277
+msgid "Rischi critici (residuo più alto)"
+msgstr "Ryzyka krytyczne (najwyższe ryzyko szczątkowe)"
+
+#: apps/management_review/report/builder.py:278
+#: apps/management_review/report/builder.py:288
+msgid "Rischio"
+msgstr "Ryzyko"
+
+#: apps/management_review/report/builder.py:278
+msgid "Asset / processo"
+msgstr "Zasób / proces"
+
+#: apps/management_review/report/builder.py:278
+msgid "Inerente → residuo"
+msgstr "Nieodłączne → szczątkowe"
+
+#: apps/management_review/report/builder.py:278
+msgid "Trattamento"
+msgstr "Postępowanie"
+
+#: apps/management_review/report/builder.py:279
+msgid "Piano"
+msgstr "Plan"
+
+#: apps/management_review/report/builder.py:283 apps/reporting/views.py:125
+msgid "Sì"
+msgstr "Tak"
+
+#: apps/management_review/report/builder.py:283 apps/reporting/views.py:125
+msgid "No"
+msgstr "Nie"
+
+#: apps/management_review/report/builder.py:287
+msgid "Rischi accettati formalmente"
+msgstr "Formalnie zaakceptowane ryzyka"
+
+#: apps/management_review/report/builder.py:288
+msgid "Residuo"
+msgstr "Szczątkowe"
+
+#: apps/management_review/report/builder.py:288
+msgid "Accettato da"
+msgstr "Zaakceptowane przez"
+
+#: apps/management_review/report/builder.py:288
+msgid "Scadenza accettazione"
+msgstr "Wygaśnięcie akceptacji"
+
+#: apps/management_review/report/builder.py:295
+msgid "Continuità operativa"
+msgstr "Ciągłość działania"
+
+#: apps/management_review/report/builder.py:296
+#, python-format
+msgid "%(n)s processi critici senza piano BCP: %(names)s"
+msgstr "%(n)s procesów krytycznych bez planu ciągłości działania: %(names)s"
+
+#: apps/management_review/report/builder.py:306
+msgid "Opportunità di miglioramento emerse dagli audit"
+msgstr "Możliwości doskonalenia wynikające z audytów"
+
+#: apps/management_review/report/builder.py:340
+msgid "Obiettivi attivi"
+msgstr "Aktywne cele"
+
+#: apps/management_review/report/builder.py:341
+msgid "Mancati o fuori traiettoria"
+msgstr "Niezrealizowane lub poza planem"
+
+#: apps/management_review/report/builder.py:343
+msgid "Raggiunti (12 mesi)"
+msgstr "Osiągnięte (12 miesięcy)"
+
+#: apps/management_review/report/builder.py:344
+msgid "Obiettivi di sicurezza (§6.2)"
+msgstr "Cele bezpieczeństwa informacji (§6.2)"
+
+#: apps/management_review/report/builder.py:345
+#, fuzzy
+#| msgid "Attivo"
+msgid "Obiettivo"
+msgstr "Aktywny"
+
+#: apps/management_review/report/builder.py:345
+msgid "Partenza → target"
+msgstr "Punkt wyjścia → cel"
+
+#: apps/management_review/report/builder.py:345
+msgid "Valore attuale"
+msgstr "Bieżąca wartość"
+
+#: apps/management_review/report/builder.py:345
+msgid "Progresso"
+msgstr "Postęp"
+
+#: apps/management_review/report/builder.py:346
+msgid "Traiettoria"
+msgstr "Trajektoria"
+
+#: apps/management_review/report/builder.py:346
+#, fuzzy
+#| msgid "Responsabilità"
+msgid "Responsabile"
+msgstr "Odpowiedzialność"
+
+#: apps/management_review/report/builder.py:347
+#, fuzzy
+#| msgid "Nessun requisito documentale definito per questo controllo."
+msgid "Nessun obiettivo di sicurezza definito per questo perimetro."
+msgstr "Brak wymogów dokumentacyjnych zdefiniowanych dla tej kontroli."
+
+#: apps/management_review/report/builder.py:366
+#, python-format
+msgid "Task: %(status)s"
+msgstr "Zadanie: %(status)s"
+
+#: apps/management_review/report/builder.py:368
+#, python-format
+msgid "PDCA: %(phase)s"
+msgstr "PDCA: %(phase)s"
+
+#: apps/management_review/report/builder.py:383
+msgid "Decisione"
+msgstr "Decyzja"
+
+#: apps/management_review/report/builder.py:383
+msgid "Collegamenti"
+msgstr "Powiązania"
+
+#: apps/management_review/report/builder.py:391
+#, python-format
+msgid "Ci sono %(n)s rischi senza owner assegnato"
+msgstr "%(n)s ryzyk nie ma przypisanego właściciela"
+
+#: apps/management_review/report/builder.py:393
+#, python-format
+msgid "%(n)s rischi critici senza piano di mitigazione"
+msgstr "%(n)s ryzyk krytycznych bez planu ograniczania"
+
+#: apps/management_review/report/builder.py:395
+#, python-format
+msgid "%(n)s processi critici senza piano BCP"
+msgstr "%(n)s procesów krytycznych bez planu ciągłości działania"
+
+#: apps/management_review/report/builder.py:397
+#, python-format
+msgid "%(n)s evidenze scadute"
+msgstr "%(n)s przeterminowanych dowodów"
+
+#: apps/management_review/report/builder.py:399
+#, python-format
+msgid "%(n)s cicli PDCA bloccati in fase PLAN da oltre 90 giorni"
+msgstr "%(n)s cykli PDCA utknęło w fazie PLAN ponad 90 dni"
+
+#: apps/management_review/report/builder.py:402
+#, python-format
+msgid "%(n)s azioni dei riesami precedenti scadute e ancora aperte"
+msgstr "%(n)s działań z poprzednich przeglądów jest przeterminowanych i wciąż otwartych"
+
+#: apps/management_review/report/builder.py:404
+#, python-format
+msgid "%(n)s non conformità maggiori aperte"
+msgstr "%(n)s otwartych niezgodności dużych"
+
+#: apps/management_review/report/builder.py:407
+#, python-format
+msgid "%(n)s obiettivi di sicurezza mancati o fuori traiettoria"
+msgstr "%(n)s celów bezpieczeństwa niezrealizowanych lub poza planem"
+
+#: apps/management_review/report/builder.py:419 apps/reporting/views.py:119
+msgid "Perimetro"
+msgstr "Zakres"
+
+#: apps/management_review/report/builder.py:419
+msgid "Intera organizzazione"
+msgstr "Cała organizacja"
+
+#: apps/management_review/report/builder.py:420
+msgid "Data riunione"
+msgstr "Data spotkania"
+
+#: apps/management_review/report/builder.py:421
+msgid "Presieduto da"
+msgstr "Przewodniczący"
+
+#: apps/management_review/report/builder.py:422
+msgid "Partecipanti"
+msgstr "Uczestnicy"
+
+#: apps/management_review/report/builder.py:423
+msgid "Dati congelati il"
+msgstr "Dane zamrożone"
+
+#: apps/management_review/report/builder.py:424
+msgid "Stato approvazione"
+msgstr "Status zatwierdzenia"
+
+#: apps/management_review/report/builder.py:424
+msgid "Approvato"
+msgstr "Zatwierdzony"
+
+#: apps/management_review/report/builder.py:426
+msgid "Prossimo riesame"
+msgstr "Następny przegląd"
+
+#: apps/management_review/report/builder.py:433
+#, python-format
+msgid "Testo redatto con il supporto dell'intelligenza artificiale (%(provider)s/%(model)s)%(edited)s, verificato e accettato da %(who)s il %(when)s."
+msgstr "Tekst opracowany przy wsparciu sztucznej inteligencji (%(provider)s/%(model)s)%(edited)s, zweryfikowany i zaakceptowany przez %(who)s dnia %(when)s."
+
+#: apps/management_review/report/builder.py:436
+msgid " e modificato"
+msgstr " i zmodyfikowany"
+
+#: apps/management_review/report/builder.py:439
+#, python-format
+msgid "Redatto da %(who)s il %(when)s."
+msgstr "Opracowane przez %(who)s dnia %(when)s."
+
+#: apps/management_review/report/builder.py:446
+msgid "Quadro per sito"
+msgstr "Przegląd wg zakładu"
+
+#: apps/management_review/report/builder.py:447
+msgid "Sito"
+msgstr "Zakład"
+
+#: apps/management_review/report/builder.py:460
+msgid "Discussione"
+msgstr "Dyskusja"
+
+#: apps/management_review/report/builder.py:461
+#, fuzzy
+#| msgid "Nessuna documentazione presente."
+msgid "Nessuna annotazione."
+msgstr "Brak dokumentacji."
+
+#: apps/management_review/report/builder.py:464
+msgid "Decisioni"
+msgstr "Decyzje"
+
+#: apps/management_review/report/builder.py:468
+msgid "Altre decisioni"
+msgstr "Inne decyzje"
+
+#: apps/management_review/report/builder.py:475
+msgid "Dati del riesame"
+msgstr "Dane przeglądu"
+
+#: apps/management_review/report/builder.py:476
+msgid "Decisioni e azioni"
+msgstr "Decyzje i działania"
+
+#: apps/management_review/report/builder.py:477
+#, fuzzy
+#| msgid "Nessuna documentazione presente."
+msgid "Nessuna azione registrata"
+msgstr "Brak dokumentacji."
+
+#: apps/management_review/report/builder.py:482
+msgid "Riepilogo delle decisioni (output §9.3.3)"
+msgstr "Podsumowanie decyzji (wyniki §9.3.3)"
+
+#: apps/management_review/report/builder.py:494
+msgid "Riesame di Direzione SGSI"
+msgstr "Przegląd zarządzania SZBI"
+
+#: apps/management_review/report/builder.py:501
+#, python-format
+msgid "Documento generato dal sistema GRC il %(when)s — RISERVATO — Solo per uso interno"
+msgstr "Dokument wygenerowany przez system GRC dnia %(when)s — POUFNE — Wyłącznie do użytku wewnętrznego"
+
+#: apps/management_review/report/html.py:70
+#: apps/management_review/report/pdf.py:151
+#, python-format
+msgid "… e altri %(n)s"
+msgstr "… i jeszcze %(n)s"
+
+#: apps/management_review/report/html.py:84
+#: apps/management_review/report/pdf.py:186
+msgid "Sintesi executive"
+msgstr "Podsumowanie dla kierownictwa"
+
+#: apps/management_review/report/html.py:89
+#: apps/management_review/report/pdf.py:190
+msgid "Punti di attenzione"
+msgstr "Punkty wymagające uwagi"
+
+#: apps/management_review/report/html.py:96
+#: apps/management_review/report/pdf.py:206
+msgid "RIESAME APPROVATO"
+msgstr "PRZEGLĄD ZATWIERDZONY"
+
+#: apps/management_review/report/html.py:97
+#: apps/management_review/report/pdf.py:207
+msgid "Approvato da"
+msgstr "Zatwierdzone przez"
+
+#: apps/management_review/report/html.py:99
+#: apps/management_review/report/pdf.py:209
+msgid "Note"
+msgstr "Uwagi"
+
+#: apps/management_review/services/review.py:24
+msgid "Il riesame è approvato: il verbale non è più modificabile."
+msgstr "Przegląd jest zatwierdzony: protokołu nie można już modyfikować."
+
+#: apps/management_review/services/review.py:57
+msgid "Il riesame è approvato: dati della riunione e partecipanti non sono più modificabili."
+msgstr "Przegląd jest zatwierdzony: danych spotkania i uczestników nie można już modyfikować."
+
+#: apps/management_review/services/review.py:66
+#: apps/management_review/services/review.py:88
+msgid "Indicare il titolo del punto."
+msgstr "Podaj tytuł punktu."
+
+#: apps/management_review/services/review.py:103
+msgid "I punti obbligatori ISO 27001 §9.3 non si possono eliminare."
+msgstr "Obowiązkowych punktów ISO 27001 §9.3 nie można usunąć."
+
+#: apps/management_review/services/review.py:145
+msgid "Il riesame è approvato: non si possono aggiungere decisioni."
+msgstr "Przegląd jest zatwierdzony: nie można dodawać decyzji."
+
+#: apps/management_review/services/review.py:148
+msgid "Il punto all'ordine del giorno appartiene a un altro riesame."
+msgstr "Punkt porządku obrad należy do innego przeglądu."
+
+#: apps/management_review/services/review.py:152
+msgid "Decisione del riesame"
+msgstr "Decyzja przeglądu"
+
+#: apps/management_review/services/review.py:157
+msgid "Indicare il ruolo a cui assegnare il task."
+msgstr "Wskaż rolę, do której przypisane jest zadanie."
+
+#: apps/management_review/services/review.py:159
+msgid "Per creare il task indicare la scadenza della decisione."
+msgstr "Aby utworzyć zadanie, podaj termin decyzji."
+
+#: apps/management_review/services/review.py:162
+#, python-format
+msgid "Riesame di direzione: %(title)s"
+msgstr "Przegląd zarządzania: %(title)s"
+
+#: apps/management_review/services/review.py:176
+msgid "Per un riesame di organizzazione indicare il sito del ciclo PDCA."
+msgstr "W przeglądzie ogólnoorganizacyjnym wskaż zakład dla cyklu PDCA."
+
+#: apps/management_review/services/review.py:204
+msgid "Il riesame è approvato: della decisione si può aggiornare solo lo stato."
+msgstr "Przegląd jest zatwierdzony: można zaktualizować tylko status decyzji."
+
+#: apps/management_review/services/review.py:212
+msgid "Il riesame è approvato: le decisioni non si possono eliminare."
+msgstr "Przegląd jest zatwierdzony: decyzji nie można usuwać."
+
+#: apps/management_review/services/review.py:224
+msgid "La riunione è già stata avviata."
+msgstr "Spotkanie już się rozpoczęło."
+
+#: apps/management_review/services/review.py:251
+msgid "La riunione è già completata."
+msgstr "Spotkanie zostało już zakończone."
+
+#: apps/management_review/services/review.py:255
+msgid "Prima di chiudere la riunione completare i punti obbligatori dell'ordine del giorno."
+msgstr "Przed zamknięciem spotkania uzupełnij obowiązkowe punkty porządku obrad."
+
+#: apps/management_review/services/review.py:282
+msgid "Il riesame è già approvato."
+msgstr "Przegląd jest już zatwierdzony."
+
+#: apps/management_review/services/review.py:285
 msgid "Generare lo snapshot dei dati prima di approvare il riesame."
 msgstr "Wygeneruj snapshot danych przed zatwierdzeniem przeglądu."
 
-#: apps/management_review/services.py:308
-msgid "Il riesame è già approvato."
-msgstr "Przegląd jest już zatwierdzony."
+#: apps/management_review/services/review.py:288
+#, fuzzy
+#| msgid "Generare lo snapshot dei dati prima di approvare il riesame."
+msgid "Chiudere la riunione prima di approvare il riesame."
+msgstr "Wygeneruj snapshot danych przed zatwierdzeniem przeglądu."
+
+#: apps/management_review/services/snapshot.py:376
+msgid "Il riesame è approvato: lo snapshot non può essere rigenerato."
+msgstr "Przegląd jest zatwierdzony: migawki nie można wygenerować ponownie."
+
+#: apps/management_review/services/summary.py:44
+msgid "Il riesame è approvato: la sintesi non è più modificabile."
+msgstr "Przegląd jest zatwierdzony: podsumowania nie można już modyfikować."
+
+#: apps/management_review/services/summary.py:204
+#, fuzzy
+#| msgid "Generare lo snapshot dei dati prima di approvare il riesame."
+msgid "Generare lo snapshot dei dati prima di chiedere la sintesi all'IA."
+msgstr "Wygeneruj snapshot danych przed zatwierdzeniem przeglądu."
+
+#: apps/management_review/services/summary.py:224
+msgid "L'IA non ha restituito alcun testo. Riprovare."
+msgstr "SI nie zwróciła żadnego tekstu. Spróbuj ponownie."
 
 #: apps/pdca/services.py:41
 msgid "Il ciclo è già chiuso."
@@ -538,12 +1635,10 @@ msgstr "Użyj close_cycle(), aby zamknąć cykl z fazy ACT."
 
 #: apps/pdca/services.py:153
 #, python-format
-#| msgid "Il ciclo è già chiuso."
 msgid "Il ciclo è già %(phase)s."
 msgstr "Cykl jest już %(phase)s."
 
 #: apps/pdca/services.py:156
-#| msgid "Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata (minimo 20 caratteri)."
 msgid "Per archiviare è obbligatorio specificare il motivo (minimo 20 caratteri)."
 msgstr "Aby zarchiwizować, należy podać powód (minimum 20 znaków)."
 
@@ -556,12 +1651,7 @@ msgstr "Cykl znajduje się w fazie %(phase)s. Przejdź do ACT przed zamknięciem
 msgid "Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata (minimo 20 caratteri)."
 msgstr "Aby zamknąć cykl, należy opisać znormalizowane działanie (minimum 20 znaków)."
 
-#: apps/pdca/views.py:64
-msgid "Evidenza non trovata"
-msgstr "Dowód nie został znaleziony"
-
-#: apps/pdca/views.py:130
-#| msgid "Motivo terminazione obbligatorio (min 5 caratteri)."
+#: apps/pdca/views.py:130 apps/tasks/services.py:440
 msgid "Motivo cancellazione obbligatorio (min 10 caratteri)."
 msgstr "Powód anulowania jest obowiązkowy (min 10 znaków)."
 
@@ -587,13 +1677,11 @@ msgstr "Nieprawidłowa strefa czasowa IANA: %(tz)s"
 msgid "Max 1 livello di nesting per i sub-plant: il sito scelto è già un sotto-sito."
 msgstr "Maksymalnie 1 poziom zagnieżdżenia dla podlokalizacji: wybrana lokalizacja jest już podlokalizacją."
 
-#: apps/plants/services.py:173
-#| msgid "Solo il superuser può importare framework."
+#: apps/plants/services.py:178
 msgid "Solo il superuser può forzare l'eliminazione del sito."
 msgstr "Tylko superużytkownik może wymusić usunięcie zakładu."
 
-#: apps/plants/services.py:250
-#| msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata."
+#: apps/plants/services.py:255
 msgid "Impossibile eliminare il sito: sono presenti dipendenze collegate."
 msgstr "Nie można usunąć zakładu: istnieją powiązane zależności."
 
@@ -610,7 +1698,6 @@ msgstr[1] ""
 msgstr[2] ""
 
 #: apps/plants/views.py:153
-#| msgid "Nessun requisito documentale definito per questo controllo."
 msgid "Nessun logo configurato per questo sito."
 msgstr "Brak skonfigurowanego logo dla tego zakładu."
 
@@ -619,20 +1706,19 @@ msgid "Logo non disponibile: usa l'upload file per i loghi del sito."
 msgstr "Logo niedostępne: użyj przesyłania pliku dla logo lokalizacji."
 
 #: apps/plants/views.py:167 apps/plants/views.py:170
-#| msgid "File non trovato nello storage."
 msgid "Logo non trovato nello storage."
 msgstr "Nie znaleziono logo w magazynie."
 
-#: apps/reporting/services.py:965 apps/reporting/services.py:976
+#: apps/reporting/services.py:976 apps/reporting/services.py:987
 #: apps/reporting/views.py:128
 msgid "Tutti i siti"
 msgstr "Wszystkie lokalizacje"
 
-#: apps/reporting/services.py:968 apps/reporting/services.py:979
+#: apps/reporting/services.py:979 apps/reporting/services.py:990
 msgid "BU"
 msgstr "BU"
 
-#: apps/reporting/services.py:972 apps/reporting/services.py:983
+#: apps/reporting/services.py:983 apps/reporting/services.py:994
 msgid "(nessun sito)"
 msgstr "(brak lokalizacji)"
 
@@ -644,41 +1730,13 @@ msgstr "Użytkownik"
 msgid "Email"
 msgstr "E-mail"
 
-#: apps/reporting/views.py:118
-msgid "Attivo"
-msgstr "Aktywny"
-
-#: apps/reporting/views.py:119
-msgid "Tipo"
-msgstr "Typ"
-
-#: apps/reporting/views.py:119
-msgid "Ruolo"
-msgstr "Rola"
-
-#: apps/reporting/views.py:119
-msgid "Perimetro"
-msgstr "Zakres"
-
 #: apps/reporting/views.py:120
 msgid "Siti"
 msgstr "Lokalizacje"
 
 #: apps/reporting/views.py:120
-msgid "Scadenza"
-msgstr "Termin"
-
-#: apps/reporting/views.py:120
 msgid "Segnalazioni"
 msgstr "Oznaczenia"
-
-#: apps/reporting/views.py:125
-msgid "Sì"
-msgstr "Tak"
-
-#: apps/reporting/views.py:125
-msgid "No"
-msgstr "Nie"
 
 #: apps/reporting/views.py:126
 msgid "Accesso"
@@ -705,7 +1763,6 @@ msgid "Motivazione rifiuto obbligatoria (min 10 caratteri)."
 msgstr "Uzasadnienie odrzucenia jest obowiązkowe (minimum 10 znaków)."
 
 #: apps/suppliers/services.py:446
-#| msgid "Nessun requisito documentale definito per questo controllo."
 msgid "Nessun indirizzo email configurato per questo fornitore."
 msgstr "Brak skonfigurowanego adresu e-mail dla tego dostawcy."
 
@@ -713,31 +1770,97 @@ msgstr "Brak skonfigurowanego adresu e-mail dla tego dostawcy."
 msgid "Il questionario ha già ricevuto risposta."
 msgstr "Kwestionariusz już otrzymał odpowiedź."
 
-#: apps/tasks/services.py:208
+#: apps/suppliers/services.py:547
+#, fuzzy
+#| msgid "Percorso file non valido."
+msgid "Esito di rischio non valido."
+msgstr "Nieprawidłowa ścieżka pliku."
+
+#: apps/suppliers/services.py:549
+msgid "La data di valutazione non può essere nel futuro."
+msgstr "Data oceny nie może być w przyszłości."
+
+#: apps/suppliers/services.py:636
+msgid "Indica nelle note il riferimento della valutazione (es. questionario, audit, data e autore)."
+msgstr "W uwagach podaj odniesienie do oceny (np. kwestionariusz, audyt, data i autor)."
+
+#: apps/tasks/serializers.py:72
+msgid "Deve essere una lista di giorni."
+msgstr "Musi to być lista dni."
+
+#: apps/tasks/serializers.py:77
+msgid "I giorni devono essere interi da 0 (lun) a 6 (dom)."
+msgstr "Dni muszą być liczbami całkowitymi od 0 (pon) do 6 (niedz)."
+
+#: apps/tasks/serializers.py:91
+msgid "Indicare un giorno da 1 a 28, oppure 0 per l'ultimo giorno del mese."
+msgstr "Podaj dzień od 1 do 28 albo 0 dla ostatniego dnia miesiąca."
+
+#: apps/tasks/serializers.py:100
+msgid "Il mese di partenza deve essere compreso fra 1 (gennaio) e 12 (dicembre)."
+msgstr "Miesiąc początkowy musi mieścić się w zakresie od 1 (styczeń) do 12 (grudzień)."
+
+#: apps/tasks/serializers.py:109
+msgid "Per la frequenza settimanale indicare un solo giorno."
+msgstr "Dla częstotliwości tygodniowej wskaż tylko jeden dzień."
+
+#: apps/tasks/services.py:445
+msgid "Una checklist completata è l'evidenza del controllo eseguito: non è cancellabile."
+msgstr "Wypełniona lista kontrolna jest dowodem wykonania zabezpieczenia: nie można jej usunąć."
+
+#: apps/tasks/services.py:482
 msgid "Tutti gli item obbligatori devono essere spuntati prima di completare."
 msgstr "Wszystkie obowiązkowe pozycje muszą być zaznaczone przed zakończeniem."
+
+#: apps/tasks/views.py:192
+msgid "Indicare il sito per cui avviare la checklist."
+msgstr "Wskaż zakład, dla którego uruchamiasz listę kontrolną."
+
+#: apps/tasks/views.py:198
+#, fuzzy
+#| msgid "Logo non trovato nello storage."
+msgid "Sito non trovato o non attivo."
+msgstr "Nie znaleziono logo w magazynie."
+
+#: apps/tasks/views.py:335
+msgid "Questo KPI si calcola da solo: il valore non va inserito a mano."
+msgstr "Ten KPI jest obliczany automatycznie: wartości nie wpisuje się ręcznie."
+
+#: apps/tasks/views.py:344
+#, fuzzy
+#| msgid "new_user_id obbligatorio."
+msgid "Valore numerico obbligatorio."
+msgstr "new_user_id jest wymagany."
+
+#: apps/tasks/views.py:354
+#, fuzzy
+#| msgid "Plant non trovato."
+msgid "Sito non trovato."
+msgstr "Zakład nie został znaleziony."
+
+#: apps/tasks/views.py:364
+msgid "Settimana non valida (formato atteso AAAA-MM-GG)."
+msgstr "Nieprawidłowy tydzień (oczekiwany format RRRR-MM-DD)."
 
 #: core/scoping.py:115
 msgid "Accesso negato: vista aggregata su tutti i siti riservata allo scope organizzazione."
 msgstr "Odmowa dostępu: widok zbiorczy wszystkich lokalizacji zarezerwowany dla zakresu organizacji."
 
-#: core/uploads.py:86
+#: core/uploads.py:120
 #, python-format
-#| msgid "File troppo grande. Dimensione massima: 50MB."
 msgid "File troppo grande. Dimensione massima: %(mb)sMB."
 msgstr "Plik jest za duży. Maksymalny rozmiar: %(mb)s MB."
 
-#: core/uploads.py:94
+#: core/uploads.py:128
 #, python-format
-#| msgid "Estensione file non consentita. Formati ammessi: doc, docx, xls, xlsx, ppt, pptx, pdf, png, jpg, jpeg."
 msgid "Estensione file non consentita. Formati ammessi: %(formats)s."
 msgstr "Niedozwolone rozszerzenie pliku. Dozwolone formaty: %(formats)s."
 
-#: core/uploads.py:104
+#: core/uploads.py:154
 msgid "Tipo di file non consentito. Il contenuto del file non corrisponde all'estensione."
 msgstr "Niedozwolony typ pliku. Zawartość pliku nie odpowiada rozszerzeniu."
 
-#: core/uploads.py:113
+#: core/uploads.py:163
 #, python-format
 msgid "Il contenuto del file non corrisponde all'estensione .%(ext)s."
 msgstr "Zawartość pliku nie odpowiada rozszerzeniu .%(ext)s."

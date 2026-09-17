@@ -96,6 +96,9 @@ class ReviewAction(BaseModel):
         ("miglioramento", "Opportunità di miglioramento"),
         ("modifica_sgsi", "Modifica al SGSI"),
         ("risorse", "Risorse"),
+        # La direzione può uscire dal riesame con un obiettivo di sicurezza
+        # nuovo o rivisto: è il passaggio §9.3.3 (output) → §6.2 (obiettivi).
+        ("obiettivo", "Obiettivo di sicurezza"),
         ("altro", "Altro"),
     ]
     review = models.ForeignKey(
@@ -110,6 +113,10 @@ class ReviewAction(BaseModel):
     )
     pdca_cycle = models.ForeignKey(
         "pdca.PdcaCycle", on_delete=models.SET_NULL, null=True, blank=True, related_name="review_actions"
+    )
+    security_objective = models.ForeignKey(
+        "governance.SecurityObjective", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="review_actions",
     )
     description = models.TextField()
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)

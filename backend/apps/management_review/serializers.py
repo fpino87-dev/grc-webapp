@@ -12,6 +12,8 @@ def _user_label(user):
 
 class ReviewActionSerializer(serializers.ModelSerializer):
     owner_name = serializers.SerializerMethodField()
+    objective_code = serializers.CharField(source="security_objective.code", read_only=True, allow_null=True)
+    objective_status = serializers.CharField(source="security_objective.status", read_only=True, allow_null=True)
     task_status = serializers.CharField(source="task.status", read_only=True, allow_null=True)
     task_title = serializers.CharField(source="task.title", read_only=True, allow_null=True)
     pdca_phase = serializers.CharField(source="pdca_cycle.fase_corrente", read_only=True, allow_null=True)
@@ -25,6 +27,9 @@ class ReviewActionSerializer(serializers.ModelSerializer):
     )
     create_pdca = serializers.BooleanField(write_only=True, required=False, default=False)
     pdca_plant = serializers.UUIDField(write_only=True, required=False, allow_null=True)
+    # Obiettivo di sicurezza deliberato dal riesame (§6.2): i campi del piano
+    # arrivano come oggetto unico, validato dai servizi di governance.
+    objective = serializers.JSONField(write_only=True, required=False, allow_null=True)
 
     def get_owner_name(self, obj):
         return _user_label(obj.owner) if obj.owner else None
@@ -33,7 +38,7 @@ class ReviewActionSerializer(serializers.ModelSerializer):
         model = ReviewAction
         fields = "__all__"
         read_only_fields = [
-            "id", "task", "pdca_cycle", "closed_at",
+            "id", "task", "pdca_cycle", "security_objective", "closed_at",
             "created_by", "created_at", "updated_at", "deleted_at",
         ]
 
@@ -41,7 +46,7 @@ class ReviewActionSerializer(serializers.ModelSerializer):
         if self.instance is not None:
             # review e punto non si spostano dopo la creazione
             attrs.pop("review", None)
-            for key in ("create_task", "task_role", "create_pdca", "pdca_plant"):
+            for key in ("create_task", "task_role", "create_pdca", "pdca_plant", "objective"):
                 attrs.pop(key, None)
         return attrs
 

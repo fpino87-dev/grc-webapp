@@ -1,4 +1,5 @@
 """Renderer PDF della relazione (reportlab), stesso contenuto dell'HTML."""
+from django.utils.translation import gettext as _
 import io
 import os
 from xml.sax.saxutils import escape
@@ -147,7 +148,7 @@ def _block(b, st, width):
     t.setStyle(TableStyle(style))
     out.append(t)
     if b.get("more"):
-        out.append(Paragraph(f"… e altri {b['more']}", st["note"]))
+        out.append(Paragraph(_("… e altri %(n)s") % {"n": b["more"]}, st["note"]))
     out.append(Spacer(1, 4))
     return out
 
@@ -182,11 +183,11 @@ def render_pdf(review) -> bytes:
             ("LEFTPADDING", (0, 0), (-1, -1), 8), ("RIGHTPADDING", (0, 0), (-1, -1), 8),
             ("TOPPADDING", (0, 0), (-1, -1), 6), ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
         ]))
-        story += [Paragraph("Sintesi executive", st["h2"]), box, Spacer(1, 3),
+        story += [Paragraph(_("Sintesi executive"), st["h2"]), box, Spacer(1, 3),
                   Paragraph(_text(doc_model["summary"]["note"]), st["note"])]
 
     if doc_model["alerts"]:
-        story.append(Paragraph("Punti di attenzione", st["h2"]))
+        story.append(Paragraph(_("Punti di attenzione"), st["h2"]))
         story += [Paragraph(f"<font color='{TONES['red'].hexval()}'>•</font> {_text(a)}", st["base"])
                   for a in doc_model["alerts"]]
 
@@ -202,8 +203,10 @@ def render_pdf(review) -> bytes:
     if doc_model["approval"]:
         a = doc_model["approval"]
         box = Table([[Paragraph(
-            f"<font name='{st['bold']}' color='{TONES['green'].hexval()}'>RIESAME APPROVATO</font><br/>"
-            f"Approvato da: {_text(a['by'])}<br/>Data: {_text(a['at'])}<br/>Note: {_text(a['note'])}", st["base"])]],
+            f"<font name='{st['bold']}' color='{TONES['green'].hexval()}'>{_text(_('RIESAME APPROVATO'))}</font><br/>"
+            f"{_text(_('Approvato da'))}: {_text(a['by'])}<br/>"
+            f"{_text(_('Data'))}: {_text(a['at'])}<br/>"
+            f"{_text(_('Note'))}: {_text(a['note'])}", st["base"])]],
             colWidths=[width])
         box.setStyle(TableStyle([("BOX", (0, 0), (-1, -1), 1.2, TONES["green"]),
                                  ("LEFTPADDING", (0, 0), (-1, -1), 8), ("TOPPADDING", (0, 0), (-1, -1), 6),

@@ -196,6 +196,66 @@ def _kpi_block(plant_id) -> dict:
     }
 
 
+def _objectives_block(plant_id, today) -> dict:
+    """§9.3.2 d4) — stato degli obiettivi di sicurezza (§6.2).
+
+    È il punto che finora restava scoperto: la norma chiede alla direzione di
+    guardare gli obiettivi, e l'unico contenuto disponibile era la discussione
+    libera. Qui si congelano stato, valore corrente e traiettoria di ogni
+    obiettivo aperto del perimetro, più quelli chiusi nell'ultimo anno (il
+    risultato di ciò che era stato promesso al riesame precedente).
+
+    Un riesame di sito considera gli obiettivi del sito e quelli di
+    organizzazione, che impegnano anche lui.
+    """
+    from django.db.models import Q
+    from apps.governance.models import SecurityObjective
+    from apps.governance.services import (
+        OBJECTIVE_OPEN_STATUSES, evaluate_objective, latest_objective_values,
+    )
+
+    qs = SecurityObjective.objects.select_related("plant", "kpi_definition")
+    if plant_id:
+        qs = qs.filter(Q(plant_id=plant_id) | Q(plant__isnull=True))
+    recently_closed = Q(closed_at__gte=timezone.now() - timezone.timedelta(days=365))
+    objectives = list(qs.filter(Q(status__in=OBJECTIVE_OPEN_STATUSES) | recently_closed))
+    values = latest_objective_values(objectives)
+
+    counts = {"totale": len(objectives), "attivi": 0, "a_rischio": 0, "mancati": 0, "raggiunti": 0}
+    items = []
+    for o in objectives:
+        value, measured_on = values.get(o.id, (None, None))
+        ev = evaluate_objective(o, value=value, measured_on=measured_on, today=today)
+        if o.status == "attivo":
+            counts["attivi"] += 1
+        if o.status == "raggiunto":
+            counts["raggiunti"] += 1
+        if o.status == "non_raggiunto" or ev["track"] == "mancato":
+            counts["mancati"] += 1
+        elif ev["track"] == "a_rischio":
+            counts["a_rischio"] += 1
+        items.append({
+            "id": str(o.id),
+            "code": o.code,
+            "title": o.title,
+            "plant_code": o.plant.code if o.plant_id else None,
+            "owner_role": o.owner_role,
+            "status": o.status,
+            "baseline_value": o.baseline_value,
+            "target_value": o.target_value,
+            "target_date": _iso(o.target_date),
+            "current_value": ev["current_value"],
+            "unit": ev["unit"],
+            "progress_pct": ev["progress_pct"],
+            "track": ev["track"],
+        })
+
+    # In direzione si guardano per primi quelli che non stanno andando bene.
+    order = {"mancato": 0, "a_rischio": 1, "senza_misure": 2, "in_linea": 3, "non_applicabile": 4}
+    items.sort(key=lambda i: (order.get(i["track"], 9), i["target_date"] or "", i["code"]))
+    return {**counts, "elenco": items[:SNAPSHOT_LIST_LIMIT]}
+
+
 def _audit_block(scope: dict, today, since_12m) -> dict:
     """§9.3.2 d) — risultati degli audit e non conformità (M17)."""
     from django.db.models import Case, Count, IntegerField, Q, Value, When
@@ -587,6 +647,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
         "task":           tasks_summary,
         "azioni_precedenti": _previous_actions_block(review, today),
         "kpi":            _kpi_block(plant_id),
+        "obiettivi":      _objectives_block(plant_id, today),
         "audit":          _audit_block(scope, today, since_12m),
         "siti":           [] if plant_id else _sites_block(today),
     }

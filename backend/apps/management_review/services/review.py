@@ -135,9 +135,9 @@ def suggest_chair(plant_id=None):
 
 @transaction.atomic
 def create_review_action(serializer, user, *, create_task=False, task_role="", create_pdca=False,
-                         pdca_plant=None) -> ReviewAction:
+                         pdca_plant=None, objective=None) -> ReviewAction:
     """Registra una decisione; opzionalmente apre un task (M08, assegnato a un
-    ruolo) e/o un ciclo PDCA (M11) collegati."""
+    ruolo), un ciclo PDCA (M11) e/o un obiettivo di sicurezza (§6.2) collegati."""
     from apps.pdca.services import create_cycle
     from apps.tasks.services import create_task as create_m08_task
 
@@ -170,6 +170,10 @@ def create_review_action(serializer, user, *, create_task=False, task_role="", c
         )
         fields.append("task")
 
+    if objective:
+        action.security_objective = _objective_from_decision(review, action, objective, user)
+        fields.append("security_objective")
+
     if create_pdca:
         plant = review.plant or pdca_plant
         if plant is None:
@@ -191,9 +195,54 @@ def create_review_action(serializer, user, *, create_task=False, task_role="", c
             "id": str(action.id), "review_id": str(review.pk),
             "task_id": str(action.task_id) if action.task_id else None,
             "pdca_id": str(action.pdca_cycle_id) if action.pdca_cycle_id else None,
+            "objective_id": str(action.security_objective_id) if action.security_objective_id else None,
         },
     )
     return action
+
+
+def _objective_from_decision(review, action, data: dict, user):
+    """Crea l'obiettivo di sicurezza deliberato dal riesame (§9.3.3 → §6.2).
+
+    Nasce in **bozza**, non attivo: il riesame decide *che* ci sarà un
+    obiettivo, ma il piano richiesto da §6.2 (risorse, metodo di valutazione)
+    si completa dopo la riunione, e solo allora l'obiettivo si attiva. Così la
+    delibera non produce un impegno formalmente incompleto.
+    """
+    from apps.governance.models import SecurityObjective
+    from apps.governance.services import _validate_objective, _objective_audit
+
+    payload = {
+        "plant": review.plant,
+        "code": (data.get("code") or "").strip(),
+        "title": (data.get("title") or action.description.strip().splitlines()[0][:200]),
+        "description": action.description,
+        "origin": "riesame",
+        "source_review_id": review.pk,
+        "measure_source": data.get("measure_source") or "kpi",
+        "kpi_definition": data.get("kpi_definition"),
+        "unit": data.get("unit") or "",
+        "start_date": data.get("start_date") or review.review_date,
+        "baseline_value": data.get("baseline_value"),
+        "target_value": data.get("target_value"),
+        "target_direction": data.get("target_direction") or "above",
+        "target_date": data.get("target_date") or action.due_date,
+        "owner_role": data.get("owner_role") or "",
+        "status": "bozza",
+    }
+    if not payload["code"]:
+        raise ValidationError(_("Indicare il codice dell'obiettivo di sicurezza."))
+    if payload["target_value"] is None:
+        raise ValidationError(_("Indicare il valore target dell'obiettivo."))
+    if not payload["target_date"]:
+        raise ValidationError(_("Indicare la scadenza dell'obiettivo (o quella della decisione)."))
+
+    _validate_objective(payload)
+    objective = SecurityObjective.objects.create(created_by=user, **payload)
+    _objective_audit(user, objective, "create", {
+        "origin": "riesame", "review_id": str(review.pk), "decision_id": str(action.pk),
+    })
+    return objective
 
 
 def update_review_action(serializer, user) -> ReviewAction:

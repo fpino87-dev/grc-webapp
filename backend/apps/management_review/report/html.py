@@ -1,6 +1,8 @@
 """Renderer HTML della relazione (stampabile/archiviabile)."""
 from html import escape
 
+from django.utils.translation import gettext as _
+
 from .builder import build_report
 
 TONES = {"red": "#dc2626", "orange": "#d97706", "green": "#16a34a", "muted": "#6b7280"}
@@ -65,7 +67,8 @@ def _block(b) -> str:
         body = "".join("<tr>" + "".join(f"<td>{_cell(c)}</td>" for c in r) + "</tr>" for r in b["rows"])
     else:
         body = f"<tr><td colspan='{len(b['headers'])}'>{escape(b['empty'])}</td></tr>"
-    more = f"<p class='more'>… e altri {b['more']}</p>" if b.get("more") else ""
+    more = (f"<p class='more'>{escape(_('… e altri %(n)s') % {'n': b['more']})}</p>"
+            if b.get("more") else "")
     return f"{title}<table><tr>{head}</tr>{body}</table>{more}"
 
 
@@ -78,18 +81,22 @@ def render_html(review) -> str:
     ]
     if doc["summary"]:
         parts.append(
-            f"<h2>Sintesi executive</h2><div class='summary'>{escape(doc['summary']['text'])}</div>"
+            f"<h2>{escape(_('Sintesi executive'))}</h2>"
+            f"<div class='summary'>{escape(doc['summary']['text'])}</div>"
             f"<p class='ai-note'>{escape(doc['summary']['note'])}</p>"
         )
     if doc["alerts"]:
-        parts.append("<h2>Punti di attenzione</h2>" + "".join(f"<div class='alert'>⚠️ {escape(a)}</div>" for a in doc["alerts"]))
+        parts.append(f"<h2>{escape(_('Punti di attenzione'))}</h2>"
+                     + "".join(f"<div class='alert'>⚠️ {escape(str(a))}</div>" for a in doc["alerts"]))
     for section in doc["sections"]:
         parts.append(f"<h2>{escape(section['heading'])}</h2>" + "".join(_block(b) for b in section["blocks"]))
     if doc["approval"]:
         a = doc["approval"]
         parts.append(
-            "<div class='approval'><strong style='color:#16a34a'>✓ RIESAME APPROVATO</strong><br>"
-            f"Approvato da: {escape(a['by'])}<br>Data: {escape(a['at'])}<br>Note: {escape(a['note'])}</div>"
+            f"<div class='approval'><strong style='color:#16a34a'>✓ {escape(_('RIESAME APPROVATO'))}</strong><br>"
+            f"{escape(_('Approvato da'))}: {escape(a['by'])}<br>"
+            f"{escape(_('Data'))}: {escape(a['at'])}<br>"
+            f"{escape(_('Note'))}: {escape(a['note'])}</div>"
         )
     parts.append(f"<p class='footer'>{escape(doc['footer'])}</p>")
     return (

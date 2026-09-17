@@ -219,6 +219,7 @@ class ReviewActionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             "create_task": data.pop("create_task", False),
             "task_role": data.pop("task_role", ""),
             "create_pdca": data.pop("create_pdca", False),
+            "objective": data.pop("objective", None),
         }
         pdca_plant_id = data.pop("pdca_plant", None)
         pdca_plant = None
