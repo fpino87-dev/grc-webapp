@@ -251,3 +251,198 @@ class RoleRequirement(BaseModel):
     def __str__(self):
         return f"{self.role} @ {self.scope_level}"
 
+
+
+class SecurityObjective(BaseModel):
+    """Obiettivo di sicurezza delle informazioni (ISO/IEC 27001:2022 §6.2).
+
+    Un obiettivo NON è un KPI, ed è la ragione per cui esiste questo modello
+    invece di un flag su `KPIDefinition`:
+
+      * il KPI risponde a "a che punto siamo adesso?" e le sue soglie sono un
+        *pavimento* tarato sul rischio — sotto quel livello si interviene
+        subito, e la soglia non va allargata per fare spazio a un'ambizione;
+      * l'obiettivo risponde a "arriveremo dove ci siamo impegnati, entro la
+        data promessa?" ed è una *traiettoria* verso un target, con un ruolo
+        che ne risponde.
+
+    Lo stesso numero può essere verde sulla soglia e rosso sull'obiettivo (in
+    linea oggi, fermo da mesi rispetto al target di dicembre) e viceversa (un
+    calo isolato che fa scattare l'alert ma non intacca la traiettoria).
+
+    Per questo l'obiettivo non ha soglie proprie né un proprio calcolo: se è
+    agganciato a un KPI (`measure_source="kpi"`) legge i valori dagli snapshot
+    settimanali del motore M08 — una sola misura, una sola verità sul numero.
+    Le misure manuali (`SecurityObjectiveMeasurement`) servono solo a ciò che
+    la piattaforma non misura da sé.
+
+    Solo pochi KPI meritano un obiettivo (tipicamente 4-6 all'anno): quelli
+    dove esiste un divario da colmare. Dove il processo già funziona basta
+    sorvegliarlo con le soglie.
+    """
+
+    STATUS_CHOICES = [
+        ("bozza", "Bozza"),
+        ("attivo", "Attivo"),
+        ("raggiunto", "Raggiunto"),
+        ("non_raggiunto", "Non raggiunto"),
+        ("sospeso", "Sospeso"),
+        ("annullato", "Annullato"),
+    ]
+    # §6.2 chiede di tenere conto dei requisiti di sicurezza applicabili e dei
+    # risultati della valutazione del rischio: l'origine rende tracciabile da
+    # dove nasce l'impegno.
+    ORIGIN_CHOICES = [
+        ("politica", "Politica di sicurezza"),
+        ("risk_assessment", "Valutazione del rischio"),
+        ("audit", "Esito di audit"),
+        ("requisito", "Requisito normativo o contrattuale"),
+        ("incidente", "Incidente"),
+        ("riesame", "Riesame di direzione"),
+        ("altro", "Altro"),
+    ]
+    MEASURE_SOURCE_CHOICES = [
+        ("kpi", "KPI operativo (M08)"),
+        ("manual", "Misura manuale"),
+    ]
+    # Stessa semantica di KPIDefinition.threshold_direction, e per lo stesso
+    # motivo: "above" = valore alto è buono.
+    DIRECTION_CHOICES = [
+        ("above", "Sopra il target = raggiunto"),
+        ("below", "Sotto il target = raggiunto"),
+    ]
+
+    plant = models.ForeignKey(
+        "plants.Plant",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="security_objectives",
+        db_index=True,
+        help_text=(
+            "Sito a cui si riferisce l'obiettivo. null = obiettivo di "
+            "organizzazione, valido per tutti i siti."
+        ),
+    )
+    code = models.CharField(max_length=30, db_index=True, help_text="Es: OBJ-2026-01")
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    origin = models.CharField(max_length=20, choices=ORIGIN_CHOICES, default="politica")
+    # Riesame di direzione che ha deliberato l'obiettivo. UUID e non FK per
+    # non accoppiare le migrazioni di governance a quelle di M13 (stesso
+    # criterio di RoleAssignment.document_id).
+    source_review_id = models.UUIDField(null=True, blank=True)
+
+    # ── Misura ────────────────────────────────────────────────────────────
+    measure_source = models.CharField(
+        max_length=10, choices=MEASURE_SOURCE_CHOICES, default="kpi"
+    )
+    kpi_definition = models.ForeignKey(
+        "tasks.KPIDefinition",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="security_objectives",
+        help_text="KPI da cui leggere i valori se measure_source=kpi.",
+    )
+    unit = models.CharField(
+        max_length=20,
+        blank=True,
+        help_text="Unità delle misure manuali; con un KPI si usa quella del KPI.",
+    )
+
+    # ── Traiettoria ───────────────────────────────────────────────────────
+    start_date = models.DateField(help_text="Inizio del periodo di impegno.")
+    baseline_value = models.FloatField(
+        null=True, blank=True, help_text="Valore di partenza, da cui si misura il progresso."
+    )
+    target_value = models.FloatField()
+    target_direction = models.CharField(
+        max_length=5, choices=DIRECTION_CHOICES, default="above"
+    )
+    target_date = models.DateField(db_index=True)
+
+    # ── Piano (§6.2 e-f: chi, con quali risorse, come si valuta) ──────────
+    # Ruolo e non utente: il responsabile si risolve dinamicamente via
+    # UserPlantAccess, come per i task M08 (regola architetturale #7).
+    owner_role = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Ruolo GRC che risponde dell'obiettivo (risolto via UserPlantAccess).",
+    )
+    resources = models.TextField(blank=True, help_text="Risorse necessarie (§6.2 e).")
+    evaluation_method = models.TextField(
+        blank=True, help_text="Come si valuta il risultato (§6.2 f)."
+    )
+
+    # ── Ciclo di vita ─────────────────────────────────────────────────────
+    status = models.CharField(
+        max_length=15, choices=STATUS_CHOICES, default="bozza", db_index=True
+    )
+    # §6.2: l'obiettivo deve essere comunicato. Il documento pubblicato (M07)
+    # è l'evidenza; l'id resta UUID per lo stesso motivo di source_review_id.
+    communicated_at = models.DateTimeField(null=True, blank=True)
+    document_id = models.UUIDField(null=True, blank=True)
+    closed_at = models.DateTimeField(null=True, blank=True)
+    closed_by = models.ForeignKey(
+        "auth.User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="closed_security_objectives",
+    )
+    closure_note = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["target_date", "code"]
+        indexes = [
+            models.Index(fields=["status", "target_date"]),
+        ]
+        constraints = [
+            # Stesso schema di KPIDefinition: in Postgres NULL != NULL, quindi
+            # un solo indice unico su (code, plant) lascerebbe passare due
+            # obiettivi di organizzazione con lo stesso codice. La condizione
+            # su deleted_at libera il codice dopo una cancellazione logica.
+            models.UniqueConstraint(
+                fields=["code", "plant"],
+                condition=models.Q(deleted_at__isnull=True, plant__isnull=False),
+                name="uniq_active_objective_code_per_plant",
+            ),
+            models.UniqueConstraint(
+                fields=["code"],
+                condition=models.Q(deleted_at__isnull=True, plant__isnull=True),
+                name="uniq_active_objective_code_global",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.code} — {self.title}"
+
+
+class SecurityObjectiveMeasurement(BaseModel):
+    """Misura manuale di un obiettivo (§6.2: gli obiettivi vanno monitorati).
+
+    Esiste solo per gli obiettivi `measure_source="manual"`: quando l'obiettivo
+    è agganciato a un KPI le misure sono già gli `OperationalKpiSnapshot`
+    settimanali e duplicarle qui creerebbe due verità sullo stesso numero.
+    """
+
+    objective = models.ForeignKey(
+        SecurityObjective, on_delete=models.CASCADE, related_name="measurements"
+    )
+    measured_on = models.DateField(db_index=True)
+    value = models.FloatField()
+    note = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-measured_on"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["objective", "measured_on"],
+                condition=models.Q(deleted_at__isnull=True),
+                name="uniq_active_objective_measurement_per_day",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.objective_id} @ {self.measured_on}: {self.value}"

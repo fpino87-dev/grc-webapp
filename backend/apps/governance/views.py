@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from core.audit import log_action
+from core.scoping import PlantScopedQuerysetMixin
 from core.viewsets import SoftDeleteAuditMixin
 from .models import (
     CommitteeMeeting,
@@ -15,14 +16,17 @@ from .models import (
     RoleAssignment,
     RoleRequirement,
     SecurityCommittee,
+    SecurityObjective,
 )
-from .permissions import GovernancePermission
+from .permissions import GovernancePermission, SecurityObjectivePermission
 from .serializers import (
     CommitteeMeetingSerializer,
     DocumentWorkflowPolicySerializer,
     RoleAssignmentSerializer,
     RoleRequirementSerializer,
     SecurityCommitteeSerializer,
+    SecurityObjectiveMeasurementSerializer,
+    SecurityObjectiveSerializer,
 )
 
 
@@ -301,3 +305,104 @@ class RoleRequirementViewSet(SoftDeleteAuditMixin, viewsets.ModelViewSet):
             entity=instance,
             payload={"id": str(instance.id), "role": instance.role, "enabled": instance.enabled},
         )
+
+
+class SecurityObjectiveViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+    """Obiettivi di sicurezza delle informazioni (ISO/IEC 27001 §6.2).
+
+    Gli obiettivi di organizzazione (`plant=null`) sono visibili a tutti:
+    sono impegni aziendali, non dati di un singolo sito.
+    """
+
+    queryset = SecurityObjective.objects.select_related("plant", "kpi_definition").all()
+    serializer_class = SecurityObjectiveSerializer
+    permission_classes = [SecurityObjectivePermission]
+    filterset_fields = ["plant", "status", "origin", "measure_source", "owner_role"]
+    audit_action = "governance.security_objective"
+    allow_null_plant = True
+
+    def handle_exception(self, exc):
+        # I services sollevano la ValidationError di Django (sono chiamabili
+        # anche fuori da DRF): qui diventa una 400 con i campi, non una 500.
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        from rest_framework.exceptions import ValidationError as DRFValidationError
+
+        if isinstance(exc, DjangoValidationError):
+            exc = DRFValidationError(getattr(exc, "message_dict", None) or exc.messages)
+        return super().handle_exception(exc)
+
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        if self.action == "list":
+            # Valori correnti di tutta la pagina in due query, invece di due
+            # per riga (regola #6).
+            from .services import latest_objective_values
+
+            ctx["objective_values"] = latest_objective_values(
+                self.filter_queryset(self.get_queryset())
+            )
+        return ctx
+
+    def perform_create(self, serializer):
+        from .services import create_objective
+
+        create_objective(serializer, self.request.user)
+
+    def perform_update(self, serializer):
+        from .services import update_objective
+
+        update_objective(serializer, self.request.user)
+
+    @action(detail=True, methods=["post"])
+    def activate(self, request, pk=None):
+        from .services import activate_objective
+
+        objective = activate_objective(self.get_object(), request.user)
+        return Response(self.get_serializer(objective).data)
+
+    @action(detail=True, methods=["post"])
+    def suspend(self, request, pk=None):
+        from .services import suspend_objective
+
+        objective = suspend_objective(
+            self.get_object(), request.user, note=request.data.get("note", "")
+        )
+        return Response(self.get_serializer(objective).data)
+
+    @action(detail=True, methods=["post"])
+    def close(self, request, pk=None):
+        from .services import close_objective
+
+        objective = close_objective(
+            self.get_object(),
+            request.user,
+            outcome=request.data.get("outcome", ""),
+            note=request.data.get("note", ""),
+        )
+        return Response(self.get_serializer(objective).data)
+
+    @action(detail=True, methods=["post"])
+    def measure(self, request, pk=None):
+        from .services import record_objective_measurement
+
+        measurement = record_objective_measurement(
+            self.get_object(),
+            request.user,
+            value=request.data.get("value"),
+            measured_on=request.data.get("measured_on") or None,
+            note=request.data.get("note", ""),
+        )
+        return Response(SecurityObjectiveMeasurementSerializer(measurement).data, status=201)
+
+    @action(detail=True, methods=["get"])
+    def series(self, request, pk=None):
+        """Serie storica delle misure, qualunque sia la sorgente."""
+        from .services import objective_series
+
+        return Response({"items": objective_series(self.get_object())})
+
+    @action(detail=False, methods=["get"])
+    def overview(self, request):
+        from .services import objectives_overview
+
+        return Response(objectives_overview(self.filter_queryset(self.get_queryset())))

@@ -693,3 +693,459 @@ def find_single_holder_conflicts() -> list[dict]:
                 "user_ids": sorted(user_ids),
             })
     return conflicts
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# Obiettivi di sicurezza (ISO/IEC 27001:2022 §6.2)
+# ══════════════════════════════════════════════════════════════════════════
+#
+# Le soglie del KPI e il target dell'obiettivo rispondono a due domande
+# diverse e non vanno confuse: la soglia dice "siamo sotto il livello
+# accettabile adesso?", l'obiettivo dice "arriveremo al target entro la
+# scadenza?". Qui si calcola solo la seconda. La prima resta in
+# apps.tasks.services.evaluate_kpi_status e non viene toccata.
+
+# Stati della traiettoria — non sono lo stato del record (`status`), che è la
+# decisione umana, ma la lettura automatica dell'andamento.
+TRACK_ON_TRACK = "in_linea"
+TRACK_AT_RISK = "a_rischio"
+TRACK_MISSED = "mancato"
+TRACK_NO_DATA = "senza_misure"
+TRACK_NOT_APPLICABLE = "non_applicabile"
+
+# Quanti punti percentuali di ritardo sul cammino previsto si tollerano prima
+# di dichiarare la traiettoria a rischio. Con meno margine un obiettivo che
+# progredisce a scatti (tipico: una campagna che chiude a blocchi) verrebbe
+# segnalato a ogni pausa.
+AT_RISK_GAP_PCT = 15.0
+
+OBJECTIVE_OPEN_STATUSES = ("bozza", "attivo", "sospeso")
+
+# Sentinella: `value=None` significa "misurato e non disponibile", mentre
+# l'assenza dell'argomento significa "caricalo tu". Senza distinguerli,
+# ogni obiettivo senza misure rifarebbe la query in objectives_overview.
+_UNSET = object()
+
+
+def _objective_audit(user, objective, action, payload=None):
+    from core.audit import log_action
+
+    log_action(
+        user=user,
+        action_code=f"governance.security_objective.{action}",
+        level="L2",
+        entity=objective,
+        payload={"id": str(objective.id), "code": objective.code, **(payload or {})},
+    )
+
+
+def objective_unit(objective) -> str:
+    """Unità di misura effettiva: quella del KPI se l'obiettivo è agganciato."""
+    if objective.measure_source == "kpi" and objective.kpi_definition_id:
+        return objective.kpi_definition.unit or ""
+    return objective.unit or ""
+
+
+def objective_progress_pct(objective, value):
+    """Percentuale del cammino baseline → target già percorsa.
+
+    La formula è indifferente alla direzione: per un obiettivo "below"
+    (es. ridurre i giorni dall'ultimo test di ripristino) sia numeratore sia
+    denominatore sono negativi quando si migliora, e il rapporto resta
+    positivo. Restituisce None se manca la baseline o se baseline e target
+    coincidono (non c'è cammino da percorrere: l'obiettivo non dice nulla).
+    """
+    if value is None or objective.baseline_value is None:
+        return None
+    span = objective.target_value - objective.baseline_value
+    if span == 0:
+        return None
+    pct = (value - objective.baseline_value) / span * 100.0
+    # Sotto la baseline si è tornati indietro: si riporta il valore negativo
+    # invece di azzerarlo, perché "peggio di quando abbiamo iniziato" è
+    # un'informazione che la direzione deve vedere.
+    return round(pct, 1)
+
+
+def objective_elapsed_pct(objective, today) -> float | None:
+    """Percentuale di tempo consumato fra start_date e target_date."""
+    span = (objective.target_date - objective.start_date).days
+    if span <= 0:
+        return None
+    elapsed = (today - objective.start_date).days
+    return round(max(0.0, min(elapsed / span * 100.0, 100.0)), 1)
+
+
+def objective_is_reached(objective, value) -> bool:
+    if value is None:
+        return False
+    if objective.target_direction == "below":
+        return value <= objective.target_value
+    return value >= objective.target_value
+
+
+def _weak_target(objective) -> bool:
+    """True se il target non è migliore della soglia di warning del KPI.
+
+    Un obiettivo il cui traguardo coincide con la soglia di allerta non
+    aggiunge nulla a ciò che il KPI già segnala ogni settimana: è la
+    duplicazione da evitare. Non è un errore bloccante — la taratura resta una
+    scelta di chi governa — ma va mostrata a chi lo configura.
+    """
+    if objective.measure_source != "kpi" or not objective.kpi_definition_id:
+        return False
+    warn = objective.kpi_definition.threshold_warning
+    if warn is None:
+        return False
+    if objective.target_direction == "below":
+        return objective.target_value >= warn
+    return objective.target_value <= warn
+
+
+def latest_objective_values(objectives) -> dict:
+    """{objective_id: (value, date)} per un insieme di obiettivi, senza N+1.
+
+    Due query in tutto: una sulle misure manuali, una sugli snapshot KPI.
+    """
+    from apps.tasks.models import OperationalKpiSnapshot
+    from .models import SecurityObjectiveMeasurement
+
+    objectives = list(objectives)
+    out: dict = {}
+
+    manual_ids = [o.id for o in objectives if o.measure_source == "manual"]
+    if manual_ids:
+        # ordering del modello = -measured_on: il primo per obiettivo è l'ultimo
+        # misurato, quindi setdefault tiene quello giusto.
+        for m in SecurityObjectiveMeasurement.objects.filter(
+            objective_id__in=manual_ids
+        ).order_by("objective_id", "-measured_on"):
+            out.setdefault(m.objective_id, (m.value, m.measured_on))
+
+    kpi_objs = [o for o in objectives if o.measure_source == "kpi" and o.kpi_definition_id]
+    if kpi_objs:
+        kpi_ids = {o.kpi_definition_id for o in kpi_objs}
+        snaps = (
+            OperationalKpiSnapshot.objects.filter(
+                kpi_definition_id__in=kpi_ids, value__isnull=False
+            )
+            .order_by("kpi_definition_id", "-week_start", "-created_at")
+            .values_list("kpi_definition_id", "plant_id", "value", "week_start")
+        )
+        by_kpi: dict = {}
+        for kpi_id, plant_id, value, week_start in snaps:
+            by_kpi.setdefault((kpi_id, plant_id), (value, week_start))
+        for o in kpi_objs:
+            # Obiettivo di sito → snapshot del sito, con ripiego sullo snapshot
+            # globale (KPI alimentati via API, che non hanno riga per sito).
+            hit = by_kpi.get((o.kpi_definition_id, o.plant_id)) or by_kpi.get(
+                (o.kpi_definition_id, None)
+            )
+            if hit:
+                out[o.id] = hit
+    return out
+
+
+def objective_series(objective, limit: int = 52) -> list[dict]:
+    """Serie storica delle misure, dalla più vecchia alla più recente.
+
+    Unico accesso per entrambe le sorgenti, così chi consuma il dato (grafico,
+    relazione del riesame) non deve sapere da dove arriva il numero.
+    """
+    from apps.tasks.models import OperationalKpiSnapshot
+    from .models import SecurityObjectiveMeasurement
+
+    if objective.measure_source == "manual":
+        rows = (
+            SecurityObjectiveMeasurement.objects.filter(objective=objective)
+            .filter(measured_on__gte=objective.start_date)
+            .order_by("-measured_on")
+            .values_list("measured_on", "value")[:limit]
+        )
+    elif objective.kpi_definition_id:
+        qs = OperationalKpiSnapshot.objects.filter(
+            kpi_definition_id=objective.kpi_definition_id,
+            value__isnull=False,
+            week_start__gte=objective.start_date,
+        )
+        qs = qs.filter(plant_id=objective.plant_id) if objective.plant_id else qs
+        rows = qs.order_by("-week_start").values_list("week_start", "value")[:limit]
+    else:
+        rows = []
+    return [{"date": d.isoformat(), "value": v} for d, v in reversed(list(rows))]
+
+
+def evaluate_objective(objective, *, value=_UNSET, measured_on=None, today=None) -> dict:
+    """Lettura dell'andamento: valore corrente, progresso, traiettoria.
+
+    `value`/`measured_on` si passano quando sono già stati caricati in blocco
+    (vedi `latest_objective_values`), per non rifare una query per riga.
+    """
+    from apps.plants.services import plant_today
+
+    # La mezzanotte che conta per una scadenza è quella del sito (F3).
+    today = today or plant_today(objective.plant)
+    if value is _UNSET:
+        value, measured_on = latest_objective_values([objective]).get(
+            objective.id, (None, None)
+        )
+
+    progress = objective_progress_pct(objective, value)
+    elapsed = objective_elapsed_pct(objective, today)
+    reached = objective_is_reached(objective, value)
+
+    if objective.status in ("raggiunto", "non_raggiunto", "annullato"):
+        track = TRACK_NOT_APPLICABLE
+    elif value is None:
+        track = TRACK_NO_DATA
+    elif reached:
+        track = TRACK_ON_TRACK
+    elif today > objective.target_date:
+        track = TRACK_MISSED
+    elif progress is None or elapsed is None:
+        # Senza baseline o senza durata non si può parlare di traiettoria: si
+        # dice solo che l'obiettivo non è ancora raggiunto, senza inventare un
+        # giudizio.
+        track = TRACK_NO_DATA
+    elif progress + AT_RISK_GAP_PCT < elapsed:
+        track = TRACK_AT_RISK
+    else:
+        track = TRACK_ON_TRACK
+
+    return {
+        "current_value": value,
+        "measured_on": measured_on.isoformat() if measured_on else None,
+        "unit": objective_unit(objective),
+        "progress_pct": progress,
+        "elapsed_pct": elapsed,
+        "reached": reached,
+        "track": track,
+        "days_to_target": (objective.target_date - today).days,
+        "weak_target": _weak_target(objective),
+    }
+
+
+def _validate_objective(data, instance=None):
+    """Coerenza fra sorgente della misura, sito e traiettoria."""
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+
+    def field(name, default=None):
+        if name in data:
+            return data[name]
+        return getattr(instance, name, default) if instance else default
+
+    measure_source = field("measure_source", "kpi")
+    kpi = field("kpi_definition")
+    if measure_source == "kpi" and kpi is None:
+        raise ValidationError({"kpi_definition": _("Indicare il KPI da cui leggere le misure.")})
+    if measure_source == "manual" and kpi is not None:
+        raise ValidationError({
+            "kpi_definition": _("Un obiettivo a misura manuale non può essere agganciato a un KPI.")
+        })
+
+    plant = field("plant")
+    if kpi is not None and kpi.plant_id and plant is not None and kpi.plant_id != plant.id:
+        raise ValidationError({"kpi_definition": _("Il KPI appartiene a un altro sito.")})
+    if kpi is not None and kpi.plant_id and plant is None:
+        raise ValidationError({
+            "kpi_definition": _("Un obiettivo di organizzazione non può usare un KPI di un singolo sito.")
+        })
+
+    start_date, target_date = field("start_date"), field("target_date")
+    if start_date and target_date and target_date <= start_date:
+        raise ValidationError({"target_date": _("La scadenza deve essere successiva all'inizio del periodo.")})
+
+    baseline, target = field("baseline_value"), field("target_value")
+    if baseline is not None and target is not None and baseline == target:
+        raise ValidationError({
+            "target_value": _("Il target coincide con il valore di partenza: non c'è alcun miglioramento da misurare.")
+        })
+    direction = field("target_direction", "above")
+    if baseline is not None and target is not None:
+        improving = target > baseline if direction == "above" else target < baseline
+        if not improving:
+            raise ValidationError({
+                "target_value": _("Il target peggiora il valore di partenza nella direzione indicata.")
+            })
+
+
+def create_objective(serializer, user):
+    _validate_objective(serializer.validated_data)
+    objective = serializer.save(created_by=user)
+    _objective_audit(user, objective, "create", {
+        "plant_id": str(objective.plant_id) if objective.plant_id else None,
+        "measure_source": objective.measure_source,
+        "target_value": objective.target_value,
+        "target_date": objective.target_date.isoformat(),
+    })
+    return objective
+
+
+def update_objective(serializer, user):
+    """Aggiorna un obiettivo.
+
+    §6.2 vuole obiettivi aggiornabili, ma un target che si sposta senza
+    lasciare traccia svuota l'impegno: i cambi di traiettoria su un obiettivo
+    attivo finiscono nell'audit con valore precedente e nuovo. Un obiettivo
+    chiuso non si riapre da qui.
+    """
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+
+    instance = serializer.instance
+    if instance.status in ("raggiunto", "non_raggiunto", "annullato"):
+        raise ValidationError(_("L'obiettivo è chiuso: non è più modificabile."))
+
+    _validate_objective(serializer.validated_data, instance=instance)
+    tracked = ("target_value", "target_date", "baseline_value", "target_direction", "owner_role")
+    before = {f: getattr(instance, f) for f in tracked}
+    objective = serializer.save()
+
+    changed = {
+        f: {"da": before[f].isoformat() if hasattr(before[f], "isoformat") else before[f],
+            "a": getattr(objective, f).isoformat()
+            if hasattr(getattr(objective, f), "isoformat") else getattr(objective, f)}
+        for f in tracked
+        if before[f] != getattr(objective, f)
+    }
+    _objective_audit(user, objective, "update", {"changed": changed} if changed else None)
+    return objective
+
+
+def activate_objective(objective, user):
+    """Da bozza ad attivo: l'impegno diventa formale, quindi il piano §6.2
+    (chi risponde, come si valuta) deve essere completo."""
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+
+    if objective.status not in ("bozza", "sospeso"):
+        raise ValidationError(_("Solo un obiettivo in bozza o sospeso può essere attivato."))
+    missing = []
+    if not objective.owner_role:
+        missing.append(_("il ruolo responsabile"))
+    if not objective.evaluation_method:
+        missing.append(_("il metodo di valutazione del risultato"))
+    if missing:
+        raise ValidationError(
+            _("Per attivare l'obiettivo indicare: %(fields)s.") % {"fields": ", ".join(missing)}
+        )
+    previous, objective.status = objective.status, "attivo"
+    objective.save(update_fields=["status", "updated_at"])
+    _objective_audit(user, objective, "activate", {"da": previous})
+    return objective
+
+
+def suspend_objective(objective, user, note=""):
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+
+    if objective.status != "attivo":
+        raise ValidationError(_("Solo un obiettivo attivo può essere sospeso."))
+    objective.status = "sospeso"
+    objective.save(update_fields=["status", "updated_at"])
+    _objective_audit(user, objective, "suspend", {"note": bool(note)})
+    return objective
+
+
+def close_objective(objective, user, outcome, note=""):
+    """Chiude l'obiettivo dichiarando l'esito.
+
+    L'esito lo dichiara una persona, non il calcolo: il sistema sa dire se il
+    target è stato raggiunto, ma solo la direzione decide se l'impegno si
+    considera chiuso. Un obiettivo mancato resta mancato a verbale — è il dato
+    che serve al riesame, e da lì nasce eventualmente un PDCA.
+    """
+    from django.core.exceptions import ValidationError
+    from django.utils import timezone as dj_timezone
+    from django.utils.translation import gettext as _
+
+    if outcome not in ("raggiunto", "non_raggiunto", "annullato"):
+        raise ValidationError(_("Esito non valido."))
+    if objective.status not in OBJECTIVE_OPEN_STATUSES:
+        raise ValidationError(_("L'obiettivo è già chiuso."))
+    if outcome == "annullato" and not note:
+        raise ValidationError({"note": _("Indicare il motivo dell'annullamento.")})
+
+    evaluation = evaluate_objective(objective)
+    objective.status = outcome
+    objective.closed_at = dj_timezone.now()
+    objective.closed_by = user
+    objective.closure_note = note
+    objective.save(update_fields=["status", "closed_at", "closed_by", "closure_note", "updated_at"])
+    _objective_audit(user, objective, "close", {
+        "outcome": outcome,
+        "value_at_close": evaluation["current_value"],
+        "target_value": objective.target_value,
+    })
+    return objective
+
+
+def record_objective_measurement(objective, user, *, value, measured_on=None, note=""):
+    """Registra una misura manuale.
+
+    Vietata sugli obiettivi agganciati a un KPI: là la misura è lo snapshot
+    settimanale del motore M08, e una misura scritta a mano creerebbe una
+    seconda verità sullo stesso numero. Se un KPI non ha integrazione, il
+    valore si inserisce sul KPI (`record_manual_kpi_value`), non qui.
+    """
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+    from apps.plants.services import plant_today
+    from .models import SecurityObjectiveMeasurement
+
+    if objective.measure_source != "manual":
+        raise ValidationError(
+            _("L'obiettivo è agganciato a un KPI: il valore si registra sul KPI.")
+        )
+    if objective.status not in ("attivo", "bozza"):
+        raise ValidationError(_("Si possono registrare misure solo su un obiettivo aperto."))
+    if value is None:
+        raise ValidationError({"value": _("Indicare il valore misurato.")})
+
+    measured_on = measured_on or plant_today(objective.plant)
+    if isinstance(measured_on, str):
+        # Dal payload API la data arriva come stringa: senza conversione il
+        # confronto con start_date esploderebbe a runtime.
+        from datetime import date as _date
+
+        try:
+            measured_on = _date.fromisoformat(measured_on)
+        except ValueError:
+            raise ValidationError({"measured_on": _("Data non valida (formato atteso: AAAA-MM-GG).")})
+    if measured_on < objective.start_date:
+        raise ValidationError({
+            "measured_on": _("La data della misura precede l'inizio del periodo.")
+        })
+
+    measurement, created = SecurityObjectiveMeasurement.objects.update_or_create(
+        objective=objective,
+        measured_on=measured_on,
+        defaults={"value": value, "note": note, "created_by": user},
+    )
+    _objective_audit(user, objective, "measure", {
+        "measured_on": measured_on.isoformat(), "value": value, "nuova": created,
+    })
+    return measurement
+
+
+def objectives_overview(queryset, today=None) -> dict:
+    """Conteggi per stato e per traiettoria su un insieme di obiettivi.
+
+    Pensata per il cruscotto e, in fase 2, per lo snapshot del riesame di
+    direzione (§9.3.2 d4). Il queryset arriva già ristretto al perimetro di
+    chi chiede.
+    """
+    objectives = list(
+        queryset.select_related("plant", "kpi_definition")
+        if hasattr(queryset, "select_related") else queryset
+    )
+    values = latest_objective_values(objectives)
+    by_status: dict = {}
+    by_track: dict = {}
+    for o in objectives:
+        value, measured_on = values.get(o.id, (None, None))
+        ev = evaluate_objective(o, value=value, measured_on=measured_on, today=today)
+        by_status[o.status] = by_status.get(o.status, 0) + 1
+        by_track[ev["track"]] = by_track.get(ev["track"], 0) + 1
+    return {"totale": len(objectives), "per_stato": by_status, "per_traiettoria": by_track}

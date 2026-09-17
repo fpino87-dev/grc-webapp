@@ -6,6 +6,7 @@ from .views import (
     RoleAssignmentViewSet,
     RoleRequirementViewSet,
     SecurityCommitteeViewSet,
+    SecurityObjectiveViewSet,
 )
 
 router = DefaultRouter()
@@ -14,6 +15,7 @@ router.register("role-requirements", RoleRequirementViewSet, basename="role-requ
 router.register("document-workflow-policies", DocumentWorkflowPolicyViewSet, basename="document-workflow-policy")
 router.register("committees", SecurityCommitteeViewSet, basename="committee")
 router.register("meetings", CommitteeMeetingViewSet, basename="committee-meeting")
+router.register("security-objectives", SecurityObjectiveViewSet, basename="security-objective")
 
 urlpatterns = router.urls
 

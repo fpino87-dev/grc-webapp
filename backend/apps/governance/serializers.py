@@ -1,3 +1,4 @@
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 
@@ -7,6 +8,8 @@ from .models import (
     RoleAssignment,
     RoleRequirement,
     SecurityCommittee,
+    SecurityObjective,
+    SecurityObjectiveMeasurement,
 )
 
 
@@ -92,3 +95,67 @@ class CommitteeMeetingSerializer(serializers.ModelSerializer):
         model = CommitteeMeeting
         fields = "__all__"
         
+
+
+class SecurityObjectiveMeasurementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SecurityObjectiveMeasurement
+        fields = ["id", "objective", "measured_on", "value", "note", "created_at"]
+        read_only_fields = ["created_by", "created_at", "updated_at", "deleted_at"]
+
+
+class SecurityObjectiveSerializer(serializers.ModelSerializer):
+    # Dati strutturati, non etichette: le stringhe le compone il frontend nella
+    # lingua dell'utente (lezione di RoleAssignmentSerializer.scope_code).
+    plant_code = serializers.SerializerMethodField(read_only=True)
+    kpi_code = serializers.SerializerMethodField(read_only=True)
+    evaluation = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = SecurityObjective
+        fields = "__all__"
+        # Il ciclo di vita passa dalle azioni dedicate (attiva, sospendi,
+        # chiudi), che validano e scrivono l'audit: mai da una PATCH generica.
+        read_only_fields = [
+            "created_by", "created_at", "updated_at", "deleted_at",
+            "status", "closed_at", "closed_by", "closure_note",
+        ]
+        # I vincoli di unicità su (code, plant) sono condizionali: il validator
+        # DRF generato d'ufficio non conosce la condizione e rifiuterebbe una
+        # PATCH che non tocca il codice (stesso inciampo di RoleAssignment).
+        validators = []
+
+    def get_plant_code(self, obj):
+        return obj.plant.code if obj.plant_id else None
+
+    def get_kpi_code(self, obj):
+        return obj.kpi_definition.kpi_code if obj.kpi_definition_id else None
+
+    def get_evaluation(self, obj):
+        """Andamento calcolato. In lista i valori correnti arrivano già
+        caricati in blocco dal ViewSet via context (`objective_values`), così
+        la pagina resta a query costanti."""
+        from .services import evaluate_objective
+
+        cache = self.context.get("objective_values")
+        if cache is None:
+            return evaluate_objective(obj)
+        # Se la cache c'è è autorevole: un obiettivo che non vi compare non ha
+        # misure. Interrogarlo di nuovo rimetterebbe una query per riga.
+        value, measured_on = cache.get(obj.id, (None, None))
+        return evaluate_objective(obj, value=value, measured_on=measured_on)
+
+    def validate_code(self, value):
+        """Unicità del codice nel perimetro (sito, oppure organizzazione)."""
+        qs = SecurityObjective.objects.filter(code=value)
+        plant = self.initial_data.get("plant") or (
+            str(self.instance.plant_id) if self.instance and self.instance.plant_id else None
+        )
+        qs = qs.filter(plant_id=plant) if plant else qs.filter(plant__isnull=True)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError(
+                _("Esiste già un obiettivo con questo codice in questo perimetro.")
+            )
+        return value
