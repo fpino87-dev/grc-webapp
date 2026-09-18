@@ -452,20 +452,46 @@ def _collect_governance(out_dir: Path, plant) -> dict:
         else:
             fp.write("# Nessuna assegnazione ruolo.\n")
 
-    committees = list(SecurityCommittee.objects.filter(deleted_at__isnull=True))
-    com_rows = [{
-        "name": c.name,
-        "purpose": getattr(c, "purpose", ""),
-        "frequency": getattr(c, "frequency", ""),
-    } for c in committees]
+    # Organi di governo e composizione (anche storica): è l'evidenza di chi
+    # tiene e approva il riesame (§5.1, §9.3) e dell'organo di gestione NIS2.
+    committees = list(
+        SecurityCommittee.objects.filter(deleted_at__isnull=True)
+        .prefetch_related("plants", "members")
+    )
+    com_rows, member_rows = [], []
+    for c in committees:
+        com_rows.append({
+            "name": c.name,
+            "type": c.committee_type,
+            "nis2_management_body": c.is_management_body,
+            "scope": ", ".join(sorted(p.code for p in c.plants.all())) or "ORG",
+            "description": c.description,
+        })
+        for m in c.members.all():
+            member_rows.append({
+                "body": c.name,
+                "full_name": m.full_name,
+                "position": m.position,
+                "body_role": m.body_role,
+                "has_account": m.user_id is not None,
+                "valid_from": str(m.valid_from),
+                "valid_until": str(m.valid_until) if m.valid_until else "",
+                "is_currently_active": m.is_active_on(today),
+            })
     with (gov_dir / "security_committees.csv").open("w", newline="", encoding="utf-8") as fp:
         if com_rows:
             w = safe_dict_writer(fp, fieldnames=list(com_rows[0].keys()))
             w.writeheader(); w.writerows(com_rows)
         else:
-            fp.write("# Nessun comitato di sicurezza definito.\n")
+            fp.write("# Nessun organo di governo definito.\n")
+    with (gov_dir / "committee_members.csv").open("w", newline="", encoding="utf-8") as fp:
+        if member_rows:
+            w = safe_dict_writer(fp, fieldnames=list(member_rows[0].keys()))
+            w.writeheader(); w.writerows(member_rows)
+        else:
+            fp.write("# Nessun componente degli organi di governo.\n")
 
-    return {"role_assignments": len(role_rows), "committees": len(com_rows)}
+    return {"role_assignments": len(role_rows), "committees": len(com_rows), "committee_members": len(member_rows)}
 
 
 def _collect_management_review(out_dir: Path, plant) -> dict:
@@ -478,6 +504,8 @@ def _collect_management_review(out_dir: Path, plant) -> dict:
     qs = (
         ManagementReview.objects
         .filter(plant=plant, deleted_at__isnull=True, approval_status="approvato")
+        .select_related("governing_body", "approved_by", "approved_member")
+        .prefetch_related("participants")
         .order_by("-review_date")
     )
 
@@ -491,11 +519,18 @@ def _collect_management_review(out_dir: Path, plant) -> dict:
     review_rows: list[dict] = []
     action_rows: list[dict] = []
     for r in qs:
+        participants = list(r.participants.all())
+        chair = next((p.full_name for p in participants if p.is_chair), "")
         review_rows.append({
             "title": r.title,
             "review_date": str(r.review_date),
-            "chair": (r.chair.email if r.chair else ""),
+            "governing_body": r.governing_body.name if r.governing_body_id else "",
+            "chair": chair,
             "approval_status": r.approval_status,
+            "approval_mode": r.approval_mode,
+            "approval_resolution": (
+                f"{r.approval_resolution_ref} / {r.approval_resolution_date}" if r.approval_mode == "delibera" else ""
+            ),
             "approved_at": r.approved_at.isoformat() if r.approved_at else "",
             "approved_by": (r.approved_by.email if r.approved_by else ""),
             "next_review_date": str(r.next_review_date) if r.next_review_date else "",
@@ -505,8 +540,14 @@ def _collect_management_review(out_dir: Path, plant) -> dict:
         review_payload = {
             "title": r.title,
             "review_date": str(r.review_date),
-            "chair": (r.chair.email if r.chair else None),
-            "attendees": list(r.attendees.values_list("email", flat=True)),
+            "governing_body": r.governing_body.name if r.governing_body_id else None,
+            "chair": chair or None,
+            "participants": [
+                {"name": p.full_name, "position": p.position, "role": p.body_role,
+                 "attendance": p.attendance, "delegate": p.delegate_name or None}
+                for p in participants
+            ],
+            "approved_member": r.approved_member.full_name if r.approved_member_id else None,
             "agenda": r.agenda,
             "kpi_snapshot": r.kpi_snapshot,
             "delibere": r.delibere,

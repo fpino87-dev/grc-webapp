@@ -12,7 +12,7 @@ const CATEGORIES: Record<string, string[]> = {
   "Incidenti":  ["incident_review"],
   "Fornitori":  ["supplier_assessment", "supplier_reevaluation"],
   "Formazione": ["training_mandatory", "training_refresh"],
-  "Governance": ["management_review", "security_committee"],
+  "Governance": ["management_review"],
   "Audit":      ["finding_minor", "finding_major", "finding_observation"],
   "PDCA":       ["pdca_cycle"],
   "Reporting":  ["kpi_review", "isms_review"],

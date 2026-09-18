@@ -20,7 +20,6 @@ _CATEGORY_ROLE = {
     "training_mandatory":       "compliance_officer",
     "training_refresh":         "compliance_officer",
     "management_review":        "plant_manager",
-    "security_committee":       "plant_manager",
     "finding_minor":            "internal_auditor",
     "finding_major":            "internal_auditor",
     "finding_observation":      "internal_auditor",

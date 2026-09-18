@@ -12,7 +12,7 @@ import tra app e mantenere leggero il caricamento del modulo.
 from datetime import date
 from decimal import Decimal
 
-from django.db.models import Avg, Count, DurationField, ExpressionWrapper, F, Q
+from django.db.models import Avg, Count, DurationField, ExpressionWrapper, F, Prefetch, Q
 from django.utils import timezone
 
 
@@ -1087,7 +1087,7 @@ def access_matrix(plant_id=None, lang: str = "it") -> dict:
     rows.sort(key=lambda x: (x["user_name"].lower(), x["kind"], x["role"]))
     vacant = get_vacant_mandatory_roles(target)
     issues = sum(1 for x in rows if x["flags"])
-    committees = _security_committees(target, plants)
+    committees = _security_committees(target, plants, today, EXPIRY_DAYS, lang)
 
     return {
         "generated_at": timezone.now().isoformat(),
@@ -1102,42 +1102,87 @@ def access_matrix(plant_id=None, lang: str = "it") -> dict:
             "responsibilities": sum(1 for x in rows if x["kind"] == "responsibility"),
             "issues": issues,
             "committees": len(committees),
+            "committee_issues": sum(
+                bool(c["flags"]) + sum(1 for m in c["members"] if m["flags"]) for c in committees
+            ),
         },
     }
 
 
-def _security_committees(target, plants) -> list:
-    """Comitati di Sicurezza ('direttivo') per il report. Membri = partecipanti
-    dell'ultima riunione registrata. Filtra per sito: i comitati centrali
-    (plant nullo) valgono org-wide; quelli per-sito solo per il proprio sito."""
-    from apps.governance.models import CommitteeMeeting, SecurityCommittee
+def _security_committees(target, plants, today, expiry_days, lang="it") -> list:
+    """Organi di governo (CdA, comitato, direzione) con i componenti in carica.
 
-    qs = SecurityCommittee.objects.filter(deleted_at__isnull=True).select_related("plant")
-    if target is not None:
-        qs = qs.filter(Q(plant__isnull=True) | Q(plant=target))
+    Per la user-access review contano due cose: chi siede oggi negli organi e
+    se l'account eventualmente collegato è ancora coerente. Un organo senza
+    siti vale per tutta l'organizzazione; con il filtro sito compaiono gli
+    organi di organizzazione e quelli che includono il sito.
+    """
+    from django.utils.translation import gettext, override
+
+    from apps.governance.models import CommitteeMember, SecurityCommittee
+    from apps.governance.services import sort_members
+
+    qs = (
+        SecurityCommittee.objects.filter(deleted_at__isnull=True)
+        .prefetch_related(
+            "plants",
+            Prefetch(
+                "members",
+                queryset=CommitteeMember.objects.filter(valid_from__lte=today)
+                .filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today))
+                .select_related("user"),
+            ),
+        )
+    )
+    with override(lang):
+        type_labels = {
+            "cda": gettext("Organo di amministrazione (CdA)"),
+            "comitato": gettext("Comitato sicurezza"),
+            "direzione": gettext("Direzione"),
+        }
+        role_labels = {
+            "presidente": gettext("Presidente"),
+            "membro": gettext("Membro"),
+            "segretario": gettext("Segretario"),
+        }
 
     out = []
     for c in qs:
-        last = (
-            CommitteeMeeting.objects.filter(committee=c, deleted_at__isnull=True)
-            .order_by("-held_at").prefetch_related("attendees").first()
-        )
+        plant_ids = {p.id for p in c.plants.all()}
+        if target is not None and plant_ids and target.id not in plant_ids:
+            continue
         members = []
-        if last:
-            for u in last.attendees.all():
-                members.append({
-                    "name": f"{u.first_name} {u.last_name}".strip() or u.email or u.username,
-                    "email": u.email,
-                })
+        for m in sort_members(c.members.all()):
+            flags = []
+            if m.user_id and not m.user.is_active:
+                flags.append("inactive_user")
+            if m.valid_until and m.valid_until <= today + timezone.timedelta(days=expiry_days):
+                flags.append("expiring")
+            members.append({
+                "id": str(m.id),
+                "name": m.full_name,
+                "position": m.position,
+                "body_role": m.body_role,
+                "body_role_label": role_labels.get(m.body_role, m.body_role),
+                "has_account": m.user_id is not None,
+                "valid_until": str(m.valid_until) if m.valid_until else None,
+                "flags": flags,
+            })
+        flags = []
+        if not members:
+            flags.append("no_members")
+        elif not any(m["body_role"] == "presidente" for m in members):
+            flags.append("no_chair")
         out.append({
             "id": str(c.id),
             "name": c.name,
             "committee_type": c.committee_type,
-            "frequency": c.frequency,
-            "plant_code": plants[c.plant_id].code if c.plant_id and c.plant_id in plants else None,
-            "next_meeting_at": c.next_meeting_at.isoformat() if c.next_meeting_at else None,
-            "last_meeting_at": last.held_at.isoformat() if last else None,
+            "committee_type_label": type_labels.get(c.committee_type, c.committee_type),
+            "is_management_body": c.is_management_body,
+            "covers_all": not plant_ids,
+            "plant_codes": sorted(plants[i].code for i in plant_ids if i in plants),
             "members": members,
+            "flags": flags,
         })
     return out
 

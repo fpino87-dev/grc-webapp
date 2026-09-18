@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { managementReviewApi, reviewErrorMessage, type ManagementReview } from "../../api/endpoints/managementReview";
+import { governanceApi } from "../../api/endpoints/governance";
 import { plantsApi } from "../../api/endpoints/plants";
 import { usersApi, type GrcUser } from "../../api/endpoints/users";
 import { useAuthStore } from "../../store/auth";
@@ -9,7 +10,7 @@ import { ModuleHelp } from "../../components/ui/ModuleHelp";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
 import { ReviewDetail } from "./ReviewDetail";
-import { ParticipantsFields } from "./shared";
+import { bodiesForScope } from "./ParticipantsSection";
 
 const APPROVAL_COLORS: Record<string, string> = {
   bozza:     "bg-gray-100 text-gray-600",
@@ -20,27 +21,27 @@ const APPROVAL_COLORS: Record<string, string> = {
 
 // ── NewReviewModal ────────────────────────────────────────────────────────────
 
-function NewReviewModal({ plants, users, onClose }: { plants: { id: string; code: string; name: string }[]; users: GrcUser[]; onClose: () => void }) {
+function NewReviewModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const [form, setForm] = useState<Partial<ManagementReview>>({ chair: null, attendees: [] });
+  const [form, setForm] = useState<Partial<ManagementReview>>({});
+  // undefined = scelta automatica (il CdA se c'è, altrimenti il primo organo
+  // ammesso per il perimetro); null = nessun organo, scelto esplicitamente.
+  const [bodyChoice, setBodyChoice] = useState<string | null | undefined>(undefined);
   const [error, setError] = useState("");
-  const [chairTouched, setChairTouched] = useState(false);
-  const [suggested, setSuggested] = useState<string | null>(null);
 
-  // Propone il CISO (del sito, altrimenti di organizzazione) finché l'utente
-  // non sceglie a mano chi presiede.
+  const { data: bodies = [] } = useQuery({
+    queryKey: ["committees"],
+    queryFn: () => governanceApi.committees(),
+    retry: false,
+  });
   const plantId = (form.plant as string | null | undefined) ?? null;
-  useEffect(() => {
-    if (chairTouched) return;
-    let cancelled = false;
-    managementReviewApi.suggestedChair(plantId).then(res => {
-      if (cancelled) return;
-      setSuggested(res.name);
-      setForm(prev => ({ ...prev, chair: res.id }));
-    }).catch(() => {});
-    return () => { cancelled = true; };
-  }, [plantId, chairTouched]);
+  const eligible = bodiesForScope(bodies, plantId);
+  const auto = eligible.find(b => b.committee_type === "cda") ?? eligible[0] ?? null;
+  const bodyId = bodyChoice === undefined
+    ? auto?.id ?? null
+    : eligible.some(b => b.id === bodyChoice) ? bodyChoice : null;
+  const selectedBody = eligible.find(b => b.id === bodyId) ?? null;
 
   const mutation = useMutation({
     mutationFn: managementReviewApi.create,
@@ -51,6 +52,8 @@ function NewReviewModal({ plants, users, onClose }: { plants: { id: string; code
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value || null }));
   }
+
+  const activeMembers = selectedBody?.members.filter(m => m.is_active) ?? [];
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -72,24 +75,28 @@ function NewReviewModal({ plants, users, onClose }: { plants: { id: string; code
             <label className="block text-sm font-medium text-gray-700 mb-1">{t("management_review.new.date_label")}</label>
             <input type="date" name="review_date" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
           </div>
-          <ParticipantsFields
-            users={users}
-            chair={form.chair ?? null}
-            attendees={form.attendees ?? []}
-            onChange={next => {
-              if (next.chair !== (form.chair ?? null)) setChairTouched(true);
-              setForm(prev => ({ ...prev, ...next }));
-            }}
-          />
-          {!chairTouched && suggested && (
-            <p className="text-xs text-gray-400 -mt-2">{t("management_review.participants.suggested", { name: suggested })}</p>
-          )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("management_review.participants.body")}</label>
+            <select
+              value={bodyId ?? ""}
+              onChange={e => setBodyChoice(e.target.value || null)}
+              className="w-full border rounded px-3 py-2 text-sm"
+            >
+              <option value="">{t("management_review.participants.no_body")}</option>
+              {eligible.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+            </select>
+            <p className="text-xs text-gray-500 mt-1">
+              {selectedBody
+                ? t("management_review.new.body_hint", { n: activeMembers.length })
+                : t("management_review.new.no_body_hint")}
+            </p>
+          </div>
         </div>
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("management_review.new.cancel")}</button>
           <button
-            onClick={() => mutation.mutate(form)}
+            onClick={() => mutation.mutate({ ...form, governing_body: bodyId })}
             disabled={mutation.isPending || !form.title}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
@@ -112,6 +119,10 @@ export function ManagementReviewPage() {
   const qc = useQueryClient();
 
   const selectedPlant = useAuthStore(s => s.selectedPlant);
+  // Creare ed eliminare riesami è governance; un componente dell'organo con
+  // account li consulta e li approva dal dettaglio.
+  const role = useAuthStore(s => s.user?.role) ?? "";
+  const isGovernance = ["super_admin", "compliance_officer"].includes(role);
 
   useEffect(() => {
     usersApi.list().then(setUsers).catch(() => {});
@@ -174,9 +185,11 @@ export function ManagementReviewPage() {
             configNeeded={[t("management_review.help.config_needed.1")]}
           />
         </h2>
-        <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700">
-          + {t("management_review.list.new")}
-        </button>
+        {isGovernance && (
+          <button onClick={() => setShowNew(true)} className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700">
+            + {t("management_review.list.new")}
+          </button>
+        )}
       </div>
 
       {/* Plant filter info */}
@@ -192,7 +205,9 @@ export function ManagementReviewPage() {
         ) : reviews.length === 0 ? (
           <div className="p-8 text-center">
             <p className="text-gray-400 mb-2">{t("management_review.list.none")}</p>
-            <button onClick={() => setShowNew(true)} className="text-sm text-primary-600 hover:underline">{t("management_review.list.create_first")}</button>
+            {isGovernance && (
+              <button onClick={() => setShowNew(true)} className="text-sm text-primary-600 hover:underline">{t("management_review.list.create_first")}</button>
+            )}
           </div>
         ) : (
           <table className="w-full text-sm">
@@ -233,7 +248,7 @@ export function ManagementReviewPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <button onClick={() => setSelectedId(r.id)} className="text-xs text-primary-600 hover:underline">{t("management_review.list.detail")}</button>
-                      {confirmDelete === r.id ? (
+                      {!isGovernance ? null : confirmDelete === r.id ? (
                         <span className="flex items-center gap-1">
                           <button
                             onClick={() => deleteMutation.mutate(r.id)}
@@ -261,7 +276,7 @@ export function ManagementReviewPage() {
         )}
       </div>
 
-      {showNew && plants && <NewReviewModal plants={plants} users={users} onClose={() => setShowNew(false)} />}
+      {showNew && plants && <NewReviewModal plants={plants} onClose={() => setShowNew(false)} />}
       {selected && <ReviewDetail review={selected} users={users} plants={plants ?? []} onClose={() => setSelectedId(null)} />}
     </div>
   );

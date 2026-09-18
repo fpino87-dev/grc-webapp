@@ -108,10 +108,9 @@ def test_list_committees(client):
 @pytest.mark.django_db
 def test_create_committee(client, plant):
     payload = {
-        "plant": str(plant.id),
+        "plants": [str(plant.id)],
         "name": "Comitato Sicurezza",
-        "committee_type": "bu",
-        "frequency": "trimestrale",
+        "committee_type": "comitato",
     }
     resp = client.post(URL_COMMITTEES, payload, format="json")
     assert resp.status_code == 201

@@ -129,6 +129,20 @@ class AccessMatrixView(PlantParamGuardedView):
                     r["valid_until"] or "",
                     ", ".join(r["flags"]),
                 ])
+            # Componenti degli organi di governo: nella stessa review perché
+            # chi siede in CdA o nel comitato approva il riesame (§9.3).
+            for c in data["committees"]:
+                for m in c["members"]:
+                    w.writerow([
+                        m["name"], "",
+                        gettext("Sì"),  # in carica: gli ex componenti non sono nel report
+                        gettext("Organo di governo"),
+                        f"{m['body_role_label']} — {c['name']}" + (f" ({m['position']})" if m["position"] else ""),
+                        c["committee_type_label"],
+                        gettext("Tutti i siti") if c["covers_all"] else ", ".join(c["plant_codes"]),
+                        m["valid_until"] or "",
+                        ", ".join(m["flags"]),
+                    ])
         resp = HttpResponse(buf.getvalue(), content_type="text/csv")
         resp["Content-Disposition"] = 'attachment; filename="access-matrix.csv"'
         return resp

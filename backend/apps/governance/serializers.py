@@ -3,10 +3,10 @@ from rest_framework import serializers
 
 
 from .models import (
-    CommitteeMeeting,
     DocumentWorkflowPolicy,
     RoleAssignment,
     RoleRequirement,
+    CommitteeMember,
     SecurityCommittee,
     SecurityObjective,
     SecurityObjectiveMeasurement,
@@ -84,17 +84,54 @@ class DocumentWorkflowPolicySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class CommitteeMemberSerializer(serializers.ModelSerializer):
+    user_name = serializers.SerializerMethodField()
+    user_is_active = serializers.SerializerMethodField()
+    is_active = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CommitteeMember
+        fields = [
+            "id", "committee", "full_name", "position", "body_role", "user",
+            "user_name", "user_is_active", "valid_from", "valid_until", "is_active",
+        ]
+        read_only_fields = ["id"]
+
+    def get_user_name(self, obj):
+        if not obj.user_id:
+            return None
+        u = obj.user
+        return f"{u.first_name} {u.last_name}".strip() or u.email
+
+    def get_user_is_active(self, obj):
+        return obj.user.is_active if obj.user_id else None
+
+    def get_is_active(self, obj):
+        from django.utils import timezone
+        return obj.is_active_on(timezone.localdate())
+
+
 class SecurityCommitteeSerializer(serializers.ModelSerializer):
+    members = serializers.SerializerMethodField()
+    plant_codes = serializers.SerializerMethodField()
+    is_management_body = serializers.BooleanField(read_only=True)
+
     class Meta:
         model = SecurityCommittee
-        fields = "__all__"
+        fields = [
+            "id", "name", "committee_type", "plants", "plant_codes", "description",
+            "is_management_body", "members", "created_at", "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
 
+    def get_plant_codes(self, obj):
+        return sorted(p.code for p in obj.plants.all())
 
-class CommitteeMeetingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CommitteeMeeting
-        fields = "__all__"
-        
+    def get_members(self, obj):
+        from .services import sort_members
+        # Tutte le cariche, anche chiuse: la composizione storica serve a chi
+        # rilegge un verbale passato. L'interfaccia separa in carica/cessati.
+        return CommitteeMemberSerializer(sort_members(obj.members.all()), many=True).data
 
 
 class SecurityObjectiveMeasurementSerializer(serializers.ModelSerializer):

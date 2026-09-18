@@ -64,6 +64,22 @@ export interface ExecutiveSummaryMeta {
   used_fallback?: boolean;
 }
 
+export type ParticipantRole = "presidente" | "membro" | "segretario" | "ospite";
+export type Attendance = "presente" | "assente" | "delegato";
+
+export interface ReviewParticipant {
+  id?: string;
+  member: string | null;
+  user: number | null;
+  full_name: string;
+  position: string;
+  body_role: ParticipantRole;
+  is_chair: boolean;
+  attendance: Attendance;
+  delegate_name: string;
+  has_account?: boolean;
+}
+
 export interface ManagementReview {
   id: string;
   plant: string | null;
@@ -71,16 +87,24 @@ export interface ManagementReview {
   title: string;
   review_date: string;
   next_review_date: string | null;
-  chair: number | null;
+  governing_body: string | null;
+  governing_body_name: string | null;
   chair_name: string | null;
-  attendees: number[];
-  attendees_detail: { id: number; name: string }[];
+  participants: ReviewParticipant[];
   status: "pianificato" | "in_corso" | "completato";
   approval_status: "bozza" | "in_review" | "approvato" | "rifiutato";
   approved_by: number | null;
   approved_by_name: string | null;
   approved_at: string | null;
   approval_note: string;
+  approval_mode: "" | "in_app" | "delibera";
+  approved_member: string | null;
+  approved_member_name: string | null;
+  approval_resolution_ref: string;
+  approval_resolution_date: string | null;
+  approval_document_id: string | null;
+  /** L'utente corrente può approvare: governance o componente in carica dell'organo. */
+  viewer_can_approve: boolean;
   snapshot_generated_at: string | null;
   snapshot_data: Record<string, unknown>;
   executive_summary: string;
@@ -132,8 +156,17 @@ export const managementReviewApi = {
   generateSnapshot: (id: string) =>
     apiClient.post<Record<string, unknown>>(`${base}/${id}/generate-snapshot/`).then((r) => r.data),
 
-  approve: (id: string, note: string) =>
-    apiClient.post<ManagementReview>(`${base}/${id}/approve/`, { note }).then((r) => r.data),
+  approve: (id: string, data: {
+    note: string; mode: "in_app" | "delibera";
+    resolution_ref?: string; resolution_date?: string; document_id?: string | null;
+  }) =>
+    apiClient.post<ManagementReview>(`${base}/${id}/approve/`, data).then((r) => r.data),
+
+  setParticipants: (id: string, participants: ReviewParticipant[]) =>
+    apiClient.put<ManagementReview>(`${base}/${id}/participants/`, { participants }).then((r) => r.data),
+
+  participantsFromBody: (id: string) =>
+    apiClient.post<ManagementReview>(`${base}/${id}/participants-from-body/`).then((r) => r.data),
 
   delete: (id: string) => apiClient.delete(`${base}/${id}/`).then((r) => r.data),
 

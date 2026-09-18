@@ -94,9 +94,8 @@ def render_html(review) -> str:
         a = doc["approval"]
         parts.append(
             f"<div class='approval'><strong style='color:#16a34a'>✓ {escape(_('RIESAME APPROVATO'))}</strong><br>"
-            f"{escape(_('Approvato da'))}: {escape(a['by'])}<br>"
-            f"{escape(_('Data'))}: {escape(a['at'])}<br>"
-            f"{escape(_('Note'))}: {escape(a['note'])}</div>"
+            + "<br>".join(f"{escape(str(k))}: {escape(str(v))}" for k, v in a["lines"])
+            + "</div>"
         )
     parts.append(f"<p class='footer'>{escape(doc['footer'])}</p>")
     return (

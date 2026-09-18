@@ -1149,3 +1149,214 @@ def objectives_overview(queryset, today=None) -> dict:
         by_status[o.status] = by_status.get(o.status, 0) + 1
         by_track[ev["track"]] = by_track.get(ev["track"], 0) + 1
     return {"totale": len(objectives), "per_stato": by_status, "per_traiettoria": by_track}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Organi di governo (CdA, comitato, direzione) e loro componenti
+# ═══════════════════════════════════════════════════════════════════════════
+from django.utils.translation import gettext as _  # noqa: E402
+
+# Ordine di presentazione dei componenti: è quello del verbale.
+MEMBER_ROLE_ORDER = {"presidente": 0, "membro": 1, "segretario": 2}
+
+
+def sort_members(members):
+    return sorted(members, key=lambda m: (MEMBER_ROLE_ORDER.get(m.body_role, 9), m.full_name.lower()))
+
+
+def committee_covers_plant(committee, plant_id) -> bool:
+    """Un organo senza siti governa l'intera organizzazione."""
+    ids = {p.id for p in committee.plants.all()}
+    return not ids or (plant_id is not None and _as_uuid(plant_id) in ids)
+
+
+def _as_uuid(value):
+    import uuid
+
+    if value is None or isinstance(value, uuid.UUID):
+        return value
+    try:
+        return uuid.UUID(str(value))
+    except (TypeError, ValueError):
+        return None
+
+
+def visible_committees(qs, user):
+    """Organi visibili all'utente: quelli di organizzazione e quelli che
+    governano almeno un sito del suo perimetro. I componenti sono dati
+    personali: chi non vede il sito non vede chi siede nell'organo."""
+    from django.db.models import Q
+
+    from core.scoping import get_user_plant_ids
+
+    allowed = get_user_plant_ids(user)
+    if allowed is None:
+        return qs
+    return qs.filter(Q(plants__isnull=True) | Q(plants__in=allowed)).distinct()
+
+
+def _require_committee_scope(user, plant_ids) -> None:
+    """Scrivere su un organo richiede accesso a TUTTO il suo perimetro: un
+    organo di organizzazione si gestisce solo dallo scope organizzazione."""
+    from rest_framework.exceptions import PermissionDenied
+
+    from core.scoping import get_user_plant_ids
+
+    allowed = get_user_plant_ids(user)
+    if allowed is None:
+        return
+    plant_ids = {_as_uuid(p) for p in plant_ids}
+    if not plant_ids or not plant_ids <= set(allowed):
+        raise PermissionDenied(_("Accesso negato: l'organo governa siti fuori dal tuo perimetro."))
+
+
+def _committee_audit(user, obj, action, payload=None):
+    from core.audit import log_action
+
+    log_action(
+        user=user,
+        action_code=f"governance.security_committee.{action}",
+        level="L2",
+        entity=obj,
+        payload={"id": str(obj.id), **(payload or {})},
+    )
+
+
+def create_committee(serializer, user):
+    plants = serializer.validated_data.get("plants") or []
+    _require_committee_scope(user, [p.id for p in plants])
+    committee = serializer.save(created_by=user)
+    _committee_audit(user, committee, "create", {
+        "type": committee.committee_type, "plants": [str(p.id) for p in plants],
+    })
+    return committee
+
+
+def update_committee(serializer, user):
+    committee = serializer.instance
+    _require_committee_scope(user, [p.id for p in committee.plants.all()])
+    if "plants" in serializer.validated_data:
+        _require_committee_scope(user, [p.id for p in serializer.validated_data["plants"]])
+    committee = serializer.save()
+    _committee_audit(user, committee, "update", {"type": committee.committee_type})
+    return committee
+
+
+def delete_committee(committee, user):
+    _require_committee_scope(user, [p.id for p in committee.plants.all()])
+    committee.soft_delete()
+    _committee_audit(user, committee, "delete")
+
+
+def _validate_member(data, instance=None):
+    """Periodo coerente, un solo presidente alla volta, un account collegato
+    a una sola carica contemporanea nello stesso organo."""
+    from django.core.exceptions import ValidationError
+    from django.db.models import Q
+
+    from .models import CommitteeMember
+
+    def field(name):
+        if name in data:
+            return data[name]
+        return getattr(instance, name, None) if instance else None
+
+    committee = field("committee")
+    start, end = field("valid_from"), field("valid_until")
+    if start and end and end < start:
+        raise ValidationError({"valid_until": _("La fine della carica precede l'inizio.")})
+    if not (field("full_name") or "").strip():
+        raise ValidationError({"full_name": _("Indicare nome e cognome.")})
+
+    overlapping = CommitteeMember.objects.filter(committee=committee)
+    if instance is not None:
+        overlapping = overlapping.exclude(pk=instance.pk)
+    if end is not None:
+        overlapping = overlapping.filter(valid_from__lte=end)
+    overlapping = overlapping.filter(Q(valid_until__isnull=True) | Q(valid_until__gte=start))
+
+    if field("body_role") == "presidente" and overlapping.filter(body_role="presidente").exists():
+        raise ValidationError({
+            "body_role": _("L'organo ha già un presidente in carica in questo periodo: chiudere prima la sua carica.")
+        })
+    user = field("user")
+    if user is not None and overlapping.filter(user=user).exists():
+        raise ValidationError({"user": _("Questo account è già collegato a un componente dell'organo nello stesso periodo.")})
+
+
+def _member_audit(user, member, action, payload=None):
+    # Solo identificativi: il nome di un consigliere è un dato personale e
+    # l'audit trail è append-only (regola #11).
+    from core.audit import log_action
+
+    log_action(
+        user=user,
+        action_code=f"governance.committee_member.{action}",
+        level="L2",
+        entity=member,
+        payload={
+            "id": str(member.id), "committee_id": str(member.committee_id),
+            "body_role": member.body_role, "has_account": member.user_id is not None,
+            **(payload or {}),
+        },
+    )
+
+
+def create_member(serializer, user):
+    committee = serializer.validated_data["committee"]
+    _require_committee_scope(user, [p.id for p in committee.plants.all()])
+    _validate_member(serializer.validated_data)
+    member = serializer.save(created_by=user)
+    _member_audit(user, member, "create")
+    return member
+
+
+def update_member(serializer, user):
+    member = serializer.instance
+    _require_committee_scope(user, [p.id for p in member.committee.plants.all()])
+    serializer.validated_data.pop("committee", None)  # un componente non cambia organo
+    _validate_member(serializer.validated_data, instance=member)
+    member = serializer.save()
+    _member_audit(user, member, "update")
+    return member
+
+
+def delete_member(member, user):
+    """Cancellazione per errore di inserimento. Chi lascia la carica si chiude
+    con la data di fine, non si cancella: i verbali passati lo citano."""
+    from django.core.exceptions import ValidationError
+
+    _require_committee_scope(user, [p.id for p in member.committee.plants.all()])
+    if member.review_participations.filter(review__deleted_at__isnull=True).exists():
+        raise ValidationError(_(
+            "Il componente compare in un riesame: chiudere la carica con la data di fine invece di eliminarlo."
+        ))
+    member.soft_delete()
+    _member_audit(user, member, "delete")
+
+
+def active_members(committee, day):
+    from django.db.models import Q
+
+    qs = committee.members.filter(valid_from__lte=day).filter(
+        Q(valid_until__isnull=True) | Q(valid_until__gte=day)
+    ).select_related("user")
+    return sort_members(qs)
+
+
+def user_committee_ids(user, day=None) -> set:
+    """Organi in cui l'utente siede oggi con il proprio account."""
+    from django.db.models import Q
+    from django.utils import timezone as dj_timezone
+
+    from .models import CommitteeMember
+
+    if user is None or not getattr(user, "is_authenticated", False):
+        return set()
+    day = day or dj_timezone.localdate()
+    return set(
+        CommitteeMember.objects.filter(
+            user=user, committee__deleted_at__isnull=True, valid_from__lte=day,
+        ).filter(Q(valid_until__isnull=True) | Q(valid_until__gte=day))
+        .values_list("committee_id", flat=True)
+    )

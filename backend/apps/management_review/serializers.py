@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from apps.auth_grc.models import GrcRole
 
-from .models import ManagementReview, ReviewAction, ReviewAgendaItem
+from .models import ManagementReview, ReviewAction, ReviewAgendaItem, ReviewParticipant
 
 
 def _user_label(user):
@@ -63,22 +63,53 @@ class ReviewAgendaItemSerializer(serializers.ModelSerializer):
         return attrs
 
 
+class ReviewParticipantSerializer(serializers.ModelSerializer):
+    has_account = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ReviewParticipant
+        fields = [
+            "id", "member", "user", "full_name", "position", "body_role", "is_chair",
+            "attendance", "delegate_name", "order", "has_account",
+        ]
+        read_only_fields = fields
+
+    def get_has_account(self, obj):
+        return obj.user_id is not None
+
+
 class ManagementReviewSerializer(serializers.ModelSerializer):
     actions = ReviewActionSerializer(many=True, read_only=True)
     agenda_items = ReviewAgendaItemSerializer(many=True, read_only=True)
     plant_name = serializers.CharField(source="plant.name", read_only=True, allow_null=True)
+    participants = ReviewParticipantSerializer(many=True, read_only=True)
     chair_name = serializers.SerializerMethodField()
-    attendees_detail = serializers.SerializerMethodField()
+    governing_body_name = serializers.CharField(source="governing_body.name", read_only=True, allow_null=True)
     approved_by_name = serializers.SerializerMethodField()
+    approved_member_name = serializers.SerializerMethodField()
+    viewer_can_approve = serializers.SerializerMethodField()
 
     def get_chair_name(self, obj):
-        return _user_label(obj.chair) if obj.chair else None
-
-    def get_attendees_detail(self, obj):
-        return [{"id": u.pk, "name": _user_label(u)} for u in obj.attendees.all()]
+        chair = next((p for p in obj.participants.all() if p.is_chair), None)
+        return chair.full_name if chair else None
 
     def get_approved_by_name(self, obj):
         return _user_label(obj.approved_by) if obj.approved_by else None
+
+    def get_approved_member_name(self, obj):
+        m = obj.approved_member
+        if m is None:
+            return None
+        return f"{m.full_name} ({m.position})" if m.position else m.full_name
+
+    def get_viewer_can_approve(self, obj):
+        # `approval_scope` = (è governance, organi in cui siede) calcolato una
+        # volta per richiesta dalla view: niente query per riga (regola #6).
+        scope = self.context.get("approval_scope")
+        if scope is None or obj.approval_status == "approvato":
+            return False
+        is_governance, body_ids = scope
+        return is_governance or obj.governing_body_id in body_ids
 
     class Meta:
         model = ManagementReview
@@ -98,6 +129,11 @@ class ManagementReviewSerializer(serializers.ModelSerializer):
             "approved_by",
             "approved_at",
             "approval_note",
+            "approval_mode",
+            "approved_member",
+            "approval_resolution_ref",
+            "approval_resolution_date",
+            "approval_document_id",
             "snapshot_generated_at",
             "snapshot_data",
             "kpi_snapshot",

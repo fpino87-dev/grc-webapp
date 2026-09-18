@@ -905,7 +905,7 @@
     "title": "Governance",
     "subtitle": "Normative roles, committees and role succession",
     "tabs": {
-      "roles": "Roles & committees",
+      "roles": "Roles & bodies",
       "workflow": "Document workflow (M07)",
       "frameworks": "Normative frameworks",
       "risk_appetite": "Risk Appetite",
@@ -964,11 +964,11 @@
     },
     "sections": {
       "roles": "Normative roles",
-      "committees": "Security committees"
+      "committees": "Governing bodies"
     },
     "empty": {
       "roles": "No assigned roles",
-      "committees": "No committees configured"
+      "committees": "No governing body configured"
     },
     "alerts": {
       "vacant_roles": "🚨 {{count}} mandatory roles without an active owner",
@@ -1024,33 +1024,6 @@
       "valid_from": "Valid from",
       "valid_until": "Valid until",
       "submit": "Assign role"
-    },
-    "committees": {
-      "new": {
-        "open": "+ New",
-        "title": "New committee",
-        "submit": "Create committee"
-      },
-      "fields": {
-        "name": "Name",
-        "type": "Type",
-        "frequency": "Frequency",
-        "next_meeting": "Next meeting"
-      },
-      "placeholders": {
-        "name": "e.g. Security Committee"
-      },
-      "types": {
-        "centrale": "Central",
-        "bu": "BU"
-      },
-      "frequencies": {
-        "mensile": "Monthly",
-        "trimestrale": "Quarterly",
-        "semestrale": "Semiannual"
-      },
-      "frequency": "Frequency: {{value}}",
-      "next_meeting": "next:"
     },
     "terminate": {
       "title": "Terminate role",
@@ -1221,6 +1194,59 @@
       "optional": "Optional",
       "single_holder": "Single holder",
       "multi_holder": "Multiple holders"
+    },
+    "bodies": {
+      "new_open": "+ New body",
+      "intro": "Who holds and approves the management review (ISO 27001 §5.1, §9.3): board of directors, security committee or top management. Members are entered manually, even without an account; those with a linked account can approve their body's reviews in the app.",
+      "new_title": "New governing body",
+      "edit_title": "Edit governing body",
+      "member_new_title": "New member — {{body}}",
+      "member_edit_title": "Edit member",
+      "cda_hint": "Management body under NIS2 Art. 20: it approves the risk-management measures, is accountable for them and must undergo training.",
+      "whole_org": "Whole organisation",
+      "scope_hint": "For several legal entities, one body each with the sites it governs.",
+      "nis2_badge": "NIS2 management body",
+      "no_chair": "No chair in office: the review will have no proposed chair.",
+      "no_members": "No members in office.",
+      "add_member": "+ Member",
+      "show_former": "Show former members ({{n}})",
+      "hide_former": "Hide former members",
+      "end_term": "End term",
+      "end_confirm": "End {{name}}'s term today? They will remain in past minutes.",
+      "delete_member_confirm": "Delete {{name}}? Use only for a wrong entry: someone leaving office is closed with an end date.",
+      "delete_confirm": "Delete the body “{{name}}”?",
+      "account_inactive": "account deactivated",
+      "ongoing": "in office",
+      "no_account": "— No account —",
+      "user_hint": "Optional. With a linked account the person can approve this body's reviews in the app.",
+      "fields": {
+        "name": "Name",
+        "type": "Type",
+        "scope": "Scope",
+        "description": "Mandate",
+        "full_name": "Full name",
+        "position": "Position",
+        "body_role": "Role in the body",
+        "user": "Account",
+        "valid_from": "In office from",
+        "valid_until": "Until",
+        "term": "Term"
+      },
+      "placeholders": {
+        "name": "e.g. Board of Directors",
+        "description": "e.g. Approves the review and the group's security measures",
+        "position": "e.g. Chief Executive Officer"
+      },
+      "types": {
+        "cda": "Board of directors",
+        "comitato": "Security committee",
+        "direzione": "Top management"
+      },
+      "member_roles": {
+        "presidente": "Chair",
+        "membro": "Member",
+        "segretario": "Secretary"
+      }
     }
   },
   "sidebar": {
@@ -3689,7 +3715,7 @@
         "access": "Access grants",
         "responsibilities": "Responsibilities",
         "issues": "Inconsistencies",
-        "committees": "Committees"
+        "committees": "Bodies"
       },
       "filter": {
         "all": "All",
@@ -3714,10 +3740,14 @@
       },
       "section_access": "Access (what they can do)",
       "section_resp": "Responsibilities (what they're accountable for)",
-      "committees_title": "Security committees",
-      "committees_empty": "No security committee configured. Create one in Governance → Committees.",
-      "committees_next": "next",
-      "committees_no_members": "No members recorded (no meetings yet)"
+      "committees_title": "Governing bodies",
+      "committees_empty": "No governing body configured. Create one in Governance → Governing bodies.",
+      "member_account": "with account",
+      "member_no_account": "no account",
+      "body_flag": {
+        "no_members": "No members in office",
+        "no_chair": "No chair in office"
+      }
     },
     "objectives": {
       "intro": "Objectives (ISO/IEC 27001 §6.2) are targets with a deadline: this page shows whether they will be reached in time. They are not thresholds: whether an indicator is below the acceptable level right now is shown by the KPI, not by this page.",
@@ -4471,14 +4501,14 @@
       "title": "Management Review — M13",
       "description": "Manages the ISO 27001 §9.3 management review: agenda with the mandatory items, GRC data frozen at the time of the meeting, discussion and decisions per item (with linked tasks and PDCA), an executive summary that can be drafted with AI support, and minutes downloadable as PDF or HTML.",
       "steps": {
-        "1": "Create the review with site (or whole organisation), date, chair (the CISO is proposed) and attendees: the §9.3.2 agenda is created automatically",
+        "1": "Create the review with site (or whole organisation), date and governing body: the invitees are the body's members in office (without a body the CISO is proposed as chair); the §9.3.2 agenda is created automatically. Attendance is recorded in the detail view",
         "2": "Generate the snapshot: compliance, KPIs, audits, risks, incidents, documents and actions from previous reviews are frozen",
         "3": "Start the meeting",
         "4": "For each agenda item review the data, record the discussion and register the decisions (type, owner, due date)",
         "5": "When needed, a decision opens a task in M08 assigned to a role and/or a PDCA cycle in M11",
         "6": "Close the meeting: every mandatory item needs a discussion or a decision; the next review date is proposed and appears in the schedule",
         "7": "Write the executive summary or generate an AI draft, review it and accept it",
-        "8": "Approve the review with a formal note: the minutes become immutable",
+        "8": "Approve the review: in the app (a member of the body with an account, or governance) or by recording the number and date of the body's resolution. The minutes become immutable",
         "9": "Download the minutes as PDF or HTML (also included in the audit package)"
       },
       "connections": {
@@ -4490,7 +4520,7 @@
         "ai": "Executive summary draft, always to be reviewed and accepted"
       },
       "config_needed": {
-        "1": "Appoint the CISO in M00 Governance: they are proposed as chair of the review"
+        "1": "Set up in Governance → Roles & bodies the body holding the review (e.g. the board) with its members; alternatively appoint the CISO, proposed as chair"
       }
     },
     "list": {
@@ -4530,7 +4560,9 @@
       "date_label": "Meeting date",
       "cancel": "Cancel",
       "saving": "Saving...",
-      "create": "Create review"
+      "create": "Create review",
+      "body_hint": "The invitees will be the body's {{n}} members in office: attendance is recorded in the detail view.",
+      "no_body_hint": "Without a body, the CISO appointed in Governance will be proposed as chair; other invitees are added from the detail view."
     },
     "actions": {
       "add": "Add action",
@@ -4699,19 +4731,37 @@
       "objectives_list": "Objective status"
     },
     "participants": {
-      "heading": "Chair and attendees",
-      "chair": "Chaired by",
-      "attendees": "Attendees",
-      "none": "— None —",
-      "chair_missing": "Not set",
+      "heading": "Invitees and attendance",
+      "chair": "Chair",
       "edit": "Edit",
       "save": "Save",
       "saving": "Saving...",
       "cancel": "Cancel",
-      "search_ph": "Search person...",
-      "selected": "{{count}} selected",
-      "suggested": "Proposed from the Governance role: {{name}}",
-      "save_error": "Error while saving"
+      "save_error": "Error while saving",
+      "body": "Body",
+      "no_body": "— No body —",
+      "from_body": "Reload from body",
+      "from_body_confirm": "Replace the invitees with the body's members in office at the review date? Recorded attendance and guests will be lost.",
+      "col_name": "Name and position",
+      "col_role": "Role",
+      "col_attendance": "Attendance",
+      "position_ph": "Position",
+      "delegate_ph": "Proxy's name",
+      "add_member": "+ Body member",
+      "add_user": "+ Platform user",
+      "guest_name_ph": "Guest: name",
+      "none_yet": "No invitees yet: add them before the meeting.",
+      "roles": {
+        "presidente": "Chair",
+        "membro": "Member",
+        "segretario": "Secretary",
+        "ospite": "Guest"
+      },
+      "attendance": {
+        "presente": "Present",
+        "assente": "Absent",
+        "delegato": "By proxy"
+      }
     },
     "agenda": {
       "heading": "Agenda (ISO 27001 §9.3.2)",
@@ -4782,6 +4832,19 @@
       "ai_not_configured": "The AI engine is not configured (Settings → AI Engine).",
       "ai_error": "Generation failed",
       "save_error": "Error while saving"
+    },
+    "approval_form": {
+      "approved_resolution": "Approved by {{body}} with resolution no. {{ref}} of {{date}} (recorded by {{by}})",
+      "not_allowed": "Approval is up to the body's members in office or to governance.",
+      "mode_in_app": "Approve in the app",
+      "mode_delibera": "Record the body's resolution",
+      "hint_in_app_member": "You approve as a member of the body: the minutes will show your name and position.",
+      "hint_in_app_governance": "If the body resolved outside the platform, record the resolution: the minutes will show its reference.",
+      "hint_resolution": "Resolution number and date are required; the document (M07) is the evidence for the auditor.",
+      "resolution_ref_ph": "Resolution no.",
+      "document_search_ph": "Search document...",
+      "no_document": "— No document —",
+      "register_resolution": "Record approval"
     }
   },
   "objectives": {

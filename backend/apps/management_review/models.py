@@ -21,14 +21,16 @@ class ManagementReview(BaseModel):
     title = models.CharField(max_length=200)
     review_date = models.DateField()
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="pianificato")
-    chair = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
+    # Organo che tiene e approva il riesame (CdA, comitato, direzione): da qui
+    # si propongono i partecipanti. Facoltativo: un riesame può essere tenuto
+    # dalla direzione senza un organo formalizzato in anagrafica.
+    governing_body = models.ForeignKey(
+        "governance.SecurityCommittee",
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
-        related_name="chaired_reviews",
+        related_name="management_reviews",
     )
-    attendees = models.ManyToManyField(User, blank=True, related_name="attended_reviews")
     agenda = models.JSONField(default=list)
     kpi_snapshot = models.JSONField(default=dict)
     delibere = models.JSONField(default=list)
@@ -59,6 +61,25 @@ class ManagementReview(BaseModel):
     )
     approved_at   = models.DateTimeField(null=True, blank=True)
     approval_note = models.TextField(blank=True)
+    # Due forme di approvazione (§9.3): in app, da chi preme il pulsante —
+    # un componente dell'organo con account, o governance che registra; oppure
+    # con delibera dell'organo, di cui si riportano estremi ed evidenza (M07).
+    # `approved_by` resta in entrambi i casi chi ha registrato l'approvazione.
+    APPROVAL_MODE_CHOICES = [
+        ("in_app", "In applicazione"),
+        ("delibera", "Delibera dell'organo"),
+    ]
+    approval_mode = models.CharField(max_length=10, choices=APPROVAL_MODE_CHOICES, blank=True)
+    approved_member = models.ForeignKey(
+        "governance.CommitteeMember",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="approved_reviews",
+    )
+    approval_resolution_ref = models.CharField(max_length=100, blank=True)
+    approval_resolution_date = models.DateField(null=True, blank=True)
+    approval_document_id = models.UUIDField(null=True, blank=True)
 
     # Sintesi executive del verbale. Può essere scritta a mano o partire da una
     # bozza IA (M20): la bozza resta separata finché un utente non la accetta
@@ -70,6 +91,55 @@ class ManagementReview(BaseModel):
 
     class Meta:
         ordering = ["-review_date"]
+
+
+class ReviewParticipant(BaseModel):
+    """Chi era convocato al riesame e con quale esito di presenza.
+
+    Nome e qualifica sono **congelati** alla data del riesame: il verbale deve
+    restare quello che era anche se il componente lascia la carica o cambia
+    qualifica. `member` e `user` sono il collegamento all'anagrafica (entrambi
+    facoltativi: un ospite occasionale non è in nessuna delle due).
+    """
+
+    ROLE_CHOICES = [
+        ("presidente", "Presidente"),
+        ("membro", "Membro"),
+        ("segretario", "Segretario"),
+        ("ospite", "Ospite"),
+    ]
+    ATTENDANCE_CHOICES = [
+        ("presente", "Presente"),
+        ("assente", "Assente"),
+        ("delegato", "Rappresentato da delegato"),
+    ]
+
+    review = models.ForeignKey(
+        ManagementReview, on_delete=models.CASCADE, related_name="participants"
+    )
+    member = models.ForeignKey(
+        "governance.CommitteeMember",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="review_participations",
+    )
+    user = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL, related_name="review_participations"
+    )
+    full_name = models.CharField(max_length=200)
+    position = models.CharField(max_length=200, blank=True)
+    body_role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="membro")
+    is_chair = models.BooleanField(default=False)
+    attendance = models.CharField(max_length=10, choices=ATTENDANCE_CHOICES, default="presente")
+    delegate_name = models.CharField(max_length=200, blank=True)
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "created_at"]
+
+    def __str__(self):
+        return f"{self.full_name} @ {self.review_id}"
 
 
 class ReviewAgendaItem(BaseModel):

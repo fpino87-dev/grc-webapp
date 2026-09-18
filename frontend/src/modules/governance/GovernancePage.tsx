@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { governanceApi, type RoleAssignment, type SecurityCommittee } from "../../api/endpoints/governance";
+import { governanceApi, type RoleAssignment } from "../../api/endpoints/governance";
 import { usersApi } from "../../api/endpoints/users";
 import { plantsApi } from "../../api/endpoints/plants";
 import { apiClient } from "../../api/client";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
 import { DocumentWorkflowSection } from "./DocumentWorkflowPage";
 import { FrameworkGovernanceTab } from "./FrameworkGovernanceTab";
+import { GoverningBodiesSection } from "./GoverningBodiesSection";
 import { RiskAppetiteGovernanceTab } from "./RiskAppetiteGovernanceTab";
 import { RoleCoverageMatrix, type AssignPrefill } from "./RoleCoverageMatrix";
 import { RoleRequirementsPanel } from "./RoleRequirementsPanel";
@@ -361,80 +362,10 @@ function SostituisciModal({
   );
 }
 
-// ── Modal: Comitato ───────────────────────────────────────────────────────────
-
-function CommitteeModal({ onClose }: { onClose: () => void }) {
-  const { t } = useTranslation();
-  const qc = useQueryClient();
-  const [form, setForm] = useState<Partial<SecurityCommittee>>({ committee_type: "centrale", frequency: "trimestrale" });
-  const [error, setError] = useState("");
-
-  const mutation = useMutation({
-    mutationFn: governanceApi.createCommittee,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["committees"] }); onClose(); },
-    onError: (e: any) => setError(e?.response?.data?.detail || t("common.error")),
-  });
-
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value || null }));
-  }
-
-  return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-        <h3 className="text-lg font-semibold mb-4">{t("governance.committees.new.title")}</h3>
-        <div className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.committees.fields.name")} *</label>
-            <input name="name" onChange={handleChange}
-              className="w-full border rounded px-3 py-2 text-sm"
-              placeholder={t("governance.committees.placeholders.name")} />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.committees.fields.type")}</label>
-              <select name="committee_type" defaultValue="centrale" onChange={handleChange}
-                className="w-full border rounded px-3 py-2 text-sm">
-                <option value="centrale">{t("governance.committees.types.centrale")}</option>
-                <option value="bu">{t("governance.committees.types.bu")}</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.committees.fields.frequency")}</label>
-              <select name="frequency" defaultValue="trimestrale" onChange={handleChange}
-                className="w-full border rounded px-3 py-2 text-sm">
-                <option value="mensile">{t("governance.committees.frequencies.mensile")}</option>
-                <option value="trimestrale">{t("governance.committees.frequencies.trimestrale")}</option>
-                <option value="semestrale">{t("governance.committees.frequencies.semestrale")}</option>
-              </select>
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t("governance.committees.fields.next_meeting")}</label>
-            <input type="datetime-local" name="next_meeting_at" onChange={handleChange}
-              className="w-full border rounded px-3 py-2 text-sm" />
-          </div>
-        </div>
-        {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
-        <div className="flex justify-end gap-2 mt-4">
-          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("actions.cancel")}</button>
-          <button
-            onClick={() => mutation.mutate(form)}
-            disabled={mutation.isPending || !form.name}
-            className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
-          >
-            {mutation.isPending ? t("common.saving") : t("governance.committees.new.submit")}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export function GovernancePage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
   const resolveTab = (p: string | null) =>
@@ -458,16 +389,9 @@ export function GovernancePage() {
 
   const [showRoleModal, setShowRoleModal]         = useState(false);
   const [assignInitial, setAssignInitial]         = useState<Partial<Record<string, any>> | undefined>(undefined);
-  const [showCommitteeModal, setShowCommitteeModal] = useState(false);
   const [terminaTarget, setTerminaTarget]         = useState<RoleAssignment | null>(null);
   const [sostituisciTarget, setSostituisciTarget] = useState<RoleAssignment | null>(null);
   const [toast, setToast]                         = useState<string | null>(null);
-
-  const { data: committees, isLoading: loadingComm } = useQuery({
-    queryKey: ["committees"],
-    queryFn: () => governanceApi.committees(),
-    retry: false,
-  });
 
   const { data: users } = useQuery({
     queryKey: ["users"],
@@ -665,46 +589,8 @@ export function GovernancePage() {
             />
           </div>
 
-          {/* Comitati di sicurezza */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-gray-700">{t("governance.sections.committees")}</h3>
-              <button
-                onClick={() => setShowCommitteeModal(true)}
-                className="text-xs px-2 py-1 bg-primary-600 text-white rounded hover:bg-primary-700"
-              >
-                {t("governance.committees.new.open")}
-              </button>
-            </div>
-            {loadingComm ? (
-              <p className="text-sm text-gray-400">{t("common.loading")}</p>
-            ) : !committees?.length ? (
-              <p className="text-sm text-gray-400 italic">{t("governance.empty.committees")}</p>
-            ) : (
-              <div className="space-y-3">
-                {committees.map((c) => (
-                  <div key={c.id} className="border border-gray-100 rounded p-3">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-gray-800 text-sm">{c.name}</span>
-                      <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
-                        {c.committee_type}
-                      </span>
-                    </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {t("governance.committees.frequency", { value: c.frequency })}
-                      {c.next_meeting_at && (
-                        <> — {t("governance.committees.next_meeting")}{" "}
-                          <span className="font-medium">
-                            {new Date(c.next_meeting_at).toLocaleDateString(i18n.language)}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          {/* Organi di governo: chi tiene e approva il riesame di direzione */}
+          <GoverningBodiesSection users={userList.map(u => ({ id: u.id, label: `${u.name} (${u.email})` }))} />
 
           {/* Modali */}
           {showRoleModal && (
@@ -713,9 +599,6 @@ export function GovernancePage() {
               initial={assignInitial}
               onClose={() => { setShowRoleModal(false); setAssignInitial(undefined); }}
             />
-          )}
-          {showCommitteeModal && (
-            <CommitteeModal onClose={() => setShowCommitteeModal(false)} />
           )}
           {terminaTarget && (
             <TerminaModal

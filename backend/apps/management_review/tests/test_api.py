@@ -191,20 +191,27 @@ def test_delete_review_action_soft(client, action):
 
 
 @pytest.mark.django_db
-def test_set_chair_and_attendees(client, review, user):
+def test_set_participants_with_guest(client, review, user):
     other = User.objects.create_user(username="att", email="att@test.com", password="x",
                                      first_name="Anna", last_name="Rossi")
-    resp = client.patch(f"{URL_REVIEWS}{review.id}/", {"chair": user.id, "attendees": [user.id, other.id]}, format="json")
+    resp = client.put(f"{URL_REVIEWS}{review.id}/participants/", {"participants": [
+        {"user": user.id, "is_chair": True, "body_role": "presidente"},
+        {"user": other.id, "attendance": "assente"},
+        {"full_name": "Mario Bianchi", "position": "Consulente esterno"},
+    ]}, format="json")
     assert resp.status_code == 200, resp.data
     assert resp.data["chair_name"] == "mr@test.com"
-    assert {a["name"] for a in resp.data["attendees_detail"]} == {"mr@test.com", "Anna Rossi"}
+    rows = {p["full_name"]: p for p in resp.data["participants"]}
+    assert rows["Anna Rossi"]["attendance"] == "assente"
+    assert rows["Mario Bianchi"]["body_role"] == "ospite" and not rows["Mario Bianchi"]["has_account"]
 
 
 @pytest.mark.django_db
-def test_chair_not_editable_after_approval(client, review, user):
+def test_participants_not_editable_after_approval(client, review, user):
     review.approval_status = "approvato"
     review.save(update_fields=["approval_status"])
-    resp = client.patch(f"{URL_REVIEWS}{review.id}/", {"chair": user.id}, format="json")
+    resp = client.put(f"{URL_REVIEWS}{review.id}/participants/",
+                      {"participants": [{"user": user.id, "is_chair": True}]}, format="json")
     assert resp.status_code == 400
 
 

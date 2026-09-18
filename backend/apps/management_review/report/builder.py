@@ -73,6 +73,41 @@ def _user(u) -> str:
     return (f"{u.first_name} {u.last_name}".strip() or u.email) if u else "—"
 
 
+def _participant_row(p) -> list:
+    role = {
+        "presidente": _("Presidente"), "membro": _("Membro"),
+        "segretario": _("Segretario"), "ospite": _("Ospite"),
+    }.get(p.body_role, p.body_role)
+    if p.is_chair and p.body_role != "presidente":
+        role = f"{role} · {_('presiede')}"
+    attendance = {
+        "presente": _("Presente"), "assente": _("Assente"),
+        "delegato": _("Delegato: %(name)s") % {"name": p.delegate_name},
+    }.get(p.attendance, p.attendance)
+    return [p.full_name, p.position or "—", role, attendance]
+
+
+def _approval_lines(review) -> list:
+    """Riquadro di approvazione: chi ha approvato e in che forma. In app, se
+    ha approvato un componente dell'organo, compare lui con la qualifica; con
+    delibera, gli estremi della delibera e chi l'ha registrata."""
+    at = timezone.localtime(review.approved_at).strftime("%d/%m/%Y %H:%M")
+    if review.approval_mode == "delibera":
+        body = review.governing_body.name if review.governing_body_id else _("Organo di governo")
+        lines = [
+            (_("Approvato da"), body),
+            (_("Delibera"), _("n. %(ref)s del %(date)s") % {
+                "ref": review.approval_resolution_ref, "date": fmt_date(review.approval_resolution_date)}),
+            (_("Registrata da"), f"{_user(review.approved_by)} — {at}"),
+        ]
+    else:
+        m = review.approved_member
+        who = (f"{m.full_name} — {m.position}" if m.position else m.full_name) if m else _user(review.approved_by)
+        lines = [(_("Approvato da"), who), (_("Data"), at)]
+    lines.append((_("Note"), review.approval_note or "—"))
+    return lines
+
+
 def _dash(v) -> str:
     return "—" if v in (None, "") else str(v)
 
@@ -441,13 +476,14 @@ def build_report(review) -> dict:
     if not snap:
         raise ValueError("Snapshot non ancora generato")
 
-    attendees = ", ".join(_user(u) for u in review.attendees.all()) or "—"
+    participants = list(review.participants.all())
+    chair = next((p for p in participants if p.is_chair), None)
     meta = [
         (_("Titolo"), review.title),
         (_("Perimetro"), review.plant.name if review.plant_id else _("Intera organizzazione")),
+        (_("Organo"), review.governing_body.name if review.governing_body_id else "—"),
         (_("Data riunione"), fmt_date(review.review_date)),
-        (_("Presieduto da"), _user(review.chair) if review.chair_id else "—"),
-        (_("Partecipanti"), attendees),
+        (_("Presieduto da"), chair.full_name if chair else "—"),
         (_("Dati congelati il"), fmt_date(snap.get("generated_at"))),
         (_("Stato approvazione"), {"approvato": _("Approvato"), "bozza": _("Bozza")}.get(
             review.approval_status, review.approval_status)),
@@ -473,6 +509,10 @@ def build_report(review) -> dict:
         summary = {"text": review.executive_summary, "note": note}
 
     sections = []
+    if participants:
+        sections.append({"heading": _("Partecipanti"), "blocks": [_table(
+            None, [_("Nome"), _("Qualifica"), _("Ruolo"), _("Presenza")],
+            [_participant_row(p) for p in participants])]})
     sites = snap.get("siti") or []
     if sites:
         sections.append({"heading": _("Quadro per sito"), "blocks": [_table(
@@ -516,11 +556,7 @@ def build_report(review) -> dict:
 
     approval = None
     if review.approval_status == "approvato" and review.approved_at:
-        approval = {
-            "by": _user(review.approved_by),
-            "at": timezone.localtime(review.approved_at).strftime("%d/%m/%Y %H:%M"),
-            "note": review.approval_note or "—",
-        }
+        approval = {"lines": _approval_lines(review)}
 
     return {
         "title": _("Riesame di Direzione SGSI"),

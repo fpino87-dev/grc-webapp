@@ -1,6 +1,6 @@
 """Test della review prod-readiness M00 (2026-06-13).
 
-Copre i fix: soft delete + audit su committee / meeting / document-workflow-policy
+Copre i fix: soft delete + audit su committee / document-workflow-policy
 (prima hard delete senza audit), guard sul parametro `days`, e read_only su
 created_by del RoleAssignment.
 """
@@ -38,7 +38,7 @@ def test_committee_delete_is_soft_and_audited(client):
     from core.audit import AuditLog
 
     c = SecurityCommittee.objects.create(
-        name="Comitato Centrale", committee_type="centrale", frequency="trimestrale",
+        name="Comitato Centrale", committee_type="comitato",
     )
     resp = client.delete(f"{URL_COMMITTEES}{c.id}/")
     assert resp.status_code == 204

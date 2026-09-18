@@ -8,83 +8,16 @@ import i18n from "../../i18n";
 import { AgendaSection } from "./AgendaSection";
 import { ExecutiveSummarySection } from "./ExecutiveSummarySection";
 import { SitesBlock } from "./SnapshotBlocks";
-import { ParticipantsFields, SnapSection, fmtDate, type Snap } from "./shared";
+import { useAuthStore } from "../../store/auth";
+import { ApprovalSection } from "./ApprovalSection";
+import { ParticipantsSection } from "./ParticipantsSection";
+import { SnapSection, fmtDate, type Snap } from "./shared";
 
-const APPROVAL_COLORS: Record<string, string> = {
-  bozza:     "bg-gray-100 text-gray-600",
-  in_review: "bg-blue-100 text-blue-700",
-  approvato: "bg-green-100 text-green-700",
-  rifiutato: "bg-red-100 text-red-700",
-};
+// Scrittura sul riesame: governance. Un componente dell'organo con account
+// (es. un consigliere) lo legge e lo approva, senza modificarlo.
+const WRITE_ROLES = ["super_admin", "compliance_officer"];
 
 type Plant = { id: string; code: string; name: string };
-
-// ── Presidente e partecipanti ────────────────────────────────────────────────
-
-function ParticipantsSection({ review, users, locked }: { review: ManagementReview; users: GrcUser[]; locked: boolean }) {
-  const { t } = useTranslation();
-  const qc = useQueryClient();
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState<{ chair: number | null; attendees: number[] }>({ chair: null, attendees: [] });
-  const [error, setError] = useState("");
-
-  const saveMutation = useMutation({
-    mutationFn: () => managementReviewApi.update(review.id, draft),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["management-review"] }); setEditing(false); setError(""); },
-    onError: e => setError(reviewErrorMessage(e, t("management_review.participants.save_error"))),
-  });
-
-  async function startEdit() {
-    let chair = review.chair ?? null;
-    if (chair === null) {
-      chair = (await managementReviewApi.suggestedChair(review.plant).catch(() => ({ id: null }))).id;
-    }
-    setDraft({ chair, attendees: review.attendees ?? [] });
-    setEditing(true);
-  }
-
-  return (
-    <section>
-      <div className="flex items-center justify-between mb-2">
-        <h4 className="text-sm font-semibold text-gray-700">{t("management_review.participants.heading")}</h4>
-        {!editing && !locked && (
-          <button onClick={startEdit} className="text-xs px-2 py-1 border border-gray-300 rounded hover:bg-gray-50 text-gray-600">
-            {t("management_review.participants.edit")}
-          </button>
-        )}
-      </div>
-      {editing ? (
-        <div className="border border-blue-200 rounded p-3 bg-blue-50 space-y-2">
-          <ParticipantsFields users={users} chair={draft.chair} attendees={draft.attendees} onChange={setDraft} />
-          {error && <p className="text-xs text-red-600">{error}</p>}
-          <div className="flex gap-2">
-            <button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50">
-              {saveMutation.isPending ? t("management_review.participants.saving") : t("management_review.participants.save")}
-            </button>
-            <button onClick={() => { setEditing(false); setError(""); }} className="px-3 py-1 border rounded text-xs text-gray-600 hover:bg-white">
-              {t("management_review.participants.cancel")}
-            </button>
-          </div>
-        </div>
-      ) : (
-        <dl className="text-sm space-y-1">
-          <div className="flex gap-2">
-            <dt className="text-gray-500 shrink-0">{t("management_review.participants.chair")}:</dt>
-            <dd className={review.chair_name ? "text-gray-800 font-medium" : "text-amber-600"}>
-              {review.chair_name ?? t("management_review.participants.chair_missing")}
-            </dd>
-          </div>
-          <div className="flex gap-2">
-            <dt className="text-gray-500 shrink-0">{t("management_review.participants.attendees")}:</dt>
-            <dd className="text-gray-800">
-              {review.attendees_detail?.length ? review.attendees_detail.map(a => a.name).join(", ") : <span className="text-gray-400">—</span>}
-            </dd>
-          </div>
-        </dl>
-      )}
-    </section>
-  );
-}
 
 // ── Stato riunione e prossimo riesame ────────────────────────────────────────
 
@@ -127,12 +60,12 @@ function MeetingSection({ review, locked, onMissing }: { review: ManagementRevie
         <h4 className="text-sm font-semibold text-gray-700 mb-2">{t("management_review.detail.meeting_status")}</h4>
         <div className="flex flex-wrap items-center gap-3">
           <StatusBadge status={review.status} />
-          {review.status === "pianificato" && (
+          {!locked && review.status === "pianificato" && (
             <button onClick={() => start.mutate()} disabled={start.isPending} className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50">
               ▶ {t("management_review.detail.start_meeting")}
             </button>
           )}
-          {review.status === "in_corso" && (
+          {!locked && review.status === "in_corso" && (
             <button onClick={() => complete.mutate()} disabled={complete.isPending} className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 disabled:opacity-50">
               ✓ {t("management_review.detail.mark_completed")}
             </button>
@@ -165,9 +98,9 @@ function MeetingSection({ review, locked, onMissing }: { review: ManagementRevie
 export function ReviewDetail({ review, users, plants, onClose }: { review: ManagementReview; users: GrcUser[]; plants: Plant[]; onClose: () => void }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const [note, setNote] = useState("");
   const [snapshotError, setSnapshotError] = useState("");
-  const [approveError, setApproveError] = useState("");
+  const role = useAuthStore(s => s.user?.role) ?? "";
+  const isGovernance = WRITE_ROLES.includes(role);
   const [downloading, setDownloading] = useState<"" | "html" | "pdf">("");
   const [missing, setMissing] = useState<string[]>([]);
 
@@ -175,12 +108,6 @@ export function ReviewDetail({ review, users, plants, onClose }: { review: Manag
     mutationFn: () => managementReviewApi.generateSnapshot(review.id),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["management-review"] }); setSnapshotError(""); },
     onError: e => setSnapshotError(reviewErrorMessage(e, t("management_review.detail.snapshot_error"))),
-  });
-
-  const approveMutation = useMutation({
-    mutationFn: () => managementReviewApi.approve(review.id, note),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["management-review"] }); setApproveError(""); },
-    onError: e => setApproveError(reviewErrorMessage(e, t("management_review.detail.approve_error"))),
   });
 
   async function handleDownload(fmt: "html" | "pdf") {
@@ -195,8 +122,8 @@ export function ReviewDetail({ review, users, plants, onClose }: { review: Manag
 
   const snap = (review.snapshot_generated_at ? review.snapshot_data : null) as Snap | null;
   const isApproved = review.approval_status === "approvato";
+  const locked = isApproved || !isGovernance;
   const hasSnapshot = !!review.snapshot_generated_at;
-  const isCompleted = review.status === "completato";
   // Snapshot generati prima dei dettagli: solo contatori.
   const legacySnapshot = !!snap && !("azioni_precedenti" in snap);
 
@@ -228,9 +155,9 @@ export function ReviewDetail({ review, users, plants, onClose }: { review: Manag
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
-          <MeetingSection review={review} locked={isApproved} onMissing={setMissing} />
+          <MeetingSection review={review} locked={locked} onMissing={setMissing} />
 
-          <ParticipantsSection review={review} users={users} locked={isApproved} />
+          <ParticipantsSection review={review} users={users} locked={isApproved} canWrite={isGovernance} />
 
           {/* ── Dati riesame (snapshot) ── */}
           <section>
@@ -239,13 +166,13 @@ export function ReviewDetail({ review, users, plants, onClose }: { review: Manag
               <div className="border border-dashed border-gray-300 rounded p-4 text-center">
                 <p className="text-sm text-gray-500 mb-3">{t("management_review.detail.no_snapshot")}</p>
                 {snapshotError && <p className="text-xs text-red-600 mb-2">{snapshotError}</p>}
-                <button
+                {isGovernance && <button
                   onClick={() => snapshotMutation.mutate()}
                   disabled={snapshotMutation.isPending}
                   className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
                 >
                   {snapshotMutation.isPending ? t("management_review.detail.generating") : t("management_review.detail.generate_snapshot")}
-                </button>
+                </button>}
               </div>
             ) : (
               <div className="space-y-2">
@@ -255,7 +182,7 @@ export function ReviewDetail({ review, users, plants, onClose }: { review: Manag
                   </p>
                   <button
                     onClick={() => snapshotMutation.mutate()}
-                    disabled={snapshotMutation.isPending || isApproved}
+                    disabled={snapshotMutation.isPending || locked}
                     title={isApproved ? t("management_review.detail.regen_locked") : t("management_review.detail.regen_tip")}
                     className="text-xs px-2 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-40 shrink-0"
                   >
@@ -263,7 +190,7 @@ export function ReviewDetail({ review, users, plants, onClose }: { review: Manag
                   </button>
                 </div>
                 {snapshotError && <p className="text-xs text-red-600">{snapshotError}</p>}
-                {legacySnapshot && !isApproved && (
+                {legacySnapshot && !locked && (
                   <p className="text-xs text-amber-600">{t("management_review.detail.regen_for_details")}</p>
                 )}
                 <p className="text-xs text-gray-400">{t("management_review.detail.data_in_agenda")}</p>
@@ -276,48 +203,11 @@ export function ReviewDetail({ review, users, plants, onClose }: { review: Manag
             )}
           </section>
 
-          <AgendaSection review={review} users={users} plants={plants} snap={snap} locked={isApproved} missing={missing} />
+          <AgendaSection review={review} users={users} plants={plants} snap={snap} locked={locked} missing={missing} />
 
-          <ExecutiveSummarySection review={review} locked={isApproved} />
+          <ExecutiveSummarySection review={review} locked={locked} />
 
-          {/* ── Approvazione ── */}
-          <section>
-            <h4 className="text-sm font-semibold text-gray-700 mb-3">{t("management_review.detail.approval")}</h4>
-            <div className="flex flex-wrap items-center gap-3 mb-3">
-              <span className={`text-xs px-2 py-1 rounded font-medium ${APPROVAL_COLORS[review.approval_status] ?? "bg-gray-100 text-gray-600"}`}>
-                {t(`management_review.approval.${review.approval_status}`, review.approval_status)}
-              </span>
-              {isApproved && review.approved_at && (
-                <span className="text-xs text-gray-500">
-                  {t("management_review.detail.approved_on", { date: new Date(review.approved_at).toLocaleString(i18n.language || "it") })}
-                  {review.approved_by_name && ` — ${review.approved_by_name}`}
-                  {review.approval_note && ` — ${review.approval_note}`}
-                </span>
-              )}
-            </div>
-            {!isApproved && (
-              <div className="space-y-2">
-                <textarea
-                  value={note}
-                  onChange={e => setNote(e.target.value)}
-                  placeholder={t("management_review.detail.note_ph")}
-                  rows={2}
-                  className="w-full border rounded px-3 py-2 text-sm"
-                />
-                {approveError && <p className="text-xs text-red-600">{approveError}</p>}
-                <button
-                  onClick={() => approveMutation.mutate()}
-                  disabled={approveMutation.isPending || !hasSnapshot || !isCompleted}
-                  className="px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-50"
-                >
-                  {approveMutation.isPending ? t("management_review.detail.approving") : t("management_review.detail.approve")}
-                </button>
-                {!hasSnapshot && <p className="text-xs text-amber-600">{t("management_review.detail.need_snapshot")}</p>}
-                {hasSnapshot && !isCompleted && <p className="text-xs text-amber-600">{t("management_review.detail.need_completed")}</p>}
-                {!review.executive_summary && <p className="text-xs text-gray-400">{t("management_review.detail.summary_recommended")}</p>}
-              </div>
-            )}
-          </section>
+          <ApprovalSection review={review} isGovernance={isGovernance} />
         </div>
       </div>
     </div>

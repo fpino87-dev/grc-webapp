@@ -1107,7 +1107,10 @@ function TabAccessMatrix() {
     ["access", data.summary.access, "text-blue-700"],
     ["responsibilities", data.summary.responsibilities, "text-indigo-700"],
     ["committees", data.summary.committees, "text-emerald-700"],
-    ["issues", data.summary.issues, data.summary.issues > 0 ? "text-red-600" : "text-green-600"],
+    // Le segnalazioni sugli organi (account disattivato, carica in scadenza,
+    // presidente mancante) sono incoerenze della stessa review.
+    ["issues", data.summary.issues + data.summary.committee_issues,
+     data.summary.issues + data.summary.committee_issues > 0 ? "text-red-600" : "text-green-600"],
   ];
 
   const renderTable = (k: "access" | "responsibility", titleKey: string, accent: string) => {
@@ -1174,7 +1177,7 @@ function TabAccessMatrix() {
       {renderTable("access", "reporting.access_matrix.section_access", "text-blue-700")}
       {renderTable("responsibility", "reporting.access_matrix.section_resp", "text-indigo-700")}
 
-      {/* Comitati di Sicurezza (il "direttivo") */}
+      {/* Organi di governo: chi tiene e approva il riesame (CdA, comitato, direzione) */}
       <div>
         <p className="text-sm font-semibold text-emerald-700 mb-1.5">{t("reporting.access_matrix.committees_title")} <span className="text-gray-400 font-normal">({data.committees.length})</span></p>
         {data.committees.length === 0 ? (
@@ -1183,20 +1186,54 @@ function TabAccessMatrix() {
           </div>
         ) : (
           <div className="space-y-2">
-            {data.committees.map(c => (
+            {data.committees
+              .filter(c => !onlyIssues || c.flags.length > 0 || c.members.some(m => m.flags.length > 0))
+              .map(c => (
               <div key={c.id} className="bg-white border border-gray-200 rounded-lg px-3 py-2">
                 <div className="flex items-center justify-between flex-wrap gap-2">
-                  <span className="font-medium text-gray-800">{c.name}</span>
+                  <span className="font-medium text-gray-800">
+                    {c.name}
+                    {c.is_management_body && (
+                      <span className="ml-2 text-xs font-normal bg-indigo-50 text-indigo-700 border border-indigo-200 px-1.5 py-0.5 rounded">
+                        {t("governance.bodies.nis2_badge")}
+                      </span>
+                    )}
+                  </span>
                   <span className="text-xs text-gray-500">
-                    {c.committee_type}{c.plant_code ? ` · ${c.plant_code}` : ""} · {c.frequency}
-                    {c.next_meeting_at && ` · ${t("reporting.access_matrix.committees_next")} ${c.next_meeting_at.slice(0, 10)}`}
+                    {c.committee_type_label} · {c.covers_all ? t("reporting.access_matrix.all_sites") : c.plant_codes.join(", ")}
                   </span>
                 </div>
-                <div className="text-xs text-gray-600 mt-1">
-                  {c.members.length > 0
-                    ? c.members.map(m => m.name).join(", ")
-                    : <span className="text-gray-400">{t("reporting.access_matrix.committees_no_members")}</span>}
-                </div>
+                {c.flags.map(f => (
+                  <p key={f} className="text-xs text-amber-700 mt-1">⚠ {t(`reporting.access_matrix.body_flag.${f}`)}</p>
+                ))}
+                {c.members.length > 0 && (
+                  <table className="w-full text-xs mt-1.5">
+                    <tbody>
+                      {c.members.filter(m => !onlyIssues || m.flags.length > 0).map(m => (
+                        <tr key={m.id} className="border-t border-gray-100">
+                          <td className="py-1 pr-3">
+                            <span className="text-gray-800">{m.name}</span>
+                            {m.position && <span className="text-gray-500"> — {m.position}</span>}
+                          </td>
+                          <td className="py-1 pr-3 text-gray-600 whitespace-nowrap">{m.body_role_label}</td>
+                          <td className="py-1 pr-3 text-gray-500 whitespace-nowrap">
+                            {m.has_account ? t("reporting.access_matrix.member_account") : t("reporting.access_matrix.member_no_account")}
+                          </td>
+                          <td className="py-1 whitespace-nowrap">
+                            {m.flags.map(f => (
+                              <span key={f} className="inline-block mr-1 px-1.5 py-0.5 rounded bg-red-50 text-red-700 border border-red-200">
+                                {t(`reporting.access_matrix.flag.${f}`)}
+                              </span>
+                            ))}
+                            {m.valid_until && (
+                              <span className="text-gray-400"> {t("reporting.access_matrix.until")} {m.valid_until}</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
             ))}
           </div>

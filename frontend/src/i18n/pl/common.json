@@ -908,7 +908,7 @@
     "title": "Governance",
     "subtitle": "Role normatywne, komitety i sukcesja stanowisk",
     "tabs": {
-      "roles": "Role i komitety",
+      "roles": "Role i organy",
       "workflow": "Obieg dokumentów (M07)",
       "frameworks": "Ramy normatywne",
       "risk_appetite": "Risk Appetite",
@@ -967,11 +967,11 @@
     },
     "sections": {
       "roles": "Role normatywne",
-      "committees": "Komitety bezpieczeństwa"
+      "committees": "Organy zarządcze"
     },
     "empty": {
       "roles": "Brak przypisanych ról",
-      "committees": "Brak skonfigurowanych komitetów"
+      "committees": "Brak skonfigurowanych organów zarządczych"
     },
     "alerts": {
       "vacant_roles": "🚨 {{count}} obowiązkowych ról bez aktywnego właściciela",
@@ -1027,33 +1027,6 @@
       "valid_from": "Ważne od",
       "valid_until": "Ważne do",
       "submit": "Przypisz rolę"
-    },
-    "committees": {
-      "new": {
-        "open": "+ Nowy",
-        "title": "Nowy komitet",
-        "submit": "Utwórz komitet"
-      },
-      "fields": {
-        "name": "Nazwa",
-        "type": "Typ",
-        "frequency": "Częstotliwość",
-        "next_meeting": "Następne spotkanie"
-      },
-      "placeholders": {
-        "name": "np. Komitet ds. Bezpieczeństwa"
-      },
-      "types": {
-        "centrale": "Centralny",
-        "bu": "BU"
-      },
-      "frequencies": {
-        "mensile": "Miesięczna",
-        "trimestrale": "Kwartalna",
-        "semestrale": "Półroczna"
-      },
-      "frequency": "Częstotliwość: {{value}}",
-      "next_meeting": "następna:"
     },
     "terminate": {
       "title": "Zakończ rolę",
@@ -1224,6 +1197,59 @@
       "optional": "Opcjonalny",
       "single_holder": "Jeden posiadacz",
       "multi_holder": "Wielu posiadaczy"
+    },
+    "bodies": {
+      "new_open": "+ Nowy organ",
+      "intro": "Kto prowadzi i zatwierdza przegląd zarządzania (ISO 27001 §5.1, §9.3): zarząd, komitet bezpieczeństwa lub kierownictwo. Członków wprowadza się ręcznie, także bez konta; osoby z powiązanym kontem mogą zatwierdzać w aplikacji przeglądy swojego organu.",
+      "new_title": "Nowy organ zarządczy",
+      "edit_title": "Edytuj organ zarządczy",
+      "member_new_title": "Nowy członek — {{body}}",
+      "member_edit_title": "Edytuj członka",
+      "cda_hint": "Organ zarządzający w rozumieniu art. 20 NIS2: zatwierdza środki zarządzania ryzykiem, odpowiada za nie i ma obowiązek odbywać szkolenia.",
+      "whole_org": "Cała organizacja",
+      "scope_hint": "Przy kilku podmiotach prawnych — jeden organ dla każdego, z zakładami, którymi zarządza.",
+      "nis2_badge": "Organ zarządzający NIS2",
+      "no_chair": "Brak urzędującego przewodniczącego: przegląd nie będzie miał proponowanego przewodniczącego.",
+      "no_members": "Brak urzędujących członków.",
+      "add_member": "+ Członek",
+      "show_former": "Pokaż byłych członków ({{n}})",
+      "hide_former": "Ukryj byłych członków",
+      "end_term": "Zakończ kadencję",
+      "end_confirm": "Zakończyć dziś kadencję {{name}}? Pozostanie w dotychczasowych protokołach.",
+      "delete_member_confirm": "Usunąć {{name}}? Tylko w przypadku błędnego wpisu: odejście z funkcji zamyka się datą zakończenia.",
+      "delete_confirm": "Usunąć organ „{{name}}”?",
+      "account_inactive": "konto dezaktywowane",
+      "ongoing": "urzęduje",
+      "no_account": "— Brak konta —",
+      "user_hint": "Opcjonalne. Z powiązanym kontem osoba może zatwierdzać w aplikacji przeglądy tego organu.",
+      "fields": {
+        "name": "Nazwa",
+        "type": "Typ",
+        "scope": "Zakres",
+        "description": "Mandat",
+        "full_name": "Imię i nazwisko",
+        "position": "Stanowisko",
+        "body_role": "Rola w organie",
+        "user": "Konto",
+        "valid_from": "Urzęduje od",
+        "valid_until": "Do",
+        "term": "Kadencja"
+      },
+      "placeholders": {
+        "name": "np. Zarząd",
+        "description": "np. Zatwierdza przegląd i środki bezpieczeństwa grupy",
+        "position": "np. Prezes Zarządu"
+      },
+      "types": {
+        "cda": "Zarząd",
+        "comitato": "Komitet bezpieczeństwa",
+        "direzione": "Kierownictwo"
+      },
+      "member_roles": {
+        "presidente": "Przewodniczący",
+        "membro": "Członek",
+        "segretario": "Sekretarz"
+      }
     }
   },
   "sidebar": {
@@ -3689,7 +3715,7 @@
         "access": "Dostępy",
         "responsibilities": "Odpowiedzialności",
         "issues": "Niespójności",
-        "committees": "Komitety"
+        "committees": "Organy"
       },
       "filter": {
         "all": "Wszystkie",
@@ -3714,10 +3740,14 @@
       },
       "section_access": "Dostępy (co może robić)",
       "section_resp": "Odpowiedzialności (za co odpowiada)",
-      "committees_title": "Komitety bezpieczeństwa",
-      "committees_empty": "Brak skonfigurowanego komitetu bezpieczeństwa. Utwórz w Zarządzanie → Komitety.",
-      "committees_next": "następne",
-      "committees_no_members": "Brak zarejestrowanych uczestników (brak spotkań)"
+      "committees_title": "Organy zarządcze",
+      "committees_empty": "Brak skonfigurowanych organów zarządczych. Utwórz je w Governance → Organy zarządcze.",
+      "member_account": "z kontem",
+      "member_no_account": "bez konta",
+      "body_flag": {
+        "no_members": "Brak urzędujących członków",
+        "no_chair": "Brak urzędującego przewodniczącego"
+      }
     },
     "objectives": {
       "intro": "Cele (ISO/IEC 27001 §6.2) to wartości docelowe z terminem: ta strona pokazuje, czy zostaną osiągnięte na czas. Nie są to progi: to, czy wskaźnik jest teraz poniżej akceptowalnego poziomu, pokazuje KPI, a nie ta strona.",
@@ -4471,14 +4501,14 @@
       "title": "Przegląd Zarządzania — M13",
       "description": "Obsługuje przegląd zarządzania ISO 27001 §9.3: porządek obrad z punktami obowiązkowymi, dane GRC zamrożone w chwili spotkania, dyskusję i decyzje dla każdego punktu (z powiązanymi zadaniami i cyklami PDCA), podsumowanie dla kierownictwa, które można przygotować z pomocą AI, oraz protokół do pobrania w PDF lub HTML.",
       "steps": {
-        "1": "Utwórz przegląd z zakładem (lub całą organizacją), datą, przewodniczącym (proponowany jest CISO) i uczestnikami: porządek obrad §9.3.2 tworzy się automatycznie",
+        "1": "Utwórz przegląd z zakładem (lub całą organizacją), datą i organem zarządczym: zaproszeni to urzędujący członkowie organu (bez organu jako przewodniczący proponowany jest CISO); porządek obrad §9.3.2 tworzy się automatycznie. Obecność rejestruje się w szczegółach",
         "2": "Wygeneruj snapshot: zgodność, KPI, audyty, ryzyka, incydenty, dokumenty i działania z poprzednich przeglądów zostają zamrożone",
         "3": "Rozpocznij spotkanie",
         "4": "Dla każdego punktu porządku obrad przejrzyj dane, zapisz dyskusję i zarejestruj decyzje (rodzaj, właściciel, termin)",
         "5": "W razie potrzeby decyzja otwiera zadanie w M08 przypisane do roli i/lub cykl PDCA w M11",
         "6": "Zamknij spotkanie: każdy punkt obowiązkowy wymaga dyskusji lub decyzji; proponowana jest data kolejnego przeglądu, widoczna w harmonogramie",
         "7": "Napisz podsumowanie dla kierownictwa lub wygeneruj wersję roboczą z AI, sprawdź ją i zaakceptuj",
-        "8": "Zatwierdź przegląd z formalną notatką: protokół staje się niezmienny",
+        "8": "Zatwierdź przegląd: w aplikacji (członek organu z kontem lub governance) albo rejestrując numer i datę uchwały organu. Protokół staje się niezmienny",
         "9": "Pobierz protokół w PDF lub HTML (dołączany także do pakietu audytowego)"
       },
       "connections": {
@@ -4490,7 +4520,7 @@
         "ai": "Wersja robocza podsumowania, zawsze do sprawdzenia i akceptacji"
       },
       "config_needed": {
-        "1": "Wyznacz CISO w M00 Governance: zostanie zaproponowany jako przewodniczący przeglądu"
+        "1": "Skonfiguruj w Governance → Role i organy organ prowadzący przegląd (np. zarząd) wraz z członkami; ewentualnie wyznacz CISO, proponowanego jako przewodniczący"
       }
     },
     "list": {
@@ -4530,7 +4560,9 @@
       "date_label": "Data spotkania",
       "cancel": "Anuluj",
       "saving": "Zapisywanie...",
-      "create": "Utwórz przegląd"
+      "create": "Utwórz przegląd",
+      "body_hint": "Zaproszonymi będzie {{n}} urzędujących członków organu: obecność rejestruje się w szczegółach.",
+      "no_body_hint": "Bez organu jako przewodniczący zostanie zaproponowany CISO wyznaczony w Governance; pozostałych zaproszonych dodaje się w szczegółach."
     },
     "actions": {
       "add": "Dodaj działanie",
@@ -4699,19 +4731,37 @@
       "objectives_list": "Status celów"
     },
     "participants": {
-      "heading": "Przewodniczący i uczestnicy",
-      "chair": "Przewodniczący",
-      "attendees": "Uczestnicy",
-      "none": "— Brak —",
-      "chair_missing": "Nie wskazano",
+      "heading": "Zaproszeni i obecność",
+      "chair": "Przewodniczy",
       "edit": "Edytuj",
       "save": "Zapisz",
       "saving": "Zapisywanie...",
       "cancel": "Anuluj",
-      "search_ph": "Szukaj osoby...",
-      "selected": "Wybrano: {{count}}",
-      "suggested": "Zaproponowano na podstawie roli w Governance: {{name}}",
-      "save_error": "Błąd podczas zapisywania"
+      "save_error": "Błąd podczas zapisywania",
+      "body": "Organ",
+      "no_body": "— Brak organu —",
+      "from_body": "Pobierz z organu",
+      "from_body_confirm": "Zastąpić zaproszonych członkami organu urzędującymi w dniu przeglądu? Wprowadzona obecność i goście zostaną utraceni.",
+      "col_name": "Imię i stanowisko",
+      "col_role": "Rola",
+      "col_attendance": "Obecność",
+      "position_ph": "Stanowisko",
+      "delegate_ph": "Imię pełnomocnika",
+      "add_member": "+ Członek organu",
+      "add_user": "+ Użytkownik platformy",
+      "guest_name_ph": "Gość: imię",
+      "none_yet": "Brak zaproszonych: dodaj ich przed posiedzeniem.",
+      "roles": {
+        "presidente": "Przewodniczący",
+        "membro": "Członek",
+        "segretario": "Sekretarz",
+        "ospite": "Gość"
+      },
+      "attendance": {
+        "presente": "Obecny",
+        "assente": "Nieobecny",
+        "delegato": "Przez pełnomocnika"
+      }
     },
     "agenda": {
       "heading": "Porządek obrad (ISO 27001 §9.3.2)",
@@ -4782,6 +4832,19 @@
       "ai_not_configured": "Silnik AI nie jest skonfigurowany (Ustawienia → AI Engine).",
       "ai_error": "Generowanie nie powiodło się",
       "save_error": "Błąd podczas zapisywania"
+    },
+    "approval_form": {
+      "approved_resolution": "Zatwierdzone przez {{body}} uchwałą nr {{ref}} z dnia {{date}} (zarejestrował(a) {{by}})",
+      "not_allowed": "Zatwierdzenie należy do urzędujących członków organu lub do governance.",
+      "mode_in_app": "Zatwierdź w aplikacji",
+      "mode_delibera": "Zarejestruj uchwałę organu",
+      "hint_in_app_member": "Zatwierdzasz jako członek organu: protokół wskaże imię i stanowisko.",
+      "hint_in_app_governance": "Jeśli organ podjął uchwałę poza platformą, zarejestruj ją: protokół wskaże jej dane.",
+      "hint_resolution": "Numer i data uchwały są wymagane; dokument (M07) jest dowodem dla audytora.",
+      "resolution_ref_ph": "Nr uchwały",
+      "document_search_ph": "Szukaj dokumentu...",
+      "no_document": "— Brak dokumentu —",
+      "register_resolution": "Zarejestruj zatwierdzenie"
     }
   },
   "objectives": {

@@ -346,24 +346,6 @@ def get_activity_schedule(plant=None, months_ahead: int = 6) -> list[dict]:
     except Exception:
         logger.exception("Errore nel calcolo delle scadenze degli obiettivi di sicurezza", exc_info=True)
 
-    # Security committee next meeting
-    try:
-        from apps.governance.models import SecurityCommittee
-
-        sc_qs = SecurityCommittee.objects.filter(next_meeting_at__isnull=False)
-        if plant:
-            sc_qs = sc_qs.filter(plant=plant)
-        for sc in sc_qs:
-            _add(
-                "security_committee",
-                f"Comitato: {sc.name}",
-                sc.next_meeting_at.date(),
-                "scheduled",
-                str(sc.id),
-            )
-    except Exception:
-        logger.exception("Errore nel calcolo delle scadenze comitato sicurezza", exc_info=True)
-
     # Audit findings
     try:
         from apps.audit_prep.models import AuditFinding

@@ -908,7 +908,7 @@
     "title": "Governance",
     "subtitle": "Normatif roller, komiteler ve görev devrimi",
     "tabs": {
-      "roles": "Roller ve komiteler",
+      "roles": "Roller ve organlar",
       "workflow": "Belge iş akışı (M07)",
       "frameworks": "Normatif çerçeveler",
       "risk_appetite": "Risk Appetite",
@@ -967,11 +967,11 @@
     },
     "sections": {
       "roles": "Normatif roller",
-      "committees": "Güvenlik komiteleri"
+      "committees": "Yönetişim organları"
     },
     "empty": {
       "roles": "Atanmış rol yok",
-      "committees": "Yapılandırılmış komite yok"
+      "committees": "Yapılandırılmış yönetişim organı yok"
     },
     "alerts": {
       "vacant_roles": "🚨 {{count}} zorunlu rol aktif sahipsiz",
@@ -1027,33 +1027,6 @@
       "valid_from": "Geçerlilik başlangıcı",
       "valid_until": "Geçerlilik sonu",
       "submit": "Rol ata"
-    },
-    "committees": {
-      "new": {
-        "open": "+ Yeni",
-        "title": "Yeni komite",
-        "submit": "Komite oluştur"
-      },
-      "fields": {
-        "name": "Ad",
-        "type": "Tür",
-        "frequency": "Sıklık",
-        "next_meeting": "Sonraki toplantı"
-      },
-      "placeholders": {
-        "name": "örn. Güvenlik Komitesi"
-      },
-      "types": {
-        "centrale": "Merkezi",
-        "bu": "BU"
-      },
-      "frequencies": {
-        "mensile": "Aylık",
-        "trimestrale": "Üç aylık",
-        "semestrale": "Altı aylık"
-      },
-      "frequency": "Sıklık: {{value}}",
-      "next_meeting": "sonraki:"
     },
     "terminate": {
       "title": "Rolü sonlandır",
@@ -1224,6 +1197,59 @@
       "optional": "İsteğe bağlı",
       "single_holder": "Tek görevli",
       "multi_holder": "Birden çok görevli"
+    },
+    "bodies": {
+      "new_open": "+ Yeni organ",
+      "intro": "Yönetim gözden geçirmesini kimin yürüttüğü ve onayladığı (ISO 27001 §5.1, §9.3): yönetim kurulu, güvenlik komitesi veya üst yönetim. Üyeler hesap olmadan da elle girilir; bağlı hesabı olanlar kendi organlarının gözden geçirmelerini uygulamada onaylayabilir.",
+      "new_title": "Yeni yönetişim organı",
+      "edit_title": "Yönetişim organını düzenle",
+      "member_new_title": "Yeni üye — {{body}}",
+      "member_edit_title": "Üyeyi düzenle",
+      "cda_hint": "NIS2 Madde 20 kapsamında yönetim organı: risk yönetimi tedbirlerini onaylar, bunlardan sorumludur ve eğitim almakla yükümlüdür.",
+      "whole_org": "Tüm kuruluş",
+      "scope_hint": "Birden fazla tüzel kişilik için her biri, yönettiği tesislerle birlikte ayrı bir organ.",
+      "nis2_badge": "NIS2 yönetim organı",
+      "no_chair": "Görevde başkan yok: gözden geçirme için önerilen bir başkan olmayacak.",
+      "no_members": "Görevde üye yok.",
+      "add_member": "+ Üye",
+      "show_former": "Eski üyeleri göster ({{n}})",
+      "hide_former": "Eski üyeleri gizle",
+      "end_term": "Görevi sonlandır",
+      "end_confirm": "{{name}} adlı kişinin görevi bugün sonlandırılsın mı? Geçmiş tutanaklarda kalacaktır.",
+      "delete_member_confirm": "{{name}} silinsin mi? Yalnızca hatalı giriş için kullanın: görevden ayrılan kişi bitiş tarihiyle kapatılır.",
+      "delete_confirm": "“{{name}}” organı silinsin mi?",
+      "account_inactive": "hesap devre dışı",
+      "ongoing": "görevde",
+      "no_account": "— Hesap yok —",
+      "user_hint": "İsteğe bağlı. Bağlı bir hesapla kişi bu organın gözden geçirmelerini uygulamada onaylayabilir.",
+      "fields": {
+        "name": "Ad",
+        "type": "Tür",
+        "scope": "Kapsam",
+        "description": "Görev tanımı",
+        "full_name": "Ad soyad",
+        "position": "Unvan",
+        "body_role": "Organdaki rolü",
+        "user": "Hesap",
+        "valid_from": "Görev başlangıcı",
+        "valid_until": "Bitiş",
+        "term": "Görev süresi"
+      },
+      "placeholders": {
+        "name": "ör. Yönetim Kurulu",
+        "description": "ör. Gözden geçirmeyi ve grubun güvenlik tedbirlerini onaylar",
+        "position": "ör. Genel Müdür"
+      },
+      "types": {
+        "cda": "Yönetim kurulu",
+        "comitato": "Güvenlik komitesi",
+        "direzione": "Üst yönetim"
+      },
+      "member_roles": {
+        "presidente": "Başkan",
+        "membro": "Üye",
+        "segretario": "Sekreter"
+      }
     }
   },
   "sidebar": {
@@ -3689,7 +3715,7 @@
         "access": "Erişimler",
         "responsibilities": "Sorumluluklar",
         "issues": "Tutarsızlıklar",
-        "committees": "Komiteler"
+        "committees": "Organlar"
       },
       "filter": {
         "all": "Tümü",
@@ -3714,10 +3740,14 @@
       },
       "section_access": "Erişimler (ne yapabilir)",
       "section_resp": "Sorumluluklar (neyden sorumlu)",
-      "committees_title": "Güvenlik komiteleri",
-      "committees_empty": "Yapılandırılmış güvenlik komitesi yok. Yönetişim → Komiteler'den oluşturun.",
-      "committees_next": "sonraki",
-      "committees_no_members": "Kayıtlı üye yok (henüz toplantı yok)"
+      "committees_title": "Yönetişim organları",
+      "committees_empty": "Yapılandırılmış yönetişim organı yok. Yönetişim → Yönetişim organları bölümünden oluşturun.",
+      "member_account": "hesaplı",
+      "member_no_account": "hesapsız",
+      "body_flag": {
+        "no_members": "Görevde üye yok",
+        "no_chair": "Görevde başkan yok"
+      }
     },
     "objectives": {
       "intro": "Hedefler (ISO/IEC 27001 §6.2) bir son tarihe bağlı hedef değerlerdir: bu sayfa zamanında ulaşılıp ulaşılamayacağını gösterir. Eşik değildirler: bir göstergenin şu anda kabul edilebilir seviyenin altında olup olmadığını bu sayfa değil KPI gösterir.",
@@ -4471,14 +4501,14 @@
       "title": "Yönetimin Gözden Geçirmesi — M13",
       "description": "ISO 27001 §9.3 yönetimin gözden geçirmesini yönetir: zorunlu maddeleri içeren gündem, toplantı anında dondurulan GRC verileri, madde bazında tartışma ve kararlar (bağlı görevler ve PDCA ile), yapay zekâ desteğiyle de hazırlanabilen yönetici özeti ve PDF veya HTML olarak indirilebilen tutanak.",
       "steps": {
-        "1": "Gözden geçirmeyi tesis (veya tüm kuruluş), tarih, başkan (CISO önerilir) ve katılımcılarla oluşturun: §9.3.2 gündemi otomatik oluşturulur",
+        "1": "Gözden geçirmeyi tesis (veya tüm kuruluş), tarih ve yönetişim organıyla oluşturun: davetliler organın görevdeki üyeleridir (organ yoksa CISO başkan olarak önerilir); §9.3.2 gündemi otomatik oluşturulur. Katılım ayrıntı ekranında kaydedilir",
         "2": "Anlık görüntüyü oluşturun: uyum, KPI'lar, denetimler, riskler, olaylar, belgeler ve önceki gözden geçirmelerin eylemleri dondurulur",
         "3": "Toplantıyı başlatın",
         "4": "Her gündem maddesi için verileri inceleyin, tartışmayı not edin ve kararları kaydedin (tür, sorumlu, son tarih)",
         "5": "Gerekirse bir karar, M08'de bir role atanmış görev ve/veya M11'de bir PDCA döngüsü açar",
         "6": "Toplantıyı kapatın: her zorunlu maddenin bir tartışması veya kararı olmalıdır; bir sonraki gözden geçirme tarihi önerilir ve takvimde görünür",
         "7": "Yönetici özetini yazın veya yapay zekâ ile taslak oluşturun, gözden geçirin ve kabul edin",
-        "8": "Gözden geçirmeyi resmi notla onaylayın: tutanak değiştirilemez hale gelir",
+        "8": "Gözden geçirmeyi onaylayın: uygulamada (hesabı olan bir organ üyesi veya yönetişim) ya da organ kararının numarası ve tarihini kaydederek. Tutanak değiştirilemez hale gelir",
         "9": "Tutanağı PDF veya HTML olarak indirin (denetim paketine de eklenir)"
       },
       "connections": {
@@ -4490,7 +4520,7 @@
         "ai": "Yönetici özeti taslağı, her zaman gözden geçirilip kabul edilmelidir"
       },
       "config_needed": {
-        "1": "M00 Governance'ta CISO'yu atayın: gözden geçirmenin başkanı olarak önerilir"
+        "1": "Governance → Roller ve organlar bölümünde gözden geçirmeyi yürüten organı (ör. yönetim kurulu) üyeleriyle yapılandırın; alternatif olarak başkan olarak önerilen CISO'yu atayın"
       }
     },
     "list": {
@@ -4530,7 +4560,9 @@
       "date_label": "Toplantı tarihi",
       "cancel": "İptal",
       "saving": "Kaydediliyor...",
-      "create": "Gözden geçirme oluştur"
+      "create": "Gözden geçirme oluştur",
+      "body_hint": "Davetliler organın görevdeki {{n}} üyesi olacak: katılım ayrıntı ekranında kaydedilir.",
+      "no_body_hint": "Organ olmadan, Yönetişim'de atanan CISO başkan olarak önerilir; diğer davetliler ayrıntı ekranından eklenir."
     },
     "actions": {
       "add": "Eylem ekle",
@@ -4699,19 +4731,37 @@
       "objectives_list": "Hedeflerin durumu"
     },
     "participants": {
-      "heading": "Başkan ve katılımcılar",
-      "chair": "Başkan",
-      "attendees": "Katılımcılar",
-      "none": "— Yok —",
-      "chair_missing": "Belirtilmedi",
+      "heading": "Davetliler ve katılım",
+      "chair": "Başkanlık eder",
       "edit": "Düzenle",
       "save": "Kaydet",
       "saving": "Kaydediliyor...",
       "cancel": "İptal",
-      "search_ph": "Kişi ara...",
-      "selected": "{{count}} seçildi",
-      "suggested": "Governance rolüne göre önerildi: {{name}}",
-      "save_error": "Kaydetme sırasında hata"
+      "save_error": "Kaydetme sırasında hata",
+      "body": "Organ",
+      "no_body": "— Organ yok —",
+      "from_body": "Organdan yeniden yükle",
+      "from_body_confirm": "Davetliler, gözden geçirme tarihinde görevde olan organ üyeleriyle değiştirilsin mi? Girilen katılım ve konuklar kaybolacak.",
+      "col_name": "Ad ve unvan",
+      "col_role": "Rol",
+      "col_attendance": "Katılım",
+      "position_ph": "Unvan",
+      "delegate_ph": "Vekilin adı",
+      "add_member": "+ Organ üyesi",
+      "add_user": "+ Platform kullanıcısı",
+      "guest_name_ph": "Konuk: ad",
+      "none_yet": "Davetli yok: toplantıdan önce ekleyin.",
+      "roles": {
+        "presidente": "Başkan",
+        "membro": "Üye",
+        "segretario": "Sekreter",
+        "ospite": "Konuk"
+      },
+      "attendance": {
+        "presente": "Katıldı",
+        "assente": "Katılmadı",
+        "delegato": "Vekaleten"
+      }
     },
     "agenda": {
       "heading": "Gündem (ISO 27001 §9.3.2)",
@@ -4782,6 +4832,19 @@
       "ai_not_configured": "Yapay zekâ motoru yapılandırılmamış (Ayarlar → AI Engine).",
       "ai_error": "Oluşturma başarısız oldu",
       "save_error": "Kaydetme sırasında hata"
+    },
+    "approval_form": {
+      "approved_resolution": "{{body}} tarafından {{date}} tarihli {{ref}} sayılı kararla onaylandı (kaydeden: {{by}})",
+      "not_allowed": "Onay, organın görevdeki üyelerine veya yönetişime aittir.",
+      "mode_in_app": "Uygulamada onayla",
+      "mode_delibera": "Organ kararını kaydet",
+      "hint_in_app_member": "Organ üyesi olarak onaylıyorsunuz: tutanakta adınız ve unvanınız yer alacak.",
+      "hint_in_app_governance": "Organ platform dışında karar aldıysa kararı kaydedin: tutanakta künyesi yer alacak.",
+      "hint_resolution": "Karar numarası ve tarihi zorunludur; belge (M07) denetçi için kanıttır.",
+      "resolution_ref_ph": "Karar no.",
+      "document_search_ph": "Belge ara...",
+      "no_document": "— Belge yok —",
+      "register_resolution": "Onayı kaydet"
     }
   },
   "objectives": {

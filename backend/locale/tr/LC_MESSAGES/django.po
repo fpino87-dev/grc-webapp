@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grc-webapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-17 21:56+0000\n"
+"POT-Creation-Date: 2026-09-18 15:35+0200\n"
 "PO-Revision-Date: 2026-03-18 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -17,7 +17,9 @@ msgid "L'autonomia nominale si applica solo a UPS e gruppi elettrogeni."
 msgstr "Nominal özerklik süresi yalnızca UPS ve jeneratörler için geçerlidir."
 
 #: apps/assets/services.py:264
-msgid "Impossibile eliminare: esistono valutazioni rischio attive collegate all'asset."
+msgid ""
+"Impossibile eliminare: esistono valutazioni rischio attive collegate "
+"all'asset."
 msgstr "Silinemiyor: varlığa bağlı aktif risk değerlendirmeleri var."
 
 #: apps/assets/services.py:269
@@ -190,7 +192,7 @@ msgid "Evidenza non trovata"
 msgstr "Kanıt bulunamadı"
 
 #: apps/controls/export_engine.py:207
-#: apps/management_review/report/builder.py:146
+#: apps/management_review/report/builder.py:181
 msgid "Compliant"
 msgstr "Uyumlu"
 
@@ -224,12 +226,17 @@ msgstr "İlgili değil"
 
 #: apps/controls/services/evidence.py:129
 #, python-format
-msgid "Documento collegato ma non classificato come '%(type)s' — verificare la classificazione"
-msgstr "Belge bağlı ancak '%(type)s' olarak sınıflandırılmamış — sınıflandırmayı kontrol edin"
+msgid ""
+"Documento collegato ma non classificato come '%(type)s' — verificare la "
+"classificazione"
+msgstr ""
+"Belge bağlı ancak '%(type)s' olarak sınıflandırılmamış — sınıflandırmayı "
+"kontrol edin"
 
 #: apps/controls/services/evidence.py:167
 #, python-format
-msgid "Evidenza '%(title)s' ha %(age)s giorni (max consigliato: %(max_age)s gg)"
+msgid ""
+"Evidenza '%(title)s' ha %(age)s giorni (max consigliato: %(max_age)s gg)"
 msgstr "'%(title)s' kanıtı %(age)s günlük (önerilen en fazla: %(max_age)s gün)"
 
 #: apps/controls/services/evidence.py:190
@@ -270,7 +277,8 @@ msgid "Solo il superuser può eliminare un framework."
 msgstr "Yalnızca superuser bir framework'ü silebilir."
 
 #: apps/controls/services/frameworks.py:258
-msgid "Impossibile eliminare: il framework è ancora assegnato a uno o più siti."
+msgid ""
+"Impossibile eliminare: il framework è ancora assegnato a uno o più siti."
 msgstr "Silinemiyor: çerçeve hâlâ bir veya daha fazla tesise atanmış."
 
 #: apps/controls/services/frameworks.py:284
@@ -278,7 +286,8 @@ msgid "Solo il superuser può archiviare un framework."
 msgstr "Yalnızca superuser bir framework'ü arşivleyebilir."
 
 #: apps/controls/services/frameworks.py:293
-msgid "Impossibile archiviare: il framework è ancora assegnato a uno o più siti."
+msgid ""
+"Impossibile archiviare: il framework è ancora assegnato a uno o più siti."
 msgstr "Arşivlenemiyor: çerçeve hâlâ bir veya daha fazla tesise atanmış."
 
 #: apps/controls/services/instances.py:53
@@ -297,29 +306,44 @@ msgid "• Evidenza scaduta: %(title)s (scaduta il %(date)s)"
 msgstr "• Süresi dolmuş kanıt: %(title)s (%(date)s tarihinde süresi doldu)"
 
 #: apps/controls/services/instances.py:68
-msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata."
-msgstr "En az bir geçerli kanıt iliştirilmeden durum 'uyumlu' olarak ayarlanamaz."
+msgid ""
+"Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida "
+"collegata."
+msgstr ""
+"En az bir geçerli kanıt iliştirilmeden durum 'uyumlu' olarak ayarlanamaz."
 
 #: apps/controls/services/instances.py:72
 msgid "Requisiti non soddisfatti per stato Compliant:\n"
 msgstr "Uyumlu durumu için karşılanmayan gereksinimler:\n"
 
 #: apps/controls/services/instances.py:87
-msgid "Almeno un documento approvato o un'evidenza valida richiesti per stato Parziale."
-msgstr "Kısmi durumu için en az bir onaylı doküman veya geçerli kanıt gereklidir."
+msgid ""
+"Almeno un documento approvato o un'evidenza valida richiesti per stato "
+"Parziale."
+msgstr ""
+"Kısmi durumu için en az bir onaylı doküman veya geçerli kanıt gereklidir."
 
 #: apps/controls/services/instances.py:93
-msgid "Lo stato N/A richiede una giustificazione scritta di almeno 20 caratteri."
+msgid ""
+"Lo stato N/A richiede una giustificazione scritta di almeno 20 caratteri."
 msgstr "N/A durumu için en az 20 karakterlik yazılı bir gerekçe gereklidir."
 
 #: apps/controls/services/instances.py:144
-msgid "La giustificazione di esclusione per SOA richiede almeno 50 caratteri. Specificare il motivo formale per cui il controllo non è applicabile."
-msgstr "SOA dışlama gerekçesi en az 50 karakter olmalıdır. Kontrolün neden uygulanabilir olmadığını resmi olarak belirtin."
+msgid ""
+"La giustificazione di esclusione per SOA richiede almeno 50 caratteri. "
+"Specificare il motivo formale per cui il controllo non è applicabile."
+msgstr ""
+"SOA dışlama gerekçesi en az 50 karakter olmalıdır. Kontrolün neden "
+"uygulanabilir olmadığını resmi olarak belirtin."
 
 #: apps/controls/services/instances.py:186
 #, python-format
-msgid "Impossibile eliminare il controllo: ha %(n)d valutazioni su uno o più siti. Il catalogo si gestisce ricaricando i framework."
-msgstr "Kontrol silinemiyor: bir veya daha fazla tesiste %(n)d değerlendirmesi var. Katalog, çerçeveler yeniden yüklenerek yönetilir."
+msgid ""
+"Impossibile eliminare il controllo: ha %(n)d valutazioni su uno o più siti. "
+"Il catalogo si gestisce ricaricando i framework."
+msgstr ""
+"Kontrol silinemiyor: bir veya daha fazla tesiste %(n)d değerlendirmesi var. "
+"Katalog, çerçeveler yeniden yüklenerek yönetilir."
 
 #: apps/controls/services/instances.py:220
 msgid "Eliminazione consentita solo per controlli non ancora valutati."
@@ -411,17 +435,24 @@ msgstr "'framework' parametresi zorunludur."
 
 #: apps/controls/views/reports.py:93
 msgid "Accesso negato: export aggregato riservato allo scope organizzazione."
-msgstr "Erişim reddedildi: toplu dışa aktarma yalnızca kuruluş kapsamına özeldir."
+msgstr ""
+"Erişim reddedildi: toplu dışa aktarma yalnızca kuruluş kapsamına özeldir."
 
 #: apps/controls/views/reports.py:99
 #, python-format
-msgid "Formato %(fmt)s non compatibile con framework %(fw)s. Usa uno di: %(allowed)s"
-msgstr "%(fmt)s formatı %(fw)s framework'ü ile uyumlu değil. Şunlardan birini kullanın: %(allowed)s"
+msgid ""
+"Formato %(fmt)s non compatibile con framework %(fw)s. Usa uno di: %(allowed)s"
+msgstr ""
+"%(fmt)s formatı %(fw)s framework'ü ile uyumlu değil. Şunlardan birini "
+"kullanın: %(allowed)s"
 
 #: apps/controls/views/reports.py:117
 #, python-format
-msgid "Framework '%(fw)s' non attivo per questo sito. Framework attivi: %(active)s"
-msgstr "'%(fw)s' framework'ü bu tesis için aktif değil. Aktif framework'ler: %(active)s"
+msgid ""
+"Framework '%(fw)s' non attivo per questo sito. Framework attivi: %(active)s"
+msgstr ""
+"'%(fw)s' framework'ü bu tesis için aktif değil. Aktif framework'ler: "
+"%(active)s"
 
 #: apps/controls/views/reports.py:132
 #, python-format
@@ -429,12 +460,16 @@ msgid "Errore generazione documento: %(err)s"
 msgstr "Doküman oluşturma hatası: %(err)s"
 
 #: apps/documents/services.py:293
-msgid "Eliminazione non consentita per documenti in approvazione o già approvati."
-msgstr "Onay sürecindeki veya zaten onaylanmış belgeler için silmeye izin verilmiyor."
+msgid ""
+"Eliminazione non consentita per documenti in approvazione o già approvati."
+msgstr ""
+"Onay sürecindeki veya zaten onaylanmış belgeler için silmeye izin verilmiyor."
 
 #: apps/documents/services.py:318
-msgid "Eliminazione non consentita: l'evidenza è collegata a controlli già valutati."
-msgstr "Silmeye izin verilmiyor: kanıt zaten değerlendirilmiş kontrollere bağlı."
+msgid ""
+"Eliminazione non consentita: l'evidenza è collegata a controlli già valutati."
+msgstr ""
+"Silmeye izin verilmiyor: kanıt zaten değerlendirilmiş kontrollere bağlı."
 
 #: apps/documents/views.py:141
 msgid "Non hai i permessi per inviare in revisione questo documento."
@@ -496,7 +531,7 @@ msgstr "RACI Sorumlu"
 msgid "RACI Accountable"
 msgstr "RACI Hesap Veren"
 
-#: apps/governance/serializers.py:159
+#: apps/governance/serializers.py:196
 msgid "Esiste già un obiettivo con questo codice in questo perimetro."
 msgstr "Bu kapsamda bu koda sahip bir hedef zaten var."
 
@@ -509,8 +544,12 @@ msgid "Questo utente ha già questo ruolo attivo per questo perimetro."
 msgstr "Bu kullanıcı bu kapsamda bu role zaten sahip."
 
 #: apps/governance/services.py:598
-msgid "Questo ruolo ha già un titolare attivo per questo perimetro. Usa Sostituisci per cambiare il titolare."
-msgstr "Bu rolün bu kapsamda zaten aktif bir sahibi var. Sahibi değiştirmek için Değiştir'i kullanın."
+msgid ""
+"Questo ruolo ha già un titolare attivo per questo perimetro. Usa Sostituisci "
+"per cambiare il titolare."
+msgstr ""
+"Bu rolün bu kapsamda zaten aktif bir sahibi var. Sahibi değiştirmek için "
+"Değiştir'i kullanın."
 
 #: apps/governance/services.py:941
 msgid "Indicare il KPI da cui leggere le misure."
@@ -533,7 +572,9 @@ msgid "La scadenza deve essere successiva all'inizio del periodo."
 msgstr "Son tarih, dönemin başlangıcından sonra olmalıdır."
 
 #: apps/governance/services.py:962
-msgid "Il target coincide con il valore di partenza: non c'è alcun miglioramento da misurare."
+msgid ""
+"Il target coincide con il valore di partenza: non c'è alcun miglioramento da "
+"misurare."
 msgstr "Hedef, başlangıç değeriyle aynı: ölçülecek bir iyileşme yok."
 
 #: apps/governance/services.py:969
@@ -593,25 +634,62 @@ msgstr "Geçersiz tarih (beklenen biçim: YYYY-AA-GG)."
 msgid "La data della misura precede l'inizio del periodo."
 msgstr "Ölçüm tarihi dönemin başlangıcından önce."
 
-#: apps/governance/views.py:80
+#: apps/governance/services.py:1210
+msgid "Accesso negato: l'organo governa siti fuori dal tuo perimetro."
+msgstr "Erişim reddedildi: organ, kapsamınız dışındaki tesisleri yönetiyor."
+
+#: apps/governance/services.py:1267
+msgid "La fine della carica precede l'inizio."
+msgstr "Görev bitişi başlangıçtan önce."
+
+#: apps/governance/services.py:1269
+msgid "Indicare nome e cognome."
+msgstr "Ad soyad girin."
+
+#: apps/governance/services.py:1280
+msgid ""
+"L'organo ha già un presidente in carica in questo periodo: chiudere prima la "
+"sua carica."
+msgstr "Organın bu dönemde zaten görevde bir başkanı var: önce onun görevini sonlandırın."
+
+#: apps/governance/services.py:1284
+msgid ""
+"Questo account è già collegato a un componente dell'organo nello stesso "
+"periodo."
+msgstr "Bu hesap aynı dönemde organın bir üyesine zaten bağlı."
+
+#: apps/governance/services.py:1332
+msgid ""
+"Il componente compare in un riesame: chiudere la carica con la data di fine "
+"invece di eliminarlo."
+msgstr "Üye bir gözden geçirmede yer alıyor: silmek yerine görevi bitiş tarihiyle sonlandırın."
+
+#: apps/governance/views.py:81
 msgid "Questo ruolo è già terminato."
 msgstr "Bu rol zaten sonlandırılmış."
 
-#: apps/governance/views.py:85
+#: apps/governance/views.py:86
 msgid "Motivo terminazione obbligatorio (min 5 caratteri)."
 msgstr "Sonlandırma gerekçesi zorunludur (en az 5 karakter)."
 
-#: apps/governance/views.py:117
+#: apps/governance/views.py:118
 msgid "new_user_id obbligatorio."
 msgstr "new_user_id zorunludur."
 
-#: apps/governance/views.py:120
+#: apps/governance/views.py:121
 msgid "Utente non trovato."
 msgstr "Kullanıcı bulunamadı."
 
+#: apps/governance/views.py:346
+msgid "Accesso negato per questo organo."
+msgstr "Bu organ için erişim reddedildi."
+
 #: apps/incidents/serializers.py:55
-msgid "La chiusura dell'incidente avviene solo tramite l'azione dedicata, previo RCA approvato."
-msgstr "Olayın kapatılması yalnızca onaylanmış bir RCA sonrası özel eylemle yapılır."
+msgid ""
+"La chiusura dell'incidente avviene solo tramite l'azione dedicata, previo "
+"RCA approvato."
+msgstr ""
+"Olayın kapatılması yalnızca onaylanmış bir RCA sonrası özel eylemle yapılır."
 
 #: apps/incidents/services.py:18
 msgid "RCA approvato obbligatorio per chiudere l'incidente."
@@ -620,7 +698,8 @@ msgstr "Olayı kapatmak için onaylanmış bir RCA zorunludur."
 #: apps/lessons/services.py:16
 #, python-format
 msgid "Solo una lezione in bozza può essere validata (stato attuale: %(s)s)."
-msgstr "Yalnızca taslak durumundaki bir ders doğrulanabilir (mevcut durum: %(s)s)."
+msgstr ""
+"Yalnızca taslak durumundaki bir ders doğrulanabilir (mevcut durum: %(s)s)."
 
 #: apps/lessons/services.py:46
 msgid "La lezione deve essere validata prima di poter essere propagata."
@@ -643,15 +722,20 @@ msgid "Cambiamenti nelle esigenze e aspettative delle parti interessate"
 msgstr "İlgili tarafların ihtiyaç ve beklentilerindeki değişiklikler"
 
 #: apps/management_review/agenda.py:14
-msgid "Prestazioni della sicurezza delle informazioni: non conformità e azioni correttive, monitoraggio e misurazioni, audit, obiettivi"
-msgstr "Bilgi güvenliği performansı: uygunsuzluklar ve düzeltici faaliyetler, izleme ve ölçme, denetimler, hedefler"
+msgid ""
+"Prestazioni della sicurezza delle informazioni: non conformità e azioni "
+"correttive, monitoraggio e misurazioni, audit, obiettivi"
+msgstr ""
+"Bilgi güvenliği performansı: uygunsuzluklar ve düzeltici faaliyetler, izleme "
+"ve ölçme, denetimler, hedefler"
 
 #: apps/management_review/agenda.py:16
 msgid "Feedback delle parti interessate"
 msgstr "İlgili taraflardan geri bildirim"
 
 #: apps/management_review/agenda.py:17
-msgid "Risultati della valutazione del rischio e stato del piano di trattamento"
+msgid ""
+"Risultati della valutazione del rischio e stato del piano di trattamento"
 msgstr "Risk değerlendirme sonuçları ve işleme planının durumu"
 
 #: apps/management_review/agenda.py:18
@@ -707,7 +791,7 @@ msgid "Osservazione"
 msgstr "Gözlem"
 
 #: apps/management_review/report/builder.py:31
-#: apps/management_review/report/builder.py:307
+#: apps/management_review/report/builder.py:342
 msgid "Opportunità"
 msgstr "Fırsat"
 
@@ -775,7 +859,7 @@ msgid "In linea"
 msgstr "Hedefte"
 
 #: apps/management_review/report/builder.py:50
-#: apps/management_review/report/builder.py:342
+#: apps/management_review/report/builder.py:377
 msgid "A rischio"
 msgstr "Risk altında"
 
@@ -792,7 +876,7 @@ msgid "—"
 msgstr "—"
 
 #: apps/management_review/report/builder.py:54
-#: apps/management_review/report/builder.py:452
+#: apps/management_review/report/builder.py:488
 msgid "Bozza"
 msgstr "Taslak"
 
@@ -812,622 +896,706 @@ msgstr "Ulaşılmadı"
 msgid "Sospeso"
 msgstr "Askıya alındı"
 
+#: apps/management_review/report/builder.py:78 apps/reporting/services.py:1144
+msgid "Presidente"
+msgstr "Başkan"
+
+#: apps/management_review/report/builder.py:78 apps/reporting/services.py:1145
+msgid "Membro"
+msgstr "Üye"
+
+#: apps/management_review/report/builder.py:79 apps/reporting/services.py:1146
+msgid "Segretario"
+msgstr "Sekreter"
+
+#: apps/management_review/report/builder.py:79
+msgid "Ospite"
+msgstr "Konuk"
+
+#: apps/management_review/report/builder.py:82
+msgid "presiede"
+msgstr "başkanlık eder"
+
+#: apps/management_review/report/builder.py:84
+msgid "Presente"
+msgstr "Katıldı"
+
+#: apps/management_review/report/builder.py:84
+msgid "Assente"
+msgstr "Katılmadı"
+
+#: apps/management_review/report/builder.py:85
+#, python-format
+msgid "Delegato: %(name)s"
+msgstr "Vekil: %(name)s"
+
+#: apps/management_review/report/builder.py:96 apps/reporting/views.py:139
+msgid "Organo di governo"
+msgstr "Yönetişim organı"
+
 #: apps/management_review/report/builder.py:98
+#: apps/management_review/report/builder.py:106
+msgid "Approvato da"
+msgstr "Onaylayan"
+
+#: apps/management_review/report/builder.py:99
+msgid "Delibera"
+msgstr "Karar"
+
+#: apps/management_review/report/builder.py:99
+#, python-format
+msgid "n. %(ref)s del %(date)s"
+msgstr "%(date)s tarihli %(ref)s sayılı"
+
+#: apps/management_review/report/builder.py:101
+msgid "Registrata da"
+msgstr "Kaydeden"
+
+#: apps/management_review/report/builder.py:106
+#: apps/management_review/report/builder.py:236
+msgid "Data"
+msgstr "Tarih"
+
+#: apps/management_review/report/builder.py:107
+msgid "Note"
+msgstr "Notlar"
+
+#: apps/management_review/report/builder.py:133
 msgid "Primo riesame del perimetro: nessuna azione precedente."
 msgstr "Bu kapsamdaki ilk gözden geçirme: önceki eylem yok."
 
-#: apps/management_review/report/builder.py:105
-#: apps/management_review/report/builder.py:309
-#: apps/management_review/report/builder.py:375
+#: apps/management_review/report/builder.py:140
+#: apps/management_review/report/builder.py:344
+#: apps/management_review/report/builder.py:410
 msgid "Chiusa"
 msgstr "Kapalı"
 
-#: apps/management_review/report/builder.py:106
+#: apps/management_review/report/builder.py:141
 msgid "Scaduta"
 msgstr "Süresi geçmiş"
 
-#: apps/management_review/report/builder.py:106
-#: apps/management_review/report/builder.py:309
-#: apps/management_review/report/builder.py:375
+#: apps/management_review/report/builder.py:141
+#: apps/management_review/report/builder.py:344
+#: apps/management_review/report/builder.py:410
 msgid "Aperta"
 msgstr "Açık"
 
-#: apps/management_review/report/builder.py:114
+#: apps/management_review/report/builder.py:149
 #, python-format
 msgid "Riesame precedente: %(title)s del %(date)s."
 msgstr "Önceki gözden geçirme: %(date)s tarihli %(title)s."
 
-#: apps/management_review/report/builder.py:116
+#: apps/management_review/report/builder.py:151
 msgid "Azioni considerate"
 msgstr "Ele alınan eylemler"
 
-#: apps/management_review/report/builder.py:117
+#: apps/management_review/report/builder.py:152
 msgid "Chiuse"
 msgstr "Kapalı"
 
-#: apps/management_review/report/builder.py:118
+#: apps/management_review/report/builder.py:153
 msgid "Aperte"
 msgstr "Açık"
 
-#: apps/management_review/report/builder.py:119
+#: apps/management_review/report/builder.py:154
 msgid "Scadute"
 msgstr "Süresi geçmiş"
 
-#: apps/management_review/report/builder.py:120
+#: apps/management_review/report/builder.py:155
 msgid "Azione"
 msgstr "Eylem"
 
-#: apps/management_review/report/builder.py:120
-#: apps/management_review/report/builder.py:256
-#: apps/management_review/report/builder.py:263
-#: apps/management_review/report/builder.py:278
-#: apps/management_review/report/builder.py:383
+#: apps/management_review/report/builder.py:155
+#: apps/management_review/report/builder.py:291
+#: apps/management_review/report/builder.py:298
+#: apps/management_review/report/builder.py:313
+#: apps/management_review/report/builder.py:418
 msgid "Owner"
 msgstr "Sahip"
 
-#: apps/management_review/report/builder.py:120
-#: apps/management_review/report/builder.py:237
-#: apps/management_review/report/builder.py:345
-#: apps/management_review/report/builder.py:383 apps/reporting/views.py:120
+#: apps/management_review/report/builder.py:155
+#: apps/management_review/report/builder.py:272
+#: apps/management_review/report/builder.py:380
+#: apps/management_review/report/builder.py:418 apps/reporting/views.py:120
 msgid "Scadenza"
 msgstr "Son Tarih"
 
-#: apps/management_review/report/builder.py:120
-#: apps/management_review/report/builder.py:175
-#: apps/management_review/report/builder.py:215
-#: apps/management_review/report/builder.py:307
-#: apps/management_review/report/builder.py:383
+#: apps/management_review/report/builder.py:155
+#: apps/management_review/report/builder.py:210
+#: apps/management_review/report/builder.py:250
+#: apps/management_review/report/builder.py:342
+#: apps/management_review/report/builder.py:418
 msgid "Stato"
 msgstr "Durum"
 
-#: apps/management_review/report/builder.py:120
+#: apps/management_review/report/builder.py:155
 msgid "Riesame"
 msgstr "Gözden geçirme"
 
-#: apps/management_review/report/builder.py:121
+#: apps/management_review/report/builder.py:156
 msgid "Nessuna azione dai riesami precedenti"
 msgstr "Önceki gözden geçirmelerden eylem yok"
 
-#: apps/management_review/report/builder.py:145
+#: apps/management_review/report/builder.py:180
 msgid "Compliance per framework"
 msgstr "Çerçeveye göre uygunluk"
 
-#: apps/management_review/report/builder.py:146
-#: apps/management_review/report/builder.py:150
-#: apps/management_review/report/builder.py:201
+#: apps/management_review/report/builder.py:181
+#: apps/management_review/report/builder.py:185
+#: apps/management_review/report/builder.py:236
 msgid "Framework"
 msgstr "Çerçeve"
 
-#: apps/management_review/report/builder.py:146
+#: apps/management_review/report/builder.py:181
 msgid "Controlli"
 msgstr "Kontroller"
 
-#: apps/management_review/report/builder.py:146
-#: apps/management_review/report/builder.py:479
+#: apps/management_review/report/builder.py:181
+#: apps/management_review/report/builder.py:519
 #, python-format
 msgid "% compliant"
 msgstr "% uyumlu"
 
-#: apps/management_review/report/builder.py:146
+#: apps/management_review/report/builder.py:181
 msgid "Gap/parziali"
 msgstr "Boşluk/kısmi"
 
-#: apps/management_review/report/builder.py:147
+#: apps/management_review/report/builder.py:182
 msgid "Non valutati"
 msgstr "Değerlendirilmedi"
 
-#: apps/management_review/report/builder.py:147
-#: apps/management_review/report/builder.py:254
+#: apps/management_review/report/builder.py:182
+#: apps/management_review/report/builder.py:289
 msgid "Evidenze scadute"
 msgstr "Süresi geçmiş kanıtlar"
 
-#: apps/management_review/report/builder.py:147
+#: apps/management_review/report/builder.py:182
 msgid "Nessun dato disponibile"
 msgstr "Kullanılabilir veri yok"
 
-#: apps/management_review/report/builder.py:149
+#: apps/management_review/report/builder.py:184
 msgid "Controlli in gap (primi 5 per framework)"
 msgstr "Boşluklu kontroller (çerçeve başına ilk 5)"
 
-#: apps/management_review/report/builder.py:150
+#: apps/management_review/report/builder.py:185
 msgid "Controllo"
 msgstr "Kontrol"
 
-#: apps/management_review/report/builder.py:150
-#: apps/management_review/report/builder.py:446
+#: apps/management_review/report/builder.py:185
+#: apps/management_review/report/builder.py:482
 msgid "Titolo"
 msgstr "Başlık"
 
-#: apps/management_review/report/builder.py:171
+#: apps/management_review/report/builder.py:206
 msgid "KPI monitorati"
 msgstr "İzlenen KPI'lar"
 
-#: apps/management_review/report/builder.py:171
+#: apps/management_review/report/builder.py:206
 msgid "Critici"
 msgstr "Kritik"
 
-#: apps/management_review/report/builder.py:172
+#: apps/management_review/report/builder.py:207
 msgid "In attenzione"
 msgstr "Uyarıda"
 
-#: apps/management_review/report/builder.py:173
+#: apps/management_review/report/builder.py:208
 msgid "Senza dati"
 msgstr "Veri yok"
 
-#: apps/management_review/report/builder.py:174
+#: apps/management_review/report/builder.py:209
 msgid "KPI fuori soglia"
 msgstr "Eşik dışı KPI'lar"
 
-#: apps/management_review/report/builder.py:175
+#: apps/management_review/report/builder.py:210
 msgid "KPI"
 msgstr "KPI"
 
-#: apps/management_review/report/builder.py:175
+#: apps/management_review/report/builder.py:210
 msgid "Valore"
 msgstr "Değer"
 
-#: apps/management_review/report/builder.py:175
+#: apps/management_review/report/builder.py:210
 msgid "Soglie att./crit."
 msgstr "Uyarı/kritik eşikler"
 
-#: apps/management_review/report/builder.py:175
+#: apps/management_review/report/builder.py:210
 msgid "Settimana"
 msgstr "Hafta"
 
-#: apps/management_review/report/builder.py:196
+#: apps/management_review/report/builder.py:231
 msgid "Audit (12 mesi)"
 msgstr "Denetimler (12 ay)"
 
-#: apps/management_review/report/builder.py:197
+#: apps/management_review/report/builder.py:232
 msgid "NC maggiori aperte"
 msgstr "Açık büyük uygunsuzluklar"
 
-#: apps/management_review/report/builder.py:198
+#: apps/management_review/report/builder.py:233
 msgid "NC minori aperte"
 msgstr "Açık küçük uygunsuzluklar"
 
-#: apps/management_review/report/builder.py:199
+#: apps/management_review/report/builder.py:234
 msgid "Finding scaduti"
 msgstr "Süresi geçmiş bulgular"
 
-#: apps/management_review/report/builder.py:200
+#: apps/management_review/report/builder.py:235
 msgid "Audit degli ultimi 12 mesi"
 msgstr "Son 12 aydaki denetimler"
 
-#: apps/management_review/report/builder.py:201
-#: apps/management_review/report/builder.py:203
-#: apps/management_review/report/builder.py:307
+#: apps/management_review/report/builder.py:236
+#: apps/management_review/report/builder.py:238
+#: apps/management_review/report/builder.py:342
 msgid "Audit"
 msgstr "Denetim"
 
-#: apps/management_review/report/builder.py:201
-#: apps/management_review/report/html.py:98
-#: apps/management_review/report/pdf.py:208
-msgid "Data"
-msgstr "Tarih"
-
-#: apps/management_review/report/builder.py:201
+#: apps/management_review/report/builder.py:236
 msgid "Readiness"
 msgstr "Hazırlık"
 
-#: apps/management_review/report/builder.py:201
-#: apps/management_review/report/builder.py:203
+#: apps/management_review/report/builder.py:236
+#: apps/management_review/report/builder.py:238
 msgid "Finding"
 msgstr "Bulgu"
 
-#: apps/management_review/report/builder.py:203
+#: apps/management_review/report/builder.py:238
 msgid "Non conformità aperte"
 msgstr "Açık uygunsuzluklar"
 
-#: apps/management_review/report/builder.py:203
-#: apps/management_review/report/builder.py:383 apps/reporting/views.py:119
+#: apps/management_review/report/builder.py:238
+#: apps/management_review/report/builder.py:418 apps/reporting/views.py:119
 msgid "Tipo"
 msgstr "Tür"
 
-#: apps/management_review/report/builder.py:203
+#: apps/management_review/report/builder.py:238
 msgid "Risposta entro"
 msgstr "Yanıt tarihi"
 
-#: apps/management_review/report/builder.py:215
+#: apps/management_review/report/builder.py:250
 msgid "Incidente"
 msgstr "Olay"
 
-#: apps/management_review/report/builder.py:215
+#: apps/management_review/report/builder.py:250
 msgid "Rilevato il"
 msgstr "Tespit tarihi"
 
-#: apps/management_review/report/builder.py:215
+#: apps/management_review/report/builder.py:250
 msgid "Gravità"
 msgstr "Önem derecesi"
 
-#: apps/management_review/report/builder.py:217
+#: apps/management_review/report/builder.py:252
 msgid "Incidenti (12 mesi)"
 msgstr "Olaylar (12 ay)"
 
-#: apps/management_review/report/builder.py:218
+#: apps/management_review/report/builder.py:253
 msgid "Notificati NIS2"
 msgstr "NIS2 kapsamında bildirilen"
 
-#: apps/management_review/report/builder.py:219
+#: apps/management_review/report/builder.py:254
 msgid "Ancora aperti"
 msgstr "Hâlâ açık"
 
-#: apps/management_review/report/builder.py:220
+#: apps/management_review/report/builder.py:255
 msgid "Chiusi senza RCA"
 msgstr "Kök neden analizi olmadan kapatıldı"
 
-#: apps/management_review/report/builder.py:221
-#: apps/management_review/report/builder.py:479
+#: apps/management_review/report/builder.py:256
+#: apps/management_review/report/builder.py:519
 msgid "Incidenti aperti"
 msgstr "Açık olaylar"
 
-#: apps/management_review/report/builder.py:222
+#: apps/management_review/report/builder.py:257
 msgid "Incidenti notificati NIS2 (12 mesi)"
 msgstr "NIS2 kapsamında bildirilen olaylar (12 ay)"
 
-#: apps/management_review/report/builder.py:230
+#: apps/management_review/report/builder.py:265
 msgid "Cicli PDCA aperti"
 msgstr "Açık PUKÖ döngüleri"
 
-#: apps/management_review/report/builder.py:231
+#: apps/management_review/report/builder.py:266
 msgid "Fermi in PLAN >90gg"
 msgstr "PLAN aşamasında >90 gün"
 
-#: apps/management_review/report/builder.py:232
+#: apps/management_review/report/builder.py:267
 msgid "PDCA chiusi (12 mesi)"
 msgstr "Kapatılan PUKÖ (12 ay)"
 
-#: apps/management_review/report/builder.py:233
-#: apps/management_review/report/builder.py:479
+#: apps/management_review/report/builder.py:268
+#: apps/management_review/report/builder.py:519
 msgid "Task scaduti"
 msgstr "Süresi geçmiş görevler"
 
-#: apps/management_review/report/builder.py:234
+#: apps/management_review/report/builder.py:269
 msgid "Cicli PDCA fermi in PLAN da oltre 90 giorni"
 msgstr "90 günden uzun süredir PLAN aşamasında kalan PUKÖ döngüleri"
 
-#: apps/management_review/report/builder.py:234
+#: apps/management_review/report/builder.py:269
 msgid "Ciclo"
 msgstr "Döngü"
 
-#: apps/management_review/report/builder.py:234
+#: apps/management_review/report/builder.py:269
 msgid "Aperto il"
 msgstr "Açılış tarihi"
 
-#: apps/management_review/report/builder.py:237
+#: apps/management_review/report/builder.py:272
 msgid "Task scaduti (per priorità)"
 msgstr "Süresi geçmiş görevler (önceliğe göre)"
 
-#: apps/management_review/report/builder.py:237
+#: apps/management_review/report/builder.py:272
 msgid "Task"
 msgstr "Görev"
 
-#: apps/management_review/report/builder.py:237
+#: apps/management_review/report/builder.py:272
 msgid "Priorità"
 msgstr "Öncelik"
 
-#: apps/management_review/report/builder.py:237 apps/reporting/views.py:119
+#: apps/management_review/report/builder.py:272
+#: apps/management_review/report/builder.py:514 apps/reporting/views.py:119
 msgid "Ruolo"
 msgstr "Rol"
 
-#: apps/management_review/report/builder.py:251
+#: apps/management_review/report/builder.py:286
 msgid "Documenti approvati"
 msgstr "Onaylanmış belgeler"
 
-#: apps/management_review/report/builder.py:252
+#: apps/management_review/report/builder.py:287
 msgid "In scadenza (90gg)"
 msgstr "Süresi dolacak (90 gün)"
 
-#: apps/management_review/report/builder.py:253
-#: apps/management_review/report/builder.py:258
+#: apps/management_review/report/builder.py:288
+#: apps/management_review/report/builder.py:293
 msgid "Documenti scaduti"
 msgstr "Süresi geçmiş belgeler"
 
-#: apps/management_review/report/builder.py:256
-#: apps/management_review/report/builder.py:263
+#: apps/management_review/report/builder.py:291
+#: apps/management_review/report/builder.py:298
 msgid "Documento"
 msgstr "Belge"
 
-#: apps/management_review/report/builder.py:256
+#: apps/management_review/report/builder.py:291
 msgid "Revisione prevista"
 msgstr "Planlanan gözden geçirme"
 
-#: apps/management_review/report/builder.py:260
+#: apps/management_review/report/builder.py:295
 msgid "Documenti in scadenza entro 90 giorni"
 msgstr "90 gün içinde süresi dolacak belgeler"
 
-#: apps/management_review/report/builder.py:262
+#: apps/management_review/report/builder.py:297
 #, python-format
 msgid "Documenti approvati dal %(date)s"
 msgstr "%(date)s tarihinden beri onaylanan belgeler"
 
-#: apps/management_review/report/builder.py:263
+#: apps/management_review/report/builder.py:298
 msgid "Approvato il"
 msgstr "Onay tarihi"
 
-#: apps/management_review/report/builder.py:271
-#: apps/management_review/report/builder.py:479
+#: apps/management_review/report/builder.py:306
+#: apps/management_review/report/builder.py:519
 msgid "Rischi critici"
 msgstr "Kritik riskler"
 
-#: apps/management_review/report/builder.py:272
+#: apps/management_review/report/builder.py:307
 msgid "Rischi medi"
 msgstr "Orta riskler"
 
-#: apps/management_review/report/builder.py:273
+#: apps/management_review/report/builder.py:308
 msgid "Rischi bassi"
 msgstr "Düşük riskler"
 
-#: apps/management_review/report/builder.py:274
+#: apps/management_review/report/builder.py:309
 msgid "Critici senza piano"
 msgstr "Planı olmayan kritikler"
 
-#: apps/management_review/report/builder.py:277
+#: apps/management_review/report/builder.py:312
 msgid "Rischi critici (residuo più alto)"
 msgstr "Kritik riskler (en yüksek artık risk)"
 
-#: apps/management_review/report/builder.py:278
-#: apps/management_review/report/builder.py:288
+#: apps/management_review/report/builder.py:313
+#: apps/management_review/report/builder.py:323
 msgid "Rischio"
 msgstr "Risk"
 
-#: apps/management_review/report/builder.py:278
+#: apps/management_review/report/builder.py:313
 msgid "Asset / processo"
 msgstr "Varlık / süreç"
 
-#: apps/management_review/report/builder.py:278
+#: apps/management_review/report/builder.py:313
 msgid "Inerente → residuo"
 msgstr "Doğal → artık"
 
-#: apps/management_review/report/builder.py:278
+#: apps/management_review/report/builder.py:313
 msgid "Trattamento"
 msgstr "İşleme"
 
-#: apps/management_review/report/builder.py:279
+#: apps/management_review/report/builder.py:314
 msgid "Piano"
 msgstr "Plan"
 
-#: apps/management_review/report/builder.py:283 apps/reporting/views.py:125
+#: apps/management_review/report/builder.py:318 apps/reporting/views.py:125
+#: apps/reporting/views.py:138
 msgid "Sì"
 msgstr "Evet"
 
-#: apps/management_review/report/builder.py:283 apps/reporting/views.py:125
+#: apps/management_review/report/builder.py:318 apps/reporting/views.py:125
 msgid "No"
 msgstr "Hayır"
 
-#: apps/management_review/report/builder.py:287
+#: apps/management_review/report/builder.py:322
 msgid "Rischi accettati formalmente"
 msgstr "Resmî olarak kabul edilen riskler"
 
-#: apps/management_review/report/builder.py:288
+#: apps/management_review/report/builder.py:323
 msgid "Residuo"
 msgstr "Artık"
 
-#: apps/management_review/report/builder.py:288
+#: apps/management_review/report/builder.py:323
 msgid "Accettato da"
 msgstr "Kabul eden"
 
-#: apps/management_review/report/builder.py:288
+#: apps/management_review/report/builder.py:323
 msgid "Scadenza accettazione"
 msgstr "Kabul bitiş tarihi"
 
-#: apps/management_review/report/builder.py:295
+#: apps/management_review/report/builder.py:330
 msgid "Continuità operativa"
 msgstr "İş sürekliliği"
 
-#: apps/management_review/report/builder.py:296
+#: apps/management_review/report/builder.py:331
 #, python-format
 msgid "%(n)s processi critici senza piano BCP: %(names)s"
 msgstr "İş sürekliliği planı olmayan %(n)s kritik süreç: %(names)s"
 
-#: apps/management_review/report/builder.py:306
+#: apps/management_review/report/builder.py:341
 msgid "Opportunità di miglioramento emerse dagli audit"
 msgstr "Denetimlerden çıkan iyileştirme fırsatları"
 
-#: apps/management_review/report/builder.py:340
+#: apps/management_review/report/builder.py:375
 msgid "Obiettivi attivi"
 msgstr "Aktif hedefler"
 
-#: apps/management_review/report/builder.py:341
+#: apps/management_review/report/builder.py:376
 msgid "Mancati o fuori traiettoria"
 msgstr "Kaçırılan veya hedef dışı"
 
-#: apps/management_review/report/builder.py:343
+#: apps/management_review/report/builder.py:378
 msgid "Raggiunti (12 mesi)"
 msgstr "Ulaşılan (12 ay)"
 
-#: apps/management_review/report/builder.py:344
+#: apps/management_review/report/builder.py:379
 msgid "Obiettivi di sicurezza (§6.2)"
 msgstr "Bilgi güvenliği hedefleri (§6.2)"
 
-#: apps/management_review/report/builder.py:345
+#: apps/management_review/report/builder.py:380
 msgid "Obiettivo"
 msgstr "Hedef"
 
-#: apps/management_review/report/builder.py:345
+#: apps/management_review/report/builder.py:380
 msgid "Partenza → target"
 msgstr "Başlangıç → hedef"
 
-#: apps/management_review/report/builder.py:345
+#: apps/management_review/report/builder.py:380
 msgid "Valore attuale"
 msgstr "Güncel değer"
 
-#: apps/management_review/report/builder.py:345
+#: apps/management_review/report/builder.py:380
 msgid "Progresso"
 msgstr "İlerleme"
 
-#: apps/management_review/report/builder.py:346
+#: apps/management_review/report/builder.py:381
 msgid "Traiettoria"
 msgstr "Gidişat"
 
-#: apps/management_review/report/builder.py:346
+#: apps/management_review/report/builder.py:381
 msgid "Responsabile"
 msgstr "Sorumlu"
 
-#: apps/management_review/report/builder.py:347
+#: apps/management_review/report/builder.py:382
 msgid "Nessun obiettivo di sicurezza definito per questo perimetro."
 msgstr "Bu kapsam için tanımlanmış güvenlik hedefi yok."
 
-#: apps/management_review/report/builder.py:366
+#: apps/management_review/report/builder.py:401
 #, python-format
 msgid "Task: %(status)s"
 msgstr "Görev: %(status)s"
 
-#: apps/management_review/report/builder.py:368
+#: apps/management_review/report/builder.py:403
 #, python-format
 msgid "PDCA: %(phase)s"
 msgstr "PUKÖ: %(phase)s"
 
-#: apps/management_review/report/builder.py:383
+#: apps/management_review/report/builder.py:418
 msgid "Decisione"
 msgstr "Karar"
 
-#: apps/management_review/report/builder.py:383
+#: apps/management_review/report/builder.py:418
 msgid "Collegamenti"
 msgstr "Bağlantılar"
 
-#: apps/management_review/report/builder.py:391
+#: apps/management_review/report/builder.py:426
 #, python-format
 msgid "Ci sono %(n)s rischi senza owner assegnato"
 msgstr "%(n)s riskin atanmış sahibi yok"
 
-#: apps/management_review/report/builder.py:393
+#: apps/management_review/report/builder.py:428
 #, python-format
 msgid "%(n)s rischi critici senza piano di mitigazione"
 msgstr "Azaltma planı olmayan %(n)s kritik risk"
 
-#: apps/management_review/report/builder.py:395
+#: apps/management_review/report/builder.py:430
 #, python-format
 msgid "%(n)s processi critici senza piano BCP"
 msgstr "İş sürekliliği planı olmayan %(n)s kritik süreç"
 
-#: apps/management_review/report/builder.py:397
+#: apps/management_review/report/builder.py:432
 #, python-format
 msgid "%(n)s evidenze scadute"
 msgstr "Süresi geçmiş %(n)s kanıt"
 
-#: apps/management_review/report/builder.py:399
+#: apps/management_review/report/builder.py:434
 #, python-format
 msgid "%(n)s cicli PDCA bloccati in fase PLAN da oltre 90 giorni"
 msgstr "90 günden uzun süredir PLAN aşamasında kalan %(n)s PUKÖ döngüsü"
 
-#: apps/management_review/report/builder.py:402
+#: apps/management_review/report/builder.py:437
 #, python-format
 msgid "%(n)s azioni dei riesami precedenti scadute e ancora aperte"
 msgstr "Önceki gözden geçirmelerden %(n)s eylem süresi geçmiş ve hâlâ açık"
 
-#: apps/management_review/report/builder.py:404
+#: apps/management_review/report/builder.py:439
 #, python-format
 msgid "%(n)s non conformità maggiori aperte"
 msgstr "%(n)s açık büyük uygunsuzluk"
 
-#: apps/management_review/report/builder.py:410
+#: apps/management_review/report/builder.py:445
 #, python-format
 msgid "%(n)s obiettivi di sicurezza mancati o fuori traiettoria"
 msgstr "%(n)s güvenlik hedefi kaçırıldı veya hedef dışında"
 
-#: apps/management_review/report/builder.py:433
+#: apps/management_review/report/builder.py:468
 msgid "Riesame periodico dei sistemi di gestione"
 msgstr "Yönetim sistemlerinin periyodik gözden geçirmesi"
 
-#: apps/management_review/report/builder.py:447 apps/reporting/views.py:119
+#: apps/management_review/report/builder.py:483 apps/reporting/views.py:119
 msgid "Perimetro"
 msgstr "Kapsam"
 
-#: apps/management_review/report/builder.py:447
+#: apps/management_review/report/builder.py:483
 msgid "Intera organizzazione"
 msgstr "Tüm kuruluş"
 
-#: apps/management_review/report/builder.py:448
+#: apps/management_review/report/builder.py:484
+msgid "Organo"
+msgstr "Organ"
+
+#: apps/management_review/report/builder.py:485
 msgid "Data riunione"
 msgstr "Toplantı tarihi"
 
-#: apps/management_review/report/builder.py:449
+#: apps/management_review/report/builder.py:486
 msgid "Presieduto da"
 msgstr "Başkan"
 
-#: apps/management_review/report/builder.py:450
-msgid "Partecipanti"
-msgstr "Katılımcılar"
-
-#: apps/management_review/report/builder.py:451
+#: apps/management_review/report/builder.py:487
 msgid "Dati congelati il"
 msgstr "Veriler donduruldu"
 
-#: apps/management_review/report/builder.py:452
+#: apps/management_review/report/builder.py:488
 msgid "Stato approvazione"
 msgstr "Onay durumu"
 
-#: apps/management_review/report/builder.py:452
+#: apps/management_review/report/builder.py:488
 msgid "Approvato"
 msgstr "Onaylandı"
 
-#: apps/management_review/report/builder.py:454
+#: apps/management_review/report/builder.py:490
 msgid "Prossimo riesame"
 msgstr "Sonraki gözden geçirme"
 
-#: apps/management_review/report/builder.py:466
+#: apps/management_review/report/builder.py:502
 #, python-format
-msgid "Testo redatto con il supporto dell'intelligenza artificiale%(edited)s, verificato e accettato da %(who)s il %(when)s."
-msgstr "Yapay zekâ desteğiyle hazırlanan metin%(edited)s, %(who)s tarafından %(when)s tarihinde doğrulanıp kabul edildi."
+msgid ""
+"Testo redatto con il supporto dell'intelligenza artificiale%(edited)s, "
+"verificato e accettato da %(who)s il %(when)s."
+msgstr ""
+"Yapay zekâ desteğiyle hazırlanan metin%(edited)s, %(who)s tarafından "
+"%(when)s tarihinde doğrulanıp kabul edildi."
 
-#: apps/management_review/report/builder.py:468
+#: apps/management_review/report/builder.py:504
 msgid " e modificato"
 msgstr " ve düzenlendi"
 
-#: apps/management_review/report/builder.py:471
+#: apps/management_review/report/builder.py:507
 #, python-format
 msgid "Redatto da %(who)s il %(when)s."
 msgstr "%(who)s tarafından %(when)s tarihinde hazırlandı."
 
-#: apps/management_review/report/builder.py:478
+#: apps/management_review/report/builder.py:513
+msgid "Partecipanti"
+msgstr "Katılımcılar"
+
+#: apps/management_review/report/builder.py:514
+msgid "Nome"
+msgstr "Ad"
+
+#: apps/management_review/report/builder.py:514
+msgid "Qualifica"
+msgstr "Unvan"
+
+#: apps/management_review/report/builder.py:514
+msgid "Presenza"
+msgstr "Katılım"
+
+#: apps/management_review/report/builder.py:518
 msgid "Quadro per sito"
 msgstr "Tesise göre genel görünüm"
 
-#: apps/management_review/report/builder.py:479
+#: apps/management_review/report/builder.py:519
 msgid "Sito"
 msgstr "Tesis"
 
-#: apps/management_review/report/builder.py:492
+#: apps/management_review/report/builder.py:532
 msgid "Discussione"
 msgstr "Görüşme"
 
-#: apps/management_review/report/builder.py:493
+#: apps/management_review/report/builder.py:533
 msgid "Nessuna annotazione."
 msgstr "Not yok."
 
-#: apps/management_review/report/builder.py:496
+#: apps/management_review/report/builder.py:536
 msgid "Decisioni"
 msgstr "Kararlar"
 
-#: apps/management_review/report/builder.py:500
+#: apps/management_review/report/builder.py:540
 msgid "Altre decisioni"
 msgstr "Diğer kararlar"
 
-#: apps/management_review/report/builder.py:507
+#: apps/management_review/report/builder.py:547
 msgid "Dati del riesame"
 msgstr "Gözden geçirme verileri"
 
-#: apps/management_review/report/builder.py:508
+#: apps/management_review/report/builder.py:548
 msgid "Decisioni e azioni"
 msgstr "Kararlar ve eylemler"
 
-#: apps/management_review/report/builder.py:509
+#: apps/management_review/report/builder.py:549
 msgid "Nessuna azione registrata"
 msgstr "Kayıtlı eylem yok"
 
-#: apps/management_review/report/builder.py:514
+#: apps/management_review/report/builder.py:554
 msgid "Riepilogo delle decisioni"
 msgstr "Kararların özeti"
 
-#: apps/management_review/report/builder.py:526
+#: apps/management_review/report/builder.py:562
 msgid "Riesame di Direzione SGSI"
 msgstr "BGYS Yönetimin Gözden Geçirmesi"
 
-#: apps/management_review/report/builder.py:533
+#: apps/management_review/report/builder.py:569
 #, python-format
-msgid "Documento generato dal sistema GRC il %(when)s — RISERVATO — Solo per uso interno"
-msgstr "%(when)s tarihinde GRC sistemi tarafından oluşturulan belge — GİZLİ — Yalnızca kurum içi kullanım"
+msgid ""
+"Documento generato dal sistema GRC il %(when)s — RISERVATO — Solo per uso "
+"interno"
+msgstr ""
+"%(when)s tarihinde GRC sistemi tarafından oluşturulan belge — GİZLİ — "
+"Yalnızca kurum içi kullanım"
 
 #: apps/management_review/report/html.py:70
 #: apps/management_review/report/pdf.py:151
@@ -1450,105 +1618,191 @@ msgstr "Dikkat edilecek noktalar"
 msgid "RIESAME APPROVATO"
 msgstr "GÖZDEN GEÇİRME ONAYLANDI"
 
-#: apps/management_review/report/html.py:97
-#: apps/management_review/report/pdf.py:207
-msgid "Approvato da"
-msgstr "Onaylayan"
-
-#: apps/management_review/report/html.py:99
-#: apps/management_review/report/pdf.py:209
-msgid "Note"
-msgstr "Notlar"
-
 #: apps/management_review/services/review.py:24
 msgid "Il riesame è approvato: il verbale non è più modificabile."
 msgstr "Gözden geçirme onaylandı: tutanak artık değiştirilemez."
 
-#: apps/management_review/services/review.py:57
-msgid "Il riesame è approvato: dati della riunione e partecipanti non sono più modificabili."
-msgstr "Gözden geçirme onaylandı: toplantı verileri ve katılımcılar artık değiştirilemez."
+#: apps/management_review/services/review.py:49
+msgid "Un riesame di organizzazione va tenuto da un organo di organizzazione."
+msgstr "Kuruluş genelindeki bir gözden geçirme, kuruluş düzeyinde bir organ tarafından yürütülmelidir."
 
-#: apps/management_review/services/review.py:66
-#: apps/management_review/services/review.py:88
+#: apps/management_review/services/review.py:51
+msgid "L'organo scelto non governa il sito del riesame."
+msgstr "Seçilen organ gözden geçirmenin tesisini yönetmiyor."
+
+#: apps/management_review/services/review.py:86
+#: apps/management_review/services/review.py:189
+msgid ""
+"Il riesame è approvato: dati della riunione e partecipanti non sono più "
+"modificabili."
+msgstr ""
+"Gözden geçirme onaylandı: toplantı verileri ve katılımcılar artık "
+"değiştirilemez."
+
+#: apps/management_review/services/review.py:99
+#: apps/management_review/services/review.py:121
 msgid "Indicare il titolo del punto."
 msgstr "Gündem maddesinin başlığını girin."
 
-#: apps/management_review/services/review.py:103
+#: apps/management_review/services/review.py:136
 msgid "I punti obbligatori ISO 27001 §9.3 non si possono eliminare."
 msgstr "ISO 27001 §9.3 zorunlu gündem maddeleri silinemez."
 
-#: apps/management_review/services/review.py:145
+#: apps/management_review/services/review.py:158
+msgid "Il riesame non è collegato a un organo di governo."
+msgstr "Gözden geçirme bir yönetişim organına bağlı değil."
+
+#: apps/management_review/services/review.py:192
+#: apps/management_review/services/review.py:205
+msgid "Elenco partecipanti non valido."
+msgstr "Geçersiz katılımcı listesi."
+
+#: apps/management_review/services/review.py:208
+msgid "Componente dell'organo inesistente."
+msgstr "Organ üyesi bulunamadı."
+
+#: apps/management_review/services/review.py:210
+#, python-format
+msgid "%(name)s non è componente dell'organo del riesame."
+msgstr "%(name)s gözden geçirme organının üyesi değil."
+
+#: apps/management_review/services/review.py:214
+msgid "Utente inesistente."
+msgstr "Kullanıcı bulunamadı."
+
+#: apps/management_review/services/review.py:219
+msgid "Indicare il nome di ogni partecipante."
+msgstr "Her katılımcının adını girin."
+
+#: apps/management_review/services/review.py:222
+#, python-format
+msgid "%(name)s compare due volte fra i partecipanti."
+msgstr "%(name)s katılımcılar arasında iki kez yer alıyor."
+
+#: apps/management_review/services/review.py:228
+msgid "Ruolo o presenza non validi."
+msgstr "Geçersiz rol veya katılım."
+
+#: apps/management_review/services/review.py:231
+#, python-format
+msgid "Indicare il delegato di %(name)s."
+msgstr "%(name)s için vekili girin."
+
+#: apps/management_review/services/review.py:241
+msgid "Il riesame può avere un solo presidente."
+msgstr "Gözden geçirmenin yalnızca bir başkanı olabilir."
+
+#: apps/management_review/services/review.py:243
+msgid "Chi presiede il riesame deve risultare presente."
+msgstr "Gözden geçirmeye başkanlık eden kişi katılmış olarak görünmelidir."
+
+#: apps/management_review/services/review.py:290
 msgid "Il riesame è approvato: non si possono aggiungere decisioni."
 msgstr "Gözden geçirme onaylandı: karar eklenemez."
 
-#: apps/management_review/services/review.py:148
+#: apps/management_review/services/review.py:293
 msgid "Il punto all'ordine del giorno appartiene a un altro riesame."
 msgstr "Gündem maddesi başka bir gözden geçirmeye ait."
 
-#: apps/management_review/services/review.py:152
+#: apps/management_review/services/review.py:297
 msgid "Decisione del riesame"
 msgstr "Gözden geçirme kararı"
 
-#: apps/management_review/services/review.py:157
+#: apps/management_review/services/review.py:302
 msgid "Indicare il ruolo a cui assegnare il task."
 msgstr "Görevin atanacağı rolü belirtin."
 
-#: apps/management_review/services/review.py:159
+#: apps/management_review/services/review.py:304
 msgid "Per creare il task indicare la scadenza della decisione."
 msgstr "Görevi oluşturmak için kararın son tarihini belirtin."
 
-#: apps/management_review/services/review.py:162
+#: apps/management_review/services/review.py:307
 #, python-format
 msgid "Riesame di direzione: %(title)s"
 msgstr "Yönetimin gözden geçirmesi: %(title)s"
 
-#: apps/management_review/services/review.py:180
+#: apps/management_review/services/review.py:325
 msgid "Per un riesame di organizzazione indicare il sito del ciclo PDCA."
 msgstr "Kurum genelindeki gözden geçirmede PUKÖ döngüsünün tesisini belirtin."
 
-#: apps/management_review/services/review.py:234
+#: apps/management_review/services/review.py:379
 msgid "Indicare il codice dell'obiettivo di sicurezza."
 msgstr "Güvenlik hedefinin kodunu girin."
 
-#: apps/management_review/services/review.py:236
+#: apps/management_review/services/review.py:381
 msgid "Indicare il valore target dell'obiettivo."
 msgstr "Hedefin hedef değerini girin."
 
-#: apps/management_review/services/review.py:238
+#: apps/management_review/services/review.py:383
 msgid "Indicare la scadenza dell'obiettivo (o quella della decisione)."
 msgstr "Hedefin son tarihini (ya da kararınkini) girin."
 
-#: apps/management_review/services/review.py:253
-msgid "Il riesame è approvato: della decisione si può aggiornare solo lo stato."
+#: apps/management_review/services/review.py:398
+msgid ""
+"Il riesame è approvato: della decisione si può aggiornare solo lo stato."
 msgstr "Gözden geçirme onaylandı: kararın yalnızca durumu güncellenebilir."
 
-#: apps/management_review/services/review.py:261
+#: apps/management_review/services/review.py:406
 msgid "Il riesame è approvato: le decisioni non si possono eliminare."
 msgstr "Gözden geçirme onaylandı: kararlar silinemez."
 
-#: apps/management_review/services/review.py:273
+#: apps/management_review/services/review.py:418
 msgid "La riunione è già stata avviata."
 msgstr "Toplantı zaten başladı."
 
-#: apps/management_review/services/review.py:300
+#: apps/management_review/services/review.py:445
 msgid "La riunione è già completata."
 msgstr "Toplantı zaten tamamlandı."
 
-#: apps/management_review/services/review.py:304
-msgid "Prima di chiudere la riunione completare i punti obbligatori dell'ordine del giorno."
+#: apps/management_review/services/review.py:449
+msgid ""
+"Prima di chiudere la riunione completare i punti obbligatori dell'ordine del "
+"giorno."
 msgstr "Toplantıyı kapatmadan önce zorunlu gündem maddelerini tamamlayın."
 
-#: apps/management_review/services/review.py:331
+#: apps/management_review/services/review.py:515
 msgid "Il riesame è già approvato."
 msgstr "Gözden geçirme zaten onaylanmış."
 
-#: apps/management_review/services/review.py:334
+#: apps/management_review/services/review.py:518
 msgid "Generare lo snapshot dei dati prima di approvare il riesame."
 msgstr "Gözden geçirmeyi onaylamadan önce veri snapshot'ını oluşturun."
 
-#: apps/management_review/services/review.py:337
+#: apps/management_review/services/review.py:521
 msgid "Chiudere la riunione prima di approvare il riesame."
 msgstr "Gözden geçirmeyi onaylamadan önce toplantıyı kapatın."
+
+#: apps/management_review/services/review.py:530
+msgid "Solo un componente in carica dell'organo può approvare questo riesame."
+msgstr "Bu gözden geçirmeyi yalnızca organın görevdeki bir üyesi onaylayabilir."
+
+#: apps/management_review/services/review.py:534
+msgid "La delibera dell'organo si registra da governance."
+msgstr "Organ kararı yönetişim tarafından kaydedilir."
+
+#: apps/management_review/services/review.py:540
+msgid "Data della delibera non valida (formato atteso: AAAA-MM-GG)."
+msgstr "Geçersiz karar tarihi (beklenen biçim: YYYY-AA-GG)."
+
+#: apps/management_review/services/review.py:542
+msgid "Indicare numero e data della delibera."
+msgstr "Karar numarasını ve tarihini girin."
+
+#: apps/management_review/services/review.py:544
+msgid "La delibera non può precedere la riunione di riesame."
+msgstr "Karar, gözden geçirme toplantısından önce olamaz."
+
+#: apps/management_review/services/review.py:546
+msgid "La data della delibera non può essere futura."
+msgstr "Karar tarihi gelecekte olamaz."
+
+#: apps/management_review/services/review.py:554
+msgid "Documento di evidenza inesistente o non accessibile."
+msgstr "Kanıt belgesi bulunamadı veya erişilemiyor."
+
+#: apps/management_review/services/review.py:558
+msgid "Modalità di approvazione non valida."
+msgstr "Geçersiz onay yöntemi."
 
 #: apps/management_review/services/snapshot.py:376
 msgid "Il riesame è approvato: lo snapshot non può essere rigenerato."
@@ -1571,20 +1825,34 @@ msgid "Il ciclo è già chiuso."
 msgstr "Döngü zaten kapatılmış."
 
 #: apps/pdca/services.py:50
-msgid "Per avanzare da PLAN a DO è obbligatorio descrivere l'azione pianificata (minimo 20 caratteri)."
-msgstr "PLAN'dan DO'ya geçmek için planlanan eylemin tanımlanması zorunludur (en az 20 karakter)."
+msgid ""
+"Per avanzare da PLAN a DO è obbligatorio descrivere l'azione pianificata "
+"(minimo 20 caratteri)."
+msgstr ""
+"PLAN'dan DO'ya geçmek için planlanan eylemin tanımlanması zorunludur (en az "
+"20 karakter)."
 
 #: apps/pdca/services.py:58
-msgid "Per avanzare da DO a CHECK è obbligatorio allegare un'evidenza dell'implementazione."
-msgstr "DO'dan CHECK'e geçmek için uygulamaya dair bir kanıt iliştirilmesi zorunludur."
+msgid ""
+"Per avanzare da DO a CHECK è obbligatorio allegare un'evidenza "
+"dell'implementazione."
+msgstr ""
+"DO'dan CHECK'e geçmek için uygulamaya dair bir kanıt iliştirilmesi "
+"zorunludur."
 
 #: apps/pdca/services.py:66
-msgid "Per avanzare da CHECK ad ACT è obbligatorio descrivere il risultato della verifica."
-msgstr "CHECK'ten ACT'e geçmek için doğrulama sonucunun tanımlanması zorunludur."
+msgid ""
+"Per avanzare da CHECK ad ACT è obbligatorio descrivere il risultato della "
+"verifica."
+msgstr ""
+"CHECK'ten ACT'e geçmek için doğrulama sonucunun tanımlanması zorunludur."
 
 #: apps/pdca/services.py:73
-msgid "Per avanzare da CHECK ad ACT è obbligatorio indicare l'esito: ok / partial / ko."
-msgstr "CHECK'ten ACT'e geçmek için sonucu belirtmek zorunludur: ok / partial / ko."
+msgid ""
+"Per avanzare da CHECK ad ACT è obbligatorio indicare l'esito: ok / partial / "
+"ko."
+msgstr ""
+"CHECK'ten ACT'e geçmek için sonucu belirtmek zorunludur: ok / partial / ko."
 
 #: apps/pdca/services.py:99
 msgid "Usa close_cycle() per chiudere dalla fase ACT."
@@ -1596,7 +1864,8 @@ msgid "Il ciclo è già %(phase)s."
 msgstr "Döngü zaten %(phase)s."
 
 #: apps/pdca/services.py:156
-msgid "Per archiviare è obbligatorio specificare il motivo (minimo 20 caratteri)."
+msgid ""
+"Per archiviare è obbligatorio specificare il motivo (minimo 20 caratteri)."
 msgstr "Arşivlemek için bir gerekçe belirtmek zorunludur (en az 20 karakter)."
 
 #: apps/pdca/services.py:190
@@ -1605,21 +1874,33 @@ msgid "Il ciclo è in fase %(phase)s. Avanza fino ad ACT prima di chiudere."
 msgstr "Döngü şu aşamada: %(phase)s. Kapatmadan önce ACT aşamasına ilerleyin."
 
 #: apps/pdca/services.py:197
-msgid "Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata (minimo 20 caratteri)."
-msgstr "Döngüyü kapatmak için standartlaştırılmış eylemi tanımlamak zorunludur (en az 20 karakter)."
+msgid ""
+"Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata "
+"(minimo 20 caratteri)."
+msgstr ""
+"Döngüyü kapatmak için standartlaştırılmış eylemi tanımlamak zorunludur (en "
+"az 20 karakter)."
 
-#: apps/pdca/views.py:130 apps/tasks/services.py:440
+#: apps/pdca/views.py:130 apps/tasks/services.py:448
 msgid "Motivo cancellazione obbligatorio (min 10 caratteri)."
 msgstr "İptal gerekçesi zorunludur (min 10 karakter)."
 
 #: apps/pdca/views.py:137
-msgid "Ciclo gia' chiuso: ha generato una Lesson Learned e fa parte dell'audit trail. Non e' cancellabile."
-msgstr "Döngü zaten kapatılmış: bir Lesson Learned oluşturdu ve denetim izinin parçası. Silinemez."
+msgid ""
+"Ciclo gia' chiuso: ha generato una Lesson Learned e fa parte dell'audit "
+"trail. Non e' cancellabile."
+msgstr ""
+"Döngü zaten kapatılmış: bir Lesson Learned oluşturdu ve denetim izinin "
+"parçası. Silinemez."
 
 #: apps/pdca/views.py:152
 #, python-format
-msgid "Impossibile cancellare: %(count)d finding manuali aperti referenziano questo ciclo. Chiudi o annulla prima i finding."
-msgstr "Silinemiyor: %(count)d açık manuel bulgu bu döngüye başvuruyor. Önce bulguları kapatın veya iptal edin."
+msgid ""
+"Impossibile cancellare: %(count)d finding manuali aperti referenziano questo "
+"ciclo. Chiudi o annulla prima i finding."
+msgstr ""
+"Silinemiyor: %(count)d açık manuel bulgu bu döngüye başvuruyor. Önce "
+"bulguları kapatın veya iptal edin."
 
 #: apps/plants/models.py:213
 msgid "Max 1 livello di nesting per i sub-plant."
@@ -1631,8 +1912,11 @@ msgid "Timezone IANA non valido: %(tz)s"
 msgstr "Geçersiz IANA saat dilimi: %(tz)s"
 
 #: apps/plants/serializers.py:43
-msgid "Max 1 livello di nesting per i sub-plant: il sito scelto è già un sotto-sito."
-msgstr "Alt tesisler için en fazla 1 iç içe geçme düzeyi: seçilen tesis zaten bir alt tesis."
+msgid ""
+"Max 1 livello di nesting per i sub-plant: il sito scelto è già un sotto-sito."
+msgstr ""
+"Alt tesisler için en fazla 1 iç içe geçme düzeyi: seçilen tesis zaten bir "
+"alt tesis."
 
 #: apps/plants/services.py:178
 msgid "Solo il superuser può forzare l'eliminazione del sito."
@@ -1666,7 +1950,7 @@ msgid "Logo non trovato nello storage."
 msgstr "Logo depolamada bulunamadı."
 
 #: apps/reporting/services.py:976 apps/reporting/services.py:987
-#: apps/reporting/views.py:128
+#: apps/reporting/views.py:128 apps/reporting/views.py:142
 msgid "Tutti i siti"
 msgstr "Tüm tesisler"
 
@@ -1677,6 +1961,18 @@ msgstr "BU"
 #: apps/reporting/services.py:983 apps/reporting/services.py:994
 msgid "(nessun sito)"
 msgstr "(tesis yok)"
+
+#: apps/reporting/services.py:1139
+msgid "Organo di amministrazione (CdA)"
+msgstr "Yönetim kurulu"
+
+#: apps/reporting/services.py:1140
+msgid "Comitato sicurezza"
+msgstr "Güvenlik komitesi"
+
+#: apps/reporting/services.py:1141
+msgid "Direzione"
+msgstr "Üst yönetim"
 
 #: apps/reporting/views.py:118
 msgid "Utente"
@@ -1707,7 +2003,9 @@ msgid "La nota è obbligatoria per l'accettazione formale del rischio."
 msgstr "Riskin resmi olarak kabulü için not zorunludur."
 
 #: apps/risk/services.py:249
-msgid "Per rischi critici (rosso) la nota di accettazione deve essere di almeno 50 caratteri."
+msgid ""
+"Per rischi critici (rosso) la nota di accettazione deve essere di almeno 50 "
+"caratteri."
 msgstr "Kritik (kırmızı) riskler için kabul notu en az 50 karakter olmalıdır."
 
 #: apps/suppliers/services.py:369
@@ -1735,8 +2033,12 @@ msgid "La data di valutazione non può essere nel futuro."
 msgstr "Değerlendirme tarihi gelecekte olamaz."
 
 #: apps/suppliers/services.py:636
-msgid "Indica nelle note il riferimento della valutazione (es. questionario, audit, data e autore)."
-msgstr "Notlarda değerlendirmenin referansını belirtin (ör. anket, denetim, tarih ve yazar)."
+msgid ""
+"Indica nelle note il riferimento della valutazione (es. questionario, audit, "
+"data e autore)."
+msgstr ""
+"Notlarda değerlendirmenin referansını belirtin (ör. anket, denetim, tarih ve "
+"yazar)."
 
 #: apps/tasks/serializers.py:72
 msgid "Deve essere una lista di giorni."
@@ -1751,18 +2053,22 @@ msgid "Indicare un giorno da 1 a 28, oppure 0 per l'ultimo giorno del mese."
 msgstr "1 ile 28 arasında bir gün ya da ayın son günü için 0 girin."
 
 #: apps/tasks/serializers.py:100
-msgid "Il mese di partenza deve essere compreso fra 1 (gennaio) e 12 (dicembre)."
+msgid ""
+"Il mese di partenza deve essere compreso fra 1 (gennaio) e 12 (dicembre)."
 msgstr "Başlangıç ayı 1 (Ocak) ile 12 (Aralık) arasında olmalıdır."
 
 #: apps/tasks/serializers.py:109
 msgid "Per la frequenza settimanale indicare un solo giorno."
 msgstr "Haftalık sıklık için tek bir gün belirtin."
 
-#: apps/tasks/services.py:445
-msgid "Una checklist completata è l'evidenza del controllo eseguito: non è cancellabile."
-msgstr "Tamamlanmış bir kontrol listesi, kontrolün yapıldığının kanıtıdır: silinemez."
+#: apps/tasks/services.py:453
+msgid ""
+"Una checklist completata è l'evidenza del controllo eseguito: non è "
+"cancellabile."
+msgstr ""
+"Tamamlanmış bir kontrol listesi, kontrolün yapıldığının kanıtıdır: silinemez."
 
-#: apps/tasks/services.py:482
+#: apps/tasks/services.py:490
 msgid "Tutti gli item obbligatori devono essere spuntati prima di completare."
 msgstr "Tamamlamadan önce tüm zorunlu öğeler işaretlenmelidir."
 
@@ -1791,8 +2097,12 @@ msgid "Settimana non valida (formato atteso AAAA-MM-GG)."
 msgstr "Geçersiz hafta (beklenen biçim YYYY-AA-GG)."
 
 #: core/scoping.py:115
-msgid "Accesso negato: vista aggregata su tutti i siti riservata allo scope organizzazione."
-msgstr "Erişim reddedildi: tüm tesislerin toplu görünümü yalnızca kuruluş kapsamına özeldir."
+msgid ""
+"Accesso negato: vista aggregata su tutti i siti riservata allo scope "
+"organizzazione."
+msgstr ""
+"Erişim reddedildi: tüm tesislerin toplu görünümü yalnızca kuruluş kapsamına "
+"özeldir."
 
 #: core/uploads.py:120
 #, python-format
@@ -1805,7 +2115,9 @@ msgid "Estensione file non consentita. Formati ammessi: %(formats)s."
 msgstr "İzin verilmeyen dosya uzantısı. İzin verilen formatlar: %(formats)s."
 
 #: core/uploads.py:154
-msgid "Tipo di file non consentito. Il contenuto del file non corrisponde all'estensione."
+msgid ""
+"Tipo di file non consentito. Il contenuto del file non corrisponde "
+"all'estensione."
 msgstr "Dosya türüne izin verilmiyor. Dosya içeriği uzantıyla eşleşmiyor."
 
 #: core/uploads.py:163

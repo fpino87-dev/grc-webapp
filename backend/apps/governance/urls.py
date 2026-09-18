@@ -1,7 +1,7 @@
 from rest_framework.routers import DefaultRouter
 
 from .views import (
-    CommitteeMeetingViewSet,
+    CommitteeMemberViewSet,
     DocumentWorkflowPolicyViewSet,
     RoleAssignmentViewSet,
     RoleRequirementViewSet,
@@ -14,7 +14,7 @@ router.register("role-assignments", RoleAssignmentViewSet, basename="role-assign
 router.register("role-requirements", RoleRequirementViewSet, basename="role-requirement")
 router.register("document-workflow-policies", DocumentWorkflowPolicyViewSet, basename="document-workflow-policy")
 router.register("committees", SecurityCommitteeViewSet, basename="committee")
-router.register("meetings", CommitteeMeetingViewSet, basename="committee-meeting")
+router.register("committee-members", CommitteeMemberViewSet, basename="committee-member")
 router.register("security-objectives", SecurityObjectiveViewSet, basename="security-objective")
 
 urlpatterns = router.urls

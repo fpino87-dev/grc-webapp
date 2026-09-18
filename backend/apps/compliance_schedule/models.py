@@ -29,7 +29,6 @@ RULE_TYPE_LABELS = {
     "training_refresh":         "Aggiornamento formazione",
     # Governance / Management Review
     "management_review":        "Revisione della direzione",
-    "security_committee":       "Riunione comitato sicurezza",
     "security_objective":       "Obiettivo di sicurezza",
     # Audit Prep
     "finding_minor":            "Risoluzione non conformità minore",
@@ -51,7 +50,7 @@ RULE_CATEGORIES = {
     "Fornitori": ["supplier_assessment", "supplier_reevaluation"],
     "Asset": ["asset_maintenance"],
     "Formazione": ["training_mandatory", "training_refresh"],
-    "Governance": ["management_review", "security_committee", "security_objective"],
+    "Governance": ["management_review", "security_objective"],
     "Audit": ["finding_minor", "finding_major", "finding_observation"],
     "PDCA": ["pdca_cycle"],
     "Reporting": ["kpi_review", "isms_review"],
@@ -85,7 +84,6 @@ DEFAULT_RULES = {
     "training_mandatory":       (1,  "years",  30),
     "training_refresh":         (2,  "years",  60),
     "management_review":        (1,  "years",  30),
-    "security_committee":       (3,  "months", 14),
     "finding_minor":            (90, "days",   14),
     "finding_major":            (30, "days",    7),
     "finding_observation":      (6,  "months", 30),

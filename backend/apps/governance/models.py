@@ -128,44 +128,88 @@ class DocumentWorkflowPolicy(BaseModel):
 
 
 class SecurityCommittee(BaseModel):
-    plant = models.ForeignKey(
-        "plants.Plant",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-    )
+    """Organo di governo: CdA, comitato di sicurezza o direzione.
+
+    È l'anagrafica stabile di chi tiene e approva il riesame di direzione
+    (ISO/IEC 27001 §5.1, §9.3) e — per il CdA — dell'organo di gestione a cui
+    NIS2 art. 20 attribuisce approvazione delle misure, responsabilità e
+    obbligo di formazione. I membri (`CommitteeMember`) si compilano a mano:
+    chi siede in CdA di norma non ha un account sulla piattaforma, e crearne
+    uno solo per scriverne il nome nel verbale violerebbe il minimo privilegio.
+
+    Il nome della classe resta quello storico (tabella e API invariate).
+    """
+
+    TYPE_CHOICES = [
+        ("cda", "Organo di amministrazione (CdA)"),
+        ("comitato", "Comitato sicurezza"),
+        ("direzione", "Direzione"),
+    ]
+
     name = models.CharField(max_length=200)
-    committee_type = models.CharField(
-        max_length=20,
-        choices=[("centrale", "Centrale"), ("bu", "BU")],
+    committee_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default="comitato")
+    # Perimetro: nessun sito = intera organizzazione. Più siti = l'entità
+    # giuridica (o la BU) che l'organo governa: oggi un CdA di gruppo, domani
+    # magari uno per società — non serve un modello "entità" dedicato.
+    plants = models.ManyToManyField(
+        "plants.Plant", blank=True, related_name="governing_bodies",
     )
-    frequency = models.CharField(
-        max_length=20,
-        choices=[
-            ("mensile", "Mensile"),
-            ("trimestrale", "Trimestrale"),
-            ("semestrale", "Semestrale"),
-        ],
+    description = models.TextField(
+        blank=True, help_text="Mandato dell'organo rispetto al sistema di gestione."
     )
-    next_meeting_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ["name"]
 
+    @property
+    def is_management_body(self) -> bool:
+        """Organo di gestione ai sensi di NIS2 art. 20."""
+        return self.committee_type == "cda"
 
-class CommitteeMeeting(BaseModel):
+    def __str__(self):
+        return self.name
+
+
+class CommitteeMember(BaseModel):
+    """Componente di un organo di governo, con o senza account.
+
+    `user` è facoltativo: collegarlo abilita chi ha un account ad approvare
+    dall'app i riesami del proprio organo. Nome e qualifica restano comunque
+    i dati di riferimento (sono quelli che finiscono nel verbale).
+    La composizione cambia nel tempo: una carica finita si chiude con
+    `valid_until`, non si cancella — i verbali passati la citano.
+    """
+
+    ROLE_CHOICES = [
+        ("presidente", "Presidente"),
+        ("membro", "Membro"),
+        ("segretario", "Segretario"),
+    ]
+
     committee = models.ForeignKey(
-        SecurityCommittee,
-        on_delete=models.CASCADE,
-        related_name="meetings",
+        SecurityCommittee, on_delete=models.CASCADE, related_name="members"
     )
-    held_at = models.DateTimeField()
-    verbale_doc_id = models.UUIDField(null=True, blank=True)
-    delibere = models.JSONField(default=list)
-    attendees = models.ManyToManyField("auth.User", blank=True)
+    full_name = models.CharField(max_length=200)
+    position = models.CharField(
+        max_length=200, blank=True, help_text="Qualifica: es. Amministratore Delegato, CFO."
+    )
+    body_role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="membro")
+    user = models.ForeignKey(
+        "auth.User", null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="committee_memberships",
+    )
+    valid_from = models.DateField()
+    valid_until = models.DateField(null=True, blank=True)
 
     class Meta:
-        ordering = ["-held_at"]
+        ordering = ["full_name"]
+        indexes = [models.Index(fields=["committee", "valid_until"])]
+
+    def is_active_on(self, day) -> bool:
+        return self.valid_from <= day and (self.valid_until is None or self.valid_until >= day)
+
+    def __str__(self):
+        return f"{self.full_name} ({self.body_role}) @ {self.committee_id}"
 
 
 class RoleRequirement(BaseModel):

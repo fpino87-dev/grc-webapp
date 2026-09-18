@@ -125,7 +125,9 @@ def _add_management_reviews(zf, zip_name: str, plant_id, default_storage) -> Non
     qs = ManagementReview.objects.filter(
         deleted_at__isnull=True,
         status="completato",
-    ).select_related("chair", "approved_by").annotate(
+    ).select_related("approved_by", "approved_member", "governing_body").prefetch_related(
+        "participants"
+    ).annotate(
         n_actions=Count("actions", filter=Q(actions__deleted_at__isnull=True))
     )
     if plant_id:
@@ -138,7 +140,7 @@ def _add_management_reviews(zf, zip_name: str, plant_id, default_storage) -> Non
     # Riepilogo CSV
     buf = io.StringIO()
     w = safe_writer(buf)
-    w.writerow(["Data", "Titolo", "Presidente", "Stato approvazione",
+    w.writerow(["Data", "Titolo", "Organo", "Presidente", "Stato approvazione", "Forma approvazione",
                 "Approvato da", "Approvato il", "Prossima revisione",
                 "N. decisioni", "Verbale allegato"])
     for r in reviews:
@@ -146,9 +148,12 @@ def _add_management_reviews(zf, zip_name: str, plant_id, default_storage) -> Non
         w.writerow([
             r.review_date.isoformat(),
             r.title,
-            r.chair.get_full_name() if r.chair else "—",
+            r.governing_body.name if r.governing_body_id else "—",
+            next((p.full_name for p in r.participants.all() if p.is_chair), "—"),
             r.approval_status,
-            r.approved_by.get_full_name() if r.approved_by else "—",
+            {"in_app": "In app", "delibera": f"Delibera {r.approval_resolution_ref}"}.get(r.approval_mode, "—"),
+            (r.approved_member.full_name if r.approved_member_id
+             else r.approved_by.get_full_name() if r.approved_by else "—"),
             r.approved_at.strftime("%Y-%m-%d") if r.approved_at else "—",
             r.next_review_date.isoformat() if r.next_review_date else "—",
             r.n_actions,
@@ -194,8 +199,8 @@ def _add_management_review_reports(zf, zip_name: str, plant_id) -> None:
 
     qs = (
         ManagementReview.objects.filter(approval_status="approvato", snapshot_generated_at__isnull=False)
-        .select_related("plant", "chair", "approved_by")
-        .prefetch_related("attendees", "agenda_items", "actions__owner", "actions__task", "actions__pdca_cycle")
+        .select_related("plant", "governing_body", "approved_by", "approved_member")
+        .prefetch_related("participants", "agenda_items", "actions__owner", "actions__task", "actions__pdca_cycle")
     )
     if plant_id:
         qs = qs.filter(plant_id=plant_id)

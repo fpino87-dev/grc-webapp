@@ -908,7 +908,7 @@
     "title": "Governance",
     "subtitle": "Rôles normatifs, comités et succession des responsabilités",
     "tabs": {
-      "roles": "Rôles & comités",
+      "roles": "Rôles & organes",
       "workflow": "Workflow documentaire (M07)",
       "frameworks": "Cadres normatifs",
       "risk_appetite": "Risk Appetite",
@@ -967,11 +967,11 @@
     },
     "sections": {
       "roles": "Rôles normatifs",
-      "committees": "Comités de sécurité"
+      "committees": "Organes de gouvernance"
     },
     "empty": {
       "roles": "Aucun rôle assigné",
-      "committees": "Aucun comité configuré"
+      "committees": "Aucun organe de gouvernance configuré"
     },
     "alerts": {
       "vacant_roles": "🚨 {{count}} rôles obligatoires sans titulaire actif",
@@ -1027,33 +1027,6 @@
       "valid_from": "Valide à partir du",
       "valid_until": "Valide jusqu'au",
       "submit": "Assigner le rôle"
-    },
-    "committees": {
-      "new": {
-        "open": "+ Nouveau",
-        "title": "Nouveau comité",
-        "submit": "Créer le comité"
-      },
-      "fields": {
-        "name": "Nom",
-        "type": "Type",
-        "frequency": "Fréquence",
-        "next_meeting": "Prochaine réunion"
-      },
-      "placeholders": {
-        "name": "ex. Comité de sécurité"
-      },
-      "types": {
-        "centrale": "Central",
-        "bu": "BU"
-      },
-      "frequencies": {
-        "mensile": "Mensuel",
-        "trimestrale": "Trimestriel",
-        "semestrale": "Semestriel"
-      },
-      "frequency": "Fréquence : {{value}}",
-      "next_meeting": "prochaine :"
     },
     "terminate": {
       "title": "Terminer le rôle",
@@ -1224,6 +1197,59 @@
       "optional": "Facultatif",
       "single_holder": "Titulaire unique",
       "multi_holder": "Plusieurs titulaires"
+    },
+    "bodies": {
+      "new_open": "+ Nouvel organe",
+      "intro": "Qui tient et approuve la revue de direction (ISO 27001 §5.1, §9.3) : conseil d'administration, comité de sécurité ou direction. Les membres sont saisis manuellement, même sans compte ; ceux qui ont un compte associé peuvent approuver dans l'application les revues de leur organe.",
+      "new_title": "Nouvel organe de gouvernance",
+      "edit_title": "Modifier l'organe de gouvernance",
+      "member_new_title": "Nouveau membre — {{body}}",
+      "member_edit_title": "Modifier le membre",
+      "cda_hint": "Organe de direction au sens de l'art. 20 NIS2 : il approuve les mesures de gestion des risques, en répond et doit suivre une formation.",
+      "whole_org": "Toute l'organisation",
+      "scope_hint": "Pour plusieurs entités juridiques, un organe pour chacune avec les sites qu'il gouverne.",
+      "nis2_badge": "Organe de direction NIS2",
+      "no_chair": "Aucun président en fonction : la revue n'aura pas de président proposé.",
+      "no_members": "Aucun membre en fonction.",
+      "add_member": "+ Membre",
+      "show_former": "Afficher les anciens membres ({{n}})",
+      "hide_former": "Masquer les anciens membres",
+      "end_term": "Clore le mandat",
+      "end_confirm": "Clore aujourd'hui le mandat de {{name}} ? Il restera dans les procès-verbaux passés.",
+      "delete_member_confirm": "Supprimer {{name}} ? À utiliser uniquement pour une saisie erronée : un départ se clôt avec une date de fin.",
+      "delete_confirm": "Supprimer l'organe « {{name}} » ?",
+      "account_inactive": "compte désactivé",
+      "ongoing": "en fonction",
+      "no_account": "— Aucun compte —",
+      "user_hint": "Facultatif. Avec un compte associé, la personne peut approuver dans l'application les revues de cet organe.",
+      "fields": {
+        "name": "Nom",
+        "type": "Type",
+        "scope": "Périmètre",
+        "description": "Mandat",
+        "full_name": "Nom et prénom",
+        "position": "Fonction",
+        "body_role": "Rôle dans l'organe",
+        "user": "Compte",
+        "valid_from": "En fonction depuis",
+        "valid_until": "Jusqu'au",
+        "term": "Mandat"
+      },
+      "placeholders": {
+        "name": "ex. Conseil d'administration",
+        "description": "ex. Approuve la revue et les mesures de sécurité du groupe",
+        "position": "ex. Directeur général"
+      },
+      "types": {
+        "cda": "Conseil d'administration",
+        "comitato": "Comité de sécurité",
+        "direzione": "Direction"
+      },
+      "member_roles": {
+        "presidente": "Président",
+        "membro": "Membre",
+        "segretario": "Secrétaire"
+      }
     }
   },
   "sidebar": {
@@ -3689,7 +3715,7 @@
         "access": "Accès",
         "responsibilities": "Responsabilités",
         "issues": "Incohérences",
-        "committees": "Comités"
+        "committees": "Organes"
       },
       "filter": {
         "all": "Tous",
@@ -3714,10 +3740,14 @@
       },
       "section_access": "Accès (ce qu'il peut faire)",
       "section_resp": "Responsabilités (de quoi il répond)",
-      "committees_title": "Comités de sécurité",
-      "committees_empty": "Aucun comité de sécurité configuré. Créez-en un dans Gouvernance → Comités.",
-      "committees_next": "prochaine",
-      "committees_no_members": "Aucun participant enregistré (aucune réunion)"
+      "committees_title": "Organes de gouvernance",
+      "committees_empty": "Aucun organe de gouvernance configuré. Créez-en un dans Gouvernance → Organes de gouvernance.",
+      "member_account": "avec compte",
+      "member_no_account": "sans compte",
+      "body_flag": {
+        "no_members": "Aucun membre en fonction",
+        "no_chair": "Aucun président en fonction"
+      }
     },
     "objectives": {
       "intro": "Les objectifs (ISO/IEC 27001 §6.2) sont des cibles assorties d'une échéance : cette page indique s'ils seront atteints à temps. Ce ne sont pas des seuils : c'est le KPI, et non cette page, qui indique si un indicateur est actuellement sous le niveau acceptable.",
@@ -4471,14 +4501,14 @@
       "title": "Revue de Direction — M13",
       "description": "Gère la revue de direction ISO 27001 §9.3 : ordre du jour avec les points obligatoires, données GRC figées au moment de la réunion, discussion et décisions par point (avec tâches et PDCA liés), synthèse exécutive pouvant être rédigée avec l'aide de l'IA et procès-verbal téléchargeable en PDF ou HTML.",
       "steps": {
-        "1": "Créez la revue avec le site (ou toute l'organisation), la date, le président (le RSSI est proposé) et les participants : l'ordre du jour §9.3.2 est créé automatiquement",
+        "1": "Créez la revue avec le site (ou toute l'organisation), la date et l'organe de gouvernance : les convoqués sont les membres en fonction de l'organe (sans organe, le RSSI est proposé comme président) ; l'ordre du jour §9.3.2 est créé automatiquement. Les présences s'enregistrent dans le détail",
         "2": "Générez l'instantané : conformité, KPI, audits, risques, incidents, documents et actions des revues précédentes sont figés",
         "3": "Démarrez la réunion",
         "4": "Pour chaque point de l'ordre du jour, consultez les données, notez la discussion et enregistrez les décisions (type, responsable, échéance)",
         "5": "Si nécessaire, une décision ouvre une tâche dans M08 assignée à un rôle et/ou un cycle PDCA dans M11",
         "6": "Clôturez la réunion : chaque point obligatoire doit avoir une discussion ou une décision ; la date de la prochaine revue est proposée et apparaît dans l'échéancier",
         "7": "Rédigez la synthèse exécutive ou générez un brouillon avec l'IA, relisez-le et acceptez-le",
-        "8": "Approuvez la revue avec une note formelle : le procès-verbal devient immuable",
+        "8": "Approuvez la revue : dans l'application (un membre de l'organe disposant d'un compte, ou la gouvernance) ou en enregistrant le numéro et la date de la délibération de l'organe. Le procès-verbal devient immuable",
         "9": "Téléchargez le procès-verbal en PDF ou HTML (également inclus dans le dossier d'audit)"
       },
       "connections": {
@@ -4490,7 +4520,7 @@
         "ai": "Brouillon de la synthèse exécutive, toujours à relire et accepter"
       },
       "config_needed": {
-        "1": "Nommer le RSSI dans M00 Governance : il est proposé comme président de la revue"
+        "1": "Configurer dans Governance → Rôles & organes l'organe qui tient la revue (ex. le conseil d'administration) avec ses membres ; à défaut, nommer le RSSI, proposé comme président"
       }
     },
     "list": {
@@ -4530,7 +4560,9 @@
       "date_label": "Date de réunion",
       "cancel": "Annuler",
       "saving": "Enregistrement...",
-      "create": "Créer la revue"
+      "create": "Créer la revue",
+      "body_hint": "Les convoqués seront les {{n}} membres en fonction de l'organe : les présences s'enregistrent dans le détail.",
+      "no_body_hint": "Sans organe, le RSSI nommé dans Gouvernance sera proposé comme président ; les autres convoqués s'ajoutent depuis le détail."
     },
     "actions": {
       "add": "Ajouter une action",
@@ -4699,19 +4731,37 @@
       "objectives_list": "État des objectifs"
     },
     "participants": {
-      "heading": "Président et participants",
-      "chair": "Présidée par",
-      "attendees": "Participants",
-      "none": "— Aucun —",
-      "chair_missing": "Non indiqué",
+      "heading": "Convoqués et présences",
+      "chair": "Préside",
       "edit": "Modifier",
       "save": "Enregistrer",
       "saving": "Enregistrement...",
       "cancel": "Annuler",
-      "search_ph": "Rechercher une personne...",
-      "selected": "{{count}} sélectionnés",
-      "suggested": "Proposé selon le rôle en Governance : {{name}}",
-      "save_error": "Erreur lors de l'enregistrement"
+      "save_error": "Erreur lors de l'enregistrement",
+      "body": "Organe",
+      "no_body": "— Aucun organe —",
+      "from_body": "Reprendre de l'organe",
+      "from_body_confirm": "Remplacer les convoqués par les membres en fonction de l'organe à la date de la revue ? Les présences et invités saisis seront perdus.",
+      "col_name": "Nom et fonction",
+      "col_role": "Rôle",
+      "col_attendance": "Présence",
+      "position_ph": "Fonction",
+      "delegate_ph": "Nom du délégué",
+      "add_member": "+ Membre de l'organe",
+      "add_user": "+ Utilisateur de la plateforme",
+      "guest_name_ph": "Invité : nom",
+      "none_yet": "Aucun convoqué : les indiquer avant la réunion.",
+      "roles": {
+        "presidente": "Président",
+        "membro": "Membre",
+        "segretario": "Secrétaire",
+        "ospite": "Invité"
+      },
+      "attendance": {
+        "presente": "Présent",
+        "assente": "Absent",
+        "delegato": "Représenté"
+      }
     },
     "agenda": {
       "heading": "Ordre du jour (ISO 27001 §9.3.2)",
@@ -4782,6 +4832,19 @@
       "ai_not_configured": "Le moteur IA n'est pas configuré (Paramètres → AI Engine).",
       "ai_error": "La génération a échoué",
       "save_error": "Erreur lors de l'enregistrement"
+    },
+    "approval_form": {
+      "approved_resolution": "Approuvé par {{body}} par délibération n° {{ref}} du {{date}} (enregistrée par {{by}})",
+      "not_allowed": "L'approbation revient aux membres en fonction de l'organe ou à la gouvernance.",
+      "mode_in_app": "Approuver dans l'application",
+      "mode_delibera": "Enregistrer la délibération de l'organe",
+      "hint_in_app_member": "Vous approuvez en tant que membre de l'organe : le procès-verbal indiquera votre nom et votre fonction.",
+      "hint_in_app_governance": "Si l'organe a délibéré hors de la plateforme, enregistrez la délibération : le procès-verbal en indiquera les références.",
+      "hint_resolution": "Le numéro et la date de la délibération sont obligatoires ; le document (M07) constitue la preuve pour l'auditeur.",
+      "resolution_ref_ph": "N° de délibération",
+      "document_search_ph": "Rechercher un document...",
+      "no_document": "— Aucun document —",
+      "register_resolution": "Enregistrer l'approbation"
     }
   },
   "objectives": {

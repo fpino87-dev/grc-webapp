@@ -15,13 +15,34 @@ export interface RoleAssignment {
   is_active: boolean;
 }
 
+/** Organo di governo: CdA (organo di gestione NIS2 art. 20), comitato
+ *  sicurezza o direzione. Nessun sito = intera organizzazione. */
+export type CommitteeType = "cda" | "comitato" | "direzione";
+export type MemberRole = "presidente" | "membro" | "segretario";
+
+export interface CommitteeMember {
+  id: string;
+  committee: string;
+  full_name: string;
+  position: string;
+  body_role: MemberRole;
+  user: number | null;
+  user_name: string | null;
+  user_is_active: boolean | null;
+  valid_from: string;
+  valid_until: string | null;
+  is_active: boolean;
+}
+
 export interface SecurityCommittee {
   id: string;
-  plant: string | null;
   name: string;
-  committee_type: "centrale" | "bu";
-  frequency: "mensile" | "trimestrale" | "semestrale";
-  next_meeting_at: string | null;
+  committee_type: CommitteeType;
+  plants: string[];
+  plant_codes: string[];
+  description: string;
+  is_management_body: boolean;
+  members: CommitteeMember[];
 }
 
 export interface VacantiResult {
@@ -164,6 +185,16 @@ export const governanceApi = {
     apiClient.get<{ results: SecurityCommittee[] }>("/governance/committees/").then((r) => r.data.results ?? r.data),
   createCommittee: (data: Partial<SecurityCommittee>) =>
     apiClient.post<SecurityCommittee>("/governance/committees/", data).then((r) => r.data),
+  updateCommittee: (id: string, data: Partial<SecurityCommittee>) =>
+    apiClient.patch<SecurityCommittee>(`/governance/committees/${id}/`, data).then((r) => r.data),
+  deleteCommittee: (id: string) =>
+    apiClient.delete(`/governance/committees/${id}/`).then((r) => r.data),
+  createMember: (data: Partial<CommitteeMember>) =>
+    apiClient.post<CommitteeMember>("/governance/committee-members/", data).then((r) => r.data),
+  updateMember: (id: string, data: Partial<CommitteeMember>) =>
+    apiClient.patch<CommitteeMember>(`/governance/committee-members/${id}/`, data).then((r) => r.data),
+  deleteMember: (id: string) =>
+    apiClient.delete(`/governance/committee-members/${id}/`).then((r) => r.data),
 
   // Document workflow policies
   listDocumentPolicies: () =>

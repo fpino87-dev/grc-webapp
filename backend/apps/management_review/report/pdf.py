@@ -204,9 +204,8 @@ def render_pdf(review) -> bytes:
         a = doc_model["approval"]
         box = Table([[Paragraph(
             f"<font name='{st['bold']}' color='{TONES['green'].hexval()}'>{_text(_('RIESAME APPROVATO'))}</font><br/>"
-            f"{_text(_('Approvato da'))}: {_text(a['by'])}<br/>"
-            f"{_text(_('Data'))}: {_text(a['at'])}<br/>"
-            f"{_text(_('Note'))}: {_text(a['note'])}", st["base"])]],
+            + "<br/>".join(f"{_text(str(k))}: {_text(str(v))}" for k, v in a["lines"]),
+            st["base"])]],
             colWidths=[width])
         box.setStyle(TableStyle([("BOX", (0, 0), (-1, -1), 1.2, TONES["green"]),
                                  ("LEFTPADDING", (0, 0), (-1, -1), 8), ("TOPPADDING", (0, 0), (-1, -1), 6),

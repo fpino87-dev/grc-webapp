@@ -241,12 +241,17 @@ export interface AccessMatrixRow {
 export interface SecurityCommitteeRow {
   id: string;
   name: string;
-  committee_type: string;
-  frequency: string;
-  plant_code: string | null;
-  next_meeting_at: string | null;
-  last_meeting_at: string | null;
-  members: { name: string; email: string }[];
+  committee_type: "cda" | "comitato" | "direzione";
+  committee_type_label: string;
+  is_management_body: boolean;
+  covers_all: boolean;
+  plant_codes: string[];
+  members: {
+    id: string; name: string; position: string; body_role: string; body_role_label: string;
+    has_account: boolean; valid_until: string | null; flags: string[];
+  }[];
+  /** no_members | no_chair */
+  flags: string[];
 }
 
 export interface AccessMatrixData {
@@ -256,7 +261,7 @@ export interface AccessMatrixData {
   rows: AccessMatrixRow[];
   vacant_mandatory_roles: string[];
   committees: SecurityCommitteeRow[];
-  summary: { users: number; access: number; responsibilities: number; issues: number; committees: number };
+  summary: { users: number; access: number; responsibilities: number; issues: number; committees: number; committee_issues: number };
 }
 
 // ── Obiettivi di sicurezza (§6.2) — vista aggregata di sola lettura ──

@@ -1,5 +1,6 @@
 import logging
 
+from django.db.models import Prefetch
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -11,16 +12,16 @@ from core.audit import log_action
 from core.scoping import PlantScopedQuerysetMixin
 from core.viewsets import SoftDeleteAuditMixin
 from .models import (
-    CommitteeMeeting,
     DocumentWorkflowPolicy,
     RoleAssignment,
     RoleRequirement,
+    CommitteeMember,
     SecurityCommittee,
     SecurityObjective,
 )
 from .permissions import GovernancePermission, SecurityObjectivePermission
 from .serializers import (
-    CommitteeMeetingSerializer,
+    CommitteeMemberSerializer,
     DocumentWorkflowPolicySerializer,
     RoleAssignmentSerializer,
     RoleRequirementSerializer,
@@ -261,18 +262,99 @@ class DocumentWorkflowPolicyViewSet(SoftDeleteAuditMixin, viewsets.ModelViewSet)
         )
 
 
-class SecurityCommitteeViewSet(SoftDeleteAuditMixin, viewsets.ModelViewSet):
-    queryset = SecurityCommittee.objects.all()
+def _django_to_drf(exc):
+    from rest_framework.exceptions import ValidationError as DRFValidationError
+
+    return DRFValidationError(getattr(exc, "message_dict", None) or exc.messages)
+
+
+class SecurityCommitteeViewSet(viewsets.ModelViewSet):
+    """Organi di governo (CdA, comitato sicurezza, direzione) con i componenti.
+
+    Lettura filtrata per perimetro: i componenti sono dati personali. Scrittura
+    a governance (super_admin/compliance_officer) e solo su organi il cui
+    perimetro è interamente accessibile (controllo nei services).
+    """
+
+    queryset = SecurityCommittee.objects.prefetch_related(
+        "plants",
+        Prefetch("members", queryset=CommitteeMember.objects.select_related("user")),
+    )
     serializer_class = SecurityCommitteeSerializer
     permission_classes = [GovernancePermission]
-    audit_action = "governance.security_committee"
+    filterset_fields = ["committee_type"]
+
+    def get_queryset(self):
+        from .services import visible_committees
+
+        return visible_committees(super().get_queryset(), self.request.user)
+
+    def handle_exception(self, exc):
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        if isinstance(exc, DjangoValidationError):
+            exc = _django_to_drf(exc)
+        return super().handle_exception(exc)
+
+    def perform_create(self, serializer):
+        from .services import create_committee
+
+        create_committee(serializer, self.request.user)
+
+    def perform_update(self, serializer):
+        from .services import update_committee
+
+        update_committee(serializer, self.request.user)
+
+    def perform_destroy(self, instance):
+        from .services import delete_committee
+
+        delete_committee(instance, self.request.user)
 
 
-class CommitteeMeetingViewSet(SoftDeleteAuditMixin, viewsets.ModelViewSet):
-    queryset = CommitteeMeeting.objects.all()
-    serializer_class = CommitteeMeetingSerializer
+class CommitteeMemberViewSet(viewsets.ModelViewSet):
+    """Componenti degli organi di governo. Si vedono solo quelli degli organi
+    visibili; chi lascia la carica si chiude con `valid_until`."""
+
+    queryset = CommitteeMember.objects.select_related("user", "committee").filter(
+        committee__deleted_at__isnull=True
+    )
+    serializer_class = CommitteeMemberSerializer
     permission_classes = [GovernancePermission]
-    audit_action = "governance.committee_meeting"
+    filterset_fields = ["committee", "body_role"]
+
+    def get_queryset(self):
+        from .services import visible_committees
+
+        visible = visible_committees(SecurityCommittee.objects.all(), self.request.user)
+        return super().get_queryset().filter(committee__in=visible.values("id"))
+
+    def handle_exception(self, exc):
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        if isinstance(exc, DjangoValidationError):
+            exc = _django_to_drf(exc)
+        return super().handle_exception(exc)
+
+    def perform_create(self, serializer):
+        from rest_framework.exceptions import PermissionDenied
+
+        from .services import create_member, visible_committees
+
+        committee = serializer.validated_data["committee"]
+        if not visible_committees(SecurityCommittee.objects.filter(pk=committee.pk), self.request.user).exists():
+            raise PermissionDenied(_("Accesso negato per questo organo."))
+        create_member(serializer, self.request.user)
+
+    def perform_update(self, serializer):
+        from .services import update_member
+
+        update_member(serializer, self.request.user)
+
+    def perform_destroy(self, instance):
+        from .services import delete_member
+
+        delete_member(instance, self.request.user)
 
 
 class RoleRequirementViewSet(SoftDeleteAuditMixin, viewsets.ModelViewSet):

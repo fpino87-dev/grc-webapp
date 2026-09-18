@@ -27,6 +27,7 @@ TABLES_TO_TRUNCATE = [
     "suppliers_supplier",
     # Management Review (M13)
     "management_review_reviewaction",
+    "management_review_reviewparticipant",
     "management_review_managementreview",
     # Lessons (M12)
     "lessons_lessonlearned",
@@ -72,7 +73,7 @@ TABLES_TO_TRUNCATE = [
     "notifications_notificationrule",
     "notifications_emailconfiguration",
     # Governance (M00)
-    "governance_committeemeeting",
+    "governance_committeemember",
     "governance_securitycommittee",
     "governance_roleassignment",
     # Auth / RBAC (M02)

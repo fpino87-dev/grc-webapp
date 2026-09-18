@@ -92,22 +92,37 @@ def test_permission_restricted_to_governance_and_audit():
 
 @pytest.mark.django_db
 def test_security_committees_in_report(topo):
-    from apps.governance.models import CommitteeMeeting, SecurityCommittee
+    """Organi di governo: componenti in carica (anche senza account), filtro
+    per sito, segnalazioni su account disattivati e presidente mancante."""
+    from datetime import date, timedelta
+
+    from apps.governance.models import CommitteeMember, SecurityCommittee
     from apps.reporting.services import access_matrix
-    from django.utils import timezone
     bu, pa, pb = topo
 
     member = User.objects.create_user(username="commemb", email="cm@am.test",
-                                       first_name="Comm", last_name="Member", password="x")
-    c = SecurityCommittee.objects.create(name="Direttivo Centrale", committee_type="centrale", frequency="trimestrale")
-    m = CommitteeMeeting.objects.create(committee=c, held_at=timezone.now())
-    m.attendees.add(member)
+                                       first_name="Comm", last_name="Member", password="x", is_active=False)
+    cda = SecurityCommittee.objects.create(name="CdA", committee_type="cda")
+    CommitteeMember.objects.create(committee=cda, full_name="Paola Neri", position="Presidente CdA",
+                                   body_role="presidente", valid_from=date(2025, 1, 1))
+    CommitteeMember.objects.create(committee=cda, full_name="Comm Member", user=member,
+                                   valid_from=date(2025, 1, 1))
+    CommitteeMember.objects.create(committee=cda, full_name="Ex Consigliere",
+                                   valid_from=date(2020, 1, 1), valid_until=date.today() - timedelta(days=1))
+    site = SecurityCommittee.objects.create(name="Comitato B", committee_type="comitato")
+    site.plants.add(pb)
 
     data = access_matrix(None, "it")
-    assert data["summary"]["committees"] == 1
-    row = data["committees"][0]
-    assert row["name"] == "Direttivo Centrale"
-    assert any("Comm Member" == mm["name"] for mm in row["members"])
+    assert data["summary"]["committees"] == 2
+    row = next(c for c in data["committees"] if c["name"] == "CdA")
+    assert row["is_management_body"] and row["covers_all"]
+    assert [m["name"] for m in row["members"]] == ["Paola Neri", "Comm Member"]  # presidente prima, ex escluso
+    assert row["members"][1]["flags"] == ["inactive_user"]
+    assert row["members"][0]["has_account"] is False
+    assert next(c for c in data["committees"] if c["name"] == "Comitato B")["flags"] == ["no_members"]
+
+    # filtro sito: il comitato del sito B non compare sul sito A
+    assert [c["name"] for c in access_matrix(str(pa.id), "it")["committees"]] == ["CdA"]
 
 
 @pytest.mark.django_db

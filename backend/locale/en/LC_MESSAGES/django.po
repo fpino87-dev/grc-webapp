@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grc-webapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-17 21:56+0000\n"
+"POT-Creation-Date: 2026-09-18 15:35+0200\n"
 "PO-Revision-Date: 2026-03-18 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -17,7 +17,9 @@ msgid "L'autonomia nominale si applica solo a UPS e gruppi elettrogeni."
 msgstr "Rated autonomy applies only to UPS units and generators."
 
 #: apps/assets/services.py:264
-msgid "Impossibile eliminare: esistono valutazioni rischio attive collegate all'asset."
+msgid ""
+"Impossibile eliminare: esistono valutazioni rischio attive collegate "
+"all'asset."
 msgstr "Cannot delete: there are active risk assessments linked to the asset."
 
 #: apps/assets/services.py:269
@@ -190,7 +192,7 @@ msgid "Evidenza non trovata"
 msgstr "Evidence not found"
 
 #: apps/controls/export_engine.py:207
-#: apps/management_review/report/builder.py:146
+#: apps/management_review/report/builder.py:181
 msgid "Compliant"
 msgstr "Compliant"
 
@@ -224,13 +226,18 @@ msgstr "Not relevant"
 
 #: apps/controls/services/evidence.py:129
 #, python-format
-msgid "Documento collegato ma non classificato come '%(type)s' — verificare la classificazione"
-msgstr "Document linked but not classified as '%(type)s' — check the classification"
+msgid ""
+"Documento collegato ma non classificato come '%(type)s' — verificare la "
+"classificazione"
+msgstr ""
+"Document linked but not classified as '%(type)s' — check the classification"
 
 #: apps/controls/services/evidence.py:167
 #, python-format
-msgid "Evidenza '%(title)s' ha %(age)s giorni (max consigliato: %(max_age)s gg)"
-msgstr "Evidence '%(title)s' is %(age)s days old (recommended max: %(max_age)s days)"
+msgid ""
+"Evidenza '%(title)s' ha %(age)s giorni (max consigliato: %(max_age)s gg)"
+msgstr ""
+"Evidence '%(title)s' is %(age)s days old (recommended max: %(max_age)s days)"
 
 #: apps/controls/services/evidence.py:190
 #, python-format
@@ -270,7 +277,8 @@ msgid "Solo il superuser può eliminare un framework."
 msgstr "Only the superuser can delete a framework."
 
 #: apps/controls/services/frameworks.py:258
-msgid "Impossibile eliminare: il framework è ancora assegnato a uno o più siti."
+msgid ""
+"Impossibile eliminare: il framework è ancora assegnato a uno o più siti."
 msgstr "Cannot delete: the framework is still assigned to one or more sites."
 
 #: apps/controls/services/frameworks.py:284
@@ -278,7 +286,8 @@ msgid "Solo il superuser può archiviare un framework."
 msgstr "Only the superuser can archive a framework."
 
 #: apps/controls/services/frameworks.py:293
-msgid "Impossibile archiviare: il framework è ancora assegnato a uno o più siti."
+msgid ""
+"Impossibile archiviare: il framework è ancora assegnato a uno o più siti."
 msgstr "Cannot archive: the framework is still assigned to one or more sites."
 
 #: apps/controls/services/instances.py:53
@@ -297,29 +306,45 @@ msgid "• Evidenza scaduta: %(title)s (scaduta il %(date)s)"
 msgstr "• Expired evidence: %(title)s (expired on %(date)s)"
 
 #: apps/controls/services/instances.py:68
-msgid "Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida collegata."
-msgstr "Cannot set status to 'compliant' without at least one linked valid evidence."
+msgid ""
+"Impossibile impostare lo stato a 'compliant' senza almeno un'evidenza valida "
+"collegata."
+msgstr ""
+"Cannot set status to 'compliant' without at least one linked valid evidence."
 
 #: apps/controls/services/instances.py:72
 msgid "Requisiti non soddisfatti per stato Compliant:\n"
 msgstr "Requirements not satisfied for Compliant status:\n"
 
 #: apps/controls/services/instances.py:87
-msgid "Almeno un documento approvato o un'evidenza valida richiesti per stato Parziale."
-msgstr "At least one approved document or one valid evidence is required for Partial status."
+msgid ""
+"Almeno un documento approvato o un'evidenza valida richiesti per stato "
+"Parziale."
+msgstr ""
+"At least one approved document or one valid evidence is required for Partial "
+"status."
 
 #: apps/controls/services/instances.py:93
-msgid "Lo stato N/A richiede una giustificazione scritta di almeno 20 caratteri."
+msgid ""
+"Lo stato N/A richiede una giustificazione scritta di almeno 20 caratteri."
 msgstr "N/A status requires a written justification of at least 20 characters."
 
 #: apps/controls/services/instances.py:144
-msgid "La giustificazione di esclusione per SOA richiede almeno 50 caratteri. Specificare il motivo formale per cui il controllo non è applicabile."
-msgstr "SOA exclusion justification requires at least 50 characters. Provide the formal reason why the control is not applicable."
+msgid ""
+"La giustificazione di esclusione per SOA richiede almeno 50 caratteri. "
+"Specificare il motivo formale per cui il controllo non è applicabile."
+msgstr ""
+"SOA exclusion justification requires at least 50 characters. Provide the "
+"formal reason why the control is not applicable."
 
 #: apps/controls/services/instances.py:186
 #, python-format
-msgid "Impossibile eliminare il controllo: ha %(n)d valutazioni su uno o più siti. Il catalogo si gestisce ricaricando i framework."
-msgstr "Cannot delete the control: it has %(n)d assessments across one or more sites. The catalog is managed by reloading the frameworks."
+msgid ""
+"Impossibile eliminare il controllo: ha %(n)d valutazioni su uno o più siti. "
+"Il catalogo si gestisce ricaricando i framework."
+msgstr ""
+"Cannot delete the control: it has %(n)d assessments across one or more "
+"sites. The catalog is managed by reloading the frameworks."
 
 #: apps/controls/services/instances.py:220
 msgid "Eliminazione consentita solo per controlli non ancora valutati."
@@ -415,13 +440,18 @@ msgstr "Access denied: aggregate export restricted to the organization scope."
 
 #: apps/controls/views/reports.py:99
 #, python-format
-msgid "Formato %(fmt)s non compatibile con framework %(fw)s. Usa uno di: %(allowed)s"
-msgstr "Format %(fmt)s is not compatible with framework %(fw)s. Use one of: %(allowed)s"
+msgid ""
+"Formato %(fmt)s non compatibile con framework %(fw)s. Usa uno di: %(allowed)s"
+msgstr ""
+"Format %(fmt)s is not compatible with framework %(fw)s. Use one of: "
+"%(allowed)s"
 
 #: apps/controls/views/reports.py:117
 #, python-format
-msgid "Framework '%(fw)s' non attivo per questo sito. Framework attivi: %(active)s"
-msgstr "Framework '%(fw)s' is not active for this site. Active frameworks: %(active)s"
+msgid ""
+"Framework '%(fw)s' non attivo per questo sito. Framework attivi: %(active)s"
+msgstr ""
+"Framework '%(fw)s' is not active for this site. Active frameworks: %(active)s"
 
 #: apps/controls/views/reports.py:132
 #, python-format
@@ -429,12 +459,15 @@ msgid "Errore generazione documento: %(err)s"
 msgstr "Document generation error: %(err)s"
 
 #: apps/documents/services.py:293
-msgid "Eliminazione non consentita per documenti in approvazione o già approvati."
+msgid ""
+"Eliminazione non consentita per documenti in approvazione o già approvati."
 msgstr "Deletion not allowed for documents under approval or already approved."
 
 #: apps/documents/services.py:318
-msgid "Eliminazione non consentita: l'evidenza è collegata a controlli già valutati."
-msgstr "Deletion not allowed: the evidence is linked to controls already assessed."
+msgid ""
+"Eliminazione non consentita: l'evidenza è collegata a controlli già valutati."
+msgstr ""
+"Deletion not allowed: the evidence is linked to controls already assessed."
 
 #: apps/documents/views.py:141
 msgid "Non hai i permessi per inviare in revisione questo documento."
@@ -496,7 +529,7 @@ msgstr "RACI Responsible"
 msgid "RACI Accountable"
 msgstr "RACI Accountable"
 
-#: apps/governance/serializers.py:159
+#: apps/governance/serializers.py:196
 msgid "Esiste già un obiettivo con questo codice in questo perimetro."
 msgstr "An objective with this code already exists in this scope."
 
@@ -509,8 +542,12 @@ msgid "Questo utente ha già questo ruolo attivo per questo perimetro."
 msgstr "This user already has this role active for this scope."
 
 #: apps/governance/services.py:598
-msgid "Questo ruolo ha già un titolare attivo per questo perimetro. Usa Sostituisci per cambiare il titolare."
-msgstr "This role already has an active holder for this scope. Use Replace to change the holder."
+msgid ""
+"Questo ruolo ha già un titolare attivo per questo perimetro. Usa Sostituisci "
+"per cambiare il titolare."
+msgstr ""
+"This role already has an active holder for this scope. Use Replace to change "
+"the holder."
 
 #: apps/governance/services.py:941
 msgid "Indicare il KPI da cui leggere le misure."
@@ -533,8 +570,11 @@ msgid "La scadenza deve essere successiva all'inizio del periodo."
 msgstr "The deadline must be later than the start of the period."
 
 #: apps/governance/services.py:962
-msgid "Il target coincide con il valore di partenza: non c'è alcun miglioramento da misurare."
-msgstr "The target equals the starting value: there is no improvement to measure."
+msgid ""
+"Il target coincide con il valore di partenza: non c'è alcun miglioramento da "
+"misurare."
+msgstr ""
+"The target equals the starting value: there is no improvement to measure."
 
 #: apps/governance/services.py:969
 msgid "Il target peggiora il valore di partenza nella direzione indicata."
@@ -593,25 +633,63 @@ msgstr "Invalid date (expected format: YYYY-MM-DD)."
 msgid "La data della misura precede l'inizio del periodo."
 msgstr "The measurement date is earlier than the start of the period."
 
-#: apps/governance/views.py:80
+#: apps/governance/services.py:1210
+msgid "Accesso negato: l'organo governa siti fuori dal tuo perimetro."
+msgstr "Access denied: the body governs sites outside your scope."
+
+#: apps/governance/services.py:1267
+msgid "La fine della carica precede l'inizio."
+msgstr "The end of the term precedes its start."
+
+#: apps/governance/services.py:1269
+msgid "Indicare nome e cognome."
+msgstr "Enter the full name."
+
+#: apps/governance/services.py:1280
+msgid ""
+"L'organo ha già un presidente in carica in questo periodo: chiudere prima la "
+"sua carica."
+msgstr "The body already has a chair in office in this period: end their term first."
+
+#: apps/governance/services.py:1284
+msgid ""
+"Questo account è già collegato a un componente dell'organo nello stesso "
+"periodo."
+msgstr "This account is already linked to a member of the body in the same period."
+
+#: apps/governance/services.py:1332
+msgid ""
+"Il componente compare in un riesame: chiudere la carica con la data di fine "
+"invece di eliminarlo."
+msgstr "The member appears in a review: end the term with an end date instead of deleting it."
+
+#: apps/governance/views.py:81
 msgid "Questo ruolo è già terminato."
 msgstr "This role has already ended."
 
-#: apps/governance/views.py:85
+#: apps/governance/views.py:86
 msgid "Motivo terminazione obbligatorio (min 5 caratteri)."
 msgstr "Termination reason is required (min 5 characters)."
 
-#: apps/governance/views.py:117
+#: apps/governance/views.py:118
 msgid "new_user_id obbligatorio."
 msgstr "new_user_id is required."
 
-#: apps/governance/views.py:120
+#: apps/governance/views.py:121
 msgid "Utente non trovato."
 msgstr "User not found."
 
+#: apps/governance/views.py:346
+msgid "Accesso negato per questo organo."
+msgstr "Access denied for this body."
+
 #: apps/incidents/serializers.py:55
-msgid "La chiusura dell'incidente avviene solo tramite l'azione dedicata, previo RCA approvato."
-msgstr "Closing the incident is done only through the dedicated action, after an approved RCA."
+msgid ""
+"La chiusura dell'incidente avviene solo tramite l'azione dedicata, previo "
+"RCA approvato."
+msgstr ""
+"Closing the incident is done only through the dedicated action, after an "
+"approved RCA."
 
 #: apps/incidents/services.py:18
 msgid "RCA approvato obbligatorio per chiudere l'incidente."
@@ -643,15 +721,20 @@ msgid "Cambiamenti nelle esigenze e aspettative delle parti interessate"
 msgstr "Changes in the needs and expectations of interested parties"
 
 #: apps/management_review/agenda.py:14
-msgid "Prestazioni della sicurezza delle informazioni: non conformità e azioni correttive, monitoraggio e misurazioni, audit, obiettivi"
-msgstr "Information security performance: nonconformities and corrective actions, monitoring and measurement, audits, objectives"
+msgid ""
+"Prestazioni della sicurezza delle informazioni: non conformità e azioni "
+"correttive, monitoraggio e misurazioni, audit, obiettivi"
+msgstr ""
+"Information security performance: nonconformities and corrective actions, "
+"monitoring and measurement, audits, objectives"
 
 #: apps/management_review/agenda.py:16
 msgid "Feedback delle parti interessate"
 msgstr "Feedback from interested parties"
 
 #: apps/management_review/agenda.py:17
-msgid "Risultati della valutazione del rischio e stato del piano di trattamento"
+msgid ""
+"Risultati della valutazione del rischio e stato del piano di trattamento"
 msgstr "Risk assessment results and status of the treatment plan"
 
 #: apps/management_review/agenda.py:18
@@ -707,7 +790,7 @@ msgid "Osservazione"
 msgstr "Observation"
 
 #: apps/management_review/report/builder.py:31
-#: apps/management_review/report/builder.py:307
+#: apps/management_review/report/builder.py:342
 msgid "Opportunità"
 msgstr "Opportunity"
 
@@ -775,7 +858,7 @@ msgid "In linea"
 msgstr "On track"
 
 #: apps/management_review/report/builder.py:50
-#: apps/management_review/report/builder.py:342
+#: apps/management_review/report/builder.py:377
 msgid "A rischio"
 msgstr "At risk"
 
@@ -792,7 +875,7 @@ msgid "—"
 msgstr "—"
 
 #: apps/management_review/report/builder.py:54
-#: apps/management_review/report/builder.py:452
+#: apps/management_review/report/builder.py:488
 msgid "Bozza"
 msgstr "Draft"
 
@@ -812,622 +895,706 @@ msgstr "Not achieved"
 msgid "Sospeso"
 msgstr "Suspended"
 
+#: apps/management_review/report/builder.py:78 apps/reporting/services.py:1144
+msgid "Presidente"
+msgstr "Chair"
+
+#: apps/management_review/report/builder.py:78 apps/reporting/services.py:1145
+msgid "Membro"
+msgstr "Member"
+
+#: apps/management_review/report/builder.py:79 apps/reporting/services.py:1146
+msgid "Segretario"
+msgstr "Secretary"
+
+#: apps/management_review/report/builder.py:79
+msgid "Ospite"
+msgstr "Guest"
+
+#: apps/management_review/report/builder.py:82
+msgid "presiede"
+msgstr "chairs"
+
+#: apps/management_review/report/builder.py:84
+msgid "Presente"
+msgstr "Present"
+
+#: apps/management_review/report/builder.py:84
+msgid "Assente"
+msgstr "Absent"
+
+#: apps/management_review/report/builder.py:85
+#, python-format
+msgid "Delegato: %(name)s"
+msgstr "Proxy: %(name)s"
+
+#: apps/management_review/report/builder.py:96 apps/reporting/views.py:139
+msgid "Organo di governo"
+msgstr "Governing body"
+
 #: apps/management_review/report/builder.py:98
+#: apps/management_review/report/builder.py:106
+msgid "Approvato da"
+msgstr "Approved by"
+
+#: apps/management_review/report/builder.py:99
+msgid "Delibera"
+msgstr "Resolution"
+
+#: apps/management_review/report/builder.py:99
+#, python-format
+msgid "n. %(ref)s del %(date)s"
+msgstr "no. %(ref)s of %(date)s"
+
+#: apps/management_review/report/builder.py:101
+msgid "Registrata da"
+msgstr "Recorded by"
+
+#: apps/management_review/report/builder.py:106
+#: apps/management_review/report/builder.py:236
+msgid "Data"
+msgstr "Date"
+
+#: apps/management_review/report/builder.py:107
+msgid "Note"
+msgstr "Notes"
+
+#: apps/management_review/report/builder.py:133
 msgid "Primo riesame del perimetro: nessuna azione precedente."
 msgstr "First review for this scope: no previous actions."
 
-#: apps/management_review/report/builder.py:105
-#: apps/management_review/report/builder.py:309
-#: apps/management_review/report/builder.py:375
+#: apps/management_review/report/builder.py:140
+#: apps/management_review/report/builder.py:344
+#: apps/management_review/report/builder.py:410
 msgid "Chiusa"
 msgstr "Closed"
 
-#: apps/management_review/report/builder.py:106
+#: apps/management_review/report/builder.py:141
 msgid "Scaduta"
 msgstr "Overdue"
 
-#: apps/management_review/report/builder.py:106
-#: apps/management_review/report/builder.py:309
-#: apps/management_review/report/builder.py:375
+#: apps/management_review/report/builder.py:141
+#: apps/management_review/report/builder.py:344
+#: apps/management_review/report/builder.py:410
 msgid "Aperta"
 msgstr "Open"
 
-#: apps/management_review/report/builder.py:114
+#: apps/management_review/report/builder.py:149
 #, python-format
 msgid "Riesame precedente: %(title)s del %(date)s."
 msgstr "Previous review: %(title)s of %(date)s."
 
-#: apps/management_review/report/builder.py:116
+#: apps/management_review/report/builder.py:151
 msgid "Azioni considerate"
 msgstr "Actions reviewed"
 
-#: apps/management_review/report/builder.py:117
+#: apps/management_review/report/builder.py:152
 msgid "Chiuse"
 msgstr "Closed"
 
-#: apps/management_review/report/builder.py:118
+#: apps/management_review/report/builder.py:153
 msgid "Aperte"
 msgstr "Open"
 
-#: apps/management_review/report/builder.py:119
+#: apps/management_review/report/builder.py:154
 msgid "Scadute"
 msgstr "Overdue"
 
-#: apps/management_review/report/builder.py:120
+#: apps/management_review/report/builder.py:155
 msgid "Azione"
 msgstr "Action"
 
-#: apps/management_review/report/builder.py:120
-#: apps/management_review/report/builder.py:256
-#: apps/management_review/report/builder.py:263
-#: apps/management_review/report/builder.py:278
-#: apps/management_review/report/builder.py:383
+#: apps/management_review/report/builder.py:155
+#: apps/management_review/report/builder.py:291
+#: apps/management_review/report/builder.py:298
+#: apps/management_review/report/builder.py:313
+#: apps/management_review/report/builder.py:418
 msgid "Owner"
 msgstr "Owner"
 
-#: apps/management_review/report/builder.py:120
-#: apps/management_review/report/builder.py:237
-#: apps/management_review/report/builder.py:345
-#: apps/management_review/report/builder.py:383 apps/reporting/views.py:120
+#: apps/management_review/report/builder.py:155
+#: apps/management_review/report/builder.py:272
+#: apps/management_review/report/builder.py:380
+#: apps/management_review/report/builder.py:418 apps/reporting/views.py:120
 msgid "Scadenza"
 msgstr "Expiry"
 
-#: apps/management_review/report/builder.py:120
-#: apps/management_review/report/builder.py:175
-#: apps/management_review/report/builder.py:215
-#: apps/management_review/report/builder.py:307
-#: apps/management_review/report/builder.py:383
+#: apps/management_review/report/builder.py:155
+#: apps/management_review/report/builder.py:210
+#: apps/management_review/report/builder.py:250
+#: apps/management_review/report/builder.py:342
+#: apps/management_review/report/builder.py:418
 msgid "Stato"
 msgstr "Status"
 
-#: apps/management_review/report/builder.py:120
+#: apps/management_review/report/builder.py:155
 msgid "Riesame"
 msgstr "Review"
 
-#: apps/management_review/report/builder.py:121
+#: apps/management_review/report/builder.py:156
 msgid "Nessuna azione dai riesami precedenti"
 msgstr "No actions from previous reviews"
 
-#: apps/management_review/report/builder.py:145
+#: apps/management_review/report/builder.py:180
 msgid "Compliance per framework"
 msgstr "Compliance by framework"
 
-#: apps/management_review/report/builder.py:146
-#: apps/management_review/report/builder.py:150
-#: apps/management_review/report/builder.py:201
+#: apps/management_review/report/builder.py:181
+#: apps/management_review/report/builder.py:185
+#: apps/management_review/report/builder.py:236
 msgid "Framework"
 msgstr "Framework"
 
-#: apps/management_review/report/builder.py:146
+#: apps/management_review/report/builder.py:181
 msgid "Controlli"
 msgstr "Controls"
 
-#: apps/management_review/report/builder.py:146
-#: apps/management_review/report/builder.py:479
+#: apps/management_review/report/builder.py:181
+#: apps/management_review/report/builder.py:519
 #, python-format
 msgid "% compliant"
 msgstr "% compliant"
 
-#: apps/management_review/report/builder.py:146
+#: apps/management_review/report/builder.py:181
 msgid "Gap/parziali"
 msgstr "Gaps/partial"
 
-#: apps/management_review/report/builder.py:147
+#: apps/management_review/report/builder.py:182
 msgid "Non valutati"
 msgstr "Not assessed"
 
-#: apps/management_review/report/builder.py:147
-#: apps/management_review/report/builder.py:254
+#: apps/management_review/report/builder.py:182
+#: apps/management_review/report/builder.py:289
 msgid "Evidenze scadute"
 msgstr "Expired evidence"
 
-#: apps/management_review/report/builder.py:147
+#: apps/management_review/report/builder.py:182
 msgid "Nessun dato disponibile"
 msgstr "No data available"
 
-#: apps/management_review/report/builder.py:149
+#: apps/management_review/report/builder.py:184
 msgid "Controlli in gap (primi 5 per framework)"
 msgstr "Controls with gaps (top 5 per framework)"
 
-#: apps/management_review/report/builder.py:150
+#: apps/management_review/report/builder.py:185
 msgid "Controllo"
 msgstr "Control"
 
-#: apps/management_review/report/builder.py:150
-#: apps/management_review/report/builder.py:446
+#: apps/management_review/report/builder.py:185
+#: apps/management_review/report/builder.py:482
 msgid "Titolo"
 msgstr "Title"
 
-#: apps/management_review/report/builder.py:171
+#: apps/management_review/report/builder.py:206
 msgid "KPI monitorati"
 msgstr "KPIs monitored"
 
-#: apps/management_review/report/builder.py:171
+#: apps/management_review/report/builder.py:206
 msgid "Critici"
 msgstr "Critical"
 
-#: apps/management_review/report/builder.py:172
+#: apps/management_review/report/builder.py:207
 msgid "In attenzione"
 msgstr "Warning"
 
-#: apps/management_review/report/builder.py:173
+#: apps/management_review/report/builder.py:208
 msgid "Senza dati"
 msgstr "No data"
 
-#: apps/management_review/report/builder.py:174
+#: apps/management_review/report/builder.py:209
 msgid "KPI fuori soglia"
 msgstr "KPIs outside threshold"
 
-#: apps/management_review/report/builder.py:175
+#: apps/management_review/report/builder.py:210
 msgid "KPI"
 msgstr "KPI"
 
-#: apps/management_review/report/builder.py:175
+#: apps/management_review/report/builder.py:210
 msgid "Valore"
 msgstr "Value"
 
-#: apps/management_review/report/builder.py:175
+#: apps/management_review/report/builder.py:210
 msgid "Soglie att./crit."
 msgstr "Warn./crit. thresholds"
 
-#: apps/management_review/report/builder.py:175
+#: apps/management_review/report/builder.py:210
 msgid "Settimana"
 msgstr "Week"
 
-#: apps/management_review/report/builder.py:196
+#: apps/management_review/report/builder.py:231
 msgid "Audit (12 mesi)"
 msgstr "Audits (12 months)"
 
-#: apps/management_review/report/builder.py:197
+#: apps/management_review/report/builder.py:232
 msgid "NC maggiori aperte"
 msgstr "Open major NCs"
 
-#: apps/management_review/report/builder.py:198
+#: apps/management_review/report/builder.py:233
 msgid "NC minori aperte"
 msgstr "Open minor NCs"
 
-#: apps/management_review/report/builder.py:199
+#: apps/management_review/report/builder.py:234
 msgid "Finding scaduti"
 msgstr "Overdue findings"
 
-#: apps/management_review/report/builder.py:200
+#: apps/management_review/report/builder.py:235
 msgid "Audit degli ultimi 12 mesi"
 msgstr "Audits in the last 12 months"
 
-#: apps/management_review/report/builder.py:201
-#: apps/management_review/report/builder.py:203
-#: apps/management_review/report/builder.py:307
+#: apps/management_review/report/builder.py:236
+#: apps/management_review/report/builder.py:238
+#: apps/management_review/report/builder.py:342
 msgid "Audit"
 msgstr "Audit"
 
-#: apps/management_review/report/builder.py:201
-#: apps/management_review/report/html.py:98
-#: apps/management_review/report/pdf.py:208
-msgid "Data"
-msgstr "Date"
-
-#: apps/management_review/report/builder.py:201
+#: apps/management_review/report/builder.py:236
 msgid "Readiness"
 msgstr "Readiness"
 
-#: apps/management_review/report/builder.py:201
-#: apps/management_review/report/builder.py:203
+#: apps/management_review/report/builder.py:236
+#: apps/management_review/report/builder.py:238
 msgid "Finding"
 msgstr "Finding"
 
-#: apps/management_review/report/builder.py:203
+#: apps/management_review/report/builder.py:238
 msgid "Non conformità aperte"
 msgstr "Open nonconformities"
 
-#: apps/management_review/report/builder.py:203
-#: apps/management_review/report/builder.py:383 apps/reporting/views.py:119
+#: apps/management_review/report/builder.py:238
+#: apps/management_review/report/builder.py:418 apps/reporting/views.py:119
 msgid "Tipo"
 msgstr "Type"
 
-#: apps/management_review/report/builder.py:203
+#: apps/management_review/report/builder.py:238
 msgid "Risposta entro"
 msgstr "Response due"
 
-#: apps/management_review/report/builder.py:215
+#: apps/management_review/report/builder.py:250
 msgid "Incidente"
 msgstr "Incident"
 
-#: apps/management_review/report/builder.py:215
+#: apps/management_review/report/builder.py:250
 msgid "Rilevato il"
 msgstr "Detected on"
 
-#: apps/management_review/report/builder.py:215
+#: apps/management_review/report/builder.py:250
 msgid "Gravità"
 msgstr "Severity"
 
-#: apps/management_review/report/builder.py:217
+#: apps/management_review/report/builder.py:252
 msgid "Incidenti (12 mesi)"
 msgstr "Incidents (12 months)"
 
-#: apps/management_review/report/builder.py:218
+#: apps/management_review/report/builder.py:253
 msgid "Notificati NIS2"
 msgstr "NIS2-notified"
 
-#: apps/management_review/report/builder.py:219
+#: apps/management_review/report/builder.py:254
 msgid "Ancora aperti"
 msgstr "Still open"
 
-#: apps/management_review/report/builder.py:220
+#: apps/management_review/report/builder.py:255
 msgid "Chiusi senza RCA"
 msgstr "Closed without RCA"
 
-#: apps/management_review/report/builder.py:221
-#: apps/management_review/report/builder.py:479
+#: apps/management_review/report/builder.py:256
+#: apps/management_review/report/builder.py:519
 msgid "Incidenti aperti"
 msgstr "Open incidents"
 
-#: apps/management_review/report/builder.py:222
+#: apps/management_review/report/builder.py:257
 msgid "Incidenti notificati NIS2 (12 mesi)"
 msgstr "NIS2-notified incidents (12 months)"
 
-#: apps/management_review/report/builder.py:230
+#: apps/management_review/report/builder.py:265
 msgid "Cicli PDCA aperti"
 msgstr "Open PDCA cycles"
 
-#: apps/management_review/report/builder.py:231
+#: apps/management_review/report/builder.py:266
 msgid "Fermi in PLAN >90gg"
 msgstr "Stuck in PLAN >90 days"
 
-#: apps/management_review/report/builder.py:232
+#: apps/management_review/report/builder.py:267
 msgid "PDCA chiusi (12 mesi)"
 msgstr "PDCA closed (12 months)"
 
-#: apps/management_review/report/builder.py:233
-#: apps/management_review/report/builder.py:479
+#: apps/management_review/report/builder.py:268
+#: apps/management_review/report/builder.py:519
 msgid "Task scaduti"
 msgstr "Overdue tasks"
 
-#: apps/management_review/report/builder.py:234
+#: apps/management_review/report/builder.py:269
 msgid "Cicli PDCA fermi in PLAN da oltre 90 giorni"
 msgstr "PDCA cycles stuck in PLAN for over 90 days"
 
-#: apps/management_review/report/builder.py:234
+#: apps/management_review/report/builder.py:269
 msgid "Ciclo"
 msgstr "Cycle"
 
-#: apps/management_review/report/builder.py:234
+#: apps/management_review/report/builder.py:269
 msgid "Aperto il"
 msgstr "Opened on"
 
-#: apps/management_review/report/builder.py:237
+#: apps/management_review/report/builder.py:272
 msgid "Task scaduti (per priorità)"
 msgstr "Overdue tasks (by priority)"
 
-#: apps/management_review/report/builder.py:237
+#: apps/management_review/report/builder.py:272
 msgid "Task"
 msgstr "Task"
 
-#: apps/management_review/report/builder.py:237
+#: apps/management_review/report/builder.py:272
 msgid "Priorità"
 msgstr "Priority"
 
-#: apps/management_review/report/builder.py:237 apps/reporting/views.py:119
+#: apps/management_review/report/builder.py:272
+#: apps/management_review/report/builder.py:514 apps/reporting/views.py:119
 msgid "Ruolo"
 msgstr "Role"
 
-#: apps/management_review/report/builder.py:251
+#: apps/management_review/report/builder.py:286
 msgid "Documenti approvati"
 msgstr "Approved documents"
 
-#: apps/management_review/report/builder.py:252
+#: apps/management_review/report/builder.py:287
 msgid "In scadenza (90gg)"
 msgstr "Expiring (90 days)"
 
-#: apps/management_review/report/builder.py:253
-#: apps/management_review/report/builder.py:258
+#: apps/management_review/report/builder.py:288
+#: apps/management_review/report/builder.py:293
 msgid "Documenti scaduti"
 msgstr "Expired documents"
 
-#: apps/management_review/report/builder.py:256
-#: apps/management_review/report/builder.py:263
+#: apps/management_review/report/builder.py:291
+#: apps/management_review/report/builder.py:298
 msgid "Documento"
 msgstr "Document"
 
-#: apps/management_review/report/builder.py:256
+#: apps/management_review/report/builder.py:291
 msgid "Revisione prevista"
 msgstr "Review due"
 
-#: apps/management_review/report/builder.py:260
+#: apps/management_review/report/builder.py:295
 msgid "Documenti in scadenza entro 90 giorni"
 msgstr "Documents expiring within 90 days"
 
-#: apps/management_review/report/builder.py:262
+#: apps/management_review/report/builder.py:297
 #, python-format
 msgid "Documenti approvati dal %(date)s"
 msgstr "Documents approved since %(date)s"
 
-#: apps/management_review/report/builder.py:263
+#: apps/management_review/report/builder.py:298
 msgid "Approvato il"
 msgstr "Approved on"
 
-#: apps/management_review/report/builder.py:271
-#: apps/management_review/report/builder.py:479
+#: apps/management_review/report/builder.py:306
+#: apps/management_review/report/builder.py:519
 msgid "Rischi critici"
 msgstr "Critical risks"
 
-#: apps/management_review/report/builder.py:272
+#: apps/management_review/report/builder.py:307
 msgid "Rischi medi"
 msgstr "Medium risks"
 
-#: apps/management_review/report/builder.py:273
+#: apps/management_review/report/builder.py:308
 msgid "Rischi bassi"
 msgstr "Low risks"
 
-#: apps/management_review/report/builder.py:274
+#: apps/management_review/report/builder.py:309
 msgid "Critici senza piano"
 msgstr "Critical without a plan"
 
-#: apps/management_review/report/builder.py:277
+#: apps/management_review/report/builder.py:312
 msgid "Rischi critici (residuo più alto)"
 msgstr "Critical risks (highest residual)"
 
-#: apps/management_review/report/builder.py:278
-#: apps/management_review/report/builder.py:288
+#: apps/management_review/report/builder.py:313
+#: apps/management_review/report/builder.py:323
 msgid "Rischio"
 msgstr "Risk"
 
-#: apps/management_review/report/builder.py:278
+#: apps/management_review/report/builder.py:313
 msgid "Asset / processo"
 msgstr "Asset / process"
 
-#: apps/management_review/report/builder.py:278
+#: apps/management_review/report/builder.py:313
 msgid "Inerente → residuo"
 msgstr "Inherent → residual"
 
-#: apps/management_review/report/builder.py:278
+#: apps/management_review/report/builder.py:313
 msgid "Trattamento"
 msgstr "Treatment"
 
-#: apps/management_review/report/builder.py:279
+#: apps/management_review/report/builder.py:314
 msgid "Piano"
 msgstr "Plan"
 
-#: apps/management_review/report/builder.py:283 apps/reporting/views.py:125
+#: apps/management_review/report/builder.py:318 apps/reporting/views.py:125
+#: apps/reporting/views.py:138
 msgid "Sì"
 msgstr "Yes"
 
-#: apps/management_review/report/builder.py:283 apps/reporting/views.py:125
+#: apps/management_review/report/builder.py:318 apps/reporting/views.py:125
 msgid "No"
 msgstr "No"
 
-#: apps/management_review/report/builder.py:287
+#: apps/management_review/report/builder.py:322
 msgid "Rischi accettati formalmente"
 msgstr "Formally accepted risks"
 
-#: apps/management_review/report/builder.py:288
+#: apps/management_review/report/builder.py:323
 msgid "Residuo"
 msgstr "Residual"
 
-#: apps/management_review/report/builder.py:288
+#: apps/management_review/report/builder.py:323
 msgid "Accettato da"
 msgstr "Accepted by"
 
-#: apps/management_review/report/builder.py:288
+#: apps/management_review/report/builder.py:323
 msgid "Scadenza accettazione"
 msgstr "Acceptance expiry"
 
-#: apps/management_review/report/builder.py:295
+#: apps/management_review/report/builder.py:330
 msgid "Continuità operativa"
 msgstr "Business continuity"
 
-#: apps/management_review/report/builder.py:296
+#: apps/management_review/report/builder.py:331
 #, python-format
 msgid "%(n)s processi critici senza piano BCP: %(names)s"
 msgstr "%(n)s critical processes without a BCP: %(names)s"
 
-#: apps/management_review/report/builder.py:306
+#: apps/management_review/report/builder.py:341
 msgid "Opportunità di miglioramento emerse dagli audit"
 msgstr "Improvement opportunities raised by audits"
 
-#: apps/management_review/report/builder.py:340
+#: apps/management_review/report/builder.py:375
 msgid "Obiettivi attivi"
 msgstr "Active objectives"
 
-#: apps/management_review/report/builder.py:341
+#: apps/management_review/report/builder.py:376
 msgid "Mancati o fuori traiettoria"
 msgstr "Missed or off track"
 
-#: apps/management_review/report/builder.py:343
+#: apps/management_review/report/builder.py:378
 msgid "Raggiunti (12 mesi)"
 msgstr "Achieved (12 months)"
 
-#: apps/management_review/report/builder.py:344
+#: apps/management_review/report/builder.py:379
 msgid "Obiettivi di sicurezza (§6.2)"
 msgstr "Information security objectives (§6.2)"
 
-#: apps/management_review/report/builder.py:345
+#: apps/management_review/report/builder.py:380
 msgid "Obiettivo"
 msgstr "Objective"
 
-#: apps/management_review/report/builder.py:345
+#: apps/management_review/report/builder.py:380
 msgid "Partenza → target"
 msgstr "Baseline → target"
 
-#: apps/management_review/report/builder.py:345
+#: apps/management_review/report/builder.py:380
 msgid "Valore attuale"
 msgstr "Current value"
 
-#: apps/management_review/report/builder.py:345
+#: apps/management_review/report/builder.py:380
 msgid "Progresso"
 msgstr "Progress"
 
-#: apps/management_review/report/builder.py:346
+#: apps/management_review/report/builder.py:381
 msgid "Traiettoria"
 msgstr "Trajectory"
 
-#: apps/management_review/report/builder.py:346
+#: apps/management_review/report/builder.py:381
 msgid "Responsabile"
 msgstr "Responsible"
 
-#: apps/management_review/report/builder.py:347
+#: apps/management_review/report/builder.py:382
 msgid "Nessun obiettivo di sicurezza definito per questo perimetro."
 msgstr "No security objectives defined for this scope."
 
-#: apps/management_review/report/builder.py:366
+#: apps/management_review/report/builder.py:401
 #, python-format
 msgid "Task: %(status)s"
 msgstr "Task: %(status)s"
 
-#: apps/management_review/report/builder.py:368
+#: apps/management_review/report/builder.py:403
 #, python-format
 msgid "PDCA: %(phase)s"
 msgstr "PDCA: %(phase)s"
 
-#: apps/management_review/report/builder.py:383
+#: apps/management_review/report/builder.py:418
 msgid "Decisione"
 msgstr "Decision"
 
-#: apps/management_review/report/builder.py:383
+#: apps/management_review/report/builder.py:418
 msgid "Collegamenti"
 msgstr "Links"
 
-#: apps/management_review/report/builder.py:391
+#: apps/management_review/report/builder.py:426
 #, python-format
 msgid "Ci sono %(n)s rischi senza owner assegnato"
 msgstr "There are %(n)s risks with no owner assigned"
 
-#: apps/management_review/report/builder.py:393
+#: apps/management_review/report/builder.py:428
 #, python-format
 msgid "%(n)s rischi critici senza piano di mitigazione"
 msgstr "%(n)s critical risks without a mitigation plan"
 
-#: apps/management_review/report/builder.py:395
+#: apps/management_review/report/builder.py:430
 #, python-format
 msgid "%(n)s processi critici senza piano BCP"
 msgstr "%(n)s critical processes without a BCP"
 
-#: apps/management_review/report/builder.py:397
+#: apps/management_review/report/builder.py:432
 #, python-format
 msgid "%(n)s evidenze scadute"
 msgstr "%(n)s expired pieces of evidence"
 
-#: apps/management_review/report/builder.py:399
+#: apps/management_review/report/builder.py:434
 #, python-format
 msgid "%(n)s cicli PDCA bloccati in fase PLAN da oltre 90 giorni"
 msgstr "%(n)s PDCA cycles stuck in the PLAN phase for over 90 days"
 
-#: apps/management_review/report/builder.py:402
+#: apps/management_review/report/builder.py:437
 #, python-format
 msgid "%(n)s azioni dei riesami precedenti scadute e ancora aperte"
 msgstr "%(n)s actions from previous reviews are overdue and still open"
 
-#: apps/management_review/report/builder.py:404
+#: apps/management_review/report/builder.py:439
 #, python-format
 msgid "%(n)s non conformità maggiori aperte"
 msgstr "%(n)s open major nonconformities"
 
-#: apps/management_review/report/builder.py:410
+#: apps/management_review/report/builder.py:445
 #, python-format
 msgid "%(n)s obiettivi di sicurezza mancati o fuori traiettoria"
 msgstr "%(n)s security objectives missed or off track"
 
-#: apps/management_review/report/builder.py:433
+#: apps/management_review/report/builder.py:468
 msgid "Riesame periodico dei sistemi di gestione"
 msgstr "Periodic review of the management systems"
 
-#: apps/management_review/report/builder.py:447 apps/reporting/views.py:119
+#: apps/management_review/report/builder.py:483 apps/reporting/views.py:119
 msgid "Perimetro"
 msgstr "Scope"
 
-#: apps/management_review/report/builder.py:447
+#: apps/management_review/report/builder.py:483
 msgid "Intera organizzazione"
 msgstr "Whole organisation"
 
-#: apps/management_review/report/builder.py:448
+#: apps/management_review/report/builder.py:484
+msgid "Organo"
+msgstr "Body"
+
+#: apps/management_review/report/builder.py:485
 msgid "Data riunione"
 msgstr "Meeting date"
 
-#: apps/management_review/report/builder.py:449
+#: apps/management_review/report/builder.py:486
 msgid "Presieduto da"
 msgstr "Chaired by"
 
-#: apps/management_review/report/builder.py:450
-msgid "Partecipanti"
-msgstr "Attendees"
-
-#: apps/management_review/report/builder.py:451
+#: apps/management_review/report/builder.py:487
 msgid "Dati congelati il"
 msgstr "Data frozen on"
 
-#: apps/management_review/report/builder.py:452
+#: apps/management_review/report/builder.py:488
 msgid "Stato approvazione"
 msgstr "Approval status"
 
-#: apps/management_review/report/builder.py:452
+#: apps/management_review/report/builder.py:488
 msgid "Approvato"
 msgstr "Approved"
 
-#: apps/management_review/report/builder.py:454
+#: apps/management_review/report/builder.py:490
 msgid "Prossimo riesame"
 msgstr "Next review"
 
-#: apps/management_review/report/builder.py:466
+#: apps/management_review/report/builder.py:502
 #, python-format
-msgid "Testo redatto con il supporto dell'intelligenza artificiale%(edited)s, verificato e accettato da %(who)s il %(when)s."
-msgstr "Text drafted with the support of artificial intelligence%(edited)s, verified and accepted by %(who)s on %(when)s."
+msgid ""
+"Testo redatto con il supporto dell'intelligenza artificiale%(edited)s, "
+"verificato e accettato da %(who)s il %(when)s."
+msgstr ""
+"Text drafted with the support of artificial intelligence%(edited)s, verified "
+"and accepted by %(who)s on %(when)s."
 
-#: apps/management_review/report/builder.py:468
+#: apps/management_review/report/builder.py:504
 msgid " e modificato"
 msgstr " and edited"
 
-#: apps/management_review/report/builder.py:471
+#: apps/management_review/report/builder.py:507
 #, python-format
 msgid "Redatto da %(who)s il %(when)s."
 msgstr "Drafted by %(who)s on %(when)s."
 
-#: apps/management_review/report/builder.py:478
+#: apps/management_review/report/builder.py:513
+msgid "Partecipanti"
+msgstr "Attendees"
+
+#: apps/management_review/report/builder.py:514
+msgid "Nome"
+msgstr "Name"
+
+#: apps/management_review/report/builder.py:514
+msgid "Qualifica"
+msgstr "Position"
+
+#: apps/management_review/report/builder.py:514
+msgid "Presenza"
+msgstr "Attendance"
+
+#: apps/management_review/report/builder.py:518
 msgid "Quadro per sito"
 msgstr "Overview by site"
 
-#: apps/management_review/report/builder.py:479
+#: apps/management_review/report/builder.py:519
 msgid "Sito"
 msgstr "Site"
 
-#: apps/management_review/report/builder.py:492
+#: apps/management_review/report/builder.py:532
 msgid "Discussione"
 msgstr "Discussion"
 
-#: apps/management_review/report/builder.py:493
+#: apps/management_review/report/builder.py:533
 msgid "Nessuna annotazione."
 msgstr "No notes."
 
-#: apps/management_review/report/builder.py:496
+#: apps/management_review/report/builder.py:536
 msgid "Decisioni"
 msgstr "Decisions"
 
-#: apps/management_review/report/builder.py:500
+#: apps/management_review/report/builder.py:540
 msgid "Altre decisioni"
 msgstr "Other decisions"
 
-#: apps/management_review/report/builder.py:507
+#: apps/management_review/report/builder.py:547
 msgid "Dati del riesame"
 msgstr "Review data"
 
-#: apps/management_review/report/builder.py:508
+#: apps/management_review/report/builder.py:548
 msgid "Decisioni e azioni"
 msgstr "Decisions and actions"
 
-#: apps/management_review/report/builder.py:509
+#: apps/management_review/report/builder.py:549
 msgid "Nessuna azione registrata"
 msgstr "No actions recorded"
 
-#: apps/management_review/report/builder.py:514
+#: apps/management_review/report/builder.py:554
 msgid "Riepilogo delle decisioni"
 msgstr "Summary of decisions"
 
-#: apps/management_review/report/builder.py:526
+#: apps/management_review/report/builder.py:562
 msgid "Riesame di Direzione SGSI"
 msgstr "ISMS Management Review"
 
-#: apps/management_review/report/builder.py:533
+#: apps/management_review/report/builder.py:569
 #, python-format
-msgid "Documento generato dal sistema GRC il %(when)s — RISERVATO — Solo per uso interno"
-msgstr "Document generated by the GRC system on %(when)s — CONFIDENTIAL — Internal use only"
+msgid ""
+"Documento generato dal sistema GRC il %(when)s — RISERVATO — Solo per uso "
+"interno"
+msgstr ""
+"Document generated by the GRC system on %(when)s — CONFIDENTIAL — Internal "
+"use only"
 
 #: apps/management_review/report/html.py:70
 #: apps/management_review/report/pdf.py:151
@@ -1450,105 +1617,190 @@ msgstr "Points of attention"
 msgid "RIESAME APPROVATO"
 msgstr "REVIEW APPROVED"
 
-#: apps/management_review/report/html.py:97
-#: apps/management_review/report/pdf.py:207
-msgid "Approvato da"
-msgstr "Approved by"
-
-#: apps/management_review/report/html.py:99
-#: apps/management_review/report/pdf.py:209
-msgid "Note"
-msgstr "Notes"
-
 #: apps/management_review/services/review.py:24
 msgid "Il riesame è approvato: il verbale non è più modificabile."
 msgstr "The review is approved: the minutes can no longer be modified."
 
-#: apps/management_review/services/review.py:57
-msgid "Il riesame è approvato: dati della riunione e partecipanti non sono più modificabili."
-msgstr "The review is approved: meeting data and attendees can no longer be modified."
+#: apps/management_review/services/review.py:49
+msgid "Un riesame di organizzazione va tenuto da un organo di organizzazione."
+msgstr "An organisation-wide review must be held by an organisation-wide body."
 
-#: apps/management_review/services/review.py:66
-#: apps/management_review/services/review.py:88
+#: apps/management_review/services/review.py:51
+msgid "L'organo scelto non governa il sito del riesame."
+msgstr "The selected body does not govern the review's site."
+
+#: apps/management_review/services/review.py:86
+#: apps/management_review/services/review.py:189
+msgid ""
+"Il riesame è approvato: dati della riunione e partecipanti non sono più "
+"modificabili."
+msgstr ""
+"The review is approved: meeting data and attendees can no longer be modified."
+
+#: apps/management_review/services/review.py:99
+#: apps/management_review/services/review.py:121
 msgid "Indicare il titolo del punto."
 msgstr "Enter the title of the agenda item."
 
-#: apps/management_review/services/review.py:103
+#: apps/management_review/services/review.py:136
 msgid "I punti obbligatori ISO 27001 §9.3 non si possono eliminare."
 msgstr "The mandatory ISO 27001 §9.3 agenda items cannot be deleted."
 
-#: apps/management_review/services/review.py:145
+#: apps/management_review/services/review.py:158
+msgid "Il riesame non è collegato a un organo di governo."
+msgstr "The review is not linked to a governing body."
+
+#: apps/management_review/services/review.py:192
+#: apps/management_review/services/review.py:205
+msgid "Elenco partecipanti non valido."
+msgstr "Invalid participant list."
+
+#: apps/management_review/services/review.py:208
+msgid "Componente dell'organo inesistente."
+msgstr "Body member not found."
+
+#: apps/management_review/services/review.py:210
+#, python-format
+msgid "%(name)s non è componente dell'organo del riesame."
+msgstr "%(name)s is not a member of the review's body."
+
+#: apps/management_review/services/review.py:214
+msgid "Utente inesistente."
+msgstr "User not found."
+
+#: apps/management_review/services/review.py:219
+msgid "Indicare il nome di ogni partecipante."
+msgstr "Enter the name of every participant."
+
+#: apps/management_review/services/review.py:222
+#, python-format
+msgid "%(name)s compare due volte fra i partecipanti."
+msgstr "%(name)s appears twice among the participants."
+
+#: apps/management_review/services/review.py:228
+msgid "Ruolo o presenza non validi."
+msgstr "Invalid role or attendance."
+
+#: apps/management_review/services/review.py:231
+#, python-format
+msgid "Indicare il delegato di %(name)s."
+msgstr "Enter the proxy for %(name)s."
+
+#: apps/management_review/services/review.py:241
+msgid "Il riesame può avere un solo presidente."
+msgstr "The review can have only one chair."
+
+#: apps/management_review/services/review.py:243
+msgid "Chi presiede il riesame deve risultare presente."
+msgstr "Whoever chairs the review must be recorded as present."
+
+#: apps/management_review/services/review.py:290
 msgid "Il riesame è approvato: non si possono aggiungere decisioni."
 msgstr "The review is approved: no further decisions can be added."
 
-#: apps/management_review/services/review.py:148
+#: apps/management_review/services/review.py:293
 msgid "Il punto all'ordine del giorno appartiene a un altro riesame."
 msgstr "The agenda item belongs to another review."
 
-#: apps/management_review/services/review.py:152
+#: apps/management_review/services/review.py:297
 msgid "Decisione del riesame"
 msgstr "Review decision"
 
-#: apps/management_review/services/review.py:157
+#: apps/management_review/services/review.py:302
 msgid "Indicare il ruolo a cui assegnare il task."
 msgstr "Specify the role the task is assigned to."
 
-#: apps/management_review/services/review.py:159
+#: apps/management_review/services/review.py:304
 msgid "Per creare il task indicare la scadenza della decisione."
 msgstr "To create the task, set the decision's due date."
 
-#: apps/management_review/services/review.py:162
+#: apps/management_review/services/review.py:307
 #, python-format
 msgid "Riesame di direzione: %(title)s"
 msgstr "Management review: %(title)s"
 
-#: apps/management_review/services/review.py:180
+#: apps/management_review/services/review.py:325
 msgid "Per un riesame di organizzazione indicare il sito del ciclo PDCA."
 msgstr "For an organisation-wide review, specify the site for the PDCA cycle."
 
-#: apps/management_review/services/review.py:234
+#: apps/management_review/services/review.py:379
 msgid "Indicare il codice dell'obiettivo di sicurezza."
 msgstr "Enter the code of the security objective."
 
-#: apps/management_review/services/review.py:236
+#: apps/management_review/services/review.py:381
 msgid "Indicare il valore target dell'obiettivo."
 msgstr "Enter the objective's target value."
 
-#: apps/management_review/services/review.py:238
+#: apps/management_review/services/review.py:383
 msgid "Indicare la scadenza dell'obiettivo (o quella della decisione)."
 msgstr "Enter the objective's deadline (or the decision's)."
 
-#: apps/management_review/services/review.py:253
-msgid "Il riesame è approvato: della decisione si può aggiornare solo lo stato."
+#: apps/management_review/services/review.py:398
+msgid ""
+"Il riesame è approvato: della decisione si può aggiornare solo lo stato."
 msgstr "The review is approved: only the decision's status can be updated."
 
-#: apps/management_review/services/review.py:261
+#: apps/management_review/services/review.py:406
 msgid "Il riesame è approvato: le decisioni non si possono eliminare."
 msgstr "The review is approved: decisions cannot be deleted."
 
-#: apps/management_review/services/review.py:273
+#: apps/management_review/services/review.py:418
 msgid "La riunione è già stata avviata."
 msgstr "The meeting has already started."
 
-#: apps/management_review/services/review.py:300
+#: apps/management_review/services/review.py:445
 msgid "La riunione è già completata."
 msgstr "The meeting is already completed."
 
-#: apps/management_review/services/review.py:304
-msgid "Prima di chiudere la riunione completare i punti obbligatori dell'ordine del giorno."
+#: apps/management_review/services/review.py:449
+msgid ""
+"Prima di chiudere la riunione completare i punti obbligatori dell'ordine del "
+"giorno."
 msgstr "Complete the mandatory agenda items before closing the meeting."
 
-#: apps/management_review/services/review.py:331
+#: apps/management_review/services/review.py:515
 msgid "Il riesame è già approvato."
 msgstr "The review has already been approved."
 
-#: apps/management_review/services/review.py:334
+#: apps/management_review/services/review.py:518
 msgid "Generare lo snapshot dei dati prima di approvare il riesame."
 msgstr "Generate the data snapshot before approving the review."
 
-#: apps/management_review/services/review.py:337
+#: apps/management_review/services/review.py:521
 msgid "Chiudere la riunione prima di approvare il riesame."
 msgstr "Close the meeting before approving the review."
+
+#: apps/management_review/services/review.py:530
+msgid "Solo un componente in carica dell'organo può approvare questo riesame."
+msgstr "Only a member of the body in office can approve this review."
+
+#: apps/management_review/services/review.py:534
+msgid "La delibera dell'organo si registra da governance."
+msgstr "The body's resolution is recorded by governance."
+
+#: apps/management_review/services/review.py:540
+msgid "Data della delibera non valida (formato atteso: AAAA-MM-GG)."
+msgstr "Invalid resolution date (expected format: YYYY-MM-DD)."
+
+#: apps/management_review/services/review.py:542
+msgid "Indicare numero e data della delibera."
+msgstr "Enter the resolution number and date."
+
+#: apps/management_review/services/review.py:544
+msgid "La delibera non può precedere la riunione di riesame."
+msgstr "The resolution cannot precede the review meeting."
+
+#: apps/management_review/services/review.py:546
+msgid "La data della delibera non può essere futura."
+msgstr "The resolution date cannot be in the future."
+
+#: apps/management_review/services/review.py:554
+msgid "Documento di evidenza inesistente o non accessibile."
+msgstr "Evidence document not found or not accessible."
+
+#: apps/management_review/services/review.py:558
+msgid "Modalità di approvazione non valida."
+msgstr "Invalid approval method."
 
 #: apps/management_review/services/snapshot.py:376
 msgid "Il riesame è approvato: lo snapshot non può essere rigenerato."
@@ -1571,20 +1823,32 @@ msgid "Il ciclo è già chiuso."
 msgstr "The cycle is already closed."
 
 #: apps/pdca/services.py:50
-msgid "Per avanzare da PLAN a DO è obbligatorio descrivere l'azione pianificata (minimo 20 caratteri)."
-msgstr "To move from PLAN to DO you must describe the planned action (minimum 20 characters)."
+msgid ""
+"Per avanzare da PLAN a DO è obbligatorio descrivere l'azione pianificata "
+"(minimo 20 caratteri)."
+msgstr ""
+"To move from PLAN to DO you must describe the planned action (minimum 20 "
+"characters)."
 
 #: apps/pdca/services.py:58
-msgid "Per avanzare da DO a CHECK è obbligatorio allegare un'evidenza dell'implementazione."
-msgstr "To move from DO to CHECK you must attach evidence of the implementation."
+msgid ""
+"Per avanzare da DO a CHECK è obbligatorio allegare un'evidenza "
+"dell'implementazione."
+msgstr ""
+"To move from DO to CHECK you must attach evidence of the implementation."
 
 #: apps/pdca/services.py:66
-msgid "Per avanzare da CHECK ad ACT è obbligatorio descrivere il risultato della verifica."
+msgid ""
+"Per avanzare da CHECK ad ACT è obbligatorio descrivere il risultato della "
+"verifica."
 msgstr "To move from CHECK to ACT you must describe the verification result."
 
 #: apps/pdca/services.py:73
-msgid "Per avanzare da CHECK ad ACT è obbligatorio indicare l'esito: ok / partial / ko."
-msgstr "To move from CHECK to ACT you must indicate the outcome: ok / partial / ko."
+msgid ""
+"Per avanzare da CHECK ad ACT è obbligatorio indicare l'esito: ok / partial / "
+"ko."
+msgstr ""
+"To move from CHECK to ACT you must indicate the outcome: ok / partial / ko."
 
 #: apps/pdca/services.py:99
 msgid "Usa close_cycle() per chiudere dalla fase ACT."
@@ -1596,7 +1860,8 @@ msgid "Il ciclo è già %(phase)s."
 msgstr "The cycle is already %(phase)s."
 
 #: apps/pdca/services.py:156
-msgid "Per archiviare è obbligatorio specificare il motivo (minimo 20 caratteri)."
+msgid ""
+"Per archiviare è obbligatorio specificare il motivo (minimo 20 caratteri)."
 msgstr "A reason (minimum 20 characters) is required to archive."
 
 #: apps/pdca/services.py:190
@@ -1605,21 +1870,33 @@ msgid "Il ciclo è in fase %(phase)s. Avanza fino ad ACT prima di chiudere."
 msgstr "The cycle is in phase %(phase)s. Move to ACT before closing."
 
 #: apps/pdca/services.py:197
-msgid "Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata (minimo 20 caratteri)."
-msgstr "To close the cycle you must describe the standardized action (minimum 20 characters)."
+msgid ""
+"Per chiudere il ciclo è obbligatorio descrivere l'azione standardizzata "
+"(minimo 20 caratteri)."
+msgstr ""
+"To close the cycle you must describe the standardized action (minimum 20 "
+"characters)."
 
-#: apps/pdca/views.py:130 apps/tasks/services.py:440
+#: apps/pdca/views.py:130 apps/tasks/services.py:448
 msgid "Motivo cancellazione obbligatorio (min 10 caratteri)."
 msgstr "Cancellation reason is required (min 10 characters)."
 
 #: apps/pdca/views.py:137
-msgid "Ciclo gia' chiuso: ha generato una Lesson Learned e fa parte dell'audit trail. Non e' cancellabile."
-msgstr "Cycle already closed: it generated a Lesson Learned and is part of the audit trail. It cannot be deleted."
+msgid ""
+"Ciclo gia' chiuso: ha generato una Lesson Learned e fa parte dell'audit "
+"trail. Non e' cancellabile."
+msgstr ""
+"Cycle already closed: it generated a Lesson Learned and is part of the audit "
+"trail. It cannot be deleted."
 
 #: apps/pdca/views.py:152
 #, python-format
-msgid "Impossibile cancellare: %(count)d finding manuali aperti referenziano questo ciclo. Chiudi o annulla prima i finding."
-msgstr "Cannot delete: %(count)d open manual findings reference this cycle. Close or cancel the findings first."
+msgid ""
+"Impossibile cancellare: %(count)d finding manuali aperti referenziano questo "
+"ciclo. Chiudi o annulla prima i finding."
+msgstr ""
+"Cannot delete: %(count)d open manual findings reference this cycle. Close or "
+"cancel the findings first."
 
 #: apps/plants/models.py:213
 msgid "Max 1 livello di nesting per i sub-plant."
@@ -1631,8 +1908,11 @@ msgid "Timezone IANA non valido: %(tz)s"
 msgstr "Invalid IANA timezone: %(tz)s"
 
 #: apps/plants/serializers.py:43
-msgid "Max 1 livello di nesting per i sub-plant: il sito scelto è già un sotto-sito."
-msgstr "Max 1 level of nesting for sub-sites: the selected site is already a sub-site."
+msgid ""
+"Max 1 livello di nesting per i sub-plant: il sito scelto è già un sotto-sito."
+msgstr ""
+"Max 1 level of nesting for sub-sites: the selected site is already a sub-"
+"site."
 
 #: apps/plants/services.py:178
 msgid "Solo il superuser può forzare l'eliminazione del sito."
@@ -1666,7 +1946,7 @@ msgid "Logo non trovato nello storage."
 msgstr "Logo not found in storage."
 
 #: apps/reporting/services.py:976 apps/reporting/services.py:987
-#: apps/reporting/views.py:128
+#: apps/reporting/views.py:128 apps/reporting/views.py:142
 msgid "Tutti i siti"
 msgstr "All sites"
 
@@ -1677,6 +1957,18 @@ msgstr "BU"
 #: apps/reporting/services.py:983 apps/reporting/services.py:994
 msgid "(nessun sito)"
 msgstr "(no site)"
+
+#: apps/reporting/services.py:1139
+msgid "Organo di amministrazione (CdA)"
+msgstr "Board of directors"
+
+#: apps/reporting/services.py:1140
+msgid "Comitato sicurezza"
+msgstr "Security committee"
+
+#: apps/reporting/services.py:1141
+msgid "Direzione"
+msgstr "Top management"
 
 #: apps/reporting/views.py:118
 msgid "Utente"
@@ -1707,8 +1999,12 @@ msgid "La nota è obbligatoria per l'accettazione formale del rischio."
 msgstr "A note is required for formal risk acceptance."
 
 #: apps/risk/services.py:249
-msgid "Per rischi critici (rosso) la nota di accettazione deve essere di almeno 50 caratteri."
-msgstr "For critical (red) risks, the acceptance note must be at least 50 characters long."
+msgid ""
+"Per rischi critici (rosso) la nota di accettazione deve essere di almeno 50 "
+"caratteri."
+msgstr ""
+"For critical (red) risks, the acceptance note must be at least 50 characters "
+"long."
 
 #: apps/suppliers/services.py:369
 msgid "Solo assessment completati possono essere approvati."
@@ -1735,8 +2031,12 @@ msgid "La data di valutazione non può essere nel futuro."
 msgstr "The assessment date cannot be in the future."
 
 #: apps/suppliers/services.py:636
-msgid "Indica nelle note il riferimento della valutazione (es. questionario, audit, data e autore)."
-msgstr "In the notes, state the reference for the assessment (e.g. questionnaire, audit, date and author)."
+msgid ""
+"Indica nelle note il riferimento della valutazione (es. questionario, audit, "
+"data e autore)."
+msgstr ""
+"In the notes, state the reference for the assessment (e.g. questionnaire, "
+"audit, date and author)."
 
 #: apps/tasks/serializers.py:72
 msgid "Deve essere una lista di giorni."
@@ -1751,18 +2051,23 @@ msgid "Indicare un giorno da 1 a 28, oppure 0 per l'ultimo giorno del mese."
 msgstr "Enter a day from 1 to 28, or 0 for the last day of the month."
 
 #: apps/tasks/serializers.py:100
-msgid "Il mese di partenza deve essere compreso fra 1 (gennaio) e 12 (dicembre)."
+msgid ""
+"Il mese di partenza deve essere compreso fra 1 (gennaio) e 12 (dicembre)."
 msgstr "The starting month must be between 1 (January) and 12 (December)."
 
 #: apps/tasks/serializers.py:109
 msgid "Per la frequenza settimanale indicare un solo giorno."
 msgstr "For weekly frequency, specify a single day."
 
-#: apps/tasks/services.py:445
-msgid "Una checklist completata è l'evidenza del controllo eseguito: non è cancellabile."
-msgstr "A completed checklist is the evidence that the control was performed: it cannot be deleted."
+#: apps/tasks/services.py:453
+msgid ""
+"Una checklist completata è l'evidenza del controllo eseguito: non è "
+"cancellabile."
+msgstr ""
+"A completed checklist is the evidence that the control was performed: it "
+"cannot be deleted."
 
-#: apps/tasks/services.py:482
+#: apps/tasks/services.py:490
 msgid "Tutti gli item obbligatori devono essere spuntati prima di completare."
 msgstr "All mandatory items must be checked before completing."
 
@@ -1776,7 +2081,8 @@ msgstr "Site not found or not active."
 
 #: apps/tasks/views.py:335
 msgid "Questo KPI si calcola da solo: il valore non va inserito a mano."
-msgstr "This KPI is computed automatically: the value must not be entered by hand."
+msgstr ""
+"This KPI is computed automatically: the value must not be entered by hand."
 
 #: apps/tasks/views.py:344
 msgid "Valore numerico obbligatorio."
@@ -1791,8 +2097,12 @@ msgid "Settimana non valida (formato atteso AAAA-MM-GG)."
 msgstr "Invalid week (expected format YYYY-MM-DD)."
 
 #: core/scoping.py:115
-msgid "Accesso negato: vista aggregata su tutti i siti riservata allo scope organizzazione."
-msgstr "Access denied: aggregate view across all sites restricted to the organization scope."
+msgid ""
+"Accesso negato: vista aggregata su tutti i siti riservata allo scope "
+"organizzazione."
+msgstr ""
+"Access denied: aggregate view across all sites restricted to the "
+"organization scope."
 
 #: core/uploads.py:120
 #, python-format
@@ -1805,7 +2115,9 @@ msgid "Estensione file non consentita. Formati ammessi: %(formats)s."
 msgstr "File extension not allowed. Allowed formats: %(formats)s."
 
 #: core/uploads.py:154
-msgid "Tipo di file non consentito. Il contenuto del file non corrisponde all'estensione."
+msgid ""
+"Tipo di file non consentito. Il contenuto del file non corrisponde "
+"all'estensione."
 msgstr "File type not allowed. The file content does not match the extension."
 
 #: core/uploads.py:163

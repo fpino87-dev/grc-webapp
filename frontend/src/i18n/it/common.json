@@ -905,7 +905,7 @@
     "title": "Governance",
     "subtitle": "Ruoli normativi, comitati e successione incarichi",
     "tabs": {
-      "roles": "Ruoli & comitati",
+      "roles": "Ruoli & organi",
       "workflow": "Workflow documentale (M07)",
       "frameworks": "Framework normativi",
       "risk_appetite": "Risk Appetite",
@@ -964,11 +964,11 @@
     },
     "sections": {
       "roles": "Ruoli normativi",
-      "committees": "Comitati per la sicurezza"
+      "committees": "Organi di governo"
     },
     "empty": {
       "roles": "Nessun ruolo assegnato",
-      "committees": "Nessun comitato configurato"
+      "committees": "Nessun organo di governo configurato"
     },
     "alerts": {
       "vacant_roles": "🚨 {{count}} ruoli obbligatori senza titolare attivo",
@@ -1024,33 +1024,6 @@
       "valid_from": "Valido dal",
       "valid_until": "Valido fino al",
       "submit": "Assegna ruolo"
-    },
-    "committees": {
-      "new": {
-        "open": "+ Nuovo",
-        "title": "Nuovo comitato",
-        "submit": "Crea comitato"
-      },
-      "fields": {
-        "name": "Nome",
-        "type": "Tipo",
-        "frequency": "Frequenza",
-        "next_meeting": "Prossima riunione"
-      },
-      "placeholders": {
-        "name": "es. Comitato per la Sicurezza"
-      },
-      "types": {
-        "centrale": "Centrale",
-        "bu": "BU"
-      },
-      "frequencies": {
-        "mensile": "Mensile",
-        "trimestrale": "Trimestrale",
-        "semestrale": "Semestrale"
-      },
-      "frequency": "Frequenza: {{value}}",
-      "next_meeting": "prossima:"
     },
     "terminate": {
       "title": "Termina ruolo",
@@ -1221,6 +1194,59 @@
       "optional": "Facoltativo",
       "single_holder": "Titolare unico",
       "multi_holder": "Più titolari"
+    },
+    "bodies": {
+      "new_open": "+ Nuovo organo",
+      "intro": "Chi tiene e approva il riesame di direzione (ISO 27001 §5.1, §9.3): CdA, comitato sicurezza o direzione. I componenti si inseriscono a mano, anche senza account; chi ha un account collegato può approvare dall'app i riesami del proprio organo.",
+      "new_title": "Nuovo organo di governo",
+      "edit_title": "Modifica organo di governo",
+      "member_new_title": "Nuovo componente — {{body}}",
+      "member_edit_title": "Modifica componente",
+      "cda_hint": "Organo di gestione ai sensi di NIS2 art. 20: approva le misure di gestione del rischio, ne risponde ed è tenuto a formarsi.",
+      "whole_org": "Intera organizzazione",
+      "scope_hint": "Per più entità giuridiche, un organo per ciascuna con i siti che governa.",
+      "nis2_badge": "Organo di gestione NIS2",
+      "no_chair": "Nessun presidente in carica: il riesame non avrà un presidente proposto.",
+      "no_members": "Nessun componente in carica.",
+      "add_member": "+ Componente",
+      "show_former": "Mostra ex componenti ({{n}})",
+      "hide_former": "Nascondi ex componenti",
+      "end_term": "Chiudi carica",
+      "end_confirm": "Chiudere oggi la carica di {{name}}? Resterà nei verbali passati.",
+      "delete_member_confirm": "Eliminare {{name}}? Usare solo per un inserimento errato: chi lascia la carica si chiude con la data di fine.",
+      "delete_confirm": "Eliminare l'organo «{{name}}»?",
+      "account_inactive": "account disattivato",
+      "ongoing": "in carica",
+      "no_account": "— Nessun account —",
+      "user_hint": "Facoltativo. Con l'account collegato la persona può approvare dall'app i riesami di questo organo.",
+      "fields": {
+        "name": "Nome",
+        "type": "Tipo",
+        "scope": "Perimetro",
+        "description": "Mandato",
+        "full_name": "Nome e cognome",
+        "position": "Qualifica",
+        "body_role": "Ruolo nell'organo",
+        "user": "Account",
+        "valid_from": "In carica dal",
+        "valid_until": "Fino al",
+        "term": "Carica"
+      },
+      "placeholders": {
+        "name": "es. Consiglio di Amministrazione",
+        "description": "es. Approva il riesame e le misure di sicurezza del gruppo",
+        "position": "es. Amministratore Delegato"
+      },
+      "types": {
+        "cda": "Organo di amministrazione (CdA)",
+        "comitato": "Comitato sicurezza",
+        "direzione": "Direzione"
+      },
+      "member_roles": {
+        "presidente": "Presidente",
+        "membro": "Membro",
+        "segretario": "Segretario"
+      }
     }
   },
   "sidebar": {
@@ -3689,7 +3715,7 @@
         "access": "Accessi",
         "responsibilities": "Responsabilità",
         "issues": "Incoerenze",
-        "committees": "Comitati"
+        "committees": "Organi"
       },
       "filter": {
         "all": "Tutti",
@@ -3714,10 +3740,14 @@
       },
       "section_access": "Accessi (cosa può fare)",
       "section_resp": "Responsabilità (di cosa risponde)",
-      "committees_title": "Comitati di Sicurezza",
-      "committees_empty": "Nessun Comitato di Sicurezza configurato. Creane uno in Governance → Comitati.",
-      "committees_next": "prossima",
-      "committees_no_members": "Nessun partecipante registrato (nessuna riunione)"
+      "committees_title": "Organi di governo",
+      "committees_empty": "Nessun organo di governo configurato. Crealo in Governance → Organi di governo.",
+      "member_account": "con account",
+      "member_no_account": "senza account",
+      "body_flag": {
+        "no_members": "Nessun componente in carica",
+        "no_chair": "Nessun presidente in carica"
+      }
     },
     "objectives": {
       "intro": "Gli obiettivi (ISO/IEC 27001 §6.2) sono traguardi con una scadenza: qui si legge se ci si arriverà in tempo. Non sono soglie: se un indicatore è sotto il livello accettabile adesso lo dice il KPI, non questa pagina.",
@@ -4471,14 +4501,14 @@
       "title": "Revisione di Direzione — M13",
       "description": "Gestisce il riesame di direzione ISO 27001 §9.3: ordine del giorno con i punti obbligatori, dati GRC congelati al momento della riunione, discussione e decisioni per punto (con task e PDCA collegati), sintesi executive anche con il supporto dell'IA e verbale scaricabile in PDF o HTML.",
       "steps": {
-        "1": "Crea il riesame con sito (o intera organizzazione), data, presidente (viene proposto il CISO) e partecipanti: l'ordine del giorno §9.3.2 viene creato automaticamente",
+        "1": "Crea il riesame con sito (o intera organizzazione), data e organo di governo: i convocati sono i componenti in carica dell'organo (senza organo viene proposto il CISO come presidente); l'ordine del giorno §9.3.2 viene creato automaticamente. Le presenze si registrano nel dettaglio",
         "2": "Genera lo snapshot: compliance, KPI, audit, rischi, incidenti, documenti e azioni dei riesami precedenti vengono congelati",
         "3": "Avvia la riunione",
         "4": "Per ogni punto dell'ordine del giorno consulta i dati, annota la discussione e registra le decisioni (tipo, owner, scadenza)",
         "5": "Se serve, una decisione apre un task in M08 assegnato a un ruolo e/o un ciclo PDCA in M11",
         "6": "Chiudi la riunione: ogni punto obbligatorio deve avere una discussione o una decisione; viene proposta la data del prossimo riesame, che compare nello scadenzario",
         "7": "Scrivi la sintesi executive o genera una bozza con l'IA, rivedila e accettala",
-        "8": "Approva il riesame con nota formale: il verbale diventa immutabile",
+        "8": "Approva il riesame: in app (un componente dell'organo con account, o la governance) oppure registrando numero e data della delibera dell'organo. Il verbale diventa immutabile",
         "9": "Scarica il verbale in PDF o HTML (incluso anche nel pacchetto audit)"
       },
       "connections": {
@@ -4490,7 +4520,7 @@
         "ai": "Bozza della sintesi executive, sempre da rivedere e accettare"
       },
       "config_needed": {
-        "1": "Nominare il CISO in M00 Governance: viene proposto come presidente del riesame"
+        "1": "Configurare in Governance → Ruoli & organi l'organo che tiene il riesame (es. il CdA) con i suoi componenti; in alternativa nominare il CISO, proposto come presidente"
       }
     },
     "list": {
@@ -4530,7 +4560,9 @@
       "date_label": "Data riunione",
       "cancel": "Annulla",
       "saving": "Salvataggio...",
-      "create": "Crea revisione"
+      "create": "Crea revisione",
+      "body_hint": "I convocati saranno i {{n}} componenti in carica dell'organo: le presenze si registrano nel dettaglio.",
+      "no_body_hint": "Senza organo verrà proposto come presidente il CISO nominato in Governance; gli altri convocati si aggiungono dal dettaglio."
     },
     "actions": {
       "add": "Aggiungi azione",
@@ -4699,19 +4731,37 @@
       "objectives_list": "Stato degli obiettivi"
     },
     "participants": {
-      "heading": "Presidente e partecipanti",
-      "chair": "Presieduto da",
-      "attendees": "Partecipanti",
-      "none": "— Nessuno —",
-      "chair_missing": "Non indicato",
+      "heading": "Convocati e presenze",
+      "chair": "Presiede",
       "edit": "Modifica",
       "save": "Salva",
       "saving": "Salvataggio...",
       "cancel": "Annulla",
-      "search_ph": "Cerca persona...",
-      "selected": "{{count}} selezionati",
-      "suggested": "Proposto in base al ruolo in Governance: {{name}}",
-      "save_error": "Errore durante il salvataggio"
+      "save_error": "Errore durante il salvataggio",
+      "body": "Organo",
+      "no_body": "— Nessun organo —",
+      "from_body": "Riproponi dall'organo",
+      "from_body_confirm": "Sostituire i convocati con i componenti in carica dell'organo alla data del riesame? Presenze e ospiti inseriti andranno persi.",
+      "col_name": "Nome e qualifica",
+      "col_role": "Ruolo",
+      "col_attendance": "Presenza",
+      "position_ph": "Qualifica",
+      "delegate_ph": "Nome del delegato",
+      "add_member": "+ Componente dell'organo",
+      "add_user": "+ Utente della piattaforma",
+      "guest_name_ph": "Ospite: nome",
+      "none_yet": "Nessun convocato: indicarli prima della riunione.",
+      "roles": {
+        "presidente": "Presidente",
+        "membro": "Membro",
+        "segretario": "Segretario",
+        "ospite": "Ospite"
+      },
+      "attendance": {
+        "presente": "Presente",
+        "assente": "Assente",
+        "delegato": "Delegato"
+      }
     },
     "agenda": {
       "heading": "Ordine del giorno (ISO 27001 §9.3.2)",
@@ -4782,6 +4832,19 @@
       "ai_not_configured": "Il motore IA non è configurato (Impostazioni → AI Engine).",
       "ai_error": "Generazione non riuscita",
       "save_error": "Errore durante il salvataggio"
+    },
+    "approval_form": {
+      "approved_resolution": "Approvato da {{body}} con delibera n. {{ref}} del {{date}} (registrata da {{by}})",
+      "not_allowed": "L'approvazione spetta ai componenti in carica dell'organo o a governance.",
+      "mode_in_app": "Approva in app",
+      "mode_delibera": "Registra delibera dell'organo",
+      "hint_in_app_member": "Approvi come componente dell'organo: il verbale riporterà nome e qualifica.",
+      "hint_in_app_governance": "Se l'organo ha deliberato fuori dalla piattaforma, registra la delibera: il verbale ne riporterà gli estremi.",
+      "hint_resolution": "Numero e data della delibera sono obbligatori; il documento (M07) è l'evidenza per l'auditor.",
+      "resolution_ref_ph": "N. delibera",
+      "document_search_ph": "Cerca documento...",
+      "no_document": "— Nessun documento —",
+      "register_resolution": "Registra approvazione"
     }
   },
   "objectives": {

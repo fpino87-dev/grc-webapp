@@ -14,8 +14,8 @@ from core.audit import log_action
 from core.scoping import PlantScopedQuerysetMixin, get_user_plant_ids
 
 from . import services
-from .models import ManagementReview, ReviewAction, ReviewAgendaItem
-from .permissions import ManagementReviewPermission
+from .models import ManagementReview, ReviewAction, ReviewAgendaItem, ReviewParticipant
+from .permissions import ManagementReviewPermission, ReviewWithBodyMembersPermission
 from .serializers import ManagementReviewSerializer, ReviewActionSerializer, ReviewAgendaItemSerializer
 
 
@@ -36,21 +36,49 @@ def _action_queryset():
 
 class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = ManagementReview.objects.select_related(
-        "plant", "chair", "approved_by"
+        "plant", "governing_body", "approved_by", "approved_member"
     ).prefetch_related(
-        "attendees",
+        Prefetch("participants", queryset=ReviewParticipant.objects.all()),
         Prefetch("actions", queryset=_action_queryset()),
         Prefetch("agenda_items", queryset=ReviewAgendaItem.objects.all()),
     )
     serializer_class = ManagementReviewSerializer
-    permission_classes = [ManagementReviewPermission]
+    permission_classes = [ReviewWithBodyMembersPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["plant", "status"]
     search_fields = ["title"]
     plant_field = "plant"
 
+    def get_queryset(self):
+        from core.permissions import user_has_any_role
+
+        from apps.governance.services import user_committee_ids
+
+        user = self.request.user
+        if user_has_any_role(user, ManagementReviewPermission.read_roles):
+            return super().get_queryset()
+        # Solo componenti di un organo (vedi ManagementReviewPermission): i
+        # riesami del proprio organo, indipendentemente dal perimetro siti.
+        return self.queryset.filter(governing_body_id__in=user_committee_ids(user))
+
+    def get_serializer_context(self):
+        from core.permissions import user_has_any_role
+
+        from apps.governance.services import user_committee_ids
+
+        ctx = super().get_serializer_context()
+        user = self.request.user
+        ctx["approval_scope"] = (
+            user_has_any_role(user, ManagementReviewPermission.write_roles),
+            user_committee_ids(user),
+        )
+        return ctx
+
     def perform_create(self, serializer):
-        services.create_review(serializer, self.request.user)
+        try:
+            services.create_review(serializer, self.request.user)
+        except DjangoValidationError as e:
+            raise _drf_error(e) from e
 
     def perform_update(self, serializer):
         try:
@@ -96,9 +124,25 @@ class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def approve(self, request, pk=None):
         review = self._run(
-            services.approve_review, self.get_object(), request.user, request.data.get("note", "")
+            services.approve_review, self.get_object(), request.user, request.data.get("note", ""),
+            mode=request.data.get("mode", "in_app"),
+            resolution_ref=request.data.get("resolution_ref", ""),
+            resolution_date=request.data.get("resolution_date") or None,
+            document_id=request.data.get("document_id") or None,
         )
         return self._respond(review)
+
+    @action(detail=True, methods=["put"])
+    def participants(self, request, pk=None):
+        """Sostituisce l'elenco dei convocati (componenti, utenti, ospiti)."""
+        self._run(services.set_participants, self.get_object(), request.data.get("participants"), request.user)
+        return self._respond(self.get_object())
+
+    @action(detail=True, methods=["post"], url_path="participants-from-body")
+    def participants_from_body(self, request, pk=None):
+        """Ripropone i convocati dai componenti in carica dell'organo."""
+        self._run(services.participants_from_body, self.get_object(), request.user)
+        return self._respond(self.get_object())
 
     @action(detail=False, methods=["get"], url_path="suggested-chair")
     def suggested_chair(self, request):
