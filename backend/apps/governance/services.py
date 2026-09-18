@@ -1112,7 +1112,7 @@ def record_objective_measurement(objective, user, *, value, measured_on=None, no
         try:
             measured_on = _date.fromisoformat(measured_on)
         except ValueError:
-            raise ValidationError({"measured_on": _("Data non valida (formato atteso: AAAA-MM-GG).")})
+            raise ValidationError({"measured_on": _("Data non valida (formato atteso: AAAA-MM-GG).")}) from None
     if measured_on < objective.start_date:
         raise ValidationError({
             "measured_on": _("La data della misura precede l'inizio del periodo.")

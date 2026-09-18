@@ -1,6 +1,6 @@
 """M13 × §6.2 — obiettivi di sicurezza nello snapshot, nel verbale e nelle delibere."""
 import pytest
-from datetime import date, timedelta
+from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.utils import timezone
