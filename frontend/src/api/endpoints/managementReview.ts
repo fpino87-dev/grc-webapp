@@ -89,6 +89,9 @@ export interface ManagementReview {
   next_review_date: string | null;
   governing_body: string | null;
   governing_body_name: string | null;
+  /** Sito il cui logo compare in testa al verbale PDF/HTML. */
+  report_logo_plant: string | null;
+  report_logo_plant_code: string | null;
   chair_name: string | null;
   participants: ReviewParticipant[];
   status: "pianificato" | "in_corso" | "completato";
@@ -164,6 +167,9 @@ export const managementReviewApi = {
 
   setParticipants: (id: string, participants: ReviewParticipant[]) =>
     apiClient.put<ManagementReview>(`${base}/${id}/participants/`, { participants }).then((r) => r.data),
+
+  setReportLogo: (id: string, plant: string | null) =>
+    apiClient.post<ManagementReview>(`${base}/${id}/report-logo/`, { plant }).then((r) => r.data),
 
   participantsFromBody: (id: string) =>
     apiClient.post<ManagementReview>(`${base}/${id}/participants-from-body/`).then((r) => r.data),

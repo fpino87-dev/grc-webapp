@@ -558,7 +558,12 @@ def build_report(review) -> dict:
     if review.approval_status == "approvato" and review.approved_at:
         approval = {"lines": _approval_lines(review)}
 
+    from apps.plants.services import plant_logo
+
+    logo = plant_logo(review.report_logo_plant) if review.report_logo_plant_id else None
+
     return {
+        "logo": {"data": logo[0], "mime": logo[1]} if logo else None,
         "title": _("Riesame di Direzione SGSI"),
         "subtitle": _scope_subtitle(review),
         "meta": meta,

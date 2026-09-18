@@ -4845,6 +4845,14 @@
       "document_search_ph": "Cerca documento...",
       "no_document": "— Nessun documento —",
       "register_resolution": "Registra approvazione"
+    },
+    "report_logo": {
+      "title": "Logo del verbale",
+      "none": "— Nessun logo —",
+      "hint": "Compare in alto a destra nel verbale PDF e HTML. Si sceglie tra i loghi caricati per i siti in Plant Registry; modificabile anche dopo l'approvazione.",
+      "no_logos": "Nessun sito ha un logo caricato: caricalo in Plant Registry → modifica sito.",
+      "preview_alt": "Anteprima del logo",
+      "save_error": "Impossibile impostare il logo"
     }
   },
   "objectives": {

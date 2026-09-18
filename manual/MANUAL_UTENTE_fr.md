@@ -720,6 +720,7 @@ Dans le procès-verbal, la synthèse indique si elle a été rédigée avec l'ai
 
    Après l'approbation, les données de la réunion, les convoqués, l'ordre du jour, les décisions et la synthèse ne sont plus modifiables ; seul l'état d'avancement des décisions peut encore être mis à jour
 2. Téléchargez le procès-verbal en **PDF** ou **HTML** : données de la revue, participants, synthèse exécutive, points d'attention, ordre du jour avec données, discussion et décisions, récapitulatif des décisions, approbation. Le téléchargement est enregistré dans la piste d'audit
+   Sous **Statut de la réunion**, on choisit le **logo du procès-verbal**, en haut à droite du PDF et du HTML, parmi ceux chargés pour les sites dans le Plant Registry (celui du site de la revue est proposé). Il peut être modifié même après l'approbation
 3. Le **dossier d'audit** (M03) inclut le récapitulatif des revues et le procès-verbal PDF des revues approuvées
 
 ---

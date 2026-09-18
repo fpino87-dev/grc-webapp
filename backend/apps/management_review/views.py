@@ -36,7 +36,7 @@ def _action_queryset():
 
 class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = ManagementReview.objects.select_related(
-        "plant", "governing_body", "approved_by", "approved_member"
+        "plant", "governing_body", "approved_by", "approved_member", "report_logo_plant"
     ).prefetch_related(
         Prefetch("participants", queryset=ReviewParticipant.objects.all()),
         Prefetch("actions", queryset=_action_queryset()),
@@ -131,6 +131,12 @@ class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             document_id=request.data.get("document_id") or None,
         )
         return self._respond(review)
+
+    @action(detail=True, methods=["post"], url_path="report-logo")
+    def report_logo(self, request, pk=None):
+        """Sceglie il logo del verbale (`{"plant": <uuid>|null}`)."""
+        self._run(services.set_report_logo, self.get_object(), request.data.get("plant") or None, request.user)
+        return self._respond(self.get_object())
 
     @action(detail=True, methods=["put"])
     def participants(self, request, pk=None):

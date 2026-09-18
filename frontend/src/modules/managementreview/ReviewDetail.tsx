@@ -11,6 +11,7 @@ import { SitesBlock } from "./SnapshotBlocks";
 import { useAuthStore } from "../../store/auth";
 import { ApprovalSection } from "./ApprovalSection";
 import { ParticipantsSection } from "./ParticipantsSection";
+import { ReportLogoPicker } from "./ReportLogoPicker";
 import { SnapSection, fmtDate, type Snap } from "./shared";
 
 // Scrittura sul riesame: governance. Un componente dell'organo con account
@@ -155,7 +156,10 @@ export function ReviewDetail({ review, users, plants, onClose }: { review: Manag
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
-          <MeetingSection review={review} locked={locked} onMissing={setMissing} />
+          <div>
+            <MeetingSection review={review} locked={locked} onMissing={setMissing} />
+            <ReportLogoPicker review={review} canWrite={isGovernance} />
+          </div>
 
           <ParticipantsSection review={review} users={users} locked={isApproved} canWrite={isGovernance} />
 

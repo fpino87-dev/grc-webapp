@@ -720,6 +720,7 @@ W protokole podsumowanie informuje, czy powstało z pomocą AI (i jakiego modelu
 
    Po zatwierdzeniu nie można zmieniać danych spotkania, zaproszonych, porządku obrad, decyzji ani podsumowania; można jedynie aktualizować status realizacji decyzji
 2. Pobierz protokół w formacie **PDF** lub **HTML**: dane przeglądu, uczestnicy, podsumowanie dla kierownictwa, punkty uwagi, porządek obrad z danymi, dyskusja i decyzje, zestawienie decyzji, zatwierdzenie. Pobranie jest rejestrowane w ścieżce audytu
+   W sekcji **Status spotkania** wybiera się **logo protokołu**, w prawym górnym rogu PDF i HTML, spośród logo wgranych dla zakładów w Plant Registry (proponowane jest logo zakładu przeglądu). Można je zmienić także po zatwierdzeniu
 3. **Pakiet audytowy** (M03) zawiera zestawienie przeglądów i protokoły PDF przeglądów zatwierdzonych
 
 ---

@@ -4845,6 +4845,14 @@
       "document_search_ph": "Search document...",
       "no_document": "— No document —",
       "register_resolution": "Record approval"
+    },
+    "report_logo": {
+      "title": "Minutes logo",
+      "none": "— No logo —",
+      "hint": "Shown at the top right of the PDF and HTML minutes. Chosen among the logos uploaded for the sites in Plant Registry; can be changed even after approval.",
+      "no_logos": "No site has an uploaded logo: upload one in Plant Registry → edit site.",
+      "preview_alt": "Logo preview",
+      "save_error": "Unable to set the logo"
     }
   },
   "objectives": {

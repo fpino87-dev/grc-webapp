@@ -4845,6 +4845,14 @@
       "document_search_ph": "Szukaj dokumentu...",
       "no_document": "— Brak dokumentu —",
       "register_resolution": "Zarejestruj zatwierdzenie"
+    },
+    "report_logo": {
+      "title": "Logo protokołu",
+      "none": "— Brak logo —",
+      "hint": "Wyświetlane w prawym górnym rogu protokołu PDF i HTML. Wybierane spośród logo wgranych dla zakładów w Plant Registry; można je zmienić także po zatwierdzeniu.",
+      "no_logos": "Żaden zakład nie ma wgranego logo: wgraj je w Plant Registry → edycja zakładu.",
+      "preview_alt": "Podgląd logo",
+      "save_error": "Nie można ustawić logo"
     }
   },
   "objectives": {

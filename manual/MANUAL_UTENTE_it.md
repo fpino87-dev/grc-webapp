@@ -720,6 +720,7 @@ Nel verbale la sintesi riporta se è stata redatta con il supporto dell'IA (e co
 
    Dopo l'approvazione dati della riunione, convocati, ordine del giorno, decisioni e sintesi non sono più modificabili; resta aggiornabile solo lo stato di avanzamento delle decisioni
 2. Scarica il verbale in **PDF** o **HTML**: dati del riesame, partecipanti, sintesi executive, punti di attenzione, ordine del giorno con dati, discussione e decisioni, riepilogo delle decisioni, approvazione. Il download è registrato nell'audit trail
+   Sotto **Stato riunione** si sceglie il **logo del verbale**, in alto a destra nel PDF e nell'HTML, tra quelli caricati per i siti in Plant Registry (proposto quello del sito del riesame). Si può cambiare anche dopo l'approvazione
 3. Il **pacchetto audit** (M03) include il riepilogo dei riesami e il verbale PDF di quelli approvati
 
 ---

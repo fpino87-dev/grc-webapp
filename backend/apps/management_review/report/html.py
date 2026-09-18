@@ -8,6 +8,8 @@ from .builder import build_report
 TONES = {"red": "#dc2626", "orange": "#d97706", "green": "#16a34a", "muted": "#6b7280"}
 
 CSS = """
+.brand { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.brand img { max-height: 56px; max-width: 180px; object-fit: contain; }
 body { font-family: Arial, sans-serif; font-size: 12px; color: #333; max-width: 960px; margin: 40px auto; padding: 0 20px; }
 h1 { font-size: 20px; border-bottom: 2px solid #1e40af; padding-bottom: 8px; color: #1e40af; margin-bottom: 2px; }
 .subtitle { color: #6b7280; font-size: 11px; margin: 0 0 16px; }
@@ -72,11 +74,25 @@ def _block(b) -> str:
     return f"{title}<table><tr>{head}</tr>{body}</table>{more}"
 
 
+def _header(doc) -> str:
+    """Titolo con, a destra, il logo scelto per il verbale (data URI: il file
+    HTML resta autosufficiente anche archiviato o inoltrato)."""
+    import base64
+
+    title = f"<h1>{escape(doc['title'])}</h1><p class='subtitle'>{escape(doc['subtitle'])}</p>"
+    logo = doc.get("logo")
+    if not logo:
+        return title
+    src = f"data:{logo['mime']};base64,{base64.b64encode(logo['data']).decode('ascii')}"
+    return (f"<div class='brand'><div>{title}</div>"
+            f"<img src=\"{src}\" alt=\"{escape(_('Logo'))}\"></div>")
+
+
 def render_html(review) -> str:
     doc = build_report(review)
     meta = "".join(f"<tr><td class='k'>{escape(k)}</td><td>{escape(str(v))}</td></tr>" for k, v in doc["meta"])
     parts = [
-        f"<h1>{escape(doc['title'])}</h1><p class='subtitle'>{escape(doc['subtitle'])}</p>",
+        _header(doc),
         f"<table class='meta'>{meta}</table>",
     ]
     if doc["summary"]:

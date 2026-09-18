@@ -720,6 +720,7 @@ Tutanakta özet, yapay zekâ desteğiyle (ve hangi modelle) hazırlanıp hazırl
 
    Onaydan sonra toplantı verileri, davetliler, gündem, kararlar ve özet değiştirilemez; yalnızca kararların ilerleme durumu güncellenebilir
 2. Tutanağı **PDF** veya **HTML** olarak indirin: gözden geçirme bilgileri, katılımcılar, yönetici özeti, dikkat edilecek noktalar, veriler/tartışma/kararlarla gündem, karar özeti, onay. İndirme denetim izine kaydedilir
+   **Toplantı durumu** altında, Plant Registry'de tesisler için yüklenenler arasından PDF ve HTML'in sağ üst köşesindeki **tutanak logosu** seçilir (gözden geçirme tesisinin logosu önerilir). Onaydan sonra da değiştirilebilir
 3. **Denetim paketi** (M03), gözden geçirmelerin özetini ve onaylanmış gözden geçirmelerin PDF tutanaklarını içerir
 
 ---

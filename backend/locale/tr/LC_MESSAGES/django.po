@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grc-webapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-18 15:35+0200\n"
+"POT-Creation-Date: 2026-09-18 16:01+0200\n"
 "PO-Revision-Date: 2026-03-18 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -191,36 +191,36 @@ msgstr "Doküman bulunamadı"
 msgid "Evidenza non trovata"
 msgstr "Kanıt bulunamadı"
 
-#: apps/controls/export_engine.py:207
+#: apps/controls/export_engine.py:187
 #: apps/management_review/report/builder.py:181
 msgid "Compliant"
 msgstr "Uyumlu"
 
-#: apps/controls/export_engine.py:208
+#: apps/controls/export_engine.py:188
 msgid "Parziale"
 msgstr "Kısmi"
 
-#: apps/controls/export_engine.py:209
+#: apps/controls/export_engine.py:189
 msgid "Gap"
 msgstr "Boşluk"
 
-#: apps/controls/export_engine.py:210
+#: apps/controls/export_engine.py:190
 msgid "N/A"
 msgstr "N/A"
 
-#: apps/controls/export_engine.py:211
+#: apps/controls/export_engine.py:191
 msgid "Non valutato"
 msgstr "Değerlendirilmedi"
 
-#: apps/controls/export_engine.py:219
+#: apps/controls/export_engine.py:199
 msgid "Applicabile"
 msgstr "Uygulanabilir"
 
-#: apps/controls/export_engine.py:220
+#: apps/controls/export_engine.py:200
 msgid "Escluso"
 msgstr "Hariç tutuldu"
 
-#: apps/controls/export_engine.py:221
+#: apps/controls/export_engine.py:201
 msgid "Non pertinente"
 msgstr "İlgili değil"
 
@@ -650,7 +650,9 @@ msgstr "Ad soyad girin."
 msgid ""
 "L'organo ha già un presidente in carica in questo periodo: chiudere prima la "
 "sua carica."
-msgstr "Organın bu dönemde zaten görevde bir başkanı var: önce onun görevini sonlandırın."
+msgstr ""
+"Organın bu dönemde zaten görevde bir başkanı var: önce onun görevini "
+"sonlandırın."
 
 #: apps/governance/services.py:1284
 msgid ""
@@ -662,7 +664,9 @@ msgstr "Bu hesap aynı dönemde organın bir üyesine zaten bağlı."
 msgid ""
 "Il componente compare in un riesame: chiudere la carica con la data di fine "
 "invece di eliminarlo."
-msgstr "Üye bir gözden geçirmede yer alıyor: silmek yerine görevi bitiş tarihiyle sonlandırın."
+msgstr ""
+"Üye bir gözden geçirmede yer alıyor: silmek yerine görevi bitiş tarihiyle "
+"sonlandırın."
 
 #: apps/governance/views.py:81
 msgid "Questo ruolo è già terminato."
@@ -1584,11 +1588,11 @@ msgstr "Kayıtlı eylem yok"
 msgid "Riepilogo delle decisioni"
 msgstr "Kararların özeti"
 
-#: apps/management_review/report/builder.py:562
+#: apps/management_review/report/builder.py:567
 msgid "Riesame di Direzione SGSI"
 msgstr "BGYS Yönetimin Gözden Geçirmesi"
 
-#: apps/management_review/report/builder.py:569
+#: apps/management_review/report/builder.py:574
 #, python-format
 msgid ""
 "Documento generato dal sistema GRC il %(when)s — RISERVATO — Solo per uso "
@@ -1597,24 +1601,28 @@ msgstr ""
 "%(when)s tarihinde GRC sistemi tarafından oluşturulan belge — GİZLİ — "
 "Yalnızca kurum içi kullanım"
 
-#: apps/management_review/report/html.py:70
+#: apps/management_review/report/html.py:72
 #: apps/management_review/report/pdf.py:151
 #, python-format
 msgid "… e altri %(n)s"
 msgstr "… ve %(n)s tane daha"
 
-#: apps/management_review/report/html.py:84
-#: apps/management_review/report/pdf.py:186
+#: apps/management_review/report/html.py:88
+msgid "Logo"
+msgstr "Logo"
+
+#: apps/management_review/report/html.py:100
+#: apps/management_review/report/pdf.py:212
 msgid "Sintesi executive"
 msgstr "Yönetici özeti"
 
-#: apps/management_review/report/html.py:89
-#: apps/management_review/report/pdf.py:190
+#: apps/management_review/report/html.py:105
+#: apps/management_review/report/pdf.py:216
 msgid "Punti di attenzione"
 msgstr "Dikkat edilecek noktalar"
 
-#: apps/management_review/report/html.py:96
-#: apps/management_review/report/pdf.py:206
+#: apps/management_review/report/html.py:112
+#: apps/management_review/report/pdf.py:232
 msgid "RIESAME APPROVATO"
 msgstr "GÖZDEN GEÇİRME ONAYLANDI"
 
@@ -1624,14 +1632,16 @@ msgstr "Gözden geçirme onaylandı: tutanak artık değiştirilemez."
 
 #: apps/management_review/services/review.py:49
 msgid "Un riesame di organizzazione va tenuto da un organo di organizzazione."
-msgstr "Kuruluş genelindeki bir gözden geçirme, kuruluş düzeyinde bir organ tarafından yürütülmelidir."
+msgstr ""
+"Kuruluş genelindeki bir gözden geçirme, kuruluş düzeyinde bir organ "
+"tarafından yürütülmelidir."
 
 #: apps/management_review/services/review.py:51
 msgid "L'organo scelto non governa il sito del riesame."
 msgstr "Seçilen organ gözden geçirmenin tesisini yönetmiyor."
 
-#: apps/management_review/services/review.py:86
-#: apps/management_review/services/review.py:189
+#: apps/management_review/services/review.py:92
+#: apps/management_review/services/review.py:223
 msgid ""
 "Il riesame è approvato: dati della riunione e partecipanti non sono più "
 "modificabili."
@@ -1639,168 +1649,177 @@ msgstr ""
 "Gözden geçirme onaylandı: toplantı verileri ve katılımcılar artık "
 "değiştirilemez."
 
-#: apps/management_review/services/review.py:99
-#: apps/management_review/services/review.py:121
+#: apps/management_review/services/review.py:105
+#: apps/management_review/services/review.py:127
 msgid "Indicare il titolo del punto."
 msgstr "Gündem maddesinin başlığını girin."
 
-#: apps/management_review/services/review.py:136
+#: apps/management_review/services/review.py:142
 msgid "I punti obbligatori ISO 27001 §9.3 non si possono eliminare."
 msgstr "ISO 27001 §9.3 zorunlu gündem maddeleri silinemez."
 
-#: apps/management_review/services/review.py:158
+#: apps/management_review/services/review.py:167
+msgid "Sito inesistente o non accessibile."
+msgstr "Tesis bulunamadı veya erişilemiyor."
+
+#: apps/management_review/services/review.py:169
+msgid "Il sito scelto non ha un logo caricato."
+msgstr "Seçilen tesisin yüklenmiş bir logosu yok."
+
+#: apps/management_review/services/review.py:192
 msgid "Il riesame non è collegato a un organo di governo."
 msgstr "Gözden geçirme bir yönetişim organına bağlı değil."
 
-#: apps/management_review/services/review.py:192
-#: apps/management_review/services/review.py:205
+#: apps/management_review/services/review.py:226
+#: apps/management_review/services/review.py:239
 msgid "Elenco partecipanti non valido."
 msgstr "Geçersiz katılımcı listesi."
 
-#: apps/management_review/services/review.py:208
+#: apps/management_review/services/review.py:242
 msgid "Componente dell'organo inesistente."
 msgstr "Organ üyesi bulunamadı."
 
-#: apps/management_review/services/review.py:210
+#: apps/management_review/services/review.py:244
 #, python-format
 msgid "%(name)s non è componente dell'organo del riesame."
 msgstr "%(name)s gözden geçirme organının üyesi değil."
 
-#: apps/management_review/services/review.py:214
+#: apps/management_review/services/review.py:248
 msgid "Utente inesistente."
 msgstr "Kullanıcı bulunamadı."
 
-#: apps/management_review/services/review.py:219
+#: apps/management_review/services/review.py:253
 msgid "Indicare il nome di ogni partecipante."
 msgstr "Her katılımcının adını girin."
 
-#: apps/management_review/services/review.py:222
+#: apps/management_review/services/review.py:256
 #, python-format
 msgid "%(name)s compare due volte fra i partecipanti."
 msgstr "%(name)s katılımcılar arasında iki kez yer alıyor."
 
-#: apps/management_review/services/review.py:228
+#: apps/management_review/services/review.py:262
 msgid "Ruolo o presenza non validi."
 msgstr "Geçersiz rol veya katılım."
 
-#: apps/management_review/services/review.py:231
+#: apps/management_review/services/review.py:265
 #, python-format
 msgid "Indicare il delegato di %(name)s."
 msgstr "%(name)s için vekili girin."
 
-#: apps/management_review/services/review.py:241
+#: apps/management_review/services/review.py:275
 msgid "Il riesame può avere un solo presidente."
 msgstr "Gözden geçirmenin yalnızca bir başkanı olabilir."
 
-#: apps/management_review/services/review.py:243
+#: apps/management_review/services/review.py:277
 msgid "Chi presiede il riesame deve risultare presente."
 msgstr "Gözden geçirmeye başkanlık eden kişi katılmış olarak görünmelidir."
 
-#: apps/management_review/services/review.py:290
+#: apps/management_review/services/review.py:324
 msgid "Il riesame è approvato: non si possono aggiungere decisioni."
 msgstr "Gözden geçirme onaylandı: karar eklenemez."
 
-#: apps/management_review/services/review.py:293
+#: apps/management_review/services/review.py:327
 msgid "Il punto all'ordine del giorno appartiene a un altro riesame."
 msgstr "Gündem maddesi başka bir gözden geçirmeye ait."
 
-#: apps/management_review/services/review.py:297
+#: apps/management_review/services/review.py:331
 msgid "Decisione del riesame"
 msgstr "Gözden geçirme kararı"
 
-#: apps/management_review/services/review.py:302
+#: apps/management_review/services/review.py:336
 msgid "Indicare il ruolo a cui assegnare il task."
 msgstr "Görevin atanacağı rolü belirtin."
 
-#: apps/management_review/services/review.py:304
+#: apps/management_review/services/review.py:338
 msgid "Per creare il task indicare la scadenza della decisione."
 msgstr "Görevi oluşturmak için kararın son tarihini belirtin."
 
-#: apps/management_review/services/review.py:307
+#: apps/management_review/services/review.py:341
 #, python-format
 msgid "Riesame di direzione: %(title)s"
 msgstr "Yönetimin gözden geçirmesi: %(title)s"
 
-#: apps/management_review/services/review.py:325
+#: apps/management_review/services/review.py:359
 msgid "Per un riesame di organizzazione indicare il sito del ciclo PDCA."
 msgstr "Kurum genelindeki gözden geçirmede PUKÖ döngüsünün tesisini belirtin."
 
-#: apps/management_review/services/review.py:379
+#: apps/management_review/services/review.py:413
 msgid "Indicare il codice dell'obiettivo di sicurezza."
 msgstr "Güvenlik hedefinin kodunu girin."
 
-#: apps/management_review/services/review.py:381
+#: apps/management_review/services/review.py:415
 msgid "Indicare il valore target dell'obiettivo."
 msgstr "Hedefin hedef değerini girin."
 
-#: apps/management_review/services/review.py:383
+#: apps/management_review/services/review.py:417
 msgid "Indicare la scadenza dell'obiettivo (o quella della decisione)."
 msgstr "Hedefin son tarihini (ya da kararınkini) girin."
 
-#: apps/management_review/services/review.py:398
+#: apps/management_review/services/review.py:432
 msgid ""
 "Il riesame è approvato: della decisione si può aggiornare solo lo stato."
 msgstr "Gözden geçirme onaylandı: kararın yalnızca durumu güncellenebilir."
 
-#: apps/management_review/services/review.py:406
+#: apps/management_review/services/review.py:440
 msgid "Il riesame è approvato: le decisioni non si possono eliminare."
 msgstr "Gözden geçirme onaylandı: kararlar silinemez."
 
-#: apps/management_review/services/review.py:418
+#: apps/management_review/services/review.py:452
 msgid "La riunione è già stata avviata."
 msgstr "Toplantı zaten başladı."
 
-#: apps/management_review/services/review.py:445
+#: apps/management_review/services/review.py:479
 msgid "La riunione è già completata."
 msgstr "Toplantı zaten tamamlandı."
 
-#: apps/management_review/services/review.py:449
+#: apps/management_review/services/review.py:483
 msgid ""
 "Prima di chiudere la riunione completare i punti obbligatori dell'ordine del "
 "giorno."
 msgstr "Toplantıyı kapatmadan önce zorunlu gündem maddelerini tamamlayın."
 
-#: apps/management_review/services/review.py:515
+#: apps/management_review/services/review.py:549
 msgid "Il riesame è già approvato."
 msgstr "Gözden geçirme zaten onaylanmış."
 
-#: apps/management_review/services/review.py:518
+#: apps/management_review/services/review.py:552
 msgid "Generare lo snapshot dei dati prima di approvare il riesame."
 msgstr "Gözden geçirmeyi onaylamadan önce veri snapshot'ını oluşturun."
 
-#: apps/management_review/services/review.py:521
+#: apps/management_review/services/review.py:555
 msgid "Chiudere la riunione prima di approvare il riesame."
 msgstr "Gözden geçirmeyi onaylamadan önce toplantıyı kapatın."
 
-#: apps/management_review/services/review.py:530
+#: apps/management_review/services/review.py:564
 msgid "Solo un componente in carica dell'organo può approvare questo riesame."
-msgstr "Bu gözden geçirmeyi yalnızca organın görevdeki bir üyesi onaylayabilir."
+msgstr ""
+"Bu gözden geçirmeyi yalnızca organın görevdeki bir üyesi onaylayabilir."
 
-#: apps/management_review/services/review.py:534
+#: apps/management_review/services/review.py:568
 msgid "La delibera dell'organo si registra da governance."
 msgstr "Organ kararı yönetişim tarafından kaydedilir."
 
-#: apps/management_review/services/review.py:540
+#: apps/management_review/services/review.py:574
 msgid "Data della delibera non valida (formato atteso: AAAA-MM-GG)."
 msgstr "Geçersiz karar tarihi (beklenen biçim: YYYY-AA-GG)."
 
-#: apps/management_review/services/review.py:542
+#: apps/management_review/services/review.py:576
 msgid "Indicare numero e data della delibera."
 msgstr "Karar numarasını ve tarihini girin."
 
-#: apps/management_review/services/review.py:544
+#: apps/management_review/services/review.py:578
 msgid "La delibera non può precedere la riunione di riesame."
 msgstr "Karar, gözden geçirme toplantısından önce olamaz."
 
-#: apps/management_review/services/review.py:546
+#: apps/management_review/services/review.py:580
 msgid "La data della delibera non può essere futura."
 msgstr "Karar tarihi gelecekte olamaz."
 
-#: apps/management_review/services/review.py:554
+#: apps/management_review/services/review.py:588
 msgid "Documento di evidenza inesistente o non accessibile."
 msgstr "Kanıt belgesi bulunamadı veya erişilemiyor."
 
-#: apps/management_review/services/review.py:558
+#: apps/management_review/services/review.py:592
 msgid "Modalità di approvazione non valida."
 msgstr "Geçersiz onay yöntemi."
 

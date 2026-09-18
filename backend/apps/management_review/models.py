@@ -31,6 +31,16 @@ class ManagementReview(BaseModel):
         blank=True,
         related_name="management_reviews",
     )
+    # Logo in testa al verbale PDF/HTML: quello di uno dei siti (società) già
+    # caricato in Plant Registry. È presentazione, non contenuto: resta
+    # modificabile anche dopo l'approvazione (con audit).
+    report_logo_plant = models.ForeignKey(
+        "plants.Plant",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
     agenda = models.JSONField(default=list)
     kpi_snapshot = models.JSONField(default=dict)
     delibere = models.JSONField(default=list)

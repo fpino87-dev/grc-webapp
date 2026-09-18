@@ -4845,6 +4845,14 @@
       "document_search_ph": "Belge ara...",
       "no_document": "— Belge yok —",
       "register_resolution": "Onayı kaydet"
+    },
+    "report_logo": {
+      "title": "Tutanak logosu",
+      "none": "— Logo yok —",
+      "hint": "PDF ve HTML tutanağın sağ üst köşesinde görünür. Plant Registry'de tesisler için yüklenen logolar arasından seçilir; onaydan sonra da değiştirilebilir.",
+      "no_logos": "Hiçbir tesisin yüklenmiş logosu yok: Plant Registry → tesisi düzenle bölümünden yükleyin.",
+      "preview_alt": "Logo önizlemesi",
+      "save_error": "Logo ayarlanamadı"
     }
   },
   "objectives": {

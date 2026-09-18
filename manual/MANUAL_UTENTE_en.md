@@ -720,6 +720,7 @@ In the minutes the summary states whether it was drafted with AI support (and wi
 
    After approval meeting data, invitees, agenda, decisions and summary can no longer be changed; only the progress status of decisions can still be updated
 2. Download the minutes as **PDF** or **HTML**: review data, attendees, executive summary, points of attention, agenda with data, discussion and decisions, decisions summary, approval. The download is recorded in the audit trail
+   Under **Meeting status** you choose the **minutes logo**, top right in the PDF and HTML, among those uploaded for the sites in Plant Registry (the review site's logo is proposed). It can be changed even after approval
 3. The **audit package** (M03) includes the review summary and the PDF minutes of approved reviews
 
 ---

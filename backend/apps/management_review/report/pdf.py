@@ -153,6 +153,35 @@ def _block(b, st, width):
     return out
 
 
+def _logo_flowable(logo, max_w=45 * mm, max_h=16 * mm):
+    """Logo ridimensionato nel riquadro mantenendo le proporzioni. Un file che
+    ReportLab/Pillow non sa leggere non blocca il verbale: si omette."""
+    from reportlab.lib.utils import ImageReader
+    from reportlab.platypus import Image
+
+    try:
+        reader = ImageReader(io.BytesIO(logo["data"]))
+        w, h = reader.getSize()
+        scale = min(max_w / w, max_h / h)
+        return Image(io.BytesIO(logo["data"]), width=w * scale, height=h * scale, hAlign="RIGHT")
+    except Exception:
+        return None
+
+
+def _header(doc_model, st, width) -> list:
+    title = [Paragraph(_text(doc_model["title"]), st["h1"]), Paragraph(_text(doc_model["subtitle"]), st["sub"])]
+    logo = _logo_flowable(doc_model["logo"]) if doc_model.get("logo") else None
+    if logo is None:
+        return title
+    logo_w = 48 * mm
+    head = Table([[title, logo]], colWidths=[width - logo_w, logo_w])
+    head.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"), ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    return [head]
+
+
 def render_pdf(review) -> bytes:
     doc_model = build_report(review)
     st = _styles()
@@ -163,10 +192,7 @@ def render_pdf(review) -> bytes:
         title=f"Riesame di Direzione — {review.title}", author="GRC",
     )
     width = A4[0] - 2 * margin
-    story = [
-        Paragraph(_text(doc_model["title"]), st["h1"]),
-        Paragraph(_text(doc_model["subtitle"]), st["sub"]),
-    ]
+    story = _header(doc_model, st, width)
     meta = Table(
         [[Paragraph(_text(k), st["note"]), Paragraph(_text(v), st["base"])] for k, v in doc_model["meta"]],
         colWidths=[35 * mm, width - 35 * mm],

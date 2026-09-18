@@ -4845,6 +4845,14 @@
       "document_search_ph": "Rechercher un document...",
       "no_document": "— Aucun document —",
       "register_resolution": "Enregistrer l'approbation"
+    },
+    "report_logo": {
+      "title": "Logo du procès-verbal",
+      "none": "— Aucun logo —",
+      "hint": "Affiché en haut à droite du procès-verbal PDF et HTML. Choisi parmi les logos chargés pour les sites dans le Plant Registry ; modifiable même après l'approbation.",
+      "no_logos": "Aucun site n'a de logo chargé : chargez-le dans Plant Registry → modifier le site.",
+      "preview_alt": "Aperçu du logo",
+      "save_error": "Impossible de définir le logo"
     }
   },
   "objectives": {

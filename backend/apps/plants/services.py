@@ -269,3 +269,43 @@ def delete_plant(plant: Plant, user, force: bool = False) -> None:
         entity=plant,
         payload={"id": str(plant.id), "code": plant.code, "name": plant.name},
     )
+
+
+# ── Logo del sito (report ed export) ─────────────────────────────────────────
+_LOGO_MIME = {
+    "png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg",
+    "gif": "image/gif", "webp": "image/webp",
+}
+
+
+def plant_logo(plant) -> tuple[bytes, str] | None:
+    """(contenuto, mime) del logo caricato per il sito, o None.
+
+    Solo file nello storage interno sotto `plant-logos/<id>/` — mai URL
+    esterni (niente SSRF) né percorsi fuori cartella (niente path traversal):
+    stesse regole dell'endpoint che serve il logo al browser.
+    """
+    from django.core.files.storage import default_storage
+
+    logo_url = (getattr(plant, "logo_url", None) or "").strip() if plant is not None else ""
+    if not logo_url or logo_url.startswith(("http://", "https://")):
+        return None
+    storage_path = logo_url.split("/media/", 1)[1] if "/media/" in logo_url else logo_url
+    storage_path = storage_path.lstrip("/")
+    if not storage_path.startswith(f"plant-logos/{plant.id}/") or ".." in storage_path:
+        return None
+    mime = _LOGO_MIME.get(storage_path.rsplit(".", 1)[-1].lower())
+    if mime is None or not default_storage.exists(storage_path):
+        return None
+    with default_storage.open(storage_path, "rb") as f:
+        return f.read(), mime
+
+
+def plant_logo_data_uri(plant) -> str | None:
+    import base64
+
+    logo = plant_logo(plant)
+    if logo is None:
+        return None
+    data, mime = logo
+    return f"data:{mime};base64,{base64.b64encode(data).decode('ascii')}"

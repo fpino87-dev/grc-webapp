@@ -85,6 +85,7 @@ class ManagementReviewSerializer(serializers.ModelSerializer):
     participants = ReviewParticipantSerializer(many=True, read_only=True)
     chair_name = serializers.SerializerMethodField()
     governing_body_name = serializers.CharField(source="governing_body.name", read_only=True, allow_null=True)
+    report_logo_plant_code = serializers.CharField(source="report_logo_plant.code", read_only=True, allow_null=True)
     approved_by_name = serializers.SerializerMethodField()
     approved_member_name = serializers.SerializerMethodField()
     viewer_can_approve = serializers.SerializerMethodField()
@@ -131,6 +132,7 @@ class ManagementReviewSerializer(serializers.ModelSerializer):
             "approval_note",
             "approval_mode",
             "approved_member",
+            "report_logo_plant",
             "approval_resolution_ref",
             "approval_resolution_date",
             "approval_document_id",

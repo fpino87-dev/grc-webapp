@@ -57,6 +57,12 @@ def create_review(serializer, user) -> ManagementReview:
     _validate_governing_body(data.get("governing_body"), data.get("plant"))
     review = serializer.save(created_by=user)
     ensure_iso_agenda(review, user)
+    # Logo proposto: quello del sito del riesame, se caricato.
+    from apps.plants.services import plant_logo
+
+    if review.plant_id and plant_logo(review.plant) is not None:
+        review.report_logo_plant = review.plant
+        review.save(update_fields=["report_logo_plant", "updated_at"])
     # Convocati proposti: i componenti in carica dell'organo o, in mancanza di
     # un organo, il CISO come presidente (si correggono dal dettaglio).
     if review.governing_body_id:
@@ -140,6 +146,34 @@ def delete_agenda_item(item: ReviewAgendaItem, user) -> None:
         user=user, action_code="management_review.agenda.delete", level="L2", entity=item,
         payload={"review_id": str(item.review_id)},
     )
+
+
+# ── Logo del verbale ──────────────────────────────────────────────────────────
+
+def set_report_logo(review: ManagementReview, plant_id, user) -> ManagementReview:
+    """Sceglie il logo del verbale tra quelli dei siti accessibili all'utente.
+
+    Il logo è presentazione e non contenuto del verbale: si può cambiare anche
+    dopo l'approvazione, e il cambio resta nell'audit trail.
+    """
+    from apps.plants.models import Plant
+    from apps.plants.services import plant_logo
+    from core.scoping import user_can_access_plant
+
+    plant = None
+    if plant_id:
+        plant = Plant.objects.filter(pk=plant_id).first()
+        if plant is None or not user_can_access_plant(user, plant):
+            raise ValidationError(_("Sito inesistente o non accessibile."))
+        if plant_logo(plant) is None:
+            raise ValidationError(_("Il sito scelto non ha un logo caricato."))
+    review.report_logo_plant = plant
+    review.save(update_fields=["report_logo_plant", "updated_at"])
+    log_action(
+        user=user, action_code="management_review.report_logo", level="L3", entity=review,
+        payload={"review_id": str(review.pk), "plant_id": str(plant.pk) if plant else None},
+    )
+    return review
 
 
 # ── Partecipanti ──────────────────────────────────────────────────────────────

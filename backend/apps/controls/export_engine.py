@@ -6,11 +6,9 @@ dallo stesso dato sorgente: ControlInstance.
 Tutti i formati restituiscono HTML stampabile/scaricabile.
 """
 
-import base64
 import datetime
 import re
 
-from django.core.files.storage import default_storage
 from django.utils import timezone
 
 
@@ -105,28 +103,10 @@ def generate_export(framework_code: str, plant_id,
 
 
 def _get_logo_src_for_plant(plant) -> str | None:
-    """
-    Restituisce un data URI del logo del plant, se configurato e presente nello storage.
-    Usa default_storage partendo da logo_url (tipicamente /media/...).
-    """
-    if plant is None or not getattr(plant, "logo_url", None):
-        return None
-    logo_url = plant.logo_url.strip()
-    if not logo_url:
-        return None
+    """Data URI del logo del plant (vedi `apps.plants.services.plant_logo`)."""
+    from apps.plants.services import plant_logo_data_uri
 
-    # Deriva lo storage_path da logo_url (es. /media/plant-logos/...)
-    storage_path = logo_url
-    if "/media/" in logo_url:
-        storage_path = logo_url.split("/media/", 1)[1]
-    storage_path = storage_path.lstrip("/")
-    if not storage_path or not default_storage.exists(storage_path):
-        return None
-
-    with default_storage.open(storage_path, "rb") as f:
-        data = f.read()
-    b64 = base64.b64encode(data).decode("ascii")
-    return f"data:image/png;base64,{b64}"
+    return plant_logo_data_uri(plant)
 
 
 def _base_html(title: str, content: str, plant_name: str,

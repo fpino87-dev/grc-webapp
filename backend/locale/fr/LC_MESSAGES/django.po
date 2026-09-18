@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grc-webapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-18 15:35+0200\n"
+"POT-Creation-Date: 2026-09-18 16:01+0200\n"
 "PO-Revision-Date: 2026-03-18 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -199,36 +199,36 @@ msgstr "Document non trouvé"
 msgid "Evidenza non trovata"
 msgstr "Évidence non trouvée"
 
-#: apps/controls/export_engine.py:207
+#: apps/controls/export_engine.py:187
 #: apps/management_review/report/builder.py:181
 msgid "Compliant"
 msgstr "Conforme"
 
-#: apps/controls/export_engine.py:208
+#: apps/controls/export_engine.py:188
 msgid "Parziale"
 msgstr "Partiel"
 
-#: apps/controls/export_engine.py:209
+#: apps/controls/export_engine.py:189
 msgid "Gap"
 msgstr "Écart"
 
-#: apps/controls/export_engine.py:210
+#: apps/controls/export_engine.py:190
 msgid "N/A"
 msgstr "N/A"
 
-#: apps/controls/export_engine.py:211
+#: apps/controls/export_engine.py:191
 msgid "Non valutato"
 msgstr "Non évalué"
 
-#: apps/controls/export_engine.py:219
+#: apps/controls/export_engine.py:199
 msgid "Applicabile"
 msgstr "Applicable"
 
-#: apps/controls/export_engine.py:220
+#: apps/controls/export_engine.py:200
 msgid "Escluso"
 msgstr "Exclu"
 
-#: apps/controls/export_engine.py:221
+#: apps/controls/export_engine.py:201
 msgid "Non pertinente"
 msgstr "Non pertinent"
 
@@ -672,19 +672,24 @@ msgstr "Indiquer le nom et le prénom."
 msgid ""
 "L'organo ha già un presidente in carica in questo periodo: chiudere prima la "
 "sua carica."
-msgstr "L'organe a déjà un président en fonction sur cette période : clore d'abord son mandat."
+msgstr ""
+"L'organe a déjà un président en fonction sur cette période : clore d'abord "
+"son mandat."
 
 #: apps/governance/services.py:1284
 msgid ""
 "Questo account è già collegato a un componente dell'organo nello stesso "
 "periodo."
-msgstr "Ce compte est déjà associé à un membre de l'organe sur la même période."
+msgstr ""
+"Ce compte est déjà associé à un membre de l'organe sur la même période."
 
 #: apps/governance/services.py:1332
 msgid ""
 "Il componente compare in un riesame: chiudere la carica con la data di fine "
 "invece di eliminarlo."
-msgstr "Le membre figure dans une revue : clore le mandat avec une date de fin au lieu de le supprimer."
+msgstr ""
+"Le membre figure dans une revue : clore le mandat avec une date de fin au "
+"lieu de le supprimer."
 
 #: apps/governance/views.py:81
 msgid "Questo ruolo è già terminato."
@@ -1607,11 +1612,11 @@ msgstr "Aucune action enregistrée"
 msgid "Riepilogo delle decisioni"
 msgstr "Synthèse des décisions"
 
-#: apps/management_review/report/builder.py:562
+#: apps/management_review/report/builder.py:567
 msgid "Riesame di Direzione SGSI"
 msgstr "Revue de direction du SMSI"
 
-#: apps/management_review/report/builder.py:569
+#: apps/management_review/report/builder.py:574
 #, python-format
 msgid ""
 "Documento generato dal sistema GRC il %(when)s — RISERVATO — Solo per uso "
@@ -1620,24 +1625,28 @@ msgstr ""
 "Document généré par le système GRC le %(when)s — CONFIDENTIEL — Usage "
 "interne uniquement"
 
-#: apps/management_review/report/html.py:70
+#: apps/management_review/report/html.py:72
 #: apps/management_review/report/pdf.py:151
 #, python-format
 msgid "… e altri %(n)s"
 msgstr "… et %(n)s autres"
 
-#: apps/management_review/report/html.py:84
-#: apps/management_review/report/pdf.py:186
+#: apps/management_review/report/html.py:88
+msgid "Logo"
+msgstr "Logo"
+
+#: apps/management_review/report/html.py:100
+#: apps/management_review/report/pdf.py:212
 msgid "Sintesi executive"
 msgstr "Synthèse pour la direction"
 
-#: apps/management_review/report/html.py:89
-#: apps/management_review/report/pdf.py:190
+#: apps/management_review/report/html.py:105
+#: apps/management_review/report/pdf.py:216
 msgid "Punti di attenzione"
 msgstr "Points d'attention"
 
-#: apps/management_review/report/html.py:96
-#: apps/management_review/report/pdf.py:206
+#: apps/management_review/report/html.py:112
+#: apps/management_review/report/pdf.py:232
 msgid "RIESAME APPROVATO"
 msgstr "REVUE APPROUVÉE"
 
@@ -1647,14 +1656,16 @@ msgstr "La revue est approuvée : le compte rendu n'est plus modifiable."
 
 #: apps/management_review/services/review.py:49
 msgid "Un riesame di organizzazione va tenuto da un organo di organizzazione."
-msgstr "Une revue à l'échelle de l'organisation doit être tenue par un organe de l'organisation."
+msgstr ""
+"Une revue à l'échelle de l'organisation doit être tenue par un organe de "
+"l'organisation."
 
 #: apps/management_review/services/review.py:51
 msgid "L'organo scelto non governa il sito del riesame."
 msgstr "L'organe choisi ne gouverne pas le site de la revue."
 
-#: apps/management_review/services/review.py:86
-#: apps/management_review/services/review.py:189
+#: apps/management_review/services/review.py:92
+#: apps/management_review/services/review.py:223
 msgid ""
 "Il riesame è approvato: dati della riunione e partecipanti non sono più "
 "modificabili."
@@ -1662,124 +1673,132 @@ msgstr ""
 "La revue est approuvée : les données de la réunion et les participants ne "
 "sont plus modifiables."
 
-#: apps/management_review/services/review.py:99
-#: apps/management_review/services/review.py:121
+#: apps/management_review/services/review.py:105
+#: apps/management_review/services/review.py:127
 msgid "Indicare il titolo del punto."
 msgstr "Indiquez le titre du point."
 
-#: apps/management_review/services/review.py:136
+#: apps/management_review/services/review.py:142
 msgid "I punti obbligatori ISO 27001 §9.3 non si possono eliminare."
 msgstr "Les points obligatoires ISO 27001 §9.3 ne peuvent pas être supprimés."
 
-#: apps/management_review/services/review.py:158
+#: apps/management_review/services/review.py:167
+msgid "Sito inesistente o non accessibile."
+msgstr "Site introuvable ou inaccessible."
+
+#: apps/management_review/services/review.py:169
+msgid "Il sito scelto non ha un logo caricato."
+msgstr "Le site choisi n'a pas de logo chargé."
+
+#: apps/management_review/services/review.py:192
 msgid "Il riesame non è collegato a un organo di governo."
 msgstr "La revue n'est pas liée à un organe de gouvernance."
 
-#: apps/management_review/services/review.py:192
-#: apps/management_review/services/review.py:205
+#: apps/management_review/services/review.py:226
+#: apps/management_review/services/review.py:239
 msgid "Elenco partecipanti non valido."
 msgstr "Liste des participants non valide."
 
-#: apps/management_review/services/review.py:208
+#: apps/management_review/services/review.py:242
 msgid "Componente dell'organo inesistente."
 msgstr "Membre de l'organe introuvable."
 
-#: apps/management_review/services/review.py:210
+#: apps/management_review/services/review.py:244
 #, python-format
 msgid "%(name)s non è componente dell'organo del riesame."
 msgstr "%(name)s n'est pas membre de l'organe de la revue."
 
-#: apps/management_review/services/review.py:214
+#: apps/management_review/services/review.py:248
 msgid "Utente inesistente."
 msgstr "Utilisateur introuvable."
 
-#: apps/management_review/services/review.py:219
+#: apps/management_review/services/review.py:253
 msgid "Indicare il nome di ogni partecipante."
 msgstr "Indiquer le nom de chaque participant."
 
-#: apps/management_review/services/review.py:222
+#: apps/management_review/services/review.py:256
 #, python-format
 msgid "%(name)s compare due volte fra i partecipanti."
 msgstr "%(name)s figure deux fois parmi les participants."
 
-#: apps/management_review/services/review.py:228
+#: apps/management_review/services/review.py:262
 msgid "Ruolo o presenza non validi."
 msgstr "Rôle ou présence non valide."
 
-#: apps/management_review/services/review.py:231
+#: apps/management_review/services/review.py:265
 #, python-format
 msgid "Indicare il delegato di %(name)s."
 msgstr "Indiquer le délégué de %(name)s."
 
-#: apps/management_review/services/review.py:241
+#: apps/management_review/services/review.py:275
 msgid "Il riesame può avere un solo presidente."
 msgstr "La revue ne peut avoir qu'un seul président."
 
-#: apps/management_review/services/review.py:243
+#: apps/management_review/services/review.py:277
 msgid "Chi presiede il riesame deve risultare presente."
 msgstr "La personne qui préside la revue doit être présente."
 
-#: apps/management_review/services/review.py:290
+#: apps/management_review/services/review.py:324
 msgid "Il riesame è approvato: non si possono aggiungere decisioni."
 msgstr "La revue est approuvée : aucune décision ne peut être ajoutée."
 
-#: apps/management_review/services/review.py:293
+#: apps/management_review/services/review.py:327
 msgid "Il punto all'ordine del giorno appartiene a un altro riesame."
 msgstr "Le point à l'ordre du jour appartient à une autre revue."
 
-#: apps/management_review/services/review.py:297
+#: apps/management_review/services/review.py:331
 msgid "Decisione del riesame"
 msgstr "Décision de la revue"
 
-#: apps/management_review/services/review.py:302
+#: apps/management_review/services/review.py:336
 msgid "Indicare il ruolo a cui assegnare il task."
 msgstr "Indiquez le rôle auquel la tâche est affectée."
 
-#: apps/management_review/services/review.py:304
+#: apps/management_review/services/review.py:338
 msgid "Per creare il task indicare la scadenza della decisione."
 msgstr "Pour créer la tâche, indiquez l'échéance de la décision."
 
-#: apps/management_review/services/review.py:307
+#: apps/management_review/services/review.py:341
 #, python-format
 msgid "Riesame di direzione: %(title)s"
 msgstr "Revue de direction : %(title)s"
 
-#: apps/management_review/services/review.py:325
+#: apps/management_review/services/review.py:359
 msgid "Per un riesame di organizzazione indicare il sito del ciclo PDCA."
 msgstr ""
 "Pour une revue à l'échelle de l'organisation, indiquez le site du cycle PDCA."
 
-#: apps/management_review/services/review.py:379
+#: apps/management_review/services/review.py:413
 msgid "Indicare il codice dell'obiettivo di sicurezza."
 msgstr "Indiquez le code de l'objectif de sécurité."
 
-#: apps/management_review/services/review.py:381
+#: apps/management_review/services/review.py:415
 msgid "Indicare il valore target dell'obiettivo."
 msgstr "Indiquez la valeur cible de l'objectif."
 
-#: apps/management_review/services/review.py:383
+#: apps/management_review/services/review.py:417
 msgid "Indicare la scadenza dell'obiettivo (o quella della decisione)."
 msgstr "Indiquez l'échéance de l'objectif (ou celle de la décision)."
 
-#: apps/management_review/services/review.py:398
+#: apps/management_review/services/review.py:432
 msgid ""
 "Il riesame è approvato: della decisione si può aggiornare solo lo stato."
 msgstr ""
 "La revue est approuvée : seul l'état de la décision peut être mis à jour."
 
-#: apps/management_review/services/review.py:406
+#: apps/management_review/services/review.py:440
 msgid "Il riesame è approvato: le decisioni non si possono eliminare."
 msgstr "La revue est approuvée : les décisions ne peuvent pas être supprimées."
 
-#: apps/management_review/services/review.py:418
+#: apps/management_review/services/review.py:452
 msgid "La riunione è già stata avviata."
 msgstr "La réunion a déjà commencé."
 
-#: apps/management_review/services/review.py:445
+#: apps/management_review/services/review.py:479
 msgid "La riunione è già completata."
 msgstr "La réunion est déjà terminée."
 
-#: apps/management_review/services/review.py:449
+#: apps/management_review/services/review.py:483
 msgid ""
 "Prima di chiudere la riunione completare i punti obbligatori dell'ordine del "
 "giorno."
@@ -1787,47 +1806,47 @@ msgstr ""
 "Complétez les points obligatoires de l'ordre du jour avant de clore la "
 "réunion."
 
-#: apps/management_review/services/review.py:515
+#: apps/management_review/services/review.py:549
 msgid "Il riesame è già approvato."
 msgstr "La revue est déjà approuvée."
 
-#: apps/management_review/services/review.py:518
+#: apps/management_review/services/review.py:552
 msgid "Generare lo snapshot dei dati prima di approvare il riesame."
 msgstr "Générez le snapshot des données avant d'approuver la revue."
 
-#: apps/management_review/services/review.py:521
+#: apps/management_review/services/review.py:555
 msgid "Chiudere la riunione prima di approvare il riesame."
 msgstr "Clôturez la réunion avant d'approuver la revue."
 
-#: apps/management_review/services/review.py:530
+#: apps/management_review/services/review.py:564
 msgid "Solo un componente in carica dell'organo può approvare questo riesame."
 msgstr "Seul un membre en fonction de l'organe peut approuver cette revue."
 
-#: apps/management_review/services/review.py:534
+#: apps/management_review/services/review.py:568
 msgid "La delibera dell'organo si registra da governance."
 msgstr "La délibération de l'organe est enregistrée par la gouvernance."
 
-#: apps/management_review/services/review.py:540
+#: apps/management_review/services/review.py:574
 msgid "Data della delibera non valida (formato atteso: AAAA-MM-GG)."
 msgstr "Date de délibération non valide (format attendu : AAAA-MM-JJ)."
 
-#: apps/management_review/services/review.py:542
+#: apps/management_review/services/review.py:576
 msgid "Indicare numero e data della delibera."
 msgstr "Indiquer le numéro et la date de la délibération."
 
-#: apps/management_review/services/review.py:544
+#: apps/management_review/services/review.py:578
 msgid "La delibera non può precedere la riunione di riesame."
 msgstr "La délibération ne peut pas précéder la réunion de revue."
 
-#: apps/management_review/services/review.py:546
+#: apps/management_review/services/review.py:580
 msgid "La data della delibera non può essere futura."
 msgstr "La date de la délibération ne peut pas être future."
 
-#: apps/management_review/services/review.py:554
+#: apps/management_review/services/review.py:588
 msgid "Documento di evidenza inesistente o non accessibile."
 msgstr "Document de preuve introuvable ou inaccessible."
 
-#: apps/management_review/services/review.py:558
+#: apps/management_review/services/review.py:592
 msgid "Modalità di approvazione non valida."
 msgstr "Mode d'approbation non valide."
 
