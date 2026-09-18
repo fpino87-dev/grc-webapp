@@ -661,11 +661,11 @@ Modül, ISO/IEC 27001:2022 §9.3'ün gerektirdiği yönetimin gözden geçirmesi
    - **Başlık**: ör. "Yönetimin gözden geçirmesi 2026"
    - **Tesis**: bir tesis veya tüm kuruluşun gözden geçirmesi için **org-wide** (veriler tüm tesisleri kapsar ve tutanak tesis bazında bir görünüm içerir)
    - **Toplantı tarihi**
-   - **Başkan**: M00 Governance'ta atanan CISO önerilir (tesisin CISO'su, yoksa kuruluşunki; o da yoksa ISMS Manager) ve elle değiştirilebilir
-   - **Katılımcılar**
+   - **Organ**: gözden geçirmeyi yürüten yönetişim organı (bkz. [Yönetişim → Yönetişim organları](#19-yönetişim-m00)); yapılandırılmışsa yönetim kurulu önerilir. Davetliler, gözden geçirme tarihinde organın görevdeki üyeleridir; toplantıya organın başkanı başkanlık eder
+   - Organ olmadan, M00 Governance'ta atanan CISO başkan olarak önerilir (tesisin CISO'su, yoksa kuruluşunki; o da yoksa ISMS Manager)
 3. **Gözden geçirme oluştur**'a tıklayın: sistem zorunlu maddeleri içeren gündemi otomatik oluşturur
 
-Başkan, katılımcılar ve sonraki gözden geçirme tarihi onaya kadar ayrıntı görünümünden değiştirilebilir.
+Ayrıntı görünümünden, onaya kadar **davetliler ve katılım** yönetilir: her biri için katıldı, katılmadı veya vekil aracılığıyla (vekilin adıyla), rolü ve başkanlık eden kişi — bu kişinin katılmış olması gerekir. Organ üyeleri, platform kullanıcıları ve hesabı olmayan **konuklar** (ör. bir danışman) ad ve unvanla eklenebilir. **Organdan yeniden yükle** görevdeki üyeleri yeniden yükler. Tutanakta ad ve unvan, sonradan değişse bile gözden geçirme tarihindeki haliyle kalır. Organ ve sonraki gözden geçirme tarihi de değiştirilebilir.
 
 ### Zorunlu gündem (ISO 27001 §9.3.2)
 
@@ -714,7 +714,11 @@ Tutanakta özet, yapay zekâ desteğiyle (ve hangi modelle) hazırlanıp hazırl
 
 ### Onay ve tutanak
 
-1. **Gözden geçirmeyi onayla**'ya tıklayın ve resmi notu girin (anlık görüntü ve tamamlanmış toplantı gerekir). Onaydan sonra toplantı verileri, gündem, kararlar ve özet değiştirilemez; yalnızca kararların ilerleme durumu güncellenebilir
+1. Onayın iki biçimi vardır (ikisi de anlık görüntü ve tamamlanmış toplantı gerektirir):
+   - **Uygulamada onayla**: **bağlı hesabı olan, organın görevdeki bir üyesi** (ör. bir yönetim kurulu üyesi) verebilir; yalnızca kendi organının gözden geçirmelerini görür ve onaylar, bunları düzenleyemez; tutanakta adı ve unvanı yer alır. Yönetişim (Compliance Officer) de onaylayabilir
+   - **Organ kararını kaydet**: organ platform dışında karar aldıysa yönetişim **karar numarasını ve tarihini** (toplantıdan önce olamaz) ve isteğe bağlı olarak kanıt olarak **M07 belgesini** kaydeder; tutanakta “<organ> tarafından onaylandı — … tarihli … sayılı karar” ve kaydeden kişi yer alır
+
+   Onaydan sonra toplantı verileri, davetliler, gündem, kararlar ve özet değiştirilemez; yalnızca kararların ilerleme durumu güncellenebilir
 2. Tutanağı **PDF** veya **HTML** olarak indirin: gözden geçirme bilgileri, katılımcılar, yönetici özeti, dikkat edilecek noktalar, veriler/tartışma/kararlarla gündem, karar özeti, onay. İndirme denetim izine kaydedilir
 3. **Denetim paketi** (M03), gözden geçirmelerin özetini ve onaylanmış gözden geçirmelerin PDF tutanaklarını içerir
 
@@ -1201,6 +1205,17 @@ Bir pozisyon artık gerekli değilse (ör. normatif kapsam değişikliği):
 3. **Bitiş tarihini** belirleyin
 4. Bu role atanmış açık görevler varsa sistem bunların nasıl yönetileceğini sorar (başka bir role yeniden ata veya açık bırak)
 5. **Onayla**'ya tıklayın
+
+### Yönetişim organları (yönetim kurulu, komite, üst yönetim)
+
+**Governance → Roller ve organlar** bölümüne gidin ve **Yönetişim organları**'na kaydırın. Bu, yönetim gözden geçirmesini kimin yürüttüğü ve onayladığının kaydıdır (ISO 27001 §5.1, §9.3).
+
+1. **+ Yeni organ**: ad, **tür** (Yönetim kurulu, Güvenlik komitesi, Üst yönetim), **kapsam** (tüm kuruluş veya yönettiği tesisler: birden fazla tüzel kişilik varsa her biri için ayrı bir organ) ve görev tanımı. Yönetim kurulu **NIS2 yönetim organı** olarak işaretlenir (Madde 20: risk yönetimi tedbirlerini onaylar, bunlardan sorumludur ve eğitim almakla yükümlüdür)
+2. **+ Üye**: ad soyad, unvan (ör. Genel Müdür), organdaki rolü (başkan, üye, sekreter), görev başlangıcı ve varsa bitişi. **Hesap** isteğe bağlıdır: bağlanması kişinin bu organın gözden geçirmelerini uygulamada onaylamasını sağlar. Yalnızca tutanağa bir ad yazmak için hesap oluşturmaya gerek yoktur
+3. Organdan ayrılan kişi silinmez, **Görevi sonlandır** (bitiş tarihi) ile kapatılır: geçmiş tutanaklarda ve **eski üyeler** arasında kalır. **Sil** yalnızca hatalı bir girişi düzeltmek içindir ve üye bir gözden geçirmede yer alıyorsa izin verilmez
+
+Kurallar: aynı anda yalnızca bir görevdeki başkan; aynı hesap, aynı dönemde aynı organın iki üyesine bağlanamaz. Organları Super Admin ve Compliance Officer yönetir, yalnızca kapsamı tamamen kendi kapsamlarında olanları; diğer roller kendi kapsamlarındaki tesisler için görüntüler. Üyeler ve uyarılar (devre dışı hesap, sona eren görev, eksik başkan) **Reporting → Erişim ve sorumluluklar** bölümünde ve denetim paketinde de görünür.
+
 
 ### Sona eren rol uyarıları ve zorunlu boş rol uyarıları
 

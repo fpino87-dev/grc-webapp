@@ -661,11 +661,11 @@ Il modulo guida il riesame di direzione richiesto da ISO/IEC 27001:2022 §9.3 e 
    - **Titolo**: es. "Riesame di direzione 2026"
    - **Sito**: un sito, oppure **org-wide** per un riesame dell'intera organizzazione (i dati aggregano tutti i siti e il verbale include un quadro per sito)
    - **Data riunione**
-   - **Presieduto da**: viene proposto il CISO nominato in M00 Governance (quello del sito, altrimenti quello di organizzazione; in mancanza l'ISMS Manager), modificabile a mano
-   - **Partecipanti**
+   - **Organo**: l'organo di governo che tiene il riesame (vedi [Governance → Organi di governo](#19-governance-m00)); viene proposto il CdA, se configurato. I convocati sono i componenti in carica dell'organo alla data del riesame, con il presidente dell'organo come presidente della riunione
+   - Senza organo, viene proposto come presidente il CISO nominato in M00 Governance (quello del sito, altrimenti quello di organizzazione; in mancanza l'ISMS Manager)
 3. Clicca **Crea revisione**: il sistema crea automaticamente l'ordine del giorno con i punti obbligatori
 
-Presidente, partecipanti e data del prossimo riesame si possono modificare dal dettaglio fino all'approvazione.
+Dal dettaglio, fino all'approvazione, si gestiscono i **convocati e le presenze**: per ciascuno presente, assente o rappresentato da un delegato (con il nome del delegato), il ruolo e chi presiede, che deve risultare presente. Si possono aggiungere componenti dell'organo, utenti della piattaforma e **ospiti** senza account (es. un consulente), indicando nome e qualifica. **Riproponi dall'organo** ricarica i componenti in carica. Nel verbale nome e qualifica restano quelli alla data del riesame, anche se in seguito cambiano. Si possono modificare anche l'organo e la data del prossimo riesame.
 
 ### Ordine del giorno obbligatorio (ISO 27001 §9.3.2)
 
@@ -714,7 +714,11 @@ Nel verbale la sintesi riporta se è stata redatta con il supporto dell'IA (e co
 
 ### Approvazione e verbale
 
-1. Clicca **Approva riesame** e inserisci la nota formale (richiede snapshot generato e riunione completata). Dopo l'approvazione dati della riunione, ordine del giorno, decisioni e sintesi non sono più modificabili; resta aggiornabile solo lo stato di avanzamento delle decisioni
+1. L'approvazione ha due forme (richiedono snapshot generato e riunione completata):
+   - **Approva in app**: la può dare un **componente in carica dell'organo con account collegato** (es. un consigliere), che vede e approva solo i riesami del proprio organo senza poterli modificare; nel verbale compaiono il suo nome e la sua qualifica. Può approvare anche la governance (Compliance Officer)
+   - **Registra delibera dell'organo**: se l'organo ha deliberato fuori dalla piattaforma, la governance registra **numero e data della delibera** (non anteriore alla riunione) e, facoltativamente, il **documento M07** come evidenza; il verbale riporta «Approvato da <organo> — Delibera n. … del …» e chi l'ha registrata
+
+   Dopo l'approvazione dati della riunione, convocati, ordine del giorno, decisioni e sintesi non sono più modificabili; resta aggiornabile solo lo stato di avanzamento delle decisioni
 2. Scarica il verbale in **PDF** o **HTML**: dati del riesame, partecipanti, sintesi executive, punti di attenzione, ordine del giorno con dati, discussione e decisioni, riepilogo delle decisioni, approvazione. Il download è registrato nell'audit trail
 3. Il **pacchetto audit** (M03) include il riepilogo dei riesami e il verbale PDF di quelli approvati
 
@@ -1201,6 +1205,17 @@ Se una posizione non e' piu' richiesta (es. cambio di scope normativo):
 3. Imposta la **data di termine**
 4. Se ci sono task aperti assegnati a questo ruolo, il sistema ti chiede come gestirli (riassegna ad altro ruolo o lascia aperti)
 5. Clicca **Conferma**
+
+### Organi di governo (CdA, comitato, direzione)
+
+Vai su **Governance → Ruoli & organi** e scorri fino a **Organi di governo**. È l'anagrafica di chi tiene e approva il riesame di direzione (ISO 27001 §5.1, §9.3).
+
+1. **+ Nuovo organo**: nome, **tipo** (Organo di amministrazione — CdA, Comitato sicurezza, Direzione), **perimetro** (intera organizzazione, oppure i siti che governa: con più entità giuridiche si crea un organo per ciascuna) e mandato. Il CdA è marcato come **organo di gestione NIS2** (art. 20: approva le misure di gestione del rischio, ne risponde ed è tenuto a formarsi)
+2. **+ Componente**: nome e cognome, qualifica (es. Amministratore Delegato), ruolo nell'organo (presidente, membro, segretario), inizio ed eventuale fine della carica. L'**account** è facoltativo: collegarlo permette alla persona di approvare dall'app i riesami di questo organo. Non serve creare account solo per scrivere un nome nel verbale
+3. Chi lascia l'organo si chiude con **Chiudi carica** (data di fine), non si elimina: resta nei verbali passati e tra gli **ex componenti**. **Elimina** serve solo a correggere un inserimento errato e non è consentito se il componente compare in un riesame
+
+Regole: un solo presidente in carica per volta; lo stesso account non può essere collegato a due componenti dello stesso organo nello stesso periodo. Gestiscono gli organi Super Admin e Compliance Officer, solo per organi il cui perimetro rientra interamente nel proprio; gli altri ruoli li consultano per i siti del proprio perimetro. Componenti e segnalazioni (account disattivato, carica in scadenza, presidente mancante) compaiono anche in **Reporting → Accessi & responsabilità** e nel pacchetto audit.
+
 
 ### Alert ruoli in scadenza e ruoli vacanti obbligatori
 

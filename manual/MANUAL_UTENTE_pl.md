@@ -661,11 +661,11 @@ Moduł prowadzi przez przegląd zarządzania wymagany przez ISO/IEC 27001:2022 �
    - **Tytuł**: np. „Przegląd zarządzania 2026"
    - **Zakład**: jeden zakład lub **org-wide** dla przeglądu całej organizacji (dane obejmują wszystkie zakłady, a protokół zawiera przegląd według zakładów)
    - **Data spotkania**
-   - **Przewodniczący**: proponowany jest CISO wyznaczony w M00 Governance (dla zakładu, a w przeciwnym razie dla organizacji; w ostateczności ISMS Manager), z możliwością ręcznej zmiany
-   - **Uczestnicy**
+   - **Organ**: organ zarządczy prowadzący przegląd (zob. [Ład organizacyjny → Organy zarządcze](#19-ład-organizacyjny-m00)); proponowany jest zarząd, jeśli został skonfigurowany. Zaproszeni to członkowie organu urzędujący w dniu przeglądu, a przewodniczący organu przewodniczy posiedzeniu
+   - Bez organu jako przewodniczący proponowany jest CISO wyznaczony w M00 Governance (dla zakładu, a w przeciwnym razie dla organizacji; w ostateczności ISMS Manager)
 3. Kliknij **Utwórz przegląd**: system automatycznie tworzy porządek obrad z punktami obowiązkowymi
 
-Przewodniczącego, uczestników i datę kolejnego przeglądu można zmieniać w szczegółach do momentu zatwierdzenia.
+W szczegółach, do momentu zatwierdzenia, zarządza się **zaproszonymi i obecnością**: dla każdego obecny, nieobecny lub reprezentowany przez pełnomocnika (z jego imieniem), rola oraz kto przewodniczy — ta osoba musi być obecna. Można dodać członków organu, użytkowników platformy i **gości** bez konta (np. konsultanta), podając imię i stanowisko. **Pobierz z organu** ponownie wczytuje urzędujących członków. W protokole imię i stanowisko pozostają takie jak w dniu przeglądu, nawet jeśli później się zmienią. Można też zmienić organ i datę kolejnego przeglądu.
 
 ### Obowiązkowy porządek obrad (ISO 27001 §9.3.2)
 
@@ -714,7 +714,11 @@ W protokole podsumowanie informuje, czy powstało z pomocą AI (i jakiego modelu
 
 ### Zatwierdzenie i protokół
 
-1. Kliknij **Zatwierdź przegląd** i wprowadź formalną notatkę (wymaga snapshotu i zakończonego spotkania). Po zatwierdzeniu nie można zmieniać danych spotkania, porządku obrad, decyzji ani podsumowania; można jedynie aktualizować status realizacji decyzji
+1. Zatwierdzenie ma dwie formy (obie wymagają snapshotu i zakończonego spotkania):
+   - **Zatwierdź w aplikacji**: może to zrobić **urzędujący członek organu z powiązanym kontem** (np. członek zarządu), który widzi i zatwierdza tylko przeglądy swojego organu, bez możliwości ich edycji; protokół wskazuje jego imię i stanowisko. Zatwierdzić może też governance (Compliance Officer)
+   - **Zarejestruj uchwałę organu**: jeśli organ podjął uchwałę poza platformą, governance rejestruje **numer i datę uchwały** (nie wcześniejszą niż posiedzenie) oraz opcjonalnie **dokument M07** jako dowód; protokół wskazuje „Zatwierdzone przez <organ> — Uchwała nr … z dnia …” oraz kto ją zarejestrował
+
+   Po zatwierdzeniu nie można zmieniać danych spotkania, zaproszonych, porządku obrad, decyzji ani podsumowania; można jedynie aktualizować status realizacji decyzji
 2. Pobierz protokół w formacie **PDF** lub **HTML**: dane przeglądu, uczestnicy, podsumowanie dla kierownictwa, punkty uwagi, porządek obrad z danymi, dyskusja i decyzje, zestawienie decyzji, zatwierdzenie. Pobranie jest rejestrowane w ścieżce audytu
 3. **Pakiet audytowy** (M03) zawiera zestawienie przeglądów i protokoły PDF przeglądów zatwierdzonych
 
@@ -1201,6 +1205,17 @@ Jeśli stanowisko nie jest już wymagane (np. zmiana zakresu normatywnego):
 3. Ustaw **datę zakończenia**
 4. Jeśli są otwarte zadania przypisane do tej roli, system pyta jak nimi zarządzić (przypisz do innej roli lub pozostaw otwarte)
 5. Kliknij **Potwierdź**
+
+### Organy zarządcze (zarząd, komitet, kierownictwo)
+
+Przejdź do **Governance → Role i organy** i przewiń do **Organy zarządcze**. To rejestr tego, kto prowadzi i zatwierdza przegląd zarządzania (ISO 27001 §5.1, §9.3).
+
+1. **+ Nowy organ**: nazwa, **typ** (Zarząd, Komitet bezpieczeństwa, Kierownictwo), **zakres** (cała organizacja albo zakłady, którymi zarządza: przy kilku podmiotach prawnych — organ dla każdego) i mandat. Zarząd jest oznaczony jako **organ zarządzający NIS2** (art. 20: zatwierdza środki zarządzania ryzykiem, odpowiada za nie i ma obowiązek odbywać szkolenia)
+2. **+ Członek**: imię i nazwisko, stanowisko (np. Prezes Zarządu), rola w organie (przewodniczący, członek, sekretarz), początek i ewentualny koniec kadencji. **Konto** jest opcjonalne: jego powiązanie pozwala osobie zatwierdzać w aplikacji przeglądy tego organu. Nie trzeba tworzyć kont tylko po to, by wpisać nazwisko do protokołu
+3. Odejście z organu zamyka się przyciskiem **Zakończ kadencję** (data końcowa), bez usuwania: osoba pozostaje w dotychczasowych protokołach i wśród **byłych członków**. **Usuń** służy wyłącznie do poprawienia błędnego wpisu i nie jest dozwolone, jeśli członek występuje w przeglądzie
+
+Zasady: jednocześnie tylko jeden urzędujący przewodniczący; to samo konto nie może być powiązane z dwoma członkami tego samego organu w tym samym okresie. Organami zarządzają Super Admin i Compliance Officer, tylko tymi, których zakres w całości mieści się w ich własnym; pozostałe role przeglądają je dla zakładów ze swojego zakresu. Członkowie i ostrzeżenia (konto dezaktywowane, kończąca się kadencja, brak przewodniczącego) pojawiają się też w **Reporting → Dostępy i odpowiedzialności** oraz w pakiecie audytowym.
+
 
 ### Alerty o rolach wygasających i wakatach obowiązkowych ról
 

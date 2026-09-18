@@ -661,11 +661,11 @@ The module guides the management review required by ISO/IEC 27001:2022 §9.3 and
    - **Title**: e.g. "Management review 2026"
    - **Site**: a site, or **org-wide** for a review of the whole organisation (data aggregates all sites and the minutes include an overview by site)
    - **Meeting date**
-   - **Chaired by**: the CISO appointed in M00 Governance is proposed (the site CISO, otherwise the organisation one; failing that the ISMS Manager) and can be changed manually
-   - **Attendees**
+   - **Body**: the governing body holding the review (see [Governance → Governing bodies](#19-governance-m00)); the board of directors is proposed, if configured. The invitees are the body's members in office on the review date, with the body's chair as meeting chair
+   - Without a body, the CISO appointed in M00 Governance is proposed as chair (the site CISO, otherwise the organisation one; failing that the ISMS Manager)
 3. Click **Create review**: the system automatically creates the agenda with the mandatory items
 
-Chair, attendees and next review date can be changed from the detail view until approval.
+From the detail view, until approval, you manage **invitees and attendance**: for each one present, absent or represented by a proxy (with the proxy's name), the role and who chairs, who must be present. You can add body members, platform users and **guests** without an account (e.g. a consultant), with name and position. **Reload from body** reloads the members in office. In the minutes name and position stay as they were on the review date, even if they change later. The body and the next review date can also be changed.
 
 ### Mandatory agenda (ISO 27001 §9.3.2)
 
@@ -714,7 +714,11 @@ In the minutes the summary states whether it was drafted with AI support (and wi
 
 ### Approval and minutes
 
-1. Click **Approve review** and enter the formal note (requires the snapshot and a completed meeting). After approval meeting data, agenda, decisions and summary can no longer be changed; only the progress status of decisions can still be updated
+1. Approval takes two forms (both require the snapshot and a completed meeting):
+   - **Approve in the app**: given by a **member of the body in office with a linked account** (e.g. a director), who sees and approves only their body's reviews without being able to edit them; the minutes show their name and position. Governance (Compliance Officer) can also approve
+   - **Record the body's resolution**: if the body resolved outside the platform, governance records the **resolution number and date** (not earlier than the meeting) and, optionally, the **M07 document** as evidence; the minutes show “Approved by <body> — Resolution no. … of …” and who recorded it
+
+   After approval meeting data, invitees, agenda, decisions and summary can no longer be changed; only the progress status of decisions can still be updated
 2. Download the minutes as **PDF** or **HTML**: review data, attendees, executive summary, points of attention, agenda with data, discussion and decisions, decisions summary, approval. The download is recorded in the audit trail
 3. The **audit package** (M03) includes the review summary and the PDF minutes of approved reviews
 
@@ -1201,6 +1205,17 @@ If a position is no longer required (e.g. change in regulatory scope):
 3. Set the **end date**
 4. If there are open tasks assigned to this role, the system asks how to handle them (reassign to another role or leave open)
 5. Click **Confirm**
+
+### Governing bodies (board, committee, top management)
+
+Go to **Governance → Roles & bodies** and scroll to **Governing bodies**. This is the register of who holds and approves the management review (ISO 27001 §5.1, §9.3).
+
+1. **+ New body**: name, **type** (Board of directors, Security committee, Top management), **scope** (whole organisation, or the sites it governs: with several legal entities create one body each) and mandate. The board is flagged as **NIS2 management body** (Art. 20: it approves the risk-management measures, is accountable for them and must undergo training)
+2. **+ Member**: full name, position (e.g. Chief Executive Officer), role in the body (chair, member, secretary), start and optional end of term. The **account** is optional: linking it lets the person approve this body's reviews in the app. There is no need to create accounts just to write a name in the minutes
+3. Someone leaving the body is closed with **End term** (end date), not deleted: they stay in past minutes and among **former members**. **Delete** only corrects a wrong entry and is not allowed if the member appears in a review
+
+Rules: only one chair in office at a time; the same account cannot be linked to two members of the same body in the same period. Super Admin and Compliance Officer manage the bodies, only those whose scope lies entirely within their own; other roles see them for the sites in their scope. Members and warnings (deactivated account, term expiring, missing chair) also appear in **Reporting → Access & responsibilities** and in the audit pack.
+
 
 ### Alerts for expiring roles and mandatory vacant roles
 

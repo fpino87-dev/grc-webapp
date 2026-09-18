@@ -661,11 +661,11 @@ Le module guide la revue de direction exigée par ISO/IEC 27001:2022 §9.3 et pr
    - **Titre** : ex. « Revue de direction 2026 »
    - **Site** : un site, ou **org-wide** pour une revue de toute l'organisation (les données agrègent tous les sites et le procès-verbal inclut une vue par site)
    - **Date de la réunion**
-   - **Présidée par** : le RSSI nommé dans M00 Gouvernance est proposé (celui du site, sinon celui de l'organisation ; à défaut l'ISMS Manager), modifiable manuellement
-   - **Participants**
+   - **Organe** : l'organe de gouvernance qui tient la revue (voir [Gouvernance → Organes de gouvernance](#19-gouvernance-m00)) ; le conseil d'administration est proposé, s'il est configuré. Les convoqués sont les membres en fonction de l'organe à la date de la revue, le président de l'organe présidant la réunion
+   - Sans organe, le RSSI nommé dans M00 Gouvernance est proposé comme président (celui du site, sinon celui de l'organisation ; à défaut l'ISMS Manager)
 3. Cliquez sur **Créer la revue** : le système crée automatiquement l'ordre du jour avec les points obligatoires
 
-Président, participants et date de la prochaine revue sont modifiables depuis le détail jusqu'à l'approbation.
+Depuis le détail, jusqu'à l'approbation, on gère les **convoqués et les présences** : pour chacun présent, absent ou représenté par un délégué (avec le nom du délégué), le rôle et la personne qui préside, qui doit être présente. On peut ajouter des membres de l'organe, des utilisateurs de la plateforme et des **invités** sans compte (ex. un consultant), avec nom et fonction. **Reprendre de l'organe** recharge les membres en fonction. Dans le procès-verbal, nom et fonction restent ceux de la date de la revue, même s'ils changent ensuite. L'organe et la date de la prochaine revue sont également modifiables.
 
 ### Ordre du jour obligatoire (ISO 27001 §9.3.2)
 
@@ -714,7 +714,11 @@ Dans le procès-verbal, la synthèse indique si elle a été rédigée avec l'ai
 
 ### Approbation et procès-verbal
 
-1. Cliquez sur **Approuver la revue** et saisissez la note formelle (nécessite l'instantané et la réunion terminée). Après l'approbation, les données de la réunion, l'ordre du jour, les décisions et la synthèse ne sont plus modifiables ; seul l'état d'avancement des décisions peut encore être mis à jour
+1. L'approbation prend deux formes (toutes deux nécessitent l'instantané et la réunion terminée) :
+   - **Approuver dans l'application** : par un **membre en fonction de l'organe disposant d'un compte associé** (ex. un administrateur), qui ne voit et n'approuve que les revues de son organe sans pouvoir les modifier ; le procès-verbal indique son nom et sa fonction. La gouvernance (Compliance Officer) peut aussi approuver
+   - **Enregistrer la délibération de l'organe** : si l'organe a délibéré hors de la plateforme, la gouvernance enregistre le **numéro et la date de la délibération** (pas antérieure à la réunion) et, en option, le **document M07** comme preuve ; le procès-verbal indique « Approuvé par <organe> — Délibération n° … du … » et qui l'a enregistrée
+
+   Après l'approbation, les données de la réunion, les convoqués, l'ordre du jour, les décisions et la synthèse ne sont plus modifiables ; seul l'état d'avancement des décisions peut encore être mis à jour
 2. Téléchargez le procès-verbal en **PDF** ou **HTML** : données de la revue, participants, synthèse exécutive, points d'attention, ordre du jour avec données, discussion et décisions, récapitulatif des décisions, approbation. Le téléchargement est enregistré dans la piste d'audit
 3. Le **dossier d'audit** (M03) inclut le récapitulatif des revues et le procès-verbal PDF des revues approuvées
 
@@ -1201,6 +1205,17 @@ Si un poste n'est plus requis (ex. changement de périmètre normatif) :
 3. Définissez la **date de fin**
 4. Si des tâches ouvertes sont assignées à ce rôle, le système vous demande comment les gérer (réassigner à un autre rôle ou laisser ouvertes)
 5. Cliquez sur **Confirmer**
+
+### Organes de gouvernance (CA, comité, direction)
+
+Allez dans **Governance → Rôles & organes** et descendez jusqu'à **Organes de gouvernance**. C'est le registre de qui tient et approuve la revue de direction (ISO 27001 §5.1, §9.3).
+
+1. **+ Nouvel organe** : nom, **type** (Conseil d'administration, Comité de sécurité, Direction), **périmètre** (toute l'organisation, ou les sites qu'il gouverne : avec plusieurs entités juridiques, un organe pour chacune) et mandat. Le conseil d'administration est signalé comme **organe de direction NIS2** (art. 20 : il approuve les mesures de gestion des risques, en répond et doit suivre une formation)
+2. **+ Membre** : nom et prénom, fonction (ex. Directeur général), rôle dans l'organe (président, membre, secrétaire), début et éventuelle fin du mandat. Le **compte** est facultatif : l'associer permet à la personne d'approuver dans l'application les revues de cet organe. Inutile de créer des comptes uniquement pour inscrire un nom au procès-verbal
+3. Un départ se clôt avec **Clore le mandat** (date de fin), sans suppression : la personne reste dans les procès-verbaux passés et parmi les **anciens membres**. **Supprimer** sert uniquement à corriger une saisie erronée et n'est pas permis si le membre figure dans une revue
+
+Règles : un seul président en fonction à la fois ; un même compte ne peut pas être associé à deux membres du même organe sur la même période. Super Admin et Compliance Officer gèrent les organes, uniquement ceux dont le périmètre est entièrement compris dans le leur ; les autres rôles les consultent pour les sites de leur périmètre. Membres et signalements (compte désactivé, mandat arrivant à échéance, président manquant) figurent aussi dans **Reporting → Accès & responsabilités** et dans le pack d'audit.
+
 
 ### Alertes rôles qui expirent et rôles obligatoires vacants
 
