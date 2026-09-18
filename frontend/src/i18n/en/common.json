@@ -3525,7 +3525,8 @@
       "owner": "By Owner",
       "risk_bia_bcp": "Risk / BIA / BCP",
       "kpi": "KPI",
-      "access_matrix": "Access & responsibilities"
+      "access_matrix": "Access & responsibilities",
+      "objectives": "Security objectives"
     },
     "kpi": {
       "active_sites": "Active sites",
@@ -3717,6 +3718,33 @@
       "committees_empty": "No security committee configured. Create one in Governance → Committees.",
       "committees_next": "next",
       "committees_no_members": "No members recorded (no meetings yet)"
+    },
+    "objectives": {
+      "intro": "Objectives (ISO/IEC 27001 §6.2) are targets with a deadline: this page shows whether they will be reached in time. They are not thresholds: whether an indicator is below the acceptable level right now is shown by the KPI, not by this page.",
+      "manage_link": "Manage objectives",
+      "load_error": "Unable to load the report. The all-sites view is reserved for organisation scope: select a site.",
+      "col_scope": "Scope",
+      "col_active": "Active",
+      "col_in_preparation": "Draft / suspended",
+      "col_achieved": "Achieved",
+      "col_not_achieved": "Not achieved",
+      "totals_footer": "Also: {{preparation}} draft or suspended · closed in the last {{days}} days: {{achieved}} achieved, {{missed}} not achieved.",
+      "section_by_plant": "Status by site",
+      "by_plant_hint": "Trajectories only cover active objectives. Achieved and not achieved: closed in the last {{days}} days. Organisation objectives apply to all sites.",
+      "empty": "No security objectives in the selected scope.",
+      "section_deadlines": "Deadlines within {{days}} days",
+      "deadlines_hint": "Active objectives due soon or already overdue and not yet closed. The bar compares the distance covered (colour) with the time elapsed (marker).",
+      "no_deadlines": "No active objectives due in the next {{days}} days.",
+      "days_left": "in {{n}} d",
+      "overdue_days": "overdue by {{n}} d",
+      "section_kpi": "Objectives and linked KPI",
+      "kpi_hint": "Same value, two readings. The threshold is the floor: it tells whether we are below the acceptable level today. The objective is the trajectory: it tells whether we will reach the target by the deadline. A KPI can be within threshold while the objective is at risk, and vice versa.",
+      "no_kpi_linked": "No active objectives linked to a KPI.",
+      "col_kpi": "KPI",
+      "col_floor": "KPI threshold (floor)",
+      "col_trajectory": "Objective (trajectory)",
+      "by_date": "by {{date}}",
+      "weak_target_short": "The target does not exceed the KPI warning threshold: the objective adds nothing to what the KPI already signals."
     }
   },
   "manual": {

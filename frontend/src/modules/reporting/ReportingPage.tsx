@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { reportingApi, type BiaBcpRow, type TopRisk, type ThreatBreakdown, type Nis2CategoryBreakdown, type HeatmapCell, type RequiredDocsCoverage, type SupplierNdaEntry, type TreatmentRosi, type TreatmentRosiTotals, type AccessMatrixRow } from "../../api/endpoints/reporting";
 import { plantsApi } from "../../api/endpoints/plants";
 import { useAuthStore } from "../../store/auth";
+import { TabObjectives } from "./TabObjectives";
 import {
   BarChart,
   Bar,
@@ -1209,7 +1210,7 @@ export function ReportingPage() {
   const { t } = useTranslation();
   const role = useAuthStore(s => s.user?.role) ?? "";
   const showAccessMatrix = ACCESS_REVIEW_ROLES.includes(role);
-  const tabKeys = ["compliance", "owner", "risk_bia_bcp", "kpi", ...(showAccessMatrix ? ["access_matrix"] : [])] as const;
+  const tabKeys = ["compliance", "owner", "risk_bia_bcp", "kpi", "objectives", ...(showAccessMatrix ? ["access_matrix"] : [])] as const;
   type TabKey = typeof tabKeys[number];
   const [tab, setTab] = useState<TabKey>("compliance");
 
@@ -1237,6 +1238,7 @@ export function ReportingPage() {
       {tab === "owner" && <TabOwner />}
       {tab === "risk_bia_bcp" && <TabRiskBiaBcp />}
       {tab === "kpi" && <TabKpi />}
+      {tab === "objectives" && <TabObjectives />}
       {tab === "access_matrix" && <TabAccessMatrix />}
     </div>
   );

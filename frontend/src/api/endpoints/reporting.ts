@@ -259,6 +259,65 @@ export interface AccessMatrixData {
   summary: { users: number; access: number; responsibilities: number; issues: number; committees: number };
 }
 
+// ── Obiettivi di sicurezza (§6.2) — vista aggregata di sola lettura ──
+export type ReportObjectiveTrack = "in_linea" | "a_rischio" | "mancato" | "senza_misure";
+
+export interface ObjectiveCounts {
+  attivi: number;
+  in_linea: number;
+  a_rischio: number;
+  mancato: number;
+  senza_misure: number;
+  in_preparazione: number;
+  raggiunti: number;
+  non_raggiunti: number;
+}
+
+export interface ObjectivesPlantRow extends ObjectiveCounts {
+  plant_id: string | null;
+  plant_code: string | null;
+  plant_name: string | null;
+  bu_code: string | null;
+}
+
+export interface ObjectiveReportItem {
+  id: string;
+  code: string;
+  title: string;
+  plant_code: string | null;
+  owner_role: string;
+  baseline_value: number | null;
+  target_value: number;
+  target_direction: "above" | "below";
+  target_date: string;
+  current_value: number | null;
+  measured_on: string | null;
+  unit: string;
+  progress_pct: number | null;
+  elapsed_pct: number | null;
+  days_to_target: number;
+  track: ReportObjectiveTrack;
+}
+
+export interface ObjectiveKpiItem extends ObjectiveReportItem {
+  kpi_code: string;
+  kpi_name: string;
+  kpi_status: "ok" | "warning" | "critical" | "no_data";
+  threshold_warning: number | null;
+  threshold_critical: number | null;
+  threshold_direction: "above" | "below";
+  weak_target: boolean;
+}
+
+export interface ObjectivesReportData {
+  horizon_days: number;
+  closed_window_days: number;
+  totals: ObjectiveCounts;
+  by_plant: ObjectivesPlantRow[];
+  deadlines: ObjectiveReportItem[];
+  kpi_linked: ObjectiveKpiItem[];
+}
+
 export const reportingApi = {
   accessMatrix: (plant?: string) =>
     apiClient.get<AccessMatrixData>(
@@ -307,6 +366,11 @@ export const reportingApi = {
   riskBiaBcp: (plant?: string) =>
     apiClient.get<RiskBiaBcpData>(
       "/reporting/risk-bia-bcp/",
+      { params: plant ? { plant } : {} }
+    ).then(r => r.data),
+  objectives: (plant?: string) =>
+    apiClient.get<ObjectivesReportData>(
+      "/reporting/objectives/",
       { params: plant ? { plant } : {} }
     ).then(r => r.data),
   kpiOverview: (plant?: string) =>

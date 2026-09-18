@@ -3525,7 +3525,8 @@
       "owner": "Par responsable",
       "risk_bia_bcp": "Risque / BIA / BCP",
       "kpi": "KPI",
-      "access_matrix": "Accès & responsabilités"
+      "access_matrix": "Accès & responsabilités",
+      "objectives": "Objectifs de sécurité"
     },
     "kpi": {
       "active_sites": "Sites actifs",
@@ -3717,6 +3718,33 @@
       "committees_empty": "Aucun comité de sécurité configuré. Créez-en un dans Gouvernance → Comités.",
       "committees_next": "prochaine",
       "committees_no_members": "Aucun participant enregistré (aucune réunion)"
+    },
+    "objectives": {
+      "intro": "Les objectifs (ISO/IEC 27001 §6.2) sont des cibles assorties d'une échéance : cette page indique s'ils seront atteints à temps. Ce ne sont pas des seuils : c'est le KPI, et non cette page, qui indique si un indicateur est actuellement sous le niveau acceptable.",
+      "manage_link": "Gérer les objectifs",
+      "load_error": "Impossible de charger le rapport. La vue sur tous les sites est réservée au périmètre organisation : sélectionnez un site.",
+      "col_scope": "Périmètre",
+      "col_active": "Actifs",
+      "col_in_preparation": "Brouillon / suspendus",
+      "col_achieved": "Atteints",
+      "col_not_achieved": "Non atteints",
+      "totals_footer": "En outre : {{preparation}} en brouillon ou suspendus · clôturés au cours des {{days}} derniers jours : {{achieved}} atteints, {{missed}} non atteints.",
+      "section_by_plant": "Situation par site",
+      "by_plant_hint": "Les trajectoires ne concernent que les objectifs actifs. Atteints et non atteints : clôturés au cours des {{days}} derniers jours. Les objectifs d'organisation s'appliquent à tous les sites.",
+      "empty": "Aucun objectif de sécurité dans le périmètre sélectionné.",
+      "section_deadlines": "Échéances sous {{days}} jours",
+      "deadlines_hint": "Objectifs actifs arrivant à échéance ou déjà échus et pas encore clôturés. La barre compare le chemin parcouru (couleur) au temps écoulé (repère).",
+      "no_deadlines": "Aucun objectif actif n'arrive à échéance dans les {{days}} prochains jours.",
+      "days_left": "dans {{n}} j",
+      "overdue_days": "échu depuis {{n}} j",
+      "section_kpi": "Objectifs et KPI associé",
+      "kpi_hint": "Même valeur, deux lectures. Le seuil est le plancher : il indique si nous sommes aujourd'hui sous le niveau acceptable. L'objectif est la trajectoire : il indique si nous atteindrons la cible à l'échéance. Un KPI peut être dans le seuil et l'objectif à risque, et inversement.",
+      "no_kpi_linked": "Aucun objectif actif associé à un KPI.",
+      "col_kpi": "KPI",
+      "col_floor": "Seuil KPI (plancher)",
+      "col_trajectory": "Objectif (trajectoire)",
+      "by_date": "d'ici le {{date}}",
+      "weak_target_short": "La cible ne dépasse pas le seuil d'alerte du KPI : l'objectif n'ajoute rien à ce que le KPI signale déjà."
     }
   },
   "manual": {

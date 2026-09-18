@@ -151,6 +151,18 @@ class KpiOverviewView(PlantParamGuardedView):
         return Response(services.kpi_overview(request.query_params.get("plant")))
 
 
+class ObjectivesReportView(PlantParamGuardedView):
+    """
+    GET /reporting/objectives/?plant=<uuid>
+
+    Obiettivi di sicurezza (§6.2) in forma aggregata: traiettorie per sito,
+    scadenze entro 90 giorni, confronto con il KPI agganciato. Sola lettura.
+    """
+
+    def get(self, request):
+        return Response(services.objectives_report(request.query_params.get("plant")))
+
+
 # ── KPI suggestion engine (catalogo standard → import) ───────────────────────
 
 

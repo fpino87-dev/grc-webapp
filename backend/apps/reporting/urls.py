@@ -3,7 +3,7 @@ from .views import (
     AccessMatrixView,
     ComplianceSummaryView, RiskSummaryView, IncidentSummaryView,
     DashboardSummaryView, OwnerReportView, KpiTrendView, RiskBiaBcpView,
-    KpiOverviewView,
+    KpiOverviewView, ObjectivesReportView,
 )
 
 urlpatterns = [
@@ -17,4 +17,5 @@ urlpatterns = [
     path("kpi-trend/", KpiTrendView.as_view(), name="reporting-kpi-trend"),
     path("risk-bia-bcp/", RiskBiaBcpView.as_view(), name="reporting-risk-bia-bcp"),
     path("kpi-overview/", KpiOverviewView.as_view(), name="reporting-kpi-overview"),
+    path("objectives/", ObjectivesReportView.as_view(), name="reporting-objectives"),
 ]

@@ -3525,7 +3525,8 @@
       "owner": "Sahibe göre",
       "risk_bia_bcp": "Risk / BIA / BCP",
       "kpi": "KPI",
-      "access_matrix": "Erişim ve sorumluluklar"
+      "access_matrix": "Erişim ve sorumluluklar",
+      "objectives": "Güvenlik hedefleri"
     },
     "kpi": {
       "active_sites": "Aktif siteler",
@@ -3717,6 +3718,33 @@
       "committees_empty": "Yapılandırılmış güvenlik komitesi yok. Yönetişim → Komiteler'den oluşturun.",
       "committees_next": "sonraki",
       "committees_no_members": "Kayıtlı üye yok (henüz toplantı yok)"
+    },
+    "objectives": {
+      "intro": "Hedefler (ISO/IEC 27001 §6.2) bir son tarihe bağlı hedef değerlerdir: bu sayfa zamanında ulaşılıp ulaşılamayacağını gösterir. Eşik değildirler: bir göstergenin şu anda kabul edilebilir seviyenin altında olup olmadığını bu sayfa değil KPI gösterir.",
+      "manage_link": "Hedefleri yönet",
+      "load_error": "Rapor yüklenemedi. Tüm tesisler görünümü kuruluş kapsamına ayrılmıştır: bir tesis seçin.",
+      "col_scope": "Kapsam",
+      "col_active": "Aktif",
+      "col_in_preparation": "Taslak / askıda",
+      "col_achieved": "Ulaşılan",
+      "col_not_achieved": "Ulaşılamayan",
+      "totals_footer": "Ayrıca: {{preparation}} taslak veya askıda · son {{days}} günde kapatılan: {{achieved}} ulaşılan, {{missed}} ulaşılamayan.",
+      "section_by_plant": "Tesise göre durum",
+      "by_plant_hint": "Gidişat yalnızca aktif hedefleri kapsar. Ulaşılan ve ulaşılamayan: son {{days}} günde kapatılanlar. Kuruluş hedefleri tüm tesisler için geçerlidir.",
+      "empty": "Seçilen kapsamda güvenlik hedefi yok.",
+      "section_deadlines": "{{days}} gün içindeki son tarihler",
+      "deadlines_hint": "Süresi yaklaşan veya geçmiş ve henüz kapatılmamış aktif hedefler. Çubuk, kat edilen yolu (renk) geçen süreyle (işaret) karşılaştırır.",
+      "no_deadlines": "Önümüzdeki {{days}} gün içinde süresi dolan aktif hedef yok.",
+      "days_left": "{{n}} gün sonra",
+      "overdue_days": "{{n}} gün gecikmiş",
+      "section_kpi": "Hedefler ve bağlı KPI",
+      "kpi_hint": "Aynı değer, iki okuma. Eşik tabandır: bugün kabul edilebilir seviyenin altında olup olmadığımızı söyler. Hedef gidişattır: hedef değere son tarihe kadar ulaşıp ulaşmayacağımızı söyler. Bir KPI eşik içinde olup hedef risk altında olabilir, tersi de mümkündür.",
+      "no_kpi_linked": "Bir KPI'ya bağlı aktif hedef yok.",
+      "col_kpi": "KPI",
+      "col_floor": "KPI eşiği (taban)",
+      "col_trajectory": "Hedef (gidişat)",
+      "by_date": "{{date}} tarihine kadar",
+      "weak_target_short": "Hedef değer KPI uyarı eşiğini aşmıyor: hedef, KPI'nın zaten bildirdiğine bir şey eklemiyor."
     }
   },
   "manual": {

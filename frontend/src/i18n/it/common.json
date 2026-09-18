@@ -3607,7 +3607,8 @@
       "owner": "Per Owner",
       "risk_bia_bcp": "Risk / BIA / BCP",
       "kpi": "KPI",
-      "access_matrix": "Accessi & responsabilità"
+      "access_matrix": "Accessi & responsabilità",
+      "objectives": "Obiettivi di sicurezza"
     },
     "risk_bia_bcp": {
       "kpi_total": "Rischi totali",
@@ -3717,6 +3718,33 @@
       "committees_empty": "Nessun Comitato di Sicurezza configurato. Creane uno in Governance → Comitati.",
       "committees_next": "prossima",
       "committees_no_members": "Nessun partecipante registrato (nessuna riunione)"
+    },
+    "objectives": {
+      "intro": "Gli obiettivi (ISO/IEC 27001 §6.2) sono traguardi con una scadenza: qui si legge se ci si arriverà in tempo. Non sono soglie: se un indicatore è sotto il livello accettabile adesso lo dice il KPI, non questa pagina.",
+      "manage_link": "Gestisci gli obiettivi",
+      "load_error": "Impossibile caricare il report. La vista su tutti i siti è riservata allo scope organizzazione: seleziona un sito.",
+      "col_scope": "Ambito",
+      "col_active": "Attivi",
+      "col_in_preparation": "Bozza / sospesi",
+      "col_achieved": "Raggiunti",
+      "col_not_achieved": "Non raggiunti",
+      "totals_footer": "Inoltre: {{preparation}} in bozza o sospesi · chiusi negli ultimi {{days}} giorni: {{achieved}} raggiunti, {{missed}} non raggiunti.",
+      "section_by_plant": "Situazione per sito",
+      "by_plant_hint": "Le traiettorie riguardano solo gli obiettivi attivi. Raggiunti e non raggiunti: chiusi negli ultimi {{days}} giorni. Gli obiettivi di organizzazione valgono per tutti i siti.",
+      "empty": "Nessun obiettivo di sicurezza nel perimetro selezionato.",
+      "section_deadlines": "Scadenze entro {{days}} giorni",
+      "deadlines_hint": "Obiettivi attivi in scadenza o già scaduti e non ancora chiusi. La barra confronta il cammino percorso (colore) con il tempo consumato (tacca).",
+      "no_deadlines": "Nessun obiettivo attivo in scadenza nei prossimi {{days}} giorni.",
+      "days_left": "tra {{n}} gg",
+      "overdue_days": "scaduto da {{n}} gg",
+      "section_kpi": "Obiettivi e KPI collegato",
+      "kpi_hint": "Stesso valore, due letture. La soglia è il pavimento: dice se oggi siamo sotto il livello accettabile. L'obiettivo è la traiettoria: dice se arriveremo al target entro la scadenza. Un KPI può essere in soglia e l'obiettivo a rischio, e viceversa.",
+      "no_kpi_linked": "Nessun obiettivo attivo agganciato a un KPI.",
+      "col_kpi": "KPI",
+      "col_floor": "Soglia KPI (pavimento)",
+      "col_trajectory": "Obiettivo (traiettoria)",
+      "by_date": "entro il {{date}}",
+      "weak_target_short": "Il target non supera la soglia di warning del KPI: l'obiettivo non aggiunge nulla a ciò che il KPI già segnala."
     }
   },
   "manual": {

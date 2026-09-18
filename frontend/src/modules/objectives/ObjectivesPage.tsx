@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
@@ -18,6 +19,9 @@ export function ObjectivesPage() {
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<SecurityObjective | null>(null);
   const [selected, setSelected] = useState<SecurityObjective | null>(null);
+  // `?id=` apre direttamente il dettaglio: è il collegamento dal Reporting.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const linkedId = searchParams.get("id");
 
   const { data: objectives = [], isLoading } = useQuery({
     queryKey: ["security-objectives"],
@@ -34,7 +38,13 @@ export function ObjectivesPage() {
     (a, b) => (order[a.evaluation.track] ?? 9) - (order[b.evaluation.track] ?? 9)
       || a.target_date.localeCompare(b.target_date),
   );
-  const current = selected ? objectives.find((o) => o.id === selected.id) ?? selected : null;
+  const current = selected
+    ? objectives.find((o) => o.id === selected.id) ?? selected
+    : linkedId ? objectives.find((o) => o.id === linkedId) ?? null : null;
+  const closeDetail = () => {
+    setSelected(null);
+    if (linkedId) setSearchParams({}, { replace: true });
+  };
 
   const counts = {
     attivi: objectives.filter((o) => o.status === "attivo").length,
@@ -160,7 +170,7 @@ export function ObjectivesPage() {
 
       {creating && <ObjectiveForm onClose={() => setCreating(false)} />}
       {editing && <ObjectiveForm objective={editing} onClose={() => setEditing(null)} />}
-      {current && <ObjectiveDetail objective={current} onClose={() => setSelected(null)} />}
+      {current && <ObjectiveDetail objective={current} onClose={closeDetail} />}
     </div>
   );
 }

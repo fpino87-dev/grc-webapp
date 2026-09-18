@@ -3525,7 +3525,8 @@
       "owner": "Wg właściciela",
       "risk_bia_bcp": "Ryzyko / BIA / BCP",
       "kpi": "KPI",
-      "access_matrix": "Dostępy i odpowiedzialności"
+      "access_matrix": "Dostępy i odpowiedzialności",
+      "objectives": "Cele bezpieczeństwa"
     },
     "kpi": {
       "active_sites": "Aktywne zakłady",
@@ -3717,6 +3718,33 @@
       "committees_empty": "Brak skonfigurowanego komitetu bezpieczeństwa. Utwórz w Zarządzanie → Komitety.",
       "committees_next": "następne",
       "committees_no_members": "Brak zarejestrowanych uczestników (brak spotkań)"
+    },
+    "objectives": {
+      "intro": "Cele (ISO/IEC 27001 §6.2) to wartości docelowe z terminem: ta strona pokazuje, czy zostaną osiągnięte na czas. Nie są to progi: to, czy wskaźnik jest teraz poniżej akceptowalnego poziomu, pokazuje KPI, a nie ta strona.",
+      "manage_link": "Zarządzaj celami",
+      "load_error": "Nie można załadować raportu. Widok wszystkich zakładów jest zarezerwowany dla zakresu organizacji: wybierz zakład.",
+      "col_scope": "Zakres",
+      "col_active": "Aktywne",
+      "col_in_preparation": "Szkic / zawieszone",
+      "col_achieved": "Osiągnięte",
+      "col_not_achieved": "Nieosiągnięte",
+      "totals_footer": "Ponadto: {{preparation}} w wersji roboczej lub zawieszonych · zamknięte w ciągu ostatnich {{days}} dni: osiągnięte {{achieved}}, nieosiągnięte {{missed}}.",
+      "section_by_plant": "Stan według zakładu",
+      "by_plant_hint": "Trajektorie dotyczą tylko aktywnych celów. Osiągnięte i nieosiągnięte: zamknięte w ciągu ostatnich {{days}} dni. Cele organizacji dotyczą wszystkich zakładów.",
+      "empty": "Brak celów bezpieczeństwa w wybranym zakresie.",
+      "section_deadlines": "Terminy w ciągu {{days}} dni",
+      "deadlines_hint": "Aktywne cele z nadchodzącym lub przekroczonym terminem, jeszcze niezamknięte. Pasek porównuje przebytą drogę (kolor) z upływem czasu (znacznik).",
+      "no_deadlines": "Brak aktywnych celów z terminem w ciągu najbliższych {{days}} dni.",
+      "days_left": "za {{n}} dni",
+      "overdue_days": "po terminie {{n}} dni",
+      "section_kpi": "Cele i powiązany KPI",
+      "kpi_hint": "Ta sama wartość, dwie interpretacje. Próg to minimum: mówi, czy dziś jesteśmy poniżej akceptowalnego poziomu. Cel to trajektoria: mówi, czy osiągniemy wartość docelową w terminie. KPI może mieścić się w progu, a cel być zagrożony, i odwrotnie.",
+      "no_kpi_linked": "Brak aktywnych celów powiązanych z KPI.",
+      "col_kpi": "KPI",
+      "col_floor": "Próg KPI (minimum)",
+      "col_trajectory": "Cel (trajektoria)",
+      "by_date": "do {{date}}",
+      "weak_target_short": "Wartość docelowa nie przekracza progu ostrzegawczego KPI: cel nie wnosi nic ponad to, co KPI już sygnalizuje."
     }
   },
   "manual": {

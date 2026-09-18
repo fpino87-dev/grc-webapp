@@ -1153,3 +1153,143 @@ def _to_uuid(value):
         return uuid.UUID(str(value))
     except (ValueError, AttributeError, TypeError):
         return None
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# Obiettivi di sicurezza (ISO/IEC 27001 §6.2) — vista aggregata
+# ───────────────────────────────────────────────────────────────────────────
+# Tab separato dai KPI per scelta: la soglia di un KPI è un *pavimento* ("siamo
+# sotto il livello accettabile adesso?"), l'obiettivo è una *traiettoria*
+# ("arriveremo al target entro la scadenza?"). Qui si legge soltanto: il calcolo
+# della traiettoria resta in apps.governance.services, la gestione in /objectives.
+OBJECTIVES_DEADLINE_HORIZON_DAYS = 90
+OBJECTIVES_CLOSED_WINDOW_DAYS = 365
+
+_TRACK_KEYS = ("in_linea", "a_rischio", "mancato", "senza_misure")
+
+
+def _empty_objective_counts() -> dict:
+    return {
+        "attivi": 0, **{k: 0 for k in _TRACK_KEYS},
+        "in_preparazione": 0, "raggiunti": 0, "non_raggiunti": 0,
+    }
+
+
+def objectives_report(plant_id, today=None) -> dict:
+    """Situazione del piano degli obiettivi per sito, scadenze vicine e confronto
+    con il KPI agganciato.
+
+    Con `plant_id` il perimetro è il sito più gli obiettivi di organizzazione
+    (valgono per tutti i siti); senza, tutti i siti (la view lo riserva allo
+    scope org). Le traiettorie contano solo gli obiettivi *attivi*: una bozza
+    non è ancora un impegno e un obiettivo sospeso non corre verso la scadenza.
+    """
+    from datetime import timedelta
+
+    from apps.governance.models import SecurityObjective
+    from apps.governance.services import evaluate_objective, latest_objective_values
+    from apps.tasks.services import evaluate_kpi_status
+
+    closed_since = timezone.now() - timedelta(days=OBJECTIVES_CLOSED_WINDOW_DAYS)
+    qs = (
+        SecurityObjective.objects
+        .filter(Q(plant__isnull=True) | Q(plant__deleted_at__isnull=True))
+        .filter(
+            Q(status__in=("bozza", "attivo", "sospeso"))
+            | Q(status__in=("raggiunto", "non_raggiunto"), closed_at__gte=closed_since)
+        )
+        .select_related("plant", "plant__bu", "kpi_definition")
+    )
+    if plant_id:
+        qs = qs.filter(Q(plant_id=plant_id) | Q(plant__isnull=True))
+    objectives = list(qs.order_by("target_date", "code"))
+    values = latest_objective_values(objectives)
+
+    totals = _empty_objective_counts()
+    rows: dict = {}
+    deadlines, kpi_linked = [], []
+
+    for o in objectives:
+        key = o.plant_id
+        if key not in rows:
+            rows[key] = {
+                "plant_id": str(o.plant_id) if o.plant_id else None,
+                "plant_code": o.plant.code if o.plant_id else None,
+                "plant_name": o.plant.name if o.plant_id else None,
+                "bu_code": o.plant.bu.code if o.plant_id and o.plant.bu_id else None,
+                **_empty_objective_counts(),
+            }
+        row = rows[key]
+
+        if o.status in ("bozza", "sospeso"):
+            bucket = "in_preparazione"
+        elif o.status == "raggiunto":
+            bucket = "raggiunti"
+        elif o.status == "non_raggiunto":
+            bucket = "non_raggiunti"
+        else:
+            bucket = None
+        if bucket:
+            row[bucket] += 1
+            totals[bucket] += 1
+            continue
+
+        value, measured_on = values.get(o.id, (None, None))
+        ev = evaluate_objective(o, value=value, measured_on=measured_on, today=today)
+        track = ev["track"] if ev["track"] in _TRACK_KEYS else "senza_misure"
+        for target in (row, totals):
+            target["attivi"] += 1
+            target[track] += 1
+
+        item = {
+            "id": str(o.id),
+            "code": o.code,
+            "title": o.title,
+            "plant_code": o.plant.code if o.plant_id else None,
+            "owner_role": o.owner_role,
+            "baseline_value": o.baseline_value,
+            "target_value": o.target_value,
+            "target_direction": o.target_direction,
+            "target_date": o.target_date.isoformat(),
+            "current_value": ev["current_value"],
+            "measured_on": ev["measured_on"],
+            "unit": ev["unit"],
+            "progress_pct": ev["progress_pct"],
+            "elapsed_pct": ev["elapsed_pct"],
+            "days_to_target": ev["days_to_target"],
+            "track": track,
+        }
+        if ev["days_to_target"] <= OBJECTIVES_DEADLINE_HORIZON_DAYS:
+            deadlines.append(item)
+        if o.measure_source == "kpi" and o.kpi_definition_id:
+            kpi = o.kpi_definition
+            kpi_linked.append({
+                **item,
+                "kpi_code": kpi.kpi_code,
+                "kpi_name": kpi.name,
+                # Stato rispetto alla soglia calcolato sullo stesso valore
+                # letto per l'obiettivo: una sola misura, due letture.
+                "kpi_status": evaluate_kpi_status(kpi, ev["current_value"]),
+                "threshold_warning": kpi.threshold_warning,
+                "threshold_critical": kpi.threshold_critical,
+                "threshold_direction": kpi.threshold_direction,
+                "weak_target": ev["weak_target"],
+            })
+
+    deadlines.sort(key=lambda i: (i["days_to_target"], i["code"]))
+    track_order = {"mancato": 0, "a_rischio": 1, "senza_misure": 2, "in_linea": 3}
+    kpi_linked.sort(key=lambda i: (track_order[i["track"]], i["target_date"], i["code"]))
+
+    # Organizzazione in testa, poi i siti per BU e codice.
+    by_plant = sorted(
+        rows.values(),
+        key=lambda r: (r["plant_id"] is not None, r["bu_code"] or "", r["plant_code"] or ""),
+    )
+    return {
+        "horizon_days": OBJECTIVES_DEADLINE_HORIZON_DAYS,
+        "closed_window_days": OBJECTIVES_CLOSED_WINDOW_DAYS,
+        "totals": totals,
+        "by_plant": by_plant,
+        "deadlines": deadlines,
+        "kpi_linked": kpi_linked,
+    }
