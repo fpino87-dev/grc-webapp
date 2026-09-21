@@ -71,7 +71,7 @@ backend (Django + DRF)
     ├── Redis          session cache + Celery broker
     └── S3 / MinIO     object storage for documents and evidence
     │
-    └── Celery Worker  async tasks: notifications, KB4 sync, audit trail jobs
+    └── Celery Worker  async tasks: notifications, audit trail jobs
         Celery Beat    recurring scheduler: deadlines, email digest, sync
 ```
 
@@ -310,7 +310,7 @@ backend/
 │   ├── lessons/             # M12 — Lesson Learned
 │   ├── management_review/   # M13 — Management Review
 │   ├── suppliers/           # M14 — Suppliers
-│   ├── training/            # M15 — Training/KnowBe4
+│   ├── training/            # M15 — Evidence-based training
 │   ├── bcp/                 # M16 — BCP
 │   ├── audit_prep/          # M17 — Audit Readiness
 │   ├── reporting/           # M18 — Reporting (no model, aggregate views only)
@@ -1157,30 +1157,15 @@ POST /api/v1/ai/confirm/
 
 ## External integrations
 
-### KnowBe4 (M15)
+### Training (M15): no external integration
 
-```python
-# apps/training/kb4_client.py
-class KnowBe4Client:
-    BASE_URL = settings.KNOWBE4_API_URL
+M15 does not integrate with e-learning or phishing-simulation platforms (the KnowBe4 integration has been removed): the platform **governs** training, it does not deliver it. Data are counts per group only: no employee register.
 
-    def get_enrollments_delta(self, since: datetime) -> list[dict]:
-        """Downloads completions since the given timestamp."""
-        ...
-
-    def get_phishing_results(self, campaign_id: str) -> list[dict]:
-        ...
-
-    def provision_user(self, user: User, groups: list[str]) -> bool:
-        """Creates or updates the user on KB4 with the correct groups (role+plant+language)."""
-        ...
-
-    def deprovision_user(self, email: str) -> bool:
-        """Revokes user access on KB4 (called by the post_save signal on User.is_active=False)."""
-        ...
-```
-
-The sync is executed by the Celery task `training.tasks.sync_knowbe4` scheduled every night at 02:00.
+- **Model** (`apps/training/models.py`): `TrainingCourse` (type, audience, `validity_months`, `controls` M2M), `TrainingAudience` (per-site target group with `headcount`), `TrainingPlan` (per site or organisation-wide, with an M07 `document` for approval), `TrainingPlanItem`, `TrainingSession` (session with counts, `evidence` and `legacy` flag).
+- **Services** (`apps/training/services.py`): `register_session` validates the file (`validate_uploaded_file`), creates the `Evidence` and links it to the site's `ControlInstance`s (`link_evidence_to_controls`); `remind_plan_items` opens tasks for the `compliance_officer` role (source_module `M15`); indicators shared by KPIs, Reporting and Cockpit (`training_coverage`, `plan_progress`, `latest_phishing`, `expiring_training_evidence`).
+- **Permissions**: write access for `super_admin`/`compliance_officer`/`plant_manager` within their scope or for an active CISO appointment in Governance (`can_manage_training`); read access for auditors too. `GET /api/v1/training/courses/capabilities/` tells the UI what to show.
+- **Celery task**: `remind-training-plan-items`, daily at 08:10.
+- **Historical data**: per-person enrollments and phishing results (`TrainingEnrollment`, `PhishingSimulation`) are aggregated by migration `training.0004` into `legacy` sessions and are no longer exposed by the API; the tables and the `framework_refs` column will be dropped in a later release.
 
 ### Outbound webhook (M19)
 
@@ -1434,7 +1419,7 @@ The pytest suite (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=
 | `seed_demo` | Load demo data | Development environment only |
 | `makemessages -l <lang>` | Extract backend i18n strings | After adding new strings |
 | `compilemessages` | Compile .po files to .mo | After translation |
-| `sync_knowbe4 --full` | Manual KnowBe4 sync | Recovery after error |
+| `check_training_migration_readiness` | Read-only preview of the training data migration (`training.0004`) | Before the `migrate` that applies it |
 
 ---
 
@@ -1451,7 +1436,6 @@ The pytest suite (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=
 | `FRONTEND_URL` | string | http://localhost:3001 | Frontend URL | Yes |
 | `CORS_ALLOWED_ORIGINS` | string | http://localhost:3001 | CORS origins | No |
 | `AI_ENGINE_ENABLED` | bool | False | Enable M20 AI Engine | No |
-| `KNOWBE4_API_KEY` | string | — | KnowBe4 API key | Only if M15 is active |
 
 ---
 
@@ -1522,16 +1506,6 @@ python manage.py load_frameworks --file frameworks/nuovo.json --dry-run
 
 python manage.py load_frameworks --file frameworks/nuovo.json --validate-only
 # Validates the JSON without importing
-```
-
-### KnowBe4 sync fails
-
-```bash
-# Verify credentials
-python manage.py shell -c "from apps.training.kb4_client import KnowBe4Client; print(KnowBe4Client().health_check())"
-
-# Re-run the sync manually
-python manage.py sync_knowbe4 --full
 ```
 
 ### AI cloud token unauthorised (M20)

@@ -42,8 +42,8 @@
 
                       |
               Celery Worker + Beat
-              (task async, sync KB4,
-               notifiche, audit job)
+              (task async, notifiche,
+               promemoria, audit job)
 
                       |
               +-------+--------+
@@ -53,7 +53,7 @@
               +----------------+   (solo dati anonimi)
 
   Integrazioni esterne:
-  KnowBe4 API . SMTP aziendale . SSO/SAML . SIEM webhook . ACN email
+  SMTP aziendale . SSO/SAML . SIEM webhook . ACN email
 ```
 
 ---
@@ -157,7 +157,6 @@ Il repository include `.env.example` (sviluppo) e `.env.prod.example` (produzion
 | `EMAIL_HOST_PASSWORD` | No | — | Password SMTP (cifrata con FERNET_KEY in DB) |
 | `SSO_ENABLED` | No | `False` | Abilita autenticazione SSO |
 | `SAML_METADATA_URL` | Se SSO | — | URL metadata IdP SAML |
-| `KNOWBE4_API_KEY` | Se M15 | — | API key KnowBe4 |
 | `AI_ENGINE_ENABLED` | No | `False` | Master switch AI Engine M20 |
 | `AZURE_OPENAI_KEY` | Se AI cloud | — | API key Azure OpenAI |
 | `ANTHROPIC_API_KEY` | Se AI cloud | — | API key Anthropic |
@@ -204,12 +203,6 @@ SAML_METADATA_URL=https://idp.azienda.com/metadata
 OIDC_CLIENT_ID=...
 OIDC_CLIENT_SECRET=...
 OIDC_ENDPOINT=https://idp.azienda.com
-
-# ── KnowBe4 (M15) ─────────────────────────────────────────────────────
-KNOWBE4_API_KEY=...
-KNOWBE4_API_URL=https://us.api.knowbe4.com
-KNOWBE4_SYNC_ENABLED=true
-KNOWBE4_SYNC_CRON=0 2 * * *           # ogni notte alle 02:00
 
 # ── AI Engine (M20) — disabilitato di default ─────────────────────────
 AI_ENGINE_ENABLED=false
@@ -575,7 +568,6 @@ add_header Referrer-Policy strict-origin-when-cross-origin;
 | 6379 | Backend, Celery | Redis | Cache / broker |
 | 11434 | Backend | Ollama | AI locale M20 |
 | 443 | Sanitizer | Azure / Anthropic | AI cloud M20 (solo anonimi) |
-| 443 | Celery | KnowBe4 API | Sync M15 |
 
 ### Sicurezza API e sessioni
 
@@ -688,7 +680,7 @@ python manage.py test tests.smoke --keepdb --settings=core.settings.test_restore
 GET /api/health/
 -> { "status": "ok", "db": "ok", "redis": "ok", "storage": "ok", "version": "1.2.0" }
 
-GET /api/health/detailed/    # solo IP interni -- include metriche Celery e sync KB4
+GET /api/health/detailed/    # solo IP interni -- include metriche Celery
 ```
 
 ### Metriche chiave (Prometheus)

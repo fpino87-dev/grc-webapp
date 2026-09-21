@@ -71,7 +71,7 @@ backend (Django + DRF)
     ├── Redis          oturum önbelleği + Celery broker
     └── S3 / MinIO     belgeler ve kanıtlar için nesne depolama
     │
-    └── Celery Worker  asenkron görevler: bildirimler, KB4 senkronizasyonu, denetim izi işleri
+    └── Celery Worker  asenkron görevler: bildirimler, denetim izi işleri
         Celery Beat    tekrarlayan zamanlayıcılar: son tarihler, e-posta özeti, senkronizasyon
 ```
 
@@ -310,7 +310,7 @@ backend/
 │   ├── lessons/             # M12 — Alınan Dersler
 │   ├── management_review/   # M13 — Yönetim Gözden Geçirme
 │   ├── suppliers/           # M14 — Tedarikçiler
-│   ├── training/            # M15 — Eğitim/KnowBe4
+│   ├── training/            # M15 — Kanıta dayalı eğitim
 │   ├── bcp/                 # M16 — BCP
 │   ├── audit_prep/          # M17 — Denetim Hazırlığı
 │   ├── reporting/           # M18 — Raporlama (model yok, yalnızca toplama view'ları)
@@ -1156,30 +1156,15 @@ POST /api/v1/ai/confirm/
 
 ## Harici entegrasyonlar
 
-### KnowBe4 (M15)
+### Eğitim (M15): harici entegrasyon yok
 
-```python
-# apps/training/kb4_client.py
-class KnowBe4Client:
-    BASE_URL = settings.KNOWBE4_API_URL
+M15, e-öğrenme veya oltalama simülasyonu platformlarıyla entegre olmaz (KnowBe4 entegrasyonu kaldırıldı): platform eğitimi **yönetir**, vermez. Veriler yalnızca grup bazında sayılardır: çalışan sicili tutulmaz.
 
-    def get_enrollments_delta(self, since: datetime) -> list[dict]:
-        """Belirtilen zaman damgasından bu yana tamamlamaları indirir."""
-        ...
-
-    def get_phishing_results(self, campaign_id: str) -> list[dict]:
-        ...
-
-    def provision_user(self, user: User, groups: list[str]) -> bool:
-        """KB4'te doğru gruplarla kullanıcı oluşturur veya günceller (rol+tesis+dil)."""
-        ...
-
-    def deprovision_user(self, email: str) -> bool:
-        """KB4'te kullanıcı erişimini iptal eder (User.is_active=False için post_save sinyali tarafından çağrılır)."""
-        ...
-```
-
-Senkronizasyon, her gece saat 02:00'de zamanlanmış `training.tasks.sync_knowbe4` Celery görevi tarafından yürütülür.
+- **Model** (`apps/training/models.py`): `TrainingCourse` (tür, hedef kitle, `validity_months`, `controls` M2M), `TrainingAudience` (`headcount` içeren tesis hedef grubu), `TrainingPlan` (tesis veya kuruluş geneli, onay için M07 `document`), `TrainingPlanItem`, `TrainingSession` (sayılar, `evidence` ve `legacy` işaretiyle oturum).
+- **Servisler** (`apps/training/services.py`): `register_session` dosyayı doğrular (`validate_uploaded_file`), `Evidence` oluşturur ve tesisin `ControlInstance` kayıtlarına bağlar (`link_evidence_to_controls`); `remind_plan_items`, `compliance_officer` rolüne görev açar (source_module `M15`); KPI, Reporting ve Cockpit tarafından paylaşılan göstergeler (`training_coverage`, `plan_progress`, `latest_phishing`, `expiring_training_evidence`).
+- **Yetkiler**: yazma, kendi kapsamlarında `super_admin`/`compliance_officer`/`plant_manager` rollerine veya Governance'taki aktif CISO atamasına (`can_manage_training`); okuma denetçilere de açık. `GET /api/v1/training/courses/capabilities/` arayüze neyi göstereceğini bildirir.
+- **Celery görevi**: `remind-training-plan-items`, her gün 08:10'da.
+- **Geçmiş veriler**: kişi bazlı kayıtlar ve oltalama sonuçları (`TrainingEnrollment`, `PhishingSimulation`) `training.0004` taşımasıyla `legacy` oturumlarda toplanır ve artık API ile sunulmaz; tablolar ve `framework_refs` sütunu sonraki bir sürümde kaldırılacaktır.
 
 ### Giden webhook (M19)
 
@@ -1433,7 +1418,7 @@ pytest paketi (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=70`
 | `seed_demo` | Demo verileri yükler | Yalnızca geliştirme ortamı |
 | `makemessages -l <dil>` | Backend i18n dizilerini çıkarır | Yeni diziler eklendikten sonra |
 | `compilemessages` | .po dosyalarını .mo'ya derler | Çeviri sonrasında |
-| `sync_knowbe4 --full` | Manuel KnowBe4 senkronizasyonu | Hata sonrası kurtarma |
+| `check_training_migration_readiness` | Eğitim verisi taşımasının (`training.0004`) salt okunur önizlemesi | Taşımayı uygulayan `migrate` öncesinde |
 
 ---
 
@@ -1450,7 +1435,6 @@ pytest paketi (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=70`
 | `FRONTEND_URL` | string | http://localhost:3001 | Frontend URL | Evet |
 | `CORS_ALLOWED_ORIGINS` | string | http://localhost:3001 | CORS origin'leri | Hayır |
 | `AI_ENGINE_ENABLED` | bool | False | M20 AI Engine'i etkinleştirir | Hayır |
-| `KNOWBE4_API_KEY` | string | — | KnowBe4 API anahtarı | Yalnızca M15 aktifse |
 
 ---
 
@@ -1521,16 +1505,6 @@ python manage.py load_frameworks --file frameworks/yeni.json --dry-run
 
 python manage.py load_frameworks --file frameworks/yeni.json --validate-only
 # İçe aktarmadan JSON'ı doğrular
-```
-
-### KnowBe4 senkronizasyonu başarısız oluyor
-
-```bash
-# Kimlik bilgilerini doğrula
-python manage.py shell -c "from apps.training.kb4_client import KnowBe4Client; print(KnowBe4Client().health_check())"
-
-# Senkronizasyonu manuel olarak yeniden çalıştır
-python manage.py sync_knowbe4 --full
 ```
 
 ### AI bulut token'ı yetkisiz (M20)

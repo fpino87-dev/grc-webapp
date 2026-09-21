@@ -946,46 +946,61 @@ Il rifiuto genera un task al referente interno per gestire la transizione (sosti
 
 ## 14. Formazione (M15)
 
-[Schermata: piano formativo personale]
+La piattaforma **non eroga** i corsi e non si collega a piattaforme di e-learning o di simulazione phishing: **governa** la formazione. Per ogni sito si pianifica cosa fare, si registra ogni erogazione con il **file di prova** e si misura la copertura del personale **solo in numeri**. È quello che chiedono ISO 27001 A.6.3 e cl. 7.2, NIS2 art. 21.2.g, ACN PR.AT e TISAX ISA 2.1.3: un piano, la prova che è stato eseguito e la copertura raggiunta.
 
-### Come vedere i propri corsi obbligatori
+Vai su **Operazioni → Formazione** e seleziona il sito in alto. La pagina ha quattro tab: **Piano**, **Erogazioni**, **Gruppi destinatari**, **Catalogo corsi**.
 
-1. Vai su **Governance → Formazione → Il mio piano**
-2. Trovi l'elenco dei corsi obbligatori per il tuo ruolo e plant, con:
-   - Nome del corso
-   - Stato: Da completare / In corso / Completato / Scaduto
-   - Data di scadenza (o data di completamento se gia' fatto)
-   - Tipo: online (KnowBe4), presenza, documentale
+### Chi fa cosa
 
-### Completion e scadenze
+- **Registrano** gruppi, piani ed erogazioni il Compliance Officer e il Plant Manager del sito, oppure chi ha la **nomina di CISO** in Governance per il sito o per l'organizzazione. Non c'è assegnazione: registra chi arriva prima.
+- **Leggono** piano, erogazioni e copertura anche l'Internal Auditor e l'Auditor Esterno: sono numeri e file di prova, non dati personali.
+- Gli altri ruoli vedono solo il **Catalogo corsi**.
 
-- Clicca **Avvia corso** sui corsi online per aprire direttamente il modulo su KnowBe4
-- I completamenti vengono sincronizzati automaticamente ogni notte — se hai completato un corso su KnowBe4 e non appare ancora come completato nella govrico, aspetta il giorno successivo o contatta il Compliance Officer
-- Un corso scaduto (completato ma da rifare periodicamente) appare con badge rosso e genera un task di rinnovo
+### 1. Catalogo corsi
 
-### Gap analysis competenze
+Per ogni corso indica:
 
-Vai su **Governance → Formazione → Gap analysis**. La pagina mostra:
+- **Tipo**: corso, campagna di sensibilizzazione o simulazione di phishing;
+- **Destinatari**: personale, ruoli critici o organo di gestione;
+- **Validità (mesi)**: dopo quanti mesi l'erogazione va ripetuta (es. 12 = ogni anno); vuoto = non scade;
+- **Obbligatorio**: i corsi obbligatori per il personale entrano nella copertura;
+- **Controlli dimostrati**: cerca il controllo per codice (es. A.6.3). Ogni erogazione del corso diventerà evidenza di questi controlli.
 
-- I requisiti di competenza previsti per ogni ruolo e plant
-- Le competenze effettivamente certificate (corsi completati, attestati caricati)
-- I gap evidenziati: competenze richieste ma non ancora coperte da alcun corso completato
+Un corso già in un piano o con erogazioni non si elimina: si **archivia**.
 
-Il Compliance Officer puo' usare questa vista per pianificare le sessioni formative e colmare i gap prioritari.
+### 2. Gruppi destinatari
 
-### Visibilità dei risultati (privacy)
+Per il sito inserisci i gruppi di persone da formare con il loro **numero** (es. «Produzione: 240», «Uffici: 45»). Non si inseriscono nomi né dati dei dipendenti. Quando il numero cambia, aggiornalo: la data di aggiornamento si imposta da sola. Un gruppo non riverificato da oltre 6 mesi è segnato **da riverificare**, perché la copertura si calcola su quel numero.
 
-I risultati individuali — completamenti, punteggi dei corsi e in particolare gli **esiti delle simulazioni di phishing** (chi ha cliccato) — sono dati personali dei dipendenti. Per questo sono consultabili **solo dai ruoli di governance** (Super Admin, Compliance Officer, Plant Manager) e dall'**Internal Auditor**; non sono visibili agli altri ruoli operativi né all'Auditor Esterno. Il catalogo dei corsi resta invece visibile a tutti.
+### 3. Piano formativo
 
-### Sincronizzazione KnowBe4 (solo admin)
+1. Nel tab **Piano** scegli l'anno e clicca **Crea il piano del sito** (chi gestisce l'organizzazione può creare anche il **piano di organizzazione**, che vale per tutti i siti).
+2. Clicca **Collega documento** e scegli il documento del piano gestito in **Documenti**: l'approvazione segue il workflow documentale. Il piano approvato è il documento richiesto da ISO 27001 A.6.3.
+3. Clicca **Aggiungi voce** per ogni attività: corso, scadenza e gruppi destinatari.
 
-Vai su **Impostazioni → Integrazioni → KnowBe4**:
+Ogni voce mostra lo stato (**Pianificata**, **In scadenza** entro 30 giorni, **In ritardo**, **Svolta**), il numero di erogazioni e la copertura raggiunta.
 
-1. Configura la API key KnowBe4
-2. Clicca **Sincronizza ora** per forzare la sincronizzazione immediata dei completamenti
-3. Verifica il log dell'ultima sincronizzazione per individuare eventuali errori
+**Promemoria.** Ogni mattina, per le voci senza erogazioni in scadenza entro 30 giorni o già in ritardo, viene aperto un **task al Compliance Officer** del sito e inviata una notifica a chi segue la formazione. Il task si chiude da solo quando registri l'erogazione. Le scadenze delle voci compaiono anche in **Activity Schedule**.
 
-La sincronizzazione automatica avviene ogni notte alle 02:00.
+### 4. Registrare un'erogazione
+
+1. Nel tab **Erogazioni** clicca **Registra erogazione**.
+2. Scegli il corso e la data. La voce del piano viene riconosciuta da sola; se ce n'è più di una puoi sceglierla.
+3. Seleziona i gruppi coinvolti e inserisci le **persone formate**. Le persone da formare sono proposte dalla somma dei gruppi e si possono correggere.
+   Per una **simulazione di phishing** inserisci invece le e-mail inviate, i clic e le segnalazioni.
+4. Allega il **file di prova** (registro presenze, export dell'e-learning, report della campagna). È obbligatorio: i nomi dei partecipanti stanno solo nel file, la piattaforma registra i numeri.
+5. Clicca **Registra**.
+
+Dal file nasce un'**evidenza** con scadenza pari alla validità del corso, **collegata automaticamente ai controlli del corso** sul sito. Il messaggio di conferma indica quanti controlli sono stati collegati ed elenca quelli non applicabili al sito (non istanziati o esclusi dallo SOA).
+
+Il file di prova non si sostituisce: se è sbagliato, elimina l'erogazione e registrala di nuovo. Un'erogazione la cui prova sostiene controlli già valutati non si elimina (solo un superuser può farlo). Le righe **storico senza prova** vengono dalla migrazione dei vecchi dati per persona: riportano solo i conteggi.
+
+### Dove si vedono i risultati
+
+- **Reporting → KPI**, sezione «Formazione e consapevolezza»: copertura per corso e sito, avanzamento del piano, voci in ritardo, ultime simulazioni di phishing e formazione da ripetere.
+- **KPI** calcolati in automatico, agganciabili agli **obiettivi di sicurezza**: copertura della formazione obbligatoria, avanzamento del piano, voci in ritardo, tasso di clic e di segnalazione del phishing.
+- **Centro Operativo**: segnala le voci del piano in ritardo.
+- **Pacchetto audit** (Audit Preparation): cartella `07_training` con piano, erogazioni con il riferimento all'evidenza, copertura e gruppi del sito.
 
 ---
 

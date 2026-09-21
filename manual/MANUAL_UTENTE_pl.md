@@ -946,46 +946,61 @@ Odrzucenie generuje zadanie dla wewnętrznego opiekuna w celu zarządzania przej
 
 ## 14. Szkolenia (M15)
 
-[Zrzut ekranu: indywidualny plan szkoleń]
+Platforma **nie prowadzi** kursów i nie łączy się z platformami e-learningowymi ani do symulacji phishingu: **nadzoruje** szkolenia. Dla każdego zakładu planuje się, co zrobić, rejestruje każde szkolenie z **plikiem dowodowym** i mierzy pokrycie personelu **wyłącznie w liczbach**. Tego wymagają ISO 27001 A.6.3 i pkt 7.2, NIS2 art. 21.2.g, ACN PR.AT oraz TISAX ISA 2.1.3: planu, dowodu jego realizacji i osiągniętego pokrycia.
 
-### Jak zobaczyć swoje obowiązkowe kursy
+Przejdź do **Operacje → Szkolenia** i wybierz zakład u góry. Strona ma cztery zakładki: **Plan**, **Szkolenia**, **Grupy docelowe**, **Katalog kursów**.
 
-1. Przejdź do **Ład organizacyjny → Szkolenia → Mój plan**
-2. Znajdziesz listę obowiązkowych kursów dla swojej roli i plant z:
-   - Nazwą kursu
-   - Statusem: Do ukończenia / W toku / Ukończony / Wygasły
-   - Datą terminu (lub datą ukończenia, jeśli już wykonano)
-   - Typem: online (KnowBe4), stacjonarny, dokumentalny
+### Kto co robi
 
-### Ukończenie i terminy
+- Grupy, plany i szkolenia **rejestrują** Compliance Officer i Plant Manager zakładu albo osoba z **nominacją na CISO** w module Governance dla zakładu lub organizacji. Nie ma przydziału: rejestruje ten, kto zrobi to pierwszy.
+- Audytor Wewnętrzny i Audytor Zewnętrzny również **przeglądają** plan, szkolenia i pokrycie: to liczby i pliki dowodowe, a nie dane osobowe.
+- Pozostałe role widzą tylko **Katalog kursów**.
 
-- Kliknij **Uruchom kurs** na kursach online, aby bezpośrednio otworzyć moduł na KnowBe4
-- Ukończenia są synchronizowane automatycznie każdej nocy — jeśli ukończyłeś kurs na KnowBe4, ale nie pojawia się jeszcze jako ukończony w govrico, poczekaj do następnego dnia lub skontaktuj się z Compliance Officer
-- Kurs wygasły (ukończony, ale wymagający okresowego powtórzenia) pojawia się z czerwoną odznaką i generuje zadanie odświeżenia
+### 1. Katalog kursów
 
-### Analiza luk kompetencji
+Dla każdego kursu określ:
 
-Przejdź do **Ład organizacyjny → Szkolenia → Analiza luk**. Strona pokazuje:
+- **Rodzaj**: kurs, kampania świadomościowa lub symulacja phishingu;
+- **Odbiorcy**: personel, role krytyczne lub organ zarządzający;
+- **Ważność (miesiące)**: po ilu miesiącach szkolenie trzeba powtórzyć (np. 12 = co roku); puste = nie wygasa;
+- **Obowiązkowy**: obowiązkowe kursy dla personelu wliczają się do pokrycia;
+- **Potwierdzane kontrole**: wyszukaj kontrolę po kodzie (np. A.6.3). Każde szkolenie z tego kursu stanie się dowodem dla tych kontroli.
 
-- Wymagania kompetencyjne przewidziane dla każdej roli i plant
-- Faktycznie certyfikowane kompetencje (ukończone kursy, wgrane zaświadczenia)
-- Podświetlone luki: wymagane kompetencje, ale niezabezpieczone żadnym ukończonym kursem
+Kursu, który jest już w planie lub ma zarejestrowane szkolenia, nie można usunąć: należy go **zarchiwizować**.
 
-Compliance Officer może używać tego widoku do planowania sesji szkoleniowych i uzupełniania priorytetowych luk.
+### 2. Grupy docelowe
 
-### Widoczność wyników (prywatność)
+Dla zakładu wprowadź grupy osób do przeszkolenia z ich **liczbą** (np. „Produkcja: 240”, „Biura: 45”). Nie wprowadza się nazwisk ani danych pracowników. Gdy liczba się zmienia, zaktualizuj ją: data aktualizacji ustawia się automatycznie. Grupa niezweryfikowana od ponad 6 miesięcy jest oznaczona **do weryfikacji**, bo pokrycie liczy się na podstawie tej liczby.
 
-Wyniki indywidualne — ukończenia kursów, wyniki punktowe, a zwłaszcza **rezultaty symulacji phishingu** (kto kliknął) — są danymi osobowymi pracowników. Z tego powodu są dostępne **tylko dla ról governance** (Super Admin, Compliance Officer, Plant Manager) oraz dla **Internal Auditora**; nie są widoczne dla pozostałych ról operacyjnych ani dla Audytora Zewnętrznego. Katalog kursów pozostaje natomiast widoczny dla wszystkich.
+### 3. Plan szkoleń
 
-### Synchronizacja KnowBe4 (tylko admin)
+1. W zakładce **Plan** wybierz rok i kliknij **Utwórz plan zakładu** (osoba zarządzająca organizacją może też utworzyć **plan organizacji**, obowiązujący we wszystkich zakładach).
+2. Kliknij **Powiąż dokument** i wybierz dokument planu prowadzony w module **Dokumenty**: zatwierdzenie przebiega zgodnie z obiegiem dokumentów. Zatwierdzony plan to dokument wymagany przez ISO 27001 A.6.3.
+3. Kliknij **Dodaj pozycję** dla każdego działania: kurs, termin i grupy docelowe.
 
-Przejdź do **Ustawienia → Integracje → KnowBe4**:
+Każda pozycja pokazuje status (**Zaplanowana**, **Termin wkrótce** w ciągu 30 dni, **Zaległa**, **Zrealizowana**), liczbę szkoleń i osiągnięte pokrycie.
 
-1. Skonfiguruj klucz API KnowBe4
-2. Kliknij **Synchronizuj teraz**, aby wymusić natychmiastową synchronizację ukończeń
-3. Sprawdź dziennik ostatniej synchronizacji, aby zidentyfikować ewentualne błędy
+**Przypomnienia.** Każdego ranka dla pozycji bez szkoleń z terminem w ciągu 30 dni lub już zaległych otwierane jest **zadanie dla Compliance Officera** zakładu i wysyłane powiadomienie do osób odpowiedzialnych za szkolenia. Zadanie zamyka się samo po zarejestrowaniu szkolenia. Terminy pozycji pojawiają się też w **Activity Schedule**.
 
-Automatyczna synchronizacja odbywa się każdej nocy o 02:00.
+### 4. Rejestrowanie szkolenia
+
+1. W zakładce **Szkolenia** kliknij **Zarejestruj szkolenie**.
+2. Wybierz kurs i datę. Pozycja planu jest rozpoznawana automatycznie; jeśli jest ich kilka, możesz ją wybrać.
+3. Zaznacz uczestniczące grupy i wpisz liczbę **przeszkolonych osób**. Liczba osób do przeszkolenia jest proponowana jako suma grup i można ją poprawić.
+   Dla **symulacji phishingu** wpisz zamiast tego liczbę wysłanych e-maili, kliknięć i zgłoszeń.
+4. Załącz **plik dowodowy** (lista obecności, eksport z e-learningu, raport z kampanii). Jest obowiązkowy: nazwiska uczestników są tylko w pliku, platforma zapisuje liczby.
+5. Kliknij **Zarejestruj**.
+
+Z pliku powstaje **dowód** ważny przez okres ważności kursu, **automatycznie powiązany z kontrolami kursu** w zakładzie. Komunikat potwierdzenia pokazuje, ile kontroli powiązano, i wymienia te, które nie obowiązują w zakładzie (nieutworzone lub wyłączone z SoA).
+
+Pliku dowodowego nie można podmienić: jeśli jest błędny, usuń szkolenie i zarejestruj je ponownie. Szkolenia, którego dowód potwierdza już ocenione kontrole, nie można usunąć (może to zrobić tylko superuser). Wiersze **historyczne bez dowodu** pochodzą z migracji dawnych danych osobowych: zawierają tylko liczby.
+
+### Gdzie widać wyniki
+
+- **Reporting → KPI**, sekcja „Szkolenia i świadomość”: pokrycie według kursu i zakładu, realizacja planu, zaległe pozycje, ostatnie symulacje phishingu i szkolenia do powtórzenia.
+- **KPI** obliczane automatycznie, z którymi można powiązać **cele bezpieczeństwa**: pokrycie obowiązkowymi szkoleniami, realizacja planu, zaległe pozycje, wskaźnik kliknięć i zgłoszeń w phishingu.
+- **Centrum Operacyjne**: sygnalizuje zaległe pozycje planu.
+- **Pakiet audytowy** (Audit Preparation): folder `07_training` z planem, szkoleniami z odniesieniem do dowodu, pokryciem i grupami zakładu.
 
 ---
 

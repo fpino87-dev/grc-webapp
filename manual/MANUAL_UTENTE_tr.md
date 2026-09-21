@@ -946,46 +946,61 @@ Red, iç sorumluda geçişi yönetmek için görev oluşturur (tedarikçi deği�
 
 ## 14. Eğitim (M15)
 
-[Ekran görüntüsü: kişisel eğitim planı]
+Platform kurs **vermez** ve e-öğrenme ya da oltalama simülasyonu platformlarına bağlanmaz: eğitimi **yönetir**. Her tesis için ne yapılacağı planlanır, her oturum **kanıt dosyasıyla** kaydedilir ve personel kapsamı **yalnızca sayılarla** ölçülür. ISO 27001 A.6.3 ve md. 7.2, NIS2 md. 21.2.g, ACN PR.AT ve TISAX ISA 2.1.3'ün istediği budur: bir plan, uygulandığının kanıtı ve ulaşılan kapsam.
 
-### Kendi zorunlu kurslarınızı nasıl görebilirsiniz
+**Operasyonlar → Eğitim** bölümüne gidin ve üstten tesisi seçin. Sayfada dört sekme vardır: **Plan**, **Oturumlar**, **Hedef gruplar**, **Kurs kataloğu**.
 
-1. **Yönetişim → Eğitim → Planım** bölümüne gidin
-2. Rolünüz ve tesisiniz için zorunlu kursların listesini şunlarla birlikte bulursunuz:
-   - Kursun adı
-   - Durum: Tamamlanmamış / Devam Ediyor / Tamamlandı / Süresi Dolmuş
-   - Son tarih (veya zaten yapıldıysa tamamlanma tarihi)
-   - Tür: çevrimiçi (KnowBe4), yüz yüze, belgesel
+### Kim ne yapar
 
-### Tamamlama ve son tarihler
+- Grupları, planları ve oturumları tesisin Compliance Officer'ı ve Plant Manager'ı ya da Governance'ta tesis veya kuruluş için **CISO ataması** olan kişi **kaydeder**. Görev ataması yoktur: ilk kim ulaşırsa o kaydeder.
+- İç Denetçi ve Dış Denetçi de planı, oturumları ve kapsamı **görüntüler**: bunlar sayılar ve kanıt dosyalarıdır, kişisel veri değildir.
+- Diğer roller yalnızca **Kurs kataloğunu** görür.
 
-- Çevrimiçi kurslarda **Kursu Başlat**'a tıklayarak doğrudan KnowBe4'teki modülü açın
-- Tamamlamalar her gece otomatik olarak eşitlenir — KnowBe4'te bir kursu tamamladıysanız ve govrico'da henüz tamamlandı olarak görünmüyorsa ertesi güne kadar bekleyin veya Uyum Yetkilisi ile iletişime geçin
-- Süresi dolmuş kurs (tamamlandı ancak periyodik olarak yenilenmesi gerekiyor) kırmızı rozetle görünür ve yenileme görevi oluşturur
+### 1. Kurs kataloğu
 
-### Yetkinlik boşluğu analizi
+Her kurs için şunları belirtin:
 
-**Yönetişim → Eğitim → Boşluk analizi** bölümüne gidin. Sayfada şunlar gösterilir:
+- **Tür**: kurs, farkındalık kampanyası veya oltalama simülasyonu;
+- **Hedef kitle**: personel, kritik roller veya yönetim organı;
+- **Geçerlilik (ay)**: oturumun kaç ay sonra tekrarlanması gerektiği (ör. 12 = her yıl); boş = süresi dolmaz;
+- **Zorunlu**: personel için zorunlu kurslar kapsama dahil edilir;
+- **Kanıtlanan kontroller**: kontrolü koda göre arayın (ör. A.6.3). Kursun her oturumu bu kontrollerin kanıtı olur.
 
-- Her rol ve tesis için öngörülen yetkinlik gereksinimleri
-- Fiilen sertifikalanmış yetkinlikler (tamamlanan kurslar, yüklenen belgeler)
-- Vurgulanan boşluklar: gerekli ancak henüz tamamlanan hiçbir kursla karşılanmamış yetkinlikler
+Bir planda yer alan veya oturumu kaydedilmiş bir kurs silinemez: **arşivlenir**.
 
-Uyum Yetkilisi, eğitim oturumlarını planlamak ve öncelikli boşlukları kapatmak için bu görünümü kullanabilir.
+### 2. Hedef gruplar
 
-### Sonuçların görünürlüğü (gizlilik)
+Tesis için eğitilecek kişi gruplarını **sayılarıyla** girin (ör. "Üretim: 240", "Ofisler: 45"). Çalışan adı veya verisi girilmez. Sayı değiştiğinde güncelleyin: güncelleme tarihi otomatik ayarlanır. 6 aydan uzun süredir doğrulanmayan grup **yeniden doğrulanmalı** olarak işaretlenir, çünkü kapsam bu sayıyla hesaplanır.
 
-Bireysel sonuçlar — kurs tamamlamaları, puanlar ve özellikle **phishing simülasyonu sonuçları** (kimin tıkladığı) — çalışanların kişisel verileridir. Bu nedenle yalnızca **yönetişim rolleri** (Super Admin, Compliance Officer, Plant Manager) ve **Internal Auditor** tarafından görüntülenebilir; diğer operasyonel roller veya Dış Denetçi tarafından görülemez. Kurs kataloğu ise herkes tarafından görünür kalır.
+### 3. Eğitim planı
 
-### KnowBe4 eşitleme (yalnızca yönetici)
+1. **Plan** sekmesinde yılı seçin ve **Tesis planını oluştur**'a tıklayın (kuruluşu yöneten kişi, tüm tesisler için geçerli olan **kuruluş planını** da oluşturabilir).
+2. **Belge bağla**'ya tıklayın ve **Belgeler** modülünde yönetilen plan belgesini seçin: onay, belge iş akışını izler. Onaylı plan, ISO 27001 A.6.3'ün istediği belgedir.
+3. Her faaliyet için **Kalem ekle**'ye tıklayın: kurs, vade ve hedef gruplar.
 
-**Ayarlar → Entegrasyonlar → KnowBe4** bölümüne gidin:
+Her kalem durumunu (**Planlandı**, 30 gün içinde **Vadesi yakın**, **Gecikmiş**, **Yapıldı**), oturum sayısını ve ulaşılan kapsamı gösterir.
 
-1. KnowBe4 API anahtarını yapılandırın
-2. Tamamlamaların anlık eşitlemesini zorlamak için **Şimdi Eşitle**'ye tıklayın
-3. Olası hataları belirlemek için son eşitleme günlüğünü doğrulayın
+**Hatırlatıcılar.** Her sabah, oturumu olmayan ve 30 gün içinde vadesi dolacak ya da gecikmiş kalemler için tesisin **Compliance Officer'ına bir görev** açılır ve eğitimi takip edenlere bildirim gönderilir. Oturumu kaydettiğinizde görev kendiliğinden kapanır. Kalemlerin vadeleri **Activity Schedule** içinde de görünür.
 
-Otomatik eşitleme her gece 02:00'de gerçekleşir.
+### 4. Oturum kaydetme
+
+1. **Oturumlar** sekmesinde **Oturum kaydet**'e tıklayın.
+2. Kursu ve tarihi seçin. Plan kalemi otomatik tanınır; birden fazla varsa seçebilirsiniz.
+3. Katılan grupları seçin ve **eğitilen kişi** sayısını girin. Eğitilecek kişi sayısı grupların toplamından önerilir ve düzeltilebilir.
+   **Oltalama simülasyonu** için bunun yerine gönderilen e-posta, tıklama ve bildirim sayılarını girin.
+4. **Kanıt dosyasını** ekleyin (katılım listesi, e-öğrenme dışa aktarımı, kampanya raporu). Zorunludur: katılımcıların adları yalnızca dosyada bulunur, platform sayıları kaydeder.
+5. **Kaydet**'e tıklayın.
+
+Dosyadan, kursun geçerlilik süresi kadar geçerli bir **kanıt** oluşur ve tesiste **kursun kontrollerine otomatik bağlanır**. Onay mesajı kaç kontrolün bağlandığını gösterir ve tesiste uygulanmayanları (oluşturulmamış veya SoA dışı bırakılmış) listeler.
+
+Kanıt dosyası değiştirilemez: yanlışsa oturumu silip yeniden kaydedin. Kanıtı daha önce değerlendirilmiş kontrolleri destekleyen bir oturum silinemez (yalnızca bir superuser silebilir). **Kanıtsız geçmiş kayıt** satırları eski kişi bazlı verilerin taşınmasından gelir: yalnızca sayıları içerir.
+
+### Sonuçlar nerede görünür
+
+- **Reporting → KPI**, "Eğitim ve farkındalık" bölümü: kurs ve tesis bazında kapsam, plan ilerlemesi, geciken kalemler, son oltalama simülasyonları ve tekrarlanacak eğitimler.
+- **Güvenlik hedeflerinin** bağlanabildiği, otomatik hesaplanan **KPI'lar**: zorunlu eğitim kapsamı, plan ilerlemesi, geciken kalemler, oltalamada tıklama ve bildirim oranı.
+- **Operasyon Merkezi**: geciken plan kalemlerini işaret eder.
+- **Denetim paketi** (Audit Preparation): tesisin planı, kanıt referanslı oturumları, kapsamı ve gruplarıyla `07_training` klasörü.
 
 ---
 

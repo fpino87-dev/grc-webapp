@@ -946,46 +946,61 @@ The rejection generates a task for the internal contact to manage the transition
 
 ## 14. Training (M15)
 
-[Screenshot: personal training plan]
+The platform **does not deliver** courses and does not connect to e-learning or phishing-simulation platforms: it **governs** training. For each site you plan what to do, record every session with its **proof file** and measure staff coverage **in numbers only**. This is what ISO 27001 A.6.3 and cl. 7.2, NIS2 art. 21.2.g, ACN PR.AT and TISAX ISA 2.1.3 require: a plan, proof that it was carried out and the coverage achieved.
 
-### How to see your mandatory courses
+Go to **Operations → Training** and select the site at the top. The page has four tabs: **Plan**, **Sessions**, **Target groups**, **Course catalogue**.
 
-1. Go to **Governance → Training → My plan**
-2. You will find the list of mandatory courses for your role and plant, with:
-   - Course name
-   - Status: To be completed / In progress / Completed / Expired
-   - Expiry date (or completion date if already done)
-   - Type: online (KnowBe4), in-person, documentary
+### Who does what
 
-### Completion and deadlines
+- **Recording** groups, plans and sessions is done by the site's Compliance Officer and Plant Manager, or by whoever holds the **CISO appointment** in Governance for the site or for the organisation. There is no assignment: whoever gets there first records it.
+- The Internal Auditor and the External Auditor also **read** the plan, sessions and coverage: they are numbers and proof files, not personal data.
+- Other roles only see the **Course catalogue**.
 
-- Click **Start course** on online courses to open the module directly on KnowBe4
-- Completions are synchronised automatically every night — if you have completed a course on KnowBe4 and it does not yet appear as completed in the govrico, wait until the next day or contact the Compliance Officer
-- An expired course (completed but requiring periodic renewal) appears with a red badge and generates a renewal task
+### 1. Course catalogue
 
-### Skills gap analysis
+For each course set:
 
-Go to **Governance → Training → Gap analysis**. The page shows:
+- **Type**: course, awareness campaign or phishing simulation;
+- **Audience**: staff, critical roles or management body;
+- **Validity (months)**: after how many months the session must be repeated (e.g. 12 = every year); empty = does not expire;
+- **Mandatory**: mandatory staff courses count towards coverage;
+- **Controls demonstrated**: search the control by code (e.g. A.6.3). Every session of the course will become evidence for these controls.
 
-- The competency requirements for each role and plant
-- The competencies actually certified (completed courses, uploaded certificates)
-- Highlighted gaps: required competencies not yet covered by any completed course
+A course already in a plan or with recorded sessions cannot be deleted: **archive** it instead.
 
-The Compliance Officer can use this view to plan training sessions and address priority gaps.
+### 2. Target groups
 
-### Results visibility (privacy)
+For the site, enter the groups of people to be trained with their **number** (e.g. "Production: 240", "Offices: 45"). No names or employee data are entered. When the number changes, update it: the update date is set automatically. A group not rechecked for over 6 months is flagged **to be rechecked**, because coverage is computed on that number.
 
-Individual results — course completions, scores and especially **phishing simulation outcomes** (who clicked) — are employees' personal data. For this reason they can be viewed **only by governance roles** (Super Admin, Compliance Officer, Plant Manager) and by the **Internal Auditor**; they are not visible to other operational roles or to the External Auditor. The course catalogue, on the other hand, remains visible to everyone.
+### 3. Training plan
 
-### KnowBe4 synchronisation (admin only)
+1. In the **Plan** tab choose the year and click **Create the site plan** (whoever manages the organisation can also create the **organisation plan**, which applies to every site).
+2. Click **Link document** and choose the plan document managed in **Documents**: approval follows the document workflow. The approved plan is the document required by ISO 27001 A.6.3.
+3. Click **Add item** for each activity: course, due date and target groups.
 
-Go to **Settings → Integrations → KnowBe4**:
+Each item shows its status (**Planned**, **Due soon** within 30 days, **Overdue**, **Done**), the number of sessions and the coverage achieved.
 
-1. Configure the KnowBe4 API key
-2. Click **Sync now** to force immediate synchronisation of completions
-3. Check the last synchronisation log to identify any errors
+**Reminders.** Every morning, for items with no session that are due within 30 days or already overdue, a **task is opened for the site's Compliance Officer** and a notification is sent to those who follow training. The task closes on its own when you record the session. Item due dates also appear in the **Activity Schedule**.
 
-Automatic synchronisation occurs every night at 02:00.
+### 4. Recording a session
+
+1. In the **Sessions** tab click **Record session**.
+2. Choose the course and the date. The plan item is recognised automatically; if there is more than one you can choose it.
+3. Select the groups involved and enter the **people trained**. The people to train are proposed from the total of the groups and can be corrected.
+   For a **phishing simulation** enter the e-mails sent, clicks and reports instead.
+4. Attach the **proof file** (attendance sheet, e-learning export, campaign report). It is mandatory: participants' names are only in the file, the platform stores the numbers.
+5. Click **Record**.
+
+The file becomes **evidence** expiring after the course's validity, **automatically linked to the course's controls** at the site. The confirmation message shows how many controls were linked and lists those not applicable to the site (not instantiated or excluded from the SoA).
+
+The proof file cannot be replaced: if it is wrong, delete the session and record it again. A session whose proof supports controls already assessed cannot be deleted (only a superuser can). Rows marked **historical, no proof** come from the migration of the old per-person data: they only carry counts.
+
+### Where to see the results
+
+- **Reporting → KPI**, "Training and awareness" section: coverage by course and site, plan progress, overdue items, latest phishing simulations and training to repeat.
+- **KPIs** computed automatically, which security objectives can link to: mandatory training coverage, plan progress, overdue items, phishing click and report rates.
+- **Operations Center**: flags overdue plan items.
+- **Audit pack** (Audit Preparation): `07_training` folder with the site's plan, sessions with the evidence reference, coverage and groups.
 
 ---
 

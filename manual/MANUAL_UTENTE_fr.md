@@ -946,46 +946,61 @@ Le refus génère une tâche au référent interne pour gérer la transition (re
 
 ## 14. Formation (M15)
 
-[Écran : plan de formation personnel]
+La plateforme **ne dispense pas** les cours et ne se connecte à aucune plateforme d'e-learning ou de simulation de phishing : elle **pilote** la formation. Pour chaque site, on planifie ce qu'il faut faire, on enregistre chaque session avec son **fichier de preuve** et on mesure la couverture du personnel **uniquement en chiffres**. C'est ce qu'exigent ISO 27001 A.6.3 et cl. 7.2, NIS2 art. 21.2.g, ACN PR.AT et TISAX ISA 2.1.3 : un plan, la preuve de sa réalisation et la couverture atteinte.
 
-### Comment voir ses cours obligatoires
+Allez dans **Opérations → Formation** et sélectionnez le site en haut. La page comporte quatre onglets : **Plan**, **Sessions**, **Groupes cibles**, **Catalogue des cours**.
 
-1. Allez sur **Gouvernance → Formation → Mon plan**
-2. Vous trouvez la liste des cours obligatoires pour votre rôle et plant, avec :
-   - Nom du cours
-   - Statut : À compléter / En cours / Terminé / Expiré
-   - Date d'échéance (ou date de completion si déjà fait)
-   - Type : en ligne (KnowBe4), présentiel, documentaire
+### Qui fait quoi
 
-### Completion et échéances
+- **Enregistrent** les groupes, les plans et les sessions le Compliance Officer et le Plant Manager du site, ou la personne ayant la **nomination de CISO** dans Governance pour le site ou pour l'organisation. Il n'y a pas d'affectation : le premier disponible enregistre.
+- L'Auditeur Interne et l'Auditeur Externe **consultent** aussi le plan, les sessions et la couverture : ce sont des chiffres et des fichiers de preuve, pas des données personnelles.
+- Les autres rôles ne voient que le **Catalogue des cours**.
 
-- Cliquez sur **Démarrer le cours** pour les cours en ligne pour ouvrir directement le module sur KnowBe4
-- Les completions sont synchronisées automatiquement chaque nuit — si vous avez terminé un cours sur KnowBe4 et qu'il n'apparaît pas encore comme terminé dans la govrico, attendez le lendemain ou contactez le Compliance Officer
-- Un cours expiré (terminé mais à refaire périodiquement) apparaît avec un badge rouge et génère une tâche de renouvellement
+### 1. Catalogue des cours
 
-### Analyse des écarts de compétences
+Pour chaque cours, indiquez :
 
-Allez sur **Gouvernance → Formation → Analyse des écarts**. La page affiche :
+- **Type** : cours, campagne de sensibilisation ou simulation de phishing ;
+- **Public** : personnel, rôles critiques ou organe de direction ;
+- **Validité (mois)** : au bout de combien de mois la session doit être répétée (ex. 12 = chaque année) ; vide = n'expire pas ;
+- **Obligatoire** : les cours obligatoires pour le personnel entrent dans la couverture ;
+- **Contrôles démontrés** : recherchez le contrôle par code (ex. A.6.3). Chaque session du cours deviendra une preuve de ces contrôles.
 
-- Les exigences de compétences prévues pour chaque rôle et plant
-- Les compétences effectivement certifiées (cours terminés, attestations chargées)
-- Les écarts mis en évidence : compétences requises mais pas encore couvertes par un cours terminé
+Un cours déjà présent dans un plan ou ayant des sessions ne peut pas être supprimé : on l'**archive**.
 
-Le Compliance Officer peut utiliser cette vue pour planifier les sessions de formation et combler les écarts prioritaires.
+### 2. Groupes cibles
 
-### Visibilité des résultats (confidentialité)
+Pour le site, saisissez les groupes de personnes à former avec leur **nombre** (ex. « Production : 240 », « Bureaux : 45 »). Aucun nom ni donnée des salariés n'est saisi. Quand le nombre change, mettez-le à jour : la date de mise à jour est renseignée automatiquement. Un groupe non revérifié depuis plus de 6 mois est signalé **à revérifier**, car la couverture est calculée sur ce nombre.
 
-Les résultats individuels — achèvements de cours, scores et surtout **résultats des simulations de phishing** (qui a cliqué) — sont des données personnelles des employés. Pour cette raison, ils ne sont consultables **que par les rôles de gouvernance** (Super Admin, Compliance Officer, Plant Manager) et par l'**Internal Auditor** ; ils ne sont pas visibles par les autres rôles opérationnels ni par l'Auditeur Externe. Le catalogue des cours, en revanche, reste visible par tous.
+### 3. Plan de formation
 
-### Synchronisation KnowBe4 (admin uniquement)
+1. Dans l'onglet **Plan**, choisissez l'année et cliquez sur **Créer le plan du site** (qui gère l'organisation peut aussi créer le **plan de l'organisation**, valable pour tous les sites).
+2. Cliquez sur **Lier un document** et choisissez le document du plan géré dans **Documents** : l'approbation suit le circuit documentaire. Le plan approuvé est le document exigé par ISO 27001 A.6.3.
+3. Cliquez sur **Ajouter un élément** pour chaque activité : cours, échéance et groupes cibles.
 
-Allez sur **Paramètres → Intégrations → KnowBe4** :
+Chaque élément affiche son statut (**Planifié**, **Échéance proche** sous 30 jours, **En retard**, **Réalisé**), le nombre de sessions et la couverture atteinte.
 
-1. Configurez la clé API KnowBe4
-2. Cliquez sur **Synchroniser maintenant** pour forcer la synchronisation immédiate des completions
-3. Vérifiez le journal de la dernière synchronisation pour identifier d'éventuelles erreurs
+**Rappels.** Chaque matin, pour les éléments sans session arrivant à échéance sous 30 jours ou déjà en retard, une **tâche est ouverte pour le Compliance Officer** du site et une notification est envoyée à ceux qui suivent la formation. La tâche se ferme d'elle-même quand vous enregistrez la session. Les échéances des éléments apparaissent aussi dans **Activity Schedule**.
 
-La synchronisation automatique a lieu chaque nuit à 02h00.
+### 4. Enregistrer une session
+
+1. Dans l'onglet **Sessions**, cliquez sur **Enregistrer une session**.
+2. Choisissez le cours et la date. L'élément du plan est reconnu automatiquement ; s'il y en a plusieurs, vous pouvez le choisir.
+3. Sélectionnez les groupes concernés et saisissez les **personnes formées**. Les personnes à former sont proposées à partir du total des groupes et peuvent être corrigées.
+   Pour une **simulation de phishing**, saisissez à la place les e-mails envoyés, les clics et les signalements.
+4. Joignez le **fichier de preuve** (feuille de présence, export e-learning, rapport de campagne). Il est obligatoire : les noms des participants ne figurent que dans le fichier, la plateforme enregistre les chiffres.
+5. Cliquez sur **Enregistrer**.
+
+Le fichier devient une **preuve** qui expire selon la validité du cours, **liée automatiquement aux contrôles du cours** sur le site. Le message de confirmation indique combien de contrôles ont été liés et liste ceux qui ne s'appliquent pas au site (non instanciés ou exclus de la SoA).
+
+Le fichier de preuve ne se remplace pas : s'il est erroné, supprimez la session et enregistrez-la de nouveau. Une session dont la preuve étaye des contrôles déjà évalués ne peut pas être supprimée (seul un superuser le peut). Les lignes **historique sans preuve** proviennent de la migration des anciennes données individuelles : elles ne portent que des chiffres.
+
+### Où voir les résultats
+
+- **Reporting → KPI**, section « Formation et sensibilisation » : couverture par cours et par site, avancement du plan, éléments en retard, dernières simulations de phishing et formations à renouveler.
+- **KPI** calculés automatiquement, que les **objectifs de sécurité** peuvent suivre : couverture de la formation obligatoire, avancement du plan, éléments en retard, taux de clic et de signalement du phishing.
+- **Centre Opérationnel** : signale les éléments du plan en retard.
+- **Pack d'audit** (Audit Preparation) : dossier `07_training` avec le plan, les sessions et la référence à la preuve, la couverture et les groupes du site.
 
 ---
 

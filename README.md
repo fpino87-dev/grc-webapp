@@ -47,7 +47,7 @@ La piattaforma GRC consolida in un'unica soluzione la gestione di tutti i framew
 - Workflow documentale ISO 27001 cl.7.5 con approvazione a 3 livelli e versioning SHA-256
 - Gestione incidenti NIS2 con timer countdown 24h/72h/30gg e template ACN precompilato
 - PDCA controller con trigger automatici e storico maturità per auditor
-- Integrazione KnowBe4 bidirezionale per cybersecurity awareness
+- Formazione e awareness basate sulle evidenze: piano, erogazioni con file di prova collegate ai controlli, copertura del personale per conteggi (nessuna integrazione e-learning)
 - AI Engine opzionale (M20) con human-in-the-loop e sanitization layer GDPR-safe
 - Interfaccia multilingua IT · EN · FR · PL · TR
 
@@ -72,7 +72,7 @@ La piattaforma GRC consolida in un'unica soluzione la gestione di tutti i framew
 | M12 | Lesson Learning & KB | Knowledge base full-text search, categorizzazione, collegamento a PDCA | Implementato |
 | M13 | Revisione di Direzione | Verbali, presenze, action items, collegamento a KPI M18 | Implementato |
 | M14 | Supplier Management | Anagrafica fornitori, valutazione VDA ISA 5.x, supply chain NIS2 | Implementato |
-| M15 | Formazione & Awareness | Piani formativi, integrazione KnowBe4, tracking completamenti, phishing | Implementato |
+| M15 | Formazione & Awareness | Piano formativo, erogazioni con prova (evidenze sui controlli), gruppi destinatari, copertura, phishing aggregato | Implementato |
 | M16 | Business Continuity | Piani BCP, test DR, scadenza piani, collegamento a BIA M05 | Implementato |
 | M17 | Audit Preparation | Preparazione audit TISAX/ISO/NIS2, finding, evidence pack, annulla con soft delete | Implementato |
 | M18 | Reporting & Dashboard | KPI snapshot settimanale, export report, dashboard cross-modulo | Implementato |
@@ -168,7 +168,7 @@ Browser → Nginx Proxy Manager → Frontend React/Vite (porta 3001)
                                        → MinIO / S3 (documenti ed evidenze)
 
 Integrazioni esterne:
-KnowBe4 API · SMTP aziendale · SSO/SAML · SIEM webhook · ACN email
+SMTP aziendale · SSO/SAML · SIEM webhook · ACN email
 AI Engine M20: Ollama/vLLM (locale) + Azure OpenAI/Anthropic (cloud, solo dati anonimi)
 ```
 
@@ -294,7 +294,7 @@ Il repository include `.env.example` (sviluppo) e `.env.prod.example` (produzion
 | `REDIS_URL` | Si | `redis://redis:6379/0` | URL connessione Redis |
 | `FRONTEND_URL` | Si | `http://localhost:3001` | URL frontend (usato per CORS e link nelle email) |
 
-Per l'elenco completo di tutte le variabili (storage, email, SSO, KnowBe4, AI Engine) vedere [INFRASTRUCTURE.md](./INFRASTRUCTURE.md#variabili-dambiente-obbligatorie).
+Per l'elenco completo di tutte le variabili (storage, email, SSO, AI Engine) vedere [INFRASTRUCTURE.md](./INFRASTRUCTURE.md#variabili-dambiente-obbligatorie).
 
 ---
 
@@ -339,7 +339,6 @@ Per l'elenco completo di tutte le variabili (storage, email, SSO, KnowBe4, AI En
 
 | Sistema | Modulo | Tipo | Note |
 |---------|--------|------|------|
-| KnowBe4 | M15 | API REST bidirezionale | Provisioning utenti + import completamenti + phishing |
 | Azure OpenAI / Anthropic | M20 | API REST — opt-in | Solo prompt sanitizzati, nessun PII |
 | Ollama / vLLM | M20 | HTTP locale | Modello on-prem per classificazioni |
 | SMTP aziendale | M19 | SMTP | Notifiche e digest email, credenziali cifrate Fernet |
