@@ -106,18 +106,61 @@ def audit_findings_open_rate(plant, week_start) -> dict:
 
 
 # ── M15 Training ───────────────────────────────────────────────────────────---
+# Formazione a evidenze: i numeri vengono dalle erogazioni registrate con prova
+# e dai gruppi destinatari (conteggi), non dalle iscrizioni per persona.
 def training_completion_rate(plant, week_start) -> dict:
-    """% di iscrizioni a corsi obbligatori attivi in stato 'completato'."""
-    from apps.training.models import TrainingEnrollment
+    """% di personale coperto dalla formazione obbligatoria del piano
+    dell'anno (erogazioni valide / headcount dei gruppi destinatari)."""
+    from apps.training.services import training_coverage
 
-    qs = TrainingEnrollment.objects.filter(course__mandatory=True, course__status="attivo")
-    if plant is not None:
-        qs = qs.filter(course__plants=plant)
-    total = qs.count()
-    if total == 0:
-        return _no_data("Nessuna iscrizione a formazione obbligatoria.")
-    completed = qs.filter(status="completato").count()
-    return _result(_rate(completed, total), total, f"{completed}/{total} completati")
+    cov = training_coverage(plant)
+    if not cov["target"]:
+        return _no_data("Nessun corso obbligatorio a piano con gruppi destinatari.")
+    return _result(cov["pct"], cov["target"],
+                   f"{cov['covered']}/{cov['target']} persone formate")
+
+
+def training_plan_progress(plant, week_start) -> dict:
+    """% di voci del piano dell'anno, già scadute, con un'erogazione registrata."""
+    from apps.training.services import plan_progress
+
+    prog = plan_progress(plant)
+    if not prog["due"]:
+        return _no_data("Nessuna voce del piano ancora scaduta.")
+    return _result(prog["pct"], prog["due"], f"{prog['done']}/{prog['due']} voci svolte")
+
+
+def training_plan_overdue(plant, week_start) -> dict:
+    """N. di voci del piano scadute senza erogazione (stato puntuale)."""
+    from apps.training.services import plan_progress
+
+    n = plan_progress(plant)["overdue"]
+    return _result(float(n), n, f"{n} voci del piano in ritardo")
+
+
+def _latest_phishing(plant):
+    from apps.training.services import latest_phishing
+
+    return latest_phishing(plant)
+
+
+_NO_PHISHING = "Nessuna simulazione di phishing negli ultimi 12 mesi."
+
+
+def phishing_click_rate(plant, week_start) -> dict:
+    """% di clic sull'ultima simulazione di phishing di ogni sito (12 mesi)."""
+    ph = _latest_phishing(plant)
+    if not ph["sent"]:
+        return _no_data(_NO_PHISHING)
+    return _result(ph["click_pct"], ph["sent"], f"{ph['clicked']}/{ph['sent']} clic")
+
+
+def phishing_report_rate(plant, week_start) -> dict:
+    """% di segnalazioni sull'ultima simulazione di phishing di ogni sito (12 mesi)."""
+    ph = _latest_phishing(plant)
+    if not ph["sent"]:
+        return _no_data(_NO_PHISHING)
+    return _result(ph["report_pct"], ph["sent"], f"{ph['reported']}/{ph['sent']} segnalazioni")
 
 
 # ── M04 Asset IT ───────────────────────────────────────────────────────────---
@@ -473,6 +516,10 @@ INTERNAL_CONNECTORS = {
     "open_pdca_over_90days": open_pdca_over_90days,
     "audit_findings_open_rate": audit_findings_open_rate,
     "training_completion_rate": training_completion_rate,
+    "training_plan_progress": training_plan_progress,
+    "training_plan_overdue": training_plan_overdue,
+    "phishing_click_rate": phishing_click_rate,
+    "phishing_report_rate": phishing_report_rate,
     "systems_eol_count": systems_eol_count,
     "incident_mttr_hours": incident_mttr_hours,
     "incident_recurrence_rate": incident_recurrence_rate,

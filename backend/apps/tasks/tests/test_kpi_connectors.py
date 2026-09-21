@@ -114,22 +114,47 @@ def test_audit_findings_open_rate(plant, framework):
 
 # ── M15 Training ──────────────────────────────────────────────────────────────
 @pytest.mark.django_db
-def test_training_completion_rate(plant):
-    from django.contrib.auth import get_user_model
+def test_training_connectors(plant):
+    """Formazione a evidenze: i connettori leggono piano, gruppi ed erogazioni
+    (il dettaglio del calcolo è coperto in apps/training/tests)."""
+    from apps.tasks.kpi_connectors import (
+        phishing_click_rate,
+        phishing_report_rate,
+        training_completion_rate,
+        training_plan_overdue,
+        training_plan_progress,
+    )
+    from apps.training.models import (
+        TrainingAudience, TrainingCourse, TrainingPlan, TrainingPlanItem, TrainingSession,
+    )
 
-    from apps.tasks.kpi_connectors import training_completion_rate
-    from apps.training.models import TrainingCourse, TrainingEnrollment
-    User = get_user_model()
+    today = timezone.localdate()
+    week = _monday()
+    assert training_completion_rate(plant, week)["value"] is None
+    assert phishing_click_rate(plant, week)["value"] is None
 
-    course = TrainingCourse.objects.create(title="Awareness", mandatory=True, status="attivo")
-    course.plants.add(plant)
-    for i, st in enumerate(["completato", "completato", "in_corso", "assegnato"]):
-        u = User.objects.create_user(username=f"tu{i}", email=f"tu{i}@t.com", password="x")
-        TrainingEnrollment.objects.create(course=course, user=u, status=st)
+    course = TrainingCourse.objects.create(title="Awareness", mandatory=True, validity_months=12)
+    aud = TrainingAudience.objects.create(plant=plant, name="Produzione", headcount=200,
+                                          headcount_updated_at=today)
+    plan = TrainingPlan.objects.create(plant=plant, year=today.year)
+    item = TrainingPlanItem.objects.create(plan=plan, course=course, due_date=today)
+    item.audiences.add(aud)
+    TrainingPlanItem.objects.create(
+        plan=plan, course=course, due_date=today - datetime.timedelta(days=1),
+    )
+    TrainingSession.objects.create(course=course, plant=plant, plan_item=item, held_on=today,
+                                   target_count=200, trained_count=150)
+    phish = TrainingCourse.objects.create(title="Phishing", kind="phishing")
+    TrainingSession.objects.create(course=phish, plant=plant, held_on=today,
+                                   sent_count=100, clicked_count=8, reported_count=45)
 
-    res = training_completion_rate(plant, _monday())
-    assert res["run_count"] == 4
-    assert res["value"] == 50.0
+    res = training_completion_rate(plant, week)
+    assert (res["value"], res["run_count"]) == (75.0, 200)
+    # Una voce scaduta ieri, senza erogazione: 0/1 svolte e 1 in ritardo.
+    assert training_plan_progress(plant, week)["value"] == 0.0
+    assert training_plan_overdue(plant, week)["value"] == 1.0
+    assert phishing_click_rate(plant, week)["value"] == 8.0
+    assert phishing_report_rate(plant, week)["value"] == 45.0
 
 
 # ── M04 Asset EOL ─────────────────────────────────────────────────────────────

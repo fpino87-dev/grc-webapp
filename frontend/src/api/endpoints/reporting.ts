@@ -197,22 +197,7 @@ export interface KpiOverviewData {
       all: MttrEntry;
     };
   };
-  training: {
-    total_users: number;
-    mandatory_courses_count: number;
-    users_all_mandatory_completed: number;
-    pct_all_mandatory: number;
-    courses: {
-      id: string;
-      title: string;
-      source: string;
-      deadline: string | null;
-      enrolled: number;
-      completed: number;
-      pct_completed: number;
-      not_enrolled: number;
-    }[];
-  };
+  training: TrainingKpi;
   supplier_nda: {
     covered: number;
     expiring_soon: number;
@@ -220,6 +205,59 @@ export interface KpiOverviewData {
     without_nda: number;
     suppliers: SupplierNdaEntry[];
   };
+}
+
+export interface TrainingKpi {
+  coverage: {
+    year: number;
+    target: number;
+    covered: number;
+    pct: number | null;
+    rows: {
+      course_id: string;
+      course_title: string;
+      plant_id: string;
+      plant_code: string;
+      target: number;
+      trained: number;
+      pct: number | null;
+    }[];
+  };
+  plan: {
+    year: number;
+    items: number;
+    due: number;
+    done: number;
+    pct: number | null;
+    overdue: number;
+    due_soon: number;
+  };
+  phishing: {
+    sent: number;
+    clicked: number;
+    reported: number;
+    click_pct: number | null;
+    report_pct: number | null;
+    campaigns: {
+      session_id: string;
+      course_title: string;
+      plant_code: string | null;
+      held_on: string;
+      sent: number;
+      clicked: number;
+      reported: number;
+      legacy: boolean;
+    }[];
+  };
+  expiring_evidence: {
+    session_id: string;
+    course_title: string;
+    plant_code: string | null;
+    held_on: string;
+    valid_until: string;
+    expired: boolean;
+  }[];
+  stale_audiences: number;
 }
 
 export interface AccessMatrixRow {

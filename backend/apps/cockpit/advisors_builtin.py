@@ -289,9 +289,9 @@ def vacant_roles_advisor(context=None):
 
 @register_advisor
 def training_overdue_advisor(context=None):
-    """Formazione obbligatoria scaduta non completata (solo conteggio — regola #11)."""
-    from apps.training.services import get_overdue_enrollments
-    count = get_overdue_enrollments().count()
+    """Voci del piano formativo scadute senza erogazione (solo conteggio — regola #11)."""
+    from apps.training.services import plan_progress
+    count = plan_progress()["overdue"]
     if count <= 0:
         return []
     return [Insight(

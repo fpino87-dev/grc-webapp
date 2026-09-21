@@ -10,6 +10,7 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from core.audit import log_action
 
 from .models import (
+    TrainingAudience,
     TrainingEnrollment,
     TrainingPlanItem,
     TrainingSession,
@@ -19,6 +20,11 @@ from .models import (
 # nomina di CISO in Governance. Nessuna assegnazione: registra chi arriva prima.
 MANAGER_ROLES = frozenset({"super_admin", "compliance_officer", "plant_manager"})
 DUE_SOON_DAYS = 30
+# Indicatori: finestra delle campagne di phishing considerate, anticipo con cui
+# segnalare una prova in scadenza, età oltre cui un headcount va riverificato.
+PHISHING_WINDOW_DAYS = 365
+EVIDENCE_EXPIRING_DAYS = 60
+HEADCOUNT_STALE_MONTHS = 6
 # Promemoria delle voci del piano: task M08 riconoscibili per la deduplica.
 REMINDER_SOURCE_MODULE = "M15"
 OPEN_TASK_STATUSES = ("aperto", "in_corso", "scaduto")
@@ -31,16 +37,6 @@ def get_completion_rate(course_id) -> float:
         return 0.0
     completed = TrainingEnrollment.objects.filter(course_id=course_id, status="completato").count()
     return round((completed / total) * 100, 2)
-
-
-def get_overdue_enrollments():
-    """Return enrollments where the course deadline has passed and status is not completed."""
-    today = timezone.localdate()
-    return TrainingEnrollment.objects.filter(
-        course__deadline__lt=today,
-    ).exclude(
-        status__in=["completato", "scaduto"],
-    ).select_related("course", "user")
 
 
 # ── Permessi di gestione ────────────────────────────────────────────────────
@@ -266,6 +262,194 @@ def plan_status(plan, today=None) -> dict:
             "coverage_pct": round(min(trained, target) / target * 100, 1) if target else None,
         })
     return {"plan_id": str(plan.pk), "year": plan.year, "counts": counts, "items": rows}
+
+
+# ── Indicatori (KPI, Reporting, Cockpit) ───────────────────────────────────
+# Solo conteggi per corso, sito e gruppo: nessun dato personale (regola #11).
+
+def _items_in_scope(plant):
+    """Voci dei piani del sito più quelle del piano di organizzazione, che vale
+    per ogni sito (`plant=None` = tutti i piani)."""
+    qs = TrainingPlanItem.objects.filter(plan__deleted_at__isnull=True)
+    if plant is not None:
+        qs = qs.filter(Q(plan__plant=plant) | Q(plan__plant__isnull=True))
+    return qs
+
+
+def session_valid_on(session, day) -> bool:
+    """Un'erogazione vale fino a `held_on + validity_months` del corso."""
+    months = session.course.validity_months
+    return months is None or session.held_on + relativedelta(months=months) >= day
+
+
+def training_coverage(plant=None, today=None) -> dict:
+    """Copertura della formazione obbligatoria del personale generale.
+
+    Per ogni corso obbligatorio del piano dell'anno e per ogni sito: persone da
+    formare = somma degli headcount dei gruppi destinatari delle sue voci;
+    formate = persone formate nelle erogazioni ancora valide del corso su quel
+    sito, fino al massimo delle persone da formare. Le voci senza gruppi non
+    hanno un denominatore e restano fuori; le erogazioni storiche migrate
+    (`legacy`) pure, perché contavano gli utenti della piattaforma e non il
+    personale.
+    """
+    today = today or timezone.localdate()
+    items = (
+        _items_in_scope(plant)
+        .filter(
+            plan__year=today.year, course__status="attivo", course__mandatory=True,
+            course__audience_kind="generale",
+        )
+        .exclude(course__kind="phishing")
+        .select_related("course")
+        .prefetch_related("audiences__plant")
+    )
+    targets, courses, plants = {}, {}, {}
+    for item in items:
+        courses[item.course_id] = item.course
+        for aud in item.audiences.all():
+            if plant is not None and aud.plant_id != plant.pk:
+                continue
+            plants[aud.plant_id] = aud.plant
+            targets.setdefault((item.course_id, aud.plant_id), {})[aud.pk] = aud.headcount
+
+    trained = {}
+    if targets:
+        sessions = TrainingSession.objects.filter(
+            course_id__in=list(courses), plant_id__in=list(plants),
+            legacy=False, held_on__lte=today,
+        ).select_related("course")
+        for s in sessions:
+            if session_valid_on(s, today):
+                key = (s.course_id, s.plant_id)
+                trained[key] = trained.get(key, 0) + (s.trained_count or 0)
+
+    rows, total_target, total_covered = [], 0, 0
+    for (course_id, plant_id), audiences in targets.items():
+        target = sum(audiences.values())
+        done = trained.get((course_id, plant_id), 0)
+        covered = min(done, target)
+        total_target += target
+        total_covered += covered
+        rows.append({
+            "course_id": str(course_id),
+            "course_title": courses[course_id].title,
+            "plant_id": str(plant_id),
+            "plant_code": plants[plant_id].code,
+            "target": target,
+            "trained": done,
+            "pct": round(covered / target * 100, 1) if target else None,
+        })
+    rows.sort(key=lambda r: (r["pct"] if r["pct"] is not None else 101, r["course_title"]))
+    return {
+        "year": today.year,
+        "target": total_target,
+        "covered": total_covered,
+        "pct": round(total_covered / total_target * 100, 1) if total_target else None,
+        "rows": rows,
+    }
+
+
+def plan_progress(plant=None, today=None) -> dict:
+    """Avanzamento del piano dell'anno: voci già scadute con almeno
+    un'erogazione su voci già scadute; più le voci in ritardo di qualunque
+    anno e quelle in scadenza entro DUE_SOON_DAYS. Come nel resto del modulo,
+    una voce del piano di organizzazione è fatta quando ha un'erogazione."""
+    today = today or timezone.localdate()
+    items = _items_in_scope(plant).filter(course__status="attivo").annotate(
+        has_sessions=Exists(TrainingSession.objects.filter(plan_item=OuterRef("pk"))),
+    )
+    due = items.filter(plan__year=today.year, due_date__lt=today)
+    due_n = due.count()
+    done_n = due.filter(has_sessions=True).count()
+    return {
+        "year": today.year,
+        "items": items.filter(plan__year=today.year).count(),
+        "due": due_n,
+        "done": done_n,
+        "pct": round(done_n / due_n * 100, 1) if due_n else None,
+        "overdue": items.filter(has_sessions=False, due_date__lt=today).count(),
+        "due_soon": items.filter(
+            has_sessions=False, due_date__gte=today,
+            due_date__lte=today + timedelta(days=DUE_SOON_DAYS),
+        ).count(),
+    }
+
+
+def latest_phishing(plant=None, today=None) -> dict:
+    """Ultima campagna di phishing di ogni sito negli ultimi
+    PHISHING_WINDOW_DAYS giorni, con i tassi di clic e di segnalazione sul
+    totale delle e-mail inviate. Le campagne storiche migrate valgono: i loro
+    conteggi vengono dagli esiti reali."""
+    today = today or timezone.localdate()
+    qs = TrainingSession.objects.filter(
+        course__kind="phishing", sent_count__gt=0,
+        held_on__gte=today - timedelta(days=PHISHING_WINDOW_DAYS), held_on__lte=today,
+    ).select_related("course", "plant").order_by("-held_on", "-created_at")
+    if plant is not None:
+        qs = qs.filter(plant=plant)
+    latest = {}
+    for s in qs:
+        latest.setdefault(s.plant_id, s)
+    campaigns = sorted(latest.values(), key=lambda s: s.held_on, reverse=True)
+    sent = sum(s.sent_count for s in campaigns)
+    clicked = sum(s.clicked_count or 0 for s in campaigns)
+    reported = sum(s.reported_count or 0 for s in campaigns)
+    return {
+        "sent": sent,
+        "clicked": clicked,
+        "reported": reported,
+        "click_pct": round(clicked / sent * 100, 1) if sent else None,
+        "report_pct": round(reported / sent * 100, 1) if sent else None,
+        "campaigns": [{
+            "session_id": str(s.pk),
+            "course_title": s.course.title,
+            "plant_code": s.plant.code if s.plant_id else None,
+            "held_on": s.held_on,
+            "sent": s.sent_count,
+            "clicked": s.clicked_count or 0,
+            "reported": s.reported_count or 0,
+            "legacy": s.legacy,
+        } for s in campaigns],
+    }
+
+
+def expiring_training_evidence(plant=None, today=None) -> list:
+    """Per ogni corso e sito, l'erogazione più recente la cui prova è già
+    scaduta o scade entro EVIDENCE_EXPIRING_DAYS: va ripetuta. Un'erogazione
+    più vecchia già sostituita da una nuova non viene segnalata."""
+    today = today or timezone.localdate()
+    qs = TrainingSession.objects.filter(
+        legacy=False, evidence__isnull=False, evidence__deleted_at__isnull=True,
+        course__status="attivo",
+    ).select_related("course", "plant", "evidence").order_by("-held_on", "-created_at")
+    if plant is not None:
+        qs = qs.filter(plant=plant)
+    latest = {}
+    for s in qs:
+        latest.setdefault((s.course_id, s.plant_id), s)
+    limit = today + timedelta(days=EVIDENCE_EXPIRING_DAYS)
+    rows = [{
+        "session_id": str(s.pk),
+        "course_title": s.course.title,
+        "plant_code": s.plant.code if s.plant_id else None,
+        "held_on": s.held_on,
+        "valid_until": s.evidence.valid_until,
+        "expired": s.evidence.valid_until < today,
+    } for s in latest.values() if s.evidence.valid_until and s.evidence.valid_until <= limit]
+    return sorted(rows, key=lambda r: r["valid_until"])
+
+
+def stale_audiences_count(plant=None, today=None) -> int:
+    """Gruppi il cui headcount non viene riverificato da più di
+    HEADCOUNT_STALE_MONTHS mesi: la copertura si calcola su numeri vecchi."""
+    today = today or timezone.localdate()
+    qs = TrainingAudience.objects.filter(
+        headcount_updated_at__lt=today - relativedelta(months=HEADCOUNT_STALE_MONTHS),
+    )
+    if plant is not None:
+        qs = qs.filter(plant=plant)
+    return qs.count()
 
 
 # ── Promemoria delle voci del piano ────────────────────────────────────────

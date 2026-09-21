@@ -252,12 +252,12 @@ class TestNewAdvisors:
     def test_training_overdue(self):
         from datetime import timedelta
         from django.utils import timezone
-        from django.contrib.auth import get_user_model
-        from apps.training.models import TrainingCourse, TrainingEnrollment
+        from apps.training.models import TrainingCourse, TrainingPlan, TrainingPlanItem
         from apps.cockpit.advisors_builtin import training_overdue_advisor
-        u = get_user_model().objects.create_user(username="learner", password="p")
-        course = TrainingCourse.objects.create(title="Sec Awareness", deadline=timezone.localdate() - timedelta(days=5), mandatory=True)
-        TrainingEnrollment.objects.create(course=course, user=u, status="assegnato")
+        today = timezone.localdate()
+        course = TrainingCourse.objects.create(title="Sec Awareness", mandatory=True)
+        plan = TrainingPlan.objects.create(plant=None, year=today.year)
+        TrainingPlanItem.objects.create(plan=plan, course=course, due_date=today - timedelta(days=5))
         out = training_overdue_advisor(AdvisorContext())
         assert any(i.code == "training.overdue" and i.params["count"] >= 1 for i in out)
 

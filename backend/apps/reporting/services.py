@@ -707,69 +707,23 @@ def _mttr(plant_id):
 
 
 def _training(plant):
-    from django.contrib.auth import get_user_model
-
-    from apps.auth_grc.models import UserPlantAccess
-    from apps.training.models import TrainingCourse, TrainingEnrollment
-
-    User = get_user_model()
-
-    # Perimetro: utenti attivi con almeno un accesso GRC non eliminato.
-    if plant:
-        accessible_ids = (
-            UserPlantAccess.objects.filter(deleted_at__isnull=True)
-            .filter(Q(scope_plants=plant) | Q(scope_plants__isnull=True))
-            .values_list("user_id", flat=True)
-        )
-        user_qs = User.objects.filter(id__in=accessible_ids, is_active=True).distinct()
-    else:
-        user_qs = User.objects.filter(
-            plant_access__deleted_at__isnull=True, is_active=True,
-        ).distinct()
-
-    total_users = user_qs.count()
-    user_ids = list(user_qs.values_list("id", flat=True))
-
-    course_qs = TrainingCourse.objects.filter(mandatory=True, status="attivo")
-    if plant:
-        course_qs = course_qs.filter(plants=plant)
-
-    mandatory_courses = []
-    mandatory_course_ids = list(course_qs.values_list("id", flat=True))
-
-    for course in course_qs.order_by("title"):
-        enrolled = TrainingEnrollment.objects.filter(course=course, user_id__in=user_ids).count()
-        completed = TrainingEnrollment.objects.filter(
-            course=course, user_id__in=user_ids, status="completato"
-        ).count()
-        mandatory_courses.append({
-            "id": str(course.id),
-            "title": course.title,
-            "source": course.source,
-            "deadline": str(course.deadline) if course.deadline else None,
-            "enrolled": enrolled,
-            "completed": completed,
-            "pct_completed": round(completed / enrolled * 100, 1) if enrolled else 0,
-            "not_enrolled": total_users - enrolled,
-        })
-
-    if mandatory_course_ids and user_ids:
-        users_all_done = 0
-        for uid in user_ids:
-            completed_count = TrainingEnrollment.objects.filter(
-                user_id=uid, course_id__in=mandatory_course_ids, status="completato",
-            ).values("course_id").distinct().count()
-            if completed_count >= len(mandatory_course_ids):
-                users_all_done += 1
-    else:
-        users_all_done = 0
+    """Formazione a evidenze: copertura del personale per corso e sito,
+    avanzamento del piano, ultime simulazioni di phishing e prove da rinnovare.
+    Solo conteggi, nessun nominativo (regola #11)."""
+    from apps.training.services import (
+        expiring_training_evidence,
+        latest_phishing,
+        plan_progress,
+        stale_audiences_count,
+        training_coverage,
+    )
 
     return {
-        "total_users": total_users,
-        "mandatory_courses_count": len(mandatory_course_ids),
-        "users_all_mandatory_completed": users_all_done,
-        "pct_all_mandatory": round(users_all_done / total_users * 100, 1) if total_users else 0,
-        "courses": mandatory_courses,
+        "coverage": training_coverage(plant),
+        "plan": plan_progress(plant),
+        "phishing": latest_phishing(plant),
+        "expiring_evidence": expiring_training_evidence(plant),
+        "stale_audiences": stale_audiences_count(plant),
     }
 
 

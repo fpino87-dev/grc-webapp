@@ -11,7 +11,7 @@ Il pack include 9 cartelle (subset selezionabile via `scope`):
     04_bia_bcp/                  processi critici + piani BCP + ultimi test
     05_incidents/                incidenti del plant
     06_audit_trail.csv           log eventi rilevanti (filtrato sugli entity)
-    07_training_competencies.csv enrollment + competenze
+    07_training/                 piano, erogazioni con prova, copertura, gruppi (conteggi)
     08_governance/               role assignment + comitati sicurezza
     09_management_review/        ultima review approvata + delibere + actions
     manifest.json                sha256 di ogni file (tamper evidence)
@@ -399,31 +399,96 @@ def _collect_incidents(out_dir: Path, plant, since: Optional[date]) -> dict:
     return {"total": len(rows)}
 
 
-def _collect_training(out_dir: Path, plant) -> dict:
-    from apps.training.models import TrainingEnrollment
-
-    tr_dir = out_dir / "07_training"
-    tr_dir.mkdir(parents=True, exist_ok=True)
-
-    qs = (
-        TrainingEnrollment.objects
-        .filter(deleted_at__isnull=True)
-        .select_related("user", "course")
-    )
-    rows = [{
-        "user": (e.user.email if e.user else ""),
-        "course": (e.course.title if e.course else ""),
-        "status": e.status,
-        "completion_date": str(e.completion_date) if getattr(e, "completion_date", None) else "",
-        "score": getattr(e, "score", None),
-    } for e in qs]
-    with (tr_dir / "training_enrollments.csv").open("w", newline="", encoding="utf-8") as fp:
+def _write_csv(path: Path, rows: list[dict], empty_note: str) -> None:
+    with path.open("w", newline="", encoding="utf-8") as fp:
         if rows:
             w = safe_dict_writer(fp, fieldnames=list(rows[0].keys()))
             w.writeheader(); w.writerows(rows)
         else:
-            fp.write("# Nessuna iscrizione training trovata.\n")
-    return {"total": len(rows)}
+            fp.write(f"# {empty_note}\n")
+
+
+def _collect_training(out_dir: Path, plant) -> dict:
+    """Formazione a evidenze del sito: piano (con le voci del piano di
+    organizzazione), erogazioni con il riferimento all'evidenza che ne è la
+    prova, copertura per corso e gruppi destinatari. Solo conteggi: la prova
+    nominativa è il file dell'evidenza, esportato con le evidenze."""
+    from django.db.models import Q
+
+    from apps.training.models import TrainingAudience, TrainingPlanItem, TrainingSession
+    from apps.training.services import item_state, training_coverage
+
+    tr_dir = out_dir / "07_training"
+    tr_dir.mkdir(parents=True, exist_ok=True)
+    today = timezone.localdate()
+
+    items = (
+        TrainingPlanItem.objects.filter(plan__deleted_at__isnull=True)
+        .filter(Q(plan__plant=plant) | Q(plan__plant__isnull=True))
+        .select_related("plan__document", "course")
+        .prefetch_related("audiences", "sessions")
+        .order_by("-plan__year", "due_date")
+    )
+    item_rows = []
+    for it in items:
+        sessions = list(it.sessions.all())
+        it.has_sessions = bool(sessions)
+        doc = it.plan.document
+        item_rows.append({
+            "year": it.plan.year,
+            "plan_scope": "sito" if it.plan.plant_id else "organizzazione",
+            "plan_document": (doc.document_code or doc.title) if doc else "",
+            "plan_document_status": doc.status if doc else "",
+            "course": it.course.title,
+            "course_kind": it.course.kind,
+            "due_date": str(it.due_date),
+            "state": item_state(it, today),
+            "sessions": len(sessions),
+            "target_headcount": sum(a.headcount for a in it.audiences.all()) or "",
+        })
+    _write_csv(tr_dir / "plan_items.csv", item_rows, "Nessun piano formativo per il sito.")
+
+    sessions = (
+        TrainingSession.objects.filter(plant=plant)
+        .select_related("course", "evidence")
+        .prefetch_related("audiences")
+        .order_by("-held_on")
+    )
+    session_rows = [{
+        "held_on": str(s.held_on),
+        "course": s.course.title,
+        "course_kind": s.course.kind,
+        "audiences": "; ".join(a.name for a in s.audiences.all()),
+        "target_count": s.target_count if s.target_count is not None else "",
+        "trained_count": s.trained_count if s.trained_count is not None else "",
+        "sent_count": s.sent_count if s.sent_count is not None else "",
+        "clicked_count": s.clicked_count if s.clicked_count is not None else "",
+        "reported_count": s.reported_count if s.reported_count is not None else "",
+        "evidence_id": str(s.evidence_id) if s.evidence_id else "",
+        "evidence_valid_until": (
+            str(s.evidence.valid_until) if s.evidence_id and s.evidence.valid_until else ""
+        ),
+        "legacy_without_proof": s.legacy,
+    } for s in sessions]
+    _write_csv(tr_dir / "sessions.csv", session_rows, "Nessuna erogazione registrata per il sito.")
+
+    coverage = training_coverage(plant, today)
+    _write_csv(tr_dir / "coverage.csv", [
+        {k: r[k] for k in ("course_title", "target", "trained", "pct")} for r in coverage["rows"]
+    ], "Nessun corso obbligatorio a piano con gruppi destinatari.")
+
+    audiences = TrainingAudience.objects.filter(plant=plant).order_by("name")
+    _write_csv(tr_dir / "audiences.csv", [{
+        "name": a.name,
+        "headcount": a.headcount,
+        "headcount_updated_at": str(a.headcount_updated_at),
+    } for a in audiences], "Nessun gruppo destinatari per il sito.")
+
+    return {
+        "plan_items": len(item_rows),
+        "sessions": len(session_rows),
+        "coverage_pct": coverage["pct"],
+    }
 
 
 def _collect_governance(out_dir: Path, plant) -> dict:

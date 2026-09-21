@@ -5,6 +5,7 @@ import { reportingApi, type BiaBcpRow, type TopRisk, type ThreatBreakdown, type 
 import { plantsApi } from "../../api/endpoints/plants";
 import { useAuthStore } from "../../store/auth";
 import { TabObjectives } from "./TabObjectives";
+import { TrainingKpiSection } from "./TrainingKpiSection";
 import {
   BarChart,
   Bar,
@@ -990,71 +991,7 @@ function TabKpi() {
           )}
 
           {/* ── 3. Training ── */}
-          <section>
-            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
-              {t("reporting.kpi.section_training")}
-            </h3>
-            {/* Summary card */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">{t("reporting.kpi.training_users")}</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{data.training.total_users}</p>
-                <p className="text-xs text-gray-400 mt-1">{t("reporting.kpi.training_grc_perimeter")}</p>
-              </div>
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">{t("reporting.kpi.training_mandatory_courses")}</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{data.training.mandatory_courses_count}</p>
-              </div>
-              <div className={`bg-white border rounded-lg p-4 ${data.training.pct_all_mandatory >= 80 ? "border-green-300" : data.training.pct_all_mandatory >= 50 ? "border-yellow-300" : "border-red-300"}`}>
-                <p className="text-xs text-gray-500 uppercase tracking-wide">{t("reporting.kpi.training_all_done")}</p>
-                <p className={`text-3xl font-bold mt-1 ${data.training.pct_all_mandatory >= 80 ? "text-green-600" : data.training.pct_all_mandatory >= 50 ? "text-yellow-600" : "text-red-600"}`}>
-                  {data.training.pct_all_mandatory}%
-                </p>
-                <p className="text-xs text-gray-400 mt-1">{data.training.users_all_mandatory_completed}/{data.training.total_users} {t("reporting.kpi.training_users_suffix")}</p>
-              </div>
-            </div>
-
-            {/* Per-course table */}
-            {data.training.courses.length === 0 ? (
-              <p className="text-sm text-gray-400 italic">{t("reporting.kpi.no_mandatory_courses")}</p>
-            ) : (
-              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                      <th className="px-4 py-3 text-left">{t("reporting.kpi.col_course")}</th>
-                      <th className="px-4 py-3 text-center">{t("reporting.kpi.col_source")}</th>
-                      <th className="px-4 py-3 text-right">{t("reporting.kpi.col_enrolled")}</th>
-                      <th className="px-4 py-3 text-right">{t("reporting.kpi.col_completed")}</th>
-                      <th className="px-4 py-3 text-right">{t("reporting.kpi.col_not_enrolled")}</th>
-                      <th className="px-4 py-3 text-left w-40">{t("reporting.kpi.col_completion")}</th>
-                      <th className="px-4 py-3 text-right">{t("reporting.kpi.col_deadline")}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {data.training.courses.map(c => (
-                      <tr key={c.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 font-medium text-gray-900">{c.title}</td>
-                        <td className="px-4 py-3 text-center">
-                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{c.source}</span>
-                        </td>
-                        <td className="px-4 py-3 text-right text-gray-600">{c.enrolled}</td>
-                        <td className="px-4 py-3 text-right text-green-700 font-medium">{c.completed}</td>
-                        <td className="px-4 py-3 text-right text-red-600">{c.not_enrolled}</td>
-                        <td className="px-4 py-3">
-                          <CoverageBar
-                            pct={c.pct_completed}
-                            colorClass={c.pct_completed >= 80 ? "bg-green-500" : c.pct_completed >= 50 ? "bg-yellow-400" : "bg-red-500"}
-                          />
-                        </td>
-                        <td className="px-4 py-3 text-right text-xs text-gray-500">{c.deadline ?? "—"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
+          <TrainingKpiSection data={data.training} />
         </>
       )}
     </div>
