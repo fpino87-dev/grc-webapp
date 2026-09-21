@@ -312,15 +312,6 @@ def test_operational_role_cannot_read_records():
     assert c.get(URL_SESS).status_code == 403
 
 
-@pytest.mark.django_db
-def test_legacy_endpoints_are_read_only(co, course):
-    c = _client(co)
-    r = c.post("/api/v1/training/enrollments/",
-               {"course": str(course.pk), "user": str(co.pk)}, format="json")
-    assert r.status_code == 405
-    assert c.get("/api/v1/training/phishing/").status_code == 200
-
-
 # ── Migrazione dati storici ─────────────────────────────────────────────────
 
 @pytest.mark.django_db

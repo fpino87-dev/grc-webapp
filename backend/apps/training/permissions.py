@@ -38,10 +38,3 @@ class TrainingRecordsPermission(RoleScopedPermission):
         if request.method in _SAFE:
             return user_has_any_role(user, self.read_roles) or _is_manager(user)
         return _is_manager(user)
-
-
-class TrainingResultsPermission(RoleScopedPermission):
-    """Vecchie iscrizioni e risultati phishing per persona (in sola lettura fino
-    alla rimozione): dati personali → governance + auditor interno."""
-    read_roles = _GOVERNANCE | {GrcRole.INTERNAL_AUDITOR}
-    write_roles = _GOVERNANCE

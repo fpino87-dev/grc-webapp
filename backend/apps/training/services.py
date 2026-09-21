@@ -11,7 +11,6 @@ from core.audit import log_action
 
 from .models import (
     TrainingAudience,
-    TrainingEnrollment,
     TrainingPlanItem,
     TrainingSession,
 )
@@ -19,6 +18,9 @@ from .models import (
 # Chi gestisce piano, gruppi ed erogazioni: questi ruoli GRC oppure chi ha la
 # nomina di CISO in Governance. Nessuna assegnazione: registra chi arriva prima.
 MANAGER_ROLES = frozenset({"super_admin", "compliance_officer", "plant_manager"})
+# Piani, gruppi ed erogazioni sono conteggi e file di prova, non dati personali:
+# li leggono anche gli auditor, interni ed esterni (sono l'evidenza che cercano).
+RECORD_READ_ROLES = MANAGER_ROLES | {"internal_auditor", "external_auditor"}
 DUE_SOON_DAYS = 30
 # Indicatori: finestra delle campagne di phishing considerate, anticipo con cui
 # segnalare una prova in scadenza, età oltre cui un headcount va riverificato.
@@ -28,15 +30,6 @@ HEADCOUNT_STALE_MONTHS = 6
 # Promemoria delle voci del piano: task M08 riconoscibili per la deduplica.
 REMINDER_SOURCE_MODULE = "M15"
 OPEN_TASK_STATUSES = ("aperto", "in_corso", "scaduto")
-
-
-def get_completion_rate(course_id) -> float:
-    """Return completion rate (0-100) for a given course."""
-    total = TrainingEnrollment.objects.filter(course_id=course_id).count()
-    if total == 0:
-        return 0.0
-    completed = TrainingEnrollment.objects.filter(course_id=course_id, status="completato").count()
-    return round((completed / total) * 100, 2)
 
 
 # ── Permessi di gestione ────────────────────────────────────────────────────
@@ -63,36 +56,70 @@ def is_training_manager(user) -> bool:
     return user_has_any_role(user, MANAGER_ROLES) or _active_ciso_assignments(user).exists()
 
 
-def can_manage_training(user, plant) -> bool:
-    """True se `user` gestisce la formazione del sito (`plant=None` = piano di
-    organizzazione, che richiede un perimetro di organizzazione)."""
+def _manage_scopes(user):
+    """Perimetri su cui `user` gestisce la formazione: (org, bu_ids, plant_ids).
+    Ruoli GRC di gestione per il loro perimetro più le nomine CISO attive."""
     from apps.auth_grc.models import UserPlantAccess
 
-    if getattr(user, "is_superuser", False):
-        return True
+    org, bu_ids, plant_ids = False, set(), set()
     for access in UserPlantAccess.objects.filter(
         user=user, role__in=MANAGER_ROLES, deleted_at__isnull=True,
     ).prefetch_related("scope_plants"):
         if access.scope_type == "org":
-            return True
-        if plant is None:
-            continue
-        if access.scope_type == "bu" and access.scope_bu_id and access.scope_bu_id == plant.bu_id:
-            return True
-        if access.scope_type in ("plant_list", "single_plant") and any(
-            p.pk == plant.pk for p in access.scope_plants.all()
-        ):
-            return True
+            org = True
+        elif access.scope_type == "bu" and access.scope_bu_id:
+            bu_ids.add(access.scope_bu_id)
+        elif access.scope_type in ("plant_list", "single_plant"):
+            plant_ids.update(p.pk for p in access.scope_plants.all())
     for a in _active_ciso_assignments(user):
         if a.scope_type == "org":
-            return True
-        if plant is None:
-            continue
-        if a.scope_type == "plant" and a.scope_id == plant.pk:
-            return True
-        if a.scope_type == "bu" and plant.bu_id and a.scope_id == plant.bu_id:
-            return True
-    return False
+            org = True
+        elif a.scope_type == "bu" and a.scope_id:
+            bu_ids.add(a.scope_id)
+        elif a.scope_type == "plant" and a.scope_id:
+            plant_ids.add(a.scope_id)
+    return org, bu_ids, plant_ids
+
+
+def _in_scopes(scopes, plant) -> bool:
+    org, bu_ids, plant_ids = scopes
+    if org:
+        return True
+    if plant is None:
+        return False
+    return plant.pk in plant_ids or bool(plant.bu_id and plant.bu_id in bu_ids)
+
+
+def can_manage_training(user, plant) -> bool:
+    """True se `user` gestisce la formazione del sito (`plant=None` = piano di
+    organizzazione, che richiede un perimetro di organizzazione)."""
+    if getattr(user, "is_superuser", False):
+        return True
+    return _in_scopes(_manage_scopes(user), plant)
+
+
+def training_capabilities(user) -> dict:
+    """Cosa può fare l'utente nel modulo, per l'interfaccia: leggere piani ed
+    erogazioni, gestire la formazione di organizzazione, su quali siti. Il
+    backend ricontrolla comunque ogni scrittura."""
+    from apps.plants.models import Plant
+    from core.permissions import user_has_any_role
+    from core.scoping import scope_queryset_by_plant
+
+    manager = is_training_manager(user)
+    plants = scope_queryset_by_plant(Plant.objects.all(), user, plant_field="pk").only("id", "bu_id")
+    if getattr(user, "is_superuser", False):
+        manage_org, manage_ids = True, [str(p.pk) for p in plants]
+    else:
+        scopes = _manage_scopes(user)
+        manage_org = scopes[0]
+        manage_ids = [str(p.pk) for p in plants if _in_scopes(scopes, p)]
+    return {
+        "can_read_records": manager or user_has_any_role(user, RECORD_READ_ROLES),
+        "can_manage_courses": manager,
+        "can_manage_org": manage_org,
+        "manage_plant_ids": manage_ids,
+    }
 
 
 def require_training_manage(user, plant) -> None:
@@ -109,6 +136,19 @@ def _audit(user, action, entity, payload):
         entity=entity,
         payload={"id": str(entity.pk), **payload},
     )
+
+
+# ── Catalogo corsi ──────────────────────────────────────────────────────────
+
+def delete_course(course, user):
+    """Un corso già in un piano o con erogazioni non si elimina: le voci e le
+    prove resterebbero senza corso. Si archivia."""
+    if course.plan_items.exists() or course.sessions.exists():
+        raise ValidationError(
+            _("Il corso è in un piano formativo o ha erogazioni registrate: archivialo.")
+        )
+    course.soft_delete()
+    _audit(user, "course.delete", course, {})
 
 
 # ── Gruppi di destinatari ───────────────────────────────────────────────────

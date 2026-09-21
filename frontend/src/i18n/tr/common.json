@@ -1847,43 +1847,154 @@
     }
   },
   "training": {
-    "title": "Operasyonlar — Eğitim",
-    "empty": "Kayıtlı kurs yok",
-    "sources": {
-      "interno": "dahili",
-      "kb4": "kb4",
-      "esterno": "harici"
+    "title": "Eğitim",
+    "subtitle": "Eğitim planı, kanıtı eklenmiş oturumlar ve personel kapsamı. Platform eğitimi vermez: eğitimi yönetir ve denetimde kanıtlanabilir hâle getirir.",
+    "select_plant": "Planı, oturumları ve hedef grupları görmek için üstten bir tesis seçin.",
+    "tabs": {
+      "plan": "Plan",
+      "sessions": "Oturumlar",
+      "audiences": "Hedef gruplar",
+      "courses": "Kurs kataloğu"
     },
-    "new": {
-      "open": "+ Yeni kurs",
-      "title": "Yeni kurs",
-      "submit": "Kurs oluştur"
+    "kinds": {
+      "corso": "Kurs",
+      "awareness": "Farkındalık kampanyası",
+      "phishing": "Oltalama simülasyonu"
     },
-    "fields": {
-      "title": "Başlık",
-      "description": "Açıklama",
-      "source": "Kaynak",
-      "duration_minutes": "Süre (dakika)",
-      "deadline": "Son tarih",
-      "mandatory": "Zorunlu",
-      "status": "Durum"
+    "audience_kinds": {
+      "generale": "Personel",
+      "ruoli_critici": "Kritik roller",
+      "organo_gestione": "Yönetim organı"
     },
-    "table": {
-      "title": "Kurs başlığı",
-      "source": "Kaynak",
-      "mandatory": "Zorunlu",
-      "duration": "Süre (dk)",
-      "deadline": "Son tarih",
-      "status": "Durum"
-    },
-    "edit": {
-      "title": "Kursu düzenle",
-      "submit": "Değişiklikleri kaydet"
-    },
-    "delete_confirm": "\"{{title}}\" kursunu silmek istediğinizden emin misiniz?",
     "statuses": {
       "attivo": "Aktif",
       "archiviato": "Arşivlendi"
+    },
+    "item_states": {
+      "fatto": "Yapıldı",
+      "in_ritardo": "Gecikmiş",
+      "in_scadenza": "Vadesi yakın",
+      "pianificato": "Planlandı"
+    },
+    "plan": {
+      "intro": "Yılın planı neyin, hangi gruplar için ve ne zamana kadar yapılacağını listeler. Hem tesis planı hem kuruluş planı geçerlidir. Onay, bağlı belge üzerinden yapılır.",
+      "year": "Yıl",
+      "site_plan": "Eğitim planı {{code}} — {{year}}",
+      "org_plan": "Kuruluş eğitim planı — {{year}}",
+      "document": "Onay belgesi",
+      "no_document": "bağlı belge yok",
+      "link_document": "Belge bağla",
+      "unlink_document": "Belge bağlantısını kaldır",
+      "document_hint": "Onaylı plan, ISO 27001 A.6.3'ün istediği belgedir: kendi onay akışını izleyen, Belgeler modülünde yönetilen belgeyi bağlayın.",
+      "search_document": "Başlık veya koda göre ara…",
+      "no_site_plan": "{{year}} için tesis planı yok.",
+      "create_site": "{{year}} tesis planını oluştur",
+      "create_org": "{{year}} kuruluş planını oluştur",
+      "add_item": "Kalem ekle",
+      "empty_items": "Planda kalem yok.",
+      "delete_item_confirm": "Bu plan kalemi silinsin mi?",
+      "no_audiences": "Bu tesis için hedef grup yok: Hedef gruplar sekmesinde oluşturun.",
+      "audiences_hint": "Gruplardaki toplam kişi sayısı kapsamın paydasıdır.",
+      "fields": {
+        "course": "Kurs",
+        "due_date": "Vade",
+        "audiences": "Hedef gruplar",
+        "notes": "Notlar",
+        "state": "Durum",
+        "sessions": "Oturumlar",
+        "coverage": "Kapsam"
+      }
+    },
+    "sessions": {
+      "intro": "Her oturum sayılarıyla ve bir kanıt dosyasıyla kaydedilir (katılım listesi, e-öğrenme dışa aktarımı, kampanya raporu). Dosya, kursun kontrollerine bağlı bir kanıta dönüşür.",
+      "new": "Oturum kaydet",
+      "register": "Kaydet",
+      "empty": "Bu tesis için kayıtlı oturum yok.",
+      "plan_item_auto": "Otomatik (bu kursun plan kalemi)",
+      "plan_item_option": "Vadesi {{due}} olan plan kalemi",
+      "target_hint": "Boşsa seçilen grupların toplamı kullanılır.",
+      "file_hint": "Zorunlu. Katılımcıların adlarını içerir: platform yalnızca sayıları kaydeder.",
+      "registered": "Oturum kaydedildi. Kanıta bağlanan kontroller: {{count}}.",
+      "not_applicable": "Bu tesiste uygulanmayan kurs kontrolleri: {{codes}}.",
+      "phishing_counts": "gönderilen {{sent}} · tıklama {{clicked}} · bildirilen {{reported}}",
+      "legacy": "kanıtsız geçmiş kayıt",
+      "download": "Kanıtı indir",
+      "valid_until": "{{date}} tarihine kadar geçerli",
+      "delete_confirm": "Oturum silinsin mi? Bağlı kanıt da silinir; ancak daha önce değerlendirilmiş kontrolleri destekliyorsa silinmez.",
+      "fields": {
+        "course": "Kurs",
+        "held_on": "Tarih",
+        "plan_item": "Plan kalemi",
+        "audiences": "Gruplar",
+        "target": "Eğitilecek kişiler",
+        "trained": "Eğitilen kişiler",
+        "sent": "Gönderilen e-postalar",
+        "clicked": "Tıklamalar",
+        "reported": "Bildirimler",
+        "file": "Kanıt dosyası",
+        "notes": "Notlar",
+        "counts": "Sayılar",
+        "proof": "Kanıt"
+      }
+    },
+    "audiences": {
+      "intro": "Hedef gruplar eğitilecek kişileri sayar (ör. \"Üretim: 240\"). Çalışan sicili tutulmaz: yalnızca sayı değiştiğinde güncellenir.",
+      "new": "Yeni grup",
+      "edit": "Grubu düzenle",
+      "empty": "Bu tesis için hedef grup yok.",
+      "name_placeholder": "ör. Üretim, Ofisler, BT/OT",
+      "headcount_hint": "Gruptaki kişi sayısı. Değiştirdiğinizde güncelleme tarihi otomatik ayarlanır.",
+      "stale": "yeniden doğrulanmalı",
+      "total": "Tesis toplamı",
+      "delete_confirm": "\"{{name}}\" grubu silinsin mi?",
+      "fields": {
+        "name": "Grup",
+        "headcount": "Kişi",
+        "updated_at": "Sayının güncellendiği tarih",
+        "notes": "Notlar"
+      }
+    },
+    "courses": {
+      "intro": "Ne yapılacağı, ne sıklıkla tekrarlanacağı ve hangi çerçeve kontrollerini kanıtladığı.",
+      "new": "Yeni kurs",
+      "edit": "Kursu düzenle",
+      "empty": "Katalogda kurs yok.",
+      "show_archived": "Arşivlenenleri göster",
+      "no_expiry": "süresi dolmaz",
+      "validity_hint": "Bu kadar ay sonra oturum tekrarlanmalıdır. Boş = süresi dolmaz.",
+      "controls_hint": "Kaydedilen her oturum, oturumun yapıldığı tesiste bu kontrollerin kanıtı olur.",
+      "search_controls": "Koda göre kontrol ara, ör. A.6.3",
+      "no_matches": "Kontrol bulunamadı.",
+      "no_controls": "kontrol yok",
+      "delete_confirm": "\"{{title}}\" kursu silinsin mi?",
+      "fields": {
+        "title": "Başlık",
+        "description": "Açıklama",
+        "kind": "Tür",
+        "audience_kind": "Hedef kitle",
+        "validity_months": "Geçerlilik (ay)",
+        "duration_minutes": "Süre (dakika)",
+        "mandatory": "Zorunlu",
+        "status": "Durum",
+        "controls": "Kanıtlanan kontroller"
+      }
+    },
+    "help": {
+      "title": "Kanıta dayalı eğitim",
+      "description": "Platform kurs vermez ve e-öğrenmeye bağlanmaz: eğitimi yönetir. Her tesis için ne yapılacağı planlanır, her oturum kanıt dosyasıyla kaydedilir ve personel kapsamı yalnızca sayılarla ölçülür.",
+      "steps": {
+        "1": "Kurs kataloğu: her kurs için tür, hedef kitle, kaç ayda bir tekrarlanacağı ve hangi kontrolleri kanıtladığını belirtin.",
+        "2": "Hedef gruplar: tesisin gruplarını kişi sayısıyla girin (ör. Üretim 240) ve değiştiğinde güncelleyin.",
+        "3": "Plan: yılın planını oluşturun, kalemleri ekleyin (kurs, gruplar, vade) ve onay belgesini bağlayın.",
+        "4": "Oturumlar: her oturumu sayıları ve kanıt dosyasıyla kaydedin. Kanıt kursun kontrollerine otomatik bağlanır ve kalemin hatırlatıcısı kapanır.",
+        "5": "Kapsamı, geciken kalemleri ve oltalamayı Raporlama ve KPI'larda izleyin, güvenlik hedeflerini bunlara bağlayın."
+      },
+      "connections": {
+        "documents": "Plan bağlı belgeyle onaylanır; her kanıt dosyası bir kanıta dönüşür",
+        "controls": "Oturum kanıtları kursta belirtilen kontrolleri kanıtlar",
+        "kpi": "Kapsam, plan ilerlemesi, gecikmeler ve oltalama otomatik hesaplanan KPI'lardır",
+        "objectives": "Güvenlik hedefleri eğitim KPI'larına bağlanır"
+      }
     }
   },
   "incidents": {

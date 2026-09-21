@@ -29,12 +29,26 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
   - **Centro Operativo**: il segnale «formazione in ritardo» conta le voci del piano scadute senza erogazione;
   - **Pacchetto audit, cartella `07_training/`**: piano del sito e di organizzazione con lo stato di ogni voce e il documento di approvazione, erogazioni con il riferimento all'evidenza che ne è la prova, copertura e gruppi destinatari. Solo i dati del sito del pacchetto.
 
+- **Formazione — nuova interfaccia del modulo (M15, fase 4 di 5)**: in Operazioni → Formazione, per il sito selezionato, quattro tab:
+  - **Piano**: piano dell'anno del sito e piano di organizzazione, con il documento di approvazione collegato dal modulo Documenti e il suo stato, le voci «corso · gruppi · scadenza» con stato (pianificata, in scadenza, in ritardo, svolta), numero di erogazioni e copertura raggiunta;
+  - **Erogazioni**: registrazione con i numeri (o, per il phishing, e-mail inviate, clic e segnalazioni) e il **file di prova obbligatorio**; la conferma indica quanti controlli sono stati collegati alla prova e quali non sono applicabili al sito; download della prova con la sua scadenza; le righe storiche migrate sono indicate come «storico senza prova»;
+  - **Gruppi destinatari**: numero di persone per gruppo, con il segnale «da riverificare» dopo 6 mesi senza aggiornamento;
+  - **Catalogo corsi**: tipo, destinatari, validità in mesi e **controlli dimostrati**, cercati per codice.
+
+  Ognuno vede ciò che gli compete: chi gestisce la formazione del sito (Compliance Officer, Plant Manager o CISO nominato) registra; gli auditor, interni ed esterni, consultano in sola lettura; gli altri ruoli vedono solo il catalogo. Guida contestuale (?) e manuali utente e tecnici aggiornati nelle cinque lingue; i18n IT/EN/FR/PL/TR.
+
 ### Changed
 
 - **Formazione — il KPI «Completamento formazione obbligatoria» diventa «Copertura formazione obbligatoria»**: prima misurava la percentuale di iscrizioni completate dagli **utenti della piattaforma**, ora misura la copertura del **personale** dei gruppi destinatari. I valori storici del KPI hanno quindi un significato diverso da quelli nuovi: il trend va letto con questa discontinuità, anche negli obiettivi di sicurezza agganciati. Anche il **tasso di clic sul phishing** passa da dato atteso via API (KnowBe4) a calcolo interno dalle simulazioni registrate. La migrazione `tasks.0016` aggiorna le definizioni già importate, senza toccare nomi e descrizioni personalizzati.
 - **Pacchetto audit — formazione senza dati personali**: la cartella formazione non contiene più l'elenco delle iscrizioni con l'e-mail di ogni utente, che includeva anche gli altri siti.
 
 - **Formazione — iscrizioni ed esiti phishing per persona in sola lettura**: la migrazione `training.0004` li riassume in **erogazioni storiche** che riportano soltanto i conteggi (iscritti e completati per corso; inviate, clic e segnalazioni per campagna). I dati per persona restano intatti e consultabili per una release e verranno poi eliminati (minimizzazione GDPR). I riferimenti normativi scritti a testo nei corsi diventano collegamenti ai controlli. **NB deploy:** prima di `migrate` è disponibile l'anteprima in sola lettura `python manage.py check_training_migration_readiness`, che elenca le erogazioni storiche che verranno create e i riferimenti che non trovano un controllo e vanno ricollegati a mano.
+
+- **Formazione — un corso già in un piano o con erogazioni non si elimina più**: prima si poteva cancellare lasciando voci del piano e prove senza corso; ora va archiviato.
+
+### Removed
+
+- **Formazione — integrazione KnowBe4 e dati per persona**: rimossi il client KnowBe4 (mai attivo: mancava la configurazione), le variabili `KNOWBE4_*` dagli esempi di configurazione e dalla documentazione, gli endpoint delle iscrizioni e degli esiti phishing per persona e il tasso di completamento per corso calcolato sulle iscrizioni. I dati per persona restano nel database, non più consultabili, fino alla loro eliminazione in una release successiva insieme ai vecchi riferimenti normativi testuali dei corsi.
 
 ### Fixed
 

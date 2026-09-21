@@ -1847,43 +1847,154 @@
     }
   },
   "training": {
-    "title": "Operazioni — Formazione",
-    "empty": "Nessun corso registrato",
-    "sources": {
-      "interno": "interno",
-      "kb4": "kb4",
-      "esterno": "esterno"
+    "title": "Formazione",
+    "subtitle": "Piano formativo, erogazioni con la prova allegata e copertura del personale. La piattaforma non eroga la formazione: ne governa lo svolgimento e lo rende dimostrabile in audit.",
+    "select_plant": "Seleziona un sito in alto per vedere piano, erogazioni e gruppi destinatari.",
+    "tabs": {
+      "plan": "Piano",
+      "sessions": "Erogazioni",
+      "audiences": "Gruppi destinatari",
+      "courses": "Catalogo corsi"
     },
-    "new": {
-      "open": "+ Nuovo corso",
-      "title": "Nuovo corso",
-      "submit": "Crea corso"
+    "kinds": {
+      "corso": "Corso",
+      "awareness": "Campagna di sensibilizzazione",
+      "phishing": "Simulazione di phishing"
     },
-    "fields": {
-      "title": "Titolo",
-      "description": "Descrizione",
-      "source": "Fonte",
-      "duration_minutes": "Durata (minuti)",
-      "deadline": "Scadenza",
-      "mandatory": "Obbligatorio",
-      "status": "Stato"
+    "audience_kinds": {
+      "generale": "Personale",
+      "ruoli_critici": "Ruoli critici",
+      "organo_gestione": "Organo di gestione"
     },
-    "table": {
-      "title": "Titolo corso",
-      "source": "Fonte",
-      "mandatory": "Obbligatorio",
-      "duration": "Durata (min)",
-      "deadline": "Scadenza",
-      "status": "Stato"
-    },
-    "edit": {
-      "title": "Modifica corso",
-      "submit": "Salva modifiche"
-    },
-    "delete_confirm": "Sei sicuro di voler eliminare il corso \"{{title}}\"?",
     "statuses": {
       "attivo": "Attivo",
       "archiviato": "Archiviato"
+    },
+    "item_states": {
+      "fatto": "Svolta",
+      "in_ritardo": "In ritardo",
+      "in_scadenza": "In scadenza",
+      "pianificato": "Pianificata"
+    },
+    "plan": {
+      "intro": "Il piano dell'anno elenca cosa va fatto, per quali gruppi e entro quando. Valgono sia il piano del sito sia quello di organizzazione. L'approvazione passa dal documento collegato.",
+      "year": "Anno",
+      "site_plan": "Piano formativo {{code}} — {{year}}",
+      "org_plan": "Piano formativo di organizzazione — {{year}}",
+      "document": "Documento di approvazione",
+      "no_document": "nessun documento collegato",
+      "link_document": "Collega documento",
+      "unlink_document": "Scollega documento",
+      "document_hint": "Il piano approvato è il documento richiesto da ISO 27001 A.6.3: collega il documento gestito in Documenti, che segue il suo flusso di approvazione.",
+      "search_document": "Cerca per titolo o codice…",
+      "no_site_plan": "Nessun piano del sito per il {{year}}.",
+      "create_site": "Crea il piano del sito {{year}}",
+      "create_org": "Crea il piano di organizzazione {{year}}",
+      "add_item": "Aggiungi voce",
+      "empty_items": "Nessuna voce nel piano.",
+      "delete_item_confirm": "Eliminare questa voce del piano?",
+      "no_audiences": "Nessun gruppo destinatari per questo sito: crealo nel tab Gruppi destinatari.",
+      "audiences_hint": "La somma delle persone dei gruppi è il denominatore della copertura.",
+      "fields": {
+        "course": "Corso",
+        "due_date": "Scadenza",
+        "audiences": "Gruppi destinatari",
+        "notes": "Note",
+        "state": "Stato",
+        "sessions": "Erogazioni",
+        "coverage": "Copertura"
+      }
+    },
+    "sessions": {
+      "intro": "Ogni erogazione si registra con i numeri e con il file di prova (registro presenze, export dell'e-learning, report della campagna). Dal file nasce un'evidenza collegata ai controlli del corso.",
+      "new": "Registra erogazione",
+      "register": "Registra",
+      "empty": "Nessuna erogazione registrata per questo sito.",
+      "plan_item_auto": "Automatica (voce del piano per questo corso)",
+      "plan_item_option": "Voce del piano in scadenza il {{due}}",
+      "target_hint": "Se vuoto, si usa la somma delle persone dei gruppi selezionati.",
+      "file_hint": "Obbligatorio. Contiene i nomi dei partecipanti: la piattaforma registra solo i numeri.",
+      "registered": "Erogazione registrata. Controlli collegati alla prova: {{count}}.",
+      "not_applicable": "Controlli del corso non applicabili a questo sito: {{codes}}.",
+      "phishing_counts": "inviate {{sent}} · clic {{clicked}} · segnalate {{reported}}",
+      "legacy": "storico senza prova",
+      "download": "Scarica prova",
+      "valid_until": "valida fino al {{date}}",
+      "delete_confirm": "Eliminare l'erogazione? Anche la prova collegata verrà eliminata, se non prova controlli già valutati.",
+      "fields": {
+        "course": "Corso",
+        "held_on": "Data",
+        "plan_item": "Voce del piano",
+        "audiences": "Gruppi",
+        "target": "Persone da formare",
+        "trained": "Persone formate",
+        "sent": "E-mail inviate",
+        "clicked": "Clic",
+        "reported": "Segnalazioni",
+        "file": "File di prova",
+        "notes": "Note",
+        "counts": "Numeri",
+        "proof": "Prova"
+      }
+    },
+    "audiences": {
+      "intro": "I gruppi destinatari contano le persone da formare (es. «Produzione: 240»). Nessuna anagrafica dei dipendenti: si aggiorna solo il numero quando cambia.",
+      "new": "Nuovo gruppo",
+      "edit": "Modifica gruppo",
+      "empty": "Nessun gruppo destinatari per questo sito.",
+      "name_placeholder": "es. Produzione, Uffici, IT/OT",
+      "headcount_hint": "Numero di persone del gruppo. Quando lo cambi, la data di aggiornamento si imposta da sola.",
+      "stale": "da riverificare",
+      "total": "Totale sito",
+      "delete_confirm": "Eliminare il gruppo «{{name}}»?",
+      "fields": {
+        "name": "Gruppo",
+        "headcount": "Persone",
+        "updated_at": "Numero aggiornato il",
+        "notes": "Note"
+      }
+    },
+    "courses": {
+      "intro": "Cosa va fatto, ogni quanto va ripetuto e quali controlli dei framework dimostra.",
+      "new": "Nuovo corso",
+      "edit": "Modifica corso",
+      "empty": "Nessun corso nel catalogo.",
+      "show_archived": "Mostra archiviati",
+      "no_expiry": "non scade",
+      "validity_hint": "Dopo questi mesi l'erogazione va ripetuta. Vuoto = non scade.",
+      "controls_hint": "Ogni erogazione registrata diventa evidenza di questi controlli sul sito dell'erogazione.",
+      "search_controls": "Cerca un controllo per codice, es. A.6.3",
+      "no_matches": "Nessun controllo trovato.",
+      "no_controls": "nessun controllo",
+      "delete_confirm": "Eliminare il corso «{{title}}»?",
+      "fields": {
+        "title": "Titolo",
+        "description": "Descrizione",
+        "kind": "Tipo",
+        "audience_kind": "Destinatari",
+        "validity_months": "Validità (mesi)",
+        "duration_minutes": "Durata (minuti)",
+        "mandatory": "Obbligatorio",
+        "status": "Stato",
+        "controls": "Controlli dimostrati"
+      }
+    },
+    "help": {
+      "title": "Formazione basata sulle evidenze",
+      "description": "La piattaforma non eroga i corsi e non si collega all'e-learning: governa la formazione. Per ogni sito si pianifica cosa fare, si registra ogni erogazione con il file di prova e si misura la copertura del personale, solo in numeri.",
+      "steps": {
+        "1": "Catalogo corsi: per ogni corso indica tipo, destinatari, ogni quanti mesi va ripetuto e quali controlli dimostra.",
+        "2": "Gruppi destinatari: per il sito inserisci i gruppi con il numero di persone (es. Produzione 240) e aggiornalo quando cambia.",
+        "3": "Piano: crea il piano dell'anno, aggiungi le voci (corso, gruppi, scadenza) e collega il documento di approvazione.",
+        "4": "Erogazioni: registra ogni sessione con i numeri e il file di prova. L'evidenza viene collegata da sola ai controlli del corso e il promemoria della voce si chiude.",
+        "5": "Segui copertura, voci in ritardo e phishing nel Reporting e nei KPI, e aggancia gli obiettivi di sicurezza."
+      },
+      "connections": {
+        "documents": "Il piano si approva con il documento collegato; ogni prova diventa un'evidenza",
+        "controls": "Le evidenze delle erogazioni provano i controlli indicati dal corso",
+        "kpi": "Copertura, avanzamento del piano, ritardi e phishing sono KPI calcolati in automatico",
+        "objectives": "Gli obiettivi di sicurezza si agganciano ai KPI della formazione"
+      }
     }
   },
   "incidents": {

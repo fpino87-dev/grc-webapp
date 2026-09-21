@@ -1847,43 +1847,154 @@
     }
   },
   "training": {
-    "title": "Operacje — Szkolenia",
-    "empty": "Brak zarejestrowanych kursów",
-    "sources": {
-      "interno": "wewnętrzne",
-      "kb4": "kb4",
-      "esterno": "zewnętrzne"
+    "title": "Szkolenia",
+    "subtitle": "Plan szkoleń, szkolenia z załączonym dowodem i pokrycie personelu. Platforma nie prowadzi szkoleń: nadzoruje je i pozwala wykazać ich realizację w audycie.",
+    "select_plant": "Wybierz zakład u góry, aby zobaczyć plan, szkolenia i grupy docelowe.",
+    "tabs": {
+      "plan": "Plan",
+      "sessions": "Szkolenia",
+      "audiences": "Grupy docelowe",
+      "courses": "Katalog kursów"
     },
-    "new": {
-      "open": "+ Nowy kurs",
-      "title": "Nowy kurs",
-      "submit": "Utwórz kurs"
+    "kinds": {
+      "corso": "Kurs",
+      "awareness": "Kampania świadomościowa",
+      "phishing": "Symulacja phishingu"
     },
-    "fields": {
-      "title": "Tytuł",
-      "description": "Opis",
-      "source": "Źródło",
-      "duration_minutes": "Czas trwania (minuty)",
-      "deadline": "Termin",
-      "mandatory": "Obowiązkowy",
-      "status": "Status"
+    "audience_kinds": {
+      "generale": "Personel",
+      "ruoli_critici": "Role krytyczne",
+      "organo_gestione": "Organ zarządzający"
     },
-    "table": {
-      "title": "Tytuł kursu",
-      "source": "Źródło",
-      "mandatory": "Obowiązkowy",
-      "duration": "Czas trwania (min)",
-      "deadline": "Termin",
-      "status": "Status"
-    },
-    "edit": {
-      "title": "Edytuj kurs",
-      "submit": "Zapisz zmiany"
-    },
-    "delete_confirm": "Czy na pewno chcesz usunąć kurs \"{{title}}\"?",
     "statuses": {
       "attivo": "Aktywny",
       "archiviato": "Zarchiwizowany"
+    },
+    "item_states": {
+      "fatto": "Zrealizowana",
+      "in_ritardo": "Zaległa",
+      "in_scadenza": "Termin wkrótce",
+      "pianificato": "Zaplanowana"
+    },
+    "plan": {
+      "intro": "Plan na dany rok określa, co trzeba zrobić, dla jakich grup i do kiedy. Obowiązuje zarówno plan zakładu, jak i plan organizacji. Zatwierdzenie odbywa się przez powiązany dokument.",
+      "year": "Rok",
+      "site_plan": "Plan szkoleń {{code}} — {{year}}",
+      "org_plan": "Plan szkoleń organizacji — {{year}}",
+      "document": "Dokument zatwierdzający",
+      "no_document": "brak powiązanego dokumentu",
+      "link_document": "Powiąż dokument",
+      "unlink_document": "Odłącz dokument",
+      "document_hint": "Zatwierdzony plan to dokument wymagany przez ISO 27001 A.6.3: powiąż dokument prowadzony w module Dokumenty, który ma własny obieg zatwierdzania.",
+      "search_document": "Szukaj po tytule lub kodzie…",
+      "no_site_plan": "Brak planu zakładu na {{year}}.",
+      "create_site": "Utwórz plan zakładu na {{year}}",
+      "create_org": "Utwórz plan organizacji na {{year}}",
+      "add_item": "Dodaj pozycję",
+      "empty_items": "Brak pozycji w planie.",
+      "delete_item_confirm": "Usunąć tę pozycję planu?",
+      "no_audiences": "Brak grup docelowych dla tego zakładu: utwórz je w zakładce Grupy docelowe.",
+      "audiences_hint": "Suma osób w grupach to mianownik pokrycia.",
+      "fields": {
+        "course": "Kurs",
+        "due_date": "Termin",
+        "audiences": "Grupy docelowe",
+        "notes": "Uwagi",
+        "state": "Status",
+        "sessions": "Szkolenia",
+        "coverage": "Pokrycie"
+      }
+    },
+    "sessions": {
+      "intro": "Każde szkolenie rejestruje się z liczbami i plikiem dowodowym (lista obecności, eksport z e-learningu, raport z kampanii). Z pliku powstaje dowód powiązany z kontrolami kursu.",
+      "new": "Zarejestruj szkolenie",
+      "register": "Zarejestruj",
+      "empty": "Brak zarejestrowanych szkoleń dla tego zakładu.",
+      "plan_item_auto": "Automatycznie (pozycja planu dla tego kursu)",
+      "plan_item_option": "Pozycja planu z terminem {{due}}",
+      "target_hint": "Jeśli puste, używana jest suma osób w wybranych grupach.",
+      "file_hint": "Wymagany. Zawiera nazwiska uczestników: platforma zapisuje tylko liczby.",
+      "registered": "Szkolenie zarejestrowane. Kontrole powiązane z dowodem: {{count}}.",
+      "not_applicable": "Kontrole kursu nieobowiązujące w tym zakładzie: {{codes}}.",
+      "phishing_counts": "wysłane {{sent}} · kliknięcia {{clicked}} · zgłoszone {{reported}}",
+      "legacy": "historyczne bez dowodu",
+      "download": "Pobierz dowód",
+      "valid_until": "ważne do {{date}}",
+      "delete_confirm": "Usunąć szkolenie? Powiązany dowód również zostanie usunięty, chyba że potwierdza już ocenione kontrole.",
+      "fields": {
+        "course": "Kurs",
+        "held_on": "Data",
+        "plan_item": "Pozycja planu",
+        "audiences": "Grupy",
+        "target": "Osoby do przeszkolenia",
+        "trained": "Osoby przeszkolone",
+        "sent": "Wysłane e-maile",
+        "clicked": "Kliknięcia",
+        "reported": "Zgłoszenia",
+        "file": "Plik dowodowy",
+        "notes": "Uwagi",
+        "counts": "Liczby",
+        "proof": "Dowód"
+      }
+    },
+    "audiences": {
+      "intro": "Grupy docelowe liczą osoby do przeszkolenia (np. „Produkcja: 240”). Bez ewidencji pracowników: aktualizuje się tylko liczbę, gdy się zmienia.",
+      "new": "Nowa grupa",
+      "edit": "Edytuj grupę",
+      "empty": "Brak grup docelowych dla tego zakładu.",
+      "name_placeholder": "np. Produkcja, Biura, IT/OT",
+      "headcount_hint": "Liczba osób w grupie. Po jej zmianie data aktualizacji ustawia się automatycznie.",
+      "stale": "do weryfikacji",
+      "total": "Razem w zakładzie",
+      "delete_confirm": "Usunąć grupę „{{name}}”?",
+      "fields": {
+        "name": "Grupa",
+        "headcount": "Osoby",
+        "updated_at": "Liczba zaktualizowana",
+        "notes": "Uwagi"
+      }
+    },
+    "courses": {
+      "intro": "Co trzeba zrobić, jak często powtarzać i jakie kontrole z ram normatywnych to potwierdza.",
+      "new": "Nowy kurs",
+      "edit": "Edytuj kurs",
+      "empty": "Brak kursów w katalogu.",
+      "show_archived": "Pokaż zarchiwizowane",
+      "no_expiry": "nie wygasa",
+      "validity_hint": "Po tylu miesiącach szkolenie trzeba powtórzyć. Puste = nie wygasa.",
+      "controls_hint": "Każde zarejestrowane szkolenie staje się dowodem dla tych kontroli w zakładzie szkolenia.",
+      "search_controls": "Szukaj kontroli po kodzie, np. A.6.3",
+      "no_matches": "Nie znaleziono kontroli.",
+      "no_controls": "brak kontroli",
+      "delete_confirm": "Usunąć kurs „{{title}}”?",
+      "fields": {
+        "title": "Tytuł",
+        "description": "Opis",
+        "kind": "Rodzaj",
+        "audience_kind": "Odbiorcy",
+        "validity_months": "Ważność (miesiące)",
+        "duration_minutes": "Czas trwania (minuty)",
+        "mandatory": "Obowiązkowy",
+        "status": "Status",
+        "controls": "Potwierdzane kontrole"
+      }
+    },
+    "help": {
+      "title": "Szkolenia oparte na dowodach",
+      "description": "Platforma nie prowadzi kursów i nie łączy się z e-learningiem: nadzoruje szkolenia. Dla każdego zakładu planuje się, co zrobić, rejestruje każde szkolenie z plikiem dowodowym i mierzy pokrycie personelu, wyłącznie w liczbach.",
+      "steps": {
+        "1": "Katalog kursów: dla każdego kursu określ rodzaj, odbiorców, po ilu miesiącach trzeba go powtórzyć i jakie kontrole potwierdza.",
+        "2": "Grupy docelowe: wprowadź grupy zakładu z liczbą osób (np. Produkcja 240) i aktualizuj ją, gdy się zmienia.",
+        "3": "Plan: utwórz plan na rok, dodaj pozycje (kurs, grupy, termin) i powiąż dokument zatwierdzający.",
+        "4": "Szkolenia: rejestruj każde szkolenie z liczbami i plikiem dowodowym. Dowód zostaje automatycznie powiązany z kontrolami kursu, a przypomnienie pozycji się zamyka.",
+        "5": "Śledź pokrycie, zaległe pozycje i phishing w Raportowaniu i KPI oraz powiąż z nimi cele bezpieczeństwa."
+      },
+      "connections": {
+        "documents": "Plan zatwierdza się powiązanym dokumentem; każdy plik dowodowy staje się dowodem",
+        "controls": "Dowody ze szkoleń potwierdzają kontrole wskazane w kursie",
+        "kpi": "Pokrycie, realizacja planu, zaległości i phishing to KPI obliczane automatycznie",
+        "objectives": "Cele bezpieczeństwa wiążą się z KPI szkoleń"
+      }
     }
   },
   "incidents": {

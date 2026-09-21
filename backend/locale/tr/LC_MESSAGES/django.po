@@ -2259,3 +2259,7 @@ msgstr "Dosya içeriği .%(ext)s uzantısıyla eşleşmiyor."
 #: apps/training/services.py
 msgid "Erogazione registrata."
 msgstr "Eğitim oturumu kaydedildi."
+
+#: apps/training/services.py
+msgid "Il corso è in un piano formativo o ha erogazioni registrate: archivialo."
+msgstr "Kurs bir eğitim planında yer alıyor veya kayıtlı oturumları var: arşivleyin."

@@ -2256,3 +2256,7 @@ msgstr "The file content does not match the .%(ext)s extension."
 #: apps/training/services.py
 msgid "Erogazione registrata."
 msgstr "Training session registered."
+
+#: apps/training/services.py
+msgid "Il corso è in un piano formativo o ha erogazioni registrate: archivialo."
+msgstr "The course is in a training plan or has recorded sessions: archive it instead."

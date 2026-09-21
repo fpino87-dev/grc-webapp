@@ -9,29 +9,26 @@ from core.scoping import PlantScopedQuerysetMixin
 from core.viewsets import SoftDeleteAuditMixin
 
 from .models import (
-    PhishingSimulation,
     TrainingAudience,
     TrainingCourse,
-    TrainingEnrollment,
     TrainingPlan,
     TrainingPlanItem,
     TrainingSession,
 )
-from .permissions import TrainingPermission, TrainingRecordsPermission, TrainingResultsPermission
+from .permissions import TrainingPermission, TrainingRecordsPermission
 from .serializers import (
-    PhishingSimulationSerializer,
     TrainingAudienceSerializer,
     TrainingCourseSerializer,
-    TrainingEnrollmentSerializer,
     TrainingPlanItemSerializer,
     TrainingPlanSerializer,
     TrainingSessionSerializer,
+    control_option,
 )
 from . import services
 
 
 class TrainingCourseViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
-    queryset = TrainingCourse.objects.prefetch_related("plants", "controls")
+    queryset = TrainingCourse.objects.prefetch_related("plants", "controls__framework")
     serializer_class = TrainingCourseSerializer
     permission_classes = [TrainingPermission]
     filterset_fields = ["status", "mandatory", "source", "kind", "audience_kind"]
@@ -39,6 +36,9 @@ class TrainingCourseViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, view
     plant_field = "plants"
     allow_null_plant = True  # corso senza plants = catalogo globale
     audit_action = "training.course"
+
+    def perform_destroy(self, instance):
+        services.delete_course(instance, self.request.user)
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)
@@ -50,38 +50,28 @@ class TrainingCourseViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, view
             payload={"course_id": str(instance.pk)},
         )
 
-    @action(detail=True, methods=["get"])
-    def completion_rate(self, request, pk=None):
-        # get_object() passa dal queryset scoped: niente tassi di completamento
-        # di corsi di altri siti via pk diretto (sweep 2026-06-12).
-        course = self.get_object()
-        rate = services.get_completion_rate(course.pk)
-        return Response({"course_id": str(course.pk), "completion_rate": rate})
+    @action(detail=False, methods=["get"])
+    def capabilities(self, request):
+        """Cosa l'utente può leggere e dove può scrivere: leggibile da ogni
+        ruolo, perché decide quali parti del modulo mostrare."""
+        return Response(services.training_capabilities(request.user))
 
+    @action(detail=False, methods=["get"], url_path="control-options")
+    def control_options(self, request):
+        """Controlli collegabili a un corso, cercati per codice (es. «A.6.3»).
+        Serve a chi gestisce la formazione anche senza accesso al catalogo
+        framework; solo codice, framework e titolo."""
+        from apps.controls.models import Control
 
-class TrainingEnrollmentViewSet(PlantScopedQuerysetMixin, viewsets.ReadOnlyModelViewSet):
-    """Vecchie iscrizioni per persona: in sola lettura, aggregate nelle sessioni
-    storiche dalla migrazione training.0004 e rimosse in una release successiva."""
-
-    queryset = TrainingEnrollment.objects.select_related("course", "user")
-    serializer_class = TrainingEnrollmentSerializer
-    permission_classes = [TrainingResultsPermission]
-    filterset_fields = ["course", "user", "status", "passed"]
-    plant_field = "course__plants"
-    allow_null_plant = True  # iscrizioni a corsi globali (senza plants)
-    search_fields = ["user__username", "course__title"]
-
-
-class PhishingSimulationViewSet(PlantScopedQuerysetMixin, viewsets.ReadOnlyModelViewSet):
-    """Vecchi esiti di phishing per persona: in sola lettura (vedi sopra)."""
-
-    queryset = PhishingSimulation.objects.select_related("user", "plant")
-    serializer_class = PhishingSimulationSerializer
-    permission_classes = [TrainingResultsPermission]
-    filterset_fields = ["plant", "result", "user"]
-    search_fields = ["user__username", "kb4_simulation_id"]
-    plant_field = "plant"
-    allow_null_plant = True  # simulazioni cross-plant (campagne aziendali) senza plant
+        qs = Control.objects.filter(framework__archived_at__isnull=True).select_related("framework")
+        search = (request.query_params.get("search") or "").strip()
+        if search:
+            qs = qs.filter(external_id__icontains=search)
+        lang = getattr(request, "LANGUAGE_CODE", "it")
+        return Response([
+            control_option(c, lang)
+            for c in qs.order_by("framework__code", "external_id")[:50]
+        ])
 
 
 class _ServiceWriteMixin:

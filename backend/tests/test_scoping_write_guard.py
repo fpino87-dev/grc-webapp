@@ -163,24 +163,3 @@ def test_courses_foreign_hidden_global_visible(pm_a, plant_a, plant_b):
     resp = _client(pm_a).get("/api/v1/training/courses/")
     titles = {c["title"] for c in resp.data["results"]}
     assert titles == {"Solo A", "Globale"}
-
-
-@pytest.mark.django_db
-def test_enrollments_of_foreign_course_hidden(pm_a, plant_b):
-    from apps.training.models import TrainingCourse, TrainingEnrollment
-    course = TrainingCourse.objects.create(title="Solo B")
-    course.plants.add(plant_b)
-    someone = User.objects.create_user(username="wg_emp", email="e@test.com", password="x")
-    TrainingEnrollment.objects.create(course=course, user=someone)
-
-    resp = _client(pm_a).get("/api/v1/training/enrollments/")
-    assert resp.data["count"] == 0
-
-
-@pytest.mark.django_db
-def test_completion_rate_foreign_course_404(pm_a, plant_b):
-    from apps.training.models import TrainingCourse
-    course = TrainingCourse.objects.create(title="Solo B")
-    course.plants.add(plant_b)
-    resp = _client(pm_a).get(f"/api/v1/training/courses/{course.id}/completion_rate/")
-    assert resp.status_code == 404

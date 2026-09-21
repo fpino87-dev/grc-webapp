@@ -1847,43 +1847,154 @@
     }
   },
   "training": {
-    "title": "Opérations — Formation",
-    "empty": "Aucun cours enregistré",
-    "sources": {
-      "interno": "interne",
-      "kb4": "kb4",
-      "esterno": "externe"
+    "title": "Formation",
+    "subtitle": "Plan de formation, sessions avec preuve jointe et couverture du personnel. La plateforme ne dispense pas la formation : elle la pilote et la rend démontrable en audit.",
+    "select_plant": "Sélectionnez un site en haut pour voir le plan, les sessions et les groupes cibles.",
+    "tabs": {
+      "plan": "Plan",
+      "sessions": "Sessions",
+      "audiences": "Groupes cibles",
+      "courses": "Catalogue des cours"
     },
-    "new": {
-      "open": "+ Nouveau cours",
-      "title": "Nouveau cours",
-      "submit": "Créer le cours"
+    "kinds": {
+      "corso": "Cours",
+      "awareness": "Campagne de sensibilisation",
+      "phishing": "Simulation de phishing"
     },
-    "fields": {
-      "title": "Titre",
-      "description": "Description",
-      "source": "Source",
-      "duration_minutes": "Durée (minutes)",
-      "deadline": "Échéance",
-      "mandatory": "Obligatoire",
-      "status": "Statut"
+    "audience_kinds": {
+      "generale": "Personnel",
+      "ruoli_critici": "Rôles critiques",
+      "organo_gestione": "Organe de direction"
     },
-    "table": {
-      "title": "Titre du cours",
-      "source": "Source",
-      "mandatory": "Obligatoire",
-      "duration": "Durée (min)",
-      "deadline": "Échéance",
-      "status": "Statut"
-    },
-    "edit": {
-      "title": "Modifier le cours",
-      "submit": "Enregistrer les modifications"
-    },
-    "delete_confirm": "Voulez-vous vraiment supprimer le cours \"{{title}}\" ?",
     "statuses": {
       "attivo": "Actif",
       "archiviato": "Archivé"
+    },
+    "item_states": {
+      "fatto": "Réalisé",
+      "in_ritardo": "En retard",
+      "in_scadenza": "Échéance proche",
+      "pianificato": "Planifié"
+    },
+    "plan": {
+      "intro": "Le plan de l'année indique ce qui doit être fait, pour quels groupes et avant quand. Le plan du site et celui de l'organisation s'appliquent tous deux. L'approbation passe par le document lié.",
+      "year": "Année",
+      "site_plan": "Plan de formation {{code}} — {{year}}",
+      "org_plan": "Plan de formation de l'organisation — {{year}}",
+      "document": "Document d'approbation",
+      "no_document": "aucun document lié",
+      "link_document": "Lier un document",
+      "unlink_document": "Délier le document",
+      "document_hint": "Le plan approuvé est le document exigé par ISO 27001 A.6.3 : liez le document géré dans Documents, qui suit son propre circuit d'approbation.",
+      "search_document": "Rechercher par titre ou code…",
+      "no_site_plan": "Aucun plan du site pour {{year}}.",
+      "create_site": "Créer le plan du site {{year}}",
+      "create_org": "Créer le plan de l'organisation {{year}}",
+      "add_item": "Ajouter un élément",
+      "empty_items": "Aucun élément dans le plan.",
+      "delete_item_confirm": "Supprimer cet élément du plan ?",
+      "no_audiences": "Aucun groupe cible pour ce site : créez-les dans l'onglet Groupes cibles.",
+      "audiences_hint": "Le total des personnes des groupes est le dénominateur de la couverture.",
+      "fields": {
+        "course": "Cours",
+        "due_date": "Échéance",
+        "audiences": "Groupes cibles",
+        "notes": "Notes",
+        "state": "Statut",
+        "sessions": "Sessions",
+        "coverage": "Couverture"
+      }
+    },
+    "sessions": {
+      "intro": "Chaque session s'enregistre avec ses chiffres et un fichier de preuve (feuille de présence, export e-learning, rapport de campagne). Le fichier devient une preuve liée aux contrôles du cours.",
+      "new": "Enregistrer une session",
+      "register": "Enregistrer",
+      "empty": "Aucune session enregistrée pour ce site.",
+      "plan_item_auto": "Automatique (élément du plan pour ce cours)",
+      "plan_item_option": "Élément du plan à échéance le {{due}}",
+      "target_hint": "Si vide, le total des groupes sélectionnés est utilisé.",
+      "file_hint": "Obligatoire. Il contient les noms des participants : la plateforme n'enregistre que les chiffres.",
+      "registered": "Session enregistrée. Contrôles liés à la preuve : {{count}}.",
+      "not_applicable": "Contrôles du cours non applicables à ce site : {{codes}}.",
+      "phishing_counts": "envoyés {{sent}} · clics {{clicked}} · signalés {{reported}}",
+      "legacy": "historique sans preuve",
+      "download": "Télécharger la preuve",
+      "valid_until": "valable jusqu'au {{date}}",
+      "delete_confirm": "Supprimer la session ? La preuve liée sera aussi supprimée, sauf si elle étaye des contrôles déjà évalués.",
+      "fields": {
+        "course": "Cours",
+        "held_on": "Date",
+        "plan_item": "Élément du plan",
+        "audiences": "Groupes",
+        "target": "Personnes à former",
+        "trained": "Personnes formées",
+        "sent": "E-mails envoyés",
+        "clicked": "Clics",
+        "reported": "Signalements",
+        "file": "Fichier de preuve",
+        "notes": "Notes",
+        "counts": "Chiffres",
+        "proof": "Preuve"
+      }
+    },
+    "audiences": {
+      "intro": "Les groupes cibles comptent les personnes à former (ex. « Production : 240 »). Aucun registre du personnel : seul le nombre est mis à jour quand il change.",
+      "new": "Nouveau groupe",
+      "edit": "Modifier le groupe",
+      "empty": "Aucun groupe cible pour ce site.",
+      "name_placeholder": "ex. Production, Bureaux, IT/OT",
+      "headcount_hint": "Nombre de personnes du groupe. Quand vous le modifiez, la date de mise à jour est renseignée automatiquement.",
+      "stale": "à revérifier",
+      "total": "Total du site",
+      "delete_confirm": "Supprimer le groupe « {{name}} » ?",
+      "fields": {
+        "name": "Groupe",
+        "headcount": "Personnes",
+        "updated_at": "Nombre mis à jour le",
+        "notes": "Notes"
+      }
+    },
+    "courses": {
+      "intro": "Ce qui doit être fait, à quelle fréquence le répéter et quels contrôles des référentiels cela démontre.",
+      "new": "Nouveau cours",
+      "edit": "Modifier le cours",
+      "empty": "Aucun cours dans le catalogue.",
+      "show_archived": "Afficher les archivés",
+      "no_expiry": "n'expire pas",
+      "validity_hint": "Après ce nombre de mois, la session doit être répétée. Vide = n'expire pas.",
+      "controls_hint": "Chaque session enregistrée devient une preuve de ces contrôles sur le site de la session.",
+      "search_controls": "Rechercher un contrôle par code, ex. A.6.3",
+      "no_matches": "Aucun contrôle trouvé.",
+      "no_controls": "aucun contrôle",
+      "delete_confirm": "Supprimer le cours « {{title}} » ?",
+      "fields": {
+        "title": "Titre",
+        "description": "Description",
+        "kind": "Type",
+        "audience_kind": "Public",
+        "validity_months": "Validité (mois)",
+        "duration_minutes": "Durée (minutes)",
+        "mandatory": "Obligatoire",
+        "status": "Statut",
+        "controls": "Contrôles démontrés"
+      }
+    },
+    "help": {
+      "title": "Formation fondée sur les preuves",
+      "description": "La plateforme ne dispense pas les cours et ne se connecte pas à l'e-learning : elle pilote la formation. Pour chaque site, on planifie ce qu'il faut faire, on enregistre chaque session avec son fichier de preuve et on mesure la couverture du personnel, uniquement en chiffres.",
+      "steps": {
+        "1": "Catalogue des cours : pour chaque cours, indiquez le type, le public, au bout de combien de mois il doit être répété et quels contrôles il démontre.",
+        "2": "Groupes cibles : saisissez les groupes du site avec leur nombre de personnes (ex. Production 240) et mettez-le à jour quand il change.",
+        "3": "Plan : créez le plan de l'année, ajoutez les éléments (cours, groupes, échéance) et liez le document d'approbation.",
+        "4": "Sessions : enregistrez chaque session avec ses chiffres et son fichier de preuve. La preuve est liée automatiquement aux contrôles du cours et le rappel de l'élément se ferme.",
+        "5": "Suivez la couverture, les éléments en retard et le phishing dans le Reporting et les KPI, et rattachez-y les objectifs de sécurité."
+      },
+      "connections": {
+        "documents": "Le plan est approuvé via le document lié ; chaque preuve devient un élément probant",
+        "controls": "Les preuves des sessions démontrent les contrôles indiqués sur le cours",
+        "kpi": "Couverture, avancement du plan, retards et phishing sont des KPI calculés automatiquement",
+        "objectives": "Les objectifs de sécurité se rattachent aux KPI de la formation"
+      }
     }
   },
   "incidents": {
