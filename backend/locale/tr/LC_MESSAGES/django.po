@@ -1056,7 +1056,6 @@ msgstr "Kontroller"
 
 #: apps/management_review/report/builder.py:181
 #: apps/management_review/report/builder.py:519
-#, python-format
 msgid "% compliant"
 msgstr "% uyumlu"
 

@@ -22,6 +22,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 - **Formazione — iscrizioni ed esiti phishing per persona in sola lettura**: la migrazione `training.0004` li riassume in **erogazioni storiche** che riportano soltanto i conteggi (iscritti e completati per corso; inviate, clic e segnalazioni per campagna). I dati per persona restano intatti e consultabili per una release e verranno poi eliminati (minimizzazione GDPR). I riferimenti normativi scritti a testo nei corsi diventano collegamenti ai controlli. **NB deploy:** prima di `migrate` è disponibile l'anteprima in sola lettura `python manage.py check_training_migration_readiness`, che elenca le erogazioni storiche che verranno create e i riferimenti che non trovano un controllo e vanno ricollegati a mano.
 
+### Fixed
+
+- **Build di produzione — compilazione delle traduzioni**: dalla 0.8.0 `compilemessages` (eseguito da `Dockerfile.prod`) falliva in polacco e turco perché l'etichetta «% compliant» del verbale del riesame era marcata per errore come stringa di formato, e l'immagine non si costruiva. Il marcatore è stato rimosso nelle quattro lingue.
+
 ## [0.8.0] - 2026-09-21
 
 ### Added
