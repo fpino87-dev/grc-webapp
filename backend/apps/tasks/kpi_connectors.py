@@ -163,6 +163,18 @@ def phishing_report_rate(plant, week_start) -> dict:
     return _result(ph["report_pct"], ph["sent"], f"{ph['reported']}/{ph['sent']} segnalazioni")
 
 
+def board_training_valid(plant, week_start) -> dict:
+    """% di componenti in carica dell'organo di gestione con formazione valida
+    (NIS2 art. 20). La nota riporta solo conteggi, nessun nominativo."""
+    from apps.training.services import board_training
+
+    board = board_training(plant)
+    if not board["total"]:
+        return _no_data("Nessun componente in carica di un organo di gestione (CdA).")
+    return _result(board["pct"], board["total"],
+                   f"{board['trained']}/{board['total']} componenti con formazione valida")
+
+
 # ── M04 Asset IT ───────────────────────────────────────────────────────────---
 def systems_eol_count(plant, week_start) -> dict:
     """N. di asset IT con eol_date già trascorsa (stato puntuale)."""
@@ -520,6 +532,7 @@ INTERNAL_CONNECTORS = {
     "training_plan_overdue": training_plan_overdue,
     "phishing_click_rate": phishing_click_rate,
     "phishing_report_rate": phishing_report_rate,
+    "board_training_valid": board_training_valid,
     "systems_eol_count": systems_eol_count,
     "incident_mttr_hours": incident_mttr_hours,
     "incident_recurrence_rate": incident_recurrence_rate,

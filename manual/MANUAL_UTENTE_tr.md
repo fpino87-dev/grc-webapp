@@ -953,7 +953,7 @@ Platform kurs **vermez** ve e-öğrenme ya da oltalama simülasyonu platformlar�
 ### Kim ne yapar
 
 - Grupları, planları ve oturumları tesisin Compliance Officer'ı ve Plant Manager'ı ya da Governance'ta tesis veya kuruluş için **CISO ataması** olan kişi **kaydeder**. Görev ataması yoktur: ilk kim ulaşırsa o kaydeder.
-- İç Denetçi ve Dış Denetçi de planı, oturumları ve kapsamı **görüntüler**: bunlar sayılar ve kanıt dosyalarıdır, kişisel veri değildir.
+- İç Denetçi ve Dış Denetçi de planı, oturumları ve kapsamı **görüntüler**: bunlar sayılar ve kanıt dosyalarıdır, kişisel veri değildir. Kritik roller ve yönetim kurulu için, Governance'ta zaten bulunan katılımcı adlarını da görürler: bunlar NIS2 Md. 20'nin istediği kanıttır.
 - Diğer roller yalnızca **Kurs kataloğunu** görür.
 
 ### 1. Kurs kataloğu
@@ -965,6 +965,7 @@ Her kurs için şunları belirtin:
 - **Geçerlilik (ay)**: oturumun kaç ay sonra tekrarlanması gerektiği (ör. 12 = her yıl); boş = süresi dolmaz;
 - **Zorunlu**: personel için zorunlu kurslar kapsama dahil edilir;
 - **Kanıtlanan kontroller**: kontrolü koda göre arayın (ör. A.6.3). Kursun her oturumu bu kontrollerin kanıtı olur.
+- **Kazandırılan yetkinlik** ve **seviye** (yalnızca kritik roller ve yönetim organı, isteğe bağlı): hesabı olan katılımcılar bu yetkinliği yetkinlik profillerinde alır (ISO 27001 md. 7.2). Önerilen adlar rollerin yetkinlik gereksinimlerinden gelir.
 
 Bir planda yer alan veya oturumu kaydedilmiş bir kurs silinemez: **arşivlenir**.
 
@@ -995,12 +996,24 @@ Dosyadan, kursun geçerlilik süresi kadar geçerli bir **kanıt** oluşur ve te
 
 Kanıt dosyası değiştirilemez: yanlışsa oturumu silip yeniden kaydedin. Kanıtı daha önce değerlendirilmiş kontrolleri destekleyen bir oturum silinemez (yalnızca bir superuser silebilir). **Kanıtsız geçmiş kayıt** satırları eski kişi bazlı verilerin taşınmasından gelir: yalnızca sayıları içerir.
 
+### 5. Kritik roller ve yönetim organı
+
+Hedef kitlesi **kritik roller** veya **yönetim organı** olan kurslarda oturum, grupları değil **kimlerin katıldığını** kaydeder:
+
+1. Kayıt formunda, kurs ve tarihten sonra iki liste görünür: tesiste etkin **atama sahipleri** (atamalarıyla birlikte) ve tesisin veya kuruluşun **yönetişim organlarının görevdeki üyeleri** (yönetim kurulu üyeleri YK etiketi taşır). Listeler oturum tarihine bağlıdır: o gün görevde olanları gösterir.
+2. Katılanları işaretleyin. Eğitilen kişi sayısı katılımcı sayısıdır (hem üye hem atama sahibi olan kişi bir kez sayılır); eğitilecek kişi sayısı, belirtmezseniz aynı sayıdır.
+3. Kanıt dosyasını (imza föyü, sertifikalar) ekleyin ve kaydedin.
+
+Kurs bir **yetkinlik** kazandırıyorsa, hesabı olanlar bunu oturumun kanıtıyla ve aynı geçerlilik süresiyle alır. Zaten sahip olunan daha yüksek bir seviye düşürülmez. Oturumu silerseniz yetkinlik önceki haline döner. Katılımcılar değiştirilemez: hatalıysa oturumu silip yeniden kaydedin.
+
+**Yönetim organı eğitimi (NIS2 Md. 20).** **Oturumlar** sekmesindeki bir panel, tesisin veya kuruluşun yönetim kurulu türündeki organlarının görevdeki üyelerini listeler: geçerli eğitimi olanlar yeşil (geçerlilik tarihiyle), henüz eğitilecek olanlar kırmızı. Hedef kitlesi "yönetim organı" olan ve hâlâ geçerli bir kursa katılım sayılır. Üyeler **Governance → Yönetişim organları** bölümünden yönetilir.
+
 ### Sonuçlar nerede görünür
 
 - **Reporting → KPI**, "Eğitim ve farkındalık" bölümü: kurs ve tesis bazında kapsam, plan ilerlemesi, geciken kalemler, son oltalama simülasyonları ve tekrarlanacak eğitimler.
-- **Güvenlik hedeflerinin** bağlanabildiği, otomatik hesaplanan **KPI'lar**: zorunlu eğitim kapsamı, plan ilerlemesi, geciken kalemler, oltalamada tıklama ve bildirim oranı.
+- **Güvenlik hedeflerinin** bağlanabildiği, otomatik hesaplanan **KPI'lar**: zorunlu eğitim kapsamı, plan ilerlemesi, geciken kalemler, oltalamada tıklama ve bildirim oranı, yönetim organı eğitimi.
 - **Operasyon Merkezi**: geciken plan kalemlerini işaret eder.
-- **Denetim paketi** (Audit Preparation): tesisin planı, kanıt referanslı oturumları, kapsamı ve gruplarıyla `07_training` klasörü.
+- **Denetim paketi** (Audit Preparation): tesisin planı, kanıt referanslı oturumları, kapsamı, gruplarıyla, kritik rol ve yönetim kurulu oturumlarının katılımcıları ve yönetim kurulu eğitim durumuyla (`board_training.csv`) `07_training` klasörü.
 
 ---
 

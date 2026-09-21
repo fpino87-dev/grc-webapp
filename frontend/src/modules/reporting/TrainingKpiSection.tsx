@@ -51,7 +51,7 @@ export function TrainingKpiSection({ data }: { data: TrainingKpi }) {
         {t("reporting.kpi.section_training")}
       </h3>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-4">
         <Card
           label={t("reporting.kpi.training.coverage")}
           value={fmt(coverage.pct)}
@@ -81,6 +81,14 @@ export function TrainingKpiSection({ data }: { data: TrainingKpi }) {
           hint={phishing.sent
             ? t("reporting.kpi.training.phishing_report_hint", { pct: phishing.report_pct ?? 0, sent: phishing.sent })
             : t("reporting.kpi.training.no_phishing")}
+        />
+        <Card
+          label={t("reporting.kpi.training.board")}
+          value={fmt(data.board.pct)}
+          valueClass={pctColor(data.board.pct, 100, 75)}
+          hint={data.board.total
+            ? t("reporting.kpi.training.board_hint", { trained: data.board.trained, total: data.board.total })
+            : t("reporting.kpi.training.no_board")}
         />
       </div>
 

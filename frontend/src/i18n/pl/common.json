@@ -1934,7 +1934,18 @@
         "file": "Plik dowodowy",
         "notes": "Uwagi",
         "counts": "Liczby",
-        "proof": "Dowód"
+        "proof": "Dowód",
+        "participants": "Uczestnicy"
+      },
+      "participants": {
+        "role_holders": "Osoby z nominacjami w zakładzie",
+        "no_role_holders": "Brak aktywnych nominacji w zakładzie w tym dniu.",
+        "members": "Członkowie organów zarządczych",
+        "no_members": "Brak urzędujących członków w tym dniu.",
+        "management_body": "Zarząd",
+        "hint": "Wybierz uczestników: lista pokazuje osoby pełniące funkcję w dniu szkolenia.",
+        "competency_hint": "Osoby z kontem otrzymują kompetencję „{{competency}}” (poziom {{level}}).",
+        "target_hint": "Ile osób należało przeszkolić; jeśli puste — liczba uczestników."
       }
     },
     "audiences": {
@@ -1976,8 +1987,12 @@
         "duration_minutes": "Czas trwania (minuty)",
         "mandatory": "Obowiązkowy",
         "status": "Status",
-        "controls": "Potwierdzane kontrole"
-      }
+        "controls": "Potwierdzane kontrole",
+        "competency": "Przyznawana kompetencja",
+        "competency_level": "Poziom"
+      },
+      "competency_hint": "Opcjonalnie. Uczestnicy z kontem otrzymują tę kompetencję (ISO 27001 pkt 7.2) w swoim profilu, z dowodem szkolenia. Wyższy poziom, który już posiadają, nigdy nie zostanie obniżony.",
+      "grants": "Przyznaje: {{competency}} (poziom {{level}})"
     },
     "help": {
       "title": "Szkolenia oparte na dowodach",
@@ -1987,14 +2002,29 @@
         "2": "Grupy docelowe: wprowadź grupy zakładu z liczbą osób (np. Produkcja 240) i aktualizuj ją, gdy się zmienia.",
         "3": "Plan: utwórz plan na rok, dodaj pozycje (kurs, grupy, termin) i powiąż dokument zatwierdzający.",
         "4": "Szkolenia: rejestruj każde szkolenie z liczbami i plikiem dowodowym. Dowód zostaje automatycznie powiązany z kontrolami kursu, a przypomnienie pozycji się zamyka.",
-        "5": "Śledź pokrycie, zaległe pozycje i phishing w Raportowaniu i KPI oraz powiąż z nimi cele bezpieczeństwa."
+        "5": "Śledź pokrycie, zaległe pozycje i phishing w Raportowaniu i KPI oraz powiąż z nimi cele bezpieczeństwa.",
+        "6": "Role krytyczne i zarząd: w kursach dla nich szkolenie wskazuje uczestników, wybranych spośród osób z nominacjami i członków organów zarządczych. Osoby z kontem otrzymują kompetencję kursu; panel „Szkolenie organu zarządzającego” pokazuje, kto jest przeszkolony i do kiedy."
       },
       "connections": {
         "documents": "Plan zatwierdza się powiązanym dokumentem; każdy plik dowodowy staje się dowodem",
         "controls": "Dowody ze szkoleń potwierdzają kontrole wskazane w kursie",
         "kpi": "Pokrycie, realizacja planu, zaległości i phishing to KPI obliczane automatycznie",
-        "objectives": "Cele bezpieczeństwa wiążą się z KPI szkoleń"
+        "objectives": "Cele bezpieczeństwa wiążą się z KPI szkoleń",
+        "governance": "Uczestników szkoleń dla ról krytycznych i zarządu wybiera się spośród nominacji i organów zarządczych; szkolenie zarządu to KPI (NIS2 art. 20)"
       }
+    },
+    "competency_levels": {
+      "1": "1 — Świadomość",
+      "2": "2 — Praktyk",
+      "3": "3 — Ekspert"
+    },
+    "board": {
+      "title": "Szkolenie organu zarządzającego (NIS2 art. 20)",
+      "summary": "{{trained}}/{{total}} członków z ważnym szkoleniem",
+      "valid_until": "ważne do {{date}}",
+      "no_expiry": "ważne",
+      "to_train": "do przeszkolenia",
+      "hint": "Urzędujący członkowie organów typu zarząd zakładu lub organizacji. Szkolenie się liczy, jeśli zarejestrowano je z wciąż ważnym kursem dla organu zarządzającego."
     }
   },
   "incidents": {
@@ -3731,7 +3761,10 @@
         "legacy": "historyczne",
         "expiring_title": "Szkolenia do powtórzenia: dowód wygasł lub wygasa w ciągu 60 dni",
         "col_valid_until": "Ważne do",
-        "expired": "wygasło"
+        "expired": "wygasło",
+        "board": "Szkolenie zarządu",
+        "board_hint": "{{trained}}/{{total}} członków z ważnym szkoleniem",
+        "no_board": "Brak zarządu w rejestrze"
       }
     },
     "loading_kpi": "Ładowanie KPI...",

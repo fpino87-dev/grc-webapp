@@ -39,12 +39,13 @@ export function TrainingPage() {
         <ModuleHelp
           title={t("training.help.title")}
           description={t("training.help.description")}
-          steps={[1, 2, 3, 4, 5].map(n => t(`training.help.steps.${n}`))}
+          steps={[1, 2, 3, 4, 5, 6].map(n => t(`training.help.steps.${n}`))}
           connections={[
             { module: "M07", relation: t("training.help.connections.documents") },
             { module: "M03", relation: t("training.help.connections.controls") },
             { module: "M08 KPI", relation: t("training.help.connections.kpi") },
             { module: "M00", relation: t("training.help.connections.objectives") },
+            { module: "M00", relation: t("training.help.connections.governance") },
           ]}
         />
       </div>

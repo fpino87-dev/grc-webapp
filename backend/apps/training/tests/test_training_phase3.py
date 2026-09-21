@@ -193,7 +193,7 @@ def test_reporting_training_section_has_no_personal_data(plant):
     TrainingEnrollment.objects.create(course=course, user=u, status="completato")
 
     tr = kpi_overview(str(plant.pk))["training"]
-    assert set(tr) == {"coverage", "plan", "phishing", "expiring_evidence", "stale_audiences"}
+    assert set(tr) == {"coverage", "plan", "phishing", "expiring_evidence", "stale_audiences", "board"}
     assert tr["coverage"]["pct"] == 75.0
     assert "persona@t.it" not in repr(tr)
 
@@ -217,11 +217,12 @@ def test_audit_pack_training_is_site_scoped_and_anonymous(plant, plant_b, tmp_pa
     TrainingEnrollment.objects.create(course=course, user=u, status="completato")
 
     out = _collect_training(tmp_path, plant)
-    assert out == {"plan_items": 2, "sessions": 1, "coverage_pct": 75.0}
+    assert out == {"plan_items": 2, "sessions": 1, "coverage_pct": 75.0,
+                   "board_training_pct": None}
 
     folder = tmp_path / "07_training"
     assert sorted(p.name for p in folder.iterdir()) == [
-        "audiences.csv", "coverage.csv", "plan_items.csv", "sessions.csv",
+        "audiences.csv", "board_training.csv", "coverage.csv", "plan_items.csv", "sessions.csv",
     ]
     with (folder / "plan_items.csv").open(encoding="utf-8") as fp:
         scopes = sorted(r["plan_scope"] for r in csv.DictReader(fp))

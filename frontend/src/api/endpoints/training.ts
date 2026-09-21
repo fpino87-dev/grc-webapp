@@ -2,7 +2,9 @@ import { apiClient } from "../client";
 
 // Formazione a evidenze: la piattaforma non eroga la formazione, la governa.
 // Piano → erogazioni con file di prova → evidenze sui controlli → KPI.
-// Solo conteggi per gruppo: nessun dato personale dei dipendenti.
+// Personale: solo conteggi per gruppo, nessun dato personale dei dipendenti.
+// Ruoli critici e organo di gestione: partecipanti per nome, scelti fra i
+// titolari di nomine e i componenti degli organi di governo.
 
 type Page<T> = { results: T[] };
 
@@ -30,7 +32,12 @@ export interface TrainingCourse {
   validity_months: number | null;
   controls: string[];
   controls_detail: ControlOption[];
+  competency: string;
+  competency_level: 1 | 2 | 3;
 }
+
+export const isNamedCourse = (c: Pick<TrainingCourse, "kind" | "audience_kind">) =>
+  c.audience_kind !== "generale" && c.kind !== "phishing";
 
 export interface TrainingCapabilities {
   can_read_records: boolean;
@@ -107,6 +114,42 @@ export interface TrainingSession {
   evidence_file_path: string | null;
   legacy: boolean;
   notes: string;
+  participants_detail: SessionParticipant[];
+}
+
+export interface SessionParticipant {
+  id: string;
+  name: string;
+  roles: string[];
+  committee: string | null;
+  user_id: string | null;
+  member_id: string | null;
+}
+
+export interface ParticipantOptions {
+  role_holders: { user_id: string; name: string; roles: string[] }[];
+  members: {
+    member_id: string;
+    name: string;
+    position: string;
+    committee: string;
+    management_body: boolean;
+    user_id: string | null;
+  }[];
+}
+
+export interface BoardStatus {
+  total: number;
+  trained: number;
+  pct: number | null;
+  members: {
+    member_id: string;
+    full_name: string;
+    position: string;
+    committee: string;
+    trained: boolean;
+    valid_until: string | null;
+  }[];
 }
 
 export interface SessionCreated extends TrainingSession {
@@ -126,6 +169,8 @@ export const trainingApi = {
   controlOptions: (search: string) =>
     apiClient.get<ControlOption[]>(`${BASE}/courses/control-options/`, { params: { search } })
       .then(r => r.data),
+  competencyOptions: () =>
+    apiClient.get<string[]>(`${BASE}/courses/competency-options/`).then(r => r.data),
   createCourse: (data: Partial<TrainingCourse>) =>
     apiClient.post<TrainingCourse>(`${BASE}/courses/`, data).then(r => r.data),
   updateCourse: (id: string, data: Partial<TrainingCourse>) =>
@@ -168,4 +213,11 @@ export const trainingApi = {
   updateSession: (id: string, data: Partial<TrainingSession>) =>
     apiClient.patch<TrainingSession>(`${BASE}/sessions/${id}/`, data).then(r => r.data),
   deleteSession: (id: string) => apiClient.delete(`${BASE}/sessions/${id}/`),
+  participantOptions: (plant: string, heldOn: string) =>
+    apiClient.get<ParticipantOptions>(`${BASE}/sessions/participant-options/`, {
+      params: { plant, held_on: heldOn },
+    }).then(r => r.data),
+  boardStatus: (plant: string) =>
+    apiClient.get<BoardStatus>(`${BASE}/sessions/board-status/`, { params: { plant } })
+      .then(r => r.data),
 };

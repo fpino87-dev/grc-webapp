@@ -1934,7 +1934,18 @@
         "file": "Proof file",
         "notes": "Notes",
         "counts": "Numbers",
-        "proof": "Proof"
+        "proof": "Proof",
+        "participants": "Participants"
+      },
+      "participants": {
+        "role_holders": "Role holders at the site",
+        "no_role_holders": "No active role assignment at the site on this date.",
+        "members": "Governing body members",
+        "no_members": "No serving member on this date.",
+        "management_body": "Board",
+        "hint": "Select who attended: the list shows the people in office on the session date.",
+        "competency_hint": "Those with an account receive the competency “{{competency}}” (level {{level}}).",
+        "target_hint": "How many people should have been trained; if empty, the number of participants."
       }
     },
     "audiences": {
@@ -1976,8 +1987,12 @@
         "duration_minutes": "Duration (minutes)",
         "mandatory": "Mandatory",
         "status": "Status",
-        "controls": "Controls demonstrated"
-      }
+        "controls": "Controls demonstrated",
+        "competency": "Competency granted",
+        "competency_level": "Level"
+      },
+      "competency_hint": "Optional. Participants with an account receive this competency (ISO 27001 cl. 7.2) on their profile, backed by the session's proof. A higher level they already hold is never lowered.",
+      "grants": "Grants: {{competency}} (level {{level}})"
     },
     "help": {
       "title": "Evidence-based training",
@@ -1987,14 +2002,29 @@
         "2": "Target groups: enter the site's groups with their number of people (e.g. Production 240) and update it when it changes.",
         "3": "Plan: create the year's plan, add items (course, groups, due date) and link the approval document.",
         "4": "Sessions: record each session with its numbers and proof file. The evidence is linked automatically to the course's controls and the item's reminder is closed.",
-        "5": "Track coverage, overdue items and phishing in Reporting and KPIs, and link security objectives to them."
+        "5": "Track coverage, overdue items and phishing in Reporting and KPIs, and link security objectives to them.",
+        "6": "Critical roles and board: for courses aimed at them, the session lists who attended, chosen from role holders and governing body members. Those with an account receive the course's competency; the “Management body training” panel shows who is trained and until when."
       },
       "connections": {
         "documents": "The plan is approved through the linked document; each proof becomes evidence",
         "controls": "Session evidence proves the controls set on the course",
         "kpi": "Coverage, plan progress, overdue items and phishing are computed automatically as KPIs",
-        "objectives": "Security objectives link to the training KPIs"
+        "objectives": "Security objectives link to the training KPIs",
+        "governance": "Participants in critical-role and board sessions are chosen from role assignments and governing bodies; board training is a KPI (NIS2 Art. 20)"
       }
+    },
+    "competency_levels": {
+      "1": "1 — Awareness",
+      "2": "2 — Practitioner",
+      "3": "3 — Expert"
+    },
+    "board": {
+      "title": "Management body training (NIS2 Art. 20)",
+      "summary": "{{trained}}/{{total}} members with valid training",
+      "valid_until": "valid until {{date}}",
+      "no_expiry": "valid",
+      "to_train": "to be trained",
+      "hint": "Serving members of board-type governing bodies of the site or the organisation. Training counts when recorded with a still-valid management-body course."
     }
   },
   "incidents": {
@@ -3731,7 +3761,10 @@
         "legacy": "historical",
         "expiring_title": "Training to repeat: proof expired or expiring within 60 days",
         "col_valid_until": "Valid until",
-        "expired": "expired"
+        "expired": "expired",
+        "board": "Board training",
+        "board_hint": "{{trained}}/{{total}} members with valid training",
+        "no_board": "No board on record"
       }
     },
     "loading_kpi": "Loading KPIs...",

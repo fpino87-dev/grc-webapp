@@ -953,7 +953,7 @@ Allez dans **Opérations → Formation** et sélectionnez le site en haut. La pa
 ### Qui fait quoi
 
 - **Enregistrent** les groupes, les plans et les sessions le Compliance Officer et le Plant Manager du site, ou la personne ayant la **nomination de CISO** dans Governance pour le site ou pour l'organisation. Il n'y a pas d'affectation : le premier disponible enregistre.
-- L'Auditeur Interne et l'Auditeur Externe **consultent** aussi le plan, les sessions et la couverture : ce sont des chiffres et des fichiers de preuve, pas des données personnelles.
+- L'Auditeur Interne et l'Auditeur Externe **consultent** aussi le plan, les sessions et la couverture : ce sont des chiffres et des fichiers de preuve, pas des données personnelles. Pour les rôles critiques et le CA, ils voient aussi les noms des participants, les mêmes que ceux déjà présents dans Governance : c'est la preuve exigée par l'art. 20 de NIS2.
 - Les autres rôles ne voient que le **Catalogue des cours**.
 
 ### 1. Catalogue des cours
@@ -965,6 +965,7 @@ Pour chaque cours, indiquez :
 - **Validité (mois)** : au bout de combien de mois la session doit être répétée (ex. 12 = chaque année) ; vide = n'expire pas ;
 - **Obligatoire** : les cours obligatoires pour le personnel entrent dans la couverture ;
 - **Contrôles démontrés** : recherchez le contrôle par code (ex. A.6.3). Chaque session du cours deviendra une preuve de ces contrôles.
+- **Compétence attribuée** et **niveau** (rôles critiques et organe de direction uniquement, facultatif) : les participants disposant d'un compte reçoivent cette compétence dans leur fiche de compétences (ISO 27001 cl. 7.2). Les noms proposés sont ceux des exigences de compétence des rôles.
 
 Un cours déjà présent dans un plan ou ayant des sessions ne peut pas être supprimé : on l'**archive**.
 
@@ -995,12 +996,24 @@ Le fichier devient une **preuve** qui expire selon la validité du cours, **lié
 
 Le fichier de preuve ne se remplace pas : s'il est erroné, supprimez la session et enregistrez-la de nouveau. Une session dont la preuve étaye des contrôles déjà évalués ne peut pas être supprimée (seul un superuser le peut). Les lignes **historique sans preuve** proviennent de la migration des anciennes données individuelles : elles ne portent que des chiffres.
 
+### 5. Rôles critiques et organe de direction
+
+Pour les cours destinés aux **rôles critiques** ou à l'**organe de direction**, la session enregistre **qui a participé**, pas des groupes :
+
+1. Dans le formulaire, après le cours et la date, deux listes apparaissent : les **titulaires de nominations** actives sur le site (avec leurs nominations) et les **membres en fonction des organes de gouvernance** du site ou de l'organisation (les membres du CA portent l'étiquette CA). Les listes dépendent de la date de la session : elles montrent qui était en fonction ce jour-là.
+2. Cochez les participants. Les personnes formées correspondent au nombre de participants (une personne à la fois membre et titulaire de nominations compte une fois) ; les personnes à former, si vous ne les indiquez pas, sont le même nombre.
+3. Joignez le fichier de preuve (feuille d'émargement, attestations) et enregistrez.
+
+Si le cours attribue une **compétence**, ceux qui ont un compte la reçoivent, avec la preuve de la session et la même échéance. Un niveau supérieur déjà détenu n'est pas abaissé. Si vous supprimez la session, la compétence revient à son état antérieur. Les participants ne se modifient pas : s'ils sont erronés, supprimez la session et enregistrez-la à nouveau.
+
+**Formation de l'organe de direction (NIS2 art. 20).** Dans l'onglet **Sessions**, un encadré liste les membres en fonction des organes de type CA du site ou de l'organisation : en vert ceux qui ont une formation valide (avec sa date de fin de validité), en rouge ceux qui restent à former. Compte la participation à un cours encore valide destiné à l'« organe de direction ». Les membres se gèrent dans **Governance → Organes de gouvernance**.
+
 ### Où voir les résultats
 
 - **Reporting → KPI**, section « Formation et sensibilisation » : couverture par cours et par site, avancement du plan, éléments en retard, dernières simulations de phishing et formations à renouveler.
-- **KPI** calculés automatiquement, que les **objectifs de sécurité** peuvent suivre : couverture de la formation obligatoire, avancement du plan, éléments en retard, taux de clic et de signalement du phishing.
+- **KPI** calculés automatiquement, que les **objectifs de sécurité** peuvent suivre : couverture de la formation obligatoire, avancement du plan, éléments en retard, taux de clic et de signalement du phishing, formation de l'organe de direction.
 - **Centre Opérationnel** : signale les éléments du plan en retard.
-- **Pack d'audit** (Audit Preparation) : dossier `07_training` avec le plan, les sessions et la référence à la preuve, la couverture et les groupes du site.
+- **Pack d'audit** (Audit Preparation) : dossier `07_training` avec le plan, les sessions et la référence à la preuve, la couverture et les groupes du site, les participants des sessions pour rôles critiques et CA, l'état de la formation du CA (`board_training.csv`).
 
 ---
 

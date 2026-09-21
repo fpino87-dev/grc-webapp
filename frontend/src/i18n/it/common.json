@@ -1934,7 +1934,18 @@
         "file": "File di prova",
         "notes": "Note",
         "counts": "Numeri",
-        "proof": "Prova"
+        "proof": "Prova",
+        "participants": "Partecipanti"
+      },
+      "participants": {
+        "role_holders": "Titolari di nomine sul sito",
+        "no_role_holders": "Nessuna nomina attiva sul sito a questa data.",
+        "members": "Componenti degli organi di governo",
+        "no_members": "Nessun componente in carica a questa data.",
+        "management_body": "CdA",
+        "hint": "Seleziona chi ha partecipato: sono le persone in carica alla data dell'erogazione.",
+        "competency_hint": "Chi ha un account riceve la competenza «{{competency}}» (livello {{level}}).",
+        "target_hint": "Quante persone andavano formate; se vuoto, il numero dei partecipanti."
       }
     },
     "audiences": {
@@ -1976,8 +1987,12 @@
         "duration_minutes": "Durata (minuti)",
         "mandatory": "Obbligatorio",
         "status": "Stato",
-        "controls": "Controlli dimostrati"
-      }
+        "controls": "Controlli dimostrati",
+        "competency": "Competenza attribuita",
+        "competency_level": "Livello"
+      },
+      "competency_hint": "Facoltativa. Chi partecipa con un account riceve questa competenza (ISO 27001 cl. 7.2) nella sua scheda, con la prova dell'erogazione. Un livello più alto già posseduto non viene abbassato.",
+      "grants": "Attribuisce: {{competency}} (livello {{level}})"
     },
     "help": {
       "title": "Formazione basata sulle evidenze",
@@ -1987,14 +2002,29 @@
         "2": "Gruppi destinatari: per il sito inserisci i gruppi con il numero di persone (es. Produzione 240) e aggiornalo quando cambia.",
         "3": "Piano: crea il piano dell'anno, aggiungi le voci (corso, gruppi, scadenza) e collega il documento di approvazione.",
         "4": "Erogazioni: registra ogni sessione con i numeri e il file di prova. L'evidenza viene collegata da sola ai controlli del corso e il promemoria della voce si chiude.",
-        "5": "Segui copertura, voci in ritardo e phishing nel Reporting e nei KPI, e aggancia gli obiettivi di sicurezza."
+        "5": "Segui copertura, voci in ritardo e phishing nel Reporting e nei KPI, e aggancia gli obiettivi di sicurezza.",
+        "6": "Ruoli critici e CdA: per i corsi destinati a loro, nell'erogazione scegli chi ha partecipato fra i titolari di nomine e i componenti degli organi di governo. Chi ha un account riceve la competenza del corso; il riquadro «Formazione dell'organo di gestione» mostra chi è formato e fino a quando."
       },
       "connections": {
         "documents": "Il piano si approva con il documento collegato; ogni prova diventa un'evidenza",
         "controls": "Le evidenze delle erogazioni provano i controlli indicati dal corso",
         "kpi": "Copertura, avanzamento del piano, ritardi e phishing sono KPI calcolati in automatico",
-        "objectives": "Gli obiettivi di sicurezza si agganciano ai KPI della formazione"
+        "objectives": "Gli obiettivi di sicurezza si agganciano ai KPI della formazione",
+        "governance": "I partecipanti delle erogazioni per ruoli critici e CdA si scelgono fra nomine e organi di governo; la formazione del CdA è un KPI (NIS2 art. 20)"
       }
+    },
+    "competency_levels": {
+      "1": "1 — Consapevolezza",
+      "2": "2 — Operativo",
+      "3": "3 — Esperto"
+    },
+    "board": {
+      "title": "Formazione dell'organo di gestione (NIS2 art. 20)",
+      "summary": "{{trained}}/{{total}} componenti con formazione valida",
+      "valid_until": "valida fino al {{date}}",
+      "no_expiry": "valida",
+      "to_train": "da formare",
+      "hint": "Componenti in carica degli organi di tipo CdA del sito o dell'organizzazione. La formazione vale se registrata con un corso per l'organo di gestione ancora valido."
     }
   },
   "incidents": {
@@ -3728,7 +3758,10 @@
         "legacy": "storico",
         "expiring_title": "Formazione da ripetere: prova scaduta o in scadenza entro 60 giorni",
         "col_valid_until": "Valida fino al",
-        "expired": "scaduta"
+        "expired": "scaduta",
+        "board": "Formazione CdA",
+        "board_hint": "{{trained}}/{{total}} componenti con formazione valida",
+        "no_board": "Nessun CdA in anagrafica"
       }
     },
     "compliance": {

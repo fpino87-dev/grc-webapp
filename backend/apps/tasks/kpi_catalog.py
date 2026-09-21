@@ -1021,6 +1021,41 @@ KPI_CATALOG = {
         },
         "checklist_hint": {"it": "", "en": "", "fr": "", "pl": "", "tr": ""},
     },
+    "board_training_valid": {
+        "name": {
+            "it": "Formazione dell'organo di gestione",
+            "en": "Management Body Training",
+            "fr": "Formation de l'organe de direction",
+            "pl": "Szkolenie organu zarządzającego",
+            "tr": "Yönetim Organı Eğitimi",
+        },
+        "description": {
+            "it": "Percentuale dei componenti in carica dell'organo di gestione (CdA) con un'erogazione ancora valida di un corso per l'organo di gestione.",
+            "en": "Percentage of the serving members of the management body (board) with a still-valid session of a management-body course.",
+            "fr": "Pourcentage des membres en fonction de l'organe de direction (CA) ayant suivi une session encore valide d'un cours destiné à l'organe de direction.",
+            "pl": "Odsetek urzędujących członków organu zarządzającego (zarządu) z wciąż ważnym szkoleniem z kursu dla organu zarządzającego.",
+            "tr": "Yönetim organının (yönetim kurulu) görevdeki üyelerinden, yönetim organına yönelik bir kursun hâlâ geçerli bir oturumuna katılmış olanların yüzdesi.",
+        },
+        "unit": "%",
+        "aggregation": "last_value",
+        "threshold_direction": "above",
+        "threshold_warning": 100.0,
+        "threshold_critical": 75.0,
+        "notify_on_warning": True,
+        "notify_on_critical": True,
+        "source": "internal",
+        "category": "training",
+        "frameworks": ["NIS2", "ISO27001"],
+        "match_keywords": [],
+        "rationale": {
+            "it": "NIS2 Art.20(2) / ISO 27001 cl.5.1 e 7.2 — i membri dell'organo di gestione sono tenuti a seguire una formazione per valutare i rischi di cibersicurezza e il loro impatto; la formazione va ripetuta e documentata.",
+            "en": "NIS2 Art.20(2) / ISO 27001 cl.5.1 and 7.2 — members of the management body are required to follow training to assess cybersecurity risks and their impact; the training must be repeated and documented.",
+            "fr": "NIS2 Art.20(2) / ISO 27001 cl.5.1 et 7.2 — les membres de l'organe de direction sont tenus de suivre une formation pour évaluer les risques de cybersécurité et leur impact ; la formation doit être renouvelée et documentée.",
+            "pl": "NIS2 Art.20(2) / ISO 27001 pkt 5.1 i 7.2 — członkowie organu zarządzającego mają obowiązek uczestniczyć w szkoleniach, aby oceniać ryzyka cyberbezpieczeństwa i ich wpływ; szkolenie należy powtarzać i dokumentować.",
+            "tr": "NIS2 Md.20(2) / ISO 27001 md.5.1 ve 7.2 — yönetim organı üyeleri siber güvenlik risklerini ve etkilerini değerlendirebilmek için eğitim almakla yükümlüdür; eğitim tekrarlanmalı ve belgelenmelidir.",
+        },
+        "checklist_hint": {"it": "", "en": "", "fr": "", "pl": "", "tr": ""},
+    },
     # ───────────────────────── SUPPLIER ────────────────────────────────────
     "suppliers_assessed_rate": {
         "name": {

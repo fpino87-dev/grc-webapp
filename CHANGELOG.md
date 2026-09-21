@@ -37,6 +37,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
   Ognuno vede ciò che gli compete: chi gestisce la formazione del sito (Compliance Officer, Plant Manager o CISO nominato) registra; gli auditor, interni ed esterni, consultano in sola lettura; gli altri ruoli vedono solo il catalogo. Guida contestuale (?) e manuali utente e tecnici aggiornati nelle cinque lingue; i18n IT/EN/FR/PL/TR.
 
+- **Formazione — ruoli critici e organo di gestione (M15, fase 5 di 5)**: per i corsi destinati ai **ruoli critici** o all'**organo di gestione** l'erogazione registra **chi ha partecipato**, non solo quante persone:
+  - i partecipanti si scelgono fra i **titolari di nomine** (Governance) attive sul sito e i **componenti in carica degli organi di governo** del sito o di organizzazione, alla data dell'erogazione; chi è sia componente sia titolare di nomine conta una volta; la registrazione conserva le nomine che la persona aveva in quel momento. Il personale generale resta registrato solo in numeri;
+  - un corso può attribuire una **competenza** a un livello (ISO 27001 cl. 7.2): chi partecipa con un account la trova nella propria scheda competenze, con la prova dell'erogazione e la stessa scadenza. Un livello più alto già posseduto non viene abbassato e una prova più recente non viene sostituita da una più vecchia; se l'erogazione viene eliminata, la competenza torna com'era prima (o viene rimossa, se era nata da quella erogazione);
+  - nuovo KPI calcolato **«Formazione dell'organo di gestione»** (NIS2 art. 20): componenti in carica del CdA con una formazione ancora valida sul totale dei componenti in carica. Nel tab Erogazioni un riquadro mostra chi è formato e fino a quando e chi è ancora da formare; nel Reporting la sola percentuale; nel **pacchetto audit** (`07_training/`) i partecipanti di ogni erogazione e lo stato della formazione del CdA (`board_training.csv`).
+
+  Nell'audit trail delle erogazioni finiscono solo identificativi e il numero dei partecipanti, mai i nomi.
+
 ### Changed
 
 - **Formazione — il KPI «Completamento formazione obbligatoria» diventa «Copertura formazione obbligatoria»**: prima misurava la percentuale di iscrizioni completate dagli **utenti della piattaforma**, ora misura la copertura del **personale** dei gruppi destinatari. I valori storici del KPI hanno quindi un significato diverso da quelli nuovi: il trend va letto con questa discontinuità, anche negli obiettivi di sicurezza agganciati. Anche il **tasso di clic sul phishing** passa da dato atteso via API (KnowBe4) a calcolo interno dalle simulazioni registrate. La migrazione `tasks.0016` aggiorna le definizioni già importate, senza toccare nomi e descrizioni personalizzati.
@@ -53,6 +60,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 ### Fixed
 
 - **Build di produzione — compilazione delle traduzioni**: dalla 0.8.0 `compilemessages` (eseguito da `Dockerfile.prod`) falliva in polacco e turco perché l'etichetta «% compliant» del verbale del riesame era marcata per errore come stringa di formato, e l'immagine non si costruiva. Il marcatore è stato rimosso nelle quattro lingue.
+- **Competenze (M02)**: una competenza eliminata impediva di registrarne di nuovo una con lo stesso nome per la stessa persona (errore di salvataggio). Ora l'unicità vale solo fra le competenze attive.
 
 ## [0.8.0] - 2026-09-21
 

@@ -711,6 +711,7 @@ def _training(plant):
     avanzamento del piano, ultime simulazioni di phishing e prove da rinnovare.
     Solo conteggi, nessun nominativo (regola #11)."""
     from apps.training.services import (
+        board_training,
         expiring_training_evidence,
         latest_phishing,
         plan_progress,
@@ -724,6 +725,8 @@ def _training(plant):
         "phishing": latest_phishing(plant),
         "expiring_evidence": expiring_training_evidence(plant),
         "stale_audiences": stale_audiences_count(plant),
+        # Organo di gestione: solo i conteggi, i nominativi restano nel modulo.
+        "board": {k: v for k, v in board_training(plant).items() if k != "members"},
     }
 
 

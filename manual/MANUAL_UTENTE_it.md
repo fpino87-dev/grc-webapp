@@ -953,7 +953,7 @@ Vai su **Operazioni → Formazione** e seleziona il sito in alto. La pagina ha q
 ### Chi fa cosa
 
 - **Registrano** gruppi, piani ed erogazioni il Compliance Officer e il Plant Manager del sito, oppure chi ha la **nomina di CISO** in Governance per il sito o per l'organizzazione. Non c'è assegnazione: registra chi arriva prima.
-- **Leggono** piano, erogazioni e copertura anche l'Internal Auditor e l'Auditor Esterno: sono numeri e file di prova, non dati personali.
+- **Leggono** piano, erogazioni e copertura anche l'Internal Auditor e l'Auditor Esterno: sono numeri e file di prova, non dati personali. Per i ruoli critici e il CdA vedono anche i nomi dei partecipanti, gli stessi già presenti in Governance: sono la prova richiesta da NIS2 art. 20.
 - Gli altri ruoli vedono solo il **Catalogo corsi**.
 
 ### 1. Catalogo corsi
@@ -965,6 +965,7 @@ Per ogni corso indica:
 - **Validità (mesi)**: dopo quanti mesi l'erogazione va ripetuta (es. 12 = ogni anno); vuoto = non scade;
 - **Obbligatorio**: i corsi obbligatori per il personale entrano nella copertura;
 - **Controlli dimostrati**: cerca il controllo per codice (es. A.6.3). Ogni erogazione del corso diventerà evidenza di questi controlli.
+- **Competenza attribuita** e **livello** (solo per ruoli critici e organo di gestione, facoltativa): chi partecipa con un account riceve questa competenza nella propria scheda competenze (ISO 27001 cl. 7.2). I nomi proposti sono quelli dei requisiti di competenza dei ruoli.
 
 Un corso già in un piano o con erogazioni non si elimina: si **archivia**.
 
@@ -995,12 +996,24 @@ Dal file nasce un'**evidenza** con scadenza pari alla validità del corso, **col
 
 Il file di prova non si sostituisce: se è sbagliato, elimina l'erogazione e registrala di nuovo. Un'erogazione la cui prova sostiene controlli già valutati non si elimina (solo un superuser può farlo). Le righe **storico senza prova** vengono dalla migrazione dei vecchi dati per persona: riportano solo i conteggi.
 
+### 5. Ruoli critici e organo di gestione
+
+Per i corsi con destinatari **ruoli critici** o **organo di gestione** l'erogazione registra **chi ha partecipato**, non i gruppi:
+
+1. Nel form di registrazione, dopo il corso e la data, compaiono due elenchi: i **titolari di nomine** attive sul sito (con le loro nomine) e i **componenti in carica degli organi di governo** del sito o di organizzazione (i componenti del CdA hanno l'etichetta CdA). Gli elenchi dipendono dalla data dell'erogazione: compare chi era in carica quel giorno.
+2. Spunta chi ha partecipato. Le persone formate sono il numero dei partecipanti (una persona che è sia componente sia titolare di nomine conta una volta); le persone da formare, se non le indichi, sono lo stesso numero.
+3. Allega il file di prova (foglio firme, attestati) e registra.
+
+Se il corso attribuisce una **competenza**, chi ha un account la riceve con la prova dell'erogazione e la stessa scadenza. Un livello più alto già posseduto non viene abbassato. Se elimini l'erogazione, la competenza torna com'era prima. I partecipanti non si modificano: se sono sbagliati, elimina l'erogazione e registrala di nuovo.
+
+**Formazione dell'organo di gestione (NIS2 art. 20).** Nel tab **Erogazioni** un riquadro elenca i componenti in carica degli organi di tipo CdA del sito o dell'organizzazione: in verde chi ha una formazione valida (con la data fino a cui vale), in rosso chi è ancora da formare. Conta la partecipazione a un corso con destinatari «organo di gestione» ancora valido. I componenti si gestiscono in **Governance → Organi di governo**.
+
 ### Dove si vedono i risultati
 
 - **Reporting → KPI**, sezione «Formazione e consapevolezza»: copertura per corso e sito, avanzamento del piano, voci in ritardo, ultime simulazioni di phishing e formazione da ripetere.
-- **KPI** calcolati in automatico, agganciabili agli **obiettivi di sicurezza**: copertura della formazione obbligatoria, avanzamento del piano, voci in ritardo, tasso di clic e di segnalazione del phishing.
+- **KPI** calcolati in automatico, agganciabili agli **obiettivi di sicurezza**: copertura della formazione obbligatoria, avanzamento del piano, voci in ritardo, tasso di clic e di segnalazione del phishing, formazione dell'organo di gestione.
 - **Centro Operativo**: segnala le voci del piano in ritardo.
-- **Pacchetto audit** (Audit Preparation): cartella `07_training` con piano, erogazioni con il riferimento all'evidenza, copertura e gruppi del sito.
+- **Pacchetto audit** (Audit Preparation): cartella `07_training` con piano, erogazioni con il riferimento all'evidenza, copertura e gruppi del sito, partecipanti delle erogazioni per ruoli critici e CdA, stato della formazione del CdA (`board_training.csv`).
 
 ---
 

@@ -953,7 +953,7 @@ Go to **Operations → Training** and select the site at the top. The page has f
 ### Who does what
 
 - **Recording** groups, plans and sessions is done by the site's Compliance Officer and Plant Manager, or by whoever holds the **CISO appointment** in Governance for the site or for the organisation. There is no assignment: whoever gets there first records it.
-- The Internal Auditor and the External Auditor also **read** the plan, sessions and coverage: they are numbers and proof files, not personal data.
+- The Internal Auditor and the External Auditor also **read** the plan, sessions and coverage: they are numbers and proof files, not personal data. For critical roles and the board they also see the participants' names, the same ones already held in Governance: they are the proof NIS2 Art. 20 requires.
 - Other roles only see the **Course catalogue**.
 
 ### 1. Course catalogue
@@ -965,6 +965,7 @@ For each course set:
 - **Validity (months)**: after how many months the session must be repeated (e.g. 12 = every year); empty = does not expire;
 - **Mandatory**: mandatory staff courses count towards coverage;
 - **Controls demonstrated**: search the control by code (e.g. A.6.3). Every session of the course will become evidence for these controls.
+- **Competency granted** and **level** (critical roles and management body only, optional): participants with an account receive this competency on their competency profile (ISO 27001 cl. 7.2). The suggested names are those of the roles' competency requirements.
 
 A course already in a plan or with recorded sessions cannot be deleted: **archive** it instead.
 
@@ -995,12 +996,24 @@ The file becomes **evidence** expiring after the course's validity, **automatica
 
 The proof file cannot be replaced: if it is wrong, delete the session and record it again. A session whose proof supports controls already assessed cannot be deleted (only a superuser can). Rows marked **historical, no proof** come from the migration of the old per-person data: they only carry counts.
 
+### 5. Critical roles and management body
+
+For courses whose audience is **critical roles** or **management body**, the session records **who attended**, not groups:
+
+1. In the recording form, after the course and date, two lists appear: the **role holders** active at the site (with their roles) and the **serving members of governing bodies** of the site or the organisation (board members carry the Board label). The lists depend on the session date: they show who was in office that day.
+2. Tick who attended. People trained is the number of participants (someone who is both a member and a role holder counts once); people to train, if you leave it empty, is the same number.
+3. Attach the proof file (signature sheet, certificates) and record.
+
+If the course grants a **competency**, those with an account receive it, backed by the session's proof and with the same expiry. A higher level they already hold is not lowered. If you delete the session, the competency goes back to what it was. Participants cannot be changed: if they are wrong, delete the session and record it again.
+
+**Management body training (NIS2 Art. 20).** In the **Sessions** tab a panel lists the serving members of the site's or organisation's board-type bodies: in green those with valid training (with the date it is valid until), in red those still to be trained. What counts is attending a still-valid course whose audience is "management body". Members are managed in **Governance → Governing bodies**.
+
 ### Where to see the results
 
 - **Reporting → KPI**, "Training and awareness" section: coverage by course and site, plan progress, overdue items, latest phishing simulations and training to repeat.
-- **KPIs** computed automatically, which security objectives can link to: mandatory training coverage, plan progress, overdue items, phishing click and report rates.
+- **KPIs** computed automatically, which security objectives can link to: mandatory training coverage, plan progress, overdue items, phishing click and report rates, management body training.
 - **Operations Center**: flags overdue plan items.
-- **Audit pack** (Audit Preparation): `07_training` folder with the site's plan, sessions with the evidence reference, coverage and groups.
+- **Audit pack** (Audit Preparation): `07_training` folder with the site's plan, sessions with the evidence reference, coverage and groups, participants in critical-role and board sessions, board training status (`board_training.csv`).
 
 ---
 

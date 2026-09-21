@@ -1,4 +1,7 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
+
+from apps.governance.models import CommitteeMember
 
 from .models import (
     TrainingAudience,
@@ -32,6 +35,8 @@ class TrainingCourseSerializer(serializers.ModelSerializer):
             "validity_months",
             "controls",
             "controls_detail",
+            "competency",
+            "competency_level",
             "created_at",
             "updated_at",
             "created_by",
@@ -103,6 +108,15 @@ class TrainingSessionSerializer(serializers.ModelSerializer):
     evidence_file_path = serializers.CharField(
         source="evidence.file_path", read_only=True, default=None,
     )
+    # Ruoli critici e organo di gestione: chi ha partecipato, scelto fra i
+    # titolari di nomine e i componenti degli organi di governo del sito.
+    participant_users = serializers.PrimaryKeyRelatedField(
+        queryset=get_user_model().objects.all(), many=True, write_only=True, required=False,
+    )
+    participant_members = serializers.PrimaryKeyRelatedField(
+        queryset=CommitteeMember.objects.all(), many=True, write_only=True, required=False,
+    )
+    participants_detail = serializers.SerializerMethodField()
 
     class Meta:
         model = TrainingSession
@@ -110,5 +124,27 @@ class TrainingSessionSerializer(serializers.ModelSerializer):
                   "held_on", "audiences", "target_count", "trained_count", "sent_count",
                   "clicked_count", "reported_count", "evidence", "evidence_valid_until",
                   "evidence_file_path", "legacy", "notes", "file",
+                  "participant_users", "participant_members", "participants_detail",
                   "created_at", "updated_at", "created_by"]
         read_only_fields = _SYSTEM + ["evidence", "legacy"]
+
+    def get_participants_detail(self, obj):
+        return [participant_row(p) for p in obj.participants.all()]
+
+
+def participant_row(p) -> dict:
+    member = p.committee_member
+    if member is not None:
+        name = member.full_name
+    elif p.user is not None:
+        name = p.user.get_full_name().strip() or p.user.email or p.user.username
+    else:
+        name = ""
+    return {
+        "id": str(p.pk),
+        "name": name,
+        "roles": p.roles,
+        "committee": member.committee.name if member is not None else None,
+        "user_id": str(p.user_id) if p.user_id else None,
+        "member_id": str(p.committee_member_id) if p.committee_member_id else None,
+    }

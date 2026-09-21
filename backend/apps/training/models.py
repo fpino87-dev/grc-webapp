@@ -49,9 +49,21 @@ class TrainingCourse(BaseModel):
     controls = models.ManyToManyField(
         "controls.Control", blank=True, related_name="training_courses",
     )
+    # Ruoli critici e organo di gestione: la competenza (ISO 27001 cl. 7.2) che
+    # l'erogazione attribuisce ai partecipanti con account, e a quale livello.
+    competency = models.CharField(max_length=200, blank=True)
+    competency_level = models.PositiveSmallIntegerField(
+        choices=[(1, "1"), (2, "2"), (3, "3")], default=1,
+    )
 
     class Meta:
         ordering = ["-created_at"]
+
+    @property
+    def is_named(self) -> bool:
+        """Le erogazioni di questo corso elencano i partecipanti per nome
+        (titolari di nomine, componenti degli organi di governo)."""
+        return self.audience_kind != "generale" and self.kind != "phishing"
 
 
 class TrainingAudience(BaseModel):
@@ -155,6 +167,38 @@ class TrainingSession(BaseModel):
 
     class Meta:
         ordering = ["-held_on"]
+
+
+class TrainingParticipant(BaseModel):
+    """Partecipante nominativo di un'erogazione per ruoli critici o per l'organo
+    di gestione: titolare di una nomina (M00) o componente di un organo di
+    governo, anche senza account. Il personale generale resta solo contato.
+
+    `competency` è la `UserCompetency` aggiornata dall'erogazione (solo per chi
+    ha un account); `competency_before` ne conserva lo stato precedente, per
+    ripristinarlo se l'erogazione viene eliminata (null = creata da questa)."""
+
+    session = models.ForeignKey(
+        TrainingSession, on_delete=models.CASCADE, related_name="participants",
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="training_participations",
+    )
+    committee_member = models.ForeignKey(
+        "governance.CommitteeMember", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="training_participations",
+    )
+    # Nomine attive sul sito alla data dell'erogazione (fotografia, per la prova).
+    roles = models.JSONField(default=list, blank=True)
+    competency = models.ForeignKey(
+        "auth_grc.UserCompetency", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="training_participations",
+    )
+    competency_before = models.JSONField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["created_at"]
 
 
 class TrainingEnrollment(BaseModel):

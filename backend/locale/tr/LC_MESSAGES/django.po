@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grc-webapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-21 12:22+0200\n"
+"POT-Creation-Date: 2026-09-21 22:28+0200\n"
 "PO-Revision-Date: 2026-03-18 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -900,15 +900,15 @@ msgstr "Ulaşılmadı"
 msgid "Sospeso"
 msgstr "Askıya alındı"
 
-#: apps/management_review/report/builder.py:78 apps/reporting/services.py:1144
+#: apps/management_review/report/builder.py:78 apps/reporting/services.py:1101
 msgid "Presidente"
 msgstr "Başkan"
 
-#: apps/management_review/report/builder.py:78 apps/reporting/services.py:1145
+#: apps/management_review/report/builder.py:78 apps/reporting/services.py:1102
 msgid "Membro"
 msgstr "Üye"
 
-#: apps/management_review/report/builder.py:79 apps/reporting/services.py:1146
+#: apps/management_review/report/builder.py:79 apps/reporting/services.py:1103
 msgid "Segretario"
 msgstr "Sekreter"
 
@@ -1967,28 +1967,28 @@ msgstr "Logo mevcut değil: tesis logoları için dosya yüklemeyi kullanın."
 msgid "Logo non trovato nello storage."
 msgstr "Logo depolamada bulunamadı."
 
-#: apps/reporting/services.py:976 apps/reporting/services.py:987
+#: apps/reporting/services.py:933 apps/reporting/services.py:944
 #: apps/reporting/views.py:128 apps/reporting/views.py:142
 msgid "Tutti i siti"
 msgstr "Tüm tesisler"
 
-#: apps/reporting/services.py:979 apps/reporting/services.py:990
+#: apps/reporting/services.py:936 apps/reporting/services.py:947
 msgid "BU"
 msgstr "BU"
 
-#: apps/reporting/services.py:983 apps/reporting/services.py:994
+#: apps/reporting/services.py:940 apps/reporting/services.py:951
 msgid "(nessun sito)"
 msgstr "(tesis yok)"
 
-#: apps/reporting/services.py:1139
+#: apps/reporting/services.py:1096
 msgid "Organo di amministrazione (CdA)"
 msgstr "Yönetim kurulu"
 
-#: apps/reporting/services.py:1140
+#: apps/reporting/services.py:1097
 msgid "Comitato sicurezza"
 msgstr "Güvenlik komitesi"
 
-#: apps/reporting/services.py:1141
+#: apps/reporting/services.py:1098
 msgid "Direzione"
 msgstr "Üst yönetim"
 
@@ -2106,7 +2106,7 @@ msgstr "Bu KPI otomatik hesaplanır: değer elle girilmemelidir."
 msgid "Valore numerico obbligatorio."
 msgstr "Sayısal bir değer zorunludur."
 
-#: apps/tasks/views.py:354
+#: apps/tasks/views.py:354 apps/training/views.py:197
 msgid "Sito non trovato."
 msgstr "Tesis bulunamadı."
 
@@ -2114,8 +2114,8 @@ msgstr "Tesis bulunamadı."
 msgid "Settimana non valida (formato atteso AAAA-MM-GG)."
 msgstr "Geçersiz hafta (beklenen biçim YYYY-AA-GG)."
 
-#: apps/training/models.py:22
 #
+#: apps/training/models.py:22
 msgid "Corso"
 msgstr "Kurs"
 
@@ -2131,97 +2131,149 @@ msgstr "Oltalama simülasyonu"
 msgid "Personale"
 msgstr "Personel"
 
-#: apps/training/models.py:28
 #
+#: apps/training/models.py:28
 msgid "Ruoli critici"
 msgstr "Kritik roller"
 
-#: apps/training/models.py:29
 #
+#: apps/training/models.py:29
 msgid "Organo di gestione"
 msgstr "Yönetim organı"
 
-#: apps/training/services.py:101
 #
+#: apps/training/services.py:136
 msgid "Non gestisci la formazione di questo sito."
 msgstr "Bu tesisin eğitimlerini siz yönetmiyorsunuz."
 
-#: apps/training/services.py:130
+#: apps/training/services.py:157
+msgid ""
+"Il corso è in un piano formativo o ha erogazioni registrate: archivialo."
+msgstr ""
+"Kurs bir eğitim planında yer alıyor veya kayıtlı oturumları var: arşivleyin."
+
+#: apps/training/services.py:178
 msgid "Il sito di un gruppo non si può cambiare."
 msgstr "Bir grubun tesisi değiştirilemez."
 
-#: apps/training/services.py:161
+#: apps/training/services.py:209
 msgid "Il sito di un piano non si può cambiare."
 msgstr "Bir planın tesisi değiştirilemez."
 
-#: apps/training/services.py:171
+#: apps/training/services.py:219
 msgid "Il piano ha erogazioni registrate: non si può eliminare."
 msgstr "Planda kayıtlı eğitimler var: silinemez."
 
-#: apps/training/services.py:187
+#: apps/training/services.py:235
 msgid "I gruppi devono appartenere allo stesso sito."
 msgstr "Gruplar aynı tesise ait olmalıdır."
 
-#: apps/training/services.py:203
+#: apps/training/services.py:251
 msgid "Una voce non si può spostare in un altro piano."
 msgstr "Bir kalem başka bir plana taşınamaz."
 
-#: apps/training/services.py:214
+#: apps/training/services.py:262
 msgid "La voce ha erogazioni registrate: non si può eliminare."
 msgstr "Kalemde kayıtlı eğitimler var: silinemez."
 
-#: apps/training/services.py:274
+#: apps/training/services.py:713
+msgid ""
+"Si possono scegliere solo titolari di nomine attive su questo sito alla data "
+"dell'erogazione."
+msgstr "Yalnızca oturum tarihinde bu tesiste etkin ataması olan kişiler seçilebilir."
+
+#: apps/training/services.py:717
+msgid ""
+"Si possono scegliere solo componenti in carica degli organi di governo di "
+"questo sito."
+msgstr "Yalnızca bu tesisin yönetişim organlarının görevdeki üyeleri seçilebilir."
+
+#: apps/training/services.py:721
+msgid ""
+"Indica chi ha partecipato: titolari di nomine o componenti degli organi di "
+"governo."
+msgstr "Kimlerin katıldığını belirtin: atama sahipleri veya yönetişim organı üyeleri."
+
+#: apps/training/services.py:837
 msgid "Indica quante e-mail sono state inviate."
 msgstr "Kaç e-posta gönderildiğini belirtin."
 
-#: apps/training/services.py:279
+#: apps/training/services.py:842
 msgid "Clic e segnalazioni non possono superare le e-mail inviate."
 msgstr "Tıklamalar ve bildirimler gönderilen e-postaları aşamaz."
 
-#: apps/training/services.py:285
+#: apps/training/services.py:848
 msgid "Indica quante persone andavano formate o scegli i gruppi."
 msgstr "Kaç kişinin eğitilmesi gerektiğini belirtin veya grupları seçin."
 
-#: apps/training/services.py:288
+#: apps/training/services.py:851
 msgid "Indica quante persone sono state formate."
 msgstr "Kaç kişinin eğitildiğini belirtin."
 
-#: apps/training/services.py:291
+#: apps/training/services.py:854
 msgid "Le persone formate non possono superare quelle da formare."
 msgstr "Eğitilen kişi sayısı eğitilmesi gerekenleri aşamaz."
 
-#: apps/training/services.py:319
+#: apps/training/services.py:882
 msgid "La voce del piano riguarda un altro corso."
 msgstr "Plan kalemi başka bir kursa ait."
 
-#: apps/training/services.py:321
+#: apps/training/services.py:884
 msgid "La voce del piano è di un altro sito."
 msgstr "Plan kalemi başka bir tesise ait."
 
-#: apps/training/services.py:332
+#: apps/training/services.py:924
+msgid "Erogazione registrata."
+msgstr "Eğitim oturumu kaydedildi."
+
 #
+#: apps/training/services.py:935
 msgid "Indica il sito dell'erogazione."
 msgstr "Eğitimin yapıldığı tesisi belirtin."
 
-#: apps/training/services.py:335
 #
+#: apps/training/services.py:938
 msgid "Il corso è archiviato."
 msgstr "Kurs arşivlenmiş."
 
-#: apps/training/services.py:338
+#: apps/training/services.py:941
 msgid "Allega la prova dell'erogazione (registro presenze, export, report)."
 msgstr "Eğitimin kanıtını ekleyin (katılım listesi, dışa aktarım, rapor)."
 
-#: apps/training/services.py:342 apps/training/services.py:393
 #
+#: apps/training/services.py:945 apps/training/services.py:1037
 msgid "La data dell'erogazione non può essere futura."
 msgstr "Eğitim tarihi gelecekte olamaz."
 
-#: apps/training/services.py:390
+#: apps/training/services.py:957
+msgid ""
+"Per questo corso si indicano i partecipanti, non i gruppi di destinatari."
+msgstr "Bu kurs için hedef gruplar değil, katılımcılar belirtilir."
+
+#: apps/training/services.py:965
+msgid ""
+"Le erogazioni per il personale registrano solo conteggi, non nominativi."
+msgstr "Personel oturumları yalnızca sayıları kaydeder, isimleri değil."
+
+#: apps/training/services.py:1025
+msgid ""
+"I partecipanti non si modificano: elimina l'erogazione e registrala di nuovo."
+msgstr "Katılımcılar değiştirilemez: oturumu silin ve yeniden kaydedin."
+
+#: apps/training/services.py:1030
+msgid "Per questo corso le persone formate sono i partecipanti registrati."
+msgstr "Bu kurs için eğitilen kişiler kayıtlı katılımcılardır."
+
+#: apps/training/services.py:1034
 msgid "Campo non modificabile: elimina e registra di nuovo."
 msgstr "Bu alan değiştirilemez: silip yeniden kaydedin."
 
-#: apps/training/views.py:160
+#
+#: apps/training/views.py:181
+msgid "Indica il sito."
+msgstr "Tesisi belirtin."
+
+#: apps/training/views.py:205
 msgid ""
 "Il file di prova non si sostituisce: elimina l'erogazione e registrala di "
 "nuovo."
@@ -2255,11 +2307,3 @@ msgstr "Dosya türüne izin verilmiyor. Dosya içeriği uzantıyla eşleşmiyor.
 #, python-format
 msgid "Il contenuto del file non corrisponde all'estensione .%(ext)s."
 msgstr "Dosya içeriği .%(ext)s uzantısıyla eşleşmiyor."
-
-#: apps/training/services.py
-msgid "Erogazione registrata."
-msgstr "Eğitim oturumu kaydedildi."
-
-#: apps/training/services.py
-msgid "Il corso è in un piano formativo o ha erogazioni registrate: archivialo."
-msgstr "Kurs bir eğitim planında yer alıyor veya kayıtlı oturumları var: arşivleyin."

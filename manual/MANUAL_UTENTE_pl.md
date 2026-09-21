@@ -953,7 +953,7 @@ Przejdź do **Operacje → Szkolenia** i wybierz zakład u góry. Strona ma czte
 ### Kto co robi
 
 - Grupy, plany i szkolenia **rejestrują** Compliance Officer i Plant Manager zakładu albo osoba z **nominacją na CISO** w module Governance dla zakładu lub organizacji. Nie ma przydziału: rejestruje ten, kto zrobi to pierwszy.
-- Audytor Wewnętrzny i Audytor Zewnętrzny również **przeglądają** plan, szkolenia i pokrycie: to liczby i pliki dowodowe, a nie dane osobowe.
+- Audytor Wewnętrzny i Audytor Zewnętrzny również **przeglądają** plan, szkolenia i pokrycie: to liczby i pliki dowodowe, a nie dane osobowe. W przypadku ról krytycznych i zarządu widzą też nazwiska uczestników, te same, które są już w module Governance: to dowód wymagany przez art. 20 NIS2.
 - Pozostałe role widzą tylko **Katalog kursów**.
 
 ### 1. Katalog kursów
@@ -965,6 +965,7 @@ Dla każdego kursu określ:
 - **Ważność (miesiące)**: po ilu miesiącach szkolenie trzeba powtórzyć (np. 12 = co roku); puste = nie wygasa;
 - **Obowiązkowy**: obowiązkowe kursy dla personelu wliczają się do pokrycia;
 - **Potwierdzane kontrole**: wyszukaj kontrolę po kodzie (np. A.6.3). Każde szkolenie z tego kursu stanie się dowodem dla tych kontroli.
+- **Przyznawana kompetencja** i **poziom** (tylko role krytyczne i organ zarządzający, opcjonalnie): uczestnicy z kontem otrzymują tę kompetencję w swoim profilu kompetencji (ISO 27001 pkt 7.2). Proponowane nazwy pochodzą z wymagań kompetencyjnych ról.
 
 Kursu, który jest już w planie lub ma zarejestrowane szkolenia, nie można usunąć: należy go **zarchiwizować**.
 
@@ -995,12 +996,24 @@ Z pliku powstaje **dowód** ważny przez okres ważności kursu, **automatycznie
 
 Pliku dowodowego nie można podmienić: jeśli jest błędny, usuń szkolenie i zarejestruj je ponownie. Szkolenia, którego dowód potwierdza już ocenione kontrole, nie można usunąć (może to zrobić tylko superuser). Wiersze **historyczne bez dowodu** pochodzą z migracji dawnych danych osobowych: zawierają tylko liczby.
 
+### 5. Role krytyczne i organ zarządzający
+
+W kursach z odbiorcami **role krytyczne** lub **organ zarządzający** szkolenie rejestruje **kto uczestniczył**, a nie grupy:
+
+1. W formularzu, po kursie i dacie, pojawiają się dwie listy: **osoby z nominacjami** aktywnymi w zakładzie (z ich nominacjami) oraz **urzędujący członkowie organów zarządczych** zakładu lub organizacji (członkowie zarządu mają etykietę Zarząd). Listy zależą od daty szkolenia: pokazują, kto pełnił funkcję tego dnia.
+2. Zaznacz uczestników. Liczba przeszkolonych to liczba uczestników (osoba będąca zarówno członkiem organu, jak i posiadaczem nominacji liczy się raz); liczba osób do przeszkolenia, jeśli jej nie podasz, jest taka sama.
+3. Załącz plik dowodowy (lista obecności, certyfikaty) i zarejestruj.
+
+Jeśli kurs przyznaje **kompetencję**, osoby z kontem otrzymują ją z dowodem szkolenia i tą samą datą ważności. Wyższy poziom, który już posiadają, nie zostanie obniżony. Jeśli usuniesz szkolenie, kompetencja wróci do poprzedniego stanu. Uczestników nie można zmienić: jeśli są błędni, usuń szkolenie i zarejestruj je ponownie.
+
+**Szkolenie organu zarządzającego (NIS2 art. 20).** W zakładce **Szkolenia** panel wymienia urzędujących członków organów typu zarząd zakładu lub organizacji: na zielono osoby z ważnym szkoleniem (z datą ważności), na czerwono osoby do przeszkolenia. Liczy się udział w wciąż ważnym kursie z odbiorcami „organ zarządzający”. Członkami zarządza się w **Governance → Organy zarządcze**.
+
 ### Gdzie widać wyniki
 
 - **Reporting → KPI**, sekcja „Szkolenia i świadomość”: pokrycie według kursu i zakładu, realizacja planu, zaległe pozycje, ostatnie symulacje phishingu i szkolenia do powtórzenia.
-- **KPI** obliczane automatycznie, z którymi można powiązać **cele bezpieczeństwa**: pokrycie obowiązkowymi szkoleniami, realizacja planu, zaległe pozycje, wskaźnik kliknięć i zgłoszeń w phishingu.
+- **KPI** obliczane automatycznie, z którymi można powiązać **cele bezpieczeństwa**: pokrycie obowiązkowymi szkoleniami, realizacja planu, zaległe pozycje, wskaźnik kliknięć i zgłoszeń w phishingu, szkolenie organu zarządzającego.
 - **Centrum Operacyjne**: sygnalizuje zaległe pozycje planu.
-- **Pakiet audytowy** (Audit Preparation): folder `07_training` z planem, szkoleniami z odniesieniem do dowodu, pokryciem i grupami zakładu.
+- **Pakiet audytowy** (Audit Preparation): folder `07_training` z planem, szkoleniami z odniesieniem do dowodu, pokryciem i grupami zakładu, uczestnikami szkoleń dla ról krytycznych i zarządu oraz stanem szkolenia zarządu (`board_training.csv`).
 
 ---
 

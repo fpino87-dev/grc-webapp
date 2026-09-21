@@ -258,6 +258,8 @@ export interface TrainingKpi {
     expired: boolean;
   }[];
   stale_audiences: number;
+  // Organo di gestione (NIS2 art. 20): solo conteggi.
+  board: { total: number; trained: number; pct: number | null };
 }
 
 export interface AccessMatrixRow {

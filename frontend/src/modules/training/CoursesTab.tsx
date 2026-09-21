@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
+  isNamedCourse,
   trainingApi,
   type AudienceKind,
   type ControlOption,
@@ -70,13 +71,25 @@ function CourseForm({ course, onClose }: { course?: TrainingCourse; onClose: () 
     validity_months: course ? course.validity_months : 12,
     duration_minutes: course?.duration_minutes ?? null,
     status: course?.status ?? "attivo",
+    competency: course?.competency ?? "",
+    competency_level: course?.competency_level ?? (1 as 1 | 2 | 3),
+  });
+  const named = isNamedCourse(form);
+  const { data: competencies = [] } = useQuery({
+    queryKey: ["training-competency-options"],
+    queryFn: () => trainingApi.competencyOptions(),
+    enabled: named,
   });
   const [controls, setControls] = useState<ControlOption[]>(course?.controls_detail ?? []);
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm(f => ({ ...f, [k]: v }));
 
   const mutation = useMutation({
     mutationFn: () => {
-      const payload = { ...form, controls: controls.map(c => c.id) };
+      const payload = {
+        ...form,
+        competency: named ? form.competency.trim() : "",
+        controls: controls.map(c => c.id),
+      };
       return course ? trainingApi.updateCourse(course.id, payload) : trainingApi.createCourse(payload);
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["training-courses"] }); onClose(); },
@@ -120,6 +133,29 @@ function CourseForm({ course, onClose }: { course?: TrainingCourse; onClose: () 
                    className={inputCls} />
           </div>
         </div>
+        {named && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="sm:col-span-2">
+              <label className={labelCls}>{t("training.courses.fields.competency")}</label>
+              <input value={form.competency} onChange={e => set("competency", e.target.value)}
+                     list="training-competencies" className={inputCls} />
+              <datalist id="training-competencies">
+                {competencies.map(c => <option key={c} value={c} />)}
+              </datalist>
+            </div>
+            <div>
+              <label className={labelCls}>{t("training.courses.fields.competency_level")}</label>
+              <select value={form.competency_level}
+                      onChange={e => set("competency_level", Number(e.target.value) as 1 | 2 | 3)}
+                      className={inputCls}>
+                {([1, 2, 3] as const).map(l => (
+                  <option key={l} value={l}>{t(`training.competency_levels.${l}`)}</option>
+                ))}
+              </select>
+            </div>
+            <p className="sm:col-span-3 text-xs text-gray-400 -mt-1">{t("training.courses.competency_hint")}</p>
+          </div>
+        )}
         <label className="flex items-center gap-2 text-sm text-gray-700">
           <input type="checkbox" checked={form.mandatory} onChange={e => set("mandatory", e.target.checked)} />
           {t("training.courses.fields.mandatory")}
@@ -211,7 +247,14 @@ export function CoursesTab({ canManage }: { canManage: boolean }) {
                     {c.mandatory && <span className="text-xs text-red-700">{t("training.courses.fields.mandatory")}</span>}
                   </td>
                   <td className={`${td} text-gray-600`}>{t(`training.kinds.${c.kind}`)}</td>
-                  <td className={`${td} text-gray-600`}>{t(`training.audience_kinds.${c.audience_kind}`)}</td>
+                  <td className={`${td} text-gray-600`}>
+                    {t(`training.audience_kinds.${c.audience_kind}`)}
+                    {isNamedCourse(c) && c.competency && (
+                      <p className="text-xs text-gray-400">
+                        {t("training.courses.grants", { competency: c.competency, level: c.competency_level })}
+                      </p>
+                    )}
+                  </td>
                   <td className={`${td} text-gray-600`}>
                     {c.validity_months ?? t("training.courses.no_expiry")}
                   </td>

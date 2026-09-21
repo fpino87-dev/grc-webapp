@@ -11,6 +11,7 @@ from core.audit import log_action
 
 from .models import (
     TrainingAudience,
+    TrainingParticipant,
     TrainingPlanItem,
     TrainingSession,
 )
@@ -120,6 +121,14 @@ def training_capabilities(user) -> dict:
         "can_manage_org": manage_org,
         "manage_plant_ids": manage_ids,
     }
+
+
+def competency_options() -> list[str]:
+    from apps.auth_grc.models import RoleCompetencyRequirement
+
+    return sorted(set(
+        RoleCompetencyRequirement.objects.values_list("competency", flat=True)
+    ), key=str.lower)
 
 
 def require_training_manage(user, plant) -> None:
@@ -480,6 +489,69 @@ def expiring_training_evidence(plant=None, today=None) -> list:
     return sorted(rows, key=lambda r: r["valid_until"])
 
 
+def board_training(plant=None, today=None) -> dict:
+    """Formazione dell'organo di gestione (NIS2 art. 20): componenti in carica
+    degli organi di tipo CdA del perimetro con un'erogazione ancora valida di
+    un corso per l'organo di gestione. Un organo senza siti governa l'intera
+    organizzazione e vale per ogni sito. Un componente con account è
+    riconosciuto anche se è stato scelto fra i titolari di nomine."""
+    from apps.governance.models import CommitteeMember
+
+    today = today or timezone.localdate()
+    members = _active_on(
+        CommitteeMember.objects.filter(
+            committee__committee_type="cda", committee__deleted_at__isnull=True,
+        ),
+        today,
+    ).select_related("committee")
+    if plant is not None:
+        members = members.filter(
+            Q(committee__plants=plant) | Q(committee__plants__isnull=True),
+        ).distinct()
+    members = list(members.order_by("committee__name", "full_name"))
+
+    user_ids = {m.user_id for m in members if m.user_id}
+    participations = TrainingParticipant.objects.filter(
+        session__deleted_at__isnull=True, session__legacy=False,
+        session__held_on__lte=today, session__course__audience_kind="organo_gestione",
+    ).filter(
+        Q(committee_member__in=[m.pk for m in members]) | Q(user_id__in=user_ids),
+    ).select_related("session__course")
+    # Scadenza più lontana fra le erogazioni valide di ciascuno (None = non scade).
+    best_member, best_user = {}, {}
+    for p in participations:
+        if not session_valid_on(p.session, today):
+            continue
+        until = _evidence_valid_until(p.session.course, p.session.held_on)
+        for key, best in ((p.committee_member_id, best_member), (p.user_id, best_user)):
+            if key is None:
+                continue
+            if key not in best or (best[key] is not None and (until is None or until > best[key])):
+                best[key] = until
+
+    rows, trained = [], 0
+    for m in members:
+        found = [b[k] for b, k in ((best_member, m.pk), (best_user, m.user_id)) if k in b]
+        ok = bool(found)
+        trained += ok
+        valid_until = None if not ok or None in found else max(found)
+        rows.append({
+            "member_id": str(m.pk),
+            "full_name": m.full_name,
+            "position": m.position,
+            "committee": m.committee.name,
+            "trained": ok,
+            "valid_until": valid_until,
+        })
+    total = len(members)
+    return {
+        "total": total,
+        "trained": trained,
+        "pct": round(trained / total * 100, 1) if total else None,
+        "members": rows,
+    }
+
+
 def stale_audiences_count(plant=None, today=None) -> int:
     """Gruppi il cui headcount non viene riverificato da più di
     HEADCOUNT_STALE_MONTHS mesi: la copertura si calcola su numeri vecchi."""
@@ -569,6 +641,191 @@ def remind_plan_items(today=None) -> dict:
         )
         counts[state] += 1
     return counts
+
+
+# ── Partecipanti nominativi (ruoli critici, organo di gestione) ─────────────
+
+def _active_on(qs, day):
+    """Nomine e componenti in carica il giorno `day`."""
+    return qs.filter(valid_from__lte=day).filter(
+        Q(valid_until__isnull=True) | Q(valid_until__gte=day),
+    )
+
+
+def _covers(assignment, plant) -> bool:
+    if assignment.scope_type == "org":
+        return True
+    if assignment.scope_type == "bu":
+        return bool(plant.bu_id) and assignment.scope_id == plant.bu_id
+    return assignment.scope_id == plant.pk
+
+
+def _person_name(user) -> str:
+    return user.get_full_name().strip() or user.email or user.username
+
+
+def participant_options(plant, day) -> dict:
+    """Chi può partecipare a un'erogazione nominativa del sito alla data `day`:
+    i titolari di nomine attive che coprono il sito e i componenti in carica
+    degli organi di governo del sito (o di organizzazione)."""
+    from apps.governance.models import CommitteeMember, RoleAssignment
+
+    holders = {}
+    assignments = _active_on(
+        RoleAssignment.objects.filter(user__is_active=True), day,
+    ).select_related("user").order_by("role")
+    for a in assignments:
+        if not _covers(a, plant):
+            continue
+        entry = holders.setdefault(a.user_id, {
+            "user_id": str(a.user_id), "name": _person_name(a.user), "roles": [],
+        })
+        if a.role not in entry["roles"]:
+            entry["roles"].append(a.role)
+
+    members = _active_on(
+        CommitteeMember.objects.filter(committee__deleted_at__isnull=True), day,
+    ).filter(
+        Q(committee__plants=plant) | Q(committee__plants__isnull=True),
+    ).distinct().select_related("committee").order_by("committee__name", "full_name")
+    return {
+        "role_holders": sorted(holders.values(), key=lambda h: h["name"].lower()),
+        "members": [{
+            "member_id": str(m.pk),
+            "name": m.full_name,
+            "position": m.position,
+            "committee": m.committee.name,
+            "management_body": m.committee.is_management_body,
+            "user_id": str(m.user_id) if m.user_id else None,
+        } for m in members],
+    }
+
+
+def _resolve_participants(plant, held_on, users, members) -> list[dict]:
+    """Valida i partecipanti scelti contro le opzioni del sito alla data
+    dell'erogazione e li unifica: chi è sia componente di un organo sia
+    titolare di nomine diventa un solo partecipante."""
+    options = participant_options(plant, held_on)
+    holders = {h["user_id"]: h for h in options["role_holders"]}
+    allowed_members = {m["member_id"] for m in options["members"]}
+    if any(str(u.pk) not in holders for u in users):
+        raise ValidationError({"participant_users": _(
+            "Si possono scegliere solo titolari di nomine attive su questo sito alla data dell'erogazione."
+        )})
+    if any(str(m.pk) not in allowed_members for m in members):
+        raise ValidationError({"participant_members": _(
+            "Si possono scegliere solo componenti in carica degli organi di governo di questo sito."
+        )})
+    if not users and not members:
+        raise ValidationError({"participant_users": _(
+            "Indica chi ha partecipato: titolari di nomine o componenti degli organi di governo."
+        )})
+
+    people, by_user = [], {}
+    for m in members:
+        entry = {"user": m.user, "committee_member": m, "roles": []}
+        people.append(entry)
+        if m.user_id:
+            by_user[m.user_id] = entry
+    for u in users:
+        entry = by_user.get(u.pk)
+        if entry is None:
+            entry = {"user": u, "committee_member": None, "roles": []}
+            people.append(entry)
+            by_user[u.pk] = entry
+        entry["roles"] = holders[str(u.pk)]["roles"]
+    # Un componente con account che è anche titolare di nomine porta le sue
+    # nomine anche se è stato scelto solo come componente.
+    for entry in people:
+        user = entry["user"]
+        if user is not None and not entry["roles"] and str(user.pk) in holders:
+            entry["roles"] = holders[str(user.pk)]["roles"]
+    return people
+
+
+_COMPETENCY_FIELDS = ("level", "evidence_id", "evidence_type", "obtained_at", "valid_until",
+                      "certification_body", "verified_by_id")
+
+
+def _competency_snapshot(uc) -> dict:
+    snap = {f: getattr(uc, f) for f in _COMPETENCY_FIELDS}
+    for f in ("evidence_id", "verified_by_id"):
+        snap[f] = str(snap[f]) if snap[f] else None
+    for f in ("obtained_at", "valid_until"):
+        snap[f] = snap[f].isoformat() if snap[f] else None
+    return snap
+
+
+def _restore_snapshot(uc, snap):
+    from datetime import date
+
+    for f in _COMPETENCY_FIELDS:
+        value = snap.get(f)
+        if f in ("obtained_at", "valid_until") and value:
+            value = date.fromisoformat(value)
+        setattr(uc, f, value)
+    uc.save()
+
+
+def _apply_competency(participant, course, session, user):
+    """ISO 27001 cl. 7.2: l'erogazione aggiorna la competenza del partecipante
+    con account. Non abbassa un livello più alto già posseduto e non
+    sostituisce una prova più recente dello stesso livello."""
+    from apps.auth_grc.models import UserCompetency
+
+    if not course.competency or participant.user_id is None:
+        return
+    level = course.competency_level
+    uc = UserCompetency.objects.filter(
+        user_id=participant.user_id, competency=course.competency,
+    ).first()
+    if uc is not None and (
+        uc.level > level
+        or (uc.level == level and uc.obtained_at and uc.obtained_at > session.held_on)
+    ):
+        return
+    before = _competency_snapshot(uc) if uc is not None else None
+    if uc is None:
+        uc = UserCompetency(
+            user_id=participant.user_id, competency=course.competency, created_by=user,
+        )
+    uc.level = level
+    uc.evidence = session.evidence
+    uc.evidence_type = "training"
+    uc.obtained_at = session.held_on
+    uc.valid_until = session.evidence.valid_until if session.evidence_id else None
+    uc.certification_body = ""
+    uc.verified_by = user
+    uc.save()
+    participant.competency = uc
+    participant.competency_before = before
+    participant.save(update_fields=["competency", "competency_before", "updated_at"])
+
+
+def _revert_competencies(session):
+    """Eliminata l'erogazione, le competenze che essa sosteneva tornano allo
+    stato precedente. Se quello stato veniva a sua volta da un'erogazione già
+    eliminata si risale ancora; se la competenza era nata dall'erogazione, la
+    si elimina (soft). Una competenza aggiornata poi da altro resta com'è."""
+    for p in session.participants.filter(competency__isnull=False).select_related("competency"):
+        uc = p.competency
+        if uc.deleted_at is not None or uc.evidence_id != session.evidence_id:
+            continue
+        snap = p.competency_before
+        for _step in range(50):
+            if not snap or not snap.get("evidence_id"):
+                break
+            prev = TrainingParticipant.objects.filter(
+                competency=uc, session__evidence_id=snap["evidence_id"],
+                session__deleted_at__isnull=False,
+            ).first()
+            if prev is None:
+                break
+            snap = prev.competency_before
+        if snap is None:
+            uc.soft_delete()
+        else:
+            _restore_snapshot(uc, snap)
 
 
 # ── Erogazioni ──────────────────────────────────────────────────────────────
@@ -689,6 +946,24 @@ def register_session(serializer, uploaded_file, user):
 
     audiences = data.get("audiences", [])
     _check_audiences(audiences, plant)
+    users = data.pop("participant_users", [])
+    members = data.pop("participant_members", [])
+    people = []
+    if course.is_named:
+        # Ruoli critici e organo di gestione: si registra chi ha partecipato,
+        # i conteggi ne derivano.
+        if audiences:
+            raise ValidationError({"audiences": _(
+                "Per questo corso si indicano i partecipanti, non i gruppi di destinatari."
+            )})
+        people = _resolve_participants(plant, held_on, users, members)
+        data["trained_count"] = len(people)
+        if data.get("target_count") is None:
+            data["target_count"] = len(people)
+    elif users or members:
+        raise ValidationError({"participant_users": _(
+            "Le erogazioni per il personale registrano solo conteggi, non nominativi."
+        )})
     if course.kind != "phishing" and data.get("target_count") is None and audiences:
         data["target_count"] = sum(a.headcount for a in audiences)
     _validate_counts(course.kind, data)
@@ -712,6 +987,13 @@ def register_session(serializer, uploaded_file, user):
             user,
         )
         session = serializer.save(created_by=user, evidence=evidence, legacy=False)
+        for person in people:
+            participant = TrainingParticipant.objects.create(
+                session=session, user=person["user"],
+                committee_member=person["committee_member"], roles=person["roles"],
+                created_by=user,
+            )
+            _apply_competency(participant, course, session, user)
         links = link_evidence_to_controls(evidence, course, plant)
         if session.plan_item_id:
             _close_plan_item_reminders(session.plan_item, user)
@@ -725,6 +1007,7 @@ def register_session(serializer, uploaded_file, user):
         "sent_count": session.sent_count,
         "controls_linked": links["linked"],
         "controls_not_applicable": len(links["not_applicable"]),
+        "participants": len(people),
     })
     return session
 
@@ -737,6 +1020,15 @@ def update_session(serializer, user):
     require_training_manage(user, session.plant)
     data = serializer.validated_data
     data.pop("file", None)
+    if "participant_users" in data or "participant_members" in data:
+        raise ValidationError({"participant_users": _(
+            "I partecipanti non si modificano: elimina l'erogazione e registrala di nuovo."
+        )})
+    if session.course.is_named and "trained_count" in data \
+            and data["trained_count"] != session.participants.count():
+        raise ValidationError({"trained_count": _(
+            "Per questo corso le persone formate sono i partecipanti registrati."
+        )})
     for f in _IMMUTABLE_SESSION_FIELDS:
         if f in data and data[f] != getattr(session, f):
             raise ValidationError({f: _("Campo non modificabile: elimina e registra di nuovo.")})
@@ -759,6 +1051,11 @@ def update_session(serializer, user):
             ev = session.evidence
             ev.valid_until = _evidence_valid_until(session.course, session.held_on)
             ev.save(update_fields=["valid_until", "updated_at"])
+            # Le competenze che poggiano su questa prova seguono la nuova data.
+            from apps.auth_grc.models import UserCompetency
+            UserCompetency.objects.filter(evidence=ev).update(
+                obtained_at=session.held_on, valid_until=ev.valid_until, updated_at=timezone.now(),
+            )
         if data.get("plan_item") is not None:
             _close_plan_item_reminders(session.plan_item, user)
     _audit(user, "session.update", session, {
@@ -784,4 +1081,5 @@ def delete_session(session, user):
             except DjangoValidationError as e:
                 raise ValidationError({"detail": e.messages[0]}) from e
         session.soft_delete()
+        _revert_competencies(session)
     _audit(user, "session.delete", session, {"course_id": str(session.course_id)})

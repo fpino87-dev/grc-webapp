@@ -11,7 +11,7 @@ Il pack include 9 cartelle (subset selezionabile via `scope`):
     04_bia_bcp/                  processi critici + piani BCP + ultimi test
     05_incidents/                incidenti del plant
     06_audit_trail.csv           log eventi rilevanti (filtrato sugli entity)
-    07_training/                 piano, erogazioni con prova, copertura, gruppi (conteggi)
+    07_training/                 piano, erogazioni con prova, copertura, gruppi, formazione CdA
     08_governance/               role assignment + comitati sicurezza
     09_management_review/        ultima review approvata + delibere + actions
     manifest.json                sha256 di ogni file (tamper evidence)
@@ -411,12 +411,15 @@ def _write_csv(path: Path, rows: list[dict], empty_note: str) -> None:
 def _collect_training(out_dir: Path, plant) -> dict:
     """Formazione a evidenze del sito: piano (con le voci del piano di
     organizzazione), erogazioni con il riferimento all'evidenza che ne è la
-    prova, copertura per corso e gruppi destinatari. Solo conteggi: la prova
-    nominativa è il file dell'evidenza, esportato con le evidenze."""
+    prova, copertura per corso e gruppi destinatari. Per il personale solo
+    conteggi (la prova nominativa è il file dell'evidenza); per ruoli critici e
+    organo di gestione i partecipanti e lo stato della formazione del CdA
+    (NIS2 art. 20)."""
     from django.db.models import Q
 
     from apps.training.models import TrainingAudience, TrainingPlanItem, TrainingSession
-    from apps.training.services import item_state, training_coverage
+    from apps.training.serializers import participant_row
+    from apps.training.services import board_training, item_state, training_coverage
 
     tr_dir = out_dir / "07_training"
     tr_dir.mkdir(parents=True, exist_ok=True)
@@ -451,7 +454,9 @@ def _collect_training(out_dir: Path, plant) -> dict:
     sessions = (
         TrainingSession.objects.filter(plant=plant)
         .select_related("course", "evidence")
-        .prefetch_related("audiences")
+        .prefetch_related(
+            "audiences", "participants__user", "participants__committee_member__committee",
+        )
         .order_by("-held_on")
     )
     session_rows = [{
@@ -459,6 +464,9 @@ def _collect_training(out_dir: Path, plant) -> dict:
         "course": s.course.title,
         "course_kind": s.course.kind,
         "audiences": "; ".join(a.name for a in s.audiences.all()),
+        # Ruoli critici e organo di gestione: partecipanti nominativi (nomine,
+        # componenti degli organi), già presenti in 08_governance.
+        "participants": "; ".join(participant_row(p)["name"] for p in s.participants.all()),
         "target_count": s.target_count if s.target_count is not None else "",
         "trained_count": s.trained_count if s.trained_count is not None else "",
         "sent_count": s.sent_count if s.sent_count is not None else "",
@@ -477,6 +485,15 @@ def _collect_training(out_dir: Path, plant) -> dict:
         {k: r[k] for k in ("course_title", "target", "trained", "pct")} for r in coverage["rows"]
     ], "Nessun corso obbligatorio a piano con gruppi destinatari.")
 
+    board = board_training(plant, today)
+    _write_csv(tr_dir / "board_training.csv", [{
+        "committee": m["committee"],
+        "full_name": m["full_name"],
+        "position": m["position"],
+        "trained": m["trained"],
+        "valid_until": str(m["valid_until"]) if m["valid_until"] else "",
+    } for m in board["members"]], "Nessun componente in carica di un organo di gestione (CdA).")
+
     audiences = TrainingAudience.objects.filter(plant=plant).order_by("name")
     _write_csv(tr_dir / "audiences.csv", [{
         "name": a.name,
@@ -488,6 +505,7 @@ def _collect_training(out_dir: Path, plant) -> dict:
         "plan_items": len(item_rows),
         "sessions": len(session_rows),
         "coverage_pct": coverage["pct"],
+        "board_training_pct": board["pct"],
     }
 
 

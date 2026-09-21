@@ -1,3 +1,6 @@
+from django.db.models import Prefetch
+from django.utils import timezone
+from django.utils.dateparse import parse_date
 from django.utils.translation import gettext as _
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -11,6 +14,7 @@ from core.viewsets import SoftDeleteAuditMixin
 from .models import (
     TrainingAudience,
     TrainingCourse,
+    TrainingParticipant,
     TrainingPlan,
     TrainingPlanItem,
     TrainingSession,
@@ -55,6 +59,12 @@ class TrainingCourseViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, view
         """Cosa l'utente può leggere e dove può scrivere: leggibile da ogni
         ruolo, perché decide quali parti del modulo mostrare."""
         return Response(services.training_capabilities(request.user))
+
+    @action(detail=False, methods=["get"], url_path="competency-options")
+    def competency_options(self, request):
+        """Competenze richieste ai ruoli (ISO 27001 cl. 7.2), da proporre come
+        competenza attribuita da un corso per ruoli critici o per il CdA."""
+        return Response(services.competency_options())
 
     @action(detail=False, methods=["get"], url_path="control-options")
     def control_options(self, request):
@@ -131,7 +141,13 @@ class TrainingPlanItemViewSet(_ServiceWriteMixin, PlantScopedQuerysetMixin, view
 class TrainingSessionViewSet(_ServiceWriteMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = TrainingSession.objects.select_related(
         "course", "plant", "evidence", "plan_item",
-    ).prefetch_related("audiences")
+    ).prefetch_related(
+        "audiences",
+        Prefetch(
+            "participants",
+            queryset=TrainingParticipant.objects.select_related("user", "committee_member__committee"),
+        ),
+    )
     serializer_class = TrainingSessionSerializer
     permission_classes = [TrainingRecordsPermission]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
@@ -152,6 +168,36 @@ class TrainingSessionViewSet(_ServiceWriteMixin, PlantScopedQuerysetMixin, views
         response.data["control_links"] = self._created.control_links
         return response
 
+    @action(detail=False, methods=["get"], url_path="participant-options")
+    def participant_options(self, request):
+        """Chi si può indicare come partecipante di un'erogazione nominativa del
+        sito alla data indicata. Nomi di persone: solo a chi gestisce la
+        formazione del sito."""
+        from apps.plants.models import Plant
+
+        plant = Plant.objects.filter(pk=request.query_params.get("plant")).first() \
+            if _is_uuid(request.query_params.get("plant")) else None
+        if plant is None:
+            return Response({"plant": [_("Indica il sito.")]}, status=status.HTTP_400_BAD_REQUEST)
+        services.require_training_manage(request.user, plant)
+        day = parse_date(request.query_params.get("held_on") or "") or timezone.localdate()
+        return Response(services.participant_options(plant, day))
+
+    @action(detail=False, methods=["get"], url_path="board-status")
+    def board_status(self, request):
+        """Formazione dell'organo di gestione (NIS2 art. 20) del sito, o di tutti
+        i siti per lo scope di organizzazione: chi è in carica e fino a quando
+        la sua formazione è valida."""
+        from apps.plants.models import Plant
+        from core.scoping import require_plant_access
+
+        raw = request.query_params.get("plant")
+        plant = Plant.objects.filter(pk=raw).first() if _is_uuid(raw) else None
+        if raw and plant is None:
+            return Response({"plant": [_("Sito non trovato.")]}, status=status.HTTP_400_BAD_REQUEST)
+        require_plant_access(request.user, plant)
+        return Response(services.board_training(plant))
+
     def update(self, request, *args, **kwargs):
         if "file" in request.FILES:
             return Response(
@@ -161,3 +207,13 @@ class TrainingSessionViewSet(_ServiceWriteMixin, PlantScopedQuerysetMixin, views
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return super().update(request, *args, **kwargs)
+
+
+def _is_uuid(value) -> bool:
+    import uuid
+
+    try:
+        uuid.UUID(str(value))
+    except (TypeError, ValueError):
+        return False
+    return True

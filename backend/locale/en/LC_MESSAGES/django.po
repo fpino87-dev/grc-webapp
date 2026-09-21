@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grc-webapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-21 12:22+0200\n"
+"POT-Creation-Date: 2026-09-21 22:28+0200\n"
 "PO-Revision-Date: 2026-03-18 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -899,15 +899,15 @@ msgstr "Not achieved"
 msgid "Sospeso"
 msgstr "Suspended"
 
-#: apps/management_review/report/builder.py:78 apps/reporting/services.py:1144
+#: apps/management_review/report/builder.py:78 apps/reporting/services.py:1101
 msgid "Presidente"
 msgstr "Chair"
 
-#: apps/management_review/report/builder.py:78 apps/reporting/services.py:1145
+#: apps/management_review/report/builder.py:78 apps/reporting/services.py:1102
 msgid "Membro"
 msgstr "Member"
 
-#: apps/management_review/report/builder.py:79 apps/reporting/services.py:1146
+#: apps/management_review/report/builder.py:79 apps/reporting/services.py:1103
 msgid "Segretario"
 msgstr "Secretary"
 
@@ -1960,28 +1960,28 @@ msgstr "Logo not available: use file upload for site logos."
 msgid "Logo non trovato nello storage."
 msgstr "Logo not found in storage."
 
-#: apps/reporting/services.py:976 apps/reporting/services.py:987
+#: apps/reporting/services.py:933 apps/reporting/services.py:944
 #: apps/reporting/views.py:128 apps/reporting/views.py:142
 msgid "Tutti i siti"
 msgstr "All sites"
 
-#: apps/reporting/services.py:979 apps/reporting/services.py:990
+#: apps/reporting/services.py:936 apps/reporting/services.py:947
 msgid "BU"
 msgstr "BU"
 
-#: apps/reporting/services.py:983 apps/reporting/services.py:994
+#: apps/reporting/services.py:940 apps/reporting/services.py:951
 msgid "(nessun sito)"
 msgstr "(no site)"
 
-#: apps/reporting/services.py:1139
+#: apps/reporting/services.py:1096
 msgid "Organo di amministrazione (CdA)"
 msgstr "Board of directors"
 
-#: apps/reporting/services.py:1140
+#: apps/reporting/services.py:1097
 msgid "Comitato sicurezza"
 msgstr "Security committee"
 
-#: apps/reporting/services.py:1141
+#: apps/reporting/services.py:1098
 msgid "Direzione"
 msgstr "Top management"
 
@@ -2103,7 +2103,7 @@ msgstr ""
 msgid "Valore numerico obbligatorio."
 msgstr "A numeric value is required."
 
-#: apps/tasks/views.py:354
+#: apps/tasks/views.py:354 apps/training/views.py:197
 msgid "Sito non trovato."
 msgstr "Site not found."
 
@@ -2111,8 +2111,8 @@ msgstr "Site not found."
 msgid "Settimana non valida (formato atteso AAAA-MM-GG)."
 msgstr "Invalid week (expected format YYYY-MM-DD)."
 
-#: apps/training/models.py:22
 #
+#: apps/training/models.py:22
 msgid "Corso"
 msgstr "Course"
 
@@ -2128,101 +2128,155 @@ msgstr "Phishing simulation"
 msgid "Personale"
 msgstr "Staff"
 
-#: apps/training/models.py:28
 #
+#: apps/training/models.py:28
 msgid "Ruoli critici"
 msgstr "Critical roles"
 
-#: apps/training/models.py:29
 #
+#: apps/training/models.py:29
 msgid "Organo di gestione"
 msgstr "Management body"
 
-#: apps/training/services.py:101
 #
+#: apps/training/services.py:136
 msgid "Non gestisci la formazione di questo sito."
 msgstr "You do not manage training for this site."
 
-#: apps/training/services.py:130
+#: apps/training/services.py:157
+msgid ""
+"Il corso è in un piano formativo o ha erogazioni registrate: archivialo."
+msgstr ""
+"The course is in a training plan or has recorded sessions: archive it "
+"instead."
+
+#: apps/training/services.py:178
 msgid "Il sito di un gruppo non si può cambiare."
 msgstr "The site of a group cannot be changed."
 
-#: apps/training/services.py:161
+#: apps/training/services.py:209
 msgid "Il sito di un piano non si può cambiare."
 msgstr "The site of a plan cannot be changed."
 
-#: apps/training/services.py:171
+#: apps/training/services.py:219
 msgid "Il piano ha erogazioni registrate: non si può eliminare."
 msgstr "The plan has recorded sessions: it cannot be deleted."
 
-#: apps/training/services.py:187
+#: apps/training/services.py:235
 msgid "I gruppi devono appartenere allo stesso sito."
 msgstr "Groups must belong to the same site."
 
-#: apps/training/services.py:203
+#: apps/training/services.py:251
 msgid "Una voce non si può spostare in un altro piano."
 msgstr "An item cannot be moved to another plan."
 
-#: apps/training/services.py:214
+#: apps/training/services.py:262
 msgid "La voce ha erogazioni registrate: non si può eliminare."
 msgstr "The item has recorded sessions: it cannot be deleted."
 
-#: apps/training/services.py:274
+#: apps/training/services.py:713
+msgid ""
+"Si possono scegliere solo titolari di nomine attive su questo sito alla data "
+"dell'erogazione."
+msgstr "Only holders of role assignments active at this site on the session date can be selected."
+
+#: apps/training/services.py:717
+msgid ""
+"Si possono scegliere solo componenti in carica degli organi di governo di "
+"questo sito."
+msgstr "Only serving members of this site's governing bodies can be selected."
+
+#: apps/training/services.py:721
+msgid ""
+"Indica chi ha partecipato: titolari di nomine o componenti degli organi di "
+"governo."
+msgstr "State who attended: role holders or governing body members."
+
+#: apps/training/services.py:837
 msgid "Indica quante e-mail sono state inviate."
 msgstr "State how many e-mails were sent."
 
-#: apps/training/services.py:279
+#: apps/training/services.py:842
 msgid "Clic e segnalazioni non possono superare le e-mail inviate."
 msgstr "Clicks and reports cannot exceed the e-mails sent."
 
-#: apps/training/services.py:285
+#: apps/training/services.py:848
 msgid "Indica quante persone andavano formate o scegli i gruppi."
 msgstr "State how many people were to be trained, or choose the groups."
 
-#: apps/training/services.py:288
+#: apps/training/services.py:851
 msgid "Indica quante persone sono state formate."
 msgstr "State how many people were trained."
 
-#: apps/training/services.py:291
+#: apps/training/services.py:854
 msgid "Le persone formate non possono superare quelle da formare."
 msgstr "People trained cannot exceed people to be trained."
 
-#: apps/training/services.py:319
+#: apps/training/services.py:882
 msgid "La voce del piano riguarda un altro corso."
 msgstr "The plan item refers to another course."
 
-#: apps/training/services.py:321
+#: apps/training/services.py:884
 msgid "La voce del piano è di un altro sito."
 msgstr "The plan item belongs to another site."
 
-#: apps/training/services.py:332
+#: apps/training/services.py:924
+msgid "Erogazione registrata."
+msgstr "Training session registered."
+
 #
+#: apps/training/services.py:935
 msgid "Indica il sito dell'erogazione."
 msgstr "State the site of the session."
 
-#: apps/training/services.py:335
 #
+#: apps/training/services.py:938
 msgid "Il corso è archiviato."
 msgstr "The course is archived."
 
-#: apps/training/services.py:338
+#: apps/training/services.py:941
 msgid "Allega la prova dell'erogazione (registro presenze, export, report)."
 msgstr "Attach the proof of the session (attendance sheet, export, report)."
 
-#: apps/training/services.py:342 apps/training/services.py:393
 #
+#: apps/training/services.py:945 apps/training/services.py:1037
 msgid "La data dell'erogazione non può essere futura."
 msgstr "The session date cannot be in the future."
 
-#: apps/training/services.py:390
+#: apps/training/services.py:957
+msgid ""
+"Per questo corso si indicano i partecipanti, non i gruppi di destinatari."
+msgstr "For this course, record the participants, not the target groups."
+
+#: apps/training/services.py:965
+msgid ""
+"Le erogazioni per il personale registrano solo conteggi, non nominativi."
+msgstr "Staff sessions record counts only, not names."
+
+#: apps/training/services.py:1025
+msgid ""
+"I partecipanti non si modificano: elimina l'erogazione e registrala di nuovo."
+msgstr "Participants cannot be changed: delete the session and record it again."
+
+#: apps/training/services.py:1030
+msgid "Per questo corso le persone formate sono i partecipanti registrati."
+msgstr "For this course, the people trained are the recorded participants."
+
+#: apps/training/services.py:1034
 msgid "Campo non modificabile: elimina e registra di nuovo."
 msgstr "This field cannot be changed: delete and record again."
 
-#: apps/training/views.py:160
+#
+#: apps/training/views.py:181
+msgid "Indica il sito."
+msgstr "State the site."
+
+#: apps/training/views.py:205
 msgid ""
 "Il file di prova non si sostituisce: elimina l'erogazione e registrala di "
 "nuovo."
-msgstr "The proof file cannot be replaced: delete the session and record it again."
+msgstr ""
+"The proof file cannot be replaced: delete the session and record it again."
 
 #: core/scoping.py:115
 msgid ""
@@ -2252,11 +2306,3 @@ msgstr "File type not allowed. The file content does not match the extension."
 #, python-format
 msgid "Il contenuto del file non corrisponde all'estensione .%(ext)s."
 msgstr "The file content does not match the .%(ext)s extension."
-
-#: apps/training/services.py
-msgid "Erogazione registrata."
-msgstr "Training session registered."
-
-#: apps/training/services.py
-msgid "Il corso è in un piano formativo o ha erogazioni registrate: archivialo."
-msgstr "The course is in a training plan or has recorded sessions: archive it instead."

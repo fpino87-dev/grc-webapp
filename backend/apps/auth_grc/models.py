@@ -255,8 +255,16 @@ class UserCompetency(BaseModel):
     )
 
     class Meta:
-        unique_together = ["user", "competency"]
         ordering = ["user", "competency"]
+        constraints = [
+            # Unica fra le righe vive: una competenza eliminata (soft delete)
+            # non impedisce di registrarla di nuovo.
+            models.UniqueConstraint(
+                fields=["user", "competency"],
+                condition=models.Q(deleted_at__isnull=True),
+                name="uniq_user_competency_alive",
+            ),
+        ]
 
     @property
     def is_valid(self) -> bool:

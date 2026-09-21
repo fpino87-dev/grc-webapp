@@ -1934,7 +1934,18 @@
         "file": "Kanıt dosyası",
         "notes": "Notlar",
         "counts": "Sayılar",
-        "proof": "Kanıt"
+        "proof": "Kanıt",
+        "participants": "Katılımcılar"
+      },
+      "participants": {
+        "role_holders": "Tesisteki atama sahipleri",
+        "no_role_holders": "Bu tarihte tesiste etkin atama yok.",
+        "members": "Yönetişim organı üyeleri",
+        "no_members": "Bu tarihte görevde üye yok.",
+        "management_body": "YK",
+        "hint": "Katılanları seçin: liste, oturum tarihinde görevde olan kişileri gösterir.",
+        "competency_hint": "Hesabı olanlar “{{competency}}” yetkinliğini alır (seviye {{level}}).",
+        "target_hint": "Kaç kişinin eğitilmesi gerekiyordu; boşsa katılımcı sayısı."
       }
     },
     "audiences": {
@@ -1976,8 +1987,12 @@
         "duration_minutes": "Süre (dakika)",
         "mandatory": "Zorunlu",
         "status": "Durum",
-        "controls": "Kanıtlanan kontroller"
-      }
+        "controls": "Kanıtlanan kontroller",
+        "competency": "Kazandırılan yetkinlik",
+        "competency_level": "Seviye"
+      },
+      "competency_hint": "İsteğe bağlı. Hesabı olan katılımcılar bu yetkinliği (ISO 27001 md. 7.2) oturumun kanıtıyla birlikte profillerinde alır. Zaten sahip oldukları daha yüksek bir seviye asla düşürülmez.",
+      "grants": "Kazandırır: {{competency}} (seviye {{level}})"
     },
     "help": {
       "title": "Kanıta dayalı eğitim",
@@ -1987,14 +2002,29 @@
         "2": "Hedef gruplar: tesisin gruplarını kişi sayısıyla girin (ör. Üretim 240) ve değiştiğinde güncelleyin.",
         "3": "Plan: yılın planını oluşturun, kalemleri ekleyin (kurs, gruplar, vade) ve onay belgesini bağlayın.",
         "4": "Oturumlar: her oturumu sayıları ve kanıt dosyasıyla kaydedin. Kanıt kursun kontrollerine otomatik bağlanır ve kalemin hatırlatıcısı kapanır.",
-        "5": "Kapsamı, geciken kalemleri ve oltalamayı Raporlama ve KPI'larda izleyin, güvenlik hedeflerini bunlara bağlayın."
+        "5": "Kapsamı, geciken kalemleri ve oltalamayı Raporlama ve KPI'larda izleyin, güvenlik hedeflerini bunlara bağlayın.",
+        "6": "Kritik roller ve yönetim kurulu: onlara yönelik kurslarda oturum, atama sahipleri ve yönetişim organı üyeleri arasından kimlerin katıldığını belirtir. Hesabı olanlar kursun yetkinliğini alır; “Yönetim organı eğitimi” paneli kimin eğitildiğini ve ne zamana kadar geçerli olduğunu gösterir."
       },
       "connections": {
         "documents": "Plan bağlı belgeyle onaylanır; her kanıt dosyası bir kanıta dönüşür",
         "controls": "Oturum kanıtları kursta belirtilen kontrolleri kanıtlar",
         "kpi": "Kapsam, plan ilerlemesi, gecikmeler ve oltalama otomatik hesaplanan KPI'lardır",
-        "objectives": "Güvenlik hedefleri eğitim KPI'larına bağlanır"
+        "objectives": "Güvenlik hedefleri eğitim KPI'larına bağlanır",
+        "governance": "Kritik rol ve yönetim kurulu oturumlarının katılımcıları atamalar ve yönetişim organları arasından seçilir; yönetim kurulu eğitimi bir KPI'dır (NIS2 Md. 20)"
       }
+    },
+    "competency_levels": {
+      "1": "1 — Farkındalık",
+      "2": "2 — Uygulayıcı",
+      "3": "3 — Uzman"
+    },
+    "board": {
+      "title": "Yönetim organı eğitimi (NIS2 Md. 20)",
+      "summary": "Geçerli eğitimi olan {{trained}}/{{total}} üye",
+      "valid_until": "{{date}} tarihine kadar geçerli",
+      "no_expiry": "geçerli",
+      "to_train": "eğitilecek",
+      "hint": "Tesisin veya kuruluşun yönetim kurulu türündeki organlarının görevdeki üyeleri. Eğitim, hâlâ geçerli bir yönetim organı kursuyla kaydedildiğinde sayılır."
     }
   },
   "incidents": {
@@ -3731,7 +3761,10 @@
         "legacy": "geçmiş",
         "expiring_title": "Tekrarlanacak eğitimler: kanıtın süresi dolmuş veya 60 gün içinde doluyor",
         "col_valid_until": "Geçerlilik sonu",
-        "expired": "süresi doldu"
+        "expired": "süresi doldu",
+        "board": "YK eğitimi",
+        "board_hint": "Geçerli eğitimi olan {{trained}}/{{total}} üye",
+        "no_board": "Kayıtlı yönetim kurulu yok"
       }
     },
     "loading_kpi": "KPI'ler yükleniyor...",
