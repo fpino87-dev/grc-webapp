@@ -964,10 +964,12 @@ Her kurs için şunları belirtin:
 - **Hedef kitle**: personel, kritik roller veya yönetim organı;
 - **Geçerlilik (ay)**: oturumun kaç ay sonra tekrarlanması gerektiği (ör. 12 = her yıl); boş = süresi dolmaz;
 - **Zorunlu**: personel için zorunlu kurslar kapsama dahil edilir;
-- **Kanıtlanan kontroller**: kontrolü koda göre arayın (ör. A.6.3). Kursun her oturumu bu kontrollerin kanıtı olur.
+- **Kapsam**: kurs tüm tesislerde geçerliyse **kuruluş** (ör. standart hijyen: yalnızca bir kez girersiniz), tesise özgü kurslar için **yalnızca seçili tesisler**. Kuruluş kurslarını kuruluş genelinde kapsamı olanlar yönetir; bir plant manager kendi tesislerinin kurslarını oluşturur ve düzenler. Bir tesisin planında ve oturumlarında kuruluş kursları ile o tesisin kursları sunulur.
 - **Kazandırılan yetkinlik** ve **seviye** (yalnızca kritik roller ve yönetim organı, isteğe bağlı): hesabı olan katılımcılar bu yetkinliği yetkinlik profillerinde alır (ISO 27001 md. 7.2). Önerilen adlar rollerin yetkinlik gereksinimlerinden gelir.
 
 Bir planda yer alan veya oturumu kaydedilmiş bir kurs silinemez: **arşivlenir**.
+
+**Oturumların kanıtladığı kontroller.** Kataloğun üstünde tüm kurslar için geçerli tek bir ayar vardır: her hedef kitle için bir oturumun hangi kontrolleri kanıtladığı (ör. personel → ACN PR.AT-01, ISO A.6.3, TISAX ISA-2.1.3; kritik roller → ACN PR.AT-02). Bunu kuruluşu yöneten kişi, kontrolü koda göre arayarak düzenler; diğerleri salt okunur görür. Kontroller kurs kurs seçilmez ve çerçeveler değiştirilmez. Başlangıç değerleri `load_training_evidence_controls` komutuyla yüklenir.
 
 ### 2. Hedef gruplar
 
@@ -992,7 +994,7 @@ Her kalem durumunu (**Planlandı**, 30 gün içinde **Vadesi yakın**, **Gecikmi
 4. **Kanıt dosyasını** ekleyin (katılım listesi, e-öğrenme dışa aktarımı, kampanya raporu). Zorunludur: katılımcıların adları yalnızca dosyada bulunur, platform sayıları kaydeder.
 5. **Kaydet**'e tıklayın.
 
-Dosyadan, kursun geçerlilik süresi kadar geçerli bir **kanıt** oluşur ve tesiste **kursun kontrollerine otomatik bağlanır**. Onay mesajı kaç kontrolün bağlandığını gösterir ve tesiste uygulanmayanları (oluşturulmamış veya SoA dışı bırakılmış) listeler.
+Dosyadan, kursun geçerlilik süresi kadar geçerli bir **kanıt** oluşur ve oturumun tesisinde, **yalnızca tesiste uygulanan çerçevelerde**, **kursun hedef kitlesi için belirlenen kontrollere otomatik bağlanır** (ör. ACN PR.AT-01 yalnızca NIS2 tesislerinde, ISA-2.1.3 yalnızca TISAX tesislerinde). Onay mesajı kaç kontrolün bağlandığını gösterir ve uygulanan bir çerçevenin oluşturulmamış veya SoA dışı bırakılmış kontrollerini listeler.
 
 Kanıt dosyası değiştirilemez: yanlışsa oturumu silip yeniden kaydedin. Kanıtı daha önce değerlendirilmiş kontrolleri destekleyen bir oturum silinemez (yalnızca bir superuser silebilir). **Kanıtsız geçmiş kayıt** satırları eski kişi bazlı verilerin taşınmasından gelir: yalnızca sayıları içerir.
 

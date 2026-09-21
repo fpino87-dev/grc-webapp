@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { documentsApi } from "../../api/endpoints/documents";
 import {
+  courseAppliesTo,
   trainingApi,
   type TrainingAudience,
   type TrainingCapabilities,
@@ -87,7 +88,9 @@ function ItemForm({ plan, courses, audiences, onClose }: {
           <label className={labelCls}>{t("training.plan.fields.course")} *</label>
           <select value={course} onChange={e => setCourse(e.target.value)} className={inputCls}>
             <option value="">—</option>
-            {courses.map(c => <option key={c.id} value={c.id}>{c.title} · {t(`training.kinds.${c.kind}`)}</option>)}
+            {courses.filter(c => c.status === "attivo" && courseAppliesTo(c, plan.plant)).map(c => (
+              <option key={c.id} value={c.id}>{c.title} · {t(`training.kinds.${c.kind}`)}</option>
+            ))}
           </select>
         </div>
         <div>

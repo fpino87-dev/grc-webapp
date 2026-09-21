@@ -964,10 +964,12 @@ Pour chaque cours, indiquez :
 - **Public** : personnel, rôles critiques ou organe de direction ;
 - **Validité (mois)** : au bout de combien de mois la session doit être répétée (ex. 12 = chaque année) ; vide = n'expire pas ;
 - **Obligatoire** : les cours obligatoires pour le personnel entrent dans la couverture ;
-- **Contrôles démontrés** : recherchez le contrôle par code (ex. A.6.3). Chaque session du cours deviendra une preuve de ces contrôles.
+- **Périmètre** : **organisation**, si le cours vaut pour tous les sites (ex. hygiène standard : vous le saisissez une seule fois), ou **certains sites uniquement** pour les cours spécifiques. Les cours d'organisation sont gérés par les personnes ayant un périmètre d'organisation ; un plant manager crée et modifie les cours de ses sites. Le plan et les sessions d'un site proposent les cours d'organisation et ceux de ce site.
 - **Compétence attribuée** et **niveau** (rôles critiques et organe de direction uniquement, facultatif) : les participants disposant d'un compte reçoivent cette compétence dans leur fiche de compétences (ISO 27001 cl. 7.2). Les noms proposés sont ceux des exigences de compétence des rôles.
 
 Un cours déjà présent dans un plan ou ayant des sessions ne peut pas être supprimé : on l'**archive**.
+
+**Contrôles prouvés par les sessions.** En haut du catalogue se trouve un paramètre unique, valable pour tous les cours : pour chaque public, quels contrôles une session prouve (ex. personnel → ACN PR.AT-01, ISO A.6.3, TISAX ISA-2.1.3 ; rôles critiques → ACN PR.AT-02). La personne qui gère l'organisation le modifie en recherchant le contrôle par code ; les autres le voient en lecture seule. Les contrôles ne se choisissent pas cours par cours et les référentiels ne sont pas modifiés. Les valeurs initiales se chargent avec la commande `load_training_evidence_controls`.
 
 ### 2. Groupes cibles
 
@@ -992,7 +994,7 @@ Chaque élément affiche son statut (**Planifié**, **Échéance proche** sous 3
 4. Joignez le **fichier de preuve** (feuille de présence, export e-learning, rapport de campagne). Il est obligatoire : les noms des participants ne figurent que dans le fichier, la plateforme enregistre les chiffres.
 5. Cliquez sur **Enregistrer**.
 
-Le fichier devient une **preuve** qui expire selon la validité du cours, **liée automatiquement aux contrôles du cours** sur le site. Le message de confirmation indique combien de contrôles ont été liés et liste ceux qui ne s'appliquent pas au site (non instanciés ou exclus de la SoA).
+Le fichier devient une **preuve** qui expire selon la validité du cours, **liée automatiquement aux contrôles définis pour le public du cours**, sur le site de la session et **uniquement pour les référentiels appliqués au site** (ex. ACN PR.AT-01 uniquement sur les sites NIS2, ISA-2.1.3 uniquement sur les sites TISAX). Le message de confirmation indique combien de contrôles ont été liés et liste ceux d'un référentiel appliqué qui ne sont pas instanciés ou sont exclus de la SoA.
 
 Le fichier de preuve ne se remplace pas : s'il est erroné, supprimez la session et enregistrez-la de nouveau. Une session dont la preuve étaye des contrôles déjà évalués ne peut pas être supprimée (seul un superuser le peut). Les lignes **historique sans preuve** proviennent de la migration des anciennes données individuelles : elles ne portent que des chiffres.
 

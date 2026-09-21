@@ -7,13 +7,13 @@ from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
-from core.audit import log_action
 from core.scoping import PlantScopedQuerysetMixin
 from core.viewsets import SoftDeleteAuditMixin
 
 from .models import (
     TrainingAudience,
     TrainingCourse,
+    TrainingEvidenceControl,
     TrainingParticipant,
     TrainingPlan,
     TrainingPlanItem,
@@ -23,6 +23,7 @@ from .permissions import TrainingPermission, TrainingRecordsPermission
 from .serializers import (
     TrainingAudienceSerializer,
     TrainingCourseSerializer,
+    TrainingEvidenceControlSerializer,
     TrainingPlanItemSerializer,
     TrainingPlanSerializer,
     TrainingSessionSerializer,
@@ -32,7 +33,7 @@ from . import services
 
 
 class TrainingCourseViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
-    queryset = TrainingCourse.objects.prefetch_related("plants", "controls__framework")
+    queryset = TrainingCourse.objects.prefetch_related("plants")
     serializer_class = TrainingCourseSerializer
     permission_classes = [TrainingPermission]
     filterset_fields = ["status", "mandatory", "source", "kind", "audience_kind"]
@@ -45,14 +46,10 @@ class TrainingCourseViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, view
         services.delete_course(instance, self.request.user)
 
     def perform_create(self, serializer):
-        instance = serializer.save(created_by=self.request.user)
-        log_action(
-            user=self.request.user,
-            action_code="training.course.create",
-            level="L2",
-            entity=instance,
-            payload={"course_id": str(instance.pk)},
-        )
+        services.create_course(serializer, self.request.user)
+
+    def perform_update(self, serializer):
+        services.update_course(serializer, self.request.user)
 
     @action(detail=False, methods=["get"])
     def capabilities(self, request):
@@ -68,7 +65,8 @@ class TrainingCourseViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, view
 
     @action(detail=False, methods=["get"], url_path="control-options")
     def control_options(self, request):
-        """Controlli collegabili a un corso, cercati per codice (es. «A.6.3»).
+        """Controlli da impostare come provati dalle erogazioni, cercati per
+        codice (es. «PR.AT-01»).
         Serve a chi gestisce la formazione anche senza accesso al catalogo
         framework; solo codice, framework e titolo."""
         from apps.controls.models import Control
@@ -98,6 +96,18 @@ class _ServiceWriteMixin:
 
     def perform_destroy(self, instance):
         type(self).delete_service(instance, self.request.user)
+
+
+class TrainingEvidenceControlViewSet(_ServiceWriteMixin, viewsets.ModelViewSet):
+    """Quali controlli provano le erogazioni, per tipo di destinatari: vale per
+    tutta l'organizzazione, la gestisce chi ha perimetro di organizzazione."""
+    queryset = TrainingEvidenceControl.objects.select_related("control__framework")
+    serializer_class = TrainingEvidenceControlSerializer
+    permission_classes = [TrainingRecordsPermission]
+    http_method_names = ["get", "post", "delete", "head", "options"]
+    filterset_fields = ["audience_kind"]
+    create_service = services.create_evidence_control
+    delete_service = services.delete_evidence_control
 
 
 class TrainingAudienceViewSet(_ServiceWriteMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):

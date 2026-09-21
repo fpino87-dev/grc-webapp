@@ -156,7 +156,7 @@ def test_capabilities_of_site_plant_manager_and_nominated_ciso(plant):
 
 
 @pytest.mark.django_db
-def test_control_options_and_course_controls(client):
+def test_control_options_and_evidence_controls(client):
     import datetime
 
     from apps.controls.models import Control, Framework
@@ -170,11 +170,24 @@ def test_control_options_and_course_controls(client):
     assert [o["external_id"] for o in opts] == ["A.6.3"]
     assert opts[0]["framework_code"] == "ISO27001"
 
-    r = client.post(URL_COURSES, {"title": "Awareness", "controls": [str(ctrl.pk)]},
-                    format="json")
+    r = client.post(URL_COURSES, {"title": "Awareness"}, format="json")
     assert r.status_code == 201, r.data
-    assert "framework_refs" not in r.data
-    assert [c["external_id"] for c in r.data["controls_detail"]] == ["A.6.3"]
+    assert "framework_refs" not in r.data and "controls" not in r.data
+
+    url = "/api/v1/training/evidence-controls/"
+    r = client.post(url, {"audience_kind": "generale", "control": str(ctrl.pk)}, format="json")
+    assert r.status_code == 201, r.data
+    assert r.data["control_detail"]["external_id"] == "A.6.3"
+    dup = client.post(url, {"audience_kind": "generale", "control": str(ctrl.pk)}, format="json")
+    assert dup.status_code == 400
+    assert client.patch(f"{url}{r.data['id']}/", {"audience_kind": "ruoli_critici"},
+                        format="json").status_code == 405
+    assert [x["id"] for x in client.get(url).data["results"]] == [r.data["id"]]
+    assert client.delete(f"{url}{r.data['id']}/").status_code == 204
+    assert client.get(url).data["results"] == []
+    # Ricreabile dopo l'eliminazione (unicità solo fra le righe vive).
+    assert client.post(url, {"audience_kind": "generale", "control": str(ctrl.pk)},
+                       format="json").status_code == 201
 
 
 @pytest.mark.django_db

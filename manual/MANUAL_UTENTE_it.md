@@ -964,10 +964,12 @@ Per ogni corso indica:
 - **Destinatari**: personale, ruoli critici o organo di gestione;
 - **Validità (mesi)**: dopo quanti mesi l'erogazione va ripetuta (es. 12 = ogni anno); vuoto = non scade;
 - **Obbligatorio**: i corsi obbligatori per il personale entrano nella copertura;
-- **Controlli dimostrati**: cerca il controllo per codice (es. A.6.3). Ogni erogazione del corso diventerà evidenza di questi controlli.
+- **Ambito**: **organizzazione**, se il corso vale per tutti i siti (es. igiene standard: lo inserisci una volta sola), oppure **solo alcuni siti** per i corsi specifici. I corsi di organizzazione li gestisce chi ha un perimetro di organizzazione; un plant manager crea e modifica i corsi dei propri siti. Nel piano e nelle erogazioni di un sito compaiono i corsi di organizzazione e quelli di quel sito.
 - **Competenza attribuita** e **livello** (solo per ruoli critici e organo di gestione, facoltativa): chi partecipa con un account riceve questa competenza nella propria scheda competenze (ISO 27001 cl. 7.2). I nomi proposti sono quelli dei requisiti di competenza dei ruoli.
 
 Un corso già in un piano o con erogazioni non si elimina: si **archivia**.
+
+**Controlli provati dalle erogazioni.** In cima al catalogo c'è un'impostazione unica, valida per tutti i corsi: per ogni tipo di destinatari, quali controlli prova un'erogazione (es. personale → ACN PR.AT-01, ISO A.6.3, TISAX ISA-2.1.3; ruoli critici → ACN PR.AT-02). La modifica chi gestisce l'organizzazione, cercando il controllo per codice; gli altri la vedono in sola lettura. Non si scelgono i controlli corso per corso e i framework non vengono modificati. I valori iniziali si caricano con il comando `load_training_evidence_controls`.
 
 ### 2. Gruppi destinatari
 
@@ -992,7 +994,7 @@ Ogni voce mostra lo stato (**Pianificata**, **In scadenza** entro 30 giorni, **I
 4. Allega il **file di prova** (registro presenze, export dell'e-learning, report della campagna). È obbligatorio: i nomi dei partecipanti stanno solo nel file, la piattaforma registra i numeri.
 5. Clicca **Registra**.
 
-Dal file nasce un'**evidenza** con scadenza pari alla validità del corso, **collegata automaticamente ai controlli del corso** sul sito. Il messaggio di conferma indica quanti controlli sono stati collegati ed elenca quelli non applicabili al sito (non istanziati o esclusi dallo SOA).
+Dal file nasce un'**evidenza** con scadenza pari alla validità del corso, **collegata automaticamente ai controlli impostati per i destinatari del corso**, sul sito dell'erogazione e **solo per i framework applicati al sito** (es. ACN PR.AT-01 solo sui siti NIS2, ISA-2.1.3 solo su quelli TISAX). Il messaggio di conferma indica quanti controlli sono stati collegati ed elenca quelli di un framework applicato ma non istanziati o esclusi dallo SOA.
 
 Il file di prova non si sostituisce: se è sbagliato, elimina l'erogazione e registrala di nuovo. Un'erogazione la cui prova sostiene controlli già valutati non si elimina (solo un superuser può farlo). Le righe **storico senza prova** vengono dalla migrazione dei vecchi dati per persona: riportano solo i conteggi.
 

@@ -964,10 +964,12 @@ For each course set:
 - **Audience**: staff, critical roles or management body;
 - **Validity (months)**: after how many months the session must be repeated (e.g. 12 = every year); empty = does not expire;
 - **Mandatory**: mandatory staff courses count towards coverage;
-- **Controls demonstrated**: search the control by code (e.g. A.6.3). Every session of the course will become evidence for these controls.
+- **Scope**: **organisation**, if the course applies to all sites (e.g. standard hygiene: you enter it only once), or **selected sites only** for specific courses. Organisation courses are managed by those with an organisation-wide scope; a plant manager creates and edits the courses of their own sites. A site's plan and sessions offer the organisation courses and that site's courses.
 - **Competency granted** and **level** (critical roles and management body only, optional): participants with an account receive this competency on their competency profile (ISO 27001 cl. 7.2). The suggested names are those of the roles' competency requirements.
 
 A course already in a plan or with recorded sessions cannot be deleted: **archive** it instead.
+
+**Controls proven by sessions.** At the top of the catalogue there is a single setting, valid for all courses: for each audience, which controls a session proves (e.g. staff → ACN PR.AT-01, ISO A.6.3, TISAX ISA-2.1.3; critical roles → ACN PR.AT-02). Whoever manages the organisation edits it, searching the control by code; others see it read-only. Controls are not chosen course by course and the frameworks are not modified. The initial values are loaded with the `load_training_evidence_controls` command.
 
 ### 2. Target groups
 
@@ -992,7 +994,7 @@ Each item shows its status (**Planned**, **Due soon** within 30 days, **Overdue*
 4. Attach the **proof file** (attendance sheet, e-learning export, campaign report). It is mandatory: participants' names are only in the file, the platform stores the numbers.
 5. Click **Record**.
 
-The file becomes **evidence** expiring after the course's validity, **automatically linked to the course's controls** at the site. The confirmation message shows how many controls were linked and lists those not applicable to the site (not instantiated or excluded from the SoA).
+The file becomes **evidence** expiring after the course's validity, **automatically linked to the controls set for the course's audience**, at the session's site and **only for the frameworks applied at the site** (e.g. ACN PR.AT-01 only at NIS2 sites, ISA-2.1.3 only at TISAX sites). The confirmation message shows how many controls were linked and lists those of an applied framework that are not instantiated or are excluded from the SoA.
 
 The proof file cannot be replaced: if it is wrong, delete the session and record it again. A session whose proof supports controls already assessed cannot be deleted (only a superuser can). Rows marked **historical, no proof** come from the migration of the old per-person data: they only carry counts.
 

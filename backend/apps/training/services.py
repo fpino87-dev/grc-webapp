@@ -148,10 +148,58 @@ def _audit(user, action, entity, payload):
 
 
 # ── Catalogo corsi ──────────────────────────────────────────────────────────
+# Ambito del corso: nessun sito = organizzazione (lo gestisce chi ha perimetro
+# di organizzazione), altrimenti i siti indicati (chi gestisce tutti quei siti).
+
+def _require_course_scope(user, plants):
+    if not plants:
+        if not can_manage_training(user, None):
+            raise PermissionDenied(_(
+                "I corsi di organizzazione li gestisce chi ha un perimetro di organizzazione."
+            ))
+        return
+    scopes = None if getattr(user, "is_superuser", False) else _manage_scopes(user)
+    if scopes is not None and not all(_in_scopes(scopes, p) for p in plants):
+        raise PermissionDenied(_("Non gestisci la formazione di tutti i siti del corso."))
+
+
+def create_course(serializer, user):
+    _require_course_scope(user, serializer.validated_data.get("plants", []))
+    course = serializer.save(created_by=user)
+    _audit(user, "course.create", course, {"plants": course.plants.count()})
+    return course
+
+
+def update_course(serializer, user):
+    course = serializer.instance
+    _require_course_scope(user, list(course.plants.all()))
+    if "plants" in serializer.validated_data:
+        _require_course_scope(user, serializer.validated_data["plants"])
+    course = serializer.save()
+    _audit(user, "course.update", course, {"plants": course.plants.count()})
+    return course
+
+
+def course_applies_to(course, plant) -> bool:
+    """Il corso vale per il sito: è di organizzazione o è di quel sito.
+    `plant=None` (piano di organizzazione) accetta solo corsi di organizzazione."""
+    ids = {p.pk for p in course.plants.all()}
+    return not ids or (plant is not None and plant.pk in ids)
+
+
+def _check_course_scope(course, plant, field="course"):
+    if not course_applies_to(course, plant):
+        if plant is None:
+            message = _("Nel piano di organizzazione vanno solo i corsi di organizzazione.")
+        else:
+            message = _("Il corso non vale per questo sito.")
+        raise ValidationError({field: message})
+
 
 def delete_course(course, user):
     """Un corso già in un piano o con erogazioni non si elimina: le voci e le
     prove resterebbero senza corso. Si archivia."""
+    _require_course_scope(user, list(course.plants.all()))
     if course.plan_items.exists() or course.sessions.exists():
         raise ValidationError(
             _("Il corso è in un piano formativo o ha erogazioni registrate: archivialo.")
@@ -238,6 +286,7 @@ def _check_audiences(audiences, plant):
 def create_plan_item(serializer, user):
     plan = serializer.validated_data["plan"]
     require_training_manage(user, plan.plant)
+    _check_course_scope(serializer.validated_data["course"], plan.plant)
     _check_audiences(serializer.validated_data.get("audiences", []), plan.plant)
     item = serializer.save(created_by=user)
     _audit(user, "plan_item.create", item, {"plan_id": str(plan.pk)})
@@ -249,6 +298,8 @@ def update_plan_item(serializer, user):
     require_training_manage(user, item.plan.plant)
     if "plan" in serializer.validated_data and serializer.validated_data["plan"] != item.plan:
         raise ValidationError({"plan": _("Una voce non si può spostare in un altro piano.")})
+    if "course" in serializer.validated_data:
+        _check_course_scope(serializer.validated_data["course"], item.plan.plant)
     _check_audiences(serializer.validated_data.get("audiences", []), item.plan.plant)
     item = serializer.save()
     _audit(user, "plan_item.update", item, {"plan_id": str(item.plan_id)})
@@ -562,6 +613,35 @@ def stale_audiences_count(plant=None, today=None) -> int:
     if plant is not None:
         qs = qs.filter(plant=plant)
     return qs.count()
+
+
+# ── Controlli provati dalle erogazioni (impostazione del modulo) ───────────
+# Vale per tutta l'organizzazione: la gestisce chi ha perimetro di organizzazione.
+
+def create_evidence_control(serializer, user):
+    require_training_manage(user, None)
+    data = serializer.validated_data
+    if data["control"].framework.archived_at is not None:
+        raise ValidationError({"control": _("Il framework del controllo è archiviato.")})
+    from .models import TrainingEvidenceControl
+    if TrainingEvidenceControl.objects.filter(
+        audience_kind=data["audience_kind"], control=data["control"],
+    ).exists():
+        raise ValidationError({"control": _("Il controllo è già impostato per questi destinatari.")})
+    rule = serializer.save(created_by=user)
+    _audit(user, "evidence_control.create", rule, {
+        "audience_kind": rule.audience_kind, "control_id": str(rule.control_id),
+    })
+    return rule
+
+
+def delete_evidence_control(rule, user):
+    # Le prove già collegate restano sui controlli: vale per le erogazioni future.
+    require_training_manage(user, None)
+    rule.soft_delete()
+    _audit(user, "evidence_control.delete", rule, {
+        "audience_kind": rule.audience_kind, "control_id": str(rule.control_id),
+    })
 
 
 # ── Promemoria delle voci del piano ────────────────────────────────────────
@@ -884,13 +964,31 @@ def _check_plan_item(plan_item, course, plant):
         raise ValidationError({"plan_item": _("La voce del piano è di un altro sito.")})
 
 
-def link_evidence_to_controls(evidence, course, plant) -> dict:
-    """Collega l'evidenza dell'erogazione alle istanze dei controlli del corso
-    sul sito. Un controllo non istanziato sul sito, o escluso dallo SOA, non è
-    un errore: lo si segnala come non applicabile."""
-    from apps.controls.models import ControlInstance
+def evidence_controls_for(audience_kind):
+    """Controlli che un'erogazione per questi destinatari prova, dai framework
+    non archiviati (impostazione del modulo, `TrainingEvidenceControl`)."""
+    from apps.controls.models import Control
 
-    controls = list(course.controls.all().only("id", "external_id"))
+    return Control.objects.filter(
+        training_evidence_rules__audience_kind=audience_kind,
+        training_evidence_rules__deleted_at__isnull=True,
+        framework__archived_at__isnull=True,
+    ).distinct()
+
+
+def link_evidence_to_controls(evidence, course, plant) -> dict:
+    """Collega l'evidenza dell'erogazione ai controlli impostati per i
+    destinatari del corso, sul sito dell'erogazione e solo per i framework
+    applicati al sito. Un controllo di un framework applicato ma non istanziato
+    o escluso dallo SOA non è un errore: lo si segnala come non applicabile."""
+    from apps.controls.models import ControlInstance
+    from apps.plants.services import get_active_frameworks
+
+    controls = list(
+        evidence_controls_for(course.audience_kind)
+        .filter(framework__in=get_active_frameworks(plant))
+        .only("id", "external_id")
+    )
     if not controls:
         return {"linked": 0, "not_applicable": []}
     instances = list(
@@ -936,6 +1034,7 @@ def register_session(serializer, uploaded_file, user):
     require_training_manage(user, plant)
     if course.status != "attivo":
         raise ValidationError({"course": _("Il corso è archiviato.")})
+    _check_course_scope(course, plant)
     if not uploaded_file:
         raise ValidationError(
             {"file": _("Allega la prova dell'erogazione (registro presenze, export, report).")}

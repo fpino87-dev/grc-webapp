@@ -62,7 +62,7 @@ export function TrainingPage() {
       </div>
 
       {current === "courses" ? (
-        <CoursesTab canManage={caps.can_manage_courses} />
+        <CoursesTab caps={caps} />
       ) : !plant ? (
         <div className="bg-white border border-gray-200 rounded-lg p-8 text-center text-gray-500 text-sm">
           {t("training.select_plant")}

@@ -12,8 +12,9 @@ class TrainingCourse(BaseModel):
     """Corso o campagna del catalogo formativo.
 
     La piattaforma non eroga la formazione: il corso descrive cosa va fatto,
-    ogni quanto va ripetuto (`validity_months`) e quali controlli dei framework
-    la sua erogazione dimostra (`controls`).
+    per chi, ogni quanto va ripetuto (`validity_months`) e in quale ambito
+    (organizzazione o siti). I controlli che le erogazioni provano dipendono
+    dai destinatari (`TrainingEvidenceControl`), non dal singolo corso.
     """
 
     SOURCE_CHOICES = [("interno", "Interno"), ("kb4", "KnowBe4"), ("esterno", "Esterno")]
@@ -36,8 +37,10 @@ class TrainingCourse(BaseModel):
     description = models.TextField(blank=True)
     duration_minutes = models.IntegerField(null=True, blank=True)
     mandatory = models.BooleanField(default=False)
-    # Deprecato: sostituito da `controls`, rimosso con la nuova interfaccia (fase 4).
+    # Deprecato: sostituito da `controls` (a sua volta deprecato), da eliminare.
     framework_refs = models.JSONField(default=list)
+    # Ambito: nessun sito = corso di organizzazione, valido per tutti i siti
+    # (es. igiene standard); uno o più siti = corso specifico di quei siti.
     plants = models.ManyToManyField("plants.Plant", blank=True, related_name="training_courses")
     deadline = models.DateField(null=True, blank=True)
     kind = models.CharField(max_length=20, choices=KIND_CHOICES, default="corso")
@@ -46,6 +49,9 @@ class TrainingCourse(BaseModel):
     )
     # Mesi di validità di un'erogazione: dopo va ripetuta. Null = non scade.
     validity_months = models.PositiveSmallIntegerField(null=True, blank=True, default=12)
+    # Deprecato: i controlli provati dalle erogazioni si impostano per tipo di
+    # destinatari (TrainingEvidenceControl). Copiato dalla migrazione 0006,
+    # eliminato nella release successiva insieme a framework_refs.
     controls = models.ManyToManyField(
         "controls.Control", blank=True, related_name="training_courses",
     )
@@ -64,6 +70,30 @@ class TrainingCourse(BaseModel):
         """Le erogazioni di questo corso elencano i partecipanti per nome
         (titolari di nomine, componenti degli organi di governo)."""
         return self.audience_kind != "generale" and self.kind != "phishing"
+
+
+class TrainingEvidenceControl(BaseModel):
+    """Impostazione unica del modulo: quali controlli prova un'erogazione, in
+    base ai destinatari del corso (es. personale → ACN PR.AT-01, ISO A.6.3).
+    La prova si collega solo ai controlli istanziati sul sito dell'erogazione,
+    quindi solo dove il framework è applicato. I framework non si toccano."""
+
+    audience_kind = models.CharField(
+        max_length=20, choices=TrainingCourse.AUDIENCE_KIND_CHOICES,
+    )
+    control = models.ForeignKey(
+        "controls.Control", on_delete=models.CASCADE, related_name="training_evidence_rules",
+    )
+
+    class Meta:
+        ordering = ["audience_kind", "control__external_id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["audience_kind", "control"],
+                condition=Q(deleted_at__isnull=True),
+                name="uniq_training_evidence_control",
+            ),
+        ]
 
 
 class TrainingAudience(BaseModel):

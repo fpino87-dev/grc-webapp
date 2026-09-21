@@ -964,10 +964,12 @@ Dla każdego kursu określ:
 - **Odbiorcy**: personel, role krytyczne lub organ zarządzający;
 - **Ważność (miesiące)**: po ilu miesiącach szkolenie trzeba powtórzyć (np. 12 = co roku); puste = nie wygasa;
 - **Obowiązkowy**: obowiązkowe kursy dla personelu wliczają się do pokrycia;
-- **Potwierdzane kontrole**: wyszukaj kontrolę po kodzie (np. A.6.3). Każde szkolenie z tego kursu stanie się dowodem dla tych kontroli.
+- **Zakres**: **organizacja**, jeśli kurs obowiązuje we wszystkich zakładach (np. standardowa higiena: wprowadzasz go tylko raz), albo **tylko wybrane zakłady** dla kursów specyficznych. Kursami organizacji zarządzają osoby z zakresem całej organizacji; plant manager tworzy i edytuje kursy swoich zakładów. W planie i szkoleniach zakładu dostępne są kursy organizacji i kursy tego zakładu.
 - **Przyznawana kompetencja** i **poziom** (tylko role krytyczne i organ zarządzający, opcjonalnie): uczestnicy z kontem otrzymują tę kompetencję w swoim profilu kompetencji (ISO 27001 pkt 7.2). Proponowane nazwy pochodzą z wymagań kompetencyjnych ról.
 
 Kursu, który jest już w planie lub ma zarejestrowane szkolenia, nie można usunąć: należy go **zarchiwizować**.
+
+**Kontrole potwierdzane przez szkolenia.** Na górze katalogu jest jedno ustawienie, wspólne dla wszystkich kursów: dla każdego rodzaju odbiorców — jakie kontrole potwierdza szkolenie (np. personel → ACN PR.AT-01, ISO A.6.3, TISAX ISA-2.1.3; role krytyczne → ACN PR.AT-02). Edytuje je osoba zarządzająca organizacją, wyszukując kontrolę po kodzie; pozostali widzą je tylko do odczytu. Kontroli nie wybiera się dla każdego kursu osobno, a frameworki nie są zmieniane. Wartości początkowe ładuje polecenie `load_training_evidence_controls`.
 
 ### 2. Grupy docelowe
 
@@ -992,7 +994,7 @@ Każda pozycja pokazuje status (**Zaplanowana**, **Termin wkrótce** w ciągu 30
 4. Załącz **plik dowodowy** (lista obecności, eksport z e-learningu, raport z kampanii). Jest obowiązkowy: nazwiska uczestników są tylko w pliku, platforma zapisuje liczby.
 5. Kliknij **Zarejestruj**.
 
-Z pliku powstaje **dowód** ważny przez okres ważności kursu, **automatycznie powiązany z kontrolami kursu** w zakładzie. Komunikat potwierdzenia pokazuje, ile kontroli powiązano, i wymienia te, które nie obowiązują w zakładzie (nieutworzone lub wyłączone z SoA).
+Z pliku powstaje **dowód** ważny przez okres ważności kursu, **automatycznie powiązany z kontrolami ustawionymi dla odbiorców kursu**, w zakładzie szkolenia i **tylko dla frameworków stosowanych w zakładzie** (np. ACN PR.AT-01 tylko w zakładach NIS2, ISA-2.1.3 tylko w zakładach TISAX). Komunikat potwierdzenia pokazuje, ile kontroli powiązano, i wymienia kontrole stosowanego frameworka, które nie zostały utworzone lub są wyłączone z SoA.
 
 Pliku dowodowego nie można podmienić: jeśli jest błędny, usuń szkolenie i zarejestruj je ponownie. Szkolenia, którego dowód potwierdza już ocenione kontrole, nie można usunąć (może to zrobić tylko superuser). Wiersze **historyczne bez dowodu** pochodzą z migracji dawnych danych osobowych: zawierają tylko liczby.
 

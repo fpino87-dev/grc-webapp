@@ -1973,10 +1973,6 @@
       "show_archived": "Show archived",
       "no_expiry": "does not expire",
       "validity_hint": "After these months the session must be repeated. Empty = does not expire.",
-      "controls_hint": "Each recorded session becomes evidence for these controls at the session's site.",
-      "search_controls": "Search a control by code, e.g. A.6.3",
-      "no_matches": "No controls found.",
-      "no_controls": "no controls",
       "delete_confirm": "Delete the course \"{{title}}\"?",
       "fields": {
         "title": "Title",
@@ -1987,18 +1983,22 @@
         "duration_minutes": "Duration (minutes)",
         "mandatory": "Mandatory",
         "status": "Status",
-        "controls": "Controls demonstrated",
         "competency": "Competency granted",
-        "competency_level": "Level"
+        "competency_level": "Level",
+        "scope": "Scope"
       },
       "competency_hint": "Optional. Participants with an account receive this competency (ISO 27001 cl. 7.2) on their profile, backed by the session's proof. A higher level they already hold is never lowered.",
-      "grants": "Grants: {{competency}} (level {{level}})"
+      "grants": "Grants: {{competency}} (level {{level}})",
+      "scope_org": "Organisation: applies to all sites",
+      "scope_sites": "Selected sites only",
+      "scope_hint": "A common course (e.g. standard hygiene) is entered once as an organisation course; site-specific courses apply only to the chosen sites. Sessions are always recorded per site.",
+      "scope_org_short": "Organisation"
     },
     "help": {
       "title": "Evidence-based training",
       "description": "The platform does not deliver courses and does not connect to e-learning: it governs training. For each site you plan what to do, record each session with its proof file and measure staff coverage, in numbers only.",
       "steps": {
-        "1": "Course catalogue: for each course set type, audience, how many months before it must be repeated and which controls it demonstrates.",
+        "1": "Course catalogue: for each course set the type, audience, scope (organisation or sites) and how many months until it must be repeated. At the top, whoever manages the organisation sets which controls sessions prove for each audience.",
         "2": "Target groups: enter the site's groups with their number of people (e.g. Production 240) and update it when it changes.",
         "3": "Plan: create the year's plan, add items (course, groups, due date) and link the approval document.",
         "4": "Sessions: record each session with its numbers and proof file. The evidence is linked automatically to the course's controls and the item's reminder is closed.",
@@ -2007,7 +2007,7 @@
       },
       "connections": {
         "documents": "The plan is approved through the linked document; each proof becomes evidence",
-        "controls": "Session evidence proves the controls set on the course",
+        "controls": "Session proofs are linked to the controls set for the audience, only for the frameworks applied at the site",
         "kpi": "Coverage, plan progress, overdue items and phishing are computed automatically as KPIs",
         "objectives": "Security objectives link to the training KPIs",
         "governance": "Participants in critical-role and board sessions are chosen from role assignments and governing bodies; board training is a KPI (NIS2 Art. 20)"
@@ -2025,6 +2025,15 @@
       "no_expiry": "valid",
       "to_train": "to be trained",
       "hint": "Serving members of board-type governing bodies of the site or the organisation. Training counts when recorded with a still-valid management-body course."
+    },
+    "evidence_controls": {
+      "title": "Controls proven by sessions",
+      "intro": "Applies to all courses: each session's proof is linked to the controls set for its audience, only for the frameworks applied at the session's site (e.g. ACN only at NIS2 sites).",
+      "search": "Search by code (e.g. PR.AT-01)",
+      "no_matches": "No control found",
+      "none": "No control: sessions are not linked to controls.",
+      "none_board": "No control: board training is measured by the management body KPI.",
+      "add": "Add control"
     }
   },
   "incidents": {

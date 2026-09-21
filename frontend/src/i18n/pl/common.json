@@ -1973,10 +1973,6 @@
       "show_archived": "Pokaż zarchiwizowane",
       "no_expiry": "nie wygasa",
       "validity_hint": "Po tylu miesiącach szkolenie trzeba powtórzyć. Puste = nie wygasa.",
-      "controls_hint": "Każde zarejestrowane szkolenie staje się dowodem dla tych kontroli w zakładzie szkolenia.",
-      "search_controls": "Szukaj kontroli po kodzie, np. A.6.3",
-      "no_matches": "Nie znaleziono kontroli.",
-      "no_controls": "brak kontroli",
       "delete_confirm": "Usunąć kurs „{{title}}”?",
       "fields": {
         "title": "Tytuł",
@@ -1987,18 +1983,22 @@
         "duration_minutes": "Czas trwania (minuty)",
         "mandatory": "Obowiązkowy",
         "status": "Status",
-        "controls": "Potwierdzane kontrole",
         "competency": "Przyznawana kompetencja",
-        "competency_level": "Poziom"
+        "competency_level": "Poziom",
+        "scope": "Zakres"
       },
       "competency_hint": "Opcjonalnie. Uczestnicy z kontem otrzymują tę kompetencję (ISO 27001 pkt 7.2) w swoim profilu, z dowodem szkolenia. Wyższy poziom, który już posiadają, nigdy nie zostanie obniżony.",
-      "grants": "Przyznaje: {{competency}} (poziom {{level}})"
+      "grants": "Przyznaje: {{competency}} (poziom {{level}})",
+      "scope_org": "Organizacja: obowiązuje we wszystkich zakładach",
+      "scope_sites": "Tylko wybrane zakłady",
+      "scope_hint": "Wspólny kurs (np. standardowa higiena) wprowadza się raz jako kurs organizacji; kursy specyficzne obowiązują tylko w wybranych zakładach. Szkolenia rejestruje się zawsze dla zakładu.",
+      "scope_org_short": "Organizacja"
     },
     "help": {
       "title": "Szkolenia oparte na dowodach",
       "description": "Platforma nie prowadzi kursów i nie łączy się z e-learningiem: nadzoruje szkolenia. Dla każdego zakładu planuje się, co zrobić, rejestruje każde szkolenie z plikiem dowodowym i mierzy pokrycie personelu, wyłącznie w liczbach.",
       "steps": {
-        "1": "Katalog kursów: dla każdego kursu określ rodzaj, odbiorców, po ilu miesiącach trzeba go powtórzyć i jakie kontrole potwierdza.",
+        "1": "Katalog kursów: dla każdego kursu podaj rodzaj, odbiorców, zakres (organizacja lub zakłady) i po ilu miesiącach trzeba go powtórzyć. Na górze osoba zarządzająca organizacją ustawia, jakie kontrole potwierdzają szkolenia dla każdego rodzaju odbiorców.",
         "2": "Grupy docelowe: wprowadź grupy zakładu z liczbą osób (np. Produkcja 240) i aktualizuj ją, gdy się zmienia.",
         "3": "Plan: utwórz plan na rok, dodaj pozycje (kurs, grupy, termin) i powiąż dokument zatwierdzający.",
         "4": "Szkolenia: rejestruj każde szkolenie z liczbami i plikiem dowodowym. Dowód zostaje automatycznie powiązany z kontrolami kursu, a przypomnienie pozycji się zamyka.",
@@ -2007,7 +2007,7 @@
       },
       "connections": {
         "documents": "Plan zatwierdza się powiązanym dokumentem; każdy plik dowodowy staje się dowodem",
-        "controls": "Dowody ze szkoleń potwierdzają kontrole wskazane w kursie",
+        "controls": "Dowody szkoleń są wiązane z kontrolami ustawionymi dla odbiorców, tylko dla frameworków stosowanych w zakładzie",
         "kpi": "Pokrycie, realizacja planu, zaległości i phishing to KPI obliczane automatycznie",
         "objectives": "Cele bezpieczeństwa wiążą się z KPI szkoleń",
         "governance": "Uczestników szkoleń dla ról krytycznych i zarządu wybiera się spośród nominacji i organów zarządczych; szkolenie zarządu to KPI (NIS2 art. 20)"
@@ -2025,6 +2025,15 @@
       "no_expiry": "ważne",
       "to_train": "do przeszkolenia",
       "hint": "Urzędujący członkowie organów typu zarząd zakładu lub organizacji. Szkolenie się liczy, jeśli zarejestrowano je z wciąż ważnym kursem dla organu zarządzającego."
+    },
+    "evidence_controls": {
+      "title": "Kontrole potwierdzane przez szkolenia",
+      "intro": "Dotyczy wszystkich kursów: dowód każdego szkolenia jest powiązany z kontrolami ustawionymi dla jego odbiorców, tylko dla frameworków stosowanych w zakładzie szkolenia (np. ACN tylko w zakładach NIS2).",
+      "search": "Szukaj po kodzie (np. PR.AT-01)",
+      "no_matches": "Nie znaleziono kontroli",
+      "none": "Brak kontroli: szkolenia nie są powiązane z kontrolami.",
+      "none_board": "Brak kontroli: szkolenie zarządu mierzy KPI organu zarządzającego.",
+      "add": "Dodaj kontrolę"
     }
   },
   "incidents": {

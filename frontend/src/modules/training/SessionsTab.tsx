@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
+  courseAppliesTo,
   isNamedCourse,
   trainingApi,
   type ParticipantOptions,
@@ -102,7 +103,8 @@ function SessionForm({ plantId, onClose, onDone }: {
   const { data: courses = [] } = useQuery({
     queryKey: ["training-courses"],
     queryFn: () => trainingApi.courses(),
-    select: cs => cs.filter(c => c.status === "attivo"),
+    // Corsi attivi validi per il sito: di organizzazione o di questo sito.
+    select: cs => cs.filter(c => c.status === "attivo" && courseAppliesTo(c, plantId)),
   });
   const { data: audiences = [] } = useQuery({
     queryKey: ["training-audiences", plantId],

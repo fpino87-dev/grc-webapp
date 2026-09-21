@@ -33,7 +33,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
   - **Piano**: piano dell'anno del sito e piano di organizzazione, con il documento di approvazione collegato dal modulo Documenti e il suo stato, le voci «corso · gruppi · scadenza» con stato (pianificata, in scadenza, in ritardo, svolta), numero di erogazioni e copertura raggiunta;
   - **Erogazioni**: registrazione con i numeri (o, per il phishing, e-mail inviate, clic e segnalazioni) e il **file di prova obbligatorio**; la conferma indica quanti controlli sono stati collegati alla prova e quali non sono applicabili al sito; download della prova con la sua scadenza; le righe storiche migrate sono indicate come «storico senza prova»;
   - **Gruppi destinatari**: numero di persone per gruppo, con il segnale «da riverificare» dopo 6 mesi senza aggiornamento;
-  - **Catalogo corsi**: tipo, destinatari, validità in mesi e **controlli dimostrati**, cercati per codice.
+  - **Catalogo corsi**: tipo, destinatari, validità in mesi e ambito (vedi sotto).
 
   Ognuno vede ciò che gli compete: chi gestisce la formazione del sito (Compliance Officer, Plant Manager o CISO nominato) registra; gli auditor, interni ed esterni, consultano in sola lettura; gli altri ruoli vedono solo il catalogo. Guida contestuale (?) e manuali utente e tecnici aggiornati nelle cinque lingue; i18n IT/EN/FR/PL/TR.
 
@@ -43,6 +43,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
   - nuovo KPI calcolato **«Formazione dell'organo di gestione»** (NIS2 art. 20): componenti in carica del CdA con una formazione ancora valida sul totale dei componenti in carica. Nel tab Erogazioni un riquadro mostra chi è formato e fino a quando e chi è ancora da formare; nel Reporting la sola percentuale; nel **pacchetto audit** (`07_training/`) i partecipanti di ogni erogazione e lo stato della formazione del CdA (`board_training.csv`).
 
   Nell'audit trail delle erogazioni finiscono solo identificativi e il numero dei partecipanti, mai i nomi.
+
+- **Formazione — corsi di organizzazione o di sito e controlli provati per tipo di destinatari (M15)**:
+  - ogni corso ha un **ambito**: **organizzazione**, valido per tutti i siti (es. igiene standard, inserito una volta sola), oppure **solo alcuni siti**. I corsi di organizzazione li gestisce chi ha un perimetro di organizzazione; un plant manager gestisce i corsi dei propri siti. Nel piano e nelle erogazioni di un sito si possono usare solo i corsi di organizzazione e quelli di quel sito; nel piano di organizzazione solo i corsi di organizzazione. Le erogazioni restano registrate per sito;
+  - i **controlli provati dalle erogazioni** non si scelgono più corso per corso: un'**impostazione unica** in cima al catalogo indica, per ogni tipo di destinatari, quali controlli prova un'erogazione (es. personale → ACN PR.AT-01, ISO A.6.3, TISAX ISA-2.1.3; ruoli critici → ACN PR.AT-02). La modifica chi gestisce l'organizzazione; i framework non vengono toccati. La prova si collega **solo ai framework applicati al sito** dell'erogazione (es. ACN solo sui siti NIS2), e i controlli di framework non applicati non vengono più segnalati come «non applicabili».
+
+  **NB deploy:** la migrazione `training.0006` trasforma i controlli già collegati ai corsi attivi in regole per i destinatari di quei corsi (un controllo collegato a un solo corso «personale» varrà per tutte le erogazioni per il personale: verificare l'impostazione dopo il deploy). Poi eseguire `python manage.py load_training_evidence_controls` per aggiungere i valori predefiniti.
 
 ### Changed
 

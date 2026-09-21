@@ -65,18 +65,23 @@ def controls(db):
 
 @pytest.fixture
 def course(db, co, controls):
-    from apps.training.models import TrainingCourse
+    from apps.training.models import TrainingCourse, TrainingEvidenceControl
     c = TrainingCourse.objects.create(
         title="Awareness base", kind="corso", mandatory=True, validity_months=12, created_by=co,
     )
-    c.controls.set(controls)
+    for ctrl in controls:
+        TrainingEvidenceControl.objects.create(audience_kind="generale", control=ctrl)
     return c
 
 
 @pytest.fixture
 def instances(plant, controls):
-    """A.6.3 applicabile, A.5.1 escluso dallo SOA, A.8.7 non istanziato."""
+    """A.6.3 applicabile, A.5.1 escluso dallo SOA, A.8.7 non istanziato;
+    il framework è applicato al sito."""
     from apps.controls.models import ControlInstance
+    from apps.plants.models import PlantFramework
+    PlantFramework.objects.create(plant=plant, framework=controls[0].framework,
+                                  active_from=date(2024, 1, 1))
     return [
         ControlInstance.objects.create(plant=plant, control=controls[0], status="gap"),
         ControlInstance.objects.create(plant=plant, control=controls[1], status="non_valutato",
@@ -132,11 +137,43 @@ def test_session_does_not_touch_other_site_controls(co, course, plant, plant_b, 
 
 
 @pytest.mark.django_db
-def test_course_without_controls_links_nothing(co, course, plant, instances):
-    course.controls.clear()
+def test_audience_without_controls_links_nothing(co, course, plant, instances):
+    from apps.training.models import TrainingEvidenceControl
+    for rule in TrainingEvidenceControl.objects.all():
+        rule.soft_delete()
     r = _register(co, course, plant)
     assert r.status_code == 201
     assert r.data["control_links"] == {"linked": 0, "not_applicable": []}
+
+
+@pytest.mark.django_db
+def test_controls_follow_audience_and_site_frameworks(co, course, plant, plant_b, controls, instances):
+    """Solo i controlli dei destinatari del corso e dei framework applicati al
+    sito: quelli di un framework non applicato non sono «non applicabili»."""
+    from apps.controls.models import Control, ControlInstance, Framework
+    from apps.training.models import TrainingCourse, TrainingEvidenceControl
+
+    acn = Framework.objects.create(code="ACN_NIS2", name="ACN", version="1",
+                                   published_at=date(2024, 1, 1))
+    pr_at = Control.objects.create(framework=acn, external_id="PR.AT-01", translations={})
+    TrainingEvidenceControl.objects.create(audience_kind="generale", control=pr_at)
+    critical = Control.objects.create(framework=controls[0].framework, external_id="A.6.9",
+                                      translations={})
+    ControlInstance.objects.create(plant=plant, control=critical, status="gap")
+    TrainingEvidenceControl.objects.create(audience_kind="ruoli_critici", control=critical)
+
+    r = _register(co, course, plant)
+    assert r.data["control_links"] == {"linked": 1, "not_applicable": ["A.5.1", "A.8.7"]}
+
+    member_course = TrainingCourse.objects.create(title="Per CdA", audience_kind="organo_gestione")
+    assert TrainingEvidenceControl.objects.filter(audience_kind="organo_gestione").count() == 0
+    from apps.training.services import evidence_controls_for, link_evidence_to_controls
+    assert list(evidence_controls_for("ruoli_critici")) == [critical]
+    assert link_evidence_to_controls(None, member_course, plant) == {"linked": 0, "not_applicable": []}
+    # Framework archiviato: il suo controllo esce dall'impostazione.
+    acn.archived_at = timezone.now()
+    acn.save()
+    assert pr_at not in evidence_controls_for("generale")
 
 
 @pytest.mark.django_db

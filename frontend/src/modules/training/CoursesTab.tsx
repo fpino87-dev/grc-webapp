@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { plantsApi } from "../../api/endpoints/plants";
 import {
   isNamedCourse,
   trainingApi,
   type AudienceKind,
   type ControlOption,
   type CourseKind,
+  type TrainingCapabilities,
   type TrainingCourse,
 } from "../../api/endpoints/training";
 import {
@@ -16,8 +18,9 @@ import {
 const KINDS: CourseKind[] = ["corso", "awareness", "phishing"];
 const AUDIENCE_KINDS: AudienceKind[] = ["generale", "ruoli_critici", "organo_gestione"];
 
-function ControlPicker({ value, onChange }: {
-  value: ControlOption[]; onChange: (v: ControlOption[]) => void;
+// Cerca un controllo per codice (es. «PR.AT-01») fra quelli dei framework caricati.
+function ControlSearch({ exclude, onPick }: {
+  exclude: Set<string>; onPick: (c: ControlOption) => void;
 }) {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
@@ -26,28 +29,18 @@ function ControlPicker({ value, onChange }: {
     queryFn: () => trainingApi.controlOptions(search),
     enabled: search.trim().length >= 2,
   });
-  const chosen = new Set(value.map(c => c.id));
+  const available = options.filter(o => !exclude.has(o.id));
 
   return (
-    <div>
-      <div className="flex flex-wrap gap-1.5 mb-2">
-        {value.length === 0 && <span className="text-xs text-gray-400">{t("training.courses.no_controls")}</span>}
-        {value.map(c => (
-          <span key={c.id} className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-800 text-xs px-2 py-0.5 rounded">
-            {c.framework_code} {c.external_id}
-            <button type="button" onClick={() => onChange(value.filter(v => v.id !== c.id))}
-                    className="text-indigo-400 hover:text-indigo-700">×</button>
-          </span>
-        ))}
-      </div>
-      <input value={search} onChange={e => setSearch(e.target.value)}
-             placeholder={t("training.courses.search_controls")} className={inputCls} />
+    <div className="relative">
+      <input value={search} onChange={e => setSearch(e.target.value)} autoFocus
+             placeholder={t("training.evidence_controls.search")} className={inputCls} />
       {search.trim().length >= 2 && (
-        <div className="border border-gray-200 rounded mt-1 max-h-40 overflow-y-auto">
-          {options.filter(o => !chosen.has(o.id)).length === 0 ? (
-            <p className="text-xs text-gray-400 px-3 py-2">{t("training.courses.no_matches")}</p>
-          ) : options.filter(o => !chosen.has(o.id)).map(o => (
-            <button type="button" key={o.id} onClick={() => { onChange([...value, o]); setSearch(""); }}
+        <div className="absolute z-10 w-full bg-white border border-gray-200 rounded mt-1 max-h-48 overflow-y-auto shadow">
+          {available.length === 0 ? (
+            <p className="text-xs text-gray-400 px-3 py-2">{t("training.evidence_controls.no_matches")}</p>
+          ) : available.map(o => (
+            <button type="button" key={o.id} onClick={() => { onPick(o); setSearch(""); }}
                     className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50">
               <span className="font-medium">{o.framework_code} {o.external_id}</span>
               <span className="text-gray-500"> — {o.title}</span>
@@ -59,9 +52,97 @@ function ControlPicker({ value, onChange }: {
   );
 }
 
-function CourseForm({ course, onClose }: { course?: TrainingCourse; onClose: () => void }) {
+// Quali controlli prova un'erogazione, per tipo di destinatari: vale per tutti
+// i corsi e tutti i siti; la prova va solo sui framework applicati al sito.
+function EvidenceControlsPanel({ canEdit }: { canEdit: boolean }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
+  const [adding, setAdding] = useState<AudienceKind | null>(null);
+  const { data: rules = [] } = useQuery({
+    queryKey: ["training-evidence-controls"],
+    queryFn: () => trainingApi.evidenceControls(),
+  });
+  const refresh = () => qc.invalidateQueries({ queryKey: ["training-evidence-controls"] });
+  const onError = (e: unknown) => alert(apiErrorMessage(e, t("common.save_error")));
+  const add = useMutation({
+    mutationFn: ({ kind, control }: { kind: AudienceKind; control: string }) =>
+      trainingApi.createEvidenceControl(kind, control),
+    onSuccess: refresh, onError,
+  });
+  const remove = useMutation({
+    mutationFn: (id: string) => trainingApi.deleteEvidenceControl(id),
+    onSuccess: refresh, onError,
+  });
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 mb-4">
+      <p className="text-sm font-medium text-gray-800">{t("training.evidence_controls.title")}</p>
+      <p className="text-xs text-gray-500 mb-3">{t("training.evidence_controls.intro")}</p>
+      <div className="space-y-2">
+        {AUDIENCE_KINDS.map(kind => {
+          const own = rules.filter(r => r.audience_kind === kind);
+          return (
+            <div key={kind} className="grid grid-cols-1 sm:grid-cols-[12rem_1fr] gap-2 items-start">
+              <p className="text-sm text-gray-700 pt-0.5">{t(`training.audience_kinds.${kind}`)}</p>
+              <div>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {own.length === 0 && (
+                    <span className="text-xs text-gray-400">
+                      {t(kind === "organo_gestione" ? "training.evidence_controls.none_board" : "training.evidence_controls.none")}
+                    </span>
+                  )}
+                  {own.map(r => (
+                    <span key={r.id} title={r.control_detail.title}
+                          className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-800 text-xs px-2 py-0.5 rounded">
+                      {r.control_detail.framework_code} {r.control_detail.external_id}
+                      {canEdit && (
+                        <button type="button" onClick={() => remove.mutate(r.id)}
+                                aria-label={t("actions.delete")}
+                                className="text-indigo-400 hover:text-indigo-700">×</button>
+                      )}
+                    </span>
+                  ))}
+                  {canEdit && adding !== kind && (
+                    <button type="button" onClick={() => setAdding(kind)}
+                            className="text-xs text-indigo-600 hover:text-indigo-800">
+                      + {t("training.evidence_controls.add")}
+                    </button>
+                  )}
+                </div>
+                {canEdit && adding === kind && (
+                  <div className="flex gap-2 mt-2 max-w-md">
+                    <div className="flex-1">
+                      <ControlSearch exclude={new Set(own.map(r => r.control))}
+                                     onPick={c => { add.mutate({ kind, control: c.id }); setAdding(null); }} />
+                    </div>
+                    <button type="button" onClick={() => setAdding(null)} className={btnSecondary}>
+                      {t("actions.cancel")}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Chi può modificare un corso: di organizzazione → perimetro di organizzazione;
+// di sito → chi gestisce tutti i suoi siti (lo ricontrolla il backend).
+const canEditCourse = (c: TrainingCourse, caps: TrainingCapabilities) =>
+  c.plants.length === 0 ? caps.can_manage_org : c.plants.every(id => caps.manage_plant_ids.includes(id));
+
+function CourseForm({ course, caps, onClose }: {
+  course?: TrainingCourse; caps: TrainingCapabilities; onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [orgWide, setOrgWide] = useState(course ? course.plants.length === 0 : caps.can_manage_org);
+  const [sites, setSites] = useState<string[]>(course?.plants ?? []);
+  const { data: plants = [] } = useQuery({ queryKey: ["plants"], queryFn: plantsApi.list });
+  const manageable = plants.filter(p => caps.manage_plant_ids.includes(p.id));
   const [form, setForm] = useState({
     title: course?.title ?? "",
     description: course?.description ?? "",
@@ -80,7 +161,6 @@ function CourseForm({ course, onClose }: { course?: TrainingCourse; onClose: () 
     queryFn: () => trainingApi.competencyOptions(),
     enabled: named,
   });
-  const [controls, setControls] = useState<ControlOption[]>(course?.controls_detail ?? []);
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm(f => ({ ...f, [k]: v }));
 
   const mutation = useMutation({
@@ -88,7 +168,7 @@ function CourseForm({ course, onClose }: { course?: TrainingCourse; onClose: () 
       const payload = {
         ...form,
         competency: named ? form.competency.trim() : "",
-        controls: controls.map(c => c.id),
+        plants: orgWide ? [] : sites,
       };
       return course ? trainingApi.updateCourse(course.id, payload) : trainingApi.createCourse(payload);
     },
@@ -170,9 +250,29 @@ function CourseForm({ course, onClose }: { course?: TrainingCourse; onClose: () 
           </div>
         )}
         <div>
-          <label className={labelCls}>{t("training.courses.fields.controls")}</label>
-          <p className="text-xs text-gray-500 mb-2">{t("training.courses.controls_hint")}</p>
-          <ControlPicker value={controls} onChange={setControls} />
+          <label className={labelCls}>{t("training.courses.fields.scope")}</label>
+          <div className="space-y-1">
+            <label className={`flex items-center gap-2 text-sm ${caps.can_manage_org ? "text-gray-700" : "text-gray-400"}`}>
+              <input type="radio" checked={orgWide} disabled={!caps.can_manage_org} onChange={() => setOrgWide(true)} />
+              {t("training.courses.scope_org")}
+            </label>
+            <label className="flex items-center gap-2 text-sm text-gray-700">
+              <input type="radio" checked={!orgWide} onChange={() => setOrgWide(false)} />
+              {t("training.courses.scope_sites")}
+            </label>
+          </div>
+          {!orgWide && (
+            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 ml-6">
+              {manageable.map(p => (
+                <label key={p.id} className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={sites.includes(p.id)}
+                         onChange={() => setSites(v => (v.includes(p.id) ? v.filter(x => x !== p.id) : [...v, p.id]))} />
+                  {p.code} <span className="text-gray-400">{p.name}</span>
+                </label>
+              ))}
+            </div>
+          )}
+          <p className="text-xs text-gray-400 mt-1">{t("training.courses.scope_hint")}</p>
         </div>
       </div>
       {mutation.isError && (
@@ -180,7 +280,8 @@ function CourseForm({ course, onClose }: { course?: TrainingCourse; onClose: () 
       )}
       <div className="flex justify-end gap-2 mt-5">
         <button onClick={onClose} className={btnSecondary}>{t("actions.cancel")}</button>
-        <button onClick={() => mutation.mutate()} disabled={mutation.isPending || !form.title.trim()} className={btnPrimary}>
+        <button onClick={() => mutation.mutate()} disabled={mutation.isPending || !form.title.trim() || (!orgWide && sites.length === 0)}
+                className={btnPrimary}>
           {mutation.isPending ? t("common.saving") : t("actions.save")}
         </button>
       </div>
@@ -188,7 +289,8 @@ function CourseForm({ course, onClose }: { course?: TrainingCourse; onClose: () 
   );
 }
 
-export function CoursesTab({ canManage }: { canManage: boolean }) {
+export function CoursesTab({ caps }: { caps: TrainingCapabilities }) {
+  const canManage = caps.can_manage_courses;
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [editing, setEditing] = useState<TrainingCourse | null>(null);
@@ -221,6 +323,8 @@ export function CoursesTab({ canManage }: { canManage: boolean }) {
         </div>
       </div>
 
+      {caps.can_read_records && <EvidenceControlsPanel canEdit={caps.can_manage_org} />}
+
       <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
         {isLoading ? (
           <div className="p-8 text-center text-gray-400">{t("common.loading")}</div>
@@ -234,7 +338,7 @@ export function CoursesTab({ canManage }: { canManage: boolean }) {
                 <th className={th}>{t("training.courses.fields.kind")}</th>
                 <th className={th}>{t("training.courses.fields.audience_kind")}</th>
                 <th className={th}>{t("training.courses.fields.validity_months")}</th>
-                <th className={th}>{t("training.courses.fields.controls")}</th>
+                <th className={th}>{t("training.courses.fields.scope")}</th>
                 <th className={th}>{t("training.courses.fields.status")}</th>
                 {canManage && <th className={th} />}
               </tr>
@@ -258,18 +362,12 @@ export function CoursesTab({ canManage }: { canManage: boolean }) {
                   <td className={`${td} text-gray-600`}>
                     {c.validity_months ?? t("training.courses.no_expiry")}
                   </td>
-                  <td className={td}>
-                    <div className="flex flex-wrap gap-1">
-                      {c.controls_detail.length === 0 && <span className="text-xs text-amber-700">{t("training.courses.no_controls")}</span>}
-                      {c.controls_detail.map(ctrl => (
-                        <span key={ctrl.id} title={ctrl.title} className="text-xs bg-indigo-50 text-indigo-800 px-1.5 py-0.5 rounded">
-                          {ctrl.external_id}
-                        </span>
-                      ))}
-                    </div>
+                  <td className={`${td} text-gray-600`}>
+                    {c.plant_codes.length === 0 ? t("training.courses.scope_org_short") : c.plant_codes.join(", ")}
                   </td>
                   <td className={`${td} text-gray-600`}>{t(`training.statuses.${c.status}`)}</td>
-                  {canManage && (
+                  {canManage && !canEditCourse(c, caps) && <td className={td} />}
+                  {canManage && canEditCourse(c, caps) && (
                     <td className={`${td} whitespace-nowrap text-right`}>
                       <button onClick={() => setEditing(c)} className="text-xs text-indigo-600 hover:text-indigo-800 mr-3">
                         {t("actions.edit")}
@@ -288,8 +386,8 @@ export function CoursesTab({ canManage }: { canManage: boolean }) {
         )}
       </div>
 
-      {creating && <CourseForm onClose={() => setCreating(false)} />}
-      {editing && <CourseForm course={editing} onClose={() => setEditing(null)} />}
+      {creating && <CourseForm caps={caps} onClose={() => setCreating(false)} />}
+      {editing && <CourseForm course={editing} caps={caps} onClose={() => setEditing(null)} />}
     </div>
   );
 }

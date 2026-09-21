@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grc-webapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-21 22:28+0200\n"
+"POT-Creation-Date: 2026-09-21 23:05+0200\n"
 "PO-Revision-Date: 2026-03-18 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -2122,7 +2122,7 @@ msgstr ""
 msgid "Valore numerico obbligatorio."
 msgstr "Wymagana jest wartość liczbowa."
 
-#: apps/tasks/views.py:354 apps/training/views.py:197
+#: apps/tasks/views.py:354 apps/training/views.py:207
 msgid "Sito non trovato."
 msgstr "Nie znaleziono zakładu."
 
@@ -2131,29 +2131,29 @@ msgid "Settimana non valida (formato atteso AAAA-MM-GG)."
 msgstr "Nieprawidłowy tydzień (oczekiwany format RRRR-MM-DD)."
 
 #
-#: apps/training/models.py:22
+#: apps/training/models.py:23
 msgid "Corso"
 msgstr "Kurs"
 
-#: apps/training/models.py:23
+#: apps/training/models.py:24
 msgid "Campagna di sensibilizzazione"
 msgstr "Kampania uświadamiająca"
 
-#: apps/training/models.py:24
+#: apps/training/models.py:25
 msgid "Simulazione di phishing"
 msgstr "Symulacja phishingu"
 
-#: apps/training/models.py:27
+#: apps/training/models.py:28
 msgid "Personale"
 msgstr "Personel"
 
 #
-#: apps/training/models.py:28
+#: apps/training/models.py:29
 msgid "Ruoli critici"
 msgstr "Role krytyczne"
 
 #
-#: apps/training/models.py:29
+#: apps/training/models.py:30
 msgid "Organo di gestione"
 msgstr "Organ zarządzający"
 
@@ -2162,136 +2162,168 @@ msgstr "Organ zarządzający"
 msgid "Non gestisci la formazione di questo sito."
 msgstr "Nie zarządzasz szkoleniami tego zakładu."
 
-#: apps/training/services.py:157
+#: apps/training/services.py:158
+msgid ""
+"I corsi di organizzazione li gestisce chi ha un perimetro di organizzazione."
+msgstr "Kursami organizacji zarządzają osoby z zakresem całej organizacji."
+
+#
+#: apps/training/services.py:163
+msgid "Non gestisci la formazione di tutti i siti del corso."
+msgstr "Nie zarządzasz szkoleniami we wszystkich zakładach kursu."
+
+#: apps/training/services.py:193
+msgid "Nel piano di organizzazione vanno solo i corsi di organizzazione."
+msgstr "W planie organizacji mogą być tylko kursy organizacji."
+
+#: apps/training/services.py:195
+msgid "Il corso non vale per questo sito."
+msgstr "Kurs nie dotyczy tego zakładu."
+
+#: apps/training/services.py:205
 msgid ""
 "Il corso è in un piano formativo o ha erogazioni registrate: archivialo."
 msgstr ""
 "Kurs jest w planie szkoleń lub ma zarejestrowane szkolenia: zarchiwizuj go."
 
-#: apps/training/services.py:178
+#: apps/training/services.py:226
 msgid "Il sito di un gruppo non si può cambiare."
 msgstr "Nie można zmienić zakładu grupy."
 
-#: apps/training/services.py:209
+#: apps/training/services.py:257
 msgid "Il sito di un piano non si può cambiare."
 msgstr "Nie można zmienić zakładu planu."
 
-#: apps/training/services.py:219
+#: apps/training/services.py:267
 msgid "Il piano ha erogazioni registrate: non si può eliminare."
 msgstr "Plan ma zarejestrowane szkolenia: nie można go usunąć."
 
-#: apps/training/services.py:235
+#: apps/training/services.py:283
 msgid "I gruppi devono appartenere allo stesso sito."
 msgstr "Grupy muszą należeć do tego samego zakładu."
 
-#: apps/training/services.py:251
+#: apps/training/services.py:300
 msgid "Una voce non si può spostare in un altro piano."
 msgstr "Pozycji nie można przenieść do innego planu."
 
-#: apps/training/services.py:262
+#: apps/training/services.py:313
 msgid "La voce ha erogazioni registrate: non si può eliminare."
 msgstr "Pozycja ma zarejestrowane szkolenia: nie można jej usunąć."
 
-#: apps/training/services.py:713
+#
+#: apps/training/services.py:625
+msgid "Il framework del controllo è archiviato."
+msgstr "Framework tej kontroli jest zarchiwizowany."
+
+#: apps/training/services.py:630
+msgid "Il controllo è già impostato per questi destinatari."
+msgstr "Ta kontrola jest już ustawiona dla tych odbiorców."
+
+#: apps/training/services.py:793
 msgid ""
 "Si possono scegliere solo titolari di nomine attive su questo sito alla data "
 "dell'erogazione."
-msgstr "Można wybrać tylko osoby z nominacjami aktywnymi w tym zakładzie w dniu szkolenia."
+msgstr ""
+"Można wybrać tylko osoby z nominacjami aktywnymi w tym zakładzie w dniu "
+"szkolenia."
 
-#: apps/training/services.py:717
+#: apps/training/services.py:797
 msgid ""
 "Si possono scegliere solo componenti in carica degli organi di governo di "
 "questo sito."
-msgstr "Można wybrać tylko urzędujących członków organów zarządczych tego zakładu."
+msgstr ""
+"Można wybrać tylko urzędujących członków organów zarządczych tego zakładu."
 
-#: apps/training/services.py:721
+#: apps/training/services.py:801
 msgid ""
 "Indica chi ha partecipato: titolari di nomine o componenti degli organi di "
 "governo."
-msgstr "Wskaż uczestników: osoby z nominacjami lub członków organów zarządczych."
+msgstr ""
+"Wskaż uczestników: osoby z nominacjami lub członków organów zarządczych."
 
-#: apps/training/services.py:837
+#: apps/training/services.py:917
 msgid "Indica quante e-mail sono state inviate."
 msgstr "Podaj, ile e-maili wysłano."
 
-#: apps/training/services.py:842
+#: apps/training/services.py:922
 msgid "Clic e segnalazioni non possono superare le e-mail inviate."
 msgstr "Kliknięcia i zgłoszenia nie mogą przekraczać liczby wysłanych e-maili."
 
-#: apps/training/services.py:848
+#: apps/training/services.py:928
 msgid "Indica quante persone andavano formate o scegli i gruppi."
 msgstr "Podaj, ile osób miało zostać przeszkolonych, lub wybierz grupy."
 
-#: apps/training/services.py:851
+#: apps/training/services.py:931
 msgid "Indica quante persone sono state formate."
 msgstr "Podaj, ile osób przeszkolono."
 
-#: apps/training/services.py:854
+#: apps/training/services.py:934
 msgid "Le persone formate non possono superare quelle da formare."
 msgstr ""
 "Liczba przeszkolonych nie może przekraczać liczby osób do przeszkolenia."
 
-#: apps/training/services.py:882
+#: apps/training/services.py:962
 msgid "La voce del piano riguarda un altro corso."
 msgstr "Pozycja planu dotyczy innego kursu."
 
-#: apps/training/services.py:884
+#: apps/training/services.py:964
 msgid "La voce del piano è di un altro sito."
 msgstr "Pozycja planu należy do innego zakładu."
 
-#: apps/training/services.py:924
+#: apps/training/services.py:1022
 msgid "Erogazione registrata."
 msgstr "Szkolenie zarejestrowane."
 
 #
-#: apps/training/services.py:935
+#: apps/training/services.py:1033
 msgid "Indica il sito dell'erogazione."
 msgstr "Podaj zakład, w którym odbyło się szkolenie."
 
 #
-#: apps/training/services.py:938
+#: apps/training/services.py:1036
 msgid "Il corso è archiviato."
 msgstr "Kurs jest zarchiwizowany."
 
-#: apps/training/services.py:941
+#: apps/training/services.py:1040
 msgid "Allega la prova dell'erogazione (registro presenze, export, report)."
 msgstr ""
 "Załącz dowód przeprowadzenia szkolenia (lista obecności, eksport, raport)."
 
 #
-#: apps/training/services.py:945 apps/training/services.py:1037
+#: apps/training/services.py:1044 apps/training/services.py:1136
 msgid "La data dell'erogazione non può essere futura."
 msgstr "Data szkolenia nie może być w przyszłości."
 
-#: apps/training/services.py:957
+#: apps/training/services.py:1056
 msgid ""
 "Per questo corso si indicano i partecipanti, non i gruppi di destinatari."
 msgstr "Dla tego kursu wskazuje się uczestników, a nie grupy docelowe."
 
-#: apps/training/services.py:965
+#: apps/training/services.py:1064
 msgid ""
 "Le erogazioni per il personale registrano solo conteggi, non nominativi."
 msgstr "Szkolenia dla personelu rejestrują tylko liczby, bez nazwisk."
 
-#: apps/training/services.py:1025
+#: apps/training/services.py:1124
 msgid ""
 "I partecipanti non si modificano: elimina l'erogazione e registrala di nuovo."
-msgstr "Uczestników nie można zmienić: usuń szkolenie i zarejestruj je ponownie."
+msgstr ""
+"Uczestników nie można zmienić: usuń szkolenie i zarejestruj je ponownie."
 
-#: apps/training/services.py:1030
+#: apps/training/services.py:1129
 msgid "Per questo corso le persone formate sono i partecipanti registrati."
 msgstr "Dla tego kursu przeszkolone osoby to zarejestrowani uczestnicy."
 
-#: apps/training/services.py:1034
+#: apps/training/services.py:1133
 msgid "Campo non modificabile: elimina e registra di nuovo."
 msgstr "Tego pola nie można zmienić: usuń i zarejestruj ponownie."
 
 #
-#: apps/training/views.py:181
+#: apps/training/views.py:191
 msgid "Indica il sito."
 msgstr "Podaj zakład."
 
-#: apps/training/views.py:205
+#: apps/training/views.py:215
 msgid ""
 "Il file di prova non si sostituisce: elimina l'erogazione e registrala di "
 "nuovo."

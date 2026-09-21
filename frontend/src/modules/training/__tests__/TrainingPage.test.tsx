@@ -17,6 +17,10 @@ vi.mock("../../../store/auth", () => ({
   useAuthStore: (selector: (s: { selectedPlant: typeof PLANT }) => unknown) => selector({ selectedPlant: PLANT }),
 }));
 
+vi.mock("../../../api/endpoints/plants", () => ({
+  plantsApi: { list: vi.fn().mockResolvedValue([{ id: "p1", code: "TA", name: "Plant A" }]) },
+}));
+
 vi.mock("../../../api/endpoints/documents", () => ({
   documentsApi: { searchDocuments: vi.fn(), downloadEvidence: vi.fn() },
 }));
@@ -38,6 +42,9 @@ vi.mock("../../../api/endpoints/training", async (importOriginal) => ({
     participantOptions: vi.fn(),
     boardStatus: vi.fn(),
     competencyOptions: vi.fn(),
+    evidenceControls: vi.fn(),
+    createEvidenceControl: vi.fn(),
+    deleteEvidenceControl: vi.fn(),
   },
 }));
 
@@ -47,13 +54,15 @@ const api = vi.mocked(trainingApi);
 const course = {
   id: "c1", title: "Awareness base", description: "", source: "interno" as const, status: "attivo" as const,
   kind: "corso" as const, audience_kind: "generale" as const, mandatory: true, duration_minutes: 60,
-  validity_months: 12, controls: ["k1"],
-  controls_detail: [{ id: "k1", external_id: "A.6.3", framework_code: "ISO27001", title: "Awareness" }],
+  validity_months: 12, plants: [] as string[], plant_codes: [] as string[],
   competency: "", competency_level: 1 as const,
+};
+const otherSiteCourse = {
+  ...course, id: "c3", title: "Carrelli sito B", plants: ["p2"], plant_codes: ["TB"],
 };
 const boardCourse = {
   ...course, id: "c2", title: "Cyber per il CdA", audience_kind: "organo_gestione" as const,
-  controls: [], controls_detail: [], competency: "NIS2 Compliance", competency_level: 2 as const,
+  competency: "NIS2 Compliance", competency_level: 2 as const,
 };
 
 function renderPage() {
@@ -64,6 +73,10 @@ function renderPage() {
 beforeEach(() => {
   vi.clearAllMocks();
   api.courses.mockResolvedValue([course]);
+  api.evidenceControls.mockResolvedValue([
+    { id: "r1", audience_kind: "generale", control: "k1",
+      control_detail: { id: "k1", external_id: "ACN-NIS2-PR.AT-01", framework_code: "ACN_NIS2", title: "Awareness" } },
+  ]);
   api.audiences.mockResolvedValue([
     { id: "a1", plant: "p1", plant_code: "TA", name: "Produzione", headcount: 200,
       headcount_updated_at: "2020-01-01", notes: "" },
@@ -115,7 +128,9 @@ describe("TrainingPage", () => {
     expect(await screen.findByText("Awareness base")).toBeInTheDocument();
     expect(screen.queryByText("training.tabs.plan")).not.toBeInTheDocument();
     expect(screen.queryByText("training.courses.new")).not.toBeInTheDocument();
-    expect(screen.getByText("A.6.3")).toBeInTheDocument();
+    expect(screen.getByText("training.courses.scope_org_short")).toBeInTheDocument();
+    // Impostazione dei controlli: solo per chi legge i registri.
+    expect(screen.queryByText("training.evidence_controls.title")).not.toBeInTheDocument();
   });
 
   it("il gestore del sito vede piano, erogazioni e gruppi con le azioni", async () => {
@@ -186,5 +201,36 @@ describe("TrainingPage", () => {
     expect(form.getAll("participant_users")).toEqual(["u1"]);
     expect(form.getAll("audiences")).toEqual([]);
     expect(form.get("trained_count")).toBeNull();
+  });
+
+  it("catalogo: controlli per destinatari modificabili solo con perimetro di organizzazione", async () => {
+    api.capabilities.mockResolvedValue({
+      can_read_records: true, can_manage_courses: true, can_manage_org: false, manage_plant_ids: ["p1"],
+    });
+    api.courses.mockResolvedValue([course, otherSiteCourse]);
+    renderPage();
+    fireEvent.click(await screen.findByText("training.tabs.courses"));
+    expect(await screen.findByText("ACN_NIS2 ACN-NIS2-PR.AT-01")).toBeInTheDocument();
+    expect(screen.queryByText(/training.evidence_controls.add/)).not.toBeInTheDocument();
+    // Corso di organizzazione e corso di un altro sito: non modificabili dal gestore del sito.
+    expect(screen.getByText("TB")).toBeInTheDocument();
+    expect(screen.queryByText("actions.edit")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("training.courses.new"));
+    const orgRadio = (await screen.findByText("training.courses.scope_org")).querySelector("input")!;
+    expect(orgRadio).toBeDisabled();
+    expect(await screen.findByText("TA")).toBeInTheDocument();
+  });
+
+  it("le erogazioni del sito propongono solo i corsi validi per il sito", async () => {
+    api.capabilities.mockResolvedValue({
+      can_read_records: true, can_manage_courses: true, can_manage_org: true, manage_plant_ids: ["p1"],
+    });
+    api.courses.mockResolvedValue([course, otherSiteCourse]);
+    renderPage();
+    fireEvent.click(await screen.findByText("training.tabs.sessions"));
+    fireEvent.click(await screen.findByText("training.sessions.new"));
+    await screen.findByText(/Awareness base · /);
+    expect(screen.queryByText(/Carrelli sito B/)).not.toBeInTheDocument();
   });
 });

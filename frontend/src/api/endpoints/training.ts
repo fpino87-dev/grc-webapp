@@ -30,10 +30,23 @@ export interface TrainingCourse {
   mandatory: boolean;
   duration_minutes: number | null;
   validity_months: number | null;
-  controls: string[];
-  controls_detail: ControlOption[];
+  // Ambito: nessun sito = corso di organizzazione, valido per tutti i siti.
+  plants: string[];
+  plant_codes: string[];
   competency: string;
   competency_level: 1 | 2 | 3;
+}
+
+export const courseAppliesTo = (c: Pick<TrainingCourse, "plants">, plantId: string | null) =>
+  c.plants.length === 0 || (plantId !== null && c.plants.includes(plantId));
+
+// Impostazione unica del modulo: quali controlli prova un'erogazione, in base
+// ai destinatari del corso. La prova va solo sui framework applicati al sito.
+export interface EvidenceControl {
+  id: string;
+  audience_kind: AudienceKind;
+  control: string;
+  control_detail: ControlOption;
 }
 
 export const isNamedCourse = (c: Pick<TrainingCourse, "kind" | "audience_kind">) =>
@@ -171,6 +184,11 @@ export const trainingApi = {
       .then(r => r.data),
   competencyOptions: () =>
     apiClient.get<string[]>(`${BASE}/courses/competency-options/`).then(r => r.data),
+  evidenceControls: () => list<EvidenceControl>(`${BASE}/evidence-controls/`),
+  createEvidenceControl: (audience_kind: AudienceKind, control: string) =>
+    apiClient.post<EvidenceControl>(`${BASE}/evidence-controls/`, { audience_kind, control })
+      .then(r => r.data),
+  deleteEvidenceControl: (id: string) => apiClient.delete(`${BASE}/evidence-controls/${id}/`),
   createCourse: (data: Partial<TrainingCourse>) =>
     apiClient.post<TrainingCourse>(`${BASE}/courses/`, data).then(r => r.data),
   updateCourse: (id: string, data: Partial<TrainingCourse>) =>

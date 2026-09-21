@@ -1973,10 +1973,6 @@
       "show_archived": "Arşivlenenleri göster",
       "no_expiry": "süresi dolmaz",
       "validity_hint": "Bu kadar ay sonra oturum tekrarlanmalıdır. Boş = süresi dolmaz.",
-      "controls_hint": "Kaydedilen her oturum, oturumun yapıldığı tesiste bu kontrollerin kanıtı olur.",
-      "search_controls": "Koda göre kontrol ara, ör. A.6.3",
-      "no_matches": "Kontrol bulunamadı.",
-      "no_controls": "kontrol yok",
       "delete_confirm": "\"{{title}}\" kursu silinsin mi?",
       "fields": {
         "title": "Başlık",
@@ -1987,18 +1983,22 @@
         "duration_minutes": "Süre (dakika)",
         "mandatory": "Zorunlu",
         "status": "Durum",
-        "controls": "Kanıtlanan kontroller",
         "competency": "Kazandırılan yetkinlik",
-        "competency_level": "Seviye"
+        "competency_level": "Seviye",
+        "scope": "Kapsam"
       },
       "competency_hint": "İsteğe bağlı. Hesabı olan katılımcılar bu yetkinliği (ISO 27001 md. 7.2) oturumun kanıtıyla birlikte profillerinde alır. Zaten sahip oldukları daha yüksek bir seviye asla düşürülmez.",
-      "grants": "Kazandırır: {{competency}} (seviye {{level}})"
+      "grants": "Kazandırır: {{competency}} (seviye {{level}})",
+      "scope_org": "Kuruluş: tüm tesislerde geçerli",
+      "scope_sites": "Yalnızca seçili tesisler",
+      "scope_hint": "Ortak bir kurs (ör. standart hijyen) kuruluş kursu olarak bir kez girilir; tesise özgü kurslar yalnızca seçilen tesislerde geçerlidir. Oturumlar her zaman tesis bazında kaydedilir.",
+      "scope_org_short": "Kuruluş"
     },
     "help": {
       "title": "Kanıta dayalı eğitim",
       "description": "Platform kurs vermez ve e-öğrenmeye bağlanmaz: eğitimi yönetir. Her tesis için ne yapılacağı planlanır, her oturum kanıt dosyasıyla kaydedilir ve personel kapsamı yalnızca sayılarla ölçülür.",
       "steps": {
-        "1": "Kurs kataloğu: her kurs için tür, hedef kitle, kaç ayda bir tekrarlanacağı ve hangi kontrolleri kanıtladığını belirtin.",
+        "1": "Kurs kataloğu: her kurs için tür, hedef kitle, kapsam (kuruluş veya tesisler) ve kaç ayda bir tekrarlanması gerektiğini belirtin. Üstte, kuruluşu yöneten kişi her hedef kitle için oturumların hangi kontrolleri kanıtladığını belirler.",
         "2": "Hedef gruplar: tesisin gruplarını kişi sayısıyla girin (ör. Üretim 240) ve değiştiğinde güncelleyin.",
         "3": "Plan: yılın planını oluşturun, kalemleri ekleyin (kurs, gruplar, vade) ve onay belgesini bağlayın.",
         "4": "Oturumlar: her oturumu sayıları ve kanıt dosyasıyla kaydedin. Kanıt kursun kontrollerine otomatik bağlanır ve kalemin hatırlatıcısı kapanır.",
@@ -2007,7 +2007,7 @@
       },
       "connections": {
         "documents": "Plan bağlı belgeyle onaylanır; her kanıt dosyası bir kanıta dönüşür",
-        "controls": "Oturum kanıtları kursta belirtilen kontrolleri kanıtlar",
+        "controls": "Oturum kanıtları, hedef kitle için belirlenen kontrollere yalnızca tesiste uygulanan çerçevelerde bağlanır",
         "kpi": "Kapsam, plan ilerlemesi, gecikmeler ve oltalama otomatik hesaplanan KPI'lardır",
         "objectives": "Güvenlik hedefleri eğitim KPI'larına bağlanır",
         "governance": "Kritik rol ve yönetim kurulu oturumlarının katılımcıları atamalar ve yönetişim organları arasından seçilir; yönetim kurulu eğitimi bir KPI'dır (NIS2 Md. 20)"
@@ -2025,6 +2025,15 @@
       "no_expiry": "geçerli",
       "to_train": "eğitilecek",
       "hint": "Tesisin veya kuruluşun yönetim kurulu türündeki organlarının görevdeki üyeleri. Eğitim, hâlâ geçerli bir yönetim organı kursuyla kaydedildiğinde sayılır."
+    },
+    "evidence_controls": {
+      "title": "Oturumların kanıtladığı kontroller",
+      "intro": "Tüm kurslar için geçerlidir: her oturumun kanıtı, hedef kitlesi için belirlenen kontrollere yalnızca oturumun yapıldığı tesiste uygulanan çerçevelerde bağlanır (ör. ACN yalnızca NIS2 tesislerinde).",
+      "search": "Koda göre ara (ör. PR.AT-01)",
+      "no_matches": "Kontrol bulunamadı",
+      "none": "Kontrol yok: oturumlar kontrollere bağlanmaz.",
+      "none_board": "Kontrol yok: yönetim kurulu eğitimi yönetim organı KPI'ı ile ölçülür.",
+      "add": "Kontrol ekle"
     }
   },
   "incidents": {

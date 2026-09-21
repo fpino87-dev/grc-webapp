@@ -6,6 +6,7 @@ from apps.governance.models import CommitteeMember
 from .models import (
     TrainingAudience,
     TrainingCourse,
+    TrainingEvidenceControl,
     TrainingPlan,
     TrainingPlanItem,
     TrainingSession,
@@ -13,9 +14,8 @@ from .models import (
 
 
 class TrainingCourseSerializer(serializers.ModelSerializer):
-    # Controlli che l'erogazione del corso dimostra, leggibili senza un'altra
-    # chiamata: codice, framework e titolo.
-    controls_detail = serializers.SerializerMethodField()
+    # Ambito: nessun sito = corso di organizzazione.
+    plant_codes = serializers.SerializerMethodField()
 
     class Meta:
         model = TrainingCourse
@@ -29,12 +29,11 @@ class TrainingCourseSerializer(serializers.ModelSerializer):
             "duration_minutes",
             "mandatory",
             "plants",
+            "plant_codes",
             "deadline",
             "kind",
             "audience_kind",
             "validity_months",
-            "controls",
-            "controls_detail",
             "competency",
             "competency_level",
             "created_at",
@@ -43,9 +42,8 @@ class TrainingCourseSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "created_at", "updated_at", "created_by"]
 
-    def get_controls_detail(self, obj):
-        lang = getattr(self.context.get("request"), "LANGUAGE_CODE", "it")
-        return [control_option(c, lang) for c in obj.controls.all()]
+    def get_plant_codes(self, obj):
+        return sorted(p.code for p in obj.plants.all())
 
 
 def control_option(control, lang="it") -> dict:
@@ -58,6 +56,21 @@ def control_option(control, lang="it") -> dict:
 
 
 _SYSTEM = ["id", "created_at", "updated_at", "created_by"]
+
+
+class TrainingEvidenceControlSerializer(serializers.ModelSerializer):
+    control_detail = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TrainingEvidenceControl
+        fields = ["id", "audience_kind", "control", "control_detail",
+                  "created_at", "updated_at", "created_by"]
+        read_only_fields = _SYSTEM
+        validators = []
+
+    def get_control_detail(self, obj):
+        lang = getattr(self.context.get("request"), "LANGUAGE_CODE", "it")
+        return control_option(obj.control, lang)
 
 
 class TrainingAudienceSerializer(serializers.ModelSerializer):
