@@ -1,5 +1,7 @@
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.db import models
+from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 
 from core.models import BaseModel
 
@@ -7,8 +9,25 @@ User = get_user_model()
 
 
 class TrainingCourse(BaseModel):
+    """Corso o campagna del catalogo formativo.
+
+    La piattaforma non eroga la formazione: il corso descrive cosa va fatto,
+    ogni quanto va ripetuto (`validity_months`) e quali controlli dei framework
+    la sua erogazione dimostra (`controls`).
+    """
+
     SOURCE_CHOICES = [("interno", "Interno"), ("kb4", "KnowBe4"), ("esterno", "Esterno")]
     STATUS_CHOICES = [("attivo", "Attivo"), ("archiviato", "Archiviato")]
+    KIND_CHOICES = [
+        ("corso", _("Corso")),
+        ("awareness", _("Campagna di sensibilizzazione")),
+        ("phishing", _("Simulazione di phishing")),
+    ]
+    AUDIENCE_KIND_CHOICES = [
+        ("generale", _("Personale")),
+        ("ruoli_critici", _("Ruoli critici")),
+        ("organo_gestione", _("Organo di gestione")),
+    ]
 
     title = models.CharField(max_length=300)
     source = models.CharField(max_length=10, choices=SOURCE_CHOICES, default="interno")
@@ -17,12 +36,125 @@ class TrainingCourse(BaseModel):
     description = models.TextField(blank=True)
     duration_minutes = models.IntegerField(null=True, blank=True)
     mandatory = models.BooleanField(default=False)
+    # Deprecato: sostituito da `controls`, rimosso con la nuova interfaccia (fase 4).
     framework_refs = models.JSONField(default=list)
     plants = models.ManyToManyField("plants.Plant", blank=True, related_name="training_courses")
     deadline = models.DateField(null=True, blank=True)
+    kind = models.CharField(max_length=20, choices=KIND_CHOICES, default="corso")
+    audience_kind = models.CharField(
+        max_length=20, choices=AUDIENCE_KIND_CHOICES, default="generale",
+    )
+    # Mesi di validità di un'erogazione: dopo va ripetuta. Null = non scade.
+    validity_months = models.PositiveSmallIntegerField(null=True, blank=True, default=12)
+    controls = models.ManyToManyField(
+        "controls.Control", blank=True, related_name="training_courses",
+    )
 
     class Meta:
         ordering = ["-created_at"]
+
+
+class TrainingAudience(BaseModel):
+    """Gruppo di destinatari di un sito, contato e non nominativo
+    (es. «Produzione»: 240 persone). Nessun dato personale dei dipendenti."""
+
+    plant = models.ForeignKey(
+        "plants.Plant", on_delete=models.PROTECT, related_name="training_audiences",
+    )
+    name = models.CharField(max_length=150)
+    headcount = models.PositiveIntegerField()
+    headcount_updated_at = models.DateField()
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["plant", "name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["plant", "name"],
+                condition=Q(deleted_at__isnull=True),
+                name="uniq_training_audience_plant_name",
+            ),
+        ]
+
+
+class TrainingPlan(BaseModel):
+    """Piano formativo annuale di un sito (o di organizzazione se `plant` è
+    null). L'approvazione passa dal documento M07 collegato: il piano approvato
+    è il documento richiesto da ISO 27001 A.6.3."""
+
+    plant = models.ForeignKey(
+        "plants.Plant", on_delete=models.PROTECT, null=True, blank=True,
+        related_name="training_plans",
+    )
+    year = models.PositiveSmallIntegerField()
+    document = models.ForeignKey(
+        "documents.Document", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="training_plans",
+    )
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-year"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["plant", "year"],
+                condition=Q(deleted_at__isnull=True),
+                nulls_distinct=False,
+                name="uniq_training_plan_plant_year",
+            ),
+        ]
+
+
+class TrainingPlanItem(BaseModel):
+    """Voce del piano: quale corso, per quali gruppi, entro quando."""
+
+    plan = models.ForeignKey(TrainingPlan, on_delete=models.CASCADE, related_name="items")
+    course = models.ForeignKey(
+        TrainingCourse, on_delete=models.PROTECT, related_name="plan_items",
+    )
+    audiences = models.ManyToManyField(TrainingAudience, blank=True, related_name="plan_items")
+    due_date = models.DateField(db_index=True)
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["due_date"]
+
+
+class TrainingSession(BaseModel):
+    """Erogazione registrata: conteggi più il file di prova allegato
+    (registro presenze, export e-learning, report della campagna), da cui
+    nasce l'evidenza. Le righe `legacy` vengono dalla migrazione dei vecchi
+    dati per persona e non hanno evidenza."""
+
+    course = models.ForeignKey(
+        TrainingCourse, on_delete=models.PROTECT, related_name="sessions",
+    )
+    plan_item = models.ForeignKey(
+        TrainingPlanItem, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="sessions",
+    )
+    plant = models.ForeignKey(
+        "plants.Plant", on_delete=models.PROTECT, null=True, blank=True,
+        related_name="training_sessions",
+    )
+    held_on = models.DateField(db_index=True)
+    audiences = models.ManyToManyField(TrainingAudience, blank=True, related_name="sessions")
+    # Corsi e campagne di sensibilizzazione
+    target_count = models.PositiveIntegerField(null=True, blank=True)
+    trained_count = models.PositiveIntegerField(null=True, blank=True)
+    # Simulazioni di phishing
+    sent_count = models.PositiveIntegerField(null=True, blank=True)
+    clicked_count = models.PositiveIntegerField(null=True, blank=True)
+    reported_count = models.PositiveIntegerField(null=True, blank=True)
+    evidence = models.ForeignKey(
+        "documents.Evidence", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="training_sessions",
+    )
+    legacy = models.BooleanField(default=False)
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-held_on"]
 
 
 class TrainingEnrollment(BaseModel):

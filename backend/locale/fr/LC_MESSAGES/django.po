@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grc-webapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-18 16:01+0200\n"
+"POT-Creation-Date: 2026-09-21 12:22+0200\n"
 "PO-Revision-Date: 2026-03-18 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -1972,7 +1972,7 @@ msgstr ""
 msgid "Solo il superuser può forzare l'eliminazione del sito."
 msgstr "Seul le superutilisateur peut forcer la suppression du site."
 
-#: apps/plants/services.py:255
+#: apps/plants/services.py:270
 msgid "Impossibile eliminare il sito: sono presenti dipendenze collegate."
 msgstr ""
 "Impossible de supprimer le site : des dépendances liées sont présentes."
@@ -2154,6 +2154,119 @@ msgstr "Site introuvable."
 #: apps/tasks/views.py:364
 msgid "Settimana non valida (formato atteso AAAA-MM-GG)."
 msgstr "Semaine non valide (format attendu AAAA-MM-JJ)."
+
+#: apps/training/models.py:22
+#
+msgid "Corso"
+msgstr "Cours"
+
+#: apps/training/models.py:23
+msgid "Campagna di sensibilizzazione"
+msgstr "Campagne de sensibilisation"
+
+#: apps/training/models.py:24
+msgid "Simulazione di phishing"
+msgstr "Simulation d'hameçonnage"
+
+#: apps/training/models.py:27
+msgid "Personale"
+msgstr "Personnel"
+
+#: apps/training/models.py:28
+#
+msgid "Ruoli critici"
+msgstr "Rôles critiques"
+
+#: apps/training/models.py:29
+#
+msgid "Organo di gestione"
+msgstr "Organe de direction"
+
+#: apps/training/services.py:101
+#
+msgid "Non gestisci la formazione di questo sito."
+msgstr "Vous ne gérez pas la formation de ce site."
+
+#: apps/training/services.py:130
+msgid "Il sito di un gruppo non si può cambiare."
+msgstr "Le site d'un groupe ne peut pas être modifié."
+
+#: apps/training/services.py:161
+msgid "Il sito di un piano non si può cambiare."
+msgstr "Le site d'un plan ne peut pas être modifié."
+
+#: apps/training/services.py:171
+msgid "Il piano ha erogazioni registrate: non si può eliminare."
+msgstr "Le plan comporte des sessions enregistrées : il ne peut pas être supprimé."
+
+#: apps/training/services.py:187
+msgid "I gruppi devono appartenere allo stesso sito."
+msgstr "Les groupes doivent appartenir au même site."
+
+#: apps/training/services.py:203
+msgid "Una voce non si può spostare in un altro piano."
+msgstr "Un élément ne peut pas être déplacé vers un autre plan."
+
+#: apps/training/services.py:214
+msgid "La voce ha erogazioni registrate: non si può eliminare."
+msgstr "L'élément comporte des sessions enregistrées : il ne peut pas être supprimé."
+
+#: apps/training/services.py:274
+msgid "Indica quante e-mail sono state inviate."
+msgstr "Indiquez combien d'e-mails ont été envoyés."
+
+#: apps/training/services.py:279
+msgid "Clic e segnalazioni non possono superare le e-mail inviate."
+msgstr "Les clics et les signalements ne peuvent pas dépasser les e-mails envoyés."
+
+#: apps/training/services.py:285
+msgid "Indica quante persone andavano formate o scegli i gruppi."
+msgstr "Indiquez combien de personnes devaient être formées ou choisissez les groupes."
+
+#: apps/training/services.py:288
+msgid "Indica quante persone sono state formate."
+msgstr "Indiquez combien de personnes ont été formées."
+
+#: apps/training/services.py:291
+msgid "Le persone formate non possono superare quelle da formare."
+msgstr "Les personnes formées ne peuvent pas dépasser celles à former."
+
+#: apps/training/services.py:319
+msgid "La voce del piano riguarda un altro corso."
+msgstr "L'élément du plan concerne un autre cours."
+
+#: apps/training/services.py:321
+msgid "La voce del piano è di un altro sito."
+msgstr "L'élément du plan appartient à un autre site."
+
+#: apps/training/services.py:332
+#
+msgid "Indica il sito dell'erogazione."
+msgstr "Indiquez le site de la session."
+
+#: apps/training/services.py:335
+#
+msgid "Il corso è archiviato."
+msgstr "Le cours est archivé."
+
+#: apps/training/services.py:338
+msgid "Allega la prova dell'erogazione (registro presenze, export, report)."
+msgstr "Joignez la preuve de la session (feuille de présence, export, rapport)."
+
+#: apps/training/services.py:342 apps/training/services.py:393
+#
+msgid "La data dell'erogazione non può essere futura."
+msgstr "La date de la session ne peut pas être dans le futur."
+
+#: apps/training/services.py:390
+msgid "Campo non modificabile: elimina e registra di nuovo."
+msgstr "Champ non modifiable : supprimez et enregistrez à nouveau."
+
+#: apps/training/views.py:160
+msgid ""
+"Il file di prova non si sostituisce: elimina l'erogazione e registrala di "
+"nuovo."
+msgstr "Le fichier de preuve ne peut pas être remplacé : supprimez la session et enregistrez-la à nouveau."
 
 #: core/scoping.py:115
 msgid ""

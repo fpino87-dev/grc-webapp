@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grc-webapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-18 16:01+0200\n"
+"POT-Creation-Date: 2026-09-21 12:22+0200\n"
 "PO-Revision-Date: 2026-03-18 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -1934,7 +1934,7 @@ msgstr ""
 msgid "Solo il superuser può forzare l'eliminazione del sito."
 msgstr "Only the superuser can force-delete the plant."
 
-#: apps/plants/services.py:255
+#: apps/plants/services.py:270
 msgid "Impossibile eliminare il sito: sono presenti dipendenze collegate."
 msgstr "Cannot delete the plant: linked dependencies are present."
 
@@ -2111,6 +2111,119 @@ msgstr "Site not found."
 #: apps/tasks/views.py:364
 msgid "Settimana non valida (formato atteso AAAA-MM-GG)."
 msgstr "Invalid week (expected format YYYY-MM-DD)."
+
+#: apps/training/models.py:22
+#
+msgid "Corso"
+msgstr "Course"
+
+#: apps/training/models.py:23
+msgid "Campagna di sensibilizzazione"
+msgstr "Awareness campaign"
+
+#: apps/training/models.py:24
+msgid "Simulazione di phishing"
+msgstr "Phishing simulation"
+
+#: apps/training/models.py:27
+msgid "Personale"
+msgstr "Staff"
+
+#: apps/training/models.py:28
+#
+msgid "Ruoli critici"
+msgstr "Critical roles"
+
+#: apps/training/models.py:29
+#
+msgid "Organo di gestione"
+msgstr "Management body"
+
+#: apps/training/services.py:101
+#
+msgid "Non gestisci la formazione di questo sito."
+msgstr "You do not manage training for this site."
+
+#: apps/training/services.py:130
+msgid "Il sito di un gruppo non si può cambiare."
+msgstr "The site of a group cannot be changed."
+
+#: apps/training/services.py:161
+msgid "Il sito di un piano non si può cambiare."
+msgstr "The site of a plan cannot be changed."
+
+#: apps/training/services.py:171
+msgid "Il piano ha erogazioni registrate: non si può eliminare."
+msgstr "The plan has recorded sessions: it cannot be deleted."
+
+#: apps/training/services.py:187
+msgid "I gruppi devono appartenere allo stesso sito."
+msgstr "Groups must belong to the same site."
+
+#: apps/training/services.py:203
+msgid "Una voce non si può spostare in un altro piano."
+msgstr "An item cannot be moved to another plan."
+
+#: apps/training/services.py:214
+msgid "La voce ha erogazioni registrate: non si può eliminare."
+msgstr "The item has recorded sessions: it cannot be deleted."
+
+#: apps/training/services.py:274
+msgid "Indica quante e-mail sono state inviate."
+msgstr "State how many e-mails were sent."
+
+#: apps/training/services.py:279
+msgid "Clic e segnalazioni non possono superare le e-mail inviate."
+msgstr "Clicks and reports cannot exceed the e-mails sent."
+
+#: apps/training/services.py:285
+msgid "Indica quante persone andavano formate o scegli i gruppi."
+msgstr "State how many people were to be trained, or choose the groups."
+
+#: apps/training/services.py:288
+msgid "Indica quante persone sono state formate."
+msgstr "State how many people were trained."
+
+#: apps/training/services.py:291
+msgid "Le persone formate non possono superare quelle da formare."
+msgstr "People trained cannot exceed people to be trained."
+
+#: apps/training/services.py:319
+msgid "La voce del piano riguarda un altro corso."
+msgstr "The plan item refers to another course."
+
+#: apps/training/services.py:321
+msgid "La voce del piano è di un altro sito."
+msgstr "The plan item belongs to another site."
+
+#: apps/training/services.py:332
+#
+msgid "Indica il sito dell'erogazione."
+msgstr "State the site of the session."
+
+#: apps/training/services.py:335
+#
+msgid "Il corso è archiviato."
+msgstr "The course is archived."
+
+#: apps/training/services.py:338
+msgid "Allega la prova dell'erogazione (registro presenze, export, report)."
+msgstr "Attach the proof of the session (attendance sheet, export, report)."
+
+#: apps/training/services.py:342 apps/training/services.py:393
+#
+msgid "La data dell'erogazione non può essere futura."
+msgstr "The session date cannot be in the future."
+
+#: apps/training/services.py:390
+msgid "Campo non modificabile: elimina e registra di nuovo."
+msgstr "This field cannot be changed: delete and record again."
+
+#: apps/training/views.py:160
+msgid ""
+"Il file di prova non si sostituisce: elimina l'erogazione e registrala di "
+"nuovo."
+msgstr "The proof file cannot be replaced: delete the session and record it again."
 
 #: core/scoping.py:115
 msgid ""

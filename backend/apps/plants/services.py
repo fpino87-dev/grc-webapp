@@ -205,7 +205,13 @@ def delete_plant(plant: Plant, user, force: bool = False) -> None:
     from apps.lessons.models import LessonLearned
     from apps.management_review.models import ManagementReview
     from apps.suppliers.models import Supplier
-    from apps.training.models import TrainingCourse, PhishingSimulation
+    from apps.training.models import (
+        PhishingSimulation,
+        TrainingAudience,
+        TrainingCourse,
+        TrainingPlan,
+        TrainingSession,
+    )
     from apps.bcp.models import BcpPlan
     from apps.audit_prep.models import AuditPrep, AuditProgram
     from apps.compliance_schedule.models import ComplianceSchedulePolicy
@@ -236,6 +242,15 @@ def delete_plant(plant: Plant, user, force: bool = False) -> None:
         plants=plant, deleted_at__isnull=True
     ).distinct().count()
     dependency_counts["phishing_simulations"] = PhishingSimulation.objects.filter(
+        plant=plant, deleted_at__isnull=True
+    ).count()
+    dependency_counts["training_audiences"] = TrainingAudience.objects.filter(
+        plant=plant, deleted_at__isnull=True
+    ).count()
+    dependency_counts["training_plans"] = TrainingPlan.objects.filter(
+        plant=plant, deleted_at__isnull=True
+    ).count()
+    dependency_counts["training_sessions"] = TrainingSession.objects.filter(
         plant=plant, deleted_at__isnull=True
     ).count()
     dependency_counts["bcp_plans"] = BcpPlan.objects.filter(plant=plant, deleted_at__isnull=True).count()

@@ -131,14 +131,11 @@ def test_list_enrollments(client):
 
 
 @pytest.mark.django_db
-def test_create_enrollment(client, course, user):
-    payload = {
-        "course": str(course.id),
-        "user": str(user.id),
-        "status": "assegnato",
-    }
+def test_create_enrollment_not_allowed(client, course, user):
+    """Le iscrizioni per persona sono in sola lettura (formazione a evidenze)."""
+    payload = {"course": str(course.id), "user": str(user.id), "status": "assegnato"}
     resp = client.post(URL_ENROLLMENTS, payload, format="json")
-    assert resp.status_code in (201, 400)  # 400 if unique constraint (already enrolled)
+    assert resp.status_code == 405
 
 
 @pytest.mark.django_db

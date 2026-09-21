@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grc-webapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-18 16:01+0200\n"
+"POT-Creation-Date: 2026-09-21 12:22+0200\n"
 "PO-Revision-Date: 2026-03-18 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -1941,7 +1941,7 @@ msgstr ""
 msgid "Solo il superuser può forzare l'eliminazione del sito."
 msgstr "Yalnızca superuser tesisin silinmesini zorlayabilir."
 
-#: apps/plants/services.py:255
+#: apps/plants/services.py:270
 msgid "Impossibile eliminare il sito: sono presenti dipendenze collegate."
 msgstr "Tesis silinemiyor: bağlı bağımlılıklar mevcut."
 
@@ -2114,6 +2114,119 @@ msgstr "Tesis bulunamadı."
 #: apps/tasks/views.py:364
 msgid "Settimana non valida (formato atteso AAAA-MM-GG)."
 msgstr "Geçersiz hafta (beklenen biçim YYYY-AA-GG)."
+
+#: apps/training/models.py:22
+#
+msgid "Corso"
+msgstr "Kurs"
+
+#: apps/training/models.py:23
+msgid "Campagna di sensibilizzazione"
+msgstr "Farkındalık kampanyası"
+
+#: apps/training/models.py:24
+msgid "Simulazione di phishing"
+msgstr "Oltalama simülasyonu"
+
+#: apps/training/models.py:27
+msgid "Personale"
+msgstr "Personel"
+
+#: apps/training/models.py:28
+#
+msgid "Ruoli critici"
+msgstr "Kritik roller"
+
+#: apps/training/models.py:29
+#
+msgid "Organo di gestione"
+msgstr "Yönetim organı"
+
+#: apps/training/services.py:101
+#
+msgid "Non gestisci la formazione di questo sito."
+msgstr "Bu tesisin eğitimlerini siz yönetmiyorsunuz."
+
+#: apps/training/services.py:130
+msgid "Il sito di un gruppo non si può cambiare."
+msgstr "Bir grubun tesisi değiştirilemez."
+
+#: apps/training/services.py:161
+msgid "Il sito di un piano non si può cambiare."
+msgstr "Bir planın tesisi değiştirilemez."
+
+#: apps/training/services.py:171
+msgid "Il piano ha erogazioni registrate: non si può eliminare."
+msgstr "Planda kayıtlı eğitimler var: silinemez."
+
+#: apps/training/services.py:187
+msgid "I gruppi devono appartenere allo stesso sito."
+msgstr "Gruplar aynı tesise ait olmalıdır."
+
+#: apps/training/services.py:203
+msgid "Una voce non si può spostare in un altro piano."
+msgstr "Bir kalem başka bir plana taşınamaz."
+
+#: apps/training/services.py:214
+msgid "La voce ha erogazioni registrate: non si può eliminare."
+msgstr "Kalemde kayıtlı eğitimler var: silinemez."
+
+#: apps/training/services.py:274
+msgid "Indica quante e-mail sono state inviate."
+msgstr "Kaç e-posta gönderildiğini belirtin."
+
+#: apps/training/services.py:279
+msgid "Clic e segnalazioni non possono superare le e-mail inviate."
+msgstr "Tıklamalar ve bildirimler gönderilen e-postaları aşamaz."
+
+#: apps/training/services.py:285
+msgid "Indica quante persone andavano formate o scegli i gruppi."
+msgstr "Kaç kişinin eğitilmesi gerektiğini belirtin veya grupları seçin."
+
+#: apps/training/services.py:288
+msgid "Indica quante persone sono state formate."
+msgstr "Kaç kişinin eğitildiğini belirtin."
+
+#: apps/training/services.py:291
+msgid "Le persone formate non possono superare quelle da formare."
+msgstr "Eğitilen kişi sayısı eğitilmesi gerekenleri aşamaz."
+
+#: apps/training/services.py:319
+msgid "La voce del piano riguarda un altro corso."
+msgstr "Plan kalemi başka bir kursa ait."
+
+#: apps/training/services.py:321
+msgid "La voce del piano è di un altro sito."
+msgstr "Plan kalemi başka bir tesise ait."
+
+#: apps/training/services.py:332
+#
+msgid "Indica il sito dell'erogazione."
+msgstr "Eğitimin yapıldığı tesisi belirtin."
+
+#: apps/training/services.py:335
+#
+msgid "Il corso è archiviato."
+msgstr "Kurs arşivlenmiş."
+
+#: apps/training/services.py:338
+msgid "Allega la prova dell'erogazione (registro presenze, export, report)."
+msgstr "Eğitimin kanıtını ekleyin (katılım listesi, dışa aktarım, rapor)."
+
+#: apps/training/services.py:342 apps/training/services.py:393
+#
+msgid "La data dell'erogazione non può essere futura."
+msgstr "Eğitim tarihi gelecekte olamaz."
+
+#: apps/training/services.py:390
+msgid "Campo non modificabile: elimina e registra di nuovo."
+msgstr "Bu alan değiştirilemez: silip yeniden kaydedin."
+
+#: apps/training/views.py:160
+msgid ""
+"Il file di prova non si sostituisce: elimina l'erogazione e registrala di "
+"nuovo."
+msgstr "Kanıt dosyası değiştirilemez: eğitimi silip yeniden kaydedin."
 
 #: core/scoping.py:115
 msgid ""

@@ -8,6 +8,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ## [Unreleased]
 
+### Added
+
+- **Formazione basata sulle evidenze — fondamenta (M15, fase 1 di 5)**: la piattaforma non eroga la formazione e non si integra con e-learning o KnowBe4, ma ne **governa** lo svolgimento, come chiedono ISO 27001 A.6.3, NIS2 art. 21.2.g, ACN PR.AT e TISAX ISA 2.1.3 (piano, prova di esecuzione, copertura). Nuovi elementi, per ora disponibili via API (l'interfaccia arriva in una fase successiva):
+  - **gruppi di destinatari** per sito, **solo numerici** (es. «Produzione: 240 persone»), senza anagrafica né dati personali dei dipendenti;
+  - **piano formativo annuale** per sito o di organizzazione, con voci «corso · gruppi · scadenza» e stato di ogni voce (fatta, in scadenza, in ritardo) con la copertura raggiunta; l'approvazione passa dal documento collegato nel workflow documentale;
+  - **erogazioni** registrate con persone da formare e formate (o, per il phishing, e-mail inviate, clic e segnalazioni) e con il **file di prova obbligatorio** (registro presenze, export dell'e-learning, report della campagna), da cui nasce automaticamente un'**evidenza** con scadenza pari alla validità del corso;
+  - i corsi indicano ogni quanto vanno ripetuti e **quali controlli** dei framework la loro erogazione dimostra.
+
+  Gestiscono la formazione compliance officer e plant manager del sito oppure chi ha la **nomina di CISO** in Governance, senza assegnazione: registra chi arriva prima. Gli auditor, interni ed esterni, vedono erogazioni e copertura in sola lettura: sono numeri e prove, non dati personali.
+
+### Changed
+
+- **Formazione — iscrizioni ed esiti phishing per persona in sola lettura**: la migrazione `training.0004` li riassume in **erogazioni storiche** che riportano soltanto i conteggi (iscritti e completati per corso; inviate, clic e segnalazioni per campagna). I dati per persona restano intatti e consultabili per una release e verranno poi eliminati (minimizzazione GDPR). I riferimenti normativi scritti a testo nei corsi diventano collegamenti ai controlli. **NB deploy:** prima di `migrate` è disponibile l'anteprima in sola lettura `python manage.py check_training_migration_readiness`, che elenca le erogazioni storiche che verranno create e i riferimenti che non trovano un controllo e vanno ricollegati a mano.
+
 ## [0.8.0] - 2026-09-21
 
 ### Added
