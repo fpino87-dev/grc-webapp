@@ -19,6 +19,9 @@ from .models import (
 # nomina di CISO in Governance. Nessuna assegnazione: registra chi arriva prima.
 MANAGER_ROLES = frozenset({"super_admin", "compliance_officer", "plant_manager"})
 DUE_SOON_DAYS = 30
+# Promemoria delle voci del piano: task M08 riconoscibili per la deduplica.
+REMINDER_SOURCE_MODULE = "M15"
+OPEN_TASK_STATUSES = ("aperto", "in_corso", "scaduto")
 
 
 def get_completion_rate(course_id) -> float:
@@ -265,6 +268,85 @@ def plan_status(plan, today=None) -> dict:
     return {"plan_id": str(plan.pk), "year": plan.year, "counts": counts, "items": rows}
 
 
+# ── Promemoria delle voci del piano ────────────────────────────────────────
+
+def _reminder_text(item, state, today):
+    plan = item.plan
+    scope = plan.plant.name if plan.plant_id else "organizzazione"
+    headcount = sum(a.headcount for a in item.audiences.all())
+    lines = [
+        f"Piano formativo {plan.year} ({scope}): «{item.course.title}».",
+        f"Scadenza della voce: {item.due_date.isoformat()}"
+        + (f" ({(today - item.due_date).days} giorni fa)." if state == "in_ritardo"
+           else f" (fra {(item.due_date - today).days} giorni)."),
+    ]
+    if headcount:
+        lines.append(f"Destinatari previsti: {headcount} persone.")
+    lines.append(
+        "Registra l'erogazione in Formazione allegando la prova (registro presenze, "
+        "export e-learning, report della campagna): il promemoria si chiude da solo."
+    )
+    return "\n".join(lines)
+
+
+def remind_plan_items(today=None) -> dict:
+    """Per ogni voce del piano senza erogazioni, in scadenza entro
+    DUE_SOON_DAYS o già in ritardo, apre un task al compliance officer del
+    perimetro (regola #7) e avvisa via M19 chi segue la formazione.
+
+    Un solo promemoria per voce: se ne esiste già uno non chiuso (o annullato
+    da chi lo ha ricevuto) non se ne apre un altro. Ritorna solo conteggi.
+    """
+    from apps.auth_grc.models import GrcRole
+    from apps.notifications.resolver import fire_notification
+    from apps.plants.services import plant_today
+    from apps.tasks.models import Task
+    from apps.tasks.services import create_task
+
+    horizon = (today or timezone.localdate()) + timedelta(days=DUE_SOON_DAYS + 1)
+    reminded = Task.objects.filter(
+        source_module=REMINDER_SOURCE_MODULE, source_id=OuterRef("pk"),
+        status__in=OPEN_TASK_STATUSES + ("annullato",),
+    )
+    items = (
+        TrainingPlanItem.objects.filter(
+            plan__deleted_at__isnull=True, course__status="attivo", due_date__lte=horizon,
+        )
+        .annotate(
+            has_sessions=Exists(TrainingSession.objects.filter(plan_item=OuterRef("pk"))),
+            reminded=Exists(reminded),
+        )
+        .filter(has_sessions=False, reminded=False)
+        .select_related("plan__plant", "course")
+        .prefetch_related("audiences")
+    )
+    counts = {"in_scadenza": 0, "in_ritardo": 0}
+    for item in items:
+        day = today or plant_today(item.plan.plant)
+        state = item_state(item, day)
+        if state not in counts:
+            continue
+        late = state == "in_ritardo"
+        create_task(
+            plant=item.plan.plant,
+            title=f"Formazione {'in ritardo' if late else 'in scadenza'}: {item.course.title}",
+            description=_reminder_text(item, state, day),
+            priority="alta" if late else "media",
+            source_module=REMINDER_SOURCE_MODULE,
+            source_id=item.pk,
+            due_date=day + timedelta(days=7) if late else item.due_date,
+            assign_type="role",
+            assign_value=GrcRole.COMPLIANCE_OFFICER,
+        )
+        fire_notification(
+            "training_plan_due",
+            plant=item.plan.plant,
+            context={"item": item, "state": state, "today": day},
+        )
+        counts[state] += 1
+    return counts
+
+
 # ── Erogazioni ──────────────────────────────────────────────────────────────
 
 def _validate_counts(kind, data):
@@ -321,6 +403,46 @@ def _check_plan_item(plan_item, course, plant):
         raise ValidationError({"plan_item": _("La voce del piano è di un altro sito.")})
 
 
+def link_evidence_to_controls(evidence, course, plant) -> dict:
+    """Collega l'evidenza dell'erogazione alle istanze dei controlli del corso
+    sul sito. Un controllo non istanziato sul sito, o escluso dallo SOA, non è
+    un errore: lo si segnala come non applicabile."""
+    from apps.controls.models import ControlInstance
+
+    controls = list(course.controls.all().only("id", "external_id"))
+    if not controls:
+        return {"linked": 0, "not_applicable": []}
+    instances = list(
+        ControlInstance.objects.filter(
+            plant=plant, control__in=controls, deleted_at__isnull=True,
+        ).exclude(applicability__in=("escluso", "non_pertinente")).only("id", "control_id")
+    )
+    if instances:
+        evidence.control_instances.add(*instances)
+        # L'aggiunta dal lato dell'evidenza non tocca le istanze: le si segna
+        # aggiornate come fa il segnale di controls per il collegamento manuale.
+        ControlInstance.objects.filter(pk__in=[i.pk for i in instances]).update(
+            updated_at=timezone.now(),
+        )
+    covered = {i.control_id for i in instances}
+    return {
+        "linked": len(instances),
+        "not_applicable": sorted(c.external_id for c in controls if c.pk not in covered),
+    }
+
+
+def _close_plan_item_reminders(plan_item, user):
+    """Registrata l'erogazione, il promemoria della voce del piano non serve più."""
+    from apps.tasks.models import Task
+    from apps.tasks.services import complete_task
+
+    for task in Task.objects.filter(
+        source_module=REMINDER_SOURCE_MODULE, source_id=plan_item.pk,
+        status__in=OPEN_TASK_STATUSES,
+    ):
+        complete_task(task, user, notes=_("Erogazione registrata."))
+
+
 def register_session(serializer, uploaded_file, user):
     """Registra un'erogazione con il file di prova, da cui nasce l'evidenza."""
     from apps.documents.services import create_evidence_with_file
@@ -366,6 +488,10 @@ def register_session(serializer, uploaded_file, user):
             user,
         )
         session = serializer.save(created_by=user, evidence=evidence, legacy=False)
+        links = link_evidence_to_controls(evidence, course, plant)
+        if session.plan_item_id:
+            _close_plan_item_reminders(session.plan_item, user)
+    session.control_links = links
     _audit(user, "session.register", session, {
         "course_id": str(course.pk),
         "plant_id": str(plant.pk),
@@ -373,6 +499,8 @@ def register_session(serializer, uploaded_file, user):
         "target_count": session.target_count,
         "trained_count": session.trained_count,
         "sent_count": session.sent_count,
+        "controls_linked": links["linked"],
+        "controls_not_applicable": len(links["not_applicable"]),
     })
     return session
 
@@ -407,6 +535,8 @@ def update_session(serializer, user):
             ev = session.evidence
             ev.valid_until = _evidence_valid_until(session.course, session.held_on)
             ev.save(update_fields=["valid_until", "updated_at"])
+        if data.get("plan_item") is not None:
+            _close_plan_item_reminders(session.plan_item, user)
     _audit(user, "session.update", session, {
         "target_count": session.target_count,
         "trained_count": session.trained_count,

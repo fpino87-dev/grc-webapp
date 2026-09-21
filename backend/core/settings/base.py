@@ -183,6 +183,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.governance.tasks.notify_expiring_roles_task",
         "schedule": crontab(hour=8, minute=0),
     },
+    "remind-training-plan-items": {
+        "task": "apps.training.tasks.remind_training_plan_items_task",
+        "schedule": crontab(hour=8, minute=10),  # 08:10 — scaglionato da notify-expiring-roles (08:00)
+    },
     "check-overdue-findings": {
         "task": "apps.audit_prep.tasks.check_overdue_findings",
         "schedule": crontab(hour=8, minute=45),  # 08:45 — scaglionato da notify-expiring-roles (08:00)

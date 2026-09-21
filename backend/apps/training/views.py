@@ -151,7 +151,16 @@ class TrainingSessionViewSet(_ServiceWriteMixin, PlantScopedQuerysetMixin, views
     delete_service = services.delete_session
 
     def perform_create(self, serializer):
-        services.register_session(serializer, self.request.FILES.get("file"), self.request.user)
+        self._created = services.register_session(
+            serializer, self.request.FILES.get("file"), self.request.user,
+        )
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        # Esito del collegamento ai controlli: quanti collegati e quali non
+        # applicabili al sito (solo codici di controllo, nessun dato personale).
+        response.data["control_links"] = self._created.control_links
+        return response
 
     def update(self, request, *args, **kwargs):
         if "file" in request.FILES:

@@ -18,6 +18,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
   Gestiscono la formazione compliance officer e plant manager del sito oppure chi ha la **nomina di CISO** in Governance, senza assegnazione: registra chi arriva prima. Gli auditor, interni ed esterni, vedono erogazioni e copertura in sola lettura: sono numeri e prove, non dati personali.
 
+- **Formazione — le erogazioni diventano prova dei controlli, con promemoria e scadenzario (M15, fase 2 di 5)**:
+  - l'evidenza nata da un'erogazione viene **collegata automaticamente ai controlli** indicati dal corso **sul sito dell'erogazione**. Un controllo non istanziato sul sito o escluso dallo SOA non blocca la registrazione: la risposta lo segnala come «non applicabile a questo sito»;
+  - ogni giorno le **voci del piano senza erogazioni** in scadenza entro 30 giorni o già in ritardo aprono un **task al Compliance Officer** del perimetro (regola «task a ruolo»), con priorità alta se in ritardo, e una **notifica** («Formazione del piano in scadenza o in ritardo») a chi ha il profilo di notifica standard o completo, cioè anche plant manager e CISO, mai agli auditor esterni. Un solo promemoria per voce: non si ripete finché è aperto e non ricompare se chi lo riceve lo annulla. Si **chiude da solo** quando l'erogazione viene registrata;
+  - nello **scadenzario** (categoria Formazione) compaiono le scadenze delle voci del piano ancora da svolgere, comprese quelle del piano di organizzazione su ogni sito. Le scadenze dei corsi fissate prima del piano restano visibili finché il corso non entra in un piano.
+
 ### Changed
 
 - **Formazione — iscrizioni ed esiti phishing per persona in sola lettura**: la migrazione `training.0004` li riassume in **erogazioni storiche** che riportano soltanto i conteggi (iscritti e completati per corso; inviate, clic e segnalazioni per campagna). I dati per persona restano intatti e consultabili per una release e verranno poi eliminati (minimizzazione GDPR). I riferimenti normativi scritti a testo nei corsi diventano collegamenti ai controlli. **NB deploy:** prima di `migrate` è disponibile l'anteprima in sola lettura `python manage.py check_training_migration_readiness`, che elenca le erogazioni storiche che verranno create e i riferimenti che non trovano un controllo e vanno ricollegati a mano.

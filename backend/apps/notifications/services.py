@@ -308,6 +308,29 @@ def notify_objective_deadline(objective, evaluation: dict, recipients: list[str]
     )
 
 
+def notify_training_plan_due(item, state: str, today, recipients: list[str]):
+    """Voce del piano formativo senza erogazioni, a ridosso della scadenza o
+    oltre. Nessun dato personale: corso, perimetro, date e conteggi."""
+    plan = item.plan
+    late = state == "in_ritardo"
+    when = (
+        f"scaduta il {item.due_date} ({(today - item.due_date).days} giorni fa)"
+        if late else f"in scadenza il {item.due_date} (fra {(item.due_date - today).days} giorni)"
+    )
+    send_grc_email(
+        subject=f"[GRC] Formazione {'in ritardo' if late else 'in scadenza'}: {item.course.title}",
+        body=(
+            f"Piano formativo {plan.year} — "
+            f"{plan.plant.name if plan.plant_id else 'Intera organizzazione'}\n\n"
+            f"Corso:    {item.course.title}\n"
+            f"Voce:     {when}\n\n"
+            "Non risultano erogazioni registrate. È stato aperto un task al "
+            "Compliance Officer: si chiude registrando l'erogazione con la prova allegata."
+        ),
+        recipients=recipients,
+    )
+
+
 def notify_evidence_expired(instance, recipients: list[str]):
     send_grc_email(
         subject=f"[GRC] Evidenza scaduta: {instance.control.external_id}",

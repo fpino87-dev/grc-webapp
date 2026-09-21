@@ -2255,3 +2255,7 @@ msgstr "Dosya türüne izin verilmiyor. Dosya içeriği uzantıyla eşleşmiyor.
 #, python-format
 msgid "Il contenuto del file non corrisponde all'estensione .%(ext)s."
 msgstr "Dosya içeriği .%(ext)s uzantısıyla eşleşmiyor."
+
+#: apps/training/services.py
+msgid "Erogazione registrata."
+msgstr "Eğitim oturumu kaydedildi."

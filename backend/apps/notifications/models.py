@@ -175,6 +175,7 @@ NOTIFICATION_PROFILES = {
             "document_approval",
             "supplier_concentration_critical",
             "objective_off_track",
+            "training_plan_due",
         ],
     },
     "completo": {
@@ -201,6 +202,7 @@ NOTIFICATION_PROFILES = {
             "risk_accepted",
             "objective_off_track",
             "objective_deadline",
+            "training_plan_due",
         ],
     },
 }
@@ -237,6 +239,7 @@ EVENT_LABELS = {
     "supplier_concentration_critical": "Concentrazione fornitura critica (crossing)",
     "management_review":   "Revisione direzione da approvare",
     "risk_accepted":       "Rischio formalmente accettato",
+    "training_plan_due":   "Formazione del piano in scadenza o in ritardo",
 }
 
 ROLE_LABELS = {
@@ -329,6 +332,7 @@ EVENT_TYPES = [
     ("management_review", "Revisione direzione da approvare"),
     ("objective_off_track", "Obiettivo di sicurezza fuori traiettoria"),
     ("objective_deadline", "Obiettivo di sicurezza in scadenza"),
+    ("training_plan_due", "Formazione del piano in scadenza o in ritardo"),
     ("supplier_assessment", "Assessment fornitore completato"),
     ("supplier_concentration_critical", "Concentrazione fornitura critica (crossing)"),
 ]

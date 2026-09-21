@@ -88,6 +88,7 @@ def fire_notification(event_type: str, plant=None, bu=None, context: dict | None
       notify_risk_red,
       notify_role_expiring,
       notify_supplier_concentration,
+      notify_training_plan_due,
       send_grc_email,
   )
 
@@ -133,6 +134,9 @@ def fire_notification(event_type: str, plant=None, bu=None, context: dict | None
 
   elif event_type == "objective_deadline" and "objective" in ctx:
       notify_objective_deadline(ctx["objective"], ctx.get("evaluation", {}), recipients)
+
+  elif event_type == "training_plan_due" and "item" in ctx:
+      notify_training_plan_due(ctx["item"], ctx.get("state", ""), ctx["today"], recipients)
 
   elif event_type == "bcp_test_failed":
       plan = ctx.get("plan")

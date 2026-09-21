@@ -2297,3 +2297,7 @@ msgstr ""
 #, python-format
 msgid "Il contenuto del file non corrisponde all'estensione .%(ext)s."
 msgstr "Le contenu du fichier ne correspond pas à l'extension .%(ext)s."
+
+#: apps/training/services.py
+msgid "Erogazione registrata."
+msgstr "Session de formation enregistrée."

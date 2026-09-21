@@ -290,11 +290,32 @@ def get_activity_schedule(plant=None, months_ahead: int = 6) -> list[dict]:
     except Exception:
         logger.exception("Errore nel calcolo delle scadenze rivalutazione fornitori", exc_info=True)
 
-    # Training courses deadline
+    # Formazione: le voci del piano formativo ancora senza erogazioni (il piano
+    # di organizzazione vale per ogni sito). La scadenza delle erogazioni fatte
+    # arriva già dalle evidenze (`valid_until`).
     try:
-        from apps.training.models import TrainingCourse
+        from django.db.models import Exists, OuterRef
+        from django.db.models import Q as _Q
+        from apps.training.models import TrainingCourse, TrainingPlanItem, TrainingSession
 
-        tr_qs = TrainingCourse.objects.filter(deadline__isnull=False, mandatory=True)
+        item_qs = TrainingPlanItem.objects.filter(
+            plan__deleted_at__isnull=True, course__status="attivo",
+        ).annotate(
+            has_sessions=Exists(TrainingSession.objects.filter(plan_item=OuterRef("pk"))),
+        ).filter(has_sessions=False)
+        if plant:
+            item_qs = item_qs.filter(_Q(plan__plant=plant) | _Q(plan__plant__isnull=True))
+        for item in item_qs.select_related("course", "plan"):
+            _add("training_mandatory", f"Formazione: {item.course.title} (piano {item.plan.year})",
+                 item.due_date, "pianificato", str(item.id), "/training")
+
+        # Scadenze dei corsi fissate prima del piano formativo: restano finché
+        # il corso non entra in un piano, per non perderle col passaggio.
+        tr_qs = TrainingCourse.objects.filter(deadline__isnull=False, mandatory=True).exclude(
+            Exists(TrainingPlanItem.objects.filter(
+                course=OuterRef("pk"), plan__deleted_at__isnull=True,
+            )),
+        )
         if plant:
             tr_qs = tr_qs.filter(plants=plant)
         for tr in tr_qs:

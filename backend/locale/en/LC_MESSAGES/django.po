@@ -2252,3 +2252,7 @@ msgstr "File type not allowed. The file content does not match the extension."
 #, python-format
 msgid "Il contenuto del file non corrisponde all'estensione .%(ext)s."
 msgstr "The file content does not match the .%(ext)s extension."
+
+#: apps/training/services.py
+msgid "Erogazione registrata."
+msgstr "Training session registered."
