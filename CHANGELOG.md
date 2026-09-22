@@ -79,6 +79,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ### Changed
 
+- **Riesame di direzione — chiusura della riunione a portata di mano nell'approvazione**: il pannello di approvazione diceva soltanto «chiudi la riunione per poter approvare», mentre il pulsante per chiuderla si trovava in cima alla scheda. Ora l'azione è anche lì, accanto alla spiegazione del perché serve — la chiusura verifica che **tutti i punti obbligatori dell'ordine del giorno siano stati trattati** (ISO/IEC 27001 §9.3.2) — e, se qualche punto è scoperto, vengono evidenziati come già avviene dall'intestazione. In seduta si chiude e si approva senza risalire la pagina.
+
 - **Formazione — il KPI «Completamento formazione obbligatoria» diventa «Copertura formazione obbligatoria»**: prima misurava la percentuale di iscrizioni completate dagli **utenti della piattaforma**, ora misura la copertura del **personale** dei gruppi destinatari. I valori storici del KPI hanno quindi un significato diverso da quelli nuovi: il trend va letto con questa discontinuità, anche negli obiettivi di sicurezza agganciati. Anche il **tasso di clic sul phishing** passa da dato atteso via API (KnowBe4) a calcolo interno dalle simulazioni registrate. La migrazione `tasks.0016` aggiorna le definizioni già importate, senza toccare nomi e descrizioni personalizzati.
 - **Pacchetto audit — formazione senza dati personali**: la cartella formazione non contiene più l'elenco delle iscrizioni con l'e-mail di ogni utente, che includeva anche gli altri siti.
 

@@ -4822,7 +4822,8 @@
       "need_completed": "Chiudi la riunione per poter approvare",
       "summary_recommended": "Consigliato: completa la sintesi executive prima dell'approvazione.",
       "download_pdf": "Verbale PDF",
-      "download_html": "HTML"
+      "download_html": "HTML",
+      "need_completed_why": "Per approvare, chiudi prima la riunione: la chiusura verifica che tutti i punti obbligatori dell'ordine del giorno siano stati trattati."
     },
     "snap": {
       "compliance_fw": "Compliance per framework",

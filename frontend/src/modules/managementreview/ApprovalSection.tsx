@@ -18,7 +18,9 @@ const APPROVAL_COLORS: Record<string, string> = {
 // dell'organo con account, o da governance — oppure registrando la delibera
 // dell'organo (numero, data ed eventuale documento come evidenza).
 
-export function ApprovalSection({ review, isGovernance }: { review: ManagementReview; isGovernance: boolean }) {
+export function ApprovalSection({ review, isGovernance, onMissing }: {
+  review: ManagementReview; isGovernance: boolean; onMissing?: (codes: string[]) => void;
+}) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [mode, setMode] = useState<"in_app" | "delibera">("in_app");
@@ -36,6 +38,23 @@ export function ApprovalSection({ review, isGovernance }: { review: ManagementRe
     queryFn: () => documentsApi.list(docQuery ? { search: docQuery } : {}),
     enabled: mode === "delibera" && isGovernance && !isApproved,
     retry: false,
+  });
+
+  // La chiusura della riunione è il controllo di copertura dei punti
+  // obbligatori (§9.3.2): resta un passaggio a sé, ma si fa da qui — in seduta
+  // si chiude e si approva nello stesso momento, senza risalire la pagina.
+  const complete = useMutation({
+    mutationFn: () => managementReviewApi.complete(review.id),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["management-review"] }); setError(""); onMissing?.([]); },
+    onError: (e: any) => {
+      const data = e?.response?.data;
+      if (data?.code === "agenda_incomplete") {
+        onMissing?.(data.missing ?? []);
+        setError(t("management_review.detail.agenda_incomplete", { count: (data.missing ?? []).length }));
+      } else {
+        setError(reviewErrorMessage(e, t("management_review.detail.status_error")));
+      }
+    },
   });
 
   const approve = useMutation({
@@ -132,7 +151,15 @@ export function ApprovalSection({ review, isGovernance }: { review: ManagementRe
               : t("management_review.detail.approve")}
           </button>
           {!hasSnapshot && <p className="text-xs text-amber-600">{t("management_review.detail.need_snapshot")}</p>}
-          {hasSnapshot && !isCompleted && <p className="text-xs text-amber-600">{t("management_review.detail.need_completed")}</p>}
+          {hasSnapshot && !isCompleted && (
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-xs text-amber-600">{t("management_review.detail.need_completed_why")}</p>
+              <button onClick={() => complete.mutate()} disabled={complete.isPending}
+                      className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 disabled:opacity-50">
+                ✓ {complete.isPending ? t("management_review.detail.approving") : t("management_review.detail.mark_completed")}
+              </button>
+            </div>
+          )}
           {!review.executive_summary && <p className="text-xs text-gray-400">{t("management_review.detail.summary_recommended")}</p>}
         </div>
       )}

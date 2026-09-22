@@ -4822,7 +4822,8 @@
       "need_completed": "Clôturez la réunion pour pouvoir approuver",
       "summary_recommended": "Recommandé : complétez la synthèse exécutive avant l'approbation.",
       "download_pdf": "Procès-verbal PDF",
-      "download_html": "HTML"
+      "download_html": "HTML",
+      "need_completed_why": "Pour approuver, clôturez d'abord la séance : la clôture vérifie que tous les points obligatoires de l'ordre du jour ont été traités."
     },
     "snap": {
       "compliance_fw": "Conformité par framework",

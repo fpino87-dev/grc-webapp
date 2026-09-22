@@ -4822,7 +4822,8 @@
       "need_completed": "Close the meeting to be able to approve",
       "summary_recommended": "Recommended: complete the executive summary before approval.",
       "download_pdf": "PDF minutes",
-      "download_html": "HTML"
+      "download_html": "HTML",
+      "need_completed_why": "To approve, first close the meeting: closing checks that every mandatory agenda item has been covered."
     },
     "snap": {
       "compliance_fw": "Compliance per framework",

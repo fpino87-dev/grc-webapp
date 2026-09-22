@@ -4822,7 +4822,8 @@
       "need_completed": "Onaylayabilmek için toplantıyı kapatın",
       "summary_recommended": "Önerilir: onaydan önce yönetici özetini tamamlayın.",
       "download_pdf": "PDF tutanak",
-      "download_html": "HTML"
+      "download_html": "HTML",
+      "need_completed_why": "Onaylamak için önce toplantıyı kapatın: kapatma, gündemdeki tüm zorunlu maddelerin ele alındığını doğrular."
     },
     "snap": {
       "compliance_fw": "Framework başına uyum",

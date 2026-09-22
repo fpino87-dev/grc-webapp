@@ -4822,7 +4822,8 @@
       "need_completed": "Zamknij spotkanie, aby móc zatwierdzić",
       "summary_recommended": "Zalecane: uzupełnij podsumowanie dla kierownictwa przed zatwierdzeniem.",
       "download_pdf": "Protokół PDF",
-      "download_html": "HTML"
+      "download_html": "HTML",
+      "need_completed_why": "Aby zatwierdzić, najpierw zamknij posiedzenie: zamknięcie sprawdza, czy omówiono wszystkie obowiązkowe punkty porządku obrad."
     },
     "snap": {
       "compliance_fw": "Zgodność wg frameworka",

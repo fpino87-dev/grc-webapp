@@ -216,7 +216,7 @@ export function ReviewDetail({ review, users, plants, onClose }: { review: Manag
 
           <ExecutiveSummarySection review={review} locked={locked} />
 
-          <ApprovalSection review={review} isGovernance={isGovernance} />
+          <ApprovalSection review={review} isGovernance={isGovernance} onMissing={setMissing} />
 
           <DeliberatedDocuments review={review} snap={snap} isGovernance={isGovernance} />
         </div>
