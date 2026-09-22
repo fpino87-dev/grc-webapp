@@ -1735,7 +1735,8 @@
       "body": "Organo di governo",
       "body_from_policy": "Come da policy di workflow",
       "notes": "Note",
-      "resolution_badge": "Delibera {{ref}}"
+      "resolution_badge": "Delibera {{ref}}",
+      "review_badge": "Approvato in riesame"
     },
     "unapproved_version": "Versione non approvata",
     "approved_version": "In vigore: {{version}}"
@@ -5070,7 +5071,9 @@
       "needs_resolution": "Registra prima l'approvazione del riesame come delibera dell'organo: i documenti ne ereditano gli estremi.",
       "done": "{{count}} documenti mandati in vigore.",
       "approve": "Approva i documenti deliberati ({{count}})",
-      "empty": "Nessun documento obbligatorio in attesa di approvazione in questo perimetro."
+      "empty": "Nessun documento obbligatorio in attesa di approvazione in questo perimetro.",
+      "needs_approval": "Approva prima il riesame: i documenti trattati nella seduta ne ereditano gli estremi.",
+      "hint_meeting": "Seleziona i documenti approvati nella seduta del {{date}}: entreranno in vigore con quella data, collegati a questo riesame."
     }
   },
   "objectives": {

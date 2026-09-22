@@ -1735,7 +1735,8 @@
       "body": "Organe de gouvernance",
       "body_from_policy": "Selon la politique de flux",
       "notes": "Notes",
-      "resolution_badge": "Délibération {{ref}}"
+      "resolution_badge": "Délibération {{ref}}",
+      "review_badge": "Approuvé en revue de direction"
     },
     "unapproved_version": "Version non approuvée",
     "approved_version": "En vigueur : {{version}}"
@@ -5070,7 +5071,9 @@
       "needs_resolution": "Enregistrez d'abord l'approbation de la revue comme délibération de l'organe : les documents en héritent les références.",
       "done": "{{count}} documents entrés en vigueur.",
       "approve": "Approuver les documents délibérés ({{count}})",
-      "empty": "Aucun document obligatoire en attente d'approbation dans ce périmètre."
+      "empty": "Aucun document obligatoire en attente d'approbation dans ce périmètre.",
+      "needs_approval": "Approuvez d'abord la revue : les documents traités en séance en héritent les références.",
+      "hint_meeting": "Sélectionnez les documents approuvés lors de la séance du {{date}} : ils entrent en vigueur à cette date, rattachés à cette revue."
     }
   },
   "objectives": {

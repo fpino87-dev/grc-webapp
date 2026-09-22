@@ -301,3 +301,51 @@ def test_approve_documents_reports_skipped(co, board, plant):
     assert resp.status_code == 200
     assert [d["title"] for d in resp.data["approved"]] == ["Politica nuova"]
     assert len(resp.data["skipped"]) == 2
+
+
+@pytest.mark.django_db
+def test_approve_documents_after_in_app_approval(co, board, plant):
+    """Riesame approvato in app: i documenti della seduta si approvano lo stesso,
+    con la data della riunione e il collegamento al riesame."""
+    from apps.documents.models import DocumentApproval
+    from apps.management_review.models import ManagementReview
+
+    review = ManagementReview.objects.create(
+        title="Riesame", review_date=date(2026, 1, 10), plant=plant, governing_body=board,
+    )
+    _ready(review.pk)
+    ManagementReview.objects.filter(pk=review.pk).update(
+        approval_status="approvato", approval_mode="in_app",
+        approved_by=co, approved_at=timezone.now(),
+    )
+    review.refresh_from_db()
+    doc = _policy(plant, co)
+
+    resp = _api(co).post(f"{URL}{review.id}/approve-documents/",
+                         {"document_ids": [str(doc.id)]}, format="json")
+    assert resp.status_code == 200, resp.data
+
+    doc.refresh_from_db()
+    record = DocumentApproval.objects.get(document=doc, action="approve")
+    assert doc.status == "approvato"
+    assert record.approval_mode == "delibera"
+    assert record.resolution_ref == ""          # nessun numero: il riferimento è la seduta
+    assert record.resolution_date == review.review_date
+    assert str(record.review_id) == str(review.pk)
+    assert doc.approved_at.date() == review.review_date
+
+
+@pytest.mark.django_db
+def test_approve_documents_requires_approved_review(co, board, plant):
+    from apps.management_review.models import ManagementReview
+
+    review = ManagementReview.objects.create(title="R", review_date=date(2026, 1, 10),
+                                             plant=plant, governing_body=board)
+    _ready(review.pk)
+    doc = _policy(plant, co)
+
+    resp = _api(co).post(f"{URL}{review.id}/approve-documents/",
+                         {"document_ids": [str(doc.id)]}, format="json")
+    assert resp.status_code == 400
+    doc.refresh_from_db()
+    assert doc.status == "revisione"

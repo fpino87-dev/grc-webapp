@@ -25,18 +25,25 @@ export function DeliberatedDocuments({ review, snap, isGovernance }: {
 }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[] | null>(null);
   const [error, setError] = useState("");
   const [result, setResult] = useState<{ approved: number; skipped: Array<{ title?: string; reason: string }> } | null>(null);
 
   const pending = snap?.documenti?.elenco_non_approvati ?? [];
-  const byResolution = review.approval_status === "approvato" && review.approval_mode === "delibera";
+  // Basta che il riesame sia approvato: se l'organo ha deliberato fuori dalla
+  // piattaforma i documenti ne ereditano gli estremi, altrimenti il
+  // riferimento è la seduta stessa.
+  const approved = review.approval_status === "approvato";
+  const hasResolution = !!review.approval_resolution_ref && !!review.approval_resolution_date;
+
+  // null = nessuna scelta esplicita: valgono tutti i documenti dell'elenco
+  const chosen = selected ?? pending.map(d => d.id);
 
   const mutation = useMutation({
-    mutationFn: () => managementReviewApi.approveDocuments(review.id, selected),
+    mutationFn: () => managementReviewApi.approveDocuments(review.id, chosen),
     onSuccess: (data) => {
       setResult({ approved: data.approved.length, skipped: data.skipped });
-      setSelected([]);
+      setSelected(null);
       qc.invalidateQueries({ queryKey: ["management-reviews"] });
       qc.invalidateQueries({ queryKey: ["documents"] });
     },
@@ -59,18 +66,23 @@ export function DeliberatedDocuments({ review, snap, isGovernance }: {
   }
 
   const toggle = (id: string) =>
-    setSelected(s => (s.includes(id) ? s.filter(x => x !== id) : [...s, id]));
+    setSelected(s => {
+      const current = s ?? pending.map(d => d.id);
+      return current.includes(id) ? current.filter(x => x !== id) : [...current, id];
+    });
 
   return (
     <section className="border border-gray-200 rounded-lg p-4">
       <h3 className="text-sm font-semibold text-gray-800">{t("management_review.deliberated.title")}</h3>
       <p className="text-xs text-gray-500 mt-1">
-        {byResolution
-          ? t("management_review.deliberated.hint", {
-              ref: review.approval_resolution_ref,
-              date: fmtDate(review.approval_resolution_date),
-            })
-          : t("management_review.deliberated.needs_resolution")}
+        {!approved
+          ? t("management_review.deliberated.needs_approval")
+          : hasResolution
+            ? t("management_review.deliberated.hint", {
+                ref: review.approval_resolution_ref,
+                date: fmtDate(review.approval_resolution_date),
+              })
+            : t("management_review.deliberated.hint_meeting", { date: fmtDate(review.review_date) })}
       </p>
 
       <div className="mt-3 space-y-1">
@@ -79,8 +91,8 @@ export function DeliberatedDocuments({ review, snap, isGovernance }: {
             <input
               type="checkbox"
               className="mt-0.5"
-              disabled={!byResolution || mutation.isPending}
-              checked={selected.includes(d.id)}
+              disabled={!approved || mutation.isPending}
+              checked={chosen.includes(d.id)}
               onChange={() => toggle(d.id)}
             />
             <span>
@@ -103,13 +115,13 @@ export function DeliberatedDocuments({ review, snap, isGovernance }: {
 
       <button
         type="button"
-        disabled={!byResolution || selected.length === 0 || mutation.isPending}
+        disabled={!approved || chosen.length === 0 || mutation.isPending}
         onClick={() => { setError(""); setResult(null); mutation.mutate(); }}
         className="mt-3 px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
       >
         {mutation.isPending
           ? t("common.saving")
-          : t("management_review.deliberated.approve", { count: selected.length })}
+          : t("management_review.deliberated.approve", { count: chosen.length })}
       </button>
     </section>
   );

@@ -1735,7 +1735,8 @@
       "body": "Governing body",
       "body_from_policy": "As set by the workflow policy",
       "notes": "Notes",
-      "resolution_badge": "Resolution {{ref}}"
+      "resolution_badge": "Resolution {{ref}}",
+      "review_badge": "Approved in management review"
     },
     "unapproved_version": "Version not approved",
     "approved_version": "In force: {{version}}"
@@ -5070,7 +5071,9 @@
       "needs_resolution": "First record the review approval as a resolution of the body: the documents inherit its details.",
       "done": "{{count}} documents now in force.",
       "approve": "Approve resolved documents ({{count}})",
-      "empty": "No mandatory document awaiting approval in this scope."
+      "empty": "No mandatory document awaiting approval in this scope.",
+      "needs_approval": "Approve the review first: documents handled in the meeting inherit its details.",
+      "hint_meeting": "Select the documents approved in the meeting of {{date}}: they take effect on that date, linked to this review."
     }
   },
   "objectives": {

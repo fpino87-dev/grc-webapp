@@ -547,13 +547,17 @@ def approve_documents_by_resolution(review: ManagementReview, document_ids, user
 
     if not can_register_resolution(user):
         raise PermissionDenied(_("La delibera dell'organo si registra da governance."))
-    if review.approval_status != "approvato" or review.approval_mode != "delibera":
+    # Vale qualunque modalità di approvazione del riesame: se l'organo ha
+    # deciso in app, il riferimento dei documenti è la seduta stessa; se ha
+    # deliberato fuori piattaforma, ne ereditano numero e data.
+    if review.approval_status != "approvato":
         raise ValidationError(
-            _("Registra prima l'approvazione del riesame come delibera dell'organo: "
-              "i documenti deliberati ne ereditano gli estremi.")
+            _("Approva prima il riesame: i documenti trattati nella seduta ne "
+              "ereditano gli estremi.")
         )
-    if not review.approval_resolution_ref or not review.approval_resolution_date:
-        raise ValidationError(_("La delibera del riesame è senza numero o data."))
+    decision_date = review.approval_resolution_date or review.review_date
+    if not decision_date:
+        raise ValidationError(_("Il riesame è senza data: impossibile datare l'entrata in vigore."))
 
     ids = [i for i in (document_ids or []) if i]
     if not ids:
@@ -577,12 +581,12 @@ def approve_documents_by_resolution(review: ManagementReview, document_ids, user
         try:
             approve_document(
                 doc, user,
-                notes=_("Deliberato nella seduta del %(date)s.") % {
-                    "date": review.approval_resolution_date.strftime("%d/%m/%Y"),
+                notes=_("Approvato nella seduta di riesame del %(date)s.") % {
+                    "date": decision_date.strftime("%d/%m/%Y"),
                 },
                 mode="delibera",
                 resolution_ref=review.approval_resolution_ref,
-                resolution_date=review.approval_resolution_date,
+                resolution_date=decision_date,
                 governing_body=body,
                 review_id=review.pk,
             )
@@ -600,8 +604,9 @@ def approve_documents_by_resolution(review: ManagementReview, document_ids, user
             entity=review,
             payload={
                 "review_id": str(review.pk),
+                "approval_mode": review.approval_mode,
                 "resolution_ref": review.approval_resolution_ref,
-                "resolution_date": str(review.approval_resolution_date),
+                "resolution_date": str(decision_date),
                 "documents": [d["id"] for d in approved],
                 "count": len(approved),
             },

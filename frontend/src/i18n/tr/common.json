@@ -1735,7 +1735,8 @@
       "body": "Yönetim organı",
       "body_from_policy": "İş akışı politikasına göre",
       "notes": "Notlar",
-      "resolution_badge": "Karar {{ref}}"
+      "resolution_badge": "Karar {{ref}}",
+      "review_badge": "Yönetim gözden geçirmesinde onaylandı"
     },
     "unapproved_version": "Onaylanmamış sürüm",
     "approved_version": "Yürürlükte: {{version}}"
@@ -5070,7 +5071,9 @@
       "needs_resolution": "Önce gözden geçirme onayını organ kararı olarak kaydedin: belgeler karar bilgilerini devralır.",
       "done": "{{count}} belge yürürlüğe girdi.",
       "approve": "Karara bağlanan belgeleri onayla ({{count}})",
-      "empty": "Bu kapsamda onay bekleyen zorunlu belge yok."
+      "empty": "Bu kapsamda onay bekleyen zorunlu belge yok.",
+      "needs_approval": "Önce gözden geçirmeyi onaylayın: toplantıda ele alınan belgeler bilgilerini devralır.",
+      "hint_meeting": "{{date}} tarihli toplantıda onaylanan belgeleri seçin: bu tarihte yürürlüğe girer ve bu gözden geçirmeye bağlanır."
     }
   },
   "objectives": {

@@ -162,7 +162,8 @@ def _require_author_separation(document, user, action: str) -> None:
     )
 
 
-def _validate_approval_mode(document, mode, resolution_ref, resolution_date, governing_body):
+def _validate_approval_mode(document, mode, resolution_ref, resolution_date, governing_body,
+                            from_review=False):
     """Controlla la modalità di approvazione rispetto alla policy di workflow.
 
     Un tipo di documento che la governance riserva all'organo (politiche
@@ -191,7 +192,12 @@ def _validate_approval_mode(document, mode, resolution_ref, resolution_date, gov
             raise ValidationError(
                 _("Data della delibera non valida (formato atteso: AAAA-MM-GG).")
             ) from None
-    if not (resolution_ref or "").strip() or not resolution_date:
+    if not resolution_date:
+        raise ValidationError(_("Indicare la data della decisione dell'organo."))
+    # Il numero di delibera serve quando la decisione è presa fuori dalla
+    # piattaforma: se arriva da un riesame di direzione, il riferimento è la
+    # seduta stessa, già collegata al documento.
+    if not from_review and not (resolution_ref or "").strip():
         raise ValidationError(_("Indicare numero e data della delibera."))
     if resolution_date > timezone.localdate():
         raise ValidationError(_("La data della delibera non può essere futura."))
@@ -222,6 +228,7 @@ def approve_document(
     """
     mode, resolution_date, governing_body = _validate_approval_mode(
         document, mode, resolution_ref, resolution_date, governing_body,
+        from_review=bool(review_id),
     )
     if mode == "in_app":
         _require_author_separation(document, user, "approve")

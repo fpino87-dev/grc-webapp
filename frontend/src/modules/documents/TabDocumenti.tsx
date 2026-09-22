@@ -268,7 +268,9 @@ export function TabDocumenti() {
                     )}
                     {doc.last_approval?.mode === "delibera" && (
                       <div className="text-[10px] text-indigo-600">
-                        {t("documents.approve.resolution_badge", { ref: doc.last_approval.resolution_ref })}
+                        {doc.last_approval.resolution_ref
+                          ? t("documents.approve.resolution_badge", { ref: doc.last_approval.resolution_ref })
+                          : t("documents.approve.review_badge")}
                       </div>
                     )}
                   </td>
