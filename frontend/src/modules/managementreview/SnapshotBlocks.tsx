@@ -4,7 +4,8 @@ import i18n from "../../i18n";
 import {
   DetailTable, KpiBox, KpiGrid, SnapSection, fmtDate, isOverdue,
   type Snap, type SnapAudit, type SnapDoc, type SnapFinding, type SnapFramework, type SnapIncident,
-  type SnapKpi, type SnapObjective, type SnapPdca, type SnapPrevAction, type SnapRisk, type SnapSite, type SnapTask,
+  type SnapKpi, type SnapObjective, type SnapPdca, type SnapPendingDoc, type SnapPrevAction, type SnapRisk,
+  type SnapSite, type SnapTask,
 } from "./shared";
 
 // Ogni blocco mostra i dati congelati di un'area; se lo snapshot non contiene
@@ -276,6 +277,13 @@ export function PdcaTasksBlock({ snap }: { snap: Snap }) {
   );
 }
 
+// Stati del workflow documentale: le etichette esistono già nel modulo Documenti.
+const DOC_STATUS_KEY: Record<string, string> = {
+  bozza: "documents.filters.draft",
+  revisione: "documents.filters.in_review",
+  approvazione: "documents.filters.in_approval",
+};
+
 export function DocumentsBlock({ snap }: { snap: Snap }) {
   const { t } = useTranslation();
   const d = snap.documenti;
@@ -289,6 +297,21 @@ export function DocumentsBlock({ snap }: { snap: Snap }) {
         <KpiBox label={t("management_review.snap.expired")} value={d.scaduti ?? 0} color="text-red-600" />
         <KpiBox label={t("management_review.snap.expired_evidence_kpi")} value={d.evidenze_scadute ?? 0} color="text-red-600" />
       </KpiGrid>
+      <DetailTable
+        title={t("management_review.snap.docs_pending")}
+        headers={[
+          t("management_review.snap.col_document"), t("documents.fields.document_type"),
+          t("documents.table.status"), t("management_review.snap.col_owner"),
+          t("management_review.snap.col_created"),
+        ]}
+        rows={((d.elenco_non_approvati ?? []) as SnapPendingDoc[]).map(x => [
+          <span className="font-medium">{x.document_code ? `[${x.document_code}] ` : ""}{x.title}</span>,
+          t(`documents.type.${x.document_type}`, { defaultValue: x.document_type }),
+          <span className="text-yellow-700">{DOC_STATUS_KEY[x.status] ? t(DOC_STATUS_KEY[x.status]) : x.status}</span>,
+          x.owner || "—", fmtDate(x.created_at),
+        ])}
+        total={d.non_approvati_obbligatori}
+      />
       <DetailTable
         title={t("management_review.snap.docs_expired")}
         headers={headers}

@@ -50,6 +50,14 @@ OBJECTIVE_TRACK = {
     "in_linea": _("In linea"), "a_rischio": _("A rischio"), "mancato": _("Mancato"),
     "senza_misure": _("Senza misure"), "non_applicabile": _("—"),
 }
+DOC_STATUS = {
+    "bozza": _("Bozza"), "revisione": _("In revisione"), "approvazione": _("In approvazione"),
+    "approvato": _("Approvato"), "archiviato": _("Archiviato"),
+}
+DOC_TYPE = {
+    "policy": _("Policy"), "procedura": _("Procedura"), "manuale": _("Manuale ISMS"),
+    "contratto": _("Contratto/NDA"), "registro": _("Registro"), "altro": _("Altro"),
+}
 OBJECTIVE_STATUS = {
     "bozza": _("Bozza"), "attivo": _("Attivo"), "raggiunto": _("Raggiunto"),
     "non_raggiunto": _("Non raggiunto"), "sospeso": _("Sospeso"), "annullato": _("Annullato"),
@@ -277,6 +285,11 @@ def _improvement_status_blocks(snap) -> list:
     ]
 
 
+def _doc_label(item) -> str:
+    code = item.get("document_code")
+    return f"[{code}] {item.get('title')}" if code else str(item.get("title") or "")
+
+
 def _document_blocks(snap) -> list:
     d = snap.get("documenti") or {}
 
@@ -287,6 +300,18 @@ def _document_blocks(snap) -> list:
                     (_("In scadenza (90gg)"), d.get("in_scadenza", 0), "orange"),
                     (_("Documenti scaduti"), d.get("scaduti", 0), "red"),
                     (_("Evidenze scadute"), d.get("evidenze_scadute", 0), "red"))]
+    if "elenco_non_approvati" in d:
+        blocks.append(_table(
+            _("Documenti obbligatori non ancora approvati"),
+            [_("Documento"), _("Tipo"), _("Stato"), _("Owner"), _("Creato il")],
+            [[_doc_label(x),
+              DOC_TYPE.get(x.get("document_type"), _dash(x.get("document_type"))),
+              {"text": DOC_STATUS.get(x.get("status"), _dash(x.get("status"))), "tone": "orange"},
+              _dash(x.get("owner")), fmt_date(x.get("created_at"))]
+             for x in d.get("elenco_non_approvati", [])],
+            d.get("non_approvati_obbligatori"),
+            empty=_("Tutti i documenti obbligatori del perimetro sono approvati."),
+        ))
     if "elenco_scaduti" in d:
         doc_headers = [_("Documento"), _("Owner"), _("Revisione prevista")]
         blocks += [

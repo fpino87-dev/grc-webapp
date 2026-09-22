@@ -112,3 +112,131 @@ def test_delete_approved_document_allowed_for_superuser(document, superuser):
     delete_document(document, superuser)
     document.refresh_from_db()
     assert document.deleted_at is not None
+
+
+# ── Promemoria automatici: documenti obbligatori non approvati ───────────────
+
+@pytest.fixture
+def mandatory_old_document(db, plant, user):
+    """Documento obbligatorio, mai approvato, creato oltre la soglia."""
+    from django.utils import timezone
+    from apps.documents.models import Document
+    from apps.documents.tasks import UNAPPROVED_REMINDER_DAYS
+
+    doc = Document.objects.create(
+        title="Policy accessi", category="policy", document_type="policy",
+        status="bozza", plant=plant, is_mandatory=True, created_by=user,
+    )
+    # created_at è auto_now_add: lo si sposta indietro con un update diretto
+    Document.objects.filter(pk=doc.pk).update(
+        created_at=timezone.now() - timezone.timedelta(days=UNAPPROVED_REMINDER_DAYS + 1)
+    )
+    doc.refresh_from_db()
+    return doc
+
+
+@pytest.mark.django_db
+def test_reminder_created_for_old_mandatory_document(mandatory_old_document, superuser):
+    from apps.documents.tasks import remind_unapproved_mandatory_documents
+    from apps.tasks.models import Task
+
+    remind_unapproved_mandatory_documents()
+
+    task = Task.objects.get(source_module="M07", source_id=mandatory_old_document.pk)
+    assert task.status == "aperto"
+    # Assegnato a ruolo, mai a utente (regola #7)
+    assert task.assigned_role == "compliance_officer"
+    assert task.assigned_to is None
+
+
+@pytest.mark.django_db
+def test_reminder_not_duplicated(mandatory_old_document, superuser):
+    from apps.documents.tasks import remind_unapproved_mandatory_documents
+    from apps.tasks.models import Task
+
+    remind_unapproved_mandatory_documents()
+    remind_unapproved_mandatory_documents()
+    remind_unapproved_mandatory_documents()
+
+    assert Task.objects.filter(source_module="M07", source_id=mandatory_old_document.pk).count() == 1
+
+
+@pytest.mark.django_db
+def test_reminder_not_reopened_after_cancel(mandatory_old_document, superuser):
+    """Se chi lo riceve lo annulla, il promemoria non ricompare."""
+    from apps.documents.tasks import remind_unapproved_mandatory_documents
+    from apps.tasks.models import Task
+
+    remind_unapproved_mandatory_documents()
+    Task.objects.filter(source_module="M07").update(status="annullato")
+    remind_unapproved_mandatory_documents()
+
+    assert Task.objects.filter(source_module="M07", source_id=mandatory_old_document.pk).count() == 1
+
+
+@pytest.mark.django_db
+def test_recent_or_optional_documents_have_no_reminder(document, plant, user, superuser):
+    """Né i documenti non obbligatori né quelli creati da poco."""
+    from apps.documents.models import Document
+    from apps.documents.tasks import remind_unapproved_mandatory_documents
+    from apps.tasks.models import Task
+
+    document.is_mandatory = False
+    document.save(update_fields=["is_mandatory"])
+    Document.objects.create(
+        title="Nuova policy", category="policy", document_type="policy",
+        status="bozza", plant=plant, is_mandatory=True, created_by=user,
+    )
+
+    remind_unapproved_mandatory_documents()
+    assert not Task.objects.filter(source_module="M07").exists()
+
+
+@pytest.mark.django_db
+def test_reminder_closed_on_approval(mandatory_old_document, user, superuser):
+    from apps.documents.services import approve_document, submit_for_review
+    from apps.documents.tasks import remind_unapproved_mandatory_documents
+    from apps.tasks.models import Task
+
+    remind_unapproved_mandatory_documents()
+    submit_for_review(mandatory_old_document, user)
+    approve_document(mandatory_old_document, user, notes="ok")
+
+    task = Task.objects.get(source_module="M07", source_id=mandatory_old_document.pk)
+    assert task.status == "completato"
+
+
+@pytest.mark.django_db
+def test_stale_reminder_closed_by_next_run(mandatory_old_document, superuser):
+    """Promemoria rimasto aperto su un documento non più in attesa: il giro
+    successivo lo chiude (rete di sicurezza)."""
+    from apps.documents.tasks import remind_unapproved_mandatory_documents
+    from apps.tasks.models import Task
+
+    remind_unapproved_mandatory_documents()
+    # approvazione "fuori flusso" (import dati, migrazione): il task resta aperto
+    type(mandatory_old_document).objects.filter(pk=mandatory_old_document.pk).update(status="approvato")
+
+    remind_unapproved_mandatory_documents()
+    assert Task.objects.get(source_module="M07", source_id=mandatory_old_document.pk).status == "completato"
+
+
+@pytest.mark.django_db
+def test_expiry_reminder_not_duplicated_daily(plant, user, superuser):
+    """Il promemoria di scadenza non si ripete ogni giorno sullo stesso documento."""
+    from django.utils import timezone
+    from apps.documents.models import Document
+    from apps.documents.tasks import notify_expiring_documents
+    from apps.tasks.models import Task
+
+    Document.objects.create(
+        title="Manuale ISMS", category="procedura", document_type="manuale",
+        status="approvato", plant=plant, created_by=user,
+        review_due_date=timezone.localdate() - timezone.timedelta(days=3),
+    )
+    notify_expiring_documents()
+    first = Task.objects.filter(source_module="M07").count()
+    notify_expiring_documents()
+
+    assert first > 0
+    assert Task.objects.filter(source_module="M07").count() == first

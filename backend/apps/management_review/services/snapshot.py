@@ -458,6 +458,31 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     approved_since = previous.review_date if previous else (today - timezone.timedelta(days=365))
     approved_recent_q = Q(status="approvato", approved_at__date__gte=approved_since)
 
+    # §9.3.2 d) — documenti obbligatori non ancora in vigore: la direzione li
+    # vede per nome e decide se portarli all'approvazione. I non obbligatori
+    # (contratti, NDA) restano nei conteggi, fuori dall'elenco.
+    from apps.documents.services import PENDING_STATUSES
+
+    pending_mandatory_q = Q(is_mandatory=True, status__in=PENDING_STATUSES)
+
+    def _pending_doc_items(q):
+        return [
+            {
+                "id": str(d["id"]),
+                "title": d["title"],
+                "document_code": d["document_code"],
+                "document_type": d["document_type"],
+                "status": d["status"],
+                "owner": _display_name(d["owner__first_name"], d["owner__last_name"], d["owner__email"]),
+                "created_at": _iso(d["created_at"]),
+            }
+            # I più vecchi per primi: sono quelli fermi da più tempo.
+            for d in docs_qs.filter(q).order_by("created_at").values(
+                "id", "title", "document_code", "document_type", "status", "created_at",
+                "owner__first_name", "owner__last_name", "owner__email",
+            )[:SNAPSHOT_LIST_LIMIT]
+        ]
+
     def _doc_items(q, order):
         return [
             {
@@ -482,6 +507,9 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
         "scaduti": docs_qs.filter(expired_q).count(),
         "approvati_periodo": docs_qs.filter(approved_recent_q).count(),
         "approvati_dal": approved_since.isoformat(),
+        "obbligatori": docs_qs.filter(is_mandatory=True).count(),
+        "non_approvati_obbligatori": docs_qs.filter(pending_mandatory_q).count(),
+        "elenco_non_approvati": _pending_doc_items(pending_mandatory_q),
         "elenco_scaduti": _doc_items(expired_q, "review_due_date"),
         "elenco_in_scadenza": _doc_items(expiring_q, "review_due_date"),
         "elenco_approvati_periodo": _doc_items(approved_recent_q, "-approved_at"),

@@ -34,6 +34,11 @@ export type SnapFramework = {
   expired_evidence_count: number; gap_controls?: SnapGapControl[];
 };
 export type SnapDoc = { id: string; title: string; owner: string; review_due_date: string | null; approved_at: string | null };
+// Documento obbligatorio non ancora approvato (elenco_non_approvati).
+export type SnapPendingDoc = {
+  id: string; title: string; document_code: string; document_type: string;
+  status: string; owner: string; created_at: string | null;
+};
 export type SnapRisk = {
   id: string; name: string; asset: string | null; process: string | null;
   inherent_score: number | null; score: number | null; treatment: string | null; owner: string | null;

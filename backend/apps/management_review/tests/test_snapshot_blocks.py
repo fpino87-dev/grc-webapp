@@ -112,3 +112,61 @@ def test_schedule_includes_planned_and_next_review(plant, user):
     planned = _review(plant, user, today + datetime.timedelta(days=60))
     items = [i for i in get_activity_schedule(plant=plant, months_ahead=6) if i["category"] == "management_review"]
     assert [i["ref_id"] for i in items] == [str(planned.pk)]
+
+
+# ── Documenti obbligatori non approvati (§9.3.2 d) ──────────────────────────
+
+def _document(plant, user, title, **kw):
+    from apps.documents.models import Document
+    defaults = dict(category="policy", document_type="policy", status="bozza",
+                    plant=plant, is_mandatory=True, created_by=user)
+    return Document.objects.create(title=title, **{**defaults, **kw})
+
+
+def test_pending_mandatory_documents_in_snapshot(plant, user):
+    _document(plant, user, "Policy accessi")
+    _document(plant, user, "Procedura backup", status="revisione", document_type="procedura",
+              document_code="D-002", owner=user)
+    _document(plant, user, "NDA fornitore", document_type="contratto", is_mandatory=False)
+    _document(plant, user, "Manuale ISMS", status="approvato", document_type="manuale")
+
+    docs = generate_snapshot(_review(plant, user, timezone.localdate()), user)["documenti"]
+
+    assert docs["non_approvati_obbligatori"] == 2
+    titles = [d["title"] for d in docs["elenco_non_approvati"]]
+    # Solo gli obbligatori non approvati: l'NDA e il manuale approvato restano fuori
+    assert titles == ["Policy accessi", "Procedura backup"]
+    riga = docs["elenco_non_approvati"][1]
+    assert riga["status"] == "revisione"
+    assert riga["document_code"] == "D-002"
+    assert riga["document_type"] == "procedura"
+    assert riga["owner"] == user.email
+    assert riga["created_at"]
+
+
+def test_pending_mandatory_documents_empty(plant, user):
+    _document(plant, user, "Policy approvata", status="approvato")
+
+    docs = generate_snapshot(_review(plant, user, timezone.localdate()), user)["documenti"]
+    assert docs["non_approvati_obbligatori"] == 0
+    assert docs["elenco_non_approvati"] == []
+
+
+def test_pending_documents_in_report(plant, user):
+    """La tabella arriva nel verbale, sotto il punto d) dell'ordine del giorno."""
+    from apps.management_review.report.builder import build_report
+
+    _document(plant, user, "Policy accessi", document_code="D-001")
+    review = _review(plant, user, timezone.localdate())
+    generate_snapshot(review, user)
+    review.refresh_from_db()
+
+    report = build_report(review)
+    tables = [
+        b for section in report["sections"] for b in section.get("blocks", [])
+        if b.get("type") == "table" and str(b.get("title") or "") == "Documenti obbligatori non ancora approvati"
+    ]
+    assert len(tables) == 1
+    # Il documento compare con il suo codice, lo stato e la data di creazione
+    assert tables[0]["rows"][0][0] == "[D-001] Policy accessi"
+    assert tables[0]["rows"][0][2]["text"] == "Bozza"

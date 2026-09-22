@@ -179,6 +179,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.documents.tasks.notify_expiring_documents",
         "schedule": crontab(hour=7, minute=45),
     },
+    "remind-unapproved-mandatory-documents": {
+        "task": "apps.documents.tasks.remind_unapproved_mandatory_documents",
+        "schedule": crontab(hour=7, minute=50),  # subito dopo le scadenze documentali
+    },
     "notify-expiring-roles": {
         "task": "apps.governance.tasks.notify_expiring_roles_task",
         "schedule": crontab(hour=8, minute=0),

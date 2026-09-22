@@ -10,6 +10,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ### Added
 
+- **Documenti obbligatori non approvati: visibili nel riesame di direzione e presi in carico dopo 90 giorni (M07 + M13)**
+  - **Riesame di direzione**: al punto d) dell'ordine del giorno (§9.3.2) il verbale e la schermata del riesame elencano ora i **documenti obbligatori non ancora approvati** del perimetro — codice, titolo, tipo, stato (bozza, in revisione, in approvazione), owner e data di creazione, i più vecchi per primi. Prima la direzione leggeva solo i conteggi («3 in bozza, 2 in revisione») senza sapere quali documenti fossero. I documenti non obbligatori (contratti, NDA, registri) restano nei conteggi complessivi e non occupano il verbale. Se tutti i documenti obbligatori sono approvati, il verbale lo dichiara esplicitamente. L'elenco entra nei riesami futuri: i verbali già approvati non cambiano, perché i dati congelati di un riesame approvato non si rigenerano.
+  - **Promemoria automatico**: un documento obbligatorio ancora non approvato **90 giorni dopo la sua creazione** apre un'attività (M08) assegnata al **ruolo** Compliance Officer del sito, con scadenza a 30 giorni, e invia la notifica «Documento in attesa approvazione» a chi ha il profilo di notifica standard o completo (mai agli auditor esterni). Un solo promemoria per documento: non si ripete finché è aperto e non ricompare se chi lo riceve lo annulla. **Si chiude da solo** quando il documento viene approvato; se per qualunque ragione restasse aperto su un documento non più in attesa, viene chiuso dal controllo del giorno successivo.
+
 - **Formazione basata sulle evidenze — fondamenta (M15, fase 1 di 5)**: la piattaforma non eroga la formazione e non si integra con e-learning o KnowBe4, ma ne **governa** lo svolgimento, come chiedono ISO 27001 A.6.3, NIS2 art. 21.2.g, ACN PR.AT e TISAX ISA 2.1.3 (piano, prova di esecuzione, copertura). Nuovi elementi, per ora disponibili via API (l'interfaccia arriva in una fase successiva):
   - **gruppi di destinatari** per sito, **solo numerici** (es. «Produzione: 240 persone»), senza anagrafica né dati personali dei dipendenti;
   - **piano formativo annuale** per sito o di organizzazione, con voci «corso · gruppi · scadenza» e stato di ogni voce (fatta, in scadenza, in ritardo) con la copertura raggiunta; l'approvazione passa dal documento collegato nel workflow documentale;
@@ -72,6 +76,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
   - un **documento obbligatorio non può essere approvato** se la Governance non ha dichiarato quali ruoli approvano quel tipo di documento (prima, in assenza di policy, l'approvazione era libera). Il messaggio di errore indica che la policy va definita in Governance → Workflow documentale.
 
 ### Fixed
+
+- **Documenti — i promemoria di scadenza non si ripetono più ogni giorno**: il controllo notturno apriva una nuova attività ogni mattina per ogni documento con la revisione o la validità scaduta, riaprendola anche dopo che era stata annullata: un documento scaduto generava un'attività al giorno, senza fine. Ora vale un promemoria per documento e per tipo di scadenza; l'escalation da «in scadenza» a «scaduto» resta, e un promemoria annullato non viene riaperto. Il titolo dell'attività non contiene più il numero di giorni residui (che lo faceva invecchiare): il conteggio resta nella descrizione.
 
 - **Build di produzione — compilazione delle traduzioni**: dalla 0.8.0 `compilemessages` (eseguito da `Dockerfile.prod`) falliva in polacco e turco perché l'etichetta «% compliant» del verbale del riesame era marcata per errore come stringa di formato, e l'immagine non si costruiva. Il marcatore è stato rimosso nelle quattro lingue.
 - **Competenze (M02)**: una competenza eliminata impediva di registrarne di nuovo una con lo stesso nome per la stessa persona (errore di salvataggio). Ora l'unicità vale solo fra le competenze attive.

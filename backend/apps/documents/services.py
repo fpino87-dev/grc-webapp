@@ -23,6 +23,16 @@ from .models import Document, DocumentApproval, DocumentVersion, Evidence
 # `approver` e `approved_at` in sola lettura, così un'approvazione non può
 # avvenire senza controllo di policy, record DocumentApproval e audit trail
 # (ISO/IEC 27001 §7.5.2 — approvazione dell'informazione documentata).
+# Stati in cui il documento non è (ancora) in vigore: usati dal promemoria
+# automatico M07 e dallo snapshot del riesame di direzione.
+PENDING_STATUSES = ("bozza", "revisione", "approvazione")
+
+# Promemoria automatici sui documenti (task M08 con sorgente M07).
+REMINDER_SOURCE_MODULE = "M07"
+OPEN_TASK_STATUSES = ("aperto", "in_corso")
+# Un promemoria già annullato da chi l'ha ricevuto non viene riaperto.
+BLOCKING_TASK_STATUSES = OPEN_TASK_STATUSES + ("annullato",)
+
 ALLOWED_TRANSITIONS = {
     # invio in revisione: da bozza, o da approvato per la revisione periodica
     "submit": {"bozza", "approvato"},
@@ -103,6 +113,10 @@ def approve_document(document, user, notes=""):
             entity=document,
             payload={"id": str(document.pk), "title": document.title, "notes": (notes or "")[:200]},
         )
+    # Il documento è in vigore: i promemoria automatici aperti su di esso non
+    # servono più (stesso schema dei promemoria del piano formativo, M15).
+    close_document_reminders(document, user, _("Documento approvato."))
+
     # notifica approvatori / stakeholder definiti in governance
     try:
         from apps.governance.services import resolve_document_recipients
@@ -158,6 +172,32 @@ def archive_document(document, user, notes=""):
             entity=document,
             payload={"id": str(document.pk), "title": document.title, "notes": (notes or "")[:200]},
         )
+
+
+def close_document_reminders(document, user, notes="") -> int:
+    """Chiude i promemoria automatici (M08) aperti su un documento.
+
+    Best-effort: un errore qui non deve far fallire l'approvazione. I task
+    rimasti aperti per un documento ormai approvato vengono comunque chiusi dal
+    giro successivo di `remind_unapproved_mandatory_documents`.
+    """
+    from apps.tasks.models import Task
+    from apps.tasks.services import complete_task
+
+    closed = 0
+    try:
+        for task in Task.objects.filter(
+            source_module=REMINDER_SOURCE_MODULE,
+            source_id=document.pk,
+            status__in=OPEN_TASK_STATUSES,
+        ):
+            complete_task(task, user, notes=notes)
+            closed += 1
+    except Exception as exc:
+        logging.getLogger(__name__).warning(
+            "Documento %s: chiusura promemoria non riuscita: %s", document.pk, exc,
+        )
+    return closed
 
 
 def add_version(
