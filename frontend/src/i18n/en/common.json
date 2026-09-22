@@ -969,7 +969,9 @@
       "approval_body": "Competent body",
       "approval_body_none": "None (state it when recording the resolution)",
       "owner_can_approve": "The document owner may approve it",
-      "owner_can_approve_hint": "For contracts, NDAs and registers handled by their owner, even without a normative appointment."
+      "owner_can_approve_hint": "For contracts, NDAs and registers handled by their owner, even without a normative appointment.",
+      "distinct_reviewer": "The drafter cannot close the review",
+      "distinct_reviewer_hint": "Segregation of duties: whoever created the document or uploaded the version under review cannot approve or reject it. Body resolutions are unaffected."
     },
     "sections": {
       "roles": "Normative roles",

@@ -146,6 +146,15 @@ class DocumentWorkflowPolicy(BaseModel):
             "indicati sopra (contratti, NDA, registri a carico dell'owner)."
         ),
     )
+    require_distinct_reviewer = models.BooleanField(
+        default=False,
+        help_text=(
+            "Separazione dei compiti: chi ha redatto il documento o ne ha caricato "
+            "la versione in esame non può chiuderne la revisione, né approvandolo "
+            "né respingendolo. La delibera dell'organo non è toccata: è un atto "
+            "collegiale, non della persona che lo trascrive."
+        ),
+    )
 
     class Meta:
         verbose_name = "Document workflow policy"

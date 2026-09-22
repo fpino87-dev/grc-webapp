@@ -173,3 +173,82 @@ def test_only_governance_registers_resolution(policy_document, body_policy, plan
     assert resp.data["last_approval"]["mode"] == "delibera"
     assert resp.data["last_approval"]["resolution_ref"] == "7/2026"
     assert resp.data["last_approval"]["governing_body"] == "CdA"
+
+
+# ── Separazione autore / revisore ───────────────────────────────────────────
+
+@pytest.fixture
+def separated_policy(db):
+    """Procedure: le approva il CISO, e non chi le ha scritte."""
+    from apps.governance.models import DocumentWorkflowPolicy, NormativeRole
+    return DocumentWorkflowPolicy.objects.create(
+        document_type="procedura", scope_type="org",
+        submit_roles=[NormativeRole.COMPLIANCE_OFFICER],
+        review_roles=[NormativeRole.CISO],
+        approve_roles=[NormativeRole.CISO],
+        require_distinct_reviewer=True,
+    )
+
+
+@pytest.fixture
+def procedura(db, plant, user):
+    from apps.documents.models import Document
+    return Document.objects.create(
+        title="Procedura accessi", category="procedura", document_type="procedura",
+        status="revisione", plant=plant, is_mandatory=True, created_by=user,
+    )
+
+
+def test_author_cannot_approve_or_reject(procedura, separated_policy, user):
+    from apps.documents.services import approve_document, reject_document
+
+    with pytest.raises(ValidationError) as exc:
+        approve_document(procedura, user)
+    assert "redatto" in str(exc.value)
+    with pytest.raises(ValidationError):
+        reject_document(procedura, user, notes="no")
+
+    procedura.refresh_from_db()
+    assert procedura.status == "revisione"
+
+
+def test_another_person_can_approve(procedura, separated_policy):
+    from apps.documents.services import approve_document
+
+    reviewer = User.objects.create_user(username="rev", email="rev@x.it", password="x")
+    approve_document(procedura, reviewer)
+
+    procedura.refresh_from_db()
+    assert procedura.status == "approvato"
+    assert procedura.approver == reviewer
+
+
+def test_uploader_of_version_under_review_cannot_approve(procedura, separated_policy, user):
+    """Anche chi ha solo caricato la versione in esame è parte della redazione."""
+    from django.core.files.uploadedfile import SimpleUploadedFile
+    from apps.documents.services import add_version_with_file, approve_document
+
+    autore = User.objects.create_user(username="drafter", email="drafter@x.it", password="x")
+    procedura.created_by = User.objects.create_user(username="altro2", email="a2@x.it", password="x")
+    procedura.save(update_fields=["created_by"])
+    add_version_with_file(
+        procedura, SimpleUploadedFile("p.pdf", b"%PDF-1.4 x", content_type="application/pdf"),
+        autore, "", "Rev. 01",
+    )
+    procedura.refresh_from_db()
+
+    with pytest.raises(ValidationError):
+        approve_document(procedura, autore)
+
+
+def test_separation_does_not_block_body_resolution(policy_document, body_policy, user):
+    """La delibera è un atto collegiale: chi la trascrive può aver redatto."""
+    from apps.governance.models import DocumentWorkflowPolicy
+
+    DocumentWorkflowPolicy.objects.filter(pk=body_policy.pk).update(require_distinct_reviewer=True)
+    from apps.documents.services import approve_document
+
+    approve_document(policy_document, user, mode="delibera", resolution_ref="9/2026",
+                     resolution_date=timezone.localdate())
+    policy_document.refresh_from_db()
+    assert policy_document.status == "approvato"

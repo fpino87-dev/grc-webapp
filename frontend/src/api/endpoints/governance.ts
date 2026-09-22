@@ -145,6 +145,8 @@ export interface DocumentWorkflowPolicy {
   requires_body_resolution?: boolean;
   approval_body?: string | null;
   owner_can_approve?: boolean;
+  /** Chi redige non chiude la revisione (separazione dei compiti). */
+  require_distinct_reviewer?: boolean;
 }
 
 export const governanceApi = {

@@ -190,3 +190,33 @@ def test_role_assignment_created_by_is_read_only(client, user):
     assert resp.status_code == 201
     ra = RoleAssignment.objects.get(pk=resp.data["id"])
     assert ra.created_by_id == user.id
+
+
+# ── Policy di workflow documentale predefinite ──────────────────────────────
+
+@pytest.mark.django_db
+def test_load_document_workflow_policies_is_idempotent():
+    """Il comando allinea le policy di organizzazione e non duplica nulla."""
+    from django.core.management import call_command
+    from apps.governance.models import DocumentWorkflowPolicy, SecurityCommittee
+
+    cda = SecurityCommittee.objects.create(name="CdA", committee_type="cda")
+    DocumentWorkflowPolicy.objects.create(
+        document_type="policy", scope_type="org", approve_roles=["ciso"],
+    )
+
+    call_command("load_document_workflow_policies", verbosity=0)
+    call_command("load_document_workflow_policies", verbosity=0)
+
+    policies = {p.document_type: p for p in DocumentWorkflowPolicy.objects.filter(scope_type="org")}
+    assert len(policies) == 6
+    # politiche: deliberate dall'organo, con separazione dei compiti
+    assert policies["policy"].requires_body_resolution is True
+    assert policies["policy"].approval_body_id == cda.pk
+    assert policies["policy"].require_distinct_reviewer is True
+    # procedure e manuali: CISO o referente ISMS
+    assert "isms_manager" in policies["procedura"].approve_roles
+    # contratti e registri: li chiude il titolare
+    assert policies["contratto"].owner_can_approve is True
+    assert policies["registro"].owner_can_approve is True
+    assert policies["contratto"].require_distinct_reviewer is False

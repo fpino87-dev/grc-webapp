@@ -969,7 +969,9 @@
       "approval_body": "Organo competente",
       "approval_body_none": "Nessuno (da indicare al momento della delibera)",
       "owner_can_approve": "Il titolare del documento può approvarlo",
-      "owner_can_approve_hint": "Per contratti, NDA e registri a carico di chi li gestisce, anche senza una nomina normativa."
+      "owner_can_approve_hint": "Per contratti, NDA e registri a carico di chi li gestisce, anche senza una nomina normativa.",
+      "distinct_reviewer": "Chi redige non chiude la revisione",
+      "distinct_reviewer_hint": "Separazione dei compiti: chi ha creato il documento o ne ha caricato la versione in esame non può approvarlo né respingerlo. La delibera dell'organo non è toccata."
     },
     "sections": {
       "roles": "Ruoli normativi",

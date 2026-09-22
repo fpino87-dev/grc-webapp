@@ -123,6 +123,45 @@ def _approval_timestamp(resolution_date):
     )
 
 
+def _document_authors(document) -> set:
+    """Chi ha redatto il documento: chi l'ha creato e chi ha caricato la
+    versione attualmente in esame."""
+    authors = {document.created_by_id}
+    latest = document.versions.first()
+    if latest is not None:
+        authors.add(latest.uploaded_by_id)
+    return {a for a in authors if a}
+
+
+def _require_author_separation(document, user, action: str) -> None:
+    """Segregazione dei compiti sulla revisione (ISO/IEC 27001 §5.3).
+
+    Vale dove la policy di workflow la richiede: su quei tipi di documento chi
+    ha scritto il testo non può essere anche chi ne chiude la revisione. Non ha
+    eccezioni per i superuser: è una regola di processo, non un permesso — se
+    serve derogare si cambia la policy, e resta scritto in Governance.
+    """
+    from apps.governance.services import resolve_document_workflow_policy
+
+    policy = resolve_document_workflow_policy(
+        getattr(document, "document_type", None) or "altro", getattr(document, "plant", None),
+    )
+    if policy is None or not policy.require_distinct_reviewer:
+        return
+    if user.pk not in _document_authors(document):
+        return
+
+    if action == "approve":
+        raise ValidationError(
+            _("Chi ha redatto il documento non può approvarlo: la revisione spetta "
+              "a un'altra persona fra quelle previste dal workflow documentale.")
+        )
+    raise ValidationError(
+        _("Chi ha redatto il documento non può respingerlo: la revisione spetta "
+          "a un'altra persona fra quelle previste dal workflow documentale.")
+    )
+
+
 def _validate_approval_mode(document, mode, resolution_ref, resolution_date, governing_body):
     """Controlla la modalità di approvazione rispetto alla policy di workflow.
 
@@ -184,6 +223,8 @@ def approve_document(
     mode, resolution_date, governing_body = _validate_approval_mode(
         document, mode, resolution_ref, resolution_date, governing_body,
     )
+    if mode == "in_app":
+        _require_author_separation(document, user, "approve")
     _require_transition(document, "approve_resolution" if mode == "delibera" else "approve")
     document.status = "approvato"
     document.approved_at = _approval_timestamp(resolution_date)
@@ -256,6 +297,7 @@ def approve_document(
 
 
 def reject_document(document, user, notes=""):
+    _require_author_separation(document, user, "reject")
     _require_transition(document, "reject")
     with transaction.atomic():
         document.status = "bozza"

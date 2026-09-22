@@ -972,7 +972,9 @@
       "approval_body": "Organe compétent",
       "approval_body_none": "Aucun (à indiquer lors de la délibération)",
       "owner_can_approve": "Le titulaire du document peut l'approuver",
-      "owner_can_approve_hint": "Pour les contrats, NDA et registres gérés par leur titulaire, même sans nomination normative."
+      "owner_can_approve_hint": "Pour les contrats, NDA et registres gérés par leur titulaire, même sans nomination normative.",
+      "distinct_reviewer": "Le rédacteur ne clôt pas la revue",
+      "distinct_reviewer_hint": "Séparation des tâches : la personne qui a créé le document ou téléversé la version examinée ne peut ni l'approuver ni le rejeter. Les délibérations de l'organe ne sont pas concernées."
     },
     "sections": {
       "roles": "Rôles normatifs",

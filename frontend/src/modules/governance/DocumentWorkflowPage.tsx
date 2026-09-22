@@ -86,6 +86,7 @@ export function DocumentWorkflowSection({ embedded }: { embedded?: boolean }) {
         requires_body_resolution: !!editing.requires_body_resolution,
         approval_body: editing.requires_body_resolution ? editing.approval_body || null : null,
         owner_can_approve: !!editing.owner_can_approve,
+        require_distinct_reviewer: !!editing.require_distinct_reviewer,
       };
       if (editing.id) {
         await governanceApi.updateDocumentPolicy(editing.id, payload);
@@ -118,6 +119,7 @@ export function DocumentWorkflowSection({ embedded }: { embedded?: boolean }) {
       approve_roles: [],
       requires_body_resolution: false,
       owner_can_approve: false,
+      require_distinct_reviewer: false,
     });
   }
 
@@ -361,6 +363,18 @@ export function DocumentWorkflowSection({ embedded }: { embedded?: boolean }) {
                   </select>
                 </div>
               )}
+              <label className="flex items-start gap-2 text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={!!editing.require_distinct_reviewer}
+                  onChange={(e) => setEditing((prev) => ({ ...prev!, require_distinct_reviewer: e.target.checked }))}
+                />
+                <span>
+                  {t("governance.workflow.distinct_reviewer")}
+                  <span className="block text-xs text-gray-500">{t("governance.workflow.distinct_reviewer_hint")}</span>
+                </span>
+              </label>
               <label className="flex items-start gap-2 text-sm text-gray-700">
                 <input
                   type="checkbox"

@@ -972,7 +972,9 @@
       "approval_body": "Właściwy organ",
       "approval_body_none": "Brak (wskaż przy rejestracji uchwały)",
       "owner_can_approve": "Właściciel dokumentu może go zatwierdzić",
-      "owner_can_approve_hint": "Dla umów, NDA i rejestrów prowadzonych przez właściciela, także bez formalnego powołania."
+      "owner_can_approve_hint": "Dla umów, NDA i rejestrów prowadzonych przez właściciela, także bez formalnego powołania.",
+      "distinct_reviewer": "Autor nie zamyka przeglądu",
+      "distinct_reviewer_hint": "Rozdzielenie obowiązków: osoba, która utworzyła dokument lub wgrała badaną wersję, nie może go zatwierdzić ani odrzucić. Uchwały organu pozostają bez zmian."
     },
     "sections": {
       "roles": "Role normatywne",

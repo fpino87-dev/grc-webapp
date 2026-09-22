@@ -972,7 +972,9 @@
       "approval_body": "Yetkili organ",
       "approval_body_none": "Yok (karar kaydedilirken belirtilir)",
       "owner_can_approve": "Belge sahibi onaylayabilir",
-      "owner_can_approve_hint": "Sahibi tarafından yürütülen sözleşmeler, gizlilik anlaşmaları ve kayıtlar için, resmi atama olmadan da."
+      "owner_can_approve_hint": "Sahibi tarafından yürütülen sözleşmeler, gizlilik anlaşmaları ve kayıtlar için, resmi atama olmadan da.",
+      "distinct_reviewer": "Belgeyi hazırlayan gözden geçirmeyi kapatamaz",
+      "distinct_reviewer_hint": "Görevler ayrılığı: belgeyi oluşturan veya incelenen sürümü yükleyen kişi onaylayamaz ya da reddedemez. Organ kararları bundan etkilenmez."
     },
     "sections": {
       "roles": "Normatif roller",

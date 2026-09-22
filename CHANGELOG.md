@@ -10,6 +10,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ### Added
 
+- **Separazione dei compiti sulla revisione dei documenti (M07)**: dove la policy di workflow lo richiede, chi ha redatto il documento — chi lo ha creato o ne ha caricato la versione in esame — **non può chiuderne la revisione**, né approvandolo né respingendolo: serve un'altra persona fra quelle previste dal workflow. La regola non ha eccezioni per gli amministratori: è una regola di processo, non un permesso, e per derogare si cambia la policy, che resta scritta in Governance. La delibera dell'organo non è toccata, perché è un atto collegiale e non della persona che lo trascrive.
+
+- **Policy di workflow documentale predefinite**: il nuovo comando `python manage.py load_document_workflow_policies` (idempotente, con `--dry-run`) configura il workflow secondo la prassi decisa con la direzione: **politiche** deliberate dall'organo di governo, **procedure e manuali** approvati dal CISO o dal referente ISMS, **contratti, NDA e registri** chiusi dal loro titolare, separazione dei compiti su ciò che è obbligatorio. Prima non esisteva alcun caricamento predefinito: su un'installazione nuova nessun tipo di documento aveva una policy. Le policy definite per singolo sito o BU non vengono toccate.
+
 - **L'approvazione dice quale versione è in vigore (M07)**: finora un documento con più versioni e una sola approvazione non permetteva di sapere **quale** versione fosse stata approvata, e caricando un nuovo file su un documento approvato il documento restava «approvato» con la data della vecchia approvazione — cioè un testo modificato risultava in vigore senza essere stato approvato (ISO/IEC 27001 §7.5.3, controllo delle modifiche). Ora:
   - ogni approvazione registra la **versione approvata**, mostrata nell'elenco documenti accanto alla data («In vigore: Rev. 03»);
   - caricare una nuova versione su un **documento obbligatorio** in vigore lo riporta **in revisione**, con registrazione nell'audit trail e avviso a chi deve revisionarlo: rientra così fra i documenti da approvare, anche nel riesame di direzione;
