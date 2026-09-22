@@ -5073,7 +5073,8 @@
       "approve": "Approuver les documents délibérés ({{count}})",
       "empty": "Aucun document obligatoire en attente d'approbation dans ce périmètre.",
       "needs_approval": "Approuvez d'abord la revue : les documents traités en séance en héritent les références.",
-      "hint_meeting": "Sélectionnez les documents approuvés lors de la séance du {{date}} : ils entrent en vigueur à cette date, rattachés à cette revue."
+      "hint_meeting": "Sélectionnez les documents approuvés lors de la séance du {{date}} : ils entrent en vigueur à cette date, rattachés à cette revue.",
+      "approved_here": "approuvé lors de cette séance"
     }
   },
   "objectives": {

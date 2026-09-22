@@ -5073,7 +5073,8 @@
       "approve": "Approve resolved documents ({{count}})",
       "empty": "No mandatory document awaiting approval in this scope.",
       "needs_approval": "Approve the review first: documents handled in the meeting inherit its details.",
-      "hint_meeting": "Select the documents approved in the meeting of {{date}}: they take effect on that date, linked to this review."
+      "hint_meeting": "Select the documents approved in the meeting of {{date}}: they take effect on that date, linked to this review.",
+      "approved_here": "approved in this meeting"
     }
   },
   "objectives": {

@@ -285,13 +285,28 @@ def _improvement_status_blocks(snap) -> list:
     ]
 
 
+def approved_documents_ids(review) -> set:
+    """Id dei documenti mandati in vigore con l'approvazione di questo riesame."""
+    from apps.documents.models import DocumentApproval
+
+    return {
+        str(doc_id) for doc_id in DocumentApproval.objects.filter(
+            review_id=review.pk, action="approve", deleted_at__isnull=True,
+        ).values_list("document_id", flat=True)
+    }
+
+
 def _doc_label(item) -> str:
     code = item.get("document_code")
     return f"[{code}] {item.get('title')}" if code else str(item.get("title") or "")
 
 
-def _document_blocks(snap) -> list:
+def _document_blocks(snap, ctx=None) -> list:
     d = snap.get("documenti") or {}
+    # Documenti approvati proprio in questa seduta: nei dati congelati
+    # risultano ancora in lavorazione, ma il verbale deve dire com'è finita —
+    # è un esito del riesame (§9.3.3), non un dato di partenza.
+    approved_here = (ctx or {}).get("approved_in_review") or set()
 
     def rows(items, key):
         return [[x.get("title"), _dash(x.get("owner")), fmt_date(x.get(key))] for x in items]
@@ -306,7 +321,9 @@ def _document_blocks(snap) -> list:
             [_("Documento"), _("Tipo"), _("Stato"), _("Owner"), _("Creato il")],
             [[_doc_label(x),
               DOC_TYPE.get(x.get("document_type"), _dash(x.get("document_type"))),
-              {"text": DOC_STATUS.get(x.get("status"), _dash(x.get("status"))), "tone": "orange"},
+              {"text": _("Approvato in questa seduta"), "tone": "green", "bold": True}
+              if str(x.get("id")) in approved_here
+              else {"text": DOC_STATUS.get(x.get("status"), _dash(x.get("status"))), "tone": "orange"},
               _dash(x.get("owner")), fmt_date(x.get("created_at"))]
              for x in d.get("elenco_non_approvati", [])],
             d.get("non_approvati_obbligatori"),
@@ -409,12 +426,12 @@ def _objectives_blocks(snap) -> list:
 
 
 DATA_BLOCKS = {
-    "azioni_precedenti": lambda s: _previous_actions_blocks(s),
-    "prestazioni": lambda s: (_compliance_blocks(s) + _kpi_blocks(s) + _objectives_blocks(s)
-                              + _audit_blocks(s) + _incident_blocks(s)
-                              + _improvement_status_blocks(s) + _document_blocks(s)),
-    "rischi": lambda s: _risk_blocks(s),
-    "miglioramento": lambda s: _opportunity_blocks(s),
+    "azioni_precedenti": lambda s, ctx: _previous_actions_blocks(s),
+    "prestazioni": lambda s, ctx: (_compliance_blocks(s) + _kpi_blocks(s) + _objectives_blocks(s)
+                                   + _audit_blocks(s) + _incident_blocks(s)
+                                   + _improvement_status_blocks(s) + _document_blocks(s, ctx)),
+    "rischi": lambda s, ctx: _risk_blocks(s),
+    "miglioramento": lambda s, ctx: _opportunity_blocks(s),
 }
 
 
@@ -549,11 +566,12 @@ def build_report(review) -> dict:
 
     actions = list(review.actions.all())
     agenda = list(review.agenda_items.all())
+    data_ctx = {"approved_in_review": approved_documents_ids(review)}
     if agenda:
         for item in agenda:
             clause = ISO_AGENDA_CLAUSE.get(item.code)
             title = ISO_AGENDA_TITLES.get(item.code) or item.title
-            blocks = list(DATA_BLOCKS.get(item.code, lambda s: [])(snap))
+            blocks = list(DATA_BLOCKS.get(item.code, lambda s, ctx: [])(snap, data_ctx))
             blocks.append({"type": "paragraph", "label": _("Discussione"),
                            "text": item.discussion.strip() or _("Nessuna annotazione.")})
             # Trasparenza (AI Act art. 50): il lettore del verbale deve sapere
@@ -580,7 +598,7 @@ def build_report(review) -> dict:
         # Riesami approvati prima dell'ordine del giorno strutturato.
         blocks = []
         for code in ("azioni_precedenti", "prestazioni", "rischi", "miglioramento"):
-            blocks += DATA_BLOCKS[code](snap)
+            blocks += DATA_BLOCKS[code](snap, data_ctx)
         sections.append({"heading": _("Dati del riesame"), "blocks": blocks})
         sections.append({"heading": _("Decisioni e azioni"), "blocks": [
             _table(None, DECISION_HEADERS, _decision_rows(actions), empty=_("Nessuna azione registrata"))]})

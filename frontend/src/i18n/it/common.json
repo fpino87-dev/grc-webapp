@@ -5073,7 +5073,8 @@
       "approve": "Approva i documenti deliberati ({{count}})",
       "empty": "Nessun documento obbligatorio in attesa di approvazione in questo perimetro.",
       "needs_approval": "Approva prima il riesame: i documenti trattati nella seduta ne ereditano gli estremi.",
-      "hint_meeting": "Seleziona i documenti approvati nella seduta del {{date}}: entreranno in vigore con quella data, collegati a questo riesame."
+      "hint_meeting": "Seleziona i documenti approvati nella seduta del {{date}}: entreranno in vigore con quella data, collegati a questo riesame.",
+      "approved_here": "approvato in questa seduta"
     }
   },
   "objectives": {

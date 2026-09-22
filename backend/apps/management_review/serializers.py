@@ -98,6 +98,25 @@ class ManagementReviewSerializer(serializers.ModelSerializer):
     approved_by_name = serializers.SerializerMethodField()
     approved_member_name = serializers.SerializerMethodField()
     viewer_can_approve = serializers.SerializerMethodField()
+    approved_documents = serializers.SerializerMethodField()
+
+    def get_approved_documents(self, obj):
+        """Documenti mandati in vigore con l'approvazione di questo riesame.
+
+        Solo nel dettaglio: in elenco sarebbe una query per riga (regola #6),
+        e la lista dei riesami non ne ha bisogno.
+        """
+        if self.parent is not None:
+            return []
+        from apps.documents.models import DocumentApproval
+
+        return [
+            {"id": str(a.document_id), "title": a.document.title,
+             "document_code": a.document.document_code}
+            for a in DocumentApproval.objects.filter(
+                review_id=obj.pk, action="approve", deleted_at__isnull=True,
+            ).select_related("document").order_by("created_at")
+        ]
 
     def get_chair_name(self, obj):
         chair = next((p for p in obj.participants.all() if p.is_chair), None)

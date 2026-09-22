@@ -113,6 +113,8 @@ export interface ManagementReview {
   approval_document_id: string | null;
   /** L'utente corrente può approvare: governance o componente in carica dell'organo. */
   viewer_can_approve: boolean;
+  /** Documenti mandati in vigore con l'approvazione di questo riesame (solo nel dettaglio). */
+  approved_documents?: Array<{ id: string; title: string; document_code: string }>;
   snapshot_generated_at: string | null;
   snapshot_data: Record<string, unknown>;
   executive_summary: string;

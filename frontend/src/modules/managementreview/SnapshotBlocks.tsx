@@ -284,7 +284,7 @@ const DOC_STATUS_KEY: Record<string, string> = {
   approvazione: "documents.filters.in_approval",
 };
 
-export function DocumentsBlock({ snap }: { snap: Snap }) {
+export function DocumentsBlock({ snap, approvedHere }: { snap: Snap; approvedHere?: Set<string> }) {
   const { t } = useTranslation();
   const d = snap.documenti;
   if (!d) return null;
@@ -307,7 +307,9 @@ export function DocumentsBlock({ snap }: { snap: Snap }) {
         rows={((d.elenco_non_approvati ?? []) as SnapPendingDoc[]).map(x => [
           <span className="font-medium">{x.document_code ? `[${x.document_code}] ` : ""}{x.title}</span>,
           t(`documents.type.${x.document_type}`, { defaultValue: x.document_type }),
-          <span className="text-yellow-700">{DOC_STATUS_KEY[x.status] ? t(DOC_STATUS_KEY[x.status]) : x.status}</span>,
+          approvedHere?.has(x.id)
+            ? <span className="text-green-700 font-medium">{t("management_review.deliberated.approved_here")}</span>
+            : <span className="text-yellow-700">{DOC_STATUS_KEY[x.status] ? t(DOC_STATUS_KEY[x.status]) : x.status}</span>,
           x.owner || "—", fmtDate(x.created_at),
         ])}
         total={d.non_approvati_obbligatori}
@@ -433,7 +435,9 @@ export function SitesBlock({ snap }: { snap: Snap }) {
 }
 
 /** Dati dello snapshot pertinenti a ciascun punto obbligatorio dell'ordine del giorno. */
-export function AgendaData({ code, snap }: { code: string; snap: Snap }) {
+export function AgendaData({ code, snap, approvedHere }: {
+  code: string; snap: Snap; approvedHere?: Set<string>;
+}) {
   const { t } = useTranslation();
   switch (code) {
     case "azioni_precedenti":
@@ -447,7 +451,7 @@ export function AgendaData({ code, snap }: { code: string; snap: Snap }) {
           {snap.audit && <SnapSection title={t("management_review.snap.audit_section")} defaultOpen={false}><AuditBlock snap={snap} /></SnapSection>}
           <SnapSection title={t("management_review.snap.incidents_12m")} defaultOpen={false}><IncidentsBlock snap={snap} /></SnapSection>
           <SnapSection title={t("management_review.snap.pdca_task")} defaultOpen={false}><PdcaTasksBlock snap={snap} /></SnapSection>
-          <SnapSection title={t("management_review.snap.docs_evidence")} defaultOpen={false}><DocumentsBlock snap={snap} /></SnapSection>
+          <SnapSection title={t("management_review.snap.docs_evidence")} defaultOpen={false}><DocumentsBlock snap={snap} approvedHere={approvedHere} /></SnapSection>
         </div>
       );
     case "rischi":

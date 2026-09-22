@@ -5073,7 +5073,8 @@
       "approve": "Karara bağlanan belgeleri onayla ({{count}})",
       "empty": "Bu kapsamda onay bekleyen zorunlu belge yok.",
       "needs_approval": "Önce gözden geçirmeyi onaylayın: toplantıda ele alınan belgeler bilgilerini devralır.",
-      "hint_meeting": "{{date}} tarihli toplantıda onaylanan belgeleri seçin: bu tarihte yürürlüğe girer ve bu gözden geçirmeye bağlanır."
+      "hint_meeting": "{{date}} tarihli toplantıda onaylanan belgeleri seçin: bu tarihte yürürlüğe girer ve bu gözden geçirmeye bağlanır.",
+      "approved_here": "bu toplantıda onaylandı"
     }
   },
   "objectives": {

@@ -315,7 +315,13 @@ function AgendaItemCard({
         <div className="px-3 pb-3 pt-1 space-y-3 border-t border-gray-100">
           {AGENDA_CODES_WITH_DATA.has(item.code) && (
             snap
-              ? <div className="bg-gray-50/60 rounded p-2"><AgendaData code={item.code} snap={snap} /></div>
+              ? <div className="bg-gray-50/60 rounded p-2">
+                  <AgendaData
+                    code={item.code}
+                    snap={snap}
+                    approvedHere={new Set((review.approved_documents ?? []).map(d => d.id))}
+                  />
+                </div>
               : <p className="text-xs text-gray-400 italic">{t("management_review.agenda.data_after_snapshot")}</p>
           )}
 

@@ -29,7 +29,11 @@ export function DeliberatedDocuments({ review, snap, isGovernance }: {
   const [error, setError] = useState("");
   const [result, setResult] = useState<{ approved: number; skipped: Array<{ title?: string; reason: string }> } | null>(null);
 
-  const pending = snap?.documenti?.elenco_non_approvati ?? [];
+  const all = snap?.documenti?.elenco_non_approvati ?? [];
+  // Quelli già mandati in vigore con questo riesame restano visibili come
+  // esito della seduta, ma non sono più da approvare.
+  const approvedHere = new Set((review.approved_documents ?? []).map(d => d.id));
+  const pending = all.filter(d => !approvedHere.has(d.id));
   // Basta che il riesame sia approvato: se l'organo ha deliberato fuori dalla
   // piattaforma i documenti ne ereditano gli estremi, altrimenti il
   // riferimento è la seduta stessa.
@@ -56,11 +60,23 @@ export function DeliberatedDocuments({ review, snap, isGovernance }: {
   // Il pannello resta visibile anche senza documenti in attesa: dice che non
   // ce ne sono, invece di sparire e lasciar credere che manchi la funzione.
   if (!isGovernance || !snap) return null;
+
+  const approvedList = all.filter(d => approvedHere.has(d.id));
+  const approvedRows = approvedList.length > 0 && (
+    <div className="mt-3 space-y-1">
+      {approvedList.map(d => (
+        <p key={d.id} className="text-xs text-green-700">
+          ✓ {d.document_code ? `[${d.document_code}] ` : ""}{d.title} — {t("management_review.deliberated.approved_here")}
+        </p>
+      ))}
+    </div>
+  );
+
   if (pending.length === 0) {
     return (
       <section className="border border-gray-200 rounded-lg p-4">
         <h3 className="text-sm font-semibold text-gray-800">{t("management_review.deliberated.title")}</h3>
-        <p className="text-xs text-gray-500 mt-1">{t("management_review.deliberated.empty")}</p>
+        {approvedRows || <p className="text-xs text-gray-500 mt-1">{t("management_review.deliberated.empty")}</p>}
       </section>
     );
   }
@@ -84,6 +100,8 @@ export function DeliberatedDocuments({ review, snap, isGovernance }: {
               })
             : t("management_review.deliberated.hint_meeting", { date: fmtDate(review.review_date) })}
       </p>
+
+      {approvedRows}
 
       <div className="mt-3 space-y-1">
         {pending.map(d => (

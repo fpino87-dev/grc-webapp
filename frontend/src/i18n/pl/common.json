@@ -5073,7 +5073,8 @@
       "approve": "Zatwierdź uchwalone dokumenty ({{count}})",
       "empty": "Brak dokumentów obowiązkowych oczekujących na zatwierdzenie w tym zakresie.",
       "needs_approval": "Najpierw zatwierdź przegląd: dokumenty omówione na posiedzeniu przejmą jego dane.",
-      "hint_meeting": "Wybierz dokumenty zatwierdzone na posiedzeniu {{date}}: wejdą w życie z tą datą, powiązane z tym przeglądem."
+      "hint_meeting": "Wybierz dokumenty zatwierdzone na posiedzeniu {{date}}: wejdą w życie z tą datą, powiązane z tym przeglądem.",
+      "approved_here": "zatwierdzono na tym posiedzeniu"
     }
   },
   "objectives": {

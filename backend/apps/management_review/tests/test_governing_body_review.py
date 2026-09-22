@@ -349,3 +349,37 @@ def test_approve_documents_requires_approved_review(co, board, plant):
     assert resp.status_code == 400
     doc.refresh_from_db()
     assert doc.status == "revisione"
+
+
+@pytest.mark.django_db
+def test_minutes_show_documents_approved_in_the_meeting(co, board, plant):
+    """Nel verbale il documento approvato in seduta non risulta più in revisione."""
+    from apps.management_review.report.builder import build_report
+
+    review = _approved_review(co, board, plant)
+    doc = _policy(plant, co)
+    altro = _policy(plant, co, title="Politica ancora aperta")
+
+    # lo snapshot è congelato con entrambi i documenti da approvare
+    from apps.management_review.services import generate_snapshot
+    from apps.management_review.models import ManagementReview
+    ManagementReview.objects.filter(pk=review.pk).update(approval_status="bozza")
+    review.refresh_from_db()
+    generate_snapshot(review, co)
+    ManagementReview.objects.filter(pk=review.pk).update(
+        approval_status="approvato", approval_mode="delibera",
+        approval_resolution_ref="4/2026", approval_resolution_date=timezone.localdate(),
+    )
+    review.refresh_from_db()
+
+    _api(co).post(f"{URL}{review.id}/approve-documents/",
+                  {"document_ids": [str(doc.id)]}, format="json")
+
+    report = build_report(review)
+    table = next(
+        b for section in report["sections"] for b in section.get("blocks", [])
+        if b.get("type") == "table" and str(b.get("title") or "") == "Documenti obbligatori non ancora approvati"
+    )
+    righe = {r[0]: r[2] for r in table["rows"]}
+    assert righe[doc.title]["text"] == "Approvato in questa seduta"
+    assert righe[altro.title]["text"] == "In revisione"
