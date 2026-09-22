@@ -240,3 +240,43 @@ def test_expiry_reminder_not_duplicated_daily(plant, user, superuser):
 
     assert first > 0
     assert Task.objects.filter(source_module="M07").count() == first
+
+
+# ── Numero di revisione del documento (frontespizio) ────────────────────────
+
+@pytest.mark.django_db
+def test_version_label_stored_and_displayed(document, user):
+    """L'etichetta la scrive chi carica; il contatore interno resta separato."""
+    from apps.documents.serializers import DocumentVersionSerializer
+    from apps.documents.services import add_version
+
+    v1 = add_version(document, "f1.pdf", "abc", "p/v1.pdf", user, "prima", 100,
+                     version_label="Rev. 03")
+    v2 = add_version(document, "f2.pdf", "def", "p/v2.pdf", user, "seconda", 100)
+
+    assert (v1.version_number, v1.version_label) == (1, "Rev. 03")
+    assert (v2.version_number, v2.version_label) == (2, "")
+    # senza etichetta la UI mostra il contatore
+    assert DocumentVersionSerializer(v1).data["version_display"] == "Rev. 03"
+    assert DocumentVersionSerializer(v2).data["version_display"] == "v2"
+
+
+@pytest.mark.django_db
+def test_upload_endpoint_accepts_version_label(document, user):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    from rest_framework.test import APIClient
+
+    UserPlantAccess.objects.create(user=user, role=GrcRole.COMPLIANCE_OFFICER, scope_type="org")
+    client = APIClient()
+    client.force_authenticate(user=user)
+
+    resp = client.post(
+        f"/api/v1/documents/documents/{document.id}/upload/",
+        {"file": SimpleUploadedFile("policy.pdf", b"%PDF-1.4 contenuto", content_type="application/pdf"),
+         "version_label": "2.1", "change_summary": "revisione annuale"},
+        format="multipart",
+    )
+    assert resp.status_code == 201, resp.data
+    assert resp.data["version_label"] == "2.1"
+    assert resp.data["version_display"] == "2.1"

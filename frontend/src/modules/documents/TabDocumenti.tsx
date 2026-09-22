@@ -209,13 +209,16 @@ export function TabDocumenti() {
                   <td className="px-4 py-3 font-medium text-gray-800">{doc.title}</td>
                   <td className="px-4 py-3 text-xs">
                     {doc.latest_version ? (
-                      <button
-                        type="button"
-                        onClick={() => handleDownloadDocument(doc)}
-                        className="text-indigo-600 hover:underline"
-                      >
-                        {t("documents.actions.download")}
-                      </button>
+                      <div className="flex flex-col gap-0.5">
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadDocument(doc)}
+                          className="text-indigo-600 hover:underline text-left"
+                        >
+                          {t("documents.actions.download")}
+                        </button>
+                        <span className="text-[10px] text-gray-500">{doc.latest_version.version_display}</span>
+                      </div>
                     ) : (
                       <span className="text-gray-400">—</span>
                     )}

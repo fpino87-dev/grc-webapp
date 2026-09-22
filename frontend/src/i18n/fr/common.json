@@ -1579,7 +1579,10 @@
     "upload": {
       "title": "Nouvelle version du document",
       "submit": "Téléverser la version",
-      "change_notes": "Notes de modification (optionnel)"
+      "change_notes": "Notes de modification (optionnel)",
+      "version_label": "Version du document",
+      "version_label_ph": "ex. Rév. 03",
+      "version_label_hint": "Le numéro de révision tel qu'il figure sur la page de garde du fichier. Laissez vide pour afficher le compteur interne."
     },
     "change_plant": {
       "title": "Changer le site du document",

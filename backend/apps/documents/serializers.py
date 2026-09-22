@@ -6,10 +6,16 @@ from .models import Document, DocumentApproval, DocumentVersion, Evidence
 
 class DocumentVersionSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField(read_only=True)
+    version_display = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = DocumentVersion
         fields = "__all__"
+
+    def get_version_display(self, obj):
+        """Il numero di revisione del documento, se chi ha caricato il file
+        l'ha indicato; altrimenti il contatore interno."""
+        return obj.version_label or f"v{obj.version_number}"
 
     def get_file_url(self, obj):
         if not obj.storage_path:

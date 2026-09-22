@@ -1579,7 +1579,10 @@
     "upload": {
       "title": "New document version",
       "submit": "Upload version",
-      "change_notes": "Change notes (optional)"
+      "change_notes": "Change notes (optional)",
+      "version_label": "Document version",
+      "version_label_ph": "e.g. Rev. 03",
+      "version_label_hint": "The revision number as it appears on the file's cover page. Leave it empty to show the internal counter."
     },
     "change_plant": {
       "title": "Change document site",

@@ -128,12 +128,15 @@ export function UploadVersionModal({ doc, onClose }: { doc: Document; onClose: (
   const qc = useQueryClient();
   const [file, setFile] = useState<File | null>(null);
   const [changeSummary, setChangeSummary] = useState("");
+  const [versionLabel, setVersionLabel] = useState("");
   const [error, setError] = useState("");
 
   const mutation = useMutation({
     mutationFn: () => {
       if (!file) throw new Error(t("documents.errors.no_file_selected"));
-      return documentsApi.uploadVersion(doc.id, file, changeSummary || undefined);
+      return documentsApi.uploadVersion(
+        doc.id, file, changeSummary || undefined, versionLabel || undefined,
+      );
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["documents"] });
@@ -162,6 +165,17 @@ export function UploadVersionModal({ doc, onClose }: { doc: Document; onClose: (
             <p className="mt-1 text-xs text-gray-500">
               {t("documents.file_help")}
             </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.upload.version_label")}</label>
+            <input
+              value={versionLabel}
+              onChange={e => setVersionLabel(e.target.value)}
+              placeholder={t("documents.upload.version_label_ph")}
+              maxLength={50}
+              className="w-full border rounded px-3 py-2 text-sm"
+            />
+            <p className="mt-1 text-xs text-gray-500">{t("documents.upload.version_label_hint")}</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.upload.change_notes")}</label>

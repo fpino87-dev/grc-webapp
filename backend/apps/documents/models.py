@@ -120,6 +120,10 @@ class DocumentVersion(BaseModel):
         related_name="versions",
     )
     version_number = models.PositiveIntegerField()
+    # Numero di revisione come appare sul frontespizio del documento
+    # ("Rev. 03", "2.1", "Ed. 2 Rev. 1"): lo scrive chi carica il file. Il
+    # contatore qui sopra resta la chiave tecnica (ordinamento e unicità).
+    version_label = models.CharField(max_length=50, blank=True)
     file_name = models.CharField(max_length=255)
     file_size = models.PositiveIntegerField(null=True, blank=True)
     sha256 = models.CharField(max_length=64)

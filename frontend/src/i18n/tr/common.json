@@ -1579,7 +1579,10 @@
     "upload": {
       "title": "Yeni belge sürümü",
       "submit": "Sürümü yükle",
-      "change_notes": "Değişiklik notları (isteğe bağlı)"
+      "change_notes": "Değişiklik notları (isteğe bağlı)",
+      "version_label": "Belge sürümü",
+      "version_label_ph": "örn. Rev. 03",
+      "version_label_hint": "Dosyanın kapak sayfasındaki revizyon numarası. Boş bırakırsanız iç sayaç gösterilir."
     },
     "change_plant": {
       "title": "Belge sitesini değiştir",

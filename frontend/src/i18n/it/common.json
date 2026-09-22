@@ -1579,7 +1579,10 @@
     "upload": {
       "title": "Nuova versione documento",
       "submit": "Carica versione",
-      "change_notes": "Note cambio (opzionale)"
+      "change_notes": "Note cambio (opzionale)",
+      "version_label": "Versione del documento",
+      "version_label_ph": "es. Rev. 03",
+      "version_label_hint": "Il numero di revisione come appare sul frontespizio del file. Se lo lasci vuoto viene mostrato il contatore interno."
     },
     "change_plant": {
       "title": "Cambia sito documento",

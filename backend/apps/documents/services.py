@@ -310,7 +310,8 @@ def close_document_reminders(document, user, notes="") -> int:
 
 
 def add_version(
-    document, file_name, sha256, storage_path, user, change_summary="", file_size=None
+    document, file_name, sha256, storage_path, user, change_summary="", file_size=None,
+    version_label="",
 ):
     """
     Mantiene compatibilità con eventuali chiamate esistenti.
@@ -322,6 +323,7 @@ def add_version(
         v = DocumentVersion.objects.create(
             document=document,
             version_number=version_number,
+            version_label=(version_label or "").strip()[:50],
             file_name=file_name,
             sha256=sha256,
             storage_path=storage_path,
@@ -343,7 +345,7 @@ def add_version(
     return v
 
 
-def add_version_with_file(document, uploaded_file, user, change_summary=""):
+def add_version_with_file(document, uploaded_file, user, change_summary="", version_label=""):
     validate_uploaded_file(uploaded_file)
 
     content = uploaded_file.read()
@@ -376,6 +378,7 @@ def add_version_with_file(document, uploaded_file, user, change_summary=""):
         version = DocumentVersion.objects.create(
             document=document,
             version_number=version_number,
+            version_label=(version_label or "").strip()[:50],
             file_name=original_name,
             file_size=file_size,
             sha256=sha256_hash,
@@ -391,6 +394,7 @@ def add_version_with_file(document, uploaded_file, user, change_summary=""):
             payload={
                 "id": str(document.pk),
                 "version_number": version_number,
+                "version_label": version.version_label,
                 "file_name": original_name,
             },
         )

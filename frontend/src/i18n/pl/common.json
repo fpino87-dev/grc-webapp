@@ -1579,7 +1579,10 @@
     "upload": {
       "title": "Nowa wersja dokumentu",
       "submit": "Prześlij wersję",
-      "change_notes": "Notatki zmian (opcjonalne)"
+      "change_notes": "Notatki zmian (opcjonalne)",
+      "version_label": "Wersja dokumentu",
+      "version_label_ph": "np. Rew. 03",
+      "version_label_hint": "Numer wersji taki, jaki widnieje na stronie tytułowej pliku. Pozostaw puste, aby pokazać licznik wewnętrzny."
     },
     "change_plant": {
       "title": "Zmień zakład dokumentu",

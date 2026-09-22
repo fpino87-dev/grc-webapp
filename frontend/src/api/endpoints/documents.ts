@@ -3,6 +3,10 @@ import { apiClient } from "../client";
 export interface DocumentVersionSummary {
   id: string;
   version_number: number;
+  /** Revisione come sul frontespizio del documento: "Rev. 03", "2.1", … */
+  version_label?: string;
+  /** version_label se indicata, altrimenti il contatore interno ("v2"). */
+  version_display?: string;
   file_name: string;
   storage_path: string;
   file_url?: string | null;
@@ -92,10 +96,11 @@ export const documentsApi = {
     apiClient.post<Document>("/documents/documents/", data).then(r => r.data),
   update: (id: string, data: Partial<Document>) =>
     apiClient.patch<Document>(`/documents/documents/${id}/`, data).then(r => r.data),
-  uploadVersion: (id: string, file: File, changeSummary?: string) => {
+  uploadVersion: (id: string, file: File, changeSummary?: string, versionLabel?: string) => {
     const form = new FormData();
     form.append("file", file);
     if (changeSummary) form.append("change_summary", changeSummary);
+    if (versionLabel) form.append("version_label", versionLabel);
     return apiClient.post(`/documents/documents/${id}/upload/`, form, {
       headers: { "Content-Type": "multipart/form-data" },
     }).then(r => r.data as DocumentVersionSummary);

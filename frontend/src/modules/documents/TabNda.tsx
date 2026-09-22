@@ -160,7 +160,12 @@ export function TabNda() {
                   <td className="px-4 py-3">{expiryCell(doc.expiry_date)}</td>
                   <td className="px-4 py-3 text-xs">
                     {doc.latest_version
-                      ? <button onClick={() => handleDownload(doc)} className="text-indigo-600 hover:underline">{t("documents.actions.download")}</button>
+                      ? (
+                        <div className="flex flex-col gap-0.5">
+                          <button onClick={() => handleDownload(doc)} className="text-indigo-600 hover:underline text-left">{t("documents.actions.download")}</button>
+                          <span className="text-[10px] text-gray-500">{doc.latest_version.version_display}</span>
+                        </div>
+                      )
                       : <span className="text-gray-400">—</span>}
                   </td>
                   <td className="px-4 py-3">

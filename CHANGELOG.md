@@ -10,6 +10,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ### Added
 
+- **Numero di revisione del documento inserito da chi carica il file (M07)**: caricando una nuova versione si indica la **versione come appare sul frontespizio** («Rev. 03», «2.1», «Ed. 2 Rev. 1»), che compare poi nell'elenco documenti e negli NDA accanto al file. Il contatore interno resta separato e continua a garantire l'ordine dello storico: se l'etichetta non viene indicata si continua a vedere «v1», «v2». Le versioni già caricate non cambiano.
+
 - **Approvazione dei documenti per delibera dell'organo di governo (M07 + M13)**: le politiche che il CdA delibera in seduta ora si registrano come tali, invece di apparire approvate da una singola persona.
   - **Due modalità di approvazione**, come già per il riesame di direzione: *in applicazione* (approva chi preme il pulsante, con il ruolo previsto dal workflow) oppure *delibera dell'organo* (si registrano organo, numero e data della delibera). Con la delibera **il documento entra in vigore il giorno della seduta**, non quello della registrazione, e la registrazione resta tracciata a parte nell'audit trail. Il verbale firmato resta l'evidenza: la piattaforma la conserva, non sostituisce la delibera.
   - **Dal riesame di direzione**: una volta registrata l'approvazione del riesame come delibera, i documenti deliberati nella stessa seduta si mandano in vigore **in blocco**, scegliendoli dall'elenco dei documenti obbligatori non approvati già stampato nel verbale; ereditano numero e data della delibera e restano collegati al riesame. I documenti che non possono essere approvati (fuori perimetro, già in vigore) sono elencati con il motivo, senza bloccare gli altri.

@@ -310,8 +310,11 @@ class DocumentViewSet(PlantPayloadWriteGuardMixin, viewsets.ModelViewSet):
             return Response({"error": _("Nessun file fornito.")}, status=status.HTTP_400_BAD_REQUEST)
 
         change_summary = request.data.get("change_summary", "")
+        version_label = request.data.get("version_label", "")
         try:
-            version = add_version_with_file(document, uploaded_file, request.user, change_summary)
+            version = add_version_with_file(
+                document, uploaded_file, request.user, change_summary, version_label,
+            )
             serializer = DocumentVersionSerializer(version, context={"request": request})
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except ValidationError as e:
