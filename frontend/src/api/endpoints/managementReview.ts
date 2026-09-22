@@ -165,6 +165,16 @@ export const managementReviewApi = {
   }) =>
     apiClient.post<ManagementReview>(`${base}/${id}/approve/`, data).then((r) => r.data),
 
+  // Documenti deliberati nella seduta: ereditano gli estremi della delibera
+  // già registrata sull'approvazione del riesame.
+  approveDocuments: (id: string, document_ids: string[]) =>
+    apiClient
+      .post<{
+        approved: Array<{ id: string; title: string }>;
+        skipped: Array<{ id: string; title?: string; reason: string }>;
+      }>(`${base}/${id}/approve-documents/`, { document_ids })
+      .then((r) => r.data),
+
   setParticipants: (id: string, participants: ReviewParticipant[]) =>
     apiClient.put<ManagementReview>(`${base}/${id}/participants/`, { participants }).then((r) => r.data),
 

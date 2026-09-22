@@ -963,7 +963,13 @@
           "documents": "The workflow drives document states: draft, in review, approved.",
           "governance": "The roles used in the policy are the ones appointed in the role coverage matrix."
         }
-      }
+      },
+      "requires_resolution": "Requires a governing body resolution",
+      "requires_resolution_hint": "Documents of this type take effect only with a recorded resolution: in-app approval by a single user is refused.",
+      "approval_body": "Competent body",
+      "approval_body_none": "None (state it when recording the resolution)",
+      "owner_can_approve": "The document owner may approve it",
+      "owner_can_approve_hint": "For contracts, NDAs and registers handled by their owner, even without a normative appointment."
     },
     "sections": {
       "roles": "Normative roles",
@@ -1711,7 +1717,21 @@
     },
     "org_wide": "Org-wide",
     "shared_badge": "shared",
-    "shared_with_n_plants": "sites"
+    "shared_with_n_plants": "sites",
+    "approve": {
+      "title": "Approve document",
+      "mode_in_app": "In the application",
+      "mode_delibera": "Governing body resolution",
+      "hint_in_app": "You approve it, with the role set by the document workflow.",
+      "hint_delibera": "You record the approval resolved by the body in session: the document takes effect on the resolution date and the signed minutes are the evidence.",
+      "resolution_ref": "Resolution number",
+      "resolution_ref_ph": "e.g. 4/2026",
+      "resolution_date": "Resolution date",
+      "body": "Governing body",
+      "body_from_policy": "As set by the workflow policy",
+      "notes": "Notes",
+      "resolution_badge": "Resolution {{ref}}"
+    }
   },
   "schedule": {
     "activity": {
@@ -5026,6 +5046,13 @@
       "no_logos": "No site has an uploaded logo: upload one in Plant Registry → edit site.",
       "preview_alt": "Logo preview",
       "save_error": "Unable to set the logo"
+    },
+    "deliberated": {
+      "title": "Documents resolved in the meeting",
+      "hint": "Select the documents approved by the body: they will inherit resolution {{ref}} of {{date}}.",
+      "needs_resolution": "First record the review approval as a resolution of the body: the documents inherit its details.",
+      "done": "{{count}} documents now in force.",
+      "approve": "Approve resolved documents ({{count}})"
     }
   },
   "objectives": {

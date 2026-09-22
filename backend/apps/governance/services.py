@@ -492,6 +492,16 @@ def user_has_document_permission(user, document, action: str) -> bool:
     policy = resolve_document_workflow_policy(doc_type, plant)
     target_roles = (getattr(policy, role_field, []) or []) if policy else []
 
+    # Il titolare del documento, dove la policy lo prevede: contratti, NDA e
+    # registri li chiude chi li ha in carico, senza una nomina normativa.
+    if (
+        action == "approve"
+        and policy is not None
+        and policy.owner_can_approve
+        and getattr(document, "owner_id", None) == user.pk
+    ):
+        return True
+
     if not target_roles:
         # Nessuna policy per questo tipo documento (o lista ruoli vuota).
         # Documento obbligatorio + approvazione → deny by default: mandare in

@@ -13,6 +13,7 @@ L'API pubblica resta `apps.management_review.services.<funzione>`.
 from .review import (
     MINUTES_FIELDS,
     add_agenda_item,
+    approve_documents_by_resolution,
     approve_review,
     approving_member,
     can_approve,
@@ -47,7 +48,8 @@ from .summary import (
 __all__ = [
     "MINUTES_FIELDS", "SNAPSHOT_LIST_LIMIT", "approving_member", "can_approve",
     "participants_from_body", "set_participants", "set_report_logo",
-    "accept_executive_summary", "add_agenda_item", "approve_review", "complete_review",
+    "accept_executive_summary", "add_agenda_item", "approve_documents_by_resolution",
+    "approve_review", "complete_review",
     "create_review", "create_review_action", "delete_agenda_item", "delete_review_action",
     "discard_summary_draft", "draft_executive_summary", "ensure_iso_agenda", "generate_snapshot",
     "get_kpi_snapshot", "get_operational_kpi_summary", "start_review", "suggest_chair",

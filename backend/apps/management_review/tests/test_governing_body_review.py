@@ -213,3 +213,91 @@ def test_list_query_count_does_not_grow_with_reviews(co, board):
         client.post(URL, {"title": f"R{i + 2}", "review_date": "2026-03-01",
                           "governing_body": str(board.id)}, format="json")
     assert count() == one
+
+
+# ── Documenti deliberati nella seduta ────────────────────────────────────────
+
+def _approved_review(co, board, plant, ref="4/2026", when=None):
+    """Riesame approvato con delibera dell'organo, pronto per i documenti."""
+    from apps.management_review.models import ManagementReview
+
+    review = ManagementReview.objects.create(
+        title="Riesame", review_date=date(2026, 1, 10), plant=plant, governing_body=board,
+    )
+    _ready(review.pk)
+    ManagementReview.objects.filter(pk=review.pk).update(
+        approval_status="approvato", approval_mode="delibera",
+        approval_resolution_ref=ref,
+        approval_resolution_date=when or (timezone.localdate() - timedelta(days=1)),
+        approved_by=co, approved_at=timezone.now(),
+    )
+    review.refresh_from_db()
+    return review
+
+
+def _policy(plant, co, title="Politica sicurezza", status="revisione"):
+    from apps.documents.models import Document
+    return Document.objects.create(
+        title=title, category="politica", document_type="policy", status=status,
+        plant=plant, is_mandatory=True, created_by=co,
+    )
+
+
+@pytest.mark.django_db
+def test_approve_documents_from_resolution(co, board, plant):
+    from apps.documents.models import DocumentApproval
+
+    review = _approved_review(co, board, plant)
+    doc = _policy(plant, co)
+    altro = _policy(plant, co, title="Politica backup", status="bozza")
+
+    resp = _api(co).post(f"{URL}{review.id}/approve-documents/",
+                         {"document_ids": [str(doc.id), str(altro.id)]}, format="json")
+    assert resp.status_code == 200, resp.data
+    assert len(resp.data["approved"]) == 2 and resp.data["skipped"] == []
+
+    doc.refresh_from_db()
+    record = DocumentApproval.objects.get(document=doc, action="approve")
+    assert doc.status == "approvato"
+    assert record.approval_mode == "delibera"
+    assert record.resolution_ref == "4/2026"
+    assert record.resolution_date == review.approval_resolution_date
+    assert record.governing_body_id == board.pk
+    assert str(record.review_id) == str(review.pk)
+    # entra in vigore il giorno della delibera
+    assert doc.approved_at.date() == review.approval_resolution_date
+
+
+@pytest.mark.django_db
+def test_approve_documents_requires_approved_resolution(co, board, plant):
+    from apps.management_review.models import ManagementReview
+
+    review = ManagementReview.objects.create(title="R", review_date=date(2026, 1, 10),
+                                             plant=plant, governing_body=board)
+    _ready(review.pk)
+    doc = _policy(plant, co)
+
+    resp = _api(co).post(f"{URL}{review.id}/approve-documents/",
+                         {"document_ids": [str(doc.id)]}, format="json")
+    assert resp.status_code == 400
+    doc.refresh_from_db()
+    assert doc.status == "revisione"
+
+
+@pytest.mark.django_db
+def test_approve_documents_reports_skipped(co, board, plant):
+    """Un documento già in vigore non blocca la registrazione degli altri."""
+    import uuid
+
+    review = _approved_review(co, board, plant)
+    gia_approvato = _policy(plant, co, title="Politica vecchia", status="approvato")
+    da_approvare = _policy(plant, co, title="Politica nuova")
+
+    resp = _api(co).post(
+        f"{URL}{review.id}/approve-documents/",
+        {"document_ids": [str(gia_approvato.id), str(da_approvare.id), str(uuid.uuid4())]},
+        format="json",
+    )
+    assert resp.status_code == 200
+    assert [d["title"] for d in resp.data["approved"]] == ["Politica nuova"]
+    assert len(resp.data["skipped"]) == 2

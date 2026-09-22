@@ -528,6 +528,87 @@ def can_approve(review: ManagementReview, user) -> bool:
     )
 
 
+def approve_documents_by_resolution(review: ManagementReview, document_ids, user) -> dict:
+    """Manda in vigore i documenti deliberati nella seduta del riesame.
+
+    L'elenco dei documenti obbligatori non approvati compare nel verbale
+    (§9.3.2 d): quelli che l'organo delibera si approvano qui in blocco, con gli
+    estremi della delibera già registrata sul riesame. La data di entrata in
+    vigore è quella della delibera, non quella della registrazione.
+
+    Ritorna i documenti approvati e quelli saltati, con il motivo: la seduta
+    non deve fallire per un documento fuori perimetro o già in vigore.
+    """
+    from rest_framework.exceptions import PermissionDenied
+
+    from apps.documents.models import Document
+    from apps.documents.services import approve_document, can_register_resolution
+    from core.scoping import scope_queryset_by_plant
+
+    if not can_register_resolution(user):
+        raise PermissionDenied(_("La delibera dell'organo si registra da governance."))
+    if review.approval_status != "approvato" or review.approval_mode != "delibera":
+        raise ValidationError(
+            _("Registra prima l'approvazione del riesame come delibera dell'organo: "
+              "i documenti deliberati ne ereditano gli estremi.")
+        )
+    if not review.approval_resolution_ref or not review.approval_resolution_date:
+        raise ValidationError(_("La delibera del riesame è senza numero o data."))
+
+    ids = [i for i in (document_ids or []) if i]
+    if not ids:
+        raise ValidationError(_("Nessun documento indicato."))
+
+    visible = scope_queryset_by_plant(
+        Document.objects.filter(deleted_at__isnull=True), user, allow_null_plant=True,
+    ).select_related("plant", "owner")
+    found = {str(d.pk): d for d in visible.filter(pk__in=ids)}
+
+    body = None
+    if review.governing_body_id:
+        body = review.governing_body
+
+    approved, skipped = [], []
+    for doc_id in ids:
+        doc = found.get(str(doc_id))
+        if doc is None:
+            skipped.append({"id": str(doc_id), "reason": _("Documento inesistente o fuori perimetro.")})
+            continue
+        try:
+            approve_document(
+                doc, user,
+                notes=_("Deliberato nella seduta del %(date)s.") % {
+                    "date": review.approval_resolution_date.strftime("%d/%m/%Y"),
+                },
+                mode="delibera",
+                resolution_ref=review.approval_resolution_ref,
+                resolution_date=review.approval_resolution_date,
+                governing_body=body,
+                review_id=review.pk,
+            )
+        except ValidationError as exc:
+            skipped.append({"id": str(doc.pk), "title": doc.title,
+                            "reason": exc.messages[0] if getattr(exc, "messages", None) else str(exc)})
+            continue
+        approved.append({"id": str(doc.pk), "title": doc.title})
+
+    if approved:
+        log_action(
+            user=user,
+            action_code="management_review.documents_approved",
+            level="L2",
+            entity=review,
+            payload={
+                "review_id": str(review.pk),
+                "resolution_ref": review.approval_resolution_ref,
+                "resolution_date": str(review.approval_resolution_date),
+                "documents": [d["id"] for d in approved],
+                "count": len(approved),
+            },
+        )
+    return {"approved": approved, "skipped": skipped}
+
+
 def approve_review(review: ManagementReview, user, note="", *, mode="in_app",
                    resolution_ref="", resolution_date=None, document_id=None) -> ManagementReview:
     """Approva formalmente il riesame di direzione (§9.3).

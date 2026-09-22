@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { documentsApi, type Document } from "../../api/endpoints/documents";
 import { suppliersApi, type Supplier } from "../../api/endpoints/suppliers";
+import { governanceApi } from "../../api/endpoints/governance";
 import { useAuthStore } from "../../store/auth";
 import { useTranslation } from "react-i18next";
 
@@ -338,6 +339,111 @@ export function EditDocumentModal({ doc, onClose }: { doc: Document; onClose: ()
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
             {mutation.isPending ? t("common.saving") : t("documents.edit.submit")}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+/**
+ * Approvazione di un documento: in applicazione, oppure registrando la delibera
+ * con cui l'organo di governo l'ha approvato in seduta (il verbale firmato
+ * resta l'evidenza). I tipi che la governance riserva all'organo rifiutano
+ * l'approvazione in applicazione: il messaggio arriva dal backend.
+ */
+export function ApproveDocumentModal({ doc, onClose }: { doc: Document; onClose: () => void }) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [mode, setMode] = useState<"in_app" | "delibera">("in_app");
+  const [notes, setNotes] = useState("");
+  const [ref, setRef] = useState("");
+  const [date, setDate] = useState("");
+  const [body, setBody] = useState("");
+  const [error, setError] = useState("");
+
+  const { data: bodies } = useQuery({
+    queryKey: ["governing-bodies"],
+    queryFn: () => governanceApi.committees(),
+    enabled: mode === "delibera",
+  });
+
+  const mutation = useMutation({
+    mutationFn: () => documentsApi.approve(doc.id, {
+      notes: notes || undefined,
+      mode,
+      ...(mode === "delibera"
+        ? { resolution_ref: ref, resolution_date: date, governing_body: body || null }
+        : {}),
+    }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["documents"] });
+      qc.invalidateQueries({ queryKey: ["documents-nda"] });
+      onClose();
+    },
+    onError: (e: unknown) => {
+      // @ts-expect-error forma dell'errore axios
+      setError(e?.response?.data?.detail || e?.response?.data?.error || t("common.save_error"));
+    },
+  });
+
+  const canSubmit = mode === "in_app" || (!!ref.trim() && !!date);
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+        <h3 className="text-lg font-semibold mb-1">{t("documents.approve.title")}</h3>
+        <p className="text-xs text-gray-500 mb-4 truncate">{doc.title}</p>
+
+        <div className="space-y-3">
+          <div className="flex gap-4 text-sm">
+            {(["in_app", "delibera"] as const).map(m => (
+              <label key={m} className="flex items-center gap-1.5">
+                <input type="radio" checked={mode === m} onChange={() => { setMode(m); setError(""); }} />
+                {t(`documents.approve.mode_${m}`)}
+              </label>
+            ))}
+          </div>
+          <p className="text-xs text-gray-500">{t(`documents.approve.hint_${mode}`)}</p>
+
+          {mode === "delibera" && (
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">{t("documents.approve.resolution_ref")} *</label>
+                <input className="w-full border rounded px-3 py-2 text-sm" value={ref}
+                       placeholder={t("documents.approve.resolution_ref_ph")}
+                       onChange={e => setRef(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">{t("documents.approve.resolution_date")} *</label>
+                <input type="date" className="w-full border rounded px-3 py-2 text-sm" value={date}
+                       onChange={e => setDate(e.target.value)} />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-xs font-medium text-gray-700 mb-1">{t("documents.approve.body")}</label>
+                <select className="w-full border rounded px-3 py-2 text-sm" value={body}
+                        onChange={e => setBody(e.target.value)}>
+                  <option value="">{t("documents.approve.body_from_policy")}</option>
+                  {(bodies ?? []).map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                </select>
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t("documents.approve.notes")}</label>
+            <textarea rows={2} value={notes} onChange={e => setNotes(e.target.value)}
+                      className="w-full border rounded px-3 py-2 text-sm resize-none" />
+          </div>
+        </div>
+
+        {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3 break-words">{error}</p>}
+        <div className="flex justify-end gap-2 mt-4">
+          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("actions.cancel")}</button>
+          <button onClick={() => { setError(""); mutation.mutate(); }} disabled={!canSubmit || mutation.isPending}
+                  className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50">
+            {mutation.isPending ? t("common.saving") : t("actions.approve")}
           </button>
         </div>
       </div>

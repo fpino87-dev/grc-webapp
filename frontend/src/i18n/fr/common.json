@@ -966,7 +966,13 @@
           "documents": "Le workflow régit les états des documents : brouillon, en révision, approuvé.",
           "governance": "Les rôles utilisés dans la politique sont ceux nommés dans la matrice de couverture des rôles."
         }
-      }
+      },
+      "requires_resolution": "Requiert une délibération de l'organe de gouvernance",
+      "requires_resolution_hint": "Les documents de ce type n'entrent en vigueur qu'avec une délibération enregistrée : l'approbation dans l'application par une seule personne est refusée.",
+      "approval_body": "Organe compétent",
+      "approval_body_none": "Aucun (à indiquer lors de la délibération)",
+      "owner_can_approve": "Le titulaire du document peut l'approuver",
+      "owner_can_approve_hint": "Pour les contrats, NDA et registres gérés par leur titulaire, même sans nomination normative."
     },
     "sections": {
       "roles": "Rôles normatifs",
@@ -1711,7 +1717,21 @@
     },
     "org_wide": "Toute l'organisation",
     "shared_badge": "partagé",
-    "shared_with_n_plants": "sites"
+    "shared_with_n_plants": "sites",
+    "approve": {
+      "title": "Approuver le document",
+      "mode_in_app": "Dans l'application",
+      "mode_delibera": "Délibération de l'organe",
+      "hint_in_app": "Vous approuvez vous-même, avec le rôle prévu par le flux documentaire.",
+      "hint_delibera": "Vous enregistrez l'approbation délibérée par l'organe en séance : le document entre en vigueur le jour de la délibération et le procès-verbal signé en est la preuve.",
+      "resolution_ref": "Numéro de délibération",
+      "resolution_ref_ph": "ex. 4/2026",
+      "resolution_date": "Date de délibération",
+      "body": "Organe de gouvernance",
+      "body_from_policy": "Selon la politique de flux",
+      "notes": "Notes",
+      "resolution_badge": "Délibération {{ref}}"
+    }
   },
   "schedule": {
     "activity": {
@@ -5026,6 +5046,13 @@
       "no_logos": "Aucun site n'a de logo chargé : chargez-le dans Plant Registry → modifier le site.",
       "preview_alt": "Aperçu du logo",
       "save_error": "Impossible de définir le logo"
+    },
+    "deliberated": {
+      "title": "Documents délibérés en séance",
+      "hint": "Sélectionnez les documents approuvés par l'organe : ils hériteront de la délibération {{ref}} du {{date}}.",
+      "needs_resolution": "Enregistrez d'abord l'approbation de la revue comme délibération de l'organe : les documents en héritent les références.",
+      "done": "{{count}} documents entrés en vigueur.",
+      "approve": "Approuver les documents délibérés ({{count}})"
     }
   },
   "objectives": {

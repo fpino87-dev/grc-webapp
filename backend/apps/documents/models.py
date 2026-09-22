@@ -138,10 +138,25 @@ class DocumentVersion(BaseModel):
 
 
 class DocumentApproval(BaseModel):
+    """Registrazione di un'approvazione (o di un rifiuto) del documento.
+
+    Due forme, come per il riesame di direzione (§9.3):
+    - ``in_app``: approva chi preme il pulsante, con il ruolo previsto dalla
+      policy di workflow;
+    - ``delibera``: l'organo di governo ha deliberato in seduta e qui se ne
+      registrano gli estremi (organo, numero e data della delibera, riesame in
+      cui è stata assunta). Chi registra resta in ``actor``: il verbale firmato
+      è l'evidenza, la piattaforma non sostituisce la delibera.
+    """
+
     ACTION_CHOICES = [
         ("approve", "Approvato"),
         ("reject", "Rifiutato"),
         ("request_changes", "Modifiche richieste"),
+    ]
+    APPROVAL_MODE_CHOICES = [
+        ("in_app", "In applicazione"),
+        ("delibera", "Delibera dell'organo"),
     ]
 
     document = models.ForeignKey(
@@ -152,6 +167,19 @@ class DocumentApproval(BaseModel):
     action = models.CharField(max_length=20, choices=ACTION_CHOICES)
     actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     notes = models.TextField(blank=True)
+    approval_mode = models.CharField(max_length=10, choices=APPROVAL_MODE_CHOICES, blank=True)
+    governing_body = models.ForeignKey(
+        "governance.SecurityCommittee",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="document_approvals",
+    )
+    resolution_ref = models.CharField(max_length=100, blank=True)
+    resolution_date = models.DateField(null=True, blank=True)
+    # Riesame di direzione in cui la delibera è stata assunta. UUID e non FK per
+    # non far dipendere M07 da M13 (stesso schema di ManagementReview.document_id).
+    review_id = models.UUIDField(null=True, blank=True)
 
 
 class Evidence(BaseModel):

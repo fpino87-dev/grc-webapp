@@ -963,7 +963,13 @@
           "documents": "Il workflow governa gli stati dei documenti: bozza, in revisione, approvato.",
           "governance": "I ruoli citati nella policy sono quelli nominati nella matrice di copertura ruoli."
         }
-      }
+      },
+      "requires_resolution": "Richiede delibera dell'organo di governo",
+      "requires_resolution_hint": "I documenti di questo tipo entrano in vigore solo con una delibera registrata: l'approvazione in applicazione da parte di un singolo viene rifiutata.",
+      "approval_body": "Organo competente",
+      "approval_body_none": "Nessuno (da indicare al momento della delibera)",
+      "owner_can_approve": "Il titolare del documento può approvarlo",
+      "owner_can_approve_hint": "Per contratti, NDA e registri a carico di chi li gestisce, anche senza una nomina normativa."
     },
     "sections": {
       "roles": "Ruoli normativi",
@@ -1711,7 +1717,21 @@
     },
     "org_wide": "Tutta l'organizzazione",
     "shared_badge": "condiviso",
-    "shared_with_n_plants": "siti"
+    "shared_with_n_plants": "siti",
+    "approve": {
+      "title": "Approva documento",
+      "mode_in_app": "In applicazione",
+      "mode_delibera": "Delibera dell'organo",
+      "hint_in_app": "Approvi tu, con il ruolo previsto dal workflow documentale.",
+      "hint_delibera": "Registri l'approvazione deliberata dall'organo in seduta: il documento entra in vigore il giorno della delibera e il verbale firmato ne è l'evidenza.",
+      "resolution_ref": "Numero delibera",
+      "resolution_ref_ph": "es. 4/2026",
+      "resolution_date": "Data delibera",
+      "body": "Organo di governo",
+      "body_from_policy": "Come da policy di workflow",
+      "notes": "Note",
+      "resolution_badge": "Delibera {{ref}}"
+    }
   },
   "schedule": {
     "activity": {
@@ -5026,6 +5046,13 @@
       "no_logos": "Nessun sito ha un logo caricato: caricalo in Plant Registry → modifica sito.",
       "preview_alt": "Anteprima del logo",
       "save_error": "Impossibile impostare il logo"
+    },
+    "deliberated": {
+      "title": "Documenti deliberati nella seduta",
+      "hint": "Seleziona i documenti approvati dall'organo: erediteranno la delibera {{ref}} del {{date}}.",
+      "needs_resolution": "Registra prima l'approvazione del riesame come delibera dell'organo: i documenti ne ereditano gli estremi.",
+      "done": "{{count}} documenti mandati in vigore.",
+      "approve": "Approva i documenti deliberati ({{count}})"
     }
   },
   "objectives": {

@@ -966,7 +966,13 @@
           "documents": "İş akışı doküman durumlarını yönetir: taslak, incelemede, onaylandı.",
           "governance": "Politikada kullanılan roller, rol kapsama matrisinde atanan rollerdir."
         }
-      }
+      },
+      "requires_resolution": "Yönetim organı kararı gerektirir",
+      "requires_resolution_hint": "Bu türdeki belgeler yalnızca kayıtlı bir kararla yürürlüğe girer: tek kişinin uygulama içi onayı reddedilir.",
+      "approval_body": "Yetkili organ",
+      "approval_body_none": "Yok (karar kaydedilirken belirtilir)",
+      "owner_can_approve": "Belge sahibi onaylayabilir",
+      "owner_can_approve_hint": "Sahibi tarafından yürütülen sözleşmeler, gizlilik anlaşmaları ve kayıtlar için, resmi atama olmadan da."
     },
     "sections": {
       "roles": "Normatif roller",
@@ -1711,7 +1717,21 @@
     },
     "org_wide": "Tüm organizasyon",
     "shared_badge": "paylaşıldı",
-    "shared_with_n_plants": "site"
+    "shared_with_n_plants": "site",
+    "approve": {
+      "title": "Belgeyi onayla",
+      "mode_in_app": "Uygulama içinde",
+      "mode_delibera": "Yönetim organı kararı",
+      "hint_in_app": "Belge iş akışında öngörülen rolle siz onaylarsınız.",
+      "hint_delibera": "Organın toplantıda aldığı kararı kaydedersiniz: belge karar tarihinde yürürlüğe girer, imzalı tutanak kanıttır.",
+      "resolution_ref": "Karar numarası",
+      "resolution_ref_ph": "örn. 4/2026",
+      "resolution_date": "Karar tarihi",
+      "body": "Yönetim organı",
+      "body_from_policy": "İş akışı politikasına göre",
+      "notes": "Notlar",
+      "resolution_badge": "Karar {{ref}}"
+    }
   },
   "schedule": {
     "activity": {
@@ -5026,6 +5046,13 @@
       "no_logos": "Hiçbir tesisin yüklenmiş logosu yok: Plant Registry → tesisi düzenle bölümünden yükleyin.",
       "preview_alt": "Logo önizlemesi",
       "save_error": "Logo ayarlanamadı"
+    },
+    "deliberated": {
+      "title": "Toplantıda karara bağlanan belgeler",
+      "hint": "Organın onayladığı belgeleri seçin: {{date}} tarihli {{ref}} sayılı kararı devralacaklar.",
+      "needs_resolution": "Önce gözden geçirme onayını organ kararı olarak kaydedin: belgeler karar bilgilerini devralır.",
+      "done": "{{count}} belge yürürlüğe girdi.",
+      "approve": "Karara bağlanan belgeleri onayla ({{count}})"
     }
   },
   "objectives": {

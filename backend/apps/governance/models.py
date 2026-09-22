@@ -120,6 +120,32 @@ class DocumentWorkflowPolicy(BaseModel):
         blank=True,
         help_text="Ruoli che possono approvare/mandare in vigore il documento.",
     )
+    # Chi approva davvero, oltre al ruolo: l'organo di governo (delibera in
+    # seduta) o il titolare del documento. Nascono dalla prassi reale —
+    # il CdA delibera le politiche, il CISO approva le procedure, contratti e
+    # NDA li chiude il loro owner.
+    requires_body_resolution = models.BooleanField(
+        default=False,
+        help_text=(
+            "Documenti di questo tipo entrano in vigore solo con delibera dell'organo "
+            "di governo: l'approvazione in applicazione da parte di un singolo è rifiutata."
+        ),
+    )
+    approval_body = models.ForeignKey(
+        "SecurityCommittee",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="document_policies",
+        help_text="Organo competente per la delibera (CdA, comitato, direzione).",
+    )
+    owner_can_approve = models.BooleanField(
+        default=False,
+        help_text=(
+            "Il titolare del documento può approvarlo anche senza uno dei ruoli "
+            "indicati sopra (contratti, NDA, registri a carico dell'owner)."
+        ),
+    )
 
     class Meta:
         verbose_name = "Document workflow policy"

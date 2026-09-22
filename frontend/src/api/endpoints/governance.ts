@@ -140,6 +140,11 @@ export interface DocumentWorkflowPolicy {
   submit_roles: string[];
   review_roles: string[];
   approve_roles: string[];
+  // Chi approva davvero, oltre al ruolo: delibera dell'organo di governo
+  // (politiche deliberate dal CdA) o titolare del documento (contratti, NDA).
+  requires_body_resolution?: boolean;
+  approval_body?: string | null;
+  owner_can_approve?: boolean;
 }
 
 export const governanceApi = {

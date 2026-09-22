@@ -14,7 +14,9 @@ from core.scoping import (
 )
 from core.viewsets import SoftDeleteAuditMixin
 
-from .models import Document, DocumentVersion, Evidence
+from django.db.models import Prefetch
+
+from .models import Document, DocumentApproval, DocumentVersion, Evidence
 from .permissions import DocumentPermission
 from .serializers import (
     DocumentSerializer,
@@ -30,7 +32,17 @@ class DocumentViewSet(PlantPayloadWriteGuardMixin, viewsets.ModelViewSet):
     # plant fuori perimetro (sweep 2026-06-12 fase 2).
     queryset = Document.objects.select_related(
         "plant", "owner", "reviewer", "approver", "supplier"
-    ).prefetch_related("versions", "shared_plants")
+    ).prefetch_related(
+        "versions", "shared_plants",
+        # `last_approval` nel serializer: senza questo sarebbe una query per riga
+        Prefetch(
+            "approvals",
+            queryset=DocumentApproval.objects.filter(action="approve")
+            .select_related("governing_body", "actor")
+            .order_by("-created_at"),
+            to_attr="approve_records",
+        ),
+    )
     serializer_class = DocumentSerializer
     permission_classes = [DocumentPermission]
     filterset_fields = ["status", "category", "document_type", "is_mandatory", "supplier"]
@@ -159,8 +171,9 @@ class DocumentViewSet(PlantPayloadWriteGuardMixin, viewsets.ModelViewSet):
                 {"detail": e.messages[0] if getattr(e, "messages", None) else str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        doc.refresh_from_db()
-        return Response(DocumentSerializer(doc).data)
+        # il prefetch di get_object() è già valutato: per rileggere anche le
+        # approvazioni appena scritte serve una nuova query, non un refresh
+        return Response(DocumentSerializer(self.get_object()).data)
 
     @action(detail=True, methods=["post"])
     def submit(self, request, pk=None):
@@ -180,13 +193,61 @@ class DocumentViewSet(PlantPayloadWriteGuardMixin, viewsets.ModelViewSet):
                 {"detail": e.messages[0] if getattr(e, "messages", None) else str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        doc.refresh_from_db()
-        return Response(DocumentSerializer(doc).data)
+        return Response(DocumentSerializer(self.get_object()).data)
 
     @action(detail=True, methods=["post"])
     def approve(self, request, pk=None):
+        """Approvazione in applicazione o registrazione di una delibera.
+
+        Body: {notes, mode: "in_app"|"delibera", resolution_ref, resolution_date,
+        governing_body, review_id}.
+        """
+        from apps.governance.models import SecurityCommittee
+
+        body = None
+        body_id = request.data.get("governing_body")
+        if body_id:
+            body = SecurityCommittee.objects.filter(
+                pk=body_id, deleted_at__isnull=True,
+            ).first()
+            if body is None:
+                return Response(
+                    {"detail": _("Organo di governo inesistente.")},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        mode = request.data.get("mode") or "in_app"
+        if mode == "delibera" and not services.can_register_resolution(request.user):
+            return Response(
+                {"detail": _("La delibera dell'organo si registra da governance.")},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        def approve(doc, user, notes):
+            services.approve_document(
+                doc, user, notes,
+                mode=mode,
+                resolution_ref=request.data.get("resolution_ref", ""),
+                resolution_date=request.data.get("resolution_date") or None,
+                governing_body=body,
+                review_id=request.data.get("review_id") or None,
+            )
+
+        doc = self.get_object()
+        if mode == "delibera":
+            from django.core.exceptions import ValidationError
+
+            try:
+                approve(doc, request.user, request.data.get("notes", ""))
+            except ValidationError as e:
+                return Response(
+                    {"detail": e.messages[0] if getattr(e, "messages", None) else str(e)},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            return Response(DocumentSerializer(self.get_object()).data)
+
         return self._run_workflow(
-            request, self.get_object(), "approve", services.approve_document,
+            request, doc, "approve", approve,
             _("Non hai i permessi per approvare questo documento."),
         )
 

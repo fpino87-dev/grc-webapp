@@ -10,6 +10,7 @@ import { ExecutiveSummarySection } from "./ExecutiveSummarySection";
 import { SitesBlock } from "./SnapshotBlocks";
 import { useAuthStore } from "../../store/auth";
 import { ApprovalSection } from "./ApprovalSection";
+import { DeliberatedDocuments } from "./DeliberatedDocuments";
 import { ParticipantsSection } from "./ParticipantsSection";
 import { ReportLogoPicker } from "./ReportLogoPicker";
 import { SnapSection, fmtDate, type Snap } from "./shared";
@@ -212,6 +213,8 @@ export function ReviewDetail({ review, users, plants, onClose }: { review: Manag
           <ExecutiveSummarySection review={review} locked={locked} />
 
           <ApprovalSection review={review} isGovernance={isGovernance} />
+
+          <DeliberatedDocuments review={review} snap={snap} isGovernance={isGovernance} />
         </div>
       </div>
     </div>

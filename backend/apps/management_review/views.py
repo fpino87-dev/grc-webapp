@@ -132,6 +132,19 @@ class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         )
         return self._respond(review)
 
+    @action(detail=True, methods=["post"], url_path="approve-documents")
+    def approve_documents(self, request, pk=None):
+        """Manda in vigore i documenti deliberati nella seduta.
+
+        Body: `{"document_ids": [...]}`. Gli estremi della delibera sono quelli
+        già registrati sull'approvazione del riesame.
+        """
+        result = self._run(
+            services.approve_documents_by_resolution,
+            self.get_object(), request.data.get("document_ids") or [], request.user,
+        )
+        return Response(result)
+
     @action(detail=True, methods=["post"], url_path="report-logo")
     def report_logo(self, request, pk=None):
         """Sceglie il logo del verbale (`{"plant": <uuid>|null}`)."""

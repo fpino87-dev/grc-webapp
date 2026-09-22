@@ -29,6 +29,7 @@ class DocumentApprovalSerializer(serializers.ModelSerializer):
 
 class DocumentSerializer(serializers.ModelSerializer):
     latest_version = serializers.SerializerMethodField(read_only=True)
+    last_approval = serializers.SerializerMethodField(read_only=True)
     plant_name = serializers.CharField(source="plant.name", read_only=True)
     plant_code = serializers.CharField(source="plant.code", read_only=True)
     shared_plant_names = serializers.SerializerMethodField(read_only=True)
@@ -45,6 +46,28 @@ class DocumentSerializer(serializers.ModelSerializer):
         # semplice permesso di scrittura poteva portare un documento ad
         # "approvato" senza alcuna approvazione tracciata.
         read_only_fields = ["status", "approved_at", "approver"]
+
+    def get_last_approval(self, obj):
+        """Ultima approvazione: dice se il documento è in vigore per delibera
+        dell'organo e con quali estremi (il verbale è l'evidenza)."""
+        records = getattr(obj, "approve_records", None)
+        record = records[0] if records else (
+            None if records is not None
+            else obj.approvals.filter(action="approve").order_by("-created_at").first()
+        )
+        if record is None:
+            return None
+        return {
+            "mode": record.approval_mode or "in_app",
+            "resolution_ref": record.resolution_ref,
+            "resolution_date": record.resolution_date,
+            "governing_body": record.governing_body.name if record.governing_body_id else None,
+            "review_id": str(record.review_id) if record.review_id else None,
+            "actor": (
+                f"{record.actor.first_name} {record.actor.last_name}".strip() or record.actor.email
+            ) if record.actor_id else None,
+            "recorded_at": record.created_at,
+        }
 
     def get_latest_version(self, obj):
         version = obj.versions.first()

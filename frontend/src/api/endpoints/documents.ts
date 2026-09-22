@@ -8,6 +8,27 @@ export interface DocumentVersionSummary {
   file_url?: string | null;
 }
 
+// Approvazione in applicazione oppure delibera dell'organo di governo
+// (il verbale firmato della seduta resta l'evidenza).
+export interface ApproveDocumentPayload {
+  notes?: string;
+  mode?: "in_app" | "delibera";
+  resolution_ref?: string;
+  resolution_date?: string;
+  governing_body?: string | null;
+  review_id?: string | null;
+}
+
+export interface DocumentApprovalInfo {
+  mode: "in_app" | "delibera";
+  resolution_ref: string;
+  resolution_date: string | null;
+  governing_body: string | null;
+  review_id: string | null;
+  actor: string | null;
+  recorded_at: string;
+}
+
 export interface Document {
   id: string;
   document_code: string;
@@ -28,6 +49,7 @@ export interface Document {
   expiry_date: string | null;
   is_mandatory: boolean;
   approved_at: string | null;
+  last_approval?: DocumentApprovalInfo | null;
   latest_version?: DocumentVersionSummary | null;
 }
 
@@ -80,8 +102,8 @@ export const documentsApi = {
   },
   submit: (id: string) =>
     apiClient.post(`/documents/documents/${id}/submit/`).then(r => r.data),
-  approve: (id: string, notes?: string) =>
-    apiClient.post(`/documents/documents/${id}/approve/`, {notes}).then(r => r.data),
+  approve: (id: string, data?: ApproveDocumentPayload) =>
+    apiClient.post(`/documents/documents/${id}/approve/`, data ?? {}).then(r => r.data),
   reject: (id: string, notes?: string) =>
     apiClient.post(`/documents/documents/${id}/reject/`, {notes}).then(r => r.data),
   expiring: () =>

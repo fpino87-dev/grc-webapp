@@ -966,7 +966,13 @@
           "documents": "Workflow steruje statusami dokumentów: wersja robocza, w przeglądzie, zatwierdzony.",
           "governance": "Role użyte w polityce to te wyznaczone w macierzy pokrycia ról."
         }
-      }
+      },
+      "requires_resolution": "Wymaga uchwały organu zarządzającego",
+      "requires_resolution_hint": "Dokumenty tego typu wchodzą w życie wyłącznie na podstawie zarejestrowanej uchwały: zatwierdzenie w aplikacji przez jedną osobę jest odrzucane.",
+      "approval_body": "Właściwy organ",
+      "approval_body_none": "Brak (wskaż przy rejestracji uchwały)",
+      "owner_can_approve": "Właściciel dokumentu może go zatwierdzić",
+      "owner_can_approve_hint": "Dla umów, NDA i rejestrów prowadzonych przez właściciela, także bez formalnego powołania."
     },
     "sections": {
       "roles": "Role normatywne",
@@ -1711,7 +1717,21 @@
     },
     "org_wide": "Cała organizacja",
     "shared_badge": "udostępniony",
-    "shared_with_n_plants": "zakłady"
+    "shared_with_n_plants": "zakłady",
+    "approve": {
+      "title": "Zatwierdź dokument",
+      "mode_in_app": "W aplikacji",
+      "mode_delibera": "Uchwała organu",
+      "hint_in_app": "Zatwierdzasz osobiście, w roli przewidzianej przez obieg dokumentów.",
+      "hint_delibera": "Rejestrujesz zatwierdzenie uchwalone przez organ na posiedzeniu: dokument wchodzi w życie z dniem uchwały, a podpisany protokół stanowi dowód.",
+      "resolution_ref": "Numer uchwały",
+      "resolution_ref_ph": "np. 4/2026",
+      "resolution_date": "Data uchwały",
+      "body": "Organ zarządzający",
+      "body_from_policy": "Zgodnie z polityką obiegu",
+      "notes": "Uwagi",
+      "resolution_badge": "Uchwała {{ref}}"
+    }
   },
   "schedule": {
     "activity": {
@@ -5026,6 +5046,13 @@
       "no_logos": "Żaden zakład nie ma wgranego logo: wgraj je w Plant Registry → edycja zakładu.",
       "preview_alt": "Podgląd logo",
       "save_error": "Nie można ustawić logo"
+    },
+    "deliberated": {
+      "title": "Dokumenty uchwalone na posiedzeniu",
+      "hint": "Wybierz dokumenty zatwierdzone przez organ: odziedziczą uchwałę {{ref}} z {{date}}.",
+      "needs_resolution": "Najpierw zarejestruj zatwierdzenie przeglądu jako uchwałę organu: dokumenty przejmą jej dane.",
+      "done": "{{count}} dokumentów weszło w życie.",
+      "approve": "Zatwierdź uchwalone dokumenty ({{count}})"
     }
   },
   "objectives": {

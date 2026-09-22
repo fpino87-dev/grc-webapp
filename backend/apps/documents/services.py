@@ -41,10 +41,20 @@ ALLOWED_TRANSITIONS = {
     "reject": {"revisione", "approvazione"},
     # archiviazione: solo un documento che è stato in vigore
     "archive": {"approvato"},
+    # delibera dell'organo di governo: è l'atto che manda in vigore il
+    # documento, anche se l'iter interno non era stato avviato. Il vincolo
+    # bozza → approvato esiste per impedire l'approvazione silenziosa di un
+    # singolo utente, non per limitare il CdA — e resta tracciato che si è
+    # trattato di una delibera, con i suoi estremi.
+    "approve_resolution": {"bozza", "revisione", "approvazione"},
 }
 
 _TRANSITION_ERRORS = {
     "submit": _lazy("Invio in revisione non consentito da questo stato: %(status)s."),
+    "approve_resolution": _lazy(
+        "Delibera non registrabile: il documento è già in vigore o archiviato "
+        "(stato attuale: %(status)s)."
+    ),
     "approve": _lazy("Approvazione non consentita: il documento non è in revisione o in approvazione (stato attuale: %(status)s)."),
     "reject": _lazy("Rifiuto non consentito: il documento non è in revisione o in approvazione (stato attuale: %(status)s)."),
     "archive": _lazy("Archiviazione non consentita: solo un documento approvato può essere archiviato (stato attuale: %(status)s)."),
@@ -84,10 +94,99 @@ def submit_for_review(document, user):
         logging.getLogger(__name__).warning("Documenti: notifica non inviata: %s", exc)
 
 
-def approve_document(document, user, notes=""):
-    _require_transition(document, "approve")
+def can_register_resolution(user) -> bool:
+    """Chi può registrare una delibera dell'organo su un documento.
+
+    Non è chi *approva* (quello lo dice la policy di workflow con i ruoli
+    normativi): la delibera l'ha assunta l'organo in seduta, qui la si
+    trascrive. Vale quindi lo stesso criterio del riesame di direzione —
+    la registra governance, con il verbale firmato come evidenza.
+    """
+    from apps.auth_grc.models import GrcRole
+    from core.permissions import user_has_any_role
+
+    if not getattr(user, "is_authenticated", False):
+        return False
+    if getattr(user, "is_superuser", False):
+        return True
+    return user_has_any_role(user, {GrcRole.SUPER_ADMIN, GrcRole.COMPLIANCE_OFFICER})
+
+
+def _approval_timestamp(resolution_date):
+    """Istante di entrata in vigore: mezzogiorno del giorno di delibera (così
+    nessun fuso sposta il documento al giorno prima o dopo), altrimenti adesso."""
+    if resolution_date is None:
+        return timezone.now()
+    return timezone.make_aware(
+        datetime.datetime.combine(resolution_date, datetime.time(12, 0)),
+        timezone.get_current_timezone(),
+    )
+
+
+def _validate_approval_mode(document, mode, resolution_ref, resolution_date, governing_body):
+    """Controlla la modalità di approvazione rispetto alla policy di workflow.
+
+    Un tipo di documento che la governance riserva all'organo (politiche
+    deliberate dal CdA) non si approva in applicazione: serve la delibera.
+    """
+    from apps.governance.services import resolve_document_workflow_policy
+
+    if mode not in ("in_app", "delibera"):
+        raise ValidationError(_("Modalità di approvazione non valida."))
+
+    policy = resolve_document_workflow_policy(
+        getattr(document, "document_type", None) or "altro", getattr(document, "plant", None),
+    )
+    if mode == "in_app":
+        if policy is not None and policy.requires_body_resolution:
+            raise ValidationError(
+                _("Documenti di questo tipo entrano in vigore solo con delibera "
+                  "dell'organo di governo: registra gli estremi della delibera.")
+            )
+        return mode, None, None
+
+    if isinstance(resolution_date, str) and resolution_date:
+        try:
+            resolution_date = datetime.date.fromisoformat(resolution_date)
+        except ValueError:
+            raise ValidationError(
+                _("Data della delibera non valida (formato atteso: AAAA-MM-GG).")
+            ) from None
+    if not (resolution_ref or "").strip() or not resolution_date:
+        raise ValidationError(_("Indicare numero e data della delibera."))
+    if resolution_date > timezone.localdate():
+        raise ValidationError(_("La data della delibera non può essere futura."))
+
+    if governing_body is None and policy is not None:
+        governing_body = policy.approval_body
+    return mode, resolution_date, governing_body
+
+
+def approve_document(
+    document,
+    user,
+    notes="",
+    *,
+    mode="in_app",
+    resolution_ref="",
+    resolution_date=None,
+    governing_body=None,
+    review_id=None,
+):
+    """Manda in vigore il documento.
+
+    ``mode="in_app"``: approva chi preme il pulsante, con il ruolo previsto
+    dalla policy di workflow. ``mode="delibera"``: l'organo di governo ha
+    deliberato in seduta e qui se ne registrano gli estremi; la data di
+    approvazione è quella della delibera, non quella della registrazione (che
+    resta nel record e nell'audit trail).
+    """
+    mode, resolution_date, governing_body = _validate_approval_mode(
+        document, mode, resolution_ref, resolution_date, governing_body,
+    )
+    _require_transition(document, "approve_resolution" if mode == "delibera" else "approve")
     document.status = "approvato"
-    document.approved_at = timezone.now()
+    document.approved_at = _approval_timestamp(resolution_date)
     document.approver = user
     # Set review_due_date from configurable schedule policy
     try:
@@ -104,14 +203,24 @@ def approve_document(document, user, notes=""):
     with transaction.atomic():
         document.save(update_fields=["status", "approved_at", "approver", "review_due_date", "updated_at"])
         DocumentApproval.objects.create(
-            document=document, action="approve", actor=user, notes=notes
+            document=document, action="approve", actor=user, notes=notes,
+            approval_mode=mode,
+            governing_body=governing_body,
+            resolution_ref=(resolution_ref or "").strip()[:100] if mode == "delibera" else "",
+            resolution_date=resolution_date if mode == "delibera" else None,
+            review_id=review_id if mode == "delibera" else None,
         )
         log_action(
             user=user,
             action_code="document.approved",
             level="L2",
             entity=document,
-            payload={"id": str(document.pk), "title": document.title, "notes": (notes or "")[:200]},
+            payload={
+                "id": str(document.pk), "title": document.title,
+                "notes": (notes or "")[:200], "mode": mode,
+                "resolution_ref": (resolution_ref or "")[:100] if mode == "delibera" else "",
+                "resolution_date": str(resolution_date) if resolution_date else None,
+            },
         )
     # Il documento è in vigore: i promemoria automatici aperti su di esso non
     # servono più (stesso schema dei promemoria del piano formativo, M15).

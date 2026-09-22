@@ -67,6 +67,12 @@ export function DocumentWorkflowSection({ embedded }: { embedded?: boolean }) {
     retry: false,
   });
 
+  const { data: bodies = [] } = useQuery({
+    queryKey: ["governing-bodies"],
+    queryFn: governanceApi.committees,
+    retry: false,
+  });
+
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (!editing) return;
@@ -77,6 +83,9 @@ export function DocumentWorkflowSection({ embedded }: { embedded?: boolean }) {
         submit_roles: editing.submit_roles ?? [],
         review_roles: editing.review_roles ?? [],
         approve_roles: editing.approve_roles ?? [],
+        requires_body_resolution: !!editing.requires_body_resolution,
+        approval_body: editing.requires_body_resolution ? editing.approval_body || null : null,
+        owner_can_approve: !!editing.owner_can_approve,
       };
       if (editing.id) {
         await governanceApi.updateDocumentPolicy(editing.id, payload);
@@ -107,6 +116,8 @@ export function DocumentWorkflowSection({ embedded }: { embedded?: boolean }) {
       submit_roles: [],
       review_roles: [],
       approve_roles: [],
+      requires_body_resolution: false,
+      owner_can_approve: false,
     });
   }
 
@@ -320,6 +331,48 @@ export function DocumentWorkflowSection({ embedded }: { embedded?: boolean }) {
                   onChange={(next) => setEditing((prev) => ({ ...prev!, approve_roles: next }))}
                 />
               </div>
+            </div>
+
+            <div className="border-t border-gray-100 pt-3 space-y-2">
+              <label className="flex items-start gap-2 text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={!!editing.requires_body_resolution}
+                  onChange={(e) => setEditing((prev) => ({ ...prev!, requires_body_resolution: e.target.checked }))}
+                />
+                <span>
+                  {t("governance.workflow.requires_resolution")}
+                  <span className="block text-xs text-gray-500">{t("governance.workflow.requires_resolution_hint")}</span>
+                </span>
+              </label>
+              {editing.requires_body_resolution && (
+                <div className="ml-6">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t("governance.workflow.approval_body")}</label>
+                  <select
+                    value={editing.approval_body || ""}
+                    onChange={(e) => setEditing((prev) => ({ ...prev!, approval_body: e.target.value || null }))}
+                    className="border rounded px-3 py-2 text-sm"
+                  >
+                    <option value="">{t("governance.workflow.approval_body_none")}</option>
+                    {bodies.map((b) => (
+                      <option key={b.id} value={b.id}>{b.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              <label className="flex items-start gap-2 text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={!!editing.owner_can_approve}
+                  onChange={(e) => setEditing((prev) => ({ ...prev!, owner_can_approve: e.target.checked }))}
+                />
+                <span>
+                  {t("governance.workflow.owner_can_approve")}
+                  <span className="block text-xs text-gray-500">{t("governance.workflow.owner_can_approve_hint")}</span>
+                </span>
+              </label>
             </div>
 
             <div className="flex justify-end gap-2 pt-2">

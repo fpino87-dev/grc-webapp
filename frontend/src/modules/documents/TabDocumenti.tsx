@@ -4,7 +4,7 @@ import { documentsApi, type Document } from "../../api/endpoints/documents";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { useAuthStore } from "../../store/auth";
 import { InlineTypeEdit } from "./documentUtils";
-import { NewDocumentModal, EditDocumentModal, UploadVersionModal } from "./DocumentFormModals";
+import { NewDocumentModal, EditDocumentModal, UploadVersionModal, ApproveDocumentModal } from "./DocumentFormModals";
 import { ChangePlantModal, ShareDocumentModal, LinkControlsModal } from "./DocumentShareModals";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
@@ -38,7 +38,7 @@ export function TabDocumenti() {
   });
 
   const submitMutation = useMutation({ mutationFn: documentsApi.submit, onSuccess: () => qc.invalidateQueries({ queryKey: ["documents"] }) });
-  const approveMutation = useMutation({ mutationFn: (id: string) => documentsApi.approve(id), onSuccess: () => qc.invalidateQueries({ queryKey: ["documents"] }) });
+  const [approveDoc, setApproveDoc] = useState<Document | null>(null);
   const rejectMutation = useMutation({ mutationFn: (id: string) => documentsApi.reject(id), onSuccess: () => qc.invalidateQueries({ queryKey: ["documents"] }) });
   const deleteMutation = useMutation({
     mutationFn: (id: string) => documentsApi.remove(id),
@@ -251,14 +251,21 @@ export function TabDocumenti() {
                       : <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">{t("documents.mandatory.no")}</span>}
                   </td>
                   <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{doc.review_due_date ? new Date(doc.review_due_date).toLocaleDateString(i18n.language || "it") : "—"}</td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{doc.approved_at ? new Date(doc.approved_at).toLocaleDateString(i18n.language || "it") : "—"}</td>
+                  <td className="px-4 py-3 text-gray-500 text-xs">
+                    {doc.approved_at ? new Date(doc.approved_at).toLocaleDateString(i18n.language || "it") : "—"}
+                    {doc.last_approval?.mode === "delibera" && (
+                      <div className="text-[10px] text-indigo-600">
+                        {t("documents.approve.resolution_badge", { ref: doc.last_approval.resolution_ref })}
+                      </div>
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
                       <button onClick={() => setEditDoc(doc)} title={t("documents.actions.edit")} className="text-sm w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 text-gray-500 hover:text-gray-800">✎</button>
                       {doc.status === "bozza" && <button onClick={() => submitMutation.mutate(doc.id)} title={t("documents.actions.submit_for_review")} className="text-sm w-7 h-7 flex items-center justify-center rounded hover:bg-blue-50 text-gray-500 hover:text-blue-700">▷</button>}
                       {(doc.status === "revisione" || doc.status === "approvazione") && (
                         <>
-                          <button onClick={() => approveMutation.mutate(doc.id)} title={t("actions.approve")} className="text-sm w-7 h-7 flex items-center justify-center rounded hover:bg-green-50 text-gray-500 hover:text-green-700">✓</button>
+                          <button onClick={() => setApproveDoc(doc)} title={t("actions.approve")} className="text-sm w-7 h-7 flex items-center justify-center rounded hover:bg-green-50 text-gray-500 hover:text-green-700">✓</button>
                           <button onClick={() => rejectMutation.mutate(doc.id)} title={t("actions.reject")} className="text-sm w-7 h-7 flex items-center justify-center rounded hover:bg-red-50 text-gray-500 hover:text-red-600">✗</button>
                         </>
                       )}
@@ -282,6 +289,7 @@ export function TabDocumenti() {
       {editDoc && <EditDocumentModal doc={editDoc} onClose={() => setEditDoc(null)} />}
       {linkControlsDoc && <LinkControlsModal doc={linkControlsDoc} onClose={() => setLinkControlsDoc(null)} />}
       {uploadDoc && <UploadVersionModal doc={uploadDoc} onClose={() => setUploadDoc(null)} />}
+      {approveDoc && <ApproveDocumentModal doc={approveDoc} onClose={() => setApproveDoc(null)} />}
       {changePlantDoc && <ChangePlantModal doc={changePlantDoc} onClose={() => setChangePlantDoc(null)} />}
       {shareDoc && <ShareDocumentModal doc={shareDoc} onClose={() => setShareDoc(null)} />}
     </div>
