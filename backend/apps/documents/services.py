@@ -9,6 +9,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _lazy
 
 from core.audit import log_action
 from core.uploads import (
@@ -17,8 +18,40 @@ from core.uploads import (
 
 from .models import Document, DocumentApproval, DocumentVersion, Evidence
 
+# ── Macchina a stati del workflow documentale (M07) ─────────────────────────
+# Le transizioni di stato passano SOLO da qui: il serializer espone `status`,
+# `approver` e `approved_at` in sola lettura, così un'approvazione non può
+# avvenire senza controllo di policy, record DocumentApproval e audit trail
+# (ISO/IEC 27001 §7.5.2 — approvazione dell'informazione documentata).
+ALLOWED_TRANSITIONS = {
+    # invio in revisione: da bozza, o da approvato per la revisione periodica
+    "submit": {"bozza", "approvato"},
+    # approvazione/rifiuto: solo su un documento effettivamente in lavorazione
+    "approve": {"revisione", "approvazione"},
+    "reject": {"revisione", "approvazione"},
+    # archiviazione: solo un documento che è stato in vigore
+    "archive": {"approvato"},
+}
+
+_TRANSITION_ERRORS = {
+    "submit": _lazy("Invio in revisione non consentito da questo stato: %(status)s."),
+    "approve": _lazy("Approvazione non consentita: il documento non è in revisione o in approvazione (stato attuale: %(status)s)."),
+    "reject": _lazy("Rifiuto non consentito: il documento non è in revisione o in approvazione (stato attuale: %(status)s)."),
+    "archive": _lazy("Archiviazione non consentita: solo un documento approvato può essere archiviato (stato attuale: %(status)s)."),
+}
+
+
+def _require_transition(document, action: str) -> None:
+    """Blocca i salti di stato (es. bozza → approvato) prima di ogni scrittura."""
+    allowed = ALLOWED_TRANSITIONS.get(action, set())
+    if document.status not in allowed:
+        raise ValidationError(
+            _TRANSITION_ERRORS[action] % {"status": document.get_status_display()}
+        )
+
 
 def submit_for_review(document, user):
+    _require_transition(document, "submit")
     document.status = "revisione"
     document.save(update_fields=["status", "updated_at"])
     log_action(
@@ -42,6 +75,7 @@ def submit_for_review(document, user):
 
 
 def approve_document(document, user, notes=""):
+    _require_transition(document, "approve")
     document.status = "approvato"
     document.approved_at = timezone.now()
     document.approver = user
@@ -94,6 +128,7 @@ def approve_document(document, user, notes=""):
 
 
 def reject_document(document, user, notes=""):
+    _require_transition(document, "reject")
     with transaction.atomic():
         document.status = "bozza"
         document.save(update_fields=["status", "updated_at"])
@@ -103,6 +138,22 @@ def reject_document(document, user, notes=""):
         log_action(
             user=user,
             action_code="document.rejected",
+            level="L2",
+            entity=document,
+            payload={"id": str(document.pk), "title": document.title, "notes": (notes or "")[:200]},
+        )
+
+
+def archive_document(document, user, notes=""):
+    """Manda fuori vigore un documento approvato (nessuna eliminazione: lo
+    storico resta consultabile per l'audit)."""
+    _require_transition(document, "archive")
+    with transaction.atomic():
+        document.status = "archiviato"
+        document.save(update_fields=["status", "updated_at"])
+        log_action(
+            user=user,
+            action_code="document.archived",
             level="L2",
             entity=document,
             payload={"id": str(document.pk), "title": document.title, "notes": (notes or "")[:200]},

@@ -38,6 +38,13 @@ class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Document
         fields = "__all__"
+        # Lo stato del workflow NON si scrive via PATCH: `status`, `approver` e
+        # `approved_at` cambiano solo attraverso le azioni submit/approve/reject/
+        # archive, che verificano la DocumentWorkflowPolicy e scrivono il record
+        # di approvazione + l'audit trail. Senza questo vincolo un utente con
+        # semplice permesso di scrittura poteva portare un documento ad
+        # "approvato" senza alcuna approvazione tracciata.
+        read_only_fields = ["status", "approved_at", "approver"]
 
     def get_latest_version(self, obj):
         version = obj.versions.first()

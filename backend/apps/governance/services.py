@@ -446,6 +446,27 @@ def resolve_document_workflow_policy(document_type: str, plant=None):
     return _match_policy_for_plant(qs, plant)
 
 
+_DOCUMENT_ROLE_FIELDS = {
+    "submit": "submit_roles",
+    "review": "review_roles",
+    "approve": "approve_roles",
+}
+
+
+def document_workflow_policy_gap(document, action: str) -> bool:
+    """True se per questo documento/azione la governance non ha dichiarato alcun
+    ruolo (policy assente o lista vuota). Serve alle view per distinguere
+    "non hai il ruolo" da "la policy non è configurata"."""
+    role_field = _DOCUMENT_ROLE_FIELDS.get(action)
+    if not role_field:
+        return False
+    policy = resolve_document_workflow_policy(
+        getattr(document, "document_type", None) or "altro",
+        getattr(document, "plant", None),
+    )
+    return not ((getattr(policy, role_field, []) or []) if policy else [])
+
+
 def user_has_document_permission(user, document, action: str) -> bool:
     """
     Verifica se l'utente ha il permesso governance per l'azione richiesta
@@ -462,24 +483,24 @@ def user_has_document_permission(user, document, action: str) -> bool:
     if getattr(user, "is_superuser", False):
         return True
 
-    doc_type = getattr(document, "document_type", None) or "altro"
-    plant = getattr(document, "plant", None)
-    policy = resolve_document_workflow_policy(doc_type, plant)
-    if not policy:
-        # Se non esiste policy esplicita, fallback: nessun blocco aggiuntivo
-        return True
-
-    role_field = {
-        "submit": "submit_roles",
-        "review": "review_roles",
-        "approve": "approve_roles",
-    }.get(action)
+    role_field = _DOCUMENT_ROLE_FIELDS.get(action)
     if not role_field:
         return False
 
-    target_roles = getattr(policy, role_field, []) or []
+    doc_type = getattr(document, "document_type", None) or "altro"
+    plant = getattr(document, "plant", None)
+    policy = resolve_document_workflow_policy(doc_type, plant)
+    target_roles = (getattr(policy, role_field, []) or []) if policy else []
+
     if not target_roles:
-        # Policy definita ma lista ruoli vuota → nessun vincolo aggiuntivo
+        # Nessuna policy per questo tipo documento (o lista ruoli vuota).
+        # Documento obbligatorio + approvazione → deny by default: mandare in
+        # vigore una policy/procedura obbligatoria senza che la governance abbia
+        # dichiarato CHI approva non è difendibile in audit (ISO/IEC 27001 §7.5.2,
+        # NIS2 art. 20). Sulle altre azioni e sui documenti non obbligatori resta
+        # il comportamento permissivo storico, per non bloccare i flussi esistenti.
+        if action == "approve" and getattr(document, "is_mandatory", False):
+            return False
         return True
 
     today = timezone.localdate()
@@ -516,12 +537,7 @@ def resolve_document_recipients(document, action: str) -> list[str]:
     if not policy:
         return []
 
-    field_map = {
-        "submit": "submit_roles",
-        "review": "review_roles",
-        "approve": "approve_roles",
-    }
-    role_field = field_map.get(action)
+    role_field = _DOCUMENT_ROLE_FIELDS.get(action)
     if not role_field:
         return []
 

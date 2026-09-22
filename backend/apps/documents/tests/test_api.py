@@ -83,10 +83,92 @@ def test_retrieve_document(client, document):
 
 
 @pytest.mark.django_db
-def test_update_document_status(client, document):
+def test_patch_cannot_change_workflow_status(client, document):
+    """Lo stato del workflow non è scrivibile via PATCH: si cambia solo con le
+    azioni submit/approve/reject/archive, che verificano policy e tracciano."""
     resp = client.patch(f"{URL_DOCS}{document.id}/", {"status": "revisione"}, format="json")
     assert resp.status_code == 200
+    assert resp.data["status"] == "bozza"
+    document.refresh_from_db()
+    assert document.status == "bozza"
+
+
+@pytest.mark.django_db
+def test_patch_cannot_self_approve(client, document, user):
+    """Il bypass più grave: PATCH che porta ad approvato senza approvazione
+    tracciata (né DocumentApproval né audit)."""
+    from apps.documents.models import DocumentApproval
+
+    resp = client.patch(
+        f"{URL_DOCS}{document.id}/",
+        {"status": "approvato", "approver": user.id, "approved_at": "2026-01-01T00:00:00Z"},
+        format="json",
+    )
+    assert resp.status_code == 200
+    document.refresh_from_db()
+    assert document.status == "bozza"
+    assert document.approver is None
+    assert document.approved_at is None
+    assert not DocumentApproval.objects.filter(document=document).exists()
+
+
+@pytest.mark.django_db
+def test_approve_rejected_from_bozza(client, document):
+    """Salto di stato bozza → approvato: rifiutato dalla macchina a stati."""
+    resp = client.post(f"{URL_DOCS}{document.id}/approve/", {}, format="json")
+    assert resp.status_code == 400
+    document.refresh_from_db()
+    assert document.status == "bozza"
+
+
+@pytest.mark.django_db
+def test_submit_then_approve_flow(client, document):
+    resp = client.post(f"{URL_DOCS}{document.id}/submit/", {}, format="json")
+    assert resp.status_code == 200
     assert resp.data["status"] == "revisione"
+
+    resp = client.post(f"{URL_DOCS}{document.id}/approve/", {"notes": "ok"}, format="json")
+    assert resp.status_code == 200
+    assert resp.data["status"] == "approvato"
+
+    # archiviazione: consentita solo da approvato
+    resp = client.post(f"{URL_DOCS}{document.id}/archive/", {}, format="json")
+    assert resp.status_code == 200
+    assert resp.data["status"] == "archiviato"
+
+
+@pytest.mark.django_db
+def test_mandatory_document_without_policy_cannot_be_approved(client, document):
+    """Deny by default: un documento obbligatorio non va in vigore se la
+    governance non ha dichiarato chi approva quel tipo di documento."""
+    document.is_mandatory = True
+    document.status = "revisione"
+    document.save(update_fields=["is_mandatory", "status"])
+
+    resp = client.post(f"{URL_DOCS}{document.id}/approve/", {}, format="json")
+    assert resp.status_code == 403
+    document.refresh_from_db()
+    assert document.status == "revisione"
+
+
+@pytest.mark.django_db
+def test_reject_requires_review_permission(client, document, plant):
+    """Il rifiuto ora richiede il permesso di revisione da policy."""
+    from apps.governance.models import DocumentWorkflowPolicy, NormativeRole
+
+    DocumentWorkflowPolicy.objects.create(
+        document_type="policy", scope_type="org",
+        submit_roles=[NormativeRole.COMPLIANCE_OFFICER],
+        review_roles=[NormativeRole.CISO],
+        approve_roles=[NormativeRole.CISO],
+    )
+    document.status = "revisione"
+    document.save(update_fields=["status"])
+
+    resp = client.post(f"{URL_DOCS}{document.id}/reject/", {"notes": "no"}, format="json")
+    assert resp.status_code == 403
+    document.refresh_from_db()
+    assert document.status == "revisione"
 
 
 @pytest.mark.django_db

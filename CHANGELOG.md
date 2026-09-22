@@ -63,6 +63,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 - **Formazione — integrazione KnowBe4 e dati per persona**: rimossi il client KnowBe4 (mai attivo: mancava la configurazione), le variabili `KNOWBE4_*` dagli esempi di configurazione e dalla documentazione, gli endpoint delle iscrizioni e degli esiti phishing per persona e il tasso di completamento per corso calcolato sulle iscrizioni. I dati per persona restano nel database, non più consultabili, fino alla loro eliminazione in una release successiva insieme ai vecchi riferimenti normativi testuali dei corsi.
 
+### Security
+
+- **Documenti (M07) — l'approvazione non è più aggirabile**: lo stato di un documento (`bozza → in revisione → approvato → archiviato`), l'approvatore e la data di approvazione erano modificabili con una scrittura diretta sul documento, senza passare dalle azioni del workflow: chi aveva il permesso di scrittura sui documenti — compreso un Control Owner — poteva portare una policy allo stato «approvato» **senza** alcun controllo sulla policy di workflow della Governance, **senza** il record di approvazione e **senza** la registrazione nell'audit trail. Ora:
+  - stato, approvatore e data di approvazione sono in **sola lettura**: cambiano solo tramite le azioni «invia in revisione», «approva», «respingi» e «archivia», che verificano il ruolo previsto dalla policy di workflow, registrano l'approvazione e scrivono l'audit trail (ISO/IEC 27001 §7.5.2);
+  - i **salti di stato** sono rifiutati: un documento non può passare da bozza ad approvato senza essere stato in revisione, né essere archiviato se non è mai entrato in vigore;
+  - il **rifiuto** di un documento richiede lo stesso ruolo previsto per la revisione: prima era consentito a chiunque avesse la scrittura sui documenti, e poteva interrompere un iter di approvazione;
+  - un **documento obbligatorio non può essere approvato** se la Governance non ha dichiarato quali ruoli approvano quel tipo di documento (prima, in assenza di policy, l'approvazione era libera). Il messaggio di errore indica che la policy va definita in Governance → Workflow documentale.
+
 ### Fixed
 
 - **Build di produzione — compilazione delle traduzioni**: dalla 0.8.0 `compilemessages` (eseguito da `Dockerfile.prod`) falliva in polacco e turco perché l'etichetta «% compliant» del verbale del riesame era marcata per errore come stringa di formato, e l'immagine non si costruiva. Il marcatore è stato rimosso nelle quattro lingue.

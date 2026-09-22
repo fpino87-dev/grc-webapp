@@ -131,8 +131,40 @@ class DocumentViewSet(PlantPayloadWriteGuardMixin, viewsets.ModelViewSet):
             filename=filename,
         )
 
+    def _workflow_denied(self, doc, workflow_action, message):
+        """403 con il motivo corretto: manca il ruolo, oppure la governance non
+        ha ancora dichiarato chi approva questo tipo di documento."""
+        from apps.governance.services import document_workflow_policy_gap
+
+        if workflow_action == "approve" and document_workflow_policy_gap(doc, "approve"):
+            message = _(
+                "Documento obbligatorio senza policy di workflow: definisci in "
+                "Governance i ruoli che approvano i documenti di tipo \"%(doc_type)s\" "
+                "prima di mandarlo in vigore."
+            ) % {"doc_type": doc.get_document_type_display()}
+        return Response({"detail": message}, status=status.HTTP_403_FORBIDDEN)
+
+    def _run_workflow(self, request, doc, workflow_action, service, denied_message):
+        """Esegue una transizione del workflow: prima il permesso governance,
+        poi la macchina a stati in services (che rifiuta i salti di stato)."""
+        from django.core.exceptions import ValidationError
+        from apps.governance.services import user_has_document_permission
+
+        if not user_has_document_permission(request.user, doc, action=workflow_action):
+            return self._workflow_denied(doc, workflow_action, denied_message)
+        try:
+            service(doc, request.user, request.data.get("notes", ""))
+        except ValidationError as e:
+            return Response(
+                {"detail": e.messages[0] if getattr(e, "messages", None) else str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        doc.refresh_from_db()
+        return Response(DocumentSerializer(doc).data)
+
     @action(detail=True, methods=["post"])
     def submit(self, request, pk=None):
+        from django.core.exceptions import ValidationError
         from apps.governance.services import user_has_document_permission
 
         doc = self.get_object()
@@ -141,27 +173,40 @@ class DocumentViewSet(PlantPayloadWriteGuardMixin, viewsets.ModelViewSet):
                 {"detail": _("Non hai i permessi per inviare in revisione questo documento.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
-        services.submit_for_review(doc, request.user)
+        try:
+            services.submit_for_review(doc, request.user)
+        except ValidationError as e:
+            return Response(
+                {"detail": e.messages[0] if getattr(e, "messages", None) else str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        doc.refresh_from_db()
         return Response(DocumentSerializer(doc).data)
 
     @action(detail=True, methods=["post"])
     def approve(self, request, pk=None):
-        from apps.governance.services import user_has_document_permission
-
-        doc = self.get_object()
-        if not user_has_document_permission(request.user, doc, action="approve"):
-            return Response(
-                {"detail": _("Non hai i permessi per approvare questo documento.")},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-        services.approve_document(doc, request.user, request.data.get("notes", ""))
-        return Response(DocumentSerializer(doc).data)
+        return self._run_workflow(
+            request, self.get_object(), "approve", services.approve_document,
+            _("Non hai i permessi per approvare questo documento."),
+        )
 
     @action(detail=True, methods=["post"])
     def reject(self, request, pk=None):
-        doc = self.get_object()
-        services.reject_document(doc, request.user, request.data.get("notes", ""))
-        return Response(DocumentSerializer(doc).data)
+        # Il rifiuto interrompe un iter di approvazione: richiede lo stesso
+        # permesso della revisione (prima era aperto a chiunque scrivesse).
+        return self._run_workflow(
+            request, self.get_object(), "review", services.reject_document,
+            _("Non hai i permessi per respingere questo documento."),
+        )
+
+    @action(detail=True, methods=["post"])
+    def archive(self, request, pk=None):
+        # Mandare fuori vigore un documento approvato equivale a revocarne
+        # l'approvazione: stesso permesso dell'approvazione.
+        return self._run_workflow(
+            request, self.get_object(), "approve", services.archive_document,
+            _("Non hai i permessi per archiviare questo documento."),
+        )
 
     @action(detail=False, methods=["get"])
     def expiring(self, request):
