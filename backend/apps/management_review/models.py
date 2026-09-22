@@ -164,6 +164,12 @@ class ReviewAgendaItem(BaseModel):
     order = models.PositiveSmallIntegerField(default=0)
     mandatory = models.BooleanField(default=False)
     discussion = models.TextField(blank=True)
+    # Bozza IA della discussione (M20): resta separata dal verbale finché una
+    # persona non la accetta, anche modificata (CLAUDE.md #9, AI Act art. 50).
+    # `discussion_meta` dice se il testo è assistito dall'IA e chi lo ha validato.
+    discussion_meta = models.JSONField(default=dict, blank=True)
+    discussion_draft = models.TextField(blank=True)
+    discussion_draft_meta = models.JSONField(default=dict, blank=True)
 
     class Meta:
         ordering = ["order", "created_at"]

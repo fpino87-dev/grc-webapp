@@ -49,6 +49,11 @@ export interface ReviewAgendaItem {
   order: number;
   mandatory: boolean;
   discussion: string;
+  /** Provenienza del testo nel verbale: assistito dall'IA, chi l'ha validato. */
+  discussion_meta?: Record<string, any>;
+  /** Bozza IA in attesa di essere accettata o scartata. */
+  discussion_draft?: string;
+  discussion_draft_meta?: Record<string, any>;
   updated_at: string;
 }
 
@@ -214,6 +219,21 @@ export const managementReviewApi = {
 
   deleteAgendaItem: (id: string) =>
     apiClient.delete(`/management-review/agenda-items/${id}/`).then((r) => r.data),
+
+  // Bozza IA della discussione di un punto: la scrive il modello, la accetta
+  // (anche modificata) una persona.
+  draftAgendaDiscussion: (id: string, lang: string) =>
+    apiClient
+      .post<ReviewAgendaItem>(`/management-review/agenda-items/${id}/discussion-draft/`, { lang })
+      .then((r) => r.data),
+  discardAgendaDraft: (id: string) =>
+    apiClient
+      .delete<ReviewAgendaItem>(`/management-review/agenda-items/${id}/discussion-draft/`)
+      .then((r) => r.data),
+  acceptAgendaDiscussion: (id: string, text: string) =>
+    apiClient
+      .post<ReviewAgendaItem>(`/management-review/agenda-items/${id}/discussion/`, { text })
+      .then((r) => r.data),
 
   createAction: (data: CreateActionPayload) =>
     apiClient.post<ReviewAction>("/management-review/review-actions/", data).then((r) => r.data),

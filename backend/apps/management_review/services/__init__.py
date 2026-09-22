@@ -6,6 +6,8 @@ Servizi del modulo Revisione di Direzione (M13), organizzati per area:
 - snapshot.py — dati congelati per la riunione (compliance, documenti, rischi,
                 incidenti, PDCA/task, KPI, audit, azioni precedenti, siti)
 - summary.py  — sintesi executive con bozza IA (M20) e accettazione umana
+- agenda_ai.py — bozza IA della discussione dei singoli punti dell'ordine del
+                giorno, con la stessa accettazione umana
 
 L'API pubblica resta `apps.management_review.services.<funzione>`.
 """
@@ -33,6 +35,11 @@ from .review import (
     update_review,
     update_review_action,
 )
+from .agenda_ai import (
+    accept_agenda_discussion,
+    discard_agenda_draft,
+    draft_agenda_discussion,
+)
 from .snapshot import (
     SNAPSHOT_LIST_LIMIT,
     generate_snapshot,
@@ -48,7 +55,8 @@ from .summary import (
 __all__ = [
     "MINUTES_FIELDS", "SNAPSHOT_LIST_LIMIT", "approving_member", "can_approve",
     "participants_from_body", "set_participants", "set_report_logo",
-    "accept_executive_summary", "add_agenda_item", "approve_documents_by_resolution",
+    "accept_agenda_discussion", "accept_executive_summary", "add_agenda_item",
+    "approve_documents_by_resolution", "discard_agenda_draft", "draft_agenda_discussion",
     "approve_review", "complete_review",
     "create_review", "create_review_action", "delete_agenda_item", "delete_review_action",
     "discard_summary_draft", "draft_executive_summary", "ensure_iso_agenda", "generate_snapshot",

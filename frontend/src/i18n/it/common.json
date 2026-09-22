@@ -4928,7 +4928,8 @@
       "col_compliance": "% compliant",
       "open_incidents": "Incidenti aperti",
       "objectives_section": "Obiettivi di sicurezza (§6.2)",
-      "objectives_list": "Stato degli obiettivi"
+      "objectives_list": "Stato degli obiettivi",
+      "docs_pending_empty": "Nessun documento obbligatorio in attesa di approvazione."
     },
     "participants": {
       "heading": "Convocati e presenze",
@@ -4999,7 +5000,15 @@
         "feedback_parti": "Es. esiti di audit dei clienti, reclami, segnalazioni di fornitori o del personale...",
         "rischi": "Il profilo di rischio è accettabile? I piani di trattamento procedono? Le accettazioni in scadenza vanno rinnovate?",
         "miglioramento": "Quali opportunità di miglioramento si decide di perseguire?"
-      }
+      },
+      "ai_draft": "Bozza con IA",
+      "ai_working": "Generazione…",
+      "ai_retry": "Rigenera",
+      "ai_discard": "Scarta",
+      "ai_accept": "Accetta e salva nel verbale",
+      "ai_draft_meta": "Bozza generata da {{model}}: rileggila e, se serve, modificala. Entra nel verbale solo quando la accetti.",
+      "ai_note": "Testo assistito dall'IA ({{model}}), verificato e accettato da {{name}}.",
+      "ai_error": "Bozza non disponibile: intelligenza artificiale non raggiungibile o non configurata."
     },
     "decision_type": {
       "miglioramento": "Miglioramento",
@@ -5059,7 +5068,8 @@
       "hint": "Seleziona i documenti approvati dall'organo: erediteranno la delibera {{ref}} del {{date}}.",
       "needs_resolution": "Registra prima l'approvazione del riesame come delibera dell'organo: i documenti ne ereditano gli estremi.",
       "done": "{{count}} documenti mandati in vigore.",
-      "approve": "Approva i documenti deliberati ({{count}})"
+      "approve": "Approva i documenti deliberati ({{count}})",
+      "empty": "Nessun documento obbligatorio in attesa di approvazione in questo perimetro."
     }
   },
   "objectives": {

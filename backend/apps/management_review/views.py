@@ -267,6 +267,41 @@ class ReviewAgendaItemViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         except DjangoValidationError as e:
             raise _drf_error(e) from e
 
+    def _run(self, fn, *args, **kwargs):
+        try:
+            return fn(*args, **kwargs)
+        except DjangoValidationError as e:
+            raise _drf_error(e) from e
+
+    @action(detail=True, methods=["post", "delete"], url_path="discussion-draft")
+    def discussion_draft(self, request, pk=None):
+        """Bozza IA della discussione del punto; DELETE la scarta."""
+        from apps.ai_engine.router import LlmUnavailable
+
+        item = self.get_object()
+        if request.method == "DELETE":
+            item = self._run(services.discard_agenda_draft, item, request.user)
+            return Response(ReviewAgendaItemSerializer(item).data)
+
+        lang = (request.data.get("lang") or "it")[:2]
+        try:
+            self._run(services.draft_agenda_discussion, item, request.user, lang)
+        except LlmUnavailable:
+            return Response({"error": "ai_unavailable"}, status=503)
+        except ValueError as e:
+            return Response({"error": str(e), "code": "ai_not_configured"}, status=400)
+        item.refresh_from_db()
+        return Response(ReviewAgendaItemSerializer(item).data)
+
+    @action(detail=True, methods=["post"])
+    def discussion(self, request, pk=None):
+        """Porta nel verbale la discussione del punto (anche modificata)."""
+        item = self._run(
+            services.accept_agenda_discussion, self.get_object(),
+            request.data.get("text", ""), request.user,
+        )
+        return Response(ReviewAgendaItemSerializer(item).data)
+
 
 class ReviewActionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = _action_queryset().select_related("review")

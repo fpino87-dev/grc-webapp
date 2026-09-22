@@ -105,9 +105,19 @@ export function SnapSection({ title, children, defaultOpen = true }: { title: st
 }
 
 /** Elenco sintetico per la direzione: nascosto se vuoto, "altri N" se troncato. */
-export function DetailTable({ title, headers, rows, total }: { title?: string; headers: string[]; rows: React.ReactNode[][]; total?: number }) {
+export function DetailTable({ title, headers, rows, total, empty }: { title?: string; headers: string[]; rows: React.ReactNode[][]; total?: number; empty?: string }) {
   const { t } = useTranslation();
-  if (rows.length === 0) return null;
+  if (rows.length === 0) {
+    // Con `empty` la sezione resta visibile e dichiara che non c'è nulla:
+    // per la direzione "nessuno" è un'informazione, non un vuoto.
+    if (!empty) return null;
+    return (
+      <div className="mt-3">
+        {title && <p className="text-xs font-semibold text-gray-600 mb-1">{title}</p>}
+        <p className="text-xs text-gray-500 italic">{empty}</p>
+      </div>
+    );
+  }
   const rest = (total ?? rows.length) - rows.length;
   return (
     <div className="mt-3">

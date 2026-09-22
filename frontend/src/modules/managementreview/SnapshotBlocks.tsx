@@ -311,6 +311,7 @@ export function DocumentsBlock({ snap }: { snap: Snap }) {
           x.owner || "—", fmtDate(x.created_at),
         ])}
         total={d.non_approvati_obbligatori}
+        empty={t("management_review.snap.docs_pending_empty")}
       />
       <DetailTable
         title={t("management_review.snap.docs_expired")}

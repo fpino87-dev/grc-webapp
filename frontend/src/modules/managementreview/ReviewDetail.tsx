@@ -127,7 +127,11 @@ export function ReviewDetail({ review, users, plants, onClose }: { review: Manag
   const locked = isApproved || !isGovernance;
   const hasSnapshot = !!review.snapshot_generated_at;
   // Snapshot generati prima dei dettagli: solo contatori.
-  const legacySnapshot = !!snap && !("azioni_precedenti" in snap);
+  const legacySnapshot = !!snap && (
+    !("azioni_precedenti" in snap)
+    // snapshot congelati prima dei documenti obbligatori non approvati
+    || !("elenco_non_approvati" in ((snap.documenti as Record<string, unknown>) ?? {}))
+  );
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">

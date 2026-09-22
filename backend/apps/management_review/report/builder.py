@@ -556,6 +556,18 @@ def build_report(review) -> dict:
             blocks = list(DATA_BLOCKS.get(item.code, lambda s: [])(snap))
             blocks.append({"type": "paragraph", "label": _("Discussione"),
                            "text": item.discussion.strip() or _("Nessuna annotazione.")})
+            # Trasparenza (AI Act art. 50): il lettore del verbale deve sapere
+            # quali testi sono assistiti dall'IA e chi li ha fatti propri.
+            discussion_meta = item.discussion_meta or {}
+            if item.discussion.strip() and discussion_meta.get("ai_assisted"):
+                blocks.append({"type": "paragraph", "label": None, "text": _(
+                    "Testo redatto con il supporto dell'intelligenza artificiale%(edited)s, "
+                    "verificato e accettato da %(who)s il %(when)s."
+                ) % {
+                    "edited": _(" e modificato") if discussion_meta.get("edited") else "",
+                    "who": discussion_meta.get("accepted_by_name") or "—",
+                    "when": fmt_date(discussion_meta.get("accepted_at")),
+                }})
             decisions = [a for a in actions if a.agenda_item_id == item.pk]
             if decisions:
                 blocks.append(_table(_("Decisioni"), DECISION_HEADERS, _decision_rows(decisions)))

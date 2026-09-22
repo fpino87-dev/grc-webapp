@@ -4928,7 +4928,8 @@
       "col_compliance": "% uyumlu",
       "open_incidents": "Açık olaylar",
       "objectives_section": "Güvenlik hedefleri (§6.2)",
-      "objectives_list": "Hedeflerin durumu"
+      "objectives_list": "Hedeflerin durumu",
+      "docs_pending_empty": "Onay bekleyen zorunlu belge yok."
     },
     "participants": {
       "heading": "Davetliler ve katılım",
@@ -4999,7 +5000,15 @@
         "feedback_parti": "Örn. müşteri denetimi sonuçları, şikâyetler, tedarikçi veya çalışan bildirimleri...",
         "rischi": "Risk profili kabul edilebilir mi? İşleme planları ilerliyor mu? Süresi dolan kabuller yenilenmeli mi?",
         "miglioramento": "Hangi iyileştirme fırsatlarının izlenmesine karar verildi?"
-      }
+      },
+      "ai_draft": "YZ taslağı",
+      "ai_working": "Oluşturuluyor…",
+      "ai_retry": "Yeniden oluştur",
+      "ai_discard": "Vazgeç",
+      "ai_accept": "Kabul et ve tutanağa kaydet",
+      "ai_draft_meta": "{{model}} tarafından oluşturulan taslak: okuyun ve gerekirse düzenleyin. Yalnızca kabul ettiğinizde tutanağa girer.",
+      "ai_note": "YZ destekli metin ({{model}}), {{name}} tarafından doğrulanıp kabul edildi.",
+      "ai_error": "Taslak kullanılamıyor: yapay zekâ erişilemiyor veya yapılandırılmamış."
     },
     "decision_type": {
       "miglioramento": "İyileştirme",
@@ -5059,7 +5068,8 @@
       "hint": "Organın onayladığı belgeleri seçin: {{date}} tarihli {{ref}} sayılı kararı devralacaklar.",
       "needs_resolution": "Önce gözden geçirme onayını organ kararı olarak kaydedin: belgeler karar bilgilerini devralır.",
       "done": "{{count}} belge yürürlüğe girdi.",
-      "approve": "Karara bağlanan belgeleri onayla ({{count}})"
+      "approve": "Karara bağlanan belgeleri onayla ({{count}})",
+      "empty": "Bu kapsamda onay bekleyen zorunlu belge yok."
     }
   },
   "objectives": {

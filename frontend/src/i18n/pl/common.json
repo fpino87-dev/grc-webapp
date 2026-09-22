@@ -4928,7 +4928,8 @@
       "col_compliance": "% zgodności",
       "open_incidents": "Otwarte incydenty",
       "objectives_section": "Cele bezpieczeństwa (§6.2)",
-      "objectives_list": "Status celów"
+      "objectives_list": "Status celów",
+      "docs_pending_empty": "Brak dokumentów obowiązkowych oczekujących na zatwierdzenie."
     },
     "participants": {
       "heading": "Zaproszeni i obecność",
@@ -4999,7 +5000,15 @@
         "feedback_parti": "Np. wyniki audytów klientów, reklamacje, zgłoszenia dostawców lub pracowników...",
         "rischi": "Czy profil ryzyka jest akceptowalny? Czy plany postępowania są realizowane? Czy odnowić wygasające akceptacje?",
         "miglioramento": "Które możliwości doskonalenia postanowiono realizować?"
-      }
+      },
+      "ai_draft": "Szkic AI",
+      "ai_working": "Generowanie…",
+      "ai_retry": "Wygeneruj ponownie",
+      "ai_discard": "Odrzuć",
+      "ai_accept": "Zaakceptuj i zapisz w protokole",
+      "ai_draft_meta": "Szkic wygenerowany przez {{model}}: przeczytaj go i w razie potrzeby popraw. Trafia do protokołu dopiero po akceptacji.",
+      "ai_note": "Tekst wspomagany przez AI ({{model}}), zweryfikowany i zaakceptowany przez {{name}}.",
+      "ai_error": "Szkic niedostępny: AI nieosiągalna lub nieskonfigurowana."
     },
     "decision_type": {
       "miglioramento": "Doskonalenie",
@@ -5059,7 +5068,8 @@
       "hint": "Wybierz dokumenty zatwierdzone przez organ: odziedziczą uchwałę {{ref}} z {{date}}.",
       "needs_resolution": "Najpierw zarejestruj zatwierdzenie przeglądu jako uchwałę organu: dokumenty przejmą jej dane.",
       "done": "{{count}} dokumentów weszło w życie.",
-      "approve": "Zatwierdź uchwalone dokumenty ({{count}})"
+      "approve": "Zatwierdź uchwalone dokumenty ({{count}})",
+      "empty": "Brak dokumentów obowiązkowych oczekujących na zatwierdzenie w tym zakresie."
     }
   },
   "objectives": {

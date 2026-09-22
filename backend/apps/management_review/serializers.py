@@ -54,8 +54,17 @@ class ReviewActionSerializer(serializers.ModelSerializer):
 class ReviewAgendaItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReviewAgendaItem
-        fields = ["id", "review", "code", "title", "order", "mandatory", "discussion", "updated_at"]
-        read_only_fields = ["id", "code", "order", "mandatory", "updated_at"]
+        fields = [
+            "id", "review", "code", "title", "order", "mandatory", "discussion",
+            "discussion_meta", "discussion_draft", "discussion_draft_meta", "updated_at",
+        ]
+        # La bozza IA e la sua provenienza non si scrivono via PATCH: passano
+        # dalle azioni discussion-draft / discussion, che registrano chi ha
+        # validato il testo (CLAUDE.md #9).
+        read_only_fields = [
+            "id", "code", "order", "mandatory", "updated_at",
+            "discussion_meta", "discussion_draft", "discussion_draft_meta",
+        ]
 
     def validate(self, attrs):
         if self.instance is not None:

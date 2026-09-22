@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
 import {
   managementReviewApi, reviewErrorMessage,
   type DecisionType, type ManagementReview, type ReviewAction, type ReviewAgendaItem,
@@ -259,6 +260,28 @@ function AgendaItemCard({
     onSuccess: () => { invalidate(qc); setError(""); setEdited(null); },
     onError: e => setError(reviewErrorMessage(e, t("management_review.agenda.save_error"))),
   });
+  // Bozza IA: la genera il modello, la accetta (o la scarta) una persona.
+  const draft = item.discussion_draft ?? "";
+  const draftMeta = item.discussion_draft_meta ?? {};
+  const meta = item.discussion_meta ?? {};
+  const aiText = edited ?? (draft || item.discussion);
+
+  const askAi = useMutation({
+    mutationFn: () => managementReviewApi.draftAgendaDiscussion(item.id, (i18n.language || "it").slice(0, 2)),
+    onSuccess: () => { invalidate(qc); setError(""); setEdited(null); },
+    onError: e => setError(reviewErrorMessage(e, t("management_review.agenda.ai_error"))),
+  });
+  const acceptAi = useMutation({
+    mutationFn: () => managementReviewApi.acceptAgendaDiscussion(item.id, aiText),
+    onSuccess: () => { invalidate(qc); setError(""); setEdited(null); },
+    onError: e => setError(reviewErrorMessage(e, t("management_review.agenda.save_error"))),
+  });
+  const discardAi = useMutation({
+    mutationFn: () => managementReviewApi.discardAgendaDraft(item.id),
+    onSuccess: () => { invalidate(qc); setEdited(null); },
+    onError: e => setError(reviewErrorMessage(e, t("management_review.agenda.save_error"))),
+  });
+
   const remove = useMutation({
     mutationFn: () => managementReviewApi.deleteAgendaItem(item.id),
     onSuccess: () => invalidate(qc),
@@ -300,6 +323,35 @@ function AgendaItemCard({
             <label className="block text-xs font-medium text-gray-600 mb-1">{t("management_review.agenda.discussion")}</label>
             {locked ? (
               <p className="text-sm text-gray-700 whitespace-pre-line">{item.discussion || <span className="text-gray-400">—</span>}</p>
+            ) : draft ? (
+              // La bozza non entra nel verbale da sola: va riletta e accettata.
+              <div className="border border-indigo-200 bg-indigo-50/40 rounded p-2 space-y-2">
+                <p className="text-xs text-indigo-700">
+                  {t("management_review.agenda.ai_draft_meta", {
+                    model: `${draftMeta.provider}/${draftMeta.model}`,
+                  })}
+                </p>
+                <textarea
+                  rows={5}
+                  value={aiText}
+                  onChange={e => setEdited(e.target.value)}
+                  className="w-full border rounded px-3 py-2 text-sm bg-white"
+                />
+                <div className="flex gap-2">
+                  <button onClick={() => acceptAi.mutate()} disabled={acceptAi.isPending || !aiText.trim()}
+                          className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 disabled:opacity-50">
+                    {acceptAi.isPending ? t("management_review.agenda.saving") : t("management_review.agenda.ai_accept")}
+                  </button>
+                  <button onClick={() => askAi.mutate()} disabled={askAi.isPending}
+                          className="px-3 py-1 border border-indigo-300 text-indigo-700 rounded text-xs hover:bg-indigo-50 disabled:opacity-50">
+                    {askAi.isPending ? t("management_review.agenda.ai_working") : t("management_review.agenda.ai_retry")}
+                  </button>
+                  <button onClick={() => discardAi.mutate()} disabled={discardAi.isPending}
+                          className="px-3 py-1 border rounded text-xs text-gray-600">
+                    {t("management_review.agenda.ai_discard")}
+                  </button>
+                </div>
+              </div>
             ) : (
               <>
                 <textarea
@@ -309,13 +361,29 @@ function AgendaItemCard({
                   placeholder={t(`management_review.agenda.hints.${item.code}`, t("management_review.agenda.discussion_ph"))}
                   className="w-full border rounded px-3 py-2 text-sm"
                 />
-                {dirty && (
-                  <div className="flex gap-2 mt-1">
-                    <button onClick={() => save.mutate()} disabled={save.isPending} className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50">
-                      {save.isPending ? t("management_review.agenda.saving") : t("management_review.agenda.save")}
+                <div className="flex gap-2 mt-1">
+                  {dirty && (
+                    <>
+                      <button onClick={() => save.mutate()} disabled={save.isPending} className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50">
+                        {save.isPending ? t("management_review.agenda.saving") : t("management_review.agenda.save")}
+                      </button>
+                      <button onClick={() => setEdited(null)} className="px-3 py-1 border rounded text-xs text-gray-600">{t("management_review.agenda.cancel")}</button>
+                    </>
+                  )}
+                  {snap && !dirty && (
+                    <button onClick={() => askAi.mutate()} disabled={askAi.isPending}
+                            className="px-3 py-1 border border-indigo-300 text-indigo-700 rounded text-xs hover:bg-indigo-50 disabled:opacity-50">
+                      {askAi.isPending ? t("management_review.agenda.ai_working") : t("management_review.agenda.ai_draft")}
                     </button>
-                    <button onClick={() => setEdited(null)} className="px-3 py-1 border rounded text-xs text-gray-600">{t("management_review.agenda.cancel")}</button>
-                  </div>
+                  )}
+                </div>
+                {meta.ai_assisted && (
+                  <p className="text-[10px] text-gray-500 mt-1">
+                    {t("management_review.agenda.ai_note", {
+                      name: meta.accepted_by_name ?? "—",
+                      model: `${meta.provider}/${meta.model}`,
+                    })}
+                  </p>
                 )}
               </>
             )}

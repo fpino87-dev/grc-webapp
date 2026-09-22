@@ -46,7 +46,17 @@ export function DeliberatedDocuments({ review, snap, isGovernance }: {
     },
   });
 
-  if (!isGovernance || pending.length === 0) return null;
+  // Il pannello resta visibile anche senza documenti in attesa: dice che non
+  // ce ne sono, invece di sparire e lasciar credere che manchi la funzione.
+  if (!isGovernance || !snap) return null;
+  if (pending.length === 0) {
+    return (
+      <section className="border border-gray-200 rounded-lg p-4">
+        <h3 className="text-sm font-semibold text-gray-800">{t("management_review.deliberated.title")}</h3>
+        <p className="text-xs text-gray-500 mt-1">{t("management_review.deliberated.empty")}</p>
+      </section>
+    );
+  }
 
   const toggle = (id: string) =>
     setSelected(s => (s.includes(id) ? s.filter(x => x !== id) : [...s, id]));
