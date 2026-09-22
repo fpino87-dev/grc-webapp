@@ -301,7 +301,7 @@ export function DocumentsBlock({ snap, approvedHere }: { snap: Snap; approvedHer
         title={t("management_review.snap.docs_pending")}
         headers={[
           t("management_review.snap.col_document"), t("documents.fields.document_type"),
-          t("documents.table.status"), t("management_review.snap.col_owner"),
+          t("documents.table.status"), t("management_review.snap.col_version"),
           t("management_review.snap.col_created"),
         ]}
         rows={((d.elenco_non_approvati ?? []) as SnapPendingDoc[]).map(x => [
@@ -310,7 +310,7 @@ export function DocumentsBlock({ snap, approvedHere }: { snap: Snap; approvedHer
           approvedHere?.has(x.id)
             ? <span className="text-green-700 font-medium">{t("management_review.deliberated.approved_here")}</span>
             : <span className="text-yellow-700">{DOC_STATUS_KEY[x.status] ? t(DOC_STATUS_KEY[x.status]) : x.status}</span>,
-          x.owner || "—", fmtDate(x.created_at),
+          x.version || "—", fmtDate(x.created_at),
         ])}
         total={d.non_approvati_obbligatori}
         empty={t("management_review.snap.docs_pending_empty")}

@@ -4931,7 +4931,8 @@
       "open_incidents": "Otwarte incydenty",
       "objectives_section": "Cele bezpieczeństwa (§6.2)",
       "objectives_list": "Status celów",
-      "docs_pending_empty": "Brak dokumentów obowiązkowych oczekujących na zatwierdzenie."
+      "docs_pending_empty": "Brak dokumentów obowiązkowych oczekujących na zatwierdzenie.",
+      "col_version": "Wersja"
     },
     "participants": {
       "heading": "Zaproszeni i obecność",

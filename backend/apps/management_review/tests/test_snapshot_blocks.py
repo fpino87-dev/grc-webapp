@@ -140,7 +140,6 @@ def test_pending_mandatory_documents_in_snapshot(plant, user):
     assert riga["status"] == "revisione"
     assert riga["document_code"] == "D-002"
     assert riga["document_type"] == "procedura"
-    assert riga["owner"] == user.email
     assert riga["created_at"]
 
 
@@ -170,3 +169,38 @@ def test_pending_documents_in_report(plant, user):
     # Il documento compare con il suo codice, lo stato e la data di creazione
     assert tables[0]["rows"][0][0] == "[D-001] Policy accessi"
     assert tables[0]["rows"][0][2]["text"] == "Bozza"
+
+
+def test_pending_documents_carry_the_revision(plant, user):
+    """La riga porta la revisione scritta sul frontespizio, non l'owner."""
+    from apps.documents.services import add_version
+
+    doc = _document(plant, user, "Politica accessi", document_code="D-010")
+    add_version(doc, "policy.pdf", "abc", "p/v1.pdf", user, "", 10, version_label="Rev. 03")
+    senza_file = _document(plant, user, "Politica senza file")
+
+    docs = generate_snapshot(_review(plant, user, timezone.localdate()), user)["documenti"]
+    righe = {d["title"]: d for d in docs["elenco_non_approvati"]}
+
+    assert righe["Politica accessi"]["version"] == "Rev. 03"
+    assert righe["Politica senza file"]["version"] is None
+    assert "owner" not in righe["Politica accessi"]
+
+
+def test_report_shows_revision_column(plant, user):
+    from apps.documents.services import add_version
+    from apps.management_review.report.builder import build_report
+
+    doc = _document(plant, user, "Politica accessi", document_code="D-011")
+    add_version(doc, "p.pdf", "abc", "p/v1.pdf", user, "", 10, version_label="Rev. 07")
+    review = _review(plant, user, timezone.localdate())
+    generate_snapshot(review, user)
+    review.refresh_from_db()
+
+    report = build_report(review)
+    table = next(
+        b for section in report["sections"] for b in section.get("blocks", [])
+        if b.get("type") == "table" and str(b.get("title") or "") == "Documenti obbligatori non ancora approvati"
+    )
+    assert [str(h) for h in table["headers"]] == ["Documento", "Tipo", "Stato", "Revisione", "Creato il"]
+    assert table["rows"][0][3] == "Rev. 07"

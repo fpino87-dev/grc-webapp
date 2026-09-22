@@ -4931,7 +4931,8 @@
       "open_incidents": "Açık olaylar",
       "objectives_section": "Güvenlik hedefleri (§6.2)",
       "objectives_list": "Hedeflerin durumu",
-      "docs_pending_empty": "Onay bekleyen zorunlu belge yok."
+      "docs_pending_empty": "Onay bekleyen zorunlu belge yok.",
+      "col_version": "Revizyon"
     },
     "participants": {
       "heading": "Davetliler ve katılım",

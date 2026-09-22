@@ -7,7 +7,7 @@ import { fmtDate } from "./shared";
 
 type PendingDoc = {
   id: string; title: string; document_code: string; document_type: string;
-  status: string; owner: string; created_at: string | null;
+  status: string; version: string | null; created_at: string | null;
 };
 
 /**
@@ -115,7 +115,7 @@ export function DeliberatedDocuments({ review, snap, isGovernance }: {
             />
             <span>
               <span className="font-medium">{d.document_code ? `[${d.document_code}] ` : ""}{d.title}</span>
-              <span className="text-gray-400"> · {fmtDate(d.created_at)}</span>
+              <span className="text-gray-400"> · {d.version || fmtDate(d.created_at)}</span>
             </span>
           </label>
         ))}

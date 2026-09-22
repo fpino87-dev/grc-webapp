@@ -318,13 +318,13 @@ def _document_blocks(snap, ctx=None) -> list:
     if "elenco_non_approvati" in d:
         blocks.append(_table(
             _("Documenti obbligatori non ancora approvati"),
-            [_("Documento"), _("Tipo"), _("Stato"), _("Owner"), _("Creato il")],
+            [_("Documento"), _("Tipo"), _("Stato"), _("Revisione"), _("Creato il")],
             [[_doc_label(x),
               DOC_TYPE.get(x.get("document_type"), _dash(x.get("document_type"))),
               {"text": _("Approvato in questa seduta"), "tone": "green", "bold": True}
               if str(x.get("id")) in approved_here
               else {"text": DOC_STATUS.get(x.get("status"), _dash(x.get("status"))), "tone": "orange"},
-              _dash(x.get("owner")), fmt_date(x.get("created_at"))]
+              _dash(x.get("version")), fmt_date(x.get("created_at"))]
              for x in d.get("elenco_non_approvati", [])],
             d.get("non_approvati_obbligatori"),
             empty=_("Tutti i documenti obbligatori del perimetro sono approvati."),

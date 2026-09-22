@@ -4931,7 +4931,8 @@
       "open_incidents": "Incidenti aperti",
       "objectives_section": "Obiettivi di sicurezza (§6.2)",
       "objectives_list": "Stato degli obiettivi",
-      "docs_pending_empty": "Nessun documento obbligatorio in attesa di approvazione."
+      "docs_pending_empty": "Nessun documento obbligatorio in attesa di approvazione.",
+      "col_version": "Revisione"
     },
     "participants": {
       "heading": "Convocati e presenze",

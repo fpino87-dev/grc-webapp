@@ -466,6 +466,26 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     pending_mandatory_q = Q(is_mandatory=True, status__in=PENDING_STATUSES)
 
     def _pending_doc_items(q):
+        # La revisione che sta per essere approvata, come scritta sul
+        # frontespizio del file ("Rev. 03"): è ciò che l'auditor confronta con
+        # il documento in mano. Senza etichetta vale il contatore interno.
+        from django.db.models import OuterRef, Subquery
+        from apps.documents.models import DocumentVersion
+
+        latest = DocumentVersion.objects.filter(document=OuterRef("pk")).order_by("-version_number")
+        rows = (
+            docs_qs.filter(q)
+            .annotate(
+                v_label=Subquery(latest.values("version_label")[:1]),
+                v_number=Subquery(latest.values("version_number")[:1]),
+            )
+            # I più vecchi per primi: sono quelli fermi da più tempo.
+            .order_by("created_at")
+            .values(
+                "id", "title", "document_code", "document_type", "status", "created_at",
+                "v_label", "v_number",
+            )[:SNAPSHOT_LIST_LIMIT]
+        )
         return [
             {
                 "id": str(d["id"]),
@@ -473,14 +493,10 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
                 "document_code": d["document_code"],
                 "document_type": d["document_type"],
                 "status": d["status"],
-                "owner": _display_name(d["owner__first_name"], d["owner__last_name"], d["owner__email"]),
+                "version": d["v_label"] or (f"v{d['v_number']}" if d["v_number"] else None),
                 "created_at": _iso(d["created_at"]),
             }
-            # I più vecchi per primi: sono quelli fermi da più tempo.
-            for d in docs_qs.filter(q).order_by("created_at").values(
-                "id", "title", "document_code", "document_type", "status", "created_at",
-                "owner__first_name", "owner__last_name", "owner__email",
-            )[:SNAPSHOT_LIST_LIMIT]
+            for d in rows
         ]
 
     def _doc_items(q, order):

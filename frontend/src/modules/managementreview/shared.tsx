@@ -37,7 +37,8 @@ export type SnapDoc = { id: string; title: string; owner: string; review_due_dat
 // Documento obbligatorio non ancora approvato (elenco_non_approvati).
 export type SnapPendingDoc = {
   id: string; title: string; document_code: string; document_type: string;
-  status: string; owner: string; created_at: string | null;
+  /** Revisione come sul frontespizio ("Rev. 03"), o contatore interno. */
+  status: string; version: string | null; created_at: string | null;
 };
 export type SnapRisk = {
   id: string; name: string; asset: string | null; process: string | null;

@@ -4931,7 +4931,8 @@
       "open_incidents": "Open incidents",
       "objectives_section": "Security objectives (§6.2)",
       "objectives_list": "Objective status",
-      "docs_pending_empty": "No mandatory document awaiting approval."
+      "docs_pending_empty": "No mandatory document awaiting approval.",
+      "col_version": "Revision"
     },
     "participants": {
       "heading": "Invitees and attendance",
