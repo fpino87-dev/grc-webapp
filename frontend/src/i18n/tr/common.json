@@ -1734,7 +1734,9 @@
       "body_from_policy": "İş akışı politikasına göre",
       "notes": "Notlar",
       "resolution_badge": "Karar {{ref}}"
-    }
+    },
+    "unapproved_version": "Onaylanmamış sürüm",
+    "approved_version": "Yürürlükte: {{version}}"
   },
   "schedule": {
     "activity": {

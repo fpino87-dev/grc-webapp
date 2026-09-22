@@ -280,3 +280,86 @@ def test_upload_endpoint_accepts_version_label(document, user):
     assert resp.status_code == 201, resp.data
     assert resp.data["version_label"] == "2.1"
     assert resp.data["version_display"] == "2.1"
+
+
+# ── Collegamento approvazione ↔ versione ────────────────────────────────────
+
+def _upload(document, user, name="policy.pdf", label=""):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+    from apps.documents.services import add_version_with_file
+
+    return add_version_with_file(
+        document,
+        SimpleUploadedFile(name, b"%PDF-1.4 contenuto", content_type="application/pdf"),
+        user, "", label,
+    )
+
+
+@pytest.mark.django_db
+def test_approval_records_approved_version(document, user):
+    from apps.documents.models import DocumentApproval
+    from apps.documents.services import approve_document, approved_version, submit_for_review
+
+    v1 = _upload(document, user, label="Rev. 02")
+    submit_for_review(document, user)
+    approve_document(document, user)
+
+    record = DocumentApproval.objects.get(document=document, action="approve")
+    assert record.version_id == v1.pk
+    assert approved_version(document).version_label == "Rev. 02"
+
+
+@pytest.mark.django_db
+def test_mandatory_document_reopens_on_new_version(document, user):
+    from apps.documents.services import (
+        approve_document, approved_version, has_unapproved_version, submit_for_review,
+    )
+
+    document.is_mandatory = True
+    document.save(update_fields=["is_mandatory"])
+    v1 = _upload(document, user, label="Rev. 02")
+    submit_for_review(document, user)
+    approve_document(document, user)
+
+    v2 = _upload(document, user, name="policy2.pdf", label="Rev. 03")
+    document.refresh_from_db()
+
+    # il testo cambiato non resta in vigore: si riapre l'iter
+    assert document.status == "revisione"
+    # l'approvazione continua a puntare alla versione effettivamente approvata
+    assert approved_version(document).pk == v1.pk != v2.pk
+    # in revisione non si segnala "versione non approvata": lo dice lo stato
+    assert has_unapproved_version(document) is False
+
+
+@pytest.mark.django_db
+def test_optional_document_flags_unapproved_version(document, user):
+    from apps.documents.services import approve_document, has_unapproved_version, submit_for_review
+
+    document.is_mandatory = False
+    document.save(update_fields=["is_mandatory"])
+    _upload(document, user, label="1.0")
+    submit_for_review(document, user)
+    approve_document(document, user)
+    assert has_unapproved_version(document) is False
+
+    _upload(document, user, name="c2.pdf", label="1.1")
+    document.refresh_from_db()
+
+    assert document.status == "approvato"  # niente rientro forzato
+    assert has_unapproved_version(document) is True
+
+
+@pytest.mark.django_db
+def test_legacy_approval_without_version_is_not_flagged(document, user):
+    """Approvazioni registrate prima del collegamento: nessun falso allarme."""
+    from apps.documents.models import DocumentApproval
+    from apps.documents.services import has_unapproved_version
+
+    document.status = "approvato"
+    document.save(update_fields=["status"])
+    DocumentApproval.objects.create(document=document, action="approve", actor=user)
+    _upload(document, user)
+    document.refresh_from_db()
+
+    assert has_unapproved_version(document) is False

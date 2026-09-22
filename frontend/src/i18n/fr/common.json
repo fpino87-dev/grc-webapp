@@ -1734,7 +1734,9 @@
       "body_from_policy": "Selon la politique de flux",
       "notes": "Notes",
       "resolution_badge": "Délibération {{ref}}"
-    }
+    },
+    "unapproved_version": "Version non approuvée",
+    "approved_version": "En vigueur : {{version}}"
   },
   "schedule": {
     "activity": {

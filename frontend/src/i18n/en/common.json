@@ -1734,7 +1734,9 @@
       "body_from_policy": "As set by the workflow policy",
       "notes": "Notes",
       "resolution_badge": "Resolution {{ref}}"
-    }
+    },
+    "unapproved_version": "Version not approved",
+    "approved_version": "In force: {{version}}"
   },
   "schedule": {
     "activity": {

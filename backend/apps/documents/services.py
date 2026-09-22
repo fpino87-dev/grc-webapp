@@ -200,10 +200,14 @@ def approve_document(
         )
     # Atomica (P1-2): stato documento + record approvazione + audit append-only
     # vanno insieme; le notifiche restano fuori dalla transazione (best-effort, I/O).
+    # La versione in vigore è l'ultima caricata al momento dell'approvazione.
+    approved = document.versions.first()
+
     with transaction.atomic():
         document.save(update_fields=["status", "approved_at", "approver", "review_due_date", "updated_at"])
         DocumentApproval.objects.create(
             document=document, action="approve", actor=user, notes=notes,
+            version=approved,
             approval_mode=mode,
             governing_body=governing_body,
             resolution_ref=(resolution_ref or "").strip()[:100] if mode == "delibera" else "",
@@ -220,6 +224,7 @@ def approve_document(
                 "notes": (notes or "")[:200], "mode": mode,
                 "resolution_ref": (resolution_ref or "")[:100] if mode == "delibera" else "",
                 "resolution_date": str(resolution_date) if resolution_date else None,
+                "version": (approved.version_label or f"v{approved.version_number}") if approved else None,
             },
         )
     # Il documento è in vigore: i promemoria automatici aperti su di esso non
@@ -345,6 +350,67 @@ def add_version(
     return v
 
 
+def approved_version(document):
+    """Versione attualmente approvata, se l'approvazione la registra."""
+    record = (
+        document.approvals.filter(action="approve", version__isnull=False)
+        .order_by("-created_at").first()
+    )
+    return record.version if record else None
+
+
+def has_unapproved_version(document) -> bool:
+    """True se dopo l'ultima approvazione è stata caricata una nuova versione.
+
+    Vale solo per i documenti che risultano in vigore: per gli altri lo stato
+    dice già che non sono approvati. Sulle approvazioni registrate prima del
+    collegamento versione-approvazione non si segnala nulla, perché non si sa
+    quale versione fosse stata approvata.
+    """
+    if document.status != "approvato":
+        return False
+    latest = document.versions.first()
+    if latest is None:
+        return False
+    current = approved_version(document)
+    return current is not None and current.pk != latest.pk
+
+
+def _reopen_for_new_version(document, user, version):
+    """Nuova versione su un documento in vigore.
+
+    Per i documenti obbligatori il testo cambiato non resta in vigore senza una
+    nuova approvazione: il documento torna in revisione (§7.5.3, controllo delle
+    modifiche). Per gli altri lo stato non cambia e la nuova versione resta
+    segnalata come non ancora approvata.
+    """
+    if document.status != "approvato" or not document.is_mandatory:
+        return
+
+    document.status = "revisione"
+    document.save(update_fields=["status", "updated_at"])
+    log_action(
+        user=user,
+        action_code="document.reopened_by_new_version",
+        level="L2",
+        entity=document,
+        payload={
+            "id": str(document.pk),
+            "title": document.title,
+            "version": version.version_label or f"v{version.version_number}",
+        },
+    )
+    try:
+        from apps.governance.services import resolve_document_recipients
+        from apps.notifications.services import notify_document_review_needed
+
+        recipients = resolve_document_recipients(document, action="review")
+        if recipients:
+            notify_document_review_needed(document, recipients)
+    except Exception as exc:
+        logging.getLogger(__name__).warning("Documenti: notifica non inviata: %s", exc)
+
+
 def add_version_with_file(document, uploaded_file, user, change_summary="", version_label=""):
     validate_uploaded_file(uploaded_file)
 
@@ -398,6 +464,8 @@ def add_version_with_file(document, uploaded_file, user, change_summary="", vers
                 "file_name": original_name,
             },
         )
+
+    _reopen_for_new_version(document, user, version)
 
     if old_path:
         def _delete_old():

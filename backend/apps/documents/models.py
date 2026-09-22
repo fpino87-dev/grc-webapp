@@ -181,6 +181,17 @@ class DocumentApproval(BaseModel):
     )
     resolution_ref = models.CharField(max_length=100, blank=True)
     resolution_date = models.DateField(null=True, blank=True)
+    # Versione del file che è stata approvata: senza questo dato un documento
+    # con più versioni e una sola approvazione non dice QUALE versione sia in
+    # vigore (ISO/IEC 27001 §7.5.3, controllo delle modifiche). Nullo sulle
+    # approvazioni registrate prima di questo collegamento.
+    version = models.ForeignKey(
+        "DocumentVersion",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="approvals",
+    )
     # Riesame di direzione in cui la delibera è stata assunta. UUID e non FK per
     # non far dipendere M07 da M13 (stesso schema di ManagementReview.document_id).
     review_id = models.UUIDField(null=True, blank=True)

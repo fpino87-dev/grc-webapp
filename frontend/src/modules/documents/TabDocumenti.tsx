@@ -218,6 +218,11 @@ export function TabDocumenti() {
                           {t("documents.actions.download")}
                         </button>
                         <span className="text-[10px] text-gray-500">{doc.latest_version.version_display}</span>
+                        {doc.has_unapproved_version && (
+                          <span className="text-[10px] text-amber-700 bg-amber-50 rounded px-1 py-0.5">
+                            {t("documents.unapproved_version")}
+                          </span>
+                        )}
                       </div>
                     ) : (
                       <span className="text-gray-400">—</span>
@@ -256,6 +261,11 @@ export function TabDocumenti() {
                   <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{doc.review_due_date ? new Date(doc.review_due_date).toLocaleDateString(i18n.language || "it") : "—"}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">
                     {doc.approved_at ? new Date(doc.approved_at).toLocaleDateString(i18n.language || "it") : "—"}
+                    {doc.last_approval?.version && (
+                      <div className="text-[10px] text-gray-500">
+                        {t("documents.approved_version", { version: doc.last_approval.version.version_display })}
+                      </div>
+                    )}
                     {doc.last_approval?.mode === "delibera" && (
                       <div className="text-[10px] text-indigo-600">
                         {t("documents.approve.resolution_badge", { ref: doc.last_approval.resolution_ref })}

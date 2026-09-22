@@ -36,6 +36,7 @@ class DocumentApprovalSerializer(serializers.ModelSerializer):
 class DocumentSerializer(serializers.ModelSerializer):
     latest_version = serializers.SerializerMethodField(read_only=True)
     last_approval = serializers.SerializerMethodField(read_only=True)
+    has_unapproved_version = serializers.SerializerMethodField(read_only=True)
     plant_name = serializers.CharField(source="plant.name", read_only=True)
     plant_code = serializers.CharField(source="plant.code", read_only=True)
     shared_plant_names = serializers.SerializerMethodField(read_only=True)
@@ -63,8 +64,15 @@ class DocumentSerializer(serializers.ModelSerializer):
         )
         if record is None:
             return None
+        version = record.version
         return {
             "mode": record.approval_mode or "in_app",
+            "version": {
+                "id": str(version.pk),
+                "version_number": version.version_number,
+                "version_label": version.version_label,
+                "version_display": version.version_label or f"v{version.version_number}",
+            } if version is not None else None,
             "resolution_ref": record.resolution_ref,
             "resolution_date": record.resolution_date,
             "governing_body": record.governing_body.name if record.governing_body_id else None,
@@ -74,6 +82,13 @@ class DocumentSerializer(serializers.ModelSerializer):
             ) if record.actor_id else None,
             "recorded_at": record.created_at,
         }
+
+    def get_has_unapproved_version(self, obj):
+        """Documento in vigore su cui è stata caricata una versione successiva
+        a quella approvata: il testo cambiato non è (ancora) approvato."""
+        from .services import has_unapproved_version
+
+        return has_unapproved_version(obj)
 
     def get_latest_version(self, obj):
         version = obj.versions.first()

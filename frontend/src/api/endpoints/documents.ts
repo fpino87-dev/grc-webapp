@@ -25,6 +25,8 @@ export interface ApproveDocumentPayload {
 
 export interface DocumentApprovalInfo {
   mode: "in_app" | "delibera";
+  /** Versione del file effettivamente approvata (null sulle approvazioni storiche). */
+  version: { id: string; version_number: number; version_label: string; version_display: string } | null;
   resolution_ref: string;
   resolution_date: string | null;
   governing_body: string | null;
@@ -54,6 +56,8 @@ export interface Document {
   is_mandatory: boolean;
   approved_at: string | null;
   last_approval?: DocumentApprovalInfo | null;
+  /** In vigore, ma con una versione caricata dopo quella approvata. */
+  has_unapproved_version?: boolean;
   latest_version?: DocumentVersionSummary | null;
 }
 

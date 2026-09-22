@@ -1734,7 +1734,9 @@
       "body_from_policy": "Zgodnie z polityką obiegu",
       "notes": "Uwagi",
       "resolution_badge": "Uchwała {{ref}}"
-    }
+    },
+    "unapproved_version": "Wersja niezatwierdzona",
+    "approved_version": "Obowiązuje: {{version}}"
   },
   "schedule": {
     "activity": {

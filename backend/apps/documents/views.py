@@ -38,7 +38,7 @@ class DocumentViewSet(PlantPayloadWriteGuardMixin, viewsets.ModelViewSet):
         Prefetch(
             "approvals",
             queryset=DocumentApproval.objects.filter(action="approve")
-            .select_related("governing_body", "actor")
+            .select_related("governing_body", "actor", "version")
             .order_by("-created_at"),
             to_attr="approve_records",
         ),

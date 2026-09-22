@@ -10,6 +10,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ### Added
 
+- **L'approvazione dice quale versione è in vigore (M07)**: finora un documento con più versioni e una sola approvazione non permetteva di sapere **quale** versione fosse stata approvata, e caricando un nuovo file su un documento approvato il documento restava «approvato» con la data della vecchia approvazione — cioè un testo modificato risultava in vigore senza essere stato approvato (ISO/IEC 27001 §7.5.3, controllo delle modifiche). Ora:
+  - ogni approvazione registra la **versione approvata**, mostrata nell'elenco documenti accanto alla data («In vigore: Rev. 03»);
+  - caricare una nuova versione su un **documento obbligatorio** in vigore lo riporta **in revisione**, con registrazione nell'audit trail e avviso a chi deve revisionarlo: rientra così fra i documenti da approvare, anche nel riesame di direzione;
+  - per i documenti **non obbligatori** lo stato non cambia, ma la nuova versione è segnalata come **non approvata** nell'elenco;
+  - le approvazioni registrate prima di questa versione non indicano la versione approvata e non generano segnalazioni: restano lo storico.
+
 - **Numero di revisione del documento inserito da chi carica il file (M07)**: caricando una nuova versione si indica la **versione come appare sul frontespizio** («Rev. 03», «2.1», «Ed. 2 Rev. 1»), che compare poi nell'elenco documenti e negli NDA accanto al file. Il contatore interno resta separato e continua a garantire l'ordine dello storico: se l'etichetta non viene indicata si continua a vedere «v1», «v2». Le versioni già caricate non cambiano.
 
 - **Approvazione dei documenti per delibera dell'organo di governo (M07 + M13)**: le politiche che il CdA delibera in seduta ora si registrano come tali, invece di apparire approvate da una singola persona.
