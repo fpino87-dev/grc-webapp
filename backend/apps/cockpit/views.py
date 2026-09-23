@@ -96,15 +96,16 @@ class CockpitExplainView(APIView):
 
     def post(self, request, fingerprint):
         from apps.cockpit.services import ai_explain_insight
-        from apps.ai_engine.router import LlmUnavailable
+        from apps.ai_engine.router import AiNotConfigured, LlmUnavailable, ai_not_configured_message
 
         try:
             out = ai_explain_insight(fingerprint, user=request.user)
         except LlmUnavailable:
             return Response({"detail": "Servizio AI non disponibile. Riprova più tardi."},
                             status=status.HTTP_503_SERVICE_UNAVAILABLE)
-        except ValueError as exc:
-            return Response({"detail": str(exc)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        except AiNotConfigured:
+            return Response({"detail": ai_not_configured_message()},
+                            status=status.HTTP_503_SERVICE_UNAVAILABLE)
         if out is None:
             return Response({"detail": "insight non trovato."}, status=status.HTTP_404_NOT_FOUND)
         return Response(out)
@@ -122,7 +123,7 @@ class CockpitAssistantView(APIView):
 
     def post(self, request):
         from apps.cockpit.services import ai_assistant
-        from apps.ai_engine.router import LlmUnavailable
+        from apps.ai_engine.router import AiNotConfigured, LlmUnavailable, ai_not_configured_message
 
         question = (request.data.get("question") or "").strip()
         if not question:
@@ -141,8 +142,9 @@ class CockpitAssistantView(APIView):
         except LlmUnavailable:
             return Response({"detail": "Servizio AI non disponibile. Riprova più tardi."},
                             status=status.HTTP_503_SERVICE_UNAVAILABLE)
-        except ValueError as exc:
-            return Response({"detail": str(exc)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        except AiNotConfigured:
+            return Response({"detail": ai_not_configured_message()},
+                            status=status.HTTP_503_SERVICE_UNAVAILABLE)
         return Response(out)
 
 

@@ -2342,3 +2342,12 @@ msgstr "Dosya içeriği .%(ext)s uzantısıyla eşleşmiyor."
 #, python-format
 msgid "Documento generato con IA (%(model)s): bozza da verificare e approvare prima dell'uso."
 msgstr "Yapay zekâ ile oluşturulan belge (%(model)s): kullanmadan önce gözden geçirilip onaylanması gereken taslak."
+
+msgid "Operazione non riuscita per un errore interno. Il dettaglio è nel log del server."
+msgstr "İşlem dahili bir hata nedeniyle başarısız oldu. Ayrıntılar sunucu günlüğündedir."
+
+msgid "Nessuna configurazione IA attiva. Configurarla in Impostazioni → AI Engine."
+msgstr "Etkin yapay zekâ yapılandırması yok. Ayarlar → AI Engine bölümünden yapılandırın."
+
+msgid "File non valido."
+msgstr "Geçersiz dosya."

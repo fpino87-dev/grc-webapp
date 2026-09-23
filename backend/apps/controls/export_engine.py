@@ -8,8 +8,16 @@ Tutti i formati restituiscono HTML stampabile/scaricabile.
 
 import datetime
 import re
+from html import escape as _esc
+from urllib.parse import urlparse
 
 from django.utils import timezone
+
+
+def _safe_url(url: str) -> str:
+    """Solo link http(s), escapati per l'attributo: un `javascript:` scritto
+    nel campo del portale change non deve diventare un link eseguibile."""
+    return _esc(url) if urlparse(url or "").scheme in ("http", "https") else ""
 
 
 def _isa_sort_key(external_id: str) -> tuple:
@@ -111,7 +119,11 @@ def _get_logo_src_for_plant(plant) -> str | None:
 
 def _base_html(title: str, content: str, plant_name: str,
                fw_name: str, user_name: str, logo_src: str | None = None) -> str:
-    """Template HTML base condiviso da tutti i formati."""
+    """Template HTML base condiviso da tutti i formati.
+
+    `title`, `plant_name`, `fw_name` e `user_name` arrivano già escapati:
+    ogni testo che viene dal database passa da `_esc` prima di entrare
+    nell'HTML (nomi, giustificazioni, note sono scritti dagli utenti)."""
     from django.utils import translation
     lang = translation.get_language() or "it"
     now = timezone.now().strftime("%d/%m/%Y %H:%M")
@@ -119,7 +131,7 @@ def _base_html(title: str, content: str, plant_name: str,
     if logo_src:
         logo_img = (
             f'<div style="text-align:right;margin-bottom:10px;">'
-            f'<img src="{logo_src}" alt="Logo" '
+            f'<img src="{_esc(logo_src)}" alt="Logo" '
             f'style="max-height:40px;max-width:160px;object-fit:contain;"/>'
             f"</div>"
         )
@@ -231,12 +243,12 @@ def _generate_soa(fw, plant, instances, user) -> str:
     for domain, insts in domains.items():
         rows_html += f"""
         <tr style="background:#dbeafe">
-          <td colspan="8"><strong>{domain}</strong></td>
+          <td colspan="8"><strong>{_esc(domain)}</strong></td>
         </tr>"""
         for inst in insts:
             owner_name = ""
             if inst.owner:
-                owner_name = (
+                owner_name = _esc(
                     f"{inst.owner.first_name} {inst.owner.last_name}".strip()
                     or inst.owner.email
                 )
@@ -245,12 +257,12 @@ def _generate_soa(fw, plant, instances, user) -> str:
             ).count()
             last_eval = inst.last_evaluated_at.strftime("%d/%m/%Y") \
                 if inst.last_evaluated_at else "—"
-            justif = (inst.exclusion_justification or
-                      inst.na_justification or "")[:80]
+            justif = _esc((inst.exclusion_justification or
+                           inst.na_justification or "")[:80])
             rows_html += f"""
         <tr>
-          <td><strong>{inst.control.external_id}</strong></td>
-          <td>{inst.control.get_title(lang)[:60]}</td>
+          <td><strong>{_esc(inst.control.external_id)}</strong></td>
+          <td>{_esc(inst.control.get_title(lang)[:60])}</td>
           <td>{_applicability_badge(inst.applicability)}</td>
           <td>{_status_badge(inst.status)}</td>
           <td>{justif}</td>
@@ -259,8 +271,8 @@ def _generate_soa(fw, plant, instances, user) -> str:
           <td>{ev_count} evidenze</td>
         </tr>"""
 
-    plant_name = plant.name if plant else "Organizzazione"
-    user_name = (f"{user.first_name} {user.last_name}".strip() or user.email)
+    plant_name = _esc(plant.name) if plant else "Organizzazione"
+    user_name = _esc(f"{user.first_name} {user.last_name}".strip() or user.email)
 
     content = f"""
 <h1>Statement of Applicability (SOA)</h1>
@@ -275,7 +287,7 @@ def _generate_soa(fw, plant, instances, user) -> str:
   </div>
   <div class="meta-item">
     <div class="meta-label">Framework</div>
-    <div class="meta-value">{fw.name} v{fw.version}</div>
+    <div class="meta-value">{_esc(fw.name)} v{_esc(fw.version)}</div>
   </div>
   <div class="meta-item">
     <div class="meta-label">Data generazione</div>
@@ -339,7 +351,7 @@ def _generate_soa(fw, plant, instances, user) -> str:
     logo_src = _get_logo_src_for_plant(plant)
     return _base_html(
         f"SOA — {plant_name}",
-        content, plant_name, fw.name, user_name, logo_src
+        content, plant_name, _esc(fw.name), user_name, logo_src
     )
 
 
@@ -361,18 +373,19 @@ def _generate_soa_change_section(plant) -> str:
                 if not asset.needs_revaluation
                 else '<span class="badge-red">In attesa</span>'
             )
+            change_ref = _esc(asset.last_change_ref or "—")
+            portal_url = _safe_url(asset.change_portal_url)
             portal_link = (
-                f'<a href="{asset.change_portal_url}" style="color:#1e40af">'
-                f'{asset.last_change_ref}</a>'
-                if asset.change_portal_url
-                else asset.last_change_ref or "—"
+                f'<a href="{portal_url}" style="color:#1e40af">{change_ref}</a>'
+                if portal_url
+                else change_ref
             )
             rows += f"""
         <tr>
-          <td>{asset.name}</td>
+          <td>{_esc(asset.name)}</td>
           <td>{portal_link}</td>
           <td>{asset.last_change_date.strftime("%d/%m/%Y") if asset.last_change_date else "—"}</td>
-          <td>{(asset.last_change_desc or "")[:80]}</td>
+          <td>{_esc((asset.last_change_desc or "")[:80])}</td>
           <td>{rivalutato}</td>
         </tr>"""
         table_html = f"""
@@ -416,8 +429,8 @@ def _generate_vda_isa(fw, plant, instances, user) -> str:
     il base quando esiste l'estensione, quindi è lì che owner / status /
     ML / justification vengono effettivamente registrati.
     """
-    plant_name = plant.name if plant else "Organizzazione"
-    user_name = (f"{user.first_name} {user.last_name}".strip() or user.email)
+    plant_name = _esc(plant.name) if plant else "Organizzazione"
+    user_name = _esc(f"{user.first_name} {user.last_name}".strip() or user.email)
 
     MATURITY_LABELS = {
         0: "0 — Non implementato",
@@ -467,21 +480,21 @@ def _generate_vda_isa(fw, plant, instances, user) -> str:
         ml_color = MATURITY_COLORS.get(ml, "#f3f4f6")
         owner_name = ""
         if eval_inst.owner:
-            owner_name = (
+            owner_name = _esc(
                 f"{eval_inst.owner.first_name} {eval_inst.owner.last_name}".strip()
                 or eval_inst.owner.email
             )
-        justif = (eval_inst.na_justification or
-                  eval_inst.exclusion_justification or "")[:100]
+        justif = _esc((eval_inst.na_justification or
+                       eval_inst.exclusion_justification or "")[:100])
         if eval_inst.status != "na":
             total_ml += ml
             count_with += 1
 
         rows_html += f"""
         <tr>
-          <td><strong>{base_id}</strong></td>
-          <td>{level_tag}</td>
-          <td>{title_ctrl.get_title("en")[:70]}</td>
+          <td><strong>{_esc(base_id)}</strong></td>
+          <td>{_esc(level_tag)}</td>
+          <td>{_esc(title_ctrl.get_title("en")[:70])}</td>
           <td style="background:{ml_color};font-weight:bold">{ml}</td>
           <td style="background:{ml_color}">{ml_label}</td>
           <td>{_status_badge(eval_inst.status)}</td>
@@ -495,7 +508,7 @@ def _generate_vda_isa(fw, plant, instances, user) -> str:
 <h1>VDA ISA Assessment Export</h1>
 <p style="color:#6b7280;font-size:9px">
   TISAX — VDA Information Security Assessment —
-  {fw.name} v{fw.version}
+  {_esc(fw.name)} v{_esc(fw.version)}
 </p>
 
 <div class="meta">
@@ -505,7 +518,7 @@ def _generate_vda_isa(fw, plant, instances, user) -> str:
   </div>
   <div class="meta-item">
     <div class="meta-label">Framework / Livello</div>
-    <div class="meta-value">{fw.name}</div>
+    <div class="meta-value">{_esc(fw.name)}</div>
   </div>
   <div class="meta-item">
     <div class="meta-label">Maturity medio</div>
@@ -543,7 +556,7 @@ def _generate_vda_isa(fw, plant, instances, user) -> str:
     logo_src = _get_logo_src_for_plant(plant)
     return _base_html(
         f"VDA ISA — {plant_name}",
-        content, plant_name, fw.name, user_name, logo_src
+        content, plant_name, _esc(fw.name), user_name, logo_src
     )
 
 
@@ -557,9 +570,9 @@ def _generate_compliance_matrix(fw, plant, instances, user) -> str:
     """
     from django.utils import translation
     lang = translation.get_language() or "it"
-    plant_name = plant.name if plant else "Organizzazione"
-    user_name = (f"{user.first_name} {user.last_name}".strip() or user.email)
-    nis2_scope = getattr(plant, "nis2_scope", "—") if plant else "—"
+    plant_name = _esc(plant.name) if plant else "Organizzazione"
+    user_name = _esc(f"{user.first_name} {user.last_name}".strip() or user.email)
+    nis2_scope = _esc(getattr(plant, "nis2_scope", "") or "—") if plant else "—"
     is_acn = (fw.code == "ACN_NIS2")
     matrix_title = "NIS2 — ACN Compliance Matrix" if is_acn else "NIS2 Compliance Matrix"
     matrix_subtitle = (
@@ -581,7 +594,7 @@ def _generate_compliance_matrix(fw, plant, instances, user) -> str:
         domain = inst.control.domain.get_name(lang) if inst.control.domain else ""
         owner_name = ""
         if inst.owner:
-            owner_name = (
+            owner_name = _esc(
                 f"{inst.owner.first_name} {inst.owner.last_name}".strip()
                 or inst.owner.email
             )
@@ -591,21 +604,21 @@ def _generate_compliance_matrix(fw, plant, instances, user) -> str:
             "target_control__framework__code",
             "target_control__external_id",
         )[:3]
-        mapping_str = ", ".join(
+        mapping_str = _esc(", ".join(
             f"{m['target_control__framework__code']} "
             f"{m['target_control__external_id']}"
             for m in mappings
-        ) or "—"
+        ) or "—")
 
         last_eval = inst.last_evaluated_at.strftime("%d/%m/%Y") \
             if inst.last_evaluated_at else "—"
-        note = (inst.last_evaluated_note or "")[:80] if hasattr(inst, "last_evaluated_note") else "—"
+        note = _esc((inst.last_evaluated_note or "")[:80]) if hasattr(inst, "last_evaluated_note") else "—"
 
         rows_html += f"""
         <tr>
-          <td><strong>{inst.control.external_id}</strong></td>
-          <td>{domain}</td>
-          <td>{inst.control.get_title(lang)[:80]}</td>
+          <td><strong>{_esc(inst.control.external_id)}</strong></td>
+          <td>{_esc(domain)}</td>
+          <td>{_esc(inst.control.get_title(lang)[:80])}</td>
           <td>{_status_badge(inst.status)}</td>
           <td>{note}</td>
           <td>{mapping_str}</td>
@@ -692,5 +705,5 @@ def _generate_compliance_matrix(fw, plant, instances, user) -> str:
     logo_src = _get_logo_src_for_plant(plant)
     return _base_html(
         f"{matrix_title} — {plant_name}",
-        content, plant_name, fw.name, user_name, logo_src
+        content, plant_name, _esc(fw.name), user_name, logo_src
     )

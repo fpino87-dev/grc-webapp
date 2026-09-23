@@ -2,8 +2,11 @@ import json
 import re
 
 from core.csv_safe import safe_writer
+from core.errors import internal_error_response
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.http import HttpResponse
+from django.utils.translation import gettext as _
 from rest_framework import filters, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -120,9 +123,13 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 
         try:
             add_version_with_file(doc, uploaded_file, request.user, change_summary="Caricamento iniziale NDA")
-        except Exception as e:
+        except DjangoValidationError as e:
+            # File rifiutato dalla validazione (tipo/MIME/dimensione): messaggio per l'utente.
             doc.delete()
-            return Response({"error": str(e)}, status=400)
+            return Response({"error": e.messages[0] if e.messages else _("File non valido.")}, status=400)
+        except Exception:
+            doc.delete()
+            return internal_error_response("upload NDA fornitore")
 
         log_action(
             user=request.user,
@@ -180,7 +187,7 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         una lista di codici CPV suggeriti con descrizione.
         Human-in-the-loop: l'output è sempre revisionato dall'utente prima dell'applicazione.
         """
-        from apps.ai_engine.router import route
+        from apps.ai_engine.router import AiNotConfigured, ai_not_configured_message, route
         from apps.ai_engine.sanitizer import Sanitizer
 
         description = (request.data.get("description") or "").strip()
@@ -221,13 +228,13 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 module_source="M14",
                 sanitize=False,  # già sanitizzato manualmente sopra
             )
-        except ValueError as exc:
-            return Response({"error": str(exc)}, status=503)
-        except Exception as exc:
+        except AiNotConfigured:
+            return Response({"error": ai_not_configured_message()}, status=503)
+        except Exception:
             import logging
-            logging.getLogger(__name__).error("suggest_cpv AI error: %s", exc)
+            logging.getLogger(__name__).exception("suggest_cpv AI error")
             return Response(
-                {"error": f"Errore AI ({type(exc).__name__}): controlla la configurazione AI Engine o il budget disponibile."},
+                {"error": "Errore AI: controlla la configurazione AI Engine o il budget disponibile."},
                 status=503,
             )
 

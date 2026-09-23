@@ -181,7 +181,7 @@ class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post", "delete"], url_path="summary-draft")
     def summary_draft(self, request, pk=None):
-        from apps.ai_engine.router import LlmUnavailable
+        from apps.ai_engine.router import AiNotConfigured, LlmUnavailable, ai_not_configured_message
 
         review = self.get_object()
         if request.method == "DELETE":
@@ -192,9 +192,8 @@ class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             self._run(services.draft_executive_summary, review, request.user, lang)
         except LlmUnavailable:
             return Response({"error": "ai_unavailable"}, status=503)
-        except ValueError as e:
-            # Nessuna configurazione IA attiva
-            return Response({"error": str(e), "code": "ai_not_configured"}, status=400)
+        except AiNotConfigured:
+            return Response({"error": ai_not_configured_message(), "code": "ai_not_configured"}, status=400)
         return self._respond(review)
 
     @action(detail=True, methods=["post"])
@@ -276,7 +275,7 @@ class ReviewAgendaItemViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     @action(detail=True, methods=["post", "delete"], url_path="discussion-draft")
     def discussion_draft(self, request, pk=None):
         """Bozza IA della discussione del punto; DELETE la scarta."""
-        from apps.ai_engine.router import LlmUnavailable
+        from apps.ai_engine.router import AiNotConfigured, LlmUnavailable, ai_not_configured_message
 
         item = self.get_object()
         if request.method == "DELETE":
@@ -288,8 +287,8 @@ class ReviewAgendaItemViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             self._run(services.draft_agenda_discussion, item, request.user, lang)
         except LlmUnavailable:
             return Response({"error": "ai_unavailable"}, status=503)
-        except ValueError as e:
-            return Response({"error": str(e), "code": "ai_not_configured"}, status=400)
+        except AiNotConfigured:
+            return Response({"error": ai_not_configured_message(), "code": "ai_not_configured"}, status=400)
         item.refresh_from_db()
         return Response(ReviewAgendaItemSerializer(item).data)
 

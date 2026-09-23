@@ -143,3 +143,29 @@ def test_explain_prompt_keeps_description_when_language_has_only_summary(admin_c
     admin_client.post(f"/api/v1/controls/controls/{ctrl.id}/explain/", {"lang": "zz-evil"}, format="json")
     ctrl.refresh_from_db()
     assert set(ctrl.translations) == {"it", "fr"}
+
+
+@pytest.mark.django_db
+def test_explain_errors_do_not_leak_exception_text(admin_client, monkeypatch):
+    """CodeQL py/stack-trace-exposure: il testo di un'eccezione imprevista resta
+    nel log; "IA non configurata" ha un messaggio fisso, non quello dell'eccezione."""
+    from apps.ai_engine import tasks_ai
+    from apps.ai_engine.router import AiNotConfigured
+
+    ctrl = _summary_control()
+    url = f"/api/v1/controls/controls/{ctrl.id}/explain/"
+
+    def boom(**kw):
+        raise RuntimeError("dettaglio interno /srv/app/secret.py")
+
+    monkeypatch.setattr(tasks_ai, "route", boom)
+    r = admin_client.post(url, {"lang": "it"}, format="json")
+    assert r.status_code == 500 and "secret" not in str(r.data)
+
+    def not_configured(**kw):
+        raise AiNotConfigured("testo interno")
+
+    monkeypatch.setattr(tasks_ai, "route", not_configured)
+    r = admin_client.post(url, {"lang": "it"}, format="json")
+    assert r.status_code == 400
+    assert r.data["error"].startswith("Nessuna configurazione IA attiva")

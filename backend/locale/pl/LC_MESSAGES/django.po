@@ -2363,3 +2363,12 @@ msgstr "Zawartość pliku nie odpowiada rozszerzeniu .%(ext)s."
 #, python-format
 msgid "Documento generato con IA (%(model)s): bozza da verificare e approvare prima dell'uso."
 msgstr "Dokument wygenerowany przez AI (%(model)s): wersja robocza do sprawdzenia i zatwierdzenia przed użyciem."
+
+msgid "Operazione non riuscita per un errore interno. Il dettaglio è nel log del server."
+msgstr "Operacja nie powiodła się z powodu błędu wewnętrznego. Szczegóły znajdują się w dzienniku serwera."
+
+msgid "Nessuna configurazione IA attiva. Configurarla in Impostazioni → AI Engine."
+msgstr "Brak aktywnej konfiguracji AI. Skonfiguruj ją w Ustawienia → AI Engine."
+
+msgid "File non valido."
+msgstr "Nieprawidłowy plik."

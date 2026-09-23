@@ -28,6 +28,10 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
+# Solo lettura del codice: nessun job scrive sul repo (principio del minimo privilegio).
+permissions:
+  contents: read
+
 jobs:
   pip-audit:
     name: pip-audit (backend)

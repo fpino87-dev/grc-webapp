@@ -13,7 +13,9 @@ import csv as _csv
 import re
 
 _TRIGGER = ("=", "+", "-", "@", "\t", "\r")
-_NUMERIC = re.compile(r"^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$")
+# Parte decimale in un gruppo opzionale: con `\d+\.?\d*` le cifre senza punto
+# si possono spartire in più modi e l'input lungo causa backtracking quadratico.
+_NUMERIC = re.compile(r"^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$")
 
 
 def csv_safe(value) -> str:

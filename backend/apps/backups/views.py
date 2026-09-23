@@ -87,7 +87,13 @@ class BackupViewSet(ReadOnlyModelViewSet):
         record = self.get_object()
         try:
             record = start_restore(record.pk, request.user)
-        except (FileNotFoundError, ValueError) as exc:
+        except FileNotFoundError:
+            # Il messaggio di sistema contiene il percorso sul server: non esporlo.
+            return Response(
+                {"detail": "File di backup non trovato sul server."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except ValueError as exc:
             return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(
             BackupRecordSerializer(record).data,

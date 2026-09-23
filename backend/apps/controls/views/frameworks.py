@@ -150,8 +150,8 @@ class ControlViewSet(viewsets.ModelViewSet):
         Genera (o rigenera) la spiegazione plain-language del controllo via AI.
         Body: { "lang": "it" }
         """
+        from apps.ai_engine.router import AiNotConfigured, ai_not_configured_message
         from apps.ai_engine.tasks_ai import explain_control
-        from django.utils.translation import gettext as _
 
         from django.conf import settings
 
@@ -162,10 +162,11 @@ class ControlViewSet(viewsets.ModelViewSet):
         try:
             result = explain_control(control, lang, request.user)
             return Response(result)
-        except Exception as e:
-            import logging
-            logging.getLogger(__name__).error(f"explain_control error: {e}")
-            return Response({"error": _("Generazione spiegazione non riuscita: %(err)s") % {"err": str(e)}}, status=500)
+        except AiNotConfigured:
+            return Response({"error": ai_not_configured_message()}, status=400)
+        except Exception:
+            from core.errors import internal_error_response
+            return internal_error_response(f"explain_control {control.external_id}")
 
     @action(detail=True, methods=["post"], url_path="generate-document")
     def generate_document(self, request, pk=None):
@@ -173,24 +174,25 @@ class ControlViewSet(viewsets.ModelViewSet):
         Genera un documento .docx di procedura operativa per il controllo via AI.
         Body: { "lang": "it" }
         """
-        import logging
         from django.http import HttpResponse
-        from django.utils.translation import gettext as _
         from core.audit import log_action
         from ..services import generate_procedure_document
 
+        from django.conf import settings
+
+        from apps.ai_engine.router import AiNotConfigured, ai_not_configured_message
+        from core.errors import internal_error_response
+
         control = self.get_object()
-        lang = request.data.get("lang", "it")
+        lang = str(request.data.get("lang") or "it")[:2]
+        if lang not in dict(settings.LANGUAGES):
+            lang = "it"
         try:
             docx_bytes = generate_procedure_document(control, lang, request.user)
-        except ValueError as e:
-            return Response({"error": str(e)}, status=400)
-        except Exception as e:
-            logging.getLogger(__name__).error(f"generate_document error [{control.external_id}]: {e}")
-            return Response(
-                {"error": _("Generazione documento non riuscita: %(err)s") % {"err": str(e)}},
-                status=500,
-            )
+        except AiNotConfigured:
+            return Response({"error": ai_not_configured_message()}, status=400)
+        except Exception:
+            return internal_error_response(f"generate_document {control.external_id}")
 
         log_action(
             user=request.user,

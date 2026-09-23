@@ -161,8 +161,9 @@ class AiSuggestView(APIView):
                 {"error": "Servizio AI temporaneamente non disponibile. Riprova più tardi."},
                 status=503,
             )
-        except Exception as exc:
-            return Response({"error": f"Errore AI: {str(exc)[:200]}"}, status=500)
+        except Exception:
+            from core.errors import internal_error_response
+            return internal_error_response(f"ai suggest {task_type}")
 
         return Response(
             {
@@ -292,8 +293,9 @@ class AiAssistantExplainView(APIView):
                 {"error": "Assistente AI temporaneamente non disponibile. Riprova più tardi."},
                 status=503,
             )
-        except Exception as exc:
-            return Response({"error": f"Errore LLM: {str(exc)[:200]}"}, status=500)
+        except Exception:
+            from core.errors import internal_error_response
+            return internal_error_response("ai assistant explain")
 
         log_action(
             user=request.user,

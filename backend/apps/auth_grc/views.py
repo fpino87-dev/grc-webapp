@@ -71,8 +71,9 @@ class ResetTestDbView(APIView):
                 "message": "Reset completato",
                 "detail": out.getvalue(),
             })
-        except Exception as e:
-            return Response({"error": str(e)}, status=500)
+        except Exception:
+            from core.errors import internal_error_response
+            return internal_error_response("reset_test_db")
 
 
 class UserPlantAccessViewSet(viewsets.ModelViewSet):

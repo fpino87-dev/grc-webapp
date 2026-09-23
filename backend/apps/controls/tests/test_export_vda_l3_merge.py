@@ -102,3 +102,36 @@ def test_l3_export_keeps_l2_only_unchanged(plant, fw_pair, evaluator):
 
     assert html.count("<strong>ISA-2.1.1</strong>") == 1
     assert "L2 + L3 (VH)" not in html.split("ISA-2.1.1")[1].split("</tr>")[0]
+
+
+@pytest.mark.django_db
+def test_exports_escape_user_text(plant, fw_pair, evaluator):
+    """Testi scritti dagli utenti (giustificazioni, nomi, asset) non diventano
+    HTML attivo nel report, e un link `javascript:` del portale change non
+    diventa cliccabile."""
+    from apps.assets.models import Asset
+    from apps.controls.models import Control, ControlInstance, Framework
+
+    xss = '<script>alert(1)</script>'
+    evaluator.first_name = "<b>Mario</b>"
+    evaluator.save()
+    plant.name = "Sito <img src=x onerror=alert(1)>"
+    plant.save()
+    iso = Framework.objects.create(code="ISO27001", name="ISO", version="1",
+                                   published_at=timezone.localdate())
+    for fw in (iso, fw_pair[0]):
+        ctrl = Control.objects.create(framework=fw, external_id=f"{fw.code}-1",
+                                      translations={"en": {"title": xss}, "it": {"title": xss}})
+        ControlInstance.objects.create(plant=plant, control=ctrl, status="na", owner=evaluator,
+                                       applicability="escluso", exclusion_justification=xss,
+                                       na_justification=xss)
+    Asset.objects.create(plant=plant, name=xss, asset_type="IT", last_change_ref=xss,
+                         last_change_date=timezone.localdate(), last_change_desc=xss,
+                         change_portal_url="javascript:alert(1)")
+
+    for code, fmt in (("ISO27001", "soa"), ("TISAX_L2", "vda_isa"), ("ISO27001", "compliance_matrix")):
+        html = generate_export(code, plant.pk, fmt, evaluator)
+        assert "<script>alert" not in html, fmt
+        assert "<img src=x" not in html and "<b>Mario" not in html, fmt
+        assert "&lt;script&gt;" in html, fmt
+        assert "javascript:" not in html, fmt

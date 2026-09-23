@@ -1,5 +1,6 @@
 import calendar
 import datetime
+import logging
 
 from django.db import transaction
 from django.utils import timezone
@@ -7,6 +8,8 @@ from django.utils import timezone
 from core.audit import log_action
 
 from .models import Task
+
+logger = logging.getLogger(__name__)
 
 
 def create_task(
@@ -1139,8 +1142,10 @@ def import_kpi_suggestions(plant, kpi_codes, overrides=None, user=None) -> dict:
                 kpi = KPIDefinition.objects.create(
                     kpi_code=code, created_by=user, **fields
                 )
-        except Exception as exc:  # noqa: BLE001
-            errors.append({"kpi_code": code, "error": str(exc)[:200]})
+        except Exception:  # noqa: BLE001
+            # Il testo dell'eccezione (es. SQL) resta nel log, non nella risposta.
+            logger.exception("import KPI %s non riuscito", code)
+            errors.append({"kpi_code": code, "error": "save_failed"})
             continue
 
         if user is not None:

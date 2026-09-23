@@ -21,6 +21,19 @@ logger = logging.getLogger(__name__)
 LOCAL_MIN_TIMEOUT = 300
 
 
+class AiNotConfigured(ValueError):
+    """Nessuna configurazione IA attiva. Sottoclasse di ValueError per
+    compatibilità; le view rispondono con `ai_not_configured_message()` invece
+    del testo dell'eccezione, così un ValueError di altra origine non arriva
+    all'utente."""
+
+
+def ai_not_configured_message() -> str:
+    from django.utils.translation import gettext as _
+
+    return _("Nessuna configurazione IA attiva. Configurarla in Impostazioni → AI Engine.")
+
+
 class LlmUnavailable(Exception):
     """Sollevata quando nessun provider LLM è raggiungibile (cloud + fallback
     locale entrambi giù). Permette ai chiamanti di degradare con grazia
@@ -97,7 +110,7 @@ def route(
 
     config = AiProviderConfig.get_active()
     if not config:
-        raise ValueError("Nessuna configurazione AI attiva. Configurare in Impostazioni -> AI Engine.")
+        raise AiNotConfigured("Nessuna configurazione AI attiva. Configurare in Impostazioni -> AI Engine.")
 
     config.reset_budget_if_needed()
 

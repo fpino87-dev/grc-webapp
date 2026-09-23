@@ -123,15 +123,9 @@ class ComplianceExportView(APIView):
             html = generate_export(framework_code, plant_id, export_format, request.user)
         except ValueError as e:
             return Response({"error": str(e)}, status=400)
-        except Exception as e:
-            import traceback
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.error(f"Export error [{export_format}/{framework_code}]: {traceback.format_exc()}")
-            return Response(
-                {"error": _("Errore generazione documento: %(err)s") % {"err": str(e)}},
-                status=500,
-            )
+        except Exception:
+            from core.errors import internal_error_response
+            return internal_error_response(f"export {export_format}/{framework_code}")
 
         from core.audit import log_action
         from apps.plants.models import Plant

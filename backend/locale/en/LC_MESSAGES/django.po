@@ -2341,3 +2341,12 @@ msgstr "The file content does not match the .%(ext)s extension."
 #, python-format
 msgid "Documento generato con IA (%(model)s): bozza da verificare e approvare prima dell'uso."
 msgstr "Document generated with AI (%(model)s): draft to be reviewed and approved before use."
+
+msgid "Operazione non riuscita per un errore interno. Il dettaglio è nel log del server."
+msgstr "The operation failed due to an internal error. Details are in the server log."
+
+msgid "Nessuna configurazione IA attiva. Configurarla in Impostazioni → AI Engine."
+msgstr "No active AI configuration. Set it up in Settings → AI Engine."
+
+msgid "File non valido."
+msgstr "Invalid file."

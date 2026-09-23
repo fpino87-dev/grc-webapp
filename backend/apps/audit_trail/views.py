@@ -34,14 +34,20 @@ class AuditLogViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets
 
     @action(detail=False, methods=["get"])
     def verify_integrity(self, request):
-        from django.core.management import call_command
+        from django.core.management import CommandError, call_command
+
+        from core.errors import internal_error_response
 
         out = StringIO()
         try:
             call_command("verify_audit_trail_integrity", stdout=out)
             return Response({"ok": True, "output": out.getvalue()})
-        except Exception as e:
-            return Response({"ok": False, "error": str(e)}, status=500)
+        except CommandError as e:
+            # Esito della verifica (catena rotta, record alterati): è il
+            # risultato che l'auditor chiede, scritto dal comando stesso.
+            return Response({"ok": False, "error": str(e), "output": out.getvalue()}, status=500)
+        except Exception:
+            return internal_error_response("verify_audit_trail_integrity")
 
 
 class AuditIntegrityView(APIView):
