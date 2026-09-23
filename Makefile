@@ -52,6 +52,10 @@ prod-seed:
 	  python manage.py load_competency_requirements
 	docker compose -f docker-compose.prod.yml exec backend \
 	  python manage.py load_required_documents
+	docker compose -f docker-compose.prod.yml exec backend \
+	  python manage.py load_role_requirements
+	docker compose -f docker-compose.prod.yml exec backend \
+	  python manage.py load_training_evidence_controls
 
 prod-logs:
 	docker compose -f docker-compose.prod.yml logs -f --tail=50
