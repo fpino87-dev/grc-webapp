@@ -118,7 +118,8 @@ def _get_logo_src_for_plant(plant) -> str | None:
 
 
 def _base_html(title: str, content: str, plant_name: str,
-               fw_name: str, user_name: str, logo_src: str | None = None) -> str:
+               fw_name: str, user_name: str, logo_src: str | None = None,
+               landscape: bool = False) -> str:
     """Template HTML base condiviso da tutti i formati.
 
     `title`, `plant_name`, `fw_name` e `user_name` arrivano già escapati:
@@ -127,6 +128,7 @@ def _base_html(title: str, content: str, plant_name: str,
     from django.utils import translation
     lang = translation.get_language() or "it"
     now = timezone.now().strftime("%d/%m/%Y %H:%M")
+    page_css = "@page { size: A4 landscape; margin: 10mm; }" if landscape else ""
     logo_img = ""
     if logo_src:
         logo_img = (
@@ -180,6 +182,7 @@ def _base_html(title: str, content: str, plant_name: str,
     .signature {{ border:1px solid #d1d5db; padding:10px;
                   margin-top:20px; border-radius:4px; }}
     @media print {{ body {{ margin:0; }} }}
+    {page_css}
   </style>
 </head>
 <body>
@@ -416,6 +419,36 @@ def _generate_soa_change_section(plant) -> str:
 {table_html}"""
 
 
+def _vda_references(*insts) -> str:
+    """Colonna "Reference documentation": documenti ed evidenze collegati alle
+    istanze (base + VH fuse), senza duplicati. Legge dal prefetch."""
+    today = timezone.localdate()
+    seen: set = set()
+    items: list[str] = []
+    for inst in insts:
+        if inst is None:
+            continue
+        for d in inst.documents.all():
+            if d.deleted_at is not None or d.pk in seen:
+                continue
+            seen.add(d.pk)
+            label = " ".join(p for p in (d.document_code, d.title) if p)
+            if d.status != "approvato":
+                label += f" [{d.status}]"
+            items.append(f"&#128196; {_esc(label)}")
+        for ev in inst.evidences.all():
+            if ev.deleted_at is not None or ev.pk in seen:
+                continue
+            seen.add(ev.pk)
+            label = _esc(ev.title)
+            if ev.valid_until:
+                expired = ev.valid_until < today
+                label += (f" ({'scaduta' if expired else 'valida fino al'} "
+                          f"{ev.valid_until.strftime('%d/%m/%Y')})")
+            items.append(f"&#128206; {label}")
+    return "<br>".join(items)
+
+
 def _generate_vda_isa(fw, plant, instances, user) -> str:
     """VDA ISA Export — TISAX, maturity level 0-5.
 
@@ -456,6 +489,7 @@ def _generate_vda_isa(fw, plant, instances, user) -> str:
     rows_html = ""
     total_ml = 0
     count_with = 0
+    missing_impl = 0
 
     for base_id in sorted(grouped.keys(), key=_isa_sort_key):
         pair = grouped[base_id]
@@ -475,6 +509,13 @@ def _generate_vda_isa(fw, plant, instances, user) -> str:
             title_ctrl = vh.control
             level_tag = "L3 (VH)"
 
+        # Descrizione dalla VH (dove si valuta); ripiego sulla base se la
+        # descrizione era stata scritta lì prima dell'aggiunta di L3.
+        impl = eval_inst.implementation_description or (
+            base.implementation_description if base else ""
+        )
+        refs = _vda_references(base, vh)
+
         ml = eval_inst.calc_maturity_level
         ml_label = MATURITY_LABELS.get(ml, str(ml))
         ml_color = MATURITY_COLORS.get(ml, "#f3f4f6")
@@ -484,22 +525,30 @@ def _generate_vda_isa(fw, plant, instances, user) -> str:
                 f"{eval_inst.owner.first_name} {eval_inst.owner.last_name}".strip()
                 or eval_inst.owner.email
             )
-        justif = _esc((eval_inst.na_justification or
-                       eval_inst.exclusion_justification or "")[:100])
+        justif = _esc(eval_inst.na_justification or
+                      eval_inst.exclusion_justification or "")
         if eval_inst.status != "na":
             total_ml += ml
             count_with += 1
+            if ml >= 3 and not impl:
+                missing_impl += 1
 
+        impl_cell = (
+            _esc(impl) if impl else
+            ('<span class="badge-red">Missing</span>' if ml >= 3 and eval_inst.status != "na"
+             else "")
+        )
         rows_html += f"""
         <tr>
           <td><strong>{_esc(base_id)}</strong></td>
           <td>{_esc(level_tag)}</td>
-          <td>{_esc(title_ctrl.get_title("en")[:70])}</td>
-          <td style="background:{ml_color};font-weight:bold">{ml}</td>
-          <td style="background:{ml_color}">{ml_label}</td>
+          <td>{_esc(title_ctrl.get_title("en"))}</td>
+          <td style="background:{ml_color}"><strong>{ml}</strong><br>{ml_label}</td>
           <td>{_status_badge(eval_inst.status)}</td>
           <td>{owner_name}</td>
-          <td>{justif}</td>
+          <td class="pre">{impl_cell}</td>
+          <td>{refs}</td>
+          <td class="pre">{justif}</td>
         </tr>"""
 
     avg_ml = round(total_ml / count_with, 1) if count_with > 0 else 0
@@ -528,19 +577,38 @@ def _generate_vda_isa(fw, plant, instances, user) -> str:
     <div class="meta-label">Data assessment</div>
     <div class="meta-value">{timezone.now().strftime("%d/%m/%Y")}</div>
   </div>
+  <div class="meta-item">
+    <div class="meta-label">Controlli ML &#8805; 3 senza Implementation description</div>
+    <div class="meta-value">{missing_impl}</div>
+  </div>
 </div>
 
-<table>
+<style>
+  table.vda {{ table-layout: fixed; }}
+  table.vda td {{ word-wrap: break-word; overflow-wrap: anywhere; }}
+  table.vda tr {{ page-break-inside: avoid; }}
+  table.vda thead {{ display: table-header-group; }}
+  td.pre {{ white-space: pre-wrap; }}
+</style>
+<table class="vda">
+  <colgroup>
+    <col style="width:6%"><col style="width:6%"><col style="width:15%">
+    <col style="width:9%"><col style="width:6%"><col style="width:7%">
+    <col style="width:26%"><col style="width:15%"><col style="width:10%">
+  </colgroup>
+  <thead>
   <tr>
     <th>ID</th>
     <th>Livello</th>
     <th>Requisito</th>
-    <th>ML</th>
     <th>Maturity Level</th>
     <th>Stato GRC</th>
     <th>Owner</th>
+    <th>Implementation description</th>
+    <th>Reference documentation</th>
     <th>Note / Justification</th>
   </tr>
+  </thead>
   {rows_html}
 </table>
 
@@ -556,7 +624,8 @@ def _generate_vda_isa(fw, plant, instances, user) -> str:
     logo_src = _get_logo_src_for_plant(plant)
     return _base_html(
         f"VDA ISA — {plant_name}",
-        content, plant_name, _esc(fw.name), user_name, logo_src
+        content, plant_name, _esc(fw.name), user_name, logo_src,
+        landscape=True,
     )
 
 

@@ -454,6 +454,7 @@ AuditLog'un temel özellikleri:
 
 - SOA ISO 27001 için `applicability` alanı
 - VDA ISA için `calc_maturity_level` (özellik, 0-5 ölçeği)
+- `implementation_description` — VDA ISA "Implementation description" (gereksinimin tesiste nasıl uygulandığı); yalnızca `POST /set-implementation/` → `set_implementation_description()` ile yazılır (denetim `control.implementation_description_set`, payload yalnızca uzunluk), VDA ISA'ya aktarılır; açıklaması olmayan ML ≥ 3 için M21 advisor `controls.tisax_missing_implementation`
 - Değişiklik yönetimi için `needs_revaluation` (M04)
 - `na_justification` — status=`na` olduğunda `evaluate_control()` tarafından kaydedilen serbest metin; detay API'sinde gösterilir ve dışa aktarma motoru (VDA ve SOA) tarafından kullanılır
 
@@ -464,8 +465,8 @@ AuditLog'un temel özellikleri:
 | `non_valutato` | 0 | — |
 | `gap` | 1 | — |
 | `na` | 0 | VDA ISA'da ortalama ML'den hariç tutulur |
-| `parziale` | 2 / 3 | En az bir geçerli kanıt varsa 3 |
-| `compliant` | 4 / 5 | ≥ 2 geçerli kanıt varsa 5 |
+| `parziale` | 2 | — |
+| `compliant` | 3 / 4 | ≥ 2 geçerli kanıt varsa 4; 5 yalnızca manuel geçersiz kılma ile (`set-maturity`) |
 
 ```python
 class ControlInstance(BaseModel):

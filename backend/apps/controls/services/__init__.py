@@ -35,12 +35,14 @@ from .instances import (
     evaluate_control,
     propagate_control,
     resolve_review_due_date,
+    set_implementation_description,
     validate_exclusion,
 )
 from .gap import run_gap_analysis
 from .reporting import (
     count_open_gaps_by_plant,
     count_revaluation_by_plant,
+    count_tisax_missing_implementation_by_plant,
     get_compliance_summary,
 )
 
@@ -52,6 +54,7 @@ __all__ = [
     "check_evidence_requirements",
     "count_open_gaps_by_plant",
     "count_revaluation_by_plant",
+    "count_tisax_missing_implementation_by_plant",
     "can_delete_instance",
     "delete_control",
     "delete_control_instance",
@@ -63,6 +66,7 @@ __all__ = [
     "import_framework_payload",
     "is_covered_by_extender",
     "resolve_review_due_date",
+    "set_implementation_description",
     "list_framework_governance_metadata",
     "preview_framework_import",
     "propagate_control",

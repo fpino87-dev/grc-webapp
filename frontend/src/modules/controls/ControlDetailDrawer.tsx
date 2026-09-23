@@ -107,6 +107,7 @@ export function ControlDetailDrawer({ instanceId, onClose }: Props) {
                   naJustification={info.na_justification ?? ""}
                   calcMaturityLevel={info.calc_maturity_level}
                   maturityLevelOverride={info.maturity_level_override}
+                  implementationDescription={info.implementation_description ?? ""}
                   framework={info.framework}
                   approvedInSoa={info.approved_in_soa}
                   soaApprovedAt={info.soa_approved_at}

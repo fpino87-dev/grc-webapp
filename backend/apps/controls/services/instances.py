@@ -127,6 +127,41 @@ def evaluate_control(instance, new_status, user, note=""):
     return instance
 
 
+IMPLEMENTATION_DESCRIPTION_MAX = 5000
+
+
+def set_implementation_description(instance, text: str, user):
+    """Registra la "Implementation description" VDA ISA del controllo.
+
+    Nel payload di audit va solo la lunghezza e se il testo è stato svuotato:
+    il testo completo resta sul controllo (e nell'export), il log registra chi
+    e quando ha cambiato la dichiarazione."""
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    text = (text or "").strip()
+    if len(text) > IMPLEMENTATION_DESCRIPTION_MAX:
+        raise ValidationError(
+            _("La descrizione dell'implementazione supera %(max)s caratteri.")
+            % {"max": IMPLEMENTATION_DESCRIPTION_MAX}
+        )
+    previous = instance.implementation_description
+    if text == previous:
+        return instance
+    instance.implementation_description = text
+    instance.save(update_fields=["implementation_description", "updated_at"])
+    log_action(
+        user=user,
+        action_code="control.implementation_description_set",
+        level="L2",
+        entity=instance,
+        payload={"length": len(text), "cleared": not text, "was_empty": not previous},
+    )
+    return instance
+
+
 def validate_exclusion(instance, applicability: str,
                        justification: str, user) -> None:
     """

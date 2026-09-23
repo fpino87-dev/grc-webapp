@@ -47,6 +47,22 @@ def count_revaluation_by_plant() -> dict:
     return _count_effective_by_plant(Q(needs_revaluation=True))
 
 
+def count_tisax_missing_implementation_by_plant() -> dict:
+    """Controlli TISAX con maturità dichiarata ≥ 3 ma senza "Implementation
+    description", per plant, deduplicati come la lista controlli.
+
+    Maturità ≥ 3 replica `ControlInstance.calc_maturity_level` in SQL: override
+    manuale ≥ 3, oppure calcolo automatico su stato `compliant` (3 o 4)."""
+    from django.db.models import Q
+    ml_ge_3 = (
+        Q(maturity_level_override=True, maturity_level__gte=3)
+        | Q(maturity_level_override=False, status="compliant")
+    )
+    return _count_effective_by_plant(
+        Q(control__framework__code__startswith="TISAX", implementation_description="") & ml_ge_3
+    )
+
+
 def get_compliance_summary(plant_id, framework_code=None):
     """
     % di compliance del plant (per framework specifico o globale sui framework

@@ -550,7 +550,14 @@
           "note_placeholder": "Not / gerekçe (N/A için zorunlu, min 20 karakter)",
           "req_tooltip": "Belge & Kanıt sekmesindeki gereksinimleri çözün"
         },
-        "save_evaluation": "Değerlendirmeyi kaydet"
+        "save_evaluation": "Değerlendirmeyi kaydet",
+        "implementation": {
+          "title": "Implementation description (VDA ISA)",
+          "hint": "Gereksinimin tesiste nasıl uygulandığını açıklayın: süreçler, araçlar, sorumluluklar ve referans dokümanlar. VDA ISA dışa aktarımında olgunluk seviyesinin yanında yer alır.",
+          "placeholder": "Örn. Erişim yönetimi süreci PR-ACC-01 prosedüründe tanımlanmıştır; talepler yönetici onayıyla BT bilet sisteminden geçer; ayrıcalıklı hesaplar IT Manager tarafından üç ayda bir gözden geçirilir.",
+          "save": "Açıklamayı kaydet",
+          "missing_warning": "Uygulama açıklaması olmadan {{level}} olgunluk seviyesi beyan edildi: TISAX denetiminde bu seviye savunulamaz."
+        }
       },
       "docs": {
         "requirements": {
@@ -4714,6 +4721,11 @@
         "title": "{{count}} NIS2 son tarihi riskte",
         "what": "Açık olaylarda yaklaşan veya ihlal edilmiş NIS2 bildirimleri ({{plant_name}}).",
         "action": "Yasal son tarihten önce NIS2 bildirimini gönderin."
+      },
+      "controls.tisax_missing_implementation": {
+        "title": "Implementation description içermeyen {{count}} TISAX kontrolü",
+        "what": "Gereksinimin nasıl uygulandığı açıklanmadan ≥ 3 olgunluk beyan edildi ({{plant_name}}).",
+        "action": "TISAX kontrollerini açın ve Değerlendirme sekmesinde Implementation description alanını doldurun."
       }
     },
     "breakdown": {

@@ -127,7 +127,8 @@ def _collect_controls(out_dir: Path, plant, frameworks: list[str]) -> dict:
             "maturity_level": getattr(inst, "maturity_level", None),
             "owner": (inst.owner.email if inst.owner else ""),
             "last_evaluated_at": inst.updated_at.isoformat() if inst.updated_at else "",
-            "note": getattr(inst, "note", "") or "",
+            "implementation_description": inst.implementation_description,
+            "note": inst.notes,
         })
 
     csv_path = controls_dir / "controls_status.csv"

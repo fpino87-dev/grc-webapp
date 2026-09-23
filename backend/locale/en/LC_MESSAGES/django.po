@@ -2666,3 +2666,8 @@ msgstr "The file content does not match the .%(ext)s extension."
 #: apps/management_review/views.py
 msgid "Generare lo snapshot dei dati prima di scaricare il verbale."
 msgstr "Generate the data snapshot before downloading the minutes."
+
+#: apps/controls/services/instances.py
+#, python-format
+msgid "La descrizione dell'implementazione supera %(max)s caratteri."
+msgstr "The implementation description exceeds %(max)s characters."

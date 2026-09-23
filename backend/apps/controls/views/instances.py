@@ -285,6 +285,7 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 "maturity_level": instance.maturity_level,
                 "maturity_level_override": instance.maturity_level_override,
                 "calc_maturity_level": instance.calc_maturity_level,
+                "implementation_description": instance.implementation_description,
                 "approved_in_soa": instance.approved_in_soa,
                 "soa_approved_at": instance.soa_approved_at.isoformat() if instance.soa_approved_at else None,
                 "soa_approved_by_name": (
@@ -432,6 +433,24 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             payload={"maturity_level": int(level)},
         )
         return Response({"ok": True, "maturity_level": int(level)})
+
+    @action(detail=True, methods=["post"], url_path="set-implementation")
+    def set_implementation(self, request, pk=None):
+        """Body: { "implementation_description": "..." } — VDA ISA TISAX."""
+        from django.core.exceptions import ValidationError
+
+        from ..services import set_implementation_description
+        instance = self.get_object()
+        try:
+            set_implementation_description(
+                instance, request.data.get("implementation_description", ""), request.user,
+            )
+        except ValidationError as e:
+            return Response({"error": e.messages[0]}, status=400)
+        return Response({
+            "ok": True,
+            "implementation_description": instance.implementation_description,
+        })
 
     @action(detail=False, methods=["post"], url_path="bulk-approve-soa")
     def bulk_approve_soa(self, request):

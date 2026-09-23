@@ -454,6 +454,7 @@ Propriétés clés de l'AuditLog :
 
 - Champ `applicability` pour la SOA ISO 27001
 - `calc_maturity_level` (propriété) pour VDA ISA (échelle 0-5)
+- `implementation_description` — « Implementation description » VDA ISA (comment l'exigence est mise en œuvre sur le site) ; écrite uniquement via `POST /set-implementation/` → `set_implementation_description()` (audit `control.implementation_description_set`, payload avec la seule longueur), exportée dans le VDA ISA ; advisor M21 `controls.tisax_missing_implementation` pour ML ≥ 3 sans description
 - `needs_revaluation` pour la gestion du changement (M04)
 - `na_justification` — texte libre sauvegardé par `evaluate_control()` quand status=`na` ; exposé dans l'API détail et utilisé par le moteur d'export (VDA et SOA)
 
@@ -464,8 +465,8 @@ Propriétés clés de l'AuditLog :
 | `non_valutato` | 0 | — |
 | `gap` | 1 | — |
 | `na` | 0 | Exclu de la moyenne ML dans le VDA ISA |
-| `parziale` | 2 / 3 | 3 si au moins une preuve valide |
-| `compliant` | 4 / 5 | 5 si ≥ 2 preuves valides |
+| `parziale` | 2 | — |
+| `compliant` | 3 / 4 | 4 si ≥ 2 preuves valides ; 5 uniquement par override manuel (`set-maturity`) |
 
 ```python
 class ControlInstance(BaseModel):

@@ -101,6 +101,24 @@ def controls_gap_advisor(context=None):
 
 
 @register_advisor
+def controls_tisax_missing_implementation_advisor(context=None):
+    """Controlli TISAX con maturità ≥ 3 senza "Implementation description": in
+    audit VDA ISA un livello "definito e documentato" senza descrizione di come
+    è implementato non è difendibile. Stessa deduplicazione L3→L2 della lista."""
+    from apps.controls.services import count_tisax_missing_implementation_by_plant
+    rows = [
+        {"plant_id": pid, "c": c}
+        for pid, c in count_tisax_missing_implementation_by_plant().items()
+    ]
+    return _per_plant(
+        rows, "controls.tisax_missing_implementation", "controls", "controls", "warning",
+        owner_role="control_owner", effort_h=4.0,
+        compliance_refs=[{"framework": "TISAX", "control": "VDA ISA — Implementation description"}],
+        deep_link="/controls",
+    )
+
+
+@register_advisor
 def risk_revaluation_advisor(context=None):
     """Controlli da rivalutare (`needs_revaluation`) per plant: drift di rischio.
     Riusa il service canonico (dedup L3→L2) come `controls.gap`."""

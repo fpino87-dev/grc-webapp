@@ -42,6 +42,7 @@ class ControlInstanceSerializer(serializers.ModelSerializer):
         #   status / last_evaluated_*          → POST /evaluate/ (evaluate_control)
         #   applicability / exclusion / na_*   → POST /set-applicability/
         #   maturity_level{,_override}         → POST /set-maturity/
+        #   implementation_description         → POST /set-implementation/
         #   approved_in_soa / soa_*            → POST /bulk-approve-soa/
         #   needs_revaluation{,_since}         → cascata change asset + evaluate
         # Scrivibili via PATCH restano solo: owner, notes, assets (con
@@ -59,6 +60,7 @@ class ControlInstanceSerializer(serializers.ModelSerializer):
             "na_review_by",
             "maturity_level",
             "maturity_level_override",
+            "implementation_description",
             "approved_in_soa",
             "soa_approved_at",
             "soa_approved_by",

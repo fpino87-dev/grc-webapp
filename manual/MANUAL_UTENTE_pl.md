@@ -223,7 +223,7 @@ Dowód jest dostępny natychmiast. System automatycznie sprawdzi, czy typ MIME p
 2. Kliknij przycisk **Eksportuj** (ikona pobierania) w prawym górnym rogu strony
 3. Wybierz typ eksportu:
    - **SOA ISO 27001** — Deklaracja Stosowalności ze wszystkimi kontrolami Annex A i ich statusem
-   - **VDA ISA TISAX** — Tabela VDA Information Security Assessment
+   - **VDA ISA TISAX** — Tabela VDA Information Security Assessment w układzie poziomym (A4 poziomo): dla każdej kontroli dojrzałość, status, owner, **Implementation description**, **Reference documentation** (powiązane dokumenty i dowody) oraz Note / Justification. Kontrole z dojrzałością ≥ 3 bez opisu są oznaczone „Missing” i zliczane w nagłówku. Opis uzupełnia się w zakładce **Ocena** kontroli, w polu „Implementation description (VDA ISA)”
    - **Matryca NIS2** — Matryca zgodności NIS2
 
 > **Ważna uwaga**: zawsze używaj przycisku „Eksportuj" wewnątrz strony. Nie otwieraj bezpośrednio URL pliku, kopiując link w przeglądarce — pobranie wymaga tokenu JWT aktywnej sesji i zakończy się błędem 401, jeśli zostanie podjęte poza platformą.

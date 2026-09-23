@@ -141,6 +141,7 @@ export interface ControlDetailInfo {
   soa_approved_at: string | null;
   soa_approved_by_name: string | null;
   notes: string;
+  implementation_description: string;
   needs_revaluation?: boolean;
   needs_revaluation_since?: string | null;
   /** Cadenza di riverifica in mesi impostata sul controllo; null = quella della policy del sito. */
@@ -262,6 +263,8 @@ export const controlsApi = {
     apiClient.post(`/controls/instances/${instanceId}/set-applicability/`, { applicability, justification }).then((r) => r.data),
   setMaturity: (instanceId: string, maturityLevel: number) =>
     apiClient.post(`/controls/instances/${instanceId}/set-maturity/`, { maturity_level: maturityLevel }).then((r) => r.data),
+  setImplementation: (instanceId: string, implementationDescription: string) =>
+    apiClient.post(`/controls/instances/${instanceId}/set-implementation/`, { implementation_description: implementationDescription }).then((r) => r.data),
   deleteInstance: (id: string) => apiClient.delete(`/controls/instances/${id}/`),
   archiveFramework: (id: string) => apiClient.delete(`/controls/frameworks/${id}/`),
   deleteFramework: (id: string) => apiClient.delete(`/controls/frameworks/${id}/delete/`),

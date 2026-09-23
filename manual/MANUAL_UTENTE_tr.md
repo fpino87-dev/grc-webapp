@@ -223,7 +223,7 @@ Kanıt hemen kullanılabilir. Sistem, dosyanın MIME türünün beyan edilen uza
 2. Sayfanın sağ üstündeki **Dışa Aktar** düğmesine (indirme simgesi) tıklayın
 3. Dışa aktarma türünü seçin:
    - **ISO 27001 SOA** — tüm Ek A kontrolleri ve ilgili durumlarla birlikte Uygulanabilirlik Beyanı
-   - **VDA ISA TISAX** — VDA Bilgi Güvenliği Değerlendirme Tablosu
+   - **VDA ISA TISAX** — VDA Bilgi Güvenliği Değerlendirme Tablosu, yatay formatta (A4 yatay): her kontrol için olgunluk, durum, owner, **Implementation description**, **Reference documentation** (bağlı belgeler ve kanıtlar) ve Note / Justification. Açıklaması olmayan olgunluk ≥ 3 kontroller "Missing" olarak işaretlenir ve başlıkta sayılır. Açıklama, kontrolün **Değerlendirme** sekmesindeki «Implementation description (VDA ISA)» kutusunda doldurulur
    - **NIS2 Matriksi** — NIS2 uyum matrisi
 
 > **Önemli not**: Dosyanın URL'sini tarayıcıdan kopyalayarak doğrudan açmayı denemeyin; her zaman sayfadaki "Dışa Aktar" düğmesini kullanın. İndirme işlemi aktif oturumun JWT belirtecini gerektirdiğinden platform dışında denendiğinde 401 hatasıyla başarısız olur.

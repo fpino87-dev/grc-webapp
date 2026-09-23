@@ -196,6 +196,12 @@ class ControlInstance(BaseModel):
         help_text="Obbligatorio se applicability=escluso. Motivazione formale per SOA ISO 27001.",
     )
 
+    # VDA ISA "Implementation description": COME il requisito è implementato
+    # nel sito (processi, strumenti, responsabilità). È la colonna che l'auditor
+    # TISAX legge accanto alla maturità dichiarata: senza, il livello è solo un
+    # numero. Scritta via POST /set-implementation/ (audit trail).
+    implementation_description = models.TextField(blank=True)
+
     # Maturity level per VDA ISA TISAX (0-5)
     maturity_level = models.IntegerField(
         null=True, blank=True,

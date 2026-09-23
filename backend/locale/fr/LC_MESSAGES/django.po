@@ -2733,3 +2733,8 @@ msgstr "Le contenu du fichier ne correspond pas à l'extension .%(ext)s."
 msgid "Generare lo snapshot dei dati prima di scaricare il verbale."
 msgstr ""
 "Générez l'instantané des données avant de télécharger le procès-verbal."
+
+#: apps/controls/services/instances.py
+#, python-format
+msgid "La descrizione dell'implementazione supera %(max)s caratteri."
+msgstr "La description de la mise en œuvre dépasse %(max)s caractères."

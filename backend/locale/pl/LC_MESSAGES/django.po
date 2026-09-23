@@ -2688,3 +2688,8 @@ msgstr "Zawartość pliku nie odpowiada rozszerzeniu .%(ext)s."
 #: apps/management_review/views.py
 msgid "Generare lo snapshot dei dati prima di scaricare il verbale."
 msgstr "Wygeneruj migawkę danych przed pobraniem protokołu."
+
+#: apps/controls/services/instances.py
+#, python-format
+msgid "La descrizione dell'implementazione supera %(max)s caratteri."
+msgstr "Opis wdrożenia przekracza %(max)s znaków."

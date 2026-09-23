@@ -17,6 +17,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
   - Punti liberi per le altre decisioni, con task e PDCA come nel riesame completo.
   - **Non vale come riesame periodico**: lo scadenzario continua a calcolare il prossimo riesame solo dai riesami completi, e il riesame completo successivo riporta anche le azioni decise nelle sedute mirate (§9.3.2 a). Il **verbale** del mirato dichiara che non sostituisce il riesame §9.3 ed elenca documenti esaminati, revisione ed esito; nel **pacchetto audit** le sedute mirate sono in `09_management_review/sedute_intermedie/`.
 
+- **Controlli TISAX — "Implementation description" VDA ISA**: finora per un controllo TISAX si registravano solo stato e livello di maturità, senza descrivere *come* il requisito è implementato; nell'export VDA ISA l'auditor vedeva un numero senza spiegazione.
+  - Nel tab **Valutazione** dei controlli TISAX c'è un nuovo riquadro «Implementation description (VDA ISA)», con un avviso quando la maturità dichiarata è 3 o più e la descrizione manca. Ogni modifica è registrata nell'audit trail (chi e quando; il testo resta sul controllo).
+  - L'**export VDA ISA** è ora in **formato orizzontale** (A4 landscape) e riporta per ogni controllo anche **Implementation description** e **Reference documentation** (documenti ed evidenze collegati, con stato del documento se non approvato e scadenza delle evidenze). La giustificazione N/A / esclusione non è più troncata. I controlli con maturità ≥ 3 senza descrizione sono segnati "Missing" e contati nell'intestazione. Per TISAX L3 la descrizione è quella del controllo VH, o quella del controllo base se sul VH manca.
+  - Il **Centro Operativo (M21)** segnala per sito i controlli TISAX con maturità ≥ 3 senza descrizione.
+  - Il **pacchetto audit** (`01_controls/controls_status.csv`) include la descrizione dell'implementazione; la colonna `note` era sempre vuota per un errore di campo e ora riporta le note del controllo.
+
 - **Documenti (M07) — la delibera dell'organo vale anche per una nuova versione di un documento in vigore**: finora l'organo non poteva approvare per delibera la nuova versione di un documento già in vigore; ora può approvarla o respingerla. Ogni respingimento registra quale revisione è stata respinta.
 
 ### Fixed

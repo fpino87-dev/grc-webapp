@@ -223,7 +223,7 @@ L'evidenza è disponibile immediatamente. Il sistema verificherà automaticament
 2. Clicca il pulsante **Esporta** (icona download) in alto a destra nella pagina
 3. Seleziona il tipo di export:
    - **SOA ISO 27001** — Statement of Applicability con tutti i controlli Annex A e il relativo stato
-   - **VDA ISA TISAX** — Tabella VDA Information Security Assessment
+   - **VDA ISA TISAX** — Tabella VDA Information Security Assessment, in formato orizzontale (A4 landscape): per ogni controllo maturità, stato, owner, **Implementation description**, **Reference documentation** (documenti ed evidenze collegati) e Note / Justification. I controlli con maturità ≥ 3 senza descrizione sono segnati "Missing" e contati nell'intestazione. La descrizione si compila nel tab **Valutazione** del controllo, riquadro «Implementation description (VDA ISA)»
    - **NIS2 Matrix** — Matrice di conformità NIS2
 
 > **Nota importante**: usa sempre il pulsante "Esporta" all'interno della pagina. Non aprire l'URL del file direttamente dal browser copiando il link — il download richiede il token JWT della sessione attiva e fallirebbe con un errore 401 se tentato fuori dalla piattaforma.

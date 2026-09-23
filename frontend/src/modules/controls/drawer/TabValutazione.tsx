@@ -36,6 +36,7 @@ export function TabValutazione({
   naJustification,
   calcMaturityLevel,
   maturityLevelOverride,
+  implementationDescription,
   framework,
   approvedInSoa,
   soaApprovedAt,
@@ -60,6 +61,7 @@ export function TabValutazione({
   naJustification: string;
   calcMaturityLevel: number;
   maturityLevelOverride: boolean;
+  implementationDescription: string;
   framework: string;
   approvedInSoa: boolean;
   soaApprovedAt: string | null;
@@ -88,6 +90,9 @@ export function TabValutazione({
   const [applicabilityError, setApplicabilityError] = useState("");
   const [maturityOverrideVal, setMaturityOverrideVal] = useState(calcMaturityLevel);
   const [gapActions, setGapActions] = useState<Array<{ title?: string; priority?: string; description?: string }>>([]);
+  const [implValue, setImplValue] = useState(implementationDescription);
+  const [implSaved, setImplSaved] = useState(false);
+  const [implError, setImplError] = useState("");
   const [notesValue, setNotesValue] = useState(initialNotes ?? "");
   const [notesSaved, setNotesSaved] = useState(false);
   const [assetIds, setAssetIds] = useState<string[]>((linkedAssets ?? []).map(a => a.id));
@@ -152,6 +157,20 @@ export function TabValutazione({
     mutationFn: () => controlsApi.setMaturity(instanceId, maturityOverrideVal),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["control-detail", instanceId] });
+    },
+  });
+
+  const implMutation = useMutation({
+    mutationFn: () => controlsApi.setImplementation(instanceId, implValue),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["control-detail", instanceId] });
+      setImplError("");
+      setImplSaved(true);
+      setTimeout(() => setImplSaved(false), 2000);
+    },
+    onError: (e: unknown) => {
+      const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? t("common.error");
+      setImplError(msg);
     },
   });
 
@@ -400,6 +419,36 @@ export function TabValutazione({
             className="w-full py-1.5 bg-purple-600 text-white rounded text-xs hover:bg-purple-700 disabled:opacity-50"
           >
             {maturityMutation.isPending ? t("common.saving") : t("controls.drawer.evaluation.maturity.override")}
+          </button>
+        </div>
+      )}
+
+      {/* Implementation description VDA ISA — solo per TISAX: è ciò che
+          l'auditor legge accanto alla maturità dichiarata nell'export. */}
+      {(framework.includes("TISAX") || framework.includes("VDA")) && (
+        <div className="border border-purple-200 rounded-lg p-3 space-y-2 bg-purple-50/30">
+          <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide">{t("controls.drawer.evaluation.implementation.title")}</p>
+          <p className="text-xs text-gray-500">{t("controls.drawer.evaluation.implementation.hint")}</p>
+          {calcMaturityLevel >= 3 && currentStatus !== "na" && !implementationDescription.trim() && (
+            <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+              ⚠ {t("controls.drawer.evaluation.implementation.missing_warning", { level: calcMaturityLevel })}
+            </p>
+          )}
+          <textarea
+            value={implValue}
+            onChange={e => { setImplValue(e.target.value); setImplSaved(false); }}
+            placeholder={t("controls.drawer.evaluation.implementation.placeholder")}
+            maxLength={5000}
+            className="w-full border rounded px-3 py-2 text-sm"
+            rows={5}
+          />
+          {implError && <p className="text-xs text-red-600">{implError}</p>}
+          <button
+            onClick={() => implMutation.mutate()}
+            disabled={implMutation.isPending || implValue.trim() === implementationDescription.trim()}
+            className="w-full py-1.5 bg-purple-600 text-white rounded text-xs hover:bg-purple-700 disabled:opacity-50"
+          >
+            {implMutation.isPending ? t("common.saving") : implSaved ? "✓ " + t("common.saved", { defaultValue: "Salvato" }) : t("controls.drawer.evaluation.implementation.save")}
           </button>
         </div>
       )}

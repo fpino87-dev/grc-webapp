@@ -550,7 +550,14 @@
           "note_placeholder": "Notatka / uzasadnienie (wymagane dla N/D, min 20 znaków)",
           "req_tooltip": "Rozwiąż wymagania w zakładce Dokumenty i Dowody"
         },
-        "save_evaluation": "Zapisz ocenę"
+        "save_evaluation": "Zapisz ocenę",
+        "implementation": {
+          "title": "Implementation description (VDA ISA)",
+          "hint": "Opisz, w jaki sposób wymaganie jest wdrożone w zakładzie: procesy, narzędzia, odpowiedzialności i dokumenty referencyjne. Opis pojawia się w eksporcie VDA ISA obok poziomu dojrzałości.",
+          "placeholder": "Np. Proces zarządzania dostępem jest opisany w procedurze PR-ACC-01; wnioski przechodzą przez system zgłoszeń IT z akceptacją przełożonego; kwartalny przegląd kont uprzywilejowanych przez IT Managera.",
+          "save": "Zapisz opis",
+          "missing_warning": "Zadeklarowano dojrzałość {{level}} bez opisu wdrożenia: podczas audytu TISAX tego poziomu nie da się obronić."
+        }
       },
       "docs": {
         "requirements": {
@@ -4714,6 +4721,11 @@
         "title": "{{count}} terminów NIS2 zagrożonych",
         "what": "Zbliżające się lub już naruszone powiadomienia NIS2 dla otwartych incydentów ({{plant_name}}).",
         "action": "Wyślij powiadomienie NIS2 przed ustawowym terminem."
+      },
+      "controls.tisax_missing_implementation": {
+        "title": "{{count}} kontroli TISAX bez Implementation description",
+        "what": "Zadeklarowano dojrzałość ≥ 3 bez opisu sposobu wdrożenia wymagania ({{plant_name}}).",
+        "action": "Otwórz kontrole TISAX i uzupełnij Implementation description w zakładce Ocena."
       }
     },
     "breakdown": {

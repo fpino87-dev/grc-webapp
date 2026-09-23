@@ -550,7 +550,14 @@
           "note_placeholder": "Note / justification (obligatoire pour N/A, min 20 caractères)",
           "req_tooltip": "Résolvez les exigences dans l'onglet Documents & Preuves"
         },
-        "save_evaluation": "Enregistrer l'évaluation"
+        "save_evaluation": "Enregistrer l'évaluation",
+        "implementation": {
+          "title": "Implementation description (VDA ISA)",
+          "hint": "Décrivez comment l'exigence est mise en œuvre sur le site : processus, outils, responsabilités et documents de référence. Elle figure dans l'export VDA ISA à côté du niveau de maturité.",
+          "placeholder": "Ex. Le processus de gestion des accès est défini dans la procédure PR-ACC-01 ; les demandes passent par le ticketing IT avec approbation du responsable ; revue trimestrielle des comptes à privilèges par l'IT Manager.",
+          "save": "Enregistrer la description",
+          "missing_warning": "Maturité {{level}} déclarée sans description de la mise en œuvre : lors d'un audit TISAX, ce niveau n'est pas défendable."
+        }
       },
       "docs": {
         "requirements": {
@@ -4714,6 +4721,11 @@
         "title": "{{count}} échéances NIS2 à risque",
         "what": "Notifications NIS2 imminentes ou déjà dépassées sur des incidents ouverts ({{plant_name}}).",
         "action": "Envoyez la notification NIS2 avant l'échéance légale."
+      },
+      "controls.tisax_missing_implementation": {
+        "title": "{{count}} contrôles TISAX sans Implementation description",
+        "what": "Maturité ≥ 3 déclarée sans décrire comment l'exigence est mise en œuvre ({{plant_name}}).",
+        "action": "Ouvrez les contrôles TISAX et renseignez l'Implementation description dans l'onglet Évaluation."
       }
     },
     "breakdown": {

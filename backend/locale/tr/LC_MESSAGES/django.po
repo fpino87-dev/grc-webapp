@@ -2667,3 +2667,8 @@ msgstr "Dosya içeriği .%(ext)s uzantısıyla eşleşmiyor."
 #: apps/management_review/views.py
 msgid "Generare lo snapshot dei dati prima di scaricare il verbale."
 msgstr "Tutanağı indirmeden önce veri anlık görüntüsünü oluşturun."
+
+#: apps/controls/services/instances.py
+#, python-format
+msgid "La descrizione dell'implementazione supera %(max)s caratteri."
+msgstr "Uygulama açıklaması %(max)s karakteri aşıyor."
