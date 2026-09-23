@@ -205,6 +205,9 @@ def draft_executive_summary(review: ManagementReview, user, lang: str = "it") ->
     from apps.ai_engine.router import route
     from apps.plants.models import Plant
 
+    from .review import ensure_full_review
+
+    ensure_full_review(review)
     _ensure_editable(review)
     if not review.snapshot_generated_at:
         raise ValidationError(_("Generare lo snapshot dei dati prima di chiedere la sintesi all'IA."))
@@ -259,6 +262,9 @@ def accept_executive_summary(review: ManagementReview, text: str, user) -> Manag
     (eventualmente modificato) la consuma e l'interazione IA viene confermata."""
     from apps.ai_engine.router import confirm_output
 
+    from .review import ensure_full_review
+
+    ensure_full_review(review)
     _ensure_editable(review)
     text = (text or "").strip()
     draft = review.executive_summary_draft.strip()

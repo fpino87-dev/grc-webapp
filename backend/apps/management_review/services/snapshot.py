@@ -371,6 +371,10 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     """
     from django.core.exceptions import ValidationError
 
+    from .review import ensure_full_review
+
+    ensure_full_review(review)
+
     if review.approval_status == "approvato":
         # Lo snapshot è il contenuto del verbale approvato: non si riscrive.
         raise ValidationError(_("Il riesame è approvato: lo snapshot non può essere rigenerato."))

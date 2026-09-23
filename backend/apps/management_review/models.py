@@ -21,6 +21,15 @@ class ManagementReview(BaseModel):
     title = models.CharField(max_length=200)
     review_date = models.DateField()
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="pianificato")
+    # Completo: il riesame periodico ISO 27001 §9.3 (punti obbligatori,
+    # snapshot dei dati). Mirato: riunione dell'organo su punti specifici
+    # (documenti da decidere, piccole decisioni) fra un riesame completo e
+    # l'altro; non vale mai come riesame §9.3. Scelto alla creazione.
+    KIND_CHOICES = [
+        ("completo", "Completo (ISO 27001 §9.3)"),
+        ("mirato", "Mirato"),
+    ]
+    kind = models.CharField(max_length=10, choices=KIND_CHOICES, default="completo")
     # Organo che tiene e approva il riesame (CdA, comitato, direzione): da qui
     # si propongono i partecipanti. Facoltativo: un riesame può essere tenuto
     # dalla direzione senza un organo formalizzato in anagrafica.
@@ -101,6 +110,11 @@ class ManagementReview(BaseModel):
 
     class Meta:
         ordering = ["-review_date"]
+        indexes = [models.Index(fields=["plant", "kind", "status"], name="mr_plant_kind_status_idx")]
+
+    @property
+    def is_targeted(self) -> bool:
+        return self.kind == "mirato"
 
 
 class ReviewParticipant(BaseModel):
@@ -171,8 +185,34 @@ class ReviewAgendaItem(BaseModel):
     discussion_draft = models.TextField(blank=True)
     discussion_draft_meta = models.JSONField(default=dict, blank=True)
 
+    # Punto "documento" del riesame mirato (code="document"): il documento da
+    # decidere, la revisione che l'organo esamina (fissata alla selezione) e
+    # l'esito. L'esito si applica al documento all'approvazione del riesame.
+    OUTCOME_CHOICES = [
+        ("approvato", "Approvato"),
+        ("rinviato", "Rinviato"),
+        ("respinto", "Respinto"),
+    ]
+    document = models.ForeignKey(
+        "documents.Document", on_delete=models.PROTECT, null=True, blank=True,
+        related_name="review_items",
+    )
+    document_version = models.ForeignKey(
+        "documents.DocumentVersion", on_delete=models.PROTECT, null=True, blank=True,
+        related_name="+",
+    )
+    document_outcome = models.CharField(max_length=10, choices=OUTCOME_CHOICES, blank=True)
+    document_outcome_applied_at = models.DateTimeField(null=True, blank=True)
+
     class Meta:
         ordering = ["order", "created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["review", "document"],
+                condition=models.Q(deleted_at__isnull=True, document__isnull=False),
+                name="uniq_review_document_item",
+            ),
+        ]
 
 
 class ReviewAction(BaseModel):

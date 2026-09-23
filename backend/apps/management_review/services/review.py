@@ -24,6 +24,16 @@ def _ensure_not_approved(review: ManagementReview, message=None) -> None:
         raise ValidationError(message or _("Il riesame è approvato: il verbale non è più modificabile."))
 
 
+def ensure_full_review(review: ManagementReview) -> None:
+    """Snapshot dei dati, sintesi executive e bozze IA esistono solo nel
+    riesame completo §9.3: il mirato non congela dati."""
+    if review.is_targeted:
+        raise ValidationError(
+            _("Il riesame mirato non prevede snapshot dei dati, sintesi executive né bozze IA."),
+            code="targeted_review",
+        )
+
+
 # ── Creazione e ordine del giorno ─────────────────────────────────────────────
 
 def ensure_iso_agenda(review: ManagementReview, user=None) -> None:
@@ -56,7 +66,9 @@ def create_review(serializer, user) -> ManagementReview:
     data = serializer.validated_data
     _validate_governing_body(data.get("governing_body"), data.get("plant"))
     review = serializer.save(created_by=user)
-    ensure_iso_agenda(review, user)
+    # Il mirato ha un ordine del giorno libero: niente punti §9.3.2.
+    if not review.is_targeted:
+        ensure_iso_agenda(review, user)
     # Logo proposto: quello del sito del riesame, se caricato.
     from apps.plants.services import plant_logo
 
@@ -79,7 +91,7 @@ def create_review(serializer, user) -> ManagementReview:
         action_code="management_review.review.create",
         level="L2",
         entity=review,
-        payload={"id": str(review.id), "title": review.title},
+        payload={"id": str(review.id), "title": review.title, "kind": review.kind},
     )
     return review
 
@@ -87,6 +99,8 @@ def create_review(serializer, user) -> ManagementReview:
 def update_review(serializer, user) -> ManagementReview:
     review = serializer.instance
     data = serializer.validated_data
+    if "kind" in data and data["kind"] != review.kind:
+        raise ValidationError(_("Il tipo di riesame si sceglie alla creazione e non si modifica."))
     if MINUTES_FIELDS & set(data.keys()):
         _ensure_not_approved(
             review, _("Il riesame è approvato: dati della riunione e partecipanti non sono più modificabili.")
@@ -103,10 +117,12 @@ def add_agenda_item(review: ManagementReview, title: str, user) -> ReviewAgendaI
     title = (title or "").strip()
     if not title:
         raise ValidationError(_("Indicare il titolo del punto."))
+    from .targeted import first_custom_order
+
     last = review.agenda_items.order_by("-order").first()
     item = ReviewAgendaItem.objects.create(
         review=review, code="custom", title=title[:200],
-        order=(last.order + 1) if last else len(ISO_AGENDA_CODES), created_by=user,
+        order=(last.order + 1) if last else first_custom_order(review), created_by=user,
     )
     log_action(
         user=user, action_code="management_review.agenda.add", level="L2", entity=item,
@@ -127,6 +143,11 @@ def update_agenda_item(item: ReviewAgendaItem, data: dict, user) -> ReviewAgenda
             raise ValidationError(_("Indicare il titolo del punto."))
         item.title = title[:200]
         fields.append("title")
+    if "document_outcome" in data:
+        from .targeted import validate_document_outcome
+
+        item.document_outcome = validate_document_outcome(item, data["document_outcome"])
+        fields.append("document_outcome")
     if fields:
         item.save(update_fields=[*fields, "updated_at"])
         log_action(
@@ -477,6 +498,8 @@ def complete_review(review: ManagementReview, user) -> ManagementReview:
 
     if review.status == "completato":
         raise ValidationError(_("La riunione è già completata."))
+    if review.is_targeted:
+        return _complete_targeted_review(review, user)
     missing = uncovered_mandatory_items(review)
     if missing:
         raise ValidationError(
@@ -500,6 +523,33 @@ def complete_review(review: ManagementReview, user) -> ManagementReview:
         level="L2",
         entity=review,
         payload={"id": str(review.id), "title": review.title},
+    )
+    return review
+
+
+def _complete_targeted_review(review: ManagementReview, user) -> ManagementReview:
+    """Chiusura del riesame mirato: almeno un punto, e ogni documento con il
+    suo esito. Nessuna proposta di prossimo riesame: resta quella del
+    riesame completo."""
+    from .targeted import uncovered_targeted_items
+
+    if not review.agenda_items.filter(deleted_at__isnull=True).exists():
+        raise ValidationError(_("Aggiungere almeno un punto all'ordine del giorno prima di chiudere la riunione."))
+    missing = uncovered_targeted_items(review)
+    if missing:
+        raise ValidationError(
+            _("Prima di chiudere la riunione registrare l'esito di ogni documento all'ordine del giorno."),
+            code="document_outcome_missing",
+            params={"missing": missing},
+        )
+    review.status = "completato"
+    review.save(update_fields=["status", "updated_at"])
+    log_action(
+        user=user,
+        action_code="management_review.review.complete",
+        level="L2",
+        entity=review,
+        payload={"id": str(review.id), "title": review.title, "kind": review.kind},
     )
     return review
 

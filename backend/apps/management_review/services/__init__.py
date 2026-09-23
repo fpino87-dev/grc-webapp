@@ -24,6 +24,7 @@ from .review import (
     create_review_action,
     delete_agenda_item,
     delete_review_action,
+    ensure_full_review,
     ensure_iso_agenda,
     participants_from_body,
     set_participants,
@@ -34,6 +35,11 @@ from .review import (
     update_agenda_item,
     update_review,
     update_review_action,
+)
+from .targeted import (
+    add_document_items,
+    pending_documents,
+    refresh_item_version,
 )
 from .agenda_ai import (
     accept_agenda_discussion,
@@ -62,4 +68,5 @@ __all__ = [
     "discard_summary_draft", "draft_executive_summary", "ensure_iso_agenda", "generate_snapshot",
     "get_kpi_snapshot", "get_operational_kpi_summary", "start_review", "suggest_chair",
     "uncovered_mandatory_items", "update_agenda_item", "update_review", "update_review_action",
+    "add_document_items", "ensure_full_review", "pending_documents", "refresh_item_version",
 ]

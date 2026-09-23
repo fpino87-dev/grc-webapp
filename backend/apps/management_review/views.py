@@ -30,6 +30,24 @@ def _drf_error(exc: DjangoValidationError) -> DRFValidationError:
     return DRFValidationError(body)
 
 
+def _agenda_item_queryset():
+    """Punti con documento, revisione esaminata e ultima revisione caricata
+    (annotata: il serializer segnala la revisione cambiata senza query per
+    punto, regola #6)."""
+    from django.db.models import OuterRef, Subquery
+
+    from apps.documents.models import DocumentVersion
+
+    latest = DocumentVersion.objects.filter(
+        document=OuterRef("document"), deleted_at__isnull=True,
+    ).order_by("-version_number")
+    return ReviewAgendaItem.objects.select_related("review", "document", "document_version").annotate(
+        latest_version_id=Subquery(latest.values("id")[:1]),
+        latest_version_label=Subquery(latest.values("version_label")[:1]),
+        latest_version_number=Subquery(latest.values("version_number")[:1]),
+    )
+
+
 def _action_queryset():
     return ReviewAction.objects.select_related("owner", "task", "pdca_cycle")
 
@@ -40,12 +58,12 @@ class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     ).prefetch_related(
         Prefetch("participants", queryset=ReviewParticipant.objects.all()),
         Prefetch("actions", queryset=_action_queryset()),
-        Prefetch("agenda_items", queryset=ReviewAgendaItem.objects.all()),
+        Prefetch("agenda_items", queryset=_agenda_item_queryset()),
     )
     serializer_class = ManagementReviewSerializer
     permission_classes = [ReviewWithBodyMembersPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ["plant", "status"]
+    filterset_fields = ["plant", "status", "kind"]
     search_fields = ["title"]
     plant_field = "plant"
 
@@ -115,6 +133,24 @@ class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     def complete(self, request, pk=None):
         review = self._run(services.complete_review, self.get_object(), request.user)
         return self._respond(review)
+
+    @action(detail=True, methods=["get"], url_path="pending-documents")
+    def pending_documents(self, request, pk=None):
+        """Riesame mirato: documenti del perimetro su cui l'organo può decidere."""
+        return Response(self._run(services.pending_documents, self.get_object(), request.user))
+
+    @action(detail=True, methods=["post"], url_path="document-items")
+    def document_items(self, request, pk=None):
+        """Riesame mirato: mette all'ordine del giorno i documenti scelti."""
+        review = self.get_object()
+        result = self._run(
+            services.add_document_items, review, request.data.get("document_ids") or [], request.user,
+        )
+        return Response({
+            "added": [str(i.pk) for i in result["added"]],
+            "skipped": result["skipped"],
+            "review": self._respond(review).data,
+        })
 
     @action(detail=True, methods=["post"], url_path="generate-snapshot")
     def generate_snapshot(self, request, pk=None):
@@ -237,7 +273,7 @@ class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 
 
 class ReviewAgendaItemViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
-    queryset = ReviewAgendaItem.objects.select_related("review")
+    queryset = _agenda_item_queryset()
     serializer_class = ReviewAgendaItemSerializer
     permission_classes = [ManagementReviewPermission]
     filter_backends = [DjangoFilterBackend]
@@ -291,6 +327,12 @@ class ReviewAgendaItemViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             return Response({"error": ai_not_configured_message(), "code": "ai_not_configured"}, status=400)
         item.refresh_from_db()
         return Response(ReviewAgendaItemSerializer(item).data)
+
+    @action(detail=True, methods=["post"], url_path="refresh-version")
+    def refresh_version(self, request, pk=None):
+        """Riesame mirato: allinea il punto all'ultima revisione del documento."""
+        item = self._run(services.refresh_item_version, self.get_object(), request.user)
+        return Response(ReviewAgendaItemSerializer(self.get_queryset().get(pk=item.pk)).data)
 
     @action(detail=True, methods=["post"])
     def discussion(self, request, pk=None):

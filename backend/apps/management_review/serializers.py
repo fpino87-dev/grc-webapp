@@ -51,19 +51,60 @@ class ReviewActionSerializer(serializers.ModelSerializer):
         return attrs
 
 
+def _version_label(version):
+    if version is None:
+        return None
+    return version.version_label or f"v{version.version_number}"
+
+
 class ReviewAgendaItemSerializer(serializers.ModelSerializer):
+    document_info = serializers.SerializerMethodField()
+
+    def get_document_info(self, obj):
+        """Documento del punto (riesame mirato): revisione esaminata e, se nel
+        frattempo ne è stata caricata una nuova, quale. L'ultima versione
+        arriva annotata dalla view (niente query per punto, regola #6)."""
+        if obj.document_id is None:
+            return None
+        doc = obj.document
+        if hasattr(obj, "latest_version_id"):
+            latest_id = obj.latest_version_id
+            latest_label = obj.latest_version_label or (
+                f"v{obj.latest_version_number}" if obj.latest_version_number else None
+            )
+        else:
+            from .services.targeted import latest_version
+
+            latest = latest_version(doc)
+            latest_id, latest_label = (latest.pk, _version_label(latest)) if latest else (None, None)
+        return {
+            "id": str(doc.pk),
+            "document_code": doc.document_code,
+            "title": doc.title,
+            "status": doc.status,
+            "is_mandatory": doc.is_mandatory,
+            "examined_version": _version_label(obj.document_version),
+            "latest_version": latest_label,
+            "version_changed": latest_id is not None and latest_id != obj.document_version_id,
+        }
+
     class Meta:
         model = ReviewAgendaItem
         fields = [
             "id", "review", "code", "title", "order", "mandatory", "discussion",
             "discussion_meta", "discussion_draft", "discussion_draft_meta", "updated_at",
+            "document", "document_version", "document_outcome", "document_outcome_applied_at",
+            "document_info",
         ]
         # La bozza IA e la sua provenienza non si scrivono via PATCH: passano
         # dalle azioni discussion-draft / discussion, che registrano chi ha
-        # validato il testo (CLAUDE.md #9).
+        # validato il testo (CLAUDE.md #9). Documento e revisione esaminata si
+        # scelgono dall'azione document-items del riesame; l'applicazione
+        # dell'esito la registra l'approvazione del riesame.
         read_only_fields = [
             "id", "code", "order", "mandatory", "updated_at",
             "discussion_meta", "discussion_draft", "discussion_draft_meta",
+            "document", "document_version", "document_outcome_applied_at",
         ]
 
     def validate(self, attrs):

@@ -272,7 +272,10 @@ def draft_agenda_discussion(item: ReviewAgendaItem, user, lang: str = "it") -> d
     from apps.ai_engine.router import route
     from apps.plants.models import Plant
 
+    from .review import ensure_full_review
+
     review = item.review
+    ensure_full_review(review)
     _ensure_editable(item)
     if not review.snapshot_generated_at:
         raise ValidationError(

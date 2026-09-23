@@ -47,6 +47,9 @@ ALLOWED_TRANSITIONS = {
     # singolo utente, non per limitare il CdA — e resta tracciato che si è
     # trattato di una delibera, con i suoi estremi.
     "approve_resolution": {"bozza", "revisione", "approvazione"},
+    # respingimento deciso dall'organo (riesame mirato): da bozza il documento
+    # resta in bozza e si registra solo l'esito sulla revisione esaminata.
+    "reject_resolution": {"bozza", "revisione", "approvazione"},
 }
 
 _TRANSITION_ERRORS = {
@@ -57,6 +60,10 @@ _TRANSITION_ERRORS = {
     ),
     "approve": _lazy("Approvazione non consentita: il documento non è in revisione o in approvazione (stato attuale: %(status)s)."),
     "reject": _lazy("Rifiuto non consentito: il documento non è in revisione o in approvazione (stato attuale: %(status)s)."),
+    "reject_resolution": _lazy(
+        "Respingimento non registrabile: il documento è in vigore senza nuove versioni o è "
+        "archiviato (stato attuale: %(status)s)."
+    ),
     "archive": _lazy("Archiviazione non consentita: solo un documento approvato può essere archiviato (stato attuale: %(status)s)."),
 }
 
@@ -64,6 +71,10 @@ _TRANSITION_ERRORS = {
 def _require_transition(document, action: str) -> None:
     """Blocca i salti di stato (es. bozza → approvato) prima di ogni scrittura."""
     allowed = ALLOWED_TRANSITIONS.get(action, set())
+    # L'organo decide anche su una nuova versione caricata dopo l'ultima
+    # approvazione di un documento che resta in vigore (non obbligatorio).
+    if action in ("approve_resolution", "reject_resolution") and has_unapproved_version(document):
+        return
     if document.status not in allowed:
         raise ValidationError(
             _TRANSITION_ERRORS[action] % {"status": document.get_status_display()}
@@ -303,21 +314,62 @@ def approve_document(
         logging.getLogger(__name__).warning("Documenti: notifica non inviata: %s", exc)
 
 
-def reject_document(document, user, notes=""):
-    _require_author_separation(document, user, "reject")
-    _require_transition(document, "reject")
+def reject_document(
+    document,
+    user,
+    notes="",
+    *,
+    mode="in_app",
+    resolution_ref="",
+    resolution_date=None,
+    governing_body=None,
+    review_id=None,
+):
+    """Respinge la revisione in esame: il documento torna in bozza.
+
+    ``mode="delibera"``: lo ha deciso l'organo di governo in seduta (riesame
+    mirato). È un atto collegiale come l'approvazione per delibera: niente
+    controllo di separazione autore-revisore; da bozza il documento resta in
+    bozza, e un documento in vigore con una nuova versione resta in vigore con
+    la versione già approvata. In entrambi i casi si registra quale revisione
+    è stata respinta.
+    """
+    if mode == "delibera":
+        mode, resolution_date, governing_body = _validate_approval_mode(
+            document, mode, resolution_ref, resolution_date, governing_body,
+            from_review=bool(review_id),
+        )
+        _require_transition(document, "reject_resolution")
+    else:
+        mode = "in_app"
+        _require_author_separation(document, user, "reject")
+        _require_transition(document, "reject")
+    new_status = "bozza" if document.status in ("revisione", "approvazione") else document.status
+    rejected = document.versions.first()
     with transaction.atomic():
-        document.status = "bozza"
-        document.save(update_fields=["status", "updated_at"])
+        if new_status != document.status:
+            document.status = new_status
+            document.save(update_fields=["status", "updated_at"])
         DocumentApproval.objects.create(
-            document=document, action="reject", actor=user, notes=notes
+            document=document, action="reject", actor=user, notes=notes,
+            version=rejected,
+            approval_mode=mode,
+            governing_body=governing_body if mode == "delibera" else None,
+            resolution_ref=(resolution_ref or "").strip()[:100] if mode == "delibera" else "",
+            resolution_date=resolution_date if mode == "delibera" else None,
+            review_id=review_id if mode == "delibera" else None,
         )
         log_action(
             user=user,
             action_code="document.rejected",
             level="L2",
             entity=document,
-            payload={"id": str(document.pk), "title": document.title, "notes": (notes or "")[:200]},
+            payload={
+                "id": str(document.pk), "title": document.title,
+                "notes": (notes or "")[:200], "mode": mode,
+                "resolution_ref": (resolution_ref or "")[:100] if mode == "delibera" else "",
+                "version": (rejected.version_label or f"v{rejected.version_number}") if rejected else None,
+            },
         )
 
 
