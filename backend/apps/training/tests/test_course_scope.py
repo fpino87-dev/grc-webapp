@@ -177,21 +177,19 @@ def test_load_defaults_adds_only_loaded_controls_and_is_idempotent(acn):
     assert rows == [("generale", "ACN-NIS2-PR.AT-01"), ("ruoli_critici", "ACN-NIS2-PR.AT-02")]
 
 
-@pytest.mark.django_db
-def test_migration_turns_course_controls_into_audience_rules(acn):
-    from django.apps import apps
-
-    from apps.training.models import TrainingCourse, TrainingEvidenceControl
+def test_migration_turns_course_controls_into_audience_rules(legacy_apps, acn):
+    from apps.training.models import TrainingEvidenceControl
 
     migration = importlib.import_module("apps.training.migrations.0006_training_evidence_controls")
+    TrainingCourse = legacy_apps.get_model("training", "TrainingCourse")
     general = TrainingCourse.objects.create(title="Awareness")
-    general.controls.set([acn["ACN-NIS2-PR.AT-01"]])
+    general.controls.set([acn["ACN-NIS2-PR.AT-01"].pk])
     critical = TrainingCourse.objects.create(title="Admin", audience_kind="ruoli_critici")
-    critical.controls.set([acn["ACN-NIS2-PR.AT-02"], acn["ACN-NIS2-GV.RR-02"]])
+    critical.controls.set([acn["ACN-NIS2-PR.AT-02"].pk, acn["ACN-NIS2-GV.RR-02"].pk])
     archived = TrainingCourse.objects.create(title="Vecchio", status="archiviato")
-    archived.controls.set([acn["ACN-NIS2-GV.RR-02"]])
+    archived.controls.set([acn["ACN-NIS2-GV.RR-02"].pk])
 
-    migration.copy_course_controls(apps, None)
+    migration.copy_course_controls(legacy_apps, None)
     rows = sorted(TrainingEvidenceControl.objects.values_list("audience_kind", "control__external_id"))
     assert rows == [
         ("generale", "ACN-NIS2-PR.AT-01"),

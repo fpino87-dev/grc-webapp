@@ -206,7 +206,6 @@ def delete_plant(plant: Plant, user, force: bool = False) -> None:
     from apps.management_review.models import ManagementReview
     from apps.suppliers.models import Supplier
     from apps.training.models import (
-        PhishingSimulation,
         TrainingAudience,
         TrainingCourse,
         TrainingPlan,
@@ -241,9 +240,6 @@ def delete_plant(plant: Plant, user, force: bool = False) -> None:
     dependency_counts["training_courses"] = TrainingCourse.objects.filter(
         plants=plant, deleted_at__isnull=True
     ).distinct().count()
-    dependency_counts["phishing_simulations"] = PhishingSimulation.objects.filter(
-        plant=plant, deleted_at__isnull=True
-    ).count()
     dependency_counts["training_audiences"] = TrainingAudience.objects.filter(
         plant=plant, deleted_at__isnull=True
     ).count()

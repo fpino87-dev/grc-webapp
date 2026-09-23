@@ -1,9 +1,9 @@
 """Migrazione dei vecchi dati per persona verso la formazione a evidenze.
 
 Condiviso fra la migrazione dati `0004` e il comando in sola lettura
-`check_training_migration_readiness`: entrambi ricevono i model (storici nella
-migrazione, reali nel comando), così l'anteprima mostra esattamente ciò che la
-migrazione farà.
+`check_training_migration_readiness`: entrambi ricevono i model storici (le
+tabelle per persona e `framework_refs` non esistono più nei model reali, la
+0007 le elimina), così l'anteprima mostra esattamente ciò che la migrazione farà.
 
 - `framework_refs` (stringhe) → `controls` per `external_id`;
 - iscrizioni → una sessione `legacy` per corso con i soli conteggi;
@@ -18,6 +18,26 @@ from django.utils import timezone
 
 LEGACY_PHISHING_TITLE = "Simulazione di phishing (storico)"
 
+# Ultimo stato dello schema in cui esistono ancora i dati per persona.
+LEGACY_STATE_NODE = ("training", "0006_training_evidence_controls")
+DATA_MIGRATION_NODE = ("training", "0004_migrate_legacy_training_data")
+
+
+def legacy_models(connection):
+    """Model storici (TrainingCourse, TrainingEnrollment, PhishingSimulation,
+    Control, Plant) nello stato `LEGACY_STATE_NODE`, per leggere i dati per
+    persona di un DB non ancora migrato."""
+    from django.db.migrations.loader import MigrationLoader
+
+    apps = MigrationLoader(connection).project_state(LEGACY_STATE_NODE).apps
+    return (
+        apps.get_model("training", "TrainingCourse"),
+        apps.get_model("training", "TrainingEnrollment"),
+        apps.get_model("training", "PhishingSimulation"),
+        apps.get_model("controls", "Control"),
+        apps.get_model("plants", "Plant"),
+    )
+
 
 def _local_date(dt):
     return timezone.localtime(dt).date() if timezone.is_aware(dt) else dt.date()
@@ -28,7 +48,7 @@ def plan_legacy_migration(
 ) -> dict:
     """Calcola, senza scrivere nulla, cosa produrrà la migrazione."""
     # `.only()` sulle colonne esistenti prima della 0003: il comando di anteprima
-    # gira con i model reali su un DB non ancora migrato.
+    # gira con i model dello stato 0006 su un DB non ancora migrato.
     courses = list(
         TrainingCourse.objects.filter(deleted_at__isnull=True)
         .only("id", "title", "framework_refs", "created_at")

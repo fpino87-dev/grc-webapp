@@ -2,8 +2,7 @@
 
 Iscrizioni ed esiti phishing per persona diventano sessioni `legacy` con i soli
 conteggi; `framework_refs` diventa il collegamento ai controlli. Le tabelle per
-persona restano intatte (in sola lettura) e vengono eliminate in una release
-successiva. Anteprima senza modifiche: `manage.py check_training_migration_readiness`.
+persona vengono eliminate dalla 0007. Anteprima senza modifiche: `manage.py check_training_migration_readiness`.
 """
 from django.db import migrations
 

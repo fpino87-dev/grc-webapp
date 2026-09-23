@@ -37,8 +37,6 @@ class TrainingCourse(BaseModel):
     description = models.TextField(blank=True)
     duration_minutes = models.IntegerField(null=True, blank=True)
     mandatory = models.BooleanField(default=False)
-    # Deprecato: sostituito da `controls` (a sua volta deprecato), da eliminare.
-    framework_refs = models.JSONField(default=list)
     # Ambito: nessun sito = corso di organizzazione, valido per tutti i siti
     # (es. igiene standard); uno o più siti = corso specifico di quei siti.
     plants = models.ManyToManyField("plants.Plant", blank=True, related_name="training_courses")
@@ -49,12 +47,6 @@ class TrainingCourse(BaseModel):
     )
     # Mesi di validità di un'erogazione: dopo va ripetuta. Null = non scade.
     validity_months = models.PositiveSmallIntegerField(null=True, blank=True, default=12)
-    # Deprecato: i controlli provati dalle erogazioni si impostano per tipo di
-    # destinatari (TrainingEvidenceControl). Copiato dalla migrazione 0006,
-    # eliminato nella release successiva insieme a framework_refs.
-    controls = models.ManyToManyField(
-        "controls.Control", blank=True, related_name="training_courses",
-    )
     # Ruoli critici e organo di gestione: la competenza (ISO 27001 cl. 7.2) che
     # l'erogazione attribuisce ai partecipanti con account, e a quale livello.
     competency = models.CharField(max_length=200, blank=True)
@@ -229,41 +221,3 @@ class TrainingParticipant(BaseModel):
 
     class Meta:
         ordering = ["created_at"]
-
-
-class TrainingEnrollment(BaseModel):
-    STATUS_CHOICES = [
-        ("assegnato", "Assegnato"),
-        ("in_corso", "In corso"),
-        ("completato", "Completato"),
-        ("scaduto", "Scaduto"),
-    ]
-
-    course = models.ForeignKey(TrainingCourse, on_delete=models.CASCADE, related_name="enrollments")
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="training_enrollments")
-    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="assegnato")
-    completed_at = models.DateTimeField(null=True, blank=True)
-    score = models.IntegerField(null=True, blank=True)
-    passed = models.BooleanField(null=True, blank=True)
-
-    class Meta:
-        unique_together = [["course", "user"]]
-        ordering = ["-created_at"]
-
-
-class PhishingSimulation(BaseModel):
-    RESULT_CHOICES = [
-        ("clicked", "Clicked"),
-        ("reported", "Reported"),
-        ("ignored", "Ignored"),
-    ]
-
-    kb4_simulation_id = models.CharField(max_length=100, blank=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="phishing_results")
-    plant = models.ForeignKey("plants.Plant", on_delete=models.PROTECT, null=True, blank=True)
-    result = models.CharField(max_length=15, choices=RESULT_CHOICES)
-    sent_at = models.DateTimeField()
-    responded_at = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        ordering = ["-sent_at"]

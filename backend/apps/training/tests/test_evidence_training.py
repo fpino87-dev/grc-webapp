@@ -314,21 +314,14 @@ def test_operational_role_cannot_read_records():
 
 # ── Migrazione dati storici ─────────────────────────────────────────────────
 
-@pytest.mark.django_db
-def test_legacy_migration_aggregates_and_is_idempotent(co, plant):
+def test_legacy_migration_aggregates_and_is_idempotent(legacy_apps, co, plant):
     from apps.controls.models import Control, ControlDomain, Framework
-    from apps.plants.models import Plant
     from apps.training.legacy import (
         LEGACY_PHISHING_TITLE,
         apply_legacy_migration,
         plan_legacy_migration,
     )
-    from apps.training.models import (
-        PhishingSimulation,
-        TrainingCourse,
-        TrainingEnrollment,
-        TrainingSession,
-    )
+    from apps.training.models import TrainingSession
 
     fw = Framework.objects.create(code="ISO-T", name="ISO", version="1",
                                   published_at=timezone.localdate())
@@ -337,33 +330,66 @@ def test_legacy_migration_aggregates_and_is_idempotent(co, plant):
     ctrl = Control.objects.create(framework=fw, domain=dom, external_id="A.6.3",
                                   translations={"it": {"name": "N"}}, level="L2",
                                   evidence_requirement={}, control_category="organizzativo")
-    course = TrainingCourse.objects.create(title="Storico", framework_refs=["A.6.3", "X.9"],
-                                           created_by=co)
-    course.plants.add(plant)
+    Course = legacy_apps.get_model("training", "TrainingCourse")
+    Enrollment = legacy_apps.get_model("training", "TrainingEnrollment")
+    Phishing = legacy_apps.get_model("training", "PhishingSimulation")
+    course = Course.objects.create(title="Storico", framework_refs=["A.6.3", "X.9"],
+                                   created_by_id=co.pk)
+    course.plants.add(plant.pk)
     users = [_user(f"e{i}") for i in range(3)]
     now = timezone.now()
-    TrainingEnrollment.objects.create(course=course, user=users[0], status="completato",
-                                      completed_at=now)
-    TrainingEnrollment.objects.create(course=course, user=users[1], status="completato",
-                                      completed_at=now - timedelta(days=20))
-    TrainingEnrollment.objects.create(course=course, user=users[2], status="assegnato")
+    Enrollment.objects.create(course=course, user_id=users[0].pk, status="completato",
+                              completed_at=now)
+    Enrollment.objects.create(course=course, user_id=users[1].pk, status="completato",
+                              completed_at=now - timedelta(days=20))
+    Enrollment.objects.create(course=course, user_id=users[2].pk, status="assegnato")
     for u, res in zip(users, ["clicked", "reported", "ignored"], strict=True):
-        PhishingSimulation.objects.create(kb4_simulation_id="C1", user=u, plant=plant,
-                                          result=res, sent_at=now)
+        Phishing.objects.create(kb4_simulation_id="C1", user_id=u.pk, plant_id=plant.pk,
+                                result=res, sent_at=now)
 
-    args = (TrainingCourse, TrainingEnrollment, PhishingSimulation, Control, Plant)
+    args = (Course, Enrollment, Phishing, legacy_apps.get_model("controls", "Control"),
+            legacy_apps.get_model("plants", "Plant"))
+    Session = legacy_apps.get_model("training", "TrainingSession")
     plan = plan_legacy_migration(*args)
     assert plan["unmatched_refs"] == [{"course": "Storico", "ref": "X.9"}]
-    apply_legacy_migration(plan, TrainingCourse, TrainingSession)
-    apply_legacy_migration(plan_legacy_migration(*args), TrainingCourse, TrainingSession)
+    apply_legacy_migration(plan, Course, Session)
+    apply_legacy_migration(plan_legacy_migration(*args), Course, Session)
 
-    assert list(course.controls.all()) == [ctrl]
-    s = TrainingSession.objects.get(course=course)
+    assert list(course.controls.values_list("pk", flat=True)) == [ctrl.pk]
+    s = TrainingSession.objects.get(course_id=course.pk)
     assert (s.legacy, s.plant_id, s.target_count, s.trained_count) == (True, plant.pk, 3, 2)
     assert s.held_on == timezone.localdate()
     ph = TrainingSession.objects.get(course__title=LEGACY_PHISHING_TITLE)
     assert (ph.sent_count, ph.clicked_count, ph.reported_count) == (3, 1, 1)
     assert ph.course.kind == "phishing" and ph.course.source == "kb4"
     assert TrainingSession.objects.count() == 2  # la seconda esecuzione non duplica
-    # I dati per persona restano intatti.
-    assert TrainingEnrollment.objects.count() == 3 and PhishingSimulation.objects.count() == 3
+
+
+def test_readiness_check_previews_legacy_data_before_migrate(legacy_apps, co, plant, monkeypatch):
+    import io
+
+    from django.core.management import call_command
+    from django.db.migrations.recorder import MigrationRecorder
+
+    from apps.training.legacy import DATA_MIGRATION_NODE
+
+    Course = legacy_apps.get_model("training", "TrainingCourse")
+    course = Course.objects.create(title="Storico", framework_refs=["Z.1"], created_by_id=co.pk)
+    legacy_apps.get_model("training", "TrainingEnrollment").objects.create(
+        course=course, user_id=_user("e0").pk, status="completato",
+    )
+
+    out = io.StringIO()
+    call_command("check_training_migration_readiness", stdout=out)
+    assert "già applicata" in out.getvalue()
+
+    applied = MigrationRecorder.applied_migrations
+    monkeypatch.setattr(
+        MigrationRecorder, "applied_migrations",
+        lambda self: {k: v for k, v in applied(self).items() if k != DATA_MIGRATION_NODE},
+    )
+    out = io.StringIO()
+    call_command("check_training_migration_readiness", stdout=out)
+    text = out.getvalue()
+    assert "Storico: Z.1" in text
+    assert "Sessioni storiche dalle iscrizioni: 1" in text

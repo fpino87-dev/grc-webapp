@@ -1,6 +1,7 @@
 """Anteprima della migrazione training.0004 (formazione a evidenze).
 
-Da lanciare in produzione PRIMA di `migrate`. Non modifica nulla: mostra quali
+Da lanciare in produzione PRIMA di `migrate` (la 0007 elimina poi i dati per
+persona, quindi dopo non c'è più nulla da mostrare). Non modifica nulla: mostra quali
 riferimenti normativi dei corsi diventano collegamenti ai controlli (e quali non
 trovano un controllo) e quante sessioni storiche nasceranno dai dati per persona.
 
@@ -16,14 +17,19 @@ class Command(BaseCommand):
     help = "Anteprima in sola lettura della migrazione dei dati di formazione (training.0004)."
 
     def handle(self, *args, **options):
-        from apps.controls.models import Control
-        from apps.plants.models import Plant
-        from apps.training.legacy import plan_legacy_migration
-        from apps.training.models import PhishingSimulation, TrainingCourse, TrainingEnrollment
+        from django.db import connection
+        from django.db.migrations.recorder import MigrationRecorder
 
-        plan = plan_legacy_migration(
-            TrainingCourse, TrainingEnrollment, PhishingSimulation, Control, Plant,
-        )
+        from apps.plants.models import Plant
+        from apps.training.legacy import DATA_MIGRATION_NODE, legacy_models, plan_legacy_migration
+
+        if DATA_MIGRATION_NODE in MigrationRecorder(connection).applied_migrations():
+            self.stdout.write(self.style.SUCCESS(
+                "Migrazione dei dati di formazione già applicata: nulla da mostrare."
+            ))
+            return
+
+        plan = plan_legacy_migration(*legacy_models(connection))
         plant_codes = dict(Plant.objects.values_list("pk", "code"))
 
         def site(pid):
@@ -58,5 +64,6 @@ class Command(BaseCommand):
                 f" clic {r['clicked_count']}, segnalate {r['reported_count']}"
             )
         self.stdout.write(self.style.SUCCESS(
-            "\nNessuna modifica eseguita. I dati per persona restano intatti dopo la migrazione."
+            "\nNessuna modifica eseguita. Dopo `migrate` restano solo i conteggi:"
+            " i dati per persona vengono eliminati."
         ))

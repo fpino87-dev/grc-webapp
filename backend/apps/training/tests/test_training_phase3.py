@@ -183,14 +183,12 @@ def test_reporting_training_section_has_no_personal_data(plant):
     from django.contrib.auth import get_user_model
 
     from apps.reporting.services import kpi_overview
-    from apps.training.models import TrainingEnrollment
 
     course = _course()
     today = timezone.localdate()
     _item(course, plant, today, [_aud(plant, "Produzione", 20)])
     _session(course, plant, today - timedelta(days=1), target_count=20, trained_count=15)
-    u = get_user_model().objects.create_user(username="x", email="persona@t.it", password="x")
-    TrainingEnrollment.objects.create(course=course, user=u, status="completato")
+    get_user_model().objects.create_user(username="x", email="persona@t.it", password="x")
 
     tr = kpi_overview(str(plant.pk))["training"]
     assert set(tr) == {"coverage", "plan", "phishing", "expiring_evidence", "stale_audiences", "board"}
@@ -205,7 +203,6 @@ def test_audit_pack_training_is_site_scoped_and_anonymous(plant, plant_b, tmp_pa
     from django.contrib.auth import get_user_model
 
     from apps.audit_prep.audit_pack import _collect_training
-    from apps.training.models import TrainingEnrollment
 
     course = _course()
     today = timezone.localdate()
@@ -213,8 +210,7 @@ def test_audit_pack_training_is_site_scoped_and_anonymous(plant, plant_b, tmp_pa
     _item(course, None, today + timedelta(days=20))
     _session(course, plant, today - timedelta(days=1), target_count=20, trained_count=15)
     _session(course, plant_b, today - timedelta(days=1), target_count=5, trained_count=5)
-    u = get_user_model().objects.create_user(username="x", email="persona@t.it", password="x")
-    TrainingEnrollment.objects.create(course=course, user=u, status="completato")
+    get_user_model().objects.create_user(username="x", email="persona@t.it", password="x")
 
     out = _collect_training(tmp_path, plant)
     assert out == {"plan_items": 2, "sessions": 1, "coverage_pct": 75.0,
