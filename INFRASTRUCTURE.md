@@ -1,6 +1,7 @@
 # INFRASTRUCTURE.md — govrico
 
 > Architettura infrastrutturale, stack tecnologico, deployment, database, sicurezza, backup e monitoraggio.
+> Descrive ciò che il repository fornisce; dove una scelta spetta a chi gestisce l'installazione (es. monitoraggio centralizzato) è indicato come raccomandazione.
 
 ---
 
@@ -11,7 +12,7 @@
 - [Porte in uso](#porte-in-uso)
 - [Variabili d'ambiente obbligatorie](#variabili-dambiente-obbligatorie)
 - [Deployment produzione — step by step](#deployment-produzione--step-by-step)
-- [Nginx Proxy Manager](#nginx-proxy-manager)
+- [Reverse proxy](#reverse-proxy)
 - [Database](#database)
 - [Storage file](#storage-file)
 - [Celery — task schedulati](#celery--task-schedulati)
@@ -27,33 +28,31 @@
 ## Panoramica architetturale
 
 ```
-  Browser --> Nginx Proxy Manager (80/443)
-                  |               |
-             Frontend          Backend API
-             React SPA         Django + DRF
-             porta 3001        porta 8001
-                                    |
-                      +-------------+-----------+
-                      |             |           |
-                 PostgreSQL       Redis      S3 / MinIO
-                 Primary +        Cache +    Documenti
-                 Replica          Broker     Evidenze
-                 porta 5433
+  Browser --> Reverse proxy HTTPS (nginx sull'host o Nginx Proxy Manager, 80/443)
+                  |                         |
+             Frontend                  Backend API
+             React SPA (nginx)         Django + DRF (gunicorn)
+             127.0.0.1:3001            127.0.0.1:8000
+                                            |
+                        +-------------------+------------------+
+                        |                   |                  |
+                   PostgreSQL 17          Redis 7         File caricati
+                   (volume pgdata)        broker +        /srv/grc/media
+                                          cache           (bind mount)
+                        |
+                Celery worker + Celery Beat
+                (scadenze, promemoria, backup notturno,
+                 KPI, OSINT, pulizie)
 
-                      |
-              Celery Worker + Beat
-              (task async, notifiche,
-               promemoria, audit job)
-
-                      |
-              +-------+--------+
-              |  AI Engine M20 |  <- opzionale
-              |  Ollama/vLLM   |
-              |  + Sanitizer   |--> Cloud LLM
-              +----------------+   (solo dati anonimi)
+                        |
+                +-------+--------+
+                |  AI Engine M20 |  <- opzionale
+                |  Ollama locale |
+                |  + Sanitizer   |--> Provider cloud (testo sanitizzato)
+                +----------------+
 
   Integrazioni esterne:
-  SMTP aziendale . SSO/SAML . SIEM webhook . ACN email
+  SMTP aziendale · Sentry (opzionale) · enricher CTI dell'OSINT Monitor
 ```
 
 ---
@@ -64,50 +63,48 @@
 
 | Componente | Tecnologia | Versione |
 |-----------|-----------|---------|
-| Runtime | Python | 3.11+ |
-| Framework | Django + Django REST Framework | 5.1 |
-| Task queue | Celery | 5.x |
-| Broker / cache | Redis | 7.x |
-| Auth JWT | SimpleJWT | latest |
-| Auth SSO | django-allauth | latest |
-| i18n | Django i18n built-in | — |
-| Cifratura | cryptography (Fernet) | latest |
-| MIME check | python-magic | latest |
+| Runtime | Python | 3.11 |
+| Framework | Django + Django REST Framework | 5.2 LTS + DRF 3.17 |
+| Application server | Gunicorn (gthread) | — |
+| Task queue | Celery + django-celery-beat | 5.4 |
+| Broker / cache | Redis | 7 |
+| Auth | SimpleJWT (JWT + blacklist) + MFA TOTP | 5.5 |
+| i18n | Django i18n (`.po` IT/EN/FR/PL/TR) | — |
+| Cifratura | cryptography (Fernet, AES-256-GCM per i backup) | — |
+| MIME check | python-magic | — |
+| Error monitoring | sentry-sdk (opzionale) | 2.x |
 
 ### Frontend
 
 | Componente | Tecnologia | Versione |
 |-----------|-----------|---------|
-| Framework | React | 18+ |
-| Language | TypeScript | 5.x |
-| Build | Vite | 5.x |
-| State management | Zustand | — |
-| Data fetching | TanStack Query | — |
-| Router | React Router | v6 |
-| i18n | i18next + react-i18next | — |
-| UI components | Tailwind CSS + shadcn/ui | — |
-| Charts | Recharts | — |
+| Framework | React | 18 |
+| Language | TypeScript | 5 |
+| Build | Vite | 8 |
+| State management | Zustand | 5 |
+| Data fetching | TanStack Query | 5 |
+| Router | React Router | 7 |
+| i18n | i18next + react-i18next | 23 |
+| UI | Tailwind CSS | 3 |
+| Charts | Recharts | 2 |
 
 ### Database e storage
 
-| Componente | Tecnologia | Versione |
-|-----------|-----------|---------|
-| Database principale | PostgreSQL | 16+ (immagine dev: `postgres:16-alpine`) |
-| Full-text search | PostgreSQL FTS nativo | — |
-| Cache / broker | Redis | 7+ |
-| Object storage | MinIO (on-prem) o AWS S3 | — |
+| Componente | Tecnologia | Note |
+|-----------|-----------|------|
+| Database principale | PostgreSQL | 17 in produzione (`postgres:17-alpine`), 16 nello stack di sviluppo |
+| Cache / broker | Redis | 7, con password in produzione |
+| File caricati | Filesystem (`MEDIA_ROOT`) | in produzione bind mount `/srv/grc/media`, condiviso da backend e worker Celery |
 
 ### Infrastruttura
 
 | Componente | Tecnologia |
 |-----------|-----------|
-| Container | Docker + Compose |
-| Reverse proxy | Nginx Proxy Manager |
-| Orchestrazione avanzata | Kubernetes o Docker Swarm |
-| IaC | Terraform |
-| Config management | Ansible |
-| CI/CD | GitLab CI o GitHub Actions |
-| Secrets | HashiCorp Vault o env cifrati |
+| Container | Docker + Docker Compose v2 (`docker-compose.prod.yml`, `Dockerfile.prod`) |
+| Reverse proxy | nginx sull'host (installato da `manual/install_grc.sh`) oppure Nginx Proxy Manager |
+| Installazione guidata | `manual/install_grc.sh` (Ubuntu 24.04 / 26.04 LTS) |
+| CI | GitHub Actions: `tests` (pytest, ruff, migrazioni, vitest, eslint, tsc), `security-audit` (pip-audit, npm audit), `sbom` (CycloneDX a ogni release), CodeQL |
+| Secrets | file `.env.prod` (permessi 600) — vedi [Secrets management](#secrets-management) |
 
 ---
 
@@ -115,13 +112,14 @@
 
 | Servizio | Porta host dev | Porta host prod | Porta container |
 |----------|---------------|----------------|----------------|
-| Backend Django | 8001 | 8001 | 8000 |
-| Frontend Vite/Nginx | 3001 | 3001 | 3000 |
-| PostgreSQL GRC | 5433 | 5433 | 5432 |
-| Redis GRC | — | — | 6379 |
-| MinIO console | 9001 | — | 9001 |
-| Mailhog SMTP | 1026 | — (non in prod) | 1025 |
-| Mailhog UI | 8026 | — (non in prod) | 8025 |
+| Backend Django | 8001 | 127.0.0.1:8000 (+ 127.0.0.1:8001 con `install_grc.sh`) | 8000 |
+| Frontend | 3001 (Vite) | 3001 (nginx; 127.0.0.1 con `install_grc.sh`) | 3000 dev / 80 prod |
+| PostgreSQL | 5433 | non esposta | 5432 |
+| Redis | non esposta | non esposta | 6379 |
+| MinIO console | 9001 | — | 9001 (solo sviluppo, l'applicazione salva i file su filesystem) |
+| Mailhog SMTP | 1026 | — | 1025 |
+| Mailhog UI | 8026 | — | 8025 |
+| Ollama (opzionale) | — | 127.0.0.1:11434 | 11434 |
 
 **Altri container sul server (non toccare):**
 - `ai-docintel-*` — progetto separato
@@ -136,92 +134,67 @@ Il repository include `.env.example` (sviluppo) e `.env.prod.example` (produzion
 
 ### Tabella variabili principali
 
-| Variabile | Obbligatoria | Default dev | Descrizione |
-|-----------|-------------|-------------|-------------|
-| `SECRET_KEY` | Si | — | Chiave Django (min 50 char, generare con `secrets.token_urlsafe(50)`) |
-| `FERNET_KEY` | Si | — | Cifratura AES-256 credenziali SMTP (generare con `Fernet.generate_key()`) |
-| `DEBUG` | No | `True` | Impostare `False` in produzione |
-| `ALLOWED_HOSTS` | Si in prod | `localhost` | Host ammessi separati da virgola |
-| `DATABASE_URL` | Si | `postgresql://grc:REPLACE_DB_PASSWORD@db:5432/grc_dev` | URL connessione PostgreSQL |
-| `REDIS_URL` | Si | `redis://redis:6379/0` | URL connessione Redis |
-| `FRONTEND_URL` | Si | `http://localhost:3001` | URL frontend (per CORS e link nelle email) |
-| `STORAGE_BACKEND` | No | `local` | `local` o `s3` |
-| `S3_ENDPOINT_URL` | Se S3 | — | Endpoint MinIO o AWS S3 |
-| `S3_BUCKET_NAME` | Se S3 | — | Nome bucket documenti |
-| `S3_ACCESS_KEY` | Se S3 | — | Access key S3/MinIO |
-| `S3_SECRET_KEY` | Se S3 | — | Secret key S3/MinIO |
-| `EMAIL_HOST` | No | — | Server SMTP |
-| `EMAIL_PORT` | No | 587 | Porta SMTP |
-| `EMAIL_USE_TLS` | No | `True` | TLS per SMTP |
-| `EMAIL_HOST_USER` | No | — | Utente SMTP |
-| `EMAIL_HOST_PASSWORD` | No | — | Password SMTP (cifrata con FERNET_KEY in DB) |
-| `SSO_ENABLED` | No | `False` | Abilita autenticazione SSO |
-| `SAML_METADATA_URL` | Se SSO | — | URL metadata IdP SAML |
-| `AI_ENGINE_ENABLED` | No | `False` | Master switch AI Engine M20 |
-| `AZURE_OPENAI_KEY` | Se AI cloud | — | API key Azure OpenAI |
-| `ANTHROPIC_API_KEY` | Se AI cloud | — | API key Anthropic |
-| `AUDIT_TRAIL_RETENTION_L1_YEARS` | No | `5` | Retention log sicurezza (anni) |
-| `AUDIT_TRAIL_RETENTION_L2_YEARS` | No | `3` | Retention log compliance (anni) |
-| `AUDIT_TRAIL_RETENTION_L3_YEARS` | No | `1` | Retention log operativo (anni) |
-| `SESSION_COOKIE_SECURE` | No | `False` | Impostare `True` in produzione (HTTPS) |
-| `CSRF_COOKIE_SECURE` | No | `False` | Impostare `True` in produzione (HTTPS) |
+| Variabile | Obbligatoria | Default | Descrizione |
+|-----------|-------------|---------|-------------|
+| `SECRET_KEY` | Sì | — | Chiave Django (min 50 caratteri: `secrets.token_urlsafe(50)`) |
+| `FERNET_KEY` | Sì | — | Cifratura delle credenziali SMTP salvate nel DB (`Fernet.generate_key()`) |
+| `DEBUG` | No | `False` in prod | `false` in produzione |
+| `ALLOWED_HOSTS` | Sì in prod | — | Host ammessi, separati da virgola |
+| `FRONTEND_URL` | Sì | — | URL pubblico del frontend (CORS, link nelle email); validato all'avvio in prod |
+| `CSRF_TRUSTED_ORIGINS` | Sì in prod | — | Origini HTTPS da cui arrivano i POST |
+| `DRF_NUM_PROXIES` | No | `1` | Proxy fidati davanti a Django (IP reale del client per rate limit e audit) |
+| `ADMIN_URL` | Consigliata | `admin/` | Percorso non prevedibile dell'admin Django |
+| `DATABASE_URL` | Sì | — | Connessione PostgreSQL |
+| `POSTGRES_DB` / `POSTGRES_USER` / `POSTGRES_PASSWORD` | Sì in prod | — | Credenziali del container PostgreSQL |
+| `REDIS_URL` / `REDIS_PASSWORD` | Sì | — | Connessione e password Redis |
+| `BACKUP_ENCRYPTION_KEY` | Consigliata | vuota | Cifra gli archivi di backup; **distinta** da `FERNET_KEY`; senza di essa i backup cifrati non si ripristinano |
+| `EMAIL_*`, `DEFAULT_FROM_EMAIL` | No | — | SMTP di fallback; la configurazione operativa si fa dall'app (Impostazioni → Email) |
+| `CELERY_CONCURRENCY` | No | `4` | Processi del worker Celery |
+| `KPI_INGEST_API_KEY` | No | vuota | Chiave per l'invio di KPI da sistemi esterni (M18) |
+| `SENTRY_DSN` / `VITE_SENTRY_DSN` | No | vuota | Error monitoring backend / frontend (disattivo se vuoto) |
+| `APP_VERSION` / `VITE_APP_VERSION` | No | — | Versione riportata a Sentry |
+| `SESSION_COOKIE_SECURE` / `CSRF_COOKIE_SECURE` | No | `True` in prod | Cookie solo su HTTPS |
 
-### Riferimento completo `.env`
+Note:
+- **AI Engine**: provider (Anthropic, OpenAI, Google, Mistral, Groq, Ollama locale), chiavi, modelli, routing per funzione e budget si configurano **dall'app** (Impostazioni → AI Engine) e sono salvati nel DB. Le variabili `AI_ENGINE_ENABLED`, `AI_LOCAL_*`, `AI_CLOUD_PROVIDER`, `AZURE_OPENAI_KEY` e `ANTHROPIC_API_KEY` presenti negli esempi non sono lette dal codice.
+- **Audit trail**: non esiste una retention per cancellazione (il log è immutabile); le variabili `AUDIT_TRAIL_RETENTION_*` non hanno effetto.
+- **`STORAGE_BACKEND`**: i file sono salvati su filesystem; la variabile non ha effetto.
+
+### Riferimento `.env.prod`
+
+Il modello completo e commentato è `.env.prod.example`. Estratto delle voci essenziali:
 
 ```bash
-# ── Core ──────────────────────────────────────────────────────────────
+# ── Django ────────────────────────────────────────────────────────────
 SECRET_KEY=<stringa-generata-min-50-char>
-FERNET_KEY=<chiave-fernet-generata>
 DEBUG=false
 ALLOWED_HOSTS=grc.azienda.com
 FRONTEND_URL=https://grc.azienda.com
+CSRF_TRUSTED_ORIGINS=https://grc.azienda.com
+DRF_NUM_PROXIES=1
+ADMIN_URL=<uuid>/
 
-# ── Database ──────────────────────────────────────────────────────────
-DATABASE_URL=postgresql://grc:REPLACE_DB_PASSWORD@db:5432/grc_prod
+# ── PostgreSQL / Redis ────────────────────────────────────────────────
+DATABASE_URL=postgresql://grc:<password>@db:5432/grc_prod
+POSTGRES_DB=grc_prod
+POSTGRES_USER=grc
+POSTGRES_PASSWORD=<password>
+REDIS_URL=redis://:<password>@redis:6379/0
+REDIS_PASSWORD=<password>
 
-# ── Redis ─────────────────────────────────────────────────────────────
-REDIS_URL=redis://redis:6379/0
+# ── Cifratura ─────────────────────────────────────────────────────────
+FERNET_KEY=<chiave-fernet>
+BACKUP_ENCRYPTION_KEY=<secrets.token_urlsafe(48)>
 
-# ── Storage ───────────────────────────────────────────────────────────
-STORAGE_BACKEND=s3                    # local | s3
-S3_ENDPOINT_URL=https://minio.internal
-S3_BUCKET_NAME=grc-documents
-S3_ACCESS_KEY=...
-S3_SECRET_KEY=...
-
-# ── Email ─────────────────────────────────────────────────────────────
+# ── Email (fallback: la configurazione operativa si fa dall'app) ─────
 EMAIL_HOST=smtp.azienda.com
 EMAIL_PORT=587
 EMAIL_USE_TLS=true
-EMAIL_HOST_USER=grc-noreply@azienda.com
-EMAIL_HOST_PASSWORD=...
 DEFAULT_FROM_EMAIL=govrico <grc-noreply@azienda.com>
 
-# ── SSO ───────────────────────────────────────────────────────────────
-SSO_ENABLED=true
-SAML_METADATA_URL=https://idp.azienda.com/metadata
-OIDC_CLIENT_ID=...
-OIDC_CLIENT_SECRET=...
-OIDC_ENDPOINT=https://idp.azienda.com
-
-# ── AI Engine (M20) — disabilitato di default ─────────────────────────
-AI_ENGINE_ENABLED=false
-AI_LOCAL_ENDPOINT=http://ollama:11434
-AI_LOCAL_MODEL=llama3.1:8b
-AI_CLOUD_PROVIDER=azure               # azure | anthropic
-AZURE_OPENAI_ENDPOINT=https://...
-AZURE_OPENAI_KEY=...
-AZURE_OPENAI_DEPLOYMENT=gpt-4o
-ANTHROPIC_API_KEY=...
-
-# ── Retention audit trail ─────────────────────────────────────────────
-AUDIT_TRAIL_RETENTION_L1_YEARS=5      # Log sicurezza
-AUDIT_TRAIL_RETENTION_L2_YEARS=3      # Log compliance
-AUDIT_TRAIL_RETENTION_L3_YEARS=1      # Log operativo
-
-# ── Sicurezza cookie ──────────────────────────────────────────────────
-SESSION_COOKIE_SECURE=true
-CSRF_COOKIE_SECURE=true
+# ── Sentry (opzionale) ────────────────────────────────────────────────
+SENTRY_DSN=
+VITE_SENTRY_DSN=
 ```
 
 ---
@@ -230,20 +203,22 @@ CSRF_COOKIE_SECURE=true
 
 ### Requisiti server minimi
 
-- 4 CPU, 8 GB RAM, 100 GB SSD
-- Docker Engine >= 24.x + Docker Compose v2
-- Sistema operativo: Ubuntu 22.04 LTS o Debian 12 (consigliati)
-- Accesso SSH con utente non-root sudoer
+- 4 CPU, 8 GB RAM (16 GB se si abilita l'IA locale), 100 GB SSD
+- Docker Engine recente + Docker Compose v2 (≥ 2.24.4 per l'override del frontend di `install_grc.sh`)
+- Ubuntu 24.04 o 26.04 LTS (consigliati)
+- Accesso SSH con utente sudoer
 
-### Procedura completa
+### Installazione guidata
 
-**1. Installazione Docker Engine + Docker Compose v2**
+`manual/install_grc.sh` (eseguito come root) installa Docker, nginx con certificato self-signed, UFW, genera `.env.prod` con tutte le chiavi, avvia lo stack, carica i dati di riferimento, programma il backup notturno e crea il superuser. Dal suo menu si fanno anche aggiornamento (backup completo, anteprima delle migrazioni dei dati e conferma), restart, log e stato.
+
+### Procedura manuale
+
+**1. Docker Engine + Compose v2**
 
 ```bash
-# Ubuntu 22.04
 curl -fsSL https://get.docker.com | sh
-sudo usermod -aG docker $USER
-# Logout e login per applicare il gruppo
+sudo usermod -aG docker $USER      # logout/login per applicare il gruppo
 docker --version && docker compose version
 ```
 
@@ -254,178 +229,110 @@ git clone https://github.com/fpino87-dev/grc-webapp.git
 cd grc-webapp
 ```
 
-**3. Configurazione variabili produzione**
+**3. Variabili di produzione**
 
 ```bash
 cp .env.prod.example .env.prod
-# Compilare TUTTI i valori — non lasciare placeholder
-nano .env.prod
+chmod 600 .env.prod
+nano .env.prod        # compilare tutti i valori, nessun placeholder
+
+# chiavi
+python3 -c "import secrets; print(secrets.token_urlsafe(50))"                               # SECRET_KEY
+python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"  # FERNET_KEY
+python3 -c "import secrets; print(secrets.token_urlsafe(48))"                               # BACKUP_ENCRYPTION_KEY
 ```
 
-**4. Generazione chiavi sicure**
+**4. Cartella dei file caricati**
 
 ```bash
-# SECRET_KEY Django (min 50 caratteri)
-python3 -c "import secrets; print(secrets.token_urlsafe(50))"
-
-# FERNET_KEY per cifratura AES-256 credenziali SMTP
-python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+sudo mkdir -p /srv/grc/media
 ```
 
-Inserire i valori generati in `.env.prod`.
-
-**5. Build immagini produzione**
+**5. Build, avvio e permessi**
 
 ```bash
 make prod-build
-```
-
-**6. Avvio stack**
-
-```bash
 make prod-up
+# il backend gira come utente non-root `grc`: rende scrivibili media e backup
+docker compose -f docker-compose.prod.yml exec --user root backend chown -R grc:grc /app/media /app/backups
 ```
 
-**7. Migrazioni database**
+**6. Migrazioni e dati di riferimento**
 
 ```bash
 make prod-migrate
+make prod-seed            # framework, profili notifica, competenze, requisiti di ruolo,
+                          # documenti richiesti, controlli provati dalla formazione (idempotente)
+# solo alla prima installazione: aggiorna anche le policy di organizzazione esistenti
+docker compose -f docker-compose.prod.yml exec backend python manage.py load_document_workflow_policies
+# backup automatico notturno (02:00)
+docker compose -f docker-compose.prod.yml exec backend python manage.py schedule_backup_task
 ```
 
-**8. Dati iniziali (frameworks, profili notifica, competenze, documenti richiesti)**
-
-```bash
-make prod-seed
-```
-
-**9. Creazione superuser iniziale**
+**7. Superuser iniziale**
 
 ```bash
 docker compose -f docker-compose.prod.yml exec backend python manage.py createsuperuser
 ```
 
-**10. Configurazione Nginx Proxy Manager** (vedi sezione dedicata sotto)
+**8. Reverse proxy** — vedi [Reverse proxy](#reverse-proxy)
 
-**11. Verifica deploy**
+**9. Verifica**
 
 ```bash
-make prod-check
-# Verifica anche l'endpoint di health
-curl http://localhost:8001/api/health/
+make prod-check                               # manage.py check --deploy
+curl -s http://127.0.0.1:8000/api/health/     # {"status": "ok", "db": true, ...}
+docker compose -f docker-compose.prod.yml exec backend python manage.py verify_schedule
 ```
+
+**Aggiornamenti di versione**: leggere prima la sezione della release nel `CHANGELOG.md`, che riporta la sequenza di deploy quando servono passi particolari (es. anteprime prima di `migrate`). Dopo ogni aggiornamento del codice dei task o della schedule: `docker compose -f docker-compose.prod.yml restart celery celery-beat`.
 
 ### Docker Compose sviluppo — estratto
 
 ```yaml
-# docker-compose.yml — estratto reale del progetto
-version: '3.9'
-
 services:
   db:
     image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: grc_dev
-      POSTGRES_USER: grc
-      POSTGRES_PASSWORD: REPLACE_DB_PASSWORD
     ports: ["5433:5432"]
     volumes: [pgdata:/var/lib/postgresql/data]
 
   redis:
     image: redis:7-alpine
-    volumes: [redisdata:/data]
-
-  minio:
-    image: minio/minio
-    command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: minio_root_user
-      MINIO_ROOT_PASSWORD: REPLACE_MINIO_ROOT_PASSWORD
-    ports: ["9001:9001"]
-    volumes: [miniodata:/data]
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.dev
     command: python manage.py runserver 0.0.0.0:8000
-    volumes: [./backend:/app]
+    volumes: [./backend:/app]           # codice montato: autoreload
     ports: ["8001:8000"]
-    env_file: .env
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_started
 
   celery:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.dev
     command: celery -A core worker -l info --concurrency 2
-    volumes: [./backend:/app]
-    env_file: .env
-    depends_on: [backend, redis]
+    volumes: [./backend:/app]           # NB: dopo modifiche al codice → restart celery
 
   celery-beat:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.dev
     command: celery -A core beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    volumes: [./backend:/app]
-    env_file: .env
-    depends_on: [backend, redis]
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
     volumes: [./frontend:/app, /app/node_modules]
     ports: ["3001:3000"]
-    environment:
-      - VITE_API_URL=http://localhost:8001
 
   mailhog:
     image: mailhog/mailhog
     ports: ["1026:1025", "8026:8025"]
-
-volumes:
-  pgdata:
-  redisdata:
-  miniodata:
 ```
 
 ---
 
-## Nginx Proxy Manager
+## Reverse proxy
 
-Nginx Proxy Manager (NPM) gestisce il routing HTTPS e il proxy verso i servizi interni. E' già in esecuzione sul server come container `npm` sulla porta 80/443.
+Il reverse proxy termina TLS e inoltra:
+- `/api/`, `/<ADMIN_URL>`, `/static/`, `/media/` → backend `127.0.0.1:8000`
+- tutto il resto → frontend `127.0.0.1:3001`
 
-### Configurazione proxy host
+Header da inoltrare al backend: `Host`, `X-Real-IP`, `X-Forwarded-For`, `X-Forwarded-Proto` (Django usa `SECURE_PROXY_SSL_HEADER` per riconoscere HTTPS). Dimensione massima upload consigliata: `client_max_body_size 50m`.
 
-**Frontend (React SPA):**
-- Forward hostname/IP: `localhost`
-- Forward port: `3001`
-- Dominio pubblico: `grc.azienda.com`
-- SSL: Let's Encrypt — attivare "Force SSL" e "HTTP/2 Support"
+**nginx sull'host** — configurato da `install_grc.sh` (redirect 80→443, TLS 1.2/1.3, HSTS).
 
-**Backend API:**
-- Forward hostname/IP: `localhost`
-- Forward port: `8001`
-- Dominio pubblico: `grc.azienda.com`
-- Location: `/api/` (proxy solo percorsi `/api/*`)
-- SSL: stesso certificato del frontend
-
-**Custom location header consigliato per l'API:**
-
-```nginx
-proxy_set_header Host $host;
-proxy_set_header X-Real-IP $remote_addr;
-proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-proxy_set_header X-Forwarded-Proto $scheme;
-client_max_body_size 50m;
-```
-
-SSL Let's Encrypt con auto-renewal automatico gestito da NPM.
+**Nginx Proxy Manager** — il backend è pubblicato solo su `127.0.0.1:8000`: se NPM gira in un container, deve usare la rete dell'host oppure raggiungere l'host tramite il bridge Docker con un binding del backend adeguato; il frontend è su `3001`. Attivare "Force SSL" e il certificato Let's Encrypt. Dettagli in [manual/HowtoDeploy.md](./manual/HowtoDeploy.md).
 
 ---
 
@@ -433,109 +340,108 @@ SSL Let's Encrypt con auto-renewal automatico gestito da NPM.
 
 ### Principi di design
 
-- **Table inheritance IT/OT**: tabella `Asset` base + `AssetIT` e `AssetOT` con attributi specifici — nessuna colonna nullable inutile
-- **Audit trail append-only**: tabella `AuditLog` protetta da trigger PostgreSQL che rifiuta UPDATE e DELETE
-- **Hash chain**: ogni record contiene `prev_hash` e `record_hash = SHA256(payload + prev_hash)` — integrità verificabile
-- **Partitioning per anno**: `AuditLog` partizionata su `timestamp_utc` — gestione retention differenziata L1/L2/L3 via `DROP PARTITION`
-- **Full-text search**: colonna `tsvector` su `LessonLearned` per knowledge base M12 (lingua italiana e inglese)
-- **Soft delete globale**: nessuna tabella usa hard delete — `deleted_at TIMESTAMPTZ NULL` con filtro nel manager
+- **Ereditarietà degli asset**: modello `Asset` base e tabelle figlie `AssetIT`, `AssetOT`, `AssetSW`, `AssetFacility` (multi-table inheritance) con gli attributi specifici
+- **Audit trail append-only**: tabella `audit_log` protetta da trigger PostgreSQL che rifiuta UPDATE e DELETE; nessuna cancellazione per retention
+- **Hash chain**: ogni record contiene `prev_hash` e `record_hash` (SHA-256), serializzati con `select_for_update`; verifica con `verify_audit_trail_integrity`
+- **Soft delete globale**: `deleted_at` con filtro nel manager di default; purge definitivo solo manuale (`purge_soft_deleted`, dry-run salvo `--apply`)
+- **Chiavi UUID** su tutti i modelli di dominio (`core.models.BaseModel`)
 
-### Indici critici
+### Indici
 
-```sql
--- Audit trail — query per entità e per utente
-CREATE INDEX idx_auditlog_entity   ON audit_log(entity_type, entity_id, timestamp_utc DESC);
-CREATE INDEX idx_auditlog_user     ON audit_log(user_id, timestamp_utc DESC);
-
--- Task — scadenze imminenti (query più frequente nella dashboard)
-CREATE INDEX idx_task_due          ON tasks(due_date, stato)
-  WHERE stato IN ('aperto','in_corso');
-
--- ControlInstance — vista compliance per plant e framework
-CREATE INDEX idx_ctrl_inst_plant   ON control_instances(plant_id, framework_id, stato);
-
--- Lesson learned — full-text search knowledge base
-CREATE INDEX idx_lesson_fts        ON lesson_learned
-  USING GIN(to_tsvector('italian', coalesce(descrizione,'') || ' ' || coalesce(causa_radice,'')));
-
--- Risk score — heat map (aggiornato frequentemente)
-CREATE INDEX idx_risk_score        ON risk_assessments(plant_id, score DESC)
-  WHERE archived_at IS NULL;
-```
+Gli indici sono definiti nei modelli (`db_index=True` e `Meta.indexes`) sui campi di filtro frequenti — stato, scadenze, score, validità, perimetro — per `Task`, `Incident`, `ControlInstance`, `RiskAssessment`, `Document`, `Evidence`, `ManagementReview` e altri, e creati dalle migrazioni. I vincoli di unicità "solo fra i record non eliminati" sono `UniqueConstraint` condizionali.
 
 ### Trigger append-only per audit trail
 
+Definito nella migrazione `core/migrations/0002_audit_trigger.py`:
+
 ```sql
-CREATE OR REPLACE FUNCTION prevent_audit_mutation()
-RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION prevent_audit_mutation() RETURNS TRIGGER AS $$
 BEGIN
   RAISE EXCEPTION 'Audit trail is append-only -- UPDATE and DELETE are not allowed';
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER audit_no_mutation
-BEFORE UPDATE OR DELETE ON audit_log
+CREATE TRIGGER audit_no_mutation BEFORE UPDATE OR DELETE ON audit_log
 FOR EACH ROW EXECUTE FUNCTION prevent_audit_mutation();
 ```
-
-Oltre agli indici SQL espliciti, il codice applicativo definisce `db_index=True` sui principali campi di filtro (`status`, `due_date`, `score`, `valid_until`, campi di tipo e stato) per `Task`, `Incident`, `ControlInstance`, `RiskAssessment`, `Document` ed `Evidence`, per ottimizzare le query operative usate da dashboard e scadenzario.
 
 ---
 
 ## Storage file
 
-### Struttura bucket
+I file caricati (documenti, evidenze, loghi, NDA) sono salvati su filesystem in `MEDIA_ROOT` (`/app/media` nel container, bind mount `/srv/grc/media` in produzione). Il volume **deve** essere montato sia sul backend (upload) sia sul worker Celery (ripristino dei backup).
 
 ```
-grc-documents/
-├── documents/{plant_id}/{doc_id}/v{major}.{minor}_{hash}.pdf
-├── evidences/{plant_id}/{control_instance_id}/{evidence_id}_{filename}
-├── audit-exports/{year}/{month}/export_{timestamp}_{hash}.zip
-└── ai-temp/{request_id}/                     <- eliminati dopo 24h (lifecycle rule)
+media/
+├── documents/{document_id}/v{n}/{nome_file}     # versioni dei documenti (M07), con SHA-256 in DB
+├── evidences/{evidence_id}/{nome_file}          # evidenze dei controlli
+└── ...                                         # loghi dei siti, allegati di altri moduli
 ```
 
-### Policy di retention
+### Conservazione
 
-| Tipo | Retention | Note |
-|------|-----------|------|
-| Documenti vigenti | Illimitata | Versioni archiviate mantenute |
-| Evidenze valide | Illimitata | Scadute: archiviate dopo 1 anno |
-| Export audit | 5 anni | Allineato a audit trail L1 |
-| Temp AI (M20) | 24 ore | Auto-delete via bucket lifecycle |
+| Tipo | Conservazione | Note |
+|------|---------------|------|
+| Documenti ed evidenze | Illimitata | Eliminazione logica (soft delete); purge manuale con `purge_soft_deleted` |
+| Audit trail | Permanente | Immutabile, email pseudonimizzata |
+| Log interazioni IA | 365 giorni | `cleanup_ai_interaction_logs` mensile (`AI_LOG_RETENTION_DAYS`) |
+| Risultati task Celery | 7 giorni | `cleanup_celery_results` |
+| Backup | 30 giorni | pulizia automatica nel task di backup |
 
 ---
 
 ## Celery — task schedulati
 
-Tutti i task sono gestiti da Celery Beat con scheduler basato su database (`django_celery_beat`). I task critici usano `autoretry` con backoff esponenziale per gestire errori transitori.
+La schedule è definita in `CELERY_BEAT_SCHEDULE` (`core/settings/base.py`) e sincronizzata nel DB (`django_celery_beat`); il backup notturno è registrato a parte da `schedule_backup_task`. `python manage.py verify_schedule` confronta le due cose. Orari nel fuso `Europe/Rome`.
 
-| Task | Schedule | Descrizione | Modulo |
-|------|----------|-------------|--------|
-| `check_expired_evidences` | Ogni notte 02:00 | Marca evidenze scadute e notifica i responsabili | M07 |
-| `generate_weekly_kpi_snapshots` | Lunedi 06:00 | Snapshot KPI settimanale per dashboard M18 | M18 |
-| `check_unrevalued_changes` | Lunedi 07:00 | Asset con change non rivalutati in risk assessment | M04 |
-| `check_upcoming_audits` | Lunedi 07:30 | Reminder audit pianificati (range ±4 giorni) | M17 |
-| `notify_expiring_roles` | Ogni giorno 08:00 | Ruoli in scadenza nei prossimi 30/7/1 giorni | M00 |
-| `notify_pdca_blocked` | Ogni giorno 08:30 | PDCA bloccati senza aggiornamenti | M11 |
-| `check_overdue_findings` | Ogni giorno 08:00 | Finding scaduti da 1/7/14 giorni | M17 |
-| `check_stale_audit_preps` | Lunedi 08:15 | AuditPrep bloccati senza aggiornamenti da >30gg | M17 |
-| `check_expired_bcp_plans` | Ogni notte 02:10 | Piani BCP scaduti o in scadenza | M16 |
-| `cleanup_expired_audit_logs` | 1° del mese 03:00 | Retention differenziata: L1=5anni, L2=3anni, L3=1anno | M10 |
-| `cleanup_celery_results` | Ogni notte 03:30 | Pulizia risultati task Celery scaduti dal DB | — |
+| Task | Schedule | Modulo |
+|------|----------|--------|
+| Backup automatico (DB + file) e pulizia backup scaduti | ogni notte 02:00 | Backup |
+| `check_expired_evidences` | ogni notte 02:05 | M03/M07 |
+| `check_expired_bcp_plans` | ogni notte 02:10 | M16 |
+| `check_control_reviews_due` | ogni notte 02:15 | M03 |
+| `roll_recurring_tasks` | ogni notte 02:20 | M08 |
+| `check_maintenance_due` | ogni notte 02:25 | M04 |
+| `check_schedule_deadlines` | ogni notte 02:30 | M08 |
+| `recompute_expired_risk_adj_task` | ogni notte 02:45 | M14 |
+| `cleanup_celery_results` | ogni notte 03:30 | — |
+| `check_enricher_health` | ogni notte 03:30 | OSINT |
+| `cleanup_ai_interaction_logs` | il 1° del mese 03:45 | M20 |
+| `generate_scheduled_checklists` | ogni giorno 07:00 | M08 |
+| `check_expiring_risk_acceptances` | ogni giorno 07:20 | M06 |
+| `notify_expiring_documents` | ogni giorno 07:45 | M07 |
+| `remind_unapproved_mandatory_documents` | ogni giorno 07:50 | M07 |
+| `notify_expiring_roles_task` | ogni giorno 08:00 | M00 |
+| `remind_training_plan_items_task` | ogni giorno 08:10 | M15 |
+| `notify_blocked_pdca_task` | ogni giorno 08:30 | M11 |
+| `check_overdue_findings` | ogni giorno 08:45 | M17 |
+| `check_final_report_deadlines` | ogni giorno 09:00 | M09 |
+| `check_nis2_deadlines` | ogni 30 minuti | M09 |
+| `weekly_scan` | lunedì 04:00 | OSINT |
+| `push_kpis` | lunedì 05:30 | OSINT |
+| `generate_weekly_kpi_snapshots` | lunedì 06:00 | M18 |
+| `compute_operational_kpis` | lunedì 06:30 | M08/M18 |
+| `check_unrevalued_changes` | lunedì 07:00 | M04 |
+| `sync` (Centro Operativo) | lunedì 07:15 | M21 |
+| `check_software_eos` | lunedì 07:15 | M04 |
+| `check_upcoming_audits` | lunedì 07:30 | M17 |
+| `evaluate_objectives_task` | lunedì 07:45 | M00 |
+| `check_stale_audit_preps` | lunedì 08:15 | M17 |
+| `check_questionnaire_followups_task` | lunedì 09:30 | M14 |
+
+I task critici usano `autoretry` con backoff esponenziale.
 
 ### Verifica stato Celery
 
 ```bash
-# Verifica worker attivi
-docker compose exec backend celery -A core inspect active
-
-# Verifica task schedulati
-docker compose exec backend celery -A core inspect scheduled
-
-# Monitor in tempo reale
+docker compose exec celery celery -A core inspect ping
+docker compose exec celery celery -A core inspect active
+docker compose exec backend python manage.py verify_schedule
 docker compose logs celery --tail=50 -f
 docker compose logs celery-beat --tail=50 -f
 ```
+
+I processi Celery non ricaricano il codice a caldo: dopo ogni modifica ai task o a `CELERY_BEAT_SCHEDULE` va eseguito `docker compose restart celery celery-beat`.
 
 ---
 
@@ -543,132 +449,74 @@ docker compose logs celery-beat --tail=50 -f
 
 ### TLS e header HTTP
 
-```nginx
-# nginx.conf — sezione TLS e sicurezza
-ssl_protocols TLSv1.2 TLSv1.3;
-ssl_prefer_server_ciphers off;
-ssl_session_timeout 1d;
-ssl_session_cache shared:SSL:10m;
-
-add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
-add_header X-Frame-Options DENY;
-add_header X-Content-Type-Options nosniff;
-add_header Content-Security-Policy "default-src 'self'; script-src 'self'; object-src 'none'";
-add_header Referrer-Policy strict-origin-when-cross-origin;
-```
+- **Reverse proxy**: TLS 1.2/1.3, redirect 80→443, HSTS.
+- **Frontend** (`frontend/nginx.conf`): `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` restrittiva, `Content-Security-Policy` con `default-src 'self'` e `frame-ancestors 'none'`.
+- **Django** (`core.settings.prod`): `SECURE_HSTS_SECONDS` (2 anni, subdomain, preload), `SECURE_SSL_REDIRECT`, cookie `Secure`, `SECURE_PROXY_SSL_HEADER`.
 
 ### Regole firewall
 
 | Porta | Sorgente | Destinazione | Motivo |
 |-------|---------|-------------|--------|
-| 443 | Internet | Load balancer | UI utenti |
-| 80 | Internet | Load balancer | Redirect a 443 |
-| 8000 | Load balancer | Backend | API interna |
-| 5432 | Backend, Celery | PostgreSQL | Database |
-| 6379 | Backend, Celery | Redis | Cache / broker |
-| 11434 | Backend | Ollama | AI locale M20 |
-| 443 | Sanitizer | Azure / Anthropic | AI cloud M20 (solo anonimi) |
+| 22 | Amministratori | Server | SSH |
+| 80 | Internet | Reverse proxy | Redirect a 443 |
+| 443 | Internet | Reverse proxy | UI e API |
+| 443 (uscita) | Backend / Celery | Provider IA cloud, enricher OSINT, Sentry | Solo se configurati |
+| 587 (uscita) | Backend / Celery | SMTP | Notifiche |
+
+Backend, frontend, PostgreSQL, Redis e Ollama non sono esposti all'esterno: Docker pubblica le porte scavalcando UFW, per questo i servizi sono legati a `127.0.0.1`.
 
 ### Sicurezza API e sessioni
 
-- I token JWT usano SimpleJWT con durata **30 minuti** per gli access token e **7 giorni** per i refresh token, con rotazione e blacklist abilitate.
-- Rate limiting DRF: **AnonRateThrottle 20/h**, **UserRateThrottle 500/h**, **LoginRateThrottle 5/min** su `GrcTokenObtainPairView`.
-- In `core.settings.prod` sono abilitati `SECURE_HSTS_*`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE` e `SECURE_SSL_REDIRECT`.
-- File upload: whitelist estensioni + MIME type reale verificato con python-magic.
-- Password: minimo 12 caratteri + validatori CommonPassword, NumericPassword, UserAttributeSimilarity.
+- JWT SimpleJWT: access token **30 minuti**, refresh **7 giorni**, rotazione e blacklist; MFA TOTP con dispositivi fidati.
+- Rate limiting DRF: **anonimi 20/h**, **utenti 2000/h**, **login 5/min**; limiti separati per chiamate IA ed export.
+- File upload: whitelist estensioni + MIME type reale (python-magic).
+- Password: minimo 12 caratteri + CommonPassword, NumericPassword, UserAttributeSimilarity.
+- Errori imprevisti: dettaglio solo nei log del server, messaggio generico al client.
 
 ### Secrets management
 
-In produzione non usare variabili d'ambiente Docker in chiaro. Usare HashiCorp Vault con agent sidecar oppure secret cifrati in Kubernetes (`kind: Secret` con cifratura etcd at-rest abilitata).
+- `.env.prod` con permessi `600`, fuori dal repository.
+- `FERNET_KEY` cifra le credenziali SMTP salvate nel DB; `BACKUP_ENCRYPTION_KEY` (distinta) cifra i backup.
+- Copiare `BACKUP_ENCRYPTION_KEY` fuori dal server: senza, i backup cifrati non si ripristinano.
+- Per esigenze più strette (Vault, secret manager del cloud) le variabili si possono iniettare nell'ambiente dei container al posto del file; il repository non include un'integrazione dedicata.
 
 ---
 
 ## Backup e disaster recovery
 
-### Obiettivi RTO / RPO
+### Backup applicativo
+
+Il modulo **Backup** (Impostazioni → Backup) produce archivi completi `.tar` con il dump del database (`database.dump`) e l'albero dei file caricati, cifrati se `BACKUP_ENCRYPTION_KEY` è impostata. Gli archivi sono nel volume `backupdata` (`/app/backups`).
+
+- **Automatico**: ogni notte alle 02:00 (`schedule_backup_task`), con eliminazione dei backup più vecchi di 30 giorni
+- **Manuale**: pulsante «Crea backup»
+- **Download e import** di un archivio dall'interfaccia (import compatibile anche con i vecchi `.dump` solo database)
+- **Ripristino**: asincrono dal worker Celery; sostituisce database e cartella dei file
+
+### Copia fuori dal server
+
+Il volume dei backup è sullo stesso host: copiare periodicamente gli archivi altrove (NAS, storage di rete, bucket). Esempio con cron sull'host:
+
+```bash
+# copia notturna degli archivi del volume backupdata
+30 4 * * * rsync -a /var/lib/docker/volumes/grc-webapp_backupdata/_data/ backup-host:/backup/govrico/
+```
+
+### Obiettivi RTO / RPO indicativi
 
 | Scenario | RPO | RTO |
 |----------|-----|-----|
-| Failure singolo nodo | 0 (replica sincrona) | < 2 min |
-| Corruzione dati | Ultimo backup (max 24h) | < 4 ore |
-| Disaster completo datacenter | Ultimo backup (max 24h) | < 8 ore |
-| Ripristino DB < 10 GB (Docker) | 24h (backup giornaliero) | 15-30 min |
+| Corruzione dati / errore umano | Ultimo backup (max 24h) | 15-60 min (ripristino da interfaccia) |
+| Perdita del server | Ultima copia fuori server | Reinstallazione + ripristino (ore) |
 
-### Backup automatico — crontab host
+### Test di ripristino periodico
 
-Configurare sul server host (non nei container):
+Eseguire almeno ogni trimestre, in un ambiente separato, e registrare l'esito come evidenza in M16 BCP:
 
-```bash
-# Aprire crontab dell'utente che esegue Docker
-crontab -e
-
-# Backup giornaliero PostgreSQL — ogni notte alle 01:00
-0 1 * * * docker exec grc-webapp-db-1 pg_dump -U grc grc_prod | gzip > /backup/grc_$(date +\%Y\%m\%d).sql.gz
-
-# Pulizia backup più vecchi di 30 giorni — ogni notte alle 02:00
-0 2 * * * find /backup -name "grc_*.sql.gz" -mtime +30 -delete
-
-# Backup file media — ogni notte alle 03:00
-0 3 * * * docker cp grc-webapp-backend-1:/app/media /backup/media_$(date +\%Y\%m\%d)/
-```
-
-Assicurarsi che `/backup` esista e abbia spazio sufficiente:
-
-```bash
-mkdir -p /backup
-df -h /backup
-```
-
-### Script di backup completo
-
-```bash
-#!/usr/bin/env bash
-# scripts/backup.sh
-set -euo pipefail
-
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-BACKUP_DIR="/backups/${TIMESTAMP}"
-RETENTION_DAYS=${RETENTION_DAYS:-30}
-
-mkdir -p "${BACKUP_DIR}"
-
-# 1. Backup PostgreSQL
-pg_dump -Fc "${DATABASE_URL}" > "${BACKUP_DIR}/db.dump"
-echo "DB dump OK"
-
-# 2. Sync documenti su bucket di backup
-aws s3 sync s3://grc-documents "s3://grc-backups/${TIMESTAMP}/documents" --quiet
-echo "Storage sync OK"
-
-# 3. Verifica integrità dump
-pg_restore --list "${BACKUP_DIR}/db.dump" > /dev/null
-echo "Verifica integrita OK"
-
-# 4. Cleanup backup scaduti
-find /backups -maxdepth 1 -type d -mtime "+${RETENTION_DAYS}" -exec rm -rf {} +
-
-echo "Backup completato: ${BACKUP_DIR}"
-```
-
-### Procedura test restore mensile
-
-Eseguire ogni primo lunedi del mese. Documentare il risultato come evidenza in M16 BCP.
-
-```bash
-# 1. Verifica restore in ambiente isolato
-gunzip -c /backup/grc_YYYYMMDD.sql.gz | psql -U grc grc_test
-
-# Oppure con formato custom pg_dump:
-# pg_restore -d grc_test_restore "${LATEST_BACKUP}/db.dump"
-
-# 2. Verifica hash chain audit trail
-python manage.py verify_audit_trail_integrity --db grc_test_restore
-
-# 3. Smoke test applicativo
-python manage.py test tests.smoke --keepdb --settings=core.settings.test_restore
-
-# 4. Documentare risultato come evidenza in M16 BCP
-```
+1. Installare un'istanza pulita (es. con `install_grc.sh`) con la stessa `BACKUP_ENCRYPTION_KEY`
+2. Importare l'archivio da Impostazioni → Backup e avviare il ripristino
+3. Verificare la catena dell'audit: `python manage.py verify_audit_trail_integrity`
+4. Controllare a campione documenti, evidenze e loghi
 
 ---
 
@@ -678,136 +526,74 @@ python manage.py test tests.smoke --keepdb --settings=core.settings.test_restore
 
 ```
 GET /api/health/
--> { "status": "ok", "db": "ok", "redis": "ok", "storage": "ok", "version": "1.2.0" }
-
-GET /api/health/detailed/    # solo IP interni -- include metriche Celery
+-> 200 {"status": "ok", "db": true, "schedule": {"expected": N, "problems": [...]}}
+-> 503 {"status": "error", "db": false, ...}          # database non raggiungibile
 ```
 
-### Metriche chiave (Prometheus)
+`schedule` segnala task periodici mancanti o disallineati rispetto a `CELERY_BEAT_SCHEDULE` (informativo, non cambia lo stato HTTP).
 
-| Metrica | Warning | Critico |
-|---------|---------|---------|
-| `grc_api_latency_p99_ms` | > 500 | > 2000 |
-| `grc_db_pool_used_pct` | > 80% | > 95% |
-| `grc_celery_queue_length` | > 100 | > 500 |
-| `grc_audit_chain_integrity` | — | `false` |
-| `grc_nis2_timer_remaining_min` | < 120 | < 30 |
-| `grc_ai_sanitizer_errors_5m` | > 0 | > 5 |
+### Cosa monitorare
 
-### Alert P1 — risposta immediata
+Il repository non include uno stack di metriche: si consiglia un monitor esterno su
+- `GET /api/health/` (stato e `schedule.problems`)
+- container `backend`, `celery`, `celery-beat` in esecuzione (`docker compose ps`)
+- spazio disco di `/srv/grc/media` e del volume dei backup
+- esito del backup notturno (Impostazioni → Backup)
+- integrità dell'audit trail: `verify_audit_trail_integrity` pianificato periodicamente
 
-- Audit trail chain rotta (integrità SHA-256 fallita)
-- NIS2 timer < 30 minuti senza notifica inviata
-- Database non raggiungibile
-- Sanitizer M20 che espone dati non anonimizzati
+### Error monitoring
 
-### Log strutturati (JSON)
+Sentry (opzionale) su backend (Django, Celery, Redis) e frontend (React), attivo se `SENTRY_DSN` / `VITE_SENTRY_DSN` sono valorizzati. Configurazione GDPR-safe: `send_default_pii=False`, header Authorization rimosso, Session Replay disattivo di default e con testo mascherato.
 
-```json
-{
-  "timestamp": "2026-03-13T10:00:00Z",
-  "level": "INFO",
-  "module": "M09",
-  "action": "incident.created",
-  "plant_id": "PLT-001",
-  "user_id": "USR-042",
-  "incident_id": "INC-2026-0042",
-  "nis2_notifiable": "da_valutare",
-  "request_id": "req-abc123"
-}
-```
+### Log
+
+I container scrivono su stdout/stderr in formato testo (`livello data modulo processo thread messaggio`); si leggono con `docker compose logs`. Nei log non finiscono dati personali (email, CF, telefono): solo conteggi o identificatori. Per la raccolta centralizzata usare il logging driver di Docker verso il sistema aziendale.
 
 ---
 
 ## Scalabilità
 
-### Horizontal scaling backend
+L'installazione di riferimento è un singolo host con Docker Compose. Leve disponibili:
+- **Backend**: worker e thread di gunicorn in `backend/Dockerfile.prod` (default 4 worker × 2 thread)
+- **Celery**: `CELERY_CONCURRENCY` (default 4) e `--max-tasks-per-child`
+- **Database**: risorse del container PostgreSQL; indici già definiti sui filtri frequenti
 
-```yaml
-# Kubernetes HPA
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: grc-backend-hpa
-spec:
-  scaleTargetRef:
-    kind: Deployment
-    name: grc-backend
-  minReplicas: 2
-  maxReplicas: 10
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 70
-```
-
-### PostgreSQL read replicas
-
-I job pesanti (M18 export report, M17 evidence pack) vengono indirizzati alla replica di lettura — nessun impatto sulle operazioni transazionali OLTP.
-
-```
-Primary (write)  -->  Replica 1  (read -- dashboard M18, export M17)
-                 -->  Replica 2  (read -- audit trail queries M10)
-```
+Orchestratori (Kubernetes, Swarm) e repliche di lettura non sono inclusi nel repository.
 
 ---
 
 ## AI Engine — infrastruttura M20
 
-### Installazione Ollama (modello locale)
+### Modello locale (Ollama)
+
+`install_grc.sh` può aggiungere Ollama come container (`127.0.0.1:11434`) e scaricare un modello adatto alla RAM (es. `llama3.2:3b` solo CPU, `llama3.1:8b` con GPU e ≥ 32 GB). In alternativa installarlo sull'host:
 
 ```bash
-# Installazione
-curl -fsSL https://ollama.ai/install.sh | sh
-systemctl enable ollama && systemctl start ollama
-
-# Download modello in base alla RAM disponibile
-ollama pull llama3.1:8b      # 8 GB -- classificazioni rapide
-ollama pull llama3.1:70b     # 40 GB -- analisi testo complessa
-
-# Test
-curl http://localhost:11434/api/generate \
-  -d '{"model":"llama3.1:8b","prompt":"Classifica questa severita: accesso non autorizzato a PLC","stream":false}'
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull llama3.2:3b
+curl http://localhost:11434/api/generate -d '{"model":"llama3.2:3b","prompt":"ok","stream":false}'
 ```
 
-### Regole sanitization (dati verso cloud)
+L'endpoint locale (es. `http://ollama:11434` o `http://host.docker.internal:11434`) si imposta nell'app.
 
-| Tipo dato | Trasformazione | Esempio |
-|-----------|---------------|---------|
-| Nome plant | Token fisso | "Stabilimento Milano" -> `[PLANT_A]` |
-| Nome persona | Token numerato | "Mario Rossi" -> `[PERSON_1]` |
-| Valore ALE | Range ordinale | "450.000 euro" -> `[VALORE_ALTO]` |
-| IP / hostname | Offuscato | "192.168.1.50" -> `[IP_INTERNAL]` |
-| P.IVA / C.F. | Rimosso | -> `[REMOVED]` |
-| Nome fornitore | Token fisso | "Fornitore X S.r.l." -> `[SUPPLIER_A]` |
+### Configurazione
 
-### Configurazione per funzione (settings/ai_engine.py)
+Tutto si configura da **Impostazioni → AI Engine** (modello `AiProviderConfig` nel DB): provider cloud e chiave, modello cloud e locale (con catalogo aggiornato dal provider), routing locale/cloud **per funzione**, fallback, budget mensile di token. Senza una configurazione attiva le funzioni IA rispondono «IA non configurata».
 
-```python
-AI_ENGINE_CONFIG = {
-    "enabled": False,                    # master switch -- off di default
-    "functions": {
-        "classification":    {"enabled": False, "model": "local"},
-        "text_analysis":     {"enabled": False, "model": "cloud"},
-        "draft_generation":  {"enabled": False, "model": "cloud"},
-        "anomaly_detection": {"enabled": False, "model": "local"},
-    },
-    "sanitization": {
-        "strip_plant_names":    True,
-        "strip_person_names":   True,
-        "strip_financial_values": True,
-        "strip_ip_addresses":   True,
-    },
-    "logging": {
-        "log_input_hash": True,          # mai il testo originale
-        "log_output":     True,
-        "log_delta":      True,
-    }
-}
-```
+### Sanitizzazione (dati verso il cloud)
+
+| Tipo dato | Trasformazione |
+|-----------|---------------|
+| Nomi e codici dei siti | Token (`[PLANT_A]`, `[PLANT_B]`, …), ripristinati nella risposta |
+| Indirizzi IP | `[IP_REMOVED]` |
+| Email | `[EMAIL_REMOVED]` |
+| Telefoni | `[PHONE_REMOVED]` |
+| Codice fiscale | `[CF_REMOVED]` |
+| Partita IVA | `[PIVA_REMOVED]` |
+| Nomi delle persone (riesame M13) | pseudonimizzati prima dell'invio |
+| Dati OSINT | anonimizzati dall'`AnonymizationService` |
+
+Ogni interazione è registrata in `AiInteractionLog` con l'hash dell'input (mai il testo), l'output e l'esito della revisione umana (conservazione 365 giorni). Nessun output IA è applicato senza conferma di una persona.
 
 ---
 
@@ -815,41 +601,38 @@ AI_ENGINE_CONFIG = {
 
 ### Sicurezza
 
-- [ ] TLS 1.2+ configurato, certificato valido e non scaduto
-- [ ] Header di sicurezza HTTP presenti (HSTS, CSP, X-Frame-Options, X-Content-Type-Options)
-- [ ] `DEBUG=false` e `SECRET_KEY` generato (non il valore di default)
-- [ ] `FERNET_KEY` generato e configurato
-- [ ] Database non esposto all'esterno della rete interna
-- [ ] Secrets non in chiaro nelle variabili d'ambiente Docker
-- [ ] Firewall configurato (solo porte necessarie aperte)
-- [ ] SSO configurato, testato e con fallback locale disabilitato
-- [ ] Scadenza token auditor esterno configurata in M02
-- [ ] Rate limiting verificato: login 5/min, utenti 500/h
+- [ ] TLS 1.2+ con certificato valido
+- [ ] Header di sicurezza presenti (HSTS, CSP, X-Frame-Options, X-Content-Type-Options)
+- [ ] `DEBUG=false`, `SECRET_KEY`, `FERNET_KEY` e `BACKUP_ENCRYPTION_KEY` generate
+- [ ] `ADMIN_URL` non prevedibile
+- [ ] `.env.prod` con permessi 600; `BACKUP_ENCRYPTION_KEY` copiata fuori dal server
+- [ ] Backend, frontend, database e Redis non raggiungibili dall'esterno (solo 80/443)
+- [ ] Firewall configurato (22, 80, 443)
+- [ ] MFA attiva per gli amministratori
+- [ ] Scadenza dei token auditor esterno configurata in M02
+- [ ] Rate limiting verificato: login 5/min, utenti 2000/h
 
 ### Operatività
 
-- [ ] Backup automatico configurato (crontab host) e testato con restore verificato
-- [ ] Monitoraggio e alerting attivi (P1 su audit trail e NIS2 timer)
-- [ ] Log centralizzati (ELK / Loki / CloudWatch)
-- [ ] Health check risponde correttamente su tutti i componenti: `curl /api/health/`
-- [ ] Celery beat attivo: `celery -A core inspect scheduled`
-- [ ] Tutti i task schedulati presenti nella tabella Celery Beat
-- [ ] Job verifica integrità audit trail: `python manage.py verify_audit_trail_integrity`
+- [ ] `/srv/grc/media` e `/app/backups` scrivibili dall'utente `grc`
+- [ ] Backup notturno programmato (`schedule_backup_task`), un backup manuale riuscito e un ripristino di prova documentato
+- [ ] Copia degli archivi di backup fuori dal server
+- [ ] `GET /api/health/` risponde 200 senza `schedule.problems`
+- [ ] Celery worker e beat attivi: `celery -A core inspect ping`, `verify_schedule`
+- [ ] `verify_audit_trail_integrity` senza errori
+- [ ] Monitor esterno su health, container e spazio disco
 
 ### Framework normativi e dati
 
-- [ ] VDA ISA 6.0, NIS2 Art.21, ISO 27001:2022 importati via `load_frameworks`
-- [ ] `load_notification_profiles` eseguito
-- [ ] `load_competency_requirements` eseguito
-- [ ] `load_required_documents` eseguito
-- [ ] `ControlInstance` generate per tutti i plant attivi
-- [ ] `nis2_scope` configurato correttamente per ogni plant
+- [ ] `make prod-seed` eseguito (framework, profili notifica, competenze, requisiti di ruolo, documenti richiesti, controlli provati dalla formazione)
+- [ ] `load_document_workflow_policies` eseguito alla prima installazione e policy verificate in Governance
+- [ ] Framework assegnati ai siti e `ControlInstance` generate
+- [ ] `nis2_scope` configurato per ogni sito
 - [ ] Almeno un CISO con `RoleAssignment` attiva in M00
 
 ### AI Engine (solo se abilitato)
 
-- [ ] Sanitization layer testato: nessun PII passa nel log cloud
-- [ ] Modello locale Ollama risponde correttamente
-- [ ] Cloud API key configurata e testata
-- [ ] `AiInteractionLog` popola correttamente M10
-- [ ] Human-in-the-loop verificato end-to-end per ogni funzione abilitata
+- [ ] Configurazione attiva in Impostazioni → AI Engine, con test di connessione riuscito
+- [ ] Routing per funzione deciso (locale per i dati più sensibili)
+- [ ] Sanitizzazione verificata: nessun dato personale nei prompt inviati al cloud
+- [ ] Human-in-the-loop verificato per le funzioni abilitate
