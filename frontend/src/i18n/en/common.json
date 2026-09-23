@@ -138,6 +138,52 @@
       "model_local_gone": "Model \\u201c{{model}}\\u201d does not appear to be downloaded on this Ollama instance.",
       "model_substituted": "instead of {{from}}",
       "local_slow_hint": "The local model runs on the server's CPU: a long summary can take minutes. For long texts prefer a 7B model or larger."
+    },
+    "assistant": {
+      "title": "govrico Assistant",
+      "close": "Close",
+      "site_label": "Site:",
+      "change_site": "change",
+      "analyzing": "Analysing the site status…",
+      "load_error": "Loading failed. Please try again.",
+      "pick_site": "Which site do you want to work on?",
+      "no_sites": "No accessible sites.",
+      "all_clear": "✅ No open gaps on the monitored criteria. Keep it up.",
+      "to_fix": "Items to fix: {{count}}",
+      "urgent": "urgent: {{count}}",
+      "fw_compliance": "{{pct}}% compliance ({{compliant}}/{{total}} controls)",
+      "fw_extended": "{{count}} covered by an extending framework",
+      "fw_na": "{{count}} N/A excluded",
+      "explanation": "Explanation",
+      "useful": "👍 This was helpful",
+      "useful_hint": "Report that the explanation was helpful (improves AI quality over time)",
+      "not_useful": "👎 Not helpful",
+      "not_useful_hint": "Report that the explanation was not helpful",
+      "go_fix": "Go and fix",
+      "explain": "Explain",
+      "thinking": "Thinking…",
+      "explain_error": "AI assistant unavailable. Please try again later.",
+      "truncated": "Showing the {{count}} most urgent. Fix these and I will come back with the next ones.",
+      "categories": {
+        "documents": "Document",
+        "controls": "Control",
+        "risk": "Risk",
+        "suppliers": "Supplier"
+      },
+      "gaps": {
+        "document_expired": "Expired {{count}} days ago",
+        "document_review_due": "Review due for {{count}} days",
+        "control_expired_evidence": "Expired evidence: {{count}}",
+        "control_missing_evidence": "Missing evidence: {{count}}",
+        "control_missing_doc": "Missing documents: {{count}}",
+        "control_status_gap": "Marked as gap (awaiting remediation)",
+        "control_status_partial": "Partially compliant",
+        "control_not_evaluated": "Never assessed",
+        "risk_needs_revaluation": "Needs reassessment (recent change)",
+        "risk_expired": "Assessment expired {{count}} days ago",
+        "supplier_never_assessed": "Never assessed (NIS2 / high risk)",
+        "supplier_assessment_expired": "Assessment expired {{count}} days ago"
+      }
     }
   },
   "countdown": {

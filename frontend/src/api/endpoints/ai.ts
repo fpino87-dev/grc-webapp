@@ -108,9 +108,9 @@ export const aiApi = {
       apiClient
         .post<AssistantStartResponse>("/ai/assistant/start/", { plant_id })
         .then((r) => r.data),
-    explain: (plant_id: string, gap: AssistantGap) =>
+    explain: (plant_id: string, gap: AssistantGap, lang: string) =>
       apiClient
-        .post<AssistantExplainResponse>("/ai/assistant/explain/", { plant_id, gap })
+        .post<AssistantExplainResponse>("/ai/assistant/explain/", { plant_id, gap, lang })
         .then((r) => r.data),
   },
 };

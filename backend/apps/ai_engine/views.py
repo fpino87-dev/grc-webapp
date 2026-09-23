@@ -274,7 +274,7 @@ class AiAssistantExplainView(APIView):
         if not plant:
             return Response({"error": "Plant non trovato"}, status=404)
 
-        prompt, system = build_explanation_prompt(gap)
+        prompt, system = build_explanation_prompt(gap, request.data.get("lang") or "it")
         try:
             result = route(
                 task_type="assistant_explain",

@@ -230,3 +230,12 @@ def test_get_expired_documents_respects_plant_access(co_user_org, pm_user_plant_
     out_co = get_expired_documents(co_user_org, plant_b.id)
     assert len(out_co) == 1
     assert out_co[0]["kind"] == "expired"
+
+
+def test_explanation_prompt_follows_ui_language():
+    from apps.ai_engine.agent_orchestrator import build_explanation_prompt
+
+    gap = {"kind": "document_expired", "title": "T", "subtitle": "S", "details": {}}
+    assert "Spiega in italiano" in build_explanation_prompt(gap)[1]
+    assert "Spiega in polacco" in build_explanation_prompt(gap, "pl")[1]
+    assert "Spiega in italiano" in build_explanation_prompt(gap, "xx")[1]

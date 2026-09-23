@@ -108,6 +108,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ### Fixed
 
+- **Assistente govrico tradotto in tutte le lingue**: il pannello dell'assistente nella barra in alto era solo in italiano; ora testi, categorie e stato dei gap seguono la lingua dell'interfaccia (IT/EN/FR/PL/TR), e anche la spiegazione IA di un gap viene scritta nella lingua dell'utente. Se la spiegazione non è disponibile compare un messaggio, invece di non succedere nulla.
+
 - **Documenti — i promemoria di scadenza non si ripetono più ogni giorno**: il controllo notturno apriva una nuova attività ogni mattina per ogni documento con la revisione o la validità scaduta, riaprendola anche dopo che era stata annullata: un documento scaduto generava un'attività al giorno, senza fine. Ora vale un promemoria per documento e per tipo di scadenza; l'escalation da «in scadenza» a «scaduto» resta, e un promemoria annullato non viene riaperto. Il titolo dell'attività non contiene più il numero di giorni residui (che lo faceva invecchiare): il conteggio resta nella descrizione.
 
 - **Build di produzione — compilazione delle traduzioni**: dalla 0.8.0 `compilemessages` (eseguito da `Dockerfile.prod`) falliva in polacco e turco perché l'etichetta «% compliant» del verbale del riesame era marcata per errore come stringa di formato, e l'immagine non si costruiva. Il marcatore è stato rimosso nelle quattro lingue.

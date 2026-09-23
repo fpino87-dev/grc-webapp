@@ -365,6 +365,52 @@
       "model_local_gone": "Le modèle « {{model}} » ne semble pas téléchargé sur cette instance Ollama.",
       "model_substituted": "à la place de {{from}}",
       "local_slow_hint": "Le modèle local tourne sur le CPU du serveur : une synthèse longue peut prendre plusieurs minutes. Pour les textes longs, préférez un modèle de 7B ou plus."
+    },
+    "assistant": {
+      "title": "Assistant govrico",
+      "close": "Fermer",
+      "site_label": "Site :",
+      "change_site": "changer",
+      "analyzing": "Analyse de l'état du site en cours…",
+      "load_error": "Erreur de chargement. Réessayez.",
+      "pick_site": "Sur quel site voulez-vous travailler ?",
+      "no_sites": "Aucun site accessible.",
+      "all_clear": "✅ Aucun écart ouvert sur les critères surveillés. Continuez ainsi.",
+      "to_fix": "Points à corriger : {{count}}",
+      "urgent": "urgents : {{count}}",
+      "fw_compliance": "{{pct}} % de conformité ({{compliant}}/{{total}} contrôles)",
+      "fw_extended": "{{count}} couverts par un référentiel étendu",
+      "fw_na": "{{count}} N/A exclus",
+      "explanation": "Explication",
+      "useful": "👍 Cela m'a été utile",
+      "useful_hint": "Signaler que l'explication a été utile (améliore la qualité de l'IA au fil du temps)",
+      "not_useful": "👎 Pas utile",
+      "not_useful_hint": "Signaler que l'explication n'a pas été utile",
+      "go_fix": "Aller corriger",
+      "explain": "Explique-moi",
+      "thinking": "Réflexion en cours…",
+      "explain_error": "Assistant IA indisponible. Réessayez plus tard.",
+      "truncated": "J'affiche les {{count}} plus urgents. Traitez-les et je reviendrai avec les suivants.",
+      "categories": {
+        "documents": "Document",
+        "controls": "Contrôle",
+        "risk": "Risque",
+        "suppliers": "Fournisseur"
+      },
+      "gaps": {
+        "document_expired": "Expiré depuis {{count}} jours",
+        "document_review_due": "Révision requise depuis {{count}} jours",
+        "control_expired_evidence": "Preuves expirées : {{count}}",
+        "control_missing_evidence": "Preuves manquantes : {{count}}",
+        "control_missing_doc": "Documents manquants : {{count}}",
+        "control_status_gap": "Marqué comme écart (en attente de correction)",
+        "control_status_partial": "Conformité partielle",
+        "control_not_evaluated": "Jamais évalué",
+        "risk_needs_revaluation": "Réévaluation requise (changement récent)",
+        "risk_expired": "Évaluation expirée depuis {{count}} jours",
+        "supplier_never_assessed": "Jamais évalué (NIS2 / risque élevé)",
+        "supplier_assessment_expired": "Évaluation expirée depuis {{count}} jours"
+      }
     }
   },
   "controls": {

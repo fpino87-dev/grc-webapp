@@ -365,6 +365,52 @@
       "model_local_gone": "«{{model}}» modeli bu Ollama örneğinde indirilmiş görünmüyor.",
       "model_substituted": "{{from}} yerine",
       "local_slow_hint": "Yerel model sunucunun CPU'sunda çalışır: uzun bir özet dakikalar sürebilir. Uzun metinler için 7B ve üzeri bir model tercih edin."
+    },
+    "assistant": {
+      "title": "govrico Asistanı",
+      "close": "Kapat",
+      "site_label": "Tesis:",
+      "change_site": "değiştir",
+      "analyzing": "Tesisin durumu analiz ediliyor…",
+      "load_error": "Yükleme hatası. Tekrar deneyin.",
+      "pick_site": "Hangi tesis üzerinde çalışmak istiyorsunuz?",
+      "no_sites": "Erişilebilir tesis yok.",
+      "all_clear": "✅ İzlenen kriterlerde açık boşluk yok. Böyle devam edin.",
+      "to_fix": "Düzeltilecek konular: {{count}}",
+      "urgent": "acil: {{count}}",
+      "fw_compliance": "%{{pct}} uyum ({{compliant}}/{{total}} kontrol)",
+      "fw_extended": "{{count}} tanesi genişletilmiş çerçeve kapsamında",
+      "fw_na": "{{count}} U/D hariç",
+      "explanation": "Açıklama",
+      "useful": "👍 Faydalı oldu",
+      "useful_hint": "Açıklamanın faydalı olduğunu bildirin (zamanla yapay zekâ kalitesini artırır)",
+      "not_useful": "👎 Faydalı olmadı",
+      "not_useful_hint": "Açıklamanın faydalı olmadığını bildirin",
+      "go_fix": "Çözmeye git",
+      "explain": "Açıkla",
+      "thinking": "Düşünüyorum…",
+      "explain_error": "Yapay zekâ asistanı kullanılamıyor. Daha sonra tekrar deneyin.",
+      "truncated": "En acil {{count}} konu gösteriliyor. Bunları çözün, sonrakilerle geri döneceğim.",
+      "categories": {
+        "documents": "Belge",
+        "controls": "Kontrol",
+        "risk": "Risk",
+        "suppliers": "Tedarikçi"
+      },
+      "gaps": {
+        "document_expired": "{{count}} gün önce süresi doldu",
+        "document_review_due": "{{count}} gündür gözden geçirme bekliyor",
+        "control_expired_evidence": "Süresi dolmuş kanıtlar: {{count}}",
+        "control_missing_evidence": "Eksik kanıtlar: {{count}}",
+        "control_missing_doc": "Eksik belgeler: {{count}}",
+        "control_status_gap": "Boşluk olarak işaretlendi (iyileştirme bekleniyor)",
+        "control_status_partial": "Kısmi uyum",
+        "control_not_evaluated": "Hiç değerlendirilmedi",
+        "risk_needs_revaluation": "Yeniden değerlendirme gerekli (yakın zamanda değişiklik)",
+        "risk_expired": "Değerlendirmenin süresi {{count}} gün önce doldu",
+        "supplier_never_assessed": "Hiç değerlendirilmedi (NIS2 / yüksek risk)",
+        "supplier_assessment_expired": "Değerlendirmenin süresi {{count}} gün önce doldu"
+      }
     }
   },
   "controls": {

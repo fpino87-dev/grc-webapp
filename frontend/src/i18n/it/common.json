@@ -138,6 +138,52 @@
       "model_local_gone": "Il modello «{{model}}» non risulta scaricato su questa istanza Ollama.",
       "model_substituted": "al posto di {{from}}",
       "local_slow_hint": "Il modello locale gira sulla CPU del server: una sintesi lunga può richiedere minuti. Per i testi lunghi conviene un modello da 7B in su."
+    },
+    "assistant": {
+      "title": "Assistente govrico",
+      "close": "Chiudi",
+      "site_label": "Sito:",
+      "change_site": "cambia",
+      "analyzing": "Sto analizzando lo stato del sito…",
+      "load_error": "Errore nel caricamento. Riprova.",
+      "pick_site": "Su quale sito vuoi lavorare?",
+      "no_sites": "Nessun sito accessibile.",
+      "all_clear": "✅ Nessun gap aperto sui criteri monitorati. Continua così.",
+      "to_fix": "Cose da sistemare: {{count}}",
+      "urgent": "urgenti: {{count}}",
+      "fw_compliance": "{{pct}}% compliance ({{compliant}}/{{total}} controlli)",
+      "fw_extended": "{{count}} coperti da framework esteso",
+      "fw_na": "{{count}} N/A esclusi",
+      "explanation": "Spiegazione",
+      "useful": "👍 Mi è stato utile",
+      "useful_hint": "Segnala che la spiegazione è stata utile (migliora la qualità dell'IA nel tempo)",
+      "not_useful": "👎 Non è stato utile",
+      "not_useful_hint": "Segnala che la spiegazione non è stata utile",
+      "go_fix": "Vai a risolvere",
+      "explain": "Spiegami",
+      "thinking": "Sto pensando…",
+      "explain_error": "Assistente IA non disponibile. Riprova più tardi.",
+      "truncated": "Mostro le {{count}} più urgenti. Risolvi queste e tornerò con le successive.",
+      "categories": {
+        "documents": "Documento",
+        "controls": "Controllo",
+        "risk": "Rischio",
+        "suppliers": "Fornitore"
+      },
+      "gaps": {
+        "document_expired": "Scaduto da {{count}} giorni",
+        "document_review_due": "Revisione richiesta da {{count}} giorni",
+        "control_expired_evidence": "Evidenze scadute: {{count}}",
+        "control_missing_evidence": "Evidenze mancanti: {{count}}",
+        "control_missing_doc": "Documenti mancanti: {{count}}",
+        "control_status_gap": "Marcato come gap (in attesa di rimedio)",
+        "control_status_partial": "Compliance parziale",
+        "control_not_evaluated": "Mai valutato",
+        "risk_needs_revaluation": "Richiede rivalutazione (modifica recente)",
+        "risk_expired": "Valutazione scaduta da {{count}} giorni",
+        "supplier_never_assessed": "Mai valutato (NIS2 / alto rischio)",
+        "supplier_assessment_expired": "Valutazione scaduta da {{count}} giorni"
+      }
     }
   },
   "countdown": {

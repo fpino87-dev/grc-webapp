@@ -172,10 +172,15 @@ def build_summary(user, plant_id) -> dict:
     }
 
 
-def build_explanation_prompt(gap: dict) -> tuple[str, str]:
-    """Costruisce (prompt, system) per chiedere all'LLM una spiegazione del gap."""
+_LANG_NAMES = {"it": "italiano", "en": "inglese", "fr": "francese", "pl": "polacco", "tr": "turco"}
+
+
+def build_explanation_prompt(gap: dict, lang: str = "it") -> tuple[str, str]:
+    """Costruisce (prompt, system) per chiedere all'LLM una spiegazione del gap,
+    nella lingua dell'interfaccia dell'utente."""
+    lang_name = _LANG_NAMES.get((lang or "it")[:2], "italiano")
     system = (
-        "Sei un consulente GRC. Spiega in italiano semplice e diretto a un "
+        f"Sei un consulente GRC. Spiega in {lang_name} semplice e diretto a un "
         "responsabile aziendale (non tecnico) cosa significa questo gap di "
         "compliance, perche' conta, e quali sono i passi concreti per chiuderlo. "
         "Massimo 5 frasi. Non aggiungere disclaimer."

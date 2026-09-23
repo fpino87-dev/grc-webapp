@@ -365,6 +365,52 @@
       "model_local_gone": "Model „{{model}}” nie wygląda na pobrany na tej instancji Ollama.",
       "model_substituted": "zamiast {{from}}",
       "local_slow_hint": "Model lokalny działa na CPU serwera: długie podsumowanie może zająć minuty. Do długich tekstów lepszy jest model 7B lub większy."
+    },
+    "assistant": {
+      "title": "Asystent govrico",
+      "close": "Zamknij",
+      "site_label": "Zakład:",
+      "change_site": "zmień",
+      "analyzing": "Analizuję stan zakładu…",
+      "load_error": "Błąd ładowania. Spróbuj ponownie.",
+      "pick_site": "Nad którym zakładem chcesz pracować?",
+      "no_sites": "Brak dostępnych zakładów.",
+      "all_clear": "✅ Brak otwartych luk w monitorowanych kryteriach. Tak trzymać.",
+      "to_fix": "Do poprawienia: {{count}}",
+      "urgent": "pilne: {{count}}",
+      "fw_compliance": "{{pct}}% zgodności ({{compliant}}/{{total}} kontroli)",
+      "fw_extended": "{{count}} objętych rozszerzonym frameworkiem",
+      "fw_na": "{{count}} N/D wykluczonych",
+      "explanation": "Wyjaśnienie",
+      "useful": "👍 To było pomocne",
+      "useful_hint": "Zgłoś, że wyjaśnienie było pomocne (z czasem poprawia jakość AI)",
+      "not_useful": "👎 Nie było pomocne",
+      "not_useful_hint": "Zgłoś, że wyjaśnienie nie było pomocne",
+      "go_fix": "Przejdź do rozwiązania",
+      "explain": "Wyjaśnij",
+      "thinking": "Myślę…",
+      "explain_error": "Asystent AI niedostępny. Spróbuj ponownie później.",
+      "truncated": "Pokazuję {{count}} najpilniejszych. Rozwiąż je, a wrócę z kolejnymi.",
+      "categories": {
+        "documents": "Dokument",
+        "controls": "Kontrola",
+        "risk": "Ryzyko",
+        "suppliers": "Dostawca"
+      },
+      "gaps": {
+        "document_expired": "Wygasł {{count}} dni temu",
+        "document_review_due": "Przegląd wymagany od {{count}} dni",
+        "control_expired_evidence": "Wygasłe dowody: {{count}}",
+        "control_missing_evidence": "Brakujące dowody: {{count}}",
+        "control_missing_doc": "Brakujące dokumenty: {{count}}",
+        "control_status_gap": "Oznaczona jako luka (oczekuje na działania naprawcze)",
+        "control_status_partial": "Częściowa zgodność",
+        "control_not_evaluated": "Nigdy nie oceniono",
+        "risk_needs_revaluation": "Wymaga ponownej oceny (niedawna zmiana)",
+        "risk_expired": "Ocena wygasła {{count}} dni temu",
+        "supplier_never_assessed": "Nigdy nie oceniono (NIS2 / wysokie ryzyko)",
+        "supplier_assessment_expired": "Ocena wygasła {{count}} dni temu"
+      }
     }
   },
   "controls": {
