@@ -2395,3 +2395,8 @@ msgstr ""
 #, python-format
 msgid "Il contenuto del file non corrisponde all'estensione .%(ext)s."
 msgstr "Le contenu du fichier ne correspond pas à l'extension .%(ext)s."
+
+#: apps/controls/services/documents.py
+#, python-format
+msgid "Documento generato con IA (%(model)s): bozza da verificare e approvare prima dell'uso."
+msgstr "Document généré par IA (%(model)s) : brouillon à vérifier et à approuver avant utilisation."

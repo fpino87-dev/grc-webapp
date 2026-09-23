@@ -333,6 +333,7 @@ function AgendaItemCard({
               // La bozza non entra nel verbale da sola: va riletta e accettata.
               <div className="border border-indigo-200 bg-indigo-50/40 rounded p-2 space-y-2">
                 <p className="text-xs text-indigo-700">
+                  🤖 {t("ai.generated_label")}{" "}
                   {t("management_review.agenda.ai_draft_meta", {
                     model: `${draftMeta.provider}/${draftMeta.model}`,
                   })}

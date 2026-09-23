@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
@@ -238,6 +239,7 @@ function AssistantBody({
   explainingId?: string;
   onFeedback: (gap: AssistantGap, useful: boolean) => Promise<void>;
 }) {
+  const { t } = useTranslation();
   const { summary, gaps, gaps_total, gaps_truncated } = data;
   const redCount = gaps.filter((g) => g.urgency === "red").length;
 
@@ -302,9 +304,10 @@ function AssistantBody({
                   Spiegazione
                 </span>
               </div>
-              <p className="text-xs text-gray-800 whitespace-pre-wrap mb-3">
+              <p className="text-xs text-gray-800 whitespace-pre-wrap mb-1">
                 {explanations[gap.ref_id].text}
               </p>
+              <p className="text-[11px] text-gray-500 mb-3">🤖 {t("ai.generated_label")}</p>
               <div className="flex gap-2">
                 <button
                   onClick={() => onFeedback(gap, true)}

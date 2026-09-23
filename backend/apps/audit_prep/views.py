@@ -119,7 +119,7 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             entity=instance,
             payload={
                 "title": instance.title,
-                "reason": request.data.get("reason", ""),
+                "reason": str(request.data.get("reason", ""))[:200],
             },
         )
         return Response(status=204)
@@ -153,7 +153,7 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             entity=instance,
             payload={
                 "title": instance.title,
-                "reason": reason,
+                "reason": reason.strip()[:200],
                 "reminders_closed": closed_reminders,
             },
         )

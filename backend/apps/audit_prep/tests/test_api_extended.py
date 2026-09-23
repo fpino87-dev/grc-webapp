@@ -89,6 +89,17 @@ def test_annulla_action_valid(client, audit_prep):
 
 
 @pytest.mark.django_db
+def test_annulla_audit_payload_truncates_free_text_reason(client, audit_prep):
+    from core.audit import AuditLog
+
+    reason = "Motivo lungo " + "x" * 500
+    resp = client.post(f"{URL_PREPS}{audit_prep.id}/annulla/", {"reason": reason}, format="json")
+    assert resp.status_code == 200
+    log = AuditLog.objects.filter(action_code="audit_prep.auditprep.cancelled").latest("timestamp_utc")
+    assert log.payload["reason"] == reason[:200]
+
+
+@pytest.mark.django_db
 def test_readiness_action(client, audit_prep):
     resp = client.get(f"{URL_PREPS}{audit_prep.id}/readiness/")
     assert resp.status_code == 200

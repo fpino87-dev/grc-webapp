@@ -3,6 +3,9 @@ def generate_procedure_document(control, lang: str, user) -> bytes:
     Generates a .docx procedure document for a Control via AI.
     Returns raw bytes of the Word document.
     """
+    from django.utils import translation
+    from django.utils.translation import gettext as _
+
     from apps.ai_engine.router import route
     from ..document_generator import markdown_to_docx
 
@@ -54,4 +57,8 @@ def generate_procedure_document(control, lang: str, user) -> bytes:
 
     md_text = result["text"]
     doc_title = f"{control.external_id} — {title_loc}"
-    return markdown_to_docx(md_text, title=doc_title)
+    with translation.override(lang):
+        ai_notice = _(
+            "Documento generato con IA (%(model)s): bozza da verificare e approvare prima dell'uso."
+        ) % {"model": f"{result.get('provider')}/{result.get('model')}"}
+    return markdown_to_docx(md_text, title=doc_title, ai_notice=ai_notice)

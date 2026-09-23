@@ -109,6 +109,7 @@ export function TabCosa({ info }: { info: ControlDetailInfo }) {
         {summaryText ? (
           <div className="px-3 py-2.5 text-sm text-gray-700 leading-relaxed">
             {summaryText}
+            <p className="mt-1.5 text-[11px] text-gray-500">🤖 {t("ai.generated_label")}</p>
           </div>
         ) : (
           <p className="px-3 py-2.5 text-xs text-gray-400 italic">

@@ -55,3 +55,30 @@ def test_control_without_evaluations_is_soft_deleted(admin_client):
     assert resp.status_code == 204
     assert Control.objects.all_with_deleted().filter(pk=ctrl.id, deleted_at__isnull=False).exists()
     assert AuditLog.objects.filter(action_code="controls.control.delete").exists()
+
+
+@pytest.mark.django_db
+def test_generated_procedure_docx_is_marked_as_ai(monkeypatch):
+    """AI Act art. 50: il .docx generato dichiara di essere opera dell'IA,
+    sotto il titolo e nelle proprietà del file."""
+    import io
+
+    from docx import Document
+
+    from apps.ai_engine import router
+    from apps.controls.models import Control, Framework
+    from apps.controls.services import generate_procedure_document
+
+    fw = Framework.objects.create(code="ISO27001", name="ISO", version="1",
+                                  published_at=datetime.date(2024, 1, 1))
+    ctrl = Control.objects.create(framework=fw, external_id="A.5.1",
+                                  translations={"en": {"title": "Policies"}})
+    monkeypatch.setattr(router, "route", lambda **kw: {
+        "text": "## Scope\nText", "provider": "anthropic", "model": "m1",
+    })
+
+    doc = Document(io.BytesIO(generate_procedure_document(ctrl, "en", None)))
+    notice = "Document generated with AI (anthropic/m1): draft to be reviewed and approved before use."
+    assert doc.paragraphs[1].text == notice
+    assert doc.core_properties.comments == notice
+    assert doc.core_properties.keywords == "AI-generated"

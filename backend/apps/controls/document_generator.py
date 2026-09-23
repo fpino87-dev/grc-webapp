@@ -33,7 +33,10 @@ def _parse_inline(paragraph, text: str) -> None:
             run.text = part
 
 
-def markdown_to_docx(md_text: str, title: str = "") -> bytes:
+def markdown_to_docx(md_text: str, title: str = "", ai_notice: str = "") -> bytes:
+    """`ai_notice`: il testo è generato dall'IA (AI Act art. 50). L'avviso va
+    sotto il titolo e nelle proprietà del file, così resta col documento anche
+    fuori dall'applicazione."""
     from docx import Document
     from docx.enum.text import WD_ALIGN_PARAGRAPH
     from docx.shared import Inches
@@ -49,6 +52,13 @@ def markdown_to_docx(md_text: str, title: str = "") -> bytes:
     if title:
         heading = doc.add_heading(title, level=0)
         heading.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+    if ai_notice:
+        notice = doc.add_paragraph()
+        notice.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        notice.add_run(ai_notice).italic = True
+        doc.core_properties.comments = ai_notice
+        doc.core_properties.keywords = "AI-generated"
 
     for line in md_text.splitlines():
         line = line.rstrip()

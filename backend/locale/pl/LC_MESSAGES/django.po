@@ -2358,3 +2358,8 @@ msgstr "Niedozwolony typ pliku. Zawartość pliku nie odpowiada rozszerzeniu."
 #, python-format
 msgid "Il contenuto del file non corrisponde all'estensione .%(ext)s."
 msgstr "Zawartość pliku nie odpowiada rozszerzeniu .%(ext)s."
+
+#: apps/controls/services/documents.py
+#, python-format
+msgid "Documento generato con IA (%(model)s): bozza da verificare e approvare prima dell'uso."
+msgstr "Dokument wygenerowany przez AI (%(model)s): wersja robocza do sprawdzenia i zatwierdzenia przed użyciem."

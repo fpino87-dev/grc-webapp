@@ -141,6 +141,7 @@ export function CpvInput({
           {aiError && <p className="text-xs text-red-600">{aiError}</p>}
           {!aiLoading && suggestions.length > 0 && (
             <div className="space-y-1">
+              <p className="text-[11px] text-gray-500">🤖 {t("ai.generated_label")}</p>
               {suggestions.map(s => {
                 const alreadyAdded = value.some(c => c.code === s.code);
                 return (
