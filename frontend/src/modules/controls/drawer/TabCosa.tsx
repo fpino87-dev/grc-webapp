@@ -8,14 +8,19 @@ export function TabCosa({ info }: { info: ControlDetailInfo }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [guidanceOpen, setGuidanceOpen] = useState(false);
-  const [summaryText, setSummaryText] = useState(info.practical_summary || "");
+  const lang = (i18n.language || "it").slice(0, 2);
+  // Il riassunto appena generato vale solo per la lingua in cui è stato chiesto:
+  // cambiando lingua si torna a quello del dettaglio (ricaricato per lingua).
+  const [generated, setGenerated] = useState<{ lang: string; text: string } | null>(null);
+  const summaryText = (generated?.lang === lang ? generated.text : info.practical_summary) || "";
   const [docError, setDocError] = useState("");
 
   const explainMut = useMutation({
-    mutationFn: () => controlsApi.explainControl(info.control_uuid, i18n.language || "it"),
+    mutationFn: () => controlsApi.explainControl(info.control_uuid, lang),
     onSuccess: (data) => {
-      setSummaryText(data.summary);
-      qc.invalidateQueries({ queryKey: ["control-detail", info.control_id] });
+      setGenerated({ lang, text: data.summary });
+      // La chiave è per istanza e lingua: il riassunto vale per ogni istanza del controllo.
+      qc.invalidateQueries({ queryKey: ["control-detail"] });
     },
   });
 

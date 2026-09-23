@@ -320,7 +320,10 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 "control_category": control.control_category,
                 "evidence_requirement": control.evidence_requirement,
                 "description": control.tr("description", lang),
-                "practical_summary": control.tr("practical_summary", lang),
+                # Niente fallback IT/EN: il riassunto è generato dall'IA per
+                # lingua, e mostrarne uno in un'altra lingua lo fa sembrare
+                # sbagliato. Se manca, la UI offre di generarlo.
+                "practical_summary": (control.translations.get(lang) or {}).get("practical_summary", ""),
                 "implementation_guidance": control.tr("guidance", lang),
                 "evidence_examples": control.tr("evidence_examples", lang, default=[]),
                 "mappings": mappings,

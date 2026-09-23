@@ -108,6 +108,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ### Fixed
 
+- **Controlli — spiegazione IA «Cosa serve» nella lingua sbagliata**: la spiegazione veniva generata nella lingua scelta, ma chi usava l'app in francese, polacco, turco o inglese vedeva spesso quella italiana già esistente, marcata come generata dall'IA e con il pulsante «Rigenera». Ora ogni lingua mostra solo la propria spiegazione, e se manca si può generarla. Cambiando lingua con il pannello aperto la spiegazione si aggiorna, e riaprendo il controllo non ricompare quella vecchia. Rigenerando in una lingua che aveva già una spiegazione, l'IA riceve di nuovo la descrizione e le linee guida del controllo (prima le riceveva vuote). Lingue non previste vengono ignorate.
+
 - **Assistente govrico tradotto in tutte le lingue**: il pannello dell'assistente nella barra in alto era solo in italiano; ora testi, categorie e stato dei gap seguono la lingua dell'interfaccia (IT/EN/FR/PL/TR), e anche la spiegazione IA di un gap viene scritta nella lingua dell'utente. Se la spiegazione non è disponibile compare un messaggio, invece di non succedere nulla.
 
 - **Documenti — i promemoria di scadenza non si ripetono più ogni giorno**: il controllo notturno apriva una nuova attività ogni mattina per ogni documento con la revisione o la validità scaduta, riaprendola anche dopo che era stata annullata: un documento scaduto generava un'attività al giorno, senza fine. Ora vale un promemoria per documento e per tipo di scadenza; l'escalation da «in scadenza» a «scaduto» resta, e un promemoria annullato non viene riaperto. Il titolo dell'attività non contiene più il numero di giorni residui (che lo faceva invecchiare): il conteggio resta nella descrizione.

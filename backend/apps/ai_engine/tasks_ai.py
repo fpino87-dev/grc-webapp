@@ -101,9 +101,10 @@ def explain_control(control, lang: str, user) -> dict:
     control.translations[lang]['practical_summary'] per evitare chiamate ripetute.
     """
     title = control.get_title(lang)
-    tr = control.translations.get(lang, control.translations.get("it", control.translations.get("en", {})))
-    description = tr.get("description", "")[:600]
-    guidance = tr.get("guidance", "")[:600]
+    # Fallback per campo: una lingua con il solo `practical_summary` già
+    # generato non deve lasciare il prompt senza descrizione e linee guida.
+    description = control.tr("description", lang)[:600]
+    guidance = control.tr("guidance", lang)[:600]
     req = control.evidence_requirement or {}
 
     docs = [d.get("description") or d.get("type", "") for d in req.get("documents", []) if d.get("mandatory")]

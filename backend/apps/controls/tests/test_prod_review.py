@@ -82,3 +82,64 @@ def test_generated_procedure_docx_is_marked_as_ai(monkeypatch):
     assert doc.paragraphs[1].text == notice
     assert doc.core_properties.comments == notice
     assert doc.core_properties.keywords == "AI-generated"
+
+
+def _summary_control():
+    from apps.controls.models import Control, Framework
+
+    fw = Framework.objects.create(code="ISO27001", name="ISO", version="1",
+                                  published_at=datetime.date(2024, 1, 1))
+    return Control.objects.create(framework=fw, external_id="A.5.1", translations={
+        "it": {"title": "Politiche", "description": "Definire le politiche",
+               "practical_summary": "Riassunto in italiano"},
+        "fr": {"practical_summary": "Résumé en français"},
+    })
+
+
+@pytest.mark.django_db
+def test_detail_shows_practical_summary_only_in_requested_language(admin_client):
+    """Il riassunto IA è per lingua: niente ripiego sull'italiano, così la UI
+    propone di generarlo invece di mostrarlo nella lingua sbagliata."""
+    from apps.controls.models import ControlInstance
+    from apps.plants.models import Plant
+
+    plant = Plant.objects.create(code="M3P", name="M3 Plant", country="IT", nis2_scope="importante", status="attivo")
+    from apps.plants.models import PlantFramework
+
+    ctrl = _summary_control()
+    PlantFramework.objects.create(plant=plant, framework=ctrl.framework,
+                                  active_from=datetime.date(2024, 1, 1))
+    inst = ControlInstance.objects.create(plant=plant, control=ctrl)
+    url = f"/api/v1/controls/instances/{inst.id}/detail-info/"
+
+    def summary(lang):
+        r = admin_client.get(url, {"lang": lang})
+        assert r.status_code == 200, r.data
+        return r.data["practical_summary"]
+
+    assert summary("it") == "Riassunto in italiano"
+    assert summary("fr") == "Résumé en français"
+    assert summary("pl") == ""
+
+
+@pytest.mark.django_db
+def test_explain_prompt_keeps_description_when_language_has_only_summary(admin_client, monkeypatch):
+    from apps.ai_engine import tasks_ai
+
+    ctrl = _summary_control()
+    prompts = []
+
+    def fake_route(**kw):
+        prompts.append(kw["prompt"])
+        return {"text": '{"summary": "Nouveau résumé"}'}
+
+    monkeypatch.setattr(tasks_ai, "route", fake_route)
+    r = admin_client.post(f"/api/v1/controls/controls/{ctrl.id}/explain/", {"lang": "fr"}, format="json")
+    assert r.status_code == 200
+    assert "Definire le politiche" in prompts[0] and "in français" in prompts[0]
+    ctrl.refresh_from_db()
+    assert ctrl.translations["fr"]["practical_summary"] == "Nouveau résumé"
+
+    admin_client.post(f"/api/v1/controls/controls/{ctrl.id}/explain/", {"lang": "zz-evil"}, format="json")
+    ctrl.refresh_from_db()
+    assert set(ctrl.translations) == {"it", "fr"}

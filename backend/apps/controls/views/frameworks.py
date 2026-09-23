@@ -153,8 +153,12 @@ class ControlViewSet(viewsets.ModelViewSet):
         from apps.ai_engine.tasks_ai import explain_control
         from django.utils.translation import gettext as _
 
+        from django.conf import settings
+
         control = self.get_object()
-        lang = request.data.get("lang", "it")
+        lang = str(request.data.get("lang") or "it")[:2]
+        if lang not in dict(settings.LANGUAGES):
+            lang = "it"
         try:
             result = explain_control(control, lang, request.user)
             return Response(result)
