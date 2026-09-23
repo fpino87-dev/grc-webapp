@@ -2728,3 +2728,8 @@ msgstr ""
 #, python-format
 msgid "Il contenuto del file non corrisponde all'estensione .%(ext)s."
 msgstr "Le contenu du fichier ne correspond pas à l'extension .%(ext)s."
+
+#: apps/management_review/views.py
+msgid "Generare lo snapshot dei dati prima di scaricare il verbale."
+msgstr ""
+"Générez l'instantané des données avant de télécharger le procès-verbal."

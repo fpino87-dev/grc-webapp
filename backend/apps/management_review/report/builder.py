@@ -636,12 +636,16 @@ def build_targeted_report(review) -> dict:
     )
 
 
+class ReportNotReady(ValueError):
+    """Il verbale del riesame completo richiede lo snapshot dei dati."""
+
+
 def build_report(review) -> dict:
     if review.is_targeted:
         return build_targeted_report(review)
     snap = review.snapshot_data
     if not snap:
-        raise ValueError("Snapshot non ancora generato")
+        raise ReportNotReady("Snapshot non ancora generato")
 
     participants = list(review.participants.all())
     chair = next((p for p in participants if p.is_chair), None)

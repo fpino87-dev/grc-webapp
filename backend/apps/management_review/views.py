@@ -251,7 +251,9 @@ class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="report")
     def report(self, request, pk=None):
-        from .report import render_html, render_pdf
+        from django.utils.translation import gettext as _
+
+        from .report import ReportNotReady, render_html, render_pdf
 
         review = self.get_object()
         fmt = request.query_params.get("fmt", "html")
@@ -262,8 +264,11 @@ class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 content, content_type = render_pdf(review), "application/pdf"
             else:
                 content, content_type = render_html(review), "text/html; charset=utf-8"
-        except ValueError as e:
-            return Response({"error": str(e)}, status=400)
+        except ReportNotReady:
+            # Messaggio fisso: il testo di un ValueError imprevisto (renderer,
+            # librerie) non arriva al client.
+            return Response({"error": _("Generare lo snapshot dei dati prima di scaricare il verbale.")},
+                            status=400)
         filename = f"riesame_{'mirato_' if review.is_targeted else ''}{review.id}"
         if review.review_date:
             filename += f"_{review.review_date.strftime('%Y%m%d')}"

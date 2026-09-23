@@ -2684,3 +2684,7 @@ msgstr "Niedozwolony typ pliku. Zawartość pliku nie odpowiada rozszerzeniu."
 #, python-format
 msgid "Il contenuto del file non corrisponde all'estensione .%(ext)s."
 msgstr "Zawartość pliku nie odpowiada rozszerzeniu .%(ext)s."
+
+#: apps/management_review/views.py
+msgid "Generare lo snapshot dei dati prima di scaricare il verbale."
+msgstr "Wygeneruj migawkę danych przed pobraniem protokołu."

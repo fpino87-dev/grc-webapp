@@ -2662,3 +2662,7 @@ msgstr "File type not allowed. The file content does not match the extension."
 #, python-format
 msgid "Il contenuto del file non corrisponde all'estensione .%(ext)s."
 msgstr "The file content does not match the .%(ext)s extension."
+
+#: apps/management_review/views.py
+msgid "Generare lo snapshot dei dati prima di scaricare il verbale."
+msgstr "Generate the data snapshot before downloading the minutes."
