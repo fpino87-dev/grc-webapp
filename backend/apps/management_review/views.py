@@ -264,7 +264,7 @@ class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 content, content_type = render_html(review), "text/html; charset=utf-8"
         except ValueError as e:
             return Response({"error": str(e)}, status=400)
-        filename = f"riesame_{review.id}"
+        filename = f"riesame_{'mirato_' if review.is_targeted else ''}{review.id}"
         if review.review_date:
             filename += f"_{review.review_date.strftime('%Y%m%d')}"
         filename += f".{fmt}"

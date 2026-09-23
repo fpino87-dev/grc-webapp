@@ -448,3 +448,49 @@ def test_audit_pack_separates_intermediate_sessions(co, plant, tmp_path):
     assert (root / "NO_APPROVED_REVIEW.txt").exists()
     csv_text = (root / "sedute_intermedie" / "documenti.csv").read_text(encoding="utf-8")
     assert "Politica" in csv_text and "approvato" in csv_text and ",si," in csv_text
+
+
+# ── Fase 3: verbale ──────────────────────────────────────────────────────────
+
+def test_targeted_minutes_html_and_pdf(co, plant):
+    from apps.documents.services import add_version
+    from apps.management_review.models import ManagementReview
+    from apps.management_review.report import render_html, render_pdf
+
+    rid, docs = _closed_targeted(co, plant, {"Politica <b>accessi</b>": "approvato", "Procedura": "rinviato",
+                                             "Cambiata": "approvato"})
+    _api(co).post(ITEMS, {"review": rid, "title": "Budget formazione"}, format="json")
+    add_version(docs["Cambiata"], "c.pdf", "sha-c", "p/c.pdf", co, "", 10, version_label="Rev. 02")
+    _api(co).post(f"{URL}{rid}/approve/", {}, format="json")
+
+    review = ManagementReview.objects.get(pk=rid)
+    html = render_html(review)
+    assert "Riesame mirato" in html
+    assert "Non sostituisce il riesame di direzione periodico" in html
+    assert "Documenti esaminati" in html and "Rev. 01" in html
+    assert "Approvato" in html and "Rinviato" in html
+    assert "Non applicato" in html and "Punti di attenzione" in html
+    assert "Budget formazione" in html
+    assert "<b>accessi</b>" not in html and "&lt;b&gt;accessi&lt;/b&gt;" in html
+    assert "Dati congelati" not in html and "Prossimo riesame" not in html
+    assert render_pdf(review)[:4] == b"%PDF"
+
+
+def test_targeted_minutes_download_name(co, plant):
+    rid = _targeted(co, plant)["id"]
+    r = _api(co).get(f"{URL}{rid}/report/", {"fmt": "html"})
+    assert r.status_code == 200
+    assert 'filename="riesame_mirato_' in r["Content-Disposition"]
+
+
+def test_targeted_minutes_follow_language(co, plant):
+    from django.utils import translation
+
+    from apps.management_review.models import ManagementReview
+    from apps.management_review.report import render_html
+
+    rid, _docs = _closed_targeted(co, plant, {"Policy": "respinto"})
+    with translation.override("en"):
+        html = render_html(ManagementReview.objects.get(pk=rid))
+    assert "Targeted review" in html and "Documents examined" in html and "Rejected" in html
+    assert "does not replace the periodic management review" in html

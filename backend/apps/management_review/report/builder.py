@@ -513,19 +513,139 @@ def _scope_subtitle(review) -> str:
     return f"{line} · +{rest}" if rest > 0 else line
 
 
+OUTCOME = {"approvato": _("Approvato"), "rinviato": _("Rinviato"), "respinto": _("Respinto")}
+OUTCOME_TONE = {"approvato": "green", "rinviato": "orange", "respinto": "red"}
+
+
+def _version_label(version) -> str:
+    if version is None:
+        return "—"
+    return version.version_label or f"v{version.version_number}"
+
+
+def _outcome_state(item, review_approved: bool) -> dict:
+    """Stato dell'applicazione dell'esito al documento, come cella di tabella."""
+    if item.document_outcome_applied_at:
+        return {"text": _("Applicato il %(date)s") % {"date": fmt_date(item.document_outcome_applied_at)},
+                "tone": "green"}
+    if item.document_outcome_error:
+        return {"text": _("Non applicato: %(reason)s") % {"reason": item.document_outcome_error},
+                "tone": "red", "bold": True}
+    if not item.document_outcome:
+        return {"text": _("Esito non registrato"), "tone": "muted"}
+    if not review_approved:
+        return {"text": _("Si applica all'approvazione del verbale"), "tone": "muted"}
+    return {"text": "—", "tone": "muted"}
+
+
+def _common_meta(review, chair) -> list:
+    return [
+        (_("Titolo"), review.title),
+        (_("Perimetro"), review.plant.name if review.plant_id else _("Intera organizzazione")),
+        (_("Organo"), review.governing_body.name if review.governing_body_id else "—"),
+        (_("Data riunione"), fmt_date(review.review_date)),
+        (_("Presieduto da"), chair.full_name if chair else "—"),
+    ]
+
+
+def _report_frame(review, *, title, subtitle, meta, summary, alerts, sections) -> dict:
+    """Logo, approvazione e piè di pagina comuni ai due tipi di verbale."""
+    from apps.plants.services import plant_logo
+
+    approval = None
+    if review.approval_status == "approvato" and review.approved_at:
+        approval = {"lines": _approval_lines(review)}
+    logo = plant_logo(review.report_logo_plant) if review.report_logo_plant_id else None
+    return {
+        "logo": {"data": logo[0], "mime": logo[1]} if logo else None,
+        "title": title,
+        "subtitle": subtitle,
+        "meta": meta,
+        "summary": summary,
+        "alerts": alerts,
+        "sections": sections,
+        "approval": approval,
+        "footer": _("Documento generato dal sistema GRC il %(when)s — RISERVATO — Solo per uso interno") % {
+            "when": timezone.localtime().strftime("%d/%m/%Y %H:%M")},
+    }
+
+
+def build_targeted_report(review) -> dict:
+    """Verbale del riesame mirato: la seduta dell'organo sui punti in ordine
+    del giorno, con i documenti esaminati e il loro esito. Nessun dato
+    congelato né punti §9.3.2: il sottotitolo dichiara che non è il riesame
+    periodico."""
+    participants = list(review.participants.all())
+    chair = next((p for p in participants if p.is_chair), None)
+    approved = review.approval_status == "approvato"
+    meta = _common_meta(review, chair) + [
+        (_("Stato approvazione"), {"approvato": _("Approvato"), "bozza": _("Bozza")}.get(
+            review.approval_status, review.approval_status)),
+    ]
+
+    agenda = list(review.agenda_items.all())
+    actions = list(review.actions.all())
+    doc_items = [i for i in agenda if i.document_id]
+
+    sections = []
+    if participants:
+        sections.append({"heading": _("Partecipanti"), "blocks": [_table(
+            None, [_("Nome"), _("Qualifica"), _("Ruolo"), _("Presenza")],
+            [_participant_row(p) for p in participants])]})
+    if doc_items:
+        sections.append({"heading": _("Documenti esaminati"), "blocks": [_table(
+            None, [_("Documento"), _("Revisione esaminata"), _("Esito"), _("Applicazione")],
+            [[i.title, _version_label(i.document_version),
+              {"text": OUTCOME.get(i.document_outcome, "—"), "tone": OUTCOME_TONE.get(i.document_outcome),
+               "bold": True},
+              _outcome_state(i, approved)] for i in doc_items])]})
+
+    for item in agenda:
+        blocks = []
+        if item.document_id:
+            heading = _("Documento: %(title)s") % {"title": item.title}
+            blocks.append({"type": "paragraph", "label": _("Esito"), "text": _(
+                "%(outcome)s — revisione esaminata %(version)s"
+            ) % {"outcome": OUTCOME.get(item.document_outcome, _("non registrato")),
+                 "version": _version_label(item.document_version)}})
+        else:
+            heading = item.title
+        blocks.append({"type": "paragraph", "label": _("Discussione"),
+                       "text": item.discussion.strip() or _("Nessuna annotazione.")})
+        decisions = [a for a in actions if a.agenda_item_id == item.pk]
+        if decisions:
+            blocks.append(_table(_("Decisioni"), DECISION_HEADERS, _decision_rows(decisions)))
+        sections.append({"heading": heading, "blocks": blocks})
+    loose = [a for a in actions if a.agenda_item_id is None]
+    if loose:
+        sections.append({"heading": _("Altre decisioni"),
+                         "blocks": [_table(None, DECISION_HEADERS, _decision_rows(loose))]})
+
+    alerts = [
+        _("%(title)s: esito «%(outcome)s» non applicato — %(reason)s") % {
+            "title": i.title, "outcome": OUTCOME.get(i.document_outcome, i.document_outcome),
+            "reason": i.document_outcome_error}
+        for i in doc_items if i.document_outcome_error
+    ]
+    return _report_frame(
+        review,
+        title=_("Riesame mirato"),
+        subtitle=_("Riunione dell'organo su punti specifici. Non sostituisce il riesame di direzione "
+                   "periodico (ISO/IEC 27001 §9.3)."),
+        meta=meta, summary=None, alerts=alerts, sections=sections,
+    )
+
+
 def build_report(review) -> dict:
+    if review.is_targeted:
+        return build_targeted_report(review)
     snap = review.snapshot_data
     if not snap:
         raise ValueError("Snapshot non ancora generato")
 
     participants = list(review.participants.all())
     chair = next((p for p in participants if p.is_chair), None)
-    meta = [
-        (_("Titolo"), review.title),
-        (_("Perimetro"), review.plant.name if review.plant_id else _("Intera organizzazione")),
-        (_("Organo"), review.governing_body.name if review.governing_body_id else "—"),
-        (_("Data riunione"), fmt_date(review.review_date)),
-        (_("Presieduto da"), chair.full_name if chair else "—"),
+    meta = _common_meta(review, chair) + [
         (_("Dati congelati il"), fmt_date(snap.get("generated_at"))),
         (_("Stato approvazione"), {"approvato": _("Approvato"), "bozza": _("Bozza")}.get(
             review.approval_status, review.approval_status)),
@@ -609,23 +729,7 @@ def build_report(review) -> dict:
         sections.append({"heading": _("Riepilogo delle decisioni"),
                          "blocks": [_table(None, DECISION_HEADERS, _decision_rows(actions))]})
 
-    approval = None
-    if review.approval_status == "approvato" and review.approved_at:
-        approval = {"lines": _approval_lines(review)}
-
-    from apps.plants.services import plant_logo
-
-    logo = plant_logo(review.report_logo_plant) if review.report_logo_plant_id else None
-
-    return {
-        "logo": {"data": logo[0], "mime": logo[1]} if logo else None,
-        "title": _("Riesame di Direzione SGSI"),
-        "subtitle": _scope_subtitle(review),
-        "meta": meta,
-        "summary": summary,
-        "alerts": _alerts(snap),
-        "sections": sections,
-        "approval": approval,
-        "footer": _("Documento generato dal sistema GRC il %(when)s — RISERVATO — Solo per uso interno") % {
-            "when": timezone.localtime().strftime("%d/%m/%Y %H:%M")},
-    }
+    return _report_frame(
+        review, title=_("Riesame di Direzione SGSI"), subtitle=_scope_subtitle(review),
+        meta=meta, summary=summary, alerts=_alerts(snap), sections=sections,
+    )
