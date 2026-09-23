@@ -44,7 +44,8 @@ La piattaforma GRC consolida in un'unica soluzione la gestione di tutti i framew
 - 22 moduli funzionali dall'onboarding all'audit preparation (M00-M21) più il modulo trasversale OSINT Monitor, multilingua IT/EN/FR/PL/TR
 - Struttura multi-plant con Business Unit, sub-plant e profilo NIS2 per plant
 - Risk assessment IT/OT con heat map 5x5 e traduzione automatica in ALE (€)
-- Workflow documentale ISO 27001 cl.7.5 con approvazione a 3 livelli e versioning SHA-256
+- Workflow documentale ISO 27001 cl.7.5: policy di approvazione per tipo di documento (anche per delibera dell'organo di governo), separazione dei compiti, versione in vigore tracciata, versioning SHA-256
+- Riesame di direzione ISO 27001 cl.9.3 con dati congelati, ordine del giorno, approvazione dell'organo e verbale PDF/HTML multilingua
 - Gestione incidenti NIS2 con timer countdown 24h/72h/30gg e template ACN precompilato
 - PDCA controller con trigger automatici e storico maturità per auditor
 - Formazione e awareness basate sulle evidenze: piano, erogazioni con file di prova collegate ai controlli, copertura del personale per conteggi (nessuna integrazione e-learning)
@@ -57,27 +58,27 @@ La piattaforma GRC consolida in un'unica soluzione la gestione di tutti i framew
 
 | Codice | Modulo | Funzionalità principali | Stato |
 |--------|--------|-------------------------|-------|
-| M00 | Governance & Organigramma | Struttura organizzativa, ruoli CISO/DPO/Plant Manager, organigramma multi-plant | Implementato |
+| M00 | Governance & Organigramma | Ruoli normativi (CISO/DPO/Plant Manager…) con scadenze, organi di governo con componenti, obiettivi di sicurezza ISO 27001 §6.2, policy di workflow documentale | Implementato |
 | M01 | Plant Registry | Anagrafica plant, Business Unit, profilo NIS2, sub-plant | Implementato |
-| M02 | Ruoli & RBAC | Assegnazione ruoli dinamica per plant, scadenza accessi, token auditor esterno | Implementato |
+| M02 | Ruoli & RBAC | Accessi per ruolo e perimetro (organizzazione, BU, uno o più siti), pannello unico accessi e responsabilità, MFA, token auditor esterno, competenze | Implementato |
 | M03 | Libreria Controlli | Catalogo controlli da JSON normativi, gap analysis, stato per plant | Implementato |
 | M04 | Asset Inventory IT/OT | Inventario asset con criticità 1-5, badge tooltip, change management | Implementato |
 | M05 | BIA & ROI | Business Impact Analysis, calcolo RTO/RPO, traduzione ALE | Implementato |
 | M06 | Risk Assessment IT/OT | Heat map 5x5, score IEC 62443, scenari OT, trattamento rischi | Implementato |
-| M07 | Documenti & Evidenze | Versioning SHA-256, approvazione 3 livelli, scadenza evidenze, MIME check | Implementato |
+| M07 | Documenti & Evidenze | Versioning SHA-256 con revisione da frontespizio, workflow di approvazione per tipo (anche per delibera), separazione dei compiti, scadenza evidenze, MIME check | Implementato |
 | M08 | Scadenzario & Task | Assegnazione per ruolo, notifiche scadenza, compliance_schedule cross-modulo | Implementato |
 | M09 | Gestione Incidenti | Timer NIS2 24h/72h/30gg, template ACN, escalation automatica, countdown real-time | Implementato |
-| M10 | Audit Trail | Hash chain SHA-256 append-only, verify_audit_trail_integrity, partitioning per anno | Implementato |
+| M10 | Audit Trail | Hash chain SHA-256 append-only e immutabile (trigger PostgreSQL), email pseudonimizzata, verify_audit_trail_integrity | Implementato |
 | M11 | PDCA Controller | Ciclo Plan-Do-Check-Act, trigger automatici, storico maturità, notifica PDCA bloccati | Implementato |
-| M12 | Lesson Learning & KB | Knowledge base full-text search, categorizzazione, collegamento a PDCA | Implementato |
-| M13 | Revisione di Direzione | Verbali, presenze, action items, collegamento a KPI M18 | Implementato |
+| M12 | Lesson Learning & KB | Knowledge base con ricerca, validazione, propagazione ai siti, collegamento a PDCA | Implementato |
+| M13 | Revisione di Direzione | Snapshot dati ISO 9.3, ordine del giorno, convocati e presenze, documenti da approvare, bozze IA con accettazione umana, approvazione dell'organo, verbale PDF/HTML | Implementato |
 | M14 | Supplier Management | Anagrafica fornitori, valutazione VDA ISA 5.x, supply chain NIS2 | Implementato |
 | M15 | Formazione & Awareness | Piano formativo, erogazioni con prova (evidenze sui controlli), gruppi destinatari, copertura, phishing aggregato | Implementato |
 | M16 | Business Continuity | Piani BCP, test DR, scadenza piani, collegamento a BIA M05 | Implementato |
 | M17 | Audit Preparation | Preparazione audit TISAX/ISO/NIS2, finding, evidence pack, annulla con soft delete | Implementato |
-| M18 | Reporting & Dashboard | KPI snapshot settimanale, export report, dashboard cross-modulo | Implementato |
-| M19 | Notifiche & Integrazioni | Notifiche in-app, email digest, webhook SIEM, profili notifica per ruolo | Implementato |
-| M20 | AI Engine *(opzionale)* | Classificazione severità, analisi RCA, bozze documenti, anomaly detection — sanitization GDPR | Implementato |
+| M18 | Reporting & Dashboard | KPI snapshot settimanale con connettori interni, matrice accessi & responsabilità (ISO A.5.18), export report, dashboard cross-modulo | Implementato |
+| M19 | Notifiche | Notifiche email per evento con regole e profili per ruolo, iscrizioni personali, configurazione SMTP cifrata | Implementato |
+| M20 | AI Engine *(opzionale)* | Classificazione incidenti, bozze RCA, azioni per i gap, spiegazioni dei controlli, bozze del riesame, assistente — sanitizzazione GDPR e human-in-the-loop | Implementato |
 | M21 | Centro Operativo | Posture score, advisor automatici, problemi/configurazioni mancanti e azioni consigliate in vista prioritizzata, widget dashboard | Implementato |
 | — | OSINT Monitor *(trasversale)* | Monitoraggio superficie di attacco e reputazione domini, enricher CTI, scoring esposizione, alert e semaforo salute chiavi | Implementato |
 
@@ -136,6 +137,9 @@ make prod-up
 # 3. Migrazioni e dati iniziali
 make prod-migrate
 make prod-seed
+# Solo alla prima installazione: policy di workflow documentale predefinite
+# (aggiorna quelle di organizzazione già presenti — usare --dry-run per vedere cosa cambia)
+docker compose -f docker-compose.prod.yml exec backend python manage.py load_document_workflow_policies
 
 # 4. Crea superuser iniziale
 docker compose -f docker-compose.prod.yml exec backend python manage.py createsuperuser
@@ -168,8 +172,8 @@ Browser → Nginx Proxy Manager → Frontend React/Vite (porta 3001)
                                        → MinIO / S3 (documenti ed evidenze)
 
 Integrazioni esterne:
-SMTP aziendale · SSO/SAML · SIEM webhook · ACN email
-AI Engine M20: Ollama/vLLM (locale) + Azure OpenAI/Anthropic (cloud, solo dati anonimi)
+SMTP aziendale · Sentry (opzionale) · enricher CTI dell'OSINT Monitor
+AI Engine M20: Ollama (locale) + Anthropic/OpenAI/Google/Mistral/Groq (cloud, testo sanitizzato)
 ```
 
 ---
@@ -233,18 +237,19 @@ grc-webapp/
 ## Framework normativi supportati
 
 - ISO/IEC 27001:2022 — 93 controlli Annex A
-- TISAX L2 VDA ISA 6.0 — 40 controlli
-- TISAX L3 VDA ISA 6.0 — 68 controlli (superset L2)
-- NIS2 (UE 2022/2555) — misure Art.21
+- NIS2 (UE 2022/2555) — 25 misure Art. 21
+- ACN NIS2 (D.Lgs. 138/2024, attuazione italiana secondo NIST CSF 2.0) — 43 misure
+- TISAX VDA ISA 6.0 — L2 High Protection (45 controlli), L3 Very High (12 estensioni "-VH" sopra L2), Prototype Protection (22)
 - IEC 62443 (semplificato) — score OT in M06
 
 I framework sono dati, non codice: aggiungere un nuovo standard (DORA, NIST CSF 2.0, ecc.) non richiede deploy. Vedere `backend/frameworks/` e la sezione [Aggiungere un framework normativo](./manual/MANUAL_TECNICO_it.md#aggiungere-un-framework-normativo) nel manuale tecnico (IT; altre lingue in `manual/`).
 
 | Framework | Versione | Controlli | Stato |
 |-----------|----------|-----------|-------|
-| VDA ISA (TISAX) | 6.0 | 83 | Incluso |
-| NIS2 Art. 21 | 2022/2555 | ~20 misure | Incluso |
 | ISO 27001 Annex A | 2022 | 93 | Incluso |
+| NIS2 Art. 21 | 2022/2555 | 25 | Incluso |
+| ACN NIS2 | D.Lgs. 138/2024 | 43 | Incluso |
+| VDA ISA (TISAX) L2 / L3 / Prototype | 6.0 | 45 / +12 VH / 22 | Incluso |
 | IEC 62443 (semplificato) | 3-3 | Score OT in M06 | Incluso |
 | DORA / NIST CSF 2.0 | — | — | Aggiungibile via JSON |
 
@@ -267,14 +272,17 @@ Audit Prep → Finding → PDCA → Lesson Learned
 ## Sicurezza
 
 - JWT 30min + refresh 7gg con rotazione e blacklist (SimpleJWT)
-- Rate limiting: login 5/min, utenti autenticati 500/h, anonimi 20/h
+- MFA (TOTP) con dispositivi fidati
+- Rate limiting: login 5/min, utenti autenticati 2000/h, anonimi 20/h, chiamate IA ed export limitate a parte
 - MIME check upload file con python-magic (whitelist estensioni + tipo reale)
 - Fernet AES-256 per credenziali SMTP in database (FERNET_KEY)
 - Password minimo 12 caratteri + validatori Django (CommonPassword, NumericPassword, UserAttributeSimilarity)
 - Audit trail append-only con hash chain SHA-256 — trigger PostgreSQL impedisce UPDATE/DELETE
 - Docker produzione con utente non-root + Gunicorn
 - Header HTTP sicurezza: HSTS, CSP, X-Frame-Options, X-Content-Type-Options
-- GDPR: `anonymize_user()` disponibile in `auth_grc/services.py`, retention automatica audit log mensile
+- GDPR: `anonymize_user()` in `auth_grc/services.py`; audit log immutabile e pseudonimizzato (nessuna cancellazione per retention); log interazioni IA conservati 365 giorni; export dei dati (`export_portable_data`)
+- Output HTML degli export con escape dei testi utente; errori imprevisti senza dettagli interni verso il client
+- Supply chain: `pip-audit` e `npm audit` ogni notte, GitHub CodeQL, Dependabot, secret scanning con push protection, SBOM CycloneDX a ogni release
 
 ---
 
@@ -307,14 +315,14 @@ Per l'elenco completo di tutte le variabili (storage, email, SSO, AI Engine) ved
 | `make test` | Esegui test suite (pytest backend + npm test frontend) |
 | `make lint` | Linting backend con ruff (check + format) |
 | `make load-fw` | Importa framework normativi JSON (ISO27001, NIS2, TISAX) |
-| `make load-competencies` | Importa requisiti competenze M15 |
+| `make load-competencies` | Importa requisiti di competenza (M02) |
 | `make seed` | Carica dati demo con seed_demo |
 | `make shell` | Shell Django interattiva (shell_plus) |
 | `make prod-build` | Build immagini Docker produzione |
 | `make prod-up` | Avvia stack produzione in background |
 | `make prod-down` | Ferma e rimuove stack produzione |
 | `make prod-migrate` | Esegui migrazioni Django in produzione |
-| `make prod-seed` | Carica dati iniziali in produzione (frameworks, profili notifica, competenze, documenti richiesti) |
+| `make prod-seed` | Carica dati iniziali in produzione (framework, profili notifica, competenze, requisiti di ruolo, documenti richiesti, controlli provati dalla formazione) — idempotente, non sovrascrive le personalizzazioni |
 | `make prod-logs` | Log in tempo reale di tutti i servizi produzione (tail 50) |
 | `make prod-shell` | Shell Django interattiva in produzione |
 | `make prod-check` | Verifica configurazione deploy produzione (`manage.py check --deploy`) |
@@ -339,12 +347,12 @@ Per l'elenco completo di tutte le variabili (storage, email, SSO, AI Engine) ved
 
 | Sistema | Modulo | Tipo | Note |
 |---------|--------|------|------|
-| Azure OpenAI / Anthropic | M20 | API REST — opt-in | Solo prompt sanitizzati, nessun PII |
-| Ollama / vLLM | M20 | HTTP locale | Modello on-prem per classificazioni |
-| SMTP aziendale | M19 | SMTP | Notifiche e digest email, credenziali cifrate Fernet |
-| SSO / LDAP | M02 | OAuth2 / SAML | Autenticazione aziendale |
-| SIEM / SOC | M19 | Webhook uscente | Feed eventi sicurezza real-time |
-| ACN (NIS2) | M09 | Email uscente | Template notifica precompilato |
+| Anthropic / OpenAI / Google / Mistral / Groq | M20 | API REST — opt-in | Prompt sanitizzati (Sanitizer), routing per funzione |
+| Ollama | M20 | HTTP locale | Modello on-prem, nessun trasferimento extra-UE |
+| SMTP aziendale | M19 | SMTP | Notifiche email, credenziali cifrate Fernet |
+| VirusTotal, HIBP, AbuseIPDB, OTX, Google Safe Browsing, abuse.ch, crt.sh, RDAP | OSINT | API REST — opt-in per chiave | Enricher CTI con difesa SSRF |
+| Sentry | trasversale | SDK — opzionale | Error monitoring GDPR-safe, attivo se `SENTRY_DSN` impostato |
+| ACN (NIS2) | M09 | Documento generato | Notifica precompilata da inviare tramite il portale ACN |
 
 ---
 
@@ -368,24 +376,23 @@ Ogni nuova chiave i18n deve essere tradotta contestualmente in tutte e 5 le ling
 
 Opzionale, disabilitato di default, opt-in per funzione:
 
-| Funzione | Esecuzione | Moduli coinvolti |
+| Funzione | Esecuzione predefinita | Moduli coinvolti |
 |----------|-----------|-----------------|
-| Classificazione severità / criticità | Modello locale | M04, M07, M09 |
-| Analisi testo RCA / gap analysis | Cloud (sanitizzato) | M06, M09, M12 |
-| Generazione bozze documenti / notifiche | Cloud (sanitizzato) | M07, M09 |
-| Anomaly detection scadenze / incidenti | Locale + cloud | M08, M09 |
+| Classificazione degli incidenti | Locale (Ollama) | M09 |
+| Bozza RCA, azioni per i gap | Cloud (sanitizzato) | M09, M03 |
+| Spiegazione dei controlli, procedura .docx per un controllo | Cloud (solo testo normativo) | M03 |
+| Sintesi del riesame e bozze dei punti all'ordine del giorno | Cloud (sanitizzato + nomi pseudonimizzati) | M13 |
+| Suggerimento codici CPV dei fornitori | Cloud (sanitizzato) | M14 |
+| Assistente govrico, spiegazione insight, copilota del Centro Operativo | Cloud (sanitizzato) | M20, M21 |
+| Analisi della superficie d'attacco | Cloud (anonimizzato) | OSINT |
 
-Garanzie di sicurezza: nessun PII o valore ALE raggiunge il cloud LLM, sanitization layer obbligatorio on-prem, human-in-the-loop su ogni output, `AiInteractionLog` in M10 con hash input e delta umano.
+Il routing locale/cloud si configura per funzione. Garanzie: sanitizzazione prima di ogni invio al cloud, human-in-the-loop su ogni output (nessun output applicato in automatico), contenuti generati dichiarati come tali (AI Act art. 50), `AiInteractionLog` con hash dell'input (mai il testo) e conservazione 365 giorni.
 
 ---
 
 ## Backup
 
-Backup rapido del database:
-
-```bash
-docker exec grc-webapp-db-1 pg_dump -U grc grc_prod | gzip > backup_$(date +%Y%m%d).sql.gz
-```
+Il modulo **Backup** (Impostazioni → Backup) crea archivi completi **database + file caricati** (`.tar`), con backup automatico ogni notte alle 02:00 (`python manage.py schedule_backup_task`), conservazione di 30 giorni, download, import e ripristino guidato dall'interfaccia.
 
 Per la strategia completa di backup, crontab host, pulizia automatica, backup file media, procedura di restore verificato e obiettivi RTO/RPO vedere [INFRASTRUCTURE.md](./INFRASTRUCTURE.md#backup-e-disaster-recovery).
 
@@ -401,23 +408,18 @@ Per la strategia completa di backup, crontab host, pulizia automatica, backup fi
 | [manual/MANUAL_TECNICO_it.md](./manual/MANUAL_TECNICO_it.md) | Manuale tecnico — API, modelli, framework, AI Engine, test (IT; altre lingue in `manual/`) |
 | [manual/HowtoDeploy.md](./manual/HowtoDeploy.md) | **Deploy (English)** — Ubuntu server, Docker, firewall, reverse proxy, TLS, environment variables |
 
-### Stato implementazione ultime feature
+### Novità dell'ultima release
 
-- **Soft delete e rimozione accesso**: eliminazione logica (soft delete) con regole di business in `services.py` per istanze controlli, documenti ed evidenze, asset IT/OT, plant, archiviazione framework; rimozione accesso GRC utente (super_admin) con audit dove previsto.
-- **M17 Audit Preparation**: eliminazione sicura con soft delete e azione di annullamento (`annulla`) che archivia il prep solo se tutti i finding sono chiusi, con audit trail dedicato.
-- **Hardening backend**: JWT SimpleJWT (**ACCESS_TOKEN_LIFETIME=30min**, **REFRESH_TOKEN_LIFETIME=7gg** con rotazione e blacklist), rate limiting DRF (**AnonRateThrottle 20/h**, **UserRateThrottle 500/h**), header sicurezza e `CONN_MAX_AGE` per pooling DB.
-- **UX moduli operativi**: help contestuale via componente `ModuleHelp` sulle principali pagine React (asset, BIA, risk, incidenti, controlli, audit prep, management review, scadenzario).
-- **Audit trail & job async**: catena hash serializzata (`select_for_update`) e task Celery critici con `autoretry` e backoff esponenziale.
-- **Performance DB**: indici aggiuntivi su campi di filtro frequenti per incidenti, task, controlli, rischi, documenti ed evidenze.
+Le modifiche di ogni versione, con le note di aggiornamento per chi fa il deploy, sono nel [CHANGELOG](./CHANGELOG.md). La 0.9.0 introduce la formazione basata sulle evidenze (M15), l'approvazione controllata dei documenti con versione in vigore e delibera dell'organo (M07/M13) e un giro di correzioni di sicurezza.
 
 ---
 
 ## Contribuire
 
-- Branch da `develop`: `git checkout -b feature/M{nn}-descrizione-breve`
-- Coverage minimo 80% per ogni nuovo modulo (target globale >= 70%)
-- Pull Request verso `develop` con 2 reviewer obbligatori
-- Merge su `main` solo via PR approvata + CI verde
+- Branch da `main`: `feature/M{nn}-descrizione-breve`, `fix/…`, `security/…`
+- Conventional Commits (`feat`, `fix`, `security`, `docs`, …) e voce nel CHANGELOG per ogni `feat`/`fix`/`security`
+- Coverage globale ≥ 70% (≥ 80% sui nuovi moduli); ogni chiave i18n tradotta in tutte e 5 le lingue
+- Pull Request verso `main` con 1 reviewer e CI verde — dettagli in [CONTRIBUTING.md](./CONTRIBUTING.md)
 - Seguire le regole architetturali e le convenzioni di codice documentate nel [manuale tecnico](./manual/MANUAL_TECNICO_it.md#convenzioni-di-sviluppo) — mai derogare
 
 Convenzioni di codice, struttura modelli e API in [MANUAL_TECNICO_it.md](./manual/MANUAL_TECNICO_it.md#convenzioni-di-sviluppo).
