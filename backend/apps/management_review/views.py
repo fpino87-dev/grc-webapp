@@ -152,6 +152,14 @@ class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             "review": self._respond(review).data,
         })
 
+    @action(detail=True, methods=["post"], url_path="apply-outcomes")
+    def apply_outcomes(self, request, pk=None):
+        """Riesame mirato approvato: ritenta gli esiti non ancora applicati ai
+        documenti (es. dopo aver sistemato una revisione cambiata)."""
+        review = self.get_object()
+        result = self._run(services.apply_document_outcomes, review, request.user)
+        return Response({**result, "review": self._respond(review).data})
+
     @action(detail=True, methods=["post"], url_path="generate-snapshot")
     def generate_snapshot(self, request, pk=None):
         snapshot = self._run(services.generate_snapshot, self.get_object(), request.user)

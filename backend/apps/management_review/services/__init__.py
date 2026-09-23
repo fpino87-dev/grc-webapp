@@ -38,6 +38,7 @@ from .review import (
 )
 from .targeted import (
     add_document_items,
+    apply_document_outcomes,
     pending_documents,
     refresh_item_version,
 )
@@ -68,5 +69,5 @@ __all__ = [
     "discard_summary_draft", "draft_executive_summary", "ensure_iso_agenda", "generate_snapshot",
     "get_kpi_snapshot", "get_operational_kpi_summary", "start_review", "suggest_chair",
     "uncovered_mandatory_items", "update_agenda_item", "update_review", "update_review_action",
-    "add_document_items", "ensure_full_review", "pending_documents", "refresh_item_version",
+    "add_document_items", "apply_document_outcomes", "ensure_full_review", "pending_documents", "refresh_item_version",
 ]

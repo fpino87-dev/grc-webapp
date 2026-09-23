@@ -203,6 +203,9 @@ class ReviewAgendaItem(BaseModel):
     )
     document_outcome = models.CharField(max_length=10, choices=OUTCOME_CHOICES, blank=True)
     document_outcome_applied_at = models.DateTimeField(null=True, blank=True)
+    # Perché l'esito non è stato applicato (es. revisione cambiata dopo la
+    # seduta): resta visibile nella scheda e nel verbale. Vuoto se applicato.
+    document_outcome_error = models.CharField(max_length=300, blank=True)
 
     class Meta:
         ordering = ["order", "created_at"]

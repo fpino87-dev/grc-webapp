@@ -122,9 +122,11 @@ def _add_management_reviews(zf, zip_name: str, plant_id, default_storage) -> Non
 
     from django.db.models import Count, Q
 
+    # Solo i riesami completi §9.3: le sedute mirate non sono il riesame periodico.
     qs = ManagementReview.objects.filter(
         deleted_at__isnull=True,
         status="completato",
+        kind="completo",
     ).select_related("approved_by", "approved_member", "governing_body").prefetch_related(
         "participants"
     ).annotate(
@@ -198,7 +200,9 @@ def _add_management_review_reports(zf, zip_name: str, plant_id) -> None:
     from apps.management_review.report import render_pdf
 
     qs = (
-        ManagementReview.objects.filter(approval_status="approvato", snapshot_generated_at__isnull=False)
+        ManagementReview.objects.filter(
+            approval_status="approvato", snapshot_generated_at__isnull=False, kind="completo",
+        )
         .select_related("plant", "governing_body", "approved_by", "approved_member")
         .prefetch_related("participants", "agenda_items", "actions__owner", "actions__task", "actions__pdca_cycle")
     )

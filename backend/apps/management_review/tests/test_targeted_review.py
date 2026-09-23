@@ -288,3 +288,163 @@ def test_resolution_on_new_version_of_document_in_force(co, plant):
     approve_document(doc, co, mode="delibera", resolution_ref="3", resolution_date=today)
     latest = DocumentApproval.objects.filter(document=doc, action="approve").latest("created_at")
     assert latest.version.version_label == "Rev. 03"
+
+
+# ── Fase 2: approvazione ed esiti ────────────────────────────────────────────
+
+def _closed_targeted(co, plant, outcomes):
+    """Riesame mirato chiuso con un punto per documento e il suo esito."""
+    rid = _targeted(co, plant)["id"]
+    docs = {}
+    for title, outcome in outcomes.items():
+        doc = _doc(plant, co, title)
+        docs[title] = doc
+        r = _api(co).post(f"{URL}{rid}/document-items/", {"document_ids": [str(doc.pk)]}, format="json")
+        item = next(i for i in r.data["review"]["agenda_items"] if str(i["document"]) == str(doc.pk))
+        _api(co).patch(f"{ITEMS}{item['id']}/", {"document_outcome": outcome, "discussion": f"Esito {outcome}"},
+                       format="json")
+    assert _api(co).post(f"{URL}{rid}/complete/").status_code == 200
+    return rid, docs
+
+
+def test_approval_applies_outcomes_without_snapshot(co, plant):
+    from apps.documents.models import DocumentApproval
+    from apps.management_review.models import ReviewAgendaItem
+
+    rid, docs = _closed_targeted(co, plant, {"Da approvare": "approvato", "Da respingere": "respinto",
+                                             "Da rinviare": "rinviato"})
+    r = _api(co).post(f"{URL}{rid}/approve/", {"note": "ok"}, format="json")
+    assert r.status_code == 200, r.data
+    assert r.data["approval_status"] == "approvato"
+
+    for d in docs.values():
+        d.refresh_from_db()
+    assert docs["Da approvare"].status == "approvato"
+    rec = DocumentApproval.objects.get(document=docs["Da approvare"], action="approve")
+    assert rec.approval_mode == "delibera" and str(rec.review_id) == rid
+    assert rec.version.version_label == "Rev. 01"
+    assert docs["Da respingere"].status == "bozza"
+    assert DocumentApproval.objects.get(document=docs["Da respingere"], action="reject").notes == "Esito respinto"
+    assert docs["Da rinviare"].status == "revisione"
+    assert ReviewAgendaItem.objects.filter(review_id=rid, document_outcome_applied_at__isnull=True).count() == 0
+
+
+def test_resolution_approval_uses_resolution_date(co, plant):
+    from datetime import timedelta
+
+    from apps.documents.models import DocumentApproval
+
+    rid, docs = _closed_targeted(co, plant, {"Politica": "approvato"})
+    when = timezone.localdate() - timedelta(days=0)
+    r = _api(co).post(f"{URL}{rid}/approve/", {"mode": "delibera", "resolution_ref": "12/2026",
+                                               "resolution_date": str(when)}, format="json")
+    assert r.status_code == 200, r.data
+    rec = DocumentApproval.objects.get(document=docs["Politica"], action="approve")
+    assert rec.resolution_ref == "12/2026" and rec.resolution_date == when
+
+
+def test_changed_revision_is_not_applied_and_retry_is_idempotent(co, plant):
+    from apps.documents.models import DocumentApproval
+    from apps.documents.services import add_version
+    from apps.management_review.models import ReviewAgendaItem
+
+    rid, docs = _closed_targeted(co, plant, {"Cambiata": "approvato", "Stabile": "approvato"})
+    # nuova revisione caricata fra la chiusura della seduta e l'approvazione del verbale
+    add_version(docs["Cambiata"], "z.pdf", "sha-z", "p/z.pdf", co, "", 10, version_label="Rev. 02")
+    assert _api(co).post(f"{URL}{rid}/approve/", {}, format="json").status_code == 200
+
+    changed = ReviewAgendaItem.objects.get(review_id=rid, document=docs["Cambiata"])
+    assert changed.document_outcome_applied_at is None and "revisione" in changed.document_outcome_error
+    docs["Cambiata"].refresh_from_db()
+    assert docs["Cambiata"].status == "revisione"
+
+    r = _api(co).post(f"{URL}{rid}/apply-outcomes/")
+    assert r.status_code == 200
+    assert r.data["applied"] == [] and len(r.data["skipped"]) == 1
+    assert DocumentApproval.objects.filter(document=docs["Stabile"], action="approve").count() == 1
+
+
+def test_full_review_still_needs_snapshot(co, plant):
+    from apps.management_review.models import ManagementReview
+
+    r = _api(co).post(URL, {"title": "Annuale", "review_date": str(timezone.localdate()),
+                            "plant": str(plant.pk)}, format="json")
+    ManagementReview.objects.filter(pk=r.data["id"]).update(status="completato")
+    assert _api(co).post(f"{URL}{r.data['id']}/approve/", {}, format="json").status_code == 400
+
+
+# ── Fase 2: effetti sugli altri moduli ───────────────────────────────────────
+
+def _review(plant, user, when, kind="completo", **kw):
+    from apps.management_review.models import ManagementReview
+    return ManagementReview.objects.create(plant=plant, title=f"{kind} {when}", review_date=when,
+                                           kind=kind, created_by=user, **kw)
+
+
+def test_schedule_ignores_targeted_reviews(co, plant):
+    from datetime import timedelta
+
+    from apps.compliance_schedule.services import get_activity_schedule
+
+    today = timezone.localdate()
+    full = _review(plant, co, today - timedelta(days=300), status="completato",
+                   next_review_date=today + timedelta(days=65))
+    _review(plant, co, today - timedelta(days=30), kind="mirato", status="completato",
+            next_review_date=today + timedelta(days=10))
+    planned = _review(plant, co, today + timedelta(days=20), kind="mirato")
+
+    items = [i for i in get_activity_schedule(plant=plant, months_ahead=6) if i["category"] == "management_review"]
+    by_ref = {i["ref_id"]: i for i in items}
+    # il prossimo riesame §9.3 resta quello deciso nel completo
+    assert by_ref[str(full.pk)]["due_date"] == str(full.next_review_date)
+    assert by_ref[str(planned.pk)]["label"].startswith("Riesame mirato:")
+    assert len(items) == 2
+
+
+def test_snapshot_previous_is_full_and_includes_targeted_actions(co, plant):
+    from datetime import timedelta
+
+    from apps.management_review.models import ReviewAction
+    from apps.management_review.services import generate_snapshot
+
+    today = timezone.localdate()
+    full = _review(plant, co, today - timedelta(days=365))
+    targeted = _review(plant, co, today - timedelta(days=100), kind="mirato")
+    ReviewAction.objects.create(review=full, description="Dal completo", status="chiuso",
+                                closed_at=timezone.now() - timedelta(days=200))
+    ReviewAction.objects.create(review=targeted, description="Dal mirato", status="chiuso",
+                                closed_at=timezone.now() - timedelta(days=50))
+    current = _review(plant, co, today)
+
+    block = generate_snapshot(current, co)["azioni_precedenti"]
+    assert block["riesame_precedente"]["id"] == str(full.pk)
+    assert {a["description"] for a in block["elenco"]} == {"Dal completo", "Dal mirato"}
+
+
+def test_first_full_review_sees_targeted_actions(co, plant):
+    from datetime import timedelta
+
+    from apps.management_review.models import ReviewAction
+    from apps.management_review.services import generate_snapshot
+
+    today = timezone.localdate()
+    targeted = _review(plant, co, today - timedelta(days=60), kind="mirato")
+    ReviewAction.objects.create(review=targeted, description="Decisa in seduta")
+    block = generate_snapshot(_review(plant, co, today), co)["azioni_precedenti"]
+    assert block["riesame_precedente"] is None
+    assert [a["description"] for a in block["elenco"]] == ["Decisa in seduta"]
+
+
+def test_audit_pack_separates_intermediate_sessions(co, plant, tmp_path):
+    from apps.audit_prep.audit_pack import _collect_management_review
+
+    rid, _docs = _closed_targeted(co, plant, {"Politica": "approvato"})
+    _api(co).post(f"{URL}{rid}/approve/", {}, format="json")
+
+    out = _collect_management_review(tmp_path, plant)
+    assert out["reviews_approved"] == 0
+    assert out["targeted_reviews_approved"] == 1 and out["targeted_documents"] == 1
+    root = tmp_path / "09_management_review"
+    assert (root / "NO_APPROVED_REVIEW.txt").exists()
+    csv_text = (root / "sedute_intermedie" / "documenti.csv").read_text(encoding="utf-8")
+    assert "Politica" in csv_text and "approvato" in csv_text and ",si," in csv_text

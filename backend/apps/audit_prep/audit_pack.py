@@ -577,16 +577,78 @@ def _collect_governance(out_dir: Path, plant) -> dict:
     return {"role_assignments": len(role_rows), "committees": len(com_rows), "committee_members": len(member_rows)}
 
 
+def _collect_targeted_reviews(mr_dir: Path, plant) -> dict:
+    """Riesami mirati approvati → `sedute_intermedie/`: sedute dell'organo su
+    punti specifici fra un riesame §9.3 e l'altro. Non sono il riesame
+    periodico, ma provano le decisioni sui documenti (§7.5.3)."""
+    from apps.management_review.models import ManagementReview, ReviewAgendaItem
+
+    reviews = list(
+        ManagementReview.objects
+        .filter(plant=plant, deleted_at__isnull=True, approval_status="approvato", kind="mirato")
+        .select_related("governing_body", "approved_by")
+        .order_by("-review_date")
+    )
+    if not reviews:
+        return {"targeted_reviews_approved": 0, "targeted_documents": 0}
+
+    sub = mr_dir / "sedute_intermedie"
+    sub.mkdir(parents=True, exist_ok=True)
+    rows = [{
+        "title": r.title,
+        "review_date": str(r.review_date),
+        "governing_body": r.governing_body.name if r.governing_body_id else "",
+        "approval_mode": r.approval_mode,
+        "approval_resolution": (
+            f"{r.approval_resolution_ref} / {r.approval_resolution_date}" if r.approval_mode == "delibera" else ""
+        ),
+        "approved_at": r.approved_at.isoformat() if r.approved_at else "",
+        "approved_by": (r.approved_by.email if r.approved_by else ""),
+    } for r in reviews]
+    with (sub / "_index.csv").open("w", newline="", encoding="utf-8") as fp:
+        w = safe_dict_writer(fp, fieldnames=list(rows[0].keys()))
+        w.writeheader(); w.writerows(rows)
+
+    items = (
+        ReviewAgendaItem.objects
+        .filter(review__in=reviews, deleted_at__isnull=True, document__isnull=False)
+        .select_related("review", "document", "document_version")
+        .order_by("-review__review_date", "order")
+    )
+    doc_rows = [{
+        "review_date": str(i.review.review_date),
+        "review_title": i.review.title,
+        "document_code": i.document.document_code,
+        "document_title": i.document.title,
+        "examined_version": (
+            (i.document_version.version_label or f"v{i.document_version.version_number}")
+            if i.document_version_id else ""
+        ),
+        "outcome": i.document_outcome,
+        "applied": "si" if i.document_outcome_applied_at else "no",
+        "not_applied_reason": i.document_outcome_error,
+    } for i in items]
+    with (sub / "documenti.csv").open("w", newline="", encoding="utf-8") as fp:
+        if doc_rows:
+            w = safe_dict_writer(fp, fieldnames=list(doc_rows[0].keys()))
+            w.writeheader(); w.writerows(doc_rows)
+        else:
+            fp.write("# Nessun documento deciso nelle sedute intermedie.\n")
+    return {"targeted_reviews_approved": len(rows), "targeted_documents": len(doc_rows)}
+
+
 def _collect_management_review(out_dir: Path, plant) -> dict:
-    """Solo review APPROVATE (snapshot di direzione formale)."""
+    """Riesami completi APPROVATI (snapshot di direzione formale, §9.3) nella
+    radice; le sedute mirate in `sedute_intermedie/`."""
     from apps.management_review.models import ManagementReview, ReviewAction
 
     mr_dir = out_dir / "09_management_review"
     mr_dir.mkdir(parents=True, exist_ok=True)
+    targeted = _collect_targeted_reviews(mr_dir, plant)
 
     qs = (
         ManagementReview.objects
-        .filter(plant=plant, deleted_at__isnull=True, approval_status="approvato")
+        .filter(plant=plant, deleted_at__isnull=True, approval_status="approvato", kind="completo")
         .select_related("governing_body", "approved_by", "approved_member")
         .prefetch_related("participants")
         .order_by("-review_date")
@@ -597,7 +659,7 @@ def _collect_management_review(out_dir: Path, plant) -> dict:
             "Nessuna revisione di direzione approvata per questo plant alla data del pack.\n",
             encoding="utf-8",
         )
-        return {"reviews_approved": 0, "actions_total": 0}
+        return {"reviews_approved": 0, "actions_total": 0, **targeted}
 
     review_rows: list[dict] = []
     action_rows: list[dict] = []
@@ -667,7 +729,7 @@ def _collect_management_review(out_dir: Path, plant) -> dict:
         else:
             fp.write("# Nessuna action item nelle review approvate.\n")
 
-    return {"reviews_approved": len(review_rows), "actions_total": len(action_rows)}
+    return {"reviews_approved": len(review_rows), "actions_total": len(action_rows), **targeted}
 
 
 def _collect_audit_trail(out_dir: Path, plant, since: Optional[date]) -> dict:

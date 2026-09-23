@@ -252,3 +252,92 @@ def first_custom_order(review: ManagementReview) -> int:
     """Ordine del primo punto aggiunto a mano: dopo i punti §9.3.2 nel
     riesame completo, dall'inizio nel mirato."""
     return 0 if review.is_targeted else len(ISO_AGENDA_CODES)
+
+
+def apply_document_outcomes(review: ManagementReview, user) -> dict:
+    """Applica ai documenti gli esiti decisi nel riesame mirato approvato.
+
+    - approvato → entra in vigore per delibera dell'organo, con gli estremi del
+      riesame (numero e data della delibera, o la data della seduta);
+    - respinto → torna in bozza (o, se in vigore, resta la revisione già
+      approvata) con il respingimento registrato sulla revisione esaminata;
+    - rinviato → nessun cambio: il documento resta in attesa.
+
+    Idempotente: tocca solo i punti non ancora applicati. Un documento che non
+    si può aggiornare (revisione cambiata dopo la seduta, stato non più
+    compatibile) non annulla l'approvazione del riesame: resta con il motivo
+    in `document_outcome_error` e si può ritentare.
+    """
+    from django.utils import timezone
+
+    from apps.documents.services import approve_document, reject_document
+
+    ensure_targeted(review)
+    if review.approval_status != "approvato":
+        raise ValidationError(_("Gli esiti si applicano ai documenti quando il riesame è approvato."))
+
+    decision_date = review.approval_resolution_date or review.review_date
+    body = review.governing_body if review.governing_body_id else None
+    note = _("Deciso nel riesame mirato del %(date)s.") % {"date": decision_date.strftime("%d/%m/%Y")}
+    items = (
+        review.agenda_items.filter(
+            deleted_at__isnull=True, code=DOCUMENT_ITEM_CODE,
+            document_outcome_applied_at__isnull=True,
+        )
+        .exclude(document_outcome="")
+        .select_related("document", "document_version")
+        .order_by("order")
+    )
+
+    applied, skipped = [], []
+    for item in items:
+        doc = item.document
+        error = ""
+        latest = latest_version(doc)
+        if latest is None or latest.pk != item.document_version_id:
+            error = _("Dopo la seduta è stata caricata una nuova revisione: l'esito riguarda "
+                      "una revisione che non è più l'ultima.")
+        else:
+            try:
+                if item.document_outcome == "approvato":
+                    approve_document(
+                        doc, user, notes=note, mode="delibera",
+                        resolution_ref=review.approval_resolution_ref, resolution_date=decision_date,
+                        governing_body=body, review_id=review.pk,
+                    )
+                elif item.document_outcome == "respinto":
+                    reject_document(
+                        doc, user, notes=(item.discussion or note)[:500], mode="delibera",
+                        resolution_ref=review.approval_resolution_ref, resolution_date=decision_date,
+                        governing_body=body, review_id=review.pk,
+                    )
+            except ValidationError as exc:
+                error = exc.messages[0] if getattr(exc, "messages", None) else str(exc)
+
+        if error:
+            item.document_outcome_error = error[:300]
+            item.save(update_fields=["document_outcome_error", "updated_at"])
+            skipped.append({"item_id": str(item.pk), "document_id": str(doc.pk), "title": doc.title,
+                            "outcome": item.document_outcome, "reason": error})
+            continue
+        item.document_outcome_applied_at = timezone.now()
+        item.document_outcome_error = ""
+        item.save(update_fields=["document_outcome_applied_at", "document_outcome_error", "updated_at"])
+        applied.append({"item_id": str(item.pk), "document_id": str(doc.pk), "title": doc.title,
+                        "outcome": item.document_outcome})
+
+    if applied or skipped:
+        log_action(
+            user=user,
+            action_code="management_review.document_outcomes_applied",
+            level="L2",
+            entity=review,
+            payload={
+                "review_id": str(review.pk),
+                "approved": [a["document_id"] for a in applied if a["outcome"] == "approvato"],
+                "rejected": [a["document_id"] for a in applied if a["outcome"] == "respinto"],
+                "postponed": [a["document_id"] for a in applied if a["outcome"] == "rinviato"],
+                "skipped": [s["document_id"] for s in skipped],
+            },
+        )
+    return {"applied": applied, "skipped": skipped}

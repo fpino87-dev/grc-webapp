@@ -341,10 +341,18 @@ def get_activity_schedule(plant=None, months_ahead: int = 6) -> list[dict]:
             mr_qs = mr_qs.filter(_Q(plant=plant) | _Q(plant__isnull=True))
         planned = list(mr_qs.filter(status__in=["pianificato", "in_corso"]))
         for mr in planned:
-            _add("management_review", f"Riesame di direzione: {mr.title}", mr.review_date, mr.status, str(mr.id),
+            label = "Riesame mirato" if mr.kind == "mirato" else "Riesame di direzione"
+            _add("management_review", f"{label}: {mr.title}", mr.review_date, mr.status, str(mr.id),
                  "/management-review")
-        latest_done = mr_qs.filter(status="completato", next_review_date__isnull=False).order_by("-review_date").first()
-        if latest_done and not any(p.review_date >= latest_done.review_date for p in planned):
+        # Il prossimo riesame §9.3 si calcola solo dai riesami completi: una
+        # seduta mirata non sostituisce il riesame periodico.
+        latest_done = (
+            mr_qs.filter(kind="completo", status="completato", next_review_date__isnull=False)
+            .order_by("-review_date").first()
+        )
+        if latest_done and not any(
+            p.kind == "completo" and p.review_date >= latest_done.review_date for p in planned
+        ):
             _add("management_review", f"Prossimo riesame di direzione (da {latest_done.title})",
                  latest_done.next_review_date, "da_pianificare", str(latest_done.id), "/management-review")
     except Exception:

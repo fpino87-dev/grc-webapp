@@ -683,7 +683,8 @@ def approve_review(review: ManagementReview, user, note="", *, mode="in_app",
 
     if review.approval_status == "approvato":
         raise ValidationError(_("Il riesame è già approvato."))
-    if not review.snapshot_generated_at:
+    # Il mirato non congela dati: lo snapshot serve solo al riesame §9.3.
+    if not review.is_targeted and not review.snapshot_generated_at:
         raise ValidationError(
             _("Generare lo snapshot dei dati prima di approvare il riesame.")
         )
@@ -748,4 +749,11 @@ def approve_review(review: ManagementReview, user, note="", *, mode="in_app",
             "resolution_ref": fields["approval_resolution_ref"] or None,
         },
     )
+    # Riesame mirato: l'approvazione del verbale manda a effetto le decisioni
+    # sui documenti (in vigore / respinti). Gli esiti non applicabili restano
+    # sul punto con il motivo, senza annullare l'approvazione.
+    if review.is_targeted:
+        from .targeted import apply_document_outcomes
+
+        apply_document_outcomes(review, user)
     return review

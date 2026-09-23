@@ -113,9 +113,13 @@ def get_kpi_snapshot(plant_id) -> dict:
 
 
 def _previous_reviews(review: ManagementReview):
-    """Riesami precedenti dello stesso perimetro (stesso sito, o di organizzazione)."""
+    """Riesami completi precedenti dello stesso perimetro (stesso sito, o di
+    organizzazione). I mirati non contano: il "periodo" del §9.3 va da un
+    riesame completo all'altro."""
     return (
-        ManagementReview.objects.filter(plant_id=review.plant_id, review_date__lt=review.review_date)
+        ManagementReview.objects.filter(
+            plant_id=review.plant_id, review_date__lt=review.review_date, kind="completo",
+        )
         .exclude(pk=review.pk)
         .order_by("-review_date")
     )
@@ -124,21 +128,29 @@ def _previous_reviews(review: ManagementReview):
 def _previous_actions_block(review: ManagementReview, today) -> dict:
     """§9.3.2 a) — stato delle azioni dei riesami precedenti: tutte quelle del
     riesame immediatamente precedente, più quelle più vecchie ancora aperte o
-    chiuse nel periodo."""
+    chiuse nel periodo. Comprese quelle decise nei riesami mirati tenuti
+    dopo l'ultimo riesame completo."""
     from django.db.models import Case, IntegerField, Q, Value, When
 
     previous = _previous_reviews(review).first()
     empty = {"riesame_precedente": None, "totale": 0, "aperte": 0, "scadute": 0, "chiuse": 0, "elenco": []}
-    if previous is None:
-        return empty
 
-    qs = ReviewAction.objects.filter(
+    base = ReviewAction.objects.filter(
         review__plant_id=review.plant_id,
         review__review_date__lt=review.review_date,
         review__deleted_at__isnull=True,
-    ).exclude(review=review).filter(
-        Q(review=previous) | Q(status="aperto") | Q(closed_at__date__gte=previous.review_date)
-    )
+    ).exclude(review=review)
+    if previous is None:
+        # Primo riesame completo: restano da verificare le decisioni delle
+        # sedute mirate che lo hanno preceduto.
+        qs = base.filter(review__kind="mirato")
+        if not qs.exists():
+            return empty
+    else:
+        qs = base.filter(
+            Q(review=previous) | Q(status="aperto") | Q(closed_at__date__gte=previous.review_date)
+            | Q(review__kind="mirato", review__review_date__gte=previous.review_date)
+        )
     overdue_q = Q(status="aperto", due_date__lt=today)
     rank = Case(
         When(overdue_q, then=Value(0)),
@@ -154,7 +166,7 @@ def _previous_actions_block(review: ManagementReview, today) -> dict:
     return {
         "riesame_precedente": {
             "id": str(previous.pk), "title": previous.title, "review_date": _iso(previous.review_date),
-        },
+        } if previous else None,
         "totale": qs.count(),
         "aperte": qs.filter(status="aperto").count(),
         "scadute": qs.filter(overdue_q).count(),
