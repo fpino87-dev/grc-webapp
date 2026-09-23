@@ -21,6 +21,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ### Fixed
 
+- **Build di produzione del frontend**: dalla 0.9.0 `npm ci` falliva nella build Docker di produzione (su npm 10 con un errore poco chiaro, `Cannot read properties of null (reading 'edgesOut')`) perché l'aggiornamento di sicurezza delle dipendenze di sviluppo aveva portato `vitest` a 4.1.11 lasciando `@vitest/coverage-v8`, che richiede la stessa versione esatta, a 4.1.6. Ora sono allineati a 4.1.11 (resta chiusa la vulnerabilità di vitest) e la CI installa le dipendenze esattamente come la build di produzione, senza `--legacy-peer-deps`, così un lockfile incoerente fa fallire la CI invece del deploy.
+
 - **Traduzioni del backend**: una trentina di messaggi dei documenti e del riesame di direzione introdotti a settembre (per esempio gli errori di separazione dei compiti e gli stati dei documenti nel verbale) comparivano in italiano anche in francese, polacco e turco; ora sono tradotti in tutte le lingue.
 
 - **Script di installazione `manual/install_grc.sh` riallineato alla piattaforma** (da verificare su una macchina nuova):
