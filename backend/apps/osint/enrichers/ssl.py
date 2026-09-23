@@ -96,6 +96,7 @@ def _get_tls_cert(domain: str) -> dict | None:
     # Tentativo 1: verifica completa (connessione all'IP pinnato, SNI=domain)
     try:
         ctx = ssl.create_default_context()
+        ctx.minimum_version = ssl.TLSVersion.TLSv1_2
         with socket.create_connection((ip, 443), timeout=TLS_TIMEOUT) as sock:
             with ctx.wrap_socket(sock, server_hostname=domain) as ssock:
                 return ssock.getpeercert()
@@ -108,6 +109,9 @@ def _get_tls_cert(domain: str) -> dict | None:
     # Tentativo 2: no-verify per rilevare cert scaduti/non validi
     try:
         ctx = ssl.create_default_context()
+        # Senza verifica solo per leggere un certificato scaduto o non valido;
+        # il protocollo resta almeno TLS 1.2 (default di Python, qui esplicito).
+        ctx.minimum_version = ssl.TLSVersion.TLSv1_2
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
         with socket.create_connection((ip, 443), timeout=TLS_TIMEOUT) as sock:
