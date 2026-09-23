@@ -130,12 +130,17 @@ def evaluate_control(instance, new_status, user, note=""):
 IMPLEMENTATION_DESCRIPTION_MAX = 5000
 
 
-def set_implementation_description(instance, text: str, user):
+def set_implementation_description(instance, text: str, user, ai_interaction_id=None):
     """Registra la "Implementation description" VDA ISA del controllo.
 
     Nel payload di audit va solo la lunghezza e se il testo è stato svuotato:
     il testo completo resta sul controllo (e nell'export), il log registra chi
-    e quando ha cambiato la dichiarazione."""
+    e quando ha cambiato la dichiarazione.
+
+    `ai_interaction_id`: la bozza viene dall'intervista guidata. Il testo
+    salvato chiude l'interazione IA come confermata (con il testo finale, per
+    misurare quanto l'umano ha corretto), solo se l'interazione è dell'utente
+    e riguarda questo controllo."""
     from django.core.exceptions import ValidationError
     from django.utils.translation import gettext as _
 
@@ -147,6 +152,17 @@ def set_implementation_description(instance, text: str, user):
             _("La descrizione dell'implementazione supera %(max)s caratteri.")
             % {"max": IMPLEMENTATION_DESCRIPTION_MAX}
         )
+    ai_assisted = False
+    if ai_interaction_id:
+        from apps.ai_engine.models import AiInteractionLog
+        from apps.ai_engine.router import confirm_output
+
+        ai_assisted = AiInteractionLog.objects.filter(
+            pk=ai_interaction_id, user_id=user.pk, entity_id=instance.pk,
+        ).exists()
+        if ai_assisted:
+            confirm_output(ai_interaction_id, user, text)
+
     previous = instance.implementation_description
     if text == previous:
         return instance
@@ -157,7 +173,10 @@ def set_implementation_description(instance, text: str, user):
         action_code="control.implementation_description_set",
         level="L2",
         entity=instance,
-        payload={"length": len(text), "cleared": not text, "was_empty": not previous},
+        payload={
+            "length": len(text), "cleared": not text, "was_empty": not previous,
+            "ai_assisted": ai_assisted,
+        },
     )
     return instance
 

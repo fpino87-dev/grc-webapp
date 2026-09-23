@@ -13,6 +13,7 @@ const TASKS = [
   "chatbot",
   "cpv_suggestion",
   "generate_procedure",
+  "vda_interview",
   "cockpit_explain",
   "cockpit_assistant",
 ] as const;

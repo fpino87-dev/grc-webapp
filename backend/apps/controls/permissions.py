@@ -42,6 +42,14 @@ class ControlInstanceAssignPermission(RoleScopedPermission):
     write_roles = ControlInstancePermission.write_roles
 
 
+class VdaInterviewPermission(RoleScopedPermission):
+    """Intervista guidata VDA ISA: anche la GET può generare domande via IA
+    (costo token) e mostra le risposte interne, quindi è riservata a chi
+    valuta i controlli — mai ai ruoli di sola lettura (auditor)."""
+    read_roles = ControlInstancePermission.write_roles
+    write_roles = ControlInstancePermission.write_roles
+
+
 class SoAApprovalPermission(RoleScopedPermission):
     """Approvazione formale dello Statement of Applicability (ISO 27001
     §6.1.3.d): atto di governance, non operativo — il control_owner valuta i

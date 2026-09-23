@@ -2672,3 +2672,20 @@ msgstr "Tutanağı indirmeden önce veri anlık görüntüsünü oluşturun."
 #, python-format
 msgid "La descrizione dell'implementazione supera %(max)s caratteri."
 msgstr "Uygulama açıklaması %(max)s karakteri aşıyor."
+
+#: apps/controls
+msgid "Formato delle risposte non valido."
+msgstr "Geçersiz yanıt biçimi."
+
+#: apps/controls
+#, python-format
+msgid "Una risposta supera %(max)s caratteri."
+msgstr "Bir yanıt %(max)s karakteri aşıyor."
+
+#: apps/controls
+msgid "Servizio IA temporaneamente non disponibile. Riprova più tardi."
+msgstr "Yapay zeka hizmeti geçici olarak kullanılamıyor. Lütfen daha sonra tekrar deneyin."
+
+#: apps/controls
+msgid "L'intervista VDA ISA è disponibile solo per i controlli TISAX."
+msgstr "VDA ISA görüşmesi yalnızca TISAX kontrolleri için kullanılabilir."

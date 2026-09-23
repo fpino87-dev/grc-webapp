@@ -215,6 +215,19 @@ Każdy interaktywny element na pulpicie jest klikalny:
 
 Dowód jest dostępny natychmiast. System automatycznie sprawdzi, czy typ MIME pliku odpowiada zadeklarowanemu rozszerzeniu.
 
+### Jak uzupełnić Implementation description TISAX (wywiad z pytaniami)
+
+VDA ISA wypełnia się po angielsku: dla każdej kontroli TISAX audytor czyta, obok zadeklarowanej dojrzałości, **w jaki sposób** wymaganie jest wdrożone. W zakładce **Ocena** kontroli znajduje się pole „Implementation description (VDA ISA)”: można wpisać tekst bezpośrednio po angielsku lub skorzystać z wywiadu.
+
+1. Kliknij **Uzupełnij za pomocą wywiadu (AI)**
+2. Dla każdego wymagania VDA (obowiązkowe *must*, zalecane *should*, wysoka / bardzo wysoka ochrona) pojawia się pytanie w Twoim języku; oryginalne wymaganie po angielsku otwiera się przez „Oryginalne wymaganie (EN)”. Dla kontroli L3 pojawiają się także wymagania rozszerzanej kontroli L2
+3. Odpowiadaj konkretnie: kto, co, jakim dokumentem lub narzędziem, jak często. Napisz „nie”, jeśli wymaganie nie jest jeszcze spełnione. Nazwiska i dane osobowe nie są potrzebne
+4. **Zapisz odpowiedzi**, aby wrócić później (pozostają przy kontroli, także na potrzeby ponownej oceny w kolejnym roku)
+5. **Wygeneruj szkic po angielsku**: AI pisze opis wyłącznie na podstawie Twoich odpowiedzi i pokazuje tłumaczenie w Twoim języku do weryfikacji. Obowiązkowe wymagania bez odpowiedzi są oznaczone `[TO BE COMPLETED]`; wymagania zadeklarowane jako niespełnione są sygnalizowane, aby zadeklarowana dojrzałość była spójna
+6. **Użyj tego szkicu** kopiuje tekst do pola opisu: przeczytaj go, popraw w razie potrzeby i kliknij **Zapisz opis**
+
+Szkic nigdy nie zapisuje się sam: ścieżka audytu rejestruje, kto zapisał opis i czy pochodził z AI. Jeśli AI nie jest skonfigurowane, pytania pokazują oryginalny tekst wymagania, a automatyczny szkic jest niedostępny. Centrum Operacyjne sygnalizuje kontrole TISAX z dojrzałością ≥ 3 bez opisu.
+
 ### Jak pobrać SOA ISO 27001, VDA ISA TISAX, Matrycę NIS2
 
 [Zrzut ekranu: strona eksportu compliance]

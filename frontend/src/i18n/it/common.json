@@ -102,7 +102,8 @@
         "cpv_suggestion": "Suggerimento codici CPV (M14 Fornitori)",
         "generate_procedure": "Genera documento procedura (M03 Controlli)",
         "cockpit_explain": "Spiega insight (M21 Centro Operativo)",
-        "cockpit_assistant": "Chiedi a govrico (M21 Centro Operativo)"
+        "cockpit_assistant": "Chiedi a govrico (M21 Centro Operativo)",
+        "vda_interview": "Intervista guidata VDA ISA (M03 Controlli)"
       },
       "insufficient_permissions": "Permessi insufficienti.",
       "provider_cloud": "Provider Cloud",
@@ -554,6 +555,33 @@
           "placeholder": "Es. Il processo di gestione degli accessi è definito nella procedura PR-ACC-01; le richieste passano dal ticketing IT con approvazione del responsabile; revisione trimestrale degli account privilegiati a cura dell'IT Manager.",
           "save": "Salva descrizione",
           "missing_warning": "Maturità {{level}} dichiarata senza descrizione dell'implementazione: in audit TISAX il livello non è difendibile."
+        },
+        "interview": {
+          "open": "Compila con l'intervista guidata (IA)",
+          "close": "Chiudi l'intervista",
+          "intro": "Rispondi nella tua lingua a una domanda per ogni requisito VDA ISA. L'IA scrive la descrizione in inglese usando solo le tue risposte: rileggila sempre prima di salvarla. Nomi e dati personali non servono.",
+          "loading": "Preparazione delle domande…",
+          "ai_not_configured": "IA non configurata: le domande sono mostrate con il testo originale del requisito (inglese) e la bozza automatica non è disponibile.",
+          "ai_unavailable": "Servizio IA non raggiungibile: alcune domande sono mostrate con il testo originale del requisito (inglese).",
+          "levels": {
+            "must": "Obbligatorio (must)",
+            "should": "Consigliato (should)",
+            "high": "Alta protezione",
+            "very_high": "Protezione molto alta"
+          },
+          "original": "Requisito originale (EN)",
+          "answer_placeholder": "Come lo fate? Chi, cosa, con quale documento o strumento, ogni quanto. Scrivi «no» se non è ancora in atto.",
+          "answered_count": "{{answered}}/{{total}} requisiti con risposta",
+          "save_answers": "Salva risposte",
+          "answers_saved": "Risposte salvate",
+          "generate": "Genera bozza in inglese",
+          "generating": "Generazione in corso…",
+          "draft_title": "Bozza in inglese — da rivedere",
+          "draft_local_title": "Traduzione per la verifica",
+          "unanswered_warning": "{{count}} requisiti obbligatori senza risposta: nella bozza sono segnati [TO BE COMPLETED].",
+          "not_implemented_warning": "{{count}} requisiti dichiarati non soddisfatti: verifica che la maturità dichiarata sia coerente.",
+          "use_draft": "Usa questa bozza",
+          "draft_used": "Bozza copiata nel campo descrizione: rivedila e premi «Salva descrizione»."
         }
       },
       "docs": {
@@ -658,7 +686,8 @@
         "3": "Collega documenti di policy e evidenze operative",
         "4": "Il sistema suggerisce lo stato automaticamente dai documenti collegati",
         "5": "Salva la valutazione — richiede almeno 1 evidenza valida per \"Compliant\"",
-        "6": "Scarica SOA (ISO27001), VDA ISA (TISAX) o NIS2 Matrix con i bottoni in alto"
+        "6": "Scarica SOA (ISO27001), VDA ISA (TISAX) o NIS2 Matrix con i bottoni in alto",
+        "7": "TISAX: nel tab Valutazione compila l'Implementation description in inglese — o usa l'intervista guidata (IA) rispondendo nella tua lingua"
       },
       "connections": {
         "documents": {

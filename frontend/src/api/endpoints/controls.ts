@@ -108,6 +108,36 @@ export interface LinkedDocument {
   review_due_date: string | null;
 }
 
+export type VdaRequirementLevel = "must" | "should" | "high" | "very_high";
+
+export interface VdaInterviewRequirement {
+  id: string;
+  level: VdaRequirementLevel;
+  source: string;
+  text_en: string;
+  question: string;
+}
+
+export interface VdaInterview {
+  lang: string;
+  requirements: VdaInterviewRequirement[];
+  answers: Record<string, string>;
+  answers_lang: string;
+  answers_updated_at: string | null;
+  ai_error: "" | "not_configured" | "unavailable";
+}
+
+export interface VdaInterviewDraft {
+  draft_en: string;
+  draft_local: string;
+  unanswered: string[];
+  not_implemented: string[];
+  interaction_id: string | null;
+  provider: string;
+  model: string;
+  used_fallback: boolean;
+}
+
 export interface ControlDetailInfo {
   control_id: string;
   control_uuid: string;
@@ -263,8 +293,17 @@ export const controlsApi = {
     apiClient.post(`/controls/instances/${instanceId}/set-applicability/`, { applicability, justification }).then((r) => r.data),
   setMaturity: (instanceId: string, maturityLevel: number) =>
     apiClient.post(`/controls/instances/${instanceId}/set-maturity/`, { maturity_level: maturityLevel }).then((r) => r.data),
-  setImplementation: (instanceId: string, implementationDescription: string) =>
-    apiClient.post(`/controls/instances/${instanceId}/set-implementation/`, { implementation_description: implementationDescription }).then((r) => r.data),
+  setImplementation: (instanceId: string, implementationDescription: string, aiInteractionId?: string | null) =>
+    apiClient.post(`/controls/instances/${instanceId}/set-implementation/`, {
+      implementation_description: implementationDescription,
+      ai_interaction_id: aiInteractionId || undefined,
+    }).then((r) => r.data),
+  getVdaInterview: (instanceId: string, lang: string) =>
+    apiClient.get<VdaInterview>(`/controls/instances/${instanceId}/vda-interview/`, { params: { lang } }).then((r) => r.data),
+  saveVdaInterview: (instanceId: string, answers: Record<string, string>, lang: string) =>
+    apiClient.post<{ ok: boolean; answered: number }>(`/controls/instances/${instanceId}/vda-interview/`, { answers, lang }).then((r) => r.data),
+  draftVdaInterview: (instanceId: string, answers: Record<string, string>, lang: string) =>
+    apiClient.post<VdaInterviewDraft>(`/controls/instances/${instanceId}/vda-interview/draft/`, { answers, lang }).then((r) => r.data),
   deleteInstance: (id: string) => apiClient.delete(`/controls/instances/${id}/`),
   archiveFramework: (id: string) => apiClient.delete(`/controls/frameworks/${id}/`),
   deleteFramework: (id: string) => apiClient.delete(`/controls/frameworks/${id}/delete/`),

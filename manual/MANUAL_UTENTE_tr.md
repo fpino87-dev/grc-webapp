@@ -215,6 +215,19 @@ Kontrol panelindeki her etkileşimli öğe tıklanabilir:
 
 Kanıt hemen kullanılabilir. Sistem, dosyanın MIME türünün beyan edilen uzantıyla eşleştiğini otomatik olarak doğrular.
 
+### TISAX Implementation description nasıl doldurulur (rehberli görüşme)
+
+VDA ISA İngilizce doldurulur: her TISAX kontrolü için denetçi, beyan edilen olgunluğun yanında gereksinimin **nasıl** uygulandığını okur. Kontrolün **Değerlendirme** sekmesinde «Implementation description (VDA ISA)» kutusu bulunur: metni doğrudan İngilizce yazabilir veya rehberli görüşmeyi kullanabilirsiniz.
+
+1. **Rehberli görüşme ile doldur (YZ)** düğmesine tıklayın
+2. Her VDA gereksinimi için (zorunlu *must*, önerilen *should*, yüksek / çok yüksek koruma) kendi dilinizde bir soru görünür; İngilizce orijinal gereksinim «Orijinal gereksinim (EN)» ile açılır. L3 kontrollerinde genişletilen L2 kontrolünün gereksinimleri de görünür
+3. Somut yanıt verin: kim, ne, hangi belge veya araçla, ne sıklıkla. Gereksinim henüz karşılanmıyorsa «hayır» yazın. Kişi adları ve kişisel veriler gerekli değildir
+4. Daha sonra devam etmek için **Yanıtları kaydet** (yanıtlar kontrolde kalır, sonraki yılın yeniden değerlendirmesi için de)
+5. **İngilizce taslak oluştur**: yapay zeka açıklamayı yalnızca yanıtlarınızı kullanarak yazar ve kontrol için kendi dilinizde çevirisini gösterir. Yanıtsız zorunlu gereksinimler `[TO BE COMPLETED]` olarak işaretlenir; karşılanmadığı beyan edilenler, beyan edilen olgunluk tutarlı kalsın diye belirtilir
+6. **Bu taslağı kullan** metni açıklama alanına kopyalar: okuyun, gerekirse düzeltin ve **Açıklamayı kaydet** düğmesine basın
+
+Taslak hiçbir zaman kendiliğinden kaydedilmez: denetim izi, açıklamayı kimin kaydettiğini ve yapay zekadan gelip gelmediğini kaydeder. Yapay zeka yapılandırılmamışsa sorular gereksinimin orijinal metnini gösterir ve otomatik taslak kullanılamaz. Operasyon Merkezi, açıklaması olmayan olgunluk ≥ 3 TISAX kontrollerini işaretler.
+
 ### ISO 27001 SOA, VDA ISA TISAX, NIS2 Matriksi nasıl indirilir
 
 [Ekran görüntüsü: uyum dışa aktarma sayfası]

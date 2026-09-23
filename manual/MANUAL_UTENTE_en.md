@@ -215,6 +215,19 @@ Every interactive element on the dashboard is clickable:
 
 The evidence is available immediately. The system will automatically verify that the MIME type of the file matches the declared extension.
 
+### How to fill in the TISAX Implementation description (guided interview)
+
+The VDA ISA is filled in in English: for each TISAX control the auditor reads, next to the declared maturity, **how** the requirement is implemented. The control's **Evaluation** tab has the «Implementation description (VDA ISA)» box: you can write the English text directly or use the guided interview.
+
+1. Click **Fill in with the guided interview (AI)**
+2. For each VDA requirement (mandatory *must*, recommended *should*, high / very high protection) a question appears in your language; the original English requirement opens with «Original requirement (EN)». For L3 controls the requirements of the extended L2 control appear as well
+3. Answer concretely: who, what, which document or tool, how often. Write "no" if the requirement is not fulfilled yet. Names of people and personal data are not needed
+4. **Save answers** to continue later (they stay on the control, also for next year's re-evaluation)
+5. **Generate English draft**: the AI writes the description using only your answers and shows a translation in your language for review. Mandatory requirements without an answer are marked `[TO BE COMPLETED]`; those declared as not fulfilled are flagged, so that the declared maturity stays consistent
+6. **Use this draft** copies the text into the description field: read it, correct it if needed and press **Save description**
+
+The draft is never saved on its own: the audit trail records who saved the description and whether it came from the AI. If the AI is not configured, the questions show the original requirement text and the automatic draft is not available. The Operations Center flags TISAX controls with maturity ≥ 3 and no description.
+
 ### How to download SOA ISO 27001, VDA ISA TISAX, NIS2 Matrix
 
 [Screenshot: compliance export page]

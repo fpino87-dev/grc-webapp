@@ -455,6 +455,7 @@ AuditLog'un temel özellikleri:
 - SOA ISO 27001 için `applicability` alanı
 - VDA ISA için `calc_maturity_level` (özellik, 0-5 ölçeği)
 - `implementation_description` — VDA ISA "Implementation description" (gereksinimin tesiste nasıl uygulandığı); yalnızca `POST /set-implementation/` → `set_implementation_description()` ile yazılır (denetim `control.implementation_description_set`, payload yalnızca uzunluk), VDA ISA'ya aktarılır; açıklaması olmayan ML ≥ 3 için M21 advisor `controls.tisax_missing_implementation`
+- `implementation_interview` — VDA ISA rehberli görüşme yanıtları (`{lang, answers: {req_id: metin}, updated_at}`); `GET|POST /vda-interview/` ve `POST /vda-interview/draft/` (`services/vda_interview.py`, `VdaInterviewPermission`: yalnızca kontrolleri değerlendiren roller). Gereksinimler çerçevenin EN açıklamasından çıkarılır (must / should / yüksek / çok yüksek koruma bölümleri; VH için genişletilen temel kontrolün gereksinimleri de), `req_id` = metnin hash'i. YZ soruları `Control.translations[lang]["interview_questions"]` içinde önbelleğe alınır (normatif metin, sanitize yok); taslak (YZ görevi `vda_interview`) Sanitizer'dan geçer, kaydedilmez ve `ai_interaction_id` ile kaydetmek YZ etkileşimini onaylar (denetim payload'ında `ai_assisted`)
 - Değişiklik yönetimi için `needs_revaluation` (M04)
 - `na_justification` — status=`na` olduğunda `evaluate_control()` tarafından kaydedilen serbest metin; detay API'sinde gösterilir ve dışa aktarma motoru (VDA ve SOA) tarafından kullanılır
 

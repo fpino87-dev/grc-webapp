@@ -200,3 +200,125 @@ Rispondi SOLO con JSON valido:
         match = re.search(r"\{.*\}", result["text"], re.DOTALL)
         parsed = json.loads(match.group()) if match else {}
     return {**result, "rca_draft": parsed}
+
+
+_LANG_LABELS = {"it": "Italian", "en": "English", "fr": "French", "pl": "Polish", "tr": "Turkish"}
+
+
+def _parse_json_object(text: str) -> dict:
+    try:
+        data = json.loads(text)
+    except Exception:
+        match = re.search(r"\{.*\}", text or "", re.DOTALL)
+        try:
+            data = json.loads(match.group()) if match else {}
+        except Exception:
+            data = {}
+    return data if isinstance(data, dict) else {}
+
+
+def generate_interview_questions(control, requirements: list[dict], lang: str, user) -> dict:
+    """Riformula i requisiti VDA ISA (inglese) come domande nella lingua `lang`.
+
+    Testo normativo pubblico: nessun dato aziendale, quindi niente sanitize.
+    Ritorna `{req_id: domanda}` solo per gli id richiesti."""
+    lang_label = _LANG_LABELS.get(lang, lang)
+    items = "\n".join(f'- id "{r["id"]}": {r["text"]}' for r in requirements)
+    prompt = f"""VDA ISA control {control.external_id}: {control.get_title("en")}
+
+Requirements:
+{items}
+
+For each requirement write ONE question in {lang_label} that a site manager can answer
+to explain HOW the organization fulfils it (who, what, which document or tool, how often).
+Plain language, no jargon, max 30 words each. Do not answer the question.
+
+Reply ONLY with valid JSON: {{"questions": {{"<id>": "<question>"}}}}"""
+
+    result = route(
+        task_type="vda_interview",
+        prompt=prompt,
+        system="You are a TISAX / VDA ISA assessor preparing interview questions. Reply only with valid JSON.",
+        user=user,
+        entity_id=control.pk,
+        module_source="M03",
+        sanitize=False,  # dati normativi pubblici, nessun dato aziendale
+    )
+    questions = _parse_json_object(result.get("text", "")).get("questions") or {}
+    wanted = {r["id"] for r in requirements}
+    return {
+        k: str(v).strip()[:500]
+        for k, v in questions.items()
+        if k in wanted and isinstance(v, str) and v.strip()
+    }
+
+
+def draft_vda_implementation(instance, requirements: list[dict], answers: dict,
+                             references: list[str], lang: str, user) -> dict:
+    """Bozza della "Implementation description" VDA ISA dalle risposte.
+
+    Il testo va in audit TISAX: il prompt vieta di aggiungere fatti non presenti
+    nelle risposte e impone il segnaposto `[TO BE COMPLETED: ...]` dove manca
+    un'informazione. Le risposte passano dal Sanitizer (regola #9)."""
+    control = instance.control
+    lang_label = _LANG_LABELS.get(lang, lang)
+    lines = []
+    for r in requirements:
+        answer = answers.get(r["id"], "").strip() or "(no answer)"
+        lines.append(f'[{r["id"]}] ({r["level"]}) {r["text"]}\n    ANSWER: {answer}')
+    refs = "\n".join(f"- {x}" for x in references) or "- none"
+
+    prompt = f"""VDA ISA control {control.external_id}: {control.get_title("en")}
+
+Requirements with the organization's answers (answers are written in {lang_label}):
+{chr(10).join(lines)}
+
+Documents and evidence linked to this control:
+{refs}
+
+Write the "Implementation description" for the VDA ISA self-assessment.
+
+Rules:
+1. Use ONLY facts stated in the answers. Never add tools, products, frequencies, roles,
+   documents or measures that are not in the answers. If unsure, leave it out.
+2. English, factual, third person ("The organization ...", "The policy ..."). Present tense
+   for current practice, past tense for dated events ("was approved in 2025").
+   One short paragraph per topic; you may reference the linked documents above by name
+   when an answer mentions them.
+3. For every requirement of level "must", "high" or "very_high" with "(no answer)", add
+   a line "[TO BE COMPLETED: <requirement in max 10 words>]". Ignore unanswered "should".
+4. If an answer says the requirement is NOT fulfilled or only partially, state it honestly
+   and list its id in "not_implemented". Do not soften it.
+5. Max 250 words.
+6. "draft_local" is a faithful translation of "draft_en" into {lang_label}
+   (keep the [TO BE COMPLETED] markers, translated).
+
+Reply ONLY with valid JSON:
+{{"draft_en": "...", "draft_local": "...", "not_implemented": ["<id>", ...]}}"""
+
+    result = route(
+        task_type="vda_interview",
+        prompt=prompt,
+        system=(
+            "You write VDA ISA (TISAX) self-assessment texts that an auditor will verify on site. "
+            "Accuracy matters more than completeness. Reply only with valid JSON."
+        ),
+        user=user,
+        entity_id=instance.pk,
+        module_source="M03",
+        sanitize=True,
+        plant_ids=[instance.plant_id] if instance.plant_id else [],
+        max_tokens=3000,
+        timeout=120,
+    )
+    data = _parse_json_object(result.get("text", ""))
+    not_impl = data.get("not_implemented") or []
+    return {
+        "draft_en": str(data.get("draft_en") or "").strip(),
+        "draft_local": str(data.get("draft_local") or "").strip(),
+        "not_implemented": [str(x) for x in not_impl if isinstance(x, str)],
+        "interaction_id": result.get("interaction_id"),
+        "provider": result.get("provider", ""),
+        "model": result.get("model", ""),
+        "used_fallback": result.get("used_fallback", False),
+    }

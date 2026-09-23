@@ -587,6 +587,7 @@ export function ControlsList() {
               t("controls.help.steps.4"),
               t("controls.help.steps.5"),
               t("controls.help.steps.6"),
+              t("controls.help.steps.7"),
             ]}
             connections={[
               { module: t("controls.help.connections.documents.module"), relation: t("controls.help.connections.documents.relation") },

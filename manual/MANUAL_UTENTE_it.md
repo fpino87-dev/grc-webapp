@@ -215,6 +215,19 @@ Ogni elemento interattivo nella dashboard è cliccabile:
 
 L'evidenza è disponibile immediatamente. Il sistema verificherà automaticamente che il tipo MIME del file corrisponda all'estensione dichiarata.
 
+### Come compilare l'Implementation description TISAX (intervista guidata)
+
+Il VDA ISA si compila in inglese: per ogni controllo TISAX l'auditor legge, accanto alla maturità dichiarata, **come** il requisito è implementato. Nel tab **Valutazione** del controllo c'è il riquadro «Implementation description (VDA ISA)»: si può scrivere direttamente il testo in inglese oppure usare l'intervista guidata.
+
+1. Clicca **Compila con l'intervista guidata (IA)**
+2. Per ogni requisito VDA (obbligatorio *must*, consigliato *should*, alta / molto alta protezione) compare una domanda nella tua lingua; il requisito originale in inglese si apre con «Requisito originale (EN)». Per i controlli L3 compaiono anche i requisiti del controllo L2 esteso
+3. Rispondi in modo concreto: chi, cosa, con quale documento o strumento, ogni quanto. Scrivi «no» se il requisito non è ancora soddisfatto. Nomi di persone e dati personali non servono
+4. **Salva risposte** per riprendere in un secondo momento (restano sul controllo anche per la rivalutazione dell'anno successivo)
+5. **Genera bozza in inglese**: l'IA scrive la descrizione usando solo le tue risposte e mostra la traduzione nella tua lingua per la verifica. I requisiti obbligatori senza risposta sono segnati `[TO BE COMPLETED]`; quelli dichiarati non soddisfatti sono segnalati, perché la maturità dichiarata sia coerente
+6. **Usa questa bozza** copia il testo nel campo descrizione: rileggilo, correggilo se serve e premi **Salva descrizione**
+
+La bozza non viene mai salvata da sola: resta registrato nell'audit trail chi ha salvato la descrizione e se proveniva dall'IA. Se l'IA non è configurata le domande mostrano il testo originale del requisito e la bozza automatica non è disponibile. Il Centro Operativo segnala i controlli TISAX con maturità ≥ 3 senza descrizione.
+
 ### Come scaricare SOA ISO 27001, VDA ISA TISAX, NIS2 Matrix
 
 [Schermata: pagina export compliance]

@@ -455,6 +455,7 @@ Key properties of AuditLog:
 - `applicability` field for ISO 27001 SOA
 - `calc_maturity_level` (property) for VDA ISA (scale 0–5)
 - `implementation_description` — VDA ISA "Implementation description" (how the requirement is implemented at the site); written only via `POST /set-implementation/` → `set_implementation_description()` (audit `control.implementation_description_set`, payload with length only), exported in the VDA ISA; M21 advisor `controls.tisax_missing_implementation` for ML ≥ 3 without description
+- `implementation_interview` — answers of the VDA ISA guided interview (`{lang, answers: {req_id: text}, updated_at}`); `GET|POST /vda-interview/` and `POST /vda-interview/draft/` (`services/vda_interview.py`, `VdaInterviewPermission`: only roles that evaluate controls). Requirements are extracted from the framework's EN description (must / should / high / very high protection sections; for a VH also those of the extended base), `req_id` = hash of the text. AI questions cached in `Control.translations[lang]["interview_questions"]` (normative text, no sanitize); the draft (AI task `vda_interview`) goes through the Sanitizer, is not saved, and saving with `ai_interaction_id` confirms the AI interaction (`ai_assisted` in the audit payload)
 - `needs_revaluation` for change management (M04)
 - `na_justification` — free text saved by `evaluate_control()` when status=`na`; exposed in the detail API and used by the export engine (VDA and SOA)
 

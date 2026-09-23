@@ -8,6 +8,7 @@ import { useAuthStore } from "../../../store/auth";
 import i18n from "../../../i18n";
 import { STATUS_GUIDE, useRequirementLabel, RequirementsBanner } from "./shared";
 import { SOA_APPROVAL_ROLES } from "../roles";
+import { VdaInterviewPanel } from "./VdaInterviewPanel";
 
 const MATURITY_KEYS: Record<number, string> = {
   0: "controls.maturity_0",
@@ -93,6 +94,10 @@ export function TabValutazione({
   const [implValue, setImplValue] = useState(implementationDescription);
   const [implSaved, setImplSaved] = useState(false);
   const [implError, setImplError] = useState("");
+  const [interviewOpen, setInterviewOpen] = useState(false);
+  // Interazione IA da cui viene il testo nel campo: il salvataggio la chiude
+  // come confermata (con il testo finale rivisto dall'utente).
+  const [aiInteractionId, setAiInteractionId] = useState<string | null>(null);
   const [notesValue, setNotesValue] = useState(initialNotes ?? "");
   const [notesSaved, setNotesSaved] = useState(false);
   const [assetIds, setAssetIds] = useState<string[]>((linkedAssets ?? []).map(a => a.id));
@@ -161,9 +166,10 @@ export function TabValutazione({
   });
 
   const implMutation = useMutation({
-    mutationFn: () => controlsApi.setImplementation(instanceId, implValue),
+    mutationFn: () => controlsApi.setImplementation(instanceId, implValue, aiInteractionId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["control-detail", instanceId] });
+      setAiInteractionId(null);
       setImplError("");
       setImplSaved(true);
       setTimeout(() => setImplSaved(false), 2000);
@@ -450,6 +456,23 @@ export function TabValutazione({
           >
             {implMutation.isPending ? t("common.saving") : implSaved ? "✓ " + t("common.saved", { defaultValue: "Salvato" }) : t("controls.drawer.evaluation.implementation.save")}
           </button>
+          <button
+            type="button"
+            onClick={() => setInterviewOpen(o => !o)}
+            className="w-full py-1.5 border border-purple-300 text-purple-700 rounded text-xs hover:bg-purple-50"
+          >
+            {interviewOpen ? t("controls.drawer.evaluation.interview.close") : t("controls.drawer.evaluation.interview.open")}
+          </button>
+          {interviewOpen && (
+            <VdaInterviewPanel
+              instanceId={instanceId}
+              onUseDraft={(text, interactionId) => {
+                setImplValue(text);
+                setAiInteractionId(interactionId);
+                setImplSaved(false);
+              }}
+            />
+          )}
         </div>
       )}
 

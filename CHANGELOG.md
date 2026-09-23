@@ -23,6 +23,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
   - Il **Centro Operativo (M21)** segnala per sito i controlli TISAX con maturità ≥ 3 senza descrizione.
   - Il **pacchetto audit** (`01_controls/controls_status.csv`) include la descrizione dell'implementazione; la colonna `note` era sempre vuota per un errore di campo e ora riporta le note del controllo.
 
+- **Controlli TISAX — intervista guidata con l'IA per l'Implementation description**: il VDA ISA va compilato in inglese; ora chi valuta il controllo può rispondere a domande nella propria lingua (IT/EN/FR/PL/TR) e ottenere la bozza in inglese.
+  - Le domande nascono dai requisiti VDA ISA del controllo (obbligatori *must*, consigliati *should*, alta e molto alta protezione; per L3 anche quelli del controllo L2 esteso), con il testo originale inglese sempre consultabile. Le domande sono generate una volta per lingua e riutilizzate.
+  - L'IA scrive la descrizione **usando solo le risposte**: non aggiunge strumenti, frequenze o misure non dichiarate, segna `[TO BE COMPLETED]` i requisiti obbligatori senza risposta e segnala quelli dichiarati non soddisfatti, per tenere coerente la maturità. Accanto alla bozza c'è la traduzione nella lingua dell'utente per verificarla.
+  - **Controllo umano sempre**: la bozza non viene mai salvata da sola; va copiata nel campo, rivista e salvata. L'audit trail registra se la descrizione salvata proveniva dall'IA e il registro IA conserva bozza e testo finale. Le risposte passano dal filtro dei dati personali prima dell'invio al provider IA e restano sul controllo per la rivalutazione successiva.
+  - Riservata ai ruoli che valutano i controlli (non agli auditor). Il provider (cloud o locale) si sceglie in Impostazioni → IA, voce «Intervista guidata VDA ISA». Senza IA configurata le domande mostrano il requisito originale e la bozza automatica non è disponibile.
+
 - **Documenti (M07) — la delibera dell'organo vale anche per una nuova versione di un documento in vigore**: finora l'organo non poteva approvare per delibera la nuova versione di un documento già in vigore; ora può approvarla o respingerla. Ogni respingimento registra quale revisione è stata respinta.
 
 ### Fixed

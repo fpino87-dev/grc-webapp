@@ -85,7 +85,7 @@ def test_set_implementation_saves_and_audits(client, plant, fw_pair):
     assert inst.implementation_description == text
     log = AuditLog.objects.get(entity_id=inst.pk, action_code="control.implementation_description_set")
     # il testo non finisce nel payload di audit, solo metadati
-    assert log.payload == {"length": len(text), "cleared": False, "was_empty": True}
+    assert log.payload == {"length": len(text), "cleared": False, "was_empty": True, "ai_assisted": False}
 
     detail = client.get(f"{URL_INSTANCES}{inst.id}/detail-info/")
     assert detail.data["implementation_description"] == text

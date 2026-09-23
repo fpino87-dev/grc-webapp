@@ -201,6 +201,10 @@ class ControlInstance(BaseModel):
     # TISAX legge accanto alla maturità dichiarata: senza, il livello è solo un
     # numero. Scritta via POST /set-implementation/ (audit trail).
     implementation_description = models.TextField(blank=True)
+    # Risposte dell'intervista guidata che produce la descrizione:
+    # {"lang": "it", "answers": {req_id: testo}, "updated_at": iso}. Restano
+    # per la rivalutazione successiva (vedi services/vda_interview.py).
+    implementation_interview = models.JSONField(default=dict, blank=True)
 
     # Maturity level per VDA ISA TISAX (0-5)
     maturity_level = models.IntegerField(

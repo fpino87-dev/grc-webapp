@@ -11,6 +11,7 @@ from ..permissions import (
     ControlInstanceAssignPermission,
     ControlInstancePermission,
     SoAApprovalPermission,
+    VdaInterviewPermission,
 )
 from ..serializers import ControlInstanceSerializer
 
@@ -96,6 +97,8 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             return [ControlInstanceAssignPermission()]
         if self.action == "bulk_approve_soa":
             return [SoAApprovalPermission()]
+        if self.action in ("vda_interview", "vda_interview_draft"):
+            return [VdaInterviewPermission()]
         return super().get_permissions()
 
     def destroy(self, request, *args, **kwargs):
@@ -444,6 +447,7 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         try:
             set_implementation_description(
                 instance, request.data.get("implementation_description", ""), request.user,
+                ai_interaction_id=request.data.get("ai_interaction_id") or None,
             )
         except ValidationError as e:
             return Response({"error": e.messages[0]}, status=400)
@@ -451,6 +455,67 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             "ok": True,
             "implementation_description": instance.implementation_description,
         })
+
+    def _interview_lang(self, value) -> str:
+        from django.conf import settings
+        lang = str(value or "it")[:2]
+        return lang if lang in dict(settings.LANGUAGES) else "it"
+
+    def _interview_instance(self):
+        """Istanza del controllo, solo per framework TISAX (VDA ISA)."""
+        from django.utils.translation import gettext as _
+        instance = self.get_object()
+        if not instance.control.framework.code.startswith("TISAX"):
+            return instance, Response(
+                {"error": _("L'intervista VDA ISA è disponibile solo per i controlli TISAX.")},
+                status=400,
+            )
+        return instance, None
+
+    @action(detail=True, methods=["get", "post"], url_path="vda-interview")
+    def vda_interview(self, request, pk=None):
+        """GET ?lang=it → requisiti, domande (generate e messe in cache al primo
+        uso) e risposte salvate. POST {answers, lang} → salva le risposte."""
+        from django.core.exceptions import ValidationError
+
+        from ..services.vda_interview import get_interview, save_interview_answers
+
+        instance, error = self._interview_instance()
+        if error:
+            return error
+        if request.method == "GET":
+            lang = self._interview_lang(request.query_params.get("lang"))
+            return Response(get_interview(instance, lang, request.user))
+        lang = self._interview_lang(request.data.get("lang"))
+        try:
+            answers = save_interview_answers(instance, request.data.get("answers"), lang, request.user)
+        except ValidationError as e:
+            return Response({"error": e.messages[0]}, status=400)
+        return Response({"ok": True, "answered": len(answers)})
+
+    @action(detail=True, methods=["post"], url_path="vda-interview/draft")
+    def vda_interview_draft(self, request, pk=None):
+        """POST {answers, lang} → salva le risposte e ritorna la bozza IA
+        (EN + lingua utente). La bozza NON viene salvata sul controllo."""
+        from django.core.exceptions import ValidationError
+
+        from apps.ai_engine.router import AiNotConfigured, LlmUnavailable, ai_not_configured_message
+
+        from ..services.vda_interview import draft_implementation
+
+        instance, error = self._interview_instance()
+        if error:
+            return error
+        lang = self._interview_lang(request.data.get("lang"))
+        try:
+            return Response(draft_implementation(instance, request.data.get("answers"), lang, request.user))
+        except ValidationError as e:
+            return Response({"error": e.messages[0]}, status=400)
+        except AiNotConfigured:
+            return Response({"error": ai_not_configured_message()}, status=400)
+        except LlmUnavailable:
+            from django.utils.translation import gettext as _
+            return Response({"error": _("Servizio IA temporaneamente non disponibile. Riprova più tardi.")}, status=503)
 
     @action(detail=False, methods=["post"], url_path="bulk-approve-soa")
     def bulk_approve_soa(self, request):

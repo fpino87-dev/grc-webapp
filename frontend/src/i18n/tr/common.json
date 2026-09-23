@@ -329,7 +329,8 @@
         "cpv_suggestion": "CPV kodu önerisi (M14 Tedarikçiler)",
         "generate_procedure": "Prosedür belgesi oluştur (M03 Kontroller)",
         "cockpit_explain": "Insight'ı açıkla (M21 Operasyon Merkezi)",
-        "cockpit_assistant": "govrico'ya sor (M21 Operasyon Merkezi)"
+        "cockpit_assistant": "govrico'ya sor (M21 Operasyon Merkezi)",
+        "vda_interview": "VDA ISA rehberli görüşme (M03 Kontroller)"
       },
       "insufficient_permissions": "Yetersiz izinler.",
       "provider_cloud": "Cloud Sağlayıcı",
@@ -557,6 +558,33 @@
           "placeholder": "Örn. Erişim yönetimi süreci PR-ACC-01 prosedüründe tanımlanmıştır; talepler yönetici onayıyla BT bilet sisteminden geçer; ayrıcalıklı hesaplar IT Manager tarafından üç ayda bir gözden geçirilir.",
           "save": "Açıklamayı kaydet",
           "missing_warning": "Uygulama açıklaması olmadan {{level}} olgunluk seviyesi beyan edildi: TISAX denetiminde bu seviye savunulamaz."
+        },
+        "interview": {
+          "open": "Rehberli görüşme ile doldur (YZ)",
+          "close": "Görüşmeyi kapat",
+          "intro": "Her VDA ISA gereksinimi için bir soruyu kendi dilinizde yanıtlayın. Yapay zeka açıklamayı yalnızca yanıtlarınızı kullanarak İngilizce yazar: kaydetmeden önce mutlaka okuyun. İsimler ve kişisel veriler gerekli değildir.",
+          "loading": "Sorular hazırlanıyor…",
+          "ai_not_configured": "Yapay zeka yapılandırılmamış: sorular gereksinimin orijinal metniyle (İngilizce) gösterilir ve otomatik taslak kullanılamaz.",
+          "ai_unavailable": "Yapay zeka hizmetine ulaşılamıyor: bazı sorular gereksinimin orijinal metniyle (İngilizce) gösterilir.",
+          "levels": {
+            "must": "Zorunlu (must)",
+            "should": "Önerilen (should)",
+            "high": "Yüksek koruma",
+            "very_high": "Çok yüksek koruma"
+          },
+          "original": "Orijinal gereksinim (EN)",
+          "answer_placeholder": "Bunu nasıl yapıyorsunuz? Kim, ne, hangi belge veya araçla, ne sıklıkla. Henüz uygulanmıyorsa «hayır» yazın.",
+          "answered_count": "{{answered}}/{{total}} gereksinim yanıtlandı",
+          "save_answers": "Yanıtları kaydet",
+          "answers_saved": "Yanıtlar kaydedildi",
+          "generate": "İngilizce taslak oluştur",
+          "generating": "Oluşturuluyor…",
+          "draft_title": "İngilizce taslak — gözden geçirilecek",
+          "draft_local_title": "Kontrol için çeviri",
+          "unanswered_warning": "Yanıtsız {{count}} zorunlu gereksinim: taslakta [TO BE COMPLETED] olarak işaretlendi.",
+          "not_implemented_warning": "{{count}} gereksinim karşılanmadı olarak beyan edildi: beyan edilen olgunluğun tutarlı olduğunu kontrol edin.",
+          "use_draft": "Bu taslağı kullan",
+          "draft_used": "Taslak açıklama alanına kopyalandı: gözden geçirin ve «Açıklamayı kaydet» düğmesine basın."
         }
       },
       "docs": {
@@ -661,7 +689,8 @@
         "3": "Politika belgeleri ve operasyonel kanıtları bağlayın",
         "4": "Sistem bağlı belgelerden durumu otomatik önerir",
         "5": "Değerlendirmeyi kaydedin — \"Uyumlu\" için en az 1 geçerli kanıt gerektirir",
-        "6": "Üstteki düğmelerle SOA (ISO27001), VDA ISA (TISAX) veya NIS2 Matrisini indirin"
+        "6": "Üstteki düğmelerle SOA (ISO27001), VDA ISA (TISAX) veya NIS2 Matrisini indirin",
+        "7": "TISAX: Değerlendirme sekmesinde Implementation description alanını İngilizce doldurun — veya kendi dilinizde yanıtlayarak rehberli görüşmeyi (YZ) kullanın"
       },
       "connections": {
         "documents": {

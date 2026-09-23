@@ -2693,3 +2693,20 @@ msgstr "Wygeneruj migawkę danych przed pobraniem protokołu."
 #, python-format
 msgid "La descrizione dell'implementazione supera %(max)s caratteri."
 msgstr "Opis wdrożenia przekracza %(max)s znaków."
+
+#: apps/controls
+msgid "Formato delle risposte non valido."
+msgstr "Nieprawidłowy format odpowiedzi."
+
+#: apps/controls
+#, python-format
+msgid "Una risposta supera %(max)s caratteri."
+msgstr "Odpowiedź przekracza %(max)s znaków."
+
+#: apps/controls
+msgid "Servizio IA temporaneamente non disponibile. Riprova più tardi."
+msgstr "Usługa AI jest chwilowo niedostępna. Spróbuj ponownie później."
+
+#: apps/controls
+msgid "L'intervista VDA ISA è disponibile solo per i controlli TISAX."
+msgstr "Wywiad VDA ISA jest dostępny tylko dla kontroli TISAX."

@@ -329,7 +329,8 @@
         "cpv_suggestion": "Suggestion de codes CPV (M14 Fournisseurs)",
         "generate_procedure": "Générer un document de procédure (M03 Contrôles)",
         "cockpit_explain": "Expliquer l'insight (M21 Centre opérationnel)",
-        "cockpit_assistant": "Demander à govrico (M21 Centre opérationnel)"
+        "cockpit_assistant": "Demander à govrico (M21 Centre opérationnel)",
+        "vda_interview": "Entretien guidé VDA ISA (M03 Contrôles)"
       },
       "insufficient_permissions": "Permissions insuffisantes.",
       "provider_cloud": "Fournisseur Cloud",
@@ -557,6 +558,33 @@
           "placeholder": "Ex. Le processus de gestion des accès est défini dans la procédure PR-ACC-01 ; les demandes passent par le ticketing IT avec approbation du responsable ; revue trimestrielle des comptes à privilèges par l'IT Manager.",
           "save": "Enregistrer la description",
           "missing_warning": "Maturité {{level}} déclarée sans description de la mise en œuvre : lors d'un audit TISAX, ce niveau n'est pas défendable."
+        },
+        "interview": {
+          "open": "Remplir avec l'entretien guidé (IA)",
+          "close": "Fermer l'entretien",
+          "intro": "Répondez dans votre langue à une question par exigence VDA ISA. L'IA rédige la description en anglais en utilisant uniquement vos réponses : relisez-la toujours avant de l'enregistrer. Les noms et données personnelles ne sont pas nécessaires.",
+          "loading": "Préparation des questions…",
+          "ai_not_configured": "IA non configurée : les questions sont affichées avec le texte original de l'exigence (anglais) et le brouillon automatique n'est pas disponible.",
+          "ai_unavailable": "Service d'IA injoignable : certaines questions sont affichées avec le texte original de l'exigence (anglais).",
+          "levels": {
+            "must": "Obligatoire (must)",
+            "should": "Recommandé (should)",
+            "high": "Protection élevée",
+            "very_high": "Protection très élevée"
+          },
+          "original": "Exigence originale (EN)",
+          "answer_placeholder": "Comment le faites-vous ? Qui, quoi, avec quel document ou outil, à quelle fréquence. Écrivez « non » si ce n'est pas encore en place.",
+          "answered_count": "{{answered}}/{{total}} exigences avec réponse",
+          "save_answers": "Enregistrer les réponses",
+          "answers_saved": "Réponses enregistrées",
+          "generate": "Générer le brouillon en anglais",
+          "generating": "Génération en cours…",
+          "draft_title": "Brouillon en anglais — à relire",
+          "draft_local_title": "Traduction pour vérification",
+          "unanswered_warning": "{{count}} exigences obligatoires sans réponse : elles sont marquées [TO BE COMPLETED] dans le brouillon.",
+          "not_implemented_warning": "{{count}} exigences déclarées non satisfaites : vérifiez que la maturité déclarée est cohérente.",
+          "use_draft": "Utiliser ce brouillon",
+          "draft_used": "Brouillon copié dans le champ description : relisez-le et cliquez sur « Enregistrer la description »."
         }
       },
       "docs": {
@@ -661,7 +689,8 @@
         "3": "Liez des documents de politique et des preuves opérationnelles",
         "4": "Le système suggère automatiquement le statut à partir des documents liés",
         "5": "Enregistrez l'évaluation — nécessite au moins 1 preuve valide pour \"Conforme\"",
-        "6": "Téléchargez SOA (ISO27001), VDA ISA (TISAX) ou Matrice NIS2 avec les boutons en haut"
+        "6": "Téléchargez SOA (ISO27001), VDA ISA (TISAX) ou Matrice NIS2 avec les boutons en haut",
+        "7": "TISAX : dans l'onglet Évaluation, renseignez l'Implementation description en anglais — ou utilisez l'entretien guidé (IA) en répondant dans votre langue"
       },
       "connections": {
         "documents": {

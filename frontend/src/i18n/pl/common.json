@@ -329,7 +329,8 @@
         "cpv_suggestion": "Sugestia kodów CPV (M14 Dostawcy)",
         "generate_procedure": "Generuj dokument procedury (M03 Kontrole)",
         "cockpit_explain": "Wyjaśnij insight (M21 Centrum operacyjne)",
-        "cockpit_assistant": "Zapytaj govrico (M21 Centrum operacyjne)"
+        "cockpit_assistant": "Zapytaj govrico (M21 Centrum operacyjne)",
+        "vda_interview": "Wywiad VDA ISA (M03 Kontrole)"
       },
       "insufficient_permissions": "Niewystarczające uprawnienia.",
       "provider_cloud": "Dostawca Cloud",
@@ -557,6 +558,33 @@
           "placeholder": "Np. Proces zarządzania dostępem jest opisany w procedurze PR-ACC-01; wnioski przechodzą przez system zgłoszeń IT z akceptacją przełożonego; kwartalny przegląd kont uprzywilejowanych przez IT Managera.",
           "save": "Zapisz opis",
           "missing_warning": "Zadeklarowano dojrzałość {{level}} bez opisu wdrożenia: podczas audytu TISAX tego poziomu nie da się obronić."
+        },
+        "interview": {
+          "open": "Uzupełnij za pomocą wywiadu (AI)",
+          "close": "Zamknij wywiad",
+          "intro": "Odpowiedz w swoim języku na jedno pytanie dla każdego wymagania VDA ISA. AI napisze opis po angielsku, korzystając wyłącznie z Twoich odpowiedzi: zawsze przeczytaj go przed zapisaniem. Nazwiska i dane osobowe nie są potrzebne.",
+          "loading": "Przygotowywanie pytań…",
+          "ai_not_configured": "AI nie jest skonfigurowane: pytania są wyświetlane z oryginalnym tekstem wymagania (po angielsku), a automatyczny szkic jest niedostępny.",
+          "ai_unavailable": "Usługa AI jest nieosiągalna: niektóre pytania są wyświetlane z oryginalnym tekstem wymagania (po angielsku).",
+          "levels": {
+            "must": "Obowiązkowe (must)",
+            "should": "Zalecane (should)",
+            "high": "Wysoka ochrona",
+            "very_high": "Bardzo wysoka ochrona"
+          },
+          "original": "Oryginalne wymaganie (EN)",
+          "answer_placeholder": "Jak to robicie? Kto, co, jakim dokumentem lub narzędziem, jak często. Napisz „nie”, jeśli jeszcze tego nie wdrożono.",
+          "answered_count": "{{answered}}/{{total}} wymagań z odpowiedzią",
+          "save_answers": "Zapisz odpowiedzi",
+          "answers_saved": "Odpowiedzi zapisane",
+          "generate": "Wygeneruj szkic po angielsku",
+          "generating": "Generowanie…",
+          "draft_title": "Szkic po angielsku — do sprawdzenia",
+          "draft_local_title": "Tłumaczenie do weryfikacji",
+          "unanswered_warning": "{{count}} obowiązkowych wymagań bez odpowiedzi: w szkicu są oznaczone [TO BE COMPLETED].",
+          "not_implemented_warning": "{{count}} wymagań zadeklarowano jako niespełnione: sprawdź, czy zadeklarowana dojrzałość jest spójna.",
+          "use_draft": "Użyj tego szkicu",
+          "draft_used": "Szkic skopiowano do pola opisu: sprawdź go i kliknij „Zapisz opis”."
         }
       },
       "docs": {
@@ -661,7 +689,8 @@
         "3": "Połącz dokumenty polityki i dowody operacyjne",
         "4": "System automatycznie sugeruje status z powiązanych dokumentów",
         "5": "Zapisz ocenę — wymaga co najmniej 1 ważnego dowodu dla \"Zgodny\"",
-        "6": "Pobierz SOA (ISO27001), VDA ISA (TISAX) lub Macierz NIS2 przyciskami na górze"
+        "6": "Pobierz SOA (ISO27001), VDA ISA (TISAX) lub Macierz NIS2 przyciskami na górze",
+        "7": "TISAX: w zakładce Ocena uzupełnij Implementation description po angielsku — lub skorzystaj z wywiadu (AI), odpowiadając w swoim języku"
       },
       "connections": {
         "documents": {

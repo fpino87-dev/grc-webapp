@@ -215,6 +215,19 @@ Chaque élément interactif du tableau de bord est cliquable :
 
 La preuve est disponible immédiatement. Le système vérifiera automatiquement que le type MIME du fichier correspond à l'extension déclarée.
 
+### Comment renseigner l'Implementation description TISAX (entretien guidé)
+
+Le VDA ISA se remplit en anglais : pour chaque contrôle TISAX, l'auditeur lit, à côté de la maturité déclarée, **comment** l'exigence est mise en œuvre. L'onglet **Évaluation** du contrôle contient l'encadré « Implementation description (VDA ISA) » : vous pouvez écrire directement le texte en anglais ou utiliser l'entretien guidé.
+
+1. Cliquez sur **Remplir avec l'entretien guidé (IA)**
+2. Pour chaque exigence VDA (obligatoire *must*, recommandée *should*, protection élevée / très élevée) une question apparaît dans votre langue ; l'exigence originale en anglais s'ouvre avec « Exigence originale (EN) ». Pour les contrôles L3 apparaissent aussi les exigences du contrôle L2 étendu
+3. Répondez concrètement : qui, quoi, avec quel document ou outil, à quelle fréquence. Écrivez « non » si l'exigence n'est pas encore satisfaite. Les noms de personnes et les données personnelles ne sont pas nécessaires
+4. **Enregistrer les réponses** pour reprendre plus tard (elles restent sur le contrôle, y compris pour la réévaluation de l'année suivante)
+5. **Générer le brouillon en anglais** : l'IA rédige la description en utilisant uniquement vos réponses et affiche la traduction dans votre langue pour vérification. Les exigences obligatoires sans réponse sont marquées `[TO BE COMPLETED]` ; celles déclarées non satisfaites sont signalées, pour que la maturité déclarée reste cohérente
+6. **Utiliser ce brouillon** copie le texte dans le champ description : relisez-le, corrigez-le si nécessaire et cliquez sur **Enregistrer la description**
+
+Le brouillon n'est jamais enregistré tout seul : la piste d'audit enregistre qui a enregistré la description et si elle provenait de l'IA. Si l'IA n'est pas configurée, les questions affichent le texte original de l'exigence et le brouillon automatique n'est pas disponible. Le Centre opérationnel signale les contrôles TISAX de maturité ≥ 3 sans description.
+
 ### Comment télécharger la SOA ISO 27001, VDA ISA TISAX, NIS2 Matrix
 
 [Écran : page d'export de conformité]

@@ -102,7 +102,8 @@
         "cpv_suggestion": "CPV code suggestion (M14 Suppliers)",
         "generate_procedure": "Generate procedure document (M03 Controls)",
         "cockpit_explain": "Explain insight (M21 Operations Cockpit)",
-        "cockpit_assistant": "Ask govrico (M21 Operations Cockpit)"
+        "cockpit_assistant": "Ask govrico (M21 Operations Cockpit)",
+        "vda_interview": "VDA ISA guided interview (M03 Controls)"
       },
       "insufficient_permissions": "Insufficient permissions.",
       "provider_cloud": "Cloud Provider",
@@ -554,6 +555,33 @@
           "placeholder": "E.g. The access management process is defined in procedure PR-ACC-01; requests go through IT ticketing with manager approval; privileged accounts are reviewed quarterly by the IT Manager.",
           "save": "Save description",
           "missing_warning": "Maturity {{level}} declared without an implementation description: in a TISAX audit the level cannot be defended."
+        },
+        "interview": {
+          "open": "Fill in with the guided interview (AI)",
+          "close": "Close the interview",
+          "intro": "Answer one question per VDA ISA requirement in your language. The AI writes the description in English using only your answers: always review it before saving. Names and personal data are not needed.",
+          "loading": "Preparing the questions…",
+          "ai_not_configured": "AI not configured: questions are shown with the original requirement text (English) and the automatic draft is not available.",
+          "ai_unavailable": "AI service unreachable: some questions are shown with the original requirement text (English).",
+          "levels": {
+            "must": "Mandatory (must)",
+            "should": "Recommended (should)",
+            "high": "High protection",
+            "very_high": "Very high protection"
+          },
+          "original": "Original requirement (EN)",
+          "answer_placeholder": "How do you do it? Who, what, which document or tool, how often. Write \"no\" if it is not in place yet.",
+          "answered_count": "{{answered}}/{{total}} requirements answered",
+          "save_answers": "Save answers",
+          "answers_saved": "Answers saved",
+          "generate": "Generate English draft",
+          "generating": "Generating…",
+          "draft_title": "English draft — to review",
+          "draft_local_title": "Translation for review",
+          "unanswered_warning": "{{count}} mandatory requirements without an answer: they are marked [TO BE COMPLETED] in the draft.",
+          "not_implemented_warning": "{{count}} requirements declared as not fulfilled: check that the declared maturity is consistent.",
+          "use_draft": "Use this draft",
+          "draft_used": "Draft copied into the description field: review it and press \"Save description\"."
         }
       },
       "docs": {
@@ -658,7 +686,8 @@
         "3": "Link policy documents and operational evidence",
         "4": "The system suggests the status automatically from linked documents",
         "5": "Save the evaluation — requires at least 1 valid evidence for \"Compliant\"",
-        "6": "Download SOA (ISO27001), VDA ISA (TISAX) or NIS2 Matrix using the buttons at the top"
+        "6": "Download SOA (ISO27001), VDA ISA (TISAX) or NIS2 Matrix using the buttons at the top",
+        "7": "TISAX: in the Evaluation tab fill in the Implementation description in English — or use the guided interview (AI) and answer in your language"
       },
       "connections": {
         "documents": {
