@@ -117,6 +117,10 @@ CACHES = {"default": {
 }}
 
 CELERY_BROKER_URL = env("REDIS_URL", default="redis://localhost:6379/0")
+# Riprova la connessione a Redis anche all'avvio (in Docker il worker può
+# partire prima del broker). Oggi lo fa già `broker_connection_retry`; da
+# Celery 6 all'avvio conta solo questa impostazione.
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_RESULT_BACKEND = "django-db"
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_TASK_SERIALIZER = "json"
