@@ -177,7 +177,7 @@ def test_pending_documents_carry_the_revision(plant, user):
 
     doc = _document(plant, user, "Politica accessi", document_code="D-010")
     add_version(doc, "policy.pdf", "abc", "p/v1.pdf", user, "", 10, version_label="Rev. 03")
-    senza_file = _document(plant, user, "Politica senza file")
+    _document(plant, user, "Politica senza file")
 
     docs = generate_snapshot(_review(plant, user, timezone.localdate()), user)["documenti"]
     righe = {d["title"]: d for d in docs["elenco_non_approvati"]}
