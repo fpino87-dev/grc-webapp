@@ -72,7 +72,7 @@ backend (Django + DRF)
     └── S3 / MinIO     object storage for documents and evidence
     │
     └── Celery Worker  async tasks: notifications, audit trail jobs
-        Celery Beat    recurring scheduler: deadlines, email digest, sync
+        Celery Beat    recurring scheduler: deadlines and reminders, nightly backup, KPIs, OSINT
 ```
 
 ### Architectural principles (from CLAUDE.md)
@@ -440,7 +440,6 @@ class AuditLog(models.Model):
 
     class Meta:
         db_table = 'audit_log'
-        # partitioned by RANGE (timestamp_utc) — defined in the migration
 ```
 
 Key properties of AuditLog:
@@ -1062,24 +1061,24 @@ apps/new_module/
 
 ```
 apps/ai_engine/
-├── sanitizer.py        # PII anonymisation before cloud
-├── router.py           # local vs cloud selection based on the function
-├── functions/
-│   ├── classification.py
-│   ├── text_analysis.py
-│   ├── draft_generation.py
-│   └── anomaly_detection.py
-├── models.py           # AiInteractionLog
-├── tasks.py            # async anomaly detection jobs
+├── sanitizer.py                            # PII anonymisation before the cloud
+├── router.py                               # local/cloud routing per function, confirm/ignore
+├── tasks_ai.py                             # AI functions: incident classification, control explanation, gap actions, RCA draft
+├── agent_orchestrator.py + agent_tools.py  # GRC assistant: site gaps and explanations
+├── catalog.py                              # provider model catalogue
+├── circuit_breaker.py                      # circuit breaker towards the providers
+├── models.py                               # AiInteractionLog
+├── tasks.py                                # AiInteractionLog retention (monthly cleanup)
 └── tests/
 ```
 
 ### AiInteractionLog
 
 ```python
-class AiInteractionLog(BaseModel):
+class AiInteractionLog(models.Model):              # append-only, UUID pk
+    user_id = models.UUIDField()
     function = models.CharField(max_length=50)
-    # classification | text_analysis | draft_generation | anomaly_detection
+    # task_type: incident_classify | rca_draft | gap_actions | control_explain | review_summary | …
     module_source = models.CharField(max_length=5)       # M04, M07, M09...
     entity_id = models.UUIDField()
     model_used = models.CharField(max_length=100)        # e.g. gpt-4o | llama3.1:8b
@@ -1087,7 +1086,7 @@ class AiInteractionLog(BaseModel):
     output_ai = models.TextField()                       # raw model output
     output_human_final = models.TextField(null=True)     # after human confirmation/edit
     delta = models.JSONField(null=True)                  # diff between output_ai and output_human_final
-    confirmed_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    confirmed_by_id = models.UUIDField(null=True)
     confirmed_at = models.DateTimeField(null=True)
     ignored = models.BooleanField(default=False)         # suggestion ignored by the user
 ```
@@ -1172,24 +1171,6 @@ M15 does not integrate with e-learning or phishing-simulation platforms (the Kno
 - **Celery task**: `remind-training-plan-items`, daily at 08:10.
 - **Critical roles and management body**: for courses whose `audience_kind` is not `generale` (phishing excluded, `TrainingCourse.is_named`) the session records `TrainingParticipant` rows (FK `user` and/or `committee_member`, `roles` = snapshot of the active appointments). `participant_options(plant, day)` lists holders of active `RoleAssignment`s covering the site and serving `CommitteeMember`s of the site's bodies or of bodies without sites; `register_session` accepts `participant_users`/`participant_members`, validates them against those options and merges people who are both member and role holder. If the course has `competency`/`competency_level`, `_apply_competency` updates the `UserCompetency` (evidence, `valid_until`, `verified_by`) without lowering the level or replacing a more recent proof, saving the previous state in `competency_before`; when the session is deleted `_revert_competencies` restores it (walking back through already-deleted sessions) or soft-deletes a competency created by the session. `UserCompetency` now has a conditional unique constraint (`uniq_user_competency_alive`, non-deleted rows only). `board_training(plant)` feeds the internal KPI `board_training_valid` (serving members of `cda`-type `SecurityCommittee`s with a valid session of an `organo_gestione` course), the Reporting section (counts only), the audit pack's `board_training.csv` and `GET /api/v1/training/sessions/board-status/?plant=`. Other endpoints: `GET sessions/participant-options/?plant=&held_on=` (only for those managing the site's training) and `GET courses/competency-options/`. The audit trail holds only ids and `participants` (a count).
 - **Historical data**: per-person enrollments and phishing results (`TrainingEnrollment`, `PhishingSimulation`) are aggregated by migration `training.0004` into `legacy` sessions holding counts only; migration `training.0007`, in the same `migrate`, then drops the per-person tables and the deprecated course fields (`framework_refs`, `controls`).
-
-### Outbound webhook (M19)
-
-```python
-# Webhook payload structure
-{
-  "event": "risk.red_threshold_exceeded",
-  "timestamp": "2026-03-13T10:00:00Z",
-  "plant_id": "PLT-001",
-  "plant_name": "...",              # included only if the recipient has access
-  "data": {
-    "risk_id": "...",
-    "score": 18,
-    "asset_ids": ["..."]
-  },
-  "signature": "sha256=..."         # HMAC-SHA256 with the configured key
-}
-```
 
 ---
 

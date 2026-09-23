@@ -72,7 +72,7 @@ backend (Django + DRF)
     └── S3 / MinIO     belgeler ve kanıtlar için nesne depolama
     │
     └── Celery Worker  asenkron görevler: bildirimler, denetim izi işleri
-        Celery Beat    tekrarlayan zamanlayıcılar: son tarihler, e-posta özeti, senkronizasyon
+        Celery Beat    tekrarlayan zamanlayıcılar: son tarihler ve hatırlatmalar, gece yedeklemesi, KPI, OSINT
 ```
 
 ### Mimari ilkeler (CLAUDE.md'den)
@@ -440,7 +440,6 @@ class AuditLog(models.Model):
 
     class Meta:
         db_table = 'audit_log'
-        # RANGE (timestamp_utc) ile bölümlenmiş — migrasyonda tanımlı
 ```
 
 AuditLog'un temel özellikleri:
@@ -1061,24 +1060,24 @@ apps/new_module/
 
 ```
 apps/ai_engine/
-├── sanitizer.py        # buluta göndermeden önce PII anonimleştirme
-├── router.py           # fonksiyona göre yerel vs. bulut seçimi
-├── functions/
-│   ├── classification.py
-│   ├── text_analysis.py
-│   ├── draft_generation.py
-│   └── anomaly_detection.py
-├── models.py           # AiInteractionLog
-├── tasks.py            # anomali tespiti için asenkron işler
+├── sanitizer.py                            # buluttan önce kişisel verilerin anonimleştirilmesi
+├── router.py                               # işlev başına yerel/bulut yönlendirme, confirm/ignore
+├── tasks_ai.py                             # yapay zekâ işlevleri: olay sınıflandırma, kontrol açıklaması, boşluk eylemleri, RCA taslağı
+├── agent_orchestrator.py + agent_tools.py  # GRC asistanı: tesis boşlukları ve açıklamalar
+├── catalog.py                              # sağlayıcı model kataloğu
+├── circuit_breaker.py                      # sağlayıcılara yönelik devre kesici
+├── models.py                               # AiInteractionLog
+├── tasks.py                                # AiInteractionLog saklama süresi (aylık temizlik)
 └── tests/
 ```
 
 ### AiInteractionLog
 
 ```python
-class AiInteractionLog(BaseModel):
+class AiInteractionLog(models.Model):              # append-only, UUID pk
+    user_id = models.UUIDField()
     function = models.CharField(max_length=50)
-    # classification | text_analysis | draft_generation | anomaly_detection
+    # task_type: incident_classify | rca_draft | gap_actions | control_explain | review_summary | …
     module_source = models.CharField(max_length=5)       # M04, M07, M09...
     entity_id = models.UUIDField()
     model_used = models.CharField(max_length=100)        # ör. gpt-4o | llama3.1:8b
@@ -1086,7 +1085,7 @@ class AiInteractionLog(BaseModel):
     output_ai = models.TextField()                       # modelin ham çıktısı
     output_human_final = models.TextField(null=True)     # insanın onayı/düzenlemesinden sonra
     delta = models.JSONField(null=True)                  # output_ai ile output_human_final arasındaki fark
-    confirmed_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    confirmed_by_id = models.UUIDField(null=True)
     confirmed_at = models.DateTimeField(null=True)
     ignored = models.BooleanField(default=False)         # kullanıcı tarafından yoksayılan öneri
 ```
@@ -1171,24 +1170,6 @@ M15, e-öğrenme veya oltalama simülasyonu platformlarıyla entegre olmaz (Know
 - **Celery görevi**: `remind-training-plan-items`, her gün 08:10'da.
 - **Kritik roller ve yönetim organı**: `audience_kind` değeri `generale` olmayan kurslarda (oltalama hariç, `TrainingCourse.is_named`) oturum `TrainingParticipant` kayıtları tutar (FK `user` ve/veya `committee_member`, `roles` = etkin atamaların anlık görüntüsü). `participant_options(plant, day)`, tesisi kapsayan etkin `RoleAssignment` sahiplerini ve tesisin ya da tesissiz organların görevdeki `CommitteeMember` kayıtlarını listeler; `register_session`, `participant_users`/`participant_members` alanlarını kabul eder, bu seçeneklere göre doğrular ve hem üye hem atama sahibi olan kişileri birleştirir. Kursta `competency`/`competency_level` varsa `_apply_competency`, seviyeyi düşürmeden ve daha yeni bir kanıtı değiştirmeden `UserCompetency` kaydını (kanıt, `valid_until`, `verified_by`) günceller ve önceki durumu `competency_before` içinde saklar; oturum silindiğinde `_revert_competencies` bunu geri yükler (zaten silinmiş oturumlar üzerinden geriye giderek) veya oturumla oluşan yetkinliği soft delete ile siler. `UserCompetency` artık koşullu bir benzersizlik kısıtına sahiptir (`uniq_user_competency_alive`, yalnızca silinmemiş satırlar). `board_training(plant)`, dahili KPI `board_training_valid` (`cda` türündeki `SecurityCommittee` organlarının, `organo_gestione` kursundan geçerli oturumu olan görevdeki üyeleri), Reporting bölümü (yalnızca sayılar), denetim paketindeki `board_training.csv` ve `GET /api/v1/training/sessions/board-status/?plant=` için veri sağlar. Diğer endpoint'ler: `GET sessions/participant-options/?plant=&held_on=` (yalnızca tesisin eğitimini yönetenler) ve `GET courses/competency-options/`. Audit trail yalnızca id'leri ve `participants` (sayı) içerir.
 - **Geçmiş veriler**: kişi bazlı kayıtlar ve oltalama sonuçları (`TrainingEnrollment`, `PhishingSimulation`) `training.0004` taşımasıyla yalnızca sayıları içeren `legacy` oturumlarda toplanır; aynı `migrate` içinde `training.0007` taşıması ardından kişi bazlı tabloları ve kursun kullanımdan kalkan alanlarını (`framework_refs`, `controls`) siler.
-
-### Giden webhook (M19)
-
-```python
-# Webhook yük yapısı
-{
-  "event": "risk.red_threshold_exceeded",
-  "timestamp": "2026-03-13T10:00:00Z",
-  "plant_id": "PLT-001",
-  "plant_name": "...",              # yalnızca alıcının erişimi varsa dahil edilir
-  "data": {
-    "risk_id": "...",
-    "score": 18,
-    "asset_ids": ["..."]
-  },
-  "signature": "sha256=..."         # yapılandırılmış anahtarla HMAC-SHA256
-}
-```
 
 ---
 

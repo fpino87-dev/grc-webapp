@@ -72,7 +72,7 @@ backend (Django + DRF)
     └── S3 / MinIO     object storage documenti ed evidenze
     │
     └── Celery Worker  task asincroni: notifiche, job audit trail
-        Celery Beat    scheduler ricorrenti: scadenze, digest email, sync
+        Celery Beat    scheduler ricorrenti: scadenze e promemoria, backup notturno, KPI, OSINT
 ```
 
 ### Principi architetturali (da CLAUDE.md)
@@ -440,7 +440,6 @@ class AuditLog(models.Model):
 
     class Meta:
         db_table = 'audit_log'
-        # partitioned by RANGE (timestamp_utc) — definito nella migrazione
 ```
 
 Proprietà chiave dell'AuditLog:
@@ -1062,24 +1061,24 @@ apps/new_module/
 
 ```
 apps/ai_engine/
-├── sanitizer.py        # anonimizzazione PII prima del cloud
-├── router.py           # scelta locale vs cloud in base alla funzione
-├── functions/
-│   ├── classification.py
-│   ├── text_analysis.py
-│   ├── draft_generation.py
-│   └── anomaly_detection.py
-├── models.py           # AiInteractionLog
-├── tasks.py            # job asincroni anomaly detection
+├── sanitizer.py                            # anonimizzazione PII prima del cloud
+├── router.py                               # routing locale/cloud per funzione, confirm/ignore
+├── tasks_ai.py                             # funzioni IA: classificazione incidenti, spiegazione controlli, azioni per i gap, bozza RCA
+├── agent_orchestrator.py + agent_tools.py  # assistente GRC: gap del sito e spiegazioni
+├── catalog.py                              # catalogo modelli dei provider
+├── circuit_breaker.py                      # circuit breaker verso i provider
+├── models.py                               # AiInteractionLog
+├── tasks.py                                # retention di AiInteractionLog (cleanup mensile)
 └── tests/
 ```
 
 ### AiInteractionLog
 
 ```python
-class AiInteractionLog(BaseModel):
+class AiInteractionLog(models.Model):              # append-only, UUID pk
+    user_id = models.UUIDField()
     function = models.CharField(max_length=50)
-    # classification | text_analysis | draft_generation | anomaly_detection
+    # task_type: incident_classify | rca_draft | gap_actions | control_explain | review_summary | …
     module_source = models.CharField(max_length=5)       # M04, M07, M09...
     entity_id = models.UUIDField()
     model_used = models.CharField(max_length=100)        # es. gpt-4o | llama3.1:8b
@@ -1087,7 +1086,7 @@ class AiInteractionLog(BaseModel):
     output_ai = models.TextField()                       # output grezzo del modello
     output_human_final = models.TextField(null=True)     # dopo conferma/modifica umana
     delta = models.JSONField(null=True)                  # diff output_ai vs output_human_final
-    confirmed_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    confirmed_by_id = models.UUIDField(null=True)
     confirmed_at = models.DateTimeField(null=True)
     ignored = models.BooleanField(default=False)         # suggerimento ignorato dall'utente
 ```
@@ -1172,24 +1171,6 @@ M15 non si integra con piattaforme di e-learning o di simulazione phishing (l'in
 - **Task Celery**: `remind-training-plan-items`, ogni giorno alle 08:10.
 - **Ruoli critici e organo di gestione**: per i corsi con `audience_kind` diverso da `generale` (esclusi i phishing, `TrainingCourse.is_named`) l'erogazione registra `TrainingParticipant` (FK `user` e/o `committee_member`, `roles` = fotografia delle nomine attive). `participant_options(plant, day)` elenca i titolari di `RoleAssignment` attivi che coprono il sito e i `CommitteeMember` in carica degli organi del sito o senza siti; `register_session` accetta `participant_users`/`participant_members`, li valida su quelle opzioni e unifica chi è sia componente sia titolare. Se il corso ha `competency`/`competency_level`, `_apply_competency` aggiorna la `UserCompetency` (evidenza, `valid_until`, `verified_by`) senza abbassare il livello né sostituire una prova più recente, salvando lo stato precedente in `competency_before`; alla cancellazione dell'erogazione `_revert_competencies` lo ripristina (risalendo le erogazioni già eliminate) o fa soft delete della competenza nata dall'erogazione. `UserCompetency` ha ora un vincolo di unicità condizionale (`uniq_user_competency_alive`, solo righe non eliminate). `board_training(plant)` alimenta il KPI interno `board_training_valid` (componenti in carica dei `SecurityCommittee` di tipo `cda` con un'erogazione valida di un corso `organo_gestione`), la sezione Reporting (solo conteggi), `board_training.csv` del pacchetto audit e `GET /api/v1/training/sessions/board-status/?plant=`. Altri endpoint: `GET sessions/participant-options/?plant=&held_on=` (solo a chi gestisce la formazione del sito) e `GET courses/competency-options/`. Nell'audit trail solo id e `participants` (conteggio).
 - **Dati storici**: le iscrizioni e gli esiti phishing per persona (`TrainingEnrollment`, `PhishingSimulation`) sono aggregati dalla migrazione `training.0004` in sessioni `legacy` con i soli conteggi; la migrazione `training.0007`, nello stesso `migrate`, elimina poi le tabelle per persona e i campi deprecati del corso (`framework_refs`, `controls`).
-
-### Webhook uscente (M19)
-
-```python
-# Struttura payload webhook
-{
-  "event": "risk.red_threshold_exceeded",
-  "timestamp": "2026-03-13T10:00:00Z",
-  "plant_id": "PLT-001",
-  "plant_name": "...",              # incluso solo se il destinatario ha accesso
-  "data": {
-    "risk_id": "...",
-    "score": 18,
-    "asset_ids": ["..."]
-  },
-  "signature": "sha256=..."         # HMAC-SHA256 con la chiave configurata
-}
-```
 
 ---
 
