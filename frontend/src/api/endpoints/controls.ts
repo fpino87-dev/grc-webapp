@@ -115,23 +115,62 @@ export interface VdaInterviewRequirement {
   level: VdaRequirementLevel;
   source: string;
   text_en: string;
+}
+
+export interface VdaInterviewTopic {
+  id: string;
   question: string;
+  auditor_intent: string;
+  what_to_mention: string[];
+  example: string;
+  req_ids: string[];
+}
+
+export type VdaCoverage = "covered" | "partial" | "missing";
+
+export interface VdaFollowup {
+  id: string;
+  round: number;
+  question: string;
+  req_ids: string[];
+}
+
+export interface VdaReview {
+  round: number;
+  at: string;
+  summary: string;
+  coverage: Record<string, VdaCoverage>;
+  followups: VdaFollowup[];
+  evidence: { item: string; linked: string }[];
+  maturity: { supported_level: number | null; comment: string };
 }
 
 export interface VdaInterview {
   lang: string;
   requirements: VdaInterviewRequirement[];
+  topics: VdaInterviewTopic[];
   answers: Record<string, string>;
-  answers_lang: string;
-  answers_updated_at: string | null;
+  reviews: VdaReview[];
+  followups: VdaFollowup[];
+  followup_answers: Record<string, string>;
+  rounds_used: number;
+  max_rounds: number;
+  declared_maturity: number;
+  updated_at: string | null;
   ai_error: "" | "not_configured" | "unavailable";
+}
+
+export interface VdaInterviewPayload {
+  answers: Record<string, string>;
+  followup_answers: Record<string, string>;
+  lang: string;
+  reset_reviews?: boolean;
 }
 
 export interface VdaInterviewDraft {
   draft_en: string;
   draft_local: string;
-  unanswered: string[];
-  not_implemented: string[];
+  gaps: string[];
   interaction_id: string | null;
   provider: string;
   model: string;
@@ -300,10 +339,12 @@ export const controlsApi = {
     }).then((r) => r.data),
   getVdaInterview: (instanceId: string, lang: string) =>
     apiClient.get<VdaInterview>(`/controls/instances/${instanceId}/vda-interview/`, { params: { lang } }).then((r) => r.data),
-  saveVdaInterview: (instanceId: string, answers: Record<string, string>, lang: string) =>
-    apiClient.post<{ ok: boolean; answered: number }>(`/controls/instances/${instanceId}/vda-interview/`, { answers, lang }).then((r) => r.data),
-  draftVdaInterview: (instanceId: string, answers: Record<string, string>, lang: string) =>
-    apiClient.post<VdaInterviewDraft>(`/controls/instances/${instanceId}/vda-interview/draft/`, { answers, lang }).then((r) => r.data),
+  saveVdaInterview: (instanceId: string, payload: VdaInterviewPayload) =>
+    apiClient.post<VdaInterview>(`/controls/instances/${instanceId}/vda-interview/`, payload).then((r) => r.data),
+  reviewVdaInterview: (instanceId: string, payload: VdaInterviewPayload) =>
+    apiClient.post<VdaInterview>(`/controls/instances/${instanceId}/vda-interview/review/`, payload).then((r) => r.data),
+  draftVdaInterview: (instanceId: string, payload: VdaInterviewPayload) =>
+    apiClient.post<VdaInterviewDraft>(`/controls/instances/${instanceId}/vda-interview/draft/`, payload).then((r) => r.data),
   deleteInstance: (id: string) => apiClient.delete(`/controls/instances/${id}/`),
   archiveFramework: (id: string) => apiClient.delete(`/controls/frameworks/${id}/`),
   deleteFramework: (id: string) => apiClient.delete(`/controls/frameworks/${id}/delete/`),

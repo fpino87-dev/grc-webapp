@@ -217,16 +217,16 @@ Dowód jest dostępny natychmiast. System automatycznie sprawdzi, czy typ MIME p
 
 ### Jak uzupełnić Implementation description TISAX (wywiad z pytaniami)
 
-VDA ISA wypełnia się po angielsku: dla każdej kontroli TISAX audytor czyta, obok zadeklarowanej dojrzałości, **w jaki sposób** wymaganie jest wdrożone. W zakładce **Ocena** kontroli znajduje się pole „Implementation description (VDA ISA)”: można wpisać tekst bezpośrednio po angielsku lub skorzystać z wywiadu.
+VDA ISA wypełnia się po angielsku: dla każdej kontroli TISAX audytor czyta, obok zadeklarowanej dojrzałości, **w jaki sposób** wymaganie jest wdrożone. W zakładce **Ocena** kontroli znajduje się pole „Implementation description (VDA ISA)”: można wpisać tekst bezpośrednio po angielsku lub skorzystać z wywiadu, który symuluje rozmowę z audytorem TISAX.
 
 1. Kliknij **Uzupełnij za pomocą wywiadu (AI)**
-2. Dla każdego wymagania VDA (obowiązkowe *must*, zalecane *should*, wysoka / bardzo wysoka ochrona) pojawia się pytanie w Twoim języku; oryginalne wymaganie po angielsku otwiera się przez „Oryginalne wymaganie (EN)”. Dla kontroli L3 pojawiają się także wymagania rozszerzanej kontroli L2
-3. Odpowiadaj konkretnie: kto, co, jakim dokumentem lub narzędziem, jak często. Napisz „nie”, jeśli wymaganie nie jest jeszcze spełnione. Nazwiska i dane osobowe nie są potrzebne
-4. **Zapisz odpowiedzi**, aby wrócić później (pozostają przy kontroli, także na potrzeby ponownej oceny w kolejnym roku)
-5. **Wygeneruj szkic po angielsku**: AI pisze opis wyłącznie na podstawie Twoich odpowiedzi i pokazuje tłumaczenie w Twoim języku do weryfikacji. Obowiązkowe wymagania bez odpowiedzi są oznaczone `[TO BE COMPLETED]`; wymagania zadeklarowane jako niespełnione są sygnalizowane, aby zadeklarowana dojrzałość była spójna
+2. Audytor zadaje **2–4 pytania według tematów** w Twoim języku (np. dla polityki bezpieczeństwa: dokumenty, ich zatwierdzanie i przegląd, komunikacja do pracowników i partnerów). Przy każdym pytaniu widać, **co audytor chce zrozumieć**, **co wymienić** oraz, na żądanie, **przykład** z symbolami zastępczymi w nawiasach kwadratowych: dostosuj go do swojej sytuacji, nie kopiuj. „Wymagania VDA tego pytania” pokazuje oryginalne wymagania po angielsku (dla kontroli L3 także wymagania rozszerzanej kontroli L2)
+3. Odpowiadaj konkretnie: jakie dokumenty, kto odpowiada, jak to przebiega, jak często. Napisz „nie”, jeśli coś nie jest jeszcze wdrożone. Nazwiska i dane osobowe nie są potrzebne
+4. **Weryfikacja z audytorem** (maksymalnie **2 rundy**): dla każdego wymagania audytor wskazuje, czy jest pokryte, częściowo pokryte czy niepokryte, **dojrzałość**, którą potwierdzają odpowiedzi (z ostrzeżeniem, jeśli jest niższa od zadeklarowanej), **dowody**, o które zapyta na miejscu (wskazując te już powiązane z kontrolą), oraz do 3 **pytań uzupełniających** o to, czego brakuje. Odpowiedz na pytania uzupełniające i w razie potrzeby przeprowadź drugą rundę. Po wykorzystaniu rund można rozpocząć weryfikację od nowa: odpowiedzi na pytania pozostają
+5. **Wygeneruj szkic po angielsku**: AI pisze opis na podstawie całej rozmowy, według tematów i bez powtarzania faktów, korzystając wyłącznie z tego, co napisałeś. Obowiązkowe wymagania nadal niepokryte w ostatniej weryfikacji są oznaczone `[TO BE COMPLETED]`. Obok widać tłumaczenie w Twoim języku do weryfikacji
 6. **Użyj tego szkicu** kopiuje tekst do pola opisu: przeczytaj go, popraw w razie potrzeby i kliknij **Zapisz opis**
 
-Szkic nigdy nie zapisuje się sam: ścieżka audytu rejestruje, kto zapisał opis i czy pochodził z AI. Jeśli AI nie jest skonfigurowane, pytania pokazują oryginalny tekst wymagania, a automatyczny szkic jest niedostępny. Centrum Operacyjne sygnalizuje kontrole TISAX z dojrzałością ≥ 3 bez opisu.
+Odpowiedzi zapisuje się przyciskiem **Zapisz odpowiedzi** (weryfikacja i szkic również je zapisują) i pozostają przy kontroli na potrzeby ponownej oceny w kolejnym roku. Wywiad pozostaje w języku, w którym został rozpoczęty. Szkic nigdy nie zapisuje się sam: ścieżka audytu rejestruje, kto zapisał opis i czy pochodził z AI. Jeśli AI nie jest skonfigurowane, wywiad jest niedostępny, a pole pokazuje oryginalne wymagania, aby napisać opis ręcznie. Centrum Operacyjne sygnalizuje kontrole TISAX z dojrzałością ≥ 3 bez opisu.
 
 ### Jak pobrać SOA ISO 27001, VDA ISA TISAX, Matrycę NIS2
 

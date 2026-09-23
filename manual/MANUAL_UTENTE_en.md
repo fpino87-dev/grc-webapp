@@ -217,16 +217,16 @@ The evidence is available immediately. The system will automatically verify that
 
 ### How to fill in the TISAX Implementation description (guided interview)
 
-The VDA ISA is filled in in English: for each TISAX control the auditor reads, next to the declared maturity, **how** the requirement is implemented. The control's **Evaluation** tab has the «Implementation description (VDA ISA)» box: you can write the English text directly or use the guided interview.
+The VDA ISA is filled in in English: for each TISAX control the auditor reads, next to the declared maturity, **how** the requirement is implemented. The control's **Evaluation** tab has the «Implementation description (VDA ISA)» box: you can write the English text directly or use the guided interview, which simulates a conversation with a TISAX auditor.
 
 1. Click **Fill in with the guided interview (AI)**
-2. For each VDA requirement (mandatory *must*, recommended *should*, high / very high protection) a question appears in your language; the original English requirement opens with «Original requirement (EN)». For L3 controls the requirements of the extended L2 control appear as well
-3. Answer concretely: who, what, which document or tool, how often. Write "no" if the requirement is not fulfilled yet. Names of people and personal data are not needed
-4. **Save answers** to continue later (they stay on the control, also for next year's re-evaluation)
-5. **Generate English draft**: the AI writes the description using only your answers and shows a translation in your language for review. Mandatory requirements without an answer are marked `[TO BE COMPLETED]`; those declared as not fulfilled are flagged, so that the declared maturity stays consistent
+2. The auditor asks you **2–4 questions by topic** in your language (e.g. for the security policy: the documents, their approval and review, communication to staff and partners). For each question you see **what the auditor wants to understand**, **what to mention** and, on request, **an example** with placeholders in square brackets: adapt it to your reality, do not copy it. «VDA requirements of this question» shows the original English requirements (for L3 controls also those of the extended L2 control)
+3. Answer concretely: which documents, who is responsible, how it works, how often. Write "no" if something is not in place yet. Names of people and personal data are not needed
+4. **Review with the auditor** (at most **2 rounds**): for each requirement the auditor says whether it is covered, partial or not covered, the **maturity** the answers support (with a warning if lower than the declared one), the **evidence** it will ask for on site (flagging what is already linked to the control) and up to 3 **follow-up questions** on what is missing. Answer the follow-ups and, if needed, run the second round. After the rounds you can restart the review: the answers to the questions are kept
+5. **Generate English draft**: the AI writes the description from the whole conversation, by topic and without repeating facts, using only what you wrote. Mandatory requirements still uncovered at the last review are marked `[TO BE COMPLETED]`. A translation in your language is shown for review
 6. **Use this draft** copies the text into the description field: read it, correct it if needed and press **Save description**
 
-The draft is never saved on its own: the audit trail records who saved the description and whether it came from the AI. If the AI is not configured, the questions show the original requirement text and the automatic draft is not available. The Operations Center flags TISAX controls with maturity ≥ 3 and no description.
+Answers are saved with **Save answers** (review and draft save them too) and stay on the control for next year's re-evaluation. The interview stays in the language it was started in. The draft is never saved on its own: the audit trail records who saved the description and whether it came from the AI. If the AI is not configured the interview is not available and the box shows the original requirements to write the description manually. The Operations Center flags TISAX controls with maturity ≥ 3 and no description.
 
 ### How to download SOA ISO 27001, VDA ISA TISAX, NIS2 Matrix
 

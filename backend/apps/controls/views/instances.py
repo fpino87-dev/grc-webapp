@@ -97,7 +97,7 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             return [ControlInstanceAssignPermission()]
         if self.action == "bulk_approve_soa":
             return [SoAApprovalPermission()]
-        if self.action in ("vda_interview", "vda_interview_draft"):
+        if self.action in ("vda_interview", "vda_interview_review", "vda_interview_draft"):
             return [VdaInterviewPermission()]
         return super().get_permissions()
 
@@ -472,13 +472,28 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             )
         return instance, None
 
+    def _interview_call(self, fn):
+        """Esegue un passo dell'intervista traducendo gli errori in risposte HTTP."""
+        from django.core.exceptions import ValidationError
+        from django.utils.translation import gettext as _
+
+        from apps.ai_engine.router import AiNotConfigured, LlmUnavailable, ai_not_configured_message
+
+        try:
+            return Response(fn())
+        except ValidationError as e:
+            return Response({"error": e.messages[0]}, status=400)
+        except AiNotConfigured:
+            return Response({"error": ai_not_configured_message()}, status=400)
+        except LlmUnavailable:
+            return Response({"error": _("Servizio IA temporaneamente non disponibile. Riprova più tardi.")}, status=503)
+
     @action(detail=True, methods=["get", "post"], url_path="vda-interview")
     def vda_interview(self, request, pk=None):
-        """GET ?lang=it → requisiti, domande (generate e messe in cache al primo
-        uso) e risposte salvate. POST {answers, lang} → salva le risposte."""
-        from django.core.exceptions import ValidationError
-
-        from ..services.vda_interview import get_interview, save_interview_answers
+        """GET ?lang=it → temi (generati e messi in cache al primo uso),
+        requisiti, risposte, verifiche dell'auditor e approfondimenti.
+        POST {answers, followup_answers, lang, reset_reviews?} → salva."""
+        from ..services.vda_interview import get_interview, save_interview
 
         instance, error = self._interview_instance()
         if error:
@@ -487,35 +502,48 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             lang = self._interview_lang(request.query_params.get("lang"))
             return Response(get_interview(instance, lang, request.user))
         lang = self._interview_lang(request.data.get("lang"))
-        try:
-            answers = save_interview_answers(instance, request.data.get("answers"), lang, request.user)
-        except ValidationError as e:
-            return Response({"error": e.messages[0]}, status=400)
-        return Response({"ok": True, "answered": len(answers)})
+
+        def run():
+            save_interview(
+                instance, request.data.get("answers"), request.data.get("followup_answers"),
+                lang, request.user, reset_reviews=bool(request.data.get("reset_reviews")),
+            )
+            return get_interview(instance, lang, request.user)
+        return self._interview_call(run)
+
+    @action(detail=True, methods=["post"], url_path="vda-interview/review")
+    def vda_interview_review(self, request, pk=None):
+        """POST {answers, followup_answers, lang} → salva e fa la verifica
+        "da auditor" (max 2 giri). Ritorna l'intervista aggiornata."""
+        from ..services.vda_interview import get_interview, review_interview
+
+        instance, error = self._interview_instance()
+        if error:
+            return error
+        lang = self._interview_lang(request.data.get("lang"))
+
+        def run():
+            review_interview(
+                instance, request.data.get("answers"), request.data.get("followup_answers"),
+                lang, request.user,
+            )
+            return get_interview(instance, lang, request.user)
+        return self._interview_call(run)
 
     @action(detail=True, methods=["post"], url_path="vda-interview/draft")
     def vda_interview_draft(self, request, pk=None):
-        """POST {answers, lang} → salva le risposte e ritorna la bozza IA
+        """POST {answers, followup_answers, lang} → salva e ritorna la bozza IA
         (EN + lingua utente). La bozza NON viene salvata sul controllo."""
-        from django.core.exceptions import ValidationError
-
-        from apps.ai_engine.router import AiNotConfigured, LlmUnavailable, ai_not_configured_message
-
         from ..services.vda_interview import draft_implementation
 
         instance, error = self._interview_instance()
         if error:
             return error
         lang = self._interview_lang(request.data.get("lang"))
-        try:
-            return Response(draft_implementation(instance, request.data.get("answers"), lang, request.user))
-        except ValidationError as e:
-            return Response({"error": e.messages[0]}, status=400)
-        except AiNotConfigured:
-            return Response({"error": ai_not_configured_message()}, status=400)
-        except LlmUnavailable:
-            from django.utils.translation import gettext as _
-            return Response({"error": _("Servizio IA temporaneamente non disponibile. Riprova più tardi.")}, status=503)
+        return self._interview_call(lambda: draft_implementation(
+            instance, request.data.get("answers"), request.data.get("followup_answers"),
+            lang, request.user,
+        ))
 
     @action(detail=False, methods=["post"], url_path="bulk-approve-soa")
     def bulk_approve_soa(self, request):

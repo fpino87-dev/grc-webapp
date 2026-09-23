@@ -1,9 +1,11 @@
 """
-Intervista guidata VDA ISA: requisiti dal framework, domande IA in cache,
-risposte salvate, bozza IA non salvata (human-in-the-loop), conferma
+Intervista guidata VDA ISA "da auditor": requisiti dal framework, temi IA in
+cache, fotografia dei temi e lingua bloccata, verifica su 2 giri con
+approfondimenti, bozza IA non salvata (human-in-the-loop), conferma
 dell'interazione IA al salvataggio della descrizione.
 """
 import json
+import re
 from unittest.mock import patch
 
 import pytest
@@ -90,93 +92,179 @@ def test_parse_requirements_levels_and_continuations():
     assert parse_requirements(DESC_BASE)[0]["id"] == reqs[0]["id"]
 
 
+def _ids_in(prompt):
+    return re.findall(r"^- \[([0-9a-f]{10})\]", prompt, re.M)
+
+
+class FakeAI:
+    """Simula il provider IA riconoscendo il passo dal prompt."""
+
+    def __init__(self, coverage="missing", followups=1, maturity=2):
+        self.calls = []
+        self.coverage = coverage
+        self.followups = followups
+        self.maturity = maturity
+
+    def __call__(self, **kwargs):
+        prompt = kwargs["prompt"]
+        self.calls.append(kwargs)
+        ids = _ids_in(prompt)
+        if "Group the requirements" in prompt:
+            half = len(ids) // 2
+            return _route_result({"topics": [
+                {"question": "Quali documenti?", "auditor_intent": "Capire i documenti",
+                 "what_to_mention": ["policy", "manuale"], "example": "Il documento [codice]...",
+                 "req_ids": ids[:half]},
+                {"question": "Come li comunicate?", "auditor_intent": "Capire la diffusione",
+                 "what_to_mention": ["intranet"], "example": "Pubblicati su [strumento]",
+                 "req_ids": ids[half:-1] + ["invented"]},  # l'ultimo id "dimenticato"
+            ]})
+        if "review round" in prompt:
+            return _route_result({
+                "coverage": {i: self.coverage for i in ids[:-1]} | {"invented": "covered"},
+                "followups": [{"question": f"Approfondimento {n}?", "req_ids": ids[:1]}
+                              for n in range(self.followups + 3)],
+                "evidence": [{"item": "Verbale CdA", "linked": "POL-1 Policy"},
+                             {"item": "Registro", "linked": "Inventato"}],
+                "maturity": {"supported_level": self.maturity, "comment": "Manca la revisione"},
+                "summary": "Base presente.",
+            }, interaction_id=None)
+        return _route_result({"draft_en": "The policy exists.", "draft_local": "La policy esiste."})
+
+
 @pytest.mark.django_db
-def test_get_interview_vh_includes_base_and_caches_questions(client, setup):
+def test_get_interview_generates_topics_once_and_covers_all_requirements(client, setup):
     vh = setup["vh"]
-
-    def fake_route(**kwargs):
-        ids = [line.split('"')[1] for line in kwargs["prompt"].splitlines() if line.startswith('- id "')]
-        assert kwargs["sanitize"] is False  # testo normativo pubblico
-        return _route_result({"questions": {i: f"Domanda {i}?" for i in ids}})
-
-    with patch("apps.ai_engine.tasks_ai.route", side_effect=fake_route) as mocked:
+    ai = FakeAI()
+    with patch("apps.ai_engine.tasks_ai.route", side_effect=ai):
         resp = client.get(f"{URL}{vh.id}/vda-interview/?lang=it")
         assert resp.status_code == 200
-        assert mocked.call_count == 2  # una chiamata per controllo (base + VH)
-        reqs = resp.data["requirements"]
-        assert [r["level"] for r in reqs] == ["must", "must", "should", "high", "very_high"]
-        assert reqs[0]["source"] == "L2" and reqs[-1]["source"] == "L3"
-        assert all(r["question"].startswith("Domanda") for r in reqs)
+        assert len(ai.calls) == 1 and ai.calls[0]["sanitize"] is False
+        data = resp.data
+        # VH: requisiti del base (4) + propri (1)
+        assert [r["level"] for r in data["requirements"]] == ["must", "must", "should", "high", "very_high"]
+        topics = data["topics"]
+        assert [t["id"] for t in topics] == ["t1", "t2"]
+        assigned = [rid for t in topics for rid in t["req_ids"]]
+        assert "invented" not in assigned
+        assert sorted(assigned) == sorted(r["id"] for r in data["requirements"])  # dimenticato → ultimo tema
+        assert data["rounds_used"] == 0 and data["max_rounds"] == 2
 
-        # seconda apertura: domande dalla cache, nessuna chiamata IA
         client.get(f"{URL}{vh.id}/vda-interview/?lang=it")
-        assert mocked.call_count == 2
+        assert len(ai.calls) == 1  # cache
 
 
 @pytest.mark.django_db
-def test_get_interview_without_ai_returns_requirements(client, setup):
+def test_get_interview_without_ai_returns_only_requirements(client, setup):
     from apps.ai_engine.router import AiNotConfigured
     with patch("apps.ai_engine.tasks_ai.route", side_effect=AiNotConfigured("x")):
         resp = client.get(f"{URL}{setup['base'].id}/vda-interview/?lang=pl")
     assert resp.status_code == 200
     assert resp.data["ai_error"] == "not_configured"
-    assert len(resp.data["requirements"]) == 4
-    assert all(r["question"] == "" and r["text_en"] for r in resp.data["requirements"])
+    assert resp.data["topics"] == [] and len(resp.data["requirements"]) == 4
 
 
 @pytest.mark.django_db
-def test_save_answers_filters_unknown_ids_and_audits_counts(client, setup):
+def test_save_snapshots_topics_and_locks_language(client, setup):
     from core.audit import AuditLog
     inst = setup["base"]
-    rid = parse_requirements(DESC_BASE)[0]["id"]
-    resp = client.post(f"{URL}{inst.id}/vda-interview/", {
-        "lang": "it", "answers": {rid: "  Politica approvata dal CdA  ", "bogus": "x", parse_requirements(DESC_BASE)[1]["id"]: ""},
-    }, format="json")
-    assert resp.status_code == 200 and resp.data["answered"] == 1
+    with patch("apps.ai_engine.tasks_ai.route", side_effect=FakeAI()):
+        resp = client.post(f"{URL}{inst.id}/vda-interview/", {
+            "lang": "it", "answers": {"t1": "  POL-ISMS-01 approvata dal CdA  ", "bogus": "x"},
+        }, format="json")
+    assert resp.status_code == 200
     inst.refresh_from_db()
-    assert inst.implementation_interview["answers"] == {rid: "Politica approvata dal CdA"}
-    assert inst.implementation_interview["lang"] == "it"
+    state = inst.implementation_interview
+    assert state["answers"] == {"t1": "POL-ISMS-01 approvata dal CdA"}
+    assert state["lang"] == "it" and len(state["topics"]) == 2
     log = AuditLog.objects.get(entity_id=inst.pk, action_code="control.vda_interview_saved")
-    assert log.payload == {"answered": 1, "lang": "it"}
+    assert log.payload["answered"] == 1 and "POL" not in str(log.payload)
+
+    # riaperta in un'altra lingua: stessi temi, lingua originale, nessuna chiamata IA
+    with patch("apps.ai_engine.tasks_ai.route", side_effect=AssertionError("no AI")):
+        again = client.get(f"{URL}{inst.id}/vda-interview/?lang=pl")
+    assert again.data["lang"] == "it" and again.data["answers"]["t1"].startswith("POL")
 
 
 @pytest.mark.django_db
-def test_draft_returns_text_but_does_not_save_description(client, setup):
+def test_review_rounds_followups_and_limit(client, setup):
+    from core.audit import AuditLog
+    inst = setup["base"]
+    ai = FakeAI(followups=1)
+    with patch("apps.ai_engine.tasks_ai.route", side_effect=ai):
+        # senza risposte la verifica non parte
+        empty = client.post(f"{URL}{inst.id}/vda-interview/review/", {"lang": "it", "answers": {}}, format="json")
+        assert empty.status_code == 400
+
+        r1 = client.post(f"{URL}{inst.id}/vda-interview/review/",
+                         {"lang": "it", "answers": {"t1": "Policy approvata"}}, format="json")
+        assert r1.status_code == 200
+        review = r1.data["reviews"][0]
+        assert review["round"] == 1
+        assert len(review["followups"]) == 3  # massimo 3
+        assert [f["id"] for f in r1.data["followups"]] == ["f1_1", "f1_2", "f1_3"]
+        assert "invented" not in review["coverage"]
+        # requisito non valutato dall'IA → missing
+        assert set(review["coverage"].values()) == {"missing"}
+        assert review["evidence"][1]["linked"] == ""  # nome non collegato → scartato
+        assert ai.calls[-1]["sanitize"] is True
+        assert "review round 1 of 2" in ai.calls[-1]["prompt"]
+
+        r2 = client.post(f"{URL}{inst.id}/vda-interview/review/", {
+            "lang": "it", "answers": {"t1": "Policy approvata"},
+            "followup_answers": {"f1_1": "Revisione annuale", "zzz": "x"},
+        }, format="json")
+        assert r2.data["rounds_used"] == 2
+        assert r2.data["followup_answers"] == {"f1_1": "Revisione annuale"}
+        assert "Follow-up Q: Approfondimento 0?\nA: Revisione annuale" in ai.calls[-1]["prompt"]
+        assert "LAST round" in ai.calls[-1]["prompt"]
+
+        r3 = client.post(f"{URL}{inst.id}/vda-interview/review/",
+                         {"lang": "it", "answers": {"t1": "Policy approvata"}}, format="json")
+        assert r3.status_code == 400
+
+        # ricominciare la verifica azzera giri e approfondimenti, non le risposte
+        reset = client.post(f"{URL}{inst.id}/vda-interview/", {
+            "lang": "it", "answers": {"t1": "Policy approvata"}, "reset_reviews": True,
+        }, format="json")
+        assert reset.data["rounds_used"] == 0 and reset.data["followups"] == []
+        assert reset.data["answers"] == {"t1": "Policy approvata"}
+    log = AuditLog.objects.filter(entity_id=inst.pk, action_code="control.vda_interview_reviewed").first()
+    assert set(log.payload) == {"round", "covered", "partial", "missing", "supported_maturity"}
+
+
+@pytest.mark.django_db
+def test_draft_uses_review_gaps_and_is_not_saved(client, setup):
     inst = setup["base"]
     reqs = parse_requirements(DESC_BASE)
-    answers = {reqs[0]["id"]: "Sì, approvata dal CdA", reqs[3]["id"]: "No, non ancora"}
-    captured = {}
-
-    def fake_route(**kwargs):
-        captured.update(kwargs)
-        return _route_result({
-            "draft_en": "The policy is released by the board.",
-            "draft_local": "La politica è approvata dal CdA.",
-            "not_implemented": [reqs[3]["id"], "invented-id"],
-        })
-
-    with patch("apps.ai_engine.tasks_ai.route", side_effect=fake_route):
-        resp = client.post(f"{URL}{inst.id}/vda-interview/draft/", {"lang": "it", "answers": answers},
-                           format="json")
+    ai = FakeAI(coverage="missing")
+    with patch("apps.ai_engine.tasks_ai.route", side_effect=ai):
+        client.post(f"{URL}{inst.id}/vda-interview/review/",
+                    {"lang": "it", "answers": {"t1": "Sì, approvata dal CdA"}}, format="json")
+        resp = client.post(f"{URL}{inst.id}/vda-interview/draft/",
+                           {"lang": "it", "answers": {"t1": "Sì, approvata dal CdA"}}, format="json")
     assert resp.status_code == 200
-    assert resp.data["draft_en"] == "The policy is released by the board."
-    assert resp.data["draft_local"] == "La politica è approvata dal CdA."
-    assert resp.data["not_implemented"] == [reqs[3]["id"]]  # id inventati scartati
-    assert resp.data["unanswered"] == [reqs[1]["id"], reqs[2]["id"]]
-    assert captured["sanitize"] is True and captured["task_type"] == "vda_interview"
-    assert "Sì, approvata dal CdA" in captured["prompt"]
+    assert resp.data["draft_en"] == "The policy exists."
+    # gaps = obbligatori (must/high/very_high) "missing" nell'ultima verifica; il should no
+    assert set(resp.data["gaps"]) == {reqs[0]["id"], reqs[1]["id"], reqs[3]["id"]}
+    prompt = ai.calls[-1]["prompt"]
+    assert ai.calls[-1]["sanitize"] is True
+    assert "Sì, approvata dal CdA" in prompt and "State each fact ONCE" in prompt
     inst.refresh_from_db()
     assert inst.implementation_description == ""  # human-in-the-loop
-    assert inst.implementation_interview["answers"] == answers
 
 
 @pytest.mark.django_db
-def test_draft_without_ai_configured_returns_400(client, setup):
+def test_draft_without_answers_or_ai(client, setup):
     from apps.ai_engine.router import AiNotConfigured
+    with patch("apps.ai_engine.tasks_ai.route", side_effect=FakeAI()):
+        no_answers = client.post(f"{URL}{setup['base'].id}/vda-interview/draft/",
+                                 {"lang": "it", "answers": {}}, format="json")
+    assert no_answers.status_code == 400
     with patch("apps.ai_engine.tasks_ai.route", side_effect=AiNotConfigured("x")):
-        resp = client.post(f"{URL}{setup['base'].id}/vda-interview/draft/", {"lang": "it", "answers": {}},
-                           format="json")
-    assert resp.status_code == 400
+        no_ai = client.post(f"{URL}{setup['vh'].id}/vda-interview/draft/",
+                            {"lang": "it", "answers": {"t1": "x"}}, format="json")
+    assert no_ai.status_code == 400
 
 
 @pytest.mark.django_db

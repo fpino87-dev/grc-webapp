@@ -2688,3 +2688,16 @@ msgstr "AI service temporarily unavailable. Please try again later."
 #: apps/controls
 msgid "L'intervista VDA ISA è disponibile solo per i controlli TISAX."
 msgstr "The VDA ISA interview is only available for TISAX controls."
+
+#: apps/controls/services/vda_interview.py
+#, python-format
+msgid "Hai già usato i %(max)s giri di verifica."
+msgstr "You have already used the %(max)s review rounds."
+
+#: apps/controls/services/vda_interview.py
+msgid "Rispondi ad almeno una domanda prima della verifica."
+msgstr "Answer at least one question before the review."
+
+#: apps/controls/services/vda_interview.py
+msgid "Rispondi ad almeno una domanda prima di generare la bozza."
+msgstr "Answer at least one question before generating the draft."

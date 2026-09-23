@@ -217,16 +217,16 @@ L'evidenza è disponibile immediatamente. Il sistema verificherà automaticament
 
 ### Come compilare l'Implementation description TISAX (intervista guidata)
 
-Il VDA ISA si compila in inglese: per ogni controllo TISAX l'auditor legge, accanto alla maturità dichiarata, **come** il requisito è implementato. Nel tab **Valutazione** del controllo c'è il riquadro «Implementation description (VDA ISA)»: si può scrivere direttamente il testo in inglese oppure usare l'intervista guidata.
+Il VDA ISA si compila in inglese: per ogni controllo TISAX l'auditor legge, accanto alla maturità dichiarata, **come** il requisito è implementato. Nel tab **Valutazione** del controllo c'è il riquadro «Implementation description (VDA ISA)»: si può scrivere direttamente il testo in inglese oppure usare l'intervista guidata, che simula il confronto con un auditor TISAX.
 
 1. Clicca **Compila con l'intervista guidata (IA)**
-2. Per ogni requisito VDA (obbligatorio *must*, consigliato *should*, alta / molto alta protezione) compare una domanda nella tua lingua; il requisito originale in inglese si apre con «Requisito originale (EN)». Per i controlli L3 compaiono anche i requisiti del controllo L2 esteso
-3. Rispondi in modo concreto: chi, cosa, con quale documento o strumento, ogni quanto. Scrivi «no» se il requisito non è ancora soddisfatto. Nomi di persone e dati personali non servono
-4. **Salva risposte** per riprendere in un secondo momento (restano sul controllo anche per la rivalutazione dell'anno successivo)
-5. **Genera bozza in inglese**: l'IA scrive la descrizione usando solo le tue risposte e mostra la traduzione nella tua lingua per la verifica. I requisiti obbligatori senza risposta sono segnati `[TO BE COMPLETED]`; quelli dichiarati non soddisfatti sono segnalati, perché la maturità dichiarata sia coerente
+2. L'auditor ti fa **2–4 domande per tema** nella tua lingua (per esempio, per la politica di sicurezza: i documenti, la loro approvazione e revisione, la comunicazione a dipendenti e partner). Per ogni domanda vedi **cosa vuole capire l'auditor**, **cosa citare** e, a richiesta, **un esempio** con segnaposto tra parentesi quadre: adattalo alla tua realtà, non copiarlo. «Requisiti VDA di questa domanda» mostra i requisiti originali in inglese (per i controlli L3 anche quelli del controllo L2 esteso)
+3. Rispondi in modo concreto: quali documenti, chi è responsabile, come avviene, ogni quanto. Scrivi «no» se qualcosa non è ancora in atto. Nomi di persone e dati personali non servono
+4. **Verifica con l'auditor** (al massimo **2 giri**): l'auditor indica per ogni requisito se è coperto, parziale o non coperto, la **maturità** che le risposte sostengono (con un avviso se è più bassa di quella dichiarata), le **evidenze** che chiederà in sede (segnalando quelle già collegate al controllo) e fino a 3 **domande di approfondimento** su ciò che manca. Rispondi agli approfondimenti e, se serve, fai il secondo giro. Finiti i giri si può ricominciare la verifica: le risposte alle domande restano
+5. **Genera bozza in inglese**: l'IA scrive la descrizione dall'intera conversazione, per tema e senza ripetere i fatti, usando solo quello che hai scritto. I requisiti obbligatori ancora scoperti all'ultima verifica sono segnati `[TO BE COMPLETED]`. Accanto c'è la traduzione nella tua lingua per la verifica
 6. **Usa questa bozza** copia il testo nel campo descrizione: rileggilo, correggilo se serve e premi **Salva descrizione**
 
-La bozza non viene mai salvata da sola: resta registrato nell'audit trail chi ha salvato la descrizione e se proveniva dall'IA. Se l'IA non è configurata le domande mostrano il testo originale del requisito e la bozza automatica non è disponibile. Il Centro Operativo segnala i controlli TISAX con maturità ≥ 3 senza descrizione.
+Le risposte si salvano con **Salva risposte** (anche verifica e bozza le salvano) e restano sul controllo per la rivalutazione dell'anno successivo. L'intervista resta nella lingua in cui è stata iniziata. La bozza non viene mai salvata da sola: resta registrato nell'audit trail chi ha salvato la descrizione e se proveniva dall'IA. Se l'IA non è configurata l'intervista non è disponibile e il riquadro mostra i requisiti originali per scrivere la descrizione a mano. Il Centro Operativo segnala i controlli TISAX con maturità ≥ 3 senza descrizione.
 
 ### Come scaricare SOA ISO 27001, VDA ISA TISAX, NIS2 Matrix
 

@@ -217,61 +217,216 @@ def _parse_json_object(text: str) -> dict:
     return data if isinstance(data, dict) else {}
 
 
-def generate_interview_questions(control, requirements: list[dict], lang: str, user) -> dict:
-    """Riformula i requisiti VDA ISA (inglese) come domande nella lingua `lang`.
+# Controlli con molti requisiti (fino a 15 per un VH) e modelli che "ragionano"
+# prima di rispondere (il ragionamento consuma lo stesso budget): con 3000
+# token la risposta JSON veniva troncata.
+_VDA_MAX_TOKENS = 8000
 
-    Testo normativo pubblico: nessun dato aziendale, quindi niente sanitize.
-    Ritorna `{req_id: domanda}` solo per gli id richiesti."""
+_VDA_MATURITY = (
+    "VDA ISA maturity levels: 0 Incomplete (not implemented), 1 Performed (done informally), "
+    "2 Managed (planned and tracked), 3 Established (defined, documented, applied), "
+    "4 Predictable (measured and monitored), 5 Optimizing (continuously improved)."
+)
+
+
+def _requirements_block(requirements: list[dict]) -> str:
+    return "\n".join(f'- [{r["id"]}] ({r["level"]}) {r["text"]}' for r in requirements)
+
+
+def _conversation_block(topics: list[dict], followups: list[dict]) -> str:
+    lines = []
+    for t in topics:
+        lines.append(f"Q: {t['question']}\nA: {t['answer'].strip() or '(no answer)'}")
+    for f in followups:
+        lines.append(f"Follow-up Q: {f['question']}\nA: {f['answer'].strip() or '(no answer)'}")
+    return "\n\n".join(lines)
+
+
+def _str_list(value, limit: int, max_len: int) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [str(x).strip()[:max_len] for x in value if isinstance(x, str) and x.strip()][:limit]
+
+
+def generate_interview_topics(control, requirements: list[dict], lang: str, user) -> list[dict]:
+    """Raggruppa i requisiti VDA ISA in 2-4 temi d'intervista nella lingua `lang`.
+
+    Testo normativo pubblico: niente sanitize. L'esempio usa segnaposto tra
+    parentesi quadre per ogni fatto specifico, così non può essere copiato come
+    se fosse vero. Ogni requisito finisce in un tema: quelli che l'IA dimentica
+    vanno nell'ultimo (la verifica dell'auditor controlla comunque tutti)."""
     lang_label = _LANG_LABELS.get(lang, lang)
-    items = "\n".join(f'- id "{r["id"]}": {r["text"]}' for r in requirements)
+    guidance = control.tr("guidance", "en")
     prompt = f"""VDA ISA control {control.external_id}: {control.get_title("en")}
 
-Requirements:
-{items}
+Requirements (id, level, text):
+{_requirements_block(requirements)}
+{f"{chr(10)}Implementation guidance:{chr(10)}{guidance[:800]}{chr(10)}" if guidance else ""}
+You are a TISAX auditor preparing the interview for this control. Group the requirements
+into 2 to 4 topics, as you would ask them in a real audit interview (e.g. for a policy
+control: the documents themselves; approval and review; communication to staff and partners).
+Every requirement id must belong to exactly one topic; "should" requirements go into the
+most related topic. Avoid topics that would make the site repeat the same answer.
 
-For each requirement write ONE question in {lang_label} that a site manager can answer
-to explain HOW the organization fulfils it (who, what, which document or tool, how often).
-Plain language, no jargon, max 30 words each. Do not answer the question.
+For each topic, written in {lang_label}:
+- "question": one open question (max 35 words) asking the site to explain how they do it
+- "auditor_intent": what the auditor wants to understand (max 25 words)
+- "what_to_mention": 3 to 6 short items the answer should cover (documents, roles,
+  approval, frequency, tools, records)
+- "example": an example answer of 2-3 sentences, in {lang_label}, where EVERY specific fact is a
+  placeholder in square brackets written in {lang_label} (e.g. [document code], [role],
+  [frequency], [tool], translated). Never invent concrete names, numbers or products.
+- "req_ids": the requirement ids covered
 
-Reply ONLY with valid JSON: {{"questions": {{"<id>": "<question>"}}}}"""
+Reply ONLY with valid JSON: {{"topics": [{{"question": "...", "auditor_intent": "...", "what_to_mention": ["..."], "example": "...", "req_ids": ["..."]}}]}}"""
 
     result = route(
         task_type="vda_interview",
         prompt=prompt,
-        system="You are a TISAX / VDA ISA assessor preparing interview questions. Reply only with valid JSON.",
+        system="You are an experienced TISAX / VDA ISA auditor. Reply only with valid JSON.",
         user=user,
         entity_id=control.pk,
         module_source="M03",
         sanitize=False,  # dati normativi pubblici, nessun dato aziendale
+        max_tokens=_VDA_MAX_TOKENS,
+        timeout=120,
     )
-    questions = _parse_json_object(result.get("text", "")).get("questions") or {}
-    wanted = {r["id"] for r in requirements}
+    raw = _parse_json_object(result.get("text", "")).get("topics")
+    if not isinstance(raw, list):
+        return []
+    valid_ids = [r["id"] for r in requirements]
+    assigned: set[str] = set()
+    topics = []
+    for item in raw[:5]:
+        if not isinstance(item, dict) or not str(item.get("question") or "").strip():
+            continue
+        req_ids = [x for x in (item.get("req_ids") or []) if x in valid_ids and x not in assigned]
+        assigned.update(req_ids)
+        topics.append({
+            "id": f"t{len(topics) + 1}",
+            "question": str(item["question"]).strip()[:400],
+            "auditor_intent": str(item.get("auditor_intent") or "").strip()[:300],
+            "what_to_mention": _str_list(item.get("what_to_mention"), 8, 150),
+            "example": str(item.get("example") or "").strip()[:800],
+            "req_ids": req_ids,
+        })
+    if topics:
+        topics[-1]["req_ids"] += [x for x in valid_ids if x not in assigned]
+    return topics
+
+
+def review_vda_interview(instance, requirements: list[dict], topics: list[dict],
+                         followups: list[dict], references: list[str], lang: str,
+                         round_no: int, max_rounds: int, user) -> dict:
+    """Verifica "da auditor" delle risposte: copertura per requisito, domande di
+    approfondimento, evidenze da preparare, maturità sostenuta dalle risposte."""
+    control = instance.control
+    lang_label = _LANG_LABELS.get(lang, lang)
+    refs = "\n".join(f"- {x}" for x in references) or "- none"
+    last = round_no >= max_rounds
+    prompt = f"""VDA ISA control {control.external_id}: {control.get_title("en")}
+
+Requirements (id, level, text):
+{_requirements_block(requirements)}
+
+Interview with the site (answers in {lang_label}):
+{_conversation_block(topics, followups)}
+
+Documents and evidence already linked to this control:
+{refs}
+
+Maturity level currently declared: {instance.calc_maturity_level}
+{_VDA_MATURITY}
+
+You are the TISAX auditor. This is review round {round_no} of {max_rounds}.
+1. "coverage": for EVERY requirement id, "covered" (an answer explicitly addresses it),
+   "partial" or "missing". Judge only on what is written, never assume.
+2. "followups": at most 3 questions in {lang_label} about the most important gaps
+   ("must", "high", "very_high" first), specific and referring to what the site said.
+   Never ask again something already answered. Empty list if nothing important is missing.
+   {"This is the LAST round: ask only what is essential." if last else ""}
+3. "evidence": up to 6 records or documents you would ask to see on site for this control,
+   in {lang_label}; "linked" is the exact name from the linked list above if one matches,
+   otherwise "".
+4. "maturity": the highest level (0-5) the answers support, with one sentence in
+   {lang_label} explaining why (and what is missing for the next level).
+5. "summary": 1-2 sentences in {lang_label} with your overall impression.
+
+Reply ONLY with valid JSON:
+{{"coverage": {{"<id>": "covered"}}, "followups": [{{"question": "...", "req_ids": ["<id>"]}}], "evidence": [{{"item": "...", "linked": ""}}], "maturity": {{"supported_level": 3, "comment": "..."}}, "summary": "..."}}"""
+
+    result = route(
+        task_type="vda_interview",
+        prompt=prompt,
+        system=(
+            "You are a strict but fair TISAX auditor. You assess only what the site states. "
+            "Reply only with valid JSON."
+        ),
+        user=user,
+        entity_id=instance.pk,
+        module_source="M03",
+        sanitize=True,
+        plant_ids=[instance.plant_id] if instance.plant_id else [],
+        max_tokens=_VDA_MAX_TOKENS,
+        timeout=120,
+    )
+    data = _parse_json_object(result.get("text", ""))
+    coverage = data.get("coverage") if isinstance(data.get("coverage"), dict) else {}
+    followups_out = []
+    for f in data.get("followups") or []:
+        if isinstance(f, dict) and str(f.get("question") or "").strip():
+            followups_out.append({
+                "question": str(f["question"]).strip()[:400],
+                "req_ids": [str(x) for x in (f.get("req_ids") or []) if isinstance(x, str)],
+            })
+    evidence = []
+    for e in data.get("evidence") or []:
+        if isinstance(e, dict) and str(e.get("item") or "").strip():
+            evidence.append({"item": str(e["item"]).strip()[:200], "linked": str(e.get("linked") or "").strip()})
+    maturity = data.get("maturity") if isinstance(data.get("maturity"), dict) else {}
+    try:
+        level = min(5, max(0, int(maturity.get("supported_level"))))
+    except (TypeError, ValueError):
+        level = None
     return {
-        k: str(v).strip()[:500]
-        for k, v in questions.items()
-        if k in wanted and isinstance(v, str) and v.strip()
+        "coverage": {str(k): str(v) for k, v in coverage.items()},
+        "followups": followups_out,
+        "evidence": evidence,
+        "maturity": {"supported_level": level, "comment": str(maturity.get("comment") or "").strip()[:500]},
+        "summary": str(data.get("summary") or "").strip()[:600],
+        "interaction_id": result.get("interaction_id"),
     }
 
 
-def draft_vda_implementation(instance, requirements: list[dict], answers: dict,
+def draft_vda_implementation(instance, requirements: list[dict], topics: list[dict],
+                             followups: list[dict], gaps: list[dict] | None,
                              references: list[str], lang: str, user) -> dict:
-    """Bozza della "Implementation description" VDA ISA dalle risposte.
+    """Bozza della "Implementation description" VDA ISA dall'intervista.
 
     Il testo va in audit TISAX: il prompt vieta di aggiungere fatti non presenti
-    nelle risposte e impone il segnaposto `[TO BE COMPLETED: ...]` dove manca
-    un'informazione. Le risposte passano dal Sanitizer (regola #9)."""
+    nelle risposte, impone un fatto una volta sola (le risposte ai temi e agli
+    approfondimenti si sovrappongono) e il segnaposto `[TO BE COMPLETED: ...]`
+    per i requisiti obbligatori scoperti. Le risposte passano dal Sanitizer."""
     control = instance.control
     lang_label = _LANG_LABELS.get(lang, lang)
-    lines = []
-    for r in requirements:
-        answer = answers.get(r["id"], "").strip() or "(no answer)"
-        lines.append(f'[{r["id"]}] ({r["level"]}) {r["text"]}\n    ANSWER: {answer}')
     refs = "\n".join(f"- {x}" for x in references) or "- none"
+    if gaps is None:
+        gap_rule = ('For every "must", "high" or "very_high" requirement that no answer addresses, '
+                    'add a line "[TO BE COMPLETED: <requirement in max 10 words>]".')
+    elif gaps:
+        gap_rule = ("The auditor review found these mandatory requirements NOT covered; add for each a line "
+                    '"[TO BE COMPLETED: <requirement in max 10 words>]":\n'
+                    + _requirements_block(gaps))
+    else:
+        gap_rule = "The auditor review found no uncovered mandatory requirement: add no placeholder."
 
     prompt = f"""VDA ISA control {control.external_id}: {control.get_title("en")}
 
-Requirements with the organization's answers (answers are written in {lang_label}):
-{chr(10).join(lines)}
+Requirements (id, level, text):
+{_requirements_block(requirements)}
+
+Interview with the site (answers in {lang_label}):
+{_conversation_block(topics, followups)}
 
 Documents and evidence linked to this control:
 {refs}
@@ -280,21 +435,25 @@ Write the "Implementation description" for the VDA ISA self-assessment.
 
 Rules:
 1. Use ONLY facts stated in the answers. Never add tools, products, frequencies, roles,
-   documents or measures that are not in the answers. If unsure, leave it out.
-2. English, factual, third person ("The organization ...", "The policy ..."). Present tense
+   documents or measures that are not in the answers. Never claim that a document covers,
+   references or includes something unless an answer says so explicitly. If unsure, leave it out.
+2. Describe only what the organization DOES. Do not mention the interview, the auditor, the
+   requirements, missing evidence or what is not described; no summary or conclusion
+   ("Overall ..."). Never write sentences like "No other ... are described" or
+   "... is not mentioned". Requirements without an answer are simply left out (see rule 5).
+3. English, factual, third person ("The organization ...", "The policy ..."). Present tense
    for current practice, past tense for dated events ("was approved in 2025").
-   One short paragraph per topic; you may reference the linked documents above by name
-   when an answer mentions them.
-3. For every requirement of level "must", "high" or "very_high" with "(no answer)", add
-   a line "[TO BE COMPLETED: <requirement in max 10 words>]". Ignore unanswered "should".
-4. If an answer says the requirement is NOT fulfilled or only partially, state it honestly
-   and list its id in "not_implemented". Do not soften it.
-5. Max 250 words.
-6. "draft_local" is a faithful translation of "draft_en" into {lang_label}
+4. Organize the text by topic in short paragraphs. State each fact ONCE: answers and
+   follow-ups overlap, merge them and never repeat a sentence or a fact.
+   Do not list the linked documents: they are exported in a separate "Reference
+   documentation" column. Name a document only when an answer names it.
+5. If an answer says something is NOT done or only partially, state it honestly in one sentence.
+   {gap_rule}
+6. Max 200 words.
+7. "draft_local" is a faithful translation of "draft_en" into {lang_label}
    (keep the [TO BE COMPLETED] markers, translated).
 
-Reply ONLY with valid JSON:
-{{"draft_en": "...", "draft_local": "...", "not_implemented": ["<id>", ...]}}"""
+Reply ONLY with valid JSON: {{"draft_en": "...", "draft_local": "..."}}"""
 
     result = route(
         task_type="vda_interview",
@@ -308,15 +467,13 @@ Reply ONLY with valid JSON:
         module_source="M03",
         sanitize=True,
         plant_ids=[instance.plant_id] if instance.plant_id else [],
-        max_tokens=3000,
+        max_tokens=_VDA_MAX_TOKENS,
         timeout=120,
     )
     data = _parse_json_object(result.get("text", ""))
-    not_impl = data.get("not_implemented") or []
     return {
         "draft_en": str(data.get("draft_en") or "").strip(),
         "draft_local": str(data.get("draft_local") or "").strip(),
-        "not_implemented": [str(x) for x in not_impl if isinstance(x, str)],
         "interaction_id": result.get("interaction_id"),
         "provider": result.get("provider", ""),
         "model": result.get("model", ""),

@@ -2710,3 +2710,16 @@ msgstr "Usługa AI jest chwilowo niedostępna. Spróbuj ponownie później."
 #: apps/controls
 msgid "L'intervista VDA ISA è disponibile solo per i controlli TISAX."
 msgstr "Wywiad VDA ISA jest dostępny tylko dla kontroli TISAX."
+
+#: apps/controls/services/vda_interview.py
+#, python-format
+msgid "Hai già usato i %(max)s giri di verifica."
+msgstr "Wykorzystano już %(max)s rundy weryfikacji."
+
+#: apps/controls/services/vda_interview.py
+msgid "Rispondi ad almeno una domanda prima della verifica."
+msgstr "Odpowiedz na co najmniej jedno pytanie przed weryfikacją."
+
+#: apps/controls/services/vda_interview.py
+msgid "Rispondi ad almeno una domanda prima di generare la bozza."
+msgstr "Odpowiedz na co najmniej jedno pytanie przed wygenerowaniem szkicu."

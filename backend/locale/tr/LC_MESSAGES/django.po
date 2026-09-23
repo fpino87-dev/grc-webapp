@@ -2689,3 +2689,16 @@ msgstr "Yapay zeka hizmeti geçici olarak kullanılamıyor. Lütfen daha sonra t
 #: apps/controls
 msgid "L'intervista VDA ISA è disponibile solo per i controlli TISAX."
 msgstr "VDA ISA görüşmesi yalnızca TISAX kontrolleri için kullanılabilir."
+
+#: apps/controls/services/vda_interview.py
+#, python-format
+msgid "Hai già usato i %(max)s giri di verifica."
+msgstr "%(max)s doğrulama turunu zaten kullandınız."
+
+#: apps/controls/services/vda_interview.py
+msgid "Rispondi ad almeno una domanda prima della verifica."
+msgstr "Doğrulamadan önce en az bir soruyu yanıtlayın."
+
+#: apps/controls/services/vda_interview.py
+msgid "Rispondi ad almeno una domanda prima di generare la bozza."
+msgstr "Taslağı oluşturmadan önce en az bir soruyu yanıtlayın."
