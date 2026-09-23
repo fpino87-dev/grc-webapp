@@ -671,6 +671,10 @@ Temel URL: `/api/v1/`
 | `pdca/` | GET, POST | M11 PDCA |
 | `lessons/` | GET, POST | M12 alınan dersler |
 | `management-review/` | GET, POST | M13 yönetim gözden geçirme |
+| `management-review/reviews/{id}/pending-documents/` | GET | Hedefli gözden geçirme: kapsamda karar bekleyen belgeler |
+| `management-review/reviews/{id}/document-items/` | POST | Hedefli gözden geçirme: seçilen belgeleri gündeme ekler (revizyon sabit) |
+| `management-review/agenda-items/{id}/refresh-version/` | POST | Hedefli gözden geçirme: maddeyi en son revizyona günceller (kararı siler) |
+| `management-review/reviews/{id}/apply-outcomes/` | POST | Onaylanmış hedefli gözden geçirme: uygulanmayan kararları yeniden dener |
 | `suppliers/` | GET, POST | M14 tedarikçiler |
 | `training/` | GET, POST | M15 eğitim |
 | `bcp/` | GET, POST | M16 BCP |

@@ -30,7 +30,9 @@ export function ApprovalSection({ review, isGovernance, onMissing }: {
   const [error, setError] = useState("");
 
   const isApproved = review.approval_status === "approvato";
-  const hasSnapshot = !!review.snapshot_generated_at;
+  // Il riesame mirato non congela dati: si approva senza snapshot.
+  const isTargeted = review.kind === "mirato";
+  const hasSnapshot = !!review.snapshot_generated_at || isTargeted;
   const isCompleted = review.status === "completato";
 
   const { data: docs } = useQuery({
@@ -51,6 +53,9 @@ export function ApprovalSection({ review, isGovernance, onMissing }: {
       if (data?.code === "agenda_incomplete") {
         onMissing?.(data.missing ?? []);
         setError(t("management_review.detail.agenda_incomplete", { count: (data.missing ?? []).length }));
+      } else if (data?.code === "document_outcome_missing") {
+        onMissing?.(data.missing ?? []);
+        setError(t("management_review.targeted.outcomes_missing", { count: (data.missing ?? []).length }));
       } else {
         setError(reviewErrorMessage(e, t("management_review.detail.status_error")));
       }
@@ -160,7 +165,9 @@ export function ApprovalSection({ review, isGovernance, onMissing }: {
               </button>
             </div>
           )}
-          {!review.executive_summary && <p className="text-xs text-gray-400">{t("management_review.detail.summary_recommended")}</p>}
+          {isTargeted
+            ? <p className="text-xs text-gray-500">{t("management_review.targeted.approval_hint")}</p>
+            : !review.executive_summary && <p className="text-xs text-gray-400">{t("management_review.detail.summary_recommended")}</p>}
         </div>
       )}
     </section>

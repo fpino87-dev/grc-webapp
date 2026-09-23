@@ -723,6 +723,18 @@ Nel verbale la sintesi riporta se è stata redatta con il supporto dell'IA (e co
    Sotto **Stato riunione** si sceglie il **logo del verbale**, in alto a destra nel PDF e nell'HTML, tra quelli caricati per i siti in Plant Registry (proposto quello del sito del riesame). Si può cambiare anche dopo l'approvazione
 3. Il **pacchetto audit** (M03) include il riepilogo dei riesami e il verbale PDF di quelli approvati
 
+### Riesame mirato
+
+Fra un riesame completo e l'altro l'organo può riunirsi su punti specifici, per esempio per approvare una politica o decidere un piccolo cambiamento. Per queste sedute crea un riesame di tipo **Mirato** (scelta nel modulo di creazione, non modificabile dopo).
+
+1. Il riesame mirato **non ha** i punti obbligatori del §9.3.2, lo snapshot dei dati, la sintesi executive né le bozze IA, e **non vale come riesame periodico**: la data del prossimo riesame resta quella decisa nell'ultimo riesame completo
+2. **Documenti da decidere**: con **«Aggiungi documenti da decidere»** si apre l'elenco dei documenti del perimetro in bozza, in revisione o in approvazione, e di quelli in vigore con una nuova versione non approvata (badge *Obbligatorio*, *Nuova versione*, *Delibera dell'organo*). Ogni documento scelto diventa un punto dell'ordine del giorno, con la **revisione esaminata** fissata al momento della scelta
+3. Per ogni documento registra l'**esito**: *Approvato*, *Rinviato* o *Respinto*, con eventuale nota nella discussione. Se dopo la scelta viene caricata una nuova revisione, il punto lo segnala: usa **«Riallinea»** (l'esito va registrato di nuovo, sul testo nuovo)
+4. Aggiungi i **punti liberi** per le altre decisioni, come nel riesame completo (discussione, decisioni, task, PDCA)
+5. **Chiudi la riunione**: serve almeno un punto e ogni documento deve avere un esito
+6. **Approva il verbale** (in app o registrando la delibera): gli esiti si applicano ai documenti. Gli *approvati* entrano in vigore per delibera dell'organo, con la data della delibera o della seduta; i *respinti* tornano in bozza; i *rinviati* restano in attesa. Se un esito non si può applicare (per esempio è stata caricata una nuova revisione dopo la seduta) resta indicato con il motivo e si può ritentare
+7. Il **verbale** del riesame mirato riporta i documenti esaminati con revisione ed esito, i punti e le decisioni; nel **pacchetto audit** le sedute mirate sono in `09_management_review/sedute_intermedie/`
+
 ---
 
 ## 12. Audit Preparation (M17)

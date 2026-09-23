@@ -4753,7 +4753,8 @@
         "6": "Toplantıyı kapatın: her zorunlu maddenin bir tartışması veya kararı olmalıdır; bir sonraki gözden geçirme tarihi önerilir ve takvimde görünür",
         "7": "Yönetici özetini yazın veya yapay zekâ ile taslak oluşturun, gözden geçirin ve kabul edin",
         "8": "Gözden geçirmeyi onaylayın: uygulamada (hesabı olan bir organ üyesi veya yönetişim) ya da organ kararının numarası ve tarihini kaydederek. Tutanak değiştirilemez hale gelir",
-        "9": "Tutanağı PDF veya HTML olarak indirin (denetim paketine de eklenir)"
+        "9": "Tutanağı PDF veya HTML olarak indirin (denetim paketine de eklenir)",
+        "10": "İki gözden geçirme arasında tekil belgeleri veya küçük kararları onaylamak için “Hedefli” bir gözden geçirme oluşturun: bekleyen belgeleri seçin, her birinin kararını kaydedin ve tutanağı onaylayın."
       },
       "connections": {
         "risk": "Anlık görüntüde kritik riskler ve resmi olarak kabul edilen riskler",
@@ -5121,6 +5122,54 @@
       "needs_approval": "Önce gözden geçirmeyi onaylayın: toplantıda ele alınan belgeler bilgilerini devralır.",
       "hint_meeting": "{{date}} tarihli toplantıda onaylanan belgeleri seçin: bu tarihte yürürlüğe girer ve bu gözden geçirmeye bağlanır.",
       "approved_here": "bu toplantıda onaylandı"
+    },
+    "targeted": {
+      "badge": "Hedefli",
+      "not_periodic": "Belirli konulardaki toplantı: periyodik §9.3 gözden geçirmesinin yerini tutmaz.",
+      "kind_label": "Gözden geçirme türü",
+      "kinds": {
+        "completo": "Tam (ISO 27001 §9.3)",
+        "mirato": "Hedefli"
+      },
+      "kind_hints": {
+        "completo": "Periyodik gözden geçirme: zorunlu §9.3.2 maddeleri, dondurulmuş veriler, özet.",
+        "mirato": "Organın belirli konulardaki toplantısı: onaylanacak belgeler ve diğer kararlar. Periyodik gözden geçirme sayılmaz."
+      },
+      "filter_all": "Tüm türler",
+      "agenda_intro": "Organın karar vermesi gereken belgeleri seçin ve diğer kararlar için maddeler ekleyin.",
+      "add_documents": "Karar verilecek belgeleri ekle",
+      "pending_title": "Karar bekleyen belgeler",
+      "pending_hint": "Kapsamdaki taslak, incelemede veya onay aşamasındaki belgeler ile onaylanmamış yeni sürümü olan yürürlükteki belgeler. Seçilen her belge, şu anda yüklü revizyon üzerinden bir madde olur.",
+      "filter_ph": "Koda veya başlığa göre ara",
+      "no_pending": "Karar bekleyen belge yok.",
+      "no_file": "dosya yok",
+      "mandatory": "Zorunlu",
+      "new_version": "Yeni sürüm",
+      "body_resolution": "Organ kararı",
+      "already_selected": "Zaten gündemde",
+      "add_selected": "Seçilenleri ekle ({{count}})",
+      "add_error": "Belgeler eklenemedi.",
+      "skipped": "Eklenmeyenler:",
+      "examined_version": "İncelenen revizyon: {{version}}",
+      "version_changed": "Seçimden sonra {{version}} revizyonu yüklendi: karar vermeden önce maddeyi güncelleyin.",
+      "realign": "Güncelle",
+      "outcome": "Karar:",
+      "outcomes": {
+        "approvato": "Onaylandı",
+        "rinviato": "Ertelendi",
+        "respinto": "Reddedildi"
+      },
+      "outcome_missing": "Karar verilecek",
+      "to_decide": "Karar verilecek",
+      "applied_on": "{{date}} tarihinde belgeye uygulandı",
+      "not_applied": "Uygulanmadı: {{reason}}",
+      "applies_on_approval": "Tutanak onaylandığında belgeye uygulanır.",
+      "outcomes_title": "Belgelere uygulanan kararlar",
+      "retry": "Uygulanmayan kararları yeniden dene",
+      "retry_error": "Kararlar uygulanamadı.",
+      "outcomes_missing": "Kararı olmayan belgeler: {{count}}. Toplantıyı kapatmadan önce her belgenin kararını kaydedin.",
+      "no_next_review": "Hedefli gözden geçirme bir sonraki gözden geçirmeyi önermez: periyodik gözden geçirmenin tarihi geçerli kalır.",
+      "approval_hint": "Tutanak onaylandığında kararlar belgelere uygulanır: onaylananlar yürürlüğe girer, reddedilenler taslağa döner."
     }
   },
   "objectives": {

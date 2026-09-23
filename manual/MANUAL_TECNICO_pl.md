@@ -671,6 +671,10 @@ Bazowy URL: `/api/v1/`
 | `pdca/` | GET, POST | PDCA M11 |
 | `lessons/` | GET, POST | Lesson Learned M12 |
 | `management-review/` | GET, POST | Przegląd Zarządzania M13 |
+| `management-review/reviews/{id}/pending-documents/` | GET | Przegląd ukierunkowany: dokumenty z zakresu oczekujące na decyzję |
+| `management-review/reviews/{id}/document-items/` | POST | Przegląd ukierunkowany: dodaje wybrane dokumenty do porządku obrad (wersja ustalona) |
+| `management-review/agenda-items/{id}/refresh-version/` | POST | Przegląd ukierunkowany: aktualizuje punkt do najnowszej wersji (kasuje decyzję) |
+| `management-review/reviews/{id}/apply-outcomes/` | POST | Zatwierdzony przegląd ukierunkowany: ponawia niezastosowane decyzje |
 | `suppliers/` | GET, POST | Dostawcy M14 |
 | `training/` | GET, POST | Szkolenia M15 |
 | `bcp/` | GET, POST | BCP M16 |

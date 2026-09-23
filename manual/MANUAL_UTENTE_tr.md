@@ -723,6 +723,18 @@ Tutanakta özet, yapay zekâ desteğiyle (ve hangi modelle) hazırlanıp hazırl
    **Toplantı durumu** altında, Plant Registry'de tesisler için yüklenenler arasından PDF ve HTML'in sağ üst köşesindeki **tutanak logosu** seçilir (gözden geçirme tesisinin logosu önerilir). Onaydan sonra da değiştirilebilir
 3. **Denetim paketi** (M03), gözden geçirmelerin özetini ve onaylanmış gözden geçirmelerin PDF tutanaklarını içerir
 
+### Hedefli gözden geçirme
+
+İki tam gözden geçirme arasında organ, belirli konular için toplanabilir; örneğin bir politikayı onaylamak veya küçük bir değişikliğe karar vermek için. Bu toplantılar için **Hedefli** türünde bir gözden geçirme oluşturun (oluşturma formunda seçilir, sonradan değiştirilemez).
+
+1. Hedefli gözden geçirmede zorunlu §9.3.2 maddeleri, veri anlık görüntüsü, yönetici özeti ve yapay zekâ taslakları **yoktur** ve **periyodik gözden geçirme sayılmaz**: bir sonraki gözden geçirme tarihi son tam gözden geçirmede belirlenen tarih olarak kalır
+2. **Karar verilecek belgeler**: **“Karar verilecek belgeleri ekle”**, kapsamdaki taslak, incelemede veya onay aşamasındaki belgeleri ve onaylanmamış yeni sürümü olan yürürlükteki belgeleri listeler (*Zorunlu*, *Yeni sürüm*, *Organ kararı* etiketleri). Seçilen her belge, seçim anında sabitlenen **incelenen revizyon** ile bir gündem maddesi olur
+3. Her belge için **kararı** kaydedin: *Onaylandı*, *Ertelendi* veya *Reddedildi*; isterseniz tartışmaya not ekleyin. Seçimden sonra yeni bir revizyon yüklenirse madde bunu belirtir: **“Güncelle”**yi kullanın (karar yeni metin üzerinden yeniden kaydedilmelidir)
+4. Diğer kararlar için tam gözden geçirmedeki gibi **serbest maddeler** ekleyin (tartışma, kararlar, görevler, PDCA)
+5. **Toplantıyı kapatın**: en az bir madde gerekir ve her belgenin bir kararı olmalıdır
+6. **Tutanağı onaylayın** (uygulamada veya kararı kaydederek): kararlar belgelere uygulanır. *Onaylananlar* organ kararıyla, karar veya toplantı tarihiyle yürürlüğe girer; *reddedilenler* taslağa döner; *ertelenenler* beklemede kalır. Bir karar uygulanamazsa (örneğin toplantıdan sonra yeni bir revizyon yüklendiyse) nedeniyle birlikte gösterilir ve yeniden denenebilir
+7. Hedefli gözden geçirmenin **tutanağı**, incelenen belgeleri revizyon ve kararıyla, maddeleri ve kararları içerir; **denetim paketinde** hedefli toplantılar `09_management_review/sedute_intermedie/` klasöründedir
+
 ---
 
 ## 12. Denetim Hazırlığı (M17)

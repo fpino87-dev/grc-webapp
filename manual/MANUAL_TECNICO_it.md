@@ -672,6 +672,10 @@ Base URL: `/api/v1/`
 | `pdca/` | GET, POST | PDCA M11 |
 | `lessons/` | GET, POST | Lesson Learned M12 |
 | `management-review/` | GET, POST | Revisione Direzione M13 |
+| `management-review/reviews/{id}/pending-documents/` | GET | Riesame mirato: documenti in attesa di decisione del perimetro |
+| `management-review/reviews/{id}/document-items/` | POST | Riesame mirato: mette all'ordine del giorno i documenti scelti (revisione fissata) |
+| `management-review/agenda-items/{id}/refresh-version/` | POST | Riesame mirato: riallinea il punto all'ultima revisione (azzera l'esito) |
+| `management-review/reviews/{id}/apply-outcomes/` | POST | Riesame mirato approvato: ritenta gli esiti non applicati ai documenti |
 | `suppliers/` | GET, POST | Fornitori M14 |
 | `training/` | GET, POST | Formazione M15 |
 | `bcp/` | GET, POST | BCP M16 |

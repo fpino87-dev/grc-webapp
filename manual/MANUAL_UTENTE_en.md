@@ -723,6 +723,18 @@ In the minutes the summary states whether it was drafted with AI support (and wi
    Under **Meeting status** you choose the **minutes logo**, top right in the PDF and HTML, among those uploaded for the sites in Plant Registry (the review site's logo is proposed). It can be changed even after approval
 3. The **audit package** (M03) includes the review summary and the PDF minutes of approved reviews
 
+### Targeted review
+
+Between one full review and the next, the body can meet on specific items, for example to approve a policy or decide a small change. For these meetings create a review of type **Targeted** (chosen in the creation form, it cannot be changed later).
+
+1. The targeted review has **no** mandatory §9.3.2 items, data snapshot, executive summary or AI drafts, and it **does not count as the periodic review**: the next review date stays the one decided in the last full review
+2. **Documents to decide**: **“Add documents to decide”** opens the list of documents in scope that are in draft, under review or awaiting approval, and of documents in force with a new unapproved version (badges *Mandatory*, *New version*, *Body resolution*). Each chosen document becomes an agenda item, with the **reviewed revision** fixed at the time of selection
+3. For each document record the **outcome**: *Approved*, *Postponed* or *Rejected*, with an optional note in the discussion. If a new revision is uploaded after the selection, the item flags it: use **“Realign”** (the outcome must be recorded again, on the new text)
+4. Add **free items** for the other decisions, as in the full review (discussion, decisions, tasks, PDCA)
+5. **Close the meeting**: at least one item is required and every document must have an outcome
+6. **Approve the minutes** (in the app or by recording the resolution): the outcomes are applied to the documents. *Approved* ones take effect by resolution of the body, with the date of the resolution or of the meeting; *rejected* ones go back to draft; *postponed* ones stay pending. If an outcome cannot be applied (for example a new revision was uploaded after the meeting) it is shown with the reason and can be retried
+7. The **minutes** of the targeted review list the documents examined with revision and outcome, the items and the decisions; in the **audit pack** targeted meetings are in `09_management_review/sedute_intermedie/`
+
 ---
 
 ## 12. Audit Preparation (M17)

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { managementReviewApi, reviewErrorMessage, type ManagementReview } from "../../api/endpoints/managementReview";
+import { managementReviewApi, reviewErrorMessage, type ManagementReview, type ReviewKind } from "../../api/endpoints/managementReview";
 import { governanceApi } from "../../api/endpoints/governance";
 import { plantsApi } from "../../api/endpoints/plants";
 import { usersApi, type GrcUser } from "../../api/endpoints/users";
@@ -24,7 +24,7 @@ const APPROVAL_COLORS: Record<string, string> = {
 function NewReviewModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const [form, setForm] = useState<Partial<ManagementReview>>({});
+  const [form, setForm] = useState<Partial<ManagementReview>>({ kind: "completo" });
   // undefined = scelta automatica (il CdA se c'è, altrimenti il primo organo
   // ammesso per il perimetro); null = nessun organo, scelto esplicitamente.
   const [bodyChoice, setBodyChoice] = useState<string | null | undefined>(undefined);
@@ -60,6 +60,21 @@ function NewReviewModal({ plants, onClose }: { plants: { id: string; code: strin
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
         <h3 className="text-lg font-semibold mb-4">{t("management_review.new.title")}</h3>
         <div className="space-y-3">
+          <fieldset>
+            <legend className="block text-sm font-medium text-gray-700 mb-1">{t("management_review.targeted.kind_label")}</legend>
+            <div className="space-y-1">
+              {(["completo", "mirato"] as ReviewKind[]).map(k => (
+                <label key={k} className={`flex items-start gap-2 border rounded px-3 py-2 cursor-pointer ${form.kind === k ? "border-primary-400 bg-primary-50/40" : "border-gray-200"}`}>
+                  <input type="radio" name="kind" className="mt-1" checked={form.kind === k}
+                         onChange={() => setForm(prev => ({ ...prev, kind: k }))} />
+                  <span>
+                    <span className="block text-sm text-gray-800">{t(`management_review.targeted.kinds.${k}`)}</span>
+                    <span className="block text-xs text-gray-500">{t(`management_review.targeted.kind_hints.${k}`)}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t("management_review.new.title_label")}</label>
             <input name="title" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" placeholder={t("management_review.new.title_ph")} />
@@ -116,6 +131,7 @@ export function ManagementReviewPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [users, setUsers] = useState<GrcUser[]>([]);
+  const [kindFilter, setKindFilter] = useState<"" | ReviewKind>("");
   const qc = useQueryClient();
 
   const selectedPlant = useAuthStore(s => s.selectedPlant);
@@ -152,7 +168,7 @@ export function ManagementReviewPage() {
     },
   });
 
-  const reviews = data?.results ?? [];
+  const reviews = (data?.results ?? []).filter(r => !kindFilter || r.kind === kindFilter);
   const selected = reviews.find(r => r.id === selectedId) ?? null;
 
   return (
@@ -173,6 +189,7 @@ export function ManagementReviewPage() {
               t("management_review.help.steps.7"),
               t("management_review.help.steps.8"),
               t("management_review.help.steps.9"),
+              t("management_review.help.steps.10"),
             ]}
             connections={[
               { module: "M06 Risk", relation: t("management_review.help.connections.risk") },
@@ -192,12 +209,19 @@ export function ManagementReviewPage() {
         )}
       </div>
 
-      {/* Plant filter info */}
-      {selectedPlant && (
-        <p className="text-xs text-gray-500 mb-3">
-          {t("management_review.list.filter_active")} <span className="font-medium text-gray-700">{selectedPlant.name}</span>
-        </p>
-      )}
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+        {selectedPlant ? (
+          <p className="text-xs text-gray-500">
+            {t("management_review.list.filter_active")} <span className="font-medium text-gray-700">{selectedPlant.name}</span>
+          </p>
+        ) : <span />}
+        <select value={kindFilter} onChange={e => setKindFilter(e.target.value as "" | ReviewKind)}
+                className="border rounded px-2 py-1 text-xs" aria-label={t("management_review.targeted.kind_label")}>
+          <option value="">{t("management_review.targeted.filter_all")}</option>
+          <option value="completo">{t("management_review.targeted.kinds.completo")}</option>
+          <option value="mirato">{t("management_review.targeted.kinds.mirato")}</option>
+        </select>
+      </div>
 
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {isLoading ? (
@@ -226,7 +250,14 @@ export function ManagementReviewPage() {
             <tbody className="divide-y divide-gray-100">
               {reviews.map(r => (
                 <tr key={r.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 font-medium text-gray-800">{r.title}</td>
+                  <td className="px-4 py-3 font-medium text-gray-800">
+                    {r.title}
+                    {r.kind === "mirato" && (
+                      <span className="ml-2 text-xs font-medium px-1.5 py-0.5 rounded bg-purple-100 text-purple-700">
+                        {t("management_review.targeted.badge")}
+                      </span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-xs text-gray-500">{r.plant_name ?? <span className="text-gray-300">{t("management_review.list.org_wide")}</span>}</td>
                   <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
                   <td className="px-4 py-3">

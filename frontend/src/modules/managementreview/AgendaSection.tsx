@@ -10,6 +10,7 @@ import { GRC_ACCESS_ROLES, type GrcUser } from "../../api/endpoints/users";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { AGENDA_CODES_WITH_DATA, AgendaData } from "./SnapshotBlocks";
 import { ISO_CLAUSE, fmtDate, isOverdue, userLabel, type Snap } from "./shared";
+import { DocumentOutcomeControls, PendingDocumentsPicker } from "./TargetedDocuments";
 
 const DECISION_TYPES: DecisionType[] = ["miglioramento", "modifica_sgsi", "risorse", "obiettivo", "altro"];
 const TASK_ROLES = GRC_ACCESS_ROLES.filter(r => r !== "super_admin");
@@ -289,18 +290,29 @@ function AgendaItemCard({
   });
 
   const clause = ISO_CLAUSE[item.code];
-  const title = item.code === "custom" ? item.title : t(`management_review.agenda.items.${item.code}`);
+  const isDocument = item.code === "document";
+  const title = item.code === "custom" || isDocument ? item.title : t(`management_review.agenda.items.${item.code}`);
   const covered = item.discussion.trim().length > 0 || decisions.length > 0;
+  // Punto documento del riesame mirato: "fatto" quando ha un esito.
+  const pending = isDocument ? !item.document_outcome : !covered;
   const dirty = discussion !== item.discussion;
 
   return (
-    <div className={`border rounded ${highlight && !covered ? "border-red-300" : "border-gray-200"}`}>
+    <div className={`border rounded ${highlight && pending ? "border-red-300" : "border-gray-200"}`}>
       <button onClick={() => setOpen(!open)} className="w-full text-left px-3 py-2 flex items-start gap-2 hover:bg-gray-50">
         <span className="text-xs font-bold text-primary-700 w-4 shrink-0 mt-0.5">{clause ?? "•"}</span>
         <span className="flex-1 text-sm text-gray-800">{title}</span>
         <span className="flex items-center gap-1.5 shrink-0">
           {decisions.length > 0 && (
             <span className="text-xs text-gray-500">{t("management_review.agenda.decisions_count", { count: decisions.length })}</span>
+          )}
+          {isDocument && (
+            item.document_outcome
+              ? <span className={`text-xs px-1.5 py-0.5 rounded ${item.document_outcome === "approvato" ? "bg-green-100 text-green-700"
+                  : item.document_outcome === "respinto" ? "bg-red-100 text-red-700" : "bg-amber-50 text-amber-700"}`}>
+                  {t(`management_review.targeted.outcomes.${item.document_outcome}`)}
+                </span>
+              : <span className={`text-xs px-1.5 py-0.5 rounded ${highlight ? "bg-red-100 text-red-700" : "bg-amber-50 text-amber-700"}`}>{t("management_review.targeted.to_decide")}</span>
           )}
           {item.mandatory && (
             covered
@@ -313,6 +325,7 @@ function AgendaItemCard({
 
       {open && (
         <div className="px-3 pb-3 pt-1 space-y-3 border-t border-gray-100">
+          {isDocument && <DocumentOutcomeControls item={item} locked={locked} />}
           {AGENDA_CODES_WITH_DATA.has(item.code) && (
             snap
               ? <div className="bg-gray-50/60 rounded p-2">
@@ -467,7 +480,12 @@ export function AgendaSection({
           </span>
         )}
       </div>
-      <p className="text-xs text-gray-400 mb-2">{t("management_review.agenda.intro")}</p>
+      <p className="text-xs text-gray-400 mb-2">
+        {review.kind === "mirato" ? t("management_review.targeted.agenda_intro") : t("management_review.agenda.intro")}
+      </p>
+      {review.kind === "mirato" && !locked && review.status !== "completato" && (
+        <div className="mb-2"><PendingDocumentsPicker review={review} /></div>
+      )}
 
       <div className="space-y-2">
         {items.map(item => (
@@ -480,7 +498,7 @@ export function AgendaSection({
             plants={plants}
             snap={snap}
             locked={locked}
-            highlight={missing.includes(item.code)}
+            highlight={missing.includes(item.code) || missing.includes(item.id)}
           />
         ))}
       </div>

@@ -671,6 +671,10 @@ URL de base : `/api/v1/`
 | `pdca/` | GET, POST | PDCA M11 |
 | `lessons/` | GET, POST | Lessons Apprises M12 |
 | `management-review/` | GET, POST | Revue de Direction M13 |
+| `management-review/reviews/{id}/pending-documents/` | GET | Revue ciblée : documents du périmètre en attente de décision |
+| `management-review/reviews/{id}/document-items/` | POST | Revue ciblée : inscrit les documents choisis à l'ordre du jour (révision figée) |
+| `management-review/agenda-items/{id}/refresh-version/` | POST | Revue ciblée : réaligne le point sur la dernière révision (efface la décision) |
+| `management-review/reviews/{id}/apply-outcomes/` | POST | Revue ciblée approuvée : réessaie les décisions non appliquées aux documents |
 | `suppliers/` | GET, POST | Fournisseurs M14 |
 | `training/` | GET, POST | Formation M15 |
 | `bcp/` | GET, POST | PCA M16 |

@@ -672,6 +672,10 @@ Base URL: `/api/v1/`
 | `pdca/` | GET, POST | M11 PDCA |
 | `lessons/` | GET, POST | M12 lesson learned |
 | `management-review/` | GET, POST | M13 management review |
+| `management-review/reviews/{id}/pending-documents/` | GET | Targeted review: documents in scope awaiting a decision |
+| `management-review/reviews/{id}/document-items/` | POST | Targeted review: puts the chosen documents on the agenda (revision fixed) |
+| `management-review/agenda-items/{id}/refresh-version/` | POST | Targeted review: realigns the item to the latest revision (clears the outcome) |
+| `management-review/reviews/{id}/apply-outcomes/` | POST | Approved targeted review: retries outcomes not applied to documents |
 | `suppliers/` | GET, POST | M14 suppliers |
 | `training/` | GET, POST | M15 training |
 | `bcp/` | GET, POST | M16 BCP |

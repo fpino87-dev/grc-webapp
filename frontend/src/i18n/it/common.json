@@ -4753,7 +4753,8 @@
         "6": "Chiudi la riunione: ogni punto obbligatorio deve avere una discussione o una decisione; viene proposta la data del prossimo riesame, che compare nello scadenzario",
         "7": "Scrivi la sintesi executive o genera una bozza con l'IA, rivedila e accettala",
         "8": "Approva il riesame: in app (un componente dell'organo con account, o la governance) oppure registrando numero e data della delibera dell'organo. Il verbale diventa immutabile",
-        "9": "Scarica il verbale in PDF o HTML (incluso anche nel pacchetto audit)"
+        "9": "Scarica il verbale in PDF o HTML (incluso anche nel pacchetto audit)",
+        "10": "Per approvare singoli documenti o piccole decisioni fra un riesame e l'altro crea un riesame «Mirato»: scegli i documenti in attesa, registra l'esito di ciascuno e approva il verbale."
       },
       "connections": {
         "risk": "Rischi critici e rischi accettati formalmente nello snapshot",
@@ -5121,6 +5122,54 @@
       "needs_approval": "Approva prima il riesame: i documenti trattati nella seduta ne ereditano gli estremi.",
       "hint_meeting": "Seleziona i documenti approvati nella seduta del {{date}}: entreranno in vigore con quella data, collegati a questo riesame.",
       "approved_here": "approvato in questa seduta"
+    },
+    "targeted": {
+      "badge": "Mirato",
+      "not_periodic": "Seduta su punti specifici: non sostituisce il riesame periodico §9.3.",
+      "kind_label": "Tipo di riesame",
+      "kinds": {
+        "completo": "Completo (ISO 27001 §9.3)",
+        "mirato": "Mirato"
+      },
+      "kind_hints": {
+        "completo": "Riesame periodico: punti obbligatori §9.3.2, dati congelati, sintesi.",
+        "mirato": "Seduta dell'organo su punti specifici: documenti da approvare e altre decisioni. Non vale come riesame periodico."
+      },
+      "filter_all": "Tutti i tipi",
+      "agenda_intro": "Scegli i documenti su cui l'organo deve decidere e aggiungi i punti per le altre decisioni.",
+      "add_documents": "Aggiungi documenti da decidere",
+      "pending_title": "Documenti in attesa di decisione",
+      "pending_hint": "Documenti del perimetro in bozza, in revisione o in approvazione, e documenti in vigore con una nuova versione non approvata. Ogni documento scelto diventa un punto, sulla revisione caricata ora.",
+      "filter_ph": "Cerca per codice o titolo",
+      "no_pending": "Nessun documento in attesa di decisione.",
+      "no_file": "nessun file",
+      "mandatory": "Obbligatorio",
+      "new_version": "Nuova versione",
+      "body_resolution": "Delibera dell'organo",
+      "already_selected": "Già all'ordine del giorno",
+      "add_selected": "Aggiungi selezionati ({{count}})",
+      "add_error": "Impossibile aggiungere i documenti.",
+      "skipped": "Non aggiunti:",
+      "examined_version": "Revisione esaminata: {{version}}",
+      "version_changed": "Dopo la selezione è stata caricata la revisione {{version}}: riallinea il punto prima di decidere.",
+      "realign": "Riallinea",
+      "outcome": "Esito:",
+      "outcomes": {
+        "approvato": "Approvato",
+        "rinviato": "Rinviato",
+        "respinto": "Respinto"
+      },
+      "outcome_missing": "Da decidere",
+      "to_decide": "Da decidere",
+      "applied_on": "Applicato al documento il {{date}}",
+      "not_applied": "Non applicato: {{reason}}",
+      "applies_on_approval": "Si applica al documento all'approvazione del verbale.",
+      "outcomes_title": "Esiti applicati ai documenti",
+      "retry": "Ritenta gli esiti non applicati",
+      "retry_error": "Impossibile applicare gli esiti.",
+      "outcomes_missing": "Documenti senza esito: {{count}}. Registra l'esito di ogni documento prima di chiudere la riunione.",
+      "no_next_review": "Il riesame mirato non propone il prossimo riesame: resta quello del riesame periodico.",
+      "approval_hint": "Approvando il verbale, gli esiti si applicano ai documenti: gli approvati entrano in vigore, i respinti tornano in bozza."
     }
   },
   "objectives": {

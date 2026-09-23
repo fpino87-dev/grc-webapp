@@ -4753,7 +4753,8 @@
         "6": "Zamknij spotkanie: każdy punkt obowiązkowy wymaga dyskusji lub decyzji; proponowana jest data kolejnego przeglądu, widoczna w harmonogramie",
         "7": "Napisz podsumowanie dla kierownictwa lub wygeneruj wersję roboczą z AI, sprawdź ją i zaakceptuj",
         "8": "Zatwierdź przegląd: w aplikacji (członek organu z kontem lub governance) albo rejestrując numer i datę uchwały organu. Protokół staje się niezmienny",
-        "9": "Pobierz protokół w PDF lub HTML (dołączany także do pakietu audytowego)"
+        "9": "Pobierz protokół w PDF lub HTML (dołączany także do pakietu audytowego)",
+        "10": "Aby zatwierdzić pojedyncze dokumenty lub drobne decyzje między przeglądami, utwórz przegląd „Ukierunkowany”: wybierz oczekujące dokumenty, zapisz decyzję dla każdego i zatwierdź protokół."
       },
       "connections": {
         "risk": "Ryzyka krytyczne i formalnie zaakceptowane w snapshocie",
@@ -5121,6 +5122,54 @@
       "needs_approval": "Najpierw zatwierdź przegląd: dokumenty omówione na posiedzeniu przejmą jego dane.",
       "hint_meeting": "Wybierz dokumenty zatwierdzone na posiedzeniu {{date}}: wejdą w życie z tą datą, powiązane z tym przeglądem.",
       "approved_here": "zatwierdzono na tym posiedzeniu"
+    },
+    "targeted": {
+      "badge": "Ukierunkowany",
+      "not_periodic": "Posiedzenie w sprawie konkretnych punktów: nie zastępuje okresowego przeglądu §9.3.",
+      "kind_label": "Rodzaj przeglądu",
+      "kinds": {
+        "completo": "Pełny (ISO 27001 §9.3)",
+        "mirato": "Ukierunkowany"
+      },
+      "kind_hints": {
+        "completo": "Przegląd okresowy: obowiązkowe punkty §9.3.2, zamrożone dane, podsumowanie.",
+        "mirato": "Posiedzenie organu w sprawie konkretnych punktów: dokumenty do zatwierdzenia i inne decyzje. Nie liczy się jako przegląd okresowy."
+      },
+      "filter_all": "Wszystkie rodzaje",
+      "agenda_intro": "Wybierz dokumenty, o których organ ma zdecydować, i dodaj punkty dla pozostałych decyzji.",
+      "add_documents": "Dodaj dokumenty do decyzji",
+      "pending_title": "Dokumenty oczekujące na decyzję",
+      "pending_hint": "Dokumenty z zakresu w wersji roboczej, w przeglądzie lub w zatwierdzaniu oraz dokumenty obowiązujące z nową niezatwierdzoną wersją. Każdy wybrany dokument staje się punktem, w wersji wgranej teraz.",
+      "filter_ph": "Szukaj po kodzie lub tytule",
+      "no_pending": "Brak dokumentów oczekujących na decyzję.",
+      "no_file": "brak pliku",
+      "mandatory": "Obowiązkowy",
+      "new_version": "Nowa wersja",
+      "body_resolution": "Uchwała organu",
+      "already_selected": "Już w porządku obrad",
+      "add_selected": "Dodaj wybrane ({{count}})",
+      "add_error": "Nie udało się dodać dokumentów.",
+      "skipped": "Nie dodano:",
+      "examined_version": "Rozpatrzona wersja: {{version}}",
+      "version_changed": "Po wybraniu wgrano wersję {{version}}: zaktualizuj punkt przed podjęciem decyzji.",
+      "realign": "Zaktualizuj",
+      "outcome": "Decyzja:",
+      "outcomes": {
+        "approvato": "Zatwierdzony",
+        "rinviato": "Odroczony",
+        "respinto": "Odrzucony"
+      },
+      "outcome_missing": "Do decyzji",
+      "to_decide": "Do decyzji",
+      "applied_on": "Zastosowano do dokumentu {{date}}",
+      "not_applied": "Niezastosowano: {{reason}}",
+      "applies_on_approval": "Stosowane do dokumentu po zatwierdzeniu protokołu.",
+      "outcomes_title": "Decyzje zastosowane do dokumentów",
+      "retry": "Ponów niezastosowane decyzje",
+      "retry_error": "Nie udało się zastosować decyzji.",
+      "outcomes_missing": "Dokumenty bez decyzji: {{count}}. Zapisz decyzję dla każdego dokumentu przed zamknięciem posiedzenia.",
+      "no_next_review": "Przegląd ukierunkowany nie proponuje kolejnego przeglądu: obowiązuje termin z przeglądu okresowego.",
+      "approval_hint": "Po zatwierdzeniu protokołu decyzje są stosowane do dokumentów: zatwierdzone wchodzą w życie, odrzucone wracają do wersji roboczej."
     }
   },
   "objectives": {

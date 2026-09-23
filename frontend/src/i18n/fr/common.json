@@ -4753,7 +4753,8 @@
         "6": "Clôturez la réunion : chaque point obligatoire doit avoir une discussion ou une décision ; la date de la prochaine revue est proposée et apparaît dans l'échéancier",
         "7": "Rédigez la synthèse exécutive ou générez un brouillon avec l'IA, relisez-le et acceptez-le",
         "8": "Approuvez la revue : dans l'application (un membre de l'organe disposant d'un compte, ou la gouvernance) ou en enregistrant le numéro et la date de la délibération de l'organe. Le procès-verbal devient immuable",
-        "9": "Téléchargez le procès-verbal en PDF ou HTML (également inclus dans le dossier d'audit)"
+        "9": "Téléchargez le procès-verbal en PDF ou HTML (également inclus dans le dossier d'audit)",
+        "10": "Pour approuver des documents isolés ou de petites décisions entre deux revues, créez une revue « Ciblée » : choisissez les documents en attente, enregistrez la décision pour chacun et approuvez le procès-verbal."
       },
       "connections": {
         "risk": "Risques critiques et risques formellement acceptés dans l'instantané",
@@ -5121,6 +5122,54 @@
       "needs_approval": "Approuvez d'abord la revue : les documents traités en séance en héritent les références.",
       "hint_meeting": "Sélectionnez les documents approuvés lors de la séance du {{date}} : ils entrent en vigueur à cette date, rattachés à cette revue.",
       "approved_here": "approuvé lors de cette séance"
+    },
+    "targeted": {
+      "badge": "Ciblée",
+      "not_periodic": "Séance sur des points spécifiques : elle ne remplace pas la revue périodique §9.3.",
+      "kind_label": "Type de revue",
+      "kinds": {
+        "completo": "Complète (ISO 27001 §9.3)",
+        "mirato": "Ciblée"
+      },
+      "kind_hints": {
+        "completo": "Revue périodique : points obligatoires §9.3.2, données figées, synthèse.",
+        "mirato": "Séance de l'organe sur des points spécifiques : documents à approuver et autres décisions. Elle ne vaut pas revue périodique."
+      },
+      "filter_all": "Tous les types",
+      "agenda_intro": "Choisissez les documents sur lesquels l'organe doit décider et ajoutez les points pour les autres décisions.",
+      "add_documents": "Ajouter des documents à décider",
+      "pending_title": "Documents en attente de décision",
+      "pending_hint": "Documents du périmètre en brouillon, en révision ou en approbation, et documents en vigueur avec une nouvelle version non approuvée. Chaque document choisi devient un point, sur la révision chargée maintenant.",
+      "filter_ph": "Rechercher par code ou titre",
+      "no_pending": "Aucun document en attente de décision.",
+      "no_file": "aucun fichier",
+      "mandatory": "Obligatoire",
+      "new_version": "Nouvelle version",
+      "body_resolution": "Délibération de l'organe",
+      "already_selected": "Déjà à l'ordre du jour",
+      "add_selected": "Ajouter la sélection ({{count}})",
+      "add_error": "Impossible d'ajouter les documents.",
+      "skipped": "Non ajoutés :",
+      "examined_version": "Révision examinée : {{version}}",
+      "version_changed": "La révision {{version}} a été chargée après la sélection : réalignez le point avant de décider.",
+      "realign": "Réaligner",
+      "outcome": "Décision :",
+      "outcomes": {
+        "approvato": "Approuvé",
+        "rinviato": "Reporté",
+        "respinto": "Rejeté"
+      },
+      "outcome_missing": "À décider",
+      "to_decide": "À décider",
+      "applied_on": "Appliqué au document le {{date}}",
+      "not_applied": "Non appliqué : {{reason}}",
+      "applies_on_approval": "S'applique au document à l'approbation du procès-verbal.",
+      "outcomes_title": "Décisions appliquées aux documents",
+      "retry": "Réessayer les décisions non appliquées",
+      "retry_error": "Impossible d'appliquer les décisions.",
+      "outcomes_missing": "Documents sans décision : {{count}}. Enregistrez la décision de chaque document avant de clôturer la réunion.",
+      "no_next_review": "La revue ciblée ne propose pas la prochaine revue : celle de la revue périodique reste valable.",
+      "approval_hint": "À l'approbation du procès-verbal, les décisions s'appliquent aux documents : les approuvés entrent en vigueur, les rejetés reviennent en brouillon."
     }
   },
   "objectives": {

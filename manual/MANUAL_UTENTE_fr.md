@@ -723,6 +723,18 @@ Dans le procès-verbal, la synthèse indique si elle a été rédigée avec l'ai
    Sous **Statut de la réunion**, on choisit le **logo du procès-verbal**, en haut à droite du PDF et du HTML, parmi ceux chargés pour les sites dans le Plant Registry (celui du site de la revue est proposé). Il peut être modifié même après l'approbation
 3. Le **dossier d'audit** (M03) inclut le récapitulatif des revues et le procès-verbal PDF des revues approuvées
 
+### Revue ciblée
+
+Entre deux revues complètes, l'organe peut se réunir sur des points spécifiques, par exemple pour approuver une politique ou décider d'un petit changement. Pour ces séances, créez une revue de type **Ciblée** (choisie dans le formulaire de création, non modifiable ensuite).
+
+1. La revue ciblée **n'a pas** les points obligatoires du §9.3.2, l'instantané des données, la synthèse exécutive ni les brouillons IA, et **ne vaut pas revue périodique** : la date de la prochaine revue reste celle décidée lors de la dernière revue complète
+2. **Documents à décider** : **« Ajouter des documents à décider »** ouvre la liste des documents du périmètre en brouillon, en révision ou en approbation, et de ceux en vigueur avec une nouvelle version non approuvée (badges *Obligatoire*, *Nouvelle version*, *Délibération de l'organe*). Chaque document choisi devient un point de l'ordre du jour, avec la **révision examinée** figée au moment du choix
+3. Pour chaque document, enregistrez la **décision** : *Approuvé*, *Reporté* ou *Rejeté*, avec une note éventuelle dans la discussion. Si une nouvelle révision est chargée après le choix, le point le signale : utilisez **« Réaligner »** (la décision doit être enregistrée à nouveau, sur le nouveau texte)
+4. Ajoutez les **points libres** pour les autres décisions, comme dans la revue complète (discussion, décisions, tâches, PDCA)
+5. **Clôturez la réunion** : il faut au moins un point et chaque document doit avoir une décision
+6. **Approuvez le procès-verbal** (dans l'application ou en enregistrant la délibération) : les décisions s'appliquent aux documents. Les *approuvés* entrent en vigueur par délibération de l'organe, à la date de la délibération ou de la séance ; les *rejetés* reviennent en brouillon ; les *reportés* restent en attente. Si une décision ne peut pas être appliquée (par exemple une nouvelle révision a été chargée après la séance), elle reste indiquée avec le motif et peut être réessayée
+7. Le **procès-verbal** de la revue ciblée présente les documents examinés avec révision et décision, les points et les décisions ; dans le **pack d'audit** les séances ciblées sont dans `09_management_review/sedute_intermedie/`
+
 ---
 
 ## 12. Préparation Audit (M17)

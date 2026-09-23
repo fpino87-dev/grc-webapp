@@ -14,6 +14,7 @@ import { DeliberatedDocuments } from "./DeliberatedDocuments";
 import { ParticipantsSection } from "./ParticipantsSection";
 import { ReportLogoPicker } from "./ReportLogoPicker";
 import { SnapSection, fmtDate, type Snap } from "./shared";
+import { OutcomeSummary } from "./TargetedDocuments";
 
 // Scrittura sul riesame: governance. Un componente dell'organo con account
 // (es. un consigliere) lo legge e lo approva, senza modificarlo.
@@ -45,6 +46,9 @@ function MeetingSection({ review, locked, onMissing }: { review: ManagementRevie
       if (data?.code === "agenda_incomplete") {
         onMissing(data.missing ?? []);
         setError(t("management_review.detail.agenda_incomplete", { count: (data.missing ?? []).length }));
+      } else if (data?.code === "document_outcome_missing") {
+        onMissing(data.missing ?? []);
+        setError(t("management_review.targeted.outcomes_missing", { count: (data.missing ?? []).length }));
       } else {
         setError(reviewErrorMessage(e, t("management_review.detail.status_error")));
       }
@@ -75,7 +79,9 @@ function MeetingSection({ review, locked, onMissing }: { review: ManagementRevie
         </div>
         {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
       </div>
-      <div>
+      {review.kind === "mirato" ? (
+        <p className="text-xs text-gray-500 self-center">{t("management_review.targeted.no_next_review")}</p>
+      ) : <div>
         <h4 className="text-sm font-semibold text-gray-700 mb-2">{t("management_review.detail.next_review")}</h4>
         {locked ? (
           <p className="text-sm text-gray-800">{fmtDate(review.next_review_date)}</p>
@@ -90,7 +96,7 @@ function MeetingSection({ review, locked, onMissing }: { review: ManagementRevie
           </div>
         )}
         <p className="text-xs text-gray-400 mt-1">{t("management_review.detail.next_review_hint")}</p>
-      </div>
+      </div>}
     </section>
   );
 }
@@ -116,7 +122,8 @@ export function ReviewDetail({ review, users, plants, onClose }: { review: Manag
     setDownloading(fmt);
     try {
       const date = review.review_date?.replace(/-/g, "") ?? "";
-      await managementReviewApi.downloadReport(review.id, `riesame_${review.id}_${date}.${fmt}`, fmt);
+      const prefix = review.kind === "mirato" ? "riesame_mirato" : "riesame";
+      await managementReviewApi.downloadReport(review.id, `${prefix}_${review.id}_${date}.${fmt}`, fmt);
     } finally {
       setDownloading("");
     }
@@ -126,6 +133,7 @@ export function ReviewDetail({ review, users, plants, onClose }: { review: Manag
   const isApproved = review.approval_status === "approvato";
   const locked = isApproved || !isGovernance;
   const hasSnapshot = !!review.snapshot_generated_at;
+  const isTargeted = review.kind === "mirato";
   // Snapshot generati prima dei dettagli: solo contatori.
   const legacySnapshot = !!snap && (
     !("azioni_precedenti" in snap)
@@ -139,14 +147,22 @@ export function ReviewDetail({ review, users, plants, onClose }: { review: Manag
         {/* Header */}
         <div className="flex items-start justify-between gap-3 px-6 py-4 border-b border-gray-100 shrink-0">
           <div className="min-w-0">
-            <h3 className="text-lg font-semibold text-gray-900">{review.title}</h3>
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              {review.title}
+              {isTargeted && (
+                <span className="text-xs font-medium px-2 py-0.5 rounded bg-purple-100 text-purple-700">
+                  {t("management_review.targeted.badge")}
+                </span>
+              )}
+            </h3>
+            {isTargeted && <p className="text-xs text-purple-700 mt-0.5">{t("management_review.targeted.not_periodic")}</p>}
             <p className="text-xs text-gray-400 mt-0.5">
               {t("management_review.detail.meeting_date")} {fmtDate(review.review_date)}
               <span className="ml-2">· {review.plant_name ?? t("management_review.list.org_wide")}</span>
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            {hasSnapshot && (["pdf", "html"] as const).map(fmt => (
+            {(hasSnapshot || isTargeted) && (["pdf", "html"] as const).map(fmt => (
               <button
                 key={fmt}
                 onClick={() => handleDownload(fmt)}
@@ -168,8 +184,8 @@ export function ReviewDetail({ review, users, plants, onClose }: { review: Manag
 
           <ParticipantsSection review={review} users={users} locked={isApproved} canWrite={isGovernance} />
 
-          {/* ── Dati riesame (snapshot) ── */}
-          <section>
+          {/* ── Dati riesame (snapshot): solo nel riesame completo §9.3 ── */}
+          {!isTargeted && <section>
             <h4 className="text-sm font-semibold text-gray-700 mb-2">{t("management_review.detail.review_data")}</h4>
             {!hasSnapshot ? (
               <div className="border border-dashed border-gray-300 rounded p-4 text-center">
@@ -210,15 +226,17 @@ export function ReviewDetail({ review, users, plants, onClose }: { review: Manag
                 )}
               </div>
             )}
-          </section>
+          </section>}
 
           <AgendaSection review={review} users={users} plants={plants} snap={snap} locked={locked} missing={missing} />
 
-          <ExecutiveSummarySection review={review} locked={locked} />
+          {!isTargeted && <ExecutiveSummarySection review={review} locked={locked} />}
 
           <ApprovalSection review={review} isGovernance={isGovernance} onMissing={setMissing} />
 
-          <DeliberatedDocuments review={review} snap={snap} isGovernance={isGovernance} />
+          {isTargeted
+            ? <OutcomeSummary review={review} isGovernance={isGovernance} />
+            : <DeliberatedDocuments review={review} snap={snap} isGovernance={isGovernance} />}
         </div>
       </div>
     </div>

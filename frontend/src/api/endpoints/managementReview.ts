@@ -55,6 +55,48 @@ export interface ReviewAgendaItem {
   discussion_draft?: string;
   discussion_draft_meta?: Record<string, any>;
   updated_at: string;
+  /** Riesame mirato: documento da decidere, revisione esaminata ed esito. */
+  document?: string | null;
+  document_version?: string | null;
+  document_outcome?: DocumentOutcome | "";
+  document_outcome_applied_at?: string | null;
+  /** Perché l'esito non è stato applicato al documento (vuoto se applicato). */
+  document_outcome_error?: string;
+  document_info?: {
+    id: string;
+    document_code: string;
+    title: string;
+    status: string;
+    is_mandatory: boolean;
+    examined_version: string | null;
+    latest_version: string | null;
+    version_changed: boolean;
+  } | null;
+}
+
+export type DocumentOutcome = "approvato" | "rinviato" | "respinto";
+export type ReviewKind = "completo" | "mirato";
+
+/** Documento su cui l'organo può decidere in un riesame mirato. */
+export interface PendingDocument {
+  id: string;
+  document_code: string;
+  title: string;
+  document_type: string;
+  status: string;
+  is_mandatory: boolean;
+  plant_code: string | null;
+  version: string | null;
+  has_version: boolean;
+  /** In vigore, con una versione caricata dopo l'ultima approvazione. */
+  new_version: boolean;
+  requires_body_resolution: boolean;
+  selected: boolean;
+}
+
+export interface OutcomeResult {
+  applied: Array<{ item_id: string; document_id: string; title: string; outcome: DocumentOutcome }>;
+  skipped: Array<{ item_id: string; document_id: string; title: string; outcome: DocumentOutcome; reason: string }>;
 }
 
 export interface ExecutiveSummaryMeta {
@@ -91,6 +133,8 @@ export interface ManagementReview {
   plant_name: string | null;
   title: string;
   review_date: string;
+  /** completo = riesame periodico §9.3; mirato = seduta su punti specifici. */
+  kind: ReviewKind;
   next_review_date: string | null;
   governing_body: string | null;
   governing_body_name: string | null;
@@ -213,10 +257,24 @@ export const managementReviewApi = {
     URL.revokeObjectURL(url);
   },
 
+  // Riesame mirato: documenti in attesa, selezione, riallineamento, esiti.
+  pendingDocuments: (id: string) =>
+    apiClient.get<PendingDocument[]>(`${base}/${id}/pending-documents/`).then((r) => r.data),
+  addDocumentItems: (id: string, document_ids: string[]) =>
+    apiClient
+      .post<{ added: string[]; skipped: Array<{ id: string; title?: string; reason: string }>; review: ManagementReview }>(
+        `${base}/${id}/document-items/`, { document_ids },
+      )
+      .then((r) => r.data),
+  refreshItemVersion: (itemId: string) =>
+    apiClient.post<ReviewAgendaItem>(`/management-review/agenda-items/${itemId}/refresh-version/`).then((r) => r.data),
+  applyOutcomes: (id: string) =>
+    apiClient.post<OutcomeResult & { review: ManagementReview }>(`${base}/${id}/apply-outcomes/`).then((r) => r.data),
+
   addAgendaItem: (review: string, title: string) =>
     apiClient.post<ReviewAgendaItem>("/management-review/agenda-items/", { review, title }).then((r) => r.data),
 
-  updateAgendaItem: (id: string, data: Partial<Pick<ReviewAgendaItem, "discussion" | "title">>) =>
+  updateAgendaItem: (id: string, data: Partial<Pick<ReviewAgendaItem, "discussion" | "title" | "document_outcome">>) =>
     apiClient.patch<ReviewAgendaItem>(`/management-review/agenda-items/${id}/`, data).then((r) => r.data),
 
   deleteAgendaItem: (id: string) =>

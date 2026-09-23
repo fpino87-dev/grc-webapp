@@ -8,7 +8,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ## [Unreleased]
 
+### Added
+
+- **Riesame mirato (M13)**: una riunione dell'organo di governo su punti specifici fra un riesame di direzione completo e l'altro — per approvare uno o più documenti o decidere un piccolo cambiamento senza ripercorrere tutti i punti del §9.3.
+  - Alla creazione si sceglie il tipo: **completo** (il riesame periodico ISO/IEC 27001 §9.3, come finora) o **mirato**. Il mirato ha un ordine del giorno libero: niente punti obbligatori §9.3.2, snapshot dei dati, sintesi executive né bozze IA.
+  - **Documenti da decidere**: si scelgono da un elenco dei documenti del perimetro in bozza, in revisione o in approvazione, e di quelli in vigore con una nuova versione non approvata. Ogni documento diventa un punto con la **revisione esaminata** fissata alla scelta; se nel frattempo arriva una revisione nuova, il punto lo segnala e va riallineato prima di decidere.
+  - Per ogni documento l'organo registra l'**esito**: approvato, rinviato o respinto. All'**approvazione del verbale** gli esiti si applicano: gli approvati entrano in vigore per delibera dell'organo con la data della delibera o della seduta, i respinti tornano in bozza (resta registrata la revisione respinta), i rinviati restano in attesa. Un esito che non si può applicare resta indicato con il motivo e si può ritentare.
+  - Punti liberi per le altre decisioni, con task e PDCA come nel riesame completo.
+  - **Non vale come riesame periodico**: lo scadenzario continua a calcolare il prossimo riesame solo dai riesami completi, e il riesame completo successivo riporta anche le azioni decise nelle sedute mirate (§9.3.2 a). Il **verbale** del mirato dichiara che non sostituisce il riesame §9.3 ed elenca documenti esaminati, revisione ed esito; nel **pacchetto audit** le sedute mirate sono in `09_management_review/sedute_intermedie/`.
+
+- **Documenti (M07) — la delibera dell'organo vale anche per una nuova versione di un documento in vigore**: finora l'organo non poteva approvare per delibera la nuova versione di un documento già in vigore; ora può approvarla o respingerla. Ogni respingimento registra quale revisione è stata respinta.
+
 ### Fixed
+
+- **Traduzioni del backend**: una trentina di messaggi dei documenti e del riesame di direzione introdotti a settembre (per esempio gli errori di separazione dei compiti e gli stati dei documenti nel verbale) comparivano in italiano anche in francese, polacco e turco; ora sono tradotti in tutte le lingue.
 
 - **Script di installazione `manual/install_grc.sh` riallineato alla piattaforma** (da verificare su una macchina nuova):
   - i **file caricati** (documenti, evidenze, loghi) si salvano di nuovo: la cartella `/srv/grc/media` usata dalla configurazione di produzione da luglio veniva creata da Docker con proprietario `root` e il backend non poteva scriverci;

@@ -723,6 +723,18 @@ W protokole podsumowanie informuje, czy powstało z pomocą AI (i jakiego modelu
    W sekcji **Status spotkania** wybiera się **logo protokołu**, w prawym górnym rogu PDF i HTML, spośród logo wgranych dla zakładów w Plant Registry (proponowane jest logo zakładu przeglądu). Można je zmienić także po zatwierdzeniu
 3. **Pakiet audytowy** (M03) zawiera zestawienie przeglądów i protokoły PDF przeglądów zatwierdzonych
 
+### Przegląd ukierunkowany
+
+Między dwoma pełnymi przeglądami organ może zbierać się w sprawie konkretnych punktów, np. aby zatwierdzić politykę lub zdecydować o drobnej zmianie. Dla takich posiedzeń utwórz przegląd typu **Ukierunkowany** (wybierany w formularzu tworzenia, później niezmienny).
+
+1. Przegląd ukierunkowany **nie ma** obowiązkowych punktów §9.3.2, migawki danych, podsumowania dla kierownictwa ani szkiców AI i **nie liczy się jako przegląd okresowy**: termin kolejnego przeglądu pozostaje ten ustalony w ostatnim pełnym przeglądzie
+2. **Dokumenty do decyzji**: **„Dodaj dokumenty do decyzji”** otwiera listę dokumentów z zakresu w wersji roboczej, w przeglądzie lub w zatwierdzaniu oraz dokumentów obowiązujących z nową niezatwierdzoną wersją (oznaczenia *Obowiązkowy*, *Nowa wersja*, *Uchwała organu*). Każdy wybrany dokument staje się punktem porządku obrad z **rozpatrywaną wersją** ustaloną w chwili wyboru
+3. Dla każdego dokumentu zapisz **decyzję**: *Zatwierdzony*, *Odroczony* lub *Odrzucony*, z ewentualną notatką w omówieniu. Jeśli po wyborze wgrano nową wersję, punkt to sygnalizuje: użyj **„Zaktualizuj”** (decyzję trzeba zapisać ponownie, dla nowego tekstu)
+4. Dodaj **punkty dowolne** dla pozostałych decyzji, jak w pełnym przeglądzie (omówienie, decyzje, zadania, PDCA)
+5. **Zamknij posiedzenie**: potrzebny jest co najmniej jeden punkt, a każdy dokument musi mieć decyzję
+6. **Zatwierdź protokół** (w aplikacji lub rejestrując uchwałę): decyzje są stosowane do dokumentów. *Zatwierdzone* wchodzą w życie uchwałą organu, z datą uchwały lub posiedzenia; *odrzucone* wracają do wersji roboczej; *odroczone* pozostają oczekujące. Jeśli decyzji nie da się zastosować (np. po posiedzeniu wgrano nową wersję), pozostaje oznaczona wraz z przyczyną i można ponowić próbę
+7. **Protokół** przeglądu ukierunkowanego zawiera rozpatrzone dokumenty z wersją i decyzją, punkty i decyzje; w **pakiecie audytowym** posiedzenia ukierunkowane są w `09_management_review/sedute_intermedie/`
+
 ---
 
 ## 12. Przygotowanie do audytu (M17)

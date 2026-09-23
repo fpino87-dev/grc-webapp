@@ -4753,7 +4753,8 @@
         "6": "Close the meeting: every mandatory item needs a discussion or a decision; the next review date is proposed and appears in the schedule",
         "7": "Write the executive summary or generate an AI draft, review it and accept it",
         "8": "Approve the review: in the app (a member of the body with an account, or governance) or by recording the number and date of the body's resolution. The minutes become immutable",
-        "9": "Download the minutes as PDF or HTML (also included in the audit package)"
+        "9": "Download the minutes as PDF or HTML (also included in the audit package)",
+        "10": "To approve single documents or small decisions between reviews, create a “Targeted” review: choose the pending documents, record the outcome of each one and approve the minutes."
       },
       "connections": {
         "risk": "Critical risks and formally accepted risks in the snapshot",
@@ -5121,6 +5122,54 @@
       "needs_approval": "Approve the review first: documents handled in the meeting inherit its details.",
       "hint_meeting": "Select the documents approved in the meeting of {{date}}: they take effect on that date, linked to this review.",
       "approved_here": "approved in this meeting"
+    },
+    "targeted": {
+      "badge": "Targeted",
+      "not_periodic": "Meeting on specific items: it does not replace the periodic §9.3 review.",
+      "kind_label": "Review type",
+      "kinds": {
+        "completo": "Full (ISO 27001 §9.3)",
+        "mirato": "Targeted"
+      },
+      "kind_hints": {
+        "completo": "Periodic review: mandatory §9.3.2 items, frozen data, summary.",
+        "mirato": "Meeting of the body on specific items: documents to approve and other decisions. It does not count as the periodic review."
+      },
+      "filter_all": "All types",
+      "agenda_intro": "Choose the documents the body must decide on and add items for the other decisions.",
+      "add_documents": "Add documents to decide",
+      "pending_title": "Documents awaiting a decision",
+      "pending_hint": "Documents in scope that are in draft, under review or awaiting approval, and documents in force with a new unapproved version. Each chosen document becomes an item, on the revision uploaded now.",
+      "filter_ph": "Search by code or title",
+      "no_pending": "No documents awaiting a decision.",
+      "no_file": "no file",
+      "mandatory": "Mandatory",
+      "new_version": "New version",
+      "body_resolution": "Body resolution",
+      "already_selected": "Already on the agenda",
+      "add_selected": "Add selected ({{count}})",
+      "add_error": "Could not add the documents.",
+      "skipped": "Not added:",
+      "examined_version": "Reviewed revision: {{version}}",
+      "version_changed": "Revision {{version}} was uploaded after the selection: realign the item before deciding.",
+      "realign": "Realign",
+      "outcome": "Outcome:",
+      "outcomes": {
+        "approvato": "Approved",
+        "rinviato": "Postponed",
+        "respinto": "Rejected"
+      },
+      "outcome_missing": "To decide",
+      "to_decide": "To decide",
+      "applied_on": "Applied to the document on {{date}}",
+      "not_applied": "Not applied: {{reason}}",
+      "applies_on_approval": "Applied to the document when the minutes are approved.",
+      "outcomes_title": "Outcomes applied to documents",
+      "retry": "Retry outcomes not applied",
+      "retry_error": "Could not apply the outcomes.",
+      "outcomes_missing": "Documents without an outcome: {{count}}. Record the outcome of every document before closing the meeting.",
+      "no_next_review": "The targeted review does not propose the next review: the periodic review's date stays.",
+      "approval_hint": "When the minutes are approved, the outcomes are applied to the documents: approved ones take effect, rejected ones go back to draft."
     }
   },
   "objectives": {
