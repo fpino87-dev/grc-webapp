@@ -618,15 +618,12 @@ CELERY_CONCURRENCY=4
 BACKUP_DIR=/app/backups
 BACKUP_ENCRYPTION_KEY=${BACKUP_ENCRYPTION_KEY}
 
-# --- Storage -----------------------------------------------------------------
-STORAGE_BACKEND=local
+# --- File caricati: /srv/grc/media sull'host (bind mount) -------------------
 
 # --- AI Engine ---------------------------------------------------------------
-# Provider cloud, chiavi e routing per funzione si configurano dall'app
-# (Impostazioni → AI Engine). Qui solo il motore locale opzionale.
-AI_ENGINE_ENABLED=${AI_ENGINE_VALUE}
-AI_LOCAL_ENDPOINT=http://ollama:11434
-AI_LOCAL_MODEL=${OLLAMA_MODEL}
+# Provider, chiavi, modelli e routing per funzione si configurano dall'app
+# (Impostazioni → AI Engine). Il motore locale Ollama, se scelto, è già
+# configurato da questo script nel database.
 
 # --- Reporting: ingest KPI da sistemi esterni (opzionale) ---------------------
 KPI_INGEST_API_KEY=

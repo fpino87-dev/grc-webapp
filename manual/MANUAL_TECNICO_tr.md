@@ -836,7 +836,7 @@ sanitized_context, token_map = sanitizer.sanitize({"text": raw_text}, plant_ids=
 ### Denetim günlüğü saklama ve değişmezlik
 
 - L1 (güvenlik), L2 (uyumluluk), L3 (operasyonel): olay **sınıflandırma** seviyeleri (saklama referansı: 5/3/1 yıl)
-- **Silme görevi yok**: denetim günlüğü yalnızca-ekleme/değişmezdir. PostgreSQL tetikleyicisi UPDATE ve DELETE'i reddeder, dolayısıyla silme yoluyla saklama yoktur (kural #4). Saklama fiilen kalıcıdır; `AUDIT_RETENTION` değerleri (settings) yalnızca sınıflandırma meta verileridir.
+- **Silme görevi yok**: denetim günlüğü yalnızca-ekleme/değişmezdir. PostgreSQL tetikleyicisi UPDATE ve DELETE'i reddeder, dolayısıyla silme yoluyla saklama yoktur (kural #4). Saklama fiilen kalıcıdır; L1/L2/L3 yalnızca sınıflandırma düzeyleridir.
 
 ---
 
@@ -1117,21 +1117,24 @@ class Sanitizer:
 ### Bir service'den AI fonksiyonu çağırma
 
 ```python
-from apps.ai_engine.functions.classification import classify_incident_severity
+from apps.ai_engine.router import AiNotConfigured, LlmUnavailable, route
 
-# M09 service'inde — incidents/services.py
-async def suggest_severity(incident: Incident, request) -> dict | None:
-    if not settings.AI_ENGINE_CONFIG['functions']['classification']['enabled']:
-        return None
-
-    result = await classify_incident_severity(
-        description=incident.description,
-        assets=[a.name for a in incident.assets.all()],
-        plant_type=incident.plant.nis2_scope,
-    )
-    # result = { "suggested_severity": "alta", "confidence": 0.87, "reasoning": "..." }
-
-    # Kullanıcıya öneri olarak gösterilir — otomatik uygulanmaz
+# Bir serviste (kural #2): plant_ids içindeki tesis adları token'a dönüştürülür
+def suggest_severity(incident, user) -> dict | None:
+    try:
+        result = route(
+            task_type="incident_classify",   # Ayarlar → AI Engine'deki yönlendirmeye göre yerel veya bulut
+            prompt=f"...{incident.description}",
+            user=user,
+            entity_id=incident.pk,
+            module_source="M09",
+            sanitize=True,                   # serbest metinde zorunlu (kural #9)
+            plant_ids=[incident.plant_id],
+        )
+    except (AiNotConfigured, LlmUnavailable):
+        return None                          # Yapay zekâ yapılandırılmamış veya erişilemiyor: öneri yok
+    # result = {"text", "provider", "model", "interaction_id", ...}
+    # Kullanıcıya önerilir, asla kendiliğinden uygulanmaz: confirm_output() / ignore_output()
     return result
 ```
 
@@ -1422,7 +1425,6 @@ pytest paketi (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=70`
 | `REDIS_URL` | string | redis://redis:6379/0 | Redis URL | Evet |
 | `FRONTEND_URL` | string | http://localhost:3001 | Frontend URL | Evet |
 | `CORS_ALLOWED_ORIGINS` | string | http://localhost:3001 | CORS origin'leri | Hayır |
-| `AI_ENGINE_ENABLED` | bool | False | M20 AI Engine'i etkinleştirir | Hayır |
 
 ---
 
@@ -1497,7 +1499,7 @@ python manage.py load_frameworks --file frameworks/yeni.json --validate-only
 
 ### AI bulut token'ı yetkisiz (M20)
 
-1. `AI_ENGINE_ENABLED=true` olduğunu ve `AI_ENGINE_CONFIG` içinde belirli fonksiyonun etkinleştirildiğini doğrula
+1. **Ayarlar → AI Engine** içinde etkin bir yapılandırma olduğunu ve işlevin doğru sağlayıcıya yönlendirildiğini (işlev başına yönlendirme) doğrulayın
 2. API anahtarının yapılandırıldığını ve süresi dolmadığını kontrol et
 3. Sanitizer'ın hata üretmediğini doğrula: `grep "sanitizer" logs/app.log | tail -20`
 4. Kalıcı hata durumunda, sistem mevcut ise yerel modele döner

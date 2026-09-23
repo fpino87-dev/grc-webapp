@@ -837,7 +837,7 @@ sanitized_context, token_map = sanitizer.sanitize({"text": raw_text}, plant_ids=
 ### Audit log retention and immutability
 
 - L1 (security), L2 (compliance), L3 (operational): event **classification** levels (retention reference: 5/3/1 years)
-- **No deletion task**: the audit log is append-only/immutable. The PostgreSQL trigger rejects UPDATE and DELETE, so there is no retention-by-deletion (rule #4). Retention is effectively permanent; the `AUDIT_RETENTION` values (settings) are classification metadata only.
+- **No deletion task**: the audit log is append-only/immutable. The PostgreSQL trigger rejects UPDATE and DELETE, so there is no retention-by-deletion (rule #4). Retention is effectively permanent; L1/L2/L3 are classification levels only.
 
 ---
 
@@ -1118,21 +1118,24 @@ class Sanitizer:
 ### Calling an AI function from a service
 
 ```python
-from apps.ai_engine.functions.classification import classify_incident_severity
+from apps.ai_engine.router import AiNotConfigured, LlmUnavailable, route
 
-# In the M09 service — incidents/services.py
-async def suggest_severity(incident: Incident, request) -> dict | None:
-    if not settings.AI_ENGINE_CONFIG['functions']['classification']['enabled']:
-        return None
-
-    result = await classify_incident_severity(
-        description=incident.description,
-        assets=[a.name for a in incident.assets.all()],
-        plant_type=incident.plant.nis2_scope,
-    )
-    # result = { "suggested_severity": "high", "confidence": 0.87, "reasoning": "..." }
-
-    # Shown to the user as a suggestion — not applied automatically
+# In a service (rule #2): site names in plant_ids are tokenised
+def suggest_severity(incident, user) -> dict | None:
+    try:
+        result = route(
+            task_type="incident_classify",   # local or cloud according to the routing in Settings → AI Engine
+            prompt=f"...{incident.description}",
+            user=user,
+            entity_id=incident.pk,
+            module_source="M09",
+            sanitize=True,                   # mandatory with free text (rule #9)
+            plant_ids=[incident.plant_id],
+        )
+    except (AiNotConfigured, LlmUnavailable):
+        return None                          # AI not configured or unreachable: no suggestion
+    # result = {"text", "provider", "model", "interaction_id", ...}
+    # Offered to the user, never applied on its own: confirm_output() / ignore_output()
     return result
 ```
 
@@ -1423,7 +1426,6 @@ The pytest suite (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=
 | `REDIS_URL` | string | redis://redis:6379/0 | Redis URL | Yes |
 | `FRONTEND_URL` | string | http://localhost:3001 | Frontend URL | Yes |
 | `CORS_ALLOWED_ORIGINS` | string | http://localhost:3001 | CORS origins | No |
-| `AI_ENGINE_ENABLED` | bool | False | Enable M20 AI Engine | No |
 
 ---
 
@@ -1498,7 +1500,7 @@ python manage.py load_frameworks --file frameworks/nuovo.json --validate-only
 
 ### AI cloud token unauthorised (M20)
 
-1. Verify that `AI_ENGINE_ENABLED=true` and that the specific function is enabled in `AI_ENGINE_CONFIG`
+1. In **Settings → AI Engine** check that an active configuration exists and that the function is routed to the right provider (routing per function)
 2. Check that the API key is configured and has not expired
 3. Verify that the sanitizer is not generating errors: `grep "sanitizer" logs/app.log | tail -20`
 4. In the event of a persistent error, the system falls back to the local model if available

@@ -328,8 +328,8 @@ Log in through the browser, verify login, language switch, and a sample API call
 
 ## 13. Backups and operations
 
-- **Database**: schedule `pg_dump` from the PostgreSQL container or host (see `INFRASTRUCTURE.md` for retention ideas).
-- **Uploaded files**: the current build uses local filesystem storage (`STORAGE_BACKEND=local` in `.env.prod`). Include the backend media volume in your backup plan (e.g. `pg_dump` covers the database; the file store on disk must be backed up separately). S3/object storage is not yet implemented.
+- **Backups**: the app's **Backup** module (Settings → Backup) creates full `.tar` archives with the database dump and the uploaded files, encrypted when `BACKUP_ENCRYPTION_KEY` is set. Schedule the nightly run (02:00, 30-day retention) once with `docker compose -f docker-compose.prod.yml exec backend python manage.py schedule_backup_task`; archives can be downloaded, imported and restored from the UI. Keep a copy of the archives **off the server** (they live in the `backupdata` volume) and store `BACKUP_ENCRYPTION_KEY` separately: without it encrypted backups cannot be restored.
+- **Uploaded files**: stored on the filesystem in `/srv/grc/media` (bind mount shared by `backend` and `celery`); create it before the first start and make it writable by the `grc` user (`docker compose -f docker-compose.prod.yml exec --user root backend chown -R grc:grc /app/media /app/backups`). There is no object-storage backend.
 - **Secrets**: store `.env.prod` outside version control; restrict file permissions (`chmod 600 .env.prod`).
 
 ---

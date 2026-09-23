@@ -156,9 +156,9 @@ Il repository include `.env.example` (sviluppo) e `.env.prod.example` (produzion
 | `SESSION_COOKIE_SECURE` / `CSRF_COOKIE_SECURE` | No | `True` in prod | Cookie solo su HTTPS |
 
 Note:
-- **AI Engine**: provider (Anthropic, OpenAI, Google, Mistral, Groq, Ollama locale), chiavi, modelli, routing per funzione e budget si configurano **dall'app** (Impostazioni → AI Engine) e sono salvati nel DB. Le variabili `AI_ENGINE_ENABLED`, `AI_LOCAL_*`, `AI_CLOUD_PROVIDER`, `AZURE_OPENAI_KEY` e `ANTHROPIC_API_KEY` presenti negli esempi non sono lette dal codice.
-- **Audit trail**: non esiste una retention per cancellazione (il log è immutabile); le variabili `AUDIT_TRAIL_RETENTION_*` non hanno effetto.
-- **`STORAGE_BACKEND`**: i file sono salvati su filesystem; la variabile non ha effetto.
+- **AI Engine**: provider (Anthropic, OpenAI, Google, Mistral, Groq, Ollama locale), chiavi, modelli, routing per funzione e budget si configurano **dall'app** (Impostazioni → AI Engine) e sono salvati nel DB: non ci sono variabili d'ambiente per l'IA.
+- **Audit trail**: immutabile, nessuna retention per cancellazione.
+- **File caricati**: sempre su filesystem (`/srv/grc/media` in produzione); non c'è un backend di object storage.
 
 ### Riferimento `.env.prod`
 

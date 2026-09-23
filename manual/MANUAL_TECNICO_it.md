@@ -837,7 +837,7 @@ sanitized_context, token_map = sanitizer.sanitize({"text": raw_text}, plant_ids=
 ### Retention e immutabilità dell'audit log
 
 - L1 (sicurezza), L2 (compliance), L3 (operativo): livelli di **classificazione** degli eventi (riferimento di conservazione: 5/3/1 anni)
-- **Nessun task di cancellazione**: l'audit log è append-only/immutabile. Il trigger PostgreSQL rifiuta UPDATE e DELETE, quindi non esiste retention-by-deletion (regola #4). La conservazione è di fatto permanente; i valori in `AUDIT_RETENTION` (settings) sono solo metadati di classificazione.
+- **Nessun task di cancellazione**: l'audit log è append-only/immutabile. Il trigger PostgreSQL rifiuta UPDATE e DELETE, quindi non esiste retention-by-deletion (regola #4). La conservazione è di fatto permanente; L1/L2/L3 sono solo livelli di classificazione.
 
 ---
 
@@ -1118,21 +1118,24 @@ class Sanitizer:
 ### Chiamare una funzione AI da un service
 
 ```python
-from apps.ai_engine.functions.classification import classify_incident_severity
+from apps.ai_engine.router import AiNotConfigured, LlmUnavailable, route
 
-# Nel service M09 — incidents/services.py
-async def suggest_severity(incident: Incident, request) -> dict | None:
-    if not settings.AI_ENGINE_CONFIG['functions']['classification']['enabled']:
-        return None
-
-    result = await classify_incident_severity(
-        description=incident.description,
-        assets=[a.name for a in incident.assets.all()],
-        plant_type=incident.plant.nis2_scope,
-    )
-    # result = { "suggested_severity": "alta", "confidence": 0.87, "reasoning": "..." }
-
-    # Viene mostrato all'utente come suggerimento — non applicato automaticamente
+# In un service (regola #2): i nomi dei siti in plant_ids vengono tokenizzati
+def suggest_severity(incident, user) -> dict | None:
+    try:
+        result = route(
+            task_type="incident_classify",   # locale o cloud secondo il routing in Impostazioni → AI Engine
+            prompt=f"...{incident.description}",
+            user=user,
+            entity_id=incident.pk,
+            module_source="M09",
+            sanitize=True,                   # obbligatorio con testo libero (regola #9)
+            plant_ids=[incident.plant_id],
+        )
+    except (AiNotConfigured, LlmUnavailable):
+        return None                          # IA non configurata o non raggiungibile: nessun suggerimento
+    # result = {"text", "provider", "model", "interaction_id", ...}
+    # Proposto all'utente, mai applicato da solo: confirm_output() / ignore_output()
     return result
 ```
 
@@ -1423,7 +1426,6 @@ La suite pytest (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=7
 | `REDIS_URL` | string | redis://redis:6379/0 | Redis URL | Sì |
 | `FRONTEND_URL` | string | http://localhost:3001 | URL frontend | Sì |
 | `CORS_ALLOWED_ORIGINS` | string | http://localhost:3001 | CORS origins | No |
-| `AI_ENGINE_ENABLED` | bool | False | Abilita M20 AI Engine | No |
 
 ---
 
@@ -1498,7 +1500,7 @@ python manage.py load_frameworks --file frameworks/nuovo.json --validate-only
 
 ### Token AI cloud non autorizzato (M20)
 
-1. Verifica che `AI_ENGINE_ENABLED=true` e che la funzione specifica sia abilitata in `AI_ENGINE_CONFIG`
+1. Verifica in **Impostazioni → AI Engine** che esista una configurazione attiva e che la funzione sia instradata al provider giusto (routing per funzione)
 2. Controlla che l'API key sia configurata e non scaduta
 3. Verifica che il sanitizer non stia generando errori: `grep "sanitizer" logs/app.log | tail -20`
 4. In caso di errore persistente, il sistema fa fallback al modello locale se disponibile

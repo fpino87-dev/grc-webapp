@@ -422,30 +422,9 @@ CSRF_COOKIE_HTTPONLY    = False   # Deve essere False: axios/fetch leggono il to
 CSRF_COOKIE_SAMESITE    = "Lax"
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-AI_ENGINE_CONFIG = {
-    "enabled": env.bool("AI_ENGINE_ENABLED", default=False),
-    "functions": {
-        "classification": {"enabled": False, "model": "local"},
-        "text_analysis": {"enabled": False, "model": "cloud"},
-        "draft_generation": {"enabled": False, "model": "cloud"},
-        "anomaly_detection": {"enabled": False, "model": "local"},
-    },
-    "sanitization": {
-        "strip_plant_names": True,
-        "strip_person_names": True,
-        "strip_financial_values": True,
-        "strip_ip_addresses": True,
-    },
-}
-AI_LOCAL_ENDPOINT = env("AI_LOCAL_ENDPOINT", default="http://localhost:11434")
-AI_LOCAL_MODEL = env("AI_LOCAL_MODEL", default="llama3.1:8b")
-AI_CLOUD_PROVIDER = env("AI_CLOUD_PROVIDER", default="azure")
-
-AUDIT_RETENTION = {
-    "L1": env.int("AUDIT_TRAIL_RETENTION_L1_YEARS", default=5),
-    "L2": env.int("AUDIT_TRAIL_RETENTION_L2_YEARS", default=3),
-    "L3": env.int("AUDIT_TRAIL_RETENTION_L3_YEARS", default=1),
-}
+# AI Engine (M20): provider, chiavi, modelli, routing per funzione e budget si
+# configurano dall'app (AiProviderConfig nel DB), non da variabili d'ambiente.
+# L'audit trail è immutabile: nessuna retention per cancellazione (regola #4).
 
 AUTH_PASSWORD_VALIDATORS = [
     {
