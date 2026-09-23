@@ -8,6 +8,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-09-23
+
+### Aggiornamento dalla 0.8.0 — sequenza di deploy
+
+Questa release **elimina i dati per persona della vecchia formazione** (iscrizioni ed esiti phishing per dipendente) dopo averne portato i conteggi in erogazioni storiche: l'operazione non è reversibile. In produzione, nell'ordine:
+
+1. **Backup completo** (DB + media) dal pulsante «Crea backup» o dal comando di backup.
+2. **Anteprima** in sola lettura, **prima** di `migrate`: `python manage.py check_training_migration_readiness` — elenca le erogazioni storiche che verranno create e i riferimenti normativi dei corsi che non trovano un controllo (da ricollegare a mano).
+3. Rebuild dei container (`docker compose -f docker-compose.prod.yml up -d --build`): serve anche ai font del verbale PDF del riesame.
+4. `python manage.py migrate`: 14 migrazioni nuove in formazione (`training.0003`–`0007`), documenti (approvazioni, versioni, policy di workflow), riesame, notifiche, task/KPI e competenze (`auth_grc.0007`).
+5. `python manage.py load_training_evidence_controls`, poi verificare in Formazione → Catalogo le regole «controlli provati per tipo di destinatari».
+6. `python manage.py load_document_workflow_policies` (con `--dry-run` per vedere prima cosa configura).
+7. Riavvio di `celery` e `celery-beat` (nuovo task dei promemoria del piano formativo).
+
 ### Added
 
 - **Bozza IA della discussione dei punti all'ordine del giorno (M13 + M20)**: su ogni punto del riesame si può chiedere all'IA una **bozza della verbalizzazione**, costruita sui soli dati congelati pertinenti a quel punto (azioni precedenti, conformità, indicatori, obiettivi, audit, incidenti, documenti, rischi, miglioramento) più le decisioni già registrate. La bozza **non entra mai nel verbale da sola**: resta separata finché una persona non la rilegge e la accetta, anche modificata, e può essere rigenerata o scartata. Come per la sintesi executive, i nomi delle persone sono pseudonimizzati prima dell'invio e il verbale **dichiara** quali testi sono assistiti dall'IA e chi li ha verificati e accettati (AI Act art. 50). La bozza e la sua provenienza non sono scrivibili con una modifica diretta del punto.
