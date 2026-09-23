@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  install_grc.sh — govrico — Full Auto Install on Ubuntu 24
+#  install_grc.sh — govrico — Full Auto Install on Ubuntu 24.04 / 26.04 LTS
 #  Repo: https://github.com/fpino87-dev/grc-webapp
 #
 #  Uso:
@@ -52,8 +52,8 @@ state_check() { [[ -f "${STATE_DIR}/$1.done" ]]; }
 # ---------------------------------------------------------------------------
 echo -e "\n${BOLD}${CYAN}"
 echo "  ╔══════════════════════════════════════════════════════╗"
-echo "  ║   govrico — Manager v2.3                             ║"
-echo "  ║   Ubuntu 24 LTS · Docker · Nginx SSL (self-signed)  ║"
+echo "  ║   govrico — Manager v2.4                             ║"
+echo "  ║   Ubuntu LTS · Docker · Nginx SSL (self-signed)     ║"
 echo "  ╚══════════════════════════════════════════════════════╝"
 echo -e "${RESET}\n"
 
@@ -116,10 +116,131 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Azioni di gestione (non-install)
+# Funzioni comuni a installazione e aggiornamento
 # ---------------------------------------------------------------------------
 COMPOSE="docker compose -f ${INSTALL_DIR}/docker-compose.prod.yml -f ${INSTALL_DIR}/docker-compose.override.yml --env-file ${INSTALL_DIR}/.env.prod"
+MEDIA_DIR="/srv/grc/media"   # bind mount di docker-compose.prod.yml (backend + celery)
 
+# File tracciati da git che le versioni ≤ 2.3 di questo script modificavano
+# (FIX A–D). Le correzioni sono ora nel repository: le modifiche locali vanno
+# annullate, altrimenti `git pull --ff-only` si blocca quando upstream li cambia.
+LEGACY_PATCHED_FILES=(
+  docker-compose.prod.yml
+  backend/Dockerfile.prod
+  backend/core/settings/prod.py
+  frontend/nginx.conf
+)
+
+restore_legacy_patches() {
+  local f changed=()
+  for f in "${LEGACY_PATCHED_FILES[@]}"; do
+    git -C "${INSTALL_DIR}" diff --quiet -- "${f}" 2>/dev/null || changed+=("${f}")
+  done
+  if [[ ${#changed[@]} -gt 0 ]]; then
+    info "Annullo le patch locali delle versioni precedenti dello script: ${changed[*]}"
+    git -C "${INSTALL_DIR}" checkout -- "${changed[@]}"
+  fi
+  if ! git -C "${INSTALL_DIR}" diff --quiet; then
+    git -C "${INSTALL_DIR}" status --short
+    error "Modifiche locali nel repository in ${INSTALL_DIR}: salvale o annullale prima di aggiornare."
+  fi
+}
+
+compose_supports_override_tag() {
+  # `!override` nei file compose è supportato da Docker Compose 2.24.4
+  local v
+  v="$(docker compose version --short 2>/dev/null | sed 's/^v//')"
+  [[ -n "${v}" ]] && [[ "$(printf '%s\n2.24.4\n' "${v}" | sort -V | head -1)" == "2.24.4" ]]
+}
+
+write_compose_override() {
+  # backend su 127.0.0.1:8001 per nginx; frontend solo su localhost (Docker
+  # pubblica le porte scavalcando UFW: con 3001:80 la SPA sarebbe raggiungibile
+  # in HTTP diretto da fuori, senza passare da nginx/HTTPS).
+  cat > "${INSTALL_DIR}/docker-compose.override.yml" << 'OVEREOF'
+services:
+  backend:
+    ports:
+      - "127.0.0.1:8001:8000"
+OVEREOF
+  if compose_supports_override_tag; then
+    cat >> "${INSTALL_DIR}/docker-compose.override.yml" << 'OVEREOF'
+  frontend:
+    ports: !override
+      - "127.0.0.1:3001:80"
+OVEREOF
+  else
+    warn "Docker Compose < 2.24.4: il frontend resta pubblicato su 0.0.0.0:3001 — aggiorna Docker e rilancia"
+  fi
+  if [[ "${ENABLE_OLLAMA:-false}" == "true" ]]; then
+    cat >> "${INSTALL_DIR}/docker-compose.override.yml" << 'OLLAMAEOF'
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    volumes:
+      - ollamadata:/root/.ollama
+    ports:
+      - "127.0.0.1:11434:11434"
+
+volumes:
+  ollamadata:
+OLLAMAEOF
+  fi
+}
+
+ensure_env_defaults() {
+  # Aggiunge a un .env.prod esistente le variabili introdotte dopo la sua
+  # generazione e allinea la versione applicativa al file VERSION.
+  local env_file="${INSTALL_DIR}/.env.prod" version
+  version="$(tr -d '[:space:]' < "${INSTALL_DIR}/VERSION" 2>/dev/null || echo unknown)"
+  sed -i -E "s/^APP_VERSION=.*/APP_VERSION=${version}/; s/^VITE_APP_VERSION=.*/VITE_APP_VERSION=${version}/" "${env_file}"
+  if ! grep -q "^BACKUP_ENCRYPTION_KEY=." "${env_file}"; then
+    local key
+    key="$(python3 -c 'import secrets; print(secrets.token_urlsafe(48))')"
+    sed -i '/^BACKUP_ENCRYPTION_KEY=/d' "${env_file}"
+    printf '\n# Cifratura dei backup (aggiunta da install_grc.sh) — CONSERVARE: senza, i backup cifrati non si ripristinano\nBACKUP_ENCRYPTION_KEY=%s\n' "${key}" >> "${env_file}"
+    [[ -f /root/grc_credentials.txt ]] && printf 'BACKUP_ENCRYPTION_KEY : %s\n' "${key}" >> /root/grc_credentials.txt
+    warn "Generata BACKUP_ENCRYPTION_KEY (salvata in .env.prod e /root/grc_credentials.txt): conservala fuori dal server"
+  fi
+  grep -q "^DRF_NUM_PROXIES=" "${env_file}" || printf '\n# Un reverse proxy (nginx) davanti a Django\nDRF_NUM_PROXIES=1\n' >> "${env_file}"
+}
+
+prepare_media_dir() {
+  mkdir -p "${MEDIA_DIR}"
+}
+
+fix_volume_permissions() {
+  # Il backend gira come utente non-root `grc`: la cartella media sull'host
+  # nasce di root e il volume dei backup va reso scrivibile.
+  ${COMPOSE} exec -T --user root backend chown -R grc:grc /app/media /app/backups \
+    || warn "chown di /app/media e /app/backups non riuscito: upload e backup potrebbero fallire"
+}
+
+load_reference_data() {
+  # Tutti idempotenti: creano ciò che manca senza toccare le personalizzazioni.
+  local cmd
+  for cmd in load_frameworks load_notification_profiles load_competency_requirements \
+             load_role_requirements load_required_documents load_training_evidence_controls \
+             schedule_backup_task; do
+    info "  ${cmd}"
+    ${COMPOSE} exec -T backend python manage.py "${cmd}" >/dev/null \
+      || warn "${cmd} non riuscito — rilanciarlo a mano"
+  done
+}
+
+wait_backend() {
+  local wait=0
+  info "Attendo disponibilità backend..."
+  until curl -sf http://127.0.0.1:8001/api/health/ &>/dev/null; do
+    sleep 5; wait=$((wait+5)); echo -n "."
+    [[ ${wait} -ge 180 ]] && { echo ""; warn "Timeout — verifico comunque..."; break; }
+  done
+  echo ""
+}
+
+# ---------------------------------------------------------------------------
+# Azioni di gestione (non-install)
+# ---------------------------------------------------------------------------
 if [[ "${ACTION}" == "restart" ]]; then
   step "Restart servizi"
   ${COMPOSE} restart
@@ -164,92 +285,57 @@ fi
 if [[ "${ACTION}" == "update" ]]; then
   step "Aggiornamento govrico"
   cd "${INSTALL_DIR}"
+  [[ -f "${STATE_DIR}/ai_choice.conf" ]] && source "${STATE_DIR}/ai_choice.conf"
 
+  # 1. Backup completo (DB + media) con il codice attualmente in esercizio
+  if ${COMPOSE} ps --status running 2>/dev/null | grep -q backend; then
+    info "Backup completo prima dell'aggiornamento..."
+    ${COMPOSE} exec -T backend python manage.py shell -c "
+from django.contrib.auth import get_user_model
+from apps.backups.services import create_backup
+u = get_user_model().objects.filter(is_superuser=True, is_active=True).order_by('date_joined').first()
+r = create_backup(u, backup_type='manual')
+print('Backup:', r.filename, r.status)
+" || error "Backup non riuscito: aggiornamento interrotto. Verificare lo spazio disco e i log del backend."
+    success "Backup creato (Impostazioni → Backup)"
+  else
+    warn "Stack non in esecuzione: backup pre-aggiornamento saltato"
+  fi
+
+  # 2. Codice
+  restore_legacy_patches
   info "Git pull..."
   git pull --ff-only
-  success "Codice aggiornato"
+  success "Codice aggiornato alla versione $(cat VERSION 2>/dev/null || echo '?')"
 
-  # Riapplica i fix al codice sorgente
-  info "FIX A: docker-compose.prod.yml..."
-  python3 - "${INSTALL_DIR}/docker-compose.prod.yml" << 'FIXEOF'
-import sys, re
-path = sys.argv[1]
-with open(path) as f: content = f.read()
-original = content
-content = re.sub(r'(celery-beat:.*?context:\s*)\.\\/backend', r'\1.', content, flags=re.DOTALL)
-content = re.sub(r'(celery-beat:.*?dockerfile:\s*)Dockerfile\.prod', r'\1backend/Dockerfile.prod', content, flags=re.DOTALL)
-if content != original:
-    with open(path, 'w') as f: f.write(content)
-    print("  → Fix applicato")
-else:
-    print("  → Nessuna modifica necessaria")
-FIXEOF
+  ensure_env_defaults
+  write_compose_override
+  prepare_media_dir
 
-  info "FIX B: backend/Dockerfile.prod..."
-  python3 - "${INSTALL_DIR}/backend/Dockerfile.prod" << 'FIXEOF'
-import sys
-path = sys.argv[1]
-with open(path) as f: content = f.read()
-original = content
-if 'FRONTEND_URL' not in content:
-    content = content.replace(
-        'REDIS_URL=redis://x:6379/0 \\',
-        'REDIS_URL=redis://x:6379/0 \\\n    FRONTEND_URL=http://localhost \\'
-    )
-if content != original:
-    with open(path, 'w') as f: f.write(content)
-    print("  → Fix applicato")
-else:
-    print("  → Nessuna modifica necessaria")
-FIXEOF
-
-  info "FIX C: core/settings/prod.py..."
-  python3 - "${INSTALL_DIR}/backend/core/settings/prod.py" << 'FIXEOF'
-import sys, re
-path = sys.argv[1]
-with open(path) as f: content = f.read()
-original = content
-content = re.sub(r'(SECURE_SSL_REDIRECT\s*=\s*)True', r'\1False', content)
-if content != original:
-    with open(path, 'w') as f: f.write(content)
-    print("  → Fix applicato")
-else:
-    print("  → Nessuna modifica necessaria")
-FIXEOF
-
-  info "FIX D: frontend/nginx.conf..."
-  cat > "${INSTALL_DIR}/frontend/nginx.conf" << 'NGINXFEOF'
-server {
-    listen 80;
-    root /usr/share/nginx/html;
-    index index.html;
-    gzip on;
-    gzip_types text/plain text/css application/json application/javascript text/xml;
-    add_header X-Frame-Options "DENY" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-    add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()" always;
-    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; worker-src 'none';" always;
-    location / { try_files $uri $uri/ /index.html; }
-    location ~* \.(js|css|png|jpg|jpeg|svg|ico|woff2)$ {
-        add_header Cache-Control "public, max-age=31536000, immutable" always;
-        add_header X-Content-Type-Options "nosniff" always;
-        add_header X-Frame-Options "DENY" always;
-    }
-}
-NGINXFEOF
-
+  # 3. Immagini
   info "Rebuild immagini Docker..."
   ${COMPOSE} build
 
+  # 4. Anteprima delle migrazioni di dati (nuovo codice, database non ancora migrato)
+  info "Anteprima delle migrazioni dei dati..."
+  ${COMPOSE} run --rm --no-deps backend python manage.py check_training_migration_readiness 2>/dev/null \
+    || info "Nessuna anteprima disponibile per questa versione"
+  echo ""
+  echo -ne "  Procedere con migrazioni e riavvio? Leggi prima le note di aggiornamento nel CHANGELOG [s/N] "
+  read -r GO_ANSWER </dev/tty
+  [[ "${GO_ANSWER,,}" == "s" ]] || error "Aggiornamento interrotto prima delle migrazioni: il codice è aggiornato ma i container girano ancora con le immagini precedenti."
+
+  # 5. Riavvio, migrazioni, dati di riferimento
   info "Restart stack..."
   ${COMPOSE} up -d
+  wait_backend
 
   info "Migrazioni database..."
   ${COMPOSE} exec -T backend python manage.py migrate --noinput
 
-  info "Fix permessi /app/backups..."
-  ${COMPOSE} exec -T --user root backend chown -R grc:grc /app/backups 2>/dev/null || true
+  fix_volume_permissions
+  info "Dati di riferimento (idempotenti)..."
+  load_reference_data
 
   success "Aggiornamento completato"
   ${COMPOSE} ps
@@ -408,11 +494,9 @@ else
   export DEBIAN_FRONTEND=noninteractive
   apt-get install -y -qq \
     curl wget git ca-certificates gnupg lsb-release \
-    python3 python3-pip python3-venv \
+    python3 python3-cryptography \
     nginx openssl \
-    ufw fail2ban \
-    cron
-  pip3 install cryptography -q 2>/dev/null || true
+    ufw fail2ban
   state_done "step2_deps"
   success "Dipendenze installate"
 fi
@@ -450,6 +534,7 @@ step "4/9 · Clone repository"
 
 if [[ -d "${INSTALL_DIR}/.git" ]]; then
   info "Repository già presente → git pull"
+  restore_legacy_patches
   git -C "${INSTALL_DIR}" pull --ff-only
 else
   git clone "${REPO_URL}" "${INSTALL_DIR}"
@@ -457,86 +542,9 @@ fi
 cd "${INSTALL_DIR}"
 success "Repository in ${INSTALL_DIR}"
 
-# FIX A: docker-compose.prod.yml — celery-beat context e dockerfile errati
-info "FIX A: patching docker-compose.prod.yml (celery-beat context)..."
-python3 - "${INSTALL_DIR}/docker-compose.prod.yml" << 'PYEOF'
-import sys, re
-path = sys.argv[1]
-with open(path) as f: content = f.read()
-original = content
-content = re.sub(r'(celery-beat:.*?context:\s*)\.\/backend', r'\1.', content, flags=re.DOTALL)
-content = re.sub(r'(celery-beat:.*?dockerfile:\s*)Dockerfile\.prod', r'\1backend/Dockerfile.prod', content, flags=re.DOTALL)
-if content != original:
-    with open(path, 'w') as f: f.write(content)
-    print("  → Fix applicato")
-else:
-    print("  → Nessuna modifica necessaria")
-PYEOF
-
-# FIX B: backend/Dockerfile.prod — FRONTEND_URL mancante per collectstatic
-info "FIX B: patching backend/Dockerfile.prod (FRONTEND_URL placeholder)..."
-python3 - "${INSTALL_DIR}/backend/Dockerfile.prod" << 'PYEOF'
-import sys
-path = sys.argv[1]
-with open(path) as f: content = f.read()
-original = content
-if 'FRONTEND_URL' not in content:
-    content = content.replace(
-        'REDIS_URL=redis://x:6379/0 \\',
-        'REDIS_URL=redis://x:6379/0 \\\n    FRONTEND_URL=http://localhost \\'
-    )
-if content != original:
-    with open(path, 'w') as f: f.write(content)
-    print("  → Fix applicato")
-else:
-    print("  → Nessuna modifica necessaria")
-PYEOF
-
-# FIX C: backend/core/settings/prod.py — SECURE_SSL_REDIRECT hardcoded True
-info "FIX C: patching core/settings/prod.py (SECURE_SSL_REDIRECT)..."
-python3 - "${INSTALL_DIR}/backend/core/settings/prod.py" << 'PYEOF'
-import sys, re
-path = sys.argv[1]
-with open(path) as f: content = f.read()
-original = content
-content = re.sub(r'(SECURE_SSL_REDIRECT\s*=\s*)True', r'\1False', content)
-if content != original:
-    with open(path, 'w') as f: f.write(content)
-    print("  → Fix applicato")
-else:
-    print("  → Nessuna modifica necessaria")
-PYEOF
-
-# FIX D: frontend/nginx.conf — CSP multiriga genera header malformati
-info "FIX D: patching frontend/nginx.conf (CSP su singola riga)..."
-cat > "${INSTALL_DIR}/frontend/nginx.conf" << 'NGINXFRONTEOF'
-server {
-    listen 80;
-    root /usr/share/nginx/html;
-    index index.html;
-
-    gzip on;
-    gzip_types text/plain text/css application/json application/javascript text/xml;
-
-    add_header X-Frame-Options "DENY" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-    add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()" always;
-    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; worker-src 'none';" always;
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    location ~* \.(js|css|png|jpg|jpeg|svg|ico|woff2)$ {
-        add_header Cache-Control "public, max-age=31536000, immutable" always;
-        add_header X-Content-Type-Options "nosniff" always;
-        add_header X-Frame-Options "DENY" always;
-    }
-}
-NGINXFRONTEOF
-
-success "Tutti i fix applicati al codice sorgente"
+# Nessuna patch ai sorgenti: le correzioni che le versioni ≤ 2.3 applicavano
+# qui (FIX A–D) sono nel repository. Il working tree resta pulito, così
+# l'aggiornamento con `git pull --ff-only` non si blocca.
 
 # ---------------------------------------------------------------------------
 # STEP 5 — Generazione .env.prod
@@ -553,6 +561,8 @@ else
   DB_PASSWORD=$(python3 -c "import secrets; print(secrets.token_hex(20))")
   REDIS_PASSWORD=$(python3 -c "import secrets; print(secrets.token_hex(16))")
   ADMIN_URL=$(python3 -c "import uuid; print(str(uuid.uuid4()) + '/')")
+  BACKUP_ENCRYPTION_KEY=$(python3 -c "import secrets; print(secrets.token_urlsafe(48))")
+  APP_VERSION_VALUE=$(tr -d '[:space:]' < "${INSTALL_DIR}/VERSION" 2>/dev/null || echo unknown)
   AI_ENGINE_VALUE="false"
   [[ "${ENABLE_OLLAMA}" == "true" ]] && AI_ENGINE_VALUE="true"
 
@@ -573,6 +583,8 @@ ADMIN_URL=${ADMIN_URL}
 SHOW_API_DOCS=false
 SESSION_COOKIE_SECURE=true
 CSRF_COOKIE_SECURE=true
+# Un reverse proxy (nginx sull'host) davanti a Django: IP reale del client da X-Forwarded-For
+DRF_NUM_PROXIES=1
 
 # --- PostgreSQL ---------------------------------------------------------------
 DATABASE_URL=postgresql://grc:${DB_PASSWORD}@db:5432/grc_prod
@@ -598,37 +610,43 @@ DEFAULT_FROM_EMAIL=govrico <noreply@example.com>
 
 # --- Celery ------------------------------------------------------------------
 CELERY_CONCURRENCY=4
+
+# --- Backup ------------------------------------------------------------------
+# Archivi DB + file caricati, backup automatico ogni notte alle 02:00.
+# BACKUP_ENCRYPTION_KEY cifra gli archivi: CONSERVARLA fuori dal server,
+# senza non si ripristinano. Deve restare distinta da FERNET_KEY.
 BACKUP_DIR=/app/backups
+BACKUP_ENCRYPTION_KEY=${BACKUP_ENCRYPTION_KEY}
 
 # --- Storage -----------------------------------------------------------------
 STORAGE_BACKEND=local
 
 # --- AI Engine ---------------------------------------------------------------
+# Provider cloud, chiavi e routing per funzione si configurano dall'app
+# (Impostazioni → AI Engine). Qui solo il motore locale opzionale.
 AI_ENGINE_ENABLED=${AI_ENGINE_VALUE}
 AI_LOCAL_ENDPOINT=http://ollama:11434
 AI_LOCAL_MODEL=${OLLAMA_MODEL}
-AI_CLOUD_PROVIDER=azure
-AZURE_OPENAI_KEY=
-ANTHROPIC_API_KEY=
 
-# --- Audit trail retention ---------------------------------------------------
-AUDIT_TRAIL_RETENTION_L1_YEARS=5
-AUDIT_TRAIL_RETENTION_L2_YEARS=3
-AUDIT_TRAIL_RETENTION_L3_YEARS=1
+# --- Reporting: ingest KPI da sistemi esterni (opzionale) ---------------------
+KPI_INGEST_API_KEY=
 
 # --- Sentry (disabilitato) ---------------------------------------------------
 SENTRY_DSN=
 SENTRY_ENVIRONMENT=production
 SENTRY_TRACES_SAMPLE_RATE=0.1
 SENTRY_PROFILES_SAMPLE_RATE=0.0
-APP_VERSION=1.0.0
+APP_VERSION=${APP_VERSION_VALUE}
 
 # --- Frontend build args -----------------------------------------------------
 VITE_API_URL=
 VITE_SENTRY_DSN=
 VITE_SENTRY_ENVIRONMENT=production
 VITE_SENTRY_TRACES_RATE=0.1
-VITE_APP_VERSION=1.0.0
+VITE_SENTRY_REPLAY_ENABLED=false
+VITE_SENTRY_REPLAY_SESSION_RATE=0.1
+VITE_SENTRY_REPLAY_ERROR_RATE=1.0
+VITE_APP_VERSION=${APP_VERSION_VALUE}
 ENV_CONTENT
 
   chmod 600 "${ENV_DST}"
@@ -642,8 +660,8 @@ ENV_CONTENT
 ======================================================
 
 IP Server        : ${SERVER_IP}
-URL Piattaforma  : https://${SERVER_IP}
-URL Admin Django : https://${SERVER_IP}/${ADMIN_URL}
+URL Piattaforma  : ${PUBLIC_ORIGIN}
+URL Admin Django : ${PUBLIC_ORIGIN}/${ADMIN_URL}
 
 --- Secrets (NON CONDIVIDERE MAI) ---
 SECRET_KEY       : ${SECRET_KEY}
@@ -651,6 +669,8 @@ FERNET_KEY       : ${FERNET_KEY}
 DB_PASSWORD      : ${DB_PASSWORD}
 REDIS_PASSWORD   : ${REDIS_PASSWORD}
 ADMIN_URL path   : ${ADMIN_URL}
+BACKUP_ENCRYPTION_KEY : ${BACKUP_ENCRYPTION_KEY}
+  (senza questa chiave i backup cifrati non si ripristinano: copiala fuori dal server)
 
 --- AI locale ---
 Abilitato        : ${AI_ENGINE_VALUE}
@@ -662,8 +682,8 @@ CREDS
   success "Credenziali salvate in ${CREDS_FILE}"
 fi
 
-DB_PASSWORD=$(grep    "^POSTGRES_PASSWORD=" "${ENV_DST}" | cut -d= -f2)
-REDIS_PASSWORD=$(grep "^REDIS_PASSWORD="    "${ENV_DST}" | cut -d= -f2)
+# .env.prod già esistente (reinstallazione): variabili nuove + versione
+ensure_env_defaults
 
 # ---------------------------------------------------------------------------
 # STEP 6 — Certificato SSL self-signed
@@ -816,6 +836,10 @@ step "8/9 · Firewall UFW"
 if state_check "step8_ufw"; then
   skip "Firewall già configurato"
 else
+  # Server dedicato: le regole UFW esistenti vengono sostituite.
+  if ufw status 2>/dev/null | grep -q "Status: active"; then
+    warn "UFW già attivo: le regole attuali vengono azzerate e sostituite (22, 80, 443)"
+  fi
   ufw --force reset
   ufw default deny incoming
   ufw default allow outgoing
@@ -834,47 +858,19 @@ step "9/9 · Build e avvio stack Docker"
 
 cd "${INSTALL_DIR}"
 
-# Override: espone backend 8001 su localhost per nginx
-# Aggiunge ollama come servizio se abilitato
-cat > "${INSTALL_DIR}/docker-compose.override.yml" << OVEREOF
-services:
-  backend:
-    ports:
-      - "127.0.0.1:8001:8000"
-OVEREOF
-
-if [[ "${ENABLE_OLLAMA}" == "true" ]]; then
-  cat >> "${INSTALL_DIR}/docker-compose.override.yml" << 'OLLAMAEOF'
-  ollama:
-    image: ollama/ollama:latest
-    restart: unless-stopped
-    volumes:
-      - ollamadata:/root/.ollama
-    ports:
-      - "127.0.0.1:11434:11434"
-
-volumes:
-  ollamadata:
-OLLAMAEOF
-fi
+# Override: backend su 127.0.0.1:8001 e frontend su 127.0.0.1:3001 per nginx,
+# ollama se abilitato
+write_compose_override
+prepare_media_dir
 
 info "Build Docker (prima esecuzione: 5-15 min, le successive usano cache)..."
-docker compose -f docker-compose.prod.yml --env-file .env.prod build
+${COMPOSE} build
 
 info "Avvio stack..."
-docker compose -f docker-compose.prod.yml \
-  -f docker-compose.override.yml \
-  --env-file .env.prod up -d
+${COMPOSE} up -d
 success "Stack avviato"
 
-# Attendi backend (curl diretto sull'host, più affidabile)
-info "Attendo disponibilità backend..."
-WAIT=0
-until curl -sf http://127.0.0.1:8001/api/health/ &>/dev/null; do
-  sleep 5; WAIT=$((WAIT+5)); echo -n "."
-  [[ $WAIT -ge 180 ]] && { echo ""; warn "Timeout — verifico comunque..."; break; }
-done
-echo ""
+wait_backend
 
 EXEC="docker compose -f docker-compose.prod.yml -f docker-compose.override.yml --env-file .env.prod exec -T backend"
 
@@ -882,20 +878,23 @@ info "Migrazioni database..."
 ${EXEC} python manage.py migrate --noinput
 success "Migrazioni OK"
 
-# Fix permessi cartella backup (utente grc non-root deve poter scrivere)
-info "Fix permessi /app/backups..."
-docker compose -f docker-compose.prod.yml -f docker-compose.override.yml --env-file .env.prod   exec -T --user root backend chown -R grc:grc /app/backups 2>/dev/null || true
-success "Permessi backup OK"
+# Permessi: cartella media sull'host e volume backup scrivibili dall'utente grc
+info "Permessi /app/media e /app/backups..."
+fix_volume_permissions
+success "Permessi OK"
 
-if state_check "step9_frameworks"; then
-  skip "Framework normativi già caricati"
+info "Dati di riferimento (framework, profili notifica, competenze, requisiti, backup notturno)..."
+load_reference_data
+success "Dati di riferimento caricati (ISO 27001, NIS2, ACN NIS2, TISAX) e backup automatico programmato alle 02:00"
+
+# Policy di workflow documentale predefinite: solo alla prima installazione,
+# perché il comando aggiorna anche le policy di organizzazione già presenti.
+if state_check "step9_workflow_policies"; then
+  skip "Policy di workflow documentale"
 else
-  info "Caricamento framework normativi..."
-  ${EXEC} python manage.py load_frameworks
-  ${EXEC} python manage.py load_notification_profiles
-  ${EXEC} python manage.py load_competency_requirements
-  state_done "step9_frameworks"
-  success "Framework caricati (ISO27001, NIS2, TISAX L2/L3)"
+  ${EXEC} python manage.py load_document_workflow_policies \
+    && state_done "step9_workflow_policies" \
+    || warn "load_document_workflow_policies non riuscito — rilanciarlo a mano"
 fi
 
 info "Check deploy Django..."
@@ -949,10 +948,7 @@ else
   echo -e "${BOLD}${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
   echo -e "${BOLD} Crea l'account amministratore della piattaforma GRC${RESET}"
   echo -e "${BOLD}${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}\n"
-  docker compose -f docker-compose.prod.yml \
-    -f docker-compose.override.yml \
-    --env-file .env.prod \
-    exec backend python manage.py createsuperuser
+  ${COMPOSE} exec backend python manage.py createsuperuser
   state_done "step9_superuser"
   success "Superuser creato"
 fi
@@ -988,19 +984,14 @@ SVCEOF
 fi
 
 # ---------------------------------------------------------------------------
-# Backup automatico (cron 02:30 ogni notte, retention 30 giorni)
+# Backup automatico: lo gestisce l'applicazione (Celery, ogni notte alle 02:00,
+# archivio DB + file caricati, cifrato, retention 30 giorni) — programmato
+# sopra da `schedule_backup_task`. Le versioni ≤ 2.3 creavano anche un cron
+# sull'host con il solo dump del DB in chiaro: se presente, lo segnaliamo.
 # ---------------------------------------------------------------------------
-if state_check "step9_cron"; then
-  skip "Cron backup già configurato"
-else
-  mkdir -p "${BACKUP_DIR}"
-  cat > /etc/cron.d/grc-backup << 'CRONEOF'
-# GRC — backup nightly 02:30
-30 2 * * * root docker exec $(docker ps -qf "name=grc-webapp-db") pg_dump -U grc grc_prod 2>/dev/null | gzip > /var/backups/grc/grc_$(date +\%Y\%m\%d).sql.gz && find /var/backups/grc -name "*.sql.gz" -mtime +30 -delete
-CRONEOF
-  chmod 644 /etc/cron.d/grc-backup
-  state_done "step9_cron"
-  success "Cron backup configurato → ${BACKUP_DIR} (retention 30 gg)"
+if [[ -f /etc/cron.d/grc-backup ]]; then
+  warn "Trovato il vecchio cron /etc/cron.d/grc-backup (solo DB, non cifrato, in ${BACKUP_DIR})."
+  warn "Il backup completo è ora nell'app: valuta di rimuoverlo con  rm /etc/cron.d/grc-backup"
 fi
 
 # ---------------------------------------------------------------------------
@@ -1014,8 +1005,8 @@ echo "  ╔═══════════════════════
 echo "  ║   ✅  Installazione completata con successo!             ║"
 echo "  ╚══════════════════════════════════════════════════════════╝"
 echo -e "${RESET}"
-echo -e "  🌐  govrico   →  ${BOLD}${CYAN}https://${SERVER_IP}${RESET}"
-echo -e "  🔧  Admin Django      →  ${BOLD}${CYAN}https://${SERVER_IP}/${ADMIN_URL_PATH}${RESET}"
+echo -e "  🌐  govrico           →  ${BOLD}${CYAN}${PUBLIC_ORIGIN}${RESET}"
+echo -e "  🔧  Admin Django      →  ${BOLD}${CYAN}${PUBLIC_ORIGIN}/${ADMIN_URL_PATH}${RESET}"
 echo ""
 if [[ "${ENABLE_OLLAMA}" == "true" ]]; then
   echo -e "  🤖  AI locale         →  ${BOLD}${GREEN}Abilitato${RESET} · Ollama · ${OLLAMA_MODEL}"
@@ -1024,9 +1015,11 @@ else
 fi
 echo ""
 echo -e "${YELLOW}${BOLD}  ⚠  SSL self-signed:${RESET} il browser mostrerà 'Connessione non sicura'."
-echo -e "     Clicca ${BOLD}Avanzate → Vai comunque su ${SERVER_IP}${RESET} per accedere."
+echo -e "     Clicca ${BOLD}Avanzate → Procedi${RESET} per accedere."
 echo ""
 echo -e "  📋  Credenziali e secrets → ${BOLD}/root/grc_credentials.txt${RESET}"
+echo -e "  🔐  Copia ${BOLD}BACKUP_ENCRYPTION_KEY${RESET} fuori dal server: senza, i backup non si ripristinano"
+echo -e "  💾  Backup automatico     → ogni notte alle 02:00 (Impostazioni → Backup)"
 echo -e "  📂  Stato installazione   → ${BOLD}${STATE_DIR}/${RESET}"
 echo ""
 echo -e "${BOLD}  Comandi utili:${RESET}"
@@ -1034,4 +1027,5 @@ echo -e "    cd ${INSTALL_DIR}"
 echo -e "    docker compose -f docker-compose.prod.yml -f docker-compose.override.yml --env-file .env.prod logs -f"
 echo -e "    docker compose -f docker-compose.prod.yml -f docker-compose.override.yml --env-file .env.prod ps"
 echo -e "    systemctl restart grc-webapp"
+echo -e "    sudo ./install_grc.sh   → menu: aggiornamento (backup + anteprima + migrazioni), log, stato"
 echo ""

@@ -8,6 +8,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ## [Unreleased]
 
+### Fixed
+
+- **Script di installazione `manual/install_grc.sh` riallineato alla piattaforma** (da verificare su una macchina nuova):
+  - i **file caricati** (documenti, evidenze, loghi) si salvano di nuovo: la cartella `/srv/grc/media` usata dalla configurazione di produzione da luglio veniva creata da Docker con proprietario `root` e il backend non poteva scriverci;
+  - il **backup automatico completo** (database + file, cifrato, ogni notte alle 02:00) viene programmato nell'applicazione e il file `.env.prod` generato contiene la chiave di cifratura dei backup; il vecchio cron sull'host con il solo dump del database in chiaro non viene più creato;
+  - vengono caricati **tutti i dati di riferimento** (requisiti di ruolo, documenti obbligatori, controlli provati dalla formazione, policy di workflow documentale), prima assenti su un'installazione nuova;
+  - il frontend è pubblicato solo su `127.0.0.1`: prima era raggiungibile in HTTP diretto sulla porta 3001, perché Docker scavalca il firewall UFW;
+  - l'**aggiornamento** dal menu fa prima un backup completo, mostra l'anteprima delle migrazioni dei dati e chiede conferma, poi migra e ricarica i dati di riferimento; non modifica più i file del repository, così `git pull` non si blocca;
+  - la versione applicativa viene letta dal file `VERSION` invece di essere fissa a 1.0.0; eliminate dal `.env.prod` generato le variabili non più usate (retention dell'audit, provider IA cloud).
+
 ## [0.9.0] - 2026-09-23
 
 ### Aggiornamento dalla 0.8.0 — sequenza di deploy
