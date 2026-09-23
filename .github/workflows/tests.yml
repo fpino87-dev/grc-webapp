@@ -11,8 +11,6 @@ on:
     branches: [main]
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 # Solo lettura del codice: nessun job scrive sul repo (principio del minimo privilegio).
 permissions:
@@ -52,15 +50,15 @@ jobs:
       FERNET_KEY: -RJI_2I6JFpmhfHjLjJNqzuKTYwLQkbxkRVZz2TlpWo=
       ALLOWED_HOSTS: localhost
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
           cache: pip
           cache-dependency-path: backend/requirements/dev.txt
       - name: System deps (python-magic)
-        run: sudo apt-get update && sudo apt-get install -y libmagic1
+        run: sudo apt-get update && sudo apt-get install -y libmagic1t64
       - name: Install requirements
         working-directory: backend
         run: pip install -r requirements/dev.txt
@@ -81,9 +79,9 @@ jobs:
     name: frontend (vitest + eslint + tsc)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "22"
           cache: npm

@@ -10,9 +10,6 @@ on:
     types: [published]
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-
 permissions:
   contents: write   # necessario per allegare gli SBOM agli asset di release
 
@@ -20,7 +17,7 @@ jobs:
   sbom:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: SBOM backend (Python / requirements)
         uses: anchore/sbom-action@v0

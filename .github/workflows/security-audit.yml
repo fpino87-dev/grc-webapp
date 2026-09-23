@@ -25,8 +25,6 @@ on:
       - ".github/workflows/security-audit.yml"
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 # Solo lettura del codice: nessun job scrive sul repo (principio del minimo privilegio).
 permissions:
@@ -37,9 +35,9 @@ jobs:
     name: pip-audit (backend)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
           cache: pip
@@ -64,9 +62,9 @@ jobs:
     name: npm audit (frontend)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "22"
           cache: npm
@@ -88,7 +86,7 @@ jobs:
         run: npm audit --omit=dev --json > npm-audit-report.json || true
       - name: Upload audit report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: npm-audit-report
           path: frontend/npm-audit-report.json
