@@ -68,6 +68,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ### Fixed
 
+- **Fornitori (M14) — elenco limitato a 25 fornitori**: il server restituisce gli elenchi a pagine da 25 e la pagina Fornitori leggeva solo la prima: oltre il 25° fornitore (in ordine alfabetico) gli altri non comparivano, né in elenco né nella ricerca, e mancavano anche nelle scelte del fornitore (invio questionario, asset, documenti). Ora l'elenco legge tutte le pagine.
+
 - **Audit Prep (M17) — chiusura di una non conformità con PDCA ancora aperto**: chiudendo una Major o Minor NC mentre il suo PDCA non era ancora concluso, la piattaforma mostrava un errore ma salvava comunque il finding come chiuso, lasciando il PDCA aperto e senza creare la Lesson Learned. Ora la chiusura è un'operazione unica: un finding con PDCA si chiude solo quando il PDCA è chiuso (o archiviato), oppure in fase ACT se copre solo quel finding — in tal caso il PDCA si chiude insieme, con le note di chiusura come standardizzazione; negli altri casi non viene salvato nulla e il messaggio indica la fase del PDCA. La chiusura di un PDCA porta "in risposta" tutti i finding collegati ancora aperti, qualunque sia l'origine del ciclo.
 
 - **Fornitori (M14) — link al questionario sempre presente nell'email**: il link al form del questionario veniva inserito solo se il testo del template conteneva la variabile `{questionnaire_link}`; con un template scritto senza variabile il fornitore riceveva un'email senza link per rispondere, mentre il tab Template dichiarava che il link era incluso automaticamente. Ora, se la variabile manca, il link viene aggiunto in fondo all'email; il testo del tab spiega il comportamento.

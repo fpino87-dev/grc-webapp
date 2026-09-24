@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export interface CpvCode {
   code: string;
@@ -153,7 +154,8 @@ export interface SupplierDuplicates {
 
 export const suppliersApi = {
   list: (params?: Record<string, string>) =>
-    apiClient.get<{ results: Supplier[] }>("/suppliers/suppliers/", { params }).then(r => r.data),
+    // Tutte le pagine: con più di 25 fornitori l'elenco ne mostrava solo 25.
+    fetchAllPages<Supplier>("/suppliers/suppliers/", params).then(results => ({ results })),
   get: (id: string) =>
     apiClient.get<Supplier>(`/suppliers/suppliers/${id}/`).then(r => r.data),
   create: (data: Partial<Supplier>) =>
@@ -176,21 +178,9 @@ export const suppliersApi = {
     apiClient.delete(`/suppliers/questionnaire-templates/${id}/`).then(r => r.data),
 
   // Questionnaires
-  // Il listing è paginato lato server (25 per pagina di default): prendere solo
-  // `results` mostrava al massimo i primi 25 questionari. Si seguono le pagine
-  // fino all'ultima, così elenco e riepilogo contano tutti i questionari.
-  listQuestionnaires: async (params?: Record<string, string>) => {
-    const all: SupplierQuestionnaire[] = [];
-    for (let page = 1; ; page++) {
-      const { data } = await apiClient.get<{ results: SupplierQuestionnaire[]; next: string | null } | SupplierQuestionnaire[]>(
-        "/suppliers/questionnaires/",
-        { params: { ...params, page_size: "500", page: String(page) } },
-      );
-      if (Array.isArray(data)) return data;
-      all.push(...data.results);
-      if (!data.next) return all;
-    }
-  },
+  // Tutte le pagine: elenco e riepilogo contano tutti i questionari.
+  listQuestionnaires: (params?: Record<string, string>) =>
+    fetchAllPages<SupplierQuestionnaire>("/suppliers/questionnaires/", params),
   sendQuestionnaire: (supplierId: string, templateId: string) =>
     apiClient.post<SupplierQuestionnaire>("/suppliers/questionnaires/send/", {
       supplier_id: supplierId,
