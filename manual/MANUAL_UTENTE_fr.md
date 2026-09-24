@@ -88,8 +88,8 @@ Le menu latéral gauche affiche uniquement les sections accessibles selon votre 
 | **Tableau de bord** | KPI de conformité, carte de chaleur des risques, échéances imminentes, alertes |
 | **Compliance** | Bibliothèque de contrôles (M03), documents (M07), preuves |
 | **Risk** | Assets IT/OT (M04), BIA (M05), Risk Assessment (M06) |
-| **Opérations** | Incidents (M09), Tâches/Échéancier (M08), PDCA (M11) |
-| **Gouvernance** | Organigramme/Rôles (M00), Lessons Apprises (M12), Revue de Direction (M13), Fournisseurs (M14), Formation (M15), BCP (M16) |
+| **Opérations** | Incidents (M09), Tâches/Échéancier (M08), PDCA (M11), Fournisseurs (M14) |
+| **Gouvernance** | Organigramme/Rôles (M00), Lessons Apprises (M12), Revue de Direction (M13), Formation (M15), BCP (M16) |
 | **Audit** | Préparation Audit (M17), Reporting (M18) |
 | **Notifications** | Notifications email, préférences |
 | **Paramètres** | Uniquement pour les rôles administratifs — SMTP, politiques, profils de notification |
@@ -898,34 +898,64 @@ L'audit annulé n'est jamais supprimé physiquement — il reste dans l'archive 
 
 ## 13. Fournisseurs (M14)
 
-[Écran : liste des fournisseurs]
+[Capture d'écran : liste des fournisseurs]
+
+Le module s'ouvre depuis **Opérations → Fournisseurs** et comporte cinq onglets : **Fournisseurs**, **Questionnaires**, **Modèles de questionnaire**, **Statut NDA** et **Paramètres d'évaluation**. Les fournisseurs sont créés et modifiés par le Super Admin, le Compliance Officer, le Risk Manager et le Plant Manager ; les auditeurs internes et externes les consultent en lecture seule. Chaque utilisateur voit les fournisseurs de ses sites et ceux sans site associé (fournisseurs de toute l'organisation).
 
 ### Comment enregistrer un fournisseur
 
-1. Allez sur **Gouvernance → Fournisseurs → Nouveau fournisseur**
+1. Dans l'onglet **Fournisseurs**, cliquez sur **+ Nouveau fournisseur**
 2. Renseignez :
-   - **Raison sociale** et **Numéro de TVA**
-   - **Catégorie** : IT, OT, Services Professionnels, Logistique, autre
-   - **Criticité** : importance pour la continuité opérationnelle (1–5)
-   - **Référent interne** : sélectionnez le rôle responsable de la gestion du fournisseur
-   - **Référent fournisseur** : nom et email du contact chez le fournisseur
-   - **Traitement des données** : indicateur si le fournisseur traite des données personnelles (implique des obligations RGPD supplémentaires)
-3. Cliquez sur **Enregistrer**
+   - **Dénomination (raison sociale)**, **N° fiscal / TVA** et **Pays du siège social** — obligatoires
+   - **Email fournisseur (TO)** — obligatoire, c'est le destinataire des questionnaires ; dans **Emails supplémentaires en copie (CC)** vous pouvez ajouter d'autres contacts en copie
+   - **Description de la fourniture** — ce que fournit le fournisseur ; sert aussi à la suggestion des codes CPV
+   - **Niveau de risque** — votre estimation initiale ; l'évaluation réelle provient des sources décrites plus loin
+   - Section **ACN / NIS2** : **codes CPV** de la fourniture (le bouton IA suggère des codes à partir de la description, envoyée sans le nom du fournisseur ; chaque suggestion doit être acceptée manuellement), l'indicateur **Fournisseur pertinent NIS2** et, s'il est coché, le **critère de pertinence** (fourniture ICT structurelle, non-fongibilité ou les deux) et le **% de concentration de la fourniture**
+   - Section **TISAX** : l'indicateur **Fournisseur pertinent TISAX** s'il traite des informations du périmètre TISAX (ex. données ou prototypes des clients OEM) ou accède aux systèmes dans le périmètre (VDA ISA 6.1.1)
+3. Cliquez sur **Créer le fournisseur**
 
 **Contrôle des doublons** — pendant la saisie, le système recherche les fournisseurs déjà enregistrés :
 
 - **Même numéro de TVA** (comparé en ignorant espaces, points, tirets et préfixe pays, ex. `IT 0123.4567.890` = `01234567890`) : l'enregistrement est **bloqué**. Si le fournisseur existant est dans votre périmètre, vous pouvez l'ouvrir avec **Ouvrir** ; s'il est enregistré sur un site hors périmètre, vous voyez seulement qu'il existe et devez demander à un Compliance Officer de l'associer à votre site. Un fournisseur supprimé n'empêche pas une nouvelle saisie.
 - **Raison sociale similaire** (en ignorant majuscules, ponctuation et formes juridiques comme S.r.l., S.p.A., SARL, GmbH) : un **avertissement** liste les fournisseurs similaires ; pour créer malgré tout, cochez **J'ai vérifié : il s'agit d'un fournisseur différent**. La piste d'audit enregistre le nombre de noms similaires présents à la création.
 
-### Date d'évaluation et échéance
+L'icône de modification permet de changer les données et le **Statut** du fournisseur (actif, suspendu, résilié). La suppression est logique (le fournisseur reste dans l'historique) et entraîne celle de ses questionnaires.
 
-La date d'évaluation **ne se saisit pas dans la fiche fournisseur** : le système la déduit de la dernière évaluation enregistrée, qui peut être :
+**Concentration** — le pourcentage détermine le seuil TPRM (Délibération ACN 127434) : sous 20 % **faible**, de 20 % à 50 % **moyenne**, au-delà de 50 % **critique**. Lorsqu'un fournisseur entre dans le seuil critique, le système envoie une notification, une seule fois tant que la concentration ne redescend pas.
 
-- le résultat d'un **questionnaire** envoyé depuis la plateforme (onglet **Questionnaires → Évaluer**) ;
-- une **évaluation existante**, c'est-à-dire réalisée en dehors de la plateforme (voir ci-dessous) ;
-- un **audit tiers** approuvé.
+### Liste des fournisseurs
 
-L'**échéance** est calculée avec la validité configurée dans **Fournisseurs → Paramètres d'évaluation** (12 mois par défaut). La liste des fournisseurs affiche la date, l'origine et l'échéance ; l'échéancier propose l'élément **Réévaluation des fournisseurs** à l'approche de l'échéance et ouvre un rappel au Compliance Officer.
+Pour chaque fournisseur, la liste affiche le n° fiscal/TVA, le pays, la concentration, le **Risque Adj**, le statut, la date et l'échéance de la dernière évaluation. Vous pouvez rechercher par dénomination, n° fiscal/TVA ou email et filtrer par risque, statut, pertinence NIS2 et pertinence TISAX ; le filtre **Risque** porte sur le Risque Adj et l'option **Non évalués** liste les fournisseurs sans aucune évaluation.
+
+**↓ Exporter CSV** télécharge tous les fournisseurs, seulement les pertinents NIS2 ou seulement les pertinents TISAX, avec codes CPV, critère NIS2, concentration et dates d'évaluation.
+
+Un clic sur le nom ouvre le détail du fournisseur, avec trois sections : **Évaluation interne**, **Audits tiers** et **NDA / Contrats**.
+
+### Calcul du risque (Risque Adj)
+
+Le **Risque Adj** est la classe la plus défavorable (faible, moyen, élevé, critique) parmi trois sources, chacune prise en compte seulement si elle existe :
+
+1. l'**évaluation interne** en cours ;
+2. le dernier **questionnaire** évalué et non expiré (envoyé depuis la plateforme ou évaluation existante enregistrée) ;
+3. le dernier **audit tiers** approuvé dans la validité configurée.
+
+Si le fournisseur est pertinent NIS2 et que la concentration est critique, la classe monte d'un niveau (si l'option est active dans les paramètres). Sans aucune source, le fournisseur est **non évalué**. Le calcul est refait à chaque nouvelle évaluation et chaque nuit : une évaluation expirée cesse de compter d'elle-même.
+
+### Évaluation interne
+
+Dans le détail du fournisseur, section **Évaluation interne**, cliquez sur **Lancer l'évaluation** (ou **Nouvelle évaluation**) et notez de 1 (risque minimal) à 5 (risque maximal) six paramètres : **Impact métier**, **Accès aux systèmes**, **Données traitées**, **Dépendance fournisseur**, **Intégration IT** et **Conformité certifications cyber**. L'aperçu affiche le score pondéré et la classe obtenue avant l'enregistrement. Chaque nouvelle évaluation remplace la précédente, qui reste dans l'**Historique des évaluations**.
+
+### Questionnaires
+
+**Modèles** — dans l'onglet **Modèles de questionnaire**, vous préparez un ou plusieurs e-mails types : nom, **URL du formulaire** du questionnaire (par exemple un formulaire en ligne), objet et texte. Dans l'objet et le texte, `{supplier_name}` devient le nom du fournisseur ; dans le texte, `{questionnaire_link}` devient le lien vers le formulaire.
+
+**Envoi** — dans la liste des fournisseurs, cliquez sur **Quest.**, choisissez le modèle et cliquez sur **Envoyer**. L'e-mail part vers l'adresse TO du fournisseur avec les e-mails CC en copie. Le fournisseur remplit le formulaire externe : la plateforme ne reçoit pas les réponses automatiquement.
+
+**Relances** — chaque lundi, la personne qui a envoyé les questionnaires reçoit un seul e-mail récapitulatif de ceux sans réponse depuis plus de 7 jours. Depuis l'onglet **Questionnaires**, vous pouvez **Renvoyer** le questionnaire ; à partir du 3e envoi sans réponse, la liste indique de contacter directement le fournisseur.
+
+**Évaluation** — après avoir lu les réponses, dans l'onglet **Questionnaires**, cliquez sur **Évaluer** et indiquez la **date d'évaluation**, l'**évaluation** (niveau de risque) et d'éventuelles notes. L'échéance est calculée avec la validité des questionnaires configurée dans les paramètres (12 mois par défaut).
+
+En haut de l'onglet **Questionnaires** figurent les évaluations valides, celles qui expirent dans les 90 jours, les questionnaires en attente de réponse et ceux expirés : un clic sur un encadré filtre la liste.
 
 **Enregistrer une évaluation existante** — pour les fournisseurs déjà évalués avant l'utilisation de la plateforme, ou avec un questionnaire recueilli sur papier :
 
@@ -934,43 +964,41 @@ L'**échéance** est calculée avec la validité configurée dans **Fournisseurs
 3. Dans le champ **Référence / notes** (obligatoire), indiquez où se trouve l'évaluation et qui l'a remplie : c'est ce que vous montrerez à l'auditeur
 4. Cliquez sur **Enregistrer**. Aucun e-mail n'est envoyé au fournisseur ; dans l'onglet Questionnaires, l'élément apparaît avec l'étiquette **Enregistrée**
 
-Le filtre **Risque** de la liste porte sur le **risque ajusté** affiché dans la colonne ; l'option **Non évalués** liste les fournisseurs sans aucune évaluation.
+### Date d'évaluation et échéance
 
-### Évaluation : planifiée → en cours → complétée → approuvée/refusée
+La date d'évaluation **ne se saisit pas dans la fiche fournisseur** : le système la déduit de la dernière évaluation enregistrée, qui peut être :
 
-Chaque fournisseur critique doit être périodiquement évalué via une évaluation. Le flux est :
+- le résultat d'un **questionnaire** envoyé depuis la plateforme (onglet **Questionnaires → Évaluer**) ;
+- une **évaluation existante**, c'est-à-dire réalisée en dehors de la plateforme ;
+- un **audit tiers** approuvé.
 
-1. **Planifiée** : l'évaluation est créée avec une date cible. Le référent interne reçoit une tâche
-2. **En cours** : l'évaluation est lancée. Le fournisseur reçoit (par email ou accès temporaire) le questionnaire à remplir
-3. **Complétée** : le fournisseur a répondu à toutes les questions. Le référent interne reçoit le questionnaire pour révision
-4. **Approuvée** ou **Refusée** : le Compliance Officer ou le Risk Manager exprime le jugement final (voir ci-dessous)
+L'**échéance** est calculée avec la validité configurée dans **Paramètres d'évaluation** (12 mois par défaut). La liste des fournisseurs affiche la date, l'origine et l'échéance ; l'échéancier propose l'élément **Réévaluation des fournisseurs** à l'approche de l'échéance et ouvre un rappel au Compliance Officer.
 
-### Score gouvernance, sécurité, BCP
+### Audits tiers : planifié → complété → approuvé / rejeté
 
-Le questionnaire d'évaluation évalue le fournisseur sur 3 dimensions :
+Pour les fournisseurs soumis à un audit (le vôtre ou celui d'un organisme tiers), dans le détail du fournisseur, section **Audits tiers** :
+
+1. **+ Nouvel audit** : indiquez la date et cliquez sur **Enregistrer**. L'audit est **Planifié**
+2. **Compléter** : saisissez les scores 0–100 de **Governance**, **Security** et **BCP** et les **constats**. Le score **Overall** est la moyenne des scores saisis. À la complétion, le niveau de risque du fournisseur est mis à jour (Overall ≥ 75 faible, ≥ 50 moyen, sous 50 élevé) et la notification d'audit complété est envoyée
+3. **Approuver** ou **Rejeter** : la personne qui revoit l'audit enregistre ses notes ; pour un rejet, la motivation est obligatoire (au moins 10 caractères)
+
+Seul un audit **approuvé** entre dans le Risque Adj, et seulement dans la validité des audits configurée (12 mois par défaut) : Overall ≥ 75 faible, ≥ 50 moyen, ≥ 25 élevé, sous 25 critique. Un audit rejeté reste dans l'historique mais ne compte pas.
 
 | Dimension | Ce qu'elle évalue |
-|-----------|------------------|
-| **Gouvernance** | Structure organisationnelle pour la sécurité, politiques internes, responsabilités définies, audits internes |
-| **Sécurité** | Contrôles techniques mis en œuvre, gestion des vulnérabilités, réponse aux incidents, certifications (ISO 27001, TISAX) |
-| **BCP** | Plans de continuité opérationnelle, RTO/RPO déclarés, tests de continuité effectués, redondances d'infrastructure |
+|-----------|-------------|
+| **Governance** | Organisation de la sécurité, politiques internes, responsabilités définies, audits internes |
+| **Security** | Contrôles techniques en place, gestion des vulnérabilités, réponse aux incidents, certifications (ISO 27001, TISAX) |
+| **BCP** | Plans de continuité d'activité, RTO/RPO déclarés, tests de continuité réalisés, redondances d'infrastructure |
 
-Chaque dimension produit un score 0-100. Le score global est la moyenne pondérée des trois dimensions.
+### NDA et contrats
 
-### Approbation et refus avec notes obligatoires
+Dans le détail du fournisseur, section **NDA / Contrats**, cliquez sur **+ Charger NDA**, choisissez le fichier et indiquez le **titre** et, le cas échéant, l'**échéance**. Le document est archivé dans le module Documents comme contrat lié au fournisseur ; depuis la même section, vous pouvez le télécharger ou, s'il n'est pas approuvé, l'approuver.
 
-**Approbation :**
-1. Depuis la fiche de l'évaluation complétée, cliquez sur **Approuver le fournisseur**
-2. Saisissez les **notes d'approbation** (obligatoires — ex. "Fournisseur certifié ISO 27001, score adéquat. Prochaine révision dans 12 mois")
-3. Définissez la **date d'expiration de l'approbation** (typiquement 12 mois)
-4. Cliquez sur **Confirmer l'approbation**
+L'onglet **Statut NDA** résume la couverture des fournisseurs actifs : avec NDA actif, expirant dans les 90 jours, expiré, en brouillon ou manquant. Vous pouvez rechercher par fournisseur et filtrer par statut NDA et par risque.
 
-**Refus :**
-1. Depuis la fiche de l'évaluation complétée, cliquez sur **Refuser le fournisseur**
-2. Saisissez les **notes de refus** (obligatoires — doit être une justification détaillée motivant la décision)
-3. Cliquez sur **Confirmer le refus**
+### Paramètres d'évaluation
 
-Le refus génère une tâche au référent interne pour gérer la transition (remplacement du fournisseur ou plan de remédiation).
+L'onglet **Paramètres d'évaluation** regroupe les paramètres du calcul : **poids** des six paramètres de l'évaluation interne (leur somme doit être 1,00), **libellés des niveaux** de chaque paramètre, **seuils** du score pondéré pour les classes moyen, élevé et critique, **validité** des questionnaires et des audits tiers (en mois) et l'option **Bump NIS2 + concentration critique**. Les utilisateurs du module peuvent les consulter ; seul le Super Admin peut les modifier.
 
 ---
 

@@ -88,8 +88,8 @@ The left sidebar shows only the sections accessible based on your role. The main
 | **Dashboard** | Compliance KPIs, risk heat map, upcoming deadlines, alerts |
 | **Compliance** | Controls library (M03), documents (M07), evidence |
 | **Risk** | IT/OT Assets (M04), BIA (M05), Risk Assessment (M06) |
-| **Operations** | Incidents (M09), Tasks/Schedule (M08), PDCA (M11) |
-| **Governance** | Org chart/Roles (M00), Lesson Learned (M12), Management Review (M13), Suppliers (M14), Training (M15), BCP (M16) |
+| **Operations** | Incidents (M09), Tasks/Schedule (M08), PDCA (M11), Suppliers (M14) |
+| **Governance** | Org chart/Roles (M00), Lesson Learned (M12), Management Review (M13), Training (M15), BCP (M16) |
 | **Audit** | Audit Preparation (M17), Reporting (M18) |
 | **Notifications** | Email notifications, preferences |
 | **Settings** | Administrative roles only — SMTP, policies, notification profiles |
@@ -900,32 +900,62 @@ The cancelled audit is never physically deleted — it remains in the archive wi
 
 [Screenshot: supplier list]
 
+The module is opened from **Operations → Suppliers** and has five tabs: **Suppliers**, **Questionnaires**, **Questionnaire templates**, **NDA status** and **Evaluation settings**. Suppliers are created and edited by Super Admin, Compliance Officer, Risk Manager and Plant Manager; internal and external auditors have read-only access. Each user sees the suppliers of their own sites and those with no site assigned (organisation-wide suppliers).
+
 ### How to register a supplier
 
-1. Go to **Governance → Suppliers → New supplier**
+1. In the **Suppliers** tab click **+ New supplier**
 2. Fill in:
-   - **Company name** and **VAT number**
-   - **Category**: IT, OT, Professional Services, Logistics, other
-   - **Criticality**: how critical it is to operational continuity (1–5)
-   - **Internal contact**: select the role responsible for managing the supplier
-   - **Supplier contact**: name and email of the contact at the supplier
-   - **Data processing**: flag if the supplier processes personal data (entails additional GDPR obligations)
-3. Click **Save**
+   - **Company name**, **Tax / VAT number** and **Registered office country** — mandatory
+   - **Supplier email (TO)** — mandatory, it is the recipient of questionnaires; under **Additional CC emails** you can add other contacts in copy
+   - **Supply description** — what the supplier provides; also used to suggest CPV codes
+   - **Risk level** — your initial estimate; the actual evaluation comes from the sources described below
+   - **ACN / NIS2** section: **CPV codes** of the supply (the AI button suggests codes from the description, which is sent without the supplier name; each suggestion must be accepted manually), the **NIS2 relevant supplier** flag and, if set, the **relevance criterion** (structural ICT supply, non-fungibility or both) and the **% supply concentration**
+   - **TISAX** section: the **TISAX relevant supplier** flag if the supplier handles information within the TISAX scope (e.g. OEM customer data or prototypes) or accesses in-scope systems (VDA ISA 6.1.1)
+3. Click **Create supplier**
 
 **Duplicate check** — while you fill in the form the system looks for suppliers already registered:
 
 - **Same VAT number** (compared ignoring spaces, dots, hyphens and the country prefix, e.g. `IT 0123.4567.890` = `01234567890`): saving is **blocked**. If the existing supplier is within your scope you can open it with **Open**; if it is registered on a site outside your scope you only see that it exists and must ask a Compliance Officer to link it to your site. A deleted supplier does not prevent re-entry.
 - **Similar company name** (ignoring case, punctuation and legal forms such as S.r.l., S.p.A., GmbH, Ltd): a **warning** lists the similar suppliers; to create anyway tick **I have checked: this is a different supplier**. The audit trail records how many similar names were present at creation.
 
-### Evaluation date and expiry
+The edit icon lets you change the data and the supplier **Status** (active, suspended, terminated). Deletion is logical (the supplier stays in the history) and also removes its questionnaires.
 
-The evaluation date is **not entered in the supplier record**: the system derives it from the latest recorded evaluation, which can be:
+**Concentration** — the percentage sets the TPRM threshold (ACN Resolution 127434): below 20% **low**, 20% to 50% **medium**, above 50% **critical**. When a supplier enters the critical threshold the system sends a notification, only once until the concentration drops back.
 
-- the result of a **questionnaire** sent from the platform (**Questionnaires → Evaluate** tab);
-- an **existing evaluation**, i.e. carried out outside the platform (see below);
-- an approved **third-party audit**.
+### Supplier list
 
-The **expiry** is calculated with the validity configured in **Suppliers → Evaluation settings** (12 months by default). The supplier list shows date, source and expiry; the compliance schedule shows a **Supplier re-evaluation** item as the expiry approaches and opens a reminder for the Compliance Officer.
+For each supplier the list shows tax/VAT number, country, concentration, **Adj risk**, status, and date and expiry of the latest evaluation. You can search by name, tax/VAT number or email and filter by risk, status, NIS2 relevance and TISAX relevance; the **Risk** filter works on the Adj risk and the **Not evaluated** option lists suppliers with no evaluation at all.
+
+**↓ Export CSV** downloads all suppliers, only NIS2 relevant ones or only TISAX relevant ones, with CPV codes, NIS2 criterion, concentration and evaluation dates.
+
+Clicking the name opens the supplier detail, with three sections: **Internal evaluation**, **Third-party audits** and **NDA / Contracts**.
+
+### How the risk is calculated (Adj risk)
+
+The **Adj risk** is the worst class (low, medium, high, critical) among three sources, each one counted only if present:
+
+1. the current **internal evaluation**;
+2. the latest evaluated, non-expired **questionnaire** (sent from the platform or recorded existing evaluation);
+3. the latest **third-party audit** approved within the configured validity.
+
+If the supplier is NIS2 relevant and the concentration is critical, the class goes up one level (if the option is enabled in the settings). With no source at all the supplier is **not evaluated**. The calculation runs at every new evaluation and every night, so an expired evaluation stops counting by itself.
+
+### Internal evaluation
+
+In the supplier detail, **Internal evaluation** section, click **Start assessment** (or **New assessment**) and score six parameters from 1 (minimum risk) to 5 (maximum risk): **Business impact**, **System access**, **Data processed**, **Supplier dependency**, **IT integration** and **Cyber certification compliance**. The preview shows the weighted score and the resulting class before saving. Each new evaluation replaces the previous one, which stays in the **Assessment history**.
+
+### Questionnaires
+
+**Templates** — in the **Questionnaire templates** tab you prepare one or more model emails: name, **questionnaire form URL** (for example an online form), subject and body. In subject and body `{supplier_name}` becomes the supplier name; in the body `{questionnaire_link}` becomes the link to the form.
+
+**Sending** — in the supplier list click **Quest.**, choose the template and click **Send**. The email goes to the supplier TO address with the CC emails in copy. The supplier fills in the external form: the platform does not receive the answers automatically.
+
+**Reminders** — every Monday whoever sent questionnaires receives a single summary email listing those with no answer for more than 7 days. From the **Questionnaires** tab you can **Resend** the questionnaire; from the 3rd send without an answer the list flags that the supplier should be contacted directly.
+
+**Evaluation** — once you have read the answers, in the **Questionnaires** tab click **Evaluate** and enter the **evaluation date**, the **evaluation** (risk level) and any notes. The expiry is calculated with the questionnaire validity configured in the settings (12 months by default).
+
+At the top of the **Questionnaires** tab you see valid evaluations, those expiring within 90 days, questionnaires awaiting an answer and expired ones: clicking a card filters the list.
 
 **Recording an existing evaluation** — for suppliers already evaluated before using the platform, or with a questionnaire collected on paper:
 
@@ -934,43 +964,41 @@ The **expiry** is calculated with the validity configured in **Suppliers → Eva
 3. In the **Reference / notes** field (mandatory) write where the evaluation is stored and who completed it: this is what you will show the auditor
 4. Click **Record**. No email is sent to the supplier; in the Questionnaires tab the entry is labelled **Recorded**
 
-The list **Risk** filter works on the **adjusted risk** shown in the column; the **Not evaluated** option lists suppliers with no evaluation at all.
+### Evaluation date and expiry
 
-### Assessment: planned → in progress → completed → approved/rejected
+The evaluation date is **not entered in the supplier record**: the system derives it from the latest recorded evaluation, which can be:
 
-Each critical supplier must be periodically evaluated through an assessment. The flow is:
+- the result of a **questionnaire** sent from the platform (**Questionnaires → Evaluate** tab);
+- an **existing evaluation**, i.e. carried out outside the platform;
+- an approved **third-party audit**.
 
-1. **Planned**: the assessment is created with a target date. The internal contact receives a task
-2. **In progress**: the assessment is started. The supplier receives (via email or temporary access) the questionnaire to fill in
-3. **Completed**: the supplier has answered all questions. The internal contact receives the questionnaire for review
-4. **Approved** or **Rejected**: the Compliance Officer or Risk Manager expresses the final judgement (see below)
+The **expiry** is calculated with the validity configured in **Evaluation settings** (12 months by default). The supplier list shows date, source and expiry; the compliance schedule shows a **Supplier re-evaluation** item as the expiry approaches and opens a reminder for the Compliance Officer.
 
-### Governance, security, BCP score
+### Third-party audits: planned → completed → approved / rejected
 
-The assessment questionnaire evaluates the supplier on 3 dimensions:
+For suppliers that undergo an audit (your own or by a third party), in the supplier detail, **Third-party audits** section:
 
-| Dimension | What it evaluates |
-|-----------|------------------|
-| **Governance** | Organisational structure for security, internal policies, defined responsibilities, internal audits |
-| **Security** | Implemented technical controls, vulnerability management, incident response, certifications (ISO 27001, TISAX) |
-| **BCP** | Operational continuity plans, declared RTO/RPO, continuity tests performed, infrastructure redundancies |
+1. **+ New audit**: enter the date and click **Register**. The audit is **Planned**
+2. **Complete**: enter the 0–100 scores for **Governance**, **Security** and **BCP** and the **findings**. The **Overall** score is the average of the scores entered. On completion the supplier risk level is updated (Overall ≥ 75 low, ≥ 50 medium, below 50 high) and the audit-completed notification is sent
+3. **Approve** or **Reject**: the reviewer records the notes; for a rejection the reason is mandatory (at least 10 characters)
 
-Each dimension produces a score of 0–100. The overall score is the weighted average of the three dimensions.
+Only an **approved** audit counts in the Adj risk, and only within the configured audit validity (12 months by default): Overall ≥ 75 low, ≥ 50 medium, ≥ 25 high, below 25 critical. A rejected audit stays in the history but does not count.
 
-### Approval and rejection with mandatory notes
+| Dimension | What it assesses |
+|-----------|-------------|
+| **Governance** | Security organisation, internal policies, defined responsibilities, internal audits |
+| **Security** | Technical controls in place, vulnerability management, incident response, certifications (ISO 27001, TISAX) |
+| **BCP** | Business continuity plans, declared RTO/RPO, continuity tests performed, infrastructure redundancy |
 
-**Approval:**
-1. From the completed assessment record click **Approve supplier**
-2. Enter the **approval notes** (mandatory — e.g. "Supplier certified ISO 27001, adequate score. Next review in 12 months")
-3. Set the **approval expiry date** (typically 12 months)
-4. Click **Confirm approval**
+### NDAs and contracts
 
-**Rejection:**
-1. From the completed assessment record click **Reject supplier**
-2. Enter the **rejection notes** (mandatory — must be a detailed justification for the decision)
-3. Click **Confirm rejection**
+In the supplier detail, **NDA / Contracts** section, click **+ Upload NDA**, choose the file and enter the **title** and, if any, the **expiry**. The document is stored in the Documents module as a contract linked to the supplier; from the same section you can download it or, if it is not approved, approve it.
 
-The rejection generates a task for the internal contact to manage the transition (supplier replacement or remediation plan).
+The **NDA status** tab summarises coverage of active suppliers: with an active NDA, expiring within 90 days, expired, draft or missing. You can search by supplier and filter by NDA status and risk.
+
+### Evaluation settings
+
+The **Evaluation settings** tab holds the calculation parameters: **weights** of the six internal evaluation parameters (they must add up to 1.00), **level labels** for each parameter, weighted-score **thresholds** for the medium, high and critical classes, **validity** of questionnaires and third-party audits (in months) and the **NIS2 bump + critical concentration** option. Users of the module can view them; only the Super Admin can change them.
 
 ---
 

@@ -88,8 +88,8 @@ Sol taraftaki yan menü, yalnızca rolünüze göre erişilebilen bölümleri g�
 | **Kontrol Paneli** | Uyum KPI'ları, risk ısı haritası, yaklaşan son tarihler, uyarılar |
 | **Uyum** | Kontrol kütüphanesi (M03), belgeler (M07), kanıtlar |
 | **Risk** | BT/OT varlıkları (M04), İEA (M05), Risk Değerlendirmesi (M06) |
-| **Operasyonlar** | Olaylar (M09), Görevler/Takvim (M08), PDCA (M11) |
-| **Yönetişim** | Org şeması/Roller (M00), Alınan Dersler (M12), Yönetim Gözden Geçirmesi (M13), Tedarikçiler (M14), Eğitim (M15), İSP (M16) |
+| **Operasyonlar** | Olaylar (M09), Görevler/Takvim (M08), PDCA (M11), Tedarikçiler (M14) |
+| **Yönetişim** | Org şeması/Roller (M00), Alınan Dersler (M12), Yönetim Gözden Geçirmesi (M13), Eğitim (M15), İSP (M16) |
 | **Denetim** | Denetim Hazırlığı (M17), Raporlama (M18) |
 | **Bildirimler** | E-posta bildirimleri, tercihler |
 | **Ayarlar** | Yalnızca yönetici rolleri için — SMTP, politika, bildirim profilleri |
@@ -900,32 +900,62 @@ Zaten açık bulguları olan bir denetimi iptal ettiğinizde:
 
 [Ekran görüntüsü: tedarikçi listesi]
 
+Modül **Operasyonlar → Tedarikçiler** menüsünden açılır ve beş sekmeden oluşur: **Tedarikçiler**, **Anketler**, **Anket şablonları**, **NDA durumu** ve **Değerlendirme ayarları**. Tedarikçileri Super Admin, Compliance Officer, Risk Manager ve Plant Manager oluşturur ve düzenler; iç ve dış denetçiler yalnızca okuyabilir. Her kullanıcı kendi tesislerinin tedarikçilerini ve tesis atanmamış tedarikçileri (tüm kuruluşun tedarikçileri) görür.
+
 ### Tedarikçi nasıl kaydedilir
 
-1. **Yönetişim → Tedarikçiler → Yeni tedarikçi** bölümüne gidin
+1. **Tedarikçiler** sekmesinde **+ Yeni tedarikçi**'ye tıklayın
 2. Doldurun:
-   - **Ticari unvan** ve **Vergi kimlik numarası**
-   - **Kategori**: BT, OT, Profesyonel Hizmetler, Lojistik, diğer
-   - **Kritiklik**: operasyonel süreklilik için ne kadar kritik (1–5)
-   - **İç sorumlu**: tedarikçi yönetiminden sorumlu rolü seçin
-   - **Tedarikçi sorumlusu**: tedarikçideki ilgili kişinin adı ve e-postası
-   - **Veri işleme**: tedarikçi kişisel veri işliyorsa işaretleyin (ek GDPR yükümlülükleri doğurur)
-3. **Kaydet**'e tıklayın
+   - **Unvan (şirket adı)**, **Vergi / KDV no** ve **Merkez ülkesi** — zorunlu
+   - **Tedarikçi e-postası (TO)** — zorunlu, anketlerin alıcısıdır; **Ek CC e-postaları** alanına bilgi olarak başka kişiler ekleyebilirsiniz
+   - **Tedarik açıklaması** — tedarikçinin ne sağladığı; CPV kodu önerisi için de kullanılır
+   - **Risk seviyesi** — ilk tahmininiz; asıl değerlendirme aşağıda açıklanan kaynaklardan gelir
+   - **ACN / NIS2** bölümü: tedarikin **CPV kodları** (IA düğmesi, tedarikçi adı olmadan gönderilen açıklamadan kod önerir; her öneri elle kabul edilmelidir), **NIS2 kapsamında önemli tedarikçi** işareti ve işaretliyse **önem kriteri** (yapısal BİT tedariki, ikame edilemezlik veya her ikisi) ile **% tedarik yoğunluğu**
+   - **TISAX** bölümü: tedarikçi TISAX kapsamındaki bilgileri işliyorsa (ör. OEM müşterilerinin verileri veya prototipleri) ya da kapsamdaki sistemlere erişiyorsa (VDA ISA 6.1.1) **TISAX kapsamında önemli tedarikçi** işareti
+3. **Tedarikçi oluştur**'a tıklayın
 
 **Mükerrer kayıt kontrolü** — formu doldururken sistem daha önce kaydedilmiş tedarikçileri arar:
 
 - **Aynı vergi numarası** (boşluklar, noktalar, tireler ve ülke öneki yok sayılarak karşılaştırılır, ör. `IT 0123.4567.890` = `01234567890`): kayıt **engellenir**. Mevcut tedarikçi yetki alanınızdaysa **Aç** ile açabilirsiniz; yetki alanınız dışındaki bir tesiste kayıtlıysa yalnızca var olduğunu görürsünüz ve tesisinizle ilişkilendirmesi için bir Compliance Officer'a başvurmanız gerekir. Silinmiş bir tedarikçi yeniden girişi engellemez.
 - **Benzer şirket unvanı** (büyük/küçük harf, noktalama ve S.r.l., S.p.A., GmbH, Ltd. Şti. gibi şirket türleri yok sayılarak): benzer tedarikçileri listeleyen bir **uyarı** görünür; yine de oluşturmak için **Kontrol ettim: bu farklı bir tedarikçi** seçeneğini işaretleyin. Denetim izi, oluşturma anında kaç benzer ad bulunduğunu kaydeder.
 
-### Değerlendirme tarihi ve geçerlilik sonu
+Düzenleme simgesiyle verileri ve tedarikçinin **Durumunu** (aktif, askıda, sonlandırılmış) değiştirebilirsiniz. Silme işlemi mantıksaldır (tedarikçi geçmişte kalır) ve anketlerini de kapsar.
 
-Değerlendirme tarihi **tedarikçi kaydına girilmez**: sistem bunu kaydedilen son değerlendirmeden türetir. Bu değerlendirme şunlardan biri olabilir:
+**Yoğunlaşma** — yüzde, TPRM eşiğini belirler (ACN 127434 sayılı Karar): %20'nin altı **düşük**, %20 ile %50 arası **orta**, %50'nin üstü **kritik**. Bir tedarikçi kritik eşiğe girdiğinde sistem, yoğunlaşma düşene kadar yalnızca bir kez bildirim gönderir.
 
-- platformdan gönderilen bir **anketin** sonucu (**Anketler → Değerlendir** sekmesi);
-- **mevcut bir değerlendirme**, yani platform dışında yapılmış bir değerlendirme (aşağıya bakın);
-- onaylanmış bir **üçüncü taraf denetimi**.
+### Tedarikçi listesi
 
-**Geçerlilik sonu**, **Tedarikçiler → Değerlendirme ayarları** bölümünde yapılandırılan geçerlilik süresiyle hesaplanır (varsayılan 12 ay). Tedarikçi listesi tarihi, kaynağı ve geçerlilik sonunu gösterir; takvim, süre yaklaştığında **Tedarikçi yeniden değerlendirmesi** kalemini gösterir ve Compliance Officer için bir hatırlatma açar.
+Liste her tedarikçi için vergi/KDV no, ülke, yoğunlaşma, **Adj risk**, durum ve son değerlendirmenin tarihi ile geçerlilik sonunu gösterir. Unvan, vergi/KDV no veya e-posta ile arama yapabilir, risk, durum, NIS2 önemi ve TISAX önemine göre filtreleyebilirsiniz; **Risk** filtresi Adj risk üzerinde çalışır ve **Değerlendirilmemiş** seçeneği hiçbir değerlendirmesi olmayan tedarikçileri listeler.
+
+**↓ CSV dışa aktar**, tüm tedarikçileri, yalnızca NIS2 kapsamındakileri veya yalnızca TISAX kapsamındakileri CPV kodları, NIS2 kriteri, yoğunlaşma ve değerlendirme tarihleriyle indirir.
+
+Ada tıklamak tedarikçi ayrıntısını üç bölümle açar: **İç değerlendirme**, **Üçüncü taraf denetimleri** ve **NDA / Sözleşmeler**.
+
+### Risk nasıl hesaplanır (Adj risk)
+
+**Adj risk**, her biri yalnızca mevcutsa dikkate alınan üç kaynak arasındaki en kötü sınıftır (düşük, orta, yüksek, kritik):
+
+1. güncel **iç değerlendirme**;
+2. değerlendirilmiş ve süresi dolmamış son **anket** (platformdan gönderilen veya kaydedilmiş mevcut değerlendirme);
+3. yapılandırılan geçerlilik süresi içinde onaylanmış son **üçüncü taraf denetimi**.
+
+Tedarikçi NIS2 kapsamındaysa ve yoğunlaşma kritikse sınıf bir seviye yükselir (ayarlarda seçenek etkinse). Hiçbir kaynak yoksa tedarikçi **değerlendirilmemiş** olarak görünür. Hesaplama her yeni değerlendirmede ve her gece yapılır; böylece süresi dolan bir değerlendirme kendiliğinden hesaba katılmaz.
+
+### İç değerlendirme
+
+Tedarikçi ayrıntısında, **İç değerlendirme** bölümünde **Değerlendirmeyi başlat**'a (veya **Yeni değerlendirme**'ye) tıklayın ve altı parametreye 1 (en düşük risk) ile 5 (en yüksek risk) arasında puan verin: **İş etkisi**, **Sistem erişimi**, **İşlenen veriler**, **Tedarikçi bağımlılığı**, **BT entegrasyonu** ve **Siber sertifika uyumluluğu**. Önizleme, kaydetmeden önce ağırlıklı puanı ve ortaya çıkan sınıfı gösterir. Her yeni değerlendirme öncekinin yerini alır; önceki **Değerlendirme geçmişinde** kalır.
+
+### Anketler
+
+**Şablonlar** — **Anket şablonları** sekmesinde bir veya daha fazla örnek e-posta hazırlarsınız: ad, anketin **form URL'si** (örneğin bir çevrimiçi form), konu ve metin. Konu ve metinde `{supplier_name}` tedarikçinin adına dönüşür; metinde `{questionnaire_link}` form bağlantısına dönüşür.
+
+**Gönderim** — tedarikçi listesinde **Anket**'e tıklayın, şablonu seçin ve **Gönder**'e tıklayın. E-posta tedarikçinin TO adresine, CC e-postaları bilgi olarak eklenerek gider. Tedarikçi harici formu doldurur: platform yanıtları otomatik olarak almaz.
+
+**Hatırlatmalar** — her pazartesi anketleri gönderen kişi, 7 günden uzun süredir yanıtsız olanları içeren tek bir özet e-posta alır. **Anketler** sekmesinden anketi **Yeniden gönder**ebilirsiniz; yanıtsız 3. gönderimden itibaren liste tedarikçiyle doğrudan iletişime geçilmesi gerektiğini belirtir.
+
+**Değerlendirme** — yanıtları okuduktan sonra **Anketler** sekmesinde **Değerlendir**'e tıklayın ve **değerlendirme tarihini**, **değerlendirmeyi** (risk seviyesi) ve varsa notları girin. Geçerlilik sonu, ayarlarda yapılandırılan anket geçerlilik süresiyle hesaplanır (varsayılan 12 ay).
+
+**Anketler** sekmesinin üstünde geçerli değerlendirmeler, 90 gün içinde süresi dolacaklar, yanıt bekleyen ve süresi dolmuş anketler görünür: bir kutuya tıklamak listeyi filtreler.
 
 **Mevcut bir değerlendirmeyi kaydetme** — platformu kullanmaya başlamadan önce değerlendirilmiş tedarikçiler veya kağıt üzerinde toplanan bir anket için:
 
@@ -934,43 +964,41 @@ Değerlendirme tarihi **tedarikçi kaydına girilmez**: sistem bunu kaydedilen s
 3. **Referans / notlar** alanına (zorunlu) değerlendirmenin nerede saklandığını ve kimin doldurduğunu yazın: denetçiye göstereceğiniz bilgi budur
 4. **Kaydet**'e tıklayın. Tedarikçiye e-posta gönderilmez; Anketler sekmesinde kayıt **Kaydedildi** etiketiyle görünür
 
-Listedeki **Risk** filtresi sütunda gösterilen **düzeltilmiş risk** üzerinde çalışır; **Değerlendirilmemiş** seçeneği hiçbir değerlendirmesi olmayan tedarikçileri listeler.
+### Değerlendirme tarihi ve geçerlilik sonu
 
-### Değerlendirme: planlandı → devam ediyor → tamamlandı → onaylandı/reddedildi
+Değerlendirme tarihi **tedarikçi kaydına girilmez**: sistem bunu kaydedilen son değerlendirmeden türetir. Bu değerlendirme şunlardan biri olabilir:
 
-Her kritik tedarikçi periyodik değerlendirmelerle değerlendirilmelidir. Akış şöyledir:
+- platformdan gönderilen bir **anketin** sonucu (**Anketler → Değerlendir** sekmesi);
+- **mevcut bir değerlendirme**, yani platform dışında yapılmış bir değerlendirme;
+- onaylanmış bir **üçüncü taraf denetimi**.
 
-1. **Planlandı**: değerlendirme hedef tarihle oluşturulur. İç sorumlu bir görev alır
-2. **Devam Ediyor**: değerlendirme başlatılır. Tedarikçi (e-posta veya geçici erişim aracılığıyla) doldurulacak anketi alır
-3. **Tamamlandı**: tedarikçi tüm soruları yanıtladı. İç sorumlu anketi inceleme için alır
-4. **Onaylandı** veya **Reddedildi**: Uyum Yetkilisi veya Risk Yöneticisi nihai yargıyı verir (aşağıya bakın)
+**Geçerlilik sonu**, **Değerlendirme ayarları** bölümünde yapılandırılan geçerlilik süresiyle hesaplanır (varsayılan 12 ay). Tedarikçi listesi tarihi, kaynağı ve geçerlilik sonunu gösterir; takvim, süre yaklaştığında **Tedarikçi yeniden değerlendirmesi** kalemini gösterir ve Compliance Officer için bir hatırlatma açar.
 
-### Yönetişim, güvenlik, İSP skoru
+### Üçüncü taraf denetimleri: planlandı → tamamlandı → onaylandı / reddedildi
 
-Değerlendirme anketi, tedarikçiyi 3 boyutta değerlendirir:
+Denetime tabi tutulan tedarikçiler için (kendi denetiminiz veya üçüncü bir kuruluşun), tedarikçi ayrıntısında **Üçüncü taraf denetimleri** bölümünde:
 
-| Boyut | Ne değerlendirir |
-|-------|-----------------|
-| **Yönetişim** | Güvenlik için organizasyon yapısı, iç politikalar, tanımlanmış sorumluluklar, iç denetimler |
-| **Güvenlik** | Uygulanan teknik kontroller, güvenlik açığı yönetimi, olay müdahalesi, sertifikalar (ISO 27001, TISAX) |
-| **İSP** | Operasyonel süreklilik planları, beyan edilen RTO/RPO, gerçekleştirilen süreklilik testleri, altyapı fazlalıkları |
+1. **+ Yeni denetim**: tarihi girin ve **Kaydet**'e tıklayın. Denetim **Planlandı** durumundadır
+2. **Tamamla**: **Governance**, **Security** ve **BCP** için 0–100 puanları ve **bulguları** girin. **Overall** puanı girilen puanların ortalamasıdır. Tamamlandığında tedarikçinin risk seviyesi güncellenir (Overall ≥ 75 düşük, ≥ 50 orta, 50'nin altı yüksek) ve denetim tamamlandı bildirimi gönderilir
+3. **Onayla** veya **Reddet**: denetimi gözden geçiren kişi notlarını kaydeder; ret için gerekçe zorunludur (en az 10 karakter)
 
-Her boyut 0-100 arası skor üretir. Genel skor, üç boyutun ağırlıklı ortalamasıdır.
+Adj riske yalnızca **onaylanmış** bir denetim ve yalnızca yapılandırılan denetim geçerlilik süresi içinde (varsayılan 12 ay) dahil edilir: Overall ≥ 75 düşük, ≥ 50 orta, ≥ 25 yüksek, 25'in altı kritik. Reddedilen bir denetim geçmişte kalır ancak hesaba katılmaz.
 
-### Zorunlu notlarla onay ve red
+| Boyut | Neyi değerlendirir |
+|-----------|-------------|
+| **Governance** | Güvenlik organizasyonu, iç politikalar, tanımlı sorumluluklar, iç denetimler |
+| **Security** | Uygulanan teknik kontroller, zafiyet yönetimi, olay müdahalesi, sertifikalar (ISO 27001, TISAX) |
+| **BCP** | İş sürekliliği planları, beyan edilen RTO/RPO, yapılan süreklilik testleri, altyapı yedekliliği |
 
-**Onay:**
-1. Tamamlanmış değerlendirme kartından **Tedarikçiyi Onayla**'ya tıklayın
-2. **Onay notlarını** girin (zorunlu — ör. "ISO 27001 sertifikalı tedarikçi, yeterli puan. Sonraki gözden geçirme 12 ay sonra")
-3. **Onay son tarihini** belirleyin (tipik olarak 12 ay)
-4. **Onayı Onayla**'ya tıklayın
+### NDA ve sözleşmeler
 
-**Red:**
-1. Tamamlanmış değerlendirme kartından **Tedarikçiyi Reddet**'e tıklayın
-2. **Red notlarını** girin (zorunlu — kararı gerekçelendiren ayrıntılı gerekçe olmalıdır)
-3. **Reddi Onayla**'ya tıklayın
+Tedarikçi ayrıntısında, **NDA / Sözleşmeler** bölümünde **+ NDA yükle**'ye tıklayın, dosyayı seçin ve **başlığı** ile varsa **geçerlilik sonunu** girin. Belge, Dokümanlar modülünde tedarikçiye bağlı bir sözleşme olarak arşivlenir; aynı bölümden indirebilir veya onaylanmamışsa onaylayabilirsiniz.
 
-Red, iç sorumluda geçişi yönetmek için görev oluşturur (tedarikçi değişimi veya iyileştirme planı).
+**NDA durumu** sekmesi aktif tedarikçilerin kapsamını özetler: aktif NDA'lı, 90 gün içinde süresi dolacak, süresi dolmuş, taslak veya NDA'sız. Tedarikçiye göre arama yapabilir, NDA durumu ve riske göre filtreleyebilirsiniz.
+
+### Değerlendirme ayarları
+
+**Değerlendirme ayarları** sekmesi hesaplama parametrelerini içerir: iç değerlendirmenin altı parametresinin **ağırlıkları** (toplamı 1,00 olmalıdır), her parametrenin **seviye etiketleri**, orta, yüksek ve kritik sınıflar için ağırlıklı puan **eşikleri**, anketlerin ve üçüncü taraf denetimlerinin **geçerlilik süresi** (ay olarak) ve **NIS2 artışı + kritik yoğunlaşma** seçeneği. Modülü kullananlar bunları görüntüleyebilir; yalnızca Super Admin değiştirebilir.
 
 ---
 

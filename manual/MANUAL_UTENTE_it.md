@@ -88,8 +88,8 @@ Il menu laterale a sinistra mostra solo le sezioni accessibili in base al tuo ru
 | **Dashboard** | KPI compliance, heat map rischi, scadenze imminenti, alert |
 | **Compliance** | Libreria controlli (M03), documenti (M07), evidenze |
 | **Risk** | Asset IT/OT (M04), BIA (M05), Risk Assessment (M06) |
-| **Operazioni** | Incidenti (M09), Task/Scadenzario (M08), PDCA (M11) |
-| **Governance** | Organigramma/Ruoli (M00), Lesson Learned (M12), Revisione Direzione (M13), Fornitori (M14), Formazione (M15), BCP (M16) |
+| **Operazioni** | Incidenti (M09), Task/Scadenzario (M08), PDCA (M11), Fornitori (M14) |
+| **Governance** | Organigramma/Ruoli (M00), Lesson Learned (M12), Revisione Direzione (M13), Formazione (M15), BCP (M16) |
 | **Audit** | Audit Preparation (M17), Reporting (M18) |
 | **Notifiche** | Notifiche email, preferenze |
 | **Impostazioni** | Solo per ruoli amministrativi — SMTP, policy, profili notifica |
@@ -900,32 +900,62 @@ L'audit annullato non viene mai eliminato fisicamente — rimane nell'archivio c
 
 [Schermata: lista fornitori]
 
+Il modulo si apre da **Operazioni → Fornitori** ed è organizzato in cinque tab: **Fornitori**, **Questionari**, **Template questionario**, **Stato NDA** e **Impostazioni valutazione**. Creano e modificano i fornitori Super Admin, Compliance Officer, Risk Manager e Plant Manager; gli auditor interni ed esterni li consultano in sola lettura. Ogni utente vede i fornitori dei propri siti e quelli senza sito associato (fornitori dell'intera organizzazione).
+
 ### Come registrare un fornitore
 
-1. Vai su **Governance → Fornitori → Nuovo fornitore**
+1. Nel tab **Fornitori** clicca **+ Nuovo fornitore**
 2. Compila:
-   - **Ragione sociale** e **Partita IVA**
-   - **Categoria**: IT, OT, Servizi Professionali, Logistica, altro
-   - **Criticita'**: quanto e' critico per la continuita' operativa (1–5)
-   - **Referente interno**: seleziona il ruolo responsabile della gestione del fornitore
-   - **Referente fornitore**: nome e email del contatto presso il fornitore
-   - **Trattamento dati**: flag se il fornitore tratta dati personali (comporta obblighi GDPR aggiuntivi)
-3. Clicca **Salva**
+   - **Denominazione (ragione sociale)**, **CF / P.IVA** e **Paese sede legale** — obbligatori
+   - **Email fornitore (TO)** — obbligatoria, è il destinatario dei questionari; in **Email aggiuntive (CC)** puoi aggiungere altri contatti in copia
+   - **Descrizione fornitura** — cosa fornisce; serve anche al suggerimento dei codici CPV
+   - **Livello rischio** — la tua stima iniziale; la valutazione vera arriva dalle fonti descritte più avanti
+   - Sezione **ACN / NIS2**: **codici CPV** della fornitura (con il pulsante IA puoi farti suggerire i codici dalla descrizione, che viene inviata senza il nome del fornitore; ogni suggerimento va accettato a mano), flag **Fornitore NIS2 rilevante** e, se attivo, **criterio di rilevanza** (fornitura ICT strutturale, non fungibilità o entrambi) e **% di concentrazione** della fornitura
+   - Sezione **TISAX**: flag **Fornitore rilevante TISAX** se tratta informazioni del perimetro TISAX (es. dati o prototipi dei clienti OEM) o accede ai sistemi in scope (VDA ISA 6.1.1)
+3. Clicca **Crea fornitore**
 
 **Controllo duplicati** — mentre compili il form il sistema cerca fornitori già registrati:
 
 - **Stessa P.IVA** (confrontata ignorando spazi, punti, trattini e prefisso paese, es. `IT 0123.4567.890` = `01234567890`): il salvataggio è **bloccato**. Se il fornitore esistente è nel tuo perimetro puoi aprirlo con **Apri**; se è registrato su un sito fuori perimetro ne vedi solo l'esistenza e devi chiedere a un Compliance Officer di associarlo al tuo sito. Un fornitore eliminato non blocca il reinserimento.
 - **Ragione sociale simile** (ignorando maiuscole, punteggiatura e forme societarie come S.r.l., S.p.A., GmbH): compare un **avviso** con i fornitori simili; per creare comunque spunta **Ho verificato: è un fornitore diverso**. L'audit trail registra quanti nomi simili erano presenti alla creazione.
 
-### Data di valutazione e scadenza
+Con l'icona di modifica cambi i dati e lo **Stato** del fornitore (attivo, sospeso, terminato). L'eliminazione è logica (il fornitore resta nello storico) e porta con sé i suoi questionari.
 
-La data di valutazione **non si inserisce nell'anagrafica**: il sistema la ricava dall'ultima valutazione registrata, che può essere:
+**Concentrazione** — la percentuale determina la soglia TPRM (ACN Delibera 127434): sotto il 20% **bassa**, dal 20% al 50% **media**, oltre il 50% **critica**. Quando un fornitore entra nella soglia critica il sistema invia una notifica, una sola volta finché la concentrazione non rientra.
 
-- l'esito di un **questionario** inviato dalla piattaforma (tab **Questionari → Valuta**);
-- una **valutazione esistente**, cioè svolta fuori dalla piattaforma (vedi sotto);
-- un **audit terze parti** approvato.
+### Elenco fornitori
 
-La **scadenza** si calcola con la validità configurata in **Fornitori → Impostazioni valutazione** (12 mesi di default). L'elenco fornitori mostra data, origine e scadenza; lo scadenzario propone la voce **Rivalutazione fornitori** in prossimità della scadenza e apre un promemoria al Compliance Officer.
+L'elenco mostra per ogni fornitore CF/P.IVA, paese, concentrazione, **Rischio Adj**, stato, data e scadenza dell'ultima valutazione. Puoi cercare per denominazione, CF/P.IVA o email e filtrare per rischio, stato, rilevanza NIS2 e rilevanza TISAX; il filtro **Rischio** lavora sul Rischio Adj e l'opzione **Non valutati** elenca i fornitori senza alcuna valutazione.
+
+**↓ Esporta CSV** scarica tutti i fornitori, solo i NIS2 rilevanti o solo i TISAX rilevanti, con codici CPV, criterio NIS2, concentrazione e date di valutazione.
+
+Cliccando sul nome si apre il dettaglio del fornitore, con tre sezioni: **Valutazione interna**, **Audit terze parti** e **NDA / Contratti**.
+
+### Come si calcola il rischio (Rischio Adj)
+
+Il **Rischio Adj** è la classe peggiore (basso, medio, alto, critico) fra tre fonti, ognuna considerata solo se presente:
+
+1. la **valutazione interna** corrente;
+2. l'ultimo **questionario** valutato e non scaduto (inviato dalla piattaforma o valutazione esistente registrata);
+3. l'ultimo **audit terze parti** approvato entro la validità configurata.
+
+Se il fornitore è NIS2 rilevante e la concentrazione è critica, la classe sale di un livello (se l'opzione è attiva nelle impostazioni). Senza nessuna fonte il fornitore risulta **non valutato**. Il ricalcolo avviene a ogni nuova valutazione e ogni notte, così una valutazione scaduta smette di contare da sola.
+
+### Valutazione interna
+
+Dal dettaglio del fornitore, sezione **Valutazione interna**, clicca **Avvia valutazione** (o **Nuova valutazione**) e assegna un punteggio da 1 (rischio minimo) a 5 (rischio massimo) a sei parametri: **Impatto business**, **Accesso sistemi**, **Dati trattati**, **Dipendenza fornitore**, **Integrazione IT** e **Compliance certificazioni cyber**. L'anteprima mostra lo score ponderato e la classe risultante prima di salvare. Ogni nuova valutazione sostituisce la precedente, che resta nello **Storico valutazioni**.
+
+### Questionari
+
+**Template** — nel tab **Template questionario** prepari una o più email tipo: nome, **URL del form** del questionario (ad esempio un modulo online), oggetto e testo. Nell'oggetto e nel testo `{supplier_name}` diventa il nome del fornitore; nel testo `{questionnaire_link}` diventa il link al form.
+
+**Invio** — dall'elenco fornitori clicca **Quest.**, scegli il template e clicca **Invia**. L'email parte all'indirizzo TO del fornitore con in copia le email CC. Il fornitore compila il form esterno: la piattaforma non riceve le risposte in automatico.
+
+**Solleciti** — ogni lunedì chi ha inviato i questionari riceve un'unica email di riepilogo con quelli senza risposta da più di 7 giorni. Dal tab **Questionari** puoi **Reinviare** il questionario; dal 3° invio senza risposta l'elenco segnala di contattare direttamente il fornitore.
+
+**Valutazione** — quando hai letto le risposte, nel tab **Questionari** clicca **Valuta** e indica **data di valutazione**, **valutazione** (livello di rischio) ed eventuali note. La scadenza si calcola con la validità dei questionari configurata nelle impostazioni (12 mesi di default).
+
+Il tab **Questionari** riepiloga in alto le valutazioni valide, quelle in scadenza nei 90 giorni, i questionari in attesa di risposta e quelli scaduti: cliccando un riquadro filtri l'elenco.
 
 **Registrare una valutazione esistente** — per i fornitori già valutati prima di usare la piattaforma, o con un questionario raccolto su carta:
 
@@ -934,43 +964,41 @@ La **scadenza** si calcola con la validità configurata in **Fornitori → Impos
 3. Nel campo **Riferimento / note** (obbligatorio) scrivi dove si trova la valutazione e chi l'ha compilata: è ciò che mostrerai all'auditor
 4. Clicca **Registra**. Nessuna email viene inviata al fornitore; nel tab Questionari la voce compare con l'etichetta **Registrata**
 
-Il filtro **Rischio** dell'elenco lavora sul **rischio aggiustato** mostrato in colonna; l'opzione **Non valutati** elenca i fornitori senza alcuna valutazione.
+### Data di valutazione e scadenza
 
-### Assessment: pianificato → in corso → completato → approvato/rifiutato
+La data di valutazione **non si inserisce nell'anagrafica**: il sistema la ricava dall'ultima valutazione registrata, che può essere:
 
-Ogni fornitore critico deve essere periodicamente valutato tramite assessment. Il flusso e':
+- l'esito di un **questionario** inviato dalla piattaforma (tab **Questionari → Valuta**);
+- una **valutazione esistente**, cioè svolta fuori dalla piattaforma;
+- un **audit terze parti** approvato.
 
-1. **Pianificato**: l'assessment viene creato con data target. Il referente interno riceve un task
-2. **In corso**: l'assessment viene avviato. Il fornitore riceve (via email o accesso temporaneo) il questionario da compilare
-3. **Completato**: il fornitore ha risposto a tutte le domande. Il referente interno riceve il questionario per la revisione
-4. **Approvato** o **Rifiutato**: il Compliance Officer o il Risk Manager esprime il giudizio finale (vedi sotto)
+La **scadenza** si calcola con la validità configurata in **Impostazioni valutazione** (12 mesi di default). L'elenco fornitori mostra data, origine e scadenza; lo scadenzario propone la voce **Rivalutazione fornitori** in prossimità della scadenza e apre un promemoria al Compliance Officer.
 
-### Score governance, security, BCP
+### Audit terze parti: pianificato → completato → approvato / rifiutato
 
-Il questionario di assessment valuta il fornitore su 3 dimensioni:
+Per i fornitori sottoposti a un audit (tuo o di un ente terzo), dal dettaglio del fornitore, sezione **Audit terze parti**:
+
+1. **+ Nuovo audit**: indica la data e clicca **Registra**. L'audit è **Pianificato**
+2. **Completa**: inserisci i punteggi 0–100 di **Governance**, **Security** e **BCP** e i **findings**. Lo score **Overall** è la media dei punteggi inseriti. Al completamento il livello di rischio del fornitore si aggiorna (Overall ≥ 75 basso, ≥ 50 medio, sotto 50 alto) e parte la notifica di audit completato
+3. **Approva** o **Rifiuta**: chi rivede l'audit registra le note; per il rifiuto la motivazione è obbligatoria (almeno 10 caratteri)
+
+Solo un audit **approvato** entra nel Rischio Adj, e solo entro la validità degli audit configurata (12 mesi di default): Overall ≥ 75 basso, ≥ 50 medio, ≥ 25 alto, sotto 25 critico. Un audit rifiutato resta nello storico ma non conta.
 
 | Dimensione | Cosa valuta |
 |-----------|-------------|
-| **Governance** | Struttura organizzativa per la sicurezza, politiche interne, responsabilita' definite, audit interni |
-| **Security** | Controlli tecnici implementati, gestione vulnerabilita', incident response, certificazioni (ISO 27001, TISAX) |
-| **BCP** | Piani di continuita' operativa, RTO/RPO dichiarati, test di continuita' eseguiti, ridondanze infrastrutturali |
+| **Governance** | Struttura organizzativa per la sicurezza, politiche interne, responsabilità definite, audit interni |
+| **Security** | Controlli tecnici implementati, gestione vulnerabilità, incident response, certificazioni (ISO 27001, TISAX) |
+| **BCP** | Piani di continuità operativa, RTO/RPO dichiarati, test di continuità eseguiti, ridondanze infrastrutturali |
 
-Ogni dimensione produce uno score 0-100. Lo score complessivo e' la media pesata delle tre dimensioni.
+### NDA e contratti
 
-### Approvazione e rifiuto con note obbligatorie
+Dal dettaglio del fornitore, sezione **NDA / Contratti**, clicca **+ Carica NDA**, scegli il file e indica **titolo** ed eventuale **scadenza**. Il documento viene archiviato nel modulo Documenti come contratto collegato al fornitore; dalla stessa sezione lo scarichi o, se non è approvato, lo approvi.
 
-**Approvazione:**
-1. Dalla scheda dell'assessment completato clicca **Approva fornitore**
-2. Inserisci le **note di approvazione** (obbligatorie — es. "Fornitore certificato ISO 27001, punteggio adeguato. Prossima revisione tra 12 mesi")
-3. Imposta la **data di scadenza dell'approvazione** (tipicamente 12 mesi)
-4. Clicca **Conferma approvazione**
+Il tab **Stato NDA** riassume la copertura dei fornitori attivi: con NDA attivo, in scadenza nei 90 giorni, scaduto, in bozza o mancante. Puoi cercare per fornitore e filtrare per stato NDA e rischio.
 
-**Rifiuto:**
-1. Dalla scheda dell'assessment completato clicca **Rifiuta fornitore**
-2. Inserisci le **note di rifiuto** (obbligatorie — deve essere una motivazione dettagliata che giustifichi la decisione)
-3. Clicca **Conferma rifiuto**
+### Impostazioni valutazione
 
-Il rifiuto genera un task al referente interno per gestire la transizione (sostituzione fornitore o piano di remediation).
+Il tab **Impostazioni valutazione** raccoglie i parametri del calcolo: **pesi** dei sei parametri della valutazione interna (la somma deve essere 1,00), **etichette dei livelli** per ogni parametro, **soglie** dello score ponderato per le classi medio, alto e critico, **validità** dei questionari e degli audit terze parti (in mesi) e l'opzione **bump NIS2 + concentrazione critica**. Chi usa il modulo può consultarle, solo il Super Admin può modificarle.
 
 ---
 

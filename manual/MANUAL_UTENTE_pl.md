@@ -88,8 +88,8 @@ Menu boczne po lewej stronie wyświetla tylko sekcje dostępne zgodnie z Twoją 
 | **Pulpit** | KPI compliance, mapa ciepła ryzyk, zbliżające się terminy, alerty |
 | **Compliance** | Biblioteka kontroli (M03), dokumenty (M07), dowody |
 | **Ryzyko** | Aktywa IT/OT (M04), BIA (M05), Ocena ryzyka (M06) |
-| **Operacje** | Incydenty (M09), Zadania/Terminarz (M08), PDCA (M11) |
-| **Ład organizacyjny** | Schemat organizacyjny/Role (M00), Lekcje (M12), Przegląd Zarządu (M13), Dostawcy (M14), Szkolenia (M15), BCP (M16) |
+| **Operacje** | Incydenty (M09), Zadania/Terminarz (M08), PDCA (M11), Dostawcy (M14) |
+| **Ład organizacyjny** | Schemat organizacyjny/Role (M00), Lekcje (M12), Przegląd Zarządu (M13), Szkolenia (M15), BCP (M16) |
 | **Audyt** | Przygotowanie do audytu (M17), Raportowanie (M18) |
 | **Powiadomienia** | Powiadomienia e-mail, preferencje |
 | **Ustawienia** | Tylko dla ról administracyjnych — SMTP, polityki, profile powiadomień |
@@ -900,32 +900,62 @@ Anulowany audyt nigdy nie jest fizycznie usuwany — pozostaje w archiwum ze sta
 
 [Zrzut ekranu: lista dostawców]
 
+Moduł otwiera się z menu **Operacje → Dostawcy** i ma pięć zakładek: **Dostawcy**, **Kwestionariusze**, **Szablony kwestionariusza**, **Status NDA** i **Ustawienia oceny**. Dostawców tworzą i edytują Super Admin, Compliance Officer, Risk Manager i Plant Manager; audytorzy wewnętrzni i zewnętrzni mają dostęp tylko do odczytu. Każdy użytkownik widzi dostawców swoich zakładów oraz dostawców bez przypisanego zakładu (dostawców całej organizacji).
+
 ### Jak zarejestrować dostawcę
 
-1. Przejdź do **Ład organizacyjny → Dostawcy → Nowy dostawca**
-2. Wypełnij:
-   - **Nazwa firmy** i **NIP**
-   - **Kategoria**: IT, OT, Usługi Profesjonalne, Logistyka, inne
-   - **Krytyczność**: jak ważny jest dla ciągłości operacyjnej (1–5)
-   - **Wewnętrzny opiekun**: wybierz rolę odpowiedzialną za zarządzanie dostawcą
-   - **Kontakt dostawcy**: imię i e-mail kontaktu u dostawcy
-   - **Przetwarzanie danych**: flaga, jeśli dostawca przetwarza dane osobowe (wiąże się z dodatkowymi obowiązkami RODO)
-3. Kliknij **Zapisz**
+1. W zakładce **Dostawcy** kliknij **+ Nowy dostawca**
+2. Uzupełnij:
+   - **Nazwa (firma)**, **NIP / VAT** i **Kraj siedziby** — obowiązkowe
+   - **Email dostawcy (DO)** — obowiązkowy, jest odbiorcą kwestionariuszy; w polu **Dodatkowe adresy w kopii (DW)** możesz dodać inne kontakty w kopii
+   - **Opis dostawy** — co dostarcza dostawca; służy też do podpowiadania kodów CPV
+   - **Poziom ryzyka** — Twoja wstępna ocena; właściwa ocena pochodzi ze źródeł opisanych dalej
+   - Sekcja **ACN / NIS2**: **kody CPV** dostawy (przycisk IA podpowiada kody na podstawie opisu, wysyłanego bez nazwy dostawcy; każdą podpowiedź trzeba zaakceptować ręcznie), znacznik **Dostawca istotny dla NIS2** oraz, jeśli jest zaznaczony, **kryterium istotności** (strukturalna dostawa ICT, niezastępowalność lub oba) i **% koncentracji dostaw**
+   - Sekcja **TISAX**: znacznik **Dostawca istotny dla TISAX**, jeśli dostawca przetwarza informacje z zakresu TISAX (np. dane lub prototypy klientów OEM) lub ma dostęp do systemów w zakresie (VDA ISA 6.1.1)
+3. Kliknij **Utwórz dostawcę**
 
 **Kontrola duplikatów** — podczas wypełniania formularza system wyszukuje już zarejestrowanych dostawców:
 
 - **Ten sam NIP** (porównywany z pominięciem spacji, kropek, myślników i prefiksu kraju, np. `IT 0123.4567.890` = `01234567890`): zapis jest **zablokowany**. Jeśli istniejący dostawca jest w Twoim zakresie, możesz go otworzyć przyciskiem **Otwórz**; jeśli jest zarejestrowany w zakładzie spoza Twojego zakresu, widzisz tylko, że istnieje, i musisz poprosić Compliance Officera o przypisanie go do Twojego zakładu. Usunięty dostawca nie blokuje ponownego wprowadzenia.
 - **Podobna nazwa firmy** (z pominięciem wielkości liter, interpunkcji i form prawnych, np. S.r.l., S.p.A., GmbH, Sp. z o.o.): pojawia się **ostrzeżenie** z listą podobnych dostawców; aby mimo to utworzyć, zaznacz **Sprawdziłem: to inny dostawca**. Ścieżka audytu rejestruje, ile podobnych nazw istniało w chwili utworzenia.
 
-### Data oceny i termin ważności
+Ikoną edycji zmieniasz dane i **Status** dostawcy (aktywny, zawieszony, zakończony). Usunięcie jest logiczne (dostawca pozostaje w historii) i obejmuje także jego kwestionariusze.
 
-Daty oceny **nie wprowadza się w karcie dostawcy**: system wyznacza ją na podstawie ostatniej zarejestrowanej oceny, którą może być:
+**Koncentracja** — procent wyznacza próg TPRM (Uchwała ACN 127434): poniżej 20% **niska**, od 20% do 50% **średnia**, powyżej 50% **krytyczna**. Gdy dostawca wchodzi w próg krytyczny, system wysyła powiadomienie, tylko raz, dopóki koncentracja nie spadnie.
 
-- wynik **kwestionariusza** wysłanego z platformy (zakładka **Kwestionariusze → Oceń**);
-- **istniejąca ocena**, czyli przeprowadzona poza platformą (patrz niżej);
-- zatwierdzony **audyt strony trzeciej**.
+### Lista dostawców
 
-**Termin ważności** jest obliczany na podstawie ważności skonfigurowanej w **Dostawcy → Ustawienia oceny** (domyślnie 12 miesięcy). Lista dostawców pokazuje datę, źródło i termin ważności; harmonogram wyświetla pozycję **Ponowna ocena dostawców** w miarę zbliżania się terminu i otwiera przypomnienie dla Compliance Officera.
+Dla każdego dostawcy lista pokazuje NIP/VAT, kraj, koncentrację, **Ryzyko Adj**, status oraz datę i termin ważności ostatniej oceny. Możesz szukać po nazwie, NIP/VAT lub adresie e-mail i filtrować według ryzyka, statusu, istotności NIS2 i istotności TISAX; filtr **Ryzyko** działa na Ryzyku Adj, a opcja **Nieocenieni** pokazuje dostawców bez żadnej oceny.
+
+**↓ Eksport CSV** pobiera wszystkich dostawców, tylko istotnych dla NIS2 lub tylko istotnych dla TISAX, z kodami CPV, kryterium NIS2, koncentracją i datami oceny.
+
+Kliknięcie nazwy otwiera szczegóły dostawcy z trzema sekcjami: **Ocena wewnętrzna**, **Audyty zewnętrzne** i **NDA / Umowy**.
+
+### Jak obliczane jest ryzyko (Ryzyko Adj)
+
+**Ryzyko Adj** to najgorsza klasa (niskie, średnie, wysokie, krytyczne) spośród trzech źródeł, z których każde liczy się tylko wtedy, gdy istnieje:
+
+1. bieżąca **ocena wewnętrzna**;
+2. ostatni oceniony i niewygasły **kwestionariusz** (wysłany z platformy lub zarejestrowana istniejąca ocena);
+3. ostatni **audyt zewnętrzny** zatwierdzony w skonfigurowanym okresie ważności.
+
+Jeśli dostawca jest istotny dla NIS2, a koncentracja jest krytyczna, klasa rośnie o jeden poziom (jeśli opcja jest włączona w ustawieniach). Bez żadnego źródła dostawca jest **nieoceniony**. Obliczenie odbywa się przy każdej nowej ocenie i co noc, więc wygasła ocena sama przestaje się liczyć.
+
+### Ocena wewnętrzna
+
+W szczegółach dostawcy, w sekcji **Ocena wewnętrzna**, kliknij **Rozpocznij ocenę** (lub **Nowa ocena**) i oceń od 1 (minimalne ryzyko) do 5 (maksymalne ryzyko) sześć parametrów: **Wpływ na biznes**, **Dostęp do systemów**, **Przetwarzane dane**, **Zależność od dostawcy**, **Integracja IT** i **Zgodność z certyfikacjami cyber**. Podgląd pokazuje wynik ważony i klasę przed zapisaniem. Każda nowa ocena zastępuje poprzednią, która pozostaje w **Historii ocen**.
+
+### Kwestionariusze
+
+**Szablony** — w zakładce **Szablony kwestionariusza** przygotowujesz jeden lub więcej wzorów wiadomości: nazwę, **URL formularza** kwestionariusza (np. formularz online), temat i treść. W temacie i treści `{supplier_name}` zamienia się w nazwę dostawcy; w treści `{questionnaire_link}` zamienia się w link do formularza.
+
+**Wysyłka** — na liście dostawców kliknij **Kwest.**, wybierz szablon i kliknij **Wyślij**. Wiadomość trafia na adres DO dostawcy z adresami DW w kopii. Dostawca wypełnia zewnętrzny formularz: platforma nie otrzymuje odpowiedzi automatycznie.
+
+**Przypomnienia** — w każdy poniedziałek osoba, która wysłała kwestionariusze, otrzymuje jedną wiadomość zbiorczą z tymi bez odpowiedzi od ponad 7 dni. W zakładce **Kwestionariusze** możesz **Wysłać ponownie** kwestionariusz; od 3. wysyłki bez odpowiedzi lista sygnalizuje, że należy skontaktować się z dostawcą bezpośrednio.
+
+**Ocena** — po przeczytaniu odpowiedzi w zakładce **Kwestionariusze** kliknij **Oceń** i podaj **datę oceny**, **ocenę** (poziom ryzyka) i ewentualne uwagi. Termin ważności jest obliczany na podstawie ważności kwestionariuszy skonfigurowanej w ustawieniach (domyślnie 12 miesięcy).
+
+U góry zakładki **Kwestionariusze** widać ważne oceny, oceny wygasające w ciągu 90 dni, kwestionariusze oczekujące na odpowiedź i wygasłe: kliknięcie kafelka filtruje listę.
 
 **Rejestracja istniejącej oceny** — dla dostawców ocenionych przed rozpoczęciem korzystania z platformy lub na podstawie kwestionariusza papierowego:
 
@@ -934,43 +964,41 @@ Daty oceny **nie wprowadza się w karcie dostawcy**: system wyznacza ją na pods
 3. W polu **Odniesienie / uwagi** (obowiązkowe) wpisz, gdzie znajduje się ocena i kto ją wypełnił: to pokażesz audytorowi
 4. Kliknij **Zarejestruj**. Do dostawcy nie jest wysyłany żaden e-mail; w zakładce Kwestionariusze pozycja ma etykietę **Zarejestrowana**
 
-Filtr **Ryzyko** na liście działa na **ryzyku skorygowanym** widocznym w kolumnie; opcja **Nieocenieni** pokazuje dostawców bez żadnej oceny.
+### Data oceny i termin ważności
 
-### Ocena: zaplanowana → w toku → zakończona → zatwierdzona/odrzucona
+Daty oceny **nie wprowadza się w karcie dostawcy**: system wyznacza ją na podstawie ostatniej zarejestrowanej oceny, którą może być:
 
-Każdy krytyczny dostawca musi być okresowo oceniany. Przepływ to:
+- wynik **kwestionariusza** wysłanego z platformy (zakładka **Kwestionariusze → Oceń**);
+- **istniejąca ocena**, czyli przeprowadzona poza platformą;
+- zatwierdzony **audyt zewnętrzny**.
 
-1. **Zaplanowana**: ocena jest tworzona z docelową datą. Wewnętrzny opiekun otrzymuje zadanie
-2. **W toku**: ocena jest uruchamiana. Dostawca otrzymuje (e-mailem lub tymczasowym dostępem) kwestionariusz do wypełnienia
-3. **Zakończona**: dostawca odpowiedział na wszystkie pytania. Wewnętrzny opiekun otrzymuje kwestionariusz do przeglądu
-4. **Zatwierdzona** lub **Odrzucona**: Compliance Officer lub Risk Manager wydaje ostateczną ocenę (patrz poniżej)
+**Termin ważności** jest obliczany na podstawie ważności skonfigurowanej w **Ustawieniach oceny** (domyślnie 12 miesięcy). Lista dostawców pokazuje datę, źródło i termin ważności; harmonogram wyświetla pozycję **Ponowna ocena dostawców** w miarę zbliżania się terminu i otwiera przypomnienie dla Compliance Officera.
 
-### Wynik w zakresie ładu, bezpieczeństwa, BCP
+### Audyty zewnętrzne: zaplanowany → zakończony → zatwierdzony / odrzucony
 
-Kwestionariusz oceny ocenia dostawcę w 3 wymiarach:
+Dla dostawców poddawanych audytowi (własnemu lub przez podmiot trzeci), w szczegółach dostawcy, w sekcji **Audyty zewnętrzne**:
+
+1. **+ Nowy audyt**: podaj datę i kliknij **Zarejestruj**. Audyt jest **Zaplanowany**
+2. **Zakończ**: wprowadź wyniki 0–100 dla **Governance**, **Security** i **BCP** oraz **ustalenia**. Wynik **Overall** to średnia wprowadzonych wyników. Po zakończeniu poziom ryzyka dostawcy się aktualizuje (Overall ≥ 75 niskie, ≥ 50 średnie, poniżej 50 wysokie) i wysyłane jest powiadomienie o zakończeniu audytu
+3. **Zatwierdź** lub **Odrzuć**: osoba weryfikująca audyt zapisuje uwagi; przy odrzuceniu uzasadnienie jest obowiązkowe (co najmniej 10 znaków)
+
+Do Ryzyka Adj wlicza się tylko audyt **zatwierdzony** i tylko w skonfigurowanym okresie ważności audytów (domyślnie 12 miesięcy): Overall ≥ 75 niskie, ≥ 50 średnie, ≥ 25 wysokie, poniżej 25 krytyczne. Odrzucony audyt pozostaje w historii, ale się nie liczy.
 
 | Wymiar | Co ocenia |
-|--------|-----------|
-| **Ład organizacyjny** | Struktura organizacyjna w zakresie bezpieczeństwa, wewnętrzne polityki, zdefiniowane obowiązki, audyty wewnętrzne |
-| **Bezpieczeństwo** | Wdrożone kontrole techniczne, zarządzanie podatnościami, reagowanie na incydenty, certyfikacje (ISO 27001, TISAX) |
-| **BCP** | Plany ciągłości operacyjnej, zadeklarowane RTO/RPO, przeprowadzone testy ciągłości, redundancje infrastrukturalne |
+|-----------|-------------|
+| **Governance** | Organizacja bezpieczeństwa, polityki wewnętrzne, zdefiniowane odpowiedzialności, audyty wewnętrzne |
+| **Security** | Wdrożone zabezpieczenia techniczne, zarządzanie podatnościami, reagowanie na incydenty, certyfikaty (ISO 27001, TISAX) |
+| **BCP** | Plany ciągłości działania, deklarowane RTO/RPO, przeprowadzone testy ciągłości, redundancja infrastruktury |
 
-Każdy wymiar daje wynik 0-100. Wynik ogólny to ważona średnia trzech wymiarów.
+### NDA i umowy
 
-### Zatwierdzenie i odrzucenie z obowiązkowymi notatkami
+W szczegółach dostawcy, w sekcji **NDA / Umowy**, kliknij **+ Wgraj NDA**, wybierz plik i podaj **tytuł** oraz ewentualnie **termin ważności**. Dokument jest archiwizowany w module Dokumenty jako umowa powiązana z dostawcą; w tej samej sekcji możesz go pobrać lub, jeśli nie jest zatwierdzony, zatwierdzić.
 
-**Zatwierdzenie:**
-1. Z karty zakończonej oceny kliknij **Zatwierdź dostawcę**
-2. Wpisz **notatki zatwierdzenia** (obowiązkowe — np. „Dostawca certyfikowany ISO 27001, odpowiedni wynik. Następny przegląd za 12 miesięcy")
-3. Ustaw **datę wygaśnięcia zatwierdzenia** (zazwyczaj 12 miesięcy)
-4. Kliknij **Potwierdź zatwierdzenie**
+Zakładka **Status NDA** podsumowuje pokrycie aktywnych dostawców: z aktywnym NDA, wygasającym w ciągu 90 dni, wygasłym, w wersji roboczej lub bez NDA. Możesz szukać po dostawcy i filtrować według statusu NDA i ryzyka.
 
-**Odrzucenie:**
-1. Z karty zakończonej oceny kliknij **Odrzuć dostawcę**
-2. Wpisz **notatki odrzucenia** (obowiązkowe — musi to być szczegółowe uzasadnienie uzasadniające decyzję)
-3. Kliknij **Potwierdź odrzucenie**
+### Ustawienia oceny
 
-Odrzucenie generuje zadanie dla wewnętrznego opiekuna w celu zarządzania przejściem (zastąpienie dostawcy lub plan naprawczy).
+Zakładka **Ustawienia oceny** zawiera parametry obliczeń: **wagi** sześciu parametrów oceny wewnętrznej (suma musi wynosić 1,00), **etykiety poziomów** każdego parametru, **progi** wyniku ważonego dla klas średnie, wysokie i krytyczne, **ważność** kwestionariuszy i audytów zewnętrznych (w miesiącach) oraz opcję **Podbicie NIS2 + krytyczna koncentracja**. Użytkownicy modułu mogą je przeglądać; zmieniać je może tylko Super Admin.
 
 ---
 
