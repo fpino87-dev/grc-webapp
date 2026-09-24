@@ -615,6 +615,15 @@ Si lors de la phase CHECK le résultat est **ko** (la solution n'a pas fonctionn
 
 Il n'y a pas de limite au nombre d'itérations DO-CHECK, mais le système signale les cycles avec plus de 3 itérations au Compliance Officer.
 
+### Cycle de site ou d'organisation
+
+À la création, le champ **Site** indique à quoi s'applique le cycle :
+
+- un **site** : le cycle ne concerne que cet établissement et il est géré par les utilisateurs de ce site ;
+- **Organisation — tous les sites** : le cycle vaut pour toute l'organisation (ex. une procédure commune ou une campagne de sensibilisation pour tous). Le périmètre devient automatiquement **Organisation**.
+
+Les cycles d'organisation sont visibles par tous les sites, mais seuls les utilisateurs ayant accès à toute l'organisation peuvent les ouvrir et les faire avancer (avancement de phase, modification, archivage, suppression) ; pour les autres, ils apparaissent en **lecture seule**, avec le dossier consultable. En filtrant la liste par site, les cycles d'organisation apparaissent aussi, car ils s'y appliquent ; l'option **Organisation uniquement** n'affiche que ceux-ci. Dans la phase DO d'un cycle d'organisation, on peut joindre une preuve de n'importe quel site. À la clôture, la leçon apprise générée est elle aussi d'organisation et, si le CHECK est ko, le nouveau cycle reste d'organisation.
+
 ### Cycles PDCA créés automatiquement par des incidents, findings, risques critiques
 
 Les cycles PDCA sont créés manuellement ou automatiquement par :
@@ -657,6 +666,8 @@ Lorsqu'un cycle PDCA est clôturé avec un résultat positif, le système crée 
 - La standardisation documentée dans la phase ACT
 
 La leçon apprise automatique part en état "Brouillon" et est assignée comme tâche au propriétaire du cycle PDCA pour révision avant approbation.
+
+Si le cycle PDCA est d'organisation, la leçon apprise l'est aussi : tous les sites la voient, mais seuls les utilisateurs ayant accès à toute l'organisation peuvent la gérer.
 
 ### Recherche dans la base de connaissances
 
@@ -723,7 +734,7 @@ L'instantané peut être régénéré jusqu'à l'approbation ; ensuite il reste 
 3. Avec **Ajouter une décision**, enregistrez les éléments de sortie de la revue (§9.3.3) : description, **type** (amélioration, modification du SMSI, ressources, autre), responsable et échéance
 4. Si la décision doit être mise en œuvre, cochez :
    - **Créer une tâche** : ouvre une tâche dans M08 **assignée au rôle** choisi, avec l'échéance de la décision (priorité haute pour les modifications du SMSI)
-   - **Ouvrir un cycle PDCA** : ouvre un cycle PDCA dans M11 (pour une revue de toute l'organisation, indiquez le site)
+   - **Ouvrir un cycle PDCA** : ouvre un cycle PDCA dans M11 (pour une revue de toute l'organisation, choisissez un site ou **Organisation (tous les sites)**, réservé aux utilisateurs ayant accès à toute l'organisation)
    L'état de la tâche et la phase du PDCA liés sont visibles sur la décision
 5. Cliquez sur **Marquer comme terminée** : le système vérifie les points obligatoires et propose la **date de la prochaine revue** selon la politique de l'échéancier. Les réunions planifiées et la prochaine revue apparaissent dans l'**Échéancier**
 

@@ -151,7 +151,6 @@ function DecisionForm({
 
   const needsDue = (form.create_task || form.decision_type === "obiettivo") && !form.due_date;
   const isObjective = form.decision_type === "obiettivo";
-  const needsSite = form.create_pdca && !review.plant && !form.pdca_plant;
   const needsObjective = isObjective && (!form.obj_code.trim() || form.obj_target === "");
 
   return (
@@ -189,7 +188,8 @@ function DecisionForm({
         </label>
         {form.create_pdca && !review.plant && (
           <select value={form.pdca_plant} onChange={e => set("pdca_plant", e.target.value)} className="border rounded px-2 py-1 text-sm">
-            <option value="">{t("management_review.actions.pdca_site_ph")}</option>
+            {/* Nessun sito = PDCA di organizzazione (solo con accesso a tutta l'organizzazione) */}
+            <option value="">{t("management_review.actions.pdca_site_org")}</option>
             {plants.map(p => <option key={p.id} value={p.id}>{p.code} — {p.name}</option>)}
           </select>
         )}
@@ -224,7 +224,7 @@ function DecisionForm({
       <div className="flex gap-2">
         <button
           onClick={() => create.mutate()}
-          disabled={create.isPending || !form.description.trim() || needsDue || needsSite || needsObjective}
+          disabled={create.isPending || !form.description.trim() || needsDue || needsObjective}
           className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50"
         >
           {create.isPending ? t("management_review.actions.saving") : t("management_review.actions.add_btn")}

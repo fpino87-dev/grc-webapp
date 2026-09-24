@@ -615,6 +615,15 @@ Se nella fase CHECK l'esito e' **ko** (la soluzione non ha funzionato):
 
 Non c'e' un limite al numero di iterazioni DO-CHECK, ma il sistema segnala cicli con piu' di 3 iterazioni al Compliance Officer.
 
+### Ciclo di sito o di organizzazione
+
+Alla creazione il campo **Sito** indica a chi si applica il ciclo:
+
+- un **sito**: il ciclo riguarda solo quello stabilimento e lo gestiscono gli utenti di quel sito;
+- **Organizzazione — tutti i siti**: il ciclo vale per l'intera organizzazione (es. una procedura comune o una campagna di awareness per tutti). L'ambito diventa automaticamente **Organizzazione**.
+
+I cicli di organizzazione sono visibili a tutti i siti, ma li aprono e li portano avanti (avanzamento di fase, modifica, archiviazione, cancellazione) solo gli utenti con accesso a tutta l'organizzazione; per gli altri compaiono in **sola lettura**, con il dossier consultabile. Filtrando l'elenco per un sito compaiono anche i cicli di organizzazione, che valgono anche lì; l'opzione **Solo organizzazione** mostra soltanto questi. Nella fase DO di un ciclo di organizzazione si può allegare un'evidenza di qualunque sito. Alla chiusura anche la lesson learned generata è di organizzazione e, se il CHECK ha esito ko, il nuovo ciclo resta di organizzazione.
+
 ### PDCA creati automaticamente da incidenti, finding, rischi critici
 
 I cicli PDCA vengono creati manualmente o automaticamente da:
@@ -657,6 +666,8 @@ Quando un ciclo PDCA viene chiuso con esito positivo, il sistema crea automatica
 - La standardizzazione documentata nella fase ACT
 
 La lesson learned automatica parte in stato "Bozza" e viene assegnata come task all'owner del ciclo PDCA per la revisione prima dell'approvazione.
+
+Se il ciclo PDCA è di organizzazione, anche la lesson learned è di organizzazione: la vedono tutti i siti, ma la gestiscono solo gli utenti con accesso a tutta l'organizzazione.
 
 ### Ricerca nella knowledge base
 
@@ -723,7 +734,7 @@ Lo snapshot si può rigenerare fino all'approvazione; dopo resta fisso perché �
 3. Con **Aggiungi decisione** registra gli output del riesame (§9.3.3): descrizione, **tipo** (miglioramento, modifica al SGSI, risorse, altro), owner e scadenza
 4. Se la decisione va eseguita, spunta:
    - **Crea task**: apre un task in M08 **assegnato al ruolo** scelto, con la scadenza della decisione (priorità alta per le modifiche al SGSI)
-   - **Apri ciclo PDCA**: apre un ciclo PDCA in M11 (per un riesame di organizzazione indica il sito)
+   - **Apri ciclo PDCA**: apre un ciclo PDCA in M11 (per un riesame di organizzazione scegli un sito oppure **Organizzazione (tutti i siti)**, riservato a chi ha accesso a tutta l'organizzazione)
    Lo stato del task e la fase del PDCA collegati si vedono sulla decisione
 5. Clicca **Segna come completata**: il sistema verifica i punti obbligatori e propone la **data del prossimo riesame** secondo la policy dello scadenzario. Riunioni pianificate e prossimo riesame compaiono nello **Scadenzario**
 

@@ -3252,7 +3252,8 @@
       "plant_label": "Filter by site:",
       "all_plants": "All sites",
       "from_topbar": "Active site: {{plant}}",
-      "clear": "Clear filter"
+      "clear": "Clear filter",
+      "only_org": "Organization only"
     },
     "table": {
       "title": "Title / Finding",
@@ -3324,7 +3325,10 @@
       "finding_hint": "Number/code of the finding or opportunity in the audit report",
       "cancel": "Cancel",
       "create_btn": "Create cycle",
-      "save_btn": "Save changes"
+      "save_btn": "Save changes",
+      "plant_org_option": "Organization — all sites",
+      "plant_org_hint": "Choose «Organization» for a cycle that applies to all sites.",
+      "plant_org_denied": "Organization-wide cycles (all sites) can only be opened by users with access to the whole organization."
     },
     "archive": {
       "tooltip": "Archive without implementation",
@@ -3410,7 +3414,9 @@
       "confirm_btn": "Confirm deletion",
       "in_progress": "Deleting…",
       "error_generic": "Error while deleting the cycle."
-    }
+    },
+    "read_only_org": "Read only",
+    "read_only_org_title": "Organization-wide cycle: only users with access to the whole organization can manage it."
   },
   "bcp": {
     "test_frequency_label": "Test frequency",
@@ -4908,12 +4914,12 @@
       "create_pdca": "Open PDCA cycle",
       "task_role_hint": "The task is assigned to the selected role, with the decision's due date.",
       "task_needs_due": "Set the due date to create the task.",
-      "pdca_site_ph": "— PDCA site —",
       "linked_task": "Task:",
       "linked_pdca": "PDCA:",
       "save_error": "Error while saving",
       "linked_objective": "Objective:",
-      "objective_hint": "The objective starts as a manually measured draft: after the meeting you complete the plan (resources, evaluation method) and activate it, linking it to a KPI if appropriate."
+      "objective_hint": "The objective starts as a manually measured draft: after the meeting you complete the plan (resources, evaluation method) and activate it, linking it to a KPI if appropriate.",
+      "pdca_site_org": "Organization (all sites)"
     },
     "detail": {
       "meeting_date": "Meeting date:",

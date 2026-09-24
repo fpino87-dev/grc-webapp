@@ -110,7 +110,7 @@ export function LessonsPage() {
                   <td className="px-4 py-3 font-medium text-gray-800">{lesson.title}</td>
                   <td className="px-4 py-3 text-gray-600">{lesson.category || "—"}</td>
                   <td className="px-4 py-3"><StatusBadge status={lesson.status} /></td>
-                  <td className="px-4 py-3 text-gray-600">{lesson.plant}</td>
+                  <td className="px-4 py-3 text-gray-600">{lesson.plant ?? i18n.t("pdca.scope.org")}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{new Date(lesson.created_at).toLocaleDateString(i18n.language || "it")}</td>
                   <td className="px-4 py-3">
                     {lesson.status === "bozza" && (

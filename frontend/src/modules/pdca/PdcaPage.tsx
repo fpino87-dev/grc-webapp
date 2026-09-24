@@ -20,6 +20,9 @@ const AUDIT_SUBTYPE_CODES = ["interno", "seconda_parte", "terza_parte"];
 
 const triggerLabel = (t: TFn, code: string) =>
   TRIGGER_CODES.includes(code) ? t(`pdca.trigger.${code}`) : code;
+// Valore dei select "Sito" per il ciclo di organizzazione (plant = null).
+const ORG_VALUE = "__org__";
+
 const scopeLabel = (t: TFn, code: string) =>
   SCOPE_CODES.includes(code) ? t(`pdca.scope.${code}`) : code;
 const auditSubtypeLabel = (t: TFn, code: string) =>
@@ -344,6 +347,10 @@ function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string
     ...(selectedPlant?.id ? { plant: selectedPlant.id } : {}),
   });
   const [error, setError] = useState("");
+  // Il ciclo di organizzazione (senza sito) è riservato a chi ha accesso a
+  // tutta l'organizzazione; il backend ricontrolla comunque.
+  const { data: caps } = useQuery({ queryKey: ["pdca-capabilities"], queryFn: pdcaApi.capabilities });
+  const isOrg = form.plant === null;
 
   const mutation = useMutation({
     mutationFn: pdcaApi.create,
@@ -354,7 +361,16 @@ function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value } = e.target;
     setForm(prev => {
-      const next = { ...prev, [name]: value };
+      const next: Partial<PdcaCycle> = { ...prev, [name]: value };
+      if (name === "plant") {
+        if (value === ORG_VALUE) {
+          next.plant = null;
+          next.scope_type = "org";
+        } else {
+          if (value === "") delete next.plant;
+          if (prev.plant === null) next.scope_type = "plant";
+        }
+      }
       if (name === "trigger_type" && value !== "audit") {
         delete next.audit_subtype;
         delete next.riferimento_finding;
@@ -372,10 +388,14 @@ function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string
         <div className="space-y-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.plant_label")}</label>
-            <select name="plant" value={form.plant ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+            <select name="plant" value={isOrg ? ORG_VALUE : form.plant ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
               <option value="">{t("common.select")}</option>
+              <option value={ORG_VALUE} disabled={!caps?.can_manage_org}>{t("pdca.form.plant_org_option")}</option>
               {plants.map(p => <option key={p.id} value={p.id}>{p.code} — {p.name}</option>)}
             </select>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {caps?.can_manage_org ? t("pdca.form.plant_org_hint") : t("pdca.form.plant_org_denied")}
+            </p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.title_label")}</label>
@@ -404,10 +424,14 @@ function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.scope_label")}</label>
-              <select name="scope_type" defaultValue="plant" onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-                <option value="plant">{t("pdca.scope.plant")}</option>
-                <option value="org">{t("pdca.scope.org")}</option>
-                <option value="process">{t("pdca.scope.process")}</option>
+              {/* Ambito "Organizzazione" = ciclo senza sito: si sceglie dal campo Sito. */}
+              <select name="scope_type" value={form.scope_type} disabled={isOrg} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm disabled:bg-gray-50">
+                {isOrg
+                  ? <option value="org">{t("pdca.scope.org")}</option>
+                  : <>
+                      <option value="plant">{t("pdca.scope.plant")}</option>
+                      <option value="process">{t("pdca.scope.process")}</option>
+                    </>}
               </select>
             </div>
           </div>
@@ -442,7 +466,7 @@ function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("pdca.form.cancel")}</button>
           <button
             onClick={() => mutation.mutate(form)}
-            disabled={mutation.isPending || !form.plant || !form.title}
+            disabled={mutation.isPending || form.plant === undefined || !form.title}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
             {mutation.isPending ? t("common.saving") : t("pdca.form.create_btn")}
@@ -727,8 +751,10 @@ function AdvanceButtons({
     queryKey: ["pdca-evidences", cycle.plant],
     enabled: open === "do",
     queryFn: async () => {
+      // Ciclo di sito: evidenze del sito + di organizzazione. Ciclo di
+      // organizzazione: tutte le evidenze visibili (di qualunque sito).
       const res = await apiClient.get("/documents/evidences/", {
-        params: { plant: cycle.plant, page_size: 1000 },
+        params: { ...(cycle.plant ? { plant: cycle.plant } : {}), page_size: 1000 },
       });
       return res.data.results || res.data;
     },
@@ -1036,7 +1062,9 @@ export function PdcaPage() {
 
   const params: Record<string, string> = {};
   if (filterTrigger) params.trigger_type = filterTrigger;
-  if (effectivePlant) params.plant = effectivePlant;
+  // Filtro per sito: cicli del sito + cicli di organizzazione (valgono anche lì).
+  if (effectivePlant === ORG_VALUE) params.org = "true";
+  else if (effectivePlant) params.site = effectivePlant;
 
   const { data, isLoading } = useQuery({
     queryKey: ["pdca", filterTrigger, effectivePlant],
@@ -1086,6 +1114,7 @@ export function PdcaPage() {
               ? t("pdca.filters.from_topbar", { plant: selectedPlant.code || selectedPlant.name })
               : t("pdca.filters.all_plants")}
           </option>
+          <option value={ORG_VALUE}>{t("pdca.filters.only_org")}</option>
           {(plants ?? []).map(p => (
             <option key={p.id} value={p.id}>{p.code} — {p.name}</option>
           ))}
@@ -1136,9 +1165,17 @@ export function PdcaPage() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-gray-600 text-xs">
-                    {c.plant_code ? <span className="font-mono">{c.plant_code}</span> : null}
-                    {c.plant_name ? <div className="text-[11px] text-gray-400">{c.plant_name}</div> : null}
-                    {!c.plant_code && !c.plant_name ? "—" : null}
+                    {c.plant === null ? (
+                      <span className="text-[11px] font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded px-1.5 py-0.5">
+                        {t("pdca.scope.org")}
+                      </span>
+                    ) : (
+                      <>
+                        {c.plant_code ? <span className="font-mono">{c.plant_code}</span> : null}
+                        {c.plant_name ? <div className="text-[11px] text-gray-400">{c.plant_name}</div> : null}
+                        {!c.plant_code && !c.plant_name ? "—" : null}
+                      </>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-gray-600 text-xs">{scopeLabel(t, c.scope_type)}</td>
                   <td className="px-4 py-3">
@@ -1146,11 +1183,22 @@ export function PdcaPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-row flex-wrap gap-1 items-center">
-                      <AdvanceButtons cycle={c as any} onUpdated={() => {}} />
-                      <CycleDossierButton cycle={c} />
-                      <EditCycleButton cycle={c} />
-                      <ArchiviaCycleButton cycle={c} />
-                      <DeleteCycleButton cycle={c} />
+                      {c.can_manage === false ? (
+                        <>
+                          <CycleDossierButton cycle={c} />
+                          <span className="text-[11px] text-gray-400" title={t("pdca.read_only_org_title")}>
+                            {t("pdca.read_only_org")}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <AdvanceButtons cycle={c as any} onUpdated={() => {}} />
+                          <CycleDossierButton cycle={c} />
+                          <EditCycleButton cycle={c} />
+                          <ArchiviaCycleButton cycle={c} />
+                          <DeleteCycleButton cycle={c} />
+                        </>
+                      )}
                     </div>
                   </td>
                   <td className="px-4 py-3 text-gray-500 text-xs">

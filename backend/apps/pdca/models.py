@@ -7,7 +7,9 @@ User = get_user_model()
 
 
 class PdcaCycle(BaseModel):
-    plant = models.ForeignKey("plants.Plant", on_delete=models.CASCADE)
+    # Senza sito = ciclo di organizzazione (vale per tutti i siti): lo creano e
+    # lo gestiscono solo gli utenti con scope org (vedi PdcaPermission).
+    plant = models.ForeignKey("plants.Plant", on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=255)
     trigger_type = models.CharField(max_length=50)
     trigger_source_id = models.UUIDField(null=True, blank=True)

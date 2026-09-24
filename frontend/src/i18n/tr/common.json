@@ -3252,7 +3252,8 @@
       "plant_label": "Siteye göre filtrele:",
       "all_plants": "Tüm siteler",
       "from_topbar": "Etkin site: {{plant}}",
-      "clear": "Filtreyi temizle"
+      "clear": "Filtreyi temizle",
+      "only_org": "Yalnızca organizasyon"
     },
     "table": {
       "title": "Başlık / Bulgu",
@@ -3324,7 +3325,10 @@
       "finding_hint": "Denetim raporundaki bulgu veya fırsatın numarası/kodu",
       "cancel": "İptal",
       "create_btn": "Döngü oluştur",
-      "save_btn": "Değişiklikleri kaydet"
+      "save_btn": "Değişiklikleri kaydet",
+      "plant_org_option": "Organizasyon — tüm tesisler",
+      "plant_org_hint": "Tüm tesisler için geçerli bir döngü için «Organizasyon» seçin.",
+      "plant_org_denied": "Organizasyon döngülerini (tüm tesisler) yalnızca tüm organizasyona erişimi olan kullanıcılar açabilir."
     },
     "archive": {
       "tooltip": "Uygulamadan arşivle",
@@ -3410,7 +3414,9 @@
       "confirm_btn": "Silmeyi onayla",
       "in_progress": "Siliniyor…",
       "error_generic": "Döngü silinirken hata oluştu."
-    }
+    },
+    "read_only_org": "Salt okunur",
+    "read_only_org_title": "Organizasyon döngüsü: yalnızca tüm organizasyona erişimi olan kullanıcılar yönetebilir."
   },
   "bcp": {
     "test_frequency_label": "Test sıklığı",
@@ -4908,12 +4914,12 @@
       "create_pdca": "PDCA döngüsü aç",
       "task_role_hint": "Görev, kararın son tarihiyle seçilen role atanır.",
       "task_needs_due": "Görev oluşturmak için son tarihi girin.",
-      "pdca_site_ph": "— PDCA tesisi —",
       "linked_task": "Görev:",
       "linked_pdca": "PDCA:",
       "save_error": "Kaydetme sırasında hata",
       "linked_objective": "Hedef:",
-      "objective_hint": "Hedef, elle ölçülen bir taslak olarak doğar: toplantıdan sonra planı (kaynaklar, değerlendirme yöntemi) tamamlayıp etkinleştirirsiniz, uygunsa bir KPI'a bağlayarak."
+      "objective_hint": "Hedef, elle ölçülen bir taslak olarak doğar: toplantıdan sonra planı (kaynaklar, değerlendirme yöntemi) tamamlayıp etkinleştirirsiniz, uygunsa bir KPI'a bağlayarak.",
+      "pdca_site_org": "Organizasyon (tüm tesisler)"
     },
     "detail": {
       "meeting_date": "Toplantı tarihi:",

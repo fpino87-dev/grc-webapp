@@ -22,9 +22,12 @@ export interface PdcaPhase {
 
 export interface PdcaCycle {
   id: string;
-  plant: string;
+  // null = ciclo di organizzazione (vale per tutti i siti)
+  plant: string | null;
   plant_name?: string | null;
   plant_code?: string | null;
+  // false per i cicli di organizzazione visti da chi non ha scope org
+  can_manage?: boolean;
   title: string;
   descrizione?: string;
   trigger_type: string;
@@ -53,4 +56,6 @@ export const pdcaApi = {
     apiClient.delete(`/pdca/cycles/${id}/`, { data: { reason } }),
   archivia: (id: string, motivo: string) =>
     apiClient.post(`/pdca/cycles/${id}/archivia/`, { motivo }),
+  capabilities: () =>
+    apiClient.get<{ can_manage_org: boolean }>("/pdca/cycles/capabilities/").then((r) => r.data),
 };

@@ -19,7 +19,11 @@ class LessonLearned(BaseModel):
     description = models.TextField()
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default="altro")
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="bozza")
-    plant = models.ForeignKey("plants.Plant", on_delete=models.PROTECT, related_name="lessons")
+    # Senza sito = lesson di organizzazione (es. chiusura di un PDCA di
+    # organizzazione): la gestiscono solo gli utenti con scope org.
+    plant = models.ForeignKey(
+        "plants.Plant", on_delete=models.PROTECT, null=True, blank=True, related_name="lessons",
+    )
     incident = models.ForeignKey(
         "incidents.Incident",
         on_delete=models.SET_NULL,

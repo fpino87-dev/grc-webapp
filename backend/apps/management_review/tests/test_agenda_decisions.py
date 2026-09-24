@@ -116,11 +116,16 @@ def test_decision_task_requires_role_and_due_date(client, review):
     assert not ReviewAction.objects.filter(review_id=review["id"]).exists()
 
 
-def test_org_wide_pdca_needs_site(client, plant):
+def test_org_review_pdca_is_org_wide_or_on_chosen_site(client, plant):
     resp = client.post(URL_REVIEWS, {"title": "Riesame org", "review_date": "2026-03-10"}, format="json")
     rid = resp.data["id"]
     base = {"review": rid, "description": "Programma awareness", "create_pdca": True}
-    assert client.post(URL_ACTIONS, base, format="json").status_code == 400
+    # Senza sito → PDCA di organizzazione
+    resp = client.post(URL_ACTIONS, base, format="json")
+    assert resp.status_code == 201, resp.data
+    cycle = ReviewAction.objects.get(pk=resp.data["id"]).pdca_cycle
+    assert cycle.plant_id is None
+    # Con sito indicato → PDCA di quel sito
     resp = client.post(URL_ACTIONS, {**base, "pdca_plant": str(plant.id)}, format="json")
     assert resp.status_code == 201, resp.data
     assert ReviewAction.objects.get(pk=resp.data["id"]).pdca_cycle.plant_id == plant.id

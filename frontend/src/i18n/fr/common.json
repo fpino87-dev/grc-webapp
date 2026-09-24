@@ -3252,7 +3252,8 @@
       "plant_label": "Filtrer par site :",
       "all_plants": "Tous les sites",
       "from_topbar": "Site actif : {{plant}}",
-      "clear": "Effacer le filtre"
+      "clear": "Effacer le filtre",
+      "only_org": "Organisation uniquement"
     },
     "table": {
       "title": "Titre / Constat",
@@ -3324,7 +3325,10 @@
       "finding_hint": "Numéro/code du constat ou de l'opportunité dans le rapport d'audit",
       "cancel": "Annuler",
       "create_btn": "Créer le cycle",
-      "save_btn": "Enregistrer les modifications"
+      "save_btn": "Enregistrer les modifications",
+      "plant_org_option": "Organisation — tous les sites",
+      "plant_org_hint": "Choisissez «Organisation» pour un cycle qui s'applique à tous les sites.",
+      "plant_org_denied": "Les cycles d'organisation (tous les sites) ne peuvent être ouverts que par les utilisateurs ayant accès à toute l'organisation."
     },
     "archive": {
       "tooltip": "Archiver sans mise en œuvre",
@@ -3410,7 +3414,9 @@
       "confirm_btn": "Confirmer la suppression",
       "in_progress": "Suppression…",
       "error_generic": "Erreur lors de la suppression du cycle."
-    }
+    },
+    "read_only_org": "Lecture seule",
+    "read_only_org_title": "Cycle d'organisation : seuls les utilisateurs ayant accès à toute l'organisation peuvent le gérer."
   },
   "bcp": {
     "test_frequency_label": "Fréquence de test",
@@ -4908,12 +4914,12 @@
       "create_pdca": "Ouvrir un cycle PDCA",
       "task_role_hint": "La tâche est assignée au rôle choisi, avec l'échéance de la décision.",
       "task_needs_due": "Indiquez l'échéance pour créer la tâche.",
-      "pdca_site_ph": "— Site du PDCA —",
       "linked_task": "Tâche :",
       "linked_pdca": "PDCA :",
       "save_error": "Erreur lors de l'enregistrement",
       "linked_objective": "Objectif :",
-      "objective_hint": "L'objectif naît en brouillon, à mesure manuelle : après la réunion, on complète le plan (ressources, méthode d'évaluation) et on l'active, en le liant éventuellement à un KPI."
+      "objective_hint": "L'objectif naît en brouillon, à mesure manuelle : après la réunion, on complète le plan (ressources, méthode d'évaluation) et on l'active, en le liant éventuellement à un KPI.",
+      "pdca_site_org": "Organisation (tous les sites)"
     },
     "detail": {
       "meeting_date": "Date de réunion :",

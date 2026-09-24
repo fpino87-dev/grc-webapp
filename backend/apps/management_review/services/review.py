@@ -375,9 +375,17 @@ def create_review_action(serializer, user, *, create_task=False, task_role="", c
         fields.append("security_objective")
 
     if create_pdca:
+        # Riesame di organizzazione senza sito indicato → PDCA di organizzazione,
+        # riservato a chi ha accesso a tutta l'organizzazione.
         plant = review.plant or pdca_plant
         if plant is None:
-            raise ValidationError(_("Per un riesame di organizzazione indicare il sito del ciclo PDCA."))
+            from core.scoping import user_has_org_scope
+
+            if not user_has_org_scope(user):
+                raise ValidationError(_(
+                    "Solo chi ha accesso a tutta l'organizzazione può aprire un PDCA di "
+                    "organizzazione: indicare il sito del ciclo PDCA."
+                ))
         action.pdca_cycle = create_cycle(
             plant=plant, title=title, trigger_type="management_review", trigger_source_id=review.pk,
         )

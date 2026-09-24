@@ -615,6 +615,15 @@ CHECK aşamasında sonuç **başarısız** ise (çözüm işe yaramadı):
 
 DO-CHECK iterasyonlarının sayısında sınır yoktur, ancak sistem 3'ten fazla iterasyona sahip döngüleri Uyum Yetkilisi'ne bildirir.
 
+### Tesis veya organizasyon döngüsü
+
+Oluştururken **Tesis** alanı döngünün neye uygulandığını belirtir:
+
+- bir **tesis**: döngü yalnızca o tesisle ilgilidir ve o tesisin kullanıcıları tarafından yönetilir;
+- **Organizasyon — tüm tesisler**: döngü tüm organizasyon için geçerlidir (ör. ortak bir prosedür veya herkes için bir farkındalık kampanyası). Kapsam otomatik olarak **Organizasyon** olur.
+
+Organizasyon döngüleri tüm tesislerde görünür, ancak bunları yalnızca tüm organizasyona erişimi olan kullanıcılar açabilir ve ilerletebilir (aşama ilerletme, düzenleme, arşivleme, silme); diğerleri için **salt okunur** görünürler ve dosya incelenebilir. Listeyi bir tesise göre filtrelemek, orada da geçerli olan organizasyon döngülerini de gösterir; **Yalnızca organizasyon** seçeneği yalnızca bunları gösterir. Bir organizasyon döngüsünün DO aşamasında herhangi bir tesisten kanıt eklenebilir. Kapanışta oluşturulan alınan ders de organizasyon düzeyindedir ve CHECK sonucu başarısız ise yeni döngü organizasyon döngüsü olarak kalır.
+
 ### Olaylardan, bulgulardan, kritik risklerden otomatik oluşturulan PDCA döngüleri
 
 PDCA döngüleri manuel olarak veya otomatik olarak şu kaynaklardan oluşturulur:
@@ -657,6 +666,8 @@ Bir PDCA döngüsü olumlu sonuçla kapatıldığında, sistem otomatik olarak �
 - ACT aşamasında belgelenen standartlaştırma
 
 Otomatik alınan ders "Taslak" durumunda başlar ve onaydan önce gözden geçirilmek üzere PDCA döngüsünün sahibine görev olarak atanır.
+
+PDCA döngüsü organizasyon düzeyindeyse alınan ders de organizasyon düzeyindedir: tüm tesisler görebilir, ancak yalnızca tüm organizasyona erişimi olan kullanıcılar yönetebilir.
 
 ### Bilgi bankasında arama
 
@@ -723,7 +734,7 @@ Anlık görüntü onaya kadar yeniden oluşturulabilir; sonrasında tutanağın 
 3. **Karar ekle** ile gözden geçirmenin çıktılarını (§9.3.3) kaydedin: açıklama, **tür** (iyileştirme, BGYS değişikliği, kaynaklar, diğer), sorumlu ve son tarih
 4. Kararın uygulanması gerekiyorsa şunları işaretleyin:
    - **Görev oluştur**: M08'de, kararın son tarihiyle **seçilen role atanmış** bir görev açar (BGYS değişiklikleri için yüksek öncelik)
-   - **PDCA döngüsü aç**: M11'de bir PDCA döngüsü açar (tüm kuruluşun gözden geçirmesi için tesisi belirtin)
+   - **PDCA döngüsü aç**: M11'de bir PDCA döngüsü açar (tüm kuruluşun gözden geçirmesi için bir tesis veya yalnızca tüm organizasyona erişimi olanlara açık **Organizasyon (tüm tesisler)** seçeneğini seçin)
    Bağlı görevin durumu ve PDCA'nın aşaması karar üzerinde görünür
 5. **Tamamlandı olarak işaretle**'ye tıklayın: sistem zorunlu maddeleri kontrol eder ve takvim politikasına göre **sonraki gözden geçirme tarihini** önerir. Planlanan toplantılar ve sonraki gözden geçirme **Takvim**'de görünür
 

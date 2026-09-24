@@ -615,6 +615,15 @@ If in the CHECK phase the outcome is **ko** (the solution did not work):
 
 There is no limit to the number of DO-CHECK iterations, but the system signals cycles with more than 3 iterations to the Compliance Officer.
 
+### Site or organization-wide cycle
+
+When creating a cycle, the **Site** field states what the cycle applies to:
+
+- a **site**: the cycle concerns that plant only and is managed by that site's users;
+- **Organization — all sites**: the cycle applies to the whole organization (e.g. a common procedure or an awareness campaign for everyone). The scope automatically becomes **Organization**.
+
+Organization-wide cycles are visible to all sites, but only users with access to the whole organization can open and drive them (phase advancement, editing, archiving, deletion); for the others they appear **read only**, with the dossier available. Filtering the list by a site also shows organization-wide cycles, which apply there too; the **Organization only** option shows just those. In the DO phase of an organization-wide cycle you can attach evidence from any site. On closure the generated lesson learned is organization-wide too and, if the CHECK outcome is ko, the new cycle stays organization-wide.
+
 ### PDCAs automatically created from incidents, findings, critical risks
 
 PDCA cycles are created manually or automatically from:
@@ -657,6 +666,8 @@ When a PDCA cycle is closed with a positive outcome, the system automatically cr
 - The standardisation documented in the ACT phase
 
 The automatic lesson learned starts in "Draft" status and is assigned as a task to the PDCA cycle owner for review before approval.
+
+If the PDCA cycle is organization-wide, the lesson learned is organization-wide too: all sites can see it, but only users with access to the whole organization can manage it.
 
 ### Searching the knowledge base
 
@@ -723,7 +734,7 @@ The snapshot can be regenerated until approval; afterwards it is fixed because i
 3. With **Add decision** record the review outputs (§9.3.3): description, **type** (improvement, change to the ISMS, resources, other), owner and due date
 4. If the decision needs to be carried out, tick:
    - **Create task**: opens a task in M08 **assigned to the selected role**, with the decision's due date (high priority for changes to the ISMS)
-   - **Open PDCA cycle**: opens a PDCA cycle in M11 (for an organisation-wide review select the site)
+   - **Open PDCA cycle**: opens a PDCA cycle in M11 (for an organisation-wide review choose a site or **Organization (all sites)**, reserved to users with access to the whole organization)
    The status of the linked task and the phase of the linked PDCA are shown on the decision
 5. Click **Mark as completed**: the system checks the mandatory items and proposes the **next review date** according to the schedule policy. Planned meetings and the next review appear in the **Schedule**
 

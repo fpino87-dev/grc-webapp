@@ -116,6 +116,27 @@ def require_plant_access(user, plant=None, *, aggregate_requires_org=True) -> No
         ))
 
 
+def user_has_org_scope(user) -> bool:
+    """True se l'utente ha accesso a tutta l'organizzazione (scope org o
+    superuser): è il perimetro richiesto per gestire gli oggetti di
+    organizzazione, cioè senza sito (`plant=None`)."""
+    return get_user_plant_ids(user) is None
+
+
+def require_org_scope_for_org_wide(user, plant) -> None:
+    """Guard sulle SCRITTURE di oggetti di organizzazione (plant assente):
+    chi ha accesso a un solo sito, o ad alcuni, non decide per tutti."""
+    if plant is not None or user_has_org_scope(user):
+        return
+    from django.utils.translation import gettext as _
+    from rest_framework.exceptions import PermissionDenied
+
+    raise PermissionDenied(_(
+        "Solo chi ha accesso a tutta l'organizzazione può gestire gli elementi "
+        "di organizzazione (senza sito)."
+    ))
+
+
 def require_payload_plant_access(user, data, model, plant_field: str = "plant") -> None:
     """Guard sulle SCRITTURE: blocca create/update il cui body indica un plant
     (o un oggetto correlato appartenente a un plant) fuori dal perimetro

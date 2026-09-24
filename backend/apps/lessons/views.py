@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 
 from core.audit import log_action
-from core.scoping import PlantScopedQuerysetMixin
+from core.scoping import PlantScopedQuerysetMixin, require_org_scope_for_org_wide
 from core.viewsets import SoftDeleteAuditMixin
 from .models import LessonLearned
 from .permissions import LessonLearnedPermission
@@ -20,9 +20,12 @@ class LessonLearnedViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, views
     filterset_fields = ["plant", "status", "category"]
     search_fields = ["title", "description"]
     plant_field = "plant"
+    # Le lesson di organizzazione (plant=None) sono visibili a tutti i siti.
+    allow_null_plant = True
     audit_action = "lessons.lesson_learned"
 
     def perform_create(self, serializer):
+        require_org_scope_for_org_wide(self.request.user, serializer.validated_data.get("plant"))
         instance = serializer.save(
             created_by=self.request.user,
             identified_by=serializer.validated_data.get("identified_by") or self.request.user,
@@ -34,6 +37,11 @@ class LessonLearnedViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, views
             entity=instance,
             payload={"id": str(instance.id), "title": instance.title},
         )
+
+    def perform_update(self, serializer):
+        if "plant" in serializer.validated_data:
+            require_org_scope_for_org_wide(self.request.user, serializer.validated_data["plant"])
+        serializer.save()
 
     @action(detail=True, methods=["post"])
     def validate(self, request, pk=None):

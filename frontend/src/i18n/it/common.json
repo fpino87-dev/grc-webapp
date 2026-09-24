@@ -3252,7 +3252,8 @@
       "plant_label": "Filtra per sito:",
       "all_plants": "Tutti i siti",
       "from_topbar": "Sito attivo: {{plant}}",
-      "clear": "Rimuovi filtro"
+      "clear": "Rimuovi filtro",
+      "only_org": "Solo organizzazione"
     },
     "table": {
       "title": "Titolo / Finding",
@@ -3324,7 +3325,10 @@
       "finding_hint": "Numero/codice del rilievo o opportunità nell'audit report",
       "cancel": "Annulla",
       "create_btn": "Crea ciclo",
-      "save_btn": "Salva modifiche"
+      "save_btn": "Salva modifiche",
+      "plant_org_option": "Organizzazione — tutti i siti",
+      "plant_org_hint": "Scegli «Organizzazione» per un ciclo che vale per tutti i siti.",
+      "plant_org_denied": "I cicli di organizzazione (tutti i siti) li apre solo chi ha accesso a tutta l'organizzazione."
     },
     "archive": {
       "tooltip": "Archivia senza implementazione",
@@ -3410,7 +3414,9 @@
       "confirm_btn": "Conferma cancellazione",
       "in_progress": "Cancellazione…",
       "error_generic": "Errore durante la cancellazione del ciclo."
-    }
+    },
+    "read_only_org": "Sola lettura",
+    "read_only_org_title": "Ciclo di organizzazione: lo gestisce solo chi ha accesso a tutta l'organizzazione."
   },
   "bcp": {
     "test_frequency_label": "Frequenza test",
@@ -4908,12 +4914,12 @@
       "create_pdca": "Apri ciclo PDCA",
       "task_role_hint": "Il task viene assegnato al ruolo scelto, con la scadenza della decisione.",
       "task_needs_due": "Per creare il task indica la scadenza.",
-      "pdca_site_ph": "— Sito del PDCA —",
       "linked_task": "Task:",
       "linked_pdca": "PDCA:",
       "save_error": "Errore durante il salvataggio",
       "linked_objective": "Obiettivo:",
-      "objective_hint": "L'obiettivo nasce in bozza a misura manuale: dopo la riunione si completa il piano (risorse, metodo di valutazione) e lo si attiva, eventualmente agganciandolo a un KPI."
+      "objective_hint": "L'obiettivo nasce in bozza a misura manuale: dopo la riunione si completa il piano (risorse, metodo di valutazione) e lo si attiva, eventualmente agganciandolo a un KPI.",
+      "pdca_site_org": "Organizzazione (tutti i siti)"
     },
     "detail": {
       "meeting_date": "Data riunione:",

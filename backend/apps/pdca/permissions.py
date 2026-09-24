@@ -1,6 +1,6 @@
 """RBAC modulo PDCA (M11) — P1-3 SoD write-authorization."""
 from apps.auth_grc.models import GrcRole
-from core.permissions import RoleScopedPermission
+from core.permissions import RoleScopedPermission, org_wide_write_allowed
 
 _AUDIT = {GrcRole.INTERNAL_AUDITOR, GrcRole.EXTERNAL_AUDITOR}
 
@@ -22,3 +22,10 @@ class PdcaPermission(RoleScopedPermission):
         GrcRole.PLANT_MANAGER,
         GrcRole.CONTROL_OWNER,
     }
+
+    def has_object_permission(self, request, view, obj) -> bool:  # type: ignore[override]
+        # Cicli di organizzazione (senza sito): avanzamento, chiusura,
+        # archiviazione, modifica e cancellazione solo con scope org.
+        cycle = getattr(obj, "cycle", obj)
+        return org_wide_write_allowed(request, cycle.plant_id)
+

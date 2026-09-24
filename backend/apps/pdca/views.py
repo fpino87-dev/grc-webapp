@@ -1,4 +1,7 @@
+import uuid
+
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -7,7 +10,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from core.audit import log_action
-from core.scoping import PlantScopedQuerysetMixin
+from core.scoping import PlantScopedQuerysetMixin, require_org_scope_for_org_wide, user_has_org_scope
 
 from . import services
 from .models import PdcaCycle, PdcaPhase
@@ -22,9 +25,42 @@ class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     filterset_fields = ["plant", "fase_corrente", "trigger_type"]
     search_fields = ["title"]
     plant_field = "plant"
+    # I cicli di organizzazione (plant=None) sono visibili a tutti i siti.
+    allow_null_plant = True
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        params = self.request.query_params
+        # ?org=true → solo i cicli di organizzazione.
+        if params.get("org", "").lower() == "true":
+            qs = qs.filter(plant__isnull=True)
+        # ?site=<id> → cicli del sito + cicli di organizzazione (valgono anche
+        # per quel sito). `?plant=<id>` resta il filtro esatto sul sito.
+        site = params.get("site")
+        if site:
+            try:
+                site = uuid.UUID(str(site))
+            except ValueError:
+                return qs.none()
+            qs = qs.filter(Q(plant_id=site) | Q(plant__isnull=True))
+        return qs
+
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        ctx["can_manage_org"] = user_has_org_scope(self.request.user)
+        return ctx
+
+    @action(detail=False, methods=["get"], url_path="capabilities")
+    def capabilities(self, request):
+        """GET /pdca/cycles/capabilities/ — l'utente può aprire e gestire cicli
+        di organizzazione? (il backend ricontrolla ogni scrittura)."""
+        return Response({"can_manage_org": user_has_org_scope(request.user)})
 
     def perform_create(self, serializer):
-        cycle = serializer.save(created_by=self.request.user)
+        plant = serializer.validated_data.get("plant")
+        require_org_scope_for_org_wide(self.request.user, plant)
+        extra = {"scope_type": "org"} if plant is None else {}
+        cycle = serializer.save(created_by=self.request.user, **extra)
         # Create the four PDCA phase records for this cycle
         for fase in services.PHASE_ORDER:
             PdcaPhase.objects.get_or_create(cycle=cycle, phase=fase)
@@ -37,6 +73,10 @@ class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         )
 
     def perform_update(self, serializer):
+        # Un ciclo di sito non diventa di organizzazione senza scope org
+        # (quello già di organizzazione è coperto da PdcaPermission).
+        if "plant" in serializer.validated_data:
+            require_org_scope_for_org_wide(self.request.user, serializer.validated_data["plant"])
         cycle = serializer.save()
         log_action(
             user=self.request.user,
@@ -199,3 +239,4 @@ class PdcaPhaseViewSet(
     permission_classes = [PdcaPermission]
     filterset_fields = ["cycle", "phase"]
     plant_field = "cycle__plant"
+    allow_null_plant = True

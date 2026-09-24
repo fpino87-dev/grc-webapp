@@ -615,6 +615,15 @@ Jeśli w fazie CHECK wynik jest **ko** (rozwiązanie nie zadziałało):
 
 Nie ma limitu liczby iteracji DO-CHECK, ale system sygnalizuje cykle z więcej niż 3 iteracjami do Compliance Officer.
 
+### Cykl zakładu lub organizacji
+
+Przy tworzeniu pole **Zakład** określa, czego dotyczy cykl:
+
+- **zakład**: cykl dotyczy tylko tego zakładu i zarządzają nim jego użytkownicy;
+- **Organizacja — wszystkie zakłady**: cykl obowiązuje w całej organizacji (np. wspólna procedura lub kampania świadomości dla wszystkich). Zakres automatycznie zmienia się na **Organizacja**.
+
+Cykle organizacji są widoczne we wszystkich zakładach, ale otwierać je i prowadzić (przejście faz, edycja, archiwizacja, usunięcie) mogą tylko użytkownicy z dostępem do całej organizacji; pozostali widzą je **tylko do odczytu**, z dostępnym dossier. Filtrowanie listy po zakładzie pokazuje także cykle organizacji, które obowiązują również tam; opcja **Tylko organizacja** pokazuje wyłącznie je. W fazie DO cyklu organizacji można dołączyć dowód z dowolnego zakładu. Po zamknięciu wygenerowana lekcja również dotyczy organizacji, a jeśli wynik CHECK to ko, nowy cykl pozostaje cyklem organizacji.
+
 ### PDCA tworzone automatycznie z incydentów, wyników audytu, ryzyk krytycznych
 
 Cykle PDCA są tworzone ręcznie lub automatycznie przez:
@@ -657,6 +666,8 @@ Gdy cykl PDCA zostaje zamknięty z pozytywnym wynikiem, system automatycznie two
 - Standaryzację udokumentowaną w fazie ACT
 
 Automatyczna lekcja startuje w stanie „Szkic" i jest przypisana jako zadanie właścicielowi cyklu PDCA do przeglądu przed zatwierdzeniem.
+
+Jeśli cykl PDCA dotyczy organizacji, lekcja również dotyczy organizacji: widzą ją wszystkie zakłady, ale zarządzać nią mogą tylko użytkownicy z dostępem do całej organizacji.
 
 ### Wyszukiwanie w bazie wiedzy
 
@@ -723,7 +734,7 @@ Snapshot można generować ponownie do momentu zatwierdzenia; potem pozostaje ni
 3. Przyciskiem **Dodaj decyzję** zarejestruj wyniki przeglądu (§9.3.3): opis, **rodzaj** (doskonalenie, zmiana w ISMS, zasoby, inne), właściciela i termin
 4. Jeśli decyzję trzeba zrealizować, zaznacz:
    - **Utwórz zadanie**: otwiera zadanie w M08 **przypisane do wybranej roli**, z terminem decyzji (wysoki priorytet dla zmian w ISMS)
-   - **Otwórz cykl PDCA**: otwiera cykl PDCA w M11 (dla przeglądu całej organizacji wskaż zakład)
+   - **Otwórz cykl PDCA**: otwiera cykl PDCA w M11 (dla przeglądu całej organizacji wybierz zakład lub **Organizacja (wszystkie zakłady)**, dostępne tylko dla użytkowników z dostępem do całej organizacji)
    Status powiązanego zadania i faza cyklu PDCA są widoczne przy decyzji
 5. Kliknij **Oznacz jako zakończone**: system sprawdza punkty obowiązkowe i proponuje **datę kolejnego przeglądu** zgodnie z polityką harmonogramu. Zaplanowane spotkania i kolejny przegląd pojawiają się w **Harmonogramie**
 

@@ -3252,7 +3252,8 @@
       "plant_label": "Filtruj wg zakładu:",
       "all_plants": "Wszystkie zakłady",
       "from_topbar": "Aktywny zakład: {{plant}}",
-      "clear": "Wyczyść filtr"
+      "clear": "Wyczyść filtr",
+      "only_org": "Tylko organizacja"
     },
     "table": {
       "title": "Tytuł / Ustalenie",
@@ -3324,7 +3325,10 @@
       "finding_hint": "Numer/kod ustalenia lub szansy w raporcie z audytu",
       "cancel": "Anuluj",
       "create_btn": "Utwórz cykl",
-      "save_btn": "Zapisz zmiany"
+      "save_btn": "Zapisz zmiany",
+      "plant_org_option": "Organizacja — wszystkie zakłady",
+      "plant_org_hint": "Wybierz «Organizacja» dla cyklu obowiązującego we wszystkich zakładach.",
+      "plant_org_denied": "Cykle organizacji (wszystkie zakłady) mogą otwierać tylko użytkownicy z dostępem do całej organizacji."
     },
     "archive": {
       "tooltip": "Zarchiwizuj bez wdrożenia",
@@ -3410,7 +3414,9 @@
       "confirm_btn": "Potwierdź usunięcie",
       "in_progress": "Usuwanie…",
       "error_generic": "Błąd podczas usuwania cyklu."
-    }
+    },
+    "read_only_org": "Tylko odczyt",
+    "read_only_org_title": "Cykl organizacji: zarządzać nim mogą tylko użytkownicy z dostępem do całej organizacji."
   },
   "bcp": {
     "test_frequency_label": "Częstotliwość testu",
@@ -4908,12 +4914,12 @@
       "create_pdca": "Otwórz cykl PDCA",
       "task_role_hint": "Zadanie zostanie przypisane do wybranej roli z terminem decyzji.",
       "task_needs_due": "Aby utworzyć zadanie, podaj termin.",
-      "pdca_site_ph": "— Zakład cyklu PDCA —",
       "linked_task": "Zadanie:",
       "linked_pdca": "PDCA:",
       "save_error": "Błąd podczas zapisywania",
       "linked_objective": "Cel:",
-      "objective_hint": "Cel powstaje jako wersja robocza z pomiarem ręcznym: po spotkaniu uzupełnia się plan (zasoby, metoda oceny) i aktywuje, ewentualnie wiążąc go z KPI."
+      "objective_hint": "Cel powstaje jako wersja robocza z pomiarem ręcznym: po spotkaniu uzupełnia się plan (zasoby, metoda oceny) i aktywuje, ewentualnie wiążąc go z KPI.",
+      "pdca_site_org": "Organizacja (wszystkie zakłady)"
     },
     "detail": {
       "meeting_date": "Data spotkania:",

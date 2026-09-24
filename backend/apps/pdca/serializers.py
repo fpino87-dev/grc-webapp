@@ -55,6 +55,9 @@ class PdcaCycleSerializer(serializers.ModelSerializer):
     # (il ViewSet fa gia' select_related("plant")).
     plant_name = serializers.CharField(source="plant.name", read_only=True, default=None)
     plant_code = serializers.CharField(source="plant.code", read_only=True, default=None)
+    # L'utente corrente può scrivere su questo ciclo? False solo per i cicli
+    # di organizzazione visti da chi non ha scope org.
+    can_manage = serializers.SerializerMethodField()
 
     class Meta:
         model = PdcaCycle
@@ -63,6 +66,7 @@ class PdcaCycleSerializer(serializers.ModelSerializer):
             "plant",
             "plant_name",
             "plant_code",
+            "can_manage",
             "title",
             "descrizione",
             "trigger_type",
@@ -83,7 +87,7 @@ class PdcaCycleSerializer(serializers.ModelSerializer):
             "created_by",
         ]
         read_only_fields = [
-            "id", "plant_name", "plant_code",
+            "id", "plant_name", "plant_code", "can_manage",
             "fase_corrente", "reopened_as", "closed_at",
             "created_at", "updated_at", "created_by",
             # Campi governati dalle azioni di workflow (advance/close/archivia):
@@ -91,3 +95,7 @@ class PdcaCycleSerializer(serializers.ModelSerializer):
             # modello leggendo il valore dal body della richiesta, non da qui.
             "act_description", "check_outcome", "motivo_archiviazione",
         ]
+
+    def get_can_manage(self, obj) -> bool:
+        return obj.plant_id is not None or bool(self.context.get("can_manage_org"))
+

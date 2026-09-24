@@ -3,7 +3,7 @@ import { apiClient } from "../client";
 export interface LessonLearned {
   id: string; title: string; description: string;
   category: string; status: "bozza"|"validato"|"propagato";
-  plant: string; corrective_action: string; created_at: string;
+  plant: string | null; corrective_action: string; created_at: string;
 }
 
 export const lessonsApi = {

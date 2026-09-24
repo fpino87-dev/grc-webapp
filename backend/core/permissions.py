@@ -70,3 +70,15 @@ class RoleScopedPermission(BasePermission):
             return user_has_any_role(request.user, self.read_roles)
         write = self.write_roles or self.read_roles
         return user_has_any_role(request.user, write)
+
+
+def org_wide_write_allowed(request, plant_id) -> bool:
+    """Controllo a livello di oggetto per le scritture su record di
+    organizzazione (`plant_id` None): ammesse solo con scope org. Letture
+    sempre ammesse (lo scoping dei queryset decide cosa si vede)."""
+    if request.method in _SAFE_METHODS or plant_id is not None:
+        return True
+    from core.scoping import user_has_org_scope
+
+    return user_has_org_scope(request.user)
+
