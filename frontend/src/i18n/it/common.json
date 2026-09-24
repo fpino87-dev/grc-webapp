@@ -3032,6 +3032,18 @@
       "download_btn": "Scarica",
       "detach_btn": "Scollega",
       "report_hint": "Il file viene archiviato come evidenza di tipo «report», senza scadenza, ed entra nel pacchetto audit."
+    },
+    "group": {
+      "badge": "Multi-sito: {{sites}}",
+      "shared_hint": "Audit multi-sito ({{sites}}): tipo, committente, ente, data e rapporto sono comuni a tutti i siti e si modificano da qualunque sito del gruppo; checklist, prontezza e finding restano per sito.",
+      "scope_id_label": "Scope ID",
+      "scope_id_placeholder": "Es. lo Scope ID TISAX dell'assessment",
+      "multi_toggle": "Audit su più siti (es. un assessment TISAX su alcuni stabilimenti)",
+      "multi_hint": "Scegli almeno due siti: verrà creato un audit per sito, con dati e rapporto comuni.",
+      "select_sites_first": "Scegli almeno due siti",
+      "no_common_framework": "Nessun framework assegnato a tutti i siti scelti",
+      "common_finding_label": "Rilievo comune a tutti i siti dell'audit ({{sites}}): crea un finding per sito",
+      "common_finding_badge": "Comune ai siti"
     }
   },
   "risk": {

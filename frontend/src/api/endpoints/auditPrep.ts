@@ -21,6 +21,25 @@ export interface AuditPrep {
   report_evidence: string | null;
   report_evidence_title: string | null;
   report_evidence_filename: string | null;
+  // Audit multi-sito: gruppo e siti coinvolti (vuoto per un audit di un solo sito)
+  group: string | null;
+  group_title: string | null;
+  group_scope_id: string | null;
+  group_sites: { prep: string; plant: string; plant_code: string }[];
+}
+
+export interface AuditGroup {
+  id: string;
+  title: string;
+  framework: string | null;
+  audit_type: AuditType;
+  requesting_party: string;
+  auditor_name: string;
+  audit_date: string | null;
+  scope_id: string;
+  report_evidence: string | null;
+  report_evidence_title: string | null;
+  preps: { id: string; plant: string; plant_code: string; status: string; readiness_score: number | null }[];
 }
 
 export type AuditType = "interno" | "seconda_parte" | "terza_parte";
@@ -50,6 +69,8 @@ export interface AuditFinding {
   root_cause: string;
   corrective_action: string;
   pdca_cycle: string | null;
+  // Rilievo comune ai siti di un audit multi-sito (stesso valore sui finding gemelli)
+  common_key: string | null;
   closure_notes: string;
   closed_at: string | null;
   closed_by_name: string | null;
@@ -148,6 +169,12 @@ export const auditPrepApi = {
   },
   detachReportFile: (id: string) =>
     apiClient.delete(`/audit-prep/audit-preps/${id}/report-file/`),
+  downloadReportFile: (id: string) =>
+    apiClient.get<Blob>(`/audit-prep/audit-preps/${id}/report-file/`, { responseType: "blob" }).then(r => r.data),
+  createGroup: (data: Partial<AuditGroup> & { plants: string[]; coverage_type?: string }) =>
+    apiClient.post<AuditGroup>("/audit-prep/audit-groups/", data).then(r => r.data),
+  updateGroup: (id: string, data: Partial<AuditGroup>) =>
+    apiClient.patch<AuditGroup>(`/audit-prep/audit-groups/${id}/`, data).then(r => r.data),
   complete: (id: string) =>
     apiClient.post<{ ok: boolean; status: string }>(`/audit-prep/audit-preps/${id}/complete/`).then(r => r.data),
   createEvidence: (data: Partial<EvidenceItem>) =>

@@ -3032,6 +3032,18 @@
       "download_btn": "Télécharger",
       "detach_btn": "Détacher",
       "report_hint": "Le fichier est archivé comme preuve de type «rapport», sans échéance, et il est inclus dans le dossier d'audit."
+    },
+    "group": {
+      "badge": "Multi-sites : {{sites}}",
+      "shared_hint": "Audit multi-sites ({{sites}}) : type, donneur d'ordre, organisme, date et rapport sont communs à tous les sites et se modifient depuis n'importe quel site du groupe ; la checklist, la préparation et les constats restent par site.",
+      "scope_id_label": "Scope ID",
+      "scope_id_placeholder": "Ex. le Scope ID TISAX de l'évaluation",
+      "multi_toggle": "Audit sur plusieurs sites (ex. une évaluation TISAX sur certains établissements)",
+      "multi_hint": "Choisissez au moins deux sites : un audit par site sera créé, avec des données et un rapport communs.",
+      "select_sites_first": "Choisissez au moins deux sites",
+      "no_common_framework": "Aucun référentiel attribué à tous les sites choisis",
+      "common_finding_label": "Constat commun à tous les sites de l'audit ({{sites}}) : crée un constat par site",
+      "common_finding_badge": "Commun aux sites"
     }
   },
   "risk": {

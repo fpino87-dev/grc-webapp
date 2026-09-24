@@ -910,6 +910,23 @@ Rodzaj i zlecającego można później poprawić w zakładce **Informacje o audy
 
 Audyty zewnętrzne pojawiają się z rodzajem i zlecającym na liście, w analizie przeglądu zarządzania (wyniki audytów, §9.3.2 d) i w protokole; **pakiet audytowy** zawiera folder `AUDIT_ESTERNI/` z podsumowaniem i załączonymi raportami.
 
+### Audyty w kilku zakładach
+
+Audyt może obejmować niektóre zakłady, ale nie całą organizację: na przykład ocena TISAX AL2 z jednym Scope ID w dwóch zakładach. W takim przypadku:
+
+1. Kliknij **+ Nowe przygotowanie** i zaznacz **Audyt w kilku zakładach**
+2. Wybierz co najmniej dwa zakłady: dostępne są tylko frameworki przypisane do **wszystkich** wybranych zakładów
+3. Uzupełnij tytuł, rodzaj, zlecającego, jednostkę, datę i ewentualnie **Scope ID**, a następnie utwórz audyt
+
+System tworzy **jeden audyt dla każdego zakładu** (tytuł „… — kod zakładu”), powiązane ze sobą:
+
+- **dla każdego zakładu**: lista kontrolna, gotowość, ustalenia z ich cyklami PDCA, terminami i zadaniami oraz zamknięcie. Użytkownicy jednego zakładu widzą i obsługują tylko swój;
+- **wspólne**: rodzaj, zlecający, jednostka, data, Scope ID i **raport oficjalny**, załączany tylko raz i dostępny do pobrania z każdego zakładu. Zmienia się je w zakładce **Informacje o audycie** dowolnego zakładu i obowiązują dla wszystkich; wymaga to jednak dostępu do wszystkich zakładów audytu.
+
+**Ustalenie wspólne** — w formularzu ustalenia zaznacz **Ustalenie wspólne dla wszystkich zakładów audytu**: dla każdego zakładu tworzone jest ustalenie z własnym cyklem PDCA, oznaczone jako **Wspólne dla zakładów**. Bez zaznaczenia ustalenie pozostaje w zakładzie, w którym je rejestrujesz.
+
+W przeglądzie zarządzania całej organizacji audyt wielu zakładów liczy się **raz**, z listą objętych zakładów; w przeglądzie zakładu widoczny jest tylko audyt tego zakładu.
+
 ### Anulowanie audytu
 
 [Zrzut ekranu: przycisk anulowania audytu]

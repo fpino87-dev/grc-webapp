@@ -5,6 +5,37 @@ from core.models import BaseModel
 User = get_user_model()
 
 
+class AuditGroup(BaseModel):
+    """Audit comune a più siti (non a tutta l'organizzazione): es. un
+    assessment TISAX AL2 con un solo Scope ID su due stabilimenti.
+
+    Ogni sito ha il proprio AuditPrep (checklist, prontezza, finding e PDCA
+    sul sito giusto); qui stanno i dati condivisi, copiati su ogni AuditPrep
+    del gruppo da `services.update_audit_group` così che riesame, pacchetto
+    audit e PDCA continuino a leggerli dal singolo audit.
+    """
+    title = models.CharField(max_length=200)
+    framework = models.ForeignKey(
+        "controls.Framework", on_delete=models.PROTECT,
+        related_name="audit_groups", null=True, blank=True,
+    )
+    audit_type = models.CharField(max_length=15, default="interno")
+    requesting_party = models.CharField(max_length=200, blank=True)
+    auditor_name = models.CharField(max_length=200, blank=True)
+    audit_date = models.DateField(null=True, blank=True)
+    scope_id = models.CharField(
+        max_length=50, blank=True,
+        help_text="Identificativo del perimetro dell'assessment (es. TISAX Scope ID)",
+    )
+    report_evidence = models.ForeignKey(
+        "documents.Evidence", null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="audit_group_reports",
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
 class AuditPrep(BaseModel):
     STATUS_CHOICES = [
         ("in_corso", "In corso"),
@@ -45,6 +76,10 @@ class AuditPrep(BaseModel):
     report_evidence = models.ForeignKey(
         "documents.Evidence", null=True, blank=True, on_delete=models.SET_NULL,
         related_name="audit_reports",
+    )
+    # Audit multi-sito: gli AuditPrep dello stesso gruppo condividono dati e rapporto.
+    group = models.ForeignKey(
+        AuditGroup, null=True, blank=True, on_delete=models.SET_NULL, related_name="preps",
     )
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="in_corso")
     readiness_score = models.IntegerField(null=True, blank=True)
@@ -125,6 +160,9 @@ class AuditFinding(BaseModel):
     status = models.CharField(max_length=25, choices=STATUS_CHOICES, default="open")
     root_cause = models.TextField(blank=True)
     corrective_action = models.TextField(blank=True)
+    # Rilievo comune ai siti di un audit multi-sito: stesso valore sui finding
+    # gemelli (uno per sito, ciascuno col proprio PDCA).
+    common_key = models.UUIDField(null=True, blank=True, db_index=True)
 
     pdca_cycle = models.ForeignKey(
         "pdca.PdcaCycle",

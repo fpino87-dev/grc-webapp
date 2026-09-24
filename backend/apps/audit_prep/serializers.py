@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import AuditFinding, AuditPrep, AuditProgram, EvidenceItem
+
+from apps.plants.models import Plant
+from .models import AuditFinding, AuditGroup, AuditPrep, AuditProgram, EvidenceItem
 
 
 class EvidenceItemSerializer(serializers.ModelSerializer):
@@ -16,6 +18,10 @@ class AuditPrepSerializer(serializers.ModelSerializer):
         source="report_evidence.title", read_only=True, default=None,
     )
     report_evidence_filename = serializers.SerializerMethodField()
+    # Audit multi-sito: titolo, Scope ID e siti del gruppo (prefetch nel viewset).
+    group_title = serializers.CharField(source="group.title", read_only=True, default=None)
+    group_scope_id = serializers.CharField(source="group.scope_id", read_only=True, default=None)
+    group_sites = serializers.SerializerMethodField()
 
     class Meta:
         model = AuditPrep
@@ -26,7 +32,7 @@ class AuditPrepSerializer(serializers.ModelSerializer):
         # report_evidence si imposta solo con l'azione report-file (upload
         # validato + audit), non collegando un'evidenza qualsiasi via PATCH.
         read_only_fields = [
-            "id", "status", "readiness_score", "report_evidence",
+            "id", "status", "readiness_score", "report_evidence", "group",
             "created_by", "created_at", "updated_at", "deleted_at",
         ]
 
@@ -37,6 +43,14 @@ class AuditPrepSerializer(serializers.ModelSerializer):
         import os
         ev = obj.report_evidence
         return os.path.basename(ev.file_path) if ev and ev.file_path else None
+
+    def get_group_sites(self, obj):
+        if not obj.group_id:
+            return []
+        return [
+            {"prep": str(p.pk), "plant": str(p.plant_id), "plant_code": p.plant.code}
+            for p in sorted(obj.group.preps.all(), key=lambda p: p.plant.code)
+        ]
 
 
 class AuditFindingSerializer(serializers.ModelSerializer):
@@ -99,3 +113,40 @@ class AuditProgramSerializer(serializers.ModelSerializer):
             return None
         u = obj.approved_by
         return f"{u.first_name} {u.last_name}".strip() or u.email
+
+
+class AuditGroupSerializer(serializers.ModelSerializer):
+    """Audit comune a più siti. In creazione `plants` (≥ 2) e `coverage_type`
+    generano un AuditPrep per sito; in lettura `preps` riepiloga i siti."""
+    plants = serializers.PrimaryKeyRelatedField(
+        many=True, write_only=True, queryset=Plant.objects.all(),
+    )
+    coverage_type = serializers.ChoiceField(
+        choices=AuditPrep.COVERAGE_CHOICES, write_only=True, required=False, default="campione",
+    )
+    audit_type = serializers.ChoiceField(choices=AuditPrep.AUDIT_TYPE_CHOICES, required=False, default="interno")
+    preps = serializers.SerializerMethodField()
+    report_evidence_title = serializers.CharField(source="report_evidence.title", read_only=True, default=None)
+
+    class Meta:
+        model = AuditGroup
+        fields = [
+            "id", "title", "framework", "audit_type", "requesting_party", "auditor_name",
+            "audit_date", "scope_id", "report_evidence", "report_evidence_title",
+            "plants", "coverage_type", "preps", "created_at", "updated_at",
+        ]
+        read_only_fields = ["id", "report_evidence", "created_at", "updated_at"]
+
+    def get_preps(self, obj):
+        return [
+            {"id": str(p.pk), "plant": str(p.plant_id), "plant_code": p.plant.code,
+             "status": p.status, "readiness_score": p.readiness_score}
+            for p in sorted(obj.preps.all(), key=lambda p: p.plant.code)
+        ]
+
+    def validate(self, attrs):
+        if self.instance is None and len(attrs.get("plants") or []) < 2:
+            from django.utils.translation import gettext as _
+            raise serializers.ValidationError({"plants": [_("Un audit multi-sito richiede almeno due siti.")]})
+        return attrs
+

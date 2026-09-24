@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
   auditPrepApi,
@@ -13,7 +13,6 @@ import {
   type SyncControlsResult,
 } from "../../api/endpoints/auditPrep";
 import { plantsApi } from "../../api/endpoints/plants";
-import { documentsApi } from "../../api/endpoints/documents";
 import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
@@ -62,12 +61,22 @@ const AUDIT_TYPES: AuditType[] = ["interno", "seconda_parte", "terza_parte"];
 /** Badge del tipo di audit, solo per gli audit esterni (seconda/terza parte). */
 function AuditTypeBadge({ prep }: { prep: AuditPrep }) {
   const { t } = useTranslation();
-  if (!prep.audit_type || prep.audit_type === "interno") return null;
+  const sites = (prep.group_sites ?? []).map(s => s.plant_code).join(", ");
   return (
-    <span className="text-xs text-indigo-700 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5">
-      {t(`audit_prep.audit_type.${prep.audit_type}`)}
-      {prep.requesting_party ? ` — ${prep.requesting_party}` : ""}
-    </span>
+    <>
+      {prep.audit_type && prep.audit_type !== "interno" && (
+        <span className="text-xs text-indigo-700 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5">
+          {t(`audit_prep.audit_type.${prep.audit_type}`)}
+          {prep.requesting_party ? ` — ${prep.requesting_party}` : ""}
+        </span>
+      )}
+      {prep.group && (
+        <span className="text-xs text-teal-700 bg-teal-50 border border-teal-200 rounded px-1.5 py-0.5"
+          title={prep.group_title ?? undefined}>
+          {t("audit_prep.group.badge", { sites })}
+        </span>
+      )}
+    </>
   );
 }
 
@@ -84,10 +93,12 @@ function ExternalAuditSection({ prep }: { prep: AuditPrep }) {
   const errMsg = (e: unknown) =>
     (e as { response?: { data?: { error?: string } } })?.response?.data?.error || t("audit_prep.error_generic");
 
+  // Audit multi-sito: tipo e committente sono dati comuni → si salvano sul gruppo.
   const saveMutation = useMutation({
-    mutationFn: () => auditPrepApi.update(prep.id, {
-      audit_type: auditType, requesting_party: auditType === "seconda_parte" ? party.trim() : "",
-    }),
+    mutationFn: async (): Promise<unknown> => {
+      const data = { audit_type: auditType, requesting_party: auditType === "seconda_parte" ? party.trim() : "" };
+      return prep.group ? auditPrepApi.updateGroup(prep.group, data) : auditPrepApi.update(prep.id, data);
+    },
     onSuccess: () => { setError(""); qc.invalidateQueries({ queryKey: ["audit-prep"] }); },
     onError: (e) => setError(errMsg(e)),
   });
@@ -108,6 +119,12 @@ function ExternalAuditSection({ prep }: { prep: AuditPrep }) {
   return (
     <div className="border-t border-gray-100 pt-4 space-y-3">
       <h4 className="text-sm font-semibold text-gray-800">{t("audit_prep.external.section_title")}</h4>
+      {prep.group && (
+        <p className="text-xs text-teal-800 bg-teal-50 border border-teal-200 rounded px-2 py-1.5">
+          {t("audit_prep.group.shared_hint", { sites: prep.group_sites.map(s => s.plant_code).join(", ") })}
+          {prep.group_scope_id ? ` · ${t("audit_prep.group.scope_id_label")}: ${prep.group_scope_id}` : ""}
+        </p>
+      )}
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-xs text-gray-600 mb-1">{t("audit_prep.external.type_label")}</label>
@@ -138,7 +155,7 @@ function ExternalAuditSection({ prep }: { prep: AuditPrep }) {
           <div className="flex flex-wrap items-center gap-2 text-sm">
             <span className="font-medium">📎 {prep.report_evidence_title}</span>
             <button
-              onClick={() => documentsApi.downloadEvidence(prep.report_evidence!).then(blob =>
+              onClick={() => auditPrepApi.downloadReportFile(prep.id).then(blob =>
                 downloadBlob(blob, prep.report_evidence_filename || prep.report_evidence_title || "rapporto"))}
               className="text-xs text-primary-700 underline">{t("audit_prep.external.download_btn")}</button>
             {editable && (
@@ -203,7 +220,8 @@ function PrepDrawer({ prep, onClose }: { prep: AuditPrep; onClose: () => void })
   const createFindingMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => auditPrepApi.createFinding(data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["findings", prep.id] });
+      // un rilievo comune crea finding anche sugli altri siti del gruppo
+      qc.invalidateQueries({ queryKey: ["findings"] });
       setShowFindingForm(false);
       setFindingForm({ finding_type: "major_nc" });
     },
@@ -439,10 +457,19 @@ function PrepDrawer({ prep, onClose }: { prep: AuditPrep; onClose: () => void })
                     <textarea value={findingForm.description || ""} rows={2} onChange={e => setFindingForm(p => ({ ...p, description: e.target.value }))}
                       className="w-full border rounded px-2 py-1.5 text-sm" />
                   </div>
+                  {prep.group && (
+                    <label className="flex items-center gap-2 text-xs text-gray-700">
+                      <input type="checkbox" checked={findingForm.apply_to_group === "true"}
+                        onChange={e => setFindingForm(p => ({ ...p, apply_to_group: e.target.checked ? "true" : "" }))} />
+                      {t("audit_prep.group.common_finding_label", { sites: prep.group_sites.map(s => s.plant_code).join(", ") })}
+                    </label>
+                  )}
                   <div className="flex gap-2">
                     <button
                       disabled={!findingForm.title || !findingForm.audit_date || createFindingMutation.isPending}
-                      onClick={() => createFindingMutation.mutate({ ...findingForm, audit_prep: prep.id })}
+                      onClick={() => createFindingMutation.mutate({
+                        ...findingForm, audit_prep: prep.id, apply_to_group: findingForm.apply_to_group === "true",
+                      })}
                       className="px-3 py-1.5 bg-primary-600 text-white text-xs rounded disabled:opacity-50">
                       {createFindingMutation.isPending ? "..." : t("audit_prep.save_finding")}
                     </button>
@@ -468,6 +495,11 @@ function PrepDrawer({ prep, onClose }: { prep: AuditPrep; onClose: () => void })
                           </span>
                         )}
                         <span className="text-sm font-medium text-gray-800">{f.title}</span>
+                        {f.common_key && (
+                          <span className="text-xs px-1.5 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-200">
+                            {t("audit_prep.group.common_finding_badge")}
+                          </span>
+                        )}
                         {f.is_overdue && <span className="text-xs text-red-600">{t("audit_prep.finding_overdue")}</span>}
                       </div>
                       <StatusBadge status={f.status} />
@@ -1156,15 +1188,32 @@ function NewPrepModal({ plants, onClose }: { plants: { id: string; code: string;
   const [form, setForm] = useState<Partial<AuditPrep>>({ audit_type: "interno" });
   const [fwKey, setFwKey] = useState("");
   const [tisaxLevel, setTisaxLevel] = useState<"L2" | "L3">("L2");
+  // Audit multi-sito (es. TISAX su 2 stabilimenti): un audit per sito, dati comuni.
+  const [multi, setMulti] = useState(false);
+  const [sites, setSites] = useState<string[]>([]);
+  const [scopeId, setScopeId] = useState("");
 
   const { data: plantFws = [] } = useQuery({
     queryKey: ["plant-frameworks", form.plant],
     queryFn: () => plantsApi.plantFrameworks(form.plant!),
-    enabled: !!form.plant,
+    enabled: !multi && !!form.plant,
+  });
+  const siteFws = useQueries({
+    queries: sites.map(id => ({ queryKey: ["plant-frameworks", id], queryFn: () => plantsApi.plantFrameworks(id) })),
   });
 
-  const frameworks = plantFws.map(pf => ({ id: pf.framework, code: pf.framework_code, name: pf.framework_name }));
-  useEffect(() => { setFwKey(""); setTisaxLevel("L2"); }, [form.plant]);
+  // Multi-sito: solo i framework assegnati a TUTTI i siti scelti.
+  const frameworks = (() => {
+    if (!multi) return plantFws.map(pf => ({ id: pf.framework, code: pf.framework_code, name: pf.framework_name }));
+    if (sites.length < 2 || siteFws.some(q => !q.data)) return [];
+    const [first, ...rest] = siteFws.map(q => q.data!);
+    return first
+      .filter(pf => rest.every(list => list.some(o => o.framework === pf.framework)))
+      .map(pf => ({ id: pf.framework, code: pf.framework_code, name: pf.framework_name }));
+  })();
+  const siteKey = multi ? sites.join(",") : form.plant;
+  useEffect(() => { setFwKey(""); setTisaxLevel("L2"); }, [siteKey]);
+  const sitesReady = multi ? sites.length >= 2 : !!form.plant;
 
   // TISAX_PROTO è autonomo: non va raggruppato con TISAX_L2/L3 nel selettore
   const hasTisax = frameworks.some(f => f.code === "TISAX_L2" || f.code === "TISAX_L3");
@@ -1180,7 +1229,13 @@ function NewPrepModal({ plants, onClose }: { plants: { id: string; code: string;
   }
 
   const mutation = useMutation({
-    mutationFn: () => auditPrepApi.create({ ...form, framework: resolvedFrameworkId() ?? undefined }),
+    mutationFn: async (): Promise<unknown> => multi
+      ? auditPrepApi.createGroup({
+          title: form.title, plants: sites, framework: resolvedFrameworkId(),
+          audit_type: form.audit_type, requesting_party: form.requesting_party ?? "",
+          auditor_name: form.auditor_name ?? "", audit_date: form.audit_date ?? null, scope_id: scopeId.trim(),
+        })
+      : auditPrepApi.create({ ...form, framework: resolvedFrameworkId() ?? undefined }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["audit-prep"] }); onClose(); },
   });
 
@@ -1194,7 +1249,26 @@ function NewPrepModal({ plants, onClose }: { plants: { id: string; code: string;
             <input name="title" onChange={e => setForm(p => ({ ...p, title: e.target.value || undefined }))}
               className="w-full border rounded px-3 py-2 text-sm" />
           </div>
+          <label className="flex items-center gap-2 text-sm text-gray-700">
+            <input type="checkbox" checked={multi} onChange={e => { setMulti(e.target.checked); setSites([]); }} />
+            {t("audit_prep.group.multi_toggle")}
+          </label>
+          {multi && (
+            <div>
+              <p className="text-xs text-gray-500 mb-1">{t("audit_prep.group.multi_hint")}</p>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 border rounded px-3 py-2">
+                {plants.map(p => (
+                  <label key={p.id} className="flex items-center gap-1.5 text-sm">
+                    <input type="checkbox" checked={sites.includes(p.id)}
+                      onChange={e => setSites(prev => e.target.checked ? [...prev, p.id] : prev.filter(x => x !== p.id))} />
+                    {p.code} — {p.name}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
+            {!multi && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{t("audit_prep.site_label")}</label>
               <select name="plant" onChange={e => setForm(p => ({ ...p, plant: e.target.value || undefined }))}
@@ -1203,14 +1277,23 @@ function NewPrepModal({ plants, onClose }: { plants: { id: string; code: string;
                 {plants.map(p => <option key={p.id} value={p.id}>{p.code} — {p.name}</option>)}
               </select>
             </div>
+            )}
+            {multi && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("audit_prep.group.scope_id_label")}</label>
+                <input value={scopeId} onChange={e => setScopeId(e.target.value)}
+                  placeholder={t("audit_prep.group.scope_id_placeholder")}
+                  className="w-full border rounded px-3 py-2 text-sm" />
+              </div>
+            )}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{t("audit_prep.step2_title")}</label>
-              <select value={fwKey} onChange={e => setFwKey(e.target.value)} disabled={!form.plant}
+              <select value={fwKey} onChange={e => setFwKey(e.target.value)} disabled={!sitesReady}
                 className="w-full border rounded px-3 py-2 text-sm disabled:bg-gray-50 disabled:text-gray-400">
-                {!form.plant
-                  ? <option value="">{t("audit_prep.select_site_first")}</option>
+                {!sitesReady
+                  ? <option value="">{multi ? t("audit_prep.group.select_sites_first") : t("audit_prep.select_site_first")}</option>
                   : frameworks.length === 0
-                    ? <option value="">{t("audit_prep.no_frameworks_assigned")}</option>
+                    ? <option value="">{multi ? t("audit_prep.group.no_common_framework") : t("audit_prep.no_frameworks_assigned")}</option>
                     : <>
                         <option value="">{t("audit_prep.select_placeholder")}</option>
                         {hasTisax && <option value="TISAX">TISAX — VDA ISA 6.0</option>}
@@ -1267,10 +1350,16 @@ function NewPrepModal({ plants, onClose }: { plants: { id: string; code: string;
             </div>
           </div>
         </div>
-        {mutation.isError && <p className="text-sm text-red-600 mt-2">{t("audit_prep.save_error")}</p>}
+        {mutation.isError && (
+          <p className="text-sm text-red-600 mt-2">
+            {(mutation.error as { response?: { data?: { error?: string; detail?: string } } })?.response?.data?.error
+              || (mutation.error as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+              || t("audit_prep.save_error")}
+          </p>
+        )}
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600">{t("audit_prep.cancel_btn")}</button>
-          <button onClick={() => mutation.mutate()} disabled={mutation.isPending || !form.title}
+          <button onClick={() => mutation.mutate()} disabled={mutation.isPending || !form.title || (multi && sites.length < 2)}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm disabled:opacity-50">
             {mutation.isPending ? t("audit_prep.saving") : t("audit_prep.create_prep_btn")}
           </button>

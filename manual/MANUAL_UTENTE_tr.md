@@ -910,6 +910,23 @@ Tür ve talep eden daha sonra **Denetim bilgileri** sekmesinden düzeltilebilir.
 
 Dış denetimler; listede, yönetim gözden geçirmesi analizinde (denetim sonuçları, §9.3.2 d) ve tutanakta türleri ve talep edenleriyle görünür; **denetim paketi**, özet ve ekli raporları içeren `AUDIT_ESTERNI/` klasörünü içerir.
 
+### Birden fazla tesiste denetim
+
+Bir denetim tüm organizasyonu değil yalnızca bazı tesisleri kapsayabilir: örneğin iki tesiste tek bir Scope ID ile yapılan bir TISAX AL2 değerlendirmesi. Bu durumda:
+
+1. **+ Yeni hazırlık**'a tıklayın ve **Birden fazla tesiste denetim** seçeneğini işaretleyin
+2. En az iki tesis seçin: yalnızca seçilen **tüm** tesislere atanmış çerçeveler sunulur
+3. Başlığı, türü, talep edeni, kuruluşu, tarihi ve varsa **Scope ID**'yi girin ve denetimi oluşturun
+
+Sistem birbirine bağlı **tesis başına bir denetim** oluşturur (başlık "… — tesis kodu"):
+
+- **tesis bazında**: kontrol listesi, hazırlık, PDCA'ları, süreleri ve görevleriyle bulgular ve kapanış. Tek bir tesisi yöneten kullanıcılar yalnızca kendi tesislerini görür ve üzerinde çalışır;
+- **ortak**: tür, talep eden, kuruluş, tarih, Scope ID ve yalnızca bir kez eklenen ve her tesisten indirilebilen **resmi rapor**. Herhangi bir tesisin **Denetim bilgileri** sekmesinden değiştirilir ve tümü için geçerlidir; ancak bunun için denetimin tüm tesislerine erişim gerekir.
+
+**Ortak bulgu** — bulgu formunda **Denetimin tüm tesisleri için ortak bulgu** seçeneğini işaretleyin: her tesis için kendi PDCA'sı olan ve **Tesislerde ortak** olarak işaretlenen bir bulgu oluşturulur. İşaretlenmezse bulgu, kaydettiğiniz tesiste kalır.
+
+Organizasyon düzeyindeki yönetim gözden geçirmesinde çok tesisli denetim, ilgili tesislerin listesiyle **bir kez** sayılır; bir tesisin gözden geçirmesinde yalnızca o tesisin denetimi görünür.
+
 ### Denetim İptal Etme
 
 [Ekran görüntüsü: denetim iptal düğmesi]

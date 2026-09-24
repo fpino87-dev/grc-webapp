@@ -910,6 +910,23 @@ Type and requesting party can be corrected later from the **Audit info** tab.
 
 External audits appear with their type and requesting party in the list, in the management review analysis (audit results, §9.3.2 d) and in the minutes; the **audit package** contains the `AUDIT_ESTERNI/` folder with a summary and the attached reports.
 
+### Audits on several sites
+
+An audit may cover some sites but not the whole organization: for example a TISAX AL2 assessment with a single Scope ID on two plants. In this case:
+
+1. Click **+ New preparation** and tick **Audit on several sites**
+2. Choose at least two sites: only frameworks assigned to **all** the selected sites are offered
+3. Fill in title, type, requesting party, audit body, date and, if any, the **Scope ID**, then create the audit
+
+The system creates **one audit per site** (title "… — site code"), linked to each other:
+
+- **per site**: checklist, readiness, findings with their PDCA, deadlines and tasks, and closure. Users managing a single site see and work only on their own;
+- **shared**: type, requesting party, audit body, date, Scope ID and the **official report**, attached only once and downloadable from every site. They are changed from the **Audit info** tab of any site and apply to all, but this requires access to all the audit's sites.
+
+**Common finding** — in the finding form tick **Finding common to all the audit's sites**: one finding is created for each site, each with its own PDCA, marked **Common to sites**. Without the tick the finding stays on the site where you record it.
+
+In the organization-wide management review, the multi-site audit counts **once**, with the list of the sites involved; in a site's review only that site's audit appears.
+
 ### Cancelling an audit
 
 [Screenshot: cancel audit button]

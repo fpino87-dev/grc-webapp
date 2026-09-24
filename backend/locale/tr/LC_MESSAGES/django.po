@@ -2754,3 +2754,24 @@ msgstr "İkinci taraf"
 #: apps/management_review/report/builder.py
 msgid "Terza parte"
 msgstr "Üçüncü taraf"
+
+#: apps/audit_prep/services.py
+msgid "Un audit multi-sito richiede almeno due siti."
+msgstr "Çok tesisli bir denetim en az iki tesis gerektirir."
+
+#: apps/audit_prep/services.py
+#, python-format
+msgid "Il framework non è assegnato ai siti: %(sites)s."
+msgstr "Çerçeve şu tesislere atanmamış: %(sites)s."
+
+#: apps/audit_prep/views.py
+msgid "Per modificare un audit multi-sito serve l'accesso a tutti i suoi siti."
+msgstr "Çok tesisli bir denetimi değiştirmek için tüm tesislerine erişim gerekir."
+
+#: apps/audit_prep/views.py
+msgid "Nessun rapporto allegato a questo audit."
+msgstr "Bu denetime ekli rapor yok."
+
+#: apps/audit_prep/views.py
+msgid "Questo audit fa parte di un audit multi-sito: i dati comuni si modificano dall'audit comune."
+msgstr "Bu denetim çok tesisli bir denetimin parçasıdır: ortak veriler ortak denetimden değiştirilir."

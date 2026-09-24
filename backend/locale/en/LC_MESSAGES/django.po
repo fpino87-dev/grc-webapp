@@ -2753,3 +2753,24 @@ msgstr "Second party"
 #: apps/management_review/report/builder.py
 msgid "Terza parte"
 msgstr "Third party"
+
+#: apps/audit_prep/services.py
+msgid "Un audit multi-sito richiede almeno due siti."
+msgstr "A multi-site audit requires at least two sites."
+
+#: apps/audit_prep/services.py
+#, python-format
+msgid "Il framework non è assegnato ai siti: %(sites)s."
+msgstr "The framework is not assigned to the sites: %(sites)s."
+
+#: apps/audit_prep/views.py
+msgid "Per modificare un audit multi-sito serve l'accesso a tutti i suoi siti."
+msgstr "Changing a multi-site audit requires access to all its sites."
+
+#: apps/audit_prep/views.py
+msgid "Nessun rapporto allegato a questo audit."
+msgstr "No report attached to this audit."
+
+#: apps/audit_prep/views.py
+msgid "Questo audit fa parte di un audit multi-sito: i dati comuni si modificano dall'audit comune."
+msgstr "This audit is part of a multi-site audit: shared data are changed from the shared audit."

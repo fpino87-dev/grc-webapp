@@ -3032,6 +3032,18 @@
       "download_btn": "İndir",
       "detach_btn": "Bağlantıyı kaldır",
       "report_hint": "Dosya, geçerlilik süresi olmadan «rapor» türünde kanıt olarak arşivlenir ve denetim paketine dahil edilir."
+    },
+    "group": {
+      "badge": "Çok tesisli: {{sites}}",
+      "shared_hint": "Çok tesisli denetim ({{sites}}): tür, talep eden, kuruluş, tarih ve rapor tüm tesislerde ortaktır ve gruptaki herhangi bir tesisten değiştirilebilir; kontrol listesi, hazırlık ve bulgular tesis bazında kalır.",
+      "scope_id_label": "Scope ID",
+      "scope_id_placeholder": "Ör. değerlendirmenin TISAX Scope ID'si",
+      "multi_toggle": "Birden fazla tesiste denetim (ör. bazı tesislerde bir TISAX değerlendirmesi)",
+      "multi_hint": "En az iki tesis seçin: her tesis için ortak veri ve raporla bir denetim oluşturulur.",
+      "select_sites_first": "En az iki tesis seçin",
+      "no_common_framework": "Seçilen tüm tesislere atanmış çerçeve yok",
+      "common_finding_label": "Denetimin tüm tesisleri için ortak bulgu ({{sites}}): her tesis için bir bulgu oluşturur",
+      "common_finding_badge": "Tesislerde ortak"
     }
   },
   "risk": {

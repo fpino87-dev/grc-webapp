@@ -2775,3 +2775,24 @@ msgstr "Druga strona"
 #: apps/management_review/report/builder.py
 msgid "Terza parte"
 msgstr "Trzecia strona"
+
+#: apps/audit_prep/services.py
+msgid "Un audit multi-sito richiede almeno due siti."
+msgstr "Audyt wielu zakładów wymaga co najmniej dwóch zakładów."
+
+#: apps/audit_prep/services.py
+#, python-format
+msgid "Il framework non è assegnato ai siti: %(sites)s."
+msgstr "Framework nie jest przypisany do zakładów: %(sites)s."
+
+#: apps/audit_prep/views.py
+msgid "Per modificare un audit multi-sito serve l'accesso a tutti i suoi siti."
+msgstr "Zmiana audytu wielu zakładów wymaga dostępu do wszystkich jego zakładów."
+
+#: apps/audit_prep/views.py
+msgid "Nessun rapporto allegato a questo audit."
+msgstr "Do tego audytu nie załączono raportu."
+
+#: apps/audit_prep/views.py
+msgid "Questo audit fa parte di un audit multi-sito: i dati comuni si modificano dall'audit comune."
+msgstr "Ten audyt jest częścią audytu wielu zakładów: wspólne dane zmienia się w audycie wspólnym."

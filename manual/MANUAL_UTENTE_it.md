@@ -910,6 +910,23 @@ Tipo e committente si possono correggere in seguito dal tab **Info audit**.
 
 Gli audit esterni compaiono con il tipo e il committente nell'elenco, nell'analisi del riesame di direzione (risultati degli audit, §9.3.2 d) e nel verbale; il **pacchetto audit** contiene la cartella `AUDIT_ESTERNI/` con un riepilogo e i rapporti allegati.
 
+### Audit su più siti
+
+Un audit può riguardare alcuni siti ma non tutta l'organizzazione: ad esempio un assessment TISAX AL2 con un unico Scope ID su due stabilimenti. In questo caso:
+
+1. Clicca **+ Nuova preparazione** e spunta **Audit su più siti**
+2. Scegli almeno due siti: tra i framework compaiono solo quelli assegnati a **tutti** i siti scelti
+3. Compila titolo, tipo, committente, ente, data ed eventuale **Scope ID** e crea l'audit
+
+Il sistema crea **un audit per sito** (titolo "… — codice sito"), collegati tra loro:
+
+- **per sito**: checklist, prontezza, finding con relativi PDCA, scadenze e task, e chiusura. Chi gestisce un solo sito vede e lavora solo il proprio;
+- **in comune**: tipo, committente, ente, data, Scope ID e **rapporto ufficiale**, che si allega una sola volta ed è scaricabile da ogni sito. Si modificano dal tab **Info audit** di qualunque sito e valgono per tutti; serve però l'accesso a tutti i siti dell'audit.
+
+**Rilievo comune** — nel form del finding spunta **Rilievo comune a tutti i siti dell'audit**: viene creato un finding per ogni sito, ciascuno con il proprio PDCA, contrassegnati come **Comune ai siti**. Senza la spunta il finding resta sul sito in cui lo registri.
+
+Nel riesame di direzione di organizzazione l'audit su più siti conta **una volta**, con l'elenco dei siti coinvolti; nel riesame di un sito compare il solo audit di quel sito.
+
 ### Annullare un audit
 
 [Schermata: pulsante annulla audit]

@@ -3032,6 +3032,18 @@
       "download_btn": "Download",
       "detach_btn": "Detach",
       "report_hint": "The file is stored as evidence of type «report», with no expiry, and is included in the audit package."
+    },
+    "group": {
+      "badge": "Multi-site: {{sites}}",
+      "shared_hint": "Multi-site audit ({{sites}}): type, requesting party, audit body, date and report are shared by all sites and can be changed from any site of the group; checklist, readiness and findings stay per site.",
+      "scope_id_label": "Scope ID",
+      "scope_id_placeholder": "E.g. the TISAX Scope ID of the assessment",
+      "multi_toggle": "Audit on several sites (e.g. a TISAX assessment on some plants)",
+      "multi_hint": "Choose at least two sites: one audit per site will be created, with shared data and report.",
+      "select_sites_first": "Choose at least two sites",
+      "no_common_framework": "No framework assigned to all the selected sites",
+      "common_finding_label": "Finding common to all the audit's sites ({{sites}}): creates one finding per site",
+      "common_finding_badge": "Common to sites"
     }
   },
   "risk": {

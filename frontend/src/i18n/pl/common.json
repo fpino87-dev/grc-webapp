@@ -3032,6 +3032,18 @@
       "download_btn": "Pobierz",
       "detach_btn": "Odłącz",
       "report_hint": "Plik jest archiwizowany jako dowód typu «raport», bez terminu ważności, i trafia do pakietu audytowego."
+    },
+    "group": {
+      "badge": "Wiele zakładów: {{sites}}",
+      "shared_hint": "Audyt wielu zakładów ({{sites}}): rodzaj, zlecający, jednostka, data i raport są wspólne dla wszystkich zakładów i można je zmienić z dowolnego zakładu grupy; lista kontrolna, gotowość i ustalenia pozostają dla każdego zakładu.",
+      "scope_id_label": "Scope ID",
+      "scope_id_placeholder": "Np. Scope ID TISAX oceny",
+      "multi_toggle": "Audyt w kilku zakładach (np. ocena TISAX w wybranych zakładach)",
+      "multi_hint": "Wybierz co najmniej dwa zakłady: dla każdego zostanie utworzony audyt ze wspólnymi danymi i raportem.",
+      "select_sites_first": "Wybierz co najmniej dwa zakłady",
+      "no_common_framework": "Brak frameworku przypisanego do wszystkich wybranych zakładów",
+      "common_finding_label": "Ustalenie wspólne dla wszystkich zakładów audytu ({{sites}}): tworzy ustalenie dla każdego zakładu",
+      "common_finding_badge": "Wspólne dla zakładów"
     }
   },
   "risk": {

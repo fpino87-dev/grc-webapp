@@ -10,7 +10,7 @@ from django.utils.translation import gettext as _
 from core.audit import log_action
 
 from .framework_hierarchy import expand_tisax
-from .models import AuditPrep, AuditFinding, AuditProgram
+from .models import AuditFinding, AuditGroup, AuditPrep, AuditProgram
 
 DEADLINE_DAYS = {
     "major_nc":    30,
@@ -62,11 +62,190 @@ def update_readiness_score(audit_prep: AuditPrep) -> AuditPrep:
     return audit_prep
 
 
+def finalize_new_prep(prep: AuditPrep, user) -> None:
+    """Passi comuni a ogni AuditPrep appena creato (singolo o di un gruppo).
+
+    Seeding automatico per i framework TISAX gerarchici (L3/PROTO): gli
+    EvidenceItem coprono anche il livello inferiore (L2 estesa da L3, L2+L3
+    estesi da PROTO). Per gli altri framework il seed resta opzionale e a
+    carico dell'utente, per non alterare il flusso manuale esistente.
+    """
+    fw_code = prep.framework.code if prep.framework_id else None
+    if fw_code in ("TISAX_L3", "TISAX_PROTO"):
+        seed_evidence_items_for_prep(
+            prep,
+            framework_codes=[fw_code],
+            coverage_type=prep.coverage_type or "campione",
+            user=user,
+        )
+        log_action(
+            user=user,
+            action_code="audit_prep.evidence.auto_seeded",
+            level="L2",
+            entity=prep,
+            payload={
+                "frameworks_requested": [fw_code],
+                "frameworks_expanded": expand_tisax([fw_code]),
+                "items_count": prep.evidence_items.count(),
+            },
+        )
+    log_action(
+        user=user,
+        action_code="audit_prep.auditprep.create",
+        level="L2",
+        entity=prep,
+        payload={"id": str(prep.id), "title": prep.title,
+                 "group": str(prep.group_id) if prep.group_id else None},
+    )
+
+
+# ── Audit multi-sito ─────────────────────────────────────────────────────────
+
+# Dati dell'audit comune copiati su ogni AuditPrep del gruppo.
+GROUP_SHARED_FIELDS = ("audit_type", "requesting_party", "auditor_name", "audit_date", "framework")
+
+
+def create_audit_group(*, user, title: str, plants, framework=None, audit_type="interno",
+                       requesting_party="", auditor_name="", audit_date=None, scope_id="",
+                       coverage_type="campione") -> AuditGroup:
+    """Crea un audit comune a più siti: il gruppo con i dati condivisi e un
+    AuditPrep per sito (checklist, prontezza e finding restano per sito).
+    Il framework, se indicato, deve essere assegnato a tutti i siti."""
+    from django.core.exceptions import ValidationError
+
+    plants = list(dict.fromkeys(plants))
+    if len(plants) < 2:
+        raise ValidationError(_("Un audit multi-sito richiede almeno due siti."))
+    if framework is not None:
+        from apps.plants.models import PlantFramework
+
+        covered = set(
+            PlantFramework.objects.filter(
+                plant__in=plants, framework=framework, active=True, deleted_at__isnull=True,
+            ).values_list("plant_id", flat=True)
+        )
+        missing = [p.code for p in plants if p.pk not in covered]
+        if missing:
+            raise ValidationError(
+                _("Il framework non è assegnato ai siti: %(sites)s.") % {"sites": ", ".join(missing)}
+            )
+
+    with transaction.atomic():
+        group = AuditGroup.objects.create(
+            title=title, framework=framework, audit_type=audit_type,
+            requesting_party=requesting_party if audit_type == "seconda_parte" else "",
+            auditor_name=auditor_name, audit_date=audit_date, scope_id=scope_id,
+            created_by=user,
+        )
+        for plant in plants:
+            prep = AuditPrep.objects.create(
+                plant=plant, group=group, title=f"{title} — {plant.code}",
+                coverage_type=coverage_type, created_by=user,
+                **{f: getattr(group, f) for f in GROUP_SHARED_FIELDS},
+            )
+            finalize_new_prep(prep, user)
+        log_action(
+            user=user,
+            action_code="audit_prep.group.create",
+            level="L2",
+            entity=group,
+            payload={"title": title, "plants": [p.code for p in plants], "audit_type": audit_type},
+        )
+    return group
+
+
+def update_audit_group(group: AuditGroup, user, **fields) -> AuditGroup:
+    """Aggiorna i dati comuni e li riporta su tutti gli audit dei siti."""
+    allowed = {k: v for k, v in fields.items() if k in (*GROUP_SHARED_FIELDS, "title", "scope_id")}
+    if allowed.get("audit_type", group.audit_type) != "seconda_parte":
+        allowed["requesting_party"] = ""
+    with transaction.atomic():
+        for k, v in allowed.items():
+            setattr(group, k, v)
+        group.save()
+        shared = {f: getattr(group, f) for f in GROUP_SHARED_FIELDS}
+        group.preps.update(**shared, updated_at=timezone.now())
+        log_action(
+            user=user,
+            action_code="audit_prep.group.updated",
+            level="L2",
+            entity=group,
+            payload={"fields": sorted(allowed)},
+        )
+    return group
+
+
+def attach_group_report(group: AuditGroup, uploaded_file, user, title: str = ""):
+    """Rapporto ufficiale unico per l'audit multi-sito, collegato a tutti gli
+    audit dei siti. L'evidenza sta sul primo sito del gruppo; gli altri siti
+    lo scaricano dal proprio audit (azione report-file)."""
+    from apps.documents.services import create_evidence_with_file
+
+    first = group.preps.select_related("plant").order_by("plant__code").first()
+    previous_id = group.report_evidence_id
+    data = {
+        "title": (title.strip() or _("Rapporto audit — %(title)s") % {"title": group.title})[:300],
+        "evidence_type": "report",
+        "description": _("Rapporto ufficiale dell'audit «%(title)s».") % {"title": group.title},
+        "plant": str(first.plant_id) if first else "",
+    }
+    with transaction.atomic():
+        evidence = create_evidence_with_file(data, uploaded_file, user)
+        group.report_evidence = evidence
+        group.save(update_fields=["report_evidence", "updated_at"])
+        group.preps.update(report_evidence=evidence, updated_at=timezone.now())
+        log_action(
+            user=user,
+            action_code="audit_prep.official_report.attached",
+            level="L2",
+            entity=group,
+            payload={
+                "evidence_id": str(evidence.pk),
+                "replaced_evidence_id": str(previous_id) if previous_id else None,
+                "audit_type": group.audit_type,
+                "preps": [str(pk) for pk in group.preps.values_list("pk", flat=True)],
+            },
+        )
+    return evidence
+
+
+def detach_group_report(group: AuditGroup, user) -> None:
+    previous_id = group.report_evidence_id
+    if not previous_id:
+        return
+    with transaction.atomic():
+        group.report_evidence = None
+        group.save(update_fields=["report_evidence", "updated_at"])
+        group.preps.update(report_evidence=None, updated_at=timezone.now())
+        log_action(
+            user=user,
+            action_code="audit_prep.official_report.detached",
+            level="L2",
+            entity=group,
+            payload={"evidence_id": str(previous_id)},
+        )
+
+
+def open_group_finding(audit_prep: AuditPrep, **kwargs) -> list[AuditFinding]:
+    """Rilievo comune a tutti i siti di un audit multi-sito: un finding per
+    sito (con PDCA, scadenza e task sul sito), legati dallo stesso common_key.
+    Il primo della lista è quello dell'audit da cui è stato registrato."""
+    if not audit_prep.group_id:
+        return [open_finding(audit_prep, **kwargs)]
+    key = uuid.uuid4()
+    preps = [audit_prep] + list(
+        audit_prep.group.preps.exclude(pk=audit_prep.pk).select_related("plant").order_by("plant__code")
+    )
+    with transaction.atomic():
+        return [open_finding(p, common_key=key, **kwargs) for p in preps]
+
+
 def open_finding(audit_prep, finding_type: str, title: str,
                  description: str, audit_date, user,
                  control_instance=None,
                  auditor_name: str = "",
-                 auto_generated: bool = False) -> AuditFinding:
+                 auto_generated: bool = False,
+                 common_key=None) -> AuditFinding:
     """
     Crea un AuditFinding e genera automaticamente:
     - PDCA (obbligatorio per major/minor)
@@ -100,6 +279,7 @@ def open_finding(audit_prep, finding_type: str, title: str,
         response_deadline=deadline,
         status="open",
         auto_generated=auto_generated,
+        common_key=common_key,
         created_by=user,
     )
 

@@ -310,8 +310,47 @@ def _audit_block(scope: dict, today, since_12m) -> dict:
         .select_related("audit_prep__plant")
         .order_by("-audit_date")
     )
+    audit_rows = [
+        {
+            "id": str(a.pk),
+            "title": a.title,
+            "audit_date": _iso(a.audit_date),
+            "framework": a.framework.code if a.framework_id else None,
+            "status": a.status,
+            "readiness_score": a.readiness_score,
+            "findings": a.n_findings,
+            "plant_code": a.plant.code if a.plant_id else None,
+            "audit_type": a.audit_type,
+            "requesting_party": a.requesting_party,
+            "group": str(a.group_id) if a.group_id else None,
+            "group_title": a.group.title if a.group_id else None,
+        }
+        for a in audits.select_related("group")
+    ]
+    if not scope:
+        # Riesame di organizzazione: un audit multi-sito conta una volta sola,
+        # con i siti coinvolti e i finding sommati (prontezza per sito omessa).
+        merged, by_group = [], {}
+        for row in audit_rows:
+            gid = row["group"]
+            if gid is None:
+                merged.append(row)
+            elif gid not in by_group:
+                by_group[gid] = {**row, "id": gid, "title": row["group_title"],
+                                 "readiness_score": None, "plant_codes": [row["plant_code"]]}
+                merged.append(by_group[gid])
+            else:
+                g = by_group[gid]
+                g["findings"] += row["findings"]
+                g["plant_codes"].append(row["plant_code"])
+        for g in by_group.values():
+            g["plant_code"] = ", ".join(sorted(c for c in g.pop("plant_codes") if c))
+        audit_rows = merged
+    for row in audit_rows:
+        row.pop("group_title", None)
+
     return {
-        "audit_12m": audits.count(),
+        "audit_12m": len(audit_rows),
         "nc_aperte_maggiori": by_type.get("major_nc", 0),
         "nc_aperte_minori": by_type.get("minor_nc", 0),
         "osservazioni_aperte": by_type.get("observation", 0),
@@ -320,21 +359,7 @@ def _audit_block(scope: dict, today, since_12m) -> dict:
         "finding_chiusi_12m": findings.filter(
             status__in=["closed", "accepted_by_auditor"], closed_at__gte=since_12m
         ).count(),
-        "elenco_audit": [
-            {
-                "id": str(a.pk),
-                "title": a.title,
-                "audit_date": _iso(a.audit_date),
-                "framework": a.framework.code if a.framework_id else None,
-                "status": a.status,
-                "readiness_score": a.readiness_score,
-                "findings": a.n_findings,
-                "plant_code": a.plant.code if a.plant_id else None,
-                "audit_type": a.audit_type,
-                "requesting_party": a.requesting_party,
-            }
-            for a in audits[:SNAPSHOT_LIST_LIMIT]
-        ],
+        "elenco_audit": audit_rows[:SNAPSHOT_LIST_LIMIT],
         "elenco_nc_aperte": [_finding(f) for f in open_nc[:SNAPSHOT_LIST_LIMIT]],
         "elenco_opportunita": [_finding(f) for f in opportunities[:SNAPSHOT_LIST_LIMIT]],
     }

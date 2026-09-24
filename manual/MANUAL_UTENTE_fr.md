@@ -910,6 +910,23 @@ Le type et le donneur d'ordre peuvent être corrigés ensuite depuis l'onglet **
 
 Les audits externes apparaissent avec leur type et leur donneur d'ordre dans la liste, dans l'analyse de la revue de direction (résultats des audits, §9.3.2 d) et dans le procès-verbal ; le **dossier d'audit** contient le dossier `AUDIT_ESTERNI/` avec une synthèse et les rapports joints.
 
+### Audits sur plusieurs sites
+
+Un audit peut concerner certains sites sans couvrir toute l'organisation : par exemple une évaluation TISAX AL2 avec un seul Scope ID sur deux établissements. Dans ce cas :
+
+1. Cliquez sur **+ Nouvelle préparation** et cochez **Audit sur plusieurs sites**
+2. Choisissez au moins deux sites : seuls les référentiels attribués à **tous** les sites choisis sont proposés
+3. Renseignez le titre, le type, le donneur d'ordre, l'organisme, la date et, le cas échéant, le **Scope ID**, puis créez l'audit
+
+Le système crée **un audit par site** (titre « … — code du site »), liés entre eux :
+
+- **par site** : checklist, préparation, constats avec leurs PDCA, échéances et tâches, et clôture. Les utilisateurs d'un seul site ne voient et ne traitent que le leur ;
+- **en commun** : type, donneur d'ordre, organisme, date, Scope ID et **rapport officiel**, joint une seule fois et téléchargeable depuis chaque site. Ils se modifient depuis l'onglet **Infos audit** de n'importe quel site et valent pour tous ; il faut toutefois avoir accès à tous les sites de l'audit.
+
+**Constat commun** — dans le formulaire du constat, cochez **Constat commun à tous les sites de l'audit** : un constat est créé pour chaque site, chacun avec son propre PDCA, marqué **Commun aux sites**. Sans la case cochée, le constat reste sur le site où vous l'enregistrez.
+
+Dans la revue de direction de l'organisation, l'audit multi-sites compte **une seule fois**, avec la liste des sites concernés ; dans la revue d'un site n'apparaît que l'audit de ce site.
+
 ### Annuler un audit
 
 [Écran : bouton d'annulation d'audit]

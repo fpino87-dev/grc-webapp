@@ -1,7 +1,7 @@
 import logging
 
 from django.utils import timezone
-from rest_framework import filters, viewsets
+from rest_framework import filters, mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
@@ -11,18 +11,62 @@ from core.scoping import PlantScopedQuerysetMixin
 from . import services
 
 logger = logging.getLogger(__name__)
-from .models import AuditFinding, AuditPrep, AuditProgram, EvidenceItem
+from .models import AuditFinding, AuditGroup, AuditPrep, AuditProgram, EvidenceItem
 from .permissions import AuditPrepPermission
 from .serializers import (
     AuditFindingSerializer,
+    AuditGroupSerializer,
     AuditPrepSerializer,
     AuditProgramSerializer,
     EvidenceItemSerializer,
 )
 
 
+def _require_all_group_sites(user, group) -> None:
+    """Le scritture sull'audit comune toccano tutti i siti del gruppo: servono
+    tutti (chi ne gestisce uno solo non decide per l'altro)."""
+    from django.utils.translation import gettext as _
+    from rest_framework.exceptions import PermissionDenied
+
+    from core.scoping import user_can_access_plant
+
+    for plant_id in group.preps.values_list("plant_id", flat=True):
+        if not user_can_access_plant(user, plant_id):
+            raise PermissionDenied(_(
+                "Per modificare un audit multi-sito serve l'accesso a tutti i suoi siti."
+            ))
+
+
+def _serve_evidence_file(evidence, user, entity):
+    """Download del rapporto ufficiale collegato all'audit (l'accesso è quello
+    all'audit, già verificato da get_object)."""
+    import os
+
+    from django.core.files.storage import default_storage
+    from django.http import FileResponse, Http404
+    from django.utils.translation import gettext as _
+
+    if not evidence or evidence.deleted_at or not evidence.file_path:
+        raise Http404(_("Nessun rapporto allegato a questo audit."))
+    path = evidence.file_path
+    if ".." in path or path.startswith("/") or not default_storage.exists(path):
+        raise Http404(_("File non trovato nello storage."))
+    log_action(
+        user=user, action_code="audit_prep.official_report.downloaded", level="L2",
+        entity=entity, payload={"evidence_id": str(evidence.pk)},
+    )
+    return FileResponse(default_storage.open(path, "rb"), as_attachment=True,
+                        filename=os.path.basename(path))
+
+
+def _validation_response(exc):
+    return Response({"error": exc.messages[0] if getattr(exc, "messages", None) else str(exc)}, status=400)
+
+
 class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
-    queryset = AuditPrep.objects.select_related("framework", "report_evidence")
+    queryset = AuditPrep.objects.select_related("framework", "report_evidence", "group").prefetch_related(
+        "group__preps__plant",
+    )
     serializer_class = AuditPrepSerializer
     permission_classes = [AuditPrepPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
@@ -32,38 +76,7 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)
-        # Seeding automatico per i framework TISAX gerarchici (L3/PROTO):
-        # gli EvidenceItem coprono anche il livello inferiore (L2 estesa da L3,
-        # L2+L3 estesi da PROTO). Per gli altri framework il seed resta opzionale
-        # e a carico dell'utente, per non alterare il flusso manuale esistente.
-        fw_code = instance.framework.code if instance.framework_id else None
-        if fw_code in ("TISAX_L3", "TISAX_PROTO"):
-            from .framework_hierarchy import expand_tisax
-            from .services import seed_evidence_items_for_prep
-            seed_evidence_items_for_prep(
-                instance,
-                framework_codes=[fw_code],
-                coverage_type=instance.coverage_type or "campione",
-                user=self.request.user,
-            )
-            log_action(
-                user=self.request.user,
-                action_code="audit_prep.evidence.auto_seeded",
-                level="L2",
-                entity=instance,
-                payload={
-                    "frameworks_requested": [fw_code],
-                    "frameworks_expanded": expand_tisax([fw_code]),
-                    "items_count": instance.evidence_items.count(),
-                },
-            )
-        log_action(
-            user=self.request.user,
-            action_code="audit_prep.auditprep.create",
-            level="L2",
-            entity=instance,
-            payload={"id": str(instance.id), "title": instance.title},
-        )
+        services.finalize_new_prep(instance, self.request.user)
 
     @staticmethod
     def _sync_program(prep):
@@ -86,6 +99,18 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             )
 
     def perform_update(self, serializer):
+        # Audit multi-sito: i dati comuni si cambiano dall'audit comune, che li
+        # riporta su tutti i siti (altrimenti i siti divergerebbero).
+        if serializer.instance.group_id:
+            from django.utils.translation import gettext as _
+            from rest_framework.exceptions import ValidationError as DRFValidationError
+
+            touched = set(serializer.validated_data) & set(services.GROUP_SHARED_FIELDS)
+            if touched:
+                raise DRFValidationError({"error": _(
+                    "Questo audit fa parte di un audit multi-sito: i dati comuni si "
+                    "modificano dall'audit comune."
+                )})
         instance = serializer.save()
         self._sync_program(instance)
         log_action(
@@ -124,29 +149,42 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         )
         return Response(status=204)
 
-    @action(detail=True, methods=["post", "delete"], url_path="report-file")
+    @action(detail=True, methods=["get", "post", "delete"], url_path="report-file")
     def report_file(self, request, pk=None):
         """
-        POST   /audit-prep/preps/<id>/report-file/  multipart: file, title (opz.)
-               → allega il rapporto ufficiale dell'auditor/ente (evidenza "report").
-        DELETE /audit-prep/preps/<id>/report-file/
-               → scollega il rapporto (l'evidenza resta archiviata).
+        GET    /audit-prep/audit-preps/<id>/report-file/  → scarica il rapporto ufficiale
+               (anche quando l'evidenza sta su un altro sito dell'audit multi-sito).
+        POST   multipart: file, title (opz.) → allega il rapporto dell'auditor/ente
+               (evidenza "report"); per un audit multi-sito vale per tutti i siti.
+        DELETE → scollega il rapporto (l'evidenza resta archiviata).
         """
         from django.core.exceptions import ValidationError as DjangoValidationError
         from django.utils.translation import gettext as _
 
         prep = self.get_object()
+        if request.method == "GET":
+            return _serve_evidence_file(prep.report_evidence, request.user, prep)
+        group = prep.group
+        if group:
+            _require_all_group_sites(request.user, group)
         if request.method == "DELETE":
-            services.detach_official_report(prep, request.user)
+            if group:
+                services.detach_group_report(group, request.user)
+            else:
+                services.detach_official_report(prep, request.user)
             return Response(status=204)
         uploaded_file = request.FILES.get("file")
         if not uploaded_file:
             return Response({"error": _("Il file del rapporto è obbligatorio.")}, status=400)
         try:
-            services.attach_official_report(prep, uploaded_file, request.user,
-                                            title=request.data.get("title", ""))
+            if group:
+                services.attach_group_report(group, uploaded_file, request.user,
+                                             title=request.data.get("title", ""))
+            else:
+                services.attach_official_report(prep, uploaded_file, request.user,
+                                                title=request.data.get("title", ""))
         except DjangoValidationError as exc:
-            return Response({"error": exc.messages[0] if exc.messages else str(exc)}, status=400)
+            return _validation_response(exc)
         prep.refresh_from_db()
         return Response(AuditPrepSerializer(prep, context={"request": request}).data, status=201)
 
@@ -327,6 +365,48 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         return resp
 
 
+class AuditGroupViewSet(
+    PlantScopedQuerysetMixin,
+    mixins.ListModelMixin, mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin, mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Audit multi-sito (non organizzazione): creazione con un AuditPrep per
+    sito e modifica dei dati comuni, riportati su tutti i siti. Visibile a chi
+    accede ad almeno uno dei siti; le scritture richiedono tutti i siti.
+    L'eliminazione avviene per singolo audit di sito."""
+    queryset = AuditGroup.objects.select_related("framework", "report_evidence").prefetch_related(
+        "preps__plant",
+    )
+    serializer_class = AuditGroupSerializer
+    permission_classes = [AuditPrepPermission]
+    plant_field = "preps__plant"
+
+    def perform_create(self, serializer):
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        from rest_framework.exceptions import PermissionDenied, ValidationError as DRFValidationError
+        from django.utils.translation import gettext as _
+
+        from core.scoping import user_can_access_plant
+
+        data = dict(serializer.validated_data)
+        plants = data.pop("plants")
+        for plant in plants:
+            if not user_can_access_plant(self.request.user, plant):
+                raise PermissionDenied(_("Accesso negato per questo sito."))
+        try:
+            serializer.instance = services.create_audit_group(user=self.request.user, plants=plants, **data)
+        except DjangoValidationError as exc:
+            raise DRFValidationError({"error": exc.messages[0]}) from exc
+
+    def perform_update(self, serializer):
+        _require_all_group_sites(self.request.user, serializer.instance)
+        data = dict(serializer.validated_data)
+        data.pop("plants", None)
+        data.pop("coverage_type", None)
+        serializer.instance = services.update_audit_group(serializer.instance, self.request.user, **data)
+
+
 class EvidenceItemViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = EvidenceItem.objects.all()
     serializer_class = EvidenceItemSerializer
@@ -374,8 +454,8 @@ class AuditFindingViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         else:
             audit_date = audit_date_raw or timezone.localdate()
 
-        finding = services.open_finding(
-            audit_prep=serializer.validated_data["audit_prep"],
+        prep = serializer.validated_data["audit_prep"]
+        kwargs = dict(
             finding_type=data.get("finding_type"),
             title=data.get("title", ""),
             description=data.get("description", ""),
@@ -384,6 +464,14 @@ class AuditFindingViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             control_instance=serializer.validated_data.get("control_instance"),
             auditor_name=data.get("auditor_name", ""),
         )
+        # Rilievo comune a tutti i siti di un audit multi-sito: un finding per
+        # sito (il controllo è per sito, quindi non si riporta sugli altri).
+        if str(data.get("apply_to_group", "")).lower() in ("true", "1") and prep.group_id:
+            _require_all_group_sites(self.request.user, prep.group)
+            kwargs["control_instance"] = None
+            finding = services.open_group_finding(prep, **kwargs)[0]
+        else:
+            finding = services.open_finding(audit_prep=prep, **kwargs)
         # Attach the created instance so DRF can return it
         serializer.instance = finding
 
