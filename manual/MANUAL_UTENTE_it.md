@@ -83,18 +83,29 @@ La lingua selezionata si applica a tutta l'interfaccia. I report e gli export ge
 
 Il menu laterale a sinistra mostra solo le sezioni accessibili in base al tuo ruolo. Le voci principali sono:
 
-| Voce | Cosa contiene |
-|------|--------------|
-| **Dashboard** | KPI compliance, heat map rischi, scadenze imminenti, alert |
-| **Compliance** | Libreria controlli (M03), documenti (M07), evidenze |
-| **Risk** | Asset IT/OT (M04), BIA (M05), Risk Assessment (M06) |
-| **Operazioni** | Incidenti (M09), Task/Scadenzario (M08), PDCA (M11), Fornitori (M14) |
-| **Governance** | Organigramma/Ruoli (M00), Lesson Learned (M12), Revisione Direzione (M13), Formazione (M15), BCP (M16) |
-| **Audit** | Audit Preparation (M17), Reporting (M18) |
-| **Notifiche** | Notifiche email, preferenze |
-| **Impostazioni** | Solo per ruoli amministrativi — SMTP, policy, profili notifica |
+| Gruppo | Voci |
+|--------|------|
+| **Principale** | Dashboard · Centro Operativo (M21)¹ · Reporting (M18) · KPI Operativi · Task (M08) · Checklist |
+| **Compliance** | Controlli (M03) · Gap Analysis · Documenti (M07) · Audit Prep (M17) |
+| **Rischio e continuità** | BIA (M05) · Risk (M06) · Asset IT/OT (M04) · BCP (M16) |
+| **Operazioni** | Incidenti (M09) · Lessons (M12) · Fornitori (M14) · Formazione (M15) · PDCA (M11) |
+| **Pianificazione** | Activity Schedule · Documenti Obbl. · Policy Scadenze² · Template Checklist³ |
+| **Organizzazione e revisione** | Governance (M00) · Obiettivi di sicurezza · Revisione Dir. (M13)⁴ · Siti (M01)² · Utenti (M02)⁵ · Competenze⁶ · Audit Trail (M10)⁷ · Autenticazione MFA |
+| **Sicurezza**⁸ | OSINT Monitor |
+| **Impostazioni**⁵ | Config. Email · Regole Notifiche · Govrico AI · Backup & Restore |
 
-Per espandere o comprimere una sezione clicca sul titolo della voce. Lo stato del menu viene ricordato tra una sessione e l'altra.
+Voci riservate ad alcuni ruoli:
+
+1. Super Admin, Compliance Officer, Risk Manager, Internal Auditor, Plant Manager
+2. Super Admin, Compliance Officer
+3. Super Admin, Compliance Officer, CISO, Risk Manager
+4. Super Admin, Compliance Officer, Risk Manager
+5. Super Admin
+6. Super Admin, Compliance Officer, CISO
+7. Super Admin, Internal Auditor, External Auditor
+8. Super Admin, CISO, Compliance Officer
+
+Il pulsante **«** in alto riduce il menu alle sole icone (il nome della voce compare passandoci sopra con il mouse) e **»** lo riapre. La scelta viene ricordata tra una sessione e l'altra.
 
 ### Icona ? su ogni pagina per aiuto contestuale
 

@@ -83,18 +83,29 @@ Wybrany język obowiązuje w całym interfejsie. Raporty i eksporty generowane s
 
 Menu boczne po lewej stronie wyświetla tylko sekcje dostępne zgodnie z Twoją rolą. Główne pozycje:
 
-| Pozycja | Zawartość |
-|---------|-----------|
-| **Pulpit** | KPI compliance, mapa ciepła ryzyk, zbliżające się terminy, alerty |
-| **Compliance** | Biblioteka kontroli (M03), dokumenty (M07), dowody |
-| **Ryzyko** | Aktywa IT/OT (M04), BIA (M05), Ocena ryzyka (M06) |
-| **Operacje** | Incydenty (M09), Zadania/Terminarz (M08), PDCA (M11), Dostawcy (M14) |
-| **Ład organizacyjny** | Schemat organizacyjny/Role (M00), Lekcje (M12), Przegląd Zarządu (M13), Szkolenia (M15), BCP (M16) |
-| **Audyt** | Przygotowanie do audytu (M17), Raportowanie (M18) |
-| **Powiadomienia** | Powiadomienia e-mail, preferencje |
-| **Ustawienia** | Tylko dla ról administracyjnych — SMTP, polityki, profile powiadomień |
+| Grupa | Pozycje |
+|--------|------|
+| **Główne** | Dashboard · Centrum Operacyjne (M21)¹ · Reporting (M18) · KPI operacyjne · Zadania (M08) · Listy kontrolne |
+| **Compliance** | Kontrole (M03) · Gap Analysis · Dokumenty (M07) · Audit Prep (M17) |
+| **Ryzyko i ciągłość** | BIA (M05) · Risk (M06) · Zasoby IT/OT (M04) · BCP (M16) |
+| **Operacje** | Incydenty (M09) · Lessons (M12) · Dostawcy (M14) · Szkolenia (M15) · PDCA (M11) |
+| **Planowanie** | Activity Schedule · Wymagane dok. · Polityka terminów² · Szablony list³ |
+| **Organizacja i przegląd** | Governance (M00) · Cele bezpieczeństwa · Przegląd zarządu (M13)⁴ · Zakłady (M01)² · Użytkownicy (M02)⁵ · Kompetencje⁶ · Audit Trail (M10)⁷ · Uwierzytelnianie MFA |
+| **Bezpieczeństwo**⁸ | OSINT Monitor |
+| **Ustawienia**⁵ | Ustawienia e-mail · Reguły powiadomień · Govrico AI · Kopia zapasowa & Przywracanie |
 
-Aby rozwinąć lub zwinąć sekcję, kliknij jej tytuł. Stan menu jest zapamiętywany między sesjami.
+Pozycje dostępne tylko dla niektórych ról:
+
+1. Super Admin, Compliance Officer, Risk Manager, Internal Auditor, Plant Manager
+2. Super Admin, Compliance Officer
+3. Super Admin, Compliance Officer, CISO, Risk Manager
+4. Super Admin, Compliance Officer, Risk Manager
+5. Super Admin
+6. Super Admin, Compliance Officer, CISO
+7. Super Admin, Internal Auditor, External Auditor
+8. Super Admin, CISO, Compliance Officer
+
+Przycisk **«** u góry zwija menu do samych ikon (nazwa pozycji pojawia się po najechaniu myszą), a **»** ponownie je rozwija. Wybór jest zapamiętywany między sesjami.
 
 ### Ikona ? na każdej stronie — pomoc kontekstowa
 

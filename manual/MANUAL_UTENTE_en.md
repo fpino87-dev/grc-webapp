@@ -83,18 +83,29 @@ The selected language applies to the entire interface. The reports and exports g
 
 The left sidebar shows only the sections accessible based on your role. The main entries are:
 
-| Entry | Contents |
-|-------|----------|
-| **Dashboard** | Compliance KPIs, risk heat map, upcoming deadlines, alerts |
-| **Compliance** | Controls library (M03), documents (M07), evidence |
-| **Risk** | IT/OT Assets (M04), BIA (M05), Risk Assessment (M06) |
-| **Operations** | Incidents (M09), Tasks/Schedule (M08), PDCA (M11), Suppliers (M14) |
-| **Governance** | Org chart/Roles (M00), Lesson Learned (M12), Management Review (M13), Training (M15), BCP (M16) |
-| **Audit** | Audit Preparation (M17), Reporting (M18) |
-| **Notifications** | Email notifications, preferences |
-| **Settings** | Administrative roles only — SMTP, policies, notification profiles |
+| Group | Entries |
+|--------|------|
+| **Main** | Dashboard · Operations Center (M21)¹ · Reporting (M18) · Operational KPIs · Tasks (M08) · Checklists |
+| **Compliance** | Controls (M03) · Gap Analysis · Documents (M07) · Audit Prep (M17) |
+| **Risk & continuity** | BIA (M05) · Risk (M06) · IT/OT Assets (M04) · BCP (M16) |
+| **Operations** | Incidents (M09) · Lessons (M12) · Suppliers (M14) · Training (M15) · PDCA (M11) |
+| **Planning** | Activity Schedule · Required Docs · Due date policy² · Checklist Templates³ |
+| **Organization & review** | Governance (M00) · Security objectives · Management Review (M13)⁴ · Sites (M01)² · Users (M02)⁵ · Competency⁶ · Audit Trail (M10)⁷ · MFA Authentication |
+| **Security**⁸ | OSINT Monitor |
+| **Settings**⁵ | Email settings · Notification rules · Govrico AI · Backup & Restore |
 
-To expand or collapse a section click on the section title. The menu state is remembered between sessions.
+Entries restricted to some roles:
+
+1. Super Admin, Compliance Officer, Risk Manager, Internal Auditor, Plant Manager
+2. Super Admin, Compliance Officer
+3. Super Admin, Compliance Officer, CISO, Risk Manager
+4. Super Admin, Compliance Officer, Risk Manager
+5. Super Admin
+6. Super Admin, Compliance Officer, CISO
+7. Super Admin, Internal Auditor, External Auditor
+8. Super Admin, CISO, Compliance Officer
+
+The **«** button at the top shrinks the menu to icons only (hover over an icon to see the entry name) and **»** expands it again. Your choice is remembered between sessions.
 
 ### ? icon on every page for contextual help
 

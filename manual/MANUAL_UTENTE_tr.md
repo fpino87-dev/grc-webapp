@@ -83,18 +83,29 @@ Seçilen dil tüm arayüze uygulanır. Oluşturulan raporlar ve dışa aktarıml
 
 Sol taraftaki yan menü, yalnızca rolünüze göre erişilebilen bölümleri gösterir. Ana öğeler şunlardır:
 
-| Öğe | İçeriği |
-|-----|---------|
-| **Kontrol Paneli** | Uyum KPI'ları, risk ısı haritası, yaklaşan son tarihler, uyarılar |
-| **Uyum** | Kontrol kütüphanesi (M03), belgeler (M07), kanıtlar |
-| **Risk** | BT/OT varlıkları (M04), İEA (M05), Risk Değerlendirmesi (M06) |
-| **Operasyonlar** | Olaylar (M09), Görevler/Takvim (M08), PDCA (M11), Tedarikçiler (M14) |
-| **Yönetişim** | Org şeması/Roller (M00), Alınan Dersler (M12), Yönetim Gözden Geçirmesi (M13), Eğitim (M15), İSP (M16) |
-| **Denetim** | Denetim Hazırlığı (M17), Raporlama (M18) |
-| **Bildirimler** | E-posta bildirimleri, tercihler |
-| **Ayarlar** | Yalnızca yönetici rolleri için — SMTP, politika, bildirim profilleri |
+| Grup | Öğeler |
+|--------|------|
+| **Ana** | Dashboard · Operasyon Merkezi (M21)¹ · Reporting (M18) · Operasyonel KPI'lar · Görevler (M08) · Kontrol Listeleri |
+| **Compliance** | Kontroller (M03) · Gap Analysis · Belgeler (M07) · Audit Prep (M17) |
+| **Risk ve süreklilik** | BIA (M05) · Risk (M06) · IT/OT Varlıkları (M04) · BCP (M16) |
+| **Operasyonlar** | Olaylar (M09) · Lessons (M12) · Tedarikçiler (M14) · Eğitim (M15) · PDCA (M11) |
+| **Planlama** | Activity Schedule · Zorunlu Belgeler · Son tarih politikası² · Liste Şablonları³ |
+| **Organizasyon ve gözden geçirme** | Governance (M00) · Güvenlik hedefleri · Yönetim gözden geçirmesi (M13)⁴ · Siteler (M01)² · Kullanıcılar (M02)⁵ · Yetkinlikler⁶ · Audit Trail (M10)⁷ · MFA Kimlik Doğrulama |
+| **Güvenlik**⁸ | OSINT Monitor |
+| **Ayarlar**⁵ | E-posta ayarları · Bildirim kuralları · Govrico AI · Yedekleme & Geri Yükleme |
 
-Bir bölümü genişletmek veya daraltmak için öğenin başlığına tıklayın. Menü durumu oturumlar arasında hatırlanır.
+Yalnızca bazı rollere açık öğeler:
+
+1. Super Admin, Compliance Officer, Risk Manager, Internal Auditor, Plant Manager
+2. Super Admin, Compliance Officer
+3. Super Admin, Compliance Officer, CISO, Risk Manager
+4. Super Admin, Compliance Officer, Risk Manager
+5. Super Admin
+6. Super Admin, Compliance Officer, CISO
+7. Super Admin, Internal Auditor, External Auditor
+8. Super Admin, CISO, Compliance Officer
+
+Üstteki **«** düğmesi menüyü yalnızca simgelere indirir (öğenin adı fareyle üzerine gelince görünür), **»** ise yeniden açar. Seçiminiz oturumlar arasında hatırlanır.
 
 ### Her sayfada bağlamsal yardım için ? simgesi
 
