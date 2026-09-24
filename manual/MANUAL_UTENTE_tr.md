@@ -600,7 +600,7 @@ Her PDCA döngüsü, sürekli iyileştirme eylemini temsil eder. 4 aşama zorunl
 | Geçiş | Zorunlu koşul |
 |-------|---------------|
 | **PLAN → DO** | Gerçekleştirilecek eylemin açıklaması (en az 20 karakter). Plan, bağlam dışında da anlaşılır olmalı |
-| **DO → CHECK** | Gerçekleştirilen eylemi belgeleyen eklenmiş kanıt (zorunlu dosya) |
+| **DO → CHECK** | Gerçekleştirilen eylemi belgeleyen kanıt (zorunlu): mevcut bir kanıt seçin veya döngüden çıkmadan aynı pencereden dosyayı yükleyin. Yüklenen dosya, döngünün tesisinde ve geçerlilik süresi olmadan döngünün kanıtı olur |
 | **CHECK → ACT** | Doğrulama sonucu (açıklayıcı metin) + Seçilen sonuç: **tamam** / **kısmi** / **başarısız** |
 | **ACT → KAPALI** | Standartlaştırma: benimsenen çözümün çoğaltılabilir olması için belgelenmesi (en az 20 karakter) |
 

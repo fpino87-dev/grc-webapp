@@ -600,7 +600,7 @@ Chaque cycle PDCA représente une action d'amélioration continue. Les 4 phases 
 | Transition | Exigence obligatoire |
 |------------|---------------------|
 | **PLAN → DO** | Description de l'action à exécuter (minimum 20 caractères). Le plan doit être compréhensible hors contexte |
-| **DO → CHECK** | Preuve jointe documentant l'action exécutée (fichier obligatoire) |
+| **DO → CHECK** | Preuve documentant l'action exécutée (obligatoire) : choisissez-en une existante ou chargez le fichier depuis la même fenêtre, sans quitter le cycle. Le fichier chargé devient une preuve du cycle, sur le site du cycle et sans échéance |
 | **CHECK → ACT** | Résultat de la vérification (texte descriptif) + Résultat choisi : **ok** / **partiel** / **ko** |
 | **ACT → CLÔTURÉ** | Standardisation : documentation de la solution adoptée pour qu'elle soit reproductible (minimum 20 caractères) |
 

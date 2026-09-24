@@ -3370,7 +3370,12 @@
       "closing": "Chiusura...",
       "error_advance": "Errore durante l'avanzamento di fase.",
       "error_close": "Errore durante la chiusura del ciclo.",
-      "reopened_note": "⟳ Questo ciclo ha generato un nuovo ciclo PLAN per esito CHECK non efficace."
+      "reopened_note": "⟳ Questo ciclo ha generato un nuovo ciclo PLAN per esito CHECK non efficace.",
+      "evidence_mode_existing": "Scegli un'evidenza esistente",
+      "evidence_mode_upload": "Carica un nuovo file",
+      "evidence_file_label": "File dell'evidenza",
+      "evidence_title_placeholder": "Titolo (se vuoto: «PDCA — titolo del ciclo»)",
+      "evidence_upload_hint": "Il file viene archiviato come evidenza del ciclo, sul sito del ciclo e senza scadenza."
     },
     "dossier": {
       "tooltip": "Dossier audit (dettaglio fasi + stampa/PDF)",

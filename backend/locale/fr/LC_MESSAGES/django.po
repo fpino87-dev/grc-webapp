@@ -2785,3 +2785,16 @@ msgstr "Un fournisseur avec ce numéro de TVA existe déjà."
 #: apps/suppliers/views.py
 msgid "Identificativo fornitore non valido."
 msgstr "Identifiant de fournisseur non valide."
+
+#: apps/pdca/services.py
+#, python-format
+msgid "Evidenza di implementazione del ciclo PDCA «%(title)s»."
+msgstr "Preuve de mise en œuvre du cycle PDCA «%(title)s»."
+
+#: apps/pdca/views.py
+msgid "Carica un file oppure scegli un'evidenza esistente, non entrambi."
+msgstr "Chargez un fichier ou choisissez une preuve existante, pas les deux."
+
+#: apps/pdca/views.py
+msgid "Il file dell'evidenza si carica solo nel passaggio da DO a CHECK."
+msgstr "Le fichier de la preuve ne peut être chargé que lors du passage de DO à CHECK."

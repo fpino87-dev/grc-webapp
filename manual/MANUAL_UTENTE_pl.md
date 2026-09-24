@@ -600,7 +600,7 @@ Każdy cykl PDCA reprezentuje działanie ciągłego doskonalenia. 4 fazy następ
 | Przejście | Obowiązkowy wymóg |
 |-----------|------------------|
 | **PLAN → DO** | Opis działania do wykonania (minimum 20 znaków). Plan musi być zrozumiały również poza kontekstem |
-| **DO → CHECK** | Dołączony dowód dokumentujący wykonane działanie (plik obowiązkowy) |
+| **DO → CHECK** | Dowód dokumentujący wykonane działanie (obowiązkowy): wybierz istniejący lub wgraj plik w tym samym oknie, bez opuszczania cyklu. Wgrany plik staje się dowodem cyklu, w zakładzie cyklu i bez terminu ważności |
 | **CHECK → ACT** | Wynik weryfikacji (opisowy tekst) + Wybrany rezultat: **ok** / **częściowy** / **ko** |
 | **ACT → ZAMKNIĘTY** | Standaryzacja: dokumentacja przyjętego rozwiązania, aby było odtwarzalne (minimum 20 znaków) |
 

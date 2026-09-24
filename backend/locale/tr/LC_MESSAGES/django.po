@@ -2719,3 +2719,16 @@ msgstr "Bu vergi numarasına sahip bir tedarikçi zaten mevcut."
 #: apps/suppliers/views.py
 msgid "Identificativo fornitore non valido."
 msgstr "Geçersiz tedarikçi tanımlayıcısı."
+
+#: apps/pdca/services.py
+#, python-format
+msgid "Evidenza di implementazione del ciclo PDCA «%(title)s»."
+msgstr "«%(title)s» PDCA döngüsünün uygulama kanıtı."
+
+#: apps/pdca/views.py
+msgid "Carica un file oppure scegli un'evidenza esistente, non entrambi."
+msgstr "Bir dosya yükleyin veya mevcut bir kanıt seçin, ikisini birden değil."
+
+#: apps/pdca/views.py
+msgid "Il file dell'evidenza si carica solo nel passaggio da DO a CHECK."
+msgstr "Kanıt dosyası yalnızca DO'dan CHECK'e geçişte yüklenebilir."

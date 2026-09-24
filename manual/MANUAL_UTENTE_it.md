@@ -600,7 +600,7 @@ Ogni ciclo PDCA rappresenta un'azione di miglioramento continuo. Le 4 fasi seguo
 | Transizione | Requisito obbligatorio |
 |-------------|----------------------|
 | **PLAN → DO** | Descrizione dell'azione da eseguire (minimo 20 caratteri). Il piano deve essere comprensibile anche fuori contesto |
-| **DO → CHECK** | Evidenza allegata che documenta l'azione eseguita (file obbligatorio) |
+| **DO → CHECK** | Evidenza che documenta l'azione eseguita (obbligatoria): scegline una esistente oppure carica il file dalla stessa finestra, senza uscire dal ciclo. Il file caricato diventa un'evidenza del ciclo, sul sito del ciclo e senza scadenza |
 | **CHECK → ACT** | Risultato della verifica (testo descrittivo) + Esito scelto: **ok** / **parziale** / **ko** |
 | **ACT → CHIUSO** | Standardizzazione: documentazione della soluzione adottata perche' sia replicabile (minimo 20 caratteri) |
 

@@ -3370,7 +3370,12 @@
       "closing": "Kapatılıyor...",
       "error_advance": "Aşama ilerletilirken hata oluştu.",
       "error_close": "Döngü kapatılırken hata oluştu.",
-      "reopened_note": "⟳ Bu döngü, etkili olmayan CHECK sonucu nedeniyle yeni bir PLAN döngüsü oluşturdu."
+      "reopened_note": "⟳ Bu döngü, etkili olmayan CHECK sonucu nedeniyle yeni bir PLAN döngüsü oluşturdu.",
+      "evidence_mode_existing": "Mevcut bir kanıt seçin",
+      "evidence_mode_upload": "Yeni dosya yükleyin",
+      "evidence_file_label": "Kanıt dosyası",
+      "evidence_title_placeholder": "Başlık (boşsa: «PDCA — döngü başlığı»)",
+      "evidence_upload_hint": "Dosya, döngünün tesisinde ve geçerlilik süresi olmadan döngünün kanıtı olarak arşivlenir."
     },
     "dossier": {
       "tooltip": "Denetim dosyası (aşama ayrıntıları + yazdırma/PDF)",

@@ -3370,7 +3370,12 @@
       "closing": "Clôture...",
       "error_advance": "Erreur lors du passage à la phase suivante.",
       "error_close": "Erreur lors de la clôture du cycle.",
-      "reopened_note": "⟳ Ce cycle a généré un nouveau cycle PLAN suite à un résultat CHECK non efficace."
+      "reopened_note": "⟳ Ce cycle a généré un nouveau cycle PLAN suite à un résultat CHECK non efficace.",
+      "evidence_mode_existing": "Choisir une preuve existante",
+      "evidence_mode_upload": "Charger un nouveau fichier",
+      "evidence_file_label": "Fichier de la preuve",
+      "evidence_title_placeholder": "Titre (si vide : «PDCA — titre du cycle»)",
+      "evidence_upload_hint": "Le fichier est archivé comme preuve du cycle, sur le site du cycle et sans échéance."
     },
     "dossier": {
       "tooltip": "Dossier d'audit (détail des phases + impression/PDF)",

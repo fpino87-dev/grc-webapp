@@ -600,7 +600,7 @@ Each PDCA cycle represents a continuous improvement action. The 4 phases follow 
 | Transition | Mandatory requirement |
 |------------|----------------------|
 | **PLAN → DO** | Description of the action to be performed (minimum 20 characters). The plan must be understandable even out of context |
-| **DO → CHECK** | Attached evidence documenting the action performed (mandatory file) |
+| **DO → CHECK** | Evidence documenting the action performed (mandatory): choose an existing one or upload the file from the same window, without leaving the cycle. The uploaded file becomes evidence of the cycle, on the cycle's site and with no expiry |
 | **CHECK → ACT** | Result of the verification (descriptive text) + Chosen outcome: **ok** / **partial** / **ko** |
 | **ACT → CLOSED** | Standardisation: documentation of the adopted solution so that it is replicable (minimum 20 characters) |
 

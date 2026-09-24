@@ -18,6 +18,7 @@ vi.mock("../../../api/endpoints/plants", () => ({
 }));
 
 import { pdcaApi } from "../../../api/endpoints/pdca";
+import { apiClient } from "../../../api/client";
 
 const mockList = vi.mocked(pdcaApi.list);
 const mockCaps = vi.mocked(pdcaApi.capabilities);
@@ -94,5 +95,27 @@ describe("PdcaPage — cicli di organizzazione", () => {
     await vi.waitFor(() => expect(mockList).toHaveBeenLastCalledWith({ site: "p1" }));
     fireEvent.change(plantFilter, { target: { value: "__org__" } });
     await vi.waitFor(() => expect(mockList).toHaveBeenLastCalledWith({ org: "true" }));
+  });
+});
+
+describe("PdcaPage — evidenza DO → CHECK", () => {
+  it("si può caricare il file direttamente invece di sceglierne uno esistente", async () => {
+    mockList.mockResolvedValue({ results: [cycle({ fase_corrente: "do" })] } as never);
+    const post = vi.mocked(apiClient.post);
+    post.mockResolvedValue({ data: { ok: true, fase_corrente: "check" } } as never);
+    renderPage();
+    fireEvent.click(await screen.findByText("pdca.advance.btn_check"));
+    fireEvent.click(screen.getByLabelText("pdca.advance.evidence_mode_upload"));
+    const file = new File(["%PDF-1.4"], "verbale.pdf", { type: "application/pdf" });
+    fireEvent.change(screen.getByLabelText("pdca.advance.evidence_file_label"), { target: { files: [file] } });
+    fireEvent.change(screen.getByPlaceholderText("pdca.advance.evidence_title_placeholder"),
+                     { target: { value: "Verbale formazione" } });
+    fireEvent.click(screen.getByText("pdca.advance.confirm"));
+    await vi.waitFor(() => expect(post).toHaveBeenCalled());
+    const [url, body] = post.mock.calls[0];
+    expect(url).toBe("/pdca/cycles/c1/advance/");
+    expect(body).toBeInstanceOf(FormData);
+    expect((body as FormData).get("file")).toBe(file);
+    expect((body as FormData).get("evidence_title")).toBe("Verbale formazione");
   });
 });

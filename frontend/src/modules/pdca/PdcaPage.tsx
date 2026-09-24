@@ -746,6 +746,10 @@ function AdvanceButtons({
   const [notes, setNotes] = useState("");
   const [outcome, setOutcome] = useState<"" | "ok" | "partial" | "ko">("");
   const [evidenceId, setEvidenceId] = useState("");
+  // DO → CHECK: evidenza esistente oppure file caricato qui (stessa richiesta).
+  const [evidenceMode, setEvidenceMode] = useState<"existing" | "upload">("existing");
+  const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
+  const [evidenceTitle, setEvidenceTitle] = useState("");
   const [error, setError] = useState("");
   const { data: evidences } = useQuery<Evidence[]>({
     queryKey: ["pdca-evidences", cycle.plant],
@@ -762,6 +766,16 @@ function AdvanceButtons({
 
   const advanceMutation = useMutation({
     mutationFn: async () => {
+      if (open === "do" && evidenceMode === "upload" && evidenceFile) {
+        const fd = new FormData();
+        fd.append("notes", notes);
+        fd.append("file", evidenceFile);
+        if (evidenceTitle.trim()) fd.append("evidence_title", evidenceTitle.trim());
+        const res = await apiClient.post(`/pdca/cycles/${cycle.id}/advance/`, fd, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        return res.data;
+      }
       const payload: any = { notes };
       if (open === "do") payload.evidence_id = evidenceId || undefined;
       if (open === "check") payload.outcome = outcome;
@@ -773,7 +787,11 @@ function AdvanceButtons({
       setNotes("");
       setOutcome("");
       setEvidenceId("");
+      setEvidenceMode("existing");
+      setEvidenceFile(null);
+      setEvidenceTitle("");
       setError("");
+      qc.invalidateQueries({ queryKey: ["pdca-evidences"] });
       qc.invalidateQueries({ queryKey: ["pdca"] });
       onUpdated();
     },
@@ -845,18 +863,49 @@ function AdvanceButtons({
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     {t("pdca.advance.do_evidence_label")}
                   </label>
-                  <select
-                    className="w-full border rounded px-3 py-2 text-sm"
-                    value={evidenceId}
-                    onChange={(e) => setEvidenceId(e.target.value)}
-                  >
-                    <option value="">{t("pdca.advance.evidence_placeholder")}</option>
-                    {(evidences || []).map((ev) => (
-                      <option key={ev.id} value={ev.id}>
-                        {ev.title}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex gap-4 mb-2 text-sm">
+                    <label className="flex items-center gap-1.5">
+                      <input type="radio" name="evidence_mode" checked={evidenceMode === "existing"}
+                             onChange={() => setEvidenceMode("existing")} />
+                      {t("pdca.advance.evidence_mode_existing")}
+                    </label>
+                    <label className="flex items-center gap-1.5">
+                      <input type="radio" name="evidence_mode" checked={evidenceMode === "upload"}
+                             onChange={() => setEvidenceMode("upload")} />
+                      {t("pdca.advance.evidence_mode_upload")}
+                    </label>
+                  </div>
+                  {evidenceMode === "existing" ? (
+                    <select
+                      className="w-full border rounded px-3 py-2 text-sm"
+                      value={evidenceId}
+                      onChange={(e) => setEvidenceId(e.target.value)}
+                    >
+                      <option value="">{t("pdca.advance.evidence_placeholder")}</option>
+                      {(evidences || []).map((ev) => (
+                        <option key={ev.id} value={ev.id}>
+                          {ev.title}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="space-y-2">
+                      <input
+                        type="file"
+                        aria-label={t("pdca.advance.evidence_file_label")}
+                        onChange={(e) => setEvidenceFile(e.target.files?.[0] ?? null)}
+                        className="w-full text-sm"
+                      />
+                      <input
+                        type="text"
+                        value={evidenceTitle}
+                        onChange={(e) => setEvidenceTitle(e.target.value)}
+                        placeholder={t("pdca.advance.evidence_title_placeholder")}
+                        className="w-full border rounded px-3 py-2 text-sm"
+                      />
+                      <p className="text-xs text-gray-500">{t("pdca.advance.evidence_upload_hint")}</p>
+                    </div>
+                  )}
                 </div>
               </>
             )}

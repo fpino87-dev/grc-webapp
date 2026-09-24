@@ -26,6 +26,22 @@ def create_cycle(plant, title, trigger_type, trigger_source_id=None, scope_type=
     return cycle
 
 
+def create_cycle_evidence(cycle, uploaded_file, user, title: str = ""):
+    """Evidenza di implementazione caricata direttamente dall'avanzamento
+    DO → CHECK: sul sito del ciclo (o di organizzazione), senza scadenza —
+    documenta l'azione del ciclo, non un controllo. Validazione del file
+    (estensione + MIME) e audit a cura di `create_evidence_with_file`."""
+    from apps.documents.services import create_evidence_with_file
+
+    data = {
+        "title": (title.strip() or f"PDCA — {cycle.title}")[:300],
+        "evidence_type": "altro",
+        "description": _("Evidenza di implementazione del ciclo PDCA «%(title)s».") % {"title": cycle.title},
+        "plant": str(cycle.plant_id) if cycle.plant_id else "",
+    }
+    return create_evidence_with_file(data, uploaded_file, user)
+
+
 @transaction.atomic
 def advance_phase(cycle, user, phase_notes: str = "", evidence=None, outcome: str = "") -> PdcaCycle:
     """

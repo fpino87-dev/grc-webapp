@@ -97,28 +97,48 @@ class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         notes = request.data.get("notes", "")
         outcome = request.data.get("outcome", "")
         evidence_id = request.data.get("evidence_id")
+        # In DO si può scegliere un'evidenza esistente oppure caricare il file
+        # (multipart `file` + `evidence_title` opzionale) nella stessa richiesta.
+        uploaded_file = request.FILES.get("file")
+        if uploaded_file and evidence_id:
+            return Response(
+                {"error": _("Carica un file oppure scegli un'evidenza esistente, non entrambi.")},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if uploaded_file and cycle.fase_corrente != "do":
+            return Response(
+                {"error": _("Il file dell'evidenza si carica solo nel passaggio da DO a CHECK.")},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         evidence = None
         if evidence_id:
             evidence = Evidence.objects.filter(pk=evidence_id).first()
             if not evidence:
                 return Response({"error": _("Evidenza non trovata")}, status=status.HTTP_404_NOT_FOUND)
         try:
-            cycle = services.advance_phase(
-                cycle,
-                request.user,
-                phase_notes=notes,
-                evidence=evidence,
-                outcome=outcome,
-            )
+            with transaction.atomic():
+                if uploaded_file:
+                    evidence = services.create_cycle_evidence(
+                        cycle, uploaded_file, request.user, title=request.data.get("evidence_title", ""),
+                    )
+                cycle = services.advance_phase(
+                    cycle,
+                    request.user,
+                    phase_notes=notes,
+                    evidence=evidence,
+                    outcome=outcome,
+                )
             return Response(
                 {
                     "ok": True,
                     "fase_corrente": cycle.fase_corrente,
                     "reopened_as": str(cycle.reopened_as.pk) if cycle.reopened_as else None,
+                    "evidence_id": str(evidence.pk) if evidence else None,
                 }
             )
         except ValidationError as exc:
-            return Response({"error": str(exc.message)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": exc.messages[0] if exc.messages else str(exc)},
+                            status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=["post"], url_path="close")
     def close(self, request, pk=None):

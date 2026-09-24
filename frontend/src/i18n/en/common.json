@@ -3370,7 +3370,12 @@
       "closing": "Closing...",
       "error_advance": "Error while advancing the phase.",
       "error_close": "Error while closing the cycle.",
-      "reopened_note": "⟳ This cycle generated a new PLAN cycle due to a non-effective CHECK outcome."
+      "reopened_note": "⟳ This cycle generated a new PLAN cycle due to a non-effective CHECK outcome.",
+      "evidence_mode_existing": "Choose existing evidence",
+      "evidence_mode_upload": "Upload a new file",
+      "evidence_file_label": "Evidence file",
+      "evidence_title_placeholder": "Title (if empty: «PDCA — cycle title»)",
+      "evidence_upload_hint": "The file is stored as evidence of the cycle, on the cycle's site and with no expiry."
     },
     "dossier": {
       "tooltip": "Audit dossier (phase detail + print/PDF)",

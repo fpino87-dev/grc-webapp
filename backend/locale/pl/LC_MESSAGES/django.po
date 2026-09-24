@@ -2740,3 +2740,16 @@ msgstr "Dostawca z tym numerem NIP już istnieje."
 #: apps/suppliers/views.py
 msgid "Identificativo fornitore non valido."
 msgstr "Nieprawidłowy identyfikator dostawcy."
+
+#: apps/pdca/services.py
+#, python-format
+msgid "Evidenza di implementazione del ciclo PDCA «%(title)s»."
+msgstr "Dowód wdrożenia cyklu PDCA «%(title)s»."
+
+#: apps/pdca/views.py
+msgid "Carica un file oppure scegli un'evidenza esistente, non entrambi."
+msgstr "Wgraj plik albo wybierz istniejący dowód, nie oba naraz."
+
+#: apps/pdca/views.py
+msgid "Il file dell'evidenza si carica solo nel passaggio da DO a CHECK."
+msgstr "Plik dowodu można wgrać tylko przy przejściu z DO do CHECK."

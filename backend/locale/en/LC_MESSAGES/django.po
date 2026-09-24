@@ -2718,3 +2718,16 @@ msgstr "A supplier with this VAT number already exists."
 #: apps/suppliers/views.py
 msgid "Identificativo fornitore non valido."
 msgstr "Invalid supplier identifier."
+
+#: apps/pdca/services.py
+#, python-format
+msgid "Evidenza di implementazione del ciclo PDCA «%(title)s»."
+msgstr "Implementation evidence of the PDCA cycle «%(title)s»."
+
+#: apps/pdca/views.py
+msgid "Carica un file oppure scegli un'evidenza esistente, non entrambi."
+msgstr "Upload a file or choose an existing evidence, not both."
+
+#: apps/pdca/views.py
+msgid "Il file dell'evidenza si carica solo nel passaggio da DO a CHECK."
+msgstr "The evidence file can only be uploaded when moving from DO to CHECK."

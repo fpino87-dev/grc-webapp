@@ -3370,7 +3370,12 @@
       "closing": "Zamykanie...",
       "error_advance": "Błąd podczas przechodzenia do kolejnej fazy.",
       "error_close": "Błąd podczas zamykania cyklu.",
-      "reopened_note": "⟳ Ten cykl wygenerował nowy cykl PLAN z powodu nieskutecznego wyniku CHECK."
+      "reopened_note": "⟳ Ten cykl wygenerował nowy cykl PLAN z powodu nieskutecznego wyniku CHECK.",
+      "evidence_mode_existing": "Wybierz istniejący dowód",
+      "evidence_mode_upload": "Wgraj nowy plik",
+      "evidence_file_label": "Plik dowodu",
+      "evidence_title_placeholder": "Tytuł (jeśli pusty: «PDCA — tytuł cyklu»)",
+      "evidence_upload_hint": "Plik jest archiwizowany jako dowód cyklu, w zakładzie cyklu i bez terminu ważności."
     },
     "dossier": {
       "tooltip": "Dossier audytowe (szczegóły faz + wydruk/PDF)",
