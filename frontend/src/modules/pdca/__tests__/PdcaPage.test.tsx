@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MemoryRouter } from "react-router-dom";
 import { PdcaPage } from "../PdcaPage";
 
 vi.mock("react-i18next", () => ({
@@ -11,7 +12,10 @@ vi.mock("../../../api/client", () => ({
   apiClient: { get: vi.fn(() => Promise.resolve({ data: { results: [] } })), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
 }));
 vi.mock("../../../api/endpoints/pdca", () => ({
-  pdcaApi: { list: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn(), archivia: vi.fn(), capabilities: vi.fn() },
+  pdcaApi: {
+    list: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn(), archivia: vi.fn(), capabilities: vi.fn(),
+    linkFinding: vi.fn(), unlinkFinding: vi.fn(),
+  },
 }));
 vi.mock("../../../api/endpoints/plants", () => ({
   plantsApi: { list: vi.fn(() => Promise.resolve([{ id: "p1", code: "TA", name: "Plant TA" }])) },
@@ -33,9 +37,13 @@ function cycle(overrides = {}) {
   };
 }
 
-function renderPage() {
+function renderPage(url = "/pdca") {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={qc}><PdcaPage /></QueryClientProvider>);
+  return render(
+    <QueryClientProvider client={qc}>
+      <MemoryRouter initialEntries={[url]}><PdcaPage /></MemoryRouter>
+    </QueryClientProvider>,
+  );
 }
 
 beforeEach(() => {
@@ -119,3 +127,23 @@ describe("PdcaPage — evidenza DO → CHECK", () => {
     expect((body as FormData).get("evidence_title")).toBe("Verbale formazione");
   });
 });
+
+describe("PdcaPage — collegamento ai finding di audit", () => {
+  it("mostra i finding collegati con audit e committente", async () => {
+    mockList.mockResolvedValue({ results: [cycle({ findings: [{
+      id: "f1", title: "Classificazione", finding_type: "observation", status: "open",
+      audit_prep: "a1", audit_title: "Audit OEM", audit_type: "seconda_parte", requesting_party: "OEM Alfa",
+    }] })] } as never);
+    renderPage();
+    expect(await screen.findByText(/\[OBSERVATION\] Classificazione/)).toBeInTheDocument();
+    expect(screen.getByText(/Audit OEM/)).toBeInTheDocument();
+    expect(screen.getByText(/OEM Alfa/)).toBeInTheDocument();
+  });
+
+  it("il deep link ?cycle= mostra solo il ciclo collegato", async () => {
+    renderPage("/pdca?cycle=c9");
+    expect(await screen.findByText("pdca.link.single_cycle")).toBeInTheDocument();
+    await vi.waitFor(() => expect(mockList).toHaveBeenLastCalledWith({ id: "c9" }));
+  });
+});
+

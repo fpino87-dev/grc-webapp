@@ -19,10 +19,10 @@ from .serializers import PdcaCycleSerializer, PdcaPhaseSerializer
 
 
 class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
-    queryset = PdcaCycle.objects.select_related("plant").prefetch_related("phases")
+    queryset = PdcaCycle.objects.select_related("plant").prefetch_related("phases", "findings__audit_prep")
     serializer_class = PdcaCycleSerializer
     permission_classes = [PdcaPermission]
-    filterset_fields = ["plant", "fase_corrente", "trigger_type"]
+    filterset_fields = ["id", "plant", "fase_corrente", "trigger_type"]
     search_fields = ["title"]
     plant_field = "plant"
     # I cicli di organizzazione (plant=None) sono visibili a tutti i siti.
@@ -31,6 +31,9 @@ class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         qs = super().get_queryset()
         params = self.request.query_params
+        # ?open=true → solo cicli ancora aperti (collegabili a un finding).
+        if params.get("open", "").lower() == "true":
+            qs = qs.exclude(fase_corrente__in=["chiuso", "archiviato"])
         # ?org=true → solo i cicli di organizzazione.
         if params.get("org", "").lower() == "true":
             qs = qs.filter(plant__isnull=True)
@@ -56,7 +59,58 @@ class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         di organizzazione? (il backend ricontrolla ogni scrittura)."""
         return Response({"can_manage_org": user_has_org_scope(request.user)})
 
+    def _scoped_finding(self, finding_id):
+        """Finding visibile all'utente (perimetro del sito dell'audit), o 404."""
+        from rest_framework.exceptions import NotFound
+
+        from apps.audit_prep.models import AuditFinding
+        from core.scoping import scope_queryset_by_plant
+
+        try:
+            pk = uuid.UUID(str(finding_id))
+        except (TypeError, ValueError):
+            raise NotFound(_("Finding non trovato.")) from None
+        finding = scope_queryset_by_plant(
+            AuditFinding.objects.select_related("audit_prep"), self.request.user,
+            plant_field="audit_prep__plant",
+        ).filter(pk=pk).first()
+        if finding is None:
+            raise NotFound(_("Finding non trovato."))
+        return finding
+
     def perform_create(self, serializer):
+        from rest_framework.exceptions import ValidationError as DRFValidationError
+
+        from apps.audit_prep import services as audit_services
+
+        # Nuovo ciclo nato da un finding di audit: sito, trigger e tipo di audit
+        # vengono dal finding (non dal form), poi il collegamento univoco.
+        finding_id = self.request.data.get("finding")
+        if finding_id:
+            finding = self._scoped_finding(finding_id)
+            if finding.pdca_cycle_id:
+                raise DRFValidationError({"error": _("Il finding è già collegato a un PDCA.")})
+            cycle = serializer.save(
+                created_by=self.request.user,
+                plant=finding.audit_prep.plant,
+                trigger_type=audit_services.PDCA_TRIGGER_MAP[finding.finding_type],
+                trigger_source_id=finding.pk,
+                scope_type="finding",
+                scope_id=finding.pk,
+                audit_subtype=finding.audit_prep.audit_type,
+            )
+            for fase in services.PHASE_ORDER:
+                PdcaPhase.objects.get_or_create(cycle=cycle, phase=fase)
+            try:
+                audit_services.link_finding_to_pdca(finding, cycle, self.request.user)
+            except ValidationError as exc:
+                raise DRFValidationError({"error": exc.messages[0]}) from exc
+            log_action(
+                user=self.request.user, action_code="pdca.cycle.create", level="L2", entity=cycle,
+                payload={"cycle_id": str(cycle.pk), "title": cycle.title, "finding": str(finding.pk)},
+            )
+            return
+
         plant = serializer.validated_data.get("plant")
         require_org_scope_for_org_wide(self.request.user, plant)
         extra = {"scope_type": "org"} if plant is None else {}
@@ -88,6 +142,39 @@ class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 "updated_fields": list(serializer.validated_data.keys()),
             },
         )
+
+    @action(detail=True, methods=["post"], url_path="link-finding")
+    def link_finding(self, request, pk=None):
+        """POST /pdca/cycles/<id>/link-finding/ {finding} → collega un finding di audit
+        (stesso sito; più finding solo dello stesso audit)."""
+        from apps.audit_prep import services as audit_services
+
+        cycle = self.get_object()
+        finding = self._scoped_finding(request.data.get("finding"))
+        try:
+            with transaction.atomic():
+                audit_services.link_finding_to_pdca(finding, cycle, request.user)
+        except ValidationError as exc:
+            return Response({"error": exc.messages[0]}, status=status.HTTP_400_BAD_REQUEST)
+        cycle = self.get_queryset().get(pk=cycle.pk)
+        return Response(self.get_serializer(cycle).data)
+
+    @action(detail=True, methods=["post"], url_path="unlink-finding")
+    def unlink_finding(self, request, pk=None):
+        """POST /pdca/cycles/<id>/unlink-finding/ {finding, reason}."""
+        from apps.audit_prep import services as audit_services
+
+        cycle = self.get_object()
+        finding = self._scoped_finding(request.data.get("finding"))
+        if finding.pdca_cycle_id != cycle.pk:
+            return Response({"error": _("Il finding non è collegato a questo PDCA.")},
+                            status=status.HTTP_400_BAD_REQUEST)
+        try:
+            audit_services.unlink_finding_from_pdca(finding, request.user, request.data.get("reason", ""))
+        except ValidationError as exc:
+            return Response({"error": exc.messages[0]}, status=status.HTTP_400_BAD_REQUEST)
+        cycle = self.get_queryset().get(pk=cycle.pk)
+        return Response(self.get_serializer(cycle).data)
 
     @action(detail=True, methods=["post"], url_path="advance")
     def advance(self, request, pk=None):

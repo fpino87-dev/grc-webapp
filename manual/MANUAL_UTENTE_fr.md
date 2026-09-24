@@ -871,15 +871,26 @@ Pour chaque contrôle dans la liste de contrôle :
 | **Observation** | Faiblesse potentielle qui n'est pas encore une non-conformité. À surveiller | 180 jours |
 | **Opportunity** | Suggestion d'amélioration sans impact sur la conformité. Aucune échéance obligatoire | — |
 
-Les délais de réponse sont calculés automatiquement à partir de la date d'ouverture du finding sur la base de ces politiques. Pour Major NC, un cycle PDCA est également créé automatiquement.
+Les délais de réponse sont calculés automatiquement à partir de la date d'ouverture du finding sur la base de ces politiques. Pour les Major et Minor NC, un cycle PDCA lié au constat est créé automatiquement ; pour les Major NC, également une tâche urgente.
 
-#### Comment clôturer un finding
+#### Lier les constats et les PDCA
 
-1. Depuis la fiche du finding, après avoir adopté les actions correctives, cliquez sur **Proposer la clôture**
-2. Chargez la **preuve de clôture** (obligatoire pour Major NC et Minor NC)
-3. Saisissez le **commentaire de clôture** : décrivez les actions entreprises
-4. Le finding passe à l'état "En vérification"
-5. L'auditeur responsable vérifie la preuve et clique sur **Confirmer la clôture** ou **Rouvrir le finding** avec un commentaire
+Chaque constat peut avoir **un seul PDCA** ; un PDCA peut couvrir plusieurs constats, mais du même audit et du même site (ex. deux observations résolues par une seule action). Le lien est visible des deux côtés : sur le constat la phase du PDCA, avec un clic pour l'ouvrir ; sur le PDCA le constat et l'audit d'origine, avec le type d'audit et le donneur d'ordre.
+
+Depuis l'onglet **Constats** de l'audit, pour un constat sans PDCA :
+
+- **Ouvrir un PDCA** crée le cycle déjà lié, sur le site de l'audit et avec le type d'audit (utile pour les observations et opportunités, qui n'en ouvrent pas automatiquement) ;
+- **Lier à un PDCA existant** le lie à un cycle ouvert du même site.
+
+On peut faire de même depuis le menu **PDCA** : dans un nouveau cycle d'origine **Audit**, choisissez l'audit et le constat (le site et le type d'audit se remplissent seuls), ou via le bouton **🔗 Constats** d'un cycle existant. Un lien erroné se supprime avec **Détacher**, en indiquant un motif conservé dans la piste d'audit.
+
+#### Comment clôturer un constat
+
+1. Dans l'onglet **Constats** de l'audit, cliquez sur **Clôturer le constat**
+2. Saisissez les **notes de clôture** (au moins 20 caractères pour les Major et Minor NC) et choisissez la **preuve de clôture** (obligatoire pour les Major et Minor NC)
+3. Cliquez sur **Clôturer**
+
+Si le constat a un PDCA lié, il ne se clôture qu'une fois l'action corrective terminée : PDCA **clôturé** (ou archivé), ou en phase **ACT** si le PDCA ne couvre que ce constat ; dans ce cas, le PDCA est clôturé avec le constat et les notes de clôture deviennent sa standardisation. Sinon, le système indique la phase du PDCA et n'enregistre rien. Quand un PDCA est clôturé, ses constats liés encore ouverts passent « en réponse », prêts à être clôturés avec une preuve.
 
 #### Comment télécharger le rapport d'audit
 

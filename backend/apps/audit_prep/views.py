@@ -59,6 +59,17 @@ def _serve_evidence_file(evidence, user, entity):
                         filename=os.path.basename(path))
 
 
+def _get_scoped(qs, pk):
+    """Oggetto `pk` dentro il queryset già filtrato per perimetro, o None
+    (anche per id malformati)."""
+    import uuid
+
+    try:
+        return qs.filter(pk=uuid.UUID(str(pk))).first()
+    except (TypeError, ValueError):
+        return None
+
+
 def _validation_response(exc):
     return Response({"error": exc.messages[0] if getattr(exc, "messages", None) else str(exc)}, status=400)
 
@@ -475,6 +486,65 @@ class AuditFindingViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         # Attach the created instance so DRF can return it
         serializer.instance = finding
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        # ?without_pdca=true → finding ancora senza PDCA (per il collegamento)
+        if self.request.query_params.get("without_pdca", "").lower() == "true":
+            qs = qs.filter(pdca_cycle__isnull=True).exclude(status__in=["closed", "accepted_by_auditor"])
+        return qs
+
+    @action(detail=True, methods=["post"], url_path="open-pdca")
+    def open_pdca(self, request, pk=None):
+        """POST /findings/<id>/open-pdca/ {title?, descrizione?} → PDCA già collegato."""
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        finding = self.get_object()
+        try:
+            services.open_pdca_for_finding(
+                finding, request.user,
+                title=request.data.get("title", ""), descrizione=request.data.get("descrizione", ""),
+            )
+        except DjangoValidationError as exc:
+            return _validation_response(exc)
+        finding.refresh_from_db()
+        return Response(AuditFindingSerializer(finding).data, status=201)
+
+    @action(detail=True, methods=["post"], url_path="link-pdca")
+    def link_pdca(self, request, pk=None):
+        """POST /findings/<id>/link-pdca/ {pdca_cycle} → collega un PDCA esistente."""
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        from django.utils.translation import gettext as _
+
+        from apps.pdca.models import PdcaCycle
+        from core.scoping import scope_queryset_by_plant
+
+        finding = self.get_object()
+        cycle = _get_scoped(
+            scope_queryset_by_plant(PdcaCycle.objects.all(), request.user, plant_field="plant"),
+            request.data.get("pdca_cycle"),
+        )
+        if cycle is None:
+            return Response({"error": _("PDCA non trovato.")}, status=404)
+        try:
+            services.link_finding_to_pdca(finding, cycle, request.user)
+        except DjangoValidationError as exc:
+            return _validation_response(exc)
+        finding.refresh_from_db()
+        return Response(AuditFindingSerializer(finding).data)
+
+    @action(detail=True, methods=["post"], url_path="unlink-pdca")
+    def unlink_pdca(self, request, pk=None):
+        """POST /findings/<id>/unlink-pdca/ {reason} → scollega (motivo obbligatorio)."""
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        finding = self.get_object()
+        try:
+            services.unlink_finding_from_pdca(finding, request.user, request.data.get("reason", ""))
+        except DjangoValidationError as exc:
+            return _validation_response(exc)
+        finding.refresh_from_db()
+        return Response(AuditFindingSerializer(finding).data)
+
     @action(detail=True, methods=["post"])
     def close(self, request, pk=None):
         from .services import close_finding
@@ -491,7 +561,7 @@ class AuditFindingViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             finding = close_finding(finding, request.user, notes, evidence)
             return Response({"ok": True, "status": finding.status})
         except ValidationError as e:
-            return Response({"error": str(e.message)}, status=400)
+            return _validation_response(e)
 
 
 class AuditProgramViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):

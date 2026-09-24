@@ -871,15 +871,26 @@ Per ogni controllo nella checklist:
 | **Observation** | Potenziale debolezza che non e' ancora una non conformita'. Da monitorare | 180 giorni |
 | **Opportunity** | Suggerimento di miglioramento senza impatto sulla conformita'. Nessuna scadenza obbligatoria | — |
 
-Le scadenze di risposta sono calcolate automaticamente dalla data di apertura del finding in base a queste policy. Per Major NC viene creato automaticamente anche un ciclo PDCA.
+Le scadenze di risposta sono calcolate automaticamente dalla data di apertura del finding in base a queste policy. Per Major e Minor NC viene creato automaticamente un ciclo PDCA collegato al finding; per le Major NC anche un task urgente.
+
+#### Collegare finding e PDCA
+
+Ogni finding può avere **un solo PDCA**; un PDCA può coprire più finding, ma dello stesso audit e dello stesso sito (es. due osservazioni risolte con un'unica azione). Il collegamento è visibile da entrambi i lati: sul finding la fase del PDCA, con un clic per aprirlo; sul PDCA il finding e l'audit di origine, con tipo di audit e committente.
+
+Dal tab **Finding** dell'audit, per un finding ancora senza PDCA:
+
+- **Apri PDCA** crea il ciclo già collegato, sul sito dell'audit e con il tipo di audit (utile per osservazioni e opportunità, che non lo aprono in automatico);
+- **Collega a PDCA esistente** lo collega a un ciclo aperto dello stesso sito.
+
+Dal menù **PDCA** si può fare lo stesso: nel nuovo ciclo con origine **Audit** scegli audit e finding (sito e tipo di audit si compilano da soli), oppure dal pulsante **🔗 Finding** di un ciclo esistente. Un collegamento errato si rimuove con **Scollega**, indicando il motivo, che resta nell'audit trail.
 
 #### Come chiudere un finding
 
-1. Dalla scheda del finding, dopo aver adottato le azioni correttive, clicca **Proponi chiusura**
-2. Carica l'**evidenza di chiusura** (obbligatoria per Major NC e Minor NC)
-3. Inserisci il **commento di chiusura**: descrivi le azioni intraprese
-4. Il finding passa in stato "In verifica"
-5. L'auditor responsabile verifica l'evidenza e clicca **Conferma chiusura** o **Riapri finding** con commento
+1. Nel tab **Finding** dell'audit clicca **Chiudi finding** sul rilievo
+2. Inserisci le **note di chiusura** (per Major e Minor NC almeno 20 caratteri) e scegli l'**evidenza di chiusura** (obbligatoria per Major e Minor NC)
+3. Clicca **Chiudi**
+
+Se il finding ha un PDCA collegato, si chiude solo ad azione correttiva completata: con il PDCA **chiuso** (o archiviato), oppure in fase **ACT** se il PDCA copre solo questo finding; in quest'ultimo caso il PDCA viene chiuso insieme al finding e le note di chiusura diventano la sua standardizzazione. Negli altri casi il sistema indica la fase del PDCA e non salva nulla. Quando un PDCA viene chiuso, i finding collegati ancora aperti passano "in risposta", pronti per la chiusura con evidenza.
 
 #### Come scaricare la relazione audit
 

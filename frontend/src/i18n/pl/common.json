@@ -3044,6 +3044,26 @@
       "no_common_framework": "Brak frameworku przypisanego do wszystkich wybranych zakładów",
       "common_finding_label": "Ustalenie wspólne dla wszystkich zakładów audytu ({{sites}}): tworzy ustalenie dla każdego zakładu",
       "common_finding_badge": "Wspólne dla zakładów"
+    },
+    "pdca_link": {
+      "linked": "PDCA · {{phase}}",
+      "unlink": "Odłącz PDCA",
+      "open": "Otwórz PDCA",
+      "link_existing": "Powiąż z istniejącym PDCA",
+      "choose_cycle": "— wybierz otwarty PDCA zakładu —",
+      "no_open_cycles": "Brak otwartych PDCA w tym zakładzie",
+      "link_btn": "Powiąż",
+      "unlink_reason": "Powód odłączenia (co najmniej 10 znaków)",
+      "unlink_confirm": "Odłącz"
+    },
+    "close_finding": {
+      "btn": "Zamknij ustalenie",
+      "pdca_hint": "Ustalenie można zamknąć, gdy powiązany PDCA jest w fazie ACT lub zamknięty. Jeśli jest w ACT i obejmuje tylko to ustalenie, zostaje zamknięty razem z nim na podstawie poniższych uwag.",
+      "notes_min": "Uwagi zamknięcia (co najmniej 20 znaków)",
+      "notes": "Uwagi zamknięcia",
+      "evidence_required": "— dowód zamknięcia (obowiązkowy) —",
+      "evidence_optional": "— dowód zamknięcia (opcjonalny) —",
+      "confirm": "Zamknij"
     }
   },
   "risk": {
@@ -3455,7 +3475,26 @@
       "error_generic": "Błąd podczas usuwania cyklu."
     },
     "read_only_org": "Tylko odczyt",
-    "read_only_org_title": "Cykl organizacji: zarządzać nim mogą tylko użytkownicy z dostępem do całej organizacji."
+    "read_only_org_title": "Cykl organizacji: zarządzać nim mogą tylko użytkownicy z dostępem do całej organizacji.",
+    "link": {
+      "audit_label": "Audyt",
+      "audit_select": "— wybierz audyt —",
+      "no_audits": "Brak dostępnych audytów",
+      "finding_label": "Ustalenie",
+      "finding_select": "— wybierz ustalenie —",
+      "no_findings": "Brak ustaleń bez PDCA w tym audycie",
+      "btn": "Ustalenia",
+      "btn_title": "Powiąż lub odłącz ustalenia audytu",
+      "modal_title": "Powiązane ustalenia audytu",
+      "rule_hint": "Każde ustalenie może mieć tylko jeden PDCA; PDCA może obejmować kilka ustaleń, ale z tego samego audytu i zakładu.",
+      "unlink": "Odłącz",
+      "unlink_reason": "Powód odłączenia (co najmniej 10 znaków)",
+      "unlink_confirm": "Odłącz",
+      "link_btn": "Powiąż",
+      "new_hint": "Powiąż cykl z zarejestrowanym ustaleniem: zakład i rodzaj audytu są pobierane z audytu.",
+      "single_cycle": "Wyświetlasz cykl powiązany z ustaleniem.",
+      "show_all": "Pokaż wszystkie cykle"
+    }
   },
   "bcp": {
     "test_frequency_label": "Częstotliwość testu",

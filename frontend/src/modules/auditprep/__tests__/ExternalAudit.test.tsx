@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MemoryRouter } from "react-router-dom";
 import { AuditPrepPage } from "../AuditPrepPage";
 
 vi.mock("react-i18next", () => ({
@@ -29,6 +30,7 @@ vi.mock("../../../api/endpoints/auditPrep", () => ({
     list: vi.fn(), programs: vi.fn(), findings: vi.fn(), evidence: vi.fn(), create: vi.fn(),
     update: vi.fn(), uploadReportFile: vi.fn(), detachReportFile: vi.fn(), downloadPrepReport: vi.fn(),
     downloadReportFile: vi.fn(), createGroup: vi.fn(), updateGroup: vi.fn(), createFinding: vi.fn(),
+    openPdca: vi.fn(), linkPdca: vi.fn(), unlinkPdca: vi.fn(), closeFinding: vi.fn(),
   },
 }));
 
@@ -50,7 +52,9 @@ function prep(overrides = {}) {
 
 function renderPage() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={qc}><AuditPrepPage /></QueryClientProvider>);
+  return render(
+    <QueryClientProvider client={qc}><MemoryRouter><AuditPrepPage /></MemoryRouter></QueryClientProvider>,
+  );
 }
 
 beforeEach(() => {
@@ -140,6 +144,45 @@ describe("Audit Prep — audit multi-sito", () => {
     const common = screen.getByLabelText("audit_prep.group.common_finding_label") as HTMLInputElement;
     fireEvent.click(common);
     expect(common.checked).toBe(true);
+  });
+});
+
+function finding(overrides = {}) {
+  return {
+    id: "f1", audit_prep: "a1", finding_type: "observation", title: "Osservazione classificazione",
+    description: "", auditor_name: "", audit_date: "2026-09-10", response_deadline: null, status: "open",
+    root_cause: "", corrective_action: "", pdca_cycle: null, pdca_title: null, pdca_phase: null,
+    common_key: null, is_overdue: false, auto_generated: false, control_external_id: null,
+    ...overrides,
+  };
+}
+
+async function openFindings() {
+  renderPage();
+  fireEvent.click(await screen.findByText("audit_prep.tab_in_progress"));
+  fireEvent.click(await screen.findByText("audit_prep.open_btn"));
+  fireEvent.click(await screen.findByText(/audit_prep\.tab_findings/));
+}
+
+describe("Audit Prep — finding e PDCA", () => {
+  it("da un'osservazione si apre il PDCA collegato", async () => {
+    api.findings.mockResolvedValue([finding()] as never);
+    api.openPdca.mockResolvedValue(finding() as never);
+    await openFindings();
+    fireEvent.click(await screen.findByText("audit_prep.pdca_link.open"));
+    await vi.waitFor(() => expect(api.openPdca).toHaveBeenCalledWith("f1"));
+  });
+
+  it("con PDCA collegato mostra la fase e la chiusura avvisa della regola", async () => {
+    api.findings.mockResolvedValue([finding({ finding_type: "minor_nc", pdca_cycle: "c1", pdca_phase: "plan",
+                                              pdca_title: "[MINOR_NC] x" })] as never);
+    await openFindings();
+    expect(await screen.findByText("audit_prep.pdca_link.linked")).toBeInTheDocument();
+    expect(screen.queryByText("audit_prep.pdca_link.open")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText("audit_prep.close_finding.btn"));
+    expect(screen.getByText("audit_prep.close_finding.pdca_hint")).toBeInTheDocument();
+    // NC: servono evidenza e note ≥ 20 caratteri prima di poter confermare
+    expect(screen.getByText("audit_prep.close_finding.confirm")).toBeDisabled();
   });
 });
 

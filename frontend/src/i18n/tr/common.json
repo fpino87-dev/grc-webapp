@@ -3044,6 +3044,26 @@
       "no_common_framework": "Seçilen tüm tesislere atanmış çerçeve yok",
       "common_finding_label": "Denetimin tüm tesisleri için ortak bulgu ({{sites}}): her tesis için bir bulgu oluşturur",
       "common_finding_badge": "Tesislerde ortak"
+    },
+    "pdca_link": {
+      "linked": "PDCA · {{phase}}",
+      "unlink": "PDCA bağlantısını kaldır",
+      "open": "PDCA aç",
+      "link_existing": "Mevcut PDCA'ya bağla",
+      "choose_cycle": "— tesisin açık bir PDCA'sını seçin —",
+      "no_open_cycles": "Bu tesiste açık PDCA yok",
+      "link_btn": "Bağla",
+      "unlink_reason": "Bağlantıyı kaldırma nedeni (en az 10 karakter)",
+      "unlink_confirm": "Bağlantıyı kaldır"
+    },
+    "close_finding": {
+      "btn": "Bulguyu kapat",
+      "pdca_hint": "Bulgu, bağlı PDCA ACT aşamasında veya kapalı olduğunda kapatılır. ACT aşamasındaysa ve yalnızca bu bulguyu kapsıyorsa, aşağıdaki notlarla birlikte kapatılır.",
+      "notes_min": "Kapanış notları (en az 20 karakter)",
+      "notes": "Kapanış notları",
+      "evidence_required": "— kapanış kanıtı (zorunlu) —",
+      "evidence_optional": "— kapanış kanıtı (isteğe bağlı) —",
+      "confirm": "Kapat"
     }
   },
   "risk": {
@@ -3455,7 +3475,26 @@
       "error_generic": "Döngü silinirken hata oluştu."
     },
     "read_only_org": "Salt okunur",
-    "read_only_org_title": "Organizasyon döngüsü: yalnızca tüm organizasyona erişimi olan kullanıcılar yönetebilir."
+    "read_only_org_title": "Organizasyon döngüsü: yalnızca tüm organizasyona erişimi olan kullanıcılar yönetebilir.",
+    "link": {
+      "audit_label": "Denetim",
+      "audit_select": "— denetimi seçin —",
+      "no_audits": "Kullanılabilir denetim yok",
+      "finding_label": "Bulgu",
+      "finding_select": "— bulguyu seçin —",
+      "no_findings": "Bu denetimde PDCA'sız bulgu yok",
+      "btn": "Bulgular",
+      "btn_title": "Denetim bulgularını bağla veya bağlantısını kaldır",
+      "modal_title": "Bağlı denetim bulguları",
+      "rule_hint": "Her bulgunun yalnızca bir PDCA'sı olabilir; bir PDCA birden fazla bulguyu kapsayabilir, ancak aynı denetim ve tesisten.",
+      "unlink": "Bağlantıyı kaldır",
+      "unlink_reason": "Bağlantıyı kaldırma nedeni (en az 10 karakter)",
+      "unlink_confirm": "Bağlantıyı kaldır",
+      "link_btn": "Bağla",
+      "new_hint": "Döngüyü kayıtlı bir bulguya bağlayın: tesis ve denetim türü denetimden alınır.",
+      "single_cycle": "Bulguya bağlı döngüyü görüntülüyorsunuz.",
+      "show_all": "Tüm döngüleri göster"
+    }
   },
   "bcp": {
     "test_frequency_label": "Test sıklığı",

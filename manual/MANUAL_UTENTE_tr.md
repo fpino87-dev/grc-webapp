@@ -871,15 +871,26 @@ Kontrol listesindeki her kontrol için:
 | **Gözlem** | Henüz uygunsuzluk olmayan potansiyel zayıflık. İzlenmeli | 180 gün |
 | **Fırsat** | Uyumluluk üzerinde etkisi olmayan iyileştirme önerisi. Zorunlu son tarih yok | — |
 
-Yanıt süreleri, bu politikalara dayanılarak bulgunun açılış tarihinden itibaren otomatik olarak hesaplanır. Majör NC için otomatik olarak PDCA döngüsü de oluşturulur.
+Yanıt süreleri, bu politikalara dayanılarak bulgunun açılış tarihinden itibaren otomatik olarak hesaplanır. Majör ve Minör NC için bulguya bağlı bir PDCA döngüsü otomatik olarak oluşturulur; Majör NC için ayrıca acil bir görev.
+
+#### Bulguları PDCA ile ilişkilendirme
+
+Her bulgunun **yalnızca bir PDCA'sı** olabilir; bir PDCA birden fazla bulguyu kapsayabilir, ancak aynı denetim ve tesisten (ör. tek bir eylemle çözülen iki gözlem). Bağlantı iki taraftan da görünür: bulguda PDCA aşaması ve tek tıkla açma; PDCA'da kaynak bulgu ve denetim, denetim türü ve talep edenle birlikte.
+
+Denetimin **Bulgular** sekmesinde, PDCA'sı olmayan bir bulgu için:
+
+- **PDCA aç**, döngüyü denetimin tesisinde ve denetim türüyle zaten bağlı olarak oluşturur (otomatik açılmayan gözlem ve fırsatlar için kullanışlıdır);
+- **Mevcut PDCA'ya bağla**, bulguyu aynı tesisin açık bir döngüsüne bağlar.
+
+Aynısı **PDCA** menüsünden de yapılabilir: kaynağı **Denetim** olan yeni bir döngüde denetimi ve bulguyu seçin (tesis ve denetim türü kendiliğinden doldurulur) veya mevcut bir döngünün **🔗 Bulgular** düğmesini kullanın. Hatalı bir bağlantı, denetim izinde saklanan bir neden belirtilerek **Bağlantıyı kaldır** ile silinir.
 
 #### Bulgu nasıl kapatılır
 
-1. Bulgu kartından, düzeltici eylemleri aldıktan sonra **Kapanış Öner**'e tıklayın
-2. **Kapanış kanıtı** yükleyin (Majör NC ve Minör NC için zorunlu)
-3. **Kapanış yorumu** girin: alınan eylemleri açıklayın
-4. Bulgu "Doğrulama Aşamasında" durumuna geçer
-5. Sorumlu denetçi kanıtı doğrular ve **Kapanışı Onayla**'ya veya yorumla **Bulguyu Yeniden Aç**'a tıklar
+1. Denetimin **Bulgular** sekmesinde bulgu üzerinde **Bulguyu kapat**'a tıklayın
+2. **Kapanış notlarını** girin (Majör ve Minör NC için en az 20 karakter) ve **kapanış kanıtını** seçin (Majör ve Minör NC için zorunlu)
+3. **Kapat**'a tıklayın
+
+Bulgunun bağlı bir PDCA'sı varsa, yalnızca düzeltici faaliyet tamamlandığında kapatılır: PDCA **kapalı** (veya arşivlenmiş) ya da yalnızca bu bulguyu kapsıyorsa **ACT** aşamasındaysa; bu durumda PDCA bulguyla birlikte kapatılır ve kapanış notları standartlaştırması olur. Aksi halde sistem PDCA aşamasını gösterir ve hiçbir şey kaydetmez. Bir PDCA kapatıldığında, bağlı ve hâlâ açık bulgular "yanıtta" durumuna geçer ve kanıtla kapatılmaya hazır olur.
 
 #### Denetim raporu nasıl indirilir
 

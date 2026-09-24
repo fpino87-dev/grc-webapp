@@ -871,15 +871,26 @@ Dla każdej kontroli na liście:
 | **Obserwacja** | Potencjalna słabość, która nie jest jeszcze niezgodnością. Do monitorowania | 180 dni |
 | **Możliwość** | Sugestia doskonalenia bez wpływu na zgodność. Brak obowiązkowego terminu | — |
 
-Terminy odpowiedzi są obliczane automatycznie od daty otwarcia wyniku na podstawie tych polityk. Dla Major NC automatycznie tworzony jest również cykl PDCA.
+Terminy odpowiedzi są obliczane automatycznie od daty otwarcia wyniku na podstawie tych polityk. Dla Major i Minor NC automatycznie tworzony jest cykl PDCA powiązany z ustaleniem; dla Major NC również pilne zadanie.
 
-#### Jak zamknąć wynik audytu
+#### Powiązanie ustaleń z PDCA
 
-1. Z karty wyniku, po podjęciu działań naprawczych, kliknij **Zaproponuj zamknięcie**
-2. Wgraj **dowód zamknięcia** (obowiązkowy dla Major NC i Minor NC)
-3. Wpisz **komentarz zamknięcia**: opisz podjęte działania
-4. Wynik przechodzi do stanu „W weryfikacji"
-5. Odpowiedzialny audytor weryfikuje dowód i klika **Potwierdź zamknięcie** lub **Ponownie otwórz wynik** z komentarzem
+Każde ustalenie może mieć **tylko jeden PDCA**; PDCA może obejmować kilka ustaleń, ale z tego samego audytu i zakładu (np. dwie obserwacje rozwiązane jednym działaniem). Powiązanie jest widoczne z obu stron: przy ustaleniu faza PDCA, z możliwością otwarcia jednym kliknięciem; przy PDCA ustalenie i audyt źródłowy, z rodzajem audytu i zlecającym.
+
+W zakładce **Ustalenia** audytu, dla ustalenia bez PDCA:
+
+- **Otwórz PDCA** tworzy już powiązany cykl, w zakładzie audytu i z rodzajem audytu (przydatne dla obserwacji i szans, które nie otwierają go automatycznie);
+- **Powiąż z istniejącym PDCA** wiąże je z otwartym cyklem tego samego zakładu.
+
+To samo można zrobić z menu **PDCA**: w nowym cyklu o źródle **Audyt** wybierz audyt i ustalenie (zakład i rodzaj audytu uzupełniają się same) albo przyciskiem **🔗 Ustalenia** istniejącego cyklu. Błędne powiązanie usuwa się przyciskiem **Odłącz**, podając powód zapisywany w ścieżce audytu.
+
+#### Jak zamknąć ustalenie
+
+1. W zakładce **Ustalenia** audytu kliknij **Zamknij ustalenie**
+2. Wpisz **uwagi zamknięcia** (dla Major i Minor NC co najmniej 20 znaków) i wybierz **dowód zamknięcia** (obowiązkowy dla Major i Minor NC)
+3. Kliknij **Zamknij**
+
+Jeśli ustalenie ma powiązany PDCA, zamyka się dopiero po zakończeniu działania korygującego: gdy PDCA jest **zamknięty** (lub zarchiwizowany) albo w fazie **ACT**, jeśli obejmuje tylko to ustalenie; wtedy PDCA zamyka się razem z ustaleniem, a uwagi zamknięcia stają się jego standaryzacją. W pozostałych przypadkach system wskazuje fazę PDCA i niczego nie zapisuje. Po zamknięciu PDCA powiązane, wciąż otwarte ustalenia przechodzą w stan „w odpowiedzi”, gotowe do zamknięcia z dowodem.
 
 #### Jak pobrać raport audytu
 

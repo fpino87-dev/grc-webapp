@@ -3044,6 +3044,26 @@
       "no_common_framework": "No framework assigned to all the selected sites",
       "common_finding_label": "Finding common to all the audit's sites ({{sites}}): creates one finding per site",
       "common_finding_badge": "Common to sites"
+    },
+    "pdca_link": {
+      "linked": "PDCA · {{phase}}",
+      "unlink": "Unlink PDCA",
+      "open": "Open PDCA",
+      "link_existing": "Link to existing PDCA",
+      "choose_cycle": "— choose an open PDCA of the site —",
+      "no_open_cycles": "No open PDCA on this site",
+      "link_btn": "Link",
+      "unlink_reason": "Reason for unlinking (at least 10 characters)",
+      "unlink_confirm": "Unlink"
+    },
+    "close_finding": {
+      "btn": "Close finding",
+      "pdca_hint": "The finding can be closed when the linked PDCA is in ACT or closed. If it is in ACT and covers only this finding, it is closed together with the notes below.",
+      "notes_min": "Closure notes (at least 20 characters)",
+      "notes": "Closure notes",
+      "evidence_required": "— closure evidence (mandatory) —",
+      "evidence_optional": "— closure evidence (optional) —",
+      "confirm": "Close"
     }
   },
   "risk": {
@@ -3455,7 +3475,26 @@
       "error_generic": "Error while deleting the cycle."
     },
     "read_only_org": "Read only",
-    "read_only_org_title": "Organization-wide cycle: only users with access to the whole organization can manage it."
+    "read_only_org_title": "Organization-wide cycle: only users with access to the whole organization can manage it.",
+    "link": {
+      "audit_label": "Audit",
+      "audit_select": "— choose the audit —",
+      "no_audits": "No audit available",
+      "finding_label": "Finding",
+      "finding_select": "— choose the finding —",
+      "no_findings": "No finding without PDCA in this audit",
+      "btn": "Findings",
+      "btn_title": "Link or unlink audit findings",
+      "modal_title": "Linked audit findings",
+      "rule_hint": "Each finding can have only one PDCA; a PDCA can cover several findings, but of the same audit and site.",
+      "unlink": "Unlink",
+      "unlink_reason": "Reason for unlinking (at least 10 characters)",
+      "unlink_confirm": "Unlink",
+      "link_btn": "Link",
+      "new_hint": "Link the cycle to a recorded finding: site and audit type are taken from the audit.",
+      "single_cycle": "You are viewing the cycle linked to the finding.",
+      "show_all": "Show all cycles"
+    }
   },
   "bcp": {
     "test_frequency_label": "Test frequency",

@@ -58,6 +58,9 @@ class AuditFindingSerializer(serializers.ModelSerializer):
     days_remaining = serializers.IntegerField(read_only=True)
     closed_by_name = serializers.SerializerMethodField(read_only=True)
     control_external_id = serializers.SerializerMethodField(read_only=True)
+    # PDCA collegato (select_related nel viewset): titolo e fase per il link.
+    pdca_title = serializers.CharField(source="pdca_cycle.title", read_only=True, default=None)
+    pdca_phase = serializers.CharField(source="pdca_cycle.fase_corrente", read_only=True, default=None)
 
     class Meta:
         model = AuditFinding
@@ -69,7 +72,7 @@ class AuditFindingSerializer(serializers.ModelSerializer):
         read_only_fields = [
             "id", "status", "closed_at", "closed_by",
             "closure_evidence", "closure_notes", "pdca_cycle", "lesson_learned",
-            "auto_generated", "created_by", "created_at", "updated_at", "deleted_at",
+            "auto_generated", "common_key", "created_by", "created_at", "updated_at", "deleted_at",
         ]
 
     def get_closed_by_name(self, obj):

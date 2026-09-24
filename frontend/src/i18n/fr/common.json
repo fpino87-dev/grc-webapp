@@ -3044,6 +3044,26 @@
       "no_common_framework": "Aucun référentiel attribué à tous les sites choisis",
       "common_finding_label": "Constat commun à tous les sites de l'audit ({{sites}}) : crée un constat par site",
       "common_finding_badge": "Commun aux sites"
+    },
+    "pdca_link": {
+      "linked": "PDCA · {{phase}}",
+      "unlink": "Détacher le PDCA",
+      "open": "Ouvrir un PDCA",
+      "link_existing": "Lier à un PDCA existant",
+      "choose_cycle": "— choisir un PDCA ouvert du site —",
+      "no_open_cycles": "Aucun PDCA ouvert sur ce site",
+      "link_btn": "Lier",
+      "unlink_reason": "Motif du détachement (au moins 10 caractères)",
+      "unlink_confirm": "Détacher"
+    },
+    "close_finding": {
+      "btn": "Clôturer le constat",
+      "pdca_hint": "Le constat se clôture quand le PDCA lié est en ACT ou clôturé. S'il est en ACT et ne couvre que ce constat, il est clôturé en même temps avec les notes ci-dessous.",
+      "notes_min": "Notes de clôture (au moins 20 caractères)",
+      "notes": "Notes de clôture",
+      "evidence_required": "— preuve de clôture (obligatoire) —",
+      "evidence_optional": "— preuve de clôture (facultative) —",
+      "confirm": "Clôturer"
     }
   },
   "risk": {
@@ -3455,7 +3475,26 @@
       "error_generic": "Erreur lors de la suppression du cycle."
     },
     "read_only_org": "Lecture seule",
-    "read_only_org_title": "Cycle d'organisation : seuls les utilisateurs ayant accès à toute l'organisation peuvent le gérer."
+    "read_only_org_title": "Cycle d'organisation : seuls les utilisateurs ayant accès à toute l'organisation peuvent le gérer.",
+    "link": {
+      "audit_label": "Audit",
+      "audit_select": "— choisir l'audit —",
+      "no_audits": "Aucun audit disponible",
+      "finding_label": "Constat",
+      "finding_select": "— choisir le constat —",
+      "no_findings": "Aucun constat sans PDCA dans cet audit",
+      "btn": "Constats",
+      "btn_title": "Lier ou détacher des constats d'audit",
+      "modal_title": "Constats d'audit liés",
+      "rule_hint": "Chaque constat peut avoir un seul PDCA ; un PDCA peut couvrir plusieurs constats, mais du même audit et du même site.",
+      "unlink": "Détacher",
+      "unlink_reason": "Motif du détachement (au moins 10 caractères)",
+      "unlink_confirm": "Détacher",
+      "link_btn": "Lier",
+      "new_hint": "Liez le cycle à un constat enregistré : le site et le type d'audit sont repris de l'audit.",
+      "single_cycle": "Vous consultez le cycle lié au constat.",
+      "show_all": "Afficher tous les cycles"
+    }
   },
   "bcp": {
     "test_frequency_label": "Fréquence de test",

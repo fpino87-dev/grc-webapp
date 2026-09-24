@@ -346,6 +346,110 @@ def open_finding(audit_prep, finding_type: str, title: str,
     return finding
 
 
+# ── Collegamento finding ↔ PDCA ──────────────────────────────────────────────
+
+FINDING_LABEL = {
+    "major_nc": "MAJOR_NC", "minor_nc": "MINOR_NC",
+    "observation": "OBSERVATION", "opportunity": "OPPORTUNITY",
+}
+
+
+def _check_linkable(finding: AuditFinding, cycle) -> None:
+    """Regole del collegamento (opzione A): un finding ha al massimo un PDCA;
+    un PDCA può coprire più finding, ma dello stesso audit e sito."""
+    from django.core.exceptions import ValidationError
+
+    if finding.pdca_cycle_id:
+        raise ValidationError(_("Il finding è già collegato a un PDCA."))
+    if finding.status in ("closed", "accepted_by_auditor"):
+        raise ValidationError(_("Il finding è chiuso: non si collega a un PDCA."))
+    if cycle.fase_corrente in ("chiuso", "archiviato"):
+        raise ValidationError(_("Il PDCA è chiuso o archiviato."))
+    if cycle.plant_id != finding.audit_prep.plant_id:
+        raise ValidationError(_("Il PDCA deve essere dello stesso sito dell'audit."))
+    other = cycle.findings.exclude(audit_prep_id=finding.audit_prep_id).first()
+    if other:
+        raise ValidationError(_(
+            "Il PDCA copre già finding di un altro audit («%(audit)s»): si possono "
+            "collegare solo finding dello stesso audit."
+        ) % {"audit": other.audit_prep.title})
+
+
+def link_finding_to_pdca(finding: AuditFinding, cycle, user) -> AuditFinding:
+    """Collega un finding a un PDCA esistente (dal finding o dal menù PDCA)."""
+    with transaction.atomic():
+        _check_linkable(finding, cycle)
+        finding.pdca_cycle = cycle
+        finding.save(update_fields=["pdca_cycle", "updated_at"])
+        if not cycle.audit_subtype:
+            cycle.audit_subtype = finding.audit_prep.audit_type
+            cycle.save(update_fields=["audit_subtype", "updated_at"])
+        log_action(
+            user=user,
+            action_code="audit.finding.pdca_linked",
+            level="L2",
+            entity=finding,
+            payload={"pdca_cycle": str(cycle.pk), "audit_prep": str(finding.audit_prep_id)},
+        )
+    return finding
+
+
+def open_pdca_for_finding(finding: AuditFinding, user, title: str = "", descrizione: str = ""):
+    """Apre un PDCA già collegato al finding: sito dell'audit, trigger dal tipo
+    di finding e tipo di audit (interno / seconda / terza parte)."""
+    from django.core.exceptions import ValidationError
+    from apps.pdca.services import create_cycle
+
+    if finding.pdca_cycle_id:
+        raise ValidationError(_("Il finding è già collegato a un PDCA."))
+    prep = finding.audit_prep
+    with transaction.atomic():
+        cycle = create_cycle(
+            plant=prep.plant,
+            title=(title.strip() or f"[{FINDING_LABEL[finding.finding_type]}] {finding.title}")[:255],
+            trigger_type=PDCA_TRIGGER_MAP[finding.finding_type],
+            trigger_source_id=finding.pk,
+            scope_type="finding",
+            scope_id=finding.pk,
+        )
+        cycle.audit_subtype = prep.audit_type
+        cycle.descrizione = descrizione or finding.description
+        cycle.created_by = user
+        cycle.save(update_fields=["audit_subtype", "descrizione", "created_by", "updated_at"])
+        log_action(
+            user=user, action_code="pdca.cycle.create", level="L2", entity=cycle,
+            payload={"cycle_id": str(cycle.pk), "title": cycle.title, "finding": str(finding.pk)},
+        )
+        link_finding_to_pdca(finding, cycle, user)
+    return cycle
+
+
+def unlink_finding_from_pdca(finding: AuditFinding, user, reason: str) -> AuditFinding:
+    """Scollega un PDCA collegato per errore: motivazione obbligatoria, resta
+    nell'audit trail. Il PDCA non viene toccato."""
+    from django.core.exceptions import ValidationError
+
+    if not finding.pdca_cycle_id:
+        raise ValidationError(_("Il finding non è collegato a un PDCA."))
+    if finding.status in ("closed", "accepted_by_auditor"):
+        raise ValidationError(_("Il finding è chiuso: il collegamento non si modifica più."))
+    if not reason or len(reason.strip()) < 10:
+        raise ValidationError(_("Motivo obbligatorio (minimo 10 caratteri)."))
+    previous = finding.pdca_cycle_id
+    with transaction.atomic():
+        finding.pdca_cycle = None
+        finding.save(update_fields=["pdca_cycle", "updated_at"])
+        log_action(
+            user=user,
+            action_code="audit.finding.pdca_unlinked",
+            level="L2",
+            entity=finding,
+            payload={"pdca_cycle": str(previous), "reason": reason.strip()[:200]},
+        )
+    return finding
+
+
+@transaction.atomic
 def close_finding(finding: AuditFinding, user,
                   closure_notes: str = "",
                   evidence=None) -> AuditFinding:
@@ -354,19 +458,42 @@ def close_finding(finding: AuditFinding, user,
     Richiede evidenza per major e minor NC.
     Crea automaticamente Lesson Learned.
     Aggiorna ControlInstance se collegato.
+
+    Con un PDCA collegato il finding si chiude solo a azione correttiva
+    completata: ciclo già chiuso/archiviato, oppure in ACT e senza altri
+    finding aperti collegati (in tal caso il ciclo si chiude qui, con le note
+    di chiusura come standardizzazione). Tutte le verifiche precedono le
+    scritture e la funzione è atomica: nessuno stato a metà.
     """
     from django.core.exceptions import ValidationError
 
     if finding.finding_type in ("major_nc", "minor_nc"):
         if evidence is None:
             raise ValidationError(
-                f"Per {finding.finding_type} e' obbligatoria "
-                f"un'evidenza di chiusura."
+                _("Per chiudere una non conformità è obbligatoria un'evidenza di chiusura.")
             )
         if not closure_notes or len(closure_notes.strip()) < 20:
             raise ValidationError(
-                "Le note di chiusura devono essere almeno 20 caratteri."
+                _("Le note di chiusura devono essere almeno 20 caratteri.")
             )
+
+    cycle = finding.pdca_cycle
+    close_cycle_too = False
+    if cycle and cycle.fase_corrente not in ("chiuso", "archiviato"):
+        others_open = cycle.findings.exclude(pk=finding.pk).exclude(
+            status__in=["closed", "accepted_by_auditor"]
+        ).exists()
+        if cycle.fase_corrente != "act" or others_open:
+            raise ValidationError(_(
+                "Il PDCA collegato «%(title)s» è in fase %(phase)s: il finding si chiude "
+                "quando l'azione correttiva è completata (PDCA in ACT o chiuso)."
+            ) % {"title": cycle.title, "phase": cycle.fase_corrente.upper()})
+        if not closure_notes or len(closure_notes.strip()) < 20:
+            raise ValidationError(_(
+                "Il PDCA collegato è in ACT e verrà chiuso insieme al finding: descrivi "
+                "nelle note di chiusura l'azione standardizzata (minimo 20 caratteri)."
+            ))
+        close_cycle_too = True
 
     finding.status = "closed"
     finding.closure_notes = closure_notes
@@ -385,10 +512,10 @@ def close_finding(finding: AuditFinding, user,
             ci.status = "parziale"
             ci.save(update_fields=["status", "updated_at"])
 
-    # Chiudi PDCA collegato se esiste
-    if finding.pdca_cycle and finding.pdca_cycle.fase_corrente != "chiuso":
+    # PDCA in ACT con solo questo finding aperto: si chiude con lui.
+    if close_cycle_too:
         from apps.pdca.services import close_cycle
-        close_cycle(finding.pdca_cycle, user)
+        close_cycle(cycle, user, act_description=closure_notes)
 
     # Crea Lesson Learned automatica
     from apps.lessons.models import LessonLearned

@@ -28,6 +28,8 @@ export interface PdcaCycle {
   plant_code?: string | null;
   // false per i cicli di organizzazione visti da chi non ha scope org
   can_manage?: boolean;
+  // Finding di audit collegati (collegamento univoco PDCA ↔ finding ↔ audit)
+  findings?: PdcaLinkedFinding[];
   title: string;
   descrizione?: string;
   trigger_type: string;
@@ -45,10 +47,21 @@ export interface PdcaCycle {
   updated_at?: string;
 }
 
+export interface PdcaLinkedFinding {
+  id: string;
+  title: string;
+  finding_type: "major_nc" | "minor_nc" | "observation" | "opportunity";
+  status: string;
+  audit_prep: string;
+  audit_title: string;
+  audit_type: "interno" | "seconda_parte" | "terza_parte";
+  requesting_party: string;
+}
+
 export const pdcaApi = {
   list: (params?: Record<string, string>) =>
     apiClient.get<{ results: PdcaCycle[] }>("/pdca/cycles/", { params }).then((r) => r.data),
-  create: (data: Partial<PdcaCycle>) =>
+  create: (data: Partial<PdcaCycle> & { finding?: string }) =>
     apiClient.post<PdcaCycle>("/pdca/cycles/", data).then((r) => r.data),
   update: (id: string, data: Partial<PdcaCycle>) =>
     apiClient.patch<PdcaCycle>(`/pdca/cycles/${id}/`, data).then((r) => r.data),
@@ -56,6 +69,10 @@ export const pdcaApi = {
     apiClient.delete(`/pdca/cycles/${id}/`, { data: { reason } }),
   archivia: (id: string, motivo: string) =>
     apiClient.post(`/pdca/cycles/${id}/archivia/`, { motivo }),
+  linkFinding: (cycleId: string, findingId: string) =>
+    apiClient.post<PdcaCycle>(`/pdca/cycles/${cycleId}/link-finding/`, { finding: findingId }).then((r) => r.data),
+  unlinkFinding: (cycleId: string, findingId: string, reason: string) =>
+    apiClient.post<PdcaCycle>(`/pdca/cycles/${cycleId}/unlink-finding/`, { finding: findingId, reason }).then((r) => r.data),
   capabilities: () =>
     apiClient.get<{ can_manage_org: boolean }>("/pdca/cycles/capabilities/").then((r) => r.data),
 };

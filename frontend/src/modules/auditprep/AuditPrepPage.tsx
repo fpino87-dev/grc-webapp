@@ -13,6 +13,9 @@ import {
   type SyncControlsResult,
 } from "../../api/endpoints/auditPrep";
 import { plantsApi } from "../../api/endpoints/plants";
+import { pdcaApi } from "../../api/endpoints/pdca";
+import { apiClient } from "../../api/client";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
@@ -187,12 +190,128 @@ function ExternalAuditSection({ prep }: { prep: AuditPrep }) {
   );
 }
 
-// ─── PrepDrawer ───────────────────────────────────────────────────────────────
+// ─── Azioni sul finding: PDCA collegato e chiusura ────────────────────────────
 
-function PrepDrawer({ prep, onClose }: { prep: AuditPrep; onClose: () => void }) {
+const PHASE_LABEL: Record<string, string> = { plan: "PLAN", do: "DO", check: "CHECK", act: "ACT" };
+
+function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditPrep }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const [tab, setTab] = useState<"checklist" | "findings" | "info">("checklist");
+  const navigate = useNavigate();
+  const [mode, setMode] = useState<"" | "link" | "unlink" | "close">("");
+  const [cycleId, setCycleId] = useState("");
+  const [reason, setReason] = useState("");
+  const [notes, setNotes] = useState("");
+  const [evidenceId, setEvidenceId] = useState("");
+  const [error, setError] = useState("");
+  const isClosed = finding.status === "closed" || finding.status === "accepted_by_auditor";
+  const isNc = finding.finding_type === "major_nc" || finding.finding_type === "minor_nc";
+
+  const { data: cycles = [] } = useQuery({
+    queryKey: ["pdca-open", prep.plant],
+    queryFn: () => pdcaApi.list({ plant: prep.plant, open: "true" }).then(r => r.results),
+    enabled: mode === "link",
+  });
+  const { data: evidences = [] } = useQuery<{ id: string; title: string }[]>({
+    queryKey: ["finding-evidences", prep.plant],
+    queryFn: () => apiClient.get("/documents/evidences/", { params: { plant: prep.plant, page_size: 1000 } })
+      .then(r => r.data.results || r.data),
+    enabled: mode === "close",
+  });
+
+  const errMsg = (e: unknown) =>
+    (e as { response?: { data?: { error?: string } } })?.response?.data?.error || t("audit_prep.error_generic");
+  const done = () => {
+    setMode(""); setError(""); setReason(""); setNotes(""); setCycleId(""); setEvidenceId("");
+    qc.invalidateQueries({ queryKey: ["findings"] });
+    qc.invalidateQueries({ queryKey: ["pdca"] });
+  };
+  const openMut = useMutation({ mutationFn: () => auditPrepApi.openPdca(finding.id), onSuccess: done, onError: e => setError(errMsg(e)) });
+  const linkMut = useMutation({ mutationFn: () => auditPrepApi.linkPdca(finding.id, cycleId), onSuccess: done, onError: e => setError(errMsg(e)) });
+  const unlinkMut = useMutation({ mutationFn: () => auditPrepApi.unlinkPdca(finding.id, reason), onSuccess: done, onError: e => setError(errMsg(e)) });
+  const closeMut = useMutation({
+    mutationFn: () => auditPrepApi.closeFinding(finding.id, { closure_notes: notes, evidence_id: evidenceId || undefined }),
+    onSuccess: () => { done(); qc.invalidateQueries({ queryKey: ["audit-prep"] }); },
+    onError: e => setError(errMsg(e)),
+  });
+
+  const btn = "text-xs border rounded px-2 py-0.5 hover:bg-gray-50 disabled:opacity-50";
+  return (
+    <div className="mt-2 space-y-2">
+      <div className="flex flex-wrap items-center gap-2">
+        {finding.pdca_cycle ? (
+          <>
+            <button onClick={() => navigate(`/pdca?cycle=${finding.pdca_cycle}`)}
+              className="text-xs text-primary-700 bg-primary-50 border border-primary-200 rounded px-2 py-0.5 hover:bg-primary-100"
+              title={finding.pdca_title ?? undefined}>
+              {t("audit_prep.pdca_link.linked", { phase: PHASE_LABEL[finding.pdca_phase ?? ""] ?? (finding.pdca_phase ?? "").toUpperCase() })}
+            </button>
+            {!isClosed && <button onClick={() => setMode(mode === "unlink" ? "" : "unlink")} className={`${btn} text-gray-500`}>{t("audit_prep.pdca_link.unlink")}</button>}
+          </>
+        ) : !isClosed && (
+          <>
+            <button onClick={() => openMut.mutate()} disabled={openMut.isPending} className={`${btn} text-primary-700 border-primary-200`}>
+              {t("audit_prep.pdca_link.open")}
+            </button>
+            <button onClick={() => setMode(mode === "link" ? "" : "link")} className={`${btn} text-gray-600`}>{t("audit_prep.pdca_link.link_existing")}</button>
+          </>
+        )}
+        {!isClosed && (
+          <button onClick={() => setMode(mode === "close" ? "" : "close")} className={`${btn} text-green-700 border-green-200`}>
+            {t("audit_prep.close_finding.btn")}
+          </button>
+        )}
+      </div>
+
+      {mode === "link" && (
+        <div className="flex flex-wrap gap-2 items-center">
+          <select value={cycleId} onChange={e => setCycleId(e.target.value)} className="border rounded px-2 py-1 text-xs min-w-[14rem]">
+            <option value="">{cycles.length ? t("audit_prep.pdca_link.choose_cycle") : t("audit_prep.pdca_link.no_open_cycles")}</option>
+            {cycles.map(c => <option key={c.id} value={c.id}>{c.title} — {PHASE_LABEL[c.fase_corrente] ?? c.fase_corrente}</option>)}
+          </select>
+          <button onClick={() => linkMut.mutate()} disabled={!cycleId || linkMut.isPending} className={`${btn} text-primary-700`}>{t("audit_prep.pdca_link.link_btn")}</button>
+        </div>
+      )}
+      {mode === "unlink" && (
+        <div className="flex flex-wrap gap-2 items-center">
+          <input value={reason} onChange={e => setReason(e.target.value)} placeholder={t("audit_prep.pdca_link.unlink_reason")}
+            className="border rounded px-2 py-1 text-xs flex-1 min-w-[14rem]" />
+          <button onClick={() => unlinkMut.mutate()} disabled={reason.trim().length < 10 || unlinkMut.isPending} className={`${btn} text-red-600`}>
+            {t("audit_prep.pdca_link.unlink_confirm")}
+          </button>
+        </div>
+      )}
+      {mode === "close" && (
+        <div className="space-y-2 bg-gray-50 border rounded p-2">
+          {finding.pdca_cycle && finding.pdca_phase !== "chiuso" && finding.pdca_phase !== "archiviato" && (
+            <p className="text-xs text-amber-800">{t("audit_prep.close_finding.pdca_hint")}</p>
+          )}
+          <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
+            placeholder={isNc || finding.pdca_phase === "act" ? t("audit_prep.close_finding.notes_min") : t("audit_prep.close_finding.notes")}
+            className="w-full border rounded px-2 py-1 text-xs" />
+          <select value={evidenceId} onChange={e => setEvidenceId(e.target.value)} className="w-full border rounded px-2 py-1 text-xs">
+            <option value="">{isNc ? t("audit_prep.close_finding.evidence_required") : t("audit_prep.close_finding.evidence_optional")}</option>
+            {evidences.map(ev => <option key={ev.id} value={ev.id}>{ev.title}</option>)}
+          </select>
+          <button onClick={() => closeMut.mutate()} disabled={closeMut.isPending || (isNc && (!evidenceId || notes.trim().length < 20))}
+            className="px-3 py-1 text-xs bg-green-600 text-white rounded disabled:opacity-50">
+            {t("audit_prep.close_finding.confirm")}
+          </button>
+        </div>
+      )}
+      {error && <p className="text-xs text-red-600">{error}</p>}
+    </div>
+  );
+}
+
+// ─── PrepDrawer ───────────────────────────────────────────────────────────────
+
+function PrepDrawer({ prep, onClose, initialTab = "checklist" }: {
+  prep: AuditPrep; onClose: () => void; initialTab?: "checklist" | "findings" | "info";
+}) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [tab, setTab] = useState<"checklist" | "findings" | "info">(initialTab);
   const [showFindingForm, setShowFindingForm] = useState(false);
   const [findingForm, setFindingForm] = useState<Record<string, string>>({ finding_type: "major_nc" });
   const [, setCompletingId] = useState(false);
@@ -509,6 +628,7 @@ function PrepDrawer({ prep, onClose }: { prep: AuditPrep; onClose: () => void })
                       {f.response_deadline && <span>{t("audit_prep.finding_deadline")} {f.response_deadline}</span>}
                       {f.control_external_id && <span>{t("audit_prep.finding_control")} {f.control_external_id}</span>}
                     </div>
+                    <FindingActions finding={f} prep={prep} />
                   </div>
                 ))}
                 {findings.length === 0 && <p className="text-sm text-gray-400 text-center py-6">{t("audit_prep.no_findings")}</p>}
@@ -1379,6 +1499,17 @@ export function AuditPrepPage() {
   const [showWizard, setShowWizard] = useState(false);
   const [showNewPrep, setShowNewPrep] = useState(false);
   const [openPrepId, setOpenPrepId] = useState<string | null>(null);
+  // Deep link dal PDCA: /audit-prep?prep=<id> apre l'audit sul tab Finding.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [drawerTab, setDrawerTab] = useState<"checklist" | "findings" | "info">("checklist");
+  useEffect(() => {
+    const linked = searchParams.get("prep");
+    if (!linked) return;
+    setMainTab("preps");
+    setOpenPrepId(linked);
+    setDrawerTab("findings");
+    setSearchParams({}, { replace: true });
+  }, [searchParams, setSearchParams]);
   const [editAudit, setEditAudit] = useState<{ programId: string; audit: PlannedAudit } | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteProgramId, setDeleteProgramId] = useState<string | null>(null);
@@ -1566,7 +1697,10 @@ export function AuditPrepPage() {
       )}
 
       {/* Drawer prep aperto */}
-      {openPrep && <PrepDrawer prep={openPrep} onClose={() => setOpenPrepId(null)} />}
+      {openPrep && (
+        <PrepDrawer key={openPrep.id} prep={openPrep} initialTab={drawerTab}
+          onClose={() => { setOpenPrepId(null); setDrawerTab("checklist"); }} />
+      )}
 
       {/* Wizard programma */}
       {showWizard && plantId && (

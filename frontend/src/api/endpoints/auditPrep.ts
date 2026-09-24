@@ -71,6 +71,9 @@ export interface AuditFinding {
   pdca_cycle: string | null;
   // Rilievo comune ai siti di un audit multi-sito (stesso valore sui finding gemelli)
   common_key: string | null;
+  // PDCA collegato (collegamento univoco finding ↔ PDCA)
+  pdca_title: string | null;
+  pdca_phase: string | null;
   closure_notes: string;
   closed_at: string | null;
   closed_by_name: string | null;
@@ -181,8 +184,14 @@ export const auditPrepApi = {
     apiClient.post<EvidenceItem>("/audit-prep/evidence-items/", data).then(r => r.data),
   updateEvidence: (id: string, data: Partial<EvidenceItem>) =>
     apiClient.patch<EvidenceItem>(`/audit-prep/evidence-items/${id}/`, data).then(r => r.data),
-  findings: (prepId: string) =>
-    apiClient.get<{ results: AuditFinding[] }>("/audit-prep/findings/", { params: { audit_prep: prepId } }).then(r => r.data.results),
+  findings: (prepId: string, extra?: Record<string, string>) =>
+    apiClient.get<{ results: AuditFinding[] }>("/audit-prep/findings/", { params: { audit_prep: prepId, ...extra } }).then(r => r.data.results),
+  openPdca: (findingId: string) =>
+    apiClient.post<AuditFinding>(`/audit-prep/findings/${findingId}/open-pdca/`, {}).then(r => r.data),
+  linkPdca: (findingId: string, cycleId: string) =>
+    apiClient.post<AuditFinding>(`/audit-prep/findings/${findingId}/link-pdca/`, { pdca_cycle: cycleId }).then(r => r.data),
+  unlinkPdca: (findingId: string, reason: string) =>
+    apiClient.post<AuditFinding>(`/audit-prep/findings/${findingId}/unlink-pdca/`, { reason }).then(r => r.data),
   createFinding: (data: Record<string, unknown>) =>
     apiClient.post<AuditFinding>("/audit-prep/findings/", data).then(r => r.data),
   closeFinding: (id: string, data: { closure_notes: string; evidence_id?: string }) =>

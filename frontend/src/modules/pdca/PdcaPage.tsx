@@ -1,7 +1,9 @@
 import { useState, Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { pdcaApi, type PdcaCycle, type PdcaPhase } from "../../api/endpoints/pdca";
+import { pdcaApi, type PdcaCycle, type PdcaLinkedFinding, type PdcaPhase } from "../../api/endpoints/pdca";
+import { auditPrepApi } from "../../api/endpoints/auditPrep";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { plantsApi } from "../../api/endpoints/plants";
 import { useAuthStore } from "../../store/auth";
 import { apiClient } from "../../api/client";
@@ -335,6 +337,137 @@ function ArchiviaCycleButton({ cycle }: { cycle: PdcaCycle }) {
   );
 }
 
+// ─── Collegamento a un finding di audit ───────────────────────────────────────
+
+/** Scelta audit → finding (solo finding senza PDCA). Con `plant` gli audit sono
+ *  limitati a quel sito (collegamento da un ciclo esistente). */
+function AuditFindingPicker({
+  plant, prepId, findingId, onChange,
+}: {
+  plant?: string | null;
+  prepId: string;
+  findingId: string;
+  onChange: (v: { prepId: string; findingId: string; prepPlant: string | null }) => void;
+}) {
+  const { t } = useTranslation();
+  const { data: preps = [] } = useQuery({
+    queryKey: ["pdca-audit-preps", plant ?? "all"],
+    queryFn: () => auditPrepApi.list(plant ? { plant } : undefined).then(r => r.results.filter(p => p.status !== "archiviato")),
+  });
+  const { data: findings = [] } = useQuery({
+    queryKey: ["pdca-linkable-findings", prepId],
+    queryFn: () => auditPrepApi.findings(prepId, { without_pdca: "true" }),
+    enabled: !!prepId,
+  });
+  const prepPlant = (id: string) => preps.find(p => p.id === id)?.plant ?? null;
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.link.audit_label")}</label>
+        <select value={prepId} onChange={e => onChange({ prepId: e.target.value, findingId: "", prepPlant: prepPlant(e.target.value) })}
+          className="w-full border rounded px-3 py-2 text-sm">
+          <option value="">{preps.length ? t("pdca.link.audit_select") : t("pdca.link.no_audits")}</option>
+          {preps.map(p => <option key={p.id} value={p.id}>{p.title}{p.audit_date ? ` (${p.audit_date})` : ""}</option>)}
+        </select>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.link.finding_label")}</label>
+        <select value={findingId} disabled={!prepId}
+          onChange={e => onChange({ prepId, findingId: e.target.value, prepPlant: prepPlant(prepId) })}
+          className="w-full border rounded px-3 py-2 text-sm disabled:bg-gray-50">
+          <option value="">{prepId && !findings.length ? t("pdca.link.no_findings") : t("pdca.link.finding_select")}</option>
+          {findings.map(f => <option key={f.id} value={f.id}>[{f.finding_type.replace("_", " ").toUpperCase()}] {f.title}</option>)}
+        </select>
+      </div>
+    </div>
+  );
+}
+
+/** Finding collegati al ciclo, con rimando all'audit. */
+function LinkedFindings({ findings }: { findings: PdcaLinkedFinding[] }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  if (!findings.length) return null;
+  return (
+    <div className="mt-1 space-y-0.5">
+      {findings.map(f => (
+        <button key={f.id} type="button" onClick={() => navigate(`/audit-prep?prep=${f.audit_prep}`)}
+          className="block text-left text-[11px] text-teal-800 hover:underline">
+          🔗 [{f.finding_type.replace("_", " ").toUpperCase()}] {f.title}
+          <span className="text-gray-500"> — {f.audit_title}
+            {f.audit_type !== "interno" ? ` (${t(`pdca.audit_subtype.${f.audit_type}`)}${f.requesting_party ? ` — ${f.requesting_party}` : ""})` : ""}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function LinkFindingButton({ cycle }: { cycle: PdcaCycle }) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [pick, setPick] = useState({ prepId: "", findingId: "" });
+  const [unlinkId, setUnlinkId] = useState("");
+  const [reason, setReason] = useState("");
+  const [error, setError] = useState("");
+  const errMsg = (e: unknown) =>
+    (e as { response?: { data?: { error?: string; detail?: string } } })?.response?.data?.error
+    || (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail || t("common.save_error");
+  const refresh = () => { setError(""); setPick({ prepId: "", findingId: "" }); setUnlinkId(""); setReason("");
+    qc.invalidateQueries({ queryKey: ["pdca"] }); qc.invalidateQueries({ queryKey: ["pdca-linkable-findings"] }); };
+  const linkMut = useMutation({ mutationFn: () => pdcaApi.linkFinding(cycle.id, pick.findingId), onSuccess: refresh, onError: e => setError(errMsg(e)) });
+  const unlinkMut = useMutation({ mutationFn: () => pdcaApi.unlinkFinding(cycle.id, unlinkId, reason), onSuccess: refresh, onError: e => setError(errMsg(e)) });
+  const linked = cycle.findings ?? [];
+  // Opzione A: più finding solo dello stesso audit → il picker resta sull'audit già collegato.
+  const lockedPrep = linked[0]?.audit_prep ?? "";
+
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)} title={t("pdca.link.btn_title")}
+        className="px-2 py-1 text-[11px] rounded-md border border-teal-200 text-teal-700 hover:bg-teal-50">
+        🔗 {t("pdca.link.btn")}
+      </button>
+      {open && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-xl p-6 space-y-4">
+            <h3 className="text-lg font-semibold">{t("pdca.link.modal_title")}</h3>
+            <p className="text-xs text-gray-500">{t("pdca.link.rule_hint")}</p>
+            {linked.length > 0 && (
+              <div className="space-y-1">
+                {linked.map(f => (
+                  <div key={f.id} className="flex items-center justify-between gap-2 text-sm border rounded px-2 py-1">
+                    <span>[{f.finding_type.replace("_", " ").toUpperCase()}] {f.title} <span className="text-gray-500">— {f.audit_title}</span></span>
+                    <button type="button" onClick={() => setUnlinkId(unlinkId === f.id ? "" : f.id)} className="text-xs text-red-600 underline">
+                      {t("pdca.link.unlink")}
+                    </button>
+                  </div>
+                ))}
+                {unlinkId && (
+                  <div className="flex gap-2">
+                    <input value={reason} onChange={e => setReason(e.target.value)} placeholder={t("pdca.link.unlink_reason")}
+                      className="flex-1 border rounded px-2 py-1 text-sm" />
+                    <button onClick={() => unlinkMut.mutate()} disabled={reason.trim().length < 10 || unlinkMut.isPending}
+                      className="px-3 py-1 text-xs border border-red-300 text-red-700 rounded disabled:opacity-50">{t("pdca.link.unlink_confirm")}</button>
+                  </div>
+                )}
+              </div>
+            )}
+            <AuditFindingPicker plant={cycle.plant} prepId={lockedPrep || pick.prepId} findingId={pick.findingId}
+              onChange={v => setPick({ prepId: lockedPrep || v.prepId, findingId: v.findingId })} />
+            {error && <p className="text-sm text-red-600">{error}</p>}
+            <div className="flex justify-end gap-2">
+              <button onClick={() => { setOpen(false); setError(""); }} className="px-4 py-2 border rounded text-sm text-gray-600">{t("pdca.form.cancel")}</button>
+              <button onClick={() => linkMut.mutate()} disabled={!pick.findingId || linkMut.isPending}
+                className="px-4 py-2 bg-primary-600 text-white rounded text-sm disabled:opacity-50">{t("pdca.link.link_btn")}</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -351,9 +484,12 @@ function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string
   // tutta l'organizzazione; il backend ricontrolla comunque.
   const { data: caps } = useQuery({ queryKey: ["pdca-capabilities"], queryFn: pdcaApi.capabilities });
   const isOrg = form.plant === null;
+  // Origine "Audit": collegamento a un finding registrato (sito e tipo di audit dal finding).
+  const [link, setLink] = useState({ prepId: "", findingId: "" });
+  const linkedToFinding = form.trigger_type === "audit" && !!link.findingId;
 
   const mutation = useMutation({
-    mutationFn: pdcaApi.create,
+    mutationFn: (data: Partial<PdcaCycle> & { finding?: string }) => pdcaApi.create(data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["pdca"] }); onClose(); },
     onError: (e: any) => setError(e?.response?.data?.detail || t("common.save_error")),
   });
@@ -388,7 +524,8 @@ function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string
         <div className="space-y-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.plant_label")}</label>
-            <select name="plant" value={isOrg ? ORG_VALUE : form.plant ?? ""} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+            <select name="plant" value={isOrg ? ORG_VALUE : form.plant ?? ""} onChange={handleChange} disabled={linkedToFinding}
+              className="w-full border rounded px-3 py-2 text-sm disabled:bg-gray-50">
               <option value="">{t("common.select")}</option>
               <option value={ORG_VALUE} disabled={!caps?.can_manage_org}>{t("pdca.form.plant_org_option")}</option>
               {plants.map(p => <option key={p.id} value={p.id}>{p.code} — {p.name}</option>)}
@@ -437,6 +574,17 @@ function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string
           </div>
 
           {isAudit && (
+            <div className="border border-teal-200 bg-teal-50/40 rounded p-3 space-y-2">
+              <p className="text-xs text-gray-600">{t("pdca.link.new_hint")}</p>
+              <AuditFindingPicker prepId={link.prepId} findingId={link.findingId}
+                onChange={v => {
+                  setLink({ prepId: v.prepId, findingId: v.findingId });
+                  // il sito del ciclo è quello dell'audit
+                  if (v.findingId && v.prepPlant) setForm(prev => ({ ...prev, plant: v.prepPlant, scope_type: "plant" }));
+                }} />
+            </div>
+          )}
+          {isAudit && !linkedToFinding && (
             <>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.audit_subtype_label")}</label>
@@ -465,8 +613,8 @@ function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("pdca.form.cancel")}</button>
           <button
-            onClick={() => mutation.mutate(form)}
-            disabled={mutation.isPending || form.plant === undefined || !form.title}
+            onClick={() => mutation.mutate(linkedToFinding ? { ...form, finding: link.findingId } : form)}
+            disabled={mutation.isPending || (form.plant === undefined && !linkedToFinding) || !form.title}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
             {mutation.isPending ? t("common.saving") : t("pdca.form.create_btn")}
@@ -1109,14 +1257,19 @@ export function PdcaPage() {
   // locale lo sovrascrive solo se valorizzato esplicitamente.
   const effectivePlant = filterPlant || selectedPlant?.id || "";
 
+  // Deep link dal finding di audit: /pdca?cycle=<id> mostra solo quel ciclo.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const onlyCycle = searchParams.get("cycle") ?? "";
   const params: Record<string, string> = {};
+  if (onlyCycle) params.id = onlyCycle;
   if (filterTrigger) params.trigger_type = filterTrigger;
   // Filtro per sito: cicli del sito + cicli di organizzazione (valgono anche lì).
-  if (effectivePlant === ORG_VALUE) params.org = "true";
+  if (onlyCycle) { /* ciclo singolo: nessun altro filtro */ }
+  else if (effectivePlant === ORG_VALUE) params.org = "true";
   else if (effectivePlant) params.site = effectivePlant;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["pdca", filterTrigger, effectivePlant],
+    queryKey: ["pdca", filterTrigger, effectivePlant, onlyCycle],
     queryFn: () => pdcaApi.list(params),
     retry: false,
   });
@@ -1178,6 +1331,12 @@ export function PdcaPage() {
         )}
       </div>
 
+      {onlyCycle && (
+        <div className="mb-3 flex items-center gap-3 text-sm bg-primary-50 border border-primary-200 rounded px-3 py-2">
+          <span>{t("pdca.link.single_cycle")}</span>
+          <button onClick={() => setSearchParams({})} className="text-primary-700 underline">{t("pdca.link.show_all")}</button>
+        </div>
+      )}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center text-gray-400">{t("common.loading")}</div>
@@ -1204,6 +1363,7 @@ export function PdcaPage() {
                 <tr key={c.id} className="hover:bg-gray-50 transition-colors align-top">
                   <td className="px-4 py-3 font-medium text-gray-800 max-w-sm">
                     <TitleCell cycle={c} />
+                    <LinkedFindings findings={c.findings ?? []} />
                   </td>
                   <td className="px-4 py-3 text-gray-600 text-xs">
                     <span className="font-medium">{triggerLabel(t, c.trigger_type)}</span>
@@ -1244,6 +1404,9 @@ export function PdcaPage() {
                           <AdvanceButtons cycle={c as any} onUpdated={() => {}} />
                           <CycleDossierButton cycle={c} />
                           <EditCycleButton cycle={c} />
+                          {c.plant !== null && c.fase_corrente !== "chiuso" && c.fase_corrente !== "archiviato" && (
+                            <LinkFindingButton cycle={c} />
+                          )}
                           <ArchiviaCycleButton cycle={c} />
                           <DeleteCycleButton cycle={c} />
                         </>

@@ -252,19 +252,18 @@ def close_cycle(cycle, user, act_description: str = "") -> PdcaCycle:
     # finding richiede evidenza e passa da `audit_prep.close_finding` (che a sua
     # volta chiude il PDCA, ma a quel punto il finding è già `closed` e il filtro
     # `status="open"` lo esclude, evitando interferenze e ricorsioni).
-    if cycle.trigger_type in (
-        "finding_major", "finding_minor", "finding_observation", "finding_opportunity",
-    ):
-        for finding in cycle.findings.filter(status="open"):
-            finding.status = "in_response"
-            finding.save(update_fields=["status", "updated_at"])
-            log_action(
-                user=user,
-                action_code="audit.finding.pdca_closed",
-                level="L2",
-                entity=finding,
-                payload={"pdca_cycle": str(cycle.pk), "new_status": "in_response"},
-            )
+    # Vale per ogni ciclo collegato a finding: aperto in automatico da una NC
+    # o collegato a mano (dal finding o dal menù PDCA), qualunque sia il trigger.
+    for finding in cycle.findings.filter(status="open"):
+        finding.status = "in_response"
+        finding.save(update_fields=["status", "updated_at"])
+        log_action(
+            user=user,
+            action_code="audit.finding.pdca_closed",
+            level="L2",
+            entity=finding,
+            payload={"pdca_cycle": str(cycle.pk), "new_status": "in_response"},
+        )
 
     # Crea Lesson Learned automatica
     from apps.lessons.models import LessonLearned

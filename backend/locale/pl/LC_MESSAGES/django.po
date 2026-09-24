@@ -2796,3 +2796,65 @@ msgstr "Do tego audytu nie załączono raportu."
 #: apps/audit_prep/views.py
 msgid "Questo audit fa parte di un audit multi-sito: i dati comuni si modificano dall'audit comune."
 msgstr "Ten audyt jest częścią audytu wielu zakładów: wspólne dane zmienia się w audycie wspólnym."
+
+#: apps/audit_prep/services.py
+msgid "Per chiudere una non conformità è obbligatoria un'evidenza di chiusura."
+msgstr "Zamknięcie niezgodności wymaga dowodu zamknięcia."
+
+#: apps/audit_prep/services.py
+msgid "Le note di chiusura devono essere almeno 20 caratteri."
+msgstr "Uwagi zamknięcia muszą mieć co najmniej 20 znaków."
+
+#: apps/audit_prep/services.py
+#, python-format
+msgid "Il PDCA collegato «%(title)s» è in fase %(phase)s: il finding si chiude quando l'azione correttiva è completata (PDCA in ACT o chiuso)."
+msgstr "Powiązany PDCA «%(title)s» jest w fazie %(phase)s: ustalenie zamyka się po zakończeniu działania korygującego (PDCA w ACT lub zamknięty)."
+
+#: apps/audit_prep/services.py
+msgid "Il PDCA collegato è in ACT e verrà chiuso insieme al finding: descrivi nelle note di chiusura l'azione standardizzata (minimo 20 caratteri)."
+msgstr "Powiązany PDCA jest w fazie ACT i zostanie zamknięty razem z ustaleniem: opisz w uwagach zamknięcia ustandaryzowane działanie (co najmniej 20 znaków)."
+
+#: apps/audit_prep/services.py
+msgid "Il finding è già collegato a un PDCA."
+msgstr "Ustalenie jest już powiązane z PDCA."
+
+#: apps/audit_prep/services.py
+msgid "Il finding è chiuso: non si collega a un PDCA."
+msgstr "Ustalenie jest zamknięte: nie można go powiązać z PDCA."
+
+#: apps/audit_prep/services.py
+msgid "Il PDCA è chiuso o archiviato."
+msgstr "PDCA jest zamknięty lub zarchiwizowany."
+
+#: apps/audit_prep/services.py
+msgid "Il PDCA deve essere dello stesso sito dell'audit."
+msgstr "PDCA musi należeć do tego samego zakładu co audyt."
+
+#: apps/audit_prep/services.py
+#, python-format
+msgid "Il PDCA copre già finding di un altro audit («%(audit)s»): si possono collegare solo finding dello stesso audit."
+msgstr "PDCA obejmuje już ustalenia innego audytu («%(audit)s»): można powiązać tylko ustalenia tego samego audytu."
+
+#: apps/audit_prep/services.py
+msgid "Il finding non è collegato a un PDCA."
+msgstr "Ustalenie nie jest powiązane z PDCA."
+
+#: apps/audit_prep/services.py
+msgid "Il finding è chiuso: il collegamento non si modifica più."
+msgstr "Ustalenie jest zamknięte: powiązania nie można już zmienić."
+
+#: apps/audit_prep/services.py
+msgid "Motivo obbligatorio (minimo 10 caratteri)."
+msgstr "Powód jest wymagany (co najmniej 10 znaków)."
+
+#: apps/audit_prep/views.py
+msgid "PDCA non trovato."
+msgstr "Nie znaleziono PDCA."
+
+#: apps/pdca/views.py
+msgid "Finding non trovato."
+msgstr "Nie znaleziono ustalenia."
+
+#: apps/pdca/views.py
+msgid "Il finding non è collegato a questo PDCA."
+msgstr "Ustalenie nie jest powiązane z tym PDCA."

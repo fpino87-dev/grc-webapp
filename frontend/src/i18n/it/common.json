@@ -3044,6 +3044,26 @@
       "no_common_framework": "Nessun framework assegnato a tutti i siti scelti",
       "common_finding_label": "Rilievo comune a tutti i siti dell'audit ({{sites}}): crea un finding per sito",
       "common_finding_badge": "Comune ai siti"
+    },
+    "pdca_link": {
+      "linked": "PDCA · {{phase}}",
+      "unlink": "Scollega PDCA",
+      "open": "Apri PDCA",
+      "link_existing": "Collega a PDCA esistente",
+      "choose_cycle": "— scegli un PDCA aperto del sito —",
+      "no_open_cycles": "Nessun PDCA aperto su questo sito",
+      "link_btn": "Collega",
+      "unlink_reason": "Motivo dello scollegamento (minimo 10 caratteri)",
+      "unlink_confirm": "Scollega"
+    },
+    "close_finding": {
+      "btn": "Chiudi finding",
+      "pdca_hint": "Il finding si chiude quando il PDCA collegato è in ACT o chiuso. Se è in ACT e copre solo questo finding, viene chiuso insieme con le note qui sotto.",
+      "notes_min": "Note di chiusura (minimo 20 caratteri)",
+      "notes": "Note di chiusura",
+      "evidence_required": "— evidenza di chiusura (obbligatoria) —",
+      "evidence_optional": "— evidenza di chiusura (facoltativa) —",
+      "confirm": "Chiudi"
     }
   },
   "risk": {
@@ -3455,7 +3475,26 @@
       "error_generic": "Errore durante la cancellazione del ciclo."
     },
     "read_only_org": "Sola lettura",
-    "read_only_org_title": "Ciclo di organizzazione: lo gestisce solo chi ha accesso a tutta l'organizzazione."
+    "read_only_org_title": "Ciclo di organizzazione: lo gestisce solo chi ha accesso a tutta l'organizzazione.",
+    "link": {
+      "audit_label": "Audit",
+      "audit_select": "— scegli l'audit —",
+      "no_audits": "Nessun audit disponibile",
+      "finding_label": "Finding",
+      "finding_select": "— scegli il finding —",
+      "no_findings": "Nessun finding senza PDCA in questo audit",
+      "btn": "Finding",
+      "btn_title": "Collega o scollega finding di audit",
+      "modal_title": "Finding di audit collegati",
+      "rule_hint": "Ogni finding può avere un solo PDCA; un PDCA può coprire più finding, ma dello stesso audit e dello stesso sito.",
+      "unlink": "Scollega",
+      "unlink_reason": "Motivo dello scollegamento (minimo 10 caratteri)",
+      "unlink_confirm": "Scollega",
+      "link_btn": "Collega",
+      "new_hint": "Collega il ciclo a un finding registrato: sito e tipo di audit vengono presi dall'audit.",
+      "single_cycle": "Stai vedendo il ciclo collegato al finding.",
+      "show_all": "Mostra tutti i cicli"
+    }
   },
   "bcp": {
     "test_frequency_label": "Frequenza test",

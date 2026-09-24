@@ -58,6 +58,9 @@ class PdcaCycleSerializer(serializers.ModelSerializer):
     # L'utente corrente può scrivere su questo ciclo? False solo per i cicli
     # di organizzazione visti da chi non ha scope org.
     can_manage = serializers.SerializerMethodField()
+    # Finding di audit collegati (prefetch nel viewset): collegamento univoco
+    # PDCA ↔ finding ↔ audit (tipo, committente) consultabile da entrambi i lati.
+    findings = serializers.SerializerMethodField()
 
     class Meta:
         model = PdcaCycle
@@ -67,6 +70,7 @@ class PdcaCycleSerializer(serializers.ModelSerializer):
             "plant_name",
             "plant_code",
             "can_manage",
+            "findings",
             "title",
             "descrizione",
             "trigger_type",
@@ -87,13 +91,28 @@ class PdcaCycleSerializer(serializers.ModelSerializer):
             "created_by",
         ]
         read_only_fields = [
-            "id", "plant_name", "plant_code", "can_manage",
+            "id", "plant_name", "plant_code", "can_manage", "findings",
             "fase_corrente", "reopened_as", "closed_at",
             "created_at", "updated_at", "created_by",
             # Campi governati dalle azioni di workflow (advance/close/archivia):
             # non impostabili con una PATCH diretta. Le azioni li scrivono sul
             # modello leggendo il valore dal body della richiesta, non da qui.
             "act_description", "check_outcome", "motivo_archiviazione",
+        ]
+
+    def get_findings(self, obj) -> list:
+        return [
+            {
+                "id": str(f.pk),
+                "title": f.title,
+                "finding_type": f.finding_type,
+                "status": f.status,
+                "audit_prep": str(f.audit_prep_id),
+                "audit_title": f.audit_prep.title,
+                "audit_type": f.audit_prep.audit_type,
+                "requesting_party": f.audit_prep.requesting_party,
+            }
+            for f in obj.findings.all()
         ]
 
     def get_can_manage(self, obj) -> bool:

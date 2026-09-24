@@ -30,6 +30,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
   - **Controllo umano sempre**: la bozza non viene mai salvata da sola; va copiata nel campo, rivista e salvata. L'audit trail registra se la descrizione salvata proveniva dall'IA e il registro IA conserva bozza e testo finale. Le risposte passano dal filtro dei dati personali prima dell'invio al provider IA e restano sul controllo per la rivalutazione successiva.
   - Riservata ai ruoli che valutano i controlli (non agli auditor). Il provider (cloud o locale) si sceglie in Impostazioni → IA, voce «Intervista guidata VDA ISA». Senza IA configurata il riquadro mostra i requisiti originali per scrivere la descrizione a mano.
 
+- **Audit Prep (M17) e PDCA (M11) — collegamento univoco tra finding e PDCA**: finora solo le non conformità aprivano un PDCA, in automatico; osservazioni e opportunità non avevano modo di essere collegate a un'azione, e dal menù PDCA il riferimento al finding era un testo libero.
+  - Ogni finding ha al massimo **un PDCA**; un PDCA può coprire più finding, ma dello stesso audit e dello stesso sito. Il collegamento si vede da entrambi i lati: sul finding la fase del PDCA con il link, sul PDCA il finding e l'audit di origine con tipo e committente.
+  - Dal finding: **Apri PDCA** (ciclo già collegato, sul sito dell'audit e con il tipo di audit) o **Collega a PDCA esistente**. Dal menù PDCA: nuovo ciclo con origine "Audit" scegliendo audit e finding, oppure collegamento da un ciclo esistente. Scollegare richiede un motivo, registrato nell'audit trail.
+  - Nell'interfaccia di Audit Prep è stato aggiunto il comando **Chiudi finding**, finora assente.
+
 - **Audit Prep (M17) — audit su più siti**: un audit che riguarda alcuni siti ma non tutta l'organizzazione (es. un assessment TISAX AL2 con un unico Scope ID su due stabilimenti) andava registrato come audit separati, senza legame tra loro e con il rapporto allegato più volte.
   - Nella nuova preparazione si può scegliere **Audit su più siti** e selezionare i siti (almeno due); sono proposti solo i framework assegnati a tutti i siti scelti. Si può indicare lo **Scope ID** dell'assessment.
   - Viene creato **un audit per sito**, collegati: checklist, prontezza, finding, PDCA, scadenze e chiusura restano per sito, così ogni sito vede e gestisce solo i propri rilievi.
@@ -61,6 +66,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 - **Documenti (M07) — la delibera dell'organo vale anche per una nuova versione di un documento in vigore**: finora l'organo non poteva approvare per delibera la nuova versione di un documento già in vigore; ora può approvarla o respingerla. Ogni respingimento registra quale revisione è stata respinta.
 
 ### Fixed
+
+- **Audit Prep (M17) — chiusura di una non conformità con PDCA ancora aperto**: chiudendo una Major o Minor NC mentre il suo PDCA non era ancora concluso, la piattaforma mostrava un errore ma salvava comunque il finding come chiuso, lasciando il PDCA aperto e senza creare la Lesson Learned. Ora la chiusura è un'operazione unica: un finding con PDCA si chiude solo quando il PDCA è chiuso (o archiviato), oppure in fase ACT se copre solo quel finding — in tal caso il PDCA si chiude insieme, con le note di chiusura come standardizzazione; negli altri casi non viene salvato nulla e il messaggio indica la fase del PDCA. La chiusura di un PDCA porta "in risposta" tutti i finding collegati ancora aperti, qualunque sia l'origine del ciclo.
 
 - **Fornitori (M14) — link al questionario sempre presente nell'email**: il link al form del questionario veniva inserito solo se il testo del template conteneva la variabile `{questionnaire_link}`; con un template scritto senza variabile il fornitore riceveva un'email senza link per rispondere, mentre il tab Template dichiarava che il link era incluso automaticamente. Ora, se la variabile manca, il link viene aggiunto in fondo all'email; il testo del tab spiega il comportamento.
 

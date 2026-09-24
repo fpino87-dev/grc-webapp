@@ -871,15 +871,26 @@ For each control in the checklist:
 | **Observation** | Potential weakness that is not yet a non-conformity. To be monitored | 180 days |
 | **Opportunity** | Improvement suggestion with no impact on compliance. No mandatory deadline | — |
 
-Response deadlines are automatically calculated from the finding opening date based on these policies. For Major NC a PDCA cycle is also automatically created.
+Response deadlines are automatically calculated from the finding opening date based on these policies. For Major and Minor NC a PDCA cycle linked to the finding is created automatically; for Major NC also an urgent task.
+
+#### Linking findings and PDCA
+
+Each finding can have **only one PDCA**; a PDCA can cover several findings, but of the same audit and site (e.g. two observations solved by a single action). The link is visible from both sides: on the finding the PDCA phase, with one click to open it; on the PDCA the originating finding and audit, with audit type and requesting party.
+
+From the audit's **Findings** tab, for a finding without a PDCA:
+
+- **Open PDCA** creates the cycle already linked, on the audit's site and with the audit type (useful for observations and opportunities, which do not open one automatically);
+- **Link to existing PDCA** links it to an open cycle of the same site.
+
+The same can be done from the **PDCA** menu: in a new cycle with origin **Audit** choose audit and finding (site and audit type are filled in automatically), or from the **🔗 Findings** button of an existing cycle. A wrong link is removed with **Unlink**, giving a reason that is kept in the audit trail.
 
 #### How to close a finding
 
-1. From the finding record, after adopting the corrective actions, click **Propose closure**
-2. Upload the **closing evidence** (mandatory for Major NC and Minor NC)
-3. Enter the **closing comment**: describe the actions taken
-4. The finding moves to "Under verification" status
-5. The responsible auditor verifies the evidence and clicks **Confirm closure** or **Reopen finding** with a comment
+1. In the audit's **Findings** tab click **Close finding** on the finding
+2. Enter the **closure notes** (at least 20 characters for Major and Minor NC) and choose the **closure evidence** (mandatory for Major and Minor NC)
+3. Click **Close**
+
+If the finding has a linked PDCA, it is closed only once the corrective action is complete: with the PDCA **closed** (or archived), or in the **ACT** phase if the PDCA covers only this finding; in that case the PDCA is closed together with the finding and the closure notes become its standardisation. Otherwise the system shows the PDCA phase and saves nothing. When a PDCA is closed, its linked findings still open move to "in response", ready to be closed with evidence.
 
 #### How to download the audit report
 
