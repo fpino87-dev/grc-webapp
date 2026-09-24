@@ -622,7 +622,7 @@ When creating a cycle, the **Site** field states what the cycle applies to:
 - a **site**: the cycle concerns that plant only and is managed by that site's users;
 - **Organization — all sites**: the cycle applies to the whole organization (e.g. a common procedure or an awareness campaign for everyone). The scope automatically becomes **Organization**.
 
-Organization-wide cycles are visible to all sites, but only users with access to the whole organization can open and drive them (phase advancement, editing, archiving, deletion); for the others they appear **read only**, with the dossier available. Filtering the list by a site also shows organization-wide cycles, which apply there too; the **Organization only** option shows just those. In the DO phase of an organization-wide cycle you can attach evidence from any site. On closure the generated lesson learned is organization-wide too and, if the CHECK outcome is ko, the new cycle stays organization-wide.
+Organization-wide cycles are visible to all sites, but only users with access to the whole organization can open and drive them (phase advancement, editing, archiving, deletion); for the others they appear **read only**, with the dossier available. Filtering the list by a site also shows organization-wide cycles, which apply there too; the **Organization only** option shows just those. The **Status** filter shows cycles in progress (PLAN to ACT), a single phase, closed or archived ones. In the DO phase of an organization-wide cycle you can attach evidence from any site. On closure the generated lesson learned is organization-wide too and, if the CHECK outcome is ko, the new cycle stays organization-wide.
 
 ### PDCAs automatically created from incidents, findings, critical risks
 

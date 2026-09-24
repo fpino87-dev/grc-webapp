@@ -177,3 +177,14 @@ describe("PdcaPage — PDCA chiuso collegato a un finding che ha già il PDCA au
   });
 });
 
+describe("PdcaPage — filtro per stato", () => {
+  it("filtra per cicli in corso o per fase", async () => {
+    renderPage();
+    const statusSelect = (await screen.findByText("pdca.filters.all_statuses")).closest("select")!;
+    fireEvent.change(statusSelect, { target: { value: "open" } });
+    await vi.waitFor(() => expect(mockList).toHaveBeenLastCalledWith({ open: "true" }));
+    fireEvent.change(statusSelect, { target: { value: "chiuso" } });
+    await vi.waitFor(() => expect(mockList).toHaveBeenLastCalledWith({ fase_corrente: "chiuso" }));
+  });
+});
+

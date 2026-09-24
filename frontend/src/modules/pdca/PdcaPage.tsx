@@ -1290,6 +1290,8 @@ export function PdcaPage() {
   const [showNew, setShowNew] = useState(false);
   const [filterTrigger, setFilterTrigger] = useState("");
   const [filterPlant, setFilterPlant] = useState("");
+  // Stato: "open" = in corso (PLAN…ACT), oppure una fase / chiuso / archiviato.
+  const [filterStatus, setFilterStatus] = useState("");
 
   // Il sito scelto nella barra in alto vale come filtro di default; il select
   // locale lo sovrascrive solo se valorizzato esplicitamente.
@@ -1301,13 +1303,15 @@ export function PdcaPage() {
   const params: Record<string, string> = {};
   if (onlyCycle) params.id = onlyCycle;
   if (filterTrigger) params.trigger_type = filterTrigger;
+  if (filterStatus === "open") params.open = "true";
+  else if (filterStatus) params.fase_corrente = filterStatus;
   // Filtro per sito: cicli del sito + cicli di organizzazione (valgono anche lì).
   if (onlyCycle) { /* ciclo singolo: nessun altro filtro */ }
   else if (effectivePlant === ORG_VALUE) params.org = "true";
   else if (effectivePlant) params.site = effectivePlant;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["pdca", filterTrigger, effectivePlant, onlyCycle],
+    queryKey: ["pdca", filterTrigger, effectivePlant, filterStatus, onlyCycle],
     queryFn: () => pdcaApi.list(params),
     retry: false,
   });
@@ -1359,9 +1363,21 @@ export function PdcaPage() {
             <option key={p.id} value={p.id}>{p.code} — {p.name}</option>
           ))}
         </select>
-        {(filterTrigger || filterPlant) && (
+        <label className="text-sm text-gray-600 font-medium ml-2">{t("pdca.filters.status_label")}</label>
+        <select
+          value={filterStatus}
+          onChange={e => setFilterStatus(e.target.value)}
+          className="border rounded px-3 py-1.5 text-sm text-gray-700 bg-white"
+        >
+          <option value="">{t("pdca.filters.all_statuses")}</option>
+          <option value="open">{t("pdca.filters.only_open")}</option>
+          {(["plan", "do", "check", "act", "chiuso", "archiviato"] as const).map(p => (
+            <option key={p} value={p}>{t(`pdca.phase.${p}`)}</option>
+          ))}
+        </select>
+        {(filterTrigger || filterPlant || filterStatus) && (
           <button
-            onClick={() => { setFilterTrigger(""); setFilterPlant(""); }}
+            onClick={() => { setFilterTrigger(""); setFilterPlant(""); setFilterStatus(""); }}
             className="text-xs text-gray-500 hover:text-gray-700 underline"
           >
             {t("pdca.filters.clear")}

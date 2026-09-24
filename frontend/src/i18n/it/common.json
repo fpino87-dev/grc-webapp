@@ -3317,7 +3317,10 @@
       "all_plants": "Tutti i siti",
       "from_topbar": "Sito attivo: {{plant}}",
       "clear": "Rimuovi filtro",
-      "only_org": "Solo organizzazione"
+      "only_org": "Solo organizzazione",
+      "status_label": "Stato:",
+      "all_statuses": "Tutti",
+      "only_open": "In corso (PLAN → ACT)"
     },
     "table": {
       "title": "Titolo / Finding",

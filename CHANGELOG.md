@@ -56,6 +56,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 - **PDCA (M11) — cicli di organizzazione**: finora ogni ciclo PDCA doveva appartenere a un sito, anche quando l'azione di miglioramento valeva per tutta l'organizzazione (es. una procedura comune): bisognava aprirlo su un sito a caso o duplicarlo.
   - Alla creazione il campo **Sito** offre l'opzione **Organizzazione — tutti i siti**: il ciclo non ha sito e l'ambito è "Organizzazione".
   - I cicli di organizzazione sono visibili a tutti i siti, ma li aprono e li portano avanti (fasi, modifica, archiviazione, cancellazione) solo gli utenti con accesso a tutta l'organizzazione; per gli utenti di singoli siti sono in sola lettura. La regola è verificata anche lato server.
+  - Nuovo filtro **Stato** nell'elenco PDCA: in corso (da PLAN ad ACT), singola fase, chiusi o archiviati.
   - Filtrando l'elenco per un sito compaiono anche i cicli di organizzazione; il nuovo filtro **Solo organizzazione** mostra soltanto questi. Nella fase DO si può allegare un'evidenza di qualunque sito.
   - Alla chiusura la **Lesson Learned (M12)** generata è anch'essa di organizzazione, con la stessa regola di gestione; se il CHECK ha esito ko il nuovo ciclo resta di organizzazione.
   - **Riesame di direzione (M13)**: per un riesame di organizzazione, l'azione con PDCA può aprire un ciclo di organizzazione invece di dover scegliere un sito.

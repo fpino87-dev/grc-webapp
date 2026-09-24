@@ -3317,7 +3317,10 @@
       "all_plants": "All sites",
       "from_topbar": "Active site: {{plant}}",
       "clear": "Clear filter",
-      "only_org": "Organization only"
+      "only_org": "Organization only",
+      "status_label": "Status:",
+      "all_statuses": "All",
+      "only_open": "In progress (PLAN → ACT)"
     },
     "table": {
       "title": "Title / Finding",

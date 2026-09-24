@@ -3317,7 +3317,10 @@
       "all_plants": "Tüm siteler",
       "from_topbar": "Etkin site: {{plant}}",
       "clear": "Filtreyi temizle",
-      "only_org": "Yalnızca organizasyon"
+      "only_org": "Yalnızca organizasyon",
+      "status_label": "Durum:",
+      "all_statuses": "Tümü",
+      "only_open": "Devam eden (PLAN → ACT)"
     },
     "table": {
       "title": "Başlık / Bulgu",

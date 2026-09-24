@@ -3317,7 +3317,10 @@
       "all_plants": "Tous les sites",
       "from_topbar": "Site actif : {{plant}}",
       "clear": "Effacer le filtre",
-      "only_org": "Organisation uniquement"
+      "only_org": "Organisation uniquement",
+      "status_label": "Statut :",
+      "all_statuses": "Tous",
+      "only_open": "En cours (PLAN → ACT)"
     },
     "table": {
       "title": "Titre / Constat",

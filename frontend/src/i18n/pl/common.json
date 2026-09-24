@@ -3317,7 +3317,10 @@
       "all_plants": "Wszystkie zakłady",
       "from_topbar": "Aktywny zakład: {{plant}}",
       "clear": "Wyczyść filtr",
-      "only_org": "Tylko organizacja"
+      "only_org": "Tylko organizacja",
+      "status_label": "Status:",
+      "all_statuses": "Wszystkie",
+      "only_open": "W toku (PLAN → ACT)"
     },
     "table": {
       "title": "Tytuł / Ustalenie",
