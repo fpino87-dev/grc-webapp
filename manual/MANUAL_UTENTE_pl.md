@@ -891,6 +891,25 @@ Z audytu w toku lub zamkniętego:
 
 ---
 
+### Audyty zewnętrzne: drugiej i trzeciej strony
+
+Oprócz audytów wewnętrznych w Audit Prep rejestruje się audyty prowadzone przez inne podmioty, aby ich ustalenia przechodziły tę samą ścieżkę (terminy, PDCA, zamknięcie z dowodem):
+
+- **Drugiej strony (klient)**: audyt, który klient (np. OEM) przeprowadza u Was bezpośrednio lub przez wyznaczoną jednostkę;
+- **Trzeciej strony (certyfikacja)**: audyt jednostki certyfikującej (np. TISAX, ISO/IEC 27001).
+
+**Jak go zarejestrować**
+
+1. Kliknij **+ Nowe przygotowanie** i wybierz **Rodzaj audytu**
+2. Dla audytu drugiej strony podaj **Zlecającego**, czyli klienta, dla którego przeprowadzany jest audyt, a w polu **Jednostka / audytor** — kto go wykonuje; framework jest opcjonalny
+3. Dodaj ustalenia jak w audycie wewnętrznym: jeśli przy ustaleniu nie podano audytora, obowiązuje jednostka audytu, a cykl PDCA otwarty dla niezgodności wskazuje rodzaj audytu (np. „Drugiej strony")
+
+Rodzaj i zlecającego można później poprawić w zakładce **Informacje o audycie**.
+
+**Raport oficjalny** — w zakładce **Informacje o audycie**, w sekcji **Oficjalny raport audytora lub jednostki**, wybierz plik (np. PDF otrzymany od klienta) i kliknij **Załącz raport**. Plik jest archiwizowany jako dowód typu „raport", w zakładzie audytu i bez terminu ważności. Stamtąd możesz go pobrać, zastąpić nową wersją (poprzedni pozostaje wśród dowodów) lub odłączyć. To coś innego niż **Pobierz raport**, czyli podsumowanie generowane przez platformę.
+
+Audyty zewnętrzne pojawiają się z rodzajem i zlecającym na liście, w analizie przeglądu zarządzania (wyniki audytów, §9.3.2 d) i w protokole; **pakiet audytowy** zawiera folder `AUDIT_ESTERNI/` z podsumowaniem i załączonymi raportami.
+
 ### Anulowanie audytu
 
 [Zrzut ekranu: przycisk anulowania audytu]

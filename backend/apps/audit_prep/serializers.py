@@ -12,6 +12,10 @@ class EvidenceItemSerializer(serializers.ModelSerializer):
 class AuditPrepSerializer(serializers.ModelSerializer):
     evidence_items = EvidenceItemSerializer(many=True, read_only=True)
     framework_code = serializers.SerializerMethodField()
+    report_evidence_title = serializers.CharField(
+        source="report_evidence.title", read_only=True, default=None,
+    )
+    report_evidence_filename = serializers.SerializerMethodField()
 
     class Meta:
         model = AuditPrep
@@ -19,13 +23,20 @@ class AuditPrepSerializer(serializers.ModelSerializer):
         # status è governato dalle azioni complete (blocca con Major NC aperti)
         # e annulla; readiness_score è calcolato dall'azione readiness. Una PATCH
         # diretta a "completato" scavalcherebbe il gate sui Major NC.
+        # report_evidence si imposta solo con l'azione report-file (upload
+        # validato + audit), non collegando un'evidenza qualsiasi via PATCH.
         read_only_fields = [
-            "id", "status", "readiness_score",
+            "id", "status", "readiness_score", "report_evidence",
             "created_by", "created_at", "updated_at", "deleted_at",
         ]
 
     def get_framework_code(self, obj):
         return obj.framework.code if obj.framework_id else None
+
+    def get_report_evidence_filename(self, obj):
+        import os
+        ev = obj.report_evidence
+        return os.path.basename(ev.file_path) if ev and ev.file_path else None
 
 
 class AuditFindingSerializer(serializers.ModelSerializer):

@@ -192,6 +192,70 @@ def _add_management_reviews(zf, zip_name: str, plant_id, default_storage) -> Non
             )
 
 
+def _add_external_audit_reports(zf, zip_name: str, plant_id, default_storage) -> None:
+    """
+    Aggiunge AUDIT_ESTERNI/ con:
+    - RIEPILOGO.csv — audit di seconda e terza parte (tipo, committente, ente,
+      data, n. finding, presenza del rapporto)
+    - il rapporto ufficiale allegato a ciascun audit (se presente)
+    """
+    import io
+    import logging
+    import os as _os
+
+    from django.db.models import Count, Q
+
+    from core.csv_safe import safe_writer
+    from apps.audit_prep.models import AuditPrep
+
+    qs = (
+        AuditPrep.objects.filter(audit_type__in=("seconda_parte", "terza_parte"))
+        .exclude(status="archiviato")
+        .select_related("report_evidence")
+        .annotate(n_findings=Count("findings", filter=Q(findings__deleted_at__isnull=True)))
+        .order_by("-audit_date")
+    )
+    if plant_id:
+        qs = qs.filter(plant_id=plant_id)
+    preps = list(qs)
+    if not preps:
+        return
+
+    type_label = dict(AuditPrep.AUDIT_TYPE_CHOICES)
+    buf = io.StringIO()
+    w = safe_writer(buf)
+    w.writerow(["Data", "Titolo", "Tipo", "Committente", "Ente / auditor", "Stato", "Finding", "Rapporto"])
+    for p in preps:
+        w.writerow([
+            p.audit_date.isoformat() if p.audit_date else "—",
+            p.title,
+            type_label.get(p.audit_type, p.audit_type),
+            p.requesting_party or "—",
+            p.auditor_name or "—",
+            p.status,
+            p.n_findings,
+            "Sì" if p.report_evidence_id else "No",
+        ])
+    zf.writestr(f"{zip_name}/AUDIT_ESTERNI/RIEPILOGO.csv", buf.getvalue().encode("utf-8-sig"))
+
+    for p in preps:
+        ev = p.report_evidence
+        if not ev or ev.deleted_at or not ev.file_path:
+            continue
+        try:
+            if not default_storage.exists(ev.file_path):
+                continue
+            content = default_storage.open(ev.file_path, "rb").read()
+            _, ext = _os.path.splitext(ev.file_path)
+            date = p.audit_date.isoformat() if p.audit_date else "senza-data"
+            fname = f"{date}_{_sanitize_name(p.title, 50)}{ext}"
+            zf.writestr(f"{zip_name}/AUDIT_ESTERNI/{fname}", content)
+        except Exception as exc:
+            logging.getLogger(__name__).warning(
+                "audit-package: rapporto audit %s saltato: %s", p.pk, exc,
+            )
+
+
 def _add_management_review_reports(zf, zip_name: str, plant_id) -> None:
     """Verbali PDF generati dal sistema per i riesami approvati."""
     import logging
@@ -414,6 +478,9 @@ class AuditPackageView(APIView):
             # ── Revisioni di direzione ─────────────────────────────────────────
             _add_management_reviews(zf, zip_name, plant_id, default_storage)
             _add_management_review_reports(zf, zip_name, plant_id)
+
+            # ── Audit esterni (seconda/terza parte) con rapporti ufficiali ─────
+            _add_external_audit_reports(zf, zip_name, plant_id, default_storage)
 
             # ── Registro rischi ────────────────────────────────────────────────
             _add_risk_register(zf, zip_name, plant_id)

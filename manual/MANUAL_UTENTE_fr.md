@@ -891,6 +891,25 @@ Depuis l'audit en cours ou clôturé :
 
 ---
 
+### Audits externes : seconde et tierce partie
+
+En plus des audits internes, Audit Prep enregistre les audits menés par des tiers, afin que leurs constats suivent le même parcours (échéances, PDCA, clôture avec preuve) :
+
+- **Seconde partie (client)** : l'audit qu'un client (ex. un OEM) réalise chez vous, directement ou via un organisme mandaté ;
+- **Tierce partie (certification)** : l'audit d'un organisme de certification (ex. TISAX, ISO/IEC 27001).
+
+**Comment l'enregistrer**
+
+1. Cliquez sur **+ Nouvelle préparation** et choisissez le **Type d'audit**
+2. Pour la seconde partie, indiquez le **Donneur d'ordre**, c'est-à-dire le client pour lequel l'audit est réalisé, et dans **Organisme / auditeur** qui le réalise ; le référentiel est facultatif
+3. Ajoutez les constats comme pour un audit interne : si aucun auditeur n'est indiqué sur le constat, l'organisme de l'audit s'applique, et le PDCA ouvert pour les non-conformités indique le type d'audit (ex. « Seconde partie »)
+
+Le type et le donneur d'ordre peuvent être corrigés ensuite depuis l'onglet **Infos audit**.
+
+**Rapport officiel** — dans l'onglet **Infos audit**, section **Rapport officiel de l'auditeur ou de l'organisme**, choisissez le fichier (ex. le PDF reçu du client) et cliquez sur **Joindre le rapport**. Le fichier est archivé comme preuve de type « rapport », sur le site de l'audit et sans échéance. Vous pouvez ensuite le télécharger, le remplacer par une révision (le précédent reste parmi les preuves) ou le détacher. C'est différent de **Télécharger le rapport**, qui est la synthèse générée par la plateforme.
+
+Les audits externes apparaissent avec leur type et leur donneur d'ordre dans la liste, dans l'analyse de la revue de direction (résultats des audits, §9.3.2 d) et dans le procès-verbal ; le **dossier d'audit** contient le dossier `AUDIT_ESTERNI/` avec une synthèse et les rapports joints.
+
 ### Annuler un audit
 
 [Écran : bouton d'annulation d'audit]

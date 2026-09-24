@@ -2753,3 +2753,25 @@ msgstr "Wgraj plik albo wybierz istniejący dowód, nie oba naraz."
 #: apps/pdca/views.py
 msgid "Il file dell'evidenza si carica solo nel passaggio da DO a CHECK."
 msgstr "Plik dowodu można wgrać tylko przy przejściu z DO do CHECK."
+
+#: apps/audit_prep/services.py
+#, python-format
+msgid "Rapporto audit — %(title)s"
+msgstr "Raport z audytu — %(title)s"
+
+#: apps/audit_prep/services.py
+#, python-format
+msgid "Rapporto ufficiale dell'audit «%(title)s»."
+msgstr "Oficjalny raport z audytu «%(title)s»."
+
+#: apps/audit_prep/views.py
+msgid "Il file del rapporto è obbligatorio."
+msgstr "Plik raportu jest wymagany."
+
+#: apps/management_review/report/builder.py
+msgid "Seconda parte"
+msgstr "Druga strona"
+
+#: apps/management_review/report/builder.py
+msgid "Terza parte"
+msgstr "Trzecia strona"

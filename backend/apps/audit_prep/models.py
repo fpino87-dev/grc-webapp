@@ -23,9 +23,29 @@ class AuditPrep(BaseModel):
         "controls.Framework", on_delete=models.PROTECT,
         related_name="audit_preps", null=True, blank=True,
     )
+    AUDIT_TYPE_CHOICES = [
+        ("interno", "Audit interno (prima parte)"),
+        ("seconda_parte", "Seconda parte (cliente)"),
+        ("terza_parte", "Terza parte (certificazione)"),
+    ]
     title = models.CharField(max_length=200)
     audit_date = models.DateField(null=True, blank=True)
+    # Per gli audit esterni: l'ente o la persona che esegue l'audit.
     auditor_name = models.CharField(max_length=200, blank=True)
+    audit_type = models.CharField(
+        max_length=15, choices=AUDIT_TYPE_CHOICES, default="interno",
+        help_text="Chi conduce l'audit: interno, cliente (seconda parte) o ente di certificazione",
+    )
+    requesting_party = models.CharField(
+        max_length=200, blank=True,
+        help_text="Committente: il cliente per cui è svolto l'audit di seconda parte "
+                  "(può differire dall'ente che lo esegue)",
+    )
+    # Rapporto ufficiale emesso dall'auditor/ente (PDF), archiviato come evidenza.
+    report_evidence = models.ForeignKey(
+        "documents.Evidence", null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="audit_reports",
+    )
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="in_corso")
     readiness_score = models.IntegerField(null=True, blank=True)
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)

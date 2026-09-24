@@ -3010,7 +3010,29 @@
     "help_step5": "Major NC → automatic PDCA opened",
     "help_step6": "Complete the audit → downloadable report",
     "help_step7": "The program automatically updates the % completion",
-    "ev_na_opt": "Not applicable"
+    "ev_na_opt": "Not applicable",
+    "audit_type": {
+      "interno": "Internal (first party)",
+      "seconda_parte": "Second party (customer)",
+      "terza_parte": "Third party (certification)"
+    },
+    "external": {
+      "section_title": "Audit type and official report",
+      "type_label": "Audit type",
+      "party_label": "Requesting party (customer)",
+      "party_placeholder": "E.g. the OEM customer the audit is performed for",
+      "body_label": "Audit body / auditor",
+      "save_btn": "Save",
+      "report_label": "Official report from the auditor or audit body",
+      "no_report": "No report attached.",
+      "file_label": "Report file",
+      "report_title_placeholder": "Title (if empty: «Audit report — audit title»)",
+      "upload_btn": "Attach report",
+      "replace_btn": "Replace report",
+      "download_btn": "Download",
+      "detach_btn": "Detach",
+      "report_hint": "The file is stored as evidence of type «report», with no expiry, and is included in the audit package."
+    }
   },
   "risk": {
     "no_process_selected": "No process selected",

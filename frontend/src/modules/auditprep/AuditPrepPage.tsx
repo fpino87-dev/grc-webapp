@@ -6,12 +6,14 @@ import {
   type AuditFinding,
   type AuditPrep,
   type AuditProgram,
+  type AuditType,
   type AutoValidateResult,
   type EvidenceItem,
   type PlannedAudit,
   type SyncControlsResult,
 } from "../../api/endpoints/auditPrep";
 import { plantsApi } from "../../api/endpoints/plants";
+import { documentsApi } from "../../api/endpoints/documents";
 import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
@@ -52,6 +54,121 @@ const FINDING_TYPE_COLORS: Record<string, string> = {
   observation: "bg-blue-100 text-blue-700",
   opportunity: "bg-gray-100 text-gray-600",
 };
+
+// ─── Audit esterni: tipo, committente, rapporto ufficiale ─────────────────────
+
+const AUDIT_TYPES: AuditType[] = ["interno", "seconda_parte", "terza_parte"];
+
+/** Badge del tipo di audit, solo per gli audit esterni (seconda/terza parte). */
+function AuditTypeBadge({ prep }: { prep: AuditPrep }) {
+  const { t } = useTranslation();
+  if (!prep.audit_type || prep.audit_type === "interno") return null;
+  return (
+    <span className="text-xs text-indigo-700 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5">
+      {t(`audit_prep.audit_type.${prep.audit_type}`)}
+      {prep.requesting_party ? ` — ${prep.requesting_party}` : ""}
+    </span>
+  );
+}
+
+function ExternalAuditSection({ prep }: { prep: AuditPrep }) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [auditType, setAuditType] = useState<AuditType>(prep.audit_type ?? "interno");
+  const [party, setParty] = useState(prep.requesting_party ?? "");
+  const [file, setFile] = useState<File | null>(null);
+  const [reportTitle, setReportTitle] = useState("");
+  const [error, setError] = useState("");
+  const editable = prep.status !== "archiviato";
+  const dirty = auditType !== (prep.audit_type ?? "interno") || party.trim() !== (prep.requesting_party ?? "");
+  const errMsg = (e: unknown) =>
+    (e as { response?: { data?: { error?: string } } })?.response?.data?.error || t("audit_prep.error_generic");
+
+  const saveMutation = useMutation({
+    mutationFn: () => auditPrepApi.update(prep.id, {
+      audit_type: auditType, requesting_party: auditType === "seconda_parte" ? party.trim() : "",
+    }),
+    onSuccess: () => { setError(""); qc.invalidateQueries({ queryKey: ["audit-prep"] }); },
+    onError: (e) => setError(errMsg(e)),
+  });
+  const uploadMutation = useMutation({
+    mutationFn: () => auditPrepApi.uploadReportFile(prep.id, file!, reportTitle.trim() || undefined),
+    onSuccess: () => {
+      setFile(null); setReportTitle(""); setError("");
+      qc.invalidateQueries({ queryKey: ["audit-prep"] });
+    },
+    onError: (e) => setError(errMsg(e)),
+  });
+  const detachMutation = useMutation({
+    mutationFn: () => auditPrepApi.detachReportFile(prep.id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["audit-prep"] }),
+    onError: (e) => setError(errMsg(e)),
+  });
+
+  return (
+    <div className="border-t border-gray-100 pt-4 space-y-3">
+      <h4 className="text-sm font-semibold text-gray-800">{t("audit_prep.external.section_title")}</h4>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs text-gray-600 mb-1">{t("audit_prep.external.type_label")}</label>
+          <select value={auditType} disabled={!editable} onChange={e => setAuditType(e.target.value as AuditType)}
+            className="w-full border rounded px-2 py-1.5 text-sm disabled:bg-gray-50">
+            {AUDIT_TYPES.map(a => <option key={a} value={a}>{t(`audit_prep.audit_type.${a}`)}</option>)}
+          </select>
+        </div>
+        {auditType === "seconda_parte" && (
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">{t("audit_prep.external.party_label")}</label>
+            <input value={party} disabled={!editable} onChange={e => setParty(e.target.value)}
+              placeholder={t("audit_prep.external.party_placeholder")}
+              className="w-full border rounded px-2 py-1.5 text-sm disabled:bg-gray-50" />
+          </div>
+        )}
+      </div>
+      {editable && dirty && (
+        <button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}
+          className="px-3 py-1.5 text-xs bg-primary-600 text-white rounded disabled:opacity-50">
+          {saveMutation.isPending ? t("audit_prep.saving") : t("audit_prep.external.save_btn")}
+        </button>
+      )}
+
+      <div>
+        <p className="text-xs text-gray-600 mb-1">{t("audit_prep.external.report_label")}</p>
+        {prep.report_evidence ? (
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="font-medium">📎 {prep.report_evidence_title}</span>
+            <button
+              onClick={() => documentsApi.downloadEvidence(prep.report_evidence!).then(blob =>
+                downloadBlob(blob, prep.report_evidence_filename || prep.report_evidence_title || "rapporto"))}
+              className="text-xs text-primary-700 underline">{t("audit_prep.external.download_btn")}</button>
+            {editable && (
+              <button onClick={() => detachMutation.mutate()} disabled={detachMutation.isPending}
+                className="text-xs text-red-600 underline disabled:opacity-50">{t("audit_prep.external.detach_btn")}</button>
+            )}
+          </div>
+        ) : (
+          <p className="text-xs text-gray-400">{t("audit_prep.external.no_report")}</p>
+        )}
+        {editable && (
+          <div className="mt-2 space-y-2">
+            <input type="file" aria-label={t("audit_prep.external.file_label")}
+              onChange={e => setFile(e.target.files?.[0] ?? null)} className="w-full text-sm" />
+            <input value={reportTitle} onChange={e => setReportTitle(e.target.value)}
+              placeholder={t("audit_prep.external.report_title_placeholder")}
+              className="w-full border rounded px-2 py-1.5 text-sm" />
+            <button onClick={() => uploadMutation.mutate()} disabled={!file || uploadMutation.isPending}
+              className="px-3 py-1.5 text-xs border border-primary-300 text-primary-700 rounded hover:bg-primary-50 disabled:opacity-50">
+              {uploadMutation.isPending ? t("audit_prep.saving")
+                : prep.report_evidence ? t("audit_prep.external.replace_btn") : t("audit_prep.external.upload_btn")}
+            </button>
+            <p className="text-xs text-gray-400">{t("audit_prep.external.report_hint")}</p>
+          </div>
+        )}
+      </div>
+      {error && <p className="text-xs text-red-600">{error}</p>}
+    </div>
+  );
+}
 
 // ─── PrepDrawer ───────────────────────────────────────────────────────────────
 
@@ -135,6 +252,7 @@ function PrepDrawer({ prep, onClose }: { prep: AuditPrep; onClose: () => void })
           <div>
             <div className="flex items-center gap-2 mb-1">
               <StatusBadge status={prep.status} />
+              <AuditTypeBadge prep={prep} />
               {prep.audit_entry_id && <span className="text-xs text-gray-400">{t("audit_prep.annual_program_tag")}</span>}
             </div>
             <h2 className="text-lg font-semibold text-gray-900">{prep.title}</h2>
@@ -377,6 +495,8 @@ function PrepDrawer({ prep, onClose }: { prep: AuditPrep; onClose: () => void })
                 <div><span className="text-gray-500">{t("audit_prep.tab_info")}:</span> <StatusBadge status={prep.status} /></div>
                 <div><span className="text-gray-500">Readiness:</span> <span className="font-medium">{prep.readiness_score ?? "—"}/100</span></div>
               </div>
+
+              <ExternalAuditSection key={prep.id + (prep.report_evidence ?? "")} prep={prep} />
 
               {prep.status === "in_corso" && (
                 <div className="flex gap-2 pt-4 border-t border-gray-100">
@@ -1002,6 +1122,7 @@ function AuditPrepCard({ prep, onOpen, onDelete }: { prep: AuditPrep; onOpen: ()
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2">
           <StatusBadge status={prep.status} />
+          <AuditTypeBadge prep={prep} />
           {prep.audit_entry_id && <span className="text-xs text-gray-400 border border-gray-200 rounded px-1.5 py-0.5">{t("audit_prep.program_tag_short")}</span>}
         </div>
         <button onClick={onDelete} className="text-gray-300 hover:text-red-500 text-sm" title={t("audit_prep.delete_btn")}>🗑</button>
@@ -1032,7 +1153,7 @@ function AuditPrepCard({ prep, onOpen, onDelete }: { prep: AuditPrep; onOpen: ()
 function NewPrepModal({ plants, onClose }: { plants: { id: string; code: string; name: string }[]; onClose: () => void }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const [form, setForm] = useState<Partial<AuditPrep>>({});
+  const [form, setForm] = useState<Partial<AuditPrep>>({ audit_type: "interno" });
   const [fwKey, setFwKey] = useState("");
   const [tisaxLevel, setTisaxLevel] = useState<"L2" | "L3">("L2");
 
@@ -1114,12 +1235,33 @@ function NewPrepModal({ plants, onClose }: { plants: { id: string; code: string;
           )}
           <div className="grid grid-cols-2 gap-3">
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("audit_prep.external.type_label")}</label>
+              <select name="audit_type" value={form.audit_type} className="w-full border rounded px-3 py-2 text-sm"
+                onChange={e => setForm(p => ({ ...p, audit_type: e.target.value as AuditType,
+                  ...(e.target.value !== "seconda_parte" ? { requesting_party: "" } : {}) }))}>
+                {AUDIT_TYPES.map(a => <option key={a} value={a}>{t(`audit_prep.audit_type.${a}`)}</option>)}
+              </select>
+            </div>
+            {form.audit_type === "seconda_parte" && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("audit_prep.external.party_label")}</label>
+                <input name="requesting_party" value={form.requesting_party ?? ""}
+                  onChange={e => setForm(p => ({ ...p, requesting_party: e.target.value }))}
+                  placeholder={t("audit_prep.external.party_placeholder")}
+                  className="w-full border rounded px-3 py-2 text-sm" />
+              </div>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{t("audit_prep.audit_date_label")}</label>
               <input name="audit_date" type="date" onChange={e => setForm(p => ({ ...p, audit_date: e.target.value || null }))}
                 className="w-full border rounded px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("audit_prep.auditor_label")}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {form.audit_type === "interno" ? t("audit_prep.auditor_label") : t("audit_prep.external.body_label")}
+              </label>
               <input name="auditor_name" onChange={e => setForm(p => ({ ...p, auditor_name: e.target.value }))}
                 className="w-full border rounded px-3 py-2 text-sm" />
             </div>

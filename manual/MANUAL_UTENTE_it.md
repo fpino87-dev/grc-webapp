@@ -891,6 +891,25 @@ Dall'audit in corso o chiuso:
 
 ---
 
+### Audit esterni: seconda e terza parte
+
+Oltre agli audit interni, in Audit Prep si registrano gli audit condotti da terzi, così i loro rilievi seguono lo stesso percorso (scadenze, PDCA, chiusura con evidenza):
+
+- **Seconda parte (cliente)**: l'audit che un cliente (es. un OEM) svolge su di voi, direttamente o tramite un ente incaricato;
+- **Terza parte (certificazione)**: l'audit di un ente di certificazione (es. TISAX, ISO/IEC 27001).
+
+**Come registrarlo**
+
+1. Clicca **+ Nuova preparazione** e scegli il **Tipo di audit**
+2. Per la seconda parte indica il **Committente**, cioè il cliente per cui è svolto l'audit, e in **Ente / auditor** chi lo esegue; il framework è facoltativo
+3. Aggiungi i finding come per un audit interno: se non indichi un auditor sul finding vale l'ente dell'audit, e il PDCA aperto per le non conformità riporta il tipo di audit (es. "Seconda parte")
+
+Tipo e committente si possono correggere in seguito dal tab **Info audit**.
+
+**Rapporto ufficiale** — nel tab **Info audit**, sezione **Rapporto ufficiale dell'auditor o dell'ente**, scegli il file (es. il PDF ricevuto dal cliente) e clicca **Allega rapporto**. Il file viene archiviato come evidenza di tipo "report", sul sito dell'audit e senza scadenza. Da lì puoi scaricarlo, sostituirlo con una revisione (il precedente resta tra le evidenze) o scollegarlo. È diverso da **Scarica relazione**, che è il riepilogo generato dalla piattaforma.
+
+Gli audit esterni compaiono con il tipo e il committente nell'elenco, nell'analisi del riesame di direzione (risultati degli audit, §9.3.2 d) e nel verbale; il **pacchetto audit** contiene la cartella `AUDIT_ESTERNI/` con un riepilogo e i rapporti allegati.
+
 ### Annullare un audit
 
 [Schermata: pulsante annulla audit]

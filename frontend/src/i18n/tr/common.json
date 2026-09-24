@@ -3010,7 +3010,29 @@
     "help_step5": "Major NC → otomatik PDCA açıldı",
     "help_step6": "Denetimi tamamlayın → indirilebilir rapor",
     "help_step7": "Program tamamlanma %'sini otomatik günceller",
-    "ev_na_opt": "Uygulanamaz"
+    "ev_na_opt": "Uygulanamaz",
+    "audit_type": {
+      "interno": "İç (birinci taraf)",
+      "seconda_parte": "İkinci taraf (müşteri)",
+      "terza_parte": "Üçüncü taraf (belgelendirme)"
+    },
+    "external": {
+      "section_title": "Denetim türü ve resmi rapor",
+      "type_label": "Denetim türü",
+      "party_label": "Talep eden (müşteri)",
+      "party_placeholder": "Ör. denetimin yapıldığı OEM müşterisi",
+      "body_label": "Kuruluş / denetçi",
+      "save_btn": "Kaydet",
+      "report_label": "Denetçinin veya kuruluşun resmi raporu",
+      "no_report": "Ekli rapor yok.",
+      "file_label": "Rapor dosyası",
+      "report_title_placeholder": "Başlık (boşsa: «Denetim raporu — denetim başlığı»)",
+      "upload_btn": "Raporu ekle",
+      "replace_btn": "Raporu değiştir",
+      "download_btn": "İndir",
+      "detach_btn": "Bağlantıyı kaldır",
+      "report_hint": "Dosya, geçerlilik süresi olmadan «rapor» türünde kanıt olarak arşivlenir ve denetim paketine dahil edilir."
+    }
   },
   "risk": {
     "no_process_selected": "Hiçbir süreç seçilmedi",

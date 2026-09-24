@@ -330,6 +330,8 @@ def _audit_block(scope: dict, today, since_12m) -> dict:
                 "readiness_score": a.readiness_score,
                 "findings": a.n_findings,
                 "plant_code": a.plant.code if a.plant_id else None,
+                "audit_type": a.audit_type,
+                "requesting_party": a.requesting_party,
             }
             for a in audits[:SNAPSHOT_LIST_LIMIT]
         ],

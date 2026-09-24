@@ -3010,7 +3010,29 @@
     "help_step5": "Major NC → automatyczne PDCA otwarte",
     "help_step6": "Zakończ audyt → raport do pobrania",
     "help_step7": "Program automatycznie aktualizuje % ukończenia",
-    "ev_na_opt": "Nie dotyczy"
+    "ev_na_opt": "Nie dotyczy",
+    "audit_type": {
+      "interno": "Wewnętrzny (pierwszej strony)",
+      "seconda_parte": "Drugiej strony (klient)",
+      "terza_parte": "Trzeciej strony (certyfikacja)"
+    },
+    "external": {
+      "section_title": "Rodzaj audytu i raport oficjalny",
+      "type_label": "Rodzaj audytu",
+      "party_label": "Zlecający (klient)",
+      "party_placeholder": "Np. klient OEM, dla którego przeprowadzany jest audyt",
+      "body_label": "Jednostka / audytor",
+      "save_btn": "Zapisz",
+      "report_label": "Oficjalny raport audytora lub jednostki",
+      "no_report": "Brak załączonego raportu.",
+      "file_label": "Plik raportu",
+      "report_title_placeholder": "Tytuł (jeśli pusty: «Raport z audytu — tytuł audytu»)",
+      "upload_btn": "Załącz raport",
+      "replace_btn": "Zastąp raport",
+      "download_btn": "Pobierz",
+      "detach_btn": "Odłącz",
+      "report_hint": "Plik jest archiwizowany jako dowód typu «raport», bez terminu ważności, i trafia do pakietu audytowego."
+    }
   },
   "risk": {
     "no_process_selected": "Nie wybrano procesu",

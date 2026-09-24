@@ -1,9 +1,12 @@
 import datetime
 import hashlib
+import html
 import logging
 import uuid
 
+from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from core.audit import log_action
 
 from .framework_hierarchy import expand_tisax
@@ -91,7 +94,8 @@ def open_finding(audit_prep, finding_type: str, title: str,
         finding_type=finding_type,
         title=title,
         description=description,
-        auditor_name=auditor_name,
+        # In mancanza di un nome sul finding vale l'auditor/ente dell'audit.
+        auditor_name=auditor_name or audit_prep.auditor_name,
         audit_date=audit_date,
         response_deadline=deadline,
         status="open",
@@ -110,6 +114,9 @@ def open_finding(audit_prep, finding_type: str, title: str,
             scope_type="finding",
             scope_id=finding.pk,
         )
+        # Il PDCA eredita il tipo di audit (interno / seconda / terza parte).
+        cycle.audit_subtype = audit_prep.audit_type
+        cycle.save(update_fields=["audit_subtype", "updated_at"])
         finding.pdca_cycle = cycle
         finding.save(update_fields=["pdca_cycle"])
 
@@ -522,12 +529,63 @@ def launch_audit_from_program(program, audit_entry: dict, user) -> "AuditPrep":
     return prep
 
 
+def attach_official_report(prep: AuditPrep, uploaded_file, user, title: str = ""):
+    """Allega il rapporto ufficiale emesso dall'auditor o dall'ente (es. il
+    PDF dell'audit di seconda parte del cliente). Il file diventa un'evidenza
+    di tipo "report" sul sito dell'audit, senza scadenza; un rapporto già
+    allegato resta tra le evidenze ma non è più quello dell'audit.
+    Validazione del file (estensione + MIME) in `create_evidence_with_file`."""
+    from apps.documents.services import create_evidence_with_file
+
+    previous_id = prep.report_evidence_id
+    data = {
+        "title": (title.strip() or _("Rapporto audit — %(title)s") % {"title": prep.title})[:300],
+        "evidence_type": "report",
+        "description": _("Rapporto ufficiale dell'audit «%(title)s».") % {"title": prep.title},
+        "plant": str(prep.plant_id) if prep.plant_id else "",
+    }
+    with transaction.atomic():
+        evidence = create_evidence_with_file(data, uploaded_file, user)
+        prep.report_evidence = evidence
+        prep.save(update_fields=["report_evidence", "updated_at"])
+        log_action(
+            user=user,
+            action_code="audit_prep.official_report.attached",
+            level="L2",
+            entity=prep,
+            payload={
+                "evidence_id": str(evidence.pk),
+                "replaced_evidence_id": str(previous_id) if previous_id else None,
+                "audit_type": prep.audit_type,
+            },
+        )
+    return evidence
+
+
+def detach_official_report(prep: AuditPrep, user) -> None:
+    """Scollega il rapporto dall'audit; l'evidenza resta archiviata."""
+    previous_id = prep.report_evidence_id
+    if not previous_id:
+        return
+    prep.report_evidence = None
+    prep.save(update_fields=["report_evidence", "updated_at"])
+    log_action(
+        user=user,
+        action_code="audit_prep.official_report.detached",
+        level="L2",
+        entity=prep,
+        payload={"evidence_id": str(previous_id)},
+    )
+
+
 def generate_audit_report(prep: "AuditPrep") -> str:
     """Genera relazione HTML scaricabile dell'audit."""
     plant_name = prep.plant.name if prep.plant else "—"
     fw_name = prep.framework.name if prep.framework else "—"
     auditor = prep.auditor_name or "—"
     audit_date = prep.audit_date.strftime("%d/%m/%Y") if prep.audit_date else "—"
+    audit_type_label = html.escape(prep.get_audit_type_display())
+    requesting_party = html.escape(prep.requesting_party or "—")
     score = prep.readiness_score or 0
     score_color = "#16a34a" if score >= 80 else "#d97706" if score >= 60 else "#dc2626"
 
@@ -614,6 +672,8 @@ tr:nth-child(even){{background:#f9fafb}}
   <div class="meta-item"><div class="meta-label">Framework</div><div class="meta-value">{fw_name}</div></div>
   <div class="meta-item"><div class="meta-label">Data audit</div><div class="meta-value">{audit_date}</div></div>
   <div class="meta-item"><div class="meta-label">Auditor</div><div class="meta-value">{auditor}</div></div>
+  <div class="meta-item"><div class="meta-label">Tipo audit</div><div class="meta-value">{audit_type_label}</div></div>
+  <div class="meta-item"><div class="meta-label">Committente</div><div class="meta-value">{requesting_party}</div></div>
   <div class="meta-item"><div class="meta-label">Tipo copertura</div><div class="meta-value">{coverage_label}</div></div>
   <div class="meta-item"><div class="meta-label">Generata il</div><div class="meta-value">{timezone.now().strftime("%d/%m/%Y %H:%M")}</div></div>
 </div>

@@ -59,6 +59,8 @@ export type SnapKpi = {
 export type SnapAudit = {
   id: string; title: string; audit_date: string | null; framework: string | null; status: string;
   readiness_score: number | null; findings: number; plant_code: string | null;
+  // assenti negli snapshot congelati prima dell'introduzione del tipo di audit
+  audit_type?: "interno" | "seconda_parte" | "terza_parte"; requesting_party?: string;
 };
 export type SnapFinding = {
   id: string; title: string; finding_type: string; status: string; response_deadline: string | null;

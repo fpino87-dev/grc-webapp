@@ -14,7 +14,16 @@ export interface AuditPrep {
   audit_program: string | null;
   audit_entry_id: string;
   coverage_type: "campione" | "esteso" | "full";
+  // Chi conduce l'audit; per la seconda parte il committente è il cliente.
+  audit_type: AuditType;
+  requesting_party: string;
+  // Rapporto ufficiale dell'auditor/ente (evidenza), impostato solo via report-file.
+  report_evidence: string | null;
+  report_evidence_title: string | null;
+  report_evidence_filename: string | null;
 }
+
+export type AuditType = "interno" | "seconda_parte" | "terza_parte";
 
 export interface EvidenceItem {
   id: string;
@@ -127,6 +136,18 @@ export const auditPrepApi = {
     apiClient.get<{ results: EvidenceItem[] }>("/audit-prep/evidence-items/", { params: { audit_prep: prepId } }).then(r => r.data.results),
   create: (data: Partial<AuditPrep>) =>
     apiClient.post<AuditPrep>("/audit-prep/audit-preps/", data).then(r => r.data),
+  update: (id: string, data: Partial<AuditPrep>) =>
+    apiClient.patch<AuditPrep>(`/audit-prep/audit-preps/${id}/`, data).then(r => r.data),
+  uploadReportFile: (id: string, file: File, title?: string) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    if (title) fd.append("title", title);
+    return apiClient.post<AuditPrep>(`/audit-prep/audit-preps/${id}/report-file/`, fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }).then(r => r.data);
+  },
+  detachReportFile: (id: string) =>
+    apiClient.delete(`/audit-prep/audit-preps/${id}/report-file/`),
   complete: (id: string) =>
     apiClient.post<{ ok: boolean; status: string }>(`/audit-prep/audit-preps/${id}/complete/`).then(r => r.data),
   createEvidence: (data: Partial<EvidenceItem>) =>

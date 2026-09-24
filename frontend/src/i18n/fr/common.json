@@ -3010,7 +3010,29 @@
     "help_step5": "Major NC → PDCA automatique ouvert",
     "help_step6": "Terminez l'audit → rapport téléchargeable",
     "help_step7": "Le programme met à jour automatiquement le % d'avancement",
-    "ev_na_opt": "Non applicable"
+    "ev_na_opt": "Non applicable",
+    "audit_type": {
+      "interno": "Interne (première partie)",
+      "seconda_parte": "Seconde partie (client)",
+      "terza_parte": "Tierce partie (certification)"
+    },
+    "external": {
+      "section_title": "Type d'audit et rapport officiel",
+      "type_label": "Type d'audit",
+      "party_label": "Donneur d'ordre (client)",
+      "party_placeholder": "Ex. le client OEM pour lequel l'audit est réalisé",
+      "body_label": "Organisme / auditeur",
+      "save_btn": "Enregistrer",
+      "report_label": "Rapport officiel de l'auditeur ou de l'organisme",
+      "no_report": "Aucun rapport joint.",
+      "file_label": "Fichier du rapport",
+      "report_title_placeholder": "Titre (si vide : «Rapport d'audit — titre de l'audit»)",
+      "upload_btn": "Joindre le rapport",
+      "replace_btn": "Remplacer le rapport",
+      "download_btn": "Télécharger",
+      "detach_btn": "Détacher",
+      "report_hint": "Le fichier est archivé comme preuve de type «rapport», sans échéance, et il est inclus dans le dossier d'audit."
+    }
   },
   "risk": {
     "no_process_selected": "Aucun processus sélectionné",

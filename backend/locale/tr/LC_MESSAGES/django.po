@@ -2732,3 +2732,25 @@ msgstr "Bir dosya yükleyin veya mevcut bir kanıt seçin, ikisini birden değil
 #: apps/pdca/views.py
 msgid "Il file dell'evidenza si carica solo nel passaggio da DO a CHECK."
 msgstr "Kanıt dosyası yalnızca DO'dan CHECK'e geçişte yüklenebilir."
+
+#: apps/audit_prep/services.py
+#, python-format
+msgid "Rapporto audit — %(title)s"
+msgstr "Denetim raporu — %(title)s"
+
+#: apps/audit_prep/services.py
+#, python-format
+msgid "Rapporto ufficiale dell'audit «%(title)s»."
+msgstr "«%(title)s» denetiminin resmi raporu."
+
+#: apps/audit_prep/views.py
+msgid "Il file del rapporto è obbligatorio."
+msgstr "Rapor dosyası zorunludur."
+
+#: apps/management_review/report/builder.py
+msgid "Seconda parte"
+msgstr "İkinci taraf"
+
+#: apps/management_review/report/builder.py
+msgid "Terza parte"
+msgstr "Üçüncü taraf"

@@ -184,7 +184,14 @@ export function AuditBlock({ snap }: { snap: Snap }) {
           t("management_review.snap.col_framework"), t("management_review.snap.col_readiness"), t("management_review.snap.col_findings"),
         ]}
         rows={((a.elenco_audit ?? []) as SnapAudit[]).map(x => [
-          <span>{x.title}{x.plant_code && <span className="text-gray-400"> · {x.plant_code}</span>}</span>,
+          <span>
+            {x.title}{x.plant_code && <span className="text-gray-400"> · {x.plant_code}</span>}
+            {x.audit_type && x.audit_type !== "interno" && (
+              <span className="ml-1 text-xs text-indigo-700">
+                ({t(`audit_prep.audit_type.${x.audit_type}`)}{x.requesting_party ? ` — ${x.requesting_party}` : ""})
+              </span>
+            )}
+          </span>,
           fmtDate(x.audit_date), x.framework ?? "—",
           x.readiness_score != null ? `${x.readiness_score}%` : "—", x.findings,
         ])}

@@ -30,6 +30,7 @@ FINDING_TYPE = {
     "major_nc": _("NC maggiore"), "minor_nc": _("NC minore"), "observation": _("Osservazione"),
     "opportunity": _("Opportunità"),
 }
+AUDIT_TYPE = {"seconda_parte": _("Seconda parte"), "terza_parte": _("Terza parte")}
 KPI_STATUS = {"critical": _("Critico"), "warning": _("Attenzione"), "ok": _("OK"), "no_data": _("N/D")}
 SEVERITY = {"bassa": _("Bassa"), "media": _("Media"), "alta": _("Alta"), "critica": _("Critica")}
 INC_STATUS = {"aperto": _("Aperto"), "in_analisi": _("In analisi"), "chiuso": _("Chiuso")}
@@ -224,8 +225,16 @@ def _audit_blocks(snap) -> list:
     a = snap.get("audit")
     if not a:
         return []
+    def _audit_label(x):
+        # Audit esterni: tipo e committente accanto al titolo (§9.3.2 d).
+        kind = AUDIT_TYPE.get(x.get("audit_type") or "")
+        if not kind:
+            return x.get("title")
+        party = x.get("requesting_party")
+        return f"{x.get('title')} ({kind}{' — ' + party if party else ''})"
+
     audits = [
-        [x.get("title"), fmt_date(x.get("audit_date")), _dash(x.get("framework")),
+        [_audit_label(x), fmt_date(x.get("audit_date")), _dash(x.get("framework")),
          f"{x['readiness_score']}%" if x.get("readiness_score") is not None else "—", str(x.get("findings", 0))]
         for x in a.get("elenco_audit", [])
     ]

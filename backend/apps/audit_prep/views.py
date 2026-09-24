@@ -22,12 +22,12 @@ from .serializers import (
 
 
 class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
-    queryset = AuditPrep.objects.all()
+    queryset = AuditPrep.objects.select_related("framework", "report_evidence")
     serializer_class = AuditPrepSerializer
     permission_classes = [AuditPrepPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ["plant", "status", "framework"]
-    search_fields = ["title", "auditor_name"]
+    filterset_fields = ["plant", "status", "framework", "audit_type"]
+    search_fields = ["title", "auditor_name", "requesting_party"]
     plant_field = "plant"
 
     def perform_create(self, serializer):
@@ -123,6 +123,32 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             },
         )
         return Response(status=204)
+
+    @action(detail=True, methods=["post", "delete"], url_path="report-file")
+    def report_file(self, request, pk=None):
+        """
+        POST   /audit-prep/preps/<id>/report-file/  multipart: file, title (opz.)
+               → allega il rapporto ufficiale dell'auditor/ente (evidenza "report").
+        DELETE /audit-prep/preps/<id>/report-file/
+               → scollega il rapporto (l'evidenza resta archiviata).
+        """
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        from django.utils.translation import gettext as _
+
+        prep = self.get_object()
+        if request.method == "DELETE":
+            services.detach_official_report(prep, request.user)
+            return Response(status=204)
+        uploaded_file = request.FILES.get("file")
+        if not uploaded_file:
+            return Response({"error": _("Il file del rapporto è obbligatorio.")}, status=400)
+        try:
+            services.attach_official_report(prep, uploaded_file, request.user,
+                                            title=request.data.get("title", ""))
+        except DjangoValidationError as exc:
+            return Response({"error": exc.messages[0] if exc.messages else str(exc)}, status=400)
+        prep.refresh_from_db()
+        return Response(AuditPrepSerializer(prep, context={"request": request}).data, status=201)
 
     @action(detail=True, methods=["post"], url_path="annulla")
     def annulla(self, request, pk=None):

@@ -891,6 +891,25 @@ Devam eden veya kapatılmış denetimden:
 
 ---
 
+### Dış denetimler: ikinci ve üçüncü taraf
+
+İç denetimlerin yanı sıra Audit Prep'te başkaları tarafından yürütülen denetimler de kaydedilir; böylece bulguları aynı yolu izler (süreler, PDCA, kanıtla kapanış):
+
+- **İkinci taraf (müşteri)**: bir müşterinin (ör. bir OEM) doğrudan veya görevlendirdiği bir kuruluş aracılığıyla sizde yaptığı denetim;
+- **Üçüncü taraf (belgelendirme)**: bir belgelendirme kuruluşunun denetimi (ör. TISAX, ISO/IEC 27001).
+
+**Nasıl kaydedilir**
+
+1. **+ Yeni hazırlık**'a tıklayın ve **Denetim türünü** seçin
+2. İkinci taraf için **Talep eden** alanına denetimin yapıldığı müşteriyi, **Kuruluş / denetçi** alanına denetimi yapanı girin; çerçeve isteğe bağlıdır
+3. Bulguları iç denetimde olduğu gibi ekleyin: bulguda denetçi belirtilmezse denetimin kuruluşu geçerli olur ve uygunsuzluklar için açılan PDCA denetim türünü gösterir (ör. "İkinci taraf")
+
+Tür ve talep eden daha sonra **Denetim bilgileri** sekmesinden düzeltilebilir.
+
+**Resmi rapor** — **Denetim bilgileri** sekmesinde, **Denetçinin veya kuruluşun resmi raporu** bölümünde dosyayı (ör. müşteriden alınan PDF) seçin ve **Raporu ekle**'ye tıklayın. Dosya, denetimin tesisinde ve geçerlilik süresi olmadan "rapor" türünde kanıt olarak arşivlenir. Buradan indirebilir, bir revizyonla değiştirebilir (öncekisi kanıtlar arasında kalır) veya bağlantısını kaldırabilirsiniz. Bu, platformun oluşturduğu özet olan **Raporu indir**'den farklıdır.
+
+Dış denetimler; listede, yönetim gözden geçirmesi analizinde (denetim sonuçları, §9.3.2 d) ve tutanakta türleri ve talep edenleriyle görünür; **denetim paketi**, özet ve ekli raporları içeren `AUDIT_ESTERNI/` klasörünü içerir.
+
 ### Denetim İptal Etme
 
 [Ekran görüntüsü: denetim iptal düğmesi]

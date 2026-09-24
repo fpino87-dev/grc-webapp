@@ -2731,3 +2731,25 @@ msgstr "Upload a file or choose an existing evidence, not both."
 #: apps/pdca/views.py
 msgid "Il file dell'evidenza si carica solo nel passaggio da DO a CHECK."
 msgstr "The evidence file can only be uploaded when moving from DO to CHECK."
+
+#: apps/audit_prep/services.py
+#, python-format
+msgid "Rapporto audit — %(title)s"
+msgstr "Audit report — %(title)s"
+
+#: apps/audit_prep/services.py
+#, python-format
+msgid "Rapporto ufficiale dell'audit «%(title)s»."
+msgstr "Official report of the audit «%(title)s»."
+
+#: apps/audit_prep/views.py
+msgid "Il file del rapporto è obbligatorio."
+msgstr "The report file is required."
+
+#: apps/management_review/report/builder.py
+msgid "Seconda parte"
+msgstr "Second party"
+
+#: apps/management_review/report/builder.py
+msgid "Terza parte"
+msgstr "Third party"
