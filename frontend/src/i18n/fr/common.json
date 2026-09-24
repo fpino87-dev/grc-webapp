@@ -3050,12 +3050,15 @@
       "unlink": "Détacher le PDCA",
       "open": "Ouvrir un PDCA",
       "link_existing": "Lier à un PDCA existant",
-      "choose_cycle": "— choisir un PDCA ouvert du site —",
-      "no_open_cycles": "Aucun PDCA ouvert sur ce site",
+      "choose_cycle": "— choisir un PDCA du site —",
+      "no_open_cycles": "Aucun PDCA sur ce site",
       "link_btn": "Lier",
       "unlink_reason": "Motif du détachement (au moins 10 caractères)",
       "unlink_confirm": "Détacher",
-      "retro_hint": "Constat déjà clôturé : lien a posteriori, y compris vers un PDCA clôturé. Aucun statut ne change."
+      "retro_hint": "Constat déjà clôturé : lien a posteriori, y compris vers un PDCA clôturé. Aucun statut ne change.",
+      "replace": "Remplacer le PDCA",
+      "replace_hint": "Choisissez le bon PDCA (même déjà clôturé). Le PDCA actuel, s'il a été ouvert automatiquement et jamais travaillé, est archivé ; sinon il reste tel quel, simplement détaché.",
+      "replace_confirm": "Remplacer"
     },
     "close_finding": {
       "btn": "Clôturer le constat",
@@ -3493,7 +3496,7 @@
       "btn": "Constats",
       "btn_title": "Lier ou détacher des constats d'audit",
       "modal_title": "Constats d'audit liés",
-      "rule_hint": "Chaque constat peut avoir un seul PDCA ; un PDCA peut couvrir plusieurs constats, mais du même audit et du même site.",
+      "rule_hint": "Chaque constat peut avoir un seul PDCA ; un PDCA peut couvrir plusieurs constats, mais du même audit et du même site. Un PDCA déjà clôturé peut aussi être lié (action déjà réalisée ou historique).",
       "unlink": "Détacher",
       "unlink_reason": "Motif du détachement (au moins 10 caractères)",
       "unlink_confirm": "Détacher",
@@ -3502,8 +3505,11 @@
       "single_cycle": "Vous consultez le cycle lié au constat.",
       "show_all": "Afficher tous les cycles",
       "closed_suffix": "clôturé",
-      "closed_cycle_hint": "Cycle clôturé : seuls les constats déjà clôturés peuvent être liés (récupération de l'historique). Aucun statut ne change.",
-      "include_closed": "Afficher aussi les constats clôturés (lien a posteriori)"
+      "archived_suffix": "archivé",
+      "no_findings_any": "Aucun constat dans cet audit",
+      "has_pdca": "lié à : {{title}}",
+      "replace_hint": "Le constat a déjà un PDCA : il sera remplacé par celui-ci. S'il s'agit du PDCA ouvert automatiquement et jamais travaillé, il est archivé ; sinon il reste tel quel, simplement détaché.",
+      "replace_reason": "Motif du remplacement (au moins 10 caractères)"
     }
   },
   "bcp": {

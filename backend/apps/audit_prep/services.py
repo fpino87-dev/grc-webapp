@@ -360,19 +360,13 @@ def _is_closed(finding: AuditFinding) -> bool:
 
 def _check_linkable(finding: AuditFinding, cycle) -> None:
     """Regole del collegamento (opzione A): un finding ha al massimo un PDCA;
-    un PDCA può coprire più finding, ma dello stesso audit e sito.
-
-    Finding aperto → solo PDCA aperti (l'azione correttiva è ancora da fare).
-    Finding chiuso → anche PDCA chiusi o archiviati: è il recupero dello
-    storico, un collegamento a posteriori di sola tracciabilità."""
+    un PDCA può coprire più finding, ma dello stesso audit e sito. Il PDCA può
+    essere in qualunque fase, anche chiuso: un'azione correttiva già eseguita
+    prima di registrare il finding, o il recupero dello storico."""
     from django.core.exceptions import ValidationError
 
     if finding.pdca_cycle_id:
         raise ValidationError(_("Il finding è già collegato a un PDCA."))
-    if not _is_closed(finding) and cycle.fase_corrente in ("chiuso", "archiviato"):
-        raise ValidationError(_(
-            "Il PDCA è chiuso o archiviato: un finding ancora aperto si collega solo a un PDCA aperto."
-        ))
     if cycle.plant_id != finding.audit_prep.plant_id:
         raise ValidationError(_("Il PDCA deve essere dello stesso sito dell'audit."))
     other = cycle.findings.exclude(audit_prep_id=finding.audit_prep_id).first()
@@ -387,11 +381,17 @@ def link_finding_to_pdca(finding: AuditFinding, cycle, user) -> AuditFinding:
     """Collega un finding a un PDCA esistente (dal finding o dal menù PDCA)."""
     with transaction.atomic():
         _check_linkable(finding, cycle)
-        # Collegamento a posteriori (finding già chiuso): nessuno stato cambia,
-        # né del finding né del PDCA — solo tracciabilità.
+        # Finding chiuso: collegamento a posteriori, nessuno stato cambia.
         retroactive = _is_closed(finding)
         finding.pdca_cycle = cycle
-        finding.save(update_fields=["pdca_cycle", "updated_at"])
+        fields = ["pdca_cycle", "updated_at"]
+        # PDCA già chiuso = azione correttiva già eseguita: il finding aperto
+        # passa "in risposta", come alla chiusura di un PDCA, pronto per la
+        # chiusura con evidenza.
+        if finding.status == "open" and cycle.fase_corrente == "chiuso":
+            finding.status = "in_response"
+            fields.append("status")
+        finding.save(update_fields=fields)
         if not cycle.audit_subtype:
             cycle.audit_subtype = finding.audit_prep.audit_type
             cycle.save(update_fields=["audit_subtype", "updated_at"])
@@ -405,6 +405,52 @@ def link_finding_to_pdca(finding: AuditFinding, cycle, user) -> AuditFinding:
                 "retroactive": retroactive, "finding_status": finding.status,
                 "pdca_phase": cycle.fase_corrente,
             },
+        )
+    return finding
+
+
+def _is_untouched_auto_cycle(cycle, finding: AuditFinding) -> bool:
+    """PDCA aperto in automatico per questo finding e mai lavorato: fase PLAN,
+    nessuna fase completata, nessun altro finding collegato."""
+    return (
+        cycle.trigger_source_id == finding.pk
+        and cycle.fase_corrente == "plan"
+        and not cycle.phases.filter(completed_at__isnull=False).exists()
+        and not cycle.findings.exclude(pk=finding.pk).exists()
+    )
+
+
+def replace_finding_pdca(finding: AuditFinding, cycle, user, reason: str) -> AuditFinding:
+    """Sostituisce il PDCA del finding (es. quello automatico della NC) con un
+    PDCA esistente, tipicamente l'azione già svolta prima di registrare il
+    finding. Il PDCA sostituito viene archiviato solo se aperto in automatico
+    per questo finding e mai lavorato; altrimenti resta com'è, solo scollegato."""
+    from django.core.exceptions import ValidationError
+    from apps.pdca.services import archivia_cycle
+
+    old = finding.pdca_cycle
+    if old is None:
+        return link_finding_to_pdca(finding, cycle, user)
+    if old.pk == cycle.pk:
+        raise ValidationError(_("Il finding è già collegato a questo PDCA."))
+    if not reason or len(reason.strip()) < 10:
+        raise ValidationError(_("Motivo obbligatorio (minimo 10 caratteri)."))
+    with transaction.atomic():
+        archive_old = _is_untouched_auto_cycle(old, finding)
+        unlink_finding_from_pdca(finding, user, reason)
+        finding.refresh_from_db()
+        link_finding_to_pdca(finding, cycle, user)
+        if archive_old:
+            archivia_cycle(old, user, _(
+                "Sostituito dal PDCA «%(title)s» collegato al finding «%(finding)s»: %(reason)s"
+            ) % {"title": cycle.title, "finding": finding.title, "reason": reason.strip()})
+        log_action(
+            user=user,
+            action_code="audit.finding.pdca_replaced",
+            level="L2",
+            entity=finding,
+            payload={"old_pdca": str(old.pk), "new_pdca": str(cycle.pk),
+                     "old_archived": archive_old, "reason": reason.strip()[:200]},
         )
     return finding
 

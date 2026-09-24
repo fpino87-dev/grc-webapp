@@ -552,6 +552,29 @@ class AuditFindingViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         finding.refresh_from_db()
         return Response(AuditFindingSerializer(finding).data)
 
+    @action(detail=True, methods=["post"], url_path="replace-pdca")
+    def replace_pdca(self, request, pk=None):
+        """POST /findings/<id>/replace-pdca/ {pdca_cycle, reason} → sostituisce il PDCA."""
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        from django.utils.translation import gettext as _
+
+        from apps.pdca.models import PdcaCycle
+        from core.scoping import scope_queryset_by_plant
+
+        finding = self.get_object()
+        cycle = _get_scoped(
+            scope_queryset_by_plant(PdcaCycle.objects.all(), request.user, plant_field="plant"),
+            request.data.get("pdca_cycle"),
+        )
+        if cycle is None:
+            return Response({"error": _("PDCA non trovato.")}, status=404)
+        try:
+            services.replace_finding_pdca(finding, cycle, request.user, request.data.get("reason", ""))
+        except DjangoValidationError as exc:
+            return _validation_response(exc)
+        finding.refresh_from_db()
+        return Response(AuditFindingSerializer(finding).data)
+
     @action(detail=True, methods=["post"], url_path="unlink-pdca")
     def unlink_pdca(self, request, pk=None):
         """POST /findings/<id>/unlink-pdca/ {reason} → scollega (motivo obbligatorio)."""

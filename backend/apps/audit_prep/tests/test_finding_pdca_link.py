@@ -268,11 +268,15 @@ def test_closed_finding_links_from_pdca_menu_on_closed_cycle(client, plant, user
 
 
 @pytest.mark.django_db
-def test_open_finding_cannot_link_to_closed_pdca(client, plant, user):
+def test_open_finding_links_to_closed_pdca_and_goes_in_response(client, plant, user):
+    """Azione correttiva già eseguita prima di registrare il finding."""
     f = _finding(_prep(plant), user)
     cycle = _closed_cycle(plant, user)
     resp = client.post(f"{URL_FINDINGS}{f.id}/link-pdca/", {"pdca_cycle": str(cycle.id)}, format="json")
-    assert resp.status_code == 400
+    assert resp.status_code == 200, resp.data
+    assert resp.data["status"] == "in_response"
+    # ora si chiude con l'evidenza, senza vincoli sul PDCA (già chiuso)
+    assert client.post(f"{URL_FINDINGS}{f.id}/close/", {"closure_notes": "chiusa"}, format="json").status_code == 200
 
 
 @pytest.mark.django_db
@@ -299,3 +303,48 @@ def test_unlink_closed_finding_with_reason(client, plant, user):
     client.post(f"{URL_FINDINGS}{f.id}/link-pdca/", {"pdca_cycle": str(cycle.id)}, format="json")
     resp = client.post(f"{URL_FINDINGS}{f.id}/unlink-pdca/", {"reason": "Ciclo storico sbagliato"}, format="json")
     assert resp.status_code == 200 and resp.data["pdca_cycle"] is None
+
+
+# ── Sostituzione del PDCA (es. quello automatico della NC) ──────────────────
+
+@pytest.mark.django_db
+def test_replace_auto_pdca_with_closed_manual_one_archives_untouched_auto(client, plant, user):
+    f = _finding(_prep(plant), user, "minor_nc", "NC dal rapporto")
+    auto = f.pdca_cycle
+    manual = _closed_cycle(plant, user)
+    # senza motivo: rifiutato
+    assert client.post(f"{URL_FINDINGS}{f.id}/replace-pdca/", {"pdca_cycle": str(manual.id)}, format="json").status_code == 400
+    resp = client.post(f"{URL_FINDINGS}{f.id}/replace-pdca/",
+                       {"pdca_cycle": str(manual.id), "reason": "Azione già svolta nel PDCA manuale"}, format="json")
+    assert resp.status_code == 200, resp.data
+    assert str(resp.data["pdca_cycle"]) == str(manual.id)
+    assert resp.data["status"] == "in_response"
+    auto.refresh_from_db()
+    assert auto.fase_corrente == "archiviato"
+    assert "Sostituito dal PDCA" in auto.motivo_archiviazione
+
+
+@pytest.mark.django_db
+def test_replace_keeps_worked_pdca(client, plant, user):
+    from apps.pdca.services import advance_phase
+    f = _finding(_prep(plant), user, "minor_nc", "NC")
+    auto = f.pdca_cycle
+    advance_phase(auto, user, phase_notes=PLAN)  # ci si è lavorato
+    manual = _cycle(plant, "Manuale")
+    resp = client.post(f"{URL_FINDINGS}{f.id}/replace-pdca/",
+                       {"pdca_cycle": str(manual.id), "reason": "Unificato nel PDCA manuale"}, format="json")
+    assert resp.status_code == 200
+    auto.refresh_from_db()
+    assert auto.fase_corrente == "do"
+
+
+@pytest.mark.django_db
+def test_replace_from_pdca_menu_via_link_finding(client, plant, user):
+    f = _finding(_prep(plant), user, "minor_nc", "NC")
+    manual = _closed_cycle(plant, user)
+    url = f"{URL_CYCLES}{manual.id}/link-finding/"
+    assert client.post(url, {"finding": str(f.id)}, format="json").status_code == 400  # manca il motivo
+    resp = client.post(url, {"finding": str(f.id), "reason": "Azione già svolta prima del rapporto"}, format="json")
+    assert resp.status_code == 200, resp.data
+    assert [x["id"] for x in resp.data["findings"]] == [str(f.id)]
+

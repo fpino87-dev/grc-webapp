@@ -216,7 +216,7 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
   const { t } = useTranslation();
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"" | "link" | "unlink" | "close">("");
+  const [mode, setMode] = useState<"" | "link" | "unlink" | "replace" | "close">("");
   const [cycleId, setCycleId] = useState("");
   const [reason, setReason] = useState("");
   const [notes, setNotes] = useState("");
@@ -225,12 +225,13 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
   const isClosed = finding.status === "closed" || finding.status === "accepted_by_auditor";
   const isNc = finding.finding_type === "major_nc" || finding.finding_type === "minor_nc";
 
-  // Finding aperto → solo PDCA aperti; finding chiuso (storico) → anche PDCA chiusi.
-  const { data: cycles = [] } = useQuery({
-    queryKey: ["pdca-linkable", prep.plant, isClosed],
-    queryFn: () => pdcaApi.list(isClosed ? { plant: prep.plant } : { plant: prep.plant, open: "true" }).then(r => r.results),
-    enabled: mode === "link",
+  // Tutti i PDCA del sito, anche chiusi: azione già eseguita o recupero dello storico.
+  const { data: allCycles = [] } = useQuery({
+    queryKey: ["pdca-linkable", prep.plant],
+    queryFn: () => pdcaApi.list({ plant: prep.plant }).then(r => r.results),
+    enabled: mode === "link" || mode === "replace",
   });
+  const cycles = allCycles.filter(c => c.id !== finding.pdca_cycle);
   const { data: evidences = [] } = useQuery<{ id: string; title: string }[]>({
     queryKey: ["finding-evidences", prep.plant],
     queryFn: () => apiClient.get("/documents/evidences/", { params: { plant: prep.plant, page_size: 1000 } })
@@ -248,6 +249,7 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
   const openMut = useMutation({ mutationFn: () => auditPrepApi.openPdca(finding.id), onSuccess: done, onError: e => setError(errMsg(e)) });
   const linkMut = useMutation({ mutationFn: () => auditPrepApi.linkPdca(finding.id, cycleId), onSuccess: done, onError: e => setError(errMsg(e)) });
   const unlinkMut = useMutation({ mutationFn: () => auditPrepApi.unlinkPdca(finding.id, reason), onSuccess: done, onError: e => setError(errMsg(e)) });
+  const replaceMut = useMutation({ mutationFn: () => auditPrepApi.replacePdca(finding.id, cycleId, reason), onSuccess: done, onError: e => setError(errMsg(e)) });
   const closeMut = useMutation({
     mutationFn: () => auditPrepApi.closeFinding(finding.id, { closure_notes: notes, evidence_id: evidenceId || undefined }),
     onSuccess: () => { done(); qc.invalidateQueries({ queryKey: ["audit-prep"] }); },
@@ -265,6 +267,7 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
               title={finding.pdca_title ?? undefined}>
               {t("audit_prep.pdca_link.linked", { phase: PHASE_LABEL[finding.pdca_phase ?? ""] ?? (finding.pdca_phase ?? "").toUpperCase() })}
             </button>
+            <button onClick={() => setMode(mode === "replace" ? "" : "replace")} className={`${btn} text-gray-600`}>{t("audit_prep.pdca_link.replace")}</button>
             <button onClick={() => setMode(mode === "unlink" ? "" : "unlink")} className={`${btn} text-gray-500`}>{t("audit_prep.pdca_link.unlink")}</button>
           </>
         ) : (
@@ -294,6 +297,21 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
             {cycles.map(c => <option key={c.id} value={c.id}>{c.title} — {PHASE_LABEL[c.fase_corrente] ?? c.fase_corrente.toUpperCase()}</option>)}
           </select>
           <button onClick={() => linkMut.mutate()} disabled={!cycleId || linkMut.isPending} className={`${btn} text-primary-700`}>{t("audit_prep.pdca_link.link_btn")}</button>
+        </div>
+      )}
+      {mode === "replace" && (
+        <div className="space-y-2">
+          <p className="text-xs text-amber-800">{t("audit_prep.pdca_link.replace_hint")}</p>
+          <div className="flex flex-wrap gap-2 items-center">
+            <select value={cycleId} onChange={e => setCycleId(e.target.value)} className="border rounded px-2 py-1 text-xs min-w-[14rem]">
+              <option value="">{cycles.length ? t("audit_prep.pdca_link.choose_cycle") : t("audit_prep.pdca_link.no_open_cycles")}</option>
+              {cycles.map(c => <option key={c.id} value={c.id}>{c.title} — {PHASE_LABEL[c.fase_corrente] ?? c.fase_corrente.toUpperCase()}</option>)}
+            </select>
+            <input value={reason} onChange={e => setReason(e.target.value)} placeholder={t("audit_prep.pdca_link.unlink_reason")}
+              className="border rounded px-2 py-1 text-xs flex-1 min-w-[12rem]" />
+            <button onClick={() => replaceMut.mutate()} disabled={!cycleId || reason.trim().length < 10 || replaceMut.isPending}
+              className={`${btn} text-primary-700`}>{t("audit_prep.pdca_link.replace_confirm")}</button>
+          </div>
         </div>
       )}
       {mode === "unlink" && (

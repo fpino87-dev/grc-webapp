@@ -884,7 +884,9 @@ Dal tab **Finding** dell'audit, per un finding ancora senza PDCA:
 
 Dal menù **PDCA** si può fare lo stesso: nel nuovo ciclo con origine **Audit** scegli audit e finding (sito e tipo di audit si compilano da soli), oppure dal pulsante **🔗 Finding** di un ciclo esistente. Un collegamento errato si rimuove con **Scollega**, indicando il motivo, che resta nell'audit trail.
 
-**Finding già chiusi (storico)** — anche un finding chiuso senza PDCA, ad esempio registrato prima di questa funzione, si può collegare a un PDCA esistente dello stesso sito, **anche già chiuso o archiviato**: dal finding con **Collega a PDCA esistente**, oppure dal menù PDCA con **🔗 Finding** (su un ciclo chiuso compaiono solo i finding chiusi; su un ciclo aperto spunta **Mostra anche i finding chiusi**). È un collegamento a posteriori di sola tracciabilità: nessuno stato cambia e l'audit trail lo registra come tale. Per un finding chiuso non si apre un nuovo PDCA; un finding ancora aperto si collega solo a un PDCA aperto.
+**PDCA già esistenti, anche chiusi** — un finding si può collegare a qualunque PDCA dello stesso sito, **anche già chiuso o archiviato**: è il caso di un'azione correttiva svolta prima di registrare il finding (es. un PDCA aperto a mano dal rapporto dell'audit) o del recupero dello storico. Se il finding è aperto e il PDCA è chiuso, il finding passa **in risposta**, pronto per la chiusura con evidenza; se il finding è già chiuso non cambia nessuno stato (collegamento a posteriori, registrato come tale nell'audit trail). Dal menù PDCA, con **🔗 Finding**, si vedono tutti i finding dell'audit, aperti e chiusi.
+
+**Sostituire un PDCA** — se il finding ha già un PDCA (per le NC quello aperto in automatico), lo si sostituisce con quello giusto indicando il motivo: dal finding con **Sostituisci PDCA**, oppure dal menù PDCA scegliendo il finding (compare con il ciclo a cui è collegato). Il PDCA sostituito viene archiviato solo se era stato aperto in automatico per quel finding e non ci si è mai lavorato; altrimenti resta com'è, solo scollegato. Per un finding chiuso non si apre un nuovo PDCA, lo si collega a uno esistente.
 
 #### Come chiudere un finding
 

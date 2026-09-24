@@ -145,15 +145,23 @@ class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="link-finding")
     def link_finding(self, request, pk=None):
-        """POST /pdca/cycles/<id>/link-finding/ {finding} → collega un finding di audit
-        (stesso sito; più finding solo dello stesso audit)."""
+        """POST /pdca/cycles/<id>/link-finding/ {finding, reason?} → collega un finding
+        di audit (stesso sito; più finding solo dello stesso audit). Se il finding
+        ha già un PDCA lo sostituisce (`reason` obbligatorio)."""
         from apps.audit_prep import services as audit_services
 
         cycle = self.get_object()
         finding = self._scoped_finding(request.data.get("finding"))
         try:
             with transaction.atomic():
-                audit_services.link_finding_to_pdca(finding, cycle, request.user)
+                # finding con già un PDCA (es. quello automatico della NC):
+                # sostituzione, con motivo obbligatorio
+                if finding.pdca_cycle_id:
+                    audit_services.replace_finding_pdca(
+                        finding, cycle, request.user, request.data.get("reason", ""),
+                    )
+                else:
+                    audit_services.link_finding_to_pdca(finding, cycle, request.user)
         except ValidationError as exc:
             return Response({"error": exc.messages[0]}, status=status.HTTP_400_BAD_REQUEST)
         cycle = self.get_queryset().get(pk=cycle.pk)

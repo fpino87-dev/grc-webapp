@@ -2849,3 +2849,12 @@ msgstr "PDCA kapalı veya arşivlenmiş: hâlâ açık bir bulgu yalnızca açı
 #: apps/audit_prep/services.py
 msgid "Il finding è chiuso: non si apre un nuovo PDCA, collegalo a un PDCA esistente."
 msgstr "Bulgu kapalı: yeni PDCA açılmaz, mevcut bir PDCA'ya bağlayın."
+
+#: apps/audit_prep/services.py
+msgid "Il finding è già collegato a questo PDCA."
+msgstr "Bulgu zaten bu PDCA'ya bağlı."
+
+#: apps/audit_prep/services.py
+#, python-format
+msgid "Sostituito dal PDCA «%(title)s» collegato al finding «%(finding)s»: %(reason)s"
+msgstr "«%(finding)s» bulgusuna bağlı «%(title)s» PDCA'sı ile değiştirildi: %(reason)s"

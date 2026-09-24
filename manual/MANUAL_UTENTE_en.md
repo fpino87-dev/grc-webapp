@@ -884,7 +884,9 @@ From the audit's **Findings** tab, for a finding without a PDCA:
 
 The same can be done from the **PDCA** menu: in a new cycle with origin **Audit** choose audit and finding (site and audit type are filled in automatically), or from the **🔗 Findings** button of an existing cycle. A wrong link is removed with **Unlink**, giving a reason that is kept in the audit trail.
 
-**Findings already closed (history)** — a closed finding without a PDCA, for example recorded before this feature, can also be linked to an existing PDCA of the same site, **even one already closed or archived**: from the finding with **Link to existing PDCA**, or from the PDCA menu with **🔗 Findings** (on a closed cycle only closed findings are offered; on an open cycle tick **Show closed findings too**). It is a retroactive link for traceability only: no status changes and the audit trail records it as such. No new PDCA is opened for a closed finding; a finding still open can only be linked to an open PDCA.
+**Existing PDCAs, including closed ones** — a finding can be linked to any PDCA of the same site, **even one already closed or archived**: this covers a corrective action carried out before the finding was recorded (e.g. a PDCA opened manually from the audit report) or history recovery. If the finding is open and the PDCA is closed, the finding moves to **in response**, ready to be closed with evidence; if the finding is already closed no status changes (retroactive link, recorded as such in the audit trail). From the PDCA menu, **🔗 Findings** shows all the audit's findings, open and closed.
+
+**Replacing a PDCA** — if the finding already has a PDCA (for NCs the one opened automatically), it is replaced with the right one by giving a reason: from the finding with **Replace PDCA**, or from the PDCA menu by choosing the finding (it shows the cycle it is linked to). The replaced PDCA is archived only if it had been opened automatically for that finding and was never worked on; otherwise it stays as it is, only unlinked. No new PDCA is opened for a closed finding: it is linked to an existing one.
 
 #### How to close a finding
 

@@ -3050,12 +3050,15 @@
       "unlink": "Odłącz PDCA",
       "open": "Otwórz PDCA",
       "link_existing": "Powiąż z istniejącym PDCA",
-      "choose_cycle": "— wybierz otwarty PDCA zakładu —",
-      "no_open_cycles": "Brak otwartych PDCA w tym zakładzie",
+      "choose_cycle": "— wybierz PDCA zakładu —",
+      "no_open_cycles": "Brak PDCA w tym zakładzie",
       "link_btn": "Powiąż",
       "unlink_reason": "Powód odłączenia (co najmniej 10 znaków)",
       "unlink_confirm": "Odłącz",
-      "retro_hint": "Ustalenie już zamknięte: powiązanie wsteczne, także z zamkniętym PDCA. Żaden status się nie zmienia."
+      "retro_hint": "Ustalenie już zamknięte: powiązanie wsteczne, także z zamkniętym PDCA. Żaden status się nie zmienia.",
+      "replace": "Zastąp PDCA",
+      "replace_hint": "Wybierz właściwy PDCA (nawet już zamknięty). Obecny PDCA, jeśli otwarty automatycznie i nigdy nieprowadzony, zostanie zarchiwizowany; w przeciwnym razie pozostaje bez zmian, tylko odłączony.",
+      "replace_confirm": "Zastąp"
     },
     "close_finding": {
       "btn": "Zamknij ustalenie",
@@ -3493,7 +3496,7 @@
       "btn": "Ustalenia",
       "btn_title": "Powiąż lub odłącz ustalenia audytu",
       "modal_title": "Powiązane ustalenia audytu",
-      "rule_hint": "Każde ustalenie może mieć tylko jeden PDCA; PDCA może obejmować kilka ustaleń, ale z tego samego audytu i zakładu.",
+      "rule_hint": "Każde ustalenie może mieć tylko jeden PDCA; PDCA może obejmować kilka ustaleń, ale z tego samego audytu i zakładu. Można też powiązać już zamknięty PDCA (działanie już wykonane lub historia).",
       "unlink": "Odłącz",
       "unlink_reason": "Powód odłączenia (co najmniej 10 znaków)",
       "unlink_confirm": "Odłącz",
@@ -3502,8 +3505,11 @@
       "single_cycle": "Wyświetlasz cykl powiązany z ustaleniem.",
       "show_all": "Pokaż wszystkie cykle",
       "closed_suffix": "zamknięte",
-      "closed_cycle_hint": "Cykl zamknięty: można powiązać tylko ustalenia już zamknięte (odtworzenie historii). Żaden status się nie zmienia.",
-      "include_closed": "Pokaż także zamknięte ustalenia (powiązanie wsteczne)"
+      "archived_suffix": "zarchiwizowany",
+      "no_findings_any": "Brak ustaleń w tym audycie",
+      "has_pdca": "powiązane z: {{title}}",
+      "replace_hint": "Ustalenie ma już PDCA: zostanie zastąpiony tym. Jeśli to PDCA otwarty automatycznie i nigdy nieprowadzony, zostanie zarchiwizowany; w przeciwnym razie pozostaje bez zmian, tylko odłączony.",
+      "replace_reason": "Powód zastąpienia (co najmniej 10 znaków)"
     }
   },
   "bcp": {

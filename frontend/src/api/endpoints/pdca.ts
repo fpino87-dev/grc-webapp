@@ -70,8 +70,9 @@ export const pdcaApi = {
     apiClient.delete(`/pdca/cycles/${id}/`, { data: { reason } }),
   archivia: (id: string, motivo: string) =>
     apiClient.post(`/pdca/cycles/${id}/archivia/`, { motivo }),
-  linkFinding: (cycleId: string, findingId: string) =>
-    apiClient.post<PdcaCycle>(`/pdca/cycles/${cycleId}/link-finding/`, { finding: findingId }).then((r) => r.data),
+  /** `reason` obbligatorio se il finding ha già un PDCA (viene sostituito). */
+  linkFinding: (cycleId: string, findingId: string, reason?: string) =>
+    apiClient.post<PdcaCycle>(`/pdca/cycles/${cycleId}/link-finding/`, { finding: findingId, ...(reason ? { reason } : {}) }).then((r) => r.data),
   unlinkFinding: (cycleId: string, findingId: string, reason: string) =>
     apiClient.post<PdcaCycle>(`/pdca/cycles/${cycleId}/unlink-finding/`, { finding: findingId, reason }).then((r) => r.data),
   capabilities: () =>

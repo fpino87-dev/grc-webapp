@@ -17,11 +17,15 @@ vi.mock("../../../api/endpoints/pdca", () => ({
     linkFinding: vi.fn(), unlinkFinding: vi.fn(),
   },
 }));
+vi.mock("../../../api/endpoints/auditPrep", () => ({
+  auditPrepApi: { list: vi.fn(), findings: vi.fn() },
+}));
 vi.mock("../../../api/endpoints/plants", () => ({
   plantsApi: { list: vi.fn(() => Promise.resolve([{ id: "p1", code: "TA", name: "Plant TA" }])) },
 }));
 
 import { pdcaApi } from "../../../api/endpoints/pdca";
+import { auditPrepApi } from "../../../api/endpoints/auditPrep";
 import { apiClient } from "../../../api/client";
 
 const mockList = vi.mocked(pdcaApi.list);
@@ -144,6 +148,32 @@ describe("PdcaPage — collegamento ai finding di audit", () => {
     renderPage("/pdca?cycle=c9");
     expect(await screen.findByText("pdca.link.single_cycle")).toBeInTheDocument();
     await vi.waitFor(() => expect(mockList).toHaveBeenLastCalledWith({ id: "c9" }));
+  });
+});
+
+describe("PdcaPage — PDCA chiuso collegato a un finding che ha già il PDCA automatico", () => {
+  it("il finding compare con il suo PDCA e la sostituzione chiede il motivo", async () => {
+    mockList.mockResolvedValue({ results: [cycle({ id: "c7", fase_corrente: "chiuso", title: "PDCA manuale", findings: [] })] } as never);
+    vi.mocked(auditPrepApi.list).mockResolvedValue({ results: [
+      { id: "a1", title: "Audit OEM", status: "in_corso", plant: "p1", audit_date: "2026-09-10" },
+    ] } as never);
+    vi.mocked(auditPrepApi.findings).mockResolvedValue([
+      { id: "f1", title: "NC dal rapporto", finding_type: "minor_nc", status: "open", pdca_cycle: "auto1", pdca_title: "[MINOR_NC] NC dal rapporto" },
+    ] as never);
+    vi.mocked(pdcaApi.linkFinding).mockResolvedValue({} as never);
+    renderPage();
+    fireEvent.click(await screen.findByText(/pdca\.link\.btn$/));
+    const selects = screen.getAllByRole("combobox");
+    fireEvent.change(await within(document.body).findByDisplayValue("pdca.link.audit_select"), { target: { value: "a1" } });
+    const findingOption = await screen.findByText(/NC dal rapporto.*pdca\.link\.has_pdca/);
+    fireEvent.change(findingOption.closest("select")!, { target: { value: "f1" } });
+    expect(screen.getByText("pdca.link.replace_hint")).toBeInTheDocument();
+    const confirm = screen.getByText("pdca.link.link_btn");
+    expect(confirm).toBeDisabled();
+    fireEvent.change(screen.getByPlaceholderText("pdca.link.replace_reason"), { target: { value: "Azione già svolta nel PDCA manuale" } });
+    fireEvent.click(confirm);
+    await vi.waitFor(() => expect(pdcaApi.linkFinding).toHaveBeenCalledWith("c7", "f1", "Azione già svolta nel PDCA manuale"));
+    expect(selects.length).toBeGreaterThan(0);
   });
 });
 

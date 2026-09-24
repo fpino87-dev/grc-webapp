@@ -2870,3 +2870,12 @@ msgstr "PDCA jest zamknięty lub zarchiwizowany: wciąż otwarte ustalenie możn
 #: apps/audit_prep/services.py
 msgid "Il finding è chiuso: non si apre un nuovo PDCA, collegalo a un PDCA esistente."
 msgstr "Ustalenie jest zamknięte: nie otwiera się nowego PDCA, powiąż je z istniejącym PDCA."
+
+#: apps/audit_prep/services.py
+msgid "Il finding è già collegato a questo PDCA."
+msgstr "Ustalenie jest już powiązane z tym PDCA."
+
+#: apps/audit_prep/services.py
+#, python-format
+msgid "Sostituito dal PDCA «%(title)s» collegato al finding «%(finding)s»: %(reason)s"
+msgstr "Zastąpiony przez PDCA «%(title)s» powiązany z ustaleniem «%(finding)s»: %(reason)s"

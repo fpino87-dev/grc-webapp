@@ -3050,12 +3050,15 @@
       "unlink": "PDCA bağlantısını kaldır",
       "open": "PDCA aç",
       "link_existing": "Mevcut PDCA'ya bağla",
-      "choose_cycle": "— tesisin açık bir PDCA'sını seçin —",
-      "no_open_cycles": "Bu tesiste açık PDCA yok",
+      "choose_cycle": "— tesisin bir PDCA'sını seçin —",
+      "no_open_cycles": "Bu tesiste PDCA yok",
       "link_btn": "Bağla",
       "unlink_reason": "Bağlantıyı kaldırma nedeni (en az 10 karakter)",
       "unlink_confirm": "Bağlantıyı kaldır",
-      "retro_hint": "Bulgu zaten kapalı: geriye dönük bağlantı, kapalı bir PDCA'ya da yapılabilir. Hiçbir durum değişmez."
+      "retro_hint": "Bulgu zaten kapalı: geriye dönük bağlantı, kapalı bir PDCA'ya da yapılabilir. Hiçbir durum değişmez.",
+      "replace": "PDCA'yı değiştir",
+      "replace_hint": "Doğru PDCA'yı seçin (zaten kapalı olsa bile). Mevcut PDCA otomatik açıldıysa ve hiç üzerinde çalışılmadıysa arşivlenir; aksi halde olduğu gibi kalır, yalnızca bağlantısı kaldırılır.",
+      "replace_confirm": "Değiştir"
     },
     "close_finding": {
       "btn": "Bulguyu kapat",
@@ -3493,7 +3496,7 @@
       "btn": "Bulgular",
       "btn_title": "Denetim bulgularını bağla veya bağlantısını kaldır",
       "modal_title": "Bağlı denetim bulguları",
-      "rule_hint": "Her bulgunun yalnızca bir PDCA'sı olabilir; bir PDCA birden fazla bulguyu kapsayabilir, ancak aynı denetim ve tesisten.",
+      "rule_hint": "Her bulgunun yalnızca bir PDCA'sı olabilir; bir PDCA birden fazla bulguyu kapsayabilir, ancak aynı denetim ve tesisten. Zaten kapalı bir PDCA da bağlanabilir (önceden yapılmış eylem veya geçmiş).",
       "unlink": "Bağlantıyı kaldır",
       "unlink_reason": "Bağlantıyı kaldırma nedeni (en az 10 karakter)",
       "unlink_confirm": "Bağlantıyı kaldır",
@@ -3502,8 +3505,11 @@
       "single_cycle": "Bulguya bağlı döngüyü görüntülüyorsunuz.",
       "show_all": "Tüm döngüleri göster",
       "closed_suffix": "kapalı",
-      "closed_cycle_hint": "Kapalı döngü: yalnızca zaten kapalı bulgular bağlanabilir (geçmişin kurtarılması). Hiçbir durum değişmez.",
-      "include_closed": "Kapalı bulguları da göster (geriye dönük bağlantı)"
+      "archived_suffix": "arşivlendi",
+      "no_findings_any": "Bu denetimde bulgu yok",
+      "has_pdca": "bağlı: {{title}}",
+      "replace_hint": "Bulgunun zaten bir PDCA'sı var: bununla değiştirilecek. Otomatik açılan ve hiç üzerinde çalışılmamış PDCA ise arşivlenir; aksi halde olduğu gibi kalır, yalnızca bağlantısı kaldırılır.",
+      "replace_reason": "Değiştirme nedeni (en az 10 karakter)"
     }
   },
   "bcp": {

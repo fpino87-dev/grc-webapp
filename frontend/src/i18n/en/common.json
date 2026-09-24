@@ -3050,12 +3050,15 @@
       "unlink": "Unlink PDCA",
       "open": "Open PDCA",
       "link_existing": "Link to existing PDCA",
-      "choose_cycle": "— choose an open PDCA of the site —",
-      "no_open_cycles": "No open PDCA on this site",
+      "choose_cycle": "— choose a PDCA of the site —",
+      "no_open_cycles": "No PDCA on this site",
       "link_btn": "Link",
       "unlink_reason": "Reason for unlinking (at least 10 characters)",
       "unlink_confirm": "Unlink",
-      "retro_hint": "Finding already closed: retroactive link, also to a closed PDCA. No status changes."
+      "retro_hint": "Finding already closed: retroactive link, also to a closed PDCA. No status changes.",
+      "replace": "Replace PDCA",
+      "replace_hint": "Choose the right PDCA (even one already closed). The current PDCA, if opened automatically and never worked on, is archived; otherwise it stays as it is, only unlinked.",
+      "replace_confirm": "Replace"
     },
     "close_finding": {
       "btn": "Close finding",
@@ -3493,7 +3496,7 @@
       "btn": "Findings",
       "btn_title": "Link or unlink audit findings",
       "modal_title": "Linked audit findings",
-      "rule_hint": "Each finding can have only one PDCA; a PDCA can cover several findings, but of the same audit and site.",
+      "rule_hint": "Each finding can have only one PDCA; a PDCA can cover several findings, but of the same audit and site. An already closed PDCA can also be linked (action already carried out, or history).",
       "unlink": "Unlink",
       "unlink_reason": "Reason for unlinking (at least 10 characters)",
       "unlink_confirm": "Unlink",
@@ -3502,8 +3505,11 @@
       "single_cycle": "You are viewing the cycle linked to the finding.",
       "show_all": "Show all cycles",
       "closed_suffix": "closed",
-      "closed_cycle_hint": "Closed cycle: only findings already closed can be linked (history recovery). No status changes.",
-      "include_closed": "Show closed findings too (retroactive link)"
+      "archived_suffix": "archived",
+      "no_findings_any": "No findings in this audit",
+      "has_pdca": "linked to: {{title}}",
+      "replace_hint": "The finding already has a PDCA: it will be replaced by this one. If it is the automatically opened PDCA and was never worked on, it is archived; otherwise it stays as it is, only unlinked.",
+      "replace_reason": "Reason for the replacement (at least 10 characters)"
     }
   },
   "bcp": {

@@ -3050,12 +3050,15 @@
       "unlink": "Scollega PDCA",
       "open": "Apri PDCA",
       "link_existing": "Collega a PDCA esistente",
-      "choose_cycle": "— scegli un PDCA aperto del sito —",
-      "no_open_cycles": "Nessun PDCA aperto su questo sito",
+      "choose_cycle": "— scegli un PDCA del sito —",
+      "no_open_cycles": "Nessun PDCA su questo sito",
       "link_btn": "Collega",
       "unlink_reason": "Motivo dello scollegamento (minimo 10 caratteri)",
       "unlink_confirm": "Scollega",
-      "retro_hint": "Finding già chiuso: collegamento a posteriori, anche a un PDCA chiuso. Nessuno stato cambia."
+      "retro_hint": "Finding già chiuso: collegamento a posteriori, anche a un PDCA chiuso. Nessuno stato cambia.",
+      "replace": "Sostituisci PDCA",
+      "replace_hint": "Scegli il PDCA giusto (anche già chiuso). Il PDCA attuale, se aperto in automatico e mai lavorato, viene archiviato; altrimenti resta com'è, solo scollegato.",
+      "replace_confirm": "Sostituisci"
     },
     "close_finding": {
       "btn": "Chiudi finding",
@@ -3493,7 +3496,7 @@
       "btn": "Finding",
       "btn_title": "Collega o scollega finding di audit",
       "modal_title": "Finding di audit collegati",
-      "rule_hint": "Ogni finding può avere un solo PDCA; un PDCA può coprire più finding, ma dello stesso audit e dello stesso sito.",
+      "rule_hint": "Ogni finding può avere un solo PDCA; un PDCA può coprire più finding, ma dello stesso audit e dello stesso sito. Si può collegare anche un PDCA già chiuso (azione già eseguita o storico).",
       "unlink": "Scollega",
       "unlink_reason": "Motivo dello scollegamento (minimo 10 caratteri)",
       "unlink_confirm": "Scollega",
@@ -3502,8 +3505,11 @@
       "single_cycle": "Stai vedendo il ciclo collegato al finding.",
       "show_all": "Mostra tutti i cicli",
       "closed_suffix": "chiuso",
-      "closed_cycle_hint": "Ciclo chiuso: si possono collegare solo finding già chiusi (recupero dello storico). Nessuno stato cambia.",
-      "include_closed": "Mostra anche i finding chiusi (collegamento a posteriori)"
+      "archived_suffix": "archiviato",
+      "no_findings_any": "Nessun finding in questo audit",
+      "has_pdca": "collegato a: {{title}}",
+      "replace_hint": "Il finding ha già un PDCA: verrà sostituito da questo. Se è il PDCA aperto in automatico e non ci hai mai lavorato, viene archiviato; altrimenti resta com'è, solo scollegato.",
+      "replace_reason": "Motivo della sostituzione (minimo 10 caratteri)"
     }
   },
   "bcp": {

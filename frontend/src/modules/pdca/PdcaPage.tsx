@@ -339,53 +339,65 @@ function ArchiviaCycleButton({ cycle }: { cycle: PdcaCycle }) {
 
 // ─── Collegamento a un finding di audit ───────────────────────────────────────
 
-/** Scelta audit → finding (solo finding senza PDCA). Con `plant` gli audit sono
- *  limitati a quel sito (collegamento da un ciclo esistente). */
+/** Scelta audit → finding. Con `plant` gli audit sono limitati a quel sito
+ *  (collegamento da un ciclo esistente). Di default solo i finding senza PDCA;
+ *  con `allowReplace` tutti i finding dell'audit, aperti e chiusi: quelli con
+ *  già un PDCA riportano il ciclo e si scelgono per sostituirlo. */
 function AuditFindingPicker({
-  plant, prepId, findingId, onChange, includeClosed = false, onlyClosed = false,
+  plant, prepId, findingId, onChange, allowReplace = false, excludeCycle,
 }: {
   plant?: string | null;
   prepId: string;
   findingId: string;
-  onChange: (v: { prepId: string; findingId: string; prepPlant: string | null }) => void;
-  /** anche i finding già chiusi (collegamento a posteriori dello storico) */
-  includeClosed?: boolean;
-  /** solo i finding chiusi: un PDCA chiuso si collega solo allo storico */
-  onlyClosed?: boolean;
+  onChange: (v: { prepId: string; findingId: string; prepPlant: string | null; currentPdca: string | null }) => void;
+  allowReplace?: boolean;
+  /** ciclo da cui si collega: i suoi finding non si ripropongono */
+  excludeCycle?: string;
 }) {
   const { t } = useTranslation();
   const { data: preps = [] } = useQuery({
-    queryKey: ["pdca-audit-preps", plant ?? "all"],
-    queryFn: () => auditPrepApi.list(plant ? { plant } : undefined).then(r => r.results.filter(p => p.status !== "archiviato")),
+    queryKey: ["pdca-audit-preps", plant ?? "all", allowReplace],
+    queryFn: () => auditPrepApi.list(plant ? { plant } : undefined)
+      .then(r => allowReplace ? r.results : r.results.filter(p => p.status !== "archiviato")),
   });
-  const withClosed = includeClosed || onlyClosed;
   const { data: allFindings = [] } = useQuery({
-    queryKey: ["pdca-linkable-findings", prepId, withClosed],
-    queryFn: () => auditPrepApi.findings(prepId, { without_pdca: "true", ...(withClosed ? { include_closed: "true" } : {}) }),
+    queryKey: ["pdca-linkable-findings", prepId, allowReplace],
+    queryFn: () => auditPrepApi.findings(prepId, allowReplace ? undefined : { without_pdca: "true" }),
     enabled: !!prepId,
   });
+  const findings = allFindings.filter(f => !excludeCycle || f.pdca_cycle !== excludeCycle);
   const isClosedFinding = (s: string) => s === "closed" || s === "accepted_by_auditor";
-  const findings = onlyClosed ? allFindings.filter(f => isClosedFinding(f.status)) : allFindings;
   const prepPlant = (id: string) => preps.find(p => p.id === id)?.plant ?? null;
+  const currentPdca = (id: string) => findings.find(f => f.id === id)?.pdca_cycle ?? null;
   return (
     <div className="grid grid-cols-2 gap-3">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.link.audit_label")}</label>
-        <select value={prepId} onChange={e => onChange({ prepId: e.target.value, findingId: "", prepPlant: prepPlant(e.target.value) })}
+        <select value={prepId} onChange={e => onChange({ prepId: e.target.value, findingId: "", prepPlant: prepPlant(e.target.value), currentPdca: null })}
           className="w-full border rounded px-3 py-2 text-sm">
           <option value="">{preps.length ? t("pdca.link.audit_select") : t("pdca.link.no_audits")}</option>
-          {preps.map(p => <option key={p.id} value={p.id}>{p.title}{p.audit_date ? ` (${p.audit_date})` : ""}</option>)}
+          {preps.map(p => (
+            <option key={p.id} value={p.id}>
+              {p.title}{p.audit_date ? ` (${p.audit_date})` : ""}{p.status === "archiviato" ? ` — ${t("pdca.link.archived_suffix")}` : ""}
+            </option>
+          ))}
         </select>
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.link.finding_label")}</label>
         <select value={findingId} disabled={!prepId}
-          onChange={e => onChange({ prepId, findingId: e.target.value, prepPlant: prepPlant(prepId) })}
+          onChange={e => onChange({ prepId, findingId: e.target.value, prepPlant: prepPlant(prepId), currentPdca: currentPdca(e.target.value) })}
           className="w-full border rounded px-3 py-2 text-sm disabled:bg-gray-50">
-          <option value="">{prepId && !findings.length ? t("pdca.link.no_findings") : t("pdca.link.finding_select")}</option>
+          <option value="">
+            {prepId && !findings.length
+              ? (allowReplace ? t("pdca.link.no_findings_any") : t("pdca.link.no_findings"))
+              : t("pdca.link.finding_select")}
+          </option>
           {findings.map(f => (
             <option key={f.id} value={f.id}>
-              [{f.finding_type.replace("_", " ").toUpperCase()}] {f.title}{isClosedFinding(f.status) ? ` (${t("pdca.link.closed_suffix")})` : ""}
+              [{f.finding_type.replace("_", " ").toUpperCase()}] {f.title}
+              {isClosedFinding(f.status) ? ` (${t("pdca.link.closed_suffix")})` : ""}
+              {f.pdca_cycle ? ` — ${t("pdca.link.has_pdca", { title: f.pdca_title ?? "" })}` : ""}
             </option>
           ))}
         </select>
@@ -418,19 +430,22 @@ function LinkFindingButton({ cycle }: { cycle: PdcaCycle }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [pick, setPick] = useState({ prepId: "", findingId: "" });
+  const [pick, setPick] = useState({ prepId: "", findingId: "", currentPdca: null as string | null });
+  const [replaceReason, setReplaceReason] = useState("");
   const [unlinkId, setUnlinkId] = useState("");
   const [reason, setReason] = useState("");
   const [error, setError] = useState("");
-  // Ciclo chiuso/archiviato: si collegano solo finding già chiusi (storico).
-  const cycleClosed = cycle.fase_corrente === "chiuso" || cycle.fase_corrente === "archiviato";
-  const [includeClosed, setIncludeClosed] = useState(false);
   const errMsg = (e: unknown) =>
     (e as { response?: { data?: { error?: string; detail?: string } } })?.response?.data?.error
     || (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail || t("common.save_error");
-  const refresh = () => { setError(""); setPick({ prepId: "", findingId: "" }); setUnlinkId(""); setReason("");
+  const refresh = () => { setError(""); setPick({ prepId: "", findingId: "", currentPdca: null }); setUnlinkId(""); setReason(""); setReplaceReason("");
     qc.invalidateQueries({ queryKey: ["pdca"] }); qc.invalidateQueries({ queryKey: ["pdca-linkable-findings"] }); };
-  const linkMut = useMutation({ mutationFn: () => pdcaApi.linkFinding(cycle.id, pick.findingId), onSuccess: refresh, onError: e => setError(errMsg(e)) });
+  // Finding con già un PDCA (es. quello automatico della NC): sostituzione con motivo.
+  const replacing = !!pick.currentPdca;
+  const linkMut = useMutation({
+    mutationFn: () => pdcaApi.linkFinding(cycle.id, pick.findingId, replacing ? replaceReason : undefined),
+    onSuccess: refresh, onError: e => setError(errMsg(e)),
+  });
   const unlinkMut = useMutation({ mutationFn: () => pdcaApi.unlinkFinding(cycle.id, unlinkId, reason), onSuccess: refresh, onError: e => setError(errMsg(e)) });
   const linked = cycle.findings ?? [];
   // Opzione A: più finding solo dello stesso audit → il picker resta sull'audit già collegato.
@@ -467,21 +482,21 @@ function LinkFindingButton({ cycle }: { cycle: PdcaCycle }) {
                 )}
               </div>
             )}
-            {cycleClosed ? (
-              <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded px-2 py-1">{t("pdca.link.closed_cycle_hint")}</p>
-            ) : (
-              <label className="flex items-center gap-2 text-xs text-gray-600">
-                <input type="checkbox" checked={includeClosed} onChange={e => setIncludeClosed(e.target.checked)} />
-                {t("pdca.link.include_closed")}
-              </label>
-            )}
             <AuditFindingPicker plant={cycle.plant} prepId={lockedPrep || pick.prepId} findingId={pick.findingId}
-              includeClosed={includeClosed} onlyClosed={cycleClosed}
-              onChange={v => setPick({ prepId: lockedPrep || v.prepId, findingId: v.findingId })} />
+              allowReplace excludeCycle={cycle.id}
+              onChange={v => setPick({ prepId: lockedPrep || v.prepId, findingId: v.findingId, currentPdca: v.currentPdca })} />
+            {replacing && (
+              <div className="space-y-1">
+                <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded px-2 py-1">{t("pdca.link.replace_hint")}</p>
+                <input value={replaceReason} onChange={e => setReplaceReason(e.target.value)} placeholder={t("pdca.link.replace_reason")}
+                  className="w-full border rounded px-2 py-1 text-sm" />
+              </div>
+            )}
             {error && <p className="text-sm text-red-600">{error}</p>}
             <div className="flex justify-end gap-2">
               <button onClick={() => { setOpen(false); setError(""); }} className="px-4 py-2 border rounded text-sm text-gray-600">{t("pdca.form.cancel")}</button>
-              <button onClick={() => linkMut.mutate()} disabled={!pick.findingId || linkMut.isPending}
+              <button onClick={() => linkMut.mutate()}
+                disabled={!pick.findingId || linkMut.isPending || (replacing && replaceReason.trim().length < 10)}
                 className="px-4 py-2 bg-primary-600 text-white rounded text-sm disabled:opacity-50">{t("pdca.link.link_btn")}</button>
             </div>
           </div>
