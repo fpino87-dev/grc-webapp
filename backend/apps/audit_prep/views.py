@@ -503,9 +503,14 @@ class AuditFindingViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        # ?without_pdca=true → finding ancora senza PDCA (per il collegamento)
-        if self.request.query_params.get("without_pdca", "").lower() == "true":
-            qs = qs.filter(pdca_cycle__isnull=True).exclude(status__in=["closed", "accepted_by_auditor"])
+        # ?without_pdca=true → finding ancora senza PDCA (per il collegamento);
+        # di default solo quelli aperti, con ?include_closed=true anche i chiusi
+        # (collegamento a posteriori dello storico).
+        params = self.request.query_params
+        if params.get("without_pdca", "").lower() == "true":
+            qs = qs.filter(pdca_cycle__isnull=True)
+            if params.get("include_closed", "").lower() != "true":
+                qs = qs.exclude(status__in=["closed", "accepted_by_auditor"])
         return qs
 
     @action(detail=True, methods=["post"], url_path="open-pdca")

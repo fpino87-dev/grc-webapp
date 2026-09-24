@@ -3054,7 +3054,8 @@
       "no_open_cycles": "No open PDCA on this site",
       "link_btn": "Link",
       "unlink_reason": "Reason for unlinking (at least 10 characters)",
-      "unlink_confirm": "Unlink"
+      "unlink_confirm": "Unlink",
+      "retro_hint": "Finding already closed: retroactive link, also to a closed PDCA. No status changes."
     },
     "close_finding": {
       "btn": "Close finding",
@@ -3499,7 +3500,10 @@
       "link_btn": "Link",
       "new_hint": "Link the cycle to a recorded finding: site and audit type are taken from the audit.",
       "single_cycle": "You are viewing the cycle linked to the finding.",
-      "show_all": "Show all cycles"
+      "show_all": "Show all cycles",
+      "closed_suffix": "closed",
+      "closed_cycle_hint": "Closed cycle: only findings already closed can be linked (history recovery). No status changes.",
+      "include_closed": "Show closed findings too (retroactive link)"
     }
   },
   "bcp": {

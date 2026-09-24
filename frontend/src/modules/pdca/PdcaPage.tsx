@@ -342,23 +342,30 @@ function ArchiviaCycleButton({ cycle }: { cycle: PdcaCycle }) {
 /** Scelta audit → finding (solo finding senza PDCA). Con `plant` gli audit sono
  *  limitati a quel sito (collegamento da un ciclo esistente). */
 function AuditFindingPicker({
-  plant, prepId, findingId, onChange,
+  plant, prepId, findingId, onChange, includeClosed = false, onlyClosed = false,
 }: {
   plant?: string | null;
   prepId: string;
   findingId: string;
   onChange: (v: { prepId: string; findingId: string; prepPlant: string | null }) => void;
+  /** anche i finding già chiusi (collegamento a posteriori dello storico) */
+  includeClosed?: boolean;
+  /** solo i finding chiusi: un PDCA chiuso si collega solo allo storico */
+  onlyClosed?: boolean;
 }) {
   const { t } = useTranslation();
   const { data: preps = [] } = useQuery({
     queryKey: ["pdca-audit-preps", plant ?? "all"],
     queryFn: () => auditPrepApi.list(plant ? { plant } : undefined).then(r => r.results.filter(p => p.status !== "archiviato")),
   });
-  const { data: findings = [] } = useQuery({
-    queryKey: ["pdca-linkable-findings", prepId],
-    queryFn: () => auditPrepApi.findings(prepId, { without_pdca: "true" }),
+  const withClosed = includeClosed || onlyClosed;
+  const { data: allFindings = [] } = useQuery({
+    queryKey: ["pdca-linkable-findings", prepId, withClosed],
+    queryFn: () => auditPrepApi.findings(prepId, { without_pdca: "true", ...(withClosed ? { include_closed: "true" } : {}) }),
     enabled: !!prepId,
   });
+  const isClosedFinding = (s: string) => s === "closed" || s === "accepted_by_auditor";
+  const findings = onlyClosed ? allFindings.filter(f => isClosedFinding(f.status)) : allFindings;
   const prepPlant = (id: string) => preps.find(p => p.id === id)?.plant ?? null;
   return (
     <div className="grid grid-cols-2 gap-3">
@@ -376,7 +383,11 @@ function AuditFindingPicker({
           onChange={e => onChange({ prepId, findingId: e.target.value, prepPlant: prepPlant(prepId) })}
           className="w-full border rounded px-3 py-2 text-sm disabled:bg-gray-50">
           <option value="">{prepId && !findings.length ? t("pdca.link.no_findings") : t("pdca.link.finding_select")}</option>
-          {findings.map(f => <option key={f.id} value={f.id}>[{f.finding_type.replace("_", " ").toUpperCase()}] {f.title}</option>)}
+          {findings.map(f => (
+            <option key={f.id} value={f.id}>
+              [{f.finding_type.replace("_", " ").toUpperCase()}] {f.title}{isClosedFinding(f.status) ? ` (${t("pdca.link.closed_suffix")})` : ""}
+            </option>
+          ))}
         </select>
       </div>
     </div>
@@ -411,6 +422,9 @@ function LinkFindingButton({ cycle }: { cycle: PdcaCycle }) {
   const [unlinkId, setUnlinkId] = useState("");
   const [reason, setReason] = useState("");
   const [error, setError] = useState("");
+  // Ciclo chiuso/archiviato: si collegano solo finding già chiusi (storico).
+  const cycleClosed = cycle.fase_corrente === "chiuso" || cycle.fase_corrente === "archiviato";
+  const [includeClosed, setIncludeClosed] = useState(false);
   const errMsg = (e: unknown) =>
     (e as { response?: { data?: { error?: string; detail?: string } } })?.response?.data?.error
     || (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail || t("common.save_error");
@@ -453,7 +467,16 @@ function LinkFindingButton({ cycle }: { cycle: PdcaCycle }) {
                 )}
               </div>
             )}
+            {cycleClosed ? (
+              <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded px-2 py-1">{t("pdca.link.closed_cycle_hint")}</p>
+            ) : (
+              <label className="flex items-center gap-2 text-xs text-gray-600">
+                <input type="checkbox" checked={includeClosed} onChange={e => setIncludeClosed(e.target.checked)} />
+                {t("pdca.link.include_closed")}
+              </label>
+            )}
             <AuditFindingPicker plant={cycle.plant} prepId={lockedPrep || pick.prepId} findingId={pick.findingId}
+              includeClosed={includeClosed} onlyClosed={cycleClosed}
               onChange={v => setPick({ prepId: lockedPrep || v.prepId, findingId: v.findingId })} />
             {error && <p className="text-sm text-red-600">{error}</p>}
             <div className="flex justify-end gap-2">
@@ -1404,9 +1427,7 @@ export function PdcaPage() {
                           <AdvanceButtons cycle={c as any} onUpdated={() => {}} />
                           <CycleDossierButton cycle={c} />
                           <EditCycleButton cycle={c} />
-                          {c.plant !== null && c.fase_corrente !== "chiuso" && c.fase_corrente !== "archiviato" && (
-                            <LinkFindingButton cycle={c} />
-                          )}
+                          {c.plant !== null && <LinkFindingButton cycle={c} />}
                           <ArchiviaCycleButton cycle={c} />
                           <DeleteCycleButton cycle={c} />
                         </>

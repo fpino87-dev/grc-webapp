@@ -3054,7 +3054,8 @@
       "no_open_cycles": "Bu tesiste açık PDCA yok",
       "link_btn": "Bağla",
       "unlink_reason": "Bağlantıyı kaldırma nedeni (en az 10 karakter)",
-      "unlink_confirm": "Bağlantıyı kaldır"
+      "unlink_confirm": "Bağlantıyı kaldır",
+      "retro_hint": "Bulgu zaten kapalı: geriye dönük bağlantı, kapalı bir PDCA'ya da yapılabilir. Hiçbir durum değişmez."
     },
     "close_finding": {
       "btn": "Bulguyu kapat",
@@ -3499,7 +3500,10 @@
       "link_btn": "Bağla",
       "new_hint": "Döngüyü kayıtlı bir bulguya bağlayın: tesis ve denetim türü denetimden alınır.",
       "single_cycle": "Bulguya bağlı döngüyü görüntülüyorsunuz.",
-      "show_all": "Tüm döngüleri göster"
+      "show_all": "Tüm döngüleri göster",
+      "closed_suffix": "kapalı",
+      "closed_cycle_hint": "Kapalı döngü: yalnızca zaten kapalı bulgular bağlanabilir (geçmişin kurtarılması). Hiçbir durum değişmez.",
+      "include_closed": "Kapalı bulguları da göster (geriye dönük bağlantı)"
     }
   },
   "bcp": {

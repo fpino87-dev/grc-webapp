@@ -884,6 +884,8 @@ Dal tab **Finding** dell'audit, per un finding ancora senza PDCA:
 
 Dal menù **PDCA** si può fare lo stesso: nel nuovo ciclo con origine **Audit** scegli audit e finding (sito e tipo di audit si compilano da soli), oppure dal pulsante **🔗 Finding** di un ciclo esistente. Un collegamento errato si rimuove con **Scollega**, indicando il motivo, che resta nell'audit trail.
 
+**Finding già chiusi (storico)** — anche un finding chiuso senza PDCA, ad esempio registrato prima di questa funzione, si può collegare a un PDCA esistente dello stesso sito, **anche già chiuso o archiviato**: dal finding con **Collega a PDCA esistente**, oppure dal menù PDCA con **🔗 Finding** (su un ciclo chiuso compaiono solo i finding chiusi; su un ciclo aperto spunta **Mostra anche i finding chiusi**). È un collegamento a posteriori di sola tracciabilità: nessuno stato cambia e l'audit trail lo registra come tale. Per un finding chiuso non si apre un nuovo PDCA; un finding ancora aperto si collega solo a un PDCA aperto.
+
 #### Come chiudere un finding
 
 1. Nel tab **Finding** dell'audit clicca **Chiudi finding** sul rilievo

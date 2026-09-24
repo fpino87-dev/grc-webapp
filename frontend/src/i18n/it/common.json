@@ -3054,7 +3054,8 @@
       "no_open_cycles": "Nessun PDCA aperto su questo sito",
       "link_btn": "Collega",
       "unlink_reason": "Motivo dello scollegamento (minimo 10 caratteri)",
-      "unlink_confirm": "Scollega"
+      "unlink_confirm": "Scollega",
+      "retro_hint": "Finding già chiuso: collegamento a posteriori, anche a un PDCA chiuso. Nessuno stato cambia."
     },
     "close_finding": {
       "btn": "Chiudi finding",
@@ -3499,7 +3500,10 @@
       "link_btn": "Collega",
       "new_hint": "Collega il ciclo a un finding registrato: sito e tipo di audit vengono presi dall'audit.",
       "single_cycle": "Stai vedendo il ciclo collegato al finding.",
-      "show_all": "Mostra tutti i cicli"
+      "show_all": "Mostra tutti i cicli",
+      "closed_suffix": "chiuso",
+      "closed_cycle_hint": "Ciclo chiuso: si possono collegare solo finding già chiusi (recupero dello storico). Nessuno stato cambia.",
+      "include_closed": "Mostra anche i finding chiusi (collegamento a posteriori)"
     }
   },
   "bcp": {

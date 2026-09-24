@@ -3054,7 +3054,8 @@
       "no_open_cycles": "Brak otwartych PDCA w tym zakładzie",
       "link_btn": "Powiąż",
       "unlink_reason": "Powód odłączenia (co najmniej 10 znaków)",
-      "unlink_confirm": "Odłącz"
+      "unlink_confirm": "Odłącz",
+      "retro_hint": "Ustalenie już zamknięte: powiązanie wsteczne, także z zamkniętym PDCA. Żaden status się nie zmienia."
     },
     "close_finding": {
       "btn": "Zamknij ustalenie",
@@ -3499,7 +3500,10 @@
       "link_btn": "Powiąż",
       "new_hint": "Powiąż cykl z zarejestrowanym ustaleniem: zakład i rodzaj audytu są pobierane z audytu.",
       "single_cycle": "Wyświetlasz cykl powiązany z ustaleniem.",
-      "show_all": "Pokaż wszystkie cykle"
+      "show_all": "Pokaż wszystkie cykle",
+      "closed_suffix": "zamknięte",
+      "closed_cycle_hint": "Cykl zamknięty: można powiązać tylko ustalenia już zamknięte (odtworzenie historii). Żaden status się nie zmienia.",
+      "include_closed": "Pokaż także zamknięte ustalenia (powiązanie wsteczne)"
     }
   },
   "bcp": {

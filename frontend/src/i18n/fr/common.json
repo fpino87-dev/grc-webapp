@@ -3054,7 +3054,8 @@
       "no_open_cycles": "Aucun PDCA ouvert sur ce site",
       "link_btn": "Lier",
       "unlink_reason": "Motif du détachement (au moins 10 caractères)",
-      "unlink_confirm": "Détacher"
+      "unlink_confirm": "Détacher",
+      "retro_hint": "Constat déjà clôturé : lien a posteriori, y compris vers un PDCA clôturé. Aucun statut ne change."
     },
     "close_finding": {
       "btn": "Clôturer le constat",
@@ -3499,7 +3500,10 @@
       "link_btn": "Lier",
       "new_hint": "Liez le cycle à un constat enregistré : le site et le type d'audit sont repris de l'audit.",
       "single_cycle": "Vous consultez le cycle lié au constat.",
-      "show_all": "Afficher tous les cycles"
+      "show_all": "Afficher tous les cycles",
+      "closed_suffix": "clôturé",
+      "closed_cycle_hint": "Cycle clôturé : seuls les constats déjà clôturés peuvent être liés (récupération de l'historique). Aucun statut ne change.",
+      "include_closed": "Afficher aussi les constats clôturés (lien a posteriori)"
     }
   },
   "bcp": {

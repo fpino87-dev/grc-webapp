@@ -2862,3 +2862,11 @@ msgstr "Ustalenie nie jest powiązane z tym PDCA."
 #: apps/audit_prep/views.py
 msgid "Audit di seconda parte: i punti di verifica sono quelli del cliente, la checklist dei controlli non si usa. Registra i rilievi dell'auditor come finding."
 msgstr "Audyt drugiej strony: kryteria weryfikacji są klienta, lista kontrolna nie jest używana. Zarejestruj ustalenia audytora jako ustalenia."
+
+#: apps/audit_prep/services.py
+msgid "Il PDCA è chiuso o archiviato: un finding ancora aperto si collega solo a un PDCA aperto."
+msgstr "PDCA jest zamknięty lub zarchiwizowany: wciąż otwarte ustalenie można powiązać tylko z otwartym PDCA."
+
+#: apps/audit_prep/services.py
+msgid "Il finding è chiuso: non si apre un nuovo PDCA, collegalo a un PDCA esistente."
+msgstr "Ustalenie jest zamknięte: nie otwiera się nowego PDCA, powiąż je z istniejącym PDCA."

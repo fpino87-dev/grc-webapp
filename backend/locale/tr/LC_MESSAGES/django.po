@@ -2841,3 +2841,11 @@ msgstr "Bulgu bu PDCA'ya bağlı değil."
 #: apps/audit_prep/views.py
 msgid "Audit di seconda parte: i punti di verifica sono quelli del cliente, la checklist dei controlli non si usa. Registra i rilievi dell'auditor come finding."
 msgstr "İkinci taraf denetimi: doğrulama noktaları müşteriye aittir, kontrol listesi kullanılmaz. Denetçinin tespitlerini bulgu olarak kaydedin."
+
+#: apps/audit_prep/services.py
+msgid "Il PDCA è chiuso o archiviato: un finding ancora aperto si collega solo a un PDCA aperto."
+msgstr "PDCA kapalı veya arşivlenmiş: hâlâ açık bir bulgu yalnızca açık bir PDCA'ya bağlanabilir."
+
+#: apps/audit_prep/services.py
+msgid "Il finding è chiuso: non si apre un nuovo PDCA, collegalo a un PDCA esistente."
+msgstr "Bulgu kapalı: yeni PDCA açılmaz, mevcut bir PDCA'ya bağlayın."

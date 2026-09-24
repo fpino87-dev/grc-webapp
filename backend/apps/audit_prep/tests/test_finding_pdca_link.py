@@ -228,3 +228,74 @@ def test_shared_pdca_in_act_needs_to_be_closed_first(client, plant, user):
 def test_observation_without_pdca_closes_freely(client, plant, user):
     f = _finding(_prep(plant), user)
     assert client.post(f"{URL_FINDINGS}{f.id}/close/", {"closure_notes": ""}, format="json").status_code == 200
+
+
+# ── Collegamento a posteriori dei finding già chiusi ────────────────────────
+
+def _closed_finding(prep, user, title="Oss chiusa"):
+    from apps.audit_prep.services import close_finding
+    f = _finding(prep, user, "observation", title)
+    return close_finding(f, user, "chiusa prima della modifica")
+
+
+def _closed_cycle(plant, user):
+    cycle = _to_act(_cycle(plant, "Ciclo storico"), user)
+    from apps.pdca.services import close_cycle
+    return close_cycle(cycle, user, act_description="Azione storica standardizzata per il sito.")
+
+
+@pytest.mark.django_db
+def test_closed_finding_links_to_closed_pdca_without_changing_states(client, plant, user):
+    from core.audit import AuditLog
+    f = _closed_finding(_prep(plant), user)
+    cycle = _closed_cycle(plant, user)
+    resp = client.post(f"{URL_FINDINGS}{f.id}/link-pdca/", {"pdca_cycle": str(cycle.id)}, format="json")
+    assert resp.status_code == 200, resp.data
+    f.refresh_from_db(); cycle.refresh_from_db()
+    assert f.status == "closed" and f.pdca_cycle_id == cycle.id
+    assert cycle.fase_corrente == "chiuso"
+    log = AuditLog.objects.filter(action_code="audit.finding.pdca_linked").latest("timestamp_utc")
+    assert log.payload["retroactive"] is True
+
+
+@pytest.mark.django_db
+def test_closed_finding_links_from_pdca_menu_on_closed_cycle(client, plant, user):
+    f = _closed_finding(_prep(plant), user)
+    cycle = _closed_cycle(plant, user)
+    resp = client.post(f"{URL_CYCLES}{cycle.id}/link-finding/", {"finding": str(f.id)}, format="json")
+    assert resp.status_code == 200, resp.data
+    assert [x["id"] for x in resp.data["findings"]] == [str(f.id)]
+
+
+@pytest.mark.django_db
+def test_open_finding_cannot_link_to_closed_pdca(client, plant, user):
+    f = _finding(_prep(plant), user)
+    cycle = _closed_cycle(plant, user)
+    resp = client.post(f"{URL_FINDINGS}{f.id}/link-pdca/", {"pdca_cycle": str(cycle.id)}, format="json")
+    assert resp.status_code == 400
+
+
+@pytest.mark.django_db
+def test_no_new_pdca_for_closed_finding(client, plant, user):
+    f = _closed_finding(_prep(plant), user)
+    assert client.post(f"{URL_FINDINGS}{f.id}/open-pdca/", {}, format="json").status_code == 400
+
+
+@pytest.mark.django_db
+def test_without_pdca_include_closed(client, plant, user):
+    prep = _prep(plant)
+    _finding(prep, user, "observation", "Aperta")
+    _closed_finding(prep, user, "Chiusa")
+    base = {"audit_prep": str(prep.id), "without_pdca": "true"}
+    assert [r["title"] for r in client.get(URL_FINDINGS, base).data["results"]] == ["Aperta"]
+    titles = {r["title"] for r in client.get(URL_FINDINGS, {**base, "include_closed": "true"}).data["results"]}
+    assert titles == {"Aperta", "Chiusa"}
+
+
+@pytest.mark.django_db
+def test_unlink_closed_finding_with_reason(client, plant, user):
+    f = _closed_finding(_prep(plant), user)
+    cycle = _closed_cycle(plant, user)
+    client.post(f"{URL_FINDINGS}{f.id}/link-pdca/", {"pdca_cycle": str(cycle.id)}, format="json")
+    resp = client.post(f"{URL_FINDINGS}{f.id}/unlink-pdca/", {"reason": "Ciclo storico sbagliato"}, format="json")
+    assert resp.status_code == 200 and resp.data["pdca_cycle"] is None

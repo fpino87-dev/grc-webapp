@@ -884,6 +884,8 @@ W zakładce **Ustalenia** audytu, dla ustalenia bez PDCA:
 
 To samo można zrobić z menu **PDCA**: w nowym cyklu o źródle **Audyt** wybierz audyt i ustalenie (zakład i rodzaj audytu uzupełniają się same) albo przyciskiem **🔗 Ustalenia** istniejącego cyklu. Błędne powiązanie usuwa się przyciskiem **Odłącz**, podając powód zapisywany w ścieżce audytu.
 
+**Ustalenia już zamknięte (historia)** — zamknięte ustalenie bez PDCA, np. zarejestrowane przed wprowadzeniem tej funkcji, również można powiązać z istniejącym PDCA tego samego zakładu, **nawet już zamkniętym lub zarchiwizowanym**: z ustalenia przyciskiem **Powiąż z istniejącym PDCA** albo z menu PDCA przyciskiem **🔗 Ustalenia** (przy zamkniętym cyklu proponowane są tylko zamknięte ustalenia; przy otwartym zaznacz **Pokaż także zamknięte ustalenia**). To powiązanie wsteczne wyłącznie dla identyfikowalności: żaden status się nie zmienia, a ścieżka audytu rejestruje je jako takie. Dla zamkniętego ustalenia nie otwiera się nowego PDCA; wciąż otwarte ustalenie wiąże się tylko z otwartym PDCA.
+
 #### Jak zamknąć ustalenie
 
 1. W zakładce **Ustalenia** audytu kliknij **Zamknij ustalenie**

@@ -884,6 +884,8 @@ From the audit's **Findings** tab, for a finding without a PDCA:
 
 The same can be done from the **PDCA** menu: in a new cycle with origin **Audit** choose audit and finding (site and audit type are filled in automatically), or from the **🔗 Findings** button of an existing cycle. A wrong link is removed with **Unlink**, giving a reason that is kept in the audit trail.
 
+**Findings already closed (history)** — a closed finding without a PDCA, for example recorded before this feature, can also be linked to an existing PDCA of the same site, **even one already closed or archived**: from the finding with **Link to existing PDCA**, or from the PDCA menu with **🔗 Findings** (on a closed cycle only closed findings are offered; on an open cycle tick **Show closed findings too**). It is a retroactive link for traceability only: no status changes and the audit trail records it as such. No new PDCA is opened for a closed finding; a finding still open can only be linked to an open PDCA.
+
 #### How to close a finding
 
 1. In the audit's **Findings** tab click **Close finding** on the finding

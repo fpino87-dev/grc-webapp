@@ -225,9 +225,10 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
   const isClosed = finding.status === "closed" || finding.status === "accepted_by_auditor";
   const isNc = finding.finding_type === "major_nc" || finding.finding_type === "minor_nc";
 
+  // Finding aperto → solo PDCA aperti; finding chiuso (storico) → anche PDCA chiusi.
   const { data: cycles = [] } = useQuery({
-    queryKey: ["pdca-open", prep.plant],
-    queryFn: () => pdcaApi.list({ plant: prep.plant, open: "true" }).then(r => r.results),
+    queryKey: ["pdca-linkable", prep.plant, isClosed],
+    queryFn: () => pdcaApi.list(isClosed ? { plant: prep.plant } : { plant: prep.plant, open: "true" }).then(r => r.results),
     enabled: mode === "link",
   });
   const { data: evidences = [] } = useQuery<{ id: string; title: string }[]>({
@@ -264,14 +265,19 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
               title={finding.pdca_title ?? undefined}>
               {t("audit_prep.pdca_link.linked", { phase: PHASE_LABEL[finding.pdca_phase ?? ""] ?? (finding.pdca_phase ?? "").toUpperCase() })}
             </button>
-            {!isClosed && <button onClick={() => setMode(mode === "unlink" ? "" : "unlink")} className={`${btn} text-gray-500`}>{t("audit_prep.pdca_link.unlink")}</button>}
+            <button onClick={() => setMode(mode === "unlink" ? "" : "unlink")} className={`${btn} text-gray-500`}>{t("audit_prep.pdca_link.unlink")}</button>
           </>
-        ) : !isClosed && (
+        ) : (
           <>
-            <button onClick={() => openMut.mutate()} disabled={openMut.isPending} className={`${btn} text-primary-700 border-primary-200`}>
-              {t("audit_prep.pdca_link.open")}
+            {!isClosed && (
+              <button onClick={() => openMut.mutate()} disabled={openMut.isPending} className={`${btn} text-primary-700 border-primary-200`}>
+                {t("audit_prep.pdca_link.open")}
+              </button>
+            )}
+            <button onClick={() => setMode(mode === "link" ? "" : "link")} className={`${btn} text-gray-600`}
+              title={isClosed ? t("audit_prep.pdca_link.retro_hint") : undefined}>
+              {t("audit_prep.pdca_link.link_existing")}
             </button>
-            <button onClick={() => setMode(mode === "link" ? "" : "link")} className={`${btn} text-gray-600`}>{t("audit_prep.pdca_link.link_existing")}</button>
           </>
         )}
         {!isClosed && (
@@ -285,7 +291,7 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
         <div className="flex flex-wrap gap-2 items-center">
           <select value={cycleId} onChange={e => setCycleId(e.target.value)} className="border rounded px-2 py-1 text-xs min-w-[14rem]">
             <option value="">{cycles.length ? t("audit_prep.pdca_link.choose_cycle") : t("audit_prep.pdca_link.no_open_cycles")}</option>
-            {cycles.map(c => <option key={c.id} value={c.id}>{c.title} — {PHASE_LABEL[c.fase_corrente] ?? c.fase_corrente}</option>)}
+            {cycles.map(c => <option key={c.id} value={c.id}>{c.title} — {PHASE_LABEL[c.fase_corrente] ?? c.fase_corrente.toUpperCase()}</option>)}
           </select>
           <button onClick={() => linkMut.mutate()} disabled={!cycleId || linkMut.isPending} className={`${btn} text-primary-700`}>{t("audit_prep.pdca_link.link_btn")}</button>
         </div>

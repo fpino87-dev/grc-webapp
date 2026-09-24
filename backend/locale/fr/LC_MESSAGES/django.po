@@ -2907,3 +2907,11 @@ msgstr "Le constat n'est pas lié à ce PDCA."
 #: apps/audit_prep/views.py
 msgid "Audit di seconda parte: i punti di verifica sono quelli del cliente, la checklist dei controlli non si usa. Registra i rilievi dell'auditor come finding."
 msgstr "Audit de seconde partie : les points de vérification sont ceux du client, la checklist des contrôles n'est pas utilisée. Enregistrez les constats de l'auditeur comme constats."
+
+#: apps/audit_prep/services.py
+msgid "Il PDCA è chiuso o archiviato: un finding ancora aperto si collega solo a un PDCA aperto."
+msgstr "Le PDCA est clôturé ou archivé : un constat encore ouvert ne peut être lié qu'à un PDCA ouvert."
+
+#: apps/audit_prep/services.py
+msgid "Il finding è chiuso: non si apre un nuovo PDCA, collegalo a un PDCA esistente."
+msgstr "Le constat est clôturé : aucun nouveau PDCA n'est ouvert, liez-le à un PDCA existant."

@@ -2840,3 +2840,11 @@ msgstr "The finding is not linked to this PDCA."
 #: apps/audit_prep/views.py
 msgid "Audit di seconda parte: i punti di verifica sono quelli del cliente, la checklist dei controlli non si usa. Registra i rilievi dell'auditor come finding."
 msgstr "Second-party audit: the audit criteria are the customer's, the controls checklist is not used. Record the auditor's findings as findings."
+
+#: apps/audit_prep/services.py
+msgid "Il PDCA è chiuso o archiviato: un finding ancora aperto si collega solo a un PDCA aperto."
+msgstr "The PDCA is closed or archived: a finding still open can only be linked to an open PDCA."
+
+#: apps/audit_prep/services.py
+msgid "Il finding è chiuso: non si apre un nuovo PDCA, collegalo a un PDCA esistente."
+msgstr "The finding is closed: no new PDCA is opened, link it to an existing PDCA."

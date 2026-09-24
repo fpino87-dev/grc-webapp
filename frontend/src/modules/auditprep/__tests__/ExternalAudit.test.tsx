@@ -208,3 +208,13 @@ describe("Audit Prep — seconda parte senza checklist", () => {
   });
 });
 
+describe("Audit Prep — collegamento a posteriori", () => {
+  it("un finding chiuso senza PDCA si collega a un PDCA esistente ma non ne apre uno nuovo", async () => {
+    api.findings.mockResolvedValue([finding({ status: "closed" })] as never);
+    await openFindings();
+    expect(await screen.findByText("audit_prep.pdca_link.link_existing")).toBeInTheDocument();
+    expect(screen.queryByText("audit_prep.pdca_link.open")).not.toBeInTheDocument();
+    expect(screen.queryByText("audit_prep.close_finding.btn")).not.toBeInTheDocument();
+  });
+});
+

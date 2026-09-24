@@ -884,6 +884,8 @@ Denetimin **Bulgular** sekmesinde, PDCA'sı olmayan bir bulgu için:
 
 Aynısı **PDCA** menüsünden de yapılabilir: kaynağı **Denetim** olan yeni bir döngüde denetimi ve bulguyu seçin (tesis ve denetim türü kendiliğinden doldurulur) veya mevcut bir döngünün **🔗 Bulgular** düğmesini kullanın. Hatalı bir bağlantı, denetim izinde saklanan bir neden belirtilerek **Bağlantıyı kaldır** ile silinir.
 
+**Zaten kapalı bulgular (geçmiş)** — PDCA'sı olmayan kapalı bir bulgu, örneğin bu özellikten önce kaydedilmiş olan, aynı tesisin mevcut bir PDCA'sına, **zaten kapalı veya arşivlenmiş olsa bile** bağlanabilir: bulgudan **Mevcut PDCA'ya bağla** ile veya PDCA menüsünden **🔗 Bulgular** ile (kapalı bir döngüde yalnızca kapalı bulgular sunulur; açık bir döngüde **Kapalı bulguları da göster** seçeneğini işaretleyin). Bu yalnızca izlenebilirlik için geriye dönük bir bağlantıdır: hiçbir durum değişmez ve denetim izi bunu bu şekilde kaydeder. Kapalı bir bulgu için yeni PDCA açılmaz; hâlâ açık bir bulgu yalnızca açık bir PDCA'ya bağlanır.
+
 #### Bulgu nasıl kapatılır
 
 1. Denetimin **Bulgular** sekmesinde bulgu üzerinde **Bulguyu kapat**'a tıklayın

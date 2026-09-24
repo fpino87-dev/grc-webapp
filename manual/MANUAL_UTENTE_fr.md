@@ -884,6 +884,8 @@ Depuis l'onglet **Constats** de l'audit, pour un constat sans PDCA :
 
 On peut faire de même depuis le menu **PDCA** : dans un nouveau cycle d'origine **Audit**, choisissez l'audit et le constat (le site et le type d'audit se remplissent seuls), ou via le bouton **🔗 Constats** d'un cycle existant. Un lien erroné se supprime avec **Détacher**, en indiquant un motif conservé dans la piste d'audit.
 
+**Constats déjà clôturés (historique)** — un constat clôturé sans PDCA, par exemple enregistré avant cette fonction, peut aussi être lié à un PDCA existant du même site, **même déjà clôturé ou archivé** : depuis le constat avec **Lier à un PDCA existant**, ou depuis le menu PDCA avec **🔗 Constats** (sur un cycle clôturé, seuls les constats clôturés sont proposés ; sur un cycle ouvert, cochez **Afficher aussi les constats clôturés**). C'est un lien a posteriori de pure traçabilité : aucun statut ne change et la piste d'audit l'enregistre comme tel. Aucun nouveau PDCA n'est ouvert pour un constat clôturé ; un constat encore ouvert ne se lie qu'à un PDCA ouvert.
+
 #### Comment clôturer un constat
 
 1. Dans l'onglet **Constats** de l'audit, cliquez sur **Clôturer le constat**
