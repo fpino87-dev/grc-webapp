@@ -3058,7 +3058,9 @@
       "retro_hint": "Finding already closed: retroactive link, also to a closed PDCA. No status changes.",
       "replace": "Replace PDCA",
       "replace_hint": "Choose the right PDCA (even one already closed). The current PDCA, if opened automatically and never worked on, is archived; otherwise it stays as it is, only unlinked.",
-      "replace_confirm": "Replace"
+      "replace_confirm": "Replace",
+      "close_with": "Close with the PDCA",
+      "close_with_title": "Closes the finding using the DO phase evidence and the ACT description of the linked PDCA, already closed."
     },
     "close_finding": {
       "btn": "Close finding",

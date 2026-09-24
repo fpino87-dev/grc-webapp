@@ -2858,3 +2858,19 @@ msgstr "Bulgu zaten bu PDCA'ya bağlı."
 #, python-format
 msgid "Sostituito dal PDCA «%(title)s» collegato al finding «%(finding)s»: %(reason)s"
 msgstr "«%(finding)s» bulgusuna bağlı «%(title)s» PDCA'sı ile değiştirildi: %(reason)s"
+
+#: apps/audit_prep/services.py
+msgid "Il finding è già chiuso."
+msgstr "Bulgu zaten kapalı."
+
+#: apps/audit_prep/services.py
+msgid "Il finding si chiude con il PDCA solo se il PDCA collegato è chiuso."
+msgstr "Bulgu, yalnızca bağlı PDCA kapalıysa PDCA ile kapatılabilir."
+
+#: apps/audit_prep/services.py
+msgid "Il PDCA collegato ha esito non efficace: l'azione correttiva va ripetuta."
+msgstr "Bağlı PDCA'nın sonucu etkisiz: düzeltici faaliyet tekrarlanmalıdır."
+
+#: apps/audit_prep/services.py
+msgid "Il PDCA collegato non ha un'evidenza nella fase DO: chiudi la non conformità con «Chiudi finding» scegliendo l'evidenza."
+msgstr "Bağlı PDCA'nın DO aşamasında kanıtı yok: uygunsuzluğu kanıtı seçerek «Bulguyu kapat» ile kapatın."

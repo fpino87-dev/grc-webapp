@@ -3058,7 +3058,9 @@
       "retro_hint": "Constat déjà clôturé : lien a posteriori, y compris vers un PDCA clôturé. Aucun statut ne change.",
       "replace": "Remplacer le PDCA",
       "replace_hint": "Choisissez le bon PDCA (même déjà clôturé). Le PDCA actuel, s'il a été ouvert automatiquement et jamais travaillé, est archivé ; sinon il reste tel quel, simplement détaché.",
-      "replace_confirm": "Remplacer"
+      "replace_confirm": "Remplacer",
+      "close_with": "Clôturer avec le PDCA",
+      "close_with_title": "Clôture le constat avec la preuve de la phase DO et la description ACT du PDCA lié, déjà clôturé."
     },
     "close_finding": {
       "btn": "Clôturer le constat",

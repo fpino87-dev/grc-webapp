@@ -2924,3 +2924,19 @@ msgstr "Le constat est déjà lié à ce PDCA."
 #, python-format
 msgid "Sostituito dal PDCA «%(title)s» collegato al finding «%(finding)s»: %(reason)s"
 msgstr "Remplacé par le PDCA «%(title)s» lié au constat «%(finding)s» : %(reason)s"
+
+#: apps/audit_prep/services.py
+msgid "Il finding è già chiuso."
+msgstr "Le constat est déjà clôturé."
+
+#: apps/audit_prep/services.py
+msgid "Il finding si chiude con il PDCA solo se il PDCA collegato è chiuso."
+msgstr "Le constat ne se clôture avec le PDCA que si le PDCA lié est clôturé."
+
+#: apps/audit_prep/services.py
+msgid "Il PDCA collegato ha esito non efficace: l'azione correttiva va ripetuta."
+msgstr "Le PDCA lié a un résultat non efficace : l'action corrective doit être refaite."
+
+#: apps/audit_prep/services.py
+msgid "Il PDCA collegato non ha un'evidenza nella fase DO: chiudi la non conformità con «Chiudi finding» scegliendo l'evidenza."
+msgstr "Le PDCA lié n'a pas de preuve dans la phase DO : clôturez la non-conformité avec «Clôturer le constat» en choisissant la preuve."

@@ -2879,3 +2879,19 @@ msgstr "Ustalenie jest już powiązane z tym PDCA."
 #, python-format
 msgid "Sostituito dal PDCA «%(title)s» collegato al finding «%(finding)s»: %(reason)s"
 msgstr "Zastąpiony przez PDCA «%(title)s» powiązany z ustaleniem «%(finding)s»: %(reason)s"
+
+#: apps/audit_prep/services.py
+msgid "Il finding è già chiuso."
+msgstr "Ustalenie jest już zamknięte."
+
+#: apps/audit_prep/services.py
+msgid "Il finding si chiude con il PDCA solo se il PDCA collegato è chiuso."
+msgstr "Ustalenie można zamknąć z PDCA tylko wtedy, gdy powiązany PDCA jest zamknięty."
+
+#: apps/audit_prep/services.py
+msgid "Il PDCA collegato ha esito non efficace: l'azione correttiva va ripetuta."
+msgstr "Powiązany PDCA ma wynik nieskuteczny: działanie korygujące trzeba powtórzyć."
+
+#: apps/audit_prep/services.py
+msgid "Il PDCA collegato non ha un'evidenza nella fase DO: chiudi la non conformità con «Chiudi finding» scegliendo l'evidenza."
+msgstr "Powiązany PDCA nie ma dowodu w fazie DO: zamknij niezgodność przyciskiem «Zamknij ustalenie», wybierając dowód."

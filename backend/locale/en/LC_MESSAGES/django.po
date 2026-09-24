@@ -2857,3 +2857,19 @@ msgstr "The finding is already linked to this PDCA."
 #, python-format
 msgid "Sostituito dal PDCA «%(title)s» collegato al finding «%(finding)s»: %(reason)s"
 msgstr "Replaced by the PDCA «%(title)s» linked to the finding «%(finding)s»: %(reason)s"
+
+#: apps/audit_prep/services.py
+msgid "Il finding è già chiuso."
+msgstr "The finding is already closed."
+
+#: apps/audit_prep/services.py
+msgid "Il finding si chiude con il PDCA solo se il PDCA collegato è chiuso."
+msgstr "The finding can be closed with the PDCA only if the linked PDCA is closed."
+
+#: apps/audit_prep/services.py
+msgid "Il PDCA collegato ha esito non efficace: l'azione correttiva va ripetuta."
+msgstr "The linked PDCA has an ineffective outcome: the corrective action must be repeated."
+
+#: apps/audit_prep/services.py
+msgid "Il PDCA collegato non ha un'evidenza nella fase DO: chiudi la non conformità con «Chiudi finding» scegliendo l'evidenza."
+msgstr "The linked PDCA has no evidence in the DO phase: close the nonconformity with «Close finding», choosing the evidence."

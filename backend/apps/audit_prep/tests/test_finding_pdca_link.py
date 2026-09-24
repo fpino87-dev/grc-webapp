@@ -403,3 +403,45 @@ def test_effective_outcome_closes_nc_with_do_evidence(plant, user):
     # una sola Lesson Learned: quella del PDCA
     assert LessonLearned.objects.filter(source_id__in=[cycle.pk, f.pk]).count() == 1
 
+
+
+# ── "Chiudi con il PDCA" e riallineamento dei collegamenti precedenti ───────
+
+def _link_as_before(finding, cycle):
+    """Collegamento fatto con la versione precedente: finding solo "in risposta"."""
+    finding.pdca_cycle = cycle
+    finding.status = "in_response"
+    finding.save(update_fields=["pdca_cycle", "status"])
+
+
+@pytest.mark.django_db
+def test_close_with_pdca_button(client, plant, user):
+    f = _finding(_prep(plant), user, "opportunity", "Opportunità dal rapporto")
+    cycle = _closed_cycle(plant, user)
+    _link_as_before(f, cycle)
+    resp = client.post(f"{URL_FINDINGS}{f.id}/close-with-pdca/", {}, format="json")
+    assert resp.status_code == 200, resp.data
+    assert resp.data["status"] == "closed"
+    assert resp.data["closure_notes"] == "Azione storica standardizzata per il sito."
+
+
+@pytest.mark.django_db
+def test_close_with_pdca_requires_closed_pdca(client, plant, user):
+    f = _finding(_prep(plant), user, "observation", "Oss")
+    client.post(f"{URL_FINDINGS}{f.id}/link-pdca/", {"pdca_cycle": str(_cycle(plant).id)}, format="json")
+    assert client.post(f"{URL_FINDINGS}{f.id}/close-with-pdca/", {}, format="json").status_code == 400
+
+
+@pytest.mark.django_db
+def test_settle_command_dry_run_and_apply(plant, user):
+    from io import StringIO
+    from django.core.management import call_command
+    f = _finding(_prep(plant), user, "opportunity", "Opportunità")
+    _link_as_before(f, _closed_cycle(plant, user))
+    out = StringIO()
+    call_command("settle_findings_closed_pdca", user=user.email, stdout=out)
+    f.refresh_from_db()
+    assert f.status == "in_response" and "ANTEPRIMA" in out.getvalue()
+    call_command("settle_findings_closed_pdca", user=user.email, apply=True, stdout=StringIO())
+    f.refresh_from_db()
+    assert f.status == "closed"

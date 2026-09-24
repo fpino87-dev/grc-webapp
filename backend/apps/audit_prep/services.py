@@ -420,9 +420,7 @@ def settle_finding_on_closed_cycle(finding: AuditFinding, cycle, user) -> str:
     """
     if _is_closed(finding):
         return finding.status
-    # L'esito sta sulla fase CHECK (sul ciclo viene salvato solo il "ko").
-    check_phase = cycle.phases.filter(phase="check").first()
-    outcome = (check_phase.outcome if check_phase else "") or cycle.check_outcome or ""
+    outcome = _check_outcome(cycle)
     if outcome == "ko" and cycle.reopened_as_id:
         finding.pdca_cycle_id = cycle.reopened_as_id
         finding.status = "open"
@@ -433,28 +431,10 @@ def settle_finding_on_closed_cycle(finding: AuditFinding, cycle, user) -> str:
         )
         return "moved"
 
-    do_phase = cycle.phases.filter(phase="do").select_related("evidence").first()
-    evidence = do_phase.evidence if do_phase else None
+    evidence = _do_evidence(cycle)
     is_nc = finding.finding_type in ("major_nc", "minor_nc")
     if outcome in ("", "ok") and (evidence is not None or not is_nc):
-        finding.status = "closed"
-        finding.closure_evidence = evidence
-        finding.closure_notes = cycle.act_description or ""
-        finding.closed_at = timezone.now()
-        finding.closed_by = user
-        finding.save(update_fields=[
-            "status", "closure_evidence", "closure_notes", "closed_at", "closed_by", "updated_at",
-        ])
-        if finding.control_instance and finding.control_instance.status == "gap":
-            ci = finding.control_instance
-            ci.status = "parziale"
-            ci.save(update_fields=["status", "updated_at"])
-        log_action(
-            user=user, action_code="audit.finding.closed_by_pdca",
-            level="L1" if finding.finding_type == "major_nc" else "L2", entity=finding,
-            payload={"pdca_cycle": str(cycle.pk), "check_outcome": outcome or None,
-                     "evidence": str(evidence.pk) if evidence else None},
-        )
+        _close_with_cycle(finding, cycle, user, evidence, outcome)
         return "closed"
 
     if finding.status == "open":
@@ -466,6 +446,65 @@ def settle_finding_on_closed_cycle(finding: AuditFinding, cycle, user) -> str:
                      "check_outcome": outcome or None, "has_do_evidence": evidence is not None},
         )
     return "in_response"
+
+
+def _check_outcome(cycle) -> str:
+    """Esito della verifica: sta sulla fase CHECK (sul ciclo solo il "ko")."""
+    check_phase = cycle.phases.filter(phase="check").first()
+    return (check_phase.outcome if check_phase else "") or cycle.check_outcome or ""
+
+
+def _do_evidence(cycle):
+    do_phase = cycle.phases.filter(phase="do").select_related("evidence").first()
+    return do_phase.evidence if do_phase else None
+
+
+def _close_with_cycle(finding: AuditFinding, cycle, user, evidence, outcome: str, manual: bool = False) -> None:
+    """Chiude il finding con evidenza (fase DO) e note (ACT) del PDCA chiuso."""
+    finding.status = "closed"
+    finding.closure_evidence = evidence
+    finding.closure_notes = cycle.act_description or ""
+    finding.closed_at = timezone.now()
+    finding.closed_by = user
+    finding.save(update_fields=[
+        "status", "closure_evidence", "closure_notes", "closed_at", "closed_by", "updated_at",
+    ])
+    if finding.control_instance and finding.control_instance.status == "gap":
+        ci = finding.control_instance
+        ci.status = "parziale"
+        ci.save(update_fields=["status", "updated_at"])
+    log_action(
+        user=user, action_code="audit.finding.closed_by_pdca",
+        level="L1" if finding.finding_type == "major_nc" else "L2", entity=finding,
+        payload={"pdca_cycle": str(cycle.pk), "check_outcome": outcome or None,
+                 "evidence": str(evidence.pk) if evidence else None, "manual": manual},
+    )
+
+
+@transaction.atomic
+def close_finding_with_pdca(finding: AuditFinding, user) -> AuditFinding:
+    """"Chiudi con il PDCA": chiude a mano un finding il cui PDCA è già chiuso,
+    riusando evidenza DO e standardizzazione ACT. È la decisione dell'utente,
+    quindi vale anche con CHECK parzialmente efficace; non con CHECK non
+    efficace (l'azione va rifatta) né per una NC senza evidenza DO."""
+    from django.core.exceptions import ValidationError
+
+    cycle = finding.pdca_cycle
+    if _is_closed(finding):
+        raise ValidationError(_("Il finding è già chiuso."))
+    if cycle is None or cycle.fase_corrente != "chiuso":
+        raise ValidationError(_("Il finding si chiude con il PDCA solo se il PDCA collegato è chiuso."))
+    outcome = _check_outcome(cycle)
+    if outcome == "ko":
+        raise ValidationError(_("Il PDCA collegato ha esito non efficace: l'azione correttiva va ripetuta."))
+    evidence = _do_evidence(cycle)
+    if evidence is None and finding.finding_type in ("major_nc", "minor_nc"):
+        raise ValidationError(_(
+            "Il PDCA collegato non ha un'evidenza nella fase DO: chiudi la non conformità "
+            "con «Chiudi finding» scegliendo l'evidenza."
+        ))
+    _close_with_cycle(finding, cycle, user, evidence, outcome, manual=True)
+    return finding
 
 
 def settle_findings_of_closed_cycle(cycle, user) -> None:

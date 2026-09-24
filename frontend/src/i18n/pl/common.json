@@ -3058,7 +3058,9 @@
       "retro_hint": "Ustalenie już zamknięte: powiązanie wsteczne, także z zamkniętym PDCA. Żaden status się nie zmienia.",
       "replace": "Zastąp PDCA",
       "replace_hint": "Wybierz właściwy PDCA (nawet już zamknięty). Obecny PDCA, jeśli otwarty automatycznie i nigdy nieprowadzony, zostanie zarchiwizowany; w przeciwnym razie pozostaje bez zmian, tylko odłączony.",
-      "replace_confirm": "Zastąp"
+      "replace_confirm": "Zastąp",
+      "close_with": "Zamknij z PDCA",
+      "close_with_title": "Zamyka ustalenie, używając dowodu z fazy DO i opisu ACT powiązanego, już zamkniętego PDCA."
     },
     "close_finding": {
       "btn": "Zamknij ustalenie",

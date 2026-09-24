@@ -575,6 +575,19 @@ class AuditFindingViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         finding.refresh_from_db()
         return Response(AuditFindingSerializer(finding).data)
 
+    @action(detail=True, methods=["post"], url_path="close-with-pdca")
+    def close_with_pdca(self, request, pk=None):
+        """POST /findings/<id>/close-with-pdca/ → chiude con evidenza e note del PDCA chiuso."""
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        finding = self.get_object()
+        try:
+            services.close_finding_with_pdca(finding, request.user)
+        except DjangoValidationError as exc:
+            return _validation_response(exc)
+        finding.refresh_from_db()
+        return Response(AuditFindingSerializer(finding).data)
+
     @action(detail=True, methods=["post"], url_path="unlink-pdca")
     def unlink_pdca(self, request, pk=None):
         """POST /findings/<id>/unlink-pdca/ {reason} → scollega (motivo obbligatorio)."""

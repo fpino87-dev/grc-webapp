@@ -3058,7 +3058,9 @@
       "retro_hint": "Finding già chiuso: collegamento a posteriori, anche a un PDCA chiuso. Nessuno stato cambia.",
       "replace": "Sostituisci PDCA",
       "replace_hint": "Scegli il PDCA giusto (anche già chiuso). Il PDCA attuale, se aperto in automatico e mai lavorato, viene archiviato; altrimenti resta com'è, solo scollegato.",
-      "replace_confirm": "Sostituisci"
+      "replace_confirm": "Sostituisci",
+      "close_with": "Chiudi con il PDCA",
+      "close_with_title": "Chiude il finding usando l'evidenza della fase DO e la descrizione ACT del PDCA collegato, già chiuso."
     },
     "close_finding": {
       "btn": "Chiudi finding",

@@ -3058,7 +3058,9 @@
       "retro_hint": "Bulgu zaten kapalı: geriye dönük bağlantı, kapalı bir PDCA'ya da yapılabilir. Hiçbir durum değişmez.",
       "replace": "PDCA'yı değiştir",
       "replace_hint": "Doğru PDCA'yı seçin (zaten kapalı olsa bile). Mevcut PDCA otomatik açıldıysa ve hiç üzerinde çalışılmadıysa arşivlenir; aksi halde olduğu gibi kalır, yalnızca bağlantısı kaldırılır.",
-      "replace_confirm": "Değiştir"
+      "replace_confirm": "Değiştir",
+      "close_with": "PDCA ile kapat",
+      "close_with_title": "Bulguyu, bağlı ve zaten kapalı PDCA'nın DO aşaması kanıtı ve ACT açıklamasıyla kapatır."
     },
     "close_finding": {
       "btn": "Bulguyu kapat",

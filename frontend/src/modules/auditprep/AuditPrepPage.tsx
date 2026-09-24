@@ -249,6 +249,11 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
   const openMut = useMutation({ mutationFn: () => auditPrepApi.openPdca(finding.id), onSuccess: done, onError: e => setError(errMsg(e)) });
   const linkMut = useMutation({ mutationFn: () => auditPrepApi.linkPdca(finding.id, cycleId), onSuccess: done, onError: e => setError(errMsg(e)) });
   const unlinkMut = useMutation({ mutationFn: () => auditPrepApi.unlinkPdca(finding.id, reason), onSuccess: done, onError: e => setError(errMsg(e)) });
+  const closeWithPdcaMut = useMutation({
+    mutationFn: () => auditPrepApi.closeWithPdca(finding.id),
+    onSuccess: () => { done(); qc.invalidateQueries({ queryKey: ["audit-prep"] }); },
+    onError: e => setError(errMsg(e)),
+  });
   const replaceMut = useMutation({ mutationFn: () => auditPrepApi.replacePdca(finding.id, cycleId, reason), onSuccess: done, onError: e => setError(errMsg(e)) });
   const closeMut = useMutation({
     mutationFn: () => auditPrepApi.closeFinding(finding.id, { closure_notes: notes, evidence_id: evidenceId || undefined }),
@@ -282,6 +287,13 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
               {t("audit_prep.pdca_link.link_existing")}
             </button>
           </>
+        )}
+        {!isClosed && finding.pdca_phase === "chiuso" && (
+          <button onClick={() => closeWithPdcaMut.mutate()} disabled={closeWithPdcaMut.isPending}
+            title={t("audit_prep.pdca_link.close_with_title")}
+            className={`${btn} text-white bg-green-600 border-green-600 hover:bg-green-700`}>
+            {t("audit_prep.pdca_link.close_with")}
+          </button>
         )}
         {!isClosed && (
           <button onClick={() => setMode(mode === "close" ? "" : "close")} className={`${btn} text-green-700 border-green-200`}>

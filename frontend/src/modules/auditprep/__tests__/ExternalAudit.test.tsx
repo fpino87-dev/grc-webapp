@@ -30,7 +30,7 @@ vi.mock("../../../api/endpoints/auditPrep", () => ({
     list: vi.fn(), programs: vi.fn(), findings: vi.fn(), evidence: vi.fn(), create: vi.fn(),
     update: vi.fn(), uploadReportFile: vi.fn(), detachReportFile: vi.fn(), downloadPrepReport: vi.fn(),
     downloadReportFile: vi.fn(), createGroup: vi.fn(), updateGroup: vi.fn(), createFinding: vi.fn(),
-    openPdca: vi.fn(), linkPdca: vi.fn(), unlinkPdca: vi.fn(), closeFinding: vi.fn(),
+    openPdca: vi.fn(), linkPdca: vi.fn(), unlinkPdca: vi.fn(), closeFinding: vi.fn(), closeWithPdca: vi.fn(), replacePdca: vi.fn(),
   },
 }));
 
@@ -215,6 +215,17 @@ describe("Audit Prep — collegamento a posteriori", () => {
     expect(await screen.findByText("audit_prep.pdca_link.link_existing")).toBeInTheDocument();
     expect(screen.queryByText("audit_prep.pdca_link.open")).not.toBeInTheDocument();
     expect(screen.queryByText("audit_prep.close_finding.btn")).not.toBeInTheDocument();
+  });
+});
+
+describe("Audit Prep — chiudi con il PDCA", () => {
+  it("un finding in risposta con PDCA chiuso si chiude con un clic", async () => {
+    api.findings.mockResolvedValue([finding({ finding_type: "opportunity", status: "in_response",
+                                              pdca_cycle: "c1", pdca_phase: "chiuso", pdca_title: "PDCA manuale" })] as never);
+    api.closeWithPdca.mockResolvedValue(finding({ status: "closed" }) as never);
+    await openFindings();
+    fireEvent.click(await screen.findByText("audit_prep.pdca_link.close_with"));
+    await vi.waitFor(() => expect(api.closeWithPdca).toHaveBeenCalledWith("f1"));
   });
 });
 
