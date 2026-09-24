@@ -124,3 +124,23 @@ def test_computed_risk_level_nd_when_no_score(supplier, user):
     a = SupplierAssessment.objects.create(supplier=supplier, assessed_by=user, status="pianificato",
                                           assessment_date=timezone.localdate(), created_by=user)
     assert a.computed_risk_level == "nd"
+
+
+# ── Corpo email questionario ────────────────────────────────────────────────
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("body,expected", [
+    ("Gentile {supplier_name}, compila: {questionnaire_link}. Grazie",
+     "Gentile ACME, compila: https://forms.example/q. Grazie"),
+    ("Gentile {supplier_name}, compila il questionario.\n",
+     "Gentile ACME, compila il questionario.\n\nhttps://forms.example/q"),
+])
+def test_questionnaire_email_always_contains_form_link(body, expected):
+    from apps.suppliers.models import QuestionnaireTemplate, Supplier
+    from apps.suppliers.services import _build_email_body
+    tpl = QuestionnaireTemplate.objects.create(
+        name="T", subject="Questionario {supplier_name}", body=body, form_url="https://forms.example/q",
+    )
+    subject, text = _build_email_body(tpl, Supplier(name="ACME"))
+    assert subject == "Questionario ACME"
+    assert text == expected

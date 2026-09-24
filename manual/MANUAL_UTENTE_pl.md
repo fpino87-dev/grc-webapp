@@ -947,7 +947,7 @@ W szczegółach dostawcy, w sekcji **Ocena wewnętrzna**, kliknij **Rozpocznij o
 
 ### Kwestionariusze
 
-**Szablony** — w zakładce **Szablony kwestionariusza** przygotowujesz jeden lub więcej wzorów wiadomości: nazwę, **URL formularza** kwestionariusza (np. formularz online), temat i treść. W temacie i treści `{supplier_name}` zamienia się w nazwę dostawcy; w treści `{questionnaire_link}` zamienia się w link do formularza.
+**Szablony** — w zakładce **Szablony kwestionariusza** przygotowujesz jeden lub więcej wzorów wiadomości: nazwę, **URL formularza** kwestionariusza (np. formularz online), temat i treść. W temacie i treści `{supplier_name}` zamienia się w nazwę dostawcy; w treści `{questionnaire_link}` zamienia się w link do formularza; jeśli w treści go brakuje, link jest dodawany na końcu wiadomości.
 
 **Wysyłka** — na liście dostawców kliknij **Kwest.**, wybierz szablon i kliknij **Wyślij**. Wiadomość trafia na adres DO dostawcy z adresami DW w kopii. Dostawca wypełnia zewnętrzny formularz: platforma nie otrzymuje odpowiedzi automatycznie.
 

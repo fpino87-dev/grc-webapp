@@ -3679,7 +3679,7 @@
       "no_match": "No questionnaire matches the filters."
     },
     "templates": {
-      "hint": "Templates for sending the questionnaire to suppliers. The form link is automatically included in the email body.",
+      "hint": "Templates for sending the questionnaire to suppliers. The form link appears where you write {questionnaire_link} in the body; if the variable is missing, it is added at the end of the email.",
       "new_btn": "+ New template",
       "none": "No template created. Create the first template to start sending questionnaires.",
       "subject_prefix": "Subject",

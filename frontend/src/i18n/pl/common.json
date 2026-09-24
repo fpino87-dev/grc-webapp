@@ -3679,7 +3679,7 @@
       "no_match": "Żaden kwestionariusz nie pasuje do filtrów."
     },
     "templates": {
-      "hint": "Szablony do wysyłania kwestionariusza dostawcom. Link do formularza jest automatycznie dołączany do treści emaila.",
+      "hint": "Szablony do wysyłania kwestionariusza dostawcom. Link do formularza pojawia się tam, gdzie wpiszesz {questionnaire_link} w treści; jeśli zmiennej brakuje, jest dodawany na końcu emaila.",
       "new_btn": "+ Nowy szablon",
       "none": "Brak szablonów. Utwórz pierwszy szablon, aby zacząć wysyłać kwestionariusze.",
       "subject_prefix": "Temat",

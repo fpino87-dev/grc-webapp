@@ -947,7 +947,7 @@ Dans le détail du fournisseur, section **Évaluation interne**, cliquez sur **L
 
 ### Questionnaires
 
-**Modèles** — dans l'onglet **Modèles de questionnaire**, vous préparez un ou plusieurs e-mails types : nom, **URL du formulaire** du questionnaire (par exemple un formulaire en ligne), objet et texte. Dans l'objet et le texte, `{supplier_name}` devient le nom du fournisseur ; dans le texte, `{questionnaire_link}` devient le lien vers le formulaire.
+**Modèles** — dans l'onglet **Modèles de questionnaire**, vous préparez un ou plusieurs e-mails types : nom, **URL du formulaire** du questionnaire (par exemple un formulaire en ligne), objet et texte. Dans l'objet et le texte, `{supplier_name}` devient le nom du fournisseur ; dans le texte, `{questionnaire_link}` devient le lien vers le formulaire ; s'il est absent du texte, le lien est ajouté à la fin de l'e-mail.
 
 **Envoi** — dans la liste des fournisseurs, cliquez sur **Quest.**, choisissez le modèle et cliquez sur **Envoyer**. L'e-mail part vers l'adresse TO du fournisseur avec les e-mails CC en copie. Le fournisseur remplit le formulaire externe : la plateforme ne reçoit pas les réponses automatiquement.
 

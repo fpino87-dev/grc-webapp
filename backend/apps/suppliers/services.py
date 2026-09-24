@@ -547,9 +547,13 @@ def reject_assessment(assessment, user, notes: str = ""):
 def _build_email_body(template, supplier) -> tuple[str, str]:
     """Interpolate template variables. Returns (subject, body)."""
     subject = template.subject.replace("{supplier_name}", supplier.name)
-    body = template.body.replace("{supplier_name}", supplier.name).replace(
-        "{questionnaire_link}", template.form_url
-    )
+    body = template.body.replace("{supplier_name}", supplier.name)
+    if "{questionnaire_link}" in body:
+        body = body.replace("{questionnaire_link}", template.form_url)
+    elif template.form_url:
+        # Template senza la variabile: il link al form va comunque nell'email,
+        # altrimenti il fornitore non avrebbe modo di rispondere.
+        body = f"{body.rstrip()}\n\n{template.form_url}"
     return subject, body
 
 

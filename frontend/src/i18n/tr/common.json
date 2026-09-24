@@ -3679,7 +3679,7 @@
       "no_match": "Filtrelerle eşleşen anket yok."
     },
     "templates": {
-      "hint": "Tedarikçilere anket göndermek için şablonlar. Form bağlantısı e-posta gövdesine otomatik eklenir.",
+      "hint": "Tedarikçilere anket göndermek için şablonlar. Form bağlantısı, metinde {questionnaire_link} yazdığınız yerde görünür; değişken yoksa e-postanın sonuna eklenir.",
       "new_btn": "+ Yeni şablon",
       "none": "Şablon yok. Anket göndermeye başlamak için ilk şablonu oluşturun.",
       "subject_prefix": "Konu",

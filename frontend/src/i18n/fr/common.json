@@ -3679,7 +3679,7 @@
       "no_match": "Aucun questionnaire ne correspond aux filtres."
     },
     "templates": {
-      "hint": "Modèles pour l'envoi du questionnaire aux fournisseurs. Le lien du formulaire est inclus automatiquement dans le corps de l'email.",
+      "hint": "Modèles pour l'envoi du questionnaire aux fournisseurs. Le lien du formulaire apparaît là où vous écrivez {questionnaire_link} dans le texte ; si la variable manque, il est ajouté à la fin de l'email.",
       "new_btn": "+ Nouveau modèle",
       "none": "Aucun modèle créé. Créez le premier modèle pour commencer à envoyer des questionnaires.",
       "subject_prefix": "Objet",

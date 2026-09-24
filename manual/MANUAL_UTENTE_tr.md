@@ -947,7 +947,7 @@ Tedarikçi ayrıntısında, **İç değerlendirme** bölümünde **Değerlendirm
 
 ### Anketler
 
-**Şablonlar** — **Anket şablonları** sekmesinde bir veya daha fazla örnek e-posta hazırlarsınız: ad, anketin **form URL'si** (örneğin bir çevrimiçi form), konu ve metin. Konu ve metinde `{supplier_name}` tedarikçinin adına dönüşür; metinde `{questionnaire_link}` form bağlantısına dönüşür.
+**Şablonlar** — **Anket şablonları** sekmesinde bir veya daha fazla örnek e-posta hazırlarsınız: ad, anketin **form URL'si** (örneğin bir çevrimiçi form), konu ve metin. Konu ve metinde `{supplier_name}` tedarikçinin adına dönüşür; metinde `{questionnaire_link}` form bağlantısına dönüşür; metinde yoksa bağlantı e-postanın sonuna eklenir.
 
 **Gönderim** — tedarikçi listesinde **Anket**'e tıklayın, şablonu seçin ve **Gönder**'e tıklayın. E-posta tedarikçinin TO adresine, CC e-postaları bilgi olarak eklenerek gider. Tedarikçi harici formu doldurur: platform yanıtları otomatik olarak almaz.
 

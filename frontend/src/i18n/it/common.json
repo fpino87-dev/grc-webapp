@@ -3679,7 +3679,7 @@
       "no_match": "Nessun questionario corrisponde ai filtri."
     },
     "templates": {
-      "hint": "Template per l'invio del questionario ai fornitori. Il link al form viene incluso automaticamente nel corpo dell'email.",
+      "hint": "Template per l'invio del questionario ai fornitori. Il link al form compare dove scrivi {questionnaire_link} nel testo; se la variabile manca, viene aggiunto in fondo all'email.",
       "new_btn": "+ Nuovo template",
       "none": "Nessun template creato. Crea il primo template per iniziare ad inviare questionari.",
       "subject_prefix": "Oggetto",

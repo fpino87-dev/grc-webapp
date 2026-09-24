@@ -947,7 +947,7 @@ In the supplier detail, **Internal evaluation** section, click **Start assessmen
 
 ### Questionnaires
 
-**Templates** — in the **Questionnaire templates** tab you prepare one or more model emails: name, **questionnaire form URL** (for example an online form), subject and body. In subject and body `{supplier_name}` becomes the supplier name; in the body `{questionnaire_link}` becomes the link to the form.
+**Templates** — in the **Questionnaire templates** tab you prepare one or more model emails: name, **questionnaire form URL** (for example an online form), subject and body. In subject and body `{supplier_name}` becomes the supplier name; in the body `{questionnaire_link}` becomes the link to the form; if the body does not contain it, the link is added at the end of the email.
 
 **Sending** — in the supplier list click **Quest.**, choose the template and click **Send**. The email goes to the supplier TO address with the CC emails in copy. The supplier fills in the external form: the platform does not receive the answers automatically.
 

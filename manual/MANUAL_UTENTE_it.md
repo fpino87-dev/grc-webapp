@@ -947,7 +947,7 @@ Dal dettaglio del fornitore, sezione **Valutazione interna**, clicca **Avvia val
 
 ### Questionari
 
-**Template** — nel tab **Template questionario** prepari una o più email tipo: nome, **URL del form** del questionario (ad esempio un modulo online), oggetto e testo. Nell'oggetto e nel testo `{supplier_name}` diventa il nome del fornitore; nel testo `{questionnaire_link}` diventa il link al form.
+**Template** — nel tab **Template questionario** prepari una o più email tipo: nome, **URL del form** del questionario (ad esempio un modulo online), oggetto e testo. Nell'oggetto e nel testo `{supplier_name}` diventa il nome del fornitore; nel testo `{questionnaire_link}` diventa il link al form; se nel testo manca, il link viene aggiunto in fondo all'email.
 
 **Invio** — dall'elenco fornitori clicca **Quest.**, scegli il template e clicca **Invia**. L'email parte all'indirizzo TO del fornitore con in copia le email CC. Il fornitore compila il form esterno: la piattaforma non riceve le risposte in automatico.
 
