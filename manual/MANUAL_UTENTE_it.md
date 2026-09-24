@@ -912,6 +912,11 @@ L'audit annullato non viene mai eliminato fisicamente — rimane nell'archivio c
    - **Trattamento dati**: flag se il fornitore tratta dati personali (comporta obblighi GDPR aggiuntivi)
 3. Clicca **Salva**
 
+**Controllo duplicati** — mentre compili il form il sistema cerca fornitori già registrati:
+
+- **Stessa P.IVA** (confrontata ignorando spazi, punti, trattini e prefisso paese, es. `IT 0123.4567.890` = `01234567890`): il salvataggio è **bloccato**. Se il fornitore esistente è nel tuo perimetro puoi aprirlo con **Apri**; se è registrato su un sito fuori perimetro ne vedi solo l'esistenza e devi chiedere a un Compliance Officer di associarlo al tuo sito. Un fornitore eliminato non blocca il reinserimento.
+- **Ragione sociale simile** (ignorando maiuscole, punteggiatura e forme societarie come S.r.l., S.p.A., GmbH): compare un **avviso** con i fornitori simili; per creare comunque spunta **Ho verificato: è un fornitore diverso**. L'audit trail registra quanti nomi simili erano presenti alla creazione.
+
 ### Data di valutazione e scadenza
 
 La data di valutazione **non si inserisce nell'anagrafica**: il sistema la ricava dall'ultima valutazione registrata, che può essere:

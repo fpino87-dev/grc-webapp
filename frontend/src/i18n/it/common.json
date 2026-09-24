@@ -3834,6 +3834,14 @@
       "submit": "Registra",
       "saving": "Salvataggio...",
       "error": "Errore durante la registrazione."
+    },
+    "duplicates": {
+      "open": "Apri",
+      "vat_exists": "P.IVA già registrata:",
+      "vat_exists_hidden": "P.IVA già registrata su un fornitore di un sito fuori dal tuo perimetro: chiedi a un Compliance Officer di associarlo al tuo sito invece di crearne uno nuovo.",
+      "similar_title": "Possibili duplicati (ragione sociale simile):",
+      "similar_hidden": "Fornitori con nome simile su siti fuori dal tuo perimetro: {{count}}",
+      "confirm_different": "Ho verificato: è un fornitore diverso"
     }
   },
   "reporting": {

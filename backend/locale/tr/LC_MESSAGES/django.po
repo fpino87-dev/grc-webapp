@@ -2702,3 +2702,20 @@ msgstr "Doğrulamadan önce en az bir soruyu yanıtlayın."
 #: apps/controls/services/vda_interview.py
 msgid "Rispondi ad almeno una domanda prima di generare la bozza."
 msgstr "Taslağı oluşturmadan önce en az bir soruyu yanıtlayın."
+
+#: apps/suppliers/services.py
+#, python-format
+msgid "Esiste già un fornitore con questa P.IVA: %(name)s."
+msgstr "Bu vergi numarasına sahip bir tedarikçi zaten mevcut: %(name)s."
+
+#: apps/suppliers/services.py
+msgid "Esiste già un fornitore con questa P.IVA, registrato su un sito fuori dal tuo perimetro: chiedi a un Compliance Officer di associarlo al tuo sito."
+msgstr "Bu vergi numarasına sahip bir tedarikçi, yetki alanınız dışındaki bir tesiste zaten kayıtlı: tesisinizle ilişkilendirmesi için bir Compliance Officer'a başvurun."
+
+#: apps/suppliers/views.py
+msgid "Esiste già un fornitore con questa P.IVA."
+msgstr "Bu vergi numarasına sahip bir tedarikçi zaten mevcut."
+
+#: apps/suppliers/views.py
+msgid "Identificativo fornitore non valido."
+msgstr "Geçersiz tedarikçi tanımlayıcısı."

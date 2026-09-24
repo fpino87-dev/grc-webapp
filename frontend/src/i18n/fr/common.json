@@ -3834,6 +3834,14 @@
       "submit": "Enregistrer",
       "saving": "Enregistrement...",
       "error": "Erreur lors de l'enregistrement."
+    },
+    "duplicates": {
+      "open": "Ouvrir",
+      "vat_exists": "Numéro de TVA déjà enregistré :",
+      "vat_exists_hidden": "Numéro de TVA déjà enregistré pour un fournisseur d'un site hors de votre périmètre : demandez à un Compliance Officer de l'associer à votre site au lieu d'en créer un nouveau.",
+      "similar_title": "Doublons possibles (raison sociale similaire) :",
+      "similar_hidden": "Fournisseurs au nom similaire sur des sites hors de votre périmètre : {{count}}",
+      "confirm_different": "J'ai vérifié : il s'agit d'un fournisseur différent"
     }
   },
   "reporting": {

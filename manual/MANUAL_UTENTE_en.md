@@ -912,6 +912,11 @@ The cancelled audit is never physically deleted — it remains in the archive wi
    - **Data processing**: flag if the supplier processes personal data (entails additional GDPR obligations)
 3. Click **Save**
 
+**Duplicate check** — while you fill in the form the system looks for suppliers already registered:
+
+- **Same VAT number** (compared ignoring spaces, dots, hyphens and the country prefix, e.g. `IT 0123.4567.890` = `01234567890`): saving is **blocked**. If the existing supplier is within your scope you can open it with **Open**; if it is registered on a site outside your scope you only see that it exists and must ask a Compliance Officer to link it to your site. A deleted supplier does not prevent re-entry.
+- **Similar company name** (ignoring case, punctuation and legal forms such as S.r.l., S.p.A., GmbH, Ltd): a **warning** lists the similar suppliers; to create anyway tick **I have checked: this is a different supplier**. The audit trail records how many similar names were present at creation.
+
 ### Evaluation date and expiry
 
 The evaluation date is **not entered in the supplier record**: the system derives it from the latest recorded evaluation, which can be:

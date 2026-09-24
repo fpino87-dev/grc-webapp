@@ -2768,3 +2768,20 @@ msgstr "Répondez à au moins une question avant la vérification."
 #: apps/controls/services/vda_interview.py
 msgid "Rispondi ad almeno una domanda prima di generare la bozza."
 msgstr "Répondez à au moins une question avant de générer le brouillon."
+
+#: apps/suppliers/services.py
+#, python-format
+msgid "Esiste già un fornitore con questa P.IVA: %(name)s."
+msgstr "Un fournisseur avec ce numéro de TVA existe déjà : %(name)s."
+
+#: apps/suppliers/services.py
+msgid "Esiste già un fornitore con questa P.IVA, registrato su un sito fuori dal tuo perimetro: chiedi a un Compliance Officer di associarlo al tuo sito."
+msgstr "Un fournisseur avec ce numéro de TVA existe déjà, enregistré sur un site hors de votre périmètre : demandez à un Compliance Officer de l'associer à votre site."
+
+#: apps/suppliers/views.py
+msgid "Esiste già un fornitore con questa P.IVA."
+msgstr "Un fournisseur avec ce numéro de TVA existe déjà."
+
+#: apps/suppliers/views.py
+msgid "Identificativo fornitore non valido."
+msgstr "Identifiant de fournisseur non valide."

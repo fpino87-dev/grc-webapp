@@ -3834,6 +3834,14 @@
       "submit": "Zarejestruj",
       "saving": "Zapisywanie...",
       "error": "Błąd podczas rejestracji oceny."
+    },
+    "duplicates": {
+      "open": "Otwórz",
+      "vat_exists": "NIP już zarejestrowany:",
+      "vat_exists_hidden": "NIP jest już zarejestrowany dla dostawcy zakładu spoza Twojego zakresu: poproś Compliance Officera o przypisanie go do Twojego zakładu zamiast tworzyć nowego.",
+      "similar_title": "Możliwe duplikaty (podobna nazwa firmy):",
+      "similar_hidden": "Dostawcy o podobnej nazwie w zakładach spoza Twojego zakresu: {{count}}",
+      "confirm_different": "Sprawdziłem: to inny dostawca"
     }
   },
   "reporting": {

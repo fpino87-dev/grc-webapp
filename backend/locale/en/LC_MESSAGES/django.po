@@ -2701,3 +2701,20 @@ msgstr "Answer at least one question before the review."
 #: apps/controls/services/vda_interview.py
 msgid "Rispondi ad almeno una domanda prima di generare la bozza."
 msgstr "Answer at least one question before generating the draft."
+
+#: apps/suppliers/services.py
+#, python-format
+msgid "Esiste già un fornitore con questa P.IVA: %(name)s."
+msgstr "A supplier with this VAT number already exists: %(name)s."
+
+#: apps/suppliers/services.py
+msgid "Esiste già un fornitore con questa P.IVA, registrato su un sito fuori dal tuo perimetro: chiedi a un Compliance Officer di associarlo al tuo sito."
+msgstr "A supplier with this VAT number already exists, registered on a site outside your scope: ask a Compliance Officer to link it to your site."
+
+#: apps/suppliers/views.py
+msgid "Esiste già un fornitore con questa P.IVA."
+msgstr "A supplier with this VAT number already exists."
+
+#: apps/suppliers/views.py
+msgid "Identificativo fornitore non valido."
+msgstr "Invalid supplier identifier."

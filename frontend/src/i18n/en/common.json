@@ -3834,6 +3834,14 @@
       "submit": "Record",
       "saving": "Saving...",
       "error": "Error while recording the evaluation."
+    },
+    "duplicates": {
+      "open": "Open",
+      "vat_exists": "VAT number already registered:",
+      "vat_exists_hidden": "VAT number already registered for a supplier on a site outside your scope: ask a Compliance Officer to link it to your site instead of creating a new one.",
+      "similar_title": "Possible duplicates (similar company name):",
+      "similar_hidden": "Suppliers with a similar name on sites outside your scope: {{count}}",
+      "confirm_different": "I have checked: this is a different supplier"
     }
   },
   "reporting": {

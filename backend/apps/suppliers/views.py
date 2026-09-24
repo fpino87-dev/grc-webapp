@@ -55,6 +55,35 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             qs = qs.filter(risk_adj="")
         return qs
 
+    @action(detail=False, methods=["post"], url_path="check-duplicates")
+    def check_duplicates(self, request):
+        """
+        POST /suppliers/check-duplicates/  {name, vat_number, country, exclude_id?}
+        Possibili duplicati prima del salvataggio: P.IVA identica (bloccante al
+        salvataggio) e ragioni sociali simili (solo avviso). POST perché il
+        controllo copre anche i siti fuori perimetro → riservato ai ruoli che
+        possono creare/modificare fornitori (write_roles).
+        """
+        import uuid
+
+        from .services import find_supplier_duplicates
+
+        data = request.data
+        exclude_id = data.get("exclude_id") or None
+        if exclude_id:
+            try:
+                exclude_id = uuid.UUID(str(exclude_id))
+            except ValueError:
+                return Response({"error": _("Identificativo fornitore non valido.")}, status=400)
+        result = find_supplier_duplicates(
+            name=str(data.get("name") or ""),
+            vat_number=str(data.get("vat_number") or ""),
+            country=str(data.get("country") or "IT"),
+            user=request.user,
+            exclude_id=exclude_id,
+        )
+        return Response(result)
+
     @action(detail=True, methods=["get"], url_path="nda")
     def nda_list(self, request, pk=None):
         """GET /suppliers/<id>/nda/ — lista documenti NDA/contratto collegati al fornitore."""
@@ -420,20 +449,45 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         data = SupplierInternalEvaluationSerializer(qs, many=True).data
         return Response({"results": data, "count": len(data)})
 
+    def _save_unique_vat(self, serializer, **kwargs):
+        """Salva traducendo la violazione del vincolo P.IVA (race tra due
+        inserimenti contemporanei) in un 400 leggibile."""
+        from django.db import IntegrityError, transaction
+        from rest_framework.exceptions import ValidationError
+
+        try:
+            with transaction.atomic():
+                return serializer.save(**kwargs)
+        except IntegrityError as exc:
+            if "uniq_supplier_vat_active" not in str(exc):
+                raise
+            raise ValidationError({"vat_number": [_("Esiste già un fornitore con questa P.IVA.")]}) from exc
+
     def perform_create(self, serializer):
-        instance = serializer.save(created_by=self.request.user)
+        from .services import check_concentration_crossing, find_supplier_duplicates
+
+        instance = self._save_unique_vat(serializer, created_by=self.request.user)
+        # Creazione confermata nonostante ragioni sociali simili: il conteggio
+        # resta nell'audit trail (la P.IVA duplicata è invece bloccata).
+        dupes = find_supplier_duplicates(
+            name=instance.name, vat_number="", country=instance.country,
+            user=self.request.user, exclude_id=instance.pk,
+        )
         log_action(
             user=self.request.user,
             action_code="suppliers.supplier.create",
             level="L2",
             entity=instance,
-            payload={"id": str(instance.id), "name": instance.name},
+            payload={
+                "id": str(instance.id),
+                "name": instance.name,
+                "similar_names_count": len(dupes["name_matches"]) + dupes["hidden_name_matches"],
+            },
         )
-        from .services import check_concentration_crossing
         check_concentration_crossing(instance, user=self.request.user)
 
     def perform_update(self, serializer):
-        instance = serializer.save()
+        instance = self._save_unique_vat(serializer)
         # Notifica M19 best-effort sull'attraversamento della soglia di
         # concentrazione critica (anti-spam gestito nel service).
         from .services import check_concentration_crossing

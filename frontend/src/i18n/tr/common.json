@@ -3834,6 +3834,14 @@
       "submit": "Kaydet",
       "saving": "Kaydediliyor...",
       "error": "Değerlendirme kaydedilirken hata oluştu."
+    },
+    "duplicates": {
+      "open": "Aç",
+      "vat_exists": "Vergi numarası zaten kayıtlı:",
+      "vat_exists_hidden": "Vergi numarası, yetki alanınız dışındaki bir tesisin tedarikçisi için zaten kayıtlı: yeni bir kayıt oluşturmak yerine tesisinizle ilişkilendirmesi için bir Compliance Officer'a başvurun.",
+      "similar_title": "Olası mükerrer kayıtlar (benzer şirket unvanı):",
+      "similar_hidden": "Yetki alanınız dışındaki tesislerde benzer adlı tedarikçiler: {{count}}",
+      "confirm_different": "Kontrol ettim: bu farklı bir tedarikçi"
     }
   },
   "reporting": {

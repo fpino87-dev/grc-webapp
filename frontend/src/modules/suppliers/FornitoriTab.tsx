@@ -144,7 +144,17 @@ export function FornitoriTab() {
         </div>
       </div>
 
-      {newModal && <NewSupplierModal onClose={() => setNewModal(false)} />}
+      {newModal && (
+        <NewSupplierModal
+          onClose={() => setNewModal(false)}
+          onOpenExisting={async id => {
+            // Possibile duplicato → si passa alla scheda del fornitore esistente.
+            const existing = await suppliersApi.get(id);
+            setNewModal(false);
+            setEditModal(existing);
+          }}
+        />
+      )}
       {editModal && <EditSupplierModal supplier={editModal} onClose={() => setEditModal(null)} />}
       {sendModal && <SendQuestionnaireModal supplier={sendModal} onClose={() => setSendModal(null)} />}
 

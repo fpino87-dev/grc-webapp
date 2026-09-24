@@ -57,6 +57,7 @@ class SupplierSerializer(serializers.ModelSerializer):
         # `recompute_risk_adj` a partire da questionari valutati e audit
         # approvati: non si imposta a mano dall'anagrafica.
         read_only_fields = [
+            "vat_normalized",
             "internal_risk_level", "risk_adj", "risk_adj_updated_at",
             "concentration_notified_threshold",
             "evaluation_date", "evaluation_expires_at", "evaluation_source",
@@ -76,6 +77,30 @@ class SupplierSerializer(serializers.ModelSerializer):
         if not value or not value.strip():
             raise serializers.ValidationError("Il Codice Fiscale / P.IVA è obbligatorio.")
         return value.strip()
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        nis2_relevant = attrs.get("nis2_relevant", getattr(self.instance, "nis2_relevant", False))
+        criterion = attrs.get("nis2_relevance_criterion", getattr(self.instance, "nis2_relevance_criterion", ""))
+        if nis2_relevant and not criterion:
+            raise serializers.ValidationError(
+                {"nis2_relevance_criterion": "Il criterio di rilevanza NIS2 è obbligatorio quando il fornitore è marcato come NIS2 rilevante."}
+            )
+        # P.IVA già registrata su un altro fornitore attivo → blocco (il vincolo
+        # DB uniq_supplier_vat_active resta la garanzia contro le race).
+        if "vat_number" in attrs or "country" in attrs:
+            from .services import find_vat_conflict, vat_conflict_message
+
+            instance = self.instance
+            vat = attrs.get("vat_number", getattr(instance, "vat_number", ""))
+            country = attrs.get("country", getattr(instance, "country", "IT"))
+            conflict = find_vat_conflict(vat, country, exclude_id=getattr(instance, "pk", None))
+            if conflict:
+                request = self.context.get("request")
+                raise serializers.ValidationError(
+                    {"vat_number": [vat_conflict_message(conflict, getattr(request, "user", None))]}
+                )
+        return attrs
 
     def validate_additional_emails(self, value):
         """
@@ -110,14 +135,6 @@ class SupplierSerializer(serializers.ModelSerializer):
             out.append(email)
         return out
 
-    def validate(self, data):
-        nis2_relevant = data.get("nis2_relevant", getattr(self.instance, "nis2_relevant", False))
-        criterion = data.get("nis2_relevance_criterion", getattr(self.instance, "nis2_relevance_criterion", ""))
-        if nis2_relevant and not criterion:
-            raise serializers.ValidationError(
-                {"nis2_relevance_criterion": "Il criterio di rilevanza NIS2 è obbligatorio quando il fornitore è marcato come NIS2 rilevante."}
-            )
-        return data
 
 
 class SupplierInternalEvaluationSerializer(serializers.ModelSerializer):

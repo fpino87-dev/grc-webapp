@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from core.models import BaseModel
 
+from .normalization import normalize_vat
+
 User = get_user_model()
 
 
@@ -25,6 +27,9 @@ class Supplier(BaseModel):
 
     name = models.CharField(max_length=200)
     vat_number = models.CharField(max_length=50, blank=True)
+    # Forma canonica di vat_number (vedi normalization.normalize_vat), calcolata
+    # in save(): chiave del vincolo di unicità tra i fornitori attivi.
+    vat_normalized = models.CharField(max_length=50, blank=True, default="", editable=False)
     country = models.CharField(max_length=2, default="IT")
     description = models.TextField(blank=True)
     risk_level = models.CharField(max_length=10, choices=RISK_CHOICES, default="medio")
@@ -131,6 +136,22 @@ class Supplier(BaseModel):
 
     class Meta:
         ordering = ["name"]
+        constraints = [
+            # Stessa P.IVA = stessa entità legale: un solo fornitore attivo.
+            # I fornitori eliminati (soft delete) non bloccano il reinserimento.
+            models.UniqueConstraint(
+                fields=["vat_normalized"],
+                condition=models.Q(deleted_at__isnull=True) & ~models.Q(vat_normalized=""),
+                name="uniq_supplier_vat_active",
+            ),
+        ]
+
+    def save(self, *args, **kwargs):
+        self.vat_normalized = normalize_vat(self.vat_number, self.country)
+        update_fields = kwargs.get("update_fields")
+        if update_fields is not None and {"vat_number", "country"} & set(update_fields):
+            kwargs["update_fields"] = set(update_fields) | {"vat_normalized"}
+        super().save(*args, **kwargs)
 
     @property
     def concentration_threshold(self) -> str:

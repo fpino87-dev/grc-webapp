@@ -137,6 +137,20 @@ export interface ConcentrationRiskRegister {
   attention: number;
 }
 
+export interface SupplierDuplicateBrief {
+  id: string;
+  name: string;
+  vat_number: string;
+  status: Supplier["status"];
+}
+
+export interface SupplierDuplicates {
+  // Fornitore fuori perimetro: se ne segnala solo l'esistenza, senza dati.
+  vat_match: ({ visible: true } & SupplierDuplicateBrief) | { visible: false } | null;
+  name_matches: SupplierDuplicateBrief[];
+  hidden_name_matches: number;
+}
+
 export const suppliersApi = {
   list: (params?: Record<string, string>) =>
     apiClient.get<{ results: Supplier[] }>("/suppliers/suppliers/", { params }).then(r => r.data),
@@ -148,6 +162,8 @@ export const suppliersApi = {
     apiClient.patch<Supplier>(`/suppliers/suppliers/${id}/`, data).then(r => r.data),
   delete: (id: string) =>
     apiClient.delete(`/suppliers/suppliers/${id}/`).then(r => r.data),
+  checkDuplicates: (data: { name: string; vat_number: string; country: string; exclude_id?: string }) =>
+    apiClient.post<SupplierDuplicates>("/suppliers/suppliers/check-duplicates/", data).then(r => r.data),
 
   // Questionnaire templates
   listTemplates: () =>

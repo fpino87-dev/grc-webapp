@@ -13,6 +13,127 @@ from .models import (
 )
 
 
+# ── Rilevamento duplicati ────────────────────────────────────────────────────
+
+# Soglia di somiglianza (difflib) tra ragioni sociali normalizzate oltre la
+# quale il nome è segnalato come possibile duplicato.
+NAME_SIMILARITY_THRESHOLD = 0.85
+MAX_NAME_MATCHES = 5
+
+
+def find_vat_conflict(vat_number: str, country: str, exclude_id=None) -> Supplier | None:
+    """Fornitore ATTIVO con la stessa P.IVA normalizzata (qualunque sito), o None."""
+    from .normalization import normalize_vat
+
+    norm = normalize_vat(vat_number, country)
+    if not norm:
+        return None
+    qs = Supplier.objects.filter(vat_normalized=norm)
+    if exclude_id:
+        qs = qs.exclude(pk=exclude_id)
+    return qs.first()
+
+
+def is_supplier_visible(supplier: Supplier, user) -> bool:
+    """True se il fornitore rientra nel perimetro siti dell'utente."""
+    from core.scoping import scope_queryset_by_plant
+
+    return scope_queryset_by_plant(
+        Supplier.objects.filter(pk=supplier.pk),
+        user,
+        plant_field="plants",
+        allow_null_plant=True,
+    ).exists()
+
+
+def vat_conflict_message(supplier: Supplier, user) -> str:
+    """Messaggio di errore per una P.IVA già registrata: il nome del fornitore
+    esistente compare solo se è nel perimetro dell'utente."""
+    from django.utils.translation import gettext as _
+
+    if is_supplier_visible(supplier, user):
+        return _("Esiste già un fornitore con questa P.IVA: %(name)s.") % {"name": supplier.name}
+    return _(
+        "Esiste già un fornitore con questa P.IVA, registrato su un sito fuori dal tuo "
+        "perimetro: chiedi a un Compliance Officer di associarlo al tuo sito."
+    )
+
+
+def _names_similar(a: str, b: str) -> bool:
+    import difflib
+
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    short, long_ = sorted((a, b), key=len)
+    # "gerico" vs "gerico security": il nome più corto è l'inizio dell'altro.
+    if len(short) >= 4 and (long_ + " ").startswith(short + " "):
+        return True
+    return difflib.SequenceMatcher(None, a, b).ratio() >= NAME_SIMILARITY_THRESHOLD
+
+
+def _supplier_brief(s: Supplier) -> dict:
+    return {"id": str(s.id), "name": s.name, "vat_number": s.vat_number, "status": s.status}
+
+
+def find_supplier_duplicates(*, name: str, vat_number: str, country: str, user, exclude_id=None) -> dict:
+    """Possibili duplicati di un fornitore in inserimento/modifica.
+
+    Il controllo copre TUTTI i fornitori attivi, anche quelli di siti fuori dal
+    perimetro dell'utente, ma i dettagli (nome, P.IVA, stato) sono restituiti
+    solo per i fornitori che l'utente può vedere; degli altri si segnala solo
+    l'esistenza, senza esporne i dati.
+
+    Ritorna:
+      vat_match           — None | {"visible": True, id, name, …} | {"visible": False}
+      name_matches        — fornitori visibili con ragione sociale simile (max 5)
+      hidden_name_matches — n. di nomi simili fuori perimetro
+    """
+    from core.scoping import scope_queryset_by_plant
+
+    from .normalization import normalize_name
+
+    vat_supplier = find_vat_conflict(vat_number, country, exclude_id=exclude_id)
+
+    target = normalize_name(name)
+    similar: list[Supplier] = []
+    if len(target) >= 3:
+        qs = Supplier.objects.only("id", "name", "vat_number", "status")
+        if exclude_id:
+            qs = qs.exclude(pk=exclude_id)
+        if vat_supplier:
+            qs = qs.exclude(pk=vat_supplier.pk)
+        similar = [s for s in qs if _names_similar(target, normalize_name(s.name))]
+
+    candidate_ids = [s.pk for s in similar] + ([vat_supplier.pk] if vat_supplier else [])
+    visible_ids = set(
+        scope_queryset_by_plant(
+            Supplier.objects.filter(pk__in=candidate_ids),
+            user,
+            plant_field="plants",
+            allow_null_plant=True,
+        ).values_list("pk", flat=True)
+    ) if candidate_ids else set()
+
+    vat_match = None
+    if vat_supplier:
+        vat_match = (
+            {"visible": True, **_supplier_brief(vat_supplier)}
+            if vat_supplier.pk in visible_ids
+            else {"visible": False}
+        )
+
+    visible_similar = [s for s in similar if s.pk in visible_ids]
+    # Prima le corrispondenze esatte, poi le altre in ordine alfabetico.
+    visible_similar.sort(key=lambda s: (normalize_name(s.name) != target, s.name.lower()))
+    return {
+        "vat_match": vat_match,
+        "name_matches": [_supplier_brief(s) for s in visible_similar[:MAX_NAME_MATCHES]],
+        "hidden_name_matches": len(similar) - len(visible_similar),
+    }
+
+
 def get_supplier_assessment_gaps() -> dict:
     """Lacune di due diligence sui fornitori **attivi**, per le 3 cose che
     effettivamente tracciamo: questionario, NDA, valutazione interna.

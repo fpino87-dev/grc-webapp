@@ -42,6 +42,7 @@ vi.mock("../../../api/endpoints/suppliers", () => ({
     ndaList: vi.fn(),
     ndaUpload: vi.fn(),
     exportCsv: vi.fn(),
+    checkDuplicates: vi.fn(),
   },
 }));
 
@@ -54,6 +55,7 @@ import { reportingApi } from "../../../api/endpoints/reporting";
 
 const mockList = vi.mocked(suppliersApi.list);
 const mockQuests = vi.mocked(suppliersApi.listQuestionnaires);
+const mockCheckDup = vi.mocked(suppliersApi.checkDuplicates);
 
 // ── Helper ────────────────────────────────────────────────────────────────────
 
@@ -98,7 +100,15 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockList.mockResolvedValue({ results: [] } as never);
   mockQuests.mockResolvedValue([] as never);
+  mockCheckDup.mockResolvedValue({ vat_match: null, name_matches: [], hidden_name_matches: 0 } as never);
 });
+
+async function openNewAndFill(name: string, vat: string) {
+  fireEvent.click(await screen.findByText("suppliers.list.new_btn"));
+  fireEvent.change(document.querySelector('input[name="name"]')!, { target: { value: name } });
+  fireEvent.change(document.querySelector('input[name="vat_number"]')!, { target: { value: vat } });
+  fireEvent.change(document.querySelector('input[name="email"]')!, { target: { value: "a@b.it" } });
+}
 
 // ── Test ──────────────────────────────────────────────────────────────────────
 
@@ -246,5 +256,40 @@ describe("SuppliersPage", () => {
 
     fireEvent.change(screen.getByPlaceholderText("suppliers.nda.search_placeholder"), { target: { value: "zzz" } });
     expect(screen.getByText("suppliers.nda.no_match")).toBeInTheDocument();
+  });
+
+  it("P.IVA già registrata: avviso e creazione bloccata", async () => {
+    mockCheckDup.mockResolvedValue({
+      vat_match: { visible: true, id: "sup-9", name: "Rossi Srl", vat_number: "01234567890", status: "attivo" },
+      name_matches: [],
+      hidden_name_matches: 0,
+    } as never);
+    renderPage();
+    await openNewAndFill("Rossi S.r.l.", "IT01234567890");
+    expect(await screen.findByText("suppliers.duplicates.vat_exists")).toBeInTheDocument();
+    expect(screen.getByText("suppliers.form.create_btn")).toBeDisabled();
+  });
+
+  it("P.IVA su sito fuori perimetro: nessun dettaglio del fornitore", async () => {
+    mockCheckDup.mockResolvedValue({ vat_match: { visible: false }, name_matches: [], hidden_name_matches: 0 } as never);
+    renderPage();
+    await openNewAndFill("Rossi", "01234567890");
+    expect(await screen.findByText("suppliers.duplicates.vat_exists_hidden")).toBeInTheDocument();
+    expect(screen.getByText("suppliers.form.create_btn")).toBeDisabled();
+  });
+
+  it("nome simile: si crea solo dopo la conferma", async () => {
+    mockCheckDup.mockResolvedValue({
+      vat_match: null,
+      name_matches: [{ id: "sup-9", name: "Rossi Meccanica Srl", vat_number: "01234567890", status: "attivo" }],
+      hidden_name_matches: 0,
+    } as never);
+    renderPage();
+    await openNewAndFill("Rossi Meccanica", "09876543210");
+    expect(await screen.findByText(/Rossi Meccanica Srl/)).toBeInTheDocument();
+    const create = screen.getByText("suppliers.form.create_btn");
+    expect(create).toBeDisabled();
+    fireEvent.click(screen.getByLabelText("suppliers.duplicates.confirm_different"));
+    expect(create).not.toBeDisabled();
   });
 });

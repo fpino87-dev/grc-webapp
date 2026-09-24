@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { suppliersApi, type Supplier } from "../../api/endpoints/suppliers";
+import { suppliersApi, type Supplier, type SupplierDuplicates } from "../../api/endpoints/suppliers";
 import { CpvInput } from "./CpvInput";
 import { RegisterExistingEvaluationModal } from "./QuestionnaireModals";
 import { useTranslation } from "react-i18next";
@@ -60,9 +60,115 @@ export function EmailListEditor({
   );
 }
 
+// ─── Rilevamento duplicati ───────────────────────────────────────────────────
+
+/**
+ * Controlla i possibili duplicati (P.IVA identica / ragione sociale simile)
+ * mentre l'utente compila il form, con debounce. `checking` resta true finché
+ * il controllo sui valori correnti non è concluso: il salvataggio attende.
+ */
+function useSupplierDuplicates(form: Partial<Supplier>, excludeId?: string) {
+  const current = JSON.stringify({
+    name: (form.name ?? "").trim(),
+    vat_number: (form.vat_number ?? "").trim(),
+    country: (form.country ?? "").trim() || "IT",
+  });
+  const [debounced, setDebounced] = useState(current);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(current), 400);
+    return () => clearTimeout(timer);
+  }, [current]);
+
+  const params = JSON.parse(debounced) as { name: string; vat_number: string; country: string };
+  const enabled = params.name.length >= 3 || params.vat_number.length > 0;
+  const query = useQuery({
+    queryKey: ["supplier-duplicates", debounced, excludeId],
+    queryFn: () => suppliersApi.checkDuplicates({ ...params, exclude_id: excludeId }),
+    enabled,
+    staleTime: 30_000,
+  });
+  return {
+    data: enabled ? query.data : undefined,
+    checking: current !== debounced || (enabled && query.isFetching),
+  };
+}
+
+function DuplicateWarning({
+  data,
+  confirmed,
+  onConfirm,
+  onOpenExisting,
+}: {
+  data: SupplierDuplicates | undefined;
+  confirmed?: boolean;
+  onConfirm?: (v: boolean) => void;
+  onOpenExisting?: (id: string) => void;
+}) {
+  const { t } = useTranslation();
+  if (!data) return null;
+  const { vat_match, name_matches, hidden_name_matches } = data;
+  const hasNameWarning = name_matches.length > 0 || hidden_name_matches > 0;
+  if (!vat_match && !hasNameWarning) return null;
+
+  const openBtn = (id: string) =>
+    onOpenExisting && (
+      <button type="button" onClick={() => onOpenExisting(id)} className="ml-2 text-xs text-indigo-700 underline hover:text-indigo-900">
+        {t("suppliers.duplicates.open")}
+      </button>
+    );
+
+  return (
+    <div className="space-y-2">
+      {vat_match && (
+        <div className="rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">
+          {vat_match.visible ? (
+            <>
+              <span className="font-medium">{t("suppliers.duplicates.vat_exists")}</span>{" "}
+              {vat_match.name} ({vat_match.vat_number}) — {t(`suppliers.list.status_${vat_match.status}`)}
+              {openBtn(vat_match.id)}
+            </>
+          ) : (
+            t("suppliers.duplicates.vat_exists_hidden")
+          )}
+        </div>
+      )}
+      {!vat_match && hasNameWarning && (
+        <div className="rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+          <p className="font-medium">{t("suppliers.duplicates.similar_title")}</p>
+          {name_matches.length > 0 && (
+            <ul className="mt-1 list-disc pl-5">
+              {name_matches.map(m => (
+                <li key={m.id}>
+                  {m.name} ({m.vat_number || "—"}) — {t(`suppliers.list.status_${m.status}`)}
+                  {openBtn(m.id)}
+                </li>
+              ))}
+            </ul>
+          )}
+          {hidden_name_matches > 0 && (
+            <p className="mt-1 text-xs">{t("suppliers.duplicates.similar_hidden", { count: hidden_name_matches })}</p>
+          )}
+          {onConfirm && (
+            <label className="mt-2 flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={!!confirmed} onChange={e => onConfirm(e.target.checked)} className="h-4 w-4" />
+              {t("suppliers.duplicates.confirm_different")}
+            </label>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Modal nuovo fornitore ───────────────────────────────────────────────────
 
-export function NewSupplierModal({ onClose }: { onClose: () => void }) {
+export function NewSupplierModal({
+  onClose,
+  onOpenExisting,
+}: {
+  onClose: () => void;
+  onOpenExisting?: (id: string) => void;
+}) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [form, setForm] = useState<Partial<Supplier>>({
@@ -73,6 +179,13 @@ export function NewSupplierModal({ onClose }: { onClose: () => void }) {
     cpv_codes: [],
   });
   const [error, setError] = useState("");
+  const dup = useSupplierDuplicates(form);
+  const [similarConfirmed, setSimilarConfirmed] = useState(false);
+  const dupSignature = dup.data ? dup.data.name_matches.map(m => m.id).join(",") + `|${dup.data.hidden_name_matches}` : "";
+  // Nuovi nomi simili → la conferma "fornitore diverso" va ridata.
+  useEffect(() => setSimilarConfirmed(false), [dupSignature]);
+  const vatBlocked = !!dup.data?.vat_match;
+  const needsConfirm = !!dup.data && !vatBlocked && (dup.data.name_matches.length > 0 || dup.data.hidden_name_matches > 0);
 
   const mutation = useMutation({
     mutationFn: suppliersApi.create,
@@ -221,12 +334,23 @@ export function NewSupplierModal({ onClose }: { onClose: () => void }) {
             <p className="mt-1 text-xs text-gray-500">{t("suppliers.form.tisax_relevant_hint")}</p>
           </div>
         </div>
+        <div className="mt-3">
+          <DuplicateWarning
+            data={dup.data}
+            confirmed={similarConfirmed}
+            onConfirm={setSimilarConfirmed}
+            onOpenExisting={onOpenExisting}
+          />
+        </div>
         {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("actions.cancel")}</button>
           <button
             onClick={() => { setError(""); mutation.mutate(form); }}
-            disabled={mutation.isPending || !form.name || !form.email}
+            disabled={
+              mutation.isPending || !form.name || !form.email
+              || dup.checking || vatBlocked || (needsConfirm && !similarConfirmed)
+            }
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
             {mutation.isPending ? t("common.saving") : t("suppliers.form.create_btn")}
@@ -323,6 +447,8 @@ export function EditSupplierModal({ supplier, onClose }: { supplier: Supplier; o
   const qc = useQueryClient();
   const [form, setForm] = useState<Partial<Supplier>>({ ...supplier, cpv_codes: supplier.cpv_codes ?? [] });
   const [error, setError] = useState("");
+  // In modifica: P.IVA di un altro fornitore bloccante, nomi simili solo avviso.
+  const dup = useSupplierDuplicates(form, supplier.id);
 
   const mutation = useMutation({
     mutationFn: () => suppliersApi.update(supplier.id, form),
@@ -484,12 +610,15 @@ export function EditSupplierModal({ supplier, onClose }: { supplier: Supplier; o
             <p className="mt-1 text-xs text-gray-500">{t("suppliers.form.tisax_relevant_hint")}</p>
           </div>
         </div>
+        <div className="mt-3">
+          <DuplicateWarning data={dup.data} />
+        </div>
         {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("actions.cancel")}</button>
           <button
             onClick={() => { setError(""); mutation.mutate(); }}
-            disabled={mutation.isPending || !form.name}
+            disabled={mutation.isPending || !form.name || !!dup.data?.vat_match}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
             {mutation.isPending ? t("common.saving") : t("suppliers.form.update_btn")}

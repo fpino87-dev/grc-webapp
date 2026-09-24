@@ -912,6 +912,11 @@ Anulowany audyt nigdy nie jest fizycznie usuwany — pozostaje w archiwum ze sta
    - **Przetwarzanie danych**: flaga, jeśli dostawca przetwarza dane osobowe (wiąże się z dodatkowymi obowiązkami RODO)
 3. Kliknij **Zapisz**
 
+**Kontrola duplikatów** — podczas wypełniania formularza system wyszukuje już zarejestrowanych dostawców:
+
+- **Ten sam NIP** (porównywany z pominięciem spacji, kropek, myślników i prefiksu kraju, np. `IT 0123.4567.890` = `01234567890`): zapis jest **zablokowany**. Jeśli istniejący dostawca jest w Twoim zakresie, możesz go otworzyć przyciskiem **Otwórz**; jeśli jest zarejestrowany w zakładzie spoza Twojego zakresu, widzisz tylko, że istnieje, i musisz poprosić Compliance Officera o przypisanie go do Twojego zakładu. Usunięty dostawca nie blokuje ponownego wprowadzenia.
+- **Podobna nazwa firmy** (z pominięciem wielkości liter, interpunkcji i form prawnych, np. S.r.l., S.p.A., GmbH, Sp. z o.o.): pojawia się **ostrzeżenie** z listą podobnych dostawców; aby mimo to utworzyć, zaznacz **Sprawdziłem: to inny dostawca**. Ścieżka audytu rejestruje, ile podobnych nazw istniało w chwili utworzenia.
+
 ### Data oceny i termin ważności
 
 Daty oceny **nie wprowadza się w karcie dostawcy**: system wyznacza ją na podstawie ostatniej zarejestrowanej oceny, którą może być:

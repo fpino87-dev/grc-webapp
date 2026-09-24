@@ -912,6 +912,11 @@ L'audit annulé n'est jamais supprimé physiquement — il reste dans l'archive 
    - **Traitement des données** : indicateur si le fournisseur traite des données personnelles (implique des obligations RGPD supplémentaires)
 3. Cliquez sur **Enregistrer**
 
+**Contrôle des doublons** — pendant la saisie, le système recherche les fournisseurs déjà enregistrés :
+
+- **Même numéro de TVA** (comparé en ignorant espaces, points, tirets et préfixe pays, ex. `IT 0123.4567.890` = `01234567890`) : l'enregistrement est **bloqué**. Si le fournisseur existant est dans votre périmètre, vous pouvez l'ouvrir avec **Ouvrir** ; s'il est enregistré sur un site hors périmètre, vous voyez seulement qu'il existe et devez demander à un Compliance Officer de l'associer à votre site. Un fournisseur supprimé n'empêche pas une nouvelle saisie.
+- **Raison sociale similaire** (en ignorant majuscules, ponctuation et formes juridiques comme S.r.l., S.p.A., SARL, GmbH) : un **avertissement** liste les fournisseurs similaires ; pour créer malgré tout, cochez **J'ai vérifié : il s'agit d'un fournisseur différent**. La piste d'audit enregistre le nombre de noms similaires présents à la création.
+
 ### Date d'évaluation et échéance
 
 La date d'évaluation **ne se saisit pas dans la fiche fournisseur** : le système la déduit de la dernière évaluation enregistrée, qui peut être :

@@ -30,6 +30,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
   - **Controllo umano sempre**: la bozza non viene mai salvata da sola; va copiata nel campo, rivista e salvata. L'audit trail registra se la descrizione salvata proveniva dall'IA e il registro IA conserva bozza e testo finale. Le risposte passano dal filtro dei dati personali prima dell'invio al provider IA e restano sul controllo per la rivalutazione successiva.
   - Riservata ai ruoli che valutano i controlli (non agli auditor). Il provider (cloud o locale) si sceglie in Impostazioni → IA, voce «Intervista guidata VDA ISA». Senza IA configurata il riquadro mostra i requisiti originali per scrivere la descrizione a mano.
 
+- **Fornitori (M14) — controllo dei duplicati all'inserimento**: finora lo stesso fornitore poteva essere registrato più volte se la P.IVA o il nome erano scritti in modo diverso (`IT01234567890` / `0123 4567 890`, `Rossi S.r.l.` / `ROSSI SRL`), con valutazioni e questionari divisi tra più schede.
+  - **P.IVA**: due fornitori attivi non possono avere la stessa P.IVA. Il confronto ignora spazi, punti, trattini e il prefisso del paese; il controllo è garantito anche dal database. Un fornitore eliminato non impedisce di reinserirlo.
+  - **Ragione sociale**: un nome uguale o molto simile a un fornitore esistente (ignorando maiuscole, punteggiatura e forme societarie come S.r.l., S.p.A., GmbH) produce solo un avviso; per creare comunque serve confermare che si tratta di un fornitore diverso. L'audit trail della creazione riporta quanti nomi simili erano presenti.
+  - Il controllo copre **tutti i siti**, ma i dati di un fornitore fuori dal perimetro dell'utente non vengono mostrati: si segnala solo che esiste, e l'utente chiede a un Compliance Officer di associarlo al proprio sito invece di creare un doppione. Il controllo è riservato ai ruoli che possono inserire fornitori.
+  - **Aggiornamento**: la migrazione si ferma se tra i fornitori attivi esistono già P.IVA duplicate e le elenca; vanno unificate o eliminate prima di rilanciare `migrate`.
+
 - **Documenti (M07) — la delibera dell'organo vale anche per una nuova versione di un documento in vigore**: finora l'organo non poteva approvare per delibera la nuova versione di un documento già in vigore; ora può approvarla o respingerla. Ogni respingimento registra quale revisione è stata respinta.
 
 ### Fixed

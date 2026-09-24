@@ -912,6 +912,11 @@ Zaten açık bulguları olan bir denetimi iptal ettiğinizde:
    - **Veri işleme**: tedarikçi kişisel veri işliyorsa işaretleyin (ek GDPR yükümlülükleri doğurur)
 3. **Kaydet**'e tıklayın
 
+**Mükerrer kayıt kontrolü** — formu doldururken sistem daha önce kaydedilmiş tedarikçileri arar:
+
+- **Aynı vergi numarası** (boşluklar, noktalar, tireler ve ülke öneki yok sayılarak karşılaştırılır, ör. `IT 0123.4567.890` = `01234567890`): kayıt **engellenir**. Mevcut tedarikçi yetki alanınızdaysa **Aç** ile açabilirsiniz; yetki alanınız dışındaki bir tesiste kayıtlıysa yalnızca var olduğunu görürsünüz ve tesisinizle ilişkilendirmesi için bir Compliance Officer'a başvurmanız gerekir. Silinmiş bir tedarikçi yeniden girişi engellemez.
+- **Benzer şirket unvanı** (büyük/küçük harf, noktalama ve S.r.l., S.p.A., GmbH, Ltd. Şti. gibi şirket türleri yok sayılarak): benzer tedarikçileri listeleyen bir **uyarı** görünür; yine de oluşturmak için **Kontrol ettim: bu farklı bir tedarikçi** seçeneğini işaretleyin. Denetim izi, oluşturma anında kaç benzer ad bulunduğunu kaydeder.
+
 ### Değerlendirme tarihi ve geçerlilik sonu
 
 Değerlendirme tarihi **tedarikçi kaydına girilmez**: sistem bunu kaydedilen son değerlendirmeden türetir. Bu değerlendirme şunlardan biri olabilir:
