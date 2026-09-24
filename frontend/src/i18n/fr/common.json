@@ -3064,6 +3064,12 @@
       "evidence_required": "— preuve de clôture (obligatoire) —",
       "evidence_optional": "— preuve de clôture (facultative) —",
       "confirm": "Clôturer"
+    },
+    "second_party": {
+      "summary": "Constats ouverts : {{open}} sur {{total}} (NC ouvertes : {{nc}})",
+      "report_ok": "Rapport du client joint",
+      "report_missing": "Rapport du client pas encore joint",
+      "framework_hint": "À titre de référence uniquement : pour un audit de seconde partie, la checklist des contrôles n'est pas chargée ; on enregistre les constats de l'auditeur."
     }
   },
   "risk": {

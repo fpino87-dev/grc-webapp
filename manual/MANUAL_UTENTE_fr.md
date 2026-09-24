@@ -917,6 +917,8 @@ En plus des audits internes, Audit Prep enregistre les audits menés par des tie
 
 Le type et le donneur d'ordre peuvent être corrigés ensuite depuis l'onglet **Infos audit**.
 
+**Seconde partie : pas de checklist.** Dans un audit de seconde partie, les points de vérification sont ceux du client : la checklist des contrôles n'est pas chargée (même en choisissant TISAX AL3), le détail s'ouvre sur l'onglet **Constats** et la carte affiche les constats ouverts et la présence du rapport, au lieu de la préparation. Le référentiel, s'il est indiqué, sert uniquement de référence. En tierce partie (certification), la checklist reste, car l'organisme vérifie précisément les exigences du référentiel.
+
 **Rapport officiel** — dans l'onglet **Infos audit**, section **Rapport officiel de l'auditeur ou de l'organisme**, choisissez le fichier (ex. le PDF reçu du client) et cliquez sur **Joindre le rapport**. Le fichier est archivé comme preuve de type « rapport », sur le site de l'audit et sans échéance. Vous pouvez ensuite le télécharger, le remplacer par une révision (le précédent reste parmi les preuves) ou le détacher. C'est différent de **Télécharger le rapport**, qui est la synthèse générée par la plateforme.
 
 Les audits externes apparaissent avec leur type et leur donneur d'ordre dans la liste, dans l'analyse de la revue de direction (résultats des audits, §9.3.2 d) et dans le procès-verbal ; le **dossier d'audit** contient le dossier `AUDIT_ESTERNI/` avec une synthèse et les rapports joints.

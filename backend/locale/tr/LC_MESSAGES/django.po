@@ -2837,3 +2837,7 @@ msgstr "Bulgu bulunamadı."
 #: apps/pdca/views.py
 msgid "Il finding non è collegato a questo PDCA."
 msgstr "Bulgu bu PDCA'ya bağlı değil."
+
+#: apps/audit_prep/views.py
+msgid "Audit di seconda parte: i punti di verifica sono quelli del cliente, la checklist dei controlli non si usa. Registra i rilievi dell'auditor come finding."
+msgstr "İkinci taraf denetimi: doğrulama noktaları müşteriye aittir, kontrol listesi kullanılmaz. Denetçinin tespitlerini bulgu olarak kaydedin."

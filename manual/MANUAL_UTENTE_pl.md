@@ -917,6 +917,8 @@ Oprócz audytów wewnętrznych w Audit Prep rejestruje się audyty prowadzone pr
 
 Rodzaj i zlecającego można później poprawić w zakładce **Informacje o audycie**.
 
+**Druga strona: bez listy kontrolnej.** W audycie drugiej strony kryteria weryfikacji są klienta: lista kontrolna nie jest ładowana (nawet po wybraniu TISAX AL3), szczegóły otwierają się na zakładce **Ustalenia**, a karta zamiast gotowości pokazuje otwarte ustalenia i informację, czy raport jest załączony. Framework, jeśli podany, służy tylko jako odniesienie. W audycie trzeciej strony (certyfikacja) lista kontrolna pozostaje, ponieważ jednostka weryfikuje właśnie wymagania frameworku.
+
 **Raport oficjalny** — w zakładce **Informacje o audycie**, w sekcji **Oficjalny raport audytora lub jednostki**, wybierz plik (np. PDF otrzymany od klienta) i kliknij **Załącz raport**. Plik jest archiwizowany jako dowód typu „raport", w zakładzie audytu i bez terminu ważności. Stamtąd możesz go pobrać, zastąpić nową wersją (poprzedni pozostaje wśród dowodów) lub odłączyć. To coś innego niż **Pobierz raport**, czyli podsumowanie generowane przez platformę.
 
 Audyty zewnętrzne pojawiają się z rodzajem i zlecającym na liście, w analizie przeglądu zarządzania (wyniki audytów, §9.3.2 d) i w protokole; **pakiet audytowy** zawiera folder `AUDIT_ESTERNI/` z podsumowaniem i załączonymi raportami.

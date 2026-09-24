@@ -3064,6 +3064,12 @@
       "evidence_required": "— dowód zamknięcia (obowiązkowy) —",
       "evidence_optional": "— dowód zamknięcia (opcjonalny) —",
       "confirm": "Zamknij"
+    },
+    "second_party": {
+      "summary": "Otwarte ustalenia: {{open}} z {{total}} (otwarte NC: {{nc}})",
+      "report_ok": "Raport klienta załączony",
+      "report_missing": "Raport klienta jeszcze niezałączony",
+      "framework_hint": "Tylko jako odniesienie: w audycie drugiej strony lista kontrolna nie jest ładowana; rejestruje się ustalenia audytora."
     }
   },
   "risk": {

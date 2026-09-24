@@ -3064,6 +3064,12 @@
       "evidence_required": "— evidenza di chiusura (obbligatoria) —",
       "evidence_optional": "— evidenza di chiusura (facoltativa) —",
       "confirm": "Chiudi"
+    },
+    "second_party": {
+      "summary": "Rilievi aperti: {{open}} su {{total}} (NC aperte: {{nc}})",
+      "report_ok": "Rapporto del cliente allegato",
+      "report_missing": "Rapporto del cliente non ancora allegato",
+      "framework_hint": "Solo come riferimento: per un audit di seconda parte non si carica la checklist dei controlli, si registrano i rilievi dell'auditor."
     }
   },
   "risk": {

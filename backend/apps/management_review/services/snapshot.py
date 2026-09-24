@@ -317,7 +317,8 @@ def _audit_block(scope: dict, today, since_12m) -> dict:
             "audit_date": _iso(a.audit_date),
             "framework": a.framework.code if a.framework_id else None,
             "status": a.status,
-            "readiness_score": a.readiness_score,
+            # seconda parte: nessuna checklist, la prontezza non ha senso
+            "readiness_score": a.readiness_score if a.uses_checklist else None,
             "findings": a.n_findings,
             "plant_code": a.plant.code if a.plant_id else None,
             "audit_type": a.audit_type,

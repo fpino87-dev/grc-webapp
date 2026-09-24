@@ -71,7 +71,7 @@ def finalize_new_prep(prep: AuditPrep, user) -> None:
     carico dell'utente, per non alterare il flusso manuale esistente.
     """
     fw_code = prep.framework.code if prep.framework_id else None
-    if fw_code in ("TISAX_L3", "TISAX_PROTO"):
+    if fw_code in ("TISAX_L3", "TISAX_PROTO") and prep.uses_checklist:
         seed_evidence_items_for_prep(
             prep,
             framework_codes=[fw_code],
@@ -951,6 +951,26 @@ def generate_audit_report(prep: "AuditPrep") -> str:
         )
     coverage_label = dict(AuditPrep.COVERAGE_CHOICES).get(prep.coverage_type, "—")
 
+    # Audit di seconda parte: niente prontezza né checklist (i punti di verifica
+    # sono del cliente), solo rilievi e dati dell'audit.
+    readiness_html = ""
+    controls_html = ""
+    if prep.uses_checklist:
+        readiness_html = f"""<h2>Readiness Score</h2>
+<div class="score-box"><div class="score-num">{score}</div><div style="color:{score_color};font-size:10px">/ 100</div></div>
+<div class="kpi-grid">
+  <div class="kpi"><div class="kpi-num">{total}</div><div style="font-size:8px;color:#6b7280">Controlli verificati</div></div>
+  <div class="kpi" style="background:#dcfce7"><div class="kpi-num" style="color:#16a34a">{present}</div><div style="font-size:8px;color:#6b7280">Evidenze presenti</div></div>
+  <div class="kpi" style="background:#fee2e2"><div class="kpi-num" style="color:#dc2626">{missing}</div><div style="font-size:8px;color:#6b7280">Evidenze mancanti</div></div>
+  <div class="kpi" style="background:#fef9c3"><div class="kpi-num" style="color:#d97706">{expired_ev}</div><div style="font-size:8px;color:#6b7280">Evidenze scadute</div></div>
+</div>
+"""
+        controls_html = f"""<h2>Controlli verificati</h2>
+<table><tr><th>ID</th><th>Dominio</th><th>Controllo</th><th>Evidenza</th><th>Stato GRC</th><th>Note</th></tr>
+{items_rows or "<tr><td colspan='6'>Nessun controllo</td></tr>"}
+</table>
+"""
+
     return f"""<!DOCTYPE html>
 <html lang="it"><head><meta charset="UTF-8">
 <title>Relazione Audit — {prep.title}</title>
@@ -984,26 +1004,14 @@ tr:nth-child(even){{background:#f9fafb}}
   <div class="meta-item"><div class="meta-label">Tipo copertura</div><div class="meta-value">{coverage_label}</div></div>
   <div class="meta-item"><div class="meta-label">Generata il</div><div class="meta-value">{timezone.now().strftime("%d/%m/%Y %H:%M")}</div></div>
 </div>
-<h2>Readiness Score</h2>
-<div class="score-box"><div class="score-num">{score}</div><div style="color:{score_color};font-size:10px">/ 100</div></div>
-<div class="kpi-grid">
-  <div class="kpi"><div class="kpi-num">{total}</div><div style="font-size:8px;color:#6b7280">Controlli verificati</div></div>
-  <div class="kpi" style="background:#dcfce7"><div class="kpi-num" style="color:#16a34a">{present}</div><div style="font-size:8px;color:#6b7280">Evidenze presenti</div></div>
-  <div class="kpi" style="background:#fee2e2"><div class="kpi-num" style="color:#dc2626">{missing}</div><div style="font-size:8px;color:#6b7280">Evidenze mancanti</div></div>
-  <div class="kpi" style="background:#fef9c3"><div class="kpi-num" style="color:#d97706">{expired_ev}</div><div style="font-size:8px;color:#6b7280">Evidenze scadute</div></div>
-</div>
-<h2>Riepilogo Finding</h2>
+{readiness_html}<h2>Riepilogo Finding</h2>
 <div class="kpi-grid">
   <div class="kpi" style="background:#fee2e2"><div class="kpi-num" style="color:#dc2626">{major_count}</div><div style="font-size:8px">Major NC</div></div>
   <div class="kpi" style="background:#fef9c3"><div class="kpi-num" style="color:#d97706">{minor_count}</div><div style="font-size:8px">Minor NC</div></div>
   <div class="kpi" style="background:#dbeafe"><div class="kpi-num" style="color:#2563eb">{obs_count}</div><div style="font-size:8px">Observation</div></div>
   <div class="kpi"><div class="kpi-num">{opp_count}</div><div style="font-size:8px">Opportunity</div></div>
 </div>
-<h2>Controlli verificati</h2>
-<table><tr><th>ID</th><th>Dominio</th><th>Controllo</th><th>Evidenza</th><th>Stato GRC</th><th>Note</th></tr>
-{items_rows or "<tr><td colspan='6'>Nessun controllo</td></tr>"}
-</table>
-<h2>Finding rilevati</h2>
+{controls_html}<h2>Finding rilevati</h2>
 <table><tr><th>Tipo</th><th>Titolo</th><th>Descrizione</th><th>Scadenza</th><th>Stato</th></tr>
 {finding_rows or "<tr><td colspan='5'>Nessun finding rilevato</td></tr>"}
 </table>

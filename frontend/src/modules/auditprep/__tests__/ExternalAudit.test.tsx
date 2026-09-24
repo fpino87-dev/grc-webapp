@@ -186,3 +186,25 @@ describe("Audit Prep — finding e PDCA", () => {
   });
 });
 
+describe("Audit Prep — seconda parte senza checklist", () => {
+  it("la card mostra i rilievi al posto della prontezza e il dettaglio non ha il tab Checklist", async () => {
+    api.findings.mockResolvedValue([finding(), finding({ id: "f2", finding_type: "minor_nc", status: "closed" })] as never);
+    renderPage();
+    fireEvent.click(await screen.findByText("audit_prep.tab_in_progress"));
+    expect(await screen.findByText("audit_prep.second_party.summary")).toBeInTheDocument();
+    expect(screen.getByText("audit_prep.second_party.report_missing")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("audit_prep.open_btn"));
+    expect(await screen.findByText(/audit_prep\.tab_findings/)).toBeInTheDocument();
+    expect(screen.queryByText("audit_prep.tab_checklist")).not.toBeInTheDocument();
+  });
+
+  it("un audit interno mantiene checklist e prontezza", async () => {
+    api.list.mockResolvedValue({ results: [prep({ audit_type: "interno", requesting_party: "" })] } as never);
+    renderPage();
+    fireEvent.click(await screen.findByText("audit_prep.tab_in_progress"));
+    fireEvent.click(await screen.findByText("audit_prep.open_btn"));
+    expect(await screen.findByText("audit_prep.tab_checklist")).toBeInTheDocument();
+    expect(screen.queryByText("audit_prep.second_party.summary")).not.toBeInTheDocument();
+  });
+});
+

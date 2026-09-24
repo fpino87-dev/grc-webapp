@@ -3064,6 +3064,12 @@
       "evidence_required": "— kapanış kanıtı (zorunlu) —",
       "evidence_optional": "— kapanış kanıtı (isteğe bağlı) —",
       "confirm": "Kapat"
+    },
+    "second_party": {
+      "summary": "Açık bulgular: {{open}} / {{total}} (açık NC: {{nc}})",
+      "report_ok": "Müşteri raporu eklendi",
+      "report_missing": "Müşteri raporu henüz eklenmedi",
+      "framework_hint": "Yalnızca referans: ikinci taraf denetiminde kontrol listesi yüklenmez; denetçinin bulguları kaydedilir."
     }
   },
   "risk": {

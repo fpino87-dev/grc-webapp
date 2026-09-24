@@ -917,6 +917,8 @@ Devam eden veya kapatılmış denetimden:
 
 Tür ve talep eden daha sonra **Denetim bilgileri** sekmesinden düzeltilebilir.
 
+**İkinci taraf: kontrol listesi yok.** İkinci taraf denetiminde doğrulama noktaları müşteriye aittir: kontrol listesi yüklenmez (TISAX AL3 seçilse bile), ayrıntı **Bulgular** sekmesinde açılır ve kart, hazırlık yerine açık bulguları ve raporun ekli olup olmadığını gösterir. Belirtilen çerçeve yalnızca referans içindir. Üçüncü taraf (belgelendirme) denetimlerinde kontrol listesi kalır, çünkü kuruluş tam olarak çerçevenin gereksinimlerini doğrular.
+
 **Resmi rapor** — **Denetim bilgileri** sekmesinde, **Denetçinin veya kuruluşun resmi raporu** bölümünde dosyayı (ör. müşteriden alınan PDF) seçin ve **Raporu ekle**'ye tıklayın. Dosya, denetimin tesisinde ve geçerlilik süresi olmadan "rapor" türünde kanıt olarak arşivlenir. Buradan indirebilir, bir revizyonla değiştirebilir (öncekisi kanıtlar arasında kalır) veya bağlantısını kaldırabilirsiniz. Bu, platformun oluşturduğu özet olan **Raporu indir**'den farklıdır.
 
 Dış denetimler; listede, yönetim gözden geçirmesi analizinde (denetim sonuçları, §9.3.2 d) ve tutanakta türleri ve talep edenleriyle görünür; **denetim paketi**, özet ve ekli raporları içeren `AUDIT_ESTERNI/` klasörünü içerir.

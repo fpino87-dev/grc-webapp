@@ -61,6 +61,24 @@ const FINDING_TYPE_COLORS: Record<string, string> = {
 
 const AUDIT_TYPES: AuditType[] = ["interno", "seconda_parte", "terza_parte"];
 
+/** Seconda parte: i punti di verifica sono del cliente → niente checklist né prontezza. */
+const usesChecklist = (prep: Pick<AuditPrep, "audit_type">) => prep.audit_type !== "seconda_parte";
+
+/** Riepilogo rilievi al posto della prontezza (audit di seconda parte). */
+function FindingsSummary({ prep, findings }: { prep: AuditPrep; findings: AuditFinding[] }) {
+  const { t } = useTranslation();
+  const open = findings.filter(f => f.status === "open" || f.status === "in_response");
+  const nc = open.filter(f => f.finding_type === "major_nc" || f.finding_type === "minor_nc").length;
+  return (
+    <div className="text-xs text-gray-600 space-y-0.5">
+      <p>{t("audit_prep.second_party.summary", { open: open.length, total: findings.length, nc })}</p>
+      <p className={prep.report_evidence ? "text-green-700" : "text-amber-700"}>
+        {prep.report_evidence ? t("audit_prep.second_party.report_ok") : t("audit_prep.second_party.report_missing")}
+      </p>
+    </div>
+  );
+}
+
 /** Badge del tipo di audit, solo per gli audit esterni (seconda/terza parte). */
 function AuditTypeBadge({ prep }: { prep: AuditPrep }) {
   const { t } = useTranslation();
@@ -311,7 +329,12 @@ function PrepDrawer({ prep, onClose, initialTab = "checklist" }: {
 }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const [tab, setTab] = useState<"checklist" | "findings" | "info">(initialTab);
+  const checklist = usesChecklist(prep);
+  const [tab, setTab] = useState<"checklist" | "findings" | "info">(
+    !checklist && initialTab === "checklist" ? "findings" : initialTab,
+  );
+  // tipo cambiato in "seconda parte" dal tab Info: la checklist sparisce
+  useEffect(() => { if (!checklist && tab === "checklist") setTab("findings"); }, [checklist, tab]);
   const [showFindingForm, setShowFindingForm] = useState(false);
   const [findingForm, setFindingForm] = useState<Record<string, string>>({ finding_type: "major_nc" });
   const [, setCompletingId] = useState(false);
@@ -394,7 +417,8 @@ function PrepDrawer({ prep, onClose, initialTab = "checklist" }: {
             </div>
             <h2 className="text-lg font-semibold text-gray-900">{prep.title}</h2>
             <p className="text-xs text-gray-500 mt-0.5">
-              {fwLabel(prep.framework_code)} · {prep.auditor_name || "—"} · {prep.audit_date || "—"} · {t(`audit_prep.coverage_${prep.coverage_type}`)}
+              {fwLabel(prep.framework_code)} · {prep.auditor_name || "—"} · {prep.audit_date || "—"}
+              {checklist && <> · {t(`audit_prep.coverage_${prep.coverage_type}`)}</>}
             </p>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
@@ -402,7 +426,7 @@ function PrepDrawer({ prep, onClose, initialTab = "checklist" }: {
 
         {/* Tabs */}
         <div className="flex border-b border-gray-200 px-6">
-          {(["checklist", "findings", "info"] as const).map(tabKey => (
+          {(checklist ? (["checklist", "findings", "info"] as const) : (["findings", "info"] as const)).map(tabKey => (
             <button key={tabKey} onClick={() => setTab(tabKey)}
               className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${tab === tabKey ? "border-primary-600 text-primary-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
               {tabKey === "checklist"
@@ -417,7 +441,7 @@ function PrepDrawer({ prep, onClose, initialTab = "checklist" }: {
         <div className="flex-1 overflow-auto p-6">
 
           {/* TAB checklist */}
-          {tab === "checklist" && (
+          {tab === "checklist" && checklist && (
             <div>
               <ReadinessBar score={prep.readiness_score} />
 
@@ -645,7 +669,7 @@ function PrepDrawer({ prep, onClose, initialTab = "checklist" }: {
                 <div><span className="text-gray-500">{t("audit_prep.auditor_col")}</span> <span className="font-medium">{prep.auditor_name || "—"}</span></div>
                 <div><span className="text-gray-500">{t("audit_prep.audit_date_label")}</span> <span className="font-medium">{prep.audit_date || "—"}</span></div>
                 <div><span className="text-gray-500">{t("audit_prep.tab_info")}:</span> <StatusBadge status={prep.status} /></div>
-                <div><span className="text-gray-500">Readiness:</span> <span className="font-medium">{prep.readiness_score ?? "—"}/100</span></div>
+                {checklist && <div><span className="text-gray-500">Readiness:</span> <span className="font-medium">{prep.readiness_score ?? "—"}/100</span></div>}
               </div>
 
               <ExternalAuditSection key={prep.id + (prep.report_evidence ?? "")} prep={prep} />
@@ -1283,7 +1307,9 @@ function AuditPrepCard({ prep, onOpen, onDelete }: { prep: AuditPrep; onOpen: ()
       <p className="text-xs text-gray-500 mb-3">
         {fwLabel(prep.framework_code)} · {prep.auditor_name || "—"} · {prep.audit_date || "—"}
       </p>
-      <ReadinessBar score={prep.readiness_score} />
+      {usesChecklist(prep)
+        ? <ReadinessBar score={prep.readiness_score} />
+        : <FindingsSummary prep={prep} findings={findings} />}
       <div className="flex gap-3 mt-2 text-xs text-gray-500">
         {majorOpen > 0 && <span className="text-red-600 font-medium">⚠️ {majorOpen} Major NC</span>}
         {minorOpen > 0 && <span className="text-orange-600">{minorOpen} Minor NC</span>}
@@ -1421,6 +1447,9 @@ function NewPrepModal({ plants, onClose }: { plants: { id: string; code: string;
                       </>
                 }
               </select>
+              {form.audit_type === "seconda_parte" && (
+                <p className="text-xs text-gray-500 mt-0.5">{t("audit_prep.second_party.framework_hint")}</p>
+              )}
             </div>
           </div>
           {fwKey === "TISAX" && (

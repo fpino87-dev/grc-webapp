@@ -70,6 +70,15 @@ def _get_scoped(qs, pk):
         return None
 
 
+def _second_party_no_checklist() -> str:
+    from django.utils.translation import gettext as _
+
+    return _(
+        "Audit di seconda parte: i punti di verifica sono quelli del cliente, "
+        "la checklist dei controlli non si usa. Registra i rilievi dell'auditor come finding."
+    )
+
+
 def _validation_response(exc):
     return Response({"error": exc.messages[0] if getattr(exc, "messages", None) else str(exc)}, status=400)
 
@@ -241,6 +250,8 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     @action(detail=True, methods=["get"])
     def readiness(self, request, pk=None):
         audit_prep = self.get_object()
+        if not audit_prep.uses_checklist:
+            return Response({"id": str(audit_prep.id), "readiness_score": None})
         score = services.calc_readiness_score(audit_prep)
         return Response({"id": str(audit_prep.id), "readiness_score": score})
 
@@ -294,6 +305,8 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 {"error": "Prep archiviato: sincronizzazione non disponibile."},
                 status=400,
             )
+        if not prep.uses_checklist:
+            return Response({"error": _second_party_no_checklist()}, status=400)
 
         fw_code = prep.framework.code if prep.framework_id else None
         if not fw_code:
@@ -346,6 +359,8 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         Idempotente: rilanciata non duplica i finding gia' auto-generati aperti."""
         from .validation import auto_validate_prep
         prep = self.get_object()
+        if not prep.uses_checklist:
+            return Response({"error": _second_party_no_checklist()}, status=400)
         if prep.status == "archiviato":
             return Response(
                 {"error": "Prep archiviato: validazione automatica non disponibile."},

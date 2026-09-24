@@ -100,6 +100,14 @@ class AuditPrep(BaseModel):
     class Meta:
         ordering = ["-created_at"]
 
+    @property
+    def uses_checklist(self) -> bool:
+        """Checklist dei controlli e prontezza servono a prepararsi sui requisiti
+        del framework (audit interni e di certificazione). Nell'audit di seconda
+        parte i punti di verifica sono quelli del cliente: contano i rilievi
+        dell'auditor, non la nostra checklist."""
+        return self.audit_type != "seconda_parte"
+
 
 class EvidenceItem(BaseModel):
     STATUS_CHOICES = [

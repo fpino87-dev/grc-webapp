@@ -917,6 +917,8 @@ Oltre agli audit interni, in Audit Prep si registrano gli audit condotti da terz
 
 Tipo e committente si possono correggere in seguito dal tab **Info audit**.
 
+**Seconda parte: niente checklist.** Nell'audit di seconda parte i punti di verifica sono quelli del cliente: la checklist dei controlli non viene caricata (nemmeno scegliendo TISAX AL3), il dettaglio si apre sul tab **Finding** e la card mostra i rilievi aperti e se il rapporto è allegato, al posto della prontezza. Il framework, se indicato, vale solo come riferimento. Nella terza parte (certificazione) la checklist resta, perché l'ente verifica proprio i requisiti del framework.
+
 **Rapporto ufficiale** — nel tab **Info audit**, sezione **Rapporto ufficiale dell'auditor o dell'ente**, scegli il file (es. il PDF ricevuto dal cliente) e clicca **Allega rapporto**. Il file viene archiviato come evidenza di tipo "report", sul sito dell'audit e senza scadenza. Da lì puoi scaricarlo, sostituirlo con una revisione (il precedente resta tra le evidenze) o scollegarlo. È diverso da **Scarica relazione**, che è il riepilogo generato dalla piattaforma.
 
 Gli audit esterni compaiono con il tipo e il committente nell'elenco, nell'analisi del riesame di direzione (risultati degli audit, §9.3.2 d) e nel verbale; il **pacchetto audit** contiene la cartella `AUDIT_ESTERNI/` con un riepilogo e i rapporti allegati.

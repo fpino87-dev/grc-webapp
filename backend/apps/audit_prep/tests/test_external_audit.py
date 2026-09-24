@@ -157,3 +157,53 @@ def test_audit_package_includes_external_reports(client, plant, prep):
     assert any(n.startswith("PKG/AUDIT_ESTERNI/2026-09-10_") and n.endswith(".pdf") for n in names)
     assert "OEM Alfa" in index and "Ente Beta" in index
     assert "Audit interno Q3" not in index
+
+
+# ── Seconda parte: nessuna checklist ────────────────────────────────────────
+
+@pytest.fixture
+def tisax_l3(db, plant):
+    from apps.controls.models import Framework
+    from apps.plants.models import PlantFramework
+    fw = Framework.objects.create(code="TISAX_L3", name="TISAX AL3", version="6.0", published_at=timezone.localdate())
+    PlantFramework.objects.create(plant=plant, framework=fw, active_from=timezone.localdate())
+    return fw
+
+
+@pytest.mark.django_db
+def test_second_party_never_seeds_checklist(client, plant, tisax_l3):
+    from apps.audit_prep.models import AuditPrep
+    resp = client.post(URL_PREPS, {"plant": str(plant.id), "title": "Audit OEM su VDA ISA",
+                                   "framework": str(tisax_l3.id), "audit_type": "seconda_parte"}, format="json")
+    assert resp.status_code == 201
+    prep = AuditPrep.objects.get(pk=resp.data["id"])
+    assert prep.evidence_items.count() == 0
+    assert prep.uses_checklist is False
+
+
+@pytest.mark.django_db
+def test_second_party_rejects_checklist_actions(client, prep):
+    url = f"{URL_PREPS}{prep['id']}/"
+    assert client.post(f"{url}sync-controls/").status_code == 400
+    resp = client.post(f"{url}auto-validate/")
+    assert resp.status_code == 400 and "seconda parte" in resp.data["error"]
+    assert client.get(f"{url}readiness/").data["readiness_score"] is None
+
+
+@pytest.mark.django_db
+def test_second_party_report_html_has_no_readiness(client, prep):
+    resp = client.get(f"{URL_PREPS}{prep['id']}/report/")
+    html = resp.content.decode()
+    assert "Readiness Score" not in html and "Controlli verificati" not in html
+    assert "Finding rilevati" in html
+
+
+@pytest.mark.django_db
+def test_second_party_snapshot_without_readiness(prep, plant):
+    import datetime
+    from apps.audit_prep.models import AuditPrep
+    from apps.management_review.services.snapshot import _audit_block
+    AuditPrep.objects.filter(pk=prep["id"]).update(readiness_score=80)
+    block = _audit_block({"plant_id": plant.id}, timezone.localdate(), timezone.now() - datetime.timedelta(days=365))
+    row = next(a for a in block["elenco_audit"] if a["id"] == prep["id"])
+    assert row["readiness_score"] is None

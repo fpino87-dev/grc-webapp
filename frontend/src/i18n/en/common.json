@@ -3064,6 +3064,12 @@
       "evidence_required": "— closure evidence (mandatory) —",
       "evidence_optional": "— closure evidence (optional) —",
       "confirm": "Close"
+    },
+    "second_party": {
+      "summary": "Open findings: {{open}} of {{total}} (open NCs: {{nc}})",
+      "report_ok": "Customer report attached",
+      "report_missing": "Customer report not attached yet",
+      "framework_hint": "Reference only: for a second-party audit the controls checklist is not loaded; you record the auditor's findings."
     }
   },
   "risk": {
