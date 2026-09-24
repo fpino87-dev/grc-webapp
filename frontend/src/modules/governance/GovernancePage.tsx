@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { governanceApi, type RoleAssignment } from "../../api/endpoints/governance";
 import { usersApi } from "../../api/endpoints/users";
 import { plantsApi } from "../../api/endpoints/plants";
-import { apiClient } from "../../api/client";
 import { ModuleHelp } from "../../components/ui/ModuleHelp";
 import { DocumentWorkflowSection } from "./DocumentWorkflowPage";
 import { FrameworkGovernanceTab } from "./FrameworkGovernanceTab";
@@ -14,6 +13,7 @@ import { RoleRequirementsPanel } from "./RoleRequirementsPanel";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { todayISO } from "../../utils/dates";
+import { fetchAllPages } from "../../api/pagination";
 
 const ROLE_KEYS: Record<string, string> = {
   ciso:                   "ciso",
@@ -73,11 +73,7 @@ function RoleAssignmentModal({
   });
   const { data: busData } = useQuery({
     queryKey: ["business-units"],
-    queryFn: async () => {
-      const res = await apiClient.get("/plants/business-units/");
-      const d = res.data;
-      return Array.isArray(d) ? d : (d?.results ?? []);
-    },
+    queryFn: () => fetchAllPages("/plants/business-units/"),
     retry: false,
   });
 

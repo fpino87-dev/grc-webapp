@@ -13,6 +13,12 @@ export interface AuditLogEntry {
 }
 
 export const auditTrailApi = {
+  // Paginato lato server e anche nella pagina (l'audit trail può contenere
+  // migliaia di eventi): qui si legge UNA pagina, con count/next/previous.
   list: (params?: Record<string, string>) =>
-    apiClient.get<{ results: AuditLogEntry[] }>("/audit-trail/audit-logs/", { params }).then((r) => r.data),
+    apiClient
+      .get<{ results: AuditLogEntry[]; count: number; next: string | null; previous: string | null }>(
+        "/audit-trail/audit-logs/", { params: { page_size: "50", ...params } },
+      )
+      .then((r) => r.data),
 };

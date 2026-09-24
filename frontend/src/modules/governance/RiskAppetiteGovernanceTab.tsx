@@ -5,6 +5,7 @@ import { apiClient } from "../../api/client";
 import { plantsApi } from "../../api/endpoints/plants";
 import { controlsApi, type FrameworkGovernanceMeta } from "../../api/endpoints/controls";
 import { todayISO } from "../../utils/dates";
+import { fetchAllPages } from "../../api/pagination";
 
 interface RiskAppetitePolicy {
   id: string;
@@ -38,11 +39,7 @@ export function RiskAppetiteGovernanceTab() {
 
   const { data: policies = [], isLoading, error } = useQuery({
     queryKey: ["risk-appetite-policies"],
-    queryFn: async () => {
-      const res = await apiClient.get<RiskAppetitePolicy[] | { results?: RiskAppetitePolicy[] }>("/risk/appetite-policies/");
-      const body = res.data;
-      return Array.isArray(body) ? body : body.results ?? [];
-    },
+    queryFn: () => fetchAllPages<RiskAppetitePolicy>("/risk/appetite-policies/"),
     retry: false,
   });
 

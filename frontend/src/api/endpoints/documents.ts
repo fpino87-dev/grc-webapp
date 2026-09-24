@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export interface DocumentVersionSummary {
   id: string;
@@ -95,7 +96,7 @@ export const EVIDENCE_TYPE_LABELS: Record<string, string> = {
 
 export const documentsApi = {
   list: (params?: Record<string,string>) =>
-    apiClient.get<{results: Document[]}>("/documents/documents/", {params}).then(r => r.data),
+    fetchAllPages<Document>("/documents/documents/", params).then((results) => ({ results, count: results.length })),
   create: (data: Partial<Document>) =>
     apiClient.post<Document>("/documents/documents/", data).then(r => r.data),
   update: (id: string, data: Partial<Document>) =>
@@ -125,7 +126,7 @@ export const documentsApi = {
 
   // Evidences
   evidences: (params?: Record<string,string>) =>
-    apiClient.get<{results: Evidence[]}>("/documents/evidences/", {params}).then(r => r.data),
+    fetchAllPages<Evidence>("/documents/evidences/", params).then((results) => ({ results, count: results.length })),
   createEvidence: (data: Partial<Evidence> & { file?: File }) => {
     const form = new FormData();
     if (data.file) form.append("file", data.file);
@@ -139,11 +140,11 @@ export const documentsApi = {
     }).then(r => r.data);
   },
   searchEvidences: (search: string) =>
-    apiClient.get<{results: Evidence[]}>("/documents/evidences/", {params: {search}}).then(r => r.data),
+    fetchAllPages<Evidence>("/documents/evidences/", {search}).then((results) => ({ results, count: results.length })),
   linkControls: (docId: string, controlInstanceIds: string[]) =>
     apiClient.post(`/documents/documents/${docId}/link-controls/`, { control_instance_ids: controlInstanceIds }).then(r => r.data),
   searchDocuments: (search: string, plant?: string) =>
-    apiClient.get<{results: Document[]}>("/documents/documents/", {params: {search, ...(plant ? {plant} : {})}}).then(r => r.data),
+    fetchAllPages<Document>("/documents/documents/", {search, ...(plant ? {plant} : {})}).then((results) => ({ results, count: results.length })),
 
   downloadEvidence: (id: string) =>
     apiClient.get<Blob>(`/documents/evidences/${id}/download/`, {

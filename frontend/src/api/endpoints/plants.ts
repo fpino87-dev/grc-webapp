@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export interface Plant {
   id: string;
@@ -37,7 +38,7 @@ export interface PlantFramework {
 }
 
 export const plantsApi = {
-  list: () => apiClient.get<{ results: Plant[] }>("/plants/plants/").then((r) => r.data.results),
+  list: () => fetchAllPages<Plant>("/plants/plants/"),
   get: (id: string) => apiClient.get<Plant>(`/plants/plants/${id}/`).then((r) => r.data),
   create: (data: Partial<Plant>) => apiClient.post<Plant>("/plants/plants/", data).then((r) => r.data),
   update: (id: string, data: Partial<Plant>) => apiClient.patch<Plant>(`/plants/plants/${id}/`, data).then((r) => r.data),
@@ -50,11 +51,11 @@ export const plantsApi = {
     }).then((r) => r.data);
   },
   businessUnits: () =>
-    apiClient.get<{ results: BusinessUnit[] }>("/plants/business-units/").then((r) => r.data.results),
+    fetchAllPages<BusinessUnit>("/plants/business-units/"),
   createBusinessUnit: (data: Partial<BusinessUnit>) =>
     apiClient.post<BusinessUnit>("/plants/business-units/", data).then((r) => r.data),
   plantFrameworks: (plantId: string) =>
-    apiClient.get<{ results: PlantFramework[] }>("/plants/plant-frameworks/", { params: { plant: plantId } }).then((r) => r.data.results),
+    fetchAllPages<PlantFramework>("/plants/plant-frameworks/", { plant: plantId }),
   assignFramework: (data: { plant: string; framework: string; level?: string }) =>
     apiClient.post<PlantFramework>("/plants/plant-frameworks/", data).then((r) => r.data),
   toggleFramework: (id: string) =>

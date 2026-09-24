@@ -3509,7 +3509,12 @@
   "audit_trail": {
     "levels_guide": "Przewodnik po poziomach",
     "filter_all": "Wszystkie",
-    "entity_placeholder": "np. zakład"
+    "entity_placeholder": "np. zakład",
+    "pagination": {
+      "summary": "Strona {{page}} z {{pages}} — {{count}} zdarzeń",
+      "prev": "← Poprzednie",
+      "next": "Następne →"
+    }
   },
   "suppliers": {
     "page_title": "Zarządzanie dostawcami",

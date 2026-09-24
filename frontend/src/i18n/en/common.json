@@ -3509,7 +3509,12 @@
   "audit_trail": {
     "levels_guide": "Levels guide",
     "filter_all": "All",
-    "entity_placeholder": "e.g. plant"
+    "entity_placeholder": "e.g. plant",
+    "pagination": {
+      "summary": "Page {{page}} of {{pages}} — {{count}} events",
+      "prev": "← Previous",
+      "next": "Next →"
+    }
   },
   "suppliers": {
     "page_title": "Supplier Management",

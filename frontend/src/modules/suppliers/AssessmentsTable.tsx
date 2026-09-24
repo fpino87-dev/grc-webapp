@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../../api/client";
 import { AssessmentStatusBadge, RiskBadge, type SupplierAssessment } from "./supplierBadges";
 import { useTranslation } from "react-i18next";
+import { fetchAllPages } from "../../api/pagination";
 
 // ─── AssessmentsTable — Audit terze parti ────────────────────────────────────
 
@@ -17,10 +18,9 @@ export function AssessmentsTable({ supplierId }: { supplierId: string }) {
 
   const { data } = useQuery<{ results: SupplierAssessment[] }>({
     queryKey: ["supplier-assessments", supplierId],
-    queryFn: async () => {
-      const res = await apiClient.get("/suppliers/assessments/", { params: { supplier: supplierId } });
-      return res.data;
-    },
+    queryFn: async () => ({
+      results: await fetchAllPages<SupplierAssessment>("/suppliers/assessments/", { supplier: supplierId }),
+    }),
   });
   const assessments = data?.results ?? [];
 

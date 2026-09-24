@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export type KpiSource = "checklist" | "internal" | "api" | "manual";
 export type KpiAggregation =
@@ -133,9 +134,7 @@ const SNAP = "/tasks/kpi-snapshots/";
 export const kpiApi = {
   // Definizioni
   getKpiDefinitions: (params?: Record<string, string>) =>
-    apiClient
-      .get<{ results: KpiDefinitionListItem[]; count: number }>(DEF, { params })
-      .then((r) => r.data),
+    fetchAllPages<KpiDefinitionListItem>(DEF, params).then((results) => ({ results, count: results.length })),
   getKpiDefinition: (id: string) =>
     apiClient.get<KpiDefinition>(`${DEF}${id}/`).then((r) => r.data),
   createKpiDefinition: (data: Partial<KpiDefinition>) =>
@@ -154,9 +153,7 @@ export const kpiApi = {
 
   // Snapshot / trend
   getKpiSnapshots: (params?: Record<string, string>) =>
-    apiClient
-      .get<{ results: KpiSnapshot[]; count: number }>(SNAP, { params })
-      .then((r) => r.data),
+    fetchAllPages<KpiSnapshot>(SNAP, params).then((results) => ({ results, count: results.length })),
   getKpiTrend: (kpiCode: string, plantId?: string, weeks = 8) => {
     const params: Record<string, string> = { kpi_code: kpiCode, weeks: String(weeks) };
     if (plantId) params.plant = plantId;

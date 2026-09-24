@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export interface GrcUser {
   id: number;
@@ -44,15 +45,14 @@ export interface PlantAccessGrant {
 
 export const plantAccessApi = {
   listForUser: (userId: number) =>
-    apiClient.get<{ results: PlantAccessGrant[] }>("/auth/plant-access/", { params: { user: userId } })
-      .then(r => r.data.results ?? r.data),
+    fetchAllPages<PlantAccessGrant>("/auth/plant-access/", { user: String(userId) }),
   create: (data: { user: number; role: string; scope_type: string; scope_plants?: string[]; scope_bu?: string | null }) =>
     apiClient.post<PlantAccessGrant>("/auth/plant-access/", data).then(r => r.data),
   remove: (id: string) => apiClient.delete(`/auth/plant-access/${id}/`),
 };
 
 export const usersApi = {
-  list: () => apiClient.get<{ results: GrcUser[] }>("/auth/users/").then(r => r.data.results),
+  list: () => fetchAllPages<GrcUser>("/auth/users/"),
   create: (data: { username: string; email: string; first_name?: string; last_name?: string; password: string; grc_role?: string }) =>
     apiClient.post<GrcUser>("/auth/users/", data).then(r => r.data),
   update: (id: number, data: Partial<GrcUser>) =>

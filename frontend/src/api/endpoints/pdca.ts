@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export interface PdcaPhaseEvidence {
   id: string;
@@ -60,7 +61,7 @@ export interface PdcaLinkedFinding {
 
 export const pdcaApi = {
   list: (params?: Record<string, string>) =>
-    apiClient.get<{ results: PdcaCycle[] }>("/pdca/cycles/", { params }).then((r) => r.data),
+    fetchAllPages<PdcaCycle>("/pdca/cycles/", params).then((results) => ({ results, count: results.length })),
   create: (data: Partial<PdcaCycle> & { finding?: string }) =>
     apiClient.post<PdcaCycle>("/pdca/cycles/", data).then((r) => r.data),
   update: (id: string, data: Partial<PdcaCycle>) =>

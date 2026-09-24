@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export interface CriticalProcess {
   id: string; plant: string; name: string;
@@ -59,9 +60,7 @@ export interface TreatmentOption {
 
 export const treatmentOptionsApi = {
   listByProcess: (processId: string) =>
-    apiClient.get<{ results: TreatmentOption[] }>("/bia/treatment-options/", {
-      params: { process: processId },
-    }).then(r => r.data.results),
+    fetchAllPages<TreatmentOption>("/bia/treatment-options/", { process: processId }),
   create: (data: Partial<TreatmentOption>) =>
     apiClient.post<TreatmentOption>("/bia/treatment-options/", data).then(r => r.data),
   update: (id: string, data: Partial<TreatmentOption>) =>
@@ -72,7 +71,7 @@ export const treatmentOptionsApi = {
 
 export const biaApi = {
   list: (params?: Record<string, string>) =>
-    apiClient.get<{ results: CriticalProcess[] }>("/bia/processes/", { params }).then(r => r.data),
+    fetchAllPages<CriticalProcess>("/bia/processes/", params).then((results) => ({ results, count: results.length })),
   resilienceGaps: (plantId?: string) =>
     apiClient.get<ResilienceGapRegister>("/bia/processes/resilience-gaps/", {
       params: plantId ? { plant: plantId } : undefined,

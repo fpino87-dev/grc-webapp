@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export interface ScheduleRule {
   id: string;
@@ -117,9 +118,7 @@ export interface FrameworkControl {
 
 export const scheduleApi = {
   listPolicies: (plant?: string) =>
-    apiClient.get<{ results: SchedulePolicy[] }>("/schedule/policies/", {
-      params: plant ? { plant } : {},
-    }).then(r => r.data),
+    fetchAllPages<SchedulePolicy>("/schedule/policies/", plant ? { plant } : {}).then((results) => ({ results, count: results.length })),
 
   getPolicy: (id: string) =>
     apiClient.get<SchedulePolicy>(`/schedule/policies/${id}/`).then(r => r.data),
@@ -150,9 +149,7 @@ export const scheduleApi = {
 
   // ── Catalogo documenti obbligatori (CRUD, solo ruoli abilitati) ──────────
   listRequiredDocuments: (framework: string) =>
-    apiClient.get<{ results: RequiredDocumentCatalog[] }>("/schedule/required-documents/", {
-      params: { framework, page_size: 1000 },
-    }).then(r => r.data.results ?? []),
+    fetchAllPages<RequiredDocumentCatalog>("/schedule/required-documents/", { framework }),
 
   createRequiredDocument: (data: Omit<RequiredDocumentCatalog, "id">) =>
     apiClient.post<RequiredDocumentCatalog>("/schedule/required-documents/", data).then(r => r.data),

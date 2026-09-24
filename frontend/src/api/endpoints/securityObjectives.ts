@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 /** Traiettoria: non è lo stato del record, è la lettura dell'andamento
  *  rispetto al target e alla scadenza. Un obiettivo può essere "attivo"
@@ -86,9 +87,7 @@ const BASE = "/governance/security-objectives/";
 
 export const securityObjectivesApi = {
   list: (params?: Record<string, string>) =>
-    apiClient
-      .get<{ results?: SecurityObjective[] } | SecurityObjective[]>(BASE, { params })
-      .then((r) => (Array.isArray(r.data) ? r.data : r.data.results ?? [])),
+    fetchAllPages<SecurityObjective>(BASE, params),
   get: (id: string) => apiClient.get<SecurityObjective>(`${BASE}${id}/`).then((r) => r.data),
   create: (data: Partial<SecurityObjective>) =>
     apiClient.post<SecurityObjective>(BASE, data).then((r) => r.data),

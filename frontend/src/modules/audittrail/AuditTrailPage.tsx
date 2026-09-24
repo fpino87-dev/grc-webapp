@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "../../api/client";
 import { auditTrailApi, type AuditLogEntry } from "../../api/endpoints/auditTrail";
@@ -192,13 +192,15 @@ export function AuditTrailPage() {
   const [levelFilter, setLevelFilter] = useState("");
   const [entityFilter, setEntityFilter] = useState("");
   const [showDrawer, setShowDrawer] = useState(false);
+  const [page, setPage] = useState(1);
+  useEffect(() => setPage(1), [levelFilter, entityFilter]);
 
-  const params: Record<string, string> = {};
+  const params: Record<string, string> = { page: String(page) };
   if (levelFilter) params.level = levelFilter;
   if (entityFilter) params.entity_type = entityFilter;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["audit-trail", levelFilter, entityFilter],
+    queryKey: ["audit-trail", levelFilter, entityFilter, page],
     queryFn: () => auditTrailApi.list(params),
     retry: false,
   });
@@ -280,6 +282,16 @@ export function AuditTrailPage() {
           </table>
         )}
       </div>
+
+      {data && data.count > 0 && (
+        <div className="mt-3 flex items-center justify-end gap-3 text-sm text-gray-600">
+          <span>{i18n.t("audit_trail.pagination.summary", { page, pages: Math.max(1, Math.ceil(data.count / 50)), count: data.count })}</span>
+          <button onClick={() => setPage(p => p - 1)} disabled={!data.previous}
+            className="px-3 py-1 border rounded disabled:opacity-40">{i18n.t("audit_trail.pagination.prev")}</button>
+          <button onClick={() => setPage(p => p + 1)} disabled={!data.next}
+            className="px-3 py-1 border rounded disabled:opacity-40">{i18n.t("audit_trail.pagination.next")}</button>
+        </div>
+      )}
 
       {showDrawer && <LevelsDrawer onClose={() => setShowDrawer(false)} />}
     </div>

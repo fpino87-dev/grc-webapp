@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export interface AiSuggestResponse {
   task_type: string;
@@ -90,7 +91,7 @@ export const aiApi = {
     apiClient.post("/ai/confirm/", { interaction_id, action: "confirm", final_text }).then((r) => r.data),
   ignore: (interaction_id: string) =>
     apiClient.post("/ai/confirm/", { interaction_id, action: "ignore" }).then((r) => r.data),
-  listConfig: () => apiClient.get<{ results: AiProviderConfig[] }>("/ai/config/").then((r) => r.data.results),
+  listConfig: () => fetchAllPages<AiProviderConfig>("/ai/config/"),
   createConfig: (payload: AiProviderConfig) => apiClient.post<AiProviderConfig>("/ai/config/", payload).then((r) => r.data),
   updateConfig: (id: string, payload: Partial<AiProviderConfig>) =>
     apiClient.patch<AiProviderConfig>(`/ai/config/${id}/`, payload).then((r) => r.data),

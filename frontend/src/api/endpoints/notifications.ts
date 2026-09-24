@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export interface NotificationSubscription {
   id: string;
@@ -9,7 +10,7 @@ export interface NotificationSubscription {
 
 export const notificationsApi = {
   subscriptions: () =>
-    apiClient.get<{ results: NotificationSubscription[] }>("/notifications/subscriptions/").then(r => r.data.results),
+    fetchAllPages<NotificationSubscription>("/notifications/subscriptions/"),
   updateSubscription: (id: string, data: Partial<NotificationSubscription>) =>
     apiClient.patch<NotificationSubscription>(`/notifications/subscriptions/${id}/`, data).then(r => r.data),
 };

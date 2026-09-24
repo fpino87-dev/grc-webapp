@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export interface AuditPrep {
   id: string;
@@ -153,11 +154,11 @@ export interface AuditProgram {
 
 export const auditPrepApi = {
   list: (params?: Record<string, string>) =>
-    apiClient.get<{ results: AuditPrep[] }>("/audit-prep/audit-preps/", { params }).then(r => r.data),
+    fetchAllPages<AuditPrep>("/audit-prep/audit-preps/", params).then((results) => ({ results, count: results.length })),
   readiness: (id: string) =>
     apiClient.get<{ score: number }>(`/audit-prep/audit-preps/${id}/readiness/`).then(r => r.data),
   evidence: (prepId: string) =>
-    apiClient.get<{ results: EvidenceItem[] }>("/audit-prep/evidence-items/", { params: { audit_prep: prepId } }).then(r => r.data.results),
+    fetchAllPages<EvidenceItem>("/audit-prep/evidence-items/", { audit_prep: prepId }),
   create: (data: Partial<AuditPrep>) =>
     apiClient.post<AuditPrep>("/audit-prep/audit-preps/", data).then(r => r.data),
   update: (id: string, data: Partial<AuditPrep>) =>
@@ -185,7 +186,7 @@ export const auditPrepApi = {
   updateEvidence: (id: string, data: Partial<EvidenceItem>) =>
     apiClient.patch<EvidenceItem>(`/audit-prep/evidence-items/${id}/`, data).then(r => r.data),
   findings: (prepId: string, extra?: Record<string, string>) =>
-    apiClient.get<{ results: AuditFinding[] }>("/audit-prep/findings/", { params: { audit_prep: prepId, ...extra } }).then(r => r.data.results),
+    fetchAllPages<AuditFinding>("/audit-prep/findings/", { audit_prep: prepId, ...extra }),
   openPdca: (findingId: string) =>
     apiClient.post<AuditFinding>(`/audit-prep/findings/${findingId}/open-pdca/`, {}).then(r => r.data),
   linkPdca: (findingId: string, cycleId: string) =>
@@ -197,7 +198,7 @@ export const auditPrepApi = {
   closeFinding: (id: string, data: { closure_notes: string; evidence_id?: string }) =>
     apiClient.post<{ ok: boolean; status: string }>(`/audit-prep/findings/${id}/close/`, data).then(r => r.data),
   programs: (params?: Record<string, string>) =>
-    apiClient.get<{ results: AuditProgram[] }>("/audit-prep/programs/", { params }).then(r => r.data),
+    fetchAllPages<AuditProgram>("/audit-prep/programs/", params).then((results) => ({ results, count: results.length })),
   createProgram: (data: Record<string, unknown>) =>
     apiClient.post<AuditProgram>("/audit-prep/programs/", data).then(r => r.data),
   approveProgram: (id: string) =>

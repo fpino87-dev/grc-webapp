@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export interface Incident {
   id: string;
@@ -174,7 +175,7 @@ export interface RCA {
 
 export const incidentsApi = {
   list: (params?: Record<string, string>) =>
-    apiClient.get<{ results: Incident[]; count: number }>("/incidents/incidents/", { params }).then((r) => r.data),
+    fetchAllPages<Incident>("/incidents/incidents/", params).then((results) => ({ results, count: results.length })),
   get: (id: string) => apiClient.get<Incident>(`/incidents/incidents/${id}/`).then((r) => r.data),
   create: (data: Partial<Incident>) =>
     apiClient.post<Incident>("/incidents/incidents/", data).then((r) => r.data),
@@ -212,9 +213,7 @@ export const incidentsApi = {
     return { ok: true, text: res.data as string };
   },
   listConfig: (plant: string) =>
-    apiClient
-      .get<{ results: NIS2Configuration[] }>("/incidents/nis2-configurations/", { params: { plant } })
-      .then((r) => r.data.results),
+    fetchAllPages<NIS2Configuration>("/incidents/nis2-configurations/", { plant }),
   createConfig: (data: NIS2Configuration) =>
     apiClient.post<NIS2Configuration>("/incidents/nis2-configurations/", data).then((r) => r.data),
   updateConfig: (id: string, data: Partial<NIS2Configuration>) =>

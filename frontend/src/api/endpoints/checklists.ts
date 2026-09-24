@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export type ChecklistFrequency =
   | "daily"
@@ -110,9 +111,7 @@ const RUN = "/tasks/checklist-runs/";
 export const checklistsApi = {
   // Template
   listTemplates: (params?: Record<string, string>) =>
-    apiClient
-      .get<{ results: ChecklistTemplate[]; count: number }>(TPL, { params })
-      .then((r) => r.data),
+    fetchAllPages<ChecklistTemplate>(TPL, params).then((results) => ({ results, count: results.length })),
   getTemplate: (id: string) =>
     apiClient.get<ChecklistTemplate>(`${TPL}${id}/`).then((r) => r.data),
   createTemplate: (data: Partial<ChecklistTemplate>) =>
@@ -129,9 +128,7 @@ export const checklistsApi = {
 
   // Run
   listRuns: (params?: Record<string, string>) =>
-    apiClient
-      .get<{ results: ChecklistRun[]; count: number }>(RUN, { params })
-      .then((r) => r.data),
+    fetchAllPages<ChecklistRun>(RUN, params).then((results) => ({ results, count: results.length })),
   getRun: (id: string) =>
     apiClient.get<ChecklistRun>(`${RUN}${id}/`).then((r) => r.data),
   /** Cancellazione logica di un run non completato; motivo obbligatorio

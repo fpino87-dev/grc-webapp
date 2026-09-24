@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export interface RiskMitigationPlan {
   id: string;
@@ -144,7 +145,7 @@ export interface AppetitePolicyFull extends AppetiteFormData {
 
 export const riskApi = {
   list: (params?: Record<string, string>) =>
-    apiClient.get<{ results: RiskAssessment[] }>("/risk/assessments/", { params }).then(r => r.data),
+    fetchAllPages<RiskAssessment>("/risk/assessments/", params).then((results) => ({ results, count: results.length })),
   create: (data: Partial<RiskAssessment>) =>
     apiClient.post<RiskAssessment>("/risk/assessments/", data).then(r => r.data),
   update: (id: string, data: Partial<RiskAssessment>) =>
@@ -156,7 +157,7 @@ export const riskApi = {
   accept: (id: string) =>
     apiClient.post(`/risk/assessments/${id}/accept/`).then(r => r.data),
   mitigationPlans: (assessmentId: string) =>
-    apiClient.get<{ results: RiskMitigationPlan[] }>("/risk/mitigation-plans/", { params: { assessment: assessmentId, page_size: "100" } }).then(r => r.data.results),
+    fetchAllPages<RiskMitigationPlan>("/risk/mitigation-plans/", { assessment: assessmentId, page_size: "100" }),
   createPlan: (data: Partial<RiskMitigationPlan>) =>
     apiClient.post<RiskMitigationPlan>("/risk/mitigation-plans/", data).then(r => r.data),
   updatePlan: (id: string, data: Partial<RiskMitigationPlan>) =>

@@ -169,7 +169,7 @@ export const suppliersApi = {
 
   // Questionnaire templates
   listTemplates: () =>
-    apiClient.get<{ results: QuestionnaireTemplate[] }>("/suppliers/questionnaire-templates/").then(r => r.data.results ?? r.data),
+    fetchAllPages<QuestionnaireTemplate>("/suppliers/questionnaire-templates/"),
   createTemplate: (data: Partial<QuestionnaireTemplate>) =>
     apiClient.post<QuestionnaireTemplate>("/suppliers/questionnaire-templates/", data).then(r => r.data),
   updateTemplate: (id: string, data: Partial<QuestionnaireTemplate>) =>

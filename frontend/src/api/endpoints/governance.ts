@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export interface RoleAssignment {
   id: string;
@@ -151,7 +152,7 @@ export interface DocumentWorkflowPolicy {
 
 export const governanceApi = {
   roleAssignments: (params?: Record<string, string>) =>
-    apiClient.get<{ results: RoleAssignment[] }>("/governance/role-assignments/", { params }).then((r) => r.data.results ?? r.data),
+    fetchAllPages<RoleAssignment>("/governance/role-assignments/", params),
   createRoleAssignment: (data: Partial<RoleAssignment>) =>
     apiClient.post<RoleAssignment>("/governance/role-assignments/", data).then((r) => r.data),
   deleteRoleAssignment: (id: string) =>
@@ -179,9 +180,7 @@ export const governanceApi = {
 
   // Role requirements (config matrice copertura)
   listRoleRequirements: () =>
-    apiClient
-      .get<{ results?: RoleRequirement[] } | RoleRequirement[]>("/governance/role-requirements/")
-      .then((r) => (Array.isArray(r.data) ? r.data : r.data.results ?? [])),
+    fetchAllPages<RoleRequirement>("/governance/role-requirements/"),
   createRoleRequirement: (data: Partial<RoleRequirement>) =>
     apiClient.post<RoleRequirement>("/governance/role-requirements/", data).then((r) => r.data),
   updateRoleRequirement: (id: string, data: Partial<RoleRequirement>) =>
@@ -189,7 +188,7 @@ export const governanceApi = {
   deleteRoleRequirement: (id: string) =>
     apiClient.delete(`/governance/role-requirements/${id}/`).then((r) => r.data),
   committees: () =>
-    apiClient.get<{ results: SecurityCommittee[] }>("/governance/committees/").then((r) => r.data.results ?? r.data),
+    fetchAllPages<SecurityCommittee>("/governance/committees/"),
   createCommittee: (data: Partial<SecurityCommittee>) =>
     apiClient.post<SecurityCommittee>("/governance/committees/", data).then((r) => r.data),
   updateCommittee: (id: string, data: Partial<SecurityCommittee>) =>
@@ -205,11 +204,7 @@ export const governanceApi = {
 
   // Document workflow policies
   listDocumentPolicies: () =>
-    apiClient
-      .get<{ results?: DocumentWorkflowPolicy[] } | DocumentWorkflowPolicy[]>(
-        "/governance/document-workflow-policies/",
-      )
-      .then((r) => (Array.isArray(r.data) ? r.data : r.data.results ?? [])),
+    fetchAllPages<DocumentWorkflowPolicy>("/governance/document-workflow-policies/"),
   createDocumentPolicy: (data: Partial<DocumentWorkflowPolicy>) =>
     apiClient
       .post<DocumentWorkflowPolicy>("/governance/document-workflow-policies/", data)

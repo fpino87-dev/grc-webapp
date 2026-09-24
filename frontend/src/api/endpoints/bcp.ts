@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export interface BcpPlan {
   id: string; plant: string; title: string; version: string;
@@ -33,7 +34,7 @@ export interface BcpTest {
 
 export const bcpApi = {
   list: (params?: Record<string, string>) =>
-    apiClient.get<{ results: BcpPlan[] }>("/bcp/plans/", { params }).then(r => r.data),
+    fetchAllPages<BcpPlan>("/bcp/plans/", params).then((results) => ({ results, count: results.length })),
   approve: (id: string) =>
     apiClient.post(`/bcp/plans/${id}/approve/`).then(r => r.data),
   create: (data: Partial<BcpPlan>) =>
@@ -41,7 +42,7 @@ export const bcpApi = {
   update: (id: string, data: Partial<BcpPlan>) =>
     apiClient.patch<BcpPlan>(`/bcp/plans/${id}/`, data).then(r => r.data),
   tests: (planId: string) =>
-    apiClient.get<{ results: BcpTest[] }>("/bcp/tests/", { params: { plan: planId } }).then(r => r.data.results),
+    fetchAllPages<BcpTest>("/bcp/tests/", { plan: planId }),
   recordTest: (data: Record<string, unknown> | FormData) => {
     const isForm = typeof FormData !== "undefined" && data instanceof FormData;
     return apiClient

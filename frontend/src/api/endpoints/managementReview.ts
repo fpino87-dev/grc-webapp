@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export type DecisionType = "miglioramento" | "modifica_sgsi" | "risorse" | "obiettivo" | "altro";
 
@@ -188,7 +189,7 @@ const base = "/management-review/reviews";
 
 export const managementReviewApi = {
   list: (params?: Record<string, string>) =>
-    apiClient.get<{ results: ManagementReview[] }>(`${base}/`, { params }).then((r) => r.data),
+    fetchAllPages<ManagementReview>(`${base}/`, params).then((results) => ({ results, count: results.length })),
 
   create: (data: Partial<ManagementReview>) =>
     apiClient.post<ManagementReview>(`${base}/`, data).then((r) => r.data),

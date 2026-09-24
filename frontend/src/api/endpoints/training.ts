@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 // Formazione a evidenze: la piattaforma non eroga la formazione, la governa.
 // Piano → erogazioni con file di prova → evidenze sui controlli → KPI.
@@ -6,7 +7,6 @@ import { apiClient } from "../client";
 // Ruoli critici e organo di gestione: partecipanti per nome, scelti fra i
 // titolari di nomine e i componenti degli organi di governo.
 
-type Page<T> = { results: T[] };
 
 export type CourseKind = "corso" | "awareness" | "phishing";
 export type AudienceKind = "generale" | "ruoli_critici" | "organo_gestione";
@@ -170,8 +170,7 @@ export interface SessionCreated extends TrainingSession {
 }
 
 const BASE = "/training";
-const list = <T,>(url: string, params?: Record<string, string>) =>
-  apiClient.get<Page<T>>(url, { params: { page_size: "500", ...params } }).then(r => r.data.results);
+const list = <T,>(url: string, params?: Record<string, string>) => fetchAllPages<T>(url, params);
 
 export const trainingApi = {
   capabilities: () =>

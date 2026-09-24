@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "../../api/client";
 import { useAuthStore } from "../../store/auth";
 import { useTranslation } from "react-i18next";
+import { fetchAllPages } from "../../api/pagination";
 
 // ─── Dati statici BIA/Risk (testi via i18n) ──────────────────────────────────
 
@@ -232,7 +233,9 @@ function TabConnessioni() {
 
   const { data: redRisks } = useQuery({
     queryKey: ["risk-red-no-pdca", plantId],
-    queryFn: () => apiClient.get(`/risk/assessments/?risk_level=rosso&has_pdca=false${plantId ? `&plant=${plantId}` : ""}`).then(r => (r.data as { results?: unknown[] }).results ?? r.data as unknown[]),
+    queryFn: () => fetchAllPages<unknown>("/risk/assessments/", {
+      risk_level: "rosso", has_pdca: "false", ...(plantId ? { plant: plantId } : {}),
+    }),
     retry: false,
   });
 

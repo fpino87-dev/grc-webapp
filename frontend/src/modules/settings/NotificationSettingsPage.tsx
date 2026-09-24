@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../../api/client";
+import { fetchAllPages } from "../../api/pagination";
 
 // ── Tipi ────────────────────────────────────────────────────────────────────
 
@@ -246,11 +247,7 @@ export function NotificationSettingsPage() {
 
   const { data: profiles, isLoading } = useQuery<RoleProfile[]>({
     queryKey: ["notification-role-profiles"],
-    queryFn: async () => {
-      const res = await apiClient.get("/notifications/role-profiles/");
-      const d = res.data;
-      return Array.isArray(d) ? d : (d?.results ?? []);
-    },
+    queryFn: () => fetchAllPages<RoleProfile>("/notifications/role-profiles/"),
     retry: false,
   });
 

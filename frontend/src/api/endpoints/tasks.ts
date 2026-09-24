@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export type TaskRecurrence =
   | "none"
@@ -31,7 +32,7 @@ export interface Task {
 
 export const tasksApi = {
   list: (params?: Record<string,string>) =>
-    apiClient.get<{results: Task[]; count: number}>("/tasks/tasks/", {params}).then(r => r.data),
+    fetchAllPages<Task>("/tasks/tasks/", params).then((results) => ({ results, count: results.length })),
   complete: (id: string, notes?: string) =>
     apiClient.post(`/tasks/tasks/${id}/complete/`, {notes}).then(r => r.data),
   create: (data: Partial<Task>) =>

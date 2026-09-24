@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export interface MappedControl {
   external_id: string;
@@ -267,12 +268,9 @@ export interface GapAnalysisResult {
 
 export const controlsApi = {
   instances: (params?: Record<string, string>) =>
-    apiClient.get<{ results: ControlInstance[]; count: number }>("/controls/instances/", { params: { page_size: "1000", ...params } }).then((r) => r.data),
+    fetchAllPages<ControlInstance>("/controls/instances/", { page_size: "1000", ...params }).then((results) => ({ results, count: results.length })),
   frameworks: (plantId?: string) =>
-    apiClient.get<{ results: Framework[] }>(
-      "/controls/frameworks/",
-      { params: plantId ? { plant: plantId } : {} }
-    ).then((r) => r.data.results ?? r.data),
+    fetchAllPages<Framework>("/controls/frameworks/", plantId ? { plant: plantId } : {}),
   frameworksGovernance: () =>
     apiClient.get<{ results: FrameworkGovernanceMeta[] }>(
       "/controls/frameworks/governance/",

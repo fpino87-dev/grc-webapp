@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export interface AssetChangeFields {
   last_change_ref: string;
@@ -141,9 +142,9 @@ export interface RegisterChangeResult {
 
 export const assetsApi = {
   listIT: (params?: Record<string,string>) =>
-    apiClient.get<{results: AssetIT[]}>("/assets/it/", {params}).then(r => r.data),
+    fetchAllPages<AssetIT>("/assets/it/", params).then((results) => ({ results, count: results.length })),
   listOT: (params?: Record<string,string>) =>
-    apiClient.get<{results: AssetOT[]}>("/assets/ot/", {params}).then(r => r.data),
+    fetchAllPages<AssetOT>("/assets/ot/", params).then((results) => ({ results, count: results.length })),
   createIT: (data: Partial<AssetIT>) =>
     apiClient.post<AssetIT>("/assets/it/", data).then(r => r.data),
   createOT: (data: Partial<AssetOT>) =>
@@ -159,7 +160,7 @@ export const assetsApi = {
   needsRevaluationIT: (plant?: string) =>
     apiClient.get<AssetIT[]>("/assets/it/needs-revaluation/", { params: plant ? { plant } : {} }).then(r => r.data),
   listFacility: (params?: Record<string, string>) =>
-    apiClient.get<{ results: AssetFacility[] }>("/assets/facility/", { params }).then(r => r.data),
+    fetchAllPages<AssetFacility>("/assets/facility/", params).then((results) => ({ results, count: results.length })),
   createFacility: (data: Partial<AssetFacility>) =>
     apiClient.post<AssetFacility>("/assets/facility/", data).then(r => r.data),
   updateFacility: (id: string, data: Partial<AssetFacility>) =>
@@ -175,7 +176,7 @@ export const assetsApi = {
   ) =>
     apiClient.post(`/assets/${type}/${id}/record-maintenance/`, data).then(r => r.data),
   listSW: (params?: Record<string, string>) =>
-    apiClient.get<{ results: AssetSW[] }>("/assets/sw/", { params }).then(r => r.data),
+    fetchAllPages<AssetSW>("/assets/sw/", params).then((results) => ({ results, count: results.length })),
   createSW: (data: Partial<AssetSW>) =>
     apiClient.post<AssetSW>("/assets/sw/", data).then(r => r.data),
   updateSW: (id: string, data: Partial<AssetSW>) =>

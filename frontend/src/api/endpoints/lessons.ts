@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../pagination";
 
 export interface LessonLearned {
   id: string; title: string; description: string;
@@ -8,7 +9,7 @@ export interface LessonLearned {
 
 export const lessonsApi = {
   list: (params?: Record<string, string>) =>
-    apiClient.get<{ results: LessonLearned[] }>("/lessons/lessons/", { params }).then(r => r.data),
+    fetchAllPages<LessonLearned>("/lessons/lessons/", params).then((results) => ({ results, count: results.length })),
   validate: (id: string) =>
     apiClient.post(`/lessons/lessons/${id}/validate/`).then(r => r.data),
   create: (data: Partial<LessonLearned>) =>

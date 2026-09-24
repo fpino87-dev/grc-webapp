@@ -3509,7 +3509,12 @@
   "audit_trail": {
     "levels_guide": "Guida ai livelli",
     "filter_all": "Tutti",
-    "entity_placeholder": "es. plant"
+    "entity_placeholder": "es. plant",
+    "pagination": {
+      "summary": "Pagina {{page}} di {{pages}} — {{count}} eventi",
+      "prev": "← Precedenti",
+      "next": "Successivi →"
+    }
   },
   "suppliers": {
     "page_title": "Gestione Fornitori",
