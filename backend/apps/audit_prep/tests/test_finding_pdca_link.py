@@ -219,9 +219,12 @@ def test_shared_pdca_in_act_needs_to_be_closed_first(client, plant, user):
     assert resp.status_code == 400
     from apps.pdca.services import close_cycle
     close_cycle(cycle, user, act_description="Azione comune standardizzata per entrambe.")
-    f1.refresh_from_db()
-    assert f1.status == "in_response"  # il PDCA chiuso porta i finding collegati in risposta
-    assert client.post(f"{URL_FINDINGS}{f1.id}/close/", {"closure_notes": "chiusa"}, format="json").status_code == 200
+    # PDCA efficace con evidenza DO: i finding collegati si chiudono con lui
+    for f in (f1, f2):
+        f.refresh_from_db()
+        assert f.status == "closed"
+        assert f.closure_evidence_id is not None
+        assert f.closure_notes == "Azione comune standardizzata per entrambe."
 
 
 @pytest.mark.django_db
@@ -268,15 +271,18 @@ def test_closed_finding_links_from_pdca_menu_on_closed_cycle(client, plant, user
 
 
 @pytest.mark.django_db
-def test_open_finding_links_to_closed_pdca_and_goes_in_response(client, plant, user):
-    """Azione correttiva già eseguita prima di registrare il finding."""
-    f = _finding(_prep(plant), user)
+def test_open_finding_links_to_closed_effective_pdca_and_closes(client, plant, user):
+    """Azione correttiva già eseguita prima di registrare il finding: il PDCA
+    chiuso ed efficace chiude il finding con la sua evidenza DO."""
+    f = _finding(_prep(plant), user, "minor_nc", "NC dal rapporto")
+    f.pdca_cycle = None
+    f.save(update_fields=["pdca_cycle"])
     cycle = _closed_cycle(plant, user)
     resp = client.post(f"{URL_FINDINGS}{f.id}/link-pdca/", {"pdca_cycle": str(cycle.id)}, format="json")
     assert resp.status_code == 200, resp.data
-    assert resp.data["status"] == "in_response"
-    # ora si chiude con l'evidenza, senza vincoli sul PDCA (già chiuso)
-    assert client.post(f"{URL_FINDINGS}{f.id}/close/", {"closure_notes": "chiusa"}, format="json").status_code == 200
+    assert resp.data["status"] == "closed"
+    do_ev = cycle.phases.get(phase="do").evidence_id
+    assert str(resp.data["closure_evidence"]) == str(do_ev)
 
 
 @pytest.mark.django_db
@@ -318,7 +324,7 @@ def test_replace_auto_pdca_with_closed_manual_one_archives_untouched_auto(client
                        {"pdca_cycle": str(manual.id), "reason": "Azione già svolta nel PDCA manuale"}, format="json")
     assert resp.status_code == 200, resp.data
     assert str(resp.data["pdca_cycle"]) == str(manual.id)
-    assert resp.data["status"] == "in_response"
+    assert resp.data["status"] == "closed"  # PDCA manuale efficace con evidenza DO
     auto.refresh_from_db()
     assert auto.fase_corrente == "archiviato"
     assert "Sostituito dal PDCA" in auto.motivo_archiviazione
@@ -347,4 +353,53 @@ def test_replace_from_pdca_menu_via_link_finding(client, plant, user):
     resp = client.post(url, {"finding": str(f.id), "reason": "Azione già svolta prima del rapporto"}, format="json")
     assert resp.status_code == 200, resp.data
     assert [x["id"] for x in resp.data["findings"]] == [str(f.id)]
+
+
+# ── Chiusura del PDCA → finding collegati, secondo l'esito del CHECK ────────
+
+def _cycle_to_act_with_outcome(cycle, user, outcome):
+    from apps.documents.models import Evidence
+    from apps.pdca.services import advance_phase
+    ev = Evidence.objects.create(title="ev", plant=cycle.plant, created_by=user)
+    advance_phase(cycle, user, phase_notes=PLAN)
+    advance_phase(cycle, user, evidence=ev)
+    advance_phase(cycle, user, phase_notes="Verifica eseguita sul campo.", outcome=outcome)
+    cycle.refresh_from_db()
+    return cycle
+
+
+@pytest.mark.django_db
+def test_partial_outcome_leaves_finding_in_response(plant, user):
+    from apps.pdca.services import close_cycle
+    f = _finding(_prep(plant), user, "minor_nc", "NC")
+    cycle = _cycle_to_act_with_outcome(f.pdca_cycle, user, "partial")
+    close_cycle(cycle, user, act_description="Azione standardizzata solo in parte.")
+    f.refresh_from_db()
+    assert f.status == "in_response"
+
+
+@pytest.mark.django_db
+def test_ko_outcome_moves_finding_to_recycle(plant, user):
+    from apps.pdca.services import close_cycle
+    f = _finding(_prep(plant), user, "minor_nc", "NC")
+    cycle = _cycle_to_act_with_outcome(f.pdca_cycle, user, "ko")
+    assert cycle.reopened_as_id
+    close_cycle(cycle, user, act_description="Azione non efficace, si riparte.")
+    f.refresh_from_db()
+    assert f.status == "open"
+    assert f.pdca_cycle_id == cycle.reopened_as_id
+
+
+@pytest.mark.django_db
+def test_effective_outcome_closes_nc_with_do_evidence(plant, user):
+    from apps.lessons.models import LessonLearned
+    from apps.pdca.services import close_cycle
+    f = _finding(_prep(plant), user, "minor_nc", "NC")
+    cycle = _cycle_to_act_with_outcome(f.pdca_cycle, user, "ok")
+    close_cycle(cycle, user, act_description="Procedura aggiornata e diffusa.")
+    f.refresh_from_db()
+    assert f.status == "closed"
+    assert f.closure_evidence_id == cycle.phases.get(phase="do").evidence_id
+    # una sola Lesson Learned: quella del PDCA
+    assert LessonLearned.objects.filter(source_id__in=[cycle.pk, f.pk]).count() == 1
 

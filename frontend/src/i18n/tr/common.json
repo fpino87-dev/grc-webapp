@@ -3442,7 +3442,8 @@
       "evidence_mode_upload": "Yeni dosya yükleyin",
       "evidence_file_label": "Kanıt dosyası",
       "evidence_title_placeholder": "Başlık (boşsa: «PDCA — döngü başlığı»)",
-      "evidence_upload_hint": "Dosya, döngünün tesisinde ve geçerlilik süresi olmadan döngünün kanıtı olarak arşivlenir."
+      "evidence_upload_hint": "Dosya, döngünün tesisinde ve geçerlilik süresi olmadan döngünün kanıtı olarak arşivlenir.",
+      "findings_close_hint": "{{count}} bağlı denetim bulgusu var: CHECK sonucu etkiliyse PDCA ile birlikte, DO aşamasının kanıtı ve kapanış notu olarak bu açıklamayla kapatılır. Kısmi sonuçta yanıtta durumuna geçer; etkisiz sonuçta yeni döngüye taşınır."
     },
     "dossier": {
       "tooltip": "Denetim dosyası (aşama ayrıntıları + yazdırma/PDF)",

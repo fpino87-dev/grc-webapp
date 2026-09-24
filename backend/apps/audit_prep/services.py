@@ -384,14 +384,11 @@ def link_finding_to_pdca(finding: AuditFinding, cycle, user) -> AuditFinding:
         # Finding chiuso: collegamento a posteriori, nessuno stato cambia.
         retroactive = _is_closed(finding)
         finding.pdca_cycle = cycle
-        fields = ["pdca_cycle", "updated_at"]
-        # PDCA già chiuso = azione correttiva già eseguita: il finding aperto
-        # passa "in risposta", come alla chiusura di un PDCA, pronto per la
-        # chiusura con evidenza.
-        if finding.status == "open" and cycle.fase_corrente == "chiuso":
-            finding.status = "in_response"
-            fields.append("status")
-        finding.save(update_fields=fields)
+        finding.save(update_fields=["pdca_cycle", "updated_at"])
+        # PDCA già chiuso = azione correttiva già eseguita: stesse regole della
+        # chiusura del PDCA (efficace con evidenza → finding chiuso).
+        if not retroactive and cycle.fase_corrente == "chiuso":
+            settle_finding_on_closed_cycle(finding, cycle, user)
         if not cycle.audit_subtype:
             cycle.audit_subtype = finding.audit_prep.audit_type
             cycle.save(update_fields=["audit_subtype", "updated_at"])
@@ -407,6 +404,76 @@ def link_finding_to_pdca(finding: AuditFinding, cycle, user) -> AuditFinding:
             },
         )
     return finding
+
+
+def settle_finding_on_closed_cycle(finding: AuditFinding, cycle, user) -> str:
+    """Esito del PDCA chiuso sul finding collegato ancora aperto/in risposta.
+
+    - CHECK efficace (o ciclo senza CHECK, es. da incidente) con evidenza DO →
+      finding chiuso: evidenza = quella della fase DO, note = standardizzazione
+      ACT (per osservazioni e opportunità l'evidenza non è necessaria);
+    - CHECK parzialmente efficace, o NC senza evidenza DO → "in risposta":
+      la chiusura la decide l'utente;
+    - CHECK non efficace → il finding passa al nuovo ciclo di riciclo.
+    Nessuna Lesson Learned aggiuntiva: la crea già la chiusura del PDCA.
+    Ritorna lo stato risultante ("closed", "in_response" o "moved").
+    """
+    if _is_closed(finding):
+        return finding.status
+    # L'esito sta sulla fase CHECK (sul ciclo viene salvato solo il "ko").
+    check_phase = cycle.phases.filter(phase="check").first()
+    outcome = (check_phase.outcome if check_phase else "") or cycle.check_outcome or ""
+    if outcome == "ko" and cycle.reopened_as_id:
+        finding.pdca_cycle_id = cycle.reopened_as_id
+        finding.status = "open"
+        finding.save(update_fields=["pdca_cycle", "status", "updated_at"])
+        log_action(
+            user=user, action_code="audit.finding.pdca_recycled", level="L2", entity=finding,
+            payload={"from_pdca": str(cycle.pk), "to_pdca": str(cycle.reopened_as_id)},
+        )
+        return "moved"
+
+    do_phase = cycle.phases.filter(phase="do").select_related("evidence").first()
+    evidence = do_phase.evidence if do_phase else None
+    is_nc = finding.finding_type in ("major_nc", "minor_nc")
+    if outcome in ("", "ok") and (evidence is not None or not is_nc):
+        finding.status = "closed"
+        finding.closure_evidence = evidence
+        finding.closure_notes = cycle.act_description or ""
+        finding.closed_at = timezone.now()
+        finding.closed_by = user
+        finding.save(update_fields=[
+            "status", "closure_evidence", "closure_notes", "closed_at", "closed_by", "updated_at",
+        ])
+        if finding.control_instance and finding.control_instance.status == "gap":
+            ci = finding.control_instance
+            ci.status = "parziale"
+            ci.save(update_fields=["status", "updated_at"])
+        log_action(
+            user=user, action_code="audit.finding.closed_by_pdca",
+            level="L1" if finding.finding_type == "major_nc" else "L2", entity=finding,
+            payload={"pdca_cycle": str(cycle.pk), "check_outcome": outcome or None,
+                     "evidence": str(evidence.pk) if evidence else None},
+        )
+        return "closed"
+
+    if finding.status == "open":
+        finding.status = "in_response"
+        finding.save(update_fields=["status", "updated_at"])
+        log_action(
+            user=user, action_code="audit.finding.pdca_closed", level="L2", entity=finding,
+            payload={"pdca_cycle": str(cycle.pk), "new_status": "in_response",
+                     "check_outcome": outcome or None, "has_do_evidence": evidence is not None},
+        )
+    return "in_response"
+
+
+def settle_findings_of_closed_cycle(cycle, user) -> None:
+    """Applica la chiusura del PDCA a tutti i finding collegati non chiusi."""
+    for finding in cycle.findings.exclude(status__in=["closed", "accepted_by_auditor"]).select_related(
+        "control_instance",
+    ):
+        settle_finding_on_closed_cycle(finding, cycle, user)
 
 
 def _is_untouched_auto_cycle(cycle, finding: AuditFinding) -> bool:

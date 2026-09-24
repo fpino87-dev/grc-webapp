@@ -3442,7 +3442,8 @@
       "evidence_mode_upload": "Carica un nuovo file",
       "evidence_file_label": "File dell'evidenza",
       "evidence_title_placeholder": "Titolo (se vuoto: «PDCA — titolo del ciclo»)",
-      "evidence_upload_hint": "Il file viene archiviato come evidenza del ciclo, sul sito del ciclo e senza scadenza."
+      "evidence_upload_hint": "Il file viene archiviato come evidenza del ciclo, sul sito del ciclo e senza scadenza.",
+      "findings_close_hint": "Ci sono {{count}} finding di audit collegati: con esito CHECK efficace si chiudono insieme al PDCA, con l'evidenza della fase DO e questa descrizione come note di chiusura. Con esito parziale passano in risposta; con esito non efficace passano al nuovo ciclo."
     },
     "dossier": {
       "tooltip": "Dossier audit (dettaglio fasi + stampa/PDF)",

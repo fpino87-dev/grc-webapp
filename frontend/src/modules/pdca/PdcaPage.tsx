@@ -1130,6 +1130,11 @@ function AdvanceButtons({
             )}
             {open === "act" && (
               <>
+                {(cycle.findings?.length ?? 0) > 0 && (
+                  <p className="text-xs text-teal-800 bg-teal-50 border border-teal-200 rounded px-2 py-1.5">
+                    {t("pdca.advance.findings_close_hint", { count: cycle.findings!.length })}
+                  </p>
+                )}
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t("pdca.advance.act_label")}
                 </label>

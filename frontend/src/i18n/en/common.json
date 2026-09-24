@@ -3442,7 +3442,8 @@
       "evidence_mode_upload": "Upload a new file",
       "evidence_file_label": "Evidence file",
       "evidence_title_placeholder": "Title (if empty: «PDCA — cycle title»)",
-      "evidence_upload_hint": "The file is stored as evidence of the cycle, on the cycle's site and with no expiry."
+      "evidence_upload_hint": "The file is stored as evidence of the cycle, on the cycle's site and with no expiry.",
+      "findings_close_hint": "There are {{count}} linked audit findings: with an effective CHECK outcome they are closed together with the PDCA, with the DO phase evidence and this description as closure notes. With a partial outcome they move to in response; with an ineffective outcome they move to the new cycle."
     },
     "dossier": {
       "tooltip": "Audit dossier (phase detail + print/PDF)",

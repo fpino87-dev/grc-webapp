@@ -3442,7 +3442,8 @@
       "evidence_mode_upload": "Wgraj nowy plik",
       "evidence_file_label": "Plik dowodu",
       "evidence_title_placeholder": "Tytuł (jeśli pusty: «PDCA — tytuł cyklu»)",
-      "evidence_upload_hint": "Plik jest archiwizowany jako dowód cyklu, w zakładzie cyklu i bez terminu ważności."
+      "evidence_upload_hint": "Plik jest archiwizowany jako dowód cyklu, w zakładzie cyklu i bez terminu ważności.",
+      "findings_close_hint": "Powiązanych ustaleń audytu: {{count}}. Przy skutecznym wyniku CHECK zamykają się razem z PDCA, z dowodem z fazy DO i tym opisem jako uwagami zamknięcia. Przy wyniku częściowym przechodzą w stan w odpowiedzi; przy wyniku nieskutecznym przechodzą do nowego cyklu."
     },
     "dossier": {
       "tooltip": "Dossier audytowe (szczegóły faz + wydruk/PDF)",

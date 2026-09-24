@@ -3442,7 +3442,8 @@
       "evidence_mode_upload": "Charger un nouveau fichier",
       "evidence_file_label": "Fichier de la preuve",
       "evidence_title_placeholder": "Titre (si vide : «PDCA — titre du cycle»)",
-      "evidence_upload_hint": "Le fichier est archivé comme preuve du cycle, sur le site du cycle et sans échéance."
+      "evidence_upload_hint": "Le fichier est archivé comme preuve du cycle, sur le site du cycle et sans échéance.",
+      "findings_close_hint": "{{count}} constats d'audit sont liés : avec un résultat CHECK efficace, ils sont clôturés avec le PDCA, avec la preuve de la phase DO et cette description comme notes de clôture. Avec un résultat partiel, ils passent en réponse ; avec un résultat non efficace, ils passent au nouveau cycle."
     },
     "dossier": {
       "tooltip": "Dossier d'audit (détail des phases + impression/PDF)",
