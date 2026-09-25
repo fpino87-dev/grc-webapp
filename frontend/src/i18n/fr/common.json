@@ -3370,7 +3370,22 @@
       "finding_major": "Constat — NC majeure",
       "finding_minor": "Constat — NC mineure",
       "finding_observation": "Constat — observation",
-      "finding_opportunity": "Constat — opportunité"
+      "finding_opportunity": "Constat — opportunité",
+      "incidente": "Incident",
+      "bcp_test_fallito": "Test PCA échoué",
+      "bcp_rto_sforato": "RTO PCA dépassé",
+      "checklist_incompleta": "Checklist incomplète"
+    },
+    "trigger_filter": {
+      "audit": "Audits et constats",
+      "incident": "Incidents",
+      "management_review": "Revue de direction",
+      "risk": "Risques",
+      "controls": "Écarts de contrôles",
+      "bcp": "PCA",
+      "checklist": "Checklists",
+      "pdca_ko": "Recyclage CHECK KO",
+      "manual": "Manuel"
     },
     "audit_subtype": {
       "interno": "Interne",

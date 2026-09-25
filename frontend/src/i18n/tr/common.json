@@ -3370,7 +3370,22 @@
       "finding_major": "Bulgu — büyük UYS",
       "finding_minor": "Bulgu — küçük UYS",
       "finding_observation": "Bulgu — gözlem",
-      "finding_opportunity": "Bulgu — iyileştirme fırsatı"
+      "finding_opportunity": "Bulgu — iyileştirme fırsatı",
+      "incidente": "Olay",
+      "bcp_test_fallito": "Başarısız BCP testi",
+      "bcp_rto_sforato": "BCP RTO aşıldı",
+      "checklist_incompleta": "Eksik kontrol listesi"
+    },
+    "trigger_filter": {
+      "audit": "Denetimler ve bulgular",
+      "incident": "Olaylar",
+      "management_review": "Yönetim gözden geçirmesi",
+      "risk": "Riskler",
+      "controls": "Kontrol açıkları",
+      "bcp": "BCP",
+      "checklist": "Kontrol listeleri",
+      "pdca_ko": "CHECK KO yeniden döngü",
+      "manual": "Manuel"
     },
     "audit_subtype": {
       "interno": "İç",

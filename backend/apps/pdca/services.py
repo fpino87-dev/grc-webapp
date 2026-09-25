@@ -10,6 +10,22 @@ from .models import PdcaCycle, PdcaPhase
 PHASE_ORDER = ["plan", "do", "check", "act"]
 
 
+# Filtro "origine" dell'elenco: una categoria raccoglie i codici di trigger
+# che i vari moduli salvano (es. i PDCA aperti dai finding sono "Audit",
+# quelli degli incidenti NIS2 hanno il codice italiano "incidente").
+TRIGGER_GROUPS = {
+    "audit": ["audit", "finding_major", "finding_minor", "finding_observation", "finding_opportunity"],
+    "incident": ["incident", "incidente"],
+    "management_review": ["management_review"],
+    "risk": ["risk", "risk_rosso"],
+    "controls": ["gap_controllo"],
+    "bcp": ["bcp_test_fallito", "bcp_rto_sforato"],
+    "checklist": ["checklist_incompleta"],
+    "pdca_ko": ["pdca_ko"],
+    "manual": ["manual"],
+}
+
+
 def create_cycle(plant, title, trigger_type, trigger_source_id=None, scope_type="custom", scope_id=None):
     cycle = PdcaCycle.objects.create(
         plant=plant,

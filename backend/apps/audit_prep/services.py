@@ -158,6 +158,29 @@ def create_audit_group(*, user, title: str, plants, framework=None, audit_type="
     return group
 
 
+def sync_pdca_audit_subtype(preps, user) -> int:
+    """Il tipo di audit dei PDCA collegati ai finding segue quello dell'audit:
+    se l'audit cambia tipo (es. da seconda parte a interno), anche i PDCA dei
+    suoi finding cambiano. Ritorna il numero di cicli aggiornati."""
+    from apps.pdca.models import PdcaCycle
+
+    updated = 0
+    for prep in preps:
+        cycles = PdcaCycle.objects.filter(findings__audit_prep=prep).exclude(
+            audit_subtype=prep.audit_type,
+        ).distinct()
+        for cycle in cycles:
+            old = cycle.audit_subtype
+            cycle.audit_subtype = prep.audit_type
+            cycle.save(update_fields=["audit_subtype", "updated_at"])
+            log_action(
+                user=user, action_code="pdca.cycle.audit_subtype_synced", level="L2", entity=cycle,
+                payload={"from": old or None, "to": prep.audit_type, "audit_prep": str(prep.pk)},
+            )
+            updated += 1
+    return updated
+
+
 def update_audit_group(group: AuditGroup, user, **fields) -> AuditGroup:
     """Aggiorna i dati comuni e li riporta su tutti gli audit dei siti.
     Un nuovo titolo rinomina anche gli audit dei siti («titolo — sito»)."""
@@ -173,6 +196,8 @@ def update_audit_group(group: AuditGroup, user, **fields) -> AuditGroup:
         group.save()
         shared = {f: getattr(group, f) for f in GROUP_SHARED_FIELDS}
         group.preps.update(**shared, updated_at=timezone.now())
+        if "audit_type" in allowed:
+            sync_pdca_audit_subtype(list(group.preps.all()), user)
         if "title" in allowed:
             for prep in group.preps.select_related("plant"):
                 prep.title = f"{group.title} — {prep.plant.code}"[:200]

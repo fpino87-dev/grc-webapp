@@ -141,6 +141,8 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                     "modificano dall'audit comune."
                 )})
         instance = serializer.save()
+        if "audit_type" in serializer.validated_data:
+            services.sync_pdca_audit_subtype([instance], self.request.user)
         self._sync_program(instance)
         log_action(
             user=self.request.user,

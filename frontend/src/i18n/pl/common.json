@@ -3370,7 +3370,22 @@
       "finding_major": "Ustalenie — NC poważna",
       "finding_minor": "Ustalenie — NC drobna",
       "finding_observation": "Ustalenie — obserwacja",
-      "finding_opportunity": "Ustalenie — szansa doskonalenia"
+      "finding_opportunity": "Ustalenie — szansa doskonalenia",
+      "incidente": "Incydent",
+      "bcp_test_fallito": "Nieudany test BCP",
+      "bcp_rto_sforato": "Przekroczone RTO BCP",
+      "checklist_incompleta": "Niekompletna lista kontrolna"
+    },
+    "trigger_filter": {
+      "audit": "Audyty i ustalenia",
+      "incident": "Incydenty",
+      "management_review": "Przegląd zarządzania",
+      "risk": "Ryzyka",
+      "controls": "Luki w kontrolach",
+      "bcp": "BCP",
+      "checklist": "Listy kontrolne",
+      "pdca_ko": "Ponowny cykl CHECK KO",
+      "manual": "Ręczne"
     },
     "audit_subtype": {
       "interno": "Wewnętrzny",

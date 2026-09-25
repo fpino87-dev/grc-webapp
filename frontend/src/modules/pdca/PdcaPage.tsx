@@ -17,6 +17,11 @@ const TRIGGER_CODES = [
   "audit", "incident", "management_review", "risk", "manual",
   "pdca_ko", "gap_controllo", "risk_rosso",
   "finding_major", "finding_minor", "finding_observation", "finding_opportunity",
+  "incidente", "bcp_test_fallito", "bcp_rto_sforato", "checklist_incompleta",
+];
+// Categorie del filtro "origine": il backend le espande nei codici (TRIGGER_GROUPS).
+const TRIGGER_FILTERS = [
+  "audit", "incident", "management_review", "risk", "controls", "bcp", "checklist", "pdca_ko", "manual",
 ];
 const SCOPE_CODES = ["plant", "org", "process"];
 const AUDIT_SUBTYPE_CODES = ["interno", "seconda_parte", "terza_parte"];
@@ -1380,11 +1385,7 @@ export function PdcaPage() {
           className="border rounded px-3 py-1.5 text-sm text-gray-700 bg-white"
         >
           <option value="">{t("pdca.filters.all_triggers")}</option>
-          <option value="audit">{t("pdca.trigger.audit")}</option>
-          <option value="incident">{t("pdca.trigger.incident")}</option>
-          <option value="management_review">{t("pdca.trigger.management_review")}</option>
-          <option value="risk">{t("pdca.trigger.risk")}</option>
-          <option value="manual">{t("pdca.trigger.manual")}</option>
+          {TRIGGER_FILTERS.map(code => <option key={code} value={code}>{t(`pdca.trigger_filter.${code}`)}</option>)}
         </select>
         <label className="text-sm text-gray-600 font-medium ml-2">{t("pdca.filters.plant_label")}</label>
         <select

@@ -3370,7 +3370,22 @@
       "finding_major": "Finding — NC maggiore",
       "finding_minor": "Finding — NC minore",
       "finding_observation": "Finding — osservazione",
-      "finding_opportunity": "Finding — opportunità"
+      "finding_opportunity": "Finding — opportunità",
+      "incidente": "Incidente",
+      "bcp_test_fallito": "Test BCP fallito",
+      "bcp_rto_sforato": "RTO BCP superato",
+      "checklist_incompleta": "Checklist incompleta"
+    },
+    "trigger_filter": {
+      "audit": "Audit e finding",
+      "incident": "Incidenti",
+      "management_review": "Revisione direzione",
+      "risk": "Rischi",
+      "controls": "Gap controlli",
+      "bcp": "BCP",
+      "checklist": "Checklist",
+      "pdca_ko": "Riciclo CHECK KO",
+      "manual": "Manuale"
     },
     "audit_subtype": {
       "interno": "Interno",

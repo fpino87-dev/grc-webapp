@@ -207,3 +207,15 @@ describe("PdcaPage — filtro per stato", () => {
   });
 });
 
+
+describe("PdcaPage — filtro per origine", () => {
+  it("propone le categorie e passa la categoria al backend", async () => {
+    renderPage();
+    const triggerSelect = (await screen.findByText("pdca.filters.all_triggers")).closest("select")!;
+    for (const code of ["audit", "incident", "bcp", "checklist", "controls"]) {
+      expect(screen.getByText(`pdca.trigger_filter.${code}`)).toBeInTheDocument();
+    }
+    fireEvent.change(triggerSelect, { target: { value: "bcp" } });
+    await vi.waitFor(() => expect(mockList).toHaveBeenLastCalledWith({ trigger_type: "bcp" }));
+  });
+});

@@ -24,7 +24,8 @@ class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     )
     serializer_class = PdcaCycleSerializer
     permission_classes = [PdcaPermission]
-    filterset_fields = ["id", "plant", "fase_corrente", "trigger_type"]
+    # trigger_type si filtra per categoria in get_queryset (TRIGGER_GROUPS)
+    filterset_fields = ["id", "plant", "fase_corrente"]
     search_fields = ["title"]
     plant_field = "plant"
     # I cicli di organizzazione (plant=None) sono visibili a tutti i siti.
@@ -36,6 +37,11 @@ class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         # ?open=true → solo cicli ancora aperti (collegabili a un finding).
         if params.get("open", "").lower() == "true":
             qs = qs.exclude(fase_corrente__in=["chiuso", "archiviato"])
+        # ?trigger_type=<categoria> → tutti i codici della categoria (es. audit
+        # comprende i PDCA aperti dai finding); un codice esatto resta valido.
+        trigger = params.get("trigger_type")
+        if trigger:
+            qs = qs.filter(trigger_type__in=services.TRIGGER_GROUPS.get(trigger, [trigger]))
         # ?org=true → solo i cicli di organizzazione.
         if params.get("org", "").lower() == "true":
             qs = qs.filter(plant__isnull=True)
