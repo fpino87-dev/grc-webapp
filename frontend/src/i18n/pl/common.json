@@ -3347,7 +3347,9 @@
       "only_org": "Tylko organizacja",
       "status_label": "Status:",
       "all_statuses": "Wszystkie",
-      "only_open": "W toku (PLAN → ACT)"
+      "only_open": "W toku (PLAN → ACT)",
+      "search_placeholder": "Szukaj po tytule, opisie, ustaleniu lub audycie…",
+      "exclude_org": "Wyklucz organizację"
     },
     "table": {
       "title": "Tytuł / Ustalenie",

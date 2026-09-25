@@ -58,3 +58,17 @@ def test_changing_group_audit_type_updates_common_pdca(co, group):
     assert r.status_code == 200, r.data
     cycle.refresh_from_db()
     assert cycle.audit_subtype == "seconda_parte"
+
+
+@pytest.mark.django_db
+def test_search_matches_cycle_and_linked_finding(client, prep):
+    from apps.pdca.services import create_cycle
+    client.post(URL_FINDINGS, {
+        "audit_prep": prep["id"], "finding_type": "minor_nc", "title": "Sospensione badge", "description": "d",
+        "audit_date": "2026-09-10",
+    }, format="json")
+    create_cycle(plant=None, title="Ciclo senza finding", trigger_type="manual")
+    rows = client.get(URL_CYCLES, {"search": "badge"}).data["results"]
+    assert len(rows) == 1 and "badge" in rows[0]["title"]
+    rows = client.get(URL_CYCLES, {"search": "Audit cliente OEM"}).data["results"]
+    assert len(rows) == 1

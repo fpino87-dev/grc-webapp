@@ -26,7 +26,11 @@ class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     permission_classes = [PdcaPermission]
     # trigger_type si filtra per categoria in get_queryset (TRIGGER_GROUPS)
     filterset_fields = ["id", "plant", "fase_corrente"]
-    search_fields = ["title"]
+    # ?search= testo libero: ciclo, riferimento e finding/audit collegati
+    search_fields = [
+        "title", "descrizione", "riferimento_finding",
+        "findings__title", "findings__audit_prep__title",
+    ]
     plant_field = "plant"
     # I cicli di organizzazione (plant=None) sono visibili a tutti i siti.
     allow_null_plant = True

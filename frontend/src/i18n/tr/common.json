@@ -3347,7 +3347,9 @@
       "only_org": "Yalnızca organizasyon",
       "status_label": "Durum:",
       "all_statuses": "Tümü",
-      "only_open": "Devam eden (PLAN → ACT)"
+      "only_open": "Devam eden (PLAN → ACT)",
+      "search_placeholder": "Başlık, açıklama, bulgu veya denetime göre ara…",
+      "exclude_org": "Kuruluşu hariç tut"
     },
     "table": {
       "title": "Başlık / Bulgu",

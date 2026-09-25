@@ -9,6 +9,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 ## [Unreleased]
 
 ### Added
+- **PDCA — ricerca ed esclusione dei cicli di organizzazione**: nell'elenco PDCA una barra di ricerca trova i cicli per titolo, descrizione, riferimento, finding e audit collegati. Filtrando per un sito si può spuntare "Escludi organizzazione" per vedere solo i cicli di quel sito.
 - **Audit Prep — correzione dei finding**: titolo e descrizione di un finding già salvato si possono correggere dalla sua card; in un rilievo comune la correzione vale per tutti i siti. Tipo, date e stato restano governati da PDCA e chiusura; ogni correzione è registrata nell'audit trail.
 - **Audit Prep — audit interno affidato a un consulente esterno**: nuova opzione "Condotto da un consulente esterno" per l'audit interno. L'audit resta di prima parte, ma si gestisce come uno di seconda parte: niente checklist dei controlli né punteggio di prontezza, si registrano i rilievi del consulente e si allega il suo rapporto, che entra nel pacchetto audit.
 - **Audit Prep — titolo modificabile**: il titolo di un audit si può correggere dal dettaglio. In un audit multi-sito si modifica il titolo comune, riportato su tutti i siti.

@@ -237,3 +237,22 @@ describe("PdcaPage — filtro per origine", () => {
     await vi.waitFor(() => expect(mockList).toHaveBeenLastCalledWith({ trigger_type: "bcp" }));
   });
 });
+
+describe("PdcaPage — ricerca ed esclusione organizzazione", () => {
+  it("la ricerca per testo passa search al backend", async () => {
+    renderPage();
+    fireEvent.change(await screen.findByLabelText("pdca.filters.search_placeholder"), { target: { value: "badge" } });
+    await vi.waitFor(() => expect(mockList).toHaveBeenLastCalledWith({ search: "badge" }));
+  });
+
+  it("con un sito scelto si possono escludere i cicli di organizzazione", async () => {
+    renderPage();
+    const plantSelect = (await screen.findByText("pdca.filters.all_plants")).closest("select")!;
+    expect(screen.queryByLabelText("pdca.filters.exclude_org")).not.toBeInTheDocument();
+    await screen.findByText("TA — Plant TA");
+    fireEvent.change(plantSelect, { target: { value: "p1" } });
+    await vi.waitFor(() => expect(mockList).toHaveBeenLastCalledWith({ site: "p1" }));
+    fireEvent.click(await screen.findByLabelText("pdca.filters.exclude_org"));
+    await vi.waitFor(() => expect(mockList).toHaveBeenLastCalledWith({ plant: "p1" }));
+  });
+});

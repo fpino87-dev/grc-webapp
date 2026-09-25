@@ -3347,7 +3347,9 @@
       "only_org": "Organisation uniquement",
       "status_label": "Statut :",
       "all_statuses": "Tous",
-      "only_open": "En cours (PLAN → ACT)"
+      "only_open": "En cours (PLAN → ACT)",
+      "search_placeholder": "Rechercher par titre, description, constat ou audit…",
+      "exclude_org": "Exclure l'organisation"
     },
     "table": {
       "title": "Titre / Constat",

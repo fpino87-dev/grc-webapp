@@ -1,4 +1,4 @@
-import { useState, Fragment } from "react";
+import { useEffect, useState, Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { pdcaApi, type PdcaCycle, type PdcaLinkedFinding, type PdcaPhase } from "../../api/endpoints/pdca";
@@ -1349,6 +1349,14 @@ export function PdcaPage() {
   const [filterPlant, setFilterPlant] = useState("");
   // Stato: "open" = in corso (PLAN…ACT), oppure una fase / chiuso / archiviato.
   const [filterStatus, setFilterStatus] = useState("");
+  // Sito specifico: di default anche i cicli di organizzazione, escludibili.
+  const [excludeOrg, setExcludeOrg] = useState(false);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  useEffect(() => {
+    const h = setTimeout(() => setDebouncedSearch(search.trim()), 300);
+    return () => clearTimeout(h);
+  }, [search]);
 
   // Il sito scelto nella barra in alto vale come filtro di default; il select
   // locale lo sovrascrive solo se valorizzato esplicitamente.
@@ -1360,15 +1368,17 @@ export function PdcaPage() {
   const params: Record<string, string> = {};
   if (onlyCycle) params.id = onlyCycle;
   if (filterTrigger) params.trigger_type = filterTrigger;
+  if (debouncedSearch && !onlyCycle) params.search = debouncedSearch;
   if (filterStatus === "open") params.open = "true";
   else if (filterStatus) params.fase_corrente = filterStatus;
   // Filtro per sito: cicli del sito + cicli di organizzazione (valgono anche lì).
   if (onlyCycle) { /* ciclo singolo: nessun altro filtro */ }
   else if (effectivePlant === ORG_VALUE) params.org = "true";
+  else if (effectivePlant && excludeOrg) params.plant = effectivePlant;
   else if (effectivePlant) params.site = effectivePlant;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["pdca", filterTrigger, effectivePlant, filterStatus, onlyCycle],
+    queryKey: ["pdca", filterTrigger, effectivePlant, filterStatus, onlyCycle, excludeOrg, debouncedSearch],
     queryFn: () => pdcaApi.list(params),
     retry: false,
   });
@@ -1390,7 +1400,10 @@ export function PdcaPage() {
         </button>
       </div>
 
-      <div className="mb-3 flex items-center gap-3">
+      <div className="mb-3 flex flex-wrap items-center gap-3">
+        <input type="search" value={search} onChange={e => setSearch(e.target.value)}
+          placeholder={t("pdca.filters.search_placeholder")} aria-label={t("pdca.filters.search_placeholder")}
+          className="border rounded px-3 py-1.5 text-sm w-64" />
         <label className="text-sm text-gray-600 font-medium">{t("pdca.filters.trigger_label")}</label>
         <select
           value={filterTrigger}
@@ -1416,6 +1429,12 @@ export function PdcaPage() {
             <option key={p.id} value={p.id}>{p.code} — {p.name}</option>
           ))}
         </select>
+        {effectivePlant && effectivePlant !== ORG_VALUE && (
+          <label className="flex items-center gap-1.5 text-sm text-gray-600">
+            <input type="checkbox" checked={excludeOrg} onChange={e => setExcludeOrg(e.target.checked)} />
+            {t("pdca.filters.exclude_org")}
+          </label>
+        )}
         <label className="text-sm text-gray-600 font-medium ml-2">{t("pdca.filters.status_label")}</label>
         <select
           value={filterStatus}
@@ -1428,9 +1447,9 @@ export function PdcaPage() {
             <option key={p} value={p}>{t(`pdca.phase.${p}`)}</option>
           ))}
         </select>
-        {(filterTrigger || filterPlant || filterStatus) && (
+        {(filterTrigger || filterPlant || filterStatus || excludeOrg || search) && (
           <button
-            onClick={() => { setFilterTrigger(""); setFilterPlant(""); setFilterStatus(""); }}
+            onClick={() => { setFilterTrigger(""); setFilterPlant(""); setFilterStatus(""); setExcludeOrg(false); setSearch(""); }}
             className="text-xs text-gray-500 hover:text-gray-700 underline"
           >
             {t("pdca.filters.clear")}

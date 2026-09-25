@@ -3347,7 +3347,9 @@
       "only_org": "Solo organizzazione",
       "status_label": "Stato:",
       "all_statuses": "Tutti",
-      "only_open": "In corso (PLAN → ACT)"
+      "only_open": "In corso (PLAN → ACT)",
+      "search_placeholder": "Cerca per titolo, descrizione, finding o audit…",
+      "exclude_org": "Escludi organizzazione"
     },
     "table": {
       "title": "Titolo / Finding",
