@@ -1456,6 +1456,25 @@ Modyfikacja tych wartości aktualizuje obliczenia dla wszystkich przyszłych ele
 
 ---
 
+## Użytkownicy i dostępy
+
+Strona **Użytkownicy i dostępy** (tylko dla Super Admina) odpowiada na trzy pytania: kto loguje się do platformy, co może robić i za co odpowiada.
+
+**Lista użytkowników** — dla każdej osoby widzisz jej **dostępy** opisane słowami (np. «Control Owner · TA, TB» lub «Compliance Officer · Cała organizacja»), jej **odpowiedzialności** w zakresie nadzoru (np. IOD · TB), status, czy ma włączone MFA i kiedy ostatnio się logowała. Możesz szukać po nazwisku lub e-mailu i filtrować po zakładzie, roli i statusie; **Dezaktywowani** pokazuje dezaktywowanych użytkowników, aby można ich było aktywować ponownie. Ostrzeżenie ⚠ wskazuje odpowiedzialności bez dostępu do portalu w tym samym zakresie (np. IOD zakładu TB, który nie widzi danych TB).
+
+**Karta użytkownika** — kliknięcie osoby otwiera panel boczny:
+- **Dostępy**: dostęp to *rola* w określonym *zakresie*. Aby go dodać, wybierz rolę z karty z opisem, a następnie zakres (zakłady, jednostka biznesowa lub cała organizacja); poniżej od razu widać, co będzie mógł edytować, a co tylko przeglądać. Każdy dostęp odbiera się z potwierdzeniem.
+- **Odpowiedzialności**: powołanie, zakończenie i zastąpienie przebiegają tak samo jak w module Nadzór (z historią i powodem). Jeśli odpowiedzialność nie jest pokryta dostępem, **Nadaj dostęp** otwiera dodawanie dostępu już ustawionego na właściwy zakres.
+- **Profil**: imię, nazwisko i e-mail, dezaktywacja lub ponowna aktywacja, usunięcie (anonimizacja RODO).
+- **Kompetencje**: analiza luk w kompetencjach wymaganych dla roli.
+- **Bezpieczeństwo**: ostatnie logowanie, MFA, reset hasła.
+
+**Nowy użytkownik** — tworzenie przebiega w czterech krokach: kto, co robi (rola), gdzie (zakres), podsumowanie. Użytkownik powstaje od razu z dostępem.
+
+**Role** — zakładka **Role** opisuje role dostępu i pokazuje macierz tego, co każda rola może robić w każdym obszarze (edycja, przeglądanie, brak dostępu). Macierz jest odczytywana z rzeczywistych uprawnień platformy, więc jest zawsze aktualna i może służyć jako dowód w przeglądzie dostępów. Link **Przegląd dostępów** otwiera macierz «Dostępy i odpowiedzialności» w Raportowaniu.
+
+Strefa resetu testowej bazy danych znajduje się teraz w **Ustawienia › Kopie zapasowe** i jest widoczna tylko dla superużytkownika.
+
 ## Role i uprawnienia
 
 ### Compliance Officer

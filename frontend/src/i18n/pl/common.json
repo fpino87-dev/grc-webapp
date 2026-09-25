@@ -942,37 +942,19 @@
   "users": {
     "title": "Governance — Użytkownicy",
     "empty": "Nie znaleziono użytkowników",
-    "table": {
-      "username": "Nazwa użytkownika",
-      "email": "Email",
-      "name": "Imię i nazwisko",
-      "grc_role": "Rola GRC",
-      "active": "Aktywny",
-      "actions": "Akcje"
-    },
     "fields": {
       "username": "Nazwa użytkownika",
       "email": "Email",
       "first_name": "Imię",
       "last_name": "Nazwisko",
       "password": "Hasło",
-      "grc_role": "Rola GRC",
-      "grc_role_none": "— brak —",
       "password_hint": "min. 12 znaków"
     },
     "actions": {
-      "assign_role": "Przypisz rolę",
       "activate": "Aktywuj",
       "deactivate": "Dezaktywuj",
-      "competency": "Kompetencje",
       "reset_password": "Resetuj hasło",
-      "delete": "Usuń użytkownika",
-      "delete_confirm": "Usunąć użytkownika {{username}} i cofnąć wszystkie uprawnienia GRC?"
-    },
-    "new": {
-      "open": "+ Nowy użytkownik",
-      "title": "Nowy użytkownik",
-      "submit": "Utwórz użytkownika"
+      "delete": "Usuń użytkownika"
     },
     "competency_gap": {
       "loading": "Ładowanie analizy luk...",
@@ -996,31 +978,184 @@
       "reset_success": "Reset zakończony. Przekierowanie do logowania...",
       "reset_error": "Błąd podczas resetowania"
     },
-    "access": {
-      "menu": "Zarządzaj dostępem",
-      "title": "Zarządzaj dostępem",
-      "subtitle": "Przypisz role dostępu na poziomie organizacji, BU lub konkretnych zakładów.",
-      "no_grants": "Brak skonfigurowanego dostępu.",
-      "add": "Dodaj dostęp",
-      "role": "Rola",
-      "scope": "Zakres",
-      "scope_org": "Cała organizacja",
-      "scope_bu": "Jednostka biznesowa",
-      "scope_single_plant": "Pojedynczy zakład",
-      "scope_plant_list": "Wiele zakładów",
-      "select_sites": "Wybierz zakłady",
-      "select_bu": "Wybierz jednostkę biznesową",
-      "no_sites": "(brak zakładu)",
-      "title_full": "Dostępy i odpowiedzialności",
-      "section_access": "Dostęp (co może robić)",
-      "section_resp": "Odpowiedzialności (za co odpowiada)",
-      "no_resp": "Brak przypisanych odpowiedzialności.",
-      "add_resp": "Dodaj odpowiedzialność",
-      "select_site": "Wybierz zakład",
-      "couple_suggest": "Czy nadać też odpowiadający dostęp «{{role}}» na tym samym zakresie?"
+    "page_title": "Użytkownicy i dostępy",
+    "page_subtitle": "Kto loguje się do platformy, co może robić i za co odpowiada.",
+    "access_review_link": "Przegląd dostępów",
+    "search_placeholder": "Szukaj po nazwisku, e-mailu lub loginie…",
+    "tabs": {
+      "users": "Użytkownicy",
+      "roles": "Role"
     },
-    "edit": {
-      "title": "Edytuj użytkownika"
+    "filters": {
+      "site": "Zakład",
+      "role": "Rola",
+      "status": "Status",
+      "all_sites": "Wszystkie zakłady",
+      "all_roles": "Wszystkie role",
+      "status_active": "Aktywni",
+      "status_inactive": "Dezaktywowani",
+      "status_all": "Wszyscy"
+    },
+    "list": {
+      "active": "aktywny",
+      "inactive": "dezaktywowany",
+      "superuser": "Superużytkownik",
+      "no_access": "Brak dostępu",
+      "gap_badge": "Odpowiedzialności bez dostępu: {{count}}",
+      "gaps_summary": "Odpowiedzialności bez dostępu do portalu w tym samym zakresie: {{count}}. Otwórz użytkownika, aby je poprawić.",
+      "last_login": "ostatnie logowanie {{when}}",
+      "never_logged": "nigdy się nie logował",
+      "mfa_on": "włączone",
+      "mfa_off": "niewłączone"
+    },
+    "scope": {
+      "org": "Cała organizacja",
+      "bu_named": "BU {{code}}",
+      "none": "brak zakładów",
+      "kind_sites": "Zakłady",
+      "kind_bu": "Jednostka biznesowa",
+      "kind_org": "Cała organizacja",
+      "no_bu": "Brak skonfigurowanych jednostek biznesowych.",
+      "org_hint": "Dotyczy wszystkich zakładów, także przyszłych, oraz elementów organizacji."
+    },
+    "editor": {
+      "step_role": "Co robi",
+      "step_scope": "Gdzie",
+      "preview_title": "Co {{name}} będzie mógł robić",
+      "can_edit": "Może edytować",
+      "can_view": "Może przeglądać",
+      "save": "Dodaj dostęp"
+    },
+    "drawer": {
+      "close": "Zamknij",
+      "tabs": {
+        "access": "Dostępy",
+        "responsibilities": "Odpowiedzialności",
+        "profile": "Profil",
+        "competencies": "Kompetencje",
+        "security": "Bezpieczeństwo"
+      },
+      "access_intro": "Dostęp to rola w określonym zakresie: decyduje, co użytkownik widzi i edytuje.",
+      "access_empty": "Brak dostępu: użytkownik może się zalogować, ale nie widzi danych.",
+      "superuser_note": "Superużytkownik: ma dostęp do wszystkiego, bez przydzielania dostępów.",
+      "add_access": "Dodaj dostęp",
+      "revoke": "Odbierz",
+      "revoke_confirm": "Potwierdź odebranie",
+      "what_can_do": "Co może robić",
+      "resp_intro": "Odpowiedzialności w zakresie nadzoru (CISO, IOD, kontakt NIS2…) z historią: powoływane, kończone i zastępowane jak w module Nadzór.",
+      "resp_empty": "Brak aktywnych odpowiedzialności.",
+      "resp_add": "Powołaj odpowiedzialność",
+      "resp_since": "od {{date}}",
+      "resp_until": "do {{date}}",
+      "resp_replace": "Zastąp",
+      "resp_terminate": "Zakończ",
+      "resp_no_access": "Nie ma dostępu do portalu w tym zakresie.",
+      "give_access": "Nadaj dostęp",
+      "saved": "Zapisano",
+      "deactivate_title": "Dezaktywuj użytkownika",
+      "deactivate_hint": "Nie będzie mógł się zalogować; historia, dostępy i odpowiedzialności pozostają.",
+      "activate_title": "Aktywuj ponownie użytkownika",
+      "activate_hint": "Będzie mógł się znów logować z dotychczasowymi dostępami.",
+      "delete_hint": "Anonimizuje użytkownika (RODO): powiązane dane pozostają bez tożsamości.",
+      "delete_confirm": "Potwierdź usunięcie",
+      "last_login": "Ostatnie logowanie",
+      "joined": "Utworzono",
+      "mfa": "Uwierzytelnianie dwuskładnikowe",
+      "mfa_hint": "MFA włącza sam użytkownik w Ustawienia › MFA.",
+      "password_done": "Hasło zaktualizowane"
+    },
+    "wizard": {
+      "open": "Nowy użytkownik",
+      "title": "Nowy użytkownik",
+      "step_who": "Kto",
+      "step_role": "Co robi",
+      "step_where": "Gdzie",
+      "step_summary": "Podsumowanie",
+      "role_intro": "Wybierz rolę opisującą, co będzie robić. Kolejne możesz dodać później.",
+      "where_intro": "W których zakładach pracuje jako {{role}}?",
+      "no_role": "Nie wybrano roli: użytkownik może się zalogować, ale nie zobaczy danych, dopóki nie nadasz mu dostępu.",
+      "next": "Dalej",
+      "back": "Wstecz",
+      "create": "Utwórz użytkownika"
+    },
+    "roles_catalog": {
+      "intro": "Role dostępu są zdefiniowane przez platformę i opisane tutaj: macierz pokazuje dla każdego obszaru, co może robić każda rola. Jest odczytywana z rzeczywistych uprawnień, więc zawsze jest aktualna.",
+      "people": "Osoby z tą rolą: {{count}}",
+      "matrix_title": "Co może robić każda rola",
+      "legend_write": "edycja",
+      "legend_read": "przeglądanie",
+      "legend_none": "brak dostępu",
+      "area_col": "Obszar",
+      "cell_write": "może edytować",
+      "cell_read": "może przeglądać",
+      "cell_none": "brak dostępu",
+      "footnote": "Zakres (zakłady, jednostka biznesowa lub cała organizacja) wybiera się dla każdego dostępu. Odpowiedzialności w zakresie nadzoru są odrębne: mówią, kto odpowiada, a nie co można robić."
+    },
+    "role": {
+      "super_admin": {
+        "name": "Super Admin",
+        "desc": "Administruje platformą: użytkownicy, dostępy i konfiguracja, a także wszystko inne."
+      },
+      "compliance_officer": {
+        "name": "Compliance Officer",
+        "desc": "Prowadzi system zarządzania: może edytować prawie wszystko, od kontroli po przegląd."
+      },
+      "risk_manager": {
+        "name": "Risk Manager",
+        "desc": "Zarządza ryzykami, BIA, BCP, incydentami i dostawcami; resztę przegląda."
+      },
+      "plant_manager": {
+        "name": "Plant Manager",
+        "desc": "Odpowiada za zakład: zarządza kontrolami, zasobami, ryzykami i szkoleniami zakładu."
+      },
+      "control_owner": {
+        "name": "Control Owner",
+        "desc": "Realizuje przypisane mu kontrole, dokumenty, zadania i PDCA."
+      },
+      "internal_auditor": {
+        "name": "Audytor wewnętrzny",
+        "desc": "Prowadzi audyty i przegląda wszystko bez zmiany danych operacyjnych."
+      },
+      "external_auditor": {
+        "name": "Audytor zewnętrzny",
+        "desc": "Dostęp tylko do odczytu dla audytora zewnętrznego, wyłącznie do wskazanych zakładów."
+      }
+    },
+    "areas": {
+      "governance": "Nadzór i role",
+      "security_objectives": "Cele bezpieczeństwa",
+      "plants": "Zakłady",
+      "plant_config": "Konfiguracja zakładów",
+      "frameworks": "Ramy normatywne",
+      "controls": "Kontrole",
+      "controls_assign": "Przypisywanie kontroli",
+      "soa_approval": "Zatwierdzanie SoA",
+      "vda_interview": "Wywiad VDA",
+      "controls_reports": "Raporty kontroli",
+      "assets": "Zasoby IT/OT",
+      "bia": "BIA",
+      "risk": "Ryzyka",
+      "risk_appetite": "Apetyt na ryzyko",
+      "documents": "Dokumenty",
+      "tasks": "Zadania i harmonogram",
+      "checklist_delete": "Usuwanie list kontrolnych",
+      "kpi_config": "Konfiguracja KPI",
+      "incidents": "Incydenty",
+      "nis2_config": "Konfiguracja NIS2",
+      "pdca": "PDCA",
+      "lessons": "Wnioski (lessons learned)",
+      "management_review": "Przegląd zarządzania",
+      "suppliers": "Dostawcy",
+      "training": "Szkolenia",
+      "training_records": "Rejestry szkoleń",
+      "bcp": "BCP",
+      "audit_prep": "Audyty",
+      "reporting": "Raportowanie",
+      "access_review": "Przegląd dostępów",
+      "schedule_policy": "Polityki terminów",
+      "ai_engine": "Silnik AI",
+      "competencies": "Kompetencje",
+      "users": "Użytkownicy i dostępy"
     }
   },
   "governance": {

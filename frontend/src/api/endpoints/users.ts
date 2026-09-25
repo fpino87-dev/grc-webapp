@@ -13,6 +13,53 @@ export interface GrcUser {
   date_joined: string;
   grc_role: string | null;
   plant_access: { id: string; role: string; scope_type: string }[];
+  // Gestione utenti: accessi descritti, responsabilità attive, avvisi di coerenza
+  last_login?: string | null;
+  accesses?: UserAccess[];
+  responsibilities?: UserResponsibility[];
+  warnings?: ResponsibilityGap[];
+  mfa_enabled?: boolean;
+}
+
+export type AccessScopeType = "org" | "bu" | "plant_list" | "single_plant";
+
+export interface UserAccess {
+  id: string;
+  role: string;
+  role_label: string;
+  scope_type: AccessScopeType;
+  scope_bu_code: string | null;
+  scope_plant_codes: string[];
+}
+
+export interface UserResponsibility {
+  id: string;
+  role: string;
+  scope_type: "org" | "bu" | "plant";
+  scope_id: string | null;
+  scope_code: string | null;
+  valid_until: string | null;
+}
+
+/** Responsabilità attiva senza accesso al portale sullo stesso perimetro. */
+export interface ResponsibilityGap {
+  responsibility: string;
+  role: string;
+  scope_type: "org" | "bu" | "plant";
+  scope_id: string | null;
+}
+
+/** Cosa può fare ogni ruolo per area: W modifica, R consultazione, - niente. */
+export interface RoleMatrix {
+  roles: string[];
+  areas: { key: string; perms: Record<string, "W" | "R" | "-"> }[];
+}
+
+export interface NewAccess {
+  role: string;
+  scope_type: AccessScopeType;
+  scope_plants?: string[];
+  scope_bu?: string | null;
 }
 
 export interface GrcRole {
@@ -53,7 +100,11 @@ export const plantAccessApi = {
 
 export const usersApi = {
   list: () => fetchAllPages<GrcUser>("/auth/users/"),
-  create: (data: { username: string; email: string; first_name?: string; last_name?: string; password: string; grc_role?: string }) =>
+  /** Gestione utenti: `status` active (default), inactive o all. */
+  listForAdmin: (status: "active" | "inactive" | "all" = "active") =>
+    fetchAllPages<GrcUser>("/auth/users/", { status }),
+  roleMatrix: () => apiClient.get<RoleMatrix>("/auth/users/role-matrix/").then(r => r.data),
+  create: (data: { username: string; email: string; first_name?: string; last_name?: string; password: string; grc_role?: string; accesses?: NewAccess[] }) =>
     apiClient.post<GrcUser>("/auth/users/", data).then(r => r.data),
   update: (id: number, data: Partial<GrcUser>) =>
     apiClient.patch<GrcUser>(`/auth/users/${id}/`, data).then(r => r.data),

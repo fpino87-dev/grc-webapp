@@ -1456,6 +1456,25 @@ Modificando questi valori si aggiornano i calcoli su tutti gli elementi futuri. 
 
 ---
 
+## Utenti e accessi
+
+La pagina **Utenti e accessi** (riservata al Super Admin) risponde a tre domande: chi entra nella piattaforma, cosa può fare, di cosa è responsabile.
+
+**Elenco utenti** — per ogni persona vedi gli **accessi** descritti in parole (es. «Control Owner · TA, TB» o «Compliance Officer · Tutta l'organizzazione»), le **responsabilità** di governance (es. DPO · TB), lo stato, se ha l'MFA attiva e quando è entrata l'ultima volta. Puoi cercare per nome o email e filtrare per sito, ruolo e stato; con **Disattivati** ritrovi gli utenti disattivati e puoi riattivarli. Un avviso ⚠ segnala le responsabilità senza accesso al portale sullo stesso perimetro (es. un DPO del sito TB che non può vedere i dati di TB).
+
+**Scheda utente** — cliccando una persona si apre un pannello laterale:
+- **Accessi**: un accesso è un *ruolo* su un *perimetro*. Per aggiungerlo scegli il ruolo da una card con la descrizione, poi il perimetro (siti, business unit o tutta l'organizzazione); sotto vedi subito cosa potrà modificare e cosa solo consultare. Ogni accesso si revoca con conferma.
+- **Responsabilità**: nomina, termine e sostituzione con lo stesso flusso di Governance (storico e motivo conservati). Se una responsabilità è scoperta, **Dai accesso** apre l'aggiunta di un accesso già impostata sul perimetro giusto.
+- **Profilo**: nome ed email, disattivazione o riattivazione, eliminazione (anonimizzazione GDPR).
+- **Competenze**: gap analysis delle competenze richieste dal ruolo.
+- **Sicurezza**: ultimo accesso, MFA, reset della password.
+
+**Nuovo utente** — la creazione è guidata in quattro passi: chi è, cosa fa (ruolo), dove (perimetro), riepilogo. L'utente nasce già con il suo accesso.
+
+**Ruoli** — la scheda **Ruoli** descrive i ruoli di accesso e mostra la matrice di cosa può fare ciascuno in ogni area (modifica, consultazione, nessun accesso). La matrice è letta dai permessi reali della piattaforma, quindi è sempre aggiornata ed è utilizzabile come evidenza nella revisione degli accessi. Il link **Revisione accessi** porta alla matrice «Accessi & Responsabilità» del Reporting.
+
+La zona di reset del database di test si trova ora in **Impostazioni › Backup**, visibile solo al superuser.
+
 ## Ruoli e cosa puoi fare
 
 ### Compliance Officer

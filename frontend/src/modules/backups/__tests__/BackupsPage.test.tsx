@@ -14,6 +14,9 @@ vi.mock("../../../store/auth", () => ({
   useAuthStore: () => ({ token: "test-token" }),
 }));
 
+vi.mock("../../../api/endpoints/users", () => ({
+  usersApi: { me: vi.fn(() => Promise.resolve({ is_superuser: false })), resetTestDb: vi.fn() },
+}));
 vi.mock("../../../api/endpoints/backups", () => ({
   listBackupsApi: vi.fn(),
   createBackupApi: vi.fn(),

@@ -942,37 +942,19 @@
   "users": {
     "title": "Governance — Kullanıcılar",
     "empty": "Kullanıcı bulunamadı",
-    "table": {
-      "username": "Kullanıcı adı",
-      "email": "Email",
-      "name": "Ad Soyad",
-      "grc_role": "GRC rolü",
-      "active": "Aktif",
-      "actions": "İşlemler"
-    },
     "fields": {
       "username": "Kullanıcı adı",
       "email": "Email",
       "first_name": "Ad",
       "last_name": "Soyad",
       "password": "Parola",
-      "grc_role": "GRC rolü",
-      "grc_role_none": "— yok —",
       "password_hint": "en az 12 karakter"
     },
     "actions": {
-      "assign_role": "Rol ata",
       "activate": "Aktifleştir",
       "deactivate": "Pasifleştir",
-      "competency": "Yeterlilikler",
       "reset_password": "Parolayı sıfırla",
-      "delete": "Kullanıcıyı sil",
-      "delete_confirm": "{{username}} kullanıcısını silinsin ve tüm GRC erişimleri iptal edilsin mi?"
-    },
-    "new": {
-      "open": "+ Yeni kullanıcı",
-      "title": "Yeni kullanıcı",
-      "submit": "Kullanıcı oluştur"
+      "delete": "Kullanıcıyı sil"
     },
     "competency_gap": {
       "loading": "Boşluk analizi yükleniyor...",
@@ -996,31 +978,184 @@
       "reset_success": "Sıfırlama tamamlandı. Girişe yönlendiriliyor...",
       "reset_error": "Sıfırlama sırasında hata"
     },
-    "access": {
-      "menu": "Erişimi yönet",
-      "title": "Erişimi yönet",
-      "subtitle": "Erişim rollerini organizasyon, BU veya belirli tesis düzeyinde atayın.",
-      "no_grants": "Yapılandırılmış erişim yok.",
-      "add": "Erişim ekle",
-      "role": "Rol",
-      "scope": "Kapsam",
-      "scope_org": "Tüm organizasyon",
-      "scope_bu": "İş birimi",
-      "scope_single_plant": "Tek tesis",
-      "scope_plant_list": "Birden çok tesis",
-      "select_sites": "Tesisleri seçin",
-      "select_bu": "İş birimini seçin",
-      "no_sites": "(tesis yok)",
-      "title_full": "Erişim ve sorumluluklar",
-      "section_access": "Erişim (ne yapabilir)",
-      "section_resp": "Sorumluluklar (neyden sorumlu)",
-      "no_resp": "Atanmış sorumluluk yok.",
-      "add_resp": "Sorumluluk ekle",
-      "select_site": "Tesisi seçin",
-      "couple_suggest": "Aynı kapsamda eşleşen «{{role}}» erişimi de verilsin mi?"
+    "page_title": "Kullanıcılar ve erişim",
+    "page_subtitle": "Platforma kimin girdiği, neler yapabileceği ve neden sorumlu olduğu.",
+    "access_review_link": "Erişim gözden geçirmesi",
+    "search_placeholder": "Ad, e-posta veya kullanıcı adıyla ara…",
+    "tabs": {
+      "users": "Kullanıcılar",
+      "roles": "Roller"
     },
-    "edit": {
-      "title": "Kullanıcıyı düzenle"
+    "filters": {
+      "site": "Tesis",
+      "role": "Rol",
+      "status": "Durum",
+      "all_sites": "Tüm tesisler",
+      "all_roles": "Tüm roller",
+      "status_active": "Etkin",
+      "status_inactive": "Devre dışı",
+      "status_all": "Tümü"
+    },
+    "list": {
+      "active": "etkin",
+      "inactive": "devre dışı",
+      "superuser": "Süper kullanıcı",
+      "no_access": "Erişim yok",
+      "gap_badge": "Erişimsiz sorumluluklar: {{count}}",
+      "gaps_summary": "Aynı kapsamda portal erişimi olmayan sorumluluklar: {{count}}. Düzeltmek için kullanıcıyı açın.",
+      "last_login": "son giriş {{when}}",
+      "never_logged": "hiç giriş yapmadı",
+      "mfa_on": "etkin",
+      "mfa_off": "etkin değil"
+    },
+    "scope": {
+      "org": "Tüm organizasyon",
+      "bu_named": "BU {{code}}",
+      "none": "tesis yok",
+      "kind_sites": "Tesisler",
+      "kind_bu": "İş birimi",
+      "kind_org": "Tüm organizasyon",
+      "no_bu": "Yapılandırılmış iş birimi yok.",
+      "org_hint": "Gelecekte eklenecekler dahil tüm tesisler ve organizasyon öğeleri için geçerlidir."
+    },
+    "editor": {
+      "step_role": "Ne yapıyor",
+      "step_scope": "Nerede",
+      "preview_title": "{{name}} neler yapabilecek",
+      "can_edit": "Düzenleyebilir",
+      "can_view": "Görüntüleyebilir",
+      "save": "Erişim ekle"
+    },
+    "drawer": {
+      "close": "Kapat",
+      "tabs": {
+        "access": "Erişimler",
+        "responsibilities": "Sorumluluklar",
+        "profile": "Profil",
+        "competencies": "Yetkinlikler",
+        "security": "Güvenlik"
+      },
+      "access_intro": "Erişim, bir kapsamdaki roldür: kullanıcının neyi görüp düzenleyeceğini belirler.",
+      "access_empty": "Erişim yok: kullanıcı giriş yapabilir ancak veri göremez.",
+      "superuser_note": "Süper kullanıcı: erişim tanımına gerek olmadan her şeye erişir.",
+      "add_access": "Erişim ekle",
+      "revoke": "Kaldır",
+      "revoke_confirm": "Kaldırmayı onayla",
+      "what_can_do": "Neler yapabilir",
+      "resp_intro": "Geçmişiyle yönetişim sorumlulukları (CISO, DPO, NIS2 irtibatı…): Yönetişim'deki gibi atanır, sonlandırılır ve değiştirilir.",
+      "resp_empty": "Etkin sorumluluk yok.",
+      "resp_add": "Sorumluluk ata",
+      "resp_since": "{{date}} tarihinden beri",
+      "resp_until": "{{date}} tarihine kadar",
+      "resp_replace": "Değiştir",
+      "resp_terminate": "Sonlandır",
+      "resp_no_access": "Bu kapsamda portal erişimi yok.",
+      "give_access": "Erişim ver",
+      "saved": "Kaydedildi",
+      "deactivate_title": "Kullanıcıyı devre dışı bırak",
+      "deactivate_hint": "Artık giriş yapamaz; geçmiş, erişimler ve sorumluluklar kalır.",
+      "activate_title": "Kullanıcıyı yeniden etkinleştir",
+      "activate_hint": "Sahip olduğu erişimlerle yeniden giriş yapabilir.",
+      "delete_hint": "Kullanıcıyı anonimleştirir (KVKK/GDPR): bağlı veriler kimliksiz olarak kalır.",
+      "delete_confirm": "Silmeyi onayla",
+      "last_login": "Son giriş",
+      "joined": "Oluşturulma",
+      "mfa": "İki faktörlü kimlik doğrulama",
+      "mfa_hint": "MFA'yı kullanıcı Ayarlar › MFA'dan etkinleştirir.",
+      "password_done": "Parola güncellendi"
+    },
+    "wizard": {
+      "open": "Yeni kullanıcı",
+      "title": "Yeni kullanıcı",
+      "step_who": "Kim",
+      "step_role": "Ne yapıyor",
+      "step_where": "Nerede",
+      "step_summary": "Özet",
+      "role_intro": "Ne yapacağını tanımlayan rolü seçin. Sonradan başkalarını ekleyebilirsiniz.",
+      "where_intro": "{{role}} olarak hangi tesislerde çalışıyor?",
+      "no_role": "Rol seçilmedi: kullanıcı giriş yapabilir ancak erişim verene kadar veri göremez.",
+      "next": "İleri",
+      "back": "Geri",
+      "create": "Kullanıcı oluştur"
+    },
+    "roles_catalog": {
+      "intro": "Erişim rolleri platform tarafından tanımlanır ve burada belgelenir: matris her alan için her rolün neler yapabileceğini gösterir. Gerçek yetkilerden okunduğu için her zaman günceldir.",
+      "people": "Bu roldeki kişi sayısı: {{count}}",
+      "matrix_title": "Her rol neler yapabilir",
+      "legend_write": "düzenleme",
+      "legend_read": "görüntüleme",
+      "legend_none": "erişim yok",
+      "area_col": "Alan",
+      "cell_write": "düzenleyebilir",
+      "cell_read": "görüntüleyebilir",
+      "cell_none": "erişim yok",
+      "footnote": "Kapsam (tesisler, iş birimi veya tüm organizasyon) her erişim için seçilir. Yönetişim sorumlulukları ayrıdır: kimin sorumlu olduğunu söyler, ne yapılabileceğini değil."
+    },
+    "role": {
+      "super_admin": {
+        "name": "Süper Yönetici",
+        "desc": "Platformu yönetir: kullanıcılar, erişimler ve yapılandırma, ayrıca diğer her şey."
+      },
+      "compliance_officer": {
+        "name": "Uyum Sorumlusu",
+        "desc": "Yönetim sistemini yönetir: kontrollerden gözden geçirmeye neredeyse her şeyi düzenleyebilir."
+      },
+      "risk_manager": {
+        "name": "Risk Yöneticisi",
+        "desc": "Riskleri, BIA, BCP, olayları ve tedarikçileri yönetir; gerisini görüntüler."
+      },
+      "plant_manager": {
+        "name": "Tesis Müdürü",
+        "desc": "Bir tesisten sorumludur: tesisin kontrollerini, varlıklarını, risklerini ve eğitimini yönetir."
+      },
+      "control_owner": {
+        "name": "Kontrol Sahibi",
+        "desc": "Kendisine atanan kontrolleri, dokümanları, görevleri ve PDCA'ları yürütür."
+      },
+      "internal_auditor": {
+        "name": "İç denetçi",
+        "desc": "Denetimleri yürütür ve operasyonel verileri değiştirmeden her şeyi görüntüler."
+      },
+      "external_auditor": {
+        "name": "Dış denetçi",
+        "desc": "Dış denetçi için yalnızca belirtilen tesislerde salt okunur erişim."
+      }
+    },
+    "areas": {
+      "governance": "Yönetişim ve roller",
+      "security_objectives": "Güvenlik hedefleri",
+      "plants": "Tesisler",
+      "plant_config": "Tesis yapılandırması",
+      "frameworks": "Çerçeveler",
+      "controls": "Kontroller",
+      "controls_assign": "Kontrol ataması",
+      "soa_approval": "SoA onayı",
+      "vda_interview": "VDA görüşmesi",
+      "controls_reports": "Kontrol raporları",
+      "assets": "BT/OT varlıkları",
+      "bia": "BIA",
+      "risk": "Riskler",
+      "risk_appetite": "Risk iştahı",
+      "documents": "Dokümanlar",
+      "tasks": "Görevler ve takvim",
+      "checklist_delete": "Kontrol listesi silme",
+      "kpi_config": "KPI yapılandırması",
+      "incidents": "Olaylar",
+      "nis2_config": "NIS2 yapılandırması",
+      "pdca": "PDCA",
+      "lessons": "Çıkarılan dersler",
+      "management_review": "Yönetim gözden geçirmesi",
+      "suppliers": "Tedarikçiler",
+      "training": "Eğitim",
+      "training_records": "Eğitim kayıtları",
+      "bcp": "BCP",
+      "audit_prep": "Denetimler",
+      "reporting": "Raporlama",
+      "access_review": "Erişim gözden geçirmesi",
+      "schedule_policy": "Süre politikaları",
+      "ai_engine": "Yapay zekâ motoru",
+      "competencies": "Yetkinlikler",
+      "users": "Kullanıcılar ve erişim"
     }
   },
   "governance": {

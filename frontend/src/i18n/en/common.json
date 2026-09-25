@@ -939,37 +939,19 @@
   "users": {
     "title": "Governance — Users",
     "empty": "No users found",
-    "table": {
-      "username": "Username",
-      "email": "Email",
-      "name": "Name",
-      "grc_role": "GRC role",
-      "active": "Active",
-      "actions": "Actions"
-    },
     "fields": {
       "username": "Username",
       "email": "Email",
       "first_name": "First name",
       "last_name": "Last name",
       "password": "Password",
-      "grc_role": "GRC role",
-      "grc_role_none": "— none —",
       "password_hint": "min 12 characters"
     },
     "actions": {
-      "assign_role": "Assign role",
       "activate": "Activate",
       "deactivate": "Deactivate",
-      "competency": "Competency",
       "reset_password": "Reset password",
-      "delete": "Delete user",
-      "delete_confirm": "Delete user {{username}} and revoke all GRC access?"
-    },
-    "new": {
-      "open": "+ New user",
-      "title": "New user",
-      "submit": "Create user"
+      "delete": "Delete user"
     },
     "competency_gap": {
       "loading": "Loading gap analysis...",
@@ -993,31 +975,184 @@
       "reset_success": "Reset completed. Redirecting to login...",
       "reset_error": "Error while resetting"
     },
-    "access": {
-      "menu": "Manage access",
-      "title": "Manage access",
-      "subtitle": "Assign access roles at organization, BU or specific-site level.",
-      "no_grants": "No access configured.",
-      "add": "Add access",
-      "role": "Role",
-      "scope": "Scope",
-      "scope_org": "Whole organization",
-      "scope_bu": "Business unit",
-      "scope_single_plant": "Single site",
-      "scope_plant_list": "Multiple sites",
-      "select_sites": "Select sites",
-      "select_bu": "Select business unit",
-      "no_sites": "(no site)",
-      "title_full": "Access & responsibilities",
-      "section_access": "Access (what they can do)",
-      "section_resp": "Responsibilities (what they're accountable for)",
-      "no_resp": "No responsibilities assigned.",
-      "add_resp": "Add responsibility",
-      "select_site": "Select site",
-      "couple_suggest": "Also grant the matching «{{role}}» access on the same scope?"
+    "page_title": "Users and access",
+    "page_subtitle": "Who can sign in, what they can do and what they are responsible for.",
+    "access_review_link": "Access review",
+    "search_placeholder": "Search by name, email or username…",
+    "tabs": {
+      "users": "Users",
+      "roles": "Roles"
     },
-    "edit": {
-      "title": "Edit user"
+    "filters": {
+      "site": "Site",
+      "role": "Role",
+      "status": "Status",
+      "all_sites": "All sites",
+      "all_roles": "All roles",
+      "status_active": "Active",
+      "status_inactive": "Deactivated",
+      "status_all": "All"
+    },
+    "list": {
+      "active": "active",
+      "inactive": "deactivated",
+      "superuser": "Superuser",
+      "no_access": "No access",
+      "gap_badge": "Responsibilities without access: {{count}}",
+      "gaps_summary": "Responsibilities without portal access on the same scope: {{count}}. Open the user to fix them.",
+      "last_login": "last sign-in {{when}}",
+      "never_logged": "never signed in",
+      "mfa_on": "enabled",
+      "mfa_off": "not enabled"
+    },
+    "scope": {
+      "org": "Whole organization",
+      "bu_named": "BU {{code}}",
+      "none": "no sites",
+      "kind_sites": "Sites",
+      "kind_bu": "Business unit",
+      "kind_org": "Whole organization",
+      "no_bu": "No business unit configured.",
+      "org_hint": "Applies to all sites, including future ones, and to organization-wide items."
+    },
+    "editor": {
+      "step_role": "What they do",
+      "step_scope": "Where",
+      "preview_title": "What {{name}} will be able to do",
+      "can_edit": "Can edit",
+      "can_view": "Can view",
+      "save": "Add access"
+    },
+    "drawer": {
+      "close": "Close",
+      "tabs": {
+        "access": "Access",
+        "responsibilities": "Responsibilities",
+        "profile": "Profile",
+        "competencies": "Competencies",
+        "security": "Security"
+      },
+      "access_intro": "An access is a role on a scope: it decides what the user sees and edits.",
+      "access_empty": "No access: the user can sign in but sees no data.",
+      "superuser_note": "Superuser: has access to everything, no access grants needed.",
+      "add_access": "Add an access",
+      "revoke": "Revoke",
+      "revoke_confirm": "Confirm revoke",
+      "what_can_do": "What they can do",
+      "resp_intro": "Governance responsibilities (CISO, DPO, NIS2 contact…) with history: appointed, ended and replaced as in Governance.",
+      "resp_empty": "No active responsibilities.",
+      "resp_add": "Appoint a responsibility",
+      "resp_since": "since {{date}}",
+      "resp_until": "until {{date}}",
+      "resp_replace": "Replace",
+      "resp_terminate": "End",
+      "resp_no_access": "Has no portal access on this scope.",
+      "give_access": "Give access",
+      "saved": "Saved",
+      "deactivate_title": "Deactivate the user",
+      "deactivate_hint": "They can no longer sign in; history, access and responsibilities remain.",
+      "activate_title": "Reactivate the user",
+      "activate_hint": "They can sign in again with the access they had.",
+      "delete_hint": "Anonymizes the user (GDPR): linked data remains without identity.",
+      "delete_confirm": "Confirm deletion",
+      "last_login": "Last sign-in",
+      "joined": "Created on",
+      "mfa": "Two-factor authentication",
+      "mfa_hint": "MFA is enabled by the user, in Settings › MFA.",
+      "password_done": "Password updated"
+    },
+    "wizard": {
+      "open": "New user",
+      "title": "New user",
+      "step_who": "Who",
+      "step_role": "What they do",
+      "step_where": "Where",
+      "step_summary": "Summary",
+      "role_intro": "Choose the role that describes what they will do. You can add more later.",
+      "where_intro": "On which sites do they work as {{role}}?",
+      "no_role": "No role chosen: the user can sign in but will see no data until you give them access.",
+      "next": "Next",
+      "back": "Back",
+      "create": "Create user"
+    },
+    "roles_catalog": {
+      "intro": "Access roles are defined by the platform and documented here: for each area the matrix shows what each role can do. It is read from the actual permissions, so it is always up to date.",
+      "people": "People with this role: {{count}}",
+      "matrix_title": "What each role can do",
+      "legend_write": "edit",
+      "legend_read": "view",
+      "legend_none": "no access",
+      "area_col": "Area",
+      "cell_write": "can edit",
+      "cell_read": "can view",
+      "cell_none": "no access",
+      "footnote": "The scope (sites, business unit or whole organization) is chosen for each access. Governance responsibilities are separate: they say who is accountable, not what one can do."
+    },
+    "role": {
+      "super_admin": {
+        "name": "Super Admin",
+        "desc": "Administers the platform: users, access and configuration, plus everything else."
+      },
+      "compliance_officer": {
+        "name": "Compliance Officer",
+        "desc": "Leads the management system: can edit almost everything, from controls to the review."
+      },
+      "risk_manager": {
+        "name": "Risk Manager",
+        "desc": "Manages risks, BIA, BCP, incidents and suppliers; views the rest."
+      },
+      "plant_manager": {
+        "name": "Plant Manager",
+        "desc": "Responsible for a plant: manages the site's controls, assets, risks and training."
+      },
+      "control_owner": {
+        "name": "Control Owner",
+        "desc": "Works on the controls, documents, tasks and PDCAs assigned to them."
+      },
+      "internal_auditor": {
+        "name": "Internal auditor",
+        "desc": "Runs audits and views everything without changing operational data."
+      },
+      "external_auditor": {
+        "name": "External auditor",
+        "desc": "Read-only access for an external auditor, on the selected sites only."
+      }
+    },
+    "areas": {
+      "governance": "Governance and roles",
+      "security_objectives": "Security objectives",
+      "plants": "Sites",
+      "plant_config": "Site configuration",
+      "frameworks": "Frameworks",
+      "controls": "Controls",
+      "controls_assign": "Control assignment",
+      "soa_approval": "SoA approval",
+      "vda_interview": "VDA interview",
+      "controls_reports": "Control reports",
+      "assets": "IT/OT assets",
+      "bia": "BIA",
+      "risk": "Risks",
+      "risk_appetite": "Risk appetite",
+      "documents": "Documents",
+      "tasks": "Tasks and schedule",
+      "checklist_delete": "Checklist deletion",
+      "kpi_config": "KPI configuration",
+      "incidents": "Incidents",
+      "nis2_config": "NIS2 configuration",
+      "pdca": "PDCA",
+      "lessons": "Lessons learned",
+      "management_review": "Management review",
+      "suppliers": "Suppliers",
+      "training": "Training",
+      "training_records": "Training records",
+      "bcp": "BCP",
+      "audit_prep": "Audits",
+      "reporting": "Reporting",
+      "access_review": "Access review",
+      "schedule_policy": "Deadline policies",
+      "ai_engine": "AI engine",
+      "competencies": "Competencies",
+      "users": "Users and access"
     }
   },
   "governance": {

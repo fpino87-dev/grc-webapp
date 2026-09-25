@@ -1456,6 +1456,25 @@ Bu değerlerin değiştirilmesi, gelecekteki tüm öğelerin hesaplamalarını g
 
 ---
 
+## Kullanıcılar ve erişim
+
+**Kullanıcılar ve erişim** sayfası (yalnızca Süper Yönetici) üç soruyu yanıtlar: platforma kim girer, neler yapabilir ve neden sorumludur.
+
+**Kullanıcı listesi** — her kişi için **erişimlerini** sözcüklerle (ör. «Kontrol Sahibi · TA, TB» veya «Uyum Sorumlusu · Tüm organizasyon»), yönetişim **sorumluluklarını** (ör. DPO · TB), durumunu, MFA'nın etkin olup olmadığını ve son giriş zamanını görürsünüz. Ad veya e-postaya göre arayabilir, tesis, rol ve duruma göre filtreleyebilirsiniz; **Devre dışı** seçeneği devre dışı kullanıcıları gösterir, böylece yeniden etkinleştirebilirsiniz. ⚠ uyarısı aynı kapsamda portal erişimi olmayan sorumlulukları işaret eder (ör. TB verilerini göremeyen TB tesisinin DPO'su).
+
+**Kullanıcı kartı** — bir kişiye tıklamak yan paneli açar:
+- **Erişimler**: erişim, bir *kapsamdaki* bir *roldür*. Eklemek için açıklamalı karttan rolü, ardından kapsamı (tesisler, iş birimi veya tüm organizasyon) seçin; hemen altında neleri düzenleyebileceğini ve neleri yalnızca görüntüleyebileceğini görürsünüz. Her erişim onayla kaldırılır.
+- **Sorumluluklar**: atama, sonlandırma ve değiştirme Yönetişim ile aynı akışı kullanır (geçmiş ve gerekçe korunur). Bir sorumluluk karşılanmıyorsa **Erişim ver**, doğru kapsama ayarlanmış yeni bir erişim ekleme formunu açar.
+- **Profil**: ad ve e-posta, devre dışı bırakma veya yeniden etkinleştirme, silme (GDPR anonimleştirmesi).
+- **Yetkinlikler**: rolün gerektirdiği yetkinliklerin boşluk analizi.
+- **Güvenlik**: son giriş, MFA, parola sıfırlama.
+
+**Yeni kullanıcı** — oluşturma dört adımda yönlendirilir: kim, ne yapıyor (rol), nerede (kapsam), özet. Kullanıcı erişimiyle birlikte oluşturulur.
+
+**Roller** — **Roller** sekmesi erişim rollerini açıklar ve her rolün her alanda neler yapabileceğinin matrisini gösterir (düzenleme, görüntüleme, erişim yok). Matris platformun gerçek yetkilerinden okunur; bu nedenle her zaman günceldir ve erişim gözden geçirmesinde kanıt olarak kullanılabilir. **Erişim gözden geçirmesi** bağlantısı Raporlama'daki «Erişimler ve Sorumluluklar» matrisini açar.
+
+Test veritabanı sıfırlama alanı artık **Ayarlar › Yedeklemeler** altındadır ve yalnızca süper kullanıcıya görünür.
+
 ## Roller ve yapabilecekleriniz
 
 ### Uyum Yetkilisi

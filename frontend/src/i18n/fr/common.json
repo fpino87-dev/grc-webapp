@@ -942,37 +942,19 @@
   "users": {
     "title": "Gouvernance — Utilisateurs",
     "empty": "Aucun utilisateur trouvé",
-    "table": {
-      "username": "Username",
-      "email": "Email",
-      "name": "Nom",
-      "grc_role": "Rôle GRC",
-      "active": "Actif",
-      "actions": "Actions"
-    },
     "fields": {
       "username": "Username",
       "email": "Email",
       "first_name": "Prénom",
       "last_name": "Nom",
       "password": "Mot de passe",
-      "grc_role": "Rôle GRC",
-      "grc_role_none": "— aucun —",
       "password_hint": "min 12 caractères"
     },
     "actions": {
-      "assign_role": "Attribuer un rôle",
       "activate": "Activer",
       "deactivate": "Désactiver",
-      "competency": "Compétences",
       "reset_password": "Réinitialiser le mot de passe",
-      "delete": "Supprimer l'utilisateur",
-      "delete_confirm": "Supprimer l'utilisateur {{username}} et révoquer tous les accès GRC ?"
-    },
-    "new": {
-      "open": "+ Nouvel utilisateur",
-      "title": "Nouvel utilisateur",
-      "submit": "Créer l'utilisateur"
+      "delete": "Supprimer l'utilisateur"
     },
     "competency_gap": {
       "loading": "Chargement de l'analyse d'écart...",
@@ -996,31 +978,184 @@
       "reset_success": "Réinitialisation terminée. Redirection vers la connexion...",
       "reset_error": "Erreur lors de la réinitialisation"
     },
-    "access": {
-      "menu": "Gérer les accès",
-      "title": "Gérer les accès",
-      "subtitle": "Attribuez des rôles d'accès au niveau organisation, BU ou sites spécifiques.",
-      "no_grants": "Aucun accès configuré.",
-      "add": "Ajouter un accès",
-      "role": "Rôle",
-      "scope": "Périmètre",
-      "scope_org": "Toute l'organisation",
-      "scope_bu": "Business unit",
-      "scope_single_plant": "Site unique",
-      "scope_plant_list": "Plusieurs sites",
-      "select_sites": "Sélectionner les sites",
-      "select_bu": "Sélectionner la business unit",
-      "no_sites": "(aucun site)",
-      "title_full": "Accès & responsabilités",
-      "section_access": "Accès (ce qu'il peut faire)",
-      "section_resp": "Responsabilités (de quoi il répond)",
-      "no_resp": "Aucune responsabilité attribuée.",
-      "add_resp": "Ajouter une responsabilité",
-      "select_site": "Sélectionner le site",
-      "couple_suggest": "Accorder aussi l'accès « {{role}} » sur le même périmètre ?"
+    "page_title": "Utilisateurs et accès",
+    "page_subtitle": "Qui accède à la plateforme, ce qu'il peut faire et ce dont il est responsable.",
+    "access_review_link": "Revue des accès",
+    "search_placeholder": "Rechercher par nom, e-mail ou identifiant…",
+    "tabs": {
+      "users": "Utilisateurs",
+      "roles": "Rôles"
     },
-    "edit": {
-      "title": "Modifier l'utilisateur"
+    "filters": {
+      "site": "Site",
+      "role": "Rôle",
+      "status": "Statut",
+      "all_sites": "Tous les sites",
+      "all_roles": "Tous les rôles",
+      "status_active": "Actifs",
+      "status_inactive": "Désactivés",
+      "status_all": "Tous"
+    },
+    "list": {
+      "active": "actif",
+      "inactive": "désactivé",
+      "superuser": "Superutilisateur",
+      "no_access": "Aucun accès",
+      "gap_badge": "Responsabilités sans accès : {{count}}",
+      "gaps_summary": "Responsabilités sans accès au portail sur le même périmètre : {{count}}. Ouvrez l'utilisateur pour les corriger.",
+      "last_login": "dernière connexion {{when}}",
+      "never_logged": "jamais connecté",
+      "mfa_on": "activée",
+      "mfa_off": "non activée"
+    },
+    "scope": {
+      "org": "Toute l'organisation",
+      "bu_named": "BU {{code}}",
+      "none": "aucun site",
+      "kind_sites": "Sites",
+      "kind_bu": "Business unit",
+      "kind_org": "Toute l'organisation",
+      "no_bu": "Aucune business unit configurée.",
+      "org_hint": "S'applique à tous les sites, y compris futurs, et aux éléments d'organisation."
+    },
+    "editor": {
+      "step_role": "Ce qu'il fait",
+      "step_scope": "Où",
+      "preview_title": "Ce que {{name}} pourra faire",
+      "can_edit": "Peut modifier",
+      "can_view": "Peut consulter",
+      "save": "Ajouter l'accès"
+    },
+    "drawer": {
+      "close": "Fermer",
+      "tabs": {
+        "access": "Accès",
+        "responsibilities": "Responsabilités",
+        "profile": "Profil",
+        "competencies": "Compétences",
+        "security": "Sécurité"
+      },
+      "access_intro": "Un accès est un rôle sur un périmètre : il détermine ce que l'utilisateur voit et modifie.",
+      "access_empty": "Aucun accès : l'utilisateur peut se connecter mais ne voit aucune donnée.",
+      "superuser_note": "Superutilisateur : accède à tout, sans besoin d'accès.",
+      "add_access": "Ajouter un accès",
+      "revoke": "Révoquer",
+      "revoke_confirm": "Confirmer la révocation",
+      "what_can_do": "Ce qu'il peut faire",
+      "resp_intro": "Responsabilités de gouvernance (RSSI, DPO, contact NIS2…) avec historique : nommées, terminées et remplacées comme dans Gouvernance.",
+      "resp_empty": "Aucune responsabilité active.",
+      "resp_add": "Nommer une responsabilité",
+      "resp_since": "depuis le {{date}}",
+      "resp_until": "jusqu'au {{date}}",
+      "resp_replace": "Remplacer",
+      "resp_terminate": "Terminer",
+      "resp_no_access": "N'a pas d'accès au portail sur ce périmètre.",
+      "give_access": "Donner l'accès",
+      "saved": "Enregistré",
+      "deactivate_title": "Désactiver l'utilisateur",
+      "deactivate_hint": "Il ne pourra plus se connecter ; historique, accès et responsabilités restent.",
+      "activate_title": "Réactiver l'utilisateur",
+      "activate_hint": "Il pourra de nouveau se connecter avec ses accès.",
+      "delete_hint": "Anonymise l'utilisateur (RGPD) : les données liées restent sans identité.",
+      "delete_confirm": "Confirmer la suppression",
+      "last_login": "Dernière connexion",
+      "joined": "Créé le",
+      "mfa": "Authentification à deux facteurs",
+      "mfa_hint": "La MFA est activée par l'utilisateur, dans Paramètres › MFA.",
+      "password_done": "Mot de passe mis à jour"
+    },
+    "wizard": {
+      "open": "Nouvel utilisateur",
+      "title": "Nouvel utilisateur",
+      "step_who": "Qui",
+      "step_role": "Ce qu'il fait",
+      "step_where": "Où",
+      "step_summary": "Récapitulatif",
+      "role_intro": "Choisissez le rôle qui décrit ce qu'il fera. Vous pourrez en ajouter d'autres ensuite.",
+      "where_intro": "Sur quels sites travaille-t-il en tant que {{role}} ?",
+      "no_role": "Aucun rôle choisi : l'utilisateur pourra se connecter mais ne verra aucune donnée tant que vous ne lui donnez pas d'accès.",
+      "next": "Suivant",
+      "back": "Retour",
+      "create": "Créer l'utilisateur"
+    },
+    "roles_catalog": {
+      "intro": "Les rôles d'accès sont définis par la plateforme et documentés ici : pour chaque domaine, la matrice montre ce que chaque rôle peut faire. Elle est lue depuis les permissions réelles et reste donc toujours à jour.",
+      "people": "Personnes avec ce rôle : {{count}}",
+      "matrix_title": "Ce que chaque rôle peut faire",
+      "legend_write": "modification",
+      "legend_read": "consultation",
+      "legend_none": "aucun accès",
+      "area_col": "Domaine",
+      "cell_write": "peut modifier",
+      "cell_read": "peut consulter",
+      "cell_none": "aucun accès",
+      "footnote": "Le périmètre (sites, business unit ou toute l'organisation) se choisit pour chaque accès. Les responsabilités de gouvernance sont distinctes : elles disent qui répond, pas ce que l'on peut faire."
+    },
+    "role": {
+      "super_admin": {
+        "name": "Super Admin",
+        "desc": "Administre la plateforme : utilisateurs, accès et configuration, en plus de tout le reste."
+      },
+      "compliance_officer": {
+        "name": "Compliance Officer",
+        "desc": "Pilote le système de management : peut modifier presque tout, des contrôles à la revue."
+      },
+      "risk_manager": {
+        "name": "Risk Manager",
+        "desc": "Gère les risques, la BIA, le PCA, les incidents et les fournisseurs ; consulte le reste."
+      },
+      "plant_manager": {
+        "name": "Plant Manager",
+        "desc": "Responsable d'un site : gère les contrôles, actifs, risques et la formation du site."
+      },
+      "control_owner": {
+        "name": "Control Owner",
+        "desc": "Fait avancer les contrôles, documents, tâches et PDCA qui lui sont attribués."
+      },
+      "internal_auditor": {
+        "name": "Auditeur interne",
+        "desc": "Conduit les audits et consulte tout sans modifier les données opérationnelles."
+      },
+      "external_auditor": {
+        "name": "Auditeur externe",
+        "desc": "Accès en consultation pour un auditeur externe, sur les seuls sites indiqués."
+      }
+    },
+    "areas": {
+      "governance": "Gouvernance et rôles",
+      "security_objectives": "Objectifs de sécurité",
+      "plants": "Sites",
+      "plant_config": "Configuration des sites",
+      "frameworks": "Référentiels",
+      "controls": "Contrôles",
+      "controls_assign": "Attribution des contrôles",
+      "soa_approval": "Approbation SoA",
+      "vda_interview": "Entretien VDA",
+      "controls_reports": "Rapports de contrôles",
+      "assets": "Actifs IT/OT",
+      "bia": "BIA",
+      "risk": "Risques",
+      "risk_appetite": "Appétence au risque",
+      "documents": "Documents",
+      "tasks": "Tâches et échéancier",
+      "checklist_delete": "Suppression de checklists",
+      "kpi_config": "Configuration KPI",
+      "incidents": "Incidents",
+      "nis2_config": "Configuration NIS2",
+      "pdca": "PDCA",
+      "lessons": "Retours d'expérience",
+      "management_review": "Revue de direction",
+      "suppliers": "Fournisseurs",
+      "training": "Formation",
+      "training_records": "Registres de formation",
+      "bcp": "PCA",
+      "audit_prep": "Audits",
+      "reporting": "Reporting",
+      "access_review": "Revue des accès",
+      "schedule_policy": "Politiques d'échéances",
+      "ai_engine": "Moteur IA",
+      "competencies": "Compétences",
+      "users": "Utilisateurs et accès"
     }
   },
   "governance": {

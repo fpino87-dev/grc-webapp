@@ -939,37 +939,19 @@
   "users": {
     "title": "Governance — Utenti",
     "empty": "Nessun utente trovato",
-    "table": {
-      "username": "Username",
-      "email": "Email",
-      "name": "Nome",
-      "grc_role": "Ruolo GRC",
-      "active": "Attivo",
-      "actions": "Azioni"
-    },
     "fields": {
       "username": "Username",
       "email": "Email",
       "first_name": "Nome",
       "last_name": "Cognome",
       "password": "Password",
-      "grc_role": "Ruolo GRC",
-      "grc_role_none": "— nessuno —",
       "password_hint": "min 12 caratteri"
     },
     "actions": {
-      "assign_role": "Assegna ruolo",
       "activate": "Attiva",
       "deactivate": "Disattiva",
-      "competency": "Competenze",
       "reset_password": "Reset password",
-      "delete": "Elimina utente",
-      "delete_confirm": "Eliminare l'utente {{username}} e revocare tutti gli accessi GRC?"
-    },
-    "new": {
-      "open": "+ Nuovo utente",
-      "title": "Nuovo utente",
-      "submit": "Crea utente"
+      "delete": "Elimina utente"
     },
     "competency_gap": {
       "loading": "Caricamento gap analysis...",
@@ -993,31 +975,184 @@
       "reset_success": "Reset completato. Reindirizzamento al login...",
       "reset_error": "Errore durante il reset"
     },
-    "access": {
-      "menu": "Gestione accessi",
-      "title": "Gestione accessi",
-      "subtitle": "Assegna ruoli di accesso a livello organizzazione, BU o siti specifici.",
-      "no_grants": "Nessun accesso configurato.",
-      "add": "Aggiungi accesso",
-      "role": "Ruolo",
-      "scope": "Perimetro",
-      "scope_org": "Tutta l'organizzazione",
-      "scope_bu": "Business Unit",
-      "scope_single_plant": "Sito singolo",
-      "scope_plant_list": "Più siti",
-      "select_sites": "Seleziona i siti",
-      "select_bu": "Seleziona la Business Unit",
-      "no_sites": "(nessun sito)",
-      "title_full": "Accessi & responsabilità",
-      "section_access": "Accesso (cosa può fare)",
-      "section_resp": "Responsabilità (di cosa risponde)",
-      "no_resp": "Nessuna responsabilità assegnata.",
-      "add_resp": "Aggiungi responsabilità",
-      "select_site": "Seleziona il sito",
-      "couple_suggest": "Vuoi concedere anche l'accesso «{{role}}» sullo stesso perimetro?"
+    "page_title": "Utenti e accessi",
+    "page_subtitle": "Chi entra nella piattaforma, cosa può fare e di cosa è responsabile.",
+    "access_review_link": "Revisione accessi",
+    "search_placeholder": "Cerca per nome, email o username…",
+    "tabs": {
+      "users": "Utenti",
+      "roles": "Ruoli"
     },
-    "edit": {
-      "title": "Modifica utente"
+    "filters": {
+      "site": "Sito",
+      "role": "Ruolo",
+      "status": "Stato",
+      "all_sites": "Tutti i siti",
+      "all_roles": "Tutti i ruoli",
+      "status_active": "Attivi",
+      "status_inactive": "Disattivati",
+      "status_all": "Tutti"
+    },
+    "list": {
+      "active": "attivo",
+      "inactive": "disattivato",
+      "superuser": "Superuser",
+      "no_access": "Nessun accesso",
+      "gap_badge": "Responsabilità senza accesso: {{count}}",
+      "gaps_summary": "Responsabilità senza accesso al portale sullo stesso perimetro: {{count}}. Apri l'utente per sistemarle.",
+      "last_login": "ultimo accesso {{when}}",
+      "never_logged": "mai entrato",
+      "mfa_on": "attiva",
+      "mfa_off": "non attiva"
+    },
+    "scope": {
+      "org": "Tutta l'organizzazione",
+      "bu_named": "BU {{code}}",
+      "none": "nessun sito",
+      "kind_sites": "Siti",
+      "kind_bu": "Business unit",
+      "kind_org": "Tutta l'organizzazione",
+      "no_bu": "Nessuna business unit configurata.",
+      "org_hint": "Vale per tutti i siti, anche quelli aggiunti in futuro, e per gli elementi di organizzazione."
+    },
+    "editor": {
+      "step_role": "Cosa fa",
+      "step_scope": "Dove",
+      "preview_title": "Cosa potrà fare {{name}}",
+      "can_edit": "Può modificare",
+      "can_view": "Può consultare",
+      "save": "Aggiungi accesso"
+    },
+    "drawer": {
+      "close": "Chiudi",
+      "tabs": {
+        "access": "Accessi",
+        "responsibilities": "Responsabilità",
+        "profile": "Profilo",
+        "competencies": "Competenze",
+        "security": "Sicurezza"
+      },
+      "access_intro": "Un accesso è un ruolo su un perimetro: decide cosa l'utente vede e modifica.",
+      "access_empty": "Nessun accesso: l'utente può entrare ma non vede dati.",
+      "superuser_note": "Superuser: accede a tutto, senza bisogno di accessi.",
+      "add_access": "Aggiungi un accesso",
+      "revoke": "Revoca",
+      "revoke_confirm": "Conferma revoca",
+      "what_can_do": "Cosa può fare",
+      "resp_intro": "Le responsabilità di governance (CISO, DPO, contatto NIS2…) con storico: si nominano, terminano e sostituiscono come in Governance.",
+      "resp_empty": "Nessuna responsabilità attiva.",
+      "resp_add": "Nomina una responsabilità",
+      "resp_since": "dal {{date}}",
+      "resp_until": "fino al {{date}}",
+      "resp_replace": "Sostituisci",
+      "resp_terminate": "Termina",
+      "resp_no_access": "Non ha accesso al portale su questo perimetro.",
+      "give_access": "Dai accesso",
+      "saved": "Salvato",
+      "deactivate_title": "Disattiva l'utente",
+      "deactivate_hint": "Non potrà più entrare; storico, accessi e responsabilità restano.",
+      "activate_title": "Riattiva l'utente",
+      "activate_hint": "Potrà di nuovo entrare con gli accessi che aveva.",
+      "delete_hint": "Anonimizza l'utente (GDPR): i dati collegati restano ma senza identità.",
+      "delete_confirm": "Conferma eliminazione",
+      "last_login": "Ultimo accesso",
+      "joined": "Creato il",
+      "mfa": "Autenticazione a due fattori",
+      "mfa_hint": "L'MFA si attiva dall'utente, in Impostazioni › MFA.",
+      "password_done": "Password aggiornata"
+    },
+    "wizard": {
+      "open": "Nuovo utente",
+      "title": "Nuovo utente",
+      "step_who": "Chi è",
+      "step_role": "Cosa fa",
+      "step_where": "Dove",
+      "step_summary": "Riepilogo",
+      "role_intro": "Scegli il ruolo che descrive cosa farà. Potrai aggiungerne altri dopo.",
+      "where_intro": "Su quali siti lavora come {{role}}?",
+      "no_role": "Nessun ruolo scelto: l'utente potrà entrare ma non vedrà dati finché non gli dai un accesso.",
+      "next": "Avanti",
+      "back": "Indietro",
+      "create": "Crea utente"
+    },
+    "roles_catalog": {
+      "intro": "I ruoli di accesso sono definiti dalla piattaforma e documentati qui: la matrice mostra, per ogni area, cosa può fare ciascun ruolo. È letta dai permessi reali, quindi è sempre aggiornata.",
+      "people": "Persone con questo ruolo: {{count}}",
+      "matrix_title": "Cosa può fare ogni ruolo",
+      "legend_write": "modifica",
+      "legend_read": "consultazione",
+      "legend_none": "nessun accesso",
+      "area_col": "Area",
+      "cell_write": "può modificare",
+      "cell_read": "può consultare",
+      "cell_none": "nessun accesso",
+      "footnote": "Il perimetro (siti, business unit o tutta l'organizzazione) si sceglie per ogni accesso. Le responsabilità di governance sono separate: dicono chi risponde, non cosa si può fare."
+    },
+    "role": {
+      "super_admin": {
+        "name": "Super Admin",
+        "desc": "Amministra la piattaforma: utenti, accessi e configurazione, oltre a tutto il resto."
+      },
+      "compliance_officer": {
+        "name": "Compliance Officer",
+        "desc": "Guida il sistema di gestione: può modificare quasi tutto, dai controlli al riesame."
+      },
+      "risk_manager": {
+        "name": "Risk Manager",
+        "desc": "Gestisce rischi, BIA, BCP, incidenti e fornitori; consulta il resto."
+      },
+      "plant_manager": {
+        "name": "Plant Manager",
+        "desc": "Responsabile di uno stabilimento: gestisce controlli, asset, rischi e formazione del sito."
+      },
+      "control_owner": {
+        "name": "Control Owner",
+        "desc": "Porta avanti controlli, documenti, task e PDCA che gli sono assegnati."
+      },
+      "internal_auditor": {
+        "name": "Auditor interno",
+        "desc": "Conduce gli audit e consulta tutto senza modificare i dati operativi."
+      },
+      "external_auditor": {
+        "name": "Auditor esterno",
+        "desc": "Accesso in consultazione per un auditor esterno, sui soli siti indicati."
+      }
+    },
+    "areas": {
+      "governance": "Governance e ruoli",
+      "security_objectives": "Obiettivi di sicurezza",
+      "plants": "Siti",
+      "plant_config": "Configurazione siti",
+      "frameworks": "Framework normativi",
+      "controls": "Controlli",
+      "controls_assign": "Assegnazione controlli",
+      "soa_approval": "Approvazione SoA",
+      "vda_interview": "Intervista VDA",
+      "controls_reports": "Report controlli",
+      "assets": "Asset IT/OT",
+      "bia": "BIA",
+      "risk": "Rischi",
+      "risk_appetite": "Propensione al rischio",
+      "documents": "Documenti",
+      "tasks": "Task e scadenzario",
+      "checklist_delete": "Eliminazione checklist",
+      "kpi_config": "Configurazione KPI",
+      "incidents": "Incidenti",
+      "nis2_config": "Configurazione NIS2",
+      "pdca": "PDCA",
+      "lessons": "Lesson learned",
+      "management_review": "Riesame di direzione",
+      "suppliers": "Fornitori",
+      "training": "Formazione",
+      "training_records": "Registri formazione",
+      "bcp": "BCP",
+      "audit_prep": "Audit",
+      "reporting": "Reporting",
+      "access_review": "Revisione accessi",
+      "schedule_policy": "Policy scadenze",
+      "ai_engine": "Motore IA",
+      "competencies": "Competenze",
+      "users": "Utenti e accessi"
     }
   },
   "governance": {

@@ -267,3 +267,151 @@ def eligible_owners_for_plant(plant: Plant) -> list[dict]:
     result.sort(key=lambda u: u["name"].lower())
     return result
 
+
+
+# ── Catalogo ruoli: cosa può fare ogni ruolo ─────────────────────────────────
+
+# Aree mostrate nella matrice "cosa può fare un ruolo", nell'ordine della UI:
+# (chiave i18n dell'area, percorso della permission class). La matrice si
+# legge dalle permission class reali (read_roles / write_roles), quindi non
+# può divergere dal codice; il test di guardia verifica che ogni nuova
+# RoleScopedPermission sia mappata qui o esclusa esplicitamente.
+ROLE_MATRIX_AREAS = [
+    ("governance", "apps.governance.permissions.GovernancePermission"),
+    ("security_objectives", "apps.governance.permissions.SecurityObjectivePermission"),
+    ("plants", "apps.plants.permissions.PlantPermission"),
+    ("plant_config", "apps.plants.permissions.PlantConfigPermission"),
+    ("frameworks", "apps.controls.permissions.FrameworkPermission"),
+    ("controls", "apps.controls.permissions.ControlInstancePermission"),
+    ("controls_assign", "apps.controls.permissions.ControlInstanceAssignPermission"),
+    ("soa_approval", "apps.controls.permissions.SoAApprovalPermission"),
+    ("vda_interview", "apps.controls.permissions.VdaInterviewPermission"),
+    ("controls_reports", "apps.controls.permissions.ControlsReportPermission"),
+    ("assets", "apps.assets.permissions.AssetPermission"),
+    ("bia", "apps.bia.permissions.BiaPermission"),
+    ("risk", "apps.risk.permissions.RiskPermission"),
+    ("risk_appetite", "apps.risk.permissions.RiskAppetitePermission"),
+    ("documents", "apps.documents.permissions.DocumentPermission"),
+    ("tasks", "apps.tasks.permissions.TaskPermission"),
+    ("checklist_delete", "apps.tasks.permissions.ChecklistRunDeletePermission"),
+    ("kpi_config", "apps.tasks.permissions.KpiConfigPermission"),
+    ("incidents", "apps.incidents.permissions.IncidentPermission"),
+    ("nis2_config", "apps.incidents.permissions.NIS2ConfigurationPermission"),
+    ("pdca", "apps.pdca.permissions.PdcaPermission"),
+    ("lessons", "apps.lessons.permissions.LessonLearnedPermission"),
+    ("management_review", "apps.management_review.permissions.ManagementReviewPermission"),
+    ("suppliers", "apps.suppliers.permissions.SupplierPermission"),
+    ("training", "apps.training.permissions.TrainingPermission"),
+    ("training_records", "apps.training.permissions.TrainingRecordsPermission"),
+    ("bcp", "apps.bcp.permissions.BcpPermission"),
+    ("audit_prep", "apps.audit_prep.permissions.AuditPrepPermission"),
+    ("reporting", "apps.reporting.permissions.ReportingPermission"),
+    ("access_review", "apps.reporting.permissions.AccessReviewPermission"),
+    ("schedule_policy", "apps.compliance_schedule.permissions.CompliancePolicyPermission"),
+    ("ai_engine", "apps.ai_engine.permissions.AiEnginePermission"),
+    ("competencies", "apps.auth_grc.permissions.CompetencyPermission"),
+]
+# Varianti che non aggiungono un'area distinta (stessi ruoli di un'altra).
+ROLE_MATRIX_EXCLUDED = {
+    "apps.management_review.permissions.ReviewWithBodyMembersPermission",
+}
+
+
+def role_permission_matrix() -> dict:
+    """Per ogni area e ruolo: "W" modifica, "R" consultazione, "-" nessun
+    accesso. Letta dalle permission class del codice. La gestione di utenti e
+    accessi è riservata al super admin (IsGrcSuperAdmin)."""
+    import importlib
+
+    roles = [r.value for r in GrcRole]
+    areas = []
+    for key, path in ROLE_MATRIX_AREAS:
+        module_path, cls_name = path.rsplit(".", 1)
+        cls = getattr(importlib.import_module(module_path), cls_name, None)
+        if cls is None:
+            continue
+        read = {str(r) for r in cls.read_roles}
+        write = {str(r) for r in (cls.write_roles or cls.read_roles)}
+        areas.append({
+            "key": key,
+            "perms": {r: "W" if r in write else "R" if r in read else "-" for r in roles},
+        })
+    areas.append({"key": "users", "perms": {r: "W" if r == GrcRole.SUPER_ADMIN else "-" for r in roles}})
+    return {"roles": roles, "areas": areas}
+
+
+# ── Coerenza responsabilità ↔ accessi ────────────────────────────────────────
+
+def access_coverage(accesses, bu_plants: dict) -> tuple[bool, set]:
+    """(ha scope org, id dei siti coperti) dagli accessi già caricati."""
+    plants: set = set()
+    for a in accesses:
+        if a.scope_type == "org":
+            return True, set()
+        if a.scope_type == "bu" and a.scope_bu_id:
+            plants |= bu_plants.get(a.scope_bu_id, set())
+        else:
+            plants |= {p.pk for p in a.scope_plants.all()}
+    return False, plants
+
+
+def responsibility_access_gaps(user, accesses, responsibilities, bu_plants: dict) -> list[dict]:
+    """Responsabilità attive non coperte da un accesso al portale sullo stesso
+    perimetro (es. DPO del sito TB senza accesso su TB): chi è responsabile
+    deve poter vedere i dati di cui risponde."""
+    if user.is_superuser:
+        return []
+    org, plants = access_coverage(accesses, bu_plants)
+    if org:
+        return []
+    gaps = []
+    for r in responsibilities:
+        if r.scope_type == "org":
+            covered = False
+        elif r.scope_type == "bu":
+            needed = bu_plants.get(r.scope_id, set())
+            covered = bool(needed) and needed <= plants
+        else:
+            covered = r.scope_id in plants
+        if not covered:
+            gaps.append({"responsibility": str(r.pk), "role": r.role, "scope_type": r.scope_type,
+                         "scope_id": str(r.scope_id) if r.scope_id else None})
+    return gaps
+
+
+def bu_plants_map() -> dict:
+    """{bu_id: {plant_id, …}} dei siti attivi, per il calcolo delle coperture."""
+    result: dict = {}
+    for pid, bu_id in Plant.objects.filter(bu__isnull=False).values_list("pk", "bu_id"):
+        result.setdefault(bu_id, set()).add(pid)
+    return result
+
+
+# ── Nuovo utente con i suoi accessi ──────────────────────────────────────────
+
+def create_grc_user(*, actor, data: dict, password: str, accesses: list[dict]):
+    """Crea l'utente e, nella stessa transazione, gli accessi scelti (ruolo +
+    perimetro). Ogni accesso passa dalla stessa validazione del pannello
+    accessi (perimetro per sito o BU mai vuoto)."""
+    from django.db import transaction
+
+    from core.audit import log_action
+    from .serializers import UserPlantAccessSerializer
+
+    User = get_user_model()
+    with transaction.atomic():
+        user = User(**data)
+        user.set_password(password)
+        user.save()
+        log_action(user=actor, action_code="auth.user.created", level="L2", entity=user,
+                   payload={"user_id": user.pk, "accesses": len(accesses)})
+        for raw in accesses:
+            ser = UserPlantAccessSerializer(data={**raw, "user": user.pk})
+            ser.is_valid(raise_exception=True)
+            access = ser.save(created_by=actor)
+            log_action(
+                user=actor, action_code="auth.access.granted", level="L2", entity=access,
+                payload={"event": "granted", "access_id": str(access.pk), "user_id": str(user.pk),
+                         "role": access.role, "scope_type": access.scope_type},
+            )
+    return user

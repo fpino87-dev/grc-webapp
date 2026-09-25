@@ -24,13 +24,78 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     grc_role = serializers.SerializerMethodField()
     plant_access = serializers.SerializerMethodField()
+    # Gestione utenti: accessi descritti (ruolo + perimetro), responsabilità
+    # attive, avvisi di coerenza, MFA e ultimo accesso (prefetch nel ViewSet).
+    accesses = serializers.SerializerMethodField()
+    responsibilities = serializers.SerializerMethodField()
+    warnings = serializers.SerializerMethodField()
+    mfa_enabled = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ["id", "username", "email", "first_name", "last_name",
-                  "is_active", "is_staff", "is_superuser", "date_joined",
-                  "grc_role", "plant_access"]
-        read_only_fields = ["id", "date_joined", "grc_role", "plant_access"]
+                  "is_active", "is_staff", "is_superuser", "date_joined", "last_login",
+                  "grc_role", "plant_access", "accesses", "responsibilities", "warnings", "mfa_enabled"]
+        read_only_fields = ["id", "date_joined", "last_login", "grc_role", "plant_access",
+                            "accesses", "responsibilities", "warnings", "mfa_enabled"]
+
+    def _bu_plants(self):
+        from .services import bu_plants_map
+        if "bu_plants" not in self.context:
+            self.context["bu_plants"] = bu_plants_map()
+        return self.context["bu_plants"]
+
+    def _responsibilities(self, obj):
+        prefetched = getattr(obj, "active_responsibilities", None)
+        if prefetched is not None:
+            return prefetched
+        return [r for r in obj.role_assignments.all() if r.is_active]
+
+    def get_accesses(self, obj):
+        from .models import GrcRole
+        rows = []
+        for a in obj.plant_access.all():
+            try:
+                label = str(GrcRole(a.role).label)
+            except ValueError:
+                label = a.role
+            rows.append({
+                "id": str(a.id), "role": a.role, "role_label": label, "scope_type": a.scope_type,
+                "scope_bu_code": a.scope_bu.code if a.scope_bu_id else None,
+                "scope_plant_codes": sorted(p.code for p in a.scope_plants.all()),
+            })
+        return rows
+
+    def _scope_codes(self):
+        """{id: codice} di siti e BU, caricato una volta per l'elenco."""
+        from apps.plants.models import BusinessUnit, Plant
+        if "scope_codes" not in self.context:
+            codes = dict(Plant.objects.values_list("pk", "code"))
+            codes.update(BusinessUnit.objects.values_list("pk", "code"))
+            self.context["scope_codes"] = codes
+        return self.context["scope_codes"]
+
+    def get_responsibilities(self, obj):
+        rows = []
+        for r in self._responsibilities(obj):
+            code = self._scope_codes().get(r.scope_id) if r.scope_id else None
+            rows.append({"id": str(r.id), "role": r.role, "scope_type": r.scope_type,
+                         "scope_id": str(r.scope_id) if r.scope_id else None, "scope_code": code,
+                         "valid_until": r.valid_until.isoformat() if r.valid_until else None})
+        return rows
+
+    def get_warnings(self, obj):
+        from .services import responsibility_access_gaps
+        return responsibility_access_gaps(
+            obj, list(obj.plant_access.all()), self._responsibilities(obj), self._bu_plants(),
+        )
+
+    def get_mfa_enabled(self, obj):
+        annotated = getattr(obj, "mfa_confirmed", None)
+        if annotated is not None:
+            return bool(annotated)
+        from django_otp import devices_for_user
+        return bool(list(devices_for_user(obj)))
 
     def get_grc_role(self, obj):
         if obj.is_superuser:
@@ -55,20 +120,24 @@ class UserCreateSerializer(serializers.ModelSerializer):
         (GrcRole.CONTROL_OWNER, "User"),
     ]
     grc_role = serializers.ChoiceField(choices=[r[0] for r in EXPOSED_ROLES], required=False, write_only=True)
+    # Accessi creati insieme all'utente: [{role, scope_type, scope_plants?, scope_bu?}]
+    accesses = serializers.ListField(child=serializers.DictField(), required=False, write_only=True)
 
     class Meta:
         model = User
-        fields = ["username", "email", "first_name", "last_name", "password", "is_staff", "grc_role"]
+        fields = ["username", "email", "first_name", "last_name", "password", "is_staff", "grc_role", "accesses"]
 
     def create(self, validated_data):
+        from .services import create_grc_user
+
         grc_role = validated_data.pop("grc_role", None)
+        accesses = validated_data.pop("accesses", None) or []
         password = validated_data.pop("password")
-        user = User(**validated_data)
-        user.set_password(password)
-        user.save()
-        if grc_role:
-            UserPlantAccess.objects.create(user=user, role=grc_role, scope_type="org")
-        return user
+        if grc_role and not accesses:
+            accesses = [{"role": grc_role, "scope_type": "org"}]
+        return create_grc_user(
+            actor=self.context["request"].user, data=validated_data, password=password, accesses=accesses,
+        )
 
 
 class SetPasswordSerializer(serializers.Serializer):
@@ -89,11 +158,38 @@ class AssignRoleSerializer(serializers.Serializer):
 class UserViewSet(viewsets.ModelViewSet):
     # prefetch_related("plant_access"): il UserSerializer legge ruolo + accessi
     # per ogni utente → senza prefetch sarebbe 2N+ query sul listing.
-    queryset = (
-        User.objects.filter(is_active=True).order_by("username").prefetch_related("plant_access")
-    )
+    queryset = User.objects.all().order_by("username").prefetch_related("plant_access")
     filterset_fields = ["is_active", "is_staff"]
     search_fields = ["username", "email", "first_name", "last_name"]
+
+    def get_queryset(self):
+        """Elenco: di default solo gli attivi (gli altri moduli scelgono owner
+        e destinatari fra questi); ?status=inactive|all per la gestione utenti.
+        Le azioni di dettaglio vedono tutti, così un disattivato si riattiva."""
+        from django.db.models import Exists, OuterRef, Prefetch, Q
+        from django.utils import timezone
+        from django_otp.plugins.otp_totp.models import TOTPDevice
+
+        from apps.governance.models import RoleAssignment
+
+        today = timezone.localdate()
+        qs = super().get_queryset().prefetch_related(
+            "plant_access__scope_plants", "plant_access__scope_bu",
+            Prefetch(
+                "role_assignments",
+                queryset=RoleAssignment.objects.filter(valid_from__lte=today).filter(
+                    Q(valid_until__isnull=True) | Q(valid_until__gte=today)
+                ),
+                to_attr="active_responsibilities",
+            ),
+        ).annotate(mfa_confirmed=Exists(TOTPDevice.objects.filter(user=OuterRef("pk"), confirmed=True)))
+        if self.action == "list":
+            status_param = self.request.query_params.get("status", "active")
+            if status_param == "active" and "is_active" not in self.request.query_params:
+                qs = qs.filter(is_active=True)
+            elif status_param == "inactive":
+                qs = qs.filter(is_active=False)
+        return qs
 
     def get_serializer_class(self):
         if self.action == "create":
@@ -101,7 +197,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return UserSerializer
 
     def get_permissions(self):
-        if self.action in ["me", "list_roles"]:
+        if self.action in ["me", "list_roles", "role_matrix"]:
             return [IsAuthenticated()]
         return [IsAuthenticated(), IsGrcSuperAdmin()]
 
@@ -188,6 +284,12 @@ class UserViewSet(viewsets.ModelViewSet):
             payload={"user_id": user.pk, "is_active": user.is_active},
         )
         return Response({"is_active": user.is_active})
+
+    @action(detail=False, methods=["get"], url_path="role-matrix", permission_classes=[IsAuthenticated])
+    def role_matrix(self, request):
+        """Cosa può fare ogni ruolo, per area (letto dalle permission class)."""
+        from .services import role_permission_matrix
+        return Response(role_permission_matrix())
 
     @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
     def list_roles(self, request):

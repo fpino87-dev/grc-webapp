@@ -1456,6 +1456,25 @@ Modifying these values updates the calculations for all future items. Existing i
 
 ---
 
+## Users and access
+
+The **Users and access** page (Super Admin only) answers three questions: who can sign in, what they can do, and what they are responsible for.
+
+**User list** — for each person you see their **access** described in words (e.g. «Control Owner · TA, TB» or «Compliance Officer · Whole organization»), their governance **responsibilities** (e.g. DPO · TB), status, whether MFA is enabled and when they last signed in. You can search by name or email and filter by site, role and status; **Deactivated** shows deactivated users so you can reactivate them. A ⚠ warning flags responsibilities without portal access on the same scope (e.g. a DPO of site TB who cannot see TB's data).
+
+**User card** — clicking a person opens a side panel:
+- **Access**: an access is a *role* on a *scope*. To add one, pick the role from a card with its description, then the scope (sites, business unit or whole organization); right below you see what they will be able to edit and what only view. Each access is revoked with a confirmation.
+- **Responsibilities**: appointment, end and replacement use the same flow as Governance (history and reason kept). If a responsibility is uncovered, **Give access** opens a new access already set on the right scope.
+- **Profile**: name and email, deactivation or reactivation, deletion (GDPR anonymization).
+- **Competencies**: gap analysis of the competencies required by the role.
+- **Security**: last sign-in, MFA, password reset.
+
+**New user** — creation is guided in four steps: who, what they do (role), where (scope), summary. The user is created together with their access.
+
+**Roles** — the **Roles** tab describes the access roles and shows the matrix of what each can do in every area (edit, view, no access). The matrix is read from the platform's actual permissions, so it is always up to date and can be used as evidence in the access review. The **Access review** link opens the «Access & Responsibilities» matrix in Reporting.
+
+The test database reset zone is now in **Settings › Backups**, visible to the superuser only.
+
 ## Roles and what you can do
 
 ### Compliance Officer

@@ -1,896 +1,171 @@
-import { Fragment, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "../../api/client";
-import { usersApi, plantAccessApi, GRC_ACCESS_ROLES, type GrcUser, type GrcRole, type PlantAccessGrant } from "../../api/endpoints/users";
-import { plantsApi } from "../../api/endpoints/plants";
-import { governanceApi, type RoleAssignment } from "../../api/endpoints/governance";
-import { todayISO } from "../../utils/dates";
-import { useAuthStore } from "../../store/auth";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { usersApi, GRC_ACCESS_ROLES } from "../../api/endpoints/users";
+import { plantsApi } from "../../api/endpoints/plants";
+import { NewUserWizard } from "./NewUserWizard";
+import { RolesCatalog } from "./RolesCatalog";
+import { UserDrawer } from "./UserDrawer";
+import { Avatar, ROLE_ICON, ROLE_TONE, accessScopeText, displayName, relativeTime, respName, roleName } from "./shared";
 
-// Ruoli normativi (NormativeRole) — responsabilità di governance (0..N per persona).
-const GOVERNANCE_ROLES = [
-  "ciso", "compliance_officer", "risk_manager", "internal_auditor", "external_auditor",
-  "plant_manager", "control_owner", "plant_security_officer", "nis2_contact", "dpo",
-  "isms_manager", "comitato_membro", "bu_referente", "raci_responsible", "raci_accountable",
-] as const;
-// Ruoli che esistono sia come accesso (GrcRole) sia come responsabilità → coupling leggero.
-const OVERLAPPING_ROLES = new Set<string>(GRC_ACCESS_ROLES.filter(r => (GOVERNANCE_ROLES as readonly string[]).includes(r)));
-
-function AccessManagementModal({ user, onClose }: { user: GrcUser; onClose: () => void }) {
-  const { t } = useTranslation();
-  const qc = useQueryClient();
-  const [role, setRole] = useState<string>("control_owner");
-  const [scopeType, setScopeType] = useState<"org" | "bu" | "plant_list" | "single_plant">("single_plant");
-  const [plantIds, setPlantIds] = useState<string[]>([]);
-  const [buId, setBuId] = useState<string>("");
-  const [error, setError] = useState("");
-
-  // Responsabilità (governance RoleAssignment)
-  const [respRole, setRespRole] = useState<string>("ciso");
-  const [respScope, setRespScope] = useState<"org" | "bu" | "plant">("plant");
-  const [respScopeId, setRespScopeId] = useState<string>("");
-  const [respError, setRespError] = useState("");
-
-  const { data: grants } = useQuery({ queryKey: ["plant-access", user.id], queryFn: () => plantAccessApi.listForUser(user.id) });
-  const { data: plants } = useQuery({ queryKey: ["plants"], queryFn: () => plantsApi.list(), retry: false });
-  const { data: bus } = useQuery({ queryKey: ["business-units"], queryFn: () => plantsApi.businessUnits(), retry: false });
-  const { data: resps } = useQuery({ queryKey: ["resp-assignments", user.id], queryFn: () => governanceApi.roleAssignments({ user: String(user.id) }) as Promise<RoleAssignment[]> });
-
-  const invalidate = () => qc.invalidateQueries({ queryKey: ["plant-access", user.id] });
-  const invalidateResp = () => qc.invalidateQueries({ queryKey: ["resp-assignments", user.id] });
-
-  // Coupling leggero: se la responsabilità ha un nome di ruolo che è anche un
-  // accesso, propone (conferma esplicita) di creare il grant di accesso sullo
-  // stesso perimetro. Nessuna sincronizzazione automatica nascosta.
-  function maybeSuggestAccess(role: string, scope: string, scopeId: string) {
-    if (!OVERLAPPING_ROLES.has(role)) return;
-    if (!window.confirm(t("users.access.couple_suggest", { role: role.replace(/_/g, " ") }))) return;
-    plantAccessApi.create({
-      user: user.id, role,
-      scope_type: scope === "plant" ? "single_plant" : scope,
-      scope_plants: scope === "plant" && scopeId ? [scopeId] : undefined,
-      scope_bu: scope === "bu" ? (scopeId || null) : undefined,
-    }).then(invalidate).catch(() => { /* errore mostrato altrove */ });
-  }
-
-  const createResp = useMutation({
-    mutationFn: () => governanceApi.createRoleAssignment({
-      user: user.id, role: respRole,
-      scope_type: respScope,
-      scope_id: respScope === "org" ? null : (respScopeId || null),
-      valid_from: todayISO(),
-    } as Partial<RoleAssignment>),
-    onSuccess: () => {
-      setRespError("");
-      invalidateResp();
-      maybeSuggestAccess(respRole, respScope, respScopeId);
-      setRespScopeId("");
-    },
-    onError: (e: unknown) => {
-      const data = (e as { response?: { data?: Record<string, unknown> } })?.response?.data;
-      setRespError(data ? Object.values(data).flat().join(" ") : t("common.error"));
-    },
-  });
-  const deleteResp = useMutation({ mutationFn: (id: string) => governanceApi.deleteRoleAssignment(id), onSuccess: invalidateResp });
-
-  const createMut = useMutation({
-    mutationFn: () => plantAccessApi.create({
-      user: user.id, role, scope_type: scopeType,
-      scope_plants: (scopeType === "plant_list" || scopeType === "single_plant") ? plantIds : undefined,
-      scope_bu: scopeType === "bu" ? (buId || null) : undefined,
-    }),
-    onSuccess: () => { setError(""); setPlantIds([]); setBuId(""); invalidate(); },
-    onError: (e: unknown) => {
-      const data = (e as { response?: { data?: Record<string, unknown> } })?.response?.data;
-      setError(data ? Object.values(data).flat().join(" ") : t("common.error"));
-    },
-  });
-  const deleteMut = useMutation({ mutationFn: (id: string) => plantAccessApi.remove(id), onSuccess: invalidate });
-
-  const togglePlant = (id: string) =>
-    setPlantIds(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]);
-
-  const scopeLabel = (g: PlantAccessGrant) => {
-    if (g.scope_type === "org") return t("users.access.scope_org");
-    if (g.scope_type === "bu") return `${t("users.access.scope_bu")}: ${g.scope_bu_code ?? "—"}`;
-    return g.scope_plant_codes.join(", ") || t("users.access.no_sites");
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-        <div className="px-5 py-4 border-b flex items-center justify-between">
-          <h3 className="font-semibold text-gray-900">{t("users.access.title_full")} — {user.first_name} {user.last_name || user.username}</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 text-xl">×</button>
-        </div>
-
-        <div className="px-5 py-4 space-y-4">
-          <p className="text-xs text-gray-500">{t("users.access.subtitle")}</p>
-
-          <p className="text-sm font-semibold text-blue-700">🔑 {t("users.access.section_access")}</p>
-          {/* Grants esistenti */}
-          <div className="border border-gray-200 rounded-lg divide-y">
-            {(grants ?? []).length === 0 && <p className="px-3 py-3 text-sm text-gray-400">{t("users.access.no_grants")}</p>}
-            {(grants ?? []).map(g => (
-              <div key={g.id} className="flex items-center justify-between px-3 py-2 text-sm">
-                <div>
-                  <span className="font-medium text-gray-800">{g.role_label}</span>
-                  <span className="text-gray-500 text-xs ml-2">{scopeLabel(g)}</span>
-                </div>
-                <button onClick={() => deleteMut.mutate(g.id)} className="text-red-600 hover:text-red-800 text-xs border border-red-200 rounded px-2 py-0.5">
-                  {t("actions.delete")}
-                </button>
-              </div>
-            ))}
-          </div>
-
-          {/* Nuovo grant */}
-          <div className="border border-gray-200 rounded-lg p-3 space-y-3 bg-gray-50/50">
-            <p className="text-xs font-semibold text-gray-600 uppercase">{t("users.access.add")}</p>
-            <div className="grid grid-cols-2 gap-3">
-              <label className="text-sm">
-                <span className="block text-xs text-gray-500 mb-1">{t("users.access.role")}</span>
-                <select value={role} onChange={e => setRole(e.target.value)} className="w-full border rounded px-2 py-1.5 text-sm">
-                  {GRC_ACCESS_ROLES.map(r => <option key={r} value={r}>{r.replace(/_/g, " ")}</option>)}
-                </select>
-              </label>
-              <label className="text-sm">
-                <span className="block text-xs text-gray-500 mb-1">{t("users.access.scope")}</span>
-                <select value={scopeType} onChange={e => setScopeType(e.target.value as typeof scopeType)} className="w-full border rounded px-2 py-1.5 text-sm">
-                  <option value="single_plant">{t("users.access.scope_single_plant")}</option>
-                  <option value="plant_list">{t("users.access.scope_plant_list")}</option>
-                  <option value="bu">{t("users.access.scope_bu")}</option>
-                  <option value="org">{t("users.access.scope_org")}</option>
-                </select>
-              </label>
-            </div>
-
-            {(scopeType === "single_plant" || scopeType === "plant_list") && (
-              <div>
-                <span className="block text-xs text-gray-500 mb-1">{t("users.access.select_sites")}</span>
-                <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
-                  {(plants ?? []).map(p => (
-                    <button key={p.id} type="button" onClick={() => togglePlant(p.id)}
-                      className={`text-xs px-2 py-1 rounded border ${plantIds.includes(p.id) ? "bg-slate-700 text-white border-slate-700" : "bg-white text-gray-600 border-gray-300"}`}>
-                      {p.code}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {scopeType === "bu" && (
-              <label className="text-sm block">
-                <span className="block text-xs text-gray-500 mb-1">{t("users.access.select_bu")}</span>
-                <select value={buId} onChange={e => setBuId(e.target.value)} className="w-full border rounded px-2 py-1.5 text-sm">
-                  <option value="">—</option>
-                  {(bus ?? []).map(b => <option key={b.id} value={b.id}>{b.code} — {b.name}</option>)}
-                </select>
-              </label>
-            )}
-
-            {error && <p className="text-xs text-red-600">{error}</p>}
-            <button onClick={() => createMut.mutate()} disabled={createMut.isPending}
-              className="text-sm bg-slate-700 text-white rounded px-3 py-1.5 hover:bg-slate-800 disabled:opacity-50">
-              {t("users.access.add")}
-            </button>
-          </div>
-
-          {/* ── Responsabilità governance ───────────────────────────────── */}
-          <p className="text-sm font-semibold text-indigo-700 pt-2">📋 {t("users.access.section_resp")}</p>
-          <div className="border border-gray-200 rounded-lg divide-y">
-            {(resps ?? []).length === 0 && <p className="px-3 py-3 text-sm text-gray-400">{t("users.access.no_resp")}</p>}
-            {(resps ?? []).map(r => (
-              <div key={r.id} className="flex items-center justify-between px-3 py-2 text-sm">
-                <div>
-                  <span className="font-medium text-gray-800">{r.role.replace(/_/g, " ")}</span>
-                  <span className="text-gray-500 text-xs ml-2">
-                    {r.scope_type === "org"
-                      ? t("users.access.scope_org")
-                      : `${r.scope_type === "bu" ? t("users.access.scope_bu") + ": " : ""}${r.scope_code ?? r.scope_type}`}
-                  </span>
-                </div>
-                <button onClick={() => deleteResp.mutate(r.id)} className="text-red-600 hover:text-red-800 text-xs border border-red-200 rounded px-2 py-0.5">
-                  {t("actions.delete")}
-                </button>
-              </div>
-            ))}
-          </div>
-          <div className="border border-gray-200 rounded-lg p-3 space-y-3 bg-gray-50/50">
-            <p className="text-xs font-semibold text-gray-600 uppercase">{t("users.access.add_resp")}</p>
-            <div className="grid grid-cols-2 gap-3">
-              <label className="text-sm">
-                <span className="block text-xs text-gray-500 mb-1">{t("users.access.role")}</span>
-                <select value={respRole} onChange={e => setRespRole(e.target.value)} className="w-full border rounded px-2 py-1.5 text-sm">
-                  {GOVERNANCE_ROLES.map(r => <option key={r} value={r}>{r.replace(/_/g, " ")}</option>)}
-                </select>
-              </label>
-              <label className="text-sm">
-                <span className="block text-xs text-gray-500 mb-1">{t("users.access.scope")}</span>
-                <select value={respScope} onChange={e => { setRespScope(e.target.value as typeof respScope); setRespScopeId(""); }} className="w-full border rounded px-2 py-1.5 text-sm">
-                  <option value="plant">{t("users.access.scope_single_plant")}</option>
-                  <option value="bu">{t("users.access.scope_bu")}</option>
-                  <option value="org">{t("users.access.scope_org")}</option>
-                </select>
-              </label>
-            </div>
-            {respScope === "plant" && (
-              <label className="text-sm block">
-                <span className="block text-xs text-gray-500 mb-1">{t("users.access.select_site")}</span>
-                <select value={respScopeId} onChange={e => setRespScopeId(e.target.value)} className="w-full border rounded px-2 py-1.5 text-sm">
-                  <option value="">—</option>
-                  {(plants ?? []).map(p => <option key={p.id} value={p.id}>{p.code} — {p.name}</option>)}
-                </select>
-              </label>
-            )}
-            {respScope === "bu" && (
-              <label className="text-sm block">
-                <span className="block text-xs text-gray-500 mb-1">{t("users.access.select_bu")}</span>
-                <select value={respScopeId} onChange={e => setRespScopeId(e.target.value)} className="w-full border rounded px-2 py-1.5 text-sm">
-                  <option value="">—</option>
-                  {(bus ?? []).map(b => <option key={b.id} value={b.id}>{b.code} — {b.name}</option>)}
-                </select>
-              </label>
-            )}
-            {respError && <p className="text-xs text-red-600">{respError}</p>}
-            <button onClick={() => createResp.mutate()} disabled={createResp.isPending}
-              className="text-sm bg-indigo-700 text-white rounded px-3 py-1.5 hover:bg-indigo-800 disabled:opacity-50">
-              {t("users.access.add_resp")}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface CompetencyGap {
-  competency: string; role: string; required_level: number;
-  current_level: number; gap: number; evidence_type: string;
-}
-interface CompetencyWarning { competency: string; expired_on: string; message: string; }
-interface GapAnalysisResult {
-  user_id: string; user_name: string; roles: string[];
-  gaps: CompetencyGap[]; ok: string[]; warnings: CompetencyWarning[];
-  gap_count: number;
-}
-
-function CompetencyPanel({ userId }: { userId: number }) {
-  const { t } = useTranslation();
-  const { data, isLoading } = useQuery({
-    queryKey: ["competency-gap", userId],
-    queryFn: () =>
-      apiClient.get<GapAnalysisResult>(`/auth/user-competencies/gap-analysis/?user=${userId}`)
-        .then(r => r.data),
-    retry: false,
-  });
-
-  if (isLoading) return <p className="text-xs text-gray-400 p-4">{t("users.competency_gap.loading")}</p>;
-  if (!data) return null;
-
-  return (
-    <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 text-sm">
-      <div className="flex items-center gap-3 mb-3">
-        <h4 className="font-semibold text-gray-700">
-          {t("users.competency_gap.title", { name: data.user_name })}
-        </h4>
-        {data.gap_count > 0 && (
-          <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded">
-            {t("users.competency_gap.gap_count", { count: data.gap_count })}
-          </span>
-        )}
-        {data.ok.length > 0 && !data.gap_count && (
-          <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">
-            {t("users.competency_gap.complete")}
-          </span>
-        )}
-      </div>
-
-      {data.gaps.length > 0 && (
-        <div className="mb-3">
-          <p className="text-xs font-medium text-red-600 mb-1">{t("users.competency_gap.to_fill")}</p>
-          <div className="space-y-1">
-            {data.gaps.map((g, i) => (
-              <div key={i} className="flex items-center gap-2 bg-red-50 rounded px-3 py-1.5 text-xs">
-                <span className="font-medium text-red-700">{g.competency}</span>
-                <span className="text-gray-500">({g.role})</span>
-                <span className="ml-auto text-red-600">
-                  {t("users.competency_gap.level_from_to", { current: g.current_level, required: g.required_level })}
-                </span>
-                <span className="text-gray-400 capitalize">{g.evidence_type}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {data.warnings.length > 0 && (
-        <div className="mb-3">
-          <p className="text-xs font-medium text-orange-600 mb-1">{t("users.competency_gap.expired")}</p>
-          <div className="space-y-1">
-            {data.warnings.map((w, i) => (
-              <div key={i} className="flex items-center gap-2 bg-orange-50 rounded px-3 py-1.5 text-xs">
-                <span className="text-orange-700">{w.message}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {data.ok.length > 0 && (
-        <div>
-          <p className="text-xs font-medium text-green-600 mb-1">{t("users.competency_gap.ok")}</p>
-          <div className="flex flex-wrap gap-1">
-            {data.ok.map((c, i) => (
-              <span key={i} className="bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded">{c}</span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {data.gaps.length === 0 && data.warnings.length === 0 && data.ok.length === 0 && (
-        <p className="text-xs text-gray-400">{t("users.competency_gap.none")}</p>
-      )}
-    </div>
-  );
-}
-
-const roleColors: Record<string, string> = {
-  super_admin: "bg-purple-100 text-purple-800",
-  compliance_officer: "bg-blue-100 text-blue-800",
-  risk_manager: "bg-orange-100 text-orange-800",
-  plant_manager: "bg-teal-100 text-teal-800",
-  control_owner: "bg-green-100 text-green-800",
-  internal_auditor: "bg-yellow-100 text-yellow-800",
-  external_auditor: "bg-gray-100 text-gray-600",
-};
-
-function RoleBadge({ role }: { role: string | null }) {
-  if (!role) return <span className="text-gray-400 text-xs">—</span>;
-  return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${roleColors[role] ?? "bg-gray-100 text-gray-600"}`}>
-      {role.replace(/_/g, " ")}
-    </span>
-  );
-}
-
-function NewUserModal({ roles, onClose }: { roles: GrcRole[]; onClose: () => void }) {
-  const { t } = useTranslation();
-  const qc = useQueryClient();
-  const [form, setForm] = useState({ username: "", email: "", first_name: "", last_name: "", password: "", grc_role: "" });
-  const [error, setError] = useState("");
-
-  const mutation = useMutation({
-    mutationFn: usersApi.create,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["users"] }); onClose(); },
-    onError: (e: unknown) => {
-      const data = (e as { response?: { data?: Record<string, unknown> } })?.response?.data;
-      setError(data ? Object.values(data).flat().join(" ") : t("common.save_error"));
-    },
-  });
-
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  }
-
-  return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
-        <h3 className="text-lg font-semibold mb-4">{t("users.new.title")}</h3>
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("users.fields.username")} *</label>
-              <input name="username" value={form.username} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("users.fields.email")} *</label>
-              <input name="email" type="email" value={form.email} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("users.fields.first_name")}</label>
-              <input name="first_name" value={form.first_name} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("users.fields.last_name")}</label>
-              <input name="last_name" value={form.last_name} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t("users.fields.password")} * <span className="text-xs font-normal text-gray-400">({t("users.fields.password_hint")})</span></label>
-            <input name="password" type="password" value={form.password} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t("users.fields.grc_role")}</label>
-            <select name="grc_role" value={form.grc_role} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
-              <option value="">{t("users.fields.grc_role_none")}</option>
-              {roles.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
-            </select>
-          </div>
-        </div>
-        {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
-        <div className="flex justify-end gap-2 mt-4">
-          <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("actions.cancel")}</button>
-          <button
-            onClick={() => mutation.mutate({ username: form.username, email: form.email, first_name: form.first_name, last_name: form.last_name, password: form.password, grc_role: form.grc_role || undefined })}
-            disabled={mutation.isPending}
-            className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
-          >
-            {mutation.isPending ? t("common.saving") : t("users.new.submit")}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function AssignRoleInline({ user, roles }: { user: GrcUser; roles: GrcRole[] }) {
-  const { t } = useTranslation();
-  const qc = useQueryClient();
-  const [open, setOpen] = useState(false);
-  const [role, setRole] = useState(user.grc_role ?? "");
-
-  const mutation = useMutation({
-    mutationFn: ({ id, role }: { id: number; role: string }) => usersApi.assignRole(id, role),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["users"] }); setOpen(false); },
-  });
-
-  if (!open) {
-    return (
-      <button onClick={() => setOpen(true)} className="text-xs text-blue-600 hover:underline border border-blue-200 rounded px-2 py-0.5">
-        {t("users.actions.assign_role")}
-      </button>
-    );
-  }
-
-  return (
-    <div className="flex items-center gap-1">
-      <select value={role} onChange={e => setRole(e.target.value)} className="border rounded px-2 py-0.5 text-xs">
-        <option value="">{t("users.fields.grc_role_none")}</option>
-        {roles.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
-      </select>
-      <button
-        onClick={() => mutation.mutate({ id: user.id, role })}
-        disabled={mutation.isPending}
-        className="text-xs bg-primary-600 text-white rounded px-2 py-0.5 hover:bg-primary-700 disabled:opacity-50"
-      >
-        {t("actions.confirm")}
-      </button>
-      <button onClick={() => setOpen(false)} className="text-xs text-gray-500 hover:text-gray-700">✕</button>
-    </div>
-  );
-}
-
-function ResetPasswordModal({ user, onClose }: { user: GrcUser; onClose: () => void }) {
-  const { t } = useTranslation();
-  const qc = useQueryClient();
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-
-  const mutation = useMutation({
-    mutationFn: () => usersApi.setPassword(user.id, password),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["users"] });
-      onClose();
-    },
-    onError: (e: unknown) => {
-      const data = (e as { response?: { data?: Record<string, unknown> } })?.response?.data;
-      setError(data ? Object.values(data).flat().join(" ") : t("common.save_error"));
-    },
-  });
-
-  const disabled = password.length < 12 || mutation.isPending;
-
-  return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-        <h3 className="text-lg font-semibold mb-4">
-          {t("users.actions.reset_password")} — {user.username}
-        </h3>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          {t("users.fields.password")} ({t("users.fields.password_hint")})
-        </label>
-        <input
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          className="w-full border rounded px-3 py-2 text-sm"
-        />
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-        <div className="flex justify-end gap-2 mt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50"
-          >
-            {t("actions.cancel")}
-          </button>
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={() => mutation.mutate()}
-            className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
-          >
-            {mutation.isPending ? t("common.saving") : t("users.actions.reset_password")}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function EditUserModal({ user, onClose }: { user: GrcUser; onClose: () => void }) {
-  const { t } = useTranslation();
-  const qc = useQueryClient();
-  const [form, setForm] = useState({
-    email: user.email,
-    first_name: user.first_name,
-    last_name: user.last_name,
-  });
-  const [error, setError] = useState("");
-
-  const mutation = useMutation({
-    mutationFn: () =>
-      usersApi.update(user.id, {
-        email: form.email,
-        first_name: form.first_name,
-        last_name: form.last_name,
-      }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["users"] });
-      onClose();
-    },
-    onError: () => setError(t("common.save_error")),
-  });
-
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  }
-
-  return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-        <h3 className="text-lg font-semibold mb-4">
-          {t("users.edit.title")} — {user.username}
-        </h3>
-        <div className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("users.fields.email")} *
-            </label>
-            <input
-              name="email"
-              type="email"
-              value={form.email}
-              onChange={handleChange}
-              className="w-full border rounded px-3 py-2 text-sm"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("users.fields.first_name")}
-              </label>
-              <input
-                name="first_name"
-                value={form.first_name}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("users.fields.last_name")}
-              </label>
-              <input
-                name="last_name"
-                value={form.last_name}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2 text-sm"
-              />
-            </div>
-          </div>
-        </div>
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-        <div className="flex justify-end gap-2 mt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50"
-          >
-            {t("actions.cancel")}
-          </button>
-          <button
-            type="button"
-            disabled={mutation.isPending}
-            onClick={() => mutation.mutate()}
-            className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
-          >
-            {mutation.isPending ? t("common.saving") : t("actions.save")}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DangerZone() {
-  const { t } = useTranslation();
-  const logout = useAuthStore(s => s.logout);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [confirmText, setConfirmText] = useState("");
-  const [isResetting, setIsResetting] = useState(false);
-  const [result, setResult] = useState<{ ok: boolean; msg: string } | null>(null);
-
-  async function handleReset() {
-    setIsResetting(true);
-    setResult(null);
-    try {
-      await usersApi.resetTestDb();
-      setResult({ ok: true, msg: t("users.danger.reset_success") });
-      setTimeout(() => {
-        logout();
-        window.location.href = "/login";
-      }, 2000);
-    } catch (e: any) {
-      const msg = e?.response?.data?.error || t("users.danger.reset_error");
-      setResult({ ok: false, msg });
-    } finally {
-      setIsResetting(false);
-    }
-  }
-
-  return (
-    <div className="mt-12 border-2 border-red-300 rounded-lg p-6 bg-red-50">
-      <h3 className="text-red-700 font-bold text-lg mb-2">
-        {t("users.danger.title")}
-      </h3>
-      <p className="text-sm text-red-600 mb-4">
-        {t("users.danger.body")}
-      </p>
-
-      {result && (
-        <div className={`mb-4 px-4 py-3 rounded text-sm ${result.ok ? "bg-green-100 text-green-800 border border-green-300" : "bg-red-100 text-red-800 border border-red-400"}`}>
-          {result.msg}
-        </div>
-      )}
-
-      {!showConfirm ? (
-        <button
-          onClick={() => setShowConfirm(true)}
-          className="px-4 py-2 bg-red-600 text-white rounded font-medium hover:bg-red-700"
-        >
-          {t("users.danger.open")}
-        </button>
-      ) : (
-        <div className="bg-white border border-red-400 rounded p-4">
-          <p className="font-semibold text-red-700 mb-3">
-            {t("users.danger.confirm_body")}
-          </p>
-          <input
-            placeholder={t("users.danger.confirm_placeholder")}
-            value={confirmText}
-            onChange={e => setConfirmText(e.target.value)}
-            className="border rounded px-3 py-2 text-sm w-full mb-3"
-          />
-          <div className="flex gap-3">
-            <button
-              onClick={handleReset}
-              disabled={confirmText !== "RESET" || isResetting}
-              className="px-4 py-2 bg-red-700 text-white rounded disabled:opacity-40 font-medium"
-            >
-              {isResetting ? t("users.danger.resetting") : t("users.danger.confirm")}
-            </button>
-            <button
-              onClick={() => { setShowConfirm(false); setConfirmText(""); }}
-              className="px-4 py-2 border rounded text-gray-600"
-            >
-              {t("actions.cancel")}
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+type Status = "active" | "inactive" | "all";
 
 export function UsersPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [view, setView] = useState<"users" | "roles">("users");
+  const [status, setStatus] = useState<Status>("active");
+  const [search, setSearch] = useState("");
+  const [site, setSite] = useState("");
+  const [role, setRole] = useState("");
+  const [openId, setOpenId] = useState<number | null>(null);
   const [showNew, setShowNew] = useState(false);
-  const [expandedCompetency, setExpandedCompetency] = useState<number | null>(null);
-  const [editUser, setEditUser] = useState<GrcUser | null>(null);
-  const [resetUser, setResetUser] = useState<GrcUser | null>(null);
-  const [accessUser, setAccessUser] = useState<GrcUser | null>(null);
-  const [menuUserId, setMenuUserId] = useState<number | null>(null);
-  const qc = useQueryClient();
 
-  const { data: me } = useQuery({
-    queryKey: ["users-me"],
-    queryFn: usersApi.me,
-    retry: false,
-  });
-
+  const { data: me } = useQuery({ queryKey: ["users-me"], queryFn: usersApi.me, retry: false });
   const { data: users = [], isLoading } = useQuery({
-    queryKey: ["users"],
-    queryFn: usersApi.list,
+    queryKey: ["users", "admin", status],
+    queryFn: () => usersApi.listForAdmin(status),
     retry: false,
   });
-
-  const { data: roles = [] } = useQuery({
-    queryKey: ["users-roles"],
-    queryFn: usersApi.listRoles,
+  // per il catalogo ruoli e la sostituzione delle responsabilità servono gli attivi
+  const { data: activeUsers = [] } = useQuery({
+    queryKey: ["users", "admin", "active"],
+    queryFn: () => usersApi.listForAdmin("active"),
     retry: false,
   });
+  const { data: plants = [] } = useQuery({ queryKey: ["plants"], queryFn: () => plantsApi.list() });
+  const { data: bus = [] } = useQuery({ queryKey: ["business-units"], queryFn: () => plantsApi.businessUnits() });
+  const canManage = me?.grc_role === "super_admin" || !!me?.is_superuser;
 
-  const toggleMutation = useMutation({
-    mutationFn: (id: number) => usersApi.toggleActive(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["users"] }),
-  });
-
-  const removeUserMutation = useMutation({
-    mutationFn: (id: number) => usersApi.remove(id),
-    onSuccess: (_data, id) => {
-      qc.setQueryData<any[]>(["users"], (old) => (old ?? []).filter((u) => u.id !== id));
-    },
-    onError: (e: any) => window.alert(e?.response?.data?.detail || t("common.error")),
-  });
+  const sitePlant = plants.find(p => p.id === site);
+  const siteCode = sitePlant?.code;
+  const siteBuCode = bus.find(b => b.id === sitePlant?.bu)?.code;
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return users.filter(u => {
+      if (q && ![u.username, u.email, u.first_name, u.last_name].join(" ").toLowerCase().includes(q)) return false;
+      const acc = u.accesses ?? [];
+      if (role && !acc.some(a => a.role === role)) return false;
+      if (siteCode && !u.is_superuser && !acc.some(a => a.scope_type === "org" || a.scope_plant_codes.includes(siteCode)
+        || (a.scope_type === "bu" && !!siteBuCode && a.scope_bu_code === siteBuCode))) return false;
+      return true;
+    });
+  }, [users, search, role, siteCode, siteBuCode]);
+  const opened = users.find(u => u.id === openId) ?? activeUsers.find(u => u.id === openId) ?? null;
+  const gapsTotal = users.reduce((n, u) => n + (u.warnings?.length ?? 0), 0);
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">{t("users.title")}</h2>
-        <button
-          onClick={() => setShowNew(true)}
-          className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700"
-        >
-          {t("users.new.open")}
-        </button>
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">{t("users.page_title")}</h2>
+          <p className="text-sm text-gray-500">{t("users.page_subtitle")}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link to="/reporting?tab=access_matrix" className="text-sm text-gray-600 hover:text-primary-700 px-3 py-2">
+            {t("users.access_review_link")} →
+          </Link>
+          {canManage && (
+            <button onClick={() => setShowNew(true)} className="px-4 py-2 rounded-lg bg-primary-600 text-white text-sm hover:bg-primary-700 shadow-sm">
+              + {t("users.wizard.open")}
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200">
-        {isLoading ? (
-          <div className="p-8 text-center text-gray-400">{t("common.loading")}</div>
-        ) : users.length === 0 ? (
-          <div className="p-8 text-center text-gray-400">{t("users.empty")}</div>
-        ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("users.table.username")}</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("users.table.email")}</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("users.table.name")}</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("users.table.grc_role")}</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("users.table.active")}</th>
-                <th className="px-4 py-3 font-medium text-gray-600">{t("users.table.actions")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {users.map(user => (
-                <Fragment key={user.id}>
-                  <tr className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 font-medium text-gray-800">{user.username}</td>
-                    <td className="px-4 py-3 text-gray-600">{user.email}</td>
-                    <td className="px-4 py-3 text-gray-600">
-                      {[user.first_name, user.last_name].filter(Boolean).join(" ") || t("common.none")}
-                    </td>
-                    <td className="px-4 py-3"><RoleBadge role={user.grc_role} /></td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-block w-2.5 h-2.5 rounded-full ${user.is_active ? "bg-green-500" : "bg-red-400"}`} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <AssignRoleInline user={user} roles={roles} />
-                        <div className="relative">
-                          <button
-                            type="button"
-                            onClick={() => setMenuUserId(prev => (prev === user.id ? null : user.id))}
-                            className="inline-flex items-center gap-1 border border-gray-300 rounded px-2 py-0.5 text-xs text-gray-700 hover:bg-gray-50"
-                          >
-                            <span>{t("users.table.actions")}</span>
-                            <span className="text-[10px]">{menuUserId === user.id ? "▲" : "▼"}</span>
-                          </button>
-                          {menuUserId === user.id && (
-                            <div className="absolute right-0 mt-1 w-40 bg-white border border-gray-200 rounded shadow-md z-10 text-xs">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  toggleMutation.mutate(user.id);
-                                  setMenuUserId(null);
-                                }}
-                                disabled={toggleMutation.isPending}
-                                className="w-full text-left px-3 py-1.5 hover:bg-gray-50"
-                              >
-                                {user.is_active ? t("users.actions.deactivate") : t("users.actions.activate")}
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setExpandedCompetency(prev => (prev === user.id ? null : user.id));
-                                  setMenuUserId(null);
-                                }}
-                                className="w-full text-left px-3 py-1.5 hover:bg-gray-50"
-                              >
-                                {t("users.actions.competency")}
-                              </button>
-                              {me?.grc_role === "super_admin" && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setEditUser(user);
-                                    setMenuUserId(null);
-                                  }}
-                                  className="w-full text-left px-3 py-1.5 hover:bg-gray-50"
-                                >
-                                  {t("actions.edit")}
-                                </button>
-                              )}
-                              {me?.grc_role === "super_admin" && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setAccessUser(user);
-                                    setMenuUserId(null);
-                                  }}
-                                  className="w-full text-left px-3 py-1.5 hover:bg-gray-50"
-                                >
-                                  {t("users.access.menu")}
-                                </button>
-                              )}
-                              {me?.grc_role === "super_admin" && !user.is_superuser && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setResetUser(user);
-                                    setMenuUserId(null);
-                                  }}
-                                  className="w-full text-left px-3 py-1.5 hover:bg-gray-50"
-                                >
-                                  {t("users.actions.reset_password")}
-                                </button>
-                              )}
-                              {me?.grc_role === "super_admin" && me?.id !== user.id && !user.is_superuser && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    if (!window.confirm(t("users.actions.delete_confirm", { username: user.username }))) return;
-                                    removeUserMutation.mutate(user.id);
-                                    setMenuUserId(null);
-                                  }}
-                                  disabled={removeUserMutation.isPending}
-                                  className="w-full text-left px-3 py-1.5 hover:bg-red-50 text-red-700 disabled:opacity-50"
-                                >
-                                  {t("users.actions.delete")}
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                  {expandedCompetency === user.id && (
-                    <tr>
-                      <td colSpan={6} className="p-0">
-                        <CompetencyPanel userId={user.id} />
-                      </td>
-                    </tr>
-                  )}
-                </Fragment>
+      <nav className="flex gap-1 border-b border-gray-200">
+        {(["users", "roles"] as const).map(v => (
+          <button key={v} onClick={() => setView(v)}
+            className={`px-4 py-2 text-sm border-b-2 -mb-px ${view === v ? "border-primary-600 text-primary-700 font-medium" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
+            {t(`users.tabs.${v}`)}
+          </button>
+        ))}
+      </nav>
+
+      {view === "roles" ? <RolesCatalog users={activeUsers} /> : (
+        <>
+          <div className="flex flex-wrap items-center gap-2">
+            <input type="search" value={search} onChange={e => setSearch(e.target.value)}
+              placeholder={t("users.search_placeholder")} aria-label={t("users.search_placeholder")}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-72" />
+            <select value={site} onChange={e => setSite(e.target.value)} aria-label={t("users.filters.site")}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
+              <option value="">{t("users.filters.all_sites")}</option>
+              {plants.map(p => <option key={p.id} value={p.id}>{p.code} — {p.name}</option>)}
+            </select>
+            <select value={role} onChange={e => setRole(e.target.value)} aria-label={t("users.filters.role")}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
+              <option value="">{t("users.filters.all_roles")}</option>
+              {GRC_ACCESS_ROLES.map(r => <option key={r} value={r}>{roleName(t, r)}</option>)}
+            </select>
+            <div className="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-0.5 ml-auto" role="radiogroup" aria-label={t("users.filters.status")}>
+              {(["active", "inactive", "all"] as const).map(s => (
+                <button key={s} role="radio" aria-checked={status === s} onClick={() => setStatus(s)}
+                  className={`px-3 py-1.5 text-sm rounded-md ${status === s ? "bg-white shadow-sm text-gray-900 font-medium" : "text-gray-500"}`}>
+                  {t(`users.filters.status_${s}`)}
+                </button>
               ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+            </div>
+          </div>
 
-      {showNew && <NewUserModal roles={roles} onClose={() => setShowNew(false)} />}
-      {editUser && <EditUserModal user={editUser} onClose={() => setEditUser(null)} />}
-      {resetUser && <ResetPasswordModal user={resetUser} onClose={() => setResetUser(null)} />}
-      {accessUser && <AccessManagementModal user={accessUser} onClose={() => setAccessUser(null)} />}
+          {gapsTotal > 0 && (
+            <p className="text-sm text-amber-900 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+              ⚠ {t("users.list.gaps_summary", { count: gapsTotal })}
+            </p>
+          )}
 
-      {me?.is_superuser && <DangerZone />}
+          <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+            {isLoading ? (
+              <p className="p-8 text-center text-gray-400">{t("common.loading")}</p>
+            ) : filtered.length === 0 ? (
+              <p className="p-8 text-center text-gray-400">{t("users.empty")}</p>
+            ) : filtered.map(u => (
+              <button key={u.id} type="button" onClick={() => setOpenId(u.id)}
+                className="w-full text-left flex flex-wrap md:flex-nowrap items-center gap-4 px-4 py-3 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none">
+                <Avatar user={u} />
+                <div className="w-56 min-w-0">
+                  <p className={`text-sm font-medium truncate ${u.is_active ? "text-gray-900" : "text-gray-400"}`}>{displayName(u)}</p>
+                  <p className="text-xs text-gray-500 truncate">{u.email}</p>
+                </div>
+                <div className="flex-1 min-w-0 flex flex-wrap gap-1.5">
+                  {u.is_superuser && <span className="text-xs px-2 py-0.5 rounded-full border bg-purple-50 text-purple-800 border-purple-200">🛠 {t("users.list.superuser")}</span>}
+                  {(u.accesses ?? []).map(a => (
+                    <span key={a.id} className={`text-xs px-2 py-0.5 rounded-full border ${ROLE_TONE[a.role] ?? "bg-gray-50 text-gray-700 border-gray-200"}`}>
+                      <span aria-hidden>{ROLE_ICON[a.role]}</span> {roleName(t, a.role)} · {accessScopeText(t, a)}
+                    </span>
+                  ))}
+                  {!u.is_superuser && (u.accesses ?? []).length === 0 && <span className="text-xs text-gray-400 italic">{t("users.list.no_access")}</span>}
+                  {(u.responsibilities ?? []).map(r => (
+                    <span key={r.id} className="text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">
+                      🛡 {respName(t, r.role)}{r.scope_code ? ` · ${r.scope_code}` : ""}
+                    </span>
+                  ))}
+                  {(u.warnings?.length ?? 0) > 0 && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-800">⚠ {t("users.list.gap_badge", { count: u.warnings!.length })}</span>
+                  )}
+                </div>
+                <div className="w-44 text-right text-xs text-gray-500 space-y-0.5 shrink-0">
+                  <p>
+                    <span className={`inline-block w-2 h-2 rounded-full mr-1 ${u.is_active ? "bg-green-500" : "bg-gray-300"}`} />
+                    {u.is_active ? t("users.list.active") : t("users.list.inactive")}
+                    {" · "}{u.mfa_enabled ? <span className="text-green-700">MFA ✓</span> : <span className="text-gray-400">MFA —</span>}
+                  </p>
+                  <p>{u.last_login ? t("users.list.last_login", { when: relativeTime(u.last_login, i18n.language) }) : t("users.list.never_logged")}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
+      {opened && (
+        <UserDrawer user={opened} users={activeUsers} canManage={canManage} isSelf={me?.id === opened.id}
+          onClose={() => setOpenId(null)} />
+      )}
+      {showNew && (
+        <NewUserWizard onClose={() => setShowNew(false)}
+          onCreated={id => { setShowNew(false); setStatus("active"); setOpenId(id); }} />
+      )}
     </div>
   );
 }

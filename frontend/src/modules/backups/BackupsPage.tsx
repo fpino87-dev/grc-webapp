@@ -11,6 +11,8 @@ import {
   type BackupRecord,
 } from "../../api/endpoints/backups";
 import { useAuthStore } from "../../store/auth";
+import { usersApi } from "../../api/endpoints/users";
+import { DangerZone } from "./DangerZone";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -263,6 +265,7 @@ export function BackupsPage() {
   const [confirmDelete,  setConfirmDelete]  = useState<BackupRecord | null>(null);
   const [showImport, setShowImport] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "ok" | "err"; msg: string } | null>(null);
+  const { data: me } = useQuery({ queryKey: ["users-me"], queryFn: usersApi.me, retry: false });
 
   const { data: backups = [], isLoading } = useQuery({
     queryKey: ["backups"],
@@ -441,6 +444,8 @@ export function BackupsPage() {
           onCancel={() => setConfirmDelete(null)}
         />
       )}
+
+      {me?.is_superuser && <DangerZone />}
     </div>
   );
 }

@@ -1456,6 +1456,25 @@ La modification de ces valeurs met à jour les calculs pour tous les éléments 
 
 ---
 
+## Utilisateurs et accès
+
+La page **Utilisateurs et accès** (réservée au Super Admin) répond à trois questions : qui accède à la plateforme, ce qu'il peut faire, de quoi il est responsable.
+
+**Liste des utilisateurs** — pour chaque personne vous voyez ses **accès** décrits en clair (par ex. «Control Owner · TA, TB» ou «Compliance Officer · Toute l'organisation»), ses **responsabilités** de gouvernance (par ex. DPO · TB), le statut, si la MFA est activée et sa dernière connexion. Vous pouvez rechercher par nom ou e-mail et filtrer par site, rôle et statut ; **Désactivés** affiche les utilisateurs désactivés pour les réactiver. Un avertissement ⚠ signale les responsabilités sans accès au portail sur le même périmètre (par ex. un DPO du site TB qui ne peut pas voir les données de TB).
+
+**Fiche utilisateur** — un clic sur une personne ouvre un panneau latéral :
+- **Accès** : un accès est un *rôle* sur un *périmètre*. Pour l'ajouter, choisissez le rôle sur une carte avec sa description, puis le périmètre (sites, business unit ou toute l'organisation) ; juste en dessous vous voyez ce qu'il pourra modifier et seulement consulter. Chaque accès se révoque avec confirmation.
+- **Responsabilités** : nomination, fin et remplacement suivent le même flux que Gouvernance (historique et motif conservés). Si une responsabilité n'est pas couverte, **Donner l'accès** ouvre l'ajout d'un accès déjà réglé sur le bon périmètre.
+- **Profil** : nom et e-mail, désactivation ou réactivation, suppression (anonymisation RGPD).
+- **Compétences** : analyse des écarts de compétences requises par le rôle.
+- **Sécurité** : dernière connexion, MFA, réinitialisation du mot de passe.
+
+**Nouvel utilisateur** — la création est guidée en quatre étapes : qui, ce qu'il fait (rôle), où (périmètre), récapitulatif. L'utilisateur est créé avec son accès.
+
+**Rôles** — l'onglet **Rôles** décrit les rôles d'accès et montre la matrice de ce que chacun peut faire dans chaque domaine (modification, consultation, aucun accès). La matrice est lue depuis les permissions réelles de la plateforme : elle est toujours à jour et utilisable comme preuve lors de la revue des accès. Le lien **Revue des accès** ouvre la matrice «Accès & Responsabilités» du Reporting.
+
+La zone de réinitialisation de la base de test se trouve désormais dans **Paramètres › Sauvegardes**, visible uniquement par le superutilisateur.
+
 ## Rôles et ce que vous pouvez faire
 
 ### Compliance Officer
