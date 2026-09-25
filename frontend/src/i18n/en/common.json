@@ -3475,7 +3475,12 @@
       "confirm_btn": "Archive cycle",
       "in_progress": "Archiving…",
       "error_generic": "Error while archiving",
-      "findings_hint": "This PDCA covers observations or opportunities still open: archiving it leaves them open. To discard them use «Do not pursue» on the finding in Audit Prep, which also archives the PDCA."
+      "proof_label": "Proof of the decision (optional)",
+      "proof_existing": "— existing evidence —",
+      "proof_file": "Or upload a file",
+      "dossier_reason": "Archived:",
+      "not_pursued_hint": "Open linked observations/opportunities: {{count}}. They will become «Not pursued» with this reason and the proof, if you attach it.",
+      "nc_open_hint": "Open linked nonconformities: {{count}}. They stay open: address them with a new PDCA or close them with evidence."
     },
     "advance": {
       "to_do": "Advance to DO",

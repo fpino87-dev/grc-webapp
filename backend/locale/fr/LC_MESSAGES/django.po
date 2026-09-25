@@ -3036,3 +3036,11 @@ msgstr "Cycles PDCA au-delà de la date prévue"
 #: apps/management_review/report/builder.py
 msgid "Data prevista"
 msgstr "Date prévue"
+
+#: apps/pdca/services.py
+msgid "Archiviazione PDCA — %(title)s"
+msgstr "Archivage PDCA — %(title)s"
+
+#: apps/pdca/services.py
+msgid "Motivazione dell'archiviazione del ciclo PDCA «%(title)s»."
+msgstr "Justification de l'archivage du cycle PDCA «%(title)s»."

@@ -304,14 +304,33 @@ function ArchiviaCycleButton({ cycle }: { cycle: PdcaCycle }) {
   const [open, setOpen] = useState(false);
   const [motivo, setMotivo] = useState("");
   const [error, setError] = useState("");
+  // Prova facoltativa della decisione: evidenza esistente oppure file
+  const [evidenceId, setEvidenceId] = useState("");
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const openFindings = (cycle.findings ?? []).filter(f => f.status === "open" || f.status === "in_response");
+  const dropping = openFindings.filter(f => f.finding_type === "observation" || f.finding_type === "opportunity");
+  const ncOpen = openFindings.length - dropping.length;
+  const { data: evidences = [] } = useQuery<{ id: string; title: string }[]>({
+    queryKey: ["pdca-evidences", cycle.plant],
+    enabled: open,
+    queryFn: async () => {
+      const res = await apiClient.get("/documents/evidences/", {
+        params: { ...(cycle.plant ? { plant: cycle.plant } : {}), page_size: 1000 },
+      });
+      return res.data.results || res.data;
+    },
+  });
 
   const mutation = useMutation({
-    mutationFn: () => pdcaApi.archivia(cycle.id, motivo.trim()),
+    mutationFn: () => pdcaApi.archivia(cycle.id, motivo.trim(), { evidence_id: evidenceId || undefined, file: proofFile }),
     onSuccess: () => {
       setOpen(false);
       setMotivo("");
       setError("");
+      setEvidenceId("");
+      setProofFile(null);
       qc.invalidateQueries({ queryKey: ["pdca"] });
+      qc.invalidateQueries({ queryKey: ["findings"] });
     },
     onError: (e: unknown) => {
       const msg =
@@ -341,12 +360,15 @@ function ArchiviaCycleButton({ cycle }: { cycle: PdcaCycle }) {
               <strong>{cycle.title}</strong>
             </p>
             <p className="text-sm text-gray-500 mb-3">{t("pdca.archive.intro")}</p>
-            {/* osservazioni/opportunità collegate: si scartano da Audit Prep con
-                "Non perseguire", altrimenti resterebbero aperte */}
-            {(cycle.findings ?? []).some(f => (f.finding_type === "observation" || f.finding_type === "opportunity")
-              && (f.status === "open" || f.status === "in_response")) && (
-              <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded px-2 py-1.5 mb-3">
-                {t("pdca.archive.findings_hint")}
+            {/* stessa decisione di "Non perseguire" sul finding */}
+            {dropping.length > 0 && (
+              <p className="text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded px-2 py-1.5 mb-2">
+                {t("pdca.archive.not_pursued_hint", { count: dropping.length })}
+              </p>
+            )}
+            {ncOpen > 0 && (
+              <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded px-2 py-1.5 mb-2">
+                {t("pdca.archive.nc_open_hint", { count: ncOpen })}
               </p>
             )}
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -361,6 +383,17 @@ function ArchiviaCycleButton({ cycle }: { cycle: PdcaCycle }) {
             <p className="text-xs text-gray-400 mt-0.5">
               {t("pdca.archive.min_chars", { n: motivo.trim().length })}
             </p>
+            <label className="block text-sm font-medium text-gray-700 mt-3 mb-1">{t("pdca.archive.proof_label")}</label>
+            <div className="space-y-1.5">
+              <select value={evidenceId} disabled={!!proofFile} onChange={e => setEvidenceId(e.target.value)}
+                aria-label={t("pdca.archive.proof_existing")}
+                className="w-full border rounded px-2 py-1.5 text-sm disabled:bg-gray-100">
+                <option value="">{t("pdca.archive.proof_existing")}</option>
+                {evidences.map(ev => <option key={ev.id} value={ev.id}>{ev.title}</option>)}
+              </select>
+              <input type="file" disabled={!!evidenceId} aria-label={t("pdca.archive.proof_file")}
+                onChange={e => setProofFile(e.target.files?.[0] ?? null)} className="w-full text-sm" />
+            </div>
             {error && (
               <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-2">{error}</p>
             )}
@@ -881,6 +914,15 @@ function CycleDossierModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () =
                   {cycle.is_overdue ? ` · ${t("pdca.owner.overdue")}` : ""}
                 </dd>
               </div>
+              {cycle.fase_corrente === "archiviato" && (
+                <div className="flex gap-2 col-span-2">
+                  <dt className="text-gray-500">{t("pdca.archive.dossier_reason")}</dt>
+                  <dd className="text-gray-800">
+                    {cycle.motivo_archiviazione || "—"}
+                    {cycle.archive_evidence_title ? ` · 📎 ${cycle.archive_evidence_title}` : ""}
+                  </dd>
+                </div>
+              )}
               {cycle.riferimento_finding && (
                 <div className="flex gap-2">
                   <dt className="text-gray-500">{t("pdca.dossier.meta_finding")}</dt>

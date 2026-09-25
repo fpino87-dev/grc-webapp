@@ -2970,3 +2970,11 @@ msgstr "Hedef tarihi geçen PDCA döngüleri"
 #: apps/management_review/report/builder.py
 msgid "Data prevista"
 msgstr "Hedef tarih"
+
+#: apps/pdca/services.py
+msgid "Archiviazione PDCA — %(title)s"
+msgstr "PDCA arşivleme — %(title)s"
+
+#: apps/pdca/services.py
+msgid "Motivazione dell'archiviazione del ciclo PDCA «%(title)s»."
+msgstr "«%(title)s» PDCA döngüsünün arşivlenme gerekçesi."

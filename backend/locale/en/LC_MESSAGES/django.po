@@ -2969,3 +2969,11 @@ msgstr "PDCA cycles past their target date"
 #: apps/management_review/report/builder.py
 msgid "Data prevista"
 msgstr "Target date"
+
+#: apps/pdca/services.py
+msgid "Archiviazione PDCA — %(title)s"
+msgstr "PDCA archiving — %(title)s"
+
+#: apps/pdca/services.py
+msgid "Motivazione dell'archiviazione del ciclo PDCA «%(title)s»."
+msgstr "Rationale for archiving the PDCA cycle «%(title)s»."

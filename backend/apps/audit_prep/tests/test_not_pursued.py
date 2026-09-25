@@ -100,3 +100,49 @@ def test_not_pursued_cannot_be_closed_and_is_not_open(client, prep, plant):
     assert block["opportunita_aperte"] == 0
     assert block["finding_non_perseguiti_12m"] == 1
     assert block["elenco_non_perseguiti"][0]["motivo"] == REASON
+
+
+# ── Dal PDCA: Archivia = stessa decisione ───────────────────────────────────
+
+URL_CYCLES = "/api/v1/pdca/cycles/"
+
+
+@pytest.mark.django_db
+def test_archive_from_pdca_marks_opportunities_not_pursued_with_proof(client, prep):
+    from apps.audit_prep.models import AuditFinding
+    data = _finding(client, prep["id"])
+    client.post(f"{URL_FINDINGS}{data['id']}/open-pdca/", {}, format="json")
+    cycle_id = AuditFinding.objects.get(pk=data["id"]).pdca_cycle_id
+    resp = client.post(f"{URL_CYCLES}{cycle_id}/archivia/", {"motivo": REASON, "file": _pdf()}, format="multipart")
+    assert resp.status_code == 200, resp.data
+    assert resp.data["findings_not_pursued"] == [data["title"]] and resp.data["nc_still_open"] == 0
+    f = AuditFinding.objects.select_related("pdca_cycle").get(pk=data["id"])
+    assert f.status == "not_pursued" and f.closure_notes == REASON and f.closure_evidence_id
+    assert f.pdca_cycle.fase_corrente == "archiviato"
+    assert f.pdca_cycle.archive_evidence_id == f.closure_evidence_id
+
+
+@pytest.mark.django_db
+def test_archive_from_pdca_leaves_nonconformities_open(client, prep):
+    from apps.audit_prep.models import AuditFinding
+    nc = _finding(client, prep["id"], "minor_nc")
+    cycle_id = AuditFinding.objects.get(pk=nc["id"]).pdca_cycle_id
+    opp = _finding(client, prep["id"])
+    client.post(f"{URL_FINDINGS}{opp['id']}/link-pdca/", {"pdca_cycle": str(cycle_id)}, format="json")
+    resp = client.post(f"{URL_CYCLES}{cycle_id}/archivia/", {"motivo": REASON}, format="json")
+    assert resp.status_code == 200, resp.data
+    assert resp.data["nc_still_open"] == 1
+    assert AuditFinding.objects.get(pk=nc["id"]).status == "open"
+    assert AuditFinding.objects.get(pk=opp["id"]).status == "not_pursued"
+
+
+@pytest.mark.django_db
+def test_archive_cycle_without_findings_keeps_optional_proof(client, plant):
+    from apps.pdca.models import PdcaCycle
+    from apps.pdca.services import create_cycle
+    cycle = create_cycle(plant=plant, title="Spunto", trigger_type="manual")
+    assert client.post(f"{URL_CYCLES}{cycle.pk}/archivia/", {"motivo": "corto"}, format="json").status_code == 400
+    resp = client.post(f"{URL_CYCLES}{cycle.pk}/archivia/", {"motivo": REASON, "file": _pdf()}, format="multipart")
+    assert resp.status_code == 200, resp.data
+    cycle = PdcaCycle.objects.get(pk=cycle.pk)
+    assert cycle.fase_corrente == "archiviato" and cycle.archive_evidence_id

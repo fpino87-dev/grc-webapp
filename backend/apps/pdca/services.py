@@ -173,7 +173,7 @@ def advance_phase(cycle, user, phase_notes: str = "", evidence=None, outcome: st
 
 
 @transaction.atomic
-def archivia_cycle(cycle, user, motivo: str = "") -> PdcaCycle:
+def archivia_cycle(cycle, user, motivo: str = "", evidence=None) -> PdcaCycle:
     """
     Archivia il ciclo senza implementazione — usato quando lo spunto non
     porta beneficio sufficiente a giustificarne il costo.
@@ -189,9 +189,11 @@ def archivia_cycle(cycle, user, motivo: str = "") -> PdcaCycle:
         )
     cycle.fase_corrente = "archiviato"
     cycle.motivo_archiviazione = motivo.strip()
+    cycle.archive_evidence = evidence
     cycle.closed_at = timezone.now()
     cycle.closed_by = user
-    cycle.save(update_fields=["fase_corrente", "motivo_archiviazione", "closed_at", "closed_by", "updated_at"])
+    cycle.save(update_fields=["fase_corrente", "motivo_archiviazione", "archive_evidence", "closed_at",
+                              "closed_by", "updated_at"])
     log_action(
         user=user,
         action_code="pdca.cycle.archiviato",
@@ -201,9 +203,56 @@ def archivia_cycle(cycle, user, motivo: str = "") -> PdcaCycle:
             "trigger_type": cycle.trigger_type,
             "fase_at_archiviazione": cycle.fase_corrente,
             "motivo": motivo.strip()[:200],
+            "evidence": str(evidence.pk) if evidence else None,
         },
     )
     return cycle
+
+
+def archivia_with_findings(cycle, user, motivo: str = "", evidence=None,
+                           uploaded_file=None, evidence_title: str = "") -> dict:
+    """Archiviazione dal modulo PDCA con la stessa decisione del finding:
+    le osservazioni e opportunità collegate ancora aperte passano a "non
+    perseguito" con lo stesso motivo e la stessa prova (facoltativa, file o
+    evidenza esistente); le non conformità restano aperte e seguono il PDCA.
+    Senza finding collegati è la normale archiviazione, con la prova se c'è."""
+    from apps.audit_prep.services import FINDING_DONE_STATUSES, NOT_PURSUABLE_TYPES, not_pursue_finding
+
+    if cycle.fase_corrente in ("chiuso", "archiviato"):
+        raise ValidationError(_("Il ciclo è già %(phase)s.") % {"phase": cycle.fase_corrente})
+    if not motivo or len(motivo.strip()) < 20:
+        raise ValidationError(
+            _("Per archiviare è obbligatorio specificare il motivo (minimo 20 caratteri).")
+        )
+    if evidence is not None and uploaded_file is not None:
+        raise ValidationError(_("Carica un file oppure scegli un'evidenza esistente, non entrambi."))
+    motivo = motivo.strip()
+    with transaction.atomic():
+        if uploaded_file is not None:
+            from apps.documents.services import create_evidence_with_file
+            evidence = create_evidence_with_file({
+                "title": (evidence_title.strip() or _("Archiviazione PDCA — %(title)s") % {"title": cycle.title})[:300],
+                "evidence_type": "altro",
+                "description": _("Motivazione dell'archiviazione del ciclo PDCA «%(title)s».") % {"title": cycle.title},
+                "plant": str(cycle.plant_id) if cycle.plant_id else "",
+            }, uploaded_file, user)
+        not_pursued = []
+        for finding in cycle.findings.filter(finding_type__in=NOT_PURSUABLE_TYPES).select_related(
+            "audit_prep__plant",
+        ):
+            finding.refresh_from_db()
+            if finding.status in FINDING_DONE_STATUSES or finding.audit_prep.status == "archiviato":
+                continue
+            not_pursue_finding(finding, user, motivo, evidence=evidence)
+            not_pursued.append(finding.title)
+        cycle.refresh_from_db()
+        if cycle.fase_corrente != "archiviato":
+            archivia_cycle(cycle, user, motivo, evidence=evidence)
+        elif evidence is not None and cycle.archive_evidence_id is None:
+            cycle.archive_evidence = evidence
+            cycle.save(update_fields=["archive_evidence", "updated_at"])
+        nc_open = cycle.findings.exclude(status__in=FINDING_DONE_STATUSES).count()
+    return {"findings_not_pursued": not_pursued, "nc_still_open": nc_open}
 
 
 @transaction.atomic

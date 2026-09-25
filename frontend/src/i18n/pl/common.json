@@ -3475,7 +3475,12 @@
       "confirm_btn": "Zarchiwizuj cykl",
       "in_progress": "Archiwizowanie…",
       "error_generic": "Błąd podczas archiwizacji",
-      "findings_hint": "Ten PDCA obejmuje wciąż otwarte obserwacje lub szanse: archiwizacja pozostawi je otwarte. Aby je odrzucić, użyj «Nie kontynuuj» przy ustaleniu w Audit Prep — zarchiwizuje to również PDCA."
+      "proof_label": "Dowód decyzji (opcjonalnie)",
+      "proof_existing": "— istniejący dowód —",
+      "proof_file": "Lub prześlij plik",
+      "dossier_reason": "Zarchiwizowano:",
+      "not_pursued_hint": "Powiązane otwarte obserwacje/szanse: {{count}}. Otrzymają status «Niekontynuowane» z tym powodem i dowodem, jeśli go załączysz.",
+      "nc_open_hint": "Powiązane otwarte niezgodności: {{count}}. Pozostają otwarte: rozwiąż je nowym PDCA lub zamknij z dowodem."
     },
     "advance": {
       "to_do": "Przejdź do DO",

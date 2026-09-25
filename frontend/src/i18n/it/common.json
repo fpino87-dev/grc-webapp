@@ -3475,7 +3475,12 @@
       "confirm_btn": "Archivia ciclo",
       "in_progress": "Archiviazione…",
       "error_generic": "Errore durante l'archiviazione",
-      "findings_hint": "Questo PDCA copre osservazioni o opportunità ancora aperte: archiviandolo restano aperte. Per scartarle usa «Non perseguire» sul finding in Audit Prep, che archivia anche il PDCA."
+      "proof_label": "Prova della decisione (facoltativa)",
+      "proof_existing": "— evidenza esistente —",
+      "proof_file": "Oppure carica un file",
+      "dossier_reason": "Archiviato:",
+      "not_pursued_hint": "Osservazioni/opportunità aperte collegate: {{count}}. Passeranno a «Non perseguito» con questo motivo e la prova, se la alleghi.",
+      "nc_open_hint": "Non conformità aperte collegate: {{count}}. Restano aperte: vanno trattate con un nuovo PDCA o chiuse con evidenza."
     },
     "advance": {
       "to_do": "Avanza a DO",

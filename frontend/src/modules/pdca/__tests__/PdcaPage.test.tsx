@@ -278,3 +278,24 @@ describe("PdcaPage — responsabile e data prevista", () => {
       expect.objectContaining({ action_owner: "IT Manager", target_date: "2026-12-31" })));
   });
 });
+
+describe("PdcaPage — archiviazione con finding collegati", () => {
+  it("avvisa dei rilievi non perseguiti e delle NC che restano aperte, prova facoltativa", async () => {
+    const base = { audit_prep: "a1", audit_title: "Audit", plant_code: "TA", common_key: null, group_title: null,
+      audit_type: "interno", requesting_party: "" };
+    mockList.mockResolvedValue({ results: [cycle({ findings: [
+      { ...base, id: "f1", title: "Opp", finding_type: "opportunity", status: "open" },
+      { ...base, id: "f2", title: "NC", finding_type: "minor_nc", status: "open" },
+    ] })] } as never);
+    vi.mocked(pdcaApi.archivia).mockResolvedValue({} as never);
+    renderPage();
+    fireEvent.click(await screen.findByTitle("pdca.archive.tooltip"));
+    expect(screen.getByText("pdca.archive.not_pursued_hint")).toBeInTheDocument();
+    expect(screen.getByText("pdca.archive.nc_open_hint")).toBeInTheDocument();
+    fireEvent.change(screen.getByPlaceholderText("pdca.archive.reason_placeholder"),
+      { target: { value: "Costo sproporzionato rispetto al beneficio" } });
+    fireEvent.click(screen.getByText("pdca.archive.confirm_btn"));
+    await vi.waitFor(() => expect(pdcaApi.archivia).toHaveBeenCalledWith("c1",
+      "Costo sproporzionato rispetto al beneficio", { evidence_id: undefined, file: null }));
+  });
+});

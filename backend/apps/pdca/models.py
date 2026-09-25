@@ -64,6 +64,11 @@ class PdcaCycle(BaseModel):
         blank=True,
         help_text="Obbligatorio per archiviare: motivo per cui lo spunto non viene perseguito",
     )
+    # Prova facoltativa della decisione di archiviare (es. verbale, analisi costi/benefici)
+    archive_evidence = models.ForeignKey(
+        "documents.Evidence", null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="pdca_archived_cycles",
+    )
     act_description = models.TextField(
         blank=True,
         help_text="Descrizione standardizzazione — obbligatoria per chiudere",

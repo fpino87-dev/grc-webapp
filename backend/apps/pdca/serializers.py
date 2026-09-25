@@ -62,6 +62,7 @@ class PdcaCycleSerializer(serializers.ModelSerializer):
     # PDCA ↔ finding ↔ audit (tipo, committente) consultabile da entrambi i lati.
     findings = serializers.SerializerMethodField()
     is_overdue = serializers.BooleanField(read_only=True)
+    archive_evidence_title = serializers.CharField(source="archive_evidence.title", read_only=True, default=None)
 
     class Meta:
         model = PdcaCycle
@@ -87,6 +88,8 @@ class PdcaCycleSerializer(serializers.ModelSerializer):
             "act_description",
             "check_outcome",
             "motivo_archiviazione",
+            "archive_evidence",
+            "archive_evidence_title",
             "reopened_as",
             "closed_at",
             "phases",
@@ -101,7 +104,7 @@ class PdcaCycleSerializer(serializers.ModelSerializer):
             # Campi governati dalle azioni di workflow (advance/close/archivia):
             # non impostabili con una PATCH diretta. Le azioni li scrivono sul
             # modello leggendo il valore dal body della richiesta, non da qui.
-            "act_description", "check_outcome", "motivo_archiviazione",
+            "act_description", "check_outcome", "motivo_archiviazione", "archive_evidence",
         ]
 
     def get_findings(self, obj) -> list:

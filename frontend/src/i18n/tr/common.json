@@ -3475,7 +3475,12 @@
       "confirm_btn": "Döngüyü arşivle",
       "in_progress": "Arşivleniyor…",
       "error_generic": "Arşivleme sırasında hata",
-      "findings_hint": "Bu PDCA hâlâ açık gözlemleri veya fırsatları kapsıyor: arşivlemek onları açık bırakır. Reddetmek için Audit Prep'te bulgu üzerinde «Takip etme»yi kullanın; bu PDCA'yı da arşivler."
+      "proof_label": "Kararın kanıtı (isteğe bağlı)",
+      "proof_existing": "— mevcut kanıt —",
+      "proof_file": "Veya bir dosya yükleyin",
+      "dossier_reason": "Arşivlendi:",
+      "not_pursued_hint": "Bağlı açık gözlem/fırsat sayısı: {{count}}. Bu gerekçe ve eklerseniz kanıtla «Takip edilmedi» durumuna geçecekler.",
+      "nc_open_hint": "Bağlı açık uygunsuzluk sayısı: {{count}}. Açık kalırlar: yeni bir PDCA ile ele alın veya kanıtla kapatın."
     },
     "advance": {
       "to_do": "DO aşamasına geç",

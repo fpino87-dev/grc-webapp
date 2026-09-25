@@ -45,6 +45,8 @@ export interface PdcaCycle {
   act_description?: string;
   check_outcome?: string;
   motivo_archiviazione?: string;
+  archive_evidence?: string | null;
+  archive_evidence_title?: string | null;
   reopened_as?: string | null;
   closed_at?: string | null;
   phases?: PdcaPhase[];
@@ -76,8 +78,18 @@ export const pdcaApi = {
     apiClient.patch<PdcaCycle>(`/pdca/cycles/${id}/`, data).then((r) => r.data),
   remove: (id: string, reason: string) =>
     apiClient.delete(`/pdca/cycles/${id}/`, { data: { reason } }),
-  archivia: (id: string, motivo: string) =>
-    apiClient.post(`/pdca/cycles/${id}/archivia/`, { motivo }),
+  /** Motivo obbligatorio, prova facoltativa (evidenza esistente o file). Le
+   *  osservazioni/opportunità collegate aperte diventano "non perseguite". */
+  archivia: (id: string, motivo: string, proof?: { evidence_id?: string; file?: File | null }) => {
+    if (proof?.file) {
+      const fd = new FormData();
+      fd.append("motivo", motivo);
+      fd.append("file", proof.file);
+      return apiClient.post(`/pdca/cycles/${id}/archivia/`, fd, { headers: { "Content-Type": "multipart/form-data" } });
+    }
+    return apiClient.post(`/pdca/cycles/${id}/archivia/`,
+      { motivo, ...(proof?.evidence_id ? { evidence_id: proof.evidence_id } : {}) });
+  },
   /** `reason` obbligatorio se il finding ha già un PDCA (viene sostituito). */
   linkFinding: (cycleId: string, findingId: string, reason?: string) =>
     apiClient.post<PdcaCycle>(`/pdca/cycles/${cycleId}/link-finding/`, { finding: findingId, ...(reason ? { reason } : {}) }).then((r) => r.data),

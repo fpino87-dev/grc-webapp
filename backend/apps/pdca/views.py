@@ -19,7 +19,7 @@ from .serializers import PdcaCycleSerializer, PdcaPhaseSerializer
 
 
 class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
-    queryset = PdcaCycle.objects.select_related("plant").prefetch_related(
+    queryset = PdcaCycle.objects.select_related("plant", "archive_evidence").prefetch_related(
         "phases", "findings__audit_prep__plant", "findings__audit_prep__group",
     )
     serializer_class = PdcaCycleSerializer
@@ -264,13 +264,36 @@ class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="archivia")
     def archivia(self, request, pk=None):
+        """POST {motivo, evidence_id?} o multipart con `file` (+ `evidence_title`).
+        Le osservazioni/opportunità collegate aperte diventano "non perseguite"."""
+        from apps.audit_prep.views import _require_all_group_sites
+        from apps.documents.models import Evidence
+        from core.scoping import scope_queryset_by_plant
+
         cycle = self.get_object()
-        motivo = request.data.get("motivo", "")
+        # rilievo comune: la decisione tocca anche gli altri siti del gruppo
+        for f in cycle.findings.filter(common_key__isnull=False).select_related("audit_prep__group"):
+            if f.audit_prep.group_id:
+                _require_all_group_sites(request.user, f.audit_prep.group)
+        evidence = None
+        evidence_id = request.data.get("evidence_id")
+        if evidence_id:
+            try:
+                evidence = scope_queryset_by_plant(
+                    Evidence.objects.all(), request.user, plant_field="plant",
+                ).filter(pk=uuid.UUID(str(evidence_id))).first()
+            except ValueError:
+                evidence = None
+            if evidence is None:
+                return Response({"error": _("Evidenza non trovata.")}, status=status.HTTP_404_NOT_FOUND)
         try:
-            cycle = services.archivia_cycle(cycle, request.user, motivo)
-            return Response({"ok": True, "fase_corrente": "archiviato"})
+            result = services.archivia_with_findings(
+                cycle, request.user, request.data.get("motivo", ""), evidence=evidence,
+                uploaded_file=request.FILES.get("file"), evidence_title=request.data.get("evidence_title", ""),
+            )
         except ValidationError as exc:
-            return Response({"error": str(exc.message)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": exc.messages[0]}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"ok": True, "fase_corrente": "archiviato", **result})
 
     def destroy(self, request, *args, **kwargs):
         """Soft-delete del ciclo PDCA con vincoli a tutela dell'audit trail.

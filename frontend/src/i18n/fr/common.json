@@ -3475,7 +3475,12 @@
       "confirm_btn": "Archiver le cycle",
       "in_progress": "Archivage…",
       "error_generic": "Erreur lors de l'archivage",
-      "findings_hint": "Ce PDCA couvre des observations ou opportunités encore ouvertes : l'archiver les laisse ouvertes. Pour les écarter, utilisez «Ne pas poursuivre» sur le constat dans Audit Prep, qui archive aussi le PDCA."
+      "proof_label": "Preuve de la décision (facultative)",
+      "proof_existing": "— preuve existante —",
+      "proof_file": "Ou téléversez un fichier",
+      "dossier_reason": "Archivé :",
+      "not_pursued_hint": "Observations/opportunités ouvertes liées : {{count}}. Elles passeront à «Non poursuivi» avec ce motif et la preuve, si vous la joignez.",
+      "nc_open_hint": "Non-conformités ouvertes liées : {{count}}. Elles restent ouvertes : traitez-les avec un nouveau PDCA ou clôturez-les avec une preuve."
     },
     "advance": {
       "to_do": "Passer à DO",
