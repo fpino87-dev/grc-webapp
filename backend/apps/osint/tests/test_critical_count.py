@@ -1,11 +1,8 @@
-"""Test P2-3 — bridge OSINT → KPI engine M08 (osint_critical_open_count)."""
+"""Conteggio dei critici OSINT aperti per sito (usato dal Centro Operativo).
+I KPI OSINT sono ora connettori interni: vedi apps/tasks/tests/test_kpi_osint.py."""
 import pytest
 
-from apps.osint.services import (
-    OSINT_CRITICAL_KPI_CODE,
-    count_open_critical_findings_by_plant,
-    push_osint_kpis,
-)
+from apps.osint.services import count_open_critical_findings_by_plant
 from apps.osint.models import (
     AlertSeverity, EntityType, FindingStatus, OsintEntity, OsintFinding,
     SourceModule,
@@ -64,48 +61,3 @@ class TestCount:
         counts = count_open_critical_findings_by_plant()
         # nessuna entità my_domain → plant non presente
         assert str(p.id) not in counts
-
-
-class TestPush:
-    def test_push_creates_kpi_snapshot(self):
-        from apps.tasks.models import KPIDefinition, OperationalKpiSnapshot
-
-        p = _plant("P1")
-        e = _entity(p)
-        _finding(e, severity=AlertSeverity.CRITICAL)
-
-        result = push_osint_kpis()
-        assert result["pushed"] == 1
-
-        kpi = KPIDefinition.objects.get(kpi_code=OSINT_CRITICAL_KPI_CODE)
-        # La definizione ha soglie (altrimenti lo status sarebbe sempre 'ok').
-        assert kpi.threshold_direction == "below"
-        assert kpi.threshold_warning == 0 and kpi.threshold_critical == 2
-        snap = OperationalKpiSnapshot.objects.get(kpi_definition=kpi, plant=p)
-        assert snap.value == 1
-        assert snap.source == "api"  # ingest_kpi_from_api normalizza la sorgente
-        assert snap.status == "warning"  # 1 finding critico aperto → warning (non 'ok')
-
-    def test_push_three_criticals_is_critical_status(self):
-        from apps.tasks.models import KPIDefinition, OperationalKpiSnapshot
-
-        p = _plant("P3")
-        e = _entity(p)
-        for code in ("ssl_expired", "blacklist", "breach"):
-            _finding(e, code=code, severity=AlertSeverity.CRITICAL)
-        push_osint_kpis()
-        kpi = KPIDefinition.objects.get(kpi_code=OSINT_CRITICAL_KPI_CODE)
-        snap = OperationalKpiSnapshot.objects.get(kpi_definition=kpi, plant=p)
-        assert snap.value == 3
-        assert snap.status == "critical"  # ≥3 → critical
-
-    def test_push_reports_zero_when_no_exposure(self):
-        from apps.tasks.models import KPIDefinition, OperationalKpiSnapshot
-
-        p = _plant("P2")
-        _entity(p)  # entità ma nessun finding critico
-        push_osint_kpis()
-        kpi = KPIDefinition.objects.get(kpi_code=OSINT_CRITICAL_KPI_CODE)
-        snap = OperationalKpiSnapshot.objects.get(kpi_definition=kpi, plant=p)
-        assert snap.value == 0
-        assert snap.status == "ok"  # 0 critici → ok

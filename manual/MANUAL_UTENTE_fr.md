@@ -1649,6 +1649,10 @@ Les notifications d'exposition externe sont destinées **uniquement au personnel
 
 Si le module IA (M20) est activé, vous pouvez demander une analyse de la surface d'attaque, des briefings NIS2 et des rapports pour la direction : les données sont **anonymisées** avant l'envoi au fournisseur IA.
 
+### KPI
+
+Dans les KPI opérationnels, trois indicateurs d'état sont calculés automatiquement chaque semaine, par site : **Posture externe** (sécurité moyenne 0–100 des domaines et actifs exposés), **Problèmes externes critiques ouverts** sur vos domaines et actifs, et **Fournisseurs critiques à risque** (% des fournisseurs critiques notés D ou F ; les fournisseurs sans site comptent pour tous les sites). Il n'y a pas d'indicateur sur les signalements aux fournisseurs : signaler est une faculté, pas une obligation.
+
 ### Qui peut accéder
 
 OSINT Monitor est réservé au Super Admin, au CISO et au Compliance Officer.

@@ -1649,6 +1649,10 @@ Le notifiche di esposizione esterna sono destinate **solo al personale interno**
 
 Se il modulo AI (M20) è attivo, puoi richiedere analisi della superficie di attacco, briefing NIS2 e report per la direzione: i dati vengono **anonimizzati** prima dell'invio al provider AI.
 
+### KPI
+
+Nella sezione KPI operativi, tre indicatori di stato si calcolano da soli ogni settimana, per sito: **Postura esterna** (sicurezza media 0–100 di domini e asset esposti), **Problemi esterni critici aperti** sui tuoi domini e asset, e **Fornitori critici a rischio** (% dei fornitori critici con voto D o F; i fornitori senza siti contano per tutti i siti). Non c'è un indicatore sulle segnalazioni ai fornitori: segnalare è una facoltà, non un obbligo.
+
 ### Chi può accedere
 
 OSINT Monitor è riservato a Super Admin, CISO e Compliance Officer.

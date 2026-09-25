@@ -522,6 +522,72 @@ def facility_check_age_days(plant, week_start) -> dict:
 
 # Registry kpi_code → connettore. I codici qui presenti DEVONO avere
 # source="internal" nel catalogo (kpi_catalog) e nelle KPIDefinition salvate.
+# ── OSINT (esposizione esterna) ──────────────────────────────────────────────
+# KPI di stato, da leggere a colpo d'occhio: la tua postura esterna, i critici
+# aperti sui tuoi domini e asset, e quanti fornitori critici hanno un voto
+# basso. Nessun indicatore sulle segnalazioni ai fornitori: segnalare è una
+# facoltà, non un obbligo.
+
+def _osint_own_entities(plant):
+    """Entità OSINT proprie del sito: i suoi domini e i suoi asset esposti."""
+    from apps.assets.models import AssetIT, AssetOT, AssetSW
+    from apps.osint.models import OsintEntity
+
+    qs = OsintEntity.objects.filter(entity_type__in=["my_domain", "asset"], is_active=True)
+    if plant is None:
+        return qs
+    asset_ids = set()
+    for model in (AssetIT, AssetOT, AssetSW):
+        asset_ids |= set(model.objects.filter(plant=plant).values_list("pk", flat=True))
+    return qs.filter(Q(entity_type="my_domain", source_id=plant.pk) | Q(entity_type="asset", source_id__in=asset_ids))
+
+
+def osint_security_score(plant, week_start) -> dict:
+    """Sicurezza esterna media (0–100, più alto = meglio) di domini e asset del sito."""
+    from apps.osint.scoring import security_score
+
+    risks = [r for r in _osint_own_entities(plant).values_list("last_score_total", flat=True) if r is not None]
+    if not risks:
+        return _no_data("Nessun dominio o asset del sito ancora analizzato.")
+    avg = sum(security_score(r) for r in risks) / len(risks)
+    return _result(round(avg, 1), len(risks), f"media di {len(risks)} domini/asset")
+
+
+def osint_critical_open_count(plant, week_start) -> dict:
+    """Problemi OSINT critici aperti su domini e asset del sito (stato puntuale)."""
+    from apps.osint.findings import OPEN_STATUSES
+    from apps.osint.models import OsintFinding
+
+    entities = _osint_own_entities(plant)
+    n = entities.count()
+    if n == 0:
+        return _no_data("Nessun dominio o asset del sito monitorato.")
+    open_crit = OsintFinding.objects.filter(
+        entity__in=entities, severity="critical", status__in=OPEN_STATUSES,
+    ).count()
+    return _result(float(open_crit), n, f"{open_crit} critici aperti su {n} domini/asset")
+
+
+def osint_critical_suppliers_at_risk_rate(plant, week_start) -> dict:
+    """% dei fornitori critici (monitoraggio approfondito) con voto D o F."""
+    from apps.osint.models import OsintEntity, OsintSettings
+    from apps.osint.scoring import grade_for
+    from apps.suppliers.models import Supplier
+
+    qs = OsintEntity.objects.filter(entity_type="supplier", is_active=True, deep_monitoring=True,
+                                    last_score_total__isnull=False)
+    if plant is not None:
+        # Fornitori del sito, più quelli senza siti: servono tutta l'organizzazione.
+        serving = Supplier.objects.filter(Q(plants=plant) | Q(plants__isnull=True)).values("pk")
+        qs = qs.filter(source_id__in=serving)
+    risks = list(qs.values_list("last_score_total", flat=True))
+    if not risks:
+        return _no_data("Nessun fornitore critico ancora analizzato.")
+    settings = OsintSettings.load()
+    at_risk = sum(1 for r in risks if grade_for(r, settings) in ("D", "F"))
+    return _result(_rate(at_risk, len(risks)), len(risks), f"{at_risk}/{len(risks)} fornitori critici con voto D/F")
+
+
 INTERNAL_CONNECTORS = {
     "controls_compliance_rate": controls_compliance_rate,
     "evidence_expiry_rate": evidence_expiry_rate,
@@ -539,6 +605,9 @@ INTERNAL_CONNECTORS = {
     "incident_rca_completion_rate": incident_rca_completion_rate,
     "suppliers_assessed_rate": suppliers_assessed_rate,
     "suppliers_critical_unassessed": suppliers_critical_unassessed,
+    "osint_security_score": osint_security_score,
+    "osint_critical_open_count": osint_critical_open_count,
+    "osint_critical_suppliers_at_risk_rate": osint_critical_suppliers_at_risk_rate,
     "dr_test_age_days": dr_test_age_days,
     "dr_test_pass_rate": dr_test_pass_rate,
     "dr_rto_gap_hours": dr_rto_gap_hours,

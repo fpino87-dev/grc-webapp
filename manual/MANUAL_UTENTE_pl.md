@@ -1649,6 +1649,10 @@ Powiadomienia o ekspozycji zewnętrznej trafiają **wyłącznie do personelu wew
 
 Jeśli moduł AI (M20) jest aktywny, możesz zażądać analizy powierzchni ataku, briefingów NIS2 i raportów dla zarządu: dane są **anonimizowane** przed wysłaniem do dostawcy AI.
 
+### KPI
+
+W KPI operacyjnych co tydzień, dla każdego zakładu, automatycznie obliczane są trzy wskaźniki stanu: **Postawa zewnętrzna** (średnie bezpieczeństwo 0–100 domen i wystawionych zasobów), **Otwarte krytyczne problemy zewnętrzne** w waszych domenach i zasobach oraz **Dostawcy krytyczni zagrożeni** (% dostawców krytycznych z oceną D lub F; dostawcy bez zakładów liczą się dla wszystkich zakładów). Nie ma wskaźnika zgłoszeń do dostawców: zgłaszanie jest możliwością, a nie obowiązkiem.
+
 ### Kto ma dostęp
 
 OSINT Monitor jest zarezerwowany dla Super Admin, CISO i Compliance Officer.

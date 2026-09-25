@@ -1649,6 +1649,10 @@ Dış maruziyet bildirimleri **yalnızca iç personele** gider (asla Dış Denet
 
 AI modülü (M20) etkinse, saldırı yüzeyi analizi, NIS2 brifingleri ve yönetim kurulu raporları isteyebilirsiniz: veriler AI sağlayıcısına gönderilmeden önce **anonimleştirilir**.
 
+### KPI'lar
+
+Operasyonel KPI'larda her hafta, tesis bazında üç durum göstergesi otomatik hesaplanır: **Dış güvenlik duruşu** (alan adlarının ve açıktaki varlıkların 0–100 ortalama güvenliği), alan adlarınız ve varlıklarınızdaki **Açık kritik dış sorunlar** ve **Risk altındaki kritik tedarikçiler** (D veya F notlu kritik tedarikçilerin yüzdesi; tesisi olmayan tedarikçiler tüm tesisler için sayılır). Tedarikçilere bildirimle ilgili bir gösterge yoktur: bildirmek bir zorunluluk değil, bir seçenektir.
+
 ### Kimler erişebilir
 
 OSINT Monitor, Super Admin, CISO ve Compliance Officer ile sınırlıdır.

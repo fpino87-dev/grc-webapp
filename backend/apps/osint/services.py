@@ -425,7 +425,6 @@ def find_duplicates() -> dict[str, list[OsintEntity]]:
 # KPI bridge: OSINT → KPI engine M08 (→ management review M13)
 # ---------------------------------------------------------------------------
 
-OSINT_CRITICAL_KPI_CODE = "osint_critical_open_count"
 
 
 def count_open_critical_findings_by_plant() -> dict[str, int]:
@@ -475,62 +474,6 @@ def count_open_critical_findings_by_plant() -> dict[str, int]:
         else:
             counts[key] = n
     return counts
-
-
-def push_osint_kpis(user=None) -> dict:
-    """Pubblica il KPI `osint_critical_open_count` per ogni plant nel KPI engine M08.
-
-    Usa `apps.tasks.services.ingest_kpi_from_api` (stessa pipeline degli ingest
-    esterni): trova/crea la KPIDefinition, salva lo snapshot settimanale, valuta
-    lo status e scrive l'audit. Da qui il valore confluisce nella management
-    review (M13) tra gli `operational_kpis`. Ritorna un riepilogo.
-    """
-    from apps.tasks.services import ingest_kpi_from_api
-    from apps.tasks.models import KPIDefinition
-
-    # Assicura che la KPIDefinition abbia soglie: senza, evaluate_kpi_status
-    # ritorna sempre 'ok' (warn/crit None) e il KPI non segnalerebbe mai
-    # l'esposizione nella management review. Direzione 'below' (valori bassi =
-    # buoni): >0 → warning, >2 → critical (0 ok, 1-2 warning, ≥3 critical).
-    kpi_def, created = KPIDefinition.objects.get_or_create(
-        kpi_code=OSINT_CRITICAL_KPI_CODE,
-        defaults={
-            "name": "OSINT — finding critici aperti",
-            "description": "Numero di finding OSINT critici aperti sulle entità my_domain del plant.",
-            "unit": "n°",
-            "source": "api",
-            "threshold_warning": 0,
-            "threshold_critical": 2,
-            "threshold_direction": "below",
-        },
-    )
-    # Retrofit difensivo se la def esisteva già senza soglie (es. creata da un
-    # push precedente al fix), senza sovrascrivere eventuali tuning dell'admin.
-    if not created and kpi_def.threshold_warning is None and kpi_def.threshold_critical is None:
-        kpi_def.threshold_warning = 0
-        kpi_def.threshold_critical = 2
-        kpi_def.threshold_direction = "below"
-        kpi_def.save(update_fields=[
-            "threshold_warning", "threshold_critical", "threshold_direction", "updated_at",
-        ])
-
-    counts = count_open_critical_findings_by_plant()
-    pushed = 0
-    for plant_id, value in counts.items():
-        try:
-            ingest_kpi_from_api(
-                kpi_code=OSINT_CRITICAL_KPI_CODE,
-                plant_id=plant_id,
-                value=value,
-                source="osint",
-                note="Finding OSINT critici aperti (entità my_domain del plant).",
-                user=user,
-            )
-            pushed += 1
-        except Exception as exc:  # noqa: BLE001 - best-effort per plant
-            logger.warning("OSINT KPI push failed for plant %s: %s", plant_id, exc)
-    logger.info("OSINT KPI push: %d plant aggiornati (%s)", pushed, OSINT_CRITICAL_KPI_CODE)
-    return {"plants": len(counts), "pushed": pushed}
 
 
 

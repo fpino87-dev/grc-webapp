@@ -1649,6 +1649,10 @@ External exposure notifications go **to internal staff only** (never to the Exte
 
 If the AI module (M20) is enabled, you can request attack-surface analysis, NIS2 briefings and board reports: the data is **anonymised** before being sent to the AI provider.
 
+### KPIs
+
+In the operational KPIs, three status indicators are computed automatically every week, per site: **External posture** (average 0–100 security of domains and exposed assets), **Open critical external issues** on your domains and assets, and **Critical suppliers at risk** (% of critical suppliers graded D or F; suppliers without sites count for every site). There is no indicator on reports to suppliers: reporting is an option, not an obligation.
+
 ### Who can access
 
 OSINT Monitor is restricted to Super Admin, CISO and Compliance Officer.
