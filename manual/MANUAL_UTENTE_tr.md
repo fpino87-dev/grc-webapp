@@ -1633,6 +1633,14 @@ Pano yukarıdan aşağı okunur: **dış güvenlik duruşunuz** (0–100 güvenl
 
 **Tedarikçilere bildirilecekler** — tedarikçilerde düzeltme size düşmez: önemli olan not ve **kritik** sorunlardır. Görev oluşturulmaz. **Bildir**, seçilen dilde, kopyalanacak veya e-postanızda açılacak hazır bir metin açar (gönderen sizsiniz, asla platform değil); ardından bildirimi isteğe bağlı bir notla kaydedersiniz. Sorun, tarama artık tespit etmeyene kadar «Bildirildi» olarak kalır, sonra kendiliğinden kapanır; 30 gün sonra hâlâ mevcutsa **Hatırlat** ile yeniden öne çıkar. Tedarikçilerin kritik olmayan sorunları yalnızca bilgi amaçlıdır. Tedarikçi OT varlıklarınızın bakımını yapıyorsa (ör. uzaktan bakım), kritik bir uyarı kararınız için yükseltme bekler. Tedarikçi kartında (M14), **Dış duruş** sekmesinde not, kritikler ve bildirim geçmişi bulunur: tedarik zinciri izlemesinin kanıtı (NIS2 md. 21.2.d).
 
+**Tedarikçilerde neler kontrol edilir** — yalnızca bir tedarikçiyi kuruluşunuza giriş kapısı yapabilecek şeyler, kamuya açık ve pasif kaynaklarla (sistemlerinde tarama yapılmaz):
+- **Ele geçirilme**: fidye yazılımı sızıntı sitelerinde yer alma (ransomware.live, 6 saatte bir güncellenir), hizmetlerinin bilinen ihlalleri (HIBP), kötü amaçlı yazılım ve kara listeler.
+- **Taklit**: taklit edilebilir alan adı (DMARC uygulanmıyor: herkes «tedarikçiden» e-posta gönderebilir, fatura dolandırıcılığının yolu), son bir yılda e-postayla kaydedilmiş benzer alan adları, süresi dolmuş veya dolmak üzere olan alan adı.
+- **Maruziyet** (yalnızca kritik tedarikçiler): sertifika kayıtlarında bulunan ve Shodan InternetDB ile doğrulanan uzaktan erişimler (VPN, ağ geçitleri, web posta, SFTP…); CISA KEV kataloğunda yer alan, yani aktif olarak sömürülen bir açığı varsa kritiktir.
+- **Kullanılan hizmetler**: tedarikçi kartında, Dış duruş sekmesinde gerçekten kullandığınız hizmetlerin adreslerini (sipariş portalı, SFTP…) belirtirsiniz: yalnızca bunlarda sertifika önemlidir.
+
+Kapsamlı izleme ve haftalık taramayla **kritik tedarikçiler**, NIS2 veya TISAX açısından ilgili, yüksek veya kritik riskli ya da OT varlıklarınızın bakımını yapanlardır. Görünür hijyen (kurumsal site sertifikası, başlıklar, DNSSEC, MTA-STS) az ağırlıklı ve hiç bildirim üretmeyen **Olgunluk** boyutunda kalır. Her sorun **sizin yapmanız gerekeni** de belirtir: örneğin taklit edilebilir bir alan adında, muhasebeden her banka bilgisi değişikliğini telefonla doğrulamasını istemek.
+
 **Varlık kartı** — bir varlığa tıklayınca açılır: Genel bakış (not, boyutlar, eğilim), Sorunlar, Geçilen kontroller, Teknik veriler, Olaylar (olay ve görev bağlantılı uyarı zaman çizelgesi) ve Ayarlar (beklenen e-posta ve web duruşu).
 
 Dış maruziyet bildirimleri **yalnızca iç personele** gider (asla Dış Denetçiye değil).

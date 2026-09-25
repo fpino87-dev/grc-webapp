@@ -125,6 +125,12 @@ class OsintEntity(BaseModel):
         blank=True,
         help_text="True = confermato alias, False = verificato distinto, None = da verificare.",
     )
+    # Fornitori critici (NIS2, TISAX, rischio alto/critico, manutentori OT):
+    # monitoraggio approfondito — domini sosia e accessi remoti esposti.
+    deep_monitoring = models.BooleanField(default=False)
+    # Host dei servizi del fornitore che usiamo davvero (portale, SFTP…):
+    # solo su questi il certificato conta. Specchio di Supplier.service_urls.
+    service_hosts = models.JSONField(default=list, blank=True)
 
     class Meta:
         unique_together = [("source_module", "source_id", "domain")]
@@ -276,7 +282,23 @@ class OsintScan(BaseModel):
     # Valorizzato solo quando l'allowlist è configurata (altrimenti vuoto).
     ct_unexpected_issuers = models.JSONField(default=list, blank=True)
 
+    # Supply chain (fornitori)
+    # Violazioni del servizio del fornitore note a HIBP ({name, date, pwn_count, data_classes})
+    hibp_domain_breaches = models.JSONField(default=list, blank=True)
+    # Corrispondenze sui leak site ransomware ({victim, group, discovered, country})
+    ransomware_hits = models.JSONField(default=list, blank=True)
+    # Accessi remoti trovati dai log CT e verificati con Shodan InternetDB
+    # ({host, ip, ports, admin_ports, kev, vulns_count})
+    remote_access = models.JSONField(default=list, blank=True)
+    # Certificato dei servizi usati ({host, reachable, days_remaining, expiry})
+    service_checks = models.JSONField(default=list, blank=True)
+
     # Score
+    # Fornitori: tre pilastri + maturità (rischio 0–100, come gli altri score)
+    score_compromise = models.IntegerField(null=True, blank=True)
+    score_impersonation = models.IntegerField(null=True, blank=True)
+    score_exposure = models.IntegerField(null=True, blank=True)
+    score_maturity = models.IntegerField(null=True, blank=True)
     score_ssl = models.IntegerField(default=0)
     score_dns = models.IntegerField(default=0)
     score_reputation = models.IntegerField(default=0)
@@ -367,6 +389,13 @@ class FindingCode(models.TextChoices):
     CT_UNEXPECTED_ISSUER = "ct_unexpected_issuer", "Certificato da CA non attesa (CT)"
     THREATFOX_LISTED = "threatfox_listed", "IoC malware attivo (abuse.ch ThreatFox)"
     URLHAUS_LISTED = "urlhaus_listed", "URL malware sull'host (abuse.ch URLhaus)"
+    # Supply chain: cosa conta davvero su un fornitore
+    DOMAIN_SPOOFABLE = "domain_spoofable", "Dominio falsificabile (DMARC non in blocco)"
+    RANSOMWARE_VICTIM = "ransomware_victim", "Vittima di ransomware (leak site)"
+    SERVICE_BREACH = "service_breach", "Violazione dati del servizio (HIBP)"
+    REMOTE_ACCESS_KEV = "remote_access_kev", "Accesso remoto con vulnerabilità sfruttata (CISA KEV)"
+    ADMIN_SERVICE_EXPOSED = "admin_service_exposed", "Servizio di amministrazione esposto (RDP/SMB/Telnet)"
+    SERVICE_CERT = "service_cert", "Certificato scaduto su un servizio usato"
 
 
 class FindingStatus(models.TextChoices):
@@ -524,3 +553,24 @@ class OsintSettings(BaseModel):
         if obj is None:
             obj = cls.objects.create()
         return obj
+
+
+class OsintRansomwareVictim(models.Model):
+    """Vittime pubblicate sui leak site ransomware (fonte ransomware.live),
+    scaricate periodicamente e confrontate in locale con i fornitori: l'API
+    di ricerca è limitata a una chiamata al minuto."""
+    victim = models.CharField(max_length=300)
+    domain = models.CharField(max_length=255, blank=True, db_index=True)
+    group = models.CharField(max_length=100)
+    discovered = models.DateTimeField(db_index=True)
+    country = models.CharField(max_length=10, blank=True)
+    activity = models.CharField(max_length=200, blank=True)
+    name_key = models.CharField(max_length=300, db_index=True, help_text="Nome normalizzato per il confronto")
+    fetched_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["group", "victim"], name="osint_rw_victim_unique")]
+        ordering = ["-discovered"]
+
+    def __str__(self) -> str:
+        return f"{self.victim} ({self.group})"

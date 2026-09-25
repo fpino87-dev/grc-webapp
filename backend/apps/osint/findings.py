@@ -147,8 +147,13 @@ def _detect_finding_codes(entity, scan) -> dict[str, dict]:
     if missing_headers:
         detected[FindingCode.HEADERS_MISSING] = {"missing": missing_headers}
 
-    # Lookalike
-    lookalikes = getattr(scan, "lookalike_domains", None) or []
+    # Lookalike: dal generatore interno solo i sosia registrati di recente con
+    # posta (un omonimo registrato da anni è quasi sempre un'altra azienda);
+    # i risultati dnstwist, senza data di registrazione, restano come prima.
+    lookalikes = [
+        d for d in (getattr(scan, "lookalike_domains", None) or [])
+        if d.get("recent") or ("recent" not in d and d.get("fuzzer") != "lite")
+    ]
     if lookalikes:
         detected[FindingCode.LOOKALIKE] = {"domains": lookalikes[:20]}
 
@@ -181,7 +186,74 @@ def _detect_finding_codes(entity, scan) -> dict[str, dict]:
     if pending > 0:
         detected[FindingCode.NEW_SUBDOMAIN] = {"count": pending}
 
+    if entity.entity_type == EntityType.SUPPLIER:
+        return _supplier_profile(entity, scan, detected)
     return detected
+
+
+# Su un fornitore contano tre cose: è compromesso, qualcuno può fingersi lui,
+# espone accessi remoti vulnerabili. L'igiene di facciata (certificato del
+# sito vetrina, header, DNSSEC, MTA-STS…) confluisce nella Maturità del voto e
+# non genera problemi da segnalare.
+SUPPLIER_KEEP = {
+    "blacklist", "vt_malicious", "gsb_unsafe", "threatfox_listed", "urlhaus_listed",
+    "domain_expiry_soon", "lookalike_domains", "subdomain_takeover",
+}
+
+
+def _supplier_profile(entity, scan, detected: dict) -> dict:
+    from apps.osint.models import FindingCode
+
+    out = {code: params for code, params in detected.items() if code in SUPPLIER_KEEP}
+    if not entity.deep_monitoring:
+        out.pop(FindingCode.SUBDOMAIN_TAKEOVER, None)
+    # Sosia di un fornitore: contano solo quelli registrati di recente con
+    # posta. Un omonimo registrato da anni è quasi sempre un'altra azienda.
+    out.pop(FindingCode.LOOKALIKE, None)
+    recent = [d for d in (getattr(scan, "lookalike_domains", None) or []) if d.get("recent")]
+    if recent:
+        out[FindingCode.LOOKALIKE] = {"domains": recent[:20]}
+
+    # Dominio falsificabile: senza DMARC in blocco chiunque può inviare email
+    # "da" questo dominio (frode sulle fatture, cambio IBAN).
+    if scan.dmarc_present is False or (scan.dmarc_present is True and scan.dmarc_policy == "none"):
+        out[FindingCode.DOMAIN_SPOOFABLE] = {
+            "dmarc": "missing" if scan.dmarc_present is False else "none",
+            "spf": scan.spf_policy or "", "deep": bool(entity.deep_monitoring),
+        }
+
+    hits = getattr(scan, "ransomware_hits", None) or []
+    if hits:
+        out[FindingCode.RANSOMWARE_VICTIM] = {"hits": hits[:5]}
+
+    breaches = [b for b in (getattr(scan, "hibp_domain_breaches", None) or []) if _months_ago(b.get("date")) <= 24]
+    if breaches:
+        out[FindingCode.SERVICE_BREACH] = {
+            "breaches": breaches[:5], "recent": any(_months_ago(b.get("date")) <= 12 for b in breaches),
+        }
+
+    remote = getattr(scan, "remote_access", None) or []
+    kev = [{"host": r["host"], "kev": r["kev"]} for r in remote if r.get("kev")]
+    if kev:
+        out[FindingCode.REMOTE_ACCESS_KEV] = {"hosts": kev[:10]}
+    admin = [{"host": r["host"], "services": r["admin_ports"]} for r in remote if r.get("admin_ports")]
+    if admin:
+        out[FindingCode.ADMIN_SERVICE_EXPOSED] = {"hosts": admin[:10]}
+
+    certs = [c for c in (getattr(scan, "service_checks", None) or [])
+             if c.get("reachable") and c.get("days_remaining") is not None and c["days_remaining"] <= 14]
+    if certs:
+        out[FindingCode.SERVICE_CERT] = {"hosts": certs[:10], "expired": any(c["days_remaining"] <= 0 for c in certs)}
+    return out
+
+
+def _months_ago(date_str) -> float:
+    from datetime import date
+    try:
+        d = date.fromisoformat(str(date_str)[:10])
+    except ValueError:
+        return 999
+    return (timezone.localdate() - d).days / 30.4
 
 
 def _severity_for(code: str, params: dict | None = None) -> str:
@@ -192,6 +264,22 @@ def _severity_for(code: str, params: dict | None = None) -> str:
     email e merita CRITICAL, mentre uno con solo un A record attivo resta WARNING.
     """
     from apps.osint.models import AlertSeverity, FindingCode
+
+    params = params or {}
+    # Supply chain: severità dipendenti dal contesto.
+    if code == FindingCode.DOMAIN_SPOOFABLE:
+        # critico per i fornitori critici; per gli altri resta da tenere d'occhio
+        return AlertSeverity.CRITICAL if params.get("deep") else AlertSeverity.WARNING
+    if code == FindingCode.SERVICE_BREACH:
+        return AlertSeverity.CRITICAL if params.get("recent") else AlertSeverity.WARNING
+    if code == FindingCode.SERVICE_CERT:
+        return AlertSeverity.CRITICAL if params.get("expired") else AlertSeverity.WARNING
+    if code == FindingCode.DOMAIN_EXPIRY_SOON and (params.get("days") or 1) <= 0:
+        return AlertSeverity.CRITICAL  # dominio scaduto: chi lo registra riceve la posta
+    if code in (FindingCode.RANSOMWARE_VICTIM, FindingCode.REMOTE_ACCESS_KEV):
+        return AlertSeverity.CRITICAL
+    if code == FindingCode.ADMIN_SERVICE_EXPOSED:
+        return AlertSeverity.WARNING
 
     # Lookalike "weaponization": severity in base allo stato del sosia.
     if code == FindingCode.LOOKALIKE:

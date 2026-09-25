@@ -14,7 +14,16 @@ import {
 import { Link } from "react-router-dom";
 import { GradeBadge, ReportToSupplierDialog, findingTitle } from "./shared";
 
-function ScorePill({ label, score }: { label: string; score: number }) {
+function ScorePill({ label, score }: { label: string; score: number | null }) {
+  const { t } = useTranslation();
+  if (score == null) {
+    return (
+      <div className="flex flex-col items-center px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-400" title={t("osint.chain.not_assessed")}>
+        <span className="text-xs font-medium">{label}</span>
+        <span className="text-xl font-bold mt-0.5">—</span>
+      </div>
+    );
+  }
   const cls = classifyScore(score);
   const colors = {
     critical: "bg-red-100 text-red-700 border-red-200",
@@ -414,7 +423,16 @@ export function OsintEntityDrawer({ entityId, onClose }: { entityId: string; onC
             <div className="flex-1 min-w-0">
               <h2 className="font-semibold text-gray-900 text-lg truncate">{entity.display_name}</h2>
               <p className="text-sm text-gray-500 truncate">{entity.domain} · {t(`osint.entity_type.${entity.entity_type}`)}</p>
-              {isSupplier && <p className="text-xs text-gray-500 mt-1">{t("osint.drawer.supplier_mode")}</p>}
+              {isSupplier && (
+                <p className="text-xs text-gray-500 mt-1">
+                  {entity.deep_monitoring && (
+                    <span className="mr-1.5 px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700" title={t("osint.chain.deep_hint")}>
+                      {t("osint.chain.deep_badge")}
+                    </span>
+                  )}
+                  {t("osint.drawer.supplier_mode")}
+                </p>
+              )}
             </div>
             <button onClick={() => scanMutation.mutate()} disabled={scanMutation.isPending || isScanning}
               className="px-3 py-1.5 text-sm border rounded-lg hover:bg-gray-50 disabled:opacity-50">
@@ -438,12 +456,22 @@ export function OsintEntityDrawer({ entityId, onClose }: { entityId: string; onC
             <>
               {scan ? (
                 <>
+                  {isSupplier ? (
+                    <div className="grid grid-cols-4 gap-3">
+                      <ScorePill label={t("osint.chain.pillar_compromise")} score={scan.score_compromise ?? null} />
+                      <ScorePill label={t("osint.chain.pillar_impersonation")} score={scan.score_impersonation ?? null} />
+                      <ScorePill label={t("osint.chain.pillar_exposure")} score={scan.score_exposure ?? null} />
+                      <ScorePill label={t("osint.chain.pillar_maturity")} score={scan.score_maturity ?? null} />
+                    </div>
+                  ) : (
                   <div className="grid grid-cols-4 gap-3">
                     <ScorePill label="SSL" score={scan.score_ssl} />
                     <ScorePill label="DNS" score={scan.score_dns} />
                     <ScorePill label={t("osint.detail.reputation")} score={scan.score_reputation} />
                     <ScorePill label="GRC" score={scan.score_grc_context} />
                   </div>
+                  )}
+                  {isSupplier && <p className="text-xs text-gray-500">{t("osint.chain.pillars_hint")}</p>}
                   <p className="text-xs text-gray-400">
                     {t("osint.detail.last_scan")}: {new Date(scan.scan_date).toLocaleDateString()} · {t("osint.drawer.dim_hint")}
                   </p>
@@ -472,7 +500,12 @@ export function OsintEntityDrawer({ entityId, onClose }: { entityId: string; onC
 
           {tab === "passed" && <ScanFindings entity={entity} />}
 
-          {tab === "tech" && (scan ? <ScanTechData scan={scan} /> : <p className="text-sm text-gray-400">{t("osint.detail.no_scan")}</p>)}
+          {tab === "tech" && (scan ? (
+            <>
+              {isSupplier && <SupplyChainData scan={scan} deep={!!entity.deep_monitoring} services={entity.service_hosts ?? []} />}
+              <ScanTechData scan={scan} />
+            </>
+          ) : <p className="text-sm text-gray-400">{t("osint.detail.no_scan")}</p>)}
 
           {tab === "events" && <EventsList events={entity.events ?? entity.active_alerts} />}
 
@@ -568,6 +601,12 @@ function SupplierProblems({ findings, onReport }: { findings: OsintFinding[]; on
                   : t("osint.drawer.not_reported", { date: new Date(f.first_seen).toLocaleDateString() })}
                 {f.report_overdue && <span className="ml-1 text-amber-700 font-medium">· {t("osint.drawer.still_open")}</span>}
               </p>
+              <p className="text-xs text-gray-600 mt-1">{t(`osint.finding_explain.${f.code}`, { defaultValue: "" })}</p>
+              {t(`osint.finding_action.${f.code}`, { defaultValue: "" }) && (
+                <p className="text-xs text-indigo-800 bg-indigo-50 rounded px-2 py-1 mt-1">
+                  <span className="font-medium">{t("osint.chain.your_action")}</span> {t(`osint.finding_action.${f.code}`)}
+                </p>
+              )}
               {f.report_note && <p className="text-xs text-gray-600 mt-1 italic" title={f.report_note}>“{f.report_note}”</p>}
             </div>
             <button onClick={() => onReport(f)}
@@ -623,5 +662,84 @@ function EventsList({ events }: { events: OsintAlert[] }) {
         </li>
       ))}
     </ol>
+  );
+}
+
+/** Dati di supply chain del fornitore: accessi remoti, servizi usati,
+ *  leak site ransomware, violazioni note, domini sosia. */
+function SupplyChainData({ scan, deep, services }: { scan: OsintScanDetail; deep: boolean; services: string[] }) {
+  const { t } = useTranslation();
+  const box = "rounded-xl border border-gray-200 p-3";
+  const title = "text-xs font-semibold text-gray-700 mb-1.5";
+  const empty = <p className="text-xs text-gray-400">{t("osint.chain.nothing")}</p>;
+  return (
+    <div className="space-y-3 mb-5">
+      <div className={box}>
+        <p className={title}>{t("osint.chain.remote_title")}</p>
+        {!deep ? <p className="text-xs text-gray-400">{t("osint.chain.remote_not_deep")}</p>
+          : (scan.remote_access ?? []).length === 0 ? empty : (
+            <ul className="space-y-1">
+              {(scan.remote_access ?? []).map(r => (
+                <li key={r.host} className="text-xs text-gray-700">
+                  <span className="font-mono">{r.host}</span> · {r.ip} · {t("osint.chain.ports")}: {r.ports.join(", ") || "—"}
+                  {r.kev.length > 0 && <span className="ml-1 text-red-700 font-medium">KEV: {r.kev.join(", ")}</span>}
+                  {r.admin_ports.length > 0 && <span className="ml-1 text-orange-700">{r.admin_ports.join(", ")}</span>}
+                </li>
+              ))}
+            </ul>
+          )}
+      </div>
+      <div className={box}>
+        <p className={title}>{t("osint.chain.services_title")}</p>
+        {services.length === 0 ? <p className="text-xs text-gray-400">{t("osint.chain.services_none")}</p> : (
+          <ul className="space-y-1">
+            {(scan.service_checks ?? []).map(c => (
+              <li key={c.host} className="text-xs text-gray-700">
+                <span className="font-mono">{c.host}</span> · {!c.reachable ? t("osint.chain.unreachable")
+                  : c.days_remaining != null && c.days_remaining <= 0 ? <span className="text-red-700">{t("osint.chain.cert_expired")}</span>
+                    : t("osint.chain.cert_days", { days: c.days_remaining ?? "?" })}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <div className={box}>
+        <p className={title}>{t("osint.chain.ransomware_title")}</p>
+        {(scan.ransomware_hits ?? []).length === 0 ? empty : (
+          <ul className="space-y-1">
+            {(scan.ransomware_hits ?? []).map((h, i) => (
+              <li key={i} className="text-xs text-red-700">{h.victim} · {h.group} · {new Date(h.discovered).toLocaleDateString()}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <div className={box}>
+        <p className={title}>{t("osint.chain.breaches_title")}</p>
+        {(scan.hibp_domain_breaches ?? []).length === 0 ? empty : (
+          <ul className="space-y-1">
+            {(scan.hibp_domain_breaches ?? []).map(b => (
+              <li key={b.name} className="text-xs text-gray-700">{b.name} · {b.date} · {b.data_classes.slice(0, 4).join(", ")}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+      {deep && (
+        <div className={box}>
+          <p className={title}>{t("osint.chain.lookalike_title")}</p>
+          <p className="text-[11px] text-gray-400 mb-1">{t("osint.chain.lookalike_hint")}</p>
+          {(scan.lookalike_domains ?? []).length === 0 ? empty : (
+            <ul className="space-y-1">
+              {(scan.lookalike_domains ?? []).map(l => (
+                <li key={l.domain} className="text-xs text-gray-700">
+                  <span className="font-mono">{l.domain}</span>{l.mx && <span className="ml-1 text-gray-600">✉ {t("osint.chain.has_mail")}</span>}
+                  {l.registered && <span className="ml-1 text-gray-500">· {t("osint.chain.registered_on", { date: new Date(l.registered).toLocaleDateString() })}</span>}
+                  {l.recent && <span className="ml-1 text-red-700 font-medium">· {t("osint.chain.recent")}</span>}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

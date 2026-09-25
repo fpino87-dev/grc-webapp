@@ -3007,3 +3007,11 @@ msgstr "Zgłasza się tylko problemy dostawców: wewnętrzne się naprawia."
 #: apps/osint/findings.py
 msgid "Il problema non è più aperto."
 msgstr "Problem nie jest już otwarty."
+
+#: apps/suppliers/serializers.py
+msgid "Indica al massimo 10 servizi."
+msgstr "Podaj maksymalnie 10 usług."
+
+#: apps/suppliers/serializers.py
+msgid "Indirizzo non valido: %(value)s"
+msgstr "Nieprawidłowy adres: %(value)s"

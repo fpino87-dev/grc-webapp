@@ -2986,3 +2986,11 @@ msgstr "Yalnızca tedarikçi sorunları bildirilir: iç sorunlar düzeltilir."
 #: apps/osint/findings.py
 msgid "Il problema non è più aperto."
 msgstr "Sorun artık açık değil."
+
+#: apps/suppliers/serializers.py
+msgid "Indica al massimo 10 servizi."
+msgstr "En fazla 10 hizmet belirtin."
+
+#: apps/suppliers/serializers.py
+msgid "Indirizzo non valido: %(value)s"
+msgstr "Geçersiz adres: %(value)s"

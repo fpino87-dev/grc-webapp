@@ -74,6 +74,20 @@ def _acquire_token(bucket: str, min_interval: int) -> None:
         time.sleep(min_interval)
 
 
+def _wants_lookalike(entity) -> bool:
+    return entity.entity_type == "my_domain" or (entity.entity_type == "supplier" and entity.deep_monitoring)
+
+
+def _run_lookalike(entity, scan, settings) -> bool:
+    try:
+        import dnstwist  # noqa: F401  # type: ignore[import-untyped]
+        from apps.osint.enrichers import dnstwist as dnstwist_enr
+        return dnstwist_enr.run(entity, scan, settings)
+    except ImportError:
+        from apps.osint.enrichers import lookalike_lite
+        return lookalike_lite.run(entity, scan, settings)
+
+
 def run_enrichment(entity: "OsintEntity", settings: "OsintSettings") -> "OsintScan":
     """Esegue tutti gli enricher sull'entità e salva il risultato in un nuovo OsintScan.
 
@@ -82,7 +96,7 @@ def run_enrichment(entity: "OsintEntity", settings: "OsintSettings") -> "OsintSc
     from apps.osint.models import OsintScan, ScanStatus
     from apps.osint.enrichers import (
         ssl, dns, whois_enr, virustotal, abuseipdb, otx, gsb, hibp,
-        http_headers, dnsbl, dnstwist as dnstwist_enr, takeover, abusech,
+        http_headers, dnsbl, takeover, abusech, supplychain,
     )
     from apps.osint.scoring import compute_scores
 
@@ -143,9 +157,16 @@ def run_enrichment(entity: "OsintEntity", settings: "OsintSettings") -> "OsintSc
     # sopra). Nessun throttle: solo lookup CNAME/A locali.
     results["takeover"] = takeover.run(entity, scan, settings)
 
-    # dnstwist — opzionale (skip se libreria non installata). Pesante: solo my_domain.
-    if entity.entity_type == "my_domain":
-        results["dnstwist"] = dnstwist_enr.run(entity, scan, settings)
+    # Domini sosia: i propri domini e i fornitori a monitoraggio approfondito
+    # (frode sulle fatture, phishing a nome del fornitore). dnstwist se
+    # installato, altrimenti il generatore leggero interno.
+    if _wants_lookalike(entity):
+        results["lookalike"] = _run_lookalike(entity, scan, settings)
+
+    # Supply chain: leak site ransomware, violazioni HIBP del servizio,
+    # certificati dei servizi usati, accessi remoti esposti (approfondito).
+    if entity.entity_type == "supplier":
+        results["supplychain"] = supplychain.run(entity, scan, settings)
 
     # Score (passa settings per evitare un reload)
     compute_scores(entity, scan, settings)
@@ -209,10 +230,14 @@ def _propagate_scan(
     # identico a uno stand-alone dello stesso tipo (niente finding lookalike/breach
     # spuri su un fornitore).
     if entity.entity_type != EntityType.MY_DOMAIN:
-        scan.lookalike_domains = []
         scan.hibp_breaches = None
         scan.hibp_latest_breach = None
         scan.hibp_data_types = []
+    # Sosia: solo per chi li prevede; se il donor non li ha cercati, si cercano qui.
+    if not _wants_lookalike(entity):
+        scan.lookalike_domains = []
+    elif not _wants_lookalike(source_scan.entity):
+        _run_lookalike(entity, scan, settings)
 
     # Sottodomini: propaga il set del donor a questa entità (copia DB→DB, nessuna
     # API). `_sync_subdomains` rispetta la auto-include policy e non altera le
@@ -227,6 +252,11 @@ def _propagate_scan(
     # Takeover: per-entità (dipende dai sottodomini *inclusi* di questa entità).
     # È solo lookup DNS, non un'API a quota → eseguirlo per entità è corretto.
     takeover.run(entity, scan, settings)
+
+    # Supply chain: per-entità (nome, servizi usati, livello di monitoraggio).
+    if entity.entity_type == EntityType.SUPPLIER:
+        from apps.osint.enrichers import supplychain
+        supplychain.run(entity, scan, settings)
 
     # Score per-entità + status ereditato dal donor (stesso esito enrichment).
     compute_scores(entity, scan, settings)

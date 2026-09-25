@@ -191,6 +191,8 @@ def compute_scores(entity: "OsintEntity", scan: "OsintScan", settings=None) -> N
 
     if settings is None:
         settings = OsintSettings.load()
+    if getattr(entity, "entity_type", None) == "supplier":
+        return _compute_supplier_scores(entity, scan, settings)
     ssl = _score_ssl(scan, warning_days=settings.ssl_expiry_warning_days, entity=entity)
     dns = _score_dns(scan, entity=entity)
     rep = _score_reputation(scan)
@@ -226,6 +228,64 @@ def compute_scores(entity: "OsintEntity", scan: "OsintScan", settings=None) -> N
         total = max(total, settings.score_threshold_critical)
 
     scan.score_total = round(total)
+
+
+def _compute_supplier_scores(entity, scan, settings) -> None:
+    """Fornitori: rischio per pilastri — compromissione, impersonificazione,
+    esposizione (solo monitoraggio approfondito) e maturità, che pesa poco.
+    La compromissione in atto domina il totale."""
+    from datetime import date
+
+    ssl = _score_ssl(scan, warning_days=settings.ssl_expiry_warning_days, entity=entity)
+    dns = _score_dns(scan, entity=entity)
+    rep = _score_reputation(scan)
+    scan.score_ssl, scan.score_dns, scan.score_reputation = ssl, dns, rep
+    scan.score_grc_context = 0
+
+    def months(d):
+        try:
+            return (date.today() - date.fromisoformat(str(d)[:10])).days / 30.4
+        except ValueError:
+            return 999
+
+    compromise = 100 if (_has_active_compromise(scan) or scan.ransomware_hits) else 0
+    breaches = scan.hibp_domain_breaches or []
+    if not compromise and any(months(b.get("date")) <= 12 for b in breaches):
+        compromise = 60
+    elif not compromise and any(months(b.get("date")) <= 24 for b in breaches):
+        compromise = 20
+
+    imp = 0
+    if scan.dmarc_present is False:
+        imp += 60
+    elif scan.dmarc_present is True and scan.dmarc_policy == "none":
+        imp += 40
+    # solo sosia registrati di recente: gli omonimi storici non sono impostori
+    looks = [x for x in (scan.lookalike_domains or []) if x.get("recent")]
+    imp += 40 if any(x.get("mx") for x in looks) else (15 if looks else 0)
+    if scan.domain_expiry_date:
+        days = (scan.domain_expiry_date - date.today()).days
+        imp += 100 if days <= 0 else (30 if days <= 30 else 0)
+    imp = min(imp, 100)
+
+    exposure = None
+    certs = [c for c in (scan.service_checks or []) if c.get("reachable") and c.get("days_remaining") is not None]
+    cert_risk = 40 if any(c["days_remaining"] <= 0 for c in certs) else (15 if any(c["days_remaining"] <= 14 for c in certs) else 0)
+    if entity.deep_monitoring:
+        remote = scan.remote_access or []
+        exposure = 100 if any(r.get("kev") for r in remote) else (50 if any(r.get("admin_ports") for r in remote) else 0)
+        exposure = min(100, exposure + cert_risk + (40 if scan.takeover_candidates else 0))
+    elif certs:
+        exposure = cert_risk
+
+    maturity = round((ssl + dns) / 2)
+    if exposure is None:
+        blended = 0.7 * imp + 0.3 * maturity
+    else:
+        blended = 0.45 * imp + 0.35 * exposure + 0.20 * maturity
+    scan.score_compromise, scan.score_impersonation = compromise, imp
+    scan.score_exposure, scan.score_maturity = exposure, maturity
+    scan.score_total = round(max(compromise, blended))
 
 
 def score_delta(entity: "OsintEntity", current_scan: "OsintScan") -> int:

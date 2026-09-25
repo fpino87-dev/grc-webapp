@@ -2985,3 +2985,11 @@ msgstr "Only supplier issues are reported: internal ones are fixed."
 #: apps/osint/findings.py
 msgid "Il problema non è più aperto."
 msgstr "The issue is no longer open."
+
+#: apps/suppliers/serializers.py
+msgid "Indica al massimo 10 servizi."
+msgstr "List at most 10 services."
+
+#: apps/suppliers/serializers.py
+msgid "Indirizzo non valido: %(value)s"
+msgstr "Invalid address: %(value)s"

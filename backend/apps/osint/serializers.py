@@ -59,7 +59,7 @@ class OsintEntityListSerializer(_GradeMixin, serializers.ModelSerializer):
             "expected_mail", "expected_web",
             "duplicate_candidate_of", "duplicate_verified",
             "last_scan", "delta", "active_alerts_count",
-            "security", "grade", "open_findings", "trend",
+            "security", "grade", "open_findings", "trend", "deep_monitoring",
             "created_at", "updated_at",
         ]
 
@@ -115,7 +115,7 @@ class OsintEntityDetailSerializer(_GradeMixin, serializers.ModelSerializer):
             "expected_mail", "expected_web",
             "duplicate_candidate_of", "duplicate_verified",
             "last_scan", "delta", "active_alerts", "pending_subdomains_count",
-            "security", "grade", "findings", "events",
+            "security", "grade", "findings", "events", "deep_monitoring", "service_hosts",
             "created_at", "updated_at",
         ]
 

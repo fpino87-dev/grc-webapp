@@ -4187,7 +4187,12 @@
       "no_critical": "Kritik sorun yok",
       "reported_on": "{{date}} tarihinde bildirildi",
       "not_reported": "henüz bildirilmedi",
-      "history": "Bildirim geçmişi ({{count}})"
+      "history": "Bildirim geçmişi ({{count}})",
+      "services_title": "Kullandığınız tedarikçi hizmetleri",
+      "services_hint": "Sipariş portalı, SFTP, VPN, paylaşılan platformlar: OSINT sertifikalarını kontrol eder. Kurumsal web sitesi gerekmez.",
+      "services_empty": "Belirtilmiş hizmet yok",
+      "services_add": "Ekle",
+      "services_remove": "Kaldır"
     }
   },
   "reporting": {
@@ -4845,7 +4850,13 @@
       "subdomain_takeover": "Olası alt alan adı ele geçirme",
       "ct_unexpected_issuer": "Beklenmeyen bir CA tarafından verilmiş sertifika",
       "threatfox_listed": "Etkin bir ele geçirilme göstergesi (ThreatFox)",
-      "urlhaus_listed": "Sunucuda kötü amaçlı URL (URLhaus)"
+      "urlhaus_listed": "Sunucuda kötü amaçlı URL (URLhaus)",
+      "domain_spoofable": "Taklit edilebilir alan adı (e-posta dolandırıcılığı)",
+      "ransomware_victim": "Fidye yazılımı kurbanı",
+      "service_breach": "Hizmet veri ihlali",
+      "remote_access_kev": "Sömürülen güvenlik açığı olan uzaktan erişim",
+      "admin_service_exposed": "Açıkta yönetim hizmeti",
+      "service_cert": "Kullanılan bir hizmette süresi dolmuş sertifika"
     },
     "finding_explain": {
       "ssl_expiry": "Sitenin sertifikasının süresi yakında doluyor: sonrasında tarayıcılar erişimi engelleyecek.",
@@ -4869,7 +4880,52 @@
       "subdomain_takeover": "Bir alt alan adı artık kullanılmayan bir bulut hizmetine işaret ediyor ve üçüncü taraflarca ele geçirilebilir.",
       "ct_unexpected_issuer": "Alan adı için beklenmeyen bir sertifika yetkilisi tarafından sertifika verildi.",
       "threatfox_listed": "Alan adı veya IP'si ThreatFox ele geçirilme göstergeleri arasında yer alıyor (abuse.ch).",
-      "urlhaus_listed": "Sunucuda kötü amaçlı yazılım dağıtan URL'ler bulundu (URLhaus, abuse.ch)."
+      "urlhaus_listed": "Sunucuda kötü amaçlı yazılım dağıtan URL'ler bulundu (URLhaus, abuse.ch).",
+      "domain_spoofable": "Alan adı DMARC'ı engelleme modunda uygulamıyor: herkes bu alan adından geliyormuş gibi görünen e-postalar gönderebilir.",
+      "ransomware_victim": "Ad veya alan adı bir fidye yazılımı grubunun sızıntı sitesinde görünüyor: şirket saldırıya uğramış ve veriler çalınmış olabilir.",
+      "service_breach": "Bu alan adının çevrimiçi hizmeti kamuya açık bir veri ihlalinde yer alıyor.",
+      "remote_access_kev": "Bir uzaktan erişim sistemi (VPN, ağ geçidi, web posta) CISA KEV kataloğundaki, saldırganlarca aktif olarak sömürülen bir açık barındırıyor.",
+      "admin_service_exposed": "Bir sunucu internete yönetim hizmetleri (RDP, SMB, Telnet, VNC) açıyor; sık hedeflenen bir durum.",
+      "service_cert": "Bu tedarikçiyle kullandığınız bir hizmetin sertifikasının süresi dolmuş veya dolmak üzere."
+    },
+    "finding_action": {
+      "domain_spoofable": "Muhasebeyi uyarın: bu tedarikçiden gelen her banka bilgisi değişikliği talebi, bilinen bir kişiyle telefonla doğrulanmalıdır.",
+      "lookalike_domains": "Muhasebe ve satın almayı uyarın: bu benzer alan adlarından gelen e-postalar tedarikçiden değildir. Posta filtrenizde engellemeyi düşünün.",
+      "ransomware_victim": "Tedarikçiyle hangi verileri ve erişimleri paylaştığınızı kontrol edin; etkiyi netleştirene kadar erişimleri ve dosya alışverişini askıya alın.",
+      "service_breach": "Hangi verilerinizin etkilendiğini sorun; hizmetlerinde hesabınız varsa parolaları değiştirin.",
+      "remote_access_kev": "Tedarikçinin sistemlerinize erişimi varsa, açık düzeltilene kadar askıya almayı düşünün.",
+      "admin_service_exposed": "Tedarikçi sistemlerinize erişiyorsa, bu hizmetlerin internetten erişilemediğini teyit etmesini isteyin.",
+      "domain_expiry_soon": "Bu alan adından gelen e-postalara dikkat edin: süresi dolar ve başkası kaydederse artık tedarikçiye ait olmayabilir.",
+      "blacklist": "Sorun çözülene kadar bu tedarikçiden gelen ekleri ve bağlantıları dikkatle ele alın.",
+      "threatfox_listed": "Bu tedarikçiden gelen ekleri ve bağlantıları dikkatle ele alın; göstergeyi sistemlerinizde engellemeyi düşünün.",
+      "urlhaus_listed": "Tedarikçi temizleyene kadar bu sunucuya giden bağlantıları açmayın."
+    },
+    "chain": {
+      "deep_badge": "Kapsamlı",
+      "deep_hint": "Kritik tedarikçi (NIS2, TISAX, yüksek/kritik risk veya OT bakımcısı): benzer alan adları ve açıktaki uzaktan erişimler de kontrol edilir.",
+      "pillar_compromise": "Ele geçirilme",
+      "pillar_impersonation": "Taklit",
+      "pillar_exposure": "Maruziyet",
+      "pillar_maturity": "Olgunluk",
+      "pillars_hint": "Sütun başına güvenlik, yüksek = daha iyi. Olgunluk (site hijyeni, DNS) az ağırlık taşır; Maruziyet kritik tedarikçilerde ve belirtilen hizmetlerde değerlendirilir.",
+      "not_assessed": "Değerlendirilmedi",
+      "your_action": "Sizin yapmanız gereken:",
+      "nothing": "Bildirilecek bir şey yok",
+      "remote_title": "Açıktaki uzaktan erişimler",
+      "remote_not_deep": "Yalnızca kritik tedarikçiler için kontrol edilir.",
+      "ports": "portlar",
+      "services_title": "Kullanılan hizmetler",
+      "services_none": "Tedarikçi kartında hizmet belirtilmemiş.",
+      "unreachable": "erişilemiyor",
+      "cert_expired": "sertifikanın süresi dolmuş",
+      "cert_days": "sertifika {{days}} gün daha geçerli",
+      "ransomware_title": "Fidye yazılımı sızıntı siteleri (son 180 gün)",
+      "breaches_title": "Bilinen hizmet ihlalleri (HIBP)",
+      "lookalike_title": "Benzer alan adları",
+      "has_mail": "e-postalı",
+      "registered_on": "{{date}} tarihinde kaydedildi",
+      "recent": "yakın zamanda kaydedildi",
+      "lookalike_hint": "Yalnızca son bir yılda kaydedilmiş ve e-postası olan benzer alan adları işaretlenir: eski adaşlar başka şirketlerdir."
     }
   },
   "checklists": {

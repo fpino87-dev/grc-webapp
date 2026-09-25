@@ -55,6 +55,12 @@ class Supplier(BaseModel):
         blank=True,
         help_text="Sito web / dominio principale del fornitore — usato dal modulo OSINT per monitoraggio passivo.",
     )
+    # Servizi del fornitore che usiamo davvero (portale ordini, SFTP, VPN…):
+    # l'OSINT ne controlla il certificato. Il sito vetrina non conta.
+    service_urls = models.JSONField(
+        default=list, blank=True,
+        help_text="URL dei servizi del fornitore usati dall'azienda (es. https://portale.fornitore.it)",
+    )
     # Valutazione corrente — campi derivati (calcolati da `recompute_risk_adj`,
     # read-only via API): data, scadenza e origine dell'ultima valutazione
     # registrata (questionario valutato, valutazione esistente registrata o

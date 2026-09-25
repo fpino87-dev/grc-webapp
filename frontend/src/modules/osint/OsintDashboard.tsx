@@ -254,6 +254,9 @@ export function OsintDashboard() {
                       <p className="font-medium text-gray-900 truncate max-w-[16rem]">
                         {e.display_name}
                         {e.is_nis2_critical && <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-orange-50 text-orange-700" title={t("osint.dash.nis2_critical")}>NIS2</span>}
+                        {tab === "supplier" && e.deep_monitoring && (
+                          <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700" title={t("osint.chain.deep_hint")}>{t("osint.chain.deep_badge")}</span>
+                        )}
                       </p>
                       <p className="text-xs text-gray-400 truncate max-w-[16rem]">{e.domain}</p>
                     </td>

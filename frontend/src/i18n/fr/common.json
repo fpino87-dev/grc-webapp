@@ -4187,7 +4187,12 @@
       "no_critical": "Aucun problème critique",
       "reported_on": "signalé le {{date}}",
       "not_reported": "pas encore signalé",
-      "history": "Historique des signalements ({{count}})"
+      "history": "Historique des signalements ({{count}})",
+      "services_title": "Services du fournisseur que vous utilisez",
+      "services_hint": "Portail de commandes, SFTP, VPN, plateformes partagées : l'OSINT en contrôle le certificat. Le site vitrine n'est pas nécessaire.",
+      "services_empty": "Aucun service indiqué",
+      "services_add": "Ajouter",
+      "services_remove": "Retirer"
     }
   },
   "reporting": {
@@ -4845,7 +4850,13 @@
       "subdomain_takeover": "Possible prise de contrôle de sous-domaine",
       "ct_unexpected_issuer": "Certificat émis par une AC inattendue",
       "threatfox_listed": "Indicateur de compromission actif (ThreatFox)",
-      "urlhaus_listed": "URL malveillante sur l'hôte (URLhaus)"
+      "urlhaus_listed": "URL malveillante sur l'hôte (URLhaus)",
+      "domain_spoofable": "Domaine usurpable (fraude par e-mail)",
+      "ransomware_victim": "Victime de ransomware",
+      "service_breach": "Violation de données du service",
+      "remote_access_kev": "Accès distant avec une vulnérabilité exploitée",
+      "admin_service_exposed": "Service d'administration exposé",
+      "service_cert": "Certificat expiré sur un service utilisé"
     },
     "finding_explain": {
       "ssl_expiry": "Le certificat du site expire bientôt : ensuite, les navigateurs bloqueront l'accès.",
@@ -4869,7 +4880,52 @@
       "subdomain_takeover": "Un sous-domaine pointe vers un service cloud qui n'est plus utilisé et pourrait être repris par des tiers.",
       "ct_unexpected_issuer": "Un certificat a été émis pour le domaine par une autorité de certification inattendue.",
       "threatfox_listed": "Le domaine ou son IP figure parmi les indicateurs de compromission ThreatFox (abuse.ch).",
-      "urlhaus_listed": "Des URL diffusant des logiciels malveillants ont été trouvées sur l'hôte (URLhaus, abuse.ch)."
+      "urlhaus_listed": "Des URL diffusant des logiciels malveillants ont été trouvées sur l'hôte (URLhaus, abuse.ch).",
+      "domain_spoofable": "Le domaine n'applique pas DMARC en blocage : n'importe qui peut envoyer des e-mails semblant provenir de ce domaine.",
+      "ransomware_victim": "Le nom ou le domaine apparaît sur le site de fuite d'un groupe de ransomware : l'entreprise a pu être touchée et des données volées.",
+      "service_breach": "Le service en ligne de ce domaine figure dans une violation de données publique.",
+      "remote_access_kev": "Un système d'accès distant (VPN, passerelle, webmail) expose une vulnérabilité du catalogue CISA KEV, activement exploitée.",
+      "admin_service_exposed": "Un hôte expose sur internet des services d'administration (RDP, SMB, Telnet, VNC), une cible fréquente.",
+      "service_cert": "Le certificat d'un service que vous utilisez avec ce fournisseur a expiré ou va expirer."
+    },
+    "finding_action": {
+      "domain_spoofable": "Prévenez la comptabilité : toute demande de ce fournisseur de changer ses coordonnées bancaires doit être vérifiée par téléphone avec un contact connu.",
+      "lookalike_domains": "Prévenez comptabilité et achats : les e-mails de ces domaines similaires ne viennent pas du fournisseur. Envisagez de les bloquer dans votre filtre de messagerie.",
+      "ransomware_victim": "Vérifiez quelles données et quels accès vous partagez avec le fournisseur ; suspendez accès et échanges de fichiers jusqu'à ce qu'il précise l'impact.",
+      "service_breach": "Demandez quelles données vous concernant étaient impliquées ; si vous avez des comptes sur leur service, changez les mots de passe.",
+      "remote_access_kev": "Si le fournisseur a accès à vos systèmes, envisagez de suspendre cet accès jusqu'à la correction de la vulnérabilité.",
+      "admin_service_exposed": "Si le fournisseur accède à vos systèmes, demandez-lui de confirmer que ces services ne sont pas joignables depuis internet.",
+      "domain_expiry_soon": "Surveillez les e-mails de ce domaine : s'il expire et est enregistré par d'autres, ils pourraient ne plus venir du fournisseur.",
+      "blacklist": "Traitez avec prudence pièces jointes et liens de ce fournisseur tant que le problème n'est pas résolu.",
+      "threatfox_listed": "Traitez avec prudence pièces jointes et liens de ce fournisseur ; envisagez de bloquer l'indicateur sur vos systèmes.",
+      "urlhaus_listed": "N'ouvrez pas de liens vers cet hôte tant que le fournisseur ne l'a pas nettoyé."
+    },
+    "chain": {
+      "deep_badge": "Approfondi",
+      "deep_hint": "Fournisseur critique (NIS2, TISAX, risque élevé/critique ou mainteneur OT) : on contrôle aussi les domaines sosies et les accès distants exposés.",
+      "pillar_compromise": "Compromission",
+      "pillar_impersonation": "Usurpation",
+      "pillar_exposure": "Exposition",
+      "pillar_maturity": "Maturité",
+      "pillars_hint": "Sécurité par pilier, plus haut = mieux. La Maturité (hygiène du site, DNS) pèse peu ; l'Exposition est évaluée sur les fournisseurs critiques et les services indiqués.",
+      "not_assessed": "Non évalué",
+      "your_action": "Ce que vous devez faire :",
+      "nothing": "Rien à signaler",
+      "remote_title": "Accès distants exposés",
+      "remote_not_deep": "Contrôlé uniquement pour les fournisseurs critiques.",
+      "ports": "ports",
+      "services_title": "Services utilisés",
+      "services_none": "Aucun service indiqué dans la fiche fournisseur.",
+      "unreachable": "injoignable",
+      "cert_expired": "certificat expiré",
+      "cert_days": "certificat valide encore {{days}} jours",
+      "ransomware_title": "Sites de fuite ransomware (180 derniers jours)",
+      "breaches_title": "Violations connues du service (HIBP)",
+      "lookalike_title": "Domaines sosies",
+      "has_mail": "avec messagerie",
+      "registered_on": "enregistré le {{date}}",
+      "recent": "enregistré récemment",
+      "lookalike_hint": "Seuls les sosies enregistrés dans l'année avec messagerie sont signalés : les homonymes anciens sont d'autres entreprises."
     }
   },
   "checklists": {

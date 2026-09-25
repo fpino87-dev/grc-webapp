@@ -137,6 +137,25 @@ class SupplierSerializer(serializers.ModelSerializer):
 
 
 
+    def validate_service_urls(self, value):
+        """Servizi del fornitore usati da noi: fino a 10 URL o hostname pubblici."""
+        from django.utils.translation import gettext as _
+
+        from apps.osint.services import extract_domain
+        from apps.osint.validators import hostname_is_scannable
+
+        if value in (None, ""):
+            return []
+        if not isinstance(value, list) or len(value) > 10:
+            raise serializers.ValidationError(_("Indica al massimo 10 servizi."))
+        cleaned = []
+        for raw in value:
+            host = extract_domain(str(raw))
+            if not host or not hostname_is_scannable(host)[0]:
+                raise serializers.ValidationError(_("Indirizzo non valido: %(value)s") % {"value": str(raw)[:100]})
+            cleaned.append(str(raw).strip()[:300])
+        return cleaned
+
 class SupplierInternalEvaluationSerializer(serializers.ModelSerializer):
     evaluated_by_display = serializers.SerializerMethodField(read_only=True)
 

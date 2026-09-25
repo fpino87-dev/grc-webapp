@@ -135,6 +135,14 @@ def push_osint_kpis(self):
     return _push()
 
 
+@shared_task(name="osint.refresh_ransomware_victims")
+def refresh_ransomware_victims():
+    """Ogni 6 ore: vittime recenti dai leak site ransomware (ransomware.live),
+    confrontate in locale con i fornitori a ogni scan."""
+    from apps.osint.enrichers.supplychain import refresh_ransomware_victims as _refresh
+    return {"new_victims": _refresh()}
+
+
 @shared_task(name="osint.check_enricher_health")
 def check_enricher_health():
     """Probe giornaliera della salute delle chiavi enricher (semaforo settings).

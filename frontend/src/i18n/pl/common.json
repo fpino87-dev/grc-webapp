@@ -4187,7 +4187,12 @@
       "no_critical": "Brak problemów krytycznych",
       "reported_on": "zgłoszone {{date}}",
       "not_reported": "jeszcze niezgłoszone",
-      "history": "Historia zgłoszeń ({{count}})"
+      "history": "Historia zgłoszeń ({{count}})",
+      "services_title": "Używane usługi dostawcy",
+      "services_hint": "Portal zamówień, SFTP, VPN, wspólne platformy: OSINT sprawdza ich certyfikat. Strona firmowa nie jest potrzebna.",
+      "services_empty": "Nie wskazano usług",
+      "services_add": "Dodaj",
+      "services_remove": "Usuń"
     }
   },
   "reporting": {
@@ -4845,7 +4850,13 @@
       "subdomain_takeover": "Możliwe przejęcie subdomeny",
       "ct_unexpected_issuer": "Certyfikat wydany przez nieoczekiwane CA",
       "threatfox_listed": "Aktywny wskaźnik kompromitacji (ThreatFox)",
-      "urlhaus_listed": "Złośliwy URL na hoście (URLhaus)"
+      "urlhaus_listed": "Złośliwy URL na hoście (URLhaus)",
+      "domain_spoofable": "Domena możliwa do podszycia (oszustwo e-mail)",
+      "ransomware_victim": "Ofiara ransomware",
+      "service_breach": "Wyciek danych z usługi",
+      "remote_access_kev": "Dostęp zdalny z wykorzystywaną podatnością",
+      "admin_service_exposed": "Wystawiona usługa administracyjna",
+      "service_cert": "Wygasły certyfikat w używanej usłudze"
     },
     "finding_explain": {
       "ssl_expiry": "Certyfikat strony wkrótce wygasa: potem przeglądarki zablokują dostęp.",
@@ -4869,7 +4880,52 @@
       "subdomain_takeover": "Subdomena wskazuje na nieużywaną usługę chmurową i może zostać przejęta przez osoby trzecie.",
       "ct_unexpected_issuer": "Dla domeny wydano certyfikat przez nieoczekiwany urząd certyfikacji.",
       "threatfox_listed": "Domena lub jej IP występuje wśród wskaźników kompromitacji ThreatFox (abuse.ch).",
-      "urlhaus_listed": "Na hoście znaleziono adresy URL rozpowszechniające złośliwe oprogramowanie (URLhaus, abuse.ch)."
+      "urlhaus_listed": "Na hoście znaleziono adresy URL rozpowszechniające złośliwe oprogramowanie (URLhaus, abuse.ch).",
+      "domain_spoofable": "Domena nie wymusza DMARC: każdy może wysyłać e-maile wyglądające na pochodzące z tej domeny.",
+      "ransomware_victim": "Nazwa lub domena pojawia się na stronie wycieków grupy ransomware: firma mogła zostać zaatakowana, a dane wykradzione.",
+      "service_breach": "Usługa online tej domeny występuje w publicznym wycieku danych.",
+      "remote_access_kev": "System dostępu zdalnego (VPN, brama, poczta WWW) ma podatność z katalogu CISA KEV, aktywnie wykorzystywaną przez atakujących.",
+      "admin_service_exposed": "Host wystawia w internecie usługi administracyjne (RDP, SMB, Telnet, VNC), częsty cel ataków.",
+      "service_cert": "Certyfikat usługi, z której korzystacie u tego dostawcy, wygasł lub wkrótce wygaśnie."
+    },
+    "finding_action": {
+      "domain_spoofable": "Uprzedź księgowość: każdą prośbę tego dostawcy o zmianę danych bankowych trzeba zweryfikować telefonicznie ze znanym kontaktem.",
+      "lookalike_domains": "Uprzedź księgowość i zakupy: e-maile z tych podobnych domen nie pochodzą od dostawcy. Rozważ ich zablokowanie w filtrze poczty.",
+      "ransomware_victim": "Sprawdź, jakie dane i dostępy współdzielicie z dostawcą; zawieś dostępy i wymianę plików, dopóki nie wyjaśni skutków.",
+      "service_breach": "Zapytaj, których waszych danych dotyczył wyciek; jeśli macie konta w ich usłudze, zmieńcie hasła.",
+      "remote_access_kev": "Jeśli dostawca ma dostęp do waszych systemów, rozważ jego zawieszenie do czasu usunięcia podatności.",
+      "admin_service_exposed": "Jeśli dostawca ma dostęp do waszych systemów, poproś o potwierdzenie, że te usługi nie są dostępne z internetu.",
+      "domain_expiry_soon": "Uważaj na e-maile z tej domeny: jeśli wygaśnie i ktoś inny ją zarejestruje, mogą nie pochodzić już od dostawcy.",
+      "blacklist": "Ostrożnie traktuj załączniki i linki od tego dostawcy, dopóki problem nie zostanie rozwiązany.",
+      "threatfox_listed": "Ostrożnie traktuj załączniki i linki od tego dostawcy; rozważ zablokowanie wskaźnika w waszych systemach.",
+      "urlhaus_listed": "Nie otwieraj linków do tego hosta, dopóki dostawca go nie oczyści."
+    },
+    "chain": {
+      "deep_badge": "Pogłębiony",
+      "deep_hint": "Dostawca krytyczny (NIS2, TISAX, ryzyko wysokie/krytyczne lub serwisant OT): sprawdza się też domeny podszywające się i wystawione dostępy zdalne.",
+      "pillar_compromise": "Kompromitacja",
+      "pillar_impersonation": "Podszywanie",
+      "pillar_exposure": "Ekspozycja",
+      "pillar_maturity": "Dojrzałość",
+      "pillars_hint": "Bezpieczeństwo według filarów, wyżej = lepiej. Dojrzałość (higiena strony, DNS) waży mało; Ekspozycję ocenia się u dostawców krytycznych i dla wskazanych usług.",
+      "not_assessed": "Nieoceniony",
+      "your_action": "Co powinieneś zrobić:",
+      "nothing": "Nic do zgłoszenia",
+      "remote_title": "Wystawione dostępy zdalne",
+      "remote_not_deep": "Sprawdzane tylko u dostawców krytycznych.",
+      "ports": "porty",
+      "services_title": "Używane usługi",
+      "services_none": "W karcie dostawcy nie wskazano usług.",
+      "unreachable": "nieosiągalny",
+      "cert_expired": "certyfikat wygasł",
+      "cert_days": "certyfikat ważny jeszcze {{days}} dni",
+      "ransomware_title": "Strony wycieków ransomware (ostatnie 180 dni)",
+      "breaches_title": "Znane wycieki z usługi (HIBP)",
+      "lookalike_title": "Domeny podszywające się",
+      "has_mail": "z pocztą",
+      "registered_on": "zarejestrowana {{date}}",
+      "recent": "zarejestrowana niedawno",
+      "lookalike_hint": "Zgłaszane są tylko domeny podszywające się zarejestrowane w ostatnim roku i z pocztą: dawne domeny o tej samej nazwie należą do innych firm."
     }
   },
   "checklists": {

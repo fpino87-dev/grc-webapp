@@ -85,6 +85,7 @@ def _upsert_entity(
     scan_frequency: str,
     result: AggregationResult,
     kept: set,
+    extra: dict | None = None,
 ) -> None:
     domain = domain.strip().lower()
     if not domain:
@@ -112,6 +113,7 @@ def _upsert_entity(
             "is_nis2_critical": is_nis2_critical,
             "scan_frequency": scan_frequency,
             "is_active": True,
+            **(extra or {}),
         },
     )
     if created:
@@ -134,6 +136,10 @@ def _upsert_entity(
             entity.is_active = True
             result.reactivated += 1
             changed = True
+        for field, value in (extra or {}).items():
+            if getattr(entity, field) != value:
+                setattr(entity, field, value)
+                changed = True
         if changed:
             entity.save()
             result.updated += 1
@@ -239,8 +245,33 @@ def _sync_plants(settings: OsintSettings, result: AggregationResult) -> None:
     _deactivate_missing(SourceModule.SITES, kept, result)
 
 
+def supplier_is_critical(sup, ot_maintainers: set) -> bool:
+    """Fornitore critico → monitoraggio approfondito: rilevante NIS2 o TISAX,
+    rischio alto/critico (dichiarato, rettificato o da valutazione interna),
+    oppure manutentore di asset OT."""
+    risky = {"alto", "critico"}
+    return bool(
+        getattr(sup, "nis2_relevant", False) or getattr(sup, "tisax_relevant", False)
+        or {getattr(sup, "risk_level", ""), getattr(sup, "risk_adj", ""), getattr(sup, "internal_risk_level", "")} & risky
+        or sup.pk in ot_maintainers
+    )
+
+
+def service_hosts_from(urls) -> list[str]:
+    """Host dei servizi del fornitore usati da noi (da URL o hostname)."""
+    hosts = []
+    for raw in urls or []:
+        host = extract_domain(str(raw))
+        if host and host not in hosts and hostname_is_scannable(host)[0]:
+            hosts.append(host)
+    return hosts[:10]
+
+
 def _sync_suppliers(settings: OsintSettings, result: AggregationResult) -> None:
     kept: set = set()
+    ot_maintainers = set(
+        AssetOT.objects.filter(maintainer_supplier__isnull=False).values_list("maintainer_supplier_id", flat=True)
+    )
     for sup in Supplier.objects.all():
         # Il ripiego sull'email vale solo se il dominio è del fornitore: con un
         # contatto su Gmail o su una PEC si finirebbe a monitorare il provider.
@@ -251,7 +282,8 @@ def _sync_suppliers(settings: OsintSettings, result: AggregationResult) -> None:
         if not domain:
             continue
         is_nis2 = bool(getattr(sup, "nis2_relevant", False))
-        freq = settings.freq_suppliers_critical if is_nis2 else settings.freq_suppliers_other
+        deep = supplier_is_critical(sup, ot_maintainers)
+        freq = settings.freq_suppliers_critical if deep else settings.freq_suppliers_other
         _upsert_entity(
             source_module=SourceModule.SUPPLIERS,
             source_id=sup.id,
@@ -262,6 +294,7 @@ def _sync_suppliers(settings: OsintSettings, result: AggregationResult) -> None:
             scan_frequency=freq,
             result=result,
             kept=kept,
+            extra={"deep_monitoring": deep, "service_hosts": service_hosts_from(getattr(sup, "service_urls", None))},
         )
     _deactivate_missing(SourceModule.SUPPLIERS, kept, result)
 
@@ -637,6 +670,7 @@ def supplier_posture(supplier_id) -> list[dict]:
         reports = findings.filter(reported_at__isnull=False).select_related("reported_by").order_by("-reported_at")
         result.append({
             "entity": str(e.pk), "domain": e.domain, "name": e.display_name,
+            "deep_monitoring": e.deep_monitoring, "service_hosts": e.service_hosts,
             "security": security_score(e.last_score_total), "grade": grade_for(e.last_score_total, settings),
             "last_scan_at": e.last_scan_at,
             "critical_open": [{"id": str(f.pk), "code": f.code, "status": f.status,

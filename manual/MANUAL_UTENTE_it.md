@@ -1633,6 +1633,14 @@ La dashboard si legge dall'alto: la **tua postura esterna** (voto A–F con punt
 
 **Da segnalare ai fornitori** — per i fornitori la correzione non spetta a te: contano il voto e i problemi **critici**. Non si creano task. Con **Segnala** si apre un testo già pronto, nella lingua scelta, da copiare o aprire nella tua posta (l'invio parte da te, mai dalla piattaforma); poi registri la segnalazione con una nota facoltativa. Il problema resta «Segnalato» finché lo scan non lo rileva più, poi si chiude da solo; se dopo 30 giorni è ancora presente torna in evidenza con **Sollecita**. I problemi non critici dei fornitori restano solo informativi. Se il fornitore mantiene asset OT tuoi (es. teleassistenza), un alert critico resta in attesa di escalation per una tua decisione. Nella scheda del fornitore (M14), tab **Postura esterna**, trovi voto, critici e storico delle segnalazioni: l'evidenza del monitoraggio della supply chain (NIS2 art. 21.2.d).
 
+**Cosa si controlla sui fornitori** — solo ciò che può fare del fornitore una porta d'ingresso verso di te, con fonti pubbliche e passive (nessuna scansione dei loro sistemi):
+- **Compromissione**: presenza sui leak site ransomware (ransomware.live, aggiornato ogni 6 ore), violazioni note del loro servizio (HIBP), liste di malware e blacklist.
+- **Impersonificazione**: dominio falsificabile (DMARC non in blocco: chiunque può mandare email «dal fornitore», il vettore della frode sulle fatture), domini sosia registrati nell'ultimo anno con posta, dominio scaduto o in scadenza.
+- **Esposizione** (solo fornitori critici): accessi remoti (VPN, gateway, webmail, SFTP…) trovati nei log dei certificati e verificati con Shodan InternetDB; è critico se hanno una vulnerabilità del catalogo CISA KEV, cioè attivamente sfruttata.
+- **Servizi usati**: nella scheda fornitore, tab Postura esterna, indichi gli indirizzi dei servizi che usi davvero (portale ordini, SFTP…): solo su questi conta il certificato.
+
+Sono **fornitori critici**, con monitoraggio approfondito e scansione settimanale, quelli rilevanti NIS2 o TISAX, con rischio alto o critico, o manutentori di tuoi asset OT. L'igiene di facciata (certificato del sito vetrina, header, DNSSEC, MTA-STS) resta nella dimensione **Maturità**, che pesa poco e non genera segnalazioni. Ogni problema indica anche **cosa fare tu**: per esempio, con un dominio falsificabile, avvisare l'amministrazione di verificare al telefono ogni cambio di coordinate bancarie.
+
 **Scheda entità** — si apre cliccando un'entità: Panoramica (voto, dimensioni, andamento), Problemi, Controlli superati, Dati tecnici, Eventi (cronologia degli alert con i link a incidenti e task) e Impostazioni (postura attesa di posta e web).
 
 Le notifiche di esposizione esterna sono destinate **solo al personale interno** (mai all'Auditor Esterno).

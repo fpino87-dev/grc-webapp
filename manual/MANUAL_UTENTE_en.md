@@ -1633,6 +1633,14 @@ The dashboard reads top-down: **your external posture** (A–F grade with a 0–
 
 **To report to suppliers** — for suppliers fixing is not up to you: what matters is the grade and the **critical** issues. No tasks are created. **Report** opens a ready-made text, in the chosen language, to copy or open in your mail (you send it, never the platform); then you record the report with an optional note. The issue stays «Reported» until the scan no longer detects it, then closes by itself; if still present after 30 days it comes back with **Follow up**. Non-critical supplier issues are for information only. If the supplier maintains your OT assets (e.g. remote maintenance), a critical alert stays pending escalation for your decision. In the supplier card (M14), **External posture** tab, you find grade, criticals and report history: the evidence of supply-chain monitoring (NIS2 art. 21.2.d).
 
+**What is checked on suppliers** — only what can make a supplier an entry point into your organization, with public, passive sources (no scanning of their systems):
+- **Compromise**: presence on ransomware leak sites (ransomware.live, refreshed every 6 hours), known breaches of their service (HIBP), malware lists and blacklists.
+- **Impersonation**: spoofable domain (DMARC not enforced: anyone can send emails «from the supplier», the invoice-fraud vector), lookalike domains registered in the last year with mail, expired or expiring domain.
+- **Exposure** (critical suppliers only): remote access (VPN, gateways, webmail, SFTP…) found in certificate logs and checked with Shodan InternetDB; critical if it has a vulnerability in the CISA KEV catalog, i.e. actively exploited.
+- **Services in use**: in the supplier card, External posture tab, you list the addresses of the services you actually use (order portal, SFTP…): only there does the certificate matter.
+
+**Critical suppliers**, with in-depth monitoring and weekly scans, are those relevant for NIS2 or TISAX, with high or critical risk, or maintaining your OT assets. Surface hygiene (corporate site certificate, headers, DNSSEC, MTA-STS) stays in the **Maturity** dimension, which weighs little and never raises reports. Each issue also says **what you should do**: for a spoofable domain, for instance, tell accounts payable to verify any bank-detail change by phone.
+
 **Entity card** — opens by clicking an entity: Overview (grade, dimensions, trend), Issues, Passed checks, Technical data, Events (alert timeline with links to incidents and tasks) and Settings (expected mail and web posture).
 
 External exposure notifications go **to internal staff only** (never to the External Auditor).

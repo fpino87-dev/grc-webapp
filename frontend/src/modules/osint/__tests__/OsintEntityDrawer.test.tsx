@@ -59,4 +59,28 @@ describe("OSINT — scheda entità", () => {
     expect(screen.getByText(/osint\.drawer\.go_fix/)).toBeInTheDocument();
     expect(screen.queryByText("osint.dash.report_btn")).not.toBeInTheDocument();
   });
+
+  it("fornitore critico: pilastri del voto, cosa fare tu, dati di supply chain", async () => {
+    api.entity.mockResolvedValue(entity({
+      deep_monitoring: true, service_hosts: ["portale.x.it"],
+      findings: [finding({ code: "domain_spoofable", status: "open", reported_at: null, report_overdue: false })],
+      last_scan: {
+        scan_date: "2026-09-20T00:00:00Z", score_total: 60, score_ssl: 0, score_dns: 0, score_reputation: 0, score_grc_context: 0,
+        score_compromise: 0, score_impersonation: 60, score_exposure: 100, score_maturity: 20,
+        remote_access: [{ host: "vpn.x.it", ip: "203.0.113.1", ports: [443], admin_ports: [], kev: ["CVE-2024-21762"], vulns_count: 2 }],
+        service_checks: [{ host: "portale.x.it", reachable: true, days_remaining: -1, expiry: "2026-09-19" }],
+        ransomware_hits: [], hibp_domain_breaches: [], lookalike_domains: [{ domain: "x-it.com", mx: true }],
+        enricher_errors: {}, blacklist_sources: [],
+      },
+    }) as never);
+    renderDrawer();
+    expect(await screen.findByText("osint.chain.pillar_impersonation")).toBeInTheDocument();
+    expect(screen.getByText("osint.chain.deep_badge")).toBeInTheDocument();
+    fireEvent.click(screen.getByText(/osint\.drawer\.tabs\.problems/));
+    expect(screen.getByText("osint.chain.your_action")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("osint.drawer.tabs.tech"));
+    expect(screen.getByText(/KEV: CVE-2024-21762/)).toBeInTheDocument();
+    expect(screen.getByText("osint.chain.cert_expired")).toBeInTheDocument();
+    expect(screen.getByText("x-it.com")).toBeInTheDocument();
+  });
 });

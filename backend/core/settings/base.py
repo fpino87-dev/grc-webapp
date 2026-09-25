@@ -219,6 +219,11 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.incidents.tasks.check_nis2_deadlines",
         "schedule": crontab(minute="*/30"),
     },
+    # Ogni 6 ore: l'elenco delle vittime recenti copre pochi giorni
+    "osint-ransomware-victims": {
+        "task": "osint.refresh_ransomware_victims",
+        "schedule": crontab(hour="*/6", minute=15),
+    },
     # Giornalieri
     "osint-enricher-health": {
         "task": "osint.check_enricher_health",

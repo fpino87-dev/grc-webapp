@@ -88,6 +88,11 @@ export function ReportToSupplierDialog({ finding, onClose }: { finding: OsintFin
               className={`text-xs px-2 py-0.5 rounded border uppercase ${lang === l ? "bg-gray-900 text-white border-gray-900" : "border-gray-300 text-gray-600"}`}>{l}</button>
           ))}
         </div>
+        {t(`osint.finding_action.${finding.code}`, { defaultValue: "" }) && (
+          <p className="text-xs text-indigo-800 bg-indigo-50 rounded-lg px-3 py-2">
+            <span className="font-medium">{t("osint.chain.your_action")}</span> {t(`osint.finding_action.${finding.code}`)}
+          </p>
+        )}
         <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm space-y-2">
           <p className="font-medium text-gray-800">{subject}</p>
           <p className="whitespace-pre-line text-gray-700">{body}</p>

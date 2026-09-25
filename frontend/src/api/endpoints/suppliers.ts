@@ -15,6 +15,8 @@ export interface Supplier {
   country: string;
   email: string;
   additional_emails: string[];
+  /** Servizi del fornitore che usiamo (portale, SFTP…): l'OSINT ne controlla il certificato. */
+  service_urls?: string[];
   description: string;
   risk_level: RiskClass;
   status: "attivo" | "sospeso" | "terminato";

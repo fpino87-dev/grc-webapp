@@ -1633,6 +1633,14 @@ Pulpit czyta się od góry: **twoja postawa zewnętrzna** (ocena A–F z wynikie
 
 **Do zgłoszenia dostawcom** — u dostawców naprawa nie należy do ciebie: liczą się ocena i problemy **krytyczne**. Zadania nie są tworzone. **Zgłoś** otwiera gotowy tekst w wybranym języku do skopiowania lub otwarcia w poczcie (wysyłasz go ty, nigdy platforma); następnie rejestrujesz zgłoszenie z opcjonalną notatką. Problem pozostaje «Zgłoszony», dopóki skan go nie przestanie wykrywać, a potem zamyka się sam; jeśli po 30 dniach nadal występuje, wraca z przyciskiem **Przypomnij**. Problemy niekrytyczne dostawców są tylko informacyjne. Jeśli dostawca utrzymuje twoje zasoby OT (np. zdalne serwisowanie), alert krytyczny czeka na eskalację i twoją decyzję. W karcie dostawcy (M14), zakładka **Postawa zewnętrzna**, znajdziesz ocenę, problemy krytyczne i historię zgłoszeń: dowód monitorowania łańcucha dostaw (NIS2 art. 21.2.d).
 
+**Co jest sprawdzane u dostawców** — tylko to, co może uczynić dostawcę furtką do waszej organizacji, na podstawie publicznych, pasywnych źródeł (bez skanowania ich systemów):
+- **Kompromitacja**: obecność na stronach wycieków ransomware (ransomware.live, odświeżane co 6 godzin), znane wycieki z ich usługi (HIBP), listy malware i czarne listy.
+- **Podszywanie**: domena możliwa do podszycia (DMARC niewymuszany: każdy może wysłać e-mail „od dostawcy”, wektor oszustw fakturowych), domeny podszywające się zarejestrowane w ostatnim roku i z pocztą, domena wygasła lub wkrótce wygasająca.
+- **Ekspozycja** (tylko dostawcy krytyczni): dostępy zdalne (VPN, bramy, poczta WWW, SFTP…) znalezione w logach certyfikatów i sprawdzone w Shodan InternetDB; krytyczne, jeśli mają podatność z katalogu CISA KEV, czyli aktywnie wykorzystywaną.
+- **Używane usługi**: w karcie dostawcy, zakładka Postawa zewnętrzna, wskazujesz adresy usług, z których faktycznie korzystasz (portal zamówień, SFTP…): tylko tam liczy się certyfikat.
+
+**Dostawcy krytyczni**, z pogłębionym monitorowaniem i cotygodniowym skanem, to ci istotni dla NIS2 lub TISAX, z ryzykiem wysokim lub krytycznym albo serwisujący wasze zasoby OT. Higiena „fasadowa” (certyfikat strony firmowej, nagłówki, DNSSEC, MTA-STS) trafia do wymiaru **Dojrzałość**, który waży mało i nigdy nie generuje zgłoszeń. Każdy problem wskazuje też, **co powinieneś zrobić**: np. przy domenie możliwej do podszycia poprosić księgowość o telefoniczną weryfikację każdej zmiany danych bankowych.
+
 **Karta podmiotu** — otwiera się po kliknięciu podmiotu: Przegląd (ocena, wymiary, trend), Problemy, Zaliczone kontrole, Dane techniczne, Zdarzenia (oś czasu alertów z linkami do incydentów i zadań) i Ustawienia (oczekiwana postawa poczty i WWW).
 
 Powiadomienia o ekspozycji zewnętrznej trafiają **wyłącznie do personelu wewnętrznego** (nigdy do Audytora zewnętrznego).

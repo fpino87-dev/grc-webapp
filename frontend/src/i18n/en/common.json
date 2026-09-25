@@ -4187,7 +4187,12 @@
       "no_critical": "No critical issues",
       "reported_on": "reported on {{date}}",
       "not_reported": "not yet reported",
-      "history": "Report history ({{count}})"
+      "history": "Report history ({{count}})",
+      "services_title": "Supplier services you use",
+      "services_hint": "Order portal, SFTP, VPN, shared platforms: OSINT checks their certificate. The corporate website is not needed.",
+      "services_empty": "No service listed",
+      "services_add": "Add",
+      "services_remove": "Remove"
     }
   },
   "reporting": {
@@ -4845,7 +4850,13 @@
       "subdomain_takeover": "Possible subdomain takeover",
       "ct_unexpected_issuer": "Certificate issued by an unexpected CA",
       "threatfox_listed": "Active indicator of compromise (ThreatFox)",
-      "urlhaus_listed": "Malware URL on the host (URLhaus)"
+      "urlhaus_listed": "Malware URL on the host (URLhaus)",
+      "domain_spoofable": "Spoofable domain (email fraud)",
+      "ransomware_victim": "Ransomware victim",
+      "service_breach": "Service data breach",
+      "remote_access_kev": "Remote access with an exploited vulnerability",
+      "admin_service_exposed": "Exposed administration service",
+      "service_cert": "Expired certificate on a service in use"
     },
     "finding_explain": {
       "ssl_expiry": "The site's certificate expires soon: after that, browsers will block access.",
@@ -4869,7 +4880,52 @@
       "subdomain_takeover": "A subdomain points to a cloud service no longer in use and could be taken over by third parties.",
       "ct_unexpected_issuer": "A certificate was issued for the domain by an unexpected certificate authority.",
       "threatfox_listed": "The domain or its IP appears among ThreatFox indicators of compromise (abuse.ch).",
-      "urlhaus_listed": "URLs distributing malware were found on the host (URLhaus, abuse.ch)."
+      "urlhaus_listed": "URLs distributing malware were found on the host (URLhaus, abuse.ch).",
+      "domain_spoofable": "The domain does not enforce DMARC: anyone can send emails that appear to come from this domain.",
+      "ransomware_victim": "The name or domain appears on a ransomware group's leak site: the company may have been hit and data stolen.",
+      "service_breach": "The online service of this domain appears in a public data breach.",
+      "remote_access_kev": "A remote access system (VPN, gateway, webmail) exposes a vulnerability listed in the CISA KEV catalog, actively exploited by attackers.",
+      "admin_service_exposed": "A host exposes administration services on the internet (RDP, SMB, Telnet, VNC), a frequent target.",
+      "service_cert": "The certificate of a service you use with this supplier has expired or is about to expire."
+    },
+    "finding_action": {
+      "domain_spoofable": "Warn accounts payable: any request from this supplier to change bank details must be verified by phone with a known contact.",
+      "lookalike_domains": "Warn accounts payable and purchasing: emails from these similar domains do not come from the supplier. Consider blocking them in your mail filter.",
+      "ransomware_victim": "Check which data and access you share with the supplier; suspend access and file exchanges until they clarify the impact.",
+      "service_breach": "Ask which of your data was involved; if you have accounts on their service, change the passwords.",
+      "remote_access_kev": "If the supplier has access to your systems, consider suspending it until the vulnerability is fixed.",
+      "admin_service_exposed": "If the supplier accesses your systems, ask them to confirm these services are not reachable from the internet.",
+      "domain_expiry_soon": "Watch emails coming from this domain: if it expires and is registered by others, they may no longer be the supplier's.",
+      "blacklist": "Treat attachments and links from this supplier with caution until the issue is resolved.",
+      "threatfox_listed": "Treat attachments and links from this supplier with caution; consider blocking the indicator on your systems.",
+      "urlhaus_listed": "Do not open links to this host until the supplier has cleaned it."
+    },
+    "chain": {
+      "deep_badge": "In-depth",
+      "deep_hint": "Critical supplier (NIS2, TISAX, high/critical risk or OT maintainer): lookalike domains and exposed remote access are checked too.",
+      "pillar_compromise": "Compromise",
+      "pillar_impersonation": "Impersonation",
+      "pillar_exposure": "Exposure",
+      "pillar_maturity": "Maturity",
+      "pillars_hint": "Security per pillar, higher = better. Maturity (site hygiene, DNS) weighs little; Exposure is assessed on critical suppliers and on the listed services.",
+      "not_assessed": "Not assessed",
+      "your_action": "What you should do:",
+      "nothing": "Nothing to report",
+      "remote_title": "Exposed remote access",
+      "remote_not_deep": "Checked only for critical suppliers.",
+      "ports": "ports",
+      "services_title": "Services in use",
+      "services_none": "No service listed in the supplier card.",
+      "unreachable": "unreachable",
+      "cert_expired": "certificate expired",
+      "cert_days": "certificate valid for {{days}} more days",
+      "ransomware_title": "Ransomware leak sites (last 180 days)",
+      "breaches_title": "Known service breaches (HIBP)",
+      "lookalike_title": "Lookalike domains",
+      "has_mail": "with mail",
+      "registered_on": "registered on {{date}}",
+      "recent": "recently registered",
+      "lookalike_hint": "Only lookalikes registered in the last year with mail are flagged: long-standing namesakes are other companies."
     }
   },
   "checklists": {

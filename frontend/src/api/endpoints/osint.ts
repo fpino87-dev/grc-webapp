@@ -47,6 +47,8 @@ export interface OsintEntity {
   /** Sicurezza 0–100 (100 − rischio: più alto = meglio) e voto A–F. */
   security?: number | null;
   grade?: Grade | null;
+  /** Fornitore critico: monitoraggio approfondito (sosia, accessi remoti). */
+  deep_monitoring?: boolean;
   open_findings?: { critical: number; warning: number; info: number };
   /** Ultime sicurezze (dal più vecchio), per la sparkline. */
   trend?: number[];
@@ -56,7 +58,21 @@ export interface OsintEntity {
 
 export type Grade = "A" | "B" | "C" | "D" | "F";
 
-export interface OsintScanDetail extends OsintScanBrief {
+/** Dati di supply chain raccolti sui fornitori. */
+export interface SupplyChainScanData {
+  hibp_domain_breaches?: { name: string; date: string; pwn_count: number; data_classes: string[] }[];
+  ransomware_hits?: { victim: string; group: string; discovered: string; country: string }[];
+  remote_access?: { host: string; ip: string; ports: number[]; admin_ports: string[]; kev: string[]; vulns_count: number }[];
+  service_checks?: { host: string; reachable: boolean; days_remaining: number | null; expiry: string | null }[];
+  lookalike_domains?: { domain: string; mx?: boolean; ips?: string[]; registered?: string | null; recent?: boolean }[];
+  /** Pilastri del rischio fornitore (0–100, rischio): null = non valutato. */
+  score_compromise?: number | null;
+  score_impersonation?: number | null;
+  score_exposure?: number | null;
+  score_maturity?: number | null;
+}
+
+export interface OsintScanDetail extends OsintScanBrief, SupplyChainScanData {
   ssl_valid: boolean | null;
   ssl_expiry_date: string | null;
   ssl_days_remaining: number | null;
@@ -104,6 +120,7 @@ export interface OsintEntityDetail extends OsintEntity {
   findings?: OsintFinding[];
   /** Cronologia degli alert (eventi). */
   events?: OsintAlert[];
+  service_hosts?: string[];
 }
 
 export interface OsintAlert {
@@ -187,7 +204,9 @@ export type FindingCode =
   | "subdomain_takeover"
   | "ct_unexpected_issuer"
   | "threatfox_listed"
-  | "urlhaus_listed";
+  | "urlhaus_listed"
+  | "domain_spoofable" | "ransomware_victim" | "service_breach"
+  | "remote_access_kev" | "admin_service_exposed" | "service_cert";
 
 export interface FindingPlaybook {
   title: string;
@@ -252,6 +271,7 @@ export interface OsintChanges {
 
 export interface SupplierPosture {
   entity: string; domain: string; name: string; security: number | null; grade: Grade | null; last_scan_at: string | null;
+  deep_monitoring: boolean; service_hosts: string[];
   critical_open: { id: string; code: FindingCode; status: FindingStatus; first_seen: string; reported_at: string | null; overdue: boolean }[];
   reports: { id: string; code: FindingCode; status: FindingStatus; reported_at: string; resolved_at: string | null; note: string }[];
 }

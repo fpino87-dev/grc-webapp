@@ -3052,3 +3052,11 @@ msgstr "Seuls les problèmes des fournisseurs se signalent : les problèmes inte
 #: apps/osint/findings.py
 msgid "Il problema non è più aperto."
 msgstr "Le problème n'est plus ouvert."
+
+#: apps/suppliers/serializers.py
+msgid "Indica al massimo 10 servizi."
+msgstr "Indiquez au maximum 10 services."
+
+#: apps/suppliers/serializers.py
+msgid "Indirizzo non valido: %(value)s"
+msgstr "Adresse non valide : %(value)s"

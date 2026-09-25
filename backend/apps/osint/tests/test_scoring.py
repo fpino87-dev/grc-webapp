@@ -261,17 +261,19 @@ class TestConfigurableWeights:
         compute_scores(entity, scan, s)
         assert scan.score_total == 33
 
-    def test_supplier_excludes_grc_weight(self):
+    def test_supplier_site_certificate_only_weighs_on_maturity(self):
+        """Fornitore: il certificato del sito vetrina è igiene, non rischio di
+        supply chain. Pesa solo nella Maturità (20%·30% del totale), i pesi
+        SSL/DNS/Rep e GRC delle impostazioni non si applicano."""
         from apps.osint.models import OsintSettings
         s = OsintSettings.load()
-        # Per un fornitore il GRC è escluso: pesi usati = SSL/DNS/Rep = 1/1/1.
         s.weight_ssl = s.weight_dns = s.weight_reputation = 1
-        s.weight_grc = 1000  # ignorato per i non-my_domain
+        s.weight_grc = 1000
         entity = self._entity(EntityType.SUPPLIER)
         scan = self._scan_ssl100()
         compute_scores(entity, scan, s)
-        # SSL=100, DNS=0, Rep=0 → 100/3 ≈ 33
-        assert scan.score_total == 33
+        # maturità = (SSL 100 + DNS 0) / 2 = 50 → 0.3 · 50 = 15
+        assert scan.score_maturity == 50 and scan.score_total == 15
 
 
 @pytest.mark.django_db
