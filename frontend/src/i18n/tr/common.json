@@ -3093,11 +3093,11 @@
       "proof_existing": "— kanıt: mevcut kanıt (isteğe bağlı) —",
       "proof_file": "Kanıt: dosya yükle (isteğe bağlı)",
       "confirm": "Onayla: takip etme",
-      "reason_label": "Takip edilmedi:",
       "has_proof": "kanıt eklendi",
       "reopen": "Yeniden aç",
       "reopen_reason": "Yeniden açma gerekçesi (en az 10 karakter)",
-      "reopen_confirm": "Bulguyu yeniden aç"
+      "reopen_confirm": "Bulguyu yeniden aç",
+      "decided_on": "Karar tarihi: {{date}}"
     },
     "finding_edit": {
       "btn": "Düzenle",

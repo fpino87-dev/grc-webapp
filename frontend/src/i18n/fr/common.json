@@ -3093,11 +3093,11 @@
       "proof_existing": "— preuve : preuve existante (facultative) —",
       "proof_file": "Preuve : téléverser un fichier (facultatif)",
       "confirm": "Confirmer : ne pas poursuivre",
-      "reason_label": "Non poursuivi :",
       "has_proof": "preuve jointe",
       "reopen": "Rouvrir",
       "reopen_reason": "Motif de la réouverture (10 caractères minimum)",
-      "reopen_confirm": "Rouvrir le constat"
+      "reopen_confirm": "Rouvrir le constat",
+      "decided_on": "Décidé le {{date}}"
     },
     "finding_edit": {
       "btn": "Modifier",

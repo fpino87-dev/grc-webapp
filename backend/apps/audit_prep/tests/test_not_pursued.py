@@ -146,3 +146,12 @@ def test_archive_cycle_without_findings_keeps_optional_proof(client, plant):
     assert resp.status_code == 200, resp.data
     cycle = PdcaCycle.objects.get(pk=cycle.pk)
     assert cycle.fase_corrente == "archiviato" and cycle.archive_evidence_id
+
+
+@pytest.mark.django_db
+def test_audit_report_shows_not_pursued_reason_in_full(client, prep):
+    data = _finding(client, prep["id"])
+    client.post(f"{URL_FINDINGS}{data['id']}/not-pursue/", {"reason": REASON + " <script>"}, format="json")
+    html_out = client.get(f"/api/v1/audit-prep/audit-preps/{prep['id']}/report/").content.decode()
+    assert "Non perseguito" in html_out
+    assert REASON in html_out and "&lt;script&gt;" in html_out and "<script>" not in html_out

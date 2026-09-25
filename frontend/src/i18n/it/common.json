@@ -3093,11 +3093,11 @@
       "proof_existing": "— prova: evidenza esistente (facoltativa) —",
       "proof_file": "Prova: carica un file (facoltativa)",
       "confirm": "Conferma: non perseguire",
-      "reason_label": "Non perseguito:",
       "has_proof": "prova allegata",
       "reopen": "Riapri",
       "reopen_reason": "Motivo della riapertura (minimo 10 caratteri)",
-      "reopen_confirm": "Riapri il finding"
+      "reopen_confirm": "Riapri il finding",
+      "decided_on": "Deciso il {{date}}"
     },
     "finding_edit": {
       "btn": "Modifica",

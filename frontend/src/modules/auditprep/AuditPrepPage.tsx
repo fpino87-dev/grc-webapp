@@ -492,9 +492,10 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
           </button>
         </div>
       )}
-      {isNotPursued && finding.closure_notes && (
-        <p className="text-xs text-gray-600 bg-gray-50 border rounded px-2 py-1">
-          <span className="font-medium">{t("audit_prep.not_pursued.reason_label")}</span> {finding.closure_notes}
+      {/* motivo al passaggio del mouse; per intero nel report dell'audit */}
+      {isNotPursued && (
+        <p className="text-xs text-gray-500" title={finding.closure_notes || undefined}>
+          {t("audit_prep.not_pursued.decided_on", { date: finding.closed_at ? new Date(finding.closed_at).toLocaleDateString() : "—" })}
           {finding.closure_evidence ? ` · 📎 ${t("audit_prep.not_pursued.has_proof")}` : ""}
         </p>
       )}

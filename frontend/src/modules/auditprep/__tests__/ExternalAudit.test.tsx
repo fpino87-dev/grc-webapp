@@ -342,7 +342,9 @@ describe("Audit Prep — rilievi non perseguiti", () => {
     api.findings.mockResolvedValue([opp({ status: "not_pursued", closure_notes: "Scartata dalla direzione" })] as never);
     api.reopenFinding.mockResolvedValue({} as never);
     await openPrep();
-    expect(await screen.findByText(/Scartata dalla direzione/)).toBeInTheDocument();
+    // il motivo non è a vista: è nel tooltip della riga di stato
+    expect(await screen.findByTitle("Scartata dalla direzione")).toBeInTheDocument();
+    expect(screen.queryByText(/Scartata dalla direzione/)).not.toBeInTheDocument();
     expect(screen.queryByText("audit_prep.close_finding.btn")).not.toBeInTheDocument();
     fireEvent.click(screen.getByText("audit_prep.not_pursued.reopen"));
     fireEvent.change(screen.getByPlaceholderText("audit_prep.not_pursued.reopen_reason"),

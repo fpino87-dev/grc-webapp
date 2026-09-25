@@ -3093,11 +3093,11 @@
       "proof_existing": "— dowód: istniejący dowód (opcjonalnie) —",
       "proof_file": "Dowód: prześlij plik (opcjonalnie)",
       "confirm": "Potwierdź: nie kontynuuj",
-      "reason_label": "Niekontynuowane:",
       "has_proof": "dowód załączony",
       "reopen": "Otwórz ponownie",
       "reopen_reason": "Powód ponownego otwarcia (co najmniej 10 znaków)",
-      "reopen_confirm": "Otwórz ustalenie ponownie"
+      "reopen_confirm": "Otwórz ustalenie ponownie",
+      "decided_on": "Decyzja z {{date}}"
     },
     "finding_edit": {
       "btn": "Edytuj",

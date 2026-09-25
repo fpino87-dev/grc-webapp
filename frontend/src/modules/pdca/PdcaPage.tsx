@@ -1331,24 +1331,19 @@ function AdvanceButtons({
 
   if (fase === "chiuso" || fase === "archiviato") {
     const isArchiviato = fase === "archiviato";
+    // In elenco solo la riga di stato: motivo / standardizzazione ACT al
+    // passaggio del mouse, il testo completo (e la prova) nella scheda 📄.
+    const detail = isArchiviato ? cycle.motivo_archiviazione : cycle.act_description;
     return (
-      <>
-        <p className="text-xs text-gray-500">
-          {t(isArchiviato ? "pdca.status.archived_on" : "pdca.status.closed_on", {
-            date: new Date(
-              cycle.closed_at || cycle.updated_at || cycle.created_at,
-            ).toLocaleDateString(i18n.language || "it"),
-          })}
-        </p>
-        {isArchiviato && (cycle as any).motivo_archiviazione && (
-          <p className="mt-1 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 whitespace-pre-wrap">
-            {(cycle as any).motivo_archiviazione}
-          </p>
-        )}
-        {!isArchiviato && cycle.act_description && (
-          <p className="mt-1 text-xs text-gray-700 whitespace-pre-wrap">{cycle.act_description}</p>
-        )}
-      </>
+      <p className="text-xs text-gray-500 whitespace-nowrap" title={detail || undefined}>
+        {isArchiviato ? "📦 " : "✓ "}
+        {t(isArchiviato ? "pdca.status.archived_on" : "pdca.status.closed_on", {
+          date: new Date(
+            cycle.closed_at || cycle.updated_at || cycle.created_at,
+          ).toLocaleDateString(i18n.language || "it"),
+        })}
+        {isArchiviato && cycle.archive_evidence ? " · 📎" : ""}
+      </p>
     );
   }
 

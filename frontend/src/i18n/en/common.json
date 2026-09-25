@@ -3093,11 +3093,11 @@
       "proof_existing": "— proof: existing evidence (optional) —",
       "proof_file": "Proof: upload a file (optional)",
       "confirm": "Confirm: do not pursue",
-      "reason_label": "Not pursued:",
       "has_proof": "proof attached",
       "reopen": "Reopen",
       "reopen_reason": "Reason for reopening (at least 10 characters)",
-      "reopen_confirm": "Reopen the finding"
+      "reopen_confirm": "Reopen the finding",
+      "decided_on": "Decided on {{date}}"
     },
     "finding_edit": {
       "btn": "Edit",

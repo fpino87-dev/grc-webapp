@@ -80,9 +80,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 - **Documenti (M07) — la delibera dell'organo vale anche per una nuova versione di un documento in vigore**: finora l'organo non poteva approvare per delibera la nuova versione di un documento già in vigore; ora può approvarla o respingerla. Ogni respingimento registra quale revisione è stata respinta.
 
 ### Changed
+- **PDCA e Audit Prep — elenchi più puliti**: per i PDCA archiviati o chiusi l'elenco mostra solo la riga di stato con la data (e 📎 se c'è una prova); motivo dell'archiviazione e standardizzazione compaiono al passaggio del mouse e per intero nella scheda del ciclo. Lo stesso per i rilievi non perseguiti in Audit Prep, il cui motivo è riportato per intero nella relazione dell'audit.
 - **PDCA — stessa gestione per PDCA di sito e di organizzazione**: il pulsante "Finding" per collegare un rilievo di audit è disponibile anche sui PDCA di organizzazione (propone solo i rilievi comuni degli audit multi-sito, collegati su tutti i siti). In elenco l'origine dei PDCA aperti da un finding è "Audit", come per quelli creati a mano; il tipo di rilievo resta indicato nel titolo.
 - **PDCA — elenco più leggibile per i rilievi comuni**: i finding collegati di un rilievo comune a più siti occupano una sola riga, con il nome dell'audit e un riquadro per sito colorato secondo lo stato del finding; il titolo del finding non viene più ripetuto quando coincide con quello del ciclo. L'origine dei PDCA aperti da un finding è ora tradotta (es. "Finding — osservazione") invece del codice interno, e per i cicli di organizzazione "Organizzazione" non compare più due volte.
 - **Audit Prep — copertura dell'audit singolo**: un audit creato singolarmente, cioè non lanciato da un programma annuale a più step, copre sempre tutti i controlli e non mostra più la copertura "Campione 25%". Anche gli audit singoli già esistenti passano a copertura completa; le voci di checklist già generate restano invariate.
+
+### Security
+- **Audit Prep — relazione dell'audit**: titolo, descrizione e note dei finding sono ora codificati nella relazione HTML, così un testo inserito in un finding non può alterare la pagina generata.
 
 ### Fixed
 - **PDCA — filtro per origine**: il filtro non trovava i PDCA aperti dai finding (sotto "Audit") né quelli degli incidenti NIS2 (sotto "Incidente"), e non esisteva per i PDCA da BCP e da checklist. Ora filtra per categoria (audit e finding, incidenti, riesame, rischi, gap controlli, BCP, checklist, riciclo, manuale) e tutte le origini hanno un'etichetta tradotta.

@@ -1454,11 +1454,14 @@ def generate_audit_report(prep: "AuditPrep") -> str:
         color = type_colors.get(f.finding_type, "#6b7280")
         finding_rows += (
             f"<tr><td style='color:{color};font-weight:bold'>{f.finding_type.upper()}</td>"
-            f"<td>{f.title}</td>"
-            f"<td style='font-size:11px'>{f.description[:80]}</td>"
+            f"<td>{html.escape(f.title)}</td>"
+            f"<td style='font-size:11px'>{html.escape(f.description[:80])}</td>"
             f"<td style='font-size:11px'>{f.response_deadline or '—'}</td>"
-            f"<td><span style='color:{'#dc2626' if f.is_overdue else '#16a34a'}'>{f.get_status_display()}</span></td>"
-            f"</tr>"
+            f"<td><span style='color:{'#dc2626' if f.is_overdue else '#16a34a'}'>{f.get_status_display()}</span>"
+            # motivo della decisione / note di chiusura per intero (in elenco solo in tooltip)
+            + (f"<div style='font-size:10px;color:#4b5563'>{html.escape(f.closure_notes)}</div>"
+               if f.status in ("not_pursued", "closed") and f.closure_notes else "")
+            + "</td></tr>"
         )
     coverage_label = dict(AuditPrep.COVERAGE_CHOICES).get(prep.coverage_type, "—")
 
