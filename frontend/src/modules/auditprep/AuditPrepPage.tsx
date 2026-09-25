@@ -1455,7 +1455,7 @@ function NewPrepModal({ plants, onClose }: { plants: { id: string; code: string;
               <label className="block text-sm font-medium text-gray-700 mb-1">{t("audit_prep.site_label")}</label>
               <select name="plant" onChange={e => setForm(p => ({ ...p, plant: e.target.value || undefined }))}
                 className="w-full border rounded px-3 py-2 text-sm">
-                <option value="">{t("audit_prep.optional_placeholder")}</option>
+                <option value="">{t("audit_prep.select_placeholder")}</option>
                 {plants.map(p => <option key={p.id} value={p.id}>{p.code} — {p.name}</option>)}
               </select>
             </div>
@@ -1544,7 +1544,7 @@ function NewPrepModal({ plants, onClose }: { plants: { id: string; code: string;
         )}
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600">{t("audit_prep.cancel_btn")}</button>
-          <button onClick={() => mutation.mutate()} disabled={mutation.isPending || !form.title || (multi && sites.length < 2)}
+          <button onClick={() => mutation.mutate()} disabled={mutation.isPending || !form.title || (multi ? sites.length < 2 : !form.plant)}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm disabled:opacity-50">
             {mutation.isPending ? t("audit_prep.saving") : t("audit_prep.create_prep_btn")}
           </button>

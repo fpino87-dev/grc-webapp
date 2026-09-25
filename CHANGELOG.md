@@ -72,6 +72,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 - **Documenti (M07) — la delibera dell'organo vale anche per una nuova versione di un documento in vigore**: finora l'organo non poteva approvare per delibera la nuova versione di un documento già in vigore; ora può approvarla o respingerla. Ogni respingimento registra quale revisione è stata respinta.
 
 ### Fixed
+- **Audit Prep — nuovo audit senza sito**: il form indicava il sito come opzionale, ma un audit a sito singolo richiede un sito; il salvataggio falliva con un errore generico. Ora il sito è obbligatorio e il pulsante di creazione resta disabilitato finché non viene scelto. Per un audit che copre più siti si usa l'opzione "audit multi-sito".
 
 - **Elenchi troncati a 25 elementi in tutta la piattaforma**: lo stesso difetto dell'elenco fornitori riguardava circa 50 elenchi — tra cui valutazioni del rischio, documenti ed evidenze, asset, processi BIA, piani e test BCP, cicli PDCA, lesson learned, incidenti, task, audit con relative checklist e finding, programmi di audit, riesami, checklist, KPI, siti, utenti e accessi, obiettivi, corsi di formazione e policy: oltre il 25° record gli altri non comparivano né negli elenchi né nelle ricerche e nei menù di scelta. Ora tutti gli elenchi leggono tutte le pagine; un test automatico impedisce di reintrodurre il problema. L'**audit trail**, che può contenere migliaia di eventi, ha invece una paginazione esplicita (50 eventi per pagina, con pagina precedente/successiva e totale).
 
