@@ -409,14 +409,28 @@ export function OpportunitiesBlock({ snap }: { snap: Snap }) {
   const { t } = useTranslation();
   const a = snap.audit;
   const items = (a?.elenco_opportunita ?? []) as SnapFinding[];
-  if (items.length === 0) return null;
+  // assente negli snapshot congelati prima dello stato "non perseguito"
+  const dropped = (a?.elenco_non_perseguiti ?? []) as (SnapFinding & { motivo?: string })[];
+  if (items.length === 0 && dropped.length === 0) return null;
   return (
-    <DetailTable
-      title={t("management_review.snap.opportunities_list")}
-      headers={[t("management_review.snap.col_finding"), t("management_review.snap.col_audit")]}
-      rows={items.map(f => [f.title, f.audit])}
-      total={a.opportunita_aperte}
-    />
+    <>
+      {items.length > 0 && (
+        <DetailTable
+          title={t("management_review.snap.opportunities_list")}
+          headers={[t("management_review.snap.col_finding"), t("management_review.snap.col_audit")]}
+          rows={items.map(f => [f.title, f.audit])}
+          total={a.opportunita_aperte}
+        />
+      )}
+      {dropped.length > 0 && (
+        <DetailTable
+          title={t("management_review.snap.not_pursued_list")}
+          headers={[t("management_review.snap.col_finding"), t("management_review.snap.col_audit"), t("management_review.snap.col_reason")]}
+          rows={dropped.map(f => [f.title, f.audit, f.motivo || "—"])}
+          total={a.finding_non_perseguiti_12m}
+        />
+      )}
+    </>
   );
 }
 

@@ -42,7 +42,12 @@
     "in_progress": "En cours",
     "completed": "Terminée",
     "overdue": "En retard",
-    "archived": "Inactive"
+    "archived": "Inactive",
+    "open": "Ouvert",
+    "in_response": "En réponse",
+    "closed": "Clôturé",
+    "accepted_by_auditor": "Accepté par l'auditeur",
+    "not_pursued": "Non poursuivi"
   },
   "actions": {
     "save": "Enregistrer",
@@ -3079,6 +3084,21 @@
       "evidence_optional": "— preuve de clôture (facultative) —",
       "confirm": "Clôturer"
     },
+    "not_pursued": {
+      "btn": "Ne pas poursuivre",
+      "btn_title": "Constat évalué et écarté : il est clôturé comme non poursuivi, avec un motif et une preuve facultative",
+      "hint": "Le constat est clôturé comme «Non poursuivi». Le PDCA lié encore ouvert est archivé avec le même motif.",
+      "hint_common": "Constat commun : la décision s'applique à tous les sites de l'audit. Le PDCA lié encore ouvert est archivé avec le même motif.",
+      "reason_placeholder": "Motif de la décision (20 caractères minimum)",
+      "proof_existing": "— preuve : preuve existante (facultative) —",
+      "proof_file": "Preuve : téléverser un fichier (facultatif)",
+      "confirm": "Confirmer : ne pas poursuivre",
+      "reason_label": "Non poursuivi :",
+      "has_proof": "preuve jointe",
+      "reopen": "Rouvrir",
+      "reopen_reason": "Motif de la réouverture (10 caractères minimum)",
+      "reopen_confirm": "Rouvrir le constat"
+    },
     "finding_edit": {
       "btn": "Modifier",
       "common_hint": "Constat commun : le titre et la description changent sur tous les sites de l'audit."
@@ -3454,7 +3474,8 @@
       "min_chars": "Minimum 20 caractères ({{n}}/20)",
       "confirm_btn": "Archiver le cycle",
       "in_progress": "Archivage…",
-      "error_generic": "Erreur lors de l'archivage"
+      "error_generic": "Erreur lors de l'archivage",
+      "findings_hint": "Ce PDCA couvre des observations ou opportunités encore ouvertes : l'archiver les laisse ouvertes. Pour les écarter, utilisez «Ne pas poursuivre» sur le constat dans Audit Prep, qui archive aussi le PDCA."
     },
     "advance": {
       "to_do": "Passer à DO",
@@ -3567,7 +3588,8 @@
         "open": "Ouvert",
         "in_response": "En réponse",
         "closed": "Clôturé",
-        "accepted_by_auditor": "Accepté par l'auditeur"
+        "accepted_by_auditor": "Accepté par l'auditeur",
+        "not_pursued": "Non poursuivi"
       }
     }
   },
@@ -5221,7 +5243,9 @@
       "objectives_section": "Objectifs de sécurité (§6.2)",
       "objectives_list": "État des objectifs",
       "docs_pending_empty": "Aucun document obligatoire en attente d'approbation.",
-      "col_version": "Révision"
+      "col_version": "Révision",
+      "not_pursued_list": "Constats évalués et non poursuivis (12 mois)",
+      "col_reason": "Motif"
     },
     "participants": {
       "heading": "Convoqués et présences",

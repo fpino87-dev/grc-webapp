@@ -36,6 +36,12 @@ const styles: Record<string, string> = {
   in_progress: "bg-blue-100 text-blue-700",
   completed: "bg-green-100 text-green-700",
   overdue: "bg-red-200 text-red-800",
+  // Finding di audit (M17)
+  open: "bg-amber-100 text-amber-800",
+  in_response: "bg-blue-100 text-blue-700",
+  closed: "bg-green-100 text-green-700",
+  accepted_by_auditor: "bg-green-100 text-green-700",
+  not_pursued: "bg-gray-200 text-gray-700",
 };
 
 const labels: Record<string, string> = {

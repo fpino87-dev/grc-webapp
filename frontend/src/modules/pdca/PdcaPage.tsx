@@ -311,6 +311,14 @@ function ArchiviaCycleButton({ cycle }: { cycle: PdcaCycle }) {
               <strong>{cycle.title}</strong>
             </p>
             <p className="text-sm text-gray-500 mb-3">{t("pdca.archive.intro")}</p>
+            {/* osservazioni/opportunità collegate: si scartano da Audit Prep con
+                "Non perseguire", altrimenti resterebbero aperte */}
+            {(cycle.findings ?? []).some(f => (f.finding_type === "observation" || f.finding_type === "opportunity")
+              && (f.status === "open" || f.status === "in_response")) && (
+              <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded px-2 py-1.5 mb-3">
+                {t("pdca.archive.findings_hint")}
+              </p>
+            )}
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t("pdca.archive.reason_label")}
             </label>
@@ -430,6 +438,7 @@ const FINDING_STATUS_CHIP: Record<string, string> = {
   in_response: "bg-blue-50 text-blue-800 border-blue-200",
   closed: "bg-green-50 text-green-800 border-green-200",
   accepted_by_auditor: "bg-green-50 text-green-800 border-green-200",
+  not_pursued: "bg-gray-100 text-gray-600 border-gray-300",
 };
 
 /** Finding collegati al ciclo, con rimando all'audit. I finding di un rilievo

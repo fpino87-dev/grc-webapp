@@ -42,7 +42,12 @@
     "in_progress": "In corso",
     "completed": "Completata",
     "overdue": "Scaduta",
-    "archived": "Non attiva"
+    "archived": "Non attiva",
+    "open": "Aperto",
+    "in_response": "In risposta",
+    "closed": "Chiuso",
+    "accepted_by_auditor": "Accettato dall'auditor",
+    "not_pursued": "Non perseguito"
   },
   "actions": {
     "save": "Salva",
@@ -3079,6 +3084,21 @@
       "evidence_optional": "— evidenza di chiusura (facoltativa) —",
       "confirm": "Chiudi"
     },
+    "not_pursued": {
+      "btn": "Non perseguire",
+      "btn_title": "Rilievo valutato e scartato: si chiude come non perseguito, con motivo e prova facoltativa",
+      "hint": "Il rilievo si chiude come «Non perseguito». Il PDCA collegato ancora aperto viene archiviato con lo stesso motivo.",
+      "hint_common": "Rilievo comune: la decisione vale per tutti i siti dell'audit. Il PDCA collegato ancora aperto viene archiviato con lo stesso motivo.",
+      "reason_placeholder": "Motivo della decisione (minimo 20 caratteri)",
+      "proof_existing": "— prova: evidenza esistente (facoltativa) —",
+      "proof_file": "Prova: carica un file (facoltativa)",
+      "confirm": "Conferma: non perseguire",
+      "reason_label": "Non perseguito:",
+      "has_proof": "prova allegata",
+      "reopen": "Riapri",
+      "reopen_reason": "Motivo della riapertura (minimo 10 caratteri)",
+      "reopen_confirm": "Riapri il finding"
+    },
     "finding_edit": {
       "btn": "Modifica",
       "common_hint": "Rilievo comune: titolo e descrizione cambiano su tutti i siti dell'audit."
@@ -3454,7 +3474,8 @@
       "min_chars": "Minimo 20 caratteri ({{n}}/20)",
       "confirm_btn": "Archivia ciclo",
       "in_progress": "Archiviazione…",
-      "error_generic": "Errore durante l'archiviazione"
+      "error_generic": "Errore durante l'archiviazione",
+      "findings_hint": "Questo PDCA copre osservazioni o opportunità ancora aperte: archiviandolo restano aperte. Per scartarle usa «Non perseguire» sul finding in Audit Prep, che archivia anche il PDCA."
     },
     "advance": {
       "to_do": "Avanza a DO",
@@ -3567,7 +3588,8 @@
         "open": "Aperto",
         "in_response": "In risposta",
         "closed": "Chiuso",
-        "accepted_by_auditor": "Accettato dall'auditor"
+        "accepted_by_auditor": "Accettato dall'auditor",
+        "not_pursued": "Non perseguito"
       }
     }
   },
@@ -5221,7 +5243,9 @@
       "objectives_section": "Obiettivi di sicurezza (§6.2)",
       "objectives_list": "Stato degli obiettivi",
       "docs_pending_empty": "Nessun documento obbligatorio in attesa di approvazione.",
-      "col_version": "Revisione"
+      "col_version": "Revisione",
+      "not_pursued_list": "Rilievi valutati e non perseguiti (12 mesi)",
+      "col_reason": "Motivo"
     },
     "participants": {
       "heading": "Convocati e presenze",

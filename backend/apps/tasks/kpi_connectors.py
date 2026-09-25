@@ -101,7 +101,7 @@ def audit_findings_open_rate(plant, week_start) -> dict:
     total = qs.count()
     if total == 0:
         return _no_data("Nessun finding di audit registrato.")
-    open_n = qs.exclude(status__in=["closed", "accepted_by_auditor"]).count()
+    open_n = qs.exclude(status__in=["closed", "accepted_by_auditor", "not_pursued"]).count()
     return _result(_rate(open_n, total), total, f"{open_n}/{total} finding aperti")
 
 

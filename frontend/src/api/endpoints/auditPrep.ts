@@ -69,7 +69,7 @@ export interface AuditFinding {
   auditor_name: string;
   audit_date: string;
   response_deadline: string | null;
-  status: "open" | "in_response" | "closed" | "accepted_by_auditor";
+  status: "open" | "in_response" | "closed" | "accepted_by_auditor" | "not_pursued";
   root_cause: string;
   corrective_action: string;
   pdca_cycle: string | null;
@@ -81,6 +81,7 @@ export interface AuditFinding {
   // PDCA di organizzazione: copre il rilievo comune su tutti i siti
   pdca_is_org: boolean;
   closure_notes: string;
+  closure_evidence: string | null;
   closed_at: string | null;
   closed_by_name: string | null;
   control_external_id: string | null;
@@ -209,6 +210,22 @@ export const auditPrepApi = {
   /** Corregge i testi del finding (nel rilievo comune titolo e descrizione valgono per tutti i siti). */
   updateFinding: (id: string, data: Partial<Pick<AuditFinding, "title" | "description" | "root_cause" | "corrective_action">>) =>
     apiClient.patch<AuditFinding>(`/audit-prep/findings/${id}/`, data).then(r => r.data),
+  /** Osservazione/opportunità non perseguita: motivo, prova facoltativa (evidenza esistente o file). */
+  notPursueFinding: (id: string, data: { reason: string; evidence_id?: string; file?: File | null; evidence_title?: string }) => {
+    if (data.file) {
+      const fd = new FormData();
+      fd.append("reason", data.reason);
+      fd.append("file", data.file);
+      if (data.evidence_title) fd.append("evidence_title", data.evidence_title);
+      return apiClient.post<AuditFinding>(`/audit-prep/findings/${id}/not-pursue/`, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      }).then(r => r.data);
+    }
+    return apiClient.post<AuditFinding>(`/audit-prep/findings/${id}/not-pursue/`,
+      { reason: data.reason, ...(data.evidence_id ? { evidence_id: data.evidence_id } : {}) }).then(r => r.data);
+  },
+  reopenFinding: (id: string, reason: string) =>
+    apiClient.post<AuditFinding>(`/audit-prep/findings/${id}/reopen/`, { reason }).then(r => r.data),
   closeFinding: (id: string, data: { closure_notes: string; evidence_id?: string }) =>
     apiClient.post<{ ok: boolean; status: string }>(`/audit-prep/findings/${id}/close/`, data).then(r => r.data),
   programs: (params?: Record<string, string>) =>

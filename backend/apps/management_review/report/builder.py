@@ -397,6 +397,18 @@ def _opportunity_blocks(snap) -> list:
                    a.get("opportunita_aperte"))]
 
 
+def _not_pursued_blocks(snap) -> list:
+    """Osservazioni e opportunità valutate e non perseguite (12 mesi), con il motivo."""
+    a = snap.get("audit") or {}
+    items = a.get("elenco_non_perseguiti", [])
+    if not items:
+        return []
+    return [_table(_("Rilievi valutati e non perseguiti (12 mesi)"),
+                   [_("Rilievo"), _("Audit"), _("Motivo")],
+                   [[x.get("title"), x.get("audit") or "—", x.get("motivo") or "—"] for x in items],
+                   a.get("finding_non_perseguiti_12m"))]
+
+
 def _objectives_blocks(snap) -> list:
     """§9.3.2 d4) — stato degli obiettivi di sicurezza.
 
@@ -440,7 +452,7 @@ DATA_BLOCKS = {
                                    + _audit_blocks(s) + _incident_blocks(s)
                                    + _improvement_status_blocks(s) + _document_blocks(s, ctx)),
     "rischi": lambda s, ctx: _risk_blocks(s),
-    "miglioramento": lambda s, ctx: _opportunity_blocks(s),
+    "miglioramento": lambda s, ctx: _opportunity_blocks(s) + _not_pursued_blocks(s),
 }
 
 

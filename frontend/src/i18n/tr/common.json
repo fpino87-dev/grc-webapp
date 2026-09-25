@@ -42,7 +42,12 @@
     "in_progress": "Devam ediyor",
     "completed": "Tamamlandı",
     "overdue": "Gecikmiş",
-    "archived": "Etkin değil"
+    "archived": "Etkin değil",
+    "open": "Açık",
+    "in_response": "Yanıt aşamasında",
+    "closed": "Kapalı",
+    "accepted_by_auditor": "Denetçi tarafından kabul edildi",
+    "not_pursued": "Takip edilmedi"
   },
   "actions": {
     "save": "Kaydet",
@@ -3079,6 +3084,21 @@
       "evidence_optional": "— kapanış kanıtı (isteğe bağlı) —",
       "confirm": "Kapat"
     },
+    "not_pursued": {
+      "btn": "Takip etme",
+      "btn_title": "Değerlendirilip reddedilen bulgu: gerekçe ve isteğe bağlı kanıtla takip edilmedi olarak kapatılır",
+      "hint": "Bulgu «Takip edilmedi» olarak kapatılır. Bağlı ve hâlâ açık olan PDCA aynı gerekçeyle arşivlenir.",
+      "hint_common": "Ortak bulgu: karar denetimin tüm tesisleri için geçerlidir. Bağlı ve hâlâ açık olan PDCA aynı gerekçeyle arşivlenir.",
+      "reason_placeholder": "Kararın gerekçesi (en az 20 karakter)",
+      "proof_existing": "— kanıt: mevcut kanıt (isteğe bağlı) —",
+      "proof_file": "Kanıt: dosya yükle (isteğe bağlı)",
+      "confirm": "Onayla: takip etme",
+      "reason_label": "Takip edilmedi:",
+      "has_proof": "kanıt eklendi",
+      "reopen": "Yeniden aç",
+      "reopen_reason": "Yeniden açma gerekçesi (en az 10 karakter)",
+      "reopen_confirm": "Bulguyu yeniden aç"
+    },
     "finding_edit": {
       "btn": "Düzenle",
       "common_hint": "Ortak bulgu: başlık ve açıklama denetimin tüm tesislerinde değişir."
@@ -3454,7 +3474,8 @@
       "min_chars": "En az 20 karakter ({{n}}/20)",
       "confirm_btn": "Döngüyü arşivle",
       "in_progress": "Arşivleniyor…",
-      "error_generic": "Arşivleme sırasında hata"
+      "error_generic": "Arşivleme sırasında hata",
+      "findings_hint": "Bu PDCA hâlâ açık gözlemleri veya fırsatları kapsıyor: arşivlemek onları açık bırakır. Reddetmek için Audit Prep'te bulgu üzerinde «Takip etme»yi kullanın; bu PDCA'yı da arşivler."
     },
     "advance": {
       "to_do": "DO aşamasına geç",
@@ -3567,7 +3588,8 @@
         "open": "Açık",
         "in_response": "Yanıt aşamasında",
         "closed": "Kapalı",
-        "accepted_by_auditor": "Denetçi tarafından kabul edildi"
+        "accepted_by_auditor": "Denetçi tarafından kabul edildi",
+        "not_pursued": "Takip edilmedi"
       }
     }
   },
@@ -5221,7 +5243,9 @@
       "objectives_section": "Güvenlik hedefleri (§6.2)",
       "objectives_list": "Hedeflerin durumu",
       "docs_pending_empty": "Onay bekleyen zorunlu belge yok.",
-      "col_version": "Revizyon"
+      "col_version": "Revizyon",
+      "not_pursued_list": "Değerlendirilip takip edilmeyen bulgular (12 ay)",
+      "col_reason": "Gerekçe"
     },
     "participants": {
       "heading": "Davetliler ve katılım",

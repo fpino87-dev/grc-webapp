@@ -2921,3 +2921,43 @@ msgstr "The audit is archived: its findings cannot be edited."
 #: apps/audit_prep/views.py
 msgid "Del finding si modificano solo titolo, descrizione, causa radice e azione correttiva."
 msgstr "Only the title, description, root cause and corrective action of a finding can be edited."
+
+#: apps/audit_prep/services.py
+msgid "Il finding è non perseguito: per chiuderlo va prima riaperto."
+msgstr "The finding is not pursued: reopen it before closing it."
+
+#: apps/audit_prep/services.py
+msgid "Solo osservazioni e opportunità si possono non perseguire: una non conformità va trattata."
+msgstr "Only observations and opportunities can be left unpursued: a nonconformity must be addressed."
+
+#: apps/audit_prep/services.py
+msgid "Il finding è già concluso."
+msgstr "The finding is already concluded."
+
+#: apps/audit_prep/services.py
+msgid "Il motivo è obbligatorio (minimo 20 caratteri)."
+msgstr "The reason is required (at least 20 characters)."
+
+#: apps/audit_prep/services.py
+msgid "Decisione di non perseguire — %(title)s"
+msgstr "Decision not to pursue — %(title)s"
+
+#: apps/audit_prep/services.py
+msgid "Motivazione della decisione di non dare seguito al rilievo «%(title)s»."
+msgstr "Rationale for the decision not to follow up on the finding «%(title)s»."
+
+#: apps/audit_prep/services.py
+msgid "Si riapre solo un finding non perseguito."
+msgstr "Only a not-pursued finding can be reopened."
+
+#: apps/management_review/report/builder.py
+msgid "Rilievi valutati e non perseguiti (12 mesi)"
+msgstr "Findings assessed and not pursued (12 months)"
+
+#: apps/management_review/report/builder.py
+msgid "Rilievo"
+msgstr "Finding"
+
+#: apps/management_review/report/builder.py
+msgid "Motivo"
+msgstr "Reason"

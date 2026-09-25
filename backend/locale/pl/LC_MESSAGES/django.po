@@ -2943,3 +2943,43 @@ msgstr "Audyt jest zarchiwizowany: ustaleń nie można edytować."
 #: apps/audit_prep/views.py
 msgid "Del finding si modificano solo titolo, descrizione, causa radice e azione correttiva."
 msgstr "W ustaleniu można edytować tylko tytuł, opis, przyczynę źródłową i działanie korygujące."
+
+#: apps/audit_prep/services.py
+msgid "Il finding è non perseguito: per chiuderlo va prima riaperto."
+msgstr "Ustalenie jest niekontynuowane: przed zamknięciem otwórz je ponownie."
+
+#: apps/audit_prep/services.py
+msgid "Solo osservazioni e opportunità si possono non perseguire: una non conformità va trattata."
+msgstr "Tylko obserwacje i szanse można pozostawić bez kontynuacji: niezgodność trzeba rozwiązać."
+
+#: apps/audit_prep/services.py
+msgid "Il finding è già concluso."
+msgstr "Ustalenie jest już zakończone."
+
+#: apps/audit_prep/services.py
+msgid "Il motivo è obbligatorio (minimo 20 caratteri)."
+msgstr "Powód jest wymagany (co najmniej 20 znaków)."
+
+#: apps/audit_prep/services.py
+msgid "Decisione di non perseguire — %(title)s"
+msgstr "Decyzja o niekontynuowaniu — %(title)s"
+
+#: apps/audit_prep/services.py
+msgid "Motivazione della decisione di non dare seguito al rilievo «%(title)s»."
+msgstr "Uzasadnienie decyzji o niepodejmowaniu działań w sprawie ustalenia «%(title)s»."
+
+#: apps/audit_prep/services.py
+msgid "Si riapre solo un finding non perseguito."
+msgstr "Ponownie otworzyć można tylko ustalenie niekontynuowane."
+
+#: apps/management_review/report/builder.py
+msgid "Rilievi valutati e non perseguiti (12 mesi)"
+msgstr "Ustalenia ocenione i niekontynuowane (12 miesięcy)"
+
+#: apps/management_review/report/builder.py
+msgid "Rilievo"
+msgstr "Ustalenie"
+
+#: apps/management_review/report/builder.py
+msgid "Motivo"
+msgstr "Powód"

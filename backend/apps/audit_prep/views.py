@@ -550,7 +550,7 @@ class AuditFindingViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         if params.get("without_pdca", "").lower() == "true":
             qs = qs.filter(pdca_cycle__isnull=True)
             if params.get("include_closed", "").lower() != "true":
-                qs = qs.exclude(status__in=["closed", "accepted_by_auditor"])
+                qs = qs.exclude(status__in=services.FINDING_DONE_STATUSES)
         return qs
 
     @action(detail=True, methods=["post"], url_path="open-pdca")
@@ -668,6 +668,51 @@ class AuditFindingViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         except DjangoValidationError as exc:
             return _validation_response(exc)
         finding.refresh_from_db()
+        return Response(AuditFindingSerializer(finding).data)
+
+    @action(detail=True, methods=["post"], url_path="not-pursue")
+    def not_pursue(self, request, pk=None):
+        """POST /findings/<id>/not-pursue/ {reason, evidence_id?} o multipart
+        con `file` (+ `evidence_title`): osservazione/opportunità non perseguita."""
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        from django.utils.translation import gettext as _
+
+        from apps.documents.models import Evidence
+        from core.scoping import scope_queryset_by_plant
+
+        finding = self.get_object()
+        if finding.common_key and finding.audit_prep.group_id:
+            _require_all_group_sites(request.user, finding.audit_prep.group)
+        evidence = None
+        evidence_id = request.data.get("evidence_id")
+        if evidence_id:
+            evidence = _get_scoped(
+                scope_queryset_by_plant(Evidence.objects.all(), request.user, plant_field="plant"), evidence_id,
+            )
+            if evidence is None:
+                return Response({"error": _("Evidenza non trovata.")}, status=404)
+        try:
+            result = services.not_pursue_finding(
+                finding, request.user, request.data.get("reason", ""), evidence=evidence,
+                uploaded_file=request.FILES.get("file"), evidence_title=request.data.get("evidence_title", ""),
+            )
+        except DjangoValidationError as exc:
+            return _validation_response(exc)
+        finding.refresh_from_db()
+        return Response({**AuditFindingSerializer(finding).data, "not_pursued": result})
+
+    @action(detail=True, methods=["post"])
+    def reopen(self, request, pk=None):
+        """POST /findings/<id>/reopen/ {reason} → riapre un finding non perseguito."""
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        finding = self.get_object()
+        if finding.common_key and finding.audit_prep.group_id:
+            _require_all_group_sites(request.user, finding.audit_prep.group)
+        try:
+            finding = services.reopen_finding(finding, request.user, request.data.get("reason", ""))
+        except DjangoValidationError as exc:
+            return _validation_response(exc)
         return Response(AuditFindingSerializer(finding).data)
 
     @action(detail=True, methods=["post"])

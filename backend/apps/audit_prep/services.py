@@ -405,8 +405,13 @@ FINDING_LABEL = {
 }
 
 
+# Finding conclusi: chiusi, accettati dall'auditor o (osservazioni e
+# opportunità) non perseguiti. Non contano come aperti.
+FINDING_DONE_STATUSES = ("closed", "accepted_by_auditor", "not_pursued")
+
+
 def _is_closed(finding: AuditFinding) -> bool:
-    return finding.status in ("closed", "accepted_by_auditor")
+    return finding.status in FINDING_DONE_STATUSES
 
 
 def _require_org_scope(user) -> None:
@@ -586,7 +591,7 @@ def close_finding_with_pdca(finding: AuditFinding, user) -> AuditFinding:
 
 def settle_findings_of_closed_cycle(cycle, user) -> None:
     """Applica la chiusura del PDCA a tutti i finding collegati non chiusi."""
-    for finding in cycle.findings.exclude(status__in=["closed", "accepted_by_auditor"]).select_related(
+    for finding in cycle.findings.exclude(status__in=FINDING_DONE_STATUSES).select_related(
         "control_instance",
     ):
         settle_finding_on_closed_cycle(finding, cycle, user)
@@ -852,6 +857,8 @@ def close_finding(finding: AuditFinding, user,
     """
     from django.core.exceptions import ValidationError
 
+    if finding.status == "not_pursued":
+        raise ValidationError(_("Il finding è non perseguito: per chiuderlo va prima riaperto."))
     if finding.finding_type in ("major_nc", "minor_nc"):
         if evidence is None:
             raise ValidationError(
@@ -866,7 +873,7 @@ def close_finding(finding: AuditFinding, user,
     close_cycle_too = False
     if cycle and cycle.fase_corrente not in ("chiuso", "archiviato"):
         others_open = cycle.findings.exclude(pk=finding.pk).exclude(
-            status__in=["closed", "accepted_by_auditor"]
+            status__in=FINDING_DONE_STATUSES
         ).exists()
         if cycle.fase_corrente != "act" or others_open:
             raise ValidationError(_(
@@ -933,6 +940,125 @@ def close_finding(finding: AuditFinding, user,
             "lesson_id": str(ll.pk),
         },
     )
+    return finding
+
+
+# ── Osservazioni e opportunità non perseguite ───────────────────────────────
+
+NOT_PURSUABLE_TYPES = ("observation", "opportunity")
+
+
+def _findings_of_decision(finding: AuditFinding):
+    """Il finding e, per un rilievo comune, quelli degli altri siti."""
+    if finding.common_key:
+        return list(
+            AuditFinding.objects.filter(common_key=finding.common_key)
+            .select_related("audit_prep__plant", "pdca_cycle")
+            .order_by("audit_prep__plant__code")
+        )
+    return [finding]
+
+
+def not_pursue_finding(finding: AuditFinding, user, reason: str, evidence=None,
+                       uploaded_file=None, evidence_title: str = "") -> dict:
+    """Decisione di non dare seguito a un'osservazione o a un'opportunità.
+
+    Il finding (e nel rilievo comune quelli degli altri siti) passa a
+    "not_pursued" con il motivo come nota e la prova facoltativa come
+    evidenza di chiusura: un'evidenza esistente o un file caricato ora. Il
+    PDCA collegato ancora aperto viene archiviato con lo stesso motivo, se
+    non copre altri finding aperti. Le non conformità seguono il PDCA."""
+    from django.core.exceptions import ValidationError
+    from apps.pdca.services import archivia_cycle
+
+    if finding.finding_type not in NOT_PURSUABLE_TYPES:
+        raise ValidationError(_(
+            "Solo osservazioni e opportunità si possono non perseguire: una non conformità va trattata."
+        ))
+    if _is_closed(finding):
+        raise ValidationError(_("Il finding è già concluso."))
+    reason = (reason or "").strip()
+    if len(reason) < 20:
+        raise ValidationError(_("Il motivo è obbligatorio (minimo 20 caratteri)."))
+    if evidence is not None and uploaded_file is not None:
+        raise ValidationError(_("Carica un file oppure scegli un'evidenza esistente, non entrambi."))
+    if finding.audit_prep.status == "archiviato":
+        raise ValidationError(_("L'audit è archiviato: i finding non si modificano."))
+
+    with transaction.atomic():
+        if uploaded_file is not None:
+            from apps.documents.services import create_evidence_with_file
+            evidence = create_evidence_with_file({
+                "title": (evidence_title.strip() or _("Decisione di non perseguire — %(title)s")
+                          % {"title": finding.title})[:300],
+                "evidence_type": "altro",
+                "description": _("Motivazione della decisione di non dare seguito al rilievo «%(title)s».")
+                % {"title": finding.title},
+                "plant": "" if finding.common_key else str(finding.audit_prep.plant_id),
+            }, uploaded_file, user)
+        now = timezone.now()
+        updated, cycles = [], {}
+        for f in _findings_of_decision(finding):
+            if _is_closed(f):
+                continue
+            f.status = "not_pursued"
+            f.closure_notes = reason
+            f.closure_evidence = evidence
+            f.closed_at = now
+            f.closed_by = user
+            f.save(update_fields=["status", "closure_notes", "closure_evidence", "closed_at", "closed_by",
+                                  "updated_at"])
+            log_action(
+                user=user, action_code="audit.finding.not_pursued", level="L2", entity=f,
+                payload={"reason": reason[:200], "evidence": str(evidence.pk) if evidence else None,
+                         "common_key": str(f.common_key) if f.common_key else None},
+            )
+            updated.append(f.audit_prep.plant.code)
+            if f.pdca_cycle_id:
+                cycles[f.pdca_cycle_id] = f.pdca_cycle
+        archived, kept = [], []
+        for cycle in cycles.values():
+            if cycle.fase_corrente in ("chiuso", "archiviato"):
+                continue
+            if cycle.findings.exclude(status__in=FINDING_DONE_STATUSES).exists():
+                kept.append(cycle.title)
+                continue
+            archivia_cycle(cycle, user, reason)
+            archived.append(cycle.title)
+    return {"sites": updated, "pdca_archived": archived, "pdca_kept": kept}
+
+
+def reopen_finding(finding: AuditFinding, user, reason: str) -> AuditFinding:
+    """Riapre un finding non perseguito (l'opportunità viene ripresa): torna
+    aperto, anche sugli altri siti del rilievo comune. Il PDCA archiviato
+    resta archiviato: se ne apre o collega uno nuovo."""
+    from django.core.exceptions import ValidationError
+
+    if finding.status != "not_pursued":
+        raise ValidationError(_("Si riapre solo un finding non perseguito."))
+    reason = (reason or "").strip()
+    if len(reason) < 10:
+        raise ValidationError(_("Motivo obbligatorio (minimo 10 caratteri)."))
+    with transaction.atomic():
+        for f in _findings_of_decision(finding):
+            if f.status != "not_pursued":
+                continue
+            previous = f.closure_notes
+            f.status = "open"
+            f.closure_notes = ""
+            f.closure_evidence = None
+            f.closed_at = None
+            f.closed_by = None
+            # il PDCA archiviato non si riprende: si apre o collega un nuovo ciclo
+            if f.pdca_cycle_id and f.pdca_cycle.fase_corrente == "archiviato":
+                f.pdca_cycle = None
+            f.save(update_fields=["status", "closure_notes", "closure_evidence", "closed_at", "closed_by",
+                                  "pdca_cycle", "updated_at"])
+            log_action(
+                user=user, action_code="audit.finding.reopened", level="L2", entity=f,
+                payload={"reason": reason[:200], "previous_reason": previous[:200]},
+            )
+    finding.refresh_from_db()
     return finding
 
 
@@ -1331,7 +1457,7 @@ def generate_audit_report(prep: "AuditPrep") -> str:
             f"<td>{f.title}</td>"
             f"<td style='font-size:11px'>{f.description[:80]}</td>"
             f"<td style='font-size:11px'>{f.response_deadline or '—'}</td>"
-            f"<td><span style='color:{'#dc2626' if f.is_overdue else '#16a34a'}'>{f.status}</span></td>"
+            f"<td><span style='color:{'#dc2626' if f.is_overdue else '#16a34a'}'>{f.get_status_display()}</span></td>"
             f"</tr>"
         )
     coverage_label = dict(AuditPrep.COVERAGE_CHOICES).get(prep.coverage_type, "—")

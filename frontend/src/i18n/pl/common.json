@@ -42,7 +42,12 @@
     "in_progress": "W toku",
     "completed": "Zakończona",
     "overdue": "Po terminie",
-    "archived": "Nieaktywna"
+    "archived": "Nieaktywna",
+    "open": "Otwarte",
+    "in_response": "W trakcie odpowiedzi",
+    "closed": "Zamknięte",
+    "accepted_by_auditor": "Zaakceptowane przez audytora",
+    "not_pursued": "Niekontynuowane"
   },
   "actions": {
     "save": "Zapisz",
@@ -3079,6 +3084,21 @@
       "evidence_optional": "— dowód zamknięcia (opcjonalny) —",
       "confirm": "Zamknij"
     },
+    "not_pursued": {
+      "btn": "Nie kontynuuj",
+      "btn_title": "Ustalenie ocenione i odrzucone: zamykane jako niekontynuowane, z powodem i opcjonalnym dowodem",
+      "hint": "Ustalenie zostanie zamknięte jako «Niekontynuowane». Powiązany, wciąż otwarty PDCA zostanie zarchiwizowany z tym samym powodem.",
+      "hint_common": "Ustalenie wspólne: decyzja dotyczy wszystkich zakładów audytu. Powiązany, wciąż otwarty PDCA zostanie zarchiwizowany z tym samym powodem.",
+      "reason_placeholder": "Powód decyzji (co najmniej 20 znaków)",
+      "proof_existing": "— dowód: istniejący dowód (opcjonalnie) —",
+      "proof_file": "Dowód: prześlij plik (opcjonalnie)",
+      "confirm": "Potwierdź: nie kontynuuj",
+      "reason_label": "Niekontynuowane:",
+      "has_proof": "dowód załączony",
+      "reopen": "Otwórz ponownie",
+      "reopen_reason": "Powód ponownego otwarcia (co najmniej 10 znaków)",
+      "reopen_confirm": "Otwórz ustalenie ponownie"
+    },
     "finding_edit": {
       "btn": "Edytuj",
       "common_hint": "Ustalenie wspólne: tytuł i opis zmieniają się we wszystkich zakładach audytu."
@@ -3454,7 +3474,8 @@
       "min_chars": "Minimum 20 znaków ({{n}}/20)",
       "confirm_btn": "Zarchiwizuj cykl",
       "in_progress": "Archiwizowanie…",
-      "error_generic": "Błąd podczas archiwizacji"
+      "error_generic": "Błąd podczas archiwizacji",
+      "findings_hint": "Ten PDCA obejmuje wciąż otwarte obserwacje lub szanse: archiwizacja pozostawi je otwarte. Aby je odrzucić, użyj «Nie kontynuuj» przy ustaleniu w Audit Prep — zarchiwizuje to również PDCA."
     },
     "advance": {
       "to_do": "Przejdź do DO",
@@ -3567,7 +3588,8 @@
         "open": "Otwarte",
         "in_response": "W trakcie odpowiedzi",
         "closed": "Zamknięte",
-        "accepted_by_auditor": "Zaakceptowane przez audytora"
+        "accepted_by_auditor": "Zaakceptowane przez audytora",
+        "not_pursued": "Niekontynuowane"
       }
     }
   },
@@ -5221,7 +5243,9 @@
       "objectives_section": "Cele bezpieczeństwa (§6.2)",
       "objectives_list": "Status celów",
       "docs_pending_empty": "Brak dokumentów obowiązkowych oczekujących na zatwierdzenie.",
-      "col_version": "Wersja"
+      "col_version": "Wersja",
+      "not_pursued_list": "Ustalenia ocenione i niekontynuowane (12 miesięcy)",
+      "col_reason": "Powód"
     },
     "participants": {
       "heading": "Zaproszeni i obecność",

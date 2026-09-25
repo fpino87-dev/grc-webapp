@@ -322,14 +322,18 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
   const { t } = useTranslation();
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"" | "link" | "unlink" | "replace" | "close">("");
+  const [mode, setMode] = useState<"" | "link" | "unlink" | "replace" | "close" | "not_pursue" | "reopen">("");
+  const [proofFile, setProofFile] = useState<File | null>(null);
   const [notice, setNotice] = useState("");
   const [cycleId, setCycleId] = useState("");
   const [reason, setReason] = useState("");
   const [notes, setNotes] = useState("");
   const [evidenceId, setEvidenceId] = useState("");
   const [error, setError] = useState("");
-  const isClosed = finding.status === "closed" || finding.status === "accepted_by_auditor";
+  const isNotPursued = finding.status === "not_pursued";
+  const isClosed = finding.status === "closed" || finding.status === "accepted_by_auditor" || isNotPursued;
+  // Osservazioni e opportunità si possono valutare e scartare; le NC seguono il PDCA.
+  const canNotPursue = !isClosed && (finding.finding_type === "observation" || finding.finding_type === "opportunity");
   const isNc = finding.finding_type === "major_nc" || finding.finding_type === "minor_nc";
 
   // Rilievo comune di un audit multi-sito: con scope org si può usare un solo
@@ -350,7 +354,7 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
     queryKey: ["finding-evidences", prep.plant],
     queryFn: () => apiClient.get("/documents/evidences/", { params: { plant: prep.plant, page_size: 1000 } })
       .then(r => r.data.results || r.data),
-    enabled: mode === "close",
+    enabled: mode === "close" || mode === "not_pursue",
   });
 
   const errMsg = (e: unknown) =>
@@ -360,7 +364,7 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
     // perché hanno già un PDCA in lavorazione.
     const skipped = (data as { common_link?: { skipped?: string[] } | null } | undefined)?.common_link?.skipped ?? [];
     setNotice(skipped.length ? t("audit_prep.common_pdca.skipped", { sites: skipped.join(", ") }) : "");
-    setMode(""); setError(""); setReason(""); setNotes(""); setCycleId(""); setEvidenceId("");
+    setMode(""); setError(""); setReason(""); setNotes(""); setCycleId(""); setEvidenceId(""); setProofFile(null);
     qc.invalidateQueries({ queryKey: ["findings"] });
     qc.invalidateQueries({ queryKey: ["pdca"] });
   };
@@ -374,6 +378,16 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
     onError: e => setError(errMsg(e)),
   });
   const replaceMut = useMutation({ mutationFn: () => auditPrepApi.replacePdca(finding.id, cycleId, reason), onSuccess: done, onError: e => setError(errMsg(e)) });
+  const notPursueMut = useMutation({
+    mutationFn: () => auditPrepApi.notPursueFinding(finding.id, { reason: notes.trim(), evidence_id: evidenceId || undefined, file: proofFile }),
+    onSuccess: () => { done(); qc.invalidateQueries({ queryKey: ["audit-prep"] }); },
+    onError: e => setError(errMsg(e)),
+  });
+  const reopenMut = useMutation({
+    mutationFn: () => auditPrepApi.reopenFinding(finding.id, reason.trim()),
+    onSuccess: () => { done(); qc.invalidateQueries({ queryKey: ["audit-prep"] }); },
+    onError: e => setError(errMsg(e)),
+  });
   const closeMut = useMutation({
     mutationFn: () => auditPrepApi.closeFinding(finding.id, { closure_notes: notes, evidence_id: evidenceId || undefined }),
     onSuccess: () => { done(); qc.invalidateQueries({ queryKey: ["audit-prep"] }); },
@@ -432,6 +446,17 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
             {t("audit_prep.close_finding.btn")}
           </button>
         )}
+        {canNotPursue && (
+          <button onClick={() => setMode(mode === "not_pursue" ? "" : "not_pursue")} title={t("audit_prep.not_pursued.btn_title")}
+            className={`${btn} text-gray-600`}>
+            {t("audit_prep.not_pursued.btn")}
+          </button>
+        )}
+        {isNotPursued && (
+          <button onClick={() => setMode(mode === "reopen" ? "" : "reopen")} className={`${btn} text-primary-700`}>
+            {t("audit_prep.not_pursued.reopen")}
+          </button>
+        )}
       </div>
 
       {mode === "link" && (
@@ -465,6 +490,43 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
           <button onClick={() => unlinkMut.mutate()} disabled={reason.trim().length < 10 || unlinkMut.isPending} className={`${btn} text-red-600`}>
             {t("audit_prep.pdca_link.unlink_confirm")}
           </button>
+        </div>
+      )}
+      {isNotPursued && finding.closure_notes && (
+        <p className="text-xs text-gray-600 bg-gray-50 border rounded px-2 py-1">
+          <span className="font-medium">{t("audit_prep.not_pursued.reason_label")}</span> {finding.closure_notes}
+          {finding.closure_evidence ? ` · 📎 ${t("audit_prep.not_pursued.has_proof")}` : ""}
+        </p>
+      )}
+      {mode === "not_pursue" && (
+        <div className="space-y-2 bg-gray-50 border rounded p-2">
+          <p className="text-xs text-gray-600">
+            {t(finding.common_key ? "audit_prep.not_pursued.hint_common" : "audit_prep.not_pursued.hint")}
+          </p>
+          <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
+            aria-label={t("audit_prep.not_pursued.reason_placeholder")}
+            placeholder={t("audit_prep.not_pursued.reason_placeholder")} className="w-full border rounded px-2 py-1 text-xs" />
+          <div className="grid grid-cols-2 gap-2">
+            <select value={evidenceId} disabled={!!proofFile} onChange={e => setEvidenceId(e.target.value)}
+              className="border rounded px-2 py-1 text-xs disabled:bg-gray-100">
+              <option value="">{t("audit_prep.not_pursued.proof_existing")}</option>
+              {evidences.map(ev => <option key={ev.id} value={ev.id}>{ev.title}</option>)}
+            </select>
+            <input type="file" disabled={!!evidenceId} aria-label={t("audit_prep.not_pursued.proof_file")}
+              onChange={e => setProofFile(e.target.files?.[0] ?? null)} className="text-xs" />
+          </div>
+          <button onClick={() => notPursueMut.mutate()} disabled={notes.trim().length < 20 || notPursueMut.isPending}
+            className="px-3 py-1 text-xs bg-gray-700 text-white rounded disabled:opacity-50">
+            {t("audit_prep.not_pursued.confirm")}
+          </button>
+        </div>
+      )}
+      {mode === "reopen" && (
+        <div className="flex flex-wrap gap-2 items-center">
+          <input value={reason} onChange={e => setReason(e.target.value)} placeholder={t("audit_prep.not_pursued.reopen_reason")}
+            className="border rounded px-2 py-1 text-xs flex-1 min-w-[14rem]" />
+          <button onClick={() => reopenMut.mutate()} disabled={reason.trim().length < 10 || reopenMut.isPending}
+            className={`${btn} text-primary-700`}>{t("audit_prep.not_pursued.reopen_confirm")}</button>
         </div>
       )}
       {mode === "close" && (

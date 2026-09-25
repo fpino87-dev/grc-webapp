@@ -159,6 +159,9 @@ class AuditFinding(BaseModel):
         ("in_response",         "In risposta"),
         ("closed",              "Chiuso"),
         ("accepted_by_auditor", "Accettato dall'auditor"),
+        # Osservazione/opportunità valutata e scartata: motivo e prova facoltativa
+        # nei campi di chiusura (closure_notes / closure_evidence).
+        ("not_pursued",         "Non perseguito"),
     ]
 
     audit_prep = models.ForeignKey(
@@ -222,7 +225,7 @@ class AuditFinding(BaseModel):
         if not self.response_deadline:
             return False
         return (
-            self.status not in ("closed", "accepted_by_auditor")
+            self.status not in ("closed", "accepted_by_auditor", "not_pursued")
             and self.response_deadline < timezone.localdate()
         )
 

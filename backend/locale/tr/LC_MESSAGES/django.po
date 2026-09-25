@@ -2922,3 +2922,43 @@ msgstr "Denetim arşivlendi: bulgular düzenlenemez."
 #: apps/audit_prep/views.py
 msgid "Del finding si modificano solo titolo, descrizione, causa radice e azione correttiva."
 msgstr "Bir bulguda yalnızca başlık, açıklama, kök neden ve düzeltici faaliyet düzenlenebilir."
+
+#: apps/audit_prep/services.py
+msgid "Il finding è non perseguito: per chiuderlo va prima riaperto."
+msgstr "Bulgu takip edilmedi: kapatmadan önce yeniden açın."
+
+#: apps/audit_prep/services.py
+msgid "Solo osservazioni e opportunità si possono non perseguire: una non conformità va trattata."
+msgstr "Yalnızca gözlemler ve fırsatlar takip edilmeyebilir: bir uygunsuzluk ele alınmalıdır."
+
+#: apps/audit_prep/services.py
+msgid "Il finding è già concluso."
+msgstr "Bulgu zaten sonuçlandı."
+
+#: apps/audit_prep/services.py
+msgid "Il motivo è obbligatorio (minimo 20 caratteri)."
+msgstr "Gerekçe zorunludur (en az 20 karakter)."
+
+#: apps/audit_prep/services.py
+msgid "Decisione di non perseguire — %(title)s"
+msgstr "Takip etmeme kararı — %(title)s"
+
+#: apps/audit_prep/services.py
+msgid "Motivazione della decisione di non dare seguito al rilievo «%(title)s»."
+msgstr "«%(title)s» bulgusunun takip edilmemesi kararının gerekçesi."
+
+#: apps/audit_prep/services.py
+msgid "Si riapre solo un finding non perseguito."
+msgstr "Yalnızca takip edilmeyen bir bulgu yeniden açılabilir."
+
+#: apps/management_review/report/builder.py
+msgid "Rilievi valutati e non perseguiti (12 mesi)"
+msgstr "Değerlendirilip takip edilmeyen bulgular (12 ay)"
+
+#: apps/management_review/report/builder.py
+msgid "Rilievo"
+msgstr "Bulgu"
+
+#: apps/management_review/report/builder.py
+msgid "Motivo"
+msgstr "Gerekçe"

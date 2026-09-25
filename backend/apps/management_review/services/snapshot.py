@@ -305,8 +305,15 @@ def _audit_block(scope: dict, today, since_12m) -> dict:
         .annotate(rank=nc_rank)
         .order_by("rank", "response_deadline")
     )
+    not_pursued = (
+        findings.filter(status="not_pursued", closed_at__gte=since_12m)
+        .select_related("audit_prep__plant")
+        .order_by("-closed_at")
+    )
     opportunities = (
-        findings.filter(finding_type="opportunity").exclude(status="closed")
+        findings.filter(finding_type="opportunity").exclude(
+            status__in=["closed", "accepted_by_auditor", "not_pursued"],
+        )
         .select_related("audit_prep__plant")
         .order_by("-audit_date")
     )
@@ -363,6 +370,12 @@ def _audit_block(scope: dict, today, since_12m) -> dict:
         "elenco_audit": audit_rows[:SNAPSHOT_LIST_LIMIT],
         "elenco_nc_aperte": [_finding(f) for f in open_nc[:SNAPSHOT_LIST_LIMIT]],
         "elenco_opportunita": [_finding(f) for f in opportunities[:SNAPSHOT_LIST_LIMIT]],
+        # Osservazioni e opportunità valutate e scartate negli ultimi 12 mesi,
+        # con il motivo: la direzione vede cosa si è deciso di non fare.
+        "finding_non_perseguiti_12m": not_pursued.count(),
+        "elenco_non_perseguiti": [
+            {**_finding(f), "motivo": f.closure_notes[:300]} for f in not_pursued[:SNAPSHOT_LIST_LIMIT]
+        ],
     }
 
 

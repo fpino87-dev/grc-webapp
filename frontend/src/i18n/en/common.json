@@ -42,7 +42,12 @@
     "in_progress": "In progress",
     "completed": "Completed",
     "overdue": "Overdue",
-    "archived": "Inactive"
+    "archived": "Inactive",
+    "open": "Open",
+    "in_response": "In response",
+    "closed": "Closed",
+    "accepted_by_auditor": "Accepted by auditor",
+    "not_pursued": "Not pursued"
   },
   "actions": {
     "save": "Save",
@@ -3079,6 +3084,21 @@
       "evidence_optional": "— closure evidence (optional) —",
       "confirm": "Close"
     },
+    "not_pursued": {
+      "btn": "Do not pursue",
+      "btn_title": "Finding assessed and discarded: it is closed as not pursued, with a reason and optional proof",
+      "hint": "The finding is closed as «Not pursued». The linked PDCA still open is archived with the same reason.",
+      "hint_common": "Common finding: the decision applies to all the audit's sites. The linked PDCA still open is archived with the same reason.",
+      "reason_placeholder": "Reason for the decision (at least 20 characters)",
+      "proof_existing": "— proof: existing evidence (optional) —",
+      "proof_file": "Proof: upload a file (optional)",
+      "confirm": "Confirm: do not pursue",
+      "reason_label": "Not pursued:",
+      "has_proof": "proof attached",
+      "reopen": "Reopen",
+      "reopen_reason": "Reason for reopening (at least 10 characters)",
+      "reopen_confirm": "Reopen the finding"
+    },
     "finding_edit": {
       "btn": "Edit",
       "common_hint": "Common finding: title and description change on all the audit's sites."
@@ -3454,7 +3474,8 @@
       "min_chars": "Minimum 20 characters ({{n}}/20)",
       "confirm_btn": "Archive cycle",
       "in_progress": "Archiving…",
-      "error_generic": "Error while archiving"
+      "error_generic": "Error while archiving",
+      "findings_hint": "This PDCA covers observations or opportunities still open: archiving it leaves them open. To discard them use «Do not pursue» on the finding in Audit Prep, which also archives the PDCA."
     },
     "advance": {
       "to_do": "Advance to DO",
@@ -3567,7 +3588,8 @@
         "open": "Open",
         "in_response": "In response",
         "closed": "Closed",
-        "accepted_by_auditor": "Accepted by auditor"
+        "accepted_by_auditor": "Accepted by auditor",
+        "not_pursued": "Not pursued"
       }
     }
   },
@@ -5221,7 +5243,9 @@
       "objectives_section": "Security objectives (§6.2)",
       "objectives_list": "Objective status",
       "docs_pending_empty": "No mandatory document awaiting approval.",
-      "col_version": "Revision"
+      "col_version": "Revision",
+      "not_pursued_list": "Findings assessed and not pursued (12 months)",
+      "col_reason": "Reason"
     },
     "participants": {
       "heading": "Invitees and attendance",

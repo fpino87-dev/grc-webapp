@@ -30,7 +30,7 @@ vi.mock("../../../api/endpoints/auditPrep", () => ({
     list: vi.fn(), programs: vi.fn(), findings: vi.fn(), evidence: vi.fn(), create: vi.fn(),
     update: vi.fn(), uploadReportFile: vi.fn(), detachReportFile: vi.fn(), downloadPrepReport: vi.fn(),
     downloadReportFile: vi.fn(), createGroup: vi.fn(), updateGroup: vi.fn(), createFinding: vi.fn(),
-    updateFinding: vi.fn(), openPdca: vi.fn(), linkPdca: vi.fn(), unlinkPdca: vi.fn(), closeFinding: vi.fn(), closeWithPdca: vi.fn(), replacePdca: vi.fn(),
+    updateFinding: vi.fn(), notPursueFinding: vi.fn(), reopenFinding: vi.fn(), openPdca: vi.fn(), linkPdca: vi.fn(), unlinkPdca: vi.fn(), closeFinding: vi.fn(), closeWithPdca: vi.fn(), replacePdca: vi.fn(),
   },
 }));
 
@@ -303,5 +303,51 @@ describe("Audit Prep — correzione del finding", () => {
     fireEvent.change(screen.getByLabelText("audit_prep.description_label"), { target: { value: "Descrizione" } });
     fireEvent.click(screen.getByText("audit_prep.external.save_btn"));
     await vi.waitFor(() => expect(api.updateFinding).toHaveBeenCalledWith("f1", { title: "Titolo", description: "Descrizione" }));
+  });
+});
+
+function opp(overrides = {}) {
+  return {
+    id: "f9", audit_prep: "a1", finding_type: "opportunity", title: "Modulo unico asset", description: "",
+    auditor_name: "", audit_date: "2026-09-10", response_deadline: null, status: "open", root_cause: "",
+    corrective_action: "", pdca_cycle: null, common_key: null, pdca_title: null, pdca_phase: null,
+    pdca_is_org: false, closure_notes: "", closure_evidence: null, closed_at: null, closed_by_name: null,
+    is_overdue: false, auto_generated: false, control_external_id: null, ...overrides,
+  };
+}
+
+describe("Audit Prep — rilievi non perseguiti", () => {
+  it("un'opportunità si scarta con motivo e prova facoltativa", async () => {
+    api.findings.mockResolvedValue([opp()] as never);
+    api.notPursueFinding.mockResolvedValue({} as never);
+    await openPrep();
+    fireEvent.click(await screen.findByText("audit_prep.not_pursued.btn"));
+    const confirm = screen.getByText("audit_prep.not_pursued.confirm");
+    expect(confirm).toBeDisabled();
+    fireEvent.change(screen.getByLabelText("audit_prep.not_pursued.reason_placeholder"),
+      { target: { value: "Costo sproporzionato rispetto al beneficio" } });
+    fireEvent.click(confirm);
+    await vi.waitFor(() => expect(api.notPursueFinding).toHaveBeenCalledWith("f9",
+      { reason: "Costo sproporzionato rispetto al beneficio", evidence_id: undefined, file: null }));
+  });
+
+  it("le non conformità non hanno «Non perseguire»", async () => {
+    api.findings.mockResolvedValue([opp({ finding_type: "minor_nc" })] as never);
+    await openPrep();
+    await screen.findByText("audit_prep.close_finding.btn");
+    expect(screen.queryByText("audit_prep.not_pursued.btn")).not.toBeInTheDocument();
+  });
+
+  it("un finding non perseguito mostra il motivo e si riapre", async () => {
+    api.findings.mockResolvedValue([opp({ status: "not_pursued", closure_notes: "Scartata dalla direzione" })] as never);
+    api.reopenFinding.mockResolvedValue({} as never);
+    await openPrep();
+    expect(await screen.findByText(/Scartata dalla direzione/)).toBeInTheDocument();
+    expect(screen.queryByText("audit_prep.close_finding.btn")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText("audit_prep.not_pursued.reopen"));
+    fireEvent.change(screen.getByPlaceholderText("audit_prep.not_pursued.reopen_reason"),
+      { target: { value: "Ripresa nel budget 2027" } });
+    fireEvent.click(screen.getByText("audit_prep.not_pursued.reopen_confirm"));
+    await vi.waitFor(() => expect(api.reopenFinding).toHaveBeenCalledWith("f9", "Ripresa nel budget 2027"));
   });
 });

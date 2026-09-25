@@ -2988,3 +2988,43 @@ msgstr "L'audit est archivé : ses constats ne peuvent pas être modifiés."
 #: apps/audit_prep/views.py
 msgid "Del finding si modificano solo titolo, descrizione, causa radice e azione correttiva."
 msgstr "Seuls le titre, la description, la cause racine et l'action corrective d'un constat peuvent être modifiés."
+
+#: apps/audit_prep/services.py
+msgid "Il finding è non perseguito: per chiuderlo va prima riaperto."
+msgstr "Le constat est non poursuivi : rouvrez-le avant de le clôturer."
+
+#: apps/audit_prep/services.py
+msgid "Solo osservazioni e opportunità si possono non perseguire: una non conformità va trattata."
+msgstr "Seules les observations et opportunités peuvent ne pas être poursuivies : une non-conformité doit être traitée."
+
+#: apps/audit_prep/services.py
+msgid "Il finding è già concluso."
+msgstr "Le constat est déjà conclu."
+
+#: apps/audit_prep/services.py
+msgid "Il motivo è obbligatorio (minimo 20 caratteri)."
+msgstr "Le motif est obligatoire (20 caractères minimum)."
+
+#: apps/audit_prep/services.py
+msgid "Decisione di non perseguire — %(title)s"
+msgstr "Décision de ne pas poursuivre — %(title)s"
+
+#: apps/audit_prep/services.py
+msgid "Motivazione della decisione di non dare seguito al rilievo «%(title)s»."
+msgstr "Justification de la décision de ne pas donner suite au constat «%(title)s»."
+
+#: apps/audit_prep/services.py
+msgid "Si riapre solo un finding non perseguito."
+msgstr "Seul un constat non poursuivi peut être rouvert."
+
+#: apps/management_review/report/builder.py
+msgid "Rilievi valutati e non perseguiti (12 mesi)"
+msgstr "Constats évalués et non poursuivis (12 mois)"
+
+#: apps/management_review/report/builder.py
+msgid "Rilievo"
+msgstr "Constat"
+
+#: apps/management_review/report/builder.py
+msgid "Motivo"
+msgstr "Motif"
