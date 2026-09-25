@@ -3547,6 +3547,7 @@
       "btn_title": "Lier ou détacher des constats d'audit",
       "modal_title": "Constats d'audit liés",
       "rule_hint": "Chaque constat peut avoir un seul PDCA ; un PDCA peut couvrir plusieurs constats, mais du même audit et du même site. Un PDCA déjà clôturé peut aussi être lié (action déjà réalisée ou historique).",
+      "org_rule_hint": "PDCA d'organisation : liez un constat commun d'un audit multi-sites ; le lien s'applique au constat de chaque site.",
       "unlink": "Détacher",
       "unlink_reason": "Motif du détachement (au moins 10 caractères)",
       "unlink_confirm": "Détacher",

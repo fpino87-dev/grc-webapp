@@ -158,7 +158,12 @@ describe("PdcaPage — collegamento ai finding di audit", () => {
     expect(screen.getByText("TN-TUN-01")).toBeInTheDocument();
     expect(screen.getAllByText(/TISAX AL2 PreCert/)).toHaveLength(1);
     expect(screen.getAllByText(/OSS\.05 Offboarding/)).toHaveLength(1);
-    expect(screen.getByText("pdca.trigger.finding_observation")).toBeInTheDocument();
+    // origine "Audit" come i PDCA creati a mano (il tipo è nel titolo)
+    expect(screen.getByText("pdca.trigger.audit")).toBeInTheDocument();
+    expect(screen.queryByText("pdca.trigger.finding_observation")).not.toBeInTheDocument();
+    // il collegamento ai finding c'è anche sui cicli di organizzazione
+    fireEvent.click(screen.getByText(/pdca\.link\.btn$/));
+    expect(await screen.findByText("pdca.link.org_rule_hint")).toBeInTheDocument();
     // "Organizzazione" solo nella colonna Sito
     expect(screen.getAllByText("pdca.scope.org")).toHaveLength(1);
   });

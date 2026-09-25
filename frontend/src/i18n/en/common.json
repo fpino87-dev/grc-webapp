@@ -3547,6 +3547,7 @@
       "btn_title": "Link or unlink audit findings",
       "modal_title": "Linked audit findings",
       "rule_hint": "Each finding can have only one PDCA; a PDCA can cover several findings, but of the same audit and site. An already closed PDCA can also be linked (action already carried out, or history).",
+      "org_rule_hint": "Organisation PDCA: link a common finding of a multi-site audit; the link applies to the finding on every site.",
       "unlink": "Unlink",
       "unlink_reason": "Reason for unlinking (at least 10 characters)",
       "unlink_confirm": "Unlink",

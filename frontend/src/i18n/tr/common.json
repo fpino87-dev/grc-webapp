@@ -3547,6 +3547,7 @@
       "btn_title": "Denetim bulgularını bağla veya bağlantısını kaldır",
       "modal_title": "Bağlı denetim bulguları",
       "rule_hint": "Her bulgunun yalnızca bir PDCA'sı olabilir; bir PDCA birden fazla bulguyu kapsayabilir, ancak aynı denetim ve tesisten. Zaten kapalı bir PDCA da bağlanabilir (önceden yapılmış eylem veya geçmiş).",
+      "org_rule_hint": "Kuruluş PDCA'sı: çok tesisli bir denetimin ortak bulgusunu bağlayın; bağlantı her tesisteki bulgu için geçerlidir.",
       "unlink": "Bağlantıyı kaldır",
       "unlink_reason": "Bağlantıyı kaldırma nedeni (en az 10 karakter)",
       "unlink_confirm": "Bağlantıyı kaldır",

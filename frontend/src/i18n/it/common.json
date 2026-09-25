@@ -3547,6 +3547,7 @@
       "btn_title": "Collega o scollega finding di audit",
       "modal_title": "Finding di audit collegati",
       "rule_hint": "Ogni finding può avere un solo PDCA; un PDCA può coprire più finding, ma dello stesso audit e dello stesso sito. Si può collegare anche un PDCA già chiuso (azione già eseguita o storico).",
+      "org_rule_hint": "PDCA di organizzazione: si collega un rilievo comune di un audit multi-sito, e il collegamento vale per il finding di ogni sito.",
       "unlink": "Scollega",
       "unlink_reason": "Motivo dello scollegamento (minimo 10 caratteri)",
       "unlink_confirm": "Scollega",

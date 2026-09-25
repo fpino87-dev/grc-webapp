@@ -26,8 +26,11 @@ const TRIGGER_FILTERS = [
 const SCOPE_CODES = ["plant", "org", "process"];
 const AUDIT_SUBTYPE_CODES = ["interno", "seconda_parte", "terza_parte"];
 
+// In elenco e scheda i PDCA aperti da un finding sono "Audit" come quelli
+// creati a mano: il tipo di finding è già nel titolo ([OBSERVATION] …).
 const triggerLabel = (t: TFn, code: string) =>
-  TRIGGER_CODES.includes(code) ? t(`pdca.trigger.${code}`) : code;
+  code.startsWith("finding_") ? t("pdca.trigger.audit")
+    : TRIGGER_CODES.includes(code) ? t(`pdca.trigger.${code}`) : code;
 // Valore dei select "Sito" per il ciclo di organizzazione (plant = null).
 const ORG_VALUE = "__org__";
 
@@ -187,7 +190,7 @@ function EditCycleModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () => v
               <select name="trigger_type" value={form.trigger_type} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
                 {/* origine automatica (es. finding di audit): resta selezionata */}
                 {form.trigger_type && !["audit", "incident", "management_review", "risk", "manual"].includes(form.trigger_type) && (
-                  <option value={form.trigger_type}>{triggerLabel(t, form.trigger_type)}</option>
+                  <option value={form.trigger_type}>{TRIGGER_CODES.includes(form.trigger_type) ? t(`pdca.trigger.${form.trigger_type}`) : form.trigger_type}</option>
                 )}
                 <option value="audit">{t("pdca.trigger.audit")}</option>
                 <option value="incident">{t("pdca.trigger.incident")}</option>
@@ -354,7 +357,7 @@ function ArchiviaCycleButton({ cycle }: { cycle: PdcaCycle }) {
  *  con `allowReplace` tutti i finding dell'audit, aperti e chiusi: quelli con
  *  già un PDCA riportano il ciclo e si scelgono per sostituirlo. */
 function AuditFindingPicker({
-  plant, prepId, findingId, onChange, allowReplace = false, excludeCycle,
+  plant, prepId, findingId, onChange, allowReplace = false, excludeCycle, commonKey,
 }: {
   plant?: string | null;
   prepId: string;
@@ -363,19 +366,25 @@ function AuditFindingPicker({
   allowReplace?: boolean;
   /** ciclo da cui si collega: i suoi finding non si ripropongono */
   excludeCycle?: string;
+  /** ciclo di organizzazione: solo audit multi-sito e rilievi comuni
+   *  (`null` = qualunque rilievo comune, stringa = solo quel rilievo) */
+  commonKey?: string | null;
 }) {
   const { t } = useTranslation();
   const { data: preps = [] } = useQuery({
     queryKey: ["pdca-audit-preps", plant ?? "all", allowReplace],
     queryFn: () => auditPrepApi.list(plant ? { plant } : undefined)
-      .then(r => allowReplace ? r.results : r.results.filter(p => p.status !== "archiviato")),
+      .then(r => (allowReplace ? r.results : r.results.filter(p => p.status !== "archiviato"))
+        .filter(p => commonKey === undefined || !!p.group)),
   });
   const { data: allFindings = [] } = useQuery({
     queryKey: ["pdca-linkable-findings", prepId, allowReplace],
     queryFn: () => auditPrepApi.findings(prepId, allowReplace ? undefined : { without_pdca: "true" }),
     enabled: !!prepId,
   });
-  const findings = allFindings.filter(f => !excludeCycle || f.pdca_cycle !== excludeCycle);
+  const findings = allFindings
+    .filter(f => !excludeCycle || f.pdca_cycle !== excludeCycle)
+    .filter(f => commonKey === undefined || (!!f.common_key && (commonKey === null || f.common_key === commonKey)));
   const isClosedFinding = (s: string) => s === "closed" || s === "accepted_by_auditor";
   const prepPlant = (id: string) => preps.find(p => p.id === id)?.plant ?? null;
   const currentPdca = (id: string) => findings.find(f => f.id === id)?.pdca_cycle ?? null;
@@ -489,6 +498,8 @@ function LinkFindingButton({ cycle }: { cycle: PdcaCycle }) {
   const linked = cycle.findings ?? [];
   // Opzione A: più finding solo dello stesso audit → il picker resta sull'audit già collegato.
   const lockedPrep = linked[0]?.audit_prep ?? "";
+  // Ciclo di organizzazione: solo rilievi comuni (collegati su tutti i siti).
+  const isOrg = cycle.plant === null;
 
   return (
     <>
@@ -500,7 +511,7 @@ function LinkFindingButton({ cycle }: { cycle: PdcaCycle }) {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-xl p-6 space-y-4">
             <h3 className="text-lg font-semibold">{t("pdca.link.modal_title")}</h3>
-            <p className="text-xs text-gray-500">{t("pdca.link.rule_hint")}</p>
+            <p className="text-xs text-gray-500">{t(isOrg ? "pdca.link.org_rule_hint" : "pdca.link.rule_hint")}</p>
             {linked.length > 0 && (
               <div className="space-y-1">
                 {linked.map(f => (
@@ -523,6 +534,7 @@ function LinkFindingButton({ cycle }: { cycle: PdcaCycle }) {
             )}
             <AuditFindingPicker plant={cycle.plant} prepId={lockedPrep || pick.prepId} findingId={pick.findingId}
               allowReplace excludeCycle={cycle.id}
+              commonKey={isOrg ? (linked[0]?.common_key ?? null) : undefined}
               onChange={v => setPick({ prepId: lockedPrep || v.prepId, findingId: v.findingId, currentPdca: v.currentPdca })} />
             {replacing && (
               <div className="space-y-1">
@@ -1499,7 +1511,7 @@ export function PdcaPage() {
                           <AdvanceButtons cycle={c as any} onUpdated={() => {}} />
                           <CycleDossierButton cycle={c} />
                           <EditCycleButton cycle={c} />
-                          {c.plant !== null && <LinkFindingButton cycle={c} />}
+                          <LinkFindingButton cycle={c} />
                           <ArchiviaCycleButton cycle={c} />
                           <DeleteCycleButton cycle={c} />
                         </>

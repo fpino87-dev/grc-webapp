@@ -3547,6 +3547,7 @@
       "btn_title": "Powiąż lub odłącz ustalenia audytu",
       "modal_title": "Powiązane ustalenia audytu",
       "rule_hint": "Każde ustalenie może mieć tylko jeden PDCA; PDCA może obejmować kilka ustaleń, ale z tego samego audytu i zakładu. Można też powiązać już zamknięty PDCA (działanie już wykonane lub historia).",
+      "org_rule_hint": "PDCA organizacji: powiąż ustalenie wspólne audytu wielozakładowego; powiązanie dotyczy ustalenia w każdym zakładzie.",
       "unlink": "Odłącz",
       "unlink_reason": "Powód odłączenia (co najmniej 10 znaków)",
       "unlink_confirm": "Odłącz",
