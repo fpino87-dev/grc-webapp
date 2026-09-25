@@ -9,6 +9,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 ## [Unreleased]
 
 ### Added
+- **Audit Prep — audit interno affidato a un consulente esterno**: nuova opzione "Condotto da un consulente esterno" per l'audit interno. L'audit resta di prima parte, ma si gestisce come uno di seconda parte: niente checklist dei controlli né punteggio di prontezza, si registrano i rilievi del consulente e si allega il suo rapporto, che entra nel pacchetto audit.
+- **Audit Prep — titolo modificabile**: il titolo di un audit si può correggere dal dettaglio. In un audit multi-sito si modifica il titolo comune, riportato su tutti i siti.
 - **Audit Prep — PDCA di organizzazione per i rilievi comuni**: una non conformità comune a tutti i siti di un audit multi-sito può essere gestita con un solo PDCA di organizzazione invece che con un PDCA per sito. L'opzione è disponibile alla registrazione del rilievo e, per quelli già registrati, con il pulsante "PDCA comune a tutti i siti"; si può anche collegare un PDCA di organizzazione esistente. I PDCA automatici non ancora lavorati vengono sostituiti e archiviati; quelli già in lavorazione restano e vengono segnalati. Alla chiusura del PDCA comune i finding di tutti i siti si chiudono secondo l'esito della verifica. Riservato agli utenti con accesso a tutta l'organizzazione; ogni collegamento resta nell'audit trail.
 
 - **Riesame mirato (M13)**: una riunione dell'organo di governo su punti specifici fra un riesame di direzione completo e l'altro — per approvare uno o più documenti o decidere un piccolo cambiamento senza ripercorrere tutti i punti del §9.3.
@@ -71,6 +73,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
   - **Aggiornamento**: la migrazione si ferma se tra i fornitori attivi esistono già P.IVA duplicate e le elenca; vanno unificate o eliminate prima di rilanciare `migrate`.
 
 - **Documenti (M07) — la delibera dell'organo vale anche per una nuova versione di un documento in vigore**: finora l'organo non poteva approvare per delibera la nuova versione di un documento già in vigore; ora può approvarla o respingerla. Ogni respingimento registra quale revisione è stata respinta.
+
+### Changed
+- **Audit Prep — copertura dell'audit singolo**: un audit creato singolarmente, cioè non lanciato da un programma annuale a più step, copre sempre tutti i controlli e non mostra più la copertura "Campione 25%". Anche gli audit singoli già esistenti passano a copertura completa; le voci di checklist già generate restano invariate.
 
 ### Fixed
 - **Audit Prep — nuovo audit senza sito**: il form indicava il sito come opzionale, ma un audit a sito singolo richiede un sito; il salvataggio falliva con un errore generico. Ora il sito è obbligatorio e il pulsante di creazione resta disabilitato finché non viene scelto. Per un audit che copre più siti si usa l'opzione "audit multi-sito".

@@ -17,6 +17,8 @@ export interface AuditPrep {
   coverage_type: "campione" | "esteso" | "full";
   // Chi conduce l'audit; per la seconda parte il committente è il cliente.
   audit_type: AuditType;
+  // Audit interno affidato a un consulente esterno: gestito come la seconda parte.
+  external_consultant: boolean;
   requesting_party: string;
   // Rapporto ufficiale dell'auditor/ente (evidenza), impostato solo via report-file.
   report_evidence: string | null;
@@ -34,6 +36,7 @@ export interface AuditGroup {
   title: string;
   framework: string | null;
   audit_type: AuditType;
+  external_consultant: boolean;
   requesting_party: string;
   auditor_name: string;
   audit_date: string | null;
@@ -177,7 +180,7 @@ export const auditPrepApi = {
     apiClient.delete(`/audit-prep/audit-preps/${id}/report-file/`),
   downloadReportFile: (id: string) =>
     apiClient.get<Blob>(`/audit-prep/audit-preps/${id}/report-file/`, { responseType: "blob" }).then(r => r.data),
-  createGroup: (data: Partial<AuditGroup> & { plants: string[]; coverage_type?: string }) =>
+  createGroup: (data: Partial<AuditGroup> & { plants: string[] }) =>
     apiClient.post<AuditGroup>("/audit-prep/audit-groups/", data).then(r => r.data),
   updateGroup: (id: string, data: Partial<AuditGroup>) =>
     apiClient.patch<AuditGroup>(`/audit-prep/audit-groups/${id}/`, data).then(r => r.data),

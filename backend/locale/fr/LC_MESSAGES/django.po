@@ -2940,3 +2940,39 @@ msgstr "Le PDCA lié a un résultat non efficace : l'action corrective doit êtr
 #: apps/audit_prep/services.py
 msgid "Il PDCA collegato non ha un'evidenza nella fase DO: chiudi la non conformità con «Chiudi finding» scegliendo l'evidenza."
 msgstr "Le PDCA lié n'a pas de preuve dans la phase DO : clôturez la non-conformité avec «Clôturer le constat» en choisissant la preuve."
+
+#: apps/audit_prep/services.py
+msgid "Solo chi ha accesso a tutta l'organizzazione può usare un PDCA di organizzazione per i finding comuni."
+msgstr "Seuls les utilisateurs ayant accès à toute l'organisation peuvent utiliser un PDCA d'organisation pour les constats communs."
+
+#: apps/audit_prep/services.py
+msgid "Un PDCA di organizzazione si collega solo ai finding comuni di un audit multi-sito."
+msgstr "Un PDCA d'organisation ne peut être lié qu'aux constats communs d'un audit multi-sites."
+
+#: apps/audit_prep/services.py
+msgid "Il PDCA di organizzazione copre già un altro rilievo: si possono collegare solo i finding dello stesso rilievo comune."
+msgstr "Le PDCA d'organisation couvre déjà un autre constat : seuls les constats du même constat commun peuvent être liés."
+
+#: apps/audit_prep/services.py
+msgid "Il PDCA scelto non è di organizzazione."
+msgstr "Le PDCA choisi n'est pas un PDCA d'organisation."
+
+#: apps/audit_prep/services.py
+msgid "Rilievo comune: sostituito dal PDCA di organizzazione «%(title)s»."
+msgstr "Constat commun : remplacé par le PDCA d'organisation «%(title)s»."
+
+#: apps/audit_prep/services.py
+msgid "Il finding ha già un PDCA in lavorazione: per sostituirlo indica il motivo (minimo 10 caratteri)."
+msgstr "Le constat a déjà un PDCA en cours : pour le remplacer, indiquez le motif (10 caractères minimum)."
+
+#: apps/audit_prep/services.py
+msgid "Un PDCA di organizzazione si apre solo per i finding comuni di un audit multi-sito."
+msgstr "Un PDCA d'organisation ne s'ouvre que pour les constats communs d'un audit multi-sites."
+
+#: apps/audit_prep/services.py
+msgid "Il finding ha già un PDCA in lavorazione: collegalo al PDCA comune con «Sostituisci PDCA»."
+msgstr "Le constat a déjà un PDCA en cours : liez-le au PDCA commun avec «Remplacer le PDCA»."
+
+#: apps/audit_prep/views.py
+msgid "Audit interno condotto da un consulente esterno: i punti di verifica sono quelli del consulente, la checklist dei controlli non si usa. Registra i rilievi del consulente come finding."
+msgstr "Audit interne réalisé par un consultant externe : les points de vérification sont ceux du consultant, la checklist des contrôles n'est pas utilisée. Enregistrez les constats du consultant."

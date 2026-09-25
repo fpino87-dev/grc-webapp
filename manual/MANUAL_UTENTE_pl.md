@@ -842,6 +842,8 @@ Po ukończeniu Kroku 4 kreatora, program automatycznie przechodzi do stanu „Za
 
 W obu przypadkach struktura listy kontrolnej jest identyczna — różnica polega jedynie na liczbie kontroli do weryfikacji.
 
+Zakres (próbka, rozszerzony, pełny) dotyczy tylko audytów uruchomionych z **programu rocznego**, w którym weryfikacja jest rozłożona na kilka kwartałów. Audyt utworzony samodzielnie przez **+ Nowe przygotowanie**, także wielozakładowy, zawsze obejmuje **wszystkie kontrole** i nie pokazuje wartości procentowej.
+
 #### Jak wypełnić listę kontrolną kontroli
 
 Dla każdej kontroli na liście:
@@ -922,6 +924,10 @@ Oprócz audytów wewnętrznych w Audit Prep rejestruje się audyty prowadzone pr
 Rodzaj i zlecającego można później poprawić w zakładce **Informacje o audycie**.
 
 **Druga strona: bez listy kontrolnej.** W audycie drugiej strony kryteria weryfikacji są klienta: lista kontrolna nie jest ładowana (nawet po wybraniu TISAX AL3), szczegóły otwierają się na zakładce **Ustalenia**, a karta zamiast gotowości pokazuje otwarte ustalenia i informację, czy raport jest załączony. Framework, jeśli podany, służy tylko jako odniesienie. W audycie trzeciej strony (certyfikacja) lista kontrolna pozostaje, ponieważ jednostka weryfikuje właśnie wymagania frameworku.
+
+**Audyt wewnętrzny powierzony zewnętrznemu konsultantowi.** Jeśli audyt wewnętrzny prowadzi konsultant, zaznacz **Prowadzony przez zewnętrznego konsultanta** (przy tworzeniu lub w zakładce **Informacje o audycie**). Audyt pozostaje wewnętrzny, ale jest traktowany jak audyt drugiej strony: bez listy kontrolnej i gotowości; rejestruj ustalenia konsultanta i załącz jego raport, który trafia do pakietu audytowego (folder AUDIT_ESTERNI).
+
+**Tytuł** — tytuł audytu edytujesz ołówkiem obok nazwy w widoku szczegółów. W audycie wielozakładowym edytujesz tytuł audytu wspólnego, przenoszony do każdego zakładu.
 
 **Raport oficjalny** — w zakładce **Informacje o audycie**, w sekcji **Oficjalny raport audytora lub jednostki**, wybierz plik (np. PDF otrzymany od klienta) i kliknij **Załącz raport**. Plik jest archiwizowany jako dowód typu „raport", w zakładzie audytu i bez terminu ważności. Stamtąd możesz go pobrać, zastąpić nową wersją (poprzedni pozostaje wśród dowodów) lub odłączyć. To coś innego niż **Pobierz raport**, czyli podsumowanie generowane przez platformę.
 

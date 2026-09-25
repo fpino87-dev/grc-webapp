@@ -3084,6 +3084,19 @@
       "report_ok": "Raport klienta załączony",
       "report_missing": "Raport klienta jeszcze niezałączony",
       "framework_hint": "Tylko jako odniesienie: w audycie drugiej strony lista kontrolna nie jest ładowana; rejestruje się ustalenia audytora."
+    },
+    "consultant": {
+      "badge": "Wewnętrzny — konsultant zewnętrzny",
+      "flag_label": "Prowadzony przez zewnętrznego konsultanta",
+      "flag_hint": "Traktowany jak audyt drugiej strony: bez listy kontrolnej i gotowości; rejestruj ustalenia konsultanta i załącz jego raport.",
+      "framework_hint": "Tylko informacyjnie: dla audytu powierzonego zewnętrznemu konsultantowi lista kontrolna nie jest ładowana; rejestruj ustalenia konsultanta.",
+      "name_label": "Konsultant / firma",
+      "report_ok": "Raport konsultanta załączony",
+      "report_missing": "Raport konsultanta jeszcze nie załączony"
+    },
+    "title_edit": {
+      "btn": "Edytuj tytuł",
+      "group_hint": "Audyt wielozakładowy: tytuł dotyczy audytu wspólnego i jest przenoszony do każdego zakładu."
     }
   },
   "risk": {

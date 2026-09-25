@@ -102,15 +102,18 @@ def finalize_new_prep(prep: AuditPrep, user) -> None:
 # ── Audit multi-sito ─────────────────────────────────────────────────────────
 
 # Dati dell'audit comune copiati su ogni AuditPrep del gruppo.
-GROUP_SHARED_FIELDS = ("audit_type", "requesting_party", "auditor_name", "audit_date", "framework")
+GROUP_SHARED_FIELDS = (
+    "audit_type", "external_consultant", "requesting_party", "auditor_name", "audit_date", "framework",
+)
 
 
 def create_audit_group(*, user, title: str, plants, framework=None, audit_type="interno",
-                       requesting_party="", auditor_name="", audit_date=None, scope_id="",
-                       coverage_type="campione") -> AuditGroup:
+                       external_consultant=False, requesting_party="", auditor_name="",
+                       audit_date=None, scope_id="") -> AuditGroup:
     """Crea un audit comune a più siti: il gruppo con i dati condivisi e un
     AuditPrep per sito (checklist, prontezza e finding restano per sito).
-    Il framework, se indicato, deve essere assegnato a tutti i siti."""
+    Il framework, se indicato, deve essere assegnato a tutti i siti.
+    Non nasce da un programma: la copertura è sempre completa."""
     from django.core.exceptions import ValidationError
 
     plants = list(dict.fromkeys(plants))
@@ -133,6 +136,7 @@ def create_audit_group(*, user, title: str, plants, framework=None, audit_type="
     with transaction.atomic():
         group = AuditGroup.objects.create(
             title=title, framework=framework, audit_type=audit_type,
+            external_consultant=external_consultant and audit_type == "interno",
             requesting_party=requesting_party if audit_type == "seconda_parte" else "",
             auditor_name=auditor_name, audit_date=audit_date, scope_id=scope_id,
             created_by=user,
@@ -140,7 +144,7 @@ def create_audit_group(*, user, title: str, plants, framework=None, audit_type="
         for plant in plants:
             prep = AuditPrep.objects.create(
                 plant=plant, group=group, title=f"{title} — {plant.code}",
-                coverage_type=coverage_type, created_by=user,
+                coverage_type="full", created_by=user,
                 **{f: getattr(group, f) for f in GROUP_SHARED_FIELDS},
             )
             finalize_new_prep(prep, user)
@@ -155,16 +159,24 @@ def create_audit_group(*, user, title: str, plants, framework=None, audit_type="
 
 
 def update_audit_group(group: AuditGroup, user, **fields) -> AuditGroup:
-    """Aggiorna i dati comuni e li riporta su tutti gli audit dei siti."""
+    """Aggiorna i dati comuni e li riporta su tutti gli audit dei siti.
+    Un nuovo titolo rinomina anche gli audit dei siti («titolo — sito»)."""
     allowed = {k: v for k, v in fields.items() if k in (*GROUP_SHARED_FIELDS, "title", "scope_id")}
-    if allowed.get("audit_type", group.audit_type) != "seconda_parte":
+    audit_type = allowed.get("audit_type", group.audit_type)
+    if audit_type != "seconda_parte":
         allowed["requesting_party"] = ""
+    if audit_type != "interno":
+        allowed["external_consultant"] = False
     with transaction.atomic():
         for k, v in allowed.items():
             setattr(group, k, v)
         group.save()
         shared = {f: getattr(group, f) for f in GROUP_SHARED_FIELDS}
         group.preps.update(**shared, updated_at=timezone.now())
+        if "title" in allowed:
+            for prep in group.preps.select_related("plant"):
+                prep.title = f"{group.title} — {prep.plant.code}"[:200]
+                prep.save(update_fields=["title", "updated_at"])
         log_action(
             user=user,
             action_code="audit_prep.group.updated",

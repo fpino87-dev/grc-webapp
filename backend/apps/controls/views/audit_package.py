@@ -195,7 +195,8 @@ def _add_management_reviews(zf, zip_name: str, plant_id, default_storage) -> Non
 def _add_external_audit_reports(zf, zip_name: str, plant_id, default_storage) -> None:
     """
     Aggiunge AUDIT_ESTERNI/ con:
-    - RIEPILOGO.csv — audit di seconda e terza parte (tipo, committente, ente,
+    - RIEPILOGO.csv — audit di seconda e terza parte e audit interni affidati a
+      un consulente esterno (tipo, committente, ente,
       data, n. finding, presenza del rapporto)
     - il rapporto ufficiale allegato a ciascun audit (se presente)
     """
@@ -209,7 +210,11 @@ def _add_external_audit_reports(zf, zip_name: str, plant_id, default_storage) ->
     from apps.audit_prep.models import AuditPrep
 
     qs = (
-        AuditPrep.objects.filter(audit_type__in=("seconda_parte", "terza_parte"))
+        AuditPrep.objects.filter(
+            Q(audit_type__in=("seconda_parte", "terza_parte"))
+            # audit interno condotto da un consulente esterno: anche lui ha un rapporto
+            | Q(audit_type="interno", external_consultant=True)
+        )
         .exclude(status="archiviato")
         .select_related("report_evidence")
         .annotate(n_findings=Count("findings", filter=Q(findings__deleted_at__isnull=True)))
@@ -229,7 +234,8 @@ def _add_external_audit_reports(zf, zip_name: str, plant_id, default_storage) ->
         w.writerow([
             p.audit_date.isoformat() if p.audit_date else "—",
             p.title,
-            type_label.get(p.audit_type, p.audit_type),
+            type_label.get(p.audit_type, p.audit_type)
+            + (" — consulente esterno" if p.external_consultant else ""),
             p.requesting_party or "—",
             p.auditor_name or "—",
             p.status,

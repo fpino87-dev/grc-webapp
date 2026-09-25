@@ -20,6 +20,7 @@ class AuditGroup(BaseModel):
         related_name="audit_groups", null=True, blank=True,
     )
     audit_type = models.CharField(max_length=15, default="interno")
+    external_consultant = models.BooleanField(default=False)
     requesting_party = models.CharField(max_length=200, blank=True)
     auditor_name = models.CharField(max_length=200, blank=True)
     audit_date = models.DateField(null=True, blank=True)
@@ -67,6 +68,13 @@ class AuditPrep(BaseModel):
         max_length=15, choices=AUDIT_TYPE_CHOICES, default="interno",
         help_text="Chi conduce l'audit: interno, cliente (seconda parte) o ente di certificazione",
     )
+    # Audit interno affidato a un consulente esterno: i punti di verifica sono
+    # quelli del consulente, quindi si gestisce come una seconda parte.
+    external_consultant = models.BooleanField(
+        default=False,
+        help_text="Solo per l'audit interno: condotto da un consulente esterno "
+                  "(niente checklist, si registrano i rilievi del consulente)",
+    )
     requesting_party = models.CharField(
         max_length=200, blank=True,
         help_text="Committente: il cliente per cui è svolto l'audit di seconda parte "
@@ -104,9 +112,12 @@ class AuditPrep(BaseModel):
     def uses_checklist(self) -> bool:
         """Checklist dei controlli e prontezza servono a prepararsi sui requisiti
         del framework (audit interni e di certificazione). Nell'audit di seconda
-        parte i punti di verifica sono quelli del cliente: contano i rilievi
-        dell'auditor, non la nostra checklist."""
-        return self.audit_type != "seconda_parte"
+        parte i punti di verifica sono quelli del cliente, e in quello interno
+        affidato a un consulente esterno quelli del consulente: contano i
+        rilievi dell'auditor, non la nostra checklist."""
+        if self.audit_type == "seconda_parte":
+            return False
+        return not (self.audit_type == "interno" and self.external_consultant)
 
 
 class EvidenceItem(BaseModel):

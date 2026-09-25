@@ -3084,6 +3084,19 @@
       "report_ok": "Rapport du client joint",
       "report_missing": "Rapport du client pas encore joint",
       "framework_hint": "À titre de référence uniquement : pour un audit de seconde partie, la checklist des contrôles n'est pas chargée ; on enregistre les constats de l'auditeur."
+    },
+    "consultant": {
+      "badge": "Interne — consultant externe",
+      "flag_label": "Réalisé par un consultant externe",
+      "flag_hint": "Géré comme un audit de seconde partie : ni checklist ni préparation ; enregistrez les constats du consultant et joignez son rapport.",
+      "framework_hint": "À titre de référence uniquement : pour un audit confié à un consultant externe, la checklist des contrôles n'est pas chargée ; enregistrez les constats du consultant.",
+      "name_label": "Consultant / cabinet",
+      "report_ok": "Rapport du consultant joint",
+      "report_missing": "Rapport du consultant pas encore joint"
+    },
+    "title_edit": {
+      "btn": "Modifier le titre",
+      "group_hint": "Audit multi-sites : le titre s'applique à l'audit commun et est reporté sur chaque site."
     }
   },
   "risk": {

@@ -842,6 +842,8 @@ Depuis le détail du programme approuvé :
 
 Dans les deux cas, la structure de la liste de contrôle est identique — la différence réside uniquement dans le nombre de contrôles à vérifier.
 
+La couverture (échantillon, étendue, complète) ne s'applique qu'aux audits lancés depuis un **programme annuel**, où la vérification est répartie sur plusieurs trimestres. Un audit créé individuellement avec **+ Nouvelle préparation**, y compris multi-sites, couvre toujours **tous les contrôles** et n'affiche pas de pourcentage.
+
 #### Comment remplir la liste de contrôle des contrôles
 
 Pour chaque contrôle dans la liste de contrôle :
@@ -922,6 +924,10 @@ En plus des audits internes, Audit Prep enregistre les audits menés par des tie
 Le type et le donneur d'ordre peuvent être corrigés ensuite depuis l'onglet **Infos audit**.
 
 **Seconde partie : pas de checklist.** Dans un audit de seconde partie, les points de vérification sont ceux du client : la checklist des contrôles n'est pas chargée (même en choisissant TISAX AL3), le détail s'ouvre sur l'onglet **Constats** et la carte affiche les constats ouverts et la présence du rapport, au lieu de la préparation. Le référentiel, s'il est indiqué, sert uniquement de référence. En tierce partie (certification), la checklist reste, car l'organisme vérifie précisément les exigences du référentiel.
+
+**Audit interne confié à un consultant externe.** Si l'audit interne est réalisé par un consultant, cochez **Réalisé par un consultant externe** (à la création ou depuis l'onglet **Infos audit**). L'audit reste interne mais est géré comme une seconde partie : ni checklist ni préparation ; enregistrez les constats du consultant et joignez son rapport, qui est inclus dans le paquet d'audit (dossier AUDIT_ESTERNI).
+
+**Titre** — le titre de l'audit se modifie avec le crayon à côté de son nom, dans le détail. Dans un audit multi-sites, on modifie le titre de l'audit commun, reporté sur chaque site.
 
 **Rapport officiel** — dans l'onglet **Infos audit**, section **Rapport officiel de l'auditeur ou de l'organisme**, choisissez le fichier (ex. le PDF reçu du client) et cliquez sur **Joindre le rapport**. Le fichier est archivé comme preuve de type « rapport », sur le site de l'audit et sans échéance. Vous pouvez ensuite le télécharger, le remplacer par une révision (le précédent reste parmi les preuves) ou le détacher. C'est différent de **Télécharger le rapport**, qui est la synthèse générée par la plateforme.
 

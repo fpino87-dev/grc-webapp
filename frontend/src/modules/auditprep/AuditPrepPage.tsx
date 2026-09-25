@@ -61,8 +61,10 @@ const FINDING_TYPE_COLORS: Record<string, string> = {
 
 const AUDIT_TYPES: AuditType[] = ["interno", "seconda_parte", "terza_parte"];
 
-/** Seconda parte: i punti di verifica sono del cliente → niente checklist né prontezza. */
-const usesChecklist = (prep: Pick<AuditPrep, "audit_type">) => prep.audit_type !== "seconda_parte";
+/** Seconda parte (punti di verifica del cliente) o interno affidato a un
+ *  consulente esterno (punti del consulente) → niente checklist né prontezza. */
+const usesChecklist = (prep: Pick<AuditPrep, "audit_type" | "external_consultant">) =>
+  prep.audit_type !== "seconda_parte" && !(prep.audit_type === "interno" && prep.external_consultant);
 
 /** Riepilogo rilievi al posto della prontezza (audit di seconda parte). */
 function FindingsSummary({ prep, findings }: { prep: AuditPrep; findings: AuditFinding[] }) {
@@ -73,7 +75,7 @@ function FindingsSummary({ prep, findings }: { prep: AuditPrep; findings: AuditF
     <div className="text-xs text-gray-600 space-y-0.5">
       <p>{t("audit_prep.second_party.summary", { open: open.length, total: findings.length, nc })}</p>
       <p className={prep.report_evidence ? "text-green-700" : "text-amber-700"}>
-        {prep.report_evidence ? t("audit_prep.second_party.report_ok") : t("audit_prep.second_party.report_missing")}
+        {t(`audit_prep.${prep.audit_type === "interno" ? "consultant" : "second_party"}.${prep.report_evidence ? "report_ok" : "report_missing"}`)}
       </p>
     </div>
   );
@@ -91,6 +93,11 @@ function AuditTypeBadge({ prep }: { prep: AuditPrep }) {
           {prep.requesting_party ? ` — ${prep.requesting_party}` : ""}
         </span>
       )}
+      {prep.audit_type === "interno" && prep.external_consultant && (
+        <span className="text-xs text-indigo-700 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5">
+          {t("audit_prep.consultant.badge")}
+        </span>
+      )}
       {prep.group && (
         <span className="text-xs text-teal-700 bg-teal-50 border border-teal-200 rounded px-1.5 py-0.5"
           title={prep.group_title ?? undefined}>
@@ -101,23 +108,71 @@ function AuditTypeBadge({ prep }: { prep: AuditPrep }) {
   );
 }
 
+/** Titolo modificabile. Nell'audit multi-sito si rinomina l'audit comune e
+ *  il backend riporta il nuovo titolo su ogni sito («titolo — sito»). */
+function EditableTitle({ prep }: { prep: AuditPrep }) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState("");
+  const [error, setError] = useState("");
+  const save = useMutation({
+    mutationFn: async (): Promise<unknown> => prep.group
+      ? auditPrepApi.updateGroup(prep.group, { title: value.trim() })
+      : auditPrepApi.update(prep.id, { title: value.trim() }),
+    onSuccess: () => { setEditing(false); setError(""); qc.invalidateQueries({ queryKey: ["audit-prep"] }); },
+    onError: (e) => setError((e as { response?: { data?: { error?: string } } })?.response?.data?.error || t("audit_prep.error_generic")),
+  });
+  if (!editing) {
+    return (
+      <div className="flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-gray-900">{prep.title}</h2>
+        {prep.status !== "archiviato" && (
+          <button onClick={() => { setValue(prep.group ? (prep.group_title ?? prep.title) : prep.title); setEditing(true); }}
+            title={t("audit_prep.title_edit.btn")} aria-label={t("audit_prep.title_edit.btn")}
+            className="text-gray-400 hover:text-gray-600 text-sm">✎</button>
+        )}
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center gap-2">
+        <input value={value} onChange={e => setValue(e.target.value)} maxLength={200} autoFocus
+          aria-label={t("audit_prep.title_label")}
+          className="border rounded px-2 py-1 text-sm min-w-[18rem]" />
+        <button onClick={() => save.mutate()} disabled={!value.trim() || save.isPending}
+          className="px-2 py-1 text-xs bg-primary-600 text-white rounded disabled:opacity-50">{t("audit_prep.external.save_btn")}</button>
+        <button onClick={() => { setEditing(false); setError(""); }} className="px-2 py-1 text-xs border rounded text-gray-600">{t("audit_prep.cancel_btn")}</button>
+      </div>
+      {prep.group && <p className="text-xs text-gray-500">{t("audit_prep.title_edit.group_hint")}</p>}
+      {error && <p className="text-xs text-red-600">{error}</p>}
+    </div>
+  );
+}
+
 function ExternalAuditSection({ prep }: { prep: AuditPrep }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [auditType, setAuditType] = useState<AuditType>(prep.audit_type ?? "interno");
   const [party, setParty] = useState(prep.requesting_party ?? "");
+  const [consultant, setConsultant] = useState(!!prep.external_consultant);
   const [file, setFile] = useState<File | null>(null);
   const [reportTitle, setReportTitle] = useState("");
   const [error, setError] = useState("");
   const editable = prep.status !== "archiviato";
-  const dirty = auditType !== (prep.audit_type ?? "interno") || party.trim() !== (prep.requesting_party ?? "");
+  const dirty = auditType !== (prep.audit_type ?? "interno") || party.trim() !== (prep.requesting_party ?? "")
+    || (auditType === "interno" && consultant) !== !!prep.external_consultant;
   const errMsg = (e: unknown) =>
     (e as { response?: { data?: { error?: string } } })?.response?.data?.error || t("audit_prep.error_generic");
 
   // Audit multi-sito: tipo e committente sono dati comuni → si salvano sul gruppo.
   const saveMutation = useMutation({
     mutationFn: async (): Promise<unknown> => {
-      const data = { audit_type: auditType, requesting_party: auditType === "seconda_parte" ? party.trim() : "" };
+      const data = {
+        audit_type: auditType, requesting_party: auditType === "seconda_parte" ? party.trim() : "",
+        external_consultant: auditType === "interno" && consultant,
+      };
       return prep.group ? auditPrepApi.updateGroup(prep.group, data) : auditPrepApi.update(prep.id, data);
     },
     onSuccess: () => { setError(""); qc.invalidateQueries({ queryKey: ["audit-prep"] }); },
@@ -163,6 +218,12 @@ function ExternalAuditSection({ prep }: { prep: AuditPrep }) {
           </div>
         )}
       </div>
+      {auditType === "interno" && (
+        <label className="flex items-start gap-2 text-xs text-gray-700">
+          <input type="checkbox" checked={consultant} disabled={!editable} onChange={e => setConsultant(e.target.checked)} className="mt-0.5" />
+          <span>{t("audit_prep.consultant.flag_label")}<span className="block text-gray-500">{t("audit_prep.consultant.flag_hint")}</span></span>
+        </label>
+      )}
       {editable && dirty && (
         <button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}
           className="px-3 py-1.5 text-xs bg-primary-600 text-white rounded disabled:opacity-50">
@@ -482,10 +543,10 @@ function PrepDrawer({ prep, onClose, initialTab = "checklist" }: {
               <AuditTypeBadge prep={prep} />
               {prep.audit_entry_id && <span className="text-xs text-gray-400">{t("audit_prep.annual_program_tag")}</span>}
             </div>
-            <h2 className="text-lg font-semibold text-gray-900">{prep.title}</h2>
+            <EditableTitle prep={prep} />
             <p className="text-xs text-gray-500 mt-0.5">
               {fwLabel(prep.framework_code)} · {prep.auditor_name || "—"} · {prep.audit_date || "—"}
-              {checklist && <> · {t(`audit_prep.coverage_${prep.coverage_type}`)}</>}
+              {checklist && prep.audit_program && <> · {t(`audit_prep.coverage_${prep.coverage_type}`)}</>}
             </p>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
@@ -740,7 +801,9 @@ function PrepDrawer({ prep, onClose, initialTab = "checklist" }: {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div><span className="text-gray-500">{t("audit_prep.framework_col")}</span> <span className="font-medium">{fwLabel(prep.framework_code)}</span></div>
-                <div><span className="text-gray-500">{t("audit_prep.coverage_col")}</span> <span className="font-medium">{t(`audit_prep.coverage_${prep.coverage_type}`)}</span></div>
+                {checklist && prep.audit_program && (
+                  <div><span className="text-gray-500">{t("audit_prep.coverage_col")}</span> <span className="font-medium">{t(`audit_prep.coverage_${prep.coverage_type}`)}</span></div>
+                )}
                 <div><span className="text-gray-500">{t("audit_prep.auditor_col")}</span> <span className="font-medium">{prep.auditor_name || "—"}</span></div>
                 <div><span className="text-gray-500">{t("audit_prep.audit_date_label")}</span> <span className="font-medium">{prep.audit_date || "—"}</span></div>
                 <div><span className="text-gray-500">{t("audit_prep.tab_info")}:</span> <StatusBadge status={prep.status} /></div>
@@ -1454,6 +1517,7 @@ function NewPrepModal({ plants, onClose }: { plants: { id: string; code: string;
       ? auditPrepApi.createGroup({
           title: form.title, plants: sites, framework: resolvedFrameworkId(),
           audit_type: form.audit_type, requesting_party: form.requesting_party ?? "",
+          external_consultant: form.audit_type === "interno" && !!form.external_consultant,
           auditor_name: form.auditor_name ?? "", audit_date: form.audit_date ?? null, scope_id: scopeId.trim(),
         })
       : auditPrepApi.create({ ...form, framework: resolvedFrameworkId() ?? undefined }),
@@ -1525,6 +1589,9 @@ function NewPrepModal({ plants, onClose }: { plants: { id: string; code: string;
               {form.audit_type === "seconda_parte" && (
                 <p className="text-xs text-gray-500 mt-0.5">{t("audit_prep.second_party.framework_hint")}</p>
               )}
+              {form.audit_type === "interno" && form.external_consultant && (
+                <p className="text-xs text-gray-500 mt-0.5">{t("audit_prep.consultant.framework_hint")}</p>
+              )}
             </div>
           </div>
           {fwKey === "TISAX" && (
@@ -1545,7 +1612,8 @@ function NewPrepModal({ plants, onClose }: { plants: { id: string; code: string;
               <label className="block text-sm font-medium text-gray-700 mb-1">{t("audit_prep.external.type_label")}</label>
               <select name="audit_type" value={form.audit_type} className="w-full border rounded px-3 py-2 text-sm"
                 onChange={e => setForm(p => ({ ...p, audit_type: e.target.value as AuditType,
-                  ...(e.target.value !== "seconda_parte" ? { requesting_party: "" } : {}) }))}>
+                  ...(e.target.value !== "seconda_parte" ? { requesting_party: "" } : {}),
+                  ...(e.target.value !== "interno" ? { external_consultant: false } : {}) }))}>
                 {AUDIT_TYPES.map(a => <option key={a} value={a}>{t(`audit_prep.audit_type.${a}`)}</option>)}
               </select>
             </div>
@@ -1559,6 +1627,13 @@ function NewPrepModal({ plants, onClose }: { plants: { id: string; code: string;
               </div>
             )}
           </div>
+          {form.audit_type === "interno" && (
+            <label className="flex items-start gap-2 text-sm text-gray-700">
+              <input type="checkbox" checked={!!form.external_consultant} className="mt-1"
+                onChange={e => setForm(p => ({ ...p, external_consultant: e.target.checked }))} />
+              <span>{t("audit_prep.consultant.flag_label")}<span className="block text-xs text-gray-500">{t("audit_prep.consultant.flag_hint")}</span></span>
+            </label>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{t("audit_prep.audit_date_label")}</label>
@@ -1567,7 +1642,8 @@ function NewPrepModal({ plants, onClose }: { plants: { id: string; code: string;
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {form.audit_type === "interno" ? t("audit_prep.auditor_label") : t("audit_prep.external.body_label")}
+                {form.audit_type !== "interno" ? t("audit_prep.external.body_label")
+                  : form.external_consultant ? t("audit_prep.consultant.name_label") : t("audit_prep.auditor_label")}
               </label>
               <input name="auditor_name" onChange={e => setForm(p => ({ ...p, auditor_name: e.target.value }))}
                 className="w-full border rounded px-3 py-2 text-sm" />

@@ -31,10 +31,19 @@ class AuditPrepSerializer(serializers.ModelSerializer):
         # diretta a "completato" scavalcherebbe il gate sui Major NC.
         # report_evidence si imposta solo con l'azione report-file (upload
         # validato + audit), non collegando un'evidenza qualsiasi via PATCH.
+        # coverage_type: completa per l'audit singolo, dal programma per quelli
+        # lanciati da un programma — non si cambia a mano.
         read_only_fields = [
-            "id", "status", "readiness_score", "report_evidence", "group",
+            "id", "status", "readiness_score", "report_evidence", "group", "coverage_type",
             "created_by", "created_at", "updated_at", "deleted_at",
         ]
+
+    def validate(self, attrs):
+        # Consulente esterno solo per l'audit interno.
+        audit_type = attrs.get("audit_type", getattr(self.instance, "audit_type", "interno"))
+        if audit_type != "interno" and ({"audit_type", "external_consultant"} & set(attrs)):
+            attrs["external_consultant"] = False
+        return attrs
 
     def get_framework_code(self, obj):
         return obj.framework.code if obj.framework_id else None
@@ -124,13 +133,10 @@ class AuditProgramSerializer(serializers.ModelSerializer):
 
 
 class AuditGroupSerializer(serializers.ModelSerializer):
-    """Audit comune a più siti. In creazione `plants` (≥ 2) e `coverage_type`
-    generano un AuditPrep per sito; in lettura `preps` riepiloga i siti."""
+    """Audit comune a più siti. In creazione `plants` (≥ 2) genera un
+    AuditPrep per sito, a copertura completa; in lettura `preps` riepiloga i siti."""
     plants = serializers.PrimaryKeyRelatedField(
         many=True, write_only=True, queryset=Plant.objects.all(),
-    )
-    coverage_type = serializers.ChoiceField(
-        choices=AuditPrep.COVERAGE_CHOICES, write_only=True, required=False, default="campione",
     )
     audit_type = serializers.ChoiceField(choices=AuditPrep.AUDIT_TYPE_CHOICES, required=False, default="interno")
     preps = serializers.SerializerMethodField()
@@ -139,9 +145,9 @@ class AuditGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = AuditGroup
         fields = [
-            "id", "title", "framework", "audit_type", "requesting_party", "auditor_name",
-            "audit_date", "scope_id", "report_evidence", "report_evidence_title",
-            "plants", "coverage_type", "preps", "created_at", "updated_at",
+            "id", "title", "framework", "audit_type", "external_consultant", "requesting_party",
+            "auditor_name", "audit_date", "scope_id", "report_evidence", "report_evidence_title",
+            "plants", "preps", "created_at", "updated_at",
         ]
         read_only_fields = ["id", "report_evidence", "created_at", "updated_at"]
 

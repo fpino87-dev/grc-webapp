@@ -842,6 +842,8 @@ Al completamento dello Step 4 del wizard il programma passa automaticamente in s
 
 In entrambi i casi la struttura della checklist e' identica — la differenza e' solo nel numero di controlli da verificare.
 
+La copertura (campione, esteso, completo) vale solo per gli audit lanciati da un **programma annuale**, dove la verifica è distribuita su più trimestri. Un audit creato singolarmente con **+ Nuova preparazione**, anche multi-sito, copre sempre **tutti i controlli** e non mostra la percentuale.
+
 #### Come compilare la checklist controlli
 
 Per ogni controllo nella checklist:
@@ -922,6 +924,10 @@ Oltre agli audit interni, in Audit Prep si registrano gli audit condotti da terz
 Tipo e committente si possono correggere in seguito dal tab **Info audit**.
 
 **Seconda parte: niente checklist.** Nell'audit di seconda parte i punti di verifica sono quelli del cliente: la checklist dei controlli non viene caricata (nemmeno scegliendo TISAX AL3), il dettaglio si apre sul tab **Finding** e la card mostra i rilievi aperti e se il rapporto è allegato, al posto della prontezza. Il framework, se indicato, vale solo come riferimento. Nella terza parte (certificazione) la checklist resta, perché l'ente verifica proprio i requisiti del framework.
+
+**Audit interno affidato a un consulente esterno.** Se l'audit interno lo conduce un consulente, spunta **Condotto da un consulente esterno** (alla creazione o dal tab **Info audit**). L'audit resta interno, ma si gestisce come una seconda parte: niente checklist né prontezza, si registrano i rilievi del consulente e si allega il suo rapporto, che entra nel pacchetto audit (cartella AUDIT_ESTERNI).
+
+**Titolo** — il titolo dell'audit si modifica con la matita accanto al nome, nel dettaglio. In un audit multi-sito si modifica il titolo dell'audit comune, riportato su ogni sito.
 
 **Rapporto ufficiale** — nel tab **Info audit**, sezione **Rapporto ufficiale dell'auditor o dell'ente**, scegli il file (es. il PDF ricevuto dal cliente) e clicca **Allega rapporto**. Il file viene archiviato come evidenza di tipo "report", sul sito dell'audit e senza scadenza. Da lì puoi scaricarlo, sostituirlo con una revisione (il precedente resta tra le evidenze) o scollegarlo. È diverso da **Scarica relazione**, che è il riepilogo generato dalla piattaforma.
 

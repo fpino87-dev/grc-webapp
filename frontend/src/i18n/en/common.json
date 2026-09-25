@@ -3084,6 +3084,19 @@
       "report_ok": "Customer report attached",
       "report_missing": "Customer report not attached yet",
       "framework_hint": "Reference only: for a second-party audit the controls checklist is not loaded; you record the auditor's findings."
+    },
+    "consultant": {
+      "badge": "Internal — external consultant",
+      "flag_label": "Conducted by an external consultant",
+      "flag_hint": "Handled like a second-party audit: no checklist or readiness; record the consultant's findings and attach their report.",
+      "framework_hint": "For reference only: for an audit entrusted to an external consultant the controls checklist is not loaded; record the consultant's findings.",
+      "name_label": "Consultant / firm",
+      "report_ok": "Consultant's report attached",
+      "report_missing": "Consultant's report not yet attached"
+    },
+    "title_edit": {
+      "btn": "Edit title",
+      "group_hint": "Multi-site audit: the title applies to the common audit and is copied to every site."
     }
   },
   "risk": {

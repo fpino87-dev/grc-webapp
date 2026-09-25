@@ -842,6 +842,8 @@ Sihirbazın 4. Adımı tamamlandığında program otomatik olarak "Onaylandı" d
 
 Her iki durumda da kontrol listesinin yapısı aynıdır — fark yalnızca doğrulanacak kontrol sayısındadır.
 
+Kapsam (örnek, genişletilmiş, tam) yalnızca **yıllık programdan** başlatılan ve doğrulamanın birkaç çeyreğe yayıldığı denetimler için geçerlidir. **+ Yeni hazırlık** ile tek başına oluşturulan bir denetim, çok tesisli olsa bile, her zaman **tüm kontrolleri** kapsar ve yüzde göstermez.
+
 #### Kontrol listesi nasıl doldurulur
 
 Kontrol listesindeki her kontrol için:
@@ -922,6 +924,10 @@ Devam eden veya kapatılmış denetimden:
 Tür ve talep eden daha sonra **Denetim bilgileri** sekmesinden düzeltilebilir.
 
 **İkinci taraf: kontrol listesi yok.** İkinci taraf denetiminde doğrulama noktaları müşteriye aittir: kontrol listesi yüklenmez (TISAX AL3 seçilse bile), ayrıntı **Bulgular** sekmesinde açılır ve kart, hazırlık yerine açık bulguları ve raporun ekli olup olmadığını gösterir. Belirtilen çerçeve yalnızca referans içindir. Üçüncü taraf (belgelendirme) denetimlerinde kontrol listesi kalır, çünkü kuruluş tam olarak çerçevenin gereksinimlerini doğrular.
+
+**Dış danışmana verilen iç denetim.** İç denetimi bir danışman yürütüyorsa **Dış danışman tarafından yürütülür** seçeneğini işaretleyin (oluştururken veya **Denetim bilgileri** sekmesinden). Denetim iç denetim olarak kalır ancak ikinci taraf gibi yönetilir: kontrol listesi ve hazırlık yok; danışmanın bulgularını kaydedin ve denetim paketine (AUDIT_ESTERNI klasörü) dahil edilen raporunu ekleyin.
+
+**Başlık** — denetim başlığı, ayrıntı görünümünde adının yanındaki kalemle düzenlenir. Çok tesisli bir denetimde, her tesise aktarılan ortak denetimin başlığı düzenlenir.
 
 **Resmi rapor** — **Denetim bilgileri** sekmesinde, **Denetçinin veya kuruluşun resmi raporu** bölümünde dosyayı (ör. müşteriden alınan PDF) seçin ve **Raporu ekle**'ye tıklayın. Dosya, denetimin tesisinde ve geçerlilik süresi olmadan "rapor" türünde kanıt olarak arşivlenir. Buradan indirebilir, bir revizyonla değiştirebilir (öncekisi kanıtlar arasında kalır) veya bağlantısını kaldırabilirsiniz. Bu, platformun oluşturduğu özet olan **Raporu indir**'den farklıdır.
 

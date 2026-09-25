@@ -70,9 +70,15 @@ def _get_scoped(qs, pk):
         return None
 
 
-def _second_party_no_checklist() -> str:
+def _second_party_no_checklist(prep=None) -> str:
     from django.utils.translation import gettext as _
 
+    if prep is not None and prep.audit_type == "interno":
+        return _(
+            "Audit interno condotto da un consulente esterno: i punti di verifica sono "
+            "quelli del consulente, la checklist dei controlli non si usa. Registra i "
+            "rilievi del consulente come finding."
+        )
     return _(
         "Audit di seconda parte: i punti di verifica sono quelli del cliente, "
         "la checklist dei controlli non si usa. Registra i rilievi dell'auditor come finding."
@@ -95,7 +101,10 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     plant_field = "plant"
 
     def perform_create(self, serializer):
-        instance = serializer.save(created_by=self.request.user)
+        # L'audit singolo (non lanciato da un programma) copre tutti i controlli:
+        # il campione ha senso solo nei programmi pluriennali a più step.
+        extra = {} if serializer.validated_data.get("audit_program") else {"coverage_type": "full"}
+        instance = serializer.save(created_by=self.request.user, **extra)
         services.finalize_new_prep(instance, self.request.user)
 
     @staticmethod
@@ -306,7 +315,7 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 status=400,
             )
         if not prep.uses_checklist:
-            return Response({"error": _second_party_no_checklist()}, status=400)
+            return Response({"error": _second_party_no_checklist(prep)}, status=400)
 
         fw_code = prep.framework.code if prep.framework_id else None
         if not fw_code:
@@ -360,7 +369,7 @@ class AuditPrepViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         from .validation import auto_validate_prep
         prep = self.get_object()
         if not prep.uses_checklist:
-            return Response({"error": _second_party_no_checklist()}, status=400)
+            return Response({"error": _second_party_no_checklist(prep)}, status=400)
         if prep.status == "archiviato":
             return Response(
                 {"error": "Prep archiviato: validazione automatica non disponibile."},
@@ -429,7 +438,6 @@ class AuditGroupViewSet(
         _require_all_group_sites(self.request.user, serializer.instance)
         data = dict(serializer.validated_data)
         data.pop("plants", None)
-        data.pop("coverage_type", None)
         serializer.instance = services.update_audit_group(serializer.instance, self.request.user, **data)
 
 

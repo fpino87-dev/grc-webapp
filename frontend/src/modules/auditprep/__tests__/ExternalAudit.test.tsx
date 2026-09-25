@@ -43,7 +43,7 @@ function prep(overrides = {}) {
     id: "a1", plant: "p1", framework: null, framework_code: null, title: "Audit cliente OEM",
     audit_date: "2026-09-10", auditor_name: "Ente Beta", status: "in_corso", readiness_score: null,
     owner: null, audit_program: null, audit_entry_id: "", coverage_type: "campione",
-    audit_type: "seconda_parte", requesting_party: "OEM Alfa",
+    audit_type: "seconda_parte", external_consultant: false, requesting_party: "OEM Alfa",
     report_evidence: null, report_evidence_title: null, report_evidence_filename: null,
     group: null, group_title: null, group_scope_id: null, group_sites: [],
     ...overrides,
@@ -136,7 +136,7 @@ describe("Audit Prep — audit multi-sito", () => {
     fireEvent.change(screen.getByDisplayValue("OEM Alfa"), { target: { value: "OEM Beta" } });
     fireEvent.click(screen.getByText("audit_prep.external.save_btn"));
     await vi.waitFor(() => expect(api.updateGroup).toHaveBeenCalledWith("g1",
-      { audit_type: "seconda_parte", requesting_party: "OEM Beta" }));
+      { audit_type: "seconda_parte", requesting_party: "OEM Beta", external_consultant: false }));
     expect(api.update).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByText(/audit_prep\.tab_findings/));
@@ -229,3 +229,60 @@ describe("Audit Prep — chiudi con il PDCA", () => {
   });
 });
 
+async function openPrep() {
+  renderPage();
+  fireEvent.click(await screen.findByText("audit_prep.tab_in_progress"));
+  fireEvent.click(await screen.findByText("audit_prep.open_btn"));
+}
+
+describe("Audit Prep — interno con consulente esterno, titolo, copertura", () => {
+  it("l'audit interno del consulente esterno non ha checklist", async () => {
+    api.list.mockResolvedValue({ results: [prep({ audit_type: "interno", external_consultant: true, requesting_party: "" })] } as never);
+    await openPrep();
+    expect((await screen.findAllByText("audit_prep.consultant.badge")).length).toBeGreaterThan(0);
+    expect(screen.queryByText("audit_prep.tab_checklist")).not.toBeInTheDocument();
+  });
+
+  it("il flag si salva dal tab Info", async () => {
+    api.list.mockResolvedValue({ results: [prep({ audit_type: "interno", requesting_party: "" })] } as never);
+    api.update.mockResolvedValue({} as never);
+    await openInfo();
+    fireEvent.click(screen.getByLabelText(/audit_prep\.consultant\.flag_label/));
+    fireEvent.click(screen.getByText("audit_prep.external.save_btn"));
+    await vi.waitFor(() => expect(api.update).toHaveBeenCalledWith("a1",
+      { audit_type: "interno", requesting_party: "", external_consultant: true }));
+  });
+
+  it("il titolo si modifica; nel multi-sito sull'audit comune", async () => {
+    api.update.mockResolvedValue({} as never);
+    await openPrep();
+    fireEvent.click(await screen.findByLabelText("audit_prep.title_edit.btn"));
+    fireEvent.change(screen.getByLabelText("audit_prep.title_label"), { target: { value: "Nuovo titolo" } });
+    fireEvent.click(screen.getByText("audit_prep.external.save_btn"));
+    await vi.waitFor(() => expect(api.update).toHaveBeenCalledWith("a1", { title: "Nuovo titolo" }));
+  });
+
+  it("titolo di un audit multi-sito → updateGroup", async () => {
+    api.list.mockResolvedValue({ results: [prep(grouped)] } as never);
+    api.updateGroup.mockResolvedValue({} as never);
+    await openPrep();
+    fireEvent.click(await screen.findByLabelText("audit_prep.title_edit.btn"));
+    expect(screen.getByLabelText("audit_prep.title_label")).toHaveValue("TISAX AL2 2026");
+    fireEvent.change(screen.getByLabelText("audit_prep.title_label"), { target: { value: "TISAX rinnovo" } });
+    fireEvent.click(screen.getByText("audit_prep.external.save_btn"));
+    await vi.waitFor(() => expect(api.updateGroup).toHaveBeenCalledWith("g1", { title: "TISAX rinnovo" }));
+  });
+
+  it("la copertura compare solo per gli audit del programma", async () => {
+    api.list.mockResolvedValue({ results: [prep({ audit_type: "interno", coverage_type: "full" })] } as never);
+    await openPrep();
+    await screen.findByLabelText("audit_prep.title_edit.btn");
+    expect(screen.queryByText(/audit_prep\.coverage_full/)).not.toBeInTheDocument();
+  });
+
+  it("audit del programma: la copertura resta", async () => {
+    api.list.mockResolvedValue({ results: [prep({ audit_type: "interno", audit_program: "pr1" })] } as never);
+    await openPrep();
+    expect(await screen.findByText(/audit_prep\.coverage_campione/)).toBeInTheDocument();
+  });
+});

@@ -139,7 +139,7 @@ def test_shared_fields_not_editable_from_single_site(co, group):
     prep_id = group["preps"][0]["id"]
     assert c.patch(f"{URL_PREPS}{prep_id}/", {"auditor_name": "Altro"}, format="json").status_code == 400
     # i campi del singolo sito restano modificabili
-    assert c.patch(f"{URL_PREPS}{prep_id}/", {"coverage_type": "full"}, format="json").status_code == 200
+    assert c.patch(f"{URL_PREPS}{prep_id}/", {"title": "Solo questo sito"}, format="json").status_code == 200
 
 
 @pytest.mark.django_db

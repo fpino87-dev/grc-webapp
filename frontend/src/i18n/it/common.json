@@ -3084,6 +3084,19 @@
       "report_ok": "Rapporto del cliente allegato",
       "report_missing": "Rapporto del cliente non ancora allegato",
       "framework_hint": "Solo come riferimento: per un audit di seconda parte non si carica la checklist dei controlli, si registrano i rilievi dell'auditor."
+    },
+    "consultant": {
+      "badge": "Interno — consulente esterno",
+      "flag_label": "Condotto da un consulente esterno",
+      "flag_hint": "Si gestisce come un audit di seconda parte: niente checklist né prontezza, si registrano i rilievi del consulente e si allega il suo rapporto.",
+      "framework_hint": "Solo come riferimento: per un audit affidato a un consulente esterno non si carica la checklist dei controlli, si registrano i rilievi del consulente.",
+      "name_label": "Consulente / società",
+      "report_ok": "Rapporto del consulente allegato",
+      "report_missing": "Rapporto del consulente non ancora allegato"
+    },
+    "title_edit": {
+      "btn": "Modifica titolo",
+      "group_hint": "Audit multi-sito: il titolo vale per l'audit comune e viene riportato su ogni sito."
     }
   },
   "risk": {

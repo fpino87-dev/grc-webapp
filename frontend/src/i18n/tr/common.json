@@ -3084,6 +3084,19 @@
       "report_ok": "Müşteri raporu eklendi",
       "report_missing": "Müşteri raporu henüz eklenmedi",
       "framework_hint": "Yalnızca referans: ikinci taraf denetiminde kontrol listesi yüklenmez; denetçinin bulguları kaydedilir."
+    },
+    "consultant": {
+      "badge": "İç — dış danışman",
+      "flag_label": "Dış danışman tarafından yürütülür",
+      "flag_hint": "İkinci taraf denetimi gibi yönetilir: kontrol listesi ve hazırlık yok; danışmanın bulgularını kaydedin ve raporunu ekleyin.",
+      "framework_hint": "Yalnızca referans için: dış danışmana verilen bir denetimde kontrol listesi yüklenmez; danışmanın bulgularını kaydedin.",
+      "name_label": "Danışman / firma",
+      "report_ok": "Danışman raporu eklendi",
+      "report_missing": "Danışman raporu henüz eklenmedi"
+    },
+    "title_edit": {
+      "btn": "Başlığı düzenle",
+      "group_hint": "Çok tesisli denetim: başlık ortak denetim için geçerlidir ve her tesise aktarılır."
     }
   },
   "risk": {
