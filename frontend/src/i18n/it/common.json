@@ -3079,6 +3079,10 @@
       "evidence_optional": "— evidenza di chiusura (facoltativa) —",
       "confirm": "Chiudi"
     },
+    "finding_edit": {
+      "btn": "Modifica",
+      "common_hint": "Rilievo comune: titolo e descrizione cambiano su tutti i siti dell'audit."
+    },
     "second_party": {
       "summary": "Rilievi aperti: {{open}} su {{total}} (NC aperte: {{nc}})",
       "report_ok": "Rapporto del cliente allegato",

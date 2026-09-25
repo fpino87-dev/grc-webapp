@@ -3079,6 +3079,10 @@
       "evidence_optional": "— dowód zamknięcia (opcjonalny) —",
       "confirm": "Zamknij"
     },
+    "finding_edit": {
+      "btn": "Edytuj",
+      "common_hint": "Ustalenie wspólne: tytuł i opis zmieniają się we wszystkich zakładach audytu."
+    },
     "second_party": {
       "summary": "Otwarte ustalenia: {{open}} z {{total}} (otwarte NC: {{nc}})",
       "report_ok": "Raport klienta załączony",

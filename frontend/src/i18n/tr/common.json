@@ -3079,6 +3079,10 @@
       "evidence_optional": "— kapanış kanıtı (isteğe bağlı) —",
       "confirm": "Kapat"
     },
+    "finding_edit": {
+      "btn": "Düzenle",
+      "common_hint": "Ortak bulgu: başlık ve açıklama denetimin tüm tesislerinde değişir."
+    },
     "second_party": {
       "summary": "Açık bulgular: {{open}} / {{total}} (açık NC: {{nc}})",
       "report_ok": "Müşteri raporu eklendi",

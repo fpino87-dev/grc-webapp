@@ -3079,6 +3079,10 @@
       "evidence_optional": "— closure evidence (optional) —",
       "confirm": "Close"
     },
+    "finding_edit": {
+      "btn": "Edit",
+      "common_hint": "Common finding: title and description change on all the audit's sites."
+    },
     "second_party": {
       "summary": "Open findings: {{open}} of {{total}} (open NCs: {{nc}})",
       "report_ok": "Customer report attached",

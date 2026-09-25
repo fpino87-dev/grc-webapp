@@ -517,6 +517,28 @@ class AuditFindingViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         # Attach the created instance so DRF can return it
         serializer.instance = finding
 
+    def perform_update(self, serializer):
+        """Del finding si correggono solo i testi (refusi): tipo, audit, date e
+        stato passano dalle azioni dedicate (PDCA, chiusura)."""
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        from django.utils.translation import gettext as _
+        from rest_framework.exceptions import ValidationError as DRFValidationError
+
+        data = dict(serializer.validated_data)
+        other = set(data) - set(services.FINDING_EDITABLE_FIELDS)
+        if other:
+            raise DRFValidationError({"error": _(
+                "Del finding si modificano solo titolo, descrizione, causa radice e azione correttiva."
+            )})
+        finding = serializer.instance
+        # rilievo comune: titolo e descrizione cambiano su tutti i siti
+        if finding.common_key and set(data) & set(services.FINDING_SHARED_TEXT) and finding.audit_prep.group_id:
+            _require_all_group_sites(self.request.user, finding.audit_prep.group)
+        try:
+            serializer.instance = services.update_finding_text(finding, self.request.user, **data)
+        except DjangoValidationError as exc:
+            raise DRFValidationError({"error": exc.messages[0]}) from exc
+
     def get_queryset(self):
         qs = super().get_queryset()
         # ?without_pdca=true → finding ancora senza PDCA (per il collegamento);

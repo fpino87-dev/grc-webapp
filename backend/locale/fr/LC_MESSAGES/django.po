@@ -2976,3 +2976,15 @@ msgstr "Le constat a déjà un PDCA en cours : liez-le au PDCA commun avec «Rem
 #: apps/audit_prep/views.py
 msgid "Audit interno condotto da un consulente esterno: i punti di verifica sono quelli del consulente, la checklist dei controlli non si usa. Registra i rilievi del consulente come finding."
 msgstr "Audit interne réalisé par un consultant externe : les points de vérification sont ceux du consultant, la checklist des contrôles n'est pas utilisée. Enregistrez les constats du consultant."
+
+#: apps/audit_prep/services.py
+msgid "Il titolo del finding è obbligatorio."
+msgstr "Le titre du constat est obligatoire."
+
+#: apps/audit_prep/services.py
+msgid "L'audit è archiviato: i finding non si modificano."
+msgstr "L'audit est archivé : ses constats ne peuvent pas être modifiés."
+
+#: apps/audit_prep/views.py
+msgid "Del finding si modificano solo titolo, descrizione, causa radice e azione correttiva."
+msgstr "Seuls le titre, la description, la cause racine et l'action corrective d'un constat peuvent être modifiés."

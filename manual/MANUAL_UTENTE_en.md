@@ -948,6 +948,8 @@ The system creates **one audit per site** (title "… — site code"), linked to
 
 **Common finding** — in the finding form tick **Finding common to all the audit's sites**: one finding is created for each site, each with its own PDCA, marked **Common to sites**. Without the tick the finding stays on the site where you record it.
 
+**Correcting a finding** — use **✎ Edit** on the finding card to correct its title and description (e.g. a typo). For a common finding the correction applies to all sites. Type, dates and status cannot be edited: they go through the PDCA and closure. Findings of archived audits can no longer be edited.
+
 **Common PDCA** — for a common nonconformity, users with access to the whole organisation also see the tick **A single organisation PDCA for all sites** (on by default): instead of one PDCA per site, a single organisation-wide PDCA is opened and linked to the finding on every site. On a common finding already recorded, the **PDCA common to all sites** button does the same: it replaces (and archives) automatic PDCAs not yet worked on, while sites with a PDCA already in progress are left as they are and reported. From **Link to existing PDCA** you can also choose an organisation PDCA: the link applies to the finding on all sites. When the common PDCA is closed, the findings on all sites are closed according to the CHECK outcome, as with a site PDCA.
 
 In the organization-wide management review, the multi-site audit counts **once**, with the list of the sites involved; in a site's review only that site's audit appears.

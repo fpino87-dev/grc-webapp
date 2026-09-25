@@ -2909,3 +2909,15 @@ msgstr "The finding already has a PDCA in progress: link it to the common PDCA w
 #: apps/audit_prep/views.py
 msgid "Audit interno condotto da un consulente esterno: i punti di verifica sono quelli del consulente, la checklist dei controlli non si usa. Registra i rilievi del consulente come finding."
 msgstr "Internal audit conducted by an external consultant: the audit points are the consultant's, the controls checklist is not used. Record the consultant's findings as findings."
+
+#: apps/audit_prep/services.py
+msgid "Il titolo del finding è obbligatorio."
+msgstr "The finding title is required."
+
+#: apps/audit_prep/services.py
+msgid "L'audit è archiviato: i finding non si modificano."
+msgstr "The audit is archived: its findings cannot be edited."
+
+#: apps/audit_prep/views.py
+msgid "Del finding si modificano solo titolo, descrizione, causa radice e azione correttiva."
+msgstr "Only the title, description, root cause and corrective action of a finding can be edited."

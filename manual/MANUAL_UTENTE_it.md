@@ -948,6 +948,8 @@ Il sistema crea **un audit per sito** (titolo "… — codice sito"), collegati 
 
 **Rilievo comune** — nel form del finding spunta **Rilievo comune a tutti i siti dell'audit**: viene creato un finding per ogni sito, ciascuno con il proprio PDCA, contrassegnati come **Comune ai siti**. Senza la spunta il finding resta sul sito in cui lo registri.
 
+**Correggere un finding** — con **✎ Modifica** nella card del finding correggi titolo e descrizione (es. un refuso). In un rilievo comune la correzione vale per tutti i siti. Tipo, date e stato non si modificano: passano da PDCA e chiusura. Negli audit archiviati i finding non si modificano più.
+
 **PDCA comune** — per una non conformità comune, chi ha accesso a tutta l'organizzazione vede anche la spunta **Un solo PDCA di organizzazione per tutti i siti** (attiva di default): invece di un PDCA per sito se ne apre uno solo, di organizzazione, collegato al finding di ogni sito. Su un rilievo comune già registrato, il pulsante **PDCA comune a tutti i siti** fa lo stesso: sostituisce (e archivia) i PDCA automatici non ancora lavorati, mentre i siti con un PDCA già in lavorazione restano com'erano e vengono segnalati. Da **Collega a PDCA esistente** si può scegliere anche un PDCA di organizzazione: il collegamento vale per il rilievo su tutti i siti. Alla chiusura del PDCA comune i finding di tutti i siti si chiudono secondo l'esito del CHECK, come per un PDCA di sito.
 
 Nel riesame di direzione di organizzazione l'audit su più siti conta **una volta**, con l'elenco dei siti coinvolti; nel riesame di un sito compare il solo audit di quel sito.

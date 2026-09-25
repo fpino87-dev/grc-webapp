@@ -2931,3 +2931,15 @@ msgstr "Ustalenie ma już PDCA w toku: powiąż je ze wspólnym PDCA za pomocą 
 #: apps/audit_prep/views.py
 msgid "Audit interno condotto da un consulente esterno: i punti di verifica sono quelli del consulente, la checklist dei controlli non si usa. Registra i rilievi del consulente come finding."
 msgstr "Audyt wewnętrzny prowadzony przez zewnętrznego konsultanta: punkty weryfikacji są punktami konsultanta, lista kontrolna nie jest używana. Zarejestruj ustalenia konsultanta jako ustalenia."
+
+#: apps/audit_prep/services.py
+msgid "Il titolo del finding è obbligatorio."
+msgstr "Tytuł ustalenia jest wymagany."
+
+#: apps/audit_prep/services.py
+msgid "L'audit è archiviato: i finding non si modificano."
+msgstr "Audyt jest zarchiwizowany: ustaleń nie można edytować."
+
+#: apps/audit_prep/views.py
+msgid "Del finding si modificano solo titolo, descrizione, causa radice e azione correttiva."
+msgstr "W ustaleniu można edytować tylko tytuł, opis, przyczynę źródłową i działanie korygujące."

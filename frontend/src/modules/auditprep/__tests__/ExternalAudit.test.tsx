@@ -30,7 +30,7 @@ vi.mock("../../../api/endpoints/auditPrep", () => ({
     list: vi.fn(), programs: vi.fn(), findings: vi.fn(), evidence: vi.fn(), create: vi.fn(),
     update: vi.fn(), uploadReportFile: vi.fn(), detachReportFile: vi.fn(), downloadPrepReport: vi.fn(),
     downloadReportFile: vi.fn(), createGroup: vi.fn(), updateGroup: vi.fn(), createFinding: vi.fn(),
-    openPdca: vi.fn(), linkPdca: vi.fn(), unlinkPdca: vi.fn(), closeFinding: vi.fn(), closeWithPdca: vi.fn(), replacePdca: vi.fn(),
+    updateFinding: vi.fn(), openPdca: vi.fn(), linkPdca: vi.fn(), unlinkPdca: vi.fn(), closeFinding: vi.fn(), closeWithPdca: vi.fn(), replacePdca: vi.fn(),
   },
 }));
 
@@ -284,5 +284,24 @@ describe("Audit Prep — interno con consulente esterno, titolo, copertura", () 
     api.list.mockResolvedValue({ results: [prep({ audit_type: "interno", audit_program: "pr1" })] } as never);
     await openPrep();
     expect(await screen.findByText(/audit_prep\.coverage_campione/)).toBeInTheDocument();
+  });
+});
+
+describe("Audit Prep — correzione del finding", () => {
+  it("titolo e descrizione si modificano dopo il salvataggio", async () => {
+    api.findings.mockResolvedValue([{
+      id: "f1", audit_prep: "a1", finding_type: "observation", title: "Titlo", description: "Descrizone",
+      auditor_name: "", audit_date: "2026-09-10", response_deadline: null, status: "open", root_cause: "",
+      corrective_action: "", pdca_cycle: null, common_key: null, pdca_title: null, pdca_phase: null,
+      pdca_is_org: false, closure_notes: "", closed_at: null, closed_by_name: null,
+      is_overdue: false, auto_generated: false, control_external_id: null,
+    }] as never);
+    api.updateFinding.mockResolvedValue({} as never);
+    await openPrep();
+    fireEvent.click(await screen.findByText(/audit_prep\.finding_edit\.btn/));
+    fireEvent.change(screen.getByLabelText("audit_prep.title_label"), { target: { value: "Titolo" } });
+    fireEvent.change(screen.getByLabelText("audit_prep.description_label"), { target: { value: "Descrizione" } });
+    fireEvent.click(screen.getByText("audit_prep.external.save_btn"));
+    await vi.waitFor(() => expect(api.updateFinding).toHaveBeenCalledWith("f1", { title: "Titolo", description: "Descrizione" }));
   });
 });

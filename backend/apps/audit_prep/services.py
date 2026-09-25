@@ -741,6 +741,51 @@ def open_pdca_for_finding(finding: AuditFinding, user, title: str = "", descrizi
     return cycle
 
 
+# Testi del finding correggibili dopo il salvataggio (refusi, descrizione
+# incompleta). Tipo, audit, date e stato restano governati dalle azioni.
+FINDING_EDITABLE_FIELDS = ("title", "description", "root_cause", "corrective_action")
+# Testi del rilievo: nei finding comuni valgono per tutti i siti.
+FINDING_SHARED_TEXT = ("title", "description")
+
+
+def update_finding_text(finding: AuditFinding, user, **fields) -> AuditFinding:
+    """Corregge i testi di un finding. Titolo e descrizione di un rilievo
+    comune si riportano sui finding degli altri siti (stesso common_key);
+    causa radice e azione correttiva restano del singolo sito."""
+    from django.core.exceptions import ValidationError
+
+    changes = {k: v for k, v in fields.items() if k in FINDING_EDITABLE_FIELDS}
+    if "title" in changes:
+        changes["title"] = (changes["title"] or "").strip()
+        if not changes["title"]:
+            raise ValidationError(_("Il titolo del finding è obbligatorio."))
+    if finding.audit_prep.status == "archiviato":
+        raise ValidationError(_("L'audit è archiviato: i finding non si modificano."))
+    changed = [k for k, v in changes.items() if getattr(finding, k) != v]
+    if not changed:
+        return finding
+    shared = {k: changes[k] for k in changed if k in FINDING_SHARED_TEXT}
+    with transaction.atomic():
+        for k in changed:
+            setattr(finding, k, changes[k])
+        finding.save(update_fields=[*changed, "updated_at"])
+        siblings = 0
+        if finding.common_key and shared:
+            siblings = (
+                AuditFinding.objects.filter(common_key=finding.common_key)
+                .exclude(pk=finding.pk)
+                .update(**shared, updated_at=timezone.now())
+            )
+        log_action(
+            user=user,
+            action_code="audit.finding.updated",
+            level="L2",
+            entity=finding,
+            payload={"fields": sorted(changed), "common_siblings_updated": siblings},
+        )
+    return finding
+
+
 def unlink_finding_from_pdca(finding: AuditFinding, user, reason: str) -> AuditFinding:
     """Scollega un PDCA collegato per errore: motivazione obbligatoria, resta
     nell'audit trail. Il PDCA non viene toccato."""

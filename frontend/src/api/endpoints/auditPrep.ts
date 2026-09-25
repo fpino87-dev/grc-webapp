@@ -206,6 +206,9 @@ export const auditPrepApi = {
     apiClient.post<AuditFinding>(`/audit-prep/findings/${findingId}/unlink-pdca/`, { reason }).then(r => r.data),
   createFinding: (data: Record<string, unknown>) =>
     apiClient.post<AuditFinding>("/audit-prep/findings/", data).then(r => r.data),
+  /** Corregge i testi del finding (nel rilievo comune titolo e descrizione valgono per tutti i siti). */
+  updateFinding: (id: string, data: Partial<Pick<AuditFinding, "title" | "description" | "root_cause" | "corrective_action">>) =>
+    apiClient.patch<AuditFinding>(`/audit-prep/findings/${id}/`, data).then(r => r.data),
   closeFinding: (id: string, data: { closure_notes: string; evidence_id?: string }) =>
     apiClient.post<{ ok: boolean; status: string }>(`/audit-prep/findings/${id}/close/`, data).then(r => r.data),
   programs: (params?: Record<string, string>) =>

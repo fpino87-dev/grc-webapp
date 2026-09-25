@@ -269,6 +269,51 @@ function ExternalAuditSection({ prep }: { prep: AuditPrep }) {
   );
 }
 
+// ─── Testo del finding: correzione di titolo e descrizione ────────────────────
+
+/** Descrizione del finding con la correzione dei testi (refusi). Nel rilievo
+ *  comune titolo e descrizione cambiano su tutti i siti. */
+function FindingText({ finding, editable }: { finding: AuditFinding; editable: boolean }) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [editing, setEditing] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [error, setError] = useState("");
+  const save = useMutation({
+    mutationFn: () => auditPrepApi.updateFinding(finding.id, { title: title.trim(), description }),
+    onSuccess: () => { setEditing(false); setError(""); qc.invalidateQueries({ queryKey: ["findings"] }); },
+    onError: (e) => setError((e as { response?: { data?: { error?: string; detail?: string } } })?.response?.data?.error
+      || (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail || t("audit_prep.error_generic")),
+  });
+  if (!editing) {
+    return (
+      <div className="flex items-start gap-2 mt-1">
+        {finding.description && <p className="text-xs text-gray-500 flex-1 whitespace-pre-line">{finding.description}</p>}
+        {editable && (
+          <button onClick={() => { setTitle(finding.title); setDescription(finding.description); setEditing(true); }}
+            className="text-xs text-gray-500 hover:text-gray-700 ml-auto">✎ {t("audit_prep.finding_edit.btn")}</button>
+        )}
+      </div>
+    );
+  }
+  return (
+    <div className="mt-2 space-y-2 bg-gray-50 border rounded p-2">
+      <input value={title} onChange={e => setTitle(e.target.value)} maxLength={300}
+        aria-label={t("audit_prep.title_label")} className="w-full border rounded px-2 py-1 text-sm" />
+      <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3}
+        aria-label={t("audit_prep.description_label")} className="w-full border rounded px-2 py-1 text-xs" />
+      {finding.common_key && <p className="text-xs text-teal-800">{t("audit_prep.finding_edit.common_hint")}</p>}
+      <div className="flex gap-2">
+        <button onClick={() => save.mutate()} disabled={!title.trim() || save.isPending}
+          className="px-3 py-1 text-xs bg-primary-600 text-white rounded disabled:opacity-50">{t("audit_prep.external.save_btn")}</button>
+        <button onClick={() => { setEditing(false); setError(""); }} className="px-3 py-1 text-xs border rounded text-gray-600">{t("audit_prep.cancel_btn")}</button>
+      </div>
+      {error && <p className="text-xs text-red-600">{error}</p>}
+    </div>
+  );
+}
+
 // ─── Azioni sul finding: PDCA collegato e chiusura ────────────────────────────
 
 const PHASE_LABEL: Record<string, string> = { plan: "PLAN", do: "DO", check: "CHECK", act: "ACT" };
@@ -783,7 +828,7 @@ function PrepDrawer({ prep, onClose, initialTab = "checklist" }: {
                       </div>
                       <StatusBadge status={f.status} />
                     </div>
-                    {f.description && <p className="text-xs text-gray-500 mt-1">{f.description}</p>}
+                    <FindingText finding={f} editable={prep.status !== "archiviato"} />
                     <div className="flex gap-3 mt-1 text-xs text-gray-400">
                       {f.response_deadline && <span>{t("audit_prep.finding_deadline")} {f.response_deadline}</span>}
                       {f.control_external_id && <span>{t("audit_prep.finding_control")} {f.control_external_id}</span>}

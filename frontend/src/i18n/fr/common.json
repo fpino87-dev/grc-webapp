@@ -3079,6 +3079,10 @@
       "evidence_optional": "— preuve de clôture (facultative) —",
       "confirm": "Clôturer"
     },
+    "finding_edit": {
+      "btn": "Modifier",
+      "common_hint": "Constat commun : le titre et la description changent sur tous les sites de l'audit."
+    },
     "second_party": {
       "summary": "Constats ouverts : {{open}} sur {{total}} (NC ouvertes : {{nc}})",
       "report_ok": "Rapport du client joint",

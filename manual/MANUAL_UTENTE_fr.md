@@ -948,6 +948,8 @@ Le système crée **un audit par site** (titre « … — code du site »), lié
 
 **Constat commun** — dans le formulaire du constat, cochez **Constat commun à tous les sites de l'audit** : un constat est créé pour chaque site, chacun avec son propre PDCA, marqué **Commun aux sites**. Sans la case cochée, le constat reste sur le site où vous l'enregistrez.
 
+**Corriger un constat** — avec **✎ Modifier** sur la carte du constat, corrigez le titre et la description (par ex. une faute de frappe). Pour un constat commun, la correction s'applique à tous les sites. Le type, les dates et le statut ne se modifient pas : ils passent par le PDCA et la clôture. Les constats des audits archivés ne sont plus modifiables.
+
 **PDCA commun** — pour une non-conformité commune, les utilisateurs ayant accès à toute l'organisation voient aussi la case **Un seul PDCA d'organisation pour tous les sites** (cochée par défaut) : au lieu d'un PDCA par site, un seul PDCA d'organisation est ouvert et relié au constat de chaque site. Sur un constat commun déjà enregistré, le bouton **PDCA commun à tous les sites** fait de même : il remplace (et archive) les PDCA automatiques pas encore traités, tandis que les sites ayant un PDCA déjà en cours restent inchangés et sont signalés. Depuis **Lier à un PDCA existant**, vous pouvez aussi choisir un PDCA d'organisation : le lien vaut pour le constat sur tous les sites. À la clôture du PDCA commun, les constats de tous les sites sont clôturés selon le résultat du CHECK, comme pour un PDCA de site.
 
 Dans la revue de direction de l'organisation, l'audit multi-sites compte **une seule fois**, avec la liste des sites concernés ; dans la revue d'un site n'apparaît que l'audit de ce site.

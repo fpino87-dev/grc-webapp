@@ -2910,3 +2910,15 @@ msgstr "Bulgunun zaten devam eden bir PDCA'sı var: «PDCA'yı değiştir» ile 
 #: apps/audit_prep/views.py
 msgid "Audit interno condotto da un consulente esterno: i punti di verifica sono quelli del consulente, la checklist dei controlli non si usa. Registra i rilievi del consulente come finding."
 msgstr "Dış danışman tarafından yürütülen iç denetim: doğrulama noktaları danışmanınkilerdir, kontrol listesi kullanılmaz. Danışmanın tespitlerini bulgu olarak kaydedin."
+
+#: apps/audit_prep/services.py
+msgid "Il titolo del finding è obbligatorio."
+msgstr "Bulgu başlığı zorunludur."
+
+#: apps/audit_prep/services.py
+msgid "L'audit è archiviato: i finding non si modificano."
+msgstr "Denetim arşivlendi: bulgular düzenlenemez."
+
+#: apps/audit_prep/views.py
+msgid "Del finding si modificano solo titolo, descrizione, causa radice e azione correttiva."
+msgstr "Bir bulguda yalnızca başlık, açıklama, kök neden ve düzeltici faaliyet düzenlenebilir."
