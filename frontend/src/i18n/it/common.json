@@ -3062,6 +3062,14 @@
       "close_with": "Chiudi con il PDCA",
       "close_with_title": "Chiude il finding usando l'evidenza della fase DO e la descrizione ACT del PDCA collegato, già chiuso."
     },
+    "common_pdca": {
+      "linked": "PDCA di organizzazione · {{phase}}",
+      "open": "PDCA comune a tutti i siti",
+      "open_title": "Apre un solo PDCA di organizzazione e lo collega a questo rilievo su tutti i siti dell'audit. Sostituisce i PDCA automatici non ancora lavorati; i siti con un PDCA già in lavorazione restano com'erano.",
+      "org_tag": "Organizzazione",
+      "skipped": "Non collegati al PDCA comune (hanno già un PDCA in lavorazione): {{sites}}",
+      "create_label": "Un solo PDCA di organizzazione per tutti i siti (azione correttiva comune)"
+    },
     "close_finding": {
       "btn": "Chiudi finding",
       "pdca_hint": "Il finding si chiude quando il PDCA collegato è in ACT o chiuso. Se è in ACT e copre solo questo finding, viene chiuso insieme con le note qui sotto.",

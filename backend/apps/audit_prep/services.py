@@ -226,18 +226,31 @@ def detach_group_report(group: AuditGroup, user) -> None:
         )
 
 
-def open_group_finding(audit_prep: AuditPrep, **kwargs) -> list[AuditFinding]:
+def open_group_finding(audit_prep: AuditPrep, common_pdca: bool = False, **kwargs) -> list[AuditFinding]:
     """Rilievo comune a tutti i siti di un audit multi-sito: un finding per
-    sito (con PDCA, scadenza e task sul sito), legati dallo stesso common_key.
-    Il primo della lista è quello dell'audit da cui è stato registrato."""
+    sito (con scadenza e task sul sito), legati dallo stesso common_key.
+    Il primo della lista è quello dell'audit da cui è stato registrato.
+
+    Per una NC il PDCA è di default uno per sito; con `common_pdca` è uno solo,
+    di organizzazione, collegato a tutti i finding (azione di sistema unica).
+    Il PDCA di organizzazione lo gestisce solo chi ha scope org."""
     if not audit_prep.group_id:
         return [open_finding(audit_prep, **kwargs)]
+    is_nc = kwargs.get("finding_type") in ("major_nc", "minor_nc")
+    common_pdca = common_pdca and is_nc
+    if common_pdca:
+        _require_org_scope(kwargs["user"])
     key = uuid.uuid4()
     preps = [audit_prep] + list(
         audit_prep.group.preps.exclude(pk=audit_prep.pk).select_related("plant").order_by("plant__code")
     )
     with transaction.atomic():
-        return [open_finding(p, common_key=key, **kwargs) for p in preps]
+        findings = [open_finding(p, common_key=key, create_pdca=not common_pdca, **kwargs) for p in preps]
+        if common_pdca:
+            open_common_pdca(findings[0], kwargs["user"])
+            for f in findings:
+                f.refresh_from_db()
+        return findings
 
 
 def open_finding(audit_prep, finding_type: str, title: str,
@@ -245,7 +258,8 @@ def open_finding(audit_prep, finding_type: str, title: str,
                  control_instance=None,
                  auditor_name: str = "",
                  auto_generated: bool = False,
-                 common_key=None) -> AuditFinding:
+                 common_key=None,
+                 create_pdca: bool = True) -> AuditFinding:
     """
     Crea un AuditFinding e genera automaticamente:
     - PDCA (obbligatorio per major/minor)
@@ -284,7 +298,7 @@ def open_finding(audit_prep, finding_type: str, title: str,
     )
 
     # Crea PDCA automatico per major e minor NC
-    if finding_type in ("major_nc", "minor_nc"):
+    if create_pdca and finding_type in ("major_nc", "minor_nc"):
         cycle_title = f"[{finding_type.upper()}] {title}"
         cycle = create_cycle(
             plant=audit_prep.plant,
@@ -358,15 +372,41 @@ def _is_closed(finding: AuditFinding) -> bool:
     return finding.status in ("closed", "accepted_by_auditor")
 
 
+def _require_org_scope(user) -> None:
+    """Il PDCA di organizzazione (senza sito) lo gestisce solo chi ha scope org."""
+    from django.core.exceptions import ValidationError
+    from core.scoping import user_has_org_scope
+
+    if not user_has_org_scope(user):
+        raise ValidationError(_(
+            "Solo chi ha accesso a tutta l'organizzazione può usare un PDCA di "
+            "organizzazione per i finding comuni."
+        ))
+
+
 def _check_linkable(finding: AuditFinding, cycle) -> None:
     """Regole del collegamento (opzione A): un finding ha al massimo un PDCA;
     un PDCA può coprire più finding, ma dello stesso audit e sito. Il PDCA può
     essere in qualunque fase, anche chiuso: un'azione correttiva già eseguita
-    prima di registrare il finding, o il recupero dello storico."""
+    prima di registrare il finding, o il recupero dello storico.
+
+    Eccezione: un PDCA di organizzazione (senza sito) copre i finding comuni di
+    un audit multi-sito, cioè quelli con lo stesso common_key, su tutti i siti."""
     from django.core.exceptions import ValidationError
 
     if finding.pdca_cycle_id:
         raise ValidationError(_("Il finding è già collegato a un PDCA."))
+    if cycle.plant_id is None:
+        if not finding.common_key:
+            raise ValidationError(_(
+                "Un PDCA di organizzazione si collega solo ai finding comuni di un audit multi-sito."
+            ))
+        if cycle.findings.exclude(common_key=finding.common_key).exists():
+            raise ValidationError(_(
+                "Il PDCA di organizzazione copre già un altro rilievo: si possono collegare "
+                "solo i finding dello stesso rilievo comune."
+            ))
+        return
     if cycle.plant_id != finding.audit_prep.plant_id:
         raise ValidationError(_("Il PDCA deve essere dello stesso sito dell'audit."))
     other = cycle.findings.exclude(audit_prep_id=finding.audit_prep_id).first()
@@ -559,6 +599,100 @@ def replace_finding_pdca(finding: AuditFinding, cycle, user, reason: str) -> Aud
                      "old_archived": archive_old, "reason": reason.strip()[:200]},
         )
     return finding
+
+
+def _common_siblings(finding: AuditFinding):
+    """Il finding e gli altri finding dello stesso rilievo comune (tutti i siti)."""
+    return (
+        AuditFinding.objects.filter(common_key=finding.common_key)
+        .select_related("audit_prep__plant", "pdca_cycle", "control_instance")
+        .order_by("audit_prep__plant__code")
+    )
+
+
+def link_common_findings_to_pdca(finding: AuditFinding, cycle, user, reason: str = "") -> dict:
+    """Collega a un PDCA di organizzazione il rilievo comune su tutti i siti.
+
+    Per ogni finding dello stesso common_key:
+    - senza PDCA → collegato;
+    - con il PDCA automatico della NC mai lavorato → sostituito (il vecchio
+      viene archiviato, come in `replace_finding_pdca`);
+    - con un altro PDCA già lavorato → lasciato com'è e riportato in `skipped`,
+      salvo il finding da cui si parte se c'è un `reason` (sostituzione esplicita).
+    Ritorna {"linked": [...], "skipped": [...]} con i codici sito."""
+    from django.core.exceptions import ValidationError
+
+    _require_org_scope(user)
+    if cycle.plant_id is not None:
+        raise ValidationError(_("Il PDCA scelto non è di organizzazione."))
+    if not finding.common_key:
+        raise ValidationError(_(
+            "Un PDCA di organizzazione si collega solo ai finding comuni di un audit multi-sito."
+        ))
+    auto_reason = _("Rilievo comune: sostituito dal PDCA di organizzazione «%(title)s».") % {"title": cycle.title}
+    linked, skipped = [], []
+    with transaction.atomic():
+        for f in _common_siblings(finding):
+            code = f.audit_prep.plant.code
+            if f.pdca_cycle_id == cycle.pk:
+                continue
+            if f.pdca_cycle_id is None:
+                link_finding_to_pdca(f, cycle, user)
+            elif _is_untouched_auto_cycle(f.pdca_cycle, f):
+                replace_finding_pdca(f, cycle, user, auto_reason)
+            elif f.pk == finding.pk and reason and len(reason.strip()) >= 10:
+                replace_finding_pdca(f, cycle, user, reason)
+            else:
+                skipped.append(code)
+                continue
+            linked.append(code)
+        if not cycle.findings.filter(pk=finding.pk).exists():
+            raise ValidationError(_(
+                "Il finding ha già un PDCA in lavorazione: per sostituirlo indica il motivo "
+                "(minimo 10 caratteri)."
+            ))
+    return {"linked": linked, "skipped": skipped}
+
+
+def open_common_pdca(finding: AuditFinding, user, title: str = "", descrizione: str = ""):
+    """Apre un PDCA di organizzazione per un rilievo comune e lo collega ai
+    finding di tutti i siti (regole di `link_common_findings_to_pdca`)."""
+    from django.core.exceptions import ValidationError
+    from apps.pdca.services import create_cycle
+
+    _require_org_scope(user)
+    if not finding.common_key:
+        raise ValidationError(_(
+            "Un PDCA di organizzazione si apre solo per i finding comuni di un audit multi-sito."
+        ))
+    if _is_closed(finding):
+        raise ValidationError(_(
+            "Il finding è chiuso: non si apre un nuovo PDCA, collegalo a un PDCA esistente."
+        ))
+    if finding.pdca_cycle_id and not _is_untouched_auto_cycle(finding.pdca_cycle, finding):
+        raise ValidationError(_(
+            "Il finding ha già un PDCA in lavorazione: collegalo al PDCA comune con «Sostituisci PDCA»."
+        ))
+    prep = finding.audit_prep
+    with transaction.atomic():
+        cycle = create_cycle(
+            plant=None,
+            title=(title.strip() or f"[{FINDING_LABEL[finding.finding_type]}] {finding.title}")[:255],
+            trigger_type=PDCA_TRIGGER_MAP[finding.finding_type],
+            trigger_source_id=finding.pk,
+            scope_type="org",
+        )
+        cycle.audit_subtype = prep.audit_type
+        cycle.descrizione = descrizione or finding.description
+        cycle.created_by = user
+        cycle.save(update_fields=["audit_subtype", "descrizione", "created_by", "updated_at"])
+        log_action(
+            user=user, action_code="pdca.cycle.create", level="L2", entity=cycle,
+            payload={"cycle_id": str(cycle.pk), "title": cycle.title, "finding": str(finding.pk),
+                     "common_key": str(finding.common_key)},
+        )
+        result = link_common_findings_to_pdca(finding, cycle, user)
+    return cycle, result
 
 
 def open_pdca_for_finding(finding: AuditFinding, user, title: str = "", descrizione: str = ""):

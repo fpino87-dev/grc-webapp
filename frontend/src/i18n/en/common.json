@@ -3062,6 +3062,14 @@
       "close_with": "Close with the PDCA",
       "close_with_title": "Closes the finding using the DO phase evidence and the ACT description of the linked PDCA, already closed."
     },
+    "common_pdca": {
+      "linked": "Organisation PDCA · {{phase}}",
+      "open": "PDCA common to all sites",
+      "open_title": "Opens a single organisation-wide PDCA and links it to this finding on every site of the audit. It replaces automatic PDCAs not yet worked on; sites with a PDCA already in progress are left as they are.",
+      "org_tag": "Organisation",
+      "skipped": "Not linked to the common PDCA (they already have a PDCA in progress): {{sites}}",
+      "create_label": "A single organisation PDCA for all sites (common corrective action)"
+    },
     "close_finding": {
       "btn": "Close finding",
       "pdca_hint": "The finding can be closed when the linked PDCA is in ACT or closed. If it is in ACT and covers only this finding, it is closed together with the notes below.",

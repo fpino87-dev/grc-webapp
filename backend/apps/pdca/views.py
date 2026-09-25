@@ -154,9 +154,14 @@ class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         finding = self._scoped_finding(request.data.get("finding"))
         try:
             with transaction.atomic():
+                # ciclo di organizzazione: il rilievo comune su tutti i siti
+                if cycle.plant_id is None:
+                    audit_services.link_common_findings_to_pdca(
+                        finding, cycle, request.user, request.data.get("reason", ""),
+                    )
                 # finding con già un PDCA (es. quello automatico della NC):
                 # sostituzione, con motivo obbligatorio
-                if finding.pdca_cycle_id:
+                elif finding.pdca_cycle_id:
                     audit_services.replace_finding_pdca(
                         finding, cycle, request.user, request.data.get("reason", ""),
                     )

@@ -3062,6 +3062,14 @@
       "close_with": "Zamknij z PDCA",
       "close_with_title": "Zamyka ustalenie, używając dowodu z fazy DO i opisu ACT powiązanego, już zamkniętego PDCA."
     },
+    "common_pdca": {
+      "linked": "PDCA organizacji · {{phase}}",
+      "open": "PDCA wspólny dla wszystkich zakładów",
+      "open_title": "Otwiera jeden PDCA na poziomie organizacji i łączy go z tym ustaleniem we wszystkich zakładach audytu. Zastępuje automatyczne PDCA, nad którymi jeszcze nie pracowano; zakłady z PDCA w toku pozostają bez zmian.",
+      "org_tag": "Organizacja",
+      "skipped": "Niepołączone ze wspólnym PDCA (mają już PDCA w toku): {{sites}}",
+      "create_label": "Jeden PDCA organizacji dla wszystkich zakładów (wspólne działanie korygujące)"
+    },
     "close_finding": {
       "btn": "Zamknij ustalenie",
       "pdca_hint": "Ustalenie można zamknąć, gdy powiązany PDCA jest w fazie ACT lub zamknięty. Jeśli jest w ACT i obejmuje tylko to ustalenie, zostaje zamknięty razem z nim na podstawie poniższych uwag.",

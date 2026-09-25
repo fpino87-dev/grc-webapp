@@ -217,6 +217,7 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [mode, setMode] = useState<"" | "link" | "unlink" | "replace" | "close">("");
+  const [notice, setNotice] = useState("");
   const [cycleId, setCycleId] = useState("");
   const [reason, setReason] = useState("");
   const [notes, setNotes] = useState("");
@@ -225,13 +226,20 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
   const isClosed = finding.status === "closed" || finding.status === "accepted_by_auditor";
   const isNc = finding.finding_type === "major_nc" || finding.finding_type === "minor_nc";
 
+  // Rilievo comune di un audit multi-sito: con scope org si può usare un solo
+  // PDCA di organizzazione per tutti i siti (il backend ricontrolla).
+  const { data: caps } = useQuery({ queryKey: ["pdca-capabilities"], queryFn: pdcaApi.capabilities });
+  const commonOrg = !!finding.common_key && !!caps?.can_manage_org;
   // Tutti i PDCA del sito, anche chiusi: azione già eseguita o recupero dello storico.
+  // Per un rilievo comune anche quelli di organizzazione (?site = sito + org).
   const { data: allCycles = [] } = useQuery({
-    queryKey: ["pdca-linkable", prep.plant],
-    queryFn: () => pdcaApi.list({ plant: prep.plant }).then(r => r.results),
+    queryKey: ["pdca-linkable", prep.plant, commonOrg],
+    queryFn: () => pdcaApi.list(commonOrg ? { site: prep.plant } : { plant: prep.plant }).then(r => r.results),
     enabled: mode === "link" || mode === "replace",
   });
   const cycles = allCycles.filter(c => c.id !== finding.pdca_cycle);
+  const cycleLabel = (c: { title: string; fase_corrente: string; plant: string | null }) =>
+    `${c.plant === null ? `[${t("audit_prep.common_pdca.org_tag")}] ` : ""}${c.title} — ${PHASE_LABEL[c.fase_corrente] ?? c.fase_corrente.toUpperCase()}`;
   const { data: evidences = [] } = useQuery<{ id: string; title: string }[]>({
     queryKey: ["finding-evidences", prep.plant],
     queryFn: () => apiClient.get("/documents/evidences/", { params: { plant: prep.plant, page_size: 1000 } })
@@ -241,12 +249,17 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
 
   const errMsg = (e: unknown) =>
     (e as { response?: { data?: { error?: string } } })?.response?.data?.error || t("audit_prep.error_generic");
-  const done = () => {
+  const done = (data?: unknown) => {
+    // Rilievo comune collegato al PDCA di organizzazione: siti rimasti fuori
+    // perché hanno già un PDCA in lavorazione.
+    const skipped = (data as { common_link?: { skipped?: string[] } | null } | undefined)?.common_link?.skipped ?? [];
+    setNotice(skipped.length ? t("audit_prep.common_pdca.skipped", { sites: skipped.join(", ") }) : "");
     setMode(""); setError(""); setReason(""); setNotes(""); setCycleId(""); setEvidenceId("");
     qc.invalidateQueries({ queryKey: ["findings"] });
     qc.invalidateQueries({ queryKey: ["pdca"] });
   };
   const openMut = useMutation({ mutationFn: () => auditPrepApi.openPdca(finding.id), onSuccess: done, onError: e => setError(errMsg(e)) });
+  const openCommonMut = useMutation({ mutationFn: () => auditPrepApi.openCommonPdca(finding.id), onSuccess: done, onError: e => setError(errMsg(e)) });
   const linkMut = useMutation({ mutationFn: () => auditPrepApi.linkPdca(finding.id, cycleId), onSuccess: done, onError: e => setError(errMsg(e)) });
   const unlinkMut = useMutation({ mutationFn: () => auditPrepApi.unlinkPdca(finding.id, reason), onSuccess: done, onError: e => setError(errMsg(e)) });
   const closeWithPdcaMut = useMutation({
@@ -270,8 +283,15 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
             <button onClick={() => navigate(`/pdca?cycle=${finding.pdca_cycle}`)}
               className="text-xs text-primary-700 bg-primary-50 border border-primary-200 rounded px-2 py-0.5 hover:bg-primary-100"
               title={finding.pdca_title ?? undefined}>
-              {t("audit_prep.pdca_link.linked", { phase: PHASE_LABEL[finding.pdca_phase ?? ""] ?? (finding.pdca_phase ?? "").toUpperCase() })}
+              {t(finding.pdca_is_org ? "audit_prep.common_pdca.linked" : "audit_prep.pdca_link.linked",
+                { phase: PHASE_LABEL[finding.pdca_phase ?? ""] ?? (finding.pdca_phase ?? "").toUpperCase() })}
             </button>
+            {commonOrg && !finding.pdca_is_org && !isClosed && (
+              <button onClick={() => openCommonMut.mutate()} disabled={openCommonMut.isPending}
+                title={t("audit_prep.common_pdca.open_title")} className={`${btn} text-teal-700 border-teal-200`}>
+                {t("audit_prep.common_pdca.open")}
+              </button>
+            )}
             <button onClick={() => setMode(mode === "replace" ? "" : "replace")} className={`${btn} text-gray-600`}>{t("audit_prep.pdca_link.replace")}</button>
             <button onClick={() => setMode(mode === "unlink" ? "" : "unlink")} className={`${btn} text-gray-500`}>{t("audit_prep.pdca_link.unlink")}</button>
           </>
@@ -280,6 +300,12 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
             {!isClosed && (
               <button onClick={() => openMut.mutate()} disabled={openMut.isPending} className={`${btn} text-primary-700 border-primary-200`}>
                 {t("audit_prep.pdca_link.open")}
+              </button>
+            )}
+            {commonOrg && !isClosed && (
+              <button onClick={() => openCommonMut.mutate()} disabled={openCommonMut.isPending}
+                title={t("audit_prep.common_pdca.open_title")} className={`${btn} text-teal-700 border-teal-200`}>
+                {t("audit_prep.common_pdca.open")}
               </button>
             )}
             <button onClick={() => setMode(mode === "link" ? "" : "link")} className={`${btn} text-gray-600`}
@@ -306,7 +332,7 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
         <div className="flex flex-wrap gap-2 items-center">
           <select value={cycleId} onChange={e => setCycleId(e.target.value)} className="border rounded px-2 py-1 text-xs min-w-[14rem]">
             <option value="">{cycles.length ? t("audit_prep.pdca_link.choose_cycle") : t("audit_prep.pdca_link.no_open_cycles")}</option>
-            {cycles.map(c => <option key={c.id} value={c.id}>{c.title} — {PHASE_LABEL[c.fase_corrente] ?? c.fase_corrente.toUpperCase()}</option>)}
+            {cycles.map(c => <option key={c.id} value={c.id}>{cycleLabel(c)}</option>)}
           </select>
           <button onClick={() => linkMut.mutate()} disabled={!cycleId || linkMut.isPending} className={`${btn} text-primary-700`}>{t("audit_prep.pdca_link.link_btn")}</button>
         </div>
@@ -317,7 +343,7 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
           <div className="flex flex-wrap gap-2 items-center">
             <select value={cycleId} onChange={e => setCycleId(e.target.value)} className="border rounded px-2 py-1 text-xs min-w-[14rem]">
               <option value="">{cycles.length ? t("audit_prep.pdca_link.choose_cycle") : t("audit_prep.pdca_link.no_open_cycles")}</option>
-              {cycles.map(c => <option key={c.id} value={c.id}>{c.title} — {PHASE_LABEL[c.fase_corrente] ?? c.fase_corrente.toUpperCase()}</option>)}
+              {cycles.map(c => <option key={c.id} value={c.id}>{cycleLabel(c)}</option>)}
             </select>
             <input value={reason} onChange={e => setReason(e.target.value)} placeholder={t("audit_prep.pdca_link.unlink_reason")}
               className="border rounded px-2 py-1 text-xs flex-1 min-w-[12rem]" />
@@ -354,6 +380,7 @@ function FindingActions({ finding, prep }: { finding: AuditFinding; prep: AuditP
         </div>
       )}
       {error && <p className="text-xs text-red-600">{error}</p>}
+      {notice && <p className="text-xs text-amber-800">{notice}</p>}
     </div>
   );
 }
@@ -395,6 +422,10 @@ function PrepDrawer({ prep, onClose, initialTab = "checklist" }: {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["evidence", prep.id] }),
   });
 
+  const { data: pdcaCaps } = useQuery({ queryKey: ["pdca-capabilities"], queryFn: pdcaApi.capabilities });
+  const findingIsNc = findingForm.finding_type === "major_nc" || findingForm.finding_type === "minor_nc";
+  // Rilievo comune NC: di default un solo PDCA di organizzazione (solo scope org).
+  const canCommonPdca = !!pdcaCaps?.can_manage_org && findingForm.apply_to_group === "true" && findingIsNc;
   const createFindingMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => auditPrepApi.createFinding(data),
     onSuccess: () => {
@@ -643,11 +674,19 @@ function PrepDrawer({ prep, onClose, initialTab = "checklist" }: {
                       {t("audit_prep.group.common_finding_label", { sites: prep.group_sites.map(s => s.plant_code).join(", ") })}
                     </label>
                   )}
+                  {canCommonPdca && (
+                    <label className="flex items-center gap-2 text-xs text-gray-700 ml-5">
+                      <input type="checkbox" checked={findingForm.common_pdca !== "false"}
+                        onChange={e => setFindingForm(p => ({ ...p, common_pdca: e.target.checked ? "true" : "false" }))} />
+                      {t("audit_prep.common_pdca.create_label")}
+                    </label>
+                  )}
                   <div className="flex gap-2">
                     <button
                       disabled={!findingForm.title || !findingForm.audit_date || createFindingMutation.isPending}
                       onClick={() => createFindingMutation.mutate({
                         ...findingForm, audit_prep: prep.id, apply_to_group: findingForm.apply_to_group === "true",
+                        common_pdca: canCommonPdca && findingForm.common_pdca !== "false",
                       })}
                       className="px-3 py-1.5 bg-primary-600 text-white text-xs rounded disabled:opacity-50">
                       {createFindingMutation.isPending ? "..." : t("audit_prep.save_finding")}

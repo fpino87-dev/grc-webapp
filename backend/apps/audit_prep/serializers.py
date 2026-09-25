@@ -61,6 +61,8 @@ class AuditFindingSerializer(serializers.ModelSerializer):
     # PDCA collegato (select_related nel viewset): titolo e fase per il link.
     pdca_title = serializers.CharField(source="pdca_cycle.title", read_only=True, default=None)
     pdca_phase = serializers.CharField(source="pdca_cycle.fase_corrente", read_only=True, default=None)
+    # PDCA di organizzazione (senza sito): copre il rilievo comune su tutti i siti.
+    pdca_is_org = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = AuditFinding
@@ -74,6 +76,9 @@ class AuditFindingSerializer(serializers.ModelSerializer):
             "closure_evidence", "closure_notes", "pdca_cycle", "lesson_learned",
             "auto_generated", "common_key", "created_by", "created_at", "updated_at", "deleted_at",
         ]
+
+    def get_pdca_is_org(self, obj):
+        return bool(obj.pdca_cycle_id) and obj.pdca_cycle.plant_id is None
 
     def get_closed_by_name(self, obj):
         if not obj.closed_by:

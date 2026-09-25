@@ -75,6 +75,8 @@ export interface AuditFinding {
   // PDCA collegato (collegamento univoco finding ↔ PDCA)
   pdca_title: string | null;
   pdca_phase: string | null;
+  // PDCA di organizzazione: copre il rilievo comune su tutti i siti
+  pdca_is_org: boolean;
   closure_notes: string;
   closed_at: string | null;
   closed_by_name: string | null;
@@ -189,6 +191,8 @@ export const auditPrepApi = {
     fetchAllPages<AuditFinding>("/audit-prep/findings/", { audit_prep: prepId, ...extra }),
   openPdca: (findingId: string) =>
     apiClient.post<AuditFinding>(`/audit-prep/findings/${findingId}/open-pdca/`, {}).then(r => r.data),
+  openCommonPdca: (findingId: string) =>
+    apiClient.post<AuditFinding>(`/audit-prep/findings/${findingId}/open-common-pdca/`, {}).then(r => r.data),
   linkPdca: (findingId: string, cycleId: string) =>
     apiClient.post<AuditFinding>(`/audit-prep/findings/${findingId}/link-pdca/`, { pdca_cycle: cycleId }).then(r => r.data),
   closeWithPdca: (findingId: string) =>

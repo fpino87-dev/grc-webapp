@@ -3062,6 +3062,14 @@
       "close_with": "Clôturer avec le PDCA",
       "close_with_title": "Clôture le constat avec la preuve de la phase DO et la description ACT du PDCA lié, déjà clôturé."
     },
+    "common_pdca": {
+      "linked": "PDCA d'organisation · {{phase}}",
+      "open": "PDCA commun à tous les sites",
+      "open_title": "Ouvre un seul PDCA d'organisation et le relie à ce constat sur tous les sites de l'audit. Il remplace les PDCA automatiques pas encore traités ; les sites ayant un PDCA déjà en cours restent inchangés.",
+      "org_tag": "Organisation",
+      "skipped": "Non reliés au PDCA commun (ils ont déjà un PDCA en cours) : {{sites}}",
+      "create_label": "Un seul PDCA d'organisation pour tous les sites (action corrective commune)"
+    },
     "close_finding": {
       "btn": "Clôturer le constat",
       "pdca_hint": "Le constat se clôture quand le PDCA lié est en ACT ou clôturé. S'il est en ACT et ne couvre que ce constat, il est clôturé en même temps avec les notes ci-dessous.",

@@ -3062,6 +3062,14 @@
       "close_with": "PDCA ile kapat",
       "close_with_title": "Bulguyu, bağlı ve zaten kapalı PDCA'nın DO aşaması kanıtı ve ACT açıklamasıyla kapatır."
     },
+    "common_pdca": {
+      "linked": "Kuruluş PDCA · {{phase}}",
+      "open": "Tüm tesislere ortak PDCA",
+      "open_title": "Tek bir kuruluş PDCA'sı açar ve bunu denetimin tüm tesislerindeki bu bulguya bağlar. Henüz üzerinde çalışılmamış otomatik PDCA'ların yerini alır; PDCA'sı zaten devam eden tesisler olduğu gibi kalır.",
+      "org_tag": "Kuruluş",
+      "skipped": "Ortak PDCA'ya bağlanmadı (zaten devam eden bir PDCA'ları var): {{sites}}",
+      "create_label": "Tüm tesisler için tek bir kuruluş PDCA'sı (ortak düzeltici faaliyet)"
+    },
     "close_finding": {
       "btn": "Bulguyu kapat",
       "pdca_hint": "Bulgu, bağlı PDCA ACT aşamasında veya kapalı olduğunda kapatılır. ACT aşamasındaysa ve yalnızca bu bulguyu kapsıyorsa, aşağıdaki notlarla birlikte kapatılır.",

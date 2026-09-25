@@ -942,6 +942,8 @@ Sistem birbirine bağlı **tesis başına bir denetim** oluşturur (başlık "�
 
 **Ortak bulgu** — bulgu formunda **Denetimin tüm tesisleri için ortak bulgu** seçeneğini işaretleyin: her tesis için kendi PDCA'sı olan ve **Tesislerde ortak** olarak işaretlenen bir bulgu oluşturulur. İşaretlenmezse bulgu, kaydettiğiniz tesiste kalır.
 
+**Ortak PDCA** — ortak bir uygunsuzlukta, tüm kuruluşa erişimi olan kullanıcılar **Tüm tesisler için tek bir kuruluş PDCA'sı** seçeneğini de görür (varsayılan olarak işaretli): tesis başına bir PDCA yerine, her tesisteki bulguya bağlı tek bir kuruluş PDCA'sı açılır. Önceden kaydedilmiş bir ortak bulguda **Tüm tesislere ortak PDCA** düğmesi aynı işi yapar: henüz üzerinde çalışılmamış otomatik PDCA'ların yerini alır (ve bunları arşivler); PDCA'sı zaten devam eden tesisler olduğu gibi kalır ve belirtilir. **Mevcut PDCA'ya bağla** bölümünden bir kuruluş PDCA'sı da seçilebilir: bağlantı tüm tesislerdeki bulgu için geçerlidir. Ortak PDCA kapatıldığında, tüm tesislerdeki bulgular tesis PDCA'sında olduğu gibi CHECK sonucuna göre kapatılır.
+
 Organizasyon düzeyindeki yönetim gözden geçirmesinde çok tesisli denetim, ilgili tesislerin listesiyle **bir kez** sayılır; bir tesisin gözden geçirmesinde yalnızca o tesisin denetimi görünür.
 
 ### Denetim İptal Etme

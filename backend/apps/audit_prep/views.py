@@ -493,9 +493,17 @@ class AuditFindingViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         # Rilievo comune a tutti i siti di un audit multi-sito: un finding per
         # sito (il controllo è per sito, quindi non si riporta sugli altri).
         if str(data.get("apply_to_group", "")).lower() in ("true", "1") and prep.group_id:
+            from django.core.exceptions import ValidationError as DjangoValidationError
+            from rest_framework.exceptions import ValidationError as DRFValidationError
+
             _require_all_group_sites(self.request.user, prep.group)
             kwargs["control_instance"] = None
-            finding = services.open_group_finding(prep, **kwargs)[0]
+            # common_pdca → un solo PDCA di organizzazione per tutti i siti.
+            common_pdca = str(data.get("common_pdca", "")).lower() in ("true", "1")
+            try:
+                finding = services.open_group_finding(prep, common_pdca=common_pdca, **kwargs)[0]
+            except DjangoValidationError as exc:
+                raise DRFValidationError({"error": exc.messages[0]}) from exc
         else:
             finding = services.open_finding(audit_prep=prep, **kwargs)
         # Attach the created instance so DRF can return it
@@ -529,6 +537,23 @@ class AuditFindingViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         finding.refresh_from_db()
         return Response(AuditFindingSerializer(finding).data, status=201)
 
+    @action(detail=True, methods=["post"], url_path="open-common-pdca")
+    def open_common_pdca(self, request, pk=None):
+        """POST /findings/<id>/open-common-pdca/ {title?, descrizione?} → PDCA di
+        organizzazione collegato al rilievo comune su tutti i siti."""
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        finding = self.get_object()
+        try:
+            _cycle, result = services.open_common_pdca(
+                finding, request.user,
+                title=request.data.get("title", ""), descrizione=request.data.get("descrizione", ""),
+            )
+        except DjangoValidationError as exc:
+            return _validation_response(exc)
+        finding.refresh_from_db()
+        return Response({**AuditFindingSerializer(finding).data, "common_link": result}, status=201)
+
     @action(detail=True, methods=["post"], url_path="link-pdca")
     def link_pdca(self, request, pk=None):
         """POST /findings/<id>/link-pdca/ {pdca_cycle} → collega un PDCA esistente."""
@@ -546,11 +571,16 @@ class AuditFindingViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         if cycle is None:
             return Response({"error": _("PDCA non trovato.")}, status=404)
         try:
-            services.link_finding_to_pdca(finding, cycle, request.user)
+            # PDCA di organizzazione → il rilievo comune su tutti i siti.
+            if cycle.plant_id is None:
+                result = services.link_common_findings_to_pdca(finding, cycle, request.user)
+            else:
+                result = None
+                services.link_finding_to_pdca(finding, cycle, request.user)
         except DjangoValidationError as exc:
             return _validation_response(exc)
         finding.refresh_from_db()
-        return Response(AuditFindingSerializer(finding).data)
+        return Response({**AuditFindingSerializer(finding).data, "common_link": result})
 
     @action(detail=True, methods=["post"], url_path="replace-pdca")
     def replace_pdca(self, request, pk=None):
@@ -568,12 +598,19 @@ class AuditFindingViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         )
         if cycle is None:
             return Response({"error": _("PDCA non trovato.")}, status=404)
+        reason = request.data.get("reason", "")
         try:
-            services.replace_finding_pdca(finding, cycle, request.user, request.data.get("reason", ""))
+            if cycle.plant_id is None:
+                if not reason or len(reason.strip()) < 10:
+                    raise DjangoValidationError(_("Motivo obbligatorio (minimo 10 caratteri)."))
+                result = services.link_common_findings_to_pdca(finding, cycle, request.user, reason)
+            else:
+                result = None
+                services.replace_finding_pdca(finding, cycle, request.user, reason)
         except DjangoValidationError as exc:
             return _validation_response(exc)
         finding.refresh_from_db()
-        return Response(AuditFindingSerializer(finding).data)
+        return Response({**AuditFindingSerializer(finding).data, "common_link": result})
 
     @action(detail=True, methods=["post"], url_path="close-with-pdca")
     def close_with_pdca(self, request, pk=None):

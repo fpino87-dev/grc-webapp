@@ -942,6 +942,8 @@ System tworzy **jeden audyt dla każdego zakładu** (tytuł „… — kod zakł
 
 **Ustalenie wspólne** — w formularzu ustalenia zaznacz **Ustalenie wspólne dla wszystkich zakładów audytu**: dla każdego zakładu tworzone jest ustalenie z własnym cyklem PDCA, oznaczone jako **Wspólne dla zakładów**. Bez zaznaczenia ustalenie pozostaje w zakładzie, w którym je rejestrujesz.
 
+**Wspólny PDCA** — przy wspólnej niezgodności użytkownicy z dostępem do całej organizacji widzą także opcję **Jeden PDCA organizacji dla wszystkich zakładów** (domyślnie zaznaczoną): zamiast jednego PDCA na zakład otwierany jest jeden PDCA na poziomie organizacji, połączony z ustaleniem w każdym zakładzie. Dla już zarejestrowanego ustalenia wspólnego przycisk **PDCA wspólny dla wszystkich zakładów** działa tak samo: zastępuje (i archiwizuje) automatyczne PDCA, nad którymi jeszcze nie pracowano, a zakłady z PDCA w toku pozostają bez zmian i są wskazywane. W **Powiąż z istniejącym PDCA** można wybrać także PDCA organizacji: połączenie obejmuje ustalenie we wszystkich zakładach. Po zamknięciu wspólnego PDCA ustalenia we wszystkich zakładach zamykane są zgodnie z wynikiem CHECK, tak jak przy PDCA zakładu.
+
 W przeglądzie zarządzania całej organizacji audyt wielu zakładów liczy się **raz**, z listą objętych zakładów; w przeglądzie zakładu widoczny jest tylko audyt tego zakładu.
 
 ### Anulowanie audytu

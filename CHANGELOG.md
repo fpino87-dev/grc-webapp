@@ -9,6 +9,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 ## [Unreleased]
 
 ### Added
+- **Audit Prep — PDCA di organizzazione per i rilievi comuni**: una non conformità comune a tutti i siti di un audit multi-sito può essere gestita con un solo PDCA di organizzazione invece che con un PDCA per sito. L'opzione è disponibile alla registrazione del rilievo e, per quelli già registrati, con il pulsante "PDCA comune a tutti i siti"; si può anche collegare un PDCA di organizzazione esistente. I PDCA automatici non ancora lavorati vengono sostituiti e archiviati; quelli già in lavorazione restano e vengono segnalati. Alla chiusura del PDCA comune i finding di tutti i siti si chiudono secondo l'esito della verifica. Riservato agli utenti con accesso a tutta l'organizzazione; ogni collegamento resta nell'audit trail.
 
 - **Riesame mirato (M13)**: una riunione dell'organo di governo su punti specifici fra un riesame di direzione completo e l'altro — per approvare uno o più documenti o decidere un piccolo cambiamento senza ripercorrere tutti i punti del §9.3.
   - Alla creazione si sceglie il tipo: **completo** (il riesame periodico ISO/IEC 27001 §9.3, come finora) o **mirato**. Il mirato ha un ordine del giorno libero: niente punti obbligatori §9.3.2, snapshot dei dati, sintesi executive né bozze IA.
