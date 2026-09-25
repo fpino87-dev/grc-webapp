@@ -2962,3 +2962,11 @@ msgstr "Bulgu"
 #: apps/management_review/report/builder.py
 msgid "Motivo"
 msgstr "Gerekçe"
+
+#: apps/management_review/report/builder.py
+msgid "Cicli PDCA oltre la data prevista"
+msgstr "Hedef tarihi geçen PDCA döngüleri"
+
+#: apps/management_review/report/builder.py
+msgid "Data prevista"
+msgstr "Hedef tarih"

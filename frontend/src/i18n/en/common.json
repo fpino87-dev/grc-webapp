@@ -3591,6 +3591,13 @@
         "accepted_by_auditor": "Accepted by auditor",
         "not_pursued": "Not pursued"
       }
+    },
+    "owner": {
+      "label": "Action owner",
+      "placeholder": "E.g. HR Manager — PL-HP-01",
+      "hint": "Can be someone who does not use the portal. Prefer the function to the person.",
+      "target_date": "Target date",
+      "overdue": "overdue"
     }
   },
   "bcp": {
@@ -5245,7 +5252,10 @@
       "docs_pending_empty": "No mandatory document awaiting approval.",
       "col_version": "Revision",
       "not_pursued_list": "Findings assessed and not pursued (12 months)",
-      "col_reason": "Reason"
+      "col_reason": "Reason",
+      "pdca_overdue_list": "PDCA cycles past their target date",
+      "col_action_owner": "Owner",
+      "col_target_date": "Target date"
     },
     "participants": {
       "heading": "Invitees and attendance",

@@ -286,6 +286,10 @@ def _improvement_status_blocks(snap) -> list:
         _table(_("Cicli PDCA fermi in PLAN da oltre 90 giorni"), [_("Ciclo"), _("Aperto il")],
                [[c.get("title"), fmt_date(c.get("created_at"))] for c in pdca.get("elenco_bloccati", [])],
                pdca.get("bloccati_plan_90gg")),
+        _table(_("Cicli PDCA oltre la data prevista"), [_("Ciclo"), _("Responsabile"), _("Data prevista")],
+               [[c.get("title"), c.get("action_owner") or "—", {"text": fmt_date(c.get("target_date")), "tone": "red"}]
+                for c in pdca.get("elenco_in_ritardo", [])],
+               pdca.get("in_ritardo")),
         _table(_("Task scaduti (per priorità)"), [_("Task"), _("Priorità"), _("Scadenza"), _("Ruolo")],
                [[t.get("title"), SEVERITY.get(t.get("priority"), _dash(t.get("priority"))),
                  {"text": fmt_date(t.get("due_date")), "tone": "red"}, ROLE.get(t.get("assigned_role"), _dash(t.get("assigned_role")))]

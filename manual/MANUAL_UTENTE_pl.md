@@ -624,6 +624,8 @@ Przy tworzeniu pole **Zakład** określa, czego dotyczy cykl:
 
 Cykle organizacji są widoczne we wszystkich zakładach, ale otwierać je i prowadzić (przejście faz, edycja, archiwizacja, usunięcie) mogą tylko użytkownicy z dostępem do całej organizacji; pozostali widzą je **tylko do odczytu**, z dostępnym dossier. Filtrowanie listy po zakładzie pokazuje także cykle organizacji, które obowiązują również tam; opcja **Tylko organizacja** pokazuje wyłącznie je. Filtr **Status** pokazuje cykle w toku (od PLAN do ACT), jedną fazę, zamknięte lub zarchiwizowane. W fazie DO cyklu organizacji można dołączyć dowód z dowolnego zakładu. Po zamknięciu wygenerowana lekcja również dotyczy organizacji, a jeśli wynik CHECK to ko, nowy cykl pozostaje cyklem organizacji.
 
+**Odpowiedzialny i planowana data** — w cyklu (przy tworzeniu lub przez ✏️) wskaż **Odpowiedzialnego za działanie** i **Planowaną datę** zakończenia. Odpowiedzialny to wolny tekst: może to być osoba spoza portalu (np. HR zakładu lub dostawca); lepiej podać funkcję niż nazwisko. Na liście pojawiają się pod tytułem, a cykl niezamknięty po terminie jest oznaczony jako **opóźniony**; przegląd zarządzania wymienia opóźnione cykle wraz z odpowiedzialnym. Zadania i powiadomienia pozostają przypisane do ról portalu. Od tej wersji lista nie ma już kolumny Zakres: zakład lub «Organizacja» jest w kolumnie Zakład, a zakres pozostaje w karcie cyklu.
+
 ### PDCA tworzone automatycznie z incydentów, wyników audytu, ryzyk krytycznych
 
 Cykle PDCA są tworzone ręcznie lub automatycznie przez:

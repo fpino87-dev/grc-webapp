@@ -675,10 +675,20 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     # ── 5. PDCA ──
     blocked_q = Q(fase_corrente="plan", created_at__lt=timezone.now() - timezone.timedelta(days=90))
     pdca_qs = PdcaCycle.objects.filter(**scope)
+    overdue_q = Q(target_date__lt=today) & ~Q(fase_corrente__in=["chiuso", "archiviato"])
     pdca_summary = {
         "aperti": pdca_qs.exclude(fase_corrente__in=["chiuso", "archiviato"]).count(),
         "bloccati_plan_90gg": pdca_qs.filter(blocked_q).count(),
         "chiusi_12m": pdca_qs.filter(fase_corrente="chiuso", closed_at__gte=since_12m).count(),
+        # oltre la data prevista e ancora aperti, con il responsabile dell'azione
+        "in_ritardo": pdca_qs.filter(overdue_q).count(),
+        "elenco_in_ritardo": [
+            {"id": str(c["id"]), "title": c["title"], "action_owner": c["action_owner"],
+             "target_date": _iso(c["target_date"])}
+            for c in pdca_qs.filter(overdue_q).order_by("target_date").values(
+                "id", "title", "action_owner", "target_date",
+            )[:SNAPSHOT_LIST_LIMIT]
+        ],
         "elenco_bloccati": [
             {"id": str(c["id"]), "title": c["title"], "created_at": _iso(c["created_at"])}
             for c in pdca_qs.filter(blocked_q).order_by("created_at").values(

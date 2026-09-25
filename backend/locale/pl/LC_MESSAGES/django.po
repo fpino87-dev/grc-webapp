@@ -2983,3 +2983,11 @@ msgstr "Ustalenie"
 #: apps/management_review/report/builder.py
 msgid "Motivo"
 msgstr "Powód"
+
+#: apps/management_review/report/builder.py
+msgid "Cicli PDCA oltre la data prevista"
+msgstr "Cykle PDCA po planowanej dacie"
+
+#: apps/management_review/report/builder.py
+msgid "Data prevista"
+msgstr "Planowana data"

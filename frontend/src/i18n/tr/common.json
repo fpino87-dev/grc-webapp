@@ -3591,6 +3591,13 @@
         "accepted_by_auditor": "Denetçi tarafından kabul edildi",
         "not_pursued": "Takip edilmedi"
       }
+    },
+    "owner": {
+      "label": "Faaliyet sorumlusu",
+      "placeholder": "Ör. İK Müdürü — PL-HP-01",
+      "hint": "Portalı kullanmayan biri olabilir. Kişi yerine görevi tercih edin.",
+      "target_date": "Hedef tarih",
+      "overdue": "gecikmiş"
     }
   },
   "bcp": {
@@ -5245,7 +5252,10 @@
       "docs_pending_empty": "Onay bekleyen zorunlu belge yok.",
       "col_version": "Revizyon",
       "not_pursued_list": "Değerlendirilip takip edilmeyen bulgular (12 ay)",
-      "col_reason": "Gerekçe"
+      "col_reason": "Gerekçe",
+      "pdca_overdue_list": "Hedef tarihi geçen PDCA döngüleri",
+      "col_action_owner": "Sorumlu",
+      "col_target_date": "Hedef tarih"
     },
     "participants": {
       "heading": "Davetliler ve katılım",

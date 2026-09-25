@@ -2961,3 +2961,11 @@ msgstr "Finding"
 #: apps/management_review/report/builder.py
 msgid "Motivo"
 msgstr "Reason"
+
+#: apps/management_review/report/builder.py
+msgid "Cicli PDCA oltre la data prevista"
+msgstr "PDCA cycles past their target date"
+
+#: apps/management_review/report/builder.py
+msgid "Data prevista"
+msgstr "Target date"

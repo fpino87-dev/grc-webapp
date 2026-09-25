@@ -4,7 +4,7 @@ import i18n from "../../i18n";
 import {
   DetailTable, KpiBox, KpiGrid, SnapSection, fmtDate, isOverdue,
   type Snap, type SnapAudit, type SnapDoc, type SnapFinding, type SnapFramework, type SnapIncident,
-  type SnapKpi, type SnapObjective, type SnapPdca, type SnapPendingDoc, type SnapPrevAction, type SnapRisk,
+  type SnapKpi, type SnapObjective, type SnapPdca, type SnapPdcaOverdue, type SnapPendingDoc, type SnapPrevAction, type SnapRisk,
   type SnapSite, type SnapTask,
 } from "./shared";
 
@@ -266,6 +266,13 @@ export function PdcaTasksBlock({ snap }: { snap: Snap }) {
         headers={[t("management_review.snap.col_cycle"), t("management_review.snap.col_opened")]}
         rows={((pdca.elenco_bloccati ?? []) as SnapPdca[]).map(c => [c.title, fmtDate(c.created_at)])}
         total={pdca.bloccati_plan_90gg}
+      />
+      {/* assente negli snapshot congelati prima di responsabile e data prevista */}
+      <DetailTable
+        title={t("management_review.snap.pdca_overdue_list")}
+        headers={[t("management_review.snap.col_cycle"), t("management_review.snap.col_action_owner"), t("management_review.snap.col_target_date")]}
+        rows={((pdca.elenco_in_ritardo ?? []) as SnapPdcaOverdue[]).map(c => [c.title, c.action_owner || "—", fmtDate(c.target_date)])}
+        total={pdca.in_ritardo}
       />
       <DetailTable
         title={t("management_review.snap.tasks_overdue_list")}

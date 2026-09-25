@@ -61,6 +61,7 @@ class PdcaCycleSerializer(serializers.ModelSerializer):
     # Finding di audit collegati (prefetch nel viewset): collegamento univoco
     # PDCA ↔ finding ↔ audit (tipo, committente) consultabile da entrambi i lati.
     findings = serializers.SerializerMethodField()
+    is_overdue = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = PdcaCycle
@@ -77,6 +78,9 @@ class PdcaCycleSerializer(serializers.ModelSerializer):
             "trigger_source_id",
             "audit_subtype",
             "riferimento_finding",
+            "action_owner",
+            "target_date",
+            "is_overdue",
             "scope_type",
             "scope_id",
             "fase_corrente",

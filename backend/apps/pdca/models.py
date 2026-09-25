@@ -32,6 +32,24 @@ class PdcaCycle(BaseModel):
         blank=True,
         help_text="Numero/riferimento del finding di audit (es. NC-2026-04-01)",
     )
+    # Chi risponde dell'azione ed entro quando (ISO 27001 §10.2, TISAX). Testo
+    # libero: il responsabile può non essere un utente del portale; meglio la
+    # funzione che la persona. Task e notifiche restano assegnati ai ruoli.
+    action_owner = models.CharField(
+        max_length=200, blank=True,
+        help_text="Responsabile dell'azione (preferibilmente la funzione, es. HR Manager — sito)",
+    )
+    target_date = models.DateField(
+        null=True, blank=True, help_text="Data prevista di completamento dell'azione",
+    )
+
+    @property
+    def is_overdue(self) -> bool:
+        """Oltre la data prevista e non ancora chiuso/archiviato (giorno del sito)."""
+        if not self.target_date or self.fase_corrente in ("chiuso", "archiviato"):
+            return False
+        from apps.plants.services import plant_today
+        return self.target_date < plant_today(self.plant)
     audit_subtype = models.CharField(
         max_length=20,
         blank=True,

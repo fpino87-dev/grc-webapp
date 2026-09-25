@@ -3591,6 +3591,13 @@
         "accepted_by_auditor": "Accettato dall'auditor",
         "not_pursued": "Non perseguito"
       }
+    },
+    "owner": {
+      "label": "Responsabile dell'azione",
+      "placeholder": "Es. HR Manager — PL-HP-01",
+      "hint": "Anche chi non usa il portale. Meglio la funzione che la persona.",
+      "target_date": "Data prevista",
+      "overdue": "in ritardo"
     }
   },
   "bcp": {
@@ -5245,7 +5252,10 @@
       "docs_pending_empty": "Nessun documento obbligatorio in attesa di approvazione.",
       "col_version": "Revisione",
       "not_pursued_list": "Rilievi valutati e non perseguiti (12 mesi)",
-      "col_reason": "Motivo"
+      "col_reason": "Motivo",
+      "pdca_overdue_list": "Cicli PDCA oltre la data prevista",
+      "col_action_owner": "Responsabile",
+      "col_target_date": "Data prevista"
     },
     "participants": {
       "heading": "Convocati e presenze",

@@ -48,6 +48,7 @@ export type SnapRisk = {
 export type SnapIncident = { id: string; title: string; detected_at: string | null; severity: string; status: string };
 export type SnapTask = { id: string; title: string; priority: string; due_date: string | null; assigned_role: string };
 export type SnapPdca = { id: string; title: string; created_at: string | null };
+export type SnapPdcaOverdue = { id: string; title: string; action_owner: string; target_date: string | null };
 export type SnapPrevAction = {
   id: string; description: string; owner: string | null; due_date: string | null; status: string; overdue: boolean;
   closed_at: string | null; review_title: string; review_date: string; task_status: string | null; pdca_phase: string | null;

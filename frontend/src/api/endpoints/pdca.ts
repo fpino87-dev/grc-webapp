@@ -36,6 +36,10 @@ export interface PdcaCycle {
   trigger_type: string;
   audit_subtype?: string;
   riferimento_finding?: string;
+  // Responsabile dell'azione (testo libero, anche non utente del portale) e data prevista
+  action_owner?: string;
+  target_date?: string | null;
+  is_overdue?: boolean;
   scope_type: string;
   fase_corrente: string;
   act_description?: string;

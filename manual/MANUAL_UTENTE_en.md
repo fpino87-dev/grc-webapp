@@ -624,6 +624,8 @@ When creating a cycle, the **Site** field states what the cycle applies to:
 
 Organization-wide cycles are visible to all sites, but only users with access to the whole organization can open and drive them (phase advancement, editing, archiving, deletion); for the others they appear **read only**, with the dossier available. Filtering the list by a site also shows organization-wide cycles, which apply there too; the **Organization only** option shows just those. The **Status** filter shows cycles in progress (PLAN to ACT), a single phase, closed or archived ones. In the DO phase of an organization-wide cycle you can attach evidence from any site. On closure the generated lesson learned is organization-wide too and, if the CHECK outcome is ko, the new cycle stays organization-wide.
 
+**Owner and target date** — in the cycle (when creating it or with ✏️) set the **Action owner** and the **Target date** for completion. The owner is free text: it can be someone who does not use the portal (e.g. a site's HR or a supplier); prefer the function to the person's name. In the list they appear under the title, and a cycle not closed after the date is marked **overdue**; the management review lists overdue cycles with their owner. Tasks and notifications remain assigned to portal roles. From this version the list no longer has the Scope column: the site or «Organization» is in the Site column, and the scope remains in the cycle's dossier.
+
 ### PDCAs automatically created from incidents, findings, critical risks
 
 PDCA cycles are created manually or automatically from:

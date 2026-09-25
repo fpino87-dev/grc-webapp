@@ -624,6 +624,8 @@ Alla creazione il campo **Sito** indica a chi si applica il ciclo:
 
 I cicli di organizzazione sono visibili a tutti i siti, ma li aprono e li portano avanti (avanzamento di fase, modifica, archiviazione, cancellazione) solo gli utenti con accesso a tutta l'organizzazione; per gli altri compaiono in **sola lettura**, con il dossier consultabile. Filtrando l'elenco per un sito compaiono anche i cicli di organizzazione, che valgono anche lì; l'opzione **Solo organizzazione** mostra soltanto questi. Il filtro **Stato** mostra i cicli in corso (da PLAN ad ACT), una sola fase, i chiusi o gli archiviati. Nella fase DO di un ciclo di organizzazione si può allegare un'evidenza di qualunque sito. Alla chiusura anche la lesson learned generata è di organizzazione e, se il CHECK ha esito ko, il nuovo ciclo resta di organizzazione.
 
+**Responsabile e data prevista** — nel ciclo (alla creazione o con ✏️) indica il **Responsabile dell'azione** e la **Data prevista** di completamento. Il responsabile è un testo libero: può essere anche chi non usa il portale (es. l'HR di un sito o un fornitore); meglio indicare la funzione che il nome della persona. Nell'elenco compaiono sotto il titolo e un ciclo non chiuso oltre la data è segnato **in ritardo**; il riesame di direzione riporta i cicli in ritardo con il responsabile. Task e notifiche restano assegnati ai ruoli del portale. Da questa versione l'elenco non ha più la colonna Ambito: il sito o «Organizzazione» è nella colonna Sito, l'ambito resta nella scheda del ciclo.
+
 ### PDCA creati automaticamente da incidenti, finding, rischi critici
 
 I cicli PDCA vengono creati manualmente o automaticamente da:

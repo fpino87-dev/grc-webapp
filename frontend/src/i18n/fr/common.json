@@ -3591,6 +3591,13 @@
         "accepted_by_auditor": "Accepté par l'auditeur",
         "not_pursued": "Non poursuivi"
       }
+    },
+    "owner": {
+      "label": "Responsable de l'action",
+      "placeholder": "Ex. Responsable RH — PL-HP-01",
+      "hint": "Peut être une personne qui n'utilise pas le portail. Préférez la fonction à la personne.",
+      "target_date": "Date prévue",
+      "overdue": "en retard"
     }
   },
   "bcp": {
@@ -5245,7 +5252,10 @@
       "docs_pending_empty": "Aucun document obligatoire en attente d'approbation.",
       "col_version": "Révision",
       "not_pursued_list": "Constats évalués et non poursuivis (12 mois)",
-      "col_reason": "Motif"
+      "col_reason": "Motif",
+      "pdca_overdue_list": "Cycles PDCA au-delà de la date prévue",
+      "col_action_owner": "Responsable",
+      "col_target_date": "Date prévue"
     },
     "participants": {
       "heading": "Convoqués et présences",

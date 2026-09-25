@@ -624,6 +624,8 @@ Oluştururken **Tesis** alanı döngünün neye uygulandığını belirtir:
 
 Organizasyon döngüleri tüm tesislerde görünür, ancak bunları yalnızca tüm organizasyona erişimi olan kullanıcılar açabilir ve ilerletebilir (aşama ilerletme, düzenleme, arşivleme, silme); diğerleri için **salt okunur** görünürler ve dosya incelenebilir. Listeyi bir tesise göre filtrelemek, orada da geçerli olan organizasyon döngülerini de gösterir; **Yalnızca organizasyon** seçeneği yalnızca bunları gösterir. **Durum** filtresi devam eden döngüleri (PLAN'dan ACT'e), tek bir aşamayı, kapalı veya arşivlenmiş olanları gösterir. Bir organizasyon döngüsünün DO aşamasında herhangi bir tesisten kanıt eklenebilir. Kapanışta oluşturulan alınan ders de organizasyon düzeyindedir ve CHECK sonucu başarısız ise yeni döngü organizasyon döngüsü olarak kalır.
 
+**Sorumlu ve hedef tarih** — döngüde (oluştururken veya ✏️ ile) **Faaliyet sorumlusu** ve tamamlanma için **Hedef tarih** belirtin. Sorumlu serbest metindir: portalı kullanmayan biri de olabilir (ör. bir tesisin İK'sı veya bir tedarikçi); kişinin adı yerine görevi yazmak tercih edilir. Listede başlığın altında görünürler ve tarihi geçmiş, kapanmamış bir döngü **gecikmiş** olarak işaretlenir; yönetim gözden geçirmesi gecikmiş döngüleri sorumlularıyla listeler. Görevler ve bildirimler portal rollerine atanmaya devam eder. Bu sürümden itibaren listede Kapsam sütunu yoktur: tesis veya «Organizasyon» Site sütunundadır, kapsam döngü dosyasında kalır.
+
 ### Olaylardan, bulgulardan, kritik risklerden otomatik oluşturulan PDCA döngüleri
 
 PDCA döngüleri manuel olarak veya otomatik olarak şu kaynaklardan oluşturulur:

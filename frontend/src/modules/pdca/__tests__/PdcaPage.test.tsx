@@ -164,8 +164,9 @@ describe("PdcaPage — collegamento ai finding di audit", () => {
     // il collegamento ai finding c'è anche sui cicli di organizzazione
     fireEvent.click(screen.getByText(/pdca\.link\.btn$/));
     expect(await screen.findByText("pdca.link.org_rule_hint")).toBeInTheDocument();
-    // "Organizzazione" solo nella colonna Sito
+    // "Organizzazione" solo nella colonna Sito (la colonna Ambito non c'è più)
     expect(screen.getAllByText("pdca.scope.org")).toHaveLength(1);
+    expect(screen.queryByText("pdca.table.scope")).not.toBeInTheDocument();
   });
 
   it("il riferimento testuale si nasconde se c'è il finding collegato", async () => {
@@ -254,5 +255,26 @@ describe("PdcaPage — ricerca ed esclusione organizzazione", () => {
     await vi.waitFor(() => expect(mockList).toHaveBeenLastCalledWith({ site: "p1" }));
     fireEvent.click(await screen.findByLabelText("pdca.filters.exclude_org"));
     await vi.waitFor(() => expect(mockList).toHaveBeenLastCalledWith({ plant: "p1" }));
+  });
+});
+
+describe("PdcaPage — responsabile e data prevista", () => {
+  it("in elenco mostra responsabile e ritardo", async () => {
+    mockList.mockResolvedValue({ results: [cycle({ action_owner: "HR Manager — TA", target_date: "2026-01-10", is_overdue: true })] } as never);
+    renderPage();
+    expect(await screen.findByText(/HR Manager — TA/)).toBeInTheDocument();
+    expect(screen.getByText(/pdca\.owner\.overdue/)).toBeInTheDocument();
+  });
+
+  it("si impostano dalla modifica del ciclo", async () => {
+    mockList.mockResolvedValue({ results: [cycle()] } as never);
+    vi.mocked(pdcaApi.update).mockResolvedValue({} as never);
+    renderPage();
+    fireEvent.click(await screen.findByTitle("pdca.form.edit_tooltip"));
+    fireEvent.change(screen.getByLabelText("pdca.owner.label"), { target: { value: "IT Manager" } });
+    fireEvent.change(screen.getByLabelText("pdca.owner.target_date"), { target: { value: "2026-12-31" } });
+    fireEvent.click(screen.getByText("pdca.form.save_btn"));
+    await vi.waitFor(() => expect(pdcaApi.update).toHaveBeenCalledWith("c1",
+      expect.objectContaining({ action_owner: "IT Manager", target_date: "2026-12-31" })));
   });
 });

@@ -3591,6 +3591,13 @@
         "accepted_by_auditor": "Zaakceptowane przez audytora",
         "not_pursued": "Niekontynuowane"
       }
+    },
+    "owner": {
+      "label": "Odpowiedzialny za działanie",
+      "placeholder": "Np. Kierownik HR — PL-HP-01",
+      "hint": "Może to być osoba spoza portalu. Lepiej funkcja niż osoba.",
+      "target_date": "Planowana data",
+      "overdue": "opóźnione"
     }
   },
   "bcp": {
@@ -5245,7 +5252,10 @@
       "docs_pending_empty": "Brak dokumentów obowiązkowych oczekujących na zatwierdzenie.",
       "col_version": "Wersja",
       "not_pursued_list": "Ustalenia ocenione i niekontynuowane (12 miesięcy)",
-      "col_reason": "Powód"
+      "col_reason": "Powód",
+      "pdca_overdue_list": "Cykle PDCA po planowanej dacie",
+      "col_action_owner": "Odpowiedzialny",
+      "col_target_date": "Planowana data"
     },
     "participants": {
       "heading": "Zaproszeni i obecność",

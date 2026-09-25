@@ -115,6 +115,30 @@ function DeleteCycleButton({ cycle }: { cycle: PdcaCycle }) {
   );
 }
 
+/** Responsabile dell'azione (testo libero: anche chi non usa il portale;
+ *  meglio la funzione che la persona) e data prevista di completamento. */
+function OwnerFields({ owner, date, onChange }: {
+  owner: string; date: string; onChange: (k: "action_owner" | "target_date", v: string) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.owner.label")}</label>
+        <input value={owner} maxLength={200} onChange={e => onChange("action_owner", e.target.value)}
+          placeholder={t("pdca.owner.placeholder")} aria-label={t("pdca.owner.label")}
+          className="w-full border rounded px-3 py-2 text-sm" />
+        <p className="text-[11px] text-gray-400 mt-0.5">{t("pdca.owner.hint")}</p>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.owner.target_date")}</label>
+        <input type="date" value={date} onChange={e => onChange("target_date", e.target.value)}
+          aria-label={t("pdca.owner.target_date")} className="w-full border rounded px-3 py-2 text-sm" />
+      </div>
+    </div>
+  );
+}
+
 function EditCycleModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () => void }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -125,6 +149,8 @@ function EditCycleModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () => v
     audit_subtype: cycle.audit_subtype ?? "",
     riferimento_finding: cycle.riferimento_finding ?? "",
     scope_type: cycle.scope_type,
+    action_owner: cycle.action_owner ?? "",
+    target_date: cycle.target_date ?? "",
   });
   const [error, setError] = useState("");
 
@@ -137,6 +163,8 @@ function EditCycleModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () => v
         scope_type: form.scope_type,
         audit_subtype: form.trigger_type === "audit" ? form.audit_subtype || undefined : undefined,
         riferimento_finding: form.trigger_type === "audit" ? form.riferimento_finding : "",
+        action_owner: form.action_owner.trim(),
+        target_date: form.target_date || null,
       };
       return pdcaApi.update(cycle.id, payload);
     },
@@ -184,6 +212,8 @@ function EditCycleModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () => v
               placeholder={t("pdca.form.desc_placeholder_edit")}
             />
           </div>
+          <OwnerFields owner={form.action_owner} date={form.target_date}
+            onChange={(k, v) => setForm(prev => ({ ...prev, [k]: v }))} />
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.trigger_label")}</label>
@@ -646,6 +676,8 @@ function NewCycleModal({ plants, onClose }: { plants: { id: string; code: string
               placeholder={t("pdca.form.desc_placeholder")}
             />
           </div>
+          <OwnerFields owner={form.action_owner ?? ""} date={form.target_date ?? ""}
+            onChange={(k, v) => setForm(prev => ({ ...prev, [k]: k === "target_date" ? (v || null) : v }))} />
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.trigger_label")}</label>
@@ -837,6 +869,17 @@ function CycleDossierModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () =
               <div className="flex gap-2">
                 <dt className="text-gray-500">{t("pdca.dossier.meta_trigger")}</dt>
                 <dd className="text-gray-800 font-medium">{triggerLabel(t, cycle.trigger_type)}</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="text-gray-500">{t("pdca.owner.label")}</dt>
+                <dd className="text-gray-800">{cycle.action_owner || "—"}</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="text-gray-500">{t("pdca.owner.target_date")}</dt>
+                <dd className={cycle.is_overdue ? "text-red-700 font-medium" : "text-gray-800"}>
+                  {cycle.target_date ? new Date(cycle.target_date).toLocaleDateString() : "—"}
+                  {cycle.is_overdue ? ` · ${t("pdca.owner.overdue")}` : ""}
+                </dd>
               </div>
               {cycle.riferimento_finding && (
                 <div className="flex gap-2">
@@ -1333,6 +1376,17 @@ function TitleCell({ cycle }: { cycle: PdcaCycle }) {
         </p>
       )}
 
+      {(cycle.action_owner || cycle.target_date) && (
+        <div className="mt-1 text-[11px] font-normal text-gray-600 flex flex-wrap gap-x-2">
+          {cycle.action_owner && <span>👤 {cycle.action_owner}</span>}
+          {cycle.target_date && (
+            <span className={cycle.is_overdue ? "text-red-700 font-medium" : ""}>
+              📅 {new Date(cycle.target_date).toLocaleDateString()}{cycle.is_overdue ? ` · ${t("pdca.owner.overdue")}` : ""}
+            </span>
+          )}
+        </div>
+      )}
+
       <div className="mt-1 flex flex-wrap gap-1">
         {/* riferimento testuale (storico): superfluo se c'è il finding collegato */}
         {cycle.riferimento_finding && !(cycle.findings ?? []).length && (
@@ -1487,7 +1541,6 @@ export function PdcaPage() {
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("pdca.table.title")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("pdca.table.trigger")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("pdca.table.plant")}</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">{t("pdca.table.scope")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("pdca.table.phases")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("pdca.table.action")}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t("pdca.table.created_at")}</th>
@@ -1521,8 +1574,6 @@ export function PdcaPage() {
                       </>
                     )}
                   </td>
-                  {/* ciclo di organizzazione: l'ambito è già nella colonna Sito */}
-                  <td className="px-4 py-3 text-gray-600 text-xs">{c.plant === null && c.scope_type === "org" ? "" : scopeLabel(t, c.scope_type)}</td>
                   <td className="px-4 py-3">
                     <PhaseStepper cycle={c as any} />
                   </td>

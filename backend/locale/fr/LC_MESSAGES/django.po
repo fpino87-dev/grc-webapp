@@ -3028,3 +3028,11 @@ msgstr "Constat"
 #: apps/management_review/report/builder.py
 msgid "Motivo"
 msgstr "Motif"
+
+#: apps/management_review/report/builder.py
+msgid "Cicli PDCA oltre la data prevista"
+msgstr "Cycles PDCA au-delà de la date prévue"
+
+#: apps/management_review/report/builder.py
+msgid "Data prevista"
+msgstr "Date prévue"
