@@ -144,6 +144,25 @@ describe("PdcaPage — collegamento ai finding di audit", () => {
     expect(screen.getByText(/OEM Alfa/)).toBeInTheDocument();
   });
 
+  it("il rilievo comune sta su una riga con un chip per sito, senza ripetere il titolo", async () => {
+    const common = { title: "OSS.05 Offboarding", finding_type: "observation", audit_type: "interno",
+      requesting_party: "", common_key: "k1", group_title: "TISAX AL2 PreCert" };
+    mockList.mockResolvedValue({ results: [cycle({
+      plant: null, plant_code: null, plant_name: null, scope_type: "org", trigger_type: "finding_observation",
+      title: "[OBSERVATION] OSS.05 Offboarding", findings: [
+        { ...common, id: "f1", status: "open", audit_prep: "a1", audit_title: "TISAX AL2 PreCert — PL", plant_code: "PL-HP-01" },
+        { ...common, id: "f2", status: "closed", audit_prep: "a2", audit_title: "TISAX AL2 PreCert — TN", plant_code: "TN-TUN-01" },
+      ] })] } as never);
+    renderPage();
+    expect(await screen.findByText("PL-HP-01")).toBeInTheDocument();
+    expect(screen.getByText("TN-TUN-01")).toBeInTheDocument();
+    expect(screen.getAllByText(/TISAX AL2 PreCert/)).toHaveLength(1);
+    expect(screen.getAllByText(/OSS\.05 Offboarding/)).toHaveLength(1);
+    expect(screen.getByText("pdca.trigger.finding_observation")).toBeInTheDocument();
+    // "Organizzazione" solo nella colonna Sito
+    expect(screen.getAllByText("pdca.scope.org")).toHaveLength(1);
+  });
+
   it("il deep link ?cycle= mostra solo il ciclo collegato", async () => {
     renderPage("/pdca?cycle=c9");
     expect(await screen.findByText("pdca.link.single_cycle")).toBeInTheDocument();

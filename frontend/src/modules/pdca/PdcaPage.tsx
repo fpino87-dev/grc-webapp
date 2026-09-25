@@ -16,6 +16,7 @@ type TFn = (key: string, opts?: Record<string, unknown>) => string;
 const TRIGGER_CODES = [
   "audit", "incident", "management_review", "risk", "manual",
   "pdca_ko", "gap_controllo", "risk_rosso",
+  "finding_major", "finding_minor", "finding_observation", "finding_opportunity",
 ];
 const SCOPE_CODES = ["plant", "org", "process"];
 const AUDIT_SUBTYPE_CODES = ["interno", "seconda_parte", "terza_parte"];
@@ -179,6 +180,10 @@ function EditCycleModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () => v
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{t("pdca.form.trigger_label")}</label>
               <select name="trigger_type" value={form.trigger_type} onChange={handleChange} className="w-full border rounded px-3 py-2 text-sm">
+                {/* origine automatica (es. finding di audit): resta selezionata */}
+                {form.trigger_type && !["audit", "incident", "management_review", "risk", "manual"].includes(form.trigger_type) && (
+                  <option value={form.trigger_type}>{triggerLabel(t, form.trigger_type)}</option>
+                )}
                 <option value="audit">{t("pdca.trigger.audit")}</option>
                 <option value="incident">{t("pdca.trigger.incident")}</option>
                 <option value="management_review">{t("pdca.trigger.management_review")}</option>
@@ -406,22 +411,51 @@ function AuditFindingPicker({
   );
 }
 
-/** Finding collegati al ciclo, con rimando all'audit. */
-function LinkedFindings({ findings }: { findings: PdcaLinkedFinding[] }) {
+const FINDING_STATUS_CHIP: Record<string, string> = {
+  open: "bg-amber-50 text-amber-800 border-amber-200",
+  in_response: "bg-blue-50 text-blue-800 border-blue-200",
+  closed: "bg-green-50 text-green-800 border-green-200",
+  accepted_by_auditor: "bg-green-50 text-green-800 border-green-200",
+};
+
+/** Finding collegati al ciclo, con rimando all'audit. I finding di un rilievo
+ *  comune (stesso common_key) stanno su una riga sola, con un chip per sito;
+ *  il titolo del finding si ripete solo se diverso da quello del ciclo. */
+function LinkedFindings({ findings, cycleTitle }: { findings: PdcaLinkedFinding[]; cycleTitle: string }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   if (!findings.length) return null;
+  const groups: PdcaLinkedFinding[][] = [];
+  const byKey: Record<string, PdcaLinkedFinding[]> = {};
+  for (const f of findings) {
+    const key = f.common_key ?? f.id;
+    if (!byKey[key]) { byKey[key] = []; groups.push(byKey[key]); }
+    byKey[key].push(f);
+  }
   return (
-    <div className="mt-1 space-y-0.5">
-      {findings.map(f => (
-        <button key={f.id} type="button" onClick={() => navigate(`/audit-prep?prep=${f.audit_prep}`)}
-          className="block text-left text-[11px] text-teal-800 hover:underline">
-          🔗 [{f.finding_type.replace("_", " ").toUpperCase()}] {f.title}
-          <span className="text-gray-500"> — {f.audit_title}
-            {f.audit_type !== "interno" ? ` (${t(`pdca.audit_subtype.${f.audit_type}`)}${f.requesting_party ? ` — ${f.requesting_party}` : ""})` : ""}
-          </span>
-        </button>
-      ))}
+    <div className="mt-1 space-y-1">
+      {groups.map(g => {
+        const f = g[0];
+        const showTitle = !cycleTitle.includes(f.title);
+        const audit = f.group_title ?? f.audit_title;
+        return (
+          <div key={f.id} className="text-[11px] text-gray-600">
+            {showTitle && <div className="text-teal-800">[{f.finding_type.replace("_", " ").toUpperCase()}] {f.title}</div>}
+            <div className="flex flex-wrap items-center gap-1">
+              <span>🔗 {audit}
+                {f.audit_type !== "interno" ? ` (${t(`pdca.audit_subtype.${f.audit_type}`)}${f.requesting_party ? ` — ${f.requesting_party}` : ""})` : ""}
+              </span>
+              {g.map(s => (
+                <button key={s.id} type="button" onClick={() => navigate(`/audit-prep?prep=${s.audit_prep}`)}
+                  title={`${s.plant_code} — ${t(`pdca.link.finding_status.${s.status}`, { defaultValue: s.status })}`}
+                  className={`font-mono border rounded px-1 hover:underline ${FINDING_STATUS_CHIP[s.status] ?? "bg-gray-50 text-gray-700 border-gray-200"}`}>
+                  {s.plant_code}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -1422,7 +1456,7 @@ export function PdcaPage() {
                 <tr key={c.id} className="hover:bg-gray-50 transition-colors align-top">
                   <td className="px-4 py-3 font-medium text-gray-800 max-w-sm">
                     <TitleCell cycle={c} />
-                    <LinkedFindings findings={c.findings ?? []} />
+                    <LinkedFindings findings={c.findings ?? []} cycleTitle={c.title} />
                   </td>
                   <td className="px-4 py-3 text-gray-600 text-xs">
                     <span className="font-medium">{triggerLabel(t, c.trigger_type)}</span>
@@ -1445,7 +1479,8 @@ export function PdcaPage() {
                       </>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-gray-600 text-xs">{scopeLabel(t, c.scope_type)}</td>
+                  {/* ciclo di organizzazione: l'ambito è già nella colonna Sito */}
+                  <td className="px-4 py-3 text-gray-600 text-xs">{c.plant === null && c.scope_type === "org" ? "" : scopeLabel(t, c.scope_type)}</td>
                   <td className="px-4 py-3">
                     <PhaseStepper cycle={c as any} />
                   </td>

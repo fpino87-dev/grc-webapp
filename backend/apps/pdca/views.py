@@ -19,7 +19,9 @@ from .serializers import PdcaCycleSerializer, PdcaPhaseSerializer
 
 
 class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
-    queryset = PdcaCycle.objects.select_related("plant").prefetch_related("phases", "findings__audit_prep")
+    queryset = PdcaCycle.objects.select_related("plant").prefetch_related(
+        "phases", "findings__audit_prep__plant", "findings__audit_prep__group",
+    )
     serializer_class = PdcaCycleSerializer
     permission_classes = [PdcaPermission]
     filterset_fields = ["id", "plant", "fase_corrente", "trigger_type"]

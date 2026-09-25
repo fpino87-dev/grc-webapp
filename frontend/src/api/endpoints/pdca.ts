@@ -55,6 +55,10 @@ export interface PdcaLinkedFinding {
   status: string;
   audit_prep: string;
   audit_title: string;
+  plant_code: string;
+  // Rilievo comune di un audit multi-sito (stesso valore sui finding dei siti)
+  common_key: string | null;
+  group_title: string | null;
   audit_type: "interno" | "seconda_parte" | "terza_parte";
   requesting_party: string;
 }

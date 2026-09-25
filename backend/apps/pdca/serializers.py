@@ -109,6 +109,10 @@ class PdcaCycleSerializer(serializers.ModelSerializer):
                 "status": f.status,
                 "audit_prep": str(f.audit_prep_id),
                 "audit_title": f.audit_prep.title,
+                # rilievo comune di un audit multi-sito: la UI raggruppa i siti
+                "plant_code": f.audit_prep.plant.code,
+                "common_key": str(f.common_key) if f.common_key else None,
+                "group_title": f.audit_prep.group.title if f.audit_prep.group_id else None,
                 "audit_type": f.audit_prep.audit_type,
                 "requesting_party": f.audit_prep.requesting_party,
             }

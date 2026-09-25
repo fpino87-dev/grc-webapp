@@ -3366,7 +3366,11 @@
       "manual": "Manual",
       "pdca_ko": "CHECK KO recycle",
       "gap_controllo": "Control gap",
-      "risk_rosso": "Red risk"
+      "risk_rosso": "Red risk",
+      "finding_major": "Finding — major NC",
+      "finding_minor": "Finding — minor NC",
+      "finding_observation": "Finding — observation",
+      "finding_opportunity": "Finding — opportunity"
     },
     "audit_subtype": {
       "interno": "Internal",
@@ -3540,7 +3544,13 @@
       "no_findings_any": "No findings in this audit",
       "has_pdca": "linked to: {{title}}",
       "replace_hint": "The finding already has a PDCA: it will be replaced by this one. If it is the automatically opened PDCA and was never worked on, it is archived; otherwise it stays as it is, only unlinked.",
-      "replace_reason": "Reason for the replacement (at least 10 characters)"
+      "replace_reason": "Reason for the replacement (at least 10 characters)",
+      "finding_status": {
+        "open": "Open",
+        "in_response": "In response",
+        "closed": "Closed",
+        "accepted_by_auditor": "Accepted by auditor"
+      }
     }
   },
   "bcp": {

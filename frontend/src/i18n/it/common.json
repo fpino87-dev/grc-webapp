@@ -3366,7 +3366,11 @@
       "manual": "Manuale",
       "pdca_ko": "Riciclo CHECK KO",
       "gap_controllo": "Gap controllo",
-      "risk_rosso": "Rischio rosso"
+      "risk_rosso": "Rischio rosso",
+      "finding_major": "Finding — NC maggiore",
+      "finding_minor": "Finding — NC minore",
+      "finding_observation": "Finding — osservazione",
+      "finding_opportunity": "Finding — opportunità"
     },
     "audit_subtype": {
       "interno": "Interno",
@@ -3540,7 +3544,13 @@
       "no_findings_any": "Nessun finding in questo audit",
       "has_pdca": "collegato a: {{title}}",
       "replace_hint": "Il finding ha già un PDCA: verrà sostituito da questo. Se è il PDCA aperto in automatico e non ci hai mai lavorato, viene archiviato; altrimenti resta com'è, solo scollegato.",
-      "replace_reason": "Motivo della sostituzione (minimo 10 caratteri)"
+      "replace_reason": "Motivo della sostituzione (minimo 10 caratteri)",
+      "finding_status": {
+        "open": "Aperto",
+        "in_response": "In risposta",
+        "closed": "Chiuso",
+        "accepted_by_auditor": "Accettato dall'auditor"
+      }
     }
   },
   "bcp": {

@@ -3366,7 +3366,11 @@
       "manual": "Manuel",
       "pdca_ko": "CHECK KO tekrarı",
       "gap_controllo": "Kontrol boşluğu",
-      "risk_rosso": "Kırmızı risk"
+      "risk_rosso": "Kırmızı risk",
+      "finding_major": "Bulgu — büyük UYS",
+      "finding_minor": "Bulgu — küçük UYS",
+      "finding_observation": "Bulgu — gözlem",
+      "finding_opportunity": "Bulgu — iyileştirme fırsatı"
     },
     "audit_subtype": {
       "interno": "İç",
@@ -3540,7 +3544,13 @@
       "no_findings_any": "Bu denetimde bulgu yok",
       "has_pdca": "bağlı: {{title}}",
       "replace_hint": "Bulgunun zaten bir PDCA'sı var: bununla değiştirilecek. Otomatik açılan ve hiç üzerinde çalışılmamış PDCA ise arşivlenir; aksi halde olduğu gibi kalır, yalnızca bağlantısı kaldırılır.",
-      "replace_reason": "Değiştirme nedeni (en az 10 karakter)"
+      "replace_reason": "Değiştirme nedeni (en az 10 karakter)",
+      "finding_status": {
+        "open": "Açık",
+        "in_response": "Yanıt aşamasında",
+        "closed": "Kapalı",
+        "accepted_by_auditor": "Denetçi tarafından kabul edildi"
+      }
     }
   },
   "bcp": {

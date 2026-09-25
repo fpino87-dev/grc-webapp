@@ -133,3 +133,15 @@ def test_closing_org_cycle_closes_findings_on_all_sites(co, group):
     advance_phase(cycle, co, phase_notes="Verifica efficacia positiva", outcome="ok")
     close_cycle(cycle, co, act_description="Procedura standardizzata su tutti i siti")
     assert {f.status for f in _findings()} == {"closed"}
+
+
+@pytest.mark.django_db
+def test_pdca_list_groups_common_findings_by_site(co, group):
+    _common_nc(co, group["preps"][0]["id"], common_pdca=True)
+    cycle = _findings()[0].pdca_cycle
+    resp = _client(co).get(f"/api/v1/pdca/cycles/{cycle.pk}/")
+    assert resp.status_code == 200
+    rows = resp.data["findings"]
+    assert sorted(r["plant_code"] for r in rows) == ["TA", "TB"]
+    assert len({r["common_key"] for r in rows}) == 1 and rows[0]["common_key"]
+    assert {r["group_title"] for r in rows} == {"TISAX AL2 2026"}

@@ -3366,7 +3366,11 @@
       "manual": "Manuel",
       "pdca_ko": "Recyclage CHECK KO",
       "gap_controllo": "Écart de contrôle",
-      "risk_rosso": "Risque rouge"
+      "risk_rosso": "Risque rouge",
+      "finding_major": "Constat — NC majeure",
+      "finding_minor": "Constat — NC mineure",
+      "finding_observation": "Constat — observation",
+      "finding_opportunity": "Constat — opportunité"
     },
     "audit_subtype": {
       "interno": "Interne",
@@ -3540,7 +3544,13 @@
       "no_findings_any": "Aucun constat dans cet audit",
       "has_pdca": "lié à : {{title}}",
       "replace_hint": "Le constat a déjà un PDCA : il sera remplacé par celui-ci. S'il s'agit du PDCA ouvert automatiquement et jamais travaillé, il est archivé ; sinon il reste tel quel, simplement détaché.",
-      "replace_reason": "Motif du remplacement (au moins 10 caractères)"
+      "replace_reason": "Motif du remplacement (au moins 10 caractères)",
+      "finding_status": {
+        "open": "Ouvert",
+        "in_response": "En réponse",
+        "closed": "Clôturé",
+        "accepted_by_auditor": "Accepté par l'auditeur"
+      }
     }
   },
   "bcp": {

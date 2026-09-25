@@ -76,6 +76,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 - **Documenti (M07) — la delibera dell'organo vale anche per una nuova versione di un documento in vigore**: finora l'organo non poteva approvare per delibera la nuova versione di un documento già in vigore; ora può approvarla o respingerla. Ogni respingimento registra quale revisione è stata respinta.
 
 ### Changed
+- **PDCA — elenco più leggibile per i rilievi comuni**: i finding collegati di un rilievo comune a più siti occupano una sola riga, con il nome dell'audit e un riquadro per sito colorato secondo lo stato del finding; il titolo del finding non viene più ripetuto quando coincide con quello del ciclo. L'origine dei PDCA aperti da un finding è ora tradotta (es. "Finding — osservazione") invece del codice interno, e per i cicli di organizzazione "Organizzazione" non compare più due volte.
 - **Audit Prep — copertura dell'audit singolo**: un audit creato singolarmente, cioè non lanciato da un programma annuale a più step, copre sempre tutti i controlli e non mostra più la copertura "Campione 25%". Anche gli audit singoli già esistenti passano a copertura completa; le voci di checklist già generate restano invariate.
 
 ### Fixed

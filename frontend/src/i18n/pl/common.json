@@ -3366,7 +3366,11 @@
       "manual": "Ręcznie",
       "pdca_ko": "Powtórka po CHECK KO",
       "gap_controllo": "Luka w zabezpieczeniu",
-      "risk_rosso": "Ryzyko czerwone"
+      "risk_rosso": "Ryzyko czerwone",
+      "finding_major": "Ustalenie — NC poważna",
+      "finding_minor": "Ustalenie — NC drobna",
+      "finding_observation": "Ustalenie — obserwacja",
+      "finding_opportunity": "Ustalenie — szansa doskonalenia"
     },
     "audit_subtype": {
       "interno": "Wewnętrzny",
@@ -3540,7 +3544,13 @@
       "no_findings_any": "Brak ustaleń w tym audycie",
       "has_pdca": "powiązane z: {{title}}",
       "replace_hint": "Ustalenie ma już PDCA: zostanie zastąpiony tym. Jeśli to PDCA otwarty automatycznie i nigdy nieprowadzony, zostanie zarchiwizowany; w przeciwnym razie pozostaje bez zmian, tylko odłączony.",
-      "replace_reason": "Powód zastąpienia (co najmniej 10 znaków)"
+      "replace_reason": "Powód zastąpienia (co najmniej 10 znaków)",
+      "finding_status": {
+        "open": "Otwarte",
+        "in_response": "W trakcie odpowiedzi",
+        "closed": "Zamknięte",
+        "accepted_by_auditor": "Zaakceptowane przez audytora"
+      }
     }
   },
   "bcp": {
