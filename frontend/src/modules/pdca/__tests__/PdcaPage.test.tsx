@@ -168,6 +168,19 @@ describe("PdcaPage — collegamento ai finding di audit", () => {
     expect(screen.getAllByText("pdca.scope.org")).toHaveLength(1);
   });
 
+  it("il riferimento testuale si nasconde se c'è il finding collegato", async () => {
+    const linked = { id: "f1", title: "SdM_09 zone", finding_type: "opportunity", status: "open", audit_prep: "a1",
+      audit_title: "Audit TISAX AL3", plant_code: "IT-CH-01", common_key: null, group_title: null,
+      audit_type: "interno", requesting_party: "" };
+    mockList.mockResolvedValue({ results: [
+      cycle({ id: "c1", title: "Sospensione badge", riferimento_finding: "SdM_09", findings: [linked] }),
+      cycle({ id: "c2", title: "Vecchio", riferimento_finding: "NC-OLD-1", findings: [] }),
+    ] } as never);
+    renderPage();
+    expect(await screen.findByText("NC-OLD-1")).toBeInTheDocument();
+    expect(screen.queryByText("SdM_09")).not.toBeInTheDocument();
+  });
+
   it("il deep link ?cycle= mostra solo il ciclo collegato", async () => {
     renderPage("/pdca?cycle=c9");
     expect(await screen.findByText("pdca.link.single_cycle")).toBeInTheDocument();

@@ -1325,7 +1325,8 @@ function TitleCell({ cycle }: { cycle: PdcaCycle }) {
       )}
 
       <div className="mt-1 flex flex-wrap gap-1">
-        {cycle.riferimento_finding && (
+        {/* riferimento testuale (storico): superfluo se c'è il finding collegato */}
+        {cycle.riferimento_finding && !(cycle.findings ?? []).length && (
           <span className="text-[11px] text-indigo-700 font-mono bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5">
             {cycle.riferimento_finding}
           </span>
