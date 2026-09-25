@@ -498,3 +498,151 @@ def push_osint_kpis(user=None) -> dict:
             logger.warning("OSINT KPI push failed for plant %s: %s", plant_id, exc)
     logger.info("OSINT KPI push: %d plant aggiornati (%s)", pushed, OSINT_CRITICAL_KPI_CODE)
     return {"plants": len(counts), "pushed": pushed}
+
+
+
+# ---------------------------------------------------------------------------
+# Dashboard: postura esterna e riepilogo settimanale
+# ---------------------------------------------------------------------------
+
+OWN_TYPES = (EntityType.MY_DOMAIN, EntityType.ASSET)
+
+
+def _own_entities():
+    return OsintEntity.objects.filter(entity_type__in=OWN_TYPES, is_active=True, deleted_at__isnull=True)
+
+
+def external_posture(weeks: int = 12) -> dict:
+    """Postura esterna dell'organizzazione (domini e asset propri): voto
+    attuale, tendenza settimanale, problemi da correggere; per i fornitori
+    solo lo stato delle segnalazioni."""
+    from collections import defaultdict
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from .findings import OPEN_STATUSES, SUPPLIER_FOLLOWUP_DAYS
+    from .models import FindingStatus, OsintFinding, OsintScan
+    from .scoring import grade_for, security_score
+
+    settings = OsintSettings.load()
+    own = _own_entities()
+    risks = [r for r in own.values_list("last_score_total", flat=True) if r is not None]
+    risk_now = round(sum(risks) / len(risks)) if risks else None
+
+    # Tendenza: per ogni settimana, media dell'ultimo scan di ogni entità fino a fine settimana.
+    now = timezone.now()
+    start = now - timedelta(weeks=weeks)
+    scans = (
+        OsintScan.objects.filter(entity__in=own, status="completed", scan_date__gte=start - timedelta(weeks=4))
+        .order_by("scan_date").values_list("entity_id", "scan_date", "score_total")
+    )
+    rows = list(scans)
+    trend = []
+    for w in range(weeks, -1, -1):
+        end = now - timedelta(weeks=w)
+        latest: dict = {}
+        for eid, date, score in rows:
+            if date <= end and score is not None:
+                latest[eid] = score
+        if latest:
+            avg = round(sum(latest.values()) / len(latest))
+            trend.append({"week_end": end.date().isoformat(), "security": security_score(avg)})
+
+    week_ago = now - timedelta(days=7)
+    own_open = OsintFinding.objects.filter(entity__in=own, status__in=OPEN_STATUSES, deleted_at__isnull=True)
+    sup_open = OsintFinding.objects.filter(
+        entity__entity_type=EntityType.SUPPLIER, entity__is_active=True, severity="critical",
+        status__in=OPEN_STATUSES, deleted_at__isnull=True,
+    )
+    followup = now - timedelta(days=SUPPLIER_FOLLOWUP_DAYS)
+    by_sev = defaultdict(int)
+    for sev in own_open.values_list("severity", flat=True):
+        by_sev[sev] += 1
+    return {
+        "security": security_score(risk_now),
+        "grade": grade_for(risk_now, settings),
+        "entities": len(risks),
+        "trend": trend,
+        "own": {
+            "critical": by_sev["critical"], "warning": by_sev["warning"], "info": by_sev["info"],
+            "resolved_week": OsintFinding.objects.filter(
+                entity__in=own, status=FindingStatus.RESOLVED, resolved_at__gte=week_ago,
+            ).count(),
+        },
+        "suppliers": {
+            "to_report": sup_open.exclude(status=FindingStatus.REPORTED).count(),
+            "reported_open": sup_open.filter(status=FindingStatus.REPORTED).count(),
+            "overdue": sup_open.filter(status=FindingStatus.REPORTED, reported_at__lt=followup).count(),
+        },
+    }
+
+
+def weekly_changes(days: int = 7) -> dict:
+    """Cosa è cambiato negli ultimi `days` giorni: nuovi problemi e risolti
+    (propri), nuovi critici dei fornitori, variazioni di voto, sottodomini
+    da classificare."""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from .models import FindingStatus, OsintFinding, OsintSubdomain
+    from .scoring import grade_for, security_score
+
+    settings = OsintSettings.load()
+    since = timezone.now() - timedelta(days=days)
+    own = _own_entities()
+    base = OsintFinding.objects.filter(deleted_at__isnull=True).select_related("entity")
+
+    def brief(f):
+        return {"id": str(f.pk), "code": f.code, "severity": f.severity, "entity": str(f.entity_id),
+                "entity_name": f.entity.display_name, "domain": f.entity.domain}
+
+    new_own = base.filter(entity__in=own, first_seen__gte=since).order_by("-first_seen")
+    resolved_own = base.filter(entity__in=own, status=FindingStatus.RESOLVED, resolved_at__gte=since)
+    new_sup = base.filter(entity__entity_type=EntityType.SUPPLIER, entity__is_active=True,
+                          severity="critical", first_seen__gte=since)
+    moved = []
+    for e in OsintEntity.objects.filter(is_active=True, deleted_at__isnull=True, last_scan_at__gte=since,
+                                        last_score_total__isnull=False, prev_score_total__isnull=False):
+        delta = e.prev_score_total - e.last_score_total  # positivo = più sicuro
+        if abs(delta) >= 10:
+            moved.append({"entity": str(e.pk), "name": e.display_name, "entity_type": e.entity_type,
+                          "security": security_score(e.last_score_total),
+                          "grade": grade_for(e.last_score_total, settings), "delta": delta})
+    moved.sort(key=lambda m: m["delta"])
+    return {
+        "days": days,
+        "new_own": {"count": new_own.count(), "items": [brief(f) for f in new_own[:8]]},
+        "resolved_own": resolved_own.count(),
+        "new_supplier_critical": {"count": new_sup.count(), "items": [brief(f) for f in new_sup[:8]]},
+        "score_changes": moved[:10],
+        "pending_subdomains": OsintSubdomain.objects.filter(status="pending", deleted_at__isnull=True).count(),
+    }
+
+
+def supplier_posture(supplier_id) -> list[dict]:
+    """Postura esterna dei domini di un fornitore (per la scheda M14): voto,
+    critici aperti e storico delle segnalazioni."""
+    from .findings import OPEN_STATUSES, report_overdue
+    from .models import OsintFinding
+    from .scoring import grade_for, security_score
+
+    settings = OsintSettings.load()
+    result = []
+    for e in OsintEntity.objects.filter(entity_type=EntityType.SUPPLIER, source_id=supplier_id,
+                                        is_active=True, deleted_at__isnull=True):
+        findings = OsintFinding.objects.filter(entity=e, deleted_at__isnull=True)
+        critical = findings.filter(severity="critical", status__in=OPEN_STATUSES)
+        reports = findings.filter(reported_at__isnull=False).select_related("reported_by").order_by("-reported_at")
+        result.append({
+            "entity": str(e.pk), "domain": e.domain, "name": e.display_name,
+            "security": security_score(e.last_score_total), "grade": grade_for(e.last_score_total, settings),
+            "last_scan_at": e.last_scan_at,
+            "critical_open": [{"id": str(f.pk), "code": f.code, "status": f.status,
+                               "first_seen": f.first_seen, "reported_at": f.reported_at,
+                               "overdue": report_overdue(f)} for f in critical],
+            "reports": [{"id": str(f.pk), "code": f.code, "status": f.status, "reported_at": f.reported_at,
+                         "resolved_at": f.resolved_at, "note": f.report_note} for f in reports[:20]],
+        })
+    return result

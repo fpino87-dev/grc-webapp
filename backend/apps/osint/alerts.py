@@ -378,7 +378,17 @@ def _route_alert(alert: "OsintAlert", entity: "OsintEntity") -> None:
     if entity.entity_type == EntityType.MY_DOMAIN and severity == AlertSeverity.CRITICAL:
         _create_incident(alert, entity)
 
-    elif entity.entity_type in (EntityType.SUPPLIER, EntityType.ASSET):
+    elif entity.entity_type == EntityType.SUPPLIER:
+        # Fornitori: la correzione non spetta a noi → nessun task automatico;
+        # il finding critico compare in "Da segnalare ai fornitori". Resta la
+        # sola escalation umana se il fornitore mantiene asset OT nostri
+        # (es. teleassistenza): lì il rischio tocca i nostri impianti.
+        if severity == AlertSeverity.CRITICAL and _has_ot_asset_linked(entity):
+            alert.status = AlertStatus.PENDING_ESCALATION
+            alert.save(update_fields=["status", "updated_at"])
+        return
+
+    elif entity.entity_type == EntityType.ASSET:
         # Solo alert CRITICAL → task automatico; WARNING rimane alert manuale
         if severity == AlertSeverity.CRITICAL:
             if _has_ot_asset_linked(entity):

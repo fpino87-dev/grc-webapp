@@ -260,3 +260,25 @@ def classify_score(score: int, settings=None) -> str:
     if score >= att:
         return "attention"
     return "ok"
+
+
+
+def security_score(risk: int | None) -> int | None:
+    """Il punteggio interno misura il rischio (0 = bene); in interfaccia si
+    mostra la sicurezza, così più alto = meglio ovunque."""
+    return None if risk is None else max(0, min(100, 100 - risk))
+
+
+def grade_for(risk: int | None, settings=None) -> str | None:
+    """Voto A–F allineato alle soglie configurate: critico = F, warning = D,
+    attenzione = C, ok = B (A se la sicurezza è almeno 90)."""
+    if risk is None:
+        return None
+    cls = classify_score(risk, settings)
+    if cls == "critical":
+        return "F"
+    if cls == "warning":
+        return "D"
+    if cls == "attention":
+        return "C"
+    return "A" if security_score(risk) >= 90 else "B"

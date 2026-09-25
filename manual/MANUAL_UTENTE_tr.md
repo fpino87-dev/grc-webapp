@@ -1625,15 +1625,17 @@ OSINT Monitor, kuruluşunuzun **dış maruziyetini** — alan adlarınızı ve t
 
 Temel taramalar (SSL, DNS, WHOIS) **ücretsiz ve her zaman aktiftir**. Ek zenginleştirmeler (HaveIBeenPwned, VirusTotal, AbuseIPDB, Google Safe Browsing, AlienVault OTX, abuse.ch), ilgili **API anahtarlarını** **OSINT → Ayarlar**'a girerek etkinleştirilir (tümü isteğe bağlı; kayıt bağlantıları için ayarlar sayfasındaki `?` düğmesini kullanın). Anahtarlar şifrelenir ve asla açık metin olarak gösterilmez.
 
-### Uyarılar ve otomatik eylemler
+### Pano, not ve sorunlar
 
-Bir tarama önemli bir sorun tespit ettiğinde:
+Pano yukarıdan aşağı okunur: **dış güvenlik duruşunuz** (0–100 güvenlik puanıyla A–F notu, yüksek = daha iyi, ve son 12 haftanın eğilimi), ardından iki ayrı iş kuyruğu ve **Son 7 gün** özeti (yeni sorunlar, çözülenler, yeni tedarikçi kritikleri, not değişiklikleri, sınıflandırılacak alt alan adları). Altında varlıklar **Alan adlarım**, **Tedarikçiler** ve **Varlıklar** olarak not, eğilim ve açık sorunlarla ayrılır. Kuruluş notu yalnızca kendi alan adlarınızı ve varlıklarınızı dikkate alır.
 
-- **Alan adlarınızdan birindeki kritik bir uyarı** otomatik olarak bir **olay** (M09) oluşturabilir
-- **Bir tedarikçiye ilişkin uyarı**, iç referans için bir **doğrulama görevi** (M08) oluşturabilir
-- Bulgular remediasyona yönlendirilebilir ve gerekirse **yükseltilebilir**
+**Düzeltilecekler (alan adlarınız ve varlıklarınız)** — en eski kritik sorunlar; **Düzeltilecekler** sayfası hepsini düzeltme kılavuzu, kontrol eşlemesi ve görev oluşturma ile listeler. Alan adınızdaki kritik bir uyarı otomatik olarak bir **olay** (M09) oluşturabilir.
 
-Dış maruziyet bildirimleri **yalnızca iç personele** yöneliktir (asla Dış Denetçiye).
+**Tedarikçilere bildirilecekler** — tedarikçilerde düzeltme size düşmez: önemli olan not ve **kritik** sorunlardır. Görev oluşturulmaz. **Bildir**, seçilen dilde, kopyalanacak veya e-postanızda açılacak hazır bir metin açar (gönderen sizsiniz, asla platform değil); ardından bildirimi isteğe bağlı bir notla kaydedersiniz. Sorun, tarama artık tespit etmeyene kadar «Bildirildi» olarak kalır, sonra kendiliğinden kapanır; 30 gün sonra hâlâ mevcutsa **Hatırlat** ile yeniden öne çıkar. Tedarikçilerin kritik olmayan sorunları yalnızca bilgi amaçlıdır. Tedarikçi OT varlıklarınızın bakımını yapıyorsa (ör. uzaktan bakım), kritik bir uyarı kararınız için yükseltme bekler. Tedarikçi kartında (M14), **Dış duruş** sekmesinde not, kritikler ve bildirim geçmişi bulunur: tedarik zinciri izlemesinin kanıtı (NIS2 md. 21.2.d).
+
+**Varlık kartı** — bir varlığa tıklayınca açılır: Genel bakış (not, boyutlar, eğilim), Sorunlar, Geçilen kontroller, Teknik veriler, Olaylar (olay ve görev bağlantılı uyarı zaman çizelgesi) ve Ayarlar (beklenen e-posta ve web duruşu).
+
+Dış maruziyet bildirimleri **yalnızca iç personele** gider (asla Dış Denetçiye değil).
 
 ### AI analizi
 

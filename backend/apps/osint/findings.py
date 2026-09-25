@@ -21,7 +21,7 @@ from django.conf import settings as django_settings
 from django.utils import timezone
 
 if TYPE_CHECKING:
-    from apps.osint.models import OsintEntity, OsintScan
+    from apps.osint.models import OsintEntity, OsintFinding, OsintScan
 
 logger = logging.getLogger(__name__)
 
@@ -220,6 +220,13 @@ def _severity_for(code: str, params: dict | None = None) -> str:
     return AlertSeverity.INFO
 
 
+# Finding ancora da chiudere: anche "segnalato al fornitore" resta aperto
+# finché lo scan non lo vede più (auto-resolve).
+OPEN_STATUSES = ("open", "acknowledged", "in_progress", "reported")
+# Segnalazioni ai fornitori ancora aperte dopo questi giorni: da sollecitare.
+SUPPLIER_FOLLOWUP_DAYS = 30
+
+
 def sync_findings(entity: "OsintEntity", scan: "OsintScan") -> tuple[int, int, int]:
     """Riconcilia i finding aperti per questa entità con la nuova evidenza dello scan.
 
@@ -233,11 +240,7 @@ def sync_findings(entity: "OsintEntity", scan: "OsintScan") -> tuple[int, int, i
     detected = _detect_finding_codes(entity, scan)
 
     open_findings = list(
-        OsintFinding.objects.filter(
-            entity=entity,
-            status__in=[FindingStatus.OPEN, FindingStatus.ACKNOWLEDGED, FindingStatus.IN_PROGRESS],
-            deleted_at__isnull=True,
-        )
+        OsintFinding.objects.filter(entity=entity, status__in=OPEN_STATUSES, deleted_at__isnull=True)
     )
     open_by_code = {f.code: f for f in open_findings}
 
@@ -272,3 +275,46 @@ def sync_findings(entity: "OsintEntity", scan: "OsintScan") -> tuple[int, int, i
         resolved += 1
 
     return created, updated, resolved
+
+
+# ---------------------------------------------------------------------------
+# Fornitori: segnalazione invece di correzione
+# ---------------------------------------------------------------------------
+
+def mark_reported(finding: "OsintFinding", user, note: str = "") -> "OsintFinding":
+    """Registra che il problema è stato segnalato al fornitore. La correzione
+    spetta al fornitore: qui si traccia la segnalazione (evidenza di
+    monitoraggio della supply chain, NIS2 art. 21.2.d) e lo scan successivo
+    lo chiude da sé quando non lo rileva più. Ripetibile (sollecito)."""
+    from django.core.exceptions import ValidationError
+
+    from django.utils.translation import gettext as _
+
+    from apps.osint.models import EntityType
+    from core.audit import log_action
+
+    if finding.entity.entity_type != EntityType.SUPPLIER:
+        raise ValidationError(_("Solo i problemi dei fornitori si segnalano: quelli interni si correggono."))
+    if finding.status not in OPEN_STATUSES:
+        raise ValidationError(_("Il problema non è più aperto."))
+    previous = finding.reported_at
+    finding.status = "reported"
+    finding.reported_at = timezone.now()
+    finding.reported_by = user
+    finding.report_note = (note or "").strip()[:2000]
+    finding.save(update_fields=["status", "reported_at", "reported_by", "report_note", "updated_at"])
+    log_action(
+        user=user, action_code="osint.finding_reported", level="L2", entity=finding,
+        payload={"code": finding.code, "domain": finding.entity.domain, "reminder": previous is not None},
+    )
+    return finding
+
+
+def report_overdue(finding: "OsintFinding") -> bool:
+    """Segnalato da oltre SUPPLIER_FOLLOWUP_DAYS e ancora rilevato."""
+    from datetime import timedelta
+
+    return (
+        finding.status == "reported" and finding.reported_at is not None
+        and finding.reported_at < timezone.now() - timedelta(days=SUPPLIER_FOLLOWUP_DAYS)
+    )

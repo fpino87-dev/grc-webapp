@@ -1625,15 +1625,17 @@ OSINT Monitor est le module transversal qui surveille l'**exposition externe** d
 
 Les scans de base (SSL, DNS, WHOIS) sont **gratuits et toujours actifs**. Les enrichissements supplémentaires (HaveIBeenPwned, VirusTotal, AbuseIPDB, Google Safe Browsing, AlienVault OTX, abuse.ch) s'activent en saisissant les **clés API** correspondantes dans **OSINT → Paramètres** (toutes optionnelles ; utilisez le bouton `?` de la page des paramètres pour les liens d'inscription). Les clés sont chiffrées et jamais affichées en clair.
 
-### Alertes et actions automatiques
+### Tableau de bord, note et problèmes
 
-Lorsqu'un scan détecte un problème pertinent :
+Le tableau de bord se lit de haut en bas : **votre posture externe** (note A–F avec un score de sécurité 0–100, plus haut = mieux, et la tendance des 12 dernières semaines), puis deux files de travail séparées et le résumé **7 derniers jours** (nouveaux problèmes, résolus, nouveaux critiques fournisseurs, variations de note, sous-domaines à classer). En dessous, les entités réparties en **Mes domaines**, **Fournisseurs** et **Actifs**, avec note, tendance et problèmes ouverts. La note de l'organisation ne tient compte que de vos domaines et actifs.
 
-- Une **alerte critique sur l'un de vos domaines** peut générer automatiquement un **incident** (M09)
-- Une **alerte sur un fournisseur** peut générer une **tâche de vérification** (M08) pour le référent interne
-- Les findings peuvent être acheminés vers la remédiation et, si nécessaire, **escaladés**
+**À corriger (vos domaines et actifs)** — les problèmes critiques les plus anciens ; la page **À corriger** les liste tous avec le guide de correction, la correspondance aux contrôles et la création d'une tâche. Une alerte critique sur votre domaine peut créer automatiquement un **incident** (M09).
 
-Les notifications d'exposition externe sont destinées **uniquement au personnel interne** (jamais à l'Auditeur Externe).
+**À signaler aux fournisseurs** — pour les fournisseurs, la correction ne vous revient pas : comptent la note et les problèmes **critiques**. Aucune tâche n'est créée. **Signaler** ouvre un texte prêt, dans la langue choisie, à copier ou ouvrir dans votre messagerie (c'est vous qui l'envoyez, jamais la plateforme) ; puis vous enregistrez le signalement avec une note facultative. Le problème reste « Signalé » jusqu'à ce que le scan ne le détecte plus, puis se clôt de lui-même ; s'il est toujours présent après 30 jours, il revient avec **Relancer**. Les problèmes non critiques des fournisseurs sont seulement informatifs. Si le fournisseur maintient vos actifs OT (par ex. télémaintenance), une alerte critique reste en attente d'escalade pour votre décision. Dans la fiche fournisseur (M14), onglet **Posture externe**, vous trouvez note, critiques et historique des signalements : la preuve de la surveillance de la chaîne d'approvisionnement (NIS2 art. 21.2.d).
+
+**Fiche entité** — s'ouvre en cliquant sur une entité : Vue d'ensemble (note, dimensions, tendance), Problèmes, Contrôles réussis, Données techniques, Événements (chronologie des alertes avec liens vers incidents et tâches) et Paramètres (posture attendue messagerie et web).
+
+Les notifications d'exposition externe sont destinées **uniquement au personnel interne** (jamais à l'Auditeur externe).
 
 ### Analyse IA
 

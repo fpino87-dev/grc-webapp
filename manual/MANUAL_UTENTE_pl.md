@@ -1625,15 +1625,17 @@ OSINT Monitor to przekrojowy moduł monitorujący **zewnętrzną ekspozycję** T
 
 Skany podstawowe (SSL, DNS, WHOIS) są **darmowe i zawsze aktywne**. Dodatkowe wzbogacenia (HaveIBeenPwned, VirusTotal, AbuseIPDB, Google Safe Browsing, AlienVault OTX, abuse.ch) włącza się, wprowadzając odpowiednie **klucze API** w **OSINT → Ustawienia** (wszystkie opcjonalne; użyj przycisku `?` na stronie ustawień, aby uzyskać linki rejestracyjne). Klucze są szyfrowane i nigdy nie pokazywane jawnie.
 
-### Alerty i działania automatyczne
+### Pulpit, ocena i problemy
 
-Gdy skan wykryje istotny problem:
+Pulpit czyta się od góry: **twoja postawa zewnętrzna** (ocena A–F z wynikiem bezpieczeństwa 0–100, wyżej = lepiej, oraz trend z ostatnich 12 tygodni), następnie dwie osobne kolejki pracy i podsumowanie **Ostatnie 7 dni** (nowe problemy, rozwiązane, nowe krytyczne u dostawców, zmiany ocen, subdomeny do sklasyfikowania). Poniżej podmioty podzielone na **Moje domeny**, **Dostawcy** i **Zasoby**, z oceną, trendem i otwartymi problemami. Ocena organizacji uwzględnia tylko twoje domeny i zasoby.
 
-- **Krytyczny alert na jednej z Twoich domen** może automatycznie wygenerować **incydent** (M09)
-- **Alert dotyczący dostawcy** może wygenerować **zadanie weryfikacji** (M08) dla referenta wewnętrznego
-- Wyniki mogą być kierowane do remediacji i, w razie potrzeby, **eskalowane**
+**Do naprawy (twoje domeny i zasoby)** — najstarsze problemy krytyczne; strona **Do naprawy** wymienia wszystkie z instrukcją naprawy, mapowaniem na kontrole i tworzeniem zadania. Krytyczny alert w twojej domenie może automatycznie utworzyć **incydent** (M09).
 
-Powiadomienia o ekspozycji zewnętrznej są przeznaczone **wyłącznie dla personelu wewnętrznego** (nigdy dla Audytora Zewnętrznego).
+**Do zgłoszenia dostawcom** — u dostawców naprawa nie należy do ciebie: liczą się ocena i problemy **krytyczne**. Zadania nie są tworzone. **Zgłoś** otwiera gotowy tekst w wybranym języku do skopiowania lub otwarcia w poczcie (wysyłasz go ty, nigdy platforma); następnie rejestrujesz zgłoszenie z opcjonalną notatką. Problem pozostaje «Zgłoszony», dopóki skan go nie przestanie wykrywać, a potem zamyka się sam; jeśli po 30 dniach nadal występuje, wraca z przyciskiem **Przypomnij**. Problemy niekrytyczne dostawców są tylko informacyjne. Jeśli dostawca utrzymuje twoje zasoby OT (np. zdalne serwisowanie), alert krytyczny czeka na eskalację i twoją decyzję. W karcie dostawcy (M14), zakładka **Postawa zewnętrzna**, znajdziesz ocenę, problemy krytyczne i historię zgłoszeń: dowód monitorowania łańcucha dostaw (NIS2 art. 21.2.d).
+
+**Karta podmiotu** — otwiera się po kliknięciu podmiotu: Przegląd (ocena, wymiary, trend), Problemy, Zaliczone kontrole, Dane techniczne, Zdarzenia (oś czasu alertów z linkami do incydentów i zadań) i Ustawienia (oczekiwana postawa poczty i WWW).
+
+Powiadomienia o ekspozycji zewnętrznej trafiają **wyłącznie do personelu wewnętrznego** (nigdy do Audytora zewnętrznego).
 
 ### Analiza AI
 

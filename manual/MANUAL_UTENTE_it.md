@@ -1625,13 +1625,15 @@ OSINT Monitor è il modulo trasversale che monitora l'**esposizione esterna** de
 
 Le scansioni di base (SSL, DNS, WHOIS) sono **gratuite e sempre attive**. Gli arricchimenti aggiuntivi (HaveIBeenPwned, VirusTotal, AbuseIPDB, Google Safe Browsing, AlienVault OTX, abuse.ch) si abilitano inserendo le rispettive **chiavi API** in **OSINT → Impostazioni** (tutte opzionali; usa il pulsante `?` della pagina impostazioni per i link di registrazione). Le chiavi sono cifrate e mai mostrate in chiaro.
 
-### Alert e azioni automatiche
+### Dashboard, voto e problemi
 
-Quando una scansione rileva un problema rilevante:
+La dashboard si legge dall'alto: la **tua postura esterna** (voto A–F con punteggio di sicurezza 0–100, più alto = meglio, e tendenza delle ultime 12 settimane), poi due code di lavoro separate e il riepilogo **Ultimi 7 giorni** (nuovi problemi, risolti, nuovi critici dei fornitori, variazioni di voto, sottodomini da classificare). Sotto, le entità divise in **I miei domini**, **Fornitori** e **Asset**, con voto, tendenza e problemi aperti. Il voto dell'organizzazione considera solo i tuoi domini e asset.
 
-- Un **alert critico su un tuo dominio** può generare automaticamente un **incidente** (M09)
-- Un **alert su un fornitore** può generare un **task di verifica** (M08) al referente interno
-- I finding possono essere instradati alla remediation e, se necessario, **escalati**
+**Da correggere (domini e asset tuoi)** — i problemi critici più vecchi; la pagina **Da correggere** li elenca tutti con la guida alla correzione, la mappatura ai controlli e la creazione di un task. Un alert critico su un tuo dominio può generare automaticamente un **incidente** (M09).
+
+**Da segnalare ai fornitori** — per i fornitori la correzione non spetta a te: contano il voto e i problemi **critici**. Non si creano task. Con **Segnala** si apre un testo già pronto, nella lingua scelta, da copiare o aprire nella tua posta (l'invio parte da te, mai dalla piattaforma); poi registri la segnalazione con una nota facoltativa. Il problema resta «Segnalato» finché lo scan non lo rileva più, poi si chiude da solo; se dopo 30 giorni è ancora presente torna in evidenza con **Sollecita**. I problemi non critici dei fornitori restano solo informativi. Se il fornitore mantiene asset OT tuoi (es. teleassistenza), un alert critico resta in attesa di escalation per una tua decisione. Nella scheda del fornitore (M14), tab **Postura esterna**, trovi voto, critici e storico delle segnalazioni: l'evidenza del monitoraggio della supply chain (NIS2 art. 21.2.d).
+
+**Scheda entità** — si apre cliccando un'entità: Panoramica (voto, dimensioni, andamento), Problemi, Controlli superati, Dati tecnici, Eventi (cronologia degli alert con i link a incidenti e task) e Impostazioni (postura attesa di posta e web).
 
 Le notifiche di esposizione esterna sono destinate **solo al personale interno** (mai all'Auditor Esterno).
 

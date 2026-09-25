@@ -23,10 +23,33 @@ class OsintScanBriefSerializer(serializers.ModelSerializer):
         ]
 
 
-class OsintEntityListSerializer(serializers.ModelSerializer):
+class _GradeMixin(serializers.Serializer):
+    """Voto A–F e punteggio di sicurezza (100 − rischio): più alto = meglio."""
+    security = serializers.SerializerMethodField()
+    grade = serializers.SerializerMethodField()
+
+    def _settings(self):
+        from apps.osint.models import OsintSettings
+        if "osint_settings" not in self.context:
+            self.context["osint_settings"] = OsintSettings.load()
+        return self.context["osint_settings"]
+
+    def get_security(self, obj):
+        from apps.osint.scoring import security_score
+        return security_score(obj.last_score_total)
+
+    def get_grade(self, obj):
+        from apps.osint.scoring import grade_for
+        return grade_for(obj.last_score_total, self._settings())
+
+
+class OsintEntityListSerializer(_GradeMixin, serializers.ModelSerializer):
     last_scan = serializers.SerializerMethodField()
     delta = serializers.SerializerMethodField()
     active_alerts_count = serializers.IntegerField(source="active_alerts_count_cached", read_only=True)
+    # Problemi aperti per gravità (annotati nel queryset) e tendenza (sicurezza)
+    open_findings = serializers.SerializerMethodField()
+    trend = serializers.SerializerMethodField()
 
     class Meta:
         model = OsintEntity
@@ -36,8 +59,18 @@ class OsintEntityListSerializer(serializers.ModelSerializer):
             "expected_mail", "expected_web",
             "duplicate_candidate_of", "duplicate_verified",
             "last_scan", "delta", "active_alerts_count",
+            "security", "grade", "open_findings", "trend",
             "created_at", "updated_at",
         ]
+
+    def get_open_findings(self, obj):
+        return {"critical": getattr(obj, "open_critical", 0), "warning": getattr(obj, "open_warning", 0),
+                "info": getattr(obj, "open_info", 0)}
+
+    def get_trend(self, obj):
+        from apps.osint.scoring import security_score
+        scans = getattr(obj, "_recent_completed_scans", None) or []
+        return [security_score(s.score_total) for s in reversed(scans[:8]) if s.score_total is not None]
 
     def _get_prefetched_last_scan(self, obj):
         cached = getattr(obj, "_recent_completed_scans", None)
@@ -64,11 +97,15 @@ class OsintScanDetailSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class OsintEntityDetailSerializer(serializers.ModelSerializer):
+class OsintEntityDetailSerializer(_GradeMixin, serializers.ModelSerializer):
     last_scan = serializers.SerializerMethodField()
     delta = serializers.SerializerMethodField()
     active_alerts = serializers.SerializerMethodField()
     pending_subdomains_count = serializers.SerializerMethodField()
+    # Problemi dell'entità dal backend (non ricalcolati in interfaccia):
+    # aperti + chiusi negli ultimi 90 giorni; eventi = alert recenti.
+    findings = serializers.SerializerMethodField()
+    events = serializers.SerializerMethodField()
 
     class Meta:
         model = OsintEntity
@@ -78,8 +115,26 @@ class OsintEntityDetailSerializer(serializers.ModelSerializer):
             "expected_mail", "expected_web",
             "duplicate_candidate_of", "duplicate_verified",
             "last_scan", "delta", "active_alerts", "pending_subdomains_count",
+            "security", "grade", "findings", "events",
             "created_at", "updated_at",
         ]
+
+    def get_findings(self, obj):
+        from datetime import timedelta
+
+        from django.db.models import Q
+        from django.utils import timezone
+
+        from apps.osint.findings import OPEN_STATUSES
+        recent = timezone.now() - timedelta(days=90)
+        qs = obj.findings.filter(deleted_at__isnull=True).filter(
+            Q(status__in=OPEN_STATUSES) | Q(resolved_at__gte=recent) | Q(status="accepted_risk")
+        ).select_related("entity", "reported_by")
+        return OsintFindingSerializer(qs, many=True).data
+
+    def get_events(self, obj):
+        alerts = obj.alerts.order_by("-created_at")[:30]
+        return OsintAlertSerializer(alerts, many=True).data
 
     def get_last_scan(self, obj):
         scan = obj.scans.filter(status="completed").order_by("-scan_date").first()
@@ -190,6 +245,8 @@ class OsintFindingSerializer(serializers.ModelSerializer):
     entity_type = serializers.CharField(source="entity.entity_type", read_only=True)
     is_nis2_critical = serializers.BooleanField(source="entity.is_nis2_critical", read_only=True)
     playbook = serializers.SerializerMethodField()
+    reported_by_name = serializers.SerializerMethodField()
+    report_overdue = serializers.SerializerMethodField()
 
     class Meta:
         model = OsintFinding
@@ -199,17 +256,27 @@ class OsintFindingSerializer(serializers.ModelSerializer):
             "scan", "code", "severity", "params", "status",
             "first_seen", "last_seen", "resolved_at", "resolution_note",
             "accepted_risk_until", "linked_task_id",
+            "reported_at", "reported_by_name", "report_note", "report_overdue",
             "playbook", "created_at", "updated_at",
         ]
         read_only_fields = [
             "id", "entity", "scan", "code", "severity", "params",
             "first_seen", "last_seen", "resolved_at",
+            "reported_at", "reported_by_name", "report_note", "report_overdue",
             "playbook", "created_at", "updated_at",
         ]
 
     def get_playbook(self, obj):
         from apps.osint.findings import get_playbook
         return get_playbook(obj.code)
+
+    def get_reported_by_name(self, obj):
+        u = obj.reported_by
+        return (f"{u.first_name} {u.last_name}".strip() or u.username) if u else None
+
+    def get_report_overdue(self, obj):
+        from apps.osint.findings import report_overdue
+        return report_overdue(obj)
 
 
 class OsintPostureSerializer(serializers.ModelSerializer):

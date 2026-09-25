@@ -44,9 +44,17 @@ export interface OsintEntity {
   last_scan: OsintScanBrief | null;
   delta: number | null;
   active_alerts_count: number;
+  /** Sicurezza 0–100 (100 − rischio: più alto = meglio) e voto A–F. */
+  security?: number | null;
+  grade?: Grade | null;
+  open_findings?: { critical: number; warning: number; info: number };
+  /** Ultime sicurezze (dal più vecchio), per la sparkline. */
+  trend?: number[];
   created_at: string;
   updated_at: string;
 }
+
+export type Grade = "A" | "B" | "C" | "D" | "F";
 
 export interface OsintScanDetail extends OsintScanBrief {
   ssl_valid: boolean | null;
@@ -92,6 +100,10 @@ export interface OsintEntityDetail extends OsintEntity {
   last_scan: OsintScanDetail | null;
   active_alerts: OsintAlert[];
   pending_subdomains_count: number;
+  /** Problemi dell'entità (aperti + chiusi negli ultimi 90 giorni). */
+  findings?: OsintFinding[];
+  /** Cronologia degli alert (eventi). */
+  events?: OsintAlert[];
 }
 
 export interface OsintAlert {
@@ -160,7 +172,7 @@ export interface OsintSettings {
 export type EnricherHealthStatus = "ok" | "invalid" | "rate_limited" | "error" | "no_key";
 export type EnricherHealth = Record<string, { status: EnricherHealthStatus; detail: string; checked_at: string }>;
 
-export type FindingStatus = "open" | "acknowledged" | "in_progress" | "resolved" | "accepted_risk";
+export type FindingStatus = "open" | "acknowledged" | "in_progress" | "resolved" | "accepted_risk" | "reported";
 export type FindingCode =
   | "ssl_expiry" | "ssl_expired"
   | "dmarc_missing" | "dmarc_none"
@@ -208,7 +220,40 @@ export interface OsintFinding {
   resolution_note: string;
   accepted_risk_until: string | null;
   linked_task_id: string | null;
+  /** Fornitori: segnalazione (chi, quando, nota) e sollecito dopo 30 giorni. */
+  reported_at?: string | null;
+  reported_by_name?: string | null;
+  report_note?: string;
+  report_overdue?: boolean;
   playbook: FindingPlaybook | null;
+}
+
+export interface FindingBrief {
+  id: string; code: FindingCode; severity: AlertSeverity; entity: string; entity_name: string; domain: string;
+}
+
+export interface OsintPosture {
+  security: number | null;
+  grade: Grade | null;
+  entities: number;
+  trend: { week_end: string; security: number | null }[];
+  own: { critical: number; warning: number; info: number; resolved_week: number };
+  suppliers: { to_report: number; reported_open: number; overdue: number };
+}
+
+export interface OsintChanges {
+  days: number;
+  new_own: { count: number; items: FindingBrief[] };
+  resolved_own: number;
+  new_supplier_critical: { count: number; items: FindingBrief[] };
+  score_changes: { entity: string; name: string; entity_type: EntityType; security: number | null; grade: Grade | null; delta: number }[];
+  pending_subdomains: number;
+}
+
+export interface SupplierPosture {
+  entity: string; domain: string; name: string; security: number | null; grade: Grade | null; last_scan_at: string | null;
+  critical_open: { id: string; code: FindingCode; status: FindingStatus; first_seen: string; reported_at: string | null; overdue: boolean }[];
+  reports: { id: string; code: FindingCode; status: FindingStatus; reported_at: string; resolved_at: string | null; note: string }[];
 }
 
 export interface FindingsSummary {
@@ -283,8 +328,14 @@ export const osintApi = {
     apiClient.post<{ task_id: string; finding: OsintFinding }>(`/osint/findings/${id}/create-task/`).then(r => r.data),
   bulkTaskFindings: (ids: string[]) =>
     apiClient.post<{ created: number }>(`/osint/findings/bulk-task/`, { finding_ids: ids }).then(r => r.data),
-  findingsSummary: () =>
-    apiClient.get<FindingsSummary>("/osint/findings/summary/").then(r => r.data),
+  findingsSummary: (ownership?: "own" | "supplier") =>
+    apiClient.get<FindingsSummary>("/osint/findings/summary/", { params: ownership ? { ownership } : {} }).then(r => r.data),
+  reportFinding: (id: string, note: string) =>
+    apiClient.post<OsintFinding>(`/osint/findings/${id}/report/`, { note }).then(r => r.data),
+  posture: () => apiClient.get<OsintPosture>("/osint/dashboard/posture/").then(r => r.data),
+  changes: (days = 7) => apiClient.get<OsintChanges>("/osint/dashboard/changes/", { params: { days } }).then(r => r.data),
+  supplierPosture: (supplierId: string) =>
+    apiClient.get<SupplierPosture[]>(`/osint/entities/by-supplier/${supplierId}/`).then(r => r.data),
 
   exportFindingsCsv: () =>
     apiClient.get("/osint/findings/export/", { responseType: "blob" }).then(r => {

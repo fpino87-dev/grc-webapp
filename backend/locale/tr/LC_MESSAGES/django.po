@@ -2978,3 +2978,11 @@ msgstr "PDCA arşivleme — %(title)s"
 #: apps/pdca/services.py
 msgid "Motivazione dell'archiviazione del ciclo PDCA «%(title)s»."
 msgstr "«%(title)s» PDCA döngüsünün arşivlenme gerekçesi."
+
+#: apps/osint/findings.py
+msgid "Solo i problemi dei fornitori si segnalano: quelli interni si correggono."
+msgstr "Yalnızca tedarikçi sorunları bildirilir: iç sorunlar düzeltilir."
+
+#: apps/osint/findings.py
+msgid "Il problema non è più aperto."
+msgstr "Sorun artık açık değil."

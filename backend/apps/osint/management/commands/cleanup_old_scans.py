@@ -60,6 +60,7 @@ class Command(BaseCommand):
                     FindingStatus.OPEN,
                     FindingStatus.ACKNOWLEDGED,
                     FindingStatus.IN_PROGRESS,
+                    FindingStatus.REPORTED,
                 ],
                 deleted_at__isnull=True,
                 scan__isnull=False,

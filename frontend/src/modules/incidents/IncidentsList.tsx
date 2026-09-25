@@ -10,6 +10,7 @@ import { Nis2ConfigPanel } from "./Nis2ConfigPanel";
 import { IncidentDetailModal } from "./IncidentDetailModal";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
+import { useSearchParams } from "react-router-dom";
 
 export function IncidentsList() {
   const { t } = useTranslation();
@@ -28,6 +29,16 @@ export function IncidentsList() {
     queryFn: () => incidentsApi.list(params),
     retry: false,
   });
+
+  // ?incident=<id>: apertura diretta (es. dagli eventi OSINT)
+  const [searchParams, setSearchParams] = useSearchParams();
+  const deepLinkId = searchParams.get("incident");
+  useEffect(() => {
+    if (!deepLinkId || !data) return;
+    const found = (data.results ?? []).find(i => i.id === deepLinkId);
+    if (found) setSelected(found);
+    setSearchParams({}, { replace: true });
+  }, [deepLinkId, data, setSearchParams]);
 
   const { data: plants } = useQuery({
     queryKey: ["plants"],

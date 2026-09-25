@@ -375,6 +375,9 @@ class FindingStatus(models.TextChoices):
     IN_PROGRESS = "in_progress", "In risoluzione"
     RESOLVED = "resolved", "Risolto"
     ACCEPTED_RISK = "accepted_risk", "Rischio accettato"
+    # Fornitori: la correzione non spetta a noi. Il problema critico si
+    # segnala al fornitore e si segue finché lo scan non lo vede più.
+    REPORTED = "reported", "Segnalato al fornitore"
 
 
 class OsintFinding(BaseModel):
@@ -400,6 +403,12 @@ class OsintFinding(BaseModel):
     resolution_note = models.TextField(blank=True)
     accepted_risk_until = models.DateField(null=True, blank=True)
     linked_task_id = models.UUIDField(null=True, blank=True)
+    # Segnalazione al fornitore (solo entità fornitore): chi, quando, cosa.
+    reported_at = models.DateTimeField(null=True, blank=True)
+    reported_by = models.ForeignKey(
+        "auth.User", null=True, blank=True, on_delete=models.SET_NULL, related_name="+",
+    )
+    report_note = models.TextField(blank=True)
 
     class Meta:
         # Un solo finding "non chiuso" per coppia entità+codice; quando viene
@@ -408,7 +417,7 @@ class OsintFinding(BaseModel):
         constraints = [
             models.UniqueConstraint(
                 fields=["entity", "code"],
-                condition=models.Q(status__in=["open", "acknowledged", "in_progress"]),
+                condition=models.Q(status__in=["open", "acknowledged", "in_progress", "reported"]),
                 name="osint_finding_one_open_per_code",
             ),
         ]

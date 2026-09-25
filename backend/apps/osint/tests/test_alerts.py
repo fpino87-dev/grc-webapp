@@ -191,8 +191,8 @@ class TestRoutingIncidentTask:
         ).exists()
 
     def test_compromise_alert_on_a_supplier_still_acts(self):
-        """L'eccezione: un fornitore compromesso è una minaccia diretta per chi
-        scambia dati con lui, quindi resta critico e genera l'azione."""
+        """Un fornitore compromesso resta critico (da segnalare), ma la
+        correzione non spetta a noi: nessun task automatico."""
         from apps.osint.models import AlertSeverity, OsintAlert
         from apps.tasks.models import Task
 
@@ -206,7 +206,7 @@ class TestRoutingIncidentTask:
         assert OsintAlert.objects.filter(
             entity=entity, severity=AlertSeverity.CRITICAL
         ).exists()
-        assert Task.objects.count() > before
+        assert Task.objects.count() == before
 
     def test_new_subdomain_no_incident_or_task(self):
         from apps.osint.models import OsintSubdomain

@@ -86,8 +86,16 @@ class OsintEntityViewSet(viewsets.ReadOnlyModelViewSet):
         # Solo gli ultimi 2 scan servono per last_scan + delta — taglia la N+1.
         # Il limit per-entità non è esprimibile in una sola query Postgres con Prefetch:
         # accettiamo `prefetch_related("scans")` con order, e gli adattatori prendono [:2].
+        from django.db.models import Count, Q
+
+        from apps.osint.findings import OPEN_STATUSES
+
+        def _open(sev):
+            return Count("findings", filter=Q(findings__severity=sev, findings__status__in=OPEN_STATUSES,
+                                              findings__deleted_at__isnull=True), distinct=True)
         return (
             OsintEntity.objects.filter(is_active=True, deleted_at__isnull=True)
+            .annotate(open_critical=_open("critical"), open_warning=_open("warning"), open_info=_open("info"))
             .prefetch_related(
                 Prefetch("scans", queryset=last_completed, to_attr="_recent_completed_scans"),
             )
@@ -97,6 +105,17 @@ class OsintEntityViewSet(viewsets.ReadOnlyModelViewSet):
         if self.action == "retrieve":
             return OsintEntityDetailSerializer
         return OsintEntityListSerializer
+
+    @action(detail=False, methods=["get"], url_path=r"by-supplier/(?P<supplier_id>[^/.]+)")
+    def by_supplier(self, request, supplier_id=None):
+        """Postura esterna dei domini di un fornitore (scheda fornitore M14)."""
+        import uuid as _uuid
+        from apps.osint.services import supplier_posture
+        try:
+            sid = _uuid.UUID(str(supplier_id))
+        except ValueError:
+            return Response([], status=status.HTTP_200_OK)
+        return Response(supplier_posture(sid))
 
     @action(detail=True, methods=["get"])
     def history(self, request, pk=None):
@@ -381,6 +400,22 @@ class OsintDashboardView(viewsets.GenericViewSet):
             "pending_subdomains": pending_subdomains,
         })
 
+    @action(detail=False, methods=["get"])
+    def posture(self, request):
+        """Postura esterna propria: voto, tendenza, problemi; stato segnalazioni fornitori."""
+        from apps.osint.services import external_posture
+        return Response(external_posture())
+
+    @action(detail=False, methods=["get"])
+    def changes(self, request):
+        """Cosa è cambiato negli ultimi ?days= giorni (default 7)."""
+        from apps.osint.services import weekly_changes
+        try:
+            days = max(1, min(90, int(request.query_params.get("days", 7))))
+        except ValueError:
+            days = 7
+        return Response(weekly_changes(days))
+
     @action(detail=False, methods=["post"], permission_classes=[OsintWritePermission])
     def sync(self, request):
         """Sincronizza esplicitamente le entità OSINT con i moduli sorgente."""
@@ -594,6 +629,17 @@ class OsintAiView(viewsets.GenericViewSet):
             return Response({"detail": "Errore chiamata AI. Verifica configurazione AI Engine."}, status=status.HTTP_502_BAD_GATEWAY)
 
 
+def _filter_ownership(qs, request):
+    """?ownership=own → domini e asset propri (da correggere);
+    ?ownership=supplier → fornitori (da segnalare)."""
+    ownership = request.query_params.get("ownership")
+    if ownership == "own":
+        return qs.filter(entity__entity_type__in=["my_domain", "asset"])
+    if ownership == "supplier":
+        return qs.filter(entity__entity_type="supplier")
+    return qs
+
+
 class OsintFindingViewSet(viewsets.GenericViewSet):
     """API per i finding persistenti (menù Risoluzione)."""
     permission_classes = [OsintWritePermission]
@@ -610,11 +656,27 @@ class OsintFindingViewSet(viewsets.GenericViewSet):
         )
 
     def list(self, request):
-        qs = self.filter_queryset(self.get_queryset())
+        from apps.osint.findings import OPEN_STATUSES
+        qs = _filter_ownership(self.filter_queryset(self.get_queryset()), request)
         # Filtro speciale "open_only" — esclude resolved/accepted_risk per default UI.
         if request.query_params.get("open_only") in ("1", "true"):
-            qs = qs.filter(status__in=[FindingStatus.OPEN, FindingStatus.ACKNOWLEDGED, FindingStatus.IN_PROGRESS])
+            qs = qs.filter(status__in=OPEN_STATUSES)
         return Response(self.get_serializer(qs, many=True).data)
+
+    @action(detail=True, methods=["post"])
+    def report(self, request, pk=None):
+        """POST /osint/findings/<id>/report/ {note?} → segnalato al fornitore."""
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        from apps.osint.findings import mark_reported
+        try:
+            finding = self.get_queryset().get(pk=pk)
+        except OsintFinding.DoesNotExist:
+            return Response({"detail": "Non trovato."}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            mark_reported(finding, request.user, request.data.get("note", ""))
+        except DjangoValidationError as exc:
+            return Response({"detail": exc.messages[0]}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(self.get_serializer(finding).data)
 
     def retrieve(self, request, pk=None):
         try:
@@ -728,9 +790,8 @@ class OsintFindingViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=["get"])
     def summary(self, request):
         from django.db.models import Count
-        qs = self.get_queryset().filter(
-            status__in=[FindingStatus.OPEN, FindingStatus.ACKNOWLEDGED, FindingStatus.IN_PROGRESS],
-        )
+        from apps.osint.findings import OPEN_STATUSES
+        qs = _filter_ownership(self.get_queryset(), request).filter(status__in=OPEN_STATUSES)
         by_severity = {row["severity"]: row["c"] for row in qs.values("severity").annotate(c=Count("id"))}
         by_code = list(
             qs.values("code", "severity").annotate(c=Count("id")).order_by("-c")

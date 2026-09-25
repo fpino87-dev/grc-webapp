@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MemoryRouter } from "react-router-dom";
 import { IncidentsList } from "../IncidentsList";
 
 // ── Mock ──────────────────────────────────────────────────────────────────────
@@ -77,11 +78,11 @@ function makeIncident(overrides = {}) {
   };
 }
 
-function renderPage() {
+function renderPage(url = "/incidents") {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={qc}>
-      <IncidentsList />
+      <MemoryRouter initialEntries={[url]}><IncidentsList /></MemoryRouter>
     </QueryClientProvider>
   );
 }
@@ -121,6 +122,13 @@ describe("IncidentsList", () => {
     expect(await screen.findByText("incidents.detail_tabs.management")).toBeInTheDocument();
     expect(screen.getByText("incidents.detail_tabs.timeline")).toBeInTheDocument();
     expect(screen.getByText("incidents.management.save_btn")).toBeInTheDocument();
+  });
+
+  it("?incident=<id> apre direttamente il dettaglio (link dagli eventi OSINT)", async () => {
+    const inc = makeIncident();
+    mockList.mockResolvedValue({ results: [inc] } as never);
+    renderPage(`/incidents?incident=${inc.id}`);
+    expect(await screen.findByText("incidents.detail_tabs.management")).toBeInTheDocument();
   });
 
   it("la vista configurazione NIS2 chiede di selezionare un plant", async () => {

@@ -1625,15 +1625,17 @@ OSINT Monitor is the transversal module that monitors your organisation's **exte
 
 The basic scans (SSL, DNS, WHOIS) are **free and always active**. Additional enrichments (HaveIBeenPwned, VirusTotal, AbuseIPDB, Google Safe Browsing, AlienVault OTX, abuse.ch) are enabled by entering the respective **API keys** in **OSINT → Settings** (all optional; use the `?` button on the settings page for the registration links). The keys are encrypted and never shown in clear text.
 
-### Alerts and automatic actions
+### Dashboard, grade and issues
 
-When a scan detects a relevant issue:
+The dashboard reads top-down: **your external posture** (A–F grade with a 0–100 security score, higher = better, and the trend over the last 12 weeks), then two separate work queues and the **Last 7 days** summary (new issues, resolved, new supplier criticals, grade changes, subdomains to classify). Below, entities split into **My domains**, **Suppliers** and **Assets**, with grade, trend and open issues. The organization grade only considers your own domains and assets.
 
-- A **critical alert on one of your domains** can automatically generate an **incident** (M09)
-- An **alert on a supplier** can generate a **verification task** (M08) for the internal contact
-- Findings can be routed to remediation and, if necessary, **escalated**
+**To fix (your domains and assets)** — the oldest critical issues; the **To fix** page lists them all with fix guidance, control mapping and task creation. A critical alert on your domain can automatically create an **incident** (M09).
 
-External-exposure notifications are intended for **internal staff only** (never the External Auditor).
+**To report to suppliers** — for suppliers fixing is not up to you: what matters is the grade and the **critical** issues. No tasks are created. **Report** opens a ready-made text, in the chosen language, to copy or open in your mail (you send it, never the platform); then you record the report with an optional note. The issue stays «Reported» until the scan no longer detects it, then closes by itself; if still present after 30 days it comes back with **Follow up**. Non-critical supplier issues are for information only. If the supplier maintains your OT assets (e.g. remote maintenance), a critical alert stays pending escalation for your decision. In the supplier card (M14), **External posture** tab, you find grade, criticals and report history: the evidence of supply-chain monitoring (NIS2 art. 21.2.d).
+
+**Entity card** — opens by clicking an entity: Overview (grade, dimensions, trend), Issues, Passed checks, Technical data, Events (alert timeline with links to incidents and tasks) and Settings (expected mail and web posture).
+
+External exposure notifications go **to internal staff only** (never to the External Auditor).
 
 ### AI analysis
 

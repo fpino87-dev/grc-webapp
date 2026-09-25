@@ -23,6 +23,7 @@ const STATUS_BADGE: Record<FindingStatus, string> = {
   in_progress: "bg-blue-100 text-blue-700",
   resolved: "bg-green-100 text-green-700",
   accepted_risk: "bg-purple-100 text-purple-700",
+  reported: "bg-gray-100 text-gray-700",
 };
 
 function severityIcon(s: AlertSeverity): string {
@@ -72,7 +73,7 @@ function FindingCard({
           <div className="flex items-center gap-2 flex-wrap">
             <span>{severityIcon(finding.severity)}</span>
             <span className="font-semibold text-sm text-gray-900">
-              {pb?.title ?? finding.code}
+              {t(`osint.finding_title.${finding.code}`, { defaultValue: pb?.title ?? finding.code })}
             </span>
             <span className="text-xs text-gray-500 truncate max-w-[200px]">
               {finding.entity_display_name} · {finding.entity_domain}
@@ -83,7 +84,7 @@ function FindingCard({
             <StatusPill status={finding.status} />
           </div>
           <div className="text-xs text-gray-500 mt-1">
-            {t("osint.remediation.first_seen")}: {new Date(finding.first_seen).toLocaleDateString("it-IT")}
+            {t("osint.remediation.first_seen")}: {new Date(finding.first_seen).toLocaleDateString()}
             {finding.linked_task_id && (
               <span className="ml-2 text-blue-600">→ Task #{finding.linked_task_id.slice(0, 8)}</span>
             )}
@@ -210,14 +211,16 @@ export function OsintRemediationPage() {
   const [showResolved, setShowResolved] = useState(false);
 
   const { data: summary } = useQuery({
-    queryKey: ["osint-findings-summary"],
-    queryFn: osintApi.findingsSummary,
+    queryKey: ["osint-findings-summary", "own"],
+    // Solo i problemi propri (domini e asset): quelli dei fornitori si
+    // segnalano dalla dashboard, non si correggono qui.
+    queryFn: () => osintApi.findingsSummary("own"),
     refetchInterval: 60_000,
   });
 
   const { data: findings = [], isLoading } = useQuery({
-    queryKey: ["osint-findings", showResolved],
-    queryFn: () => osintApi.findings(showResolved ? {} : { open_only: "1" }),
+    queryKey: ["osint-findings", "own", showResolved],
+    queryFn: () => osintApi.findings(showResolved ? { ownership: "own" } : { open_only: "1", ownership: "own" }),
   });
 
   const filtered = useMemo(() => {

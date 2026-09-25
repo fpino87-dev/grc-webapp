@@ -2977,3 +2977,11 @@ msgstr "PDCA archiving — %(title)s"
 #: apps/pdca/services.py
 msgid "Motivazione dell'archiviazione del ciclo PDCA «%(title)s»."
 msgstr "Rationale for archiving the PDCA cycle «%(title)s»."
+
+#: apps/osint/findings.py
+msgid "Solo i problemi dei fornitori si segnalano: quelli interni si correggono."
+msgstr "Only supplier issues are reported: internal ones are fixed."
+
+#: apps/osint/findings.py
+msgid "Il problema non è più aperto."
+msgstr "The issue is no longer open."

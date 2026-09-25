@@ -36,7 +36,7 @@ function SubdomainRow({
         <StatusBadge status={sub.status} />
       </td>
       <td className="px-3 py-3 text-xs text-gray-400">
-        {new Date(sub.first_seen).toLocaleDateString("it-IT")}
+        {new Date(sub.first_seen).toLocaleDateString()}
       </td>
       <td className="px-3 py-3">
         <div className="flex gap-1">
