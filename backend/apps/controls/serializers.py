@@ -25,6 +25,7 @@ class ControlInstanceSerializer(serializers.ModelSerializer):
     control_external_id = serializers.CharField(source="control.external_id", read_only=True)
     control_title = serializers.SerializerMethodField()
     framework_code = serializers.CharField(source="control.framework.code", read_only=True)
+    domain_code = serializers.CharField(source="control.domain.code", read_only=True, default="")
     mapped_controls = serializers.SerializerMethodField()
     suggested_status = serializers.SerializerMethodField(read_only=True)
     suggestion_differs = serializers.SerializerMethodField(read_only=True)

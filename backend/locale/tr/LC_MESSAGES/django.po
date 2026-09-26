@@ -2994,3 +2994,11 @@ msgstr "En fazla 10 hizmet belirtin."
 #: apps/suppliers/serializers.py
 msgid "Indirizzo non valido: %(value)s"
 msgstr "Geçersiz adres: %(value)s"
+
+#: apps/reporting/views.py
+msgid "Dominio"
+msgstr "Alan"
+
+#: apps/reporting/views.py
+msgid "Ultima valutazione"
+msgstr "Son değerlendirme"

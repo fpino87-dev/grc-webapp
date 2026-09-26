@@ -1557,11 +1557,17 @@ Il suggerimento IA non ha effetto fino a quando non lo **confermi esplicitamente
 
 ### Dashboard reporting
 
-Vai su **Audit → Reporting**. Trovi tre livelli di dashboard:
+Vai su **Reporting**. La pagina è divisa in tab: **Compliance**, **Per Owner**, **Risk / BIA / BCP**, **KPI**, **Obiettivi di sicurezza** e, per governance e audit, **Accessi & responsabilità**. Il tab aperto resta nell'indirizzo della pagina, quindi il link si può condividere.
 
-- **Operativa**: stato task, controlli per framework e plant, scadenze
-- **Risk**: heat map aggregata, top 10 rischi aperti
-- **Executive**: compliance %, trend maturita' PDCA, readiness audit
+#### Tab Compliance
+
+Il tab è pensato prima per la direzione, poi per chi lavora sui gap:
+
+1. **Sintesi per framework**: una scheda per ogni framework attivo (ISO 27001, NIS2, TISAX…), mai un totale unico fra framework diversi. Ogni scheda mostra la percentuale di controlli conformi, l'andamento delle ultime 12 settimane con il valore di oggi, la variazione e la distribuzione per stato. I numeri di gap, parziali e non valutati aprono l'elenco dei controlli già filtrato.
+2. **Confronto siti**: senza un sito selezionato, una tabella siti × framework con la percentuale di ogni sito. Un clic sulla cella seleziona quel sito.
+3. **Dove siamo scoperti**: per il framework scelto, i controlli aperti per dominio, dal dominio più scoperto. I numeri aprono l'elenco dei controlli filtrato per dominio e stato; **Esporta controlli aperti** scarica il CSV dei controlli in gap, parziali o non valutati.
+
+**Come si calcola la percentuale** (uguale in Reporting, Dashboard, andamento settimanale e Assistente): controlli conformi sui controlli applicabili dei framework attivi del sito. I controlli N/A sono esclusi dal denominatore. Con TISAX L2 e L3 attivi, i controlli L2 sostituiti da un controllo VH di L3 si valutano sul VH e sono indicati a parte, come nell'elenco del modulo Controlli. I valori dell'andamento calcolati prima di questa regola compaiono in grigio e non entrano nella variazione.
 
 ### Generare un report
 

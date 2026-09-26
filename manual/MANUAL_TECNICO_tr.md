@@ -683,6 +683,8 @@ Temel URL: `/api/v1/`
 | `audit-prep/programs/` | GET, POST | M17 denetim programları |
 | `reporting/dashboard-summary/` | GET | M18 toplama panosu |
 | `reporting/kpi-trend/` | GET | M18 KPI trendi |
+| `reporting/compliance-overview/` | GET | Uyum: çerçeveye göre özet (%, durumlar, eğilim) ve tesisler × çerçeveler karşılaştırması |
+| `reporting/compliance-domains/` | GET | Uyum: bir çerçevenin alana göre açık kontrolleri (açık kontroller için `&export=csv`) |
 | `notifications/` | GET | M19 bildirimler |
 | `cockpit/insights/` | GET | Toplu insight + posture M21 |
 | `cockpit/insights/{fingerprint}/{action}/` | POST | Insight eylemi (snooze\|accept\|reopen) |

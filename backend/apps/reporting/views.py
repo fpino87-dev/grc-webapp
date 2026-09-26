@@ -51,6 +51,59 @@ class ComplianceSummaryView(PlantParamGuardedView):
         ))
 
 
+class ComplianceOverviewView(PlantParamGuardedView):
+    """GET /api/v1/reporting/compliance-overview/?plant=
+
+    Sintesi per framework (percentuale, stati, andamento) e, senza sito,
+    confronto siti × framework."""
+
+    def get(self, request):
+        return Response(services.compliance_overview(request.query_params.get("plant")))
+
+
+class ComplianceDomainsView(PlantParamGuardedView):
+    """GET /api/v1/reporting/compliance-domains/?plant=&framework=&lang=
+    (+ &export=csv: controlli non conformi del framework)."""
+
+    def get(self, request):
+        lang = _resolve_lang(request)
+        plant_id = request.query_params.get("plant")
+        framework = request.query_params.get("framework")
+        if request.query_params.get("export") == "csv":
+            return self._csv(services.compliance_open_controls(plant_id, framework, lang), lang)
+        return Response(services.compliance_domains(plant_id, framework, lang))
+
+    def _csv(self, rows, lang):
+        import io
+
+        from django.http import HttpResponse
+        from django.utils.translation import gettext, override
+
+        from core.csv_safe import safe_writer
+
+        buf = io.StringIO()
+        w = safe_writer(buf)
+        with override(lang):
+            status_labels = {
+                "gap": gettext("Gap"),
+                "parziale": gettext("Parziale"),
+                "non_valutato": gettext("Non valutato"),
+            }
+            w.writerow([
+                gettext("Sito"), gettext("Framework"), gettext("Dominio"),
+                gettext("Controllo"), gettext("Titolo"), gettext("Stato"),
+                gettext("Owner"), gettext("Ultima valutazione"),
+            ])
+            for r in rows:
+                w.writerow([
+                    r["plant_code"], r["framework"], r["domain"], r["control"], r["title"],
+                    status_labels.get(r["status"], r["status"]), r["owner"], r["last_evaluated_at"],
+                ])
+        resp = HttpResponse(buf.getvalue(), content_type="text/csv")
+        resp["Content-Disposition"] = 'attachment; filename="compliance-open-controls.csv"'
+        return resp
+
+
 class RiskSummaryView(PlantParamGuardedView):
     def get(self, request):
         return Response(services.risk_summary(request.query_params.get("plant")))

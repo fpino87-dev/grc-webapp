@@ -742,6 +742,10 @@
         "1": "Run: python manage.py load_frameworks",
         "2": "Enable the framework on the Site in M01"
       }
+    },
+    "domain_filter": {
+      "label": "Domain: {{domain}}",
+      "clear": "Remove domain filter"
     }
   },
   "gap_analysis": {
@@ -4206,11 +4210,6 @@
       "objectives": "Security objectives"
     },
     "kpi": {
-      "active_sites": "Active sites",
-      "open_incidents": "Open incidents",
-      "total_controls": "Total controls",
-      "pct_compliant": "% Compliant",
-      "gap_controls": "Controls in gap",
       "no_required_docs_configured": "No required documents configured for this framework",
       "plant_label": "Site",
       "all_plants": "All sites",
@@ -4274,19 +4273,35 @@
         "no_board": "No board on record"
       }
     },
-    "loading_kpi": "Loading KPIs...",
     "loading_compliance": "Loading compliance...",
     "loading": "Loading...",
     "no_compliance_data": "No compliance data available",
     "no_data": "No data available",
     "compliance": {
-      "distribution_title": "Compliance distribution ({{total}} controls)",
-      "by_status_title": "Controls by status",
-      "bar_label": "Controls"
-    },
-    "status": {
-      "parziale": "Partial",
-      "non_valutato": "Not evaluated"
+      "summary_title_org": "Summary by framework — whole organisation",
+      "summary_title_plant": "Summary by framework — {{plant}}",
+      "rule_hint": "% compliant out of applicable controls (N/A excluded)",
+      "compliant_of": "{{compliant}} compliant out of {{total}}",
+      "delta_hint": "Change in percentage points from the first comparable weekly snapshot in the last 12 weeks",
+      "today": "Today",
+      "superseded": "Controls assessed through the higher level: {{count}}",
+      "na_excluded": "N/A excluded: {{count}}",
+      "see_detail": "Detail by domain",
+      "legacy_note": "The grey part of the trend is calculated with the previous rule (N/A in the denominator) and is not comparable with current values; the change only considers values calculated with the current rule.",
+      "plants_title": "Site comparison",
+      "plants_hint": "Compliance percentage of each site by framework. Click a cell to switch to that site.",
+      "col_plant": "Site",
+      "cell_hint": "Open controls: {{open}} (gap: {{gap}})",
+      "domains_title": "Where we are exposed",
+      "domains_hint": "Open controls by domain, most exposed first. Click the numbers for the list of controls.",
+      "framework_label": "Framework",
+      "gap_analysis": "Gap analysis",
+      "export_csv": "Export open controls",
+      "export_hint": "CSV of the framework's controls with gap, partial or not assessed",
+      "col_domain": "Domain",
+      "col_distribution": "Distribution",
+      "no_domain": "No domain",
+      "open_controls": "Open controls"
     },
     "owner": {
       "risks_chart_title": "Risks by owner (stacked)",

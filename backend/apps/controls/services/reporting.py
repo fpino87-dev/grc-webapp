@@ -1,5 +1,5 @@
 from ..models import ControlInstance
-from .evidence import is_covered_by_extender
+from .evidence import _extends_pairs_qs
 
 
 def _count_effective_by_plant(extra_q) -> dict:
@@ -63,78 +63,132 @@ def count_tisax_missing_implementation_by_plant() -> dict:
     )
 
 
-def get_compliance_summary(plant_id, framework_code=None):
-    """
-    % di compliance del plant (per framework specifico o globale sui framework
-    attivi).
+# ---------------------------------------------------------------------------
+# Percentuale di conformità — regola unica
+# ---------------------------------------------------------------------------
+# Usata da Reporting, snapshot settimanale, dashboard_summary e Assistente, così
+# lo stesso sito/framework dà ovunque lo stesso numero. È la regola dell'elenco
+# del modulo Controlli (`ControlInstanceViewSet` senza filtro framework):
+# - solo framework attivi sul sito;
+# - i controlli base sostituiti da un extender attivo sullo stesso sito
+#   (TISAX L2 → VH L3 via `ControlMapping(extends)`) sono fuori conteggio: si
+#   valutano sul VH e vengono riportati a parte (`superseded_by_extender`);
+# - N/A fuori dal denominatore (riportati in `na_excluded`).
 
-    Regole:
-    - I controlli `na` (Non Applicabile) sono fuori contesto organizzativo e
-      vengono **esclusi dal denominatore** (non sono ne' gap ne' compliant —
-      non li valutiamo affatto).
-    - I controlli non-compliant ma coperti da un extender (es. TISAX L2 con
-      evidenza caricata sul corrispondente L3 via `ControlMapping(extends)`)
-      vengono conteggiati come compliant nel numeratore (la regola di
-      copertura e' la stessa di `audit_prep.validation` / `is_covered_by_extender`).
+COMPLIANCE_STATUSES = ("compliant", "parziale", "gap", "non_valutato")
 
-    I campi `compliant_direct` e `covered_by_extender` sono esposti
-    separatamente per UI esplicative (es. "29 + 12 coperti da L3").
-    """
-    from django.db.models import Count
-    from django.utils import timezone
 
-    from apps.plants.models import Plant
-    from apps.plants.services import get_active_frameworks
+def effective_control_rows(plants, framework_codes=None) -> list[dict]:
+    """Righe delle istanze di controllo dei `plants` sui framework attivi, con
+    il flag `superseded`. Tre query in tutto, indipendentemente dal numero di
+    siti. Ogni riga: plant_id, control_id, framework_code, domain_id, status,
+    superseded."""
+    from apps.plants.models import PlantFramework
 
-    qs = ControlInstance.objects.filter(
-        plant_id=plant_id,
+    plant_ids = [p.pk if hasattr(p, "pk") else p for p in plants]
+    if not plant_ids:
+        return []
+
+    pf_qs = PlantFramework.objects.filter(
+        plant_id__in=plant_ids,
+        active=True,
         deleted_at__isnull=True,
+        framework__archived_at__isnull=True,
+        framework__deleted_at__isnull=True,
     )
-    if framework_code:
-        qs = qs.filter(control__framework__code=framework_code)
-    else:
-        plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
-        active_fws = get_active_frameworks(plant)
-        qs = qs.filter(control__framework__in=active_fws)
+    if framework_codes is not None:
+        pf_qs = pf_qs.filter(framework__code__in=list(framework_codes))
+    active: dict = {}
+    for plant_id, fw_id in pf_qs.values_list("plant_id", "framework_id"):
+        active.setdefault(plant_id, set()).add(fw_id)
+    if not active:
+        return []
 
-    na_count = qs.filter(status="na").count()
-    qs = qs.exclude(status="na")
-    total = qs.count()
+    # Il sostituito va calcolato su TUTTI i framework attivi del sito, anche se
+    # si chiede un solo framework: L2 perde i controlli coperti da L3 attivo.
+    all_active: dict = {}
+    for plant_id, fw_id in PlantFramework.objects.filter(
+        plant_id__in=list(active),
+        active=True,
+        deleted_at__isnull=True,
+        framework__archived_at__isnull=True,
+        framework__deleted_at__isnull=True,
+    ).values_list("plant_id", "framework_id"):
+        all_active.setdefault(plant_id, set()).add(fw_id)
+    all_fw_ids = set().union(*all_active.values())
+    extenders_of: dict = {}
+    for src_fw, tgt_fw, target in _extends_pairs_qs(all_fw_ids).values_list(
+        "source_control__framework_id", "target_control__framework_id", "target_control_id",
+    ):
+        extenders_of.setdefault(target, []).append((src_fw, tgt_fw))
 
-    if total == 0:
-        return {
-            "total": 0,
-            "compliant": 0,
-            "compliant_direct": 0,
-            "covered_by_extender": 0,
-            "gap": 0,
-            "parziale": 0,
-            "non_valutato": 0,
-            "na_excluded": na_count,
-            "pct_compliant": 0,
-        }
+    wanted_fw_ids = set().union(*active.values())
+    rows = []
+    for r in ControlInstance.objects.filter(
+        plant_id__in=list(active),
+        deleted_at__isnull=True,
+        control__framework_id__in=wanted_fw_ids,
+    ).values(
+        "plant_id", "control_id", "status",
+        "control__framework_id", "control__framework__code", "control__domain_id",
+    ):
+        plant_id, fw_id = r["plant_id"], r["control__framework_id"]
+        if fw_id not in active.get(plant_id, ()):
+            continue
+        plant_fws = all_active.get(plant_id, set())
+        superseded = any(
+            src_fw in plant_fws and tgt_fw in plant_fws
+            for src_fw, tgt_fw in extenders_of.get(r["control_id"], ())
+        )
+        rows.append({
+            "plant_id": plant_id,
+            "control_id": r["control_id"],
+            "framework_code": r["control__framework__code"],
+            "domain_id": r["control__domain_id"],
+            "status": r["status"],
+            "superseded": superseded,
+        })
+    return rows
 
-    counts = qs.values("status").annotate(n=Count("id"))
-    result = {r["status"]: r["n"] for r in counts}
-    compliant_direct = result.get("compliant", 0)
 
-    # Conta i non-compliant coperti da un extender (es. TISAX L2 coperto da L3).
-    today = timezone.localdate()
-    non_compliant_qs = qs.exclude(status="compliant").select_related("control")
-    covered_by_extender = 0
-    for ci in non_compliant_qs:
-        if is_covered_by_extender(ci, today):
-            covered_by_extender += 1
-
-    compliant_effective = compliant_direct + covered_by_extender
+def summarize_compliance(rows) -> dict:
+    """Conteggi e percentuale di conformità su righe di `effective_control_rows`."""
+    counts = dict.fromkeys(COMPLIANCE_STATUSES, 0)
+    na = superseded = 0
+    for r in rows:
+        if r["superseded"]:
+            superseded += 1
+        elif r["status"] == "na":
+            na += 1
+        else:
+            counts[r["status"]] = counts.get(r["status"], 0) + 1
+    total = sum(counts.values())
     return {
         "total": total,
-        "compliant": compliant_effective,
-        "compliant_direct": compliant_direct,
-        "covered_by_extender": covered_by_extender,
-        "gap": result.get("gap", 0),
-        "parziale": result.get("parziale", 0),
-        "non_valutato": result.get("non_valutato", 0),
-        "na_excluded": na_count,
-        "pct_compliant": round(compliant_effective / total * 100, 1),
+        **counts,
+        "na_excluded": na,
+        "superseded_by_extender": superseded,
+        "pct_compliant": round(counts["compliant"] / total * 100, 1) if total else 0,
+    }
+
+
+def get_compliance_summary(plant_id, framework_code=None):
+    """
+    % di compliance del sito (per framework o sull'insieme dei framework
+    attivi), con la regola unica descritta sopra.
+
+    Chiavi legacy per i consumatori esistenti (Assistente): `compliant_direct`
+    coincide con `compliant`; `covered_by_extender` riporta i controlli base
+    valutati tramite l'extender (es. i controlli TISAX L2 sostituiti dal VH L3).
+    """
+    if not plant_id:
+        return {**summarize_compliance([]), "compliant_direct": 0, "covered_by_extender": 0}
+    rows = effective_control_rows(
+        [plant_id], [framework_code] if framework_code else None,
+    )
+    summary = summarize_compliance(rows)
+    return {
+        **summary,
+        "compliant_direct": summary["compliant"],
+        "covered_by_extender": summary["superseded_by_extender"],
     }

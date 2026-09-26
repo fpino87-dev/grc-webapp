@@ -3060,3 +3060,11 @@ msgstr "Indiquez au maximum 10 services."
 #: apps/suppliers/serializers.py
 msgid "Indirizzo non valido: %(value)s"
 msgstr "Adresse non valide : %(value)s"
+
+#: apps/reporting/views.py
+msgid "Dominio"
+msgstr "Domaine"
+
+#: apps/reporting/views.py
+msgid "Ultima valutazione"
+msgstr "Dernière évaluation"

@@ -14,6 +14,7 @@ export interface ControlInstance {
   control_external_id: string;
   control_title: string;
   framework_code: string;
+  domain_code?: string;
   status: "compliant" | "parziale" | "gap" | "na" | "non_valutato";
   owner: number | null;
   owner_display: string | null;

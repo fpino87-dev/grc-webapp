@@ -1557,11 +1557,17 @@ Yapay zeka önerisi, **açıkça onaylayana** kadar hiçbir etki yaratmaz. Yapab
 
 ### Raporlama kontrol paneli
 
-**Denetim → Raporlama** bölümüne gidin. Üç düzey kontrol paneli bulunur:
+**Reporting** sayfasına gidin. Sayfa sekmelere ayrılmıştır: **Uyum**, **Sahibe göre**, **Risk / BIA / BCP**, **KPI**, **Güvenlik hedefleri** ve yönetişim ile denetim için **Erişim ve sorumluluklar**. Açık sekme sayfa adresinde kalır, bu nedenle bağlantı paylaşılabilir.
 
-- **Operasyonel**: görev durumu, çerçeve ve tesise göre kontroller, son tarihler
-- **Risk**: toplu ısı haritası, ilk 10 açık risk
-- **Yönetici**: uyum %, PDCA olgunluk trendi, denetim hazırlığı
+#### Uyum sekmesi
+
+Sekme önce yönetim, ardından açıklar üzerinde çalışanlar için tasarlanmıştır:
+
+1. **Çerçeveye göre özet**: her etkin çerçeve (ISO 27001, NIS2, TISAX…) için bir kart; farklı çerçeveler için asla tek bir toplam yoktur. Her kart uyumlu kontrollerin yüzdesini, bugünkü değerle birlikte son 12 haftanın eğilimini, değişimi ve duruma göre dağılımı gösterir. Açık, kısmi ve değerlendirilmemiş sayıları önceden filtrelenmiş kontrol listesini açar.
+2. **Tesis karşılaştırması**: tesis seçili değilken, her tesisin yüzdesini gösteren tesisler × çerçeveler tablosu. Bir hücreye tıklamak o tesisi seçer.
+3. **Nerede açığımız var**: seçilen çerçeve için alana göre açık kontroller, en çok açığı olan alandan başlayarak. Sayılar alana ve duruma göre filtrelenmiş kontrol listesini açar; **Açık kontrolleri dışa aktar** açık, kısmi veya değerlendirilmemiş kontrollerin CSV dosyasını indirir.
+
+**Yüzdenin hesaplanması** (Raporlama, Kontrol paneli, haftalık eğilim ve Asistan'da aynıdır): tesisin etkin çerçevelerindeki uygulanabilir kontroller içinde uyumlu kontroller. N/A kontroller paydadan hariç tutulur. TISAX L2 ve L3 birlikte etkinken, L3'ün bir VH kontrolüyle değiştirilen L2 kontrolleri VH üzerinden değerlendirilir ve Kontroller modülü listesinde olduğu gibi ayrıca gösterilir. Bu kuraldan önce hesaplanan eğilim değerleri gri gösterilir ve değişime dahil edilmez.
 
 ### Rapor oluşturma
 

@@ -745,6 +745,10 @@
         "1": "Uruchom: python manage.py load_frameworks",
         "2": "Aktywuj ramy w zakładzie w M01"
       }
+    },
+    "domain_filter": {
+      "label": "Domena: {{domain}}",
+      "clear": "Usuń filtr domeny"
     }
   },
   "gap_analysis": {
@@ -4206,11 +4210,6 @@
       "objectives": "Cele bezpieczeństwa"
     },
     "kpi": {
-      "active_sites": "Aktywne zakłady",
-      "open_incidents": "Otwarte incydenty",
-      "total_controls": "Wszystkie kontrole",
-      "pct_compliant": "% Zgodnych",
-      "gap_controls": "Kontrole z luką",
       "no_required_docs_configured": "Brak wymaganych dokumentów skonfigurowanych dla tego frameworku",
       "plant_label": "Zakład",
       "all_plants": "Wszystkie zakłady",
@@ -4274,19 +4273,35 @@
         "no_board": "Brak zarządu w rejestrze"
       }
     },
-    "loading_kpi": "Ładowanie KPI...",
     "loading_compliance": "Ładowanie zgodności...",
     "loading": "Ładowanie...",
     "no_compliance_data": "Brak danych zgodności",
     "no_data": "Brak danych",
     "compliance": {
-      "distribution_title": "Rozkład zgodności ({{total}} kontroli)",
-      "by_status_title": "Kontrole wg statusu",
-      "bar_label": "Kontrole"
-    },
-    "status": {
-      "parziale": "Częściowy",
-      "non_valutato": "Nie ocenione"
+      "summary_title_org": "Podsumowanie według frameworku — cała organizacja",
+      "summary_title_plant": "Podsumowanie według frameworku — {{plant}}",
+      "rule_hint": "% zgodnych spośród kontroli mających zastosowanie (N/A wyłączone)",
+      "compliant_of": "Zgodne: {{compliant}} z {{total}}",
+      "delta_hint": "Zmiana w punktach procentowych względem pierwszej porównywalnej migawki tygodniowej z ostatnich 12 tygodni",
+      "today": "Dziś",
+      "superseded": "Kontrole oceniane przez wyższy poziom: {{count}}",
+      "na_excluded": "Wyłączone N/A: {{count}}",
+      "see_detail": "Szczegóły według domeny",
+      "legacy_note": "Szara część trendu jest obliczona według poprzedniej reguły (N/A w mianowniku) i nie jest porównywalna z obecnymi wartościami; zmiana uwzględnia tylko wartości obliczone według obecnej reguły.",
+      "plants_title": "Porównanie zakładów",
+      "plants_hint": "Procent zgodności każdego zakładu według frameworku. Kliknij komórkę, aby przejść do tego zakładu.",
+      "col_plant": "Zakład",
+      "cell_hint": "Otwarte kontrole: {{open}} (luki: {{gap}})",
+      "domains_title": "Gdzie jesteśmy odsłonięci",
+      "domains_hint": "Otwarte kontrole według domeny, od najbardziej odsłoniętej. Kliknij liczby, aby zobaczyć listę kontroli.",
+      "framework_label": "Framework",
+      "gap_analysis": "Analiza luk",
+      "export_csv": "Eksportuj otwarte kontrole",
+      "export_hint": "CSV kontroli frameworku z luką, częściowych lub nieocenionych",
+      "col_domain": "Domena",
+      "col_distribution": "Rozkład",
+      "no_domain": "Bez domeny",
+      "open_controls": "Otwórz kontrole"
     },
     "owner": {
       "risks_chart_title": "Ryzyka wg właściciela (skumulowane)",

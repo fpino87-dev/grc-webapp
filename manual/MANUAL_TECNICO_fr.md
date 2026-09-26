@@ -683,6 +683,8 @@ URL de base : `/api/v1/`
 | `audit-prep/programs/` | GET, POST | Programmes d'audit M17 |
 | `reporting/dashboard-summary/` | GET | Tableau de bord agrégé M18 |
 | `reporting/kpi-trend/` | GET | Tendance KPI M18 |
+| `reporting/compliance-overview/` | GET | Conformité : synthèse par référentiel (%, statuts, tendance) et comparaison sites × référentiels |
+| `reporting/compliance-domains/` | GET | Conformité : contrôles ouverts par domaine d'un référentiel (`&export=csv` pour les contrôles ouverts) |
 | `notifications/` | GET | Notifications M19 |
 | `cockpit/insights/` | GET | Insights agrégés + posture M21 |
 | `cockpit/insights/{fingerprint}/{action}/` | POST | Action insight (snooze\|accept\|reopen) |

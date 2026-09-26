@@ -2993,3 +2993,11 @@ msgstr "List at most 10 services."
 #: apps/suppliers/serializers.py
 msgid "Indirizzo non valido: %(value)s"
 msgstr "Invalid address: %(value)s"
+
+#: apps/reporting/views.py
+msgid "Dominio"
+msgstr "Domain"
+
+#: apps/reporting/views.py
+msgid "Ultima valutazione"
+msgstr "Last assessment"

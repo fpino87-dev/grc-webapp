@@ -1557,11 +1557,17 @@ Sugestia SI nie ma żadnego efektu, dopóki jej **jawnie nie potwierdzisz**. Mo�
 
 ### Pulpit raportowania
 
-Przejdź do **Audyt → Raportowanie**. Znajdziesz trzy poziomy pulpitów:
+Przejdź do **Reporting**. Strona jest podzielona na zakładki: **Zgodność**, **Wg właściciela**, **Ryzyko / BIA / BCP**, **KPI**, **Cele bezpieczeństwa** oraz, dla ładu i audytu, **Dostępy i odpowiedzialności**. Otwarta zakładka pozostaje w adresie strony, więc link można udostępnić.
 
-- **Operacyjny**: status zadań, kontrole według frameworku i plant, terminy
-- **Ryzyko**: zagregowana mapa ciepła, 10 największych otwartych ryzyk
-- **Wykonawczy**: compliance %, trend dojrzałości PDCA, gotowość do audytu
+#### Zakładka Zgodność
+
+Zakładka jest przeznaczona najpierw dla kierownictwa, a następnie dla osób pracujących nad lukami:
+
+1. **Podsumowanie według frameworku**: jedna karta dla każdego aktywnego frameworku (ISO 27001, NIS2, TISAX…), nigdy jedna suma dla różnych frameworków. Każda karta pokazuje procent zgodnych kontroli, trend z ostatnich 12 tygodni z dzisiejszą wartością, zmianę i rozkład według statusu. Liczby luk, częściowych i nieocenionych otwierają już przefiltrowaną listę kontroli.
+2. **Porównanie zakładów**: bez wybranego zakładu tabela zakłady × frameworki z procentem każdego zakładu. Kliknięcie komórki wybiera ten zakład.
+3. **Gdzie jesteśmy odsłonięci**: dla wybranego frameworku otwarte kontrole według domeny, od najbardziej odsłoniętej. Liczby otwierają listę kontroli przefiltrowaną według domeny i statusu; **Eksportuj otwarte kontrole** pobiera plik CSV kontroli z luką, częściowych lub nieocenionych.
+
+**Sposób obliczania procentu** (taki sam w Raportowaniu, Pulpicie, trendzie tygodniowym i Asystencie): zgodne kontrole spośród kontroli mających zastosowanie w aktywnych frameworkach zakładu. Kontrole N/A są wyłączone z mianownika. Przy aktywnych TISAX L2 i L3 kontrole L2 zastąpione kontrolą VH z L3 są oceniane na VH i wskazywane osobno, jak na liście modułu Kontrole. Wartości trendu obliczone przed tą regułą są pokazane na szaro i nie są uwzględniane w zmianie.
 
 ### Generowanie raportu
 

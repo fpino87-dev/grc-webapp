@@ -1557,11 +1557,17 @@ The AI suggestion has no effect until you **explicitly confirm** it. You can:
 
 ### Reporting dashboard
 
-Go to **Audit → Reporting**. You will find three levels of dashboard:
+Go to **Reporting**. The page is split into tabs: **Compliance**, **By Owner**, **Risk / BIA / BCP**, **KPI**, **Security objectives** and, for governance and audit, **Access & responsibilities**. The open tab stays in the page address, so the link can be shared.
 
-- **Operational**: task status, controls by framework and plant, deadlines
-- **Risk**: aggregated heat map, top 10 open risks
-- **Executive**: compliance %, PDCA maturity trend, audit readiness
+#### Compliance tab
+
+The tab is designed first for management, then for whoever works on the gaps:
+
+1. **Summary by framework**: one card per active framework (ISO 27001, NIS2, TISAX…), never a single total across different frameworks. Each card shows the percentage of compliant controls, the trend over the last 12 weeks including today's value, the change and the distribution by status. The gap, partial and not-assessed figures open the list of controls already filtered.
+2. **Site comparison**: with no site selected, a sites × frameworks table with each site's percentage. Clicking a cell selects that site.
+3. **Where we are exposed**: for the chosen framework, open controls by domain, most exposed domain first. The figures open the list of controls filtered by domain and status; **Export open controls** downloads the CSV of controls with gap, partial or not assessed.
+
+**How the percentage is calculated** (the same in Reporting, Dashboard, weekly trend and Assistant): compliant controls out of the applicable controls of the site's active frameworks. N/A controls are excluded from the denominator. With TISAX L2 and L3 both active, L2 controls superseded by an L3 VH control are assessed on the VH and shown separately, as in the Controls module list. Trend values calculated before this rule are shown in grey and are not used for the change.
 
 ### Generating a report
 

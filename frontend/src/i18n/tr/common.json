@@ -745,6 +745,10 @@
         "1": "Çalıştır: python manage.py load_frameworks",
         "2": "M01'de Siteye çerçeveyi etkinleştirin"
       }
+    },
+    "domain_filter": {
+      "label": "Alan: {{domain}}",
+      "clear": "Alan filtresini kaldır"
     }
   },
   "gap_analysis": {
@@ -4206,11 +4210,6 @@
       "objectives": "Güvenlik hedefleri"
     },
     "kpi": {
-      "active_sites": "Aktif siteler",
-      "open_incidents": "Açık olaylar",
-      "total_controls": "Toplam kontroller",
-      "pct_compliant": "% Uyumlu",
-      "gap_controls": "Eksik kontroller",
       "no_required_docs_configured": "Bu çerçeve için yapılandırılmış zorunlu belge yok",
       "plant_label": "Site",
       "all_plants": "Tüm siteler",
@@ -4274,19 +4273,35 @@
         "no_board": "Kayıtlı yönetim kurulu yok"
       }
     },
-    "loading_kpi": "KPI'ler yükleniyor...",
     "loading_compliance": "Uyum yükleniyor...",
     "loading": "Yükleniyor...",
     "no_compliance_data": "Uyum verisi yok",
     "no_data": "Veri yok",
     "compliance": {
-      "distribution_title": "Uyum dağılımı ({{total}} kontrol)",
-      "by_status_title": "Duruma göre kontroller",
-      "bar_label": "Kontroller"
-    },
-    "status": {
-      "parziale": "Kısmi",
-      "non_valutato": "Değerlendirilmemiş"
+      "summary_title_org": "Çerçeveye göre özet — tüm kuruluş",
+      "summary_title_plant": "Çerçeveye göre özet — {{plant}}",
+      "rule_hint": "Uygulanabilir kontroller içinde uyumlu yüzdesi (N/A hariç)",
+      "compliant_of": "Uyumlu: {{compliant}} / {{total}}",
+      "delta_hint": "Son 12 haftadaki ilk karşılaştırılabilir haftalık görüntüye göre yüzde puanı değişimi",
+      "today": "Bugün",
+      "superseded": "Üst seviye üzerinden değerlendirilen kontroller: {{count}}",
+      "na_excluded": "Hariç tutulan N/A: {{count}}",
+      "see_detail": "Alana göre ayrıntı",
+      "legacy_note": "Eğilimin gri kısmı önceki kurala göre (payda içinde N/A) hesaplanmıştır ve güncel değerlerle karşılaştırılamaz; değişim yalnızca güncel kurala göre hesaplanan değerleri dikkate alır.",
+      "plants_title": "Tesis karşılaştırması",
+      "plants_hint": "Her tesisin çerçeveye göre uyum yüzdesi. O tesise geçmek için bir hücreye tıklayın.",
+      "col_plant": "Tesis",
+      "cell_hint": "Açık kontroller: {{open}} (açık: {{gap}})",
+      "domains_title": "Nerede açığımız var",
+      "domains_hint": "Alana göre açık kontroller, en çok açığı olandan başlayarak. Kontrol listesi için sayılara tıklayın.",
+      "framework_label": "Çerçeve",
+      "gap_analysis": "Boşluk analizi",
+      "export_csv": "Açık kontrolleri dışa aktar",
+      "export_hint": "Çerçevenin açık, kısmi veya değerlendirilmemiş kontrollerinin CSV dosyası",
+      "col_domain": "Alan",
+      "col_distribution": "Dağılım",
+      "no_domain": "Alan yok",
+      "open_controls": "Kontrolleri aç"
     },
     "owner": {
       "risks_chart_title": "Sahibe göre riskler (yığılmış)",

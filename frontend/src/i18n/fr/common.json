@@ -745,6 +745,10 @@
         "1": "Exécuter : python manage.py load_frameworks",
         "2": "Activer le cadre sur le site dans M01"
       }
+    },
+    "domain_filter": {
+      "label": "Domaine : {{domain}}",
+      "clear": "Retirer le filtre de domaine"
     }
   },
   "gap_analysis": {
@@ -4206,11 +4210,6 @@
       "objectives": "Objectifs de sécurité"
     },
     "kpi": {
-      "active_sites": "Sites actifs",
-      "open_incidents": "Incidents ouverts",
-      "total_controls": "Contrôles totaux",
-      "pct_compliant": "% Conforme",
-      "gap_controls": "Contrôles en écart",
       "no_required_docs_configured": "Aucun document obligatoire configuré pour ce référentiel",
       "plant_label": "Site",
       "all_plants": "Tous les sites",
@@ -4274,19 +4273,35 @@
         "no_board": "Aucun CA enregistré"
       }
     },
-    "loading_kpi": "Chargement des KPI...",
     "loading_compliance": "Chargement de la conformité...",
     "loading": "Chargement...",
     "no_compliance_data": "Aucune donnée de conformité disponible",
     "no_data": "Aucune donnée disponible",
     "compliance": {
-      "distribution_title": "Distribution conformité ({{total}} contrôles)",
-      "by_status_title": "Contrôles par statut",
-      "bar_label": "Contrôles"
-    },
-    "status": {
-      "parziale": "Partiel",
-      "non_valutato": "Non évalué"
+      "summary_title_org": "Synthèse par référentiel — toute l'organisation",
+      "summary_title_plant": "Synthèse par référentiel — {{plant}}",
+      "rule_hint": "% conformes sur les contrôles applicables (N/A exclus)",
+      "compliant_of": "{{compliant}} conformes sur {{total}}",
+      "delta_hint": "Variation en points de pourcentage par rapport au premier instantané hebdomadaire comparable des 12 dernières semaines",
+      "today": "Aujourd'hui",
+      "superseded": "Contrôles évalués via le niveau supérieur : {{count}}",
+      "na_excluded": "N/A exclus : {{count}}",
+      "see_detail": "Détail par domaine",
+      "legacy_note": "La partie grise de la tendance est calculée avec la règle précédente (N/A au dénominateur) et n'est pas comparable aux valeurs actuelles ; la variation ne tient compte que des valeurs calculées avec la règle actuelle.",
+      "plants_title": "Comparaison des sites",
+      "plants_hint": "Pourcentage de conformité de chaque site par référentiel. Cliquez sur une cellule pour passer à ce site.",
+      "col_plant": "Site",
+      "cell_hint": "Contrôles ouverts : {{open}} (écarts : {{gap}})",
+      "domains_title": "Où nous sommes exposés",
+      "domains_hint": "Contrôles ouverts par domaine, du plus exposé au moins exposé. Cliquez sur les chiffres pour la liste des contrôles.",
+      "framework_label": "Référentiel",
+      "gap_analysis": "Analyse des écarts",
+      "export_csv": "Exporter les contrôles ouverts",
+      "export_hint": "CSV des contrôles du référentiel en écart, partiels ou non évalués",
+      "col_domain": "Domaine",
+      "col_distribution": "Répartition",
+      "no_domain": "Sans domaine",
+      "open_controls": "Ouvrir les contrôles"
     },
     "owner": {
       "risks_chart_title": "Risques par responsable (empilé)",

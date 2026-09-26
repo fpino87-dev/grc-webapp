@@ -3015,3 +3015,11 @@ msgstr "Podaj maksymalnie 10 usług."
 #: apps/suppliers/serializers.py
 msgid "Indirizzo non valido: %(value)s"
 msgstr "Nieprawidłowy adres: %(value)s"
+
+#: apps/reporting/views.py
+msgid "Dominio"
+msgstr "Domena"
+
+#: apps/reporting/views.py
+msgid "Ultima valutazione"
+msgstr "Ostatnia ocena"

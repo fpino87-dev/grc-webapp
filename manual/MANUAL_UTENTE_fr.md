@@ -1557,11 +1557,17 @@ La suggestion IA n'a aucun effet tant que vous ne la **confirmez pas expliciteme
 
 ### Tableau de bord reporting
 
-Allez sur **Audit → Reporting**. Vous trouverez trois niveaux de tableau de bord :
+Allez dans **Reporting**. La page est divisée en onglets : **Conformité**, **Par responsable**, **Risque / BIA / BCP**, **KPI**, **Objectifs de sécurité** et, pour la gouvernance et l'audit, **Accès & responsabilités**. L'onglet ouvert reste dans l'adresse de la page, le lien peut donc être partagé.
 
-- **Opérationnel** : état des tâches, contrôles par framework et plant, échéances
-- **Risk** : carte de chaleur agrégée, top 10 des risques ouverts
-- **Executive** : conformité %, tendance de maturité PDCA, préparation à l'audit
+#### Onglet Conformité
+
+L'onglet est conçu d'abord pour la direction, puis pour ceux qui traitent les écarts :
+
+1. **Synthèse par référentiel** : une carte par référentiel actif (ISO 27001, NIS2, TISAX…), jamais un total unique entre référentiels différents. Chaque carte affiche le pourcentage de contrôles conformes, la tendance des 12 dernières semaines avec la valeur du jour, la variation et la répartition par statut. Les chiffres d'écarts, partiels et non évalués ouvrent la liste des contrôles déjà filtrée.
+2. **Comparaison des sites** : sans site sélectionné, un tableau sites × référentiels avec le pourcentage de chaque site. Un clic sur une cellule sélectionne ce site.
+3. **Où nous sommes exposés** : pour le référentiel choisi, les contrôles ouverts par domaine, du domaine le plus exposé au moins exposé. Les chiffres ouvrent la liste des contrôles filtrée par domaine et statut ; **Exporter les contrôles ouverts** télécharge le CSV des contrôles en écart, partiels ou non évalués.
+
+**Calcul du pourcentage** (identique dans Reporting, Tableau de bord, tendance hebdomadaire et Assistant) : contrôles conformes sur les contrôles applicables des référentiels actifs du site. Les contrôles N/A sont exclus du dénominateur. Avec TISAX L2 et L3 actifs, les contrôles L2 remplacés par un contrôle VH de L3 sont évalués sur le VH et indiqués à part, comme dans la liste du module Contrôles. Les valeurs de tendance calculées avant cette règle apparaissent en gris et n'entrent pas dans la variation.
 
 ### Générer un rapport
 

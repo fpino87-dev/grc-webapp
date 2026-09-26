@@ -2,6 +2,9 @@ from celery import shared_task
 from django.utils import timezone
 from django.db.models import Avg
 
+# Vedi IsmsKpiSnapshot.method_version.
+COMPLIANCE_METHOD_VERSION = 2
+
 
 @shared_task(name="apps.reporting.tasks.generate_weekly_kpi_snapshots")
 def generate_weekly_kpi_snapshots():
@@ -64,19 +67,22 @@ def _build_snapshot(plant, framework_code: str, week_start, plant_ids=None):
     from apps.incidents.models import Incident
     from .models import IsmsKpiSnapshot
 
+    from apps.controls.services import effective_control_rows, summarize_compliance
+
+    scope_ids = [plant.pk] if plant is not None else list(plant_ids or [])
+    # Stessa regola del valore in tempo reale (Reporting, Assistente): N/A
+    # esclusi e controlli base sostituiti da un extender attivo fuori conteggio.
+    summary = summarize_compliance(effective_control_rows(scope_ids, [framework_code]))
+    controls_total = summary["total"]
+    controls_compliant = summary["compliant"]
+    controls_gap = summary["gap"]
+    pct_compliant = float(summary["pct_compliant"])
+
     ci_qs = ControlInstance.objects.filter(
         deleted_at__isnull=True,
         control__framework__code=framework_code,
+        plant_id__in=scope_ids,
     )
-    if plant is not None:
-        ci_qs = ci_qs.filter(plant=plant)
-    elif plant_ids is not None:
-        ci_qs = ci_qs.filter(plant_id__in=plant_ids)
-
-    controls_total = ci_qs.count()
-    controls_compliant = ci_qs.filter(status="compliant").count()
-    controls_gap = ci_qs.filter(status="gap").count()
-    pct_compliant = round(controls_compliant / controls_total * 100, 1) if controls_total else 0.0
     overall_maturity = _calc_overall_maturity(ci_qs)
 
     risk_qs = RiskAssessment.objects.filter(status="completato", deleted_at__isnull=True)
@@ -101,6 +107,7 @@ def _build_snapshot(plant, framework_code: str, week_start, plant_ids=None):
         high_risks=high_risks,
         open_incidents=open_incidents,
         critical_incidents=critical_incidents,
+        method_version=COMPLIANCE_METHOD_VERSION,
     )
 
     obj, created = IsmsKpiSnapshot.objects.update_or_create(

@@ -684,6 +684,8 @@ Base URL: `/api/v1/`
 | `audit-prep/programs/` | GET, POST | M17 audit programs |
 | `reporting/dashboard-summary/` | GET | M18 aggregated dashboard |
 | `reporting/kpi-trend/` | GET | M18 KPI trend |
+| `reporting/compliance-overview/` | GET | Compliance: summary by framework (%, statuses, trend) and sites × frameworks comparison |
+| `reporting/compliance-domains/` | GET | Compliance: open controls by domain for a framework (`&export=csv` for the open controls) |
 | `notifications/` | GET | M19 notifications |
 | `cockpit/insights/` | GET | Aggregated insights + posture M21 |
 | `cockpit/insights/{fingerprint}/{action}/` | POST | Insight action (snooze\|accept\|reopen) |

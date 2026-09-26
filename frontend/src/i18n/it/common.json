@@ -742,6 +742,10 @@
         "1": "Eseguire: python manage.py load_frameworks",
         "2": "Attivare il framework sul Plant in M01"
       }
+    },
+    "domain_filter": {
+      "label": "Dominio: {{domain}}",
+      "clear": "Rimuovi filtro dominio"
     }
   },
   "gap_analysis": {
@@ -4197,7 +4201,6 @@
   },
   "reporting": {
     "title": "Reporting & Dashboard",
-    "loading_kpi": "Caricamento KPI...",
     "loading_compliance": "Caricamento compliance...",
     "loading": "Caricamento...",
     "no_compliance_data": "Nessun dato di compliance disponibile",
@@ -4234,11 +4237,6 @@
       "section_nda": "NDA Fornitori",
       "nda_hint": "stato NDA sui fornitori attivi",
       "no_required_docs_configured": "Nessun documento obbligatorio configurato per questo framework",
-      "active_sites": "Siti attivi",
-      "open_incidents": "Incidenti aperti",
-      "total_controls": "Controlli totali",
-      "pct_compliant": "% Conformi",
-      "gap_controls": "Controlli in gap",
       "tasks_completed": "Task completati",
       "training": {
         "coverage": "Copertura del personale",
@@ -4272,13 +4270,30 @@
       }
     },
     "compliance": {
-      "distribution_title": "Distribuzione compliance ({{total}} controlli)",
-      "by_status_title": "Controlli per stato",
-      "bar_label": "Controlli"
-    },
-    "status": {
-      "parziale": "Parziale",
-      "non_valutato": "Non valutato"
+      "summary_title_org": "Sintesi per framework — tutta l'organizzazione",
+      "summary_title_plant": "Sintesi per framework — {{plant}}",
+      "rule_hint": "% conformi sui controlli applicabili (N/A esclusi)",
+      "compliant_of": "{{compliant}} conformi su {{total}}",
+      "delta_hint": "Variazione in punti percentuali rispetto alla prima fotografia settimanale confrontabile delle ultime 12 settimane",
+      "today": "Oggi",
+      "superseded": "Controlli valutati tramite il livello superiore: {{count}}",
+      "na_excluded": "N/A esclusi: {{count}}",
+      "see_detail": "Dettaglio per dominio",
+      "legacy_note": "Il tratto grigio dell'andamento è calcolato con la regola precedente (N/A nel denominatore) e non è confrontabile con i valori attuali; la variazione considera solo i valori calcolati con la regola attuale.",
+      "plants_title": "Confronto siti",
+      "plants_hint": "Percentuale di conformità di ogni sito per framework. Clic su una cella per passare a quel sito.",
+      "col_plant": "Sito",
+      "cell_hint": "Controlli aperti: {{open}} (gap: {{gap}})",
+      "domains_title": "Dove siamo scoperti",
+      "domains_hint": "Controlli aperti per dominio, dal più scoperto. Clic sui numeri per l'elenco dei controlli.",
+      "framework_label": "Framework",
+      "gap_analysis": "Gap analysis",
+      "export_csv": "Esporta controlli aperti",
+      "export_hint": "CSV dei controlli in gap, parziali o non valutati del framework",
+      "col_domain": "Dominio",
+      "col_distribution": "Distribuzione",
+      "no_domain": "Senza dominio",
+      "open_controls": "Apri controlli"
     },
     "owner": {
       "risks_chart_title": "Rischi per owner (impilato)",

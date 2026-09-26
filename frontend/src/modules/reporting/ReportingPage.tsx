@@ -6,6 +6,7 @@ import { plantsApi } from "../../api/endpoints/plants";
 import { useAuthStore } from "../../store/auth";
 import { useSearchParams } from "react-router-dom";
 import { TabObjectives } from "./TabObjectives";
+import { TabCompliance } from "./TabCompliance";
 import { TrainingKpiSection } from "./TrainingKpiSection";
 import {
   BarChart,
@@ -15,7 +16,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Cell,
 } from "recharts";
 
 // Formattazione valuta (€) locale-aware. Compatta per le KPI tile (es. "1,2 Mln €"),
@@ -27,144 +27,6 @@ function formatEur(value: number, locale: string, compact = false): string {
     notation: compact ? "compact" : "standard",
     maximumFractionDigits: compact ? 1 : 0,
   }).format(value || 0);
-}
-
-interface KpiCardProps {
-  label: string;
-  value: string | number;
-  sub?: string;
-  highlight?: boolean;
-}
-
-function KpiCard({ label, value, sub, highlight }: KpiCardProps) {
-  return (
-    <div className={`bg-white rounded-lg border p-5 flex flex-col gap-1 ${highlight ? "border-primary-400" : "border-gray-200"}`}>
-      <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">{label}</span>
-      <span className={`text-3xl font-bold ${highlight ? "text-primary-600" : "text-gray-900"}`}>{value}</span>
-      {sub && <span className="text-xs text-gray-400">{sub}</span>}
-    </div>
-  );
-}
-
-const STATUS_COLORS: Record<string, string> = {
-  compliant: "bg-green-500",
-  parziale: "bg-yellow-400",
-  gap: "bg-red-500",
-  na: "bg-gray-300",
-  non_valutato: "bg-gray-200",
-};
-
-const BAR_COLORS: Record<string, string> = {
-  compliant: "#22c55e",
-  parziale: "#facc15",
-  gap: "#ef4444",
-  na: "#d1d5db",
-  non_valutato: "#e5e7eb",
-};
-
-function TabCompliance() {
-  const { t } = useTranslation();
-  const selectedPlant = useAuthStore(s => s.selectedPlant);
-
-  const STATUS_LABELS: Record<string, string> = {
-    compliant: "Compliant",
-    parziale: t("reporting.status.parziale"),
-    gap: "Gap",
-    na: "N/A",
-    non_valutato: t("reporting.status.non_valutato"),
-  };
-
-  const { data: dash, isLoading: dashLoading } = useQuery({
-    queryKey: ["reporting-dashboard", selectedPlant?.id],
-    queryFn: () => reportingApi.dashboard(selectedPlant?.id),
-    retry: false,
-  });
-
-  const { data: comp, isLoading: compLoading } = useQuery({
-    queryKey: ["reporting-compliance", selectedPlant?.id],
-    queryFn: () => reportingApi.compliance(selectedPlant?.id ? { plant: selectedPlant.id } : undefined),
-    retry: false,
-  });
-
-  const byStatus = comp?.by_status ?? {};
-  const total = comp?.total ?? 0;
-
-  const barData = Object.entries(byStatus).map(([status, count]) => ({
-    status: STATUS_LABELS[status] ?? status,
-    count,
-    fill: BAR_COLORS[status] ?? "#9ca3af",
-  }));
-
-  return (
-    <>
-      {dashLoading ? (
-        <div className="p-8 text-center text-gray-400">{t("reporting.loading_kpi")}</div>
-      ) : dash ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
-          <KpiCard label={t("reporting.kpi.active_sites")} value={dash.plants_active} />
-          <KpiCard label={t("reporting.kpi.open_incidents")} value={dash.incidents_open} highlight={dash.incidents_open > 0} />
-          <KpiCard label={t("reporting.kpi.total_controls")} value={dash.controls_total} />
-          <KpiCard label={t("reporting.kpi.pct_compliant")} value={`${(dash.pct_compliant ?? 0).toFixed(1)}%`} sub={`${dash.controls_compliant ?? 0} / ${dash.controls_total ?? 0}`} highlight />
-          <KpiCard label={t("reporting.kpi.gap_controls")} value={dash.controls_gap} highlight={dash.controls_gap > 0} />
-        </div>
-      ) : null}
-
-      {compLoading ? (
-        <div className="p-8 text-center text-gray-400">{t("reporting.loading_compliance")}</div>
-      ) : comp && total > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg border border-gray-200 p-5">
-            <h3 className="text-sm font-semibold text-gray-700 mb-4">{t("reporting.compliance.distribution_title", { total })}</h3>
-            <div className="flex rounded overflow-hidden h-8 mb-4">
-              {Object.entries(byStatus).map(([status, count]) => {
-                const pct = total > 0 ? (count / total) * 100 : 0;
-                if (pct === 0) return null;
-                return (
-                  <div
-                    key={status}
-                    title={`${STATUS_LABELS[status] ?? status}: ${count} (${pct.toFixed(1)}%)`}
-                    className={`${STATUS_COLORS[status] ?? "bg-gray-300"} transition-all`}
-                    style={{ width: `${pct}%` }}
-                  />
-                );
-              })}
-            </div>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
-              {Object.entries(byStatus).map(([status, count]) => (
-                <div key={status} className="flex items-center gap-1.5 text-xs text-gray-600">
-                  <span className={`w-3 h-3 rounded-sm inline-block ${STATUS_COLORS[status] ?? "bg-gray-300"}`} />
-                  {STATUS_LABELS[status] ?? status}: {count}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg border border-gray-200 p-5">
-            <h3 className="text-sm font-semibold text-gray-700 mb-4">{t("reporting.compliance.by_status_title")}</h3>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={barData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="status" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="count" name={t("reporting.compliance.bar_label")}>
-                  {barData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      ) : (
-        !compLoading && (
-          <div className="bg-white rounded-lg border border-gray-200 p-8 text-center text-gray-400">
-            {t("reporting.no_compliance_data")}
-          </div>
-        )
-      )}
-    </>
-  );
 }
 
 function TabOwner() {
@@ -1188,11 +1050,17 @@ export function ReportingPage() {
   const tabKeys = ["compliance", "owner", "risk_bia_bcp", "kpi", "objectives", ...(showAccessMatrix ? ["access_matrix"] : [])] as const;
   type TabKey = typeof tabKeys[number];
   // ?tab=access_matrix: link diretto (es. da Gestione utenti)
-  const [searchParams] = useSearchParams();
-  const initialTab = searchParams.get("tab");
-  const [tab, setTab] = useState<TabKey>(
-    (tabKeys as readonly string[]).includes(initialTab ?? "") ? (initialTab as TabKey) : "compliance",
-  );
+  // Il tab aperto resta nell'indirizzo (?tab=), così un link porta allo stesso tab.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get("tab");
+  const tab: TabKey = (tabKeys as readonly string[]).includes(requestedTab ?? "")
+    ? (requestedTab as TabKey)
+    : "compliance";
+  const setTab = (next: TabKey) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("tab", next);
+    setSearchParams(params, { replace: true });
+  };
 
   return (
     <div>

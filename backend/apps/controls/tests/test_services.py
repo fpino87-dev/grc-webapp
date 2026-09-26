@@ -156,7 +156,9 @@ def test_validate_exclusion_applicabile_no_justification_needed(instance_no_req,
 def test_get_compliance_summary_counts(plant, framework, user):
     from apps.controls.models import Control, ControlInstance
     from apps.controls.services import evaluate_control, get_compliance_summary
+    from apps.plants.models import PlantFramework
 
+    PlantFramework.objects.create(plant=plant, framework=framework, active_from="2024-01-01")
     c1 = Control.objects.create(framework=framework, external_id="S1", translations={}, evidence_requirement={})
     c2 = Control.objects.create(framework=framework, external_id="S2", translations={}, evidence_requirement={})
     c3 = Control.objects.create(framework=framework, external_id="S3", translations={}, evidence_requirement={})

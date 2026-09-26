@@ -504,7 +504,7 @@ def risk_bia_bcp(plant_id) -> dict:
 # Dashboard summary (KPI flat per la ReportingPage)
 # ───────────────────────────────────────────────────────────────────────────
 def dashboard_summary(plant_id) -> dict:
-    from apps.controls.models import ControlInstance
+    from apps.controls.services import effective_control_rows, summarize_compliance
     from apps.governance.services import get_vacant_mandatory_roles
     from apps.incidents.models import Incident
     from apps.pdca.models import PdcaCycle
@@ -517,12 +517,14 @@ def dashboard_summary(plant_id) -> dict:
     today = timezone.localdate()
     fw_codes = get_active_framework_codes(plant) if plant else []
 
-    ci_qs = ControlInstance.objects.filter(deleted_at__isnull=True)
-    if plant:
-        ci_qs = ci_qs.filter(plant=plant, control__framework__code__in=fw_codes)
-    total_ci = ci_qs.count()
-    compliant = ci_qs.filter(status="compliant").count()
-    gap = ci_qs.filter(status="gap").count()
+    # Regola unica di conformità (apps.controls.services.effective_control_rows).
+    scope_plants = [plant] if plant else list(
+        Plant.objects.filter(status="attivo", deleted_at__isnull=True)
+    )
+    ctrl = summarize_compliance(effective_control_rows(scope_plants))
+    total_ci = ctrl["total"]
+    compliant = ctrl["compliant"]
+    gap = ctrl["gap"]
 
     risk_qs = RiskAssessment.objects.filter(status="completato", deleted_at__isnull=True)
     if plant:
@@ -541,7 +543,7 @@ def dashboard_summary(plant_id) -> dict:
         pdca_qs = pdca_qs.filter(plant=plant)
 
     incidents_open = inc_qs.count()
-    pct_compliant = round(compliant / total_ci * 100, 1) if total_ci > 0 else 0
+    pct_compliant = ctrl["pct_compliant"]
 
     return {
         "plants_active": Plant.objects.filter(deleted_at__isnull=True).count(),
@@ -1297,3 +1299,183 @@ def objectives_report(plant_id, today=None) -> dict:
         "deadlines": deadlines,
         "kpi_linked": kpi_linked,
     }
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# Compliance — sintesi per framework, confronto siti, dettaglio per dominio
+# ───────────────────────────────────────────────────────────────────────────
+def _scope_plants(plant_id):
+    """Sito richiesto, oppure tutti i siti attivi (vista di organizzazione)."""
+    from apps.plants.models import Plant
+
+    if plant_id:
+        return list(Plant.objects.filter(pk=plant_id, deleted_at__isnull=True))
+    return list(Plant.objects.filter(status="attivo", deleted_at__isnull=True).order_by("code"))
+
+
+def _framework_names(codes) -> dict:
+    from apps.controls.models import Framework
+
+    return dict(Framework.objects.filter(code__in=list(codes)).values_list("code", "name"))
+
+
+def _compliance_trend(plant_id, framework_code, live_pct, weeks=12) -> tuple[list, float | None]:
+    """Serie delle ultime `weeks` fotografie settimanali più il valore di oggi.
+
+    Le fotografie calcolate con una regola precedente (`method_version` < 2)
+    sono marcate `legacy`: la variazione si calcola solo fra punti con la
+    regola attuale, per non confrontare numeri non omogenei."""
+    from .models import IsmsKpiSnapshot
+    from .tasks import COMPLIANCE_METHOD_VERSION
+
+    qs = IsmsKpiSnapshot.objects.filter(framework_code=framework_code)
+    qs = qs.filter(plant_id=plant_id) if plant_id else qs.filter(plant__isnull=True)
+    snaps = list(
+        qs.order_by("-week_start").values("week_start", "pct_compliant", "method_version")[:weeks]
+    )[::-1]
+    points = [
+        {
+            "date": str(s["week_start"]),
+            "pct_compliant": s["pct_compliant"],
+            "legacy": s["method_version"] < COMPLIANCE_METHOD_VERSION,
+            "live": False,
+        }
+        for s in snaps
+    ]
+    points.append({
+        "date": str(timezone.localdate()),
+        "pct_compliant": live_pct,
+        "legacy": False,
+        "live": True,
+    })
+    comparable = [p for p in points if not p["legacy"] and not p["live"]]
+    delta = round(live_pct - comparable[0]["pct_compliant"], 1) if comparable else None
+    return points, delta
+
+
+def compliance_overview(plant_id) -> dict:
+    """Tab Compliance del Reporting — parte per la direzione.
+
+    - `frameworks`: per ogni framework attivo nel perimetro, conteggi e
+      percentuale con la regola unica, andamento e variazione.
+    - `plants`: solo nella vista di organizzazione (nessun sito), la tabella
+      siti × framework con la percentuale di ciascun sito."""
+    from apps.controls.services import effective_control_rows, summarize_compliance
+
+    plants = _scope_plants(plant_id)
+    rows = effective_control_rows(plants)
+
+    by_fw: dict = {}
+    for r in rows:
+        by_fw.setdefault(r["framework_code"], []).append(r)
+    names = _framework_names(by_fw)
+
+    frameworks = []
+    for code in sorted(by_fw, key=lambda c: names.get(c, c)):
+        summary = summarize_compliance(by_fw[code])
+        trend, delta = _compliance_trend(plant_id, code, summary["pct_compliant"])
+        frameworks.append({
+            "code": code,
+            "name": names.get(code, code),
+            **summary,
+            "trend": trend,
+            "delta": delta,
+        })
+
+    plant_rows = None
+    if not plant_id:
+        by_plant_fw: dict = {}
+        for r in rows:
+            by_plant_fw.setdefault(r["plant_id"], {}).setdefault(r["framework_code"], []).append(r)
+        plant_rows = []
+        for p in plants:
+            cells = {}
+            for code, fw_rows in by_plant_fw.get(p.pk, {}).items():
+                s = summarize_compliance(fw_rows)
+                cells[code] = {
+                    "pct_compliant": s["pct_compliant"],
+                    "total": s["total"],
+                    "gap": s["gap"],
+                    "parziale": s["parziale"],
+                    "non_valutato": s["non_valutato"],
+                }
+            plant_rows.append({"id": str(p.pk), "code": p.code, "name": p.name, "cells": cells})
+
+    return {"frameworks": frameworks, "plants": plant_rows}
+
+
+def compliance_domains(plant_id, framework_code, lang="it") -> dict:
+    """Tab Compliance del Reporting — dettaglio dei gap per dominio di un
+    framework, dal dominio più scoperto."""
+    from apps.controls.models import ControlDomain
+    from apps.controls.services import effective_control_rows, summarize_compliance
+
+    if not framework_code:
+        return {"framework": None, "domains": []}
+    rows = effective_control_rows(_scope_plants(plant_id), [framework_code])
+
+    by_domain: dict = {}
+    for r in rows:
+        by_domain.setdefault(r["domain_id"], []).append(r)
+    domains = {
+        d.pk: d for d in ControlDomain.objects.filter(pk__in=[k for k in by_domain if k])
+    }
+
+    out = []
+    for domain_id, d_rows in by_domain.items():
+        d = domains.get(domain_id)
+        s = summarize_compliance(d_rows)
+        if not s["total"] and not s["superseded_by_extender"]:
+            continue
+        out.append({
+            "code": d.code if d else "",
+            "name": d.get_name(lang) if d else "",
+            "order": d.order if d else 10_000,
+            **s,
+        })
+    # Dal più scoperto: controlli aperti (gap, parziali, non valutati) in cima,
+    # a parità la percentuale più bassa, poi l'ordine del framework.
+    out.sort(key=lambda x: (
+        -(x["gap"] + x["parziale"] + x["non_valutato"]), x["pct_compliant"], x["order"],
+    ))
+    return {"framework": framework_code, "domains": out}
+
+
+def compliance_open_controls(plant_id, framework_code, lang="it") -> list:
+    """Controlli non conformi (gap, parziali, non valutati) del perimetro per
+    l'export CSV del dettaglio, con la stessa regola del resto del tab."""
+    from apps.controls.models import ControlInstance
+    from apps.controls.services import effective_control_rows
+
+    rows = effective_control_rows(
+        _scope_plants(plant_id), [framework_code] if framework_code else None,
+    )
+    keys = {
+        (r["plant_id"], r["control_id"]) for r in rows
+        if not r["superseded"] and r["status"] in ("gap", "parziale", "non_valutato")
+    }
+    if not keys:
+        return []
+    qs = ControlInstance.objects.filter(
+        plant_id__in={k[0] for k in keys},
+        control_id__in={k[1] for k in keys},
+        deleted_at__isnull=True,
+    ).select_related("plant", "control__framework", "control__domain", "owner")
+    out = []
+    for ci in qs:
+        if (ci.plant_id, ci.control_id) not in keys:
+            continue
+        c = ci.control
+        out.append({
+            "plant_code": ci.plant.code,
+            "framework": c.framework.code,
+            "domain": c.domain.get_name(lang) if c.domain else "",
+            "control": c.external_id,
+            "title": c.get_title(lang),
+            "status": ci.status,
+            "owner": ci.owner.get_full_name() if ci.owner else "",
+            "last_evaluated_at": ci.last_evaluated_at.date().isoformat() if ci.last_evaluated_at else "",
+        })
+    order = {"gap": 0, "parziale": 1, "non_valutato": 2}
+    out.sort(key=lambda x: (x["plant_code"], x["framework"], order[x["status"]], x["control"]))
+    return out

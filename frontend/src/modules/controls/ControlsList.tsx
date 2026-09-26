@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { controlsApi, type ControlInstance, type Framework } from "../../api/endpoints/controls";
 import { useAuthStore } from "../../store/auth";
 import { OWNER_ASSIGN_ROLES, SOA_APPROVAL_ROLES } from "./roles";
@@ -429,8 +429,12 @@ export function ControlsList() {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const location = useLocation();
-  const [statusFilter, setStatusFilter] = useState("");
-  const [frameworkFilter, setFrameworkFilter] = useState<string>("");
+  // Filtri iniziali dall'indirizzo: il Reporting (tab Compliance) apre l'elenco
+  // già filtrato per framework, dominio e stato.
+  const [searchParams] = useSearchParams();
+  const [statusFilter, setStatusFilter] = useState(() => searchParams.get("status") ?? "");
+  const [frameworkFilter, setFrameworkFilter] = useState<string>(() => searchParams.get("framework") ?? "");
+  const [domainFilter, setDomainFilter] = useState<string>(() => searchParams.get("domain") ?? "");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
@@ -440,7 +444,7 @@ export function ControlsList() {
   const PAGE_SIZE = 100;
   // Torna a pagina 1 a ogni cambio di filtro/ricerca (evita di restare su una
   // pagina che non esiste più). (C7)
-  useEffect(() => { setPage(1); }, [statusFilter, frameworkFilter, search, selectedPlant?.id]);
+  useEffect(() => { setPage(1); }, [statusFilter, frameworkFilter, domainFilter, search, selectedPlant?.id]);
 
   // Lo Statement of Applicability è un artefatto ISO 27001: la gestione SoA
   // (selezione + approvazione) compare solo filtrando su ISO 27001. (C5)
@@ -495,9 +499,11 @@ export function ControlsList() {
   const instances = data?.results ?? [];
 
   const filteredByFramework = useMemo(() => {
-    const list = frameworkFilter
-      ? instances.filter((c) => c.framework_code === frameworkFilter)
-      : instances;
+    const list = instances.filter(
+      (c) =>
+        (!frameworkFilter || c.framework_code === frameworkFilter) &&
+        (!domainFilter || c.domain_code === domainFilter),
+    );
     function fwGroupKey(code: string): string {
       if (code.startsWith("TISAX")) return "TISAX";
       return code;
@@ -511,7 +517,7 @@ export function ControlsList() {
         { numeric: true, sensitivity: "base" },
       );
     });
-  }, [instances, frameworkFilter]);
+  }, [instances, frameworkFilter, domainFilter]);
 
   const stats = STATUS_OPTIONS.reduce(
     (acc, s) => ({ ...acc, [s]: filteredByFramework.filter((c) => c.status === s).length }),
@@ -618,7 +624,7 @@ export function ControlsList() {
       {frameworks && frameworks.length > 0 && (
         <div className="flex gap-2 mb-4 flex-wrap">
           <button
-            onClick={() => setFrameworkFilter("")}
+            onClick={() => { setFrameworkFilter(""); setDomainFilter(""); }}
             className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
               frameworkFilter === ""
                 ? "bg-indigo-600 text-white border-indigo-600"
@@ -633,7 +639,7 @@ export function ControlsList() {
             return (
               <button
                 key={f.id}
-                onClick={() => setFrameworkFilter(f.code)}
+                onClick={() => { setFrameworkFilter(f.code); setDomainFilter(""); }}
                 className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border flex items-center gap-1 ${
                   active
                     ? "bg-indigo-600 text-white border-indigo-600"
@@ -646,6 +652,22 @@ export function ControlsList() {
               </button>
             );
           })}
+        </div>
+      )}
+
+      {domainFilter && (
+        <div className="mb-4">
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
+            {t("controls.domain_filter.label", { domain: domainFilter })}
+            <button
+              onClick={() => setDomainFilter("")}
+              className="text-indigo-500 hover:text-indigo-800"
+              aria-label={t("controls.domain_filter.clear")}
+              title={t("controls.domain_filter.clear")}
+            >
+              ✕
+            </button>
+          </span>
         </div>
       )}
 

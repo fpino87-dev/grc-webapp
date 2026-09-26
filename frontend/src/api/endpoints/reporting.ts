@@ -1,5 +1,52 @@
 import { apiClient } from "../client";
 
+// ── Compliance (tab Reporting) ────────────────────────────────────────────────
+// Conteggi con la regola unica di conformità: N/A fuori dal denominatore,
+// controlli base sostituiti da un extender attivo (TISAX L2 → VH L3) contati a parte.
+export interface ComplianceCounts {
+  total: number;
+  compliant: number;
+  parziale: number;
+  gap: number;
+  non_valutato: number;
+  na_excluded: number;
+  superseded_by_extender: number;
+  pct_compliant: number;
+}
+
+export interface ComplianceTrendPoint {
+  date: string;
+  pct_compliant: number;
+  legacy: boolean; // calcolato con la regola precedente
+  live: boolean;   // valore di oggi, non una fotografia settimanale
+}
+
+export interface ComplianceFramework extends ComplianceCounts {
+  code: string;
+  name: string;
+  trend: ComplianceTrendPoint[];
+  delta: number | null;
+}
+
+export interface CompliancePlantCell {
+  pct_compliant: number;
+  total: number;
+  gap: number;
+  parziale: number;
+  non_valutato: number;
+}
+
+export interface ComplianceOverview {
+  frameworks: ComplianceFramework[];
+  plants: { id: string; code: string; name: string; cells: Record<string, CompliancePlantCell> }[] | null;
+}
+
+export interface ComplianceDomain extends ComplianceCounts {
+  code: string;
+  name: string;
+  order: number;
+}
+
 export interface RiskByOwner {
   owner__id: string | null;
   owner__first_name: string;
@@ -383,21 +430,31 @@ export const reportingApi = {
       URL.revokeObjectURL(link.href);
     }),
 
-  dashboard: (plant?: string) =>
-    apiClient.get<{
-      plants_active: number;
-      incidents_open: number;
-      controls_total: number;
-      controls_compliant: number;
-      controls_gap: number;
-      pct_compliant: number;
-    }>("/reporting/dashboard/", { params: plant ? { plant } : {} }).then(r => r.data),
-  compliance: (params?: Record<string, string>) =>
-    apiClient.get<{
-      total: number;
-      by_status: Record<string, number>;
-      pct_compliant: number;
-    }>("/reporting/compliance/", { params }).then(r => r.data),
+  complianceOverview: (plant?: string) =>
+    apiClient.get<ComplianceOverview>(
+      "/reporting/compliance-overview/",
+      { params: plant ? { plant } : {} },
+    ).then(r => r.data),
+
+  complianceDomains: (framework: string, plant?: string) =>
+    apiClient.get<{ framework: string | null; domains: ComplianceDomain[] }>(
+      "/reporting/compliance-domains/",
+      { params: { framework, ...(plant ? { plant } : {}) } },
+    ).then(r => r.data),
+
+  exportComplianceOpenControlsCsv: (framework: string, plant?: string) =>
+    apiClient.get("/reporting/compliance-domains/", {
+      params: { export: "csv", framework, ...(plant ? { plant } : {}) },
+      responseType: "blob",
+    }).then(r => {
+      const blob = new Blob([r.data], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `compliance-${framework}.csv`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }),
+
   ownerReport: (plant?: string) =>
     apiClient.get<{ risks_by_owner: RiskByOwner[]; tasks_by_owner: TaskByOwner[] }>(
       "/reporting/owner-report/",

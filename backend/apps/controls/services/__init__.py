@@ -43,7 +43,9 @@ from .reporting import (
     count_open_gaps_by_plant,
     count_revaluation_by_plant,
     count_tisax_missing_implementation_by_plant,
+    effective_control_rows,
     get_compliance_summary,
+    summarize_compliance,
 )
 
 __all__ = [
@@ -59,9 +61,11 @@ __all__ = [
     "delete_control",
     "delete_control_instance",
     "delete_framework",
+    "effective_control_rows",
     "evaluate_control",
     "generate_procedure_document",
     "get_compliance_summary",
+    "summarize_compliance",
     "get_extender_instances",
     "import_framework_payload",
     "is_covered_by_extender",

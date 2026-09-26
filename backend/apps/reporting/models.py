@@ -32,6 +32,12 @@ class IsmsKpiSnapshot(BaseModel):
     open_incidents = models.IntegerField(default=0)
     critical_incidents = models.IntegerField(default=0)
 
+    # Versione della regola di calcolo della conformità: 1 = compliant/totale
+    # con N/A nel denominatore (fino alla 0.9.x); 2 = regola unica di
+    # `apps.controls.services.effective_control_rows`. Le serie storiche le
+    # distinguono per non confrontare numeri calcolati in modo diverso.
+    method_version = models.PositiveSmallIntegerField(default=1)
+
     snapshot_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
