@@ -309,7 +309,11 @@ def test_global_kpi_skips_plants_with_own_definition(client, plant, plant2):
 
     compute_operational_kpis()
 
-    snaps = OperationalKpiSnapshot.objects.filter(plant=plant2)
+    # Solo gli snapshot di questo KPI: le migrazioni (es. osint 0018) creano
+    # altre definizioni globali attive che il compute misura anch'esse.
+    snaps = OperationalKpiSnapshot.objects.filter(
+        plant=plant2, kpi_definition__kpi_code="ctrl_compliance_rate",
+    )
     assert snaps.count() == 1
     assert snaps.first().kpi_definition_id == own.id
 
