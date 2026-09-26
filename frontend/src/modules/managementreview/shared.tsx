@@ -32,6 +32,8 @@ export type SnapGapControl = { id: string; control__external_id: string; titles?
 export type SnapFramework = {
   framework_name: string; total: number; pct_compliant: number; by_status: Record<string, number>;
   expired_evidence_count: number; gap_controls?: SnapGapControl[];
+  // Solo negli snapshot con le regole del Reporting (compliance_rule ≥ 2).
+  na_excluded?: number; superseded_by_extender?: number;
 };
 export type SnapDoc = { id: string; title: string; owner: string; review_due_date: string | null; approved_at: string | null };
 // Documento obbligatorio non ancora approvato (elenco_non_approvati).
@@ -75,6 +77,7 @@ export type SnapObjective = {
 export type SnapSite = {
   plant_id: string; code: string; name: string; pct_compliant: number | null;
   rischi_critici: number; incidenti_aperti: number; task_scaduti: number;
+  rischi_oltre_soglia?: number; // snapshot con la soglia di accettabilità
 };
 
 // ── Sub-components ──────────────────────────────────────────────────────────

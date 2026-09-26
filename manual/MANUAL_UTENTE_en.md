@@ -724,10 +724,12 @@ Click **Generate data snapshot** to freeze GRC data at the time of the meeting. 
 
 - **a)** actions from previous reviews: all those of the previous review, plus older ones still open or closed in the period, with overdue ones highlighted
 - **d)** compliance per framework with controls with gaps; operational KPIs outside thresholds; audits of the last 12 months with readiness and open nonconformities (major first); open and NIS2-notified incidents; stuck PDCA cycles and overdue tasks; expired, expiring and recently approved documents
-- **f)** critical risks (inherent → residual, treatment, owner, whether a plan exists), formally accepted risks, critical processes without a BCP plan
+- **f)** risks **above the acceptance threshold** approved by management (inherent → residual, treatment, owner, whether a plan exists) with the threshold used, formally accepted risks, critical processes without an approved BCP
 - **g)** improvement opportunities from audits
 
 The snapshot can be regenerated until approval; afterwards it is fixed because it is the content of the minutes.
+
+Snapshot figures are calculated with **the same rules as Reporting**, so they match what management sees in the Compliance and Risk / BIA / BCP tabs: compliance on the applicable controls of active frameworks (N/A excluded, TISAX L2 controls assessed through the L3 VH), risks compared with their own site's acceptance threshold, processes with criticality ≥ 4 covered only by an approved BCP. Already approved minutes stay as they were frozen.
 
 ### How to run the meeting and record decisions
 

@@ -724,10 +724,12 @@ Cliquez sur **Générer l'instantané des données** pour figer les données GRC
 
 - **a)** actions des revues précédentes : toutes celles de la revue précédente, plus les plus anciennes encore ouvertes ou clôturées sur la période, les actions en retard étant mises en évidence
 - **d)** conformité par référentiel avec les contrôles en écart ; KPI opérationnels hors seuil ; audits des 12 derniers mois avec préparation et non-conformités ouvertes (majeures d'abord) ; incidents ouverts et notifiés NIS2 ; cycles PDCA bloqués et tâches en retard ; documents expirés, à réviser et approuvés depuis la dernière revue
-- **f)** risques critiques (inhérent → résiduel, traitement, responsable, présence d'un plan), risques formellement acceptés, processus critiques sans plan BCP
+- **f)** risques **au-delà du seuil d'acceptabilité** approuvé par la direction (inhérent → résiduel, traitement, responsable, présence d'un plan) avec le seuil utilisé, risques acceptés formellement, processus critiques sans PCA approuvé
 - **g)** opportunités d'amélioration issues des audits
 
 L'instantané peut être régénéré jusqu'à l'approbation ; ensuite il reste figé car il constitue le contenu du procès-verbal.
+
+Les chiffres de l'instantané sont calculés avec **les mêmes règles que le Reporting** et coïncident donc avec ce que la direction voit dans les onglets Conformité et Risque / BIA / BCP : conformité sur les contrôles applicables des référentiels actifs (N/A exclus, contrôles TISAX L2 évalués via le VH de L3), risques comparés au seuil d'acceptabilité de leur site, processus de criticité ≥ 4 couverts uniquement par un PCA approuvé. Les procès-verbaux déjà approuvés restent tels qu'ils ont été figés.
 
 ### Comment conduire la réunion et enregistrer les décisions
 

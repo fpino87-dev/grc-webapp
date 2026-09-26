@@ -724,10 +724,12 @@ Toplantı anındaki GRC verilerini dondurmak için **Veri anlık görüntüsü o
 
 - **a)** önceki gözden geçirmelerin eylemleri: bir önceki gözden geçirmenin tüm eylemleri ile dönem içinde hâlâ açık olan veya kapatılan daha eski eylemler; gecikmiş olanlar vurgulanır
 - **d)** çerçeve başına uyum ve açığı olan kontroller; eşik dışı operasyonel KPI'lar; son 12 ayın denetimleri, hazırlık düzeyi ve açık uygunsuzluklar (önce büyükler); açık ve NIS2 bildirilen olaylar; takılı kalmış PDCA döngüleri ve gecikmiş görevler; süresi dolmuş, gözden geçirilecek ve son gözden geçirmeden beri onaylanan belgeler
-- **f)** kritik riskler (doğal → artık, işlem, sahip, plan olup olmadığı), resmi olarak kabul edilen riskler, BCP planı olmayan kritik süreçler
+- **f)** yönetimin onayladığı **kabul edilebilirlik eşiğinin üzerindeki** riskler (doğal → artık, işlem, sahip, plan olup olmadığı) ve kullanılan eşik, resmi olarak kabul edilen riskler, onaylı BCP planı olmayan kritik süreçler
 - **g)** denetimlerden çıkan iyileştirme fırsatları
 
 Anlık görüntü onaya kadar yeniden oluşturulabilir; sonrasında tutanağın içeriği olduğu için sabit kalır.
+
+Anlık görüntüdeki sayılar **Raporlama ile aynı kurallarla** hesaplanır; bu nedenle yönetimin Uyum ve Risk / BIA / BCP sekmelerinde gördükleriyle örtüşür: etkin çerçevelerin uygulanabilir kontrolleri üzerinden uyum (N/A hariç, TISAX L2 kontrolleri L3 VH üzerinden değerlendirilir), kendi tesisinin kabul edilebilirlik eşiğiyle karşılaştırılan riskler, yalnızca onaylı bir BCP ile kapsanan kritiklik ≥ 4 süreçler. Onaylanmış tutanaklar donduruldukları gibi kalır.
 
 ### Toplantı nasıl yürütülür ve kararlar nasıl kaydedilir
 

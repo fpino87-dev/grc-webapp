@@ -724,10 +724,12 @@ Kliknij **Generuj snapshot danych**, aby zamrozić dane GRC w chwili spotkania. 
 
 - **a)** działania z poprzednich przeglądów: wszystkie z poprzedniego przeglądu oraz starsze, nadal otwarte lub zamknięte w danym okresie, z wyróżnieniem działań po terminie
 - **d)** zgodność dla każdego frameworku z kontrolami z lukami; operacyjne KPI poza progami; audyty z ostatnich 12 miesięcy z gotowością i otwartymi niezgodnościami (najpierw poważne); incydenty otwarte i zgłoszone NIS2; zablokowane cykle PDCA i zadania po terminie; dokumenty po terminie, do przeglądu i zatwierdzone od ostatniego przeglądu
-- **f)** ryzyka krytyczne (inherentne → rezydualne, postępowanie, właściciel, czy istnieje plan), ryzyka formalnie zaakceptowane, krytyczne procesy bez planu BCP
+- **f)** ryzyka **powyżej progu akceptowalności** zatwierdzonego przez kierownictwo (inherentne → rezydualne, postępowanie, właściciel, czy istnieje plan) wraz z użytym progiem, ryzyka formalnie zaakceptowane, procesy krytyczne bez zatwierdzonego planu BCP
 - **g)** możliwości doskonalenia wskazane w audytach
 
 Snapshot można generować ponownie do momentu zatwierdzenia; potem pozostaje niezmienny, ponieważ stanowi treść protokołu.
+
+Liczby w snapshocie są obliczane według **tych samych reguł co w Raportowaniu**, więc pokrywają się z tym, co kierownictwo widzi w zakładkach Zgodność oraz Ryzyko / BIA / BCP: zgodność dla kontroli mających zastosowanie w aktywnych frameworkach (N/A wyłączone, kontrole TISAX L2 oceniane przez VH z L3), ryzyka porównywane z progiem akceptowalności ich zakładu, procesy o krytyczności ≥ 4 objęte tylko zatwierdzonym planem BCP. Już zatwierdzone protokoły pozostają takie, jak zostały zamrożone.
 
 ### Jak prowadzić spotkanie i rejestrować decyzje
 

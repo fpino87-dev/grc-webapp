@@ -3001,3 +3001,60 @@ msgstr "Domain"
 #: apps/reporting/views.py
 msgid "Ultima valutazione"
 msgstr "Last assessment"
+
+#: apps/management_review/report/builder.py
+msgid "Controlli applicabili"
+msgstr "Applicable controls"
+
+#: apps/management_review/report/builder.py
+msgid "Percentuale sui controlli applicabili dei framework attivi, calcolata come nel Reporting."
+msgstr "Percentage of applicable controls of active frameworks, calculated as in Reporting."
+
+#: apps/management_review/report/builder.py
+#, python-format
+msgid "Controlli N/A esclusi: %(n)s."
+msgstr "N/A controls excluded: %(n)s."
+
+#: apps/management_review/report/builder.py
+#, python-format
+msgid "Controlli TISAX L2 valutati tramite il controllo VH di L3 e non contati a parte: %(n)s."
+msgstr "TISAX L2 controls assessed through the L3 VH control and not counted separately: %(n)s."
+
+#: apps/management_review/report/builder.py
+msgid "Oltre la soglia di accettabilità"
+msgstr "Above the acceptance threshold"
+
+#: apps/management_review/report/builder.py
+msgid "Oltre soglia senza piano"
+msgstr "Above threshold without a plan"
+
+#: apps/management_review/report/builder.py
+msgid "Rischi alti"
+msgstr "High risks"
+
+#: apps/management_review/report/builder.py
+#, python-format
+msgid "Soglia di accettabilità: punteggio residuo oltre %(score)s, dalla propensione al rischio approvata dalla direzione."
+msgstr "Acceptance threshold: residual score above %(score)s, from the risk appetite approved by management."
+
+#: apps/management_review/report/builder.py
+#, python-format
+msgid "Soglia di accettabilità: punteggio residuo oltre %(score)s (valore predefinito: nessuna propensione al rischio approvata)."
+msgstr "Acceptance threshold: residual score above %(score)s (default value: no approved risk appetite)."
+
+#: apps/management_review/report/builder.py
+#, python-format
+msgid "Rischi oltre soglia tollerati: %(n)s."
+msgstr "Risks above threshold tolerated: %(n)s."
+
+#: apps/management_review/report/builder.py
+msgid "Le soglie variano fra i siti: ogni rischio è confrontato con quella del proprio sito."
+msgstr "Thresholds differ between sites: each risk is compared with its own site's threshold."
+
+#: apps/management_review/report/builder.py
+msgid "Rischi oltre la soglia di accettabilità (residuo più alto)"
+msgstr "Risks above the acceptance threshold (highest residual)"
+
+#: apps/management_review/report/builder.py
+msgid "Rischi oltre soglia"
+msgstr "Risks above threshold"

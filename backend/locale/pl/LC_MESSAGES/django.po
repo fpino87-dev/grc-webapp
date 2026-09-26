@@ -3023,3 +3023,60 @@ msgstr "Domena"
 #: apps/reporting/views.py
 msgid "Ultima valutazione"
 msgstr "Ostatnia ocena"
+
+#: apps/management_review/report/builder.py
+msgid "Controlli applicabili"
+msgstr "Kontrole mające zastosowanie"
+
+#: apps/management_review/report/builder.py
+msgid "Percentuale sui controlli applicabili dei framework attivi, calcolata come nel Reporting."
+msgstr "Procent dla kontroli mających zastosowanie w aktywnych frameworkach, obliczony jak w Raportowaniu."
+
+#: apps/management_review/report/builder.py
+#, python-format
+msgid "Controlli N/A esclusi: %(n)s."
+msgstr "Wyłączone kontrole N/A: %(n)s."
+
+#: apps/management_review/report/builder.py
+#, python-format
+msgid "Controlli TISAX L2 valutati tramite il controllo VH di L3 e non contati a parte: %(n)s."
+msgstr "Kontrole TISAX L2 oceniane przez kontrolę VH z L3 i nieliczone osobno: %(n)s."
+
+#: apps/management_review/report/builder.py
+msgid "Oltre la soglia di accettabilità"
+msgstr "Powyżej progu akceptowalności"
+
+#: apps/management_review/report/builder.py
+msgid "Oltre soglia senza piano"
+msgstr "Powyżej progu bez planu"
+
+#: apps/management_review/report/builder.py
+msgid "Rischi alti"
+msgstr "Ryzyka wysokie"
+
+#: apps/management_review/report/builder.py
+#, python-format
+msgid "Soglia di accettabilità: punteggio residuo oltre %(score)s, dalla propensione al rischio approvata dalla direzione."
+msgstr "Próg akceptowalności: wynik rezydualny powyżej %(score)s, według apetytu na ryzyko zatwierdzonego przez kierownictwo."
+
+#: apps/management_review/report/builder.py
+#, python-format
+msgid "Soglia di accettabilità: punteggio residuo oltre %(score)s (valore predefinito: nessuna propensione al rischio approvata)."
+msgstr "Próg akceptowalności: wynik rezydualny powyżej %(score)s (wartość domyślna: brak zatwierdzonego apetytu na ryzyko)."
+
+#: apps/management_review/report/builder.py
+#, python-format
+msgid "Rischi oltre soglia tollerati: %(n)s."
+msgstr "Tolerowane ryzyka powyżej progu: %(n)s."
+
+#: apps/management_review/report/builder.py
+msgid "Le soglie variano fra i siti: ogni rischio è confrontato con quella del proprio sito."
+msgstr "Progi różnią się między zakładami: każde ryzyko porównuje się z progiem jego zakładu."
+
+#: apps/management_review/report/builder.py
+msgid "Rischi oltre la soglia di accettabilità (residuo più alto)"
+msgstr "Ryzyka powyżej progu akceptowalności (najwyższe rezydualne)"
+
+#: apps/management_review/report/builder.py
+msgid "Rischi oltre soglia"
+msgstr "Ryzyka powyżej progu"

@@ -611,7 +611,8 @@ def test_risk_over_appetite_uses_site_policy(plant, other_plant, user):
 
 @pytest.mark.django_db
 def test_risk_appetite_default_when_no_policy(plant, user):
-    from apps.reporting.services import DEFAULT_APPETITE_SCORE, risk_bia_bcp
+    from apps.reporting.services import risk_bia_bcp
+    from apps.risk.services import DEFAULT_ACCEPTABLE_SCORE as DEFAULT_APPETITE_SCORE
     make_risk(plant, user, 3, 5)  # 15
     out = risk_bia_bcp(str(plant.id))
     assert out["appetite"]["defined"] is False

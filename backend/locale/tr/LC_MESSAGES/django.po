@@ -3002,3 +3002,60 @@ msgstr "Alan"
 #: apps/reporting/views.py
 msgid "Ultima valutazione"
 msgstr "Son değerlendirme"
+
+#: apps/management_review/report/builder.py
+msgid "Controlli applicabili"
+msgstr "Uygulanabilir kontroller"
+
+#: apps/management_review/report/builder.py
+msgid "Percentuale sui controlli applicabili dei framework attivi, calcolata come nel Reporting."
+msgstr "Etkin çerçevelerin uygulanabilir kontrolleri üzerindeki yüzde, Raporlama'daki gibi hesaplanır."
+
+#: apps/management_review/report/builder.py
+#, python-format
+msgid "Controlli N/A esclusi: %(n)s."
+msgstr "Hariç tutulan N/A kontroller: %(n)s."
+
+#: apps/management_review/report/builder.py
+#, python-format
+msgid "Controlli TISAX L2 valutati tramite il controllo VH di L3 e non contati a parte: %(n)s."
+msgstr "L3 VH kontrolü üzerinden değerlendirilen ve ayrıca sayılmayan TISAX L2 kontrolleri: %(n)s."
+
+#: apps/management_review/report/builder.py
+msgid "Oltre la soglia di accettabilità"
+msgstr "Kabul edilebilirlik eşiğinin üzerinde"
+
+#: apps/management_review/report/builder.py
+msgid "Oltre soglia senza piano"
+msgstr "Planı olmayan eşik üstü"
+
+#: apps/management_review/report/builder.py
+msgid "Rischi alti"
+msgstr "Yüksek riskler"
+
+#: apps/management_review/report/builder.py
+#, python-format
+msgid "Soglia di accettabilità: punteggio residuo oltre %(score)s, dalla propensione al rischio approvata dalla direzione."
+msgstr "Kabul edilebilirlik eşiği: artık puan %(score)s üzerinde, yönetimin onayladığı risk iştahına göre."
+
+#: apps/management_review/report/builder.py
+#, python-format
+msgid "Soglia di accettabilità: punteggio residuo oltre %(score)s (valore predefinito: nessuna propensione al rischio approvata)."
+msgstr "Kabul edilebilirlik eşiği: artık puan %(score)s üzerinde (varsayılan değer: onaylı risk iştahı yok)."
+
+#: apps/management_review/report/builder.py
+#, python-format
+msgid "Rischi oltre soglia tollerati: %(n)s."
+msgstr "Tolere edilen eşik üstü riskler: %(n)s."
+
+#: apps/management_review/report/builder.py
+msgid "Le soglie variano fra i siti: ogni rischio è confrontato con quella del proprio sito."
+msgstr "Eşikler tesisler arasında farklıdır: her risk kendi tesisinin eşiğiyle karşılaştırılır."
+
+#: apps/management_review/report/builder.py
+msgid "Rischi oltre la soglia di accettabilità (residuo più alto)"
+msgstr "Kabul edilebilirlik eşiğinin üzerindeki riskler (en yüksek artık)"
+
+#: apps/management_review/report/builder.py
+msgid "Rischi oltre soglia"
+msgstr "Eşik üstü riskler"

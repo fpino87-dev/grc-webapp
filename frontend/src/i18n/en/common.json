@@ -5648,7 +5648,16 @@
       "col_reason": "Reason",
       "pdca_overdue_list": "PDCA cycles past their target date",
       "col_action_owner": "Owner",
-      "col_target_date": "Target date"
+      "col_target_date": "Target date",
+      "compliance_rule_note": "Percentages on applicable controls of active frameworks, calculated as in Reporting.",
+      "over_appetite": "Above threshold",
+      "over_appetite_no_plan": "Above threshold without a plan",
+      "high": "High",
+      "appetite_defined": "Acceptance threshold: residual above {{score}}, from the risk appetite approved by management.",
+      "appetite_default": "Acceptance threshold: residual above {{score}} (default value: no approved risk appetite).",
+      "appetite_tolerated": "Risks above threshold tolerated: {{count}}.",
+      "appetite_per_plant": "Thresholds differ between sites: each risk is compared with its own site's threshold.",
+      "top_over_appetite": "Risks above the acceptance threshold (highest residual)"
     },
     "participants": {
       "heading": "Invitees and attendance",

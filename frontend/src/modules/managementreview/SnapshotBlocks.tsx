@@ -56,8 +56,10 @@ export function ComplianceBlock({ snap }: { snap: Snap }) {
   const frameworks = snap.frameworks as Record<string, SnapFramework> | undefined;
   if (!frameworks || Object.keys(frameworks).length === 0) return null;
   const lang = i18n.language || "it";
+  const unified = (snap.compliance_rule ?? 0) >= 2;
   return (
     <div className="space-y-2">
+      {unified && <p className="text-xs text-gray-400">{t("management_review.snap.compliance_rule_note")}</p>}
       {Object.entries(frameworks).map(([code, fw]) => {
         const color = fw.pct_compliant >= 80 ? "bg-green-500" : fw.pct_compliant >= 60 ? "bg-yellow-400" : "bg-red-500";
         return (
@@ -69,6 +71,14 @@ export function ComplianceBlock({ snap }: { snap: Snap }) {
             <div className="h-2 bg-gray-200 rounded overflow-hidden">
               <div className={`h-full ${color}`} style={{ width: `${fw.pct_compliant}%` }} />
             </div>
+            {((fw.superseded_by_extender ?? 0) > 0 || (fw.na_excluded ?? 0) > 0) && (
+              <p className="text-xs text-gray-400 mt-0.5">
+                {[
+                  (fw.superseded_by_extender ?? 0) > 0 ? t("reporting.compliance.superseded", { count: fw.superseded_by_extender }) : "",
+                  (fw.na_excluded ?? 0) > 0 ? t("reporting.compliance.na_excluded", { count: fw.na_excluded }) : "",
+                ].filter(Boolean).join(" · ")}
+              </p>
+            )}
             {fw.expired_evidence_count > 0 && (
               <p className="text-xs text-amber-600 mt-0.5">{t("management_review.snap.expired_evidence", { count: fw.expired_evidence_count })}</p>
             )}
@@ -359,22 +369,42 @@ export function RisksBlock({ snap }: { snap: Snap }) {
   const r = snap.rischi;
   const bcp = snap.bcp as { processi_critici_senza_bcp: number; nomi: string[] } | undefined;
   if (!r) return null;
+  // Snapshot con le regole del Reporting: soglia di accettabilità approvata.
+  const byAppetite = r.oltre_soglia !== undefined;
+  const soglia = (r.soglia ?? {}) as { defined?: boolean; max_acceptable_score?: number; max_red_risks_count?: number | null; per_plant?: boolean };
   const yesNo = (v: boolean) => v
     ? <span className="text-green-700">{t("management_review.snap.yes")}</span>
     : <span className="text-red-600 font-medium">{t("management_review.snap.no")}</span>;
   return (
     <div>
-      <KpiGrid>
-        <KpiBox label={t("management_review.snap.critical")} value={r.rosso ?? 0} color="text-red-600" />
-        <KpiBox label={t("management_review.snap.medium")} value={r.giallo ?? 0} color="text-yellow-600" />
-        <KpiBox label={t("management_review.snap.low")} value={r.verde ?? 0} color="text-green-600" />
-        <KpiBox label={t("management_review.snap.critical_no_plan")} value={r.senza_piano ?? 0} color="text-red-600" />
-      </KpiGrid>
+      {byAppetite ? (
+        <>
+          <KpiGrid>
+            <KpiBox label={t("management_review.snap.over_appetite")} value={r.oltre_soglia ?? 0} color="text-red-600" />
+            <KpiBox label={t("management_review.snap.over_appetite_no_plan")} value={r.senza_piano ?? 0} color="text-red-600" />
+            <KpiBox label={t("management_review.snap.high")} value={r.rosso ?? 0} color="text-orange-600" />
+            <KpiBox label={t("management_review.snap.medium")} value={r.giallo ?? 0} color="text-yellow-600" />
+            <KpiBox label={t("management_review.snap.low")} value={r.verde ?? 0} color="text-green-600" />
+          </KpiGrid>
+          <p className="text-xs text-gray-500 mt-2">
+            {t(soglia.defined ? "management_review.snap.appetite_defined" : "management_review.snap.appetite_default", { score: soglia.max_acceptable_score ?? 14 })}
+            {soglia.max_red_risks_count != null && ` ${t("management_review.snap.appetite_tolerated", { count: soglia.max_red_risks_count })}`}
+            {soglia.per_plant && ` ${t("management_review.snap.appetite_per_plant")}`}
+          </p>
+        </>
+      ) : (
+        <KpiGrid>
+          <KpiBox label={t("management_review.snap.critical")} value={r.rosso ?? 0} color="text-red-600" />
+          <KpiBox label={t("management_review.snap.medium")} value={r.giallo ?? 0} color="text-yellow-600" />
+          <KpiBox label={t("management_review.snap.low")} value={r.verde ?? 0} color="text-green-600" />
+          <KpiBox label={t("management_review.snap.critical_no_plan")} value={r.senza_piano ?? 0} color="text-red-600" />
+        </KpiGrid>
+      )}
       {(r.senza_owner ?? 0) > 0 && (
         <p className="text-xs text-amber-600 mt-2">{t("management_review.snap.risks_no_owner", { count: r.senza_owner })}</p>
       )}
       <DetailTable
-        title={t("management_review.snap.top_critical")}
+        title={t(byAppetite ? "management_review.snap.top_over_appetite" : "management_review.snap.top_critical")}
         headers={[
           t("management_review.snap.col_risk"), t("management_review.snap.col_asset_process"),
           t("management_review.snap.col_score"), t("management_review.snap.col_treatment"),
@@ -388,7 +418,7 @@ export function RisksBlock({ snap }: { snap: Snap }) {
           x.owner || <span className="text-amber-600">—</span>,
           yesNo(x.has_plan),
         ])}
-        total={r.rosso}
+        total={byAppetite ? r.oltre_soglia : r.rosso}
       />
       <DetailTable
         title={t("management_review.snap.accepted_risks")}
@@ -445,19 +475,24 @@ export function SitesBlock({ snap }: { snap: Snap }) {
   const { t } = useTranslation();
   const sites = (snap.siti ?? []) as SnapSite[];
   if (sites.length === 0) return null;
+  const byAppetite = sites[0].rischi_oltre_soglia !== undefined;
   return (
     <DetailTable
       headers={[
         t("management_review.snap.col_site"), t("management_review.snap.col_compliance"),
-        t("management_review.snap.critical"), t("management_review.snap.open_incidents"), t("management_review.snap.tasks_overdue"),
+        t(byAppetite ? "management_review.snap.over_appetite" : "management_review.snap.critical"),
+        t("management_review.snap.open_incidents"), t("management_review.snap.tasks_overdue"),
       ]}
-      rows={sites.map(s => [
+      rows={sites.map(s => {
+        const risks = byAppetite ? (s.rischi_oltre_soglia ?? 0) : s.rischi_critici;
+        return [
         <span><span className="font-medium">{s.code}</span> <span className="text-gray-500">{s.name}</span></span>,
         s.pct_compliant != null ? `${s.pct_compliant}%` : "—",
-        <span className={s.rischi_critici ? "text-red-600 font-medium" : ""}>{s.rischi_critici}</span>,
+        <span className={risks ? "text-red-600 font-medium" : ""}>{risks}</span>,
         s.incidenti_aperti,
         <span className={s.task_scaduti ? "text-red-600" : ""}>{s.task_scaduti}</span>,
-      ])}
+        ];
+      })}
     />
   );
 }

@@ -1,4 +1,3 @@
-from django.db.models import Prefetch
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
@@ -9,8 +8,17 @@ from ..models import ManagementReview, ReviewAction
 # pochi elementi, i più rilevanti; il totale resta nei contatori.
 SNAPSHOT_LIST_LIMIT = 10
 
-# Soglia di rischio "critico" (rosso), coerente con il resto del modulo.
+# Fascia di rischio "alto" (rosso) della matrice 5×5, come la heatmap del
+# Reporting. La soglia di accettabilità della direzione è a parte
+# (risk.services.AppetiteThresholds).
 CRITICAL_RISK_SCORE = 14
+
+# Versione delle regole con cui lo snapshot calcola conformità, rischi e BCP:
+# 2 = regole uniche condivise con il Reporting (controls.services.
+# effective_control_rows, risk.services.AppetiteThresholds,
+# bcp.services.critical_processes_without_bcp). Assente negli snapshot
+# precedenti, che restano come sono stati congelati.
+COMPLIANCE_RULE = 2
 
 
 def _display_name(first_name, last_name, email) -> str:
@@ -85,28 +93,32 @@ def get_operational_kpi_summary(plant_id, all_plants: bool = False) -> dict:
 
 
 def get_kpi_snapshot(plant_id) -> dict:
-    """Return a dict with key metrics for the given plant."""
-    from apps.controls.models import ControlInstance
+    """Metriche chiave del sito all'avvio del riesame, con le stesse regole del
+    Reporting: conformità da `get_compliance_summary` (regola unica), rischi
+    oltre la soglia di accettabilità del sito."""
+    from apps.controls.services import get_compliance_summary
     from apps.incidents.models import Incident
     from apps.risk.models import RiskAssessment
+    from apps.risk.services import AppetiteThresholds
 
-    controls_qs = ControlInstance.objects.filter(plant_id=plant_id)
-    total_controls = controls_qs.count()
-    compliant = controls_qs.filter(status="compliant").count()
+    compliance = get_compliance_summary(plant_id)
 
     incidents_qs = Incident.objects.filter(plant_id=plant_id)
     open_incidents = incidents_qs.filter(status__in=["aperto", "in_analisi"]).count()
 
-    risks_qs = RiskAssessment.objects.filter(plant_id=plant_id, status="completato")
-    high_risks = risks_qs.filter(score__gt=14).count()
+    risks_qs = RiskAssessment.objects.filter(
+        plant_id=plant_id, status="completato", deleted_at__isnull=True,
+    )
+    high_risks = len(AppetiteThresholds().over_ids(risks_qs))
 
     return {
         "plant_id": str(plant_id),
-        "controls_total": total_controls,
-        "controls_compliant": compliant,
-        "pct_compliant": round(compliant / total_controls * 100, 1) if total_controls else 0,
+        "controls_total": compliance["total"],
+        "controls_compliant": compliance["compliant"],
+        "pct_compliant": compliance["pct_compliant"],
         "incidents_open": open_incidents,
         "risks_high": high_risks,
+        "compliance_rule": COMPLIANCE_RULE,
         "operational_kpis": get_operational_kpi_summary(plant_id),
         "snapshot_at": timezone.now().isoformat(),
     }
@@ -380,38 +392,46 @@ def _audit_block(scope: dict, today, since_12m) -> dict:
 
 
 def _sites_block(today) -> list[dict]:
-    """Riesame di organizzazione: una riga di sintesi per sito (query aggregate)."""
-    from django.db.models import Count, Q
-    from apps.controls.models import ControlInstance
+    """Riesame di organizzazione: una riga di sintesi per sito, con le stesse
+    regole del Reporting (conformità sui framework attivi del sito, rischi oltre
+    la soglia di accettabilità del sito)."""
+    from django.db.models import Count
+    from apps.controls.services import effective_control_rows, summarize_compliance
     from apps.incidents.models import Incident
     from apps.plants.models import Plant
     from apps.risk.models import RiskAssessment
+    from apps.risk.services import AppetiteThresholds
     from apps.tasks.models import Task
 
     def _by_plant(qs, **annotations):
         return {row.pop("plant_id"): row for row in qs.values("plant_id").annotate(**annotations)}
 
-    controls = _by_plant(
-        ControlInstance.objects.all(),
-        total=Count("id"), compliant=Count("id", filter=Q(status="compliant")),
-    )
-    risks = _by_plant(
-        RiskAssessment.objects.filter(status="completato", score__gt=CRITICAL_RISK_SCORE), n=Count("id"),
-    )
+    plants = list(Plant.objects.order_by("code"))
+    rows_by_plant: dict = {}
+    for r in effective_control_rows(plants):
+        rows_by_plant.setdefault(r["plant_id"], []).append(r)
+
+    risks_qs = RiskAssessment.objects.filter(status="completato", deleted_at__isnull=True)
+    thresholds = AppetiteThresholds()
+    over_by_plant: dict = {}
+    for plant_id, score in risks_qs.values_list("plant_id", "score"):
+        if thresholds.is_over(plant_id, score):
+            over_by_plant[plant_id] = over_by_plant.get(plant_id, 0) + 1
+    high = _by_plant(risks_qs.filter(score__gt=CRITICAL_RISK_SCORE), n=Count("id"))
     incidents = _by_plant(Incident.objects.filter(status__in=["aperto", "in_analisi"]), n=Count("id"))
     tasks = _by_plant(
         Task.objects.filter(status__in=["aperto", "in_corso"], due_date__lt=today), n=Count("id"),
     )
     rows = []
-    for plant in Plant.objects.order_by("code"):
-        c = controls.get(plant.pk, {})
-        total = c.get("total", 0)
+    for plant in plants:
+        summary = summarize_compliance(rows_by_plant.get(plant.pk, []))
         rows.append({
             "plant_id": str(plant.pk),
             "code": plant.code,
             "name": plant.name,
-            "pct_compliant": round(c.get("compliant", 0) / total * 100, 1) if total else None,
-            "rischi_critici": risks.get(plant.pk, {}).get("n", 0),
+            "pct_compliant": summary["pct_compliant"] if summary["total"] else None,
+            "rischi_oltre_soglia": over_by_plant.get(plant.pk, 0),
+            "rischi_critici": high.get(plant.pk, {}).get("n", 0),
             "incidenti_aperti": incidents.get(plant.pk, {}).get("n", 0),
             "task_scaduti": tasks.get(plant.pk, {}).get("n", 0),
         })
@@ -449,20 +469,41 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     since_12m = timezone.now() - timezone.timedelta(days=365)
 
     # ── 1. Compliance per framework con dettaglio ──
-    from apps.plants.services import get_active_frameworks
+    # Regola unica condivisa con il Reporting (controls.services.
+    # effective_control_rows): framework attivi di ciascun sito, N/A fuori dal
+    # denominatore, controlli base valutati tramite l'extender (TISAX L2 → VH
+    # L3) contati a parte. Riesame di organizzazione: tutti i siti.
+    from apps.controls.models import Framework
+    from apps.controls.services import effective_control_rows, summarize_compliance
     from apps.plants.models import Plant as PlantModel
-    _plant = PlantModel.objects.filter(pk=plant_id).first() if plant_id else None
+
+    scope_plants = [plant_id] if plant_id else list(PlantModel.objects.values_list("pk", flat=True))
+    rows_by_fw: dict = {}
+    for r in effective_control_rows(scope_plants):
+        rows_by_fw.setdefault(r["framework_code"], []).append(r)
+    fw_names = dict(Framework.objects.filter(code__in=list(rows_by_fw)).values_list("code", "name"))
+
+    def _instances(fw_rows, statuses):
+        keys = {
+            (r["plant_id"], r["control_id"]) for r in fw_rows
+            if not r["superseded"] and r["status"] in statuses
+        }
+        if not keys:
+            return ControlInstance.objects.none()
+        qs = ControlInstance.objects.filter(
+            plant_id__in={k[0] for k in keys}, control_id__in={k[1] for k in keys},
+        )
+        # Il prodotto cartesiano plant × control può includere coppie fuori
+        # dall'insieme (più siti): si filtra in Python sugli ID.
+        ids = [pk for pk, p, c in qs.values_list("pk", "plant_id", "control_id") if (p, c) in keys]
+        return ControlInstance.objects.filter(pk__in=ids)
 
     frameworks_detail = {}
-    for fw in get_active_frameworks(_plant):
-        qs = ControlInstance.objects.filter(
-            **scope, control__framework=fw
-        ).select_related("control__domain")
-        total = qs.count()
-        if total == 0:
+    for code in sorted(rows_by_fw, key=lambda c: fw_names.get(c, c)):
+        fw_rows = rows_by_fw[code]
+        summary = summarize_compliance(fw_rows)
+        if summary["total"] == 0 and not summary["superseded_by_extender"]:
             continue
-        by_status = dict(qs.values("status").annotate(n=Count("id")).values_list("status", "n"))
-        compliant = by_status.get("compliant", 0)
 
         gap_controls = [
             {
@@ -476,26 +517,33 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
                     if (tr or {}).get("title")
                 },
             }
-            for item in qs.filter(status="gap").order_by("control__external_id").values(
+            for item in _instances(fw_rows, {"gap"}).order_by("control__external_id").values(
                 "id", "control__external_id", "control__translations",
             )[:SNAPSHOT_LIST_LIMIT]
         ]
 
-        expired_evidence_controls = [
-            {**item, "id": str(item["id"])}
-            for item in qs.filter(
-                status="compliant",
-                evidences__valid_until__lt=today,
-            ).values("id", "control__external_id")[:10]
-        ]
+        expired_evidence_count = (
+            _instances(fw_rows, {"compliant"})
+            .filter(evidences__valid_until__lt=today)
+            .distinct()
+            .count()
+        )
 
-        frameworks_detail[fw.code] = {
-            "framework_name": fw.name,
-            "total": total,
-            "by_status": by_status,
-            "pct_compliant": round(compliant / total * 100, 1) if total else 0,
+        frameworks_detail[code] = {
+            "framework_name": fw_names.get(code, code),
+            "total": summary["total"],
+            "by_status": {
+                "compliant": summary["compliant"],
+                "parziale": summary["parziale"],
+                "gap": summary["gap"],
+                "non_valutato": summary["non_valutato"],
+                "na": summary["na_excluded"],
+            },
+            "pct_compliant": summary["pct_compliant"],
+            "na_excluded": summary["na_excluded"],
+            "superseded_by_extender": summary["superseded_by_extender"],
             "gap_controls": gap_controls,
-            "expired_evidence_count": len(expired_evidence_controls),
+            "expired_evidence_count": expired_evidence_count,
         }
 
     # ── 2. Documenti ──
@@ -601,13 +649,22 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     risks_qs = RiskAssessment.objects.filter(
         **scope, status="completato", deleted_at__isnull=True
     )
-    critical_qs = risks_qs.filter(score__gt=CRITICAL_RISK_SCORE)
+    # Oltre la soglia di accettabilità approvata dalla direzione (soglia del
+    # sito di ciascun rischio), come nel Reporting. rosso/giallo/verde restano
+    # le fasce della matrice 5×5.
+    from apps.risk.services import AppetiteThresholds, appetite_summary
+
+    thresholds = AppetiteThresholds()
+    over_qs = risks_qs.filter(pk__in=thresholds.over_ids(risks_qs))
     accepted_qs = risks_qs.filter(risk_accepted_formally=True)
     risk_summary = {
-        "rosso":  critical_qs.count(),
+        "oltre_soglia": over_qs.count(),
+        "soglia": appetite_summary(plant_id, thresholds),
+        "rosso":  risks_qs.filter(score__gt=CRITICAL_RISK_SCORE).count(),
         "giallo": risks_qs.filter(score__gt=7, score__lte=CRITICAL_RISK_SCORE).count(),
         "verde":  risks_qs.filter(score__lte=7).count(),
-        "senza_piano": critical_qs.annotate(
+        # Rischi oltre soglia senza piano di mitigazione.
+        "senza_piano": over_qs.annotate(
             n_plans=Count("mitigation_plans", filter=Q(mitigation_plans__deleted_at__isnull=True))
         ).filter(n_plans=0).count(),
         "senza_owner": risks_qs.filter(owner__isnull=True).count(),
@@ -641,7 +698,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
             for r in rows
         ]
 
-    risk_summary["top_critici"] = _risk_items(critical_qs, ["-score", "-inherent_score"])
+    risk_summary["top_critici"] = _risk_items(over_qs, ["-score", "-inherent_score"])
     risk_summary["elenco_accettati"] = _risk_items(accepted_qs, ["risk_acceptance_expiry", "-score"])
 
     # ── 4. Incidenti ──
@@ -698,21 +755,11 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     }
 
     # ── 6. BCP ──
+    # Regola unica (bcp.services): criticità ≥ 4, senza piano BCP approvato.
     from apps.bia.models import CriticalProcess
-    from apps.bcp.models import BcpPlan
+    from apps.bcp.services import critical_processes_without_bcp
 
-    critical_procs = CriticalProcess.objects.filter(
-        **scope,
-        criticality__gte=4,
-        status="approvato",
-        deleted_at__isnull=True,
-    ).prefetch_related(
-        Prefetch(
-            "bcp_plans",
-            queryset=BcpPlan.objects.filter(deleted_at__isnull=True),
-        )
-    )
-    missing_bcp = [p for p in critical_procs if not p.bcp_plans.all()]
+    missing_bcp = critical_processes_without_bcp(CriticalProcess.objects.filter(**scope))
     bcp_summary = {
         "processi_critici_senza_bcp": len(missing_bcp),
         "nomi": [p.name for p in missing_bcp[:5]],
@@ -748,6 +795,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
 
     snapshot = {
         "generated_at":   timezone.now().isoformat(),
+        "compliance_rule": COMPLIANCE_RULE,
         "plant_id":       str(plant_id) if plant_id else None,
         "frameworks":     frameworks_detail,
         "documenti":      {**docs_summary, "evidenze_scadute": ev_scadute, "evidenze_in_scadenza": ev_in_scadenza},

@@ -23,28 +23,49 @@ def approve_plan(plan: BcpPlan, user) -> BcpPlan:
     return plan
 
 
-def check_missing_bcp_plans(plant):
-    """Restituisce processi critici (criticality >= 4) senza BCP plan attivo."""
-    from apps.bia.models import CriticalProcess
+# Processo critico: criticità BIA ≥ 4, qualunque sia lo stato della BIA.
+CRITICAL_PROCESS_MIN_CRITICALITY = 4
+
+
+def processes_with_approved_bcp(process_ids) -> set:
+    """ID dei processi coperti da almeno un piano BCP **approvato**, collegato
+    direttamente (FK `critical_process`) o dall'elenco dei processi (M2M
+    `critical_processes`). Bozze e piani archiviati non coprono.
+
+    Regola unica di copertura usata da modulo BCP, Reporting e riesame di
+    direzione (M13), coerente con `CriticalProcess.rto_bcp_status`."""
     from .models import BcpPlan
 
-    processes = CriticalProcess.objects.filter(
-        plant=plant,
-        criticality__gte=4,
-        status="approvato",
-        deleted_at__isnull=True,
+    process_ids = list(process_ids)
+    if not process_ids:
+        return set()
+    approved = BcpPlan.objects.filter(deleted_at__isnull=True, status="approvato")
+    direct = approved.filter(critical_process_id__in=process_ids).values_list(
+        "critical_process_id", flat=True,
     )
-    missing = []
-    for p in processes:
-        has_direct_bcp = p.bcp_plans.filter(deleted_at__isnull=True).exists()
-        has_m2m_bcp = BcpPlan.objects.filter(
-            deleted_at__isnull=True,
-            critical_processes=p,
-        ).exists()
-        has_bcp = has_direct_bcp or has_m2m_bcp
-        if not has_bcp:
-            missing.append(p)
-    return missing
+    via_list = BcpPlan.critical_processes.through.objects.filter(
+        criticalprocess_id__in=process_ids, bcpplan__in=approved,
+    ).values_list("criticalprocess_id", flat=True)
+    return set(direct) | set(via_list)
+
+
+def critical_processes_without_bcp(processes_qs):
+    """Processi critici del queryset senza un piano BCP approvato (vedi
+    `processes_with_approved_bcp`), ordinati per criticità e nome."""
+    critical = list(
+        processes_qs.filter(
+            deleted_at__isnull=True, criticality__gte=CRITICAL_PROCESS_MIN_CRITICALITY,
+        ).order_by("-criticality", "name")
+    )
+    covered = processes_with_approved_bcp(p.pk for p in critical)
+    return [p for p in critical if p.pk not in covered]
+
+
+def check_missing_bcp_plans(plant):
+    """Processi critici del sito senza un piano BCP approvato."""
+    from apps.bia.models import CriticalProcess
+
+    return critical_processes_without_bcp(CriticalProcess.objects.filter(plant=plant))
 
 
 def record_test(

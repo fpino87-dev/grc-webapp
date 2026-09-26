@@ -186,9 +186,21 @@ def _compliance_blocks(snap) -> list:
         for g in gaps:
             titles = g.get("titles") or {}
             gap_rows.append([code, g.get("control__external_id") or "—", titles.get("it") or titles.get("en") or ""])
+    unified = snap.get("compliance_rule", 0) >= 2
     blocks = [_table(_("Compliance per framework"),
-                     [_("Framework"), _("Controlli"), _("% compliant"), _("Compliant"), _("Gap/parziali"),
-                      _("Non valutati"), _("Evidenze scadute")], rows, empty=_("Nessun dato disponibile"))]
+                     [_("Framework"), _("Controlli applicabili") if unified else _("Controlli"), _("% compliant"),
+                      _("Compliant"), _("Gap/parziali"), _("Non valutati"), _("Evidenze scadute")],
+                     rows, empty=_("Nessun dato disponibile"))]
+    if unified and fws:
+        # Come si legge la percentuale: stessa regola del Reporting.
+        na = sum(fw.get("na_excluded", 0) for fw in fws.values())
+        superseded = sum(fw.get("superseded_by_extender", 0) for fw in fws.values())
+        note = _("Percentuale sui controlli applicabili dei framework attivi, calcolata come nel Reporting.")
+        if na:
+            note += " " + _("Controlli N/A esclusi: %(n)s.") % {"n": na}
+        if superseded:
+            note += " " + _("Controlli TISAX L2 valutati tramite il controllo VH di L3 e non contati a parte: %(n)s.") % {"n": superseded}
+        blocks.append({"type": "paragraph", "label": None, "text": note})
     if gap_rows:
         blocks.append(_table(_("Controlli in gap (primi 5 per framework)"),
                              [_("Framework"), _("Controllo"), _("Titolo")], gap_rows, gap_total))
@@ -358,13 +370,37 @@ def _document_blocks(snap, ctx=None) -> list:
 
 def _risk_blocks(snap) -> list:
     r = snap.get("rischi") or {}
-    blocks = [_kpis((_("Rischi critici"), r.get("rosso", 0), "red"),
-                    (_("Rischi medi"), r.get("giallo", 0), "orange"),
-                    (_("Rischi bassi"), r.get("verde", 0), "green"),
-                    (_("Critici senza piano"), r.get("senza_piano", 0), "red"))]
+    # Snapshot con la soglia di accettabilità (regole condivise con il
+    # Reporting): "senza piano" e l'elenco riguardano i rischi oltre soglia.
+    by_appetite = "oltre_soglia" in r
+    if by_appetite:
+        soglia = r.get("soglia") or {}
+        blocks = [
+            _kpis((_("Oltre la soglia di accettabilità"), r.get("oltre_soglia", 0), "red"),
+                  (_("Oltre soglia senza piano"), r.get("senza_piano", 0), "red"),
+                  (_("Rischi alti"), r.get("rosso", 0), "orange"),
+                  (_("Rischi medi"), r.get("giallo", 0), "orange"),
+                  (_("Rischi bassi"), r.get("verde", 0), "green")),
+        ]
+        text = (
+            _("Soglia di accettabilità: punteggio residuo oltre %(score)s, dalla propensione al rischio approvata dalla direzione.")
+            if soglia.get("defined") else
+            _("Soglia di accettabilità: punteggio residuo oltre %(score)s (valore predefinito: nessuna propensione al rischio approvata).")
+        ) % {"score": soglia.get("max_acceptable_score", 14)}
+        if soglia.get("max_red_risks_count") is not None:
+            text += " " + _("Rischi oltre soglia tollerati: %(n)s.") % {"n": soglia["max_red_risks_count"]}
+        if soglia.get("per_plant"):
+            text += " " + _("Le soglie variano fra i siti: ogni rischio è confrontato con quella del proprio sito.")
+        blocks.append({"type": "paragraph", "label": None, "text": text})
+    else:
+        blocks = [_kpis((_("Rischi critici"), r.get("rosso", 0), "red"),
+                        (_("Rischi medi"), r.get("giallo", 0), "orange"),
+                        (_("Rischi bassi"), r.get("verde", 0), "green"),
+                        (_("Critici senza piano"), r.get("senza_piano", 0), "red"))]
     if "top_critici" in r:
         blocks += [
-            _table(_("Rischi critici (residuo più alto)"),
+            _table(_("Rischi oltre la soglia di accettabilità (residuo più alto)") if by_appetite
+                   else _("Rischi critici (residuo più alto)"),
                    [_("Rischio"), _("Asset / processo"), _("Inerente → residuo"), _("Trattamento"), _("Owner"),
                     _("Piano")],
                    [[x.get("name"), _dash(x.get("asset") or x.get("process")),
@@ -373,7 +409,7 @@ def _risk_blocks(snap) -> list:
                      {"text": _("Sì") if x.get("has_plan") else _("No"),
                       "tone": None if x.get("has_plan") else "red", "bold": not x.get("has_plan")}]
                     for x in r.get("top_critici", [])],
-                   r.get("rosso")),
+                   r.get("oltre_soglia") if by_appetite else r.get("rosso")),
             _table(_("Rischi accettati formalmente"),
                    [_("Rischio"), _("Residuo"), _("Accettato da"), _("Scadenza accettazione")],
                    [[x.get("name"), _dash(x.get("score")), _dash(x.get("accepted_by")), fmt_date(x.get("acceptance_expiry"))]
@@ -706,11 +742,17 @@ def build_report(review) -> dict:
             [_participant_row(p) for p in participants])]})
     sites = snap.get("siti") or []
     if sites:
+        # Snapshot con le regole del Reporting: rischi oltre la soglia di
+        # accettabilità del sito invece della fascia fissa.
+        by_appetite = "rischi_oltre_soglia" in sites[0]
+        risk_key = "rischi_oltre_soglia" if by_appetite else "rischi_critici"
         sections.append({"heading": _("Quadro per sito"), "blocks": [_table(
-            None, [_("Sito"), _("% compliant"), _("Rischi critici"), _("Incidenti aperti"), _("Task scaduti")],
+            None, [_("Sito"), _("% compliant"),
+                   _("Rischi oltre soglia") if by_appetite else _("Rischi critici"),
+                   _("Incidenti aperti"), _("Task scaduti")],
             [[f"{s.get('code')} — {s.get('name')}",
               f"{s['pct_compliant']}%" if s.get("pct_compliant") is not None else "—",
-              str(s.get("rischi_critici", 0)), str(s.get("incidenti_aperti", 0)), str(s.get("task_scaduti", 0))]
+              str(s.get(risk_key, 0)), str(s.get("incidenti_aperti", 0)), str(s.get("task_scaduti", 0))]
              for s in sites])]})
 
     actions = list(review.actions.all())

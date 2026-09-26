@@ -136,14 +136,13 @@ def _lines_rischi(snap) -> list[str]:
     r = snap.get("rischi") or {}
     if not r:
         return []
-    out = [
-        f"- Rischi: critici {r.get('rosso', 0)} (senza piano {r.get('senza_piano', 0)}), medi "
-        f"{r.get('giallo', 0)}, bassi {r.get('verde', 0)}, accettati formalmente "
-        f"{r.get('accettati_formalmente', 0)}, senza responsabile {r.get('senza_owner', 0)}"
-    ]
+    from .summary import _risk_line
+
+    out = [_risk_line(r, owner_label="senza responsabile")]
     top = _fmt_list(r.get("top_critici"), lambda x: f"{x.get('name')} (residuo {x.get('score')})")
     if top:
-        out.append(f"  Rischi critici principali: {top}")
+        label = "Rischi oltre soglia principali" if "oltre_soglia" in r else "Rischi critici principali"
+        out.append(f"  {label}: {top}")
     bcp = snap.get("bcp") or {}
     if bcp.get("processi_critici_senza_bcp"):
         out.append(f"- Processi critici senza piano di continuità: {bcp['processi_critici_senza_bcp']}")
@@ -183,8 +182,10 @@ def _lines_contesto(snap) -> list[str]:
     if siti:
         out.append("- Quadro per sito: " + _fmt_list(
             siti,
-            lambda s: f"{s.get('code')} conformità {s.get('pct_compliant')}%, rischi critici "
-                      f"{s.get('rischi_critici')}, incidenti aperti {s.get('incidenti_aperti')}",
+            lambda s: f"{s.get('code')} conformità {s.get('pct_compliant')}%, "
+                      + (f"rischi oltre soglia {s.get('rischi_oltre_soglia')}" if "rischi_oltre_soglia" in s
+                         else f"rischi critici {s.get('rischi_critici')}")
+                      + f", incidenti aperti {s.get('incidenti_aperti')}",
         ))
     out += _lines_compliance(snap)
     return out

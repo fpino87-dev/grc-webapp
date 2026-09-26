@@ -5648,7 +5648,16 @@
       "col_reason": "Powód",
       "pdca_overdue_list": "Cykle PDCA po planowanej dacie",
       "col_action_owner": "Odpowiedzialny",
-      "col_target_date": "Planowana data"
+      "col_target_date": "Planowana data",
+      "compliance_rule_note": "Procenty dla kontroli mających zastosowanie w aktywnych frameworkach, obliczone jak w Raportowaniu.",
+      "over_appetite": "Powyżej progu",
+      "over_appetite_no_plan": "Powyżej progu bez planu",
+      "high": "Wysokie",
+      "appetite_defined": "Próg akceptowalności: ryzyko rezydualne powyżej {{score}}, według apetytu na ryzyko zatwierdzonego przez kierownictwo.",
+      "appetite_default": "Próg akceptowalności: ryzyko rezydualne powyżej {{score}} (wartość domyślna: brak zatwierdzonego apetytu na ryzyko).",
+      "appetite_tolerated": "Tolerowane ryzyka powyżej progu: {{count}}.",
+      "appetite_per_plant": "Progi różnią się między zakładami: każde ryzyko porównuje się z progiem jego zakładu.",
+      "top_over_appetite": "Ryzyka powyżej progu akceptowalności (najwyższe rezydualne)"
     },
     "participants": {
       "heading": "Zaproszeni i obecność",

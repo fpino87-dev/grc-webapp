@@ -5648,7 +5648,16 @@
       "col_reason": "Gerekçe",
       "pdca_overdue_list": "Hedef tarihi geçen PDCA döngüleri",
       "col_action_owner": "Sorumlu",
-      "col_target_date": "Hedef tarih"
+      "col_target_date": "Hedef tarih",
+      "compliance_rule_note": "Etkin çerçevelerin uygulanabilir kontrolleri üzerindeki yüzdeler, Raporlama'daki gibi hesaplanır.",
+      "over_appetite": "Eşiğin üzerinde",
+      "over_appetite_no_plan": "Planı olmayan eşik üstü",
+      "high": "Yüksek",
+      "appetite_defined": "Kabul edilebilirlik eşiği: artık risk {{score}} üzerinde, yönetimin onayladığı risk iştahına göre.",
+      "appetite_default": "Kabul edilebilirlik eşiği: artık risk {{score}} üzerinde (varsayılan değer: onaylı risk iştahı yok).",
+      "appetite_tolerated": "Tolere edilen eşik üstü riskler: {{count}}.",
+      "appetite_per_plant": "Eşikler tesisler arasında farklıdır: her risk kendi tesisinin eşiğiyle karşılaştırılır.",
+      "top_over_appetite": "Kabul edilebilirlik eşiğinin üzerindeki riskler (en yüksek artık)"
     },
     "participants": {
       "heading": "Davetliler ve katılım",

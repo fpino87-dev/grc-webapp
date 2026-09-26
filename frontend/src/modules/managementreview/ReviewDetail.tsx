@@ -139,6 +139,8 @@ export function ReviewDetail({ review, users, plants, onClose }: { review: Manag
     !("azioni_precedenti" in snap)
     // snapshot congelati prima dei documenti obbligatori non approvati
     || !("elenco_non_approvati" in ((snap.documenti as Record<string, unknown>) ?? {}))
+    // snapshot calcolati prima delle regole condivise con il Reporting
+    || !("compliance_rule" in snap)
   );
 
   return (

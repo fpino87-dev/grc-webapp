@@ -43,6 +43,22 @@ DECISION_LABELS = {
 }
 
 
+def _risk_line(r: dict, owner_label: str) -> str:
+    """Riga di sintesi dei rischi per i testi di servizio (sintesi, bozze IA).
+    Con gli snapshot allineati al Reporting riporta i rischi oltre la soglia di
+    accettabilità approvata; con quelli precedenti la fascia "critici"."""
+    tail = (
+        f"medi {r.get('giallo', 0)}, bassi {r.get('verde', 0)}, accettati formalmente "
+        f"{r.get('accettati_formalmente', 0)}, {owner_label} {r.get('senza_owner', 0)}"
+    )
+    if "oltre_soglia" in r:
+        soglia = (r.get("soglia") or {}).get("max_acceptable_score", 14)
+        return (
+            f"- Rischi: oltre la soglia di accettabilità (residuo > {soglia}) {r.get('oltre_soglia', 0)} "
+            f"(senza piano {r.get('senza_piano', 0)}), alti {r.get('rosso', 0)}, " + tail
+        )
+    return f"- Rischi: critici {r.get('rosso', 0)} (senza piano {r.get('senza_piano', 0)}), " + tail
+
 def _ensure_editable(review: ManagementReview) -> None:
     if review.approval_status == "approvato":
         raise ValidationError(_("Il riesame è approvato: la sintesi non è più modificabile."))
@@ -110,14 +126,11 @@ def build_summary_prompt(review: ManagementReview, lang: str) -> str:
         )
     r = snap.get("rischi") or {}
     if r:
-        lines.append(
-            f"- Rischi: critici {r.get('rosso', 0)} (senza piano {r.get('senza_piano', 0)}), "
-            f"medi {r.get('giallo', 0)}, bassi {r.get('verde', 0)}, accettati formalmente "
-            f"{r.get('accettati_formalmente', 0)}, senza owner {r.get('senza_owner', 0)}"
-        )
+        lines.append(_risk_line(r, owner_label="senza owner"))
         top = _fmt_list(r.get("top_critici"), lambda x: f"{x.get('name')} (residuo {x.get('score')})")
         if top:
-            lines.append(f"  Rischi critici principali: {top}")
+            label = "Rischi oltre soglia principali" if "oltre_soglia" in r else "Rischi critici principali"
+            lines.append(f"  {label}: {top}")
     i = snap.get("incidenti") or {}
     if i:
         lines.append(
@@ -163,7 +176,9 @@ def build_summary_prompt(review: ManagementReview, lang: str) -> str:
     if sites:
         lines.append("- Sintesi per sito: " + "; ".join(
             f"{s.get('code')}: compliance {s.get('pct_compliant') if s.get('pct_compliant') is not None else 'n/d'}%, "
-            f"rischi critici {s.get('rischi_critici', 0)}, incidenti aperti {s.get('incidenti_aperti', 0)}"
+            + (f"rischi oltre soglia {s.get('rischi_oltre_soglia', 0)}, " if "rischi_oltre_soglia" in s
+               else f"rischi critici {s.get('rischi_critici', 0)}, ")
+            + f"incidenti aperti {s.get('incidenti_aperti', 0)}"
             for s in sites
         ))
 

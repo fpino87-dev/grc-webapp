@@ -5648,7 +5648,16 @@
       "col_reason": "Motivo",
       "pdca_overdue_list": "Cicli PDCA oltre la data prevista",
       "col_action_owner": "Responsabile",
-      "col_target_date": "Data prevista"
+      "col_target_date": "Data prevista",
+      "compliance_rule_note": "Percentuali sui controlli applicabili dei framework attivi, calcolate come nel Reporting.",
+      "over_appetite": "Oltre soglia",
+      "over_appetite_no_plan": "Oltre soglia senza piano",
+      "high": "Alti",
+      "appetite_defined": "Soglia di accettabilità: residuo oltre {{score}}, dalla propensione al rischio approvata dalla direzione.",
+      "appetite_default": "Soglia di accettabilità: residuo oltre {{score}} (valore predefinito: nessuna propensione al rischio approvata).",
+      "appetite_tolerated": "Rischi oltre soglia tollerati: {{count}}.",
+      "appetite_per_plant": "Le soglie variano fra i siti: ogni rischio è confrontato con quella del proprio sito.",
+      "top_over_appetite": "Rischi oltre la soglia di accettabilità (residuo più alto)"
     },
     "participants": {
       "heading": "Convocati e presenze",

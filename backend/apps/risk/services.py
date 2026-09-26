@@ -307,11 +307,63 @@ def get_active_appetite(plant=None, framework_code: str = ""):
     return base_qs.filter(plant__isnull=True).first()
 
 
+# Soglia di accettabilità se non c'è una RiskAppetitePolicy attiva.
+DEFAULT_ACCEPTABLE_SCORE = 14
+
+
+class AppetiteThresholds:
+    """Soglia di accettabilità per sito, con cache: policy del sito, altrimenti
+    di organizzazione, altrimenti DEFAULT_ACCEPTABLE_SCORE. Regola unica per
+    escalation, Reporting e riesame di direzione (M13)."""
+
+    def __init__(self):
+        self._cache: dict = {}
+
+    def for_plant(self, plant_id) -> int:
+        from apps.plants.models import Plant
+
+        if plant_id not in self._cache:
+            plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
+            policy = get_active_appetite(plant=plant)
+            self._cache[plant_id] = policy.max_acceptable_score if policy else DEFAULT_ACCEPTABLE_SCORE
+        return self._cache[plant_id]
+
+    def is_over(self, plant_id, score) -> bool:
+        return score is not None and score > self.for_plant(plant_id)
+
+    def over_ids(self, risk_qs) -> list:
+        """ID dei rischi del queryset oltre la soglia del proprio sito."""
+        return [
+            pk for pk, plant_id, score in risk_qs.values_list("pk", "plant_id", "score")
+            if self.is_over(plant_id, score)
+        ]
+
+    def thresholds_seen(self) -> set:
+        return set(self._cache.values())
+
+
+def appetite_summary(plant_id, thresholds: "AppetiteThresholds | None" = None) -> dict:
+    """Soglia da mostrare per il perimetro (sito, o organizzazione se None)."""
+    from apps.plants.models import Plant
+
+    plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
+    policy = get_active_appetite(plant=plant)
+    return {
+        "defined": policy is not None,
+        "max_acceptable_score": policy.max_acceptable_score if policy else DEFAULT_ACCEPTABLE_SCORE,
+        "max_red_risks_count": policy.max_red_risks_count if policy else None,
+        "max_unacceptable_score": policy.max_unacceptable_score if policy else None,
+        # Senza sito le soglie possono variare fra siti: quella mostrata è di
+        # organizzazione, i conteggi usano quella di ciascun sito.
+        "per_plant": not plant_id and thresholds is not None and len(thresholds.thresholds_seen()) > 1,
+    }
+
+
 def escalate_red_risk(assessment: RiskAssessment, user):
     from apps.tasks.services import create_task
 
     appetite = get_active_appetite(plant=assessment.plant)
-    threshold = appetite.max_acceptable_score if appetite else 14
+    threshold = appetite.max_acceptable_score if appetite else DEFAULT_ACCEPTABLE_SCORE
 
     if not assessment.score or assessment.score <= threshold:
         return

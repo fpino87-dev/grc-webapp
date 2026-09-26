@@ -724,10 +724,12 @@ Clicca **Genera snapshot dati** per congelare i dati GRC al momento della riunio
 
 - **a)** azioni dei riesami precedenti: tutte quelle del riesame precedente, più quelle più vecchie ancora aperte o chiuse nel periodo, con quelle scadute in evidenza
 - **d)** compliance per framework con i controlli in gap; KPI operativi fuori soglia; audit degli ultimi 12 mesi con readiness e non conformità aperte (maggiori prima); incidenti aperti e notificati NIS2; cicli PDCA fermi e task scaduti; documenti scaduti, in scadenza e approvati dall'ultimo riesame
-- **f)** rischi critici (inerente → residuo, trattamento, owner, presenza del piano), rischi accettati formalmente, processi critici senza piano BCP
+- **f)** rischi **oltre la soglia di accettabilità** approvata dalla direzione (inerente → residuo, trattamento, owner, presenza del piano) con la soglia usata, rischi accettati formalmente, processi critici senza un piano BCP approvato
 - **g)** opportunità di miglioramento emerse dagli audit
 
 Lo snapshot si può rigenerare fino all'approvazione; dopo resta fisso perché è il contenuto del verbale.
+
+I numeri dello snapshot si calcolano con **le stesse regole del Reporting**, quindi coincidono con quelli che la direzione vede nei tab Compliance e Risk / BIA / BCP: conformità sui controlli applicabili dei framework attivi (N/A esclusi, controlli TISAX L2 valutati tramite il VH di L3), rischi confrontati con la soglia di accettabilità del proprio sito, processi con criticità ≥ 4 coperti solo da un piano BCP approvato. I verbali già approvati restano come sono stati congelati.
 
 ### Come condurre la riunione e registrare le decisioni
 

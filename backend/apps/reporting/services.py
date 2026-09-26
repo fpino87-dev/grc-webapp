@@ -170,14 +170,8 @@ def kpi_trend(plant_id, framework_code="ISO27001", weeks=12) -> dict:
 # ───────────────────────────────────────────────────────────────────────────
 # Risk + BIA + BCP (vista unificata)
 # ───────────────────────────────────────────────────────────────────────────
-# Soglia di accettabilità se non c'è una RiskAppetitePolicy attiva: la stessa
-# usata dall'escalation dei rischi (risk.services.escalate_red_risk).
-DEFAULT_APPETITE_SCORE = 14
-
-
 def risk_bia_bcp(plant_id) -> dict:
     from apps.bcp.models import BcpPlan, BcpTest
-    from apps.plants.models import Plant
     from apps.bia.models import CriticalProcess, TreatmentOption
     from apps.risk.models import (
         NIS2_ART21_CHOICES, NIS2_RELEVANCE_CHOICES, RiskAssessment, THREAT_CATEGORIES,
@@ -205,37 +199,13 @@ def risk_bia_bcp(plant_id) -> dict:
     risks_needs_revaluation = risk_qs.filter(needs_revaluation=True).count()
     risks_formally_accepted = risk_qs.filter(risk_accepted_formally=True).count()
 
-    # Propensione al rischio approvata dalla direzione (RiskAppetitePolicy): la
-    # soglia è quella del sito del rischio (policy di sito, altrimenti di
-    # organizzazione, altrimenti 14 come l'escalation in risk.services).
-    from apps.risk.services import get_active_appetite
+    # Propensione al rischio approvata dalla direzione: soglia del sito di
+    # ciascun rischio (regola unica in risk.services.AppetiteThresholds).
+    from apps.risk.services import AppetiteThresholds, appetite_summary
 
-    threshold_cache: dict = {}
-
-    def _threshold(plant_id_):
-        if plant_id_ not in threshold_cache:
-            pol = get_active_appetite(plant=Plant.objects.filter(pk=plant_id_).first())
-            threshold_cache[plant_id_] = pol.max_acceptable_score if pol else DEFAULT_APPETITE_SCORE
-        return threshold_cache[plant_id_]
-
-    risks_over_appetite = sum(
-        1 for pid, score in risk_qs.values_list("plant_id", "score")
-        if score is not None and score > _threshold(pid)
-    )
-    appetite_policy = get_active_appetite(
-        plant=Plant.objects.filter(pk=plant_id).first() if plant_id else None,
-    )
-    appetite = {
-        "defined": appetite_policy is not None,
-        "max_acceptable_score": (
-            appetite_policy.max_acceptable_score if appetite_policy else DEFAULT_APPETITE_SCORE
-        ),
-        "max_red_risks_count": appetite_policy.max_red_risks_count if appetite_policy else None,
-        "max_unacceptable_score": appetite_policy.max_unacceptable_score if appetite_policy else None,
-        # Senza sito le soglie possono variare da sito a sito: quella mostrata
-        # è la policy di organizzazione, il conteggio usa quella di ogni sito.
-        "per_plant": not plant_id and len({t for t in threshold_cache.values()}) > 1,
-    }
+    thresholds = AppetiteThresholds()
+    risks_over_appetite = len(thresholds.over_ids(risk_qs))
+    appetite = appetite_summary(plant_id, thresholds)
 
     # ALE (Annualized Loss Expectancy) — perdita attesa annua in €.
     # Calcolata live da calc_ale() sui dati BIA collegati; vale 0 se il rischio
@@ -267,21 +237,11 @@ def risk_bia_bcp(plant_id) -> dict:
         if ale_total_inherent else 0.0
     )
 
-    # Copertura BCP: solo piani approvati, collegati al processo direttamente
-    # (FK) o dall'elenco dei processi (M2M) — stessa regola di
-    # CriticalProcess.rto_bcp_status nel modulo BIA.
+    # Copertura BCP: regola unica di bcp.services (solo piani approvati).
+    from apps.bcp.services import critical_processes_without_bcp
+
     approved_bcp_qs = bcp_qs.filter(status="approvato")
-    critical_proc_ids = set(bia_qs.filter(criticality__gte=4).values_list("id", flat=True))
-    procs_with_bcp = set(
-        approved_bcp_qs.filter(critical_process__in=critical_proc_ids)
-        .values_list("critical_process_id", flat=True)
-    ) | set(
-        BcpPlan.critical_processes.through.objects.filter(
-            criticalprocess_id__in=critical_proc_ids,
-            bcpplan__in=approved_bcp_qs,
-        ).values_list("criticalprocess_id", flat=True)
-    )
-    bia_critical_no_bcp = len(critical_proc_ids - procs_with_bcp)
+    bia_critical_no_bcp = len(critical_processes_without_bcp(bia_qs))
 
     # Test da rifare: solo sui piani approvati (una bozza non si testa).
     bcp_test_overdue = approved_bcp_qs.filter(
@@ -324,7 +284,7 @@ def risk_bia_bcp(plant_id) -> dict:
             "needs_revaluation": r.needs_revaluation,
             "ale": float(ale_by_risk.get(r.id) or 0),
             "ale_inherent": float(ale_inherent_by_risk.get(r.id) or 0),
-            "over_appetite": r.score is not None and r.score > _threshold(r.plant_id),
+            "over_appetite": thresholds.is_over(r.plant_id, r.score),
         })
 
     # Breakdown per categoria minaccia

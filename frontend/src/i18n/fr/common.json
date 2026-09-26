@@ -5648,7 +5648,16 @@
       "col_reason": "Motif",
       "pdca_overdue_list": "Cycles PDCA au-delà de la date prévue",
       "col_action_owner": "Responsable",
-      "col_target_date": "Date prévue"
+      "col_target_date": "Date prévue",
+      "compliance_rule_note": "Pourcentages sur les contrôles applicables des référentiels actifs, calculés comme dans le Reporting.",
+      "over_appetite": "Au-delà du seuil",
+      "over_appetite_no_plan": "Au-delà du seuil sans plan",
+      "high": "Élevés",
+      "appetite_defined": "Seuil d'acceptabilité : résiduel supérieur à {{score}}, selon l'appétence au risque approuvée par la direction.",
+      "appetite_default": "Seuil d'acceptabilité : résiduel supérieur à {{score}} (valeur par défaut : aucune appétence au risque approuvée).",
+      "appetite_tolerated": "Risques au-delà du seuil tolérés : {{count}}.",
+      "appetite_per_plant": "Les seuils varient selon les sites : chaque risque est comparé au seuil de son site.",
+      "top_over_appetite": "Risques au-delà du seuil d'acceptabilité (résiduel le plus élevé)"
     },
     "participants": {
       "heading": "Convoqués et présences",
