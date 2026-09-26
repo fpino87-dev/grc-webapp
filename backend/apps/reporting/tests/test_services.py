@@ -491,3 +491,86 @@ def test_kpi_overview_shape(plant, user):
     assert set(out.keys()) == {"required_docs", "mttr", "training", "supplier_nda"}
     assert isinstance(out["required_docs"], list)
     assert "findings" in out["mttr"]
+
+
+@pytest.mark.django_db
+def test_kpi_trend_returns_most_recent_weeks(plant):
+    """Con più settimane del limite deve mostrare le ultime, non le prime."""
+    from apps.reporting.services import kpi_trend
+    base = timezone.localdate()
+    for i in range(5):
+        make_snapshot(plant, base - timedelta(days=7 * i), pct_compliant=float(i))
+
+    out = kpi_trend(str(plant.id), "ISO27001", 3)
+    weeks = [r["week_start"] for r in out["results"]]
+    assert weeks == [base - timedelta(days=14), base - timedelta(days=7), base]
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# generate_weekly_kpi_snapshots
+# ───────────────────────────────────────────────────────────────────────────
+def _framework_with_instance(code, plant, user, status="compliant", active=True):
+    from apps.controls.models import Control, ControlInstance, Framework
+    from apps.plants.models import PlantFramework
+    fw = Framework.objects.filter(code=code).first() or Framework.objects.create(
+        code=code, name=code, version="1", published_at=timezone.localdate(),
+    )
+    control = Control.objects.create(
+        framework=fw, external_id=f"{code}-{plant.code}",
+        translations={"it": {"title": code}}, evidence_requirement={},
+    )
+    ControlInstance.objects.create(plant=plant, control=control, status=status, created_by=user)
+    PlantFramework.objects.create(
+        plant=plant, framework=fw, active_from=timezone.localdate(), active=active,
+    )
+    return fw
+
+
+@pytest.mark.django_db
+def test_weekly_snapshot_only_active_frameworks_per_plant(plant, other_plant, user):
+    from apps.reporting.models import IsmsKpiSnapshot
+    from apps.reporting.tasks import generate_weekly_kpi_snapshots
+    _framework_with_instance("ISO27001", plant, user)
+    _framework_with_instance("NIS2", other_plant, user)
+    # TISAX con istanze sul sito ma disattivato: nessuna serie
+    _framework_with_instance("TISAX_L2", plant, user, active=False)
+
+    generate_weekly_kpi_snapshots()
+
+    per_plant = set(
+        IsmsKpiSnapshot.objects.exclude(plant=None).values_list("plant__code", "framework_code")
+    )
+    assert per_plant == {("REP-A", "ISO27001"), ("REP-B", "NIS2")}
+    org = set(IsmsKpiSnapshot.objects.filter(plant=None).values_list("framework_code", flat=True))
+    assert org == {"ISO27001", "NIS2"}
+
+
+@pytest.mark.django_db
+def test_weekly_snapshot_org_wide_counts_only_plants_with_framework_active(plant, other_plant, user):
+    from apps.reporting.models import IsmsKpiSnapshot
+    from apps.reporting.tasks import generate_weekly_kpi_snapshots
+    _framework_with_instance("ISO27001", plant, user, status="compliant")
+    # stesso framework con istanza in gap su un sito dove è disattivato
+    _framework_with_instance("ISO27001", other_plant, user, status="gap", active=False)
+
+    generate_weekly_kpi_snapshots()
+
+    org = IsmsKpiSnapshot.objects.get(plant=None, framework_code="ISO27001")
+    assert org.controls_total == 1
+    assert org.controls_gap == 0
+    assert org.pct_compliant == 100.0
+
+
+@pytest.mark.django_db
+def test_weekly_snapshot_counts_critical_incidents(plant, user):
+    from apps.reporting.models import IsmsKpiSnapshot
+    from apps.reporting.tasks import generate_weekly_kpi_snapshots
+    _framework_with_instance("ISO27001", plant, user)
+    make_incident(plant, user, severity="critica")
+    make_incident(plant, user, severity="alta")
+
+    generate_weekly_kpi_snapshots()
+
+    snap = IsmsKpiSnapshot.objects.get(plant=plant, framework_code="ISO27001")
+    assert snap.open_incidents == 2
+    assert snap.critical_incidents == 1

@@ -11,34 +11,39 @@ def generate_weekly_kpi_snapshots():
     Creates or updates IsmsKpiSnapshot for the current ISO week start.
     """
     from apps.plants.models import Plant
-    from apps.controls.models import ControlInstance
+    from apps.plants.services import get_active_framework_codes
 
     today = timezone.localdate()
     # Monday of current week
     week_start = today - timezone.timedelta(days=today.weekday())
 
     plants = list(Plant.objects.filter(status="attivo", deleted_at__isnull=True))
-    # Collect distinct framework codes across all ControlInstances
-    frameworks = list(
-        ControlInstance.objects.filter(deleted_at__isnull=True)
-        .values_list("control__framework__code", flat=True)
-        .distinct()
-    )
+    # Per ogni sito solo i framework attivi su quel sito: un framework presente
+    # altrove (o disattivato qui) non deve produrre una serie per questo sito.
+    active_by_plant = {plant.pk: get_active_framework_codes(plant) for plant in plants}
 
     created_count = 0
     updated_count = 0
 
     for plant in plants:
-        for framework_code in frameworks:
+        for framework_code in active_by_plant[plant.pk]:
             snapshot, is_new = _build_snapshot(plant, framework_code, week_start)
             if is_new:
                 created_count += 1
             else:
                 updated_count += 1
 
-    # Also build org-wide snapshot (plant=None) for each framework
+    # Snapshot di organizzazione (plant=None): per ogni framework attivo su
+    # almeno un sito, sui soli siti che lo hanno attivo.
+    plants_by_framework: dict[str, list] = {}
+    for plant in plants:
+        for framework_code in active_by_plant[plant.pk]:
+            plants_by_framework.setdefault(framework_code, []).append(plant.pk)
+    frameworks = sorted(plants_by_framework)
     for framework_code in frameworks:
-        snapshot, is_new = _build_snapshot(None, framework_code, week_start)
+        snapshot, is_new = _build_snapshot(
+            None, framework_code, week_start, plant_ids=plants_by_framework[framework_code],
+        )
         if is_new:
             created_count += 1
         else:
@@ -53,7 +58,7 @@ def generate_weekly_kpi_snapshots():
     }
 
 
-def _build_snapshot(plant, framework_code: str, week_start):
+def _build_snapshot(plant, framework_code: str, week_start, plant_ids=None):
     from apps.controls.models import ControlInstance
     from apps.risk.models import RiskAssessment
     from apps.incidents.models import Incident
@@ -65,6 +70,8 @@ def _build_snapshot(plant, framework_code: str, week_start):
     )
     if plant is not None:
         ci_qs = ci_qs.filter(plant=plant)
+    elif plant_ids is not None:
+        ci_qs = ci_qs.filter(plant_id__in=plant_ids)
 
     controls_total = ci_qs.count()
     controls_compliant = ci_qs.filter(status="compliant").count()
@@ -82,7 +89,7 @@ def _build_snapshot(plant, framework_code: str, week_start):
     if plant is not None:
         inc_qs = inc_qs.filter(plant=plant)
     open_incidents = inc_qs.filter(status__in=["aperto", "in_analisi"]).count()
-    critical_incidents = inc_qs.filter(status__in=["aperto", "in_analisi"], severity="critico").count()
+    critical_incidents = inc_qs.filter(status__in=["aperto", "in_analisi"], severity="critica").count()
 
     defaults = dict(
         controls_total=controls_total,

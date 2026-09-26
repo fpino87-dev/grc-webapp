@@ -95,6 +95,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 - **Audit Prep — relazione dell'audit**: titolo, descrizione e note dei finding sono ora codificati nella relazione HTML, così un testo inserito in un finding non può alterare la pagina generata.
 
 ### Fixed
+- **Andamento della conformità fermo alle prime settimane**: il grafico dell'andamento in Dashboard mostrava le 12 settimane più vecchie registrate invece delle ultime 12, quindi da metà giugno non si aggiornava più. Ora mostra le settimane più recenti. La fotografia settimanale della conformità considera per ogni sito solo i framework attivi su quel sito (prima creava serie anche per framework presenti su altri siti o disattivati) e, per l'organizzazione, solo i siti che hanno il framework attivo; il conteggio degli incidenti critici aperti, sempre a zero per un errore di valore, ora è corretto. Le fotografie già registrate non vengono ricalcolate.
 - **OSINT — domini sosia mai controllati**: il controllo dipendeva da una libreria non installata e non girava. Ora usa un generatore interno di varianti e segnala solo i sosia registrati di recente con posta, per non scambiare per impostori le aziende omonime.
 - **Utenti — disattivati irraggiungibili**: gli utenti disattivati sparivano dall'elenco e non si potevano riattivare dall'interfaccia. Ora si vedono con il filtro «Disattivati».
 - **Utenti — «Assegna ruolo» ingannevole**: le voci «Plant Admin» e «User» assegnavano un accesso a tutta l'organizzazione. La gestione per perimetro sostituisce quel comando.
