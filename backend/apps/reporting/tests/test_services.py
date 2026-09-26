@@ -574,3 +574,99 @@ def test_weekly_snapshot_counts_critical_incidents(plant, user):
     snap = IsmsKpiSnapshot.objects.get(plant=plant, framework_code="ISO27001")
     assert snap.open_incidents == 2
     assert snap.critical_incidents == 1
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# risk_bia_bcp — propensione al rischio e copertura BCP
+# ───────────────────────────────────────────────────────────────────────────
+def _appetite(plant=None, score=14, max_red=3):
+    from apps.risk.models import RiskAppetitePolicy
+    return RiskAppetitePolicy.objects.create(
+        plant=plant, max_acceptable_score=score, max_red_risks_count=max_red,
+        valid_from=timezone.localdate() - timedelta(days=1),
+    )
+
+
+@pytest.mark.django_db
+def test_risk_over_appetite_uses_site_policy(plant, other_plant, user):
+    from apps.reporting.services import risk_bia_bcp
+    _appetite(None, score=14)          # organizzazione
+    _appetite(plant, score=9)          # sito A più severo
+    make_risk(plant, user, 2, 5)       # 10: oltre la soglia del sito A (9)
+    make_risk(plant, user, 2, 4)       # 8: sotto
+    make_risk(other_plant, user, 3, 4)  # 12: sotto la soglia di organizzazione (14)
+    make_risk(other_plant, user, 3, 5)  # 15: oltre
+
+    site = risk_bia_bcp(str(plant.id))
+    assert site["kpis"]["risks_over_appetite"] == 1
+    assert site["appetite"]["max_acceptable_score"] == 9
+    assert site["appetite"]["defined"] is True
+    assert [r["over_appetite"] for r in site["top_risks"]] == [True, False]
+
+    org = risk_bia_bcp(None)
+    assert org["kpis"]["risks_over_appetite"] == 2
+    assert org["appetite"]["max_acceptable_score"] == 14
+    assert org["appetite"]["per_plant"] is True
+
+
+@pytest.mark.django_db
+def test_risk_appetite_default_when_no_policy(plant, user):
+    from apps.reporting.services import DEFAULT_APPETITE_SCORE, risk_bia_bcp
+    make_risk(plant, user, 3, 5)  # 15
+    out = risk_bia_bcp(str(plant.id))
+    assert out["appetite"]["defined"] is False
+    assert out["appetite"]["max_acceptable_score"] == DEFAULT_APPETITE_SCORE
+    assert out["kpis"]["risks_over_appetite"] == 1
+
+
+@pytest.mark.django_db
+def test_bcp_coverage_only_approved_and_m2m_link(plant, user):
+    """Copre solo un piano approvato, anche se collegato dall'elenco processi
+    (M2M); bozze e archiviati non coprono e non contano come test da fare."""
+    from apps.bcp.models import BcpPlan
+    from apps.bia.models import CriticalProcess
+    from apps.reporting.services import risk_bia_bcp
+    today = timezone.localdate()
+
+    via_m2m = CriticalProcess.objects.create(plant=plant, name="M2M", criticality=5)
+    plan = BcpPlan.objects.create(plant=plant, title="Approvato M2M", status="approvato",
+                                  next_test_date=today + timedelta(days=30), created_by=user)
+    plan.critical_processes.add(via_m2m)
+
+    only_draft = CriticalProcess.objects.create(plant=plant, name="Bozza", criticality=4)
+    BcpPlan.objects.create(plant=plant, title="Draft", status="bozza",
+                           critical_process=only_draft, created_by=user)
+    only_archived = CriticalProcess.objects.create(plant=plant, name="Archiviato", criticality=4)
+    BcpPlan.objects.create(plant=plant, title="Old", status="archiviato",
+                           critical_process=only_archived, next_test_date=today - timedelta(days=90),
+                           created_by=user)
+
+    out = risk_bia_bcp(str(plant.id))
+    assert out["kpis"]["bia_critical_no_bcp"] == 2      # Bozza + Archiviato
+    assert out["kpis"]["bcp_test_overdue"] == 0         # bozza/archiviato non contano
+    rows = {r["process_name"]: r for r in out["bia_bcp_table"]}
+    assert rows["M2M"]["bcp_status"] == "approvato"
+    assert rows["Bozza"]["bcp_status"] == "bozza"
+    assert rows["Bozza"]["test_overdue"] is False
+    assert rows["Archiviato"]["bcp_status"] is None
+
+
+@pytest.mark.django_db
+def test_required_docs_no_fallback_to_controls(plant, user):
+    """Senza documenti obbligatori configurati la riga lo dice, a zero: niente
+    stato dei controlli al posto della copertura documentale."""
+    from apps.controls.models import Control, ControlInstance, Framework
+    from apps.plants.models import PlantFramework
+    from apps.reporting.services import kpi_overview
+    fw = Framework.objects.create(code="FWX", name="Framework X", version="1", published_at=timezone.localdate())
+    PlantFramework.objects.create(plant=plant, framework=fw, active_from=timezone.localdate())
+    c = Control.objects.create(framework=fw, external_id="X1", translations={}, evidence_requirement={})
+    ControlInstance.objects.create(plant=plant, control=c, status="compliant", created_by=user)
+
+    docs = kpi_overview(str(plant.id))["required_docs"]
+    row = next(r for r in docs if r["framework"] == "FWX")
+    assert row["no_required_docs"] is True
+    assert row["framework_name"] == "Framework X"
+    assert (row["total"], row["green"], row["pct_coverage"]) == (0, 0, 0)
+    # la copertura documentale è per sito: senza sito non c'è
+    assert kpi_overview(None)["required_docs"] is None

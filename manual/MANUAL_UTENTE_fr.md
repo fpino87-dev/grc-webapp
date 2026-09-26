@@ -1557,7 +1557,7 @@ La suggestion IA n'a aucun effet tant que vous ne la **confirmez pas expliciteme
 
 ### Tableau de bord reporting
 
-Allez dans **Reporting**. La page est divisée en onglets : **Conformité**, **Par responsable**, **Risque / BIA / BCP**, **KPI**, **Objectifs de sécurité** et, pour la gouvernance et l'audit, **Accès & responsabilités**. L'onglet ouvert reste dans l'adresse de la page, le lien peut donc être partagé.
+Allez dans **Reporting**. La page est divisée en onglets : **Conformité**, **Par responsable**, **Risque / BIA / BCP**, **Indicateurs de processus**, **Objectifs de sécurité** et, pour la gouvernance et l'audit, **Accès & responsabilités**. L'onglet ouvert reste dans l'adresse de la page, le lien peut donc être partagé.
 
 #### Onglet Conformité
 
@@ -1568,6 +1568,18 @@ L'onglet est conçu d'abord pour la direction, puis pour ceux qui traitent les �
 3. **Où nous sommes exposés** : pour le référentiel choisi, les contrôles ouverts par domaine, du domaine le plus exposé au moins exposé. Les chiffres ouvrent la liste des contrôles filtrée par domaine et statut ; **Exporter les contrôles ouverts** télécharge le CSV des contrôles en écart, partiels ou non évalués.
 
 **Calcul du pourcentage** (identique dans Reporting, Tableau de bord, tendance hebdomadaire et Assistant) : contrôles conformes sur les contrôles applicables des référentiels actifs du site. Les contrôles N/A sont exclus du dénominateur. Avec TISAX L2 et L3 actifs, les contrôles L2 remplacés par un contrôle VH de L3 sont évalués sur le VH et indiqués à part, comme dans la liste du module Contrôles. Les valeurs de tendance calculées avant cette règle apparaissent en gris et n'entrent pas dans la variation.
+
+#### Onglet Risque / BIA / BCP
+
+Divisé en trois sous-sections, sélectionnables en haut de l'onglet :
+
+- **Risques** : risques **au-delà du seuil d'acceptabilité** approuvé par la direction (appétence au risque du module Risques ; sans politique, 14 est utilisé), avec le nombre maximal toléré ; heatmap avec les cellules au-delà du seuil mises en évidence ; les 10 risques au score le plus élevé (cliquez pour les ouvrir) ; répartition NIS2 art. 21 et par catégorie de menace.
+- **Continuité** : processus critiques (criticité ≥ 4) sans PCA **approuvé** et plans approuvés avec test à refaire ; tableau processus · risques · PCA · dernier test. Les brouillons et les plans archivés ne couvrent pas un processus.
+- **Valeur économique** : perte annuelle attendue (ALE) inhérente et résiduelle, risque réduit par les contrôles et retour sur investissement (ROSI) des traitements planifiés.
+
+#### Onglet Indicateurs de processus
+
+Couverture des documents obligatoires par référentiel (calculée par site : sélectionnez un site), délais moyens de résolution des constats, incidents et tâches, NDA des fournisseurs (décomptes et seulement les fournisseurs à régulariser) et formation. Il suit le site choisi en haut comme les autres onglets.
 
 ### Générer un rapport
 

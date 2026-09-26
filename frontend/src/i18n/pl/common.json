@@ -4205,14 +4205,12 @@
       "compliance": "Zgodność",
       "owner": "Wg właściciela",
       "risk_bia_bcp": "Ryzyko / BIA / BCP",
-      "kpi": "KPI",
+      "kpi": "Wskaźniki procesów",
       "access_matrix": "Dostępy i odpowiedzialności",
       "objectives": "Cele bezpieczeństwa"
     },
     "kpi": {
       "no_required_docs_configured": "Brak wymaganych dokumentów skonfigurowanych dla tego frameworku",
-      "plant_label": "Zakład",
-      "all_plants": "Wszystkie zakłady",
       "no_frameworks": "Brak aktywnego frameworku dla wybranego zakładu.",
       "section_docs": "Pokrycie dokumentów obowiązkowych",
       "section_mttr": "Średni czas rozwiązania (MTTR)",
@@ -4271,7 +4269,14 @@
         "board": "Szkolenie zarządu",
         "board_hint": "{{trained}}/{{total}} członków z ważnym szkoleniem",
         "no_board": "Brak zarządu w rejestrze"
-      }
+      },
+      "days": "{{n}} dni",
+      "docs_select_plant": "Pokrycie dokumentów obowiązkowych oblicza się dla zakładu: wybierz zakład u góry.",
+      "nda_go_suppliers": "Przejdź do dostawców",
+      "nda_all_ok": "Wszyscy aktywni dostawcy mają ważne NDA.",
+      "nda_to_fix": "Dostawcy do uporządkowania: {{count}}",
+      "plant_label": "Zakład",
+      "all_plants": "Wszystkie zakłady"
     },
     "loading_compliance": "Ładowanie zgodności...",
     "loading": "Ładowanie...",
@@ -4322,15 +4327,14 @@
     },
     "risk_bia_bcp": {
       "kpi_total": "Ryzyka razem",
-      "kpi_red": "Czerwone ryzyka",
       "kpi_yellow": "Żółte ryzyka",
       "kpi_revaluation": "Do ponownej oceny",
-      "kpi_revaluation_sub": "wymaga przeglądu",
+      "kpi_revaluation_sub": "do ponownej oceny po zmianie",
       "kpi_accepted": "Formalnie zaakceptowane",
       "kpi_bia_no_bcp": "Krytyczne bez BCP",
       "kpi_bia_no_bcp_sub": "krytyczność ≥ 4",
       "kpi_bcp_overdue": "Zaległe testy BCP",
-      "kpi_bcp_overdue_sub": "test niewykonany",
+      "kpi_bcp_overdue_sub": "zatwierdzone plany z testem do powtórzenia",
       "ale_section_title": "Ekspozycja ekonomiczna (ALE)",
       "kpi_ale_inherent": "ALE inherentne (€/rok)",
       "kpi_ale_residual": "ALE rezydualne (€/rok)",
@@ -4340,7 +4344,6 @@
       "heatmap_title": "Mapa ryzyk (prawdopodobieństwo × wpływ)",
       "probability": "Prawdopodobieństwo",
       "impact": "Wpływ",
-      "risks": "ryzyka",
       "legend_red": "Wysokie",
       "legend_yellow": "Średnie",
       "legend_green": "Niskie",
@@ -4349,7 +4352,6 @@
       "col_owner": "Właściciel",
       "col_score_residual": "Wynik rezydualny",
       "col_score_inherent": "Wynik inherentny",
-      "col_ale_inherent": "ALE inherentne",
       "col_ale_residual": "ALE rezydualne",
       "rosi_title": "ROSI działań (zwrot z inwestycji w bezpieczeństwo)",
       "rosi_subtitle": "Uniknięte ALE − koszt roczny (CapEx amortyzowany przez {{years}} lata). Działania nie sumują się: każde oceniane osobno.",
@@ -4384,7 +4386,37 @@
       "test_pass": "✓ Zaliczony",
       "test_partial": "⚠ Częściowy",
       "test_fail": "✗ Niezaliczony",
-      "test_overdue": "⚠ Zaległy"
+      "test_overdue": "⚠ Zaległy",
+      "views": {
+        "risks": "Ryzyka",
+        "continuity": "Ciągłość",
+        "economic": "Wartość ekonomiczna"
+      },
+      "heatmap_cell": "P{{prob}} × W{{imp}} = {{score}} · ryzyka: {{count}}",
+      "legend_appetite": "powyżej progu akceptowalności (> {{threshold}})",
+      "accepted": "✓ Zaakceptowane",
+      "revaluate": "⚠ Do ponownej oceny",
+      "over_appetite_hint": "Powyżej progu akceptowalności zatwierdzonego przez kierownictwo",
+      "kpi_over_appetite": "Powyżej progu",
+      "kpi_over_appetite_sub": "wynik > {{threshold}} · tolerowane: {{max}}",
+      "kpi_over_appetite_sub_nomax": "wynik > {{threshold}}",
+      "appetite_missing": "Brak zatwierdzonego apetytu na ryzyko: używany jest domyślny próg {{threshold}}. Zdefiniuj go w module Ryzyka.",
+      "appetite_per_plant": "Progi akceptowalności różnią się między zakładami: liczenie używa progu każdego zakładu, mapa cieplna pokazuje próg organizacji.",
+      "appetite_defined": "Próg akceptowalności z apetytu na ryzyko zatwierdzonego przez kierownictwo.",
+      "no_bcp": "Brak planu",
+      "bcp_status": {
+        "bozza": "Wersja robocza",
+        "approvato": "Zatwierdzony"
+      },
+      "bia_status": {
+        "bozza": "BIA robocza",
+        "validato": "BIA zweryfikowana",
+        "approvato": "BIA zatwierdzona"
+      },
+      "bia_bcp_table_hint": "Proces jest objęty tylko zatwierdzonym planem BCP; test należy powtórzyć, gdy planowana data minęła lub jej brak.",
+      "col_risks": "Ryzyka (wysokie · średnie · niskie)",
+      "kpi_processes": "Procesy krytyczne",
+      "ale_hint": "Oczekiwana roczna strata obliczona z kosztów przestoju w BIA: wyceniane są tylko ryzyka powiązane z procesem mającym koszt przestoju."
     },
     "access_matrix": {
       "subtitle": "Kto ma dostęp i kto za co odpowiada — weryfikuj dostępy w dowolnym momencie.",

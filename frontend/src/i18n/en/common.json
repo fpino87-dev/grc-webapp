@@ -4205,14 +4205,12 @@
       "compliance": "Compliance",
       "owner": "By Owner",
       "risk_bia_bcp": "Risk / BIA / BCP",
-      "kpi": "KPI",
+      "kpi": "Process indicators",
       "access_matrix": "Access & responsibilities",
       "objectives": "Security objectives"
     },
     "kpi": {
       "no_required_docs_configured": "No required documents configured for this framework",
-      "plant_label": "Site",
-      "all_plants": "All sites",
       "no_frameworks": "No active framework for the selected site.",
       "section_docs": "Mandatory document coverage",
       "section_mttr": "Mean time to resolution (MTTR)",
@@ -4271,7 +4269,14 @@
         "board": "Board training",
         "board_hint": "{{trained}}/{{total}} members with valid training",
         "no_board": "No board on record"
-      }
+      },
+      "days": "{{n}} d",
+      "docs_select_plant": "Mandatory document coverage is calculated per site: select a site at the top.",
+      "nda_go_suppliers": "Go to suppliers",
+      "nda_all_ok": "All active suppliers have a valid NDA.",
+      "nda_to_fix": "Suppliers to fix: {{count}}",
+      "plant_label": "Site",
+      "all_plants": "All sites"
     },
     "loading_compliance": "Loading compliance...",
     "loading": "Loading...",
@@ -4322,15 +4327,14 @@
     },
     "risk_bia_bcp": {
       "kpi_total": "Total risks",
-      "kpi_red": "Red risks",
       "kpi_yellow": "Yellow risks",
       "kpi_revaluation": "To revaluate",
-      "kpi_revaluation_sub": "needs revaluation",
+      "kpi_revaluation_sub": "to re-assess after a change",
       "kpi_accepted": "Formally accepted",
       "kpi_bia_no_bcp": "Critical w/o BCP",
       "kpi_bia_no_bcp_sub": "criticality ≥ 4",
       "kpi_bcp_overdue": "BCP tests overdue",
-      "kpi_bcp_overdue_sub": "test not performed",
+      "kpi_bcp_overdue_sub": "approved plans with a test due",
       "ale_section_title": "Economic exposure (ALE)",
       "kpi_ale_inherent": "Inherent ALE (€/yr)",
       "kpi_ale_residual": "Residual ALE (€/yr)",
@@ -4340,7 +4344,6 @@
       "heatmap_title": "Risk heatmap (probability × impact)",
       "probability": "Probability",
       "impact": "Impact",
-      "risks": "risks",
       "legend_red": "High",
       "legend_yellow": "Medium",
       "legend_green": "Low",
@@ -4349,7 +4352,6 @@
       "col_owner": "Owner",
       "col_score_residual": "Residual score",
       "col_score_inherent": "Inherent score",
-      "col_ale_inherent": "Inherent ALE",
       "col_ale_residual": "Residual ALE",
       "rosi_title": "Treatment ROSI (return on security investment)",
       "rosi_subtitle": "ALE avoided − annualized cost (CapEx amortized over {{years}} years). Treatments don't stack: each is evaluated on its own.",
@@ -4384,7 +4386,37 @@
       "test_pass": "✓ Passed",
       "test_partial": "⚠ Partial",
       "test_fail": "✗ Failed",
-      "test_overdue": "⚠ Overdue"
+      "test_overdue": "⚠ Overdue",
+      "views": {
+        "risks": "Risks",
+        "continuity": "Continuity",
+        "economic": "Economic value"
+      },
+      "heatmap_cell": "P{{prob}} × I{{imp}} = {{score}} · risks: {{count}}",
+      "legend_appetite": "above the acceptance threshold (> {{threshold}})",
+      "accepted": "✓ Accepted",
+      "revaluate": "⚠ To be re-assessed",
+      "over_appetite_hint": "Above the acceptance threshold approved by management",
+      "kpi_over_appetite": "Above threshold",
+      "kpi_over_appetite_sub": "score > {{threshold}} · tolerated: {{max}}",
+      "kpi_over_appetite_sub_nomax": "score > {{threshold}}",
+      "appetite_missing": "No risk appetite approved: the default threshold {{threshold}} is used. Define it in the Risk module.",
+      "appetite_per_plant": "Acceptance thresholds differ between sites: the count uses each site's threshold, the heatmap shows the organisation's.",
+      "appetite_defined": "Acceptance threshold from the risk appetite approved by management.",
+      "no_bcp": "No plan",
+      "bcp_status": {
+        "bozza": "Draft",
+        "approvato": "Approved"
+      },
+      "bia_status": {
+        "bozza": "BIA draft",
+        "validato": "BIA validated",
+        "approvato": "BIA approved"
+      },
+      "bia_bcp_table_hint": "A process is covered only by an approved BCP; the test is due when its planned date has passed or is missing.",
+      "col_risks": "Risks (high · medium · low)",
+      "kpi_processes": "Critical processes",
+      "ale_hint": "Annualised loss expectancy calculated from BIA downtime costs: only risks linked to a process with a downtime cost are valued."
     },
     "access_matrix": {
       "subtitle": "Who has access and who is responsible for what — review accesses at any time.",

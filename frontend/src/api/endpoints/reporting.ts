@@ -106,6 +106,7 @@ export interface TopRisk {
   needs_revaluation: boolean;
   ale: number;
   ale_inherent: number;
+  over_appetite: boolean; // punteggio oltre la soglia di accettabilità del sito
 }
 
 export interface ThreatBreakdown {
@@ -180,6 +181,7 @@ export interface RiskBiaBcpData {
     risks_yellow: number;
     risks_needs_revaluation: number;
     risks_formally_accepted: number;
+    risks_over_appetite: number;
     bia_critical_no_bcp: number;
     bcp_test_overdue: number;
     ale_total: number;
@@ -188,6 +190,14 @@ export interface RiskBiaBcpData {
     ale_saved_pct: number;
     ale_valued_count: number;
     ale_coverage_pct: number;
+  };
+  // Propensione al rischio (RiskAppetitePolicy) attiva per il perimetro.
+  appetite: {
+    defined: boolean;
+    max_acceptable_score: number;
+    max_red_risks_count: number | null;
+    max_unacceptable_score: number | null;
+    per_plant: boolean; // vista di organizzazione con soglie diverse fra siti
   };
   heatmap: HeatmapCell[];
   top_risks: TopRisk[];
@@ -202,6 +212,7 @@ export interface RiskBiaBcpData {
 
 export interface RequiredDocsCoverage {
   framework: string;
+  framework_name: string;
   total: number;
   green: number;
   yellow: number;
@@ -228,7 +239,7 @@ export interface SupplierNdaEntry {
 }
 
 export interface KpiOverviewData {
-  required_docs: RequiredDocsCoverage[];
+  required_docs: RequiredDocsCoverage[] | null; // null senza sito: la copertura è per sito
   mttr: {
     findings: {
       all: MttrEntry;

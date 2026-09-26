@@ -1557,7 +1557,7 @@ Yapay zeka önerisi, **açıkça onaylayana** kadar hiçbir etki yaratmaz. Yapab
 
 ### Raporlama kontrol paneli
 
-**Reporting** sayfasına gidin. Sayfa sekmelere ayrılmıştır: **Uyum**, **Sahibe göre**, **Risk / BIA / BCP**, **KPI**, **Güvenlik hedefleri** ve yönetişim ile denetim için **Erişim ve sorumluluklar**. Açık sekme sayfa adresinde kalır, bu nedenle bağlantı paylaşılabilir.
+**Reporting** sayfasına gidin. Sayfa sekmelere ayrılmıştır: **Uyum**, **Sahibe göre**, **Risk / BIA / BCP**, **Süreç göstergeleri**, **Güvenlik hedefleri** ve yönetişim ile denetim için **Erişim ve sorumluluklar**. Açık sekme sayfa adresinde kalır, bu nedenle bağlantı paylaşılabilir.
 
 #### Uyum sekmesi
 
@@ -1568,6 +1568,18 @@ Sekme önce yönetim, ardından açıklar üzerinde çalışanlar için tasarlan
 3. **Nerede açığımız var**: seçilen çerçeve için alana göre açık kontroller, en çok açığı olan alandan başlayarak. Sayılar alana ve duruma göre filtrelenmiş kontrol listesini açar; **Açık kontrolleri dışa aktar** açık, kısmi veya değerlendirilmemiş kontrollerin CSV dosyasını indirir.
 
 **Yüzdenin hesaplanması** (Raporlama, Kontrol paneli, haftalık eğilim ve Asistan'da aynıdır): tesisin etkin çerçevelerindeki uygulanabilir kontroller içinde uyumlu kontroller. N/A kontroller paydadan hariç tutulur. TISAX L2 ve L3 birlikte etkinken, L3'ün bir VH kontrolüyle değiştirilen L2 kontrolleri VH üzerinden değerlendirilir ve Kontroller modülü listesinde olduğu gibi ayrıca gösterilir. Bu kuraldan önce hesaplanan eğilim değerleri gri gösterilir ve değişime dahil edilmez.
+
+#### Risk / BIA / BCP sekmesi
+
+Sekmenin üstünden seçilebilen üç alt bölüme ayrılmıştır:
+
+- **Riskler**: yönetimin onayladığı **kabul edilebilirlik eşiğinin üzerindeki** riskler (Risk modülündeki risk iştahı; politika yoksa 14 kullanılır) ve tolere edilen azami sayı; eşiğin üzerindeki hücreleri vurgulanmış ısı haritası; en yüksek puanlı 10 risk (açmak için tıklayın); NIS2 md. 21'e ve tehdit kategorisine göre dağılım.
+- **Süreklilik**: **onaylı** BCP planı olmayan kritik süreçler (kritiklik ≥ 4) ve testi yenilenecek onaylı planlar; süreç · riskler · BCP · son test tablosu. Taslaklar ve arşivlenmiş planlar bir süreci kapsamaz.
+- **Ekonomik değer**: doğal ve artık yıllık beklenen kayıp (ALE), kontrollerle azaltılan risk ve planlanan önlemlerin yatırım getirisi (ROSI).
+
+#### Süreç göstergeleri sekmesi
+
+Çerçeveye göre zorunlu belge kapsamı (tesis bazında hesaplanır: bir tesis seçin), bulgular, olaylar ve görevler için ortalama çözüm süreleri, tedarikçi NDA'ları (sayılar ve yalnızca düzeltilecek tedarikçiler) ve eğitim. Diğer sekmeler gibi üstte seçilen tesisi izler.
 
 ### Rapor oluşturma
 

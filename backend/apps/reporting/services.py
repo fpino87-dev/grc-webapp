@@ -170,8 +170,14 @@ def kpi_trend(plant_id, framework_code="ISO27001", weeks=12) -> dict:
 # ───────────────────────────────────────────────────────────────────────────
 # Risk + BIA + BCP (vista unificata)
 # ───────────────────────────────────────────────────────────────────────────
+# Soglia di accettabilità se non c'è una RiskAppetitePolicy attiva: la stessa
+# usata dall'escalation dei rischi (risk.services.escalate_red_risk).
+DEFAULT_APPETITE_SCORE = 14
+
+
 def risk_bia_bcp(plant_id) -> dict:
     from apps.bcp.models import BcpPlan, BcpTest
+    from apps.plants.models import Plant
     from apps.bia.models import CriticalProcess, TreatmentOption
     from apps.risk.models import (
         NIS2_ART21_CHOICES, NIS2_RELEVANCE_CHOICES, RiskAssessment, THREAT_CATEGORIES,
@@ -184,7 +190,8 @@ def risk_bia_bcp(plant_id) -> dict:
         status="completato", deleted_at__isnull=True
     ).select_related("owner", "accepted_by", "critical_process")
     bia_qs = CriticalProcess.objects.filter(deleted_at__isnull=True)
-    bcp_qs = BcpPlan.objects.filter(deleted_at__isnull=True)
+    # I piani archiviati non contano: né come copertura né come test da fare.
+    bcp_qs = BcpPlan.objects.filter(deleted_at__isnull=True).exclude(status="archiviato")
 
     if plant_id:
         risk_qs = risk_qs.filter(plant_id=plant_id)
@@ -197,6 +204,38 @@ def risk_bia_bcp(plant_id) -> dict:
     risks_yellow = risk_qs.filter(score__gt=7, score__lte=14).count()
     risks_needs_revaluation = risk_qs.filter(needs_revaluation=True).count()
     risks_formally_accepted = risk_qs.filter(risk_accepted_formally=True).count()
+
+    # Propensione al rischio approvata dalla direzione (RiskAppetitePolicy): la
+    # soglia è quella del sito del rischio (policy di sito, altrimenti di
+    # organizzazione, altrimenti 14 come l'escalation in risk.services).
+    from apps.risk.services import get_active_appetite
+
+    threshold_cache: dict = {}
+
+    def _threshold(plant_id_):
+        if plant_id_ not in threshold_cache:
+            pol = get_active_appetite(plant=Plant.objects.filter(pk=plant_id_).first())
+            threshold_cache[plant_id_] = pol.max_acceptable_score if pol else DEFAULT_APPETITE_SCORE
+        return threshold_cache[plant_id_]
+
+    risks_over_appetite = sum(
+        1 for pid, score in risk_qs.values_list("plant_id", "score")
+        if score is not None and score > _threshold(pid)
+    )
+    appetite_policy = get_active_appetite(
+        plant=Plant.objects.filter(pk=plant_id).first() if plant_id else None,
+    )
+    appetite = {
+        "defined": appetite_policy is not None,
+        "max_acceptable_score": (
+            appetite_policy.max_acceptable_score if appetite_policy else DEFAULT_APPETITE_SCORE
+        ),
+        "max_red_risks_count": appetite_policy.max_red_risks_count if appetite_policy else None,
+        "max_unacceptable_score": appetite_policy.max_unacceptable_score if appetite_policy else None,
+        # Senza sito le soglie possono variare da sito a sito: quella mostrata
+        # è la policy di organizzazione, il conteggio usa quella di ogni sito.
+        "per_plant": not plant_id and len({t for t in threshold_cache.values()}) > 1,
+    }
 
     # ALE (Annualized Loss Expectancy) — perdita attesa annua in €.
     # Calcolata live da calc_ale() sui dati BIA collegati; vale 0 se il rischio
@@ -228,15 +267,24 @@ def risk_bia_bcp(plant_id) -> dict:
         if ale_total_inherent else 0.0
     )
 
+    # Copertura BCP: solo piani approvati, collegati al processo direttamente
+    # (FK) o dall'elenco dei processi (M2M) — stessa regola di
+    # CriticalProcess.rto_bcp_status nel modulo BIA.
+    approved_bcp_qs = bcp_qs.filter(status="approvato")
     critical_proc_ids = set(bia_qs.filter(criticality__gte=4).values_list("id", flat=True))
     procs_with_bcp = set(
-        bcp_qs.filter(
-            critical_process__in=critical_proc_ids, status__in=["approvato", "in_revisione"]
-        ).values_list("critical_process_id", flat=True)
+        approved_bcp_qs.filter(critical_process__in=critical_proc_ids)
+        .values_list("critical_process_id", flat=True)
+    ) | set(
+        BcpPlan.critical_processes.through.objects.filter(
+            criticalprocess_id__in=critical_proc_ids,
+            bcpplan__in=approved_bcp_qs,
+        ).values_list("criticalprocess_id", flat=True)
     )
     bia_critical_no_bcp = len(critical_proc_ids - procs_with_bcp)
 
-    bcp_test_overdue = bcp_qs.filter(
+    # Test da rifare: solo sui piani approvati (una bozza non si testa).
+    bcp_test_overdue = approved_bcp_qs.filter(
         Q(next_test_date__lt=today) | Q(next_test_date__isnull=True)
     ).count()
 
@@ -276,6 +324,7 @@ def risk_bia_bcp(plant_id) -> dict:
             "needs_revaluation": r.needs_revaluation,
             "ale": float(ale_by_risk.get(r.id) or 0),
             "ale_inherent": float(ale_inherent_by_risk.get(r.id) or 0),
+            "over_appetite": r.score is not None and r.score > _threshold(r.plant_id),
         })
 
     # Breakdown per categoria minaccia
@@ -339,10 +388,16 @@ def risk_bia_bcp(plant_id) -> dict:
         risk_by_proc.setdefault(r["critical_process_id"], []).append(r["score"] or 0)
 
     bcp_by_proc = {}
-    for bcp in bcp_qs.filter(critical_process__in=proc_ids).values(
-        "critical_process_id", "status", "next_test_date", "last_test_date", "id"
-    ):
+    bcp_fields = ("status", "next_test_date", "last_test_date", "id")
+    for bcp in bcp_qs.filter(critical_process__in=proc_ids).values("critical_process_id", *bcp_fields):
         bcp_by_proc.setdefault(bcp["critical_process_id"], []).append(bcp)
+    for link in BcpPlan.critical_processes.through.objects.filter(
+        criticalprocess_id__in=proc_ids, bcpplan__in=bcp_qs,
+    ).values("criticalprocess_id", *(f"bcpplan__{f}" for f in bcp_fields)):
+        bcp = {f: link[f"bcpplan__{f}"] for f in bcp_fields}
+        plans = bcp_by_proc.setdefault(link["criticalprocess_id"], [])
+        if all(b["id"] != bcp["id"] for b in plans):
+            plans.append(bcp)
 
     bcp_plan_ids = [bcp["id"] for bcps in bcp_by_proc.values() for bcp in bcps]
     last_test_by_plan = {}
@@ -361,7 +416,7 @@ def risk_bia_bcp(plant_id) -> dict:
         # Best BCP: approvato > in_revisione > bozza; a parità, quello con dati di
         # test più informativi (last_test_date più recente, poi next_test_date).
         best_bcp = None
-        for priority_status in ("approvato", "in_revisione", "bozza"):
+        for priority_status in ("approvato", "bozza"):
             candidates = [b for b in bcp_plans if b["status"] == priority_status]
             if candidates:
                 candidates.sort(
@@ -396,9 +451,10 @@ def risk_bia_bcp(plant_id) -> dict:
             ),
             "last_test_date": last_test["test_date"].isoformat() if last_test else None,
             "last_test_result": last_test["result"] if last_test else None,
-            "test_overdue": (
-                best_bcp["next_test_date"] < today
-                if best_bcp and best_bcp["next_test_date"] else bool(best_bcp)
+            # Test da rifare solo per un piano approvato (come il riquadro).
+            "test_overdue": bool(
+                best_bcp and best_bcp["status"] == "approvato"
+                and (best_bcp["next_test_date"] is None or best_bcp["next_test_date"] < today)
             ),
         })
 
@@ -481,6 +537,7 @@ def risk_bia_bcp(plant_id) -> dict:
             "risks_yellow": risks_yellow,
             "risks_needs_revaluation": risks_needs_revaluation,
             "risks_formally_accepted": risks_formally_accepted,
+            "risks_over_appetite": risks_over_appetite,
             "bia_critical_no_bcp": bia_critical_no_bcp,
             "bcp_test_overdue": bcp_test_overdue,
             "ale_total": float(ale_total),
@@ -490,6 +547,7 @@ def risk_bia_bcp(plant_id) -> dict:
             "ale_valued_count": ale_valued_count,
             "ale_coverage_pct": ale_coverage_pct,
         },
+        "appetite": appetite,
         "heatmap": heatmap,
         "top_risks": top_risks,
         "by_threat": by_threat,
@@ -573,7 +631,10 @@ def kpi_overview(plant_id) -> dict:
         plant = Plant.objects.filter(pk=plant_id).first()
 
     return {
-        "required_docs": _required_docs(plant),
+        # I documenti obbligatori sono per sito (get_required_documents_status
+        # senza sito non restituisce nulla): nella vista di organizzazione
+        # None, e l'interfaccia chiede di scegliere un sito.
+        "required_docs": _required_docs(plant) if plant else None,
         "mttr": _mttr(plant_id),
         "training": _training(plant),
         "supplier_nda": _supplier_nda(plant),
@@ -581,41 +642,24 @@ def kpi_overview(plant_id) -> dict:
 
 
 def _required_docs(plant):
+    """Copertura dei documenti obbligatori per framework attivo del sito. Se per un framework
+    non ci sono documenti obbligatori configurati lo si dice (`no_required_docs`)
+    con conteggi a zero: niente numeri presi da altro (es. stato dei controlli)."""
     from apps.compliance_schedule.services import get_required_documents_status
-    from apps.plants.services import get_active_framework_codes
+    from apps.controls.models import Framework
+    from apps.plants.models import PlantFramework
 
-    ALL_FRAMEWORKS = ["ISO27001", "NIS2", "ACN_NIS2", "TISAX_L2", "TISAX_L3"]
-    frameworks = get_active_framework_codes(plant) if plant else ALL_FRAMEWORKS
+    pf_qs = PlantFramework.objects.filter(
+        plant=plant, active=True, deleted_at__isnull=True,
+        framework__archived_at__isnull=True, framework__deleted_at__isnull=True,
+    )
+    codes = set(pf_qs.values_list("framework__code", flat=True))
+    names = dict(Framework.objects.filter(code__in=codes).values_list("code", "name"))
 
     result = []
-    for fw in frameworks:
+    for fw in sorted(codes, key=lambda c: names.get(c, c)):
         items = get_required_documents_status(plant=plant, framework=fw)
         total = len(items)
-        if total == 0:
-            # Nessun RequiredDocument configurato: mostra la copertura dei controlli
-            from apps.controls.models import ControlInstance
-            ci_qs = ControlInstance.objects.filter(
-                control__framework__code=fw, deleted_at__isnull=True,
-            )
-            if plant:
-                ci_qs = ci_qs.filter(plant=plant)
-            ci_total = ci_qs.count()
-            ci_compliant = ci_qs.filter(status="compliant").count()
-            ci_gap = ci_qs.filter(status="gap").count()
-            ci_other = ci_total - ci_compliant - ci_gap
-            result.append({
-                "framework": fw,
-                "total": ci_total,
-                "green": ci_compliant,
-                "yellow": ci_other,
-                "red": ci_gap,
-                "pct_coverage": round(ci_compliant / ci_total * 100, 1) if ci_total else 0,
-                "mandatory_total": 0,
-                "mandatory_ok": 0,
-                "pct_mandatory": 0,
-                "no_required_docs": True,
-            })
-            continue
         green = sum(1 for i in items if i["traffic_light"] == "green")
         yellow = sum(1 for i in items if i["traffic_light"] == "yellow")
         red = sum(1 for i in items if i["traffic_light"] == "red")
@@ -623,6 +667,7 @@ def _required_docs(plant):
         mandatory_ok = sum(1 for i in items if i["mandatory"] and i["traffic_light"] == "green")
         result.append({
             "framework": fw,
+            "framework_name": names.get(fw, fw),
             "total": total,
             "green": green,
             "yellow": yellow,
@@ -631,7 +676,7 @@ def _required_docs(plant):
             "mandatory_total": mandatory_total,
             "mandatory_ok": mandatory_ok,
             "pct_mandatory": round(mandatory_ok / mandatory_total * 100, 1) if mandatory_total else 0,
-            "no_required_docs": False,
+            "no_required_docs": total == 0,
         })
     return result
 

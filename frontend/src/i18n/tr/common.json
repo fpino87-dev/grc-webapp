@@ -4205,14 +4205,12 @@
       "compliance": "Uyum",
       "owner": "Sahibe göre",
       "risk_bia_bcp": "Risk / BIA / BCP",
-      "kpi": "KPI",
+      "kpi": "Süreç göstergeleri",
       "access_matrix": "Erişim ve sorumluluklar",
       "objectives": "Güvenlik hedefleri"
     },
     "kpi": {
       "no_required_docs_configured": "Bu çerçeve için yapılandırılmış zorunlu belge yok",
-      "plant_label": "Site",
-      "all_plants": "Tüm siteler",
       "no_frameworks": "Seçili site için etkin çerçeve yok.",
       "section_docs": "Zorunlu doküman kapsamı",
       "section_mttr": "Ortalama çözüm süresi (MTTR)",
@@ -4271,7 +4269,14 @@
         "board": "YK eğitimi",
         "board_hint": "Geçerli eğitimi olan {{trained}}/{{total}} üye",
         "no_board": "Kayıtlı yönetim kurulu yok"
-      }
+      },
+      "days": "{{n}} gün",
+      "docs_select_plant": "Zorunlu belge kapsamı tesis bazında hesaplanır: üstten bir tesis seçin.",
+      "nda_go_suppliers": "Tedarikçilere git",
+      "nda_all_ok": "Tüm aktif tedarikçilerin geçerli bir NDA'sı var.",
+      "nda_to_fix": "Düzeltilecek tedarikçiler: {{count}}",
+      "plant_label": "Site",
+      "all_plants": "Tüm siteler"
     },
     "loading_compliance": "Uyum yükleniyor...",
     "loading": "Yükleniyor...",
@@ -4322,15 +4327,14 @@
     },
     "risk_bia_bcp": {
       "kpi_total": "Toplam risk",
-      "kpi_red": "Kırmızı riskler",
       "kpi_yellow": "Sarı riskler",
       "kpi_revaluation": "Yeniden değerlendirilecek",
-      "kpi_revaluation_sub": "yeniden değerlendirme gerekli",
+      "kpi_revaluation_sub": "bir değişiklikten sonra yeniden değerlendirilecek",
       "kpi_accepted": "Resmi kabul edilmiş",
       "kpi_bia_no_bcp": "BCP'siz kritik",
       "kpi_bia_no_bcp_sub": "kritiklik ≥ 4",
       "kpi_bcp_overdue": "Gecikmiş BCP testleri",
-      "kpi_bcp_overdue_sub": "test yapılmamış",
+      "kpi_bcp_overdue_sub": "testi yenilenecek onaylı planlar",
       "ale_section_title": "Ekonomik maruziyet (ALE)",
       "kpi_ale_inherent": "İçsel ALE (€/yıl)",
       "kpi_ale_residual": "Kalıntı ALE (€/yıl)",
@@ -4340,7 +4344,6 @@
       "heatmap_title": "Risk ısı haritası (olasılık × etki)",
       "probability": "Olasılık",
       "impact": "Etki",
-      "risks": "risk",
       "legend_red": "Yüksek",
       "legend_yellow": "Orta",
       "legend_green": "Düşük",
@@ -4349,7 +4352,6 @@
       "col_owner": "Sahip",
       "col_score_residual": "Kalıntı skor",
       "col_score_inherent": "İçsel skor",
-      "col_ale_inherent": "İçsel ALE",
       "col_ale_residual": "Kalıntı ALE",
       "rosi_title": "Önlem ROSI (güvenlik yatırımı getirisi)",
       "rosi_subtitle": "Önlenen ALE − yıllık maliyet (CapEx {{years}} yıla yayılmış). Önlemler toplanmaz: her biri ayrı değerlendirilir.",
@@ -4384,7 +4386,37 @@
       "test_pass": "✓ Başarılı",
       "test_partial": "⚠ Kısmi",
       "test_fail": "✗ Başarısız",
-      "test_overdue": "⚠ Süresi geçmiş"
+      "test_overdue": "⚠ Süresi geçmiş",
+      "views": {
+        "risks": "Riskler",
+        "continuity": "Süreklilik",
+        "economic": "Ekonomik değer"
+      },
+      "heatmap_cell": "O{{prob}} × E{{imp}} = {{score}} · risk: {{count}}",
+      "legend_appetite": "kabul edilebilirlik eşiğinin üzerinde (> {{threshold}})",
+      "accepted": "✓ Kabul edildi",
+      "revaluate": "⚠ Yeniden değerlendirilecek",
+      "over_appetite_hint": "Yönetimin onayladığı kabul edilebilirlik eşiğinin üzerinde",
+      "kpi_over_appetite": "Eşiğin üzerinde",
+      "kpi_over_appetite_sub": "puan > {{threshold}} · tolere edilen: {{max}}",
+      "kpi_over_appetite_sub_nomax": "puan > {{threshold}}",
+      "appetite_missing": "Onaylı risk iştahı yok: varsayılan eşik {{threshold}} kullanılıyor. Risk modülünde tanımlayın.",
+      "appetite_per_plant": "Kabul edilebilirlik eşikleri tesisler arasında farklı: sayım her tesisin eşiğini, ısı haritası kuruluşunkini kullanır.",
+      "appetite_defined": "Yönetimin onayladığı risk iştahından gelen kabul edilebilirlik eşiği.",
+      "no_bcp": "Plan yok",
+      "bcp_status": {
+        "bozza": "Taslak",
+        "approvato": "Onaylandı"
+      },
+      "bia_status": {
+        "bozza": "BIA taslak",
+        "validato": "BIA doğrulandı",
+        "approvato": "BIA onaylandı"
+      },
+      "bia_bcp_table_hint": "Bir süreç yalnızca onaylı bir BCP ile kapsanır; planlanan tarih geçmişse veya yoksa test yeniden yapılmalıdır.",
+      "col_risks": "Riskler (yüksek · orta · düşük)",
+      "kpi_processes": "Kritik süreçler",
+      "ale_hint": "BIA kesinti maliyetlerinden hesaplanan yıllık beklenen kayıp: yalnızca kesinti maliyeti olan bir sürece bağlı riskler değerlenir."
     },
     "access_matrix": {
       "subtitle": "Kimin erişimi var ve kim neyden sorumlu — erişimleri istediğiniz zaman doğrulayın.",

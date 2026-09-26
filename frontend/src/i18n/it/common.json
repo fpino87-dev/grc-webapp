@@ -4206,8 +4206,6 @@
     "no_compliance_data": "Nessun dato di compliance disponibile",
     "no_data": "Nessun dato disponibile",
     "kpi": {
-      "plant_label": "Sito",
-      "all_plants": "Tutti i siti",
       "no_frameworks": "Nessun framework attivo per il sito selezionato.",
       "section_docs": "Copertura documenti obbligatori",
       "section_mttr": "Tempo medio di risoluzione (MTTR)",
@@ -4267,7 +4265,14 @@
         "board": "Formazione CdA",
         "board_hint": "{{trained}}/{{total}} componenti con formazione valida",
         "no_board": "Nessun CdA in anagrafica"
-      }
+      },
+      "days": "{{n}} gg",
+      "docs_select_plant": "La copertura dei documenti obbligatori si calcola per sito: seleziona un sito in alto.",
+      "nda_go_suppliers": "Vai ai fornitori",
+      "nda_all_ok": "Tutti i fornitori attivi hanno un NDA valido.",
+      "nda_to_fix": "Fornitori da sistemare: {{count}}",
+      "plant_label": "Sito",
+      "all_plants": "Tutti i siti"
     },
     "compliance": {
       "summary_title_org": "Sintesi per framework — tutta l'organizzazione",
@@ -4316,21 +4321,20 @@
       "compliance": "Compliance",
       "owner": "Per Owner",
       "risk_bia_bcp": "Risk / BIA / BCP",
-      "kpi": "KPI",
+      "kpi": "Indicatori di processo",
       "access_matrix": "Accessi & responsabilità",
       "objectives": "Obiettivi di sicurezza"
     },
     "risk_bia_bcp": {
       "kpi_total": "Rischi totali",
-      "kpi_red": "Rischi rossi",
       "kpi_yellow": "Rischi gialli",
       "kpi_revaluation": "Da rivalutare",
-      "kpi_revaluation_sub": "needs revaluation",
+      "kpi_revaluation_sub": "da rivalutare dopo un cambiamento",
       "kpi_accepted": "Accettati formalmente",
       "kpi_bia_no_bcp": "Critici senza BCP",
       "kpi_bia_no_bcp_sub": "criticità ≥ 4",
       "kpi_bcp_overdue": "Test BCP scaduti",
-      "kpi_bcp_overdue_sub": "test non eseguito",
+      "kpi_bcp_overdue_sub": "piani approvati con test da rifare",
       "ale_section_title": "Esposizione economica (ALE)",
       "kpi_ale_inherent": "ALE inerente (€/anno)",
       "kpi_ale_residual": "ALE residua (€/anno)",
@@ -4340,7 +4344,6 @@
       "heatmap_title": "Heatmap rischio (probabilità × impatto)",
       "probability": "Probabilità",
       "impact": "Impatto",
-      "risks": "rischi",
       "legend_red": "Alto",
       "legend_yellow": "Medio",
       "legend_green": "Basso",
@@ -4349,7 +4352,6 @@
       "col_owner": "Owner",
       "col_score_residual": "Score residuo",
       "col_score_inherent": "Score inerente",
-      "col_ale_inherent": "ALE inerente",
       "col_ale_residual": "ALE residua",
       "rosi_title": "ROSI dei trattamenti (ritorno dell'investimento in sicurezza)",
       "rosi_subtitle": "ALE evitata − costo annualizzato (CapEx ammortizzato su {{years}} anni). I trattamenti non si sommano: ciascuno è valutato a sé.",
@@ -4384,7 +4386,37 @@
       "test_pass": "✓ Superato",
       "test_partial": "⚠ Parziale",
       "test_fail": "✗ Fallito",
-      "test_overdue": "⚠ Scaduto"
+      "test_overdue": "⚠ Scaduto",
+      "views": {
+        "risks": "Rischi",
+        "continuity": "Continuità",
+        "economic": "Valore economico"
+      },
+      "heatmap_cell": "P{{prob}} × I{{imp}} = {{score}} · rischi: {{count}}",
+      "legend_appetite": "oltre la soglia di accettabilità (> {{threshold}})",
+      "accepted": "✓ Accettato",
+      "revaluate": "⚠ Da rivalutare",
+      "over_appetite_hint": "Oltre la soglia di accettabilità approvata dalla direzione",
+      "kpi_over_appetite": "Oltre la soglia",
+      "kpi_over_appetite_sub": "punteggio > {{threshold}} · tollerati: {{max}}",
+      "kpi_over_appetite_sub_nomax": "punteggio > {{threshold}}",
+      "appetite_missing": "Nessuna propensione al rischio approvata: si usa la soglia predefinita {{threshold}}. Definiscila nel modulo Rischi.",
+      "appetite_per_plant": "Soglie di accettabilità diverse fra i siti: il conteggio usa quella di ciascun sito, la heatmap mostra quella di organizzazione.",
+      "appetite_defined": "Soglia di accettabilità dalla propensione al rischio approvata dalla direzione.",
+      "no_bcp": "Nessun piano",
+      "bcp_status": {
+        "bozza": "Bozza",
+        "approvato": "Approvato"
+      },
+      "bia_status": {
+        "bozza": "BIA in bozza",
+        "validato": "BIA validata",
+        "approvato": "BIA approvata"
+      },
+      "bia_bcp_table_hint": "Un processo è coperto solo da un piano BCP approvato; il test è da rifare se la data prevista è passata o manca.",
+      "col_risks": "Rischi (alto · medio · basso)",
+      "kpi_processes": "Processi critici",
+      "ale_hint": "Perdita attesa annua calcolata dai costi di fermo della BIA: solo i rischi collegati a un processo con costo di fermo sono valorizzati."
     },
     "access_matrix": {
       "subtitle": "Chi ha accesso e chi è responsabile di cosa — valida gli accessi in qualunque momento.",

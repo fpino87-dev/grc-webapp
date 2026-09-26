@@ -1557,7 +1557,7 @@ The AI suggestion has no effect until you **explicitly confirm** it. You can:
 
 ### Reporting dashboard
 
-Go to **Reporting**. The page is split into tabs: **Compliance**, **By Owner**, **Risk / BIA / BCP**, **KPI**, **Security objectives** and, for governance and audit, **Access & responsibilities**. The open tab stays in the page address, so the link can be shared.
+Go to **Reporting**. The page is split into tabs: **Compliance**, **By Owner**, **Risk / BIA / BCP**, **Process indicators**, **Security objectives** and, for governance and audit, **Access & responsibilities**. The open tab stays in the page address, so the link can be shared.
 
 #### Compliance tab
 
@@ -1568,6 +1568,18 @@ The tab is designed first for management, then for whoever works on the gaps:
 3. **Where we are exposed**: for the chosen framework, open controls by domain, most exposed domain first. The figures open the list of controls filtered by domain and status; **Export open controls** downloads the CSV of controls with gap, partial or not assessed.
 
 **How the percentage is calculated** (the same in Reporting, Dashboard, weekly trend and Assistant): compliant controls out of the applicable controls of the site's active frameworks. N/A controls are excluded from the denominator. With TISAX L2 and L3 both active, L2 controls superseded by an L3 VH control are assessed on the VH and shown separately, as in the Controls module list. Trend values calculated before this rule are shown in grey and are not used for the change.
+
+#### Risk / BIA / BCP tab
+
+Split into three sub-sections, selectable at the top of the tab:
+
+- **Risks**: risks **above the acceptance threshold** approved by management (risk appetite from the Risk module; 14 is used when no policy exists), with the maximum number tolerated; heatmap with the cells above the threshold highlighted; the 10 highest-scoring risks (click to open them); breakdown by NIS2 Art. 21 and by threat category.
+- **Continuity**: critical processes (criticality ≥ 4) without an **approved** BCP and approved plans with a test due; process · risks · BCP · last test table. Drafts and archived plans do not cover a process.
+- **Economic value**: inherent and residual annualised loss expectancy (ALE), risk reduced by controls and return on investment (ROSI) of planned treatments.
+
+#### Process indicators tab
+
+Mandatory document coverage by framework (calculated per site: select a site), mean time to resolve findings, incidents and tasks, supplier NDAs (counts and only the suppliers to fix) and training. It follows the site selected at the top like the other tabs.
 
 ### Generating a report
 

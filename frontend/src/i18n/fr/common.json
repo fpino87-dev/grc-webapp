@@ -4205,14 +4205,12 @@
       "compliance": "Conformité",
       "owner": "Par responsable",
       "risk_bia_bcp": "Risque / BIA / BCP",
-      "kpi": "KPI",
+      "kpi": "Indicateurs de processus",
       "access_matrix": "Accès & responsabilités",
       "objectives": "Objectifs de sécurité"
     },
     "kpi": {
       "no_required_docs_configured": "Aucun document obligatoire configuré pour ce référentiel",
-      "plant_label": "Site",
-      "all_plants": "Tous les sites",
       "no_frameworks": "Aucun référentiel actif pour le site sélectionné.",
       "section_docs": "Couverture des documents obligatoires",
       "section_mttr": "Temps moyen de résolution (MTTR)",
@@ -4271,7 +4269,14 @@
         "board": "Formation du CA",
         "board_hint": "{{trained}}/{{total}} membres avec une formation valide",
         "no_board": "Aucun CA enregistré"
-      }
+      },
+      "days": "{{n}} j",
+      "docs_select_plant": "La couverture des documents obligatoires se calcule par site : sélectionnez un site en haut.",
+      "nda_go_suppliers": "Aller aux fournisseurs",
+      "nda_all_ok": "Tous les fournisseurs actifs ont un NDA valide.",
+      "nda_to_fix": "Fournisseurs à régulariser : {{count}}",
+      "plant_label": "Site",
+      "all_plants": "Tous les sites"
     },
     "loading_compliance": "Chargement de la conformité...",
     "loading": "Chargement...",
@@ -4322,15 +4327,14 @@
     },
     "risk_bia_bcp": {
       "kpi_total": "Risques totaux",
-      "kpi_red": "Risques rouges",
       "kpi_yellow": "Risques jaunes",
       "kpi_revaluation": "À réévaluer",
-      "kpi_revaluation_sub": "réévaluation requise",
+      "kpi_revaluation_sub": "à réévaluer après un changement",
       "kpi_accepted": "Acceptés formellement",
       "kpi_bia_no_bcp": "Critiques sans BCP",
       "kpi_bia_no_bcp_sub": "criticité ≥ 4",
       "kpi_bcp_overdue": "Tests BCP en retard",
-      "kpi_bcp_overdue_sub": "test non effectué",
+      "kpi_bcp_overdue_sub": "plans approuvés avec test à refaire",
       "ale_section_title": "Exposition économique (ALE)",
       "kpi_ale_inherent": "ALE inhérent (€/an)",
       "kpi_ale_residual": "ALE résiduel (€/an)",
@@ -4340,7 +4344,6 @@
       "heatmap_title": "Carte des risques (probabilité × impact)",
       "probability": "Probabilité",
       "impact": "Impact",
-      "risks": "risques",
       "legend_red": "Élevé",
       "legend_yellow": "Moyen",
       "legend_green": "Faible",
@@ -4349,7 +4352,6 @@
       "col_owner": "Responsable",
       "col_score_residual": "Score résiduel",
       "col_score_inherent": "Score inhérent",
-      "col_ale_inherent": "ALE inhérent",
       "col_ale_residual": "ALE résiduel",
       "rosi_title": "ROSI des traitements (retour sur investissement sécurité)",
       "rosi_subtitle": "ALE évité − coût annualisé (CapEx amorti sur {{years}} ans). Les traitements ne se cumulent pas : chacun est évalué séparément.",
@@ -4384,7 +4386,37 @@
       "test_pass": "✓ Réussi",
       "test_partial": "⚠ Partiel",
       "test_fail": "✗ Échoué",
-      "test_overdue": "⚠ En retard"
+      "test_overdue": "⚠ En retard",
+      "views": {
+        "risks": "Risques",
+        "continuity": "Continuité",
+        "economic": "Valeur économique"
+      },
+      "heatmap_cell": "P{{prob}} × I{{imp}} = {{score}} · risques : {{count}}",
+      "legend_appetite": "au-delà du seuil d'acceptabilité (> {{threshold}})",
+      "accepted": "✓ Accepté",
+      "revaluate": "⚠ À réévaluer",
+      "over_appetite_hint": "Au-delà du seuil d'acceptabilité approuvé par la direction",
+      "kpi_over_appetite": "Au-delà du seuil",
+      "kpi_over_appetite_sub": "score > {{threshold}} · tolérés : {{max}}",
+      "kpi_over_appetite_sub_nomax": "score > {{threshold}}",
+      "appetite_missing": "Aucune appétence au risque approuvée : le seuil par défaut {{threshold}} est utilisé. Définissez-la dans le module Risques.",
+      "appetite_per_plant": "Seuils d'acceptabilité différents selon les sites : le décompte utilise celui de chaque site, la heatmap celui de l'organisation.",
+      "appetite_defined": "Seuil d'acceptabilité issu de l'appétence au risque approuvée par la direction.",
+      "no_bcp": "Aucun plan",
+      "bcp_status": {
+        "bozza": "Brouillon",
+        "approvato": "Approuvé"
+      },
+      "bia_status": {
+        "bozza": "BIA en brouillon",
+        "validato": "BIA validée",
+        "approvato": "BIA approuvée"
+      },
+      "bia_bcp_table_hint": "Un processus n'est couvert que par un PCA approuvé ; le test est à refaire si sa date prévue est passée ou absente.",
+      "col_risks": "Risques (élevé · moyen · faible)",
+      "kpi_processes": "Processus critiques",
+      "ale_hint": "Perte annuelle attendue calculée à partir des coûts d'arrêt de la BIA : seuls les risques liés à un processus avec coût d'arrêt sont valorisés."
     },
     "access_matrix": {
       "subtitle": "Qui a accès et qui est responsable de quoi — validez les accès à tout moment.",

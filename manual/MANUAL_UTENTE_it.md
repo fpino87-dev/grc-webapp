@@ -1557,7 +1557,7 @@ Il suggerimento IA non ha effetto fino a quando non lo **confermi esplicitamente
 
 ### Dashboard reporting
 
-Vai su **Reporting**. La pagina è divisa in tab: **Compliance**, **Per Owner**, **Risk / BIA / BCP**, **KPI**, **Obiettivi di sicurezza** e, per governance e audit, **Accessi & responsabilità**. Il tab aperto resta nell'indirizzo della pagina, quindi il link si può condividere.
+Vai su **Reporting**. La pagina è divisa in tab: **Compliance**, **Per Owner**, **Risk / BIA / BCP**, **Indicatori di processo**, **Obiettivi di sicurezza** e, per governance e audit, **Accessi & responsabilità**. Il tab aperto resta nell'indirizzo della pagina, quindi il link si può condividere.
 
 #### Tab Compliance
 
@@ -1568,6 +1568,18 @@ Il tab è pensato prima per la direzione, poi per chi lavora sui gap:
 3. **Dove siamo scoperti**: per il framework scelto, i controlli aperti per dominio, dal dominio più scoperto. I numeri aprono l'elenco dei controlli filtrato per dominio e stato; **Esporta controlli aperti** scarica il CSV dei controlli in gap, parziali o non valutati.
 
 **Come si calcola la percentuale** (uguale in Reporting, Dashboard, andamento settimanale e Assistente): controlli conformi sui controlli applicabili dei framework attivi del sito. I controlli N/A sono esclusi dal denominatore. Con TISAX L2 e L3 attivi, i controlli L2 sostituiti da un controllo VH di L3 si valutano sul VH e sono indicati a parte, come nell'elenco del modulo Controlli. I valori dell'andamento calcolati prima di questa regola compaiono in grigio e non entrano nella variazione.
+
+#### Tab Risk / BIA / BCP
+
+Diviso in tre sotto-sezioni, selezionabili in cima al tab:
+
+- **Rischi**: rischi **oltre la soglia di accettabilità** approvata dalla direzione (propensione al rischio del modulo Rischi; senza policy si usa 14), con il numero massimo tollerato; heatmap con le celle oltre soglia evidenziate; i 10 rischi con punteggio più alto (clic per aprirli); ripartizione NIS2 art. 21 e per categoria di minaccia.
+- **Continuità**: processi critici (criticità ≥ 4) senza un piano BCP **approvato** e piani approvati con il test da rifare; tabella processo · rischi · BCP · ultimo test. Bozze e piani archiviati non coprono un processo.
+- **Valore economico**: perdita attesa annua (ALE) inerente e residua, rischio abbattuto dai controlli e ritorno degli investimenti (ROSI) dei trattamenti pianificati.
+
+#### Tab Indicatori di processo
+
+Copertura dei documenti obbligatori per framework (si calcola per sito: seleziona un sito), tempi medi di risoluzione di finding, incidenti e task, NDA dei fornitori (conteggi e solo i fornitori da sistemare) e formazione. Segue il sito scelto in alto come gli altri tab.
 
 ### Generare un report
 

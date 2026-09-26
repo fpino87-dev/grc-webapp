@@ -1557,7 +1557,7 @@ Sugestia SI nie ma żadnego efektu, dopóki jej **jawnie nie potwierdzisz**. Mo�
 
 ### Pulpit raportowania
 
-Przejdź do **Reporting**. Strona jest podzielona na zakładki: **Zgodność**, **Wg właściciela**, **Ryzyko / BIA / BCP**, **KPI**, **Cele bezpieczeństwa** oraz, dla ładu i audytu, **Dostępy i odpowiedzialności**. Otwarta zakładka pozostaje w adresie strony, więc link można udostępnić.
+Przejdź do **Reporting**. Strona jest podzielona na zakładki: **Zgodność**, **Wg właściciela**, **Ryzyko / BIA / BCP**, **Wskaźniki procesów**, **Cele bezpieczeństwa** oraz, dla ładu i audytu, **Dostępy i odpowiedzialności**. Otwarta zakładka pozostaje w adresie strony, więc link można udostępnić.
 
 #### Zakładka Zgodność
 
@@ -1568,6 +1568,18 @@ Zakładka jest przeznaczona najpierw dla kierownictwa, a następnie dla osób pr
 3. **Gdzie jesteśmy odsłonięci**: dla wybranego frameworku otwarte kontrole według domeny, od najbardziej odsłoniętej. Liczby otwierają listę kontroli przefiltrowaną według domeny i statusu; **Eksportuj otwarte kontrole** pobiera plik CSV kontroli z luką, częściowych lub nieocenionych.
 
 **Sposób obliczania procentu** (taki sam w Raportowaniu, Pulpicie, trendzie tygodniowym i Asystencie): zgodne kontrole spośród kontroli mających zastosowanie w aktywnych frameworkach zakładu. Kontrole N/A są wyłączone z mianownika. Przy aktywnych TISAX L2 i L3 kontrole L2 zastąpione kontrolą VH z L3 są oceniane na VH i wskazywane osobno, jak na liście modułu Kontrole. Wartości trendu obliczone przed tą regułą są pokazane na szaro i nie są uwzględniane w zmianie.
+
+#### Zakładka Ryzyko / BIA / BCP
+
+Podzielona na trzy podsekcje, wybierane u góry zakładki:
+
+- **Ryzyka**: ryzyka **powyżej progu akceptowalności** zatwierdzonego przez kierownictwo (apetyt na ryzyko z modułu Ryzyka; bez polityki używane jest 14) wraz z maksymalną tolerowaną liczbą; mapa cieplna z wyróżnionymi komórkami powyżej progu; 10 ryzyk o najwyższym wyniku (kliknij, aby je otworzyć); podział według NIS2 art. 21 i kategorii zagrożenia.
+- **Ciągłość**: procesy krytyczne (krytyczność ≥ 4) bez **zatwierdzonego** planu BCP oraz zatwierdzone plany z testem do powtórzenia; tabela proces · ryzyka · BCP · ostatni test. Wersje robocze i plany zarchiwizowane nie obejmują procesu.
+- **Wartość ekonomiczna**: oczekiwana roczna strata (ALE) inherentna i rezydualna, ryzyko ograniczone przez kontrole oraz zwrot z inwestycji (ROSI) planowanych działań.
+
+#### Zakładka Wskaźniki procesów
+
+Pokrycie dokumentów obowiązkowych według frameworku (obliczane dla zakładu: wybierz zakład), średni czas rozwiązania ustaleń, incydentów i zadań, NDA dostawców (liczby i tylko dostawcy do uporządkowania) oraz szkolenia. Podąża za zakładem wybranym u góry, jak pozostałe zakładki.
 
 ### Generowanie raportu
 
