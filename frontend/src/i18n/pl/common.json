@@ -5380,7 +5380,8 @@
       "subtitle": "Trend ostatnich tygodni",
       "empty": "Brak dostępnych migawek",
       "warning": "Ostrzeżenie",
-      "critical": "Krytyczny"
+      "critical": "Krytyczny",
+      "by_site": "Ostatnia wartość według zakładu"
     },
     "suggest": {
       "button": "Zaproponuj KPI",

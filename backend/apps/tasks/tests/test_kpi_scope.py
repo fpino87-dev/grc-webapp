@@ -247,3 +247,34 @@ def test_list_global_single_site_shows_its_value(client, pl):
     _snap(glob, pl, W2, 42, "warning")
     row = _list_item(client, glob)
     assert (row["last_status"], row["last_value"], row["last_sites"]) == ("warning", 42, 1)
+
+
+# ── Valore di organizzazione delle definizioni globali ───────────────────────
+
+def test_compute_adds_organization_value_without_alert(pl, tn, monkeypatch, client):
+    from apps.tasks import services
+    from apps.tasks.tasks import compute_operational_kpis
+
+    code = "osint_critical_suppliers_at_risk_rate"
+    glob = KPIDefinition.objects.filter(kpi_code=code, plant__isnull=True).first() or _def(code=code)
+    glob.is_active = True
+    glob.save()
+    _def(code="osint_critical_suppliers_at_risk_rate", plant=pl)   # PL ha una definizione propria
+    alerted = []
+    monkeypatch.setattr(services, "_maybe_alert", lambda kd, plant, snap, prev: alerted.append(plant) or False)
+    compute_operational_kpis.apply()
+
+    org = OperationalKpiSnapshot.objects.get(kpi_definition=glob, plant__isnull=True)
+    assert org.week_start is not None
+    assert None not in alerted                        # nessun alert sul valore di organizzazione
+    assert _live(glob, tn).exists() and not _live(glob, pl).exists()
+
+    row = _list_item(client, glob)
+    assert row["last_sites"] is None                   # la card mostra il valore di organizzazione
+    assert row["last_status"] == org.status
+
+    resp = client.get("/api/v1/tasks/kpi-snapshots/by-site/?kpi_code=osint_critical_suppliers_at_risk_rate")
+    assert resp.status_code == 200
+    codes = [r["plant_code"] for r in resp.data["results"]]
+    assert codes == sorted(codes) and len(codes) == len(set(codes))
+    assert {"KS-PL", "KS-TN"} <= set(codes)           # PL dalla sua definizione, TN dalla globale

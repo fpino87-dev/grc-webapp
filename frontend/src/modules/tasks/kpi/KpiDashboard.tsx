@@ -65,6 +65,9 @@ function KpiCard({
         </span>
         {kpi.last_value != null && kpi.unit && <span className="text-sm text-gray-400">{kpi.unit}</span>}
       </div>
+      {kpi.last_value == null && kpi.last_note && (
+        <p className="-mt-1 mb-1 text-[11px] text-gray-500 line-clamp-2" title={kpi.last_note}>{kpi.last_note}</p>
+      )}
       {kpi.last_sites != null && kpi.last_sites > 1 && (
         <p className="-mt-1 mb-1 text-[11px] text-gray-500">{t("kpi.dashboard.sites_summary", { count: kpi.last_sites })}</p>
       )}
@@ -108,6 +111,9 @@ export function KpiDashboard() {
   });
 
   const kpis: KpiDefinitionListItem[] = data?.results ?? [];
+  // Grafico e dettaglio: una definizione di sito si legge sempre sul suo sito;
+  // una globale sul sito filtrato o, in «Tutti i siti», sul valore di
+  // organizzazione (plant vuoto).
   const plantLabel = new Map((plants ?? []).map((p) => [p.id, `${p.code} — ${p.name}`]));
   const scopeLabel = (kpi: KpiDefinitionListItem) =>
     kpi.plant ? plantLabel.get(kpi.plant) ?? "—" : t("kpi.dashboard.scope_org");
@@ -161,7 +167,7 @@ export function KpiDashboard() {
             <KpiCard
               key={kpi.id}
               kpi={kpi}
-              plantId={effectivePlant || undefined}
+              plantId={kpi.plant ?? (effectivePlant || undefined)}
               scopeLabel={scopeLabel(kpi)}
               onOpen={() => setOpenKpi(kpi)}
             />
@@ -173,7 +179,7 @@ export function KpiDashboard() {
         <KpiTrendModal
           kpiCode={openKpi.kpi_code}
           kpiName={openKpi.name}
-          plantId={effectivePlant || undefined}
+          plantId={openKpi.plant ?? (effectivePlant || undefined)}
           onClose={() => setOpenKpi(null)}
         />
       )}

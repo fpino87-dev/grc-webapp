@@ -293,6 +293,7 @@ class KPIDefinitionListSerializer(serializers.ModelSerializer):
     last_status = serializers.SerializerMethodField()
     last_value = serializers.SerializerMethodField()
     last_sites = serializers.SerializerMethodField()
+    last_note = serializers.SerializerMethodField()
 
     class Meta:
         model = KPIDefinition
@@ -300,7 +301,7 @@ class KPIDefinitionListSerializer(serializers.ModelSerializer):
             "id", "kpi_code", "name", "unit",
             "threshold_warning", "threshold_critical", "threshold_direction",
             "source", "is_active", "plant",
-            "last_status", "last_value", "last_sites",
+            "last_status", "last_value", "last_sites", "last_note",
         ]
 
     # Gravità per riassumere più siti: il peggiore fra quelli misurati.
@@ -321,15 +322,16 @@ class KPIDefinitionListSerializer(serializers.ModelSerializer):
         if snaps is None:
             snaps = list(obj.snapshots.all())
         snaps = sorted(snaps, key=lambda s: (s.week_start, s.created_at), reverse=True)
-        summary = {"status": "no_data", "value": None, "sites": None}
+        summary = {"status": "no_data", "value": None, "sites": None, "note": ""}
         if obj.plant_id is not None:
             if snaps:
-                summary = {"status": snaps[0].status, "value": snaps[0].value, "sites": None}
+                summary = {"status": snaps[0].status, "value": snaps[0].value, "sites": None,
+                           "note": snaps[0].note}
         else:
             global_snaps = [s for s in snaps if s.plant_id is None]
             if global_snaps:
                 s = global_snaps[0]
-                summary = {"status": s.status, "value": s.value, "sites": None}
+                summary = {"status": s.status, "value": s.value, "sites": None, "note": s.note}
             elif snaps:
                 week = snaps[0].week_start
                 latest = [s for s in snaps if s.week_start == week]
@@ -339,6 +341,7 @@ class KPIDefinitionListSerializer(serializers.ModelSerializer):
                     "status": worst.status if worst else "no_data",
                     "value": latest[0].value if len(latest) == 1 else None,
                     "sites": len(latest),
+                    "note": "",
                 }
         obj._latest_summary = summary
         return summary
@@ -351,3 +354,7 @@ class KPIDefinitionListSerializer(serializers.ModelSerializer):
 
     def get_last_sites(self, obj):
         return self._latest(obj)["sites"]
+
+    def get_last_note(self, obj):
+        """Spiegazione del calcolo (es. perché manca il dato)."""
+        return self._latest(obj)["note"]

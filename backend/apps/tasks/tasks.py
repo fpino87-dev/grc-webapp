@@ -135,6 +135,12 @@ def compute_operational_kpis(self):
             snapshot_count += 1
             if getattr(snapshot, "_alert_sent", False):
                 alert_count += 1
+        # Definizione globale: anche il valore di organizzazione (tutti i
+        # siti insieme), che è quello mostrato nella vista «Tutti i siti», nel
+        # riesame di organizzazione e dagli obiettivi di organizzazione.
+        if kpi_def.plant_id is None:
+            services.compute_and_store_kpi_snapshot(kpi_def, None, week_start, notify=False)
+            snapshot_count += 1
 
     return (
         f"compute_operational_kpis: {snapshot_count} snapshot, "

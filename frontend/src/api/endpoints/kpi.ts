@@ -53,6 +53,8 @@ export interface KpiDefinitionListItem {
   last_value: number | null;
   /** Definizione globale riassunta su più siti: quanti (null = un valore solo). */
   last_sites?: number | null;
+  /** Spiegazione del calcolo, es. perché manca il dato. */
+  last_note?: string;
 }
 
 export interface KpiSnapshot {
@@ -156,6 +158,13 @@ export const kpiApi = {
   // Snapshot / trend
   getKpiSnapshots: (params?: Record<string, string>) =>
     fetchAllPages<KpiSnapshot>(SNAP, params).then((results) => ({ results, count: results.length })),
+  /** Ultimo valore del KPI per ogni sito visibile (dettaglio di una definizione globale). */
+  getKpiBySite: (kpiCode: string) =>
+    apiClient
+      .get<{ kpi_code: string; results: (KpiSnapshot & { plant_code: string })[] }>(`${SNAP}by-site/`, {
+        params: { kpi_code: kpiCode },
+      })
+      .then((r) => r.data),
   getKpiTrend: (kpiCode: string, plantId?: string, weeks = 8) => {
     const params: Record<string, string> = { kpi_code: kpiCode, weeks: String(weeks) };
     if (plantId) params.plant = plantId;

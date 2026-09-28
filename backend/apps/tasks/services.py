@@ -818,11 +818,13 @@ def record_manual_kpi_value(kpi_def, plant, value, week_start=None, note="", use
     return snapshot
 
 
-def compute_and_store_kpi_snapshot(kpi_def, plant, week_start):
+def compute_and_store_kpi_snapshot(kpi_def, plant, week_start, notify=True):
     """
     Calcola e salva (o aggiorna) l'OperationalKpiSnapshot per (kpi, plant,
     settimana). Se lo status è peggiorato rispetto allo snapshot precedente e
-    le notifiche sono abilitate, invia l'alert via M19.
+    le notifiche sono abilitate, invia l'alert via M19. `notify=False` per il
+    valore di organizzazione (plant=None) di una definizione globale: gli
+    alert partono già dai singoli siti.
     """
     from .models import OperationalKpiSnapshot
 
@@ -854,7 +856,7 @@ def compute_and_store_kpi_snapshot(kpi_def, plant, week_start):
 
     # Espone al chiamante (es. task Celery) se è stato inviato un alert, senza
     # alterare il valore di ritorno documentato (lo snapshot).
-    snapshot._alert_sent = _maybe_alert(kpi_def, plant, snapshot, prev_status)
+    snapshot._alert_sent = _maybe_alert(kpi_def, plant, snapshot, prev_status) if notify else False
     return snapshot
 
 

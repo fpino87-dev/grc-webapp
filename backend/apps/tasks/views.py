@@ -430,6 +430,38 @@ class OperationalKpiSnapshotViewSet(
             qs = qs.filter(week_start__lte=week_to)
         return qs
 
+    @action(detail=False, methods=["get"], url_path="by-site")
+    def by_site(self, request):
+        """GET /kpi-snapshots/by-site/?kpi_code=X — ultimo valore del KPI per
+        ogni sito visibile all'utente (dettaglio di una definizione globale
+        nella vista «Tutti i siti»). Un valore per sito, dalla definizione che
+        vale per quel sito (kpi_scope.pick_snapshot)."""
+        from .kpi_scope import current_scope, pick_snapshot
+
+        kpi_code = request.query_params.get("kpi_code")
+        if not kpi_code:
+            return Response({"detail": "kpi_code obbligatorio."}, status=status.HTTP_400_BAD_REQUEST)
+        qs = self.get_queryset().filter(
+            kpi_definition__kpi_code=kpi_code, plant__isnull=False,
+            kpi_definition__is_active=True, kpi_definition__deleted_at__isnull=True,
+        )
+        latest_week: dict = {}
+        by_plant: dict = {}
+        for snap in qs.order_by("-week_start"):
+            week = latest_week.setdefault(snap.plant_id, snap.week_start)
+            if snap.week_start == week:
+                by_plant.setdefault(snap.plant_id, []).append(snap)
+        scope = current_scope(kpi_code)
+        rows = [pick_snapshot(candidates, scope) for candidates in by_plant.values()]
+        rows.sort(key=lambda s: s.plant.code if s.plant else "")
+        return Response({
+            "kpi_code": kpi_code,
+            "results": [
+                {**OperationalKpiSnapshotSerializer(s).data, "plant_code": s.plant.code}
+                for s in rows
+            ],
+        })
+
     @action(detail=False, methods=["get"])
     def trend(self, request):
         """GET /kpi-snapshots/trend/?kpi_code=X&plant=Y&weeks=12 — ultimi N

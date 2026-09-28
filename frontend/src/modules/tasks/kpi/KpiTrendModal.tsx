@@ -29,6 +29,16 @@ export function KpiTrendModal({ kpiCode, kpiName, plantId, onClose }: Props) {
     retry: false,
   });
 
+  // Vista «Tutti i siti»: il grafico è il valore di organizzazione, sotto
+  // l'ultimo valore di ogni sito.
+  const { data: bySite } = useQuery({
+    queryKey: ["kpi-by-site", kpiCode],
+    queryFn: () => kpiApi.getKpiBySite(kpiCode),
+    enabled: !plantId,
+    retry: false,
+  });
+  const siteRows = bySite?.results ?? [];
+
   const chartData = (data?.results ?? []).map((s) => ({
     week: new Date(s.week_start).toLocaleDateString(i18n.language || "it", {
       day: "2-digit",
@@ -94,7 +104,40 @@ export function KpiTrendModal({ kpiCode, kpiName, plantId, onClose }: Props) {
             </LineChart>
           </ResponsiveContainer>
         )}
+
+        {!plantId && siteRows.length > 0 && (
+          <div className="mt-4">
+            <p className="text-xs font-medium text-gray-600 mb-1">{t("kpi.trend.by_site")}</p>
+            <table className="w-full text-sm">
+              <tbody className="divide-y divide-gray-100">
+                {siteRows.map((s) => (
+                  <tr key={s.id}>
+                    <td className="py-1.5 text-gray-800">{s.plant_code}</td>
+                    <td className="py-1.5 text-right font-medium text-gray-900">
+                      {s.value != null ? `${s.value}${data?.unit ? ` ${data.unit}` : ""}` : "—"}
+                    </td>
+                    <td className="py-1.5 pl-3 w-28">
+                      <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${STATUS_STYLE[s.status]}`}>
+                        {t(`kpi.status.${s.status}`)}
+                      </span>
+                    </td>
+                    <td className="py-1.5 pl-2 text-xs text-gray-400 truncate max-w-[14rem]" title={s.note || undefined}>
+                      {s.note}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
+const STATUS_STYLE: Record<string, string> = {
+  ok: "bg-green-100 text-green-700",
+  warning: "bg-yellow-100 text-yellow-700",
+  critical: "bg-red-100 text-red-700",
+  no_data: "bg-gray-100 text-gray-500",
+};

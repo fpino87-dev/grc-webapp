@@ -5380,7 +5380,8 @@
       "subtitle": "Trend last weeks",
       "empty": "No snapshot available",
       "warning": "Warning",
-      "critical": "Critical"
+      "critical": "Critical",
+      "by_site": "Latest value by site"
     },
     "suggest": {
       "button": "Suggest KPIs",

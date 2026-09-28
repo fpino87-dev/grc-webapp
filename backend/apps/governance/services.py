@@ -894,7 +894,12 @@ def objective_series(objective, limit: int = 52) -> list[dict]:
             value__isnull=False,
             week_start__gte=objective.start_date,
         )
-        qs = qs.filter(plant_id=objective.plant_id) if objective.plant_id else qs
+        if objective.plant_id:
+            qs = qs.filter(plant_id=objective.plant_id)
+        elif qs.filter(plant__isnull=True).exists():
+            # Obiettivo di organizzazione: il valore di organizzazione, non le
+            # righe dei singoli siti mescolate nella stessa serie.
+            qs = qs.filter(plant__isnull=True)
         rows = qs.order_by("-week_start").values_list("week_start", "value")[:limit]
     else:
         rows = []

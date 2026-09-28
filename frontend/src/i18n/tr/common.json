@@ -5380,7 +5380,8 @@
       "subtitle": "Son haftaların trendi",
       "empty": "Mevcut anlık görüntü yok",
       "warning": "Uyarı",
-      "critical": "Kritik"
+      "critical": "Kritik",
+      "by_site": "Tesise göre son değer"
     },
     "suggest": {
       "button": "KPI Öner",

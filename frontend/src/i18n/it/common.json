@@ -5380,7 +5380,8 @@
       "subtitle": "Trend ultime settimane",
       "empty": "Nessuno snapshot disponibile",
       "warning": "Warning",
-      "critical": "Critico"
+      "critical": "Critico",
+      "by_site": "Ultimo valore per sito"
     },
     "suggest": {
       "button": "Consiglia KPI",
