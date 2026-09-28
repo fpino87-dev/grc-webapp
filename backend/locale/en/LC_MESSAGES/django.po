@@ -3091,3 +3091,9 @@ msgstr "%(n)s critical processes with an approved BCP but an overdue or never-ru
 
 msgid "%(n)s processi critici con test BCP scaduto o mai eseguito"
 msgstr "%(n)s critical processes with an overdue or never-run BCP test"
+
+msgid "Una o più evidenze indicate non esistono o non sono del sito del piano."
+msgstr "One or more of the given evidence items do not exist or do not belong to the plan's site."
+
+msgid "Indica un file o almeno un'evidenza esistente."
+msgstr "Provide a file or at least one existing evidence item."

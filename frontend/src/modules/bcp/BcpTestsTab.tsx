@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { bcpApi } from "../../api/endpoints/bcp";
+import { bcpApi, type BcpTest } from "../../api/endpoints/bcp";
+import { BcpTestEvidences } from "./BcpTestEvidences";
 import { ResultBadge, fmtDate, hours } from "./shared";
 
 interface Props {
@@ -13,6 +14,7 @@ export function BcpTestsTab({ plantId, plantLabel }: Props) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [planFilter, setPlanFilter] = useState("");
+  const [evidenceTest, setEvidenceTest] = useState<BcpTest | null>(null);
 
   const { data: tests = [], isLoading } = useQuery({
     queryKey: ["bcp", "tests", plantId],
@@ -90,7 +92,15 @@ export function BcpTestsTab({ plantId, plantLabel }: Props) {
                       title={test.objectives.map(o => `${o.met ? "✓" : "✗"} ${o.text}`).join("\n") || undefined}>
                       {test.objectives.length ? `${met}/${test.objectives.length}` : "—"}
                     </td>
-                    <td className="px-3 py-3 text-xs text-gray-600">{test.evidences_count || "—"}</td>
+                    <td className="px-3 py-3 text-xs">
+                      <button
+                        onClick={() => setEvidenceTest(test)}
+                        className={test.evidences_count ? "text-primary-700 hover:underline" : "text-amber-700 hover:underline"}
+                        title={(test.evidence_items ?? []).map(e => e.title).join("\n") || undefined}
+                      >
+                        {test.evidences_count ? test.evidences_count : t("bcp.evidence.add_short")}
+                      </button>
+                    </td>
                     <td className="px-3 py-3 text-right">
                       <button
                         onClick={() => { if (window.confirm(t("bcp.tests.delete_confirm"))) remove.mutate(test.id); }}
@@ -107,6 +117,7 @@ export function BcpTestsTab({ plantId, plantLabel }: Props) {
           </table>
         )}
       </div>
+      {evidenceTest && <BcpTestEvidences test={evidenceTest} onClose={() => setEvidenceTest(null)} />}
     </div>
   );
 }

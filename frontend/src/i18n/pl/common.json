@@ -3859,7 +3859,7 @@
       "objective_placeholder": "Dodaj cel…",
       "objectives_met": "Osiągnięte cele: {{met}}/{{total}}",
       "notes": "Uwagi",
-      "evidence": "Dowód testu (opcjonalnie)",
+      "evidence": "Dowody testu (opcjonalnie)",
       "warnings_title": "Test zarejestrowany z ostrzeżeniami",
       "warning": {
         "rto_over_mtpd": "{{process}}: uzyskane RTO {{achieved}} h przekracza MTPD ({{target}} h)",
@@ -3918,6 +3918,23 @@
         "bia": "Procesy krytyczne i cele RTO/RPO w BIA",
         "document": "Dokument planu wgrany do Dokumentów"
       }
+    },
+    "evidence": {
+      "upload": "Wgraj plik",
+      "upload_hint": "Stanie się dowodem zakładu typu „Wynik testu”, ważnym do następnego testu.",
+      "existing": "Lub wybierz istniejące dowody",
+      "search": "Szukaj po tytule…",
+      "none": "Brak dowodów zakładu lub organizacji",
+      "org": "organizacja",
+      "valid_until": "ważny do {{date}}",
+      "title": "Dowody testu",
+      "missing": "Ten test nie ma dowodów: dołącz dowód, aby wykazać go podczas audytu.",
+      "preview": "Podgląd",
+      "download": "Pobierz",
+      "download_error": "Pobieranie nie powiodło się",
+      "add": "+ Dodaj dowód",
+      "add_short": "Dodaj",
+      "attach": "Połącz dowody"
     }
   },
   "audit_trail": {

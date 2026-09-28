@@ -204,3 +204,18 @@ class BcpTestViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         services.delete_test(self.get_object(), request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["post"])
+    def evidences(self, request, pk=None):
+        """Aggiunge evidenze al test: file caricato e/o evidenze esistenti."""
+        test = self.get_object()
+        try:
+            services.add_test_evidences(
+                test,
+                request.user,
+                evidence_ids=_json_list(request.data.get("evidence_ids")),
+                evidence_file=request.FILES.get("evidence_file"),
+            )
+        except ValidationError as exc:
+            return _error(exc)
+        return Response(BcpTestSerializer(self.get_queryset().get(pk=test.pk)).data)

@@ -46,7 +46,16 @@ export interface BcpTest {
   participants_count: number;
   objectives_met_pct: number | null;
   evidences_count: number;
+  evidence_items: BcpTestEvidence[];
   notes: string;
+}
+
+export interface BcpTestEvidence {
+  id: string;
+  title: string;
+  evidence_type: string;
+  valid_until: string | null;
+  file_name: string | null;
 }
 
 export interface BcpTestWarning {
@@ -98,6 +107,16 @@ export const bcpApi = {
     apiClient.patch<BcpPlan>(`/bcp/plans/${id}/`, data).then(r => r.data),
   tests: (params?: Record<string, string>) =>
     fetchAllPages<BcpTest>("/bcp/tests/", params),
+  addTestEvidences: (id: string, data: { evidenceIds?: string[]; file?: File | null }) => {
+    const fd = new FormData();
+    fd.append("evidence_ids", JSON.stringify(data.evidenceIds ?? []));
+    if (data.file) fd.append("evidence_file", data.file);
+    return apiClient
+      .post<BcpTest>(`/bcp/tests/${id}/evidences/`, fd, {
+        headers: { "Content-Type": undefined as unknown as string },
+      })
+      .then(r => r.data);
+  },
   deleteTest: (id: string) =>
     apiClient.delete(`/bcp/tests/${id}/`).then(() => undefined),
   recordTest: (data: Record<string, unknown> | FormData) => {

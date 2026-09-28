@@ -1213,13 +1213,14 @@ Dal tab **Piani** clicca **+ Test**. Si può registrare un test anche su un pian
 - **Data del test**: di default oggi. Si può indicare una data passata, non una futura. Un test più vecchio dell'ultimo registrato non sposta la scadenza
 - **Tipo**: tabletop / discussione, drill / esercitazione parziale, interruzione completa, test parallelo
 - **Esito**: superato, parziale o fallito
-- **RTO e RPO ottenuti**, partecipanti, obiettivi con spunta di quelli raggiunti, note ed evidenza facoltativa
+- **RTO e RPO ottenuti**, partecipanti, obiettivi con spunta di quelli raggiunti, note
+- **Evidenze** (facoltative): carica un file, che diventa un'evidenza «Risultato test» del sito valida fino al prossimo test, oppure scegli una o più evidenze già presenti in Documenti › Evidenze, del sito o di organizzazione. Un file non ammesso o un'evidenza di un altro sito bloccano la registrazione: il test non viene salvato senza la prova che ti aspetti
 
 I tempi ottenuti sono confrontati con MTPD, RTO e RPO target di **ogni** processo coperto. Gli eventuali sforamenti compaiono al salvataggio.
 
 ### Esercitazioni
 
-Il tab **Esercitazioni** è lo storico dei test: data, piano, tipo, esito, RTO/RPO ottenuti (in arancione se oltre il piano), obiettivi raggiunti ed evidenze. Gli obiettivi e le note si leggono passando sopra la riga. Un test non si modifica. Se è stato registrato per errore si elimina, e la data dell'ultimo test del piano viene ricalcolata.
+Il tab **Esercitazioni** è lo storico dei test: data, piano, tipo, esito, RTO/RPO ottenuti (in arancione se oltre il piano), obiettivi raggiunti ed evidenze. Gli obiettivi e le note si leggono passando sopra la riga. Un clic sul numero delle evidenze apre la loro anteprima e il download; un test ancora senza evidenze mostra **Aggiungi** e si può rafforzare in un secondo momento, con un file o un'evidenza esistente. Le evidenze si aggiungono, non si tolgono. Esito e tempi di un test non si modificano. Se è stato registrato per errore si elimina, e la data dell'ultimo test del piano viene ricalcolata.
 
 ### PDCA automatico
 

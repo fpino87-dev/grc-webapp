@@ -3113,3 +3113,9 @@ msgstr "%(n)s procesów krytycznych z zatwierdzonym planem ciągłości działan
 
 msgid "%(n)s processi critici con test BCP scaduto o mai eseguito"
 msgstr "%(n)s procesów krytycznych z zaległym lub nigdy nieprzeprowadzonym testem ciągłości działania"
+
+msgid "Una o più evidenze indicate non esistono o non sono del sito del piano."
+msgstr "Co najmniej jeden ze wskazanych dowodów nie istnieje lub nie należy do zakładu planu."
+
+msgid "Indica un file o almeno un'evidenza esistente."
+msgstr "Wskaż plik lub co najmniej jeden istniejący dowód."

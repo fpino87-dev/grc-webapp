@@ -1213,13 +1213,14 @@ Depuis l'onglet **Plans**, cliquez sur **+ Test**. On peut aussi enregistrer un 
 - **Date du test** : aujourd'hui par défaut. On peut indiquer une date passée, pas une date future. Un test plus ancien que le dernier enregistré ne déplace pas l'échéance
 - **Type** : sur table / discussion, exercice partiel, interruption complète, test en parallèle
 - **Résultat** : réussi, partiel ou échoué
-- **RTO et RPO obtenus**, participants, objectifs avec coche de ceux atteints, notes et preuve facultative
+- **RTO et RPO obtenus**, participants, objectifs avec coche de ceux atteints, notes
+- **Preuves** (facultatives) : chargez un fichier, qui devient une preuve « Résultat de test » du site valable jusqu'au prochain test, ou choisissez une ou plusieurs preuves existantes dans Documents › Preuves, du site ou de l'organisation. Un fichier non admis ou une preuve d'un autre site bloquent l'enregistrement : le test n'est pas enregistré sans la preuve attendue
 
 Les temps obtenus sont comparés à la PMIA et aux objectifs RTO et RPO de **chaque** processus couvert. Les éventuels dépassements s'affichent à l'enregistrement.
 
 ### Exercices
 
-L'onglet **Exercices** est l'historique des tests : date, plan, type, résultat, RTO/RPO obtenus (en orange s'ils dépassent le plan), objectifs atteints et preuves. Les objectifs et les notes se lisent en survolant la ligne. Un test ne se modifie pas. S'il a été enregistré par erreur, on le supprime et la date du dernier test du plan est recalculée.
+L'onglet **Exercices** est l'historique des tests : date, plan, type, résultat, RTO/RPO obtenus (en orange s'ils dépassent le plan), objectifs atteints et preuves. Les objectifs et les notes se lisent en survolant la ligne. Un clic sur le nombre de preuves ouvre leur aperçu et le téléchargement ; un test encore sans preuve affiche **Ajouter** et peut être renforcé plus tard, avec un fichier ou une preuve existante. Les preuves s'ajoutent, elles ne se retirent pas. Le résultat et les temps d'un test ne se modifient pas. S'il a été enregistré par erreur, on le supprime et la date du dernier test du plan est recalculée.
 
 ### PDCA automatique
 

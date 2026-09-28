@@ -1213,13 +1213,14 @@ Her planın yanında **kanıtlanmış RTO**'su görünür: onu ölçen son testt
 - **Test tarihi**: varsayılan olarak bugün. Geçmiş bir tarih girilebilir, gelecek bir tarih girilemez. Kaydedilen son testten daha eski bir test vadeyi değiştirmez
 - **Tür**: masa başı / tartışma, kısmi tatbikat, tam kesinti, paralel test
 - **Sonuç**: başarılı, kısmi veya başarısız
-- **Elde edilen RTO ve RPO**, katılımcılar, ulaşılanları işaretlenmiş hedefler, notlar ve isteğe bağlı kanıt
+- **Elde edilen RTO ve RPO**, katılımcılar, ulaşılanları işaretlenmiş hedefler, notlar
+- **Kanıtlar** (isteğe bağlı): bir dosya yükleyin; tesisin bir sonraki teste kadar geçerli «Test sonucu» kanıtı olur. Veya Dokümanlar › Kanıtlar'dan tesise ya da organizasyona ait bir veya daha fazla mevcut kanıtı seçin. İzin verilmeyen bir dosya veya başka bir tesise ait kanıt kaydı engeller: test beklenen kanıt olmadan kaydedilmez
 
 Elde edilen süreler kapsanan **her** sürecin MTPD, RTO ve RPO hedefleriyle karşılaştırılır. Varsa aşımlar kayıt sırasında görünür.
 
 ### Tatbikatlar
 
-**Tatbikatlar** sekmesi test geçmişidir: tarih, plan, tür, sonuç, elde edilen RTO/RPO (planı aşıyorsa turuncu), ulaşılan hedefler ve kanıtlar. Hedefler ve notlar satırın üzerine gelinerek okunur. Bir test düzenlenemez. Yanlışlıkla kaydedildiyse silinir ve planın son test tarihi yeniden hesaplanır.
+**Tatbikatlar** sekmesi test geçmişidir: tarih, plan, tür, sonuç, elde edilen RTO/RPO (planı aşıyorsa turuncu), ulaşılan hedefler ve kanıtlar. Hedefler ve notlar satırın üzerine gelinerek okunur. Kanıt sayısına tıklamak önizlemelerini ve indirmeyi açar; henüz kanıtı olmayan bir test **Ekle** gösterir ve daha sonra bir dosya veya mevcut bir kanıtla güçlendirilebilir. Kanıtlar eklenir, kaldırılmaz. Bir testin sonucu ve süreleri düzenlenemez. Yanlışlıkla kaydedildiyse silinir ve planın son test tarihi yeniden hesaplanır.
 
 ### Otomatik PDCA
 

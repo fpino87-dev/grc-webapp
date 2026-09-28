@@ -1213,13 +1213,14 @@ From the **Plans** tab click **+ Test**. A test can also be recorded on an appro
 - **Test date**: today by default. A past date can be given, not a future one. A test older than the latest one recorded does not move the due date
 - **Type**: tabletop / discussion, drill / partial exercise, full interruption, parallel test
 - **Result**: passed, partial or failed
-- **RTO and RPO achieved**, participants, objectives with a tick for those met, notes and optional evidence
+- **RTO and RPO achieved**, participants, objectives with a tick for those met, notes
+- **Evidence** (optional): upload a file, which becomes a “Test result” evidence of the site valid until the next test, or choose one or more existing items from Documents › Evidence, of the site or of the organisation. A file that is not allowed or evidence from another site blocks the recording: the test is not saved without the proof you expect
 
 The achieved times are compared with the MTPD, RTO and RPO targets of **every** covered process. Any overruns are shown on saving.
 
 ### Exercises
 
-The **Exercises** tab is the test history: date, plan, type, result, RTO/RPO achieved (in orange if over the plan), objectives met and evidence. Objectives and notes can be read by hovering over the row. A test cannot be edited. If it was recorded by mistake it is deleted, and the plan's last test date is recalculated.
+The **Exercises** tab is the test history: date, plan, type, result, RTO/RPO achieved (in orange if over the plan), objectives met and evidence. Objectives and notes can be read by hovering over the row. Clicking the evidence count opens their preview and download; a test still without evidence shows **Add** and can be strengthened later with a file or existing evidence. Evidence is added, never removed. The result and times of a test cannot be edited. If it was recorded by mistake it is deleted, and the plan's last test date is recalculated.
 
 ### Automatic PDCA
 

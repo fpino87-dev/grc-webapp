@@ -3859,7 +3859,7 @@
       "objective_placeholder": "Ajouter un objectif…",
       "objectives_met": "Objectifs atteints : {{met}}/{{total}}",
       "notes": "Notes",
-      "evidence": "Preuve du test (facultative)",
+      "evidence": "Preuves du test (facultatives)",
       "warnings_title": "Test enregistré avec avertissements",
       "warning": {
         "rto_over_mtpd": "{{process}} : RTO obtenu {{achieved}} h au-delà de la PMIA ({{target}} h)",
@@ -3918,6 +3918,23 @@
         "bia": "Processus critiques et objectifs RTO/RPO dans la BIA",
         "document": "Document du plan chargé dans Documents"
       }
+    },
+    "evidence": {
+      "upload": "Charger un fichier",
+      "upload_hint": "Il devient une preuve « Résultat de test » du site, valable jusqu'au prochain test.",
+      "existing": "Ou choisir des preuves existantes",
+      "search": "Rechercher par titre…",
+      "none": "Aucune preuve du site ou de l'organisation",
+      "org": "organisation",
+      "valid_until": "valable jusqu'au {{date}}",
+      "title": "Preuves du test",
+      "missing": "Ce test n'a aucune preuve : joignez-en une pour le démontrer en audit.",
+      "preview": "Aperçu",
+      "download": "Télécharger",
+      "download_error": "Échec du téléchargement",
+      "add": "+ Ajouter une preuve",
+      "add_short": "Ajouter",
+      "attach": "Lier les preuves"
     }
   },
   "audit_trail": {

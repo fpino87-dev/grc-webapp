@@ -1213,13 +1213,14 @@ W zakładce **Plany** kliknij **+ Test**. Test można zarejestrować także dla 
 - **Datę testu**: domyślnie dzisiaj. Można podać datę przeszłą, nie przyszłą. Test starszy niż ostatni zarejestrowany nie przesuwa terminu
 - **Rodzaj**: tabletop / dyskusja, ćwiczenie częściowe, pełne przerwanie, test równoległy
 - **Wynik**: zaliczony, częściowy lub niezaliczony
-- **Uzyskane RTO i RPO**, uczestników, cele z zaznaczeniem osiągniętych, uwagi i opcjonalny dowód
+- **Uzyskane RTO i RPO**, uczestników, cele z zaznaczeniem osiągniętych, uwagi
+- **Dowody** (opcjonalnie): wgraj plik, który stanie się dowodem zakładu typu „Wynik testu”, ważnym do następnego testu, lub wybierz jeden lub więcej istniejących dowodów z Dokumenty › Dowody, zakładu lub organizacji. Niedozwolony plik lub dowód z innego zakładu blokuje rejestrację: test nie zostanie zapisany bez oczekiwanego dowodu
 
 Uzyskane czasy są porównywane z MTPD oraz celami RTO i RPO **każdego** objętego procesu. Ewentualne przekroczenia wyświetlają się przy zapisie.
 
 ### Ćwiczenia
 
-Zakładka **Ćwiczenia** to historia testów: data, plan, rodzaj, wynik, uzyskane RTO/RPO (na pomarańczowo, jeśli przekraczają plan), osiągnięte cele i dowody. Cele i uwagi można odczytać po najechaniu na wiersz. Testu nie można edytować. Jeśli został zarejestrowany przez pomyłkę, usuwa się go, a data ostatniego testu planu jest przeliczana.
+Zakładka **Ćwiczenia** to historia testów: data, plan, rodzaj, wynik, uzyskane RTO/RPO (na pomarańczowo, jeśli przekraczają plan), osiągnięte cele i dowody. Cele i uwagi można odczytać po najechaniu na wiersz. Kliknięcie liczby dowodów otwiera ich podgląd i pobieranie; test jeszcze bez dowodów pokazuje **Dodaj** i można go wzmocnić później plikiem lub istniejącym dowodem. Dowody się dodaje, nie usuwa. Wyniku i czasów testu nie można edytować. Jeśli został zarejestrowany przez pomyłkę, usuwa się go, a data ostatniego testu planu jest przeliczana.
 
 ### Automatyczne PDCA
 

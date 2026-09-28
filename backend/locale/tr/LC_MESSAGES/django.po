@@ -3092,3 +3092,9 @@ msgstr "Onaylı iş sürekliliği planı olan ancak testi gecikmiş veya hiç ya
 
 msgid "%(n)s processi critici con test BCP scaduto o mai eseguito"
 msgstr "İş sürekliliği testi gecikmiş veya hiç yapılmamış %(n)s kritik süreç"
+
+msgid "Una o più evidenze indicate non esistono o non sono del sito del piano."
+msgstr "Belirtilen kanıtlardan biri veya birkaçı mevcut değil ya da planın tesisine ait değil."
+
+msgid "Indica un file o almeno un'evidenza esistente."
+msgstr "Bir dosya veya en az bir mevcut kanıt belirtin."

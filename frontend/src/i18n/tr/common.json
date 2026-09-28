@@ -3859,7 +3859,7 @@
       "objective_placeholder": "Hedef ekle…",
       "objectives_met": "Ulaşılan hedefler: {{met}}/{{total}}",
       "notes": "Notlar",
-      "evidence": "Test kanıtı (isteğe bağlı)",
+      "evidence": "Test kanıtları (isteğe bağlı)",
       "warnings_title": "Test uyarılarla kaydedildi",
       "warning": {
         "rto_over_mtpd": "{{process}}: elde edilen RTO {{achieved}} sa, MTPD'yi ({{target}} sa) aşıyor",
@@ -3918,6 +3918,23 @@
         "bia": "BIA'da kritik süreçler ve RTO/RPO hedefleri",
         "document": "Dokümanlar'a yüklenmiş plan dokümanı"
       }
+    },
+    "evidence": {
+      "upload": "Dosya yükle",
+      "upload_hint": "Tesisin bir sonraki teste kadar geçerli «Test sonucu» kanıtı olur.",
+      "existing": "Veya mevcut kanıtları seçin",
+      "search": "Başlığa göre ara…",
+      "none": "Tesise veya organizasyona ait kanıt yok",
+      "org": "organizasyon",
+      "valid_until": "{{date}} tarihine kadar geçerli",
+      "title": "Test kanıtları",
+      "missing": "Bu testin kanıtı yok: denetimde kanıtlamak için bir kanıt ekleyin.",
+      "preview": "Önizleme",
+      "download": "İndir",
+      "download_error": "İndirme başarısız",
+      "add": "+ Kanıt ekle",
+      "add_short": "Ekle",
+      "attach": "Kanıtları bağla"
     }
   },
   "audit_trail": {

@@ -291,3 +291,68 @@ def test_test_on_plan_outside_scope_not_found(plant, user):
     resp = c.post(URL_TESTS, {"plan": str(plan.id), "result": "superato"}, format="json")
     assert resp.status_code in (403, 404)
     assert not plan.tests.exists()
+
+
+# ── Evidenze del test ────────────────────────────────────────────────────────
+
+def _pdf(name="report.pdf"):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    return SimpleUploadedFile(name, b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n", content_type="application/pdf")
+
+
+@pytest.mark.django_db
+def test_record_test_with_existing_evidence_of_site_or_org(plant, user):
+    from apps.documents.models import Evidence
+
+    plan = _plan(plant, user, status="approvato")
+    ev_site = Evidence.objects.create(title="Log restore", plant=plant, created_by=user)
+    ev_org = Evidence.objects.create(title="Report DR org", plant=None, created_by=user)
+    test, _w = services.record_test(plan, "superato", user, evidence_ids=[str(ev_site.pk), str(ev_org.pk)])
+    assert set(test.evidences.values_list("pk", flat=True)) == {ev_site.pk, ev_org.pk}
+
+
+@pytest.mark.django_db
+def test_evidence_of_other_site_blocks_the_test(plant, user):
+    from apps.documents.models import Evidence
+
+    plan = _plan(plant, user, status="approvato")
+    foreign = Evidence.objects.create(title="Altro sito", plant=_plant("BCE"), created_by=user)
+    with pytest.raises(ValidationError):
+        services.record_test(plan, "superato", user, evidence_ids=[str(foreign.pk)])
+    assert not plan.tests.exists()
+
+
+@pytest.mark.django_db
+def test_invalid_file_blocks_the_test_instead_of_being_lost(plant, user):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    plan = _plan(plant, user, status="approvato")
+    bad = SimpleUploadedFile("script.exe", b"MZ\x90\x00", content_type="application/octet-stream")
+    with pytest.raises(ValidationError):
+        services.record_test(plan, "superato", user, evidence_file=bad)
+    assert not plan.tests.exists()
+
+
+@pytest.mark.django_db
+def test_add_evidences_to_existing_test(client, plant, user, settings, tmp_path):
+    from apps.documents.models import Evidence
+
+    settings.MEDIA_ROOT = str(tmp_path)
+    plan = _plan(plant, user, status="approvato")
+    test, _w = services.record_test(plan, "superato", user)
+    ev = Evidence.objects.create(title="Verbale esercitazione", plant=plant, created_by=user)
+
+    resp = client.post(f"{URL_TESTS}{test.id}/evidences/", {"evidence_ids": [str(ev.pk)]}, format="json")
+    assert resp.status_code == 200, resp.data
+    assert resp.data["evidences_count"] == 1
+    assert resp.data["evidence_items"][0]["title"] == "Verbale esercitazione"
+
+    resp = client.post(f"{URL_TESTS}{test.id}/evidences/", {"evidence_file": _pdf()}, format="multipart")
+    assert resp.status_code == 200, resp.data
+    assert resp.data["evidences_count"] == 2
+    created = Evidence.objects.exclude(pk=ev.pk).get()
+    assert created.evidence_type == "test_result"
+    assert created.plant_id == plant.pk
+
+    assert client.post(f"{URL_TESTS}{test.id}/evidences/", {}, format="json").status_code == 400

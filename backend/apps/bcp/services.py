@@ -458,6 +458,13 @@ def record_test(
     test_date = test_date or today
     if test_date > today:
         raise ValidationError(_("La data del test non può essere futura."))
+    # Evidenze verificate PRIMA di salvare il test: un file non ammesso o
+    # un'evidenza fuori sito blocca la registrazione invece di perdersi.
+    existing_evidences = _evidences_for_plan(plan, evidence_ids)
+    if evidence_file:
+        from core.uploads import validate_uploaded_file
+
+        validate_uploaded_file(evidence_file)
 
     test = BcpTest.objects.create(
         plan=plan,
@@ -478,7 +485,7 @@ def record_test(
         recompute_next_test_date(plan)
         plan.save(update_fields=["last_test_date", "next_test_date", "updated_at"])
 
-    _attach_evidences(plan, test, user, notes, evidence_ids, evidence_file, evidence_payload)
+    _link_evidences(test, user, existing_evidences, evidence_file, evidence_payload, notes)
 
     log_action(
         user=user,
@@ -493,6 +500,7 @@ def record_test(
             "test_date": test_date.isoformat(),
             "rto_achieved": rto_achieved,
             "rpo_achieved": rpo_achieved,
+            "evidences": test.evidences.count(),
         },
     )
 
@@ -524,30 +532,68 @@ def record_test(
     return test, warnings
 
 
-def _attach_evidences(plan, test, user, notes, evidence_ids, evidence_file, evidence_payload):
-    """Evidenze del test: esistenti e/o file caricato. Non bloccano il test
-    (savepoint: un errore qui non invalida la registrazione)."""
-    try:
-        with transaction.atomic():
-            if evidence_ids:
-                from apps.documents.models import Evidence
+def _evidences_for_plan(plan: BcpPlan, evidence_ids) -> list:
+    """Evidenze esistenti collegabili a un test del piano: non eliminate e del
+    sito del piano o di organizzazione (le stesse che l'elenco evidenze mostra
+    per quel sito)."""
+    from apps.documents.models import Evidence
 
-                test.evidences.add(
-                    *Evidence.objects.filter(pk__in=evidence_ids, deleted_at__isnull=True)
-                )
-            if evidence_file:
-                from apps.documents.services import create_evidence_with_file
+    ids = {str(e) for e in (evidence_ids or []) if e}
+    if not ids:
+        return []
+    evidences = list(
+        Evidence.objects.filter(pk__in=ids, deleted_at__isnull=True)
+        .filter(Q(plant_id=plan.plant_id) | Q(plant__isnull=True))
+    )
+    if len(evidences) != len(ids):
+        raise ValidationError(_("Una o più evidenze indicate non esistono o non sono del sito del piano."))
+    return evidences
 
-                payload = evidence_payload.copy() if evidence_payload else {}
-                payload.setdefault("title", f"BCP test — {plan.title}")
-                payload.setdefault("evidence_type", "test_result")
-                payload.setdefault("description", notes or payload.get("description", ""))
-                payload.setdefault("plant", str(plan.plant_id) if plan.plant_id else None)
-                if plan.next_test_date:
-                    payload.setdefault("valid_until", plan.next_test_date.isoformat())
-                test.evidences.add(create_evidence_with_file(payload, evidence_file, user))
-    except Exception as exc:
-        logger.warning("BCP: evidenza non creata per il test del piano %s: %s", plan.pk, exc)
+
+def _link_evidences(test: BcpTest, user, evidences, evidence_file, evidence_payload=None, notes="") -> int:
+    """Collega al test evidenze esistenti e/o una nuova evidenza dal file
+    caricato (tipo "Risultato test", valida fino al prossimo test del piano).
+    Ritorna il numero di evidenze aggiunte."""
+    plan = test.plan
+    added = list(evidences)
+    if evidence_file:
+        from apps.documents.services import create_evidence_with_file
+
+        payload = evidence_payload.copy() if evidence_payload else {}
+        payload.setdefault("title", f"BCP test {test.test_date.isoformat()} — {plan.title}"[:300])
+        payload.setdefault("evidence_type", "test_result")
+        payload.setdefault("description", notes or "")
+        payload.setdefault("plant", str(plan.plant_id) if plan.plant_id else None)
+        if plan.next_test_date:
+            payload.setdefault("valid_until", plan.next_test_date.isoformat())
+        added.append(create_evidence_with_file(payload, evidence_file, user))
+    already = set(test.evidences.values_list("pk", flat=True))
+    new = [e for e in added if e.pk not in already]
+    if new:
+        test.evidences.add(*new)
+    return len(new)
+
+
+@transaction.atomic
+def add_test_evidences(test: BcpTest, user, evidence_ids=None, evidence_file=None) -> int:
+    """Aggiunge evidenze a un test già registrato (le evidenze si aggiungono,
+    esito e tempi del test restano quelli registrati)."""
+    if not evidence_ids and not evidence_file:
+        raise ValidationError(_("Indica un file o almeno un'evidenza esistente."))
+    evidences = _evidences_for_plan(test.plan, evidence_ids)
+    if evidence_file:
+        from core.uploads import validate_uploaded_file
+
+        validate_uploaded_file(evidence_file)
+    added = _link_evidences(test, user, evidences, evidence_file)
+    log_action(
+        user=user,
+        action_code="bcp.test.evidence_added",
+        level="L2",
+        entity=test,
+        payload={"id": str(test.id), "plan_id": str(test.plan_id), "added": added},
+    )
+    return added
 
 
 def delete_test(test: BcpTest, user) -> None:

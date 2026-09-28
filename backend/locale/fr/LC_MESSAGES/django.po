@@ -3158,3 +3158,9 @@ msgstr "%(n)s processus critiques avec un plan de continuité approuvé mais un 
 
 msgid "%(n)s processi critici con test BCP scaduto o mai eseguito"
 msgstr "%(n)s processus critiques avec un test de continuité échu ou jamais réalisé"
+
+msgid "Una o più evidenze indicate non esistono o non sono del sito del piano."
+msgstr "Une ou plusieurs preuves indiquées n'existent pas ou n'appartiennent pas au site du plan."
+
+msgid "Indica un file o almeno un'evidenza esistente."
+msgstr "Indiquez un fichier ou au moins une preuve existante."

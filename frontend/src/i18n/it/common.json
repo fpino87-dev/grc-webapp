@@ -3859,7 +3859,7 @@
       "objective_placeholder": "Aggiungi obiettivo…",
       "objectives_met": "Obiettivi raggiunti: {{met}}/{{total}}",
       "notes": "Note",
-      "evidence": "Evidenza del test (facoltativa)",
+      "evidence": "Evidenze del test (facoltative)",
       "warnings_title": "Test registrato con avvisi",
       "warning": {
         "rto_over_mtpd": "{{process}}: RTO ottenuto {{achieved}}h oltre l'MTPD ({{target}}h)",
@@ -3918,6 +3918,23 @@
         "bia": "Processi critici e target RTO/RPO in BIA",
         "document": "Documento del piano caricato in Documenti"
       }
+    },
+    "evidence": {
+      "upload": "Carica un file",
+      "upload_hint": "Diventa un'evidenza «Risultato test» del sito, valida fino al prossimo test.",
+      "existing": "Oppure scegli evidenze già presenti",
+      "search": "Cerca per titolo…",
+      "none": "Nessuna evidenza del sito o di organizzazione",
+      "org": "organizzazione",
+      "valid_until": "valida fino al {{date}}",
+      "title": "Evidenze del test",
+      "missing": "Questo test non ha evidenze: allegane una per dimostrarlo in audit.",
+      "preview": "Anteprima",
+      "download": "Scarica",
+      "download_error": "Download non riuscito",
+      "add": "+ Aggiungi evidenza",
+      "add_short": "Aggiungi",
+      "attach": "Collega evidenze"
     }
   },
   "audit_trail": {

@@ -12,13 +12,21 @@ vi.mock("../../../api/endpoints/bcp", () => ({
   bcpApi: {
     list: vi.fn(), coverage: vi.fn(), tests: vi.fn(), approve: vi.fn(), archive: vi.fn(),
     delete: vi.fn(), deleteTest: vi.fn(), create: vi.fn(), update: vi.fn(), recordTest: vi.fn(),
+    addTestEvidences: vi.fn(),
   },
 }));
 vi.mock("../../../api/endpoints/bia", () => ({
   biaApi: { list: vi.fn(() => Promise.resolve({ results: [] })) },
 }));
 vi.mock("../../../api/endpoints/documents", () => ({
-  documentsApi: { list: vi.fn(() => Promise.resolve({ results: [] })) },
+  documentsApi: {
+    list: vi.fn(() => Promise.resolve({ results: [] })),
+    evidences: vi.fn(() => Promise.resolve({ results: [
+      { id: "e1", title: "Log ripristino ERP", plant: "p1", valid_until: null },
+      { id: "e2", title: "Report DR di gruppo", plant: null, valid_until: "2027-01-31" },
+    ] })),
+    downloadEvidence: vi.fn(),
+  },
 }));
 vi.mock("../../../api/endpoints/plants", () => ({
   plantsApi: { list: vi.fn(() => Promise.resolve([{ id: "p1", code: "TA", name: "Plant TA" }])) },
@@ -100,5 +108,27 @@ describe("BcpPage", () => {
     expect(screen.queryByText("Vecchio piano")).not.toBeInTheDocument();
     fireEvent.click(screen.getByText("bcp.plans.show_archived"));
     expect(screen.getByText("Vecchio piano")).toBeInTheDocument();
+  });
+});
+
+describe("BcpPage — evidenze dei test", () => {
+  it("un test senza evidenze si rafforza collegando un'evidenza esistente", async () => {
+    const test = {
+      id: "t1", plan: "b1", plan_title: "Piano stampaggio", plant: "p1", test_date: "2026-09-20",
+      result: "superato", test_type: "drill", objectives: [], rto_achieved_hours: 6, rpo_achieved_hours: 2,
+      participants_count: 4, objectives_met_pct: null, evidences_count: 0, evidence_items: [], notes: "",
+    };
+    vi.mocked(bcpApi.tests).mockResolvedValue([test] as never);
+    vi.mocked(bcpApi.addTestEvidences).mockResolvedValue({
+      ...test, evidences_count: 1,
+      evidence_items: [{ id: "e2", title: "Report DR di gruppo", evidence_type: "report", valid_until: "2027-01-31", file_name: "dr.pdf" }],
+    } as never);
+    renderPage("/bcp?tab=tests");
+    fireEvent.click(await screen.findByText("bcp.evidence.add_short"));
+    expect(screen.getByText("bcp.evidence.missing")).toBeInTheDocument();
+    fireEvent.click(await screen.findByText("Report DR di gruppo"));
+    fireEvent.click(screen.getByText("bcp.evidence.attach"));
+    expect(await screen.findByText("bcp.evidence.download")).toBeInTheDocument();
+    expect(bcpApi.addTestEvidences).toHaveBeenCalledWith("t1", { evidenceIds: ["e2"], file: null });
   });
 });

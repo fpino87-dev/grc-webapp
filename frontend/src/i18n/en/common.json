@@ -3918,6 +3918,23 @@
         "bia": "Critical processes and RTO/RPO targets in the BIA",
         "document": "Plan document uploaded in Documents"
       }
+    },
+    "evidence": {
+      "upload": "Upload a file",
+      "upload_hint": "It becomes a “Test result” evidence of the site, valid until the next test.",
+      "existing": "Or choose existing evidence",
+      "search": "Search by title…",
+      "none": "No evidence of the site or organisation",
+      "org": "organisation",
+      "valid_until": "valid until {{date}}",
+      "title": "Test evidence",
+      "missing": "This test has no evidence: attach one to prove it in an audit.",
+      "preview": "Preview",
+      "download": "Download",
+      "download_error": "Download failed",
+      "add": "+ Add evidence",
+      "add_short": "Add",
+      "attach": "Link evidence"
     }
   },
   "audit_trail": {

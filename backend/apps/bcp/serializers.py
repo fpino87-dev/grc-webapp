@@ -8,6 +8,7 @@ class BcpTestSerializer(serializers.ModelSerializer):
     plan_title = serializers.CharField(source="plan.title", read_only=True)
     plant = serializers.UUIDField(source="plan.plant_id", read_only=True)
     evidences_count = serializers.SerializerMethodField()
+    evidence_items = serializers.SerializerMethodField()
 
     class Meta:
         model = BcpTest
@@ -19,8 +20,23 @@ class BcpTestSerializer(serializers.ModelSerializer):
             f.name for f in BcpTest._meta.fields
         ] + ["evidences"]
 
+    def _evidences(self, obj):
+        return [e for e in obj.evidences.all() if e.deleted_at is None]
+
     def get_evidences_count(self, obj) -> int:
-        return len(obj.evidences.all())
+        return len(self._evidences(obj))
+
+    def get_evidence_items(self, obj) -> list[dict]:
+        return [
+            {
+                "id": str(e.pk),
+                "title": e.title,
+                "evidence_type": e.evidence_type,
+                "valid_until": e.valid_until.isoformat() if e.valid_until else None,
+                "file_name": e.file_path.rsplit("/", 1)[-1] if e.file_path else None,
+            }
+            for e in self._evidences(obj)
+        ]
 
 
 class BcpPlanSerializer(serializers.ModelSerializer):

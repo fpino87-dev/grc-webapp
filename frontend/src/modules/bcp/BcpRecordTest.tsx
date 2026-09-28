@@ -5,6 +5,7 @@ import {
   bcpApi, type BcpPlan, type BcpTestObjective, type BcpTestResult, type BcpTestWarning,
 } from "../../api/endpoints/bcp";
 import { usePlantToday } from "../../utils/dates";
+import { BcpEvidencePicker } from "./BcpEvidencePicker";
 import { TEST_TYPES } from "./shared";
 
 export function BcpRecordTest({ plan, onClose }: { plan: BcpPlan; onClose: () => void }) {
@@ -21,6 +22,7 @@ export function BcpRecordTest({ plan, onClose }: { plan: BcpPlan; onClose: () =>
   const [objectives, setObjectives] = useState<BcpTestObjective[]>([]);
   const [newObjective, setNewObjective] = useState("");
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
+  const [evidenceIds, setEvidenceIds] = useState<string[]>([]);
   const [warnings, setWarnings] = useState<BcpTestWarning[]>([]);
 
   const mutation = useMutation({
@@ -33,6 +35,7 @@ export function BcpRecordTest({ plan, onClose }: { plan: BcpPlan; onClose: () =>
         objectives: JSON.stringify(objectives),
         notes,
         participants_count: participants || "0",
+        evidence_ids: JSON.stringify(evidenceIds),
       };
       if (rtoAchieved) fields.rto_achieved_hours = rtoAchieved;
       if (rpoAchieved) fields.rpo_achieved_hours = rpoAchieved;
@@ -177,7 +180,13 @@ export function BcpRecordTest({ plan, onClose }: { plan: BcpPlan; onClose: () =>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t("bcp.record.evidence")}</label>
-            <input type="file" onChange={e => setEvidenceFile(e.target.files?.[0] ?? null)} className="w-full border rounded px-3 py-2 text-sm" />
+            <BcpEvidencePicker
+              plantId={plan.plant}
+              file={evidenceFile}
+              onFileChange={setEvidenceFile}
+              selectedIds={evidenceIds}
+              onSelectedChange={setEvidenceIds}
+            />
           </div>
         </div>
 
