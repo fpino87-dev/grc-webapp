@@ -97,6 +97,7 @@ def compute_operational_kpis(self):
     from apps.plants.models import Plant
 
     from . import services
+    from .kpi_scope import current_scope, sync_and_log
     from .models import KPIDefinition
 
     # Settimana conclusa: il lunedì di 7 giorni fa.
@@ -106,28 +107,27 @@ def compute_operational_kpis(self):
     snapshot_count = 0
     alert_count = 0
 
+    # Prima di calcolare: via gli snapshot rimasti fuori scope (definizioni
+    # disattivate/cancellate, siti passati a una definizione propria), così
+    # nessuna riga fantasma affianca il valore reale. Idempotente.
+    synced = sync_and_log()
+
     kpis = (
         KPIDefinition.objects.filter(
             is_active=True, source__in=["checklist", "internal"]
         )
         .select_related("plant", "checklist_template")
     )
-    active_plants = list(Plant.objects.filter(status="attivo"))
+    # Scope unico (kpi_scope): la definizione di sito vale per il suo sito, la
+    # globale per i siti senza una definizione propria dello stesso kpi_code.
+    # Si calcola solo sui siti attivi.
+    scope = current_scope()
+    active_plants = {p.id: p for p in Plant.objects.filter(status="attivo")}
     for kpi_def in kpis:
-        if kpi_def.plant_id:
-            target_plants = [kpi_def.plant]
-        else:
-            # Definizione globale: vale solo per i siti che non hanno una
-            # propria definizione dello stesso kpi_code. Chi ne ha una decide
-            # soglie e attivazione per conto suo (anche disattivandola), e
-            # misurare due volte lo stesso KPI sullo stesso sito produrrebbe
-            # snapshot doppi in dashboard.
-            overridden = set(
-                KPIDefinition.objects.filter(
-                    kpi_code=kpi_def.kpi_code, plant__isnull=False
-                ).values_list("plant_id", flat=True)
-            )
-            target_plants = [p for p in active_plants if p.id not in overridden]
+        target_plants = [
+            active_plants[pid] for pid in scope.get(kpi_def.pk, set())
+            if pid in active_plants
+        ]
         for plant in target_plants:
             snapshot = services.compute_and_store_kpi_snapshot(
                 kpi_def, plant, week_start
@@ -138,7 +138,8 @@ def compute_operational_kpis(self):
 
     return (
         f"compute_operational_kpis: {snapshot_count} snapshot, "
-        f"{alert_count} alert inviati (week_start={week_start})"
+        f"{alert_count} alert inviati, {synced['pruned']} fuori scope tolti, "
+        f"{synced['restored']} ripristinati (week_start={week_start})"
     )
 
 

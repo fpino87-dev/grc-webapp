@@ -42,6 +42,7 @@ def get_operational_kpi_summary(plant_id, all_plants: bool = False) -> dict:
     snapshot globali `plant=None` da ingest API).
     """
     from django.db.models import Q
+    from apps.tasks.kpi_scope import current_scope, pick_snapshot
     from apps.tasks.models import OperationalKpiSnapshot
 
     snaps = (
@@ -49,20 +50,22 @@ def get_operational_kpi_summary(plant_id, all_plants: bool = False) -> dict:
         .filter(Q(plant_id=plant_id) | Q(plant__isnull=True) if plant_id or not all_plants else Q())
         .filter(kpi_definition__is_active=True, kpi_definition__deleted_at__isnull=True)
         .select_related("kpi_definition", "plant")
-        .order_by("kpi_definition_id", "-week_start", "-created_at")
     )
 
-    latest: dict = {}
+    # Un solo valore per KPI (per KPI e sito nel riesame di organizzazione),
+    # raggruppando per kpi_code e non per definizione: se per lo stesso sito
+    # esistono più definizioni dello stesso codice (globale e di sito), vince
+    # quella che vale per il sito (kpi_scope), mai una riga fantasma no_data.
+    per_site = all_plants and not plant_id
+    groups: dict = {}
     for s in snaps:
-        # Per ogni KPI tieni solo il primo (= più recente, per via dell'order_by);
-        # a parità di plant_id/None preferisci lo snapshot legato al plant.
-        # Con `all_plants` (riesame di organizzazione) un valore per ogni sito.
-        key = (s.kpi_definition_id, s.plant_id) if all_plants and not plant_id else s.kpi_definition_id
-        prev = latest.get(key)
-        if prev is None:
-            latest[key] = s
-        elif prev.plant_id is None and s.plant_id is not None and s.week_start == prev.week_start:
-            latest[key] = s
+        key = (s.kpi_definition.kpi_code, s.plant_id) if per_site else s.kpi_definition.kpi_code
+        groups.setdefault(key, []).append(s)
+    scope = current_scope()
+    latest = {
+        key: pick_snapshot(candidates, scope, None if per_site else plant_id)
+        for key, candidates in groups.items()
+    }
 
     status_counts = {"ok": 0, "warning": 0, "critical": 0, "no_data": 0}
     items = []

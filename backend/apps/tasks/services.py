@@ -739,6 +739,30 @@ def _maybe_alert(kpi_def, plant, snapshot, prev_status) -> bool:
     return False
 
 
+def _upsert_snapshot(kpi_def, plant, week_start, defaults):
+    """Crea o aggiorna lo snapshot (definizione, sito, settimana).
+
+    Il vincolo di unicità comprende anche le righe cancellate logicamente
+    (tolte perché fuori scope, vedi kpi_scope): una misura nuova per la stessa
+    settimana riusa e ripristina quella riga invece di violare il vincolo."""
+    from .models import OperationalKpiSnapshot
+
+    snapshot, _created = OperationalKpiSnapshot.objects.all_with_deleted().update_or_create(
+        kpi_definition=kpi_def,
+        plant=plant,
+        week_start=week_start,
+        defaults={**defaults, "deleted_at": None},
+    )
+    return snapshot
+
+
+def snapshot_in_scope(kpi_def, plant) -> bool:
+    """True se la definizione vale per il sito (plant=None: valore globale)."""
+    from .kpi_scope import current_scope, in_scope
+
+    return in_scope(current_scope(kpi_def.kpi_code), kpi_def.pk, plant.pk if plant else None)
+
+
 def record_manual_kpi_value(kpi_def, plant, value, week_start=None, note="", user=None):
     """
     Registra a mano il valore di un KPI per una settimana.
@@ -768,19 +792,14 @@ def record_manual_kpi_value(kpi_def, plant, value, week_start=None, note="", use
     prev_status = prev.status if prev else None
 
     with transaction.atomic():
-        snapshot, _created = OperationalKpiSnapshot.objects.update_or_create(
-            kpi_definition=kpi_def,
-            plant=plant,
-            week_start=week_start,
-            defaults={
-                "value": value,
-                "status": status,
-                "source": "manual",
-                "measured_at": timezone.now(),
-                "run_count": 0,
-                "note": note or "Inserimento manuale",
-            },
-        )
+        snapshot = _upsert_snapshot(kpi_def, plant, week_start, {
+            "value": value,
+            "status": status,
+            "source": "manual",
+            "measured_at": timezone.now(),
+            "run_count": 0,
+            "note": note or "Inserimento manuale",
+        })
         log_action(
             user=user,
             action_code="kpi_snapshot.recorded_manually",
@@ -824,19 +843,14 @@ def compute_and_store_kpi_snapshot(kpi_def, plant, week_start):
     )
     prev_status = prev.status if prev else None
 
-    snapshot, _created = OperationalKpiSnapshot.objects.update_or_create(
-        kpi_definition=kpi_def,
-        plant=plant,
-        week_start=week_start,
-        defaults={
-            "value": value,
-            "status": status,
-            "source": kpi_def.source,
-            "measured_at": timezone.now(),
-            "run_count": result["run_count"],
-            "note": result["note"],
-        },
-    )
+    snapshot = _upsert_snapshot(kpi_def, plant, week_start, {
+        "value": value,
+        "status": status,
+        "source": kpi_def.source,
+        "measured_at": timezone.now(),
+        "run_count": result["run_count"],
+        "note": result["note"],
+    })
 
     # Espone al chiamante (es. task Celery) se è stato inviato un alert, senza
     # alterare il valore di ritorno documentato (lo snapshot).
@@ -970,19 +984,14 @@ def ingest_kpi_from_api(
     note_label = (note or "").strip()
     note_full = f"{note_label} [origine: {source}]".strip() if source else note_label
 
-    snapshot, _c = OperationalKpiSnapshot.objects.update_or_create(
-        kpi_definition=kpi_def,
-        plant=plant,
-        week_start=week_start,
-        defaults={
-            "value": value_f,
-            "status": status,
-            "source": "api",
-            "measured_at": measured_at,
-            "run_count": 0,
-            "note": note_full[:2000],
-        },
-    )
+    snapshot = _upsert_snapshot(kpi_def, plant, week_start, {
+        "value": value_f,
+        "status": status,
+        "source": "api",
+        "measured_at": measured_at,
+        "run_count": 0,
+        "note": note_full[:2000],
+    })
 
     _maybe_alert(kpi_def, plant, snapshot, prev_status)
 
@@ -1166,6 +1175,11 @@ def import_kpi_suggestions(plant, kpi_codes, overrides=None, user=None) -> dict:
                 },
             )
         (restored if is_restore else created).append(code)
+        # Una definizione di sito scavalca la globale su quel sito; una
+        # definizione ripristinata riporta il suo storico.
+        from .kpi_scope import sync_and_log
+
+        sync_and_log(code, user)
 
     return {
         "created": created,

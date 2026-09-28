@@ -309,11 +309,29 @@ class KPIDefinitionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             return KPIDefinitionListSerializer
         return KPIDefinitionSerializer
 
+    # Ogni modifica che cambia a chi vale una definizione (nuova definizione di
+    # sito che scavalca la globale, cambio di sito o di codice, disattivazione,
+    # cancellazione) riallinea subito gli snapshot di quel kpi_code allo scope
+    # corrente: niente righe fantasma fino al calcolo del lunedì.
+
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        from .kpi_scope import sync_and_log
+
+        kpi = serializer.save(created_by=self.request.user)
+        sync_and_log(kpi.kpi_code, self.request.user)
+
+    def perform_update(self, serializer):
+        from .kpi_scope import sync_and_log
+
+        old_code = serializer.instance.kpi_code
+        kpi = serializer.save()
+        for code in {old_code, kpi.kpi_code}:
+            sync_and_log(code, self.request.user)
 
     def perform_destroy(self, instance):
         from core.audit import log_action
+
+        from .kpi_scope import sync_and_log
         log_action(
             user=self.request.user,
             action_code="kpi_definition.deleted",
@@ -322,6 +340,7 @@ class KPIDefinitionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             payload={"id": str(instance.pk), "kpi_code": instance.kpi_code},
         )
         instance.soft_delete()
+        sync_and_log(instance.kpi_code, self.request.user)
 
     @action(detail=True, methods=["post"], url_path="record-value")
     def record_value(self, request, pk=None):
@@ -355,6 +374,16 @@ class KPIDefinitionViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
         require_plant_access(request.user, plant, aggregate_requires_org=False)
+        # Un valore per un sito che ha una propria definizione di questo KPI
+        # va registrato su quella: sulla globale sarebbe una riga fuori scope.
+        if not kpi.is_active or not services.snapshot_in_scope(kpi, plant):
+            return Response(
+                {"error": _(
+                    "Questa definizione non vale per il sito indicato: il sito ha "
+                    "una propria definizione del KPI oppure la definizione non è attiva."
+                )},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         week_start = request.data.get("week_start")
         if week_start:
@@ -432,8 +461,19 @@ class OperationalKpiSnapshotViewSet(
         else:
             qs = qs.filter(plant__isnull=True)
 
-        # Ultimi N per data desc, poi riordinati ASC per il grafico.
-        latest = list(qs.order_by("-week_start")[:weeks])
+        # Una sola misura per settimana: se per lo stesso (kpi_code, sito)
+        # esistono più definizioni, vince quella che vale per il sito
+        # (kpi_scope.pick_snapshot). Poi ultimi N, riordinati ASC per il grafico.
+        from .kpi_scope import current_scope, pick_snapshot
+
+        scope = current_scope(kpi_code)
+        by_week: dict = {}
+        for snap in qs.order_by("-week_start"):
+            by_week.setdefault(snap.week_start, []).append(snap)
+        latest = [
+            pick_snapshot(by_week[week], scope)
+            for week in sorted(by_week, reverse=True)[:weeks]
+        ]
         latest.reverse()
 
         # Soglie e nome vengono dalla definizione del sito richiesto; se il

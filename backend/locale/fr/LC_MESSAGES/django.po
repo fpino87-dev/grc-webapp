@@ -3164,3 +3164,6 @@ msgstr "Une ou plusieurs preuves indiquées n'existent pas ou n'appartiennent pa
 
 msgid "Indica un file o almeno un'evidenza esistente."
 msgstr "Indiquez un fichier ou au moins une preuve existante."
+
+msgid "Questa definizione non vale per il sito indicato: il sito ha una propria definizione del KPI oppure la definizione non è attiva."
+msgstr "Cette définition ne s'applique pas au site indiqué : le site a sa propre définition du KPI ou la définition n'est pas active."
