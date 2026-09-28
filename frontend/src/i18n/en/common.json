@@ -5023,7 +5023,10 @@
       "col_last_scan": "Last scan",
       "sup_to_report": "To report: {{count}}",
       "sup_reported": "Reported: {{count}}",
-      "nis2_critical": "NIS2-critical supplier/site"
+      "nis2_critical": "NIS2-critical supplier/site",
+      "no_own": "No own domain or asset is monitored: posture and issues to fix stay empty. Enter the domain in the site record:",
+      "no_own_link": "Open Sites",
+      "todo_nothing_monitored": "No own domain monitored"
     },
     "drawer": {
       "close": "Close",

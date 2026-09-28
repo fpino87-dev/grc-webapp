@@ -5023,7 +5023,10 @@
       "col_last_scan": "Ultimo scan",
       "sup_to_report": "Da segnalare: {{count}}",
       "sup_reported": "Segnalati: {{count}}",
-      "nis2_critical": "Fornitore/sito critico NIS2"
+      "nis2_critical": "Fornitore/sito critico NIS2",
+      "no_own": "Nessun dominio o asset proprio è monitorato: postura e problemi da correggere restano vuoti. Indica il dominio nella scheda del sito:",
+      "no_own_link": "Apri Siti",
+      "todo_nothing_monitored": "Nessun dominio proprio monitorato"
     },
     "drawer": {
       "close": "Chiudi",

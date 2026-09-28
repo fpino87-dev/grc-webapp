@@ -315,6 +315,17 @@ OPEN_STATUSES = ("open", "acknowledged", "in_progress", "reported")
 SUPPLIER_FOLLOWUP_DAYS = 30
 
 
+def monitored(qs):
+    """Solo i finding di entità ancora monitorate.
+
+    Un'entità viene disattivata quando esce dalla sua sorgente (dominio tolto
+    dalla scheda del sito, fornitore non più attivo, asset dismesso): i suoi
+    finding non vengono più aggiornati dallo scan e non devono restare in
+    coda, nei conteggi o negli export — altrimenti si mostra un problema su
+    un'entità che la scheda non trova più. Riattivando l'entità tornano."""
+    return qs.filter(deleted_at__isnull=True, entity__is_active=True, entity__deleted_at__isnull=True)
+
+
 def sync_findings(entity: "OsintEntity", scan: "OsintScan") -> tuple[int, int, int]:
     """Riconcilia i finding aperti per questa entità con la nuova evidenza dello scan.
 

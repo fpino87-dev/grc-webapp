@@ -5023,7 +5023,10 @@
       "col_last_scan": "Dernier scan",
       "sup_to_report": "À signaler : {{count}}",
       "sup_reported": "Signalés : {{count}}",
-      "nis2_critical": "Fournisseur/site critique NIS2"
+      "nis2_critical": "Fournisseur/site critique NIS2",
+      "no_own": "Aucun domaine ou actif propre n'est surveillé : la posture et les problèmes à corriger restent vides. Indiquez le domaine dans la fiche du site :",
+      "no_own_link": "Ouvrir Sites",
+      "todo_nothing_monitored": "Aucun domaine propre surveillé"
     },
     "drawer": {
       "close": "Fermer",

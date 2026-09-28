@@ -5023,7 +5023,10 @@
       "col_last_scan": "Ostatni skan",
       "sup_to_report": "Do zgłoszenia: {{count}}",
       "sup_reported": "Zgłoszone: {{count}}",
-      "nis2_critical": "Dostawca/zakład krytyczny NIS2"
+      "nis2_critical": "Dostawca/zakład krytyczny NIS2",
+      "no_own": "Żadna własna domena ani zasób nie jest monitorowany: postawa i problemy do naprawy pozostają puste. Wpisz domenę w karcie zakładu:",
+      "no_own_link": "Otwórz Zakłady",
+      "todo_nothing_monitored": "Brak monitorowanych własnych domen"
     },
     "drawer": {
       "close": "Zamknij",

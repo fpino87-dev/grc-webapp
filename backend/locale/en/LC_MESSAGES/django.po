@@ -3100,3 +3100,6 @@ msgstr "Provide a file or at least one existing evidence item."
 
 msgid "Questa definizione non vale per il sito indicato: il sito ha una propria definizione del KPI oppure la definizione non è attiva."
 msgstr "This definition does not apply to the given site: the site has its own definition of the KPI or the definition is not active."
+
+msgid "I problemi dei fornitori si segnalano al fornitore: non generano task interni."
+msgstr "Supplier issues are reported to the supplier: they do not create internal tasks."

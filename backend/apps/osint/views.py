@@ -5,6 +5,7 @@ import json
 import logging
 
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
@@ -650,10 +651,9 @@ class OsintFindingViewSet(viewsets.GenericViewSet):
     ordering = ["-last_seen"]
 
     def get_queryset(self):
-        return (
-            OsintFinding.objects.filter(deleted_at__isnull=True)
-            .select_related("entity", "scan")
-        )
+        from apps.osint.findings import monitored
+
+        return monitored(OsintFinding.objects.all()).select_related("entity", "scan")
 
     def list(self, request):
         from apps.osint.findings import OPEN_STATUSES
@@ -732,6 +732,13 @@ class OsintFindingViewSet(viewsets.GenericViewSet):
             finding = self.get_queryset().get(pk=pk)
         except OsintFinding.DoesNotExist:
             return Response({"detail": "Non trovato."}, status=status.HTTP_404_NOT_FOUND)
+        # I problemi dei fornitori sono informativi: si segnalano al fornitore,
+        # non diventano lavoro nostro.
+        if finding.entity.entity_type == "supplier":
+            return Response(
+                {"detail": _("I problemi dei fornitori si segnalano al fornitore: non generano task interni.")},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         from datetime import timedelta
         from apps.tasks.models import Task
@@ -799,10 +806,9 @@ class OsintFindingViewSet(viewsets.GenericViewSet):
 
         # Risolti negli ultimi 7 giorni
         from datetime import timedelta
-        recent_resolved = OsintFinding.objects.filter(
+        recent_resolved = _filter_ownership(self.get_queryset(), request).filter(
             status=FindingStatus.RESOLVED,
             resolved_at__gte=timezone.now() - timedelta(days=7),
-            deleted_at__isnull=True,
         ).count()
 
         return Response({

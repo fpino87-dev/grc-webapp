@@ -61,6 +61,9 @@ export function OsintDashboard() {
     entities.forEach(e => { c[e.entity_type as Tab] += 1; });
     return c;
   }, [entities]);
+  // Nessun dominio o asset proprio monitorato: postura e "da correggere"
+  // sono vuoti perché non c'è niente da analizzare, non perché va tutto bene.
+  const noOwn = !isLoading && counts.my_domain + counts.asset === 0;
   const rows = useMemo(() => entities
     .filter(e => e.entity_type === tab)
     .filter(e => !search || `${e.display_name} ${e.domain}`.toLowerCase().includes(search.toLowerCase()))
@@ -131,6 +134,12 @@ export function OsintDashboard() {
             <span className="px-2 py-1 rounded-full bg-green-50 text-green-700">✓ {t("osint.dash.resolved_week", { count: posture?.own.resolved_week ?? 0 })}</span>
           </div>
           <p className="text-[11px] text-gray-400 mt-3">{t("osint.dash.posture_hint")}</p>
+          {noOwn && (
+            <p className="mt-3 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-800">
+              {t("osint.dash.no_own")}{" "}
+              <Link to="/plants" className="font-medium underline">{t("osint.dash.no_own_link")}</Link>
+            </p>
+          )}
         </section>
 
         <section className="rounded-2xl border border-gray-200 bg-white p-5">
@@ -139,7 +148,9 @@ export function OsintDashboard() {
             <Link to="/osint/remediation" className="text-xs text-primary-700 hover:underline">{t("osint.dash.see_all")}</Link>
           </div>
           {todo.length === 0 ? (
-            <p className="mt-6 text-sm text-gray-400 text-center">✓ {t("osint.dash.todo_empty")}</p>
+            <p className="mt-6 text-sm text-gray-400 text-center">
+              {noOwn ? t("osint.dash.todo_nothing_monitored") : `✓ ${t("osint.dash.todo_empty")}`}
+            </p>
           ) : (
             <ul className="mt-3 space-y-2">
               {todo.map(f => (

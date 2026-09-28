@@ -3167,3 +3167,6 @@ msgstr "Indiquez un fichier ou au moins une preuve existante."
 
 msgid "Questa definizione non vale per il sito indicato: il sito ha una propria definizione del KPI oppure la definizione non è attiva."
 msgstr "Cette définition ne s'applique pas au site indiqué : le site a sa propre définition du KPI ou la définition n'est pas active."
+
+msgid "I problemi dei fornitori si segnalano al fornitore: non generano task interni."
+msgstr "Les problèmes des fournisseurs sont signalés au fournisseur : ils ne génèrent pas de tâches internes."

@@ -3101,3 +3101,6 @@ msgstr "Bir dosya veya en az bir mevcut kanıt belirtin."
 
 msgid "Questa definizione non vale per il sito indicato: il sito ha una propria definizione del KPI oppure la definizione non è attiva."
 msgstr "Bu tanım belirtilen tesis için geçerli değil: tesisin KPI için kendi tanımı var veya tanım etkin değil."
+
+msgid "I problemi dei fornitori si segnalano al fornitore: non generano task interni."
+msgstr "Tedarikçi sorunları tedarikçiye bildirilir: dahili görev oluşturmaz."

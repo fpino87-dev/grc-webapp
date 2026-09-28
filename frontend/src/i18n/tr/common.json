@@ -5023,7 +5023,10 @@
       "col_last_scan": "Son tarama",
       "sup_to_report": "Bildirilecek: {{count}}",
       "sup_reported": "Bildirilen: {{count}}",
-      "nis2_critical": "NIS2 kritik tedarikçi/tesis"
+      "nis2_critical": "NIS2 kritik tedarikçi/tesis",
+      "no_own": "Hiçbir kendi alan adı veya varlık izlenmiyor: duruş ve düzeltilecek sorunlar boş kalır. Alan adını tesis kaydına girin:",
+      "no_own_link": "Tesisleri aç",
+      "todo_nothing_monitored": "İzlenen kendi alan adı yok"
     },
     "drawer": {
       "close": "Kapat",
