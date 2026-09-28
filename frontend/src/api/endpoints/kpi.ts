@@ -51,6 +51,8 @@ export interface KpiDefinitionListItem {
   plant: string | null;
   last_status: KpiStatus;
   last_value: number | null;
+  /** Definizione globale riassunta su più siti: quanti (null = un valore solo). */
+  last_sites?: number | null;
 }
 
 export interface KpiSnapshot {

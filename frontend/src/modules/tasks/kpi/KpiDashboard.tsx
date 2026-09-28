@@ -63,8 +63,11 @@ function KpiCard({
         <span className="text-2xl font-bold text-gray-900">
           {kpi.last_value != null ? kpi.last_value : "—"}
         </span>
-        {kpi.unit && <span className="text-sm text-gray-400">{kpi.unit}</span>}
+        {kpi.last_value != null && kpi.unit && <span className="text-sm text-gray-400">{kpi.unit}</span>}
       </div>
+      {kpi.last_sites != null && kpi.last_sites > 1 && (
+        <p className="-mt-1 mb-1 text-[11px] text-gray-500">{t("kpi.dashboard.sites_summary", { count: kpi.last_sites })}</p>
+      )}
       <Sparkline kpiCode={kpi.kpi_code} plantId={plantId} />
       <p className="mt-1 text-[11px] text-gray-400">{kpi.kpi_code}</p>
       <p className="text-[10px] text-gray-400 truncate" title={scopeLabel}>{scopeLabel}</p>

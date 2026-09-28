@@ -208,3 +208,42 @@ def test_trend_one_point_per_week_from_definition_in_scope(client, pl):
     resp = client.get(f"/api/v1/tasks/kpi-snapshots/trend/?kpi_code=dr_test_age_days&plant={pl.pk}")
     assert resp.status_code == 200
     assert [r["value"] for r in resp.data["results"]] == [120]
+
+
+# ── Lista definizioni: ultimo valore di una globale ──────────────────────────
+
+def _list_item(client, kpi):
+    resp = client.get(KPI_DEF_URL)
+    assert resp.status_code == 200
+    rows = resp.data["results"] if isinstance(resp.data, dict) else resp.data
+    return next(r for r in rows if r["id"] == str(kpi.pk))
+
+
+def test_list_global_summarises_sites_with_worst_status(client, pl, tn):
+    glob = _def(code="glob_sites")
+    _snap(glob, pl, W1, 10, "ok")                 # settimana vecchia: ignorata
+    _snap(glob, pl, W2, 400, "critical")
+    _snap(glob, tn, W2, 30, "ok")
+    row = _list_item(client, glob)
+    assert row["last_status"] == "critical"
+    assert row["last_value"] is None               # un sito non rappresenta gli altri
+    assert row["last_sites"] == 2
+
+
+def test_list_global_prefers_global_value_and_site_def_unchanged(client, pl, tn):
+    glob = _def(code="glob_value", source="api")
+    _snap(glob, tn, W2, 30, "ok")
+    _snap(glob, None, W1, 55, "warning")           # valore globale da API
+    site = _def(code="site_only", plant=pl)
+    _snap(site, pl, W2, 12, "ok")
+    row = _list_item(client, glob)
+    assert (row["last_status"], row["last_value"], row["last_sites"]) == ("warning", 55, None)
+    row = _list_item(client, site)
+    assert (row["last_status"], row["last_value"], row["last_sites"]) == ("ok", 12, None)
+
+
+def test_list_global_single_site_shows_its_value(client, pl):
+    glob = _def(code="glob_one")
+    _snap(glob, pl, W2, 42, "warning")
+    row = _list_item(client, glob)
+    assert (row["last_status"], row["last_value"], row["last_sites"]) == ("warning", 42, 1)

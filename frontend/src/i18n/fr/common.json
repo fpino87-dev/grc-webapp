@@ -5290,7 +5290,8 @@
       "manage": "Gérer les KPI",
       "all_plants": "Tous les sites",
       "empty": "Aucun KPI actif configuré",
-      "scope_org": "Organisation"
+      "scope_org": "Organisation",
+      "sites_summary": "Pire état sur {{count}} sites : ouvrez le site pour la valeur"
     },
     "definitions": {
       "title": "Définitions KPI",

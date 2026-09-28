@@ -5290,7 +5290,8 @@
       "manage": "Zarządzaj KPI",
       "all_plants": "Wszystkie zakłady",
       "empty": "Brak aktywnych KPI",
-      "scope_org": "Organizacja"
+      "scope_org": "Organizacja",
+      "sites_summary": "Najgorszy stan w {{count}} zakładach: otwórz zakład, aby zobaczyć wartość"
     },
     "definitions": {
       "title": "Definicje KPI",

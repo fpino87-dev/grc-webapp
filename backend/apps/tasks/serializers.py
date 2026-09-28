@@ -292,6 +292,7 @@ class KPIDefinitionListSerializer(serializers.ModelSerializer):
 
     last_status = serializers.SerializerMethodField()
     last_value = serializers.SerializerMethodField()
+    last_sites = serializers.SerializerMethodField()
 
     class Meta:
         model = KPIDefinition
@@ -299,20 +300,54 @@ class KPIDefinitionListSerializer(serializers.ModelSerializer):
             "id", "kpi_code", "name", "unit",
             "threshold_warning", "threshold_critical", "threshold_direction",
             "source", "is_active", "plant",
-            "last_status", "last_value",
+            "last_status", "last_value", "last_sites",
         ]
 
-    def _last_snapshot(self, obj):
-        # Sfrutta la prefetch del ViewSet se presente, altrimenti query diretta.
+    # Gravità per riassumere più siti: il peggiore fra quelli misurati.
+    _SEVERITY = {"critical": 3, "warning": 2, "ok": 1, "no_data": 0}
+
+    def _latest(self, obj) -> dict:
+        """Ultima misura della definizione, calcolata una volta per oggetto.
+
+        Definizione di sito: il suo ultimo snapshot. Definizione globale: il
+        valore globale (plant=None, da API o inserimento manuale) se c'è;
+        altrimenti l'ultima settimana misurata sui siti a cui vale, con lo
+        stato peggiore e il numero di siti — il valore di un solo sito non
+        rappresenta gli altri, quindi il numero compare solo con un sito."""
+        cache = getattr(obj, "_latest_summary", None)
+        if cache is not None:
+            return cache
         snaps = getattr(obj, "_prefetched_objects_cache", {}).get("snapshots")
-        if snaps is not None:
-            return snaps[0] if snaps else None
-        return obj.snapshots.order_by("-week_start").first()
+        if snaps is None:
+            snaps = list(obj.snapshots.all())
+        snaps = sorted(snaps, key=lambda s: (s.week_start, s.created_at), reverse=True)
+        summary = {"status": "no_data", "value": None, "sites": None}
+        if obj.plant_id is not None:
+            if snaps:
+                summary = {"status": snaps[0].status, "value": snaps[0].value, "sites": None}
+        else:
+            global_snaps = [s for s in snaps if s.plant_id is None]
+            if global_snaps:
+                s = global_snaps[0]
+                summary = {"status": s.status, "value": s.value, "sites": None}
+            elif snaps:
+                week = snaps[0].week_start
+                latest = [s for s in snaps if s.week_start == week]
+                measured = [s for s in latest if s.status != "no_data"]
+                worst = max(measured, key=lambda s: self._SEVERITY[s.status]) if measured else None
+                summary = {
+                    "status": worst.status if worst else "no_data",
+                    "value": latest[0].value if len(latest) == 1 else None,
+                    "sites": len(latest),
+                }
+        obj._latest_summary = summary
+        return summary
 
     def get_last_status(self, obj):
-        snap = self._last_snapshot(obj)
-        return snap.status if snap else "no_data"
+        return self._latest(obj)["status"]
 
     def get_last_value(self, obj):
-        snap = self._last_snapshot(obj)
-        return snap.value if snap else None
+        return self._latest(obj)["value"]
+
+    def get_last_sites(self, obj):
+        return self._latest(obj)["sites"]

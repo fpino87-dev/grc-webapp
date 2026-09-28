@@ -5290,7 +5290,8 @@
       "manage": "Manage KPIs",
       "all_plants": "All plants",
       "empty": "No active KPI configured",
-      "scope_org": "Organisation"
+      "scope_org": "Organisation",
+      "sites_summary": "Worst status across {{count}} sites: open the site for the value"
     },
     "definitions": {
       "title": "KPI Definitions",

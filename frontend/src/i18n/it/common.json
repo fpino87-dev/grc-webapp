@@ -5290,7 +5290,8 @@
       "manage": "Gestisci KPI",
       "all_plants": "Tutti i siti",
       "empty": "Nessun KPI attivo configurato",
-      "scope_org": "Organizzazione"
+      "scope_org": "Organizzazione",
+      "sites_summary": "Stato peggiore su {{count}} siti: apri il sito per il valore"
     },
     "definitions": {
       "title": "Definizioni KPI",
