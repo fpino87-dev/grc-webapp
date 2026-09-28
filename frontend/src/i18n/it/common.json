@@ -3835,7 +3835,10 @@
       "rpo": "RPO del piano (ore)",
       "bia_target": "Target BIA: {{value}}h",
       "frequency": "Frequenza dei test",
-      "save_error": "Errore durante il salvataggio"
+      "save_error": "Errore durante il salvataggio",
+      "go_to_bia": "Vai alla BIA",
+      "no_processes_warning": "Senza processi collegati il piano non copre nessun processo: lo puoi collegare anche dopo.",
+      "missing": "Per creare il piano manca: {{fields}}"
     },
     "frequency": {
       "1_months": "Mensile",

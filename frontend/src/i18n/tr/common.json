@@ -3835,7 +3835,10 @@
       "rpo": "Plan RPO (saat)",
       "bia_target": "BIA hedefi: {{value}} sa",
       "frequency": "Test sıklığı",
-      "save_error": "Kaydetme sırasında hata"
+      "save_error": "Kaydetme sırasında hata",
+      "go_to_bia": "BIA'ya git",
+      "no_processes_warning": "Bağlı süreç olmadan plan hiçbir süreci kapsamaz: daha sonra da bağlayabilirsiniz.",
+      "missing": "Planı oluşturmak için eksik: {{fields}}"
     },
     "frequency": {
       "1_months": "Aylık",

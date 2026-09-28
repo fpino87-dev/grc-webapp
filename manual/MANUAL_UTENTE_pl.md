@@ -1197,7 +1197,7 @@ Przy każdym planie widać jego **wykazane RTO**: RTO uzyskane w ostatnim teści
 2. Wypełnij:
    - **Tytuł**, **Zakład** i **Wersję**
    - **Dokument planu (M07)**: treść planu zarządzana jest w **Dokumentach**, z wersjami i zatwierdzeniem. Tutaj łączy się dokument zakładu, organizacji lub udostępniony zakładowi. Na liście planów plan bez dokumentu jest oznaczony
-   - **Objęte procesy**: jeden lub więcej procesów BIA zakładu
+   - **Objęte procesy**: jeden lub więcej procesów BIA zakładu. Są opcjonalne (zakład bez BIA może już mieć plan), ale dopóki żaden nie zostanie powiązany, plan nie obejmuje żadnego procesu
    - **RTO** i **RPO** planu: pod każdym polem wyświetla się najbardziej rygorystyczny cel BIA wybranych procesów, na pomarańczowo, jeśli wartość go przekracza
    - **Częstotliwość testów**: co miesiąc, co kwartał, co pół roku, co rok lub co dwa lata
 3. Kliknij **Utwórz plan**. Plan powstaje jako wersja robocza

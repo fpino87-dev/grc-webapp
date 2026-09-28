@@ -1197,7 +1197,7 @@ Next to each plan its **demonstrated RTO** is shown: the RTO achieved in the lat
 2. Fill in:
    - **Title**, **Site** and **Version**
    - **Plan document (M07)**: the plan text is managed in **Documents**, with versions and approval. Here you link the site's document, an organisation document or one shared with the site. In the plan list, a plan without a document is flagged
-   - **Covered processes**: one or more BIA processes of the site
+   - **Covered processes**: one or more BIA processes of the site. They are optional (a site without a BIA can already have its plan), but until one is linked the plan covers no process
    - Plan **RTO** and **RPO**: under each field the strictest BIA target of the selected processes is shown, in orange if the value exceeds it
    - **Test frequency**: monthly, quarterly, half-yearly, yearly or every two years
 3. Click **Create plan**. The plan starts as a draft

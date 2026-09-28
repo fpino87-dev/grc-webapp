@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { bcpApi, type BcpPlan } from "../../api/endpoints/bcp";
 import { biaApi } from "../../api/endpoints/bia";
 import { documentsApi } from "../../api/endpoints/documents";
@@ -90,6 +91,11 @@ export function BcpPlanForm({ plants, plan, initialPlantId, initialProcessId, on
     },
   });
 
+  const missing = [
+    ...(title.trim() ? [] : [t("bcp.form.title")]),
+    ...(plantId ? [] : [t("bcp.form.plant")]),
+  ];
+
   const toggleProcess = (id: string) =>
     setProcessIds(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
 
@@ -149,11 +155,14 @@ export function BcpPlanForm({ plants, plan, initialPlantId, initialProcessId, on
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t("bcp.form.processes")} *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("bcp.form.processes")}</label>
             {!plantId ? (
               <p className="text-xs text-gray-400">{t("bcp.form.processes_pick_plant")}</p>
             ) : processes.length === 0 ? (
-              <p className="text-xs text-gray-400">{t("bcp.form.processes_empty")}</p>
+              <p className="text-xs text-gray-500">
+                {t("bcp.form.processes_empty")}{" "}
+                <Link to="/bia" className="text-primary-700 hover:underline">{t("bcp.form.go_to_bia")}</Link>
+              </p>
             ) : (
               <div className="border rounded max-h-40 overflow-y-auto divide-y divide-gray-100">
                 {processes.map(p => (
@@ -167,6 +176,9 @@ export function BcpPlanForm({ plants, plan, initialPlantId, initialProcessId, on
                   </label>
                 ))}
               </div>
+            )}
+            {plantId && processIds.length === 0 && (
+              <p className="text-xs text-amber-700 mt-1">{t("bcp.form.no_processes_warning")}</p>
             )}
           </div>
 
@@ -207,11 +219,14 @@ export function BcpPlanForm({ plants, plan, initialPlantId, initialProcessId, on
         {mutation.isError && (
           <p className="text-sm text-red-600 mt-3">{apiError(mutation.error) ?? t("bcp.form.save_error")}</p>
         )}
+        {missing.length > 0 && (
+          <p className="text-xs text-gray-500 mt-3 text-right">{t("bcp.form.missing", { fields: missing.join(", ") })}</p>
+        )}
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-50">{t("bcp.actions.cancel")}</button>
           <button
             onClick={() => mutation.mutate()}
-            disabled={mutation.isPending || !title || !plantId || processIds.length === 0}
+            disabled={mutation.isPending || missing.length > 0}
             className="px-4 py-2 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
           >
             {mutation.isPending ? t("bcp.actions.saving") : plan ? t("bcp.actions.save") : t("bcp.actions.create")}

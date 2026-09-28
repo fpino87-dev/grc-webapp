@@ -356,3 +356,13 @@ def test_add_evidences_to_existing_test(client, plant, user, settings, tmp_path)
     assert created.plant_id == plant.pk
 
     assert client.post(f"{URL_TESTS}{test.id}/evidences/", {}, format="json").status_code == 400
+
+
+@pytest.mark.django_db
+def test_create_plan_without_processes(client, plant):
+    """Un sito senza BIA può avere il piano: non copre nessun processo finché
+    non se ne collega uno."""
+    resp = client.post(URL_PLANS, {"plant": str(plant.id), "title": "DR sito", "critical_processes": []},
+                       format="json")
+    assert resp.status_code == 201, resp.data
+    assert resp.data["critical_processes"] == []

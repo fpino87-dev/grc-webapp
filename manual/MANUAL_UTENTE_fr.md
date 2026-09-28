@@ -1197,7 +1197,7 @@ Liste les processus de la BIA de criticité ≥ 4 et, pour chacun, l'état de co
 2. Renseignez :
    - **Titre**, **Site** et **Version**
    - **Document du plan (M07)** : le texte du plan se gère dans **Documents**, avec versions et approbation. Ici on lie le document du site, de l'organisation ou partagé avec le site. Dans la liste des plans, un plan sans document est signalé
-   - **Processus couverts** : un ou plusieurs processus BIA du site
+   - **Processus couverts** : un ou plusieurs processus BIA du site. Ils sont facultatifs (un site sans BIA peut déjà avoir son plan), mais tant qu'aucun n'est lié le plan ne couvre aucun processus
    - **RTO** et **RPO** du plan : sous chaque champ s'affiche l'objectif BIA le plus strict des processus choisis, en orange si la valeur le dépasse
    - **Fréquence des tests** : mensuelle, trimestrielle, semestrielle, annuelle ou tous les deux ans
 3. Cliquez sur **Créer le plan**. Le plan est créé en brouillon

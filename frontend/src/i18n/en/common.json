@@ -3835,7 +3835,10 @@
       "rpo": "Plan RPO (hours)",
       "bia_target": "BIA target: {{value}}h",
       "frequency": "Test frequency",
-      "save_error": "Error while saving"
+      "save_error": "Error while saving",
+      "go_to_bia": "Go to the BIA",
+      "no_processes_warning": "Without linked processes the plan covers no process: you can link them later.",
+      "missing": "To create the plan, fill in: {{fields}}"
     },
     "frequency": {
       "1_months": "Monthly",

@@ -3835,7 +3835,10 @@
       "rpo": "RPO du plan (heures)",
       "bia_target": "Objectif BIA : {{value}} h",
       "frequency": "Fréquence des tests",
-      "save_error": "Erreur lors de l'enregistrement"
+      "save_error": "Erreur lors de l'enregistrement",
+      "go_to_bia": "Aller à la BIA",
+      "no_processes_warning": "Sans processus liés, le plan ne couvre aucun processus : vous pourrez les lier plus tard.",
+      "missing": "Pour créer le plan, il manque : {{fields}}"
     },
     "frequency": {
       "1_months": "Mensuelle",

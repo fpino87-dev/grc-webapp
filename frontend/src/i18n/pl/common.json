@@ -3835,7 +3835,10 @@
       "rpo": "RPO planu (godziny)",
       "bia_target": "Cel BIA: {{value}} h",
       "frequency": "Częstotliwość testów",
-      "save_error": "Błąd podczas zapisywania"
+      "save_error": "Błąd podczas zapisywania",
+      "go_to_bia": "Przejdź do BIA",
+      "no_processes_warning": "Bez powiązanych procesów plan nie obejmuje żadnego procesu: można je powiązać później.",
+      "missing": "Aby utworzyć plan, uzupełnij: {{fields}}"
     },
     "frequency": {
       "1_months": "Co miesiąc",

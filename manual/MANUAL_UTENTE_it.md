@@ -1197,7 +1197,7 @@ Accanto a ogni piano compare il suo **RTO dimostrato**: è l'RTO ottenuto nell'u
 2. Compila:
    - **Titolo**, **Sito** e **Versione**
    - **Documento del piano (M07)**: il testo del piano si gestisce in **Documenti**, con versioni e approvazione. Qui si collega il documento del sito, di organizzazione o condiviso con il sito. Nell'elenco dei piani, un piano senza documento è segnalato
-   - **Processi coperti**: uno o più processi BIA del sito
+   - **Processi coperti**: uno o più processi BIA del sito. Sono facoltativi (un sito senza BIA può già avere il piano), ma finché non se ne collega uno il piano non copre nessun processo
    - **RTO** e **RPO** del piano: sotto ogni campo compare il target BIA più stringente dei processi scelti, in arancione se il valore lo supera
    - **Frequenza dei test**: mensile, trimestrale, semestrale, annuale o biennale
 3. Clicca **Crea piano**. Il piano nasce in bozza

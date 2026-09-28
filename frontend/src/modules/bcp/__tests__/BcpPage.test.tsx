@@ -132,3 +132,24 @@ describe("BcpPage — evidenze dei test", () => {
     expect(bcpApi.addTestEvidences).toHaveBeenCalledWith("t1", { evidenceIds: ["e2"], file: null });
   });
 });
+
+describe("BcpPage — nuovo piano", () => {
+  it("si crea anche su un sito senza processi BIA, con avviso", async () => {
+    vi.mocked(bcpApi.create).mockResolvedValue(plan() as never);
+    renderPage("/bcp?tab=plans");
+    fireEvent.click(await screen.findByText("bcp.actions.new_plan"));
+    const create = screen.getByText("bcp.actions.create");
+    expect(create).toBeDisabled();
+    expect(screen.getByText("bcp.form.missing")).toBeInTheDocument();
+
+    const [titleInput] = screen.getAllByRole("textbox");
+    fireEvent.change(titleInput, { target: { value: "Piano DR" } });
+    fireEvent.change(await screen.findByDisplayValue("bcp.form.select"), { target: { value: "p1" } });
+    expect(await screen.findByText("bcp.form.processes_empty", { exact: false })).toBeInTheDocument();
+    expect(screen.getByText("bcp.form.no_processes_warning")).toBeInTheDocument();
+    expect(create).not.toBeDisabled();
+    fireEvent.click(create);
+    await vi.waitFor(() => expect(bcpApi.create).toHaveBeenCalled());
+    expect(vi.mocked(bcpApi.create).mock.calls[0][0]).toMatchObject({ plant: "p1", title: "Piano DR", critical_processes: [] });
+  });
+});

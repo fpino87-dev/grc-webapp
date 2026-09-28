@@ -1197,7 +1197,7 @@ Her planın yanında **kanıtlanmış RTO**'su görünür: onu ölçen son testt
 2. Doldurun:
    - **Başlık**, **Tesis** ve **Sürüm**
    - **Plan dokümanı (M07)**: plan metni sürümleri ve onayıyla birlikte **Dokümanlar**'da yönetilir. Burada tesisin, organizasyonun veya tesisle paylaşılan dokümanı bağlarsınız. Plan listesinde dokümanı olmayan plan işaretlenir
-   - **Kapsanan süreçler**: tesisin bir veya daha fazla BIA süreci
+   - **Kapsanan süreçler**: tesisin bir veya daha fazla BIA süreci. İsteğe bağlıdır (BIA'sı olmayan bir tesisin de planı olabilir), ancak bir süreç bağlanana kadar plan hiçbir süreci kapsamaz
    - Planın **RTO** ve **RPO**'su: her alanın altında seçilen süreçlerin en sıkı BIA hedefi görünür, değer onu aşarsa turuncu olur
    - **Test sıklığı**: aylık, üç aylık, altı aylık, yıllık veya iki yılda bir
 3. **Plan oluştur**'a tıklayın. Plan taslak olarak oluşturulur
